@@ -67,6 +67,7 @@ export function DeliveryTrafficPage() {
   const t = useTranslations('deliveryTraffic');
   const { can } = useAuth();
   const { isSystemAdmin, selectedTenantId, effectiveTenantId, setSelectedTenant } = useTenant();
+  const { isTenantAdmin } = useAuth();
   const { capabilities } = useProductForm();
 
   const [direction, setDirection] = useState<Direction>('all');
@@ -129,7 +130,7 @@ export function DeliveryTrafficPage() {
           onDirectionChange={setDirection}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
-          showTenant={isSystemAdmin && capabilities?.multiTenant === true}
+          showTenant={isSystemAdmin && !isTenantAdmin && capabilities?.multiTenant === true}
           tenantId={selectedTenantId}
           onTenantChange={setSelectedTenant}
           customStart={customStart}
