@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Checkbox } from '@/components/ui/checkbox';
 import { SegmentedControl } from '@/components/shared/segmented-control';
 import { MAX_RANGE_DAYS, validateCustomRange, type CustomRange } from './date-range';
 import type { Direction, TimeRange } from '@/lib/api/security-overview';
@@ -14,8 +13,6 @@ interface FilterBarProps {
   onTimeRangeChange: (r: TimeRange) => void;
   customRange: CustomRange;
   onCustomRangeChange: (r: CustomRange) => void;
-  comparePrevious: boolean;
-  onComparePreviousChange: (v: boolean) => void;
   leftSlot?: ReactNode;
 }
 
@@ -37,8 +34,6 @@ export function FilterBar({
   onTimeRangeChange,
   customRange,
   onCustomRangeChange,
-  comparePrevious,
-  onComparePreviousChange,
   leftSlot,
 }: FilterBarProps) {
   const t = useTranslations('securityOverview.filter');
@@ -137,13 +132,7 @@ export function FilterBar({
         </div>
       )}
 
-      <label className="flex items-center gap-2 cursor-pointer select-none">
-        <Checkbox
-          checked={comparePrevious}
-          onCheckedChange={(v) => onComparePreviousChange(v === true)}
-        />
-        <span className="text-sm text-muted-foreground">{t('comparePrevious')}</span>
-      </label>
+
     </div>
   );
 }

@@ -1336,7 +1336,7 @@
     "statusManualHold": "人工保留",
     "reason": "原因",
     "eyebrow": "旁路队列",
-    "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已存储��容��并��需要时重新注入或删除项目。"
+    "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已��储��容��并��需要时重新注入或删除项目。"
   },
   "logs": {
     "emailLogs": "邮件日志",
@@ -1522,7 +1522,7 @@
       "retries": "重试次数",
       "session_id": "会话 ID",
       "received_at": "接收时间",
-      "processed_at": "处理时间",
+      "processed_at": "处理��间",
       "delivered_at": "投递时间",
       "bounced_at": "退信时间",
       "created_at": "创建时间",
@@ -1748,7 +1748,7 @@
     "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全契约）",
     "resetPassword": {
       "title": "重置密码",
-      "description": "为管理员���{username}」设置新密码，重置后需用新密码登录。",
+      "description": "���管理员���{username}」设置新密码，重置后需用新密码登录。",
       "newPassword": "新密码",
       "placeholder": "请输入或生成新密码",
       "generate": "生成",
@@ -2538,7 +2538,7 @@
   "investigations": {
     "title": "Agent 调查",
     "description": "发起并跟踪大模型调查任务，查看风险结论、证据、执行步骤和后续动作建议。",
-    "createTitle": "新建调查",
+    "createTitle": "新建���查",
     "createDescription": "基于邮件日志发起一次 Agent 调查。当前前端先开放已落地的邮件调查 Agent。",
     "createSuccess": "调查任务已创建",
     "launch": "启动调查",
@@ -2915,7 +2915,7 @@
     "authSpoofing": "身份认证与仿冒检测",
     "authSpoofingDesc": "检测伪造发件人和认证仿冒",
     "behaviorControl": "发信行为管控",
-    "behaviorControlDesc": "检测异常发信行为并管���",
+    "behaviorControlDesc": "检���异常发信行为并管���",
     "recipientCheck": "收信人检测",
     "recipientCheckDesc": "收信人数量限制与存在性验证",
     "personalList": "用户黑白名单",
@@ -3370,7 +3370,7 @@
     "exampleSuspiciousIp": "可疑IP段",
     "exampleSuspiciousIpDesc": "需要进一步审查的IP段",
     "exampleSuspiciousIpRemark": "可疑来源待审查",
-    "exampleSuspiciousIpEffect": "来自该网段的邮件将被隔离，等待管理员处理",
+    "exampleSuspiciousIpEffect": "来自该网���的邮件将被隔离，等待管理员处理",
     "exampleInternalNetwork": "内网信任",
     "exampleInternalNetworkDesc": "企业内部网络IP段",
     "exampleInternalNetworkRemark": "内部网络",
@@ -3815,7 +3815,7 @@
     "exampleRecipientOnlyDesc": "拒绝任何发信人发给 user@example.com 的邮件",
     "simulationTest": "模拟测试",
     "simSenderPlaceholder": "输入测试��信人，如 spam@bad.com",
-    "simRecipientPlaceholder": "输入测试收信人，如 user@example.com",
+    "simRecipientPlaceholder": "输入测��收信人，如 user@example.com",
     "simRun": "运行模拟",
     "simMatch": "匹配成功 - 该规则将对测试数据生效",
     "simNoMatch": "未匹配 - 该规则不会对测试数据生效",
@@ -4129,7 +4129,7 @@
       "thresholdStrict": "严格",
       "protectedDomains": "受保护域名",
       "protectedDomainsPlaceholder": "每行一个��名\nexample.com\ntest.local",
-      "protectedDomainsHint": "每行一个域名，将检测这些域名的相似域名仿冒"
+      "protectedDomainsHint": "每行一个域名，将检测这些域名的相似域���仿冒"
     },
     "displayNameSpoof": {
       "title": "显示名仿冒检测",
@@ -4826,7 +4826,7 @@
       "publicBaseUrl": "点击主机名",
       "publicBaseUrlPlaceholder": "https://gw.your-tenant.com:8082",
       "publicBaseUrlWarning": "⚠️ 一旦保存请勿修改。修改后历史邮件中已重写的链接将失效或指向错误地址。",
-      "publicBaseUrlChangeConfirmTitle": "确认修改点击主机名?",
+      "publicBaseUrlChangeConfirmTitle": "确认修���点击主机名?",
       "publicBaseUrlChangeConfirmBody": "此操作会让所有��史邮件中已重写的链�� (指向旧主机名) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
       "publicBaseUrlChangeConfirmCta": "我已了解风险并继续",
       "policy": {
@@ -5091,7 +5091,7 @@
     "totalRules": "共 {count} 条规则",
     "createRule": "新建规则",
     "priority": "优先级",
-    "priorityHint": "数值越大优先级越高，命中多条规则时优先执行数值大的规则",
+    "priorityHint": "数值越大优先级越高，命中多条规则时优先执行数值大的��则",
     "ruleName": "规则名称",
     "applyTo": "适用对象",
     "applyToAllUsers": "全部用户",
@@ -5246,7 +5246,7 @@
     "passthrough": "放行",
     "divert": "转移",
     "exitLabel": "→ EXIT",
-    "exitTooltip": "此动作命中后邮件流永久终止，不再进入后续阶段"
+    "exitTooltip": "此动作命中后���件流永久终止，不再进入后续阶段"
   },
   "emailDisposal": {
     "pageDescription": "查看和分析邮件安全事件，进行威胁调查和处置",
@@ -5447,7 +5447,7 @@
         "critical": "严重",
         "medium": "中",
         "maliciousUrl": "恶意链接",
-        "suspicious": "可疑",
+        "suspicious": "��疑",
         "booleanTrue": "是",
         "booleanFalse": "���",
         "intentPhishing": "钓鱼",
@@ -5509,7 +5509,7 @@
       "recallDescription": "尝试从收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
       "recallAuditHint": "召回可能受目标邮件系统限制；操作结果与类型改判会写入审计记录。",
       "similarLimit": "最多支持 10 封样本",
-      "similarFound": "找到 {n} 封相似邮件",
+      "similarFound": "找到 {n} 封相���邮件",
       "exportNotImplemented": "导出功能即将推���",
       "partialResult": "{succeeded} 封处置成功，{failed} ��失败，{notApplicable} 封不适用",
       "allSucceeded": "{n} 封处置成功",
@@ -6228,7 +6228,7 @@
     "errors": {
       "nameRequired": "请输入规则名称",
       "conditionRequired": "请至少添加一个条件",
-      "scopeRequired": "请选择适用范围",
+      "scopeRequired": "请选��适用范围",
       "priorityRange": "优先级需在 {min}–{max} 之间"
     },
     "basic": {
@@ -6861,7 +6861,7 @@
     "category_spam": "垃圾邮件",
     "category_advertising": "广告邮件",
     "category_suspicious": "可疑邮件",
-    "category_sensitive": "敏感内容",
+    "category_sensitive": "敏感��容",
     "category_phishing": "钓鱼邮件",
     "category_virus": "病毒邮件",
     "category_account_compromised": "账号被盗",
@@ -6919,7 +6919,7 @@
     "perm_whitelist_desc": "允许用户将发信人加入白名单",
     "perm_blacklist_desc": "允许用户将发信人加入黑名单",
     "selfServicePending": "终端用户自助入口待上线，当前仅保存配置",
-    "portalBaseUrlLabel": "外部访问地址",
+    "portalBaseUrlLabel": "外部访问地��",
     "portalBaseUrlPlaceholder": "https://gw.example.com",
     "portalBaseUrlHelp": "收件人浏览器可访问的控制台地址；启用取回或预览时必填。",
     "periodAndTimeout": "审核时长与超时配置",
@@ -7082,7 +7082,8 @@
       "totalFiltered": "过滤邮件总量",
       "blockRate": "拦截率",
       "recallRate": "召回率",
-      "pendingReview": "待审积压"
+      "pendingReview": "待审积压",
+      "vsPrevious": "较上期"
     },
     "filter": {
       "direction": {
@@ -7248,7 +7249,7 @@
       "aiFailed": "AI 分析失败，请稍后重试",
       "empty": "AI 未返回任何分析内容，请稍后重试",
       "retry": "重试",
-      "truncated": "分析被中断，以下为已生成的部分内容，并非完整分析"
+      "truncated": "分析被中断，以下为已生成的部分内容��并非完整分析"
     },
     "print": {
       "title": "邮件安全总览报告",
@@ -7440,7 +7441,7 @@
     },
     "direction": {
       "label": "方向",
-      "all": "全部",
+      "all": "��部",
       "receive": "接收",
       "send": "外发",
       "internal": "域内"
@@ -9266,7 +9267,7 @@
       "success": "操作成功",
       "failed": "操作失败",
       "delete": "删除",
-      "deleteConfirm": "确定删除规则「{name}」吗？",
+      "deleteConfirm": "确定��除规则「{name}」吗？",
       "confirmDelete": "删除",
       "deleteFailed": "该规则有未处��告警，无法删除",
       "cancel": "取消"

@@ -11,7 +11,6 @@ import { seriesColor } from './constants';
 
 interface TrendChartCardProps {
   trend?: TrendData;
-  trendPrevious?: TrendData | null;
   isLoading: boolean;
   isHourly?: boolean;
   viewBy: ViewBy;
@@ -29,7 +28,6 @@ export const SECURITY_OVERVIEW_VIEW_OPTIONS: ViewBy[] = [
 
 export function TrendChartCard({
   trend,
-  trendPrevious,
   isLoading,
   isHourly = false,
   viewBy,
@@ -64,8 +62,6 @@ export function TrendChartCard({
     return result.includes('.') ? key : result;
   }
 
-  const prevData = trendPrevious?.[viewBy] ?? [];
-
   const echartsOption = useMemo(() => {
     if (seriesData.length === 0) return null;
     // Hourly view ("today"): show HH:mm (e.g. "08:00").
@@ -92,23 +88,6 @@ export function TrendChartCard({
       itemStyle: { color: seriesColor(key) },
       data: seriesData.map((p) => (typeof p[key] === 'number' ? p[key] : 0)),
     }));
-
-    // Previous-period comparison overlay (when "compare" is enabled and data
-    // is present): a dashed total line aligned by index to the current period.
-    // z:100 ensures the line renders on top of all stacked area series.
-    if (prevData.length > 0) {
-      series.push({
-        name: t('filter.comparePrevious'),
-        type: 'line',
-        smooth: true,
-        symbol: 'circle',
-        symbolSize: 4,
-        z: 100,
-        lineStyle: { width: 2, type: 'dashed', color: '#374151' },
-        itemStyle: { color: '#374151', borderColor: '#fff', borderWidth: 1 },
-        data: prevData.map((p) => sumVisible(p)),
-      });
-    }
 
     return {
       tooltip: {
@@ -140,7 +119,7 @@ export function TrendChartCard({
       series,
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seriesData, keys, hiddenSeries, prevData, isHourly]);
+  }, [seriesData, keys, hiddenSeries, isHourly]);
 
   const isolateSeries = (key: string) => {
     // If only this key is visible (all others hidden), show all

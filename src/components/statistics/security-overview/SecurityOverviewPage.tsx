@@ -29,7 +29,7 @@ export function SecurityOverviewPage() {
   // does not propagate until validateCustomRange passes, so the query below can
   // never fire with a half-typed or illegal interval.
   const [customRange, setCustomRange] = useState<CustomRange>(() => defaultCustomRange());
-  const [comparePrevious, setComparePrevious] = useState(false);
+
   // PRD v3: the first tab is the unified 11-category mail taxonomy.  The
   // backend exposes that bucket as `email_type`; `threat_type` is the older
   // detection taxonomy and must not be presented as "邮件类型".
@@ -87,7 +87,6 @@ export function SecurityOverviewPage() {
     startDate,
     endDate,
     direction,
-    comparePreviousPeriod: comparePrevious,
     scopeTenantId,
     interval,
   });
@@ -122,8 +121,6 @@ export function SecurityOverviewPage() {
         onTimeRangeChange={handleTimeRangeChange}
         customRange={customRange}
         onCustomRangeChange={handleCustomRangeChange}
-        comparePrevious={comparePrevious}
-        onComparePreviousChange={setComparePrevious}
         leftSlot={scopeActive ? <TenantScopeSelector value={scopeTenantId} onChange={handleScopeTenantChange} /> : null}
       />
 
@@ -146,7 +143,6 @@ export function SecurityOverviewPage() {
 
       <TrendChartCard
         trend={data?.trend}
-        trendPrevious={data?.trend_previous_period}
         isLoading={isLoading}
         isHourly={interval === 'hour'}
         viewBy={viewBy}
