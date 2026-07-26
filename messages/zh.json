@@ -1015,7 +1015,7 @@
     "priority": "优先级",
     "newPolicy": "新建群组策略",
     "editPolicy": "编辑群组策略",
-    "deleteConfirm": "确定删除该群组策略�������？",
+    "deleteConfirm": "确定删除该群组策略���������？",
     "deleteConfirmDesc": "删除后无法恢复，规则名：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效执行路径预览",
@@ -1336,12 +1336,12 @@
     "statusManualHold": "人工保留",
     "reason": "原因",
     "eyebrow": "旁路队列",
-    "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已��储��容��并��需要时重新注入或删除项目。"
+    "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已���储��容��并��需要时重新注入或删除项目。"
   },
   "logs": {
     "emailLogs": "邮件日志",
     "authAttempts": "认证日志",
-    "adminAuditLogs": "操作日志",
+    "adminAuditLogs": "操作日��",
     "timestamp": "时间",
     "sender": "发件人",
     "recipients": "收件人",
@@ -1522,7 +1522,7 @@
       "retries": "重试次数",
       "session_id": "会话 ID",
       "received_at": "接收时间",
-      "processed_at": "处理��间",
+      "processed_at": "处����间",
       "delivered_at": "投递时间",
       "bounced_at": "退信时间",
       "created_at": "创建时间",
@@ -3630,7 +3630,7 @@
     "basicSettings": "基础设置",
     "ipRangeLabel": "IP地址/段",
     "ipRangePlaceholder": "请输入IP地址或CIDR网段，如 8.8.8.8、8.8.8.0/24 或 2001:db8::/32",
-    "ipRangeFormat": "支持格式：IPv4单地址或CIDR（/0至/32）；IPv6单地址或CIDR（/0至/128）",
+    "ipRangeFormat": "支持格式：IPv4单地址或CIDR（/0至/32���；IPv6单地址或CIDR（/0至/128）",
     "regionCodeLabel": "地区代码",
     "selectRegion": "���选择地区",
     "regionNameLabel": "归属地",
@@ -4277,7 +4277,7 @@
       "mail_count": "发出邮件的总数上限",
       "ip_count": "使用发信IP个数上限",
       "recipient_count": "收信人总人数上限",
-      "attachment_size": "发出附件总大小上限(MB)"
+      "attachment_size": "发出附件��大小上限(MB)"
     },
     "recipientLimit": {
       "title": "收信人��量限制",
@@ -4789,7 +4789,7 @@
       "toggleTip": "对未知URL进行动态行为分析，模拟用户访问以检测恶意行为",
       "detectGroup": "检测结果处置（当前方向）",
       "maliciousLabel": "发现恶意URL",
-      "maliciousTip": "当沙箱分析判定URL为恶意时执行的动作",
+      "maliciousTip": "当��箱分析判定URL为恶意时执行的动作",
       "actionIsolate": "隔离（邮件存���隔离区）",
       "actionIsolateTip": "邮件存入隔���区，管理员可审核后释放或删除",
       "actionBlock": "阻断（拒绝接收该邮件）",
@@ -5508,7 +5508,7 @@
       "releaseAuditHint": "放行与类型改判都会写入审计记录。",
       "recallDescription": "尝试从收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
       "recallAuditHint": "召回可能受目标邮件系统限制；操作结果与类型改判会写入审计记录。",
-      "similarLimit": "最多支持 10 封样本",
+      "similarLimit": "最多支持 10 ���样本",
       "similarFound": "找到 {n} 封相���邮件",
       "exportNotImplemented": "导出功能即将推���",
       "partialResult": "{succeeded} 封处置成功，{failed} ��失败，{notApplicable} 封不适用",
@@ -5531,7 +5531,7 @@
       "cancel": "取消",
       "confirm": "确认召回",
       "errors": {
-        "forceRequiresType": "强制召回模式下，至少需要选择一种召回类型（已读或未读）",
+        "forceRequiresType": "强制召回模式下，至少需要选择一种召回类型（已���或未读）",
         "noRecipients": "没有可召回的收件人",
         "failed": "召回失败，请重试"
       }
@@ -6227,7 +6227,7 @@
     "removeCondition": "移除条件",
     "errors": {
       "nameRequired": "请输入规则名称",
-      "conditionRequired": "请至少添加一个条件",
+      "conditionRequired": "请���少添加一个条件",
       "scopeRequired": "请选��适用范围",
       "priorityRange": "优先级需在 {min}–{max} 之间"
     },
@@ -6542,7 +6542,7 @@
       },
       "desc_urlSandboxResult": {
         "source": "URL沙箱分析引擎",
-        "usage": "根据URL安全沙箱分析结果过滤",
+        "usage": "根据URL安全��箱分析结果过滤",
         "note": "检测URL指向的恶意内容"
       },
       "desc_shortLinkExpanded": {
@@ -6932,7 +6932,7 @@
     "timeoutAutoDeliver": "超时自动投递",
     "autoDeliverDesc": "审核超时后自动投递邮件",
     "enabled": "已启用",
-    "disabled": "已禁用",
+    "disabled": "已��用",
     "currentStatus": "当前状态：",
     "statusEnabled": "已启用",
     "statusDisabled": "已禁用",
@@ -7187,7 +7187,11 @@
       "mapUnavailable": "世界地图加载失败",
       "backToWorld": "返回全球",
       "topIps": "来源 IP TOP",
-      "byThreat": "威胁构成"
+      "byThreat": "威胁构成",
+      "blockRateLegend": "横条颜色 = 拦截率",
+      "blockRateGood": "≥97%  防护良好",
+      "blockRateWarn": "95–97%  需关注",
+      "blockRateBad": "<95%  风险较高"
     },
     "time": {
       "title": "攻击时段分布",
@@ -7247,7 +7251,7 @@
       "drawerTitle": "AI 分析结果",
       "loading": "正在分析...",
       "aiFailed": "AI 分析失败，请稍后重试",
-      "empty": "AI 未返回任何分析内容，请稍后重试",
+      "empty": "AI 未返回任何分析内容，请稍���重试",
       "retry": "重试",
       "truncated": "分析被中断，以下为已生成的部分内容��并非完整分析"
     },
@@ -7327,7 +7331,7 @@
         "sidelineQueue": "当前等待旁路处理的任务数（近似反垃圾队列）。",
         "latencyP99": "99% 的外发邮件在该耗时内完成；超过 30 秒告警。",
         "outboundQueueBacklog": "基于投递中邮件估算的外发队列积压。",
-        "threatRate": "检测到内部威胁的域内邮件占比。",
+        "threatRate": "检测到内部威胁的域��邮件占比。",
         "internalThreatCount": "检测到垃圾、钓鱼或病毒的域内邮件数。"
       }
     },
@@ -8491,7 +8495,7 @@
       "protectedDomains": "受保护域名",
       "addDomain": "添加域名",
       "editDistance": "编辑距离阈值",
-      "confidenceThreshold": "置信度阈值",
+      "confidenceThreshold": "置信度阈��",
       "confidenceThresholdHint": "仿冒概率达到该阈值时触发处置",
       "modeObserveDesc": "仅标记投递，不拦截",
       "modeStandardDesc": "隔离处置",
@@ -8578,7 +8582,7 @@
         "snapshot": "当前快照，不受时间范围筛选影响。",
         "range": "按当前时间范围统计。",
         "recallSuccess": "按当前时间范围内的召回最终结果统计；所有目标成功才计为成功。",
-        "recallFailure": "按当前时间范围内的召回最终结果统计；部分成功归入召回失败。",
+        "recallFailure": "按当前时间范围内的召回最���结果统计；部分成功归入召回失败。",
         "rate": "当前时间范围内发现漏报数 / 扫描邮件数。"
       }
     },
@@ -8978,7 +8982,7 @@
     "autoSyncDesc": "开启后按 Cron 周期自动拉取远端数据",
     "autoSyncOff": "关闭",
     "autoSyncOn": "开启",
-    "autoSyncTitle": "开启自动同步",
+    "autoSyncTitle": "开启��动同步",
     "baseDnPlaceholder": "如 dc=corp,dc=com",
     "batchConfirmDesc": "标记变更将实时推送至策略引擎并立即生效，无需重新同步。",
     "batchConfirmTag": "确定将选中的 {count} 条记录标记为{tag}吗？",
@@ -9264,7 +9268,7 @@
       "addRule": "新增规则",
       "edit": "编辑",
       "configure": "配置",
-      "success": "操作成功",
+      "success": "操���成功",
       "failed": "操作失败",
       "delete": "删除",
       "deleteConfirm": "确定��除规则「{name}」吗？",
@@ -9539,7 +9543,7 @@
       "ipFilterSummary": "黑名单: {blacklist} 条 / 白名单: {whitelist} 条",
       "rblSummary": "{servers} 个服务器 / 超时 {timeout}s",
       "overseasSummary": "{directions} 已启用",
-      "ipFrequencyHint": "限制单个 IP 的发信频率",
+      "ipFrequencyHint": "限制单个 IP 的发信频���",
       "ipFilterHint": "IP 黑名单与白名单规则",
       "rblHint": "拦截命中 RBL 服务的发件方",
       "overseasHint": "检测境外来源邮件"

@@ -7130,7 +7130,11 @@
       "mapUnavailable": "World map failed to load",
       "backToWorld": "Back to global",
       "topIps": "Top source IPs",
-      "byThreat": "Threat breakdown"
+      "byThreat": "Threat breakdown",
+      "blockRateLegend": "Bar color = block rate",
+      "blockRateGood": "≥97%  Well protected",
+      "blockRateWarn": "95–97%  Monitor",
+      "blockRateBad": "<95%  High risk"
     },
     "time": {
       "title": "Attack Time Distribution",
