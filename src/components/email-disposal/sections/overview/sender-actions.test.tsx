@@ -1,0 +1,164 @@
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { SenderActions } from './sender-actions';
+
+// Identity translator (mirrors recipient-status.test.tsx): keeps namespace +
+// key + interpolation params visible instead of resolving to real zh/en/th/ru
+// copy, so this test stays decoupled from messages/*.json content.
+vi.mock('next-intl', () => ({
+  useTranslations: (namespace: string) => (key: string, params?: Record<string, unknown>) => (
+    params ? `${namespace}.${key}:${JSON.stringify(params)}` : `${namespace}.${key}`
+  ),
+}));
+
+vi.mock('sonner', () => ({
+  toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
+}));
+
+vi.mock('../../lib/disposal-detail-api', () => ({
+  addSenderFilterRule: vi.fn(),
+}));
+
+import { addSenderFilterRule } from '../../lib/disposal-detail-api';
+
+const mockAddSenderFilterRule = addSenderFilterRule as unknown as ReturnType<typeof vi.fn>;
+
+function baseProps(overrides: Partial<React.ComponentProps<typeof SenderActions>> = {}) {
+  return {
+    sender: 'attacker@evil.com',
+    apiRequest: vi.fn() as never,
+    isSingleRecipient: false,
+    ...overrides,
+  };
+}
+
+beforeEach(() => {
+  mockAddSenderFilterRule.mockReset();
+  mockAddSenderFilterRule.mockResolvedValue(undefined);
+});
+
+describe('SenderActions', () => {
+  it('renders the blacklist / whitelist / more buttons', () => {
+    render(<SenderActions {...baseProps()} />);
+    expect(screen.getByTestId('email-disposal-overview-action-blacklist')).toBeInTheDocument();
+    expect(screen.getByTestId('email-disposal-overview-action-whitelist')).toBeInTheDocument();
+    expect(screen.getByTestId('email-disposal-overview-action-more')).toBeInTheDocument();
+  });
+
+  it('renders the multi-recipient hint when isSingleRecipient is false', () => {
+    render(<SenderActions {...baseProps({ isSingleRecipient: false })} />);
+    expect(screen.getByTestId('email-disposal-overview-recipient-hint')).toBeInTheDocument();
+  });
+
+  it('does not render the multi-recipient hint when isSingleRecipient is true', () => {
+    render(<SenderActions {...baseProps({ isSingleRecipient: true })} />);
+    expect(screen.queryByTestId('email-disposal-overview-recipient-hint')).not.toBeInTheDocument();
+  });
+
+  it('opens the E1 blacklist dialog with scope radios + include-subdomains checkbox', async () => {
+    const user = userEvent.setup();
+    render(<SenderActions {...baseProps()} />);
+    await user.click(screen.getByTestId('email-disposal-overview-action-blacklist'));
+
+    const dialog = await screen.findByTestId('email-disposal-overview-blacklist-dialog');
+    expect(within(dialog).getByTestId('email-disposal-overview-blacklist-scope-tenant')).toBeInTheDocument();
+    expect(within(dialog).getByTestId('email-disposal-overview-blacklist-scope-global')).toBeInTheDocument();
+    expect(within(dialog).getByTestId('email-disposal-overview-blacklist-include-subdomains')).toBeInTheDocument();
+  });
+
+  it('opens the E2 whitelist dialog with scope radios but NO include-subdomains checkbox', async () => {
+    const user = userEvent.setup();
+    render(<SenderActions {...baseProps()} />);
+    await user.click(screen.getByTestId('email-disposal-overview-action-whitelist'));
+
+    const dialog = await screen.findByTestId('email-disposal-overview-whitelist-dialog');
+    expect(within(dialog).getByTestId('email-disposal-overview-whitelist-scope-tenant')).toBeInTheDocument();
+    expect(within(dialog).getByTestId('email-disposal-overview-whitelist-scope-global')).toBeInTheDocument();
+    expect(within(dialog).queryByTestId('email-disposal-overview-whitelist-include-subdomains')).not.toBeInTheDocument();
+  });
+
+  it('confirms blacklist with the default (tenant) scope and includeSubdomains=false', async () => {
+    const user = userEvent.setup();
+    const apiRequest = vi.fn() as never;
+    render(<SenderActions {...baseProps({ apiRequest })} />);
+    await user.click(screen.getByTestId('email-disposal-overview-action-blacklist'));
+    await user.click(screen.getByTestId('email-disposal-overview-blacklist-confirm'));
+
+    await waitFor(() => expect(mockAddSenderFilterRule).toHaveBeenCalledTimes(1));
+    expect(mockAddSenderFilterRule).toHaveBeenCalledWith(
+      'attacker@evil.com',
+      'blacklist',
+      apiRequest,
+      { scope: 'tenant', includeSubdomains: false },
+    );
+  });
+
+  it('confirms blacklist with global scope + includeSubdomains=true when selected', async () => {
+    const user = userEvent.setup();
+    const apiRequest = vi.fn() as never;
+    render(<SenderActions {...baseProps({ apiRequest })} />);
+    await user.click(screen.getByTestId('email-disposal-overview-action-blacklist'));
+
+    const dialog = await screen.findByTestId('email-disposal-overview-blacklist-dialog');
+    await user.click(within(dialog).getByTestId('email-disposal-overview-blacklist-scope-global'));
+    await user.click(within(dialog).getByTestId('email-disposal-overview-blacklist-include-subdomains'));
+    await user.click(within(dialog).getByTestId('email-disposal-overview-blacklist-confirm'));
+
+    await waitFor(() => expect(mockAddSenderFilterRule).toHaveBeenCalledTimes(1));
+    expect(mockAddSenderFilterRule).toHaveBeenCalledWith(
+      'attacker@evil.com',
+      'blacklist',
+      apiRequest,
+      { scope: 'global', includeSubdomains: true },
+    );
+  });
+
+  it('confirms whitelist with the chosen scope', async () => {
+    const user = userEvent.setup();
+    const apiRequest = vi.fn() as never;
+    render(<SenderActions {...baseProps({ apiRequest })} />);
+    await user.click(screen.getByTestId('email-disposal-overview-action-whitelist'));
+
+    const dialog = await screen.findByTestId('email-disposal-overview-whitelist-dialog');
+    await user.click(within(dialog).getByTestId('email-disposal-overview-whitelist-scope-global'));
+    await user.click(within(dialog).getByTestId('email-disposal-overview-whitelist-confirm'));
+
+    await waitFor(() => expect(mockAddSenderFilterRule).toHaveBeenCalledTimes(1));
+    expect(mockAddSenderFilterRule).toHaveBeenCalledWith(
+      'attacker@evil.com',
+      'whitelist',
+      apiRequest,
+      { scope: 'global' },
+    );
+  });
+
+  it('renders the E7 more menu with export/mark/investigation items', async () => {
+    const user = userEvent.setup();
+    render(<SenderActions {...baseProps()} />);
+    await user.click(screen.getByTestId('email-disposal-overview-action-more'));
+
+    expect(await screen.findByTestId('email-disposal-overview-action-more-export-eml')).toBeInTheDocument();
+    expect(screen.getByTestId('email-disposal-overview-action-more-export-pdf')).toBeInTheDocument();
+    expect(screen.getByTestId('email-disposal-overview-action-more-mark-fp')).toBeInTheDocument();
+    expect(screen.getByTestId('email-disposal-overview-action-more-mark-fn')).toBeInTheDocument();
+    expect(screen.getByTestId('email-disposal-overview-action-more-investigate')).toBeInTheDocument();
+  });
+
+  it('wires the E7 export-EML item to onExportEml', async () => {
+    const user = userEvent.setup();
+    const onExportEml = vi.fn();
+    render(<SenderActions {...baseProps({ onExportEml })} />);
+    await user.click(screen.getByTestId('email-disposal-overview-action-more'));
+    await user.click(await screen.findByTestId('email-disposal-overview-action-more-export-eml'));
+
+    expect(onExportEml).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the blacklist/whitelist/more buttons when readOnly', () => {
+    render(<SenderActions {...baseProps({ readOnly: true })} />);
+    expect(screen.getByTestId('email-disposal-overview-action-blacklist')).toBeDisabled();
+    expect(screen.getByTestId('email-disposal-overview-action-whitelist')).toBeDisabled();
+    expect(screen.getByTestId('email-disposal-overview-action-more')).toBeDisabled();
+  });
+});

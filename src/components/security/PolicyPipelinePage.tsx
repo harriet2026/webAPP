@@ -1,0 +1,1194 @@
+'use client';
+
+import { useState, useCallback, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { PageHeader, PageShell } from '@/components/shared/page-shell';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { IPFrequencyPage } from '@/components/security/IPFrequencyPage';
+import { IPFilterPage } from '@/components/security/IPFilterPage';
+import { RBLFilterPage } from '@/components/security/RBLFilterPage';
+import { OverseasMailPage } from '@/components/security/OverseasMailPage';
+import { SenderFilterPage } from '@/components/security/SenderFilterPage';
+import { UserListPage } from './UserListPage';
+import { AuthSpoofingPage } from '@/components/security/AuthSpoofingPage';
+import { BehaviorControlPage } from '@/components/security/BehaviorControlPage';
+import { RecipientCheckPage } from '@/components/security/RecipientCheckPage';
+import { ContentRulesPage } from '@/components/security/ContentRulesPage';
+import { AttachmentSecurityPage } from '@/components/security/AttachmentSecurityPage';
+import { UrlProtectionPage } from '@/components/security/UrlProtectionPage';
+import { IntentEnginePage } from '@/components/security/intent-engine/IntentEnginePage';
+import { SimilarDetectionPage } from '@/components/security/similar-detection/SimilarDetectionPage';
+import { MailMarkingPage } from '@/components/security/mail-marking/MailMarkingPage';
+import { AdvancedFilterRulesModule } from '@/components/security/advanced-filter-rules/AdvancedFilterRulesModule';
+import { ComprehensiveStrategyHeader } from '@/components/security/ComprehensiveStrategyHeader';
+import { useAuth } from '@/contexts/auth-context';
+import { useProductForm } from '@/contexts/product-form-context';
+import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
+import { useRouter } from '@/i18n/navigation';
+import type { Viewer } from '@/lib/product-form/resolve';
+import { RefreshCw, ArrowRight, Settings, ChevronLeft, ChevronRight, Lock, XCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useApiRequest } from '@/lib/api/client';
+import { getModuleEnabled, listAdvancedRules } from '@/lib/api/advanced-rules';
+import { canEditSecurityModule, getSecurityModules, setSecurityModuleEnabled } from '@/lib/api/security-modules';
+import { getSimilarDetection } from '@/lib/api/similar-detection';
+import { useAgentCenterOverview } from '@/hooks/use-agent-center-overview';
+import { resolveAgentPresentation } from '@/lib/agent-center/presentation';
+
+interface PipelinePolicy {
+  key: string;
+  nameKey: string;
+  descKey: string;
+  type: 'blocking' | 'forced' | 'exception' | 'configurable' | 'ai-sync' | 'ai-async' | 'unconfigured';
+  functional: boolean;
+  locked?: boolean;
+  href?: string;
+  // html_spec alignment (§2.1-7 / §4.2): 尚未配置任何规则的模块（海外邮件检测 /
+  // 高级过滤规则）以未配置态渲染（橙色虚线 + 灰色色条 + 「去配置」），但仍可点击进入配置。
+  unconfigured?: boolean;
+}
+
+interface PipelineStage {
+  key: string;
+  nameKey: string;
+  policies: PipelinePolicy[];
+  bgClass: string;
+  borderClass: string;
+  locked?: boolean;
+}
+
+// Action-semantic palette (DESIGN.md): blocking→block, configurable→quarantine,
+// ai→review, unconfigured→neutral. Routed through the --action-* / neutral tokens
+// so the bars theme consistently with the rest of the app.
+const typeColors: Record<string, string> = {
+  blocking: 'var(--action-block)',
+  // forced 命中即阻断，与 blocking 同为阻断语义色（demo §3.1：身份认证/意图引擎红色）。
+  forced: 'var(--action-block)',
+  // exception 白名单放行，投递语义色（demo §3.1：发信人/用户黑白名单绿色）。
+  exception: 'var(--action-deliver)',
+  configurable: 'var(--action-quarantine)',
+  'ai-sync': 'var(--action-review)',
+  'ai-async': 'var(--action-review)',
+  unconfigured: 'var(--hairline-strong)',
+};
+
+type Stage1PolicyKey = 'ipFrequency' | 'ipFilter' | 'rbl' | 'overseas';
+type Stage2PolicyKey = 'senderFilter' | 'authSpoofing' | 'behaviorControl' | 'recipientCheck' | 'userList';
+type Stage3PolicyKey = 'attachment' | 'url' | 'content' | 'intentEngine';
+type Stage5PolicyKey = 'similarDetection' | 'mailMarking' | 'advancedRules';
+
+const stage1NavItems: { key: Stage1PolicyKey; nameKey: string; functional: boolean }[] = [
+  { key: 'ipFrequency', nameKey: 'pipeline.ipFrequency', functional: true },
+  { key: 'ipFilter', nameKey: 'pipeline.ipFilter', functional: true },
+  { key: 'rbl', nameKey: 'pipeline.rbl', functional: true },
+  { key: 'overseas', nameKey: 'pipeline.overseas', functional: true },
+];
+
+export const stage2NavItems: { key: Stage2PolicyKey; nameKey: string; functional: boolean }[] = [
+  { key: 'senderFilter', nameKey: 'pipeline.senderFilter', functional: true },
+  { key: 'authSpoofing', nameKey: 'pipeline.authSpoofing', functional: true },
+  { key: 'behaviorControl', nameKey: 'pipeline.behaviorControl', functional: true },
+  // GT-11878: 收信人检测的后端能力（收信人数量限制）完整且在线生效，只是管理入口
+  // 被合并进了「发信行为管控」抽屉（2026-05-04-recipient-detection-design.md：
+  // 「合并到 behavior_control，不创建新的功能页面」）。但该合并只在流水线页执行了，
+  // email-disposal / group-policy 两处 UI 至今仍把它列为阶段2的第5项 —— 页面间不
+  // 一致。这里补回卡片作为一个「入口」，点击后打开同一个行为管控抽屉。
+  { key: 'recipientCheck', nameKey: 'pipeline.recipientCheck', functional: true },
+  { key: 'userList', nameKey: 'pipeline.userBlackWhiteList', functional: true },
+];
+
+const stage3NavItems: { key: Stage3PolicyKey; nameKey: string; functional: boolean }[] = [
+  { key: 'attachment', nameKey: 'pipeline.attachment', functional: true },
+  { key: 'url', nameKey: 'pipeline.url', functional: true },
+  { key: 'content', nameKey: 'pipeline.content', functional: true },
+  { key: 'intentEngine', nameKey: 'pipeline.intentEngine', functional: true },
+];
+
+export const stage5NavItems: { key: Stage5PolicyKey; nameKey: string; functional: boolean }[] = [
+  // D-8: 左导航名沿用模块内标题「相似邮件与主题检测」(similarDetection.title)，与流水线卡片/
+  // 抽屉面包屑子标题「相似检测」(pipeline.similarDetection) 刻意不同 —— demo 三层命名各异。
+  { key: 'similarDetection', nameKey: 'similarDetection.title', functional: true },
+  { key: 'advancedRules', nameKey: 'pipeline.advancedRules', functional: true },
+  { key: 'mailMarking', nameKey: 'pipeline.mailMarking', functional: true },
+];
+
+// GT-12160：1024–1365px 的配置抽屉固定为 560px。窄抽屉保留图标导航，
+// 把可用宽度优先给配置表单；更大视口恢复原有 80vw 抽屉和完整导航。
+// 导出该断点约束，防止后续样式调整重新引入横向溢出。
+export const pipelineDrawerResponsiveClasses = {
+  sheet: 'data-[side=right]:w-[calc(100vw-2rem)] min-[640px]:data-[side=right]:w-[560px] min-[1366px]:data-[side=right]:w-[80vw] min-[1366px]:data-[side=right]:max-w-[1400px]',
+  expandedNav: 'w-14 min-[1366px]:w-[200px]',
+  expandedNavLabel: 'hidden min-[1366px]:block',
+} as const;
+
+/**
+ * The colour key for the pipeline diagram. Every action the gateway can take on
+ * a message appears here, ordered from the most permissive outcome to the least.
+ * Exported so a test can hold it to the six actions the rule engine actually
+ * supports (GT-11894 shipped four).
+ */
+export const actionLegendItems: {
+  key: 'deliver' | 'tagDeliver' | 'quarantine' | 'review' | 'block' | 'drop';
+  color: string;
+  labelKey: string;
+  descKey: string;
+}[] = [
+  { key: 'deliver', color: 'var(--action-deliver)', labelKey: 'pipeline.actionDeliver', descKey: 'pipeline.actionDeliverDesc' },
+  { key: 'tagDeliver', color: 'var(--action-mark-deliver)', labelKey: 'pipeline.actionTagDeliver', descKey: 'pipeline.actionTagDeliverDesc' },
+  { key: 'quarantine', color: 'var(--action-quarantine)', labelKey: 'pipeline.actionQuarantine', descKey: 'pipeline.actionQuarantineDesc' },
+  { key: 'review', color: 'var(--action-review)', labelKey: 'pipeline.actionReview', descKey: 'pipeline.actionReviewDesc' },
+  { key: 'block', color: 'var(--action-block)', labelKey: 'pipeline.actionBlock', descKey: 'pipeline.actionBlockDesc' },
+  { key: 'drop', color: 'var(--action-drop)', labelKey: 'pipeline.actionDrop', descKey: 'pipeline.actionDropDesc' },
+];
+
+/**
+ * Strategy pipeline belongs to the tenant-management surface in a
+ * multi-tenant deployment. A platform administrator may enter that surface by
+ * impersonating a tenant, while their authenticated role remains
+ * `system_admin`; authorization must therefore use the resolved viewer rather
+ * than the raw authenticated role alone.
+ */
+export function canAccessPolicyPipeline({
+  multiTenant,
+  effectiveViewer,
+  isSystemAdmin,
+  isTenantAdmin,
+}: {
+  multiTenant: boolean;
+  effectiveViewer: Viewer;
+  isSystemAdmin: boolean;
+  isTenantAdmin: boolean;
+}): boolean {
+  if (multiTenant && effectiveViewer === 'platform') return false;
+  return isSystemAdmin || isTenantAdmin || effectiveViewer === 'tenant';
+}
+
+export function PolicyPipelinePage() {
+  const t = useTranslations();
+  const router = useRouter();
+  const { isSystemAdmin, user, selectedTenantId } = useAuth();
+  const isTenantAdmin = user?.role === 'tenant_admin';
+  const { capabilities } = useProductForm();
+  const { effectiveViewer } = useSecurityScope(null);
+  const caps = capabilities ?? { ai: false, multiTenant: false, saas: false };
+  const overviewQuery = useAgentCenterOverview();
+  const aiStagePolicies: PipelinePolicy[] = (overviewQuery.data?.agents ?? [])
+    .filter((card) => card.access !== 'hidden')
+    .map((card): PipelinePolicy | null => {
+      const presentation = resolveAgentPresentation(card);
+      if (!presentation) return null;
+      return {
+        key: presentation.pipelineKey,
+        nameKey: presentation.pipelineNameKey,
+        descKey: presentation.pipelineDescKey,
+        type: presentation.pipelineType,
+        functional: true,
+        locked: !presentation.canConfigure,
+        href: presentation.configHref,
+      };
+    })
+    .filter((policy): policy is PipelinePolicy => policy !== null);
+  const showAIStage = aiStagePolicies.length > 0;
+  // GT-11636: 多租户形态 + 租户视角下，阶段1 IP策略由平台统一管控
+  const lockStage1 = caps.multiTenant && effectiveViewer === 'tenant';
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [activeDrawerPolicy, setActiveDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string }>({ stage: 1, key: 'ipFrequency' });
+  const [navCollapsed, setNavCollapsed] = useState(false);
+  const [intentDirty, setIntentDirty] = useState(false);
+  // html_spec 宿主对齐（Task 10）：意图引擎左导航圆点/摘要跟随总开关启用态（同 url 模块模式）
+  const [intentEngineEnabled, setIntentEngineEnabled] = useState<boolean | undefined>(undefined);
+  const [similarDirty, setSimilarDirty] = useState(false);
+  // html_spec §2.2-5：URL检测与防护显式保存 —— 未保存关抽屉需确认
+  const [urlDirty, setUrlDirty] = useState(false);
+  // GT-12105：海外邮件检测抽屉的未保存确认与其它模块共用同一套机制。
+  const [overseasDirty, setOverseasDirty] = useState(false);
+  // html_spec §2.2-2/§2.2-3：URL 左导航圆点/摘要跟随模块启用态（含未保存草稿）
+  const [urlModuleEnabled, setUrlModuleEnabled] = useState<boolean | undefined>(undefined);
+  const [attachmentDirty, setAttachmentDirty] = useState(false);
+  const [attachmentEnabled, setAttachmentEnabled] = useState<boolean | undefined>(undefined);
+  const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
+  const [pendingDrawerPolicy, setPendingDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string } | null>(null);
+
+  const { apiRequest } = useApiRequest();
+  const queryClient = useQueryClient();
+
+  // F10: stage5 综合策略抽屉宿主对齐 — 左导航启用圆点 + 页级
+  // ComprehensiveStrategyHeader 开关的数据源。仅在抽屉处于阶段5时取数
+  // (`enabled` gate)，不影响阶段1/2/3；其余阶段完全不读取这些 query。
+  const stage5Active = drawerOpen && activeDrawerPolicy.stage === 5;
+
+  const { data: advancedRulesEnabledResp } = useQuery({
+    queryKey: ['advanced-rules', 'enabled'],
+    queryFn: () => getModuleEnabled(apiRequest),
+    enabled: stage5Active,
+  });
+  const advancedRulesEnabled = advancedRulesEnabledResp?.enabled ?? true;
+
+  // GT-12076: the advanced-rules pipeline card must reflect its real configured
+  // state — html_spec §2.1-4 shows「配置」once rules exist and「去配置」only while
+  // the tenant has none. It was hardcoded unconfigured, so it kept showing
+  // 「去配置」even after rules were added. Fetch the tenant's advanced rules and
+  // derive the card state from whether any exist.
+  const { data: advancedRulesList } = useQuery({
+    queryKey: ['advanced-rules', 'list'],
+    queryFn: () => listAdvancedRules(apiRequest),
+  });
+  const advancedRulesUnconfigured = (advancedRulesList?.length ?? 0) === 0;
+
+  // similarDetection's module-level enable/disable is managed via the same
+  // /security/modules API that ModuleMasterSwitch uses (the page wraps itself
+  // in <ModuleMasterSwitch page="similar_detection">). The SimilarDetectionConfig
+  // object exposed by GET /security/similar-detection does NOT carry the enabled
+  // flag -- it's a config_overrides-level toggle, same as advanced_rules.
+  const { data: securityModulesMap } = useQuery({
+    queryKey: ['security-modules'],
+    queryFn: () => getSecurityModules(apiRequest),
+    enabled: stage5Active,
+  });
+  const similarDetectionEnabled = securityModulesMap?.similar_detection ?? true;
+  const comprehensiveStrategyEnabled = securityModulesMap?.comprehensive_strategy ?? true;
+  const comprehensiveStrategyEditable = canEditSecurityModule({
+    page: 'comprehensive_strategy',
+    role: user?.role,
+    viewer: effectiveViewer,
+    multiTenant: caps.multiTenant,
+    selectedTenantId,
+  });
+  const comprehensiveStrategyMutation = useMutation({
+    mutationFn: (enabled: boolean) => setSecurityModuleEnabled('comprehensive_strategy', enabled, apiRequest),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['security-modules'] });
+      queryClient.invalidateQueries({ queryKey: ['advanced-rules', 'enabled'] });
+      toast.success(t('common.updateSuccess'));
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  // html_spec §2.3-13 对齐：左导航「相似邮件与主题检测」摘要=「窗口{N}分钟 / 阈值{M}%」，
+  // 取自当前生效方向组（mode==='separate' 取 similar_email.receive，'aggregate' 取 aggregate）。
+  // 同 advancedRulesEnabledResp/securityModulesMap，仅在抽屉处于阶段5时取数。
+  const { data: similarDetectionConfigResp } = useQuery({
+    queryKey: ['similar-detection-config'],
+    queryFn: () => getSimilarDetection(apiRequest),
+    enabled: stage5Active,
+  });
+  const similarDetectionNavSummary = similarDetectionConfigResp
+    ? t('similarDetection.navSummary', {
+        window: similarDetectionConfigResp.mode === 'aggregate'
+          ? similarDetectionConfigResp.aggregate.window_minutes
+          : similarDetectionConfigResp.similar_email.receive.window_minutes,
+        threshold: similarDetectionConfigResp.mode === 'aggregate'
+          ? similarDetectionConfigResp.aggregate.similarity_pct
+          : similarDetectionConfigResp.similar_email.receive.similarity_pct,
+      })
+    : undefined;
+
+  // mailMarking exposes no module-level enable/disable API at all (grepped
+  // src/lib/api/mail-marking.ts + MailMarkingPage.tsx) — no nav dot, and the
+  // header renders as always-on/non-interactive for this policy.
+  // Similar detection and mail marking share the security-modules endpoint;
+  // their navigation dots must reflect the same source as each page-level
+  // ModuleMasterSwitch.
+  const stage5EnabledByKey: Partial<Record<Stage5PolicyKey, boolean>> = {
+    ...(advancedRulesEnabledResp ? { advancedRules: advancedRulesEnabled && comprehensiveStrategyEnabled } : {}),
+    ...(securityModulesMap ? { similarDetection: similarDetectionEnabled && comprehensiveStrategyEnabled } : {}),
+    ...(securityModulesMap ? { mailMarking: (securityModulesMap.mail_marking ?? true) && comprehensiveStrategyEnabled } : {}),
+  };
+
+  const handleDrawerClose = useCallback(() => {
+    const isDirty = (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'intentEngine' && intentDirty)
+      || (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'url' && urlDirty)
+      || (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'attachment' && attachmentDirty)
+      || (activeDrawerPolicy.stage === 1 && activeDrawerPolicy.key === 'overseas' && overseasDirty)
+      || (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'similarDetection' && similarDirty);
+    if (isDirty) {
+      setPendingDrawerPolicy(null);
+      setCloseConfirmOpen(true);
+    } else {
+      setDrawerOpen(false);
+    }
+  }, [intentDirty, urlDirty, attachmentDirty, overseasDirty, similarDirty, activeDrawerPolicy.stage, activeDrawerPolicy.key, setCloseConfirmOpen, setDrawerOpen, setPendingDrawerPolicy]);
+
+  // Module A is a tenant-management surface in multi-tenant deployments.
+  // A system administrator impersonating a tenant retains their system_admin
+  // authentication role, so `isSystemAdmin` alone cannot identify platform
+  // context. `effectiveViewer` is normalized by useSecurityScope and is the
+  // authorization boundary here.
+  const scopeAllowed = canAccessPolicyPipeline({
+    multiTenant: caps.multiTenant,
+    effectiveViewer,
+    isSystemAdmin,
+    isTenantAdmin,
+  });
+  // GT-12154: a platform administrator (multi-tenant + platform view) does not
+  // belong to any tenant, so the tenant-level policy pipeline route must not
+  // merely render an in-place "unauthorized" panel — PRD §0.1/§1.4/§4.2 requires
+  // 403 / redirect / hidden entry. Mirror the mail-routing page (redirect to the
+  // tenant center) so a direct-URL visit is bounced off the tenant route rather
+  // than lingering on it. Other (non-platform) blocked cases keep the panel.
+  const platformScopeBlocked = !scopeAllowed && caps.multiTenant && effectiveViewer === 'platform';
+  useEffect(() => {
+    if (platformScopeBlocked) {
+      router.replace('/tenants');
+    }
+  }, [platformScopeBlocked, router]);
+  if (!scopeAllowed) {
+    if (platformScopeBlocked) {
+      // Redirecting via the effect above; render nothing so the pipeline never
+      // flashes for a platform administrator.
+      return null;
+    }
+    return (
+      <PageShell>
+        <PageHeader title={t('pipeline.title')} />
+        <div className="flex items-center justify-center py-20 text-muted-foreground">
+          {t('common.notAuthorized')}
+        </div>
+      </PageShell>
+    );
+  }
+
+  const comprehensiveStageNameKey = showAIStage ? 'pipeline.phase5Comprehensive' : 'pipeline.phase4Comprehensive';
+  // F10: 综合策略实际是阶段4还是阶段5取决于阶段4「智能分析层」是否展示
+  // (showAIStage) —— 与 comprehensiveStageNameKey 的选择同一依据，供面包屑用。
+  const comprehensiveStageNumber = showAIStage ? 5 : 4;
+  const aiStages: PipelineStage[] = showAIStage ? [{
+    key: 'stage4',
+    nameKey: 'pipeline.phase4AI',
+    bgClass: 'bg-[#F6F0FF] dark:bg-purple-950/30',
+    borderClass: 'border-x-0',
+    policies: aiStagePolicies,
+  }] : [];
+  const stages: PipelineStage[] = [
+    {
+      key: 'stage1',
+      nameKey: 'pipeline.phase1IP',
+      bgClass: '',
+      borderClass: 'rounded-l-lg border-r-0',
+      locked: lockStage1,
+      // html_spec §3.1 对齐：IP 频率/黑白名单/RBL 命中即阻断退信 → blocking（红）；
+      // 海外邮件检测尚未配置 → configurable + unconfigured（灰色虚线 / 去配置）。
+      policies: lockStage1 ? [] : [
+        { key: 'ipFrequency', nameKey: 'pipeline.ipFrequency', descKey: 'pipeline.ipFrequencyDesc', type: 'blocking', functional: true },
+        { key: 'ipFilter', nameKey: 'pipeline.ipFilter', descKey: 'pipeline.ipFilterDesc', type: 'blocking', functional: true },
+        { key: 'rbl', nameKey: 'pipeline.rbl', descKey: 'pipeline.rblDesc', type: 'blocking', functional: true },
+        { key: 'overseas', nameKey: 'pipeline.overseas', descKey: 'pipeline.overseasDesc', type: 'configurable', functional: true, unconfigured: true },
+      ],
+    },
+    {
+      key: 'stage2',
+      nameKey: 'pipeline.phase2Sender',
+      bgClass: '',
+      borderClass: 'border-x-0',
+      // html_spec §3.1 对齐：黑白名单为例外放行 → exception（绿）；身份认证与仿冒检测
+      // 强制阻断 → forced（红）；发信行为管控/收信人检测隔离 → configurable（橙）。
+      policies: [
+        { key: 'senderFilter', nameKey: 'pipeline.senderFilter', descKey: 'pipeline.senderFilterDesc', type: 'exception', functional: true },
+        { key: 'authSpoofing', nameKey: 'pipeline.authSpoofing', descKey: 'pipeline.authSpoofingDesc', type: 'forced', functional: true },
+        { key: 'behaviorControl', nameKey: 'pipeline.behaviorControl', descKey: 'pipeline.behaviorControlDesc', type: 'configurable', functional: true },
+        { key: 'recipientCheck', nameKey: 'pipeline.recipientCheck', descKey: 'pipeline.recipientCheckDesc', type: 'configurable', functional: true },
+        { key: 'userList', nameKey: 'pipeline.userBlackWhiteList', descKey: 'pipeline.userListDesc', type: 'exception', functional: true },
+      ],
+    },
+    {
+      key: 'stage3',
+      nameKey: 'pipeline.phase3Content',
+      bgClass: '',
+      borderClass: 'border-x-0',
+      // html_spec §3.1 对齐：附件/URL/内容规则隔离 → configurable（橙）；意图引擎强制 → forced（红）。
+      policies: [
+        { key: 'attachment', nameKey: 'pipeline.attachment', descKey: 'pipeline.attachmentDesc', type: 'configurable', functional: true },
+        { key: 'url', nameKey: 'pipeline.url', descKey: 'pipeline.urlDesc', type: 'configurable', functional: true },
+        { key: 'content', nameKey: 'pipeline.content', descKey: 'pipeline.contentDesc', type: 'configurable', functional: true },
+        { key: 'intentEngine', nameKey: 'pipeline.intentEngine', descKey: 'pipeline.intentEngineDesc', type: 'forced', functional: true },
+      ],
+    },
+    ...aiStages,
+    {
+      key: 'stage5',
+      nameKey: comprehensiveStageNameKey,
+      bgClass: 'bg-[#F5F5F5] dark:bg-gray-900',
+      borderClass: 'rounded-r-lg border-l-0',
+      // html_spec §3.1 对齐：相似检测/邮件标记隔离 → configurable（橙）；高级过滤规则尚未配置
+      // → configurable + unconfigured（灰色虚线 / 去配置）。
+      policies: [
+        { key: 'similarDetection', nameKey: 'pipeline.similarDetection', descKey: 'pipeline.similarDetectionDesc', type: 'configurable', functional: true },
+        { key: 'advancedRules', nameKey: 'pipeline.advancedRules', descKey: 'pipeline.advancedRulesDesc', type: 'configurable', functional: true, unconfigured: advancedRulesUnconfigured },
+        { key: 'mailMarking', nameKey: 'pipeline.mailMarking', descKey: 'pipeline.mailMarkingDesc', type: 'configurable', functional: true },
+      ],
+    },
+  ];
+
+  const handleCardClick = (policy: PipelinePolicy) => {
+    if (policy.locked) {
+      return;
+    }
+    if (policy.href) {
+      router.push(policy.href);
+      return;
+    }
+    if (policy.key === 'senderFilter') {
+      setActiveDrawerPolicy({ stage: 2, key: 'senderFilter' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'ipFrequency') {
+      setActiveDrawerPolicy({ stage: 1, key: 'ipFrequency' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'ipFilter') {
+      setActiveDrawerPolicy({ stage: 1, key: 'ipFilter' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'rbl') {
+      setActiveDrawerPolicy({ stage: 1, key: 'rbl' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'overseas') {
+      setActiveDrawerPolicy({ stage: 1, key: 'overseas' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'authSpoofing') {
+      setActiveDrawerPolicy({ stage: 2, key: 'authSpoofing' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'behaviorControl') {
+      setActiveDrawerPolicy({ stage: 2, key: 'behaviorControl' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'recipientCheck') {
+      setActiveDrawerPolicy({ stage: 2, key: 'recipientCheck' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'userList') {
+      setActiveDrawerPolicy({ stage: 2, key: 'userList' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'content') {
+      setActiveDrawerPolicy({ stage: 3, key: 'content' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'attachment') {
+      setActiveDrawerPolicy({ stage: 3, key: 'attachment' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'url') {
+      setActiveDrawerPolicy({ stage: 3, key: 'url' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'intentEngine') {
+      setActiveDrawerPolicy({ stage: 3, key: 'intentEngine' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'similarDetection') {
+      setActiveDrawerPolicy({ stage: 5, key: 'similarDetection' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'mailMarking') {
+      setActiveDrawerPolicy({ stage: 5, key: 'mailMarking' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (policy.key === 'advancedRules') {
+      setActiveDrawerPolicy({ stage: 5, key: 'advancedRules' });
+      setDrawerOpen(true);
+      return;
+    }
+    if (!policy.functional) {
+      toast.info(t('pipeline.comingSoon'));
+    }
+  };
+
+  const renderPolicyCard = (policy: PipelinePolicy) => {
+    const isFunctional = policy.functional;
+    const isAI = policy.type === 'ai-sync' || policy.type === 'ai-async';
+    const locked = policy.locked === true;
+    // html_spec §2.1-7：未配置态 —— 橙色虚线边框 + 灰色色条 + 「去配置」，仍可点击进入配置。
+    const isUnconfigured = policy.unconfigured === true && !locked;
+
+    return (
+      // GT-12094: 策略卡片悬浮 Tooltip（策略说明），对齐 策略流水线需求文档 §3。
+      <TooltipProvider key={policy.key} delay={300}>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <div
+              data-testid={`pipeline-policy-card-${policy.key}`}
+              data-unconfigured={isUnconfigured ? 'true' : undefined}
+              className={cn(
+                'relative flex h-[60px] w-[220px] flex-none items-center gap-2 rounded-lg border p-3 transition-all',
+                'hover:border-blue-300 hover:bg-blue-50/50 dark:hover:bg-blue-950/20',
+                isUnconfigured && 'border-2 border-dashed',
+                locked ? 'cursor-not-allowed opacity-70 hover:border-border hover:bg-background' : 'cursor-pointer',
+                !isFunctional && !locked && 'opacity-70',
+              )}
+              style={isUnconfigured ? { borderColor: 'var(--action-quarantine)' } : undefined}
+              onClick={() => handleCardClick(policy)}
+            />
+          }
+        >
+          <div
+            className="absolute left-0 top-2 bottom-2 w-1 rounded-full"
+            style={{
+              backgroundColor: isUnconfigured
+                ? typeColors.unconfigured
+                : policy.key === 'mailMarking'
+                  ? 'var(--action-mark-deliver)'
+                  : typeColors[policy.type],
+            }}
+          />
+          <div className="flex-1 pl-2 min-w-0">
+            <div className="text-sm font-medium truncate">{t(policy.nameKey)}</div>
+            {isAI && (
+              <span className={cn(
+                'text-[10px] px-1.5 py-0.5 rounded text-white',
+                policy.type === 'ai-async' ? 'bg-warning' : 'bg-action-review',
+              )}>
+                {policy.type === 'ai-async' ? t('pipeline.aiAsync') : t('pipeline.aiSync')}
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            data-testid={`pipeline-policy-config-${policy.key}`}
+            className="shrink-0 text-xs text-primary hover:underline flex items-center gap-1"
+            disabled={locked}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCardClick(policy);
+            }}
+          >
+            {locked ? <Lock className="h-3 w-3" /> : null}
+            {!isFunctional
+              ? t('pipeline.comingSoon')
+              : isUnconfigured
+                ? t('pipeline.goConfig')
+                : t('pipeline.configBtn')}
+            {isFunctional && !locked && <ArrowRight className="h-3 w-3" />}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent
+          side="top"
+          className="max-w-[260px] text-xs"
+          data-testid={`pipeline-policy-tooltip-${policy.key}`}
+        >
+          {policy.key === 'intentEngine' ? (
+            // 意图引擎一期只支持分类优先：CAC 返回单一 winning intent，未暴露可配置的
+            // 置信度分数，因此 Tooltip 必须说明实际的分类匹配与处置语义，不能沿用原型
+            // 中已删除的分段阈值或其他 forced 策略的「阻断」文案。
+            <div className="space-y-0.5">
+              <div>{t('pipeline.policyTooltipPolicy')}：{t(policy.nameKey)}</div>
+              <div>{t('pipeline.policyTooltipAction')}：{t('pipeline.intentEngineTooltipAction')}</div>
+              <div>{t('pipeline.policyTooltipEffect')}：{t('pipeline.intentEngineTooltipEffect')}</div>
+            </div>
+          ) : policy.key === 'url' || policy.key === 'similarDetection' ? (
+            // html_spec §2.1-4 / Task 13 L0-a：url、相似检测 两卡复合 Tooltip（策略/动作/效果/
+            // 隔离区跳转说明，文案与动作组合逐字匹配 demo），其余卡保持单行描述（各自 spec 范围）。
+            <div className="space-y-0.5">
+              <div>{t('pipeline.policyTooltipPolicy')}：{t(policy.nameKey)}</div>
+              <div>{t('pipeline.policyTooltipAction')}：{t('pipeline.actionQuarantineAction')}、{t('pipeline.actionDeliver')}</div>
+              <div>{t('pipeline.policyTooltipEffect')}：{t('pipeline.policyEffectQuarantine')}</div>
+              <div className="opacity-80">{t('pipeline.quarantineModuleLink')}</div>
+            </div>
+          ) : policy.key === 'rbl' ? (
+            <div className="space-y-0.5">
+              <div>{t('pipeline.policyTooltipPolicy')}：{t(policy.descKey)}</div>
+              <div>{t('pipeline.policyTooltipAction')}：{t('pipeline.actionBlock')}（{t('pipeline.actionBlockDesc')}）</div>
+              <div>{t('pipeline.policyTooltipEffect')}：{t('pipeline.flowTerminate')}（{t('pipeline.flowTerminateDesc')}）</div>
+            </div>
+          ) : policy.key === 'mailMarking' ? (
+            <div className="space-y-0.5">
+              <div>{t('pipeline.policyTooltipPolicy')}：{t(policy.nameKey)}</div>
+              <div>{t('pipeline.policyTooltipAction')}：{t('pipeline.actionTagDeliver')}</div>
+              <div>{t('pipeline.policyTooltipEffect')}：{t('pipeline.mailMarkingDesc')}</div>
+            </div>
+          ) : policy.key === 'advancedRules' ? (
+            // 高级过滤规则不再退化为一行 description。卡片 Tooltip 必须给出
+            // 策略、当前启用状态、配置入口语义和命中效果四项信息（GT-12190）。
+            <div className="space-y-0.5">
+              <div>{t('pipeline.policyTooltipPolicy')}：{t(policy.nameKey)}</div>
+              <div>{t('pipeline.policyTooltipAction')}：{advancedRulesEnabled ? t('pipeline.comprehensiveEnabled') : t('pipeline.comprehensiveDisabled')}</div>
+              <div>{t('pipeline.policyTooltipEffect')}：{t('pipeline.advancedRulesSummary')}</div>
+              <div className="opacity-80">{t('pipeline.advancedRulesDesc')}</div>
+            </div>
+          ) : policy.key === 'content' ? (
+            <div className="space-y-1 leading-5">
+              <div className="font-semibold">{t('contentRules.cardTooltipStrategy')}</div>
+              <div>{t('contentRules.cardTooltipActions')}</div>
+              <div>{t('contentRules.cardTooltipEffect')}</div>
+              <div>{t('contentRules.cardTooltipQuarantineHint')}</div>
+            </div>
+          ) : (
+            // 修复：此前该分支与上面的 'content' 分支各自独立 ternary 并列渲染，导致
+            // intentEngine/url/content 之外的所有卡片（含本次的 similarDetection 修复前）
+            // descKey 单行描述被渲染两遍（同一 Tooltip 内文案重复）。合并为单一 ternary 链后
+            // 每张卡只命中一个分支，不再重复。
+            t(policy.descKey)
+          )}
+        </TooltipContent>
+      </Tooltip>
+      </TooltipProvider>
+    );
+  };
+
+  // html_spec §3.2 对齐：阶段间箭头由该阶段内策略类型推导 —— 含 blocking/forced → 阻断(红)；
+  // 否则含 configurable → 隔离(橙)；否则 → 继续(绿)。
+  const getStageFlow = (stage: PipelineStage): 'terminate' | 'quarantine' | 'continue' => {
+    const types = stage.policies.map((p) => p.type);
+    if (types.some((tp) => tp === 'blocking' || tp === 'forced')) return 'terminate';
+    if (types.some((tp) => tp === 'configurable')) return 'quarantine';
+    return 'continue';
+  };
+
+  const renderStageArrow = (stage: PipelineStage) => {
+    const flow = getStageFlow(stage);
+    const flowMeta = {
+      terminate: { color: 'var(--action-block)', label: t('pipeline.flowTerminateShort') },
+      quarantine: { color: 'var(--action-quarantine)', label: t('pipeline.flowQuarantineShort') },
+      continue: { color: 'var(--action-deliver)', label: t('pipeline.flowContinueShort') },
+    }[flow];
+    return (
+      <div className="flex flex-col items-center justify-center px-1 min-w-[40px]" data-testid={`pipeline-stage-arrow-${stage.key}-${flow}`}>
+        <ArrowRight className="h-5 w-5" style={{ color: flowMeta.color }} />
+        <span className="text-[10px] mt-0.5" style={{ color: flowMeta.color }}>{flowMeta.label}</span>
+      </div>
+    );
+  };
+
+  const navItems = activeDrawerPolicy.stage === 5 ? stage5NavItems : activeDrawerPolicy.stage === 3 ? stage3NavItems : activeDrawerPolicy.stage === 2 ? stage2NavItems : stage1NavItems;
+  // html_spec §2.1-2 对齐面包屑：IP 抽屉保持「IP策略」（无编号，同 demo connection.title），
+  // 阶段2/3/5 抽屉带「阶段N: 」前缀。
+  const navStageLabel = activeDrawerPolicy.stage === 5
+    ? t('pipeline.stageTitleFormat', { n: comprehensiveStageNumber, name: t(comprehensiveStageNameKey) })
+    : activeDrawerPolicy.stage === 3
+      ? t('pipeline.stageTitleFormat', { n: 3, name: t('pipeline.phase3Content') })
+      : activeDrawerPolicy.stage === 2
+        ? t('pipeline.stageTitleFormat', { n: 2, name: t('pipeline.phase2Sender') })
+        : t('pipeline.phase1IP');
+
+  const isNavActive = (key: string) => activeDrawerPolicy.key === key;
+
+  const currentDrawerIsDirty = (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'intentEngine' && intentDirty)
+    || (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'url' && urlDirty)
+    || (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'attachment' && attachmentDirty)
+    || (activeDrawerPolicy.stage === 1 && activeDrawerPolicy.key === 'overseas' && overseasDirty)
+    || (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'similarDetection' && similarDirty);
+
+  const requestDrawerPolicy = (next: { stage: 1 | 2 | 3 | 5; key: string }) => {
+    if (next.stage === activeDrawerPolicy.stage && next.key === activeDrawerPolicy.key) return;
+    if (currentDrawerIsDirty) {
+      setPendingDrawerPolicy(next);
+      setCloseConfirmOpen(true);
+      return;
+    }
+    setActiveDrawerPolicy(next);
+  };
+
+  // html_spec §2.3-13 对齐：抽屉左导航每个模块名下显示一行摘要（demo 的「阈值: 100次/分钟」
+  // 「黑名单: 33条 / 白名单: 22条」等）。webapp 复用各模块既有的描述文案（四语齐全，随
+  // 模块能力演进；不伪造静态计数）。stage5 的启用圆点数据源见 stage5EnabledByKey above。
+  const navSummaryKey: Record<string, string> = {
+    // 阶段1 IP策略
+    ipFrequency: 'pipeline.ipFrequencyDesc',
+    ipFilter: 'pipeline.ipFilterDesc',
+    rbl: 'pipeline.rblDesc',
+    overseas: 'pipeline.overseasDesc',
+    // 阶段2 收发信人策略
+    senderFilter: 'pipeline.senderFilterDesc',
+    authSpoofing: 'pipeline.authSpoofingDesc',
+    behaviorControl: 'pipeline.behaviorControlDesc',
+    recipientCheck: 'pipeline.recipientCheckDesc',
+    userList: 'pipeline.userListDesc',
+    // 阶段3 内容层（url/intentEngine 项为动态摘要，见 renderNavItems —— html_spec §2.2-2 / Task 10）
+    attachment: 'pipeline.attachmentNavSummary',
+    content: 'pipeline.contentNavSummary',
+    // 阶段5 综合策略
+    similarDetection: 'pipeline.similarDetectionDesc',
+    advancedRules: 'pipeline.advancedRulesSummary',
+    mailMarking: 'pipeline.mailMarkingDesc',
+  };
+
+  const renderNavItems = navItems.map((item) => {
+    const isActive = isNavActive(item.key);
+    const isStage5 = activeDrawerPolicy.stage === 5;
+    // stage1/2/3: unchanged, always item.functional (true for every current item);
+    // 例外 url：圆点跟随模块启用态（含未保存草稿，html_spec §2.2-3）。
+    // stage5: real enabled state when known (advancedRules/similarDetection),
+    // else falls back to item.functional (mailMarking — no enabled API, see above).
+    const stage5Enabled = isStage5 ? stage5EnabledByKey[item.key as Stage5PolicyKey] : undefined;
+    const urlEnabled = item.key === 'url' ? urlModuleEnabled : undefined;
+    const attachmentModuleEnabled = item.key === 'attachment' ? attachmentEnabled : undefined;
+    // html_spec 宿主对齐（Task 10）：意图引擎圆点跟随总开关启用态，同 url 模块模式。
+    const intentEnabled = item.key === 'intentEngine' ? intentEngineEnabled : undefined;
+    const dotOn = stage5Enabled !== undefined ? stage5Enabled
+      : urlEnabled !== undefined ? urlEnabled
+      : attachmentModuleEnabled !== undefined ? attachmentModuleEnabled
+      : intentEnabled !== undefined ? intentEnabled
+      : item.functional;
+    // html_spec §2.2-2：url 摘要 启用=「信誉评估/沙箱分析/仿冒检测」，禁用=「未启用」
+    // 意图引擎摘要 启用=「涉黄赌/涉政/钓鱼/垃圾/订阅」，禁用=「未启用」（Task 10）
+    // 相似检测摘要 启用=「窗口{N}分钟 / 阈值{M}%」（Task 13），禁用=「已禁用」（复用 common.disabled，
+    // demo D-8 未新造 key）；配置 query 未就绪前退回静态描述文案，避免摘要闪烁。
+    const summaryText = item.key === 'url'
+      ? (urlModuleEnabled === false ? t('pipeline.urlNavSummaryDisabled') : t('pipeline.urlNavSummary'))
+      : item.key === 'attachment'
+        ? (attachmentEnabled === false ? t('securityModules.disabled') : t('pipeline.attachmentNavSummary'))
+      : item.key === 'intentEngine'
+        ? (intentEngineEnabled === false ? t('pipeline.intentEngineNavSummaryDisabled') : t('pipeline.intentEngineNavSummary'))
+        : item.key === 'similarDetection'
+          ? (similarDetectionEnabled === false
+              ? t('common.disabled')
+              : similarDetectionNavSummary ?? t(navSummaryKey.similarDetection))
+          : navSummaryKey[item.key]
+            ? t(navSummaryKey[item.key])
+            : undefined;
+    return (
+      <Tooltip key={item.key}>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              className={cn(
+                'w-full flex items-center rounded-lg transition-colors text-left',
+                navCollapsed ? 'px-2 py-2.5 justify-center' : 'px-2 py-2.5 justify-center min-[1366px]:px-3 min-[1366px]:gap-2',
+                isActive
+                  ? 'bg-background border-l-2 border-primary text-primary'
+                  : 'hover:bg-background/60 text-foreground',
+                !item.functional && !isActive && 'text-muted-foreground',
+              )}
+              onClick={() => requestDrawerPolicy({ stage: activeDrawerPolicy.stage, key: item.key })}
+              data-testid={`pipeline-drawer-nav-${item.key}`}
+            />
+          }
+        >
+            <span className={cn(
+              "w-2.5 h-2.5 rounded-full flex-shrink-0",
+              dotOn ? "bg-blue-500" : "border-2 border-muted-foreground/30"
+            )} />
+            {!navCollapsed && (
+              // html_spec §2.3-13：所有阶段的左导航模块都显示「名称 + 摘要」两行（此前仅 stage5）。
+              <span className={cn('flex-1 min-w-0', pipelineDrawerResponsiveClasses.expandedNavLabel)}>
+                <span className="text-[14px] truncate block">{t(item.nameKey)}</span>
+                {summaryText && (
+                  <span className="text-[11px] text-muted-foreground truncate block">
+                    {summaryText}
+                  </span>
+                )}
+              </span>
+            )}
+            {!navCollapsed && !item.functional && (
+              <span className="hidden min-[1366px]:block text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
+                {t('pipeline.comingSoon')}
+              </span>
+            )}
+        </TooltipTrigger>
+        <TooltipContent
+          side="right"
+          className={cn('flex flex-col gap-1', !navCollapsed && 'min-[1366px]:hidden')}
+        >
+          <span className="font-medium">{t(item.nameKey)}</span>
+          {!item.functional && (
+            <span className="text-xs text-muted-foreground">{t('pipeline.comingSoon')}</span>
+          )}
+        </TooltipContent>
+      </Tooltip>
+    );
+  });
+
+  const drawerTitle = (() => {
+    if (activeDrawerPolicy.stage === 2) {
+      if (activeDrawerPolicy.key === 'senderFilter') return t('pipeline.senderFilterConfig');
+      if (activeDrawerPolicy.key === 'authSpoofing') return t('pipeline.authSpoofingConfig');
+      if (activeDrawerPolicy.key === 'behaviorControl') return t('behaviorControl.title');
+      if (activeDrawerPolicy.key === 'recipientCheck') return t('pipeline.recipientCheck');
+      if (activeDrawerPolicy.key === 'userList') return t('pipeline.userBlackWhiteList');
+    }
+    if (activeDrawerPolicy.stage === 3) {
+      if (activeDrawerPolicy.key === 'content') {
+        return `${t('pipeline.stageTitleFormat', { n: 3, name: t('pipeline.phase3Content') })} / ${t('contentRules.title')}`;
+      }
+      if (activeDrawerPolicy.key === 'attachment') {
+        return t('pipeline.comprehensiveBreadcrumb', {
+          stage: 3,
+          stageName: t('pipeline.phase3Content'),
+          policyName: t('attachmentSecurity.title'),
+        });
+      }
+      // html_spec §2.2-1：url 抽屉头部为「阶段3: 内容层 / URL检测与防护」面包屑
+      //（其余 stage3 模块的标题格式留待各自 spec 对齐）。
+      if (activeDrawerPolicy.key === 'url') {
+        return t('pipeline.comprehensiveBreadcrumb', {
+          stage: 3,
+          stageName: t('pipeline.phase3Content'),
+          policyName: t('urlProtection.title'),
+        });
+      }
+    }
+    // html_spec 宿主对齐（Task 10）：意图引擎抽屉头部同 url 对齐为「阶段3: 内容层 / 意图引擎」面包屑。
+    if (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'intentEngine') {
+      return t('pipeline.comprehensiveBreadcrumb', {
+        stage: 3,
+        stageName: t('pipeline.phase3Content'),
+        policyName: t('intentEngine.title'),
+      });
+    }
+    // F10: stage5 面包屑补「阶段N: 综合策略 / {策略名}」前缀（§3.1），
+    // {策略名} 沿用各分支原有文案，未改变其取值。
+    if (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'similarDetection') {
+      // D-8: 面包屑子标题=「相似检测」(pipeline.similarDetection)，与配置卡标题「相似邮件与
+      // 主题检测」(similarDetection.title) 刻意不同，不要再对齐。
+      return t('pipeline.comprehensiveBreadcrumb', {
+        stage: comprehensiveStageNumber,
+        stageName: t(comprehensiveStageNameKey),
+        policyName: t('pipeline.similarDetection'),
+      });
+    }
+    if (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'mailMarking') {
+      return t('pipeline.comprehensiveBreadcrumb', {
+        stage: comprehensiveStageNumber,
+        stageName: t(comprehensiveStageNameKey),
+        policyName: t('pipeline.mailMarking'),
+      });
+    }
+    if (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'advancedRules') {
+      return t('pipeline.comprehensiveBreadcrumb', {
+        stage: comprehensiveStageNumber,
+        stageName: t(comprehensiveStageNameKey),
+        policyName: t('pipeline.advancedRules'),
+      });
+    }
+    if (activeDrawerPolicy.key === 'ipFrequency') return t('pipeline.ipFrequencyConfig');
+    if (activeDrawerPolicy.key === 'ipFilter') return t('pipeline.ipFilterConfig');
+    if (activeDrawerPolicy.key === 'rbl') return t('pipeline.rblConfig');
+    if (activeDrawerPolicy.key === 'overseas') return t('pipeline.overseasConfig');
+    return '';
+  })();
+
+  const drawerContent = (() => {
+    if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'senderFilter') {
+      return <SenderFilterPage embedded />;
+    }
+    if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'authSpoofing') {
+      return <AuthSpoofingPage embedded />;
+    }
+    if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'behaviorControl') {
+      return <BehaviorControlPage embedded />;
+    }
+    // GT-11878: 收信人数量限制原先配置在行为管控里；对齐 demo 后行为管控页面移除了
+    // 该配置，收信人数量限制现在拥有独立的 RecipientCheckPage。
+    if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'recipientCheck') {
+      return <RecipientCheckPage embedded />;
+    }
+    if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'userList') {
+      return <UserListPage embedded />;
+    }
+    if (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'content') {
+      return <ContentRulesPage embedded />;
+    }
+    if (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'attachment') {
+      return (
+        <AttachmentSecurityPage
+          embedded
+          hideBasicLimit={caps.multiTenant && effectiveViewer === 'tenant'}
+          onDirtyChange={setAttachmentDirty}
+          onEnabledChange={setAttachmentEnabled}
+        />
+      );
+    }
+    if (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'url') {
+      return (
+        <UrlProtectionPage
+          direction="receive"
+          embedded
+          onDirtyChange={setUrlDirty}
+          onEnabledChange={setUrlModuleEnabled}
+        />
+      );
+    }
+    if (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'intentEngine') {
+      return <IntentEnginePage embedded onDirtyChange={setIntentDirty} onEnabledChange={setIntentEngineEnabled} />;
+    }
+    if (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'similarDetection') {
+      return <SimilarDetectionPage embedded onDirtyChange={setSimilarDirty} />;
+    }
+    if (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'mailMarking') {
+      return <MailMarkingPage embedded />;
+    }
+    if (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'advancedRules') {
+      return <AdvancedFilterRulesModule embedded aggregateDisabled={!comprehensiveStrategyEnabled} />;
+    }
+    if (activeDrawerPolicy.key === 'ipFrequency') return <IPFrequencyPage embedded />;
+    if (activeDrawerPolicy.key === 'ipFilter') return <IPFilterPage embedded />;
+    if (activeDrawerPolicy.key === 'rbl') return <RBLFilterPage embedded />;
+    if (activeDrawerPolicy.key === 'overseas') return <OverseasMailPage embedded onDirtyChange={setOverseasDirty} />;
+    return null;
+  })();
+
+  const drawerContentOwnsScrolling =
+    activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'authSpoofing';
+
+  return (
+    <PageShell>
+      <PageHeader
+        title={t('pipeline.title')}
+        actions={
+          <Button variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-1" />
+            {t('common.refresh')}
+          </Button>
+        }
+      />
+
+      {lockStage1 && (
+        <Alert className="border-primary/20 bg-primary/5">
+          <Lock className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-foreground text-pretty">
+            {t('pipeline.platformManagedAlert')}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Card className="rounded-xl border-border/70">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-semibold">{t('pipeline.executionPipeline')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto pb-4">
+            <div className="flex items-stretch gap-0 min-w-max">
+              {stages.map((stage, idx) => (
+                <div key={stage.key} className="contents">
+                  <div
+                    data-testid={`pipeline-stage-${stage.key}`}
+                    data-stage-index={idx + 1}
+                    className={cn(
+                      'flex flex-col min-w-[240px] border border-border/50 p-4',
+                      stage.bgClass,
+                      stage.borderClass,
+                    )}
+                  >
+                    <div className="mb-3">
+                      {/* html_spec §2.1-2：流程列标题带「阶段N: 」前缀（stages 数组顺序即展示序号）。 */}
+                      <div className="text-sm font-semibold text-foreground">
+                        {t('pipeline.stageTitleFormat', { n: idx + 1, name: t(stage.nameKey) })}
+                      </div>
+                    </div>
+                    {stage.locked ? (
+                      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/50 bg-muted/30 px-3 py-6 text-center">
+                        <Lock className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-[13px] font-medium text-foreground">{t('pipeline.platformManaged')}</span>
+                        <span className="text-[12px] text-muted-foreground text-pretty">{t('pipeline.platformManagedHint')}</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3 flex-1">
+                        {stage.policies.map((policy) => renderPolicyCard(policy))}
+                      </div>
+                    )}
+                  </div>
+                  {idx < stages.length - 1 && renderStageArrow(stage)}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-border/50 bg-muted/30 -mx-6 -mb-6 px-6 py-4 rounded-b-[24px]">
+            <div className="space-y-3 text-[13px]">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="font-medium min-w-[60px]">{t('pipeline.actionLegend')}</span>
+                {actionLegendItems.map((item) => (
+                  <div key={item.key} data-testid={`action-legend-${item.key}`} className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span className="font-medium">{t(item.labelKey)}</span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="text-muted-foreground">{t(item.descKey)}</span>
+                  </div>
+                ))}
+              </div>
+              {/* html_spec §2.2-9：名单类型图例（黑名单 / 白名单）。 */}
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="font-medium min-w-[60px]">{t('pipeline.listTypeLegend')}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1 h-3.5 rounded-full bg-foreground" />
+                  <span className="font-medium">{t('pipeline.blacklistType')}</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-muted-foreground">{t('pipeline.blacklistTypeDesc')}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1 h-3.5 rounded-full border border-border bg-background" />
+                  <span className="font-medium">{t('pipeline.whitelistType')}</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-muted-foreground">{t('pipeline.whitelistTypeDesc')}</span>
+                </div>
+              </div>
+              {/* html_spec §2.2-10：流程控制图例增加「终止」项。 */}
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="font-medium min-w-[60px]">{t('pipeline.flowControlLegend')}</span>
+                <div className="flex items-center gap-1.5">
+                  <ArrowRight className="h-4 w-4" style={{ color: 'var(--action-block)' }} />
+                  <span className="text-muted-foreground">{t('pipeline.flowTerminateDesc')}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <ArrowRight className="h-4 w-4 text-action-deliver" />
+                  <span className="text-muted-foreground">{t('pipeline.flowContinueDesc')}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Sheet open={drawerOpen} onOpenChange={(open) => { if (!open) handleDrawerClose(); else setDrawerOpen(true); }}>
+        <SheetContent
+          data-testid="pipeline-config-drawer"
+          className={cn(pipelineDrawerResponsiveClasses.sheet, 'p-0 flex flex-col')}
+          side="right"
+          showCloseButton={false}
+        >
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border/70 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-primary" />
+              <SheetTitle data-testid="pipeline-config-drawer-title" className="text-[18px] font-semibold">
+                {drawerTitle}
+              </SheetTitle>
+            </div>
+            <Button variant="ghost" size="icon" onClick={handleDrawerClose} aria-label={t('pipeline.drawerClose')} data-testid="pipeline-config-drawer-close">
+              <XCircle className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <TooltipProvider>
+          <div className="flex flex-1 overflow-hidden relative">
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <button
+                    onClick={() => setNavCollapsed(!navCollapsed)}
+                    data-testid="pipeline-drawer-nav-collapse"
+                    className={cn(
+                      "absolute z-50 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-background shadow-lg border border-border/70 flex items-center justify-center hover:bg-muted hover:scale-105 transition-all duration-200",
+                      navCollapsed ? 'left-[calc(56px-14px)]' : 'left-[calc(56px-14px)] min-[1366px]:left-[calc(200px-14px)]'
+                    )}
+                  />
+                }
+              >
+                {navCollapsed ? <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />}
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                {navCollapsed ? t('pipeline.expandNav') : t('pipeline.collapseNav')}
+              </TooltipContent>
+            </Tooltip>
+
+            <div
+              className={cn(
+                "bg-muted/40 dark:bg-muted/20 border-r border-border/70 flex-shrink-0 overflow-y-auto transition-all duration-200 flex flex-col",
+                navCollapsed ? 'w-14' : pipelineDrawerResponsiveClasses.expandedNav
+              )}
+            >
+              <nav className="flex-1 p-2 pt-4">
+                {!navCollapsed && (
+                  <div className="hidden min-[1366px]:block text-[12px] text-muted-foreground mb-2 px-3">
+                    {navStageLabel}
+                  </div>
+                )}
+                {renderNavItems}
+              </nav>
+            </div>
+
+            <div className={cn('flex-1', drawerContentOwnsScrolling ? 'overflow-hidden' : 'overflow-y-auto')}>
+              {drawerContent ? (
+                <div
+                  className={cn(
+                    drawerContentOwnsScrolling ? 'h-full min-h-0' : 'p-6 space-y-4',
+                  )}
+                >
+                  {stage5Active && (
+                    <ComprehensiveStrategyHeader
+                      policyName={t('pipeline.phase5Comprehensive')}
+                      enabled={comprehensiveStrategyEnabled}
+                      loading={comprehensiveStrategyMutation.isPending}
+                      disabled={!comprehensiveStrategyEditable}
+                      onToggle={(enabled) => comprehensiveStrategyMutation.mutate(enabled)}
+                    />
+                  )}
+                  <div className={cn(
+                    // GT-12356: when the drawer content owns its own scrolling
+                    // (authSpoofing embeds a flex-col with an inner overflow-y-auto
+                    // scroller + pinned footer), this wrapper must forward the
+                    // bounded height. Without h-full min-h-0 it grows to content
+                    // height, so the inner scroller never becomes shorter than its
+                    // content (scrollHeight == clientHeight) and the wheel has
+                    // nothing to scroll while the outer overflow-hidden clips the
+                    // overflow — the mouse-wheel-can't-scroll symptom.
+                    drawerContentOwnsScrolling && 'h-full min-h-0',
+                    stage5Active && !comprehensiveStrategyEnabled && 'pointer-events-none opacity-50',
+                  )}>
+                    {drawerContent}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+                  <Settings className="h-10 w-10 text-muted-foreground/50 mb-3" />
+                  <div className="text-base font-medium text-foreground">
+                    {t('pipeline.comingSoon')}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2 max-w-xs">
+                    {t('pipeline.comingSoonHint')}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          </TooltipProvider>
+        </SheetContent>
+      </Sheet>
+
+      <AlertDialog open={closeConfirmOpen} onOpenChange={(open) => {
+        setCloseConfirmOpen(open);
+        if (!open) setPendingDrawerPolicy(null);
+      }}>
+        <AlertDialogContent data-testid="attachment-unsaved-confirm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('common.unsavedChanges')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('common.unsavedChangesDesc')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="attachment-unsaved-cancel">{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              data-testid="attachment-unsaved-discard"
+              onClick={() => {
+                setCloseConfirmOpen(false);
+                if (pendingDrawerPolicy) {
+                  setActiveDrawerPolicy(pendingDrawerPolicy);
+                  setPendingDrawerPolicy(null);
+                } else {
+                  setDrawerOpen(false);
+                }
+              }}
+            >
+              {t('common.discard')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </PageShell>
+  );
+}

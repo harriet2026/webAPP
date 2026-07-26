@@ -1,0 +1,220 @@
+'use client';
+
+// SendReceiveContextCard -- 概览与处置模块的「收发信上下文」卡片（B1-B7，见
+// design/implement/spec/email-disposal-overview-html-spec-alignment.md §2 B
+// 节）。取代 overview-section.tsx 原先的极简「基本信息」四行块（执行动作/
+// 主题/发信人/收信人），改为 demo 的完整收发信上下文卡：发件人（B1，含 IP/
+// geo/查看IP信誉 no-op 链接）、收件人（B2 单投 pill / 多投状态分布 +
+// B3 复用既有 RecipientStatus 渲染多投矩阵）、单投不可操作提示（B4）、
+// 时间/大小（B5）、展开完整信息开关与详情（B6/B7：身份验证详情 +
+// 网络特征，spec §9-A 刻意不渲染 TLS 版本 / IP 信誉评分 -- 后端无这两个字段）。
+//
+// B2/B3 的边界：single-recipient（recipient_dispositions.length===1）只渲染
+// 一个状态 pill，不再渲染 RecipientStatus 的可操作按钮行 -- 单投的投递/丢弃/
+// 召回/通知按钮由 Task 11 与 RecipientStatus 共用的 dispatch hook 承载
+// （sender-actions.tsx 文件头注释已预告这一分工），本任务范围内不动
+// RecipientStatus 内部实现。多投（含 0 条，交给 RecipientStatus 自身的
+// empty 文案）继续按原样渲染 RecipientStatus。
+
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import { AlertTriangle, ChevronDown, Mail, MapPin, Shield } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import type { ApiRequestFn } from '@/lib/api/client';
+import type { MailChildEvent, MailLogDetail } from '@/types/email-disposal-detail';
+import { formatTimestamp } from '@/lib/format-time';
+import { deriveDomainName, formatBytes, recipientActionsForStatus } from '../../lib/detail-helpers';
+import { RecipientStatus } from '../../components/recipient-status';
+
+interface SendReceiveContextCardProps {
+  detail: MailLogDetail;
+  apiRequest: ApiRequestFn;
+  onDisposed: () => void;
+  readOnly: boolean;
+  // Per-recipient delivery events, threaded straight through to
+  // RecipientStatus (delivered-status detail line, DD-11 part 2).
+  events?: MailChildEvent[];
+}
+
+// STATUS_STYLES intentionally duplicates recipient-status.tsx's own
+// (unexported) status→className map, just for this card's single-recipient
+// status pill (B2) -- the brief forbids touching RecipientStatus internals
+// (Task 11's scope), and the multi-recipient path renders that component
+// unmodified (B3) rather than reimplementing its table here.
+const STATUS_STYLES: Record<string, string> = {
+  delivered: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  marked_delivered: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  quarantined: 'bg-blue-50 text-blue-700 border-blue-200',
+  pending_review: 'bg-amber-50 text-amber-700 border-amber-200',
+  sidelined: 'bg-blue-50 text-blue-700 border-blue-200',
+  audited: 'bg-amber-50 text-amber-700 border-amber-200',
+  blocked: 'bg-orange-50 text-orange-700 border-orange-200',
+  rejected: 'bg-orange-50 text-orange-700 border-orange-200',
+  discarded: 'bg-red-50 text-red-700 border-red-200',
+};
+const DEFAULT_STATUS_STYLE = 'bg-gray-50 text-gray-700 border-gray-200';
+
+export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnly, events }: SendReceiveContextCardProps) {
+  const t = useTranslations('emailDisposal.detail.overview');
+  const [expanded, setExpanded] = useState(false);
+
+  const dispositions = detail.recipient_dispositions ?? [];
+  const isSingle = dispositions.length === 1;
+  const single = isSingle ? dispositions[0] : undefined;
+  // §9-A: 「查看策略命中详情」/「查看IP信誉」都是 no-op 链接（spec 明确没有
+  // 落地页面），一律用统一的「暂未实现」toast 反馈，复用 SenderActions 已有
+  // 的同一句译文而不是新造一句意思重复的文案。
+  const singleNotOperable = !!single
+    && recipientActionsForStatus(single.status, !!single.object_id).length === 0;
+
+  const statusCounts: Record<string, number> = {};
+  for (const d of dispositions) statusCounts[d.status] = (statusCounts[d.status] ?? 0) + 1;
+
+  function notImplemented() {
+    toast.info(t('senderActions.notImplementedToast'));
+  }
+
+  return (
+    <div className="rounded-lg border bg-muted/30 p-4 space-y-3" data-testid="email-disposal-overview-context-card">
+      <h3 className="flex items-center gap-2 text-sm font-semibold">
+        <Mail className="h-4 w-4 text-blue-600" />
+        {t('context.title')}
+      </h3>
+
+      <div className="space-y-2 text-sm">
+        {/* B1 发件人 */}
+        <div className="flex flex-wrap items-center gap-2" data-testid="email-disposal-overview-context-sender">
+          <span className="w-16 shrink-0 text-muted-foreground">{t('sender')}:</span>
+          <span className="font-medium">
+            {deriveDomainName(detail.sender, detail.sender_name)} &lt;{detail.sender}&gt;
+          </span>
+          <span className="text-muted-foreground">IP: {detail.client_ip || '—'}</span>
+          <Badge variant="outline" className="gap-1 text-xs">
+            <MapPin className="h-3 w-3" />
+            {detail.geo_region_name || detail.geo_city || detail.geo_isp || '—'}
+          </Badge>
+          <Button
+            variant="link"
+            size="sm"
+            className="h-auto p-0 text-xs"
+            data-testid="email-disposal-overview-context-ip-reputation"
+            onClick={notImplemented}
+          >
+            [{t('context.ipReputation')}]
+          </Button>
+        </div>
+
+        {/* B2 收件人（单投 pill / 多投状态分布） */}
+        <div className="flex flex-wrap items-start gap-2" data-testid="email-disposal-overview-context-recipient">
+          <span className="w-16 shrink-0 pt-1 text-muted-foreground">{t('recipient')}:</span>
+          {isSingle && single ? (
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{single.recipient}</span>
+              <Badge variant="outline" className={STATUS_STYLES[single.status] || DEFAULT_STATUS_STYLE}>
+                {t(`recipientStatus.status.${single.status}`, { default: single.status })}
+              </Badge>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              <span>{t('context.recipientsCount', { n: dispositions.length })}</span>
+              {Object.keys(statusCounts).length > 0 && (
+                <>
+                  <span>|</span>
+                  <span>
+                    {Object.entries(statusCounts)
+                      .map(([status, count]) => `${t(`recipientStatus.status.${status}`, { default: status })}: ${count}`)
+                      .join(' | ')}
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* B3 多投：复用既有 RecipientStatus（不改其内部实现，Task 11 负责） */}
+        {!isSingle && (
+          <RecipientStatus
+            recipient_dispositions={detail.recipient_dispositions}
+            mailLogId={detail.id}
+            sender={detail.sender}
+            apiRequest={apiRequest}
+            onDisposed={onDisposed}
+            readOnly={readOnly}
+            events={events}
+          />
+        )}
+
+        {/* B4 单投不可操作提示 */}
+        {isSingle && singleNotOperable && (
+          <div
+            className="mt-1 flex flex-wrap items-center gap-2 rounded border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-900/50 dark:bg-amber-950/20"
+            data-testid="email-disposal-overview-context-not-operable"
+          >
+            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
+            <span>{t('context.notOperableWarning')}</span>
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-xs"
+              data-testid="email-disposal-overview-context-view-policy"
+              onClick={notImplemented}
+            >
+              <Shield className="mr-1 h-3 w-3" />
+              {t('context.viewPolicyDetail')}
+            </Button>
+          </div>
+        )}
+
+        {/* B5 时间/大小 */}
+        <div
+          className="flex flex-wrap items-center gap-4 pt-1 text-xs text-muted-foreground"
+          data-testid="email-disposal-overview-context-time-size"
+        >
+          <span>
+            {t('context.time')}: {formatTimestamp(detail.received_at) || detail.received_at || '—'}
+            {' → '}
+            {formatTimestamp(detail.delivered_at) || formatTimestamp(detail.received_at) || detail.delivered_at || detail.received_at || '—'}
+          </span>
+          <span>|</span>
+          <span>{t('context.size')}: {formatBytes(detail.storage_size)}</span>
+        </div>
+
+        {/* B6 展开完整信息 */}
+        <Button
+          variant="link"
+          size="sm"
+          className="h-auto p-0 text-xs"
+          data-testid="email-disposal-overview-context-expand-fullinfo"
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? t('collapse') : t('context.expandFullInfo')}
+          <ChevronDown className={`ml-1 h-3 w-3 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${expanded ? 'rotate-180' : ''}`} />
+        </Button>
+
+        {/* B7 展开完整信息详情 */}
+        {expanded && (
+          <div className="grid grid-cols-2 gap-4 border-t pt-3 text-xs" data-testid="email-disposal-overview-context-fullinfo">
+            <div>
+              <h5 className="mb-2 font-medium">{t('context.authDetails')}</h5>
+              <div className="space-y-1 text-muted-foreground">
+                <p data-testid="email-disposal-overview-context-message-id">Message-ID: {detail.message_id || '—'}</p>
+                <p data-testid="email-disposal-overview-context-return-path">Return-Path: {detail.return_path || '—'}</p>
+                <p data-testid="email-disposal-overview-context-reply-to">Reply-To: {detail.reply_to || '—'}</p>
+                <p data-testid="email-disposal-overview-context-x-mailer">X-Mailer: {detail.x_mailer || '—'}</p>
+              </div>
+            </div>
+            <div>
+              <h5 className="mb-2 font-medium">{t('context.networkFeatures')}</h5>
+              <div className="space-y-1 text-muted-foreground">
+                <p data-testid="email-disposal-overview-context-ptr">PTR: {detail.ptr_domain || '—'}</p>
+                <p data-testid="email-disposal-overview-context-asn">ASN: {detail.geo_asn ? `AS${detail.geo_asn}` : '—'}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

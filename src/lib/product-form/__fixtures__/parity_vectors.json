@@ -1,0 +1,9842 @@
+[
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "system-status",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "system-status",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "system-status",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "system-status",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "monitor-infrastructure",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "monitor-infrastructure",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "monitor-infrastructure",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "monitor-infrastructure",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "security-overview",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "security-overview",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "security-overview",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "security-overview",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "delivery-traffic-analysis",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "delivery-traffic-analysis",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "delivery-traffic-analysis",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "delivery-traffic-analysis",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "link-attachment-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "link-attachment-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "link-attachment-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "link-attachment-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "ops-top-trend",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "ops-top-trend",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "ops-top-trend",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "ops-top-trend",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "disposal-center",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "disposal-center",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "disposal-center",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "disposal-center",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "disposal-settings",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "disposal-settings",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "disposal-settings",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "disposal-settings",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "strategy-pipeline",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "strategy-pipeline",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "strategy-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "strategy-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "group-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "group-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "group-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "group-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "phishing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "phishing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "phishing-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": true,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "phishing-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "spoofing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "spoofing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "spoofing-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": true,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "spoofing-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "threat-retro",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "threat-retro",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "threat-retro",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": true,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "threat-retro",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "email-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "email-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "email-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "email-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "ai-url-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "ai-url-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "ai-url-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "ai-url-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "auth-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "auth-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "auth-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "auth-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "admin-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "admin-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "admin-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "admin-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "link-clicks",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "link-clicks",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "link-clicks",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "link-clicks",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "user-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "user-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "user-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "user-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "forwarding",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "forwarding",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "forwarding",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "forwarding",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "contacts",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "contacts",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "contacts",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "contacts",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "tenant-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "tenant-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "tenant-management",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "tenant-management",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "proxysvr",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "proxysvr",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "proxysvr",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "proxysvr",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "system-dkim",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "system-dkim",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "system-dkim",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "system-dkim",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "password-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "password-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "password-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "password-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "platform-security-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "platform-security-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "platform-security-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "platform-security-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "login-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "login-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "login-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "login-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "quarantine",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "quarantine",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "quarantine",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "quarantine",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "sideline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "sideline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "sideline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "sideline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "smtp-credentials",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "smtp-credentials",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "smtp-credentials",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "smtp-credentials",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "inbound-audit",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "inbound-audit",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "inbound-audit",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "inbound-audit",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "audit-queue",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "audit-queue",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "audit-queue",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "audit-queue",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "investigations",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "investigations",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "investigations",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "investigations",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "route-rules",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "route-rules",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "route-rules",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "route-rules",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "rule-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "rule-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "rule-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "rule-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "rbl",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "rbl",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "rbl",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "rbl",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "config-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "config-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "config-management",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "config-management",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "password-book",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "password-book",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "password-book",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "password-book",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "exec-impersonation",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "exec-impersonation",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "exec-impersonation",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "exec-impersonation",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "domain-lookalike",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "domain-lookalike",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "domain-lookalike",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "domain-lookalike",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "similar-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "similar-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "similar-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "similar-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "system-status",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "system-status",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "system-status",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "system-status",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "monitor-infrastructure",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "monitor-infrastructure",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "monitor-infrastructure",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "monitor-infrastructure",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "security-overview",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "security-overview",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "security-overview",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "security-overview",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "delivery-traffic-analysis",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "delivery-traffic-analysis",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "delivery-traffic-analysis",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "delivery-traffic-analysis",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "link-attachment-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "link-attachment-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "link-attachment-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "link-attachment-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "ops-top-trend",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "ops-top-trend",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "ops-top-trend",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "ops-top-trend",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "disposal-center",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "disposal-center",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "disposal-center",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "disposal-center",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "disposal-settings",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "disposal-settings",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "disposal-settings",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "disposal-settings",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "strategy-pipeline",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "strategy-pipeline",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "strategy-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "strategy-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "group-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "group-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "group-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "group-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "phishing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "phishing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "phishing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "phishing-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "spoofing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "spoofing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "spoofing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "spoofing-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "threat-retro",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "threat-retro",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "threat-retro",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "threat-retro",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "email-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "email-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "email-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "email-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "ai-url-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "ai-url-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "ai-url-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "ai-url-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "auth-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "auth-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "auth-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "auth-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "admin-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "admin-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "admin-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "admin-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "link-clicks",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "link-clicks",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "link-clicks",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "link-clicks",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "user-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "user-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "user-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "user-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "forwarding",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "forwarding",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "forwarding",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "forwarding",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "contacts",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "contacts",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "contacts",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "contacts",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "tenant-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "tenant-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "tenant-management",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "tenant-management",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "proxysvr",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "proxysvr",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "proxysvr",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "proxysvr",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "system-dkim",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "system-dkim",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "system-dkim",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "system-dkim",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "password-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "password-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "password-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "password-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "platform-security-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "platform-security-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "platform-security-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "platform-security-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "login-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "login-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "login-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "login-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "quarantine",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "quarantine",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "quarantine",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "quarantine",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "sideline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "sideline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "sideline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "sideline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "smtp-credentials",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "smtp-credentials",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "smtp-credentials",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "smtp-credentials",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "inbound-audit",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "inbound-audit",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "inbound-audit",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "inbound-audit",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "audit-queue",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "audit-queue",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "audit-queue",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "audit-queue",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "investigations",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "investigations",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "investigations",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "investigations",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "route-rules",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "route-rules",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "route-rules",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "route-rules",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "rule-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "rule-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "rule-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "rule-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "rbl",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "rbl",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "rbl",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "rbl",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "config-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "config-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "config-management",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "config-management",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "password-book",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "password-book",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "password-book",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "password-book",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "exec-impersonation",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "exec-impersonation",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "exec-impersonation",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "exec-impersonation",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "domain-lookalike",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "domain-lookalike",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "domain-lookalike",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "domain-lookalike",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "similar-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "similar-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "similar-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "similar-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "system-status",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "system-status",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "system-status",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "system-status",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "monitor-infrastructure",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "monitor-infrastructure",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "monitor-infrastructure",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "monitor-infrastructure",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "security-overview",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "security-overview",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "security-overview",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "security-overview",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "delivery-traffic-analysis",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "delivery-traffic-analysis",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "delivery-traffic-analysis",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "delivery-traffic-analysis",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "link-attachment-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "link-attachment-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "link-attachment-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "link-attachment-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "ops-top-trend",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "ops-top-trend",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "ops-top-trend",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "ops-top-trend",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "disposal-center",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "disposal-center",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "disposal-center",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "disposal-center",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "disposal-settings",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "disposal-settings",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "disposal-settings",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "disposal-settings",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "strategy-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "strategy-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "strategy-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "strategy-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "group-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "group-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "group-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "group-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "phishing-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "phishing-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "phishing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "phishing-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "spoofing-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "spoofing-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "spoofing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "spoofing-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "threat-retro",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "threat-retro",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "threat-retro",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "threat-retro",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "email-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "email-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "email-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "email-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "ai-url-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "ai-url-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "ai-url-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "ai-url-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "auth-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "auth-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "auth-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "auth-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "admin-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "admin-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "admin-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "admin-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "link-clicks",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "link-clicks",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "link-clicks",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "link-clicks",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "user-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "user-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "user-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "user-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "forwarding",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "forwarding",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "forwarding",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "forwarding",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "contacts",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "contacts",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "contacts",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "contacts",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "tenant-management",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "tenant-management",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "tenant-management",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "tenant-management",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "proxysvr",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "proxysvr",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "proxysvr",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "proxysvr",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "system-dkim",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "system-dkim",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "system-dkim",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "system-dkim",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "password-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "password-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "password-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "password-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "platform-security-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "platform-security-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "platform-security-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "platform-security-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "login-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "login-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "login-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "login-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "quarantine",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "quarantine",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "quarantine",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "quarantine",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "sideline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "sideline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "sideline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "sideline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "smtp-credentials",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "smtp-credentials",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "smtp-credentials",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "smtp-credentials",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "inbound-audit",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "inbound-audit",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "inbound-audit",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "inbound-audit",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "audit-queue",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "audit-queue",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "audit-queue",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "audit-queue",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "investigations",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "investigations",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "investigations",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "investigations",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "route-rules",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "route-rules",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "route-rules",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "route-rules",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "rule-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "rule-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "rule-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "rule-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "rbl",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "rbl",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "rbl",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "rbl",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "config-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "config-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "config-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "config-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "password-book",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "password-book",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "password-book",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "password-book",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "exec-impersonation",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "exec-impersonation",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "exec-impersonation",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "exec-impersonation",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "domain-lookalike",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "domain-lookalike",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "domain-lookalike",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "domain-lookalike",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "similar-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "similar-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "similar-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "similar-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "system-status",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "system-status",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "system-status",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "system-status",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "monitor-infrastructure",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "monitor-infrastructure",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "monitor-infrastructure",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "monitor-infrastructure",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "security-overview",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "security-overview",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "security-overview",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "security-overview",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "delivery-traffic-analysis",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "delivery-traffic-analysis",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "delivery-traffic-analysis",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "delivery-traffic-analysis",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "link-attachment-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "link-attachment-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "link-attachment-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "link-attachment-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "ops-top-trend",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "ops-top-trend",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "ops-top-trend",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "ops-top-trend",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "disposal-center",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "disposal-center",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "disposal-center",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "disposal-center",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "disposal-settings",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "disposal-settings",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "disposal-settings",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "disposal-settings",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "strategy-pipeline",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "strategy-pipeline",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "strategy-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "strategy-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "group-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "group-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "group-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "group-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "phishing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "phishing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "phishing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "phishing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "spoofing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "spoofing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "spoofing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "spoofing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "threat-retro",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "threat-retro",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "threat-retro",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "threat-retro",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "email-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "email-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "email-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "email-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "ai-url-logs",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "ai-url-logs",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "ai-url-logs",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "ai-url-logs",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "auth-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "auth-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "auth-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "auth-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "admin-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "admin-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "admin-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "admin-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "link-clicks",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "link-clicks",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "link-clicks",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "link-clicks",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "user-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "user-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "user-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "user-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "forwarding",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "forwarding",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "forwarding",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "forwarding",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "contacts",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "contacts",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "contacts",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "contacts",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "tenant-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "tenant-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "tenant-management",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "tenant-management",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "proxysvr",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "proxysvr",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "proxysvr",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "proxysvr",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "system-dkim",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "system-dkim",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "system-dkim",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "system-dkim",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "password-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "password-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "password-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "password-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "platform-security-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "platform-security-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "platform-security-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "platform-security-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "login-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "login-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "login-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "login-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "quarantine",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "quarantine",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "quarantine",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "quarantine",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "sideline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "sideline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "sideline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "sideline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "smtp-credentials",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "smtp-credentials",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "smtp-credentials",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "smtp-credentials",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "inbound-audit",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "inbound-audit",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "inbound-audit",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "inbound-audit",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "audit-queue",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "audit-queue",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "audit-queue",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "audit-queue",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "investigations",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "investigations",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "investigations",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "investigations",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "route-rules",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "route-rules",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "route-rules",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "route-rules",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "rule-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "rule-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "rule-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "rule-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "rbl",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "rbl",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "rbl",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "rbl",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "config-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "config-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "config-management",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "config-management",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "password-book",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "password-book",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "password-book",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "password-book",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "exec-impersonation",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "exec-impersonation",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "exec-impersonation",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "exec-impersonation",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "domain-lookalike",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "domain-lookalike",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "domain-lookalike",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "domain-lookalike",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "similar-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "similar-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "similar-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "similar-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "system-status",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "system-status",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "system-status",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "system-status",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "monitor-infrastructure",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "monitor-infrastructure",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "monitor-infrastructure",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "monitor-infrastructure",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "security-overview",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "security-overview",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "security-overview",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "security-overview",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "delivery-traffic-analysis",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "delivery-traffic-analysis",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "delivery-traffic-analysis",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "delivery-traffic-analysis",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "link-attachment-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "link-attachment-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "link-attachment-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "link-attachment-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "ops-top-trend",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "ops-top-trend",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "ops-top-trend",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "ops-top-trend",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "disposal-center",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "disposal-center",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "disposal-center",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "disposal-center",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "disposal-settings",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "disposal-settings",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "disposal-settings",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "disposal-settings",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "strategy-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "strategy-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "strategy-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "strategy-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "group-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "group-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "group-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "group-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "phishing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "phishing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "phishing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "phishing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "spoofing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "spoofing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "spoofing-detection",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "spoofing-detection",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "threat-retro",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "threat-retro",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "threat-retro",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "threat-retro",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "email-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "email-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "email-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "email-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "ai-url-logs",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "ai-url-logs",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "ai-url-logs",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "ai-url-logs",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "auth-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "auth-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "auth-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "auth-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "admin-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "admin-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "admin-logs",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "admin-logs",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "link-clicks",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "link-clicks",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "link-clicks",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "link-clicks",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "user-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "user-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "user-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "user-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "forwarding",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "forwarding",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "forwarding",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "forwarding",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "contacts",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "contacts",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "contacts",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "contacts",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "tenant-management",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "tenant-management",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "tenant-management",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "tenant-management",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "proxysvr",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "proxysvr",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "proxysvr",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "proxysvr",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "system-dkim",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "system-dkim",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "system-dkim",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "system-dkim",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "password-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "password-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "password-policy",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "password-policy",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "platform-security-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "platform-security-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "platform-security-policy",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "platform-security-policy",
+    "granted": true,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "login-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "login-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "login-security",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "login-security",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "quarantine",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "quarantine",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "quarantine",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "quarantine",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "sideline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "sideline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "sideline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "sideline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "smtp-credentials",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "smtp-credentials",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "smtp-credentials",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "smtp-credentials",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "inbound-audit",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "inbound-audit",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "inbound-audit",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "inbound-audit",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "audit-queue",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "audit-queue",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "audit-queue",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "audit-queue",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "investigations",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "investigations",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "investigations",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "investigations",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "route-rules",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "route-rules",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "route-rules",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "route-rules",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "rule-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "rule-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "rule-pipeline",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "rule-pipeline",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": true
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "rbl",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "rbl",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "rbl",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "rbl",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "config-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "config-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "config-management",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "config-management",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "password-book",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "password-book",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "password-book",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "password-book",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "exec-impersonation",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "exec-impersonation",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "exec-impersonation",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "exec-impersonation",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "domain-lookalike",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "domain-lookalike",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "domain-lookalike",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "domain-lookalike",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "similar-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "similar-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "similar-detection",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "similar-detection",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  }
+]
