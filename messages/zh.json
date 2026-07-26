@@ -204,7 +204,7 @@
     "loginTitle": "OSGateway 管理系统",
     "loginButton": "登录",
     "loginError": "用户名或密码错误",
-    "sessionExpired": "会话已过期，请重新登录",
+    "sessionExpired": "会话已过期，请重��登录",
     "showAdvancedRules": "显示高级规则设置",
     "showAdvancedRulesHint": "仅系统管理员勾选后可见",
     "twoFactorRequired": "需要二次认证",
@@ -1015,7 +1015,7 @@
     "priority": "优先级",
     "newPolicy": "新建群组策略",
     "editPolicy": "编辑群组策略",
-    "deleteConfirm": "确定删除该群组策略���������？",
+    "deleteConfirm": "确定删除该群组策略�����������？",
     "deleteConfirmDesc": "删除后无法恢复，规则名：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效执行路径预览",
@@ -1100,7 +1100,7 @@
       "phishingAgent": "AI 钓鱼邮件检测",
       "impersonationAgent": "AI 仿冒邮件检测",
       "retrospectAgent": "AI 历史威胁回溯",
-      "similarDetection": "相似邮件聚类���测",
+      "similarDetection": "相似邮件聚类�����测",
       "advancedRules": "高级条件匹配规则",
       "mailMarking": "邮件标记规则"
     },
@@ -1336,7 +1336,7 @@
     "statusManualHold": "人工保留",
     "reason": "原因",
     "eyebrow": "旁路队列",
-    "subtitle": "检查被旁路的邮件，按处理状态筛选，预��已���储��容��并��需要时重新注入或删除项目。"
+    "subtitle": "检查被旁路的邮件，按处理状态筛选��预��已���储��容��并��需要时重新注入或删除项目。"
   },
   "logs": {
     "emailLogs": "邮件日志",
@@ -1747,7 +1747,7 @@
   "users": {
     "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全契约）",
     "resetPassword": {
-      "title": "重置密码",
+      "title": "重置密���",
       "description": "���管理员���{username}」设置新密码，重置后需用新密码登录。",
       "newPassword": "新密码",
       "placeholder": "请输入或生成新密码",
@@ -2537,7 +2537,7 @@
   },
   "investigations": {
     "title": "Agent 调查",
-    "description": "发起并跟踪大模型调查任务，查看风险结论、证据、执行步骤和后续动作建议。",
+    "description": "发起并跟踪大模型调查任务，查看风险结论、证据、执行步骤和后续动��建议。",
     "createTitle": "新建���查",
     "createDescription": "基于邮件日志发起一次 Agent 调查。当前前端先开放已落地的邮件调查 Agent。",
     "createSuccess": "调查任务已创建",
@@ -2914,10 +2914,10 @@
     "senderFilterDesc": "命中白名单则跳过后续检测",
     "authSpoofing": "身份认证与仿冒检测",
     "authSpoofingDesc": "检测伪造发件人和认证仿冒",
-    "behaviorControl": "发信行为管控",
+    "behaviorControl": "发信���为管控",
     "behaviorControlDesc": "检���异常发信行为并管���",
     "recipientCheck": "收信人检测",
-    "recipientCheckDesc": "收信人数量限制与存在性验证",
+    "recipientCheckDesc": "收信人数��限制与存在性验证",
     "personalList": "用户黑白名单",
     "personalListDesc": "用户级黑白名单管理",
     "userBlackWhiteList": "用户黑白名单",
@@ -3232,7 +3232,7 @@
     "whitelist": "白名单规则",
     "enabled": "已启用",
     "disabled": "已停用",
-    "unsavedChanges": "有未保存的更改",
+    "unsavedChanges": "有未���存的更改",
     "ruleName": "规则名称",
     "ipAddress": "IP地址/段",
     "ipConfigType": "IP 配置类型",
@@ -3980,7 +3980,7 @@
     "scopeDisplayBody": "正文",
     "scopeDisplayHeader": "信头",
     "scopeDisplayAttachmentNames": "附件名称",
-    "scopeDisplayAttachmentContent": "附件内容",
+    "scopeDisplayAttachmentContent": "附件��容",
     "applyTo": "作用于",
     "applyToTip": "选择需要检查的邮件内容区域",
     "scopeDisplayAttachmentTypes": "附件类型",
@@ -4484,7 +4484,7 @@
       "hit": "命中规则",
       "miss": "未命��",
       "missReason": "未触发阈值，当前测试数据未命中规则",
-      "hitReason": "触发维度{condition}“{dimension}”，当前{count}{unit}，达到阈值{threshold}{unit}",
+      "hitReason": "触发维度{condition}“{dimension}”，当前{count}{unit}，��到阈值{threshold}{unit}",
       "unitIp": "个",
       "unitRecipient": "人",
       "unitMail": "封",
@@ -6593,7 +6593,7 @@
       "desc_mailFromFromConsistency": {
         "source": "SMTP会话MAIL FROM + 邮件头From字段",
         "usage": "检测信封层与信头层发信人是否一致",
-        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证��两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
+        "note": "钓鱼邮件常伪造信头From以冒充领导��合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证��两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
       },
       "desc_virusScanResult": {
         "source": "防病毒引擎",
@@ -6929,7 +6929,7 @@
     "minutes": "分钟",
     "currentSetting": "当前设置：{minutes}分钟",
     "maxRecheckMinutes": "复检窗口（分钟）",
-    "timeoutAutoDeliver": "超时自动投递",
+    "timeoutAutoDeliver": "超时自动投��",
     "autoDeliverDesc": "审核超时后自动投递邮件",
     "enabled": "已启用",
     "disabled": "已��用",
@@ -7292,6 +7292,16 @@
       "invalidOrder": "结束日期不能早于开始日期",
       "noFuture": "不能选择未来日期"
     },
+    "customRange": {
+      "start": "开始",
+      "end": "结束",
+      "error": {
+        "invalid": "日期格式无效",
+        "order": "开始日期不能晚于结束日期",
+        "tooLong": "最多 {max} 天"
+      }
+    },
+    "tenantScope": "租户范围",
     "kpi": {
       "inboundTotal": "接收总量",
       "outboundTotal": "外发总量",
@@ -7980,7 +7990,7 @@
     "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
     "admission": {
       "title": "准入规则",
-      "description": "决定哪些邮件进入钓鱼邮件检测智能体。命中后使用当前部署级运行限制。",
+      "description": "决定哪些邮件进入钓鱼邮件检测智能体。���中后使用当前部署级运行限制。",
       "loading": "加载中...",
       "empty": "暂无准入规则，点击「新建」添加。",
       "create": "新建",
@@ -8136,7 +8146,7 @@
       "markTextLabel": "主题前缀文本",
       "markTextPlaceholder": "例如 [可疑]",
       "markTextHint": "最长 20 字符，超出将被截断。",
-      "prefixTruncated": "主题前缀超过 {max} 字，已自动截断。",
+      "prefixTruncated": "主题前缀超过 {max} 字��已自动截断。",
       "prefixTruncatedHint": "主题前缀最长 {max} 字。",
       "disposition": {
         "accept": "放行",
@@ -9369,7 +9379,7 @@
       "statusChange": "状态变化",
       "surgeDrop": "突增 / 突降",
       "escalation": "升级链",
-      "suppress": "抑制间隔",
+      "suppress": "��制间隔",
       "silence": "静默时段",
       "previewSummary": "当 {metric} {operator} {threshold} 持续 {duration} 时触发 {severity} 告警",
       "saved": "规则已保存",
@@ -9543,7 +9553,7 @@
       "attachmentLimit": "附件基础限制",
       "groupPolicy": "群组策略"
     },
-    "attachmentHint": "附件大小、数量与嵌套层级等基础上限为平台级资源约束，统一作用于全部租户，租户侧的附件安全检测不含此项。",
+    "attachmentHint": "��件大小、数量与嵌套层级等基础上限为平台级资源约束，统一作用于全部租户，租户侧的附件安全检测不含此项。",
     "modules": {
       "ipFrequency": "IP 频率限制",
       "ipFilter": "IP 黑白名单",
@@ -9636,7 +9646,7 @@
       "passwordMaxAgeDays": "0 表示永不过期",
       "maxOnline": "0 表示不限制",
       "overflowPolicy": "「拒绝新登录」更严：合法会话在线时，攻击者的新登录会被直接拒绝",
-      "lockoutMinutes": "-1 = 永久锁定，只能由管理员在用户列表里手工解锁",
+      "lockoutMinutes": "-1 = 永久锁定��只能由管理员在用户列表里手工解锁",
       "captchaAfterFailures": "连续失败达该次数后，后续登录需输入图形验证码",
       "twoFactorEnabled": "启用后，本租户全体成员登录需进行二次认证",
       "twoFactorLocked": "平台已强制启用二次认证，本租户无法关闭",

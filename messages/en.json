@@ -7206,7 +7206,7 @@
       "kpiSection": "Key Metrics",
       "trendSection": "Trend Details",
       "noData": "No data available",
-      "loading": "Loading…"
+      "loading": "Loading���"
     },
     "normalHiddenHint": "Normal mail is hidden by default so its volume does not flatten the threat curves — click its legend entry to show it"
   },
@@ -7235,6 +7235,16 @@
       "invalidOrder": "The end date cannot be before the start date",
       "noFuture": "Future dates are not allowed"
     },
+    "customRange": {
+      "start": "Start",
+      "end": "End",
+      "error": {
+        "invalid": "Invalid date",
+        "order": "Start must be before end",
+        "tooLong": "Max {max} days"
+      }
+    },
+    "tenantScope": "Tenant scope",
     "kpi": {
       "inboundTotal": "Inbound Total",
       "outboundTotal": "Outbound Total",
