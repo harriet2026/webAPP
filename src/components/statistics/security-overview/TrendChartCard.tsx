@@ -78,15 +78,17 @@ export function TrendChartCard({
     const sumVisible = (p: TrendSeriesPoint) =>
       visibleKeys.reduce((s, k) => s + (typeof p[k] === 'number' ? (p[k] as number) : 0), 0);
 
+    // Single data point: render as bar so the chart isn't just a dot.
+    const isSinglePoint = seriesData.length === 1;
+
     const series: Record<string, unknown>[] = visibleKeys.map((key) => ({
       name: seriesLabel(key),
-      type: 'line',
+      type: isSinglePoint ? 'bar' : 'line',
       stack: 'total',
       smooth: true,
-      areaStyle: { opacity: 0.35, color: seriesColor(key) },
-      lineStyle: { width: 2.5, color: seriesColor(key) },
-      symbol: 'circle',
-      symbolSize: 5,
+      areaStyle: { opacity: 0.5, color: seriesColor(key) },
+      lineStyle: { width: 1, color: seriesColor(key) },
+      symbol: 'none',
       itemStyle: { color: seriesColor(key) },
       data: seriesData.map((p) => (typeof p[key] === 'number' ? p[key] : 0)),
     }));
@@ -100,8 +102,8 @@ export function TrendChartCard({
         smooth: true,
         symbol: 'none',
         z: 1,
-        lineStyle: { width: 2, type: 'dashed', color: '#9ca3af' },
-        itemStyle: { color: '#9ca3af' },
+        lineStyle: { width: 1, type: 'dashed', color: '#666666' },
+        itemStyle: { color: '#666666' },
         data: prevData.map((p) => sumVisible(p)),
       });
     }
@@ -109,6 +111,11 @@ export function TrendChartCard({
     return {
       tooltip: {
         trigger: 'axis',
+        backgroundColor: '#fff',
+        borderColor: '#e5e7eb',
+        borderWidth: 1,
+        borderRadius: 8,
+        textStyle: { color: '#333', fontSize: 12 },
         axisPointer: { type: 'cross', label: { backgroundColor: '#6a7985' } },
       },
       grid: { left: 0, right: 0, top: 12, bottom: 28, containLabel: true },
@@ -116,13 +123,17 @@ export function TrendChartCard({
         type: 'category',
         boundaryGap: false,
         data: dates,
-        axisLabel: { fontSize: 11, color: '#9ca3af', formatter: dateFormatter },
-        axisLine: { lineStyle: { color: '#E4E4E4' } },
+        axisLabel: { fontSize: 11, color: '#666666', formatter: dateFormatter },
+        axisLine: { show: true, lineStyle: { color: '#E4E4E4' } },
+        axisTick: { show: true, lineStyle: { color: '#E4E4E4' } },
       },
       yAxis: {
         type: 'value',
+        splitNumber: 4,
         splitLine: { lineStyle: { color: '#E4E4E4', type: 'dashed' } },
-        axisLabel: { fontSize: 11, color: '#9ca3af' },
+        axisLine: { show: true, lineStyle: { color: '#E4E4E4' } },
+        axisTick: { show: true, lineStyle: { color: '#E4E4E4' } },
+        axisLabel: { fontSize: 11, color: '#666666' },
       },
       series,
     };
