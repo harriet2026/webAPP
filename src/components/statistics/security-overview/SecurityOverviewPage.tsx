@@ -79,12 +79,17 @@ export function SecurityOverviewPage() {
     [timeRange, customRange],
   );
 
+  // When the user selects "today", request hourly granularity so the trend
+  // chart shows 0–23 h instead of a single daily data point.
+  const interval = timeRange === 'today' ? 'hour' as const : undefined;
+
   const { data, isLoading } = useSecurityOverview({
     startDate,
     endDate,
     direction,
     comparePreviousPeriod: comparePrevious,
     scopeTenantId,
+    interval,
   });
 
   const toggleSeries = (key: string) => {
@@ -143,6 +148,7 @@ export function SecurityOverviewPage() {
         trend={data?.trend}
         trendPrevious={data?.trend_previous_period}
         isLoading={isLoading}
+        isHourly={interval === 'hour'}
         viewBy={viewBy}
         onViewByChange={handleViewByChange}
         hiddenSeries={hiddenSeries}

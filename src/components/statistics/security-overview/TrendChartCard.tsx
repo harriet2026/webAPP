@@ -13,6 +13,7 @@ interface TrendChartCardProps {
   trend?: TrendData;
   trendPrevious?: TrendData | null;
   isLoading: boolean;
+  isHourly?: boolean;
   viewBy: ViewBy;
   onViewByChange: (v: ViewBy) => void;
   hiddenSeries: Set<string>;
@@ -30,6 +31,7 @@ export function TrendChartCard({
   trend,
   trendPrevious,
   isLoading,
+  isHourly = false,
   viewBy,
   onViewByChange,
   hiddenSeries,
@@ -66,8 +68,11 @@ export function TrendChartCard({
 
   const echartsOption = useMemo(() => {
     if (seriesData.length === 0) return null;
-    // Show only MM-DD on the axis (avoid wide YYYY-MM-DD labels that overlap).
-    const mmdd = (d: string) => (d.length >= 10 ? d.slice(5) : d);
+    // Hourly view ("today"): show HH:mm (e.g. "08:00").
+    // Daily view: show MM-DD (e.g. "07-24").
+    const dateFormatter = isHourly
+      ? (d: string) => (d.length >= 16 ? d.slice(11, 16) : d)
+      : (d: string) => (d.length >= 10 ? d.slice(5, 10) : d);
     const dates = seriesData.map((p) => p.date);
     const visibleKeys = keys.filter((k) => !hiddenSeries.has(k));
     const sumVisible = (p: TrendSeriesPoint) =>
@@ -111,7 +116,7 @@ export function TrendChartCard({
         type: 'category',
         boundaryGap: false,
         data: dates,
-        axisLabel: { fontSize: 11, color: '#9ca3af', formatter: mmdd },
+        axisLabel: { fontSize: 11, color: '#9ca3af', formatter: dateFormatter },
         axisLine: { lineStyle: { color: '#E4E4E4' } },
       },
       yAxis: {
@@ -122,7 +127,7 @@ export function TrendChartCard({
       series,
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seriesData, keys, hiddenSeries, prevData]);
+  }, [seriesData, keys, hiddenSeries, prevData, isHourly]);
 
   const isolateSeries = (key: string) => {
     // If only this key is visible (all others hidden), show all
