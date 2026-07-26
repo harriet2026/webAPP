@@ -146,7 +146,7 @@ export function TrendChartCard({
           <div className="text-xs font-medium text-body">
             {t(`viewBy.${viewBy}` as Parameters<typeof t>[0])}
           </div>
-          <CardTitle>{t('title')}</CardTitle>
+          <CardTitle>{t('trendCardTitle')}</CardTitle>
           <SmartSummaryBadge className="mt-2">
             {t('trendPeakHint')}
           </SmartSummaryBadge>

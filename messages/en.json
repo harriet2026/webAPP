@@ -7019,6 +7019,7 @@
     "trendPeakHint": "Click a legend item to toggle a series; double-click to isolate one",
     "subtitle": "Multi-dimensional email threat analysis and security overview",
     "title": "Security Overview",
+    "trendCardTitle": "Security Posture Analysis",
     "noData": "No data",
     "kpi": {
       "totalFiltered": "Total Filtered",
