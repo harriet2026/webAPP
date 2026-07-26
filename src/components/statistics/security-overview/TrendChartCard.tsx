@@ -6,7 +6,6 @@ import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SmartSummaryBadge } from '@/components/shared/smart-summary-badge';
 import { NON_SERIES_KEYS, type TrendData, type ViewBy, type TrendSeriesPoint } from '@/lib/api/security-overview';
 import { seriesColor } from './constants';
 
@@ -147,9 +146,6 @@ export function TrendChartCard({
             {t(`viewBy.${viewBy}` as Parameters<typeof t>[0])}
           </div>
           <CardTitle>{t('trendCardTitle')}</CardTitle>
-          <SmartSummaryBadge className="mt-2">
-            {t('trendPeakHint')}
-          </SmartSummaryBadge>
         </div>
       </CardHeader>
       <CardContent>
