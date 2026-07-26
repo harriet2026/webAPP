@@ -26,14 +26,21 @@ export interface ThreatSeriesDef {
   color: string;
 }
 
-// Stacked display order: most-severe (bottom of stack) first, matching the
-// demo's THREAT_SERIES order.
+// Stacked display order: email_type dimension (11 classes), aligned to
+// security-overview TrendChartCard email_type tab. Colors from
+// constants.ts SERIES_COLORS.
 export const THREAT_TREND_SERIES: ThreatSeriesDef[] = [
-  { key: 'phishing', color: '#EF4444' }, // threat-phishing (red-500)
-  { key: 'spoofing', color: '#F97316' }, // threat-high (orange-500)
-  { key: 'spam', color: '#EAB308' }, // threat-medium (yellow-500)
-  { key: 'virus', color: '#991B1B' }, // demo dark-red virus (no DESIGN token)
-  { key: 'malicious', color: '#06B6D4' }, // demo cyan malicious-link (no DESIGN token)
+  { key: 'normal',             color: '#9CA3AF' },
+  { key: 'subscription',       color: '#06B6D4' },
+  { key: 'advertising',        color: '#8B5CF6' },
+  { key: 'spam',               color: '#3B82F6' },
+  { key: 'harmful',            color: '#F97316' },
+  { key: 'suspicious',         color: '#EAB308' },
+  { key: 'sensitive',          color: '#EC4899' },
+  { key: 'spoofing',           color: '#F59E0B' },
+  { key: 'phishing',           color: '#EF4444' },
+  { key: 'virus',              color: '#7C3AED' },
+  { key: 'account_compromised',color: '#B91C1C' },
 ];
 
 function countAt(point: TrendSeriesPoint, key: string): number {

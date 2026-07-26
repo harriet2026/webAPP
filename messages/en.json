@@ -9397,11 +9397,17 @@
       "empty": "No threat data",
       "viewOverview": "View Email Security Overview",
       "series": {
-        "phishing": "Phishing",
-        "spoofing": "Spoofing",
+        "normal": "Normal",
+        "subscription": "Subscription",
+        "advertising": "Advertising",
         "spam": "Spam",
+        "harmful": "Harmful",
+        "suspicious": "Suspicious",
+        "sensitive": "Sensitive",
+        "spoofing": "Spoofing",
+        "phishing": "Phishing",
         "virus": "Virus",
-        "malicious": "Malicious link"
+        "account_compromised": "Account Compromised"
       }
     },
     "todo": {

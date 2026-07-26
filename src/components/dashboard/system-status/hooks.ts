@@ -407,7 +407,7 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
     pendingReport,
     nodesOnline,
     nodesTotal,
-    threatTrend: securityOverview.trend?.threat_type ?? [],
+    threatTrend: securityOverview.trend?.email_type ?? [],
     top5,
     alerts: [...platformAlerts, ...tenantAlerts],
     agents,
