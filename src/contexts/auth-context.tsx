@@ -228,6 +228,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {
         localStorage.removeItem('osgateway_user');
       }
+    } else {
+      // 绕过登录：无已存储用户时注入一个 mock 超级管理员，
+      // 使 ProtectedRoute 直接放行且所有权限检查（is_super_admin）通过，
+      // 无需真实后端即可直接展示页面。
+      const mockUser: User = {
+        id: 0,
+        username: 'demo-admin',
+        role: 'system_admin',
+        tenant_id: null,
+        role_id: null,
+        is_super_admin: true,
+        created_at: '',
+        updated_at: '',
+      };
+      cachedTenantRef.current = null;
+      setState({ user: mockUser, token: null, expiresAt: null, selectedTenantId: null });
     }
     const storedFeatures = localStorage.getItem('osgateway_features');
     if (storedFeatures) {

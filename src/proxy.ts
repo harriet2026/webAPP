@@ -75,9 +75,9 @@ function buildEdgeGates(caps: ReturnType<typeof capabilitiesForForm>) {
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Coarse login-state gate: presence of the HttpOnly token cookie. Do not
-  // inspect the value (it is an opaque JWT); staleness is handled downstream.
-  const hasAuth = !!request.cookies.get(AUTH_COOKIE)?.value;
+  // 绕过登录：始终视为已认证，跳过 /login 重定向。
+  // 仍读取 cookie（若存在则采用），仅将缺失时的默认值置为 true。
+  const hasAuth = !!request.cookies.get(AUTH_COOKIE)?.value || true;
 
   if (!isAuthPath(pathname) && !isPortalPath(pathname) && !hasAuth) {
     const locale = pathname.split('/')[1] || 'zh';
