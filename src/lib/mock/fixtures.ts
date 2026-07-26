@@ -446,6 +446,23 @@ export function mockBootstrap(): Bootstrap {
     // 让 platform 默认视角（demo 云网关默认态）就能看到完整的阶段4+阶段5，所以
     // 这里显式设为 false，仅服务于 mock/demo 展示，不代表真实生产语义。
     featureRegistry: [
+      // 平台侧基础设施监控。系统状态页的「系统在线节点」KPI 卡与「系统与服务
+      // 健康」卡都由它门控（见 system-status/visibility.ts 的 INFRA_FEATURE_ID）。
+      // 形状对齐生产 registry.go / registry_for_test.json：scope=platform、
+      // tenantAccess=hidden、grantable=false —— 即 platform 视角只读可见，任何
+      // tenant 视角（含租户管理员、impersonation）一律 HIDDEN。
+      // 必须登记：visibility.ts 对「注册表中缺失」的特性走「未登记=放行」兜底
+      // (`: true`)，之前 mock 少了这一项，导致 mock/demo 模式下这两张平台卡片
+      // 对所有视角（含租户管理员）恒显示 —— 与生产语义不符。
+      {
+        id: "monitor-infrastructure",
+        visibility: "ALWAYS",
+        scope: "platform",
+        platformAccess: "readonly",
+        tenantAccess: "hidden",
+        platformHidden: false,
+        grantable: false,
+      },
       {
         id: "phishing-detection",
         visibility: "AI_ELSE_LOCK",
@@ -2517,7 +2534,7 @@ export function resetIPFrequencyMock(): void {
   mockSuspendedIPs.splice(0, mockSuspendedIPs.length, ...initial);
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════���═════════════════════════════════════════════
 // IP 黑白名单（mock）
 // 数据结构对齐 webapp `IPFilterRuleView`（webapp/src/types/ip-filter.ts）。
 // 字段映射：list_type ∈ {blacklist,whitelist}, ip_config_type ∈ {single,range},
@@ -4202,7 +4219,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
 // 发信行为管控（behavior_control，mock）
 // 数据源自 demo `design/origin/demo/components/sender-behavior-control/mock-data.ts`
 // 的 `mockBehaviorRules`（7 条手工命名 + 生成的 #8..#35，共 35 条），并映射到统一规则。
-// demo 中的 organization 发件人对象尚未被后端支持，因此 mock 也只生成 individual/group，
+// demo 中的 organization 发件人对象尚未被后端支��，因此 mock 也只生成 individual/group，
 // 避免展示出无法保存的规则（GT-12170）。
 // 系统 `Rule`：metadata 携带 `BehaviorControlMetadata`（feature/direction/object_config/
 // time_window/dim_a/threshold_a/or_enabled/dim_b/threshold_b），action 经
@@ -6567,7 +6584,7 @@ function buildDefaultDisposalSettingsFixture(): DisposalSettings {
 // ruleToGroup（webapp/src/lib/api/groups.ts）判型条件的 Rule：
 // stage='rcpt' → GroupType 'recipient'，且 tags 带 `grp:<name>` 前缀
 // （否则 ruleToGroup 会因找不到 tag 直接判空丢弃这条数据）。member_count
-// 用 demo 的聚合数字直接覆盖（不虚构不存在的真实成员邮箱列表）。
+// 用 demo 的聚��数字直接覆盖（不虚构不存在的真实成员邮箱列表）。
 export function mockRecipientGroupRulesList(): { items: Rule[]; total: number } {
   const groups: Array<[number, string, number]> = [
     [9101, "高管邮箱", 15],
