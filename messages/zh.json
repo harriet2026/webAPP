@@ -1100,7 +1100,7 @@
       "phishingAgent": "AI 钓鱼邮件检测",
       "impersonationAgent": "AI 仿冒邮件检测",
       "retrospectAgent": "AI 历史威胁回溯",
-      "similarDetection": "相似邮件聚类检测",
+      "similarDetection": "相似邮件聚类���测",
       "advancedRules": "高级条件匹配规则",
       "mailMarking": "邮件标记规则"
     },
@@ -1336,12 +1336,12 @@
     "statusManualHold": "人工保留",
     "reason": "原因",
     "eyebrow": "旁路队列",
-    "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已���储��容��并��需要时重新注入或删除项目。"
+    "subtitle": "检查被旁路的邮件，按处理状态筛选，预��已���储��容��并��需要时重新注入或删除项目。"
   },
   "logs": {
     "emailLogs": "邮件日志",
     "authAttempts": "认证日志",
-    "adminAuditLogs": "操作日��",
+    "adminAuditLogs": "操作日����",
     "timestamp": "时间",
     "sender": "发件人",
     "recipients": "收件人",
@@ -2134,7 +2134,7 @@
     "action": "操作",
     "impersonation": "冒充上下文",
     "impersonating": "跨租户冒充",
-    "direct": "直接访问",
+    "direct": "直接访���",
     "effectiveTenant": "生效��户",
     "tenantSource": "租户来源",
     "resourceType": "操作对象",
@@ -3051,7 +3051,7 @@
     "blockError421": "返回错误码421",
     "blockDisconnect": "断开当前连接",
     "suspendDurationLabel": "IP挂起",
-    "suspendTip": "触发后自动封禁IP一段时间",
+    "suspendTip": "触发后自动封禁IP一段时���",
     "suspendNone": "不启用",
     "suspendMinutesShort": "{n}分钟",
     "suspendHourShort": "{n}小时",
@@ -3206,7 +3206,7 @@
     "detailAction": "处置动作",
     "detailStats": "统计信息",
     "currentSuspended": "当前挂起IP",
-    "viewSuspendedList": "查看挂起IP列表",
+    "viewSuspendedList": "查看挂起IP���表",
     "viewSuspendedIPs": "查看挂起IP",
     "currentSuspendedIPs": "当前挂起IP ({count})",
     "suspendedRuleLabel": "规则",
@@ -3351,7 +3351,7 @@
     "validityPeriod": "有效期：",
     "previewPermanent": "永久有效",
     "priorityLabel": "优先级：",
-    "effectBlock": "SMTP 连接被拒绝，发件方收到退信",
+    "effectBlock": "SMTP 连��被拒绝，发件方收到退信",
     "effectQuarantine": "邮件被移��隔离区，收件人���不可见",
     "effectQuarantineExtra": "管理员需前往「邮件隔离」模块手动处置",
     "effectDrop": "邮件静默删除，无退信，发件方无感知",
@@ -3500,7 +3500,7 @@
     "comingSoon": "敬请期待",
     "priority": "优先级",
     "validFrom": "生效时间",
-    "validUntil": "失效时间",
+    "validUntil": "失���时间",
     "status": "状态",
     "active": "启用",
     "inactive": "禁用",
@@ -3673,7 +3673,7 @@
       "cidrPrefixMax": "CIDR前缀长度必须在0-32之间",
       "nameDuplicate": "规则名称已存在，请更换名称"
     },
-    "title": "发信人黑白名单",
+    "title": "发信人黑白���单",
     "blacklist": "黑名单规则",
     "whitelist": "白名单规则",
     "createRule": "新建规则",
@@ -3812,7 +3812,7 @@
     "exampleWhitelistDomain": "白名单合作域名",
     "exampleWhitelistDomainDesc": "放行来自 partner.com 发给 user@example.com 的邮件",
     "exampleRecipientOnly": "拦截所有发往特定用户的邮件",
-    "exampleRecipientOnlyDesc": "拒绝任何发信人发给 user@example.com 的邮件",
+    "exampleRecipientOnlyDesc": "拒���任何发信人发给 user@example.com 的邮件",
     "simulationTest": "模拟测试",
     "simSenderPlaceholder": "输入测试��信人，如 spam@bad.com",
     "simRecipientPlaceholder": "输入测��收信人，如 user@example.com",
@@ -4482,7 +4482,7 @@
       "recipientCount": "测试收信人数",
       "run": "执行测试",
       "hit": "命中规则",
-      "miss": "未命中",
+      "miss": "未命��",
       "missReason": "未触发阈值，当前测试数据未命中规则",
       "hitReason": "触发维度{condition}“{dimension}”，当前{count}{unit}，达到阈值{threshold}{unit}",
       "unitIp": "个",
@@ -4624,7 +4624,7 @@
       "actionSideline": "审核",
       "actionReject": "阻断",
       "actionDiscard": "丢弃",
-      "barcodeExempt": "一维码豁免：条形码（Code128/EAN等）不视为二维码",
+      "barcodeExempt": "一维码豁免：条形码（Code128/EAN等）不视为二维���",
       "urlDetection": "URL检测与防护",
       "expandShortLink": "短链接自动展开",
       "keywordFilter": "内容关键词过滤",
@@ -5144,7 +5144,7 @@
     "customColorBorder": "边框色",
     "customColorRadius": "圆角",
     "subjectPrefixPlainOnlyWarn": "主题前缀/邮件头位置仅按纯文本生效",
-    "headerNameLabel": "邮件头字段名",
+    "headerNameLabel": "邮件头字段���",
     "headerNamePlaceholder": "如：X-External-Source",
     "disclaimerConfig": "声明配置",
     "disclaimerContent": "��明内容",
@@ -6226,7 +6226,7 @@
     },
     "removeCondition": "移除条件",
     "errors": {
-      "nameRequired": "请输入规则名称",
+      "nameRequired": "请输入规���名称",
       "conditionRequired": "请���少添加一个条件",
       "scopeRequired": "请选��适用范围",
       "priorityRange": "优先级需在 {min}–{max} 之间"
@@ -6326,7 +6326,7 @@
         "senderIpGroup": "发件 IP 组",
         "geoIpCountry": "GeoIP 国家",
         "geoIpRegion": "GeoIP 区域",
-        "keywordMatch": "关键词匹配",
+        "keywordMatch": "关键词��配",
         "sendTime": "发送时间",
         "sendDayOfWeek": "发送星期",
         "attachmentContent": "附件内容",
@@ -6506,7 +6506,7 @@
         "note": "用于检测压缩炸弹，建议阈值3-5层"
       },
       "desc_nestedFileCount": {
-        "source": "压缩包解析引擎",
+        "source": "压缩包��析引擎",
         "usage": "检测压缩包内文件总数",
         "note": "防止解压后文件数量过多"
       },
@@ -6593,7 +6593,7 @@
       "desc_mailFromFromConsistency": {
         "source": "SMTP会话MAIL FROM + 邮件头From字段",
         "usage": "检测信封层与信头层发信人是否一致",
-        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
+        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证��两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
       },
       "desc_virusScanResult": {
         "source": "防病毒引擎",
@@ -7328,7 +7328,7 @@
         "successRate": "当前方向成功投递数 ÷ 总数。",
         "bounceRate": "当前方向失败/退信邮件数 ÷ 总数。",
         "avgLatencyMs": "当前方向从接收到完成处理的平均耗时。",
-        "sidelineQueue": "当前等待旁路处理的任务数（近似反垃圾队列）。",
+        "sidelineQueue": "当前等待旁路处理的任务数��近似反垃圾队列）。",
         "latencyP99": "99% 的外发邮件在该耗时内完成；超过 30 秒告警。",
         "outboundQueueBacklog": "基于投递中邮件估算的外发队列积压。",
         "threatRate": "检测到内部威胁的域��邮件占比。",
@@ -7456,7 +7456,17 @@
       "7d": "近7日",
       "30d": "近30日",
       "this_month": "本月",
-      "last_month": "上月"
+      "last_month": "上月",
+      "custom": "自定义"
+    },
+    "customRange": {
+      "start": "开始",
+      "end": "结束",
+      "error": {
+        "invalid": "日期格式无效",
+        "order": "开始日期不能晚于结束日期",
+        "tooLong": "最多 {max} 天"
+      }
     },
     "kpi": {
       "totalLinkMail": "含链接邮件总量",
@@ -8047,7 +8057,7 @@
       "edit": "编辑",
       "save": "保存",
       "saving": "保存中...",
-      "saved": "运行模式已保存",
+      "saved": "运行模式已��存",
       "saveFailed": "保存失败",
       "cancel": "取消",
       "sheetTitle": "编辑运行模式与超时",
@@ -8409,7 +8419,7 @@
       "actionRejectDesc": "直接拒绝邮件，退信给发件人",
       "actionDiscardDesc": "静默丢弃，不通知发件人",
       "actionRejectWarn": "严格模式会直接拒绝邮件，可能影响正常邮件投递，请谨慎使用",
-      "previewNotify": "预览通知内容",
+      "previewNotify": "预览���知内容",
       "previewNotifyUnavailable": "模板预览暂不可用",
       "previewNotifyHint": "由后端正式模板渲染，仅预览，不发送邮件",
       "confidenceThresholdHint": "仿冒概率高于此阈值时触发处置动作（0-100）",
@@ -9260,7 +9270,7 @@
     },
     "action": {
       "confirm": "确认",
-      "startProcess": "开始处理",
+      "startProcess": "开��处理",
       "resolve": "解决",
       "viewDetail": "详情",
       "batchConfirm": "批量确认",
@@ -9539,7 +9549,7 @@
       "ipFilter": "IP 黑白名单",
       "rbl": "RBL 过滤",
       "overseas": "海外邮件检测",
-      "ipFrequencySummary": "阈值: {threshold} 次/分钟",
+      "ipFrequencySummary": "阈值: {threshold} ���/分钟",
       "ipFilterSummary": "黑名单: {blacklist} 条 / 白名单: {whitelist} 条",
       "rblSummary": "{servers} 个服务器 / 超时 {timeout}s",
       "overseasSummary": "{directions} 已启用",
@@ -9710,7 +9720,7 @@
     },
     "existence": {
       "title": "存在性验证策略",
-      "desc": "验证收件人在目录服务的真实存在性",
+      "desc": "验证收件人在目���服务的真实存在性",
       "directionNote": "仅接收方向（外部→内部）生效，内部发信自动跳过验证",
       "strictMode": "严格模式",
       "badge": {

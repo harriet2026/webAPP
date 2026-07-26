@@ -7399,7 +7399,17 @@
       "7d": "Last 7 Days",
       "30d": "Last 30 Days",
       "this_month": "This Month",
-      "last_month": "Last Month"
+      "last_month": "Last Month",
+      "custom": "Custom"
+    },
+    "customRange": {
+      "start": "Start",
+      "end": "End",
+      "error": {
+        "invalid": "Invalid date",
+        "order": "Start must be before end",
+        "tooLong": "Max {max} days"
+      }
     },
     "kpi": {
       "totalLinkMail": "Total Link Mails",

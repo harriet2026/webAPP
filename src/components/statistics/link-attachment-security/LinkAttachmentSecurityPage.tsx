@@ -3,9 +3,13 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfDay, endOfDay } from 'date-fns';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
 import { AlertTriangle, ExternalLink, Link2 } from 'lucide-react';
+import {
+  timeRangeToDates,
+  defaultCustomRange,
+  type CustomRange,
+} from '@/components/statistics/security-overview/date-range';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FilterBar } from './FilterBar';
@@ -22,45 +26,6 @@ import { useTenant } from '@/hooks/use-tenant';
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import type { Direction, TimeRange } from '@/lib/api/link-attachment-security';
 
-function timeRangeToDates(timeRange: TimeRange): { startDate: string; endDate: string } {
-  const now = new Date();
-
-  switch (timeRange) {
-    case 'today':
-      return {
-        startDate: format(startOfDay(now), 'yyyy-MM-dd'),
-        endDate: format(endOfDay(now), 'yyyy-MM-dd'),
-      };
-    case '7d':
-      return {
-        startDate: format(subDays(now, 6), 'yyyy-MM-dd'),
-        endDate: format(now, 'yyyy-MM-dd'),
-      };
-    case '30d':
-      return {
-        startDate: format(subDays(now, 29), 'yyyy-MM-dd'),
-        endDate: format(now, 'yyyy-MM-dd'),
-      };
-    case 'this_month':
-      return {
-        startDate: format(startOfMonth(now), 'yyyy-MM-dd'),
-        endDate: format(now, 'yyyy-MM-dd'),
-      };
-    case 'last_month': {
-      const last = subMonths(now, 1);
-      return {
-        startDate: format(startOfMonth(last), 'yyyy-MM-dd'),
-        endDate: format(endOfMonth(last), 'yyyy-MM-dd'),
-      };
-    }
-    default:
-      return {
-        startDate: format(subDays(now, 6), 'yyyy-MM-dd'),
-        endDate: format(now, 'yyyy-MM-dd'),
-      };
-  }
-}
-
 export function LinkAttachmentSecurityPage() {
   const t = useTranslations('linkAttachmentSecurity');
   const locale = useLocale();
@@ -68,6 +33,8 @@ export function LinkAttachmentSecurityPage() {
 
   const [direction, setDirection] = useState<Direction>('all');
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
+  const [customRange, setCustomRange] = useState<CustomRange>(defaultCustomRange);
+  const [scopeTenantId, setScopeTenantId] = useState<number | null>(null);
   // F1 / spec §4.5: viewTab + chartType persisted to localStorage (user preference).
   // Initialize to the SSR-safe defaults and hydrate from localStorage in a
   // post-mount effect — reading localStorage in the useState initializer would
@@ -94,7 +61,10 @@ export function LinkAttachmentSecurityPage() {
     if (hydrated.current) window.localStorage.setItem('las_chart_type', chartType);
   }, [chartType]);
 
-  const { startDate, endDate } = useMemo(() => timeRangeToDates(timeRange), [timeRange]);
+  const { startDate, endDate } = useMemo(
+    () => timeRangeToDates(timeRange, customRange),
+    [timeRange, customRange],
+  );
 
   const { selectedTenantId } = useTenant();
   const { scopeActive } = useSecurityScope(selectedTenantId);
@@ -110,22 +80,22 @@ export function LinkAttachmentSecurityPage() {
       className="min-h-full bg-[#F8F9FB] shadow-[0_0_0_32px_#F8F9FB] dark:bg-background dark:shadow-[0_0_0_32px_var(--background)]"
     >
       <PageHeader
-        title={
-          <span className="inline-flex items-center gap-2">
-            <Link2 className="h-6 w-6" />
-            {t('title')}
-          </span>
-        }
+        icon={Link2}
+        title={t('title')}
         description={t('subtitle')}
       />
 
-      <div className="mx-auto w-full max-w-[1072px] space-y-6">
+      <div className="space-y-6">
         <FilterBar
           direction={direction}
           onDirectionChange={setDirection}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
+          customRange={customRange}
+          onCustomRangeChange={setCustomRange}
           showTenant={scopeActive}
+          scopeTenantId={scopeTenantId}
+          onScopeTenantChange={setScopeTenantId}
         />
 
         <KpiCards
@@ -214,3 +184,4 @@ export function LinkAttachmentSecurityPage() {
     </PageShell>
   );
 }
+
