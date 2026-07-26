@@ -28,14 +28,21 @@ export interface SecurityScope {
 // silently serve all-tenant data while hiding the scope picker.
 //
 // GT-cloud-gateway fix: the normalization above is only meant to repair a
-// PLATFORM admin's inconsistent viewer selection. A real tenant admin must
-// never be promoted to the platform viewer — in a cloud-gateway / multi-tenant
-// form their account may also read `isSystemAdmin`, so the old rule flipped them
-// to 'platform' and leaked platform-only cards (系统在线节点 / 系统与服务健康)
-// into the tenant view. Short-circuit tenant-admin identity to the tenant viewer
-// so this single source of truth matches the product-form-context clamp.
+// PLATFORM admin's inconsistent viewer selection. It must fire ONLY for an
+// account that has no home tenant of its own (`userTenantId == null`), i.e. a
+// true global platform admin. Two kinds of tenant-bound accounts must never be
+// promoted to the platform viewer, or the platform-only cards
+// (系统在线节点 / 系统与服务健康) leak into the tenant view in the cloud-gateway
+// (saas + multiTenant) form:
+//   1. a real tenant admin (`isTenantAdmin`), and
+//   2. any account bound to a specific tenant (`userTenantId != null`) that
+//      happens to also read `isSystemAdmin` (e.g. a tenant-scoped system role).
+// Confining the flip to `userTenantId == null` keeps this single source of
+// truth in lockstep with the product-form-context clamp and the backend, which
+// scopes such accounts to their own tenant regardless of the viewer toggle.
 export function resolveSecurityScope(i: SecurityScopeInput): SecurityScope {
-  const effectiveViewer: Viewer = i.isTenantAdmin
+  const isTenantBound = i.isTenantAdmin || i.userTenantId != null;
+  const effectiveViewer: Viewer = isTenantBound
     ? 'tenant'
     : i.viewer === 'tenant' && i.isSystemAdmin && i.selectedTenantId == null
       ? 'platform'
@@ -44,13 +51,15 @@ export function resolveSecurityScope(i: SecurityScopeInput): SecurityScope {
   const scopeActive = i.multiTenant && effectiveViewer === 'platform';
   const scopeResolved = i.capabilitiesLoaded;
 
-  // A tenant admin is always confined to their own JWT tenant. Resolve that by
-  // identity BEFORE the isSystemAdmin branch, so a cloud-gateway tenant admin
-  // that also reads isSystemAdmin is not scoped to selectedTenantId (which is
-  // null for them, i.e. all-tenants) and does not leak cross-tenant data.
+  // Any tenant-bound account (real tenant admin, or a system role that still
+  // carries a home tenant) is confined to its own JWT tenant. Resolve that by
+  // identity BEFORE the isSystemAdmin branch, so such an account is not scoped
+  // to selectedTenantId (null for them, i.e. all-tenants) and cannot leak
+  // cross-tenant data. Only a true global platform admin (no home tenant) uses
+  // the impersonation selectedTenantId.
   const resolvedScopeTenant = scopeActive
     ? i.scopeTenantId
-    : i.isTenantAdmin
+    : isTenantBound
       ? i.userTenantId ?? null
       : i.isSystemAdmin
         ? i.selectedTenantId

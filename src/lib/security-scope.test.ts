@@ -59,6 +59,28 @@ describe('resolveSecurityScope', () => {
     expect(s.resolvedScopeTenant).toBe(7);
   });
 
+  // GT-cloud-gateway regression #2: an account that is NOT role=tenant_admin
+  // but is still bound to a home tenant (userTenantId != null) — e.g. a
+  // tenant-scoped system role in the cloud-gateway form — also reads
+  // isSystemAdmin. The `role === 'tenant_admin'` short-circuit alone did not
+  // cover it, so the normalization still flipped it to 'platform' and the
+  // infra cards leaked. Any tenant-bound account must pin to 'tenant' and its
+  // own JWT tenant, never the impersonation selectedTenantId.
+  it('tenant-bound system account (userTenantId set) is never promoted to platform', () => {
+    const s = resolveSecurityScope({
+      ...base,
+      isTenantAdmin: false,
+      isSystemAdmin: true,
+      viewer: 'tenant',
+      selectedTenantId: null,
+      userTenantId: 3,
+      multiTenant: true,
+    });
+    expect(s.effectiveViewer).toBe('tenant');
+    expect(s.scopeActive).toBe(false);
+    expect(s.resolvedScopeTenant).toBe(3);
+  });
+
   it('impersonating admin (viewer=tenant + selected) → inactive, that tenant', () => {
     const s = resolveSecurityScope({ ...base, viewer: 'tenant', selectedTenantId: 6 });
     expect(s.scopeActive).toBe(false);
