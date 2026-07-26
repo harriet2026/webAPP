@@ -18,6 +18,8 @@ import { AttachmentSidePanel } from './AttachmentSidePanel';
 import { DetailTable } from './DetailTable';
 import { BottomActions } from './BottomActions';
 import { useLinkAttachmentStats } from './hooks/useLinkAttachmentStats';
+import { useTenant } from '@/hooks/use-tenant';
+import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import type { Direction, TimeRange } from '@/lib/api/link-attachment-security';
 
 function timeRangeToDates(timeRange: TimeRange): { startDate: string; endDate: string } {
@@ -94,6 +96,9 @@ export function LinkAttachmentSecurityPage() {
 
   const { startDate, endDate } = useMemo(() => timeRangeToDates(timeRange), [timeRange]);
 
+  const { selectedTenantId } = useTenant();
+  const { scopeActive } = useSecurityScope(selectedTenantId);
+
   const { data, isLoading } = useLinkAttachmentStats({
     startDate,
     endDate,
@@ -120,6 +125,7 @@ export function LinkAttachmentSecurityPage() {
           onDirectionChange={setDirection}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
+          showTenant={scopeActive}
         />
 
         <KpiCards

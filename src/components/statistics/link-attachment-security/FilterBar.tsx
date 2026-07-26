@@ -12,20 +12,23 @@ interface FilterBarProps {
   onDirectionChange: (d: Direction) => void;
   timeRange: TimeRange;
   onTimeRangeChange: (r: TimeRange) => void;
+  showTenant?: boolean;
 }
 
-export function FilterBar({ direction, onDirectionChange, timeRange, onTimeRangeChange }: FilterBarProps) {
+export function FilterBar({ direction, onDirectionChange, timeRange, onTimeRangeChange, showTenant = false }: FilterBarProps) {
   const t = useTranslations('linkAttachmentSecurity');
   const directions: Direction[] = ['all', 'receive', 'send', 'internal'];
   const ranges: TimeRange[] = ['today', '7d', '30d', 'this_month', 'last_month'];
 
   return (
     <div className="flex min-h-[85px] flex-wrap items-center gap-4 rounded-lg bg-card p-4 shadow-sm" data-testid="link-attachment-filters">
-      <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-2.5 dark:border-gray-800">
-        <Building2 className="h-4 w-4 text-muted-foreground" />
-        <Label className="whitespace-nowrap text-sm text-muted-foreground">{t('tenantScope')}</Label>
-        <TenantSelector className="!w-64" />
-      </div>
+      {showTenant && (
+        <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-2.5 dark:border-gray-800">
+          <Building2 className="h-4 w-4 text-muted-foreground" />
+          <Label className="whitespace-nowrap text-sm text-muted-foreground">{t('tenantScope')}</Label>
+          <TenantSelector className="!w-64" />
+        </div>
+      )}
 
       <div className="flex overflow-hidden rounded border border-gray-300 dark:border-gray-600" role="group" aria-label={t('direction.label')}>
         {directions.map((item) => (
