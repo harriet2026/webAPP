@@ -7,6 +7,7 @@ import { PageShell } from '@/components/shared/page-shell';
 import { AlertCircle, ArrowUpFromLine, Clock3 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/hooks/use-tenant';
+import { useProductForm } from '@/contexts/product-form-context';
 import { FilterBar } from './FilterBar';
 import { KpiCards } from './KpiCards';
 import { TrendChart } from './TrendChart';
@@ -66,6 +67,7 @@ export function DeliveryTrafficPage() {
   const t = useTranslations('deliveryTraffic');
   const { can } = useAuth();
   const { isSystemAdmin, selectedTenantId, effectiveTenantId, setSelectedTenant } = useTenant();
+  const { capabilities } = useProductForm();
 
   const [direction, setDirection] = useState<Direction>('all');
   const [queryDirection, setQueryDirection] = useState<Direction>('all');
@@ -127,7 +129,7 @@ export function DeliveryTrafficPage() {
           onDirectionChange={setDirection}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
-          showTenant={isSystemAdmin}
+          showTenant={isSystemAdmin && capabilities?.multiTenant === true}
           tenantId={selectedTenantId}
           onTenantChange={setSelectedTenant}
           customStart={customStart}
