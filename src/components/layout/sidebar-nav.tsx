@@ -151,7 +151,7 @@ export function SidebarNav() {
       : undefined;
   // GT-12376: the gate is now the shared isNavItemAllowed (sidebar-visibility.ts)
   // so the admin-audit「操作模块」filter reuses the exact same visibility.
-  const navGateCtx = { hasPermission, isSystemAdmin, showAdvancedRules, canSeeRoute, registry, formVisible };
+  const navGateCtx = { hasPermission, isSystemAdmin, showAdvancedRules, canSeeRoute, registry, formVisible, capabilities, viewer };
   const isItemAllowed = (item: NavItem): boolean => isNavItemAllowed(item, navGateCtx);
 
   // GT-11761: the subtitle under the brand logo should follow the active route
