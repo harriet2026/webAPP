@@ -9,6 +9,27 @@ const AGENT_CENTER_FEATURE_IDS = ['phishing-detection', 'spoofing-detection', 't
 // 其全部子项被裁剪后由 sidebar-nav 的「空子项隐藏」逻辑自动折叠。
 const MONITORING_HREF_PREFIX = '/monitoring/';
 
+// 多租户形态 + 「租户管理员视角」下，「组织与成员」分组（即多租户租户视角下
+// 改名后的 `system` 组）仅保留「管理员与权限」`/users` 与「组织通讯录」
+// `/organization-contacts` 两项，其余组内项（邮件路由 / 租户管理 / 代理服务器
+// 管理 / DKIM 总览 / 平台安全策略 / 密码策略 / SMTP 凭证）不可见。按 href 关联，
+// 与既有裁剪风格一致；平台管理员视角完全不受影响。
+const ORG_MEMBERS_GROUP_HREFS = new Set<string>([
+  '/mail-routing',
+  '/tenants',
+  '/system/proxysvr',
+  '/system/dkim',
+  '/system/platform-security',
+  '/system/password-policy',
+  '/smtp-credentials',
+  '/users',
+  '/organization-contacts',
+]);
+const ORG_MEMBERS_TENANT_VISIBLE_HREFS = new Set<string>([
+  '/users', // 管理员与权限
+  '/organization-contacts', // 组织通讯录
+]);
+
 /** Pure filter: returns the registry feature ids that are visible for the given form/viewer/grants. */
 export function visibleNavIds(registry: FeatureDef[], caps: Capabilities, viewer: Viewer, grants: string[]): string[] {
   return registry.filter((f) => resolve(f, caps, viewer, grants).visible).map((f) => f.id);
@@ -105,6 +126,17 @@ export function isNavItemAllowed(item: GatedNavItem, ctx: NavGateContext): boole
     ctx.viewer === 'tenant' &&
     item.href &&
     item.href.startsWith(MONITORING_HREF_PREFIX)
+  ) {
+    return false;
+  }
+  // 多租户形态 + 租户视角：「组织与成员」分组仅保留「管理员与权限」「组织通讯录」，
+  // 组内其余项不可见（平台管理员可见）。
+  if (
+    ctx.capabilities?.multiTenant &&
+    ctx.viewer === 'tenant' &&
+    item.href &&
+    ORG_MEMBERS_GROUP_HREFS.has(item.href) &&
+    !ORG_MEMBERS_TENANT_VISIBLE_HREFS.has(item.href)
   ) {
     return false;
   }
