@@ -43,9 +43,8 @@ interface WorldGeoJson {
 
 const THREAT_FILTERS = [
   'all',
-  'normal', 'subscription', 'advertising', 'spam',
-  'harmful', 'suspicious', 'sensitive', 'spoofing',
-  'phishing', 'virus', 'account_compromised',
+  'spam', 'harmful', 'suspicious', 'sensitive',
+  'spoofing', 'phishing', 'virus', 'account_compromised',
 ] as const;
 const WORLD_MAP_NAME = 'security-overview-world';
 const WORLD_MAP_URL = '/maps/world-countries.geojson';

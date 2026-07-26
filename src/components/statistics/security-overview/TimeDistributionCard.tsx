@@ -23,14 +23,10 @@ interface TimeDistributionCardProps {
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const THREAT_FILTERS = [
   'all',
-  'normal', 'subscription', 'advertising', 'spam',
-  'harmful', 'suspicious', 'sensitive', 'spoofing',
-  'phishing', 'virus', 'account_compromised',
+  'spam', 'harmful', 'suspicious', 'sensitive',
+  'spoofing', 'phishing', 'virus', 'account_compromised',
 ];
 const DAILY_STACK = [
-  { key: 'normal',              color: '#9CA3AF' },
-  { key: 'subscription',        color: '#06B6D4' },
-  { key: 'advertising',         color: '#8B5CF6' },
   { key: 'spam',                color: '#3B82F6' },
   { key: 'harmful',             color: '#F97316' },
   { key: 'suspicious',          color: '#EAB308' },
