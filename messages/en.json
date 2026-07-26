@@ -7065,7 +7065,7 @@
       "threat_type": "Threat Type",
       "action": "Action",
       "delivery_result": "Delivery Result",
-      "email_type": "Email Type"
+      "email_type": "Threat Posture Trend"
     },
     "threatTypes": {
       "normal": "Normal",
@@ -7931,7 +7931,7 @@
       "colRisk": "Risk signals",
       "statusEnabled": "Enabled",
       "statusDisabled": "Disabled",
-      "footer": "{total} rules · {enabled} enabled",
+      "footer": "{total} rules �� {enabled} enabled",
       "namePlaceholder": "Rule name",
       "tagSectionLabel": "Recipient tags",
       "emailSectionLabel": "Recipient emails (exact match)",

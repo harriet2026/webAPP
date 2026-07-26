@@ -1015,7 +1015,7 @@
     "priority": "优先级",
     "newPolicy": "新建群组策略",
     "editPolicy": "编辑群组策略",
-    "deleteConfirm": "确定删除该群组策略吗？",
+    "deleteConfirm": "确定删除该群组策略���？",
     "deleteConfirmDesc": "删除后无法恢复，规则名：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效执行路径预览",
@@ -1336,7 +1336,7 @@
     "statusManualHold": "人工保留",
     "reason": "原因",
     "eyebrow": "旁路队列",
-    "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已存储内容，并在需要时重新注入或删除项目。"
+    "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已存储内容，并��需要时重新注入或删除项目。"
   },
   "logs": {
     "emailLogs": "邮件日志",
@@ -2691,7 +2691,7 @@
       "rawRequest": "原始请求",
       "rawResult": "原始结果",
       "prefilledRuleRequest": "预填规则请求",
-      "openRuleBuilder": "打开规则构建器",
+      "openRuleBuilder": "打开���则构建器",
       "openMatchingRule": "打开已创建规则",
       "matchedRule": "匹配到的规则",
       "ruleAlreadyCreated": "规则已创建",
@@ -3632,7 +3632,7 @@
     "ipRangePlaceholder": "请输入IP地址或CIDR网段，如 8.8.8.8、8.8.8.0/24 或 2001:db8::/32",
     "ipRangeFormat": "支持格式：IPv4单地址或CIDR（/0至/32）；IPv6单地址或CIDR（/0至/128）",
     "regionCodeLabel": "地区代码",
-    "selectRegion": "请选择地区",
+    "selectRegion": "���选择地区",
     "regionNameLabel": "归属地",
     "regionNamePlaceholder": "如「Google DNS」或「阿里云香港」",
     "autoFillHint": "选择地区后自动填充，可手动修改，最多50字符",
@@ -3814,7 +3814,7 @@
     "exampleRecipientOnly": "拦截所有发往特定用户的邮件",
     "exampleRecipientOnlyDesc": "拒绝任何发信人发给 user@example.com 的邮件",
     "simulationTest": "模拟测试",
-    "simSenderPlaceholder": "输入测试发信人，如 spam@bad.com",
+    "simSenderPlaceholder": "输入测试��信人，如 spam@bad.com",
     "simRecipientPlaceholder": "输入测试收信人，如 user@example.com",
     "simRun": "运行模拟",
     "simMatch": "匹配成功 - 该规则将对测试数据生效",
@@ -4628,7 +4628,7 @@
       "urlDetection": "URL检测与防护",
       "expandShortLink": "短链接自动展开",
       "keywordFilter": "内容关键词过滤",
-      "scanRange": "扫描范围：",
+      "scanRange": "���描范围：",
       "urlPath": "URL路径",
       "textContent": "纯文本内容",
       "intentEngine": "意图引擎",
@@ -4791,7 +4791,7 @@
       "maliciousLabel": "发现恶意URL",
       "maliciousTip": "当沙箱分析判定URL为恶意时执行的动作",
       "actionIsolate": "隔离（邮件存入隔离区）",
-      "actionIsolateTip": "邮件存入隔离区，管理员可审核后释放或删除",
+      "actionIsolateTip": "邮件存入隔���区，管理员可审核后释放或删除",
       "actionBlock": "阻断（拒绝接收该邮件）",
       "actionBlockTip": "拒绝接收该邮件，发件人收到退信通知",
       "actionMark": "标记（投递但添加风险标签）",
@@ -4827,7 +4827,7 @@
       "publicBaseUrlPlaceholder": "https://gw.your-tenant.com:8082",
       "publicBaseUrlWarning": "⚠️ 一旦保存请勿修改。修改后历史邮件中已重写的链接将失效或指向错误地址。",
       "publicBaseUrlChangeConfirmTitle": "确认修改点击主机名?",
-      "publicBaseUrlChangeConfirmBody": "此操作会让所有历史邮件中已重写的链接 (指向旧主机名) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
+      "publicBaseUrlChangeConfirmBody": "此操作会让所有历史邮件中已重写的链�� (指向旧主机名) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
       "publicBaseUrlChangeConfirmCta": "我已了解风险并继续",
       "policy": {
         "title": "点击时安全策略（固定）",
@@ -4928,7 +4928,7 @@
     "panel": {
       "high": "高危意图",
       "medium": "中危意图",
-      "low": "低危意图",
+      "low": "低危意��",
       "highHint": "建议阻断或隔离",
       "mediumHint": "建议审核",
       "lowHint": "建议标记后投递",
@@ -5148,7 +5148,7 @@
     "headerNamePlaceholder": "如：X-External-Source",
     "disclaimerConfig": "声明配置",
     "disclaimerContent": "声明内容",
-    "disclaimerContentPlaceholder": "输入免责声明，支持 HTML 格式与变量",
+    "disclaimerContentPlaceholder": "输入免责声��，支持 HTML 格式与变量",
     "disclaimerContentTip": "支持 HTML 和变量，按 UTF-8 计算最多 10240 bytes",
     "disclaimerPosition": "声明位置",
     "disclaimerFormat": "声明格式",
@@ -5511,7 +5511,7 @@
       "similarLimit": "最多支持 10 封样本",
       "similarFound": "找到 {n} 封相似邮件",
       "exportNotImplemented": "导出功能即将推出",
-      "partialResult": "{succeeded} 封处置成功，{failed} 封失败，{notApplicable} 封不适用",
+      "partialResult": "{succeeded} 封处置成功，{failed} ��失败，{notApplicable} 封不适用",
       "allSucceeded": "{n} 封处置成功",
       "failed": "批量处置失败，请稍后重试",
       "recall": "召回",
@@ -7122,7 +7122,7 @@
       "threat_type": "威胁类型",
       "action": "处置动作",
       "delivery_result": "投递结果",
-      "email_type": "邮件类型"
+      "email_type": "威胁态势趋势"
     },
     "threatTypes": {
       "normal": "正常邮件",
@@ -7663,7 +7663,7 @@
       "lockObject": "对象",
       "waitMs": "等待(ms)",
       "viewLog": "查看日志",
-      "cacheHitRatio": "缓存命中率",
+      "cacheHitRatio": "缓存���中率",
       "activeConns": "活跃连接数",
       "dbSize": "数据库大小",
       "dmlRate": "DML 速率"
@@ -8804,7 +8804,7 @@
       "delete": "删除",
       "empty": "暂无策略，请新增。",
       "modeBadge": {
-        "realtime": "实时",
+        "realtime": "实���",
         "realtimeUnsupported": "实时（未支持）",
         "deep": "深度"
       },
@@ -9365,7 +9365,7 @@
       "recipients": "收件人邮箱（逗号分隔）",
       "recoveryNotify": "恢复通知",
       "err": {
-        "nameRequired": "规则名称不能为空",
+        "nameRequired": "规则��称不能为空",
         "reservedPrefix": "名称不能以 __deleted__ 开头",
         "thresholdRequired": "阈值为必填",
         "thresholdPositive": "阈值必须为正数",
@@ -9548,7 +9548,7 @@
     "expiredTitle": "链接已过期或无效",
     "expiredDesc": "请联系管理员获取新的释放链接。",
     "errorTitle": "操作失败",
-    "errorDesc": "请稍后重试或联系管理员。",
+    "errorDesc": "���稍后重试或联系管理员。",
     "alreadyReleased": "该邮件已被释放，或已超出保留期被清理"
   },
   "portalPreview": {
@@ -9560,7 +9560,7 @@
     "expiredTitle": "链接已过期或无效",
     "expiredDesc": "请联系管理员获取新的预览链接。",
     "purgedTitle": "邮件已超出保留期",
-    "purgedDesc": "该邮件已超出隔离区保留期限并被清理，无法再预览。",
+    "purgedDesc": "该邮件已超出隔离区��留期限并被清理，无法再预览。",
     "errorTitle": "加载失败",
     "errorDesc": "请稍后重试或联系管理员。",
     "emptyBody": "该邮件没有可显示的正文内容。"
