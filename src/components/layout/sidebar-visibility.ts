@@ -4,13 +4,10 @@ import type { Permission } from '@/contexts/auth-context';
 const AGENT_CENTER_FEATURE_IDS = ['phishing-detection', 'spoofing-detection', 'threat-retro'];
 
 // 多租户形态（云网关 / AI版·多租户 / 传统版·多租户，均 multiTenant=true）下，
-// 「租户管理员视角」的监控中心仅保留「监控总览」「邮件流」，隐藏
-// 「基础设施」「检测引擎状态」「告警中心」三项（按 href 关联，与 canSeeRoute 一致）。
-const TENANT_HIDDEN_MONITORING_HREFS = new Set<string>([
-  '/monitoring/infrastructure', // 基础设施
-  '/monitoring/security',       // 检测引擎状态
-  '/monitoring/alerts',         // 告警中心
-]);
+// 「租户管理员视角」对整个监控中心模块不可见（平台管理员可见）。监控中心
+// 所有子路由均以 `/monitoring/` 为前缀，按此前缀关联；父分组自身无 href，
+// 其全部子项被裁剪后由 sidebar-nav 的「空子项隐藏」逻辑自动折叠。
+const MONITORING_HREF_PREFIX = '/monitoring/';
 
 /** Pure filter: returns the registry feature ids that are visible for the given form/viewer/grants. */
 export function visibleNavIds(registry: FeatureDef[], caps: Capabilities, viewer: Viewer, grants: string[]): string[] {
@@ -102,12 +99,12 @@ export function isNavItemAllowed(item: GatedNavItem, ctx: NavGateContext): boole
   if (item.requiresAdvancedRules && !(ctx.isSystemAdmin && ctx.showAdvancedRules)) return false;
   if (ctx.formVisible && !isItemVisibleByForm(item, ctx.registry, ctx.formVisible)) return false;
   if (!isItemVisibleByRole(item, ctx.canSeeRoute)) return false;
-  // 多租户形态 + 租户视角：监控中心仅保留「监控总览」「邮件流」。
+  // 多租户形态 + 租户视角：整个监控中心模块不可见（平台管理员可见）。
   if (
     ctx.capabilities?.multiTenant &&
     ctx.viewer === 'tenant' &&
     item.href &&
-    TENANT_HIDDEN_MONITORING_HREFS.has(item.href)
+    item.href.startsWith(MONITORING_HREF_PREFIX)
   ) {
     return false;
   }
