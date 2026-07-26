@@ -21,12 +21,24 @@ interface TimeDistributionCardProps {
 }
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const THREAT_FILTERS = ['all', 'phishing', 'spam', 'virus'];
+const THREAT_FILTERS = [
+  'all',
+  'normal', 'subscription', 'advertising', 'spam',
+  'harmful', 'suspicious', 'sensitive', 'spoofing',
+  'phishing', 'virus', 'account_compromised',
+];
 const DAILY_STACK = [
-  { key: 'phishing', color: '#EF4444' },
-  { key: 'spam', color: '#3B82F6' },
-  { key: 'virus', color: '#7C3AED' },
-  { key: 'malicious', color: '#DC2626' },
+  { key: 'normal',              color: '#9CA3AF' },
+  { key: 'subscription',        color: '#06B6D4' },
+  { key: 'advertising',         color: '#8B5CF6' },
+  { key: 'spam',                color: '#3B82F6' },
+  { key: 'harmful',             color: '#F97316' },
+  { key: 'suspicious',          color: '#EAB308' },
+  { key: 'sensitive',           color: '#EC4899' },
+  { key: 'spoofing',            color: '#F59E0B' },
+  { key: 'phishing',            color: '#EF4444' },
+  { key: 'virus',               color: '#7C3AED' },
+  { key: 'account_compromised', color: '#B91C1C' },
 ] as const;
 
 export function TimeDistributionCard({ startDate, endDate, direction, scopeTenantId }: TimeDistributionCardProps) {
@@ -192,7 +204,7 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
         splitLine,
       },
       series: DAILY_STACK.map((segment) => ({
-        name: tRoot(`threatTypes.${segment.key}`),
+        name: tRoot(`emailTypes.${segment.key}`),
         type: 'bar',
         stack: 'threats',
         barMaxWidth: 18,
@@ -223,7 +235,7 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
             <SelectContent>
               {THREAT_FILTERS.map((filter) => (
                 <SelectItem key={filter} value={filter}>
-                  {filter === 'all' ? tRoot('filter.direction.all') : tRoot(`threatTypes.${filter}`)}
+                  {filter === 'all' ? tRoot('filter.direction.all') : tRoot(`emailTypes.${filter}`)}
                 </SelectItem>
               ))}
             </SelectContent>

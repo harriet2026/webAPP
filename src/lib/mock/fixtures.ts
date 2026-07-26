@@ -841,7 +841,12 @@ const GEO_COUNTRIES = [
 ] as const;
 
 export function mockSecurityGeo(threatFilter = "all"): GeoDistributionResponse {
-  const factor = threatFilter === "all" ? 1 : threatFilter === "spam" ? 0.52 : threatFilter === "phishing" ? 0.31 : 0.17;
+  const EMAIL_TYPE_FACTORS: Record<string, number> = {
+    normal: 0.65, subscription: 0.12, advertising: 0.10, spam: 0.52,
+    harmful: 0.18, suspicious: 0.22, sensitive: 0.08, spoofing: 0.14,
+    phishing: 0.31, virus: 0.17, account_compromised: 0.05,
+  };
+  const factor = threatFilter === "all" ? 1 : (EMAIL_TYPE_FACTORS[threatFilter] ?? 0.15);
   return {
     countries: GEO_COUNTRIES.map(([country, count, block_rate]) => ({ country, count: Math.round(count * factor), block_rate })),
     summary_top3: GEO_COUNTRIES.slice(0, 3).map(([country]) => country),
@@ -849,11 +854,29 @@ export function mockSecurityGeo(threatFilter = "all"): GeoDistributionResponse {
 }
 
 export function mockSecurityTime(mode: "daily" | "weekly" = "daily", threatFilter = "all"): TimeDistributionResponse {
-  const factor = threatFilter === "all" ? 1 : threatFilter === "spam" ? 0.5 : threatFilter === "phishing" ? 0.3 : 0.16;
+  const EMAIL_TYPE_FACTORS: Record<string, number> = {
+    normal: 0.65, subscription: 0.12, advertising: 0.10, spam: 0.52,
+    harmful: 0.18, suspicious: 0.22, sensitive: 0.08, spoofing: 0.14,
+    phishing: 0.31, virus: 0.17, account_compromised: 0.05,
+  };
+  const factor = threatFilter === "all" ? 1 : (EMAIL_TYPE_FACTORS[threatFilter] ?? 0.15);
   const hourly = Array.from({ length: 24 }, (_, hour) => {
     const wave = 80 + Math.round(130 * (1 + Math.sin((hour - 7) / 3)) / 2) + (hour === 13 ? 75 : 0);
     const total = Math.round(wave * factor);
-    return { hour, total, phishing: Math.round(total * 0.25), spam: Math.round(total * 0.5), virus: Math.round(total * 0.15), malicious: Math.round(total * 0.1) };
+    return {
+      hour, total,
+      normal:              Math.round(total * 0.20),
+      subscription:        Math.round(total * 0.05),
+      advertising:         Math.round(total * 0.04),
+      spam:                Math.round(total * 0.22),
+      harmful:             Math.round(total * 0.08),
+      suspicious:          Math.round(total * 0.10),
+      sensitive:           Math.round(total * 0.04),
+      spoofing:            Math.round(total * 0.06),
+      phishing:            Math.round(total * 0.12),
+      virus:               Math.round(total * 0.07),
+      account_compromised: Math.round(total * 0.02),
+    };
   });
   const peak_hours = [...hourly].sort((a, b) => b.total - a.total).slice(0, 4).map(({ hour, total }) => ({ hour, count: total }));
   return {
@@ -1980,7 +2003,7 @@ function makeRule(input: {
 }
 
 // 与 demo `generateMockRules` 对齐：5 条手工 + 15 条自动生成，共 20 条
-// （demo 总数 55，但只展示 20 条/页；前 5 条手工的与 demo 完全一致）
+// （demo 总数 55，但只展示 20 条/页；前 5 条���工的与 demo 完全一致）
 function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
   const base = [
     makeRule({
@@ -2501,7 +2524,7 @@ export function resetIPFrequencyMock(): void {
       action: "reject",
       suspended_at: "2024-01-15T17:00:00Z",
       expires_at: "2024-01-15T17:30:00Z",
-      reason: "每日连接数超过5000",
+      reason: "每日连接数超��5000",
     },
     {
       ip: "203.0.113.15",
@@ -3484,7 +3507,7 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
 // 5 条演示规则照抄群组策略页 demo 的 mockGroupPolicies（含「IP群组1」双规则短路场景，
 // 该群组名刻意不在群组列表里，与 demo 一致）。metadata 遵循 GroupPolicyMetadata 契约
 // （feature/target_groups/stage_policies），stage_policies 附 summary 供表格徽标展示。
-// 可变 state：状态开关（PUT {is_active}）与删除在 mock 会话内生效。
+// 可变 state：状态开关（PUT {is_active}）与删除在 mock 会话��生效。
 // ════════════════════════════════════════════════════════════════════════════════
 
 interface GpFixtureSpec {
