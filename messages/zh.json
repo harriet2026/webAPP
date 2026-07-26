@@ -1015,7 +1015,7 @@
     "priority": "优先级",
     "newPolicy": "新建群组策略",
     "editPolicy": "编辑群组策略",
-    "deleteConfirm": "确定删除该群组策略���？",
+    "deleteConfirm": "确定删除该群组策略�����？",
     "deleteConfirmDesc": "删除后无法恢复，规则名：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效执行路径预览",
@@ -1336,7 +1336,7 @@
     "statusManualHold": "人工保留",
     "reason": "原因",
     "eyebrow": "旁路队列",
-    "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已存储内容，并��需要时重新注入或删除项目。"
+    "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已存储内容��并��需要时重新注入或删除项目。"
   },
   "logs": {
     "emailLogs": "邮件日志",
@@ -2180,7 +2180,7 @@
     "filter": {
       "keyword": "关键词",
       "module": "操作模块",
-      "opType": "操作类型",
+      "opType": "操作���型",
       "result": "操作结果",
       "tenant": "所属租户",
       "reset": "重置"
@@ -2901,7 +2901,7 @@
     "phase3Content": "内容层",
     "phase4AI": "智能分析层",
     "phase4Comprehensive": "综合策略",
-    "phase5Comprehensive": "综合策略",
+    "phase5Comprehensive": "���合策略",
     "ipFrequency": "IP频率限制",
     "ipFrequencyDesc": "限制每个IP的连接频率和认证失败次数",
     "ipFilter": "IP黑白名单",
@@ -3352,7 +3352,7 @@
     "previewPermanent": "永久有效",
     "priorityLabel": "优先级：",
     "effectBlock": "SMTP 连接被拒绝，发件方收到退信",
-    "effectQuarantine": "邮件被移入隔离区，收件人暂不可见",
+    "effectQuarantine": "邮件被移入隔离区，收件人���不可见",
     "effectQuarantineExtra": "管理员需前往「邮件隔离」模块手动处置",
     "effectDrop": "邮件静默删除，无退信，发件方无感知",
     "effectDropWarning": "注意：丢弃后无法找回，请谨慎使用",
@@ -4513,7 +4513,7 @@
       "antivirus": "反病毒引擎",
       "image": "图片识别",
       "encrypted": "加密附件",
-      "activeContent": "主动内容检测"
+      "activeContent": "主动内容检���"
     },
     "direction": {
       "receive": "接收",
@@ -4827,7 +4827,7 @@
       "publicBaseUrlPlaceholder": "https://gw.your-tenant.com:8082",
       "publicBaseUrlWarning": "⚠️ 一旦保存请勿修改。修改后历史邮件中已重写的链接将失效或指向错误地址。",
       "publicBaseUrlChangeConfirmTitle": "确认修改点击主机名?",
-      "publicBaseUrlChangeConfirmBody": "此操作会让所有历史邮件中已重写的链�� (指向旧主机名) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
+      "publicBaseUrlChangeConfirmBody": "此操作会让所有��史邮件中已重写的链�� (指向旧主机名) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
       "publicBaseUrlChangeConfirmCta": "我已了解风险并继续",
       "policy": {
         "title": "点击时安全策略（固定）",
@@ -6164,7 +6164,7 @@
     },
     "observe": {
       "title": "观察模式",
-      "desc": "启用后规则匹配但不执行动作，仅记录日志"
+      "desc": "启用后规则匹配但不���行动作，仅记录日志"
     },
     "hitStats": {
       "title": "7天命中",
@@ -6356,7 +6356,7 @@
         "displayNameSpoof": "显示名仿冒",
         "mailFromEmpty": "Mail From 为空",
         "mailFromFromConsistency": "信封-头 From 一致性",
-        "virusScanResult": "病毒扫描结果",
+        "virusScanResult": "���毒扫描结果",
         "comprehensiveEngineResult": "综合引擎结果",
         "senderIpCount15Min": "发件 IP 数 (15分钟)",
         "senderRecipientCount15Min": "发件收件人数 (15分钟)",
@@ -6538,7 +6538,7 @@
       "desc_rblResult": {
         "source": "RBL实时黑名单服务",
         "usage": "根据RBL查询结果过滤邮件",
-        "note": "支持多个RBL源联合查询"
+        "note": "支持多个RBL源联合查��"
       },
       "desc_urlSandboxResult": {
         "source": "URL沙箱分析引擎",
@@ -6738,7 +6738,7 @@
       "scoreLabel": "有效性评分",
       "scoreUnit": "分",
       "scoreTooltip": {
-        "activity": "活跃度 {value}/40（命中次数越多越高，命中≥30次满分）",
+        "activity": "活跃度 {value}/40（命中次数越��越高，命中≥30次满分）",
         "accuracy": "准确度 {value}/40（误报率越低越高，无反馈信号时按满分计）",
         "health": "健康度 {value}/20（规则已启用且条件配置完整）"
       },
@@ -6889,7 +6889,7 @@
     "timePoints": "通知时间点",
     "addTimePoint": "添加时间点",
     "tzComputedIn": "通知时间按 {tz} 计算",
-    "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间：",
+    "tzMismatchHint": "检测��你的浏览器时区（{browserTz}）与当前通知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间：",
     "tzUseBrowser": "使用浏览器时区（{tz}）",
     "tzKeepCurrent": "保持当前时区（{tz}）",
     "range": "通知范围",
@@ -7076,6 +7076,7 @@
     "trendPeakHint": "单击图例可切换系列，双击可单独查看某一类",
     "subtitle": "多维度分析邮件威胁态势，掌握安全拦截全局视图",
     "title": "邮件安全总览",
+    "trendCardTitle": "安全态势分析",
     "noData": "暂无数据",
     "kpi": {
       "totalFiltered": "过滤邮件总量",
@@ -7691,7 +7692,7 @@
     "description": "邮件系统队列、投递质量与连接会话的准实时监控",
     "tabs": {
       "queue": "队列监控",
-      "delivery": "投递质量",
+      "delivery": "��递质量",
       "connection": "连接会话"
     },
     "selectNode": "选择节点",
@@ -8901,7 +8902,7 @@
       "numberInvalid": "请输入服务端允许范围内的正整数",
       "recallActionSoftDelete": "召回执行：软删除（唯一）",
       "unreadPolicy": "未读邮件策略",
-      "readPolicy": "已读邮件策略",
+      "readPolicy": "已��邮件策略",
       "policy": {
         "recall": "召回（软删除）",
         "notify": "仅告警"
@@ -8981,7 +8982,7 @@
     "batchConfirmDesc": "标记变更将实时推送至策略引擎并立即生效，无需重新同步。",
     "batchConfirmTag": "确定将选中的 {count} 条记录标记为{tag}吗？",
     "batchConfirmUntag": "取消选中的 {count} 条记录的标记？",
-    "batchExec": "批量标记为高管",
+    "batchExec": "批量��记为高管",
     "batchKey": "批量标记为关键岗位",
     "batchUntag": "取消标记",
     "bindDnPlaceholder": "如 cn=admin,dc=corp,dc=com",
@@ -9546,7 +9547,7 @@
     "releasedTitle": "释放成功",
     "releasedDesc": "邮件已成功释放到您的收件箱。",
     "expiredTitle": "链接已过期或无效",
-    "expiredDesc": "请联系管理员获取新的释放链接。",
+    "expiredDesc": "请联系管理员获取新的��放链接。",
     "errorTitle": "操作失败",
     "errorDesc": "���稍后重试或联系管理员。",
     "alreadyReleased": "该邮件已被释放，或已超出保留期被清理"
@@ -9640,7 +9641,7 @@
     "platformOnly": "由平台统一设置，租户不可修改",
     "tenantBanner": "平台已下发登录安全基线。本租户只能在基线之上加严，不可低于基线；置灰选项即为低于基线、不可选择的取值。",
     "belowBaseline": "低于平台基线，当前按基线生效",
-    "noRules": "暂无 IP 规则",
+    "noRules": "��无 IP 规则",
     "addRule": "新增 IP",
     "delete": "删除",
     "save": "保存",
