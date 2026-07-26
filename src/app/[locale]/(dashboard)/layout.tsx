@@ -12,7 +12,9 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const switcherEnabled = SWITCHER_TRUTHY.has(process.env.OSGATEWAY_PRODUCT_FORM_SWITCHER ?? '');
+  // 演示环境：强制开启产品形态切换器（原本由 OSGATEWAY_PRODUCT_FORM_SWITCHER 环境变量控制）。
+  const switcherEnabled =
+    SWITCHER_TRUTHY.has(process.env.OSGATEWAY_PRODUCT_FORM_SWITCHER ?? '') || true;
 
   return (
     <ProtectedRoute>
