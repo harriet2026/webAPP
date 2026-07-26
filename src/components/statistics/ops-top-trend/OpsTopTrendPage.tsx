@@ -4,7 +4,10 @@ import { useCallback, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
 import { TrendingUp } from 'lucide-react';
-import { useAuth } from '@/contexts/auth-context';
+import { useTenant } from '@/hooks/use-tenant';
+
+import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
+import { TenantScopeSelector } from '@/components/statistics/security-overview/TenantScopeSelector';
 import { FilterBar } from './FilterBar';
 import { DimensionTabs } from './DimensionTabs';
 import { TopTable } from './TopTable';
@@ -25,7 +28,9 @@ export { PageSkeleton };
 
 export default function OpsTopTrendPage() {
   const t = useTranslations('opsTopTrend');
-  const { isSystemAdmin, selectedTenantId } = useAuth();
+  const { isSystemAdmin, selectedTenantId, setSelectedTenant } = useTenant();
+  const [scopeTenantId, setScopeTenantId] = useState<number | null>(null);
+  const { scopeActive } = useSecurityScope(scopeTenantId);
   const isPlatformScope = computeIsPlatformScope(isSystemAdmin, selectedTenantId);
 
   const [requestedDimension, setRequestedDimension] = useState<DimensionType>('connection');
@@ -100,8 +105,24 @@ export default function OpsTopTrendPage() {
   const params = { dimension, direction, timeRange, top: topCount };
   const DimensionIcon = DIMENSION_CONFIG[dimension].icon;
 
+  const tenantSlot = scopeActive ? (
+    <TenantScopeSelector
+      value={scopeTenantId}
+      onChange={(id) => {
+        setScopeTenantId(id);
+        setSelectedTenant(id);
+      }}
+    />
+  ) : undefined;
+
   return (
-    <>
+    <PageShell>
+      <PageHeader
+        icon={TrendingUp}
+        title={t('title')}
+        description={t('subtitle')}
+      />
+
       <div className="block md:hidden">
         <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-6 text-center dark:border-yellow-900 dark:bg-yellow-900/20">
           <p className="text-sm text-yellow-700 dark:text-yellow-300">
@@ -110,32 +131,17 @@ export default function OpsTopTrendPage() {
         </div>
       </div>
 
-      <div
-        className="-m-8 hidden min-h-[calc(100vh-3.5rem)] p-8 md:block"
-        style={{ backgroundColor: 'color-mix(in oklab, var(--card) 50%, var(--muted))' }}
-      >
-        <PageShell className="relative -top-px ml-4 space-y-0">
-          <PageHeader
-            title={(
-              <span className="flex items-center gap-2 font-medium tracking-normal">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                <span>{t('title')}</span>
-              </span>
-            )}
-            description={<span className="text-sm leading-5">{t('subtitle')}</span>}
-            className="mx-0 mt-0 mb-0 px-6 py-4"
-          />
-
-          <div className="space-y-6 p-6">
-            <FilterBar
-              dimension={dimension}
-              direction={direction}
-              onDirectionChange={setDirection}
-              timeRange={timeRange}
-              onTimeRangeChange={setTimeRange}
-              topCount={topCount}
-              onTopCountChange={setTopCount}
-            />
+      <div className="hidden space-y-6 md:block">
+        <FilterBar
+          dimension={dimension}
+          direction={direction}
+          onDirectionChange={setDirection}
+          timeRange={timeRange}
+          onTimeRangeChange={setTimeRange}
+          topCount={topCount}
+          onTopCountChange={setTopCount}
+          leftSlot={tenantSlot}
+        />
 
             <DimensionTabs
               dimension={dimension}
@@ -172,9 +178,7 @@ export default function OpsTopTrendPage() {
             )}
 
             <BottomActions params={params} />
-          </div>
-        </PageShell>
       </div>
-    </>
+    </PageShell>
   );
 }
