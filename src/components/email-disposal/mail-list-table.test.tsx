@@ -150,7 +150,7 @@ describe("MailListTable toolbar (GT-11580)", () => {
 
     expect(row).not.toHaveAttribute("data-hovered");
     expect(operationsCell).toHaveClass(
-      "group-data-[hovered=true]:bg-muted/45",
+      "group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))]",
       "duration-[180ms]",
     );
 
@@ -172,11 +172,11 @@ describe("MailListTable toolbar (GT-11580)", () => {
     expect(row).toHaveAttribute("data-state", "selected");
     expect(row).toHaveClass(
       "bg-primary/5",
-      "data-[hovered=true]:bg-primary/10",
+      "data-[state=selected]:data-[hovered=true]:bg-primary/10",
     );
     expect(operationsCell).toHaveClass(
-      "bg-primary/5",
-      "group-data-[hovered=true]:bg-primary/10",
+      "bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))]",
+      "group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]",
     );
 
     fireEvent.pointerEnter(row, { pointerType: "mouse" });

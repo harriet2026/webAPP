@@ -74,6 +74,8 @@ vi.mock('@/components/shared/page-shell', () => ({
   PageShell: ({ children }: { children: React.ReactNode }) => createElement('div', null, children),
   PageHeader: () => null,
   PageSurface: ({ children }: { children: React.ReactNode }) => createElement('div', null, children),
+  // 页面已改用 FramedPage 包裹（master 侧改动），mock 缺该导出会让本用例恒红。
+  FramedPage: ({ children }: { children: React.ReactNode }) => createElement('div', null, children),
 }));
 vi.mock('@/components/shared/page-filters', () => ({
   PageFilters: ({ children }: { children: React.ReactNode }) => createElement('div', null, children),

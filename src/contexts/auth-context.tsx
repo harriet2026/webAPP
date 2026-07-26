@@ -108,6 +108,17 @@ const TENANT_ADMIN_FALLBACK_PERMISSIONS: ReadonlySet<Permission> = new Set([
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const DEMO_SUPER_ADMIN: User = {
+  id: 0,
+  username: 'demo-admin',
+  role: 'system_admin',
+  tenant_id: null,
+  role_id: null,
+  is_super_admin: true,
+  created_at: '',
+  updated_at: '',
+};
+
 /**
  * Resolves the current user's OWN role matrix (Task 2's `useMyRole`, which
  * itself reads `useAuth()`) and exposes the derived capability functions.
@@ -190,7 +201,13 @@ function usePermissionBag(user: User | null): Pick<AuthContextType, 'isTrueSuper
   return { isTrueSuperAdmin, canSeeRoute, can, hasPermission };
 }
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({
+  children,
+  demoAuthBypassEnabled = false,
+}: {
+  children: React.ReactNode;
+  demoAuthBypassEnabled?: boolean;
+}) {
   const [state, setState] = useState<AuthState>({ user: null, token: null, expiresAt: null, selectedTenantId: null });
   const [isLoading, setIsLoading] = useState(true);
   const [showAdvancedRules, setShowAdvancedRules] = useState(false);
@@ -217,7 +234,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const cachedTenantRef = useRef<number | null>(null);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- Authentication and feature state are hydrated from browser-only localStorage after the client mounts. */
     const userStr = localStorage.getItem('osgateway_user');
+    let restoredStoredUser = false;
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
@@ -225,9 +244,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const selectedTenantId = storedTenantId ? parseInt(storedTenantId, 10) : null;
         cachedTenantRef.current = selectedTenantId;
         setState({ user, token: null, expiresAt: null, selectedTenantId });
+        restoredStoredUser = true;
       } catch {
         localStorage.removeItem('osgateway_user');
       }
+    }
+    if (!restoredStoredUser && demoAuthBypassEnabled) {
+      cachedTenantRef.current = null;
+      setState({
+        user: DEMO_SUPER_ADMIN,
+        token: null,
+        expiresAt: null,
+        selectedTenantId: null,
+      });
     }
     const storedFeatures = localStorage.getItem('osgateway_features');
     if (storedFeatures) {
@@ -241,7 +270,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setShowAdvancedRules(true);
     }
     setIsLoading(false);
-  }, []);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [demoAuthBypassEnabled]);
 
   const login = useCallback(async (credentials: LoginRequest, options?: { showAdvancedRules?: boolean }) => {
     const response = await apiLogin(credentials);

@@ -56,9 +56,6 @@ export const LEFT_PANEL_COLUMNS: Record<DimensionType, LeftColDef[]> = {
     { key: 'lastConn', labelKey: 'leftCol.lastConn', tipKey: 'leftColTip.lastConn', width: '110px', align: 'left', type: 'text' },
     { key: 'change', labelKey: 'leftCol.change', tipKey: 'leftColTip.changeConn', width: '80px', align: 'right', type: 'change' },
     { key: 'trend', labelKey: 'leftCol.trend', tipKey: 'leftColTip.trend', width: '60px', align: 'center', type: 'sparkline' },
-    // The derived session-caliber metric remains available without shifting the
-    // prototype's primary operational columns in the initial viewport.
-    { key: 'avgMessagesPerConnection', labelKey: 'leftCol.avgMessagesPerConnection', tipKey: 'leftColTip.avgMessagesPerConnection', width: '120px', align: 'right', type: 'number' },
   ],
   auth: [
     { key: 'sourceIp', labelKey: 'leftCol.sourceIp', tipKey: 'leftColTip.sourceIpAuth', width: '130px', align: 'left', type: 'text' },

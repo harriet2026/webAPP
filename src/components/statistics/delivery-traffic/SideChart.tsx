@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,6 +22,29 @@ export function SideChart({ distribution, direction, isLoading }: SideChartProps
   const t = useTranslations('deliveryTraffic');
   const router = useRouter();
   const isDark = useDarkMode();
+  const chartRef = useRef<ReactECharts>(null);
+  const chartContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const content = chartContentRef.current;
+    if (!content || typeof ResizeObserver === 'undefined') return;
+    let frame = 0;
+    const resize = (width = content.clientWidth) => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        chartRef.current?.getEchartsInstance().resize({ width: Math.floor(width) });
+      });
+    };
+    const observer = new ResizeObserver(([entry]) => resize(entry.contentRect.width));
+    observer.observe(content);
+    const resizeFromWindow = () => resize();
+    window.addEventListener('resize', resizeFromWindow);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('resize', resizeFromWindow);
+    };
+  }, []);
 
   const option = useMemo(() => {
     // Treat an all-zero distribution as empty: the backend always emits three
@@ -99,7 +122,7 @@ export function SideChart({ distribution, direction, isLoading }: SideChartProps
   const titleKey = direction === 'all' ? 'chart.trafficDistribution'
     : direction === 'internal' ? 'chart.threatDistribution'
     : direction === 'send' ? 'chart.topBounceDomains'
-    : 'chart.bounceReasons';
+    : 'chart.receiveBounceReasons';
 
   const onEvents = direction === 'send' ? {
     click: (params: { name?: string }) => {
@@ -108,11 +131,11 @@ export function SideChart({ distribution, direction, isLoading }: SideChartProps
   } : undefined;
 
   return (
-    <Card className="h-full rounded-xl bg-card shadow-sm backdrop-blur-none">
+    <Card className="h-full min-w-0 rounded-xl bg-card shadow-sm backdrop-blur-none">
       <CardHeader>
         <CardTitle className="text-base">{t(titleKey)}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent ref={chartContentRef} className="min-w-0 overflow-hidden">
         {isLoading ? (
           <Skeleton className="h-64 w-full rounded-lg" />
         ) : !option ? (
@@ -120,7 +143,9 @@ export function SideChart({ distribution, direction, isLoading }: SideChartProps
             {t('noData') as string}
           </div>
         ) : (
-          <ReactECharts option={option} style={{ height: 256 }} onEvents={onEvents} />
+          <div className="min-w-0 w-full max-w-full overflow-hidden [&>div]:!w-full [&_canvas]:!w-full [&_canvas]:!max-w-full">
+            <ReactECharts ref={chartRef} className="min-w-0 w-full max-w-full" option={option} style={{ height: 256, width: '100%' }} onEvents={onEvents} />
+          </div>
         )}
       </CardContent>
     </Card>

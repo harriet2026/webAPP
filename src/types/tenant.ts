@@ -111,6 +111,9 @@ export interface CreateTenantRequest {
     mail_system_type?: string;
     mail_system_config?: Record<string, unknown> | null;
   }>;
+  /** GT-12290：创建租户的同时建出该租户第一个管理员（主管理员）。两者成对提供。 */
+  admin_account?: string;
+  admin_password?: string;
 }
 
 export interface UpdateTenantRequest {

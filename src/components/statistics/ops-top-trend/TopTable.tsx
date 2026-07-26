@@ -406,7 +406,7 @@ export function TopTable({
 }: TopTableProps) {
   const t = useTranslations('opsTopTrend');
   const cols = LEFT_PANEL_COLUMNS[dimension];
-  const visibleRows = rows.slice(0, 15);
+  const visibleRows = rows;
   const showPartial = total > visibleRows.length;
   const colCount = cols.length + 1;
 

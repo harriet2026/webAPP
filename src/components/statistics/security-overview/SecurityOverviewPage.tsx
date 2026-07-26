@@ -2,8 +2,10 @@
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { Shield } from 'lucide-react';
+import { AlertCircle, RefreshCw, Shield, ShieldX } from 'lucide-react';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FilterBar } from './FilterBar';
 import { KpiCards } from './KpiCards';
 import { TrendChartCard } from './TrendChartCard';
@@ -18,6 +20,7 @@ import { useSecurityScope } from './hooks/useSecurityScope';
 import { useSecurityOverview } from './hooks/useSecurityOverview';
 import { timeRangeToDates, defaultCustomRange, type CustomRange } from './date-range';
 import { getTenant } from '@/lib/api/tenants';
+import { ApiError } from '@/lib/api/client';
 import type { Direction, TimeRange, ViewBy } from '@/lib/api/security-overview';
 
 export function SecurityOverviewPage() {
@@ -79,7 +82,7 @@ export function SecurityOverviewPage() {
     [timeRange, customRange],
   );
 
-  const { data, isLoading } = useSecurityOverview({
+  const { data, error, isError, isFetching, isLoading, refetch } = useSecurityOverview({
     startDate,
     endDate,
     direction,
@@ -122,6 +125,48 @@ export function SecurityOverviewPage() {
         leftSlot={scopeActive ? <TenantScopeSelector value={scopeTenantId} onChange={handleScopeTenantChange} /> : null}
       />
 
+      {isError ? (
+        <Card
+          role="alert"
+          data-testid={error instanceof ApiError && error.status === 403
+            ? 'security-overview-forbidden-state'
+            : 'security-overview-error-state'}
+          className="border-destructive/30 bg-destructive/5"
+        >
+          <CardHeader className="flex flex-row items-start gap-3">
+            <span className="rounded-lg bg-destructive/10 p-2 text-destructive">
+              {error instanceof ApiError && error.status === 403
+                ? <ShieldX className="h-5 w-5" aria-hidden="true" />
+                : <AlertCircle className="h-5 w-5" aria-hidden="true" />}
+            </span>
+            <div className="min-w-0 space-y-1">
+              <CardTitle className="text-base">
+                {t(error instanceof ApiError && error.status === 403
+                  ? 'error.forbiddenTitle'
+                  : 'error.loadFailedTitle')}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {t(error instanceof ApiError && error.status === 403
+                  ? 'error.forbiddenDescription'
+                  : 'error.loadFailedDescription')}
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => { void refetch(); }}
+              disabled={isFetching}
+              data-testid="security-overview-retry"
+            >
+              <RefreshCw className={isFetching ? 'animate-spin' : ''} aria-hidden="true" />
+              {t(isFetching ? 'error.retrying' : 'error.retry')}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
       <KpiCards data={data?.kpi} isLoading={isLoading} />
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -180,6 +225,8 @@ export function SecurityOverviewPage() {
         direction={direction}
         scopeTenantId={scopeTenantId}
       />
+        </>
+      )}
     </PageShell>
   );
 }

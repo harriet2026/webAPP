@@ -97,6 +97,7 @@ function metricColor(key: string): string {
 
 export function DetailTable({ data, direction, isLoading }: DetailTableProps) {
   const t = useTranslations('deliveryTraffic.table');
+  const tPage = useTranslations('deliveryTraffic');
 
   const columns = COLUMNS_BY_DIRECTION[direction] ?? COLUMNS_BY_DIRECTION.all;
 
@@ -112,24 +113,29 @@ export function DetailTable({ data, direction, isLoading }: DetailTableProps) {
               <Skeleton key={i} className="h-10 w-full rounded-lg" />
             ))}
           </div>
-        ) : !data || data.length === 0 ? (
-          <div className="h-[200px] flex items-center justify-center text-muted-foreground">—</div>
         ) : (
-          <Table className="text-sm">
-            <TableHeader>
-              <TableRow>
-                {columns.map((col) => (
-                  <TableHead
-                    key={col.key}
-                    className={`h-auto px-2 py-3 ${col.key !== 'date' ? 'text-right' : 'sticky left-0 z-10 bg-card text-left'} ${col.key === 'change' ? 'sticky right-0 z-10 bg-card' : ''}`}
-                  >
-                    {t(col.labelKey)}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody className="[&_tr:last-child]:border-b">
-              {data.map((row, rowIdx) => (
+          <div className="overflow-x-auto">
+            <Table className="text-sm">
+              <TableHeader>
+                <TableRow>
+                  {columns.map((col) => (
+                    <TableHead
+                      key={col.key}
+                      className={`h-auto px-2 py-3 ${col.key !== 'date' ? 'text-right' : 'sticky left-0 z-10 bg-card text-left'} ${col.key === 'change' ? 'sticky right-0 z-10 bg-card' : ''}`}
+                    >
+                      {t(col.labelKey)}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody className="[&_tr:last-child]:border-b">
+                {!data || data.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-[200px] text-center text-muted-foreground">
+                      {tPage('noData')}
+                    </TableCell>
+                  </TableRow>
+                ) : data.map((row, rowIdx) => (
                 <TableRow key={row.date ?? rowIdx}>
                   {columns.map((col) => {
                     const raw = row[col.key];
@@ -147,9 +153,10 @@ export function DetailTable({ data, direction, isLoading }: DetailTableProps) {
                     );
                   })}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>

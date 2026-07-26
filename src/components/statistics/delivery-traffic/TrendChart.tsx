@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,6 +27,29 @@ const COLORS: Record<string, string> = {
 export function TrendChart({ trend, direction, isLoading }: TrendChartProps) {
   const t = useTranslations('deliveryTraffic');
   const isDark = useDarkMode();
+  const chartRef = useRef<ReactECharts>(null);
+  const chartContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const content = chartContentRef.current;
+    if (!content || typeof ResizeObserver === 'undefined') return;
+    let frame = 0;
+    const resize = (width = content.clientWidth) => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        chartRef.current?.getEchartsInstance().resize({ width: Math.floor(width) });
+      });
+    };
+    const observer = new ResizeObserver(([entry]) => resize(entry.contentRect.width));
+    observer.observe(content);
+    const resizeFromWindow = () => resize();
+    window.addEventListener('resize', resizeFromWindow);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('resize', resizeFromWindow);
+    };
+  }, []);
 
   const option = useMemo(() => {
     if (!trend || !trend.points || trend.points.length === 0) return null;
@@ -79,14 +102,14 @@ export function TrendChart({ trend, direction, isLoading }: TrendChartProps) {
   }, [trend, direction, t, isDark]);
 
   return (
-    <Card className="h-full rounded-xl bg-card shadow-sm backdrop-blur-none">
+    <Card className="h-full min-w-0 rounded-xl bg-card shadow-sm backdrop-blur-none">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Activity className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           {t(direction === 'all' ? 'chart.threeWayComparison' : `chart.${direction}Trend`)}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent ref={chartContentRef} className="min-w-0 overflow-hidden">
         {isLoading ? (
           <Skeleton className="h-[296px] w-full rounded-lg" />
         ) : !option ? (
@@ -94,7 +117,9 @@ export function TrendChart({ trend, direction, isLoading }: TrendChartProps) {
             {t('noData') as string}
           </div>
         ) : (
-          <ReactECharts option={option} style={{ height: 296 }} />
+          <div className="min-w-0 w-full max-w-full overflow-hidden [&>div]:!w-full [&_canvas]:!w-full [&_canvas]:!max-w-full">
+            <ReactECharts ref={chartRef} className="min-w-0 w-full max-w-full" option={option} style={{ height: 296, width: '100%' }} />
+          </div>
         )}
       </CardContent>
     </Card>

@@ -11,10 +11,12 @@ import {
 import { blockRateTier, geoBlockRateTier } from '../constants';
 
 describe('security overview view contract', () => {
-  it('exposes exactly the two user-visible trend perspectives', () => {
+  it('exposes exactly the four html_spec v3 trend perspectives', () => {
     expect(SECURITY_OVERVIEW_VIEW_OPTIONS).toEqual([
       'email_type',
       'action',
+      'threat_level',
+      'delivery_result',
     ]);
   });
 

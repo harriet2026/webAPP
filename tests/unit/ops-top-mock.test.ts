@@ -2,18 +2,32 @@ import { describe, expect, it } from 'vitest';
 import { dispatch, isMockable } from '@/lib/mock/dispatcher';
 import { mockOpsTopFor } from '@/lib/mock/fixtures';
 import { LEFT_PANEL_COLUMNS } from '@/components/statistics/ops-top-trend/columns';
+import zh from '../../messages/zh.json';
 
 describe('ops top trend mock contract', () => {
-  it('keeps the demo row count while exposing the connection average', () => {
+  it('keeps the demo row count without exposing the connection average as a page column', () => {
     const data = mockOpsTopFor('connection', '50', 'all');
     expect(data.total).toBe(50);
     expect(data.rows).toHaveLength(50);
     expect(data.trendLabels).toHaveLength(7);
     expect(data.rows[0].trend).toHaveLength(7);
     expect(data.rows[0].metrics.avgMessagesPerConnection).toEqual(expect.any(Number));
-    expect(LEFT_PANEL_COLUMNS.connection.map((column) => column.key)).toContain(
-      'avgMessagesPerConnection',
-    );
+    expect(LEFT_PANEL_COLUMNS.connection.map((column) => column.key)).toEqual([
+      'sourceIp',
+      'geoLocation',
+      'totalConn',
+      'successCount',
+      'failureCount',
+      'failureRate',
+      'firstConn',
+      'lastConn',
+      'change',
+      'trend',
+    ]);
+  });
+
+  it('uses the product-confirmed Chinese page title exactly', () => {
+    expect(zh.opsTopTrend.title).toBe('运营TOP与趋势');
   });
 
   it('registers every endpoint used by the page', () => {

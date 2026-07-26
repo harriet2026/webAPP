@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useSecurityOverview } from '@/components/statistics/security-overview/hooks/useSecurityOverview';
 import { PRINT_VIEW_BY_OPTIONS } from '@/components/statistics/security-overview/constants';
-import type { Direction, ViewBy } from '@/lib/api/security-overview';
+import { NON_SERIES_KEYS, type Direction, type ViewBy } from '@/lib/api/security-overview';
 
 const VIEW_BY_OPTIONS = PRINT_VIEW_BY_OPTIONS;
 
@@ -47,6 +47,7 @@ function PrintContent() {
     const nsMap: Record<ViewBy, string> = {
       threat_type: 'threatTypes',
       action: 'actions',
+      threat_level: 'threatLevels',
       delivery_result: 'deliveryResults',
       email_type: 'emailTypes',
     };
@@ -107,7 +108,7 @@ function PrintContent() {
               {VIEW_BY_OPTIONS.map((viewBy) => {
                 const rows = data.trend?.[viewBy] ?? [];
                 if (rows.length === 0) return null;
-                const dynamicKeys = Object.keys(rows[0]).filter((k) => k !== 'date');
+                const dynamicKeys = Object.keys(rows[0]).filter((k) => k !== 'date' && !NON_SERIES_KEYS.has(k));
 
                 return (
                   <section key={viewBy} className="mb-8">

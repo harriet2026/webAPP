@@ -7,9 +7,10 @@ import { LINK_TYPE_COLORS, ATTACHMENT_TYPE_COLORS } from './colors';
 interface RowDonutProps {
   data: Record<string, number>;
   type: 'link' | 'attachment';
+  labels?: Record<string, string>;
 }
 
-export function RowDonut({ data, type }: RowDonutProps) {
+export function RowDonut({ data, type, labels = {} }: RowDonutProps) {
   const option = useMemo(() => {
     const entries = Object.entries(data).filter(([, v]) => v > 0);
     if (entries.length === 0) return null;
@@ -25,13 +26,13 @@ export function RowDonut({ data, type }: RowDonutProps) {
         itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 1 },
         label: { show: false },
         data: entries.map(([key, value]) => ({
-          name: key,
+          name: labels[key] ?? key,
           value,
           itemStyle: { color: colors[key] ?? '#8C8C8C' },
         })),
       }],
     };
-  }, [data, type]);
+  }, [data, labels, type]);
 
   if (!option) return null;
 

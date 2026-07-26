@@ -198,3 +198,13 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+/* 隐藏滚动条但保留滚动能力（侧边栏导航等内置滚动区域使用） */
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/auth-context";
 import { ThemeColorProvider } from "@/contexts/theme-color-context";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { isDemoAuthBypassEnabled } from "@/lib/demo-auth-bypass";
 
 export default async function LocaleLayout({
   children,
@@ -22,11 +23,14 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
+  const demoAuthBypassEnabled = isDemoAuthBypassEnabled(
+    process.env.OSGATEWAY_PRODUCT_FORM_SWITCHER,
+  );
 
   return (
     <NextIntlClientProvider messages={messages}>
       <QueryProvider>
-        <AuthProvider>
+        <AuthProvider demoAuthBypassEnabled={demoAuthBypassEnabled}>
           <ThemeColorProvider>
             <TooltipProvider>
               {children}

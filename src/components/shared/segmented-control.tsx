@@ -33,9 +33,10 @@ export function SegmentedControl<T extends string>({
         <button
           key={opt.value}
           type="button"
+          aria-pressed={value === opt.value}
           onClick={() => onChange(opt.value)}
           className={cn(
-            'text-sm font-medium transition-colors first:rounded-l-md last:rounded-r-md border-r border-border last:border-r-0',
+            'relative text-sm font-medium transition-colors first:rounded-l-md last:rounded-r-md border-r border-border last:border-r-0 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card',
             pad,
             value === opt.value
               ? 'bg-primary text-primary-foreground'

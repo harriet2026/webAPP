@@ -4,9 +4,9 @@ import { useEffect, useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfDay, endOfDay } from 'date-fns';
 import { PageShell } from '@/components/shared/page-shell';
-import { AlertCircle, ArrowUpFromLine, Clock3 } from 'lucide-react';
+import { AlertCircle, ArrowUpFromLine, Clock3, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
-import { useTenant } from '@/hooks/use-tenant';
+import { Button } from '@/components/ui/button';
 import { FilterBar } from './FilterBar';
 import { KpiCards } from './KpiCards';
 import { TrendChart } from './TrendChart';
@@ -64,8 +64,7 @@ function timeRangeToDates(timeRange: TimeRange, customStart: string, customEnd: 
 
 export function DeliveryTrafficPage() {
   const t = useTranslations('deliveryTraffic');
-  const { can } = useAuth();
-  const { isSystemAdmin, selectedTenantId, effectiveTenantId, setSelectedTenant } = useTenant();
+  const { user, isSystemAdmin } = useAuth();
 
   const [direction, setDirection] = useState<Direction>('all');
   const [queryDirection, setQueryDirection] = useState<Direction>('all');
@@ -74,6 +73,11 @@ export function DeliveryTrafficPage() {
   const defaultEnd = format(new Date(), 'yyyy-MM-dd');
   const [customStart, setCustomStart] = useState(defaultStart);
   const [customEnd, setCustomEnd] = useState(defaultEnd);
+  // This selector is a report filter, not the global platform/tenant viewer
+  // switch. Keeping it local prevents platform-view cleanup from immediately
+  // resetting the user's choice (GT-12457).
+  const [scopeTenantId, setScopeTenantId] = useState<number | null>(null);
+  const queryTenantId = isSystemAdmin ? scopeTenantId : (user?.tenant_id ?? null);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setQueryDirection(direction), 300);
@@ -95,17 +99,17 @@ export function DeliveryTrafficPage() {
     return '';
   }, [startDate, endDate, t]);
 
-  const { data, isLoading, isFetching, isError } = useDeliveryTraffic({
+  const { data, isLoading, isFetching, isError, refetch } = useDeliveryTraffic({
     startDate,
     endDate,
     direction: queryDirection,
-    tenantId: effectiveTenantId ?? null,
+    tenantId: queryTenantId,
     enabled: !dateError,
   });
   const transitioning = direction !== queryDirection;
   const showLoading = isLoading || isFetching || transitioning;
-  const visibleData = transitioning ? undefined : data;
-  const canEdit = can('delivery-traffic-analysis', 'edit');
+  // A failed refresh must not leave stale statistics looking current.
+  const visibleData = transitioning || isError ? undefined : data;
   const dataLagSeconds = visibleData?.data_lag_seconds ?? 0;
 
   return (
@@ -128,8 +132,8 @@ export function DeliveryTrafficPage() {
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
           showTenant={isSystemAdmin}
-          tenantId={selectedTenantId}
-          onTenantChange={setSelectedTenant}
+          tenantId={scopeTenantId}
+          onTenantChange={setScopeTenantId}
           customStart={customStart}
           customEnd={customEnd}
           onCustomStartChange={setCustomStart}
@@ -144,16 +148,22 @@ export function DeliveryTrafficPage() {
           </div>
         )}
         {isError && !showLoading && (
-          <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
-            <AlertCircle className="h-4 w-4" />
-            {t('loadFailed')}
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
+            <span className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              {t('loadFailed')}
+            </span>
+            <Button variant="outline" size="sm" onClick={() => void refetch()}>
+              <RefreshCw className="h-4 w-4" />
+              {t('retry')}
+            </Button>
           </div>
         )}
 
         <KpiCards data={visibleData?.kpi} direction={direction} isLoading={showLoading} />
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3" data-testid="delivery-main-analysis">
-          <div className="lg:col-span-2">
+        <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-3" data-testid="delivery-main-analysis">
+          <div className="min-w-0 lg:col-span-2">
             <TrendChart
               trend={visibleData?.trend}
               direction={direction}
@@ -196,8 +206,8 @@ export function DeliveryTrafficPage() {
           startDate={startDate}
           endDate={endDate}
           direction={direction}
-          tenantId={effectiveTenantId ?? null}
-          disabled={!canEdit}
+          tenantId={queryTenantId}
+          disabled={Boolean(dateError)}
         />
       </div>
     </PageShell>

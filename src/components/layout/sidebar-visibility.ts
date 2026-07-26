@@ -3,6 +3,30 @@ import type { Permission } from '@/contexts/auth-context';
 
 const AGENT_CENTER_FEATURE_IDS = ['phishing-detection', 'spoofing-detection', 'threat-retro'];
 
+// In every multi-tenant product form, the tenant viewer does not see the
+// monitoring center. Every child route shares this prefix; once all children
+// are filtered, sidebar-nav hides the empty parent group.
+const MONITORING_HREF_PREFIX = '/monitoring/';
+
+// In the multi-tenant tenant view, the renamed "Organization & members"
+// system group retains only account/permission management and organization
+// contacts. Platform view remains unchanged.
+const ORG_MEMBERS_GROUP_HREFS = new Set<string>([
+  '/mail-routing',
+  '/tenants',
+  '/system/proxysvr',
+  '/system/dkim',
+  '/system/platform-security',
+  '/system/password-policy',
+  '/smtp-credentials',
+  '/users',
+  '/organization-contacts',
+]);
+const ORG_MEMBERS_TENANT_VISIBLE_HREFS = new Set<string>([
+  '/users',
+  '/organization-contacts',
+]);
+
 /** Pure filter: returns the registry feature ids that are visible for the given form/viewer/grants. */
 export function visibleNavIds(registry: FeatureDef[], caps: Capabilities, viewer: Viewer, grants: string[]): string[] {
   return registry.filter((f) => resolve(f, caps, viewer, grants).visible).map((f) => f.id);
@@ -74,6 +98,8 @@ export interface NavGateContext {
   canSeeRoute: (href: string) => boolean;
   registry: FeatureDef[];
   formVisible: Set<string> | null;
+  capabilities?: Capabilities | null;
+  viewer?: Viewer;
 }
 
 /**
@@ -89,5 +115,21 @@ export function isNavItemAllowed(item: GatedNavItem, ctx: NavGateContext): boole
   if (item.requiresAdvancedRules && !(ctx.isSystemAdmin && ctx.showAdvancedRules)) return false;
   if (ctx.formVisible && !isItemVisibleByForm(item, ctx.registry, ctx.formVisible)) return false;
   if (!isItemVisibleByRole(item, ctx.canSeeRoute)) return false;
+  if (
+    ctx.capabilities?.multiTenant &&
+    ctx.viewer === 'tenant' &&
+    item.href?.startsWith(MONITORING_HREF_PREFIX)
+  ) {
+    return false;
+  }
+  if (
+    ctx.capabilities?.multiTenant &&
+    ctx.viewer === 'tenant' &&
+    item.href &&
+    ORG_MEMBERS_GROUP_HREFS.has(item.href) &&
+    !ORG_MEMBERS_TENANT_VISIBLE_HREFS.has(item.href)
+  ) {
+    return false;
+  }
   return true;
 }

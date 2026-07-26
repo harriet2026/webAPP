@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement, type ReactNode } from 'react';
 import type { Role } from '@/lib/api/roles';
@@ -93,6 +93,25 @@ function Harness() {
   ]);
 }
 
+function IdentityHarness() {
+  const { user, isLoading, isTrueSuperAdmin } = useAuth();
+  return createElement('div', null, [
+    createElement('span', { key: 'loading', 'data-testid': 'identity-loading' }, String(isLoading)),
+    createElement('span', { key: 'username', 'data-testid': 'identity-username' }, user?.username ?? ''),
+    createElement('span', { key: 'super', 'data-testid': 'identity-super' }, String(isTrueSuperAdmin)),
+  ]);
+}
+
+function renderIdentity(demoAuthBypassEnabled: boolean) {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider demoAuthBypassEnabled={demoAuthBypassEnabled}>
+        <IdentityHarness />
+      </AuthProvider>
+    </QueryClientProvider>,
+  );
+}
+
 describe('Plan C Task 2 — auth-context carries role_id/is_super_admin', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -148,6 +167,55 @@ describe('Plan C Task 2 — auth-context carries role_id/is_super_admin', () => 
 
     expect(screen.getByTestId('role-id').textContent).toBe('9');
     expect(screen.getByTestId('is-super').textContent).toBe('false');
+  });
+});
+
+describe('demo authentication bypass', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    useMyRoleMock.mockReturnValue({ data: undefined });
+  });
+
+  it('injects a mock super administrator when the server enables the bypass', async () => {
+    renderIdentity(true);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('identity-loading').textContent).toBe('false');
+    });
+    expect(screen.getByTestId('identity-username').textContent).toBe('demo-admin');
+    expect(screen.getByTestId('identity-super').textContent).toBe('true');
+  });
+
+  it('keeps anonymous behavior when the server does not enable the bypass', async () => {
+    renderIdentity(false);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('identity-loading').textContent).toBe('false');
+    });
+    expect(screen.getByTestId('identity-username').textContent).toBe('');
+    expect(screen.getByTestId('identity-super').textContent).toBe('false');
+  });
+
+  it('preserves a stored authenticated user instead of replacing it with the demo user', async () => {
+    localStorage.setItem('osgateway_user', JSON.stringify({
+      id: 7,
+      username: 'stored-admin',
+      role: 'system_admin',
+      tenant_id: null,
+      role_id: null,
+      is_super_admin: false,
+      created_at: '',
+      updated_at: '',
+    }));
+    renderIdentity(true);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('identity-loading').textContent).toBe('false');
+    });
+    expect(screen.getByTestId('identity-username').textContent).toBe('stored-admin');
+    expect(screen.getByTestId('identity-super').textContent).toBe('false');
   });
 });
 

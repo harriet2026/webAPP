@@ -4,9 +4,7 @@ export type Direction = 'all' | 'receive' | 'send' | 'internal';
 // GT-11979/11930: `custom` lets the user pick arbitrary start/end (PRD F1).
 // The dates themselves live in the page's CustomRange state, not in this union.
 export type TimeRange = 'today' | '7d' | '30d' | 'this_month' | 'last_month' | 'custom';
-// GT-11888: 「威胁等级」统计视角已从邮件安全总览移除。后端仍会返回
-// trend.threat_level / detail_table.threat_level，前端不再声明也不再消费。
-export type ViewBy = 'threat_type' | 'action' | 'delivery_result' | 'email_type';
+export type ViewBy = 'threat_type' | 'action' | 'threat_level' | 'delivery_result' | 'email_type';
 export type ChartType = 'area' | 'line' | 'bar';
 export type SecurityOverviewInterval = 'hour' | 'day' | 'month';
 
@@ -63,9 +61,7 @@ export interface TrendData {
   threat_type: TrendSeriesPoint[];
   action: TrendSeriesPoint[];
   delivery_result: TrendSeriesPoint[];
-  // The backend still returns this dimension for compatibility, while the
-  // current page contract does not expose it as a selectable perspective.
-  threat_level?: TrendSeriesPoint[];
+  threat_level: TrendSeriesPoint[];
   // Unified 11-category mail taxonomy used by the PRD's first perspective.
   email_type?: TrendSeriesPoint[];
 }
@@ -83,8 +79,7 @@ export interface DetailTableData {
   threat_type: DetailTableRow[];
   action: DetailTableRow[];
   delivery_result: DetailTableRow[];
-  // Kept in the response contract without making it user-selectable.
-  threat_level?: DetailTableRow[];
+  threat_level: DetailTableRow[];
   // Optional for compatibility with older servers; current servers populate it.
   email_type?: DetailTableRow[];
 }

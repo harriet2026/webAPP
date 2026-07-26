@@ -1,6 +1,10 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { GeoDistributionCard, countryFlagPosition } from '../GeoDistributionCard';
+import {
+  GeoDistributionCard,
+  countryFlagPosition,
+  normalizeWorldMapGeoJson,
+} from '../GeoDistributionCard';
 import type { GeoCountry } from '@/lib/api/security-overview';
 
 vi.mock('echarts', () => ({
@@ -102,6 +106,8 @@ describe('GeoDistributionCard ECharts world map', () => {
       type: 'map',
       map: 'security-overview-world',
       nameProperty: 'iso_a2',
+      layoutSize: '105%',
+      zoom: 1,
       data: [
         { name: 'US', value: 1245 },
         { name: 'BR', value: 532 },
@@ -111,6 +117,7 @@ describe('GeoDistributionCard ECharts world map', () => {
     });
     expect(option.visualMap).toMatchObject({ type: 'continuous', min: 0, max: 1245, itemWidth: 8, itemHeight: 88 });
     expect(option.visualMap.text).toEqual(['多', '少']);
+    expect(screen.getByTestId('geo-world-map')).toHaveClass('h-[260px]');
     expect(screen.getByText('本周攻击主要来源于：美国(54%)、巴西(23%)、荷兰(15%)')).toBeInTheDocument();
   });
 
@@ -127,6 +134,46 @@ describe('GeoDistributionCard ECharts world map', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '返回全球' }));
     expect(screen.queryByRole('button', { name: '返回全球' })).not.toBeInTheDocument();
+  });
+
+  it('focuses the selected China territory and keeps Taiwan in the CN map feature', () => {
+    countries = [
+      { country: 'CN', count: 234, block_rate: 99.1 },
+      { country: 'US', count: 1245, block_rate: 97.2 },
+    ];
+    render(<GeoDistributionCard {...props} />);
+
+    fireEvent.click(screen.getByRole('button', { name: '1. 中国' }));
+    const option = JSON.parse(screen.getByTestId('geo-echarts').getAttribute('data-option') ?? '{}');
+    expect(option.series[0]).toMatchObject({
+      center: [104.5, 35],
+      zoom: 3.7,
+      selectedMap: { CN: true },
+    });
+
+    const normalized = normalizeWorldMapGeoJson({
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: { iso_a2: 'CN', name_en: 'People\'s Republic of China' },
+          geometry: { type: 'MultiPolygon', coordinates: [[[[110, 18], [111, 19], [110, 18]]]] },
+        },
+        {
+          type: 'Feature',
+          properties: { iso_a2: 'TW', name_en: 'Taiwan' },
+          geometry: { type: 'Polygon', coordinates: [[[120, 22], [122, 25], [120, 22]]] },
+        },
+      ],
+    });
+    expect(normalized.features.map((feature) => feature.properties.iso_a2)).toEqual(['CN']);
+    expect(normalized.features[0]?.geometry).toMatchObject({
+      type: 'MultiPolygon',
+      coordinates: [
+        [[[110, 18], [111, 19], [110, 18]]],
+        [[[120, 22], [122, 25], [120, 22]]],
+      ],
+    });
   });
 
   it('renders ISO-derived flags, a scrollable TOP ranking and safe block-rate values', () => {

@@ -112,6 +112,12 @@ export default function UsersPage() {
   const canManageRolesTab = canManageRoles || isTenantAdmin;
   const usersQueryKey = isTenantView ? 'tenant-users' : 'users';
 
+  // Deep-link from the tenant-management drawer ("主管理员 → 在用户管理中查看"):
+  // ?tenant=<id> pre-filters the list to that tenant's users (spec §6).
+  const searchParams = useSearchParams();
+  const tenantParam = searchParams.get('tenant');
+  const tenantFilter = tenantParam !== null && tenantParam !== '' ? Number(tenantParam) : null;
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -136,9 +142,16 @@ export default function UsersPage() {
   // banner at worst (see GT-12005/12008: a 403 that simply means "not for this
   // viewer" must never be dressed up as a fault). Task 9 extends the same gate to
   // canManageAccounts so a tenant admin's own /tenant-users query is equally lazy.
+  // GT-12290：平台视角下若带了 ?tenant=<id>（来自租户抽屉的"在用户管理中查看"
+  // 深链），必须显式按该租户取数——平台作用域的 /users 里没有任何租户账号
+  // （GT-12393），继续拉全量再客户端过滤只会得到空列表。queryKey 带上
+  // tenantFilter，否则从 ?tenant=A 切到 ?tenant=B 会读到 A 的缓存。
   const { data: users, isLoading } = useQuery({
-    queryKey: [usersQueryKey],
-    queryFn: () => (isTenantView ? getTenantUsers(apiRequest) : getUsers(apiRequest)),
+    queryKey: [usersQueryKey, tenantFilter],
+    queryFn: () =>
+      isTenantView
+        ? getTenantUsers(apiRequest)
+        : getUsers(apiRequest, tenantFilter !== null && !Number.isNaN(tenantFilter) ? tenantFilter : undefined),
     enabled: canManageAccounts,
   });
 
@@ -188,12 +201,9 @@ export default function UsersPage() {
     [tenants],
   );
 
-  // Deep-link from the tenant-management drawer ("主管理员 → 在用户管理中查看"):
-  // ?tenant=<id> pre-filters the list to that tenant's users (spec §6).
-  const searchParams = useSearchParams();
-  const tenantParam = searchParams.get('tenant');
-  const tenantFilter = tenantParam !== null && tenantParam !== '' ? Number(tenantParam) : null;
-
+  // GT-12290：服务端已按 tenantFilter 过滤（见上面的 useQuery），这里保留的
+  // 客户端过滤对已过滤结果是幂等操作；不删是因为它同时承载 search 过滤，
+  // 删掉会牵动搜索/分页逻辑，本任务不动。
   const filteredUsers = useMemo(() => {
     if (!users) return [];
     let list = users;

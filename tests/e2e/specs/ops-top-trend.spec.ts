@@ -7,7 +7,7 @@ test.describe('Ops TOP Trend', () => {
     await page.waitForTimeout(2000);
     const url = page.url();
     expect(url).toContain('ops-top-trend');
-    await expect(page.locator('text=运营 TOP 与趋势').first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: '运营TOP与趋势', exact: true })).toBeVisible({ timeout: 15000 });
   });
 
   test('main page only exposes CSV export in the bottom action bar', async ({ authenticatedPage: page }) => {
@@ -36,7 +36,7 @@ test.describe('Ops TOP Trend', () => {
     await page.waitForTimeout(3000);
     const url = page.url();
     expect(url).toContain('ops-top-trend/print');
-    await expect(page.locator('text=运营 TOP 与趋势').first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=运营TOP与趋势').first()).toBeVisible({ timeout: 15000 });
   });
 
   test('connection dimension has direction buttons enabled (GT-11998)', async ({ authenticatedPage: page }) => {

@@ -18,6 +18,11 @@ import {
 } from "./lib/disposal-api";
 import { useFilterMerger } from "./hooks/use-filter-merger";
 import { useSearchTemplates } from "./hooks/use-search-templates";
+import { backfillAiFilter } from "./lib/ai-backfill";
+import {
+  mergeAiQuickFilter,
+  shouldAddDefaultSubject,
+} from "./lib/ai-search-state";
 import { SearchBar } from "./search-bar";
 import { QuickFilters } from "./quick-filters";
 import { AdvancedFilters } from "./advanced-filters";
@@ -115,6 +120,7 @@ export function EmailDisposalCenterPage({
   const [advancedFilter, setAdvancedFilter] =
     useState<AdvancedFilter>(DEFAULT_ADVANCED);
   const [aiConditions, setAiConditions] = useState<AICondition[]>([]);
+  const [aiParsedQuery, setAiParsedQuery] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -207,25 +213,43 @@ export function EmailDisposalCenterPage({
     return Array.from(unique, ([id, name]) => ({ id, name })).slice(0, 12);
   }, [data?.items]);
 
-  const handleAiConditions = useCallback(
-    (conditions: AICondition[]) => {
-      setAiConditions(conditions);
+  // AI 解析结果三级回填（design spec §7）：quick 控件覆盖式合并、advanced 构建
+  // 器组追加（受 5 组上限约束）、其余条件落回 aiConditions 兜底 chips。summary
+  // 沿用现状——回调签名保留但当前页面不展示（与拍平前的既有行为一致）。
+  const handleAiParsed = useCallback(
+    (filter: AdvancedFilter | null, _summary: string, query: string) => {
+      const result = backfillAiFilter(filter, advancedFilter.groups.length);
+      const hasAiConditions =
+        filter?.groups.some((group) => group.conditions.length > 0) ?? false;
+      setAiParsedQuery(hasAiConditions ? query.trim() : null);
+      if (hasAiConditions || Object.keys(result.quick).length > 0) {
+        setQuickFilter((prev) =>
+          mergeAiQuickFilter(prev, result.quick, query, hasAiConditions),
+        );
+      }
+      if (result.advanced.length > 0) {
+        setAdvancedFilter((prev) => ({ ...prev, groups: [...prev.groups, ...result.advanced] }));
+      }
+      setAiConditions(result.residual);
       setPage(1);
     },
-    [],
+    [advancedFilter.groups.length],
   );
 
   const handleSearch = useCallback((query: string) => {
-    setQuickFilter((prev) => ({ ...prev, subject: query.trim() || undefined }));
+    if (shouldAddDefaultSubject(query, aiParsedQuery)) {
+      setQuickFilter((prev) => ({ ...prev, subject: query.trim() || undefined }));
+    }
     setSimilarMode(false);
     setSimilarSeedCount(0);
     setPage(1);
-  }, []);
+  }, [aiParsedQuery]);
 
   const handleClearAll = useCallback(() => {
     setQuickFilter(getDefaultQuickFilter());
     setAdvancedFilter(DEFAULT_ADVANCED);
     setAiConditions([]);
+    setAiParsedQuery(null);
     setSelectedIds(new Set());
     setSimilarMode(false);
     setHeaderFilters({ directions: [], emailTypes: [], statuses: [] });
@@ -264,6 +288,7 @@ export function EmailDisposalCenterPage({
     setQuickFilter(getDefaultQuickFilter());
     setAdvancedFilter(DEFAULT_ADVANCED);
     setAiConditions([]);
+    setAiParsedQuery(null);
     setSimilarMode(false);
     setSimilarSeedCount(0);
     setHeaderFilters({ directions: [], emailTypes: [], statuses: [] });
@@ -496,7 +521,7 @@ export function EmailDisposalCenterPage({
     >
       <PageFilters data-testid="disposal-search-workbench">
         <SearchBar
-          onAiConditions={handleAiConditions}
+          onAiParsed={handleAiParsed}
           onSearch={handleSearch}
           onReset={handleClearAll}
           aiEnabled={aiEnabled}
@@ -514,6 +539,7 @@ export function EmailDisposalCenterPage({
             if (!template) return;
             setQuickFilter(template.quickFilter);
             setAdvancedFilter(template.advancedFilter);
+            setAiParsedQuery(null);
             setSimilarMode(false);
             setPage(1);
           }}

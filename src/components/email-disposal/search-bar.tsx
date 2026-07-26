@@ -10,7 +10,7 @@ import { Sparkles, Search, X, Loader2, AlertCircle, RotateCcw, Save, ChevronDown
 import { useApiRequest } from '@/lib/api/client';
 import { parseQuery } from './lib/disposal-api';
 import { toast } from 'sonner';
-import type { AICondition } from '@/types/email-disposal';
+import type { AdvancedFilter } from '@/types/log';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -19,7 +19,12 @@ import {
 const MAX_INPUT_LENGTH = 500;
 
 interface SearchBarProps {
-  onAiConditions: (conditions: AICondition[], summary: string) => void;
+  // parse-query 的解析结果直接透传给调用方，不在这里拍平成 AICondition[]——
+  // 拍平会把 in/between 的数组值变成逗号拼接字符串,后端 400（修复见
+  // design spec §7 / lib/ai-backfill.ts）。清空场景传 null。
+  // query 同时交给页面保存，避免 SearchBar 因热更新/重挂载丢失“当前输入已有
+  // AI 结果”的状态后，搜索按钮又错误补上一条默认主题条件。
+  onAiParsed: (filter: AdvancedFilter | null, summary: string, query: string) => void;
   onSearch: (query: string) => void;
   onReset: () => void;
   aiEnabled?: boolean;
@@ -34,7 +39,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({
-  onAiConditions, onSearch, onReset, aiEnabled = true, templates = [],
+  onAiParsed, onSearch, onReset, aiEnabled = true, templates = [],
   onSaveTemplate, onLoadTemplate, onDeleteTemplate,
   sampleCount = 0, onClearSamples,
   filtersExpanded = false, onToggleFilters,
@@ -63,27 +68,20 @@ export function SearchBar({
     const timeoutId = setTimeout(() => controller.abort(), 30000);
     try {
       const result = await parseQuery({ description: value }, apiRequest, controller.signal);
-      const conditions: AICondition[] = [];
-      if (result.filter) {
-        for (const group of result.filter.groups) {
-          for (const cond of group.conditions) {
-            conditions.push({ field: cond.field, op: cond.op, value: String(cond.value ?? ''), source: 'ai' });
-          }
-        }
-      }
-      onAiConditions(conditions, result.summary);
+      onAiParsed(result.filter, result.summary, value.trim());
     } catch (err) {
       const isTimeout = err instanceof Error && err.name === 'AbortError';
       setAiError(isTimeout ? t('aiTimeout') : t('aiError'));
-      onAiConditions([], '');
+      onAiParsed(null, '', '');
     } finally {
       clearTimeout(timeoutId);
       setParsing(false);
     }
-  }, [value, apiRequest, onAiConditions, t]);
+  }, [value, apiRequest, onAiParsed, t]);
 
   const handleSearch = useCallback(() => {
-    if (!value.trim()) return;
+    const query = value.trim();
+    if (!query) return;
     onSearch(value);
     toast.success(t('searchApplied'));
   }, [value, onSearch, t]);
@@ -91,10 +89,10 @@ export function SearchBar({
   const handleReset = useCallback(() => {
     setValue('');
     setAiError('');
-    onAiConditions([], '');
+    onAiParsed(null, '', '');
     onReset();
     toast.success(t('resetDone'));
-  }, [onAiConditions, onReset, t]);
+  }, [onAiParsed, onReset, t]);
 
   return (
     <div className="space-y-3">
@@ -105,7 +103,7 @@ export function SearchBar({
             value={sampleCount > 0 ? t(sampleCount === 1 ? 'sampleSingle' : 'sampleMultiple', { n: sampleCount }) : value}
             onChange={handleChange}
             placeholder={t('placeholder')}
-            className="h-10 pr-11"
+            className="h-9 pr-11"
             disabled={sampleCount > 0}
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSearch();
@@ -120,7 +118,13 @@ export function SearchBar({
                 className="h-7 w-7"
                 aria-label={t('aiClear')}
                 title={t('aiClear')}
-                onClick={() => { setValue(''); setAiError(''); onAiConditions([], ''); onSearch(''); onClearSamples?.(); }}
+                onClick={() => {
+                  setValue('');
+                  setAiError('');
+                  onAiParsed(null, '', '');
+                  onSearch('');
+                  onClearSamples?.();
+                }}
               >
                 <X className="h-3.5 w-3.5" />
               </Button>
@@ -140,83 +144,95 @@ export function SearchBar({
             ) : null}
           </div>
         </div>
-        <Button data-testid="disposal-search-submit" className="h-10 px-5" onClick={handleSearch} disabled={parsing || sampleCount > 0 || !value.trim()}>
-          <Search className="h-4 w-4 mr-2" />
-          {t('search')}
-        </Button>
-        <Button data-testid="disposal-search-reset" variant="outline" className="h-10 px-5" onClick={handleReset}>
-          <RotateCcw className="mr-2 h-4 w-4" />
-          {t('reset')}
-        </Button>
-        {templates.length === 0 ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Button
-            data-testid="disposal-template-save"
-            variant="outline"
-            className="h-10 px-5"
-            onClick={onSaveTemplate}
+            data-testid="disposal-search-submit"
+            className="h-9 gap-1.5 px-4 disabled:border-border disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100 disabled:shadow-none"
+            onClick={handleSearch}
+            disabled={parsing || sampleCount > 0 || !value.trim()}
           >
-            <Save className="mr-2 h-4 w-4" />
-            {t('saveTemplate')}
+            <Search className="h-4 w-4" />
+            {t('search')}
           </Button>
-        ) : (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  data-testid="disposal-template-menu"
-                  variant="outline"
-                  className="h-10 px-5"
-                  aria-label={t('savedTemplates')}
-                />
-              }
+          <Button
+            data-testid="disposal-search-reset"
+            variant="outline"
+            className="h-9 gap-1.5 px-3"
+            onClick={handleReset}
+          >
+            <RotateCcw className="h-4 w-4" />
+            {t('reset')}
+          </Button>
+          {templates.length === 0 ? (
+            <Button
+              data-testid="disposal-template-save"
+              variant="outline"
+              className="h-9 gap-1.5 px-3"
+              onClick={onSaveTemplate}
             >
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="h-4 w-4" />
               {t('saveTemplate')}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-56">
-              <DropdownMenuGroup>
-                <DropdownMenuItem data-testid="disposal-template-save" onClick={onSaveTemplate}>
-                  <Save className="h-4 w-4" />
-                  {t('saveCurrent')}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>{t('savedTemplates')}</DropdownMenuLabel>
-                {templates.map((template) => (
-                  <DropdownMenuItem
-                    key={template.id}
-                    data-testid={`disposal-template-load-${template.id}`}
-                    onClick={() => onLoadTemplate?.(template.id)}
-                  >
-                    <span className="flex-1">{template.name}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      aria-label={`${t('deleteTemplate')}: ${template.name}`}
-                      className="text-muted-foreground data-[hovered=true]:bg-destructive/10 data-[hovered=true]:text-destructive"
-                      onClick={(event) => { event.stopPropagation(); onDeleteTemplate?.(template.id); }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+            </Button>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    data-testid="disposal-template-menu"
+                    variant="outline"
+                    className="h-9 gap-1.5 px-3"
+                    aria-label={t('savedTemplates')}
+                  />
+                }
+              >
+                <Save className="h-4 w-4" />
+                {t('saveTemplate')}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-56">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem data-testid="disposal-template-save" onClick={onSaveTemplate}>
+                    <Save className="h-4 w-4" />
+                    {t('saveCurrent')}
                   </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-        <Button
-          data-testid="disposal-filters-toggle"
-          variant="outline"
-          className={`h-10 px-5 ${filtersExpanded ? 'border-primary/40 bg-primary/10 text-primary data-[hovered=true]:bg-primary/15 data-[hovered=true]:text-primary' : ''}`}
-          aria-expanded={filtersExpanded}
-          onClick={onToggleFilters}
-        >
-          <Filter className="mr-2 h-4 w-4" />
-          {filtersExpanded ? t('collapse') : t('advancedFilter')}
-          <ChevronDown
-            className={`ml-2 h-4 w-4 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${filtersExpanded ? 'rotate-180' : ''}`}
-          />
-        </Button>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>{t('savedTemplates')}</DropdownMenuLabel>
+                  {templates.map((template) => (
+                    <DropdownMenuItem
+                      key={template.id}
+                      data-testid={`disposal-template-load-${template.id}`}
+                      onClick={() => onLoadTemplate?.(template.id)}
+                    >
+                      <span className="flex-1">{template.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label={`${t('deleteTemplate')}: ${template.name}`}
+                        className="text-muted-foreground data-[hovered=true]:bg-destructive/10 data-[hovered=true]:text-destructive"
+                        onClick={(event) => { event.stopPropagation(); onDeleteTemplate?.(template.id); }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          <Button
+            data-testid="disposal-filters-toggle"
+            variant="outline"
+            className={`h-9 min-w-[7.875rem] gap-1.5 px-3 ${filtersExpanded ? 'border-primary/40 bg-primary/10 text-primary data-[hovered=true]:bg-primary/15 data-[hovered=true]:text-primary' : ''}`}
+            aria-expanded={filtersExpanded}
+            onClick={onToggleFilters}
+          >
+            <Filter className="h-4 w-4" />
+            {filtersExpanded ? t('collapse') : t('advancedFilter')}
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${filtersExpanded ? 'rotate-180' : ''}`}
+            />
+          </Button>
+        </div>
       </div>
 
       {aiError && (
@@ -234,7 +250,11 @@ export function SearchBar({
               <button
                 type="button"
                 data-testid={`disposal-search-sample-${i + 1}`}
-                onClick={() => { setValue(sample); onSearch(sample); }}
+                onClick={() => {
+                  setValue(sample);
+                  onAiParsed(null, '', '');
+                  onSearch(sample);
+                }}
               >
                 {sample}
               </button>

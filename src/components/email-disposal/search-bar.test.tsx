@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SearchBar } from './search-bar';
+import { parseQuery } from './lib/disposal-api';
 
 const { toastSuccess } = vi.hoisted(() => ({ toastSuccess: vi.fn() }));
 
@@ -27,11 +28,13 @@ vi.mock('./lib/disposal-api', () => ({
   parseQuery: vi.fn(),
 }));
 
+const mockedParseQuery = vi.mocked(parseQuery);
+
 function renderSearchBar(
   overrides: Partial<React.ComponentProps<typeof SearchBar>> = {},
 ) {
   const props: React.ComponentProps<typeof SearchBar> = {
-    onAiConditions: vi.fn(),
+    onAiParsed: vi.fn(),
     onSearch: vi.fn(),
     onReset: vi.fn(),
     aiEnabled: false,
@@ -50,6 +53,13 @@ describe('SearchBar actions', () => {
     const submit = screen.getByTestId('disposal-search-submit');
 
     expect(submit).toBeDisabled();
+    expect(submit).toHaveClass(
+      'h-9',
+      'gap-1.5',
+      'px-4',
+      'disabled:bg-muted',
+      'disabled:opacity-100',
+    );
     fireEvent.change(screen.getByTestId('disposal-natural-language-input'), {
       target: { value: 'Q2 report' },
     });
@@ -60,6 +70,24 @@ describe('SearchBar actions', () => {
     expect(toastSuccess).toHaveBeenCalledWith('emailDisposal.search.searchApplied');
   });
 
+  it('uses one compact visual rhythm for the search action group', () => {
+    renderSearchBar();
+
+    expect(screen.getByTestId('disposal-natural-language-input')).toHaveClass('h-9');
+    for (const testId of [
+      'disposal-search-reset',
+      'disposal-template-save',
+      'disposal-filters-toggle',
+    ]) {
+      const button = screen.getByTestId(testId);
+      expect(button).toHaveClass('h-9', 'gap-1.5', 'px-3');
+      expect(button.querySelector('svg')).not.toHaveClass('mr-2', 'ml-2');
+    }
+    expect(screen.getByTestId('disposal-filters-toggle')).toHaveClass(
+      'min-w-[7.875rem]',
+    );
+  });
+
   it('clears the local query and every parent filter when reset is clicked', () => {
     const { props } = renderSearchBar();
     const input = screen.getByTestId('disposal-natural-language-input');
@@ -68,7 +96,7 @@ describe('SearchBar actions', () => {
     fireEvent.click(screen.getByTestId('disposal-search-reset'));
 
     expect(input).toHaveValue('');
-    expect(props.onAiConditions).toHaveBeenCalledWith([], '');
+    expect(props.onAiParsed).toHaveBeenCalledWith(null, '', '');
     expect(props.onReset).toHaveBeenCalledOnce();
     expect(toastSuccess).toHaveBeenCalledWith('emailDisposal.search.resetDone');
   });
@@ -133,5 +161,94 @@ describe('SearchBar actions', () => {
 
     fireEvent.pointerEnter(sample, { pointerType: 'touch' });
     expect(sample).not.toHaveAttribute('data-hovered');
+  });
+
+  // 现存 bug 的回归用例：search-bar 此前把 parse-query 的结构化结果 String()
+  // 拍平，in/between 的数组值变成逗号拼接字符串，导致后端 400。修复后这里必须
+  // 原样透传结构化 filter，不做任何拍平。
+  it('passes the parsed structured filter through untouched, without flattening array values to strings', async () => {
+    const structuredFilter = {
+      operator: 'AND' as const,
+      groups: [
+        {
+          operator: 'AND' as const,
+          conditions: [
+            { field: 'display_status', op: 'in' as const, value: ['delivered', 'rejected'] },
+          ],
+        },
+      ],
+    };
+    mockedParseQuery.mockResolvedValue({ filter: structuredFilter, summary: 'AI 摘要', source: 'llm' });
+    const { props } = renderSearchBar({ aiEnabled: true });
+
+    fireEvent.change(screen.getByTestId('disposal-natural-language-input'), {
+      target: { value: '上周被召回的邮件' },
+    });
+    fireEvent.click(screen.getByTestId('disposal-ai-parse'));
+
+    await waitFor(() => {
+      expect(props.onAiParsed).toHaveBeenCalledWith(
+        structuredFilter,
+        'AI 摘要',
+        '上周被召回的邮件',
+      );
+    });
+    // 值必须仍是数组，不是拍平后的 "delivered,rejected" 字符串。
+    const [passedFilter] = (props.onAiParsed as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(Array.isArray(passedFilter.groups[0].conditions[0].value)).toBe(true);
+  });
+
+  it('reports which query produced the AI conditions so the page can suppress a default subject', async () => {
+    mockedParseQuery.mockResolvedValue({
+      filter: {
+        operator: 'AND',
+        groups: [
+          {
+            operator: 'AND',
+            conditions: [
+              { field: 'sender', op: 'starts_with', value: '192.168' },
+              { field: 'email_type', op: 'eq', value: 'advertisement' },
+            ],
+          },
+        ],
+      },
+      summary: 'AI 摘要',
+      source: 'llm',
+    });
+    const { props } = renderSearchBar({ aiEnabled: true });
+    const input = screen.getByTestId('disposal-natural-language-input');
+
+    fireEvent.change(input, { target: { value: '192.168 段营销邮件' } });
+    fireEvent.click(screen.getByTestId('disposal-ai-parse'));
+    await waitFor(() => {
+      expect(props.onAiParsed).toHaveBeenCalled();
+    });
+
+    fireEvent.click(screen.getByTestId('disposal-search-submit'));
+    expect(props.onAiParsed).toHaveBeenLastCalledWith(
+      expect.any(Object),
+      'AI 摘要',
+      '192.168 段营销邮件',
+    );
+    expect(props.onSearch).toHaveBeenLastCalledWith('192.168 段营销邮件');
+
+    // AI 结果只对应解析时的输入；用户随后改写查询，应恢复普通主题搜索语义。
+    fireEvent.change(input, { target: { value: '192.168 段退信' } });
+    fireEvent.click(screen.getByTestId('disposal-search-submit'));
+    expect(props.onSearch).toHaveBeenLastCalledWith('192.168 段退信');
+  });
+
+  it('reports a null filter to the parent on AI parse failure', async () => {
+    mockedParseQuery.mockRejectedValue(new Error('boom'));
+    const { props } = renderSearchBar({ aiEnabled: true });
+
+    fireEvent.change(screen.getByTestId('disposal-natural-language-input'), {
+      target: { value: 'phishing last week' },
+    });
+    fireEvent.click(screen.getByTestId('disposal-ai-parse'));
+
+    await waitFor(() => {
+      expect(props.onAiParsed).toHaveBeenCalledWith(null, '', '');
+    });
   });
 });

@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { isItemVisibleByRole } from './sidebar-visibility';
+import { capabilitiesForForm } from '@/lib/product-form/resolve';
+import {
+  isItemVisibleByRole,
+  isNavItemAllowed,
+  type NavGateContext,
+} from './sidebar-visibility';
 
 describe('isItemVisibleByRole (Plan C Task 6, spec §7.2)', () => {
   // Non-super role: only allows the one route registered to its granted submodule.
@@ -34,5 +39,70 @@ describe('isItemVisibleByRole (Plan C Task 6, spec §7.2)', () => {
     const trueSuperCanSeeRoute = () => true;
     expect(isItemVisibleByRole({ id: 'tenants', href: '/tenants' }, trueSuperCanSeeRoute)).toBe(true);
     expect(isItemVisibleByRole({ id: 'users', href: '/users' }, trueSuperCanSeeRoute)).toBe(true);
+  });
+});
+
+const allowAllContext: NavGateContext = {
+  hasPermission: () => true,
+  isSystemAdmin: true,
+  showAdvancedRules: true,
+  canSeeRoute: () => true,
+  registry: [],
+  formVisible: null,
+};
+
+describe('isNavItemAllowed — multi-tenant tenant-view pruning', () => {
+  const tenantContext: NavGateContext = {
+    ...allowAllContext,
+    capabilities: capabilitiesForForm('ai-multi'),
+    viewer: 'tenant',
+  };
+
+  it('hides every monitoring-center child route', () => {
+    for (const href of [
+      '/monitoring/dashboard',
+      '/monitoring/infrastructure',
+      '/monitoring/mailflow',
+      '/monitoring/security',
+      '/monitoring/alerts',
+    ]) {
+      expect(isNavItemAllowed({ id: href, href }, tenantContext)).toBe(false);
+    }
+  });
+
+  it('keeps only users and organization contacts in Organization & members', () => {
+    for (const href of ['/users', '/organization-contacts']) {
+      expect(isNavItemAllowed({ id: href, href }, tenantContext)).toBe(true);
+    }
+
+    for (const href of [
+      '/mail-routing',
+      '/tenants',
+      '/system/proxysvr',
+      '/system/dkim',
+      '/system/platform-security',
+      '/system/password-policy',
+      '/smtp-credentials',
+    ]) {
+      expect(isNavItemAllowed({ id: href, href }, tenantContext)).toBe(false);
+    }
+  });
+
+  it('does not apply tenant-view pruning to platform view or single-tenant forms', () => {
+    const monitoring = { id: 'monitor-dashboard', href: '/monitoring/dashboard' };
+    const tenantManagement = { id: 'tenants', href: '/tenants' };
+    const platformContext: NavGateContext = {
+      ...tenantContext,
+      viewer: 'platform',
+    };
+    const singleTenantContext: NavGateContext = {
+      ...tenantContext,
+      capabilities: capabilitiesForForm('ai-single'),
+    };
+
+    expect(isNavItemAllowed(monitoring, platformContext)).toBe(true);
+    expect(isNavItemAllowed(tenantManagement, platformContext)).toBe(true);
+    expect(isNavItemAllowed(monitoring, singleTenantContext)).toBe(true);
+    expect(isNavItemAllowed(tenantManagement, singleTenantContext)).toBe(true);
   });
 });

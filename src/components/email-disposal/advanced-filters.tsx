@@ -167,6 +167,12 @@ function getFieldDef(fieldKey: string): FieldEntry | undefined {
   return undefined;
 }
 
+// 供 ai-backfill.ts 判定「AI 解析结果的某个字段是否为高级筛选构建器可承载的字段」
+// 复用，避免另起一份字段清单造成漂移（构建器新增/下线字段时这里自动同步）。
+export const ADVANCED_FILTER_FIELD_KEYS: ReadonlySet<string> = new Set(
+  Object.values(FIELD_GROUPS).flatMap((entries) => entries.map((e) => e.key)),
+);
+
 interface ConditionValueInputProps {
   cond: FilterCondition;
   fieldDef: FieldEntry | undefined;

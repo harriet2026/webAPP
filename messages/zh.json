@@ -442,7 +442,7 @@
     }
   },
   "opsTopTrend": {
-    "title": "运营 TOP 与趋势",
+    "title": "运营TOP与趋势",
     "subtitle": "六维分析视角，支持交叉下钻，追踪攻击来源与目标",
     "tenantScope": "租户范围",
     "clickRowToExpand": "点击行展开详情",
@@ -1563,6 +1563,8 @@
     "domains": "域名",
     "invalidDomain": "域名格式不合法",
     "domainsRequired": "至少需要一个域名",
+    "validationFailed": "以下信息未填写或格式有误",
+    "nextHopPortInvalid": "端口必须为 1-65535 之间的整数",
     "accountUsage": "账号用量",
     "expireAtBeforeToday": "到期时间不能早于今天",
     "description": "描述",
@@ -1644,7 +1646,11 @@
       "expireAt": "到期时间",
       "language": "通知语言",
       "domains": "租户域名",
-      "capabilities": "能力开通"
+      "capabilities": "能力开通",
+      "adminAccount": "主管理员账号",
+      "adminAccountHint": "该账号将作为该租户管理员的登录入口",
+      "adminPassword": "初始密码",
+      "adminPasswordHint": "需满足密码策略；该管理员首次登录时将被强制修改密码"
     },
     "capability": {
       "phishing-detection": "钓鱼邮件检测智能体",
@@ -1742,7 +1748,10 @@
     "eyebrow": "租户中心",
     "domainsEyebrow": "租户域名",
     "nameRequired": "请输入租户名称",
-    "codeRequired": "请输入租户编码"
+    "codeRequired": "请输入租户编码",
+    "adminAccountRequired": "请输入主管理员账号",
+    "adminPasswordRequired": "请输入初始密码",
+    "adminAccountTaken": "该账号已存在（不区分大小写），请换一个"
   },
   "users": {
     "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全契约）",
@@ -5486,6 +5495,8 @@
       "status": "邮件状态",
       "operations": "操作",
       "view": "查看",
+      "findSimilar": "找相似",
+      "findSimilarTooltip": "以该邮件为样本，基于内容语义查找相似邮件",
       "download": "下载",
       "loading": "加载中...",
       "empty": "暂无数据",
@@ -7077,6 +7088,14 @@
     "subtitle": "多维度分析邮件威胁态势，掌握安全拦截全局视图",
     "title": "邮件安全总览",
     "noData": "暂无数据",
+    "error": {
+      "forbiddenTitle": "无权查看邮件安全总览",
+      "forbiddenDescription": "当前账号缺少统计查看权限，请联系管理员授权后重试。",
+      "loadFailedTitle": "邮件安全总览加载失败",
+      "loadFailedDescription": "服务暂时不可用或网络异常，请稍后重试。",
+      "retry": "重新加载",
+      "retrying": "正在重试…"
+    },
     "kpi": {
       "totalFiltered": "过滤邮件总量",
       "blockRate": "拦截率",
@@ -7121,6 +7140,7 @@
     "viewBy": {
       "threat_type": "威胁类型",
       "action": "处置动作",
+      "threat_level": "威胁等级",
       "delivery_result": "投递结果",
       "email_type": "邮件类型"
     },
@@ -7152,6 +7172,13 @@
       "in_delivery": "投递中",
       "partial_delivered": "部分投递",
       "unknown": "未知"
+    },
+    "threatLevels": {
+      "normal": "正常",
+      "low": "低危",
+      "medium": "中危",
+      "high": "高危",
+      "critical": "严重"
     },
     "emailTypes": {
       "normal": "正常",
@@ -7386,6 +7413,7 @@
       "trafficDistribution": "三向流量占比",
       "trend": "趋势",
       "bounceReasons": "退信原因分布",
+      "receiveBounceReasons": "接收侧退信原因",
       "threatDistribution": "威胁类型分布",
       "latencyPercentiles": "延迟百分位趋势",
       "queueTrend": "队列趋势",
@@ -7411,6 +7439,7 @@
     "dataLag": "数据更新于约 {minutes} 分钟前",
     "dataLagHours": "统计数据更新于约 {hours} 小时前",
     "loadFailed": "投递统计加载失败，请稍后重试。",
+    "retry": "重试",
     "noData": "暂无数据",
     "print": {
       "title": "投递与流量分析报告",
@@ -7474,10 +7503,10 @@
       "area": "堆叠面积图"
     },
     "linkType": {
-      "phishing": "钓鱼",
+      "phishing": "钓鱼链接",
       "malware_download": "恶意软件下载",
-      "spam": "垃圾邮件",
-      "c2": "C2 通信",
+      "spam": "垃圾推广",
+      "c2": "C2通信",
       "qr_phishing": "二维码钓鱼"
     },
     "reputation": {
@@ -7503,9 +7532,9 @@
       "detecting": "检测中"
     },
     "attachmentThreatType": {
-      "virus": "病毒",
-      "macro": "恶意宏",
-      "zip_bomb": "压缩炸弹",
+      "virus": "病毒附件",
+      "macro": "宏文档",
+      "zip_bomb": "压缩包炸弹",
       "exploit": "漏洞利用",
       "other": "其他恶意"
     },
@@ -7533,8 +7562,11 @@
       "blockRate": "点击拦截率",
       "blockRateHelp": "该域名点击后进入威胁拦截页面的比例",
       "firstSeen": "首次出现",
+      "status": "封禁状态",
       "block": "封禁",
       "blocked": "已封禁",
+      "unblocked": "未封禁",
+      "unknownDate": "未知",
       "blockConfirm": "确认拉黑域名 \"{domain}\" ？将为以下方向创建拒绝规则：",
       "blockDirection": {
         "all": "全部",
@@ -7559,15 +7591,33 @@
     },
     "table": {
       "date": "日期",
-      "totalLinkMail": "含链接邮件数",
+      "totalLinkMail": "含链接邮件总量",
       "safeLinkMail": "安全链接邮件",
       "maliciousLinkMail": "恶意链接邮件",
-      "totalAttachmentMail": "含附件邮件数",
+      "phishingLink": "钓鱼链接",
+      "malwareDownload": "恶意软件下载",
+      "cAndCCommunication": "C&C通信",
+      "spamPromotion": "垃圾推广",
+      "totalAttachmentMail": "含附件邮件总量",
       "safeAttachmentMail": "安全附件邮件",
       "maliciousAttachmentMail": "恶意附件邮件",
+      "virusAttachment": "病毒附件",
+      "macroDocument": "宏文档",
+      "zipBomb": "压缩包炸弹",
+      "exploit": "漏洞利用",
       "blockRate": "拦截率",
       "blockRateHelp": "当日恶意邮件投递层拦截率",
-      "change": "较昨日变化"
+      "change": "环比变化",
+      "expandRow": "展开 {date} 的威胁分布",
+      "collapseRow": "收起 {date} 的威胁分布",
+      "threatDistribution": "威胁类型分布"
+    },
+    "error": {
+      "serviceUnavailable": "服务不可用",
+      "loadFailed": "数据加载失败",
+      "description": "链接与附件安全统计暂时无法加载，请稍后重试。",
+      "retry": "重试",
+      "retrying": "正在重试..."
     },
     "empty": {
       "noLinkMail": "该时段无含链接邮件",

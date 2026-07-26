@@ -1984,6 +1984,8 @@
     "domains": "Domains",
     "invalidDomain": "Invalid domain format",
     "domainsRequired": "At least one domain is required",
+    "validationFailed": "The following information is missing or invalid",
+    "nextHopPortInvalid": "Port must be an integer between 1 and 65535",
     "accountUsage": "Account usage",
     "expireAtBeforeToday": "Expiry date cannot be earlier than today",
     "description": "Description",
@@ -2065,7 +2067,11 @@
       "expireAt": "Expire At",
       "language": "Notification Language",
       "domains": "Tenant Domains",
-      "capabilities": "Capabilities"
+      "capabilities": "Capabilities",
+      "adminAccount": "Primary admin account",
+      "adminAccountHint": "This account becomes the tenant administrator's login",
+      "adminPassword": "Initial password",
+      "adminPasswordHint": "Must satisfy the password policy; the administrator must change it at first login"
     },
     "capability": {
       "phishing-detection": "Phishing Detection Agent",
@@ -2163,7 +2169,10 @@
     "eyebrow": "Tenant Center",
     "domainsEyebrow": "Tenant Domains",
     "nameRequired": "Please enter tenant name",
-    "codeRequired": "Please enter tenant code"
+    "codeRequired": "Please enter tenant code",
+    "adminAccountRequired": "Enter the primary admin account",
+    "adminPasswordRequired": "Enter an initial password",
+    "adminAccountTaken": "That account already exists (case-insensitive); choose another"
   },
   "users": {
     "tenantMustChangeNotice": "New accounts use a temporary password and must change it at first login (platform security contract)",
@@ -5491,6 +5500,8 @@
       },
       "operations": "Operations",
       "view": "View",
+      "findSimilar": "Find Similar",
+      "findSimilarTooltip": "Use this email as a sample to find semantically similar emails",
       "download": "Download",
       "loading": "Loading...",
       "empty": "No data",
@@ -7020,6 +7031,14 @@
     "subtitle": "Multi-dimensional email threat analysis and security overview",
     "title": "Security Overview",
     "noData": "No data",
+    "error": {
+      "forbiddenTitle": "No permission to view the email security overview",
+      "forbiddenDescription": "Your account does not have access to these statistics. Ask an administrator for permission, then retry.",
+      "loadFailedTitle": "Email security overview failed to load",
+      "loadFailedDescription": "The service is temporarily unavailable or the network request failed. Please retry.",
+      "retry": "Reload",
+      "retrying": "Retrying…"
+    },
     "kpi": {
       "totalFiltered": "Total Filtered",
       "blockRate": "Block Rate",
@@ -7064,6 +7083,7 @@
     "viewBy": {
       "threat_type": "Threat Type",
       "action": "Action",
+      "threat_level": "Threat Level",
       "delivery_result": "Delivery Result",
       "email_type": "Email Type"
     },
@@ -7095,6 +7115,13 @@
       "in_delivery": "In Delivery",
       "partial_delivered": "Partial Delivered",
       "unknown": "Unknown"
+    },
+    "threatLevels": {
+      "normal": "Normal",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
     },
     "emailTypes": {
       "normal": "Normal",
@@ -7329,6 +7356,7 @@
       "trafficDistribution": "Three-way Traffic Distribution",
       "trend": "Trend",
       "bounceReasons": "Bounce Reasons",
+      "receiveBounceReasons": "Inbound Bounce Reasons",
       "threatDistribution": "Threat Distribution",
       "latencyPercentiles": "Latency Percentiles",
       "queueTrend": "Queue Trend",
@@ -7354,6 +7382,7 @@
     "dataLag": "Data updated ~{minutes} minutes ago",
     "dataLagHours": "Statistics were updated about {hours} hours ago",
     "loadFailed": "Delivery statistics failed to load. Try again later.",
+    "retry": "Retry",
     "noData": "No data",
     "print": {
       "title": "Delivery Traffic Report",
@@ -7417,9 +7446,9 @@
       "area": "Stacked Area Chart"
     },
     "linkType": {
-      "phishing": "Phishing",
+      "phishing": "Phishing Link",
       "malware_download": "Malware Download",
-      "spam": "Spam",
+      "spam": "Spam Promotion",
       "c2": "C2 Communication",
       "qr_phishing": "QR Phishing"
     },
@@ -7446,9 +7475,9 @@
       "detecting": "Detecting"
     },
     "attachmentThreatType": {
-      "virus": "Virus",
-      "macro": "Malicious Macro",
-      "zip_bomb": "Zip Bomb",
+      "virus": "Virus Attachment",
+      "macro": "Macro Document",
+      "zip_bomb": "Archive Bomb",
       "exploit": "Exploit",
       "other": "Other Malicious"
     },
@@ -7476,8 +7505,11 @@
       "blockRate": "Click Block Rate",
       "blockRateHelp": "Percentage of clicks on this domain that triggered threat interception",
       "firstSeen": "First Seen",
+      "status": "Block Status",
       "block": "Block",
       "blocked": "Blocked",
+      "unblocked": "Not Blocked",
+      "unknownDate": "Unknown",
       "blockConfirm": "Confirm blocking domain \"{domain}\"? A reject rule will be created for:",
       "blockDirection": {
         "all": "All",
@@ -7505,12 +7537,30 @@
       "totalLinkMail": "Total Link Mails",
       "safeLinkMail": "Safe Link Mails",
       "maliciousLinkMail": "Malicious Link Mails",
+      "phishingLink": "Phishing Links",
+      "malwareDownload": "Malware Downloads",
+      "cAndCCommunication": "C&C Communication",
+      "spamPromotion": "Spam Promotion",
       "totalAttachmentMail": "Total Attachment Mails",
       "safeAttachmentMail": "Safe Attachment Mails",
       "maliciousAttachmentMail": "Malicious Attachment Mails",
+      "virusAttachment": "Virus Attachments",
+      "macroDocument": "Macro Documents",
+      "zipBomb": "Archive Bombs",
+      "exploit": "Exploits",
       "blockRate": "Block Rate",
       "blockRateHelp": "Daily malicious mail delivery-layer block rate",
-      "change": "Change vs Yesterday"
+      "change": "Period-over-period Change",
+      "expandRow": "Expand threat distribution for {date}",
+      "collapseRow": "Collapse threat distribution for {date}",
+      "threatDistribution": "Threat Type Distribution"
+    },
+    "error": {
+      "serviceUnavailable": "Service unavailable",
+      "loadFailed": "Failed to load data",
+      "description": "Link and attachment security statistics are temporarily unavailable. Please retry later.",
+      "retry": "Retry",
+      "retrying": "Retrying..."
     },
     "empty": {
       "noLinkMail": "No link mails in this period",

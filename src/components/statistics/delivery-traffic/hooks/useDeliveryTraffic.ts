@@ -18,6 +18,10 @@ export function useDeliveryTraffic(params: {
     queryKey: ['delivery-traffic', tenantId, params.direction, params.startDate, params.endDate],
     queryFn: () => fetchDeliveryTraffic({ ...params, tenantId }, apiRequest),
     enabled: params.enabled !== false,
+    // Statistics failures (notably 503) are actionable page state. Automatic
+    // retries hide that state for several seconds and can leave stale data on
+    // screen; the page exposes an explicit retry action instead (GT-12460).
+    retry: false,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });

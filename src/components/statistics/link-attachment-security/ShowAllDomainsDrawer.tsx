@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   Sheet,
   SheetContent,
@@ -19,6 +19,7 @@ import { useTopDomains } from './hooks/useTopDomains';
 import { BlacklistConfirmDialog } from './BlacklistConfirmDialog';
 import { useTenant } from '@/hooks/use-tenant';
 import type { Direction } from '@/lib/api/link-attachment-security';
+import { formatFirstSeen } from './domain-format';
 
 interface ShowAllDomainsDrawerProps {
   open: boolean;
@@ -39,6 +40,7 @@ export function ShowAllDomainsDrawer({
 }: ShowAllDomainsDrawerProps) {
   const t = useTranslations('linkAttachmentSecurity');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
   const { isAdmin } = useTenant();
   const { data, isLoading } = useTopDomains({ startDate, endDate, direction, limit });
   const [blacklistDomain, setBlacklistDomain] = useState<string | null>(null);
@@ -79,35 +81,49 @@ export function ShowAllDomainsDrawer({
                       {' · '}
                       {t('topDomains.blockRate')}: {d.block_rate.toFixed(1)}%
                     </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      {t('topDomains.firstSeen')}:{' '}
+                      {formatFirstSeen(d.first_seen, locale, t('topDomains.unknownDate'))}
+                    </div>
                   </div>
                   {d.blacklisted ? (
                     <Badge variant="destructive" className="text-[10px]">
                       {t('topDomains.blocked')}
                     </Badge>
                   ) : isAdmin ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2"
-                      onClick={() => setBlacklistDomain(d.domain)}
-                    >
-                      <ShieldBan className="h-3.5 w-3.5 text-rose-500" />
-                      <span className="text-xs">{t('topDomains.block')}</span>
-                    </Button>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <Badge variant="outline" className="text-[10px]">
+                        {t('topDomains.unblocked')}
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2"
+                        onClick={() => setBlacklistDomain(d.domain)}
+                      >
+                        <ShieldBan className="h-3.5 w-3.5 text-rose-500" />
+                        <span className="text-xs">{t('topDomains.block')}</span>
+                      </Button>
+                    </div>
                   ) : (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger render={
-                          <span>
-                            <Button variant="ghost" size="sm" className="h-7 px-2" disabled>
-                              <ShieldBan className="h-3.5 w-3.5 text-rose-500" />
-                              <span className="text-xs">{t('topDomains.block')}</span>
-                            </Button>
-                          </span>
-                        } />
-                        <TooltipContent>{tCommon('accessDenied')}</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <Badge variant="outline" className="text-[10px]">
+                        {t('topDomains.unblocked')}
+                      </Badge>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger render={
+                            <span>
+                              <Button variant="ghost" size="sm" className="h-7 px-2" disabled>
+                                <ShieldBan className="h-3.5 w-3.5 text-rose-500" />
+                                <span className="text-xs">{t('topDomains.block')}</span>
+                              </Button>
+                            </span>
+                          } />
+                          <TooltipContent>{tCommon('accessDenied')}</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                   )}
                 </div>
               ))}

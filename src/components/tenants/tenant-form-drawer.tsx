@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ExternalLink, Loader2, Plus, Trash2 } from 'lucide-react';
+import { CircleAlert, ExternalLink, Loader2, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Link } from '@/i18n/navigation';
@@ -39,6 +39,7 @@ import {
   deleteTenantDomain,
 } from '@/lib/api/tenants';
 import { getUsers } from '@/lib/api/users';
+import { generatePassword } from '@/components/admin/reset-password-dialog';
 import { ApiError } from '@/lib/api/client';
 import type {
   Tenant,
@@ -67,6 +68,8 @@ interface TenantFormDrawerProps {
 export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFormDrawerProps) {
   const t = useTranslations('tenants');
   const tc = useTranslations('common');
+  // 复用「管理员与权限」重置密码弹窗的「生成」按钮文案，避免再造一条同义 key。
+  const tu = useTranslations('users');
   const queryClient = useQueryClient();
   const { registry } = useProductForm();
   // Capability checkboxes: only features flagged grantable in the registry.
@@ -82,11 +85,13 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
   } | null>(null);
 
   // Primary admin (detail, edit mode only): derived from the users list
-  // (the tenant_admin belonging to this tenant). Shares the ['users'] query
-  // cache with the users page. Spec §6: 主管理员从 users 派生展示.
+  // (the tenant_admin belonging to this tenant).
+  // GT-12290：主管理员必须按该租户的作用域取数 —— 平台作用域的 /users 里没有
+  // 任何租户账号（GT-12393），用它派生会恒为「未设置」。queryKey 带上租户 id，
+  // 否则切换租户会命中上一个租户的缓存。
   const { data: users } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => getUsers(),
+    queryKey: ['users', 'by-tenant', editingTenant?.id ?? null],
+    queryFn: () => getUsers(undefined, editingTenant!.id),
     enabled: open && !!editingTenant,
   });
   const primaryAdmin = editingTenant
@@ -105,7 +110,8 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
   // Domains are required in both modes (spec §5 / prototype). Re-derive the
   // schema by mode anyway so the flag stays explicit at the call site; RHF
   // reads the resolver on each render so switching create↔edit takes effect.
-  const formSchema = useMemo(() => makeTenantFormSchema(true), []);
+  // GT-12290：主管理员两字段只在创建模式必填（编辑抽屉不渲染它们）。
+  const formSchema = useMemo(() => makeTenantFormSchema(true, !editingTenant), [editingTenant]);
   const form = useForm<TenantFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: EMPTY,
@@ -136,6 +142,8 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
           next_hop_port: d.next_hop_port || undefined,
         })),
         capability_flags: [...(editingTenant.capability_flags ?? [])],
+        admin_account: '',
+        admin_password: '',
       });
     } else {
       form.reset(EMPTY);
@@ -172,7 +180,50 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
     return { removedCount: removed.length, addedCount: added.length };
   };
 
-  const handleSubmit = form.handleSubmit(async (values) => {
+  // Keep a visible, exact list of everything blocking Save. Field-level
+  // messages alone are insufficient in this long, scrollable drawer: an error
+  // (especially the required domain list) can sit outside the current viewport
+  // and make the submit look like a dead button.
+  const validationMessagesFor = (errors: FieldErrors<TenantFormValues>): string[] => {
+    const messages: string[] = [];
+
+    if (errors.name) messages.push(t('nameRequired'));
+    if (errors.code) messages.push(t('codeRequired'));
+    if (errors.admin_account) {
+      messages.push(
+        errors.admin_account.message === 'adminAccountTaken'
+          ? t('adminAccountTaken')
+          : t('adminAccountRequired'),
+      );
+    }
+    if (errors.admin_password) {
+      messages.push(
+        errors.admin_password.message === 'adminPasswordRequired'
+          ? t('adminPasswordRequired')
+          : errors.admin_password.message || t('adminPasswordRequired'),
+      );
+    }
+    if (errors.expire_at) messages.push(t('expireAtBeforeToday'));
+    if (errors.domains) {
+      if (form.getValues('domains').length === 0) {
+        messages.push(t('domainsRequired'));
+      } else {
+        form.getValues('domains').forEach((_, idx) => {
+          const itemError = errors.domains?.[idx];
+          if (itemError?.domain) {
+            messages.push(`${t('domain')} #${idx + 1}: ${t('invalidDomain')}`);
+          }
+          if (itemError?.next_hop_port) {
+            messages.push(`${t('domain')} #${idx + 1}: ${t('nextHopPortInvalid')}`);
+          }
+        });
+      }
+    }
+
+    return [...new Set(messages)];
+  };
+
+  const submitValidForm = async (values: TenantFormValues) => {
     // Guardrail: removing a domain also drops its next-hops and egress
     // bindings, which silently breaks live mail routing for that domain. Make
     // the operator confirm before a general "edit tenant" save destroys
@@ -219,6 +270,8 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
             next_hop_host: d.next_hop_host,
             next_hop_port: d.next_hop_port,
           })),
+          admin_account: values.admin_account?.trim() || undefined,
+          admin_password: values.admin_password || undefined,
         };
         const res = await createTenant(payload);
         if (res.domain_errors && res.domain_errors.length > 0) {
@@ -238,15 +291,46 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
       if (err instanceof ApiError && err.status === 409) {
         // GT-11553 — see tenantConflictToastKey: a 409 is either a duplicate
         // tenant code or optimistic-lock drift, and they need different copy.
+        // GT-12290 再加一种：主管理员账号被占用 —— 提示必须落到账号字段上，
+        // 否则会被误报成"该租户已被他人修改"。
         const code = (err.body?.error as { code?: string } | undefined)?.code;
-        toast.error(t(tenantConflictToastKey(code)));
+        if (code === 'admin_account_conflict') {
+          form.setError('admin_account', { message: 'adminAccountTaken' });
+          toast.error(t('adminAccountTaken'));
+        } else {
+          toast.error(t(tenantConflictToastKey(code)));
+        }
+      } else if (
+        err instanceof ApiError &&
+        err.status === 400 &&
+        (err.body?.error as { code?: string } | undefined)?.code === 'admin_password_weak'
+      ) {
+        // GT-12290 spec §6：密码强度以服务端策略为准（按租户可配），服务端
+        // 400 的具体文案必须回显到密码字段上，不能吞成一句笼统的"创建失败"。
+        // err.message 就是后端 validateNewPassword 返回的策略文案本身
+        // （见 ApiError 构造函数），是权威、随策略变化的文案，不在前端重新
+        // 翻译/改写。
+        form.setError('admin_password', { message: err.message });
+        toast.error(err.message);
       } else {
         toast.error(err instanceof Error ? err.message : tc('error'));
       }
     } finally {
       setIsSubmitting(false);
     }
-  });
+  };
+
+  const handleSubmit = form.handleSubmit(
+    submitValidForm,
+    (errors) => {
+      const messages = validationMessagesFor(errors);
+      toast.error(t('validationFailed'), {
+        description: messages.length > 0 ? messages.join(' · ') : undefined,
+      });
+    },
+  );
+
+  const validationMessages = validationMessagesFor(form.formState.errors);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -266,7 +350,11 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                   <Label>
                     {t('tenantName')} <span className="text-destructive">*</span>
                   </Label>
-                  <Input {...form.register('name')} placeholder={t('namePlaceholder')} />
+                  <Input
+                    {...form.register('name')}
+                    placeholder={t('namePlaceholder')}
+                    aria-invalid={!!form.formState.errors.name}
+                  />
                   {form.formState.errors.name && (
                     <p className="text-xs text-destructive">
                       {form.formState.errors.name.message === 'nameRequired'
@@ -284,6 +372,7 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                     placeholder="acme"
                     disabled={!!editingTenant}
                     readOnly={!!editingTenant}
+                    aria-invalid={!!form.formState.errors.code}
                   />
                   {form.formState.errors.code && (
                     <p className="text-xs text-destructive">
@@ -293,9 +382,76 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                     </p>
                   )}
                 </div>
+                {!editingTenant && (
+                  <>
+                    <div className="space-y-2">
+                      <Label>
+                        {t('form.adminAccount')} <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        data-testid="tenant-admin-account"
+                        {...form.register('admin_account')}
+                        placeholder="acme-admin"
+                        aria-invalid={!!form.formState.errors.admin_account}
+                      />
+                      <p className="text-xs text-muted-foreground">{t('form.adminAccountHint')}</p>
+                      {form.formState.errors.admin_account && (
+                        <p className="text-xs text-destructive">
+                          {form.formState.errors.admin_account.message === 'adminAccountRequired'
+                            ? t('adminAccountRequired')
+                            : form.formState.errors.admin_account.message === 'adminAccountTaken'
+                              ? t('adminAccountTaken')
+                              : tc('required')}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label>
+                        {t('form.adminPassword')} <span className="text-destructive">*</span>
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="text"
+                          data-testid="tenant-admin-password"
+                          className="flex-1"
+                          {...form.register('admin_password')}
+                          aria-invalid={!!form.formState.errors.admin_password}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          data-testid="tenant-admin-password-generate"
+                          onClick={() =>
+                            form.setValue('admin_password', generatePassword(), {
+                              shouldValidate: true,
+                            })
+                          }
+                        >
+                          {tu('resetPassword.generate')}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{t('form.adminPasswordHint')}</p>
+                      {form.formState.errors.admin_password && (
+                        <p className="text-xs text-destructive">
+                          {form.formState.errors.admin_password.message === 'adminPasswordRequired'
+                            ? t('adminPasswordRequired')
+                            : // GT-12290：admin_password_weak 的 400 把服务端策略
+                              // 文案原样塞进 message（见上面的 catch 分支），不是
+                              // 一个 i18n key，这里直接原文展示；tc('required')
+                              // 只兜底真正没有 message 的场景。
+                              form.formState.errors.admin_password.message || tc('required')}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
                 <div className="space-y-2">
                   <Label>{t('form.expireAt')}</Label>
-                  <Input type="date" {...form.register('expire_at')} />
+                  <Input
+                    type="date"
+                    {...form.register('expire_at')}
+                    aria-invalid={!!form.formState.errors.expire_at}
+                  />
                   {form.formState.errors.expire_at && (
                     <p className="text-xs text-destructive">
                       {t('expireAtBeforeToday')}
@@ -363,11 +519,13 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                 next-hop / ownership-verification management. */}
             {(
               <section className="space-y-4">
-                {form.formState.errors.domains?.root && (
+                {fields.length === 0 && form.formState.errors.domains && (
                   <p className="text-xs text-destructive">{t('domainsRequired')}</p>
                 )}
                 <div className="flex items-center justify-between">
-                  <SectionLabel>{t('form.domains')}</SectionLabel>
+                  <SectionLabel>
+                    {t('form.domains')} <span className="text-destructive">*</span>
+                  </SectionLabel>
                   <Button
                     type="button"
                     variant="outline"
@@ -423,6 +581,7 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                             <Input
                               {...form.register(`domains.${idx}.domain`)}
                               placeholder="example.com"
+                              aria-invalid={!!form.formState.errors.domains?.[idx]?.domain}
                             />
                             {form.formState.errors.domains?.[idx]?.domain && (
                               <p className="text-xs text-destructive">{t('invalidDomain')}</p>
@@ -461,7 +620,13 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                                     : Number(v),
                               })}
                               placeholder="25"
+                              aria-invalid={!!form.formState.errors.domains?.[idx]?.next_hop_port}
                             />
+                            {form.formState.errors.domains?.[idx]?.next_hop_port && (
+                              <p className="text-xs text-destructive">
+                                {t('nextHopPortInvalid')}
+                              </p>
+                            )}
                           </div>
                           <div className="space-y-1.5 sm:col-span-2">
                             <Label>{t('nextHopHost')}</Label>
@@ -510,14 +675,29 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
             </section>
           </div>
 
-          <SheetFooter className="flex-row justify-end gap-2 border-t px-6 py-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              {tc('cancel')}
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {tc('save')}
-            </Button>
+          <SheetFooter className="gap-3 border-t px-6 py-4 sm:flex-row sm:items-end">
+            {form.formState.submitCount > 0 && validationMessages.length > 0 && (
+              <div
+                role="alert"
+                data-testid="tenant-form-validation-summary"
+                className="flex min-w-0 flex-1 items-start gap-2 text-destructive"
+              >
+                <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium">{t('validationFailed')}</p>
+                  <p className="mt-0.5 text-xs">{validationMessages.join(' · ')}</p>
+                </div>
+              </div>
+            )}
+            <div className="ml-auto flex shrink-0 justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                {tc('cancel')}
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {tc('save')}
+              </Button>
+            </div>
           </SheetFooter>
         </form>
       </SheetContent>

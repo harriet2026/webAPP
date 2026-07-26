@@ -86,7 +86,16 @@ export function AdminAuditFilters({
   const { capabilities, registry, viewer, grants } = useProductForm();
   const visibleGroups = useMemo(() => {
     const formVisible = capabilities ? new Set(visibleNavIds(registry, capabilities, viewer, grants)) : null;
-    const ctx = { hasPermission, isSystemAdmin, showAdvancedRules, canSeeRoute, registry, formVisible };
+    const ctx = {
+      hasPermission,
+      isSystemAdmin,
+      showAdvancedRules,
+      canSeeRoute,
+      registry,
+      formVisible,
+      capabilities,
+      viewer,
+    };
     return filterVisibleModuleGroups(
       AUDIT_MODULE_GROUPS,
       (item) => isNavItemAllowed(item, ctx),

@@ -545,7 +545,7 @@ export function MailListTable({
                 data-testid={`disposal-mail-row-${item.id}`}
                 className={cn(
                   'group',
-                  selectedIds.has(item.id) && 'bg-primary/5 data-[hovered=true]:bg-primary/10',
+                  selectedIds.has(item.id) && 'bg-primary/5 data-[state=selected]:data-[hovered=true]:bg-primary/10',
                 )}
                 onClick={() => {
                   const sel = typeof window !== 'undefined' ? window.getSelection() : null;
@@ -653,32 +653,40 @@ export function MailListTable({
                 )}
                 <TableCell
                   className={cn(
-                    'sticky right-0 z-10 min-w-32 border-l bg-card text-xs transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-muted/40 group-data-[hovered=true]:bg-muted/45 motion-reduce:transition-none',
-                    selectedIds.has(item.id) && 'bg-primary/5 group-data-[hovered=true]:bg-primary/10',
+                    'sticky right-0 z-10 min-w-32 border-l bg-card text-xs transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
+                    selectedIds.has(item.id) && 'bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]',
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center justify-end gap-1">
                     <Button
                       data-testid={`disposal-view-${item.id}`}
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 text-xs"
+                      className="h-7 gap-1 px-2 text-sm text-blue-600 data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-blue-700"
                       onClick={() => onItemClick(item.id)}
                     >
-                      <Eye className="mr-1 h-3 w-3" />
+                      <Eye />
                       {t('table.view')}
                     </Button>
                     {aiEnabled && (
-                      <Button
-                        data-testid={`disposal-find-similar-${item.id}`}
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs"
-                        onClick={() => onFindSimilar?.(item.id)}
-                      >
-                        {t('batch.findSimilar')}
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              data-testid={`disposal-find-similar-${item.id}`}
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 gap-1 px-2 text-sm text-blue-600 data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-blue-700"
+                              onClick={() => onFindSimilar?.(item.id)}
+                            >
+                              <Search />
+                              {t('table.findSimilar')}
+                            </Button>
+                          }
+                        />
+                        <TooltipContent>{t('table.findSimilarTooltip')}</TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                 </TableCell>

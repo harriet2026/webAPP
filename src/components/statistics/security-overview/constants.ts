@@ -24,6 +24,11 @@ export const SERIES_COLORS: Record<string, string> = {
   sensitive: '#EC4899',
   spoofing: '#F59E0B',
   account_compromised: '#B91C1C',
+  // threat_level view
+  low: '#3B82F6',
+  medium: '#EAB308',
+  high: '#F97316',
+  critical: '#DC2626',
   // action view
   deliver: '#10B981',
   mark_deliver: '#06B6D4',
@@ -43,11 +48,11 @@ export const SERIES_COLORS: Record<string, string> = {
   unknown: '#6B7280',
 };
 
-// GT-11888: 「威胁等级」统计视角已从邮件安全总览移除，两份视角清单都不再包含
-// `threat_level`。清单集中放在这里，让页面趋势卡和打印报告共用同一处真源，
-// 不会再出现「Tab 去掉了、打印报告还在」这种半删状态。
-export const TREND_VIEW_BY_OPTIONS: ViewBy[] = ['threat_type', 'action', 'email_type'];
-export const PRINT_VIEW_BY_OPTIONS: ViewBy[] = ['threat_type', 'action', 'delivery_result', 'email_type'];
+// html_spec v3: the interactive and printed report expose the same four
+// business perspectives. `threat_type` remains in the wire contract for
+// compatibility, but is not a user-facing tab.
+export const TREND_VIEW_BY_OPTIONS: ViewBy[] = ['email_type', 'action', 'threat_level', 'delivery_result'];
+export const PRINT_VIEW_BY_OPTIONS: ViewBy[] = TREND_VIEW_BY_OPTIONS;
 
 export function seriesColor(key: string): string {
   return SERIES_COLORS[key] ?? '#6b7280';

@@ -27,10 +27,20 @@ const domainItemSchema = z.object({
 // mode). GT-11844 restored domain management in the edit drawer, so the edit
 // form is now seeded from GET /tenants/:id/domains rather than reset to [] —
 // a min(1) rule no longer deadlocks submit there.
-export function makeTenantFormSchema(requireDomains: boolean) {
+//
+// GT-12290：`requireAdmin` 只在**创建**模式为 true —— 创建租户时必须同时建出该租户的
+// 第一个管理员（主管理员）；编辑抽屉不渲染这两个字段，故必须豁免，否则编辑保存会被
+// 一个用户根本看不见的必填项挡住。
+export function makeTenantFormSchema(requireDomains: boolean, requireAdmin: boolean) {
   const domains = requireDomains
     ? z.array(domainItemSchema).min(1, 'domainsRequired')
     : z.array(domainItemSchema);
+  const adminAccount = requireAdmin
+    ? z.string().trim().min(1, 'adminAccountRequired')
+    : z.string().optional().or(z.literal(''));
+  const adminPassword = requireAdmin
+    ? z.string().min(1, 'adminPasswordRequired')
+    : z.string().optional().or(z.literal(''));
   return z.object({
     name: z.string().min(1, 'nameRequired'),
     code: z.string().min(1, 'codeRequired'),
@@ -47,11 +57,13 @@ export function makeTenantFormSchema(requireDomains: boolean) {
       ),
     domains,
     capability_flags: z.array(z.string()),
+    admin_account: adminAccount,
+    admin_password: adminPassword,
   });
 }
 
 // Default (create) schema — also the one exercised by the unit tests.
-export const tenantFormSchema = makeTenantFormSchema(true);
+export const tenantFormSchema = makeTenantFormSchema(true, true);
 
 export type TenantFormValues = z.infer<typeof tenantFormSchema>;
 
@@ -101,4 +113,6 @@ export const EMPTY_TENANT_FORM: TenantFormValues = {
   expire_at: null,
   domains: [],
   capability_flags: [],
+  admin_account: '',
+  admin_password: '',
 };

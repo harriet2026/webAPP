@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   tenantFormSchema,
+  makeTenantFormSchema,
   EMPTY_TENANT_FORM,
   tenantConflictToastKey,
   diffTenantDomains,
@@ -18,6 +19,8 @@ const base = {
   expire_at: null as string | null,
   domains: [{ domain: 'example.com' }],
   capability_flags: [] as string[],
+  admin_account: 'acme-admin',
+  admin_password: 'Aa123456789!',
 };
 
 function messages(result: ReturnType<typeof tenantFormSchema.safeParse>): string[] {
@@ -197,5 +200,44 @@ describe('diffTenantDomains (GT-11844)', () => {
   it('reports every domain as removed when the list is cleared', () => {
     const { removed } = diffTenantDomains(cur, []);
     expect(removed.map((d) => d.domain)).toEqual(['a.test', 'b.test']);
+  });
+});
+
+// GT-12290：创建租户时必须填主管理员账号+初始密码；编辑模式豁免（编辑抽屉不渲染
+// 这两个字段，主管理员改密走「重置密码」入口）。
+describe('makeTenantFormSchema requireAdmin (GT-12290)', () => {
+  const createSchema = makeTenantFormSchema(true, true);
+  const editSchema = makeTenantFormSchema(true, false);
+  const withAdmin = { ...base, admin_account: 'acme-admin', admin_password: 'Aa123456789!' };
+
+  it('accepts a create payload carrying account + password', () => {
+    expect(createSchema.safeParse(withAdmin).success).toBe(true);
+  });
+
+  it('rejects a missing admin_account with adminAccountRequired', () => {
+    const r = createSchema.safeParse({ ...withAdmin, admin_account: '' });
+    expect(r.success).toBe(false);
+    const issue = !r.success && r.error.issues.find((i) => i.path[0] === 'admin_account');
+    expect(issue && issue.message).toBe('adminAccountRequired');
+  });
+
+  it('rejects a whitespace-only admin_account', () => {
+    expect(createSchema.safeParse({ ...withAdmin, admin_account: '   ' }).success).toBe(false);
+  });
+
+  it('rejects a missing admin_password with adminPasswordRequired', () => {
+    const r = createSchema.safeParse({ ...withAdmin, admin_password: '' });
+    expect(r.success).toBe(false);
+    const issue = !r.success && r.error.issues.find((i) => i.path[0] === 'admin_password');
+    expect(issue && issue.message).toBe('adminPasswordRequired');
+  });
+
+  it('exempts both fields in edit mode', () => {
+    expect(editSchema.safeParse({ ...base, admin_account: '', admin_password: '' }).success).toBe(true);
+  });
+
+  it('keeps both keys on EMPTY_TENANT_FORM so RHF resets clear them', () => {
+    expect(EMPTY_TENANT_FORM.admin_account).toBe('');
+    expect(EMPTY_TENANT_FORM.admin_password).toBe('');
   });
 });

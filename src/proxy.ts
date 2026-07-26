@@ -6,6 +6,7 @@ import {
   FORM_OVERRIDE_COOKIE,
   isValidForm,
 } from '@/lib/product-form/resolve';
+import { isDemoAuthBypassEnabled } from '@/lib/demo-auth-bypass';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -75,9 +76,12 @@ function buildEdgeGates(caps: ReturnType<typeof capabilitiesForForm>) {
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Coarse login-state gate: presence of the HttpOnly token cookie. Do not
-  // inspect the value (it is an opaque JWT); staleness is handled downstream.
-  const hasAuth = !!request.cookies.get(AUTH_COOKIE)?.value;
+  // Demo deployments explicitly opt into a login bypass by setting the same
+  // server-side switch used to expose the product-form switcher to exactly
+  // "true". Otherwise preserve the normal HttpOnly-token gate.
+  const hasAuth =
+    isDemoAuthBypassEnabled(process.env.OSGATEWAY_PRODUCT_FORM_SWITCHER) ||
+    !!request.cookies.get(AUTH_COOKIE)?.value;
 
   if (!isAuthPath(pathname) && !isPortalPath(pathname) && !hasAuth) {
     const locale = pathname.split('/')[1] || 'zh';

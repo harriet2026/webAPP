@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +20,14 @@ interface TimeDistributionCardProps {
   scopeTenantId: number | null;
 }
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const WEEKDAY_ANCHOR_UTC = Date.UTC(2026, 6, 19); // Sunday; locale-safe fixed anchor.
+
+export function localizedWeekdays(locale: string): string[] {
+  const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
+  return Array.from({ length: 7 }, (_, day) =>
+    formatter.format(new Date(WEEKDAY_ANCHOR_UTC + day * 86_400_000)),
+  );
+}
 const THREAT_FILTERS = ['all', 'phishing', 'spam', 'virus'];
 const DAILY_STACK = [
   { key: 'phishing', color: '#EF4444' },
@@ -32,6 +39,8 @@ const DAILY_STACK = [
 export function TimeDistributionCard({ startDate, endDate, direction, scopeTenantId }: TimeDistributionCardProps) {
   const t = useTranslations('securityOverview.time');
   const tRoot = useTranslations('securityOverview');
+  const locale = useLocale();
+  const weekdays = useMemo(() => localizedWeekdays(locale), [locale]);
   const [mode, setMode] = useState<'daily' | 'weekly'>('daily');
   const [threatFilter, setThreatFilter] = useState('all');
 
@@ -86,7 +95,7 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
   const peakText = topPeak
     ? t('peakSummary', { range: hourRange(topPeak.hour), count: topPeak.count.toLocaleString() })
     : peakCell
-      ? `${t('peakLabel')}: ${DAYS[peakCell.day]} ${String(peakCell.hour).padStart(2, '0')}:00 · ${peakCell.value.toLocaleString()}`
+      ? `${t('peakLabel')}: ${weekdays[peakCell.day]} ${String(peakCell.hour).padStart(2, '0')}:00 · ${peakCell.value.toLocaleString()}`
       : null;
 
   const chartOption = useMemo<EChartsOption | null>(() => {
@@ -115,7 +124,7 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
           formatter: (params: unknown) => {
             const value = (params as { value?: [number, number, number] }).value;
             if (!value) return '';
-            return `${DAYS[value[1]]} ${String(value[0]).padStart(2, '0')}:00<br/>${value[2].toLocaleString()}`;
+            return `${weekdays[value[1]]} ${String(value[0]).padStart(2, '0')}:00<br/>${value[2].toLocaleString()}`;
           },
         },
         grid: { left: 42, right: 12, top: 8, bottom: 46 },
@@ -129,7 +138,7 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
         },
         yAxis: {
           type: 'category',
-          data: DAYS,
+          data: weekdays,
           inverse: true,
           axisLabel,
           axisLine: { show: false },
@@ -201,7 +210,7 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
         data: stackData.map((item) => Number(item?.[segment.key] ?? 0)),
       })),
     };
-  }, [buckets, hasData, hourly, maxTotal, mode, t, tRoot, weeklyMatrix]);
+  }, [buckets, hasData, hourly, maxTotal, mode, t, tRoot, weekdays, weeklyMatrix]);
 
   return (
     <Card data-testid="time-distribution-card">

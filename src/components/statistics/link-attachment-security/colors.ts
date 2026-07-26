@@ -74,4 +74,7 @@ export const ATTACHMENT_TYPE_KEYS = ['virus', 'macro', 'zip_bomb', 'exploit', 'o
 
 // demo 明细表只展示四个主链接类别；二维码钓鱼保留在趋势/分布图中。
 export const LINK_DETAIL_KEYS = ['phishing', 'malware_download', 'c2', 'spam'] as const;
-export const ATTACHMENT_DETAIL_KEYS = ['virus', 'macro', 'zip_bomb', 'exploit', 'other'] as const;
+// GT-12461: the attachment detail contract is ten business columns. `other`
+// remains available to the trend/distribution and expanded-row donut, but is
+// intentionally not rendered as an eleventh detail column.
+export const ATTACHMENT_DETAIL_KEYS = ['virus', 'macro', 'zip_bomb', 'exploit'] as const;

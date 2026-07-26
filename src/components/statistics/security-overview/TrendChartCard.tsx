@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SmartSummaryBadge } from '@/components/shared/smart-summary-badge';
 import { NON_SERIES_KEYS, type TrendData, type ViewBy, type TrendSeriesPoint } from '@/lib/api/security-overview';
-import { seriesColor } from './constants';
+import { seriesColor, TREND_VIEW_BY_OPTIONS } from './constants';
 
 interface TrendChartCardProps {
   trend?: TrendData;
@@ -23,8 +23,7 @@ interface TrendChartCardProps {
 
 /** User-visible trend perspectives defined by the current page contract. */
 export const SECURITY_OVERVIEW_VIEW_OPTIONS: ViewBy[] = [
-  'email_type',
-  'action',
+  ...TREND_VIEW_BY_OPTIONS,
 ];
 
 export function TrendChartCard({
@@ -53,6 +52,7 @@ export function TrendChartCard({
     const nsMap: Record<ViewBy, string> = {
       threat_type: 'threatTypes',
       action: 'actions',
+      threat_level: 'threatLevels',
       delivery_result: 'deliveryResults',
       email_type: 'emailTypes',
     };
@@ -197,9 +197,10 @@ export function TrendChartCard({
                 {keys.map((k) => (
                   <button
                     key={k}
+                    type="button"
                     onClick={() => onToggleSeries(k)}
                     onDoubleClick={() => isolateSeries(k)}
-                    className="flex items-center gap-1.5 text-xs transition-colors"
+                    className="flex items-center gap-1.5 rounded-md px-1 py-0.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     <div
                       className="w-3 h-3 rounded-full"

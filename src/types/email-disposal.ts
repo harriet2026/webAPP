@@ -36,7 +36,12 @@ export interface DisposalSearchParams {
 export interface AICondition {
   field: string;
   op: string;
-  value: string;
+  // design spec §7 (2026-07-25-ai-search-dedicated-llm-config): 原为 string，
+  // AI 解析结果的 in/between 等条件值现在保持结构化形态（数组/数字/布尔）直
+  // 传，不再在 search-bar.tsx 拍平成逗号拼接字符串——那样会让 in/between 条
+  // 件在后端 ParseAdvancedFilter 校验时因"期望数组却收到字符串"而 400。
+  // is_null/is_not_null 等无值操作符下可为 undefined。
+  value?: FilterCondition["value"];
   source: "ai";
 }
 

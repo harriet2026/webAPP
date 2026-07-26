@@ -47,6 +47,11 @@ const FIELD_LABEL_KEYS: Record<string, string> = {
   is_zip_bomb: "isZipBomb",
   is_encrypted_attachment: "isEncryptedAttachment",
   recipient: "recipient",
+  // AI 智能搜索专属字段（parse-query 可产出的高级 filter 字段，advanced chips
+  // 目前不暴露编辑入口，但 AI chips 需要与其它字段一致的本地化标签）。
+  received_at: "sendReceiveTime",
+  display_status: "emailStatus",
+  disposal_policy_key: "disposalPolicyKeys",
 };
 
 // GT-11610: fields whose value carries a unit. Maps field key -> i18n key
@@ -72,6 +77,7 @@ const OP_LABELS: Record<string, string> = {
   le: "≤",
   between: "~",
   in: "∈",
+  not_in: "∉",
 };
 
 // Values that should be passed through the enum i18n map (actions.*,
@@ -90,6 +96,10 @@ const ENUM_VALUE_MAP: Record<string, (v: string) => string | undefined> = {
   threat_level: (v) => `enumValue.${v}`,
   qr_code_result: (v) => `enumValue.${v}`,
   intent_label: intentLabelI18nKey,
+  // GT-12368 AI 搜索 filter 全覆盖：display_status 复用 quick-filter 的
+  // statuses.* 字典（17 值枚举，与 emailStatus 多选一致）。
+  // disposal_policy_key 不走此表——模块名走 getModuleName（见 formatCondLabel）。
+  display_status: (v) => `statuses.${v}`,
 };
 
 // Quick-filter fields whose values are enum codes that need i18n resolution.
@@ -120,11 +130,68 @@ export function SelectedConditions({
 
   const chips: { key: string; label: string; isAi: boolean }[] = [];
 
+  // GT-12368: AI chips 与 advanced chips 共用的"字段 操作符 值"本地化格式。
+  // 新增的 AI 专用字段（received_at/display_status/disposal_policy_key）也在
+  // FIELD_LABEL_KEYS/ENUM_VALUE_MAP 注册，两类 chips 展示一致。
+  const formatCondLabel = (cond: {
+    field: string;
+    op: string;
+    value?: unknown;
+  }): string => {
+    const fieldKey = FIELD_LABEL_KEYS[cond.field];
+    const fieldLabel = fieldKey ? ft(fieldKey) : cond.field;
+    const opLabel = OP_LABELS[cond.op] ?? cond.op;
+    const valueMapper = ENUM_VALUE_MAP[cond.field];
+    // GT-12368 fix round 1: AI 条件的多值结果（如 display_status in
+    // [delivered, rejected]）在 search-bar.tsx 里已被 String() 展平成逗号拼接
+    // 的单一字符串（AICondition.value 的声明类型就是 string），不会走
+    // Array.isArray 分支。仅对枚举类字段（valueMapper 命中，或
+    // disposal_policy_key）按逗号拆成多个原子值——非枚举字段（如 subject）不
+    // 拆，避免把合法值里出现的逗号误拆开。
+    const isEnumMapped = cond.field === "disposal_policy_key" || !!valueMapper;
+    const rawValues = Array.isArray(cond.value)
+      ? (cond.value as (string | number)[]).map(String)
+      : isEnumMapped
+        ? String(cond.value ?? "").split(",")
+        : [String(cond.value ?? "")];
+    // GT-11579 A3 + GT-12368: valueMapper 返回相对 emailDisposal.filters 的
+    // i18n 路径（如 "actions.quarantine"）；逐元素 map 后再 join，使 `in` 多值
+    // enum 条件的每个值都本地化（而不是先 join 成裸字符串再整体查表——那样多值
+    // 永远查不中，只会落回原始逗号拼接串）。
+    const mapOne = (v: string): string => {
+      if (cond.field === "disposal_policy_key") {
+        return getModuleName(v, disposalLang) || v;
+      }
+      if (valueMapper && v) {
+        const i18nPath = valueMapper(v);
+        // GT-12368 fix round 1: next-intl 默认 fallback 对缺失 key 不抛异常，
+        // 而是原样返回 dot-joined 路径（如
+        // "emailDisposal.filters.statuses.xxx"），try/catch 拦不住这种"假成功"
+        // ——所以改用 ft.has() 显式判断 key 是否真实存在（同
+        // investigations/page.tsx 的 formatTargetType 用法），不存在则回退到
+        // 原始枚举值，而不是把 i18n 路径原样展示给用户。
+        if (i18nPath && ft.has(i18nPath)) {
+          return ft(i18nPath);
+        }
+        return v;
+      }
+      return v;
+    };
+    let valueLabel = rawValues.map(mapOne).join(",");
+    // GT-11610: append unit suffix for unit-bearing fields (e.g. email size in
+    // KB). Skip for null operators, which have no value.
+    const unitKey = FIELD_UNIT_KEYS[cond.field];
+    if (unitKey && valueLabel && cond.op !== "is_null" && cond.op !== "is_not_null") {
+      valueLabel = `${valueLabel} ${ft(unitKey)}`;
+    }
+    return `${fieldLabel} ${opLabel} ${valueLabel}`;
+  };
+
   if (aiConditions.length > 0) {
     aiConditions.forEach((ac, i) => {
       chips.push({
         key: `ai-${i}`,
-        label: `${ac.field}: ${ac.value}`,
+        label: formatCondLabel(ac),
         isAi: true,
       });
     });
@@ -218,40 +285,9 @@ export function SelectedConditions({
   for (const [gi, group] of advanced.groups.entries()) {
     for (const [ci, cond] of group.conditions.entries()) {
       // GT-11579 A3: render localized "field op value" instead of raw SQL-like form.
-      const fieldKey = FIELD_LABEL_KEYS[cond.field];
-      const fieldLabel = fieldKey ? ft(fieldKey) : cond.field;
-      const opLabel = OP_LABELS[cond.op] ?? cond.op;
-      const valueMapper = ENUM_VALUE_MAP[cond.field];
-      const rawValue = Array.isArray(cond.value)
-        ? (cond.value as (string | number)[]).join(",")
-        : String(cond.value ?? "");
-      // GT-11579 A3: valueMapper returns a dotted i18n path relative to
-      // emailDisposal.filters (e.g. "actions.quarantine"); resolve via ft.
-      let valueLabel = rawValue;
-      if (valueMapper && rawValue) {
-        const i18nPath = valueMapper(rawValue);
-        if (i18nPath) {
-          try {
-            valueLabel = ft(i18nPath);
-          } catch {
-            valueLabel = rawValue;
-          }
-        }
-      }
-      // GT-11610: append unit suffix for unit-bearing fields (e.g. email size
-      // in KB). Skip for null operators, which have no value.
-      const unitKey = FIELD_UNIT_KEYS[cond.field];
-      if (
-        unitKey &&
-        rawValue &&
-        cond.op !== "is_null" &&
-        cond.op !== "is_not_null"
-      ) {
-        valueLabel = `${valueLabel} ${ft(unitKey)}`;
-      }
       chips.push({
         key: `a-${gi}-${ci}`,
-        label: `${fieldLabel} ${opLabel} ${valueLabel}`,
+        label: formatCondLabel(cond),
         isAi: false,
       });
     }

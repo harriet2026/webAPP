@@ -66,6 +66,41 @@ test.describe.serial('Tenants CRUD (Spec 2A)', () => {
     await expect(page.table).toBeVisible();
   });
 
+  test('create drawer identifies every missing required field after Save', async ({
+    authenticatedPage,
+  }) => {
+    const page = new TenantsPage(authenticatedPage);
+    await page.goto();
+    await page.expectLoaded();
+    await page.openCreateDrawer();
+
+    const drawer = page.drawer;
+    await drawer.locator('button[type="submit"]').click();
+
+    // Regression: validation used to stop submission without a persistent,
+    // viewport-visible explanation, so Save appeared broken when the required
+    // domain list or another field was omitted.
+    const summary = drawer.getByTestId('tenant-form-validation-summary');
+    await expect(summary).toBeVisible();
+    await expect(summary).toContainText('以下信息未填写或格式有误');
+    await expect(summary).toContainText('请输入租户名称');
+    await expect(summary).toContainText('请输入租户编码');
+    await expect(summary).toContainText('请输入主管理员账号');
+    await expect(summary).toContainText('请输入初始密码');
+    await expect(summary).toContainText('至少需要一个域名');
+
+    await expect(drawer.locator('input[name="name"]')).toHaveAttribute('aria-invalid', 'true');
+    await expect(drawer.locator('input[name="code"]')).toHaveAttribute('aria-invalid', 'true');
+    await expect(drawer.getByTestId('tenant-admin-account')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
+    await expect(drawer.getByTestId('tenant-admin-password')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
+  });
+
   test('create tenant via drawer (name + code)', async ({ authenticatedPage }) => {
     const page = new TenantsPage(authenticatedPage);
     await page.goto();
@@ -136,10 +171,10 @@ test.describe.serial('Tenants CRUD (Spec 2A)', () => {
     await page.openEditDrawer(editedTenantName);
 
     const drawer = authenticatedPage.locator('[role="dialog"]');
-    // §6: 主管理员 detail section is rendered. The test tenant has no
-    // tenant_admin user, so it shows the "未设置" (none) placeholder.
+    // §6: 主管理员 detail section is rendered from the account created
+    // together with the tenant.
     await expect(drawer.getByText('主管理员', { exact: true })).toBeVisible();
-    await expect(drawer.getByText('未设置')).toBeVisible();
+    await expect(drawer.getByText(`${testTenantCode}-admin`, { exact: true })).toBeVisible();
 
     // "在用户管理中查看" deep-links to /users pre-filtered by this tenant.
     await drawer.getByRole('link', { name: /在用户管理中查看/ }).click();

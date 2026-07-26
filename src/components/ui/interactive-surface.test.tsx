@@ -70,6 +70,7 @@ describe('InteractiveSurface', () => {
     const button = screen.getByRole('button', { name: 'Refresh' });
 
     expect(button).not.toHaveClass('active:not-aria-[haspopup]:translate-y-px');
+    expect(button).toHaveClass('border', 'border-border', 'bg-card');
     fireEvent.pointerEnter(button, { pointerType: 'mouse' });
     expect(button).toHaveAttribute('data-hovered', 'true');
 

@@ -27,8 +27,11 @@ export interface UpdateUserRequest {
   email?: string;
 }
 
-export async function getUsers(requestFn: ApiRequestFn = apiRequest): Promise<User[]> {
-  const res = await requestFn<{ items: User[] }>('/users');
+export async function getUsers(requestFn: ApiRequestFn = apiRequest, tenantId?: number | null): Promise<User[]> {
+  // GT-12290：平台作用域的 /users 只返回平台账号（tenant_id IS NULL，GT-12393 的
+  // 刻意行为）。要看某个租户的账号必须显式带 ?tenant_id — 后端据此走 ListUsersScoped。
+  const path = tenantId != null ? `/users?tenant_id=${tenantId}` : '/users';
+  const res = await requestFn<{ items: User[] }>(path);
   return res.items;
 }
 

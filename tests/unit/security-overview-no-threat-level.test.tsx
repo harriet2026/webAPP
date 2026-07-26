@@ -5,10 +5,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import type { TrendData } from '@/lib/api/security-overview';
 
-// GT-11888: 产品要求「邮件安全总览」去掉「威胁等级」数据统计模块。
-// 该视角原本出现在三处：趋势图的视角 Tab、明细表（跟随 Tab）、打印报告的分节。
-// 这里同时守住「Tab 不再渲染」「视角清单不再包含它」「i18n 文案已删干净」三层，
-// 任一处回潮都会红。
+// GT-12482 / html_spec v3 supersedes the older removal: the page and print
+// report expose 邮件类型 / 处置动作 / 威胁等级 / 投递结果 as one shared contract.
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
@@ -34,7 +32,7 @@ import { TREND_VIEW_BY_OPTIONS, PRINT_VIEW_BY_OPTIONS, SERIES_COLORS } from '@/c
 
 // Empty series everywhere: with no data rows the card renders no legend buttons,
 // so every <button> in the DOM is a view-by Tab.
-const trend = { threat_type: [], action: [], delivery_result: [], email_type: [] } as unknown as TrendData;
+const trend = { threat_type: [], action: [], threat_level: [], delivery_result: [], email_type: [] } as unknown as TrendData;
 
 const LOCALES = ['zh', 'en', 'th', 'ru'] as const;
 
@@ -43,36 +41,36 @@ function loadMessages(locale: string): Record<string, unknown> {
   return JSON.parse(readFileSync(file, 'utf-8'));
 }
 
-describe('security-overview: 威胁等级 statistics module removed (GT-11888)', () => {
-  it('trend card renders no 威胁等级 view-by tab', () => {
+describe('security-overview: four perspective contract restored (GT-12482)', () => {
+  it('trend card renders the four v3 view-by tabs', () => {
     const { container } = render(createElement(TrendChartCard, {
       trend, isLoading: false, viewBy: 'threat_type' as const,
       onViewByChange: vi.fn(), hiddenSeries: new Set<string>(), onToggleSeries: vi.fn(),
     }));
     const tabs = Array.from(container.querySelectorAll('button')).map((b) => b.textContent ?? '');
-    expect(tabs).not.toContain('viewBy.threat_level');
-    // PRD v3 收敛为两视角（邮件类型 / 处置动作）——threat_type 也随威胁等级一并下线,
-    // 现存视角即 SECURITY_OVERVIEW_VIEW_OPTIONS = ['email_type','action']。
-    expect(tabs).toEqual(['viewBy.email_type', 'viewBy.action']);
+    expect(tabs).toEqual([
+      'viewBy.email_type',
+      'viewBy.action',
+      'viewBy.threat_level',
+      'viewBy.delivery_result',
+    ]);
   });
 
-  it('neither the page nor the print report lists threat_level as a view', () => {
-    expect(TREND_VIEW_BY_OPTIONS).not.toContain('threat_level');
-    expect(PRINT_VIEW_BY_OPTIONS).not.toContain('threat_level');
-    expect(TREND_VIEW_BY_OPTIONS.length).toBeGreaterThan(0);
-    expect(PRINT_VIEW_BY_OPTIONS.length).toBeGreaterThan(0);
+  it('keeps the interactive page and print report on the same four views', () => {
+    const expected = ['email_type', 'action', 'threat_level', 'delivery_result'];
+    expect(TREND_VIEW_BY_OPTIONS).toEqual(expected);
+    expect(PRINT_VIEW_BY_OPTIONS).toEqual(expected);
   });
 
-  it('drops the threat-level labels and colors from every locale', () => {
+  it('ships threat-level labels and semantic colors in every locale', () => {
     for (const locale of LOCALES) {
       const so = loadMessages(locale).securityOverview as Record<string, unknown>;
       expect(so, `${locale} securityOverview`).toBeTruthy();
-      expect(so.threatLevels, `${locale} securityOverview.threatLevels`).toBeUndefined();
-      expect(Object.keys(so.viewBy as object), `${locale} securityOverview.viewBy`).not.toContain('threat_level');
+      expect(so.threatLevels, `${locale} securityOverview.threatLevels`).toBeTruthy();
+      expect(Object.keys(so.viewBy as object), `${locale} securityOverview.viewBy`).toContain('threat_level');
     }
-    // The 5 level series colors only ever fed the threat_level view.
     for (const key of ['low', 'medium', 'high', 'critical']) {
-      expect(SERIES_COLORS[key], `SERIES_COLORS.${key}`).toBeUndefined();
+      expect(SERIES_COLORS[key], `SERIES_COLORS.${key}`).toMatch(/^#[0-9A-F]{6}$/i);
     }
   });
 });

@@ -1,11 +1,13 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { TimeDistributionCard } from '../TimeDistributionCard';
+import { localizedWeekdays, TimeDistributionCard } from '../TimeDistributionCard';
 
+let lastChartOption: Record<string, unknown> = {};
 vi.mock('echarts-for-react', () => ({
-  default: ({ option, ...props }: { option: unknown; [key: string]: unknown }) => (
-    <div {...props} data-option={JSON.stringify(option)} />
-  ),
+  default: ({ option, ...props }: { option: Record<string, unknown>; [key: string]: unknown }) => {
+    lastChartOption = option;
+    return <div {...props} data-option={JSON.stringify(option)} />;
+  },
 }));
 
 // GT-11983 / GT-11932: the backend has always returned a TOP4 `peak_hours`
@@ -15,6 +17,7 @@ vi.mock('echarts-for-react', () => ({
 // badge ("峰值时段: 10:00 · 280"), so there was no ranking and no hour RANGE.
 
 vi.mock('next-intl', () => ({
+  useLocale: () => 'zh-CN',
   useTranslations: () => (key: string, vars?: Record<string, unknown>) => {
     const dict: Record<string, string> = {
       title: '攻击时段分布',
@@ -126,6 +129,14 @@ describe('TimeDistributionCard peak-hours ranking (GT-11983 / GT-11932)', () => 
     expect(option.series[0].type).toBe('heatmap');
     expect(option.series[0].data).toEqual([[9, 0, 12], [10, 1, 24]]);
     expect(option.yAxis.inverse).toBe(true);
+    expect(option.yAxis.data).toEqual(['周日', '周一', '周二', '周三', '周四', '周五', '周六']);
+    const formatter = (lastChartOption.tooltip as { formatter: (params: unknown) => string }).formatter;
+    expect(formatter({ value: [10, 1, 24] })).toContain('周一');
+  });
+
+  it('localizes weekday labels without forcing Chinese in other locales', () => {
+    expect(localizedWeekdays('zh-CN')[1]).toBe('周一');
+    expect(localizedWeekdays('en-US')[1]).toBe('Mon');
   });
 });
 

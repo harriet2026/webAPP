@@ -37,7 +37,10 @@ interface WorldGeoJson {
   features: Array<{
     type: 'Feature';
     properties: { iso_a2: string; name_en: string };
-    geometry: unknown;
+    geometry: {
+      type: 'Polygon' | 'MultiPolygon';
+      coordinates: unknown[];
+    };
   }>;
 }
 
@@ -47,6 +50,42 @@ const WORLD_MAP_URL = '/maps/world-countries.geojson';
 const ISO_ALPHA2 = /^[A-Z]{2}$/;
 
 let worldMapLoad: Promise<void> | null = null;
+
+const CHINA_VIEWPORT = {
+  center: [104.5, 35] as [number, number],
+  zoom: 3.7,
+};
+
+/**
+ * The upstream world asset models Taiwan as a separate ISO feature. The
+ * security overview is a country-level operational view, so normalize the
+ * product map contract before registration: all Chinese territory must share
+ * the CN series datum, selection state and tooltip.
+ */
+export function normalizeWorldMapGeoJson(geoJson: WorldGeoJson): WorldGeoJson {
+  const china = geoJson.features.find((feature) => feature.properties.iso_a2 === 'CN');
+  const taiwan = geoJson.features.find((feature) => feature.properties.iso_a2 === 'TW');
+  if (!china || !taiwan) return geoJson;
+
+  const asMultiPolygon = (geometry: WorldGeoJson['features'][number]['geometry']): unknown[] =>
+    geometry.type === 'MultiPolygon' ? geometry.coordinates : [geometry.coordinates];
+  const chinaGeometry = {
+    type: 'MultiPolygon' as const,
+    coordinates: [
+      ...asMultiPolygon(china.geometry),
+      ...asMultiPolygon(taiwan.geometry),
+    ],
+  };
+
+  return {
+    ...geoJson,
+    features: geoJson.features
+      .filter((feature) => feature.properties.iso_a2 !== 'TW')
+      .map((feature) => feature.properties.iso_a2 === 'CN'
+        ? { ...feature, geometry: chinaGeometry }
+        : feature),
+  };
+}
 
 function subscribeToColorScheme(onChange: () => void): () => void {
   const observer = new MutationObserver(onChange);
@@ -69,7 +108,7 @@ function ensureWorldMap(): Promise<void> {
       .then((geoJson) => {
         echarts.registerMap(
           WORLD_MAP_NAME,
-          geoJson as Parameters<typeof echarts.registerMap>[1],
+          normalizeWorldMapGeoJson(geoJson) as Parameters<typeof echarts.registerMap>[1],
         );
       })
       .catch((error) => {
@@ -208,6 +247,8 @@ function WorldThreatMap({
       selectedMap: selectedCountry ? { [selectedCountry]: true } : {},
       layoutCenter: ['50%', '47%'],
       layoutSize: '105%',
+      center: selectedCountry === 'CN' ? CHINA_VIEWPORT.center : undefined,
+      zoom: selectedCountry === 'CN' ? CHINA_VIEWPORT.zoom : 1,
       data: countries.map((country) => ({
         name: country.country,
         value: country.count,
@@ -252,7 +293,7 @@ function WorldThreatMap({
         option={option}
         onEvents={onEvents}
         opts={{ renderer: 'svg' }}
-        style={{ height: 260, width: '100%' }}
+        style={{ height: '100%', width: '100%' }}
       />
     </div>
   );
@@ -341,7 +382,7 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+          <div className="grid gap-4 xl:grid-cols-2">
             <Skeleton className="h-[260px] rounded-xl" />
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, index) => (
@@ -356,7 +397,7 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+            <div className="grid gap-4 xl:grid-cols-2">
               <WorldThreatMap
                 countries={countries}
                 selectedCountry={activeCountry}
@@ -374,21 +415,21 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
                         <button
                           type="button"
                           className={cn(
-                            'flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            'flex w-full items-center gap-1.5 rounded-lg px-1.5 py-2 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                           )}
                           data-country-code={country.country}
                           aria-label={`${index + 1}. ${countryName(country.country)}`}
                           aria-pressed={isSelected}
                           onClick={() => setSelectedCountry(country.country)}
                         >
-                          <span className="w-5 shrink-0 text-right text-xs text-muted-foreground">{index + 1}</span>
-                          <span className="w-6 shrink-0"><CountryFlag countryCode={country.country} /></span>
+                          <span className="w-4 shrink-0 text-right text-xs text-muted-foreground">{index + 1}</span>
+                          <span className="w-5 shrink-0"><CountryFlag countryCode={country.country} /></span>
                           <span className="min-w-0 flex-1 truncate text-sm">{countryName(country.country)}</span>
-                          <span className="w-16 shrink-0 text-right text-sm font-medium tabular-nums">{country.count.toLocaleString()}</span>
-                          <span className="hidden w-16 shrink-0 overflow-hidden rounded-full bg-muted sm:block" aria-hidden="true">
+                          <span className="w-12 shrink-0 text-right text-sm font-medium tabular-nums">{country.count.toLocaleString()}</span>
+                          <span className="hidden w-12 shrink-0 overflow-hidden rounded-full bg-muted xl:block" aria-hidden="true">
                             <span className={cn('block h-1.5 rounded-full', geoBlockRateBgClass(blockRate))} style={{ width: `${blockRate}%` }} />
                           </span>
-                          <span className={cn('w-12 shrink-0 text-right text-xs tabular-nums', geoBlockRateTextClass(blockRate))}>
+                          <span className={cn('w-10 shrink-0 text-right text-xs tabular-nums', geoBlockRateTextClass(blockRate))}>
                             {blockRate.toFixed(1)}%
                           </span>
                         </button>

@@ -13,11 +13,11 @@ const buttonVariants = cva(
       variant: {
         default: "border border-primary/80 bg-primary text-primary-foreground shadow-sm data-[hovered=true]:bg-primary/90 active:bg-primary/85",
         outline:
-          "border-border bg-background shadow-xs data-[hovered=true]:border-foreground/20 data-[hovered=true]:bg-muted/35 data-[hovered=true]:text-foreground active:bg-muted/60 aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:border-input dark:bg-input/30 dark:data-[hovered=true]:bg-input/50",
+          "border border-border bg-card shadow-xs data-[hovered=true]:border-foreground/20 data-[hovered=true]:bg-muted/35 data-[hovered=true]:text-foreground active:bg-muted/60 aria-expanded:border-primary/30 aria-expanded:bg-primary/10 aria-expanded:text-primary dark:border-input dark:bg-input/30 dark:data-[hovered=true]:bg-input/50",
         secondary:
-          "border border-transparent bg-secondary text-secondary-foreground data-[hovered=true]:bg-secondary/85 active:bg-secondary/75 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "border border-transparent bg-secondary text-secondary-foreground data-[hovered=true]:bg-secondary/85 active:bg-secondary/75 aria-expanded:bg-secondary/85 aria-expanded:text-secondary-foreground",
         ghost:
-          "data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-foreground active:bg-muted aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:data-[hovered=true]:bg-accent/60",
+          "data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-foreground active:bg-muted aria-expanded:bg-muted/65 aria-expanded:text-foreground dark:data-[hovered=true]:bg-accent/60",
         destructive:
           "border border-destructive/20 bg-destructive text-destructive-foreground data-[hovered=true]:bg-destructive/92 active:bg-destructive/85 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 data-[hovered=true]:underline",

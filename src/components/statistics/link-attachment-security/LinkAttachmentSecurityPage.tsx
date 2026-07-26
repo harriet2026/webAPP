@@ -5,8 +5,8 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfDay, endOfDay } from 'date-fns';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
-import { AlertTriangle, ExternalLink, Link2 } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { AlertCircle, AlertTriangle, ExternalLink, Link2, RefreshCw } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FilterBar } from './FilterBar';
 import { KpiCards } from './KpiCards';
@@ -19,6 +19,7 @@ import { DetailTable } from './DetailTable';
 import { BottomActions } from './BottomActions';
 import { useLinkAttachmentStats } from './hooks/useLinkAttachmentStats';
 import type { Direction, TimeRange } from '@/lib/api/link-attachment-security';
+import { ApiError } from '@/lib/api/client';
 
 function timeRangeToDates(timeRange: TimeRange): { startDate: string; endDate: string } {
   const now = new Date();
@@ -94,11 +95,12 @@ export function LinkAttachmentSecurityPage() {
 
   const { startDate, endDate } = useMemo(() => timeRangeToDates(timeRange), [timeRange]);
 
-  const { data, isLoading } = useLinkAttachmentStats({
+  const { data, error, isError, isFetching, isLoading, refetch } = useLinkAttachmentStats({
     startDate,
     endDate,
     direction,
   });
+  const serviceUnavailable = error instanceof ApiError && error.status === 503;
 
   return (
     <PageShell
@@ -122,6 +124,37 @@ export function LinkAttachmentSecurityPage() {
           onTimeRangeChange={setTimeRange}
         />
 
+        {isError ? (
+          <Card
+            role="alert"
+            data-testid="link-attachment-error-state"
+            className="border-destructive/30 bg-destructive/5"
+          >
+            <CardHeader className="flex flex-row items-start gap-3">
+              <span className="rounded-lg bg-destructive/10 p-2 text-destructive">
+                <AlertCircle className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <div className="min-w-0 space-y-1">
+                <CardTitle className="text-base">
+                  {t(serviceUnavailable ? 'error.serviceUnavailable' : 'error.loadFailed')}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">{t('error.description')}</p>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => { void refetch(); }}
+                disabled={isFetching}
+              >
+                <RefreshCw className={isFetching ? 'animate-spin' : ''} aria-hidden="true" />
+                {t(isFetching ? 'error.retrying' : 'error.retry')}
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
         <KpiCards
           data={data?.kpi}
           isLoading={isLoading}
@@ -204,6 +237,8 @@ export function LinkAttachmentSecurityPage() {
           endDate={endDate}
           direction={direction}
         />
+          </>
+        )}
       </div>
     </PageShell>
   );

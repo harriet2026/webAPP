@@ -75,12 +75,15 @@ export class TenantsPage {
   }
 
   /**
-   * Fill the create drawer. `name` and `code` are required by Spec 2A; other
-   * fields are optional and only set when provided.
+   * Fill the create drawer. The tenant identity, primary-admin credentials and
+   * at least one domain are required; optional values can override the safe
+   * defaults used for the primary admin.
    */
   async fillCreateForm(data: {
     name: string;
     code: string;
+    adminAccount?: string;
+    adminPassword?: string;
     expireAt?: string; // YYYY-MM-DD
     capabilities?: string[]; // feature ids whose checkbox should be checked
     domains?: string[]; // ≥1 required by Spec 2A §5; add a row per entry
@@ -88,6 +91,16 @@ export class TenantsPage {
     const drawer = this.drawer;
     await drawer.locator('input[name="name"]').fill(data.name);
     await drawer.locator('input[name="code"]').fill(data.code);
+    await drawer
+      .getByTestId('tenant-admin-account')
+      .fill(data.adminAccount ?? `${data.code}-admin`);
+    if (data.adminPassword !== undefined) {
+      await drawer.getByTestId('tenant-admin-password').fill(data.adminPassword);
+    } else {
+      // Reuse the product's generator so this helper follows the active
+      // password-shape contract instead of baking a second policy into E2E.
+      await drawer.getByTestId('tenant-admin-password-generate').click();
+    }
     if (data.expireAt) {
       await drawer.locator('input[name="expire_at"]').fill(data.expireAt);
     }
