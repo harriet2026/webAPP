@@ -95,15 +95,17 @@ export function TrendChartCard({
 
     // Previous-period comparison overlay (when "compare" is enabled and data
     // is present): a dashed total line aligned by index to the current period.
+    // z:100 ensures the line renders on top of all stacked area series.
     if (prevData.length > 0) {
       series.push({
         name: t('filter.comparePrevious'),
         type: 'line',
         smooth: true,
-        symbol: 'none',
-        z: 1,
-        lineStyle: { width: 1, type: 'dashed', color: '#666666' },
-        itemStyle: { color: '#666666' },
+        symbol: 'circle',
+        symbolSize: 4,
+        z: 100,
+        lineStyle: { width: 2, type: 'dashed', color: '#374151' },
+        itemStyle: { color: '#374151', borderColor: '#fff', borderWidth: 1 },
         data: prevData.map((p) => sumVisible(p)),
       });
     }
