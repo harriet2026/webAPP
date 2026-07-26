@@ -7,6 +7,7 @@ const base = {
   capabilitiesLoaded: true,
   viewer: 'platform' as const,
   isSystemAdmin: true,
+  isTenantAdmin: false,
   selectedTenantId: null,
   userTenantId: null,
 };
@@ -31,10 +32,31 @@ describe('resolveSecurityScope', () => {
 
   it('tenant_admin → inactive, resolves to own JWT tenant', () => {
     const s = resolveSecurityScope({
-      ...base, isSystemAdmin: false, viewer: 'tenant', userTenantId: 4, multiTenant: true,
+      ...base, isSystemAdmin: false, isTenantAdmin: true, viewer: 'tenant', userTenantId: 4, multiTenant: true,
     });
+    expect(s.effectiveViewer).toBe('tenant');
     expect(s.scopeActive).toBe(false);
     expect(s.resolvedScopeTenant).toBe(4);
+  });
+
+  // GT-cloud-gateway regression: in a cloud-gateway / multi-tenant form a real
+  // tenant admin can also carry isSystemAdmin + viewer=tenant + no selected
+  // tenant. The old normalization flipped that to 'platform' and leaked the
+  // platform-only infra cards (系统在线节点 / 系统与服务健康) into the tenant
+  // view. Tenant-admin identity must pin effectiveViewer to 'tenant'.
+  it('tenant_admin is never promoted to platform even when isSystemAdmin + no selected tenant', () => {
+    const s = resolveSecurityScope({
+      ...base,
+      isTenantAdmin: true,
+      isSystemAdmin: true,
+      viewer: 'tenant',
+      selectedTenantId: null,
+      userTenantId: 7,
+      multiTenant: true,
+    });
+    expect(s.effectiveViewer).toBe('tenant');
+    expect(s.scopeActive).toBe(false);
+    expect(s.resolvedScopeTenant).toBe(7);
   });
 
   it('impersonating admin (viewer=tenant + selected) → inactive, that tenant', () => {
