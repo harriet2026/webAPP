@@ -40,7 +40,7 @@ export const DETAIL_SERIES_ORDER: Partial<Record<ViewBy, readonly string[]>> = {
   action: [
     'deliver',
     'mark_deliver',
-    'advanced_review',
+    'greylist',
     'quarantine',
     'review',
     'block',

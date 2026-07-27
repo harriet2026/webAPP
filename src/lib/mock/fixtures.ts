@@ -789,7 +789,7 @@ const EMAIL_TYPE_KEYS = [
   "normal", "subscription", "advertising", "spam", "harmful", "suspicious",
   "sensitive", "spoofing", "phishing", "virus", "account_compromised",
 ];
-const ACTION_KEYS = ["deliver", "mark_deliver", "advanced_review", "quarantine", "review", "block", "drop", "recall"];
+const ACTION_KEYS = ["deliver", "mark_deliver", "greylist", "quarantine", "review", "block", "drop", "recall"];
 const LEVEL_KEYS = ["normal", "low", "medium", "high", "critical"];
 const DELIVERY_KEYS = ["delivered", "failed", "cancelled", "in_delivery", "partial_delivered", "unknown"];
 
@@ -4874,7 +4874,7 @@ export function mockPutURLProtectionSettings(
   return { ...urlProtectionSettingsState };
 }
 
-// ─── 意图引擎（intent-engine，mock）────────────────────────────────
+// ─── 意图引擎（intent-engine，mock）─────────────────────��──────────
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
 // 动作映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），
 // 非 receive 方向默认区间 accept→quarantine（D-06）。
@@ -5322,7 +5322,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     sender: "newsletter@marketing.com",
     recipients:
       "user@company.com, sales1@company.com, sales2@company.com, marketing@company.com, dev@company.com, ops@company.com, support@company.com, intern@company.com",
-    subject: "本周特惠活动（多投信 - 8人）",
+    subject: "本周特惠活动（���投信 - 8人）",
     action: "deliver",
     reason: "垃圾邮件标记投递",
     mailType: "spam",
@@ -7616,7 +7616,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 10, operation_id: 'OP20260622012', admin_user_id: 3, username: 'chenjing@lanhai.cn', operator_name: '陈静（我）',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'update',
     resource_type: 'policy_pipeline', status: 'success', client_ip: '112.65.1.18', ip_location: '上海',
-    details: { summary: '钓鱼邮件处置由隔离改为直接拒收' }, before_value: { text: '隔离' }, after_value: { text: '拒收' },
+    details: { summary: '钓鱼邮件处��由隔离改为直接拒收' }, before_value: { text: '隔离' }, after_value: { text: '拒收' },
     created_at: '2026-06-22T10:15:36Z' },
   { id: 14, operation_id: 'OP20260622016', admin_user_id: 4, username: 'sunqi@lanhai.cn', operator_name: '孙琦',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'create',

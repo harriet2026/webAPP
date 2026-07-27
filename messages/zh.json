@@ -699,7 +699,7 @@
       "deleted": "授权已删除",
       "delete": "删除",
       "deleteTitle": "删除中继授权",
-      "deleteConfirm": "确定删除 {cidr} 的中继授权？该来源将立即无法免认证中继。",
+      "deleteConfirm": "确定删除 {cidr} 的中继授权？该来源将立即无法免认证中���。",
       "clientCidr": "客户端 IP / CIDR",
       "senderDomain": "发信域",
       "selectDomain": "选择发信域",
@@ -1007,7 +1007,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块���配置：灰色为「继承全局」，彩色为「另行配置」。",
+    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块�����配置：灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
     "targetGroups": "适用对象",
@@ -1097,7 +1097,7 @@
       "url": "恶意 URL 检测与过滤",
       "content": "邮件内容关键词过滤",
       "intentEngine": "综合意图判断引擎",
-      "phishingAgent": "AI 钓鱼邮件检测",
+      "phishingAgent": "AI 钓鱼邮���检测",
       "impersonationAgent": "AI 仿冒邮件检测",
       "retrospectAgent": "AI 历史威胁回溯",
       "similarDetection": "相似邮件聚类检测",
@@ -1336,7 +1336,7 @@
     "statusManualHold": "人工保留",
     "reason": "原因",
     "eyebrow": "旁路队列",
-    "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已存储内容，并在需要时重新注入或删���项目。"
+    "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已存储内容，并在需要��重新注入或删���项目。"
   },
   "logs": {
     "emailLogs": "邮件日志",
@@ -1379,10 +1379,10 @@
     "finalActionRule": "最终生效规则",
     "actionLabels": {
       "accept": "接受",
-      "reject": "拒绝",
+      "reject": "拒收",
       "quarantine": "隔离",
-      "sideline": "旁路审查",
-      "audit": "送审",
+      "sideline": "灰名单",
+      "audit": "审核",
       "discard": "丢弃",
       "bounce": "退信",
       "mixed": "多个处理结果"
@@ -4620,7 +4620,7 @@
       "attachments": "个附件",
       "ocrMode_none": "不检测",
       "ocrMode_light": "轻度检测（仅印刷体）",
-      "ocrMode_deep": "深度检测（手写+印刷，推荐外发方向）",
+      "ocrMode_deep": "深度检测（手写+印��，推荐外发方向）",
       "qrDetection": "二维码���片检测",
       "qrMode_none": "不检测",
       "qrMode_light": "轻度检测 - 识别到二维码即拦截",
@@ -4781,7 +4781,7 @@
     "tenantRequired": {
       "title": "需要选择租户",
       "description": "URL 检测与防护是租户级别的配置，请先选择要管理的租户。",
-      "hint": "请使用页面右上角的租户选择器选择一个租户"
+      "hint": "请使用页面右上角的租户选择器选择一个租���"
     },
     "tabs": {
       "sandbox": "URL沙箱检测",
@@ -5039,7 +5039,7 @@
     "observeWarningDesc": "命中后仅记录不拦截。确认策略效果后请及时切换为正式模式。",
     "observingDirections": "正在观察中",
     "viewObserveLogs": "查看观察日志",
-    "modeAggregate": "全方向聚合（合并统计）",
+    "modeAggregate": "���方向聚合（合并统计）",
     "modeSeparate": "按方向独立检测（可勾选多个）",
     "directionConfig": "检测方向配置",
     "directionReceive": "接收",
@@ -5316,12 +5316,12 @@
       "internal": "域内",
       "actions": {
         "accept": "接受",
-        "reject": "拒绝",
+        "reject": "拒收",
         "bounce": "退信",
         "discard": "丢弃",
-        "audit": "送审",
+        "audit": "审核",
         "quarantine": "隔离",
-        "sideline": "旁路",
+        "sideline": "灰名单",
         "mixed": "混合"
       },
       "statuses": {
@@ -5434,7 +5434,7 @@
       "urlResult": "URL 检测",
       "keywordHit": "关键词命中",
       "rblResult": "RBL 结果",
-      "intentLabel": "意图标签",
+      "intentLabel": "意图标��",
       "isZipBomb": "压缩炸弹",
       "isEncryptedAttachment": "加密附件",
       "enumValue": {
@@ -5511,10 +5511,10 @@
     "batch": {
       "findSimilar": "查找相似",
       "release": "放行",
-      "delete": "删除",
+      "delete": "丢弃",
       "export": "导出",
       "confirmRelease": "确认放行选中邮件？",
-      "confirmDelete": "确认删除选中邮件？删除后无法恢复。",
+      "confirmDelete": "确认丢弃选中邮件？丢弃后无法恢复。",
       "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
       "releaseAuditHint": "放行与类型改判都会写入审计记录。",
       "recallDescription": "尝试从收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
@@ -6852,7 +6852,7 @@
       "columnPolicy": "策略",
       "columnConfig": "配置",
       "terminalNoAddons": "终结动作 —— 不执行附加策略。",
-      "emptySummary": "尚未配置任何内容。"
+      "emptySummary": "尚未配置任何��容。"
     }
   },
   "disposalSettings": {
@@ -6929,7 +6929,7 @@
     "perm_preview_desc": "允许用户预览隔离邮件内容",
     "perm_whitelist_desc": "允许用户将发信人加入白名单",
     "perm_blacklist_desc": "允许用户将发信人加入黑名单",
-    "selfServicePending": "终端用户自助入口待上线，当前仅保存配置",
+    "selfServicePending": "终端用户自助入口待上线，��前仅保存配置",
     "portalBaseUrlLabel": "外部访问地址",
     "portalBaseUrlPlaceholder": "https://gw.example.com",
     "portalBaseUrlHelp": "收件人浏览器可访问的控制台地址；启用取回或预览时必填。",
@@ -7141,7 +7141,7 @@
     },
     "viewBy": {
       "threat_type": "威胁类型",
-      "action": "处置动作",
+      "action": "执行动作",
       "email_type": "威胁态势趋势"
     },
     "threatTypes": {
@@ -7157,10 +7157,10 @@
     "actions": {
       "deliver": "投递",
       "mark_deliver": "标记投递",
-      "advanced_review": "高级审核",
+      "greylist": "灰名单",
       "quarantine": "隔离",
       "review": "审核",
-      "block": "拦截",
+      "block": "拒收",
       "drop": "丢弃",
       "recall": "召回"
     },

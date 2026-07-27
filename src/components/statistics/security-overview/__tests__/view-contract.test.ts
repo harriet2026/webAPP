@@ -26,6 +26,11 @@ describe('security overview view contract', () => {
       'sensitive', 'spoofing', 'phishing', 'virus', 'account_compromised',
     ]));
     expect(overview.trend.action).toHaveLength(7);
+    expect(Object.keys(overview.trend.action?.[0] ?? {})).toEqual(expect.arrayContaining([
+      'deliver', 'mark_deliver', 'greylist', 'quarantine', 'review', 'block', 'drop', 'recall',
+    ]));
+    expect(Object.keys(overview.trend.action?.[0] ?? {})).not.toContain('advanced_review');
+    expect(Object.keys(overview.trend.action?.[0] ?? {})).not.toContain('cancelled');
     expect(overview.trend.threat_level).toHaveLength(7);
     expect(overview.trend.delivery_result).toHaveLength(7);
     expect(overview.trend_previous_period?.email_type).toHaveLength(7);

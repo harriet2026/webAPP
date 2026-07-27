@@ -5516,10 +5516,10 @@
     "batch": {
       "findSimilar": "Find Similar",
       "release": "Release",
-      "delete": "Delete",
+      "delete": "Discard",
       "export": "Export",
       "confirmRelease": "Confirm release selected emails?",
-      "confirmDelete": "Delete the selected emails? This action cannot be undone.",
+      "confirmDelete": "Discard the selected emails? This action cannot be undone.",
       "releaseDescription": "Resume delivery for the selected emails and optionally correct their mail type.",
       "releaseAuditHint": "The release and type correction are both recorded in the audit trail.",
       "recallDescription": "Try to remove the selected emails from recipient mailboxes and optionally correct their mail type.",
@@ -7084,7 +7084,7 @@
     },
     "viewBy": {
       "threat_type": "Threat Type",
-      "action": "Action",
+      "action": "Execute Action",
       "email_type": "Threat Posture Trend"
     },
     "threatTypes": {
@@ -7100,10 +7100,10 @@
     "actions": {
       "deliver": "Deliver",
       "mark_deliver": "Mark Deliver",
-      "advanced_review": "Advanced Review",
+      "greylist": "Greylist",
       "quarantine": "Quarantine",
       "review": "Review",
-      "block": "Block",
+      "block": "Reject",
       "drop": "Drop",
       "recall": "Recall"
     },

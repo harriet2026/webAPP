@@ -27,13 +27,11 @@ export const SERIES_COLORS: Record<string, string> = {
   // action view
   deliver: '#10B981',
   mark_deliver: '#06B6D4',
-  advanced_review: '#F59E0B',
   quarantine: '#F59E0B',
   review: '#8B5CF6',
   block: '#EF4444',
   drop: '#DC2626',
   recall: '#0ea5e9',
-  cancelled: '#9CA3AF',
   greylist: '#64748B',
 };
 
