@@ -138,7 +138,7 @@ export function LinkAttachmentSecurityPage() {
           onCardClick={(tab) => setViewTab(tab)}
         />
 
-        <Card className="min-h-[818px]" data-testid="link-attachment-analysis-card">
+        <Card data-testid="link-attachment-analysis-card">
           <CardHeader className="pb-2">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <ViewSwitcher value={viewTab} onChange={setViewTab} />
@@ -148,14 +148,16 @@ export function LinkAttachmentSecurityPage() {
           <CardContent>
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
               <div className="xl:col-span-3">
-                <TrendChartCard
-                  trendLink={data?.trend?.link}
-                  trendAttachment={data?.trend?.attachment}
-                  viewTab={viewTab}
-                  chartType={chartType}
-                  isLoading={isLoading}
-                  embedded
-                />
+                <div className="sticky top-4">
+                  <TrendChartCard
+                    trendLink={data?.trend?.link}
+                    trendAttachment={data?.trend?.attachment}
+                    viewTab={viewTab}
+                    chartType={chartType}
+                    isLoading={isLoading}
+                    embedded
+                  />
+                </div>
               </div>
               <div className="xl:col-span-2">
                 {viewTab === 'link' ? (
