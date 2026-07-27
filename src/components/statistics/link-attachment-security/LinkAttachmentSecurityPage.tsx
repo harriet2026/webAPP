@@ -20,6 +20,9 @@ import { BottomActions } from './BottomActions';
 import { useLinkAttachmentStats } from './hooks/useLinkAttachmentStats';
 import type { Direction, TimeRange } from '@/lib/api/link-attachment-security';
 import { ApiError } from '@/lib/api/client';
+import { useAuth } from '@/contexts/auth-context';
+import { useProductForm } from '@/contexts/product-form-context';
+import { useTenant } from '@/hooks/use-tenant';
 
 function timeRangeToDates(timeRange: TimeRange): { startDate: string; endDate: string } {
   const now = new Date();
@@ -64,9 +67,15 @@ export function LinkAttachmentSecurityPage() {
   const t = useTranslations('linkAttachmentSecurity');
   const locale = useLocale();
   const router = useRouter();
+  const { isSystemAdmin } = useAuth();
+  const { viewer } = useProductForm();
+  const { effectiveTenantId } = useTenant();
 
   const [direction, setDirection] = useState<Direction>('all');
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
+  const [scopeTenantId, setScopeTenantId] = useState<number | null>(null);
+  const usePageTenantScope = isSystemAdmin && viewer === 'platform';
+  const resolvedTenantId = usePageTenantScope ? scopeTenantId : (effectiveTenantId ?? null);
   // F1 / spec §4.5: viewTab + chartType persisted to localStorage (user preference).
   // Initialize to the SSR-safe defaults and hydrate from localStorage in a
   // post-mount effect — reading localStorage in the useState initializer would
@@ -99,6 +108,7 @@ export function LinkAttachmentSecurityPage() {
     startDate,
     endDate,
     direction,
+    tenantId: resolvedTenantId,
   });
   const serviceUnavailable = error instanceof ApiError && error.status === 503;
 
@@ -122,6 +132,9 @@ export function LinkAttachmentSecurityPage() {
           onDirectionChange={setDirection}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
+          showTenantScope={usePageTenantScope}
+          tenantId={scopeTenantId}
+          onTenantChange={setScopeTenantId}
         />
 
         {isError ? (
@@ -189,6 +202,7 @@ export function LinkAttachmentSecurityPage() {
                     startDate={startDate}
                     endDate={endDate}
                     direction={direction}
+                    tenantId={resolvedTenantId}
                   />
                 ) : (
                   <AttachmentSidePanel
@@ -198,6 +212,7 @@ export function LinkAttachmentSecurityPage() {
                     startDate={startDate}
                     endDate={endDate}
                     direction={direction}
+                    tenantId={resolvedTenantId}
                   />
                 )}
               </div>
@@ -236,6 +251,7 @@ export function LinkAttachmentSecurityPage() {
           startDate={startDate}
           endDate={endDate}
           direction={direction}
+          tenantId={resolvedTenantId}
         />
           </>
         )}

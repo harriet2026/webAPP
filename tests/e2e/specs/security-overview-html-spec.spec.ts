@@ -13,9 +13,12 @@ test.describe('邮件安全总览 HTML spec v3', () => {
     );
   });
 
-  test('双视角、时空下钻、明细展开与无 PDF/AI 分析入口', async ({ authenticatedPage }) => {
+  test('四视角、时空下钻、明细展开与无 PDF/AI 分析入口', async ({ authenticatedPage }) => {
     const tabs = authenticatedPage.getByRole('tab');
-    await expect(tabs).toHaveText(['邮件类型', '处置动作']);
+    // html_spec 变更记录（2026-07-22）明确：产品规格是 **4 视角**
+    //（邮件类型 / 处置动作 / 威胁等级 / 投递结果）；demo 原型运行态只有前两项，
+    // 已被记为「原型缺口」而非产品裁决。旧断言只列两项 = 把原型缺口当成了规格。
+    await expect(tabs).toHaveText(['邮件类型', '处置动作', '威胁等级', '投递结果']);
     await expect(authenticatedPage.getByRole('button', { name: '面积图' })).toHaveCount(0);
     await expect(authenticatedPage.getByText('拦截率(计算方法待定)')).toHaveCount(0);
     await expect(authenticatedPage.getByRole('button', { name: '生成报告' })).toHaveCount(0);
@@ -76,10 +79,18 @@ test.describe('邮件安全总览 HTML spec v3', () => {
 
     const hottestCountry = map.locator('path[fill="rgb(153,27,27)"]').first();
     await expect(hottestCountry).toBeVisible();
-    await hottestCountry.hover();
+    // 必须先取到 ElementHandle 再 hover/click，不能重复用这个按 fill 取色的
+    // locator：ECharts 的 emphasis.itemStyle.areaColor 是 #dc2626，hover 会把
+    // 这个 path 的 fill 从 rgb(153,27,27) 改成 rgb(220,38,38)。若 click 时再解析
+    // 一次 locator，最热国家已不再匹配该选择器，点击会落到别处 —— 于是什么都没选中，
+    // 标题里也就不会出现「美国」。ElementHandle 锁定的是 DOM 节点本身，不受
+    // 属性变化影响。（隔离跑能过、连跑第二次必挂，就是这个竞态。）
+    const hottestHandle = await hottestCountry.elementHandle();
+    expect(hottestHandle).not.toBeNull();
+    await hottestHandle!.hover();
     await expect(map.getByText('威胁邮件数量: 1,245')).toBeVisible();
     await expect(map.getByText('拦截率: 97.2%')).toBeVisible();
-    await hottestCountry.click();
+    await hottestHandle!.click();
     await expect(card.locator('[data-slot="card-title"]')).toContainText('美国');
     await expect(card.locator('button[data-country-code="US"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(map.locator('path[stroke="rgb(37,99,235)"]').first()).toBeVisible();

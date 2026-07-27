@@ -551,7 +551,7 @@
     "dimConnection": "Подключения",
     "dimConnectionTip": "ТОП IP-адресов клиентов по числу SMTP-сессий. Успех = сервер ответил 250 на EHLO/HELO; результат доставки не влияет на соединение.",
     "yAxisConnection": "Подключения",
-    "dimAuth": "Auth",
+    "dimAuth": "Аутентификация",
     "dimAuthTip": "ТОП учётных записей/IP по попыткам SMTP AUTH",
     "yAxisAuth": "Попытки Auth",
     "dimSendIp": "IP отправителя",

@@ -89,6 +89,24 @@ test.describe('Link & Attachment Security', () => {
 });
 
 test.describe('Link & Attachment Security ticket contracts (hermetic mock)', () => {
+  test('keeps the system-admin tenant scope page-local and stable', async ({ page }) => {
+    await installMockIdentity(page);
+    await page.goto(PAGE_PATH);
+
+    const selector = page.getByTestId('tenant-selector');
+    await expect(selector).toBeVisible();
+    await selector.click();
+    await page.getByRole('option', { name: '示例租户 A' }).click();
+    await expect(selector).toContainText('示例租户 A');
+
+    // ProductFormProvider reconciles platform view by clearing only the global
+    // impersonation scope. The report's controlled page-local selection must
+    // survive that effect and must not write the global selection key.
+    await page.waitForTimeout(750);
+    await expect(selector).toContainText('示例租户 A');
+    expect(await page.evaluate(() => localStorage.getItem('osgateway_selected_tenant'))).toBeNull();
+  });
+
   test('shows exact dual-view columns, complete domain metadata, and both row drill-downs', async ({ page }) => {
     await installMockIdentity(page);
     await page.goto(PAGE_PATH);

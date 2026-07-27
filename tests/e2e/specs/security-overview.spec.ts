@@ -137,9 +137,11 @@ test.describe('Security Overview', () => {
   // 邮件类型 + 处置动作两个视角（威胁类型视角退役，email_type 居首为默认）。
   // 这里断言完整的 Tab 文案清单（而不是 `if (count > 1)` 这种恒真写法），
   // 任何退役视角回潮都会红。
-  test('viewBy tab switching works（邮件类型/处置动作两视角，GT-11888/PRD v3）', async () => {
+  // html_spec 变更记录(2026-07-22)：产品规格是 4 视角（邮件类型/处置动作/
+  // 威胁等级/投递结果）；demo 原型只实现前两项，属「原型缺口」而非产品裁决。
+  test('viewBy tab switching works（四视角，GT-11888/PRD v3）', async () => {
     const tabs = securityOverviewPage.getViewByTabs();
-    await expect(tabs).toHaveText(['邮件类型', '处置动作']);
+    await expect(tabs).toHaveText(['邮件类型', '处置动作', '威胁等级', '投递结果']);
 
     await securityOverviewPage.clickViewByTab(1);
     await expect(tabs.nth(1)).toHaveAttribute('data-active', '');

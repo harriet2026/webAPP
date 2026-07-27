@@ -13,6 +13,7 @@ interface AttachmentSidePanelProps {
   startDate: string;
   endDate: string;
   direction: Direction;
+  tenantId: number | null;
 }
 
 export function AttachmentSidePanel({
@@ -22,12 +23,13 @@ export function AttachmentSidePanel({
   startDate,
   endDate,
   direction,
+  tenantId,
 }: AttachmentSidePanelProps) {
   return (
     <div className="space-y-4" data-testid="attachment-side-panel">
       <AttachmentTypePieCard data={typeDistribution} isLoading={isLoading} />
       <AttachmentThreatTypePieCard data={threatTypeDistribution} isLoading={isLoading} />
-      <TopMaliciousAttachmentsCard startDate={startDate} endDate={endDate} direction={direction} />
+      <TopMaliciousAttachmentsCard startDate={startDate} endDate={endDate} direction={direction} tenantId={tenantId} />
     </div>
   );
 }

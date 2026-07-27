@@ -1,7 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import {
   Sheet,
   SheetContent,
@@ -12,8 +11,6 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
 import { useTopAttachments } from './hooks/useTopAttachments';
 import type { Direction } from '@/lib/api/link-attachment-security';
 
@@ -24,6 +21,7 @@ interface ShowAllAttachmentsDrawerProps {
   endDate: string;
   direction: Direction;
   limit?: number;
+  tenantId: number | null;
 }
 
 export function ShowAllAttachmentsDrawer({
@@ -33,11 +31,10 @@ export function ShowAllAttachmentsDrawer({
   endDate,
   direction,
   limit = 20,
+  tenantId,
 }: ShowAllAttachmentsDrawerProps) {
   const t = useTranslations('linkAttachmentSecurity');
-  const locale = useLocale();
-  const router = useRouter();
-  const { data, isLoading } = useTopAttachments({ startDate, endDate, direction, limit });
+  const { data, isLoading } = useTopAttachments({ startDate, endDate, direction, limit, tenantId });
   const attachments = data?.items ?? [];
 
   return (
@@ -77,17 +74,6 @@ export function ShowAllAttachmentsDrawer({
                     </div>
                   </div>
                   <span className="text-sm tabular-nums text-muted-foreground">{a.count}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2"
-                    onClick={() => {
-                      router.push(`/${locale}/logs/email?attachment_md5=${a.md5}`);
-                    }}
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" />
-                    <span className="text-xs">{t('topAttachments.viewSample')}</span>
-                  </Button>
                 </div>
               ))}
             </div>

@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { blacklistDomain, type Direction } from '@/lib/api/link-attachment-security';
-import { useApiRequest } from '@/lib/api/client';
+import { useScopedApiRequest } from '@/lib/api/client';
 
-export function useBlacklistDomain() {
-  const { apiRequest } = useApiRequest();
+export function useBlacklistDomain(tenantId: number | null) {
+  const { apiRequest } = useScopedApiRequest(tenantId);
   const queryClient = useQueryClient();
 
   return useMutation({

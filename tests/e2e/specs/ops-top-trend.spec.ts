@@ -18,12 +18,24 @@ test.describe('Ops TOP Trend', () => {
     await expect(page.getByRole('button', { name: /AI 解读|AI 分析/ })).toHaveCount(0);
   });
 
-  test('dimension tabs are rendered', async ({ authenticatedPage: page }) => {
+  test('dimension tabs use the prototype labels (GT-11999)', async ({ authenticatedPage: page }) => {
     await page.goto('/zh/statistics/ops-top-trend');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
-    await expect(page.locator('button').filter({ hasText: '连接' }).first()).toBeVisible({ timeout: 15000 });
-    const authTab = page.locator('button').filter({ hasText: '认证' }).first();
+
+    const expectedLabels = {
+      connection: '连接会话',
+      auth: '发信认证',
+      sendIp: '发信IP',
+      subject: '高危主题',
+      sender: '发信地址',
+      recipient: '收件对象',
+    } as const;
+    for (const [dimension, label] of Object.entries(expectedLabels)) {
+      await expect(page.getByTestId(`ops-dim-${dimension}`)).toHaveText(label, { timeout: 15000 });
+    }
+
+    const authTab = page.getByTestId('ops-dim-auth');
     await expect(authTab).toBeVisible({ timeout: 15000 });
     await authTab.click();
     await page.waitForTimeout(1000);
@@ -36,7 +48,12 @@ test.describe('Ops TOP Trend', () => {
     await page.waitForTimeout(3000);
     const url = page.url();
     expect(url).toContain('ops-top-trend/print');
-    await expect(page.locator('text=运营TOP与趋势').first()).toBeVisible({ timeout: 15000 });
+    // 打印页的标题是 opsTopTrend.print.title =「运营 TOP 与趋势报告」，
+    // 与主页面的 opsTopTrend.title =「运营TOP与趋势」(无空格) 并不相同；
+    // 旧断言拿主页面标题来匹配打印页，永远匹配不到。
+    await expect(
+      page.getByRole('heading', { name: '运营 TOP 与趋势报告', exact: true }),
+    ).toBeVisible({ timeout: 15000 });
   });
 
   test('connection dimension has direction buttons enabled (GT-11998)', async ({ authenticatedPage: page }) => {
@@ -83,7 +100,7 @@ test.describe('Ops TOP Trend', () => {
     await page.goto('/zh/statistics/ops-top-trend');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
-    const subjectTab = page.locator('button').filter({ hasText: '主题' }).first();
+    const subjectTab = page.getByTestId('ops-dim-subject');
     await expect(subjectTab).toBeVisible({ timeout: 15000 });
     await subjectTab.click();
     await page.waitForTimeout(1000);

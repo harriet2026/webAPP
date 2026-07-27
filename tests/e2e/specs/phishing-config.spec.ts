@@ -544,14 +544,20 @@ test.describe('Phishing Detection Tab B — config', () => {
     }
 
     // Turn off every currently-selected direction button. shadcn Button renders
-    // the selected one as variant 'default' (class contains 'bg-primary') and the
+    // the selected one as variant 'default' (class token 'bg-primary') and the
     // unselected as 'outline'. NOTE: every button's base class contains
-    // 'outline-none', so checking for 'outline' is unreliable — match the
-    // selected 'default' variant by its 'bg-primary' marker instead.
+    // 'outline-none', so checking for 'outline' is unreliable.
+    //
+    // It must be an EXACT class-token comparison, not `includes('bg-primary')`:
+    // the 'outline' variant carries `aria-expanded:bg-primary/10`, which
+    // *contains* the substring 'bg-primary'. A substring test therefore matches
+    // unselected buttons too, clicks them, and turns directions back ON — the
+    // draft starts as directions:['inbound'], so the loop used to end up with
+    // ['outbound','internal'] and no validation error at all.
     for (const d of ['inbound', 'outbound', 'internal']) {
       const btn = sheet.getByTestId(`rule-direction-${d}`);
       const cls = (await btn.getAttribute('class')) ?? '';
-      if (cls.includes('bg-primary')) {
+      if (cls.split(/\s+/).includes('bg-primary')) {
         await btn.click();
       }
     }

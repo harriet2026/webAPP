@@ -1,13 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
 import { useTopAttachments } from './hooks/useTopAttachments';
 import { ShowAllAttachmentsDrawer } from './ShowAllAttachmentsDrawer';
 import type { Direction } from '@/lib/api/link-attachment-security';
@@ -16,13 +14,12 @@ interface TopMaliciousAttachmentsCardProps {
   startDate: string;
   endDate: string;
   direction: Direction;
+  tenantId: number | null;
 }
 
-export function TopMaliciousAttachmentsCard({ startDate, endDate, direction }: TopMaliciousAttachmentsCardProps) {
+export function TopMaliciousAttachmentsCard({ startDate, endDate, direction, tenantId }: TopMaliciousAttachmentsCardProps) {
   const t = useTranslations('linkAttachmentSecurity');
-  const locale = useLocale();
-  const router = useRouter();
-  const { data, isLoading } = useTopAttachments({ startDate, endDate, direction, limit: 5 });
+  const { data, isLoading } = useTopAttachments({ startDate, endDate, direction, limit: 5, tenantId });
   const [showAllOpen, setShowAllOpen] = useState(false);
 
   const attachments = data?.items ?? [];
@@ -65,17 +62,6 @@ export function TopMaliciousAttachmentsCard({ startDate, endDate, direction }: T
                   <div className="truncate text-xs">{a.file_name}</div>
                 </div>
                 <Badge variant="secondary" className="text-[10px]">{a.file_ext.toUpperCase()}</Badge>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-2"
-                  onClick={() => {
-                    router.push(`/${locale}/logs/email?attachment_md5=${a.md5}`);
-                  }}
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  <span className="text-xs">{t('topAttachments.viewSample')}</span>
-                </Button>
               </div>
             ))}
           </div>
@@ -87,6 +73,7 @@ export function TopMaliciousAttachmentsCard({ startDate, endDate, direction }: T
           startDate={startDate}
           endDate={endDate}
           direction={direction}
+          tenantId={tenantId}
         />
       </CardContent>
     </Card>

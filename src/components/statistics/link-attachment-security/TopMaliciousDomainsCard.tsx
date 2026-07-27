@@ -19,14 +19,15 @@ interface TopMaliciousDomainsCardProps {
   startDate: string;
   endDate: string;
   direction: Direction;
+  tenantId: number | null;
 }
 
-export function TopMaliciousDomainsCard({ startDate, endDate, direction }: TopMaliciousDomainsCardProps) {
+export function TopMaliciousDomainsCard({ startDate, endDate, direction, tenantId }: TopMaliciousDomainsCardProps) {
   const t = useTranslations('linkAttachmentSecurity');
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const { isAdmin } = useTenant();
-  const { data, isLoading } = useTopDomains({ startDate, endDate, direction, limit: 5 });
+  const { data, isLoading } = useTopDomains({ startDate, endDate, direction, limit: 5, tenantId });
   const [blacklistDomain, setBlacklistDomain] = useState<string | null>(null);
   const [showAllOpen, setShowAllOpen] = useState(false);
 
@@ -133,6 +134,7 @@ export function TopMaliciousDomainsCard({ startDate, endDate, direction }: TopMa
             open={!!blacklistDomain}
             onOpenChange={(open) => { if (!open) setBlacklistDomain(null); }}
             onSuccess={() => setBlacklistDomain(null)}
+            tenantId={tenantId}
           />
         )}
 
@@ -142,6 +144,7 @@ export function TopMaliciousDomainsCard({ startDate, endDate, direction }: TopMa
           startDate={startDate}
           endDate={endDate}
           direction={direction}
+          tenantId={tenantId}
         />
       </CardContent>
     </Card>

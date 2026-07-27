@@ -550,7 +550,7 @@
     "dimConnection": "การเชื่อมต่อ",
     "dimConnectionTip": "TOP ของ IP ไคลเอนต์ตามจำนวนเซสชัน SMTP สำเร็จหมายถึงเซิร์ฟเวอร์ตอบ EHLO/HELO ด้วย 250 ผลการส่งไม่กระทบการตัดสินการเชื่อมต่อ",
     "yAxisConnection": "การเชื่อมต่อ",
-    "dimAuth": "Auth",
+    "dimAuth": "การยืนยันตัวตน",
     "dimAuthTip": "TOP ของบัญชี/IP ตามความพยายาม SMTP AUTH",
     "yAxisAuth": "ความพยายาม Auth",
     "dimSendIp": "IP ที่ส่ง",

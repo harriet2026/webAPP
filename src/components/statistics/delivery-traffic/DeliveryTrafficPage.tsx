@@ -18,6 +18,7 @@ import { DetailTable } from './DetailTable';
 import { BottomActions } from './BottomActions';
 import { useDeliveryTraffic } from './hooks/useDeliveryTraffic';
 import type { Direction, TimeRange } from '@/lib/api/delivery-traffic';
+import { inclusiveCalendarDayCount } from './date-range';
 
 export { PageSkeleton } from './PageSkeleton';
 
@@ -95,7 +96,8 @@ export function DeliveryTrafficPage() {
     const today = new Date(`${format(new Date(), 'yyyy-MM-dd')}T00:00:00`);
     if (end < start) return t('timeRange.invalidOrder');
     if (end > today) return t('timeRange.noFuture');
-    if ((end.getTime() - start.getTime()) / 86_400_000 > 90) return t('timeRange.over90Days');
+    const inclusiveDays = inclusiveCalendarDayCount(startDate, endDate);
+    if (inclusiveDays != null && inclusiveDays > 90) return t('timeRange.over90Days');
     return '';
   }, [startDate, endDate, t]);
 

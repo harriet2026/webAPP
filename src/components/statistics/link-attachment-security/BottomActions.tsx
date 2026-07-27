@@ -11,23 +11,25 @@ interface BottomActionsProps {
   startDate: string;
   endDate: string;
   direction: Direction;
+  tenantId: number | null;
 }
 
 export function BottomActions({
   startDate,
   endDate,
   direction,
+  tenantId,
 }: BottomActionsProps) {
   // spec §3.2.0: blacklist/CSV/AI/PDF are admin-only (tenant_user is
   // read-only). The backend already enforces this (RequireAdminOrTenantAdmin
   // on blacklist-domain/export.csv/ai-analysis); gray-disable here too so a
   // tenant_user doesn't see a clickable button that 403s.
-  const { effectiveTenantId, isAdmin } = useTenant();
+  const { isAdmin } = useTenant();
   const csvUrl = exportLinkAttachmentCsvUrl({
     start_date: startDate,
     end_date: endDate,
     direction,
-    tenant_id: effectiveTenantId,
+    tenant_id: tenantId,
   });
   const t = useTranslations('linkAttachmentSecurity');
 

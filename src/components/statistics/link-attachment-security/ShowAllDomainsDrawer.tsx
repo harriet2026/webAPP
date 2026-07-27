@@ -28,6 +28,7 @@ interface ShowAllDomainsDrawerProps {
   endDate: string;
   direction: Direction;
   limit?: number;
+  tenantId: number | null;
 }
 
 export function ShowAllDomainsDrawer({
@@ -37,12 +38,13 @@ export function ShowAllDomainsDrawer({
   endDate,
   direction,
   limit = 20,
+  tenantId,
 }: ShowAllDomainsDrawerProps) {
   const t = useTranslations('linkAttachmentSecurity');
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const { isAdmin } = useTenant();
-  const { data, isLoading } = useTopDomains({ startDate, endDate, direction, limit });
+  const { data, isLoading } = useTopDomains({ startDate, endDate, direction, limit, tenantId });
   const [blacklistDomain, setBlacklistDomain] = useState<string | null>(null);
   const domains = data?.items ?? [];
 
@@ -138,6 +140,7 @@ export function ShowAllDomainsDrawer({
             open={!!blacklistDomain}
             onOpenChange={(o) => { if (!o) setBlacklistDomain(null); }}
             onSuccess={() => setBlacklistDomain(null)}
+            tenantId={tenantId}
           />
         )}
       </SheetContent>

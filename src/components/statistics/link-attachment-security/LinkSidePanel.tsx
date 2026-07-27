@@ -13,6 +13,7 @@ interface LinkSidePanelProps {
   startDate: string;
   endDate: string;
   direction: Direction;
+  tenantId: number | null;
 }
 
 export function LinkSidePanel({
@@ -22,12 +23,13 @@ export function LinkSidePanel({
   startDate,
   endDate,
   direction,
+  tenantId,
 }: LinkSidePanelProps) {
   return (
     <div className="space-y-4" data-testid="link-side-panel">
       <LinkTypePieCard data={typeDistribution} isLoading={isLoading} />
       <UrlReputationBarsCard data={reputationDistribution} isLoading={isLoading} />
-      <TopMaliciousDomainsCard startDate={startDate} endDate={endDate} direction={direction} />
+      <TopMaliciousDomainsCard startDate={startDate} endDate={endDate} direction={direction} tenantId={tenantId} />
     </div>
   );
 }

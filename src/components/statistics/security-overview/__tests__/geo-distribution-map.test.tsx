@@ -179,6 +179,8 @@ describe('GeoDistributionCard ECharts world map', () => {
   it('renders ISO-derived flags, a scrollable TOP ranking and safe block-rate values', () => {
     render(<GeoDistributionCard {...props} />);
 
+    expect(countryFlagPosition('JP')).toBe('-360px -162px');
+    expect(countryFlagPosition('KR')).toBe('-408px -180px');
     expect(countryFlagPosition('US')).toBe('-432px -360px');
     expect(countryFlagPosition('bad')).toBeNull();
     const ranking = screen.getByTestId('geo-ranking');

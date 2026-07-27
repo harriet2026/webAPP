@@ -30,6 +30,7 @@ interface BlacklistConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  tenantId: number | null;
 }
 
 const DIRECTIONS: Direction[] = ['all', 'receive', 'send', 'internal'];
@@ -40,11 +41,12 @@ export function BlacklistConfirmDialog({
   open,
   onOpenChange,
   onSuccess,
+  tenantId,
 }: BlacklistConfirmDialogProps) {
   const t = useTranslations('linkAttachmentSecurity');
   const tCommon = useTranslations('common');
   const [selectedDirection, setSelectedDirection] = useState<Direction>('receive');
-  const mutation = useBlacklistDomain();
+  const mutation = useBlacklistDomain(tenantId);
 
   const handleConfirm = () => {
     mutation.mutate(

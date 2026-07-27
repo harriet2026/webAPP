@@ -816,7 +816,10 @@ test.describe('Email Disposal Detail Drawer (DD-14)', () => {
     // Both inline actions live in the operations cell, per the origin spec.
     const viewBtn = row!.getByRole('button', { name: '查看' });
     await expect(viewBtn).toBeVisible();
-    await expect(row!.getByRole('button', { name: '查找相似' })).toBeVisible();
+    // NOTE: the row-level label is emailDisposal.table.findSimilar = 「找相似」.
+    // 「查找相似」 is emailDisposal.batch.findSimilar — the batch-toolbar button,
+    // which lives outside the row; using it here matched nothing.
+    await expect(row!.getByRole('button', { name: '找相似' })).toBeVisible();
     // ...and only those two. GT-11584 had also put an inline 下载 here; the
     // 2026-07-18 html_spec alignment removed it (html_spec/
     // email-handling-disposal-center §列定义 row 9 specifies 查看 / 找相似).

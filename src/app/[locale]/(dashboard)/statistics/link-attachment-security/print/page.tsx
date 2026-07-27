@@ -6,10 +6,12 @@ import { useTranslations } from 'next-intl';
 import { useLinkAttachmentStats } from '@/components/statistics/link-attachment-security/hooks/useLinkAttachmentStats';
 import type { Direction } from '@/lib/api/link-attachment-security';
 import { LINK_DETAIL_KEYS, ATTACHMENT_DETAIL_KEYS } from '@/components/statistics/link-attachment-security/colors';
+import { useTenant } from '@/hooks/use-tenant';
 
 function PrintContent() {
   const t = useTranslations('linkAttachmentSecurity');
   const params = useSearchParams();
+  const { effectiveTenantId } = useTenant();
 
   const startDate = params.get('start_date') ?? '';
   const endDate = params.get('end_date') ?? '';
@@ -19,7 +21,7 @@ function PrintContent() {
   const viewTab = (params.get('view_tab') === 'attachment' ? 'attachment' : 'link') as 'link' | 'attachment';
   const chartType = params.get('chart_type') === 'area' ? 'area' : 'line';
 
-  const { data, isLoading } = useLinkAttachmentStats({ startDate, endDate, direction });
+  const { data, isLoading } = useLinkAttachmentStats({ startDate, endDate, direction, tenantId: effectiveTenantId ?? null });
 
   useEffect(() => {
     if (data && !isLoading) {
