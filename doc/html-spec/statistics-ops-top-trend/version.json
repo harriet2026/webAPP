@@ -1,0 +1,13 @@
+{
+  "module": "statistics-ops-top-trend",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-14",
+      "demo_commit": "804efb9",
+      "spec_commit": "8db3a98",
+      "summary": "初版：六维度 TOP 富列表（逐维度列集，PRD 未定义）、行展开 7 日趋势 + 4 子维度下钻、TOP 数量仅渲染 15 行、小屏提示条；修复 14 条 UTF-8 损坏中文（含列释义 Tooltip）；标注连接成败口径的最大缺口（异常失败率/策略拒绝率未拆分）；网关 /statistics/ops-top 全套端点已存在"
+    }
+  ]
+}

@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { cn } from '@/lib/utils';
 import { UI_ADDON_KEYS, disabledAddons, type AddonKey, type PrimaryAction } from './conflict-matrix';
 import type { AddonsState } from './validation';
@@ -141,7 +142,7 @@ function tv<T = string>(params: Record<string, unknown>, key: string, fallback: 
 interface FieldProps {
   label: string;
   required?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function Field({ label, required, children }: FieldProps) {
@@ -672,15 +673,17 @@ export function AddonsRowList({
             ? t('addons.storedNotWiredHint')
             : undefined;
 
-        const rowClass = cn(
-          'flex items-center gap-2 rounded-md border px-2.5 py-2 text-sm transition-colors',
-          isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-accent/50',
-          isSelected && !isDisabled && 'border-primary ring-1 ring-primary',
-          checked && !isDisabled && !isSelected && 'bg-primary/5 border-primary/40',
-        );
-
-        const inner = (
-          <>
+        return (
+          <AddonRow
+            key={key}
+            addonKey={key}
+            togglesOnClick={rowTogglesOnClick}
+            isDisabled={isDisabled}
+            isSelected={isSelected}
+            checked={checked}
+            title={title}
+            onSelect={() => onSelectKey?.(key)}
+          >
             <Checkbox
               checked={checked}
               disabled={isDisabled}
@@ -696,39 +699,78 @@ export function AddonsRowList({
                 {t('addons.upcoming')}
               </span>
             )}
-          </>
-        );
-
-        if (rowTogglesOnClick) {
-          // <label> wrapping the Radix checkbox: a click on the row text/space
-          // is forwarded to the checkbox button natively, toggling it once (a
-          // direct checkbox click stops propagation and toggles via
-          // onCheckedChange — no double toggle). Disabled rows can't toggle
-          // (checkbox disabled).
-          return (
-            <label key={key} data-testid={`addon-row-${key}`} title={title} className={rowClass}>
-              {inner}
-            </label>
-          );
-        }
-
-        return (
-          <div
-            key={key}
-            data-testid={`addon-row-${key}`}
-            role="button"
-            tabIndex={isDisabled ? -1 : 0}
-            title={title}
-            className={rowClass}
-            onClick={() => {
-              if (isDisabled) return;
-              onSelectKey?.(key);
-            }}
-          >
-            {inner}
-          </div>
+          </AddonRow>
         );
       })}
+    </div>
+  );
+}
+
+// 附加动作可点行（柔和交互反馈规格 §6.5/§7.2/§8）：hover 由 pointer 驱动（disabled 不响应），
+// 选中/勾选态不被 hover 覆盖；role=button 形态补 Enter/Space 键盘激活与 focus-visible ring。
+function AddonRow({
+  addonKey,
+  togglesOnClick,
+  isDisabled,
+  isSelected,
+  checked,
+  title,
+  onSelect,
+  children,
+}: {
+  addonKey: AddonKey | 'detailedLog';
+  togglesOnClick: boolean;
+  isDisabled: boolean;
+  isSelected: boolean;
+  checked: boolean;
+  title?: string;
+  onSelect: () => void;
+  children: React.ReactNode;
+}) {
+  const { pointerHoverProps } = usePointerHover<HTMLElement>({ disabled: isDisabled });
+  const rowClass = cn(
+    'flex items-center gap-2 rounded-md border px-2.5 py-2 text-sm outline-none',
+    'transition-[background-color,border-color,box-shadow] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+    'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset',
+    isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer data-[hovered=true]:bg-accent/50',
+    isSelected && !isDisabled && 'border-primary ring-1 ring-primary',
+    checked && !isDisabled && !isSelected && 'bg-primary/5 border-primary/40',
+  );
+
+  if (togglesOnClick) {
+    // <label> wrapping the Radix checkbox: a click on the row text/space
+    // is forwarded to the checkbox button natively, toggling it once (a
+    // direct checkbox click stops propagation and toggles via
+    // onCheckedChange — no double toggle). Disabled rows can't toggle
+    // (checkbox disabled).
+    return (
+      <label data-testid={`addon-row-${addonKey}`} title={title} className={rowClass} {...pointerHoverProps}>
+        {children}
+      </label>
+    );
+  }
+
+  return (
+    <div
+      data-testid={`addon-row-${addonKey}`}
+      role="button"
+      tabIndex={isDisabled ? -1 : 0}
+      title={title}
+      className={rowClass}
+      onClick={() => {
+        if (isDisabled) return;
+        onSelect();
+      }}
+      onKeyDown={(e) => {
+        if (isDisabled) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
+      {...pointerHoverProps}
+    >
+      {children}
     </div>
   );
 }

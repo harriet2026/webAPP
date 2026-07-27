@@ -1,0 +1,121 @@
+{
+  "captured_at": "2026-07-25",
+  "environment": {
+    "demo_url": "http://127.0.0.1:3000/security-ops-dashboard",
+    "webapp_url": "http://127.0.0.1:3001/zh/dashboard",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "zoom": 1,
+    "device_scale_factor": 1,
+    "theme": "light"
+  },
+  "before": {
+    "demo": {
+      "width": 1072,
+      "height": 46,
+      "padding": "12px 16px",
+      "gap": "12px",
+      "border_radius": "8px",
+      "box_shadow": "none"
+    },
+    "webapp": {
+      "width": 1072,
+      "height": 54,
+      "padding": "16px 20px",
+      "gap": "12px",
+      "border_radius": "16px",
+      "box_shadow": "shadow-sm"
+    }
+  },
+  "after": {
+    "demo": {
+      "rect": {
+        "x": 312,
+        "y": 193,
+        "width": 1072,
+        "height": 46
+      },
+      "padding": [
+        "12px",
+        "16px",
+        "12px",
+        "16px"
+      ],
+      "gap": "12px",
+      "border_width": "1px",
+      "border_radius": "8px",
+      "border_color": "lab(86.017 19.8815 7.75869)",
+      "background": "lab(96.5005 4.18508 1.52328)",
+      "foreground": "lab(48.4493 77.4328 61.5452)",
+      "box_shadow": "none",
+      "font": {
+        "size": "14px",
+        "line_height": "20px",
+        "weight": "500"
+      },
+      "icon_rect": {
+        "x": 329,
+        "y": 206,
+        "width": 20,
+        "height": 20
+      },
+      "text_origin": {
+        "x": 361,
+        "y": 206
+      }
+    },
+    "webapp": {
+      "rect": {
+        "x": 312,
+        "y": 193,
+        "width": 1072,
+        "height": 46
+      },
+      "padding": [
+        "12px",
+        "16px",
+        "12px",
+        "16px"
+      ],
+      "gap": "12px",
+      "border_width": "1px",
+      "border_radius": "8px",
+      "border_color": "lab(86.017 19.8815 7.75869)",
+      "background": "lab(96.5005 4.18508 1.52328)",
+      "foreground": "lab(48.4493 77.4328 61.5452)",
+      "box_shadow": "none",
+      "font": {
+        "size": "14px",
+        "line_height": "20px",
+        "weight": "500"
+      },
+      "icon_rect": {
+        "x": 329,
+        "y": 206,
+        "width": 20,
+        "height": 20
+      },
+      "text_origin": {
+        "x": 361,
+        "y": 206
+      }
+    }
+  },
+  "comparison": {
+    "rect": true,
+    "padding": true,
+    "gap": true,
+    "border_width": true,
+    "border_radius": true,
+    "border_color": true,
+    "background": true,
+    "foreground": true,
+    "box_shadow": true,
+    "font_metrics": true,
+    "icon_rect": true,
+    "text_origin": true
+  },
+  "implementation_note": "demo rounded-md computes to 8px; webapp rounded-md computes to 6px, so the shared webapp StatusBanner intentionally uses rounded-lg to preserve the 8px visual value."
+}

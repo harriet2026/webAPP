@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures/auth.fixture';
 import type { APIRequestContext } from '@playwright/test';
+import { ensureFiltersExpanded } from '../helpers/mail-list';
 
 const INGEST_URL =
   (process.env.INTERNAL_API_BASE_URL || 'https://localhost:18081') +
@@ -160,7 +161,7 @@ test.describe('Email Disposal Review E2E', () => {
     // reflects select → deselect (summary shows the type when 1 is selected,
     // and the placeholder 全部 when none are).
     // 09ee6b4cdd: 结构化筛选（邮件类型等）默认折叠在「高级筛选」开关后面。
-    await authenticatedPage.getByTestId('disposal-filters-toggle').click();
+    await ensureFiltersExpanded(authenticatedPage);
     const mailTypeLabel = authenticatedPage.locator('label').filter({ hasText: /^邮件类型$/ }).first();
     await expect(mailTypeLabel).toBeVisible({ timeout: 10000 });
     const trigger = mailTypeLabel.locator('..').getByRole('button').first();

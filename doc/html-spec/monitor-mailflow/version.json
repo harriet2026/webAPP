@@ -1,0 +1,20 @@
+{
+  "module": "monitor-mailflow",
+  "current_version": 2,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": null,
+      "summary": "初版：3 Tab（队列/投递质量/连接会话）全量提取 + 方向 Select 四值联动实测（乘数 1.8/1.0/0.7/0.4 对照表）；连接会话单链路双线 vs 全部四线视图对比；形态×角色 5×2 矩阵；3 断点截图；7 项差异（timeRange 无消费、URL tab 参数不读、Top10 名实不符等）+ 3 项需确认"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": null,
+      "summary": "用户决定落地 2 项目标行为：① 时间范围 Select 切换后页面数据跟着更新（D-01 已解决-目标行为，点数口径 1h=12点×5m / 24h=24点 / 7d=7点×日）② 监控总览下钻 ?tab= 参数按 URL 落对应 Tab（D-06/Q-02 已解决，非法值回退 queue）；§9/§10 全部条目逐项标注复核状态"
+    }
+  ]
+}

@@ -59,6 +59,24 @@ test.describe('GT-11669 login prototype alignment', () => {
     await expect(page.locator('input[name="username"]')).toBeVisible();
   });
 
+  // GT-12511: 空用户名/密码在前端拦截并给出本地化中文提示，
+  // 不再把 Go validator 的英文原文（Key: 'LoginRequest.Password' ...）暴露给用户。
+  test('empty password submit shows localized hint, not raw validator text', async ({ page }) => {
+    await page.goto(LOGIN_URL);
+    await page.locator('input[name="username"]').fill('testuser');
+    await page.locator('button[type="submit"]').click();
+    const alert = page.getByTestId('login-root').getByRole('alert');
+    await expect(alert).toContainText('请输入密码');
+    await expect(alert).not.toContainText('LoginRequest');
+  });
+
+  test('empty username submit shows localized hint', async ({ page }) => {
+    await page.goto(LOGIN_URL);
+    await page.locator('input[name="password"]').fill('whatever');
+    await page.locator('button[type="submit"]').click();
+    await expect(page.getByTestId('login-root').getByRole('alert')).toContainText('请输入用户名');
+  });
+
   test('brand rail is dark and carries the full prototype copy', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(LOGIN_URL);

@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { LogOut, User, Loader2, UserCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { LogOut, User, UserCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { LanguageSwitcher } from './language-switcher';
 import { ProductFormSwitcher } from './product-form-switcher';
@@ -16,55 +14,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { changePassword } from '@/lib/api/auth';
-import { useApiRequest } from '@/lib/api/client';
-import { toast } from 'sonner';
 
 export function Header() {
   const { user, logout } = useAuth();
   const t = useTranslations();
   const router = useRouter();
   const locale = useLocale();
-  const { apiRequest: apiRequestFn } = useApiRequest();
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleChangePassword = async () => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error(t('profile.allFieldsRequired'));
-      return;
-    }
-    if (newPassword.length < 6) {
-      toast.error(t('profile.passwordTooShort'));
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error(t('profile.passwordMismatch'));
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await changePassword(currentPassword, newPassword, apiRequestFn);
-      toast.success(t('profile.passwordChanged'));
-      setProfileOpen(false);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <>
       <header
@@ -93,10 +50,8 @@ export function Header() {
                   </DropdownMenuLabel>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setTimeout(() => setProfileOpen(true), 0)}>
-                  <User className="h-4 w-4 mr-2" />
-                  {t('header.profile')}
-                </DropdownMenuItem>
+                {/* GT-12501: 「个人信息」快捷改密弹窗入口按验收要求隐藏，
+                    改密功能保留在「个人中心」页（PasswordTab）。 */}
                 <DropdownMenuItem onClick={() => setTimeout(() => router.push(`/${locale}/profile`), 0)}>
                   <UserCircle className="h-4 w-4 mr-2" />
                   {t('profile.title')}
@@ -111,38 +66,6 @@ export function Header() {
         </div>
       </header>
 
-      <Dialog open={profileOpen} onOpenChange={(open) => !open && setProfileOpen(false)}>
-        <DialogContent className="max-w-md rounded-xl border-border shadow-2xl">
-          <DialogHeader>
-            <DialogTitle>{t('header.profile')}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>{t('profile.username')}</Label>
-              <Input value={user?.username || ''} disabled />
-            </div>
-            <div className="space-y-2">
-              <Label>{t('profile.currentPassword')}</Label>
-              <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>{t('profile.newPassword')}</Label>
-              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>{t('profile.confirmPassword')}</Label>
-              <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setProfileOpen(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleChangePassword} disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {t('profile.changePassword')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

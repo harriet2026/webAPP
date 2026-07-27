@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级4：加密附件 Tab - 附件安全检测 HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --muted: #f5f7fa; --muted-foreground: #6b7280; --border: #e5e7eb; --blue: #1677ff; --radius: 0.625rem; --font-sans: "Geist", "Inter", system-ui, sans-serif; --font-mono: "Geist Mono", ui-monospace, monospace; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1200px; margin-inline: auto; background: var(--background); color: #111827; font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .layer-nav { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 12px 18px; background: var(--muted); border-radius: 8px; font-size: 14px; font-weight: 650; }
+    .spec-header, section { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 160px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .form-label { display: block; margin: 8px 0 6px; font-size: 13px; font-weight: 600; color: #374151; }
+    .sel { min-width: 220px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: #fff; font-size: 14px; }
+    .txt-input { width: 192px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; }
+    .check-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 14px; }
+    .gray-block { margin: 14px 0; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f9fafb; }
+    .btn-outline { padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; font-size: 13px; cursor: pointer; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+    .mini-table th, .mini-table td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; }
+    .mini-table th { background: #f8fafc; color: #374151; }
+    .mono { font-family: var(--font-mono); }
+    .del-btn { border: 0; background: transparent; color: #dc2626; cursor: pointer; font-size: 14px; }
+    .hint { margin-top: 4px; color: var(--muted-foreground); font-size: 12px; }
+    .is-hidden { display: none !important; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <span>层级 4 / 5</span>
+    <a href="./layer-4-disabled-tenant-states.html">层级5：禁用/租户/多语言变体 →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 4：加密附件 Tab（EncryptedAttachmentTab，含密码本增删）</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 附件安全检测配置 Tab 组 AttachmentSecurityModule</td></tr>
+      <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级1 抽屉默认态 → Tab 组点击「加密附件」</td></tr>
+      <tr><td>demo 组件</td><td><code>attachment-security-module.tsx</code> → <code>EncryptedAttachmentTab</code>（direction=receive；<strong>该子组件无 language 参数，文案全部硬编码中文</strong>）</td></tr>
+      <tr><td>浏览器实测</td><td>面板节点 72；combobox [仅检测（识别加密，不尝试解密）, 放行]；checkbox 4 个全 checked；密码本 1 行 company2024!；添加 test@123 后 2 行（日期 2026-07-11）；删除后回 1 行。解密失败下拉 3 项：隔离/放行/阻断。</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">4</span>加密附件 Tab 默认态（可交互预览：密码本添加/删除、密码本区块联动）</h4>
+    <div class="component-preview" data-demo-extracted="encrypted-tab">
+      <label class="form-label" style="font-size:14px;">加密附件检测策略</label>
+      <select class="sel" style="min-width:300px;">
+        <option value="none">不检测</option>
+        <option value="detect_only" selected>仅检测（识别加密，不尝试解密）</option>
+        <option value="deep">深度检测（尝试解密并扫描内容，推荐外发方向）</option>
+      </select>
+
+      <label class="form-label" style="font-size:14px;">解密失败处置</label>
+      <select class="sel" style="min-width:200px;">
+        <option>隔离</option><option selected>放行</option><option>阻断</option>
+      </select>
+      <div class="hint">接收方向默认放行，防误拦</div>
+
+      <label class="form-label" style="font-size:14px;">密码获取方式</label>
+      <div class="check-row"><input type="checkbox" checked> 自动提取邮件正文中的密码</div>
+      <div class="check-row"><input type="checkbox" checked data-use-book> 使用预设密码本尝试解密</div>
+
+      <!-- 密码本（usePasswordBook 条件渲染） -->
+      <div class="gray-block" data-book-block>
+        <label class="form-label" style="margin-top:0;">密码本设置（全局共用）</label>
+        <table class="mini-table">
+          <thead><tr><th>密码</th><th>添加时间</th><th style="width:80px;">操作</th></tr></thead>
+          <tbody data-book-body>
+            <tr><td class="mono">company2024!</td><td>2024-01-15</td><td><button class="del-btn" type="button" title="点击直接删除（无二次确认，与 demo 一致）">🗑</button></td></tr>
+          </tbody>
+        </table>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="txt-input" placeholder="输入新密码" data-new-pwd>
+          <button class="btn-outline" type="button" data-add-pwd>＋ 添加密码</button>
+        </div>
+        <div class="hint">空字符串忽略；demo <strong>不校验重复密码</strong>（可添加相同密码，差异 D-7）。</div>
+      </div>
+
+      <label class="form-label" style="font-size:14px;">高级选项</label>
+      <div class="check-row"><input type="checkbox" checked> 解密成功后递归检测解压内容（深度限制：3层）</div>
+      <div class="check-row"><input type="checkbox" checked> 通过后续检测仍标记为"可疑加密邮件"</div>
+    </div>
+
+    <figure class="screenshot-figure">
+      <img src="./screenshots/encrypted-tab.png" alt="加密附件 Tab 默认态">
+      <figcaption>加密附件 Tab 默认态（浏览器实际渲染）：仅检测 / 放行 / 双密码获取方式 / 密码本 1 行 / 高级选项。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/encrypted-password-added.png" alt="密码本添加后">
+      <figcaption>输入 test@123 点击「添加密码」后：表格追加一行（添加时间为当日 2026-07-11），输入框清空。</figcaption>
+    </figure>
+
+    <h4>UI 元素清单</h4>
+    <table class="spec-table">
+      <thead><tr><th>序号</th><th>元素</th><th>默认值（receive）</th><th>选项/校验</th><th>交互（浏览器实测）</th><th>i18n</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>加密附件检测策略 Select</td><td>仅检测（识别加密，不尝试解密）</td><td>不检测 / 仅检测 / 深度检测（尝试解密并扫描内容，推荐外发方向）——PRD 仅两档，demo 三档（差异 D-1）</td><td>send 方向标题追加「（外发方向建议严格，防加密外发泄密）」且默认深度（源码）</td><td>硬编码中文</td></tr>
+        <tr><td>2</td><td>解密失败处置 Select</td><td>放行</td><td>receive：隔离/放行/阻断（实测 3 项）；send/internal：审核/放行/阻断（源码）</td><td>下方提示按方向：「接收方向默认放行，防误拦」/「外发方向默认审核，防泄密」</td><td>硬编码中文（动作名走 getActionLabel 但未传 language，恒中文）</td></tr>
+        <tr><td>3</td><td>自动提取邮件正文中的密码 Checkbox</td><td>checked</td><td>PRD 还要求「从附件名提取密码」，demo 无此项（差异 D-1 附注）</td><td>-</td><td>硬编码中文</td></tr>
+        <tr><td>4</td><td>使用预设密码本尝试解密 Checkbox</td><td>checked</td><td>取消勾选 → 整个密码本设置区块隐藏（条件渲染，预览已复刻）</td><td>-</td><td>硬编码中文</td></tr>
+        <tr><td>5</td><td>密码本表格</td><td>1 行：company2024! / 2024-01-15</td><td>列：密码（等宽字体、明文）/ 添加时间 / 操作（Trash2 红色图标）</td><td>PRD 要求安全管理员视角脱敏，demo 明文（差异 D-7/D-8）</td><td>硬编码中文</td></tr>
+        <tr><td>6</td><td>输入新密码 Input + 添加密码 Button</td><td>空</td><td>trim 后空串忽略；无重复校验；无长度/复杂度校验</td><td>添加后追加行（addedAt=当日 ISO 日期），输入框清空（实测）</td><td>硬编码中文</td></tr>
+        <tr><td>7</td><td>删除按钮（每行）</td><td>-</td><td>点击直接删除，无二次确认（与 PRD §3 一致）</td><td>实测删除后行数恢复</td><td>-</td></tr>
+        <tr><td>8</td><td>递归检测 Checkbox</td><td>checked</td><td>文案固定「深度限制：3层」，层数不可配置</td><td>-</td><td>硬编码中文</td></tr>
+        <tr><td>9</td><td>标记可疑 Checkbox</td><td>checked</td><td>「通过后续检测仍标记为"可疑加密邮件"」——PRD §1.4 功能点清单未列，demo 新增</td><td>-</td><td>硬编码中文</td></tr>
+      </tbody>
+    </table>
+
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>面板根节点</td><td><code>[role=tabpanel][data-state=active]</code>，节点总数 72</td><td>预览保留五个分组（策略/失败处置/密码获取/密码本/高级选项）</td><td>一致（结构裁剪展示）</td></tr>
+          <tr><td>combobox 值</td><td>[仅检测（识别加密，不尝试解密）, 放行]</td><td>2 个 select 同默认</td><td>一致</td></tr>
+          <tr><td>checkbox 状态</td><td>4 个全 checked（正文提取/密码本/递归/标记）</td><td>同状态</td><td>一致</td></tr>
+          <tr><td>密码本表格</td><td>tbody 1 行「company2024! | 2024-01-15」；添加后 2 行「test@123 | 2026-07-11」；删除后回 1 行</td><td>预览 JS 同增删状态机（含当日日期、空串忽略）</td><td>一致</td></tr>
+          <tr><td>条件渲染</td><td>usePasswordBook=false 时密码本区块不渲染（源码 <code>{config.usePasswordBook && ...}</code>）</td><td>取消勾选隐藏区块</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="./layer-2-image-detect-tab.html">← 层级3：图片识别 Tab</a>
+    <a href="./layer-4-disabled-tenant-states.html">层级5：禁用/租户/多语言变体 →</a>
+  </nav>
+
+  <script>
+    // 密码本区块条件渲染（usePasswordBook）
+    const useBook = document.querySelector("[data-use-book]");
+    const bookBlock = document.querySelector("[data-book-block]");
+    useBook.addEventListener("change", () => bookBlock.classList.toggle("is-hidden", !useBook.checked));
+
+    // 添加/删除密码（复刻 demo addPassword/removePassword：trim 空忽略、不查重、当日日期、点删即删）
+    const body = document.querySelector("[data-book-body]");
+    const input = document.querySelector("[data-new-pwd]");
+    const bindDel = (btn) => btn.addEventListener("click", () => btn.closest("tr").remove());
+    body.querySelectorAll(".del-btn").forEach(bindDel);
+    document.querySelector("[data-add-pwd]").addEventListener("click", () => {
+      const pwd = input.value.trim();
+      if (!pwd) return; // 空字符串忽略
+      const tr = document.createElement("tr");
+      const today = new Date().toISOString().split("T")[0];
+      tr.innerHTML = `<td class="mono"></td><td>${today}</td><td><button class="del-btn" type="button">🗑</button></td>`;
+      tr.querySelector(".mono").textContent = pwd;
+      bindDel(tr.querySelector(".del-btn"));
+      body.appendChild(tr);
+      input.value = "";
+    });
+  </script>
+</body>
+</html>

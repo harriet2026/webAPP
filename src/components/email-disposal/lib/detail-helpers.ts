@@ -119,6 +119,24 @@ export function mailTypeTone(type: EmailType): MailTypeTone {
   return mailTypeConfig[type].tone;
 }
 
+// GT-12422: 改判下拉的展示顺序按原型（html_spec layer-6 opts-reclassify）：
+// 正常 → 订阅 → 垃圾 → 广告 → 有害 → 钓鱼 → 账号被盗 → 可疑 → 身份仿冒 →
+// 病毒 → 敏感。mailTypeConfig 的键序按 tone 分组（供徽标/图例使用），
+// 与原型下拉顺序不同，勿直接 Object.keys 渲染下拉。
+export const RECLASSIFY_TYPE_ORDER: EmailType[] = [
+  "normal",
+  "subscription",
+  "spam",
+  "advertising",
+  "harmful",
+  "phishing",
+  "account_compromised",
+  "suspicious",
+  "spoofing",
+  "virus",
+  "sensitive",
+];
+
 // mailTypeConfig's labelKeys / correctionSourceLabelKey()'s return values are
 // relative-to-`emailDisposal.detail` paths that literally start with the
 // string "detail." (a DD-7 naming quirk) -- strip that prefix before handing

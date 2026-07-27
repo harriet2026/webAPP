@@ -150,14 +150,12 @@ describe('EmailDisposalCenterPage tenant-switch reset (review TEST-3)', () => {
       items: [item(1)], total: 1, page: 1, page_size: 20,
     });
 
-    const { getByTestId, findByRole } = renderPage();
+    const { findByRole } = renderPage();
 
     await waitFor(() => expect(getDisposalListMock).toHaveBeenCalled());
     const firstCall = getDisposalListMock.mock.calls.length;
 
-    // 09ee6b4cdd：结构化筛选（含平台租户选择器）默认折叠在「高级筛选」开关后面，
-    // 先展开再选择租户 B。
-    getByTestId('disposal-filters-toggle').click();
+    // GT-12423 起结构化筛选（含平台租户选择器）默认展开，无需先点开关。
     (await findByRole('button', { name: 'select tenant B' })).click();
 
     await waitFor(() => {

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>裁剪态：租户视角 - 系统状态</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== 设计变量（参考 demo globals.css） ===== */
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.55;
+      font-size: 14px;
+      padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1.2rem; margin: 2.2rem 0 .8rem; padding-bottom: .35rem; border-bottom: 2px solid var(--primary); }
+    h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; }
+    h4 { font-size: .95rem; margin: 1.2rem 0 .5rem; }
+    h5 { font-size: .85rem; margin: .8rem 0 .4rem; }
+    p { margin: .45rem 0; }
+    code { font-family: var(--font-mono); font-size: .85em; background: var(--muted); padding: .1em .35em; border-radius: 4px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    a { color: oklch(0.52 0.226 262); }
+
+    /* ===== 头部 / 元信息 ===== */
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .spec-header .subtitle { color: var(--muted-foreground); font-size: .9rem; }
+    .meta-table { border-collapse: collapse; width: 100%; margin-top: .8rem; font-size: 13px; }
+    .meta-table td { border: 1px solid var(--border); padding: 5px 10px; vertical-align: top; }
+    .meta-table td:first-child { background: var(--muted); font-weight: 600; white-space: nowrap; width: 11em; }
+
+    /* ===== 组件目录 ===== */
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem; margin-top: 1.2rem; }
+    .component-toc ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .component-toc li { margin: .3rem 0; }
+    .toc-badge { display: inline-block; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 999px; padding: 0 .5em; margin-left: .4em; vertical-align: middle; }
+    .toc-layer-links { margin-left: .6em; font-size: 12px; }
+    .toc-layer-links a { margin-right: .5em; }
+
+    /* ===== 表格 ===== */
+    .spec-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0 1rem; background: var(--card); }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); font-weight: 600; white-space: nowrap; }
+    .spec-table td.num { text-align: right; font-family: var(--font-mono); }
+    .spec-table .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    /* ===== 截图 ===== */
+    .screenshot-figure { margin: .8rem 0 1.2rem; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .screenshot-figure figcaption { font-size: 12px; color: var(--muted-foreground); margin-top: .35rem; }
+
+    /* ===== 组件规格块 ===== */
+    .component-spec { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem 1.4rem; margin: 1.2rem 0; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: .9rem 1.1rem; margin: 1rem 0; background: oklch(0.99 0 0); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; background: var(--primary); color: #fff; border-radius: 999px; font-size: .8em; font-weight: 700; margin-right: .4em; }
+    .trigger-path { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .45rem .7rem; margin: .5rem 0; }
+    .layer-nav { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 13px; }
+
+    /* ===== 可交互组件预览区 ===== */
+    .component-preview { border: 2px dashed oklch(0.7 0.12 262); border-radius: 10px; padding: 18px; background: #f4f5f7; overflow-x: auto; margin: .7rem 0; position: relative; }
+    .component-preview::before { content: "可交互预览（提取自运行中的 demo）"; position: absolute; top: -9px; left: 14px; background: oklch(0.52 0.226 262); color: #fff; font-size: 10.5px; padding: 0 8px; border-radius: 999px; line-height: 16px; }
+    .preview-note { font-size: 12px; color: var(--muted-foreground); background: oklch(0.975 0.02 95); border: 1px solid oklch(0.9 0.06 95); border-radius: 6px; padding: .4rem .7rem; margin: .4rem 0 .8rem; }
+    /* demo 提取片段兜底（Tailwind CDN 未覆盖的 shadcn 主题类） */
+    .component-preview .bg-card { background: #fff; }
+    .component-preview .text-card-foreground { color: #0a0a0a; }
+    .component-preview .bg-popover { background: #fff; }
+    .component-preview .text-popover-foreground { color: #0a0a0a; }
+    .component-preview .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .component-preview .border-input { border-color: #e5e7eb; }
+    .component-preview svg { flex-shrink: 0; }
+    .component-preview .recharts-responsive-container { min-height: 320px; }
+    .component-preview [data-slot="card"] { border-color: #e5e7eb; }
+    .component-preview button { cursor: pointer; }
+    .component-preview button:disabled { cursor: default; }
+    @keyframes spec-spin { to { transform: rotate(360deg); } }
+    .component-preview .animate-spin { animation: spec-spin 1s linear infinite; }
+
+    /* 路由提示浮层 */
+    .route-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 13px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 99; opacity: 0; transition: opacity .2s; pointer-events: none; font-family: var(--font-mono); }
+    .route-toast.show { opacity: 1; }
+
+    /* ===== DOM 比对 ===== */
+    .dom-comparison { background: oklch(0.975 0.008 262); border: 1px solid oklch(0.85 0.03 262); border-radius: 8px; padding: .6rem .9rem; margin-top: .8rem; }
+    .dom-comparison h5 { margin: .2rem 0 .4rem; }
+
+    /* ===== 差异 / 需确认 ===== */
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .diff-section h2 { border-bottom-color: var(--diff-border); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .question-section h2 { border-bottom-color: var(--question-border); }
+    .diff-table td:first-child, .question-table td:first-child { font-weight: 700; white-space: nowrap; }
+
+    /* ===== 徽标 ===== */
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 .55em; line-height: 1.6; vertical-align: middle; }
+    .tag-green { background: #dcfce7; color: #15803d; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-gray { background: #f3f4f6; color: #4b5563; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+
+    .mermaid { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .6rem; margin: .8rem 0; overflow-x: auto; }
+
+  </style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="./index.html#business-logic">← 返回主文件（§5 业务逻辑）</a>
+  <a href="./layer-4-form-legacy.html">裁剪态：传统版 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>裁剪态：租户视角（cloud 形态 · viewer=tenant）</h1>
+  <table class="meta-table">
+    <tr><td>所属规格</td><td>spec §0.2 形态×视角矩阵 · §9 数据口径与权限</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">system-status/index.html</a></td></tr>
+    <tr><td>触发路径</td><td>顶栏「产品形态」切换器 → 管理视角选「租户管理员」（demo 也支持 URL 参数 <code>?profile=cloud&amp;viewer=tenant</code>，本验证即用此方式）</td></tr>
+    <tr><td>判定机制</td><td><code>resolve("monitor-infrastructure").visible === false</code>（该 feature 定义 <code>scope:"platform", tenantAccess:"hidden"</code>）→ <code>showInfra=false</code>；告警按 <code>scope==="tenant"</code> 过滤</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">T</span> 租户视角整页态</h4>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/viewer-tenant.png" alt="租户视角整页">
+    <figcaption>租户视角：① 健康条 N 降为 1（平台事件不再计入）；② KPI 仅 3 卡（节点卡隐藏，<code>xl:grid-cols-3</code> 收敛无空缺）；③ 告警仅 2 项（待处置队列 / 举报待审）；④ 底部仅智能体 + TOP5 两卡（<code>lg:grid-cols-2</code>），系统与服务健康卡隐藏。侧边栏亦同源裁剪（出现租户菜单如「处置设置/灰邮治理」，隐藏平台管理菜单）。</figcaption>
+  </figure>
+
+  <h5>与平台视角差异清单（CDP 实测）</h5>
+  <table class="spec-table">
+    <thead><tr><th>区块</th><th>平台视角</th><th>租户视角</th><th>实测值</th></tr></thead>
+    <tbody>
+      <tr><td>健康条文案</td><td>检测到 2 项紧急事件…</td><td>检测到 <b>1</b> 项紧急事件…</td><td>✅ danger 仅剩「待处置队列」</td></tr>
+      <tr><td>KPI 栅格</td><td><code>xl:grid-cols-4</code>，4 卡</td><td><code>xl:grid-cols-3</code>，3 卡</td><td>✅ class 与子节点数实测</td></tr>
+      <tr><td>系统在线节点卡</td><td>渲染</td><td><b>不渲染</b></td><td>✅ cards 列表无该卡</td></tr>
+      <tr><td>待办与告警</td><td>5 项</td><td><b>2 项</b>（待处置队列 5 封待处理 / 举报待审 2 条）</td><td>✅ innerText 实测</td></tr>
+      <tr><td>底部概览栅格</td><td><code>lg:grid-cols-3</code>，3 卡</td><td><code>lg:grid-cols-2</code>，2 卡（智能体 + TOP5）</td><td>✅</td></tr>
+      <tr><td>系统与服务健康卡</td><td>渲染</td><td><b>不渲染</b></td><td>✅</td></tr>
+      <tr><td>智能体运行概况</td><td>渲染</td><td>渲染（仅按 <code>capabilities.ai</code>，见主文件差异 D7）</td><td>✅</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">T1</span> 租户视角待办与告警卡（提取预览）</h4>
+  <div class="component-preview" id="preview-alerts-tenant">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-base">待办与告警</div></div><div data-slot="card-content" class="px-6"><div class="space-y-2"><button class="flex w-full items-center gap-3 rounded-md border border-gray-100 px-3 py-2.5 text-left dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><span class="h-2 w-2 shrink-0 rounded-full bg-red-500"></span><div class="min-w-0 flex-1"><div class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">待处置队列</div><div class="truncate text-xs text-gray-500 dark:text-gray-400">5 封待处理</div></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 shrink-0 text-gray-400"><path d="m9 18 6-6-6-6"></path></svg></button><button class="flex w-full items-center gap-3 rounded-md border border-gray-100 px-3 py-2.5 text-left dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><span class="h-2 w-2 shrink-0 rounded-full bg-orange-500"></span><div class="min-w-0 flex-1"><div class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">举报待审</div><div class="truncate text-xs text-gray-500 dark:text-gray-400">2 条</div></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 shrink-0 text-gray-400"><path d="m9 18 6-6-6-6"></path></svg></button></div><button class="mt-3 flex items-center text-sm font-medium text-blue-600 hover:underline">查看全部告警 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></button></div></div>
+  </div>
+  <p class="preview-note">预览可操作：hover 列表项浅灰背景；点击显示 demo 跳转路由。平台级三项（检测引擎离线 / 许可证到期 / 规则库版本）在此视角<b>不渲染</b>。</p>
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果（租户态告警卡）</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>一致</th></tr></thead>
+      <tbody>
+        <tr><td>列表项数</td><td>2 个 button（均可点击，带 ChevronRight）</td><td>2</td><td>✅</td></tr>
+        <tr><td>级别圆点</td><td>bg-red-500（待处置队列）/ bg-orange-500（举报待审）</td><td>一致</td><td>✅</td></tr>
+        <tr><td>平台级三项</td><td>未渲染（scope 过滤）</td><td>未包含</td><td>✅</td></tr>
+        <tr><td>底部链接</td><td>查看全部告警 ›（仍渲染）</td><td>一致</td><td>✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="route-toast" id="route-toast"></div>
+<script>
+(function () {
+  const ap = document.getElementById("preview-alerts-tenant");
+  const routes = { "待处置队列": "/email-handling/disposal-center", "举报待审": "/report-center/management", "查看全部告警": "/monitor/alerts" };
+  ap.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b || b.disabled) return;
+    const t = b.textContent.trim();
+    for (const k in routes) if (t.startsWith(k)) {
+      const toast = document.getElementById("route-toast");
+      toast.textContent = 'demo 行为：router.push("' + routes[k] + '")';
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2000);
+      return;
+    }
+  });
+})();
+</script>
+</body>
+</html>

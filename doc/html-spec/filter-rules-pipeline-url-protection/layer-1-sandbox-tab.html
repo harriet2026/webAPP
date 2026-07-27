@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 1：URL沙箱检测 Tab 默认态 - URL检测与防护</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --text:#111827; --sub:#6b7280; --blue:#1677ff; --red:#f5222d; --radius:.625rem; }
+    * { box-sizing: border-box; }
+    body { margin:0; padding:32px; max-width:1280px; margin-inline:auto; background:var(--bg); color:var(--text); font-family:"Geist","Inter",system-ui,sans-serif; line-height:1.6; }
+    a { color:var(--blue); text-decoration:none; }
+    nav.layer-nav, .spec-header, section { margin-bottom:24px; padding:24px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); }
+    nav.layer-nav { display:flex; justify-content:space-between; padding:14px 24px; font-weight:650; }
+    h1 { margin:0 0 16px; color:var(--primary); font-size:26px; }
+    h2 { margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--primary); color:var(--primary); font-size:20px; }
+    .meta-table, .spec-table { width:100%; border-collapse:collapse; font-size:14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding:9px 11px; border:1px solid var(--border); vertical-align:top; }
+    .meta-table td:first-child, .spec-table th { background:var(--muted); font-weight:650; text-align:left; }
+    .layer-badge { display:inline-flex; align-items:center; justify-content:center; min-width:24px; height:24px; margin-right:8px; border-radius:999px; background:var(--blue); color:#fff; font-size:12px; font-weight:700; }
+    .component-preview { margin:12px 0; padding:18px; border:1px solid #dbeafe; border-radius:8px; background:#f8fbff; overflow:auto; }
+    .screenshot-figure { margin:14px 0; text-align:center; }
+    .screenshot-figure img { max-width:100%; border:1px solid var(--border); border-radius:8px; box-shadow:0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top:8px; color:var(--sub); font-size:13px; }
+    /* 沙箱 Tab 预览 */
+    .sandbox-panel { min-width:720px; padding:4px; }
+    .tabs { display:inline-flex; gap:4px; margin-bottom:14px; padding:4px; border-radius:8px; background:#f3f4f6; }
+    .tab { padding:5px 12px; border:0; border-radius:7px; font-size:13px; font-weight:650; background:transparent; color:#4b5563; cursor:pointer; }
+    .tab.active { background:#fff; color:#111827; box-shadow:0 1px 2px rgba(0,0,0,.08); }
+    .cfg-block { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; margin:10px 0; border:1px solid var(--border); border-radius:8px; background:#f9fafb; }
+    .cfg-text b { display:block; font-size:14px; }
+    .cfg-text small { color:#6b7280; font-size:12px; }
+    .toggle { position:relative; width:40px; height:22px; border:0; border-radius:999px; background:#2563eb; cursor:pointer; flex-shrink:0; transition:background .15s; }
+    .toggle::after { content:""; position:absolute; top:2px; left:20px; width:18px; height:18px; border-radius:999px; background:#fff; transition:left .15s; }
+    .toggle[aria-checked="false"] { background:#d1d5db; }
+    .toggle[aria-checked="false"]::after { left:2px; }
+    .group-label { margin:16px 0 6px; font-size:14px; font-weight:650; }
+    .field-label { margin:8px 0 4px; font-size:13px; }
+    .select-wrap { position:relative; display:inline-block; }
+    .select-trigger { display:inline-flex; align-items:center; gap:8px; min-width:220px; max-width:300px; padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; background:#fff; font-size:13px; cursor:pointer; white-space:nowrap; overflow:hidden; }
+    .select-trigger .chev { margin-left:auto; color:#9ca3af; }
+    .select-list { position:absolute; z-index:10; top:calc(100% + 4px); left:0; min-width:260px; padding:4px; border:1px solid var(--border); border-radius:8px; background:#fff; box-shadow:0 8px 24px rgba(15,23,42,.16); display:none; }
+    .select-list.open { display:block; }
+    .select-option { display:flex; justify-content:space-between; gap:12px; padding:7px 10px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap; }
+    .select-option:hover { background:#f3f4f6; }
+    .select-option .check { visibility:hidden; }
+    .select-option[data-checked="true"] .check { visibility:visible; }
+    .divider { margin:18px 0; border-top:1px solid var(--border); }
+    .intel-title { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:650; margin:14px 0 6px; }
+    .cleanup-zone { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+    .num-input { width:96px; padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; }
+    .hint { color:#6b7280; font-size:12px; margin-top:4px; }
+    .dimzone { transition:opacity .2s; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a><span>层级 1 / 3</span><a href="layer-2-sandbox-interactions.html">层级 2：校验/联动/置灰 →</a></nav>
+
+  <header class="spec-header">
+    <h1>交互层级 1：URL沙箱检测 Tab 默认态与处置下拉</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 URL沙箱检测 Tab（<code>SandboxTab</code>，url-protection-module.tsx）</td></tr>
+      <tr><td>触发路径</td><td>传统版形态（<code>?profile=legacy-single</code>，capabilities.ai=false）打开 URL检测与防护 抽屉 → 默认选中"URL沙箱检测"Tab</td></tr>
+      <tr><td>浏览器验证</td><td>抽屉节点数 126；Tab [URL沙箱检测 active, 链接保护 inactive]；开关 4 个（总开关/沙箱/本地情报库/云端）均 checked；下拉 2 个；数字输入 value=180 min=30 max=365</td></tr>
+      <tr><td>截图</td><td><code>screenshots/sandbox-tab-default.png</code>、<code>sandbox-malicious-select-open.png</code>、<code>sandbox-timeout-select-open.png</code></td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">1</span>HTML 预览（可交互：下拉展开/选中、开关切换）</h2>
+    <div class="component-preview">
+      <div class="sandbox-panel" data-demo-extracted="sandbox-tab">
+        <div class="tabs"><button class="tab active" type="button">URL沙箱检测</button><button class="tab" type="button" onclick="location.href='layer-3-link-protection.html'">链接保护</button></div>
+
+        <div class="cfg-block">
+          <span class="cfg-text" style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#a855f7;">🌐</span><span><b>沙箱检测</b><small>启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁</small></span></span>
+          <button class="toggle" type="button" role="switch" aria-checked="true" data-sandbox-toggle></button>
+        </div>
+
+        <div class="dimzone" data-detect-zone>
+          <div class="group-label">检测结果处置（当前方向）</div>
+          <div class="field-label">发现恶意URL</div>
+          <div class="select-wrap">
+            <button class="select-trigger" type="button" data-select-trigger="malicious"><span data-select-value>隔离（邮件存入隔离区）</span><span class="chev">⌄</span></button>
+            <div class="select-list" data-select-list="malicious">
+              <div class="select-option" data-checked="true">隔离（邮件存入隔离区）<span class="check">✓</span></div>
+              <div class="select-option" data-checked="false">阻断（拒绝接收该邮件）<span class="check">✓</span></div>
+              <div class="select-option" data-checked="false">标记（投递但添加风险标签）<span class="check">✓</span></div>
+              <div class="select-option" data-checked="false">丢弃（静默删除）<span class="check">✓</span></div>
+            </div>
+          </div>
+
+          <div class="group-label">扫描异常处置</div>
+          <div class="field-label">沙箱分析超时（超过30秒）</div>
+          <div class="select-wrap">
+            <button class="select-trigger" type="button" style="width:300px;" data-select-trigger="timeout"><span data-select-value>进行下一步检测（放行，依赖链接保护兜底）</span><span class="chev">⌄</span></button>
+            <div class="select-list" data-select-list="timeout">
+              <div class="select-option" data-checked="true">进行下一步检测（放行，依赖链接保护兜底）<span class="check">✓</span></div>
+              <div class="select-option" data-checked="false">按恶意处置（使用上述处置动作）<span class="check">✓</span></div>
+              <div class="select-option" data-checked="false">放行（仅记录日志）<span class="check">✓</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="intel-title"><span style="color:#22c55e;">🗄</span> 情报库设置</div>
+
+        <div class="cfg-block" style="display:block;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <span class="cfg-text"><b>本地URL情报库</b><small>启用后，缓存URL沙箱检测结果，加速后续查询</small></span>
+            <button class="toggle" type="button" role="switch" aria-checked="true" data-intel-toggle></button>
+          </div>
+          <div class="cleanup-zone" data-cleanup-zone>
+            <div class="field-label" style="font-weight:600;">URL情报库清理周期</div>
+            <span><input class="num-input" type="number" value="180" min="30" max="365" data-cleanup-input> 天</span>
+            <div class="hint">自动清理超过该天数的旧记录（有效范围：30-365天）</div>
+          </div>
+        </div>
+
+        <div class="cfg-block">
+          <span class="cfg-text" style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#3b82f6;">☁</span><span><b>云端URL情报查询</b><small>启用后，查询云端威胁情报库；禁用后仅依赖本地沙箱</small></span></span>
+          <button class="toggle" type="button" role="switch" aria-checked="true"></button>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/sandbox-tab-default.png" alt="URL沙箱检测Tab默认态">
+      <figcaption>传统版形态默认态：两个 Tab、沙箱检测开、隔离/进行下一步检测默认值、清理周期 180 天、云端情报开。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/sandbox-malicious-select-open.png" alt="发现恶意URL下拉展开">
+      <figcaption>"发现恶意URL"下拉展开：4 个选项，当前"隔离（邮件存入隔离区）"打勾。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/sandbox-timeout-select-open.png" alt="沙箱分析超时下拉展开">
+      <figcaption>"沙箱分析超时"下拉展开：3 个选项，当前"进行下一步检测（放行，依赖链接保护兜底）"打勾；触发器 w-[300px] 文案截断。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>元素清单</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>元素</th><th>默认值</th><th>可选值 / 校验</th><th>交互行为</th></tr></thead>
+      <tbody>
+        <tr><td>Tab 条</td><td>URL沙箱检测 / 链接保护</td><td>沙箱 active（传统版）</td><td>-</td><td>点击切换；链接保护详见层级3</td></tr>
+        <tr><td>沙箱开关区</td><td>沙箱检测 Switch + Globe 紫色图标</td><td>开</td><td>-</td><td>关闭 → 处置两块置灰（见层级2）</td></tr>
+        <tr><td>检测结果处置</td><td>发现恶意URL Select</td><td>隔离（邮件存入隔离区）——receive 方向默认；send/internal 默认阻断（源码，UI 不可达）</td><td>隔离 / 阻断（拒绝接收该邮件）/ 标记（投递但添加风险标签）/ 丢弃（静默删除）</td><td>展开 listbox，选中收起；映射 <code>maliciousAction: isolate|block|mark|discard</code></td></tr>
+        <tr><td>扫描异常处置</td><td>沙箱分析超时 Select（w-[300px]）</td><td>进行下一步检测（放行，依赖链接保护兜底）</td><td>进行下一步检测 / 按恶意处置（使用上述处置动作）/ 放行（仅记录日志）</td><td>映射 <code>timeoutAction: continue|treat_malicious|pass</code></td></tr>
+        <tr><td>情报库设置</td><td>标题 + Database 绿色图标</td><td>-</td><td>-</td><td>分组标题，无交互</td></tr>
+        <tr><td>本地情报库</td><td>Switch + 清理周期数字输入</td><td>开；180 天</td><td>30-365；非法值红框报错（见层级2）</td><td>关闭隐藏清理周期块；<code>localIntelEnabled / intelCleanupDays</code></td></tr>
+        <tr><td>云端情报</td><td>云端URL情报查询 Switch + Cloud 蓝色图标</td><td>开</td><td>-</td><td><code>cloudIntelEnabled</code>；无子配置</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>Tab 列表</td><td><code>[role=tab]</code> ×2：URL沙箱检测 data-state=active、链接保护 inactive</td><td>tab.active URL沙箱检测 + tab 链接保护</td><td>一致</td></tr>
+        <tr><td>活动面板节点数</td><td>tabpanel 63 节点；label 9 个（沙箱检测/检测结果处置（当前方向）/发现恶意URL/扫描异常处置/沙箱分析超时（超过30秒）/情报库设置/本地URL情报库/URL情报库清理周期/云端URL情报查询）</td><td>预览保留全部 9 个分组/字段标签</td><td>一致（结构裁剪展示）</td></tr>
+        <tr><td>图标</td><td>lucide-globe（紫）、lucide-chevron-down ×2、lucide-database（绿）、lucide-cloud（蓝）</td><td>emoji 等价替代 + chev 符号</td><td>一致（视觉等价，图标库以 demo 为准）</td></tr>
+        <tr><td>开关</td><td><code>button[role=switch]</code> ×4 全 checked（总开关/沙箱/本地情报库/云端）</td><td>本层预览含沙箱/本地/云端 3 个 toggle（总开关在主文件 2.2）</td><td>一致</td></tr>
+        <tr><td>下拉触发器</td><td><code>button[role=combobox]</code> ×2，文本"隔离（邮件存入隔离区）"/"进行下一步检测（放行，依赖链接保护兜底）"</td><td>同文本；超时触发器 300px 截断</td><td>一致</td></tr>
+        <tr><td>恶意URL选项</td><td><code>[role=option]</code> ×4，隔离项 checked</td><td>4 选项 + 勾选态</td><td>一致</td></tr>
+        <tr><td>超时选项</td><td><code>[role=option]</code> ×3，进行下一步检测 checked</td><td>3 选项 + 勾选态</td><td>一致</td></tr>
+        <tr><td>数字输入</td><td><code>input[type=number]</code> value=180 min=30 max=365 class 含 w-24</td><td>num-input 同属性</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a><a href="layer-2-sandbox-interactions.html">层级 2：校验/联动/置灰 →</a></nav>
+
+  <script>
+    // 下拉：展开/选中/收起（复刻 Radix Select 行为）
+    document.querySelectorAll("[data-select-trigger]").forEach((trigger) => {
+      const key = trigger.dataset.selectTrigger;
+      const list = document.querySelector(`[data-select-list="${key}"]`);
+      trigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        document.querySelectorAll(".select-list.open").forEach((l) => l !== list && l.classList.remove("open"));
+        list.classList.toggle("open");
+      });
+      list.querySelectorAll(".select-option").forEach((opt) => {
+        opt.addEventListener("click", () => {
+          list.querySelectorAll(".select-option").forEach((o) => o.dataset.checked = "false");
+          opt.dataset.checked = "true";
+          trigger.querySelector("[data-select-value]").textContent = opt.textContent.replace("✓", "").trim();
+          list.classList.remove("open");
+        });
+      });
+    });
+    document.addEventListener("click", () => document.querySelectorAll(".select-list.open").forEach((l) => l.classList.remove("open")));
+
+    // 沙箱开关：关闭置灰处置区（与 demo 一致：不影响情报库设置）
+    const sandboxToggle = document.querySelector("[data-sandbox-toggle]");
+    const detectZone = document.querySelector("[data-detect-zone]");
+    sandboxToggle.addEventListener("click", () => {
+      const on = sandboxToggle.getAttribute("aria-checked") === "true";
+      sandboxToggle.setAttribute("aria-checked", String(!on));
+      detectZone.style.opacity = on ? ".5" : "";
+      detectZone.style.pointerEvents = on ? "none" : "";
+    });
+
+    // 本地情报库开关：隐藏/显示清理周期块（条件渲染）
+    const intelToggle = document.querySelector("[data-intel-toggle]");
+    const cleanupZone = document.querySelector("[data-cleanup-zone]");
+    intelToggle.addEventListener("click", () => {
+      const on = intelToggle.getAttribute("aria-checked") === "true";
+      intelToggle.setAttribute("aria-checked", String(!on));
+      cleanupZone.style.display = on ? "none" : "";
+    });
+
+    // 其余 toggle 简单翻转
+    document.querySelectorAll(".toggle:not([data-sandbox-toggle]):not([data-intel-toggle])").forEach((t) => {
+      t.addEventListener("click", () => t.setAttribute("aria-checked", String(t.getAttribute("aria-checked") !== "true")));
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "module": "logs-admin-logs",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-14",
+      "demo_commit": "804efb9",
+      "spec_commit": "8db3a98",
+      "summary": "初版：分层 Tab（平台/租户）、统计概览（随筛选变）、4–5 项筛选（模块枚举与菜单同源）、7/8 列日志表、详情抽屉（变更对比 + 失败原因）；标注 8 处差异（3 处 hover 提示未实现、failReason 自由文本非枚举、无导出/排序/时间范围）；网关 /api/v1/admin-audit 全套端点已存在"
+    }
+  ]
+}

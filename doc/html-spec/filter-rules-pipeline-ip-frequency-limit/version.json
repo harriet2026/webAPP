@@ -1,0 +1,27 @@
+{
+  "module": "filter-rules-pipeline-ip-frequency-limit",
+  "current_version": 3,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-10",
+      "demo_commit": "2e0be97",
+      "spec_commit": "2e0be97",
+      "summary": "初版：策略流水线 IP频率限制模块——入口卡片、模块头部操作栏、规则列表（5 交互层级：展开规则详情/挂起IP抽屉/新建规则抽屉/示例+模拟测试），Chrome CDP 逐层 DOM 比对与截图；差异标注含优先级方向（demo/PRD\"数值越小越优先\" vs 全局约束\"数值越大越优先\"，落地以全局为准）等待确认项。"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-20",
+      "demo_commit": "3ef88c5",
+      "spec_commit": "a23c4bd",
+      "summary": "同步 demo 新增能力（agent-browser 逐项真实交互验证，截图 11~18）：① 批量删除——表头全选三态 Checkbox（跨页保留）+ 行单选高亮 + 「删除选中（N）」destructive 按钮 + 批量删除确认 AlertDialog（新增层级5）；② 批量导入/导出由占位逻辑升级为完整实现（CSV/TXT 文件+粘贴文本、模板下载、实时逐行校验预览、导入成功内联横幅、导出范围/格式 RadioGroup，新增层级6/7）；③ 优先级 Tooltip 文案更正为「数值越大，匹配顺序越靠前」（表格默认降序）。差异标注：优先级方向、导入/导出两项标记为已解决，新增批量删除能力说明；需确认新增 Q6（批量 API）/Q7（导入策略）。"
+    },
+    {
+      "version": 3,
+      "generated_at": "2026-07-20",
+      "demo_commit": "3ef88c5",
+      "spec_commit": "004c615",
+      "summary": "补齐技能首要原则与第一原则缺口：① 新增 §0.1 产品形态×角色差异矩阵（form-role-matrix），5形态×2角色，结论来自 demo 运行态 6 组合严格可见性实测——实测为「平台可见/租户隐藏」，与 product-profiles.ts 注释「多租户平台视角隐藏」字面相反，按运行态记录；② 3 个组件（2.1/2.2/2.3）元信息补 demo 组件、交互、形态/角色差异标注（[Base]/[多租户差异：租户视角]/[单租户]）；③ 差异标注新增 D-011（门控语义运行态 vs 注释冲突）、D-PRD（spec 真源缺失——docs/ 无 IP频率限制独立 PRD，原引用的 .done.md 不存在）；④ 需确认新增 Q-PRD（需求文档缺失）、Q-GATE（门控方向）。修正 spec-header 失效 PRD 引用，补 matrix-table CSS。v3.1（2026-07-21 裁决）：无 spec 时以 demo 运行态 + 用户/PO 描述为准——Q-PRD 闭环，§9 原「PRD」对照行（表格列/每页条数/scope筛选/全-1阈值）统一改为以 demo 实现为准，新增 Q8（IP组筛选优化点）。"
+    }
+  ]
+}

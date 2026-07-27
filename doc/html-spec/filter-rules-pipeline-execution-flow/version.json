@@ -1,0 +1,20 @@
+{
+  "module": "filter-rules-pipeline-execution-flow",
+  "current_version": 2,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-10",
+      "demo_commit": "804efb9",
+      "spec_commit": "804efb9",
+      "summary": "初版：策略执行流程卡片（19 条策略 · 5 阶段横向流水线 · 阶段间流转）+ 图例区。（version.json 补建，日期取原目录 mtime）"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-13",
+      "demo_commit": "804efb9",
+      "spec_commit": "804efb9",
+      "summary": "合并「统一阶段抽屉框架 UnifiedStageDrawer」(2.3)：4 个阶段抽屉（IP/收发信人/内容/综合）共享的 80vw Sheet 外壳（面包屑头 + 左侧模块导航 + 右侧模块内容），层级1·2（IP 模块切换）与层级3（跨阶段变体）两个子文件。记录 i18n 数据损坏(D-003)、面包屑不随模块切换(D-004)、语言仅3种(D-005)、命名不一致(D-006)。"
+    }
+  ]
+}

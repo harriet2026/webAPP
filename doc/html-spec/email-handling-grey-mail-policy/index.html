@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>灰邮策略配置 - HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    window.tailwind && (tailwind.config={corePlugins:{preflight:false},theme:{extend:{colors:{
+      border:'#e2e8f0',input:'#e2e8f0',ring:'#2563eb',background:'#ffffff',foreground:'#0f172a',
+      primary:{DEFAULT:'#2563eb',foreground:'#ffffff'},card:{DEFAULT:'#ffffff',foreground:'#0f172a'},
+      muted:{DEFAULT:'#f1f5f9',foreground:'#64748b'},accent:{DEFAULT:'#f1f5f9',foreground:'#0f172a'},
+      destructive:{DEFAULT:'#dc2626',foreground:'#ffffff'},popover:{DEFAULT:'#ffffff',foreground:'#0f172a'},
+      secondary:{DEFAULT:'#f1f5f9',foreground:'#0f172a'}}}}});
+  </script>
+
+  <style>
+    :root{
+      --primary:#2563eb; --primary-foreground:#ffffff;
+      --background:oklch(0.98 0.01 205); --foreground:#0f172a;
+      --card:#ffffff; --muted:#f1f5f9; --muted-foreground:#64748b;
+      --border:#e2e8f0; --destructive:#dc2626; --radius:0.625rem;
+      --diff-bg:#fef2f2; --diff-border:#dc2626; --question-bg:#fffbeb; --question-border:#d97706;
+      --font-sans:"Geist","Geist Fallback",system-ui,sans-serif; --font-mono:"Geist Mono",monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto;}
+    .spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:2rem;}
+    .spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.5rem;}
+    .meta-table{width:100%;border-collapse:collapse;font-size:0.875rem;}
+    .meta-table td{padding:0.5rem 1rem;border-bottom:1px solid var(--border);}
+    .meta-table td:first-child{font-weight:600;width:170px;color:var(--muted-foreground);white-space:nowrap;}
+    .component-toc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 2rem;margin-bottom:2rem;}
+    .component-toc>h2{color:var(--primary);font-size:1.05rem;margin-bottom:0.75rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;}
+    .component-toc ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0.5rem;}
+    .component-toc li{padding:0.375rem 0.75rem;border-radius:calc(var(--radius) - 4px);background:var(--muted);font-size:0.875rem;}
+    .component-toc li a{color:var(--primary);text-decoration:none;font-weight:500;display:inline-flex;align-items:center;gap:0.375rem;}
+    .component-toc li a:hover{text-decoration:underline;}
+    .component-toc .toc-layer-links{font-size:0.75rem;color:var(--muted-foreground);margin-left:0.5rem;}
+    .component-toc .toc-layer-links a{color:var(--muted-foreground);font-weight:400;}
+    .component-toc .toc-badge{display:inline-block;font-size:0.6875rem;font-weight:600;padding:0.0625rem 0.375rem;border-radius:calc(var(--radius) - 4px);background:var(--primary);color:#fff;white-space:nowrap;}
+    section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem;}
+    section>h2{color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:0.5rem;margin-bottom:1.25rem;font-size:1.25rem;}
+    h3{font-size:1.05rem;margin:1rem 0 0.75rem;color:var(--foreground);}
+    h4{font-size:0.95rem;margin:0.75rem 0 0.5rem;color:var(--muted-foreground);}
+    table.spec-table{width:100%;border-collapse:collapse;font-size:0.85rem;margin:1rem 0;}
+    table.spec-table th{background:var(--muted);color:var(--foreground);font-weight:600;text-align:left;padding:0.55rem 0.7rem;border:1px solid var(--border);white-space:nowrap;}
+    table.spec-table td{padding:0.55rem 0.7rem;border:1px solid var(--border);vertical-align:top;}
+    table.spec-table tr:nth-child(even) td{background:#f8fafc;}
+    .screenshot-figure{margin:1rem 0;text-align:center;}
+    .screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+    .screenshot-figure figcaption{margin-top:0.5rem;font-size:0.8125rem;color:var(--muted-foreground);}
+    .component-spec{border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.25rem 0;background:var(--card);}
+    .component-spec>h3{color:var(--primary);border-left:4px solid var(--primary);padding-left:0.75rem;}
+    pre{background:var(--muted);border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);padding:1rem;overflow-x:auto;font-family:var(--font-mono);font-size:0.8125rem;line-height:1.5;margin:1rem 0;}
+    code{font-family:var(--font-mono);font-size:0.85em;}
+    .mermaid{text-align:center;margin:1rem 0;padding:1rem;background:var(--muted);border-radius:calc(var(--radius) - 2px);}
+    .diff-section{border-left:4px solid var(--diff-border);background:var(--diff-bg);}
+    .diff-section>h2{color:var(--diff-border);border-bottom-color:var(--diff-border);}
+    .diff-badge{display:inline-block;background:var(--diff-border);color:#fff;font-size:0.75rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:calc(var(--radius) - 4px);}
+    .question-section{border-left:4px solid var(--question-border);background:var(--question-bg);}
+    .question-section>h2{color:var(--question-border);border-bottom-color:var(--question-border);}
+    .badge{display:inline-block;font-size:0.75rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:calc(var(--radius) - 4px);}
+    .badge-high{background:#dc2626;color:#fff;} .badge-medium{background:#f59e0b;color:#1e293b;} .badge-low{background:#bbf7d0;color:#14532d;}
+    blockquote{border-left:4px solid var(--destructive);background:var(--diff-bg);padding:0.75rem 1rem;margin:1rem 0;font-size:0.875rem;border-radius:0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0;}
+    .component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:2rem 1.5rem 1.5rem;margin:1.5rem 0 1.25rem;background:#fff;position:relative;overflow:auto;color:#0f172a;font-size:14px;line-height:1.5;}
+    .component-preview::before{content:"🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）";position:absolute;top:-0.625rem;left:0.75rem;background:var(--primary);color:#fff;font-size:0.6875rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:calc(var(--radius) - 4px);white-space:nowrap;z-index:2;}
+    /* ===== 预览区作用域内的 Tailwind Preflight 等价基座 =====
+       全局 preflight 已关闭以保护规格文档；此处用 :where() 保持 0 特异性，
+       与 Tailwind 真实 preflight 一致——任何 demo 上的 Tailwind 工具类（bg-*/border-*/text-* 等）
+       都能以同等或更高优先级覆盖这些基座，不会被基座反向压制。 */
+    .component-preview *,.component-preview *::before,.component-preview *::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb;}
+    .component-preview :where(h1,h2,h3,h4,h5,h6,p){margin:0;font-size:inherit;font-weight:inherit;color:inherit;border:0;padding:0;background:none;}
+    .component-preview :where(ul,ol){margin:0;padding:0;list-style:none;}
+    .component-preview :where(button,[role=button]){background-color:transparent;background-image:none;font:inherit;color:inherit;cursor:pointer;padding:0;line-height:inherit;letter-spacing:inherit;-webkit-appearance:none;appearance:none;border-width:0;border-style:solid;border-color:#e5e7eb;}
+    .component-preview :where(button:disabled,[role=button]:disabled){cursor:not-allowed;}
+    .component-preview :where(input,select,textarea){font:inherit;color:inherit;line-height:inherit;background-color:transparent;margin:0;border-width:0;border-style:solid;border-color:#e5e7eb;-webkit-appearance:none;appearance:none;}
+    .component-preview :where(input::placeholder,textarea::placeholder){color:#9ca3af;opacity:1;}
+    .component-preview :where(svg){display:block;vertical-align:middle;}
+    .component-preview :where(img,svg){max-width:100%;}
+    .component-preview :where(table){border-collapse:collapse;border-spacing:0;font-size:inherit;margin:0;}
+    .component-preview :where(th,td){padding:0;border:0;background:none;text-align:inherit;vertical-align:inherit;}
+    .component-preview :where(a){color:inherit;text-decoration:inherit;}
+    .component-preview :where(label){cursor:default;}
+    .component-preview :where(hr){border-top-width:1px;}
+    .preview-hint{font-size:0.75rem;color:var(--muted-foreground);margin:0.25rem 0 0.75rem;font-style:italic;}
+    .interaction-layer{border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.5rem 0;background:var(--card);}
+    .interaction-layer>h4{color:var(--primary);font-size:0.95rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--primary);color:#fff;font-size:0.75rem;font-weight:700;flex-shrink:0;}
+    .trigger-path{background:var(--muted);border-radius:calc(var(--radius) - 4px);padding:0.5rem 0.75rem;margin:0.5rem 0 1rem;font-size:0.8125rem;color:var(--muted-foreground);}
+    .trigger-path strong{color:var(--foreground);}
+    .dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);overflow:hidden;}
+    .dom-comparison>h5{background:var(--muted);padding:0.5rem 0.75rem;font-size:0.8125rem;font-weight:600;color:var(--foreground);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.375rem;}
+    .dom-comparison>h5::before{content:"🔍";font-size:0.875rem;}
+    .dom-comparison table{width:100%;border-collapse:collapse;font-size:0.8125rem;}
+    .dom-comparison th{background:var(--muted);font-weight:600;text-align:left;padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);}
+    .dom-comparison td{padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);vertical-align:top;}
+    .dom-comparison tr:last-child td{border-bottom:none;}
+    .dom-pass{color:#16a34a;font-weight:600;} .dom-fail{color:var(--destructive);font-weight:600;} .dom-fixed{color:#d97706;font-weight:600;}
+    table.layer-index{width:100%;border-collapse:collapse;font-size:0.875rem;margin:1rem 0;}
+    table.layer-index th{background:var(--muted);font-weight:600;text-align:left;padding:0.6rem 0.75rem;border:1px solid var(--border);}
+    table.layer-index td{padding:0.6rem 0.75rem;border:1px solid var(--border);vertical-align:top;}
+    table.layer-index td a{color:var(--primary);text-decoration:none;font-weight:600;} table.layer-index td a:hover{text-decoration:underline;}
+    .layer-nav{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.25rem;background:var(--muted);border-radius:var(--radius);margin-bottom:1.5rem;font-size:0.875rem;}
+    .layer-nav a{color:var(--primary);text-decoration:none;font-weight:600;} .layer-nav a:hover{text-decoration:underline;}
+    .version-history-section{margin:1.5rem 0;}
+    .spec-version{font-weight:600;color:var(--primary);}
+    .note{background:#eff6ff;border:1px solid #bfdbfe;border-radius:calc(var(--radius) - 4px);padding:0.75rem 1rem;margin:1rem 0;font-size:0.85rem;color:#1e3a8a;}
+  </style>
+</head>
+<body>
+<header class="spec-header"><h1>灰邮策略配置（灰邮治理）详细产品规格说明</h1>
+<table class="meta-table">
+<tr><td>spec 源</td><td><code>design/origin/spec/0702邮件处置中心.md</code> §灰邮件策略、<code>邮件处置中心—详情查看页面.md</code>（置信度/策略依据/模型版本）</td></tr>
+<tr><td>demo 源</td><td><code>demo/app/email-handling/grey-mail/policy/page.tsx</code> → <code>components/grey-mail/grey-mail-policy-page.tsx</code></td></tr>
+<tr><td>覆盖范围</td><td>策略矩阵配置（新建/编辑/启停/删除策略）+ 全局参数配置 + 保存</td></tr>
+<tr><td>遵循约束</td><td><code>design/origin/implement.md</code>（四语 i18n、复用统一规则系统 action、mark=accept+header、不新增规则系统）</td></tr>
+<tr><td>页面名称</td><td>灰邮策略配置 / Grey Mail Policy</td></tr>
+<tr><td>路由路径</td><td><code>/email-handling/grey-mail/policy</code></td></tr>
+<tr><td>组件入口</td><td><code>GreyMailPolicyPage</code></td></tr>
+<tr><td>i18n 标题 key</td><td>导航 <code>nav.greyMailPolicy</code>（页内标题硬编码中文，见 §9 D-002）</td></tr>
+<tr><td>导航层级</td><td>邮件处置 › 灰邮治理 › 灰邮策略</td></tr>
+<tr><td>规格版本</td><td><span class="spec-version">v1</span></td></tr>
+<tr><td>生成日期</td><td>2026-07-18</td></tr>
+<tr><td>demo 源 commit</td><td><code>2cdad33</code></td></tr>
+<tr><td>spec 源 commit</td><td><code>804efb9</code></td></tr>
+</table></header>
+<nav class="component-toc"><h2>📋 组件列表（点击跳转）</h2><ul>
+<li><a href="#c-2-1">2.1 策略矩阵配置（列表 + 新建/编辑表单）</a><span class="toc-badge">4层</span>
+  <span class="toc-layer-links"><a href="./layer-1-add-form.html">层级1</a> <a href="./layer-2-dept-tree.html">层级2</a> <a href="./layer-3-group-select.html">层级3</a></span></li>
+<li><a href="#c-2-2">2.2 全局参数配置</a><span class="toc-badge">1层</span></li>
+<li><a href="#c-2-3">2.3 保存栏</a><span class="toc-badge">1层</span></li>
+</ul></nav>
+<section id="version-history" class="version-history-section"><h2>🕑 版本历史</h2>
+<table class="spec-table"><thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+<tbody><tr><td>v1</td><td>2026-07-18</td><td><code>2cdad33</code></td><td><code>804efb9</code></td>
+<td>初版：策略矩阵（新建/编辑/启停/删除）、用户组 3 态（全员/组织部门树/群组）、置信度区间滑块、处置动作、全局参数、保存</td></tr></tbody></table></section>
+<section id="layout"><h2>1. 页面布局结构</h2>
+<h3>1.1 区域划分</h3>
+<table class="spec-table"><thead><tr><th>区域</th><th>名称</th><th>元素概览</th><th>尺寸/类</th><th>响应式</th></tr></thead>
+<tbody><tr><td>A区</td><td>页面标题区</td><td><code>灰邮策略配置</code>（h1，硬编码中文）</td><td>border-b p-6</td><td>固定</td></tr>
+<tr><td>B区</td><td>策略矩阵配置卡片</td><td>标题 + 新建策略按钮 + (可展开)新建/编辑表单 + 策略列表</td><td>Card p-6</td><td>内容自适应</td></tr>
+<tr><td>C区</td><td>全局参数配置卡片</td><td>默认置信度阈值/自动清理天数/用户白名单上限 + 节假日模式开关</td><td>Card p-6</td><td>grid-cols-2</td></tr>
+<tr><td>D区</td><td>保存栏</td><td>保存所有配置 按钮（右对齐）</td><td>flex justify-end</td><td>固定</td></tr></tbody></table>
+<h3>1.2 整页默认态截图（浏览器实际渲染）</h3>
+<figure class="screenshot-figure"><img src="./screenshots/page-full-default.png" alt="灰邮策略配置整页默认态"><figcaption>灰邮策略配置整页默认态（2 条内置策略 + 全局参数）</figcaption></figure>
+<h3>1.3 视觉规范</h3>
+<table class="spec-table"><thead><tr><th>属性</th><th>值</th><th>来源</th></tr></thead><tbody>
+<tr><td>主色</td><td><code>#2563eb</code>（新建/保存按钮、优先级标签底 <code>bg-blue-100</code>）</td><td>demo 运行态</td></tr>
+<tr><td>内置策略标签</td><td><code>bg-green-100 text-green-700</code>（"内置策略"）</td><td>grey-mail-policy-page.tsx</td></tr>
+<tr><td>新建表单容器</td><td><code>border-blue-200 bg-blue-50/50</code></td><td>组件</td></tr>
+<tr><td>图标库</td><td>lucide（Users/Settings/Mail/Globe/Plus/Edit/Trash2/Save/Chevron 16-20px）</td><td>组件 import</td></tr>
+</tbody></table></section>
+<section id="components"><h2>2. 逐组件规格</h2>
+<article class="component-spec" id="c-2-1"><h3>2.1 策略矩阵配置（列表 + 新建/编辑表单）</h3>
+<h4>组件元信息</h4>
+<table class="spec-table"><tbody>
+<tr><td>demo 组件路径</td><td><code>components/grey-mail/grey-mail-policy-page.tsx</code>（含内嵌 <code>OrgTree</code>）</td></tr>
+<tr><td>核心状态</td><td><code>strategies[]</code>（GreyMailStrategy）/ <code>showAddForm</code> / <code>editingStrategy</code> / <code>newStrategy</code></td></tr>
+<tr><td>数据结构</td><td><code>GreyMailStrategy{id,name,userGroup(ALL|DEPT|GROUP),userGroupValue(s),mailTypes[],confidenceMin,confidenceMax,action,priority,enabled,isDefault}</code></td></tr>
+<tr><td>交互层级数</td><td>4 层（列表态 → 新建/编辑表单 → 用户组=组织部门树 → 用户组=群组）</td></tr>
+<tr><td>拆分策略</td><td>层级 0 内嵌；层级 1/2/3 拆分为子文件</td></tr>
+</tbody></table>
+<h4>交互层级关系图</h4>
+<div class="mermaid">graph LR
+L0["层级0: 策略列表(2内置)"] -->|点击 新建策略| L1["层级1: 新建/编辑表单(用户组=全员)"]
+L0 -->|点击 编辑(铅笔)| L1
+L1 -->|用户组→组织部门| L2["层级2: 组织部门树多选"]
+L1 -->|用户组→群组| L3["层级3: 群组下拉"]
+L1 -->|保存/更新| L0
+L1 -->|取消| L0</div>
+<div class="interaction-layer"><h4><span class="layer-badge">0</span> 交互层级 0：策略列表（默认态）</h4>
+<div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染，<code>showAddForm=false</code>，展示 2 条内置策略</div>
+<div class="component-preview">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-6"><div class="flex items-center justify-between mb-6"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users w-5 h-5 text-gray-700"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><h2 class="text-lg font-semibold text-gray-900">策略矩阵配置</h2></div><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus w-4 h-4 mr-2"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>新建策略</button></div><div class="space-y-3"><div class="p-4 border rounded-lg border-gray-200 bg-white"><div class="flex items-start justify-between"><div class="flex-1 space-y-2"><div class="flex items-center gap-3"><h3 class="font-medium text-gray-900">默认营销邮件策略</h3><span class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">优先级 <!-- -->100</span><span class="text-xs px-2 py-1 rounded bg-green-100 text-green-700">内置策略</span></div><div class="flex flex-wrap gap-4 text-sm text-gray-600"><div class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users w-4 h-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>全员</span></div><div class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail w-4 h-4"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg><span>promo</span></div><div class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg><span>置信度: <!-- -->80<!-- -->% - <!-- -->100<!-- -->%</span></div><div><span class="font-medium">动作: <!-- -->归档至灰色文件夹</span></div></div></div><div class="flex items-center gap-2 ml-4"><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-pen w-4 h-4 text-blue-600"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg></button></div></div></div><div class="p-4 border rounded-lg border-gray-200 bg-white"><div class="flex items-start justify-between"><div class="flex-1 space-y-2"><div class="flex items-center gap-3"><h3 class="font-medium text-gray-900">默认订阅邮件策略</h3><span class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">优先级 <!-- -->90</span><span class="text-xs px-2 py-1 rounded bg-green-100 text-green-700">内置策略</span></div><div class="flex flex-wrap gap-4 text-sm text-gray-600"><div class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users w-4 h-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>全员</span></div><div class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail w-4 h-4"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg><span>subscribe</span></div><div class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg><span>置信度: <!-- -->70<!-- -->% - <!-- -->100<!-- -->%</span></div><div><span class="font-medium">动作: <!-- -->标题标记[灰邮]</span></div></div></div><div class="flex items-center gap-2 ml-4"><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-pen w-4 h-4 text-blue-600"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg></button></div></div></div></div></div>
+</div>
+<p class="preview-hint">可操作：策略卡右侧启用开关、编辑(铅笔)/删除(垃圾桶) 图标可点；"新建策略"展开表单见层级 1。</p>
+<figure class="screenshot-figure"><img src="./screenshots/page-full-default.png" alt="策略列表"><figcaption>层级 0：策略矩阵卡片（整页截图上半部）</figcaption></figure>
+<h4>策略卡片元素（每条策略）</h4>
+<table class="spec-table"><thead><tr><th>序号</th><th>元素</th><th>内容</th><th>渲染规则</th></tr></thead><tbody>
+<tr><td>1</td><td>策略名称</td><td>如"默认营销邮件策略"</td><td>font-medium</td></tr>
+<tr><td>2</td><td>优先级标签</td><td>优先级 {priority}</td><td><code>bg-blue-100 text-blue-700</code></td></tr>
+<tr><td>3</td><td>内置策略标签</td><td>isDefault 时显示</td><td><code>bg-green-100</code></td></tr>
+<tr><td>4</td><td>已禁用标签</td><td>!enabled 时显示</td><td><code>bg-gray-200</code></td></tr>
+<tr><td>5</td><td>用户组</td><td>全员 / 组织部门:xx / 群组:xx（Users 图标）</td><td>text-sm</td></tr>
+<tr><td>6</td><td>邮件类型</td><td>mailTypes.join(", ")（Mail 图标）</td><td>text-sm</td></tr>
+<tr><td>7</td><td>置信度</td><td>{min}% - {max}%（Globe 图标）</td><td>text-sm</td></tr>
+<tr><td>8</td><td>动作</td><td>action 标签文案</td><td>font-medium</td></tr>
+<tr><td>9</td><td>启用开关 Switch</td><td>handleToggleStrategy</td><td>右侧</td></tr>
+<tr><td>10</td><td>编辑按钮</td><td>Edit(蓝)</td><td>打开表单(→层级1)</td></tr>
+<tr><td>11</td><td>删除按钮</td><td>Trash2(红)</td><td>!isDefault 才显示</td></tr>
+<tr><td>12</td><td>新建策略按钮</td><td>Plus + "新建策略"</td><td>卡片右上，展开表单(→层级1)</td></tr>
+<tr><td>13</td><td>空态</td><td>"暂无策略，请点击'新建策略'添加"</td><td>strategies 为空时</td></tr>
+</tbody></table>
+<div class="dom-comparison"><h5>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h5>
+<table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+<tbody><tr><td>卡片根</td><td>div.bg-card…rounded-xl.border.shadow-sm.p-6</td><td>同</td><td class="dom-pass">✅</td></tr>
+<tr><td>策略条数</td><td>2（内置营销/订阅）</td><td>2</td><td class="dom-pass">✅</td></tr>
+<tr><td>新建策略按钮</td><td>button Plus '新建策略'</td><td>同</td><td class="dom-pass">✅</td></tr>
+<tr><td>删除按钮渲染</td><td>内置策略无删除按钮（isDefault）</td><td>未包含 Trash2</td><td class="dom-pass">✅</td></tr>
+<tr><td>nodeCount</td><td>84</td><td>84</td><td class="dom-pass">✅</td></tr></tbody></table></div>
+<h4>交互层级详情（层级 1/2/3 拆分为独立文件）</h4>
+<table class="layer-index"><thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead><tbody>
+<tr><td>0</td><td>策略列表</td><td>页面加载</td><td>上方内嵌</td></tr>
+<tr><td>1</td><td>新建/编辑表单</td><td>点击"新建策略"或"编辑"→ showAddForm=true</td><td><a href="./layer-1-add-form.html">查看详情 →</a></td></tr>
+<tr><td>2</td><td>用户组=组织部门（树多选）</td><td>表单内用户组下拉选"组织部门"→ 渲染 OrgTree</td><td><a href="./layer-2-dept-tree.html">查看详情 →</a></td></tr>
+<tr><td>3</td><td>用户组=群组（下拉）</td><td>表单内用户组下拉选"群组"→ 渲染群组 Select</td><td><a href="./layer-3-group-select.html">查看详情 →</a></td></tr>
+</tbody></table></article>
+<article class="component-spec" id="c-2-2"><h3>2.2 全局参数配置</h3>
+<table class="spec-table"><tbody><tr><td>状态</td><td><code>globalConfig{defaultConfidenceThreshold:85, autoCleanupDays:90, maxUserWhitelistSize:100, holidayMode:false}</code></td></tr><tr><td>交互层级数</td><td>1 层</td></tr></tbody></table>
+<div class="interaction-layer"><h4><span class="layer-badge">0</span> 全局参数配置卡片</h4>
+<div class="trigger-path"><strong>触发路径</strong>：页面加载渲染（策略卡片下方）</div>
+<div class="component-preview">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-6"><div class="flex items-center gap-2 mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings w-5 h-5 text-gray-700"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg><h2 class="text-lg font-semibold text-gray-900">全局参数配置</h2></div><div class="space-y-6"><div class="grid grid-cols-2 gap-6"><div class="space-y-2"><label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 text-gray-700">默认置信度阈值</label><div class="flex items-center gap-3"><input type="number" data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-32" min="0" max="100" value="85"><span class="text-sm text-gray-600">%</span></div></div><div class="space-y-2"><label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 text-gray-700">自动清理天数</label><div class="flex items-center gap-3"><input type="number" data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-32" min="1" max="365" value="90"><span class="text-sm text-gray-600">天</span></div></div><div class="space-y-2"><label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 text-gray-700">用户白名单大小上限</label><div class="flex items-center gap-3"><input type="number" data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-32" min="1" max="1000" value="100"><span class="text-sm text-gray-600">条</span></div></div></div><div class="space-y-4 pt-4 border-t border-gray-200"><div class="flex items-center justify-between"><div class="space-y-1"><label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 text-gray-900">节假日模式</label><p class="text-sm text-gray-600">节假日期间降低灰邮判定标准，减少误判</p></div><button type="button" role="switch" aria-checked="false" data-state="unchecked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="unchecked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button></div></div></div></div>
+</div>
+<p class="preview-hint">可操作：三个数字输入框可键入；节假日模式为 Switch 开关。</p>
+<table class="spec-table"><thead><tr><th>序号</th><th>元素</th><th>标签</th><th>默认</th><th>范围/单位</th><th>落地类型</th></tr></thead><tbody>
+<tr><td>1</td><td>Input(number)</td><td>默认置信度阈值</td><td>85</td><td>0–100 %</td><td>配置系统 <code>/apiserver.cf</code></td></tr>
+<tr><td>2</td><td>Input(number)</td><td>自动清理天数</td><td>90</td><td>1–365 天</td><td>配置系统</td></tr>
+<tr><td>3</td><td>Input(number)</td><td>用户白名单大小上限</td><td>100</td><td>1–1000 条</td><td>配置系统</td></tr>
+<tr><td>4</td><td>Switch</td><td>节假日模式</td><td>关</td><td>降低灰邮判定标准，减少误判</td><td>配置系统</td></tr>
+</tbody></table>
+<div class="dom-comparison"><h5>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h5>
+<table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+<tbody><tr><td>卡片标题</td><td>全局参数配置(Settings 图标)</td><td>同</td><td class="dom-pass">✅</td></tr>
+<tr><td>数字输入框数</td><td>3</td><td>3</td><td class="dom-pass">✅</td></tr>
+<tr><td>节假日 Switch</td><td>button[role=switch]</td><td>同</td><td class="dom-pass">✅</td></tr>
+<tr><td>默认值</td><td>85/90/100</td><td>85/90/100</td><td class="dom-pass">✅</td></tr></tbody></table></div>
+</div></article>
+<article class="component-spec" id="c-2-3"><h3>2.3 保存栏</h3>
+<div class="interaction-layer"><h4><span class="layer-badge">0</span> 保存所有配置</h4>
+<div class="trigger-path"><strong>触发路径</strong>：页面底部右对齐</div>
+<table class="spec-table"><thead><tr><th>元素</th><th>文案</th><th>图标</th><th>行为</th></tr></thead><tbody>
+<tr><td>Button(primary)</td><td>保存所有配置</td><td>Save(16px)</td><td>handleSave（demo 仅 console.log，落地需批量持久化 strategies + globalConfig）</td></tr>
+</tbody></table></div></article>
+</section>
+<section id="api-mapping"><h2>4. 数据模型与 API 映射</h2>
+<h3>4.1 前端数据模型（demo 原样提取）</h3>
+<pre><code>interface GreyMailStrategy {
+  id: string; name: string
+  userGroup: "ALL" | "DEPT" | "GROUP"
+  userGroupValue?: string; userGroupValues?: string[]   // 部门/用户多选
+  mailTypes: string[]                                    // promo/subscribe/notify/social/member/meeting
+  confidenceMin: number; confidenceMax: number          // 置信度区间 0-100
+  action: string                                         // archive/mark/quarantine/delete/deliver
+  priority: number; enabled: boolean; isDefault?: boolean
+}
+globalConfig { defaultConfidenceThreshold; autoCleanupDays; maxUserWhitelistSize; holidayMode }</code></pre>
+<h3>4.2 处置动作 → 统一规则系统 action 映射（遵循 implement.md）</h3>
+<blockquote>⚠️ 不新增 action。<code>mark</code> = <code>accept</code> + 添加特定 header（不是新 action）。<code>archive</code>/"归档至灰色文件夹"依赖邮件系统端 folder，网关侧需确认（见 §10）。</blockquote>
+<table class="spec-table"><thead><tr><th>demo action</th><th>文案</th><th>建议映射</th></tr></thead><tbody>
+<tr><td>archive</td><td>归档至灰色文件夹</td><td><span class="badge badge-medium">[需确认]</span> 邮箱侧 folder / 或 accept+header 由客户端归类</td></tr>
+<tr><td>mark</td><td>标题标记[灰邮]</td><td>accept + 添加 header（+ 主题标记）</td></tr>
+<tr><td>quarantine</td><td>隔离</td><td>现有隔离动作</td></tr>
+<tr><td>delete</td><td>删除</td><td>discard</td></tr>
+<tr><td>deliver</td><td>直投收件箱</td><td>accept</td></tr>
+</tbody></table>
+<h3>4.3 策略落地建议</h3>
+<table class="spec-table"><thead><tr><th>产品设想</th><th>网关现有能力</th><th>映射</th></tr></thead><tbody>
+<tr><td>灰邮策略矩阵</td><td>统一规则系统（加 <code>page=grey-mail</code> 字段区分来源页面）</td><td>每条策略 → 一条统一规则（条件：用户组+邮件类型+置信度区间；动作：见 4.2）</td></tr>
+<tr><td>用户组=部门/群组</td><td>组织通讯录 / 群组模块</td><td>rule 作用域绑定部门/群组</td></tr>
+<tr><td>全局参数</td><td>配置系统 ConfigManager</td><td><code>/apiserver.cf/grey_mail/*</code>（在线可改）</td></tr>
+</tbody></table></section>
+<section id="business-logic"><h2>5. 业务逻辑规格</h2>
+<h3>5.1 策略匹配与优先级</h3>
+<p>邮件被判为灰邮后，按优先级（<strong>数值越大越优先</strong>，与统一规则系统一致）匹配策略：命中用户组 + 邮件类型 + 置信度落在 [min,max] 区间 → 执行该策略 action。内置策略（isDefault）不可删除，仅可启停/编辑。</p>
+<div class="mermaid">flowchart TD
+A[邮件判定=灰邮, 得置信度] --> B{按优先级降序遍历策略}
+B --> C{用户组匹配?}
+C -->|否| B
+C -->|是| D{邮件类型匹配?}
+D -->|否| B
+D -->|是| E{置信度∈[min,max]?}
+E -->|否| B
+E -->|是| F[执行 action: archive/mark/quarantine/delete/deliver]
+B -->|无命中| G[默认放行/按全局阈值]</div>
+<h3>5.2 用户组作用域</h3>
+<table class="spec-table"><thead><tr><th>userGroup</th><th>文案</th><th>取值</th><th>UI</th></tr></thead><tbody>
+<tr><td>ALL</td><td>全员默认</td><td>-</td><td>无附加选择</td></tr>
+<tr><td>DEPT</td><td>组织部门</td><td>userGroupValues[](部门/用户 id) + userGroupValue(名称串)</td><td>组织树多选（层级2）</td></tr>
+<tr><td>GROUP</td><td>群组</td><td>userGroupValue(群组名)</td><td>群组下拉单选（层级3）</td></tr>
+</tbody></table>
+<h3>5.3 增删改行为（demo 实测）</h3>
+<table class="spec-table"><thead><tr><th>操作</th><th>handler</th><th>校验</th><th>结果</th></tr></thead><tbody>
+<tr><td>新建</td><td>handleAddStrategy</td><td>name 必填（!name 直接 return）</td><td>追加到 strategies，isDefault=false</td></tr>
+<tr><td>编辑</td><td>handleEditStrategy → handleUpdateStrategy</td><td>name + editingStrategy 必填</td><td>就地更新</td></tr>
+<tr><td>删除</td><td>handleDeleteStrategy</td><td>仅非内置可删</td><td>从 strategies 移除</td></tr>
+<tr><td>启停</td><td>handleToggleStrategy</td><td>-</td><td>enabled 取反</td></tr>
+<tr><td>保存全部</td><td>handleSave</td><td>-</td><td>console.log（demo 未持久化）</td></tr>
+</tbody></table></section>
+<section id="interaction"><h2>6. 交互规格</h2>
+<h3>6.1 表单联动</h3>
+<table class="spec-table"><thead><tr><th>触发</th><th>联动</th></tr></thead><tbody>
+<tr><td>用户组 = 组织部门</td><td>渲染 OrgTree 多选 + "已选择:xx"提示条</td></tr>
+<tr><td>用户组 = 群组</td><td>渲染群组 Select（VIP客户群组/内部管理员群组/销售团队群组）</td></tr>
+<tr><td>切换用户组</td><td>清空 userGroupValue / userGroupValues</td></tr>
+<tr><td>置信度滑块</td><td>双端 Slider，label 实时显示 {min}% - {max}%</td></tr>
+<tr><td>编辑态</td><td>按钮文案"保存策略"→"更新策略"，表单预填</td></tr>
+</tbody></table>
+<h3>6.2 异常/边界</h3>
+<table class="spec-table"><thead><tr><th>场景</th><th>表现</th></tr></thead><tbody>
+<tr><td>策略名为空</td><td>保存无效（return，无提示）—— 落地需补校验提示</td></tr>
+<tr><td>优先级输入</td><td>number，min 1 max 999</td></tr>
+<tr><td>置信度未选类型</td><td>无阻断（demo 未强制 mailTypes 必选，尽管标 *）</td></tr>
+</tbody></table></section>
+<section id="i18n"><h2>7. 国际化规格</h2>
+<h3>7.1 支持语言（implement.md 要求四种内置语言）</h3>
+<table class="spec-table"><thead><tr><th>语言</th><th>locale</th><th>示例</th></tr></thead><tbody>
+<tr><td>简体中文</td><td>zh-CN</td><td>灰邮策略配置</td></tr>
+<tr><td>English</td><td>en-US</td><td>Grey Mail Policy</td></tr>
+<tr><td>泰文</td><td>th-TH</td><td>นโยบายเกรย์เมล</td></tr>
+<tr><td>第四语言</td><td>（内置，待定）</td><td>-</td></tr>
+</tbody></table>
+<h3>7.2 i18n 覆盖情况</h3>
+<blockquote>⚠️ 本页几乎全部文案硬编码中文，<strong>未使用 <code>t()</code></strong>（与队列页不同）。落地必须补齐四语 key（标题、字段标签、用户组/邮件类型/动作选项、按钮、提示）。见 §9 D-002。</blockquote></section>
+<section id="responsive"><h2>8. 响应式规格</h2>
+<table class="spec-table"><thead><tr><th>断点</th><th>表单</th><th>全局参数</th></tr></thead><tbody>
+<tr><td>≥1024px</td><td>grid-cols-2（名称/用户组、动作/优先级）；邮件类型 grid-cols-3</td><td>grid-cols-2</td></tr>
+<tr><td>&lt;1024px</td><td>建议堆叠（demo 用固定 grid，未做小屏适配）</td><td>堆叠</td></tr>
+</tbody></table></section>
+<section id="diffs" class="diff-section"><h2>9. 与 spec / 约束的差异标注</h2>
+<table class="spec-table"><thead><tr><th>编号</th><th>位置</th><th>spec/约束</th><th>demo 实现</th><th>影响</th><th>建议</th></tr></thead><tbody>
+<tr><td><span class="diff-badge">D-001</span></td><td>处置动作</td><td>implement.md：mark=accept+header，不新增 action；archive 无对应底层</td><td>demo 定义 archive/mark/quarantine/delete/deliver 5 值（前端枚举）</td><td><span class="badge badge-high">高</span></td><td>落地映射到统一规则 action，archive 需确认(§10 Q-002)</td></tr>
+<tr><td><span class="diff-badge">D-002</span></td><td>全页文案</td><td>四语 i18n</td><td>整页硬编码中文，未走 t()</td><td><span class="badge badge-high">高</span></td><td>落地必须补 i18n</td></tr>
+<tr><td><span class="diff-badge">D-003</span></td><td>邮件类型枚举</td><td>taxonomy ContentCategory = promotional/subscription/transaction/social/membership/meeting</td><td>表单 mailTypeOptions 用简写 promo/subscribe/notify/social/member/meeting（与规范值不一致）</td><td><span class="badge badge-medium">中</span></td><td>统一为 ContentCategory 规范值</td></tr>
+<tr><td><span class="diff-badge">D-004</span></td><td>新建规则系统</td><td>implement.md：不新增规则系统，复用统一规则系统（加 page 字段）</td><td>demo 自建 strategies 本地态</td><td><span class="badge badge-high">高</span></td><td>落地映射到统一规则系统 page=grey-mail</td></tr>
+<tr><td><span class="diff-badge">D-005</span></td><td>校验/持久化</td><td>需真实校验+保存</td><td>name 空仅 return 无提示；handleSave 仅 console.log</td><td><span class="badge badge-low">低</span></td><td>补校验提示 + 接 API</td></tr>
+<tr><td><span class="diff-badge">D-006</span></td><td>全局参数</td><td>管理员可改参数应入配置系统</td><td>本地 state</td><td><span class="badge badge-medium">中</span></td><td>落到 ConfigManager <code>/apiserver.cf/grey_mail/*</code></td></tr>
+</tbody></table></section>
+<section id="questions" class="question-section"><h2>10. 需确认事项</h2>
+<blockquote>遵循 implement.md：冲突/新增 API/底层不支持项列此待确认，不自行决定。</blockquote>
+<table class="spec-table"><thead><tr><th>编号</th><th>事项</th><th>类型</th><th>说明</th></tr></thead><tbody>
+<tr><td>Q-001</td><td>灰邮策略 → 统一规则系统</td><td><span class="badge badge-medium">复用现有</span></td><td>确认灰邮策略以统一规则系统承载（page=grey-mail），条件=用户组+邮件类型+置信度区间；不新建规则系统。</td></tr>
+<tr><td>Q-002</td><td>"归档至灰色文件夹"落地</td><td><span class="badge badge-high">底层冲突</span></td><td>网关侧无 folder 归档 action；需确认由邮箱系统端 folder 承担还是 accept+header 由客户端归类。</td></tr>
+<tr><td>Q-003</td><td>置信度来源</td><td><span class="badge badge-medium">数据来源</span></td><td>灰邮置信度/模型版本由意图引擎产出？策略区间匹配依赖该值。</td></tr>
+<tr><td>Q-004</td><td>用户组作用域</td><td><span class="badge badge-medium">依赖模块</span></td><td>部门/用户多选依赖组织通讯录，群组依赖群组模块；确认数据源与规则作用域绑定方式。</td></tr>
+<tr><td>Q-005</td><td>全局参数落地</td><td><span class="badge badge-medium">配置系统</span></td><td>置信度阈值/清理天数/白名单上限/节假日模式 → ConfigManager 键路径确认。</td></tr>
+<tr><td>Q-006</td><td>自动清理/白名单上限</td><td><span class="badge badge-medium">新增能力</span></td><td>灰邮自动清理任务、用户级白名单上限是否有底层支撑，需确认。</td></tr>
+</tbody></table></section>
+
+<script>
+document.addEventListener('click',function(e){
+  // tab highlight (search mode / modal tabs)
+  var t=e.target.closest('[data-specflip]');
+  if(t){var g=t.getAttribute('data-specflip');
+    document.querySelectorAll('[data-specflip="'+g+'"]').forEach(function(b){b.setAttribute('data-on','0');});
+    t.setAttribute('data-on','1');
+    var show=t.getAttribute('data-show');
+    if(show){document.querySelectorAll('[data-panel="'+g+'"]').forEach(function(p){p.style.display='none';});
+      var pn=document.querySelector('[data-panel="'+g+'"][data-key="'+show+'"]'); if(pn)pn.style.display='';}
+  }
+  // checkbox toggle inside previews -> recompute batch buttons
+  var cb=e.target.closest('.component-preview [role="checkbox"]');
+  if(cb){
+    var setCb=function(el,checked){el.setAttribute('data-state',checked?'checked':'unchecked');el.setAttribute('aria-checked',checked);
+      el.querySelectorAll('svg').forEach(function(s){s.style.visibility=checked?'visible':'hidden';});};
+    var now=cb.getAttribute('data-state')!=='checked';
+    setCb(cb,now);
+    var host=cb.closest('[data-batchhost]');
+    if(host){
+      // header (thead) checkbox toggles all rows
+      if(cb.closest('thead')){host.querySelectorAll('tbody [role="checkbox"]').forEach(function(x){setCb(x,now);});}
+      var any=host.querySelectorAll('tbody [role="checkbox"][data-state="checked"]').length>0;
+      var labels=['放行','删除','加黑','标记误判','加白名单'];
+      host.querySelectorAll('button').forEach(function(b){
+        var tx=(b.textContent||'').trim();
+        if(labels.indexOf(tx)>=0){b.disabled=!any; b.style.opacity=any?'1':'0.6'; b.style.cursor=any?'pointer':'not-allowed';}
+      });
+    }
+  }
+},true);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>try{mermaid.initialize({startOnLoad:true,theme:'default'});}catch(e){}</script>
+</body>
+</html>

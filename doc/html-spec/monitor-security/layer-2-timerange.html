@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 2：时间范围切换 - 检测引擎状态</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== 设计变量（参考 demo globals.css） ===== */
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground); line-height: 1.55; font-size: 14px; padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem; max-width: 1280px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1.2rem; margin: 2.2rem 0 .8rem; padding-bottom: .35rem; border-bottom: 2px solid var(--primary); }
+    h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; }
+    h4 { font-size: .95rem; margin: 1.2rem 0 .5rem; }
+    h5 { font-size: .85rem; margin: .8rem 0 .4rem; }
+    p { margin: .45rem 0; }
+    code { font-family: var(--font-mono); font-size: .85em; background: var(--muted); padding: .1em .35em; border-radius: 4px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    a { color: oklch(0.52 0.226 262); }
+
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .spec-header .subtitle { color: var(--muted-foreground); font-size: .9rem; }
+    .meta-table { border-collapse: collapse; width: 100%; margin-top: .8rem; font-size: 13px; }
+    .meta-table td { border: 1px solid var(--border); padding: 5px 10px; vertical-align: top; }
+    .meta-table td:first-child { background: var(--muted); font-weight: 600; white-space: nowrap; width: 11em; }
+
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem; margin-top: 1.2rem; }
+    .component-toc ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .component-toc li { margin: .3rem 0; }
+    .toc-badge { display: inline-block; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 999px; padding: 0 .5em; margin-left: .4em; vertical-align: middle; }
+    .toc-layer-links { margin-left: .6em; font-size: 12px; }
+    .toc-layer-links a { margin-right: .5em; }
+
+    .spec-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0 1rem; background: var(--card); }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); font-weight: 600; white-space: nowrap; }
+    .spec-table td.num { text-align: right; font-family: var(--font-mono); }
+    .spec-table .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    .matrix-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0; background: var(--card); }
+    .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: center; }
+    .matrix-table th { background: var(--muted); font-weight: 600; }
+    .matrix-table td:first-child { text-align: left; font-weight: 600; background: var(--muted); }
+    .legend { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .5rem .8rem; }
+
+    .screenshot-figure { margin: .8rem 0 1.2rem; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .screenshot-figure figcaption { font-size: 12px; color: var(--muted-foreground); margin-top: .35rem; }
+
+    .component-spec { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem 1.4rem; margin: 1.2rem 0; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: .9rem 1.1rem; margin: 1rem 0; background: oklch(0.99 0 0); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; background: var(--primary); color: #fff; border-radius: 999px; font-size: .8em; font-weight: 700; margin-right: .4em; }
+    .trigger-path { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .45rem .7rem; margin: .5rem 0; }
+    .layer-nav { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 13px; }
+    .layer-index a { font-weight: 600; }
+
+    .component-preview { border: 2px dashed oklch(0.7 0.12 262); border-radius: 10px; padding: 18px; background: #f4f5f7; overflow-x: auto; margin: .7rem 0; position: relative; }
+    .component-preview::before { content: "可交互预览（提取自运行中的 demo）"; position: absolute; top: -9px; left: 14px; background: oklch(0.52 0.226 262); color: #fff; font-size: 10.5px; padding: 0 8px; border-radius: 999px; line-height: 16px; z-index: 5; }
+    .preview-note { font-size: 12px; color: var(--muted-foreground); background: oklch(0.975 0.02 95); border: 1px solid oklch(0.9 0.06 95); border-radius: 6px; padding: .4rem .7rem; margin: .4rem 0 .8rem; }
+    .component-preview .bg-card { background: #fff; }
+    .component-preview .text-card-foreground { color: #0a0a0a; }
+    .component-preview .bg-popover { background: #fff; }
+    .component-preview .text-popover-foreground { color: #0a0a0a; }
+    .component-preview .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .component-preview .border-input { border-color: #e5e7eb; }
+    .component-preview svg { flex-shrink: 0; }
+    .component-preview [data-slot="card"] { border-color: #e5e7eb; background: #fff; }
+    .component-preview button { cursor: pointer; }
+    .component-preview button:disabled { cursor: default; }
+    .component-preview .text-gray-900 { color: #111827; }
+    .component-preview .text-gray-500 { color: #6b7280; }
+    .component-preview .text-gray-400 { color: #9ca3af; }
+    .component-preview .bg-gray-50 { background: #f9fafb; }
+    @keyframes spec-spin { to { transform: rotate(360deg); } }
+    .component-preview .animate-spin { animation: spec-spin 1s linear infinite; }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .component-preview .animate-marquee { animation: marquee 30s linear infinite; }
+    .component-preview .animate-marquee:hover { animation-play-state: paused; }
+
+    .route-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 13px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 99; opacity: 0; transition: opacity .2s; pointer-events: none; font-family: var(--font-mono); }
+    .route-toast.show { opacity: 1; }
+
+    .dom-comparison { background: oklch(0.975 0.008 262); border: 1px solid oklch(0.85 0.03 262); border-radius: 8px; padding: .6rem .9rem; margin-top: .8rem; }
+    .dom-comparison h5 { margin: .2rem 0 .4rem; }
+
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .diff-section h2 { border-bottom-color: var(--diff-border); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .question-section h2 { border-bottom-color: var(--question-border); }
+    .diff-table td:first-child, .question-table td:first-child { font-weight: 700; white-space: nowrap; }
+
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 .55em; line-height: 1.6; vertical-align: middle; }
+    .tag-green { background: #dcfce7; color: #15803d; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-gray { background: #f3f4f6; color: #4b5563; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+    .mermaid { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .6rem; margin: .8rem 0; overflow-x: auto; }
+</style>
+</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-1">&larr; 返回主文件</a>
+  <span>层级 2 / 2</span>
+  <a href="./layer-1-engine-switch.html">&larr; 层级 1：引擎切换</a>
+</nav>
+<header class="spec-header">
+  <h1>交互层级 2：时间范围切换（近24小时 → 近7天）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.1 页面头部（时间范围 Select）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">monitor-security/index.html</a></td></tr>
+    <tr><td>触发路径</td><td>层级0 → 点击「近24小时」Select → 下拉（近24小时/近7天/近30天）→ 选「近7天」→ 趋势图数据集与 X 轴、卡片标题联动</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">2</span> 时间范围下拉打开态（浏览器实测）</h4>
+  <figure class="screenshot-figure"><img src="./screenshots/layer-3-timerange-open.png"><figcaption>下拉：近24小时（高亮）/ 近7天 / 近30天（注意：无「近1小时」）</figcaption></figure>
+
+  <h4>切到「近7天」后（浏览器实测截图）</h4>
+  <figure class="screenshot-figure"><img src="./screenshots/layer-4-timerange-7d.png"><figcaption>近7天：X 轴变为「1日~7日」7 个点，标题变为「反垃圾引擎 性能趋势（近7天）」；demo 现状详情表不变。【目标行为·2026-07-22 用户决定】详情表也需随范围变化（主文件差异 D-02，已解决）</figcaption></figure>
+
+  <h4>三时间范围数据口径（TREND_MOCK_DATA 源码 + 实测）</h4>
+  <table class="spec-table">
+    <thead><tr><th>时间范围</th><th>数据点数</th><th>X 轴格式</th><th>联动区块</th></tr></thead>
+    <tbody>
+      <tr><td>近24小时（默认）</td><td>24</td><td>00:00 ~ 23:00</td><td rowspan="3">趋势图数据 + 卡片标题；demo 现状详情表不联动（generateDetailData 忽略 timeRange）。【目标行为·2026-07-22 用户决定】详情表也随范围变化（24h=6h时段×4 行 / 7d=日×7 行 / 30d=日×30 行）</td></tr>
+      <tr><td>近7天</td><td>7</td><td>1日 ~ 7日</td></tr>
+      <tr><td>近30天</td><td>30</td><td>1日 ~ 30日</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果（24h → 7d，浏览器实测）</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>近24小时</th><th>近7天</th><th>是否变化</th></tr></thead>
+      <tbody>
+        <tr><td>X 轴刻度数</td><td>24</td><td>7（1日~7日）</td><td><b>是（数据集切换）</b></td></tr>
+        <tr><td>图表标题</td><td>…（近24小时）</td><td>…（近7天）</td><td>是</td></tr>
+        <tr><td>详情表行数</td><td>4</td><td>4（内容不变）</td><td>否（差异 D-02）</td></tr>
+        <tr><td>Select trigger 文案</td><td>近24小时</td><td>近7天</td><td>是</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+<h4><span class="layer-badge">2</span> 可交互时间范围切换预览（点击时间 Select → 趋势图 X 轴点数联动；明细表不变）</h4>
+<div class="preview-note">对齐 demo 差异 D-02：切换时间范围只影响<b>趋势图数据点数（24h=24 点 / 7d=7 点 / 30d=30 点）</b>与卡片标题，<b>明细表不联动</b>（demo <code>generateDetailData</code> 忽略 timeRange）。趋势图为 recharts 提取的网格+X 轴（无线段路径），此处按所选范围重算 X 轴刻度数以对齐 demo。</div>
+<div class="component-preview" id="preview-timerange" style="overflow:visible;">
+  <div class="flex items-center justify-between"><h1 class="text-2xl font-bold text-gray-900">检测引擎状态</h1><div class="flex items-center gap-3"><button type="button" role="combobox" data-state="closed" class="border-input flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs w-32"><span data-slot="select-value" style="pointer-events:none;">近24小时</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50"><path d="m6 9 6 6 6-6"/></svg></button><button class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium border bg-background shadow-xs hover:bg-accent size-9" title="刷新（demo 未绑定 onClick）"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw w-4 h-4"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></button></div></div>
+  <div style="height:14px"></div>
+  <div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-base" id="l2-trend-title">反垃圾引擎 性能趋势（近24小时）</div></div><div data-slot="card-content" class="px-6"><div id="l2-trend-chart"></div><div id="l2-points" style="font-family:var(--font-mono);font-size:12px;color:#1d4ed8;margin-top:6px;">X 轴数据点：24（00:00 ~ 23:00）</div></div></div>
+  <div style="height:14px"></div>
+  <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">↓ 明细表（对齐 demo：切时间范围<b>不变</b>）</div>
+  <div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-base">反垃圾引擎<!-- --> <!-- -->性能详情</div></div><div data-slot="card-content" class="px-6"><div data-slot="table-container" class="relative w-full overflow-x-auto"><table data-slot="table" class="w-full caption-bottom text-sm"><thead data-slot="table-header" class="[&amp;_tr]:border-b"><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">实例 ID</th><th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">统计时段</th><th data-slot="table-head" class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">扫描吞吐</th><th data-slot="table-head" class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">平均扫描耗时</th><th data-slot="table-head" class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">队列堆积数</th></tr></thead><tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0"><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">antispam-01</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">00:00-06:00</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">820<!-- --> 封/s</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">95<!-- --> ms</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">12</td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">antispam-01</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">06:00-12:00</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">890<!-- --> 封/s</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">88<!-- --> ms</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">8</td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">antispam-01</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">12:00-18:00</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">950<!-- --> 封/s</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">102<!-- --> ms</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">25</td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">antispam-01</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">18:00-24:00</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">780<!-- --> 封/s</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">78<!-- --> ms</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">5</td></tr></tbody></table></div></div></div>
+</div>
+</section>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-1">&larr; 返回主文件</a>
+  <a href="./layer-1-engine-switch.html">&larr; 层级 1：引擎切换</a>
+</nav>
+<script>
+  function showRouteToast(path){
+    let el=document.querySelector('.route-toast');
+    if(!el){el=document.createElement('div');el.className='route-toast';document.body.appendChild(el);}
+    el.textContent='demo 行为：router.push("'+path+'")';
+    el.classList.add('show');
+    clearTimeout(el._t); el._t=setTimeout(function(){el.classList.remove('show');},2200);
+  }
+  function bindSpecSelect(triggerSel, options, onPick){
+    const trigger=document.querySelector(triggerSel); if(!trigger) return;
+    trigger.style.position='relative'; let list=null;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(list){ list.remove(); list=null; trigger.setAttribute('data-state','closed'); return; }
+      trigger.setAttribute('data-state','open');
+      list=document.createElement('div');
+      list.style.cssText='position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:50;padding:4px;font-size:14px;';
+      options.forEach(function(opt){
+        const item=document.createElement('div');
+        item.textContent=opt.label;
+        item.style.cssText='padding:6px 10px;border-radius:5px;cursor:pointer;white-space:nowrap;'+(opt.active?'background:#eff6ff;color:#1d4ed8;font-weight:600;':'');
+        item.onmouseenter=function(){ if(!opt.active) item.style.background='#f3f4f6'; };
+        item.onmouseleave=function(){ if(!opt.active) item.style.background=opt.active?'#eff6ff':''; };
+        item.addEventListener('click', function(ev){
+          ev.stopPropagation();
+          const valSpan=trigger.querySelector('[data-slot="select-value"]');
+          if(valSpan) valSpan.textContent=opt.label;
+          options.forEach(function(o){o.active=(o===opt);});
+          list.remove(); list=null; trigger.setAttribute('data-state','closed');
+          if(onPick) onPick(opt);
+        });
+        list.appendChild(item);
+      });
+      trigger.appendChild(list);
+      document.addEventListener('click', function h(){ if(list){ list.remove(); list=null; trigger.setAttribute('data-state','closed'); } document.removeEventListener('click', h); });
+    });
+  }
+  const HOURS24=(function(){const a=[];for(let i=0;i<24;i++)a.push(String(i).padStart(2,'0')+':00');return a;})();
+  const DAYS=function(n){const a=[];for(let i=1;i<=n;i++)a.push(i+'日');return a;};
+  const RANGES={
+    '近24小时':{labels:HOURS24, axis:'00:00 ~ 23:00'},
+    '近7天':{labels:DAYS(7), axis:'1日 ~ 7日'},
+    '近30天':{labels:DAYS(30), axis:'1日 ~ 30日'}
+  };
+  function buildTrendSvg(labels){
+    const n=labels.length, x0=65, x1=1437, W=x1-x0, step=(n>1?W/(n-1):0);
+    let vgrid='', xticks='';
+    for(let i=0;i<n;i++){
+      const x=x0+i*step;
+      vgrid+='<line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x1="'+x+'" y1="5" x2="'+x+'" y2="265"></line>';
+      xticks+='<g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" stroke="#9CA3AF" class="recharts-cartesian-axis-tick-line" fill="none" x1="'+x+'" y1="271" x2="'+x+'" y2="265"></line><text orientation="bottom" stroke="none" font-size="10" x="'+x+'" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="'+x+'" dy="0.71em">'+labels[i]+'</tspan></text></g>';
+    }
+    return '<div class="recharts-responsive-container" style="width:100%;height:300px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 300px; max-width: 1502px;"><svg class="recharts-surface" width="1502" height="300" viewBox="0 0 1502 300" style="width: 100%; height: 100%;"><defs><clipPath id="l2-clip"><rect x="65" y="5" height="260" width="1372"></rect></clipPath></defs><g class="recharts-cartesian-grid"><g class="recharts-cartesian-grid-horizontal"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x1="65" y1="5" x2="1437" y2="5"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x1="65" y1="265" x2="1437" y2="265"></line></g><g class="recharts-cartesian-grid-vertical">'+vgrid+'</g></g><g class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"><line orientation="bottom" stroke="#9CA3AF" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="265" x2="1437" y2="265"></line><g class="recharts-cartesian-axis-ticks">'+xticks+'</g></g></svg></div></div>';
+  }
+  function applyRange(label){
+    const r=RANGES[label]; if(!r) return;
+    const chart=document.getElementById('l2-trend-chart'); if(chart) chart.innerHTML=buildTrendSvg(r.labels);
+    const tt=document.getElementById('l2-trend-title'); if(tt) tt.textContent='反垃圾引擎 性能趋势（'+label+'）';
+    const pt=document.getElementById('l2-points'); if(pt) pt.textContent='X 轴数据点：'+r.labels.length+'（'+r.axis+'）';
+  }
+  (function(){
+    applyRange('近24小时');
+    bindSpecSelect('#preview-timerange [role="combobox"]', [
+      {label:'近24小时',active:true},{label:'近7天'},{label:'近30天'}
+    ], function(opt){
+      applyRange(opt.label);
+      showRouteToast('demo 行为：setTimeRange("'+opt.label+'") — 趋势图按 '+opt.label+' 数据集重绘（明细表不变，D-02）');
+    });
+  })();
+</script>
+</body>
+</html>

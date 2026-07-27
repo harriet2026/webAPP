@@ -35,21 +35,18 @@ import {
 import { listActiveProxysvrGroups } from '@/lib/api/proxysvr';
 import type { Rule, RuleNode } from '@/types/unified-rules';
 import type { ProxysvrGroup } from '@/types/proxysvr';
-import {
-  defaultUserTree,
-  stripIsOutbound,
-  injectIsOutbound,
-} from './outbound-condition';
+import { defaultUserTree } from './outbound-condition';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PAGE = 'mail_routing_outbound';
 
-/** Fields allowed in the condition builder. is_outbound is shown but auto-set. */
+/**
+ * Fields allowed in the condition builder. is_outbound is an ordinary field the
+ * operator writes to scope a rule to one direction (GT-12321) — the tab no
+ * longer sets it behind their back.
+ */
 const ALLOWED_FIELDS = ['is_outbound', 'client_ip', 'senderdomain', 'auth_user', 'recipient_domain', 'recipient'];
-
-// IS_OUTBOUND_NODE / defaultUserTree / stripIsOutbound / injectIsOutbound live in
-// ./outbound-condition so they can be unit-tested in isolation (review M3).
 
 // ─── Zod schema ───────────────────────────────────────────────────────────────
 
@@ -151,13 +148,13 @@ export function OutboundRoutingTab({ tenantId }: OutboundRoutingTabProps) {
 
   function openEdit(rule: Rule) {
     setEditingRule(rule);
-    // Parse and strip is_outbound from stored tree; user only sees other conditions.
+    // Show the stored tree as-is, including any is_outbound condition — hiding
+    // it is what made the operator's direction choice unfixable (GT-12321).
     let tree = defaultUserTree();
     try {
-      const parsed: RuleNode = typeof rule.condition_tree === 'string'
+      tree = typeof rule.condition_tree === 'string'
         ? JSON.parse(rule.condition_tree)
         : rule.condition_tree;
-      tree = stripIsOutbound(parsed);
     } catch { /* use default */ }
     setUserTree(tree);
 
@@ -219,7 +216,7 @@ export function OutboundRoutingTab({ tenantId }: OutboundRoutingTabProps) {
           rule_class: 'route',
           stage: 'data',
           page: PAGE,
-          condition_tree: injectIsOutbound(userTree),
+          condition_tree: userTree,
           metadata,
         };
         const url = editingRule ? `/unified-rules/${editingRule.id}` : '/unified-rules';
@@ -335,12 +332,12 @@ export function OutboundRoutingTab({ tenantId }: OutboundRoutingTabProps) {
               )}
             </div>
 
-            {/* Fixed is_outbound notice */}
+            {/* Direction notice: a rule with no direction condition matches both. */}
             <div className="rounded-md bg-muted px-4 py-2 text-sm text-muted-foreground">
-              {t('outbound.isOutboundFixed')}
+              {t('outbound.directionHint')}
             </div>
 
-            {/* Condition tree (user-editable, excluding is_outbound) */}
+            {/* Condition tree (fully operator-controlled, direction included) */}
             <div className="space-y-2">
               <Label className="text-base font-semibold">{tAdvanced('conditionTree')}</Label>
               <ConditionTreeBuilder
@@ -406,7 +403,11 @@ export function OutboundRoutingTab({ tenantId }: OutboundRoutingTabProps) {
                 <div className="space-y-2">
                   <Label>{tRouteRules('proxysvrGroup')} *</Label>
                   <Select
-                    value={proxysvrGroupId ? String(proxysvrGroupId) : undefined}
+                    // '' (not undefined/null) keeps the Select controlled for the
+                    // component's lifetime; switching from uncontrolled on the first
+                    // pick raises a React error, which Next's dev overlay renders as
+                    // a second [role=dialog] and breaks the create flow.
+                    value={proxysvrGroupId?.toString() ?? ''}
                     onValueChange={(v) => setProxysvrGroupId(v ? Number(v) : null)}
                   >
                     <SelectTrigger>

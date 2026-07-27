@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - 内容规则 HTML 规格说明</title>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: #fff;
+      --muted: #f5f7fa;
+      --muted-foreground: #6b7280;
+      --border: #e5e7eb;
+      --blue: #1677ff;
+      --red: #f5222d;
+      --orange: #fa8c16;
+      --green: #52c41a;
+      --amber: #d97706;
+      --radius: 0.625rem;
+      --font-sans: "Geist", "Inter", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1, h2, h3 { line-height: 1.3; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 28px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 20px; }
+    h3 { margin: 18px 0 10px; color: #111827; font-size: 17px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .spec-header, section, .component-toc { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .toc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+    .toc-list li { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa; }
+    .toc-badge, .badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #eef4ff; color: #155eef; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-spec, .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; position: relative; }
+    .preview-card { width: 220px; height: 60px; display: flex; overflow: hidden; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); color: inherit; cursor: pointer; }
+    .preview-card:hover { border-color: #1890FF; background: #E6F7FF; }
+    .preview-bar { width: 4px; background: var(--orange); }
+    .preview-card-body { flex: 1; padding: 8px 12px; display: flex; align-items: flex-start; justify-content: space-between; }
+    .preview-title { font-size: 14px; font-weight: 650; color: #262626; }
+    .preview-config { color: #1890FF; font-size: 13px; }
+    .card-tooltip { position: absolute; left: 260px; top: 18px; z-index: 5; display: none; max-width: 280px; padding: 12px; border-radius: 8px; background: #111827; color: #f9fafb; font-size: 13px; line-height: 1.5; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+    .preview-shell { display: grid; grid-template-columns: 190px 1fr; gap: 20px; min-width: 900px; }
+    .preview-nav { padding: 12px; border-right: 1px solid var(--border); background: #f9fafb; border-radius: 8px 0 0 8px; }
+    .preview-nav-row { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; padding: 10px; border-radius: 8px; color: #4b5563; font-size: 13px; }
+    .preview-nav-row.active { background: #eaf3ff; color: #155eef; }
+    .nav-dot { width: 10px; height: 10px; margin-top: 5px; border-radius: 999px; background: #3b82f6; flex-shrink: 0; }
+    .preview-panel { padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .panel-dim { opacity: .5; pointer-events: none; }
+    .preview-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin: 14px 0; }
+    .preview-input { min-width: 260px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; color: #374151; background: #fff; }
+    .preview-select { padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: #374151; }
+    .button-blue { padding: 8px 12px; border: 0; border-radius: 8px; background: #155eef; color: #fff; font-weight: 650; cursor: pointer; }
+    .button-red { padding: 8px 12px; border: 0; border-radius: 8px; background: #dc2626; color: #fff; font-weight: 650; cursor: pointer; }
+    .button-icon { padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; cursor: pointer; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mini-table th, .mini-table td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; vertical-align: top; }
+    .mini-table th { background: #f8fafc; color: #374151; }
+    .mini-table tr.selected td { background: #eff6ff; }
+    .pill { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #f3f4f6; }
+    .pill.red { background: #ffe2e2; color: #d92d20; }
+    .pill.orange { background: #ffedd5; color: #c2410c; }
+    .pill.amber { background: #fef3c7; color: #92400e; }
+    .pill.green { background: #dcfce7; color: #15803d; }
+    .pill.blue { background: #dbeafe; color: #1d4ed8; }
+    .pill.gray { background: #e5e7eb; color: #4b5563; }
+    .pill.outline { background: #fff; border: 1px solid #d1d5db; color: #374151; }
+    .switch { position: relative; display: inline-block; width: 36px; height: 20px; border-radius: 999px; background: #155eef; cursor: pointer; transition: background .2s; vertical-align: middle; }
+    .switch::after { content: ""; position: absolute; top: 2px; left: 18px; width: 16px; height: 16px; border-radius: 999px; background: #fff; transition: left .2s; }
+    .switch.off { background: #d1d5db; }
+    .switch.off::after { left: 2px; }
+    .row-menu { position: relative; display: inline-block; }
+    .row-menu-pop { position: absolute; right: 0; top: 26px; z-index: 6; display: none; min-width: 120px; padding: 4px; border: 1px solid var(--border); border-radius: 8px; background: #fff; box-shadow: 0 8px 20px rgba(15,23,42,.16); }
+    .row-menu-pop a, .row-menu-pop button { display: block; width: 100%; padding: 6px 10px; border: 0; border-radius: 6px; background: none; text-align: left; font-size: 13px; color: #111827; cursor: pointer; }
+    .row-menu-pop a:hover, .row-menu-pop button:hover { background: #f3f4f6; }
+    .row-menu-pop .danger { color: #dc2626; }
+    .row-menu-pop hr { margin: 4px 0; border: 0; border-top: 1px solid #eee; }
+    .pager { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 13px; color: #6b7280; }
+    .pager button { min-width: 30px; height: 30px; padding: 0 6px; border: 1px solid var(--border); border-radius: 6px; background: #fff; cursor: pointer; }
+    .pager button.active { background: #155eef; color: #fff; border-color: #155eef; }
+    .is-hidden { display: none !important; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .diff-section { border-left: 4px solid var(--red); background: #fff7f7; }
+    .question-section { border-left: 4px solid #d97706; background: #fffbeb; }
+    .mermaid { padding: 16px; border-radius: 8px; background: #f8fafc; text-align: center; }
+    pre { padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; overflow: auto; font-family: var(--font-mono); font-size: 13px; }
+    @media (max-width: 900px) { body { padding: 16px; } .preview-shell { grid-template-columns: 1fr; } .preview-nav { border-right: 0; border-bottom: 1px solid var(--border); } }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>策略流水线 - 内容规则 HTML 规格说明</h1>
+    <table class="meta-table">
+      <tr><td>目标模块</td><td>策略流水线 / 阶段3：内容层 / 内容规则（policy key: <code>content</code>，priority 3002，type=<code>configurable</code>）</td></tr>
+      <tr><td>demo 地址</td><td><a href="http://localhost:3000/filter-rules/pipeline">http://localhost:3000/filter-rules/pipeline</a>（阶段3 卡片「内容规则」→ 80vw 内容策略抽屉）</td></tr>
+      <tr><td>demo 源码</td><td><code>design/origin/demo/app/filter-rules/pipeline/page.tsx</code><br><code>design/origin/demo/components/filter-rules-new/strategy-pipeline-page.tsx</code>（抽屉宿主）<br><code>design/origin/demo/components/filter-rules-new/content-strategy-page.tsx</code>（抽屉页宿主，initialPolicy=content）<br><code>design/origin/demo/components/filter-rules-new/content-rules-module.tsx</code>（模块 UI 主体）</td></tr>
+      <tr><td>关联 PRD / spec 覆盖情况</td><td><strong>内容规则没有独立需求文档。</strong>业务逻辑取自：<code>design/origin/spec/策略流水线需求文档.md</code>（阶段3 内容层、策略卡/抽屉交互、异常与性能约束）与 <code>design/origin/spec/0708（多租户视角）安全策略体系 功能需求文档（PRD）.md</code>（F1-F8 基线功能、§3.2「内容规则显示匹配位置/方式」、§4.1 边界校验、§5.4 <code>security_policy_rule</code> 表）。spec 未覆盖的 UI 细节以 demo 实际渲染为准，并在 §9 差异表注明「spec 未覆盖」。</td></tr>
+      <tr><td>落地约束</td><td><code>design/origin/implement.md</code>：涉及规则系统时复用统一规则系统（page 字段区分功能页），不新增独立规则系统；沿用统一规则系统 action（mark = accept + 特定 header，不新加 action）；产品 PRD API 不等于必须新增后端 API；四语国际化。</td></tr>
+      <tr><td>浏览器验证</td><td>2026-07-11 Asia/Shanghai，headless Chromium CDP 访问运行态 demo（viewport 1440×1000 与 1024×900）。完成：流水线默认态、策略卡 + hover Tooltip、内容策略抽屉默认态、状态筛选下拉、行选中/批量删除、行内更多菜单、删除确认、搜索过滤、分页第2页、新建规则抽屉、保存校验错误、正则语法错误、配置示例展开/应用、模拟测试命中/未命中、取消确认、策略禁用置灰、1024px 响应式，共 22 张截图。</td></tr>
+    </table>
+  </header>
+
+  <nav class="component-toc">
+    <h2>组件列表</h2>
+    <ul class="toc-list">
+      <li><a href="#component-2-1">2.1 策略流水线入口卡片（含 Tooltip）</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-2">2.2 内容策略抽屉 + 内容规则列表</a><span class="toc-badge">2层</span></li>
+      <li><a href="#component-2-3">2.3 内容规则编辑抽屉 RuleEditDrawer</a><span class="toc-badge">4层</span><br><a href="layer-1-rule-edit-drawer.html">层级2：新建/编辑规则抽屉</a> · <a href="layer-2-validation-examples-simulator.html">层级3：校验/示例/模拟测试</a></li>
+      <li><a href="#dialogs">3. 确认对话框与行内菜单</a><span class="toc-badge">1层</span><br><a href="layer-3-dialogs.html">层级4：删除/批量删除/取消确认</a></li>
+      <li><a href="#api-mapping">4. 数据模型与 API 映射</a><span class="toc-badge">规则系统映射</span></li>
+    </ul>
+  </nav>
+
+  <section id="layout">
+    <h2>1. 页面布局结构</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>实际渲染</th><th>规格含义</th></tr></thead>
+      <tbody>
+        <tr><td>左侧产品导航</td><td>深色侧边栏（AI邮件安全网关），当前位于「平台安全策略」功能域</td><td>全局导航容器，不属于本模块配置表单，但影响首屏宽度。</td></tr>
+        <tr><td>策略流水线主内容</td><td>阶段管线、策略卡、图例、例外规则区</td><td>内容规则以阶段3策略卡进入，不是独立页面首屏。</td></tr>
+        <tr><td>内容策略抽屉</td><td>右侧 80vw Sheet（1440px 视口实测 1152px 宽），顶部标题「阶段3: 内容层 / 内容规则」，无默认关闭叉（hideCloseButton），右上角为 ghost 按钮内嵌 XCircle 图标</td><td>阶段3 四个子策略的承载容器：左侧子策略导航（附件安全检测 / URL检测与防护 / 内容规则 / 意图引擎），右侧为当前策略配置卡片。</td></tr>
+        <tr><td>内容规则配置卡片</td><td>白色圆角卡片：头部（标题「内容规则」+ 已启用文案 + Switch）、可滚动内容区（工具栏 + 表格 + 分页）、sticky 底部操作栏（未保存提示 + 「保存配置」按钮）</td><td>模块启停 + 规则 CRUD 列表的主体。</td></tr>
+        <tr><td>规则编辑抽屉</td><td>在内容策略抽屉上叠加 920px Sheet，左 560px 表单 + 右侧预览帮助区</td><td>规则新建/编辑的主交互层，详见子文件。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/page-full-default.png" alt="策略流水线整页默认态">
+      <figcaption>整页默认态：策略流水线主页面，阶段3「内容规则」入口卡片位于内容层卡片区（橙色左色条）。</figcaption>
+    </figure>
+  </section>
+
+  <section id="components">
+    <h2>2. 逐组件规格</h2>
+
+    <article class="component-spec" id="component-2-1">
+      <h3>2.1 策略流水线入口卡片 Content Policy Card</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级0：页面默认态中的策略入口卡片</td></tr>
+          <tr><th>触发路径</th><td>打开 <code>/filter-rules/pipeline</code>，在阶段3内容层定位「内容规则」卡片。</td></tr>
+          <tr><th>可点击目标</th><td>浏览器验证命中 220px × 60px 卡片（<code>w-[220px] h-[60px]</code>），文本为「内容规则 / 配置→」。点击卡片整体或「配置」按钮均打开内容策略抽屉并选中内容规则。</td></tr>
+          <tr><th>Hover Tooltip</th><td>悬浮 300ms 后显示：「策略：内容规则 / 动作：隔离、投递 / 影响：命中则隔离，邮件保留至隔离区 / 被隔离邮件可在邮件隔离模块查看」（浏览器实测文案）。</td></tr>
+        </tbody>
+      </table>
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：策略卡默认态（hover 显示 Tooltip，点击进入 2.2）</h4>
+        <div class="component-preview">
+          <a class="preview-card" data-demo-extracted="content-policy-card" data-card href="#component-2-2" aria-label="打开内容规则列表规格">
+            <div class="preview-bar"></div>
+            <div class="preview-card-body">
+              <span class="preview-title">内容规则</span>
+              <span class="preview-config">配置 →</span>
+            </div>
+          </a>
+          <div class="card-tooltip" data-card-tooltip>
+            <strong>策略：内容规则</strong><br>动作：隔离、投递<br>影响：命中则隔离，邮件保留至隔离区<br>被隔离邮件可在邮件隔离模块查看
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/content-card-layer-0.png" alt="内容规则策略卡" style="max-width:280px;">
+          <img src="./screenshots/content-card-tooltip.png" alt="内容规则策略卡 Tooltip">
+          <figcaption>左：策略卡局部截图（橙色左色条 = configurable/隔离型策略）；右：hover Tooltip 实测。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>卡片标题</td><td>内容规则</td><td>点击卡片整体打开内容策略抽屉</td><td><code>policy.key = content</code>，nameKey <code>pipeline.contentRules</code></td></tr>
+            <tr><td>配置入口</td><td>配置 + ArrowRight(12px)</td><td>点击同样打开抽屉并选中内容规则（stopPropagation 后走同一逻辑）</td><td>未配置态文案为「去配置」，本卡不在 unconfigured 集合中</td></tr>
+            <tr><td>左侧色条</td><td>橙色 <code>#fa8c16</code>，宽 4px</td><td>无独立交互</td><td>由 <code>type = configurable</code>（隔离型）推导</td></tr>
+            <tr><td>Tooltip</td><td>策略/动作/影响 三段式</td><td>hover 300ms 延迟显示</td><td>configurable 类型动作为「隔离、投递」</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>根节点</td><td><code>div.w-[220px].h-[60px].rounded-lg.cursor-pointer</code>，nodeCount 9，data-slot=tooltip-trigger</td><td><code>.preview-card[data-demo-extracted]</code>，同尺寸</td><td>一致</td></tr>
+              <tr><td>子节点</td><td>色条 <code>div.w-1.bg-[#fa8c16]</code> + 内容 div（标题 span + 配置 button）</td><td>preview-bar（橙色4px）+ preview-card-body（标题 + 配置）</td><td>一致</td></tr>
+              <tr><td>关键文案</td><td>内容规则 / 配置</td><td>内容规则 / 配置 →</td><td>一致</td></tr>
+              <tr><td>Tooltip 文案</td><td>策略：内容规则 / 动作：隔离、投递 / 影响：命中则隔离…（radix popper 提取）</td><td>同文案</td><td>一致</td></tr>
+              <tr><td>触发结果</td><td>打开内容策略抽屉（setContentDrawerPolicy("content")）</td><td>锚点跳转至 2.2 规格</td><td>一致（规格内等效）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-2">
+      <h3>2.2 内容策略抽屉 + 内容规则列表 ContentRulesModule</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级1：点击策略卡后打开 80vw 内容策略抽屉，左侧导航选中「内容规则」。</td></tr>
+          <tr><th>渲染组件</th><td><code>ContentStrategyPage embedded initialPolicy="content"</code> → <code>ContentRulesModule direction="receive" embedded</code></td></tr>
+          <tr><th>实际状态</th><td>头部「内容规则 / 已启用 + Switch(checked)」；表格首屏 10 行、分页「共 16 条」（仅统计接收方向启用的规则：mock 30 条中 receive.enabled 的 16 条）；列表按优先级<strong>数值降序</strong>排序（<code>b.priority - a.priority</code>）。</td></tr>
+          <tr><th>方向语义</th><td>模块按 direction 过滤规则（抽屉内固定 receive）。同一条规则的三个方向（接收/外发/域内）各有独立的启用位与动作，列表「执行动作」列显示的是<strong>当前方向</strong>的动作。</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">1</span>交互层级 1：内容规则列表默认态（可交互预览：开关/搜索/状态筛选/选中/菜单/分页）</h4>
+        <div class="component-preview">
+          <div class="preview-shell" data-demo-extracted="content-rules-list">
+            <div class="preview-nav">
+              <div class="preview-nav-row"><span class="nav-dot"></span><span>附件安全检测<br><small>病毒扫描/沙箱分析/类型检测</small></span></div>
+              <div class="preview-nav-row"><span class="nav-dot"></span><span>URL检测与防护<br><small>信誉评估/沙箱分析/仿冒检测</small></span></div>
+              <div class="preview-nav-row active"><span class="nav-dot"></span><span>内容规则<br><small>关键词/正则/DLP检测</small></span></div>
+              <div class="preview-nav-row"><span class="nav-dot"></span><span>意图引擎<br><small>涉黄赌/涉政/钓鱼/垃圾/订阅</small></span></div>
+            </div>
+            <div class="preview-panel">
+              <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:10px;">
+                <h3 style="margin:0;">内容规则</h3>
+                <span><span data-policy-label style="color:#155eef;font-size:14px;">已启用</span> <span class="switch" data-policy-switch role="switch" aria-checked="true" tabindex="0"></span></span>
+              </div>
+              <div data-policy-body>
+                <div class="preview-toolbar">
+                  <span style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <input class="preview-input" type="search" data-preview-search placeholder="搜索规则ID或名称...">
+                    <select class="preview-select" data-status-filter>
+                      <option value="all">全部状态</option>
+                      <option value="enabled">启用</option>
+                      <option value="disabled">禁用</option>
+                    </select>
+                    <button class="button-icon" type="button" data-preview-reset title="重置搜索与筛选">⟳</button>
+                  </span>
+                  <span style="display:flex;gap:8px;">
+                    <button class="button-red is-hidden" type="button" data-batch-delete>删除选中(<span data-selected-count>0</span>)</button>
+                    <span class="button-icon">⇧ 批量导入</span>
+                    <span class="button-icon" title="导出">⇩</span>
+                    <a class="button-blue" href="layer-1-rule-edit-drawer.html">+ 新建规则</a>
+                  </span>
+                </div>
+                <table class="mini-table">
+                  <thead><tr><th></th><th>规则ID</th><th>规则名称</th><th>匹配类型</th><th>执行动作</th><th>作用域</th><th>状态</th><th>到期时间</th><th>操作</th></tr></thead>
+                  <tbody data-rule-body>
+                    <tr data-status="enabled" data-search-text="CR-20260317-004 银行卡号检测"><td><input type="checkbox" data-row-check></td><td><code>CR-20260317-004</code></td><td><strong>银行卡号检测</strong><br><small style="color:#6b7280;">\d{16,19}</small></td><td><span class="pill outline">正则表达式</span></td><td><span class="pill amber">审核</span></td><td><span class="pill gray">正文</span> <span class="pill gray">附件内容</span></td><td><span class="pill green">启用</span></td><td>永久</td><td><a href="layer-1-rule-edit-drawer.html" title="编辑">✎</a> <span class="row-menu"><button class="button-icon" type="button" data-row-more style="padding:2px 8px;">⋯</button><span class="row-menu-pop"><button type="button" data-menu-toggle>禁用</button><button type="button">复制规则</button><hr><a class="danger" href="layer-3-dialogs.html">删除</a></span></span></td></tr>
+                    <tr data-status="disabled" data-search-text="CR-20260320-030 内容规则 #30"><td><input type="checkbox" data-row-check></td><td><code>CR-20260320-030</code></td><td><strong>内容规则 #30</strong><br><small style="color:#6b7280;">\d{10}</small></td><td><span class="pill outline">正则表达式</span></td><td><span class="pill orange">隔离</span></td><td><span class="pill gray">主题</span> <span class="pill gray">正文</span></td><td><span class="pill gray">禁用</span></td><td>永久</td><td><a href="layer-1-rule-edit-drawer.html" title="编辑">✎</a> <span class="row-menu"><button class="button-icon" type="button" data-row-more style="padding:2px 8px;">⋯</button><span class="row-menu-pop"><button type="button" data-menu-toggle>启用</button><button type="button">复制规则</button><hr><a class="danger" href="layer-3-dialogs.html">删除</a></span></span></td></tr>
+                    <tr data-status="enabled" data-search-text="CR-20260307-028 内容规则 #28 关键词28"><td><input type="checkbox" data-row-check></td><td><code>CR-20260307-028</code></td><td><strong>内容规则 #28</strong><br><small style="color:#6b7280;">关键词28|测试词28</small></td><td><span class="pill outline">关键词</span></td><td><span class="pill red">阻断</span></td><td><span class="pill gray">主题</span> <span class="pill gray">正文</span></td><td><span class="pill green">启用</span></td><td>永久</td><td><a href="layer-1-rule-edit-drawer.html" title="编辑">✎</a> <span class="row-menu"><button class="button-icon" type="button" data-row-more style="padding:2px 8px;">⋯</button><span class="row-menu-pop"><button type="button" data-menu-toggle>禁用</button><button type="button">复制规则</button><hr><a class="danger" href="layer-3-dialogs.html">删除</a></span></span></td></tr>
+                    <tr data-status="enabled" data-search-text="CR-20260309-026 内容规则 #26 关键词26"><td><input type="checkbox" data-row-check></td><td><code>CR-20260309-026</code></td><td><strong>内容规则 #26</strong><br><small style="color:#6b7280;">关键词26|测试词26</small></td><td><span class="pill outline">内容组</span></td><td><span class="pill orange">隔离</span></td><td><span class="pill gray">主题</span> <span class="pill gray">正文</span></td><td><span class="pill green">启用</span></td><td>永久</td><td><a href="layer-1-rule-edit-drawer.html" title="编辑">✎</a> <span class="row-menu"><button class="button-icon" type="button" data-row-more style="padding:2px 8px;">⋯</button><span class="row-menu-pop"><button type="button" data-menu-toggle>禁用</button><button type="button">复制规则</button><hr><a class="danger" href="layer-3-dialogs.html">删除</a></span></span></td></tr>
+                  </tbody>
+                  <tbody data-empty-row class="is-hidden"><tr><td colspan="9" style="text-align:center;color:#6b7280;padding:24px;">暂无数据</td></tr></tbody>
+                </table>
+                <div class="pager">
+                  <span data-total-label>共 16 条</span>
+                  <span style="flex:1;"></span>
+                  <button type="button">&lt;</button>
+                  <button type="button" class="active" data-page-btn>1</button>
+                  <button type="button" data-page-btn>2</button>
+                  <button type="button">&gt;</button>
+                  <span>前往 <input class="preview-input" style="min-width:44px;width:44px;padding:4px;" type="number" min="1" max="2"> 页</span>
+                  <select class="preview-select"><option>10 条/页</option><option>20 条/页</option><option>50 条/页</option><option>100 条/页</option></select>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;margin-top:12px;padding-top:12px;">
+                <span data-unsaved class="is-hidden" style="color:#d97706;font-size:13px;">● 有未保存的更改</span><span></span>
+                <button class="button-blue" type="button" data-save-config>保存配置</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-default.png" alt="内容策略抽屉默认态">
+          <figcaption>内容策略抽屉默认态（1440px）：左导航 4 个子策略、右侧内容规则列表；首行 CR-20260317-004 银行卡号检测（优先级 500，接收方向动作=审核）。</figcaption>
+        </figure>
+
+        <h4>表格列定义（浏览器实测表头，表格提取节点数 304）</h4>
+        <table class="spec-table">
+          <thead><tr><th>列序</th><th>列名</th><th>宽度(源码)</th><th>渲染规则</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>复选框</td><td>w-10</td><td>表头全选（仅当前页），行选中后底色 <code>bg-blue-50/50</code></td></tr>
+            <tr><td>2</td><td>规则ID</td><td>w-36</td><td>等宽字体灰色，格式 <code>CR-YYYYMMDD-NNN</code></td></tr>
+            <tr><td>3</td><td>规则名称</td><td>min-w-32</td><td>名称加粗 + 第二行灰色小字显示匹配内容（truncate max-w-[180px]）</td></tr>
+            <tr><td>4</td><td>匹配类型</td><td>w-24</td><td>outline Badge：关键词 / 正则表达式 / 内容组</td></tr>
+            <tr><td>5</td><td>执行动作</td><td>w-28</td><td>彩色 Badge（当前方向的动作）：阻断/阻断+告警=红、隔离=橙、审核=琥珀、标记=蓝</td></tr>
+            <tr><td>6</td><td>作用域</td><td>w-32</td><td>secondary Badge，最多显示 2 个 + <code>+N</code> 折叠（主题/正文/信头/附件名称/附件内容）</td></tr>
+            <tr><td>7</td><td>状态</td><td>w-20</td><td>派生 Badge：已过期(红 destructive，整行 opacity-60) &gt; 禁用(灰) &gt; 即将到期(琥珀，7天内) &gt; 启用(绿)</td></tr>
+            <tr><td>8</td><td>到期时间</td><td>w-24</td><td>无 expiresAt 显示「永久」，否则 zh-CN 本地化日期</td></tr>
+            <tr><td>9</td><td>操作</td><td>w-24</td><td>编辑图标（Tooltip「编辑」）+ 更多菜单（禁用|启用 / 复制规则 / 删除）</td></tr>
+          </tbody>
+        </table>
+
+        <h4>工具栏与头部元素</h4>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为</th><th>差异/备注</th></tr></thead>
+          <tbody>
+            <tr><td>模块启停 Switch</td><td>已启用 + checked</td><td>切换后内容区 <code>opacity-50 pointer-events-none</code> 整体置灰禁点，文案变「已禁用」，底部出现「有未保存的更改」</td><td>见截图 policy-disabled.png；仅前端 state</td></tr>
+            <tr><td>搜索框</td><td>placeholder「搜索规则ID或名称...」</td><td>输入即过滤（匹配 name 或 id，忽略大小写），并重置页码为1</td><td>不搜匹配内容字段；实测搜「身份证」得「暂无数据」——身份证外发管控为仅外发方向规则，被 direction=receive 过滤</td></tr>
+            <tr><td>状态筛选 Select</td><td>全部状态（选项：全部状态/启用/禁用）</td><td>enabled 过滤含「未过期且启用」；disabled 过滤 <code>!enabled</code>；切换重置页码</td><td>浏览器实测下拉三项，见 status-filter-open.png</td></tr>
+            <tr><td>重置按钮</td><td>RotateCcw 图标按钮，无文字</td><td>清空搜索词 + 状态筛选 + 页码回1</td><td>无 aria-label，i18n 缺口</td></tr>
+            <tr><td>删除选中(N)</td><td>destructive 红色按钮，选中数&gt;0 才出现</td><td>点击打开批量删除确认对话框</td><td>见 <a href="layer-3-dialogs.html">层级4</a></td></tr>
+            <tr><td>批量导入</td><td>Upload 图标 + 文字</td><td>demo 无点击处理（无弹窗/无上传）</td><td>PRD 未定义导入格式，需确认</td></tr>
+            <tr><td>导出</td><td>Download 图标按钮，无文字</td><td>demo 无点击处理</td><td>同上</td></tr>
+            <tr><td>新建规则</td><td>+ 新建规则（主色按钮）</td><td>打开 920px 规则编辑抽屉（新建态）</td><td>详见 <a href="layer-1-rule-edit-drawer.html">层级2</a></td></tr>
+            <tr><td>分页</td><td>共 16 条；页码 1/2；前往第 N 页（回车跳转）；10/20/50/100 条/页</td><td>页码/前后翻页/跳页/每页条数可交互；第2页首行实测 CR-20260308-012</td><td>页 2 含「政治敏感词」（expiresAt 2026-06-30 已过期 → 红色「已过期」Badge + 整行降透明度）</td></tr>
+            <tr><td>保存配置</td><td>抽屉卡片底部 sticky 蓝色按钮</td><td>点击清除「有未保存的更改」提示</td><td>属 ContentStrategyPage 宿主；demo 仅重置脏标记，无 API</td></tr>
+          </tbody>
+        </table>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/status-filter-open.png" alt="状态筛选下拉展开">
+          <figcaption>状态筛选下拉展开：全部状态(选中) / 启用 / 禁用。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/row-selected-batch-delete.png" alt="选中行后出现批量删除按钮">
+          <figcaption>勾选首行后：行底色变浅蓝，工具栏出现红色「删除选中(1)」按钮。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/search-filtered.png" alt="搜索过滤">
+          <figcaption>搜索「身份证」：结果为「暂无数据」空态行（身份证外发管控是仅外发方向规则，接收方向列表不含它）。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/pagination-page-2.png" alt="分页第2页">
+          <figcaption>第 2 页：首行 CR-20260308-012；「政治敏感词」行显示红色「已过期」状态并整体降透明度。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/policy-disabled.png" alt="策略禁用态">
+          <figcaption>关闭头部 Switch：文案变「已禁用」，整个列表区域 opacity-50 且不可交互，底部出现「有未保存的更改」。</figcaption>
+        </figure>
+
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>抽屉根节点</td><td><code>[role=dialog]</code> 80vw Sheet，1440px 视口实测宽 1152px，class 含 <code>slide-in-from-right</code></td><td>preview-shell 保留左导航 + 右配置卡核心结构（裁剪展示）</td><td>一致（结构裁剪）</td></tr>
+              <tr><td>左导航</td><td><code>nav.flex-1.p-2</code>，4 个 button，nodeCount 21；「内容规则」按钮 class 含 <code>bg-blue-50 text-blue-700</code>（active），每项前有蓝色圆点（启用态 bg-blue-500）</td><td>4 项导航、内容规则 active、蓝色圆点</td><td>一致</td></tr>
+              <tr><td>表头</td><td>[空, 规则ID, 规则名称, 匹配类型, 执行动作, 作用域, 状态, 到期时间, 操作]，表格 nodeCount 304</td><td>同 9 列表头</td><td>一致</td></tr>
+              <tr><td>首行数据</td><td>CR-20260317-004 / 银行卡号检测 \d{16,19} / 正则表达式 / 审核 / 正文+附件内容 / 启用 / 永久</td><td>同文案同 Badge 配色</td><td>一致</td></tr>
+              <tr><td>行数/分页</td><td>tbody 10 行；「共 16 条」，页码 1、2</td><td>预览裁剪为前 4 行，分页文案一致并标注裁剪</td><td>一致（行数裁剪展示）</td></tr>
+              <tr><td>头部开关</td><td><code>button[role=switch] data-state=checked</code>，前邻文案「已启用」</td><td>switch 元素 aria-checked=true + 已启用</td><td>一致</td></tr>
+              <tr><td>隐藏条件节点</td><td>「删除选中」按钮默认未渲染（selectedIds.size===0）；空态行未渲染</td><td>默认 is-hidden，勾选后显示；空态行搜索无结果时显示</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-3">
+      <h3>2.3 内容规则编辑抽屉 RuleEditDrawer（多层交互）</h3>
+      <p>规则编辑抽屉（新建/编辑共用，920px Sheet）超过单文件可读范围，层级2及以后拆分为独立文件。主文件保留关系图与索引。</p>
+      <div class="mermaid">
+        graph LR
+          A[层级0 策略卡] --> B[层级1 内容规则列表]
+          B -->|新建规则| C[层级2 规则编辑抽屉]
+          B -->|行内编辑图标| C2[编辑态 抽屉预填]
+          C --> D[层级3 保存校验错误]
+          C --> E[层级3 正则语法错误]
+          C --> F[层级3 配置示例展开/应用]
+          C --> G[层级3 模拟测试命中/未命中]
+          C -->|取消 有更改| H[层级4 取消确认对话框]
+          B -->|行内菜单 删除| I[层级4 删除确认]
+          B -->|删除选中| J[层级4 批量删除确认]
+      </div>
+      <table class="spec-table layer-index">
+        <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>策略卡默认态</td><td>页面加载</td><td>上方内嵌（2.1）</td></tr>
+          <tr><td>1</td><td>内容规则列表</td><td>点击策略卡 / 配置按钮</td><td>上方内嵌（2.2）</td></tr>
+          <tr><td>2</td><td>新建/编辑规则抽屉</td><td>列表态点击「新建规则」或行内编辑图标</td><td><a href="layer-1-rule-edit-drawer.html">查看详情</a></td></tr>
+          <tr><td>3</td><td>校验错误、正则错误、配置示例、模拟测试</td><td>抽屉内点击「保存 / 查看配置示例 / 模拟测试」、输入非法正则</td><td><a href="layer-2-validation-examples-simulator.html">查看详情</a></td></tr>
+          <tr><td>4</td><td>删除确认、批量删除确认、取消确认对话框、行内更多菜单</td><td>行内菜单删除 / 删除选中 / 有更改时取消或关闭抽屉</td><td><a href="layer-3-dialogs.html">查看详情</a></td></tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+  <section id="dialogs">
+    <h2>3. 弹窗/抽屉/对话框规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>名称</th><th>触发条件</th><th>实际渲染</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>内容策略抽屉（阶段3）</td><td>点击「内容规则」策略卡或配置入口</td><td>80vw Sheet，标题「阶段3: 内容层 / 内容规则」+ Settings 图标，右上 XCircle 关闭按钮；左侧子策略导航可切到附件/URL/意图引擎</td><td>嵌入式配置页容器；PRD 抽屉宽 480px 与 demo 80vw 不一致，见 §9</td></tr>
+        <tr><td>规则编辑抽屉</td><td>点击「新建规则」或行内编辑图标</td><td>920px Sheet，头部标题+副标题+取消/保存，左 560px 表单 + 右预览区</td><td>新建/编辑共用；编辑态预填规则数据，详见 <a href="layer-1-rule-edit-drawer.html">层级2</a></td></tr>
+        <tr><td>删除确认 AlertDialog</td><td>行内更多菜单 → 删除</td><td>「确认删除规则 / 确定要删除规则「银行卡号检测」吗？此操作不可撤销。/ 取消 / 删除(红)」</td><td>实测已实现，见 <a href="layer-3-dialogs.html">层级4</a></td></tr>
+        <tr><td>批量删除确认 AlertDialog</td><td>点击「删除选中(N)」</td><td>「批量删除规则 / 确定要删除选中的 N 条规则吗？此操作不可撤销。/ 取消 / 确认删除(红)」</td><td>同上</td></tr>
+        <tr><td>取消确认 AlertDialog</td><td>编辑抽屉有未保存更改时点取消/关闭</td><td>「确认取消 / 当前有未保存的更改，确定要放弃吗？ / 继续编辑 / 放弃更改」</td><td>同上</td></tr>
+        <tr><td>行内更多菜单 DropdownMenu</td><td>点击行操作列 ⋯ 按钮</td><td>菜单项：禁用（或启用）/ 复制规则 / 分隔线 / 删除(红)</td><td>复制规则生成「{名称} (副本)」新行；菜单文案硬编码中文，见 §9</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="api-mapping">
+    <h2>4. 数据模型与 API 映射</h2>
+    <pre><code>interface ContentRule {
+  id: string                       // CR-YYYYMMDD-NNN
+  name: string
+  priority: number                 // demo 表单范围 1-9999，默认 100
+  matchType: "keyword" | "regex" | "content_group"
+  matchContent: string             // 关键词用 | 分隔 / JS 正则 / 内容组名称
+  scopes: ScopeType[]              // subject | body | header | attachment_name | attachment_content
+  directions: {                    // 每方向独立启用位 + 动作
+    receive: DirectionAction
+    send: DirectionAction
+    internal: DirectionAction
+  }
+  enabled: boolean
+  expiresAt?: string               // 缺省=永久；过期→「已过期」，7天内→「即将到期」
+  remark?: string                  // ≤200字
+  createdAt: string
+  updatedAt: string
+}
+interface DirectionAction {
+  enabled: boolean
+  action: "block" | "block_alert" | "isolate" | "review" | "mark"
+  tag?: string                     // mark 动作的标记文本（如 "[广告]"），仅存在于 mock 数据，编辑抽屉无对应输入
+  notifyAdmin?: boolean            // 仅 mock 数据，UI 未渲染
+  notifySender?: boolean           // 仅 mock 数据，UI 未渲染
+}</code></pre>
+    <table class="spec-table">
+      <thead><tr><th>PRD API / 数据表</th><th>用途</th><th>落地映射建议</th><th>需确认</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET/POST/PUT/DELETE /api/v1/security-policy/rules</code>（0708 PRD §5.4）</td><td>规则 CRUD、分页、搜索、状态筛选</td><td>复用统一规则系统 CRUD，<code>page=content-rules</code>（或等价 policy_key=content）区分功能页；方向（接收/外发/域内）映射统一规则的 direction 维度。</td><td>统一规则系统是否支持「一条规则三方向各自独立动作」，或需拆为 3 条底层规则（见 Q5）。</td></tr>
+        <tr><td><code>POST /api/v1/security-policy/test</code>（PRD F7 命中测试）</td><td>模拟测试</td><td>demo 为前端本地匹配（RegExp / includes）；落地若要真实链路需统一规则 dry-run 接口。</td><td>是否新增 dry-run API。</td></tr>
+        <tr><td>内容组（content_group）</td><td>匹配类型第三项「内容组」引用预定义关键词集合</td><td>对应 PRD §5.1 全局对象库「内容组」；demo 中仅为文本输入，无选择器。</td><td>内容组数据源与选择 UI（Q1）。</td></tr>
+        <tr><td><code>security_policy_rule</code> 表（PRD §5.4）</td><td><code>id, rule_id, rule_name, policy_key, stage, action, config(json), priority, enabled, version, tenant_id, scope</code></td><td>matchType/matchContent/scopes/directions 入 <code>config</code> JSON；<code>policy_key=content, stage=3</code>。</td><td>非硬性要求；若统一规则系统已有表结构则不新建。</td></tr>
+        <tr><td>批量导入/导出</td><td>工具栏按钮</td><td>demo 无实现；PRD 未定义格式。</td><td>格式（CSV/JSON）与 API（Q8）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="business-logic">
+    <h2>5. 业务逻辑规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>逻辑</th><th>spec/PRD 要求</th><th>demo 实际</th><th>落地说明</th></tr></thead>
+      <tbody>
+        <tr><td>阶段与中断语义</td><td>阶段3内容层，命中→处置·中断（0708 PRD §1.3）；configurable 类型命中后进入隔离队列（策略流水线需求文档）</td><td>卡片 Tooltip「命中则隔离，邮件保留至隔离区」；规则级动作可选阻断/阻断+告警/隔离/审核/标记</td><td>命中生成 disposalBasis(policyKey+ruleId) 供处置中心追溯。</td></tr>
+        <tr><td>优先级</td><td>PRD：同阶段数字越小越先匹配；<strong>网关统一规则系统定义：数值越大越优先</strong></td><td>列表按数值<strong>降序</strong>排列（大数在前）；配置提示「优先级数值越大，规则优先级越高」；但编辑抽屉 Tooltip/hint 写「数值越小优先级越高」——demo 自相矛盾</td><td>落地按统一规则系统「数值越大越优先」，需修正抽屉文案（D2/Q6）。</td></tr>
+        <tr><td>方向模型</td><td>spec 未覆盖（内容规则无独立 PRD）</td><td>每条规则含 receive/send/internal 三个方向，各自独立 enabled + action；列表按当前方向过滤并显示该方向动作；编辑抽屉「生效范围」勾选方向、动作为统一下拉（应用于所有勾选方向）</td><td>数据模型支持每方向异构动作，但编辑 UI 只提供统一动作，见 Q5。</td></tr>
+        <tr><td>匹配语义</td><td>PRD §3.2「内容规则显示匹配位置/方式」</td><td>匹配位置=作用域 5 选（主题/正文/信头/附件名称/附件内容）；方式=关键词（|分隔，includes 任一命中）/ 正则（JS RegExp 语法，实时校验）/ 内容组（引用词库，demo 按 includes 模拟）</td><td>附件内容匹配依赖文档解析（配置提示第4条），网关侧对应 attachd 能力（Q4）。</td></tr>
+        <tr><td>状态派生</td><td>PRD F3 启停切换，停用不删除</td><td>状态 Badge 优先级：已过期（expiresAt&lt;now，红，整行 opacity-60）&gt; 禁用（灰）&gt; 即将到期（7 天内，琥珀）&gt; 启用（绿）；「启用」筛选同时排除已过期规则</td><td>过期规则自动失效，无需手工禁用。</td></tr>
+        <tr><td>有效期</td><td>spec 未覆盖</td><td>date 输入，留空=永久；存储为 <code>T00:00:00Z</code></td><td>—</td></tr>
+        <tr><td>备注</td><td>spec 未覆盖</td><td>≤200 字，超出直接不接受输入，右下角实时计数 N/200</td><td>—</td></tr>
+        <tr><td>必填校验</td><td>PRD §4.1 规则名必填 1–50 字符；策略流水线文档：名称为空则保存按钮置灰</td><td>保存按钮始终可点；点击保存才显示红字：请输入规则名称 / 请输入匹配内容 / 请至少选择一个生效范围 / 请至少启用一个方向；无长度上限校验</td><td>demo 交互（点击后显示错误）与 PRD（按钮置灰）不同，以 demo 为准记录，见 §9。</td></tr>
+        <tr><td>删除保护</td><td>PRD §3.4 删除需二次确认</td><td>单条删除与批量删除均有 AlertDialog 二次确认；启停切换即时无确认</td><td>与 PRD 一致。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interaction">
+    <h2>6. 交互规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>实际行为（浏览器验证）</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>打开抽屉</td><td>点击卡片/配置 → 80vw Sheet 右滑入，data-state=open 动画 500ms</td><td>左导航自动选中「内容规则」（initialPolicy=content）。</td></tr>
+        <tr><td>切换子策略</td><td>点击左导航其他项切换右侧配置（附件/URL/意图引擎）</td><td>切换不弹未保存确认（demo 行为）。</td></tr>
+        <tr><td>模块启停</td><td>Switch off → 列表区 opacity-50 + pointer-events-none，「已禁用」，底部「有未保存的更改」脉冲圆点</td><td>点「保存配置」清除脏标记。</td></tr>
+        <tr><td>搜索</td><td>输入即过滤 name/id（不含匹配内容），页码重置为 1</td><td>空结果显示「暂无数据」单行。</td></tr>
+        <tr><td>状态筛选</td><td>全部状态/启用/禁用；「启用」排除已过期</td><td>切换重置页码。</td></tr>
+        <tr><td>行选中</td><td>勾选后行底色浅蓝，工具栏出现「删除选中(N)」；表头复选框全选当前页</td><td>不支持跨页选（demo 全选仅当前页 paginatedRules）。</td></tr>
+        <tr><td>行内启停/复制</td><td>更多菜单「禁用/启用」即时切换并刷新 updatedAt；「复制规则」追加「{名称} (副本)」新规则</td><td>无二次确认。</td></tr>
+        <tr><td>新建/编辑</td><td>打开 920px 抽屉；编辑态预填；右侧「当前配置效果」随表单实时联动</td><td>详见层级2/3 子文件。</td></tr>
+        <tr><td>保存空表单</td><td>显示字段级红字错误，抽屉保持打开（showErrors=true 后错误实时消隐）</td><td>校验通过则写回列表并关闭抽屉。</td></tr>
+        <tr><td>正则校验</td><td>matchType=regex 时输入实时 <code>new RegExp()</code> 校验，非法显示「正则表达式语法错误，请检查」+ textarea 红框</td><td>切换回关键词类型自动清除错误。</td></tr>
+        <tr><td>模拟测试</td><td>输入测试文本 + 点击测试：命中→红底「匹配成功，将执行{动作}动作」；未命中→绿底「未匹配到内容，邮件将正常放行」；文本或匹配内容为空→「请输入测试文本和匹配内容」</td><td>keyword 按 | 拆分 some(includes)；regex 按 RegExp.test；内容组按 includes。</td></tr>
+        <tr><td>取消/关闭</td><td>有更改时弹「确认取消」；「放弃更改」关闭抽屉、「继续编辑」留在抽屉；无更改直接关闭</td><td>Sheet 遮罩关闭同样受 hasChanges 拦截。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="i18n">
+    <h2>7. 国际化规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>语言</th><th>demo 覆盖</th><th>缺口</th></tr></thead>
+      <tbody>
+        <tr><td>中文 zh</td><td>完整覆盖</td><td>重置/导出为纯图标按钮，无可见文字与 aria-label</td></tr>
+        <tr><td>英文 en</td><td>模块内联 L 对象 + <code>getMatchTypeMetadata/getScopeMetadata/getRuleActionMetadata/getDirectionMetadata(language)</code> 覆盖</td><td>行内菜单「禁用/启用/复制规则/删除」、编辑 Tooltip「编辑」为硬编码中文；<code>formatDate</code> 固定 zh-CN 且「永久」硬编码</td></tr>
+        <tr><td>泰语 th</td><td>同上三处元数据与 L 对象覆盖</td><td>同上</td></tr>
+        <tr><td>第4语言</td><td>缺失</td><td>implement.md 要求四种内置语言，demo 仅 zh/en/th，见 Q7</td></tr>
+      </tbody>
+    </table>
+    <h4>主要 i18n key（模块内联 LABELS，非全局 t()；流水线层为全局 key）</h4>
+    <table class="spec-table">
+      <thead><tr><th>key（示意）</th><th>中文文案</th><th>使用位置</th></tr></thead>
+      <tbody>
+        <tr><td>pipeline.contentRules / pipeline.phase3Content / pipeline.configBtn</td><td>内容规则 / 阶段3: 内容层 / 配置</td><td>流水线卡片与抽屉头（全局 t()）</td></tr>
+        <tr><td>L.searchPlaceholder</td><td>搜索规则ID或名称...</td><td>列表搜索框</td></tr>
+        <tr><td>L.ruleId / ruleName / matchType / action / scope / status / expireTime / operation</td><td>规则ID / 规则名称 / 匹配类型 / 执行动作 / 作用域 / 状态 / 到期时间 / 操作</td><td>表头</td></tr>
+        <tr><td>L.all / enabled / disabled / expired / expiringSoon</td><td>全部状态 / 启用 / 禁用 / 已过期 / 即将到期</td><td>状态筛选与状态 Badge</td></tr>
+        <tr><td>L.createRule / batchImport / export / deleteSelected</td><td>新建规则 / 批量导入 / 导出 / 删除选中</td><td>工具栏</td></tr>
+        <tr><td>L.total / items / goToPage / page / itemsPerPage / noData</td><td>共 / 条 / 前往 / 页 / 条/页 / 暂无数据</td><td>分页与空态</td></tr>
+        <tr><td>L.deleteConfirmTitle / batchDeleteTitle / cancelConfirmTitle 等</td><td>确认删除规则 / 批量删除规则 / 确认取消 等</td><td>三个 AlertDialog</td></tr>
+        <tr><td>MatchType/Scope/Action/Direction 元数据 label</td><td>关键词·正则表达式·内容组 / 主题·正文·信头·附件名称·附件内容 / 阻断·阻断+告警·隔离·审核·标记 / 接收·外发·域内</td><td>Badge、下拉、复选框</td></tr>
+        <tr><td>抽屉 L.title / subtitle / basicSettings / matchCondition / actionSection / remarkTitle / currentEffect / viewExamples / simulateTest / configTips / tip1-5 / err* / matchSuccess / matchFail 等</td><td>见层级2/3 子文件元素表</td><td>规则编辑抽屉</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="responsive">
+    <h2>8. 响应式规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>断点</th><th>浏览器验证</th><th>表现</th></tr></thead>
+      <tbody>
+        <tr><td>1440px</td><td>默认截图</td><td>抽屉 80vw=1152px；左导航 208px（可折叠至 56px，折叠按钮悬浮在导航右缘）；表格全列展示。</td></tr>
+        <tr><td>1024px</td><td>已截图 + DOM 实测</td><td>抽屉 80vw≈819px，导航实测 207px，无横向滚动（hasHScroll=false）；表格列压缩但完整；编辑抽屉 920px 超出视口按 max-width 处理。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/responsive-1024-default.png" alt="1024px 流水线默认态">
+      <figcaption>1024px 流水线默认态。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/responsive-1024-drawer.png" alt="1024px 内容策略抽屉">
+      <figcaption>1024px 内容策略抽屉：80vw≈819px，导航与表格均可用。</figcaption>
+    </figure>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>9. 与 PRD / 源码 / 浏览器渲染的差异标注</h2>
+    <table class="spec-table">
+      <thead><tr><th>#</th><th>差异点</th><th>spec/PRD 描述</th><th>demo 实际</th><th>建议处理</th></tr></thead>
+      <tbody>
+        <tr><td>D1</td><td>阶段3子策略数量</td><td>策略流水线需求文档：阶段3内容层「3个子策略」（附件安全、URL防护、内容规则）</td><td>demo 阶段3 有 4 张卡：附件安全检测、URL检测与防护、内容规则、意图引擎（0708 PRD §1.3 流程图亦含意图引擎）</td><td>以 demo/0708 PRD 为准，策略流水线文档未更新。</td></tr>
+        <tr><td>D2</td><td>优先级语义自相矛盾</td><td>0708 PRD：数字越小越先匹配；网关统一规则系统：数值越大越优先</td><td>列表按数值降序排序 + 配置提示「数值越大优先级越高」，但编辑抽屉优先级 Tooltip 与 hint 写「数值越小优先级越高」</td><td>落地统一为「数值越大越优先」（网关定义），修正抽屉文案。</td></tr>
+        <tr><td>D3</td><td>应用配置示例不清除正则错误</td><td>—（spec 未覆盖）</td><td>浏览器实测：先输入非法正则触发错误，再点示例「应用」填入合法正则 <code>\d{17}[\dXx]</code>，红字「正则表达式语法错误，请检查」与红框仍残留（applyExample 未重算 regexError），且该残留错误会让保存校验失败</td><td>落地需在应用示例时重新校验/清除 regexError。</td></tr>
+        <tr><td>D4</td><td>校验时机</td><td>策略流水线需求文档：名称为空则「保存按钮置灰」；PRD §4.1 规则名 1–50 字符、禁 <code>&lt; &gt; &amp; "</code>、重名拦截</td><td>保存按钮始终可点，点击后才显示红字；无长度/字符/重名校验</td><td>以 demo 交互为准（点击后显红字），但长度/字符/重名校验需落地补齐。</td></tr>
+        <tr><td>D5</td><td>批量操作范围</td><td>PRD §3.4：批量启用/禁用/删除 + 跨页选 + 部分成功反馈</td><td>仅批量删除；全选只作用当前页；无部分成功弹窗</td><td>需确认是否补批量启停与跨页选。</td></tr>
+        <tr><td>D6</td><td>优先级列与拖拽排序</td><td>PRD F2：列表支持拖拽排序；D区含优先级列</td><td>列表无优先级列、无拖拽手柄，优先级仅在编辑抽屉数字输入</td><td>需确认列表是否补优先级列/拖拽。</td></tr>
+        <tr><td>D7</td><td>导入/导出无实现</td><td>PRD 数据迁移支持 JSON 导入/导出</td><td>批量导入、导出按钮无任何点击处理</td><td>需确认格式与交互后补齐。</td></tr>
+        <tr><td>D8</td><td>抽屉尺寸</td><td>策略流水线需求文档：配置抽屉固定 480px；0708 PRD：创建/编辑抽屉 640px</td><td>内容策略抽屉 80vw、规则编辑抽屉 920px</td><td>以 demo 为准记录。</td></tr>
+        <tr><td>D9</td><td>行点击详情</td><td>0708 PRD §3.2：点击数据行打开只读详情抽屉（480px）</td><td>行点击无反应，仅编辑图标/菜单可操作</td><td>需确认是否要只读详情态。</td></tr>
+        <tr><td>D10</td><td>per-direction 动作 vs 统一动作</td><td>—（spec 未覆盖）</td><td>数据模型支持三方向独立 action/tag/notify*（mock 数据有体现），编辑抽屉只提供一个统一动作下拉（应用于所有勾选方向）；mark 的 tag、notifyAdmin/notifySender 无编辑入口</td><td>编辑能力弱于数据模型，落地取舍见 Q5。</td></tr>
+        <tr><td>D11</td><td>i18n 硬编码</td><td>implement.md 四语要求</td><td>行内菜单（禁用/启用/复制规则/删除）、编辑 Tooltip「编辑」、formatDate(zh-CN)/「永久」硬编码中文；仅 zh/en/th 三语</td><td>落地统一走 i18n 资源，补第4语言（Q7）。</td></tr>
+        <tr><td>D12</td><td>保存无持久化</td><td>PRD：保存成功 Toast、配置 30s 内生效</td><td>「保存配置」仅清除前端脏标记；规则 CRUD 仅内存 state，刷新即失；无 Toast</td><td>demo 原型限制，落地接统一规则系统 API。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>10. 需确认事项</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>问题</th><th>影响</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td>「内容组」（content_group）的数据源是什么？是否对接 PRD §5.1 全局对象库并提供选择器（demo 目前是纯文本输入）？</td><td>影响匹配类型第三项的表单控件与后端词库 API。</td></tr>
+        <tr><td>Q2</td><td>「审核 review」是否已有统一规则系统 action？若没有，是否映射为隔离队列 + 人工审核标签？</td><td>影响动作落地与邮件处理链路。</td></tr>
+        <tr><td>Q3</td><td>「标记 mark」按 implement.md 应映射为统一规则系统 accept + 添加特定 header；mock 数据的 tag（如 [广告]）是写入 Subject 前缀还是 header？编辑抽屉是否需要补 tag 输入框？</td><td>影响动作映射与表单字段。</td></tr>
+        <tr><td>Q4</td><td>「附件内容」作用域依赖文档解析（配置提示第4条）——网关侧由 attachd 深度附件扫描承接是否可行？支持哪些文档类型？</td><td>影响作用域可选项的实际能力边界。</td></tr>
+        <tr><td>Q5</td><td>数据模型支持每方向独立动作（receive/send/internal 各自 action），但编辑 UI 是统一动作下拉。落地按统一动作（简化，一条规则一个动作 × 多方向）还是补 per-direction 动作编辑？若统一规则系统一条规则只支持单方向，是否拆成多条底层规则？</td><td>影响数据结构、统一规则系统映射与编辑抽屉布局。</td></tr>
+        <tr><td>Q6</td><td>优先级文案矛盾（D2）：确认统一为网关定义「数值越大越优先」，并同步修正编辑抽屉 Tooltip/hint 文案与 PRD 描述？</td><td>影响规则引擎排序与全部相关文案。</td></tr>
+        <tr><td>Q7</td><td>四语国际化的第4种语言是哪一种？</td><td>影响 i18n key 清单和验收范围。</td></tr>
+        <tr><td>Q8</td><td>批量导入/导出的文件格式（CSV/JSON）与字段定义？是否本期实现？</td><td>影响工具栏两个按钮的落地范围。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    if (window.mermaid) { mermaid.initialize({ startOnLoad: true }); }
+
+    // 2.1 策略卡 hover Tooltip（复刻 demo 300ms 延迟）
+    const card = document.querySelector("[data-card]");
+    const cardTooltip = document.querySelector("[data-card-tooltip]");
+    let tooltipTimer = null;
+    card?.addEventListener("mouseenter", () => {
+      tooltipTimer = setTimeout(() => { cardTooltip.style.display = "block"; }, 300);
+    });
+    card?.addEventListener("mouseleave", () => {
+      clearTimeout(tooltipTimer);
+      cardTooltip.style.display = "none";
+    });
+
+    // 2.2 模块启停 Switch
+    const policySwitch = document.querySelector("[data-policy-switch]");
+    const policyLabel = document.querySelector("[data-policy-label]");
+    const policyBody = document.querySelector("[data-policy-body]");
+    const unsaved = document.querySelector("[data-unsaved]");
+    policySwitch?.addEventListener("click", () => {
+      const off = policySwitch.classList.toggle("off");
+      policySwitch.setAttribute("aria-checked", String(!off));
+      policyLabel.textContent = off ? "已禁用" : "已启用";
+      policyLabel.style.color = off ? "#6b7280" : "#155eef";
+      policyBody.classList.toggle("panel-dim", off);
+      unsaved.classList.remove("is-hidden");
+    });
+    document.querySelector("[data-save-config]")?.addEventListener("click", () => unsaved.classList.add("is-hidden"));
+
+    // 2.2 搜索 + 状态筛选 + 重置（复刻 demo：搜 name/id，状态筛选，空态行）
+    const search = document.querySelector("[data-preview-search]");
+    const statusFilter = document.querySelector("[data-status-filter]");
+    const resetBtn = document.querySelector("[data-preview-reset]");
+    const ruleBody = document.querySelector("[data-rule-body]");
+    const emptyRow = document.querySelector("[data-empty-row]");
+    const totalLabel = document.querySelector("[data-total-label]");
+    function filterRows() {
+      const term = (search.value || "").trim().toLowerCase();
+      const status = statusFilter.value;
+      let visible = 0;
+      ruleBody.querySelectorAll("tr").forEach((row) => {
+        const matchTerm = term === "" || row.dataset.searchText.toLowerCase().includes(term);
+        const matchStatus = status === "all" || row.dataset.status === status;
+        const show = matchTerm && matchStatus;
+        row.classList.toggle("is-hidden", !show);
+        if (show) visible += 1;
+      });
+      emptyRow.classList.toggle("is-hidden", visible > 0);
+      totalLabel.textContent = (term === "" && status === "all") ? "共 16 条" : `共 ${visible} 条（预览裁剪为前4行）`;
+    }
+    search?.addEventListener("input", filterRows);
+    statusFilter?.addEventListener("change", filterRows);
+    resetBtn?.addEventListener("click", () => { search.value = ""; statusFilter.value = "all"; filterRows(); });
+
+    // 2.2 行选中 → 删除选中(N)
+    const batchBtn = document.querySelector("[data-batch-delete]");
+    const countEl = document.querySelector("[data-selected-count]");
+    function syncSelection() {
+      const checks = [...document.querySelectorAll("[data-row-check]")];
+      const n = checks.filter((c) => c.checked).length;
+      checks.forEach((c) => c.closest("tr").classList.toggle("selected", c.checked));
+      countEl.textContent = n;
+      batchBtn.classList.toggle("is-hidden", n === 0);
+    }
+    document.querySelectorAll("[data-row-check]").forEach((c) => c.addEventListener("change", syncSelection));
+    batchBtn?.addEventListener("click", () => { location.href = "layer-3-dialogs.html#batch-delete"; });
+
+    // 2.2 行内更多菜单
+    document.querySelectorAll("[data-row-more]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const pop = btn.parentElement.querySelector(".row-menu-pop");
+        const open = pop.style.display === "block";
+        document.querySelectorAll(".row-menu-pop").forEach((p) => p.style.display = "none");
+        pop.style.display = open ? "none" : "block";
+      });
+    });
+    document.addEventListener("click", () => document.querySelectorAll(".row-menu-pop").forEach((p) => p.style.display = "none"));
+    document.querySelectorAll("[data-menu-toggle]").forEach((item) => {
+      item.addEventListener("click", () => {
+        const row = item.closest("tr");
+        const pill = row.querySelector("td:nth-child(7) .pill");
+        const nowEnabled = item.textContent.trim() === "启用";
+        item.textContent = nowEnabled ? "禁用" : "启用";
+        pill.textContent = nowEnabled ? "启用" : "禁用";
+        pill.className = nowEnabled ? "pill green" : "pill gray";
+        row.dataset.status = nowEnabled ? "enabled" : "disabled";
+      });
+    });
+
+    // 2.2 分页按钮切换 active 态（预览仅演示状态变化）
+    document.querySelectorAll("[data-page-btn]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-page-btn]").forEach((b) => b.classList.toggle("active", b === btn));
+      });
+    });
+  </script>
+</body>
+</html>

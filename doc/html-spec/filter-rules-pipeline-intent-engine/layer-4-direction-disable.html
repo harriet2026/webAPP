@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 4：方向切换与禁用态 - 意图引擎</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --sub:#6b7280; --blue:#1677ff; --radius:.625rem; }
+    *{box-sizing:border-box} body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:#111827;line-height:1.6;font-family:"Geist","Inter",system-ui,sans-serif} a{color:var(--blue);text-decoration:none}
+    nav.layer-nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+    h1{margin:0 0 16px;color:var(--primary);font-size:26px} h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px}
+    .meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+    .meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}
+    .meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}
+    .meta-table td:first-child{width:160px}
+    .component-preview{margin:12px 0;padding:18px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}
+    .screenshot-figure{margin:14px 0;text-align:center}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}.screenshot-figure figcaption{margin-top:8px;color:var(--sub);font-size:13px}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}
+    .is-hidden{display:none!important}
+    .demo-box{min-width:680px;border:1px solid var(--border);border-radius:10px;background:#fff;overflow:hidden}
+    .head{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border)}
+    .head h3{margin:0;font-size:16px}
+    .switch{position:relative;display:inline-block;width:36px;height:20px;border-radius:999px;background:#2563eb;cursor:pointer;transition:background .15s;vertical-align:middle}
+    .switch::after{content:"";position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:999px;background:#fff;transition:left .15s}
+    .switch.off{background:#d1d5db}.switch.off::after{left:2px}
+    .body{padding:16px 18px;transition:opacity .2s}
+    .body.dimmed{opacity:.5;pointer-events:none}
+    .dir-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border-radius:10px;background:#f3f4f6;margin-bottom:12px}
+    .dir-tab{padding:6px 0;border:0;border-radius:8px;background:transparent;font-size:14px;font-weight:600;color:#6b7280;cursor:pointer}
+    .dir-tab.active{background:#fff;color:#111827;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+    .dir-banner{display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:12px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;color:#1d4ed8;font-size:13px}
+    .pill{display:inline-flex;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:650;background:#f3f4f6}
+    .pill.act-mark{background:#dbeafe;color:#1d4ed8}.pill.act-quarantine{background:#ffedd5;color:#c2410c}.pill.act-review{background:#f3e8ff;color:#7e22ce}.pill.act-block{background:#fee2e2;color:#b91c1c}.pill.act-drop{background:#fecaca;color:#7f1d1d}
+    select.sel{min-width:128px;height:34px;padding:0 8px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:13px}
+    .mini{font-size:13px;color:#4b5563}
+  </style>
+</head>
+<body>
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a> · <a href="layer-3-dialogs.html">← 层级3：对话框</a> · 层级 4 / 4</nav>
+
+  <header class="spec-header">
+    <h1>交互层级 4：方向切换（外发/域内）与总开关/单卡禁用态</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.2 方向 Tab / 策略总开关（<code>IntentEngineModule</code> + <code>ContentStrategyPage</code>）</td></tr>
+      <tr><td>主文件</td><td><a href="index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级0 → 点击「外发方向」/「域内方向」Tab；抽屉卡片头 Switch</td></tr>
+      <tr><td>浏览器验证</td><td>切外发方向：出现蓝色提示条「外发方向不支持"标记投递"动作，相关配置将自动降级为"隔离"」，展开的意图卡全部收起（实测 radiogroup 数量 0），风险面板开合保留。外发垃圾卡默认动作=审核；动作下拉实测 4 项：隔离/审核/阻断/丢弃（无标记投递）。域内方向提示条文案为「域内方向不支持…」。总开关关闭：文字变「已禁用」，内容区实测 class <code>opacity-50 pointer-events-none</code>，保存栏仍可点。</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">4</span>HTML 预览（可操作：方向 Tab / 总开关 / 动作集联动）</h2>
+    <div class="component-preview">
+      <div class="demo-box" data-demo-extracted="direction-and-disable">
+        <div class="head">
+          <h3>意图引擎</h3>
+          <span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;">
+            <span id="en-label" style="color:#2563eb;">已启用</span>
+            <span class="switch" id="en-switch" role="switch" aria-checked="true"></span>
+          </span>
+        </div>
+        <div class="body" id="dim-body">
+          <div class="dir-tabs" role="tablist">
+            <button class="dir-tab active" data-dir="receive" type="button">接收方向</button>
+            <button class="dir-tab" data-dir="send" type="button">外发方向</button>
+            <button class="dir-tab" data-dir="internal" type="button">域内方向</button>
+          </div>
+          <div class="dir-banner is-hidden" id="banner">ⓘ <span id="banner-text"></span></div>
+          <table class="spec-table" style="margin:0;">
+            <thead><tr><th>意图</th><th>默认动作（当前方向）</th><th>可选动作集</th></tr></thead>
+            <tbody id="act-table"></tbody>
+          </table>
+          <p class="mini" style="margin:10px 0 0;">动作下拉实例（跟随方向过滤）：
+            <select class="sel" id="demo-select"></select>
+          </p>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/direction-layer-4-send.png" alt="外发方向">
+      <figcaption>外发方向：蓝色提示条出现；展开的意图卡收起；风险面板开合状态保留（高危面板仍展开）。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/direction-layer-4-send-actions.png" alt="外发方向动作下拉">
+      <figcaption>外发方向垃圾卡展开：默认动作=审核；下拉仅 隔离/审核/阻断/丢弃 4 项，无标记投递（TC-IE-024 验证通过）。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/direction-layer-4-internal.png" alt="域内方向">
+      <figcaption>域内方向：提示条文案「域内方向不支持"标记投递"动作，相关配置将自动降级为"隔离"」。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/drawer-disabled-state.png" alt="总开关禁用态">
+      <figcaption>总开关关闭：「已禁用」灰色文字，内容区半透明不可点（opacity-50 pointer-events-none），保存栏在禁用容器之外仍可用。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>行为规则</h2>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>实际行为（浏览器验证）</th><th>PRD 对照</th></tr></thead>
+      <tbody>
+        <tr><td>切换方向 Tab</td><td>direction state 切换；<code>setExpandedIntent(null)</code> 收起所有展开卡；各方向配置独立（receive/send/internal 三份 DirectionIntentConfig）</td><td>§3.1「切换显示对应方向的配置，收起所有展开的意图卡片」一致</td></tr>
+        <tr><td>方向提示条</td><td>direction≠receive 时渲染，文案按方向替换「外发/域内」</td><td>§2.2.1 一致（TC-IE-025 通过）</td></tr>
+        <tr><td>动作集过滤</td><td>接收 RECEIVE_ACTIONS 5 项；外发/域内 SEND_INTERNAL_ACTIONS 4 项（分类优先下拉与阈值区间动作下拉同规则）</td><td>§3.3 一致</td></tr>
+        <tr><td>方向默认动作</td><td>接收：高危=隔离 中危=隔离 低危=标记投递；外发/域内：高危=阻断 中危=审核 低危=审核</td><td>PRD 未定义具体默认值，以 demo 为准</td></tr>
+        <tr><td>面板开合状态</td><td>随方向切换保留（RiskLevelPanel 本地 state，不重置）</td><td>PRD 未提及，demo 附加行为</td></tr>
+        <tr><td>总开关关闭</td><td>「已禁用」+ 内容区 opacity-50 pointer-events-none；左导航摘要变「未启用」、状态圆点变灰描边；保存配置按钮仍可点击</td><td>§3.2/§4.2 一致（TC-IE-031 通过）</td></tr>
+        <tr><td>单意图开关关闭</td><td>卡片展开体半透明禁点，头部仍可展开收起（见层级1截图）</td><td>§3.2/§4.2 一致（TC-IE-032 通过）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>方向 Tab</td><td><code>[role=tablist].grid-cols-3</code>；点击外发后 data-state=active 迁移</td><td>3 tab 等宽 grid，active 高亮迁移</td><td>一致</td></tr>
+        <tr><td>提示条</td><td>外发实测「外发方向不支持"标记投递"动作，相关配置将自动降级为"隔离"」，bg-blue-50 + Info 图标；域内文案首词替换</td><td>同文案同条件渲染</td><td>一致</td></tr>
+        <tr><td>展开卡收起</td><td>切方向后 [role=radiogroup] 数量 0（无展开卡）</td><td>预览切方向后收起演示区</td><td>一致</td></tr>
+        <tr><td>外发动作集</td><td>[role=listbox] 选项实测 [隔离, 审核, 阻断, 丢弃]</td><td>下拉按方向重建选项</td><td>一致</td></tr>
+        <tr><td>总开关</td><td>[role=switch] data-state checked→unchecked；「已启用」→「已禁用」；dim 容器 class 实测 <code>flex-1 overflow-y-auto … opacity-50 pointer-events-none</code></td><td>预览同步 label/半透明</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="layer-nav"><a href="layer-3-dialogs.html">← 层级3：对话框</a> · <a href="index.html#component-2-3">返回主文件</a></nav>
+
+  <script>
+    // 方向 → 默认动作与动作集（复刻 demo createIntentDefaults / RECEIVE_ACTIONS / SEND_INTERNAL_ACTIONS）
+    const ACT = { mark_deliver:["标记投递","act-mark"], quarantine:["隔离","act-quarantine"], review:["审核","act-review"], block:["阻断","act-block"], drop:["丢弃","act-drop"] };
+    const SETS = { receive:["mark_deliver","quarantine","review","block","drop"], send:["quarantine","review","block","drop"], internal:["quarantine","review","block","drop"] };
+    const DEFAULTS = {
+      receive:{ "涉黄/赌":"quarantine","涉政/反动":"quarantine","钓鱼":"quarantine","垃圾":"quarantine","订阅":"mark_deliver" },
+      send:{ "涉黄/赌":"block","涉政/反动":"block","钓鱼":"block","垃圾":"review","订阅":"review" },
+      internal:{ "涉黄/赌":"block","涉政/反动":"block","钓鱼":"block","垃圾":"review","订阅":"review" },
+    };
+    const banner = document.getElementById("banner");
+    const bannerText = document.getElementById("banner-text");
+    const actTable = document.getElementById("act-table");
+    const demoSelect = document.getElementById("demo-select");
+
+    function renderDir(dir) {
+      banner.classList.toggle("is-hidden", dir === "receive");
+      bannerText.textContent = (dir === "send" ? "外发" : "域内") + '方向不支持"标记投递"动作，相关配置将自动降级为"隔离"';
+      actTable.innerHTML = Object.entries(DEFAULTS[dir]).map(([name, act]) =>
+        `<tr><td>${name}</td><td><span class="pill ${ACT[act][1]}">${ACT[act][0]}</span></td><td>${SETS[dir].map(a=>ACT[a][0]).join(" / ")}</td></tr>`).join("");
+      demoSelect.innerHTML = SETS[dir].map(a => `<option>${ACT[a][0]}</option>`).join("");
+    }
+    document.querySelectorAll(".dir-tab").forEach(tab => tab.addEventListener("click", () => {
+      document.querySelectorAll(".dir-tab").forEach(t => t.classList.toggle("active", t === tab));
+      renderDir(tab.dataset.dir); // demo 同时 setExpandedIntent(null)
+    }));
+    renderDir("receive");
+
+    // 总开关：已启用/已禁用 + 半透明
+    const sw = document.getElementById("en-switch");
+    const label = document.getElementById("en-label");
+    sw.addEventListener("click", () => {
+      const off = sw.classList.toggle("off");
+      sw.setAttribute("aria-checked", String(!off));
+      label.textContent = off ? "已禁用" : "已启用";
+      label.style.color = off ? "#6b7280" : "#2563eb";
+      document.getElementById("dim-body").classList.toggle("dimmed", off);
+    });
+  </script>
+</body>
+</html>

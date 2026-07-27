@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 3：条件配置 Tab - 高级过滤规则</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --border: oklch(0.922 0 0); --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0); --radius: 0.625rem; --font-sans: "Geist", system-ui, sans-serif; --font-mono: "Geist Mono", monospace; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { margin: 0 auto; max-width: 1320px; padding: 2rem; font-family: var(--font-sans); background: var(--background); color: #1f2937; line-height: 1.6; }
+    .layer-nav, header, section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+    .layer-nav { display: flex; justify-content: space-between; }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1 { color: var(--primary); font-size: 1.3rem; margin-bottom: 0.75rem; }
+    h2 { font-size: 1.1rem; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.4rem; margin-bottom: 1rem; }
+    h4 { margin: 0.9rem 0 0.5rem; }
+    table.spec-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.84rem; }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 0.5rem 0.65rem; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); white-space: nowrap; }
+    img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    figure { margin: 1rem 0; text-align: center; }
+    figcaption { font-size: 0.8rem; color: var(--muted-foreground); margin-top: 0.4rem; }
+    code { font-family: var(--font-mono); font-size: 0.85em; background: var(--muted); padding: 0.1em 0.35em; border-radius: 4px; }
+    .pass { color: #15803d; font-weight: 700; }
+    .component-preview { border: 2px dashed oklch(0.75 0.1 262); border-radius: var(--radius); padding: 1.25rem; margin: 1rem 0; background: #f5f7fa; overflow-x: auto; }
+    .component-preview::before { content: "▶ 可交互组件预览（OR/AND 组切换、分类展开、点击 + 添加条件、配置面板、表达式实时预览均可操作）"; display: block; font-size: 0.75rem; color: var(--primary); margin-bottom: 0.9rem; font-weight: 600; }
+    .dom-comparison { background: oklch(0.97 0.02 150); border: 1px solid oklch(0.8 0.08 150); border-radius: var(--radius); padding: 0.75rem 1rem; margin: 0.75rem 0; }
+    .diffnote { border-left: 4px solid oklch(0.65 0.2 25); background: oklch(0.97 0.013 25); border-radius: 6px; padding: 0.6rem 0.9rem; margin: 0.75rem 0; font-size: 0.85rem; }
+
+    /* ===== 三栏条件编辑器预览 ===== */
+    .ce { display: grid; grid-template-columns: 280px 400px 1fr; gap: 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; min-height: 480px; }
+    .gbtn { width: 100%; text-align: left; border-radius: 10px; padding: 10px 12px; cursor: pointer; background: #fff; border: 1px solid #e5e7eb; margin-bottom: 8px; }
+    .gbtn .b { display: inline-block; border-radius: 6px; color: #fff; font-size: 11px; font-weight: 700; padding: 1px 8px; margin-right: 6px; }
+    .gbtn.or .b { background: #3b82f6; } .gbtn.and .b { background: #22c55e; }
+    .gbtn .n { font-weight: 600; font-size: 13.5px; }
+    .gbtn .c { display: block; font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .gbtn.or.on { border: 2px solid #3b82f6; background: #eff6ff; }
+    .gbtn.and.on { border: 2px solid #22c55e; background: #f0fdf4; }
+    .csearch { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 6px 9px 6px 28px; font-size: 12.5px; margin: 4px 0 8px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") no-repeat 8px center; }
+    .cat { font-size: 13px; }
+    .cat > .ct { display: flex; align-items: center; gap: 6px; width: 100%; border: 0; background: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+    .cat > .ct:hover { background: #f3f4f6; }
+    .cat .cnt { margin-left: auto; border: 1px solid #d1d5db; border-radius: 999px; font-size: 10.5px; padding: 0 7px; color: #374151; font-weight: 500; }
+    .cat .items { padding-left: 14px; display: none; max-height: 300px; overflow: auto; }
+    .cat.open .items { display: block; }
+    .citem { display: flex; align-items: center; gap: 6px; width: 100%; text-align: left; border: 0; background: none; padding: 5px 8px; font-size: 12.5px; border-radius: 6px; cursor: pointer; color: #1f2937; }
+    .citem:hover { background: #f3f4f6; }
+    .citem.env { background: #f3f4f6; font-weight: 600; }
+    .citem .plus { color: #9ca3af; font-weight: 700; }
+    .mid { border-left: 1px solid #f3f4f6; border-right: 1px solid #f3f4f6; padding: 0 14px; }
+    .mid .empty { color: #6b7280; font-size: 13px; text-align: center; margin-top: 160px; }
+    .mid .ptitle { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .mid .tbadge { margin-left: auto; border: 1px solid #d1d5db; border-radius: 6px; font-size: 11px; padding: 1px 7px; font-family: var(--font-mono); color: #374151; font-weight: 400; }
+    .mid .smtp { background: #374151; color: #fff; border-radius: 4px; font-size: 10px; padding: 1px 5px; }
+    .desc-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 9px 12px; font-size: 12px; color: #166534; margin-bottom: 12px; }
+    .desc-card b { display: block; margin-bottom: 2px; }
+    .mid label.fl { display: block; font-size: 12.5px; margin: 10px 0 4px; color: #374151; }
+    .mid select, .mid input[type=text], .mid input[type=number], .mid input[type=time], .mid textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 7px 9px; font-size: 12.5px; font-family: inherit; }
+    .mid .chk { display: inline-flex; align-items: center; gap: 5px; margin: 10px 14px 0 0; font-size: 12.5px; cursor: pointer; }
+    .aibtn { display: none; margin-top: 8px; border: 1px solid #c7d2fe; background: #eef2ff; color: #4338ca; border-radius: 8px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
+    .aibtn.show { display: inline-block; }
+    .daywrap span { display: inline-block; border: 1px solid #d1d5db; border-radius: 6px; padding: 2px 10px; font-size: 12px; margin: 3px 4px 0 0; cursor: pointer; user-select: none; }
+    .daywrap span.on { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+    .prev { font-size: 12.5px; }
+    .prev .ph { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; margin-bottom: 10px; }
+    .prev .empty { color: #9ca3af; text-align: center; margin-top: 150px; font-size: 12.5px; }
+    .pcard { border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+    .pcard.or { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .pcard.and { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .pcard .gh { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; margin-bottom: 6px; }
+    .pcard.or .gh { color: #1d4ed8; } .pcard.and .gh { color: #15803d; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .pcard.or .dot { background: #3b82f6; } .pcard.and .dot { background: #22c55e; }
+    .pcard .brief { border-left: 2px solid #bfdbfe; padding-left: 8px; }
+    .pcard.and .brief { border-left-color: #bbf7d0; }
+    .brief .op { color: #2563eb; margin: 0 3px; }
+    .brief .conn { color: #3b82f6; font-size: 11px; padding: 1px 0 1px 14px; }
+    .pcard.and .brief .conn { color: #16a34a; }
+    .brief .inc { color: #d97706; font-size: 11px; margin-left: 4px; }
+    .andconn { text-align: center; margin: 6px 0; }
+    .andconn span { background: #f3f4f6; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 2px 10px; color: #374151; }
+    .fullx { margin-top: 12px; border-top: 1px solid #f3f4f6; padding-top: 8px; }
+    .fullx .t { color: #6b7280; font-size: 11.5px; margin-bottom: 5px; }
+    .fullx pre { background: #f9fafb; border: 1px solid #f3f4f6; border-radius: 8px; padding: 8px 10px; font-family: var(--font-mono); font-size: 11.5px; white-space: pre-wrap; word-break: break-all; color: #1f2937; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-2">← 返回主文件</a>
+    <span><a href="./layer-2-edit-basic.html">← 层级 2</a>　<a href="./layer-4-actions.html">层级 4：处置策略 →</a></span>
+  </nav>
+
+  <header>
+    <h1>交互层级 3：条件配置 Tab（三栏编辑器）</h1>
+    <table class="spec-table">
+      <tr><td style="width:120px"><b>所属组件</b></td><td>3.2 规则编辑抽屉 → 条件配置 Tab（共享组件 <code>ConditionsEditor</code>，同套组件被群组策略「特征组」复用）</td></tr>
+      <tr><td><b>主文件</b></td><td><a href="./index.html">filter-rules-pipeline-advanced-rules/index.html</a></td></tr>
+      <tr><td><b>触发路径</b></td><td>层级2 抽屉内点击「条件配置」Tab</td></tr>
+      <tr><td><b>demo 源</b></td><td><code>ConditionsEditor</code> L2818-2928 / <code>ConditionSelector</code> L1429-1557 / <code>ConditionConfigPanel</code> L1566-2669 / <code>ExpressionPreview</code> L2678-2801；条件库 <code>getConditionCategories</code> L293-557</td></tr>
+      <tr><td><b>布局</b></td><td>三栏 grid <code>[280px_400px_1fr]</code>，高 <code>calc(100vh-280px)</code>：左=组切换+条件树；中=选中条件配置面板；右=逻辑表达式预览</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h2>可交互组件预览</h2>
+    <div class="component-preview">
+      <div class="ce">
+        <div class="left">
+          <button class="gbtn or on" id="gOr"><span class="b">OR</span><span class="n">匹配任意条件</span><span class="c">已添加 <b id="cOr">0</b> 个条件</span></button>
+          <button class="gbtn and" id="gAnd"><span class="b">AND</span><span class="n">匹配所有条件</span><span class="c">已添加 <b id="cAnd">0</b> 个条件</span></button>
+          <input class="csearch" id="csearch" placeholder="搜索条件...">
+          <div id="cats"></div>
+        </div>
+        <div class="mid" id="mid"><div class="empty">ⓘ 选择一个条件进行配置</div></div>
+        <div class="prev">
+          <div class="ph">📄 逻辑表达式预览</div>
+          <div id="pv"><div class="empty">＋<br>添加条件后将自动生成逻辑表达式</div></div>
+        </div>
+      </div>
+      <p style="font-size:0.78rem;color:#92400e;background:#fef3c7;border-radius:6px;padding:0.45rem 0.7rem;margin-top:0.7rem">⚠ 与 demo 一致的行为细节：① 条件<b>只能添加</b>——加入后无选中/删除入口（<code>onRemoveCondition/onSelectCondition</code> 为死 props，重复点击会加重复条件，主文件 §9 D-13）；② 表达式预览用<b>短名称</b>（如「URL数量」）而条件树用长名称（「URL数量上限」）；③ 信封类条件在预览中显示原始类型标识；④ 选择类条件的中栏面板本预览以「说明卡+结果下拉」概括呈现，逐条件的枚举差异见下方 54 条件总表。</p>
+    </div>
+
+    <figure><img src="./screenshots/layer3-conditions-default.png" alt="条件配置默认态"><figcaption>默认态：OR 组激活（蓝框），「邮件基础信息 (18)」默认展开（Badge 实算 19，计数矛盾 D-1 可视证据），中栏占位「选择一个条件进行配置」，右栏空态。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-text-condition-panel.png" alt="文本类条件面板"><figcaption>点击「主题」→ 加入 OR 组并自动选中：中栏文本类面板（匹配方式/匹配值/区分大小写/排除匹配），右栏出现蓝色 OR 条件组卡。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-matchmode-open.png" alt="匹配方式下拉"><figcaption>匹配方式下拉实测仅 4 项：包含 / 等于 / 正则表达式 / 通配符（spec 写 6 种，D-2）。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-regex-ai-button.png" alt="AI 生成正则"><figcaption>选「正则表达式」→ 出现「AI 生成正则」按钮（Sparkles 图标）。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-and-group-active.png" alt="AND 组激活"><figcaption>点击 AND 组按钮 → 绿框激活，后续添加的条件进入 AND 组。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-numeric-condition-panel.png" alt="数值类面板"><figcaption>「安全检测 (21)」展开（Badge 22）→ 添加「URL数量上限」：数值类面板（比较方式=大于 + 阈值）。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-select-condition-panel.png" alt="选择类面板"><figcaption>添加「SPF结果」：选择类面板（认证结果下拉 pass/fail/softfail/none）。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-featuregroup-panel.png" alt="特征组面板"><figcaption>添加「属于特征组」：特征组下拉引用群组管理定义。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-featuregroup-options.png" alt="特征组选项"><figcaption>特征组选项来自共享 mock：钓鱼仿冒特征 / 恶意附件特征 / 批量营销特征（变更即时生效）。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-attachmenttype-panel.png" alt="附件类型面板"><figcaption>「附件类型(MIME)」专属面板：匹配方式 + 常用 MIME 快捷 Badge + 自定义 MIME。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-dayofweek-panel.png" alt="发信星期面板"><figcaption>「发信星期」面板：周一~周日 Badge 多选 + 排除匹配。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-expression-preview-full.png" alt="表达式预览"><figcaption>右栏：OR 蓝卡(1) + AND 连接符 + AND 绿卡(3)，未配值条件带橙色「[配置不完整]」；底部完整表达式等宽字体块。</figcaption></figure>
+    <figure><img src="./screenshots/layer3-condition-search.png" alt="条件搜索"><figcaption>条件搜索「附件」→ 三分类内仅剩 label 命中的条件按钮。</figcaption></figure>
+  </section>
+
+  <section>
+    <h2>UI 元素清单</h2>
+    <h4>左栏：组切换 + 条件选择树</h4>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>规格</th><th>行为</th></tr></thead>
+      <tbody>
+        <tr><td>OR 组按钮</td><td>「OR」蓝 Badge +「匹配任意条件」+「已添加 N 个条件」；激活=蓝色 2px 边框浅蓝底</td><td>激活后新增条件进 <code>anyConditions</code>（默认激活）</td></tr>
+        <tr><td>AND 组按钮</td><td>「AND」绿 Badge +「匹配所有条件」+ 计数；激活=绿色边框浅绿底</td><td>激活后新增条件进 <code>allConditions</code></td></tr>
+        <tr><td>条件搜索框</td><td>placeholder「搜索条件...」，Search 图标</td><td>按 label 不区分大小写过滤各分类内条件按钮（分类标题保留）</td></tr>
+        <tr><td>分类折叠项 ×3</td><td>Chevron 图标 + 分类名（括注硬编码计数）+ 右侧 Badge（实算计数）：邮件基础信息(18)/19、附件相关(13)/13、安全检测(21)/22</td><td>点击标题展开/收起；默认仅「邮件基础信息」展开</td></tr>
+        <tr><td>条件按钮 ×54</td><td>Plus 图标 + label；信封类（信封发信人/收信人(SMTP)）灰底加粗；title=条件 Tooltip（三语）</td><td>点击 → <code>createDefaultCondition</code> 加入当前激活组并自动选中；<b>无删除/重选入口（D-13）</b></td></tr>
+      </tbody>
+    </table>
+    <h4>中栏：条件配置面板（按条件类别动态渲染）</h4>
+    <table class="spec-table">
+      <thead><tr><th>面板类型</th><th>适用条件</th><th>字段</th></tr></thead>
+      <tbody>
+        <tr><td>文本类</td><td>发信人/收信人/主题/抄送/密送/正文/信头/信封发信人/信封收信人/关键词匹配/附件内容/附件名/附件MD5/URL/URL域名</td><td>匹配方式 Select（包含/等于/正则表达式/通配符——仅4项，D-2）；匹配值 Textarea（多值换行分隔）；区分大小写 Checkbox；排除匹配 Checkbox；正则时出现「AI 生成正则」按钮（Sparkles）</td></tr>
+        <tr><td>数值类</td><td>邮件附件数量上限/附件总大小/单个附件大小/嵌套压缩层级/嵌套文件数量/二维码数量上限/URL数量上限/相似域名检测(0-100)/15分钟内来源IP数/15分钟内收信人数/15分钟内发信数/当日发信数/15分钟内发信上限/收信人数量上限</td><td>比较方式 Select：大于/大于等于/小于/小于等于/<b>等于</b>（demo 无 spec 所写「介于」，见本页差异注）；阈值 Input number</td></tr>
+        <tr><td>选择/单选类</td><td>SPF结果(pass/fail/softfail/none)、DKIM结果(pass/fail)、DMARC结果(pass/fail/none)、PTR结果(match/mismatch/none)、RBL查询结果、URL沙箱结果(safe/suspicious/malicious)、短链接展开(+URL输入)、显示名仿冒、MAIL FROM为空、信封与信头一致性(富卡片UI)、病毒扫描结果、加密附件(存在/不存在)、图片二维码检测、压缩炸弹检测、意图引擎检测(分类+置信度阈值)</td><td>对应枚举 Select 或 RadioGroup（写入运行时字段 <code>selectedResult</code> 等）</td></tr>
+        <tr><td>群组/组织/特征组引用</td><td>发信人群组/发信人组织/发信IP组/发信国家/发信地区/属于特征组</td><td>对象下拉 + 排除 Checkbox；特征组选项动态来自群组管理（<code>useFeatureGroups</code>），变更即时生效</td></tr>
+        <tr><td>IP 类</td><td>发信IP地址</td><td>Textarea，支持 CIDR 格式，多值换行 + 排除</td></tr>
+        <tr><td>时间类</td><td>发信时间（起止 time Input）；发信星期（周一~周日 Badge 多选）</td><td>+ 排除匹配</td></tr>
+        <tr><td>附件类型(MIME) 专属</td><td>附件类型</td><td>匹配方式 + 20 个常用 MIME 快捷 Badge + 自定义 MIME Textarea + 已选类型展示 + 排除</td></tr>
+        <tr><td>面板公共部分</td><td>全部</td><td>标题行：[SMTP] 标签(信封类) + 条件名 + 类型标识 Badge（等宽字体，如 <code>urlCount</code>）；绿色条件说明卡（数据来源/用途/注意 三行）</td></tr>
+      </tbody>
+    </table>
+    <h4>右栏：逻辑表达式预览</h4>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>规格</th></tr></thead>
+      <tbody>
+        <tr><td>空态</td><td>＋ 图标 +「添加条件后将自动生成逻辑表达式」</td></tr>
+        <tr><td>OR 条件组卡</td><td>蓝底蓝框；头部蓝点 +「OR 条件组」+ 计数 Badge（title=「命中任意一个条件即触发规则（逻辑或）」）；条件简表左侧蓝竖线，条目间插「OR」连接字</td></tr>
+        <tr><td>组间连接符</td><td>两组均非空时中间灰底「AND」胶囊</td></tr>
+        <tr><td>AND 条件组卡</td><td>绿底绿框，同结构，条目间插「AND」</td></tr>
+        <tr><td>条件简表</td><td>短名称 + 蓝色操作符 + 值（&gt;2 值折叠「+N」）；后缀标记：橙「[配置不完整]」/「(NOT)」排除/「(Aa)」区分大小写；信封类显示原始类型标识</td></tr>
+        <tr><td>完整表达式</td><td>底部「完整表达式」+ 等宽字体块，格式 <code>((OR组))\nAND\n((AND组))</code>，任一组为空仅输出另一组</td></tr>
+      </tbody>
+    </table>
+    <div class="diffnote"><b>本层差异摘要</b>（详见主文件 §9）：D-1 分类计数三处矛盾（可视）；D-2 文本匹配方式仅 4 种；数值类无「介于(between)」但多「等于」（归入 D-2 匹配模式差异）；D-13 已选条件无选中/删除入口。</div>
+  </section>
+
+  <section>
+    <h2>54 种条件类型总表（demo <code>ConditionType</code> L46-65，三分类）</h2>
+    <table class="spec-table">
+      <thead><tr><th>分类</th><th>#</th><th>条件（树内 label）</th><th>类型 id</th><th>面板</th></tr></thead>
+      <tbody id="condTable"></tbody>
+    </table>
+    <p style="font-size:0.8rem;color:#6b7280">注：mock 规则中另出现 <code>senderAuth / mailSize / qrCodeDeepDetection</code> 3 个清单外遗留类型（D-11）。</p>
+  </section>
+
+  <section class="dom-comparison">
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM（Playwright 提取，Tab 面板总节点 280）</th><th>预览还原 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td>tabpanel &gt; 三栏 grid <code>[280px_400px_1fr]</code>（eval 实测 colCount=3）</td><td><code>.ce</code> 同 grid 模板</td><td class="pass">一致</td></tr>
+        <tr><td>左栏结构</td><td>OR 按钮(激活蓝框) + AND 按钮 + 搜索框 + 3 个 Collapsible（默认仅 basic open）</td><td>同结构同默认展开态</td><td class="pass">一致</td></tr>
+        <tr><td>分类计数</td><td>「邮件基础信息 (18)」Badge=19；「附件相关 (13)」Badge=13；「安全检测 (21)」Badge=22</td><td>逐字复刻（含矛盾）</td><td class="pass">一致</td></tr>
+        <tr><td>条件按钮</td><td>Plus 图标+label；信封发信人/收信人(SMTP) 带灰底加粗（env 样式）</td><td>同 54 项同样式</td><td class="pass">一致</td></tr>
+        <tr><td>中栏面板</td><td>标题行(名称+类型Badge) + 绿说明卡 + 类别化表单；文本面板匹配方式 4 选项（listbox 实测）</td><td>文本/数值/CIDR/时间/星期/特征组/SPF 完整还原；其余选择类以说明卡+结果下拉概括（已在预览注明）</td><td class="pass">一致（简化范围已声明）</td></tr>
+        <tr><td>右栏预览</td><td>OR 蓝卡(dot+标题+计数Badge+竖线简表) / AND 连接符 / AND 绿卡 / 完整表达式 mono 块；「附件类型 包含 [配置不完整]」等标记（截图逐字核对）</td><td>同结构同标记逻辑</td><td class="pass">一致</td></tr>
+        <tr><td>条件渲染</td><td>空组不渲染该组卡片；两组均空渲染空态占位；AND 连接符仅两组均非空出现</td><td>同条件逻辑</td><td class="pass">一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+<script>
+(function () {
+  // 54 条件（label 为条件树内长名称；kind: text|num|sel|grp|cidr|time|days|mime|spf|fg）
+  var CATS = [
+    { id: "basic", name: "邮件基础信息 (18)", badge: 19, items: [
+      ["sender","发信人(信头)","text"],["recipient","收信人(信头)","text"],["subject","主题","text"],["cc","抄送","text"],["bcc","密送","text"],["body","正文","text"],["header","信头","text"],
+      ["envelopeSender","信封发信人(SMTP)","text",1],["envelopeRecipient","信封收信人(SMTP)","text",1],
+      ["senderGroup","发信人群组","grp"],["senderOrganization","发信人组织","grp"],["featureGroup","属于特征组","fg"],
+      ["senderIp","发信IP地址","cidr"],["senderIpGroup","发信IP组","grp"],["geoIpCountry","发信国家","grp"],["geoIpRegion","发信地区","grp"],
+      ["keywordMatch","关键词匹配","text"],["sendTime","发信时间","time"],["sendDayOfWeek","发信星期","days"]
+    ]},
+    { id: "attach", name: "附件相关 (13)", badge: 13, items: [
+      ["attachmentContent","附件内容","text"],["attachmentName","附件名","text"],["attachmentType","附件类型(MIME)","mime"],["attachmentCount","邮件附件数量上限","num"],
+      ["encryptedAttachment","加密附件","sel"],["attachmentMd5","附件MD5","text"],["attachmentSizeTotal","附件总大小","num"],["attachmentSizeSingle","单个附件大小","num"],
+      ["nestedZipLevel","嵌套压缩层级","num"],["nestedFileCount","嵌套文件数量","num"],["imageQrCodeResult","图片二维码检测","sel"],["qrCodeCount","二维码数量上限","num"],["attachmentZipBomb","压缩炸弹检测","sel"]
+    ]},
+    { id: "security", name: "安全检测 (21)", badge: 22, items: [
+      ["urlCount","URL数量上限","num"],["url","URL","text"],["rblResult","RBL查询结果","sel"],["urlSandboxResult","URL沙箱结果","sel"],["shortLinkExpanded","短链接展开","sel"],["urlDomain","URL域名","text"],
+      ["spfResult","SPF结果","spf"],["dkimResult","DKIM结果","sel"],["dmarcResult","DMARC结果","sel"],["ptrResult","PTR结果","sel"],
+      ["similarDomain","相似域名检测","num"],["displayNameSpoof","显示名仿冒","sel"],["mailFromEmpty","MAIL FROM为空","sel"],["mailFromFromConsistency","信封与信头一致性","sel"],
+      ["virusScanResult","病毒扫描结果","sel"],["comprehensiveEngineResult","意图引擎检测","sel"],
+      ["senderIpCount15Min","15分钟内来源IP数","num"],["senderRecipientCount15Min","15分钟内收信人数","num"],["senderMailCount15Min","15分钟内发信数","num"],
+      ["senderMailCountDaily","当日发信数","num"],["senderRateLimit15","15分钟内发信上限","num"],["recipientCount","收信人数量上限","num"]
+    ]}
+  ];
+  // 表达式预览用短名称（demo getConditionTypeLabels 与树 label 不同处）
+  var SHORT = { urlCount: "URL数量", attachmentCount: "附件数量", sender: "发信人", recipient: "收信人", attachmentType: "附件类型", qrCodeCount: "二维码数量" };
+  var KINDMAP = { text: "文本类", num: "数值类", sel: "选择类", grp: "群组/组织引用", fg: "特征组引用", cidr: "IP(CIDR)", time: "时间范围", days: "星期多选", mime: "MIME专属", spf: "选择类" };
+  var DESCS = {
+    subject: ["邮件 Subject 信头", "按主题内容过滤邮件", "支持多值换行分隔"],
+    urlCount: ["邮件正文URL提取", "限制邮件正文中URL链接的数量", "大量URL可能为钓鱼或垃圾邮件"],
+    spfResult: ["SPF 验证引擎", "按 SPF 认证结果过滤", "配合 DMARC 使用效果更佳"],
+    featureGroup: ["群组管理·特征组", "引用预定义条件集合", "特征组变更后即时生效"],
+    sendDayOfWeek: ["邮件头 Date 字段", "过滤特定星期发送的邮件", "用于周期性规则，如周末邮件"]
+  };
+
+  var state = { group: "any", any: [], all: [], selected: null, seq: 0 };
+  var catsEl = document.getElementById('cats');
+
+  function renderTree(filter) {
+    catsEl.innerHTML = CATS.map(function (c, i) {
+      var items = c.items.filter(function (it) { return !filter || it[1].toLowerCase().includes(filter.toLowerCase()); });
+      return '<div class="cat' + (i === 0 || filter ? ' open' : '') + '" data-cat="' + c.id + '">' +
+        '<button class="ct"><span class="chev">' + '▸' + '</span> ' + c.name + '<span class="cnt">' + c.badge + '</span></button>' +
+        '<div class="items">' + items.map(function (it) {
+          return '<button class="citem' + (it[3] ? ' env' : '') + '" data-t="' + it[0] + '"><span class="plus">＋</span>' + it[1] + '</button>';
+        }).join('') + '</div></div>';
+    }).join('');
+  }
+  catsEl.addEventListener('click', function (e) {
+    var ct = e.target.closest('.ct');
+    if (ct) { ct.parentElement.classList.toggle('open'); return; }
+    var ci = e.target.closest('.citem');
+    if (ci) addCondition(ci.dataset.t);
+  });
+  document.getElementById('csearch').addEventListener('input', function (e) { renderTree(e.target.value.trim()); });
+
+  function findMeta(t) { for (var c of CATS) for (var it of c.items) if (it[0] === t) return it; }
+  function addCondition(t) {
+    var it = findMeta(t);
+    var cond = { id: ++state.seq, type: t, label: it[1], kind: it[2], env: !!it[3], mode: it[2] === 'num' ? '大于' : '包含', values: [], not: false, aa: false, days: [], result: '' };
+    state[state.group === 'any' ? 'any' : 'all'].push(cond);
+    state.selected = cond;
+    renderAll();
+  }
+  document.getElementById('gOr').addEventListener('click', function () { state.group = 'any'; renderAll(); });
+  document.getElementById('gAnd').addEventListener('click', function () { state.group = 'all'; renderAll(); });
+
+  function renderMid() {
+    var mid = document.getElementById('mid'), c = state.selected;
+    if (!c) { mid.innerHTML = '<div class="empty">ⓘ 选择一个条件进行配置</div>'; return; }
+    var d = DESCS[c.type] || ["见 demo getConditionDescription (L738-910)", "按「" + c.label + "」过滤邮件", "—"];
+    var h = '<div class="ptitle">' + (c.env ? '<span class="smtp">SMTP</span>' : '') + c.label + '<span class="tbadge">' + c.type + '</span></div>' +
+      '<div class="desc-card"><b>条件说明</b>数据来源: ' + d[0] + '<br>用途: ' + d[1] + '<br>注意: ' + d[2] + '</div>';
+    if (c.kind === 'text' || c.kind === 'mime' || c.kind === 'cidr') {
+      if (c.kind !== 'cidr') h += '<label class="fl">匹配方式</label><select id="pMode"><option>包含</option><option>等于</option><option>正则表达式</option><option>通配符</option></select>';
+      h += '<label class="fl">' + (c.kind === 'cidr' ? 'IP/CIDR 列表（每行一个，支持 CIDR）' : '匹配值（多值换行分隔）') + '</label><textarea id="pVals" rows="3">' + c.values.join('\n') + '</textarea>' +
+        '<button class="aibtn' + (c.mode === '正则表达式' ? ' show' : '') + '" id="pAi">✨ AI 生成正则</button><br>' +
+        '<label class="chk"><input type="checkbox" id="pAa"' + (c.aa ? ' checked' : '') + '> 区分大小写</label>' +
+        '<label class="chk"><input type="checkbox" id="pNot"' + (c.not ? ' checked' : '') + '> 排除匹配</label>';
+      if (c.kind === 'mime') h += '<label class="fl">常用类型（demo 为 20 个快捷 Badge）</label><div class="daywrap"><span data-v="application/x-msdownload">exe</span><span data-v="application/zip">zip</span><span data-v="application/pdf">pdf</span><span data-v="application/vnd.ms-excel">xls</span></div>';
+    } else if (c.kind === 'num') {
+      h += '<label class="fl">比较方式</label><select id="pMode"><option>大于</option><option>大于等于</option><option>小于</option><option>小于等于</option><option>等于</option></select>' +
+        '<label class="fl">阈值</label><input type="number" id="pTh" value="' + (c.values[0] || 0) + '">';
+    } else if (c.kind === 'time') {
+      h += '<label class="fl">开始时间</label><input type="time" id="pT1"><label class="fl">结束时间</label><input type="time" id="pT2">' +
+        '<label class="chk"><input type="checkbox" id="pNot"' + (c.not ? ' checked' : '') + '> 排除匹配</label>';
+    } else if (c.kind === 'days') {
+      h += '<label class="fl">选择星期</label><div class="daywrap" id="pDays">' + ['周一','周二','周三','周四','周五','周六','周日'].map(function (dd) { return '<span data-d="' + dd + '"' + (c.days.includes(dd) ? ' class="on"' : '') + '>' + dd + '</span>'; }).join('') + '</div>' +
+        '<label class="chk"><input type="checkbox" id="pNot"' + (c.not ? ' checked' : '') + '> 排除匹配</label>';
+    } else if (c.kind === 'fg') {
+      h += '<label class="fl">选择特征组</label><select id="pRes"><option value="">请选择</option><option value="fg_phishing">钓鱼仿冒特征</option><option value="fg_malware">恶意附件特征</option><option value="fg_bulk">批量营销特征</option></select>' +
+        '<label class="chk"><input type="checkbox" id="pNot"' + (c.not ? ' checked' : '') + '> 排除匹配</label>';
+    } else if (c.kind === 'spf') {
+      h += '<label class="fl">认证结果</label><select id="pRes"><option value="">选择认证结果</option><option>通过 (pass)</option><option>失败 (fail)</option><option>软失败 (softfail)</option><option>无记录 (none)</option></select>';
+    } else {
+      h += '<label class="fl">检测结果</label><select id="pRes"><option value="">选择检测结果（各条件枚举见 54 条件总表）</option><option>命中/存在</option><option>未命中/不存在</option></select>' +
+        '<label class="chk"><input type="checkbox" id="pNot"' + (c.not ? ' checked' : '') + '> 排除匹配</label>';
+    }
+    mid.innerHTML = h;
+    var m = document.getElementById('pMode'); if (m) { m.value = c.mode; m.onchange = function () { c.mode = m.value; renderAll(); }; }
+    var v = document.getElementById('pVals'); if (v) v.oninput = function () { c.values = v.value.split('\n').filter(Boolean); renderPv(); };
+    var th = document.getElementById('pTh'); if (th) th.oninput = function () { c.values = [th.value]; renderPv(); };
+    var res = document.getElementById('pRes'); if (res) res.onchange = function () { c.result = res.value; c.values = res.value ? [res.value] : []; renderPv(); };
+    var nt = document.getElementById('pNot'); if (nt) nt.onchange = function () { c.not = nt.checked; renderPv(); };
+    var aa = document.getElementById('pAa'); if (aa) aa.onchange = function () { c.aa = aa.checked; renderPv(); };
+    var ds = document.getElementById('pDays'); if (ds) ds.onclick = function (e) { var s = e.target.closest('span[data-d]'); if (!s) return; s.classList.toggle('on'); var dd = s.dataset.d; c.days.includes(dd) ? c.days = c.days.filter(function (x) { return x !== dd; }) : c.days.push(dd); c.values = c.days.slice(); renderPv(); };
+    var ai = document.getElementById('pAi'); if (ai) ai.onclick = function () { ai.textContent = '✨ AI 生成正则（demo 为预留按钮，落地形态见主文件 Q-8）'; };
+  }
+
+  function brief(c, connWord, last) {
+    var name = c.env ? c.type : (SHORT[c.type] || c.label.replace(/\(.*\)$/, ''));
+    var val = c.kind === 'num' ? (c.values[0] || 0) : c.values.slice(0, 2).map(function (x) { return '"' + x + '"'; }).join(', ') + (c.values.length > 2 ? ' +' + (c.values.length - 2) : '');
+    var incomplete = c.kind === 'num' ? false : c.values.length === 0;
+    return '<div><b>' + name + '</b><span class="op">' + c.mode + '</span>' + (incomplete ? '<span class="inc">[配置不完整]</span>' : val) +
+      (c.not ? ' <span class="inc">(NOT)</span>' : '') + (c.aa ? ' <span class="inc">(Aa)</span>' : '') + '</div>' +
+      (last ? '' : '<div class="conn">' + connWord + '</div>');
+  }
+  function exprText(list, join) {
+    return '(' + list.map(function (c) {
+      var name = c.env ? c.type : (SHORT[c.type] || c.label.replace(/\(.*\)$/, ''));
+      var val = c.kind === 'num' ? ' ' + (c.values[0] || 0) : (c.values.length ? ' ' + c.values.map(function (x) { return '"' + x + '"'; }).join(', ') : '');
+      return '(' + name + ' ' + c.mode + val + ')';
+    }).join(' ' + join + ' ') + ')';
+  }
+  function renderPv() {
+    var pv = document.getElementById('pv');
+    var a = state.any, b = state.all;
+    if (!a.length && !b.length) { pv.innerHTML = '<div class="empty">＋<br>添加条件后将自动生成逻辑表达式</div>'; return; }
+    var h = '';
+    if (a.length) h += '<div class="pcard or"><div class="gh"><span class="dot"></span>OR 条件组 <span class="cnt" style="border:1px solid #93c5fd;border-radius:999px;padding:0 6px;font-size:10px;color:#2563eb">' + a.length + '</span></div><div class="brief">' + a.map(function (c, i) { return brief(c, 'OR', i === a.length - 1); }).join('') + '</div></div>';
+    if (a.length && b.length) h += '<div class="andconn"><span>AND</span></div>';
+    if (b.length) h += '<div class="pcard and"><div class="gh"><span class="dot"></span>AND 条件组 <span class="cnt" style="border:1px solid #86efac;border-radius:999px;padding:0 6px;font-size:10px;color:#16a34a">' + b.length + '</span></div><div class="brief">' + b.map(function (c, i) { return brief(c, 'AND', i === b.length - 1); }).join('') + '</div></div>';
+    var full = [];
+    if (a.length) full.push(exprText(a, 'OR'));
+    if (b.length) full.push(exprText(b, 'AND'));
+    h += '<div class="fullx"><div class="t">完整表达式</div><pre>' + full.join('\nAND\n') + '</pre></div>';
+    pv.innerHTML = h;
+  }
+  function renderAll() {
+    document.getElementById('cOr').textContent = state.any.length;
+    document.getElementById('cAnd').textContent = state.all.length;
+    document.getElementById('gOr').classList.toggle('on', state.group === 'any');
+    document.getElementById('gAnd').classList.toggle('on', state.group === 'all');
+    renderMid(); renderPv();
+  }
+  // 54 条件总表
+  document.getElementById('condTable').innerHTML = CATS.map(function (c) {
+    return c.items.map(function (it, i) {
+      return '<tr>' + (i === 0 ? '<td rowspan="' + c.items.length + '"><b>' + c.name.replace(/ \(\d+\)/, '') + '</b><br>' + c.items.length + ' 项</td>' : '') +
+        '<td>' + (i + 1) + '</td><td>' + it[1] + (it[3] ? '（信封层，[SMTP] 标识）' : '') + '</td><td><code>' + it[0] + '</code></td><td>' + KINDMAP[it[2]] + '</td></tr>';
+    }).join('');
+  }).join('');
+  renderTree('');
+  renderAll();
+})();
+</script>
+</body>
+</html>

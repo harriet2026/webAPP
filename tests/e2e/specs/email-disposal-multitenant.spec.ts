@@ -1,7 +1,7 @@
 import { test, expect } from '../fixtures/auth.fixture';
 import { seedMailLogs, getAdminToken, createTenant } from '../helpers/seed-data';
 import { resolveTenantRoleID } from '../helpers/roles';
-import { waitForDataRow } from '../helpers/mail-list';
+import { waitForDataRow, ensureFiltersExpanded } from '../helpers/mail-list';
 import type { APIRequestContext, Page } from '@playwright/test';
 
 test.describe.configure({ mode: 'serial' });
@@ -109,7 +109,7 @@ test.describe('Email Disposal Center — multi-tenant view (TC-O01..O07)', () =>
 
   test('TC-O03/O06 cloud-platform: tenant selector visible', async ({ authenticatedPage }) => {
     // 09ee6b4cdd: 结构化筛选（含租户选择器）默认折叠在「高级筛选」开关后面。
-    await authenticatedPage.getByTestId('disposal-filters-toggle').click();
+    await ensureFiltersExpanded(authenticatedPage);
     // Locate by testid, not by the trigger's TEXT: filtering on
     // /all|全部租户|所有租户|租户/ is self-defeating once a tenant is picked --
     // the trigger then renders the tenant's NAME (e.g. "audit-rcpt-test"), the
@@ -142,7 +142,7 @@ test.describe('Email Disposal Center — multi-tenant view (TC-O01..O07)', () =>
   test('TC-O03 cloud-platform: selecting a specific tenant scopes the list without entering tenant view', async ({ authenticatedPage }) => {
     // Locate by testid, not by the trigger's TEXT: filtering on
     // 09ee6b4cdd: expand the collapsed structured filters first.
-    await authenticatedPage.getByTestId('disposal-filters-toggle').click();
+    await ensureFiltersExpanded(authenticatedPage);
     // /all|全部租户|所有租户|租户/ is self-defeating once a tenant is picked --
     // the trigger then renders the tenant's NAME (e.g. "audit-rcpt-test"), the
     // filter stops matching, and the locator resolves to nothing. Playwright
@@ -299,7 +299,7 @@ test.describe('Email Disposal Center — mocked legacy-single form (no AI, singl
     await expect(authenticatedPage.getByRole('button', { name: /AI\s*解析/ })).toHaveCount(0);
     // Expand the structured filters first — asserting "no selector" against a
     // COLLAPSED section would pass on every form and prove nothing.
-    await authenticatedPage.getByTestId('disposal-filters-toggle').click();
+    await ensureFiltersExpanded(authenticatedPage);
     const tenantTrigger = authenticatedPage
       .locator('main [data-slot="select-trigger"]')
       .filter({ hasText: /all|全部租户|所有租户|租户/i });
@@ -351,7 +351,7 @@ test.describe('Email Disposal Center — mocked ai-single form (AI, single tenan
     await expect(authenticatedPage.getByRole('button', { name: /AI\s*解析/ }).first()).toBeVisible({ timeout: 10000 });
     // Expand the structured filters first — a collapsed section would make
     // this "no selector" assertion vacuously true on every form.
-    await authenticatedPage.getByTestId('disposal-filters-toggle').click();
+    await ensureFiltersExpanded(authenticatedPage);
     const tenantTrigger = authenticatedPage
       .locator('main [data-slot="select-trigger"]')
       .filter({ hasText: /all|全部租户|所有租户|租户/i });
@@ -413,7 +413,7 @@ test.describe('Email Disposal Center — mocked legacy-multi form (tenants, no A
     await authenticatedPage.goto('/zh/email-disposal/center');
     await mockProductForm(authenticatedPage, 'legacy-multi', { ai: false, multiTenant: true, saas: false });
     // 09ee6b4cdd: expand the collapsed structured filters first.
-    await authenticatedPage.getByTestId('disposal-filters-toggle').click();
+    await ensureFiltersExpanded(authenticatedPage);
     // Locate by testid, not by the trigger's TEXT: filtering on
     // /all|全部租户|所有租户|租户/ is self-defeating once a tenant is picked --
     // the trigger then renders the tenant's NAME (e.g. "audit-rcpt-test"), the

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级2：检测总览页签 - 仿冒邮件检测智能体</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { corePlugins:{ preflight:false }, theme:{ extend:{ colors:{
+      background:'var(--background)', foreground:'var(--foreground)', card:'var(--card)',
+      'card-foreground':'var(--card-foreground)', muted:'var(--muted)', 'muted-foreground':'var(--muted-foreground)',
+      primary:'var(--primary)', 'primary-foreground':'var(--primary-foreground)', border:'var(--border)',
+      input:'var(--input)', ring:'var(--ring)', destructive:'var(--destructive)', accent:'var(--accent)',
+      'accent-foreground':'var(--accent-foreground)', secondary:'var(--secondary)',
+      'secondary-foreground':'var(--secondary-foreground)', popover:'var(--popover)',
+      'popover-foreground':'var(--popover-foreground)' },
+      borderRadius:{ lg:'var(--radius)', md:'calc(var(--radius) - 2px)', sm:'calc(var(--radius) - 4px)' } } } };
+  </script>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262); --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0); --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0); --destructive: oklch(0.577 0.245 27.325);
+      --diff-bg: oklch(0.97 0.013 25); --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95); --question-border: oklch(0.75 0.15 90);
+      --radius: 0.625rem;
+      --font-sans: "Geist","Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono","Geist Mono Fallback", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground);
+      line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 2rem; }
+    .spec-header h1 { color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+    .meta-table td:first-child { font-weight: 600; width: 170px; color: var(--muted-foreground); white-space: nowrap; }
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 2rem; margin-bottom: 2rem; }
+    .component-toc > h2 { color: var(--primary); font-size: 1.05rem; margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .component-toc ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.5rem; }
+    .component-toc li { padding: 0.375rem 0.75rem; border-radius: calc(var(--radius) - 4px); background: var(--muted); font-size: 0.875rem; }
+    .component-toc li a { color: var(--primary); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.375rem; }
+    .component-toc li a:hover { text-decoration: underline; }
+    .component-toc .toc-layer-links { font-size: 0.75rem; color: var(--muted-foreground); margin-left: 0.5rem; }
+    .component-toc .toc-layer-links a { color: var(--muted-foreground); font-weight: 400; }
+    .component-toc .toc-badge { display: inline-block; font-size: 0.6875rem; font-weight: 600; padding: 0.0625rem 0.375rem;
+      border-radius: calc(var(--radius) - 4px); background: var(--primary); color: var(--primary-foreground); white-space: nowrap; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+    section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem; font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+    h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+    table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+    table.spec-table th { background: var(--muted); color: var(--foreground); font-weight: 600; text-align: left;
+      padding: 0.55rem 0.7rem; border: 1px solid var(--border); }
+    table.spec-table td { padding: 0.55rem 0.7rem; border: 1px solid var(--border); vertical-align: top; }
+    table.spec-table tr:nth-child(even) td { background: var(--muted); }
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .screenshot-figure figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .component-spec { border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1rem 0; background: var(--card); }
+    .component-spec > h3 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 0.75rem; }
+    pre { background: var(--muted); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); padding: 1rem;
+      overflow-x: auto; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; margin: 1rem 0; }
+    code { font-family: var(--font-mono); font-size: 0.85em; }
+    blockquote { border-left: 4px solid var(--destructive); background: var(--diff-bg); padding: 0.75rem 1rem; margin: 1rem 0;
+      font-size: 0.875rem; border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0; }
+    .diff-section { border-left: 4px solid var(--diff-border); background: var(--diff-bg); }
+    .diff-section > h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+    .diff-badge { display: inline-block; background: var(--diff-border); color: #fff; font-size: 0.75rem; font-weight: 600;
+      padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); margin-right: 0.5rem; }
+    .question-section { border-left: 4px solid var(--question-border); background: var(--question-bg); }
+    .question-section > h2 { color: var(--question-border); border-bottom-color: var(--question-border); }
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); }
+    .badge-high { background: oklch(0.65 0.2 25); color: #fff; }
+    .badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+    .badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+    .component-preview { border: 2px dashed var(--primary); border-radius: var(--radius); padding: 1.5rem; margin: 1rem 0;
+      background: #f7f8fb; position: relative; overflow: auto; }
+    .component-preview::before { content: "🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）"; position: absolute; top: -0.625rem;
+      left: 0.75rem; background: var(--primary); color: var(--primary-foreground); font-size: 0.6875rem; font-weight: 600;
+      padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); white-space: nowrap; }
+    .component-preview * { box-sizing: border-box; }
+    /* 让被提取的 radix 弹窗/抽屉在预览区以常规流呈现（去掉 fixed 定位与全屏遮罩） */
+    .component-preview [role="dialog"], .component-preview [role="alertdialog"] {
+      position: static !important; inset: auto !important; transform: none !important; translate: none !important;
+      width: 100% !important; max-width: 100% !important; height: auto !important; max-height: none !important;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin: 0 auto; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: calc(var(--radius) - 2px);
+      padding: 1rem 1.25rem; margin: 1.5rem 0; background: var(--card); }
+    .interaction-layer > h4 { color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%;
+      background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .trigger-path { background: var(--muted); border-radius: calc(var(--radius) - 4px); padding: 0.5rem 0.75rem; margin: 0.5rem 0 1rem;
+      font-size: 0.8125rem; color: var(--muted-foreground); }
+    .trigger-path strong { color: var(--foreground); }
+    .dom-comparison { margin: 1rem 0; border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); overflow: hidden; }
+    .dom-comparison > h5 { background: var(--muted); padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600; color: var(--foreground);
+      border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.375rem; }
+    .dom-comparison > h5::before { content: "🔍"; font-size: 0.875rem; }
+    .dom-comparison table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+    .dom-comparison th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .dom-comparison td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .dom-comparison tr:last-child td { border-bottom: none; }
+    .dom-pass { color: oklch(0.5 0.15 150); font-weight: 600; }
+    .dom-fail { color: var(--destructive); font-weight: 600; }
+    .dom-fixed { color: oklch(0.6 0.15 90); font-weight: 600; }
+    table.layer-index { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.layer-index th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+    table.layer-index td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.layer-index td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    table.layer-index td a:hover { text-decoration: underline; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; background: var(--muted);
+      border-radius: var(--radius); margin-bottom: 1.5rem; font-size: 0.875rem; }
+    .layer-nav a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .layer-nav a:hover { text-decoration: underline; }
+    .version-history-section { margin: 1.5rem 0; }
+    .version-history-table td:nth-child(5) { color: var(--muted-foreground); }
+    .spec-version { font-weight: 600; color: oklch(0.52 0.226 262); }
+    .note { background: oklch(0.97 0.02 250); border: 1px solid var(--border); border-left: 4px solid var(--primary);
+      border-radius: calc(var(--radius) - 4px); padding: 0.6rem 0.9rem; font-size: 0.8rem; color: var(--muted-foreground); margin: 0.75rem 0; }
+  </style>
+/* === TW-STATIC-BEGIN (offline Tailwind, auto-generated) === */
+<style id="tw-static">
+*, ::before, ::after {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}::backdrop {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}.absolute {position: absolute
+}.relative {position: relative
+}.sticky {position: sticky
+}.left-3 {left: 0.75rem
+}.right-0 {right: 0px
+}.top-1\/2 {top: 50%
+}.mb-2 {margin-bottom: 0.5rem
+}.mb-3 {margin-bottom: 0.75rem
+}.ml-1 {margin-left: 0.25rem
+}.mt-2 {margin-top: 0.5rem
+}.mt-4 {margin-top: 1rem
+}.block {display: block
+}.flex {display: flex
+}.inline-flex {display: inline-flex
+}.grid {display: grid
+}.size-4 {width: 1rem;height: 1rem
+}.h-3\.5 {height: 0.875rem
+}.h-4 {height: 1rem
+}.h-7 {height: 1.75rem
+}.h-9 {height: 2.25rem
+}.w-3\.5 {width: 0.875rem
+}.w-4 {width: 1rem
+}.w-\[120px\] {width: 120px
+}.w-\[160px\] {width: 160px
+}.w-fit {width: -moz-fit-content;width: fit-content
+}.w-full {width: 100%
+}.min-w-0 {min-width: 0px
+}.min-w-\[240px\] {min-width: 240px
+}.max-w-40 {max-width: 10rem
+}.max-w-56 {max-width: 14rem
+}.flex-1 {flex: 1 1 0%
+}.flex-shrink-0 {flex-shrink: 0
+}.shrink-0 {flex-shrink: 0
+}.-translate-y-1\/2 {--tw-translate-y: -50%;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.cursor-default {cursor: default
+}.cursor-pointer {cursor: pointer
+}.grid-cols-2 {grid-template-columns: repeat(2, minmax(0, 1fr))
+}.flex-wrap {flex-wrap: wrap
+}.items-center {align-items: center
+}.justify-end {justify-content: flex-end
+}.justify-center {justify-content: center
+}.justify-between {justify-content: space-between
+}.gap-1 {gap: 0.25rem
+}.gap-1\.5 {gap: 0.375rem
+}.gap-2 {gap: 0.5rem
+}.gap-3 {gap: 0.75rem
+}.gap-4 {gap: 1rem
+}.space-y-4 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(1rem * var(--tw-space-y-reverse))
+}.overflow-auto {overflow: auto
+}.overflow-hidden {overflow: hidden
+}.truncate {overflow: hidden;text-overflow: ellipsis;white-space: nowrap
+}.whitespace-nowrap {white-space: nowrap
+}.rounded-lg {border-radius: var(--radius)
+}.rounded-md {border-radius: calc(var(--radius) - 2px)
+}.border {border-width: 1px
+}.border-b {border-bottom-width: 1px
+}.border-gray-200 {--tw-border-opacity: 1;border-color: rgb(229 231 235 / var(--tw-border-opacity, 1))
+}.border-green-200 {--tw-border-opacity: 1;border-color: rgb(187 247 208 / var(--tw-border-opacity, 1))
+}.border-input {border-color: var(--input)
+}.border-orange-200 {--tw-border-opacity: 1;border-color: rgb(254 215 170 / var(--tw-border-opacity, 1))
+}.border-red-200 {--tw-border-opacity: 1;border-color: rgb(254 202 202 / var(--tw-border-opacity, 1))
+}.border-transparent {border-color: transparent
+}.border-yellow-200 {--tw-border-opacity: 1;border-color: rgb(254 240 138 / var(--tw-border-opacity, 1))
+}.bg-background {background-color: var(--background)
+}.bg-blue-600 {--tw-bg-opacity: 1;background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1))
+}.bg-gray-50 {--tw-bg-opacity: 1;background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}.bg-green-100 {--tw-bg-opacity: 1;background-color: rgb(220 252 231 / var(--tw-bg-opacity, 1))
+}.bg-orange-100 {--tw-bg-opacity: 1;background-color: rgb(255 237 213 / var(--tw-bg-opacity, 1))
+}.bg-red-100 {--tw-bg-opacity: 1;background-color: rgb(254 226 226 / var(--tw-bg-opacity, 1))
+}.bg-secondary {background-color: var(--secondary)
+}.bg-transparent {background-color: transparent
+}.bg-white {--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
+}.bg-yellow-100 {--tw-bg-opacity: 1;background-color: rgb(254 249 195 / var(--tw-bg-opacity, 1))
+}.p-4 {padding: 1rem
+}.px-2 {padding-left: 0.5rem;padding-right: 0.5rem
+}.px-3 {padding-left: 0.75rem;padding-right: 0.75rem
+}.px-4 {padding-left: 1rem;padding-right: 1rem
+}.py-0\.5 {padding-top: 0.125rem;padding-bottom: 0.125rem
+}.py-1 {padding-top: 0.25rem;padding-bottom: 0.25rem
+}.py-2 {padding-top: 0.5rem;padding-bottom: 0.5rem
+}.py-2\.5 {padding-top: 0.625rem;padding-bottom: 0.625rem
+}.pl-9 {padding-left: 2.25rem
+}.text-left {text-align: left
+}.text-right {text-align: right
+}.font-mono {font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace
+}.text-2xl {font-size: 1.5rem;line-height: 2rem
+}.text-base {font-size: 1rem;line-height: 1.5rem
+}.text-sm {font-size: 0.875rem;line-height: 1.25rem
+}.text-xs {font-size: 0.75rem;line-height: 1rem
+}.font-bold {font-weight: 700
+}.font-medium {font-weight: 500
+}.font-normal {font-weight: 400
+}.text-\[\#8C8C8C\] {--tw-text-opacity: 1;color: rgb(140 140 140 / var(--tw-text-opacity, 1))
+}.text-blue-600 {--tw-text-opacity: 1;color: rgb(37 99 235 / var(--tw-text-opacity, 1))
+}.text-foreground {color: var(--foreground)
+}.text-gray-400 {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.text-gray-600 {--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity, 1))
+}.text-gray-700 {--tw-text-opacity: 1;color: rgb(55 65 81 / var(--tw-text-opacity, 1))
+}.text-gray-900 {--tw-text-opacity: 1;color: rgb(17 24 39 / var(--tw-text-opacity, 1))
+}.text-green-600 {--tw-text-opacity: 1;color: rgb(22 163 74 / var(--tw-text-opacity, 1))
+}.text-green-700 {--tw-text-opacity: 1;color: rgb(21 128 61 / var(--tw-text-opacity, 1))
+}.text-orange-500 {--tw-text-opacity: 1;color: rgb(249 115 22 / var(--tw-text-opacity, 1))
+}.text-orange-700 {--tw-text-opacity: 1;color: rgb(194 65 12 / var(--tw-text-opacity, 1))
+}.text-primary-foreground {color: var(--primary-foreground)
+}.text-red-600 {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.text-red-700 {--tw-text-opacity: 1;color: rgb(185 28 28 / var(--tw-text-opacity, 1))
+}.text-secondary-foreground {color: var(--secondary-foreground)
+}.text-yellow-600 {--tw-text-opacity: 1;color: rgb(202 138 4 / var(--tw-text-opacity, 1))
+}.text-yellow-700 {--tw-text-opacity: 1;color: rgb(161 98 7 / var(--tw-text-opacity, 1))
+}.opacity-50 {opacity: 0.5
+}.outline-none {outline: 2px solid transparent;outline-offset: 2px
+}.transition-\[color\2c box-shadow\] {transition-property: color,box-shadow;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-all {transition-property: all;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.duration-150 {transition-duration: 150ms
+}.selection\:bg-primary *::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground *::selection {color: var(--primary-foreground)
+}.selection\:bg-primary::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground::selection {color: var(--primary-foreground)
+}.file\:inline-flex::file-selector-button {display: inline-flex
+}.file\:h-7::file-selector-button {height: 1.75rem
+}.file\:border-0::file-selector-button {border-width: 0px
+}.file\:bg-transparent::file-selector-button {background-color: transparent
+}.file\:text-sm::file-selector-button {font-size: 0.875rem;line-height: 1.25rem
+}.file\:font-medium::file-selector-button {font-weight: 500
+}.file\:text-foreground::file-selector-button {color: var(--foreground)
+}.placeholder\:text-muted-foreground::placeholder {color: var(--muted-foreground)
+}.hover\:-translate-y-0\.5:hover {--tw-translate-y: -0.125rem;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.hover\:bg-accent:hover {background-color: var(--accent)
+}.hover\:bg-blue-700:hover {--tw-bg-opacity: 1;background-color: rgb(29 78 216 / var(--tw-bg-opacity, 1))
+}.hover\:bg-gray-50:hover {--tw-bg-opacity: 1;background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}.hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}.hover\:text-blue-700:hover {--tw-text-opacity: 1;color: rgb(29 78 216 / var(--tw-text-opacity, 1))
+}.hover\:shadow-md:hover {--tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.focus-visible\:border-ring:focus-visible {border-color: var(--ring)
+}.focus-visible\:ring-\[3px\]:focus-visible {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.disabled\:pointer-events-none:disabled {pointer-events: none
+}.disabled\:cursor-not-allowed:disabled {cursor: not-allowed
+}.disabled\:opacity-50:disabled {opacity: 0.5
+}.has-\[\>svg\]\:px-2\.5:has(>svg) {padding-left: 0.625rem;padding-right: 0.625rem
+}.data-\[size\=default\]\:h-9[data-size="default"] {height: 2.25rem
+}.data-\[size\=sm\]\:h-8[data-size="sm"] {height: 2rem
+}.data-\[placeholder\]\:text-muted-foreground[data-placeholder] {color: var(--muted-foreground)
+}.\*\:data-\[slot\=select-value\]\:line-clamp-1[data-slot="select-value"] > * {overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1
+}.\*\:data-\[slot\=select-value\]\:flex[data-slot="select-value"] > * {display: flex
+}.\*\:data-\[slot\=select-value\]\:items-center[data-slot="select-value"] > * {align-items: center
+}.\*\:data-\[slot\=select-value\]\:gap-2[data-slot="select-value"] > * {gap: 0.5rem
+}@media (min-width: 768px) {.md\:grid-cols-3 {grid-template-columns: repeat(3, minmax(0, 1fr))
+    }.md\:text-sm {font-size: 0.875rem;line-height: 1.25rem
+    }
+}@media (min-width: 1024px) {.lg\:grid-cols-5 {grid-template-columns: repeat(5, minmax(0, 1fr))
+    }
+}@media (prefers-color-scheme: dark) {.dark\:border-gray-700 {--tw-border-opacity: 1;border-color: rgb(55 65 81 / var(--tw-border-opacity, 1))
+    }.dark\:border-gray-800 {--tw-border-opacity: 1;border-color: rgb(31 41 55 / var(--tw-border-opacity, 1))
+    }.dark\:border-input {border-color: var(--input)
+    }.dark\:bg-gray-800 {--tw-bg-opacity: 1;background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1))
+    }.dark\:bg-gray-900 {--tw-bg-opacity: 1;background-color: rgb(17 24 39 / var(--tw-bg-opacity, 1))
+    }.dark\:bg-gray-950 {--tw-bg-opacity: 1;background-color: rgb(3 7 18 / var(--tw-bg-opacity, 1))
+    }.dark\:text-gray-100 {--tw-text-opacity: 1;color: rgb(243 244 246 / var(--tw-text-opacity, 1))
+    }.dark\:text-gray-300 {--tw-text-opacity: 1;color: rgb(209 213 219 / var(--tw-text-opacity, 1))
+    }.dark\:hover\:bg-gray-800\/50:hover {background-color: rgb(31 41 55 / 0.5)
+    }
+}.\[\&\>svg\]\:pointer-events-none>svg {pointer-events: none
+}.\[\&\>svg\]\:size-3>svg {width: 0.75rem;height: 0.75rem
+}.\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-4 svg:not([class*='size-']) {width: 1rem;height: 1rem
+}.\[\&_svg\:not\(\[class\*\=\'text-\'\]\)\]\:text-muted-foreground svg:not([class*='text-']) {color: var(--muted-foreground)
+}.\[\&_svg\]\:pointer-events-none svg {pointer-events: none
+}.\[\&_svg\]\:shrink-0 svg {flex-shrink: 0
+}a.\[a\&\]\:hover\:bg-accent:hover {background-color: var(--accent)
+}a.\[a\&\]\:hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}
+</style>
+/* === TW-STATIC-END === */</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-3">← 返回主文件</a>
+  <span>层级 2 · 检测总览页签</span>
+  <a href="./layer-4-log-detail-drawer.html">检测详情抽屉 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 2：检测总览页签（5 KPI + 日志列表）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.3 检测总览页签（logs）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+    <tr><td>触发路径</td><td>一级页签点击「检测总览」→ activeTab="logs"</td></tr>
+    <tr><td>demo 组件</td><td><code>impersonation-detection-agent.tsx</code> TabsContent value="logs"</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">2</span> KPI + 日志列表初始态（时间默认「今日」，共 8 条）</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：点击「检测总览」页签。数据基准日固定 2026-05-19 作为「今日」以保证 mock 可筛出。</div>
+  <div class="component-preview">
+<div data-state="active" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_0_-trigger-logs" id="radix-_r_0_-content-logs" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none space-y-4 mt-4"><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"><div role="button" tabindex="0" class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 transition-all duration-150 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">今日检测</p><p class="text-2xl font-bold mt-2 text-gray-900 dark:text-gray-100">8<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div role="button" tabindex="0" class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 transition-all duration-150 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">今日拦截</p><p class="text-2xl font-bold mt-2 text-red-600">5<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div role="button" tabindex="0" class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 transition-all duration-150 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">待审核</p><p class="text-2xl font-bold mt-2 text-orange-500">2<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div role="button" tabindex="0" class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 transition-all duration-150 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">发信人名称仿冒</p><p class="text-2xl font-bold mt-2 text-gray-900 dark:text-gray-100">5<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div role="button" tabindex="0" class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 transition-all duration-150 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">品牌保护命中</p><p class="text-2xl font-bold mt-2 text-gray-900 dark:text-gray-100">2<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div></div><div><h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">仿冒检测日志</h3><div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4 mb-3"><div class="flex items-center gap-3 flex-wrap"><div class="flex-1 min-w-[240px] relative"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 pl-9 w-full" placeholder="搜索发件人 / 主题 / 仿冒目标" value=""></div><button data-slot="popover-trigger" class="inline-flex items-center justify-center whitespace-nowrap text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md has-[&gt;svg]:px-2.5 h-9 px-3 gap-1.5 flex-shrink-0 font-normal" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_r_12_" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock w-4 h-4 text-gray-400"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>今日<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-3.5 h-3.5 text-gray-400"><path d="m6 9 6 6 6-6"></path></svg></button><button type="button" role="combobox" aria-controls="radix-_r_13_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 h-9 w-[120px] flex-shrink-0"><span data-slot="select-value" style="pointer-events: none;">全部处置</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="popover-trigger" class="inline-flex items-center whitespace-nowrap text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 h-9 justify-between flex-shrink-0 font-normal w-[160px]" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_r_14_" data-state="closed"><span class="truncate text-gray-600 dark:text-gray-300">仿冒手法：全部</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-3.5 h-3.5 ml-1 text-gray-400 flex-shrink-0"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground rounded-md has-[&gt;svg]:px-2.5 h-9 px-4 bg-blue-600 hover:bg-blue-700 gap-1.5 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search w-4 h-4"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>搜索</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md has-[&gt;svg]:px-2.5 h-9 px-3 gap-1.5 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw w-4 h-4"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>重置</button></div></div><div class="flex items-center gap-2 text-sm text-gray-600 mb-2"><span>共 <span class="font-medium text-gray-900 dark:text-gray-100">8</span> 条</span></div><div class="overflow-auto border border-gray-200 dark:border-gray-800 rounded-lg"><table class="w-full text-sm"><thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"><tr><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">时间</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100">发信人</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100">主题</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">风险分</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100">仿冒类型</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100">仿冒对象</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">处置动作</th><th class="px-3 py-2.5 text-right font-medium text-gray-900 dark:text-gray-100 sticky right-0 bg-gray-50 dark:bg-gray-800">操作</th></tr></thead><tbody><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-05-19 14:23:15</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 font-mono text-xs truncate max-w-40">cfo@cacter-fake.com</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">紧急：Q2预算审批</span></td><td class="px-3 py-2.5 whitespace-nowrap"><div class="flex items-center gap-2"><span class="font-bold text-red-600">95</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">高危</span></div></td><td class="px-3 py-2.5"><div class="flex flex-wrap gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">显示名仿冒</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">近似域名</span></div></td><td class="px-3 py-2.5"><div class="flex items-center gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 text-xs">发信人名称仿冒</span><span class="text-sm">张三(CFO)</span></div></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">已隔离</span></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-05-19 13:45:22</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 font-mono text-xs truncate max-w-40">invoice@xxtech-confirm.com</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">发票确认请求 - XX科技</span></td><td class="px-3 py-2.5 whitespace-nowrap"><div class="flex items-center gap-2"><span class="font-bold text-red-600">88</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">高危</span></div></td><td class="px-3 py-2.5"><div class="flex flex-wrap gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">显示名仿冒</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">近似域名</span></div></td><td class="px-3 py-2.5"><div class="flex items-center gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 text-xs">发信人名称仿冒</span><span class="text-sm">XX科技有限公司</span></div></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">已隔离</span></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-05-19 12:30:08</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 font-mono text-xs truncate max-w-40">security@cacter-verify.net</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">CACTER官方安全验证通知</span></td><td class="px-3 py-2.5 whitespace-nowrap"><div class="flex items-center gap-2"><span class="font-bold text-red-600">92</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">高危</span></div></td><td class="px-3 py-2.5"><div class="flex flex-wrap gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">品牌关键词滥用</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">新注册域名</span></div></td><td class="px-3 py-2.5"><div class="flex items-center gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 text-xs">品牌</span><span class="text-sm">CACTER科技</span></div></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">已隔离</span></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-05-19 11:15:00</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 font-mono text-xs truncate max-w-40">admin@company.com</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">系统维护通知</span></td><td class="px-3 py-2.5 whitespace-nowrap"><div class="flex items-center gap-2"><span class="font-bold text-green-600">15</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-100 text-green-700 border-green-200">无风险</span></div></td><td class="px-3 py-2.5"><div class="flex flex-wrap gap-1"><span class="text-gray-400">-</span></div></td><td class="px-3 py-2.5"><span class="text-gray-400">-</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-100 text-green-700 border-green-200">已放行</span></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-05-19 10:42:33</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 font-mono text-xs truncate max-w-40">ceo@cacter-corp.net</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">请尽快处理这笔付款</span></td><td class="px-3 py-2.5 whitespace-nowrap"><div class="flex items-center gap-2"><span class="font-bold text-red-600">84</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">高危</span></div></td><td class="px-3 py-2.5"><div class="flex flex-wrap gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">显示名仿冒</span></div></td><td class="px-3 py-2.5"><div class="flex items-center gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 text-xs">发信人名称仿冒</span><span class="text-sm">李明(CEO)</span></div></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">已阻断</span></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-05-19 09:58:10</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 font-mono text-xs truncate max-w-40">noreply@cacter-mail.co</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">您的账户存在异常登录</span></td><td class="px-3 py-2.5 whitespace-nowrap"><div class="flex items-center gap-2"><span class="font-bold text-red-600">81</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">高危</span></div></td><td class="px-3 py-2.5"><div class="flex flex-wrap gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">品牌关键词滥用</span></div></td><td class="px-3 py-2.5"><div class="flex items-center gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 text-xs">品牌</span><span class="text-sm">CACTER科技</span></div></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">已丢弃</span></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-05-19 09:20:47</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 font-mono text-xs truncate max-w-40">billing@xxtech-pay.com</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">本月对账单待确认</span></td><td class="px-3 py-2.5 whitespace-nowrap"><div class="flex items-center gap-2"><span class="font-bold text-yellow-600">66</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-yellow-100 text-yellow-700 border-yellow-200">中危</span></div></td><td class="px-3 py-2.5"><div class="flex flex-wrap gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">显示名仿冒</span></div></td><td class="px-3 py-2.5"><div class="flex items-center gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 text-xs">发信人名称仿冒</span><span class="text-sm">XX科技有限公司</span></div></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-orange-100 text-orange-700 border-orange-200">待审核</span></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-05-19 08:35:19</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 font-mono text-xs truncate max-w-40">hr@company-notice.net</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-300 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">薪资调整确认函</span></td><td class="px-3 py-2.5 whitespace-nowrap"><div class="flex items-center gap-2"><span class="font-bold text-yellow-600">58</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-yellow-100 text-yellow-700 border-yellow-200">中危</span></div></td><td class="px-3 py-2.5"><div class="flex flex-wrap gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">显示名仿冒</span></div></td><td class="px-3 py-2.5"><div class="flex items-center gap-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 text-xs">发信人名称仿冒</span><span class="text-sm">王芳(HR总监)</span></div></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-orange-100 text-orange-700 border-orange-200">待审核</span></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr></tbody></table></div></div></div>
+</div>
+  <div class="note">上方为从 demo 提取的检测总览面板真实 DOM（262 节点）。KPI 卡可点击（联动 logCategory）。radix Popover（时间范围/仿冒手法多选）与 Select 的展开面板依赖 portal 运行时，其展开态以源码与说明为准。</div>
+
+  <figure class="screenshot-figure"><img src="./screenshots/logs-tab-default.png" alt="检测总览页签"><figcaption>检测总览页签（浏览器实际渲染，5 KPI + 搜索栏 + 8 列日志表）</figcaption></figure>
+
+  <h4>5 KPI 卡（可点击联动 logCategory）</h4>
+  <table class="spec-table">
+    <thead><tr><th>KPI</th><th>值(mock)</th><th>点击后 logCategory</th><th>色</th><th>i18n key</th></tr></thead>
+    <tbody>
+      <tr><td>今日检测</td><td>8</td><td>all</td><td>默认</td><td>impersonation.kpiTodayDetected</td></tr>
+      <tr><td>今日拦截</td><td>5</td><td>intercepted（isolated+blocked+dropped）</td><td>红</td><td>impersonation.kpiTodayIntercepted</td></tr>
+      <tr><td>待审核</td><td>2</td><td>audit</td><td>橙</td><td>impersonation.kpiPendingAudit</td></tr>
+      <tr><td>发信人名称仿冒</td><td>5</td><td>displayname（spoofTypes 含 display_name_spoof）</td><td>默认</td><td>impersonation.kpiDisplayNameSpoof</td></tr>
+      <tr><td>品牌保护命中</td><td>2</td><td>brand（impersonatedEntity.type=brand）</td><td>默认</td><td>impersonation.kpiBrandHit</td></tr>
+    </tbody>
+  </table>
+
+  <h4>筛选区元素</h4>
+  <table class="spec-table">
+    <thead><tr><th>序号</th><th>元素</th><th>文案/选项</th><th>默认</th><th>交互</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Input(搜索)</td><td>搜索发件人 / 主题 / 仿冒目标</td><td>空</td><td>logSearch（发件人/主题/仿冒目标名 匹配）</td></tr>
+      <tr><td>2</td><td>Popover(时间)</td><td>今日 / 近7日 / 近30日 / 自定义(≤90天)</td><td>今日</td><td>超限截断+琥珀 Toast「最大支持查询 90 天」</td></tr>
+      <tr><td>3</td><td>Select(处置)</td><td>全部处置/已隔离/已阻断/已丢弃/待审核/已放行</td><td>全部处置</td><td>logFilter</td></tr>
+      <tr><td>4</td><td>多选(仿冒手法)</td><td>品牌关键词滥用/近似域名/新注册域名/显示名仿冒</td><td>全选</td><td>logSpoofFilter，实时过滤</td></tr>
+      <tr><td>5</td><td>Button</td><td>搜索 / 重置</td><td>-</td><td>trim/清空全部筛选回今日</td></tr>
+      <tr><td>6</td><td>计数行</td><td>共 N 条 [/ 全部 M 条]</td><td>共 8 条</td><td>有筛选时显示「/ 全部 8 条」+ 可移除类别 Badge</td></tr>
+    </tbody>
+  </table>
+
+  <h4>日志表 8 列</h4>
+  <table class="spec-table">
+    <thead><tr><th>列</th><th>字段</th><th>渲染</th><th>i18n key</th></tr></thead>
+    <tbody>
+      <tr><td>时间</td><td>time</td><td>YYYY-MM-DD HH:mm:ss，whitespace-nowrap</td><td>impersonation.time</td></tr>
+      <tr><td>发信人</td><td>sender</td><td>font-mono，truncate max-w-40</td><td>impersonation.sender</td></tr>
+      <tr><td>主题</td><td>subject</td><td>truncate + hover Tooltip 全文</td><td>impersonation.subject</td></tr>
+      <tr><td>风险分</td><td>riskScore+riskLevel</td><td>≥80红/≥50黄/其余绿 + 风险等级徽章</td><td>impersonation.riskScore</td></tr>
+      <tr><td>仿冒类型</td><td>spoofTypes[]</td><td>Badge 列表（i18n spoofType.*），空显「-」</td><td>impersonation.spoofTypes</td></tr>
+      <tr><td>仿冒对象</td><td>impersonatedEntity</td><td>Badge(品牌/发信人名称仿冒)+名称，空「-」</td><td>impersonation.impersonatedTarget</td></tr>
+      <tr><td>处置动作</td><td>action</td><td>徽章：passed绿/audit橙/其余红</td><td>impersonation.action</td></tr>
+      <tr><td>操作</td><td>-</td><td>「详情」按钮，sticky right</td><td>common.actions</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果</h5>
+    <table>
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>面板根节点</td><td>div[role=tabpanel][data-state=active].space-y-4</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        <tr><td>节点总数</td><td>262</td><td>262</td><td class="dom-pass">✅</td></tr>
+        <tr><td>KPI 卡</td><td>5</td><td>5</td><td class="dom-pass">✅</td></tr>
+        <tr><td>表头列数</td><td>8</td><td>8</td><td class="dom-pass">✅</td></tr>
+        <tr><td>数据行</td><td>8（默认今日全命中）</td><td>8</td><td class="dom-pass">✅</td></tr>
+        <tr><td>时间选择器默认</td><td>「今日」</td><td>「今日」</td><td class="dom-pass">✅</td></tr>
+        <tr><td>处置 Select 默认</td><td>全部处置</td><td>全部处置</td><td class="dom-pass">✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#component-2-3">← 返回主文件</a>
+  <a href="./layer-4-log-detail-drawer.html">检测详情抽屉 →</a>
+</nav>
+
+<script>
+// 让内嵌的 demo 组件预览产生与 demo 一致的最小交互反馈
+(function () {
+  function within(el, role){ return el.closest('[role="'+role+'"]'); }
+  document.querySelectorAll('.component-preview').forEach(function (scope) {
+    // 页签切换：切换 aria-selected / data-state
+    scope.addEventListener('click', function (e) {
+      var tab = e.target.closest('[role="tab"]');
+      if (tab) {
+        scope.querySelectorAll('[role="tab"]').forEach(function (t) {
+          t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+          t.setAttribute('data-state', t === tab ? 'active' : 'inactive');
+        });
+      }
+      // Radio 单选：radix RadioGroupItem 是 button[role=radio]
+      var radio = e.target.closest('[role="radio"]');
+      if (radio) {
+        var group = radio.closest('[role="radiogroup"]') || scope;
+        group.querySelectorAll('[role="radio"]').forEach(function (r) {
+          r.setAttribute('data-state', r === radio ? 'checked' : 'unchecked');
+          r.setAttribute('aria-checked', r === radio ? 'true' : 'false');
+        });
+      }
+      // Switch 开关
+      var sw = e.target.closest('[role="switch"]');
+      if (sw) {
+        var on = sw.getAttribute('data-state') === 'checked';
+        sw.setAttribute('data-state', on ? 'unchecked' : 'checked');
+        sw.setAttribute('aria-checked', on ? 'false' : 'true');
+      }
+      // 手风琴展开（详情抽屉里的仿冒信号）
+      var acc = e.target.closest('[aria-expanded]');
+      if (acc && !tab) {
+        var exp = acc.getAttribute('aria-expanded') === 'true';
+        acc.setAttribute('aria-expanded', exp ? 'false' : 'true');
+      }
+      // 关闭类按钮：隐藏所在弹窗/抽屉
+      var btn = e.target.closest('button');
+      if (btn) {
+        var label = (btn.innerText || btn.textContent || '').trim();
+        if (['取消','关闭','确认删除','确认关闭','放弃'].indexOf(label) >= 0) {
+          var dlg = within(btn, 'dialog') || within(btn, 'alertdialog');
+          if (dlg) dlg.style.display = 'none';
+        }
+      }
+    });
+  });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>try{mermaid.initialize({startOnLoad:true,theme:"default"});}catch(e){}</script>
+
+</body>
+</html>

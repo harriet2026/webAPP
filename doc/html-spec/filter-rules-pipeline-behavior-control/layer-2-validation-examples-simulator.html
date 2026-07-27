@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级2：校验错误 / 配置示例 / 模拟测试 - 发信行为管控 HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --muted: #f5f7fa; --muted-foreground: #6b7280; --border: #e5e7eb; --blue: #1677ff; --radius: 0.625rem; --font-sans: "Geist", "Inter", system-ui, sans-serif; --font-mono: "Geist Mono", ui-monospace, monospace; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: #111827; font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 19px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .layer-nav { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 12px 18px; background: var(--muted); border-radius: 8px; font-size: 14px; }
+    .spec-header, section { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 160px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .frow { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 13px; }
+    .frow > label { min-width: 96px; text-align: right; color: #374151; }
+    .req::before { content: "* "; color: #ef4444; }
+    .fin { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: #fff; }
+    .fin.err { border-color: #ef4444; }
+    .ferr { margin: 2px 0 0 106px; font-size: 12px; color: #ef4444; }
+    .pcard { margin-bottom: 12px; padding: 14px; border: 1px solid #E8E8E8; border-radius: 8px; background: #fff; font-size: 13px; }
+    .pcard h6 { margin: 0 0 6px; font-size: 14px; }
+    .pcard .effect { padding: 8px; border-radius: 6px; background: #F5F5F5; color: #6b7280; font-size: 12px; }
+    .button-blue { padding: 7px 14px; border: 0; border-radius: 8px; background: #155eef; color: #fff; font-weight: 650; font-size: 13px; cursor: pointer; }
+    .button-blue:disabled { opacity: .5; cursor: not-allowed; }
+    .button-icon { padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; font-size: 13px; cursor: pointer; }
+    .collapse-btn { display: flex; justify-content: space-between; width: 100%; padding: 8px 12px; border: 0; border-radius: 8px; background: transparent; color: #155eef; font-size: 14px; font-weight: 650; cursor: pointer; }
+    .collapse-btn:hover { background: #eff6ff; }
+    .result-box { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 13px; }
+    .result-box.hit { border: 1px solid #fecaca; background: #fef2f2; color: #b91c1c; }
+    .result-box.miss { border: 1px solid #bbf7d0; background: #f0fdf4; color: #15803d; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid2 label { display: block; margin-bottom: 4px; font-size: 12px; color: #374151; }
+    .is-hidden { display: none !important; }
+    .two-col { display: grid; grid-template-columns: 1fr 380px; gap: 20px; align-items: start; }
+    @media (max-width: 1000px) { .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./layer-1-new-rule-drawer.html">← 层级 1：规则编辑抽屉</a>
+    <span>层级 2 / 3</span>
+    <a href="./layer-3-confirm-dialogs.html">层级 3：确认对话框 →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 2：保存校验错误 / 配置示例 / 模拟测试</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 规则编辑抽屉（发信行为管控）</td></tr>
+      <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级1 抽屉内：① 点击"保存"（空表单/非法值）→ 校验错误态；② 点击"查看配置示例"→ 示例展开；③ 点击"模拟测试"→ 测试面板展开 → "执行测试"→ 命中/未命中结果</td></tr>
+      <tr><td>demo 组件</td><td><code>behavior-rule-drawer.tsx</code>（handleSave / CONFIG_EXAMPLES / runSimulation）+ <code>utils.ts::validateBehaviorRuleForm</code></td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">2</span>2A 保存校验错误态（可交互复刻）</h2>
+    <div class="component-preview" data-demo-extracted="validation">
+      <div style="max-width:560px;">
+        <div class="frow"><label class="req">规则名称</label><input class="fin" data-v="name" placeholder="如：销售部外发限制"></div>
+        <div class="ferr is-hidden" data-verr="name">请输入规则名称</div>
+        <div class="frow"><label class="req">邮箱地址</label><input class="fin" data-v="email" placeholder="如：user@corp.com 或 *@domain.com"></div>
+        <div class="ferr is-hidden" data-verr="email">请输入邮箱地址</div>
+        <div class="frow"><label class="req">阈值A</label><input class="fin" type="number" data-v="thA" placeholder="请输入阈值" style="flex:0 0 120px;"> <span style="color:#6b7280;">个</span></div>
+        <div class="ferr is-hidden" data-verr="thA">阈值A必须大于0</div>
+        <div class="frow"><label></label><button class="button-blue" type="button" data-v-save>保存</button> <span style="font-size:12px;color:#9ca3af;">（空表单直接点保存复现三条错误；填入非法邮箱如 abc 可见格式错误文案）</span></div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/behavior-rule-drawer-validation-errors.png" alt="校验错误态">
+      <figcaption>浏览器实测：空表单点保存 → 规则名称/邮箱地址/阈值A 三字段红框 + 红字提示；保存按钮随即变禁用（hasBlockingErrors），修改任一出错字段后恢复可点。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>校验项</th><th>触发条件</th><th>实际提示文案</th><th>类型</th></tr></thead>
+      <tbody>
+        <tr><td>规则名称必填</td><td>name 为空白</td><td>请输入规则名称</td><td>error</td></tr>
+        <tr><td>邮箱必填/格式</td><td>sender+individual 且邮箱空 / 不匹配 <code>^(\*@[\w.-]+\.\w+|[\w.-]+@[\w.-]+\.\w+)$</code></td><td>请输入邮箱地址 / 邮箱格式不正确，支持 *@domain.com 通配符</td><td>error</td></tr>
+        <tr><td>群组/组织必选</td><td>子类型 group/organization 且未选择</td><td>请选择发信人群组 / 请选择组织部门</td><td>error</td></tr>
+        <tr><td>IP必填/格式</td><td>senderIp+single 且空 / 不匹配 IPv4/CIDR 正则</td><td>请输入IP地址或IP段 / IP格式不正确，支持 1.2.3.4 或 1.2.3.0/24</td><td>error</td></tr>
+        <tr><td>IP群组必选</td><td>senderIp+ipGroup 且未选择</td><td>请选择IP群组</td><td>error</td></tr>
+        <tr><td>域名必填/格式</td><td>senderDomain 且空 / 不匹配 <code>^[\w.-]+\.\w+$</code></td><td>请输入域名 / 域名格式不正确</td><td>error</td></tr>
+        <tr><td>阈值A</td><td>≤0</td><td>阈值A必须大于0</td><td>error</td></tr>
+        <tr><td>阈值B</td><td>OR开启且≤0</td><td>启用OR组合时，阈值B必须大于0</td><td>error</td></tr>
+        <tr><td>优先级范围</td><td>&lt;2000 或 &gt;2049</td><td>优先级范围应为 2000-2049</td><td>error</td></tr>
+        <tr><td>有效期</td><td>早于当前日期</td><td>有效期不能早于当前日期</td><td>error</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>错误提示节点</td><td>3 个 <code>p.text-xs.text-red-500</code>：请输入规则名称 / 请输入邮箱地址 / 阈值A必须大于0（浏览器提取）</td><td>3 条同文案红字</td><td>一致</td></tr>
+          <tr><td>出错字段边框</td><td>Input 加 <code>border-red-500</code></td><td>.fin.err 红框</td><td>一致</td></tr>
+          <tr><td>保存按钮态</td><td>校验失败后 disabled（hasBlockingErrors），编辑出错字段即恢复</td><td>同逻辑复刻</td><td>一致</td></tr>
+          <tr><td>抽屉保持打开</td><td>校验失败不关闭抽屉</td><td>预览留在本层</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">2</span>2B 配置示例展开 + 2C 模拟测试（可交互复刻）</h2>
+    <div class="component-preview two-col" data-demo-extracted="examples-simulator">
+      <div>
+        <button class="collapse-btn" type="button" data-x-toggle="examples"><span>💡 查看配置示例</span><span data-x-arrow="examples">∨</span></button>
+        <div class="is-hidden" data-x-panel="examples">
+          <div class="pcard"><h6>正常用户场景</h6><p style="margin:0 0 8px;color:#6b7280;font-size:12px;">日常办公发信，不触发规则</p><div class="effect">正常用户日发50封邮件，使用2个IP，未触发规则</div></div>
+          <div class="pcard"><h6>账号被盗场景</h6><p style="margin:0 0 8px;color:#6b7280;font-size:12px;">异常高频发信，触发隔离</p><div class="effect">盗号者15分钟用10个IP发信200封，触发隔离</div></div>
+          <div class="pcard"><h6>销售部群发场景</h6><p style="margin:0 0 8px;color:#6b7280;font-size:12px;">正常业务群发，阈值宽松</p><div class="effect">销售部正常日报群发500人，域内方向阈值宽松，不触发外发规则</div></div>
+        </div>
+      </div>
+      <div>
+        <button class="collapse-btn" type="button" data-x-toggle="simulator"><span>▶ 模拟测试</span><span data-x-arrow="simulator">∨</span></button>
+        <div class="is-hidden" data-x-panel="simulator">
+          <div class="pcard">
+            <div class="grid2">
+              <div><label>测试发信人</label><input class="fin" style="width:100%;" data-s="sender" placeholder="user@example.com"></div>
+              <div><label>测试IP</label><input class="fin" style="width:100%;" data-s="ip" value="192.168.1.1"></div>
+              <div><label>测试邮件数</label><input class="fin" type="number" style="width:100%;" data-s="mail" value="50"></div>
+              <div><label>测试收信人数</label><input class="fin" type="number" style="width:100%;" data-s="rcpt" value="30"></div>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+              <label style="font-size:12px;">当前规则维度A：</label>
+              <select class="fin" style="flex:1;" data-s="dimA">
+                <option value="ip_count">使用发信IP个数上限</option><option value="recipient_count">收信人总人数上限</option><option value="mail_count" selected>发出邮件的总数上限</option><option value="attachment_size">发出附件总大小上限(MB)</option>
+              </select>
+              <input class="fin" type="number" style="flex:0 0 80px;" data-s="thA" value="30" title="阈值A">
+            </div>
+            <button class="button-blue" type="button" style="width:100%;margin-top:10px;" data-s-run>执行测试</button>
+            <div class="result-box is-hidden" data-s-result></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/behavior-rule-drawer-examples-open.png" alt="配置示例展开">
+      <figcaption>配置示例展开（浏览器实际渲染）：3 张静态示例卡（正常用户 / 账号被盗 / 销售部群发），无"使用该示例"填充按钮（差异 D-18）。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/behavior-rule-drawer-simulator-open.png" alt="模拟测试展开">
+      <figcaption>模拟测试展开：测试发信人（placeholder user@example.com）/ 测试IP（默认 192.168.1.1）/ 测试邮件数（默认 50）/ 测试收信人数（默认 30）+ 执行测试按钮。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/behavior-rule-drawer-simulator-miss.png" alt="模拟测试未命中">
+      <figcaption>未命中态（绿色）：维度A=使用发信IP个数上限（不参与模拟判定）→ "未命中 / 未触发阈值，当前测试数据未命中规则"。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/behavior-rule-drawer-simulator-hit.png" alt="模拟测试命中">
+      <figcaption>命中态（红色）：维度A切换为 发出邮件的总数上限、阈值A=30、测试邮件数=50 → "命中规则 / 触发维度A"发出邮件的总数上限"，当前50封，超过阈值30封"。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>实际行为（浏览器验证）</th><th>备注</th></tr></thead>
+      <tbody>
+        <tr><td>查看配置示例 CollapsibleTrigger</td><td>ghost 蓝字按钮，点击展开/收起，箭头 ∨/∧ 切换</td><td>Lightbulb 图标</td></tr>
+        <tr><td>示例卡 ×3</td><td>名称 + 描述 + 灰底效果说明；纯静态</td><td>CONFIG_EXAMPLES 常量；无填充按钮（D-18）</td></tr>
+        <tr><td>模拟测试 CollapsibleTrigger</td><td>同样式，Play 图标</td><td>—</td></tr>
+        <tr><td>4 个测试输入</td><td>测试发信人（空）/ 测试IP（192.168.1.1）/ 测试邮件数（50）/ 测试收信人数（30）</td><td>发信人与IP不参与命中判定（D-19）</td></tr>
+        <tr><td>执行测试按钮</td><td>全宽 primary；命中→红盒（X 命中规则 + 原因），未命中→绿盒（✓ 未命中 + "未触发阈值，当前测试数据未命中规则"）</td><td>判定：维度A/B 为 mail_count 时比较测试邮件数、recipient_count 时比较测试收信人数，≥阈值即命中；OR 任一命中即命中</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>示例卡标题（h4）</td><td>正常用户场景 / 账号被盗场景 / 销售部群发场景（浏览器提取，另有右栏"配置提示"h4）</td><td>同3卡同文案</td><td>一致</td></tr>
+          <tr><td>示例卡内含按钮</td><td>无任何"使用该示例"按钮（实测按钮清单仅"查看配置示例"）</td><td>未含按钮</td><td>一致</td></tr>
+          <tr><td>模拟测试标签</td><td>测试发信人 / 测试IP / 测试邮件数 / 测试收信人数（实测4项）</td><td>同4项</td><td>一致</td></tr>
+          <tr><td>未命中结果</td><td>"未命中 | 未触发阈值，当前测试数据未命中规则"（绿色容器）</td><td>同文案绿盒</td><td>一致</td></tr>
+          <tr><td>命中结果</td><td>"命中规则 | 触发维度A"发出邮件的总数上限"，当前50封，超过阈值30封"（红色容器）</td><td>同文案模板红盒</td><td>一致</td></tr>
+          <tr><td>预览增补控件</td><td>demo 中维度A/阈值A属于左栏表单</td><td>预览为便于独立演示将维度A/阈值A内联到模拟面板（已标注）</td><td>一致（演示性增补，逻辑同 demo runSimulation）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="./layer-1-new-rule-drawer.html">← 层级 1：规则编辑抽屉</a>
+    <a href="./layer-3-confirm-dialogs.html">层级 3：确认对话框 →</a>
+  </nav>
+
+  <script>
+    // 2A 校验复刻
+    const q = (s) => document.querySelector(s);
+    q("[data-v-save]").addEventListener("click", () => {
+      const name = q('[data-v="name"]'), email = q('[data-v="email"]'), thA = q('[data-v="thA"]');
+      const errs = {};
+      if (!name.value.trim()) errs.name = "请输入规则名称";
+      const ev = email.value.trim();
+      if (!ev) errs.email = "请输入邮箱地址";
+      else if (!/^(\*@[\w.-]+\.\w+|[\w.-]+@[\w.-]+\.\w+)$/.test(ev)) errs.email = "邮箱格式不正确，支持 *@domain.com 通配符";
+      if ((parseInt(thA.value) || 0) <= 0) errs.thA = "阈值A必须大于0";
+      [["name", name], ["email", email], ["thA", thA]].forEach(([k, el]) => {
+        const errEl = q(`[data-verr="${k}"]`);
+        errEl.classList.toggle("is-hidden", !errs[k]);
+        if (errs[k]) errEl.textContent = errs[k];
+        el.classList.toggle("err", !!errs[k]);
+      });
+      const btn = q("[data-v-save]");
+      btn.disabled = Object.keys(errs).length > 0;
+      if (btn.disabled) setTimeout(() => { btn.disabled = false; }, 1500); // 复刻"编辑出错字段后恢复"：预览用定时恢复便于反复演示
+    });
+    // 2B/2C 折叠 + 模拟
+    document.querySelectorAll("[data-x-toggle]").forEach(b => b.addEventListener("click", () => {
+      const key = b.dataset.xToggle;
+      const panel = q(`[data-x-panel="${key}"]`);
+      panel.classList.toggle("is-hidden");
+      q(`[data-x-arrow="${key}"]`).textContent = panel.classList.contains("is-hidden") ? "∨" : "∧";
+    }));
+    q("[data-s-run]").addEventListener("click", () => {
+      const dimA = q('[data-s="dimA"]').value;
+      const thA = parseInt(q('[data-s="thA"]').value) || 0;
+      const mail = parseInt(q('[data-s="mail"]').value) || 0;
+      const rcpt = parseInt(q('[data-s="rcpt"]').value) || 0;
+      const DIMT = { ip_count: "使用发信IP个数上限", recipient_count: "收信人总人数上限", mail_count: "发出邮件的总数上限", attachment_size: "发出附件总大小上限(MB)" };
+      let hit = false, reason = "";
+      if (dimA === "mail_count" && mail >= thA) { hit = true; reason = `触发维度A"${DIMT[dimA]}"，当前${mail}封，超过阈值${thA}封`; }
+      else if (dimA === "recipient_count" && rcpt >= thA) { hit = true; reason = `触发维度A"${DIMT[dimA]}"，当前${rcpt}人，超过阈值${thA}人`; }
+      const box = q("[data-s-result]");
+      box.classList.remove("is-hidden", "hit", "miss");
+      box.classList.add(hit ? "hit" : "miss");
+      box.innerHTML = hit ? `<b>✕ 命中规则</b><br>${reason}` : `<b>✓ 未命中</b><br>未触发阈值，当前测试数据未命中规则`;
+    });
+  </script>
+</body>
+</html>

@@ -185,7 +185,7 @@ export function CheckItemRow({
               {t(`${warningI18nKey}.cancel` as any)}
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-amber-600 hover:bg-amber-700 text-white"
+              className="border-warning/80 bg-warning text-white data-[hovered=true]:bg-warning/90 active:bg-warning/85"
               onClick={() => {
                 onChange({ ...item, enabled: true });
                 setPendingEnable(false);

@@ -81,15 +81,15 @@ describe('buildThreatTrendOption', () => {
       boundaryGap: true,
       data: ['2026-07-24'],
     });
-    expect(option?.series).toHaveLength(5);
-    expect(option?.series[0]).toMatchObject({
+    expect(option?.series).toHaveLength(11);
+    expect(option?.series.find((series) => series.name === 'phishing')).toMatchObject({
       name: 'phishing',
       type: 'bar',
       stack: 'total',
       barMaxWidth: 72,
       data: [2413],
     });
-    expect(option?.series[2]).toMatchObject({
+    expect(option?.series.find((series) => series.name === 'spam')).toMatchObject({
       name: 'spam',
       type: 'bar',
       data: [4109],
@@ -108,11 +108,11 @@ describe('buildThreatTrendOption', () => {
       boundaryGap: false,
       data: ['2026-07-23', '2026-07-24'],
     });
-    expect(option?.series[0]).toMatchObject({
+    expect(option?.series.find((series) => series.name === 'phishing')).toMatchObject({
       type: 'line',
       symbol: 'none',
       data: [1, 3],
     });
-    expect(option?.series[0]).toHaveProperty('areaStyle');
+    expect(option?.series.find((series) => series.name === 'phishing')).toHaveProperty('areaStyle');
   });
 });

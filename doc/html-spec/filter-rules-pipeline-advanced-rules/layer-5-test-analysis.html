@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 5：测试与分析 Tab - 高级过滤规则</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --border: oklch(0.922 0 0); --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0); --radius: 0.625rem; --font-sans: "Geist", system-ui, sans-serif; --font-mono: "Geist Mono", monospace; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { margin: 0 auto; max-width: 1280px; padding: 2rem; font-family: var(--font-sans); background: var(--background); color: #1f2937; line-height: 1.6; }
+    .layer-nav, header, section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+    .layer-nav { display: flex; justify-content: space-between; }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1 { color: var(--primary); font-size: 1.3rem; margin-bottom: 0.75rem; }
+    h2 { font-size: 1.1rem; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.4rem; margin-bottom: 1rem; }
+    table.spec-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 0.55rem 0.7rem; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); white-space: nowrap; }
+    img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    figure { margin: 1rem 0; text-align: center; }
+    figcaption { font-size: 0.8rem; color: var(--muted-foreground); margin-top: 0.4rem; }
+    code { font-family: var(--font-mono); font-size: 0.85em; background: var(--muted); padding: 0.1em 0.35em; border-radius: 4px; }
+    .pass { color: #15803d; font-weight: 700; }
+    .component-preview { border: 2px dashed oklch(0.75 0.1 262); border-radius: var(--radius); padding: 1.25rem; margin: 1rem 0; background: #f5f7fa; }
+    .component-preview::before { content: "▶ 可交互组件预览（时间范围切换 / 按钮反馈可操作；demo 中本 Tab 多为占位交互 D-12）"; display: block; font-size: 0.75rem; color: var(--primary); margin-bottom: 0.9rem; font-weight: 600; }
+    .dom-comparison { background: oklch(0.97 0.02 150); border: 1px solid oklch(0.8 0.08 150); border-radius: var(--radius); padding: 0.75rem 1rem; margin: 0.75rem 0; }
+
+    .tw { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 20px; max-width: 1000px; margin: 0 auto; }
+    .tw h5 { font-size: 14px; margin: 14px 0 8px; }
+    .tw h5:first-child { margin-top: 0; }
+    .drop { border: 2px dashed #d1d5db; border-radius: 10px; padding: 24px; text-align: center; color: #6b7280; font-size: 13px; }
+    .drop button, .tw .act { border: 1px solid #d1d5db; background: #fff; border-radius: 8px; padding: 6px 14px; font-size: 13px; cursor: pointer; margin: 6px 4px 0; }
+    .tw .primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+    .anal-head { display: flex; justify-content: space-between; align-items: center; }
+    .anal-head select { border: 1px solid #d1d5db; border-radius: 8px; padding: 5px 9px; font-size: 12.5px; }
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 10px 0; }
+    .mc { border-radius: 10px; padding: 14px; text-align: center; }
+    .mc .v { font-size: 22px; font-weight: 700; }
+    .mc .l { font-size: 12px; color: #6b7280; }
+    .mc1 { background: #eff6ff; border: 1px solid #bfdbfe; } .mc1 .v { color: #1d4ed8; }
+    .mc2 { background: #f0fdf4; border: 1px solid #bbf7d0; } .mc2 .v { color: #16a34a; }
+    .mc3 { background: #fffbeb; border: 1px solid #fde68a; } .mc3 .v { color: #d97706; }
+    .mc4 { background: #faf5ff; border: 1px solid #e9d5ff; } .mc4 .v { color: #9333ea; }
+    .chart { border: 1px solid #e5e7eb; border-radius: 10px; height: 120px; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 13px; }
+    .ht { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+    .ht th { text-align: left; color: #6b7280; font-weight: 500; padding: 7px 9px; border-bottom: 1px solid #e5e7eb; }
+    .ht td { padding: 8px 9px; border-bottom: 1px solid #f3f4f6; }
+    .ht button { border: 0; background: none; color: var(--primary); cursor: pointer; font-size: 13px; }
+    .fb { display: none; margin-top: 8px; font-size: 0.8rem; color: #92400e; background: #fef3c7; border-radius: 6px; padding: 0.45rem 0.7rem; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-2">← 返回主文件</a>
+    <span><a href="./layer-4-actions.html">← 层级 4</a></span>
+  </nav>
+
+  <header>
+    <h1>交互层级 5：测试与分析 Tab</h1>
+    <table class="spec-table">
+      <tr><td style="width:120px"><b>所属组件</b></td><td>3.2 规则编辑抽屉 → 测试与分析 Tab</td></tr>
+      <tr><td><b>主文件</b></td><td><a href="./index.html">filter-rules-pipeline-advanced-rules/index.html</a></td></tr>
+      <tr><td><b>触发路径</b></td><td>层级2 抽屉内点击「测试与分析」Tab（编辑已有规则时指标卡回填该规则 statistics）</td></tr>
+      <tr><td><b>demo 源</b></td><td>L4724-4874：规则测试（4725-4754）/ 效果分析（4756-4809）/ 历史版本（4812-4873）</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h2>可交互组件预览</h2>
+    <div class="component-preview">
+      <div class="tw">
+        <h5>规则测试</h5>
+        <div class="drop">⬆ 拖拽EML文件到此处<br><button id="pick">点击选择文件</button><div style="font-size:11.5px;margin-top:4px">支持 .eml 格式，最大 10MB</div></div>
+        <button class="act primary" id="runTest">▶ 开始测试</button>
+        <div class="fb" id="fb1">demo 行为：占位交互——上传与测试无实际逻辑（主文件 §9 D-12，落地范围见 Q-10）</div>
+
+        <h5 style="display:flex;justify-content:space-between;align-items:center">效果分析
+          <span><select id="range"><option>最近24小时</option><option selected>最近7天</option><option>最近30天</option></select> <button class="act" id="refresh">⟳ 刷新数据</button></span>
+        </h5>
+        <div class="cards">
+          <div class="mc mc1"><div class="v">1234</div><div class="l">命中次数</div></div>
+          <div class="mc mc2"><div class="v">5678</div><div class="l">处理邮件数</div></div>
+          <div class="mc mc3"><div class="v">0.5%</div><div class="l">误报率</div></div>
+          <div class="mc mc4"><div class="v">95分</div><div class="l">有效性评分</div></div>
+        </div>
+        <div class="chart">📊 命中趋势图展示区域</div>
+        <div class="fb" id="fb2">demo 行为：时间范围仅切换选中值，四项指标为规则 statistics 静态值，趋势图为占位框（D-12）。「刷新数据」按钮文案在 demo 中含乱码「刷新��据」（D-6）</div>
+
+        <h5 style="display:flex;justify-content:space-between;align-items:center">历史版本 <span><button class="act">⬇ PDF</button><button class="act">⬇ CSV</button></span></h5>
+        <table class="ht">
+          <thead><tr><th>版本</th><th>修改时间</th><th>修改人</th><th>修改内容</th><th style="text-align:right">操作</th></tr></thead>
+          <tbody>
+            <tr><td>v3</td><td>2025-01-15 14:30</td><td>admin</td><td>新增条件</td><td style="text-align:right"><button class="rb">↺ 回滚</button></td></tr>
+            <tr><td>v2</td><td>2025-01-10 09:15</td><td>admin</td><td>修改动作</td><td style="text-align:right"><button class="rb">↺ 回滚</button></td></tr>
+            <tr><td>v1</td><td>2025-01-05 08:00</td><td>admin</td><td>初始版本</td><td style="text-align:right"><button class="rb">查看</button></td></tr>
+          </tbody>
+        </table>
+        <div class="fb" id="fb3">demo 行为：历史版本为静态 mock，回滚/查看/导出均无逻辑（D-12）</div>
+      </div>
+    </div>
+
+    <figure><img src="./screenshots/layer5-test-top.png" alt="规则测试区"><figcaption>规则测试区：EML 拖拽上传框 + 开始测试按钮 + 测试结果占位（编辑规则1 进入）。</figcaption></figure>
+    <figure><img src="./screenshots/layer5-analysis-cards.png" alt="效果分析与历史版本"><figcaption>效果分析四指标卡（1234 / 5678 / 0.5% / 95分，蓝绿琥珀紫四色）+ 命中趋势图占位 + 历史版本表（注意「刷新��据」乱码）。</figcaption></figure>
+    <figure><img src="./screenshots/layer5-history-table.png" alt="历史版本表"><figcaption>历史版本表：版本/修改时间/修改人/修改内容/操作（v3、v2 回滚，v1 查看）+ PDF/CSV 导出按钮。</figcaption></figure>
+  </section>
+
+  <section>
+    <h2>UI 元素清单</h2>
+    <table class="spec-table">
+      <thead><tr><th>分区</th><th>元素</th><th>规格</th><th>行为</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="3">规则测试</td><td>EML 拖拽区</td><td>虚线框，Upload 图标 +「拖拽EML文件到此处」+「点击选择文件」按钮 +「支持 .eml 格式，最大 10MB」</td><td>纯静态占位（D-12）</td></tr>
+        <tr><td>开始测试</td><td>primary Button（Play 图标）</td><td>无实际逻辑</td></tr>
+        <tr><td>测试结果区</td><td>占位区域</td><td>—</td></tr>
+        <tr><td rowspan="4">效果分析</td><td>时间范围</td><td>Select：最近24小时 / 最近7天（默认）/ 最近30天</td><td>仅切换选中值</td></tr>
+        <tr><td>刷新数据</td><td>Button（RotateCcw 图标；文案乱码 D-6）</td><td>无实际逻辑</td></tr>
+        <tr><td>指标卡 ×4</td><td>命中次数（蓝，statistics.hitCount）/ 处理邮件数（绿）/ 误报率（琥珀，%）/ 有效性评分（紫，N分）；grid-cols-4</td><td>编辑态回填规则 statistics（经 rule prop，不受 D-3 影响）；新建为空/默认</td></tr>
+        <tr><td>命中趋势图</td><td>占位框（BarChart3 图标，h-48）</td><td>—</td></tr>
+        <tr><td rowspan="2">历史版本</td><td>导出按钮</td><td>PDF / CSV（Download 图标）</td><td>无实际逻辑</td></tr>
+        <tr><td>版本表</td><td>列：版本/修改时间/修改人/修改内容/操作；3 行静态 mock（v3 新增条件、v2 修改动作 → 回滚；v1 初始版本 → 查看）</td><td>回滚 History 图标按钮，无逻辑</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="dom-comparison">
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM（Playwright 提取，Tab 面板总节点 108，根 3 个分区子节点）</th><th>预览还原 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td>tabpanel <code>space-y-6</code>，3 个直接子区块（规则测试/效果分析/历史版本）</td><td><code>.tw</code> 同 3 分区同顺序</td><td class="pass">一致</td></tr>
+        <tr><td>上传区</td><td>虚线框 + Upload svg + 两行文案 + 按钮 + 10MB 附注</td><td>同结构同文案</td><td class="pass">一致</td></tr>
+        <tr><td>指标卡</td><td>grid-cols-4，值 1234/5678/0.5%/95分，蓝/绿/琥珀/紫底（截图核对）</td><td>同 4 卡同值同色系</td><td class="pass">一致</td></tr>
+        <tr><td>历史表</td><td>5 列 3 行：v3/v2 带回滚按钮，v1 带查看（截图逐字核对）</td><td>同表内容</td><td class="pass">一致</td></tr>
+        <tr><td>条件渲染</td><td>测试结果区默认为占位（未执行测试态）；趋势图恒占位</td><td>同占位呈现</td><td class="pass">一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+<script>
+(function () {
+  function fb(id) { var e = document.getElementById(id); e.style.display = 'block'; }
+  document.getElementById('pick').addEventListener('click', function () { fb('fb1'); });
+  document.getElementById('runTest').addEventListener('click', function () { fb('fb1'); });
+  document.getElementById('refresh').addEventListener('click', function () { fb('fb2'); });
+  document.getElementById('range').addEventListener('change', function () { fb('fb2'); });
+  document.querySelectorAll('.rb').forEach(function (b) { b.addEventListener('click', function () { fb('fb3'); }); });
+  document.querySelectorAll('.act').forEach(function (b) { if (!b.id) b.addEventListener('click', function () { fb('fb3'); }); });
+})();
+</script>
+</body>
+</html>

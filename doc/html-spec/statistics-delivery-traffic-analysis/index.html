@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投递与流量分析 - HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  .component-preview { background:#fff; overflow-x:auto; }
+  .pass { color:#15803d; font-weight:600; }
+  .bad { color:#b91c1c; font-weight:600; }
+  .warn { color:#a16207; font-weight:600; }
+  .tag-base { display:inline-block; padding:.05rem .375rem; border-radius:.25rem; font-size:.6875rem; font-weight:600; background:#dbeafe; color:#1d4ed8; }
+  .tag-overlay { background:#fef3c7; color:#92400e; }
+  .tag-gap { background:#fee2e2; color:#b91c1c; }
+  .swatch { display:inline-block; width:.75rem; height:.75rem; border-radius:2px; vertical-align:-1px; margin-right:.25rem; border:1px solid rgba(0,0,0,.1); }
+  .fix-table td:nth-child(2) { color:#b91c1c; font-family:var(--font-mono); }
+  .spec-swap-bar { display:flex; align-items:center; gap:.375rem; flex-wrap:wrap; margin-bottom:.75rem; padding-bottom:.5rem; border-bottom:1px dashed var(--border); font-size:.75rem; color:var(--muted-foreground); }
+  .spec-swap-bar button { font:inherit; padding:.15rem .5rem; border:1px solid var(--border); background:#fff; border-radius:.25rem; cursor:pointer; color:var(--foreground); }
+  .spec-swap-bar button:hover { background:var(--muted); }
+  .spec-swap-bar button.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+  .fix-table td:nth-child(3) { color:#15803d; font-weight:600; }
+
+  /* ===== v2 补充：shadcn 语义色桥接（Tailwind CDN 不认识 demo 的自定义 token 类；取值自 demo globals.css 亮色主题） ===== */
+  .component-preview .bg-primary { background-color: oklch(0.52 0.226 262); }
+  .component-preview .text-primary-foreground { color: oklch(0.985 0 0); }
+  .component-preview .text-primary { color: oklch(0.52 0.226 262); }
+  .component-preview .bg-secondary { background-color: oklch(0.97 0 0); }
+  .component-preview .text-secondary-foreground { color: oklch(0.205 0 0); }
+  .component-preview .bg-destructive { background-color: oklch(0.577 0.245 27.325); }
+  .component-preview .text-destructive { color: oklch(0.577 0.245 27.325); }
+  .component-preview .bg-muted { background-color: oklch(0.97 0 0); }
+  .component-preview .text-muted-foreground { color: oklch(0.556 0 0); }
+  .component-preview .bg-card { background-color: oklch(1 0 0); }
+  .component-preview .text-card-foreground { color: oklch(0.145 0 0); }
+  .component-preview .bg-popover { background-color: oklch(1 0 0); }
+  .component-preview .text-popover-foreground { color: oklch(0.145 0 0); }
+  .component-preview .bg-accent { background-color: oklch(0.52 0.226 262); }
+  .component-preview .text-accent-foreground { color: oklch(0.985 0 0); }
+  .component-preview .bg-background { background-color: oklch(0.98 0.01 205); }
+  .component-preview .text-foreground { color: oklch(0.145 0 0); }
+  .component-preview .border-border { border-color: oklch(0.922 0 0); }
+  .component-preview .border-input { border-color: oklch(0.922 0 0); }
+  /* v2 补充：半径对齐 demo shadcn v4 半径体系（--radius=10px 推导；CDN v3 缺省值不同） */
+  .component-preview .rounded-xl { border-radius: 14px; }
+  .component-preview .rounded-lg { border-radius: 10px; }
+  .component-preview .rounded-md { border-radius: 8px; }
+  .component-preview .rounded-sm { border-radius: 6px; }
+  /* v2 补充：调色板对齐 demo Tailwind v4 实测计算色（CDN v3 调色板与 v4 有可见差异，如 blue-500 Δ16） */
+  .component-preview .bg-blue-50 { background-color: lab(96.492 -1.14644 -5.11479); }
+  .component-preview .bg-blue-500 { background-color: lab(54.1736 13.3369 -74.6839); }
+  .component-preview .bg-gray-100 { background-color: lab(96.1596 -0.0823438 -1.13575); }
+  .component-preview .bg-gray-50 { background-color: lab(98.2596 -0.247031 -0.706708); }
+  .component-preview .bg-gray-700 { background-color: rgba(0, 0, 0, 0); }
+  .component-preview .bg-green-50 { background-color: lab(98.1563 -5.60117 2.75915); }
+  .component-preview .bg-purple-50 { background-color: lab(97.1627 2.99937 -4.13398); }
+  .component-preview .border-gray-100 { border-color: lab(96.1596 -0.0823438 -1.13575); }
+  .component-preview .border-gray-200 { border-color: lab(91.6229 -0.159115 -2.26791); }
+  .component-preview .border-gray-300 { border-color: lab(85.1236 -0.612259 -3.7138); }
+  .component-preview .text-blue-600 { color: lab(44.0605 29.0279 -86.0352); }
+  .component-preview .text-gray-500 { color: lab(47.7841 -0.393182 -10.0268); }
+  .component-preview .text-gray-600 { color: lab(35.6337 -1.58697 -10.8425); }
+  .component-preview .text-gray-700 { color: lab(27.1134 -0.956401 -12.3224); }
+  .component-preview .text-green-500 { color: lab(70.5521 -66.5147 45.8073); }
+  .component-preview .text-green-600 { color: lab(59.0978 -58.6621 41.2579); }
+  .component-preview .text-orange-500 { color: lab(64.272 57.1788 90.3583); }
+  .component-preview .text-purple-600 { color: lab(43.0295 75.21 -86.5669); }
+  .component-preview .text-red-500 { color: lab(55.4814 75.0732 48.8528); }
+  .component-preview .text-red-600 { color: lab(48.4493 77.4328 61.5452); }
+  .component-preview .from-purple-500.to-blue-500 { background-image: linear-gradient(to right, lab(52.0183 66.11 -78.2316) 0%, lab(54.1736 13.3369 -74.6839) 100%); }
+  /* v2 补充：预览内自定义下拉/气泡 */
+  .rs-tip { position: fixed; z-index: 9999; max-width: 300px; background: #111827; color: #fff; font-size: 12px;
+    padding: 6px 10px; border-radius: 6px; pointer-events: none; display: none; line-height: 1.5; }
+  .rs-menu { position: absolute; z-index: 60; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12); padding: 4px; min-width: 160px; max-height: 320px; overflow: auto; display: none; }
+  .rs-menu .rs-opt { padding: 6px 10px; font-size: 13px; border-radius: 6px; cursor: pointer; }
+  .rs-menu .rs-opt:hover { background: #f3f4f6; }
+  .rs-menu .rs-opt.rs-checked { background: #eff6ff; font-weight: 600; }
+  .rs-menu .rs-foot { padding: 6px 8px; font-size: 11px; color: #9ca3af; border-top: 1px solid #e5e7eb; margin-top: 2px; max-width: 240px; }
+</style>
+</head>
+<body>
+<header class="spec-header">
+  <h1>投递与流量分析（/statistics/delivery-traffic-analysis）详细产品规格说明</h1>
+  <table class="meta-table">
+    <tr><td>规格版本</td><td><span class="spec-version">v2</span></td></tr>
+    <tr><td>生成日期</td><td>2026-07-22</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td><code>8db3a98</code></td></tr>
+    <tr><td>demo 路由</td><td><code>/statistics/delivery-traffic-analysis</code>（统计报表 &gt; 投递与流量分析）</td></tr>
+    <tr><td>demo 源码</td><td><code>demo/components/statistics/delivery-traffic-analysis-page.tsx</code>（811 行，recharts）</td></tr>
+    <tr><td>spec 源文档</td><td><code>spec/投递与流量分析 功能需求文档.md</code>（437 行，8 章，含 19 条测试用例 TC-001~TC-019）</td></tr>
+    <tr><td>核心特征</td><td><strong>方向驱动的整页重建</strong>：全部 / 接收 / 外发 / 域内 四个方向，各自有独立的 KPI 组、图表组、明细表列集。扩展分析区仅在外发/域内出现</td></tr>
+    <tr><td class="bad">⚠ i18n 中文已修复</td><td>本页用到 <strong>12 条</strong>被 UTF-8 损坏的中文（含「<span class="bad">��</span>量」「反<span class="bad">��</span>圾<span class="bad">��</span>理队列」「本<span class="bad">����</span>箱已满」）。<strong>截图与预览已在运行态修复后抓取</strong>，对照表见 §7.1</td></tr>
+  </table>
+</header>
+
+<nav class="component-toc">
+  <h2>📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#c-1">2.1 全局筛选条（方向 ×4 + 时间范围）</a><span class="toc-badge">1层</span></li>
+    <li><a href="#c-2">2.2 KPI 指标卡 ×5（随方向整组替换）</a><span class="toc-badge">4层</span>
+      <span class="toc-layer-links"><a href="./layer-1-direction-inbound.html">接收</a><a href="./layer-2-direction-outbound.html">外发</a><a href="./layer-3-direction-internal.html">域内</a></span></li>
+    <li><a href="#c-3">2.3 主分析区（趋势图 + 辅助图，随方向切换）</a><span class="toc-badge">4层</span></li>
+    <li><a href="#c-4">2.4 扩展分析区（仅外发/域内）</a><span class="toc-badge">2层</span></li>
+    <li><a href="#c-5">2.5 队列健康状态卡</a><span class="toc-badge">2层</span>
+      <span class="toc-layer-links"><a href="./layer-4-queue-health.html">展开态</a></span></li>
+    <li><a href="#c-6">2.6 明细数据表（动态列）</a><span class="toc-badge">4层</span></li>
+    <li><a href="#c-7">2.7 底部操作栏</a><span class="toc-badge">1层</span></li>
+  </ul>
+</nav>
+
+<section id="version-history">
+  <h2>0.2 版本历史</h2>
+  <table class="spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody>
+      <tr><td>v2</td><td>2026-07-22</td><td><code>804efb9</code></td><td><code>8db3a98</code></td><td>修复预览区样式与补齐交互：补 Tailwind CDN + shadcn 语义色桥接 + 半径/调色板按 demo Tailwind v4 实测对齐（v1 提取的 Tailwind/token 类无样式支撑，预览视觉与 demo 不一致；CDN v3 调色板与 v4 有可见差异如 blue-500 Δ16）；在共享 swap 快照引擎（assets/stats-preview.js，v1 已有）之上补齐缺失交互：静态操作栏方向按钮高亮并联动全页快照、时间/租户下拉、队列卡展开折叠（接收/外发追加两行明细）、无行为按钮悬浮说明。demo/spec 源未变。</td></tr><tr><td>v1</td><td>2026-07-14</td><td><code>804efb9</code></td><td><code>8db3a98</code></td><td>初版：4 个方向的完整 KPI/图表/表格矩阵、队列健康卡、扩展分析区；修复 12 条损坏中文；标注 PRD 自相矛盾 2 处 + demo 差异 10 处；网关 <code>/statistics/delivery-traffic</code> 已存在</td></tr></tbody>
+  </table>
+</section>
+
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/layer-0-all-full.png" alt="整页默认态（全部方向）">
+    <figcaption>整页默认态（方向=全部）。中文已修复：副标题原为「分析邮<span class="bad">��</span>投递状态…」。</figcaption>
+  </figure>
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>全部</th><th>接收</th><th>外发</th><th>域内</th></tr></thead>
+    <tbody>
+      <tr><td>KPI（5 卡）</td><td>接收总量 / 外发总量 / 域内总量 / 总投递成功率 / 总队列积压</td><td>接收总量 / 接收成功率 / 接收侧退信率 / 平均接收延迟 / 反垃圾处理队列</td><td>外发总量 / 外发成功率 / 外发退信率 / 外发延迟P99 / 外发队列积压</td><td>域内总量 / 域内成功率 / 内部威胁检出率 / 平均域内延迟 / DLP拦截量</td></tr>
+      <tr><td>主图</td><td>三向流量对比（3 线）</td><td>接收流量趋势分析（面积）</td><td>外发流量趋势分析</td><td>域内流量趋势分析</td></tr>
+      <tr><td>辅助图</td><td>三向流量占比（饼）</td><td>接收侧退信原因</td><td>目标域名退信率TOP</td><td>内部威胁类型分布</td></tr>
+      <tr><td>扩展区</td><td class="bad">无</td><td class="bad">无</td><td class="pass">外发延迟分位数 + 外发队列积压趋势</td><td class="pass">DLP策略命中TOP5 + 域内延迟分布</td></tr>
+      <tr><td>队列健康卡</td><td colspan="4">四个方向都有（灰/蓝/绿/紫底）</td></tr>
+      <tr><td>明细表</td><td colspan="4">固定列（日期/总量/成功/失败/成功率/环比）+ 动态列（随方向）</td></tr>
+      <tr><td>操作栏</td><td colspan="4">导出 CSV / 生成报告 / AI 解读</td></tr>
+    </tbody>
+  </table>
+  <p class="pass">✅ demo 实测卡片数：全部/接收 = 9 张（5 KPI + 主图 + 辅助图 + 队列 + 明细），外发/域内 = <strong>11 张</strong>（多出扩展区 2 张）—— 与 PRD「扩展分析区仅发件/内部显示」一致。</p>
+</section>
+
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <article class="component-spec" id="c-1">
+    <h3>2.1 全局筛选条</h3>
+    <div class="component-preview" data-preview="static"><div class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm"><div class="flex items-center gap-4"><div class="flex items-center gap-2 border-b border-gray-200 bg-white px-4 py-2.5 dark:border-gray-800 dark:bg-gray-950"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-building2 h-4 w-4 flex-shrink-0 text-gray-500" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg><span class="text-sm text-gray-600 dark:text-gray-400">租户范围</span><button data-slot="popover-trigger" class="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 px-4 py-2 has-[&gt;svg]:px-3 justify-between font-normal h-8 w-64" role="combobox" aria-expanded="false" aria-label="选择租户范围" type="button" aria-haspopup="dialog" aria-controls="radix-_R_1kd5esnebn9lb_" data-state="closed"><span class="truncate">全部租户</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-up-down ml-2 h-4 w-4 flex-shrink-0 opacity-50" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button></div><div class="flex gap-0 border border-gray-300 dark:border-gray-600 rounded overflow-hidden"><button class="px-4 py-1.5 text-sm border-r border-gray-300 dark:border-gray-600 last:border-r-0 bg-blue-500 text-white">全部</button><button class="px-4 py-1.5 text-sm border-r border-gray-300 dark:border-gray-600 last:border-r-0 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">接收</button><button class="px-4 py-1.5 text-sm border-r border-gray-300 dark:border-gray-600 last:border-r-0 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">外发</button><button class="px-4 py-1.5 text-sm border-r border-gray-300 dark:border-gray-600 last:border-r-0 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">域内</button></div><button type="button" role="combobox" aria-controls="radix-_R_cd5esnebn9lb_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-32"><span data-slot="select-value" style="pointer-events:none">近7日</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div></div>
+    <table class="spec-table">
+      <thead><tr><th>控件</th><th>选项</th><th>默认</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>租户范围</td><td>全部租户 + 各租户</td><td>全部租户</td><td class="bad">PRD <strong>完全没提多租户</strong>，demo 却有租户选择器 → §9 D1（反向差异）</td></tr>
+        <tr><td>收发方向</td><td>全部 / 接收 / 外发 / 域内</td><td>全部</td><td>切换 → KPI/图表/表格<strong>全部重建</strong></td></tr>
+        <tr><td>时间范围</td><td>今日 / 近7日 / 近30日 / 本月 / 上月</td><td>近7日</td><td class="bad">PRD 要求「超过 90 天提示」「禁选未来日期」→ demo 是固定枚举下拉，<strong>没有自定义日期</strong>，也就无从校验</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+  <h5>DOM 树比对结果</h5>
+  <table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody><tr><td>根节点</td><td><code>div.flex.items-center.justify-between.bg-white</code></td><td>同</td><td class="pass">一致</td></tr>
+<tr><td>后代节点数</td><td>25</td><td>25</td><td class="pass">一致</td></tr>
+<tr><td>方向按钮</td><td>4</td><td>4</td><td class="pass">一致</td></tr>
+<tr><td>自定义日期输入</td><td><strong>不存在</strong>（与安全总览页不同）</td><td>不包含</td><td class="pass">一致</td></tr></tbody>
+  </table>
+</div>
+  </article>
+
+  <article class="component-spec" id="c-2">
+    <h3>2.2 + 2.3 KPI 与主分析区 —— 可交互预览：4 个方向真实切换</h3>
+    <p>预览区嵌入 demo 在四个方向下的<strong>真实 DOM 快照</strong>（含真实 recharts SVG）。点方向按钮即可看到 KPI 组、图表整组替换。</p>
+    <div class="preview-hint">点「全部 / 接收 / 外发 / 域内」——KPI 五卡会整组换掉</div>
+    <div class="component-preview" data-preview="swap" data-swap-map='{"全部":"all","接收":"inbound","外发":"outbound","域内":"internal"}'>
+      <div data-swap-panel="all" data-swap-label="全部"><div class="grid grid-cols-2 lg:grid-cols-5 gap-4"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">接收总量</p><p class="text-2xl font-bold" style="color:#1890FF">89,234</p></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-to-line w-5 h-5" style="color:#1890FF"><path d="M12 17V3"></path><path d="m6 11 6 6 6-6"></path><path d="M19 21H5"></path></svg></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">外发总量</p><p class="text-2xl font-bold" style="color:#52C41A">45,678</p></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-from-line w-5 h-5" style="color:#52C41A"><path d="m18 9-6-6-6 6"></path><path d="M12 3v14"></path><path d="M5 21h14"></path></svg></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">域内总量</p><p class="text-2xl font-bold" style="color:#722ED1">12,345</p></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw w-5 h-5" style="color:#722ED1"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">总投递成功率</p><p class="text-2xl font-bold" style="color:#10b981">96.5%</p><div class="flex items-center gap-1 mt-1 text-xs text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-3 h-3"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span>+<!-- -->1.2<!-- -->%</span></div></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">总队列积压</p><p class="text-2xl font-bold" style="color:#f59e0b">1,234</p><div class="flex items-center gap-1 mt-1 text-xs text-green-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-down w-3 h-3"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline><polyline points="16 17 22 17 22 11"></polyline></svg><span>-5.3<!-- -->%</span></div></div></div></div></div></div></div>
+      <div data-swap-panel="inbound" data-swap-label="接收" hidden><div class="grid grid-cols-2 lg:grid-cols-5 gap-4"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">接收总量</p><p class="text-2xl font-bold" style="color:#1890FF">89,234</p></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-to-line w-5 h-5" style="color:#1890FF"><path d="M12 17V3"></path><path d="m6 11 6 6 6-6"></path><path d="M19 21H5"></path></svg></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">接收成功率</p><p class="text-2xl font-bold" style="color: rgb(16, 185, 129);">97.2%</p><div class="flex items-center gap-1 mt-1 text-xs text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-3 h-3"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span>+0.5%</span></div></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">接收侧退信率</p><p class="text-2xl font-bold" style="color: rgb(239, 68, 68);">2.1%</p><div class="flex items-center gap-1 mt-1 text-xs text-green-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-down w-3 h-3"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline><polyline points="16 17 22 17 22 11"></polyline></svg><span>-0.3%</span></div></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">平均接收延迟</p><p class="text-2xl font-bold" style="color: rgb(59, 130, 246);">1.2s</p></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">反垃圾处理队列</p><p class="text-2xl font-bold" style="color: rgb(245, 158, 11);">234</p></div></div></div></div></div></div>
+      <div data-swap-panel="outbound" data-swap-label="外发" hidden><div class="grid grid-cols-2 lg:grid-cols-5 gap-4"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">外发总量</p><p class="text-2xl font-bold" style="color: rgb(82, 196, 26);">45,678</p></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-from-line w-5 h-5" style="color: rgb(82, 196, 26);"><path d="m18 9-6-6-6 6"></path><path d="M12 3v14"></path><path d="M5 21h14"></path></svg></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">外发成功率</p><p class="text-2xl font-bold" style="color: rgb(16, 185, 129);">94.8%</p><div class="flex items-center gap-1 mt-1 text-xs text-green-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-down w-3 h-3"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline><polyline points="16 17 22 17 22 11"></polyline></svg><span>-0.8%</span></div></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">外发退信率</p><p class="text-2xl font-bold" style="color: rgb(239, 68, 68);">3.5%</p><div class="flex items-center gap-1 mt-1 text-xs text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-3 h-3"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span>+0.5%</span></div></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">外发延迟P99</p><p class="text-2xl font-bold" style="color: rgb(245, 158, 11);">28.5s</p></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">外发队列积压</p><p class="text-2xl font-bold" style="color: rgb(239, 68, 68);">876</p><div class="flex items-center gap-1 mt-1 text-xs text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-3 h-3"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span>+12.3%</span></div></div></div></div></div></div></div>
+      <div data-swap-panel="internal" data-swap-label="域内" hidden><div class="grid grid-cols-2 lg:grid-cols-5 gap-4"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">域内总量</p><p class="text-2xl font-bold" style="color: rgb(114, 46, 209);">12,345</p></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw w-5 h-5" style="color: rgb(114, 46, 209);"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">域内成功率</p><p class="text-2xl font-bold" style="color: rgb(16, 185, 129);">99.1%</p><div class="flex items-center gap-1 mt-1 text-xs text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-3 h-3"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span>+0.2%</span></div></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">内部威胁检出率</p><p class="text-2xl font-bold" style="color: rgb(239, 68, 68);">0.08%</p></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">平均域内延迟</p><p class="text-2xl font-bold" style="color: rgb(16, 185, 129);">45ms</p></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-4"><div class="flex items-start justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400 mb-1">DLP拦截量</p><p class="text-2xl font-bold" style="color: rgb(245, 158, 11);">156</p></div></div></div></div></div></div>
+    </div>
+    <h4>KPI 指标定义（PRD §3.1，含 SQL 口径）</h4>
+    <table class="spec-table">
+      <thead><tr><th>方向</th><th>指标</th><th>计算口径（PRD 原文）</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="5">全部</td><td>接收总量</td><td><code>COUNT(mail_id) WHERE direction='inbound'</code></td></tr>
+        <tr><td>外发总量</td><td><code>COUNT WHERE direction='outbound'</code></td></tr>
+        <tr><td>域内总量</td><td><code>COUNT WHERE direction='internal'</code></td></tr>
+        <tr><td>总投递成功率</td><td>成功投递数 / 投递总数 × 100%</td></tr>
+        <tr><td>总队列积压</td><td><code>SUM(queue_length) FROM queue_status</code>（实时）</td></tr>
+        <tr><td rowspan="5">接收</td><td>接收总量</td><td>同上</td></tr>
+        <tr><td>接收成功率</td><td><code>delivery_status='success'</code> / 总数</td></tr>
+        <tr><td>接收侧退信率</td><td><code>delivery_status='bounce'</code> / 总数</td></tr>
+        <tr><td>平均接收延迟</td><td><code>AVG(delivery_time − receive_time)</code></td></tr>
+        <tr><td>反垃圾处理队列</td><td><code>queue_length WHERE queue_name='antispam'</code>（实时）</td></tr>
+        <tr><td rowspan="5">外发</td><td>外发总量</td><td>—</td></tr>
+        <tr><td>外发成功率</td><td>成功送达目标服务器 / 总数</td></tr>
+        <tr><td>外发退信率</td><td>被目标服务器拒绝 / 总数</td></tr>
+        <tr><td>外发延迟P99</td><td><code>PERCENTILE(99, delivery_latency)</code>　·　<strong>&gt;30s 标红告警</strong></td></tr>
+        <tr><td>外发队列积压</td><td><code>queue_length WHERE queue_name='outbound'</code></td></tr>
+        <tr><td rowspan="5">域内</td><td>域内总量</td><td>—</td></tr>
+        <tr><td>域内成功率</td><td>—</td></tr>
+        <tr><td>内部威胁检出率</td><td><code>threat_type != 'normal'</code> / 总数</td></tr>
+        <tr><td>平均域内延迟</td><td><code>AVG(delivery_latency) WHERE direction='internal'</code></td></tr>
+        <tr><td>DLP拦截量</td><td><code>COUNT WHERE action='dlp_block'</code></td></tr>
+      </tbody>
+    </table>
+    <p>方向配色（PRD §2.2）：接收 <span class="swatch" style="background:#1890FF"></span><code>#1890FF</code> · 外发 <span class="swatch" style="background:#52C41A"></span><code>#52C41A</code> · 域内 <span class="swatch" style="background:#722ED1"></span><code>#722ED1</code>。</p>
+    <div class="dom-comparison">
+  <h5>DOM 树比对结果</h5>
+  <table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody><tr><td>KPI 容器</td><td><code>div.grid.grid-cols-2.lg:grid-cols-5.gap-4</code></td><td>同</td><td class="pass">一致</td></tr>
+<tr><td>全部方向节点数</td><td>53</td><td>53</td><td class="pass">一致</td></tr>
+<tr><td>接收方向节点数</td><td>44</td><td>44</td><td class="pass">一致</td></tr>
+<tr><td>外发方向节点数</td><td>49</td><td>49</td><td class="pass">一致</td></tr>
+<tr><td>域内方向节点数</td><td>40</td><td>40</td><td class="pass">一致</td></tr>
+<tr><td>多状态合并</td><td>demo 同一时刻只渲染 1 个方向</td><td>4 个方向快照全部嵌入</td><td class="warn">已修正：为可审查性合并</td></tr></tbody>
+  </table>
+</div>
+    <p>各方向的完整图表见：<a href="./layer-1-direction-inbound.html">接收</a> · <a href="./layer-2-direction-outbound.html">外发</a> · <a href="./layer-3-direction-internal.html">域内</a>。</p>
+  </article>
+
+  <article class="component-spec" id="c-4">
+    <h3>2.4 扩展分析区（仅外发 / 域内）</h3>
+    <table class="spec-table">
+      <thead><tr><th>方向</th><th>扩展图 1</th><th>扩展图 2</th></tr></thead>
+      <tbody>
+        <tr><td>外发</td><td><strong>外发延迟分位数</strong>（P50/P90/P99 三线折线图）</td><td><strong>外发队列积压趋势</strong></td></tr>
+        <tr><td>域内</td><td><strong>DLP策略命中TOP5</strong>（客户名单 / 财务报表 / 大附件外发 / 敏感关键词 / 个人信息）</td><td><strong>域内延迟分布</strong>（0-100ms / 100-500ms / 500ms-1s / &gt;1s）</td></tr>
+      </tbody>
+    </table>
+    <p>延迟区间健康标准（PRD §3.3.2）：0-100ms 应 &gt;80% · 100-500ms 应 &lt;15% · 500ms-1s 应 &lt;4% · &gt;1s 应 &lt;1%。</p>
+    <p class="bad">⚠ PRD 要求「点击 DLP 策略行 → 跳转策略命中明细」「点击退信域名 → 跳转该域名详细退信分析」→ demo <strong>都没有跳转</strong>。</p>
+  </article>
+
+  <article class="component-spec" id="c-5">
+    <h3>2.5 队列健康状态卡</h3>
+    <div class="component-preview" data-preview="static"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-purple-50 dark:bg-purple-950/20"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div class="flex items-center justify-between"><div data-slot="card-title" class="font-semibold text-base flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap w-4 h-4"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg>队列健康状态</div><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up w-4 h-4"><path d="m18 15-6-6-6 6"></path></svg></button></div></div><div data-slot="card-content" class="px-6"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check w-5 h-5 text-green-500"><path d="M20 6 9 17l-5-5"></path></svg><span class="text-green-600 font-medium">域内队列健康</span></div></div></div></div>
+    <figure class="screenshot-figure"><img src="./screenshots/layer-4-queue-expanded.png" alt="队列健康卡"></figure>
+    <table class="spec-table">
+      <thead><tr><th>PRD 要求（§4.1 / TC-010）</th><th>demo 实测</th></tr></thead>
+      <tbody>
+        <tr><td>展开后显示：队列长度、最老邮件、积压域名、处理速率</td><td class="pass">卡内已展示队列指标</td></tr>
+        <tr><td>积压 &lt; 100 → 绿色对勾 + 「队列健康」</td><td class="warn">阈值 PRD 自相矛盾：§4.3 写 &lt;100，TC-012 写 &lt;50 → §9 P1</td></tr>
+        <tr><td>积压 &gt; 1000 → 红色警告 + <strong>闪烁效果</strong></td><td class="bad">未实现</td></tr>
+        <tr><td>队列监控服务离线 → 「服务不可用」</td><td class="bad">未实现（纯 mock）</td></tr>
+      </tbody>
+    </table>
+    <p>详见 <a href="./layer-4-queue-health.html">layer-4-queue-health.html</a>。</p>
+  </article>
+
+  <article class="component-spec" id="c-6">
+    <h3>2.6 明细数据表（动态列）</h3>
+    <div class="preview-hint">切方向 → 动态列整组重建</div>
+    <div class="component-preview" data-preview="swap" data-swap-map='{"全部":"all","接收":"inbound","外发":"outbound","域内":"internal"}'>
+      <div data-swap-panel="all" data-swap-label="全部"><table class="w-full text-sm"><thead><tr class="border-b border-gray-200 dark:border-gray-700"><th class="text-left py-3 px-2 font-medium sticky left-0 bg-white dark:bg-gray-800">日期</th><th class="text-right py-3 px-2 font-medium">总量</th><th class="text-right py-3 px-2 font-medium">成功</th><th class="text-right py-3 px-2 font-medium">失败</th><th class="text-right py-3 px-2 font-medium">延迟投递</th><th class="text-right py-3 px-2 font-medium">取消</th><th class="text-right py-3 px-2 font-medium">成功率</th><th class="text-right py-3 px-2 font-medium sticky right-0 bg-white dark:bg-gray-800">环比</th></tr></thead><tbody><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-14</td><td class="text-right py-3 px-2">9,779</td><td class="text-right py-3 px-2 text-green-600">9,290</td><td class="text-right py-3 px-2 text-red-600">293</td><td class="text-right py-3 px-2 text-orange-500">146</td><td class="text-right py-3 px-2 text-gray-500">50</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500">-4.3<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-13</td><td class="text-right py-3 px-2">12,892</td><td class="text-right py-3 px-2 text-green-600">12,247</td><td class="text-right py-3 px-2 text-red-600">386</td><td class="text-right py-3 px-2 text-orange-500">193</td><td class="text-right py-3 px-2 text-gray-500">66</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+<!-- -->1.9<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-12</td><td class="text-right py-3 px-2">11,450</td><td class="text-right py-3 px-2 text-green-600">10,877</td><td class="text-right py-3 px-2 text-red-600">343</td><td class="text-right py-3 px-2 text-orange-500">171</td><td class="text-right py-3 px-2 text-gray-500">59</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500">-3.1<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-11</td><td class="text-right py-3 px-2">8,626</td><td class="text-right py-3 px-2 text-green-600">8,194</td><td class="text-right py-3 px-2 text-red-600">258</td><td class="text-right py-3 px-2 text-orange-500">129</td><td class="text-right py-3 px-2 text-gray-500">45</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500">-2.0<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-10</td><td class="text-right py-3 px-2">10,307</td><td class="text-right py-3 px-2 text-green-600">9,791</td><td class="text-right py-3 px-2 text-red-600">309</td><td class="text-right py-3 px-2 text-orange-500">154</td><td class="text-right py-3 px-2 text-gray-500">53</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500">-1.5<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-09</td><td class="text-right py-3 px-2">12,701</td><td class="text-right py-3 px-2 text-green-600">12,065</td><td class="text-right py-3 px-2 text-red-600">381</td><td class="text-right py-3 px-2 text-orange-500">190</td><td class="text-right py-3 px-2 text-gray-500">65</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+<!-- -->2.2<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-08</td><td class="text-right py-3 px-2">8,453</td><td class="text-right py-3 px-2 text-green-600">8,030</td><td class="text-right py-3 px-2 text-red-600">253</td><td class="text-right py-3 px-2 text-orange-500">126</td><td class="text-right py-3 px-2 text-gray-500">44</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500">-3.8<!-- -->%</td></tr></tbody></table></div>
+      <div data-swap-panel="inbound" data-swap-label="接收" hidden><table class="w-full text-sm"><thead><tr class="border-b border-gray-200 dark:border-gray-700"><th class="text-left py-3 px-2 font-medium sticky left-0 bg-white dark:bg-gray-800">日期</th><th class="text-right py-3 px-2 font-medium">总量</th><th class="text-right py-3 px-2 font-medium">成功</th><th class="text-right py-3 px-2 font-medium">失败</th><th class="text-right py-3 px-2 font-medium">延迟投递</th><th class="text-right py-3 px-2 font-medium">取消</th><th class="text-right py-3 px-2 font-medium">本域不存在</th><th class="text-right py-3 px-2 font-medium">本域邮箱已满</th><th class="text-right py-3 px-2 font-medium">成功率</th><th class="text-right py-3 px-2 font-medium sticky right-0 bg-white dark:bg-gray-800">环比</th></tr></thead><tbody><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-14</td><td class="text-right py-3 px-2">12,114</td><td class="text-right py-3 px-2 text-green-600">11,508</td><td class="text-right py-3 px-2 text-red-600">363</td><td class="text-right py-3 px-2 text-orange-500">181</td><td class="text-right py-3 px-2 text-gray-500">62</td><td class="text-right py-3 px-2">217</td><td class="text-right py-3 px-2">108</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500">-0.7<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-13</td><td class="text-right py-3 px-2">12,782</td><td class="text-right py-3 px-2 text-green-600">12,142</td><td class="text-right py-3 px-2 text-red-600">383</td><td class="text-right py-3 px-2 text-orange-500">191</td><td class="text-right py-3 px-2 text-gray-500">66</td><td class="text-right py-3 px-2">229</td><td class="text-right py-3 px-2">114</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+<!-- -->4.5<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-12</td><td class="text-right py-3 px-2">10,791</td><td class="text-right py-3 px-2 text-green-600">10,251</td><td class="text-right py-3 px-2 text-red-600">323</td><td class="text-right py-3 px-2 text-orange-500">161</td><td class="text-right py-3 px-2 text-gray-500">56</td><td class="text-right py-3 px-2">193</td><td class="text-right py-3 px-2">96</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+0.6<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-11</td><td class="text-right py-3 px-2">9,507</td><td class="text-right py-3 px-2 text-green-600">9,031</td><td class="text-right py-3 px-2 text-red-600">285</td><td class="text-right py-3 px-2 text-orange-500">142</td><td class="text-right py-3 px-2 text-gray-500">49</td><td class="text-right py-3 px-2">171</td><td class="text-right py-3 px-2">85</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+3.4<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-10</td><td class="text-right py-3 px-2">9,787</td><td class="text-right py-3 px-2 text-green-600">9,297</td><td class="text-right py-3 px-2 text-red-600">293</td><td class="text-right py-3 px-2 text-orange-500">146</td><td class="text-right py-3 px-2 text-gray-500">51</td><td class="text-right py-3 px-2">175</td><td class="text-right py-3 px-2">87</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+4.9<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-09</td><td class="text-right py-3 px-2">9,698</td><td class="text-right py-3 px-2 text-green-600">9,213</td><td class="text-right py-3 px-2 text-red-600">290</td><td class="text-right py-3 px-2 text-orange-500">145</td><td class="text-right py-3 px-2 text-gray-500">50</td><td class="text-right py-3 px-2">174</td><td class="text-right py-3 px-2">87</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+<!-- -->5.0<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-08</td><td class="text-right py-3 px-2">11,860</td><td class="text-right py-3 px-2 text-green-600">11,267</td><td class="text-right py-3 px-2 text-red-600">355</td><td class="text-right py-3 px-2 text-orange-500">177</td><td class="text-right py-3 px-2 text-gray-500">61</td><td class="text-right py-3 px-2">213</td><td class="text-right py-3 px-2">106</td><td class="text-right py-3 px-2 text-green-600">95.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500">-2.7<!-- -->%</td></tr></tbody></table></div>
+      <div data-swap-panel="outbound" data-swap-label="外发" hidden><table class="w-full text-sm"><thead><tr class="border-b border-gray-200 dark:border-gray-700"><th class="text-left py-3 px-2 font-medium sticky left-0 bg-white dark:bg-gray-800">日期</th><th class="text-right py-3 px-2 font-medium">总量</th><th class="text-right py-3 px-2 font-medium">成功</th><th class="text-right py-3 px-2 font-medium">失败</th><th class="text-right py-3 px-2 font-medium">延迟投递</th><th class="text-right py-3 px-2 font-medium">取消</th><th class="text-right py-3 px-2 font-medium">目标拒绝</th><th class="text-right py-3 px-2 font-medium">DNS失败</th><th class="text-right py-3 px-2 font-medium">RBL拦截</th><th class="text-right py-3 px-2 font-medium">成功率</th><th class="text-right py-3 px-2 font-medium sticky right-0 bg-white dark:bg-gray-800">环比</th></tr></thead><tbody><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-14</td><td class="text-right py-3 px-2">6,336</td><td class="text-right py-3 px-2 text-green-600">5,829</td><td class="text-right py-3 px-2 text-red-600">316</td><td class="text-right py-3 px-2 text-orange-500">126</td><td class="text-right py-3 px-2 text-gray-500">65</td><td class="text-right py-3 px-2">126</td><td class="text-right py-3 px-2">79</td><td class="text-right py-3 px-2">47</td><td class="text-right py-3 px-2 text-green-600">92.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+0.1<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-13</td><td class="text-right py-3 px-2">4,573</td><td class="text-right py-3 px-2 text-green-600">4,207</td><td class="text-right py-3 px-2 text-red-600">228</td><td class="text-right py-3 px-2 text-orange-500">91</td><td class="text-right py-3 px-2 text-gray-500">47</td><td class="text-right py-3 px-2">91</td><td class="text-right py-3 px-2">57</td><td class="text-right py-3 px-2">34</td><td class="text-right py-3 px-2 text-green-600">92.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500"><!-- -->-1.6<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-12</td><td class="text-right py-3 px-2">4,419</td><td class="text-right py-3 px-2 text-green-600">4,065</td><td class="text-right py-3 px-2 text-red-600">220</td><td class="text-right py-3 px-2 text-orange-500">88</td><td class="text-right py-3 px-2 text-gray-500">46</td><td class="text-right py-3 px-2">88</td><td class="text-right py-3 px-2">55</td><td class="text-right py-3 px-2">33</td><td class="text-right py-3 px-2 text-green-600">92.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+3.7<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-11</td><td class="text-right py-3 px-2">6,148</td><td class="text-right py-3 px-2 text-green-600">5,656</td><td class="text-right py-3 px-2 text-red-600">307</td><td class="text-right py-3 px-2 text-orange-500">122</td><td class="text-right py-3 px-2 text-gray-500">63</td><td class="text-right py-3 px-2">122</td><td class="text-right py-3 px-2">76</td><td class="text-right py-3 px-2">46</td><td class="text-right py-3 px-2 text-green-600">92.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+2.1<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-10</td><td class="text-right py-3 px-2">4,279</td><td class="text-right py-3 px-2 text-green-600">3,936</td><td class="text-right py-3 px-2 text-red-600">213</td><td class="text-right py-3 px-2 text-orange-500">85</td><td class="text-right py-3 px-2 text-gray-500">45</td><td class="text-right py-3 px-2">85</td><td class="text-right py-3 px-2">53</td><td class="text-right py-3 px-2">31</td><td class="text-right py-3 px-2 text-green-600">92.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+0.3<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-09</td><td class="text-right py-3 px-2">5,574</td><td class="text-right py-3 px-2 text-green-600">5,128</td><td class="text-right py-3 px-2 text-red-600">278</td><td class="text-right py-3 px-2 text-orange-500">111</td><td class="text-right py-3 px-2 text-gray-500">57</td><td class="text-right py-3 px-2">111</td><td class="text-right py-3 px-2">69</td><td class="text-right py-3 px-2">41</td><td class="text-right py-3 px-2 text-green-600">92.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500"><!-- -->-3.3<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-08</td><td class="text-right py-3 px-2">4,948</td><td class="text-right py-3 px-2 text-green-600">4,552</td><td class="text-right py-3 px-2 text-red-600">247</td><td class="text-right py-3 px-2 text-orange-500">98</td><td class="text-right py-3 px-2 text-gray-500">51</td><td class="text-right py-3 px-2">98</td><td class="text-right py-3 px-2">61</td><td class="text-right py-3 px-2">37</td><td class="text-right py-3 px-2 text-green-600">92.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+1.4<!-- -->%</td></tr></tbody></table></div>
+      <div data-swap-panel="internal" data-swap-label="域内" hidden><table class="w-full text-sm"><thead><tr class="border-b border-gray-200 dark:border-gray-700"><th class="text-left py-3 px-2 font-medium sticky left-0 bg-white dark:bg-gray-800">日期</th><th class="text-right py-3 px-2 font-medium">总量</th><th class="text-right py-3 px-2 font-medium">成功</th><th class="text-right py-3 px-2 font-medium">失败</th><th class="text-right py-3 px-2 font-medium">内部垃圾</th><th class="text-right py-3 px-2 font-medium">内部钓鱼</th><th class="text-right py-3 px-2 font-medium">DLP拦截</th><th class="text-right py-3 px-2 font-medium">成功率</th><th class="text-right py-3 px-2 font-medium sticky right-0 bg-white dark:bg-gray-800">环比</th></tr></thead><tbody><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-14</td><td class="text-right py-3 px-2">3,345</td><td class="text-right py-3 px-2 text-green-600">3,278</td><td class="text-right py-3 px-2 text-red-600">50</td><td class="text-right py-3 px-2">10</td><td class="text-right py-3 px-2">10</td><td class="text-right py-3 px-2">37</td><td class="text-right py-3 px-2 text-green-600">98.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+2.0<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-13</td><td class="text-right py-3 px-2">1,700</td><td class="text-right py-3 px-2 text-green-600">1,666</td><td class="text-right py-3 px-2 text-red-600">25</td><td class="text-right py-3 px-2">10</td><td class="text-right py-3 px-2">8</td><td class="text-right py-3 px-2">11</td><td class="text-right py-3 px-2 text-green-600">98.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500"><!-- -->+2.7<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-12</td><td class="text-right py-3 px-2">3,121</td><td class="text-right py-3 px-2 text-green-600">3,058</td><td class="text-right py-3 px-2 text-red-600">46</td><td class="text-right py-3 px-2">16</td><td class="text-right py-3 px-2">4</td><td class="text-right py-3 px-2">12</td><td class="text-right py-3 px-2 text-green-600">98.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500">-1.6<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-11</td><td class="text-right py-3 px-2">2,046</td><td class="text-right py-3 px-2 text-green-600">2,005</td><td class="text-right py-3 px-2 text-red-600">30</td><td class="text-right py-3 px-2">9</td><td class="text-right py-3 px-2">11</td><td class="text-right py-3 px-2">36</td><td class="text-right py-3 px-2 text-green-600">98.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500">+3.7<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-10</td><td class="text-right py-3 px-2">3,069</td><td class="text-right py-3 px-2 text-green-600">3,007</td><td class="text-right py-3 px-2 text-red-600">46</td><td class="text-right py-3 px-2">20</td><td class="text-right py-3 px-2">10</td><td class="text-right py-3 px-2">25</td><td class="text-right py-3 px-2 text-green-600">98.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500">-1.2<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-09</td><td class="text-right py-3 px-2">3,064</td><td class="text-right py-3 px-2 text-green-600">3,002</td><td class="text-right py-3 px-2 text-red-600">45</td><td class="text-right py-3 px-2">21</td><td class="text-right py-3 px-2">5</td><td class="text-right py-3 px-2">29</td><td class="text-right py-3 px-2 text-green-600">98.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-red-500"><!-- -->+2.7<!-- -->%</td></tr><tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-3 px-2 sticky left-0 bg-white dark:bg-gray-800">2026-07-08</td><td class="text-right py-3 px-2">2,138</td><td class="text-right py-3 px-2 text-green-600">2,095</td><td class="text-right py-3 px-2 text-red-600">32</td><td class="text-right py-3 px-2">14</td><td class="text-right py-3 px-2">8</td><td class="text-right py-3 px-2">34</td><td class="text-right py-3 px-2 text-green-600">98.0<!-- -->%</td><td class="text-right py-3 px-2 sticky right-0 bg-white dark:bg-gray-800 text-green-500">-0.6<!-- -->%</td></tr></tbody></table></div>
+    </div>
+    <table class="spec-table">
+      <thead><tr><th>方向</th><th>固定列</th><th>动态列（PRD §3.6）</th></tr></thead>
+      <tbody>
+        <tr><td>全部</td><td rowspan="4">日期 / 总量 / 成功 / 失败 / 成功率 / 环比</td><td>—</td></tr>
+        <tr><td>接收</td><td>延迟投递（<code>deferred</code>）/ 已取消（<code>canceled</code>）/ 用户不存在退信 / 本域邮箱已满退信</td></tr>
+        <tr><td>外发</td><td>延迟投递 / 已取消 / 目标拒绝退信 / DNS失败退信 / RBL拦截退信</td></tr>
+        <tr><td>域内</td><td>内部垃圾 / 内部钓鱼 / DLP拦截</td></tr>
+      </tbody>
+    </table>
+    <p>失败口径 = <code>delivery_status IN ('bounce','reject')</code>；环比 = 今日成功率 − 昨日成功率（绿正红负）。</p>
+  </article>
+
+  <article class="component-spec" id="c-7">
+    <h3>2.7 底部操作栏</h3>
+    <div class="component-preview" data-preview="static"><div class="flex items-center justify-end gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3 gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>导出 CSV</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3 gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>生成报告</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[&gt;svg]:px-3 gap-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles w-4 h-4"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path></svg>AI 解读</button></div></div>
+    <table class="spec-table">
+      <thead><tr><th>按钮</th><th>demo</th><th>网关现有 API</th></tr></thead>
+      <tbody>
+        <tr><td>导出 CSV</td><td class="bad">无 onClick</td><td class="pass"><code>GET /api/v1/statistics/delivery-traffic/export.csv</code></td></tr>
+        <tr><td>生成报告</td><td class="bad">无 onClick</td><td class="bad">网关无（PDF）</td></tr>
+        <tr><td>AI 解读</td><td class="bad">无 onClick</td><td class="pass"><code>POST /api/v1/statistics/delivery-traffic/ai-analysis</code></td></tr>
+      </tbody>
+    </table>
+  </article>
+</section>
+
+<section id="api-mapping">
+  <h2>4. 数据模型与 API 映射</h2>
+  <h3>4.1 网关<strong>已有</strong>端点</h3>
+  <table class="spec-table">
+    <thead><tr><th>能力</th><th>PRD</th><th>网关现有（<code>internal/api/delivery_traffic_routes.go</code>）</th><th>结论</th></tr></thead>
+    <tbody>
+      <tr><td>看板聚合</td><td class="bad">PRD <strong>没有任何 API 定义</strong>（全文无接口章节）</td><td class="pass"><code>GET /api/v1/statistics/delivery-traffic</code></td><td class="pass">直接复用</td></tr>
+      <tr><td>导出 CSV</td><td>TC-017</td><td class="pass"><code>GET …/delivery-traffic/export.csv</code></td><td class="pass">已有</td></tr>
+      <tr><td>AI 分析</td><td>TC-019</td><td class="pass"><code>POST …/delivery-traffic/ai-analysis</code></td><td class="pass">已有</td></tr>
+      <tr><td>生成 PDF 报告</td><td>TC-018</td><td class="bad">无</td><td class="bad">缺口</td></tr>
+    </tbody>
+  </table>
+  <p>查询参数（网关 handler）：<code>direction</code>、<code>start_date</code>、<code>end_date</code>。</p>
+  <h3>4.2 PRD 定义的数据表（§6.3）</h3>
+  <pre><code>delivery_logs：mail_id(PK) / direction / receive_time / delivery_time / delivery_status(success|bounce|deferred|canceled)
+              / bounce_reason / delivery_latency / target_domain / queue_name / threat_type
+queue_status（实时/Redis）：queue_name(PK) / queue_length / oldest_mail_age / processing_rate / update_time
+latency_stats（聚合）：stat_date(PK) / direction / p50_latency / p90_latency / p99_latency / avg_latency
+dlp_hits：hit_id(PK) / mail_id(FK) / policy_name / hit_time / action</code></pre>
+  <p>存储与缓存（PRD §7.2/§7.3）：原始投递日志 ES 30 天 · 日汇总 PostgreSQL 2 年 · 队列指标 Redis 实时 · 延迟分位 PostgreSQL 1 年；KPI 缓存 1min / 趋势 5min / 队列 10s / 日汇总 1h。</p>
+</section>
+
+<section id="business-logic">
+  <h2>5. 指标口径与阈值</h2>
+  <table class="spec-table">
+    <thead><tr><th>状态</th><th>触发条件</th><th>表现</th><th>demo</th></tr></thead>
+    <tbody>
+      <tr><td>队列健康</td><td>积压 &lt; 100（§4.3）/ &lt; 50（TC-012）</td><td>绿色对勾 + 「队列健康」</td><td class="warn">阈值二选一未定</td></tr>
+      <tr><td>队列告警</td><td>积压 &gt; 1000</td><td>红色警告 + 闪烁</td><td class="bad">无闪烁</td></tr>
+      <tr><td>P99 延迟告警</td><td>P99 &gt; 30s</td><td>标红 + 向上箭头</td><td class="warn">需核对</td></tr>
+      <tr><td>空态</td><td>该方向无数据</td><td>居中「暂无数据」</td><td class="bad">未实现</td></tr>
+      <tr><td>加载态</td><td>切换方向/时间</td><td>全页骨架屏</td><td class="bad">未实现（纯前端 mock，同步切换）</td></tr>
+    </tbody>
+  </table>
+  <h3>5.1 权限矩阵（PRD §1.4）</h3>
+  <table class="spec-table">
+    <thead><tr><th>角色</th><th>查看</th><th>导出</th><th>AI分析</th><th>队列操作</th></tr></thead>
+    <tbody>
+      <tr><td>只读用户</td><td>✓</td><td>✗</td><td>✗</td><td>✗</td></tr>
+      <tr><td>运营人员</td><td>✓</td><td>✓</td><td>✓</td><td>✗</td></tr>
+      <tr><td>管理员</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+    </tbody>
+  </table>
+  <p class="bad">⚠ 网关 RBAC 只有 <code>system_admin</code> / <code>tenant_admin</code>，没有「只读用户 / 运营人员」这两个角色 → §10 Q2。demo 也<strong>没有实现任何权限判断</strong>（三个按钮恒可见可点）。</p>
+</section>
+
+<section id="interaction">
+  <h2>6. 交互规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>触发</th><th>PRD</th><th>demo 实测</th></tr></thead>
+    <tbody>
+      <tr><td>切换方向</td><td>KPI/图表/表格全部刷新；快速切换需<strong>防抖</strong>，最后一次生效</td><td class="pass">整组重建正确；<span class="warn">无防抖（纯前端同步）</span></td></tr>
+      <tr><td>Hover 图表数据点</td><td>Tooltip 显示日期 + 各分类数值</td><td class="pass">recharts 原生 Tooltip</td></tr>
+      <tr><td>点击退信域名 TOP 行</td><td>跳转该域名详细退信分析（TC-008）</td><td class="bad">无跳转</td></tr>
+      <tr><td>点击 DLP 策略行</td><td>跳转策略命中明细</td><td class="bad">无跳转</td></tr>
+      <tr><td>队列健康卡展开</td><td>队列长度/最老邮件/积压域名/处理速率</td><td class="pass">已展示</td></tr>
+      <tr><td>KPI hover 问号</td><td>指标定义 + 计算公式浮层（§4.2）</td><td class="warn">需逐卡核对</td></tr>
+      <tr><td>时间范围 &gt; 90 天</td><td>「时间范围不能超过90天」</td><td class="bad">无自定义日期，无从触发</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="i18n">
+  <h2>7. 国际化规格</h2>
+  <h3 id="i18n-fix">7.1 <span class="bad">中文损坏修复表</span>（本页 12 条）</h3>
+  <p>demo 的 <code>contexts/language-context.tsx</code> 有 <strong>489 条中文</strong>被 UTF-8 损坏。本规格的截图与预览<strong>已在运行态修复后再抓取</strong>。修复依据：英文译文 + PRD 原文措辞。</p>
+  <table class="spec-table fix-table">
+  <thead><tr><th>i18n key</th><th>demo 里的损坏中文（U+FFFD）</th><th class="pass">本规格已修复为</th><th>英文译文（未损坏，作为修复依据）</th></tr></thead>
+  <tbody><tr><td><code>deliveryTraffic.subtitle</code></td><td>分析邮���投递状态、队列健康度和三向流量分布</td><td>分析邮件投递状态、队列健康度和三向流量分布</td><td>Analyze email delivery status…</td></tr>
+<tr><td><code>deliveryTraffic.totalCount</code></td><td>��量</td><td>总量</td><td>Total</td></tr>
+<tr><td><code>deliveryTraffic.antispamQueue</code></td><td>反���圾���理队列</td><td>反垃圾处理队列</td><td>Anti-spam Queue</td></tr>
+<tr><td><code>deliveryTraffic.avgInternalLatency</code></td><td>平均域���延迟</td><td>平均域内延迟</td><td>Avg Internal Latency</td></tr>
+<tr><td><code>deliveryTraffic.bounceMailboxFull</code></td><td>本����箱已满</td><td>本域邮箱已满</td><td>Mailbox Full</td></tr>
+<tr><td><code>deliveryTraffic.bounceTargetReject</code></td><td>目标拒���</td><td>目标拒绝</td><td>Target Reject</td></tr>
+<tr><td><code>deliveryTraffic.bouncePolicyReject</code></td><td>接��策略拒绝</td><td>接收策略拒绝</td><td>Policy Reject</td></tr>
+<tr><td><code>deliveryTraffic.internalTrendAnalysis</code></td><td>域内流量趋势分����</td><td>域内流量趋势分析</td><td>Internal Traffic Trend</td></tr>
+<tr><td><code>deliveryTraffic.internalVirus</code></td><td>��部病��</td><td>内部病毒</td><td>Internal Virus</td></tr>
+<tr><td><code>deliveryTraffic.outboundBounceTopDomains</code></td><td>目���域名退信率TOP</td><td>目标域名退信率TOP</td><td>Top Bounce Domains</td></tr>
+<tr><td><code>securityOverview.aiAnalysis</code></td><td>AI 解��</td><td>AI 解读</td><td>AI Analysis</td></tr>
+<tr><td><code>securityOverview.lastMonth</code></td><td>上��</td><td>上月</td><td>Last Month</td></tr></tbody>
+</table>
+  <p class="warn">注意 <code>deliveryTraffic.bounceTargetReject</code>：英文是 <em>Target Reject</em>，PRD §3.6.3 写「目标拒绝退信」→ 修复为「目标拒绝」。同理 <code>bounceMailboxFull</code> 参照同族的「本域不存在」修复为「本域邮箱已满」。</p>
+  <table class="spec-table">
+    <thead><tr><th>项</th><th>demo</th><th>implement.md</th></tr></thead>
+    <tbody>
+      <tr><td>语言</td><td>zh / en / th（65 个 key 全走 <code>t()</code>）</td><td class="bad">四语</td></tr>
+      <tr><td>key 规范</td><td class="pass"><code>deliveryTraffic.*</code></td><td>沿用</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="responsive">
+  <h2>8. 响应式规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>demo 实测</th></tr></thead>
+    <tbody>
+      <tr><td>≥1024px（lg）</td><td>KPI 5 列（<code>lg:grid-cols-5</code>）、主分析区 2/3 + 1/3（<code>lg:grid-cols-3</code>）</td></tr>
+      <tr><td>&lt;1024px</td><td class="pass">KPI 降为 2 列（<code>grid-cols-2</code>）、图表堆叠 —— <strong>本页做了响应式降级</strong>（安全总览页没做）</td></tr>
+      <tr><td>PRD 要求</td><td>最小 1280×720，推荐 1920×1080；完整支持深色模式</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1024px.png" alt="1024px"></figure>
+</section>
+
+<section id="diffs" class="diff-section">
+  <h2>9. 与 spec 的差异标注</h2>
+  <h3>9.1 PRD 自相矛盾</h3>
+  <table class="spec-table diff-table">
+    <thead><tr><th>#</th><th>矛盾点</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>P1</td><td>队列健康阈值</td><td>§4.3 写「积压 &lt; 100 → 队列健康」，TC-012 写「&lt; 50 → 队列健康」</td></tr>
+      <tr><td>P2</td><td>失败口径含 <code>reject</code></td><td>明细表「失败」= <code>delivery_status IN ('bounce','reject')</code>，但 <code>delivery_status</code> 枚举只列了 success/bounce/deferred/canceled，没有 reject</td></tr>
+    </tbody>
+  </table>
+  <h3>9.2 demo 与 PRD 的差异</h3>
+  <table class="spec-table diff-table">
+    <thead><tr><th>#</th><th>差异点</th><th>PRD</th><th>demo 实际</th><th>建议</th></tr></thead>
+    <tbody>
+      <tr><td class="bad">D0</td><td class="bad">i18n 中文损坏</td><td>正常三语</td><td class="bad">本页 12 条中文含 U+FFFD 乱码</td><td class="pass">本规格已修复（§7.1）；落地必须修 i18n 源</td></tr>
+      <tr><td>D1</td><td>多租户</td><td class="bad">PRD 全文<strong>没提</strong>多租户</td><td>demo <strong>有</strong>租户选择器</td><td>反向差异：需补 PRD 口径（租户隔离、默认全部租户）</td></tr>
+      <tr><td>D2</td><td>下钻跳转</td><td>退信域名 → 域名分析；DLP 策略 → 命中明细；退信明细 → 邮件日志；队列告警 → 队列管理</td><td class="bad">全部无跳转</td><td>落地补</td></tr>
+      <tr><td>D3</td><td>导出/报告/AI</td><td>TC-017/018/019</td><td class="bad">三个按钮均无 onClick</td><td class="pass">网关已有 export.csv + ai-analysis，直接接；PDF 无</td></tr>
+      <tr><td>D4</td><td>权限矩阵</td><td>只读用户/运营人员/管理员 三角色，按钮禁用 + Tooltip</td><td class="bad">无权限判断</td><td class="bad">网关 RBAC 无这三个角色 → §10 Q2</td></tr>
+      <tr><td>D5</td><td>队列告警闪烁 / 服务不可用</td><td>§4.3 / §5.3</td><td class="bad">未实现</td><td>接真实队列监控后补</td></tr>
+      <tr><td>D6</td><td>骨架屏 / 空态 / 数据延迟提示</td><td>§5.3「数据更新于X小时前」</td><td class="bad">全部未实现</td><td>接 API 后补</td></tr>
+      <tr><td>D7</td><td>时间范围 90 天上限 + 禁选未来</td><td>§5.1</td><td class="bad">demo 无自定义日期控件</td><td>落地补日期选择器 + 校验</td></tr>
+      <tr><td>D8</td><td>方向切换防抖 300ms</td><td>§5.4</td><td class="warn">纯前端 mock 同步切换</td><td>接 API 后必需</td></tr>
+      <tr><td>D9</td><td>KPI hover 说明浮层</td><td>§4.2 指标定义 + 计算公式</td><td class="warn">部分卡有帮助图标</td><td>逐卡补齐</td></tr>
+      <tr><td>D10</td><td>数据来源</td><td>PRD 只给 DB 表，无 API</td><td class="bad">前端 mock</td><td class="pass">网关 <code>/statistics/delivery-traffic</code> 已就绪</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项</h2>
+  <table class="spec-table question-table">
+    <thead><tr><th>#</th><th>问题</th><th>背景</th></tr></thead>
+    <tbody>
+      <tr><td>Q1</td><td>队列健康阈值取 100 还是 50？</td><td>PRD §4.3 与 TC-012 自相矛盾</td></tr>
+      <tr><td>Q2</td><td>PRD 的三角色（只读用户/运营人员/管理员）如何映射网关 RBAC？</td><td>网关只有 system_admin / tenant_admin；「队列操作」权限网关侧也没有对应能力</td></tr>
+      <tr><td>Q3</td><td>多租户口径以谁为准？</td><td>PRD 没提多租户，但 demo 有租户选择器、网关 API 也支持租户隔离</td></tr>
+      <tr><td>Q4</td><td>「生成报告」（PDF）要不要做？</td><td>网关有 export.csv 与 ai-analysis，没有 PDF 端点</td></tr>
+      <tr><td>Q5</td><td>失败口径是否包含 <code>reject</code>？</td><td>PRD 枚举里没有 reject，但明细表「失败」列口径里有</td></tr>
+      <tr><td>Q6</td><td>时间范围要不要支持自定义起止日期（含 90 天上限校验）？</td><td>demo 只有固定枚举下拉；安全总览页却有自定义日期</td></tr>
+    </tbody>
+  </table>
+</section>
+<script src="../assets/stats-preview.js"></script>
+
+
+
+<script>
+/* ===== v2 补充：预览区交互增强 =====
+ * swap 快照切换由共享引擎 ../assets/stats-preview.js 驱动（v1 已有）；
+ * 本段只补引擎未覆盖的能力：静态操作栏方向按钮联动、时间/租户下拉、队列卡展开折叠、无行为按钮说明。 */
+(function(){
+  'use strict';
+  function onReady(fn){ if (document.readyState === 'complete' || document.readyState === 'interactive') { setTimeout(fn, 0); } else { document.addEventListener('DOMContentLoaded', fn); } }
+
+  // --- tooltip ---
+  var tip = document.createElement('div'); tip.className = 'rs-tip'; document.body.appendChild(tip);
+  document.addEventListener('mouseover', function(e){
+    var t = e.target.closest('[data-rs-tip]');
+    if (!t) { tip.style.display = 'none'; return; }
+    tip.textContent = t.getAttribute('data-rs-tip');
+    tip.style.display = 'block';
+    var r = t.getBoundingClientRect();
+    tip.style.left = Math.min(r.left, window.innerWidth - 320) + 'px';
+    tip.style.top = (r.bottom + 6) + 'px';
+  });
+
+  var ACTIVE = ['bg-blue-500', 'text-white'];
+  var INACTIVE = ['bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-50', 'dark:hover:bg-gray-700'];
+  var DIR_LABELS = { '全部': 'all', '接收': 'inbound', '外发': 'outbound', '域内': 'internal' };
+
+  // 复用 stats-preview.js 的面板机制做整页方向同步（hidden 属性 + 状态条 active）
+  function setDirection(dir){
+    document.querySelectorAll('[data-preview="swap"]').forEach(function(box){
+      var hit = false;
+      box.querySelectorAll('[data-swap-panel]').forEach(function(p){
+        var on = p.getAttribute('data-swap-panel') === dir;
+        if (on) hit = true;
+      });
+      if (!hit) return;
+      box.querySelectorAll('[data-swap-panel]').forEach(function(p){
+        p.hidden = p.getAttribute('data-swap-panel') !== dir;
+      });
+      box.setAttribute('data-swap-current', dir);
+      box.querySelectorAll('.spec-swap-bar button').forEach(function(b){
+        b.classList.toggle('active', b.getAttribute('data-swap-to') === dir);
+      });
+    });
+  }
+
+  onReady(function(){
+    // --- 静态操作栏（非 swap 预览）里的 全部/接收/外发/域内 按钮组：本组高亮 + 驱动全页 swap 预览 ---
+    document.querySelectorAll('.component-preview:not([data-preview="swap"])').forEach(function(pv){
+      pv.querySelectorAll('div').forEach(function(d){
+        var btns = Array.prototype.slice.call(d.children).filter(function(c){ return c.tagName === 'BUTTON'; });
+        if (btns.length !== 4) return;
+        var texts = btns.map(function(b){ return (b.innerText || '').trim(); });
+        if (texts.join(',') !== '全部,接收,外发,域内') return;
+        btns.forEach(function(b){
+          b.addEventListener('click', function(){
+            var dir = DIR_LABELS[(b.innerText || '').trim()];
+            btns.forEach(function(x){
+              var on = x === b;
+              ACTIVE.forEach(function(c){ x.classList.toggle(c, on); });
+              INACTIVE.forEach(function(c){ x.classList.toggle(c, !on); });
+            });
+            setDirection(dir);
+          });
+        });
+      });
+    });
+
+    // --- 时间范围 / 租户 Select（demo: 今天/近7日/近30日/本月/上月，默认 近7日） ---
+    document.querySelectorAll('.component-preview [role=combobox]').forEach(function(trigger){
+      var txt = (trigger.innerText || '').trim();
+      var opts = null, foot = '';
+      if (txt.indexOf('近7日') >= 0) {
+        opts = ['今天', '近7日', '近30日', '本月', '上月'];
+        foot = '选项与 demo 一致；demo 中切换会按时间倍率重算数值（预览快照为「近7日」态）';
+      } else if (txt.indexOf('全部租户') >= 0 || trigger.getAttribute('aria-label') === '选择租户范围') {
+        opts = ['全部租户'];
+        foot = '多租户形态+平台视角显示；demo 为可搜索租户列表，选中后全页数值按确定性系数缩放';
+      }
+      if (!opts) return;
+      var menu = document.createElement('div'); menu.className = 'rs-menu';
+      menu.innerHTML = opts.map(function(o){
+        return '<div class="rs-opt' + (o === txt ? ' rs-checked' : '') + '">' + o + '</div>';
+      }).join('') + (foot ? '<div class="rs-foot">' + foot + '</div>' : '');
+      trigger.parentElement.style.position = 'relative';
+      trigger.parentElement.appendChild(menu);
+      trigger.addEventListener('click', function(e){
+        e.preventDefault(); e.stopPropagation();
+        document.querySelectorAll('.component-preview .rs-menu').forEach(function(m){ if (m !== menu) m.style.display = 'none'; });
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        menu.style.top = (trigger.offsetTop + trigger.offsetHeight + 4) + 'px';
+        menu.style.left = trigger.offsetLeft + 'px';
+      });
+      menu.querySelectorAll('.rs-opt').forEach(function(o){
+        o.addEventListener('click', function(){
+          menu.querySelectorAll('.rs-opt').forEach(function(x){ x.classList.remove('rs-checked'); });
+          o.classList.add('rs-checked');
+          var span = trigger.querySelector('span');
+          if (span) span.textContent = o.textContent;
+          menu.style.display = 'none';
+        });
+      });
+    });
+    document.addEventListener('click', function(e){
+      if (!e.target.closest('.component-preview')) document.querySelectorAll('.component-preview .rs-menu').forEach(function(m){ m.style.display = 'none'; });
+    });
+
+    // --- 队列健康卡折叠/展开（demo: expandedQueue 仅接收/外发追加两行；全部/域内仅图标切换） ---
+    var QUEUE_EXTRA = {
+      inbound: [['最长等待时间', '2m 30s'], ['反垃圾处理延迟', '1.2s']],
+      outbound: [['最长等待时间', '15m 45s'], ['积压最多域名', 'gmail.com (234)']]
+    };
+    document.querySelectorAll('.component-preview button').forEach(function(btn){
+      var svg = btn.querySelector('svg.lucide-chevron-up, svg.lucide-chevron-down');
+      if (!svg) return;
+      var card = btn.closest('[data-slot=card]');
+      if (!card || (card.innerText || '').indexOf('队列健康状态') < 0) return;
+      var dir = null;
+      var panel = btn.closest('[data-swap-panel]');
+      if (panel) dir = panel.getAttribute('data-swap-panel');
+      if (!dir) {
+        var f = location.pathname;
+        if (f.indexOf('layer-1') >= 0) dir = 'inbound';
+        else if (f.indexOf('layer-2') >= 0) dir = 'outbound';
+        else if (f.indexOf('layer-3') >= 0 || f.indexOf('layer-4') >= 0) dir = 'internal';
+      }
+      var expanded = false;
+      btn.addEventListener('click', function(){
+        expanded = !expanded;
+        svg.style.transform = expanded ? 'rotate(180deg)' : '';
+        var rows = QUEUE_EXTRA[dir];
+        if (!rows) return; // 全部/域内：demo 中展开不追加内容，仅图标切换
+        var extra = card.querySelector('.q-extra');
+        if (expanded && !extra) {
+          extra = document.createElement('div');
+          extra.className = 'q-extra space-y-2';
+          extra.style.marginTop = '8px';
+          extra.innerHTML = rows.map(function(r){
+            return '<div class="flex items-center justify-between"><span class="text-sm">' + r[0] +
+                   '</span><span class="font-medium">' + r[1] + '</span></div>';
+          }).join('');
+          (card.querySelector('[data-slot=card-content]') || card).appendChild(extra);
+        } else if (extra) {
+          extra.style.display = expanded ? '' : 'none';
+        }
+      });
+    });
+
+    // --- 无绑定行为按钮的说明 ---
+    document.querySelectorAll('.component-preview button').forEach(function(b){
+      var t = (b.innerText || '').trim();
+      if (t === '导出 CSV' || t === '生成报告' || t === 'AI 解读') {
+        b.setAttribute('data-rs-tip', 'demo 中此按钮无绑定行为（源码无 onClick）');
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

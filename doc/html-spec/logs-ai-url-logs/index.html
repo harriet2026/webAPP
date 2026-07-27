@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>沙箱日志 - HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .component-preview { background:#fff; overflow-x:auto; }
+  .pass { color:#15803d; font-weight:600; }
+  .bad { color:#b91c1c; font-weight:600; }
+  .warn { color:#a16207; font-weight:600; }
+  .spec-swap-bar { display:flex; align-items:center; gap:.375rem; flex-wrap:wrap; margin-bottom:.75rem; padding-bottom:.5rem; border-bottom:1px dashed var(--border); font-size:.75rem; color:var(--muted-foreground); }
+  .spec-swap-bar button { font:inherit; padding:.15rem .5rem; border:1px solid var(--border); background:#fff; border-radius:.25rem; cursor:pointer; }
+  .spec-swap-bar button.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+  /* 规格侧呈现层修正：把 demo 弹窗的视口级 fixed 定位中和为内联卡片（快照 DOM 本身未改动） */
+  .component-preview .fixed.inset-0 { position:relative !important; inset:auto !important; padding:0 !important; }
+  .component-preview .fixed.inset-0 > .absolute.inset-0[aria-hidden="true"] { display:none !important; }
+</style>
+</head>
+<body>
+
+<header class="spec-header">
+  <h1>沙箱日志（/logs/ai-url-logs）详细产品规格说明</h1>
+  <table class="meta-table">
+    <tr><td>规格版本</td><td>v1（首版）</td></tr>
+    <tr><td>生成日期</td><td>2026-07-18</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>demo 路由</td><td><code>/logs/ai-url-logs</code>（侧边栏：日志审计 &gt; 沙箱日志；<strong>仅传统版形态可见</strong>，见 §5.1）</td></tr>
+    <tr><td>demo 源码</td><td><code>components/ai-url-logs/ai-url-logs-page.tsx</code>(86) · <code>ai-url-search-filters.tsx</code>(82) · <code>ai-url-table.tsx</code>(160) · <code>ai-url-detail-modal.tsx</code>(59) · <code>ai-url-detail-content.tsx</code>(375)</td></tr>
+    <tr><td>spec 源文档</td><td class="bad"><strong>无专属 PRD</strong>。相关引用：<code>spec/钓鱼邮件智能体.md</code> 与 <code>spec/V2-钓鱼邮件检测智能体模块 · 需求文档（PRD）.md</code>（均要求「复用 AI-URL 沙箱日志弹窗」做 URL 下钻）· <code>spec/URL检测与防护模块 - 需求文档.md</code>（URL 沙箱检测的模块背景）</td></tr>
+    <tr><td>模块性质</td><td><strong>只读审计视图</strong>：查询 / 查看研判详情 / 单条下载（无行为），无新增/编辑/删除</td></tr>
+    <tr><td>i18n</td><td class="bad">本页详情弹窗有 <strong>10+ 处 zh 文案 UTF-8 损坏</strong>（浏览器实测渲染为 <code>高��</code>、<code>端��</code> 等，见 §7）</td></tr>
+  </table>
+</header>
+
+<nav class="component-toc">
+  <h2>📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#c-1">2.1 搜索区（普通搜索 / 高级搜索 双 Tab + 6 个筛选项）</a><span class="toc-badge">2态</span></li>
+    <li><a href="#c-2">2.2 日志列表（9 列，3 条 mock）</a><span class="toc-badge">1层</span></li>
+    <li><a href="#c-3">2.3 分页（50/100/200，默认 100）</a><span class="toc-badge">1层</span></li>
+    <li><a href="#c-4">3.1 沙箱研判详情弹窗（5 个 Tab）</a><span class="toc-badge">6态</span>
+      <span class="toc-layer-links"><a href="./layer-1-detail-modal.html">详情弹窗</a></span></li>
+  </ul>
+</nav>
+
+<section id="version-history">
+  <h2>0.2 版本历史</h2>
+  <table class="spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody><tr><td>v1</td><td>2026-07-18</td><td><code>804efb9</code></td><td><code>804efb9</code></td><td>初版：双 Tab 搜索区（6 项筛选，高级搜索与普通搜索字段完全相同）、9 列日志表（3 条 mock）、5-Tab 沙箱研判弹窗（原始日志搜索高亮/复制实测可用）；核心发现：无专属 PRD、网关无对应 API、仅传统版形态可见（LEGACY_HIDE_AI，浏览器实测）、详情弹窗 10+ 处 zh 文案 UTF-8 损坏、筛选完全不参与过滤、相邻导航项「通知日志」是 404 死链</td></tr></tbody>
+  </table>
+</section>
+
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-full-default.png" alt="整页默认态">
+    <figcaption>整页默认态（1600×1100，产品形态=云网关时直接访问路由）。搜索区默认「普通搜索」Tab；列表 3 条 mock 数据。</figcaption>
+  </figure>
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>内容</th><th>容器</th></tr></thead>
+    <tbody>
+      <tr><td>页头</td><td>H1「沙箱日志」（i18n key <code>emailLogs.aiUrlSandboxLog</code>，无副标题）</td><td><code>border-b p-6</code></td></tr>
+      <tr><td>搜索区</td><td>「普通搜索 / 高级搜索」双 Tab + 3 列网格的 6 个筛选项 + 重置 / 搜索</td><td><code>rounded-lg border p-6 mx-4 my-4</code></td></tr>
+      <tr><td>列表区</td><td>「共 3 条记录」+ 9 列表格（横向滚动，操作列右侧吸附）</td><td><code>space-y-4 p-6</code></td></tr>
+      <tr><td>分页</td><td>每页显示 50/100/200 + 上一页/下一页</td><td><code>flex justify-between pt-4</code></td></tr>
+      <tr><td>详情弹窗</td><td>居中 Modal <code>w-[1200px] h-[800px]</code>（<code>fixed inset-0 z-50</code> + <code>bg-black/70</code> 遮罩）</td><td>点行内「查看」打开</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <article class="component-spec" id="c-1">
+    <h3>2.1 搜索区（普通搜索 / 高级搜索 双 Tab）</h3>
+    <div class="preview-hint">点「普通搜索」/「高级搜索」切换 Tab 态（注意：两态字段完全相同，仅 Tab 高亮样式变化 —— 与 demo 实测一致）</div>
+    <div class="component-preview" data-preview="swap" data-swap-map='{"高级搜索":"advanced","普通搜索":"normal"}'>
+      <div data-swap-panel="normal" data-swap-label="普通搜索（默认）"><div class="bg-white rounded-lg border border-gray-200 p-6 mx-4 my-4"><div class="flex items-center gap-4 mb-6"><button class="text-base font-semibold text-blue-600 border-b-2 border-blue-600 pb-1">普通搜索</button><button class="text-base font-medium text-gray-500 pb-1">高级搜索</button></div><div class="grid grid-cols-3 gap-4 mb-6 items-end"><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">收信时间</label><button data-slot="popover-trigger" class="inline-flex items-center gap-2 whitespace-nowrap text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 px-4 py-2 has-[&gt;svg]:px-3 h-10 justify-start text-left font-normal text-muted-foreground rounded-lg w-full" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_R_1555esnebn9lb_" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>选择日期</button></div><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">邮件TID</label><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="输入邮件唯一ID"></div><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">发信人</label><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="输入邮箱地址"></div></div><div class="grid grid-cols-3 gap-4 mb-6 items-end"><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">收信人</label><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="输入邮箱地址"></div><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">主题</label><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="输入邮件主题"></div><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">URL</label><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="输入URL地址"></div></div><div class="flex gap-3 justify-start"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 py-2 has-[&gt;svg]:px-3 h-10 px-6 bg-transparent">重置</button><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground py-2 has-[&gt;svg]:px-3 h-10 px-6 bg-blue-600 hover:bg-blue-700">搜索</button></div></div></div>
+      <div data-swap-panel="advanced" data-swap-label="高级搜索" hidden><div class="bg-white rounded-lg border border-gray-200 p-6 mx-4 my-4"><div class="flex items-center gap-4 mb-6"><button class="text-base font-medium text-gray-500 pb-1">普通搜索</button><button class="text-base font-semibold text-blue-600 border-b-2 border-blue-600 pb-1">高级搜索</button></div><div class="grid grid-cols-3 gap-4 mb-6 items-end"><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">收信时间</label><button data-slot="popover-trigger" class="inline-flex items-center gap-2 whitespace-nowrap text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 px-4 py-2 has-[&gt;svg]:px-3 h-10 justify-start text-left font-normal text-muted-foreground rounded-lg w-full" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_R_1555esnebn9lb_" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar mr-2 h-4 w-4"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>选择日期</button></div><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">邮件TID</label><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="输入邮件唯一ID"></div><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">发信人</label><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="输入邮箱地址"></div></div><div class="grid grid-cols-3 gap-4 mb-6 items-end"><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">收信人</label><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="输入邮箱地址"></div><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">主题</label><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="输入邮件主题"></div><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">URL</label><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="输入URL地址"></div></div><div class="flex gap-3 justify-start"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 py-2 has-[&gt;svg]:px-3 h-10 px-6 bg-transparent">重置</button><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground py-2 has-[&gt;svg]:px-3 h-10 px-6 bg-blue-600 hover:bg-blue-700">搜索</button></div></div></div>
+    </div>
+    <figure class="screenshot-figure"><img src="./screenshots/filters-normal-tab.png" alt="普通搜索 Tab"><figcaption>普通搜索 Tab（默认）。高级搜索 Tab 截图：<a href="./screenshots/filters-advanced-tab.png">filters-advanced-tab.png</a></figcaption></figure>
+    <table class="spec-table">
+      <thead><tr><th>#</th><th>筛选项</th><th>类型</th><th>占位符 / 取值</th><th>默认</th><th>demo 实测</th></tr></thead>
+      <tbody>
+        <tr><td>—</td><td>普通搜索 / 高级搜索 Tab</td><td>text button ×2</td><td>激活态蓝色下划线</td><td>普通搜索</td><td class="bad">切换后<strong>字段完全相同</strong>（两态节点数均 32），高级搜索无任何额外字段</td></tr>
+        <tr><td>1</td><td>收信时间</td><td>LocalizedDateInput</td><td>「选择日期」→ 日历弹层（实测渲染当月日历）</td><td>空</td><td class="bad">不参与过滤</td></tr>
+        <tr><td>2</td><td>邮件TID</td><td>文本</td><td>请输入邮件唯一标识</td><td>空</td><td class="bad">不参与过滤；<strong>非受控组件</strong></td></tr>
+        <tr><td>3</td><td>发件人</td><td>文本</td><td>请输入邮箱地址</td><td>空</td><td class="bad">同上</td></tr>
+        <tr><td>4</td><td>收件人</td><td>文本</td><td>请输入邮箱地址</td><td>空</td><td class="bad">同上</td></tr>
+        <tr><td>5</td><td>主题</td><td>文本</td><td>输入邮件主题</td><td>空</td><td class="bad">同上</td></tr>
+        <tr><td>6</td><td>URL</td><td>文本</td><td>输入URL地址</td><td>空</td><td class="bad">同上</td></tr>
+        <tr><td>—</td><td>重置</td><td>outline 按钮</td><td>—</td><td>—</td><td class="bad">只清「收信时间」（其余 5 个输入框非受控，<code>handleReset</code> 无法清空）</td></tr>
+        <tr><td>—</td><td>搜索</td><td>蓝色主按钮</td><td>—</td><td>—</td><td class="bad"><code>onSearch</code> 是空函数 <code>() =&gt; {}</code>，点击无任何效果</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h5>DOM 树比对结果</h5>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>根节点</td><td><code>div.bg-white.rounded-lg.border.border-gray-200.p-6.mx-4.my-4</code></td><td>同</td><td class="pass">一致</td></tr>
+          <tr><td>普通搜索态节点数</td><td>32</td><td>32</td><td class="pass">一致</td></tr>
+          <tr><td>高级搜索态节点数</td><td>32（仅两个 Tab 按钮 class 互换）</td><td>32</td><td class="pass">一致</td></tr>
+          <tr><td>筛选项</td><td>6（3 列 ×2 行网格）</td><td>6</td><td class="pass">一致</td></tr>
+          <tr><td>日期弹层</td><td>点击「选择日期」渲染日历（100 节点，radix popper portal）</td><td>预览为静态按钮，弹层未嵌入</td><td class="warn">portal 弹层不在组件子树内，以事实表记录</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="component-spec" id="c-2">
+    <h3>2.2 日志列表</h3>
+    <div class="component-preview" data-preview="static"><div class="space-y-4 p-6"><div class="flex items-center justify-between mb-4"><div class="text-sm text-gray-600">共 3 条记录</div></div><div class="overflow-x-auto border border-gray-200 rounded-lg"><table class="w-full text-sm"><thead class="bg-gray-50 border-b border-gray-200"><tr><th class="px-4 py-3 text-left font-medium text-gray-900 cursor-pointer hover:bg-gray-100"><div class="flex items-center gap-1">收信时间<!-- --> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-3 h-3"><path d="m6 9 6 6 6-6"></path></svg></div></th><th class="px-4 py-3 text-left font-medium text-gray-900">邮件TID</th><th class="px-4 py-3 text-left font-medium text-gray-900">发信人</th><th class="px-4 py-3 text-left font-medium text-gray-900">收信人</th><th class="px-4 py-3 text-left font-medium text-gray-900">URL</th><th class="px-4 py-3 text-left font-medium text-gray-900">URL结果</th><th class="px-4 py-3 text-left font-medium text-gray-900">来源</th><th class="px-4 py-3 text-left font-medium text-gray-900">威胁类型</th><th class="px-4 py-3 sticky right-0 bg-gray-50">操作</th></tr></thead><tbody><tr class="border-b border-gray-200 hover:bg-gray-50"><td class="px-4 py-3 text-gray-900 text-xs">2025-11-03 10:30:45</td><td class="px-4 py-3 text-blue-600 text-xs font-medium">TID001</td><td class="px-4 py-3 text-gray-600 truncate text-xs">attacker@example.com</td><td class="px-4 py-3 text-gray-600 truncate text-xs">user@company.com</td><td class="px-4 py-3 text-blue-600 truncate text-xs max-w-xs" title="https://fake-bank-login.com/verify">https://fake-bank-login.com/verify</td><td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">钓鱼</span></td><td class="px-4 py-3 text-gray-600 text-xs">Email Body</td><td class="px-4 py-3 text-gray-600 text-xs">Phishing Website</td><td class="px-4 py-3 sticky right-0 bg-white flex gap-2 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-auto p-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-4 h-4"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>查看</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-gray-600 hover:text-gray-700 gap-1 h-auto p-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>下载</button></td></tr><tr class="border-b border-gray-200 hover:bg-gray-50"><td class="px-4 py-3 text-gray-900 text-xs">2025-11-03 09:15:22</td><td class="px-4 py-3 text-blue-600 text-xs font-medium">TID002</td><td class="px-4 py-3 text-gray-600 truncate text-xs">suspicious@domain.com</td><td class="px-4 py-3 text-gray-600 truncate text-xs">user@company.com</td><td class="px-4 py-3 text-blue-600 truncate text-xs max-w-xs" title="https://unknown-site.xyz/download">https://unknown-site.xyz/download</td><td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">可疑</span></td><td class="px-4 py-3 text-gray-600 text-xs">Attachment Link</td><td class="px-4 py-3 text-gray-600 text-xs">Suspicious Download</td><td class="px-4 py-3 sticky right-0 bg-white flex gap-2 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-auto p-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-4 h-4"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>查看</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-gray-600 hover:text-gray-700 gap-1 h-auto p-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>下载</button></td></tr><tr class="border-b border-gray-200 hover:bg-gray-50"><td class="px-4 py-3 text-gray-900 text-xs">2025-11-03 08:45:10</td><td class="px-4 py-3 text-blue-600 text-xs font-medium">TID003</td><td class="px-4 py-3 text-gray-600 truncate text-xs">newsletter@service.com</td><td class="px-4 py-3 text-gray-600 truncate text-xs">user@company.com</td><td class="px-4 py-3 text-blue-600 truncate text-xs max-w-xs" title="https://legitimate-shop.com/deals">https://legitimate-shop.com/deals</td><td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">正常</span></td><td class="px-4 py-3 text-gray-600 text-xs">Email Body</td><td class="px-4 py-3 text-gray-600 text-xs">Normal Link</td><td class="px-4 py-3 sticky right-0 bg-white flex gap-2 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-auto p-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-4 h-4"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>查看</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-gray-600 hover:text-gray-700 gap-1 h-auto p-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>下载</button></td></tr></tbody></table></div><div class="flex items-center justify-between pt-4"><div class="flex items-center gap-4"><div class="flex items-center gap-2"><span class="text-sm text-gray-600">每页显示<!-- -->:</span><select class="px-3 py-1 border border-gray-300 rounded text-sm bg-white"><option value="50">50</option><option value="100" selected="">100</option><option value="200">200</option></select></div></div><div class="flex gap-2"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 bg-transparent" disabled="">上一页</button><span class="px-3 py-1 text-sm text-gray-600 flex items-center">1<!-- --> / <!-- -->1</span><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 bg-transparent" disabled="">下一页</button></div></div></div></div>
+    <figure class="screenshot-figure"><img src="./screenshots/table-default.png" alt="日志列表"></figure>
+    <table class="spec-table">
+      <thead><tr><th>#</th><th>列</th><th>字段</th><th>渲染</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>收信时间</td><td><code>time</code></td><td>文本（表头有 ChevronDown 排序图标但<span class="bad">无排序逻辑</span>）</td></tr>
+        <tr><td>2</td><td>邮件TID</td><td><code>tid</code></td><td>蓝色链接态文本（TID001…）</td></tr>
+        <tr><td>3</td><td>发件人</td><td><code>sender</code></td><td>灰色，截断</td></tr>
+        <tr><td>4</td><td>收件人</td><td><code>recipient</code></td><td>灰色，截断</td></tr>
+        <tr><td>5</td><td>URL</td><td><code>url</code></td><td>蓝色 + <code>truncate max-w-xs</code> + <code>title</code> 悬停显示完整地址</td></tr>
+        <tr><td>6</td><td>URL结果</td><td><code>urlResult</code></td><td>彩色徽标：钓鱼（红 <code>bg-red-100</code>）/ 可疑（黄）/ 正常（绿）</td></tr>
+        <tr><td>7</td><td>来源</td><td><code>source</code></td><td class="warn">mock 值为英文硬编码（"Email Body" / "Attachment Link"），UI 语言为中文时不翻译</td></tr>
+        <tr><td>8</td><td>威胁类型</td><td><code>threatType</code></td><td class="warn">同上（"Phishing Website" / "Suspicious Download" / "Normal Link"）</td></tr>
+        <tr><td>9</td><td>操作</td><td>—</td><td>「查看」（Eye，蓝）+「下载」（Download，灰；<span class="bad">无 onClick</span>）；右侧吸附列</td></tr>
+      </tbody>
+    </table>
+    <p class="warn">整行不可点击 —— 打开详情的唯一入口是行内「查看」按钮（<code>onRowClick</code> 只绑在按钮上）。</p>
+    <div class="dom-comparison">
+      <h5>DOM 树比对结果</h5>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>列表区根节点</td><td><code>div.space-y-4.p-6</code>（共 92 节点）</td><td>同（92）</td><td class="pass">一致</td></tr>
+          <tr><td>列数</td><td>9</td><td>9</td><td class="pass">一致</td></tr>
+          <tr><td>数据行</td><td>3（mock）</td><td>3</td><td class="pass">一致</td></tr>
+          <tr><td>URL title 属性</td><td>存在</td><td>存在</td><td class="pass">一致</td></tr>
+          <tr><td>「下载」onClick</td><td><strong>无</strong></td><td>不包含</td><td class="bad">一致（按钮无行为）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="component-spec" id="c-3">
+    <h3>2.3 分页</h3>
+    <div class="component-preview" data-preview="static"><div class="flex items-center justify-between pt-4"><div class="flex items-center gap-4"><div class="flex items-center gap-2"><span class="text-sm text-gray-600">每页显示<!-- -->:</span><select class="px-3 py-1 border border-gray-300 rounded text-sm bg-white"><option value="50">50</option><option value="100" selected="">100</option><option value="200">200</option></select></div></div><div class="flex gap-2"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 bg-transparent" disabled="">上一页</button><span class="px-3 py-1 text-sm text-gray-600 flex items-center">1<!-- --> / <!-- -->1</span><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 bg-transparent" disabled="">下一页</button></div></div></div>
+    <p class="pass">✅ 每页 <strong>50 / 100 / 200，默认 100</strong>；上一页 / 下一页（当前 1/1 时均禁用，浏览器实测 <code>disabled</code>）；顶部「共 N 条记录」。</p>
+  </article>
+</section>
+
+<section id="dialogs">
+  <h2>3. 弹窗规格</h2>
+  <article class="component-spec" id="c-4">
+    <h3>3.1 沙箱研判详情弹窗（5 个 Tab）</h3>
+    <p>触发：列表行「查看」→ 居中 Modal <code>w-[1200px] h-[800px]</code>。头部面包屑「<strong>邮件安全 / 邮件日志 / 沙箱日志</strong>」+ 标题 = URL + X 关闭；底部仅「关闭」。5 个 Tab：<strong>AI推理（默认）/ URL基础信息 / 网络分析 / 内容详细分析 / 原始日志</strong>。</p>
+    <table class="spec-table layer-index">
+      <thead><tr><th>态</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>1a</td><td>AI推理 Tab（默认）</td><td>点「查看」</td><td rowspan="6"><a href="./layer-1-detail-modal.html">layer-1-detail-modal.html（6 态可交互）</a></td></tr>
+        <tr><td>1b</td><td>URL基础信息 Tab</td><td>点 Tab</td></tr>
+        <tr><td>1c</td><td>网络分析 Tab</td><td>点 Tab</td></tr>
+        <tr><td>1d</td><td>内容详细分析 Tab</td><td>点 Tab</td></tr>
+        <tr><td>1e</td><td>原始日志 Tab</td><td>点 Tab</td></tr>
+        <tr><td>1f</td><td>原始日志搜索态</td><td>输入关键字（实测过滤 + 黄色高亮）</td></tr>
+      </tbody>
+    </table>
+    <p class="bad">⚠ 弹窗面包屑写「邮件安全 / <strong>邮件日志</strong> / 沙箱日志」，与实际导航归属「<strong>日志审计</strong>」不一致（§9 D9）。X 按钮 tooltip 写「关闭 (ESC)」但<strong>源码无 ESC 键监听</strong>（§9 D8）；遮罩点击可关闭。</p>
+  </article>
+</section>
+
+<section id="api-mapping">
+  <h2>4. 数据模型与 API 映射</h2>
+  <h3>4.1 前端数据模型 <code>AiUrlLogItem</code></h3>
+  <pre><code>id / tid / time / sender / recipient / subject
+url
+urlResult: "phishing" | "suspicious" | "normal"
+source        // mock 为英文自由文本 "Email Body" / "Attachment Link"
+threatType    // mock 为英文自由文本 "Phishing Website" 等</code></pre>
+  <h3>4.2 网关现状</h3>
+  <table class="spec-table">
+    <thead><tr><th>能力</th><th>PRD</th><th>网关现有</th><th>结论</th></tr></thead>
+    <tbody>
+      <tr><td>沙箱日志列表查询</td><td class="bad">无专属 PRD，未定义任何 API</td><td class="bad"><code>internal/api/</code> <strong>无沙箱日志列表端点</strong>（仅有 <code>url_protection_sandbox.go</code> 的沙箱<em>配置</em>校验；<code>link-click-logs</code> 是链接保护日志的端点，非本页）</td><td class="bad">前后端均缺失，需先定义</td></tr>
+      <tr><td>研判详情（5 Tab 内容）</td><td class="bad">未定义</td><td class="bad">无</td><td class="bad">详情内容当前为<strong>静态 mock</strong>：除 URL/发件人/收件人外，域名、IP、证书、页面分析、原始日志等全部硬编码，<strong>不随行数据变化</strong></td></tr>
+      <tr><td>单条下载</td><td class="bad">未定义（下载什么未知）</td><td class="bad">无</td><td class="bad">按钮无行为</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="business-logic">
+  <h2>5. 业务逻辑</h2>
+  <p>模块背景（<code>spec/URL检测与防护模块 - 需求文档.md</code>）：URL 沙箱在<strong>投递前</strong>对邮件中的未知 URL 做动态行为分析（区别于链接保护日志的「用户<strong>点击时</strong>」检测）。本页即沙箱分析结果的审计视图。AI 版 PRD（钓鱼邮件智能体 / V2）要求在检测日志的 URL 下钻中「<strong>复用 AI-URL 沙箱日志弹窗</strong>」—— 即本页 §3.1 弹窗是跨模块共享组件。</p>
+  <h3>5.1 形态可见性（浏览器实测）</h3>
+  <table class="spec-table">
+    <thead><tr><th>形态</th><th>侧边栏「沙箱日志」</th><th>实测证据</th></tr></thead>
+    <tbody>
+      <tr><td>云网关（demo 默认）</td><td class="bad">❌ 隐藏</td><td><a href="./screenshots/sidebar-cloud-hidden.png">sidebar-cloud-hidden.png</a>（日志审计组展开后无「沙箱日志」）</td></tr>
+      <tr><td>AI 多租户 / AI 单租户</td><td class="bad">❌ 隐藏</td><td><code>product-profiles.ts</code>：<code>visibility: LEGACY_HIDE_AI</code></td></tr>
+      <tr><td>传统多租户 / 传统单租户</td><td class="pass">✅ 显示</td><td><a href="./screenshots/sidebar-legacy-multi.png">sidebar-legacy-multi.png</a>（<code>?profile=legacy-multi</code> 实测可见）</td></tr>
+    </tbody>
+  </table>
+  <p class="warn">与 <strong>链接保护日志</strong>（PRD 能力位 <code>ai</code>、传统版隐藏）正好互补：传统版用「沙箱日志」，AI 形态用「链接保护日志」。但隐藏仅作用于侧边栏 —— <strong>任何形态下直接访问路由均可打开页面</strong>（本页截图即云网关形态下直访所得）。另：<code>product-profiles.ts</code> 中本页 label 为「AI URL 日志」，与导航文案「沙箱日志」不一致。</p>
+</section>
+
+<section id="i18n">
+  <h2>7. 国际化规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>项</th><th>demo</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>i18n key</td><td class="pass">本页几乎全部走 <code>t()</code>（<code>emailLogs.*</code> / <code>common.*</code>，中/英/泰三语）</td><td>与链接保护日志的大量硬编码相反</td></tr>
+      <tr><td class="bad">zh 文案 UTF-8 损坏</td><td class="bad">浏览器实测弹窗内 <strong>10+ 处</strong>渲染为替换符：<code>高��</code>（威胁等级值）、<code>端��</code>、<code>证书有效期</code>与<code>HTTP响应头</code>整串损坏、<code>解析IP列表</code>、<code>重定向链</code>、<code>文件与资源分析</code>、<code>加载资源列表</code>、<code>文件下载记录</code>值、<code>下载链接是否有毒</code>、<code>检测到恶意脚本</code></td><td class="bad"><code>language-context.tsx</code> 源文件即损坏；落地实现时必须按语义重录这批文案（对照英文值：High Risk / Port / Certificate Validity / HTTP Response Headers…）</td></tr>
+      <tr><td>mock 数据语言</td><td class="warn">列表「来源 / 威胁类型」与详情大量 mock 值为英文</td><td>落地时应服务端返回枚举 + 前端字典渲染</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="responsive">
+  <h2>8. 响应式规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>demo 实测</th></tr></thead>
+    <tbody>
+      <tr><td>1600px</td><td>筛选 3 列网格；表格全列可见</td></tr>
+      <tr><td>1024px</td><td>筛选<strong>仍 3 列</strong>（<code>grid-cols-3</code> 无响应式降级，实测每列 ≈197px，输入框拥挤）；表格横向滚动（内容宽 1116px &gt; 可视 654px）</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1024px.png" alt="1024px"></figure>
+</section>
+
+<section id="diffs" class="diff-section">
+  <h2>9. 与 spec 的差异标注</h2>
+  <table class="spec-table diff-table">
+    <thead><tr><th>#</th><th>差异点</th><th>PRD / 预期</th><th>demo 实际</th><th>建议</th></tr></thead>
+    <tbody>
+      <tr><td class="bad">D1</td><td class="bad">无专属 PRD</td><td>页面级功能应有需求文档</td><td class="bad">仅被 AI 版智能体 PRD 以「复用弹窗」的方式引用；列表/筛选/字段口径全部无定义</td><td class="bad">补 PRD 后再落地 → §10 Q1</td></tr>
+      <tr><td class="bad">D2</td><td class="bad">筛选完全不参与过滤</td><td>查询应生效</td><td class="bad"><code>onSearch</code> 空函数 + 5/6 输入框非受控</td><td>接列表 API 时一并实现</td></tr>
+      <tr><td>D3</td><td>「高级搜索」Tab 名不副实</td><td>高级搜索应多于普通搜索</td><td class="bad">两 Tab 字段完全相同（节点数均 32），只有按钮样式变化</td><td>砍掉 Tab 或补高级字段</td></tr>
+      <tr><td>D4</td><td>「重置」不完整</td><td>清空全部条件</td><td class="bad">只清日期（其余输入框非受控）</td><td>改受控组件</td></tr>
+      <tr><td>D5</td><td>「下载」按钮（行内 + 原始日志 Tab「下载日志」）无行为</td><td>应可导出</td><td class="bad">均无 onClick</td><td>定义导出物 → §10 Q4</td></tr>
+      <tr><td class="bad">D12</td><td class="bad">落地页截图资源缺失</td><td>内容详细分析 Tab 应展示 URL 落地页截图</td><td class="bad">引用 <code>/phishing-website-screenshot.jpg</code> 但 demo public 目录无此文件（HTTP 404），实际渲染为破图</td><td>补资源或接真实截图服务</td></tr>
+      <tr><td>D6</td><td>排序图标无逻辑</td><td>—</td><td class="warn">收信时间表头有 ChevronDown 但无排序</td><td>去掉或实现</td></tr>
+      <tr><td class="bad">D7</td><td class="bad">详情内容为静态 mock</td><td>研判数据应随行变化</td><td class="bad">3 行日志打开的弹窗内容几乎相同（仅 URL/收发件人插值；域名固定 fake-bank-login.com、IP 固定 203.0.113.100）</td><td>接真实研判数据</td></tr>
+      <tr><td>D8</td><td>ESC 关闭</td><td>X 按钮 tooltip 写「关闭 (ESC)」</td><td class="bad">源码无 keydown 监听，ESC 不关闭（遮罩点击可关闭）</td><td>补监听或改文案</td></tr>
+      <tr><td>D9</td><td>面包屑归属</td><td>导航在「日志审计」</td><td class="warn">弹窗面包屑写「邮件安全 / 邮件日志 / 沙箱日志」</td><td>统一为日志审计</td></tr>
+      <tr><td class="bad">D10</td><td class="bad">zh 文案 UTF-8 损坏 10+ 处</td><td>正常中文</td><td class="bad">浏览器实测 <code>高��</code> / <code>端��</code> 等（§7）</td><td class="bad">重录文案</td></tr>
+      <tr><td>D11</td><td>接口 / 数据表</td><td class="bad">完全未定义</td><td>前端 3 条 MOCK；网关无沙箱日志端点</td><td>先定义 API 与存储 → §10 Q2</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项</h2>
+  <table class="spec-table question-table">
+    <thead><tr><th>#</th><th>问题</th><th>背景</th></tr></thead>
+    <tbody>
+      <tr><td>Q1</td><td>本页的产品定位与需求口径？（是否补专属 PRD）</td><td>无专属 PRD；仅传统版可见（LEGACY_HIDE_AI），与链接保护日志（ai 专属）互补 —— 该分工是 demo 侧约定，需产品确认</td></tr>
+      <tr><td>Q2</td><td>数据来源：沙箱结果落在哪张表、走什么 API？</td><td>网关 <code>internal/api/</code> 无沙箱日志端点；投递前沙箱检测结果目前无审计存储的对外查询口径</td></tr>
+      <tr><td>Q3</td><td>详情 5 个 Tab 的字段口径（AI推理/基础信息/网络分析/内容分析/原始日志各展示什么）？</td><td>当前全部为静态 mock，无 PRD 定义；且该弹窗被钓鱼智能体 PRD 要求跨模块复用，口径需一次定准</td></tr>
+      <tr><td>Q4</td><td>行内「下载」与「下载日志」的导出物与格式？</td><td>均无行为定义</td></tr>
+      <tr><td>Q5</td><td>相邻导航项「通知日志」（/logs/system-logs）是 404 死链，去留？</td><td>sidebar 两种形态均显示该项，但 demo 无对应页面目录，点击后整页 404（浏览器实测）</td></tr>
+      <tr><td>Q6</td><td>「来源 / 威胁类型」列的取值枚举？</td><td>mock 为英文自由文本，无枚举定义，无法确定徽标/翻译方案</td></tr>
+    </tbody>
+  </table>
+</section>
+<script src="../assets/stats-preview.js"></script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 5：复制到其他方向的未保存状态与保存清除 - 意图引擎</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --sub:#6b7280; --blue:#1677ff; --amber:#d97706; --radius:.625rem; }
+    *{box-sizing:border-box} body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:#111827;line-height:1.6;font-family:"Geist","Inter",system-ui,sans-serif} a{color:var(--blue);text-decoration:none}
+    nav.layer-nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+    h1{margin:0 0 16px;color:var(--primary);font-size:26px} h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px} h4{margin:16px 0 8px;color:#374151;font-size:15px}
+    .meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+    .meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}
+    .meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}
+    .meta-table td:first-child{width:160px}
+    .component-preview{margin:12px 0;padding:18px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}
+    .screenshot-figure{margin:14px 0;text-align:center}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}.screenshot-figure figcaption{margin-top:8px;color:var(--sub);font-size:13px}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}
+    .is-hidden{display:none!important}
+    .fixed-badge{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:700}
+    /* 预览：方向 Tab + 操作栏 */
+    .dir-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border-radius:10px;background:#f3f4f6;margin-bottom:14px;max-width:640px}
+    .dir-tab{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 0;border:0;border-radius:8px;background:transparent;font-size:14px;font-weight:600;color:#6b7280;cursor:pointer}
+    .dir-tab.active{background:#fff;color:#111827;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+    .dir-tab .mark{width:6px;height:6px;border-radius:999px;background:var(--amber)}
+    .ops-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border-radius:10px;background:#f9fafb;max-width:900px}
+    .btn-outline{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer}
+    .btn-outline:disabled{opacity:.5;cursor:not-allowed}
+    .btn-outline.danger{color:#dc2626}
+    .btn-outline.primary{background:#2563eb;color:#fff;border:0;margin-left:auto}
+    .hint{margin-left:auto;font-size:12px;display:inline-flex;align-items:center;gap:4px}
+    .hint.amber{color:var(--amber)}
+    .hint.blue{color:#2563eb}
+    .diff-section{border-left:4px solid #16a34a;background:#f0fdf4}
+    .step-note{margin:8px 0;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;font-size:13px;color:#4b5563}
+  </style>
+</head>
+<body>
+  <nav class="layer-nav"><a href="index.html#component-2-2">← 返回主文件</a> · <a href="layer-4-direction-disable.html">← 层级4：方向与禁用态</a> · 层级 5 / 5（修复项）</nav>
+
+  <header class="spec-header">
+    <h1>交互层级 5：复制到其他方向的未保存状态与保存清除 <span class="fixed-badge">已修复 · 对应差异 D-07</span></h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.2 内容策略抽屉 / 意图引擎全局操作栏「复制到其他方向」+ 方向 Tab + 底部「保存配置」（<code>intent-engine-module.tsx</code> + 外层 wrapper <code>content-strategy-page.tsx</code>）</td></tr>
+      <tr><td>主文件</td><td><a href="index.html">filter-rules-pipeline-intent-engine/index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级0 操作栏 →「复制到其他方向」→ 勾选目标方向 →「确认复制」→（本层）复制反馈 + 被改动方向 Tab 标记 →「保存配置」→ 标记与反馈清除</td></tr>
+      <tr><td>规格版本</td><td>v2（2026-07-17）· demo 源 commit <code>887ac48</code></td></tr>
+      <tr><td>浏览器验证</td><td>2026-07-17，headless Chromium 访问运行态 demo（viewport 1405×936，<code>/filter-rules/content</code> 打开意图引擎）。实测：复制到「外发/域内」后，两个方向 Tab 出现琥珀色「未保存」标记点，接收方向无标记，操作栏出现蓝色反馈「已复制到 外发 / 域内 方向，请保存后生效」；点「保存配置」后 Tab 标记与反馈全部清除；目标方向与当前方向一致时复制不标脏，仅提示「目标方向配置与当前方向一致，无需修改」。共 3 张截图。</td></tr>
+    </table>
+  </header>
+
+  <section id="fix-summary">
+    <h2>1. 问题与修复摘要</h2>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>修复前（v1 / 差异 D-07）</th><th>修复后（v2）</th></tr></thead>
+      <tbody>
+        <tr><td>未保存状态粒度</td><td>整个模块共用一个布尔 <code>isDirty</code></td><td>按方向追踪 <code>dirtyDirections{receive,send,internal}</code>，仅真正被改动的方向标脏</td></tr>
+        <tr><td>复制到其他方向</td><td>无条件 <code>setIsDirty(true)</code>，且提示显示在「当前方向」操作栏，令人误以为当前方向被改</td><td>仅对配置实际变化的目标方向标脏（深比较）；被改动方向 Tab 上打琥珀点；操作栏给出点名反馈「已复制到 X / Y 方向，请保存后生效」</td></tr>
+        <tr><td>目标与源一致</td><td>仍报「配置已修改未保存」（误报）</td><td>不标脏，提示「目标方向配置与当前方向一致，无需修改」</td></tr>
+        <tr><td>保存后</td><td>模块级提示无外部重置入口，「配置已修改未保存」一直残留</td><td>外层保存自增 <code>saveSignal</code>，模块监听后清空各方向脏标记与反馈，回调 <code>onDirtyChange(false)</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="preview">
+    <h2>2. 可交互预览（复刻 demo 修复后行为）</h2>
+    <p class="step-note">操作顺序：① 点「复制到其他方向」勾选目标 → ② 点「确认复制」看反馈 + Tab 标记 → ③ 点「保存配置」看清除。再次对已一致方向复制则提示「无需修改」。</p>
+    <div class="component-preview">
+      <div class="dir-tabs" role="tablist">
+        <button class="dir-tab active" type="button">接收方向<span class="mark is-hidden" data-mark="receive"></span></button>
+        <button class="dir-tab" type="button">外发方向<span class="mark is-hidden" data-mark="send"></span></button>
+        <button class="dir-tab" type="button">域内方向<span class="mark is-hidden" data-mark="internal"></span></button>
+      </div>
+      <div class="ops-bar">
+        <button class="btn-outline" disabled title="展开某个意图卡后可用">✓ 应用同风险等级</button>
+        <button class="btn-outline" type="button" id="pv-copy">⧉ 复制到其他方向</button>
+        <button class="btn-outline danger" type="button">↺ 重置为缺省值</button>
+        <span class="hint amber is-hidden" id="pv-dirty">⚠ 当前方向配置已修改未保存</span>
+        <span class="hint blue is-hidden" id="pv-feedback">✓ <span id="pv-feedback-text"></span></span>
+        <button class="btn-outline primary" type="button" id="pv-save">💾 保存配置</button>
+      </div>
+    </div>
+    <p class="step-note" id="pv-log">当前状态：初始态，无未保存标记。</p>
+  </section>
+
+  <section id="states">
+    <h2>3. 各状态截图与元素</h2>
+
+    <h4><span class="layer-badge">1</span>复制后：目标方向标脏 + 点名反馈</h4>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/copy-save-layer-5-feedback.png" alt="复制到外发/域内后：Tab 未保存标记 + 蓝色反馈">
+      <figcaption>接收方向复制到外发/域内后：外发方向、域内方向 Tab 右侧出现琥珀点，操作栏显示「已复制到 外发 / 域内 方向，请保存后生效」；接收方向无标记。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>实际文案/表现</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>外发方向 Tab</td><td>「外发方向」+ 琥珀点（aria-label=未保存）</td><td><code>dirtyDirections.send=true</code></td></tr>
+        <tr><td>域内方向 Tab</td><td>「域内方向」+ 琥珀点</td><td><code>dirtyDirections.internal=true</code></td></tr>
+        <tr><td>接收方向 Tab</td><td>「接收方向」无标记（当前方向）</td><td>复制源不被标脏</td></tr>
+        <tr><td>操作栏反馈</td><td>蓝色「已复制到 外发 / 域内 方向，请保存后生效」</td><td>4 秒后自动消失（<code>copyFeedback</code> 定时器）</td></tr>
+      </tbody>
+    </table>
+
+    <h4><span class="layer-badge">2</span>保存后：全部清除</h4>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/copy-save-layer-5-saved.png" alt="保存后：Tab 标记与反馈全部清除">
+      <figcaption>点击「保存配置」后：外发/域内方向 Tab 恢复无标记，操作栏反馈消失（saveSignal 触发清除）。</figcaption>
+    </figure>
+
+    <h4><span class="layer-badge">3</span>目标与源一致：不标脏</h4>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/copy-save-layer-5-nochange.png" alt="目标方向已一致：无需修改提示">
+      <figcaption>三方向配置已一致时再次复制：不产生未保存标记，操作栏仅提示「目标方向配置与当前方向一致，无需修改」。</figcaption>
+    </figure>
+  </section>
+
+  <section id="dom-comparison" class="diff-section">
+    <h2>4. DOM 树比对结果（提取 HTML vs demo 实际渲染）</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM（agent-browser 快照）</th><th>预览 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>复制后 外发 Tab</td><td><code>tab "外发方向 未保存"</code></td><td>外发 Tab + 琥珀 <code>.mark</code></td><td>✅</td></tr>
+        <tr><td>复制后 域内 Tab</td><td><code>tab "域内方向 未保存"</code></td><td>域内 Tab + 琥珀 <code>.mark</code></td><td>✅</td></tr>
+        <tr><td>复制后 接收 Tab</td><td><code>tab "接收方向" [selected]</code>（无「未保存」）</td><td>接收 Tab 无 <code>.mark</code></td><td>✅</td></tr>
+        <tr><td>复制反馈文案</td><td>「已复制到 外发 / 域内 方向，请保存后生效」</td><td>同文案（蓝色 hint）</td><td>✅</td></tr>
+        <tr><td>保存后 Tab</td><td>三个 tab 均无「未保存」后缀</td><td>预览保存后清除全部 <code>.mark</code></td><td>✅</td></tr>
+        <tr><td>一致场景反馈</td><td>「目标方向配置与当前方向一致，无需修改」，无 Tab 标记</td><td>同文案，不标脏</td><td>✅</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script>
+    (function () {
+      var copied = { receive:false, send:false, internal:false };
+      var dirty = { receive:false, send:false, internal:false };
+      var fbTimer = null;
+      function setMark(dir, on){ document.querySelector('[data-mark="'+dir+'"]').classList.toggle('is-hidden', !on); }
+      function feedback(text){
+        var el = document.getElementById('pv-feedback');
+        document.getElementById('pv-feedback-text').textContent = text;
+        el.classList.remove('is-hidden');
+        document.getElementById('pv-dirty').classList.add('is-hidden');
+        clearTimeout(fbTimer); fbTimer = setTimeout(function(){ el.classList.add('is-hidden'); }, 4000);
+      }
+      document.getElementById('pv-copy').addEventListener('click', function () {
+        // 模拟复制到 外发 + 域内，仅对尚未一致的方向标脏
+        var changed = [];
+        ['send','internal'].forEach(function (d) {
+          if (!copied[d]) { copied[d] = true; dirty[d] = true; setMark(d, true); changed.push(d === 'send' ? '外发' : '域内'); }
+        });
+        if (changed.length === 0) { feedback('目标方向配置与当前方向一致，无需修改'); document.getElementById('pv-log').textContent='当前状态：目标方向已一致，未产生未保存标记。'; return; }
+        feedback('已复制到 ' + changed.join(' / ') + ' 方向，请保存后生效');
+        document.getElementById('pv-log').textContent = '当前状态：' + changed.join('、') + ' 方向已标记未保存，等待保存。';
+      });
+      document.getElementById('pv-save').addEventListener('click', function () {
+        ['receive','send','internal'].forEach(function (d) { dirty[d] = false; setMark(d, false); });
+        document.getElementById('pv-dirty').classList.add('is-hidden');
+        document.getElementById('pv-feedback').classList.add('is-hidden');
+        document.getElementById('pv-log').textContent = '当前状态：已保存，各方向未保存标记已清除。';
+      });
+    })();
+  </script>
+</body>
+</html>

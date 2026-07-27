@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 3：复制/重置对话框 - 意图引擎</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --sub:#6b7280; --blue:#1677ff; --radius:.625rem; }
+    *{box-sizing:border-box} body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:#111827;line-height:1.6;font-family:"Geist","Inter",system-ui,sans-serif} a{color:var(--blue);text-decoration:none}
+    nav.layer-nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+    h1{margin:0 0 16px;color:var(--primary);font-size:26px} h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px}
+    .meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+    .meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}
+    .meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}
+    .meta-table td:first-child{width:160px}
+    .component-preview{margin:12px 0;padding:18px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}
+    .screenshot-figure{margin:14px 0;text-align:center}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}.screenshot-figure figcaption{margin-top:8px;color:var(--sub);font-size:13px}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}
+    .is-hidden{display:none!important}
+    .btn{display:inline-flex;align-items:center;gap:4px;height:36px;padding:0 14px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer}
+    .btn.primary{background:#2563eb;color:#fff;border:0}
+    .btn.primary:disabled{opacity:.5;cursor:not-allowed}
+    .btn.destructive{background:#dc2626;color:#fff;border:0}
+    .btn.danger-text{color:#dc2626}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50}
+    .dialog{position:relative;width:512px;max-width:92vw;padding:24px;border-radius:12px;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+    .dialog h3{margin:0 0 6px;font-size:17px}
+    .dialog .desc{color:#6b7280;font-size:14px;margin-bottom:14px}
+    .dialog .close-x{position:absolute;top:14px;right:14px;border:0;background:transparent;font-size:16px;color:#6b7280;cursor:pointer}
+    .check-row{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:14px}
+    .hint-amber{color:#d97706;font-size:12px;margin-top:8px}
+    .dialog-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+    .result-note{margin-top:10px;padding:10px 12px;border:1px solid #bbf7d0;border-radius:8px;background:#f0fdf4;color:#15803d;font-size:13px}
+  </style>
+</head>
+<body>
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a> · <a href="layer-2-threshold-config.html">← 层级2：分段阈值</a> · 层级 3 / 4 · <a href="layer-4-direction-disable.html">层级4：方向与禁用态 →</a></nav>
+
+  <header class="spec-header">
+    <h1>交互层级 3：复制配置对话框 与 重置确认对话框</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.2 全局操作栏 →「复制到其他方向」/「重置为缺省值」（<code>intent-engine-module.tsx</code> renderDialogs）</td></tr>
+      <tr><td>主文件</td><td><a href="index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级0 全局操作栏 → 点击对应按钮 → Radix Dialog（居中 + 黑色半透明遮罩）</td></tr>
+      <tr><td>浏览器验证</td><td>复制对话框默认「确认复制」disabled（实测 disabled=true）；勾选「外发方向」后启用，且出现琥珀色降级提示「提示：外发/域内方向不支持"标记投递"，将自动降级为"隔离"」（仅当前方向=接收时渲染）。重置对话框文案含当前方向名【接收】与「此操作不可撤销」，按钮为 取消 / 确认重置（destructive），右上有 Radix 默认 Close 关闭钮。</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">3</span>HTML 预览（点击按钮打开对话框，交互与 demo 一致）</h2>
+    <div class="component-preview" style="display:flex;gap:12px;">
+      <button class="btn" type="button" id="open-copy">⧉ 复制到其他方向</button>
+      <button class="btn danger-text" type="button" id="open-reset">↺ 重置为缺省值</button>
+    </div>
+    <div id="copy-result" class="result-note is-hidden"></div>
+
+    <!-- 复制对话框 -->
+    <div class="overlay is-hidden" id="copy-overlay">
+      <div class="dialog" role="dialog" data-demo-extracted="copy-dialog">
+        <button class="close-x" type="button" data-close-copy>✕</button>
+        <h3>复制配置到其他方向</h3>
+        <div class="desc">选择目标方向，将当前【接收】方向的配置复制过去。</div>
+        <label class="check-row"><input type="checkbox" id="copy-send"> 外发方向</label>
+        <label class="check-row"><input type="checkbox" id="copy-internal"> 域内方向</label>
+        <div class="hint-amber is-hidden" id="copy-hint">提示：外发/域内方向不支持"标记投递"，将自动降级为"隔离"</div>
+        <div class="dialog-footer">
+          <button class="btn" type="button" data-close-copy>取消</button>
+          <button class="btn primary" type="button" id="copy-confirm" disabled>确认复制</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 重置对话框 -->
+    <div class="overlay is-hidden" id="reset-overlay">
+      <div class="dialog" role="dialog" data-demo-extracted="reset-dialog">
+        <button class="close-x" type="button" data-close-reset>✕</button>
+        <h3>确认重置配置</h3>
+        <div class="desc">确定要将当前【接收】方向的意图引擎配置重置为系统缺省值吗？此操作不可撤销。</div>
+        <div class="dialog-footer">
+          <button class="btn" type="button" data-close-reset>取消</button>
+          <button class="btn destructive" type="button" id="reset-confirm">确认重置</button>
+        </div>
+      </div>
+    </div>
+
+    <figure class="screenshot-figure">
+      <img src="./screenshots/dialog-layer-3-copy-default.png" alt="复制对话框默认态">
+      <figcaption>复制对话框默认态：两个目标方向复选框（排除当前接收方向），确认复制 disabled。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/dialog-layer-3-copy-checked.png" alt="复制对话框勾选后">
+      <figcaption>勾选「外发方向」后：琥珀色降级提示出现，「确认复制」启用（蓝色）。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/dialog-layer-3-reset.png" alt="重置确认对话框">
+      <figcaption>重置确认对话框：文案含当前方向【接收】与不可撤销声明，确认重置为红色 destructive 按钮。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>元素清单与行为规则</h2>
+    <table class="spec-table">
+      <thead><tr><th>对话框</th><th>元素</th><th>文案/默认值</th><th>交互行为（浏览器验证）</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="5">复制配置到其他方向</td><td>标题/描述</td><td>「复制配置到其他方向」/「选择目标方向，将当前【接收】方向的配置复制过去。」</td><td>方向名随当前 Tab 动态替换（接收/外发/域内）</td></tr>
+        <tr><td>目标方向 Checkbox</td><td>列出除当前方向外的 2 个方向，默认全不勾选</td><td>勾选/取消维护 copyTargets 数组</td></tr>
+        <tr><td>降级提示</td><td>「提示：外发/域内方向不支持"标记投递"，将自动降级为"隔离"」琥珀色</td><td>仅 当前方向=接收 且 已勾选≥1 个目标 时渲染</td></tr>
+        <tr><td>取消按钮</td><td>outline</td><td>关闭对话框并清空已勾选目标（setCopyTargets([])）</td></tr>
+        <tr><td>确认复制</td><td>主按钮，默认 disabled</td><td>勾选≥1 启用；点击后深拷贝当前方向配置到各目标方向（接收→外发/域内时 classificationAction 与各区间 action 的 mark_deliver 全部替换为 quarantine），关闭对话框并标记未保存</td></tr>
+        <tr><td rowspan="3">确认重置配置</td><td>标题/描述</td><td>「确认重置配置」/「确定要将当前【接收】方向的意图引擎配置重置为系统缺省值吗？此操作不可撤销。」</td><td>方向名动态替换</td></tr>
+        <tr><td>取消按钮</td><td>outline</td><td>仅关闭对话框</td></tr>
+        <tr><td>确认重置</td><td>destructive 红色</td><td>当前方向配置恢复 createDefaultIntentEngineConfig() 对应方向缺省值，关闭对话框并标记未保存（其他方向不受影响）</td></tr>
+        <tr><td>应用同风险等级（无对话框）</td><td>全局操作栏按钮</td><td>默认 disabled；展开某意图卡后启用（实测 disabled false）</td><td>点击立即将展开卡配置深拷贝到同风险等级其他意图，无确认弹窗、无成功反馈（建议落地补 Toast）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>复制对话框根节点</td><td>新增 <code>[role=dialog]</code>（叠加在抽屉 dialog 之上）+ 黑色半透明遮罩</td><td>.overlay &gt; .dialog[role=dialog]</td><td>一致</td></tr>
+        <tr><td>复选框</td><td>2 个 <code>[role=checkbox]</code>：#copy-send、#copy-internal，初始 data-state=unchecked；勾选后 checked（实测）</td><td>2 个 checkbox 同 id 语义</td><td>一致</td></tr>
+        <tr><td>确认复制 disabled</td><td>默认 disabled=true；勾选后 false（实测）</td><td>同逻辑</td><td>一致</td></tr>
+        <tr><td>降级提示条件渲染</td><td>默认不渲染；勾选外发方向后出现（实测文案一致）</td><td>同条件显示</td><td>一致</td></tr>
+        <tr><td>重置对话框按钮</td><td>3 个 button：取消 / 确认重置 / Close(右上 X)（实测文本与顺序）</td><td>取消 / 确认重置 / ✕</td><td>一致</td></tr>
+        <tr><td>关闭行为</td><td>Radix Dialog：ESC 与遮罩点击可关闭；取消清空勾选</td><td>预览支持 ✕/取消/确认关闭，遮罩点击关闭</td><td>一致（ESC 未复刻，预览以按钮为准）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="layer-nav"><a href="layer-2-threshold-config.html">← 层级2：分段阈值</a> · <a href="layer-4-direction-disable.html">层级4：方向与禁用态 →</a></nav>
+
+  <script>
+    const copyOverlay = document.getElementById("copy-overlay");
+    const resetOverlay = document.getElementById("reset-overlay");
+    const cbSend = document.getElementById("copy-send");
+    const cbInternal = document.getElementById("copy-internal");
+    const confirmBtn = document.getElementById("copy-confirm");
+    const hint = document.getElementById("copy-hint");
+    const result = document.getElementById("copy-result");
+
+    document.getElementById("open-copy").addEventListener("click", () => copyOverlay.classList.remove("is-hidden"));
+    document.getElementById("open-reset").addEventListener("click", () => resetOverlay.classList.remove("is-hidden"));
+
+    function syncCopyState() {
+      const any = cbSend.checked || cbInternal.checked;
+      confirmBtn.disabled = !any;               // 无勾选时确认禁用（demo 实测）
+      hint.classList.toggle("is-hidden", !any); // 当前方向=接收且有勾选时显示降级提示
+    }
+    [cbSend, cbInternal].forEach(cb => cb.addEventListener("change", syncCopyState));
+
+    function closeCopy() {
+      copyOverlay.classList.add("is-hidden");
+      cbSend.checked = cbInternal.checked = false; // demo 取消时 setCopyTargets([])
+      syncCopyState();
+    }
+    document.querySelectorAll("[data-close-copy]").forEach(b => b.addEventListener("click", closeCopy));
+    copyOverlay.addEventListener("click", (e) => { if (e.target === copyOverlay) closeCopy(); });
+
+    confirmBtn.addEventListener("click", () => {
+      const targets = [cbSend.checked && "外发方向", cbInternal.checked && "域内方向"].filter(Boolean);
+      closeCopy();
+      result.classList.remove("is-hidden");
+      result.textContent = "已复制接收方向配置到：" + targets.join("、") + "（标记投递动作已自动降级为隔离；操作栏出现「配置已修改未保存」）";
+    });
+
+    function closeReset() { resetOverlay.classList.add("is-hidden"); }
+    document.querySelectorAll("[data-close-reset]").forEach(b => b.addEventListener("click", closeReset));
+    resetOverlay.addEventListener("click", (e) => { if (e.target === resetOverlay) closeReset(); });
+    document.getElementById("reset-confirm").addEventListener("click", () => {
+      closeReset();
+      result.classList.remove("is-hidden");
+      result.textContent = "当前【接收】方向配置已恢复为系统缺省值（其他方向不受影响；操作栏出现「配置已修改未保存」）";
+    });
+  </script>
+</body>
+</html>

@@ -5,8 +5,6 @@ import { useTranslations } from 'next-intl';
 import {
   AlertTriangle,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
   Clock,
   FileText,
   HelpCircle,
@@ -50,7 +48,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { CollapsibleSectionTrigger } from '@/components/ui/collapsible-section-trigger';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
@@ -642,10 +641,9 @@ export function ContentRuleDrawer({
                 </div>
 
                 <Collapsible open={examplesOpen} onOpenChange={setExamplesOpen}>
-                  <CollapsibleTrigger className="flex h-9 w-full items-center justify-between rounded-md px-3 text-left font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/30">
-                    <span className="flex items-center gap-2"><Lightbulb className="h-4 w-4" />{t('contentRules.viewExamples')}</span>
-                    {examplesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </CollapsibleTrigger>
+                  <CollapsibleSectionTrigger className="h-9">
+                    <Lightbulb className="h-4 w-4" />{t('contentRules.viewExamples')}
+                  </CollapsibleSectionTrigger>
                   <CollapsibleContent className="mt-3 space-y-2">
                     <ExampleButton title={t('contentRules.exampleKeywordReject')} description={t('contentRules.exampleKeywordRejectDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('regex', '\\d{17}[\\dXx]', ['text_body', 'html_body'], 'block')} />
                     <ExampleButton title={t('contentRules.exampleRegexQuarantine')} description={t('contentRules.exampleRegexQuarantineDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('regex', '\\d{16,19}', ['text_body', 'html_body'], 'review')} />
@@ -654,10 +652,11 @@ export function ContentRuleDrawer({
                 </Collapsible>
 
                 <Collapsible open={testOpen} onOpenChange={setTestOpen}>
-                  <CollapsibleTrigger className="flex h-9 w-full items-center justify-between rounded-md px-3 text-left font-medium text-green-600 transition-colors hover:bg-green-50 hover:text-green-700 dark:hover:bg-green-950/30">
-                    <span className="flex items-center gap-2"><Play className="h-4 w-4" />{t('contentRules.simulateTest')}</span>
-                    {testOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </CollapsibleTrigger>
+                  {/* 柔和交互反馈规格 §2.3：语义绿不作装饰用途，模拟测试触发器与其余折叠区
+                      统一走共享触发器的 primary 文字 + muted 表面。 */}
+                  <CollapsibleSectionTrigger className="h-9">
+                    <Play className="h-4 w-4" />{t('contentRules.simulateTest')}
+                  </CollapsibleSectionTrigger>
                   <CollapsibleContent className="mt-3 rounded-lg border bg-card p-4">
                     <Textarea
                       value={testContent}
@@ -816,7 +815,7 @@ function PreviewRow({ icon, label, value }: { icon: React.ReactNode; label: stri
 
 function ExampleButton({ title, description, applyLabel, onClick }: { title: string; description: string; applyLabel: string; onClick: () => void }) {
   return (
-    <div className="flex w-full items-start gap-2 rounded-lg border bg-card p-3 text-left transition-colors hover:bg-muted/40">
+    <div className="flex w-full items-start gap-2 rounded-lg border bg-card p-3 text-left">
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-medium">{title}</span>
         <span className="mt-0.5 block text-xs text-muted-foreground">{description}</span>

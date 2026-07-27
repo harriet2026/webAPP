@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级3：关闭检测二次确认 - 仿冒邮件检测智能体</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { corePlugins:{ preflight:false }, theme:{ extend:{ colors:{
+      background:'var(--background)', foreground:'var(--foreground)', card:'var(--card)',
+      'card-foreground':'var(--card-foreground)', muted:'var(--muted)', 'muted-foreground':'var(--muted-foreground)',
+      primary:'var(--primary)', 'primary-foreground':'var(--primary-foreground)', border:'var(--border)',
+      input:'var(--input)', ring:'var(--ring)', destructive:'var(--destructive)', accent:'var(--accent)',
+      'accent-foreground':'var(--accent-foreground)', secondary:'var(--secondary)',
+      'secondary-foreground':'var(--secondary-foreground)', popover:'var(--popover)',
+      'popover-foreground':'var(--popover-foreground)' },
+      borderRadius:{ lg:'var(--radius)', md:'calc(var(--radius) - 2px)', sm:'calc(var(--radius) - 4px)' } } } };
+  </script>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262); --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0); --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0); --destructive: oklch(0.577 0.245 27.325);
+      --diff-bg: oklch(0.97 0.013 25); --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95); --question-border: oklch(0.75 0.15 90);
+      --radius: 0.625rem;
+      --font-sans: "Geist","Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono","Geist Mono Fallback", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground);
+      line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 2rem; }
+    .spec-header h1 { color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+    .meta-table td:first-child { font-weight: 600; width: 170px; color: var(--muted-foreground); white-space: nowrap; }
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 2rem; margin-bottom: 2rem; }
+    .component-toc > h2 { color: var(--primary); font-size: 1.05rem; margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .component-toc ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.5rem; }
+    .component-toc li { padding: 0.375rem 0.75rem; border-radius: calc(var(--radius) - 4px); background: var(--muted); font-size: 0.875rem; }
+    .component-toc li a { color: var(--primary); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.375rem; }
+    .component-toc li a:hover { text-decoration: underline; }
+    .component-toc .toc-layer-links { font-size: 0.75rem; color: var(--muted-foreground); margin-left: 0.5rem; }
+    .component-toc .toc-layer-links a { color: var(--muted-foreground); font-weight: 400; }
+    .component-toc .toc-badge { display: inline-block; font-size: 0.6875rem; font-weight: 600; padding: 0.0625rem 0.375rem;
+      border-radius: calc(var(--radius) - 4px); background: var(--primary); color: var(--primary-foreground); white-space: nowrap; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+    section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem; font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+    h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+    table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+    table.spec-table th { background: var(--muted); color: var(--foreground); font-weight: 600; text-align: left;
+      padding: 0.55rem 0.7rem; border: 1px solid var(--border); }
+    table.spec-table td { padding: 0.55rem 0.7rem; border: 1px solid var(--border); vertical-align: top; }
+    table.spec-table tr:nth-child(even) td { background: var(--muted); }
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .screenshot-figure figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .component-spec { border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1rem 0; background: var(--card); }
+    .component-spec > h3 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 0.75rem; }
+    pre { background: var(--muted); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); padding: 1rem;
+      overflow-x: auto; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; margin: 1rem 0; }
+    code { font-family: var(--font-mono); font-size: 0.85em; }
+    blockquote { border-left: 4px solid var(--destructive); background: var(--diff-bg); padding: 0.75rem 1rem; margin: 1rem 0;
+      font-size: 0.875rem; border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0; }
+    .diff-section { border-left: 4px solid var(--diff-border); background: var(--diff-bg); }
+    .diff-section > h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+    .diff-badge { display: inline-block; background: var(--diff-border); color: #fff; font-size: 0.75rem; font-weight: 600;
+      padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); margin-right: 0.5rem; }
+    .question-section { border-left: 4px solid var(--question-border); background: var(--question-bg); }
+    .question-section > h2 { color: var(--question-border); border-bottom-color: var(--question-border); }
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); }
+    .badge-high { background: oklch(0.65 0.2 25); color: #fff; }
+    .badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+    .badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+    .component-preview { border: 2px dashed var(--primary); border-radius: var(--radius); padding: 1.5rem; margin: 1rem 0;
+      background: #f7f8fb; position: relative; overflow: auto; }
+    .component-preview::before { content: "🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）"; position: absolute; top: -0.625rem;
+      left: 0.75rem; background: var(--primary); color: var(--primary-foreground); font-size: 0.6875rem; font-weight: 600;
+      padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); white-space: nowrap; }
+    .component-preview * { box-sizing: border-box; }
+    /* 让被提取的 radix 弹窗/抽屉在预览区以常规流呈现（去掉 fixed 定位与全屏遮罩） */
+    .component-preview [role="dialog"], .component-preview [role="alertdialog"] {
+      position: static !important; inset: auto !important; transform: none !important; translate: none !important;
+      width: 100% !important; max-width: 100% !important; height: auto !important; max-height: none !important;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin: 0 auto; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: calc(var(--radius) - 2px);
+      padding: 1rem 1.25rem; margin: 1.5rem 0; background: var(--card); }
+    .interaction-layer > h4 { color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%;
+      background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .trigger-path { background: var(--muted); border-radius: calc(var(--radius) - 4px); padding: 0.5rem 0.75rem; margin: 0.5rem 0 1rem;
+      font-size: 0.8125rem; color: var(--muted-foreground); }
+    .trigger-path strong { color: var(--foreground); }
+    .dom-comparison { margin: 1rem 0; border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); overflow: hidden; }
+    .dom-comparison > h5 { background: var(--muted); padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600; color: var(--foreground);
+      border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.375rem; }
+    .dom-comparison > h5::before { content: "🔍"; font-size: 0.875rem; }
+    .dom-comparison table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+    .dom-comparison th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .dom-comparison td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .dom-comparison tr:last-child td { border-bottom: none; }
+    .dom-pass { color: oklch(0.5 0.15 150); font-weight: 600; }
+    .dom-fail { color: var(--destructive); font-weight: 600; }
+    .dom-fixed { color: oklch(0.6 0.15 90); font-weight: 600; }
+    table.layer-index { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.layer-index th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+    table.layer-index td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.layer-index td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    table.layer-index td a:hover { text-decoration: underline; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; background: var(--muted);
+      border-radius: var(--radius); margin-bottom: 1.5rem; font-size: 0.875rem; }
+    .layer-nav a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .layer-nav a:hover { text-decoration: underline; }
+    .version-history-section { margin: 1.5rem 0; }
+    .version-history-table td:nth-child(5) { color: var(--muted-foreground); }
+    .spec-version { font-weight: 600; color: oklch(0.52 0.226 262); }
+    .note { background: oklch(0.97 0.02 250); border: 1px solid var(--border); border-left: 4px solid var(--primary);
+      border-radius: calc(var(--radius) - 4px); padding: 0.6rem 0.9rem; font-size: 0.8rem; color: var(--muted-foreground); margin: 0.75rem 0; }
+  </style>
+/* === TW-STATIC-BEGIN (offline Tailwind, auto-generated) === */
+<style id="tw-static">
+*, ::before, ::after {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}::backdrop {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}.fixed {position: fixed
+}.left-\[50\%\] {left: 50%
+}.top-\[50\%\] {top: 50%
+}.z-50 {z-index: 50
+}.flex {display: flex
+}.inline-flex {display: inline-flex
+}.grid {display: grid
+}.h-5 {height: 1.25rem
+}.h-9 {height: 2.25rem
+}.w-5 {width: 1.25rem
+}.w-full {width: 100%
+}.max-w-\[calc\(100\%-2rem\)\] {max-width: calc(100% - 2rem)
+}.shrink-0 {flex-shrink: 0
+}.translate-x-\[-50\%\] {--tw-translate-x: -50%;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.translate-y-\[-50\%\] {--tw-translate-y: -50%;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.flex-col {flex-direction: column
+}.flex-col-reverse {flex-direction: column-reverse
+}.items-center {align-items: center
+}.justify-center {justify-content: center
+}.gap-2 {gap: 0.5rem
+}.gap-4 {gap: 1rem
+}.whitespace-nowrap {white-space: nowrap
+}.rounded-lg {border-radius: var(--radius)
+}.rounded-md {border-radius: calc(var(--radius) - 2px)
+}.border {border-width: 1px
+}.bg-background {background-color: var(--background)
+}.bg-red-600 {--tw-bg-opacity: 1;background-color: rgb(220 38 38 / var(--tw-bg-opacity, 1))
+}.p-6 {padding: 1.5rem
+}.px-4 {padding-left: 1rem;padding-right: 1rem
+}.py-2 {padding-top: 0.5rem;padding-bottom: 0.5rem
+}.text-center {text-align: center
+}.text-lg {font-size: 1.125rem;line-height: 1.75rem
+}.text-sm {font-size: 0.875rem;line-height: 1.25rem
+}.font-medium {font-weight: 500
+}.font-semibold {font-weight: 600
+}.text-muted-foreground {color: var(--muted-foreground)
+}.text-red-500 {--tw-text-opacity: 1;color: rgb(239 68 68 / var(--tw-text-opacity, 1))
+}.text-red-600 {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.text-white {--tw-text-opacity: 1;color: rgb(255 255 255 / var(--tw-text-opacity, 1))
+}.shadow-lg {--tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.outline-none {outline: 2px solid transparent;outline-offset: 2px
+}.transition-all {transition-property: all;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.duration-200 {transition-duration: 200ms
+}.hover\:bg-accent:hover {background-color: var(--accent)
+}.hover\:bg-red-700:hover {--tw-bg-opacity: 1;background-color: rgb(185 28 28 / var(--tw-bg-opacity, 1))
+}.hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}.focus-visible\:border-ring:focus-visible {border-color: var(--ring)
+}.focus-visible\:ring-\[3px\]:focus-visible {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.disabled\:pointer-events-none:disabled {pointer-events: none
+}.disabled\:opacity-50:disabled {opacity: 0.5
+}.has-\[\>svg\]\:px-3:has(>svg) {padding-left: 0.75rem;padding-right: 0.75rem
+}@media (min-width: 640px) {.sm\:max-w-lg {max-width: 32rem
+    }.sm\:flex-row {flex-direction: row
+    }.sm\:justify-end {justify-content: flex-end
+    }.sm\:text-left {text-align: left
+    }
+}@media (prefers-color-scheme: dark) {.dark\:border-input {border-color: var(--input)
+    }.dark\:text-red-400 {--tw-text-opacity: 1;color: rgb(248 113 113 / var(--tw-text-opacity, 1))
+    }
+}.\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-4 svg:not([class*='size-']) {width: 1rem;height: 1rem
+}.\[\&_svg\]\:pointer-events-none svg {pointer-events: none
+}.\[\&_svg\]\:shrink-0 svg {flex-shrink: 0
+}
+</style>
+/* === TW-STATIC-END === */</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-1">← 返回主文件</a>
+  <span>层级 3 · 关闭检测二次确认</span>
+  <a href="./layer-2-logs-tab.html">检测总览 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 3：关闭仿冒邮件检测 二次确认（AlertDialog）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.1 包裹层 · 卡片头启用开关</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+    <tr><td>触发路径</td><td>卡片头 Switch 由「已启用」切「已停用」→ <code>selectedAgent==="impersonation" &amp;&amp; !checked</code> → setPendingDisableAgent，弹 AlertDialog（先不改状态）</td></tr>
+    <tr><td>demo 组件</td><td><code>agent-center-page.tsx</code> &lt;AlertDialog open={pendingDisableAgent!==null}&gt;</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">3</span> 确认弹窗打开态</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：仿冒/钓鱼智能体专属逻辑——只有关闭（!checked）才拦截弹窗；开启（checked）直接生效不弹窗。</div>
+  <div class="component-preview">
+<div role="alertdialog" id="radix-_R_75esnebn9lb_" aria-describedby="radix-_R_75esnebn9lbH2_" aria-labelledby="radix-_R_75esnebn9lbH1_" data-state="open" data-slot="alert-dialog-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg" tabindex="-1" style="pointer-events: auto;"><div data-slot="alert-dialog-header" class="flex flex-col gap-2 text-center sm:text-left"><h2 id="radix-_R_75esnebn9lbH1_" data-slot="alert-dialog-title" class="text-lg font-semibold flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-5 w-5 text-red-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>确认关闭仿冒邮件检测？</h2><p id="radix-_R_75esnebn9lbH2_" data-slot="alert-dialog-description" class="text-muted-foreground text-sm">关闭后，所有邮件将<span class="font-medium text-red-600 dark:text-red-400">跳过仿冒邮件检测</span>直接进入下一处理环节，期间仿冒邮件可能漏检，存在安全风险。确认关闭吗？</p></div><div data-slot="alert-dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3">取消</button><button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[&gt;svg]:px-3 bg-red-600 hover:bg-red-700 text-white">确认关闭</button></div></div>
+</div>
+  <div class="note">预览内可点击「取消」隐藏弹窗（复刻关闭）。确认关闭后：<code>toggleAgentEnabled("impersonation", false)</code>，智能体进入「仅审计」，处置统一降级「标记投递」，顶部出现琥珀提示条。</div>
+
+  <figure class="screenshot-figure"><img src="./screenshots/disable-confirm.png" alt="关闭确认弹窗"><figcaption>关闭仿冒邮件检测二次确认（浏览器实际渲染）</figcaption></figure>
+
+  <h4>UI 元素清单</h4>
+  <table class="spec-table">
+    <thead><tr><th>序号</th><th>元素</th><th>文案</th><th>样式</th><th>交互</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Title</td><td>⚠ 确认关闭仿冒邮件检测？</td><td>AlertTriangle 红图标</td><td>-</td></tr>
+      <tr><td>2</td><td>Description</td><td>关闭后，所有邮件将<b>跳过仿冒邮件检测</b>直接进入下一处理环节，期间仿冒邮件可能漏检，存在安全风险。确认关闭吗？</td><td>「跳过仿冒邮件检测」红色强调</td><td>-</td></tr>
+      <tr><td>3</td><td>Cancel</td><td>取消</td><td>outline</td><td>关闭弹窗，不改 enabled</td></tr>
+      <tr><td>4</td><td>Action</td><td>确认关闭</td><td>bg-red-600</td><td>toggleAgentEnabled(false)+清 pending</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果</h5>
+    <table>
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td>div[role=alertdialog].bg-background（实测 512px 宽）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        <tr><td>节点总数</td><td>12</td><td>12</td><td class="dom-pass">✅</td></tr>
+        <tr><td>标题文案</td><td>确认关闭仿冒邮件检测？</td><td>一致（含 AlertTriangle）</td><td class="dom-pass">✅</td></tr>
+        <tr><td>正文红色强调</td><td>「跳过仿冒邮件检测」span.text-red-600</td><td>一致</td><td class="dom-pass">✅</td></tr>
+        <tr><td>按钮</td><td>取消 / 确认关闭（bg-red-600）</td><td>一致</td><td class="dom-pass">✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#component-2-1">← 返回主文件</a>
+  <a href="./layer-2-logs-tab.html">检测总览 →</a>
+</nav>
+
+<script>
+// 让内嵌的 demo 组件预览产生与 demo 一致的最小交互反馈
+(function () {
+  function within(el, role){ return el.closest('[role="'+role+'"]'); }
+  document.querySelectorAll('.component-preview').forEach(function (scope) {
+    // 页签切换：切换 aria-selected / data-state
+    scope.addEventListener('click', function (e) {
+      var tab = e.target.closest('[role="tab"]');
+      if (tab) {
+        scope.querySelectorAll('[role="tab"]').forEach(function (t) {
+          t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+          t.setAttribute('data-state', t === tab ? 'active' : 'inactive');
+        });
+      }
+      // Radio 单选：radix RadioGroupItem 是 button[role=radio]
+      var radio = e.target.closest('[role="radio"]');
+      if (radio) {
+        var group = radio.closest('[role="radiogroup"]') || scope;
+        group.querySelectorAll('[role="radio"]').forEach(function (r) {
+          r.setAttribute('data-state', r === radio ? 'checked' : 'unchecked');
+          r.setAttribute('aria-checked', r === radio ? 'true' : 'false');
+        });
+      }
+      // Switch 开关
+      var sw = e.target.closest('[role="switch"]');
+      if (sw) {
+        var on = sw.getAttribute('data-state') === 'checked';
+        sw.setAttribute('data-state', on ? 'unchecked' : 'checked');
+        sw.setAttribute('aria-checked', on ? 'false' : 'true');
+      }
+      // 手风琴展开（详情抽屉里的仿冒信号）
+      var acc = e.target.closest('[aria-expanded]');
+      if (acc && !tab) {
+        var exp = acc.getAttribute('aria-expanded') === 'true';
+        acc.setAttribute('aria-expanded', exp ? 'false' : 'true');
+      }
+      // 关闭类按钮：隐藏所在弹窗/抽屉
+      var btn = e.target.closest('button');
+      if (btn) {
+        var label = (btn.innerText || btn.textContent || '').trim();
+        if (['取消','关闭','确认删除','确认关闭','放弃'].indexOf(label) >= 0) {
+          var dlg = within(btn, 'dialog') || within(btn, 'alertdialog');
+          if (dlg) dlg.style.display = 'none';
+        }
+      }
+    });
+  });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>try{mermaid.initialize({startOnLoad:true,theme:"default"});}catch(e){}</script>
+
+</body>
+</html>

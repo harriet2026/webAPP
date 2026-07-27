@@ -1,0 +1,13 @@
+{
+  "module": "filter-rules-group-policy",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-18",
+      "demo_commit": "804efb9",
+      "spec_commit": "804efb9",
+      "summary": "初版：安全策略›群组策略页两卡片规格。① 群组管理（IP/发信人/收信人/内容/特征 5 类 Tab；普通组 max-w-md、特征组 max-w-6xl 抽屉复用 ConditionsEditor 并联动高级过滤规则；引用保护删除禁用；条件预览 buildFeaturePreview）。② 群组策略规则（规则表 + 状态开关 + 优先级 0000 + RuleConfigDetail 5 阶段展开；GroupPolicyDrawer 80vw 三栏：适用对象 5 下拉 / 五阶段策略卡画布 / 配置详情四档状态+附件参数 Tabs+身份认证子检查(基础格式/认证协议/仿冒特征)；EffectivePathDialog 目标群组短路演示 IP群组1)。基准形态 AI 版·单租户；覆盖 4 组件 8 交互层级、DOM 逐节点比对、12 条差异（含成员列表 label mojibake、缺删除二次确认/批量/导入导出/Tooltip、优先级方向 demo 数值越小 vs 项目权威定义数值越大 相反[#11]、策略卡状态相互独立非固定[#12]）、8 条需确认。规格正文按项目权威定义「优先级数值越大越优先」（CLAUDE.md）表述，verbatim 预览保留 demo 原文并标注冲突。新增 layer-2-config-panel-gallery：对 14 个可配置策略卡（RBL/海外/身份认证/收信人/附件/URL/内容/意图引擎/钓鱼·仿冒·威胁回溯智能体/相似/高级规则/邮件标记）逐卡截图 + 可交互配置面板 + DOM 比对，并含海外禁用（豁免原因）与意图引擎禁用（高风险警告）特殊态——因每个配置卡的参照卡/档数/特殊体各不相同。"
+    }
+  ]
+}

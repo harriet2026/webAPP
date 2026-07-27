@@ -372,8 +372,8 @@ export function MailListTable({
     return (
       <div className="space-y-3">
         {toolbar}
-        <div className="rounded-lg border">
-          <Table>
+        <div className="rounded-lg border" data-testid="disposal-mail-table">
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-10">
@@ -410,8 +410,8 @@ export function MailListTable({
     return (
       <div className="space-y-3">
         {toolbar}
-        <div className="rounded-lg border">
-          <Table>
+        <div className="rounded-lg border" data-testid="disposal-mail-table">
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-10">
@@ -516,8 +516,10 @@ export function MailListTable({
         </div>
       )}
 
+      {/* GT-12423: min-w 使 1024px 视口下产生横向滚动（原型行为，配合
+          sticky 操作列），800px 在 ≥1280 视口（容器 ≥868px）不触发滚动 */}
       <div className="rounded-lg border" data-testid="disposal-mail-table">
-        <Table>
+        <Table className="min-w-[800px]">
           <TableHeader>
             <TableRow>
               <TableHead className="w-10">

@@ -1,0 +1,13 @@
+{
+  "module": "filter-rules-identity-auth-spoofing",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-10",
+      "demo_commit": "804efb9",
+      "spec_commit": "804efb9",
+      "summary": "初版：身份认证与仿冒检测面板 — 基础格式检查（Mail From 为空 / 格式错误 / 信封-信头一致性 3 项，含观察模式）+ 认证协议检查（SPF/DKIM/DMARC/PTR，策略模板 宽松/标准/严格/自定义、观察模式、流程可视化、模板变更确认弹窗）+ 例外规则入口 + 模块启用开关/禁用态；仿冒特征检测在当前（云网关 AI）形态不渲染。"
+    }
+  ]
+}

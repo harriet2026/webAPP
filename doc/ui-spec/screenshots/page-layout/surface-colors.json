@@ -1,0 +1,33 @@
+{
+  "source": "http://localhost:3000/security-ops-dashboard",
+  "capturedAt": "2026-07-25",
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "devicePixelRatio": 1
+  },
+  "surfaces": {
+    "pageViewportOuter": {
+      "sourceElement": "body.font-sans.antialiased.bg-gray-50",
+      "visibleThrough": "div.p-8",
+      "computedColor": "lab(98.2596 -0.247031 -0.706708)",
+      "sRGB": "#F9FAFB"
+    },
+    "pageFrame": {
+      "sourceElement": "div.min-h-screen.bg-gray-100",
+      "computedColor": "lab(96.1596 -0.0823438 -1.13575)",
+      "sRGB": "#F3F4F6"
+    },
+    "pageBody": {
+      "sourceElement": "div.p-6.space-y-6",
+      "computedColor": "rgba(0, 0, 0, 0)",
+      "visualColorInheritedFrom": "pageFrame",
+      "sRGB": "#F3F4F6"
+    },
+    "pageHeader": {
+      "sourceElement": "div.bg-white",
+      "computedColor": "rgb(255, 255, 255)",
+      "sRGB": "#FFFFFF"
+    }
+  }
+}

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 3：灰名单配置 Dialog（延迟接收） - 策略流水线 · RBL过滤</title>
+<style>
+:root{
+  --primary:oklch(0.52 0.226 262);--background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);
+  --card:#fff;--border:#e5e7eb;--subtle:#64748b;--danger:#d92d20;--warn:#b7791f;--ok:#14804a;
+  --font:"Geist","Inter",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --dp-fg:lab(2.75381 0 0);--dp-border:lab(90.952 0 -0.0000119209);
+  --dp-muted-bg:lab(96.52 0 0);--dp-muted-fg:lab(48.496 0 0);
+  --dp-input-bg:lab(97.7711 -3.04654 -1.63313);
+  --dp-primary:lab(41.4441 24.5539 -79.1878);--dp-primary-fg:lab(98.26 0 0);
+  --dp-blue50:lab(96.492 -1.14644 -5.11479);--dp-blue500:lab(54.1736 13.3369 -74.6839);
+  --dp-font:Geist,"Geist Fallback","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:28px;color:var(--foreground);background:var(--background);font-family:var(--font);line-height:1.62}
+.wrap{max-width:1380px;margin:0 auto}
+header,nav,section{background:var(--card);border:1px solid var(--border);border-radius:10px}
+header{padding:24px 28px;margin-bottom:18px}
+h1{margin:0 0 14px;color:var(--primary);font-size:23px}
+h2{margin:0 0 16px;padding-bottom:8px;border-bottom:2px solid var(--primary);color:var(--primary);font-size:19px}
+h5{margin:14px 0 6px;color:#475569;font-size:13.5px}
+code{font-family:var(--mono);background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12.5px}
+a{color:#1677ff;text-decoration:none}a:hover{text-decoration:underline}
+section{padding:22px 26px;margin-bottom:18px}
+.layer-nav{display:flex;gap:16px;padding:12px 18px;margin-bottom:18px;font-size:14px;font-weight:600}
+.meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+.meta-table td,.spec-table th,.spec-table td{border:1px solid var(--border);padding:9px 11px;vertical-align:top}
+.meta-table td:first-child{width:170px;color:var(--subtle);font-weight:650;background:#f8fafc}
+.spec-table th{background:#f1f5f9;text-align:left;white-space:nowrap}
+.spec-table tr:nth-child(even) td{background:#fbfdff}
+.overflow{overflow-x:auto}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.badge-red{background:#fff1f0;color:var(--danger)}.badge-amber{background:#fff7e6;color:var(--warn)}
+.figure{margin:14px 0}
+.figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 18px rgba(15,23,42,.08)}
+.figure figcaption{margin-top:7px;color:var(--subtle);font-size:13px}
+.trigger-path{margin:8px 0 12px;padding:9px 11px;background:#f8fafc;border-radius:8px;color:#475569;font-size:13px}
+.component-preview{margin:14px 0;padding:22px;border:2px dashed #91caff;border-radius:10px;background:#f8fbff}
+.preview-note{margin:0 0 14px;color:#0958d9;font-size:12.5px;font-weight:650}
+.dom-comparison{margin:14px 0;padding:12px 14px;background:#f8fafc;border:1px solid var(--border);border-radius:8px}
+.dom-comparison h5{margin-top:0}
+.mojibake{color:var(--danger);font-weight:700}
+/* ============ demo Dialog 1:1 预览 ============ */
+.dp-stage{display:flex;justify-content:center;padding:8px 0}
+.dp-dialog{position:relative;width:512px;padding:24px;border:1px solid var(--dp-border);border-radius:10px;background:var(--dp-input-bg);
+  color:var(--dp-fg);font-family:var(--dp-font);font-size:16px;line-height:1.5;
+  box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1)}
+.dp-dialog[hidden]{display:none}
+.dp-h2{margin:0;padding:0;border:0;color:var(--dp-fg);font-size:18px;font-weight:600;line-height:1}
+.dp-desc{margin:8px 0 0;font-size:14px;color:var(--dp-muted-fg);line-height:20px}
+.dp-body{display:flex;flex-direction:column;gap:20px;padding:8px 0 0;margin-top:12px}
+.dp-radiogroup{display:flex;flex-direction:column;gap:12px}
+.dp-row{display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid var(--dp-border);border-radius:10px;cursor:pointer;transition:background .15s,border-color .15s;background:transparent}
+.dp-row:hover{background:rgba(244,244,245,.5)}
+.dp-row[data-state="checked"]{border-color:var(--dp-blue500);background:var(--dp-blue50)}
+.dp-radio{flex-shrink:0;margin-top:2px;width:16px;height:16px;padding:0;border:1px solid var(--dp-border);border-radius:999px;background:transparent;
+  color:var(--dp-primary);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.dp-radio .ind{display:none}
+.dp-radio[data-state="checked"] .ind{display:inline-flex}
+.dp-row-body{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dp-num{width:80px;height:28px;padding:0 8px;border:1px solid var(--dp-border);border-radius:4px;background:var(--dp-input-bg);color:var(--dp-fg);font-size:14px;font-family:inherit}
+.dp-row-label{font-size:14px;font-weight:400;cursor:pointer}
+.dp-ttl{display:flex;align-items:center;gap:12px;padding-top:4px;position:relative}
+.dp-ttl-label{flex-shrink:0;font-size:14px}
+.dp-unit{font-size:14px;color:var(--dp-muted-fg)}
+.dp-help{width:14px;height:14px;color:var(--dp-muted-fg);cursor:help}
+.dp-tooltip{position:absolute;left:190px;bottom:calc(100% + 6px);z-index:20;max-width:260px;padding:8px 12px;border-radius:8px;background:#0f172a;color:#fff;
+  font-size:14px;line-height:1.5;box-shadow:0 8px 24px rgba(0,0,0,.22);display:none}
+.dp-tooltip.on{display:block}
+.dp-exempt{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--dp-border);padding-top:16px}
+.dp-exempt-title{font-size:14px;font-weight:500}
+.dp-check-row{display:flex;align-items:center;gap:8px;cursor:pointer}
+.dp-check-row input{width:16px;height:16px;border-radius:4px;accent-color:#2563eb}
+.dp-check-row span{font-size:14px}
+.dp-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.dp-btn-cancel{height:36px;padding:8px 16px;border:1px solid var(--dp-border);border-radius:8px;background:var(--dp-input-bg);color:var(--dp-fg);
+  font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.dp-btn-cancel:hover{background:var(--dp-muted-bg)}
+.dp-btn-confirm{height:36px;padding:8px 16px;border:0;border-radius:8px;background:var(--dp-primary);color:var(--dp-primary-fg);
+  font-size:14px;font-weight:500;font-family:inherit;cursor:pointer}
+.dp-btn-confirm:hover{opacity:.9}
+.dp-close{position:absolute;top:16px;right:16px;width:24px;height:24px;border:0;background:none;color:var(--dp-muted-fg);cursor:pointer;border-radius:4px;
+  display:inline-flex;align-items:center;justify-content:center}
+.dp-close:hover{background:var(--dp-muted-bg)}
+.dp-close span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.dp-hint{margin-top:16px;padding:10px 12px;border-radius:8px;background:#e6f4ff;border:1px solid #91caff;color:#0958d9;font-size:13px;display:none}
+.dp-hint.on{display:block}
+.dp-state{margin-top:14px;font-size:12.5px;color:var(--subtle);font-family:var(--mono);white-space:pre-wrap}
+.reopen{margin-top:14px;padding:8px 14px;border:1px solid var(--dp-border);border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;display:none}
+.reopen.on{display:inline-block}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="layer-nav">
+  <a href="./index.html#dialog-3-1">← 返回主文件</a>
+  <a href="./layer-2-greylist-entry.html">← 层级 2：灰名单入口</a>
+  <a href="./layer-4-greylist-ratelimit.html">层级 4：频率限制模式 →</a>
+</nav>
+
+<header>
+  <h1>交互层级 3：灰名单配置 Dialog（延迟接收模式）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>3.1 灰名单配置 Dialog</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">filter-rules-pipeline-rbl-filter/index.html</a></td></tr>
+    <tr><td>demo 源</td><td><code>connection-layer-page.tsx</code> L2297–2427</td></tr>
+    <tr><td>触发路径</td><td>层级 2 入口卡 →「点<span class="mojibake">���</span>配置」→ <code>setGreylistDraft({...8 个已生效状态})</code> → <code>setShowGreylistDialog(true)</code></td></tr>
+    <tr><td>DOM 节点数</td><td><strong>47</strong>（实测）</td></tr>
+    <tr><td>实测尺寸</td><td>512 × 597 px，padding 24px，radius 10px，bg <code>lab(97.7711 -3.04654 -1.63313)</code></td></tr>
+  </table>
+</header>
+
+<section>
+  <h2>1. 该层级 UI 全貌</h2>
+  <div class="trigger-path"><strong>提取要点：</strong>全页面抽屉本身也是 <code>[role=dialog]</code>。首次提取误取到抽屉（103 节点）；已改为「先标记抽屉，再取新出现的那个 dialog」，得到真正的灰名单 Dialog（47 节点）。</div>
+  <figure class="figure">
+    <img src="./screenshots/07-greylist-dialog-delay.png" alt="灰名单 Dialog（延迟接收）" style="max-width:540px">
+    <figcaption>层级 3：Dialog 元素截图（512×597）。乱码「<span class="mojibake">���</span>」为 demo 实际渲染</figcaption>
+  </figure>
+  <figure class="figure">
+    <img src="./screenshots/09-greylist-ttl-tooltip.png" alt="白名单有效期 Tooltip">
+    <figcaption>hover <code>HelpCircle</code> 后弹出的 Tooltip（整页截图）</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>2. 可交互组件预览</h2>
+  <div class="component-preview">
+    <p class="preview-note">↓ 可操作预览：点整行或单选钮切换模式（切到「频率限制」= 层级 4）、编辑 3 个数字输入、勾选豁免项、hover ❓ 看 Tooltip、「取消」丢弃草稿、「确认」回写并置 <code>hasUnsavedChanges</code>。</p>
+    <div class="dp-stage">
+      <div class="dp-dialog" id="dlg" role="dialog" data-state="open">
+        <h2 class="dp-h2">灰名单配置</h2>
+        <p class="dp-desc">配置灰名单策略，有效过滤<span class="mojibake">���</span>圾邮件同时减少误判。</p>
+
+        <div class="dp-body">
+          <div class="dp-radiogroup" role="radiogroup">
+            <!-- 模式1：延迟接收 -->
+            <div class="dp-row" data-mode="delay" data-state="checked">
+              <button class="dp-radio" type="button" role="radio" id="greylist-delay" aria-checked="true" data-state="checked" value="delay">
+                <span class="ind"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"></circle></svg></span>
+              </button>
+              <div class="dp-row-body">
+                <input class="dp-num" type="number" min="10" value="600" id="delaySeconds">
+                <label class="dp-row-label" for="greylist-delay">秒内，阻断第一封邮件请求，发信重投则正常收<span class="mojibake">���</span></label>
+              </div>
+            </div>
+            <!-- 模式2：频率限制 -->
+            <div class="dp-row" data-mode="rateLimit" data-state="unchecked">
+              <button class="dp-radio" type="button" role="radio" id="greylist-rate" aria-checked="false" data-state="unchecked" value="rateLimit">
+                <span class="ind"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"></circle></svg></span>
+              </button>
+              <div class="dp-row-body">
+                <input class="dp-num" type="number" min="10" value="600" id="windowSeconds">
+                <label class="dp-row-label" for="greylist-rate">秒内，正常接收第<span class="mojibake">���</span>封邮<span class="mojibake">���</span>请求<span class="mojibake">���</span>阻断超过请<span class="mojibake">���</span>限制的请求</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 白名单有效期 -->
+          <div class="dp-ttl">
+            <span class="dp-ttl-label">白<span class="mojibake">���</span>单有效期</span>
+            <input class="dp-num" type="number" min="1" value="24" id="whitelistTTL">
+            <span class="dp-unit">小时</span>
+            <svg class="dp-help" id="helpIcon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>
+            <div class="dp-tooltip" id="ttlTip">通过灰名单验证的发件人将被<span class="mojibake">��</span>住该时长，有效期内再次发信无需重新验证。</div>
+          </div>
+
+          <!-- 豁免设置 -->
+          <div class="dp-exempt">
+            <span class="dp-exempt-title">豁免设置</span>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <label class="dp-check-row"><input type="checkbox" id="exemptAuthenticated" checked><span>已认证发件人（SPF/DKIM通过）自动豁免</span></label>
+              <label class="dp-check-row"><input type="checkbox" id="exemptWhitelisted" checked><span>白名单IP / <span class="mojibake">�����</span>自动豁免</span></label>
+              <label class="dp-check-row"><input type="checkbox" id="exemptInternal"><span>内部域名互发豁免</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="dp-footer">
+          <button class="dp-btn-cancel" type="button" id="btnCancel">取消</button>
+          <button class="dp-btn-confirm" type="button" id="btnConfirm">确认</button>
+        </div>
+
+        <button class="dp-close" type="button" id="btnClose">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          <span>Close</span>
+        </button>
+      </div>
+    </div>
+
+    <button class="reopen" id="reopen" type="button">重新打开 Dialog（模拟点击入口卡按钮）</button>
+
+    <div class="dp-hint" id="rateHint">已切到 <code>mode = "rateLimit"</code> → 这就是 <a href="./layer-4-greylist-ratelimit.html">层级 4 · 频率限制模式 →</a></div>
+    <div class="dp-hint" id="cancelHint"><strong>取消：</strong>demo 直接 <code>setShowGreylistDialog(false)</code>，<strong>不回写</strong> <code>greylistDraft</code>——所有改动丢弃，入口卡摘要不变。</div>
+    <div class="dp-hint" id="confirmHint"><strong>确认：</strong>demo 把草稿 8 个字段逐一回写到已生效 state，置 <code>setHasUnsavedChanges(true)</code>，再关闭 Dialog。入口卡摘要随之更新。</div>
+    <div class="dp-state" id="stateLine"></div>
+  </div>
+  <p style="font-size:13px;color:var(--subtle)"><strong>如实复刻的缺陷：</strong>频率限制模式下<strong>没有「最大请求数」输入框</strong>——摘要里的「最多 <strong>5</strong> 次」来自永远无法修改的 <code>maxRequests: "5"</code>。见主文件 §9 D2 / §10 Q2。此外延迟秒数只有 HTML 原生 <code>min="10"</code>，无 spec 要求的「&lt;60 秒警告 / &gt;3600 秒警告」。</p>
+</section>
+
+<section>
+  <h2>3. UI 元素清单</h2>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>元素</th><th>类型</th><th>文案（实际渲染）</th><th>默认值</th><th>样式（实测）</th><th>交互</th><th>i18n key</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Dialog 根</td><td><code>div[role=dialog][data-state=open]</code></td><td>—</td><td>—</td><td>512×597；padding 24px；radius 10px；shadow lg</td><td>Esc / 遮罩关闭</td><td>—</td></tr>
+      <tr><td>2</td><td>标题</td><td>h2</td><td>「灰名单配置」</td><td>—</td><td>18px / 600</td><td>无</td><td><code>connection.greylistConfig</code></td></tr>
+      <tr><td>3</td><td>描述</td><td>p</td><td>「配置灰名单策略，有效过滤<span class="mojibake">���</span>圾邮件同时减少误判。」<span class="badge badge-red">乱码</span></td><td>—</td><td>14px；色 <code>lab(48.496 0 0)</code></td><td>无</td><td><code>connection.greylistConfigDesc</code></td></tr>
+      <tr><td>4</td><td>模式单选组</td><td><code>div[role=radiogroup]</code></td><td>—</td><td><code>delay</code></td><td>gap 12px</td><td>整行可点（<code>onClick</code> 在 row 上）</td><td>—</td></tr>
+      <tr><td>5</td><td>延迟接收行</td><td>div + <code>button[role=radio]</code></td><td>「{n} 秒内，阻断第一封邮件请求，发信重投则正常收<span class="mojibake">���</span>」</td><td>选中</td><td>选中：border <code>lab(54.17 13.34 -74.68)</code>（blue-500）+ bg blue-50；未选：border <code>lab(90.952 0 0)</code>，透明底。行高 90px（选中）/ 110px（未选，文案换行）</td><td>click 行或钮 → <code>mode="delay"</code></td><td><code>connection.greylistDelayDesc</code></td></tr>
+      <tr><td>6</td><td>延迟秒数</td><td><code>input[type=number][min=10]</code></td><td>—</td><td><code>600</code></td><td>80×28；radius 4px</td><td><code>onClick</code> 上有 <code>stopPropagation()</code>，避免点输入框时误触整行</td><td>—</td></tr>
+      <tr><td>7</td><td>频率限制行</td><td>div + <code>button[role=radio]</code></td><td>「{n} 秒内，正常接收第<span class="mojibake">���</span>封邮<span class="mojibake">���</span>请求<span class="mojibake">���</span>阻断超过请<span class="mojibake">���</span>限制的请求」</td><td>未选中</td><td>同上</td><td>click → <code>mode="rateLimit"</code>（层级 4）</td><td><code>connection.greylistRateDesc</code></td></tr>
+      <tr><td>8</td><td>窗口秒数</td><td><code>input[type=number][min=10]</code></td><td>—</td><td><code>600</code></td><td>80×28</td><td>同 #6</td><td>—</td></tr>
+      <tr><td>9</td><td><strong>最大请求数</strong></td><td>—</td><td>—</td><td><code>maxRequests="5"</code></td><td>—</td><td colspan="2"><span class="badge badge-red">Dialog 内无此控件</span> 仅存在于 state 与摘要文案（D2 / Q2）</td></tr>
+      <tr><td>10</td><td>白名单有效期 Label</td><td>label</td><td>「白<span class="mojibake">���</span>单有效期」<span class="badge badge-red">乱码</span></td><td>—</td><td>14px；<code>shrink-0</code></td><td>无</td><td><code>connection.greylistWhitelistTTL</code></td></tr>
+      <tr><td>11</td><td>TTL 输入</td><td><code>input[type=number][min=1]</code></td><td>—</td><td><code>24</code></td><td>80×28</td><td>onChange → 写 draft</td><td>—</td></tr>
+      <tr><td>12</td><td>TTL 单位</td><td>span</td><td>「小时」</td><td>—</td><td>14px，muted</td><td>无</td><td><code>connection.greylistHours</code></td></tr>
+      <tr><td>13</td><td>帮助图标 + Tooltip</td><td><code>svg.lucide-circle-help</code>(14×14)</td><td>「通过灰名单验证的发件人将被<span class="mojibake">��</span>住该时长，有效期内再次发信无需重新验证。」</td><td>—</td><td><code>cursor:help</code>；Tooltip <code>max-w-[260px]</code></td><td>hover 触发（实测 <code>data-state="delayed-open"</code>）</td><td><code>connection.greylistWhitelistTTLTip</code></td></tr>
+      <tr><td>14</td><td>豁免分组标题</td><td>label</td><td>「豁免设置」</td><td>—</td><td>14px / 500；上方 <code>border-t</code> + <code>pt-4</code></td><td>无</td><td><code>connection.greylistExemptions</code></td></tr>
+      <tr><td>15</td><td>豁免项 1</td><td><code>input[type=checkbox]</code></td><td>「已认证发件人（SPF/DKIM通过）自动豁免」</td><td><strong>已勾选</strong></td><td>16×16；<code>accent-blue-600</code></td><td>toggle → 写 draft</td><td><code>connection.greylistExemptAuth</code></td></tr>
+      <tr><td>16</td><td>豁免项 2</td><td><code>input[type=checkbox]</code></td><td>「白名单IP / <span class="mojibake">�����</span>自动豁免」<span class="badge badge-red">乱码</span></td><td><strong>已勾选</strong></td><td>同上</td><td>toggle</td><td><code>connection.greylistExemptWhitelist</code></td></tr>
+      <tr><td>17</td><td>豁免项 3</td><td><code>input[type=checkbox]</code></td><td>「内部域名互发豁免」</td><td>未勾选</td><td>同上</td><td>toggle</td><td><code>connection.greylistExemptInternal</code></td></tr>
+      <tr><td>18</td><td>取消按钮</td><td>button outline</td><td>「取消」</td><td>—</td><td>62×36；radius 8px</td><td>close，<strong>丢弃草稿</strong></td><td><code>common.cancel</code></td></tr>
+      <tr><td>19</td><td>确认按钮</td><td>button primary</td><td>「确认」</td><td>—</td><td>60×36；bg <code>lab(41.44 24.55 -79.19)</code>；无边框</td><td>回写 8 字段 + <code>setHasUnsavedChanges(true)</code> + close</td><td><code>common.confirm</code></td></tr>
+      <tr><td>20</td><td>右上关闭</td><td>button + svg + sr-only span</td><td>视觉为 ✕；无障碍文本 "Close"</td><td>—</td><td>24×24</td><td>close（等同取消）</td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2>4. DOM 树比对结果</h2>
+  <div class="dom-comparison">
+    <h5>提取的 HTML vs demo 实际 DOM（<code>[data-spec='greylist-dialog']</code>，mode = delay）</h5>
+    <div class="overflow">
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>预览 HTML</th><th>一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td><code>div[role=dialog][data-state=open]</code>（<code>id="radix-_r_c_"</code>）</td><td><code>div.dp-dialog[role=dialog][data-state=open]</code></td><td>✅（<code>id</code> 为 Radix 随机值，未复制）</td></tr>
+        <tr><td>节点总数</td><td><strong>47</strong></td><td>47</td><td>✅</td></tr>
+        <tr><td>直接子节点数</td><td>4（Header div、Body div、Footer div、Close button）</td><td>4</td><td>✅</td></tr>
+        <tr><td>标题 / 描述</td><td><code>h2</code>「灰名单配置」+ <code>p</code>「配置灰名单策略，有效过滤���圾邮件同时减少误判。」</td><td>逐字一致（含 3 个 U+FFFD）</td><td>✅</td></tr>
+        <tr><td><code>[role=radiogroup]</code></td><td>1 个，含 2 个 <code>div</code> 行</td><td>同</td><td>✅</td></tr>
+        <tr><td>radio 属性（delay）</td><td><code>id="greylist-delay" role="radio" aria-checked="true" data-state="checked" value="delay" type="button"</code></td><td>同（逐属性）</td><td>✅</td></tr>
+        <tr><td>radio 属性（rate）</td><td><code>id="greylist-rate" aria-checked="false" data-state="unchecked" value="rateLimit"</code></td><td>同</td><td>✅</td></tr>
+        <tr><td>选中指示器</td><td>仅 <strong>选中</strong>的 radio 内有 <code>span &gt; svg &gt; circle</code>（3 节点）；未选中 radio <code>childNodes = 0</code></td><td>同（<code>.ind</code> 仅在 <code>data-state=checked</code> 时 <code>display:inline-flex</code>）</td><td>✅</td></tr>
+        <tr><td><code>label[for]</code> 关联</td><td><code>for="greylist-delay"</code> / <code>for="greylist-rate"</code></td><td>同</td><td>✅</td></tr>
+        <tr><td>number 输入个数与值</td><td><strong>3 个</strong>：<code>600</code>(min=10)、<code>600</code>(min=10)、<code>24</code>(min=1)</td><td>3 个，值与 min 逐一相同</td><td>✅</td></tr>
+        <tr><td><strong>maxRequests 输入</strong></td><td><strong>不存在</strong>（DOM 中无第 4 个 number 输入）</td><td>未包含（如实复刻）</td><td>✅</td></tr>
+        <tr><td>checkbox 个数与初值</td><td>3 个：<code>checked=true, true, false</code></td><td>3 个，<code>true, true, false</code></td><td>✅</td></tr>
+        <tr><td>帮助图标</td><td><code>svg</code>（<code>circle</code> + 2 × <code>path</code>），hover 后 <code>data-state="delayed-open"</code></td><td>同一 <code>circle</code>+2 <code>path</code> 结构</td><td>✅</td></tr>
+        <tr><td>Tooltip 文案</td><td>"通过灰名单验证的发件人将被��住该时长，有效期内再次发信无需重新验证。"</td><td>逐字一致（含 2 个 U+FFFD）</td><td>✅</td></tr>
+        <tr><td>Footer 按钮文案</td><td>"取消" / "<strong>确认</strong>"</td><td>同</td><td>✅（注：<strong>不是</strong>「确定」——首次脚本按「确定」选择失败）</td></tr>
+        <tr><td>关闭按钮</td><td><code>button &gt; svg(2 path) + span "Close"</code>（sr-only）</td><td>同，<code>span</code> 用 <code>clip</code> 隐藏</td><td>✅</td></tr>
+        <tr><td>切到 rateLimit 后节点数</td><td>仍为 <strong>47</strong>（指示器 3 节点在两个 radio 间移动）</td><td>同（<code>display</code> 切换，节点常驻）</td><td>⚠ 语义一致，实现方式不同（见下）</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="margin:8px 0 0;font-size:13px;color:var(--subtle)"><strong>差异说明：</strong>demo（Radix RadioGroup）在切换模式时<strong>卸载/挂载</strong>指示器 <code>span &gt; svg &gt; circle</code>，节点总数恒为 47；预览为简化实现让指示器常驻 DOM、以 <code>display</code> 控制显隐，因此预览的静态节点数恒比 demo 多 3。<strong>可见 DOM 与 <code>data-state</code>/<code>aria-checked</code> 语义完全一致</strong>，此为刻意的实现简化，已记录不作为缺陷。</p>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function () {
+  /* demo 的 greylistDraft 初值（打开 Dialog 时从已生效 state 拷贝） */
+  var draft = {
+    mode: 'delay', delaySeconds: '600', windowSeconds: '600',
+    maxRequests: '5',               /* 无 UI 控件 —— 恒为 5 */
+    whitelistTTL: '24',
+    exemptAuthenticated: true, exemptWhitelisted: true, exemptInternal: false
+  };
+  var applied = JSON.parse(JSON.stringify(draft));   /* 已生效 state */
+  var hasUnsavedChanges = false;
+
+  var dlg = document.getElementById('dlg');
+  var rows = dlg.querySelectorAll('.dp-row');
+  var stateLn = document.getElementById('stateLine');
+  var rateHint = document.getElementById('rateHint');
+  var cancelHint = document.getElementById('cancelHint');
+  var confirmHint = document.getElementById('confirmHint');
+  var reopen = document.getElementById('reopen');
+  var helpIcon = document.getElementById('helpIcon');
+  var ttlTip = document.getElementById('ttlTip');
+
+  var ids = ['delaySeconds', 'windowSeconds', 'whitelistTTL'];
+  var checks = ['exemptAuthenticated', 'exemptWhitelisted', 'exemptInternal'];
+
+  function paint() {
+    stateLn.textContent =
+      'draft   = ' + JSON.stringify(draft) + '\n' +
+      'applied = ' + JSON.stringify(applied) + '\n' +
+      'hasUnsavedChanges = ' + hasUnsavedChanges;
+  }
+
+  function setMode(m) {
+    draft.mode = m;
+    rows.forEach(function (row) {
+      var on = row.getAttribute('data-mode') === m;
+      row.setAttribute('data-state', on ? 'checked' : 'unchecked');
+      var radio = row.querySelector('.dp-radio');
+      radio.setAttribute('data-state', on ? 'checked' : 'unchecked');
+      radio.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+    rateHint.classList.toggle('on', m === 'rateLimit');
+    paint();
+  }
+
+  rows.forEach(function (row) {
+    row.addEventListener('click', function () { setMode(row.getAttribute('data-mode')); });
+  });
+
+  /* demo: 数字输入 onClick 有 stopPropagation()，防止点输入框时切换整行模式 */
+  ids.forEach(function (id) {
+    var el = document.getElementById(id);
+    el.addEventListener('click', function (e) { e.stopPropagation(); });
+    el.addEventListener('input', function () { draft[id] = el.value; paint(); });
+  });
+  checks.forEach(function (id) {
+    var el = document.getElementById(id);
+    el.addEventListener('change', function () { draft[id] = el.checked; paint(); });
+  });
+
+  helpIcon.addEventListener('mouseenter', function () { ttlTip.classList.add('on'); });
+  helpIcon.addEventListener('mouseleave', function () { ttlTip.classList.remove('on'); });
+
+  function close() { dlg.hidden = true; reopen.classList.add('on'); }
+
+  /* 取消 / 右上 X：丢弃草稿 */
+  function cancel() {
+    draft = JSON.parse(JSON.stringify(applied));
+    cancelHint.classList.add('on'); confirmHint.classList.remove('on');
+    close(); paint();
+  }
+  document.getElementById('btnCancel').addEventListener('click', cancel);
+  document.getElementById('btnClose').addEventListener('click', cancel);
+
+  /* 确认：回写 8 字段 + 置未保存位 */
+  document.getElementById('btnConfirm').addEventListener('click', function () {
+    applied = JSON.parse(JSON.stringify(draft));
+    hasUnsavedChanges = true;
+    confirmHint.classList.add('on'); cancelHint.classList.remove('on');
+    close(); paint();
+  });
+
+  reopen.addEventListener('click', function () {
+    draft = JSON.parse(JSON.stringify(applied));   /* demo: 打开时拷贝已生效 state */
+    setMode(draft.mode);
+    ids.forEach(function (id) { document.getElementById(id).value = draft[id]; });
+    checks.forEach(function (id) { document.getElementById(id).checked = draft[id]; });
+    dlg.hidden = false;
+    reopen.classList.remove('on');
+    cancelHint.classList.remove('on'); confirmHint.classList.remove('on');
+    paint();
+  });
+
+  paint();
+})();
+</script>
+</body>
+</html>

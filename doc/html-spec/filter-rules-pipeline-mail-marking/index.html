@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - 邮件标记与声明 HTML 规格说明</title>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: #fff;
+      --muted: #f5f7fa;
+      --muted-foreground: #6b7280;
+      --border: #e5e7eb;
+      --blue: #1677ff;
+      --red: #f5222d;
+      --orange: #fa8c16;
+      --green: #52c41a;
+      --radius: 0.625rem;
+      --font-sans: "Geist", "Inter", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1, h2, h3 { line-height: 1.3; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 28px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 20px; }
+    h3 { margin: 18px 0 10px; color: #111827; font-size: 17px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .spec-header, section, .component-toc { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .toc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+    .toc-list li { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa; }
+    .toc-badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #eef4ff; color: #155eef; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-spec, .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    /* ---- 策略卡预览（还原 demo Tailwind 效果） ---- */
+    .np-wrap { position: relative; display: inline-block; padding: 8px 300px 96px 8px; }
+    .np-card { width: 220px; height: 60px; display: flex; overflow: hidden; border: 1px solid #e8e8e8; border-radius: 10px; background: #fff; cursor: pointer; transition: all .2s; }
+    .np-card:hover { border-color: #1890FF; background: #E6F7FF; }
+    .np-bar { width: 4px; flex-shrink: 0; background: #fa8c16; }
+    .np-body { flex: 1; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
+    .np-name { font-size: 14px; font-weight: 500; color: #262626; }
+    .np-cfg { border: 0; background: none; color: #1890FF; font-size: 13px; cursor: pointer; }
+    .np-cfg:hover { color: #40A9FF; }
+    .np-tooltip { display: none; position: absolute; left: 245px; top: 4px; width: 300px; background: #1f2937; color: #f9fafb; border-radius: 6px; padding: 12px; font-size: 13px; z-index: 10; }
+    .np-wrap:hover .np-tooltip { display: block; }
+    .np-tooltip .tip-note { color: #9ca3af; font-size: 12px; border-top: 1px solid #374151; padding-top: 8px; margin-top: 8px; }
+    /* ---- 抽屉预览 ---- */
+    .preview-shell { display: grid; grid-template-columns: 200px 1fr; gap: 0; min-width: 900px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .preview-head { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--border); background: #fff; font-weight: 650; }
+    .preview-head .crumb-sub { color: #4b5563; font-weight: 400; }
+    .preview-nav { padding: 12px 8px; border-right: 1px solid var(--border); background: #f9fafb; }
+    .preview-nav-row { margin: 4px 0; padding: 9px 10px; border-radius: 8px; color: #374151; font-size: 13px; cursor: default; }
+    .preview-nav-row small { color: #6b7280; }
+    .preview-nav-row.active { background: #eaf3ff; color: #1d4ed8; }
+    .dot { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 999px; background: #3b82f6; vertical-align: baseline; }
+    .dot.off { background: transparent; border: 2px solid #d1d5db; }
+    .preview-panel { padding: 16px 18px; background: #f3f4f6; }
+    .module-card { border: 1px solid var(--border); border-radius: 8px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.06); }
+    .module-card-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--border); font-weight: 600; }
+    .module-card-body { padding: 16px 18px; transition: opacity .2s; }
+    .module-card-body.dimmed { opacity: .5; pointer-events: none; }
+    .switch { position: relative; width: 36px; height: 20px; border: 0; border-radius: 999px; background: #1677ff; cursor: pointer; transition: background .2s; }
+    .switch::after { content: ""; position: absolute; top: 2px; left: 18px; width: 16px; height: 16px; border-radius: 999px; background: #fff; transition: left .2s; }
+    .switch[aria-checked="false"] { background: #d1d5db; }
+    .switch[aria-checked="false"]::after { left: 2px; }
+    .switch-state { font-size: 13px; color: #1d4ed8; margin-right: 8px; }
+    .module-title-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .module-icon { width: 34px; height: 34px; border-radius: 8px; background: #dbeafe; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .tabs2 { display: grid; grid-template-columns: 1fr 1fr; max-width: 448px; gap: 4px; padding: 3px; border-radius: 8px; background: #f3f4f6; margin: 6px 0 12px; }
+    .tab2 { padding: 6px 10px; border: 0; border-radius: 7px; font-size: 14px; font-weight: 600; background: transparent; cursor: pointer; color: #374151; }
+    .tab2.active { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    .toolbar-row { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-size: 13px; color: #6b7280; }
+    .button-blue { padding: 7px 12px; border: 0; border-radius: 8px; background: #155eef; color: #fff; font-weight: 650; font-size: 13px; cursor: pointer; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mini-table th, .mini-table td { padding: 9px 10px; border-bottom: 1px solid #eee; text-align: left; }
+    .mini-table th { background: #f8fafc; color: #6b7280; font-size: 12px; font-weight: 600; }
+    .mini-table tr.row-disabled td { opacity: .5; }
+    .pill { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #f3f4f6; color: #374151; }
+    .pill.green { background: #dcfce7; color: #15803d; }
+    .op-icon { border: 0; background: none; cursor: pointer; padding: 2px 4px; font-size: 14px; }
+    .op-icon.del { color: #ef4444; }
+    .hint-bar { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: #f9fafb; color: #4b5563; font-size: 13px; }
+    .unsaved { display: none; margin-top: 10px; padding: 8px 14px; border-top: 1px solid var(--border); color: #d97706; font-size: 13px; }
+    .unsaved.show { display: block; }
+    .is-hidden { display: none !important; }
+    /* ---- 删除确认弹窗预览 ---- */
+    .dlg-backdrop { position: relative; margin: 12px 0; padding: 40px; background: rgba(15,23,42,.45); border-radius: 8px; }
+    .dlg-box { max-width: 512px; margin: 0 auto; padding: 24px; border: 1px solid var(--border); border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.2); }
+    .dlg-box h4 { margin: 0 0 8px; font-size: 17px; }
+    .dlg-box p { margin: 0 0 18px; color: #6b7280; font-size: 14px; }
+    .dlg-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .btn-outline { padding: 7px 14px; border: 1px solid var(--border); border-radius: 8px; background: #fff; cursor: pointer; font-weight: 600; }
+    .btn-danger { padding: 7px 14px; border: 0; border-radius: 8px; background: #dc2626; color: #dc2626; cursor: pointer; font-weight: 600; }
+    .btn-danger.fixed-contrast { color: #fff; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .diff-section { border-left: 4px solid var(--red); background: #fff7f7; }
+    .question-section { border-left: 4px solid #d97706; background: #fffbeb; }
+    .mermaid { padding: 16px; border-radius: 8px; background: #f8fafc; text-align: center; }
+    pre { padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; overflow: auto; font-family: var(--font-mono); font-size: 13px; }
+    @media (max-width: 900px) { body { padding: 16px; } .preview-shell { grid-template-columns: 1fr; } .preview-nav { border-right: 0; border-bottom: 1px solid var(--border); } }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>策略流水线 - 邮件标记与声明 HTML 规格说明</h1>
+    <table class="meta-table">
+      <tr><td>目标模块</td><td>策略流水线 / 阶段5：综合策略 / <b>邮件标记与声明</b>（policy key <code>mailMarking</code>，优先级 5002，type=<code>configurable</code>，<code>canExempt=false</code>，卡片声明执行动作 <code>pipeline.actionMark</code>「标记」/流水线图例的「标记投递」）</td></tr>
+      <tr><td>demo 地址</td><td><a href="http://localhost:3000/filter-rules/pipeline">http://localhost:3000/filter-rules/pipeline</a>（阶段5 综合策略列第三张卡片）</td></tr>
+      <tr><td>demo 源码</td><td><code>design/origin/demo/components/filter-rules-new/strategy-pipeline-page.tsx</code>（节点卡片 + 综合策略抽屉宿主 L2150-2193）<br><code>design/origin/demo/components/filter-rules-new/comprehensive-strategy-page.tsx</code>（抽屉内嵌宿主，<code>initialPolicy="mailMarking"</code>）<br><code>design/origin/demo/components/filter-rules-new/mail-marking-module.tsx</code>（模块本体，1685 行）</td></tr>
+      <tr><td>声明功能覆盖说明</td><td>浏览器验证确认：外发免责声明功能由 <code>mail-marking-module.tsx</code> 内部的「外发声明」Tab 承载（本规格一并覆盖）。仓库中另有 <code>disclaimer-module.tsx</code>（921 行）但<b>未被任何页面引用</b>（综合策略页只渲染 <code>MailMarkingModule</code>），视为遗留组件，见 §10 Q8。</td></tr>
+      <tr><td>关联 PRD</td><td><code>design/origin/spec/邮件标记与声明功能模块需求文档.md</code>（第一来源，§1-§7 全量覆盖）<br><code>design/origin/spec/策略流水线需求文档.md</code>（流水线阶段与抽屉宿主上下文）</td></tr>
+      <tr><td>落地约束</td><td><code>design/origin/implement.md</code>：界面规则统一复用现有统一规则系统（<code>page</code> 字段区分功能页），不新增规则系统；沿用统一规则 action——「标记」= <code>accept</code> + 添加特定 header，不新加 mark action；PRD 定义的 API 非硬性要求；四语国际化。</td></tr>
+      <tr><td>浏览器验证</td><td>2026-07-11 20:43-20:52 Asia/Shanghai，headless Chromium（CDP），视口 1440×1000（表单态 1440×1200/1500，响应式另验 1024×900），语言 zh（默认）。完成：卡片 hover Tooltip、抽屉默认态、接收/外发 Tab 切换、新建规则抽屉（接收/外发）、空表单保存校验、自定义配色、适用部门选择、模拟测试执行与重置、删除确认弹窗、模块开关禁用态。共 15 张截图存于 <code>./screenshots/</code>。</td></tr>
+    </table>
+  </header>
+
+  <nav class="component-toc">
+    <h2>组件列表</h2>
+    <ul class="toc-list">
+      <li><a href="#component-2-1">2.1 策略流水线入口卡片</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-2">2.2 综合策略抽屉 + 邮件标记与声明规则列表</a><span class="toc-badge">2层</span></li>
+      <li><a href="#component-2-3">2.3 规则编辑抽屉（多层交互）</a><span class="toc-badge">3层</span><br>
+        <a href="layer-1-receive-rule-drawer.html">层级2：接收标记规则抽屉</a> ·
+        <a href="layer-2-send-rule-drawer.html">层级2B：外发声明规则抽屉</a> ·
+        <a href="layer-3-preview-test-delete.html">层级3：预览/模拟测试/删除确认</a></li>
+      <li><a href="#dialog-3-1">3.1 删除确认对话框</a><span class="toc-badge">1层</span></li>
+      <li><a href="#api-mapping">4. 数据模型与 API 映射</a><span class="toc-badge">规则系统映射</span></li>
+    </ul>
+  </nav>
+
+  <section id="layout">
+    <h2>1. 页面布局结构</h2>
+    <p>「邮件标记与声明」不是独立路由页面，而是策略流水线页（<code>/filter-rules/pipeline</code>）阶段5「综合策略」列的第三张节点卡片。点击卡片任意处或右侧「配置 →」按钮，打开 <b>80vw 综合策略抽屉</b>（Sheet），抽屉左侧为 3 个综合策略导航（相似邮件与主题检测 / 高级过滤规则 / 邮件标记与声明），右侧白色卡片承载 <code>MailMarkingModule</code>。</p>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>实际渲染</th><th>来源组件</th></tr></thead>
+      <tbody>
+        <tr><td>流水线阶段5列</td><td>相似检测 / 高级过滤规则 / <b>邮件标记与声明</b> 三张 220×60px 卡片；本卡片左色条橙色 <code>#fa8c16</code>（configurable 类型），实测 hover 边框变 <code>#1890FF</code>、背景 <code>#E6F7FF</code></td><td><code>strategy-pipeline-page.tsx</code>（mock 数据 L275：todayHits 89 / blocked 0 / exempted 0）</td></tr>
+        <tr><td>综合策略抽屉头部</td><td>Settings 图标 + 面包屑「阶段5: 综合策略 / <b>外发免责声明</b>」+ 右上 XCircle 关闭钮。注意：面包屑第二段实际渲染为「外发免责声明」（<code>t("pipeline.disclaimer")</code>）而非「邮件标记与声明」，见 §9 D-01</td><td><code>strategy-pipeline-page.tsx</code> L2158-2182</td></tr>
+        <tr><td>抽屉左栏</td><td>3 策略导航（启用圆点 + 名称 + 摘要「接收标记+外发声明多规…」截断显示），左缘中部有折叠圆钮（ChevronLeft）</td><td><code>comprehensive-strategy-page.tsx</code></td></tr>
+        <tr><td>抽屉右栏（本模块）</td><td>白色卡片：头部「邮件标记与声明 + 已启用 Switch」→ 内容区（模块标题栏、接收标记/外发声明 Tab、工具栏、6 列规则表格、总数统计、优先级提示条）→ 底部 sticky 操作栏（未保存提示）</td><td><code>comprehensive-strategy-page.tsx</code> 卡片壳 + <code>mail-marking-module.tsx</code></td></tr>
+        <tr><td>规则编辑抽屉</td><td>在综合策略抽屉之上叠加 920px Sheet，左 560px 表单 + 右侧预览/测试栏</td><td><code>mail-marking-module.tsx</code> L1524-1662，详见子文件</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/page-full-default.png" alt="策略流水线整页默认态">
+      <figcaption>整页默认态：阶段5「综合策略」列含「邮件标记与声明」卡片（1440×1000，流水线区横向内容较宽需水平滚动）。</figcaption>
+    </figure>
+  </section>
+
+  <section id="components">
+    <h2>2. 逐组件规格</h2>
+
+    <article class="component-spec" id="component-2-1">
+      <h3>2.1 策略流水线入口卡片 MailMarking Policy Card</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级0：页面默认态中的策略入口卡片</td></tr>
+          <tr><th>触发路径</th><td>打开 <code>/filter-rules/pipeline</code> → 阶段5「综合策略」列第三张卡片「邮件标记与声明」。</td></tr>
+          <tr><th>浏览器实测</th><td>卡片 220×60px、圆角 10px、边框 <code>1px solid #E8E8E8</code>、左色条 4px 橙色 <code>rgb(250,140,22)</code>；DOM 节点数 9；按钮文案「配置」；点击卡片或「配置」均打开综合策略抽屉并选中 mailMarking。</td></tr>
+        </tbody>
+      </table>
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：策略卡默认态（hover 出 Tooltip）</h4>
+        <div class="component-preview">
+          <div class="np-wrap" data-demo-extracted="mail-marking-card">
+            <a class="np-card" href="#component-2-2" aria-label="打开邮件标记与声明列表规格" style="text-decoration:none;">
+              <div class="np-bar"></div>
+              <div class="np-body">
+                <span class="np-name">邮件标记与声明</span>
+                <button class="np-cfg" type="button">配置 →</button>
+              </div>
+            </a>
+            <div class="np-tooltip">
+              <div><b>策略：</b>邮件标记与声明</div>
+              <div><b>动作：</b>隔离、投递</div>
+              <div><b>影响：</b>命中则隔离，邮件保留至隔离区</div>
+              <div class="tip-note">被隔离邮件可在邮件隔离模块查看</div>
+            </div>
+          </div>
+          <div style="font-size:13px;color:#0369a1;">hover 卡片显示 Tooltip；点击卡片进入 2.2 综合策略抽屉规格。</div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/card-layer0-hover-tooltip.png" alt="邮件标记与声明策略卡 hover Tooltip">
+          <figcaption>hover 实测：Tooltip 显示「策略：邮件标记与声明 / 动作：隔离、投递 / 影响：命中则隔离…」——configurable 类型通用文案，与本模块实际「标记投递」语义不符（§9 D-03）。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>卡片标题</td><td>邮件标记与声明</td><td>点击卡片整体打开综合策略抽屉</td><td><code>policy.key = mailMarking</code>，i18n <code>pipeline.mailMarking</code></td></tr>
+            <tr><td>配置入口</td><td>配置 + ArrowRight 图标</td><td>同卡片点击（<code>stopPropagation</code> 后同一打开逻辑）</td><td>未配置态会显示「去配置」，本卡片非未配置集合成员，恒显「配置」</td></tr>
+            <tr><td>左侧色条</td><td>橙色 <code>#fa8c16</code></td><td>无独立交互</td><td>由 <code>type=configurable</code> 推导（隔离色），未按「标记投递」青色渲染，见 §9 D-03</td></tr>
+            <tr><td>hover Tooltip</td><td>策略/动作/影响 三行 + 隔离说明</td><td>hover 300ms 后出现</td><td>动作文案取 configurable 通用组合「隔离、投递」</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>根节点</td><td><code>div.w-[220px].rounded-lg.cursor-pointer</code>，子节点 2（色条 + 内容）</td><td><code>.np-card</code>（色条 + 内容两个子节点）</td><td>一致</td></tr>
+              <tr><td>尺寸/圆角</td><td>220×60px，computed border-radius 10px</td><td>220×60px，10px</td><td>一致</td></tr>
+              <tr><td>节点数</td><td>9</td><td>预览保留 6 个关键节点（省略 SVG path 细节）</td><td>一致（结构裁剪）</td></tr>
+              <tr><td>色条颜色</td><td><code>rgb(250,140,22)</code></td><td><code>#fa8c16</code></td><td>一致</td></tr>
+              <tr><td>关键文案</td><td>邮件标记与声明 / 配置</td><td>邮件标记与声明 / 配置</td><td>一致</td></tr>
+              <tr><td>Tooltip 文案</td><td>策略：邮件标记与声明 / 动作：隔离、投递 / 影响：命中则隔离，邮件保留至隔离区 / 被隔离邮件可在邮件隔离模块查看</td><td>同文案</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-2">
+      <h3>2.2 综合策略抽屉 + 邮件标记与声明规则列表 MailMarkingModule</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级1：点击策略卡后打开 80vw 综合策略抽屉（1440px 视口下实测宽 1152px），并选中「邮件标记与声明」。</td></tr>
+          <tr><th>渲染组件</th><td><code>ComprehensiveStrategyPage embedded initialPolicy=mailMarking</code> → <code>MailMarkingModule embedded</code>；模块启用状态由宿主头部 Switch 控制（<code>policyEnabled.mailMarking</code>，默认 true）。</td></tr>
+          <tr><th>实际状态</th><td>默认「接收标记」Tab；表格 4 条接收规则（第4条禁用行整行 opacity-50）；「外发声明」Tab 2 条规则；均单页（共 N 条规则 ≤ pageSize），故仅显示总数统计、<b>不渲染分页控件</b>。抽屉 DOM 节点数 196。</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">1</span>交互层级 1A：接收标记规则列表默认态（含 Tab 切换 / 模块开关，可交互）</h4>
+        <div class="component-preview">
+          <div class="preview-shell" data-demo-extracted="mail-marking-drawer">
+            <div class="preview-head">
+              <span>⚙ 阶段5: 综合策略 <span class="crumb-sub">/ 外发免责声明</span></span>
+              <span style="color:#6b7280;cursor:pointer;" title="关闭抽屉（demo：XCircle 按钮）">✕</span>
+            </div>
+            <div class="preview-nav">
+              <div class="preview-nav-row"><span class="dot"></span>相似邮件与主题检测<br><small>窗口30分钟 / 阈值80%</small></div>
+              <div class="preview-nav-row"><span class="dot"></span>高级过滤规则<br><small>多维度条件组合规则</small></div>
+              <div class="preview-nav-row active"><span class="dot" data-nav-dot></span>邮件标记与声明<br><small data-nav-summary>接收标记+外发声明多规...</small></div>
+            </div>
+            <div class="preview-panel">
+              <div class="module-card">
+                <div class="module-card-head">
+                  <span>邮件标记与声明</span>
+                  <span><span class="switch-state" data-switch-state>已启用</span><button class="switch" type="button" role="switch" aria-checked="true" data-module-switch aria-label="模块启用开关"></button></span>
+                </div>
+                <div class="module-card-body" data-module-body>
+                  <div class="module-title-row">
+                    <div class="module-icon">🏷</div>
+                    <div><b>邮件标记与声明</b><br><small style="color:#6b7280;">为接收邮件添加外站来源标记，为外发邮件追加免责声明</small></div>
+                  </div>
+                  <div class="tabs2" role="tablist">
+                    <button class="tab2 active" type="button" role="tab" data-mm-tab="receive">🏷 接收标记</button>
+                    <button class="tab2" type="button" role="tab" data-mm-tab="send">📄 外发声明</button>
+                  </div>
+                  <div class="toolbar-row">
+                    <span data-mm-total>共 4 条规则</span>
+                    <a class="button-blue" href="layer-1-receive-rule-drawer.html" data-mm-create>+ 新建规则</a>
+                  </div>
+                  <table class="mini-table">
+                    <thead><tr><th style="width:60px;">优先级</th><th>规则名称</th><th>适用对象</th><th style="width:110px;">位置</th><th style="width:70px;">状态</th><th style="width:90px;">操作</th></tr></thead>
+                    <tbody data-mm-body="receive">
+                      <tr><td>1</td><td><b>高管外站警示</b></td><td>高管部</td><td>正文顶部</td><td><span class="pill green">启用</span></td><td><a href="layer-1-receive-rule-drawer.html" class="op-icon" title="编辑">✎</a><button class="op-icon del" type="button" data-mm-del="高管外站警示" title="删除">🗑</button></td></tr>
+                      <tr><td>2</td><td><b>财务专用提示</b></td><td>财务部</td><td>主题前缀</td><td><span class="pill green">启用</span></td><td><a href="layer-1-receive-rule-drawer.html" class="op-icon" title="编辑">✎</a><button class="op-icon del" type="button" data-mm-del="财务专用提示" title="删除">🗑</button></td></tr>
+                      <tr><td>3</td><td><b>默认外站提示</b></td><td>全部用户</td><td>主题前缀</td><td><span class="pill green">启用</span></td><td><a href="layer-1-receive-rule-drawer.html" class="op-icon" title="编辑">✎</a><button class="op-icon del" type="button" data-mm-del="默认外站提示" title="删除">🗑</button></td></tr>
+                      <tr class="row-disabled"><td>4</td><td><b>研发静默标记</b></td><td>研发部</td><td>邮件头标记</td><td><span class="pill">禁用</span></td><td><a href="layer-1-receive-rule-drawer.html" class="op-icon" title="编辑">✎</a><button class="op-icon del" type="button" data-mm-del="研发静默标记" title="删除">🗑</button></td></tr>
+                    </tbody>
+                    <tbody data-mm-body="send" class="is-hidden">
+                      <tr><td>1</td><td><b>销售部免责声明</b></td><td>销售部</td><td>正文底部</td><td><span class="pill green">启用</span></td><td><a href="layer-2-send-rule-drawer.html" class="op-icon" title="编辑">✎</a><button class="op-icon del" type="button" data-mm-del="销售部免责声明" title="删除">🗑</button></td></tr>
+                      <tr><td>2</td><td><b>法务部专用声明</b></td><td>法务部</td><td>正文底部</td><td><span class="pill green">启用</span></td><td><a href="layer-2-send-rule-drawer.html" class="op-icon" title="编辑">✎</a><button class="op-icon del" type="button" data-mm-del="法务部专用声明" title="删除">🗑</button></td></tr>
+                    </tbody>
+                  </table>
+                  <div class="toolbar-row" style="justify-content:flex-start;border-top:1px solid #eee;padding-top:8px;"><span data-mm-total2>共 4 条规则</span></div>
+                  <div class="hint-bar">ⓘ 适用对象命中多条时，按优先级数字小者优先。豁免机制由群组策略模块统一实现，不在本模块配置。</div>
+                </div>
+                <div class="unsaved" data-unsaved>● 有未保存的更改</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-layer1-receive-default.png" alt="邮件标记与声明抽屉默认态">
+          <figcaption>抽屉默认态（接收标记 Tab）：面包屑「阶段5: 综合策略 / 外发免责声明」、左侧策略导航、模块开关「已启用」、4 条规则、禁用行半透明、底部提示条。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-layer1-send-tab.png" alt="外发声明 Tab">
+          <figcaption>点击「外发声明」Tab 后：2 条声明规则（销售部免责声明 / 法务部专用声明，位置均为正文底部）。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-layer1-disabled-state.png" alt="模块禁用态">
+          <figcaption>关闭模块开关后：开关文案「已禁用」、左导航圆点变空心且摘要变「已禁用」、内容区 opacity-50 + pointer-events-none、底部出现「有未保存的更改」琥珀色提示。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为</th><th>差异/备注</th></tr></thead>
+          <tbody>
+            <tr><td>抽屉面包屑</td><td>阶段5: 综合策略 / <b>外发免责声明</b></td><td>无交互；右侧 XCircle 关闭抽屉</td><td>文案取 <code>pipeline.disclaimer</code>，与卡片名不一致（§9 D-01）</td></tr>
+            <tr><td>左侧策略导航</td><td>3 项；当前项蓝底高亮；圆点=启用状态；摘要一行截断</td><td>点击切换策略；导航左缘圆钮可折叠为 56px 窄栏（Tooltip 显名称）</td><td>宿主组件行为，与高级过滤规则模块共用</td></tr>
+            <tr><td>模块开关</td><td>已启用（Switch checked）</td><td>切换后内容区 opacity-50 + pointer-events-none，出现「有未保存的更改」，导航摘要变「已禁用」</td><td>对应 PRD「规则启停控制」的模块级总开关；demo 未见保存按钮，unsaved 状态无落库动作（§9 D-07）</td></tr>
+            <tr><td>Tab</td><td>接收标记（Tag 图标）/ 外发声明（FileText 图标）；默认接收标记</td><td>点击切换规则列表；源码 Tab 切换不重置分页页码</td><td>PRD 3.1 要求切 Tab 重置分页到第1页，demo 未实现（§9 D-05）</td></tr>
+            <tr><td>工具栏</td><td>左「共 4 条规则」（外发 Tab 为 2），右「+ 新建规则」蓝色按钮</td><td>新建打开 920px 规则编辑抽屉（预填默认值）</td><td>见子文件层级2</td></tr>
+            <tr><td>表格列</td><td>优先级（等宽字体数字）、规则名称、适用对象、位置、状态、操作</td><td>操作列：Edit 铅笔图标（打开编辑抽屉预填）、Trash2 红色删除图标（打开删除确认）</td><td>与 PRD §2.1 六列一致；「标记位置/声明位置」列在两个 Tab 下共用列名「位置」</td></tr>
+            <tr><td>状态列</td><td>启用=绿色 Badge（bg-green-100 text-green-700），禁用=灰色 secondary Badge</td><td>列表内 Badge 不可点击；启停需进编辑抽屉改「状态」单选</td><td>源码存在未被 UI 绑定的 <code>toggleRuleStatus</code>；PRD 3.4 与 demo 一致（启停在抽屉内），但抽屉内是 Radio 非开关（§9 D-09）</td></tr>
+            <tr><td>禁用行</td><td>整行 opacity-50</td><td>仍可编辑/删除</td><td>符合 PRD 3.3</td></tr>
+            <tr><td>分页</td><td>默认 <code>pageSize=10</code>，两个 Tab 均单页 → 只渲染「共 N 条规则」总数行，无页码/跳转/条数选择器</td><td>多页时渲染 &lt; 页码(≤7+省略号) &gt; + 前往第N页(回车) + 条数下拉（20/50/100/200 条/页）</td><td>条数选项不含默认值 10，PRD 分页控件默认不可见（§9 D-05）</td></tr>
+            <tr><td>提示条</td><td>ⓘ 适用对象命中多条时，按优先级数字小者优先。豁免机制由群组策略模块统一实现，不在本模块配置。</td><td>无交互</td><td>与 PRD §2.1「优先级说明提示」及 §5.1（豁免由群组策略实现）一致</td></tr>
+            <tr><td>空态</td><td>「暂无规则」单元格横跨 6 列居中（本次数据非空未触发，源码 L635-640）</td><td>-</td><td>PRD 3.3 一致；加载骨架屏 demo 未实现（§9 D-07）</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>抽屉根节点</td><td><code>[role=dialog]</code> class 含 <code>w-[80vw] sm:max-w-[80vw] p-0 flex flex-col</code>，实测 1152×1000（1440 视口的 80%），节点数 196</td><td><code>.preview-shell</code> 保留头部/左导航/模块卡三段结构</td><td>一致（结构裁剪展示）</td></tr>
+              <tr><td>Tab 状态</td><td>接收标记 <code>data-state=active</code>、外发声明 inactive</td><td>接收标记 active</td><td>一致</td></tr>
+              <tr><td>表头</td><td>优先级 / 规则名称 / 适用对象 / 位置 / 状态 / 操作</td><td>同 6 列</td><td>一致</td></tr>
+              <tr><td>接收 Tab 行数据</td><td>1 高管外站警示/高管部/正文顶部/启用；2 财务专用提示/财务部/主题前缀/启用；3 默认外站提示/全部用户/主题前缀/启用；4 研发静默标记/研发部/邮件头标记/禁用（行 class 含 opacity-50）</td><td>同 4 行同文案，第 4 行 .row-disabled</td><td>一致</td></tr>
+              <tr><td>外发 Tab 行数据</td><td>1 销售部免责声明/销售部/正文底部/启用；2 法务部专用声明/法务部/正文底部/启用</td><td>同 2 行</td><td>一致</td></tr>
+              <tr><td>隐藏条件节点</td><td>分页控件（totalPages=1 不渲染）；外发行在接收 Tab 不渲染</td><td>预览未含分页控件；send tbody 默认 is-hidden</td><td>一致</td></tr>
+              <tr><td>开关切换后</td><td>Switch <code>data-state=unchecked</code>；内容 div class 含 <code>opacity-50 pointer-events-none</code>；出现「有未保存的更改」；导航摘要「已禁用」</td><td>预览 JS 复刻同四项状态变化</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-3">
+      <h3>2.3 规则编辑抽屉 MailMarking RuleSheet（多层交互）</h3>
+      <p>新建/编辑规则抽屉为叠加在综合策略抽屉之上的 920px Sheet，左 560px 表单 + 右侧预览/测试栏。接收标记与外发声明共用抽屉骨架、按 Tab 渲染不同表单。层级 2 及以后拆分为独立文件。</p>
+      <div class="mermaid">
+        graph LR
+          A[层级0 策略卡] --> B[层级1 规则列表]
+          B -->|接收Tab 新建/编辑| C[层级2 接收标记规则抽屉]
+          B -->|外发Tab 新建/编辑| D[层级2B 外发声明规则抽屉]
+          C --> E[层级3 校验错误/自定义配色/实时预览]
+          C --> F[层级3 模拟测试展开执行]
+          D --> F
+          B -->|行内删除| G[层级3 删除确认对话框]
+      </div>
+      <table class="spec-table layer-index">
+        <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>策略卡默认态</td><td>页面加载</td><td>上方内嵌（2.1）</td></tr>
+          <tr><td>1</td><td>抽屉 + 接收/外发规则列表</td><td>点击策略卡</td><td>上方内嵌（2.2）</td></tr>
+          <tr><td>2</td><td>接收标记规则抽屉（含校验/自定义配色/适用对象）</td><td>接收标记 Tab → 「新建规则」或行内编辑</td><td><a href="layer-1-receive-rule-drawer.html">查看详情</a></td></tr>
+          <tr><td>2B</td><td>外发声明规则抽屉（含校验/字节计数/格式）</td><td>外发声明 Tab → 「新建规则」或行内编辑</td><td><a href="layer-2-send-rule-drawer.html">查看详情</a></td></tr>
+          <tr><td>3</td><td>配置效果预览 / 模拟测试 / 删除确认</td><td>抽屉右栏折叠面板；列表行删除图标</td><td><a href="layer-3-preview-test-delete.html">查看详情</a></td></tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+  <section id="dialogs">
+    <h2>3. 弹窗/抽屉/对话框规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>名称</th><th>触发条件</th><th>实际渲染</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>综合策略抽屉</td><td>点击「邮件标记与声明」卡片或其配置按钮</td><td>80vw Sheet（1440 视口实测 1152px），头部面包屑 + XCircle，左策略导航 + 右模块卡片</td><td>嵌入式配置容器；ESC/遮罩/关闭钮关闭</td></tr>
+        <tr><td>规则编辑抽屉</td><td>点击「新建规则」或行内编辑图标</td><td>920px Sheet 叠加；头部标题按 Tab/模式四态切换（新建/编辑 × 接收标记/外发声明规则）+ 取消/保存；实测新建接收态节点数 185、外发态 176</td><td>新建、编辑共用；编辑态预填规则数据；详见子文件</td></tr>
+        <tr><td id="dialog-3-1">删除确认 AlertDialog</td><td>点击行内 Trash2 删除图标</td><td>居中 512px（max-w-lg）弹窗，标题「确认删除规则」，描述「确定要删除规则「高管外站警示」吗？此操作不可撤销。」，按钮 取消 / 确认删除</td><td>确认后从列表移除；取消保留（实测取消后行数不变）。<b>实测缺陷</b>：确认删除按钮 computed 前景色与背景色同为红色（文字不可读），见 §9 D-06。交互预览与元素表见 <a href="layer-3-preview-test-delete.html">层级3 子文件</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="api-mapping">
+    <h2>4. 数据模型与 API 映射</h2>
+    <pre><code>type RuleType = "receive" | "send"
+type MarkPosition = "subjectPrefix" | "bodyTop" | "header" | "multiple"
+type MarkStyle = "blueTag" | "orangeWarning" | "plainText" | "custom"
+type DisclaimerPosition = "bodyTop" | "bodyBottom" | "header" | "multiple"
+type DisclaimerFormat = "auto" | "htmlOnly" | "plainOnly"
+
+interface MarkingRule {
+  id: string
+  name: string
+  type: RuleType            // 接收标记 / 外发声明
+  priority: number          // 数字越小越优先（demo/PRD 语义，见 §10 Q1）
+  enabled: boolean
+  departments: string[]     // 适用部门 ID（接收=收信人维度，外发=发件人维度）
+  groups: string[]          // 适用群组 ID；两者皆空 = 全部用户
+  markText?: string         // 接收标记：文案，maxLength 50，支持变量
+  markPosition?: MarkPosition
+  markStyle?: MarkStyle
+  customColors?: { bgColor: string; textColor: string; borderColor: string; borderRadius: number }
+  disclaimerContent?: string   // 外发声明：内容，计数上限 10240 bytes（demo 按字符数计）
+  disclaimerPosition?: DisclaimerPosition
+  disclaimerFormat?: DisclaimerFormat
+  createdAt: string
+  updatedAt: string
+}</code></pre>
+    <table class="spec-table">
+      <thead><tr><th>PRD API / 数据表</th><th>用途</th><th>落地映射建议</th><th>需确认</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/mail-marking/rules</code></td><td>规则列表（分页）</td><td>映射统一规则系统列表接口，<code>page=mail-marking</code>，以 <code>direction/type=receive|send</code> 区分两个 Tab。</td><td>统一规则的 payload 是否可承载 markStyle/customColors/disclaimerFormat 等扩展字段。</td></tr>
+        <tr><td><code>POST/PUT/DELETE /api/mail-marking/rules(/:id)</code></td><td>规则增删改</td><td>复用统一规则 CRUD；「标记」动作按 implement.md 映射为 <code>accept</code> + 添加特定 header，不新增 mark action。</td><td>正文顶部/底部插入、主题前缀改写需要邮件体改写能力，是否超出现有 accept+header 组合（§10 Q2）。</td></tr>
+        <tr><td><code>POST /api/mail-marking/test</code></td><td>模拟测试</td><td>demo 为前端本地模拟（直接取第一条启用规则）；落地若要真实匹配需统一规则 dry-run 接口。</td><td>是否新增 dry-run API（§10 Q7）。</td></tr>
+        <tr><td>部门/群组下拉数据源</td><td>适用对象选择</td><td>demo 用 mock（6 部门 4 群组）；落地对接网关组织架构/群组策略数据源（LDAP 联系人同步）。</td><td>部门维度网关现有数据是否具备（§10 Q3）。</td></tr>
+        <tr><td><code>mail_marking_rules</code> 表</td><td>产品设计表</td><td>非硬性要求；优先落到统一规则表 + page 字段，避免新建独立规则表。</td><td>规则审计日志与配置回滚（PRD §6.3）沿用统一规则的变更记录。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="business-logic">
+    <h2>5. 业务逻辑规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>逻辑</th><th>PRD 要求</th><th>demo 实际</th><th>落地说明</th></tr></thead>
+      <tbody>
+        <tr><td>方向判定</td><td>邮件进入系统先判方向：接收→标记规则，外发→声明规则（§1.3）</td><td>前端以 Tab（type=receive/send）划分两套规则</td><td>网关侧对应入站 milter 路径 / 出站（{auth_authen}）路径。</td></tr>
+        <tr><td>匹配顺序</td><td>按优先级从小到大遍历，<b>首个命中生效</b>（§6.1）</td><td>列表按 priority 升序展示；模拟测试取第一条启用规则</td><td>与网关统一规则「数值越大越优先」语义相反，映射方案需确认（§10 Q1）。</td></tr>
+        <tr><td>适用对象匹配</td><td>部门 ID 与群组 ID OR 逻辑；两者皆空=全部用户（§6.1/§5.3）</td><td>表单不选时列表显示「全部用户」；已选显示名称逗号拼接</td><td>提示文案「不选任何部门/群组 = 适用于全部用户」在表单内常显。</td></tr>
+        <tr><td>标记位置</td><td>主题前缀 / 正文顶部 / 邮件头 / 多位置同时生效（=主题前缀+正文顶部，§6.1）</td><td>4 项单选；主题前缀+非纯文本样式时显示降级警告</td><td>主题前缀自动降级纯文本（§5.3 配置联动）；邮件头标记仅客户端程序识别。</td></tr>
+        <tr><td>声明位置/格式</td><td>正文顶部/底部/邮件头 X-Disclaimer；格式自动适配/仅HTML/强制纯文本（§1.2）</td><td>位置 4 项（含多位置同时生效）、格式 3 项单选，默认 正文底部 + 自动适配</td><td>PRD §1.3 流程含格式适配处理。</td></tr>
+        <tr><td>变量替换</td><td>标记与声明支持变量，处理时实时替换（§1.2/§6.1）</td><td>接收：{sender_domain} {sender_ip} {recipient_name} {date}；外发：{sender_name} {sender_email} {organization} {date} {time} {legal_contact}；点击徽标追加到输入框</td><td>变量集合以 demo 为准。</td></tr>
+        <tr><td>规则启停</td><td>单条启停开关，禁用不生效但保留配置（§1.2）</td><td>编辑抽屉「状态」禁用/启用 RadioGroup；列表禁用行半透明</td><td>另有模块级总开关（宿主头部 Switch，关闭后全部规则失效保留配置——对应源码 <code>globalSwitchHint</code> 语义）。</td></tr>
+        <tr><td>优先级边界</td><td>非正整数自动修正为 1；允许重复，按规则 ID 排序（§4.1）</td><td>number 输入 min=1，parseInt 失败回退 1；新建默认 = 当前 Tab 规则数+1（实测接收=5、外发=3）</td><td>重复时排序稳定性由后端保证。</td></tr>
+        <tr><td>权限</td><td>系统管理员全量；安全管理员查看+测试；部门管理员只读本部门；普通用户无权限（§1.4）</td><td>demo 未实现权限分支</td><td>落地按网关统一权限体系映射（§9 D-07）。</td></tr>
+        <tr><td>规模约束</td><td>规则匹配 &lt;10ms；单租户 ≤1000 条；多租户隔离（§6.2/§6.4）</td><td>-</td><td>作为验收指标记录。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interaction">
+    <h2>6. 交互规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>实际行为（浏览器验证）</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>切换 Tab</td><td>接收标记/外发声明 <code>role=tab</code>，点击后 <code>data-state</code> 更新，列表与总数联动</td><td>PRD 要求同时重置分页到第 1 页（demo 未做，§9 D-05）。</td></tr>
+        <tr><td>新建规则</td><td>打开 920px 抽屉；接收态预填 标记文案=【外站邮件】、位置=主题前缀、样式=蓝色标签、状态=启用、优先级=N+1；外发态 声明内容为空、位置=正文底部、格式=自动适配</td><td>表单初始化默认值（PRD 3.1）。</td></tr>
+        <tr><td>空表单保存</td><td>接收态：规则名称+标记文案红框（aria-invalid）+ 红字「请输入规则名称」「请输入标记文本」；外发态：「请输入规则名称」「请输入免责声明内容」；抽屉保持打开；<b>保存按钮不置灰</b>（源码注释：点击保存后才展示校验红字）</td><td>PRD 4.1/3.3 要求校验失败保存按钮置灰——demo 采用点击后显红字方案（§9 D-04）。</td></tr>
+        <tr><td>变量徽标点击</td><td>点击变量 Badge 将 " {var}" 追加至标记文案/声明内容末尾</td><td>PRD「变量插入」。</td></tr>
+        <tr><td>标记样式切换</td><td>选自定义配色 → 展开配色参数区（背景/文字/边框色 color+hex 双输入，圆角 number 0-20px）；预览即时应用 style</td><td>PRD TC-011/TC-012。</td></tr>
+        <tr><td>主题前缀警告</td><td>位置=主题前缀且样式≠纯文本时，预览区下方琥珀色警告「主题前缀位置将自动降级为纯文本，不携带颜色样式」</td><td>PRD TC-010。</td></tr>
+        <tr><td>模拟测试</td><td>展开面板→输入邮箱→点「测试」→绿色「匹配成功: 高管外站警示」；「重置」清空输入与结果。<b>demo 简化：忽略输入邮箱，恒命中当前 Tab 第一条启用规则</b></td><td>PRD 期望按适用对象真实匹配（§9 D-10）。</td></tr>
+        <tr><td>删除</td><td>行内 Trash2 → AlertDialog 确认；取消保留（行数不变），确认后移除</td><td>PRD 3.1/TC-007~009 一致。</td></tr>
+        <tr><td>关闭抽屉</td><td>取消按钮/遮罩/ESC 关闭，不保存修改；无脏数据确认弹窗</td><td>PRD 3.1「取消编辑」一致。</td></tr>
+      </tbody>
+    </table>
+    <h3>6.1 Tooltip 规格（源码验证；无头浏览器 hover 未复现 Radix Tooltip，以源码为准）</h3>
+    <table class="spec-table">
+      <thead><tr><th>字段</th><th>位置</th><th>文案</th><th>触发</th></tr></thead>
+      <tbody>
+        <tr><td>规则名称</td><td>表单 Label + HelpCircle 图标</td><td>设置一个易于识别的规则名称</td><td>hover（max-w-300px）</td></tr>
+        <tr><td>优先级</td><td>表单 Label + HelpCircle；另在输入框右侧常显括号说明</td><td>数字越小优先级越高，命中多条规则时优先执行数字小的规则</td><td>hover / 常显</td></tr>
+        <tr><td>标记文案</td><td>表单 Label + HelpCircle</td><td>设置显示给收信人的标记文案</td><td>hover</td></tr>
+        <tr><td>声明内容</td><td>表单 Label + HelpCircle</td><td>支持HTML格式和变量插入</td><td>hover</td></tr>
+        <tr><td>适用对象</td><td>表单内 Info 常显提示（非 Tooltip）</td><td>不选任何部门/群组 = 适用于全部用户</td><td>常显</td></tr>
+      </tbody>
+    </table>
+    <h3>6.2 异常场景（PRD §4，demo 覆盖情况）</h3>
+    <table class="spec-table">
+      <thead><tr><th>场景</th><th>PRD 处理方式</th><th>demo 实现</th></tr></thead>
+      <tbody>
+        <tr><td>必填为空</td><td>保存按钮置灰 + 提示</td><td>红框 + 红字提示，按钮不置灰（§9 D-04）</td></tr>
+        <tr><td>优先级非正整数</td><td>自动修正为 1</td><td>一致（parseInt 失败回退 1，min=1）</td></tr>
+        <tr><td>颜色值非法</td><td>颜色选择器限制格式</td><td>type=color 选择器 + hex 文本双输入（文本输入未校验格式）</td></tr>
+        <tr><td>权限不足/规则锁定/系统预置</td><td>相应提示文案</td><td>未实现（§9 D-07）</td></tr>
+        <tr><td>加载/保存/删除超时</td><td>加载失败重试 / Toast 提示</td><td>未实现（本地 state，无网络层）</td></tr>
+        <tr><td>并发冲突</td><td>乐观锁版本号 + 冲突提示</td><td>未实现，落地依赖后端</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="i18n">
+    <h2>7. 国际化规格</h2>
+    <p>模块内部文案由 <code>mail-marking-module.tsx</code> 内联 <code>L</code> 对象按 <code>language</code>（zh/th/en 三分支）返回；宿主（卡片名、面包屑、综合策略导航）走全局 <code>t()</code>（<code>language-context.tsx</code>，含 zh/en/th）。implement.md 要求四种内置语言，demo 仅见 3 种（§10 Q5）。</p>
+    <table class="spec-table">
+      <thead><tr><th>key（源码字段）</th><th>zh</th><th>en</th><th>使用位置</th></tr></thead>
+      <tbody>
+        <tr><td>pipeline.mailMarking / comprehensive.mailMarking</td><td>邮件标记与声明</td><td>Mail Marking &amp; Disclaimer</td><td>流水线卡片 / 抽屉导航</td></tr>
+        <tr><td>pipeline.disclaimer</td><td>外发免责声明</td><td>Outbound Disclaimer</td><td>综合策略抽屉面包屑（mailMarking 分支，D-01）</td></tr>
+        <tr><td>pipeline.mailMarkingDesc / comprehensive.mailMarkingSummary</td><td>接收标记+外发声明多规则配置</td><td>Receive marking + outbound disclaimer multi-rule config</td><td>卡片描述 / 导航摘要</td></tr>
+        <tr><td>pipeline.actionMark</td><td>标记</td><td>Mark</td><td>卡片 mock 执行动作</td></tr>
+        <tr><td>L.title / L.subtitle</td><td>邮件标记与声明 / 为接收邮件添加外站来源标记，为外发邮件追加免责声明</td><td>Mail Marking &amp; Disclaimer / Add external source marking…</td><td>模块标题栏、规则抽屉副标题</td></tr>
+        <tr><td>L.receiveMarking / L.sendDisclaimer</td><td>接收标记 / 外发声明</td><td>Receive Marking / Outbound Disclaimer</td><td>Tab</td></tr>
+        <tr><td>L.priority / L.ruleName / L.applyTo / L.position / L.status / L.operation</td><td>优先级 / 规则名称 / 适用对象 / 位置 / 状态 / 操作</td><td>Priority / Rule Name / Apply To / Position / Status / Operation</td><td>表头</td></tr>
+        <tr><td>L.total / L.items / L.goToPage / L.page / L.itemsPerPage</td><td>共 / 条规则 / 前往第 / 页 / 条/页</td><td>Total / rules / Go to page / page / items/page</td><td>总数与分页</td></tr>
+        <tr><td>L.createRule / L.edit / L.delete / L.cancel / L.save / L.reset</td><td>新建规则 / 编辑 / 删除 / 取消 / 保存 / 重置</td><td>Create Rule / Edit / Delete / Cancel / Save / Reset</td><td>操作按钮</td></tr>
+        <tr><td>L.createReceiveRule / L.editReceiveRule / L.createSendRule / L.editSendRule</td><td>新建接收标记规则 / 编辑接收标记规则 / 新建外发声明规则 / 编辑外发声明规则</td><td>Create/Edit Receive Marking Rule；Create/Edit Outbound Disclaimer Rule</td><td>规则抽屉标题四态</td></tr>
+        <tr><td>L.errRuleName / L.errMarkText / L.errDisclaimer</td><td>请输入规则名称 / 请输入标记文本 / 请输入免责声明内容</td><td>Please enter a rule name / mark text / disclaimer content</td><td>校验红字</td></tr>
+        <tr><td>L.posSubjectPrefix / L.posBodyTop / L.posBodyBottom / L.posHeader / L.posHeaderDisclaimer / L.posMultiple</td><td>主题前缀 / 正文顶部 / 正文底部 / 邮件头标记 / 邮件头 X-Disclaimer / 多位置同时生效</td><td>Subject Prefix / Body Top / Body Bottom / Email Header / Header X-Disclaimer / Multiple Positions</td><td>位置单选与列表位置列</td></tr>
+        <tr><td>L.styleBlueTag / L.styleOrangeWarning / L.stylePlainText / L.styleCustom</td><td>蓝色标签 / 橙色警告 / 纯文本 / 自定义配色</td><td>Blue Tag / Orange Warning / Plain Text / Custom Color</td><td>标记样式单选</td></tr>
+        <tr><td>L.formatAuto / L.formatHtmlOnly / L.formatPlainOnly</td><td>自动适配(HTML+纯文本) / 仅 HTML 邮件生效 / 强制纯文本追加</td><td>Auto Adapt (HTML+Plain) / HTML Email Only / Force Plain Text</td><td>声明格式单选</td></tr>
+        <tr><td>L.subjectPrefixWarn</td><td>主题前缀位置将自动降级为纯文本，不携带颜色样式</td><td>Subject prefix position will be downgraded…</td><td>预览警告</td></tr>
+        <tr><td>L.priorityHint</td><td>适用对象命中多条时，按优先级数字小者优先。豁免机制由群组策略模块统一实现，不在本模块配置。</td><td>When matching multiple rules…</td><td>列表提示条</td></tr>
+        <tr><td>L.deleteConfirmTitle / L.deleteConfirmDesc / L.deleteConfirmSuffix / L.confirmDelete</td><td>确认删除规则 / 确定要删除规则 / 此操作不可撤销。 / 确认删除</td><td>Confirm Delete Rule / Are you sure… / This action cannot be undone. / Confirm Delete</td><td>删除对话框</td></tr>
+        <tr><td>L.testMatch / L.testNoMatch / L.matchedRule / L.testEmailPlaceholder</td><td>匹配成功 / 未匹配到规则 / 命中规则 / 输入测试用户邮箱</td><td>Match Success / No Rule Matched / Matched Rule / Enter test user email</td><td>模拟测试</td></tr>
+        <tr><td>L.globalSwitch / L.globalSwitchHint / L.operationLog</td><td>全局开关 / 关闭后所有规则失效，保留配置 / 操作日志</td><td>Global Switch / … / Operation Log</td><td><b>源码已定义但 UI 未渲染</b>（模块开关由宿主提供；操作日志入口缺失，§9 D-12）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="responsive">
+    <h2>8. 响应式规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>断点</th><th>浏览器验证</th><th>表现</th></tr></thead>
+      <tbody>
+        <tr><td>1440px</td><td>默认截图</td><td>综合策略抽屉 1152px（80vw）；规则编辑抽屉固定 920px（左 560px 表单 + 右侧自适应预览栏）。</td></tr>
+        <tr><td>1024px</td><td>已截图</td><td>综合策略抽屉实测 819px（80vw），左导航固定 207px，表格与提示条压缩仍完整可读；规则编辑抽屉 920px 超出视口时受 <code>sm:max-w-[920px]</code> 限制贴边。</td></tr>
+        <tr><td>PRD 对照</td><td>-</td><td>PRD §2.3 要求抽屉 560px/中屏适应/小屏全屏 —— demo 为 920px 固定 + 80vw 宿主抽屉，见 §9 D-08。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/responsive-1024-drawer.png" alt="1024px 抽屉截图">
+      <figcaption>1024×900：综合策略抽屉 80vw（819px），列表布局保持完整。</figcaption>
+    </figure>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>9. 与 PRD / 源码 / 浏览器渲染的差异标注</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>差异点</th><th>PRD/预期</th><th>demo 实际（浏览器验证）</th><th>建议处理</th></tr></thead>
+      <tbody>
+        <tr><td>D-01</td><td>抽屉面包屑文案</td><td>应显示模块名「邮件标记与声明」</td><td>渲染 <code>t("pipeline.disclaimer")</code>=「外发免责声明」（卡片名与抽屉内模块标题均为「邮件标记与声明」，三处不一致）</td><td>demo 疑似笔误；落地统一为「邮件标记与声明」，需确认（Q4）。</td></tr>
+        <tr><td>D-02</td><td>阶段5 子策略清单</td><td>流水线 PRD §1 称阶段5含「意图引擎、相似邮件检测、高级规则」</td><td>demo 阶段5为「相似检测 / 高级过滤规则 / 邮件标记与声明」，意图引擎位于阶段3；邮件标记 PRD §2.1 信息架构与 demo 一致</td><td>以 demo + 邮件标记 PRD 为准。</td></tr>
+        <tr><td>D-03</td><td>卡片动作呈现</td><td>模块执行动作为「标记投递」（mock action=pipeline.actionMark）</td><td>色条橙色（configurable→隔离色）；hover Tooltip 显示「动作：隔离、投递 / 影响：命中则隔离」通用文案</td><td>落地应按「标记投递」（青色 #13c2c2 图例）呈现卡片与 Tooltip。</td></tr>
+        <tr><td>D-04</td><td>校验失败反馈</td><td>PRD §3.3/§4.1：保存按钮置灰</td><td>保存按钮始终可点击（disabled=false），点击后显示红框+红字（源码注释系有意设计）</td><td>二选一需确认；建议保留 demo 方案并在 PRD 侧修订。</td></tr>
+        <tr><td>D-05</td><td>分页控件</td><td>PRD §1.2/§3.1：分页浏览、页码导航、跳转、每页条数；Tab 切换重置分页</td><td>totalPages≤1 时不渲染分页（当前 mock 数据均单页）；条数选项 20/50/100/200 与默认 pageSize=10 不一致；Tab 切换未重置页码</td><td>落地补齐：选项集合含默认值、切 Tab 重置页码。</td></tr>
+        <tr><td>D-06</td><td>确认删除按钮配色</td><td>红底白字可读</td><td>computed 前景色=背景色=红（lab(48.45 77.43 61.55)），文字不可见（bg-destructive + text-destructive-foreground 在该主题下同色）</td><td>demo 主题变量缺陷；落地用红底白字。</td></tr>
+        <tr><td>D-07</td><td>状态反馈与权限</td><td>PRD §3.3/§4.2/§4.3：骨架屏、保存成功/失败 Toast、权限/锁定/超时提示</td><td>均未实现；宿主仅有「有未保存的更改」指示（且无保存按钮落库）</td><td>落地按 PRD 补齐 Toast 与错误处理。</td></tr>
+        <tr><td>D-08</td><td>抽屉宽度</td><td>PRD §2.3：编辑抽屉 560px，两列表单；小屏全屏</td><td>规则编辑抽屉 920px（左 560px 表单+右预览/测试栏）；宿主综合策略抽屉 80vw</td><td>以 demo 为准（右栏预览/测试为 PRD §2.2 要求的预览区/测试区）。</td></tr>
+        <tr><td>D-09</td><td>规则启停控件形态</td><td>PRD §3.4：抽屉中的状态开关（Switch）</td><td>编辑抽屉为「禁用/启用」RadioGroup；列表状态列为只读 Badge；源码 <code>toggleRuleStatus</code> 未绑定任何 UI</td><td>控件形态以 demo 为准或统一为 Switch，需确认。</td></tr>
+        <tr><td>D-10</td><td>模拟测试匹配逻辑</td><td>PRD TC-015：按测试邮箱输出匹配/未匹配</td><td>忽略邮箱值，恒返回当前 Tab 第一条启用规则「匹配成功: 高管外站警示」</td><td>demo 简化；落地需按适用对象（部门/群组归属）匹配。</td></tr>
+        <tr><td>D-11</td><td>声明字节计数</td><td>上限 10240 bytes</td><td>计数按 JS 字符数（<code>disclaimerContent.length</code>），中文/多字节字符与真实字节数不符；且无超限拦截</td><td>落地按 UTF-8 字节计并校验上限。</td></tr>
+        <tr><td>D-12</td><td>未渲染的源码能力</td><td>-</td><td>①L.globalSwitch/L.operationLog 标签已定义但无 UI（操作日志入口缺失，PRD §5.2 要求审计）；②props <code>enabled/onEnabledChange</code> 接入宿主开关但模块体内未使用 enabled 值做渲染分支；③<code>disclaimer-module.tsx</code> 组件未被引用</td><td>操作日志入口是否补充见 Q9；遗留组件处置见 Q8。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>10. 需确认事项</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>问题</th><th>影响</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td><b>优先级语义冲突</b>：本模块 PRD/demo 均为「数字越小优先级越高」，而网关统一规则系统定义「数值越大越优先」。落地时如何映射（存储时取反 / 模块内独立排序字段 / UI 层换算）？</td><td>影响统一规则表结构与匹配引擎语义，属跨模块一致性问题。</td></tr>
+        <tr><td>Q2</td><td><b>标记/声明的动作映射与改写能力</b>：implement.md 规定「标记 = accept + 添加特定 header」；但主题前缀改写、正文顶部/底部插入（含 HTML/纯文本双格式、变量替换）需要邮件体改写能力。网关 milter/旁路链路是否已具备 subject/body 改写？若仅支持加 header，主题前缀与正文位置如何落地？</td><td>决定本模块核心功能可行性，可能需要新增改写执行器。</td></tr>
+        <tr><td>Q3</td><td><b>部门/群组数据源</b>：适用对象的「部门」维度网关现有数据模型是否具备（现有为 LDAP 联系人/群组策略）？外发方向按发件人归属匹配的数据从何而来？</td><td>影响适用对象选择器的数据接口与匹配实现。</td></tr>
+        <tr><td>Q4</td><td>抽屉面包屑「外发免责声明」与卡片/模块名「邮件标记与声明」不一致（D-01），落地以哪个为准？</td><td>纯文案，但涉及 i18n key 取舍（pipeline.disclaimer vs pipeline.mailMarking）。</td></tr>
+        <tr><td>Q5</td><td>四语国际化的第 4 种语言是哪一种？demo 模块内联仅 zh/en/th。</td><td>影响 i18n key 清单与验收范围。</td></tr>
+        <tr><td>Q6</td><td>分页每页条数集合：demo 选项 20/50/100/200 与默认 10 不一致（D-05），落地取哪套（如 10/20/50/100）？</td><td>影响分页组件与列表接口默认值。</td></tr>
+        <tr><td>Q7</td><td>模拟测试是否新增统一规则 dry-run API（POST /api/mail-marking/test）？还是首版仅前端提示、不做真实匹配？</td><td>新增 API 需按 implement.md 先行确认。</td></tr>
+        <tr><td>Q8</td><td><code>disclaimer-module.tsx</code>（921 行独立声明组件）未被任何页面引用，声明功能已由本模块「外发声明」Tab 覆盖——该组件是否废弃、无需生成独立规格？</td><td>影响规格覆盖范围界定。</td></tr>
+        <tr><td>Q9</td><td>操作日志：PRD §5.2 要求记录标记/声明操作审计，源码有 L.operationLog 标签但无入口，落地是否在本模块加日志入口，还是仅落网关统一审计日志？</td><td>影响 UI 范围与审计链路。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    if (window.mermaid) { mermaid.initialize({ startOnLoad: true }); }
+
+    // ---- 2.2 Tab 切换（复刻 demo：切换 tbody 与总数；不重置分页，见 D-05） ----
+    const mmTabs = [...document.querySelectorAll("[data-mm-tab]")];
+    const mmBodies = [...document.querySelectorAll("[data-mm-body]")];
+    const mmTotal = document.querySelector("[data-mm-total]");
+    const mmTotal2 = document.querySelector("[data-mm-total2]");
+    const mmCreate = document.querySelector("[data-mm-create]");
+    const totals = { receive: "共 4 条规则", send: "共 2 条规则" };
+    const createHref = { receive: "layer-1-receive-rule-drawer.html", send: "layer-2-send-rule-drawer.html" };
+    mmTabs.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        mmTabs.forEach((t) => t.classList.toggle("active", t === btn));
+        mmBodies.forEach((b) => b.classList.toggle("is-hidden", b.dataset.mmBody !== btn.dataset.mmTab));
+        mmTotal.textContent = totals[btn.dataset.mmTab];
+        mmTotal2.textContent = totals[btn.dataset.mmTab];
+        mmCreate.href = createHref[btn.dataset.mmTab];
+      });
+    });
+
+    // ---- 2.2 模块开关（复刻 demo：dim 内容 + 未保存提示 + 导航摘要变化） ----
+    const sw = document.querySelector("[data-module-switch]");
+    const swState = document.querySelector("[data-switch-state]");
+    const moduleBody = document.querySelector("[data-module-body]");
+    const unsaved = document.querySelector("[data-unsaved]");
+    const navDot = document.querySelector("[data-nav-dot]");
+    const navSummary = document.querySelector("[data-nav-summary]");
+    sw.addEventListener("click", () => {
+      const on = sw.getAttribute("aria-checked") === "true";
+      sw.setAttribute("aria-checked", String(!on));
+      swState.textContent = on ? "已禁用" : "已启用";
+      swState.style.color = on ? "#6b7280" : "#1d4ed8";
+      moduleBody.classList.toggle("dimmed", on);
+      unsaved.classList.add("show");
+      navDot.classList.toggle("off", on);
+      navSummary.textContent = on ? "已禁用" : "接收标记+外发声明多规...";
+    });
+
+    // ---- 2.2 行内删除 → 跳到层级3子文件说明（此处弹出与 demo 同文案的确认框） ----
+    document.querySelectorAll("[data-mm-del]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const name = btn.dataset.mmDel;
+        const row = btn.closest("tr");
+        const ok = window.confirm("确认删除规则\n确定要删除规则「" + name + "」吗？此操作不可撤销。\n（demo 中为居中 AlertDialog，完整规格见 layer-3 子文件）");
+        if (ok) row.remove();
+      });
+    });
+  </script>
+</body>
+</html>

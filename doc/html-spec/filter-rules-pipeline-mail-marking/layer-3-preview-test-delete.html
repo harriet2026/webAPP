@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 3：配置效果预览 / 模拟测试 / 删除确认 - 邮件标记与声明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --text:#111827; --sub:#6b7280; --blue:#1677ff; --red:#ef4444; --radius:.625rem; }
+    * { box-sizing: border-box; }
+    body { margin:0; padding:32px; max-width:1280px; margin-inline:auto; background:var(--bg); color:var(--text); font-family:"Geist","Inter",system-ui,sans-serif; line-height:1.6; }
+    a { color:var(--blue); text-decoration:none; }
+    nav.layer-nav, .spec-header, section { margin-bottom:24px; padding:24px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); }
+    nav.layer-nav { display:flex; justify-content:space-between; padding:14px 24px; font-weight:600; }
+    h1 { margin:0 0 16px; color:var(--primary); font-size:26px; }
+    h2 { margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--primary); color:var(--primary); font-size:20px; }
+    h3 { margin:16px 0 8px; font-size:16px; }
+    .meta-table, .spec-table { width:100%; border-collapse:collapse; font-size:14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding:9px 11px; border:1px solid var(--border); vertical-align:top; }
+    .meta-table td:first-child, .spec-table th { background:var(--muted); font-weight:650; text-align:left; }
+    .meta-table td:first-child { width:180px; color:var(--sub); }
+    .layer-badge { display:inline-flex; align-items:center; justify-content:center; min-width:24px; height:24px; margin-right:8px; border-radius:999px; background:var(--blue); color:#fff; font-size:12px; font-weight:700; }
+    .component-preview { margin:12px 0; padding:16px; border:1px solid #dbeafe; border-radius:8px; background:#f8fbff; overflow:auto; }
+    .rail { max-width:360px; }
+    .rail-btn { display:flex; justify-content:space-between; width:100%; margin-bottom:10px; padding:9px 14px; border:1px solid var(--border); border-radius:8px; background:#fff; font-weight:600; font-size:14px; cursor:pointer; }
+    .rail-panel { margin:-4px 0 12px; padding:14px; border:1px solid var(--border); border-radius:8px; background:#fff; font-size:13px; }
+    .is-hidden { display:none !important; }
+    .test-row { display:flex; gap:6px; }
+    .input { flex:1; padding:7px 11px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; }
+    .btn { padding:7px 12px; border-radius:8px; font-weight:650; font-size:13px; cursor:pointer; }
+    .btn-blue { border:0; background:#155eef; color:#fff; }
+    .btn-outline { border:1px solid var(--border); background:#fff; }
+    .test-result { display:none; margin-top:10px; padding:10px 12px; border-radius:8px; font-size:13px; align-items:center; gap:6px; }
+    .test-result.match { display:flex; background:#f0fdf4; color:#15803d; }
+    .test-result.nomatch { display:flex; background:#f9fafb; color:#4b5563; }
+    .mark-sample { display:inline-block; padding:3px 8px; font-size:14px; border-radius:4px; background:#dbeafe; color:#1d4ed8; border:1px solid #93c5fd; }
+    .dlg-open-row { margin-bottom:10px; }
+    .dlg-backdrop { display:none; position:relative; padding:48px 24px; background:rgba(15,23,42,.45); border-radius:8px; }
+    .dlg-backdrop.show { display:block; }
+    .dlg-box { max-width:512px; margin:0 auto; padding:24px; border:1px solid var(--border); border-radius:10px; background:#fff; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+    .dlg-box h4 { margin:0 0 8px; font-size:17px; }
+    .dlg-box p { margin:0 0 18px; color:var(--sub); font-size:14px; }
+    .dlg-actions { display:flex; justify-content:flex-end; gap:8px; }
+    .btn-danger { padding:7px 14px; border:0; border-radius:8px; background:#dc2626; color:#dc2626; cursor:pointer; font-weight:600; }
+    .btn-danger:hover { background:#b91c1c; color:#b91c1c; }
+    .note { padding:10px 12px; border-radius:8px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; font-size:13px; margin:10px 0; }
+    .screenshot-figure { margin:14px 0; text-align:center; }
+    .screenshot-figure img { max-width:100%; border:1px solid var(--border); border-radius:8px; box-shadow:0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top:8px; color:var(--sub); font-size:13px; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="layer-2-send-rule-drawer.html">← 层级 2B：外发声明规则抽屉</a>
+    <span>层级 3 / 3</span>
+    <a href="index.html#component-2-3">返回主文件 →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 3：配置效果预览 / 模拟测试 / 删除确认对话框</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 规则编辑抽屉右栏折叠区（预览/测试）+ 3.1 删除确认 AlertDialog</td></tr>
+      <tr><td>主文件</td><td><a href="index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>①规则抽屉右栏「配置效果预览」「模拟测试」Collapsible 按钮开合；②层级1 列表行内 Trash2 删除图标 → AlertDialog</td></tr>
+      <tr><td>demo 组件</td><td><code>mail-marking-module.tsx</code> L1553-1642（右栏折叠区）、L1664-1680（AlertDialog）</td></tr>
+      <tr><td>截图</td><td><code>rule-sheet-layer2-simulate-test.png</code> / <code>delete-dialog-layer4.png</code></td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">3</span>3A 配置效果预览 + 模拟测试（可交互）</h2>
+    <div class="component-preview">
+      <div class="rail" data-demo-extracted="sheet-right-rail">
+        <button class="rail-btn" type="button" data-coll="preview">👁 配置效果预览 <span data-coll-ic="preview">⌃</span></button>
+        <div class="rail-panel" data-panel="preview">
+          <div style="color:#6b7280;">发件: test@gmail.com<br>收件: 张三</div>
+          <div style="margin:10px 0;"><span class="mark-sample">【外站邮件】</span></div>
+          <div>这是邮件正文内容...</div>
+        </div>
+        <button class="rail-btn" type="button" data-coll="test">🧪 模拟测试 <span data-coll-ic="test">⌄</span></button>
+        <div class="rail-panel is-hidden" data-panel="test">
+          <div class="test-row">
+            <input class="input" data-test-email placeholder="输入测试用户邮箱">
+            <button class="btn btn-blue" type="button" data-run-test>测试</button>
+            <button class="btn btn-outline" type="button" data-reset-test>重置</button>
+          </div>
+          <div class="test-result" data-test-result></div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-sheet-layer2-simulate-test.png" alt="模拟测试执行结果">
+      <figcaption>展开模拟测试 → 输入 ceo@corp.com → 点「测试」：绿色结果条「匹配成功: 高管外站警示」（CheckCircle2 图标）。实测 demo 忽略邮箱值、恒命中当前 Tab 第一条启用规则（主文件 §9 D-10）；「重置」清空输入与结果（实测输入值清空、结果条消失）。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为</th></tr></thead>
+      <tbody>
+        <tr><td>配置效果预览 Collapsible</td><td>默认展开（data-state=open），Eye 图标 + ChevronUp</td><td>点击标题开合；内容为模拟邮件卡片：发件 test@gmail.com / 收件=首个已选部门名或「张三」/ 标记块（接收态）或声明虚线块（外发态）/ 正文占位。</td></tr>
+        <tr><td>模拟测试 Collapsible</td><td>默认收起（data-state=closed），Beaker 图标 + ChevronDown</td><td>点击展开测试面板。</td></tr>
+        <tr><td>测试邮箱 Input</td><td>空；placeholder「输入测试用户邮箱」</td><td>空值点测试无反应（<code>if (!testEmail) return</code>）。</td></tr>
+        <tr><td>测试按钮</td><td>「测试」蓝色 sm 按钮</td><td>返回 {matched, ruleName}；命中→绿色条「匹配成功: 规则名」，未命中（当前 Tab 无启用规则）→灰色条「未匹配到规则」（XCircle）。</td></tr>
+        <tr><td>重置按钮</td><td>「重置」outline sm 按钮</td><td>清空测试邮箱与结果（PRD TC-016）。</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h3>DOM 树比对结果（3A）</h3>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>折叠默认态</td><td>配置效果预览 open / 模拟测试 closed（Collapsible data-state）</td><td>同默认开合</td><td>一致</td></tr>
+          <tr><td>测试行结构</td><td>Input + 测试 + 重置 三控件一行（flex gap-2）</td><td>同结构</td><td>一致</td></tr>
+          <tr><td>命中结果</td><td><code>div.p-3.rounded-lg.flex</code> class 含 <code>bg-green-50 text-green-700</code>，文案「匹配成功: 高管外站警示」</td><td>.test-result.match 同配色同文案格式</td><td>一致</td></tr>
+          <tr><td>重置后</td><td>输入值清空、结果节点不再渲染</td><td>JS 复刻同行为</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">3</span>3B 删除确认对话框 AlertDialog（可交互）</h2>
+    <div class="component-preview">
+      <div class="dlg-open-row">
+        <button class="btn btn-outline" type="button" data-open-dlg>🗑 模拟点击列表行删除图标（打开对话框）</button>
+      </div>
+      <div class="dlg-backdrop" data-dlg>
+        <div class="dlg-box" role="alertdialog" aria-label="确认删除规则">
+          <h4>确认删除规则</h4>
+          <p>确定要删除规则「高管外站警示」吗？此操作不可撤销。</p>
+          <div class="dlg-actions">
+            <button class="btn btn-outline" type="button" data-dlg-cancel>取消</button>
+            <button class="btn-danger" type="button" data-dlg-confirm title="demo 实测：文字色=背景色（红底红字不可读）；hover 后加深仍同色">确认删除</button>
+          </div>
+        </div>
+      </div>
+      <div class="note">⚠ 预览按 demo 实测还原「确认删除」按钮的<b>红底红字缺陷</b>（computed color = background = lab(48.45 77.43 61.55)）——按钮上的文字实际不可见。落地应为红底白字（主文件 §9 D-06）。</div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/delete-dialog-layer4.png" alt="删除确认对话框">
+      <figcaption>点击「高管外站警示」行删除图标：居中 512px AlertDialog，遮罩半透明；「确认删除」按钮呈纯红色块（文字不可读）。取消后实测列表仍为 4 行。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th></tr></thead>
+      <tbody>
+        <tr><td>对话框容器</td><td><code>[role=alertdialog]</code>，居中 <code>sm:max-w-lg</code>（实测 512×158px），圆角 rounded-lg，p-6</td><td>无 X 关闭钮；仅按钮关闭（AlertDialog 语义，点遮罩不关闭）。</td></tr>
+        <tr><td>标题</td><td>确认删除规则</td><td>-</td></tr>
+        <tr><td>描述</td><td>确定要删除规则「{规则名}」吗？此操作不可撤销。</td><td>规则名动态插入（中文用「」引号）。</td></tr>
+        <tr><td>取消按钮</td><td>outline 样式</td><td>关闭对话框，规则保留（实测行数不变，PRD TC-009）。</td></tr>
+        <tr><td>确认删除按钮</td><td>class <code>bg-destructive text-destructive-foreground hover:bg-destructive/90</code>；实测前景=背景同红色</td><td>从列表移除该规则并关闭（PRD TC-008）；无删除成功 Toast。</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h3>DOM 树比对结果（3B）</h3>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>根节点</td><td><code>[role=alertdialog]</code> data-slot=alert-dialog-content，节点数 7，实测 512×158</td><td>.dlg-box[role=alertdialog]（标题+描述+两按钮）</td><td>一致</td></tr>
+          <tr><td>标题/描述文案</td><td>确认删除规则 / 确定要删除规则「高管外站警示」吗？此操作不可撤销。</td><td>同文案</td><td>一致</td></tr>
+          <tr><td>按钮</td><td>取消（outline）、确认删除（destructive）</td><td>同两按钮；按 computed 实测还原同色缺陷</td><td>一致</td></tr>
+          <tr><td>取消后</td><td>对话框关闭，tbody 行数 4 不变</td><td>JS 复刻：取消仅关闭</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="index.html#component-2-3">← 返回主文件</a>
+    <a href="layer-1-receive-rule-drawer.html">层级 2：接收标记规则抽屉 →</a>
+  </nav>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    // 折叠面板
+    document.querySelectorAll("[data-coll]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const panel = $("[data-panel=" + btn.dataset.coll + "]");
+        const hidden = panel.classList.toggle("is-hidden");
+        $("[data-coll-ic=" + btn.dataset.coll + "]").textContent = hidden ? "⌄" : "⌃";
+      });
+    });
+    // 模拟测试（复刻 demo：空值不响应；忽略邮箱值恒命中第一条启用规则）
+    const emailInput = $("[data-test-email]"), result = $("[data-test-result]");
+    $("[data-run-test]").addEventListener("click", () => {
+      if (!emailInput.value) return;
+      result.className = "test-result match";
+      result.textContent = "✓ 匹配成功: 高管外站警示";
+    });
+    $("[data-reset-test]").addEventListener("click", () => {
+      emailInput.value = "";
+      result.className = "test-result";
+      result.textContent = "";
+    });
+    // 删除确认对话框
+    const dlg = $("[data-dlg]");
+    $("[data-open-dlg]").addEventListener("click", () => dlg.classList.add("show"));
+    $("[data-dlg-cancel]").addEventListener("click", () => dlg.classList.remove("show"));
+    $("[data-dlg-confirm]").addEventListener("click", () => {
+      dlg.classList.remove("show");
+      alert("demo：规则从列表移除，无删除成功 Toast（主文件 §9 D-07）");
+    });
+  </script>
+</body>
+</html>

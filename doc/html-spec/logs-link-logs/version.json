@@ -1,0 +1,13 @@
+{
+  "module": "logs-link-logs",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-14",
+      "demo_commit": "804efb9",
+      "spec_commit": "8db3a98",
+      "summary": "初版：AI 搜索 + 10 项高级筛选、10 列日志表、顺序检测时间线详情弹窗；标注 PRD 内部冲突（检测顺序前两环节相反、形态矩阵与 product-profiles 冲突）与 demo 10 处差异（重点：0709 要求的 skipped_deep_inspect 完全缺失、9 个筛选项不参与过滤、下载无行为）；网关 /api/v1/link-click-logs 已存在且已带 deep_inspect_state 参数与单条下载"
+    }
+  ]
+}

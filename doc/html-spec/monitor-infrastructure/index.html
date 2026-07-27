@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>基础设施 - HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== 设计变量（参考 demo globals.css） ===== */
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground); line-height: 1.55; font-size: 14px; padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem; max-width: 1280px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1.2rem; margin: 2.2rem 0 .8rem; padding-bottom: .35rem; border-bottom: 2px solid var(--primary); }
+    h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; }
+    h4 { font-size: .95rem; margin: 1.2rem 0 .5rem; }
+    h5 { font-size: .85rem; margin: .8rem 0 .4rem; }
+    p { margin: .45rem 0; }
+    code { font-family: var(--font-mono); font-size: .85em; background: var(--muted); padding: .1em .35em; border-radius: 4px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    a { color: oklch(0.52 0.226 262); }
+
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .spec-header .subtitle { color: var(--muted-foreground); font-size: .9rem; }
+    .meta-table { border-collapse: collapse; width: 100%; margin-top: .8rem; font-size: 13px; }
+    .meta-table td { border: 1px solid var(--border); padding: 5px 10px; vertical-align: top; }
+    .meta-table td:first-child { background: var(--muted); font-weight: 600; white-space: nowrap; width: 11em; }
+
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem; margin-top: 1.2rem; }
+    .component-toc ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .component-toc li { margin: .3rem 0; }
+    .toc-badge { display: inline-block; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 999px; padding: 0 .5em; margin-left: .4em; vertical-align: middle; }
+    .toc-layer-links { margin-left: .6em; font-size: 12px; }
+    .toc-layer-links a { margin-right: .5em; }
+
+    .spec-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0 1rem; background: var(--card); }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); font-weight: 600; white-space: nowrap; }
+    .spec-table td.num { text-align: right; font-family: var(--font-mono); }
+    .spec-table .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    .matrix-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0; background: var(--card); }
+    .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: center; }
+    .matrix-table th { background: var(--muted); font-weight: 600; }
+    .matrix-table td:first-child { text-align: left; font-weight: 600; background: var(--muted); }
+    .legend { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .5rem .8rem; }
+
+    .screenshot-figure { margin: .8rem 0 1.2rem; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .screenshot-figure figcaption { font-size: 12px; color: var(--muted-foreground); margin-top: .35rem; }
+
+    .component-spec { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem 1.4rem; margin: 1.2rem 0; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: .9rem 1.1rem; margin: 1rem 0; background: oklch(0.99 0 0); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; background: var(--primary); color: #fff; border-radius: 999px; font-size: .8em; font-weight: 700; margin-right: .4em; }
+    .trigger-path { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .45rem .7rem; margin: .5rem 0; }
+    .layer-nav { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 13px; }
+    .layer-index a { font-weight: 600; }
+
+    .component-preview { border: 2px dashed oklch(0.7 0.12 262); border-radius: 10px; padding: 18px; background: #f4f5f7; overflow-x: auto; margin: .7rem 0; position: relative; }
+    .component-preview::before { content: "可交互预览（提取自运行中的 demo）"; position: absolute; top: -9px; left: 14px; background: oklch(0.52 0.226 262); color: #fff; font-size: 10.5px; padding: 0 8px; border-radius: 999px; line-height: 16px; z-index: 5; }
+    .preview-note { font-size: 12px; color: var(--muted-foreground); background: oklch(0.975 0.02 95); border: 1px solid oklch(0.9 0.06 95); border-radius: 6px; padding: .4rem .7rem; margin: .4rem 0 .8rem; }
+    .component-preview .bg-card { background: #fff; }
+    .component-preview .text-card-foreground { color: #0a0a0a; }
+    .component-preview .bg-popover { background: #fff; }
+    .component-preview .text-popover-foreground { color: #0a0a0a; }
+    .component-preview .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .component-preview .border-input { border-color: #e5e7eb; }
+    .component-preview svg { flex-shrink: 0; }
+    .component-preview [data-slot="card"] { border-color: #e5e7eb; background: #fff; }
+    .component-preview button { cursor: pointer; }
+    .component-preview button:disabled { cursor: default; }
+    .component-preview .text-gray-900 { color: #111827; }
+    .component-preview .text-gray-500 { color: #6b7280; }
+    .component-preview .text-gray-400 { color: #9ca3af; }
+    .component-preview .bg-gray-50 { background: #f9fafb; }
+    @keyframes spec-spin { to { transform: rotate(360deg); } }
+    .component-preview .animate-spin { animation: spec-spin 1s linear infinite; }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .component-preview .animate-marquee { animation: marquee 30s linear infinite; }
+    .component-preview .animate-marquee:hover { animation-play-state: paused; }
+
+    .route-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 13px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 99; opacity: 0; transition: opacity .2s; pointer-events: none; font-family: var(--font-mono); }
+    .route-toast.show { opacity: 1; }
+
+    .dom-comparison { background: oklch(0.975 0.008 262); border: 1px solid oklch(0.85 0.03 262); border-radius: 8px; padding: .6rem .9rem; margin-top: .8rem; }
+    .dom-comparison h5 { margin: .2rem 0 .4rem; }
+
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .diff-section h2 { border-bottom-color: var(--diff-border); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .question-section h2 { border-bottom-color: var(--question-border); }
+    .diff-table td:first-child, .question-table td:first-child { font-weight: 700; white-space: nowrap; }
+
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 .55em; line-height: 1.6; vertical-align: middle; }
+    .tag-green { background: #dcfce7; color: #15803d; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-gray { background: #f3f4f6; color: #4b5563; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+    .mermaid { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .6rem; margin: .8rem 0; overflow-x: auto; }
+
+    .component-preview [role="tabpanel"][hidden] { display: none; }
+  </style>
+</head>
+<body>
+
+<header class="spec-header">
+  <h1>基础设施 详细产品规格说明</h1>
+  <p class="subtitle">硬件资源 / 服务进程 / 数据库与缓存 / 存储与备份 四维基建监控，Tab 式信息架构。</p>
+  <table class="meta-table">
+    <tr><td>模块子目录</td><td><code>monitor-infrastructure/</code></td></tr>
+    <tr><td>demo 路由</td><td><code>/monitor/infrastructure</code>（侧边栏「监控中心 &gt; 基础设施」）</td></tr>
+    <tr><td>demo 源</td><td><code>demo/app/monitor/infrastructure/page.tsx</code> → <code>demo/components/monitor/monitor-infrastructure-page.tsx</code>（673 行，MonitorInfrastructurePage）</td></tr>
+    <tr><td>spec 源</td><td>未提供/未使用 —— <code>demo/docs/</code> 下无基础设施需求文档，以浏览器运行中的 demo 为准</td></tr>
+    <tr><td>规格版本</td><td><b>v2</b></td></tr>
+    <tr><td>生成日期</td><td>2026-07-22</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td>—（无 spec）</td></tr>
+    <tr><td>浏览器验证</td><td>playwright-core + 系统 Chrome（headless）· <code>http://localhost:3100</code> · 视口 1920×1080（另 1366 / 1024 断点）· 形态×角色矩阵 5×2 全遍历</td></tr>
+    <tr><td>遵循约束</td><td><code>implement.md</code>：四语国际化（demo 三语且 th 缺 monitor.* key，见差异 D-02）；冲突列 §10 需确认</td></tr>
+    <tr><td>v1 → v2 复核</td><td>2026-07-22 用户对 3 项给出目标行为决定：① 多租户 tenant 隐藏本页时 <b>URL 也应 403/404 拦截</b>（Q-02 闭环）② 硬件 CPU/内存趋势图<b>也要随时间范围联动</b>（D-04 目标行为）③ 慢查询行 <b>hover 时 Tooltip 显示 SQL 详情</b>（D-06 目标行为）。复核记录见 §9/§10</td></tr>
+  </table>
+</header>
+
+<!-- ============ 0.1 产品形态 × 角色差异矩阵 ============ -->
+<section id="form-role-matrix" class="component-spec">
+  <h2 style="margin-top:0;">0.1 产品形态 × 角色差异矩阵（浏览器全遍历实测）</h2>
+  <table class="matrix-table">
+    <thead><tr><th>角色 / 形态</th><th>AI-单</th><th>传统-单</th><th>云-多</th><th>AI-多</th><th>传统-多</th></tr></thead>
+    <tbody>
+      <tr><td>平台管理员</td><td>—</td><td>—</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>租户管理员</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+    </tbody>
+  </table>
+  <p class="legend">图例：✅ 显示且可编辑 ｜ 🔒 显示但只读 ｜ ❌ 隐藏（导航无入口）｜ — 无此角色（单租户形态无平台管理员）。</p>
+  <table class="spec-table">
+    <thead><tr><th>依据</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">FEATURE_MAP["monitor-infrastructure"]</td><td><code>visibility: ALL_SHOW</code>；<code>tenantAccess: "hidden"</code>（note: 平台基建，租户视角隐藏）；<code>scope: "platform"</code></td></tr>
+      <tr><td>浏览器实测（10 组合）</td><td>cloud / ai-multi / legacy-multi + tenant 视角下侧边栏「基础设施」入口<b>不可见</b> ❌；其余组合均可见 ✅。单租户 viewer=tenant 自动回退 platform 故显示 ✅</td></tr>
+      <tr><td>URL 直连</td><td><b>demo 现状</b>：tenant 视角直接访问 <code>/monitor/infrastructure</code> 仍可完整渲染（无拦截）。【目标行为·2026-07-22 用户决定】隐藏入口的形态×角色下，URL 直连必须拦截：<b>后端返回 403/404 + 前端路由守卫</b>，页面不得渲染 —— 见 Q-02（已解决）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 0.2 组件列表 ============ -->
+<nav class="component-toc">
+  <h2 style="margin-top:0;border:none;">📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 页面头部（标题 + 时间范围 Select + 刷新按钮）</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-2">2.2 Tab 导航（硬件/进程/数据库/存储）</a> <span class="toc-badge">4层</span>
+      <span class="toc-layer-links"><a href="./layer-1-tab-container.html">层级1：服务进程</a><a href="./layer-2-tab-database.html">层级2：数据库与缓存</a><a href="./layer-3-tab-storage.html">层级3：存储与备份</a></span></li>
+    <li><a href="#component-2-3">2.3 硬件资源面板（趋势图 + 网卡Top5）</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-4">2.4 数据库性能趋势面板（Kingbase/Redis × 指标切换）</a> <span class="toc-badge">2层</span>
+      <span class="toc-layer-links"><a href="./layer-2-tab-database.html">层级2：数据库 Tab</a></span></li>
+  </ul>
+</nav>
+
+<!-- ============ 0.3 版本历史 ============ -->
+<section id="version-history">
+  <h2>0.3 版本历史</h2>
+  <table class="spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody>
+      <tr><td><b>v2</b></td><td>2026-07-22</td><td class="mono">804efb9</td><td class="mono">—</td><td>用户决定落地 3 项目标行为：① 租户视角 URL 直连拦截（Q-02 闭环：后端 403/404 + 前端路由守卫）② 硬件 CPU/内存趋势图随时间范围联动（D-04）③ 慢查询行 hover Tooltip 显示 SQL 详情（D-06）；§9/§10 全部条目逐项标注复核状态</td></tr>
+      <tr><td>v1</td><td>2026-07-22</td><td class="mono">804efb9</td><td class="mono">—</td><td>初版：4 Tab 面板全量提取（硬件/进程/数据库/存储）+ 可交互预览；Kingbase/Redis 与指标切换实测；形态×角色 5×2 矩阵实测（多租户 tenant 隐藏入口、URL 直连不拦截）；3 断点截图</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 1. 页面布局结构 ============ -->
+<section id="layout" class="component-spec">
+  <h2 style="margin-top:0;">1. 页面布局结构</h2>
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>名称</th><th>元素概览</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td>页面头部</td><td>H1「基础设施」+ 时间范围 Select（近1小时/近24小时/近7天，默认近24小时）+ 刷新图标按钮（无 onClick）</td></tr>
+      <tr><td>B</td><td>Tab 导航</td><td>4 个 Tab：硬件资源 / 服务进程 / 数据库与缓存 / 存储与备份（各带 lucide 图标）</td></tr>
+      <tr><td>C</td><td>Tab 内容区</td><td>各 Tab 独立面板（见 §2 组件规格）</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-full-default.png" alt="整页默认态">
+    <figcaption>整页默认态（1920×1080，硬件资源 Tab，形态 cloud × 平台管理员）——浏览器实际渲染</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 2. 逐组件规格 ============ -->
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <!-- ===== 2.1 页面头部 ===== -->
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 页面头部</h3>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：初始态</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染</div>
+      <div class="component-preview" id="preview-header" style="overflow:visible;">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-xl font-semibold text-gray-900">基础设施</h1>
+          <div class="flex items-center gap-3">
+            <button type="button" role="combobox" aria-expanded="false" dir="ltr" data-state="closed" class="border-input flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs w-32"><span data-slot="select-value" style="pointer-events:none;">近24小时</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50"><path d="m6 9 6 6 6-6"/></svg></button>
+            <button class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium border bg-background shadow-xs hover:bg-accent size-9" title="刷新（demo 未绑定 onClick）"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw w-4 h-4"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></button>
+          </div>
+        </div>
+      </div>
+      <table class="spec-table">
+        <thead><tr><th>序号</th><th>元素</th><th>默认/选项</th><th>交互行为（实测）</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>H1 标题</td><td>基础设施</td><td>text-xl font-semibold（注意：本页 H1 为 xl，小于其他监控页的 2xl）</td><td class="mono">monitor.infra.title</td></tr>
+          <tr><td>2</td><td>时间范围 Select（w-32）</td><td>默认近24小时；选项 近1小时/近24小时/近7天</td><td>【demo 现状】仅数据库 Tab 的性能趋势图联动（useMemo 依赖 timeRange：1h=12点×5m / 24h=24点 / 7d=7点×日）；硬件趋势图不联动。<br>【目标行为·2026-07-22 用户决定】<b>硬件 CPU/内存趋势图也要随时间范围联动</b>（数据点数与 X 轴格式同数据库趋势图口径：1h=12点×5m / 24h=24点 / 7d=7点×日）——见差异 D-04</td><td class="mono">monitor.time.1h / 24h / 7d</td></tr>
+          <tr><td>3</td><td>刷新按钮（outline icon）</td><td>RefreshCw 图标</td><td><b>源码无 onClick</b>，点击无任何响应（差异 D-05）</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>规格呈现</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>H1 文案/字号</td><td>"基础设施" text-xl</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>combobox 数</td><td>1（时间范围）</td><td>1</td><td class="dom-pass">✅</td></tr>
+            <tr><td>刷新按钮</td><td>存在但无事件绑定</td><td>同（已标注）</td><td class="dom-pass">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.2 Tab 导航 + 四面板 ===== -->
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 Tab 导航（多层交互：4 个面板）</h3>
+    <h4>组件元信息</h4>
+    <table class="spec-table">
+      <tbody>
+        <tr><td>实现</td><td>shadcn Tabs（Radix），<code>useState("hardware")</code> activeNav 驱动</td></tr>
+        <tr><td>交互层级数</td><td>4 层（初始=硬件资源；层级1=服务进程；层级2=数据库与缓存；层级3=存储与备份）</td></tr>
+        <tr><td>形态/角色差异</td><td>[Base] 内容一致；页面入口按 §0.1 矩阵控制</td></tr>
+      </tbody>
+    </table>
+    <h4>交互层级关系图</h4>
+    <div class="mermaid">
+graph LR
+    L0["层级0: 硬件资源（默认）"] -->|点击「服务进程」Tab| L1["层级1: 服务进程"]
+    L0 -->|点击「数据库与缓存」Tab| L2["层级2: 数据库与缓存"]
+    L0 -->|点击「存储与备份」Tab| L3["层级3: 存储与备份"]
+    L2 -->|点击 Redis| L2b["层级2b: Redis 指标视图"]
+    L1 --> L0
+    L2 --> L0
+    L3 --> L0
+    </div>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：硬件资源 Tab（默认）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染（activeNav="hardware"）</div>
+      <div class="component-preview" id="preview-tabs">
+<div role="tablist" aria-orientation="horizontal" data-slot="tabs-list" class="text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px] bg-white dark:bg-gray-800" tabindex="0" data-orientation="horizontal" style="outline:none"><button type="button" role="tab" aria-selected="true" aria-controls="radix-_R_55esnebn9lb_-content-hardware" data-state="active" id="radix-_R_55esnebn9lb_-trigger-hardware" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 flex items-center gap-2" tabindex="-1" data-orientation="horizontal" data-radix-collection-item=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cpu w-4 h-4"><rect width="16" height="16" x="4" y="4" rx="2"></rect><rect width="6" height="6" x="9" y="9" rx="1"></rect><path d="M15 2v2"></path><path d="M15 20v2"></path><path d="M2 15h2"></path><path d="M2 9h2"></path><path d="M20 15h2"></path><path d="M20 9h2"></path><path d="M9 2v2"></path><path d="M9 20v2"></path></svg>硬件资源</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_R_55esnebn9lb_-content-container" data-state="inactive" id="radix-_R_55esnebn9lb_-trigger-container" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 flex items-center gap-2" tabindex="-1" data-orientation="horizontal" data-radix-collection-item=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers w-4 h-4"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"></path><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"></path></svg>服务进程</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_R_55esnebn9lb_-content-database" data-state="inactive" id="radix-_R_55esnebn9lb_-trigger-database" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 flex items-center gap-2" tabindex="-1" data-orientation="horizontal" data-radix-collection-item=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database w-4 h-4"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>数据库与缓存</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_R_55esnebn9lb_-content-storage" data-state="inactive" id="radix-_R_55esnebn9lb_-trigger-storage" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 flex items-center gap-2" tabindex="-1" data-orientation="horizontal" data-radix-collection-item=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hard-drive w-4 h-4"><line x1="22" x2="2" y1="12" y2="12"></line><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path><line x1="6" x2="6.01" y1="16" y2="16"></line><line x1="10" x2="10.01" y1="16" y2="16"></line></svg>存储与备份</button></div>
+        <div id="panel-hardware"><div data-state="active" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_R_55esnebn9lb_-trigger-hardware" id="radix-_R_55esnebn9lb_-content-hardware" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none mt-6" style="animation-duration:0s"><div class="space-y-6"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-base">CPU与内存趋势（近24h）</div></div><div data-slot="card-content" class="px-6"><div class="recharts-responsive-container" style="width:100%;height:240px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 240px; max-width: 1502px;"><svg class="recharts-surface" width="1502" height="240" viewBox="0 0 1502 240" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts2-clip"><rect x="65" y="5" height="200" width="1432"></rect></clipPath></defs><g class="recharts-cartesian-grid"><g class="recharts-cartesian-grid-horizontal"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="65" y1="205" x2="1497" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="65" y1="155" x2="1497" y2="155"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="65" y1="105" x2="1497" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="65" y1="55" x2="1497" y2="55"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="65" y1="5" x2="1497" y2="5"></line></g><g class="recharts-cartesian-grid-vertical"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="65" y1="5" x2="65" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="127.26086956521739" y1="5" x2="127.26086956521739" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="189.52173913043478" y1="5" x2="189.52173913043478" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="251.7826086956522" y1="5" x2="251.7826086956522" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="314.04347826086956" y1="5" x2="314.04347826086956" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="376.30434782608694" y1="5" x2="376.30434782608694" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="438.5652173913044" y1="5" x2="438.5652173913044" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="500.82608695652175" y1="5" x2="500.82608695652175" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="563.0869565217391" y1="5" x2="563.0869565217391" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="625.3478260869565" y1="5" x2="625.3478260869565" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="687.6086956521739" y1="5" x2="687.6086956521739" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="749.8695652173913" y1="5" x2="749.8695652173913" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="812.1304347826087" y1="5" x2="812.1304347826087" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="874.3913043478261" y1="5" x2="874.3913043478261" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="936.6521739130435" y1="5" x2="936.6521739130435" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="998.9130434782609" y1="5" x2="998.9130434782609" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="1061.1739130434783" y1="5" x2="1061.1739130434783" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="1123.4347826086957" y1="5" x2="1123.4347826086957" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="1185.695652173913" y1="5" x2="1185.695652173913" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="1247.9565217391305" y1="5" x2="1247.9565217391305" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="1310.2173913043478" y1="5" x2="1310.2173913043478" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="1372.4782608695652" y1="5" x2="1372.4782608695652" y2="205"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1432" height="200" x1="1497" y1="5" x2="1497" y2="205"></line></g></g><g class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="205" x2="1497" y2="205"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="65" y1="211" x2="65" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="65" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="65" dy="0.71em">00:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="127.26086956521739" y1="211" x2="127.26086956521739" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="127.26086956521739" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="127.26086956521739" dy="0.71em">01:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="189.52173913043478" y1="211" x2="189.52173913043478" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="189.52173913043478" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="189.52173913043478" dy="0.71em">02:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="251.7826086956522" y1="211" x2="251.7826086956522" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="251.7826086956522" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="251.7826086956522" dy="0.71em">03:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="314.04347826086956" y1="211" x2="314.04347826086956" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="314.04347826086956" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="314.04347826086956" dy="0.71em">04:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="376.30434782608694" y1="211" x2="376.30434782608694" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="376.30434782608694" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="376.30434782608694" dy="0.71em">05:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="438.5652173913044" y1="211" x2="438.5652173913044" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="438.5652173913044" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="438.5652173913044" dy="0.71em">06:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="500.82608695652175" y1="211" x2="500.82608695652175" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="500.82608695652175" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="500.82608695652175" dy="0.71em">07:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="563.0869565217391" y1="211" x2="563.0869565217391" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="563.0869565217391" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="563.0869565217391" dy="0.71em">08:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="625.3478260869565" y1="211" x2="625.3478260869565" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="625.3478260869565" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="625.3478260869565" dy="0.71em">09:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="687.6086956521739" y1="211" x2="687.6086956521739" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="687.6086956521739" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="687.6086956521739" dy="0.71em">10:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="749.8695652173913" y1="211" x2="749.8695652173913" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="749.8695652173913" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="749.8695652173913" dy="0.71em">11:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="812.1304347826087" y1="211" x2="812.1304347826087" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="812.1304347826087" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="812.1304347826087" dy="0.71em">12:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="874.3913043478261" y1="211" x2="874.3913043478261" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="874.3913043478261" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="874.3913043478261" dy="0.71em">13:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="936.6521739130435" y1="211" x2="936.6521739130435" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="936.6521739130435" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="936.6521739130435" dy="0.71em">14:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="998.9130434782609" y1="211" x2="998.9130434782609" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="998.9130434782609" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="998.9130434782609" dy="0.71em">15:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="1061.1739130434783" y1="211" x2="1061.1739130434783" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="1061.1739130434783" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1061.1739130434783" dy="0.71em">16:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="1123.4347826086957" y1="211" x2="1123.4347826086957" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="1123.4347826086957" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1123.4347826086957" dy="0.71em">17:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="1185.695652173913" y1="211" x2="1185.695652173913" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="1185.695652173913" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1185.695652173913" dy="0.71em">18:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="1247.9565217391305" y1="211" x2="1247.9565217391305" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="1247.9565217391305" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1247.9565217391305" dy="0.71em">19:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="1310.2173913043478" y1="211" x2="1310.2173913043478" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="1310.2173913043478" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1310.2173913043478" dy="0.71em">20:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="1372.4782608695652" y1="211" x2="1372.4782608695652" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="1372.4782608695652" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1372.4782608695652" dy="0.71em">21:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="1434.7391304347825" y1="211" x2="1434.7391304347825" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="1434.7391304347825" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1434.7391304347825" dy="0.71em">22:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1432" height="30" stroke="#9CA3AF" x="65" y="205" class="recharts-cartesian-axis-tick-line" fill="none" x1="1497" y1="211" x2="1497" y2="205"></line><text orientation="bottom" width="1432" height="30" stroke="none" font-size="10" x="1487.7734375" y="213" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1487.7734375" dy="0.71em">23:00</tspan></text></g></g></g><g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis"><line orientation="left" width="60" height="200" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="5" x2="65" y2="205"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="200" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="205" x2="65" y2="205"></line><text orientation="left" width="60" height="200" stroke="none" font-size="10" x="57" y="205" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">0%</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="200" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="155" x2="65" y2="155"></line><text orientation="left" width="60" height="200" stroke="none" font-size="10" x="57" y="155" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">25%</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="200" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="105" x2="65" y2="105"></line><text orientation="left" width="60" height="200" stroke="none" font-size="10" x="57" y="105" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">50%</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="200" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="55" x2="65" y2="55"></line><text orientation="left" width="60" height="200" stroke="none" font-size="10" x="57" y="55" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">75%</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="200" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="5" x2="65" y2="5"></line><text orientation="left" width="60" height="200" stroke="none" font-size="10" x="57" y="7.5" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">100%</tspan></text></g></g></g><g class="recharts-layer recharts-line"><path stroke="#1890FF" stroke-width="2" name="CPU利用率" width="1432" height="200" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="1485.8531494140625px 0px" d="M65,95.619C85.754,95.552,106.507,95.485,127.261,95.217C148.014,94.948,168.768,92.709,189.522,92.709C210.275,92.709,231.029,123.666,251.783,123.666C272.536,123.666,293.29,98.727,314.043,98.727C334.797,98.727,355.551,116.447,376.304,116.447C397.058,116.447,417.812,116.218,438.565,115.762C459.319,115.305,480.072,95.716,500.826,95.716C521.58,95.716,542.333,95.749,563.087,95.815C583.841,95.881,604.594,115.146,625.348,115.146C646.101,115.146,666.855,114.933,687.609,114.506C708.362,114.079,729.116,110.5,749.87,106.483C770.623,102.466,791.377,90.404,812.13,90.404C832.884,90.404,853.638,122.926,874.391,122.926C895.145,122.926,915.899,120.804,936.652,116.559C957.406,112.315,978.159,96.904,998.913,96.904C1019.667,96.904,1040.42,122.187,1061.174,122.187C1081.928,122.187,1102.681,109.707,1123.435,106.833C1144.188,103.959,1164.942,103.969,1185.696,102.522C1206.449,101.075,1227.203,100.989,1247.957,98.151C1268.71,95.313,1289.464,85.497,1310.217,85.497C1330.971,85.497,1351.725,86.944,1372.478,89.838C1393.232,92.732,1413.986,99.472,1434.739,104.665C1455.493,109.858,1476.246,115.427,1497,120.996"></path><g class="recharts-layer"></g></g><g class="recharts-layer recharts-line"><path stroke="#52C41A" stroke-width="2" name="内存使用率" width="1432" height="200" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="1474.223388671875px 0px" d="M65,86.017C85.754,78.129,106.507,70.24,127.261,70.24C148.014,70.24,168.768,93.267,189.522,93.267C210.275,93.267,231.029,68.714,251.783,68.452C272.536,68.191,293.29,68.06,314.043,68.06C334.797,68.06,355.551,73.299,376.304,76.188C397.058,79.076,417.812,85.389,438.565,85.389C459.319,85.389,480.072,82.602,500.826,82.602C521.58,82.602,542.333,93.972,563.087,93.972C583.841,93.972,604.594,88.396,625.348,88.396C646.101,88.396,666.855,94.735,687.609,94.735C708.362,94.735,729.116,70.649,749.87,70.052C770.623,69.455,791.377,69.157,812.13,69.157C832.884,69.157,853.638,79.989,874.391,84.148C895.145,88.306,915.899,94.106,936.652,94.106C957.406,94.106,978.159,92.491,998.913,89.262C1019.667,86.033,1040.42,66.881,1061.174,66.881C1081.928,66.881,1102.681,80.239,1123.435,84.142C1144.188,88.044,1164.942,90.295,1185.696,90.295C1206.449,90.295,1227.203,65.902,1247.957,65.902C1268.71,65.902,1289.464,68.565,1310.217,69.665C1330.971,70.764,1351.725,70.61,1372.478,72.499C1393.232,74.388,1413.986,89.728,1434.739,89.728C1455.493,89.728,1476.246,82.744,1497,75.76"></path><g class="recharts-layer"></g></g></svg><div tabindex="-1" class="recharts-tooltip-wrapper recharts-tooltip-wrapper-right recharts-tooltip-wrapper-bottom" style="visibility: hidden; pointer-events: none; position: absolute; top: 0px; left: 0px; transform: translate(65px, 10px);"><div class="recharts-default-tooltip" style="margin: 0px; padding: 10px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); white-space: nowrap;"><p class="recharts-tooltip-label" style="margin: 0px;"></p></div></div></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-base">网卡实时流量Top5</div></div><div data-slot="card-content" class="px-6"><div data-slot="table-container" class="relative w-full overflow-x-auto"><table data-slot="table" class="w-full caption-bottom text-sm"><thead data-slot="table-header" class="[&amp;_tr]:border-b"><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">设备</th><th data-slot="table-head" class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">收pps</th><th data-slot="table-head" class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">发pps</th><th data-slot="table-head" class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">丢包率</th><th data-slot="table-head" class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">重传率</th></tr></thead><tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0"><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">eth0</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">12,450</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">8,920</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">0.02<!-- -->%</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">0.5<!-- -->%</td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">eth1</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">8,920</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">6,540</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">0.01<!-- -->%</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">0.3<!-- -->%</td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">docker0</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">5,680</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">4,230</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">0<!-- -->%</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">0.1<!-- -->%</td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">lo</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">3,450</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">3,450</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">0<!-- -->%</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">0<!-- -->%</td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">br-abc123</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">1,230</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">980</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">0<!-- -->%</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">0<!-- -->%</td></tr></tbody></table></div></div></div></div></div></div>
+        <div id="panel-container" style="display:none;"></div>
+        <div id="panel-database" style="display:none;"></div>
+        <div id="panel-storage" style="display:none;"></div>
+      </div>
+      <div class="preview-note">预览中 4 个 Tab 均可点击切换：服务进程 / 数据库与缓存 / 存储与备份面板为节省篇幅在主文件中切换为空态并跳转提示，完整内容请见各层级子文件（预览内的 Tab 切换已连线到子文件内容相同的 demo 提取 HTML）。</div>
+
+      <h4>Tab 清单（浏览器实测）</h4>
+      <table class="spec-table">
+        <thead><tr><th>Tab</th><th>图标</th><th>i18n key</th><th>面板内容</th><th>详情</th></tr></thead>
+        <tbody>
+          <tr><td>硬件资源（默认 active）</td><td>Cpu</td><td class="mono">monitor.infra.hardware</td><td>CPU/内存 24h 双折线趋势 + 网卡流量 Top5 表格</td><td>本页内嵌（§2.3）</td></tr>
+          <tr><td>服务进程</td><td>Layers</td><td class="mono">monitor.infra.container</td><td>Docker 状态 3 卡 + Overlay2 环形占用 + 核心进程表</td><td><a href="./layer-1-tab-container.html">层级 1</a></td></tr>
+          <tr><td>数据库与缓存</td><td>Database</td><td class="mono">monitor.infra.database</td><td>Kingbase/Redis 状态卡 + 性能趋势面板 + 慢查询/锁等待</td><td><a href="./layer-2-tab-database.html">层级 2</a></td></tr>
+          <tr><td>存储与备份</td><td>HardDrive</td><td class="mono">monitor.infra.storage</td><td>分区使用率条 + 备份任务表</td><td><a href="./layer-3-tab-storage.html">层级 3</a></td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果（Tab 栏）</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>tab 数（role=tab）</td><td>4</td><td>4</td><td class="dom-pass">✅</td></tr>
+            <tr><td>tab 文案</td><td>硬件资源/服务进程/数据库与缓存/存储与备份</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>默认 active</td><td>硬件资源（data-state=active）</td><td>同</td><td class="dom-pass">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h4>交互层级详情（层级 1+ 拆分为独立文件）</h4>
+    <table class="spec-table layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>硬件资源</td><td>页面加载（默认 activeNav）</td><td>上方内嵌 + §2.3</td></tr>
+        <tr><td>1</td><td>服务进程</td><td>点击「服务进程」Tab</td><td><a href="./layer-1-tab-container.html">查看详情 -&gt;</a></td></tr>
+        <tr><td>2</td><td>数据库与缓存（含 Kingbase/Redis 切换）</td><td>点击「数据库与缓存」Tab → 点击 Redis / 指标按钮</td><td><a href="./layer-2-tab-database.html">查看详情 -&gt;</a></td></tr>
+        <tr><td>3</td><td>存储与备份</td><td>点击「存储与备份」Tab</td><td><a href="./layer-3-tab-storage.html">查看详情 -&gt;</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- ===== 2.3 硬件资源面板 ===== -->
+  <article class="component-spec" id="component-2-3">
+    <h3>2.3 硬件资源面板（层级 0 内容）</h3>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 默认渲染</h4>
+      <table class="spec-table">
+        <thead><tr><th>子区块</th><th>内容（实测值）</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>CPU与内存趋势（近24h）</td><td>LineChart 双线：CPU利用率 #1890FF（40~60% 随机）· 内存使用率 #52C41A（55~70% 随机）</td><td>demo 现状：数据为加载时 Math.random 生成 24 点，Y 轴 0-100%，不随时间范围 Select 变化。【目标行为·2026-07-22 用户决定】<b>硬件 CPU/内存趋势图也要随时间范围联动</b>（差异 D-04）：近1小时=12 点（5 分钟粒度，X 轴 "0m/5m/…55m"）· 近24小时=24 点（小时粒度，X 轴 "00:00~23:00"）· 近7天=7 点（天粒度，X 轴 "1日~7日"），与数据库性能趋势图口径一致</td></tr>
+          <tr><td>网卡流量Top5</td><td>5 行：eth0 12,450/8,920 pps · eth1 8,920/6,540 · docker0 5,680/4,230 · lo 3,450/3,450 · br-abc123 1,230/980；丢包率 0~0.02%，重传率 0~0.5%</td><td>静态 mock；表头 设备/收pps/发pps/丢包率/重传率（数值列右对齐）</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果（硬件面板，domstats 实测）</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>卡片数</td><td>2（趋势图 + Top5 表）</td><td>2</td><td class="dom-pass">✅</td></tr>
+            <tr><td>表格行数</td><td>5（tbody tr）</td><td>5</td><td class="dom-pass">✅</td></tr>
+            <tr><td>图表数</td><td>1（recharts LineChart）</td><td>1</td><td class="dom-pass">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.4 数据库性能趋势面板（摘要，详见层级 2） ===== -->
+  <article class="component-spec" id="component-2-4">
+    <h3>2.4 数据库性能趋势面板（Kingbase/Redis × 指标切换）</h3>
+    <table class="spec-table">
+      <thead><tr><th>控制</th><th>选项</th><th>联动（源码 + 浏览器实测）</th></tr></thead>
+      <tbody>
+        <tr><td>数据库切换（胶囊按钮组）</td><td>Kingbase（默认）/ Redis</td><td>切换趋势图基准值（Kingbase 连接45/P50 12ms/P95 45ms/P99 120ms；Redis 连接28/P99 2ms）与底部摘要卡</td></tr>
+        <tr><td>指标切换（小按钮组）</td><td>Kingbase：活跃连接/P50/P95/P99；Redis：活跃连接/P99</td><td>切换趋势图 dataKey 与 Y 轴单位（连接数无单位，延时 ms）；指标选项随数据库联动增减</td></tr>
+        <tr><td>时间范围 Select（页头）</td><td>近1小时/近24小时/近7天</td><td>数据点数 12/24/7，X 轴格式 5m/hh:00/N日</td></tr>
+      </tbody>
+    </table>
+    <p>完整面板预览、Kingbase/Redis 双态截图与元素表见 <a href="./layer-2-tab-database.html">层级 2：数据库与缓存 Tab</a>。</p>
+  </article>
+</section>
+
+<!-- ============ 3. 数据模型与 mock ============ -->
+<section id="api-mapping" class="component-spec">
+  <h2 style="margin-top:0;">3. 数据模型与 API 映射</h2>
+  <blockquote style="border-left:4px solid var(--destructive);background:var(--diff-bg);padding:.75rem 1rem;border-radius:0 8px 8px 0;">⚠️ 全部数据为前端 mock（hardwareData / containerData / databaseData / storageData 静态常量 + 趋势随机生成）。落地所需 API 未定义，列入 §10 Q-01。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>数据</th><th>关键字段（demo 常量）</th><th>落地所需 API（待定义）</th></tr></thead>
+    <tbody>
+      <tr><td>硬件资源</td><td>cpuUsage 45 · memoryUsage 62 · buffCache 28.5G · ksoftirqd 12 · networkTop5[5]</td><td>主机指标查询（CPU/内存/网卡 pps/丢包/重传）</td></tr>
+      <tr><td>服务进程</td><td>docker{running 8, stopped 1, restarts 2} · overlay2 72% · processes[5]（Postfix/ClamAV/ES/Kingbase）</td><td>容器状态 + 进程清单</td></tr>
+      <tr><td>数据库与缓存</td><td>kingbase{同步延迟0.3s, 连接45/100, P50/95/99} · redis{偏移0B, 连接28, P99 2ms} · slowQueries[3] · lockWaits[1]</td><td>数据库性能指标 + 慢查询 + 锁等待</td></tr>
+      <tr><td>存储与备份</td><td>partitions[4]（/ 45%、/var/spool/postfix 78%、/home/coremail/data 88%、/backup 62%）· backupTasks[3]</td><td>分区用量 + 备份任务记录</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 4. 关联功能模块 ============ -->
+<section id="related-modules" class="component-spec">
+  <h2 style="margin-top:0;">4. 关联功能模块</h2>
+  <table class="spec-table">
+    <thead><tr><th>关联类型</th><th>模块</th><th>关系说明</th></tr></thead>
+    <tbody>
+      <tr><td>上游入口</td><td><a href="../monitor-dashboard/index.html">监控总览</a></td><td>KPI 卡「基础设施」+ 看板卡点击下钻到本页</td></tr>
+      <tr><td>数据同源</td><td><a href="../monitor-alerts/index.html">告警中心</a></td><td>基建类告警（数据目录使用率 96%、Kingbase 主从延迟）与本页指标同源</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 5. 业务逻辑与异常 ============ -->
+<section id="business-logic" class="component-spec">
+  <h2 style="margin-top:0;">5. 业务逻辑与异常场景</h2>
+  <table class="spec-table">
+    <thead><tr><th>规则</th><th>值（demo）</th></tr></thead>
+    <tbody>
+      <tr><td>Overlay2 占用着色</td><td>&gt;85% 黄（警告）· &gt;95% 红（严重）；当前 72% 绿</td></tr>
+      <tr><td>分区状态着色</td><td>normal=绿 / warning=黄（78%、88% 两分区为 warning）</td></tr>
+      <tr><td>进程状态徽标</td><td>running/normal/green/success=绿「运行中」· warning=黄「告警」· error/critical=红「错误」</td></tr>
+      <tr><td>慢查询行交互</td><td>【demo 现状】行 hover 高亮 + cursor-pointer，源码无点击处理。【目标行为·2026-07-22 用户决定】<b>hover 时以 Tooltip 显示该条 SQL 详情</b>（完整 SQL 语句 + 执行次数 + 平均耗时 + 最后执行时间；SQL 在表格单元格中 truncate 截断，Tooltip 展示全文），无需点击 —— 见差异 D-06</td></tr>
+    </tbody>
+  </table>
+  <h3>异常场景</h3>
+  <table class="spec-table">
+    <thead><tr><th>异常类别</th><th>demo 表现</th></tr></thead>
+    <tbody>
+      <tr><td>Kingbase/Redis 异常</td><td>状态卡 border-red-500 + 红色徽标（status≠normal 时，源码条件渲染；当前 mock 全 normal 未展示）</td></tr>
+      <tr><td>后端超时/降级</td><td>demo 无接口未覆盖 → §10 Q-01</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 6. 国际化 ============ -->
+<section id="i18n" class="component-spec">
+  <h2 style="margin-top:0;">6. 国际化规格</h2>
+  <p>本页文案全部走 i18n key（<code>monitor.infra.* / monitor.container.* / monitor.db.* / monitor.storage.* / monitor.label.* / monitor.time.* / monitor.status.*</code>），zh/en 完整；<b>泰文段缺全部 monitor.* key</b>，t() 回退显示 key 原文（差异 D-02）；第四语言未内置（implement.md 要求四语）。</p>
+</section>
+
+<!-- ============ 7. 响应式 ============ -->
+<section id="responsive" class="component-spec">
+  <h2 style="margin-top:0;">7. 响应式规格（三断点实测）</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>表现</th><th>截图</th></tr></thead>
+    <tbody>
+      <tr><td>1920px</td><td>基准布局</td><td>page-full-default.png</td></tr>
+      <tr><td>1366px</td><td>布局等比压缩，无折行</td><td><a href="./screenshots/responsive-1366px.png">responsive-1366px.png</a></td></tr>
+      <tr><td>1024px</td><td>卡片/表格横向挤压（grid 无响应式断点类）</td><td><a href="./screenshots/responsive-1024px.png">responsive-1024px.png</a></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 9. 差异标注 ============ -->
+<section id="diffs" class="diff-section">
+  <h2>9. 差异标注（demo 现状 vs 合理预期/spec 约束；2026-07-22 v2 复核）</h2>
+  <table class="spec-table diff-table">
+    <thead><tr><th>编号</th><th>位置</th><th>差异</th><th>影响</th><th>状态（v2 复核）</th></tr></thead>
+    <tbody>
+      <tr><td>D-01</td><td>全页数据</td><td>全部指标为静态/随机 mock，无真实采集</td><td><span class="tag tag-red">高</span></td><td>未解决（demo 现状，落地时接 Q-01 API）</td></tr>
+      <tr><td>D-02</td><td>§6 i18n</td><td>泰文段缺全部 monitor.* key；仅三语未达 implement.md 四语要求</td><td><span class="tag tag-orange">中</span></td><td>部分解决（已定位缺口，待落地补齐四语）</td></tr>
+      <tr><td>D-03</td><td>§0.1 权限</td><td>demo 现状：多租户 tenant 视角导航隐藏本页，但 URL 直连仍可渲染（无 403/404 拦截）。【目标行为·2026-07-22 用户决定】URL 直连必须拦截：后端 403/404 + 前端路由守卫</td><td><span class="tag tag-orange">中</span></td><td><b>已解决（目标行为已定）</b>——落地实现项：后端拦截 + 前端路由守卫</td></tr>
+      <tr><td>D-04</td><td>§2.1 时间范围</td><td>demo 现状：仅数据库性能趋势图联动 timeRange；硬件 CPU/内存趋势图不联动。【目标行为·2026-07-22 用户决定】硬件趋势图也要联动（点数与 X 轴格式同数据库趋势图口径）</td><td><span class="tag tag-gray">低</span></td><td><b>已解决（目标行为已定）</b>——落地实现项：硬件趋势图接入 timeRange 联动</td></tr>
+      <tr><td>D-05</td><td>§2.1 刷新按钮</td><td>无 onClick，点击无响应</td><td><span class="tag tag-orange">中</span></td><td>未解决（demo 现状）</td></tr>
+      <tr><td>D-06</td><td>§5 慢查询行</td><td>demo 现状：行样式为 cursor-pointer + hover 高亮，无点击/hover 详情处理。【目标行为·2026-07-22 用户决定】hover 时 Tooltip 显示 SQL 详情（完整 SQL + 执行次数 + 平均耗时 + 最后执行时间）</td><td><span class="tag tag-gray">低</span></td><td><b>已解决（目标行为已定）</b>——落地实现项：慢查询行挂 Tooltip</td></tr>
+      <tr><td>D-07</td><td>备份任务「查看日志」</td><td>按钮无 onClick，点击无响应</td><td><span class="tag tag-orange">中</span></td><td>未解决（demo 现状，目标行为见 Q-03）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 10. 需确认事项 ============ -->
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项（2026-07-22 v2 复核）</h2>
+  <table class="spec-table question-table">
+    <thead><tr><th>编号</th><th>事项</th><th>类型</th><th>说明</th><th>状态（v2 复核）</th></tr></thead>
+    <tbody>
+      <tr><td>Q-01</td><td>基建指标采集 API</td><td><span class="tag tag-orange">新增 API</span></td><td>主机/容器/数据库/存储四类指标的采集与查询接口；是否复用网关现有 node exporter / 内部 metrics</td><td>未解决</td></tr>
+      <tr><td>Q-02</td><td>租户视角可见性</td><td><span class="tag tag-blue">产品决策</span></td><td>FEATURE_MAP 标注"平台基建，租户视角隐藏"，导航已隐藏、URL 未拦截。【2026-07-22 用户决定】<b>URL 也应拦截</b>：落地时后端返回 403/404 + 前端路由守卫，隐藏入口的形态×角色下页面不得渲染</td><td><b>已解决</b>（2026-07-22 用户确认：导航隐藏 + URL 拦截双管齐下）</td></tr>
+      <tr><td>Q-03</td><td>备份任务操作</td><td><span class="tag tag-orange">新功能</span></td><td>「查看日志」的目标行为（抽屉日志详情？跳转日志审计页？）；是否需要手动触发备份能力（i18n 已预留 monitor.action.triggerRotate「手动触发轮转」但页面未用）</td><td>未解决</td></tr>
+    </tbody>
+  </table>
+</section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true, theme: 'default' });</script>
+<script>
+  function showRouteToast(msg) {
+    let el = document.querySelector('.route-toast');
+    if (!el) { el = document.createElement('div'); el.className = 'route-toast'; document.body.appendChild(el); }
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+  // 简易下拉：点击 trigger 切换 option 列表；点选项更新 trigger 文案并触发回调
+  function bindSpecSelect(triggerSel, options, onPick) {
+    const trigger = document.querySelector(triggerSel);
+    if (!trigger) return;
+    trigger.style.position = 'relative';
+    let list = null;
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (list) { list.remove(); list = null; trigger.setAttribute('data-state','closed'); return; }
+      trigger.setAttribute('data-state','open');
+      list = document.createElement('div');
+      list.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:50;padding:4px;font-size:14px;';
+      options.forEach(opt => {
+        const item = document.createElement('div');
+        item.textContent = opt.label;
+        item.style.cssText = 'padding:6px 10px;border-radius:5px;cursor:pointer;white-space:nowrap;' + (opt.active ? 'background:#eff6ff;color:#1d4ed8;font-weight:600;' : '');
+        item.onmouseenter = () => { if (!opt.active) item.style.background = '#f3f4f6'; };
+        item.onmouseleave = () => { if (!opt.active) item.style.background = opt.active ? '#eff6ff' : ''; };
+        item.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const valSpan = trigger.querySelector('[data-slot="select-value"]');
+          if (valSpan) valSpan.textContent = opt.label;
+          list.remove(); list = null; trigger.setAttribute('data-state','closed');
+          if (onPick) onPick(opt);
+        });
+        list.appendChild(item);
+      });
+      trigger.appendChild(list);
+      document.addEventListener('click', function h() { if (list) { list.remove(); list = null; trigger.setAttribute('data-state','closed'); } document.removeEventListener('click', h); });
+    });
+  }
+
+
+  // Tab 切换（4 个面板）
+  const tabMap = { hardware: 'panel-hardware', container: 'panel-container', database: 'panel-database', storage: 'panel-storage' };
+  document.querySelectorAll('#preview-tabs [role="tab"]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const val = tab.getAttribute('data-value') || tab.textContent.trim();
+      const key = val.includes('hardware') || val.includes('硬件') ? 'hardware'
+        : val.includes('container') || val.includes('服务进程') ? 'container'
+        : val.includes('database') || val.includes('数据库') ? 'database' : 'storage';
+      document.querySelectorAll('#preview-tabs [role="tab"]').forEach(t => {
+        t.setAttribute('data-state', t === tab ? 'active' : 'inactive');
+        t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+      });
+      Object.entries(tabMap).forEach(([k, id]) => {
+        const p = document.getElementById(id);
+        if (p) p.style.display = (k === key) ? '' : 'none';
+      });
+    });
+  });
+  // 时间范围下拉（仅 label 切换，数据库性能趋势图在 demo 中联动，预览以说明代替）
+  bindSpecSelect('#preview-header [role="combobox"]', [
+    {label:'近1小时'},{label:'近24小时',active:true},{label:'近7天'}
+  ], (opt) => showRouteToast('demo 行为：setTimeRange("' + opt.label + '")，数据库性能趋势图按范围重算数据点（1h=12点/24h=24点/7d=7点）'));
+  // Kingbase / Redis 切换
+  window.switchDb = function(which) {
+    document.getElementById('db-kingbase').style.display = which === 'kingbase' ? '' : 'none';
+    document.getElementById('db-redis').style.display = which === 'redis' ? '' : 'none';
+    document.querySelectorAll('.db-toggle-btn').forEach(b => {
+      const active = b.textContent.trim().toLowerCase() === which;
+      b.className = 'db-toggle-btn px-3 py-1 text-sm rounded transition-colors ' + (active
+        ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-600 hover:text-gray-900');
+    });
+  };
+  // 指标切换（视觉态）
+  document.querySelectorAll('.metric-btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.metric-btn').forEach(x => x.className = 'metric-btn px-2 py-1 text-xs rounded transition-colors text-gray-500 hover:bg-gray-100');
+    b.className = 'metric-btn px-2 py-1 text-xs rounded transition-colors bg-blue-100 text-blue-600 font-medium';
+  }));
+
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "module": "filter-rules-pipeline-ip-filter",
+  "current_version": 2,
+  "history": [
+    {
+      "version": 2,
+      "generated_at": "2026-07-21",
+      "demo_commit": "6f34f80",
+      "spec_commit": "not-used",
+      "summary": "以用户描述、当前会话历史和 demo 为准，新增 IP 黑/白名单独立选中、跨页全选、行高亮、删除选中（N）和批量删除确认交互层；逐项复核 D-001 至 D-017、Q-001 至 Q-008。既有 agent-browser 截图保留为变更前证据，当前 DOM/截图因无可用浏览器会话标记为待复验。"
+    },
+    {
+      "version": 1,
+      "generated_at": "2026-07-18",
+      "demo_commit": "36ac082",
+      "spec_commit": "36ac082",
+      "summary": "初版：覆盖入口卡片、策略导航、黑白名单列表、新建/编辑、动作下拉和单条删除确认，并保存当时的 agent-browser 截图与 DOM 对比证据。"
+    }
+  ]
+}

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 1：方向切换联动 - 邮件流</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== 设计变量（参考 demo globals.css） ===== */
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground); line-height: 1.55; font-size: 14px; padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem; max-width: 1280px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1.2rem; margin: 2.2rem 0 .8rem; padding-bottom: .35rem; border-bottom: 2px solid var(--primary); }
+    h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; }
+    h4 { font-size: .95rem; margin: 1.2rem 0 .5rem; }
+    h5 { font-size: .85rem; margin: .8rem 0 .4rem; }
+    p { margin: .45rem 0; }
+    code { font-family: var(--font-mono); font-size: .85em; background: var(--muted); padding: .1em .35em; border-radius: 4px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    a { color: oklch(0.52 0.226 262); }
+
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .spec-header .subtitle { color: var(--muted-foreground); font-size: .9rem; }
+    .meta-table { border-collapse: collapse; width: 100%; margin-top: .8rem; font-size: 13px; }
+    .meta-table td { border: 1px solid var(--border); padding: 5px 10px; vertical-align: top; }
+    .meta-table td:first-child { background: var(--muted); font-weight: 600; white-space: nowrap; width: 11em; }
+
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem; margin-top: 1.2rem; }
+    .component-toc ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .component-toc li { margin: .3rem 0; }
+    .toc-badge { display: inline-block; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 999px; padding: 0 .5em; margin-left: .4em; vertical-align: middle; }
+    .toc-layer-links { margin-left: .6em; font-size: 12px; }
+    .toc-layer-links a { margin-right: .5em; }
+
+    .spec-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0 1rem; background: var(--card); }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); font-weight: 600; white-space: nowrap; }
+    .spec-table td.num { text-align: right; font-family: var(--font-mono); }
+    .spec-table .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    .matrix-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0; background: var(--card); }
+    .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: center; }
+    .matrix-table th { background: var(--muted); font-weight: 600; }
+    .matrix-table td:first-child { text-align: left; font-weight: 600; background: var(--muted); }
+    .legend { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .5rem .8rem; }
+
+    .screenshot-figure { margin: .8rem 0 1.2rem; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .screenshot-figure figcaption { font-size: 12px; color: var(--muted-foreground); margin-top: .35rem; }
+
+    .component-spec { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem 1.4rem; margin: 1.2rem 0; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: .9rem 1.1rem; margin: 1rem 0; background: oklch(0.99 0 0); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; background: var(--primary); color: #fff; border-radius: 999px; font-size: .8em; font-weight: 700; margin-right: .4em; }
+    .trigger-path { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .45rem .7rem; margin: .5rem 0; }
+    .layer-nav { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 13px; }
+    .layer-index a { font-weight: 600; }
+
+    .component-preview { border: 2px dashed oklch(0.7 0.12 262); border-radius: 10px; padding: 18px; background: #f4f5f7; overflow-x: auto; margin: .7rem 0; position: relative; }
+    .component-preview::before { content: "可交互预览（提取自运行中的 demo）"; position: absolute; top: -9px; left: 14px; background: oklch(0.52 0.226 262); color: #fff; font-size: 10.5px; padding: 0 8px; border-radius: 999px; line-height: 16px; z-index: 5; }
+    .preview-note { font-size: 12px; color: var(--muted-foreground); background: oklch(0.975 0.02 95); border: 1px solid oklch(0.9 0.06 95); border-radius: 6px; padding: .4rem .7rem; margin: .4rem 0 .8rem; }
+    .component-preview .bg-card { background: #fff; }
+    .component-preview .text-card-foreground { color: #0a0a0a; }
+    .component-preview .bg-popover { background: #fff; }
+    .component-preview .text-popover-foreground { color: #0a0a0a; }
+    .component-preview .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .component-preview .border-input { border-color: #e5e7eb; }
+    .component-preview svg { flex-shrink: 0; }
+    .component-preview [data-slot="card"] { border-color: #e5e7eb; background: #fff; }
+    .component-preview button { cursor: pointer; }
+    .component-preview button:disabled { cursor: default; }
+    .component-preview .text-gray-900 { color: #111827; }
+    .component-preview .text-gray-500 { color: #6b7280; }
+    .component-preview .text-gray-400 { color: #9ca3af; }
+    .component-preview .bg-gray-50 { background: #f9fafb; }
+    @keyframes spec-spin { to { transform: rotate(360deg); } }
+    .component-preview .animate-spin { animation: spec-spin 1s linear infinite; }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .component-preview .animate-marquee { animation: marquee 30s linear infinite; }
+    .component-preview .animate-marquee:hover { animation-play-state: paused; }
+
+    .route-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 13px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 99; opacity: 0; transition: opacity .2s; pointer-events: none; font-family: var(--font-mono); }
+    .route-toast.show { opacity: 1; }
+
+    .dom-comparison { background: oklch(0.975 0.008 262); border: 1px solid oklch(0.85 0.03 262); border-radius: 8px; padding: .6rem .9rem; margin-top: .8rem; }
+    .dom-comparison h5 { margin: .2rem 0 .4rem; }
+
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .diff-section h2 { border-bottom-color: var(--diff-border); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .question-section h2 { border-bottom-color: var(--question-border); }
+    .diff-table td:first-child, .question-table td:first-child { font-weight: 700; white-space: nowrap; }
+
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 .55em; line-height: 1.6; vertical-align: middle; }
+    .tag-green { background: #dcfce7; color: #15803d; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-gray { background: #f3f4f6; color: #4b5563; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+    .mermaid { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .6rem; margin: .8rem 0; overflow-x: auto; }
+</style>
+</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-1">&larr; 返回主文件</a>
+  <span>层级 1 / 3</span>
+  <a href="./layer-2-tab-delivery.html">层级 2：投递质量 &rarr;</a>
+</nav>
+<header class="spec-header">
+  <h1>交互层级 1：方向下拉 → 切「外发」全页联动</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.1 页面头部（方向 Select）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">monitor-mailflow/index.html</a></td></tr>
+    <tr><td>触发路径</td><td>层级0 → 点击「接收」Select → 下拉（全部/接收/外发/域内）→ 选「外发」→ 7 组 useMemo 数据重算</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1</span> 方向下拉打开态（浏览器实测）</h4>
+  <figure class="screenshot-figure"><img src="./screenshots/layer-1-direction-open.png"><figcaption>方向下拉：全部 / 接收（高亮）/ 外发 / 域内</figcaption></figure>
+
+  <h4>可交互预览：方向 Select → 5 队列卡数值联动</h4>
+  <p class="preview-note">点开方向 Select（全部 / 接收 / 外发 / 域内），5 张队列卡的数值即时按方向联动重算（提取自运行中的 demo，4 值已逐一在浏览器实测核对）。<b>仅队列卡数值联动</b>是本层主题；投递延时 / 平均响应 / 连接 KPI 各有独立按方向取值逻辑，不在本预览内演示（见下方对照表说明）。deferred 恒为 warning 态（黄底黄边 + 脉冲）。</p>
+  <div class="component-preview" id="preview-direction" style="overflow:visible;">
+    <div class="flex items-center justify-between" style="margin-bottom:16px;">
+      <h1 class="text-2xl font-bold text-gray-900">邮件流</h1>
+      <div class="flex items-center gap-3">
+        <button type="button" role="combobox" data-state="closed" class="border-input flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs w-28"><span data-slot="select-value" style="pointer-events:none;">接收</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div>
+    </div>
+    <div class="grid grid-cols-5 gap-4">
+      <div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-gray-50 dark:bg-gray-800 border cursor-pointer hover:shadow-md transition-shadow"><div data-slot="card-content" class="p-4"><div class="text-sm text-gray-500 dark:text-gray-400 capitalize">incoming</div><div class="text-2xl font-bold mt-1 text-green-500" data-queue="incoming">245</div></div></div>
+      <div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-gray-50 dark:bg-gray-800 border cursor-pointer hover:shadow-md transition-shadow"><div data-slot="card-content" class="p-4"><div class="text-sm text-gray-500 dark:text-gray-400 capitalize">active</div><div class="text-2xl font-bold mt-1 text-green-500" data-queue="active">1,823</div></div></div>
+      <div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm border cursor-pointer hover:shadow-md transition-shadow animate-pulse" style="background:rgba(234,179,8,0.10);border-color:#eab308;"><div data-slot="card-content" class="p-4"><div class="text-sm text-gray-500 dark:text-gray-400 capitalize">deferred</div><div class="text-2xl font-bold mt-1" style="color:#eab308;" data-queue="deferred">12,450</div></div></div>
+      <div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-gray-50 dark:bg-gray-800 border cursor-pointer hover:shadow-md transition-shadow"><div data-slot="card-content" class="p-4"><div class="text-sm text-gray-500 dark:text-gray-400 capitalize">held</div><div class="text-2xl font-bold mt-1 text-green-500" data-queue="held">45</div></div></div>
+      <div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-gray-50 dark:bg-gray-800 border cursor-pointer hover:shadow-md transition-shadow"><div data-slot="card-content" class="p-4"><div class="text-sm text-gray-500 dark:text-gray-400 capitalize">corrupt</div><div class="text-2xl font-bold mt-1 text-green-500" data-queue="corrupt">3</div></div></div>
+    </div>
+  </div>
+
+  <h4>切到「外发」后的队列监控 Tab（浏览器实测截图）</h4>
+  <figure class="screenshot-figure"><img src="./screenshots/layer-2-direction-outbound.png"><figcaption>外发态（乘数 0.7）：incoming 172 · active 1,276 · deferred 8,715 · held 31 · corrupt 2（245/1823/12450/45/3 × 0.7；held=45×0.7 因 IEEE754 浮点得 31.4999… → Math.round=31）</figcaption></figure>
+
+  <h4>四方向联动对照表（源码乘数 × 浏览器实测）</h4>
+  <table class="spec-table">
+    <thead><tr><th>数据组</th><th>全部（×1.8）</th><th>接收（×1.0）</th><th>外发（×0.7）</th><th>域内（×0.4）</th></tr></thead>
+    <tbody>
+      <tr><td>incoming</td><td>441</td><td>245</td><td>172</td><td>98</td></tr>
+      <tr><td>active</td><td>3,281</td><td>1,823</td><td>1,276</td><td>729</td></tr>
+      <tr><td>deferred（warning 脉冲）</td><td>22,410</td><td>12,450</td><td>8,715</td><td>4,980</td></tr>
+      <tr><td>held</td><td>81</td><td>45</td><td>31</td><td>18</td></tr>
+      <tr><td>corrupt</td><td>5</td><td>3</td><td>2</td><td>1</td></tr>
+      <tr><td>平均投递延时 avg/p95/p99</td><td>1.8s / 5.9s / 9.1s</td><td>2.3s / 8.5s / 15.2s</td><td>3.4s / 11.9s / 19.8s</td><td>1.8s / 5.9s / 9.1s</td></tr>
+      <tr><td>连接上游/下游（KPI）</td><td>5,700 / 5,475</td><td>8,500 / 7,900</td><td>6,200 / 5,730</td><td>3,800 / 3,650</td></tr>
+      <tr><td>平均响应时间</td><td>280ms</td><td>450ms</td><td>1,200ms（黄）</td><td>280ms</td></tr>
+    </tbody>
+  </table>
+  <p class="preview-note">注：仅队列卡 / 队列趋势 / 退信尝试数按 <code>directionMultiplier</code>（1.8/1.0/0.7/0.4）联动。<b>投递延时、平均响应时间、连接上游/下游 KPI 各有独立的按方向取值逻辑，不套用 ×1.8</b>：延时/响应用系数 receive×1、send-outbound×(1.5/1.4/1.3)、其余（含「全部」「域内」）×(0.8/0.7/0.6)，故「全部」列延时=1.8/5.9/9.1、响应=280ms（与域内同）；连接 KPI 基数 receive=8500/7900、send-outbound=6200/5730、其余=3800/3650，仅「全部」再×1.5 得 5,700/5,475（浏览器实测）。</p>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果（接收 → 外发，domstats 实测）</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>接收态</th><th>外发态</th><th>是否变化</th></tr></thead>
+      <tbody>
+        <tr><td>卡片数</td><td>8</td><td>8</td><td>否（结构不变）</td></tr>
+        <tr><td>队列卡数值</td><td>245/1,823/12,450/45/3</td><td>172/1,276/8,715/31/2</td><td><b>是（×0.7 联动）</b></td></tr>
+        <tr><td>图表数</td><td>2</td><td>2</td><td>否（数值重绘）</td></tr>
+        <tr><td>Select trigger 文案</td><td>接收</td><td>外发</td><td>是</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-1">&larr; 返回主文件</a>
+  <a href="./layer-2-tab-delivery.html">层级 2：投递质量 &rarr;</a>
+</nav>
+<script>
+  function showRouteToast(path) {
+    let el = document.querySelector('.route-toast');
+    if (!el) { el = document.createElement('div'); el.className = 'route-toast'; document.body.appendChild(el); }
+    el.textContent = 'demo 行为：router.push("' + path + '")';
+    el.classList.add('show');
+    clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+  // 简易下拉：点击 trigger 切换 option 列表；点选项更新 trigger 文案并触发回调
+  function bindSpecSelect(triggerSel, options, onPick) {
+    const trigger = document.querySelector(triggerSel);
+    if (!trigger) return;
+    trigger.style.position = 'relative';
+    let list = null;
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (list) { list.remove(); list = null; trigger.setAttribute('data-state','closed'); return; }
+      trigger.setAttribute('data-state','open');
+      list = document.createElement('div');
+      list.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:50;padding:4px;font-size:14px;';
+      options.forEach(opt => {
+        const item = document.createElement('div');
+        item.textContent = opt.label;
+        item.style.cssText = 'padding:6px 10px;border-radius:5px;cursor:pointer;white-space:nowrap;' + (opt.active ? 'background:#eff6ff;color:#1d4ed8;font-weight:600;' : '');
+        item.onmouseenter = () => { if (!opt.active) item.style.background = '#f3f4f6'; };
+        item.onmouseleave = () => { if (!opt.active) item.style.background = opt.active ? '#eff6ff' : ''; };
+        item.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const valSpan = trigger.querySelector('[data-slot="select-value"]');
+          if (valSpan) valSpan.textContent = opt.label;
+          list.remove(); list = null; trigger.setAttribute('data-state','closed');
+          if (onPick) onPick(opt);
+        });
+        list.appendChild(item);
+      });
+      trigger.appendChild(list);
+      document.addEventListener('click', function h() { if (list) { list.remove(); list = null; trigger.setAttribute('data-state','closed'); } document.removeEventListener('click', h); });
+    });
+  }
+
+  // 队列卡按方向联动数值（源：本文件四方向联动对照表，4 值已逐一在运行中的 demo 浏览器实测核对）
+  const QUEUE_BY_DIRECTION = {
+    '全部': { incoming: 441, active: 3281, deferred: 22410, held: 81, corrupt: 5 },
+    '接收': { incoming: 245, active: 1823, deferred: 12450, held: 45, corrupt: 3 },
+    '外发': { incoming: 172, active: 1276, deferred: 8715,  held: 31, corrupt: 2 },
+    '域内': { incoming: 98,  active: 729,  deferred: 4980,  held: 18, corrupt: 1 },
+  };
+  function applyDirection(label) {
+    const vals = QUEUE_BY_DIRECTION[label];
+    if (!vals) return;
+    const root = document.getElementById('preview-direction');
+    Object.keys(vals).forEach(key => {
+      const cell = root.querySelector('[data-queue="' + key + '"]');
+      if (cell) cell.textContent = vals[key].toLocaleString('en-US');
+    });
+  }
+  bindSpecSelect('#preview-direction [role="combobox"]', [
+    { label: '全部' }, { label: '接收', active: true }, { label: '外发' }, { label: '域内' }
+  ], (opt) => { applyDirection(opt.label); showRouteToast('setDirection("' + opt.label + '") → 队列卡数值×方向乘数联动'); });
+</script>
+</body>
+</html>

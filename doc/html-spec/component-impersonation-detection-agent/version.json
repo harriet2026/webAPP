@@ -1,0 +1,13 @@
+{
+  "module": "component-impersonation-detection-agent",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": "804efb9",
+      "summary": "初版：覆盖仿冒邮件检测智能体三页签（检测总览/发信人名称仿冒/品牌保护，默认品牌保护）、包裹层启用开关与关闭二次确认、品牌 80vw 三段式添加/编辑抽屉（品牌身份/检测规则/处置策略，含处置模式-动作联动、审核超时 Select、告警通知预览）、检测详情 680px 抽屉、删除品牌二次确认；含数据模型/PRD API 与网关映射/业务逻辑/交互/i18n/响应式/差异(6)/需确认(6)。"
+    }
+  ]
+}

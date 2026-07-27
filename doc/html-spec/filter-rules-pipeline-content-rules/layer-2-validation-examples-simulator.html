@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 3：校验/配置示例/模拟测试 - 内容规则</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --text:#111827; --sub:#6b7280; --blue:#1677ff; --red:#f5222d; --radius:.625rem; font-family:"Geist", system-ui, sans-serif; }
+    *{box-sizing:border-box} body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:var(--text);line-height:1.6} a{color:var(--blue);text-decoration:none} nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)} h1{margin:0 0 16px;color:var(--primary);font-size:26px} h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px} h3{font-size:16px}.meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}.meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}.meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}.component-preview{margin:12px 0;padding:18px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}.row{display:grid;grid-template-columns:110px 1fr;gap:12px;margin:12px 0;align-items:start}.label{padding-top:6px;text-align:right;font-weight:600;font-size:13px}.required{color:var(--red)}.input,.select,.textarea{padding:7px 11px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#374151;font-size:14px}.textarea{width:100%;min-height:70px;font-family:ui-monospace,monospace;font-size:13px}.textarea.error,.input.error{border-color:#dc2626}.err{margin:4px 0 0;color:#dc2626;font-size:12px}.hint{color:var(--sub);font-size:12px}.button-blue{padding:8px 14px;border:0;border-radius:8px;background:#155eef;color:#fff;font-weight:650;cursor:pointer}.button-outline{padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px}.button-green{padding:8px 14px;border:0;border-radius:8px;background:#16a34a;color:#fff;font-weight:650;cursor:pointer;width:100%}.example-card{margin:10px 0;padding:14px;border:1px solid var(--border);border-radius:8px;background:#fff}.example-card h4{margin:0 0 2px}.example-card .desc{color:var(--sub);font-size:12px}.example-card .effect-text{margin-top:8px;padding:8px;border-radius:6px;background:#f8fafc;color:var(--sub);font-size:12px}.collapse-btn{display:flex;justify-content:space-between;width:100%;padding:9px 12px;border:0;border-radius:8px;background:none;font-size:14px;font-weight:650;cursor:pointer}.collapse-btn.bluec{color:#2563eb}.collapse-btn.greenc{color:#16a34a}.collapse-btn:hover{background:#eff6ff}.result{margin-top:10px;padding:12px;border-radius:8px;font-size:14px}.result.hit{background:#fef2f2;color:#b91c1c}.result.miss{background:#f0fdf4;color:#15803d}.is-hidden{display:none!important}.screenshot-figure{text-align:center;margin:14px 0}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}.screenshot-figure figcaption{margin-top:8px;color:var(--sub);font-size:13px}.layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <nav><a href="index.html#component-2-3">← 返回主文件</a> · <a href="layer-1-rule-edit-drawer.html">← 层级2：规则编辑抽屉</a> · 层级 3 / 4 · <a href="layer-3-dialogs.html">下一层：确认对话框 →</a></nav>
+  <header class="spec-header">
+    <h1>交互层级 3：保存校验 / 正则错误 / 配置示例 / 模拟测试</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 内容规则编辑抽屉 RuleEditDrawer（右侧折叠区 + 表单校验态）</td></tr>
+      <tr><td>触发路径</td><td>层级2 抽屉内：点击「保存」（空表单）→ 校验红字；类型切正则 + 输入非法正则 → 实时错误；点击「查看配置示例」→ 展开三张示例卡；点击「模拟测试」→ 展开测试区并执行</td></tr>
+      <tr><td>校验规则（源码 validateForm）</td><td>name 非空 && matchContent 非空 && scopes ≥1 && (regex 时无语法错误) && 至少一个方向启用；不通过则 setShowErrors(true)，抽屉保持打开。<strong>showErrors 打开后错误随输入实时消隐。</strong></td></tr>
+      <tr><td>浏览器实测</td><td>空表单点保存显示：「请输入规则名称」「请输入匹配内容」（方向/作用域有默认值故不报）；输入 <code>[0-9</code> 显示「正则表达式语法错误，请检查」+ textarea 红框（aria-invalid 样式 border-destructive）；应用示例1后表单变为 regex/\d{17}[\dXx]/正文+附件内容/阻断+告警，<strong>但正则错误红字残留（demo 缺陷，主文件 D3）</strong>；模拟测试命中→红底、未命中→绿底。</td></tr>
+    </table>
+  </header>
+
+  <section id="validation">
+    <h2><span class="layer-badge">3</span>A. 保存校验错误 + 正则语法错误（可交互）</h2>
+    <div class="component-preview">
+      <div style="max-width:620px;">
+        <div class="row"><span class="label"><span class="required">*</span> 规则名称</span><span><input class="input" data-v-name placeholder="如：身份证号红线规则" style="width:100%;"><p class="err is-hidden" data-v-name-err>请输入规则名称</p></span></div>
+        <div class="row"><span class="label"><span class="required">*</span> 类型</span><select class="select" data-v-type style="width:190px;"><option value="keyword">关键词</option><option value="regex" selected>正则表达式</option><option value="content_group">内容组</option></select></div>
+        <div class="row"><span class="label"><span class="required">*</span> 匹配内容</span><span style="width:100%;"><textarea class="textarea" data-v-content placeholder="例如：\d{17}[\dXx]（身份证号）"></textarea><p class="err is-hidden" data-v-regex-err>⚠ 正则表达式语法错误，请检查</p><p class="err is-hidden" data-v-content-err>请输入匹配内容</p><span class="hint" data-v-hint>需符合 JavaScript RegExp 语法</span></span></div>
+        <div class="row"><span class="label"></span><span><button class="button-blue" type="button" data-v-save>保存</button> <span class="hint">（试试：直接点保存看必填红字；输入 <code>[0-9</code> 看正则错误）</span></span></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <figure class="screenshot-figure">
+        <img src="./screenshots/edit-drawer-validation-errors.png" alt="保存校验错误">
+        <figcaption>空表单点击保存：规则名称输入框下方与匹配内容下方出现红字，抽屉保持打开。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/edit-drawer-regex-error.png" alt="正则语法错误">
+        <figcaption>类型=正则表达式、输入 <code>[0-9</code>：textarea 红框 + 「正则表达式语法错误，请检查」。</figcaption>
+      </figure>
+    </div>
+    <table class="spec-table">
+      <thead><tr><th>校验项</th><th>触发</th><th>错误文案（实测）</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>规则名称必填</td><td>点保存且 name 为空</td><td>请输入规则名称</td><td>输入框 aria-invalid=true</td></tr>
+        <tr><td>匹配内容必填</td><td>点保存且 matchContent 为空（且无正则错误）</td><td>请输入匹配内容</td><td>正则错误存在时优先显示正则错误</td></tr>
+        <tr><td>生效范围必选</td><td>点保存且三方向均未勾选</td><td>请至少启用一个方向</td><td>默认勾选接收方向，需手动全取消才触发</td></tr>
+        <tr><td>作用域必选</td><td>点保存且 scopes 为空</td><td>请至少选择一个生效范围</td><td>默认勾选主题+正文</td></tr>
+        <tr><td>正则语法</td><td>类型=regex 时输入实时校验（不等保存）</td><td>正则表达式语法错误，请检查（AlertTriangle 图标）</td><td>textarea border-destructive；切换到关键词/内容组类型自动清除</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="examples">
+    <h2><span class="layer-badge">3</span>B. 配置示例展开 / 应用（可交互）</h2>
+    <div class="component-preview">
+      <div style="max-width:420px;">
+        <button class="collapse-btn bluec" type="button" data-ex-toggle><span>💡 查看配置示例</span><span data-ex-chevron>⌄</span></button>
+        <div class="is-hidden" data-ex-body>
+          <div class="example-card"><div style="display:flex;justify-content:space-between;"><span><h4>身份证号外发管控</h4><span class="desc">防止包含身份证号的邮件外发</span></span><button class="button-outline" type="button" data-ex-apply='{"type":"regex","content":"\\d{17}[\\dXx]","scopes":"正文、附件内容","action":"阻断+告警"}'>应用</button></div><div class="effect-text">当邮件正文或附件内容包含18位身份证号时，外发方向将阻断并告警管理员。</div></div>
+          <div class="example-card"><div style="display:flex;justify-content:space-between;"><span><h4>银行卡号检测</h4><span class="desc">检测16-19位银行卡号</span></span><button class="button-outline" type="button" data-ex-apply='{"type":"regex","content":"\\d{16,19}","scopes":"正文","action":"审核"}'>应用</button></div><div class="effect-text">当邮件正文包含16-19位数字（疑似银行卡号）时，进入审核队列。</div></div>
+          <div class="example-card"><div style="display:flex;justify-content:space-between;"><span><h4>敏感词过滤</h4><span class="desc">过滤敏感内容</span></span><button class="button-outline" type="button" data-ex-apply='{"type":"keyword","content":"敏感词1|敏感词2","scopes":"主题、正文","action":"阻断"}'>应用</button></div><div class="effect-text">当邮件主题或正文包含敏感词时，所有方向均阻断。</div></div>
+          <div class="hint" data-ex-applied style="margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <figure class="screenshot-figure">
+        <img src="./screenshots/examples-expanded.png" alt="配置示例展开">
+        <figcaption>展开后三张示例卡：名称 + 描述 + 「应用」按钮 + 灰底效果说明。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/example-applied.png" alt="应用示例后表单被填充">
+        <figcaption>点击示例1「应用」：匹配内容填入 <code>\d{17}[\dXx]</code>、类型=正则表达式、作用于=正文+附件内容、动作=阻断+告警；<strong>注意残留的「正则表达式语法错误」红字未被清除（D3）</strong>。</figcaption>
+      </figure>
+    </div>
+    <table class="spec-table">
+      <thead><tr><th>示例</th><th>填充内容（applyExample）</th><th>不填充的字段</th></tr></thead>
+      <tbody>
+        <tr><td>身份证号外发管控</td><td>matchType=regex, matchContent=<code>\d{17}[\dXx]</code>, scopes=[正文, 附件内容], 统一动作=阻断+告警</td><td rowspan="3">规则名称、生效范围（方向）、优先级、有效期、备注均不变；<strong>regexError 不重算（D3）</strong></td></tr>
+        <tr><td>银行卡号检测</td><td>matchType=regex, matchContent=<code>\d{16,19}</code>, scopes=[正文], 统一动作=审核</td></tr>
+        <tr><td>敏感词过滤</td><td>matchType=keyword, matchContent=敏感词1|敏感词2, scopes=[主题, 正文], 统一动作=阻断</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="simulator">
+    <h2><span class="layer-badge">3</span>C. 模拟测试（可交互，与 demo 相同匹配算法）</h2>
+    <div class="component-preview">
+      <div style="max-width:420px;">
+        <button class="collapse-btn greenc" type="button" data-sim-toggle><span>▶ 模拟测试</span><span data-sim-chevron>⌄</span></button>
+        <div class="is-hidden" data-sim-body>
+          <div class="example-card">
+            <div class="hint">当前规则（与上方 A 区表单联动）：类型 <code data-sim-type>正则表达式</code>，匹配内容 <code data-sim-pattern>（未填写）</code></div>
+            <p style="margin:10px 0 4px;font-size:13px;font-weight:600;">测试文本</p>
+            <textarea class="textarea" data-sim-text placeholder="输入要测试的文本内容..."></textarea>
+            <button class="button-green" type="button" data-sim-run style="margin-top:10px;">▶ 测试</button>
+            <div class="result is-hidden" data-sim-result></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <figure class="screenshot-figure">
+        <img src="./screenshots/simulator-hit.png" alt="模拟测试命中">
+        <figcaption>命中（测试文本含 18 位身份证号）：红底「匹配成功，将执行阻断+告警动作」。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/simulator-miss.png" alt="模拟测试未命中">
+        <figcaption>未命中（hello world）：绿底「未匹配到内容，邮件将正常放行」。</figcaption>
+      </figure>
+    </div>
+    <table class="spec-table">
+      <thead><tr><th>输入状态</th><th>匹配算法（runSimulation 源码）</th><th>结果反馈（实测）</th></tr></thead>
+      <tbody>
+        <tr><td>测试文本或匹配内容为空</td><td>直接返回未命中</td><td>「请输入测试文本和匹配内容」</td></tr>
+        <tr><td>类型=正则</td><td><code>new RegExp(matchContent, "g").test(text)</code>，异常时报「匹配出错：{message}」</td><td rowspan="3">命中：红底 AlertTriangle「匹配成功，将执行{统一动作}动作」；未命中：绿底 CheckCircle「未匹配到内容，邮件将正常放行」</td></tr>
+        <tr><td>类型=关键词</td><td>按 | 拆分后 <code>some(kw =&gt; text.includes(kw))</code></td></tr>
+        <tr><td>类型=内容组</td><td><code>text.includes(matchContent)</code>（demo 以名称字面模拟）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>校验红字</td><td>空表单保存后 p 元素实测 [请输入规则名称, 请输入匹配内容]，class 含 text-red-500</td><td>同文案、红字、位于对应字段下方</td><td>一致</td></tr>
+        <tr><td>正则错误</td><td>「正则表达式语法错误，请检查」+ AlertTriangle；textarea class 实测含 <code>border-destructive</code></td><td>同文案 + ⚠ 前缀 + 红框 class error</td><td>一致</td></tr>
+        <tr><td>示例卡</td><td>3 张卡（身份证号外发管控/银行卡号检测/敏感词过滤），每卡 h4 + desc + 「应用」按钮 + 灰底效果说明</td><td>同 3 张卡同文案</td><td>一致</td></tr>
+        <tr><td>应用后表单</td><td>实测 textarea=\d{17}[\dXx]，combobox=[正则表达式, 阻断+告警]，scope-body/attachment_content checked、subject unchecked；正则错误红字残留</td><td>预览应用后同步展示填充摘要；残留缺陷在截图与差异表记录</td><td>一致（缺陷如实记录）</td></tr>
+        <tr><td>模拟结果容器</td><td>命中 <code>bg-red-50 text-red-700</code>；未命中 <code>bg-green-50 text-green-700</code>（class 实测）</td><td>result.hit 红底 / result.miss 绿底</td><td>一致</td></tr>
+        <tr><td>折叠交互</td><td>Collapsible：ChevronDown ↔ ChevronUp 切换，内容 mt-3 展开</td><td>⌄/⌃ 切换 + 显示隐藏</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav><a href="layer-1-rule-edit-drawer.html">← 层级2：规则编辑抽屉</a> · <a href="layer-3-dialogs.html">下一层：确认对话框 →</a></nav>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    // A. 校验（复刻 demo：showErrors 点保存开启，之后实时消隐；正则实时校验）
+    let showErrors = false;
+    let regexError = false;
+    const typeHints = { keyword: "多个关键词用竖线 | 分隔", regex: "需符合 JavaScript RegExp 语法", content_group: "引用预定义的关键词集合" };
+    const typePh = { keyword: "例如：机密|绝密|内部资料", regex: "例如：\\d{17}[\\dXx]（身份证号）", content_group: "选择或输入内容组名称" };
+    function validateRegexNow() {
+      const type = $("[data-v-type]").value;
+      const content = $("[data-v-content]").value;
+      if (type !== "regex" || !content) { regexError = false; }
+      else { try { new RegExp(content); regexError = false; } catch { regexError = true; } }
+    }
+    function renderValidation() {
+      const name = $("[data-v-name]").value.trim();
+      const content = $("[data-v-content]").value.trim();
+      $("[data-v-name-err]").classList.toggle("is-hidden", !(showErrors && !name));
+      $("[data-v-name]").classList.toggle("error", showErrors && !name);
+      $("[data-v-regex-err]").classList.toggle("is-hidden", !regexError);
+      $("[data-v-content-err]").classList.toggle("is-hidden", !(showErrors && !regexError && !content));
+      $("[data-v-content]").classList.toggle("error", regexError || (showErrors && !content));
+      $("[data-sim-type]").textContent = { keyword: "关键词", regex: "正则表达式", content_group: "内容组" }[$("[data-v-type]").value];
+      $("[data-sim-pattern]").textContent = content || "（未填写）";
+    }
+    $("[data-v-save]").addEventListener("click", () => { showErrors = true; validateRegexNow(); renderValidation(); });
+    $("[data-v-content]").addEventListener("input", () => { validateRegexNow(); renderValidation(); });
+    $("[data-v-name]").addEventListener("input", renderValidation);
+    $("[data-v-type]").addEventListener("change", () => {
+      const t = $("[data-v-type]").value;
+      $("[data-v-hint]").textContent = typeHints[t];
+      $("[data-v-content]").placeholder = typePh[t];
+      validateRegexNow(); renderValidation();
+    });
+
+    // B. 配置示例
+    $("[data-ex-toggle]").addEventListener("click", () => {
+      const body = $("[data-ex-body]");
+      const open = body.classList.toggle("is-hidden");
+      $("[data-ex-chevron]").textContent = open ? "⌄" : "⌃";
+    });
+    document.querySelectorAll("[data-ex-apply]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const cfg = JSON.parse(btn.dataset.exApply);
+        $("[data-v-type]").value = cfg.type;
+        $("[data-v-content]").value = cfg.content;
+        $("[data-v-hint]").textContent = typeHints[cfg.type];
+        $("[data-ex-applied]").textContent = `已应用：类型=${cfg.type === "regex" ? "正则表达式" : cfg.type === "keyword" ? "关键词" : "内容组"}，作用于=${cfg.scopes}，动作=${cfg.action}（与 demo 一致：不清除已有正则错误红字，见 D3）`;
+        // 复刻 demo 缺陷：applyExample 不重算 regexError（不调用 validateRegexNow）
+        renderValidation();
+      });
+    });
+
+    // C. 模拟测试（与 demo runSimulation 同算法）
+    $("[data-sim-toggle]").addEventListener("click", () => {
+      const body = $("[data-sim-body]");
+      const open = body.classList.toggle("is-hidden");
+      $("[data-sim-chevron]").textContent = open ? "⌄" : "⌃";
+    });
+    $("[data-sim-run]").addEventListener("click", () => {
+      const text = $("[data-sim-text]").value;
+      const pattern = $("[data-v-content]").value;
+      const type = $("[data-v-type]").value;
+      const box = $("[data-sim-result]");
+      box.classList.remove("is-hidden");
+      if (!text.trim() || !pattern.trim()) {
+        box.className = "result miss"; box.textContent = "✔ 请输入测试文本和匹配内容"; return;
+      }
+      try {
+        let hit = false;
+        if (type === "regex") hit = new RegExp(pattern, "g").test(text);
+        else if (type === "keyword") hit = pattern.split("|").filter(Boolean).some((kw) => text.includes(kw.trim()));
+        else hit = text.includes(pattern);
+        box.className = hit ? "result hit" : "result miss";
+        box.textContent = hit ? "⚠ 匹配成功，将执行阻断+告警动作" : "✔ 未匹配到内容，邮件将正常放行";
+      } catch (e) {
+        box.className = "result hit"; box.textContent = "⚠ 匹配出错：" + e.message;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { HelpCircle, Plus, X } from 'lucide-react';
@@ -25,6 +25,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { useAuth } from '@/contexts/auth-context';
 import { ApiError, useApiRequest } from '@/lib/api/client';
+import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { cn } from '@/lib/utils';
 import {
   getDetectionProfiles,
@@ -570,12 +571,9 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
               }
               className="space-y-3"
             >
-              <div
-                className={cn(
-                  'flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors',
-                  greylistDraft.mode === 'delay' ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted/40',
-                )}
-                onClick={() => setGreylistDraft((current) => ({ ...current, mode: 'delay' }))}
+              <GreylistModeOption
+                selected={greylistDraft.mode === 'delay'}
+                onSelect={() => setGreylistDraft((current) => ({ ...current, mode: 'delay' }))}
               >
                 <RadioGroupItem value="delay" id="rbl-greylist-delay" className="mt-0.5 shrink-0" />
                 <div className="space-y-2">
@@ -596,14 +594,11 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                     <span className="text-sm text-muted-foreground">{t('rblFilter.greylistDelayDesc')}</span>
                   </div>
                 </div>
-              </div>
+              </GreylistModeOption>
 
-              <div
-                className={cn(
-                  'flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors',
-                  greylistDraft.mode === 'rateLimit' ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted/40',
-                )}
-                onClick={() => setGreylistDraft((current) => ({ ...current, mode: 'rateLimit' }))}
+              <GreylistModeOption
+                selected={greylistDraft.mode === 'rateLimit'}
+                onSelect={() => setGreylistDraft((current) => ({ ...current, mode: 'rateLimit' }))}
               >
                 <RadioGroupItem value="rateLimit" id="rbl-greylist-rate" className="mt-0.5 shrink-0" />
                 <div className="space-y-2">
@@ -627,7 +622,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                     <span className="text-sm text-muted-foreground">{t('rblFilter.greylistRateDesc')}</span>
                   </div>
                 </div>
-              </div>
+              </GreylistModeOption>
             </RadioGroup>
 
             {greylistDraft.mode === 'rateLimit' ? (
@@ -713,5 +708,32 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
       <PageHeader title={t('rblFilter.title')} description={t('rblFilter.description')} />
       <ModuleMasterSwitch page="rbl_filter">{content}</ModuleMasterSwitch>
     </PageShell>
+  );
+}
+
+// 灰名单模式可选卡片（柔和交互反馈规格 §6.4/§7.2）：hover 为 pointer 驱动的 muted 表面，
+// 选中态（primary 淡表面）不被 hover 覆盖；键盘可达性由内部 RadioGroupItem 承担。
+function GreylistModeOption({
+  selected,
+  onSelect,
+  children,
+}: {
+  selected: boolean;
+  onSelect: () => void;
+  children: ReactNode;
+}) {
+  const { pointerHoverProps } = usePointerHover<HTMLDivElement>({ disabled: selected });
+  return (
+    <div
+      className={cn(
+        'flex cursor-pointer items-start gap-3 rounded-lg border p-4',
+        'transition-[background-color,border-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+        selected ? 'border-primary bg-primary/10' : 'border-border data-[hovered=true]:bg-muted/40',
+      )}
+      onClick={onSelect}
+      {...pointerHoverProps}
+    >
+      {children}
+    </div>
   );
 }

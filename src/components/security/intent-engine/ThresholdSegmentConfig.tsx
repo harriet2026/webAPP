@@ -135,7 +135,7 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
                     render={
                       <div
                         className={cn(
-                          'h-full flex items-center justify-center text-xs text-white font-medium transition-all cursor-pointer hover:opacity-90',
+                          'h-full flex items-center justify-center text-xs text-white font-medium cursor-help transition-[width] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
                           ACTION_COLOR[segment.action] || 'bg-gray-400',
                         )}
                         style={{ width: `${width}%` }}

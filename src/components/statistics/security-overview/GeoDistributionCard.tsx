@@ -44,7 +44,11 @@ interface WorldGeoJson {
   }>;
 }
 
-const THREAT_FILTERS = ['all', 'phishing', 'spam', 'virus', 'malicious'] as const;
+const THREAT_FILTERS = [
+  'all',
+  'spam', 'harmful', 'suspicious', 'sensitive',
+  'spoofing', 'phishing', 'virus', 'account_compromised',
+] as const;
 const WORLD_MAP_NAME = 'security-overview-world';
 const WORLD_MAP_URL = '/maps/world-countries.geojson';
 const ISO_ALPHA2 = /^[A-Z]{2}$/;
@@ -367,7 +371,7 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
               <SelectContent>
                 {THREAT_FILTERS.map((filter) => (
                   <SelectItem key={filter} value={filter}>
-                    {filter === 'all' ? t('allThreats') : tRoot(`threatTypes.${filter}`)}
+                    {filter === 'all' ? t('allThreats') : tRoot(`emailTypes.${filter}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -404,8 +408,8 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
                 countryName={countryName}
                 onSelect={setSelectedCountry}
               />
-              <div className="min-w-0">
-                <h3 className="mb-3 text-sm font-medium text-foreground">{t('topRegions')}</h3>
+              <div className="min-w-0 flex flex-col gap-3">
+                <h3 className="text-sm font-medium text-foreground">{t('topRegions')}</h3>
                 <ol className="max-h-[226px] space-y-1 overflow-y-auto pr-1" data-testid="geo-ranking">
                   {countries.slice(0, 10).map((country, index) => {
                     const blockRate = finiteRate(country.block_rate);
@@ -437,6 +441,22 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
                     );
                   })}
                 </ol>
+                {/* Block-rate colour legend */}
+                <div className="border-t pt-2">
+                  <p className="mb-1.5 text-xs text-muted-foreground">{t('blockRateLegend')}</p>
+                  <div className="flex flex-col gap-1">
+                    {([
+                      { key: 'blockRateGood', cls: 'bg-success' },
+                      { key: 'blockRateWarn', cls: 'bg-warning' },
+                      { key: 'blockRateBad',  cls: 'bg-danger'  },
+                    ] as const).map(({ key, cls }) => (
+                      <div key={key} className="flex items-center gap-2">
+                        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${cls}`} />
+                        <span className="text-xs text-muted-foreground">{t(key)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 7：放行对话框 + 改判邮件类型 - 邮件处置中心</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .pass{color:#15803d;font-weight:600;} .bad{color:#b91c1c;font-weight:600;} .warn{color:#a16207;font-weight:600;}
+  .stage-1{color:#3b82f6;} .stage-2{color:#06b6d4;} .stage-3{color:#f59e0b;} .stage-4{color:#f43f5e;} .stage-5{color:#10b981;}
+  .excluded-note{border-left:4px solid #94a3b8;background:#f1f5f9;padding:1rem 1.25rem;border-radius:.5rem;margin:1rem 0;font-size:.9rem;}
+  .kbd{font-family:var(--font-mono);background:#e2e8f0;border-radius:4px;padding:0 .3rem;font-size:.8em;}
+  table.spec-table.compact th, table.spec-table.compact td{padding:.4rem .55rem;font-size:.82rem;}
+
+  .component-preview [data-radix-popper-content-wrapper]{position:static!important;transform:none!important;margin-top:.5rem;}
+  .component-preview [role="dialog"]{position:static!important;transform:none!important;translate:none!important;left:auto!important;top:auto!important;max-width:32rem;margin:1rem auto;box-shadow:0 8px 24px rgba(0,0,0,.14);}
+  .component-preview [data-radix-popper-content-wrapper] [role="dialog"]{box-shadow:none;}
+  .component-preview [data-slot="sheet-overlay"],.component-preview [data-radix-dialog-overlay]{display:none!important;}
+  .component-preview{max-height:none;}
+  .preview-note{font-size:.75rem;color:#64748b;margin:.25rem 0 .75rem;}
+
+</style>
+</head>
+<body>
+<nav class="layer-nav">
+<a href="./index.html#components">← 返回主文件</a>
+<a href="./layer-6-table-batch.html">← L6 批量条</a>
+<a href="./layer-8-recall-dialog.html">L8 召回 →</a>
+</nav>
+<header class="spec-header"><h1>交互层级 7：放行对话框 + 改判邮件类型</h1><table class="spec-table"><thead><tr><th>属性</th><th>值</th></tr></thead><tbody><tr><td>所属组件</td><td>2.2 日志表格 InvestigationLogsTable</td></tr><tr><td>主文件</td><td><a href="./index.html#components">email-handling-disposal-center/index.html</a></td></tr><tr><td>触发路径</td><td>批量条 → 点击「放行」（<code>Dialog</code> sm:max-w-md）</td></tr><tr><td>范围说明</td><td>「规则命中统计」不在本规格范围（见主文件说明块）</td></tr></tbody></table></header>
+<section class="interaction-layer">
+<div class="component-preview"><p class="preview-hint"></p><p class="preview-note">下方内嵌为放行对话框真实 HTML（含改判 Select 触发）。</p>
+<div role="dialog" id="radix-_R_395esnebn9lb_" aria-describedby="radix-_R_395esnebn9lbH2_" aria-labelledby="radix-_R_395esnebn9lbH1_" data-state="open" data-slot="dialog-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-md" tabindex="-1" style="pointer-events: auto;"><div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left"><h2 id="radix-_R_395esnebn9lbH1_" data-slot="dialog-title" class="text-lg leading-none font-semibold flex items-center gap-2 text-green-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-5 h-5"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>确认放行</h2><p id="radix-_R_395esnebn9lbH2_" data-slot="dialog-description" class="text-muted-foreground text-sm pt-2">确认放行选中的邮件？放行后邮件将投递至用户邮箱。</p></div><div class="space-y-2 py-1"><label class="text-sm font-medium">改判邮件类型</label><button type="button" role="combobox" aria-controls="radix-_r_n_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-full"><span data-slot="select-value" style="pointer-events: none;">正常</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><p class="text-xs text-muted-foreground leading-relaxed">误判纠正：放行后将该邮件的类型改判为下方所选类型（引擎原始判定仍保留用于审计与误报率统计）。</p></div><div data-slot="dialog-footer" class="flex-col-reverse sm:flex-row sm:justify-end flex gap-2 sm:gap-0"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3">取消</button><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[&gt;svg]:px-3 bg-green-500 hover:bg-green-600 text-white">确认放行</button></div><button type="button" data-slot="dialog-close" class="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="sr-only">Close</span></button></div>
+</div>
+<figure class="screenshot-figure"><img src="./screenshots/v2-table-l7-release-dialog.png" alt="放行确认对话框"><figcaption>放行确认对话框（浏览器实测 · demo :3111）</figcaption></figure>
+<figure class="screenshot-figure"><img src="./screenshots/v2-table-l7b-reclassify-select.png" alt="改判邮件类型下拉（11 类 + 暂不改判）"><figcaption>改判邮件类型下拉（11 类 + 暂不改判）（浏览器实测 · demo :3111）</figcaption></figure>
+<h5>UI 元素清单</h5>
+<table class="spec-table compact"><thead><tr><th>元素</th><th>内容</th></tr></thead><tbody><tr><td>标题</td><td><code>CheckCircle</code> 绿 + 「确认放行 / Confirm Release」</td></tr><tr><td>描述</td><td>确认放行选中的邮件？放行后邮件将投递至用户邮箱。</td></tr><tr><td>改判 Select</td><td>label「改判邮件类型」；选项=11 taxonomy 类型 + <code>keep</code>「暂不改判（保留原判定）」；<strong>默认「正常」（误报纠正）</strong></td></tr><tr><td>提示</td><td>误判纠正：放行后将该邮件的类型改判为下方所选类型（引擎原始判定仍保留用于审计与误报率统计）</td></tr><tr><td>页脚</td><td>取消 / 确认放行（绿）→ onReleaseReclassify(ids, finalType) + 清空选择 + 重置为 normal</td></tr></tbody></table>
+<div class="dom-comparison"><h5>DOM 树比对结果（提取 HTML ↔ demo 实际渲染）</h5><table class="spec-table"><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>嵌入的 HTML</th><th>一致</th></tr></thead><tbody><tr><td>对话框容器</td><td><code>[role=dialog] sm:max-w-md</code></td><td>一致</td><td>✅</td></tr><tr><td>改判默认值</td><td>normal「正常」</td><td>一致</td><td>✅</td></tr><tr><td>改判选项数</td><td>11 + 1(暂不改判)</td><td>12</td><td>✅</td></tr><tr><td>无删除式警告</td><td>放行无「不可恢复」文案</td><td>一致</td><td>✅</td></tr></tbody></table></div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>try{mermaid.initialize({startOnLoad:true,securityLevel:'loose'});}catch(e){}</script>
+</body></html>

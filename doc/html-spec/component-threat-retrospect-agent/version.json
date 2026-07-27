@@ -1,0 +1,13 @@
+{
+  "module": "component-threat-retrospect-agent",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": "804efb9",
+      "summary": "初版：覆盖检测总览（6 张 KPI 下钻/任务表/漏报明细展开）、召回二次确认、标记误报、紧急手动扫描、受影响用户与邮件原文抽屉、回溯策略列表与实时/深度联动编辑抽屉及全部字段校验；标注组件文案未国际化(D-006)、AI 异步定位、包裹壳开关无二次确认(D-001)、缺角色分权(D-005)与模型更新入口(D-004)等差异，及回溯调度/持久化/第4语言等需确认项。"
+    }
+  ]
+}

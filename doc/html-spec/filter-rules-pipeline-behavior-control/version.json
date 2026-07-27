@@ -1,0 +1,13 @@
+{
+  "module": "filter-rules-pipeline-behavior-control",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-14",
+      "demo_commit": "804efb9",
+      "spec_commit": "804efb9",
+      "summary": "初版：按 demo 实际渲染建档——规则表格（8列，状态为只读 Badge）、方向/类型/状态筛选、920px 双栏编辑抽屉（3 区块 + 对象类型联动 + OR 组合 + 实时效果预览 + 配置示例 + 模拟测试）、删除/未保存确认对话框；标注与 spec 的 6 处差异。"
+    }
+  ]
+}

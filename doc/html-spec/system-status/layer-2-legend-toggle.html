@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 1：趋势图例显隐切换 - 系统状态</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== 设计变量（参考 demo globals.css） ===== */
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.55;
+      font-size: 14px;
+      padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1.2rem; margin: 2.2rem 0 .8rem; padding-bottom: .35rem; border-bottom: 2px solid var(--primary); }
+    h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; }
+    h4 { font-size: .95rem; margin: 1.2rem 0 .5rem; }
+    h5 { font-size: .85rem; margin: .8rem 0 .4rem; }
+    p { margin: .45rem 0; }
+    code { font-family: var(--font-mono); font-size: .85em; background: var(--muted); padding: .1em .35em; border-radius: 4px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    a { color: oklch(0.52 0.226 262); }
+
+    /* ===== 头部 / 元信息 ===== */
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .spec-header .subtitle { color: var(--muted-foreground); font-size: .9rem; }
+    .meta-table { border-collapse: collapse; width: 100%; margin-top: .8rem; font-size: 13px; }
+    .meta-table td { border: 1px solid var(--border); padding: 5px 10px; vertical-align: top; }
+    .meta-table td:first-child { background: var(--muted); font-weight: 600; white-space: nowrap; width: 11em; }
+
+    /* ===== 组件目录 ===== */
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem; margin-top: 1.2rem; }
+    .component-toc ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .component-toc li { margin: .3rem 0; }
+    .toc-badge { display: inline-block; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 999px; padding: 0 .5em; margin-left: .4em; vertical-align: middle; }
+    .toc-layer-links { margin-left: .6em; font-size: 12px; }
+    .toc-layer-links a { margin-right: .5em; }
+
+    /* ===== 表格 ===== */
+    .spec-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0 1rem; background: var(--card); }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); font-weight: 600; white-space: nowrap; }
+    .spec-table td.num { text-align: right; font-family: var(--font-mono); }
+    .spec-table .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    /* ===== 截图 ===== */
+    .screenshot-figure { margin: .8rem 0 1.2rem; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .screenshot-figure figcaption { font-size: 12px; color: var(--muted-foreground); margin-top: .35rem; }
+
+    /* ===== 组件规格块 ===== */
+    .component-spec { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem 1.4rem; margin: 1.2rem 0; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: .9rem 1.1rem; margin: 1rem 0; background: oklch(0.99 0 0); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; background: var(--primary); color: #fff; border-radius: 999px; font-size: .8em; font-weight: 700; margin-right: .4em; }
+    .trigger-path { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .45rem .7rem; margin: .5rem 0; }
+    .layer-nav { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 13px; }
+
+    /* ===== 可交互组件预览区 ===== */
+    .component-preview { border: 2px dashed oklch(0.7 0.12 262); border-radius: 10px; padding: 18px; background: #f4f5f7; overflow-x: auto; margin: .7rem 0; position: relative; }
+    .component-preview::before { content: "可交互预览（提取自运行中的 demo）"; position: absolute; top: -9px; left: 14px; background: oklch(0.52 0.226 262); color: #fff; font-size: 10.5px; padding: 0 8px; border-radius: 999px; line-height: 16px; }
+    .preview-note { font-size: 12px; color: var(--muted-foreground); background: oklch(0.975 0.02 95); border: 1px solid oklch(0.9 0.06 95); border-radius: 6px; padding: .4rem .7rem; margin: .4rem 0 .8rem; }
+    /* demo 提取片段兜底（Tailwind CDN 未覆盖的 shadcn 主题类） */
+    .component-preview .bg-card { background: #fff; }
+    .component-preview .text-card-foreground { color: #0a0a0a; }
+    .component-preview .bg-popover { background: #fff; }
+    .component-preview .text-popover-foreground { color: #0a0a0a; }
+    .component-preview .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .component-preview .border-input { border-color: #e5e7eb; }
+    .component-preview svg { flex-shrink: 0; }
+    .component-preview .recharts-responsive-container { min-height: 320px; }
+    .component-preview [data-slot="card"] { border-color: #e5e7eb; }
+    .component-preview button { cursor: pointer; }
+    .component-preview button:disabled { cursor: default; }
+    @keyframes spec-spin { to { transform: rotate(360deg); } }
+    .component-preview .animate-spin { animation: spec-spin 1s linear infinite; }
+
+    /* 路由提示浮层 */
+    .route-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 13px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 99; opacity: 0; transition: opacity .2s; pointer-events: none; font-family: var(--font-mono); }
+    .route-toast.show { opacity: 1; }
+
+    /* ===== DOM 比对 ===== */
+    .dom-comparison { background: oklch(0.975 0.008 262); border: 1px solid oklch(0.85 0.03 262); border-radius: 8px; padding: .6rem .9rem; margin-top: .8rem; }
+    .dom-comparison h5 { margin: .2rem 0 .4rem; }
+
+    /* ===== 差异 / 需确认 ===== */
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .diff-section h2 { border-bottom-color: var(--diff-border); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .question-section h2 { border-bottom-color: var(--question-border); }
+    .diff-table td:first-child, .question-table td:first-child { font-weight: 700; white-space: nowrap; }
+
+    /* ===== 徽标 ===== */
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 .55em; line-height: 1.6; vertical-align: middle; }
+    .tag-green { background: #dcfce7; color: #15803d; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-gray { background: #f3f4f6; color: #4b5563; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+
+    .mermaid { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .6rem; margin: .8rem 0; overflow-x: auto; }
+
+  </style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="./index.html#component-2-4">← 返回主文件（2.4 威胁态势趋势）</a>
+  <a href="./layer-3-viewer-tenant.html">层级：租户视角裁剪态 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 1：趋势图例显隐切换（含 Tooltip hover 态）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.4 威胁态势趋势图（recharts 堆叠面积图）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">system-status/index.html</a></td></tr>
+    <tr><td>触发路径</td><td>层级0 图例行 → 点击「钓鱼邮件」图例按钮 → <code>toggleSeries("phishing")</code> → <code>hidden</code> Set 加入该 key → 该 Area 不再渲染，其余 4 序列<b>重新堆叠</b>；再次点击恢复</td></tr>
+    <tr><td>浏览器验证</td><td>CDP 实测：点击后 <code>.recharts-area</code> 组 5 → 4，图例按钮 class <code>opacity-100 → opacity-40</code>；再次点击恢复 5</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1</span> 「钓鱼邮件」序列隐藏态</h4>
+  <div class="component-preview" id="preview-trend-hidden">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm lg:col-span-2"><div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 flex flex-row items-center justify-between space-y-0 pb-2"><div data-slot="card-title" class="font-semibold text-base">威胁态势趋势</div><button class="flex items-center text-sm font-medium text-blue-600 hover:underline">查看邮件安全总览 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></button></div><div data-slot="card-content" class="px-6"><div class="mb-3 flex flex-wrap gap-3"><button class="flex items-center gap-1.5 text-xs transition-opacity opacity-40"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background-color:#ef4444"></span>钓鱼邮件</button><button class="flex items-center gap-1.5 text-xs transition-opacity opacity-100"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background-color:#f97316"></span>仿冒邮件</button><button class="flex items-center gap-1.5 text-xs transition-opacity opacity-100"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background-color:#eab308"></span>垃圾邮件</button><button class="flex items-center gap-1.5 text-xs transition-opacity opacity-100"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background-color:#991b1b"></span>病毒附件</button><button class="flex items-center gap-1.5 text-xs transition-opacity opacity-100"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background-color:#06b6d4"></span>恶意链接</button></div><div class="recharts-responsive-container" style="width:100%;height:320px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 320px; max-width: 657px;"><svg class="recharts-surface" width="657" height="320" viewBox="0 0 657 320" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts2-clip"><rect x="65" y="5" height="280" width="587"></rect></clipPath></defs><g class="recharts-cartesian-grid"><g class="recharts-cartesian-grid-horizontal"><line stroke-dasharray="3 3" stroke="#f0f0f0" fill="none" x="65" y="5" width="587" height="280" x1="65" y1="285" x2="652" y2="285"></line><line stroke-dasharray="3 3" stroke="#f0f0f0" fill="none" x="65" y="5" width="587" height="280" x1="65" y1="215" x2="652" y2="215"></line><line stroke-dasharray="3 3" stroke="#f0f0f0" fill="none" x="65" y="5" width="587" height="280" x1="65" y1="145" x2="652" y2="145"></line><line stroke-dasharray="3 3" stroke="#f0f0f0" fill="none" x="65" y="5" width="587" height="280" x1="65" y1="75" x2="652" y2="75"></line><line stroke-dasharray="3 3" stroke="#f0f0f0" fill="none" x="65" y="5" width="587" height="280" x1="65" y1="5" x2="652" y2="5"></line></g></g><g class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="285" x2="652" y2="285" style="font-size: 12px;"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="65" y1="291" x2="65" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="65" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="65" dy="0.71em">00:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="118.36363636363637" y1="291" x2="118.36363636363637" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="118.36363636363637" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="118.36363636363637" dy="0.71em">02:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="171.72727272727275" y1="291" x2="171.72727272727275" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="171.72727272727275" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="171.72727272727275" dy="0.71em">04:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="225.0909090909091" y1="291" x2="225.0909090909091" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="225.0909090909091" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="225.0909090909091" dy="0.71em">06:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="278.4545454545455" y1="291" x2="278.4545454545455" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="278.4545454545455" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="278.4545454545455" dy="0.71em">08:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="331.8181818181818" y1="291" x2="331.8181818181818" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="331.8181818181818" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="331.8181818181818" dy="0.71em">10:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="385.1818181818182" y1="291" x2="385.1818181818182" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="385.1818181818182" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="385.1818181818182" dy="0.71em">12:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="438.54545454545456" y1="291" x2="438.54545454545456" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="438.54545454545456" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="438.54545454545456" dy="0.71em">14:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="491.90909090909093" y1="291" x2="491.90909090909093" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="491.90909090909093" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="491.90909090909093" dy="0.71em">16:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="545.2727272727273" y1="291" x2="545.2727272727273" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="545.2727272727273" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="545.2727272727273" dy="0.71em">18:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="598.6363636363636" y1="291" x2="598.6363636363636" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="598.6363636363636" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="598.6363636363636" dy="0.71em">20:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="652" y1="291" x2="652" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="639.7734375" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="639.7734375" dy="0.71em">22:00</tspan></text></g></g></g><g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="5" x2="65" y2="285" style="font-size: 12px;"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="285" x2="65" y2="285" style="font-size: 12px;"></line><text orientation="left" width="60" height="280" stroke="none" x="57" y="285" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666" style="font-size: 12px;"><tspan x="57" dy="0.355em">0</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="215" x2="65" y2="215" style="font-size: 12px;"></line><text orientation="left" width="60" height="280" stroke="none" x="57" y="215" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666" style="font-size: 12px;"><tspan x="57" dy="0.355em">45</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="145" x2="65" y2="145" style="font-size: 12px;"></line><text orientation="left" width="60" height="280" stroke="none" x="57" y="145" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666" style="font-size: 12px;"><tspan x="57" dy="0.355em">90</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="75" x2="65" y2="75" style="font-size: 12px;"></line><text orientation="left" width="60" height="280" stroke="none" x="57" y="75" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666" style="font-size: 12px;"><tspan x="57" dy="0.355em">135</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="5" x2="65" y2="5" style="font-size: 12px;"></line><text orientation="left" width="60" height="280" stroke="none" x="57" y="9" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666" style="font-size: 12px;"><tspan x="57" dy="0.355em">180</tspan></text></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><defs><clipPath id="animationClipPath-recharts-area-24"><rect x="65" y="0" width="470.97187961352677" height="286"></rect></clipPath></defs><g class="recharts-layer" clip-path="url(#animationClipPath-recharts-area-24)"><g class="recharts-layer"><path name="仿冒邮件" fill="#f97316" fill-opacity="0.5" width="587" height="280" stroke="none" class="recharts-curve recharts-area-area" d="M65,243C82.788,254.667,100.576,266.333,118.364,266.333C136.152,266.333,153.939,230.556,171.727,230.556C189.515,230.556,207.303,250.778,225.091,250.778C242.879,250.778,260.667,248.704,278.455,247.667C296.242,246.63,314.03,245.852,331.818,244.556C349.606,243.259,367.394,239.889,385.182,239.889C402.97,239.889,420.758,249.222,438.545,249.222C456.333,249.222,474.121,239.889,491.909,239.889C509.697,239.889,527.485,243.778,545.273,247.667C563.061,251.556,580.848,263.222,598.636,263.222C616.424,263.222,634.212,249.222,652,235.222L652,285C634.212,285,616.424,285,598.636,285C580.848,285,563.061,285,545.273,285C527.485,285,509.697,285,491.909,285C474.121,285,456.333,285,438.545,285C420.758,285,402.97,285,385.182,285C367.394,285,349.606,285,331.818,285C314.03,285,296.242,285,278.455,285C260.667,285,242.879,285,225.091,285C207.303,285,189.515,285,171.727,285C153.939,285,136.152,285,118.364,285C100.576,285,82.788,285,65,285Z"></path><path name="仿冒邮件" stroke="#f97316" fill="none" fill-opacity="0.5" width="587" height="280" class="recharts-curve recharts-area-curve" d="M65,243C82.788,254.667,100.576,266.333,118.364,266.333C136.152,266.333,153.939,230.556,171.727,230.556C189.515,230.556,207.303,250.778,225.091,250.778C242.879,250.778,260.667,248.704,278.455,247.667C296.242,246.63,314.03,245.852,331.818,244.556C349.606,243.259,367.394,239.889,385.182,239.889C402.97,239.889,420.758,249.222,438.545,249.222C456.333,249.222,474.121,239.889,491.909,239.889C509.697,239.889,527.485,243.778,545.273,247.667C563.061,251.556,580.848,263.222,598.636,263.222C616.424,263.222,634.212,249.222,652,235.222"></path></g></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><defs><clipPath id="animationClipPath-recharts-area-26"><rect x="65" y="0" width="470.97187961352677" height="267"></rect></clipPath></defs><g class="recharts-layer" clip-path="url(#animationClipPath-recharts-area-26)"><g class="recharts-layer"><path name="垃圾邮件" fill="#eab308" fill-opacity="0.5" width="587" height="280" stroke="none" class="recharts-curve recharts-area-area" d="M65,138.778C82.788,146.556,100.576,154.333,118.364,154.333C136.152,154.333,153.939,136.185,171.727,123.222C189.515,110.259,207.303,76.556,225.091,76.556C242.879,76.556,260.667,92.37,278.455,109.222C296.242,126.074,314.03,177.667,331.818,177.667C349.606,177.667,367.394,135.667,385.182,135.667C402.97,135.667,420.758,138.778,438.545,138.778C456.333,138.778,474.121,92.111,491.909,92.111C509.697,92.111,527.485,166.778,545.273,166.778C563.061,166.778,580.848,127.889,598.636,127.889C616.424,127.889,634.212,136.444,652,145L652,235.222C634.212,249.222,616.424,263.222,598.636,263.222C580.848,263.222,563.061,251.556,545.273,247.667C527.485,243.778,509.697,239.889,491.909,239.889C474.121,239.889,456.333,249.222,438.545,249.222C420.758,249.222,402.97,239.889,385.182,239.889C367.394,239.889,349.606,243.259,331.818,244.556C314.03,245.852,296.242,246.63,278.455,247.667C260.667,248.704,242.879,250.778,225.091,250.778C207.303,250.778,189.515,230.556,171.727,230.556C153.939,230.556,136.152,266.333,118.364,266.333C100.576,266.333,82.788,254.667,65,243Z"></path><path name="垃圾邮件" stroke="#eab308" fill="none" fill-opacity="0.5" width="587" height="280" class="recharts-curve recharts-area-curve" d="M65,138.778C82.788,146.556,100.576,154.333,118.364,154.333C136.152,154.333,153.939,136.185,171.727,123.222C189.515,110.259,207.303,76.556,225.091,76.556C242.879,76.556,260.667,92.37,278.455,109.222C296.242,126.074,314.03,177.667,331.818,177.667C349.606,177.667,367.394,135.667,385.182,135.667C402.97,135.667,420.758,138.778,438.545,138.778C456.333,138.778,474.121,92.111,491.909,92.111C509.697,92.111,527.485,166.778,545.273,166.778C563.061,166.778,580.848,127.889,598.636,127.889C616.424,127.889,634.212,136.444,652,145"></path></g></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><defs><clipPath id="animationClipPath-recharts-area-28"><rect x="65" y="0" width="470.97187961352677" height="178"></rect></clipPath></defs><g class="recharts-layer" clip-path="url(#animationClipPath-recharts-area-28)"><g class="recharts-layer"><path name="病毒附件" fill="#991b1b" fill-opacity="0.5" width="587" height="280" stroke="none" class="recharts-curve recharts-area-area" d="M65,127.889C82.788,136.444,100.576,145,118.364,145C136.152,145,153.939,110.259,171.727,96.778C189.515,83.296,207.303,64.111,225.091,64.111C242.879,64.111,260.667,76.556,278.455,92.111C296.242,107.667,314.03,157.444,331.818,157.444C349.606,157.444,367.394,109.222,385.182,109.222C402.97,109.222,420.758,117,438.545,117C456.333,117,474.121,67.222,491.909,67.222C509.697,67.222,527.485,154.333,545.273,154.333C563.061,154.333,580.848,115.444,598.636,115.444C616.424,115.444,634.212,121.667,652,127.889L652,145C634.212,136.444,616.424,127.889,598.636,127.889C580.848,127.889,563.061,166.778,545.273,166.778C527.485,166.778,509.697,92.111,491.909,92.111C474.121,92.111,456.333,138.778,438.545,138.778C420.758,138.778,402.97,135.667,385.182,135.667C367.394,135.667,349.606,177.667,331.818,177.667C314.03,177.667,296.242,126.074,278.455,109.222C260.667,92.37,242.879,76.556,225.091,76.556C207.303,76.556,189.515,110.259,171.727,123.222C153.939,136.185,136.152,154.333,118.364,154.333C100.576,154.333,82.788,146.556,65,138.778Z"></path><path name="病毒附件" stroke="#991b1b" fill="none" fill-opacity="0.5" width="587" height="280" class="recharts-curve recharts-area-curve" d="M65,127.889C82.788,136.444,100.576,145,118.364,145C136.152,145,153.939,110.259,171.727,96.778C189.515,83.296,207.303,64.111,225.091,64.111C242.879,64.111,260.667,76.556,278.455,92.111C296.242,107.667,314.03,157.444,331.818,157.444C349.606,157.444,367.394,109.222,385.182,109.222C402.97,109.222,420.758,117,438.545,117C456.333,117,474.121,67.222,491.909,67.222C509.697,67.222,527.485,154.333,545.273,154.333C563.061,154.333,580.848,115.444,598.636,115.444C616.424,115.444,634.212,121.667,652,127.889"></path></g></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><defs><clipPath id="animationClipPath-recharts-area-30"><rect x="65" y="0" width="470.97187961352677" height="158"></rect></clipPath></defs><g class="recharts-layer" clip-path="url(#animationClipPath-recharts-area-30)"><g class="recharts-layer"><path name="恶意链接" fill="#06b6d4" fill-opacity="0.5" width="587" height="280" stroke="none" class="recharts-curve recharts-area-area" d="M65,112.333C82.788,111.296,100.576,110.259,118.364,106.111C136.152,101.963,153.939,76.296,171.727,61C189.515,45.704,207.303,14.333,225.091,14.333C242.879,14.333,260.667,43.889,278.455,61C296.242,78.111,314.03,117,331.818,117C349.606,117,367.394,91.593,385.182,84.333C402.97,77.074,420.758,80.185,438.545,73.444C456.333,66.704,474.121,43.889,491.909,43.889C509.697,43.889,527.485,140.333,545.273,140.333C563.061,140.333,580.848,101.444,598.636,101.444C616.424,101.444,634.212,107.667,652,113.889L652,127.889C634.212,121.667,616.424,115.444,598.636,115.444C580.848,115.444,563.061,154.333,545.273,154.333C527.485,154.333,509.697,67.222,491.909,67.222C474.121,67.222,456.333,117,438.545,117C420.758,117,402.97,109.222,385.182,109.222C367.394,109.222,349.606,157.444,331.818,157.444C314.03,157.444,296.242,107.667,278.455,92.111C260.667,76.556,242.879,64.111,225.091,64.111C207.303,64.111,189.515,83.296,171.727,96.778C153.939,110.259,136.152,145,118.364,145C100.576,145,82.788,136.444,65,127.889Z"></path><path name="恶意链接" stroke="#06b6d4" fill="none" fill-opacity="0.5" width="587" height="280" class="recharts-curve recharts-area-curve" d="M65,112.333C82.788,111.296,100.576,110.259,118.364,106.111C136.152,101.963,153.939,76.296,171.727,61C189.515,45.704,207.303,14.333,225.091,14.333C242.879,14.333,260.667,43.889,278.455,61C296.242,78.111,314.03,117,331.818,117C349.606,117,367.394,91.593,385.182,84.333C402.97,77.074,420.758,80.185,438.545,73.444C456.333,66.704,474.121,43.889,491.909,43.889C509.697,43.889,527.485,140.333,545.273,140.333C563.061,140.333,580.848,101.444,598.636,101.444C616.424,101.444,634.212,107.667,652,113.889"></path></g></g></g></g></svg><div tabindex="-1" class="recharts-tooltip-wrapper recharts-tooltip-wrapper-right recharts-tooltip-wrapper-bottom" style="visibility: hidden; pointer-events: none; position: absolute; top: 0px; left: 0px; transform: translate(75px, 10px);"><div class="recharts-default-tooltip" style="margin: 0px; padding: 10px; background-color: rgb(255, 255, 255); border: 1px solid rgb(229, 231, 235); white-space: nowrap; border-radius: 6px; font-size: 12px; box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 8px;"><p class="recharts-tooltip-label" style="margin: 0px;">00:00</p></div></div></div></div></div></div>
+  </div>
+  <p class="preview-note">预览可操作：上方为 demo 该状态提取的完整卡片（钓鱼图例 opacity-40，SVG 中仅 4 条面积序列——已是重新堆叠后的结果）。点击「钓鱼邮件」以外的图例项可继续隐藏对应序列（预览为图层显隐；demo 会再次重新堆叠）；点击「钓鱼邮件」图例仅切换其高亮态（恢复序列需 demo 重新渲染，见下方截图对照）。</p>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/trend-legend-phishing-hidden.png" alt="钓鱼序列隐藏">
+    <figcaption>隐藏「钓鱼邮件」后：图例第一项变淡（opacity-40），红色底层面积消失，其余 4 序列自 0 基线重新堆叠。</figcaption>
+  </figure>
+
+  <h5>状态变化规格</h5>
+  <table class="spec-table">
+    <thead><tr><th>状态项</th><th>显示态</th><th>隐藏态</th></tr></thead>
+    <tbody>
+      <tr><td>图例按钮</td><td><code>opacity-100</code></td><td><code>opacity-40</code>（transition-opacity 过渡）</td></tr>
+      <tr><td>Area 序列</td><td>渲染（stackId=1 参与堆叠）</td><td>不渲染（<code>hidden.has(key)</code> → null），其余序列重新堆叠</td></tr>
+      <tr><td>Y 轴量程</td><td colspan="2">随可见序列总量自动调整</td></tr>
+      <tr><td>Tooltip</td><td colspan="2">仅列出可见序列</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果（隐藏态）</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>一致</th></tr></thead>
+      <tbody>
+        <tr><td>图例按钮数</td><td>5（全部保留，仅样式变化）</td><td>5</td><td>✅</td></tr>
+        <tr><td>「钓鱼邮件」按钮 class</td><td><code>… transition-opacity opacity-40</code></td><td>一致</td><td>✅</td></tr>
+        <tr><td>面积序列组 <code>.recharts-area</code></td><td>4（phishing 移除）</td><td>4</td><td>✅</td></tr>
+        <tr><td>其余图例按钮</td><td>opacity-100</td><td>一致</td><td>✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1a</span> Tooltip hover 态（全序列）</h4>
+  <div class="trigger-path">触发路径：层级0 全序列态 → 鼠标移入图表区域 → Recharts Tooltip 跟随显示最近数据点。</div>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/trend-tooltip-hover.png" alt="Tooltip hover">
+    <figcaption>Tooltip：白底、1px #e5e7eb 边框、圆角 6px、12px 字号、阴影 0 2px 8px rgba(0,0,0,.1)；首行时间点（08:00），下列 5 行「序列名 : 数值」，文字取各序列色。</figcaption>
+  </figure>
+  <table class="spec-table">
+    <thead><tr><th>Tooltip 元素</th><th>规格（CDP 提取）</th></tr></thead>
+    <tbody>
+      <tr><td>容器</td><td><code>.recharts-default-tooltip</code>，内联样式 padding 10px、白底、边框、r6、阴影</td></tr>
+      <tr><td>标签行</td><td><code>.recharts-tooltip-label</code>：当前 X 轴刻度（如 08:00 / 11/4 / 1/12）</td></tr>
+      <tr><td>条目行 ×可见序列数</td><td><code>.recharts-tooltip-item</code>：颜色 = 序列色；格式「{名称} : {数值}」</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="route-toast" id="route-toast"></div>
+<script>
+(function () {
+  const tp = document.getElementById("preview-trend-hidden");
+  const legendBtns = Array.from(tp.querySelectorAll("button")).filter((b) => b.className.includes("text-xs") && /钓鱼邮件|仿冒邮件|垃圾邮件|病毒附件|恶意链接/.test(b.textContent));
+  // 隐藏态提取的 SVG 只含 4 个 area：顺序对应 仿冒/垃圾/病毒/恶意链接
+  const areaOwner = ["仿冒邮件", "垃圾邮件", "病毒附件", "恶意链接"];
+  const areas = tp.querySelectorAll(".recharts-area");
+  legendBtns.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const name = btn.textContent.trim();
+      const hidden = btn.classList.toggle("opacity-40");
+      btn.classList.toggle("opacity-100", !hidden);
+      const idx = areaOwner.indexOf(name);
+      if (idx >= 0 && areas[idx]) areas[idx].style.display = hidden ? "none" : "";
+      const toast = document.getElementById("route-toast");
+      toast.textContent = "demo 行为：toggleSeries → 重新堆叠渲染（预览仅图层显隐）";
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1800);
+    });
+  });
+  const link = Array.from(tp.querySelectorAll("button")).find((b) => b.textContent.includes("查看邮件安全总览"));
+  if (link) link.addEventListener("click", () => {
+    const toast = document.getElementById("route-toast");
+    toast.textContent = 'demo 行为：router.push("/statistics/security-overview")';
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2000);
+  });
+})();
+</script>
+</body>
+</html>

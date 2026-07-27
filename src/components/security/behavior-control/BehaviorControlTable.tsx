@@ -83,7 +83,7 @@ export function BehaviorControlTable({ views, onEdit, onDelete }: Props) {
           {views.map((v) => {
             const productAction = BACKEND_TO_PRODUCT[v.rule.action as keyof typeof BACKEND_TO_PRODUCT] ?? v.rule.action;
             return (
-              <TableRow key={v.rule.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+              <TableRow key={v.rule.id}>
                 <TableCell className="font-mono text-xs text-muted-foreground">{v.list_id_display}</TableCell>
                 <TableCell className="font-medium">
                   {v.is_complex && (

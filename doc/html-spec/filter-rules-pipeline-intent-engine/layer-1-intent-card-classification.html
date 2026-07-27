@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 1：意图卡片展开（分类优先/标记投递） - 意图引擎</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --text:#111827; --sub:#6b7280; --blue:#1677ff; --red:#f5222d; --radius:.625rem; }
+    *{box-sizing:border-box} body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:var(--text);line-height:1.6;font-family:"Geist","Inter",system-ui,sans-serif} a{color:var(--blue);text-decoration:none}
+    nav.layer-nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+    h1{margin:0 0 16px;color:var(--primary);font-size:26px} h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px} h3{font-size:16px}
+    .meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+    .meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}
+    .meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}
+    .meta-table td:first-child{width:160px}
+    .component-preview{margin:12px 0;padding:18px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}
+    .screenshot-figure{margin:14px 0;text-align:center}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}.screenshot-figure figcaption{margin-top:8px;color:var(--sub);font-size:13px}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}
+    .is-hidden{display:none!important}
+    /* 意图卡片预览 */
+    .intent-card{min-width:760px;border:1px solid var(--border);border-left:4px solid #ef4444;border-radius:10px;background:#fff;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,.08)}
+    .intent-card.low{border-left-color:#3b82f6}
+    .card-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:#fef2f2}
+    .intent-card.low .card-head{background:#eff6ff}
+    .card-head .left,.card-head .right{display:inline-flex;align-items:center;gap:8px}
+    .switch{position:relative;display:inline-block;width:36px;height:20px;border-radius:999px;background:#2563eb;cursor:pointer;transition:background .15s;flex-shrink:0}
+    .switch::after{content:"";position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:999px;background:#fff;transition:left .15s}
+    .switch.off{background:#d1d5db}.switch.off::after{left:2px}
+    .pill{display:inline-flex;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:650;background:#f3f4f6}
+    .pill.risk-high{background:#fee2e2;color:#991b1b}.pill.risk-low{background:#dbeafe;color:#1e40af}
+    .pill.mode{background:#fff;border:1px solid var(--border);color:#374151;font-weight:500}
+    .pill.act-mark{background:#dbeafe;color:#1d4ed8}.pill.act-quarantine{background:#ffedd5;color:#c2410c}.pill.act-review{background:#f3e8ff;color:#7e22ce}.pill.act-block{background:#fee2e2;color:#b91c1c}.pill.act-drop{background:#fecaca;color:#7f1d1d}
+    .card-body{padding:16px;border-top:1px solid var(--border);display:grid;gap:14px;transition:opacity .2s}
+    .card-body.dimmed{opacity:.5;pointer-events:none}
+    .warn-red{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #fecaca;border-radius:10px;background:#fef2f2;color:#b91c1c;font-size:13px}
+    .field-label{font-size:13px;color:#4b5563;margin-bottom:4px}
+    .radio-row{display:flex;align-items:center;gap:16px;font-size:14px}
+    .radio-row label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+    .help{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:999px;border:1.5px solid #9ca3af;color:#9ca3af;font-size:11px;cursor:help;position:relative}
+    .help .tip,.warn-icon .tip{position:absolute;bottom:22px;left:-10px;width:300px;padding:8px 10px;border-radius:8px;background:#111827;color:#f9fafb;font-size:12px;line-height:1.5;z-index:9;display:none}
+    .help:hover .tip,.warn-icon:hover .tip{display:block}
+    .warn-icon{position:relative;color:#f59e0b;cursor:help;font-size:15px}
+    select.sel,input.inp{padding:7px 10px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:13px;color:#374151}
+    select.sel{min-width:128px;height:36px}
+    .mark-config{display:grid;gap:12px;padding:14px;border:1px solid #dbeafe;border-radius:10px;background:rgba(239,246,255,.6)}
+    .mark-config>b{color:#1e40af;font-size:14px}
+    .mark-row{display:flex;align-items:center;gap:10px;font-size:14px;flex-wrap:wrap}
+  </style>
+</head>
+<body>
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a> · 层级 1 / 4 · <a href="layer-2-threshold-config.html">层级2：分段阈值配置 →</a></nav>
+
+  <header class="spec-header">
+    <h1>交互层级 1：意图卡片展开（分类优先模式 / 标记投递子配置 / 高危警告）</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 意图分类卡片 IntentCard（<code>intent-engine-module.tsx</code>）</td></tr>
+      <tr><td>主文件</td><td><a href="index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级0 抽屉默认态 → 点击意图卡片头部（非 Switch 区域）→ 卡片展开、其他卡片收起、头部背景变风险浅色</td></tr>
+      <tr><td>截图</td><td><code>intent-card-layer-1-spam-expanded.png</code> 等 9 张（见下）</td></tr>
+      <tr><td>DOM 提取</td><td>展开卡根节点 <code>div[class*=border-l-]</code>：垃圾（分类优先，无子配置）节点数 43；订阅（标记投递子配置可见）节点数 79；涉黄/赌 节点数 43，展开头部 class 实测 <code>bg-red-50 dark:bg-red-950/20</code></td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">1</span>HTML 预览 A：高危卡片「涉黄/赌」展开（可操作：开关/模式/动作/标记投递/Tooltip）</h2>
+    <p style="font-size:13px;color:#6b7280;">操作提示：切换「处置动作」为 <b>标记投递</b> 可看到红色高危警告 + ⚠ 图标 + 标记投递子配置（demo 行为一致）；hover ? 图标看 Tooltip；点击卡片头部收起/展开；关闭启用开关看半透明禁用态。</p>
+    <div class="component-preview">
+      <div class="intent-card" data-demo-extracted="intent-card-porn-expanded">
+        <div class="card-head" id="pg-head">
+          <span class="left">
+            <span class="switch" id="pg-switch"></span>
+            <b>涉黄/赌</b>
+            <span class="pill risk-high">高危</span>
+            <span class="help">?<span class="tip">检测色情、赌博等违规内容邮件</span></span>
+          </span>
+          <span class="right">
+            <span class="pill mode">分类优先</span>
+            <span class="pill act-quarantine" id="pg-act-badge">隔离</span>
+            <span id="pg-chev">▾</span>
+          </span>
+        </div>
+        <div class="card-body" id="pg-body">
+          <div class="warn-red is-hidden" id="pg-warn">⚠ 高危意图采用标记投递，邮件将投递至用户邮箱，请确认风险</div>
+          <div>
+            <div class="field-label">检测模式</div>
+            <div class="radio-row">
+              <label><input type="radio" name="pg-mode" value="classification" checked> 分类优先</label>
+              <label><input type="radio" name="pg-mode" value="threshold"> 分段阈值</label>
+              <span class="help">?<span class="tip"><b>分类优先：</b>评分为0，只要识别为该意图即执行处置，忽略置信度分数。<br><b>分段阈值：</b>根据置信度分数落入的区间执行不同处置动作。</span></span>
+            </div>
+          </div>
+          <div id="pg-class-area">
+            <div class="field-label">处置动作</div>
+            <span style="display:inline-flex;align-items:center;gap:8px;">
+              <select class="sel" id="pg-action">
+                <option value="quarantine" selected>隔离</option>
+                <option value="mark_deliver">标记投递</option>
+                <option value="review">审核</option>
+                <option value="block">阻断</option>
+                <option value="drop">丢弃</option>
+              </select>
+              <span class="warn-icon is-hidden" id="pg-warn-icon">⚠<span class="tip">高危意图采用标记投递，邮件将投递至用户邮箱，请确认风险</span></span>
+            </span>
+            <div class="mark-config is-hidden" id="pg-mark" style="margin-top:12px;">
+              <b>标记投递配置</b>
+              <div>
+                <div class="field-label">投递目标</div>
+                <div class="radio-row">
+                  <label><input type="radio" name="pg-target" value="inbox"> 收件箱（仅标记）</label>
+                  <label><input type="radio" name="pg-target" value="spam_folder" checked> 垃圾邮件文件夹</label>
+                </div>
+              </div>
+              <div class="mark-row">
+                <label><input type="checkbox" id="pg-subj" checked> 主题标记</label>
+                <span id="pg-subj-extra">
+                  <input class="inp" style="width:128px;" maxlength="20" placeholder="标记文案" value="[涉黄/赌]">
+                  <label><input type="radio" name="pg-subj-pos" checked> 前缀</label>
+                  <label><input type="radio" name="pg-subj-pos"> 后缀</label>
+                </span>
+              </div>
+              <div class="mark-row">
+                <label><input type="checkbox" id="pg-bodym"> 正文标记</label>
+                <span id="pg-bodym-extra" class="is-hidden">
+                  <input class="inp" style="width:128px;" maxlength="20" placeholder="标记文案" value="[涉黄/赌]">
+                  <label><input type="radio" name="pg-bodym-pos" checked> 前缀</label>
+                  <label><input type="radio" name="pg-bodym-pos"> 后缀</label>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div id="pg-threshold-note" class="is-hidden" style="font-size:13px;color:#4b5563;padding:10px;border:1px dashed #93c5fd;border-radius:8px;background:#fff;">
+            分段阈值模式配置（可视化条 / 区间编辑 / 智能填充 / 预设模板）详见 <a href="layer-2-threshold-config.html">层级2：分段阈值配置</a>。
+          </div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/intent-card-layer-1-porn-expanded.png" alt="涉黄/赌卡片展开">
+      <figcaption>涉黄/赌展开态：头部浅红背景（bg-red-50），检测模式=分类优先，处置动作=隔离（接收方向高危默认值）。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/action-select-open-receive.png" alt="接收方向动作下拉">
+      <figcaption>接收方向动作下拉展开：标记投递(蓝)/隔离(橙,当前选中)/审核(紫)/阻断(红)/丢弃(深红) 共 5 项。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/intent-card-layer-1-porn-markdeliver-warning.png" alt="高危标记投递警告">
+      <figcaption>动作切换为标记投递后：卡片内出现红色警告条，动作选择器旁出现琥珀 ⚠ 图标，操作栏出现「配置已修改未保存」。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/mode-help-tooltip.png" alt="检测模式 Tooltip">
+      <figcaption>hover 检测模式 ? 图标：Tooltip 实测文案「分类优先：评分为0，只要识别为该意图即执行处置，忽略置信度分数。分段阈值：根据置信度分数落入的区间执行不同处置动作。」</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>HTML 预览 B：低危卡片「订阅」展开（默认标记投递，子配置默认可见）</h2>
+    <div class="component-preview">
+      <div class="intent-card low" data-demo-extracted="intent-card-subscription-expanded">
+        <div class="card-head" style="cursor:default;">
+          <span class="left">
+            <span class="switch" id="sub-switch"></span>
+            <b>订阅</b>
+            <span class="pill risk-low">低危</span>
+            <span class="help">?<span class="tip">检测新闻订阅、通知邮件、营销推送</span></span>
+          </span>
+          <span class="right"><span class="pill mode">分类优先</span><span class="pill act-mark">标记投递</span> ▾</span>
+        </div>
+        <div class="card-body" id="sub-body">
+          <div>
+            <div class="field-label">检测模式</div>
+            <div class="radio-row">
+              <label><input type="radio" name="sub-mode" checked> 分类优先</label>
+              <label><input type="radio" name="sub-mode"> 分段阈值</label>
+              <span class="help">?<span class="tip"><b>分类优先：</b>评分为0，只要识别为该意图即执行处置，忽略置信度分数。<br><b>分段阈值：</b>根据置信度分数落入的区间执行不同处置动作。</span></span>
+            </div>
+          </div>
+          <div>
+            <div class="field-label">处置动作</div>
+            <select class="sel"><option selected>标记投递</option><option>隔离</option><option>审核</option><option>阻断</option><option>丢弃</option></select>
+          </div>
+          <div class="mark-config">
+            <b>标记投递配置</b>
+            <div>
+              <div class="field-label">投递目标</div>
+              <div class="radio-row">
+                <label><input type="radio" name="sub-target"> 收件箱（仅标记）</label>
+                <label><input type="radio" name="sub-target" checked> 垃圾邮件文件夹</label>
+              </div>
+            </div>
+            <div class="mark-row">
+              <label><input type="checkbox" id="sub-subj" checked> 主题标记</label>
+              <span id="sub-subj-extra">
+                <input class="inp" style="width:128px;" maxlength="20" placeholder="标记文案" value="[订阅]">
+                <label><input type="radio" name="sub-subj-pos" checked> 前缀</label>
+                <label><input type="radio" name="sub-subj-pos"> 后缀</label>
+              </span>
+            </div>
+            <div class="mark-row">
+              <label><input type="checkbox" id="sub-bodym"> 正文标记</label>
+              <span id="sub-bodym-extra" class="is-hidden">
+                <input class="inp" style="width:128px;" maxlength="20" placeholder="标记文案" value="[订阅]">
+                <label><input type="radio" name="sub-bodym-pos" checked> 前缀</label>
+                <label><input type="radio" name="sub-bodym-pos"> 后缀</label>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/markdeliver-subconfig-visible.png" alt="订阅标记投递子配置">
+      <figcaption>订阅展开态：标记投递子配置面板（浅蓝底）。投递目标默认「垃圾邮件文件夹」，主题标记默认勾选 + 文案「[订阅]」+ 前缀，正文标记默认不勾选。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/markdeliver-subconfig-bodymark-on.png" alt="正文标记勾选后">
+      <figcaption>勾选「正文标记」后：出现文案输入框（默认 [订阅]）+ 前缀/后缀单选（默认前缀）。实测 8 个 radio 状态与源码一致。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/intent-help-tooltip.png" alt="意图分类 Tooltip">
+      <figcaption>hover 订阅 ? 图标：Tooltip「检测新闻订阅、通知邮件、营销推送」。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/intent-card-disabled-dim.png" alt="单意图禁用半透明">
+      <figcaption>关闭订阅启用开关：展开内容半透明（实测 class <code>p-4 space-y-4 border-t opacity-50 pointer-events-none</code>），头部仍可点击。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/intent-card-layer-1-spam-expanded.png" alt="垃圾卡片展开">
+      <figcaption>中危「垃圾」展开态（接收方向默认动作=隔离，无标记投递子配置）。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>元素清单</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>元素</th><th>默认值/文案</th><th>交互行为</th><th>i18n（见主文件 §7.1）</th></tr></thead>
+      <tbody>
+        <tr><td>卡片头</td><td>启用 Switch</td><td>checked（蓝色 data-[state=checked]:bg-blue-600）</td><td>点击切换该意图启用；<code>stopPropagation</code> 不触发展开；关闭后展开区半透明禁点</td><td>-</td></tr>
+        <tr><td>卡片头</td><td>意图名称 + 风险 Badge + ? 图标</td><td>涉黄/赌|涉政/反动|钓鱼(高危红)、垃圾(中危橙)、订阅(低危蓝)</td><td>hover ? 显示该意图描述 Tooltip</td><td>intentEngine.intent.*</td></tr>
+        <tr><td>卡片头</td><td>检测模式 Badge + 动作 Badge + 箭头</td><td>分类优先（outline）+ 当前 classificationAction（动作色）</td><td>点击头部展开/收起（单展开互斥）；展开箭头 ›→▾；头部背景变风险浅色</td><td>-</td></tr>
+        <tr><td>展开区</td><td>高危警告条</td><td>「高危意图采用标记投递，邮件将投递至用户邮箱，请确认风险」红底</td><td>仅 高危 && classificationAction=标记投递 时渲染（阈值模式下不显示）</td><td>intentEngine.warning.highRiskMark</td></tr>
+        <tr><td>展开区</td><td>检测模式 RadioGroup + ? Tooltip</td><td>分类优先 checked / 分段阈值</td><td>切换即时替换下方配置区（分类优先↔阈值配置，层级2）</td><td>intentEngine.mode.*</td></tr>
+        <tr><td>展开区</td><td>处置动作 Select（w-32 h-9）</td><td>接收：隔离(高/中危)、标记投递(低危)；选项 5 项按动作色渲染</td><td>选择后头部动作 Badge 同步；=标记投递 时显示子配置（仅接收+分类优先）；高危时旁边出现 ⚠ Tooltip 图标</td><td>intentEngine.action.*</td></tr>
+        <tr><td>标记投递子配置</td><td>投递目标 RadioGroup</td><td>垃圾邮件文件夹（默认）/ 收件箱（仅标记）</td><td>即时更新配置并标记未保存</td><td>intentEngine.markDeliver.*</td></tr>
+        <tr><td>标记投递子配置</td><td>主题标记 Checkbox + Input(maxLength=20) + 前缀/后缀</td><td>勾选，文案「[意图名]」，前缀</td><td>取消勾选隐藏输入与位置选择；输入实时保存；超 20 字被 maxLength 截断</td><td>同上</td></tr>
+        <tr><td>标记投递子配置</td><td>正文标记 Checkbox + Input + 前缀/后缀</td><td>不勾选（文案默认 [意图名] 前缀）</td><td>勾选后显示输入与位置选择</td><td>同上</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td><code>div.border.rounded-lg.border-l-4.border-l-red-500</code>（涉黄/赌）；展开头部 class 含 <code>bg-red-50</code></td><td><code>.intent-card</code> 左边框4px红 + 头部浅红底</td><td>一致</td></tr>
+        <tr><td>节点数</td><td>垃圾展开 43；订阅展开（含子配置）79；涉黄/赌展开 43</td><td>预览保留头部、警告、模式、动作、子配置全部关键节点（结构裁剪）</td><td>一致（关键节点）</td></tr>
+        <tr><td>检测模式 radio</td><td><code>#mode-class data-state=checked</code>，<code>#mode-threshold unchecked</code></td><td>分类优先 checked</td><td>一致</td></tr>
+        <tr><td>接收动作选项</td><td>5 项：标记投递(text-blue-700)/隔离(orange,checked)/审核(purple)/阻断(red-700)/丢弃(red-900)</td><td>同 5 项同顺序</td><td>一致</td></tr>
+        <tr><td>高危警告条</td><td>切标记投递后渲染 <code>div.bg-red-50.border-red-200</code>，文案一致；⚠ AlertTriangle amber-500 出现在 Select 旁</td><td>预览切换标记投递后同步显示两处警告</td><td>一致</td></tr>
+        <tr><td>子配置默认值</td><td>投递目标 target-spam checked；主题标记 checked + input value=[订阅] + subject-prefix checked；正文标记 unchecked（勾选后 body-prefix checked）</td><td>同默认值</td><td>一致</td></tr>
+        <tr><td>条件渲染</td><td>子配置仅在 接收方向 && mode=classification && action=mark_deliver 时渲染；正文/主题输入仅在对应 checkbox 勾选时渲染</td><td>预览按同条件显示/隐藏</td><td>一致</td></tr>
+        <tr><td>单意图禁用</td><td>展开体 class 追加 <code>opacity-50 pointer-events-none</code></td><td>预览 .dimmed 同效果</td><td>一致</td></tr>
+        <tr><td>意图 Tooltip</td><td>实测「检测新闻订阅、通知邮件、营销推送」</td><td>hover ? 显示同文案</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a> · <a href="layer-2-threshold-config.html">层级2：分段阈值配置 →</a></nav>
+
+  <script>
+    // ===== 涉黄/赌 高危卡（完整状态机） =====
+    const pgBody = document.getElementById("pg-body");
+    const pgChev = document.getElementById("pg-chev");
+    const pgSwitch = document.getElementById("pg-switch");
+    const pgAction = document.getElementById("pg-action");
+    const pgBadge = document.getElementById("pg-act-badge");
+    const ACT = { mark_deliver:["标记投递","act-mark"], quarantine:["隔离","act-quarantine"], review:["审核","act-review"], block:["阻断","act-block"], drop:["丢弃","act-drop"] };
+
+    document.getElementById("pg-head").addEventListener("click", (e) => {
+      if (e.target.closest("#pg-switch")) return;
+      const hidden = pgBody.classList.toggle("is-hidden");
+      pgChev.textContent = hidden ? "›" : "▾";
+    });
+    pgSwitch.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const off = pgSwitch.classList.toggle("off");
+      pgBody.classList.toggle("dimmed", off); // demo: opacity-50 pointer-events-none
+    });
+    function syncPgAction() {
+      const v = pgAction.value;
+      pgBadge.textContent = ACT[v][0];
+      pgBadge.className = "pill " + ACT[v][1];
+      const isMark = v === "mark_deliver";
+      // 高危 + 标记投递 → 红色警告条 + ⚠ 图标 + 子配置（接收方向）
+      document.getElementById("pg-warn").classList.toggle("is-hidden", !isMark);
+      document.getElementById("pg-warn-icon").classList.toggle("is-hidden", !isMark);
+      document.getElementById("pg-mark").classList.toggle("is-hidden", !isMark);
+    }
+    pgAction.addEventListener("change", syncPgAction);
+    document.querySelectorAll('input[name="pg-mode"]').forEach(r => r.addEventListener("change", () => {
+      const threshold = document.querySelector('input[name="pg-mode"]:checked').value === "threshold";
+      document.getElementById("pg-class-area").classList.toggle("is-hidden", threshold);
+      document.getElementById("pg-threshold-note").classList.toggle("is-hidden", !threshold);
+      // demo：阈值模式下高危警告条不渲染（条件含 classificationAction 且仅分类优先分支显示子配置）
+      document.getElementById("pg-warn").classList.toggle("is-hidden", threshold || pgAction.value !== "mark_deliver");
+    }));
+    document.getElementById("pg-subj").addEventListener("change", (e) => document.getElementById("pg-subj-extra").classList.toggle("is-hidden", !e.target.checked));
+    document.getElementById("pg-bodym").addEventListener("change", (e) => document.getElementById("pg-bodym-extra").classList.toggle("is-hidden", !e.target.checked));
+
+    // ===== 订阅 低危卡 =====
+    const subSwitch = document.getElementById("sub-switch");
+    subSwitch.addEventListener("click", () => {
+      const off = subSwitch.classList.toggle("off");
+      document.getElementById("sub-body").classList.toggle("dimmed", off);
+    });
+    document.getElementById("sub-subj").addEventListener("change", (e) => document.getElementById("sub-subj-extra").classList.toggle("is-hidden", !e.target.checked));
+    document.getElementById("sub-bodym").addEventListener("change", (e) => document.getElementById("sub-bodym-extra").classList.toggle("is-hidden", !e.target.checked));
+  </script>
+</body>
+</html>

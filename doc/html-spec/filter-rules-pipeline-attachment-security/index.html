@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - 附件安全检测 HTML 规格说明</title>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: #fff;
+      --muted: #f5f7fa;
+      --muted-foreground: #6b7280;
+      --border: #e5e7eb;
+      --blue: #1677ff;
+      --red: #f5222d;
+      --orange: #fa8c16;
+      --green: #52c41a;
+      --purple: #722ed1;
+      --radius: 0.625rem;
+      --font-sans: "Geist", "Inter", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1, h2, h3 { line-height: 1.3; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 28px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 20px; }
+    h3 { margin: 18px 0 10px; color: #111827; font-size: 17px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .spec-header, section, .component-toc { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .toc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+    .toc-list li { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa; }
+    .toc-badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #eef4ff; color: #155eef; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-spec, .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .trigger-path { margin: 8px 0 12px; padding: 8px 12px; border-radius: 8px; background: var(--muted); color: var(--muted-foreground); font-size: 13px; }
+    .trigger-path strong { color: var(--foreground); }
+    /* ===== demo 复刻控件 ===== */
+    .preview-card { width: 220px; height: 60px; display: flex; overflow: hidden; border: 1px solid #e8e8e8; border-radius: 8px; background: #fff; cursor: pointer; color: inherit; }
+    .preview-card:hover { border-color: #1890ff; background: #e6f7ff; }
+    .preview-bar { width: 4px; background: var(--orange); flex-shrink: 0; }
+    .preview-card-body { flex: 1; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
+    .preview-title { font-size: 14px; font-weight: 650; color: #262626; }
+    .config-link { color: #1890ff; font-size: 13px; }
+    .demo-tooltip { display: none; position: absolute; margin-top: 6px; padding: 10px 12px; max-width: 280px; border-radius: 8px; background: #111827; color: #fff; font-size: 12px; line-height: 1.5; z-index: 30; }
+    .card-wrap { position: relative; display: inline-block; }
+    .card-wrap:hover .demo-tooltip { display: block; }
+    .drawer-shell { display: grid; grid-template-columns: 208px 1fr; gap: 0; min-width: 900px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; }
+    .drawer-head { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #e8e8e8; background: #f8fbff; font-size: 15px; }
+    .drawer-nav { padding: 12px 8px; border-right: 1px solid var(--border); background: #f9fafb; }
+    .drawer-nav-row { display: flex; gap: 8px; align-items: flex-start; margin: 4px 0; padding: 10px; border: 0; border-radius: 8px; background: transparent; width: 100%; text-align: left; color: #374151; font-size: 13px; cursor: pointer; }
+    .drawer-nav-row.active { background: #eaf3ff; color: #155eef; }
+    .drawer-nav-row .dot { width: 10px; height: 10px; margin-top: 4px; border-radius: 999px; background: #3b82f6; flex-shrink: 0; }
+    .drawer-nav-row small { display: block; color: #9ca3af; }
+    .drawer-panel { padding: 16px; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .panel-head h5 { margin: 0; font-size: 16px; }
+    .switch { position: relative; width: 40px; height: 22px; border: 0; border-radius: 999px; background: #2563eb; cursor: pointer; transition: background .15s; }
+    .switch::after { content: ""; position: absolute; top: 2px; left: 20px; width: 18px; height: 18px; border-radius: 999px; background: #fff; transition: left .15s; }
+    .switch[aria-checked="false"] { background: #d1d5db; }
+    .switch[aria-checked="false"]::after { left: 2px; }
+    .tabs { display: inline-flex; gap: 4px; margin: 14px 0; padding: 4px; border-radius: 8px; background: #f3f4f6; }
+    .tab { padding: 5px 12px; border: 0; border-radius: 7px; font-size: 14px; background: transparent; cursor: pointer; color: #374151; }
+    .tab.active { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.06); font-weight: 650; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 10px 0; }
+    .form-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #374151; }
+    .num-input { width: 96px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; }
+    .num-input.warn { border-color: #f59e0b; background: #fffbeb; }
+    .unit { margin-left: 6px; color: var(--muted-foreground); font-size: 13px; }
+    .warn-text { display: none; margin-top: 4px; color: #d97706; font-size: 12px; }
+    .warn-text.show { display: block; }
+    .gray-block { margin: 14px 0; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f9fafb; }
+    .sel { min-width: 200px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: #fff; font-size: 14px; }
+    .hint { margin-top: 4px; color: var(--muted-foreground); font-size: 12px; }
+    .save-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .unsaved { display: none; align-items: center; gap: 6px; color: #d97706; font-size: 13px; }
+    .unsaved.show { display: inline-flex; }
+    .unsaved .pulse { width: 8px; height: 8px; border-radius: 999px; background: #f59e0b; }
+    .button-blue { padding: 8px 16px; border: 0; border-radius: 8px; background: #2563eb; color: #fff; font-weight: 650; font-size: 14px; cursor: pointer; }
+    .disable-mask.off { opacity: .5; pointer-events: none; }
+    .pill { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #f3f4f6; }
+    .pill.orange { background: #ffedd5; color: #c2410c; }
+    .pill.green { background: #dcfce7; color: #15803d; }
+    .pill.red { background: #ffe2e2; color: #d92d20; }
+    .pill.purple { background: #f3e8ff; color: #7e22ce; }
+    .is-hidden { display: none !important; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .diff-section { border-left: 4px solid var(--red); background: #fff7f7; }
+    .question-section { border-left: 4px solid #d97706; background: #fffbeb; }
+    .mermaid { padding: 16px; border-radius: 8px; background: #f8fafc; text-align: center; }
+    pre { padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; overflow: auto; font-family: var(--font-mono); font-size: 13px; }
+    code { font-family: var(--font-mono); font-size: 0.9em; }
+    @media (max-width: 900px) { body { padding: 16px; } .drawer-shell { grid-template-columns: 1fr; } .drawer-nav { border-right: 0; border-bottom: 1px solid var(--border); } .form-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>策略流水线 - 附件安全检测 HTML 规格说明</h1>
+    <table class="meta-table">
+      <tr><td>目标模块</td><td>策略流水线 / 阶段3：内容层 / 附件安全检测（policy key = <code>attachment</code>，priority 3000，type = configurable）</td></tr>
+      <tr><td>demo 地址</td><td><a href="http://localhost:3000/filter-rules/pipeline">http://localhost:3000/filter-rules/pipeline</a></td></tr>
+      <tr><td>demo 源码</td><td><code>design/origin/demo/components/filter-rules-new/strategy-pipeline-page.tsx</code>（策略卡 + 内容策略抽屉宿主）<br><code>design/origin/demo/components/filter-rules-new/content-strategy-page.tsx</code>（抽屉页宿主 ContentStrategyPage，initialPolicy=attachment）<br><code>design/origin/demo/components/filter-rules-new/attachment-security-module.tsx</code>（模块 UI 主体，4 个 Tab 子组件）</td></tr>
+      <tr><td>关联 PRD</td><td><code>design/origin/spec/附件安全检测模块 - 需求文档.md</code>（第一来源）<br><code>design/origin/spec/策略流水线需求文档.md</code>（流水线上下文）<br><code>design/origin/spec/链接与附件安全 功能需求文档.md</code>（附件威胁统计侧，仅下游关联）</td></tr>
+      <tr><td>落地约束</td><td><code>design/origin/implement.md</code>：管理员可见可改参数优先走配置系统（ConfigManager）；执行动作复用统一规则系统 action，不新增独立 action；PRD API 不等于必须新增后端 API；四语国际化。</td></tr>
+      <tr><td>浏览器验证</td><td>2026-07-11 20:14-20:25 Asia/Shanghai，headless Chromium CDP 驱动运行态 demo（1440×1000）。覆盖：整页默认态、策略卡 hover Tooltip、抽屉默认态（基础限制）、-1 无限制警告、超限处置下拉、反病毒引擎 Tab、图片识别 Tab（轻度/深度/高级规则提示/上限钳位）、加密附件 Tab（密码本添加/删除）、模块禁用态、保存配置、左导航切换与折叠、租户视角（?viewer=tenant）、英文语言、1024px 响应式。共 22 张截图。</td></tr>
+      <tr><td>产品形态/视角</td><td>默认形态 <code>cloud</code>（多租户）+ 平台视角：4 个 Tab 全量。多租户 + 租户视角（<code>?viewer=tenant</code>）：「基础限制」Tab 隐藏（平台统一管控），默认选中「反病毒引擎」，流水线页顶部出现蓝色 Lock Alert。单租户形态无租户视角概念。</td></tr>
+    </table>
+  </header>
+
+  <nav class="component-toc">
+    <h2>组件列表</h2>
+    <ul class="toc-list">
+      <li><a href="#component-2-1">2.1 策略流水线入口卡片（阶段3）</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-2">2.2 内容策略抽屉宿主 + 基础限制 Tab</a><span class="toc-badge">2层</span></li>
+      <li><a href="#component-2-3">2.3 附件安全检测配置 Tab 组（多层交互）</a><span class="toc-badge">5层</span><br>
+        <a href="layer-1-antivirus-tab.html">层级2：反病毒引擎</a> · <a href="layer-2-image-detect-tab.html">层级3：图片识别（轻度/深度）</a> · <a href="layer-3-encrypted-tab.html">层级4：加密附件</a> · <a href="layer-4-disabled-tenant-states.html">层级5：禁用/租户/多语言变体</a></li>
+      <li><a href="#api-mapping">4. 数据模型与 API 映射</a><span class="toc-badge">配置系统映射</span></li>
+    </ul>
+  </nav>
+
+  <section id="layout">
+    <h2>1. 页面布局结构</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>实际渲染</th><th>规格含义</th></tr></thead>
+      <tbody>
+        <tr><td>左侧产品导航</td><td>深色侧边栏，当前位于「平台安全策略 / 策略流水线」</td><td>全局导航容器，不属于本模块配置表单。</td></tr>
+        <tr><td>策略流水线主内容</td><td>五阶段等高横向卡片布局；附件安全检测卡片位于阶段3内容层首位（priority 3000）</td><td>附件安全检测以策略卡进入，不是独立页面首屏。</td></tr>
+        <tr><td>内容策略抽屉（Sheet）</td><td>右侧 80vw Sheet，头部「阶段3: 内容层 / 附件安全检测」+ XCircle 关闭按钮</td><td>阶段3 四个子策略（附件/URL/内容规则/意图引擎）的共用承载容器，内嵌 ContentStrategyPage。</td></tr>
+        <tr><td>抽屉左导航</td><td>宽 208px（w-52），可折叠至 56px（w-14）；4 个策略行 = 状态圆点 + 名称 + 摘要</td><td>子策略切换导航；圆点蓝色=启用，空心灰=禁用。</td></tr>
+        <tr><td>抽屉右配置卡</td><td>白色卡片：卡头（策略名 + 已启用/已禁用 + Switch）→ 可滚动 Tab 内容 → sticky 底部「保存配置」栏</td><td>附件安全检测配置主体，4 个 Tab（基础限制/反病毒引擎/图片识别/加密附件）。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/page-full-default.png" alt="策略流水线整页默认态">
+      <figcaption>整页默认态：附件安全检测卡片位于阶段3内容层，橙色左色条（configurable 类型 → 主要动作隔离）。</figcaption>
+    </figure>
+    <h3>1.1 视觉规范（浏览器验证值）</h3>
+    <table class="spec-table">
+      <thead><tr><th>属性</th><th>值</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>策略卡尺寸</td><td>220px × 60px，左色条 4px 橙色 <code>#fa8c16</code></td><td>浏览器 DOM：<code>w-[220px] h-[60px]</code>，configurable 类型色条</td></tr>
+        <tr><td>模块标识色</td><td>PRD 要求橙色 <code>#f97316</code>；demo 卡片色条实际为 <code>#fa8c16</code>（按动作类型推导，非模块固定色）</td><td>PRD §2 视觉一致性 / demo getColorBar()</td></tr>
+        <tr><td>抽屉宽度</td><td>80vw（1440px 视口下实测 1152px；1024px 视口下实测 819px）</td><td>浏览器 getBoundingClientRect</td></tr>
+        <tr><td>配置分组背景</td><td>灰色 <code>bg-gray-50</code>（嵌套防护/病毒库状态/二维码检测等分组）</td><td>与 PRD <code>#f9fafb</code> 一致</td></tr>
+        <tr><td>图标库</td><td>lucide-react（Settings/XCircle/AlertTriangle/RefreshCw/Plus/Trash2/CheckCircle2 等），16px 为主</td><td>demo import + 截图</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="components">
+    <h2>2. 逐组件规格</h2>
+
+    <article class="component-spec" id="component-2-1">
+      <h3>2.1 策略流水线入口卡片 Attachment Policy Card</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级0：页面默认态中的策略入口卡片</td></tr>
+          <tr><th>触发路径</th><td>打开 <code>/filter-rules/pipeline</code>，在阶段3内容层定位「附件安全检测」卡片。</td></tr>
+          <tr><th>可点击目标</th><td>卡片整体与「配置 →」按钮共用打开逻辑：<code>setContentDrawerPolicy("attachment")</code> + <code>setContentDrawerOpen(true)</code>。</td></tr>
+          <tr><th>Hover Tooltip</th><td>浏览器实测悬浮 1.2s 出现：「策略：附件安全检测 / 动作：隔离、投递 / 影响：命中则隔离，邮件保留至隔离区 / 被隔离邮件可在邮件隔离模块查看」。</td></tr>
+        </tbody>
+      </table>
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：策略卡默认态（hover 显示 Tooltip，点击跳转 2.2）</h4>
+        <div class="component-preview">
+          <div class="card-wrap" data-demo-extracted="attachment-card">
+            <a class="preview-card" href="#component-2-2" aria-label="打开附件安全检测配置抽屉规格">
+              <div class="preview-bar"></div>
+              <div class="preview-card-body">
+                <span class="preview-title">附件安全检测</span>
+                <span class="config-link">配置 →</span>
+              </div>
+            </a>
+            <div class="demo-tooltip">策略：附件安全检测<br>动作：隔离、投递<br>影响：命中则隔离，邮件保留至隔离区<br>被隔离邮件可在邮件隔离模块查看</div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/attachment-card-layer0.png" alt="附件安全检测策略卡" style="max-width:280px;">
+          <figcaption>策略卡局部截图：橙色左色条（configurable → 主要动作隔离）。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/attachment-card-hover-tooltip.png" alt="策略卡 hover Tooltip">
+          <figcaption>hover Tooltip 实测截图（右侧浮层）。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>卡片标题</td><td>附件安全检测</td><td>点击卡片整体打开内容策略抽屉并选中附件安全检测</td><td>i18n key <code>pipeline.attachmentSecurity</code></td></tr>
+            <tr><td>配置入口</td><td>配置 →（ArrowRight 12px）</td><td>同卡片点击（stopPropagation 后走同一分支）</td><td>i18n key <code>pipeline.configBtn</code></td></tr>
+            <tr><td>左侧色条</td><td>橙色 <code>#fa8c16</code>，宽 4px</td><td>无独立交互</td><td>由 <code>type = configurable</code> 推导（隔离）</td></tr>
+            <tr><td>今日统计</td><td>卡片上不显示；数据存在于 policy 定义（todayHits 78 / blocked 60 / exempted 18），仅供 Tooltip/统计</td><td>-</td><td>极简卡片「零信息展示，纯导航入口」</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>根节点</td><td><code>div.w-[220px].h-[60px].cursor-pointer</code>，子节点 2，节点总数 9</td><td><code>a.preview-card</code>（220×60，色条 + 主体两个子块）</td><td>一致（结构等价复刻）</td></tr>
+              <tr><td>文案</td><td>「附件安全检测\n配置」</td><td>「附件安全检测 / 配置 →」</td><td>一致</td></tr>
+              <tr><td>色条</td><td><code>div.w-1.bg-[#fa8c16]</code></td><td><code>.preview-bar</code> 橙色 4px</td><td>一致</td></tr>
+              <tr><td>Tooltip</td><td>Radix Tooltip，delayDuration 300ms，side=right</td><td>CSS hover 浮层，同文案</td><td>一致（触发方式简化为纯 CSS）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-2">
+      <h3>2.2 内容策略抽屉宿主 + 基础限制 Tab（ContentStrategyPage embedded + BasicLimitTab）</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级1：点击策略卡后打开 80vw 内容策略抽屉，默认选中附件安全检测 + 基础限制 Tab。</td></tr>
+          <tr><th>渲染组件</th><td><code>Sheet(80vw)</code> → <code>ContentStrategyPage embedded initialPolicy=attachment</code> → <code>AttachmentSecurityModule direction="receive" embedded</code></td></tr>
+          <tr><th>实际状态</th><td>抽屉头「阶段3: 内容层 / 附件安全检测」；左导航 4 策略全部启用（蓝点）；卡头「附件安全检测 已启用 + Switch(checked)」；Tab 组 4 项，基础限制 active；底部「保存配置」按钮。</td></tr>
+          <tr><th>方向（direction）</th><td><strong>固定 receive（接收方向）</strong>：ContentStrategyPage 有 direction state 但无任何切换 UI（setDirection 从未被调用）。表单默认值全部为接收方向默认值。见差异 D-2 / 需确认 Q2。</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">1</span>交互层级 1：抽屉默认态（基础限制 Tab，可交互）</h4>
+        <div class="trigger-path"><strong>触发路径</strong>：层级0 策略卡 / 配置 → onClick → Sheet 从右侧滑出（80vw）。预览已复刻：启用开关、-1 无限制警告、KB→MB 换算、超限处置下拉、未保存提示与保存按钮、Tab 切换（其余 Tab 链接到对应层级子文件）。</div>
+        <div class="component-preview">
+          <div class="drawer-shell" data-demo-extracted="content-drawer-basic">
+            <div class="drawer-head"><span>⚙ <strong>阶段3: 内容层</strong> <span style="color:#9ca3af;">/</span> 附件安全检测</span><span style="color:#9ca3af;cursor:pointer;" title="demo 中为 XCircle 关闭按钮">✕</span></div>
+            <div class="drawer-nav">
+              <button class="drawer-nav-row active" type="button"><span class="dot"></span><span>附件安全检测<small data-att-summary>病毒扫描/沙箱分析/类型检测</small></span></button>
+              <button class="drawer-nav-row" type="button" title="切换到 URL检测与防护（本规格不覆盖，切换后再切回时附件 Tab 与未保存改动会重置）"><span class="dot"></span><span>URL检测与防护<small>信誉评估/沙箱分析/仿冒检测</small></span></button>
+              <button class="drawer-nav-row" type="button"><span class="dot"></span><span>内容规则<small>关键词/正则/DLP检测</small></span></button>
+              <button class="drawer-nav-row" type="button"><span class="dot"></span><span>意图引擎<small>涉黄赌/涉政/钓鱼/垃圾/订阅</small></span></button>
+            </div>
+            <div class="drawer-panel">
+              <div class="panel-head">
+                <h5>附件安全检测</h5>
+                <span><span data-enable-label style="color:#2563eb;font-size:13px;margin-right:8px;">已启用</span><button class="switch" type="button" role="switch" aria-checked="true" data-enable-switch></button></span>
+              </div>
+              <div class="tabs">
+                <button class="tab active" type="button">基础限制</button>
+                <a class="tab" href="layer-1-antivirus-tab.html">反病毒引擎</a>
+                <a class="tab" href="layer-2-image-detect-tab.html">图片识别</a>
+                <a class="tab" href="layer-3-encrypted-tab.html">加密附件</a>
+              </div>
+              <div class="disable-mask" data-config-area>
+                <label class="form-label">附件结构限制（当前方向：接收方向）</label>
+                <div class="form-grid">
+                  <div>
+                    <label class="form-label">单个邮件附件个数上限</label>
+                    <input class="num-input" type="number" value="10" data-count-input>
+                    <span class="unit">个 (-1表示无限制)</span>
+                    <div class="warn-text" data-count-warn>⚠ 当前无限制，存在资源耗尽风险</div>
+                  </div>
+                  <div>
+                    <label class="form-label">单个附件大小上限</label>
+                    <input class="num-input" type="number" value="10240" data-size-input>
+                    <span class="unit">KB (<span data-size-mb>10.0 MB</span>)</span>
+                  </div>
+                </div>
+                <div class="gray-block">
+                  <label class="form-label">嵌套防护（防压缩包炸弹）</label>
+                  <div class="form-grid" style="grid-template-columns:repeat(3,1fr);">
+                    <div><label class="form-label">单个附件嵌套压缩包数量上限</label><input class="num-input" type="number" value="2" data-dirty style="width:72px;"><span class="unit">个</span></div>
+                    <div><label class="form-label">单个附件嵌套文件数量上限</label><input class="num-input" type="number" value="20" data-dirty style="width:72px;"><span class="unit">个</span></div>
+                    <div><label class="form-label">压缩包嵌套层数上限</label><input class="num-input" type="number" value="2" data-dirty style="width:72px;"><span class="unit">层</span></div>
+                  </div>
+                </div>
+                <label class="form-label">性能保护</label>
+                <div style="margin-bottom:12px;"><span style="font-size:13px;">附件扫描超时时间</span> <input class="num-input" type="number" value="30" data-dirty style="width:72px;"> <span class="unit">秒</span></div>
+                <label class="form-label">超出限制处置</label>
+                <select class="sel" data-dirty style="width:280px;">
+                  <option selected>隔离</option><option>审核</option><option>阻断</option><option>丢弃</option><option>超出部分不检测</option>
+                </select>
+                <div class="hint">接收方向默认隔离</div>
+              </div>
+              <div class="save-bar">
+                <span class="unsaved" data-unsaved><span class="pulse"></span>有未保存的更改</span>
+                <button class="button-blue" type="button" data-save-btn>保存配置</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-default-basic-tab.png" alt="抽屉默认态：基础限制 Tab">
+          <figcaption>抽屉默认态（浏览器实际渲染，1440px）：左导航 + 卡头开关 + 4 Tab + 基础限制表单 + 保存栏。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/basic-limit-unlimited-warning.png" alt="-1 无限制警告">
+          <figcaption>附件个数输入 -1：输入框琥珀色边框+浅黄背景，下方出现「当前无限制，存在资源耗尽风险」。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/basic-exceed-action-open.png" alt="超出限制处置下拉展开">
+          <figcaption>超出限制处置下拉展开：隔离 / 审核 / 阻断 / 丢弃 / 超出部分不检测（5 项，浏览器实测）。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>序号</th><th>元素</th><th>默认值（receive）</th><th>校验/联动（浏览器实测）</th><th>i18n（内联 LABELS）</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>启用开关 Switch</td><td>checked，文案「已启用」</td><td>关闭 → 文案变「已禁用」、配置区 opacity-50 + pointer-events-none、左导航摘要变「未启用」、触发未保存提示。详见<a href="layer-4-disabled-tenant-states.html">层级5</a></td><td>宿主硬编码中文（差异 D-9）</td></tr>
+            <tr><td>2</td><td>单个邮件附件个数上限 Input(number)</td><td>10</td><td>输入 -1 → 琥珀边框 + 警告文案；非法输入 parseInt 失败按 -1 处理（源码 <code>|| -1</code>，与 PRD「自动修正为1」不符，差异 D-6）</td><td>attachmentCountLimit / unlimitedHint / unlimitedWarning</td></tr>
+            <tr><td>3</td><td>单个附件大小上限 Input(number)</td><td>10240 KB</td><td>右侧实时换算 <code>formatSize</code>：-1→无限制，&lt;1024→KB，否则 MB（10240→10.0 MB）</td><td>attachmentSizeLimit</td></tr>
+            <tr><td>4-6</td><td>嵌套压缩包/嵌套文件/嵌套层数 Input(number)</td><td>2 / 20 / 2</td><td>灰底分组「嵌套防护（防压缩包炸弹）」；非法输入回退 1（源码 <code>|| 1</code>）</td><td>nestedZipLimit / nestedFileLimit / nestedLevelLimit</td></tr>
+            <tr><td>7</td><td>附件扫描超时时间 Input(number)</td><td>30 秒</td><td>非法输入回退 30</td><td>scanTimeout / secondsUnit</td></tr>
+            <tr><td>8</td><td>超出限制处置 Select</td><td>隔离</td><td>5 选项：隔离/审核/阻断/丢弃/超出部分不检测；下方提示「接收方向默认隔离」</td><td>exceedLimitAction / receiveDefault</td></tr>
+            <tr><td>9</td><td>保存配置 Button + 未保存提示</td><td>-</td><td>任一配置变更 → 「有未保存的更改」琥珀脉冲点；点击保存 → 提示消失（demo 仅前端态，无 API）</td><td>宿主硬编码中文</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>抽屉结构</td><td><code>[role=dialog]</code> 80vw：SheetHeader + 左导航(nav, 4 button) + 右配置卡</td><td>drawer-shell 三区（head/nav/panel）</td><td>一致（结构裁剪展示）</td></tr>
+              <tr><td>Tab 组</td><td><code>[role=tablist]</code> 4 个 tab：基础限制 active，其余 inactive</td><td>4 个 tab，基础限制 active，其余为层级子文件链接</td><td>一致</td></tr>
+              <tr><td>基础限制面板</td><td><code>[role=tabpanel]</code> 节点总数 46；number 输入 6 个，值 [10, 10240, 2, 20, 2, 30]；combobox 1 个「隔离」；label 10 个</td><td>6 个 number 输入同值 + 1 个 select 同默认</td><td>一致</td></tr>
+              <tr><td>-1 警告条件渲染</td><td>输入 -1 后 <code>border-amber-500</code> 类出现 + 警告文案渲染；恢复 10 后消失</td><td>预览 JS 同逻辑（=-1 时显示）</td><td>一致</td></tr>
+              <tr><td>开关状态</td><td><code>button[role=switch] data-state=checked</code>，卡头文案「已启用」</td><td>aria-checked=true + 文案联动</td><td>一致</td></tr>
+              <tr><td>未保存提示</td><td>默认不渲染；变更后渲染琥珀点 + 「有未保存的更改」；保存后移除</td><td>预览 JS 同状态机</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-3">
+      <h3>2.3 附件安全检测配置 Tab 组 AttachmentSecurityModule（多层交互）</h3>
+      <p>4 个 Tab 中「基础限制」已在 2.2 层级1 内嵌；其余 Tab 及状态变体拆分为独立子文件。左导航切换到其他策略再切回时，<strong>Tab 选中态与未保存的表单改动全部重置</strong>（组件重挂载，浏览器实测：加密附件 Tab 切走再回来变回基础限制）。</p>
+      <div class="mermaid">
+        graph LR
+          A[层级0 策略卡] --> B[层级1 抽屉默认态·基础限制]
+          B --> C[层级2 反病毒引擎 Tab]
+          B --> D[层级3 图片识别 Tab]
+          D --> D2[3B 二维码深度检测展开]
+          B --> E[层级4 加密附件 Tab]
+          E --> E2[密码本添加/删除]
+          B --> F[层级5 禁用态/租户视角/多语言]
+          B -->|左导航切走再切回| B
+      </div>
+      <table class="spec-table layer-index">
+        <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>策略卡默认态</td><td>页面加载</td><td>上方 2.1 内嵌</td></tr>
+          <tr><td>1</td><td>抽屉默认态（基础限制 Tab）</td><td>点击策略卡 / 配置 →</td><td>上方 2.2 内嵌</td></tr>
+          <tr><td>2</td><td>反病毒引擎 Tab</td><td>Tab 点击「反病毒引擎」</td><td><a href="layer-1-antivirus-tab.html">查看详情</a></td></tr>
+          <tr><td>3</td><td>图片识别 Tab（轻度默认 / 深度展开 / 高级规则提示 / 上限钳位）</td><td>Tab 点击「图片识别」；二维码检测模式下拉切换</td><td><a href="layer-2-image-detect-tab.html">查看详情</a></td></tr>
+          <tr><td>4</td><td>加密附件 Tab（密码本增删）</td><td>Tab 点击「加密附件」</td><td><a href="layer-3-encrypted-tab.html">查看详情</a></td></tr>
+          <tr><td>5</td><td>模块禁用态 / 租户视角 / 导航折叠 / 英文模式</td><td>卡头 Switch 关闭；<code>?viewer=tenant</code>；折叠按钮；顶栏语言切换</td><td><a href="layer-4-disabled-tenant-states.html">查看详情</a></td></tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+  <section id="dialogs">
+    <h2>3. 弹窗/抽屉/对话框规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>名称</th><th>触发条件</th><th>实际渲染</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>内容策略抽屉（Sheet）</td><td>点击「附件安全检测」卡片或「配置 →」</td><td>80vw 右滑 Sheet，hideCloseButton + 自绘 XCircle；头部 Settings 图标 + 面包屑「阶段3: 内容层 / 附件安全检测」</td><td>PRD §2 示意为「[←] 附件安全检测」返回箭头，demo 为面包屑 + 关闭按钮（差异 D-10，低）。点击遮罩/ESC 也可关闭（Radix Sheet 默认）。</td></tr>
+        <tr><td>下拉选项浮层</td><td>点击各 Select 触发器</td><td>Radix Select Portal，白底浮层，选中项带勾选</td><td>选中后收起，符合 PRD §3。</td></tr>
+        <tr><td>保存成功 Toast</td><td>PRD §3 状态变化「保存成功 Toast」</td><td>demo 点击保存仅清除未保存标记，<strong>无 Toast</strong></td><td>差异 D-5，落地需补。</td></tr>
+        <tr><td>关闭前未保存确认</td><td>-</td><td>demo 有未保存更改时直接关闭抽屉<strong>无确认弹窗</strong></td><td>PRD 未明确；建议落地补齐，见 Q1。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="api-mapping">
+    <h2>4. 数据模型与 API 映射</h2>
+    <pre><code>type Direction = "receive" | "send" | "internal"
+type ActionType = "isolate" | "review" | "block" | "discard" | "continue" | "pass" | "skipExceed"
+
+interface AttachmentSecurityConfig {           // 按方向三份配置
+  basicLimit: Record&lt;Direction, BasicLimitConfig&gt;
+  antivirus: Record&lt;Direction, AntivirusConfig&gt;
+  imageDetect: Record&lt;Direction, ImageDetectConfig&gt;
+  encryptedAttachment: Record&lt;Direction, EncryptedAttachmentConfig&gt;
+}
+interface BasicLimitConfig { attachmentCountLimit; attachmentSizeLimit /*KB*/; nestedZipCountLimit;
+  nestedFileCountLimit; nestedLevelLimit; scanTimeout /*s*/; exceedAction }
+interface AntivirusConfig { enabled; primaryEngine: "qianxin"|"kaspersky"; backupEngine: "qianxin"|"kaspersky"|"none";
+  autoSwitchOnFailure; dualEngineMode; virusAction; timeoutAction; engineStatus: {version, signatures, status}×2 }
+interface ImageDetectConfig { ocrMode: "none"|"light"|"deep"; ocrLimit; qrMode: "none"|"light"|"deep";
+  qrLightAction; qrBarcodeExempt; qrDeepRoute{Url,Keyword,Intent,Advanced}+子开关;
+  qrDeepArbitration: "highest_priority"|"first_match"; qrDeepLimit(1-50); qrDeepExceedAction: "pass_warn"|"isolate" }
+interface EncryptedAttachmentConfig { detectMode: "none"|"detect_only"|"deep"; decryptFailAction;
+  extractFromBody; usePasswordBook; passwordBook: {password, addedAt}[]; recursiveDetect; markSuspicious }</code></pre>
+    <table class="spec-table">
+      <thead><tr><th>PRD API / 数据表</th><th>用途</th><th>落地映射建议</th><th>需确认</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET/PUT /api/config/attachment-security?direction=</code></td><td>按方向读写配置 JSON</td><td>走网关配置系统 ConfigManager（<code>/apiserver.cf</code> 或 antispam 配置节 + DB <code>config_overrides</code> 在线覆盖），不必新增独立配置表；方向作为配置路径的一级维度。</td><td>配置粒度（租户×方向）与现有 config_overrides 模型的匹配方式（Q7）。</td></tr>
+        <tr><td><code>POST /api/antivirus/update?engine=</code>、<code>GET /api/antivirus/status</code></td><td>病毒库更新/引擎状态</td><td>网关现有深度附件扫描为 <code>attachd</code> 服务（cmd/attachd）；奇安信/卡巴斯基 ICAP 对接与病毒库状态接口<strong>当前不存在</strong>。</td><td>[需确认] 新增引擎管理 API 或以 attachd 能力替代（Q3）。</td></tr>
+        <tr><td><code>GET/POST/DELETE /api/password-book</code></td><td>密码本 CRUD（脱敏）</td><td>需新增存储（PRD 建议 AES-256-GCM 加密列 + KMS；网关已有类似 <code>OSG_DKIM_KEY_ENC_KEY</code> 加密列先例）。</td><td>[需确认] 新增表与 API；「全局共用」vs 租户隔离冲突（Q5）。</td></tr>
+        <tr><td><code>attachment_security_config</code> / <code>global_password_book</code> / <code>antivirus_engine_status</code> 表</td><td>产品设计表</td><td>非硬性要求；配置走 config_overrides，密码本单独建表需同步所有信创 backend 的 init.sql。</td><td>-</td></tr>
+        <tr><td>执行动作枚举</td><td>isolate/review/block/discard/continue/pass/skipExceed</td><td>复用统一规则系统 action：隔离→quarantine、阻断→reject、放行→accept；「审核」「丢弃」「进行下一步检测」「超出部分不检测」的映射见 Q4。</td><td>[需确认] Q4</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="business-logic">
+    <h2>5. 业务逻辑规格</h2>
+    <h3>5.1 检测流程（PRD §1 数据流转）</h3>
+    <div class="mermaid">
+      graph TD
+        A[邮件进入附件安全检测] --> B[Step1 基础限制检查<br/>数量/大小/嵌套超限→超限处置]
+        B --> C[Step2 反病毒扫描<br/>主引擎→故障切备引擎；病毒→病毒处置；超时→超时处置]
+        C --> D[Step3 图片识别<br/>OCR→关键词过滤；二维码轻度→直接处置 / 深度→解码路由下游]
+        D --> E[Step4 加密附件检测<br/>正文密码/密码本解密→递归检测；失败→解密失败处置]
+        E --> F[输出：放行/隔离/审核/阻断/丢弃]
+    </div>
+    <h3>5.2 方向默认值矩阵（demo 源码 createDefault*，浏览器验证 receive 列）</h3>
+    <table class="spec-table">
+      <thead><tr><th>配置项</th><th>接收 receive（已验证）</th><th>外发 send（源码）</th><th>域内 internal（源码）</th></tr></thead>
+      <tbody>
+        <tr><td>附件个数/大小上限</td><td>10 个 / 10240 KB</td><td>20 个 / 20480 KB</td><td>15 个 / 15360 KB</td></tr>
+        <tr><td>嵌套压缩包/文件/层数</td><td>2 / 20 / 2</td><td>3 / 30 / 2</td><td>3 / 30 / 2</td></tr>
+        <tr><td>基础限制超限处置</td><td>隔离</td><td>审核</td><td>审核</td></tr>
+        <tr><td>病毒处置 / 扫描超时处置</td><td>隔离 / 进行下一步检测</td><td>审核 / 审核</td><td>审核 / 审核</td></tr>
+        <tr><td>OCR 模式</td><td>轻度</td><td>深度（防截图泄密提示）</td><td>轻度</td></tr>
+        <tr><td>二维码轻度动作</td><td>隔离</td><td>审核</td><td>审核</td></tr>
+        <tr><td>加密附件检测模式 / 解密失败处置</td><td>仅检测 / 放行</td><td>深度检测 / 审核</td><td>仅检测 / 放行</td></tr>
+      </tbody>
+    </table>
+    <h3>5.3 动作可选集矩阵（浏览器实测下拉选项）</h3>
+    <table class="spec-table">
+      <thead><tr><th>上下文</th><th>可选动作</th><th>实测</th></tr></thead>
+      <tbody>
+        <tr><td>基础限制超限（basic）</td><td>隔离、审核、阻断、丢弃、超出部分不检测</td><td>✅ 5 项</td></tr>
+        <tr><td>发现病毒（virus）</td><td>隔离、审核、阻断、丢弃</td><td>✅ 4 项</td></tr>
+        <tr><td>扫描超时（timeout）</td><td>隔离、审核、阻断、丢弃、进行下一步检测</td><td>✅ 5 项</td></tr>
+        <tr><td>二维码轻度检测</td><td>隔离、审核、阻断、丢弃</td><td>✅ 4 项（源码 lightActions）</td></tr>
+        <tr><td>二维码深度超限</td><td>放行并记录告警、隔离兜底</td><td>✅ 2 项</td></tr>
+        <tr><td>解密失败（decrypt，receive）</td><td>隔离、放行、阻断</td><td>✅ 3 项；send/internal 为 审核、放行、阻断（源码）</td></tr>
+      </tbody>
+    </table>
+    <h3>5.4 权限与可见性</h3>
+    <table class="spec-table">
+      <thead><tr><th>维度</th><th>PRD</th><th>demo 实际</th></tr></thead>
+      <tbody>
+        <tr><td>角色权限</td><td>超管全量；安全管理员密码脱敏；审计员只读；普通用户禁止</td><td>未实现角色差异，密码本明文展示（差异 D-8）</td></tr>
+        <tr><td>产品形态</td><td>多租户配置按租户隔离</td><td>多租户 + 租户视角：基础限制 Tab 隐藏（<code>hideBasicLimit = isMultiTenant && viewer==="tenant"</code>），初始 Tab 变反病毒引擎；流水线页 Lock Alert 提示平台统管。平台视角/单租户：4 Tab 全量。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interaction">
+    <h2>6. 交互规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>实际行为（浏览器实测）</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>模块总开关</td><td>关闭 → 卡头「已禁用」、配置区 opacity-50 + pointer-events-none、左导航摘要「未启用」、圆点变空心</td><td>与 PRD §3 一致。</td></tr>
+        <tr><td>Tab 切换</td><td>Radix Tabs，点击后 data-state 切换，内容区替换；各 Tab 表单状态在同一策略内保留</td><td>与 PRD 一致。</td></tr>
+        <tr><td>左导航切换</td><td>切到其他策略后组件卸载：再切回时 Tab 重置为基础限制、未保存的改动丢失</td><td>PRD 未提；落地建议保留草稿或提示（Q1）。</td></tr>
+        <tr><td>导航折叠</td><td>圆形浮动按钮（ChevronLeft/Right），w-52 ↔ w-14；折叠态导航行仅剩圆点，hover 出 Tooltip（名称+摘要）</td><td>demo 特有，PRD 未提。</td></tr>
+        <tr><td>二维码检测模式切换</td><td>不检测→无子配置；轻度→轻度配置块；深度→深度配置块（条件渲染，实测节点数 37→109）</td><td>与 PRD §3「动态显示/隐藏对应配置区域」一致。</td></tr>
+        <tr><td>路由模块勾选</td><td>勾选 URL/关键词/意图引擎/高级规则 → 展开各自子配置行；取消勾选收起</td><td>与 PRD 一致。</td></tr>
+        <tr><td>检测数量上限钳位</td><td>输入 99 → 立即钳位为 50（min 1 / max 50）</td><td>与 PRD §4 边界一致。</td></tr>
+        <tr><td>病毒库立即更新</td><td>按钮存在但<strong>未绑定 onClick</strong>，点击无任何反馈</td><td>PRD 要求 loading + 版本刷新（差异 D-4）。</td></tr>
+        <tr><td>密码本添加/删除</td><td>输入后点添加 → 追加行（当日日期）；空串忽略；<strong>重复密码不校验</strong>；删除图标直接移除无确认</td><td>PRD 要求重复提示「密码已存在」（差异 D-7）；删除无二次确认与 PRD 一致。</td></tr>
+        <tr><td>字段级 Hover Tooltip</td><td>PRD §3 列出 10 条字段悬浮提示；demo 配置表单字段<strong>均无 Tooltip</strong>（仅策略卡与折叠导航有）</td><td>差异 D-3，落地需补。</td></tr>
+        <tr><td>保存</td><td>任意变更 → 底部「有未保存的更改」；点击保存配置 → 标记清除（无 Toast、无 API）</td><td>PRD §3 说「实时生效，无需手动保存按钮」——正面冲突（差异 D-5 / Q1）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="i18n">
+    <h2>7. 国际化规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>范围</th><th>机制</th><th>覆盖</th><th>缺口（英文模式浏览器实测）</th></tr></thead>
+      <tbody>
+        <tr><td>流水线页/策略卡</td><td>全局 <code>t()</code> keys：<code>pipeline.attachmentSecurity</code>、<code>pipeline.attachmentDesc</code>、<code>pipeline.configBtn</code>、<code>pipeline.phase3Content</code>、<code>pipeline.actionQuarantine</code></td><td>zh/en/th 三语</td><td>卡片英文「Attachment Security / Configure」正常。</td></tr>
+        <tr><td>BasicLimitTab / AntivirusTab / ImageDetectTab</td><td>组件内联 LABELS 字典（zh/en/th），如 attachmentStructure、engineConfig、qrDetection、arbitration 等约 70 个 key</td><td>zh/en/th 三语</td><td>英文模式下表单标签正确翻译（实测「Max attachments per email」等）。</td></tr>
+        <tr><td>EncryptedAttachmentTab</td><td><strong>无 language 参数，全部硬编码中文</strong></td><td>仅 zh</td><td>英文模式下整个加密附件 Tab 仍为中文（差异 D-9）。</td></tr>
+        <tr><td>抽屉宿主 ContentStrategyPage</td><td>POLICIES.labelKey/getSummary、Tab 标签、「已启用/已禁用」「保存配置」「有未保存的更改」均为硬编码中文</td><td>仅 zh</td><td>英文模式实测：左导航、Tab 组、卡头、保存栏全部保持中文（差异 D-9）。</td></tr>
+        <tr><td>第四语言</td><td>demo 语言切换器仅 中文/English/ไทย 三项；语言选择不持久化（刷新回 zh，LanguageProvider 不读 localStorage）</td><td>-</td><td>implement.md 要求四种内置语言，缺第 4 语言（Q6）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="responsive">
+    <h2>8. 响应式规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>断点</th><th>浏览器验证</th><th>表现</th></tr></thead>
+      <tbody>
+        <tr><td>1440px</td><td>默认截图</td><td>抽屉 1152px（80vw）；基础限制两列 Grid、嵌套防护三列 Grid 完整展示。</td></tr>
+        <tr><td>1024px</td><td>已截图</td><td>抽屉实测 819px；表单仍为多列 Grid（demo 未按 PRD 在 768-1023px 收缩为两列——布局类为固定 grid-cols-2/3，PRD §2 响应式规则未实现，差异 D-11）。</td></tr>
+        <tr><td>&lt;768px</td><td>未验证</td><td>PRD 要求单列 + 抽屉全屏；demo 无对应断点样式。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/responsive-1024-default.png" alt="1024px 流水线页">
+      <figcaption>1024px 流水线整页：五阶段横向布局出现横向滚动。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/responsive-1024-drawer.png" alt="1024px 抽屉">
+      <figcaption>1024px 抽屉（819px 宽）：左导航保持 208px，配置区压缩。</figcaption>
+    </figure>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>9. 与 PRD / 源码 / 浏览器渲染的差异标注</h2>
+    <table class="spec-table">
+      <thead><tr><th>#</th><th>位置</th><th>PRD 描述</th><th>demo 实际</th><th>建议处理</th></tr></thead>
+      <tbody>
+        <tr><td>D-1</td><td>加密附件检测模式</td><td>两档：不检测 / 尝试解密并检测（§1.4）</td><td>三档：不检测 / 仅检测（识别加密，不尝试解密）/ 深度检测（尝试解密并扫描）</td><td>以 demo 三档为准。</td></tr>
+        <tr><td>D-2</td><td>方向切换</td><td>配置按 receive/send/internal 三方向独立（§1、§5 上游依赖）</td><td>数据模型按方向三份，但抽屉内<strong>无方向切换 UI</strong>，固定显示接收方向</td><td>高影响，见 Q2。</td></tr>
+        <tr><td>D-3</td><td>字段 Hover Tooltip</td><td>§3 列出 10 条字段悬浮提示</td><td>配置表单字段均无 Tooltip</td><td>落地按 PRD 补齐。</td></tr>
+        <tr><td>D-4</td><td>病毒库立即更新</td><td>点击触发更新、按钮 loading、完成显示新版本（§3/§4）</td><td>按钮无 onClick 绑定，点击无反馈</td><td>落地需实现（依赖引擎状态 API，Q3）。</td></tr>
+        <tr><td>D-5</td><td>保存模式</td><td>「配置修改实时生效，无需手动保存按钮」（§3 批量操作）；另要求保存成功/失败 Toast</td><td>抽屉底部有「保存配置」按钮 + 未保存提示，点击仅清标记、无 Toast</td><td>正面冲突，见 Q1；以 demo 显式保存为倾向。</td></tr>
+        <tr><td>D-6</td><td>非法输入修正</td><td>数量输 0/负数（非-1）自动修正为 1；大小修正 1KB；超时修正 1 秒（§4）</td><td>源码 <code>parseInt||-1</code>（个数/大小）与 <code>||1</code>/<code>||30</code>（其余），输入 0 会被保留为 0，仅空串/非数字回退</td><td>落地按 PRD 边界校验实现。</td></tr>
+        <tr><td>D-7</td><td>密码本重复</td><td>重复密码提示「密码已存在」不重复添加（§4）</td><td>无重复校验，可加入相同密码；密码明文展示（PRD 要求安全管理员脱敏）</td><td>落地补校验 + 脱敏。</td></tr>
+        <tr><td>D-8</td><td>角色权限</td><td>§1 权限矩阵（超管/安全管理员/审计员/普通用户）</td><td>demo 无角色差异</td><td>落地由网关 RBAC 承接。</td></tr>
+        <tr><td>D-9</td><td>国际化</td><td>§6 支持 zh/en/th；implement.md 要求四语</td><td>抽屉宿主（Tab 标签/左导航/卡头/保存栏）与加密附件 Tab 硬编码中文，英文模式混排；语言切换不持久化；无第 4 语言</td><td>落地统一 i18n key，见 Q6。</td></tr>
+        <tr><td>D-10</td><td>抽屉头</td><td>§2 示意「[←] 附件安全检测 + 启用开关」在标题栏</td><td>标题栏为面包屑 + XCircle 关闭；启用开关在配置卡头</td><td>低影响，以 demo 为准。</td></tr>
+        <tr><td>D-11</td><td>响应式</td><td>§2：≥1024 三列、768-1023 两列、&lt;768 单列全屏抽屉</td><td>Grid 列数固定（grid-cols-2/3），无断点降级</td><td>落地按 PRD 补断点。</td></tr>
+        <tr><td>D-12</td><td>默认值示意</td><td>§2 布局图示例值（-1 个数 / 嵌套 3/100/3）</td><td>接收方向实际默认 10 / 10240KB / 2/20/2</td><td>示意图非规格值，以 demo 默认为准。</td></tr>
+        <tr><td>D-13</td><td>主备引擎相同</td><td>§4：主备相同时自动将备设为「无」并提示</td><td>源码无该校验，可主备同为奇安信</td><td>落地补联动校验。</td></tr>
+        <tr><td>D-14</td><td>左导航切换丢状态</td><td>PRD 未提</td><td>切走再切回：Tab 重置为基础限制、未保存改动丢失（组件重挂载，浏览器实测）</td><td>落地建议加未保存拦截，见 Q1。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>10. 需确认事项</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>问题</th><th>影响</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td>保存语义：PRD「实时生效无保存按钮」vs demo「显式保存 + 未保存提示」，且切换策略/关闭抽屉会静默丢弃未保存改动，是否需要未保存拦截确认框？</td><td>决定配置写入时机、API 形态与防误操作交互。</td></tr>
+        <tr><td>Q2</td><td>方向维度如何暴露：数据模型按 receive/send/internal 三份，抽屉无方向切换 UI。加方向 Tab/下拉，还是仅实现接收方向？</td><td>影响 UI 结构、配置系统路径设计与默认值矩阵是否全部落地。</td></tr>
+        <tr><td>Q3</td><td>反病毒引擎落地：网关现有 attachd 深度附件扫描，无奇安信/卡巴斯基 ICAP 对接与病毒库状态/更新 API。引擎选择、双引擎、病毒库监控是否本期实现或先行裁剪？</td><td>决定反病毒引擎 Tab 大部分控件是否可用及新增 API 范围。</td></tr>
+        <tr><td>Q4</td><td>动作映射：隔离/阻断/放行可映射统一规则系统 quarantine/reject/accept；「审核 review」「丢弃 discard」「进行下一步检测 continue」「超出部分不检测 skipExceed」「放行并记录告警 pass_warn」如何复用现有 action（如 accept+header 标记 / sideline 审核队列）而不新增？</td><td>影响规则引擎与邮件处理链路，遵循 implement.md 不新增 action 约束。</td></tr>
+        <tr><td>Q5</td><td>密码本作用域：demo 标注「全局共用」，PRD §6 兼容性要求「密码本租户独立」。多租户下按租户隔离还是平台全局？</td><td>影响表结构（租户列）、权限与脱敏策略。</td></tr>
+        <tr><td>Q6</td><td>四语国际化的第 4 种语言是哪一种？抽屉宿主与加密附件 Tab 的硬编码中文是否随落地统一为全局 i18n key？</td><td>影响 i18n key 清单与验收范围。</td></tr>
+        <tr><td>Q7</td><td>多租户「基础限制」平台基线：租户视角隐藏后，平台管理员在何处配置基线（平台安全策略页 or 本抽屉平台视角）？租户可覆盖范围是否存在（mixed scope）？</td><td>影响配置系统层级（平台基线 + 租户覆盖）与两个视角的 UI。</td></tr>
+        <tr><td>Q8</td><td>病毒库自动更新时间「每日 02:00」为固定文案，是否需要可配置（cron 表达式/时间选择器）？</td><td>影响反病毒引擎 Tab 表单与调度实现。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    if (window.mermaid) mermaid.initialize({ startOnLoad: true });
+
+    // ===== 2.2 抽屉预览交互（复刻 demo 状态机） =====
+    const unsavedEl = document.querySelector("[data-unsaved]");
+    const markDirty = () => unsavedEl.classList.add("show");
+    document.querySelector("[data-save-btn]").addEventListener("click", () => unsavedEl.classList.remove("show"));
+
+    // 启用开关：已启用/已禁用 + 配置区禁用 + 左导航摘要
+    const enableSwitch = document.querySelector("[data-enable-switch]");
+    const enableLabel = document.querySelector("[data-enable-label]");
+    const configArea = document.querySelector("[data-config-area]");
+    const attSummary = document.querySelector("[data-att-summary]");
+    enableSwitch.addEventListener("click", () => {
+      const on = enableSwitch.getAttribute("aria-checked") === "true";
+      enableSwitch.setAttribute("aria-checked", String(!on));
+      enableLabel.textContent = on ? "已禁用" : "已启用";
+      enableLabel.style.color = on ? "#6b7280" : "#2563eb";
+      configArea.classList.toggle("off", on);
+      attSummary.textContent = on ? "未启用" : "病毒扫描/沙箱分析/类型检测";
+      markDirty();
+    });
+
+    // 附件个数 -1 警告（demo: === -1 时琥珀边框+警告文案）
+    const countInput = document.querySelector("[data-count-input]");
+    const countWarn = document.querySelector("[data-count-warn]");
+    countInput.addEventListener("input", () => {
+      const unlimited = parseInt(countInput.value, 10) === -1;
+      countInput.classList.toggle("warn", unlimited);
+      countWarn.classList.toggle("show", unlimited);
+      markDirty();
+    });
+
+    // 大小 KB→MB 实时换算（demo formatSize）
+    const sizeInput = document.querySelector("[data-size-input]");
+    const sizeMb = document.querySelector("[data-size-mb]");
+    sizeInput.addEventListener("input", () => {
+      const kb = parseInt(sizeInput.value, 10);
+      sizeMb.textContent = kb === -1 ? "无限制" : (isNaN(kb) ? "-" : (kb < 1024 ? kb + " KB" : (kb / 1024).toFixed(1) + " MB"));
+      markDirty();
+    });
+
+    // 其余输入/下拉：仅触发未保存提示
+    document.querySelectorAll("[data-dirty]").forEach((el) => {
+      el.addEventListener("input", markDirty);
+      el.addEventListener("change", markDirty);
+    });
+  </script>
+</body>
+</html>

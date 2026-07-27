@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - 相似邮件检测 HTML 规格说明</title>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: #fff;
+      --muted: #f5f7fa;
+      --muted-foreground: #6b7280;
+      --border: #e5e7eb;
+      --blue: #1677ff;
+      --red: #f5222d;
+      --orange: #fa8c16;
+      --green: #52c41a;
+      --purple: #722ed1;
+      --amber-bg: #fffbeb;
+      --amber-border: #fcd34d;
+      --amber-text: #b45309;
+      --radius: 0.625rem;
+      --font-sans: "Geist", "Inter", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1, h2, h3 { line-height: 1.3; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 28px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 20px; }
+    h3 { margin: 18px 0 10px; color: #111827; font-size: 17px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .spec-header, section, .component-toc { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .toc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+    .toc-list li { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa; }
+    .toc-badge, .badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #eef4ff; color: #155eef; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-spec, .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .trigger-path { margin: 8px 0 12px; padding: 8px 12px; border-radius: 8px; background: var(--muted); color: var(--muted-foreground); font-size: 13px; }
+    .trigger-path strong { color: var(--foreground); }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .diff-section { border-left: 4px solid var(--red); background: #fff7f7; }
+    .question-section { border-left: 4px solid #d97706; background: #fffbeb; }
+    .mermaid { padding: 16px; border-radius: 8px; background: #f8fafc; text-align: center; }
+    pre { padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; overflow: auto; font-family: var(--font-mono); font-size: 13px; }
+    .is-hidden { display: none !important; }
+
+    /* ===== 策略卡预览 ===== */
+    .preview-card { position: relative; width: 220px; height: 60px; display: flex; overflow: hidden; border: 1px solid #e8e8e8; border-radius: 8px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); color: inherit; cursor: pointer; }
+    .preview-card:hover { border-color: #1890ff; background: #e6f7ff; }
+    .preview-bar { width: 4px; background: var(--orange); }
+    .preview-card-body { flex: 1; padding: 8px 10px; display: flex; align-items: flex-start; justify-content: space-between; }
+    .preview-title { font-size: 14px; font-weight: 650; color: #262626; }
+    .preview-config { color: #1890ff; font-size: 13px; }
+    .card-tip { display: none; position: absolute; z-index: 5; left: 232px; top: 0; width: 260px; padding: 10px 12px; border-radius: 8px; background: #111827; color: #f9fafb; font-size: 12.5px; line-height: 1.55; }
+    .card-tip-wrap { position: relative; display: inline-block; }
+    .card-tip-wrap:hover .card-tip, .card-tip-wrap:focus-within .card-tip { display: block; }
+    .card-tip hr { border: 0; border-top: 1px solid #374151; margin: 6px 0; }
+
+    /* ===== 抽屉宿主预览 ===== */
+    .drawer-shell { min-width: 900px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #fff; }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #e8e8e8; background: #fff; }
+    .drawer-head .crumb { display: flex; align-items: center; gap: 8px; font-size: 16px; }
+    .drawer-head .crumb b { font-size: 17px; }
+    .drawer-head .crumb .sep { color: #9ca3af; }
+    .drawer-head .crumb .sub { color: #4b5563; font-size: 15px; }
+    .drawer-body { display: grid; grid-template-columns: 200px 1fr; min-height: 320px; }
+    .drawer-nav { padding: 12px 8px; border-right: 1px solid var(--border); background: #f9fafb; }
+    .nav-row { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0; padding: 10px; border: 0; width: 100%; text-align: left; border-radius: 8px; background: transparent; color: #374151; font-size: 14px; cursor: pointer; font-family: inherit; }
+    .nav-row.active { background: #eaf3ff; color: #155eef; }
+    .nav-dot { width: 10px; height: 10px; margin-top: 5px; border-radius: 999px; background: #3b82f6; flex-shrink: 0; }
+    .nav-dot.off { background: transparent; border: 2px solid #d1d5db; }
+    .nav-name { font-weight: 600; display: block; }
+    .nav-sum { font-size: 12px; color: #6b7280; display: block; }
+    .drawer-main { padding: 16px; background: #f3f4f6; }
+    .policy-panel { background: #fff; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .policy-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .policy-head h5 { margin: 0; font-size: 16px; }
+    .policy-status { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #2563eb; }
+    .policy-status.off { color: #6b7280; }
+    .policy-content { padding: 16px; transition: opacity .2s; }
+    .policy-content.disabled { opacity: .5; pointer-events: none; }
+    .policy-foot { padding: 10px 16px; border-top: 1px solid var(--border); min-height: 40px; font-size: 13px; color: #b45309; display: flex; align-items: center; gap: 8px; }
+    .pulse-dot { width: 8px; height: 8px; border-radius: 999px; background: #f59e0b; animation: pulse 1.4s infinite; }
+    @keyframes pulse { 50% { opacity: .3; } }
+
+    /* ===== 通用控件 ===== */
+    .sw { position: relative; width: 36px; height: 20px; border-radius: 999px; background: #d1d5db; border: 0; cursor: pointer; flex-shrink: 0; transition: background .15s; }
+    .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 999px; background: #fff; transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+    .sw[aria-checked="true"] { background: #2563eb; }
+    .sw[aria-checked="true"]::after { left: 18px; }
+    .tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 8px; background: #f3f4f6; margin: 12px 0; }
+    .tab { padding: 5px 12px; border: 0; border-radius: 7px; font-size: 14px; font-weight: 600; background: transparent; cursor: pointer; color: #374151; font-family: inherit; }
+    .tab.active { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+    .pill { display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #f3f4f6; }
+    .pill.amber { background: #fef3c7; color: #b45309; border: 1px solid var(--amber-border); }
+
+    /* ===== 相似检测模块预览 ===== */
+    .sd-app { min-width: 860px; font-size: 14px; }
+    .sd-banner { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; margin-bottom: 14px; border: 1px solid var(--amber-border); border-radius: 8px; background: var(--amber-bg); color: var(--amber-text); }
+    .sd-banner .b-title { font-weight: 650; }
+    .sd-banner p { margin: 4px 0 0; font-size: 13px; }
+    .sd-block { padding: 14px; margin: 12px 0; border: 1px solid var(--border); border-radius: 8px; background: #f9fafb; }
+    .sd-block h5 { margin: 0 0 10px; font-size: 14.5px; }
+    .radio-row { display: flex; align-items: flex-start; gap: 8px; margin: 6px 0; }
+    .radio-row input[type=radio] { margin-top: 4px; accent-color: #2563eb; }
+    .dir-checks { display: flex; gap: 18px; margin: 8px 0 0 24px; flex-wrap: wrap; }
+    .dir-checks label { display: flex; align-items: center; gap: 6px; font-size: 13.5px; cursor: pointer; }
+    .dir-checks input, .norm-checks input { accent-color: #2563eb; width: 15px; height: 15px; }
+    .sd-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 12px 0; }
+    .dir-card { border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; background: #fff; transition: border-color .15s, background .15s; }
+    .dir-card.observe { border-color: var(--amber-border); background: #fffdf5; }
+    .dir-card-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .dir-card-head .t { font-weight: 650; display: flex; align-items: center; gap: 6px; }
+    .sync-btn { border: 0; background: transparent; color: #374151; font-size: 12px; cursor: pointer; padding: 4px 6px; border-radius: 6px; font-family: inherit; }
+    .sync-btn:hover { background: #f3f4f6; }
+    .obs-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px; margin-bottom: 12px; border-radius: 8px; background: #f9fafb; font-size: 13px; }
+    .obs-row .lab { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+    .obs-state { font-size: 12px; color: #6b7280; }
+    .obs-state.on { color: #d97706; }
+    .view-logs { font-size: 12px; color: #2563eb; background: none; border: 0; cursor: pointer; padding: 0; font-family: inherit; }
+    .fld { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 13.5px; }
+    .fld > .fl { min-width: 76px; color: #111827; }
+    .fld input[type=number] { width: 76px; height: 30px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 7px; font-family: inherit; }
+    .fld input[type=range] { flex: 1; accent-color: #2563eb; min-width: 60px; }
+    .fld .unit { color: #6b7280; font-size: 13px; }
+    .fld select { width: 150px; height: 30px; border: 1px solid var(--border); border-radius: 7px; background: #fff; font-family: inherit; font-size: 13px; padding: 0 6px; }
+    .fld select:disabled { opacity: .5; cursor: not-allowed; }
+    .pct { font-weight: 650; width: 44px; }
+    .sd-exempt { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; margin-top: 12px; border: 1px solid #bfdbfe; border-radius: 8px; background: #eff6ff; color: #1d4ed8; font-size: 13.5px; }
+    .sd-empty-note { padding: 10px 14px; border: 1px dashed #d1d5db; border-radius: 8px; color: #6b7280; font-size: 13px; margin: 12px 0; }
+    @media (max-width: 900px) { body { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>策略流水线 - 相似邮件检测（similarDetection）HTML 规格说明</h1>
+    <table class="meta-table">
+      <tr><td>目标模块</td><td>策略流水线 / 阶段5：综合策略 / 相似检测（策略 key: <code>similarDetection</code>，priority 5000，type=configurable）</td></tr>
+      <tr><td>demo 地址</td><td><a href="http://localhost:3000/filter-rules/pipeline">http://localhost:3000/filter-rules/pipeline</a>（云网关形态，中文）</td></tr>
+      <tr><td>demo 源码</td><td><code>design/origin/demo/components/filter-rules-new/strategy-pipeline-page.tsx</code>（策略卡 + 综合策略抽屉宿主）<br><code>design/origin/demo/components/filter-rules-new/comprehensive-strategy-page.tsx</code>（抽屉页宿主，initialPolicy=similarDetection）<br><code>design/origin/demo/components/filter-rules-new/similar-detection-module.tsx</code>（模块 UI 主体）</td></tr>
+      <tr><td>关联 PRD</td><td><code>design/origin/spec/相似检测模块需求文档.md</code>（第一来源）<br><code>design/origin/spec/策略流水线需求文档.md</code>（流水线上下文）</td></tr>
+      <tr><td>落地约束</td><td><code>design/origin/implement.md</code>：管理员可见可改配置优先走配置系统；触发动作复用统一规则系统 action（标记投递 = accept + 特定 header，不新增 mark action）；PRD API 不必新增后端 API；网关已有 textsim 服务（TLSH+FAISS 文本相似聚类，docker 内部端口 20010）可作为相似度计算底座。</td></tr>
+      <tr><td>浏览器验证</td><td>2026-07-11 20:41-20:52 Asia/Shanghai，headless Chromium CDP 访问运行态 demo（1440×1000 与 1024×900 两视口），完成：整页默认态、阶段5卡片定位与 Tooltip 悬浮、抽屉默认态、相同主题 Tab、主题标准化滚动态、全方向聚合、触发动作下拉展开、观察模式开关、方向取消勾选、全不选空态、策略禁用态、抽屉关闭，共 14 张截图 + 逐状态 DOM 事实采集。</td></tr>
+    </table>
+  </header>
+
+  <nav class="component-toc">
+    <h2>组件列表</h2>
+    <ul class="toc-list">
+      <li><a href="#component-2-1">2.1 策略流水线入口卡片（相似检测）</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-2">2.2 综合策略抽屉宿主 ComprehensiveStrategyPage</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-3">2.3 相似检测模块 SimilarDetectionModule</a><span class="toc-badge">4层</span><br>
+        <a href="layer-1-same-subject-tab.html">层级1：相同主题检测 Tab</a> ·
+        <a href="layer-2-aggregate-mode.html">层级2：全方向聚合模式</a> ·
+        <a href="layer-3-card-interactions.html">层级3：方向卡片深层交互态</a></li>
+      <li><a href="#api-mapping">4. 数据模型与 API 映射</a><span class="toc-badge">textsim 关联</span></li>
+    </ul>
+  </nav>
+
+  <section id="layout">
+    <h2>1. 页面布局结构</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>实际渲染</th><th>规格含义</th></tr></thead>
+      <tbody>
+        <tr><td>左侧产品导航</td><td>深色侧边栏，当前位于“平台安全策略”功能域；顶栏显示“产品形态：云网关”</td><td>全局导航容器，不属于本模块表单，但决定阶段5的显示（云网关形态含阶段4智能分析层，综合策略显示为“阶段5”）。</td></tr>
+        <tr><td>策略流水线主内容</td><td>五阶段横向流水线，容器 <code>overflow-x-auto</code> 可横向滚动；1440px 视口下阶段5位于首屏右缘之外，需横向滚动可见</td><td>相似检测以阶段5第一张策略卡进入，卡片为“零信息展示、纯导航入口”（无统计数字）。</td></tr>
+        <tr><td>综合策略抽屉</td><td>右侧 80vw Sheet，顶部“阶段5: 综合策略 / 相似检测”，左侧策略导航（3项），右侧白色配置卡</td><td>阶段5三个子策略共用的承载容器；相似检测为默认选中项。</td></tr>
+        <tr><td>相似检测配置内容</td><td>观察模式警告条 + 双 Tab + 检测方向配置 + 方向卡片 + 豁免提示</td><td>本规格的主体，详见 2.3 与各层级子文件。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/page-full-default.png" alt="策略流水线整页默认态">
+      <figcaption>整页默认态（1440×1000）：首屏可见阶段1-4；阶段5在横向滚动区外。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/pipeline-stage5-visible.png" alt="横向滚动至阶段5">
+      <figcaption>流水线容器横向滚动后：阶段5“综合策略”列可见，含相似检测 / 高级过滤规则（未配置，橙色虚线）/ 邮件标记与声明三张卡。</figcaption>
+    </figure>
+  </section>
+
+  <section id="components">
+    <h2>2. 逐组件规格</h2>
+
+    <article class="component-spec" id="component-2-1">
+      <h3>2.1 策略流水线入口卡片（相似检测 Policy Card）</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级0：页面默认态中的策略入口卡片（需横向滚动到阶段5）</td></tr>
+          <tr><th>触发路径</th><td>打开 <code>/filter-rules/pipeline</code> → 流水线容器横向滚动 → 阶段5“综合策略”列 → “相似检测”卡片。</td></tr>
+          <tr><th>可点击目标</th><td>浏览器实测卡片 220×60px（含左侧 4px 橙色色条 <code>#fa8c16</code>，节点数 9）；点击卡片整体或“配置 →”按钮均打开综合策略抽屉并选中相似检测。</td></tr>
+          <tr><th>悬浮 Tooltip</th><td>hover 300ms 后右侧出现深色 Tooltip：“策略：相似检测 / 动作：隔离、投递 / 影响：命中则隔离，邮件保留至隔离区”，底部附注“被隔离邮件可在邮件隔离模块查看”（configurable 类型专属附注）。</td></tr>
+        </tbody>
+      </table>
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：策略卡默认态（hover 卡片可见 Tooltip，点击跳转 2.2）</h4>
+        <div class="component-preview">
+          <span class="card-tip-wrap">
+            <a class="preview-card" data-demo-extracted="strategy-card" href="#component-2-2" aria-label="打开综合策略抽屉规格">
+              <span class="preview-bar"></span>
+              <span class="preview-card-body">
+                <span class="preview-title">相似检测</span>
+                <span class="preview-config">配置 →</span>
+              </span>
+            </a>
+            <span class="card-tip">
+              <b>策略：</b>相似检测<br>
+              <b>动作：</b>隔离、投递<br>
+              <b>影响：</b>命中则隔离，邮件保留至隔离区
+              <hr>
+              被隔离邮件可在邮件隔离模块查看
+            </span>
+          </span>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/similar-card-layer0-zoom.png" alt="阶段5综合策略列特写">
+          <figcaption>阶段5列特写：相似检测卡（橙色色条 = configurable/隔离类）；下方高级过滤规则为未配置态（橙色虚线 + “去配置”）。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/card-tooltip-hover.png" alt="相似检测卡 Tooltip 悬浮态">
+          <figcaption>hover 实拍：深色 Tooltip 展示 策略/动作/影响 + 隔离模块附注。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>卡片容器</td><td><code>w-[220px] h-[60px] rounded-lg</code>，hover 边框变 <code>#1890FF</code>、背景 <code>#E6F7FF</code></td><td>点击打开综合策略抽屉（<code>setComprehensiveDrawerPolicy("similarDetection")</code>）</td><td>卡片无今日命中等统计（极简纯导航入口）；源码 mock 数据 todayHits 34 / blocked 25 / exempted 9 仅存于数据层</td></tr>
+            <tr><td>左侧色条</td><td>4px 宽，<code>bg-[#fa8c16]</code> 橙色</td><td>无独立交互；图例高亮“隔离”时本卡加蓝色 ring</td><td>由 <code>type = configurable</code> 推导（configurable → 隔离主动作）</td></tr>
+            <tr><td>卡片标题</td><td>相似检测</td><td>—</td><td>i18n key <code>pipeline.similarDetection</code>；注意与模块内标题“相似邮件与主题检测”不同（见差异 D-8）</td></tr>
+            <tr><td>配置按钮</td><td>“配置” + ArrowRight(12px) 图标，蓝色 <code>#1890FF</code></td><td><code>stopPropagation</code> 后与卡片同一打开逻辑</td><td>i18n key <code>pipeline.configBtn</code>；未配置策略显示“去配置”（本卡不属于 unconfigured 集合）</td></tr>
+            <tr><td>Tooltip</td><td>策略：相似检测 / 动作：隔离、投递 / 影响：命中则隔离，邮件保留至隔离区 / 被隔离邮件可在邮件隔离模块查看</td><td>hover 300ms 延时出现，side=right，max-w-[280px]</td><td>动作/影响由 configurable 类型统一生成（<code>pipeline.actionQuarantineAction</code>、<code>pipeline.actionDeliver</code>、<code>pipeline.policyEffectQuarantine</code>、<code>pipeline.quarantineModuleLink</code>）</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>根节点</td><td><code>div.w-[220px].h-[60px].cursor-pointer.flex</code>，节点数 9</td><td><code>a.preview-card</code> 220×60，色条 + 标题行结构一致</td><td>一致（a 代 div 承载点击语义）</td></tr>
+              <tr><td>色条</td><td>首子节点 <code>div.w-1.bg-[#fa8c16]</code></td><td><code>.preview-bar</code> 4px 橙色</td><td>一致</td></tr>
+              <tr><td>关键文案</td><td>“相似检测” + “配置”（innerText：相似检测 | 配置）</td><td>相似检测 / 配置 →</td><td>一致</td></tr>
+              <tr><td>统计/AI 标签等条件节点</td><td>未渲染（非阶段4、非未配置）</td><td>未包含</td><td>一致</td></tr>
+              <tr><td>Tooltip 内容</td><td>浏览器 hover 实测 4 行文案（见截图）</td><td>card-tip 同文案</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-2">
+      <h3>2.2 综合策略抽屉宿主 ComprehensiveStrategyPage（embedded, initialPolicy=similarDetection）</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级0：点击策略卡后打开的 80vw Sheet（无遮罩关闭按钮，hideCloseButton，右上角 XCircle 按钮关闭）</td></tr>
+          <tr><th>抽屉头部</th><td>Settings 齿轮图标（蓝色）+ “阶段5: 综合策略”（云网关形态 <code>showAIStage=true</code>；非 AI 形态显示“阶段4: 综合策略”）+ “/” + “相似检测”。</td></tr>
+          <tr><th>左侧策略导航</th><td>3 项：<b>相似邮件与主题检测</b>（active，摘要“窗口30分钟 / 阈值80%”）、高级过滤规则（多维度条件组合规则）、邮件标记与声明（接收标记+外发声明多规则配置）。每项前有状态圆点（启用=蓝色实心，禁用=灰色空心）。导航支持折叠（左缘悬浮圆形 ChevronLeft 按钮，折叠后宽 56px、导航项仅剩圆点 + hover Tooltip）。</td></tr>
+          <tr><th>右侧配置卡</th><td>白色卡片：头部 h2“相似邮件与主题检测” + “已启用”文字 + Switch；内容区可滚动（禁用时 opacity-50 + pointer-events-none）；底部 sticky 操作栏默认为空，出现未保存更改时左侧显示琥珀色脉冲点 + “有未保存的更改”。</td></tr>
+        </tbody>
+      </table>
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：抽屉宿主默认态（可点导航切换高亮、可切启用开关观察灰化与未保存提示）</h4>
+        <div class="trigger-path"><strong>触发路径</strong>：层级0 策略卡 / “配置 →”按钮 → onClick 打开 Sheet（80vw）→ ComprehensiveStrategyPage(embedded, initialPolicy=similarDetection)</div>
+        <div class="component-preview">
+          <div class="drawer-shell" data-demo-extracted="comprehensive-drawer-host">
+            <div class="drawer-head">
+              <div class="crumb"><span style="color:#1890ff;">⚙</span><b>阶段5: 综合策略</b><span class="sep">/</span><span class="sub">相似检测</span></div>
+              <button class="sync-btn" title="关闭抽屉（演示：无操作）" style="font-size:16px;">⊗</button>
+            </div>
+            <div class="drawer-body">
+              <div class="drawer-nav" data-host-nav>
+                <button class="nav-row active" data-nav="0"><span class="nav-dot" data-nav-dot></span><span><span class="nav-name">相似邮件与主题检测</span><span class="nav-sum" data-nav-sum>窗口30分钟 / 阈值80%</span></span></button>
+                <button class="nav-row" data-nav="1"><span class="nav-dot"></span><span><span class="nav-name">高级过滤规则</span><span class="nav-sum">多维度条件组合规则</span></span></button>
+                <button class="nav-row" data-nav="2"><span class="nav-dot"></span><span><span class="nav-name">邮件标记与声明</span><span class="nav-sum">接收标记+外发声明多规...</span></span></button>
+              </div>
+              <div class="drawer-main">
+                <div class="policy-panel">
+                  <div class="policy-head">
+                    <h5>相似邮件与主题检测</h5>
+                    <div class="policy-status" data-host-status><span data-host-status-text>已启用</span>
+                      <button class="sw" role="switch" aria-checked="true" data-host-switch aria-label="策略启用开关"></button>
+                    </div>
+                  </div>
+                  <div class="policy-content" data-host-content>
+                    <div class="sd-empty-note">（此处承载 2.3 相似检测模块内容，见下方层级0完整预览）切换左侧导航将展示对应策略配置；本预览聚焦宿主行为。</div>
+                  </div>
+                  <div class="policy-foot"><span data-host-unsaved class="is-hidden"><span class="pulse-dot" style="display:inline-block;margin-right:6px;"></span>有未保存的更改</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-layer0-similar-email-default.png" alt="综合策略抽屉默认态">
+          <figcaption>抽屉默认态实拍（1440px）：头部面包屑、左导航 3 项、右侧配置卡（相似邮件检测 Tab）。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>Sheet 容器</td><td>w-[80vw]（1440px 视口实测约 1152px；1024px 视口实测 819px）</td><td>onOpenChange 关闭；右上角 XCircle 按钮关闭</td><td>hideCloseButton，无默认关闭角标</td></tr>
+            <tr><td>抽屉标题</td><td>阶段5: 综合策略 / 相似检测</td><td>—</td><td><code>pipeline.phase5Comprehensive</code>；子标题取 <code>pipeline.similarDetection</code></td></tr>
+            <tr><td>左导航项</td><td>相似邮件与主题检测（active，蓝底）/ 高级过滤规则 / 邮件标记与声明</td><td>点击切换 selectedPolicy，右侧内容与标题联动</td><td>摘要由 <code>getSummary</code> 生成：启用时“窗口30分钟 / 阈值80%”，禁用时“已禁用”</td></tr>
+            <tr><td>折叠按钮</td><td>圆形浮动按钮（ChevronLeft），位于导航右缘垂直居中</td><td>点击折叠导航至 56px；Tooltip“收起菜单/展开菜单”</td><td>折叠态导航项 hover 出 Tooltip 显示名称+摘要</td></tr>
+            <tr><td>启用开关</td><td>“已启用” + Switch(checked)</td><td>切换后：状态文字变“已禁用”（灰色）、内容区 opacity-50 + pointer-events-none、底部出现“有未保存的更改”、左导航圆点变灰空心、摘要变“已禁用”</td><td>浏览器实测全部成立（见层级3子文件截图）</td></tr>
+            <tr><td>底部操作栏</td><td>默认空；无“保存/取消”按钮</td><td>仅未保存提示，无保存动作</td><td>与 PRD“保存成功 Toast”冲突，见差异 D-4</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>抽屉头部</td><td><code>h2</code>=“阶段5: 综合策略”，同行 span“相似检测”，Settings svg 蓝色</td><td>crumb 结构同文案</td><td>一致</td></tr>
+              <tr><td>导航项数</td><td>nav 内 3 个 button（innerText：相似邮件与主题检测 | 窗口30分钟 / 阈值80% 等）</td><td>3 个 .nav-row 同文案</td><td>一致</td></tr>
+              <tr><td>active 态</td><td>首项 class 含 <code>bg-blue-50 text-blue-700</code></td><td>首项 .active 蓝底</td><td>一致</td></tr>
+              <tr><td>启用开关</td><td>宿主级 switch <code>data-state=checked</code>（tabpanel 外唯一 switch）</td><td>.sw aria-checked=true</td><td>一致</td></tr>
+              <tr><td>禁用联动</td><td>切换后实测 <code>opacity-50 pointer-events-none</code> 容器出现、“已禁用”文案出现、footer“有未保存的更改”出现</td><td>预览 JS 复刻同联动</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-3">
+      <h3>2.3 相似检测模块 SimilarDetectionModule（多层交互）</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>demo 组件路径</th><td><code>components/filter-rules-new/similar-detection-module.tsx</code>（Props: <code>embedded?: boolean</code>）</td></tr>
+          <tr><th>状态管理</th><td>useState 全部本地：<code>activeTab</code>（similar-email/same-subject）、<code>directionMode</code>（aggregate/split，<b>两 Tab 共享</b>）、<code>selectedDirections</code>（<b>两 Tab 共享</b>）、<code>similarEmailConfigs</code> / <code>sameSubjectConfigs</code>（各方向独立 DirectionConfig）、<code>aggregateConfig</code>（两 Tab 共享一份）、<code>subjectNormalization</code>。无 API 调用、无持久化。</td></tr>
+          <tr><th>DirectionConfig</th><td><code>{ enabled, observeMode, timeWindow, similarityThreshold, triggerCount, action }</code>；注意 <code>enabled</code> 字段无任何 UI 呈现/消费（见差异 D-5）。</td></tr>
+          <tr><th>交互层级数</th><td>4 层（层级0 相似邮件检测默认态内嵌本文件；层级1 相同主题 Tab、层级2 全方向聚合、层级3 卡片深层交互态拆分子文件）</td></tr>
+        </tbody>
+      </table>
+
+      <h4>交互层级关系图</h4>
+      <div class="mermaid">
+graph LR
+    P["层级0: 策略卡(2.1)"] -->|点击卡片/配置| H["层级0: 抽屉宿主(2.2) + 相似邮件检测Tab默认态"]
+    H -->|点击"相同主题检测"Tab| L1["层级1: 相同主题检测 Tab"]
+    H -->|选中"全方向聚合"单选| L2["层级2: 全方向聚合模式"]
+    H -->|下拉/开关/勾选/禁用| L3["层级3: 方向卡片深层交互态"]
+    L1 -->|同一 directionMode 状态| L2
+    L1 -->|点击"相似邮件检测"Tab| H
+    L2 -->|选中"按方向独立检测"| H
+    L3 -->|恢复默认| H
+      </div>
+
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：相似邮件检测 Tab 默认态（预览可操作：单选/勾选/开关/滑块/下拉/同步）</h4>
+        <div class="trigger-path"><strong>触发路径</strong>：抽屉打开即渲染（activeTab 默认 similar-email，directionMode 默认 split，三方向全选，接收方向观察模式默认开启 → 顶部警告条默认可见）</div>
+        <div class="component-preview">
+          <div class="sd-app" data-sd data-demo-extracted="similar-detection-module">
+            <div class="sd-banner is-hidden" data-sd-banner>
+              <span>⚠</span>
+              <div>
+                <span class="b-title">当前处于观察模式:</span>
+                <span data-sd-banner-badges></span>
+                <span>正在观察中</span>
+                <p>命中后仅记录不拦截。确认策略效果后请及时切换为正式模式。</p>
+              </div>
+            </div>
+            <div class="tabs">
+              <button class="tab active" type="button">相似邮件检测</button>
+              <a class="tab" href="layer-1-same-subject-tab.html" title="相同主题检测 Tab 拆分为层级1子文件">相同主题检测</a>
+            </div>
+            <div class="sd-block">
+              <h5>检测方向配置</h5>
+              <div class="radio-row"><input type="radio" name="sd-mode" id="sd-agg" value="aggregate"><label for="sd-agg">全方向聚合（合并统计）</label></div>
+              <div class="radio-row"><input type="radio" name="sd-mode" id="sd-split" value="split" checked><label for="sd-split">按方向独立检测（可勾选多个）</label></div>
+              <div class="dir-checks" data-sd-checks>
+                <label><input type="checkbox" data-dir-check="inbound" checked> ✉ 接收</label>
+                <label><input type="checkbox" data-dir-check="outbound" checked> ➤ 外发</label>
+                <label><input type="checkbox" data-dir-check="intra" checked> ▦ 域内</label>
+              </div>
+            </div>
+            <div class="sd-grid" data-sd-cards></div>
+            <div class="sd-empty-note is-hidden" data-sd-agg-note>聚合模式统一配置卡见 <a href="layer-2-aggregate-mode.html">层级2：全方向聚合模式</a>（预览此处同步复刻：切回“按方向独立检测”恢复三卡片）。</div>
+            <div class="sd-exempt">
+              <span>ⓘ 豁免名单统一由群组策略模块配置，本模块不再提供免检测发信人管理入口</span>
+              <button class="view-logs" type="button" title="demo 中该按钮无跳转绑定">前往群组策略配置 ↗</button>
+            </div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-layer0-similar-email-default.png" alt="相似邮件检测默认态">
+          <figcaption>层级0实拍：接收方向观察模式默认开启 → 卡片琥珀色边框 + 顶部警告条含“接收方向”徽章；外发/域内为正常蓝边卡。注意实拍中“接收方向”标题因徽章+同步按钮挤压呈竖排（差异 D-9）。</figcaption>
+        </figure>
+        <h4>UI 元素清单（层级0）</h4>
+        <table class="spec-table">
+          <thead><tr><th>序号</th><th>元素</th><th>实际文案/默认值</th><th>校验/约束</th><th>交互行为</th><th>i18n（模块内 L.* / 全局 t()）</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>观察模式全局警告条</td><td>“当前处于观察模式: [接收方向] 正在观察中”，第二行“命中后仅记录不拦截。确认策略效果后请及时切换为正式模式。”</td><td>任一（当前 Tab 的）方向 observeMode=true 时显示；徽章逐方向列出</td><td>条件渲染；聚合模式下徽章文案为“全方向聚合（合并统计）”</td><td>L.observeWarningTitle / L.observingDirections / L.observeWarningDesc</td></tr>
+            <tr><td>2</td><td>Tabs</td><td>相似邮件检测（默认 active）/ 相同主题检测</td><td>—</td><td>切换 activeTab，方向模式与勾选状态跨 Tab 共享</td><td>L.similarEmailTab / L.sameSubjectTab</td></tr>
+            <tr><td>3</td><td>RadioGroup 检测方向配置</td><td>默认选中“按方向独立检测（可勾选多个）”</td><td>单选</td><td>切 aggregate → 三卡片隐藏、显示统一配置卡（层级2）；切回恢复</td><td>L.directionConfig / L.aggregateMode / L.splitMode</td></tr>
+            <tr><td>4</td><td>方向 Checkbox ×3</td><td>接收(Mail图标)/外发(Send)/域内(Building2)，默认全选</td><td>demo 无“至少选一个”前端校验（差异 D-2）</td><td>取消勾选 → 对应卡片消失；仅 split 模式下渲染</td><td>L.inbound / L.outbound / L.intra</td></tr>
+            <tr><td>5</td><td>方向配置卡 ×3</td><td>接收：观察=开、30分钟、80%、10封、隔离并告警；外发：观察=关、30/80/10、隔离并告警；域内：观察=关、30/80/10、标记投递</td><td>—</td><td>见 6-11 行；观察开启时卡片 <code>border-amber-300 bg-amber-50/50</code>，否则 <code>border-blue-200 bg-white</code></td><td>—</td></tr>
+            <tr><td>6</td><td>卡片头部</td><td>方向图标 + 方向名 + （观察时）“观察模式”琥珀 Badge(Eye图标)</td><td>—</td><td>—</td><td>L.inboundDirection 等 / L.observeMode</td></tr>
+            <tr><td>7</td><td>同步到其他方向按钮</td><td>Copy 图标 + “同步到其他方向”（ghost/sm）</td><td>—</td><td>将本卡整份配置（含观察开关）复制到其他<b>已勾选</b>方向并重渲染</td><td>L.syncToOthers</td></tr>
+            <tr><td>8</td><td>观察模式开关行</td><td>Eye图标 + “观察模式” + 状态字（开启=琥珀色/关闭=灰色）+ Switch；开启时追加“查看观察日志 ↗”链接</td><td>—</td><td>开启 → 卡片变琥珀、Badge 出现、触发动作下拉置灰、全局警告条更新；“查看观察日志”demo 无跳转绑定（差异 D-6）</td><td>L.observeMode / L.observeModeOn / L.observeModeOff / L.viewObserveLogs</td></tr>
+            <tr><td>9</td><td>检测窗口</td><td>Input[type=number] w-20 h-8，默认 30 + “分钟”</td><td>demo 无负数/0 校验（差异 D-3）</td><td>onChange Number() 直接写入</td><td>L.detectionWindow / L.minutes</td></tr>
+            <tr><td>10</td><td>相似度阈值</td><td>Slider 50-100 步进5，默认 80，右侧“80%”</td><td>范围由 Slider 限定（PRD 4.1 一致）</td><td>拖动即更新百分比显示；仅相似邮件检测 Tab 渲染</td><td>L.similarityThreshold</td></tr>
+            <tr><td>11</td><td>触发数量</td><td>Input[type=number]，默认 10 + “封”</td><td>demo 无取整校验（差异 D-3）</td><td>onChange 直接写入</td><td>L.triggerCount / L.emails</td></tr>
+            <tr><td>12</td><td>触发动作</td><td>Select w-40 h-8，选项：隔离并告警 / 隔离 / 审核 / 标记投递 / 阻断 / 丢弃</td><td>观察模式开启时 disabled + opacity-50</td><td>下拉选择（展开态见层级3）</td><td>L.triggerAction / L.quarantineAndAlert / L.quarantine / L.review / L.markDelivery / L.block / L.discard</td></tr>
+            <tr><td>13</td><td>豁免提示条</td><td>蓝底 Info 图标 + “豁免名单统一由群组策略模块配置，本模块不再提供免检测发信人管理入口” + “前往群组策略配置 ↗”</td><td>—</td><td>demo 链接按钮无跳转绑定（差异 D-6）</td><td>L.exemptionNote / L.goToGroupPolicy</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果（层级0，1440px 实测）</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>模块根节点</td><td><code>div.space-y-6</code>，节点总数 234</td><td>.sd-app 保留 警告条/Tabs/方向配置/三卡片/豁免条 五段结构（简化重建）</td><td>一致（结构裁剪展示）</td></tr>
+              <tr><td>Tabs 状态</td><td>相似邮件检测 <code>data-state=active</code>，相同主题检测 inactive</td><td>相似邮件检测 .active</td><td>一致</td></tr>
+              <tr><td>Radio 状态</td><td>aggregate=unchecked，split=checked</td><td>split checked</td><td>一致</td></tr>
+              <tr><td>方向 Checkbox</td><td>#dir-inbound / #dir-outbound / #dir-intra 均 checked</td><td>三项 checked</td><td>一致</td></tr>
+              <tr><td>接收方向卡</td><td>amber 类边框、switch checked、Badge amber-100、查看观察日志存在、inputs [30,10]、slider aria-valuenow=80、combobox 文案“隔离并告警”且 disabled、节点数 56</td><td>预览同状态（开关开、下拉禁用、80%）</td><td>一致</td></tr>
+              <tr><td>外发/域内卡</td><td>蓝边、switch unchecked、无 Badge/日志链接、动作分别“隔离并告警”/“标记投递”、combobox 可用、节点数 47/52</td><td>预览同状态</td><td>一致</td></tr>
+              <tr><td>全局警告条</td><td>bg-amber-50 容器，徽章仅“接收方向”</td><td>banner 徽章“接收方向”</td><td>一致</td></tr>
+              <tr><td>“至少选择一个检测方向”提示</td><td>全不选实测<b>未渲染</b>（源码定义 L.atLeastOneDirection 但从未使用）</td><td>预览同样不渲染（差异 D-2 记录）</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h4>交互层级详情（层级 1+ 拆分为独立文件）</h4>
+      <table class="spec-table layer-index">
+        <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>策略卡 + 抽屉默认态（相似邮件检测 Tab）</td><td>页面加载 → 横向滚动 → 点击卡片</td><td>上方内嵌（2.1 / 2.2 / 2.3）</td></tr>
+          <tr><td>1</td><td>相同主题检测 Tab（主题标准化 + 双提示条）</td><td>抽屉内点击“相同主题检测”Tab</td><td><a href="layer-1-same-subject-tab.html">查看详情</a></td></tr>
+          <tr><td>2</td><td>全方向聚合模式（统一配置卡）</td><td>“检测方向配置”选中“全方向聚合（合并统计）”</td><td><a href="layer-2-aggregate-mode.html">查看详情</a></td></tr>
+          <tr><td>3</td><td>方向卡片深层交互态（下拉展开 / 观察切换 / 方向取消勾选 / 全不选空态 / 策略禁用态）</td><td>卡片内 Select / Switch / Checkbox / 宿主启用开关</td><td><a href="layer-3-card-interactions.html">查看详情</a></td></tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+  <section id="dialogs">
+    <h2>3. 弹窗/抽屉/对话框规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>名称</th><th>触发条件</th><th>实际渲染</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>综合策略抽屉（Sheet）</td><td>点击相似检测策略卡或“配置 →”</td><td>80vw、无遮罩关闭角标（hideCloseButton）、右上 XCircle 关闭；浏览器实测关闭后 dialog 节点移除</td><td>阶段5三策略共用；initialPolicy 决定默认选中项</td></tr>
+        <tr><td>触发动作 Select 下拉</td><td>点击卡片内“触发动作”触发器（观察模式关闭时）</td><td>Radix portal 弹层，6 选项，当前项蓝底 + ✓（实拍见层级3）</td><td>观察模式开启时触发器 disabled，不可展开</td></tr>
+        <tr><td>确认/保存类弹窗</td><td>—</td><td>demo 无任何保存按钮、确认弹窗、Toast</td><td>PRD 3.3 要求保存成功/失败 Toast、4.2 权限与并发提示——均未实现（差异 D-4）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="api-mapping">
+    <h2>4. 数据模型与 API 映射</h2>
+    <h3>4.1 前端数据模型（demo 源码原样）</h3>
+    <pre><code>type DirectionType = "inbound" | "outbound" | "intra"
+
+interface DirectionConfig {
+  enabled: boolean          // 无 UI 消费（差异 D-5）
+  observeMode: boolean
+  timeWindow: number        // 分钟
+  similarityThreshold: number // 50-100，步进5；相同主题 Tab 不渲染滑块
+  triggerCount: number      // 封
+  action: string            // quarantine-alert | quarantine | review | mark-delivery | block | discard
+}
+
+// 状态：similarEmailConfigs / sameSubjectConfigs: Record&lt;DirectionType, DirectionConfig&gt;
+// aggregateConfig: DirectionConfig（两 Tab 共享一份）
+// subjectNormalization: { ignoreCase, ignoreRePrefix, ignoreNumbers, similarSubject }
+// directionMode: "aggregate" | "split"；selectedDirections: DirectionType[]（两 Tab 共享）</code></pre>
+    <h3>4.2 PRD API / 数据表 → 网关落地映射</h3>
+    <table class="spec-table">
+      <thead><tr><th>PRD API / 数据表</th><th>用途</th><th>落地映射建议</th><th>需确认</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET/PUT /api/similar-detection/config</code></td><td>读取/更新检测配置</td><td>属“管理员可见可改参数”，按 implement.md 优先走配置系统（ConfigManager 路径如 <code>/apiserver.cf/similar_detection/*</code>，DB config_overrides 在线覆盖）；配置粒度 = 2 种检测类型 ×（聚合 1 份 或 3 方向）+ 主题标准化全局项</td><td>Q-3：配置系统 vs 统一规则系统承载</td></tr>
+        <tr><td><code>GET /api/similar-detection/observe-logs</code></td><td>观察日志查询</td><td>复用现有拦截/邮件日志（InterceptEvent/EmailLog）加 module=similarDetection + observe 标记过滤，不新增独立日志 API</td><td>Q-4：跳转目标页与筛选参数</td></tr>
+        <tr><td><code>similar_detection_config</code> 表</td><td>产品设计表</td><td>非硬性要求；走 config_overrides 则无需新表</td><td>—</td></tr>
+        <tr><td><code>similar_detection_logs</code> 表</td><td>命中日志（PRD 提出时序库 30 天滚动）</td><td>网关现有日志链路 + <code>OSG_LOG_RETENTION_DAYS</code>（默认30天）语义吻合</td><td>—</td></tr>
+        <tr><td>相似度计算引擎</td><td>PRD 6.1 提 SimHash/余弦相似度</td><td>网关已有 <b>textsim</b> 服务（TLSH + FAISS 文本相似聚类，docker 内部端口 20010，HMAC 内部认证），应以其为相似度/聚类底座</td><td>Q-1：50-100% 阈值与 TLSH 距离换算</td></tr>
+        <tr><td>触发动作枚举</td><td>6 种动作</td><td>复用统一规则系统 action：阻断→reject、隔离→quarantine、丢弃→discard、标记投递→accept+特定header（implement.md 明确 mark 不新增 action）、隔离并告警→quarantine+告警通知联动、审核→待确认</td><td>Q-2：“审核”与“隔离并告警”的 action 组合</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="business-logic">
+    <h2>5. 业务逻辑规格</h2>
+    <h3>5.1 检测判定流程（PRD 1.3）</h3>
+    <div class="mermaid">
+graph TD
+    A[邮件进入] --> B["判断方向(接收/外发/域内)"]
+    B --> C[查询方向配置<br/>聚合模式则用统一配置]
+    C --> D[计算相似度 / 主题匹配<br/>主题先按标准化规则归一]
+    D --> E{时间窗口内相似邮件数<br/>≥ 触发数量?}
+    E -->|否| F[放行]
+    E -->|是| G{观察模式开启?}
+    G -->|是| H[仅记录日志/观察告警<br/>不拦截]
+    G -->|否| I["执行触发动作<br/>(隔离并告警/隔离/审核/标记投递/阻断/丢弃)"]
+    </div>
+    <h3>5.2 关键业务规则</h3>
+    <table class="spec-table">
+      <thead><tr><th>规则</th><th>PRD 要求</th><th>demo 实际</th><th>落地说明</th></tr></thead>
+      <tbody>
+        <tr><td>方向维度</td><td>接收/外发/域内独立配置；“全方向聚合（合并统计）”为默认兼容模式</td><td>demo 默认反而是 split（三方向独立、全选）；聚合为可选项</td><td>默认值以哪个为准需确认（差异 D-7）；方向判定依赖“邮件方向识别服务”（域内=收发同租户域？Q-5）</td></tr>
+        <tr><td>观察模式</td><td>逐方向独立开关；命中仅记录 + 观察告警</td><td>开关逐卡片存在；开启后动作下拉置灰、全局警告条列出方向徽章</td><td>观察日志/告警链路需接入现有日志与告警模块</td></tr>
+        <tr><td>同步配置</td><td>复制当前配置到其他方向</td><td>复制到其他<b>已勾选</b>方向（含观察开关状态），未勾选方向不受影响</td><td>—</td></tr>
+        <tr><td>主题标准化</td><td>忽略大小写/Re:Fwd:/数字，相似度&gt;90%视为相同</td><td>4 个 Checkbox，默认 勾/勾/不勾/勾；仅相同主题 Tab 展示但语义“全局”</td><td>标准化在比对前归一；“&gt;90% 视为相同”实为相似主题匹配开关</td></tr>
+        <tr><td>豁免收口</td><td>豁免名单统一由群组策略模块配置</td><td>蓝色提示条 + “前往群组策略配置”入口（无跳转绑定）</td><td>本模块不做豁免名单 CRUD</td></tr>
+        <tr><td>禁用语义</td><td>禁用所有方向 = 该检测类型实质关闭</td><td>全不选后卡片区为空、警告条消失、无任何提示（可保存性无从体现）</td><td>Q-6：是否允许此状态提交</td></tr>
+        <tr><td>权限</td><td>系统管理员全权；安全管理员看配置/看日志、改动需审批；普通用户无权限</td><td>demo 无权限差异呈现</td><td>落地由 API 权限矩阵控制（差异 D-11）</td></tr>
+        <tr><td>并发/版本</td><td>乐观锁 + 版本冲突提示</td><td>未实现</td><td>随保存链路落地（差异 D-4 关联）</td></tr>
+      </tbody>
+    </table>
+    <h3>5.3 性能指标（PRD 6.2，验收口径）</h3>
+    <table class="spec-table">
+      <thead><tr><th>指标</th><th>目标值</th></tr></thead>
+      <tbody>
+        <tr><td>单封邮件相似度计算延迟</td><td>&lt; 50ms</td></tr>
+        <tr><td>配置接口响应时间</td><td>&lt; 200ms</td></tr>
+        <tr><td>并发邮件处理量</td><td>10000 封/秒</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interaction">
+    <h2>6. 交互规格</h2>
+    <h3>6.1 状态变化规则（浏览器逐项验证）</h3>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>实际行为</th><th>规格要求 / 备注</th></tr></thead>
+      <tbody>
+        <tr><td>Tab 切换</td><td>相似邮件⇄相同主题：各方向参数独立两套（30/80/10 vs 60/-/50），directionMode 与方向勾选共享；警告条按当前 Tab 的 observe 集合重算（默认态：相似邮件 Tab 仅“接收方向”，相同主题 Tab 为“接收方向+外发方向”）</td><td>PRD 3.1 一致；共享状态为 demo 实现细节（差异 D-7）</td></tr>
+        <tr><td>方向模式切换</td><td>aggregate：三卡片隐藏 + 统一配置卡（4 列栅格）；split：恢复卡片栅格 + 方向复选框行</td><td>PRD 5.3 一致</td></tr>
+        <tr><td>观察模式开关</td><td>开→卡片琥珀边框/浅琥珀底、头部 Badge、动作下拉 disabled+opacity-50、状态字“开启”琥珀色、出现“查看观察日志”、全局警告条追加该方向徽章；关→全部还原</td><td>PRD TC-004 全部成立</td></tr>
+        <tr><td>同步到其他方向</td><td>当前卡整份配置复制到其他已勾选方向（浏览器实测含观察开关状态一起复制）</td><td>PRD TC-005 一致</td></tr>
+        <tr><td>方向取消勾选</td><td>对应卡片即时消失；全不选时仅剩方向配置块与豁免条，<b>无</b>“至少选择一个检测方向”提示</td><td>PRD TC-013 不满足（差异 D-2）</td></tr>
+        <tr><td>策略启用开关（宿主）</td><td>关→内容 opacity-50+pointer-events-none、状态“已禁用”、左导航摘要变“已禁用”、圆点变灰、底部“有未保存的更改”出现</td><td>模块内参数修改<b>不会</b>触发未保存提示（仅宿主开关触发，差异 D-4）</td></tr>
+        <tr><td>加载/保存</td><td>无骨架屏、无保存按钮、无 Toast</td><td>PRD 3.3 未实现（差异 D-4）</td></tr>
+      </tbody>
+    </table>
+    <h3>6.2 Tooltip 规格</h3>
+    <table class="spec-table">
+      <thead><tr><th>位置</th><th>PRD 文案</th><th>demo 实际</th></tr></thead>
+      <tbody>
+        <tr><td>流水线策略卡</td><td>—</td><td>hover 300ms：“策略/动作/影响”三段 + 隔离模块附注（见 2.1 实拍）</td></tr>
+        <tr><td>检测窗口</td><td>统计相似邮件的时间范围，单位为分钟</td><td rowspan="4">模块内四字段均<b>无</b> Tooltip（组件未引入 Tooltip，差异 D-1）</td></tr>
+        <tr><td>相似度阈值</td><td>邮件内容相似度达到此百分比时被视为相似邮件</td></tr>
+        <tr><td>触发数量</td><td>时间窗口内达到此数量的相似邮件后触发动作</td></tr>
+        <tr><td>观察模式</td><td>开启后仅记录日志，不执行实际拦截动作</td></tr>
+        <tr><td>抽屉导航折叠态</td><td>—</td><td>折叠后导航项 hover Tooltip 显示策略名 + 摘要（delayDuration=0）</td></tr>
+      </tbody>
+    </table>
+    <h3>6.3 异常场景（PRD §4，均未在 demo 实现，属落地要求）</h3>
+    <table class="spec-table">
+      <thead><tr><th>场景</th><th>PRD 处理方式</th><th>demo 实际</th></tr></thead>
+      <tbody>
+        <tr><td>检测窗口输入负数 / 0</td><td>负数自动修正为 1；0 提示“检测窗口不能为0”</td><td>Number() 直接写入，无校验（差异 D-3）</td></tr>
+        <tr><td>触发数量非整数</td><td>自动取整</td><td>无处理（差异 D-3）</td></tr>
+        <tr><td>相似度越界</td><td>Slider 限定 50-100</td><td>一致 ✓（min50/max100/step5）</td></tr>
+        <tr><td>无权限 / 他人编辑中 / 超时 / 降级</td><td>对应提示与只读降级</td><td>未实现</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="i18n">
+    <h2>7. 国际化规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>语言</th><th>demo 覆盖</th><th>缺口</th></tr></thead>
+      <tbody>
+        <tr><td>中文 zh</td><td>模块内联 L.*（zh/th/en 三元表达式）完整覆盖</td><td>—</td></tr>
+        <tr><td>English en</td><td>L.* 覆盖；宿主/流水线层由全局 t() 覆盖</td><td>—</td></tr>
+        <tr><td>泰语 th</td><td>L.* 覆盖</td><td>—</td></tr>
+        <tr><td>第四语言</td><td>demo <code>type Language = "zh" | "en" | "th"</code> 仅三语</td><td>implement.md 要求四种内置语言，缺口同 Q-7</td></tr>
+      </tbody>
+    </table>
+    <h3>7.1 i18n key 清单（主要项）</h3>
+    <table class="spec-table">
+      <thead><tr><th>key（全局 t() / 模块内 L.*）</th><th>中文文案</th><th>使用位置</th></tr></thead>
+      <tbody>
+        <tr><td>pipeline.similarDetection</td><td>相似检测</td><td>策略卡标题、抽屉子标题</td></tr>
+        <tr><td>pipeline.similarDetectionDesc</td><td>检测相似邮件聚合攻击</td><td>策略卡 Tooltip 数据（configurable 类型未直接展示）</td></tr>
+        <tr><td>pipeline.phase5Comprehensive / phase4Comprehensive</td><td>阶段5: 综合策略 / 阶段4: 综合策略</td><td>抽屉标题（按 showAIStage 切换）</td></tr>
+        <tr><td>pipeline.configBtn / goConfig</td><td>配置 / 去配置</td><td>卡片右上按钮</td></tr>
+        <tr><td>comprehensive.similarDetection</td><td>相似邮件与主题检测</td><td>左导航项、配置卡标题</td></tr>
+        <tr><td>comprehensive.window / threshold + common.minutes</td><td>窗口 / 阈值 / 分钟</td><td>左导航摘要“窗口30分钟 / 阈值80%”</td></tr>
+        <tr><td>comprehensive.unsavedChanges</td><td>有未保存的更改</td><td>底部操作栏</td></tr>
+        <tr><td>common.enabled / common.disabled</td><td>已启用 / 已禁用</td><td>配置卡头部状态、导航摘要禁用态</td></tr>
+        <tr><td>L.title / similarEmailTab / sameSubjectTab</td><td>相似邮件与主题检测 / 相似邮件检测 / 相同主题检测</td><td>模块 Tabs</td></tr>
+        <tr><td>L.directionConfig / aggregateMode / splitMode</td><td>检测方向配置 / 全方向聚合（合并统计）/ 按方向独立检测（可勾选多个）</td><td>方向配置块</td></tr>
+        <tr><td>L.inbound / outbound / intra（+Direction 后缀）</td><td>接收 / 外发 / 域内（接收方向 / 外发方向 / 域内方向）</td><td>复选框 / 卡片标题 / 警告条徽章</td></tr>
+        <tr><td>L.observeMode / observeModeOn / observeModeOff / viewObserveLogs</td><td>观察模式 / 开启 / 关闭 / 查看观察日志</td><td>观察开关行</td></tr>
+        <tr><td>L.observeWarningTitle / observeWarningDesc / observingDirections</td><td>当前处于观察模式 / 命中后仅记录不拦截。确认策略效果后请及时切换为正式模式。 / 正在观察中</td><td>全局警告条</td></tr>
+        <tr><td>L.detectionWindow / minutes / similarityThreshold / triggerCount / emails / triggerAction</td><td>检测窗口 / 分钟 / 相似度阈值 / 触发数量 / 封 / 触发动作</td><td>卡片字段</td></tr>
+        <tr><td>L.quarantineAndAlert / quarantine / review / markDelivery / block / discard</td><td>隔离并告警 / 隔离 / 审核 / 标记投递 / 阻断 / 丢弃</td><td>触发动作选项</td></tr>
+        <tr><td>L.syncToOthers</td><td>同步到其他方向</td><td>卡片头部按钮</td></tr>
+        <tr><td>L.subjectNormalization / ignoreCase / ignoreRePrefix / ignoreNumbers / similarSubject</td><td>主题标准化（全局）/ 忽略大小写 / 忽略Re:/Fwd: / 忽略数字 / 相似度&gt;90%视为相同</td><td>相同主题 Tab（层级1）</td></tr>
+        <tr><td>L.realtimeNote / observeNote</td><td>此检测在邮件进入时实时计算，命中后立即拦截或标记 / 观察模式下命中仅记录日志，不执行拦截动作</td><td>相同主题 Tab 提示条（层级1）</td></tr>
+        <tr><td>L.exemptionNote / goToGroupPolicy</td><td>豁免名单统一由群组策略模块配置，本模块不再提供免检测发信人管理入口 / 前往群组策略配置</td><td>豁免提示条</td></tr>
+        <tr><td>L.atLeastOneDirection</td><td>至少选择一个检测方向</td><td><b>已定义但从未渲染</b>（差异 D-2）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="responsive">
+    <h2>8. 响应式规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>断点</th><th>浏览器验证</th><th>表现</th></tr></thead>
+      <tbody>
+        <tr><td>1440px</td><td>默认截图组</td><td>抽屉约 1152px（80vw）；方向卡片 <code>lg:grid-cols-3</code> 三列；观察开启的卡片头部已出现文字挤压竖排（差异 D-9）</td></tr>
+        <tr><td>1024px</td><td>responsive-1024-drawer.png + computed style 实测</td><td>抽屉 819px；grid-template-columns 实测三列各 160px（Tailwind lg: 按<b>视口</b>≥1024 生效而非容器宽），卡片内容极度拥挤</td></tr>
+        <tr><td>&lt;1024px（PRD 2.3）</td><td>未截图（PRD 要求 768-1024 两列、&lt;768 单列）</td><td>demo 实际断点为 <code>grid-cols-1 lg:grid-cols-3</code>，<b>无两列档</b>（差异 D-10）</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/responsive-1024-drawer.png" alt="1024px 抽屉">
+      <figcaption>1024×900 实拍：抽屉 819px 仍渲染三列 160px 方向卡，字段换行严重。</figcaption>
+    </figure>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>9. 与 PRD / 源码 / 浏览器渲染的差异标注</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>位置</th><th>PRD 描述</th><th>demo 实际（浏览器验证）</th><th>建议处理</th></tr></thead>
+      <tbody>
+        <tr><td>D-1</td><td>PRD 3.2</td><td>检测窗口/相似度阈值/触发数量/观察模式四字段有 hover 提示</td><td>模块未引入 Tooltip，四字段均无悬浮提示</td><td>落地补 Tooltip（文案用 PRD 表）</td></tr>
+        <tr><td>D-2</td><td>PRD 3.3 / TC-013</td><td>无方向勾选时显示“至少选择一个检测方向”</td><td>全不选实测无任何提示（L.atLeastOneDirection 定义但未使用）；卡片区直接为空</td><td>落地补空态提示 + 保存校验</td></tr>
+        <tr><td>D-3</td><td>PRD 4.1</td><td>检测窗口负数→1、0→提示、触发数量非整数→取整</td><td>number 输入无任何前端校验/修正</td><td>落地补校验</td></tr>
+        <tr><td>D-4</td><td>PRD 3.3 / 4.3 / 4.4</td><td>保存成功/失败 Toast、超时重试、乐观锁版本冲突提示</td><td>无保存按钮/无 Toast；模块参数改动不触发“有未保存的更改”（仅宿主启用开关触发）；配置纯前端内存态</td><td>落地补保存链路（按钮或自动保存 + Toast + 乐观锁）</td></tr>
+        <tr><td>D-5</td><td>PRD 1.2-4</td><td>每方向独立维护含启用状态</td><td>DirectionConfig.enabled 存在但无 UI；相同主题 Tab 的域内 config.enabled=false 仍照常渲染卡片（渲染只看勾选集合）</td><td>确认“方向启用”与“方向勾选”是否合并为一个概念</td></tr>
+        <tr><td>D-6</td><td>PRD 3.1 / 3.4</td><td>“查看观察日志”新窗口打开日志页；“前往群组策略配置”页内跳转</td><td>两个链接按钮均无 onClick/href 绑定（点击无响应）</td><td>落地补跳转（观察日志带方向筛选参数）</td></tr>
+        <tr><td>D-7</td><td>PRD 1.2-3 / 5.3</td><td>“全方向聚合（合并统计）”为默认兼容模式</td><td>demo 默认 directionMode=split 且三方向全选；且 directionMode/selectedDirections 两个 Tab 共享一份状态（PRD 未定义共享与否）</td><td>确认默认模式与共享粒度</td></tr>
+        <tr><td>D-8</td><td>命名</td><td>PRD 称“相似检测/相似邮件检测”</td><td>流水线卡片与抽屉子标题=“相似检测”，左导航与配置卡标题=“相似邮件与主题检测”，Tab=“相似邮件检测”</td><td>以 demo 三层命名为准，落地 i18n 分别建 key</td></tr>
+        <tr><td>D-9</td><td>视觉</td><td>—</td><td>观察模式开启的卡片头部（方向名 + Badge + 同步按钮）在三列布局下宽度不足，标题文字竖排折行（1440px 实拍即出现）</td><td>视觉缺陷：落地时压缩 Badge/按钮或允许头部换行</td></tr>
+        <tr><td>D-10</td><td>PRD 2.3</td><td>768-1024px 两列、&lt;768 单列</td><td>demo 仅 grid-cols-1 / lg:grid-cols-3 两档；1024px 视口实测三列 160px 严重拥挤</td><td>落地按 PRD 补中间断点（或按容器宽降列）</td></tr>
+        <tr><td>D-11</td><td>PRD 1.4 / 4.2</td><td>安全管理员需审批才能改；无权限提示</td><td>demo 无权限差异与提示</td><td>由后端权限矩阵 + 前端只读态落地</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>10. 需确认事项</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>问题</th><th>影响</th></tr></thead>
+      <tbody>
+        <tr><td>Q-1</td><td>相似度计算是否以现有 textsim 服务（TLSH+FAISS）为底座？UI 的 50-100%（步进5）阈值如何换算为 TLSH 距离/聚类参数？PRD 提到的 SimHash/余弦相似度多算法可配是否保留。</td><td>决定检测引擎对接方案与阈值语义。</td></tr>
+        <tr><td>Q-2</td><td>“审核”“隔离并告警”两个动作的统一规则系统 action 组合：审核是否= 隔离 + 人工审核队列标签（同发信人黑白名单 Q1）？隔离并告警的告警通道（邮件/站内/短信）？</td><td>影响动作枚举落地与告警模块联动。</td></tr>
+        <tr><td>Q-3</td><td>配置承载：走配置系统（ConfigManager /apiserver.cf/similar_detection/* + config_overrides）还是统一规则系统加 page 字段？（配置为 2 检测类型 ×（聚合或3方向）结构化对象 + 主题标准化，偏配置系统形态）</td><td>决定是否新增 API / 表。</td></tr>
+        <tr><td>Q-4</td><td>“查看观察日志”跳转目标（日志审计哪个页面）与筛选参数（module=similarDetection + direction + observe）；“前往群组策略配置”跳转路由。</td><td>影响路由与日志查询参数设计。</td></tr>
+        <tr><td>Q-5</td><td>“域内”方向的判定标准（发件人与收件人同租户域？基于 {auth_authen} + 收件人域比对？），以及与现网 inbound/outbound 判定的扩展方式。</td><td>影响 antispam 方向识别与统计口径。</td></tr>
+        <tr><td>Q-6</td><td>全部方向取消勾选（=该检测类型实质关闭）是否允许保存？还是按 PRD 校验“至少选择一个检测方向”阻止？</td><td>影响校验规则与空态设计。</td></tr>
+        <tr><td>Q-7</td><td>四语国际化的第 4 种语言（demo 仅 zh/en/th）。</td><td>影响 i18n key 清单与验收范围。</td></tr>
+        <tr><td>Q-8</td><td>保存交互形态：补“保存/取消”按钮（配合乐观锁）还是字段级自动保存？“有未保存的更改”提示当前只对宿主启用开关生效，是否需覆盖模块内全部字段。</td><td>影响宿主操作栏与所有字段的保存链路。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    if (window.mermaid) mermaid.initialize({ startOnLoad: true });
+
+    /* ===== 2.2 抽屉宿主预览：导航切换 + 启用开关联动 ===== */
+    (() => {
+      const navRows = [...document.querySelectorAll("[data-host-nav] .nav-row")];
+      navRows.forEach(row => row.addEventListener("click", () => {
+        navRows.forEach(r => r.classList.toggle("active", r === row));
+      }));
+      const sw = document.querySelector("[data-host-switch]");
+      const content = document.querySelector("[data-host-content]");
+      const statusText = document.querySelector("[data-host-status-text]");
+      const statusWrap = document.querySelector("[data-host-status]");
+      const unsaved = document.querySelector("[data-host-unsaved]");
+      const navDot = document.querySelector("[data-nav-dot]");
+      const navSum = document.querySelector("[data-nav-sum]");
+      sw.addEventListener("click", () => {
+        const on = sw.getAttribute("aria-checked") !== "true";
+        sw.setAttribute("aria-checked", String(on));
+        content.classList.toggle("disabled", !on);
+        statusText.textContent = on ? "已启用" : "已禁用";
+        statusWrap.classList.toggle("off", !on);
+        unsaved.classList.remove("is-hidden");
+        navDot.classList.toggle("off", !on);
+        navSum.textContent = on ? "窗口30分钟 / 阈值80%" : "已禁用";
+      });
+    })();
+
+    /* ===== 2.3 相似检测模块预览（层级0 状态机复刻） ===== */
+    (() => {
+      const ICONS = { inbound: "✉", outbound: "➤", intra: "▦" };
+      const NAMES = { inbound: "接收方向", outbound: "外发方向", intra: "域内方向" };
+      const ACTIONS = ["隔离并告警", "隔离", "审核", "标记投递", "阻断", "丢弃"];
+      const state = {
+        mode: "split",
+        dirs: {
+          inbound: { sel: true, obs: true,  win: 30, thr: 80, cnt: 10, act: "隔离并告警" },
+          outbound:{ sel: true, obs: false, win: 30, thr: 80, cnt: 10, act: "隔离并告警" },
+          intra:   { sel: true, obs: false, win: 30, thr: 80, cnt: 10, act: "标记投递" },
+        },
+        agg: { obs: false, win: 30, thr: 80, cnt: 10, act: "隔离并告警" },
+      };
+      const cardsEl = document.querySelector("[data-sd-cards]");
+      const banner = document.querySelector("[data-sd-banner]");
+      const bannerBadges = document.querySelector("[data-sd-banner-badges]");
+      const checksRow = document.querySelector("[data-sd-checks]");
+      const aggNote = document.querySelector("[data-sd-agg-note]");
+
+      function renderBanner() {
+        let observing = [];
+        if (state.mode === "aggregate") { if (state.agg.obs) observing = ["全方向聚合（合并统计）"]; }
+        else observing = Object.keys(state.dirs).filter(d => state.dirs[d].sel && state.dirs[d].obs).map(d => NAMES[d]);
+        banner.classList.toggle("is-hidden", observing.length === 0);
+        bannerBadges.innerHTML = observing.map(n => `<span class="pill amber">${n}</span>`).join(" ");
+      }
+      function cardHTML(d, c) {
+        return `
+        <div class="dir-card ${c.obs ? "observe" : ""}" data-dir="${d}">
+          <div class="dir-card-head">
+            <span class="t">${ICONS[d]} ${NAMES[d]} ${c.obs ? '<span class="pill amber">◉ 观察模式</span>' : ""}</span>
+            <button class="sync-btn" type="button" data-sync="${d}">❐ 同步到其他方向</button>
+          </div>
+          <div class="obs-row">
+            <span class="lab">◉ 观察模式</span>
+            <span style="display:flex;align-items:center;gap:8px;">
+              <span class="obs-state ${c.obs ? "on" : ""}">${c.obs ? "开启" : "关闭"}</span>
+              <button class="sw" role="switch" aria-checked="${c.obs}" data-obs="${d}" aria-label="${NAMES[d]}观察模式"></button>
+              ${c.obs ? '<button class="view-logs" type="button" title="demo 中无跳转绑定">查看观察日志 ↗</button>' : ""}
+            </span>
+          </div>
+          <div class="fld"><span class="fl">检测窗口</span><input type="number" value="${c.win}" data-f="win" data-dir="${d}"><span class="unit">分钟</span></div>
+          <div class="fld"><span class="fl">相似度阈值</span><input type="range" min="50" max="100" step="5" value="${c.thr}" data-f="thr" data-dir="${d}"><span class="pct" data-pct="${d}">${c.thr}%</span></div>
+          <div class="fld"><span class="fl">触发数量</span><input type="number" value="${c.cnt}" data-f="cnt" data-dir="${d}"><span class="unit">封</span></div>
+          <div class="fld"><span class="fl">触发动作</span>
+            <select data-f="act" data-dir="${d}" ${c.obs ? "disabled" : ""}>
+              ${ACTIONS.map(a => `<option ${a === c.act ? "selected" : ""}>${a}</option>`).join("")}
+            </select>
+          </div>
+        </div>`;
+      }
+      function render() {
+        const split = state.mode === "split";
+        checksRow.classList.toggle("is-hidden", !split);
+        aggNote.classList.toggle("is-hidden", split);
+        if (split) {
+          cardsEl.style.display = "grid";
+          cardsEl.innerHTML = ["inbound", "outbound", "intra"].filter(d => state.dirs[d].sel).map(d => cardHTML(d, state.dirs[d])).join("");
+        } else {
+          cardsEl.style.display = "block";
+          const c = state.agg;
+          cardsEl.innerHTML = `
+          <div class="dir-card ${c.obs ? "observe" : ""}">
+            <div class="dir-card-head"><span class="t">≋ 全方向聚合（合并统计）${c.obs ? '<span class="pill amber">◉ 观察模式</span>' : ""}</span></div>
+            <div class="obs-row"><span class="lab">◉ 观察模式</span>
+              <span style="display:flex;align-items:center;gap:8px;"><span class="obs-state ${c.obs ? "on" : ""}">${c.obs ? "开启" : "关闭"}</span>
+              <button class="sw" role="switch" aria-checked="${c.obs}" data-obs="agg" aria-label="聚合观察模式"></button></span></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+              <div class="fld" style="flex-direction:column;align-items:flex-start;"><span class="fl">检测窗口</span><span style="display:flex;gap:6px;align-items:center;"><input type="number" value="${c.win}" data-f="win" data-dir="agg"><span class="unit">分钟</span></span></div>
+              <div class="fld" style="flex-direction:column;align-items:flex-start;"><span class="fl">相似度阈值</span><span style="display:flex;gap:6px;align-items:center;width:100%;"><input type="range" min="50" max="100" step="5" value="${c.thr}" data-f="thr" data-dir="agg"><span class="pct" data-pct="agg">${c.thr}%</span></span></div>
+              <div class="fld" style="flex-direction:column;align-items:flex-start;"><span class="fl">触发数量</span><span style="display:flex;gap:6px;align-items:center;"><input type="number" value="${c.cnt}" data-f="cnt" data-dir="agg"><span class="unit">封</span></span></div>
+              <div class="fld" style="flex-direction:column;align-items:flex-start;"><span class="fl">触发动作</span><select data-f="act" data-dir="agg" ${c.obs ? "disabled" : ""} style="width:100%;">${ACTIONS.map(a => `<option ${a === c.act ? "selected" : ""}>${a}</option>`).join("")}</select></div>
+            </div>
+          </div>`;
+        }
+        renderBanner();
+      }
+      function cfg(d) { return d === "agg" ? state.agg : state.dirs[d]; }
+      cardsEl.addEventListener("click", e => {
+        const obs = e.target.closest("[data-obs]");
+        if (obs) { const c = cfg(obs.dataset.obs); c.obs = !c.obs; render(); return; }
+        const sync = e.target.closest("[data-sync]");
+        if (sync) {
+          const src = state.dirs[sync.dataset.sync];
+          Object.keys(state.dirs).forEach(d => { if (d !== sync.dataset.sync && state.dirs[d].sel) state.dirs[d] = { ...src, sel: true }; });
+          render(); return;
+        }
+      });
+      cardsEl.addEventListener("input", e => {
+        const t = e.target, d = t.dataset.dir, f = t.dataset.f;
+        if (!d || !f) return;
+        const c = cfg(d);
+        if (f === "win") c.win = Number(t.value);
+        if (f === "cnt") c.cnt = Number(t.value);
+        if (f === "thr") { c.thr = Number(t.value); document.querySelector(`[data-pct="${d}"]`).textContent = c.thr + "%"; }
+        if (f === "act") c.act = t.value;
+      });
+      checksRow.addEventListener("change", e => {
+        const cb = e.target.closest("[data-dir-check]");
+        if (!cb) return;
+        state.dirs[cb.dataset.dirCheck].sel = cb.checked;
+        render();
+      });
+      document.querySelectorAll('input[name="sd-mode"]').forEach(r => r.addEventListener("change", () => {
+        state.mode = document.querySelector('input[name="sd-mode"]:checked').value;
+        render();
+      }));
+      render();
+    })();
+  </script>
+</body>
+</html>

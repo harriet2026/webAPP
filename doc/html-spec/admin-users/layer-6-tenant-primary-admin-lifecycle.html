@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>租户首管理员生命周期 - 管理员与权限 HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/spec-style.css">
+<link rel="stylesheet" href="./preview.css">
+<style>.component-preview{background:#fff;overflow-x:auto}.pass{color:#15803d;font-weight:600}.warn{color:#a16207;font-weight:600}.path-chip{display:inline-block;padding:.1rem .5rem;margin:.1rem;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:.8rem;border:1px solid #c7d2fe}</style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="./index.html#tenant-primary-admin">← 返回主文件（0.5 租户首管理员生命周期）</a>
+  <span>层6 · 凭据弹窗 / 改密 / 再建</span>
+  <a href="./index.html">主文件 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>租户首管理员生命周期（创建 → 改密 → 再建其他管理员）</h1>
+  <table class="meta-table">
+    <thead><tr><th>属性</th><th>规格</th><th>形态/角色差异</th></tr></thead>
+    <tr><td>覆盖范围</td><td>跨两个模块：租户中心（创建首管理员 + 凭据弹窗）与 管理员与权限·管理员账号 Tab（改密 / 再建）</td><td>[跨模块] 云网关·多租户</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">admin-users/index.html</a> §0.5</td><td>[Base] —</td></tr>
+    <tr><td>产品形态</td><td>云网关 / AI版·多租户 / 传统版·多租户 才有「平台↔租户」之分；单租户形态无租户视角</td><td>[多租户] 生效</td></tr>
+    <tr><td>相关源码</td><td><code>tenant-list-tab.tsx</code>、<code>credential-result-dialog.tsx</code>、<code>tenant-center-page.tsx</code>、<code>admin-account-tab.tsx</code>、<code>product-profile-context.tsx</code>、<code>user-permission/types.ts</code></td><td>—</td></tr>
+  </table>
+</header>
+
+<!-- 路径总览 -->
+<section class="interaction-layer">
+  <h4><span class="layer-badge">L0</span> 路径总览：谁在哪里创建谁</h4>
+  <div class="trigger-path"><strong>核心结论</strong>：新建管理员的语义由「产品形态 × 当前视角」决定。</div>
+  <table class="spec-table">
+    <thead><tr><th>场景</th><th>入口</th><th>创建对象</th><th>归属</th></tr></thead>
+    <tbody>
+      <tr><td>平台管理员建平台管理员</td><td><span class="path-chip">管理员与权限</span> → 平台视角 → 管理员账号 → 新建</td><td>平台管理员</td><td><code>adminScope=platform</code></td></tr>
+      <tr><td>租户管理员建租户管理员</td><td><span class="path-chip">管理员与权限</span> → 租户视角 → 管理员账号 → 新建</td><td>本租户管理员</td><td><code>adminScope=tenant, tenantId=activeTenantId</code></td></tr>
+      <tr><td>建租户时建首个管理员</td><td><span class="path-chip">租户中心</span> → 新建租户 → 填主管理员账号 → 创建</td><td>该租户主管理员</td><td><code>isPrimary=true, mustChangePassword=true</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- L1 凭据弹窗 -->
+<section class="interaction-layer">
+  <h4><span class="layer-badge">L1</span> 首管理员凭据弹窗（一次性展示初始密码）</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：租户中心 → 「新建租户」抽屉填写主管理员账号（如 <code>admin@guige.cn</code>）+ 收信域 → 点击「创建租户」。<code>save()</code> 生成 <code>generateStrongPassword()</code> 强密码、<code>createTenantPrimaryAdmin()</code> 入库、并弹出凭据结果对话框。</div>
+  <div class="preview-hint">初始密码默认遮罩（●●●●）；点眼睛图标切换明文；单项复制 / 复制全部；「我已保存」关闭后不可再查看明文</div>
+
+  <div class="component-preview cp">
+    <div class="cp-card" style="max-width:460px">
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem"><span style="width:32px;height:32px;border-radius:50%;background:#dcfce7;color:#15803d;display:inline-flex;align-items:center;justify-content:center">✓</span><strong style="font-size:1.05rem">租户创建成功</strong></div>
+      <div class="cp-hint" style="margin-bottom:.75rem">已为「规格演示科技」创建主管理员账号，请妥善保存以下登录凭据。</div>
+      <div class="cp-sec"><h5>登录账号</h5>
+        <div class="cp-row" style="justify-content:space-between"><code>admin@guige.cn</code><button class="cp-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('admin@guige.cn');this.textContent='已复制';return false">复制</button></div>
+      </div>
+      <div class="cp-sec"><h5>初始密码（临时）</h5>
+        <div class="cp-row" style="justify-content:space-between"><code data-mask>••••••••••••••</code>
+          <span style="display:flex;gap:.35rem"><button class="cp-btn" onclick="var c=this.closest('.cp-row').querySelector('[data-mask]');c.textContent=c.textContent.indexOf('•')>-1?'Kq7#mB2xR9!wZ4':'••••••••••••••';return false">显示</button><button class="cp-btn">复制</button></span>
+        </div>
+      </div>
+      <div class="cp-banner" style="background:#fffbeb;border-color:#fde68a;color:#92400e">⚠ 此密码仅在本次创建后展示一次，关闭后将无法再次查看明文。主管理员首次登录时将被强制修改密码。</div>
+      <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:.5rem"><button class="cp-btn">复制全部</button><button class="cp-btn pri">我已保存</button></div>
+    </div>
+  </div>
+
+  <figure class="screenshot-figure"><img src="./screenshots/tenant-credential-dialog.png" alt="租户创建成功凭据弹窗" style="max-width:480px"><figcaption>浏览器实际渲染：租户创建成功凭据弹窗（登录账号 + 初始密码遮罩 + 琥珀安全提示 + 复制全部/我已保存）</figcaption></figure>
+
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>交互行为</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>登录账号「复制」</td><td>点击 → 复制账号到剪贴板 → 短暂 Toast/按钮态反馈</td><td>账号即新建租户填写的主管理员邮箱</td></tr>
+      <tr><td>初始密码「显示/隐藏」</td><td>默认遮罩为圆点；点击切换明文 ⇄ 遮罩</td><td>降低旁观窥屏风险</td></tr>
+      <tr><td>初始密码「复制」</td><td>无论遮罩与否，复制真实明文密码</td><td>密码由 <code>generateStrongPassword(14)</code> 生成，含大小写/数字/符号、排除易混淆字符</td></tr>
+      <tr><td>「复制全部」</td><td>复制「账号 + 密码」组合文本</td><td>便于一次性交付</td></tr>
+      <tr><td>「我已保存」</td><td>关闭弹窗；关闭后无法再查看明文（无重新查看入口，只能到管理员账号 Tab 重置）</td><td>一次性展示原则</td></tr>
+      <tr><td>安全提示 banner</td><td>琥珀色，明示「仅此一次 + 首登强制改密」</td><td>对应 D-006 解决方案</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison"><h5>DOM 树比对结果（凭据弹窗）</h5><table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM（agent-browser snapshot）</th><th>规格描述</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>弹窗标题</td><td>「租户创建成功」</td><td>成功标题</td><td class="pass">一致</td></tr>
+      <tr><td>登录账号</td><td><code>admin@guige.cn</code> + 复制按钮</td><td>账号可复制</td><td class="pass">一致</td></tr>
+      <tr><td>初始密码</td><td>默认遮罩 + 显示 + 复制按钮</td><td>遮罩 + 显示/复制</td><td class="pass">一致</td></tr>
+      <tr><td>安全提示</td><td>「此密码仅在本次创建后展示一次…首次登录时将被强制修改密码」</td><td>一次性 + 强制改密</td><td class="pass">一致</td></tr>
+      <tr><td>底部按钮</td><td>[复制全部, 我已保存]</td><td>复制全部 / 我已保存</td><td class="pass">一致</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- L2 改密 -->
+<section class="interaction-layer">
+  <h4><span class="layer-badge">L2</span> 给首管理员改密（重置密码路径）</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：租户中心目标租户「管理」（代登录，<code>setActiveTenantId(租户id)</code> + <code>setViewer("tenant")</code> → 跳工作台）→ 侧栏「系统管理 &gt; 管理员与权限」→ 管理员账号 Tab → 主管理员 <code>tenant_admin</code> 行「重置密码」。</div>
+  <div class="preview-hint">可手动输入新密码，或点「生成」自动生成 16 位随机密码；确定后清除「待改密」标记</div>
+
+  <div class="component-preview cp">
+    <div class="cp-card" style="max-width:440px">
+      <strong style="font-size:1rem">重置密码</strong>
+      <div class="cp-hint" style="margin:.35rem 0 .75rem">为管理员「tenant_admin」设置新密码，重置后需用新密码登录。</div>
+      <div class="cp-row" style="justify-content:space-between"><input class="cp-inp" placeholder="请输入新密码" style="flex:1"><button class="cp-btn" style="margin-left:.5rem">生成</button></div>
+      <div class="cp-hint">需满足密码策略：8 位以上，含大小写字母、数字、特殊字符。可自动生成 16 位随机密码。</div>
+      <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:.75rem"><button class="cp-btn">取消</button><button class="cp-btn pri">确定</button></div>
+    </div>
+  </div>
+
+  <figure class="screenshot-figure"><img src="./screenshots/reset-password-primary.png" alt="首管理员重置密码弹窗" style="max-width:460px"><figcaption>浏览器实际渲染：主管理员「tenant_admin」重置密码弹窗（新密码输入 + 生成 + 密码策略提示）</figcaption></figure>
+
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>交互行为</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>入口按钮</td><td>主管理员行操作列「重置密码」（KeyRound 图标）</td><td>主管理员行无删除按钮，但保留重置密码</td></tr>
+      <tr><td>新密码输入</td><td>手动输入；失焦/提交校验密码策略 <code>checkPasswordAgainstPolicy</code>，不合规 Toast 报错第一条</td><td>受平台登录安全基线约束</td></tr>
+      <tr><td>「生成」</td><td>自动填入 16 位随机强密码</td><td>省去人工构造</td></tr>
+      <tr><td>「确定」</td><td>校验通过 → 更新该管理员，<strong>清除 <code>mustChangePassword</code></strong>（待改密徽标消失）→ Toast「密码已重置」→ 关闭</td><td>重置视为完成一次密码设置</td></tr>
+      <tr><td>「取消」</td><td>关闭弹窗，不改动</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison"><h5>DOM 树比对结果（重置密码）</h5><table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>规格描述</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>弹窗标题/文案</td><td>「为管理员『tenant_admin』设置新密码，重置后需用新密码登录」</td><td>设置新密码提示</td><td class="pass">一致</td></tr>
+      <tr><td>新密码输入 + 生成</td><td>输入框 + 「生成」按钮 + 「可自动生成 16 位随机密码」</td><td>输入 + 生成 16 位</td><td class="pass">一致</td></tr>
+      <tr><td>密码策略提示</td><td>「8 位以上，含大小写字母、数字、特殊字符」（已修复历史乱码）</td><td>策略提示</td><td class="pass">一致</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- L3 再建其他管理员 -->
+<section class="interaction-layer">
+  <h4><span class="layer-badge">L3</span> 给该租户再建其他管理员</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：同 L2 代登录进入该租户 → 管理员账号 Tab → 右上「新建」→ 管理员配置抽屉。</div>
+  <div class="preview-hint">角色下拉在租户视角剔除「系统管理员(role_sys)」；新管理员以 tenantId=activeTenantId 入库</div>
+
+  <div class="component-preview cp">
+    <div class="cp-card" style="max-width:460px">
+      <strong style="font-size:1rem">管理员配置</strong>
+      <div class="cp-sec"><h5>基础信息</h5>
+        <div class="cp-row"><span class="lab">登录账号</span><input class="cp-inp" placeholder="如 ops02"></div>
+        <div class="cp-row"><span class="lab">姓名</span><input class="cp-inp" placeholder="如 李运维"></div>
+        <div class="cp-row"><span class="lab">手机号</span><input class="cp-inp" placeholder="选填"></div>
+        <div class="cp-row"><span class="lab">邮箱</span><input class="cp-inp" placeholder="选填"></div>
+        <div class="cp-row"><span class="lab">初始密码</span><input class="cp-inp" style="flex:1"><button class="cp-btn" style="margin-left:.5rem">生成</button></div>
+      </div>
+      <div class="cp-sec"><h5>角色与状态</h5>
+        <div class="cp-row"><span class="lab">角色</span><span class="cp-sel"><span data-selval>安全运营</span></span><span class="cp-hint">（无「系统管理员」）</span></div>
+        <div class="cp-row"><span class="lab">状态</span><span class="cp-sel"><span data-selval>启用</span></span></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:.5rem"><button class="cp-btn">取消</button><button class="cp-btn pri">确定</button></div>
+    </div>
+  </div>
+
+  <figure class="screenshot-figure"><img src="./screenshots/tenant-new-admin-drawer.png" alt="租户视角新建管理员抽屉" style="max-width:480px"><figcaption>浏览器实际渲染：租户视角「管理员配置」抽屉（基础信息 + 角色与状态；角色下拉不含系统管理员）</figcaption></figure>
+
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>交互行为</th><th>形态/角色差异</th></tr></thead>
+    <tbody>
+      <tr><td>「新建」按钮</td><td>打开空白管理员配置抽屉，<code>emptyDraft(scope, activeTenantId)</code> 预置 <code>adminScope=tenant</code>、<code>tenantId=activeTenantId</code></td><td>[租户视角] 归属本租户</td></tr>
+      <tr><td>角色下拉</td><td>租户视角 <code>roleOptions</code> 过滤掉 <code>role_sys</code>（系统管理员），仅平台审计员/安全运营/审计员/自定义运营</td><td>[平台视角] 含系统管理员</td></tr>
+      <tr><td>初始密码「生成」</td><td>自动生成强密码</td><td>—</td></tr>
+      <tr><td>「确定」</td><td>校验后入库，新管理员出现在本租户列表；普通管理员（非 isPrimary）操作列含「删除」</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison"><h5>DOM 树比对结果（新建管理员抽屉 · 角色隔离）</h5><table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM（agent-browser snapshot 角色下拉）</th><th>规格描述</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>角色选项集合</td><td>平台审计员 / 安全运营 / 审计员 / 自定义运营（<strong>无系统管理员</strong>）</td><td>租户视角剔除 role_sys</td><td class="pass">一致</td></tr>
+      <tr><td>抽屉分组</td><td>基础信息 + 角色与状态</td><td>两分组</td><td class="pass">一致</td></tr>
+      <tr><td>归属赋值</td><td><code>tenantId=activeTenantId</code>（代登录租户）</td><td>动态租户身份</td><td class="pass">一致</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- 差异与限制 -->
+<section class="interaction-layer">
+  <h4><span class="layer-badge">Δ</span> 差异标注与演示环境限制</h4>
+  <table class="spec-table">
+    <thead><tr><th>编号</th><th>说明</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td>D-006</td><td>初始密码明文：已由凭据弹窗一次性遮罩展示解决</td><td class="pass">已解决</td></tr>
+      <tr><td>D-008</td><td>首管理员入库 + 代登录租户身份贯通：demo 已打通；数据依赖模块级 Mock 数组，<strong>整页刷新会重置</strong>（真实后端持久化下不存在）</td><td class="warn">演示限制</td></tr>
+      <tr><td>D-009</td><td>主管理员删除保护：isPrimary 隐藏删除按钮 + 批量删除拦截</td><td class="pass">已实现</td></tr>
+    </tbody>
+  </table>
+  <div class="source-note"><strong>验证方式：</strong>本层全部交互均以 agent-browser 在 <code>http://localhost:3000</code> 云网关·租户视角实测采集截图与 DOM，对比证据另见 <code>screenshots/tenant-primary-admin-badge.json</code>。</div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#tenant-primary-admin">← 返回主文件（0.5）</a>
+  <a href="./index.html">主文件 →</a>
+</nav>
+
+<script src="./preview.js"></script>
+</body>
+</html>

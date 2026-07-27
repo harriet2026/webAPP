@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures/auth.fixture';
 import { getDefaultTenantId, pickActiveTenantId } from '../helpers/tenant';
+import { ensureFiltersExpanded } from '../helpers/mail-list';
 
 test.describe('处置设置', () => {
   // The tenant the page is scoped to. Resolved via getDefaultTenantId (page_size
@@ -70,7 +71,7 @@ test.describe('处置设置', () => {
 
     // 09ee6b4cdd (搜索栏对齐): the structured filters — tenant selector
     // included — sit behind the 高级筛选 toggle and start collapsed.
-    await authenticatedPage.getByTestId('disposal-filters-toggle').click();
+    await ensureFiltersExpanded(authenticatedPage);
 
     const trigger = authenticatedPage.getByTestId('tenant-selector');
     await expect(trigger).toBeVisible();

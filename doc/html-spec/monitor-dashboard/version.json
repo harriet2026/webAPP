@@ -1,0 +1,20 @@
+{
+  "module": "monitor-dashboard",
+  "current_version": 2,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-20",
+      "demo_commit": "804efb9",
+      "spec_commit": null,
+      "summary": "初版：整页 main 提取 + 时间范围/刷新间隔 2 个 Select 交互验证，4 张截图（2026-07-20 生成，v2 复核时保留追溯）"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": null,
+      "summary": "全量重生成：6 组件逐一提取+可交互预览（头部/KPI/健康看板/双趋势/跑马灯/底部栏）；形态×角色 5×2 矩阵浏览器实测；纠正 v1「切范围数据刷新」错误结论（实测静态不变）；新增导出PDF无响应、刷新间隔不生效、内联 i18n、Thai 缺 key、URL 直连未拦截、响应式无断点、暗色不可达等 8 项差异"
+    }
+  ]
+}

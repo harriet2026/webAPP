@@ -1,0 +1,13 @@
+{
+  "module": "statistics-link-attachment-security",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-14",
+      "demo_commit": "804efb9",
+      "spec_commit": "8db3a98",
+      "summary": "初版：链接/附件双视图 + 图表类型切换 + 右侧三子面板 + 异步召回告警条 + 明细行展开；修复 6 条 UTF-8 损坏中文（含「一键召回」按钮）；标注 demo 10 处差异（重点：封禁/一键召回无二次确认）；网关全套端点已存在含 blacklist-domain"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 3：白名单列表态 - HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: white; --border: oklch(0.922 0 0); --muted: oklch(0.97 0 0); --radius: 0.625rem; --font-sans: "Geist", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0 auto; max-width: 1200px; padding: 2rem; font-family: var(--font-sans); background: var(--background); color: #1f2937; line-height: 1.6; }
+    .layer-nav, header, section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+    .layer-nav { display: flex; justify-content: space-between; }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    h1 { color: var(--primary); font-size: 1.35rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+    th, td { border: 1px solid var(--border); padding: 0.625rem 0.75rem; text-align: left; vertical-align: top; }
+    th { background: var(--muted); }
+    img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    code { font-family: "Geist Mono", monospace; }
+    .pass { color: #15803d; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="layer-2-blacklist.html">上一层：黑名单列表</a>
+    <a href="layer-4-new-rule-form.html">下一层：新增规则表单</a>
+  </nav>
+  <header>
+    <h1>交互层级 3：白名单列表态</h1>
+    <table>
+      <tr><td>触发路径</td><td>层级2 -> 点击“白名单规则” Tab</td></tr>
+      <tr><td>截图证据</td><td><code>screenshots/02b-whitelist-list.png</code></td></tr>
+      <tr><td>主文件</td><td><a href="index.html#component-2-3">index.html#component-2-3</a></td></tr>
+    </table>
+  </header>
+  <section>
+    <h2>元素清单</h2>
+    <table>
+      <thead><tr><th>元素</th><th>白名单态表现</th><th>交互</th></tr></thead>
+      <tbody>
+        <tr><td>Tab</td><td>白名单规则选中，绿色系视觉</td><td>点击黑名单规则返回层级2</td></tr>
+        <tr><td>表格数据</td><td>172.16.0.0/16、可信IP 等白名单规则</td><td>支持搜索、Switch、编辑、删除</td></tr>
+        <tr><td>动作 Badge</td><td>投递、标记投递</td><td>hover 显示动作说明</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="./screenshots/02b-whitelist-list.png" alt="白名单列表态">
+      <figcaption>层级3截图：白名单 Tab 与白名单动作集合。</figcaption>
+    </figure>
+  </section>
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table>
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/还原 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>Tab 状态</td><td>白名单规则选中</td><td><code>icSwitchTabInline('whitelist')</code></td><td class="pass">一致</td></tr>
+        <tr><td>动作集合</td><td>投递、标记投递</td><td><code>deliver</code> / <code>tagDeliver</code></td><td class="pass">一致</td></tr>
+        <tr><td>条件节点</td><td>黑名单动作不在白名单列表中渲染</td><td>白名单数据集无黑名单动作</td><td class="pass">一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+</body>
+</html>

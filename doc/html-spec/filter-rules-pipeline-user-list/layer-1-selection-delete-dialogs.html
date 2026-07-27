@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级1：选中与删除确认弹窗 - 用户黑白名单 HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --muted: #f5f7fa; --muted-foreground: #6b7280; --border: #e5e7eb; --blue: #1677ff; --red: #f5222d; --radius: 0.625rem; --font-sans: "Geist", "Inter", system-ui, sans-serif; --font-mono: "Geist Mono", ui-monospace, monospace; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: #111827; font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: var(--muted); border-radius: var(--radius); margin-bottom: 20px; font-size: 14px; }
+    .layer-nav a { font-weight: 650; }
+    .spec-header, section { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .trigger-path { padding: 8px 12px; margin: 8px 0 12px; border-radius: 8px; background: var(--muted); color: var(--muted-foreground); font-size: 13px; }
+    .trigger-path strong { color: #111827; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; position: relative; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mini-table th, .mini-table td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; }
+    .mini-table th { background: #f8fafc; color: #374151; }
+    .mini-table tr.selected td { background: #eff6ff; }
+    .mono { font-family: var(--font-mono); font-size: 12px; }
+    .pill { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #f3f4f6; }
+    .pill.orange { background: #ffedd5; color: #c2410c; }
+    .pill.green { background: #dcfce7; color: #15803d; }
+    .pill.gray { background: #f3f4f6; color: #4b5563; }
+    .button-red { padding: 8px 12px; border: 0; border-radius: 8px; background: #dc2626; color: #fff; font-weight: 650; cursor: pointer; }
+    .button-outline { padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: #fff; cursor: pointer; font-weight: 600; }
+    .icon-btn { width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-size: 14px; }
+    .icon-btn:hover { background: #f3f4f6; }
+    .icon-btn.destructive { color: #dc2626; }
+    .icon-btn.destructive:hover { background: #fef2f2; }
+    .is-hidden { display: none !important; }
+    .dialog-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,.4); display: flex; align-items: center; justify-content: center; border-radius: 8px; z-index: 5; }
+    .dialog-box { width: 420px; max-width: 90%; padding: 20px; border-radius: 12px; background: #fff; box-shadow: 0 20px 40px rgba(0,0,0,.2); position: relative; }
+    .dialog-box h2 { margin: 0 0 8px; font-size: 17px; }
+    .dialog-box p { margin: 0 0 16px; color: var(--muted-foreground); font-size: 14px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .dialog-close { position: absolute; top: 12px; right: 12px; border: 0; background: transparent; cursor: pointer; color: #9ca3af; font-size: 14px; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .warn-block { border-left: 4px solid var(--red); background: #fff7f7; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 14px; margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <span>层级 2-3 / 共 3 层</span>
+    <a href="./layer-2-search-pagination-states.html">层级2：搜索/分页/禁用态 →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 2-3：行选中、批量/单条删除确认弹窗、操作列</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 列表操作交互（用户黑白名单）</td></tr>
+      <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级1 列表态 → 勾选行复选框 → “删除选中(N)”按钮出现 → 点击打开批量删除弹窗；或横向滚动表格 → 行内 Trash2 图标 → 单条删除弹窗（运行态未弹出，见 D-002）</td></tr>
+      <tr><td>demo 组件</td><td><code>identity-strategy-page.tsx renderUserListConfig()</code>（Checkbox / Dialog×2 / Tooltip）</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">2</span>层级 2A：行选中态 + 删除选中按钮</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：点击行首复选框（Radix Checkbox，<code>role=checkbox</code>）。选中行背景变 <code>bg-blue-50/50</code>；工具栏右侧条件渲染红色“删除选中(N)”。表头复选框全选/取消当前页。</div>
+    <div class="component-preview" data-preview-root>
+      <table class="mini-table">
+        <thead><tr><th><input type="checkbox" data-check-all></th><th>规则ID</th><th>发信人</th><th>收信人</th><th>执行动作</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td><input type="checkbox" data-row-check checked></td><td class="mono">UB-20260320-001</td><td class="mono">✉ spam@bad-actor.com</td><td class="mono">👤 alice@company.com</td><td><span class="pill orange">隔离</span></td><td><span class="pill green">启用</span></td><td><button class="icon-btn" type="button" title="编辑" data-edit-btn>✎</button><button class="icon-btn destructive" type="button" title="删除" data-single-delete data-rule-id="UB-20260320-001">🗑</button></td></tr>
+          <tr><td><input type="checkbox" data-row-check checked></td><td class="mono">UB-20260319-002</td><td class="mono">✉ *@promo-blast.net</td><td class="mono">👤 bob@company.com</td><td><span class="pill orange">隔离</span></td><td><span class="pill green">启用</span></td><td><button class="icon-btn" type="button" title="编辑" data-edit-btn>✎</button><button class="icon-btn destructive" type="button" title="删除" data-single-delete data-rule-id="UB-20260319-002">🗑</button></td></tr>
+          <tr><td><input type="checkbox" data-row-check></td><td class="mono">UB-20260318-003</td><td class="mono">✉ ads@newsletter.io</td><td class="mono">👤 *@sales.company.com</td><td><span class="pill orange">隔离</span></td><td><span class="pill gray">禁用</span></td><td><button class="icon-btn" type="button" title="编辑" data-edit-btn>✎</button><button class="icon-btn destructive" type="button" title="删除" data-single-delete data-rule-id="UB-20260318-003">🗑</button></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px;text-align:right;">
+        <button class="button-red" type="button" data-batch-delete>🗑 删除选中(2)</button>
+      </div>
+
+      <!-- 批量删除确认弹窗（与 demo 渲染一致的结构复刻） -->
+      <div class="dialog-backdrop is-hidden" data-dialog="batch">
+        <div class="dialog-box" role="dialog">
+          <button class="dialog-close" type="button" data-dialog-close>✕</button>
+          <h2>确认删除</h2>
+          <p>确认删除选中的 <span data-batch-count>2</span> 条规则 ? 此操作不可撤销</p>
+          <div class="dialog-actions">
+            <button class="button-outline" type="button" data-dialog-close>取消</button>
+            <button class="button-red" type="button" data-batch-confirm>确认</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 单条删除确认弹窗（按源码文案复刻；demo 运行态未弹出 → 预览按“应然行为”实现并标注） -->
+      <div class="dialog-backdrop is-hidden" data-dialog="single">
+        <div class="dialog-box" role="dialog">
+          <button class="dialog-close" type="button" data-dialog-close>✕</button>
+          <h2>确认删除</h2>
+          <p>确认删除规则 <span class="mono" data-single-id>UB-20260320-001</span> ? 此操作不可撤销</p>
+          <div class="dialog-actions">
+            <button class="button-outline" type="button" data-dialog-close>取消</button>
+            <button class="button-red" type="button" data-dialog-close>确认</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/selection-batch-delete-button.png" alt="行选中态与删除选中按钮">
+      <figcaption>选中 2 行后：行背景蓝色，工具栏右侧出现红色“删除选中(2)”按钮（浏览器实际渲染）。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/ops-column-scrolled.png" alt="操作列横向滚动可见">
+      <figcaption>表格横向滚动到最右后可见“操作”列：编辑（SquarePen）+ 删除（Trash2 红色）图标按钮。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th><th>i18n key</th></tr></thead>
+      <tbody>
+        <tr><td>表头复选框</td><td><code>role=checkbox</code>，勾选态 <code>data-state=checked</code></td><td>全选/取消当前页所有行（仅当前页，非跨页）</td><td>-</td></tr>
+        <tr><td>行复选框</td><td>同上</td><td>切换该行选中；选中行 <code>bg-blue-50/50 dark:bg-blue-950/20</code></td><td>-</td></tr>
+        <tr><td>删除选中按钮</td><td>删除选中(N)，variant=destructive，Trash2 图标</td><td>N&gt;0 时才渲染；点击打开批量删除弹窗</td><td>deleteSelected</td></tr>
+        <tr><td>编辑按钮</td><td>ghost 图标按钮（SquarePen 16px），Tooltip“编辑”</td><td><strong>无 onClick，点击无响应</strong>（D-003）</td><td>edit</td></tr>
+        <tr><td>删除按钮</td><td>ghost 图标按钮（Trash2 16px，红色 text-destructive），Tooltip“删除”</td><td>源码绑定打开单条删除弹窗；<strong>运行态未弹出</strong>（D-002）</td><td>delete</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果（选中态）</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>选中行 class</td><td><code>...hover:bg-gray-50 ... bg-blue-50/50 dark:bg-blue-950/20</code></td><td><code>tr.selected</code> 蓝色底（等价样式）</td><td>一致</td></tr>
+          <tr><td>选中计数</td><td>checked 复选框 2 个，按钮文案“删除选中(2)”</td><td>2 个 checked + “删除选中(2)”</td><td>一致</td></tr>
+          <tr><td>操作列按钮</td><td>2 个 button：svg <code>lucide-square-pen</code> + svg <code>lucide-trash2</code></td><td>✎ + 🗑 两个按钮（emoji 代图标）</td><td>一致（图标以 emoji 代替）</td></tr>
+          <tr><td>未选中时按钮</td><td>“删除选中”按钮不在 DOM 中（条件渲染）</td><td>预览中取消全部勾选后按钮 <code>.is-hidden</code></td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">3</span>层级 3A：批量删除确认弹窗</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：层级2A 点击“删除选中(N)” → <code>setShowUserListBatchDeleteConfirm(true)</code> → 居中 Dialog（Radix Portal 挂载至 body）。上方预览区点击“删除选中(2)”可复现。</div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/batch-delete-dialog.png" alt="批量删除确认弹窗">
+      <figcaption>批量删除弹窗（浏览器实际渲染）：标题“确认删除”，描述“确认删除选中的 2 条规则 ? 此操作不可撤销”，取消 / 确认（红）/ 右上 X。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>实际文案</th><th>交互行为</th><th>i18n key</th></tr></thead>
+      <tbody>
+        <tr><td>标题</td><td>确认删除（h2）</td><td>-</td><td>confirmDeleteTitle</td></tr>
+        <tr><td>描述</td><td>确认删除选中的 N 条规则 ? 此操作不可撤销</td><td>N = 选中数</td><td>confirmDeleteBatch + rulesText + cannotUndo</td></tr>
+        <tr><td>取消按钮</td><td>取消（outline）</td><td>关闭弹窗，选中保留</td><td>cancel</td></tr>
+        <tr><td>确认按钮</td><td>确认（destructive 红）</td><td>关闭弹窗并清空选中（demo mock 不真正删除数据、列表不变）</td><td>confirm</td></tr>
+        <tr><td>关闭 X</td><td>右上角 X（sr-only “Close”）</td><td>关闭弹窗；ESC / 点遮罩同效（Radix Dialog 默认）</td><td>-</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果（批量删除弹窗）</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>根节点</td><td><code>div[role=dialog].bg-background...fixed</code>，子节点 3，节点总数 12</td><td><code>.dialog-box[role=dialog]</code>，3 个子块（头/操作区/关闭钮）</td><td>一致</td></tr>
+          <tr><td>标题节点</td><td><code>h2.text-lg.leading-none.font-semibold</code>“确认删除”</td><td>h2“确认删除”</td><td>一致</td></tr>
+          <tr><td>描述节点</td><td><code>p.text-muted-foreground.text-sm</code>“确认删除选中的 2 条规则 ? 此操作不可撤销”</td><td>同文案（N 动态）</td><td>一致</td></tr>
+          <tr><td>按钮</td><td>[取消, 确认, Close]</td><td>[取消, 确认, ✕]</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">3</span>层级 3B：单条删除确认弹窗（demo 运行态缺陷）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：行内 Trash2 删除图标 → 源码 <code>onClick=(){ setDeletingUserListRule(rule); setShowUserListDeleteConfirm(true) }</code> → 应弹出“确认删除规则 [规则ID]”。上方预览区点击行内 🗑 可体验<strong>应然行为</strong>。</div>
+    <div class="warn-block">
+      ⚠ <strong>浏览器验证结论（D-002）</strong>：在运行态 demo 中，点击行内删除按钮后确认弹窗未挂载。验证手段：① CDP 真实鼠标事件命中按钮（hit-test 返回该 button，原生 click 监听器触发）；② 直接调用按钮 React <code>onClick</code> props；③ MutationObserver 监听 body 无任何 <code>[role=dialog]</code> 增删；④ 控制台无报错；⑤ 抽屉内与 <code>/filter-rules/identity</code> 独立路由均复现。批量删除弹窗（同组件同模式）正常，故判定为 demo 缺陷而非环境问题。规格按 PRD §3.5 + 源码文案给出应然行为。
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/single-delete-dialog.png" alt="单条删除点击后（弹窗未出现）">
+      <figcaption>缺陷证据截图：点击第1行删除按钮 1.5s 后页面无弹窗（选中态保留、无报错）。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>元素（按源码/应然）</th><th>文案</th><th>交互行为</th><th>i18n key</th></tr></thead>
+      <tbody>
+        <tr><td>标题</td><td>确认删除</td><td>-</td><td>confirmDeleteTitle</td></tr>
+        <tr><td>描述</td><td>确认删除规则 [规则ID] ? 此操作不可撤销</td><td>规则ID 取被点击行</td><td>confirmDeleteSingle + cannotUndo</td></tr>
+        <tr><td>取消 / 确认</td><td>取消（outline）/ 确认（destructive）</td><td>取消关闭；确认关闭并清空 deletingUserListRule（mock 不删数据）</td><td>cancel / confirm</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果（单条删除弹窗）</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>弹窗挂载</td><td><strong>未挂载</strong>（点击后 <code>[role=dialog]</code> 数量不变，仅 Sheet 存在）</td><td>预览按源码 JSX 结构复刻（h2 + p + 取消/确认）</td><td>不一致——demo 缺陷，已记录 D-002，预览为应然行为</td></tr>
+          <tr><td>删除按钮本体</td><td><code>button.text-destructive</code> 含 <code>svg.lucide-trash2</code>，Tooltip“删除”</td><td>红色 🗑 图标按钮 title=删除</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <a href="./layer-2-search-pagination-states.html">层级2：搜索/分页/禁用态 →</a>
+  </nav>
+
+  <script>
+    (function () {
+      const root = document.querySelector("[data-preview-root]");
+      const rows = [...root.querySelectorAll("tbody tr")];
+      const checkAll = root.querySelector("[data-check-all]");
+      const batchBtn = root.querySelector("[data-batch-delete]");
+      const batchDialog = root.querySelector('[data-dialog="batch"]');
+      const singleDialog = root.querySelector('[data-dialog="single"]');
+      const batchCount = root.querySelector("[data-batch-count]");
+      const singleId = root.querySelector("[data-single-id]");
+
+      function refresh() {
+        let n = 0;
+        rows.forEach((tr) => {
+          const c = tr.querySelector("[data-row-check]");
+          tr.classList.toggle("selected", c.checked);
+          if (c.checked) n++;
+        });
+        batchBtn.textContent = "🗑 删除选中(" + n + ")";
+        batchBtn.classList.toggle("is-hidden", n === 0);
+        checkAll.checked = n === rows.length;
+        return n;
+      }
+
+      root.querySelectorAll("[data-row-check]").forEach((c) => c.addEventListener("change", refresh));
+      checkAll.addEventListener("change", () => {
+        rows.forEach((tr) => (tr.querySelector("[data-row-check]").checked = checkAll.checked));
+        refresh();
+      });
+
+      batchBtn.addEventListener("click", () => {
+        batchCount.textContent = String(refresh());
+        batchDialog.classList.remove("is-hidden");
+      });
+      root.querySelector("[data-batch-confirm]").addEventListener("click", () => {
+        batchDialog.classList.add("is-hidden");
+        rows.forEach((tr) => (tr.querySelector("[data-row-check]").checked = false));
+        refresh(); // demo 行为：确认后仅清空选中，mock 数据不删除
+      });
+
+      root.querySelectorAll("[data-single-delete]").forEach((b) => b.addEventListener("click", () => {
+        singleId.textContent = b.dataset.ruleId;   // 应然行为复刻（demo 运行态未弹出，见 D-002）
+        singleDialog.classList.remove("is-hidden");
+      }));
+      root.querySelectorAll("[data-edit-btn]").forEach((b) => b.addEventListener("click", (e) => {
+        e.preventDefault();  // 与 demo 一致：编辑按钮无响应（D-003）
+      }));
+      root.querySelectorAll("[data-dialog-close]").forEach((b) => b.addEventListener("click", () => {
+        batchDialog.classList.add("is-hidden");
+        singleDialog.classList.add("is-hidden");
+      }));
+      refresh(); // 初始化：预置 2 行 checked → 行高亮 + “删除选中(2)”
+    })();
+  </script>
+</body>
+</html>

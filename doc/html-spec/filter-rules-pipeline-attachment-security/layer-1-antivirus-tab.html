@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级2：反病毒引擎 Tab - 附件安全检测 HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --muted: #f5f7fa; --muted-foreground: #6b7280; --border: #e5e7eb; --blue: #1677ff; --radius: 0.625rem; --font-sans: "Geist", "Inter", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1200px; margin-inline: auto; background: var(--background); color: #111827; font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .layer-nav { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 12px 18px; background: var(--muted); border-radius: 8px; font-size: 14px; font-weight: 650; }
+    .spec-header, section { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 160px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 10px 0; }
+    .form-label { display: block; margin: 8px 0 6px; font-size: 13px; font-weight: 600; color: #374151; }
+    .sel { min-width: 220px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: #fff; font-size: 14px; }
+    .check-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 14px; }
+    .gray-block { margin: 14px 0; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f9fafb; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #f3f4f6; }
+    .pill.green { background: #dcfce7; color: #15803d; }
+    .pill.amber { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .btn-outline { padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; font-size: 13px; cursor: pointer; }
+    .status-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; font-size: 13px; }
+    .hint { margin-top: 4px; color: var(--muted-foreground); font-size: 12px; }
+    .is-hidden { display: none !important; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <span>层级 2 / 5</span>
+    <a href="./layer-2-image-detect-tab.html">层级3：图片识别 Tab →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 2：反病毒引擎 Tab（AntivirusTab）</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 附件安全检测配置 Tab 组 AttachmentSecurityModule</td></tr>
+      <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级1 抽屉默认态 → Tab 组点击「反病毒引擎」→ Radix Tabs 切换（data-state=active）</td></tr>
+      <tr><td>demo 组件</td><td><code>attachment-security-module.tsx</code> → <code>AntivirusTab</code>（direction=receive）</td></tr>
+      <tr><td>浏览器实测</td><td>面板节点总数 79；combobox 值 [奇安信（国内病毒库覆盖好）, 卡巴斯基, 隔离, 进行下一步检测]；checkbox 状态 [checked, unchecked, checked]；「立即更新」按钮 ×2。</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">2</span>反病毒引擎 Tab 默认态（可交互预览）</h4>
+    <div class="component-preview" data-demo-extracted="antivirus-tab">
+      <label class="form-label" style="font-size:14px;">引擎配置</label>
+      <div class="form-grid">
+        <div>
+          <label class="form-label">主引擎</label>
+          <select class="sel" data-primary>
+            <option value="qianxin" selected>奇安信（国内病毒库覆盖好）</option>
+            <option value="kaspersky">卡巴斯基（国际病毒库覆盖好）</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">备引擎</label>
+          <select class="sel" data-backup>
+            <option value="kaspersky" selected>卡巴斯基</option>
+            <option value="qianxin">奇安信</option>
+            <option value="none">无</option>
+          </select>
+        </div>
+      </div>
+      <div class="check-row"><input type="checkbox" checked> 主引擎故障/超时时自动启用备引擎</div>
+      <div class="check-row"><input type="checkbox" data-dual> 双引擎同时扫描（提升检出率）<span class="pill amber is-hidden" data-dual-badge>⚠ 消耗双倍资源</span></div>
+
+      <div class="gray-block">
+        <label class="form-label" style="margin-top:0;">病毒库状态</label>
+        <div class="status-row">
+          <span><span class="pill green">✓ 奇安信</span> <span style="color:#6b7280;">v2024.03.31.03 (特征数 8,543,210)</span></span>
+          <button class="btn-outline" type="button" title="demo 中该按钮未绑定 onClick，点击无反馈（差异 D-4）">⟳ 立即更新</button>
+        </div>
+        <div class="status-row">
+          <span><span class="pill green">✓ 卡巴斯基</span> <span style="color:#6b7280;">v2024.03.31.01 (特征数 12,123,456)</span></span>
+          <button class="btn-outline" type="button" title="demo 中该按钮未绑定 onClick，点击无反馈（差异 D-4）">⟳ 立即更新</button>
+        </div>
+        <div class="check-row" style="color:#6b7280;"><input type="checkbox" checked> 自动更新 <span style="color:#2563eb;">每日 02:00</span></div>
+      </div>
+
+      <div class="gray-block">
+        <label class="form-label" style="margin-top:0;">当前方向执行动作</label>
+        <label class="form-label">发现病毒后的处置</label>
+        <select class="sel" style="width:280px;">
+          <option selected>隔离</option><option>审核</option><option>阻断</option><option>丢弃</option>
+        </select>
+        <div class="hint">接收方向默认隔离</div>
+        <label class="form-label">扫描超时处置（超过30秒）</label>
+        <select class="sel" style="width:280px;">
+          <option>隔离</option><option>审核</option><option>阻断</option><option>丢弃</option><option selected>进行下一步检测</option>
+        </select>
+      </div>
+    </div>
+
+    <figure class="screenshot-figure">
+      <img src="./screenshots/antivirus-tab.png" alt="反病毒引擎 Tab 上半部">
+      <figcaption>反病毒引擎 Tab（浏览器实际渲染，滚动区顶部）：引擎配置 + 病毒库状态。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/antivirus-tab-bottom.png" alt="反病毒引擎 Tab 下半部">
+      <figcaption>滚动到底部：当前方向执行动作（发现病毒处置 = 隔离、扫描超时处置 = 进行下一步检测）。</figcaption>
+    </figure>
+
+    <h4>UI 元素清单</h4>
+    <table class="spec-table">
+      <thead><tr><th>序号</th><th>元素</th><th>默认值（receive）</th><th>选项/校验</th><th>交互（浏览器实测）</th><th>i18n key（内联 LABELS）</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>主引擎 Select</td><td>奇安信（国内病毒库覆盖好）</td><td>奇安信 / 卡巴斯基（带覆盖说明后缀）</td><td>切换即生效并触发未保存提示；<strong>无主备相同校验</strong>（差异 D-13）</td><td>primaryEngine / qianxin / kaspersky</td></tr>
+        <tr><td>2</td><td>备引擎 Select</td><td>卡巴斯基</td><td>卡巴斯基 / 奇安信 / 无（短名）</td><td>同上</td><td>backupEngine / kasperskyShort / qianxinShort / none</td></tr>
+        <tr><td>3</td><td>自动切换 Checkbox</td><td>checked</td><td>-</td><td>切换勾选</td><td>autoSwitch</td></tr>
+        <tr><td>4</td><td>双引擎模式 Checkbox</td><td>unchecked</td><td>勾选后右侧出现琥珀 Badge「⚠ 消耗双倍资源」（条件渲染）</td><td>预览已复刻该条件渲染</td><td>dualEngine / doubleResource</td></tr>
+        <tr><td>5</td><td>病毒库状态区</td><td>奇安信/卡巴斯基均绿色在线 Badge + 版本 + 特征数（toLocaleString 千分位）</td><td>状态三态：online 绿 / updating 黄(Clock) / offline 红(XCircle)（源码 getStatusColor，demo mock 恒 online）</td><td>展示态</td><td>virusDbStatus / signatures</td></tr>
+        <tr><td>6</td><td>立即更新 Button ×2</td><td>-</td><td>-</td><td><strong>demo 未绑定 onClick，点击无反馈</strong>；PRD 要求 loading + 版本刷新（差异 D-4）</td><td>updateNow</td></tr>
+        <tr><td>7</td><td>自动更新 Checkbox</td><td>defaultChecked（非受控）</td><td>「每日 02:00」为固定文案</td><td>可切换但不进 config state；时间不可配置（Q8）</td><td>autoUpdate / daily</td></tr>
+        <tr><td>8</td><td>发现病毒后的处置 Select</td><td>隔离</td><td>隔离/审核/阻断/丢弃（4 项，实测）</td><td>下方提示「接收方向默认隔离」</td><td>virusAction / receiveDefault</td></tr>
+        <tr><td>9</td><td>扫描超时处置 Select</td><td>进行下一步检测</td><td>隔离/审核/阻断/丢弃/进行下一步检测（5 项，实测）</td><td>标签含固定「（超过30秒）」，与基础限制 scanTimeout 值无联动</td><td>timeoutAction</td></tr>
+      </tbody>
+    </table>
+
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>面板根节点</td><td><code>[role=tabpanel][data-state=active]</code>，节点总数 79</td><td>预览保留三大分组（引擎配置/病毒库状态/执行动作）核心结构</td><td>一致（结构裁剪展示）</td></tr>
+          <tr><td>combobox 值</td><td>[奇安信（国内病毒库覆盖好）, 卡巴斯基, 隔离, 进行下一步检测]</td><td>4 个 select 同默认值</td><td>一致</td></tr>
+          <tr><td>checkbox 状态</td><td>[checked, unchecked, checked]（自动切换/双引擎/自动更新）</td><td>同状态</td><td>一致</td></tr>
+          <tr><td>双倍资源 Badge</td><td>dualEngineMode=false 时未渲染（条件节点）</td><td>默认隐藏，勾选后出现</td><td>一致</td></tr>
+          <tr><td>按钮</td><td>「立即更新」×2，无事件绑定</td><td>同文案，title 注明无反馈</td><td>一致</td></tr>
+          <tr><td>特征数文案</td><td>「v2024.03.31.03 (特征数 8,543,210)」「v2024.03.31.01 (特征数 12,123,456)」</td><td>同文案</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <a href="./layer-2-image-detect-tab.html">层级3：图片识别 Tab →</a>
+  </nav>
+
+  <script>
+    // 双引擎模式 → 显示「消耗双倍资源」Badge（复刻 demo 条件渲染）
+    const dual = document.querySelector("[data-dual]");
+    const badge = document.querySelector("[data-dual-badge]");
+    dual.addEventListener("change", () => badge.classList.toggle("is-hidden", !dual.checked));
+  </script>
+</body>
+</html>

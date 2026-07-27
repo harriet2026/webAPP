@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 5：动作下拉展开态 - HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: white; --border: oklch(0.922 0 0); --muted: oklch(0.97 0 0); --radius: 0.625rem; --font-sans: "Geist", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0 auto; max-width: 1200px; padding: 2rem; font-family: var(--font-sans); background: var(--background); color: #1f2937; line-height: 1.6; }
+    .layer-nav, header, section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+    .layer-nav { display: flex; justify-content: space-between; }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    h1 { color: var(--primary); font-size: 1.35rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+    th, td { border: 1px solid var(--border); padding: 0.625rem 0.75rem; text-align: left; vertical-align: top; }
+    th { background: var(--muted); }
+    img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    code { font-family: "Geist Mono", monospace; }
+    .pass { color: #15803d; font-weight: 700; }
+    .fixed { color: #a16207; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="layer-4-new-rule-form.html">上一层：新增规则表单</a>
+    <a href="index.html#component-2-0">返回主文件</a>
+  </nav>
+  <header>
+    <h1>交互层级 5：动作下拉展开态</h1>
+    <table>
+      <tr><td>触发路径</td><td>层级4 -> 点击“执行动作” Select</td></tr>
+      <tr><td>截图证据</td><td><code>screenshots/03e-action-dropdown.png</code></td></tr>
+      <tr><td>主文件</td><td><a href="index.html#dialog-3-2">index.html#dialog-3-2</a></td></tr>
+    </table>
+  </header>
+  <section>
+    <h2>元素清单</h2>
+    <table>
+      <thead><tr><th>名单类型</th><th>动作选项</th><th>业务含义</th></tr></thead>
+      <tbody>
+        <tr><td>黑名单</td><td>隔离、审核、阻断、丢弃</td><td>命中黑名单后进入处置、审核、拒绝或静默丢弃分支</td></tr>
+        <tr><td>白名单</td><td>投递、标记投递</td><td>命中白名单后直接放行或加标后继续检测</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="./screenshots/03e-action-dropdown.png" alt="动作下拉展开态">
+      <figcaption>层级5截图：执行动作下拉展开态。</figcaption>
+    </figure>
+  </section>
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table>
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/还原 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>黑名单选项</td><td>隔离、审核、阻断、丢弃</td><td><code>blacklistActions</code> 同集合</td><td class="pass">一致</td></tr>
+        <tr><td>白名单选项</td><td>投递、标记投递</td><td><code>whitelistActions</code> 同集合</td><td class="pass">一致</td></tr>
+        <tr><td>浮层视觉</td><td>Radix/Select 弹层浮在表单上方</td><td>子文件用截图记录实际浮层；主文件 HTML 预览用原生 select 表达选项</td><td class="fixed">截图兜底</td></tr>
+      </tbody>
+    </table>
+  </section>
+</body>
+</html>

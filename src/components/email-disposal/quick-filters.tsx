@@ -149,8 +149,10 @@ export function QuickFilters({
   const startTime = value.sendReceiveTime?.start;
   const endTime = value.sendReceiveTime?.end;
 
+  // GT-12423: 原型筛选区为 4 列网格；lg(1024) 即四列，保证 1024px 下
+  // 收发时间/收发类型/发信人/收信人同一行（QC UI04）。
   return (
-    <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 xl:grid-cols-4" data-testid="disposal-quick-filters">
+    <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="disposal-quick-filters">
           {tenantSelector ? (
             <div className="order-1 space-y-1">
               <label className="text-xs text-muted-foreground">{t("tenantScope")}</label>

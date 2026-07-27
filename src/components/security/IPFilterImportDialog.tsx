@@ -262,7 +262,7 @@ export function IPFilterImportDialog({
                 </span>
                 <button
                   type="button"
-                  className="ml-1 inline-flex shrink-0 cursor-pointer"
+                  className="ml-1 inline-flex shrink-0 cursor-pointer rounded-sm text-muted-foreground transition-[color,background-color] duration-[120ms] ease-out motion-reduce:transition-none hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
                   aria-label={t('ipFilter.importFileClear')}
                   onClick={() => { setFileRows([]); setFileName(''); }}
                 >

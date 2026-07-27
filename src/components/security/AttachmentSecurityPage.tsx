@@ -23,6 +23,7 @@ import {
   EncryptedAttachmentTab,
 } from './attachment-security/EncryptedAttachmentTab';
 import { Button } from '@/components/ui/button';
+import { SegmentedButton } from '@/components/ui/segmented-button';
 import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
 import {
@@ -373,22 +374,17 @@ export function AttachmentSecurityPage({
                 data-testid="attachment-security-tabs"
               >
                 {visibleTabs.map((tab) => (
-                  <button
+                  <SegmentedButton
                     key={tab.key}
-                    type="button"
                     role="tab"
                     aria-selected={activeTab === tab.key}
+                    selected={activeTab === tab.key}
                     data-testid={`tab-${tab.key}`}
-                    className={cn(
-                      'whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                      activeTab === tab.key
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground',
-                    )}
+                    className="whitespace-nowrap rounded-md px-3 py-1.5"
                     onClick={() => setActiveTab(tab.key)}
                   >
                     {tabLabels[tab.key]}
-                  </button>
+                  </SegmentedButton>
                 ))}
               </div>
 

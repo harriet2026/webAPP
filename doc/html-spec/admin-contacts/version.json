@@ -1,0 +1,9 @@
+{
+  "module": "admin-contacts",
+  "current_version": 1,
+  "history": [
+    { "version": 1, "generated_at": "2026-07-19",
+      "demo_commit": "804efb9", "spec_commit": "804efb9",
+      "summary": "初版：三 Tab（数据源管理/通讯录查询/同步日志）全量组件 + 10 个交互层级子文件；4 种同步方式表单联动、测试连接双结果、批量标记全流程实测；标注 15 处 demo↔spec 差异（重点：自动同步无 Cron 配置抽屉、CSV 无列映射、无刷新按钮）；网关 API/DB 表映射为已存在" }
+  ]
+}

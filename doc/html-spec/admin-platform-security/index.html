@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系统管理 - 平台安全策略 - HTML 规格说明</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { darkMode: 'class', theme: { extend: { colors: {
+  background: 'oklch(1 0 0)', foreground: 'oklch(0.145 0 0)',
+  primary: { DEFAULT: 'oklch(0.52 0.226 262)', foreground: 'oklch(0.985 0 0)' },
+  muted: { DEFAULT: 'oklch(0.97 0 0)', foreground: 'oklch(0.556 0 0)' },
+  accent: { DEFAULT: 'oklch(0.97 0 0)', foreground: 'oklch(0.205 0 0)' },
+  popover: { DEFAULT: 'oklch(1 0 0)', foreground: 'oklch(0.145 0 0)' },
+  border: 'oklch(0.922 0 0)', input: 'oklch(0.922 0 0)', ring: 'oklch(0.52 0.226 262)',
+  destructive: 'oklch(0.577 0.245 27.325)',
+}}}};
+</script>
+<style>
+:root {
+  --primary: oklch(0.52 0.226 262); --primary-foreground: oklch(0.985 0 0);
+  --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0); --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0);
+  --border: oklch(0.922 0 0); --destructive: oklch(0.577 0.245 27.325); --radius: 0.625rem;
+  --diff-bg: oklch(0.97 0.013 25); --diff-border: oklch(0.65 0.2 25);
+  --question-bg: oklch(0.97 0.05 95); --question-border: oklch(0.75 0.15 90);
+  --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+  --font-mono: "Geist Mono", monospace;
+}
+* { box-sizing: border-box; }
+body { font-family: var(--font-sans); background: var(--background); color: var(--foreground); line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+.spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 2rem; margin-bottom: 2rem; }
+.spec-header h1 { color: var(--primary); margin: 0 0 1rem; font-size: 1.5rem; }
+.meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+.meta-table td:first-child { font-weight: 600; width: 160px; color: var(--muted-foreground); white-space: nowrap; }
+.component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 2rem; margin-bottom: 2rem; }
+.component-toc > h2 { color: var(--primary); font-size: 1.05rem; margin: 0 0 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+.component-toc ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.5rem; margin: 0; padding: 0; }
+.component-toc li { padding: 0.375rem 0.75rem; border-radius: calc(var(--radius) - 4px); background: var(--muted); font-size: 0.875rem; }
+.component-toc li a { color: var(--primary); text-decoration: none; font-weight: 500; }
+.component-toc li a:hover { text-decoration: underline; }
+.component-toc .toc-layer-links { font-size: 0.75rem; color: var(--muted-foreground); margin-left: 0.5rem; }
+.component-toc .toc-layer-links a { color: var(--muted-foreground); font-weight: 400; }
+.component-toc .toc-badge { display: inline-block; font-size: 0.6875rem; font-weight: 600; padding: 0.0625rem 0.375rem; border-radius: calc(var(--radius) - 4px); background: var(--primary); color: var(--primary-foreground); white-space: nowrap; margin-left: 0.25rem; }
+section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; margin: 0 0 1.25rem; font-size: 1.25rem; }
+h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+table.spec-table th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); white-space: nowrap; }
+table.spec-table td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+table.spec-table tr:nth-child(even) td { background: var(--muted); }
+.screenshot-figure { margin: 1rem 0; text-align: center; }
+.screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.screenshot-figure figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+.component-spec { border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1rem 0; background: var(--card); }
+.component-spec > h3 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 0.75rem; margin-top: 0.25rem; }
+pre { background: var(--muted); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; margin: 1rem 0; }
+code { font-family: var(--font-mono); font-size: 0.85em; }
+.mermaid { text-align: center; margin: 1rem 0; padding: 1rem; background: var(--muted); border-radius: calc(var(--radius) - 2px); }
+.diff-section { border-left: 4px solid var(--diff-border); background: var(--diff-bg); }
+.diff-section > h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+.question-section { border-left: 4px solid var(--question-border); background: var(--question-bg); }
+.question-section > h2 { color: var(--question-border); border-bottom-color: var(--question-border); }
+.badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); }
+.badge-high { background: oklch(0.65 0.2 25); color: white; }
+.badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+.badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+.component-preview { border: 2px dashed var(--primary); border-radius: var(--radius); padding: 1.5rem; margin: 1rem 0; background: #fff; position: relative; overflow: auto; }
+.component-preview::before { content: "🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）"; position: absolute; top: -0.625rem; left: 0.75rem; background: var(--primary); color: var(--primary-foreground); font-size: 0.6875rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); white-space: nowrap; }
+.component-preview { padding-top: 2rem; }
+/* radix 弹层在预览区静态化展示 */
+.component-preview [data-radix-popper-content-wrapper] { position: static !important; transform: none !important; min-width: 280px !important; z-index: auto !important; }
+.component-preview [role=listbox] { max-height: none !important; }
+/* Tailwind v4 类兜底 */
+.component-preview .shadow-xs { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+.component-preview .outline-hidden { outline: none; }
+.component-preview .size-4 { width: 1rem; height: 1rem; }
+.component-preview .size-3\.5 { width: 0.875rem; height: 0.875rem; }
+.interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1.5rem 0; background: var(--card); }
+.interaction-layer > h4 { color: var(--primary); font-size: 0.95rem; margin: 0 0 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+.layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+.trigger-path { background: var(--muted); border-radius: calc(var(--radius) - 4px); padding: 0.5rem 0.75rem; margin: 0.5rem 0 1rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+.trigger-path strong { color: var(--foreground); }
+.dom-comparison { margin: 1rem 0; border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); overflow: hidden; }
+.dom-comparison > h5 { background: var(--muted); padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600; margin: 0; border-bottom: 1px solid var(--border); }
+.dom-comparison > h5::before { content: "🔍 "; }
+.dom-comparison table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.dom-comparison th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+.dom-comparison td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+.dom-comparison tr:last-child td { border-bottom: none; }
+.dom-pass { color: oklch(0.5 0.15 150); font-weight: 600; }
+table.layer-index { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+table.layer-index th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+table.layer-index td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+table.layer-index td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+table.layer-index td a:hover { text-decoration: underline; }
+.layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; background: var(--muted); border-radius: var(--radius); margin-bottom: 1.5rem; font-size: 0.875rem; }
+.layer-nav a { color: var(--primary); text-decoration: none; font-weight: 600; }
+.layer-nav a:hover { text-decoration: underline; }
+.version-history-table td:nth-child(5) { color: var(--muted-foreground); }
+.spec-version { font-weight: 600; color: oklch(0.52 0.226 262); }
+</style>
+</head>
+<body>
+
+<script>
+/* IP 策略面板预览交互：左侧导航切换 + 启用开关（复刻 demo connection-layer-page 状态机） */
+function wireIpPanel(rootId, initialSelected, initialEnabledMap) {
+  const root = document.getElementById(rootId);
+  if (!root) return;
+  const SUMMARY = { 'IP频率限制': '阈值: 100次/分钟', 'IP黑白名单': '黑名单: 33条 / 白名单: 22条', 'RBL过滤': '3个服务器 / 超时5s', '海外邮件检测': '收件 已启用' };
+  const enabled = Object.assign({ 'IP频率限制': true, 'IP黑白名单': true, 'RBL过滤': true, '海外邮件检测': true }, initialEnabledMap || {});
+  let selected = initialSelected;
+  const navBtns = Array.from(root.querySelectorAll('nav button'));
+  const nameOf = b => { const s = b.querySelector(':scope > div > span'); return s ? s.textContent.trim() : ''; };
+  const title = root.querySelector('h2');
+  const statusTxt = root.querySelector('.js-status');
+  const sw = root.querySelector('[role=switch]');
+  const thumb = sw ? sw.querySelector('span') : null;
+  const content = root.querySelector('.js-content');
+  const unsaved = root.querySelector('.js-unsaved');
+  function render() {
+    navBtns.forEach(b => {
+      const n = nameOf(b);
+      const on = n === selected;
+      b.classList.toggle('bg-blue-50', on); b.classList.toggle('text-blue-700', on);
+      b.classList.toggle('hover:bg-gray-100', !on); b.classList.toggle('text-gray-700', !on);
+      const dot = b.querySelector(':scope > span');
+      if (dot) {
+        dot.className = enabled[n]
+          ? 'w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors bg-blue-500'
+          : 'w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors border-2 border-gray-300';
+      }
+      const sum = b.querySelectorAll(':scope > div > span')[1];
+      if (sum) sum.textContent = enabled[n] ? SUMMARY[n] : '未启用';
+    });
+    if (title) title.textContent = selected;
+    const en = enabled[selected];
+    if (statusTxt) { statusTxt.textContent = en ? '已启用' : '已禁用'; statusTxt.className = 'js-status text-sm ' + (en ? 'text-blue-600' : 'text-gray-500'); }
+    if (sw) { sw.setAttribute('data-state', en ? 'checked' : 'unchecked'); sw.setAttribute('aria-checked', en); }
+    if (thumb) thumb.setAttribute('data-state', en ? 'checked' : 'unchecked');
+    if (content) { content.classList.toggle('opacity-50', !en); content.classList.toggle('pointer-events-none', !en); }
+  }
+  navBtns.forEach(b => b.addEventListener('click', () => { selected = nameOf(b); render(); }));
+  if (sw) sw.addEventListener('click', () => { enabled[selected] = !enabled[selected]; if (unsaved) unsaved.style.display = 'flex'; render(); });
+  render();
+}
+</script>
+
+<header class="spec-header">
+  <h1>系统管理 - 平台安全策略 详细产品规格说明</h1>
+  <table class="meta-table">
+    <tr><td>spec 源</td><td><code>design/origin/spec/0708（多租户视角）安全策略体系 功能需求文档（PRD）.md</code>（模块B：平台安全策略）</td></tr>
+    <tr><td>demo 源</td><td><code>design/origin/demo/app/admin/platform-security/page.tsx</code> → <code>components/admin/platform-security/platform-security-page.tsx</code>（复用 <code>filter-rules-new/connection-layer-page.tsx</code> 与 <code>filter-rules-new/attachment-security-module.tsx</code>）</td></tr>
+    <tr><td>覆盖 spec 章节</td><td>§0.2（模块B矩阵）、§1.2 F10、§2.1/2.2（模块B行）、§3.2–3.5、§4、§5.4、§7.2 TC-O04/O06/O07（模块B相关部分）</td></tr>
+    <tr><td>遵循约束</td><td><code>design/origin/implement.md</code>（四语国际化、复用统一规则系统 action、冲突先确认）</td></tr>
+    <tr><td>页面名称</td><td>平台安全策略（平台级安全基线：IP 策略 + 附件基础限制）</td></tr>
+    <tr><td>路由路径</td><td><code>/admin/platform-security</code></td></tr>
+    <tr><td>组件入口</td><td><code>PlatformSecurityPage</code></td></tr>
+    <tr><td>i18n 标题 key</td><td><code>nav.platformSecurityPolicy</code>（仅侧边导航；页面体硬编码中文，见 §9 差异 D5）</td></tr>
+    <tr><td>导航层级</td><td>系统管理 &gt; 平台安全策略</td></tr>
+    <tr><td>权限矩阵</td><td>仅多租户形态（云网关 / AI多 / 传多）+ 平台管理员可见可编辑；租户管理员与单租户形态隐藏（PRD §0.2，浏览器已验证，详见 §5 业务逻辑）</td></tr>
+    <tr><td>规格版本</td><td><span class="spec-version">v1</span></td></tr>
+    <tr><td>生成日期</td><td>2026-07-19</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td><code>85c400d</code></td></tr>
+  </table>
+</header>
+
+<nav class="component-toc">
+  <h2>📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 页面头部 PageHeader</a><span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-2">2.2 模块 Tab 切换器</a><span class="toc-badge">2层</span>
+      <span class="toc-layer-links"><a href="./layer-1-attachment-tab.html">层级1</a></span></li>
+    <li><a href="#component-2-3">2.3 IP 策略面板（内嵌 ConnectionLayerPage）</a><span class="toc-badge">3层</span>
+      <span class="toc-layer-links"><a href="./layer-5-ip-nav-ipfilter.html">层级1</a> <a href="./layer-6-policy-disabled.html">层级2</a></span></li>
+    <li><a href="#component-2-4">2.4 附件基础限制面板（BasicLimitTab）</a><span class="toc-badge">4层</span>
+      <span class="toc-layer-links"><a href="./layer-1-attachment-tab.html">层级1</a> <a href="./layer-2-direction-send.html">层级2</a> <a href="./layer-3-exceed-action-open.html">层级3</a> <a href="./layer-4-unlimited-warning.html">层级4</a></span></li>
+  </ul>
+</nav>
+
+<section id="version-history">
+  <h2>🕑 版本历史</h2>
+  <table class="version-history-table spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody>
+      <tr><td>v1</td><td>2026-07-19</td><td><code>804efb9</code></td><td><code>85c400d</code></td>
+        <td>初版：页面头部 + IP策略/附件基础限制双Tab；IP策略复用连接层页（4策略左导航+启停开关）；附件基础限制三方向表单（结构限制/嵌套防护/性能保护/超限处置）；形态与视角可见性浏览器验证</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <h3>1.1 区域划分</h3>
+<table class="spec-table"><thead><tr><th>区域</th><th>名称</th><th>元素概览</th><th>尺寸/样式</th><th>响应式</th></tr></thead><tbody><tr><td>A区</td><td>页面头部</td><td>ShieldCheck 图标 + 标题「平台安全策略」+ 副标题说明</td><td>px-6 pt-6 pb-2；标题 text-2xl</td><td>全断点固定</td></tr><tr><td>B区</td><td>模块 Tab 切换器</td><td>「IP 策略」/「附件基础限制」两个 TabsTrigger</td><td>TabsList h-auto p-1 bg-gray-200/60 rounded-lg</td><td>全断点固定</td></tr><tr><td>C区(ip)</td><td>IP 策略面板</td><td>内嵌 ConnectionLayerPage（左侧策略导航 w-52 + 右侧配置卡片），容器 rounded-lg border h-[72vh] overflow-hidden</td><td>高度 72vh</td><td>左导航固定宽，内容区自适应</td></tr><tr><td>C区(attachment)</td><td>附件基础限制面板</td><td>蓝色提示条 + 方向切换器（3向）+ BasicLimitTab 表单卡片</td><td>space-y-4；表单卡片 rounded-lg border p-4</td><td>表单 grid-cols-2 / grid-cols-3，窄屏压缩</td></tr></tbody></table>
+  <h3>1.2 整页默认态截图</h3>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-full-default.png" alt="整页默认态（IP 策略 Tab 激活，IP频率限制选中）">
+    <figcaption>整页默认态（1440×1000，云网关形态 · 平台管理员视角）——默认激活「IP 策略」Tab，左侧导航默认选中「IP频率限制」（<code>initialPolicy="ipFrequency"</code>）</figcaption>
+  </figure>
+  <h3>1.3 视觉规范</h3>
+<table class="spec-table"><thead><tr><th>属性</th><th>值</th><th>来源</th></tr></thead><tbody><tr><td>主色</td><td><code>oklch(0.52 0.226 262)</code>（蓝）</td><td>demo globals.css --primary</td></tr><tr><td>页头图标</td><td>ShieldCheck 24px <code>text-blue-600</code></td><td>lucide-react</td></tr><tr><td>圆角</td><td><code>0.625rem</code>（--radius）；卡片 rounded-lg</td><td>demo globals.css</td></tr><tr><td>字体</td><td>Geist / Geist Fallback</td><td>demo globals.css --font-sans</td></tr><tr><td>Tab 激活态</td><td>白底 + shadow-sm + text-gray-900；未激活 text-gray-500</td><td>浏览器验证（data-[state=active]）</td></tr><tr><td>策略启用圆点</td><td>启用 <code>bg-blue-500</code> 实心；未启用 <code>border-2 border-gray-300</code> 空心</td><td>浏览器验证</td></tr></tbody></table>
+</section>
+
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 页面头部 PageHeader</h3>
+    <h4>组件元信息</h4>
+<table class="spec-table"><thead><tr><th>项</th><th>值</th></tr></thead><tbody><tr><td>demo 组件路径</td><td><code>components/admin/platform-security/platform-security-page.tsx</code>（38–48 行）</td></tr><tr><td>状态管理</td><td>无（纯静态渲染）</td></tr><tr><td>交互层级数</td><td>1 层（无交互）</td></tr></tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：初始态（默认渲染）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染，无需交互</div>
+      <div class="component-preview"><div class="px-6 pt-6 pb-2"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check h-6 w-6 text-blue-600"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg><h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">平台安全策略</h1></div><p class="mt-1 text-sm text-gray-500">平台级安全基线，作用于所有租户。以下策略仅平台管理员可配置，租户管理员不可见、不可修改。</p></div></div>
+<table class="spec-table"><thead><tr><th>序号</th><th>元素类型</th><th>文案/标签</th><th>图标</th><th>样式</th><th>i18n key</th></tr></thead><tbody><tr><td>1</td><td>Icon</td><td>-</td><td>ShieldCheck 24px</td><td><code>h-6 w-6 text-blue-600</code></td><td>-（硬编码）</td></tr><tr><td>2</td><td>h1</td><td>平台安全策略</td><td>-</td><td><code>text-2xl font-semibold text-gray-900</code></td><td>-（硬编码中文，见差异 D5）</td></tr><tr><td>3</td><td>p 副标题</td><td>平台级安全基线，作用于所有租户。以下策略仅平台管理员可配置，租户管理员不可见、不可修改。</td><td>-</td><td><code>mt-1 text-sm text-gray-500</code></td><td>-（硬编码中文）</td></tr></tbody></table><div class="dom-comparison"><h5>DOM 树比对结果（提取自运行中 demo，逐节点比对一致）</h5><table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody><tr><td>根节点</td><td><code>div.px-6.pt-6.pb-2</code></td><td><code>div.px-6.pt-6.pb-2</code></td><td class="dom-pass">✅</td></tr><tr><td>直接子节点数</td><td><code>2</code></td><td><code>2</code></td><td class="dom-pass">✅</td></tr><tr><td>节点总数</td><td><code>7</code></td><td><code>7</code></td><td class="dom-pass">✅</td></tr><tr><td>副标题条件渲染</td><td>恒定渲染（无条件分支）</td><td>已包含</td><td class="dom-pass">✅</td></tr></tbody></table></div>
+    </div>
+  </article>
+
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 模块 Tab 切换器（IP 策略 / 附件基础限制）</h3>
+    <h4>组件元信息</h4>
+<table class="spec-table"><thead><tr><th>项</th><th>值</th></tr></thead><tbody><tr><td>demo 组件路径</td><td><code>platform-security-page.tsx</code> 52–66 行（shadcn/radix Tabs）</td></tr><tr><td>Props/状态</td><td><code>Tabs defaultValue="ip"</code>，非受控；TabsTrigger value: <code>ip</code> / <code>attachment</code></td></tr><tr><td>交互层级数</td><td>2 层（层级0 IP 策略激活；层级1 附件基础限制激活 → 拆分子文件）</td></tr></tbody></table>
+    <h4>交互层级关系图</h4>
+    <div class="mermaid">
+graph LR
+    L0["层级0: IP 策略 Tab 激活(默认)"] -- "点击「附件基础限制」" --> L1["层级1: 附件基础限制 Tab 激活"]
+    L1 -- "点击「IP 策略」" --> L0
+    </div>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：IP 策略 Tab 激活（默认）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染，<code>defaultValue="ip"</code></div>
+
+<div class="component-preview">
+  <div id="pv-tabs"><div role="tablist" aria-orientation="horizontal" data-slot="tabs-list" class="text-muted-foreground inline-flex w-fit items-center justify-center h-auto gap-1 rounded-lg bg-gray-200/60 p-1 dark:bg-gray-800/60" tabindex="0" data-orientation="horizontal" style="outline:none"><button type="button" role="tab" aria-selected="true" aria-controls="radix-_R_55esnebn9lb_-content-ip" data-state="active" id="radix-_R_55esnebn9lb_-trigger-ip" data-slot="tabs-trigger" class="focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 rounded-md px-4 py-1.5 text-sm font-medium text-gray-500 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-950 dark:data-[state=active]:text-gray-100" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">IP 策略</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_R_55esnebn9lb_-content-attachment" data-state="inactive" id="radix-_R_55esnebn9lb_-trigger-attachment" data-slot="tabs-trigger" class="focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 rounded-md px-4 py-1.5 text-sm font-medium text-gray-500 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-950 dark:data-[state=active]:text-gray-100" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">附件基础限制</button></div>
+    <div class="mt-3 text-sm text-gray-500 js-tabhint"></div>
+  </div>
+</div>
+<script>
+/* Tab 切换器预览交互：复刻 radix Tabs 的激活态切换 */
+(function () {
+  const root = document.getElementById('pv-tabs');
+  const tabs = Array.from(root.querySelectorAll('[role=tab]'));
+  const hint = root.querySelector('.js-tabhint');
+  const HINTS = {
+    'IP 策略': '当前激活：IP 策略 —— 面板内容见下方组件 2.3（层级 0 内嵌本文件）',
+    '附件基础限制': '当前激活：附件基础限制 —— 面板内容见 <a class="text-blue-600 underline" href="./layer-1-attachment-tab.html">层级 1 子文件</a>',
+  };
+  function render(active) {
+    tabs.forEach(t => {
+      const on = t.textContent.trim() === active;
+      t.setAttribute('data-state', on ? 'active' : 'inactive');
+      t.setAttribute('aria-selected', String(on));
+    });
+    hint.innerHTML = HINTS[active];
+  }
+  tabs.forEach(t => t.addEventListener('click', () => render(t.textContent.trim())));
+  render('IP 策略');
+})();
+</script><table class="spec-table"><thead><tr><th>序号</th><th>元素类型</th><th>文案</th><th>默认态</th><th>交互行为</th><th>i18n key</th></tr></thead><tbody><tr><td>1</td><td>TabsTrigger</td><td>IP 策略</td><td>激活（白底 shadow-sm text-gray-900）</td><td>点击/方向键切换 TabsContent 到 IP 策略面板</td><td>-（硬编码）</td></tr><tr><td>2</td><td>TabsTrigger</td><td>附件基础限制</td><td>未激活（text-gray-500）</td><td>点击/方向键切换到附件基础限制面板（→ 层级1）</td><td>-（硬编码）</td></tr></tbody></table><div class="dom-comparison"><h5>DOM 树比对结果（提取自运行中 demo，逐节点比对一致）</h5><table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody><tr><td>根节点</td><td><code>div.text-muted-foreground.inline-flex.w-fit</code></td><td><code>div.text-muted-foreground.inline-flex.w-fit</code></td><td class="dom-pass">✅</td></tr><tr><td>直接子节点数</td><td><code>2</code></td><td><code>2</code></td><td class="dom-pass">✅</td></tr><tr><td>节点总数</td><td><code>3</code></td><td><code>3</code></td><td class="dom-pass">✅</td></tr><tr><td>激活态属性</td><td><code>data-state=active</code> + <code>aria-selected=true</code>（IP 策略）</td><td>已包含</td><td class="dom-pass">✅</td></tr></tbody></table></div>
+    </div>
+    <h4>交互层级详情（层级 1 拆分为独立文件）</h4>
+    <table class="layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>IP 策略 Tab 激活（默认）</td><td>页面加载</td><td>上方内嵌</td></tr>
+        <tr><td>1</td><td>附件基础限制 Tab 激活</td><td>点击「附件基础限制」TabsTrigger</td><td><a href="./layer-1-attachment-tab.html">查看详情 →</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <article class="component-spec" id="component-2-3">
+    <h3>2.3 IP 策略面板（内嵌 ConnectionLayerPage）</h3>
+    <h4>组件元信息</h4>
+<table class="spec-table"><thead><tr><th>项</th><th>值</th></tr></thead><tbody><tr><td>demo 组件路径</td><td><code>components/filter-rules-new/connection-layer-page.tsx</code>（2642 行；本页以 <code>&lt;ConnectionLayerPage embedded initialPolicy="ipFrequency" /&gt;</code> 内嵌）</td></tr><tr><td>嵌入差异</td><td><code>embedded=true</code>：隐藏顶部面包屑（<code>{!embedded &amp;&amp;...}</code> 条件渲染），容器高度 h-full；外层包裹 <code>rounded-lg border h-[72vh] overflow-hidden</code></td></tr><tr><td>状态管理</td><td><code>selectedPolicy</code>（4策略）/ <code>policyEnabled</code>（各策略启停）/ <code>navCollapsed</code>（导航折叠）/ <code>hasUnsavedChanges</code></td></tr><tr><td>交互层级数</td><td>3 层（层级0 初始态；层级1 导航切换；层级2 策略禁用态 → 均可往返）</td></tr><tr><td>复用说明</td><td>与「安全策略（策略流水线）> 连接层」为同一组件；单租户形态下该内容并入模块A（PRD §0.2）。4 个子策略的完整配置规格见下方交叉引用表</td></tr></tbody></table>
+    <h4>交互层级关系图</h4>
+    <div class="mermaid">
+graph LR
+    L0["层级0: 初始态(IP频率限制选中·已启用)"] -- "点击左侧导航「IP黑白名单」" --> L1["层级1: IP黑白名单面板"]
+    L1 -- "点击「IP频率限制」" --> L0
+    L0 -- "点击启用开关(关)" --> L2["层级2: 策略禁用态 + 未保存提示"]
+    L2 -- "点击启用开关(开)" --> L0
+    </div>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：初始态（IP频率限制选中，已启用）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染（<code>initialPolicy="ipFrequency"</code>）。预览中左侧导航 4 项可点击切换，右上启用开关可点击（复刻 demo 状态机）</div>
+
+<div class="component-preview">
+  <div id="pv-ippanel-0" class="flex rounded-lg border border-gray-200 overflow-hidden bg-white" style="min-height:340px">
+    <div class="w-52 border-r border-gray-200 bg-gray-50 flex flex-col"><nav class="flex-1 p-2 space-y-1 pt-4"><button class="w-full flex items-center gap-3 rounded-lg text-left transition-colors px-3 py-2.5 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300" data-state="closed" data-slot="tooltip-trigger"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors bg-blue-500"></span><div class="flex-1 min-w-0"><span class="text-sm font-medium block truncate">IP频率限制</span><span class="text-xs text-gray-500 dark:text-gray-400 block truncate">阈值: 100次/分钟</span></div></button><button class="w-full flex items-center gap-3 rounded-lg text-left transition-colors px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" data-state="closed" data-slot="tooltip-trigger"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors bg-blue-500"></span><div class="flex-1 min-w-0"><span class="text-sm font-medium block truncate">IP黑白名单</span><span class="text-xs text-gray-500 dark:text-gray-400 block truncate">黑名单: 33条 / 白名单: 22条</span></div></button><button class="w-full flex items-center gap-3 rounded-lg text-left transition-colors px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" data-state="closed" data-slot="tooltip-trigger"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors bg-blue-500"></span><div class="flex-1 min-w-0"><span class="text-sm font-medium block truncate">RBL过滤</span><span class="text-xs text-gray-500 dark:text-gray-400 block truncate">3个服务器 / 超时5s</span></div></button><button class="w-full flex items-center gap-3 rounded-lg text-left transition-colors px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" data-state="closed" data-slot="tooltip-trigger"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors bg-blue-500"></span><div class="flex-1 min-w-0"><span class="text-sm font-medium block truncate">海外邮件检测</span><span class="text-xs text-gray-500 dark:text-gray-400 block truncate">收件 已启用</span></div></button></nav></div>
+    <div class="flex-1 bg-gray-100 p-4">
+      <div class="bg-white rounded-lg border border-gray-200 shadow-md flex flex-col h-full">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0"><h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">IP频率限制</h2><div class="flex items-center gap-2"><span class="js-status text-sm text-blue-600 dark:text-blue-400">已启用</span><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button></div></div>
+        <div class="js-content flex-1 px-6 py-4 text-sm text-gray-400 transition-opacity duration-200">（策略配置内容区 —— 每个策略的完整配置界面见 §2.3 交叉引用表对应模块规格）</div>
+        <div class="js-unsaved px-6 py-3 border-t border-gray-200 items-center" style="display:none">
+          <span class="inline-flex items-center gap-2 text-amber-600 text-sm"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>有未保存的更改</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <script>wireIpPanel('pv-ippanel-0', 'IP频率限制');</script>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/ip-panel-default.png" alt="IP 策略面板初始态">
+        <figcaption>层级 0 截图（浏览器实际渲染）——IP频率限制面板内嵌 IpFrequencyLimitModule 规则表格</figcaption>
+      </figure>
+      <h4>左侧策略导航项清单（浏览器验证的实际文案与摘要）</h4>
+<table class="spec-table"><thead><tr><th>序号</th><th>策略</th><th>启用圆点</th><th>摘要（启用时）</th><th>摘要（未启用时）</th><th>内容区完整规格</th></tr></thead><tbody><tr><td>1</td><td>IP频率限制</td><td>bg-blue-500 实心</td><td>阈值: 100次/分钟</td><td>未启用</td><td><a href="../filter-rules-pipeline-ip-frequency-limit/index.html">filter-rules-pipeline-ip-frequency-limit</a></td></tr><tr><td>2</td><td>IP黑白名单</td><td>bg-blue-500 实心</td><td>黑名单: 33条 / 白名单: 22条</td><td>未启用</td><td><a href="../filter-rules-pipeline-ip-filter/index.html">filter-rules-pipeline-ip-filter</a></td></tr><tr><td>3</td><td>RBL过滤</td><td>bg-blue-500 实心</td><td>3个服务器 / 超时5s</td><td>未启用</td><td><a href="../filter-rules-pipeline-rbl-filter/index.html">filter-rules-pipeline-rbl-filter</a></td></tr><tr><td>4</td><td>海外邮件检测</td><td>bg-blue-500 实心</td><td>收件 已启用</td><td>未启用</td><td><a href="../filter-rules-pipeline-overseas/index.html">filter-rules-pipeline-overseas</a></td></tr></tbody></table>
+      <h4>卡片头部元素</h4>
+<table class="spec-table"><thead><tr><th>序号</th><th>元素</th><th>文案/状态</th><th>交互行为</th></tr></thead><tbody><tr><td>1</td><td>h2 标题</td><td>当前选中策略名（如「IP频率限制」）</td><td>随左侧导航切换</td></tr><tr><td>2</td><td>状态文字</td><td>已启用（text-blue-600）/ 已禁用（text-gray-500）</td><td>随开关切换</td></tr><tr><td>3</td><td>Switch 开关</td><td>checked（bg-primary）/ unchecked</td><td>点击切换该策略启停 → 内容区变灰禁用 + 底部出现「有未保存的更改」（→ 层级2）</td></tr><tr><td>4</td><td>折叠按钮</td><td>ChevronLeft 圆形按钮（绝对定位于导航右缘）</td><td>点击折叠导航至 w-14（仅圆点），hover 圆点出现 Tooltip 显示策略名+摘要</td></tr></tbody></table><div class="dom-comparison"><h5>DOM 树比对结果（提取自运行中 demo，逐节点比对一致）</h5><table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody><tr><td>根节点</td><td><code>nav.flex-1.p-2.space-y-1</code></td><td><code>nav.flex-1.p-2.space-y-1</code></td><td class="dom-pass">✅</td></tr><tr><td>直接子节点数</td><td><code>4</code></td><td><code>4</code></td><td class="dom-pass">✅</td></tr><tr><td>节点总数</td><td><code>21</code></td><td><code>21</code></td><td class="dom-pass">✅</td></tr><tr><td>导航按钮数</td><td>4（IP频率限制/IP黑白名单/RBL过滤/海外邮件检测）</td><td>4</td><td class="dom-pass">✅</td></tr><tr><td>折叠态元素</td><td>navCollapsed=false 时名称+摘要渲染，Tooltip 不渲染</td><td>与 demo 一致（展开态）</td><td class="dom-pass">✅</td></tr></tbody></table></div>
+    </div>
+    <h4>交互层级详情（层级 1+ 拆分为独立文件）</h4>
+    <table class="layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>初始态（IP频率限制）</td><td>页面加载</td><td>上方内嵌</td></tr>
+        <tr><td>1</td><td>左侧导航切换（IP黑白名单）</td><td>点击左侧导航「IP黑白名单」→ setSelectedPolicy</td><td><a href="./layer-5-ip-nav-ipfilter.html">查看详情 →</a></td></tr>
+        <tr><td>2</td><td>策略禁用态</td><td>点击卡片头部启用开关 → togglePolicyEnabled + setHasUnsavedChanges</td><td><a href="./layer-6-policy-disabled.html">查看详情 →</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <article class="component-spec" id="component-2-4">
+    <h3>2.4 附件基础限制面板（BasicLimitTab）</h3>
+    <h4>组件元信息</h4>
+<table class="spec-table"><thead><tr><th>项</th><th>值</th></tr></thead><tbody><tr><td>demo 组件路径</td><td><code>components/filter-rules-new/attachment-security-module.tsx</code> 导出的 <code>BasicLimitTab</code> + <code>createDefaultBasicLimitConfig</code>；页面按方向维护 <code>Record&lt;Direction, BasicLimitConfig&gt;</code></td></tr><tr><td>Props 接口</td><td><code>{ direction, config: BasicLimitConfig, onChange, language }</code></td></tr><tr><td>数据模型</td><td><code>BasicLimitConfig { attachmentCountLimit, attachmentSizeLimit(KB), nestedZipCountLimit, nestedFileCountLimit, nestedLevelLimit, scanTimeout(s), exceedAction }</code></td></tr><tr><td>交互层级数</td><td>4 层（层级1 Tab 打开·接收方向；层级2 方向切换·外发；层级3 处置下拉展开；层级4 -1 无限制警告）——全部拆分子文件；本面板需先点击「附件基础限制」Tab 才可见，故无层级 0 内嵌态</td></tr><tr><td>复用说明</td><td>与「内容层 > 附件安全 > 基础限制」为同一 Tab 组件；平台级仅含基础限制（杀毒/图片/加密附件等租户侧能力不在本页），提示条已明示</td></tr></tbody></table>
+    <h4>三方向默认值对照（浏览器验证 = 源码 createDefaultBasicLimitConfig 一致）</h4>
+<table class="spec-table"><thead><tr><th>字段</th><th>接收方向</th><th>外发方向</th><th>域内方向</th><th>单位</th></tr></thead><tbody><tr><td>单个邮件附件个数上限</td><td>10</td><td>20</td><td>15</td><td>个（-1 表示无限制）</td></tr><tr><td>单个附件大小上限</td><td>10240（10.0 MB）</td><td>20480（20.0 MB）</td><td>15360（15.0 MB）</td><td>KB</td></tr><tr><td>单个附件嵌套压缩包数量上限</td><td>2</td><td>3</td><td>3</td><td>个</td></tr><tr><td>单个附件嵌套文件数量上限</td><td>20</td><td>30</td><td>30</td><td>个</td></tr><tr><td>压缩包嵌套层数上限</td><td>2</td><td>2</td><td>2</td><td>层</td></tr><tr><td>附件扫描超时时间</td><td>30</td><td>30</td><td>30</td><td>秒</td></tr><tr><td>超出限制处置</td><td>隔离</td><td>审核</td><td>审核</td><td>-（辅助文案随方向变化）</td></tr></tbody></table>
+    <h4>交互层级关系图</h4>
+    <div class="mermaid">
+graph LR
+    T0["组件2.2 层级0"] -- "点击「附件基础限制」Tab" --> L1["层级1: 接收方向表单(默认)"]
+    L1 -- "点击「外发方向」" --> L2["层级2: 外发方向表单"]
+    L1 -- "点击处置下拉" --> L3["层级3: 下拉展开(5选项)"]
+    L1 -- "个数上限输入-1" --> L4["层级4: 无限制警告态"]
+    L2 -- "点击「接收方向」" --> L1
+    L3 -- "选中选项/ESC" --> L1
+    L4 -- "改回正数" --> L1
+    </div>
+    <h4>交互层级详情（全部拆分为独立文件）</h4>
+    <table class="layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>附件基础限制 Tab 打开（接收方向默认）</td><td>点击「附件基础限制」TabsTrigger</td><td><a href="./layer-1-attachment-tab.html">查看详情 →</a></td></tr>
+        <tr><td>2</td><td>方向切换（外发方向）</td><td>层级1 点击「外发方向」按钮 → setAttachmentDirection</td><td><a href="./layer-2-direction-send.html">查看详情 →</a></td></tr>
+        <tr><td>3</td><td>超出限制处置下拉展开</td><td>层级1 点击处置 Select 触发器</td><td><a href="./layer-3-exceed-action-open.html">查看详情 →</a></td></tr>
+        <tr><td>4</td><td>个数上限 -1 无限制警告</td><td>层级1 在个数上限输入 -1</td><td><a href="./layer-4-unlimited-warning.html">查看详情 →</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+</section>
+
+<section id="dialogs">
+  <h2>3. 弹窗/抽屉/对话框规格</h2>
+  <p style="font-size:0.875rem">本页面自身<strong>无独立弹窗/抽屉</strong>。相关浮层归属如下：</p>
+<table class="spec-table"><thead><tr><th>浮层</th><th>归属</th><th>规格位置</th></tr></thead><tbody><tr><td>超出限制处置下拉（radix Select 弹层）</td><td>附件基础限制面板</td><td><a href="./layer-3-exceed-action-open.html">layer-3 子文件</a></td></tr><tr><td>IP黑白名单 新增/编辑规则抽屉（920px）、批量导入、灰名单配置等</td><td>内嵌 ConnectionLayerPage 的各策略</td><td><a href="../filter-rules-pipeline-ip-filter/index.html">filter-rules-pipeline-ip-filter</a> 等对应模块规格</td></tr><tr><td>折叠导航 Tooltip（策略名+摘要）</td><td>IP 策略面板左侧导航（折叠态）</td><td>本文件 §2.3 卡片头部元素表</td></tr></tbody></table>
+</section>
+
+<section id="api-mapping">
+  <h2>4. 数据模型与 API 映射</h2>
+  <h3>4.1 前端数据模型（demo 实际定义）</h3>
+  <pre><code>type Direction = "receive" | "send" | "internal"
+type ActionType = "isolate" | "review" | "block" | "discard" | "continue" | "pass" | "skipExceed"
+
+interface BasicLimitConfig {
+  attachmentCountLimit: number   // 个；-1 = 无限制（触发警告）
+  attachmentSizeLimit: number    // KB
+  nestedZipCountLimit: number
+  nestedFileCountLimit: number
+  nestedLevelLimit: number
+  scanTimeout: number            // 秒
+  exceedAction: ActionType       // basic 语境可选：isolate/review/block/discard/skipExceed
+}
+// 页面状态：Record&lt;Direction, BasicLimitConfig&gt;，三方向独立维护
+// IP 策略侧沿用 ConnectionLayerPage 的 IpRule / GeoIpRule / RblConfig（见对应模块规格）</code></pre>
+  <h3>4.2 spec 接口约定（PRD §5.4）</h3>
+<table class="spec-table"><thead><tr><th>接口</th><th>方法</th><th>说明</th><th>demo 实现状态</th></tr></thead><tbody><tr><td><code>/api/v1/platform-security/rules</code></td><td>GET/POST/PUT/DELETE</td><td>模块B平台基线 CRUD，仅平台管理员令牌可访问</td><td>未实现（demo 为纯前端 mock 状态）</td></tr><tr><td><code>/api/v1/{tenant_id}/security-policy/rules</code></td><td>—</td><td>模块A租户策略；连接层写接口对租户返回 403</td><td>未实现（关联模块，见模块A各规格）</td></tr></tbody></table>
+  <h3>4.3 数据库表映射（PRD §5.4）</h3>
+<table class="spec-table"><thead><tr><th>表</th><th>关键字段</th><th>平台基线存储约定</th></tr></thead><tbody><tr><td><code>security_policy_rule</code></td><td><code>id, rule_id, rule_name, policy_key, stage, action, config(json), priority, enabled, version, tenant_id, scope, created_at, updated_at</code></td><td>平台基线以 <code>scope=platform</code> + <code>tenant_id=null</code> 存储；新增租户自动继承基线（不复制入租户表，PRD §6.3）</td></tr></tbody></table>
+</section>
+
+<section id="business-logic">
+  <h2>5. 业务逻辑规格</h2>
+  <h3>5.1 形态与权限矩阵（PRD §0.2，唯一事实源）</h3>
+<table class="spec-table"><thead><tr><th>产品形态</th><th>平台管理员</th><th>租户管理员</th><th>入口路径</th><th>备注</th></tr></thead><tbody><tr><td>AI版-单租户</td><td>—</td><td>—</td><td>—</td><td>单租户无此模块（IP/附件基线并入模块A安全策略）</td></tr><tr><td>传统版-单租户</td><td>—</td><td>—</td><td>—</td><td>同上</td></tr><tr><td>云网关-多租户</td><td>✅ 显示且可编辑</td><td>❌ 隐藏</td><td>系统管理 &gt; 平台安全策略</td><td>平台独占；作用于全部租户</td></tr><tr><td>AI版-多租户</td><td>✅</td><td>❌</td><td>同上</td><td>同上</td></tr><tr><td>传统版-多租户</td><td>✅</td><td>❌</td><td>同上</td><td>同上</td></tr></tbody></table>
+  <h3>5.2 可见性实现（demo product-profiles.ts + 浏览器验证）</h3>
+<table class="spec-table"><thead><tr><th>验证场景</th><th>demo 实际行为（浏览器验证）</th><th>与 PRD 对照</th></tr></thead><tbody><tr><td>云网关 + 平台管理员</td><td>侧边导航「系统管理 > 平台安全策略」可见，页面完整渲染</td><td>一致（✅）</td></tr><tr><td>云网关 + 切换登录视角 → 租户管理员</td><td>侧边导航项即时消失（<code>tenantAccess: hidden</code>）</td><td>一致（❌ 隐藏）</td></tr><tr><td>切换形态 → AI 版·单租户</td><td>侧边导航项消失（<code>visibility: MULTI_ONLY</code>）</td><td>一致（— 无此模块）</td></tr><tr><td>以上两种场景直达 URL <code>/admin/platform-security</code></td><td><strong>页面仍完整渲染</strong>（无 403/404 拦截）</td><td><strong>不一致</strong>：PRD §0 图例要求 ❌ 含直达URL拦截 → 差异 D1</td></tr></tbody></table>
+  <h3>5.3 基线下沉与关联关系（PRD 唯一事实源）</h3>
+  <ul style="font-size:0.875rem; padding-left:1.25rem">
+    <li>多租户下，IP 策略与附件基础限制的<strong>配置权由平台管理员经本模块独占</strong>，统一下沉至所有租户；租户管理员在模块A中 IP 阶段呈锁定只读（I 区占位）。</li>
+    <li>单条基线修改<strong>即时影响所有租户</strong>，不针对个别租户；基线更新后各租户下次匹配即生效（最终一致，PRD §4.4）。</li>
+    <li>邮件匹配时先加载 <code>scope=platform</code> 基线（阶段1及附件基础），再叠加当前 <code>tenant_id</code> 的租户策略（PRD §6.1）。</li>
+    <li>附件基础限制为平台级资源约束，租户侧「附件安全检测」不含此项（页面提示条明示）。</li>
+  </ul>
+  <h3>5.4 状态机（策略启停，demo 实际行为）</h3>
+  <div class="mermaid">
+stateDiagram-v2
+    [*] --> 已启用
+    已启用 --> 已禁用: 点击开关(即时·无二次确认)
+    已禁用 --> 已启用: 点击开关
+    已启用 --> 已启用: 修改配置 → hasUnsavedChanges=true
+    note right of 已禁用: 内容区 opacity-50 + pointer-events-none\n导航圆点变空心·摘要「未启用」\n底部出现「有未保存的更改」
+  </div>
+</section>
+
+<section id="interaction">
+  <h2>6. 交互规格</h2>
+  <h3>6.1 状态变化规则</h3>
+<table class="spec-table"><thead><tr><th>状态</th><th>触发条件</th><th>页面表现（浏览器验证）</th><th>恢复方式</th></tr></thead><tbody><tr><td>Tab 切换</td><td>点击 TabsTrigger</td><td>面板即时切换；各 Tab 状态独立保留（方向选择、表单值不丢失）</td><td>点击另一 Tab</td></tr><tr><td>策略禁用</td><td>点击 IP 面板启用开关</td><td>内容区变灰禁用、导航圆点空心、摘要「未启用」、底部「有未保存的更改」琥珀提示</td><td>再次点击开关</td></tr><tr><td>未保存提示</td><td>任何配置变更（开关/表单）</td><td>底部操作栏出现琥珀色脉冲圆点 + 「有未保存的更改」；<strong>无保存按钮</strong>（差异 D2）</td><td>—（demo 无保存动作）</td></tr><tr><td>无限制警告</td><td>附件个数上限输入 -1</td><td>输入框 border-amber-500 bg-amber-50 + 警告行「当前无限制，存在资源耗尽风险」</td><td>改回正数</td></tr><tr><td>方向切换</td><td>点击 接收/外发/域内 按钮</td><td>表单值切换为该方向独立配置；标题、大小换算、处置默认值、辅助文案联动</td><td>点击其他方向</td></tr></tbody></table>
+  <h3>6.2 Tooltip 规格</h3>
+<table class="spec-table"><thead><tr><th>位置</th><th>触发</th><th>内容</th><th>备注</th></tr></thead><tbody><tr><td>IP 面板折叠按钮</td><td>hover</td><td>收起菜单 / 展开菜单</td><td>side=right</td></tr><tr><td>IP 面板导航项（折叠态）</td><td>hover（delayDuration=0）</td><td>策略名 + 摘要（两行）</td><td>展开态 delayDuration=1000 基本不出现</td></tr></tbody></table>
+  <h3>6.3 异常场景（PRD §4 与 demo 现状对照）</h3>
+<table class="spec-table"><thead><tr><th>场景</th><th>PRD 要求</th><th>demo 现状</th></tr></thead><tbody><tr><td>数值越界（附件大小 >100MB、层级 >10）</td><td>超限标红拦截（§4.1）</td><td>未实现：可输入任意值，仅 -1 有特殊警告（差异 D4）</td></tr><tr><td>越权直达 URL</td><td>403/404 拦截（§0 图例、§4.2）</td><td>未拦截，页面仍渲染（差异 D1）</td></tr><tr><td>保存超时/并发冲突</td><td>Toast 重试、乐观锁版本校验（§4.3/4.4）</td><td>未实现（无保存动作）</td></tr></tbody></table>
+</section>
+
+<section id="i18n">
+  <h2>7. 国际化规格</h2>
+<table class="spec-table"><thead><tr><th>文案</th><th>i18n 现状</th><th>zh / en / th</th></tr></thead><tbody><tr><td>侧边导航「平台安全策略」</td><td><code>nav.platformSecurityPolicy</code>（language-context 三语）</td><td>平台安全策略 / Platform Security Policy / นโยบายความปลอดภัยแพลตฟอร์ม</td></tr><tr><td>页面标题、副标题、Tab 文案、方向按钮、提示条</td><td><strong>硬编码中文</strong>（platform-security-page.tsx 内字面量）</td><td>—</td></tr><tr><td>BasicLimitTab 全部字段标签/单位/警告/辅助文案</td><td>组件内置 labels 对象（zh/en/th 三语，随 <code>language</code> prop）</td><td>见组件源码 labels 表</td></tr><tr><td>处置动作标签</td><td><code>getActionLabel</code>（zh/en/th）</td><td>隔离/审核/阻断/丢弃/超出部分不检测 等</td></tr></tbody></table>
+  <blockquote><strong>implement.md 约束</strong>：页面需支持四种内置语言。demo 当前仅三语（zh/en/th）且页面骨架硬编码中文 → 差异 D5，落地时需补齐第四语言并将硬编码文案纳入 i18n。</blockquote>
+</section>
+
+<section id="responsive">
+  <h2>8. 响应式规格</h2>
+<table class="spec-table"><thead><tr><th>断点</th><th>行为（浏览器验证）</th></tr></thead><tbody><tr><td>1920px</td><td>内容区拉宽；附件表单 grid 列距拉大；IP 面板左导航固定 w-52</td></tr><tr><td>1440px（基准）</td><td>默认布局，见各层截图</td></tr><tr><td>1024px</td><td>提示条文案折行为两行；表单 grid 保持 2/3 列但列宽压缩；无横向滚动</td></tr><tr><td>&lt;1024px</td><td>PRD §2.3：最小兼容宽度 1024px，低于出现横向滚动，不做移动端重排（demo 未特殊处理，遵循同一约定）</td></tr></tbody></table>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/responsive-1024.png" alt="1024px 附件基础限制">
+    <figcaption>1024×900 —— 附件基础限制面板（提示条折行，表单列压缩）</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/responsive-1920.png" alt="1920px">
+    <figcaption>1920×1080 —— 布局拉宽，无结构变化</figcaption>
+  </figure>
+</section>
+
+<section id="diffs" class="diff-section">
+  <h2>9. 与 spec 的差异标注</h2>
+<table class="spec-table"><thead><tr><th>编号</th><th>严重度</th><th>差异点</th><th>spec 原文/约束</th><th>demo 实际（浏览器验证）</th><th>处理建议</th></tr></thead><tbody><tr><td>D1</td><td><span class="badge badge-high">高</span></td><td>越权直达 URL 未拦截</td><td>PRD §0 图例：❌ 隐藏（含直达URL拦截返回403/404）；§4.2 租户管理员越权访问模块B URL → 403</td><td>租户视角/单租户形态下导航项已隐藏，但直达 <code>/admin/platform-security</code> 页面仍完整渲染</td><td>落地时后端按令牌角色返回 403，前端路由守卫兜底</td></tr><tr><td>D2</td><td><span class="badge badge-high">高</span></td><td>无保存动作与全局生效二次确认</td><td>PRD §3.2：模块B保存时二次确认「本次修改将作用于全部租户」；§3.4 批量确认强调全局影响</td><td>页面仅有「有未保存的更改」提示，<strong>无保存按钮、无二次确认</strong>；配置变更仅存于前端状态</td><td>落地需补保存/重置按钮 + 全局影响二次确认弹窗（→ 需确认 Q1）</td></tr><tr><td>D3</td><td><span class="badge badge-medium">中</span></td><td>页面结构与 PRD A–H 区不符</td><td>PRD §2.2：模块B复用 A–H 区结构（查询筛选/操作按钮/规则数据表/抽屉），A 区 Tab 为 IP策略/附件基础限制</td><td>IP 策略 Tab 为「左侧策略导航 + 配置卡片」结构（复用连接层页）；附件 Tab 为纯表单，无 B–E 区</td><td>以 demo 为准记录；PRD 的 A–H 区仅在 IP黑白名单等子策略内部近似成立</td></tr><tr><td>D4</td><td><span class="badge badge-medium">中</span></td><td>数值边界校验缺失</td><td>PRD §4.1：附件大小 ≤100MB、嵌套层级 ≤10，超限标红</td><td>输入框可输任意数值，无上限校验；仅 -1 触发无限制警告</td><td>落地按 PRD §4.1 增加校验（→ 需确认 Q4）</td></tr><tr><td>D5</td><td><span class="badge badge-medium">中</span></td><td>国际化不完整</td><td>implement.md：支持四种内置语言</td><td>页面骨架硬编码中文；BasicLimitTab/导航 key 仅 zh/en/th 三语</td><td>落地补第四语言，硬编码文案入 i18n</td></tr><tr><td>D6</td><td><span class="badge badge-low">低</span></td><td>嵌入容器高度不协调</td><td>—（工程观察）</td><td>外层容器 <code>h-[72vh]</code>，内部卡片 <code>calc(100vh - 120px)</code>，短视口下卡片底部（sticky 操作栏）被 overflow-hidden 裁剪</td><td>落地时嵌入模式高度改为跟随容器（→ 需确认 Q5）</td></tr></tbody></table>
+</section>
+
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项</h2>
+<table class="spec-table"><thead><tr><th>编号</th><th>优先级</th><th>事项</th><th>背景</th></tr></thead><tbody><tr><td>Q1</td><td>P0</td><td>平台基线的保存机制：显式保存按钮 + 「作用于全部租户」二次确认，还是逐项即时保存？</td><td>demo 无保存动作（差异 D2）；PRD §3.2 要求二次确认但未定义保存交互形态</td></tr><tr><td>Q2</td><td>P0</td><td>越权/无此模块形态直达 URL 的拦截行为：403 页、404、还是重定向首页？</td><td>PRD 同时出现 403 与 404 表述（§0 图例 vs §4.2）；demo 未拦截（差异 D1）</td></tr><tr><td>Q3</td><td>P1</td><td>模块B 与模块A连接层复用同一组件与数据：落地 API/存储是否同源（<code>scope=platform</code> 一份数据，两处入口按形态路由）？单租户形态并入模块A后数据如何迁移/共存？</td><td>demo 复用 ConnectionLayerPage 与 BasicLimitTab；PRD §5.4 模块A/B 接口路径不同但 §6.3 为同一张表</td></tr><tr><td>Q4</td><td>P1</td><td>附件基础限制的数值边界（大小 ≤100MB、层级 ≤10、-1 是否允许入库）与超限处置动作集是否最终确认为 隔离/审核/阻断/丢弃/超出部分不检测 五项？</td><td>demo 动作集与统一规则系统 action 的映射需按 implement.md「复用统一规则系统 action」核对</td></tr><tr><td>Q5</td><td>P2</td><td>IP 策略嵌入容器 72vh 的高度策略与内部卡片高度是否统一为自适应容器？</td><td>差异 D6 的工程决策</td></tr></tbody></table>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true});</script>
+</body>
+</html>

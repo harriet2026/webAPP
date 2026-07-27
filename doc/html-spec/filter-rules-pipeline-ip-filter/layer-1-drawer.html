@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 1：IP黑白名单抽屉打开 - HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: white; --border: oklch(0.922 0 0); --muted: oklch(0.97 0 0); --radius: 0.625rem; --font-sans: "Geist", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0 auto; max-width: 1200px; padding: 2rem; font-family: var(--font-sans); background: var(--background); color: #1f2937; line-height: 1.6; }
+    .layer-nav, header, section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+    .layer-nav { display: flex; justify-content: space-between; }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    h1 { color: var(--primary); font-size: 1.35rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+    th, td { border: 1px solid var(--border); padding: 0.625rem 0.75rem; text-align: left; vertical-align: top; }
+    th { background: var(--muted); }
+    img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    code { font-family: "Geist Mono", monospace; }
+    .pass { color: #15803d; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="index.html#component-2-0">返回主文件</a>
+    <a href="layer-2-blacklist.html">下一层：黑名单列表</a>
+  </nav>
+  <header>
+    <h1>交互层级 1：IP黑白名单抽屉打开</h1>
+    <table>
+      <tr><td>所属组件</td><td>策略流水线阶段1 IP策略配置抽屉</td></tr>
+      <tr><td>触发路径</td><td>层级0 策略流水线默认态 -> 点击“IP黑白名单”卡片或“配置”按钮</td></tr>
+      <tr><td>截图证据</td><td><code>screenshots/02-ipfilter-drawer-list.png</code></td></tr>
+    </table>
+  </header>
+  <section>
+    <h2>HTML 预览要点</h2>
+    <table>
+      <thead><tr><th>区域</th><th>元素</th><th>规格</th></tr></thead>
+      <tbody>
+        <tr><td>抽屉根节点</td><td><code>SheetContent</code></td><td>右侧滑出，全高，宽度约 80vw，背景白色</td></tr>
+        <tr><td>头部</td><td>Settings 图标 + “IP策略 / IP黑白名单” + 关闭按钮</td><td>固定在顶部，底部 1px 分隔线</td></tr>
+        <tr><td>主体</td><td><code>ConnectionLayerPage embedded initialPolicy="ipFilter"</code></td><td>左侧 200px 策略导航，右侧配置内容</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="./screenshots/02-ipfilter-drawer-list.png" alt="IP黑白名单抽屉打开">
+      <figcaption>层级1截图：抽屉打开并定位到 IP黑白名单配置。</figcaption>
+    </figure>
+  </section>
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table>
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/还原 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td>右侧 SheetContent，全高抽屉</td><td><code>.ic-overlay.open &gt; .ic-panel</code></td><td class="pass">一致</td></tr>
+        <tr><td>子节点数</td><td>头部、左侧导航、右侧内容区</td><td>同三段结构</td><td class="pass">一致</td></tr>
+        <tr><td>关键文案</td><td>IP策略 / IP黑白名单</td><td>同文案</td><td class="pass">一致</td></tr>
+        <tr><td>条件渲染</td><td>仅 IP黑白名单配置区可见</td><td>仅保留该策略内容</td><td class="pass">一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+</body>
+</html>

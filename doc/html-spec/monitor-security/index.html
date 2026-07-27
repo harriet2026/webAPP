@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>检测引擎状态 - HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== 设计变量（参考 demo globals.css） ===== */
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground); line-height: 1.55; font-size: 14px; padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem; max-width: 1280px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1.2rem; margin: 2.2rem 0 .8rem; padding-bottom: .35rem; border-bottom: 2px solid var(--primary); }
+    h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; }
+    h4 { font-size: .95rem; margin: 1.2rem 0 .5rem; }
+    h5 { font-size: .85rem; margin: .8rem 0 .4rem; }
+    p { margin: .45rem 0; }
+    code { font-family: var(--font-mono); font-size: .85em; background: var(--muted); padding: .1em .35em; border-radius: 4px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    a { color: oklch(0.52 0.226 262); }
+
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .spec-header .subtitle { color: var(--muted-foreground); font-size: .9rem; }
+    .meta-table { border-collapse: collapse; width: 100%; margin-top: .8rem; font-size: 13px; }
+    .meta-table td { border: 1px solid var(--border); padding: 5px 10px; vertical-align: top; }
+    .meta-table td:first-child { background: var(--muted); font-weight: 600; white-space: nowrap; width: 11em; }
+
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem; margin-top: 1.2rem; }
+    .component-toc ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .component-toc li { margin: .3rem 0; }
+    .toc-badge { display: inline-block; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 999px; padding: 0 .5em; margin-left: .4em; vertical-align: middle; }
+    .toc-layer-links { margin-left: .6em; font-size: 12px; }
+    .toc-layer-links a { margin-right: .5em; }
+
+    .spec-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0 1rem; background: var(--card); }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); font-weight: 600; white-space: nowrap; }
+    .spec-table td.num { text-align: right; font-family: var(--font-mono); }
+    .spec-table .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    .matrix-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0; background: var(--card); }
+    .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: center; }
+    .matrix-table th { background: var(--muted); font-weight: 600; }
+    .matrix-table td:first-child { text-align: left; font-weight: 600; background: var(--muted); }
+    .legend { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .5rem .8rem; }
+
+    .screenshot-figure { margin: .8rem 0 1.2rem; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .screenshot-figure figcaption { font-size: 12px; color: var(--muted-foreground); margin-top: .35rem; }
+
+    .component-spec { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem 1.4rem; margin: 1.2rem 0; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: .9rem 1.1rem; margin: 1rem 0; background: oklch(0.99 0 0); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; background: var(--primary); color: #fff; border-radius: 999px; font-size: .8em; font-weight: 700; margin-right: .4em; }
+    .trigger-path { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .45rem .7rem; margin: .5rem 0; }
+    .layer-nav { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 13px; }
+    .layer-index a { font-weight: 600; }
+
+    .component-preview { border: 2px dashed oklch(0.7 0.12 262); border-radius: 10px; padding: 18px; background: #f4f5f7; overflow-x: auto; margin: .7rem 0; position: relative; }
+    .component-preview::before { content: "可交互预览（提取自运行中的 demo）"; position: absolute; top: -9px; left: 14px; background: oklch(0.52 0.226 262); color: #fff; font-size: 10.5px; padding: 0 8px; border-radius: 999px; line-height: 16px; z-index: 5; }
+    .preview-note { font-size: 12px; color: var(--muted-foreground); background: oklch(0.975 0.02 95); border: 1px solid oklch(0.9 0.06 95); border-radius: 6px; padding: .4rem .7rem; margin: .4rem 0 .8rem; }
+    .component-preview .bg-card { background: #fff; }
+    .component-preview .text-card-foreground { color: #0a0a0a; }
+    .component-preview .bg-popover { background: #fff; }
+    .component-preview .text-popover-foreground { color: #0a0a0a; }
+    .component-preview .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .component-preview .border-input { border-color: #e5e7eb; }
+    .component-preview svg { flex-shrink: 0; }
+    .component-preview [data-slot="card"] { border-color: #e5e7eb; background: #fff; }
+    .component-preview button { cursor: pointer; }
+    .component-preview button:disabled { cursor: default; }
+    .component-preview .text-gray-900 { color: #111827; }
+    .component-preview .text-gray-500 { color: #6b7280; }
+    .component-preview .text-gray-400 { color: #9ca3af; }
+    .component-preview .bg-gray-50 { background: #f9fafb; }
+    @keyframes spec-spin { to { transform: rotate(360deg); } }
+    .component-preview .animate-spin { animation: spec-spin 1s linear infinite; }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .component-preview .animate-marquee { animation: marquee 30s linear infinite; }
+    .component-preview .animate-marquee:hover { animation-play-state: paused; }
+
+    .route-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 13px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 99; opacity: 0; transition: opacity .2s; pointer-events: none; font-family: var(--font-mono); }
+    .route-toast.show { opacity: 1; }
+
+    .dom-comparison { background: oklch(0.975 0.008 262); border: 1px solid oklch(0.85 0.03 262); border-radius: 8px; padding: .6rem .9rem; margin-top: .8rem; }
+    .dom-comparison h5 { margin: .2rem 0 .4rem; }
+
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .diff-section h2 { border-bottom-color: var(--diff-border); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .question-section h2 { border-bottom-color: var(--question-border); }
+    .diff-table td:first-child, .question-table td:first-child { font-weight: 700; white-space: nowrap; }
+
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 .55em; line-height: 1.6; vertical-align: middle; }
+    .tag-green { background: #dcfce7; color: #15803d; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-gray { background: #f3f4f6; color: #4b5563; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+    .mermaid { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .6rem; margin: .8rem 0; overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<header class="spec-header">
+  <h1>检测引擎状态 详细产品规格说明</h1>
+  <p class="subtitle">反垃圾 / 反病毒 / 沙箱 / RBL 四引擎运行状态与性能趋势，卡片选中联动双 Y 轴趋势图与详情表。</p>
+  <table class="meta-table">
+    <tr><td>模块子目录</td><td><code>monitor-security/</code></td></tr>
+    <tr><td>demo 路由</td><td><code>/monitor/security</code>（侧边栏「监控中心 &gt; 检测引擎状态」）</td></tr>
+    <tr><td>demo 源</td><td><code>demo/app/monitor/security/page.tsx</code> → <code>demo/components/monitor/monitor-security-page.tsx</code>（669 行，MonitorSecurityPage）</td></tr>
+    <tr><td>spec 源</td><td>未提供/未使用 —— <code>demo/docs/</code> 下无检测引擎状态需求文档，以浏览器运行中的 demo 为准</td></tr>
+    <tr><td>规格版本</td><td><b>v2</b></td></tr>
+    <tr><td>生成日期</td><td>2026-07-22</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td>—（无 spec）</td></tr>
+    <tr><td>浏览器验证</td><td>playwright-core + 系统 Chrome（headless）· <code>http://localhost:3100</code> · 视口 1920×1080（另 1366 / 1024 断点）· 4 引擎 × 3 时间范围交叉实测 · 形态×角色 5×2 全遍历</td></tr>
+    <tr><td>遵循约束</td><td><code>implement.md</code>：四语国际化（demo 三语且 th 缺 monitor.* key，见差异 D-03）；冲突列 §10 需确认</td></tr>
+    <tr><td>v1 → v2 复核</td><td>2026-07-22 用户对 3 项给出目标行为决定：① 详情表<b>需随时间范围变化</b>（D-02 闭环）② 多租户 tenant 隐藏本页时 <b>URL 直连不可渲染（应拦截）</b>（D-04/Q-02 闭环）③ 引擎卡主指标<b>显示单位按数值自适应</b>（如 &lt;1s 用毫秒）（D-06/Q-03 闭环）。复核记录见 §9/§10</td></tr>
+  </table>
+</header>
+
+<!-- ============ 0.1 产品形态 × 角色差异矩阵 ============ -->
+<section id="form-role-matrix" class="component-spec">
+  <h2 style="margin-top:0;">0.1 产品形态 × 角色差异矩阵（浏览器全遍历实测）</h2>
+  <table class="matrix-table">
+    <thead><tr><th>角色 / 形态</th><th>AI-单</th><th>传统-单</th><th>云-多</th><th>AI-多</th><th>传统-多</th></tr></thead>
+    <tbody>
+      <tr><td>平台管理员</td><td>—</td><td>—</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>租户管理员</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+    </tbody>
+  </table>
+  <p class="legend">图例：✅ 显示且可编辑 ｜ 🔒 显示但只读 ｜ ❌ 隐藏（导航无入口）｜ — 无此角色。</p>
+  <table class="spec-table">
+    <thead><tr><th>依据</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">FEATURE_MAP["monitor-security"]</td><td><code>visibility: ALL_SHOW</code>；<code>tenantAccess: "hidden"</code>（note: 平台引擎状态，租户视角隐藏）；<code>scope: "platform"</code></td></tr>
+      <tr><td>浏览器实测（10 组合）</td><td>cloud / ai-multi / legacy-multi + tenant 视角下侧边栏「检测引擎状态」入口<b>不可见</b> ❌；其余组合可见 ✅。【demo 现状】tenant 视角 URL 直连仍可渲染；【目标行为·2026-07-22 用户决定】URL 直连不可渲染（后端 403/404 + 前端路由守卫）——见差异 D-04、Q-02（已解决）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 0.2 组件列表 ============ -->
+<nav class="component-toc">
+  <h2 style="margin-top:0;border:none;">📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 页面头部（时间范围 Select + 刷新按钮）</a> <span class="toc-badge">2层</span>
+      <span class="toc-layer-links"><a href="./layer-2-timerange.html">层级2：时间范围切换</a></span></li>
+    <li><a href="#component-2-2">2.2 引擎状态卡（4 卡，点击选中）</a> <span class="toc-badge">2层</span>
+      <span class="toc-layer-links"><a href="./layer-1-engine-switch.html">层级1：引擎切换</a></span></li>
+    <li><a href="#component-2-3">2.3 性能趋势图（双 Y 轴，引擎×时间范围联动）</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-4">2.4 性能详情表（4 种列结构）</a> <span class="toc-badge">1层</span></li>
+  </ul>
+</nav>
+
+<!-- ============ 0.3 版本历史 ============ -->
+<section id="version-history">
+  <h2>0.3 版本历史</h2>
+  <table class="spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody>
+      <tr><td><b>v2</b></td><td>2026-07-22</td><td class="mono">804efb9</td><td class="mono">—</td><td>用户决定落地 3 项目标行为：① 详情表随时间范围变化（D-02 闭环：24h=6h时段×4 / 7d=日×7 / 30d=日×30）② 租户视角 URL 直连拦截（D-04/Q-02 闭环：后端 403/404 + 前端路由守卫）③ 主指标单位按数值自适应（D-06/Q-03 闭环：&lt;1s 用毫秒）；§9/§10 全部条目逐项标注复核状态</td></tr>
+      <tr><td>v1</td><td>2026-07-22</td><td class="mono">804efb9</td><td class="mono">—</td><td>初版：4 引擎卡片选中联动 + 双 Y 轴趋势 + 4 种详情表结构全量提取；3 时间范围（24h/7d/30d）数据切换实测；形态×角色 5×2 矩阵（多租户 tenant 隐藏入口）；3 断点截图</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 1. 页面布局结构 ============ -->
+<section id="layout" class="component-spec">
+  <h2 style="margin-top:0;">1. 页面布局结构</h2>
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>名称</th><th>元素概览</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td>页面头部</td><td>H1「检测引擎状态」+ 时间范围 Select（近24小时/近7天/近30天，默认近24小时）+ 刷新图标按钮（无 onClick）</td></tr>
+      <tr><td>B</td><td>引擎状态卡</td><td>4 卡（反垃圾引擎/反病毒引擎/沙箱服务/RBL信誉查询）：图标 + 状态点 + 主指标；点击选中（ring-2 蓝框 + 浅蓝底）</td></tr>
+      <tr><td>C</td><td>性能趋势图</td><td>双 Y 轴 LineChart（左轴吞吐量类 / 右轴耗时类），随选中引擎 + 时间范围联动</td></tr>
+      <tr><td>D</td><td>性能详情表</td><td>4 种列结构随引擎切换（实例/节点/RBL源维度）</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-full-default.png" alt="整页默认态">
+    <figcaption>整页默认态（1920×1080，反垃圾引擎选中，近24小时，形态 cloud × 平台管理员）——浏览器实际渲染</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 2. 逐组件规格 ============ -->
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <!-- ===== 2.1 页面头部 ===== -->
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 页面头部</h3>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：初始态（时间范围=近24小时）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染</div>
+      <div class="component-preview" id="preview-header" style="overflow:visible;">
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-bold text-gray-900">检测引擎状态</h1>
+          <div class="flex items-center gap-3">
+            <button type="button" role="combobox" data-state="closed" class="border-input flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs w-32"><span data-slot="select-value" style="pointer-events:none;">近24小时</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50"><path d="m6 9 6 6 6-6"/></svg></button>
+            <button class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium border bg-background shadow-xs hover:bg-accent size-9" title="刷新（demo 未绑定 onClick）"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw w-4 h-4"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></button>
+          </div>
+        </div>
+      </div>
+      <table class="spec-table">
+        <thead><tr><th>序号</th><th>元素</th><th>默认/选项</th><th>交互行为（实测）</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>H1 标题</td><td>检测引擎状态</td><td>text-2xl font-bold</td><td class="mono">monitor.engine.title</td></tr>
+          <tr><td>2</td><td>时间范围 Select（w-32）</td><td>默认近24小时；选项 近24小时/近7天/近30天（<b>无「近1小时」</b>，与基建/邮件流页不同）</td><td>切换后趋势图与详情表<b>真实联动</b>（TREND_MOCK_DATA 按 24h/7d/30d 各备一套数据，见层级 2）</td><td class="mono">monitor.time.24h/7d/30d</td></tr>
+          <tr><td>3</td><td>刷新按钮</td><td>RefreshCw 图标</td><td>无 onClick，点击无响应（差异 D-01）</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <!-- ===== 2.2 引擎状态卡 ===== -->
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 引擎状态卡（4 卡，点击选中联动）</h3>
+    <h4>组件元信息</h4>
+    <table class="spec-table">
+      <tbody>
+        <tr><td>状态管理</td><td><code>useState("antispam")</code> selectedEngine → 驱动 trendData（TREND_MOCK_DATA）与 detailData（generateDetailData）</td></tr>
+        <tr><td>选中态样式</td><td><code>ring-2 ring-blue-500 bg-blue-50/50</code> + 图标容器变蓝底蓝字</td></tr>
+        <tr><td>交互层级数</td><td>2 层（默认反垃圾 → 点击其他引擎卡片）</td></tr>
+      </tbody>
+    </table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：反垃圾引擎选中（默认）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染（selectedEngine="antispam"）</div>
+      <h4>4 张引擎卡实测值</h4>
+      <table class="spec-table">
+        <thead><tr><th>卡片</th><th>图标/颜色</th><th>状态</th><th>主指标</th><th>趋势图系列（左轴/右轴）</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>反垃圾引擎（默认选中）</td><td>Shield · #1890FF</td><td>绿点「正常」</td><td>扫描吞吐 <b>850封/s</b></td><td>扫描吞吐（封/s）/ 平均扫描耗时（ms）</td><td class="mono">monitor.engine.antispam</td></tr>
+          <tr><td>反病毒引擎</td><td>Bug · #52C41A</td><td>绿点「正常」</td><td>扫描耗时 <b>120ms</b></td><td>扫描吞吐量（附件/s）/ 平均扫描耗时（ms）</td><td class="mono">monitor.engine.antivirus</td></tr>
+          <tr><td>沙箱服务</td><td>Box · #FA8C16</td><td>绿点「正常」</td><td>平均分析 <b>45s</b></td><td>平均分析耗时（s）/ 队列等待长度</td><td class="mono">monitor.engine.sandbox</td></tr>
+          <tr><td>RBL信誉查询</td><td>Globe · #722ED1</td><td>绿点「正常」</td><td>平均响应 <b>1.2s</b>（demo 现状；目标行为：单位按数值自适应，见表下注）</td><td>平均响应时间（ms）/ 超时率（%）</td><td class="mono">monitor.engine.rbl</td></tr>
+        </tbody>
+      </table>
+      <p><b>主指标单位自适应规则【目标行为·2026-07-22 用户决定】</b>：时间类主指标（平均扫描耗时/平均分析/平均响应）的显示单位按数值大小自适应——<b>&lt;1s 用毫秒显示</b>（如 850ms），≥1s 用秒显示（如 1.2s，保留 1 位小数）；吞吐量类（封/s、附件/s、次/s）单位固定。demo 现状为固定单位拼接（<code>primaryValue + unit</code>），RBL 卡 1.2s 与趋势图左轴 ms 口径不一致（差异 D-06/Q-03 已解决）。</p>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果（domstats 实测）</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>规格呈现</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>引擎卡数</td><td>4（grid-cols-4）</td><td>4</td><td class="dom-pass">✅</td></tr>
+            <tr><td>状态点</td><td>4 个绿点 + 「正常」文案（全引擎 normal）</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>选中态</td><td>反垃圾卡 ring-2 ring-blue-500 bg-blue-50/50</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>异常态样式</td><td>status=error 时红点「异常」+ 主指标「—」（mock 全 normal，未展示）</td><td>条件渲染已记录</td><td class="dom-pass">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <h4>交互层级详情</h4>
+    <table class="spec-table layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>反垃圾引擎选中</td><td>页面加载（默认）</td><td>上方内嵌</td></tr>
+        <tr><td>1</td><td>引擎切换（沙箱 / RBL）</td><td>点击对应引擎卡片 → setSelectedEngine</td><td><a href="./layer-1-engine-switch.html">查看详情 -&gt;</a></td></tr>
+        <tr><td>2</td><td>时间范围切换（近7天）</td><td>点击时间范围 Select → 选「近7天」</td><td><a href="./layer-2-timerange.html">查看详情 -&gt;</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- ===== 2.3 性能趋势图 ===== -->
+  <article class="component-spec" id="component-2-3">
+    <h3>2.3 性能趋势图（双 Y 轴 LineChart）</h3>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 反垃圾引擎 · 近24小时（默认）</h4>
+      <div class="component-preview">
+<div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-base">反垃圾引擎<!-- --> <!-- -->性能趋势<!-- -->（<!-- -->近24小时<!-- -->）</div></div><div data-slot="card-content" class="px-6"><div class="recharts-responsive-container" style="width:100%;height:300px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 300px; max-width: 1502px;"><svg class="recharts-surface" width="1502" height="300" viewBox="0 0 1502 300" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts2-clip"><rect x="65" y="5" height="260" width="1372"></rect></clipPath></defs><g class="recharts-cartesian-grid"><g class="recharts-cartesian-grid-horizontal"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="65" y1="5" x2="1437" y2="5"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="65" y1="265" x2="1437" y2="265"></line></g><g class="recharts-cartesian-grid-vertical"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="65" y1="5" x2="65" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="124.65217391304347" y1="5" x2="124.65217391304347" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="184.30434782608694" y1="5" x2="184.30434782608694" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="243.95652173913044" y1="5" x2="243.95652173913044" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="303.6086956521739" y1="5" x2="303.6086956521739" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="363.2608695652174" y1="5" x2="363.2608695652174" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="422.9130434782609" y1="5" x2="422.9130434782609" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="482.5652173913043" y1="5" x2="482.5652173913043" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="542.2173913043478" y1="5" x2="542.2173913043478" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="601.8695652173913" y1="5" x2="601.8695652173913" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="661.5217391304348" y1="5" x2="661.5217391304348" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="721.1739130434783" y1="5" x2="721.1739130434783" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="780.8260869565217" y1="5" x2="780.8260869565217" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="840.4782608695652" y1="5" x2="840.4782608695652" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="900.1304347826086" y1="5" x2="900.1304347826086" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="959.7826086956521" y1="5" x2="959.7826086956521" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="1019.4347826086956" y1="5" x2="1019.4347826086956" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="1079.086956521739" y1="5" x2="1079.086956521739" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="1138.7391304347825" y1="5" x2="1138.7391304347825" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="1198.391304347826" y1="5" x2="1198.391304347826" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="1258.0434782608695" y1="5" x2="1258.0434782608695" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="1317.695652173913" y1="5" x2="1317.695652173913" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="1377.3478260869565" y1="5" x2="1377.3478260869565" y2="265"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="1372" height="260" x1="1437" y1="5" x2="1437" y2="265"></line></g></g><g class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="265" x2="1437" y2="265"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="65" y1="271" x2="65" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="65" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="65" dy="0.71em">00:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="124.65217391304347" y1="271" x2="124.65217391304347" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="124.65217391304347" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="124.65217391304347" dy="0.71em">01:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="184.30434782608694" y1="271" x2="184.30434782608694" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="184.30434782608694" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="184.30434782608694" dy="0.71em">02:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="243.95652173913044" y1="271" x2="243.95652173913044" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="243.95652173913044" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="243.95652173913044" dy="0.71em">03:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="303.6086956521739" y1="271" x2="303.6086956521739" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="303.6086956521739" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="303.6086956521739" dy="0.71em">04:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="363.2608695652174" y1="271" x2="363.2608695652174" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="363.2608695652174" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="363.2608695652174" dy="0.71em">05:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="422.9130434782609" y1="271" x2="422.9130434782609" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="422.9130434782609" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="422.9130434782609" dy="0.71em">06:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="482.5652173913043" y1="271" x2="482.5652173913043" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="482.5652173913043" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="482.5652173913043" dy="0.71em">07:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="542.2173913043478" y1="271" x2="542.2173913043478" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="542.2173913043478" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="542.2173913043478" dy="0.71em">08:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="601.8695652173913" y1="271" x2="601.8695652173913" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="601.8695652173913" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="601.8695652173913" dy="0.71em">09:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="661.5217391304348" y1="271" x2="661.5217391304348" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="661.5217391304348" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="661.5217391304348" dy="0.71em">10:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="721.1739130434783" y1="271" x2="721.1739130434783" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="721.1739130434783" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="721.1739130434783" dy="0.71em">11:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="780.8260869565217" y1="271" x2="780.8260869565217" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="780.8260869565217" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="780.8260869565217" dy="0.71em">12:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="840.4782608695652" y1="271" x2="840.4782608695652" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="840.4782608695652" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="840.4782608695652" dy="0.71em">13:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="900.1304347826086" y1="271" x2="900.1304347826086" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="900.1304347826086" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="900.1304347826086" dy="0.71em">14:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="959.7826086956521" y1="271" x2="959.7826086956521" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="959.7826086956521" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="959.7826086956521" dy="0.71em">15:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="1019.4347826086956" y1="271" x2="1019.4347826086956" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="1019.4347826086956" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1019.4347826086956" dy="0.71em">16:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="1079.086956521739" y1="271" x2="1079.086956521739" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="1079.086956521739" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1079.086956521739" dy="0.71em">17:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="1138.7391304347825" y1="271" x2="1138.7391304347825" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="1138.7391304347825" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1138.7391304347825" dy="0.71em">18:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="1198.391304347826" y1="271" x2="1198.391304347826" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="1198.391304347826" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1198.391304347826" dy="0.71em">19:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="1258.0434782608695" y1="271" x2="1258.0434782608695" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="1258.0434782608695" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1258.0434782608695" dy="0.71em">20:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="1317.695652173913" y1="271" x2="1317.695652173913" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="1317.695652173913" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1317.695652173913" dy="0.71em">21:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="1377.3478260869565" y1="271" x2="1377.3478260869565" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="1377.3478260869565" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1377.3478260869565" dy="0.71em">22:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="1372" height="30" stroke="#9CA3AF" x="65" y="265" class="recharts-cartesian-axis-tick-line" fill="none" x1="1437" y1="271" x2="1437" y2="265"></line><text orientation="bottom" width="1372" height="30" stroke="none" font-size="10" x="1437" y="273" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="1437" dy="0.71em">23:00</tspan></text></g></g></g></svg><div class="recharts-legend-wrapper" style="position: absolute; width: 1492px; height: auto; left: 5px; bottom: 5px;"></div><div tabindex="-1" class="recharts-tooltip-wrapper" style="visibility: hidden; pointer-events: none; position: absolute; top: 0px; left: 0px;"></div></div></div></div></div>
+      </div>
+      <table class="spec-table">
+        <thead><tr><th>引擎</th><th>左轴（蓝/橙/紫）</th><th>右轴（绿/紫/红）</th><th>数据</th></tr></thead>
+        <tbody>
+          <tr><td>反垃圾</td><td>扫描吞吐（封/s，#1890FF）</td><td>平均扫描耗时（ms，#52C41A）</td><td rowspan="4">TREND_MOCK_DATA 静态内置 3 套（24h=24点 / 7d=7点「N日」/ 30d=30点「N日」），按引擎 × 时间范围取用</td></tr>
+          <tr><td>反病毒</td><td>扫描吞吐量（附件/s，#1890FF）</td><td>平均扫描耗时（ms，#52C41A）</td></tr>
+          <tr><td>沙箱</td><td>平均分析耗时（s，#FA8C16）</td><td>队列等待长度（#722ED1）</td></tr>
+          <tr><td>RBL</td><td>平均响应时间（ms，#722ED1）</td><td>超时率（%，#FF4D4F）</td></tr>
+        </tbody>
+      </table>
+      <p>卡片标题联动：<code>{引擎名} 性能趋势（{时间范围}）</code>；CustomTooltip 数值保留 1 位小数，timeoutRate 带 %、responseTime 带 ms。</p>
+    </div>
+  </article>
+
+  <!-- ===== 2.4 性能详情表 ===== -->
+  <article class="component-spec" id="component-2-4">
+    <h3>2.4 性能详情表（4 种列结构随引擎切换）</h3>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 反垃圾引擎详情表（默认）</h4>
+      <div class="component-preview">
+<div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-base">反垃圾引擎<!-- --> <!-- -->性能详情</div></div><div data-slot="card-content" class="px-6"><div data-slot="table-container" class="relative w-full overflow-x-auto"><table data-slot="table" class="w-full caption-bottom text-sm"><thead data-slot="table-header" class="[&amp;_tr]:border-b"><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">实例 ID</th><th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">统计时段</th><th data-slot="table-head" class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">扫描吞吐</th><th data-slot="table-head" class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">平均扫描耗时</th><th data-slot="table-head" class="text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">队列堆积数</th></tr></thead><tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0"><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">antispam-01</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">00:00-06:00</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">820<!-- --> 封/s</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">95<!-- --> ms</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">12</td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">antispam-01</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">06:00-12:00</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">890<!-- --> 封/s</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">88<!-- --> ms</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">8</td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">antispam-01</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">12:00-18:00</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">950<!-- --> 封/s</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">102<!-- --> ms</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">25</td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">antispam-01</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">18:00-24:00</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">780<!-- --> 封/s</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">78<!-- --> ms</td><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">5</td></tr></tbody></table></div></div></div>
+      </div>
+      <table class="spec-table">
+        <thead><tr><th>引擎</th><th>列结构</th><th>行数</th><th>实测首行</th></tr></thead>
+        <tbody>
+          <tr><td>反垃圾</td><td>实例 ID · 统计时段 · 扫描吞吐（封/s) · 平均扫描耗时（ms) · 队列堆积数</td><td>4（4 个 6h 时段）</td><td>antispam-01 · 00:00-06:00 · 820 · 95 · 12</td></tr>
+          <tr><td>反病毒</td><td>实例 ID · 统计时段 · 扫描吞吐量（附件/s) · 平均扫描耗时（ms) · 大文件扫描超时率（%)</td><td>4</td><td>antivirus-01 · 00:00-06:00 · 145 · 112 · 0.5</td></tr>
+          <tr><td>沙箱</td><td>节点名称 · 节点状态（胶囊徽标） · 平均分析耗时（s) · 队列等待长度 · 节点负载率</td><td>3（节点维度）</td><td>sandbox-node-01 · 空闲（绿） · 42 · 2 · 35% / 48%</td></tr>
+          <tr><td>RBL</td><td>RBL 源名称 · 平均响应时间（ms) · 超时率（%) · 查询吞吐量（次/s)</td><td>4（RBL 源维度）</td><td>Spamhaus · 850 · 0.5 · 125</td></tr>
+        </tbody>
+      </table>
+      <p>沙箱节点状态胶囊：idle=绿「空闲」 · busy=黄「繁忙」 · offline=灰「离线」。【demo 现状】详情表数据不随时间范围变化（generateDetailData 忽略 timeRange 参数）。【目标行为·2026-07-22 用户决定】<b>详情表需随时间范围变化</b>（差异 D-02）：统计时段粒度与范围联动（近24小时=6h 时段×4 行 / 近7天=日粒度×7 行 / 近30天=日粒度×30 行或按周聚合），数值按所选范围重取。</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============ 3. 数据模型与 mock ============ -->
+<section id="api-mapping" class="component-spec">
+  <h2 style="margin-top:0;">3. 数据模型与 API 映射</h2>
+  <blockquote style="border-left:4px solid var(--destructive);background:var(--diff-bg);padding:.75rem 1rem;border-radius:0 8px 8px 0;">⚠️ 全部数据为前端 mock（engineStatusData 状态卡 + TREND_MOCK_DATA 趋势 + generateDetailData 详情表）。落地所需 API 未定义，列入 §10 Q-01。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>数据</th><th>结构</th><th>落地所需 API（待定义）</th></tr></thead>
+    <tbody>
+      <tr><td>引擎状态卡</td><td>{ status: normal|error, primaryValue } × 4 引擎</td><td>引擎健康与主指标实时查询</td></tr>
+      <tr><td>性能趋势</td><td>TREND_MOCK_DATA[engine][range][]（throughput/latency/analysisTime/queueLength/responseTime/timeoutRate）</td><td>引擎性能时序（按范围聚合）</td></tr>
+      <tr><td>性能详情</td><td>按引擎 4 种行结构（实例时段 / 节点 / RBL 源）</td><td>引擎分维度性能明细</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 4. 关联功能模块 ============ -->
+<section id="related-modules" class="component-spec">
+  <h2 style="margin-top:0;">4. 关联功能模块</h2>
+  <table class="spec-table">
+    <thead><tr><th>关联类型</th><th>模块</th><th>关系说明</th></tr></thead>
+    <tbody>
+      <tr><td>上游入口</td><td><a href="../monitor-dashboard/index.html">监控总览</a></td><td>KPI 卡「检测引擎」+ 看板卡 + 趋势图外链下钻到本页</td></tr>
+      <tr><td>数据同源</td><td><a href="../monitor-alerts/index.html">告警中心</a></td><td>引擎类告警（RBL响应超时 &gt;5s）与本页 RBL 超时率指标同源</td></tr>
+      <tr><td>配置联动</td><td>策略流水线（filter-rules-pipeline-*）</td><td>本页监控的引擎即策略流水线中执行的反垃圾/反病毒/沙箱/RBL 环节</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 5. 业务逻辑与异常 / 国际化 / 响应式 ============ -->
+<section id="business-logic" class="component-spec">
+  <h2 style="margin-top:0;">5. 业务逻辑与异常场景</h2>
+  <table class="spec-table">
+    <thead><tr><th>场景</th><th>demo 表现</th></tr></thead>
+    <tbody>
+      <tr><td>引擎异常（status=error）</td><td>状态点变红 + 文案「异常」+ 主指标显示「—」灰字（源码条件渲染；mock 全 normal 未展示）</td></tr>
+      <tr><td>沙箱节点离线</td><td>节点状态胶囊灰色「离线」（mock 无 offline 行，未展示）</td></tr>
+      <tr><td>后端超时/降级</td><td>demo 无接口未覆盖 → §10 Q-01</td></tr>
+    </tbody>
+  </table>
+</section>
+<section id="i18n" class="component-spec">
+  <h2 style="margin-top:0;">6. 国际化规格</h2>
+  <p>文案全部走 i18n key（<code>monitor.engine.* / monitor.time.*</code>），zh/en 完整；泰文段缺全部 monitor.* key（差异 D-03）；第四语言未内置。引擎名 RBL 四语同形。</p>
+</section>
+<section id="responsive" class="component-spec">
+  <h2 style="margin-top:0;">7. 响应式规格（三断点实测）</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>表现</th><th>截图</th></tr></thead>
+    <tbody>
+      <tr><td>1920px</td><td>基准布局（4 列引擎卡）</td><td>page-full-default.png</td></tr>
+      <tr><td>1366px</td><td>等比压缩</td><td><a href="./screenshots/responsive-1366px.png">responsive-1366px.png</a></td></tr>
+      <tr><td>1024px</td><td>4 列卡片挤压不换行</td><td><a href="./screenshots/responsive-1024px.png">responsive-1024px.png</a></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 9. 差异标注 ============ -->
+<section id="diffs" class="diff-section">
+  <h2>9. 差异标注（2026-07-22 v2 复核）</h2>
+  <table class="spec-table diff-table">
+    <thead><tr><th>编号</th><th>位置</th><th>差异</th><th>影响</th><th>状态（v2 复核）</th></tr></thead>
+    <tbody>
+      <tr><td>D-01</td><td>§2.1 刷新按钮</td><td>无 onClick，点击无响应</td><td><span class="tag tag-orange">中</span></td><td>未解决（demo 现状）</td></tr>
+      <tr><td>D-02</td><td>§2.4 详情表</td><td>demo 现状：generateDetailData 接收 timeRange 但不使用，详情表不随时间范围变化（与标题/趋势图联动口径不一致）。【目标行为·2026-07-22 用户决定】详情表需随时间范围变化：近24小时=6h 时段×4 行 / 近7天=日粒度×7 行 / 近30天=日粒度×30 行（或按周聚合），数值按范围重取</td><td><span class="tag tag-gray">低</span></td><td><b>已解决（目标行为已定）</b>——落地实现项：详情表数据接入 timeRange 联动</td></tr>
+      <tr><td>D-03</td><td>§6 i18n</td><td>泰文缺全部 monitor.* key；仅三语未达四语要求</td><td><span class="tag tag-orange">中</span></td><td>部分解决（已定位缺口，待落地补齐）</td></tr>
+      <tr><td>D-04</td><td>§0.1 权限</td><td>demo 现状：多租户 tenant 视角导航隐藏本页，但 URL 直连仍可渲染（无拦截）。【目标行为·2026-07-22 用户决定】URL 直连不可渲染：后端 403/404 + 前端路由守卫</td><td><span class="tag tag-orange">中</span></td><td><b>已解决（目标行为已定）</b>——落地实现项：后端拦截 + 前端路由守卫</td></tr>
+      <tr><td>D-05</td><td>§2.1 时间范围选项</td><td>本页无「近1小时」选项（基建/邮件流页有），选项集跨页不一致</td><td><span class="tag tag-gray">低</span></td><td>未解决（demo 现状，跨页选项集是否统一列入 Q-01 落地时一并定）</td></tr>
+      <tr><td>D-06</td><td>§2.2 引擎卡主指标</td><td>demo 现状：RBL 卡主指标「平均响应 1.2s」固定拼接 unit，与趋势图左轴 ms（1200ms 量级）口径不一致。【目标行为·2026-07-22 用户决定】时间类主指标单位按数值自适应：&lt;1s 用毫秒（如 850ms），≥1s 用秒保留 1 位小数（如 1.2s）</td><td><span class="tag tag-gray">低</span></td><td><b>已解决（目标行为已定）</b>——落地实现项：主指标渲染按数值自适应单位</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 10. 需确认事项 ============ -->
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项（2026-07-22 v2 复核）</h2>
+  <table class="spec-table question-table">
+    <thead><tr><th>编号</th><th>事项</th><th>类型</th><th>说明</th><th>状态（v2 复核）</th></tr></thead>
+    <tbody>
+      <tr><td>Q-01</td><td>引擎性能指标 API</td><td><span class="tag tag-orange">新增 API</span></td><td>四引擎吞吐/耗时/队列/超时率的采集查询接口；反垃圾/反病毒实例、沙箱节点、RBL 源三个维度的明细接口（需支持时间范围参数，落地 D-02 目标行为）</td><td>未解决</td></tr>
+      <tr><td>Q-02</td><td>租户视角可见性</td><td><span class="tag tag-blue">产品决策</span></td><td>引擎状态为平台级信息，租户是否一律不可见。【2026-07-22 用户决定】<b>租户不可见且 URL 直连不可渲染</b>：落地时后端 403/404 + 前端路由守卫</td><td><b>已解决</b>（2026-07-22 用户确认）</td></tr>
+      <tr><td>Q-03</td><td>RBL 主指标单位口径</td><td><span class="tag tag-blue">产品决策</span></td><td>卡片 1.2s vs 趋势图 ms 的统一方式。【2026-07-22 用户决定】<b>单位按数值自适应</b>：&lt;1s 用毫秒（如 850ms），≥1s 用秒保留 1 位小数（如 1.2s）；趋势图左轴单位保持 ms</td><td><b>已解决</b>（2026-07-22 用户确认）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true, theme: 'default' });</script>
+<script>
+  function showRouteToast(path) {
+    let el = document.querySelector('.route-toast');
+    if (!el) { el = document.createElement('div'); el.className = 'route-toast'; document.body.appendChild(el); }
+    el.textContent = 'demo 行为：router.push("' + path + '")';
+    el.classList.add('show');
+    clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+  // 简易下拉：点击 trigger 切换 option 列表；点选项更新 trigger 文案并触发回调
+  function bindSpecSelect(triggerSel, options, onPick) {
+    const trigger = document.querySelector(triggerSel);
+    if (!trigger) return;
+    trigger.style.position = 'relative';
+    let list = null;
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (list) { list.remove(); list = null; trigger.setAttribute('data-state','closed'); return; }
+      trigger.setAttribute('data-state','open');
+      list = document.createElement('div');
+      list.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:50;padding:4px;font-size:14px;';
+      options.forEach(opt => {
+        const item = document.createElement('div');
+        item.textContent = opt.label;
+        item.style.cssText = 'padding:6px 10px;border-radius:5px;cursor:pointer;white-space:nowrap;' + (opt.active ? 'background:#eff6ff;color:#1d4ed8;font-weight:600;' : '');
+        item.onmouseenter = () => { if (!opt.active) item.style.background = '#f3f4f6'; };
+        item.onmouseleave = () => { if (!opt.active) item.style.background = opt.active ? '#eff6ff' : ''; };
+        item.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const valSpan = trigger.querySelector('[data-slot="select-value"]');
+          if (valSpan) valSpan.textContent = opt.label;
+          list.remove(); list = null; trigger.setAttribute('data-state','closed');
+          if (onPick) onPick(opt);
+        });
+        list.appendChild(item);
+      });
+      trigger.appendChild(list);
+      document.addEventListener('click', function h() { if (list) { list.remove(); list = null; trigger.setAttribute('data-state','closed'); } document.removeEventListener('click', h); });
+    });
+  }
+
+  bindSpecSelect('#preview-header [role="combobox"]', [
+    {label:'近24小时',active:true},{label:'近7天'},{label:'近30天'}
+  ], (opt) => showRouteToast('demo 行为：setTimeRange("' + opt.label + '")，趋势图按 ' + opt.label + ' 数据集重绘（见层级 2）'));
+</script>
+</body>
+</html>

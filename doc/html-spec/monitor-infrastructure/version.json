@@ -1,0 +1,20 @@
+{
+  "module": "monitor-infrastructure",
+  "current_version": 2,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": null,
+      "summary": "初版：4 Tab 面板全量提取（硬件/服务进程/数据库与缓存/存储与备份）+ 可交互预览；Kingbase/Redis 双态与指标切换、时间范围联动范围实测；形态×角色 5×2 矩阵实测（多租户 tenant 隐藏入口但 URL 直连不拦截）；3 断点截图；7 项差异 + 3 项需确认"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": null,
+      "summary": "用户决定落地 3 项目标行为：① 租户视角 URL 直连拦截（Q-02 闭环：后端 403/404 + 前端路由守卫）② 硬件 CPU/内存趋势图随时间范围联动（D-04 已解决-目标行为）③ 慢查询行 hover Tooltip 显示 SQL 详情（D-06 已解决-目标行为）；§9/§10 全部条目逐项标注复核状态"
+    }
+  ]
+}

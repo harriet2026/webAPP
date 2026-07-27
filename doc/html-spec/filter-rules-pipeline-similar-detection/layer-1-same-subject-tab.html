@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级1：相同主题检测 Tab - 相似邮件检测 HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0); --card: #fff; --muted: #f5f7fa; --muted-foreground: #6b7280; --border: #e5e7eb; --blue: #1677ff; --red: #f5222d; --orange: #fa8c16; --amber-bg: #fffbeb; --amber-border: #fcd34d; --amber-text: #b45309; --radius: 0.625rem; --font-sans: "Geist", "Inter", system-ui, sans-serif; --font-mono: "Geist Mono", ui-monospace, monospace; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: var(--muted); border-radius: var(--radius); margin-bottom: 20px; font-size: 14px; }
+    .layer-nav a { font-weight: 600; }
+    .spec-header, section { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .trigger-path { margin: 8px 0 12px; padding: 8px 12px; border-radius: 8px; background: var(--muted); color: var(--muted-foreground); font-size: 13px; }
+    .trigger-path strong { color: var(--foreground); }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .is-hidden { display: none !important; }
+    .sw { position: relative; width: 36px; height: 20px; border-radius: 999px; background: #d1d5db; border: 0; cursor: pointer; flex-shrink: 0; transition: background .15s; }
+    .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 999px; background: #fff; transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+    .sw[aria-checked="true"] { background: #2563eb; }
+    .sw[aria-checked="true"]::after { left: 18px; }
+    .tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 8px; background: #f3f4f6; margin: 12px 0; }
+    .tab { padding: 5px 12px; border: 0; border-radius: 7px; font-size: 14px; font-weight: 600; background: transparent; cursor: pointer; color: #374151; font-family: inherit; }
+    .tab.active { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+    .pill { display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #f3f4f6; }
+    .pill.amber { background: #fef3c7; color: #b45309; border: 1px solid var(--amber-border); }
+    .sd-app { min-width: 860px; font-size: 14px; }
+    .sd-banner { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; margin-bottom: 14px; border: 1px solid var(--amber-border); border-radius: 8px; background: var(--amber-bg); color: var(--amber-text); }
+    .sd-banner .b-title { font-weight: 650; }
+    .sd-banner p { margin: 4px 0 0; font-size: 13px; }
+    .sd-block { padding: 14px; margin: 12px 0; border: 1px solid var(--border); border-radius: 8px; background: #f9fafb; }
+    .sd-block h5 { margin: 0 0 10px; font-size: 14.5px; }
+    .radio-row { display: flex; align-items: flex-start; gap: 8px; margin: 6px 0; }
+    .radio-row input[type=radio] { margin-top: 4px; accent-color: #2563eb; }
+    .dir-checks, .norm-checks { display: flex; gap: 18px; margin: 8px 0 0 24px; flex-wrap: wrap; }
+    .norm-checks { margin-left: 0; }
+    .dir-checks label, .norm-checks label { display: flex; align-items: center; gap: 6px; font-size: 13.5px; cursor: pointer; }
+    .dir-checks input, .norm-checks input { accent-color: #2563eb; width: 15px; height: 15px; }
+    .sd-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 12px 0; }
+    .dir-card { border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; background: #fff; }
+    .dir-card.observe { border-color: var(--amber-border); background: #fffdf5; }
+    .dir-card-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .dir-card-head .t { font-weight: 650; display: flex; align-items: center; gap: 6px; }
+    .sync-btn { border: 0; background: transparent; color: #374151; font-size: 12px; cursor: pointer; padding: 4px 6px; border-radius: 6px; font-family: inherit; }
+    .sync-btn:hover { background: #f3f4f6; }
+    .obs-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px; margin-bottom: 12px; border-radius: 8px; background: #f9fafb; font-size: 13px; }
+    .obs-row .lab { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+    .obs-state { font-size: 12px; color: #6b7280; }
+    .obs-state.on { color: #d97706; }
+    .view-logs { font-size: 12px; color: #2563eb; background: none; border: 0; cursor: pointer; padding: 0; font-family: inherit; }
+    .fld { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 13.5px; }
+    .fld > .fl { min-width: 76px; color: #111827; }
+    .fld input[type=number] { width: 76px; height: 30px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 7px; font-family: inherit; }
+    .fld .unit { color: #6b7280; font-size: 13px; }
+    .fld select { width: 150px; height: 30px; border: 1px solid var(--border); border-radius: 7px; background: #fff; font-family: inherit; font-size: 13px; padding: 0 6px; }
+    .fld select:disabled { opacity: .5; cursor: not-allowed; }
+    .note { padding: 10px 14px; border-radius: 8px; font-size: 13.5px; margin: 8px 0; }
+    .note.cyan { border: 1px solid #a5f3fc; background: #ecfeff; color: #0e7490; }
+    .note.amber { border: 1px solid var(--amber-border); background: var(--amber-bg); color: var(--amber-text); }
+    .sd-exempt { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; margin-top: 12px; border: 1px solid #bfdbfe; border-radius: 8px; background: #eff6ff; color: #1d4ed8; font-size: 13.5px; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <span>层级 1 / 3</span>
+    <a href="./layer-2-aggregate-mode.html">层级2：全方向聚合模式 →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 1：相同主题检测 Tab</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 相似检测模块 SimilarDetectionModule</td></tr>
+      <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级0 抽屉默认态 → 点击 Tabs 中“相同主题检测”（<code>role=tab</code>）→ activeTab=same-subject，TabsContent 切换</td></tr>
+      <tr><td>demo 组件</td><td><code>similar-detection-module.tsx</code>（TabsContent value="same-subject"）</td></tr>
+      <tr><td>与层级0的差异</td><td>① 方向卡片使用独立的 <code>sameSubjectConfigs</code> 参数集（60分钟 / 50封，动作 隔离/审核/隔离）；② 卡片<b>不渲染相似度阈值滑块</b>（仅 similar-email Tab 有）；③ 新增“主题标准化（全局）”4 复选块；④ 新增青色/琥珀双提示条；⑤ 方向模式与方向勾选沿用与层级0共享的同一份状态。</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">1</span>交互层级 1：相同主题检测 Tab（预览可操作：Tab 返回、开关、同步、标准化勾选）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：抽屉内点击“相同主题检测”Tab。默认态：接收+外发观察模式开启 → 警告条含两个方向徽章；域内 config.enabled=false 但卡片照常渲染（差异 D-5）。</div>
+
+    <div class="component-preview">
+      <div class="sd-app" data-sd>
+        <div class="sd-banner" data-sd-banner>
+          <span>⚠</span>
+          <div>
+            <span class="b-title">当前处于观察模式:</span>
+            <span data-sd-banner-badges></span>
+            <span>正在观察中</span>
+            <p>命中后仅记录不拦截。确认策略效果后请及时切换为正式模式。</p>
+          </div>
+        </div>
+        <div class="tabs">
+          <a class="tab" href="./index.html#component-2-3" title="返回层级0（相似邮件检测 Tab）">相似邮件检测</a>
+          <button class="tab active" type="button">相同主题检测</button>
+        </div>
+        <div class="sd-block">
+          <h5>检测方向配置</h5>
+          <div class="radio-row"><input type="radio" name="sd-mode" id="agg-subject" value="aggregate"><label for="agg-subject">全方向聚合（合并统计）</label></div>
+          <div class="radio-row"><input type="radio" name="sd-mode" id="split-subject" value="split" checked><label for="split-subject">按方向独立检测（可勾选多个）</label></div>
+          <div class="dir-checks" data-sd-checks>
+            <label><input type="checkbox" data-dir-check="inbound" checked> ✉ 接收</label>
+            <label><input type="checkbox" data-dir-check="outbound" checked> ➤ 外发</label>
+            <label><input type="checkbox" data-dir-check="intra" checked> ▦ 域内</label>
+          </div>
+        </div>
+        <div class="sd-grid" data-sd-cards></div>
+        <div class="sd-block">
+          <h5>主题标准化（全局）</h5>
+          <div class="norm-checks">
+            <label><input type="checkbox" checked> 忽略大小写</label>
+            <label><input type="checkbox" checked> 忽略Re:/Fwd:</label>
+            <label><input type="checkbox"> 忽略数字</label>
+            <label><input type="checkbox" checked> 相似度&gt;90%视为相同</label>
+          </div>
+        </div>
+        <div class="note cyan">ⓘ 此检测在邮件进入时实时计算，命中后立即拦截或标记</div>
+        <div class="note amber">ⓘ 观察模式下命中仅记录日志，不执行拦截动作</div>
+        <div class="sd-exempt">
+          <span>ⓘ 豁免名单统一由群组策略模块配置，本模块不再提供免检测发信人管理入口</span>
+          <button class="view-logs" type="button" title="demo 中无跳转绑定">前往群组策略配置 ↗</button>
+        </div>
+      </div>
+    </div>
+
+    <figure class="screenshot-figure">
+      <img src="./screenshots/layer1-same-subject-tab.png" alt="相同主题检测 Tab 上半部分">
+      <figcaption>Tab 切换后实拍（上半部）：警告条含“接收方向 / 外发方向”两个徽章；三张方向卡（60分钟/50封，无相似度滑块）；接收与外发为琥珀观察态。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/layer1-same-subject-normalization.png" alt="主题标准化与提示条">
+      <figcaption>滚动到下半部实拍：主题标准化（全局）4 复选（勾/勾/不勾/勾）+ 青色实时计算提示 + 琥珀观察模式提示 + 豁免提示条。触发动作：接收=隔离（禁用）、外发=审核（禁用）、域内=隔离（可用）。</figcaption>
+    </figure>
+
+    <h4>UI 元素清单（层级1 新增/变化项）</h4>
+    <table class="spec-table">
+      <thead><tr><th>序号</th><th>元素</th><th>实际文案/默认值</th><th>校验</th><th>交互行为</th><th>i18n key（模块内 L.*）</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>方向卡默认参数</td><td>接收：观察=开、60分钟、50封、隔离；外发：观察=开、60分钟、50封、审核；域内：观察=关、60分钟、50封、隔离</td><td>同层级0（无数字校验，差异 D-3）</td><td>与层级0同一交互模型；无相似度阈值滑块行</td><td>—</td></tr>
+        <tr><td>2</td><td>相似度阈值</td><td>不渲染（<code>activeTab === "similar-email"</code> 条件）</td><td>—</td><td>状态中 similarityThreshold=90 仍存在但无 UI</td><td>—</td></tr>
+        <tr><td>3</td><td>主题标准化（全局）</td><td>忽略大小写 ✓ / 忽略Re:/Fwd: ✓ / 忽略数字 ✗ / 相似度&gt;90%视为相同 ✓</td><td>—</td><td>Checkbox 即时切换 subjectNormalization 状态；“全局”指两 Tab/各方向共用一份</td><td>L.subjectNormalization / ignoreCase / ignoreRePrefix / ignoreNumbers / similarSubject</td></tr>
+        <tr><td>4</td><td>实时计算提示条（青色）</td><td>此检测在邮件进入时实时计算，命中后立即拦截或标记</td><td>—</td><td>静态提示</td><td>L.realtimeNote</td></tr>
+        <tr><td>5</td><td>观察模式提示条（琥珀）</td><td>观察模式下命中仅记录日志，不执行拦截动作</td><td>—</td><td>静态提示（恒显示，与观察开关无联动）</td><td>L.observeNote</td></tr>
+        <tr><td>6</td><td>方向配置块 / 豁免条</td><td>与层级0完全同构（radio id 改为 aggregate-subject / split-subject）</td><td>—</td><td>directionMode 与 selectedDirections 与层级0<b>共享同一份状态</b>（差异 D-7）</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果（层级1，1440px 实测）</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>Tabs 状态</td><td>相同主题检测 <code>data-state=active</code>，相似邮件检测 inactive</td><td>相同主题检测 .active</td><td>一致</td></tr>
+          <tr><td>警告条徽章</td><td>“接收方向”“外发方向”两枚（sameSubjectConfigs 的 observe 集合）</td><td>banner 两枚徽章</td><td>一致</td></tr>
+          <tr><td>接收方向卡</td><td>amber、switch checked、inputs [60,50]、无 slider（aria-valuenow 无）、combobox “隔离”且 disabled、节点数 47</td><td>预览同状态、无滑块行</td><td>一致</td></tr>
+          <tr><td>外发方向卡</td><td>amber、switch checked、inputs [60,50]、combobox “审核”且 disabled、节点数 47</td><td>预览同状态</td><td>一致</td></tr>
+          <tr><td>域内方向卡</td><td>蓝边、switch unchecked、combobox “隔离”可用、节点数 43（config.enabled=false 仍渲染）</td><td>预览同状态</td><td>一致（enabled 无 UI 已记差异 D-5）</td></tr>
+          <tr><td>主题标准化复选</td><td>#norm-case ✓ / #norm-prefix ✓ / #norm-numbers ✗ / #norm-similar ✓</td><td>预览 勾/勾/不勾/勾</td><td>一致</td></tr>
+          <tr><td>提示条</td><td>p 文案两条：“此检测在邮件进入时实时计算…”“观察模式下命中仅记录日志…”</td><td>note.cyan / note.amber 同文案</td><td>一致</td></tr>
+          <tr><td>豁免条</td><td>“豁免名单统一由群组策略模块配置…”存在</td><td>同文案</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <a href="./layer-2-aggregate-mode.html">层级2：全方向聚合模式 →</a>
+  </nav>
+
+  <script>
+    (() => {
+      const ICONS = { inbound: "✉", outbound: "➤", intra: "▦" };
+      const NAMES = { inbound: "接收方向", outbound: "外发方向", intra: "域内方向" };
+      const ACTIONS = ["隔离并告警", "隔离", "审核", "标记投递", "阻断", "丢弃"];
+      const state = {
+        mode: "split",
+        dirs: {
+          inbound: { sel: true, obs: true,  win: 60, cnt: 50, act: "隔离" },
+          outbound:{ sel: true, obs: true,  win: 60, cnt: 50, act: "审核" },
+          intra:   { sel: true, obs: false, win: 60, cnt: 50, act: "隔离" },
+        },
+        agg: { obs: false, win: 30, cnt: 10, act: "隔离并告警" },
+      };
+      const cardsEl = document.querySelector("[data-sd-cards]");
+      const banner = document.querySelector("[data-sd-banner]");
+      const bannerBadges = document.querySelector("[data-sd-banner-badges]");
+      const checksRow = document.querySelector("[data-sd-checks]");
+
+      function renderBanner() {
+        let observing = [];
+        if (state.mode === "aggregate") { if (state.agg.obs) observing = ["全方向聚合（合并统计）"]; }
+        else observing = Object.keys(state.dirs).filter(d => state.dirs[d].sel && state.dirs[d].obs).map(d => NAMES[d]);
+        banner.classList.toggle("is-hidden", observing.length === 0);
+        bannerBadges.innerHTML = observing.map(n => `<span class="pill amber">${n}</span>`).join(" ");
+      }
+      function cardHTML(d, c) {
+        return `
+        <div class="dir-card ${c.obs ? "observe" : ""}">
+          <div class="dir-card-head">
+            <span class="t">${ICONS[d]} ${NAMES[d]} ${c.obs ? '<span class="pill amber">◉ 观察模式</span>' : ""}</span>
+            <button class="sync-btn" type="button" data-sync="${d}">❐ 同步到其他方向</button>
+          </div>
+          <div class="obs-row">
+            <span class="lab">◉ 观察模式</span>
+            <span style="display:flex;align-items:center;gap:8px;">
+              <span class="obs-state ${c.obs ? "on" : ""}">${c.obs ? "开启" : "关闭"}</span>
+              <button class="sw" role="switch" aria-checked="${c.obs}" data-obs="${d}" aria-label="${NAMES[d]}观察模式"></button>
+              ${c.obs ? '<button class="view-logs" type="button" title="demo 中无跳转绑定">查看观察日志 ↗</button>' : ""}
+            </span>
+          </div>
+          <div class="fld"><span class="fl">检测窗口</span><input type="number" value="${c.win}" data-f="win" data-dir="${d}"><span class="unit">分钟</span></div>
+          <div class="fld"><span class="fl">触发数量</span><input type="number" value="${c.cnt}" data-f="cnt" data-dir="${d}"><span class="unit">封</span></div>
+          <div class="fld"><span class="fl">触发动作</span>
+            <select data-f="act" data-dir="${d}" ${c.obs ? "disabled" : ""}>
+              ${ACTIONS.map(a => `<option ${a === c.act ? "selected" : ""}>${a}</option>`).join("")}
+            </select>
+          </div>
+        </div>`;
+      }
+      function render() {
+        checksRow.classList.toggle("is-hidden", state.mode !== "split");
+        if (state.mode === "split") {
+          cardsEl.innerHTML = ["inbound", "outbound", "intra"].filter(d => state.dirs[d].sel).map(d => cardHTML(d, state.dirs[d])).join("");
+        } else {
+          cardsEl.innerHTML = '<div class="dir-card" style="grid-column:1/-1;">聚合模式统一配置卡结构见 <a href="./layer-2-aggregate-mode.html">层级2</a>（相同主题 Tab 下同样无相似度滑块）。</div>';
+        }
+        renderBanner();
+      }
+      cardsEl.addEventListener("click", e => {
+        const obs = e.target.closest("[data-obs]");
+        if (obs) { const c = state.dirs[obs.dataset.obs]; c.obs = !c.obs; render(); return; }
+        const sync = e.target.closest("[data-sync]");
+        if (sync) {
+          const src = state.dirs[sync.dataset.sync];
+          Object.keys(state.dirs).forEach(d => { if (d !== sync.dataset.sync && state.dirs[d].sel) state.dirs[d] = { ...src, sel: true }; });
+          render();
+        }
+      });
+      cardsEl.addEventListener("input", e => {
+        const t = e.target, d = t.dataset.dir, f = t.dataset.f;
+        if (!d || !f) return;
+        if (f === "win") state.dirs[d].win = Number(t.value);
+        if (f === "cnt") state.dirs[d].cnt = Number(t.value);
+        if (f === "act") state.dirs[d].act = t.value;
+      });
+      checksRow.addEventListener("change", e => {
+        const cb = e.target.closest("[data-dir-check]");
+        if (!cb) return;
+        state.dirs[cb.dataset.dirCheck].sel = cb.checked;
+        render();
+      });
+      document.querySelectorAll('input[name="sd-mode"]').forEach(r => r.addEventListener("change", () => {
+        state.mode = document.querySelector('input[name="sd-mode"]:checked').value;
+        render();
+      }));
+      render();
+    })();
+  </script>
+</body>
+</html>

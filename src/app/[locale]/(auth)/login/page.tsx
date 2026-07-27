@@ -319,6 +319,16 @@ export default function LoginPage() {
     setErrorMessage(null);
     setSuccessMessage(null);
     setRemainingAttempts(undefined);
+    // GT-12511: 空用户名/密码在前端拦截并给出本地化提示，不再把请求发给后端
+    // （后端 binding 校验错误是 Go validator 英文原文，不应展示给终端用户）。
+    if (!submitUsername.trim()) {
+      setErrorMessage(t('auth.usernameRequired'));
+      return;
+    }
+    if (!submitPassword) {
+      setErrorMessage(t('auth.passwordRequired'));
+      return;
+    }
     setSubmitting(true);
     // Persist / clear the remembered account on every submit attempt (not
     // only on success) so the user sees it back even after a typo.
@@ -336,7 +346,7 @@ export default function LoginPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [applyRemember, captchaAnswer, captchaRequired, dispatchStep1, handleLoginError, password, username]);
+  }, [applyRemember, captchaAnswer, captchaRequired, dispatchStep1, handleLoginError, password, t, username]);
 
   // ---- Forced change submit ----
   const submitForcedChange = useCallback(

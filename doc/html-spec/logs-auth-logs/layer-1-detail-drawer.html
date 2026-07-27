@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级1：详情抽屉 - HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .component-preview { background:#fff; overflow-x:auto; }
+  .pass { color:#15803d; font-weight:600; }
+  .bad { color:#b91c1c; font-weight:600; }
+  .warn { color:#a16207; font-weight:600; }
+  .tag-base { display:inline-block; padding:.05rem .375rem; border-radius:.25rem; font-size:.6875rem; font-weight:600; background:#dbeafe; color:#1d4ed8; }
+  .tag-overlay { background:#fef3c7; color:#92400e; }
+  .tag-gap { background:#fee2e2; color:#b91c1c; }
+  .spec-swap-bar { display:flex; align-items:center; gap:.375rem; flex-wrap:wrap; margin-bottom:.75rem; padding-bottom:.5rem; border-bottom:1px dashed var(--border); font-size:.75rem; color:var(--muted-foreground); }
+  .spec-swap-bar button { font:inherit; padding:.15rem .5rem; border:1px solid var(--border); background:#fff; border-radius:.25rem; cursor:pointer; }
+  .spec-swap-bar button.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+</style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#c-5">← 返回主文件</a></nav>
+<header class="spec-header">
+  <h1>交互层级 1：认证详情抽屉</h1>
+  <table class="meta-table"><tr><td>触发路径</td><td>层级0 → 列表行「查看」→ 右侧 Sheet 抽屉（<code>sm:max-w-2xl</code>）</td></tr></table>
+</header>
+<section>
+  <div class="component-preview" data-preview="static"><div role="dialog" id="radix-_r_k_" aria-describedby="radix-_r_m_" aria-labelledby="radix-_r_l_" data-state="open" data-slot="sheet-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full border-l w-full sm:max-w-2xl p-0 flex flex-col" tabindex="-1" style="pointer-events: auto;"><div data-slot="sheet-header" class="flex flex-col gap-1.5 p-4 px-6 pt-6 pb-3 border-b border-gray-100 dark:border-gray-800"><div class="mb-1 text-xs text-gray-500">日志审计 / 认证日志</div><h2 id="radix-_r_l_" data-slot="sheet-title" class="text-foreground font-semibold flex items-center gap-2">alice@example.cn<span class="inline-flex items-center rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">成功</span></h2><p id="radix-_r_m_" data-slot="sheet-description" class="text-muted-foreground text-sm">查看该次认证尝试的详细信息与诊断建议</p></div><div class="min-h-0 flex-1 space-y-4 overflow-auto bg-gray-50 p-6"><div class="rounded-lg border border-gray-200 bg-white"><div class="border-b border-gray-100 px-4 py-3"><h3 class="font-medium text-gray-900">认证概要</h3></div><div class="divide-y divide-gray-50 px-4 py-1"><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">日志编号</div><div class="flex-1 text-sm text-gray-900">AL20260622001</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">认证结果</div><div class="flex-1 text-sm text-gray-900">成功</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">发生时间</div><div class="flex-1 text-sm text-gray-900">2026-06-22 10:30:45</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">认证耗时</div><div class="flex-1 text-sm text-gray-900">86 ms</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">认证账号</div><div class="flex-1 text-sm text-gray-900">alice@example.cn</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">来源 IP</div><div class="flex-1 text-sm text-gray-900">192.168.1.22（内网）</div></div></div></div><div class="rounded-lg border border-gray-200 bg-white"><div class="border-b border-gray-100 px-4 py-3"><h3 class="font-medium text-gray-900">协议与服务器</h3></div><div class="divide-y divide-gray-50 px-4 py-1"><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">认证协议</div><div class="flex-1 text-sm text-gray-900">LDAP</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">生效场景</div><div class="flex-1 text-sm text-gray-900">用户空间认证</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">命中域名</div><div class="flex-1 text-sm text-gray-900">example.cn</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">认证服务器</div><div class="flex-1 text-sm text-gray-900">ldap.example.cn:389</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">SSL/TLS</div><div class="flex-1 text-sm text-gray-900">未启用</div></div></div></div><div class="rounded-lg border border-gray-200 bg-white"><div class="border-b border-gray-100 px-4 py-3"><h3 class="font-medium text-gray-900">命中配置</h3></div><div class="divide-y divide-gray-50 px-4 py-1"><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">配置编号</div><div class="flex-1 text-sm text-gray-900">a6001</div></div><div class="py-2"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md px-3 has-[&gt;svg]:px-2.5 gap-1 bg-transparent"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link h-4 w-4"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>跳转到发信认证配置</button></div></div></div></div><div class="flex flex-shrink-0 justify-end gap-3 border-t border-gray-200 bg-gray-50 p-6"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3 bg-transparent">关闭</button></div><button type="button" class="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x size-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="sr-only">Close</span></button></div></div>
+  <figure class="screenshot-figure"><img src="./screenshots/layer-1-detail-drawer.png" alt="认证详情抽屉"></figure>
+  <table class="spec-table">
+    <thead><tr><th>分区</th><th>字段</th><th>渲染</th></tr></thead>
+    <tbody>
+      <tr><td>头部</td><td>面包屑「日志审计 / 认证日志」+ 标题（账号 + 结果徽标）+ 描述「查看该次认证尝试的详细信息与诊断建议」</td><td>—</td></tr>
+      <tr><td>认证概要</td><td>日志编号 / 认证结果 / 发生时间 / 认证耗时 / 认证账号 / 来源 IP</td><td>耗时 <code>{durationMs} ms</code>；IP 显示为 <code>IP（归属地）</code></td></tr>
+      <tr><td>协议与服务器</td><td>认证协议 / 生效场景 / 命中域名 / 认证服务器（host:port）/ SSL/TLS</td><td>SSL：已启用 / 未启用</td></tr>
+      <tr><td>命中配置</td><td>配置编号 + <strong>「跳转到发信认证配置」</strong></td><td>ExternalLink 图标 outline 按钮 → <code>/admin/forwarding</code></td></tr>
+      <tr><td class="bad">失败诊断</td><td class="bad"><strong>仅失败记录显示</strong>：失败原因 + 对应处置建议</td><td>红卡 <code>border-red-200 bg-red-50</code> + AlertTriangle</td></tr>
+      <tr><td>底部</td><td>「关闭」</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p>7 类失败原因与处置建议的完整映射见 <a href="./index.html#api-mapping">主文件 §4.2</a>。</p>
+  <div class="dom-comparison">
+  <h5>DOM 树比对结果</h5>
+  <table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody><tr><td>根节点</td><td><code>[data-slot=sheet-content]</code>（右侧抽屉，非 Modal）</td><td>同</td><td class="pass">一致</td></tr>
+<tr><td>后代节点数</td><td>67</td><td>67</td><td class="pass">一致</td></tr>
+<tr><td>分区</td><td>4（认证概要 / 协议与服务器 / 命中配置 / 失败诊断）</td><td>4</td><td class="pass">一致</td></tr>
+<tr><td>失败诊断</td><td>仅失败记录渲染（本例为成功记录 → 不含该区）</td><td>同</td><td class="pass">一致</td></tr>
+<tr><td>跳转按钮</td><td>「跳转到发信认证配置」→ /admin/forwarding</td><td>同</td><td class="pass">一致</td></tr></tbody>
+  </table>
+</div>
+</section>
+<script src="../assets/stats-preview.js"></script>
+</body>
+</html>

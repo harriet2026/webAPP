@@ -99,8 +99,7 @@ test.describe('Delivery Traffic Analysis', () => {
   });
 
   test('custom time range exposes bounded date inputs', async ({ authenticatedPage: page }) => {
-    await page.getByTestId('delivery-time-range').click();
-    await page.getByRole('option', { name: '自定义' }).click();
+    await page.getByTestId('delivery-time-range-custom').click();
     await expect(page.getByTestId('delivery-custom-range').locator('input[type="date"]')).toHaveCount(2);
   });
 

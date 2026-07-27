@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 2：黑名单列表默认态 - HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: white; --border: oklch(0.922 0 0); --muted: oklch(0.97 0 0); --radius: 0.625rem; --font-sans: "Geist", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0 auto; max-width: 1200px; padding: 2rem; font-family: var(--font-sans); background: var(--background); color: #1f2937; line-height: 1.6; }
+    .layer-nav, header, section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+    .layer-nav { display: flex; justify-content: space-between; }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    h1 { color: var(--primary); font-size: 1.35rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+    th, td { border: 1px solid var(--border); padding: 0.625rem 0.75rem; text-align: left; vertical-align: top; }
+    th { background: var(--muted); }
+    img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    code { font-family: "Geist Mono", monospace; }
+    .pass { color: #15803d; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="layer-1-drawer.html">上一层：抽屉打开</a>
+    <a href="layer-3-whitelist.html">下一层：白名单列表</a>
+  </nav>
+  <header>
+    <h1>交互层级 2：黑名单列表默认态</h1>
+    <table>
+      <tr><td>触发路径</td><td>层级1 抽屉打开后，默认选中“黑名单规则”</td></tr>
+      <tr><td>截图证据</td><td><code>screenshots/02-ipfilter-drawer-list.png</code></td></tr>
+      <tr><td>主文件</td><td><a href="index.html#component-2-3">index.html#component-2-3</a></td></tr>
+    </table>
+  </header>
+  <section>
+    <h2>元素清单</h2>
+    <table>
+      <thead><tr><th>元素</th><th>文案/值</th><th>交互</th></tr></thead>
+      <tbody>
+        <tr><td>Tab</td><td>黑名单规则（选中）、白名单规则</td><td>点击白名单规则进入层级3</td></tr>
+        <tr><td>搜索框</td><td>占位符“IP地址/段...”</td><td>按 IP 地址、IP组名、优先级实时过滤</td></tr>
+        <tr><td>按钮组</td><td>新增规则、批量导入、导出</td><td>新增进入层级4；导入/导出为占位或待实现</td></tr>
+        <tr><td>表格</td><td>IP地址/段、操作、状态、修改时间、操作</td><td>Switch 切换、编辑、删除</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="./screenshots/02-ipfilter-drawer-list.png" alt="黑名单列表默认态">
+      <figcaption>层级2截图：黑名单列表默认态。</figcaption>
+    </figure>
+  </section>
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table>
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/还原 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td>IP黑白名单配置区</td><td><code>.ic-module-content</code></td><td class="pass">一致</td></tr>
+        <tr><td>Tab 文案</td><td>黑名单规则 / 白名单规则</td><td>同文案</td><td class="pass">一致</td></tr>
+        <tr><td>表格列数</td><td>5列</td><td>5列</td><td class="pass">一致</td></tr>
+        <tr><td>条件节点</td><td>黑名单动作 Badge：阻断、隔离、丢弃、审核</td><td>同集合</td><td class="pass">一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+</body>
+</html>

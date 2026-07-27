@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>威胁回溯智能体 - HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: ['class','[data-theme="dark"]'],
+    corePlugins: { preflight: false },
+    theme: { extend: {
+      colors: {
+        background:'var(--background)', foreground:'var(--foreground)',
+        card:'var(--card)', 'card-foreground':'var(--card-foreground)',
+        popover:'var(--popover)', 'popover-foreground':'var(--popover-foreground)',
+        primary:'var(--primary)', 'primary-foreground':'var(--primary-foreground)',
+        secondary:'var(--secondary)', 'secondary-foreground':'var(--secondary-foreground)',
+        muted:'var(--muted)', 'muted-foreground':'var(--muted-foreground)',
+        accent:'var(--accent)', 'accent-foreground':'var(--accent-foreground)',
+        destructive:'var(--destructive)', 'destructive-foreground':'var(--destructive-foreground)',
+        border:'var(--border)', input:'var(--input)', ring:'var(--ring)',
+        'chart-1':'var(--chart-1)','chart-2':'var(--chart-2)','chart-3':'var(--chart-3)','chart-4':'var(--chart-4)','chart-5':'var(--chart-5)',
+        sidebar:'var(--sidebar)','sidebar-foreground':'var(--sidebar-foreground)','sidebar-primary':'var(--sidebar-primary)','sidebar-accent':'var(--sidebar-accent)','sidebar-border':'var(--sidebar-border)'
+      },
+      borderRadius: { lg:'var(--radius)', md:'calc(var(--radius) - 2px)', sm:'calc(var(--radius) - 4px)', xl:'calc(var(--radius) + 4px)' },
+      fontFamily: { sans:['Geist','Geist Fallback','system-ui','sans-serif'], mono:['Geist Mono','Geist Mono Fallback','monospace'] }
+    } }
+  };
+</script>
+<style id="shadcn-tokens">
+  :root{
+    --background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);
+    --card:oklch(1 0 0);--card-foreground:oklch(0.145 0 0);
+    --popover:oklch(1 0 0);--popover-foreground:oklch(0.145 0 0);
+    --primary:oklch(0.52 0.226 262);--primary-foreground:oklch(0.985 0 0);
+    --secondary:oklch(0.97 0 0);--secondary-foreground:oklch(0.205 0 0);
+    --muted:oklch(0.97 0 0);--muted-foreground:oklch(0.556 0 0);
+    --accent:oklch(0.52 0.226 262);--accent-foreground:oklch(0.985 0 0);
+    --destructive:oklch(0.577 0.245 27.325);--destructive-foreground:oklch(0.577 0.245 27.325);
+    --border:oklch(0.922 0 0);--input:oklch(0.922 0 0);--ring:oklch(0.52 0.226 262);
+    --chart-1:oklch(0.52 0.226 262);--chart-2:oklch(0.6 0.118 184.704);--chart-3:oklch(0.398 0.07 227.392);--chart-4:oklch(0.828 0.189 84.429);--chart-5:oklch(0.769 0.188 70.08);
+    --sidebar:oklch(0.175 0.02 260);--sidebar-foreground:oklch(0.985 0 0);--sidebar-primary:oklch(0.52 0.226 262);--sidebar-accent:oklch(0.269 0 0);--sidebar-border:oklch(0.269 0 0);
+    --radius:0.625rem;
+    --font-sans:"Geist","Geist Fallback",system-ui,sans-serif;--font-mono:"Geist Mono","Geist Mono Fallback",monospace;
+  }
+  .dark,[data-theme="dark"]{
+    --background:oklch(0.145 0 0);--foreground:oklch(0.985 0 0);
+    --card:oklch(0.145 0 0);--card-foreground:oklch(0.985 0 0);
+    --popover:oklch(0.145 0 0);--popover-foreground:oklch(0.985 0 0);
+    --secondary:oklch(0.269 0 0);--secondary-foreground:oklch(0.985 0 0);
+    --muted:oklch(0.269 0 0);--muted-foreground:oklch(0.708 0 0);
+    --destructive:oklch(0.396 0.141 25.723);--destructive-foreground:oklch(0.637 0.237 25.331);
+    --border:oklch(0.269 0 0);--input:oklch(0.269 0 0);
+  }
+  /* 让被提取的 radix 弹窗/抽屉在预览区内以常规流呈现（去掉 fixed 全屏定位） */
+  .component-preview [role="dialog"], .component-preview [role="alertdialog"]{
+    position:static !important; inset:auto !important; transform:none !important; translate:none !important;
+    height:auto !important; max-height:none !important; box-shadow:0 1px 6px rgba(0,0,0,.12); margin:0 auto; }
+  .component-preview [role="alertdialog"]{ width:100% !important; max-width:32rem !important; }
+  .component-preview [role="dialog"]{ width:100% !important; max-width:46rem !important; }
+  /* radix radio 视觉点（提取 DOM 只在选中项含 indicator，这里用伪元素统一渲染选中态） */
+  .component-preview [role="radio"]{ position:relative; }
+  .component-preview [role="radio"] [data-slot="radio-group-indicator"]{ display:none; }
+  .component-preview [role="radio"][data-state="checked"]::after{ content:""; position:absolute; top:50%; left:50%; width:.5rem; height:.5rem; border-radius:9999px; background:var(--primary); transform:translate(-50%,-50%); }
+</style>
+  <style>
+    :root{
+      --primary:oklch(0.52 0.226 262);--primary-foreground:oklch(0.985 0 0);
+      --background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);
+      --card:oklch(1 0 0);--card-foreground:oklch(0.145 0 0);
+      --muted:oklch(0.97 0 0);--muted-foreground:oklch(0.556 0 0);
+      --border:oklch(0.922 0 0);--destructive:oklch(0.577 0.245 27.325);
+      --radius:0.625rem;--diff-bg:oklch(0.97 0.013 25);--diff-border:oklch(0.65 0.2 25);
+      --question-bg:oklch(0.97 0.05 95);--question-border:oklch(0.75 0.15 90);
+      --font-sans:"Geist","Geist Fallback",system-ui,sans-serif;
+      --font-mono:"Geist Mono",monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto}
+    .spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:2rem}
+    .spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.5rem}
+    .meta-table{width:100%;border-collapse:collapse;font-size:.875rem}
+    .meta-table td{padding:.5rem 1rem;border-bottom:1px solid var(--border)}
+    .meta-table td:first-child{font-weight:600;width:160px;color:var(--muted-foreground);white-space:nowrap}
+    .component-toc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 2rem;margin-bottom:2rem}
+    .component-toc>h2{color:var(--primary);font-size:1.05rem;margin-bottom:.75rem;border-bottom:1px solid var(--border);padding-bottom:.5rem}
+    .component-toc ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.5rem}
+    .component-toc li{padding:.375rem .75rem;border-radius:calc(var(--radius) - 4px);background:var(--muted);font-size:.875rem}
+    .component-toc li a{color:var(--primary);text-decoration:none;font-weight:500}
+    .component-toc li a:hover{text-decoration:underline}
+    .component-toc .toc-layer-links{font-size:.75rem;color:var(--muted-foreground);margin-left:.5rem}
+    .component-toc .toc-layer-links a{color:var(--muted-foreground);font-weight:400}
+    .toc-badge{display:inline-block;font-size:.6875rem;font-weight:600;padding:.0625rem .375rem;border-radius:calc(var(--radius) - 4px);background:var(--primary);color:var(--primary-foreground);white-space:nowrap}
+    section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem}
+    section>h2{color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:.5rem;margin-bottom:1.25rem;font-size:1.25rem}
+    h3{font-size:1.05rem;margin:1rem 0 .75rem;color:var(--foreground)}
+    h4{font-size:.95rem;margin:.75rem 0 .5rem;color:var(--muted-foreground)}
+    table.spec-table{width:100%;border-collapse:collapse;font-size:.875rem;margin:1rem 0}
+    table.spec-table th{background:var(--muted);color:var(--foreground);font-weight:600;text-align:left;padding:.625rem .75rem;border:1px solid var(--border);white-space:nowrap}
+    table.spec-table td{padding:.625rem .75rem;border:1px solid var(--border);vertical-align:top}
+    table.spec-table tr:nth-child(even) td{background:var(--muted)}
+    .screenshot-figure{margin:1rem 0;text-align:center}
+    .screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .screenshot-figure figcaption{margin-top:.5rem;font-size:.8125rem;color:var(--muted-foreground)}
+    .component-spec{border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1rem 0;background:var(--card)}
+    .component-spec>h3{color:var(--primary);border-left:4px solid var(--primary);padding-left:.75rem}
+    pre{background:var(--muted);border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);padding:1rem;overflow-x:auto;font-family:var(--font-mono);font-size:.8125rem;line-height:1.5;margin:1rem 0}
+    code{font-family:var(--font-mono);font-size:.85em}
+    .mermaid{text-align:center;margin:1rem 0;padding:1rem;background:var(--muted);border-radius:calc(var(--radius) - 2px)}
+    .diff-section{border-left:4px solid var(--diff-border);background:var(--diff-bg)}
+    .diff-section>h2{color:var(--diff-border);border-bottom-color:var(--diff-border)}
+    .diff-badge{display:inline-block;background:var(--diff-border);color:var(--primary-foreground);font-size:.75rem;font-weight:600;padding:.125rem .5rem;border-radius:calc(var(--radius) - 4px);margin-right:.5rem}
+    .question-section{border-left:4px solid var(--question-border);background:var(--question-bg)}
+    .question-section>h2{color:var(--question-border);border-bottom-color:var(--question-border)}
+    .badge{display:inline-block;font-size:.75rem;font-weight:600;padding:.125rem .5rem;border-radius:calc(var(--radius) - 4px)}
+    .badge-high{background:oklch(0.65 0.2 25);color:#fff}
+    .badge-medium{background:oklch(0.75 0.15 90);color:var(--foreground)}
+    .badge-low{background:oklch(0.85 0.05 150);color:var(--foreground)}
+    blockquote{border-left:4px solid var(--destructive);background:var(--diff-bg);padding:.75rem 1rem;margin:1rem 0;font-size:.875rem;border-radius:0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0}
+    .component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:1.5rem;margin:1.5rem 0 1rem;background:#f8fafc;position:relative;overflow:auto}
+    .component-preview::before{content:"🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）";position:absolute;top:-.625rem;left:.75rem;background:var(--primary);color:var(--primary-foreground);font-size:.6875rem;font-weight:600;padding:.125rem .5rem;border-radius:calc(var(--radius) - 4px);white-space:nowrap}
+    .interaction-layer{border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.5rem 0;background:var(--card)}
+    .interaction-layer>h4{color:var(--primary);font-size:.95rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--primary);color:var(--primary-foreground);font-size:.75rem;font-weight:700;flex-shrink:0}
+    .trigger-path{background:var(--muted);border-radius:calc(var(--radius) - 4px);padding:.5rem .75rem;margin:.5rem 0 1rem;font-size:.8125rem;color:var(--muted-foreground)}
+    .trigger-path strong{color:var(--foreground)}
+    .dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);overflow:hidden}
+    .dom-comparison>h5{background:var(--muted);padding:.5rem .75rem;font-size:.8125rem;font-weight:600;border-bottom:1px solid var(--border)}
+    .dom-comparison>h5::before{content:"🔍 ";}
+    .dom-comparison table{width:100%;border-collapse:collapse;font-size:.8125rem}
+    .dom-comparison th{background:var(--muted);font-weight:600;text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--border)}
+    .dom-comparison td{padding:.5rem .75rem;border-bottom:1px solid var(--border);vertical-align:top}
+    .dom-pass{color:oklch(0.5 0.15 150);font-weight:600}
+    .dom-fail{color:var(--destructive);font-weight:600}
+    .dom-fixed{color:oklch(0.6 0.15 90);font-weight:600}
+    table.layer-index{width:100%;border-collapse:collapse;font-size:.875rem;margin:1rem 0}
+    table.layer-index th{background:var(--muted);font-weight:600;text-align:left;padding:.625rem .75rem;border:1px solid var(--border)}
+    table.layer-index td{padding:.625rem .75rem;border:1px solid var(--border);vertical-align:top}
+    table.layer-index td a{color:var(--primary);text-decoration:none;font-weight:600}
+    .version-history-section{margin:1.5rem 0}
+    .spec-version{font-weight:600;color:oklch(0.52 0.226 262)}
+  </style>
+/* === TW-STATIC-BEGIN (offline Tailwind, auto-generated) === */
+<style id="tw-static">
+*, ::before, ::after {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}::backdrop {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}.absolute {position: absolute
+}.relative {position: relative
+}.left-2\.5 {left: 0.625rem
+}.top-1\/2 {top: 50%
+}.ml-1 {margin-left: 0.25rem
+}.mt-2 {margin-top: 0.5rem
+}.flex {display: flex
+}.inline-flex {display: inline-flex
+}.grid {display: grid
+}.size-4 {width: 1rem;height: 1rem
+}.h-3\.5 {height: 0.875rem
+}.h-4 {height: 1rem
+}.h-7 {height: 1.75rem
+}.h-8 {height: 2rem
+}.h-9 {height: 2.25rem
+}.w-10 {width: 2.5rem
+}.w-3\.5 {width: 0.875rem
+}.w-4 {width: 1rem
+}.w-\[110px\] {width: 110px
+}.w-\[130px\] {width: 130px
+}.w-fit {width: -moz-fit-content;width: fit-content
+}.w-full {width: 100%
+}.min-w-0 {min-width: 0px
+}.min-w-\[220px\] {min-width: 220px
+}.max-w-\[200px\] {max-width: 200px
+}.flex-1 {flex: 1 1 0%
+}.flex-shrink-0 {flex-shrink: 0
+}.shrink-0 {flex-shrink: 0
+}.-translate-y-1\/2 {--tw-translate-y: -50%;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.cursor-pointer {cursor: pointer
+}.grid-cols-2 {grid-template-columns: repeat(2, minmax(0, 1fr))
+}.flex-wrap {flex-wrap: wrap
+}.items-center {align-items: center
+}.justify-end {justify-content: flex-end
+}.justify-center {justify-content: center
+}.justify-between {justify-content: space-between
+}.gap-1 {gap: 0.25rem
+}.gap-1\.5 {gap: 0.375rem
+}.gap-2 {gap: 0.5rem
+}.gap-3 {gap: 0.75rem
+}.overflow-hidden {overflow: hidden
+}.truncate {overflow: hidden;text-overflow: ellipsis;white-space: nowrap
+}.whitespace-nowrap {white-space: nowrap
+}.rounded-\[4px\] {border-radius: 4px
+}.rounded-lg {border-radius: var(--radius)
+}.rounded-md {border-radius: calc(var(--radius) - 2px)
+}.border {border-width: 1px
+}.border-b {border-bottom-width: 1px
+}.border-blue-200 {--tw-border-opacity: 1;border-color: rgb(191 219 254 / var(--tw-border-opacity, 1))
+}.border-gray-100 {--tw-border-opacity: 1;border-color: rgb(243 244 246 / var(--tw-border-opacity, 1))
+}.border-gray-200 {--tw-border-opacity: 1;border-color: rgb(229 231 235 / var(--tw-border-opacity, 1))
+}.border-gray-50 {--tw-border-opacity: 1;border-color: rgb(249 250 251 / var(--tw-border-opacity, 1))
+}.border-green-200 {--tw-border-opacity: 1;border-color: rgb(187 247 208 / var(--tw-border-opacity, 1))
+}.border-input {border-color: var(--input)
+}.border-orange-200 {--tw-border-opacity: 1;border-color: rgb(254 215 170 / var(--tw-border-opacity, 1))
+}.border-red-200 {--tw-border-opacity: 1;border-color: rgb(254 202 202 / var(--tw-border-opacity, 1))
+}.bg-background {background-color: var(--background)
+}.bg-blue-50 {--tw-bg-opacity: 1;background-color: rgb(239 246 255 / var(--tw-bg-opacity, 1))
+}.bg-blue-600 {--tw-bg-opacity: 1;background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1))
+}.bg-gray-50 {--tw-bg-opacity: 1;background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}.bg-green-50 {--tw-bg-opacity: 1;background-color: rgb(240 253 244 / var(--tw-bg-opacity, 1))
+}.bg-orange-50 {--tw-bg-opacity: 1;background-color: rgb(255 247 237 / var(--tw-bg-opacity, 1))
+}.bg-red-50 {--tw-bg-opacity: 1;background-color: rgb(254 242 242 / var(--tw-bg-opacity, 1))
+}.bg-transparent {background-color: transparent
+}.bg-white {--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
+}.p-4 {padding: 1rem
+}.px-2 {padding-left: 0.5rem;padding-right: 0.5rem
+}.px-3 {padding-left: 0.75rem;padding-right: 0.75rem
+}.px-4 {padding-left: 1rem;padding-right: 1rem
+}.py-0\.5 {padding-top: 0.125rem;padding-bottom: 0.125rem
+}.py-1 {padding-top: 0.25rem;padding-bottom: 0.25rem
+}.py-2 {padding-top: 0.5rem;padding-bottom: 0.5rem
+}.py-2\.5 {padding-top: 0.625rem;padding-bottom: 0.625rem
+}.py-3 {padding-top: 0.75rem;padding-bottom: 0.75rem
+}.pl-8 {padding-left: 2rem
+}.text-left {text-align: left
+}.text-right {text-align: right
+}.font-mono {font-family: Geist Mono, Geist Mono Fallback, monospace
+}.text-2xl {font-size: 1.5rem;line-height: 2rem
+}.text-\[10px\] {font-size: 10px
+}.text-\[11px\] {font-size: 11px
+}.text-base {font-size: 1rem;line-height: 1.5rem
+}.text-sm {font-size: 0.875rem;line-height: 1.25rem
+}.text-xs {font-size: 0.75rem;line-height: 1rem
+}.font-bold {font-weight: 700
+}.font-medium {font-weight: 500
+}.font-normal {font-weight: 400
+}.font-semibold {font-weight: 600
+}.text-\[\#8C8C8C\] {--tw-text-opacity: 1;color: rgb(140 140 140 / var(--tw-text-opacity, 1))
+}.text-blue-600 {--tw-text-opacity: 1;color: rgb(37 99 235 / var(--tw-text-opacity, 1))
+}.text-foreground {color: var(--foreground)
+}.text-gray-400 {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.text-gray-500 {--tw-text-opacity: 1;color: rgb(107 114 128 / var(--tw-text-opacity, 1))
+}.text-gray-600 {--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity, 1))
+}.text-gray-700 {--tw-text-opacity: 1;color: rgb(55 65 81 / var(--tw-text-opacity, 1))
+}.text-gray-900 {--tw-text-opacity: 1;color: rgb(17 24 39 / var(--tw-text-opacity, 1))
+}.text-green-600 {--tw-text-opacity: 1;color: rgb(22 163 74 / var(--tw-text-opacity, 1))
+}.text-green-700 {--tw-text-opacity: 1;color: rgb(21 128 61 / var(--tw-text-opacity, 1))
+}.text-orange-500 {--tw-text-opacity: 1;color: rgb(249 115 22 / var(--tw-text-opacity, 1))
+}.text-orange-600 {--tw-text-opacity: 1;color: rgb(234 88 12 / var(--tw-text-opacity, 1))
+}.text-primary-foreground {color: var(--primary-foreground)
+}.text-red-600 {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.opacity-50 {opacity: 0.5
+}.outline-none {outline: 2px solid transparent;outline-offset: 2px
+}.transition-\[color\2c box-shadow\] {transition-property: color,box-shadow;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-all {transition-property: all;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-shadow {transition-property: box-shadow;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition {transition-property: color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.duration-150 {transition-duration: 150ms
+}.selection\:bg-primary *::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground *::selection {color: var(--primary-foreground)
+}.selection\:bg-primary::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground::selection {color: var(--primary-foreground)
+}.file\:inline-flex::file-selector-button {display: inline-flex
+}.file\:h-7::file-selector-button {height: 1.75rem
+}.file\:border-0::file-selector-button {border-width: 0px
+}.file\:bg-transparent::file-selector-button {background-color: transparent
+}.file\:text-sm::file-selector-button {font-size: 0.875rem;line-height: 1.25rem
+}.file\:font-medium::file-selector-button {font-weight: 500
+}.file\:text-foreground::file-selector-button {color: var(--foreground)
+}.placeholder\:text-muted-foreground::placeholder {color: var(--muted-foreground)
+}.hover\:-translate-y-0\.5:hover {--tw-translate-y: -0.125rem;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.hover\:bg-accent:hover {background-color: var(--accent)
+}.hover\:bg-blue-700:hover {--tw-bg-opacity: 1;background-color: rgb(29 78 216 / var(--tw-bg-opacity, 1))
+}.hover\:bg-gray-50\/60:hover {background-color: rgb(249 250 251 / 0.6)
+}.hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}.hover\:text-gray-600:hover {--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity, 1))
+}.hover\:underline:hover {-webkit-text-decoration-line: underline;text-decoration-line: underline
+}.hover\:shadow-md:hover {--tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.focus-visible\:border-ring:focus-visible {border-color: var(--ring)
+}.focus-visible\:ring-\[3px\]:focus-visible {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.disabled\:pointer-events-none:disabled {pointer-events: none
+}.disabled\:cursor-not-allowed:disabled {cursor: not-allowed
+}.disabled\:opacity-50:disabled {opacity: 0.5
+}.has-\[\>svg\]\:px-2\.5:has(>svg) {padding-left: 0.625rem;padding-right: 0.625rem
+}.data-\[size\=default\]\:h-9[data-size="default"] {height: 2.25rem
+}.data-\[size\=sm\]\:h-8[data-size="sm"] {height: 2rem
+}.data-\[state\=checked\]\:border-primary[data-state="checked"] {border-color: var(--primary)
+}.data-\[state\=checked\]\:bg-primary[data-state="checked"] {background-color: var(--primary)
+}.data-\[placeholder\]\:text-muted-foreground[data-placeholder] {color: var(--muted-foreground)
+}.data-\[state\=checked\]\:text-primary-foreground[data-state="checked"] {color: var(--primary-foreground)
+}.\*\:data-\[slot\=select-value\]\:line-clamp-1[data-slot="select-value"] > * {overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1
+}.\*\:data-\[slot\=select-value\]\:flex[data-slot="select-value"] > * {display: flex
+}.\*\:data-\[slot\=select-value\]\:items-center[data-slot="select-value"] > * {align-items: center
+}.\*\:data-\[slot\=select-value\]\:gap-2[data-slot="select-value"] > * {gap: 0.5rem
+}.dark\:border-gray-800:is([data-theme="dark"] *) {--tw-border-opacity: 1;border-color: rgb(31 41 55 / var(--tw-border-opacity, 1))
+}.dark\:border-gray-900:is([data-theme="dark"] *) {--tw-border-opacity: 1;border-color: rgb(17 24 39 / var(--tw-border-opacity, 1))
+}.dark\:border-input:is([data-theme="dark"] *) {border-color: var(--input)
+}.dark\:bg-gray-950:is([data-theme="dark"] *) {--tw-bg-opacity: 1;background-color: rgb(3 7 18 / var(--tw-bg-opacity, 1))
+}.dark\:text-gray-100:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(243 244 246 / var(--tw-text-opacity, 1))
+}.dark\:text-gray-300:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(209 213 219 / var(--tw-text-opacity, 1))
+}.dark\:text-gray-400:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.dark\:hover\:bg-gray-900\/40:hover:is([data-theme="dark"] *) {background-color: rgb(17 24 39 / 0.4)
+}.dark\:data-\[state\=checked\]\:bg-primary[data-state="checked"]:is([data-theme="dark"] *) {background-color: var(--primary)
+}@media (min-width: 768px) {.md\:grid-cols-3 {grid-template-columns: repeat(3, minmax(0, 1fr))
+    }.md\:text-sm {font-size: 0.875rem;line-height: 1.25rem
+    }
+}@media (min-width: 1024px) {.lg\:grid-cols-6 {grid-template-columns: repeat(6, minmax(0, 1fr))
+    }
+}.\[\&\>svg\]\:pointer-events-none>svg {pointer-events: none
+}.\[\&\>svg\]\:size-3>svg {width: 0.75rem;height: 0.75rem
+}.\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-4 svg:not([class*='size-']) {width: 1rem;height: 1rem
+}.\[\&_svg\:not\(\[class\*\=\'text-\'\]\)\]\:text-muted-foreground svg:not([class*='text-']) {color: var(--muted-foreground)
+}.\[\&_svg\]\:pointer-events-none svg {pointer-events: none
+}.\[\&_svg\]\:shrink-0 svg {flex-shrink: 0
+}a.\[a\&\]\:hover\:bg-accent:hover {background-color: var(--accent)
+}a.\[a\&\]\:hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}
+
+*, ::before, ::after {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}::backdrop {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}.absolute {position: absolute
+}.relative {position: relative
+}.left-2\.5 {left: 0.625rem
+}.top-1\/2 {top: 50%
+}.ml-1 {margin-left: 0.25rem
+}.mt-2 {margin-top: 0.5rem
+}.flex {display: flex
+}.inline-flex {display: inline-flex
+}.grid {display: grid
+}.size-4 {width: 1rem;height: 1rem
+}.h-3\.5 {height: 0.875rem
+}.h-4 {height: 1rem
+}.h-7 {height: 1.75rem
+}.h-8 {height: 2rem
+}.h-9 {height: 2.25rem
+}.w-10 {width: 2.5rem
+}.w-3\.5 {width: 0.875rem
+}.w-4 {width: 1rem
+}.w-\[110px\] {width: 110px
+}.w-\[130px\] {width: 130px
+}.w-fit {width: -moz-fit-content;width: fit-content
+}.w-full {width: 100%
+}.min-w-0 {min-width: 0px
+}.min-w-\[220px\] {min-width: 220px
+}.max-w-\[200px\] {max-width: 200px
+}.flex-1 {flex: 1 1 0%
+}.flex-shrink-0 {flex-shrink: 0
+}.shrink-0 {flex-shrink: 0
+}.-translate-y-1\/2 {--tw-translate-y: -50%;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.cursor-pointer {cursor: pointer
+}.grid-cols-2 {grid-template-columns: repeat(2, minmax(0, 1fr))
+}.flex-wrap {flex-wrap: wrap
+}.items-center {align-items: center
+}.justify-end {justify-content: flex-end
+}.justify-center {justify-content: center
+}.justify-between {justify-content: space-between
+}.gap-1 {gap: 0.25rem
+}.gap-1\.5 {gap: 0.375rem
+}.gap-2 {gap: 0.5rem
+}.gap-3 {gap: 0.75rem
+}.overflow-hidden {overflow: hidden
+}.truncate {overflow: hidden;text-overflow: ellipsis;white-space: nowrap
+}.whitespace-nowrap {white-space: nowrap
+}.rounded-\[4px\] {border-radius: 4px
+}.rounded-lg {border-radius: var(--radius)
+}.rounded-md {border-radius: calc(var(--radius) - 2px)
+}.border {border-width: 1px
+}.border-b {border-bottom-width: 1px
+}.border-blue-200 {--tw-border-opacity: 1;border-color: rgb(191 219 254 / var(--tw-border-opacity, 1))
+}.border-gray-100 {--tw-border-opacity: 1;border-color: rgb(243 244 246 / var(--tw-border-opacity, 1))
+}.border-gray-200 {--tw-border-opacity: 1;border-color: rgb(229 231 235 / var(--tw-border-opacity, 1))
+}.border-gray-50 {--tw-border-opacity: 1;border-color: rgb(249 250 251 / var(--tw-border-opacity, 1))
+}.border-green-200 {--tw-border-opacity: 1;border-color: rgb(187 247 208 / var(--tw-border-opacity, 1))
+}.border-input {border-color: var(--input)
+}.border-orange-200 {--tw-border-opacity: 1;border-color: rgb(254 215 170 / var(--tw-border-opacity, 1))
+}.border-red-200 {--tw-border-opacity: 1;border-color: rgb(254 202 202 / var(--tw-border-opacity, 1))
+}.bg-background {background-color: var(--background)
+}.bg-blue-50 {--tw-bg-opacity: 1;background-color: rgb(239 246 255 / var(--tw-bg-opacity, 1))
+}.bg-blue-600 {--tw-bg-opacity: 1;background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1))
+}.bg-gray-50 {--tw-bg-opacity: 1;background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}.bg-green-50 {--tw-bg-opacity: 1;background-color: rgb(240 253 244 / var(--tw-bg-opacity, 1))
+}.bg-orange-50 {--tw-bg-opacity: 1;background-color: rgb(255 247 237 / var(--tw-bg-opacity, 1))
+}.bg-red-50 {--tw-bg-opacity: 1;background-color: rgb(254 242 242 / var(--tw-bg-opacity, 1))
+}.bg-transparent {background-color: transparent
+}.bg-white {--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
+}.p-4 {padding: 1rem
+}.px-2 {padding-left: 0.5rem;padding-right: 0.5rem
+}.px-3 {padding-left: 0.75rem;padding-right: 0.75rem
+}.px-4 {padding-left: 1rem;padding-right: 1rem
+}.py-0\.5 {padding-top: 0.125rem;padding-bottom: 0.125rem
+}.py-1 {padding-top: 0.25rem;padding-bottom: 0.25rem
+}.py-2 {padding-top: 0.5rem;padding-bottom: 0.5rem
+}.py-2\.5 {padding-top: 0.625rem;padding-bottom: 0.625rem
+}.py-3 {padding-top: 0.75rem;padding-bottom: 0.75rem
+}.pl-8 {padding-left: 2rem
+}.text-left {text-align: left
+}.text-right {text-align: right
+}.font-mono {font-family: Geist Mono, Geist Mono Fallback, monospace
+}.text-2xl {font-size: 1.5rem;line-height: 2rem
+}.text-\[10px\] {font-size: 10px
+}.text-\[11px\] {font-size: 11px
+}.text-base {font-size: 1rem;line-height: 1.5rem
+}.text-sm {font-size: 0.875rem;line-height: 1.25rem
+}.text-xs {font-size: 0.75rem;line-height: 1rem
+}.font-bold {font-weight: 700
+}.font-medium {font-weight: 500
+}.font-normal {font-weight: 400
+}.font-semibold {font-weight: 600
+}.text-\[\#8C8C8C\] {--tw-text-opacity: 1;color: rgb(140 140 140 / var(--tw-text-opacity, 1))
+}.text-blue-600 {--tw-text-opacity: 1;color: rgb(37 99 235 / var(--tw-text-opacity, 1))
+}.text-foreground {color: var(--foreground)
+}.text-gray-400 {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.text-gray-500 {--tw-text-opacity: 1;color: rgb(107 114 128 / var(--tw-text-opacity, 1))
+}.text-gray-600 {--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity, 1))
+}.text-gray-700 {--tw-text-opacity: 1;color: rgb(55 65 81 / var(--tw-text-opacity, 1))
+}.text-gray-900 {--tw-text-opacity: 1;color: rgb(17 24 39 / var(--tw-text-opacity, 1))
+}.text-green-600 {--tw-text-opacity: 1;color: rgb(22 163 74 / var(--tw-text-opacity, 1))
+}.text-green-700 {--tw-text-opacity: 1;color: rgb(21 128 61 / var(--tw-text-opacity, 1))
+}.text-orange-500 {--tw-text-opacity: 1;color: rgb(249 115 22 / var(--tw-text-opacity, 1))
+}.text-orange-600 {--tw-text-opacity: 1;color: rgb(234 88 12 / var(--tw-text-opacity, 1))
+}.text-primary-foreground {color: var(--primary-foreground)
+}.text-red-600 {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.opacity-50 {opacity: 0.5
+}.outline-none {outline: 2px solid transparent;outline-offset: 2px
+}.transition-\[color\2c box-shadow\] {transition-property: color,box-shadow;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-all {transition-property: all;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-shadow {transition-property: box-shadow;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition {transition-property: color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.duration-150 {transition-duration: 150ms
+}.selection\:bg-primary *::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground *::selection {color: var(--primary-foreground)
+}.selection\:bg-primary::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground::selection {color: var(--primary-foreground)
+}.file\:inline-flex::file-selector-button {display: inline-flex
+}.file\:h-7::file-selector-button {height: 1.75rem
+}.file\:border-0::file-selector-button {border-width: 0px
+}.file\:bg-transparent::file-selector-button {background-color: transparent
+}.file\:text-sm::file-selector-button {font-size: 0.875rem;line-height: 1.25rem
+}.file\:font-medium::file-selector-button {font-weight: 500
+}.file\:text-foreground::file-selector-button {color: var(--foreground)
+}.placeholder\:text-muted-foreground::placeholder {color: var(--muted-foreground)
+}.hover\:-translate-y-0\.5:hover {--tw-translate-y: -0.125rem;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.hover\:bg-accent:hover {background-color: var(--accent)
+}.hover\:bg-blue-700:hover {--tw-bg-opacity: 1;background-color: rgb(29 78 216 / var(--tw-bg-opacity, 1))
+}.hover\:bg-gray-50\/60:hover {background-color: rgb(249 250 251 / 0.6)
+}.hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}.hover\:text-gray-600:hover {--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity, 1))
+}.hover\:underline:hover {-webkit-text-decoration-line: underline;text-decoration-line: underline
+}.hover\:shadow-md:hover {--tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.focus-visible\:border-ring:focus-visible {border-color: var(--ring)
+}.focus-visible\:ring-\[3px\]:focus-visible {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.disabled\:pointer-events-none:disabled {pointer-events: none
+}.disabled\:cursor-not-allowed:disabled {cursor: not-allowed
+}.disabled\:opacity-50:disabled {opacity: 0.5
+}.has-\[\>svg\]\:px-2\.5:has(>svg) {padding-left: 0.625rem;padding-right: 0.625rem
+}.data-\[size\=default\]\:h-9[data-size="default"] {height: 2.25rem
+}.data-\[size\=sm\]\:h-8[data-size="sm"] {height: 2rem
+}.data-\[state\=checked\]\:border-primary[data-state="checked"] {border-color: var(--primary)
+}.data-\[state\=checked\]\:bg-primary[data-state="checked"] {background-color: var(--primary)
+}.data-\[placeholder\]\:text-muted-foreground[data-placeholder] {color: var(--muted-foreground)
+}.data-\[state\=checked\]\:text-primary-foreground[data-state="checked"] {color: var(--primary-foreground)
+}.\*\:data-\[slot\=select-value\]\:line-clamp-1[data-slot="select-value"] > * {overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1
+}.\*\:data-\[slot\=select-value\]\:flex[data-slot="select-value"] > * {display: flex
+}.\*\:data-\[slot\=select-value\]\:items-center[data-slot="select-value"] > * {align-items: center
+}.\*\:data-\[slot\=select-value\]\:gap-2[data-slot="select-value"] > * {gap: 0.5rem
+}.dark\:border-gray-800:is([data-theme="dark"] *) {--tw-border-opacity: 1;border-color: rgb(31 41 55 / var(--tw-border-opacity, 1))
+}.dark\:border-gray-900:is([data-theme="dark"] *) {--tw-border-opacity: 1;border-color: rgb(17 24 39 / var(--tw-border-opacity, 1))
+}.dark\:border-input:is([data-theme="dark"] *) {border-color: var(--input)
+}.dark\:bg-gray-950:is([data-theme="dark"] *) {--tw-bg-opacity: 1;background-color: rgb(3 7 18 / var(--tw-bg-opacity, 1))
+}.dark\:text-gray-100:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(243 244 246 / var(--tw-text-opacity, 1))
+}.dark\:text-gray-300:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(209 213 219 / var(--tw-text-opacity, 1))
+}.dark\:text-gray-400:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.dark\:hover\:bg-gray-900\/40:hover:is([data-theme="dark"] *) {background-color: rgb(17 24 39 / 0.4)
+}.dark\:data-\[state\=checked\]\:bg-primary[data-state="checked"]:is([data-theme="dark"] *) {background-color: var(--primary)
+}@media (min-width: 768px) {.md\:grid-cols-3 {grid-template-columns: repeat(3, minmax(0, 1fr))
+    }.md\:text-sm {font-size: 0.875rem;line-height: 1.25rem
+    }
+}@media (min-width: 1024px) {.lg\:grid-cols-6 {grid-template-columns: repeat(6, minmax(0, 1fr))
+    }
+}.\[\&\>svg\]\:pointer-events-none>svg {pointer-events: none
+}.\[\&\>svg\]\:size-3>svg {width: 0.75rem;height: 0.75rem
+}.\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-4 svg:not([class*='size-']) {width: 1rem;height: 1rem
+}.\[\&_svg\:not\(\[class\*\=\'text-\'\]\)\]\:text-muted-foreground svg:not([class*='text-']) {color: var(--muted-foreground)
+}.\[\&_svg\]\:pointer-events-none svg {pointer-events: none
+}.\[\&_svg\]\:shrink-0 svg {flex-shrink: 0
+}a.\[a\&\]\:hover\:bg-accent:hover {background-color: var(--accent)
+}a.\[a\&\]\:hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}
+
+</style>
+/* === TW-STATIC-END === */</head>
+<body>
+
+<!-- ========== 0. 元信息头 ========== -->
+<header class="spec-header">
+  <h1>威胁回溯智能体 详细产品规格说明</h1>
+  <table class="meta-table">
+    <tr><td>spec 源</td><td><code>design/origin/spec/V2威胁回溯邮件智能体1 — 模块需求文档（PRD）.md</code></td></tr>
+    <tr><td>demo 源</td><td><code>design/origin/demo/components/agent-center/threat-retrospect-agent-v1.tsx</code>（挂载于 <code>agent-center-page.tsx</code> 包裹壳）</td></tr>
+    <tr><td>覆盖 spec 章节</td><td>§1-§7（全量）</td></tr>
+    <tr><td>遵循约束</td><td><code>design/origin/implement.md</code></td></tr>
+    <tr><td>页面名称</td><td>威胁回溯智能体（Threat Retrospect Agent V1）</td></tr>
+    <tr><td>路由路径</td><td><code>/agent-center/overview?agent=retrospectV1</code></td></tr>
+    <tr><td>组件入口</td><td><code>ThreatRetrospectAgentV1</code>（由 <code>AgentCenterPage</code> 的 renderAgentConfig 渲染）</td></tr>
+    <tr><td>i18n 标题 key</td><td>包裹壳标题 <code>agent.title</code>；智能体名称/正文均为<strong>硬编码中文字面量</strong>（组件内无 i18n key，见 §7 与差异 D-006）</td></tr>
+    <tr><td>导航层级</td><td>智能体管理中心 → 威胁回溯智能体</td></tr>
+    <tr><td>检测定位</td><td>Stage 4.8 · <strong>AI 异步</strong>（isAsync=true，区别于钓鱼/仿冒的 AI 同步）</td></tr>
+    <tr><td>权限矩阵</td><td>安全管理员：增删改查/执行；安全运营/分析师：查看+执行（受审批）；审计员：只读（spec §1.4，demo 未实现角色分权，见 D-005）</td></tr>
+    <tr><td>规格版本</td><td><span class="spec-version">v1</span></td></tr>
+    <tr><td>生成日期</td><td>2026-07-22</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td><code>804efb9</code></td></tr>
+  </table>
+</header>
+
+<!-- ========== 0.1 组件列表 ========== -->
+<nav class="component-toc">
+  <h2>📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 组件标题栏与启用开关</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-2">2.2 页签切换 Tabs</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-3">2.3 KPI 指标卡片区</a> <span class="toc-badge">2层</span>
+      <span class="toc-layer-links"><a href="./layer-4-kpi-filter.html">层级1 下钻</a></span></li>
+    <li><a href="#component-2-4">2.4 检测日志筛选栏</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-5">2.5 任务表格 + 漏报明细</a> <span class="toc-badge">3层</span>
+      <span class="toc-layer-links"><a href="./layer-2-recall-confirm.html">召回</a> <a href="./layer-3-false-positive-confirm.html">误报</a></span></li>
+    <li><a href="#dialog-3-1">3.1 紧急手动扫描弹窗</a> <span class="toc-badge">1层</span>
+      <span class="toc-layer-links"><a href="./layer-1-scan-dialog.html">层级1</a></span></li>
+    <li><a href="#dialog-3-2">3.2 召回二次确认弹窗</a> <span class="toc-badge">1层</span>
+      <span class="toc-layer-links"><a href="./layer-2-recall-confirm.html">层级1</a></span></li>
+    <li><a href="#dialog-3-3">3.3 标记误报弹窗</a> <span class="toc-badge">1层</span>
+      <span class="toc-layer-links"><a href="./layer-3-false-positive-confirm.html">层级1</a></span></li>
+    <li><a href="#dialog-3-4">3.4 受影响用户抽屉</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#dialog-3-5">3.5 邮件原文抽屉</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-6">2.6 回溯策略页签</a> <span class="toc-badge">4层</span>
+      <span class="toc-layer-links"><a href="./layer-5-strategy-tab.html">层级1-3 策略列表/抽屉/校验</a></span></li>
+  </ul>
+</nav>
+
+<!-- ========== 0.2 版本历史 ========== -->
+<section id="version-history" class="version-history-section">
+  <h2>🕑 版本历史</h2>
+  <table class="version-history-table spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody>
+      <tr><td>v1</td><td>2026-07-22</td><td><code>804efb9</code></td><td><code>804efb9</code></td>
+        <td>初版：覆盖检测总览（KPI 下钻/任务表/漏报明细）、召回二次确认、标记误报、紧急手动扫描、受影响用户与邮件原文抽屉、回溯策略列表与实时/深度联动抽屉及全部字段校验；标注组件未国际化、AI 异步定位、包裹壳开关无二次确认等差异。</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 1. 页面布局结构 ========== -->
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <h3>1.1 区域划分</h3>
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>名称</th><th>元素概览</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>壳-Header</td><td>包裹壳面包屑 + 卡片头开关</td><td>「智能体管理中心 / 威胁回溯智能体」面包屑；卡片头右侧“已启用/已禁用 + Switch”</td><td>agent-center-page.tsx</td></tr>
+      <tr><td>A区</td><td>组件标题栏</td><td>History 图标 + “威胁回溯智能体” + 状态 Badge + “启用 + Switch” + 描述行</td><td>组件 176-201 行</td></tr>
+      <tr><td>B区</td><td>页签 Tabs</td><td>检测总览 / 回溯策略</td><td>组件 203-215 行</td></tr>
+      <tr><td>C区</td><td>KPI 指标卡片区</td><td>6 张卡片（前 5 可点击下钻，第 6 只读）</td><td>组件 382-389 行</td></tr>
+      <tr><td>D区</td><td>检测日志卡片</td><td>标题+紧急手动扫描按钮 / 筛选栏 / 批量操作条 / 任务表格 / 分页</td><td>组件 392-581 行</td></tr>
+      <tr><td>E区</td><td>回溯策略卡片</td><td>策略列表表格 + 搜索 + 新增策略 + 编辑抽屉</td><td>组件 762-1162 行</td></tr>
+      <tr><td>浮层</td><td>弹窗/抽屉</td><td>召回确认 / 标记误报 / 紧急扫描（AlertDialog）；受影响用户 / 邮件原文（Sheet）；策略编辑（Sheet）+ 删除/未保存确认</td><td>组件 583-700、931-1162 行</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.2 整页默认态截图</h3>
+  <figure class="screenshot-figure"><img src="./screenshots/page-full-default.png" alt="整页默认态（1440px，含左侧全局导航壳）"><figcaption>整页默认态（1440px 浏览器实际渲染，含 AI 邮件安全网关左侧导航壳 + 智能体子导航 + 检测总览）</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/overview-tab-default.png" alt="检测总览组件区"><figcaption>检测总览页签组件区（视口加高，任务表 4 行全展示）</figcaption></figure>
+
+  <h3>1.3 视觉规范</h3>
+  <table class="spec-table">
+    <thead><tr><th>属性</th><th>值</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>主色（操作按钮）</td><td>蓝色 <code>bg-blue-600 hover:bg-blue-700</code></td><td>紧急手动扫描 / 保存配置 / 新增策略</td></tr>
+      <tr><td>确认召回按钮</td><td>绿色 <code>bg-green-600</code></td><td>组件 594、1124 行</td></tr>
+      <tr><td>危险/删除按钮</td><td>红色 <code>bg-red-600</code></td><td>删除策略确认</td></tr>
+      <tr><td>标题图标</td><td>lucide-react <code>History</code>（20px，蓝底浅蓝圆角）</td><td>组件 187-189 行</td></tr>
+      <tr><td>圆角 / 字体</td><td><code>rounded-lg</code>；Geist / system-ui</td><td>demo globals.css</td></tr>
+      <tr><td>置信度配色</td><td>≥90 红 / ≥70 橙 / &lt;70 绿</td><td><code>confidenceColor()</code> 组件 309-311 行</td></tr>
+      <tr><td>Badge 库</td><td>ui/badge（outline 变体 + 语义色 class）</td><td>召回状态 / 威胁类型 / 检测模式</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 2. 逐组件规格 ========== -->
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <!-- 交互层级关系图（全局） -->
+  <h3>交互层级关系图（检测总览）</h3>
+  <div class="mermaid">
+graph LR
+  L0["层级0: 检测总览默认态<br/>(KPI+任务表)"] -->|点击KPI卡片| K1["下钻筛选 (layer-4)"]
+  L0 -->|点击 展开/查看漏报| E1["展开漏报明细行 (layer-4)"]
+  E1 -->|确认召回| R1["召回二次确认 (layer-2)"]
+  E1 -->|标记误报| F1["标记误报 (layer-3)"]
+  E1 -->|查看原文| S1["邮件原文抽屉 (3.5)"]
+  L0 -->|点击 影响用户 N人| U1["受影响用户抽屉 (3.4)"]
+  L0 -->|紧急手动扫描| SC["扫描弹窗 (layer-1)"]
+  L0 -->|切换 回溯策略页签| ST["回溯策略 (layer-5)"]
+  </div>
+
+  <!-- ===== 2.1 组件标题栏 ===== -->
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 组件标题栏与启用开关</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 组件路径</td><td><code>threat-retrospect-agent-v1.tsx</code>（<code>ThreatRetrospectAgentV1</code> 176-201 行）</td></tr>
+      <tr><td>状态管理</td><td><code>useState enabled=true</code>（组件内 Switch）；另有<strong>包裹壳</strong>的 <code>agentStatus["retrospectV1"].enabled</code>（卡片头 Switch）</td></tr>
+      <tr><td>交互层级数</td><td>1 层</td></tr>
+    </tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：初始态（默认渲染）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：进入 <code>?agent=retrospectV1</code> 或点击左侧子导航“威胁回溯智能体”即渲染</div>
+      <table class="spec-table">
+        <thead><tr><th>序号</th><th>元素</th><th>文案</th><th>图标</th><th>交互行为</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>图标</td><td>-</td><td>History(20px, 蓝)</td><td>无</td></tr>
+          <tr><td>2</td><td>标题</td><td>威胁回溯智能体</td><td>-</td><td>无</td></tr>
+          <tr><td>3</td><td>状态 Badge</td><td>已启用 / 已禁用</td><td>-</td><td>随组件 enabled 变色（绿/灰）</td></tr>
+          <tr><td>4</td><td>Switch（组件内）</td><td>启用</td><td>-</td><td>切换组件 <code>enabled</code>，仅改 Badge，无二次确认</td></tr>
+          <tr><td>5</td><td>描述行</td><td>智能体管理中心 → 威胁回溯智能体 · 后置检测引擎，对历史邮件定时全盘回溯复检</td><td>-</td><td>无</td></tr>
+          <tr><td>6</td><td>Switch（壳卡片头）</td><td>已启用 / 已禁用</td><td>-</td><td>切换 <code>agentStatus</code>，<strong>无二次确认弹窗</strong>（区别于钓鱼/仿冒，见 D-001）</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison"><h5>DOM 树比对结果（layer0 标题栏）</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>规格描述</th><th>一致</th></tr></thead><tbody>
+        <tr><td>标题图标容器</td><td>div.p-1.5.rounded-lg.bg-blue-50 &gt; svg(History)</td><td>同</td><td class="dom-pass">✅</td></tr>
+        <tr><td>状态 Badge 文案</td><td>“已启用”</td><td>已启用</td><td class="dom-pass">✅</td></tr>
+        <tr><td>双开关</td><td>壳卡片头 Switch + 组件内 Switch 各 1 个</td><td>2 个开关</td><td class="dom-pass">✅</td></tr>
+      </tbody></table></div>
+    </div>
+  </article>
+
+  <!-- ===== 2.2 Tabs ===== -->
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 页签切换 Tabs</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>状态管理</td><td><code>activeTab</code>（overview / strategy），默认 overview</td></tr>
+      <tr><td>交互层级数</td><td>1 层（切换即切换下方内容区）</td></tr>
+    </tbody></table>
+    <p>两个 TabsTrigger：<strong>检测总览</strong>（value=overview）、<strong>回溯策略</strong>（value=strategy）。回溯策略页签内容拆分为 <a href="./layer-5-strategy-tab.html">layer-5 子文件</a>。</p>
+  </article>
+
+  <!-- ===== 2.3 KPI ===== -->
+  <article class="component-spec" id="component-2-3">
+    <h3>2.3 KPI 指标卡片区（可下钻）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>状态管理</td><td><code>activeKpi</code>（string|null），<code>toggleKpi()</code> 再次点击取消</td></tr>
+      <tr><td>交互层级数</td><td>2 层（层级0 默认 / 层级1 下钻筛选，拆 <a href="./layer-4-kpi-filter.html">layer-4</a>）</td></tr>
+    </tbody></table>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：KPI 默认态（可交互预览）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染。前 5 张卡片 <code>role=button</code> 可点击下钻；第 6 张（漏报检出率）无 <code>clickable</code>，非按钮。</div>
+      <!-- 可交互预览：从 demo 提取的真实 KPI 网格 outerHTML，点击前 5 张切换 active 环并联动下方任务表 -->
+      <div class="component-preview">
+        <div id="miKpi"><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"><div role="button" tabindex="0" class="rounded-lg border bg-white dark:bg-gray-950 p-4 transition-all duration-150 border-gray-200 dark:border-gray-800 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">进行中任务</p><p class="text-2xl font-bold mt-2 text-gray-900 dark:text-gray-100">12</p></div><div role="button" tabindex="0" class="rounded-lg border bg-white dark:bg-gray-950 p-4 transition-all duration-150 border-gray-200 dark:border-gray-800 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">发现漏报</p><p class="text-2xl font-bold mt-2 text-red-600">156<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div role="button" tabindex="0" class="rounded-lg border bg-white dark:bg-gray-950 p-4 transition-all duration-150 border-gray-200 dark:border-gray-800 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">待确认漏报</p><p class="text-2xl font-bold mt-2 text-orange-500">23<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div role="button" tabindex="0" class="rounded-lg border bg-white dark:bg-gray-950 p-4 transition-all duration-150 border-gray-200 dark:border-gray-800 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">召回成功</p><p class="text-2xl font-bold mt-2 text-green-600">82<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div role="button" tabindex="0" class="rounded-lg border bg-white dark:bg-gray-950 p-4 transition-all duration-150 border-gray-200 dark:border-gray-800 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">召回失败</p><p class="text-2xl font-bold mt-2 text-red-600">7<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div class="rounded-lg border bg-white dark:bg-gray-950 p-4 transition-all duration-150 border-gray-200 dark:border-gray-800" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">漏报检出率</p><p class="text-2xl font-bold mt-2 text-green-600">98.5%</p></div></div></div>
+        <p id="miKpiState" style="margin-top:.75rem;font-size:.8125rem;color:#2563eb"></p>
+      </div>
+
+      <table class="spec-table">
+        <thead><tr><th>#</th><th>卡片</th><th>值</th><th>色调 tone</th><th>可点击</th><th>下钻 key → 过滤条件</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>进行中任务</td><td>12</td><td>default</td><td>是</td><td>running → status==running</td></tr>
+          <tr><td>2</td><td>发现漏报</td><td>156 封</td><td>red</td><td>是</td><td>leaks → leaks.length&gt;0</td></tr>
+          <tr><td>3</td><td>待确认漏报</td><td>23 封</td><td>orange</td><td>是</td><td>pending → recallStatus==pending_recall</td></tr>
+          <tr><td>4</td><td>召回成功</td><td>82 封</td><td>green</td><td>是</td><td>recalled → recallStatus==recalled</td></tr>
+          <tr><td>5</td><td>召回失败</td><td>7 封</td><td>red</td><td>是</td><td>failed → recallStatus==recall_failed</td></tr>
+          <tr><td>6</td><td>漏报检出率</td><td>98.5%</td><td>green</td><td><strong>否</strong></td><td>-（无 role=button）</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:.8125rem;color:var(--muted-foreground)">每张卡片带 Tooltip（hint 文案）：如“当前进行中的回溯任务数，点击筛选进行中任务”。KPI 值均为 mock 硬编码常量，非派生自任务表。</p>
+      <div class="dom-comparison"><h5>DOM 树比对结果（KPI 网格）</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM（提取）</th><th>预览 HTML</th><th>一致</th></tr></thead><tbody>
+        <tr><td>网格根 class</td><td>div.grid.grid-cols-2.md:grid-cols-3.lg:grid-cols-6.gap-3</td><td>同</td><td class="dom-pass">✅</td></tr>
+        <tr><td>卡片数</td><td>6（childCount=6, nodeCount=23）</td><td>6</td><td class="dom-pass">✅</td></tr>
+        <tr><td>前5卡 role</td><td>role=button, tabindex=0, cursor-pointer</td><td>同</td><td class="dom-pass">✅</td></tr>
+        <tr><td>第6卡 role</td><td>无 role/tabindex/cursor-pointer</td><td>同（只读）</td><td class="dom-pass">✅</td></tr>
+        <tr><td>发现漏报单位</td><td>“封” 为 span.text-sm.text-gray-400</td><td>同</td><td class="dom-pass">✅</td></tr>
+      </tbody></table></div>
+    </div>
+    <h4>交互层级详情（层级 1 拆分）</h4>
+    <table class="layer-index"><thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情</th></tr></thead><tbody>
+      <tr><td>0</td><td>KPI 默认态</td><td>页面加载</td><td>上方内嵌</td></tr>
+      <tr><td>1</td><td>下钻筛选 + 展开漏报明细</td><td>点击 KPI 卡片 / 展开行</td><td><a href="./layer-4-kpi-filter.html">查看详情 →</a></td></tr>
+    </tbody></table>
+  </article>
+
+  <!-- ===== 2.4 筛选栏 ===== -->
+  <article class="component-spec" id="component-2-4">
+    <h3>2.4 检测日志筛选栏</h3>
+    <table class="spec-table">
+      <thead><tr><th>#</th><th>元素</th><th>文案/占位</th><th>默认值</th><th>选项</th><th>交互</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>标题</td><td>检测日志</td><td>-</td><td>-</td><td>-</td></tr>
+        <tr><td>2</td><td>Button（蓝）</td><td>紧急手动扫描（Zap 图标）</td><td>-</td><td>-</td><td>打开扫描弹窗 <a href="./layer-1-scan-dialog.html">(3.1)</a></td></tr>
+        <tr><td>3</td><td>Input(search)</td><td>搜索任务ID / 触发来源 / 判定依据</td><td>""</td><td>-</td><td>匹配 id+source+basis（小写包含）</td></tr>
+        <tr><td>4</td><td>Select</td><td>时间范围</td><td>今日</td><td>今日 / 近7天 / 近30天 / 自定义</td><td>切换 timePreset（demo 中不实际过滤数据，仅影响 filterActive）</td></tr>
+        <tr><td>5</td><td>MultiSelect（Popover）</td><td>任务状态</td><td>全部（4项）</td><td>进行中/已完成/已暂停/已取消</td><td>全选/清空 + 逐项勾选</td></tr>
+        <tr><td>6</td><td>MultiSelect</td><td>召回状态</td><td>全部（4项）</td><td>已召回/待召回/召回失败/无需召回</td><td>同上</td></tr>
+        <tr><td>7</td><td>MultiSelect</td><td>风险等级</td><td>全部（3项）</td><td>高危(≥90)/中危(≥70)/低危</td><td>按 confidence 分档过滤</td></tr>
+        <tr><td>8</td><td>Button(ghost)</td><td>重置（RotateCcw）</td><td>-</td><td>-</td><td>仅当 filterActive 时显示；一键复位全部筛选+KPI</td></tr>
+      </tbody>
+    </table>
+    <blockquote>filterActive 判定：搜索非空 或 任一多选未满 或 timePreset≠today 或 activeKpi≠null。</blockquote>
+    <h4>可交互预览（从 demo 提取的真实筛选/工具栏 outerHTML）</h4>
+    <div class="component-preview">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:.625rem;overflow:hidden"><div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800"><h3 class="font-medium text-gray-900 dark:text-gray-100">检测日志</h3><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground rounded-md px-3 has-[&gt;svg]:px-2.5 h-8 gap-1.5 bg-blue-600 hover:bg-blue-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap w-3.5 h-3.5"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg> 紧急手动扫描</button></div><div class="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-gray-800"><div class="relative flex-1 min-w-[220px]"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 pl-8" placeholder="搜索任务ID / 触发来源 / 判定依据" value=""></div><button type="button" role="combobox" aria-controls="radix-_r_9_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 h-9 w-[110px] flex-shrink-0"><span data-slot="select-value" style="pointer-events: none;">今日</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="popover-trigger" class="inline-flex items-center whitespace-nowrap text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 h-9 justify-between flex-shrink-0 font-normal w-[130px]" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_r_a_" data-state="closed"><span class="truncate text-gray-600 dark:text-gray-300">任务状态：全部</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-3.5 h-3.5 ml-1 text-gray-400 flex-shrink-0"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="popover-trigger" class="inline-flex items-center whitespace-nowrap text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 h-9 justify-between flex-shrink-0 font-normal w-[130px]" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_r_b_" data-state="closed"><span class="truncate text-gray-600 dark:text-gray-300">召回状态：全部</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-3.5 h-3.5 ml-1 text-gray-400 flex-shrink-0"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="popover-trigger" class="inline-flex items-center whitespace-nowrap text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 h-9 justify-between flex-shrink-0 font-normal w-[130px]" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_r_c_" data-state="closed"><span class="truncate text-gray-600 dark:text-gray-300">风险等级：全部</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-3.5 h-3.5 ml-1 text-gray-400 flex-shrink-0"><path d="m6 9 6 6 6-6"></path></svg></button></div></div>
+    </div>
+    <div class="dom-comparison"><h5>DOM 树比对结果（筛选/工具栏）</h5>
+    <table><thead><tr><th>比对项</th><th>demo 实际 DOM（提取）</th><th>预览 HTML</th><th>一致</th></tr></thead><tbody>
+      <tr><td>标题行</td><td>div.flex.items-center.justify-between &gt; h3“检测日志” + button“紧急手动扫描”(bg-blue-600, Zap)</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+      <tr><td>搜索框</td><td>input[placeholder=“搜索任务ID / 触发来源 / 判定依据”].h-9.pl-8（Search 图标绝对定位）</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+      <tr><td>时间范围 Select</td><td>button[role=combobox][data-slot=select-trigger] 值“今日”（w-[110px]）</td><td>真实提取 DOM（闭合态）</td><td class="dom-pass">✅</td></tr>
+      <tr><td>3 个多选</td><td>button[data-slot=button] 任务状态：全部 / 召回状态：全部 / 风险等级：全部（ChevronDown）</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+      <tr><td>重置按钮</td><td>仅 filterActive 时渲染（初始态不出现）</td><td>初始态未渲染（一致）</td><td class="dom-pass">✅</td></tr>
+    </tbody></table></div>
+
+  </article>
+
+  <!-- ===== 2.5 任务表格 ===== -->
+  <article class="component-spec" id="component-2-5">
+    <h3>2.5 任务表格 + 漏报明细（多层交互）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>状态管理</td><td><code>expanded</code>（展开的任务id）、<code>selectedRows</code>、<code>recallOverrides</code>、<code>removedLeaks</code></td></tr>
+      <tr><td>交互层级数</td><td>3 层（表格 → 展开漏报明细 → 召回/误报确认）</td></tr>
+    </tbody></table>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：任务表格默认态</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：检测总览默认渲染，共 4 条 mock 任务</div>
+      <figure class="screenshot-figure"><img src="./screenshots/overview-tab-default.png" alt="任务表默认态"><figcaption>任务表默认态（4 行全展示，浏览器实际渲染）</figcaption></figure>
+      <h4>可交互预览（从 demo 提取的真实任务表 outerHTML，受上方 KPI 下钻联动过滤）</h4>
+      <div class="component-preview" id="miTaskTable">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:.625rem;overflow:auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-100 dark:border-gray-800 text-left text-xs text-gray-500"><th class="w-10 px-3 py-2.5"></th><th class="w-10 px-2 py-2.5"><button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" data-slot="checkbox" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"></button></th><th class="px-2 py-2.5 font-medium whitespace-nowrap">时间</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">触发来源</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">扫描范围</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">检测模式</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">调查轮次</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">置信度</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">最终处置</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">召回状态</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">影响用户</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">判定依据</th><th class="px-2 py-2.5 font-medium whitespace-nowrap text-right">操作</th></tr></thead><tbody><tr class="border-b border-gray-50 dark:border-gray-900 hover:bg-gray-50/60 dark:hover:bg-gray-900/40"><td class="px-3 py-3"><button class="text-gray-400 hover:text-gray-600" aria-label="展开漏报明细"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4"><path d="m9 18 6-6-6-6"></path></svg></button></td><td class="px-2 py-3"><button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" data-slot="checkbox" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"></button></td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300"><div class="font-mono text-xs">2026-06-08 02:00:12</div><div class="text-[11px] text-gray-400">RB-20260608-001</div></td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">每日快速复检</td><td class="px-2 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">过去7天 / 已投递</td><td class="px-2 py-3 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs font-normal">异步</span></td><td class="px-2 py-3 whitespace-nowrap"><button data-state="closed" data-slot="tooltip-trigger" class="text-gray-600 dark:text-gray-400">2轮</button></td><td class="px-2 py-3 whitespace-nowrap font-semibold text-red-600">92</td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">隔离</td><td class="px-2 py-3 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs font-normal border-green-200 bg-green-50 text-green-700">已召回</span></td><td class="px-2 py-3 whitespace-nowrap"><button class="text-blue-600 hover:underline inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users w-3.5 h-3.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>16人</button></td><td class="px-2 py-3 max-w-[200px]"><div class="flex items-center gap-1.5"><span class="truncate text-gray-600 dark:text-gray-400">新型变种未覆盖</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground flex-shrink-0 border-blue-200 bg-blue-50 text-blue-600 text-[10px]">已生成规则</span></div></td><td class="px-2 py-3 whitespace-nowrap text-right"><div class="flex items-center justify-end gap-1"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-blue-600">查看漏报</button></div></td></tr><tr class="border-b border-gray-50 dark:border-gray-900 hover:bg-gray-50/60 dark:hover:bg-gray-900/40"><td class="px-3 py-3"><button class="text-gray-400 hover:text-gray-600" aria-label="展开漏报明细"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4"><path d="m9 18 6-6-6-6"></path></svg></button></td><td class="px-2 py-3"><button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" data-slot="checkbox" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"></button></td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300"><div class="font-mono text-xs">2026-06-07 02:00:08</div><div class="text-[11px] text-gray-400">RB-20260607-003</div></td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">每周深度扫描</td><td class="px-2 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">过去30天 / 全部对象</td><td class="px-2 py-3 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs font-normal">异步</span></td><td class="px-2 py-3 whitespace-nowrap"><button data-state="closed" data-slot="tooltip-trigger" class="text-gray-600 dark:text-gray-400">3轮</button></td><td class="px-2 py-3 whitespace-nowrap font-semibold text-orange-500">78</td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">审核</td><td class="px-2 py-3 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs font-normal border-orange-200 bg-orange-50 text-orange-600">待召回</span></td><td class="px-2 py-3 whitespace-nowrap"><button class="text-blue-600 hover:underline inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users w-3.5 h-3.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>8人</button></td><td class="px-2 py-3 max-w-[200px]"><div class="flex items-center gap-1.5"><span class="truncate text-gray-600 dark:text-gray-400">恶意附件新变种</span></div></td><td class="px-2 py-3 whitespace-nowrap text-right"><div class="flex items-center justify-end gap-1"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-blue-600">查看漏报</button></div></td></tr><tr class="border-b border-gray-50 dark:border-gray-900 hover:bg-gray-50/60 dark:hover:bg-gray-900/40"><td class="px-3 py-3"><button class="text-gray-400 hover:text-gray-600" aria-label="展开漏报明细"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4"><path d="m9 18 6-6-6-6"></path></svg></button></td><td class="px-2 py-3"><button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" data-slot="checkbox" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"></button></td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300"><div class="font-mono text-xs">2026-06-06 02:00:15</div><div class="text-[11px] text-gray-400">RB-20260606-002</div></td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">月度合规审计</td><td class="px-2 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">过去90天 / 已删除</td><td class="px-2 py-3 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs font-normal">异步</span></td><td class="px-2 py-3 whitespace-nowrap"><button data-state="closed" data-slot="tooltip-trigger" class="text-gray-600 dark:text-gray-400">1轮</button></td><td class="px-2 py-3 whitespace-nowrap font-semibold text-green-600">65</td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">标记投递</td><td class="px-2 py-3 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs font-normal border-gray-200 bg-gray-50 text-gray-500">无需召回</span></td><td class="px-2 py-3 whitespace-nowrap"><button class="text-blue-600 hover:underline inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users w-3.5 h-3.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>3人</button></td><td class="px-2 py-3 max-w-[200px]"><div class="flex items-center gap-1.5"><span class="truncate text-gray-600 dark:text-gray-400">低危营销变体</span></div></td><td class="px-2 py-3 whitespace-nowrap text-right"><div class="flex items-center justify-end gap-1"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-blue-600">查看漏报</button></div></td></tr><tr class="border-b border-gray-50 dark:border-gray-900 hover:bg-gray-50/60 dark:hover:bg-gray-900/40"><td class="px-3 py-3"><button class="text-gray-400 hover:text-gray-600" aria-label="展开漏报明细"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4"><path d="m9 18 6-6-6-6"></path></svg></button></td><td class="px-2 py-3"><button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" data-slot="checkbox" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"></button></td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300"><div class="font-mono text-xs">2026-06-08 09:30:00</div><div class="text-[11px] text-gray-400">RB-20260608-002</div></td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">每日快速复检</td><td class="px-2 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">过去7天 / 已投递</td><td class="px-2 py-3 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs font-normal">异步</span></td><td class="px-2 py-3 whitespace-nowrap"><button data-state="closed" data-slot="tooltip-trigger" class="text-gray-600 dark:text-gray-400">2轮</button></td><td class="px-2 py-3 whitespace-nowrap font-semibold text-red-600">96</td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">隔离</td><td class="px-2 py-3 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs font-normal border-red-200 bg-red-50 text-red-600">召回失败</span></td><td class="px-2 py-3 whitespace-nowrap"><button class="text-blue-600 hover:underline inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users w-3.5 h-3.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>12人</button></td><td class="px-2 py-3 max-w-[200px]"><div class="flex items-center gap-1.5"><span class="truncate text-gray-600 dark:text-gray-400">批量召回失败</span></div></td><td class="px-2 py-3 whitespace-nowrap text-right"><div class="flex items-center justify-end gap-1"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-blue-600">查看漏报</button></div></td></tr></tbody></table></div>
+      </div>
+      <div class="dom-comparison"><h5>DOM 树比对结果（任务表）</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM（提取）</th><th>预览 HTML</th><th>一致</th></tr></thead><tbody>
+        <tr><td>表根</td><td>table.w-full.text-sm（thead 13 列 + tbody 4 行任务）</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+        <tr><td>检测模式列</td><td>Badge variant=outline “异步”（data-slot=badge）</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+        <tr><td>置信度配色</td><td>92/96→text-red-600、78→text-orange-500、65→text-green-600</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+        <tr><td>召回状态 Badge</td><td>已召回(绿)/待召回(橙)/无需召回(灰)/召回失败(红)</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+        <tr><td>影响用户</td><td>button.text-blue-600 “N人”(Users 图标)</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+        <tr><td>判定依据/已生成规则</td><td>首行 basis 后带 Badge“已生成规则”(蓝)</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+      </tbody></table></div>
+
+      <h4>表格列定义</h4>
+      <table class="spec-table">
+        <thead><tr><th>列序</th><th>列名</th><th>字段</th><th>渲染规则</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>展开</td><td>-</td><td>ChevronRight/ChevronDown 按钮，切换 expanded</td></tr>
+          <tr><td>2</td><td>复选框</td><td>-</td><td>表头全选 / 行选，驱动批量操作条</td></tr>
+          <tr><td>3</td><td>时间</td><td>time / id</td><td>mono 时间 + 灰色任务ID 两行</td></tr>
+          <tr><td>4</td><td>触发来源</td><td>source</td><td>每日快速复检 / 每周深度扫描 / 月度合规审计</td></tr>
+          <tr><td>5</td><td>扫描范围</td><td>scanScope</td><td>如“过去7天 / 已投递”</td></tr>
+          <tr><td>6</td><td>检测模式</td><td>detectionMode</td><td>Badge“异步”</td></tr>
+          <tr><td>7</td><td>调查轮次</td><td>rounds</td><td>“N轮”，Tooltip“回溯深度：共进行 N 轮递进式复检”</td></tr>
+          <tr><td>8</td><td>置信度</td><td>confidence</td><td>数值，配色 ≥90红/≥70橙/&lt;70绿</td></tr>
+          <tr><td>9</td><td>最终处置</td><td>finalAction</td><td>隔离/审核/标记投递/通过</td></tr>
+          <tr><td>10</td><td>召回状态</td><td>recallStatus</td><td>Badge：已召回(绿)/待召回(橙)/召回失败(红)/无需召回(灰)</td></tr>
+          <tr><td>11</td><td>影响用户</td><td>affectedUsers</td><td>蓝色按钮“N人”（Users 图标）→ 受影响用户抽屉</td></tr>
+          <tr><td>12</td><td>判定依据</td><td>basis</td><td>截断 + 若 hasRule 显示“已生成规则”蓝 Badge</td></tr>
+          <tr><td>13</td><td>操作</td><td>-</td><td>“查看漏报”按钮（切换 expanded）</td></tr>
+        </tbody>
+      </table>
+      <h4>四条任务数据（mock）</h4>
+      <table class="spec-table">
+        <thead><tr><th>任务ID</th><th>时间</th><th>触发来源</th><th>扫描范围</th><th>轮次</th><th>置信度</th><th>最终处置</th><th>召回状态</th><th>影响</th><th>判定依据</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>RB-20260608-001</td><td>2026-06-08 02:00:12</td><td>每日快速复检</td><td>过去7天/已投递</td><td>2</td><td>92</td><td>隔离</td><td>已召回</td><td>16人</td><td>新型变种未覆盖 [已生成规则]</td><td>已完成</td></tr>
+          <tr><td>RB-20260607-003</td><td>2026-06-07 02:00:08</td><td>每周深度扫描</td><td>过去30天/全部对象</td><td>3</td><td>78</td><td>审核</td><td>待召回</td><td>8人</td><td>恶意附件新变种</td><td>已完成</td></tr>
+          <tr><td>RB-20260606-002</td><td>2026-06-06 02:00:15</td><td>月度合规审计</td><td>过去90天/已删除</td><td>1</td><td>65</td><td>标记投递</td><td>无需召回</td><td>3人</td><td>低危营销变体</td><td>已完成</td></tr>
+          <tr><td>RB-20260608-002</td><td>2026-06-08 09:30:00</td><td>每日快速复检</td><td>过去7天/已投递</td><td>2</td><td>96</td><td>隔离</td><td>召回失败</td><td>12人</td><td>批量召回失败</td><td>进行中</td></tr>
+        </tbody>
+      </table>
+      <h4>批量操作条（selectedRows &gt; 0 时显示）</h4>
+      <p style="font-size:.8125rem">“已选 N 项” + 批量导出报告 / 批量暂停任务 / 取消选择（后两个为占位，无实际逻辑）。分页固定“共 N 条 / 1 / 1”，上下页 disabled。</p>
+      <h4>空态</h4>
+      <p style="font-size:.8125rem">筛选无结果时：Search 图标 + “未找到匹配任务，请调整筛选条件” + “一键重置筛选”按钮（colSpan=13）。</p>
+    </div>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">1</span> 交互层级 1：展开漏报明细行</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：点击行首 Chevron 或操作列“查看漏报” → expanded=任务id</div>
+      <figure class="screenshot-figure"><img src="./screenshots/row-expanded-leak.png" alt="展开漏报明细"><figcaption>展开首行漏报明细（含 recall_failed 任务的红色告警条）</figcaption></figure>
+      <p style="font-size:.8125rem">若 <code>recallStatus==recall_failed &amp;&amp; leaks≥1</code>：明细上方显示红色告警条“召回失败率过高，建议检查 Exchange 连接状态”（AlertTriangle）。明细标题“漏报邮件明细（共 N 封）”。已被“标记误报”移除的漏报（removedLeaks）不再渲染。</p>
+      <h4>漏报明细表列</h4>
+      <table class="spec-table">
+        <thead><tr><th>列</th><th>字段</th><th>渲染</th></tr></thead>
+        <tbody>
+          <tr><td>时间</td><td>time</td><td>mono</td></tr>
+          <tr><td>发信人</td><td>sender</td><td>-</td></tr>
+          <tr><td>主题</td><td>subject</td><td>截断 + Tooltip 全文</td></tr>
+          <tr><td>原处置</td><td>originalAction / originalConfidence</td><td>“通过（32）”</td></tr>
+          <tr><td>复检置信度</td><td>recheckConfidence</td><td>配色数值 + 红色“↑Δ”（较原置信度增量）</td></tr>
+          <tr><td>威胁类型</td><td>threatType</td><td>Badge：钓鱼/恶意附件/仿冒/未知</td></tr>
+          <tr><td>最终处置</td><td>finalAction</td><td>隔离/审核/标记投递/通过</td></tr>
+          <tr><td>召回状态</td><td>effRecall(leak)</td><td>Badge（受 recallOverrides 覆盖）</td></tr>
+          <tr><td>判定依据</td><td>basis</td><td>截断</td></tr>
+          <tr><td>操作</td><td>-</td><td>查看原文 / 确认召回（仅当 effRecall∉{recalled,no_need}）/ 标记误报</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>交互层级详情（层级 2 拆分）</h4>
+    <table class="layer-index"><thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情</th></tr></thead><tbody>
+      <tr><td>0</td><td>任务表格</td><td>页面加载</td><td>上方内嵌</td></tr>
+      <tr><td>1</td><td>展开漏报明细 + KPI 下钻</td><td>展开行 / 点击 KPI</td><td><a href="./layer-4-kpi-filter.html">layer-4 →</a></td></tr>
+      <tr><td>2</td><td>召回二次确认</td><td>明细行“确认召回”</td><td><a href="./layer-2-recall-confirm.html">layer-2 →</a></td></tr>
+      <tr><td>2</td><td>标记误报</td><td>明细行“标记误报”</td><td><a href="./layer-3-false-positive-confirm.html">layer-3 →</a></td></tr>
+    </tbody></table>
+  </article>
+
+  <!-- ===== 2.6 回溯策略页签 ===== -->
+  <article class="component-spec" id="component-2-6">
+    <h3>2.6 回溯策略页签（多层交互，拆分子文件）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>状态管理</td><td><code>list</code>(3 条初始策略)、<code>drawerOpen</code>、<code>editingId</code>、<code>draft</code>、<code>dirty</code>、<code>deleteTarget</code>、<code>closeConfirm</code></td></tr>
+      <tr><td>交互层级数</td><td>4 层（列表 → 编辑抽屉 → 模式联动 → 校验/未保存确认）</td></tr>
+    </tbody></table>
+    <figure class="screenshot-figure"><img src="./screenshots/strategy-tab.png" alt="回溯策略列表"><figcaption>回溯策略列表（3 条策略）</figcaption></figure>
+    <p>完整策略列表列定义、编辑抽屉三区块、实时/深度字段联动、全部校验规则、克隆/删除/未保存确认，详见 <a href="./layer-5-strategy-tab.html"><strong>layer-5 子文件</strong></a>。</p>
+    <h4>层级索引</h4>
+    <table class="layer-index"><thead><tr><th>层级</th><th>名称</th><th>触发</th><th>详情</th></tr></thead><tbody>
+      <tr><td>1</td><td>策略列表</td><td>切换“回溯策略”页签</td><td><a href="./layer-5-strategy-tab.html#list">layer-5 →</a></td></tr>
+      <tr><td>2</td><td>编辑/新增抽屉（实时模式）</td><td>点击“编辑”/“新增策略”</td><td><a href="./layer-5-strategy-tab.html#drawer">layer-5 →</a></td></tr>
+      <tr><td>3</td><td>深度模式联动 + 保存并立即测试</td><td>抽屉内切换“深度检测”</td><td><a href="./layer-5-strategy-tab.html#depth">layer-5 →</a></td></tr>
+    </tbody></table>
+  </article>
+</section>
+
+<!-- ========== 3. 弹窗/抽屉/对话框规格 ========== -->
+<section id="dialogs">
+  <h2>3. 弹窗/抽屉/对话框规格</h2>
+
+  <article class="component-spec" id="dialog-3-1">
+    <h3>3.1 紧急手动扫描弹窗（AlertDialog）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>触发</td><td>检测日志区“紧急手动扫描”按钮</td></tr>
+      <tr><td>标题 / 描述</td><td>紧急手动扫描 / 选择一个回溯策略，将基于该策略配置立即发起一次单次扫描。</td></tr>
+      <tr><td>内容</td><td>Label“回溯策略” + Select（每日快速复检 / 每周深度扫描 / 月度合规审计，默认 每日快速复检）</td></tr>
+      <tr><td>底部</td><td>取消 / 发起扫描（蓝）</td></tr>
+      <tr><td>确认结果</td><td>关闭弹窗 + Toast“已基于「{策略}」发起即时单次扫描”</td></tr>
+    </tbody></table>
+    <figure class="screenshot-figure"><img src="./screenshots/scan-dialog-open.png" alt="紧急手动扫描弹窗"><figcaption>紧急手动扫描弹窗（浏览器实际渲染）</figcaption></figure>
+    <p>完整可交互预览 + DOM 比对见 <a href="./layer-1-scan-dialog.html">layer-1 子文件</a>。</p>
+  </article>
+
+  <article class="component-spec" id="dialog-3-2">
+    <h3>3.2 召回二次确认弹窗（AlertDialog）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>触发</td><td>漏报明细行“确认召回”</td></tr>
+      <tr><td>标题 / 描述</td><td>确认召回该邮件？ / 将从用户邮箱移动至隔离区。邮件主题：{subject}</td></tr>
+      <tr><td>底部</td><td>取消 / 确认召回（绿）</td></tr>
+      <tr><td>确认结果</td><td>recallOverrides[id]=recalled + Toast“召回成功，邮件已移动至隔离区”</td></tr>
+    </tbody></table>
+    <figure class="screenshot-figure"><img src="./screenshots/recall-confirm.png" alt="召回确认弹窗"><figcaption>召回二次确认弹窗</figcaption></figure>
+    <p>完整可交互预览 + DOM 比对见 <a href="./layer-2-recall-confirm.html">layer-2 子文件</a>。</p>
+  </article>
+
+  <article class="component-spec" id="dialog-3-3">
+    <h3>3.3 标记误报弹窗（AlertDialog）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>触发</td><td>漏报明细行“标记误报”</td></tr>
+      <tr><td>标题 / 描述</td><td>标记误报 / 请选择标记误报的原因，提交后将从漏报列表移除并加入误报反馈队列。</td></tr>
+      <tr><td>内容</td><td>RadioGroup：原检测正确（默认）/ 样本质量低 / 其他</td></tr>
+      <tr><td>底部</td><td>取消 / 提交</td></tr>
+      <tr><td>确认结果</td><td>removedLeaks 追加该 leak（明细移除）+ Toast“已标记误报，加入误报反馈队列”</td></tr>
+    </tbody></table>
+    <figure class="screenshot-figure"><img src="./screenshots/false-positive-confirm.png" alt="标记误报弹窗"><figcaption>标记误报弹窗</figcaption></figure>
+    <p>完整可交互预览 + DOM 比对见 <a href="./layer-3-false-positive-confirm.html">layer-3 子文件</a>。</p>
+  </article>
+
+  <article class="component-spec" id="dialog-3-4">
+    <h3>3.4 受影响用户抽屉（Sheet）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>触发</td><td>任务行“影响用户 N人”按钮</td></tr>
+      <tr><td>形态 / 尺寸</td><td>右侧抽屉 <code>sm:max-w-md</code></td></tr>
+      <tr><td>标题 / 描述</td><td>受影响用户（N人）/ 任务 {id} 下受漏报邮件影响的用户列表</td></tr>
+      <tr><td>内容</td><td>渲染 <code>min(N,8)</code> 个用户卡片：U{i} 头像 + user{i}@company.com + “市场部 · 收件箱”（mock 生成）</td></tr>
+    </tbody></table>
+    <figure class="screenshot-figure"><img src="./screenshots/users-sheet.png" alt="受影响用户抽屉"><figcaption>受影响用户抽屉（16 人任务，展示 8 个）</figcaption></figure>
+  </article>
+
+  <article class="component-spec" id="dialog-3-5">
+    <h3>3.5 邮件原文抽屉（Sheet）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>触发</td><td>漏报明细行“查看原文”</td></tr>
+      <tr><td>形态 / 尺寸</td><td>右侧抽屉 <code>sm:max-w-lg</code>，可滚动</td></tr>
+      <tr><td>标题 / 描述</td><td>邮件原文 / {subject}</td></tr>
+      <tr><td>内容</td><td>信息卡（发信人/时间/威胁类型 Badge/判定依据）；正文（FileText 图标 + 固定示例段落）；附件列表（attachment.docx <span style="color:#dc2626">沙箱检测：恶意宏</span>）</td></tr>
+    </tbody></table>
+    <figure class="screenshot-figure"><img src="./screenshots/original-sheet.png" alt="邮件原文抽屉"><figcaption>邮件原文抽屉（含沙箱恶意宏标注）</figcaption></figure>
+    <blockquote>正文与附件为固定示例（非 mock 数据字段派生）：正文使用“尊敬的用户，{subject}。请点击下方链接…”模板；附件恒为 attachment.docx。</blockquote>
+  </article>
+</section>
+
+<!-- ========== 4. 数据模型与 API 映射 ========== -->
+<section id="api-mapping">
+  <h2>4. 数据模型与 API 映射</h2>
+  <h3>4.1 前端数据模型（从 demo 原样提取）</h3>
+  <pre><code>type RecallStatus = "recalled" | "pending_recall" | "recall_failed" | "no_need"
+type TaskStatus   = "running" | "completed" | "paused" | "cancelled"
+type FinalAction  = "isolated" | "audit" | "marked_delivery" | "passed"
+type ThreatType   = "phishing" | "malware" | "impersonation" | "unknown"
+
+interface LeakMail {
+  id; time; sender; subject;
+  originalAction: string; originalConfidence: number; recheckConfidence: number;
+  threatType: ThreatType; finalAction: FinalAction; recallStatus: RecallStatus; basis: string
+}
+interface RetrospectTask {
+  id; time; source; scanScope; detectionMode; rounds: number; confidence: number;
+  finalAction: FinalAction; recallStatus: RecallStatus; affectedUsers: number;
+  basis; status: TaskStatus; hasRule: boolean; leaks: LeakMail[]
+}
+interface Strategy {
+  id; name; mode: "realtime"|"depth"; enabled;
+  listenSources[]; confidence; cooldown;                       // 实时
+  cycleType: "daily"|"weekly"|"monthly"; weekDays[]; monthDay; timeStart; timeEnd; scanDays;  // 深度
+  alertTriggers[]; mediumThreshold; lowTime; emailEnabled; recipients;   // 3.1
+  recallMode: "conservative"|"auto"|"semi"; autoThreshold; decisionTimeout;  // 3.2
+  recallScope[];                                                // 3.3
+  stats: { triggers; found; recalled }
+}</code></pre>
+
+  <h3>4.2 spec 定义的 API（PRD §6，产品侧定义）</h3>
+  <table class="spec-table">
+    <thead><tr><th>能力</th><th>说明</th><th>spec 章节</th></tr></thead>
+    <tbody>
+      <tr><td>回溯任务列表/KPI</td><td>检测总览数据</td><td>§2.2</td></tr>
+      <tr><td>漏报明细/原文/影响用户</td><td>下钻查询</td><td>§3.1</td></tr>
+      <tr><td>召回执行</td><td>已投递/队列/已读，动作分级</td><td>§1.3 §6</td></tr>
+      <tr><td>误报修正</td><td>加入白名单+反馈模型</td><td>§1.3</td></tr>
+      <tr><td>策略 CRUD + 立即测试扫描</td><td>异步下发引擎，test 任务 ID 带 -test</td><td>§6</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.3 网关现有 API 映射</h3>
+  <blockquote>⚠️ 遵循 implement.md：spec API 为产品定义，非必须新建；优先用现有网关能力组合，冲突/缺口列入 §10 需确认。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>spec 能力</th><th>网关现有可映射</th><th>映射方式</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td>召回执行（Exchange）</td><td><code>exchange_recall_agent</code>（EWS 召回）</td><td>复用</td><td>demo 告警条已提“检查 Exchange 连接”，与现有召回代理一致</td></tr>
+      <tr><td>误报修正加白名单</td><td>统一规则系统 accept + page 字段</td><td>复用规则系统</td><td>不新增规则系统（implement.md）</td></tr>
+      <tr><td>漏报威胁数据源</td><td>邮件日志 / 拦截事件表</td><td>字段映射</td><td>回溯为后置离线扫描，需新调度</td></tr>
+      <tr><td>回溯任务调度/引擎</td><td>[需确认] 无现成后置回溯调度</td><td>-</td><td>见 Q-001</td></tr>
+      <tr><td>策略持久化</td><td>[需确认] config_overrides 或新表</td><td>-</td><td>见 Q-002</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 5. 业务逻辑规格 ========== -->
+<section id="business-logic">
+  <h2>5. 业务逻辑规格</h2>
+  <h3>5.1 召回状态机</h3>
+  <div class="mermaid">
+stateDiagram-v2
+  [*] --> pending_recall: 保守模式标记待召回
+  [*] --> recalled: 自动模式(置信度达标+非白名单)
+  pending_recall --> recalled: 管理员确认召回
+  pending_recall --> no_need: 邮件已被用户删除
+  recalled --> [*]
+  pending_recall --> recall_failed: Exchange 召回失败
+  recall_failed --> recalled: 重试成功
+  </div>
+  <h3>5.2 状态转换 / 处置规则</h3>
+  <table class="spec-table">
+    <thead><tr><th>当前召回状态</th><th>动作</th><th>结果</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>pending_recall / recall_failed</td><td>确认召回</td><td>→ recalled（override）+ Toast</td><td>demo 594 行 / spec §3.1</td></tr>
+      <tr><td>recalled / no_need</td><td>-</td><td>不显示“确认召回”按钮</td><td>demo 554 行</td></tr>
+      <tr><td>任意</td><td>标记误报</td><td>移除该漏报 + 反馈队列</td><td>demo 616 行 / spec §3.1</td></tr>
+    </tbody>
+  </table>
+  <h3>5.3 召回决策模式（策略层，spec §1.3）</h3>
+  <table class="spec-table">
+    <thead><tr><th>模式</th><th>行为</th></tr></thead>
+    <tbody>
+      <tr><td>保守（推荐）</td><td>先标记“待召回”，管理员在检测总览人工确认</td></tr>
+      <tr><td>自动</td><td>置信度≥阈值 且 非白名单，立即自动召回</td></tr>
+      <tr><td>半自动</td><td>高危自动召回，中低危人工确认</td></tr>
+    </tbody>
+  </table>
+  <h3>5.4 关键业务约束</h3>
+  <table class="spec-table">
+    <thead><tr><th>约束</th><th>值</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>实时检测回溯窗口</td><td>发现时间前推 24 小时，固定不可调</td><td>demo 1008 行 / spec §3.3</td></tr>
+      <tr><td>深度扫描范围</td><td>1-90 天</td><td>demo 校验 / spec §3.2</td></tr>
+      <tr><td>置信度阈值</td><td>1-100</td><td>demo 校验</td></tr>
+      <tr><td>冷却时间</td><td>5-1440 分钟</td><td>demo 校验</td></tr>
+      <tr><td>决策超时降级</td><td>待召回超 N 小时未确认→自动降级“仅告警”</td><td>demo 1102 行 / spec §四</td></tr>
+      <tr><td>test 扫描任务ID</td><td>带 -test 后缀</td><td>demo 837 行 / spec §6</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 6. 交互规格 ========== -->
+<section id="interaction">
+  <h2>6. 交互规格</h2>
+  <h3>6.1 全局提示（Toast）</h3>
+  <table class="spec-table">
+    <thead><tr><th>触发</th><th>文案</th><th>样式 / 时长</th></tr></thead>
+    <tbody>
+      <tr><td>确认召回</td><td>召回成功，邮件已移动至隔离区</td><td>绿色条 CheckCircle2 / 2.6s</td></tr>
+      <tr><td>标记误报提交</td><td>已标记误报，加入误报反馈队列</td><td>绿色条 / 2.6s</td></tr>
+      <tr><td>发起扫描</td><td>已基于「{策略}」发起即时单次扫描</td><td>绿色条 / 2.6s</td></tr>
+      <tr><td>策略保存</td><td>配置已保存 / 保存+测试提示</td><td>蓝色条 Info / 3s（策略页）</td></tr>
+    </tbody>
+  </table>
+  <h3>6.2 Tooltip 规格</h3>
+  <table class="spec-table">
+    <thead><tr><th>位置</th><th>文案</th></tr></thead>
+    <tbody>
+      <tr><td>各 KPI 卡片</td><td>如“当前进行中的回溯任务数，点击筛选进行中任务”“未确认处置的漏报数，高优先级行动项”等</td></tr>
+      <tr><td>调查轮次</td><td>回溯深度：共进行 N 轮递进式复检</td></tr>
+      <tr><td>冷却时间输入</td><td>防止同一威胁情报在短时间内重复触发大量回溯任务</td></tr>
+      <tr><td>漏报主题</td><td>hover 显示完整主题</td></tr>
+    </tbody>
+  </table>
+  <h3>6.3 异常场景（spec §四）</h3>
+  <table class="spec-table">
+    <thead><tr><th>场景</th><th>处理</th><th>demo 体现</th></tr></thead>
+    <tbody>
+      <tr><td>上游智能体离线</td><td>可保存启用，标注“恢复后自动生效”</td><td>监听来源含 impersonation 时黄条</td></tr>
+      <tr><td>深度策略时间段重叠</td><td>黄色警告，允许保存</td><td>overlapWarn 黄条</td></tr>
+      <tr><td>召回邮件已删除</td><td>标记“无需召回”</td><td>recallStatus=no_need</td></tr>
+      <tr><td>召回失败率高</td><td>提示检查 Exchange</td><td>展开行红色告警条</td></tr>
+      <tr><td>表单校验失败</td><td>红框 + 字段错误文案，阻止保存</td><td>fieldErrCls + 各 err 提示</td></tr>
+      <tr><td>模型更新中</td><td>提示“约10分钟生效”</td><td><strong>demo 未实现</strong>（见 D-004）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 7. 国际化规格 ========== -->
+<section id="i18n">
+  <h2>7. 国际化规格</h2>
+  <h3>7.1 支持语言</h3>
+  <table class="spec-table">
+    <thead><tr><th>语言</th><th>Language 值</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td>简体中文</td><td>zh</td><td>默认</td></tr>
+      <tr><td>English</td><td>en</td><td>支持（仅包裹壳）</td></tr>
+      <tr><td>泰文</td><td>th</td><td>支持（仅包裹壳）</td></tr>
+      <tr><td>第四语言</td><td>-</td><td><strong>demo 未内置</strong>；implement.md 要求四语，落地需补第 4 种（见 Q-003）</td></tr>
+    </tbody>
+  </table>
+  <h3>7.2 i18n key 情况</h3>
+  <blockquote>⚠️ <strong>本组件正文未国际化。</strong> <code>threat-retrospect-agent-v1.tsx</code> 全部 UI 文案为硬编码中文字面量（如“威胁回溯智能体”“检测总览”“紧急手动扫描”“确认召回该邮件？”），未走 <code>useLanguage()/t()</code>。仅包裹壳 <code>agent-center-page.tsx</code> 使用 i18n key。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>i18n key（包裹壳）</th><th>中文</th><th>使用位置</th></tr></thead>
+    <tbody>
+      <tr><td>agent.title</td><td>智能体管理中心</td><td>面包屑/卡片头</td></tr>
+      <tr><td>agent.retrospectShort</td><td>威胁回溯</td><td>子导航短标签</td></tr>
+      <tr><td>agent.async</td><td>异步</td><td>Stage 位置后 [异步] 标签</td></tr>
+      <tr><td>agent.configure / common.enabled / common.disabled</td><td>配置 / 已启用 / 已禁用</td><td>卡片/卡片头</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 8. 响应式规格 ========== -->
+<section id="responsive">
+  <h2>8. 响应式规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>KPI 网格</th><th>筛选栏</th><th>任务表</th><th>抽屉</th></tr></thead>
+    <tbody>
+      <tr><td>≥1024px (lg)</td><td>6 列（lg:grid-cols-6）</td><td>单行 flex-wrap</td><td>横向滚动容器</td><td>sm:max-w-md/lg 固定宽</td></tr>
+      <tr><td>768-1023px (md)</td><td>3 列（md:grid-cols-3）</td><td>折行</td><td>横向滚动</td><td>同</td></tr>
+      <tr><td>&lt;768px</td><td>2 列（grid-cols-2）</td><td>多行折行</td><td>横向滚动</td><td>w-full</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1440.png" alt="1440px"><figcaption>1440px 断点（KPI 6 列）</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1024.png" alt="1024px"><figcaption>1024px 断点（KPI 仍 6 列，右侧内容区收窄，表格横向滚动）</figcaption></figure>
+</section>
+
+<!-- ========== 9. 与 spec 的差异标注 ========== -->
+<section id="diffs" class="diff-section">
+  <h2>9. 与 spec 的差异标注</h2>
+  <table class="spec-table">
+    <thead><tr><th>编号</th><th>位置</th><th>spec 描述</th><th>demo 实现</th><th>影响</th><th>建议</th></tr></thead>
+    <tbody>
+      <tr><td><span class="diff-badge">D-001</span></td><td>壳卡片头开关</td><td>—</td><td>威胁回溯开关<strong>无二次确认</strong>；仅钓鱼/仿冒关闭才弹确认（agent-center-page 414 行）</td><td><span class="badge badge-medium">中</span></td><td>回溯为异步后置、关闭不即时放行邮件，无需确认可接受；实现时明确</td></tr>
+      <tr><td><span class="diff-badge">D-002</span></td><td>§2.2 KPI</td><td>4 张 KPI（今日任务/累计漏报/待召回/今日已召回）</td><td>6 张（多“召回失败”“漏报检出率”），第 6 张不可下钻</td><td><span class="badge badge-low">低</span></td><td>以 demo 为准（更全）</td></tr>
+      <tr><td><span class="diff-badge">D-003</span></td><td>§2.2 筛选</td><td>含“来源策略”“威胁等级”筛选</td><td>筛选为 任务状态/召回状态/风险等级；无“来源策略”下拉；时间下拉不实际过滤 mock</td><td><span class="badge badge-low">低</span></td><td>以 demo 为准，落地补“来源策略”过滤</td></tr>
+      <tr><td><span class="diff-badge">D-004</span></td><td>§四/§1.2 F7</td><td>模型更新管理 + “约10分钟生效”提示</td><td>demo 无模型更新入口/提示</td><td><span class="badge badge-medium">中</span></td><td>落地补 F7 或与用户确认裁剪</td></tr>
+      <tr><td><span class="diff-badge">D-005</span></td><td>§1.4 权限</td><td>三角色分权（管理员/运营/审计）</td><td>demo 无角色判断，全功能可见可操作</td><td><span class="badge badge-high">高</span></td><td>落地按权限矩阵接入 useProductProfile/角色</td></tr>
+      <tr><td><span class="diff-badge">D-006</span></td><td>全组件</td><td>四语国际化</td><td>组件文案硬编码中文，未走 i18n</td><td><span class="badge badge-high">高</span></td><td>落地必须补 i18n（含第 4 语言）</td></tr>
+      <tr><td><span class="diff-badge">D-007</span></td><td>§3.1 标记误报</td><td>确认后提示“是否加入白名单”</td><td>demo 直接移除+反馈队列，无白名单二次选择</td><td><span class="badge badge-low">低</span></td><td>落地补白名单联动</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 10. 需确认事项 ========== -->
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项</h2>
+  <blockquote>遵循 implement.md：冲突/新增 API/底层不支持事项列此待确认，不自行决定。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>编号</th><th>事项</th><th>类型</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>Q-001</td><td>后置回溯扫描调度与引擎</td><td><span class="badge badge-medium">底层能力</span></td><td>网关现无“对历史邮件定时全盘回溯复检”的后置调度/比对引擎，需确认新建方案（离线任务 + 复检模型调用）</td></tr>
+      <tr><td>Q-002</td><td>回溯策略持久化</td><td><span class="badge badge-medium">存储</span></td><td>策略（实时/深度、告警/召回/范围）落地存 config_overrides 还是新表？</td></tr>
+      <tr><td>Q-003</td><td>第 4 内置语言</td><td><span class="badge badge-medium">i18n</span></td><td>demo 仅 zh/en/th，implement.md 要求四语，确认第 4 语言</td></tr>
+      <tr><td>Q-004</td><td>召回动作分级与已读二次警告</td><td><span class="badge badge-medium">召回</span></td><td>已读邮件“追加二次安全警告横幅”、软/硬删除是否由 exchange_recall_agent 支持</td></tr>
+      <tr><td>Q-005</td><td>误报→白名单→反馈模型</td><td><span class="badge badge-medium">规则系统</span></td><td>确认复用统一规则系统 accept + page 字段（不新增规则系统），及“反馈模型”闭环是否落地</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  if(window.mermaid) mermaid.initialize({startOnLoad:true,theme:'default'});
+  // KPI 下钻可交互（真实提取 DOM）：点击前 5 张卡片切换 active 环 + 联动过滤下方任务表
+  (function(){
+    var kpi=document.getElementById("miKpi"); if(!kpi) return;
+    var st=document.getElementById("miKpiState");
+    var table=document.getElementById("miTaskTable");
+    var LAB={"进行中任务":"running","发现漏报":"leaks","待确认漏报":"pending","召回成功":"recalled","召回失败":"failed"};
+    var TASK={"RB-20260608-001":{status:"completed",recall:"recalled"},"RB-20260607-003":{status:"completed",recall:"pending_recall"},"RB-20260606-002":{status:"completed",recall:"no_need"},"RB-20260608-002":{status:"running",recall:"recall_failed"}};
+    var MSG={running:"进行中任务(status==running) → 1 条",leaks:"含漏报任务(leaks>0) → 4 条",pending:"待召回(pending_recall) → 1 条",recalled:"已召回(recalled) → 1 条",failed:"召回失败(recall_failed) → 1 条"};
+    var active=null;
+    function match(id,k){var t=TASK[id]||{};if(k==="running")return t.status==="running";if(k==="pending")return t.recall==="pending_recall";if(k==="recalled")return t.recall==="recalled";if(k==="failed")return t.recall==="recall_failed";return true;}
+    function applyFilter(){if(!table)return;table.querySelectorAll("tbody tr").forEach(function(r){var id=null;for(var k in TASK){if(r.textContent.indexOf(k)>=0){id=k;break;}}if(!id)return;r.style.display=(!active||match(id,active))?"":"none";});}
+    var cards=kpi.querySelectorAll("[role=button]");
+    cards.forEach(function(c){c.addEventListener("click",function(){
+      var p=c.querySelector("p"); var lab=p?p.textContent.trim():""; var k=LAB[lab]; if(!k) return;
+      cards.forEach(function(x){x.classList.remove("border-blue-400","ring-1","ring-blue-200");x.classList.add("border-gray-200");});
+      if(active===k){active=null;st.textContent="";applyFilter();return;}
+      active=k;c.classList.remove("border-gray-200");c.classList.add("border-blue-400","ring-1","ring-blue-200");
+      st.textContent="过滤："+MSG[k];applyFilter();
+    });});
+  })();
+</script></script>
+</body>
+</html>

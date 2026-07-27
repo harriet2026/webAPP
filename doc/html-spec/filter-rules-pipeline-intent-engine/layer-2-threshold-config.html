@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 2：分段阈值配置 - 意图引擎</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --sub:#6b7280; --blue:#1677ff; --radius:.625rem; }
+    *{box-sizing:border-box} body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:#111827;line-height:1.6;font-family:"Geist","Inter",system-ui,sans-serif} a{color:var(--blue);text-decoration:none}
+    nav.layer-nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+    h1{margin:0 0 16px;color:var(--primary);font-size:26px} h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px}
+    .meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+    .meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}
+    .meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}
+    .meta-table td:first-child{width:160px}
+    .component-preview{margin:12px 0;padding:18px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}
+    .screenshot-figure{margin:14px 0;text-align:center}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}.screenshot-figure figcaption{margin-top:8px;color:var(--sub);font-size:13px}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}
+    .is-hidden{display:none!important}
+    .th-wrap{min-width:720px;max-width:860px;display:grid;gap:14px;padding:16px;border:1px solid var(--border);border-radius:10px;background:#fff}
+    .scale{display:flex;justify-content:space-between;font-size:12px;color:#6b7280}
+    .vbar{position:relative;height:32px;border-radius:10px;overflow:hidden;display:flex;background:#e5e7eb}
+    .vbar .seg{height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;position:relative}
+    .vbar .seg:hover{opacity:.9}
+    .seg.act-mark_deliver{background:#60a5fa}.seg.act-quarantine{background:#fb923c}.seg.act-review{background:#c084fc}.seg.act-block{background:#ef4444}.seg.act-drop{background:#b91c1c}
+    .bar-tip{position:absolute;top:-34px;padding:4px 8px;border-radius:6px;background:#111827;color:#fff;font-size:12px;white-space:nowrap;z-index:5;pointer-events:none}
+    .seg-row{display:flex;align-items:center;gap:8px;font-size:14px}
+    .seg-row .idx{width:56px;color:#6b7280}
+    input.num{width:80px;height:32px;padding:0 8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px}
+    select.sel{min-width:112px;height:32px;padding:0 8px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:13px}
+    .del-btn{height:32px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:#ef4444;cursor:pointer;font-size:14px}
+    .del-btn:hover{background:#fef2f2}
+    .gap-warn{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #fde68a;border-radius:10px;background:#fffbeb;color:#b45309;font-size:13px}
+    .ops{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .btn-outline{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer}
+  </style>
+</head>
+<body>
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a> · <a href="layer-1-intent-card-classification.html">← 层级1：卡片展开</a> · 层级 2 / 4 · <a href="layer-3-dialogs.html">层级3：对话框 →</a></nav>
+
+  <header class="spec-header">
+    <h1>交互层级 2：分段阈值配置 ThresholdSegmentConfig</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 意图分类卡片 → 展开区（<code>ThresholdSegmentConfig</code> + <code>ThresholdVisualBar</code>）</td></tr>
+      <tr><td>主文件</td><td><a href="index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级1 卡片展开 → 检测模式选「分段阈值」→ 分类优先配置区替换为阈值配置区</td></tr>
+      <tr><td>浏览器验证</td><td>涉黄/赌（高危）切分段阈值：默认区间 0-0.3审核 / 0.3-0.6隔离 / 0.6-1阻断，可视化条 30%/30%/40% 三段（紫/橙/红）。将区间1 max 0.3→0.2 出现间隙警告与「智能填充」按钮；点击智能填充后区间变 [0,0.2][0.2,0.6][0.6,1] 警告消失。应用模板下拉 3 项：严格/标准（推荐）/宽松；选「严格」后区间变 0-0.3隔离 / 0.3-0.6阻断 / 0.6-1丢弃。hover 条块 Tooltip「0.00 - 0.30: 隔离」。区间覆盖完整时点「添加区间」无变化（前后均 3 行）。删除区间后立即出现间隙警告。数字输入实测属性 type=number min=0 max=1 step=0.01。</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">2</span>HTML 预览（完整可操作：编辑区间/删除/添加/智能填充/预设模板/hover Tooltip）</h2>
+    <p style="font-size:13px;color:#6b7280;">操作提示：改区间1的最大值（如 0.3→0.2）制造间隙 → 出现琥珀警告与「智能填充」；应用模板下拉试「严格」；hover 彩条看区间 Tooltip；删除到只剩 1 个区间时删除按钮消失。</p>
+    <div class="component-preview">
+      <div class="th-wrap" data-demo-extracted="threshold-segment-config">
+        <div class="scale"><span>0.0</span><span>0.2</span><span>0.4</span><span>0.6</span><span>0.8</span><span>1.0</span></div>
+        <div class="vbar" id="vbar"></div>
+        <div id="rows"></div>
+        <div class="gap-warn is-hidden" id="gap-warn">⚠ 存在未覆盖区间，请修复或点击"智能填充"</div>
+        <div class="ops">
+          <button class="btn-outline" id="add-btn" type="button">＋ 添加区间</button>
+          <button class="btn-outline is-hidden" id="fill-btn" type="button">✓ 智能填充</button>
+          <select class="sel" id="preset" style="width:132px;">
+            <option value="" selected disabled>应用模板</option>
+            <option value="strict">严格</option>
+            <option value="standard">标准（推荐）</option>
+            <option value="loose">宽松</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/threshold-layer-2-default.png" alt="分段阈值默认态">
+      <figcaption>高危意图分段阈值默认态：审核(0-0.3,紫) / 隔离(0.3-0.6,橙) / 阻断(0.6-1,红)，刻度 0.0-1.0。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/threshold-layer-2-gap-warning.png" alt="间隙警告">
+      <figcaption>区间1 max 改为 0.2 后：0.2-0.3 未覆盖 → 琥珀色警告 +「智能填充」按钮出现，可视化条出现灰色空隙。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/threshold-layer-2-after-fill.png" alt="智能填充后">
+      <figcaption>点击智能填充：区间2 min 自动前移补齐（[0,0.2][0.2,0.6][0.6,1]），警告与按钮消失。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/threshold-layer-2-preset-open.png" alt="预设模板下拉">
+      <figcaption>应用模板下拉：严格 / 标准（推荐）/ 宽松。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/threshold-layer-2-strict-applied.png" alt="严格模板应用后">
+      <figcaption>应用「严格」后：0-0.3隔离 / 0.3-0.6阻断 / 0.6-1丢弃（与 PRD §6.3 一致），可视化条橙/红/深红。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/threshold-layer-2-bar-tooltip.png" alt="条块 Tooltip">
+      <figcaption>hover 条块：Tooltip「0.00 - 0.30: 隔离」（min.toFixed(2) - max.toFixed(2): 动作名）。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/threshold-single-segment.png" alt="删除区间后">
+      <figcaption>删除区间后（剩 [0,0.5] 一段）：末端 0.5-1 未覆盖 → 间隙警告出现；仅剩 1 个区间时删除按钮不再渲染（源码 segments.length &gt; 1 才显示）。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>元素清单与行为规则</h2>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>实际渲染/默认值</th><th>交互行为（浏览器验证）</th><th>备注</th></tr></thead>
+      <tbody>
+        <tr><td>刻度行</td><td>0.0 / 0.2 / 0.4 / 0.6 / 0.8 / 1.0 六个等距刻度</td><td>静态</td><td>PRD §2.2.4 一致</td></tr>
+        <tr><td>可视化条</td><td>h-8(32px) 圆角，底色 gray-200；区间块宽 = (max-min)×100%，按动作着色：标记投递 blue-400 / 隔离 orange-400 / 审核 purple-400 / 阻断 red-500 / 丢弃 red-700</td><td>hover 块透明度变化 + Tooltip「区间范围: 动作」；宽度 &gt;12% 时块内显示动作名（源码 width&gt;12 判定）</td><td>与 PRD §2.4 色板一致；条不可拖拽（仅展示）</td></tr>
+        <tr><td>区间行</td><td>「区间N:」+ min 输入 +「-」+ max 输入 + 动作 Select + 删除按钮；输入 type=number min=0 max=1 step=0.01</td><td>修改任意值即时重排序（按 min 升序）并重绘可视化条；非数字被 parseFloat‖0 修正为 0；动作选项按方向过滤（接收5项/外发域内4项）</td><td>手输超出 0-1 不钳制（差异 D-06）</td></tr>
+        <tr><td>删除按钮</td><td>红色垃圾桶图标</td><td>删除该区间；仅剩 1 个区间时按钮不渲染（至少保留1个）</td><td>PRD §4.1 一致</td></tr>
+        <tr><td>间隙警告</td><td>琥珀色条「存在未覆盖区间，请修复或点击"智能填充"」</td><td>区间未从0开始 / 未到1结束 / 相邻区间不连续（容差0.001）时显示</td><td>仅内联提示，保存无校验（D-05）</td></tr>
+        <tr><td>添加区间</td><td>outline 按钮 + Plus 图标</td><td>末区间 max&lt;1 时追加 [lastMax,1]，动作沿用末区间；覆盖已完整时点击无变化（实测前后均3行）；空列表时创建 [0,1] 隔离</td><td>-</td></tr>
+        <tr><td>智能填充</td><td>outline 按钮 + CheckCircle2 图标，仅有间隙时显示</td><td>前移各区间 min 补齐间隙、末区间 max 拉到 1、首区间 min 归 0</td><td>实测 [0,0.2][0.2,0.6][0.6,1]</td></tr>
+        <tr><td>应用模板</td><td>Select placeholder「应用模板」；选项：严格 / 标准（推荐）/ 宽松</td><td>选择后整组区间被覆盖：严格 0-0.3隔离/0.3-0.6阻断/0.6-1丢弃；标准 0-0.3标记投递(接收)或审核/0.3-0.7隔离/0.7-1阻断；宽松 0-0.5标记投递(接收)或审核/0.5-0.8审核/0.8-1隔离</td><td>与 PRD §6.3 完全一致</td></tr>
+        <tr><td>默认区间（按风险）</td><td>高危 0-0.3审核/0.3-0.6隔离/0.6-1阻断；中危 0-0.2标记投递/0.2-0.6隔离/0.6-1阻断；低危 0-0.5标记投递/0.5-0.8隔离/0.8-1审核</td><td>-</td><td>外发/域内默认区间同值（含标记投递），见差异 D-06</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>可视化条根节点</td><td><code>div.h-8.bg-gray-200.rounded-lg.overflow-hidden.flex</code></td><td><code>.vbar</code> 32px 圆角 flex</td><td>一致</td></tr>
+        <tr><td>条块（默认高危）</td><td>3 块：bg-purple-400 30% 审核 / bg-orange-400 30% 隔离 / bg-red-500 40% 阻断（style width 百分比）</td><td>JS 按同公式渲染 3 块同色同宽</td><td>一致</td></tr>
+        <tr><td>区间行数与值</td><td>3 行：[0,0.3]审核 [0.3,0.6]隔离 [0.6,1]阻断；输入 min=0 max=1 step=0.01</td><td>同数据同属性</td><td>一致</td></tr>
+        <tr><td>间隙警告条</td><td>gap 时渲染 <code>div.bg-amber-50.border-amber-200</code> + AlertCircle，文案一致</td><td>同条件显示同文案</td><td>一致</td></tr>
+        <tr><td>智能填充按钮</td><td>仅 hasGap 时渲染；点击后区间 [0,0.2][0.2,0.6][0.6,1]，警告消失</td><td>同条件同结果</td><td>一致</td></tr>
+        <tr><td>模板选项</td><td>[严格, 标准（推荐）, 宽松]；选严格后 [0,0.3]隔离 [0.3,0.6]阻断 [0.6,1]丢弃</td><td>同选项同结果</td><td>一致</td></tr>
+        <tr><td>条块 Tooltip</td><td>实测「0.00 - 0.30: 隔离」</td><td>hover 显示同格式文案</td><td>一致</td></tr>
+        <tr><td>删除按钮条件渲染</td><td>segments.length&gt;1 时渲染（源码验证 + 删除路径实测）</td><td>剩 1 行时按钮不渲染</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="layer-nav"><a href="layer-1-intent-card-classification.html">← 层级1：卡片展开</a> · <a href="layer-3-dialogs.html">层级3：对话框 →</a></nav>
+
+  <script>
+    // ===== 分段阈值状态机（复刻 demo ThresholdSegmentConfig 行为） =====
+    const ACT = { mark_deliver:"标记投递", quarantine:"隔离", review:"审核", block:"阻断", drop:"丢弃" };
+    const RECEIVE_ACTIONS = ["mark_deliver","quarantine","review","block","drop"];
+    let uid = 0;
+    const seg = (min,max,action) => ({ id: "s"+(uid++), min, max, action });
+    // 默认：高危 0-0.3审核 / 0.3-0.6隔离 / 0.6-1阻断
+    let segments = [seg(0,0.3,"review"), seg(0.3,0.6,"quarantine"), seg(0.6,1,"block")];
+
+    const vbar = document.getElementById("vbar");
+    const rows = document.getElementById("rows");
+    const gapWarn = document.getElementById("gap-warn");
+    const fillBtn = document.getElementById("fill-btn");
+
+    function sorted() { return [...segments].sort((a,b)=>a.min-b.min); }
+    function hasGap() {
+      const s = sorted();
+      if (!s.length) return true;
+      if (s[0].min > 0.001) return true;
+      if (s[s.length-1].max < 0.999) return true;
+      for (let i=0;i<s.length-1;i++) if (Math.abs(s[i].max - s[i+1].min) > 0.001) return true;
+      return false;
+    }
+    function render() {
+      const s = sorted();
+      // 可视化条：demo 按排序后区间依次渲染（间隙露出底色）
+      vbar.innerHTML = "";
+      let cursor = 0;
+      s.forEach(x => {
+        if (x.min > cursor + 0.001) { const sp = document.createElement("div"); sp.style.width = ((x.min-cursor)*100)+"%"; vbar.appendChild(sp); }
+        const d = document.createElement("div");
+        d.className = "seg act-" + x.action;
+        const w = (x.max - x.min) * 100;
+        d.style.width = w + "%";
+        if (w > 12) d.textContent = ACT[x.action];
+        d.addEventListener("mouseenter", () => {
+          const t = document.createElement("div");
+          t.className = "bar-tip";
+          t.textContent = x.min.toFixed(2) + " - " + x.max.toFixed(2) + ": " + ACT[x.action];
+          d.appendChild(t);
+        });
+        d.addEventListener("mouseleave", () => d.querySelector(".bar-tip")?.remove());
+        vbar.appendChild(d);
+        cursor = Math.max(cursor, x.max);
+      });
+      // 区间行
+      rows.innerHTML = "";
+      s.forEach((x, i) => {
+        const row = document.createElement("div");
+        row.className = "seg-row";
+        row.style.margin = "6px 0";
+        row.innerHTML = `<span class="idx">区间${i+1}:</span>
+          <input class="num" type="number" min="0" max="1" step="0.01" value="${x.min}" data-k="min">
+          <span style="color:#9ca3af;">-</span>
+          <input class="num" type="number" min="0" max="1" step="0.01" value="${x.max}" data-k="max">
+          <select class="sel" data-k="action">${RECEIVE_ACTIONS.map(a=>`<option value="${a}" ${a===x.action?"selected":""}>${ACT[a]}</option>`).join("")}</select>
+          ${segments.length > 1 ? '<button class="del-btn" type="button" title="删除区间">🗑</button>' : ""}`;
+        row.querySelectorAll("[data-k]").forEach(el => el.addEventListener("change", () => {
+          if (el.dataset.k === "action") x.action = el.value;
+          else x[el.dataset.k] = parseFloat(el.value) || 0; // demo: parseFloat||0，不钳制超界值（D-06）
+          render();
+        }));
+        row.querySelector(".del-btn")?.addEventListener("click", () => { segments = segments.filter(y => y.id !== x.id); render(); });
+        rows.appendChild(row);
+      });
+      const gap = hasGap();
+      gapWarn.classList.toggle("is-hidden", !gap);
+      fillBtn.classList.toggle("is-hidden", !gap);
+    }
+    document.getElementById("add-btn").addEventListener("click", () => {
+      const s = sorted();
+      if (!s.length) { segments = [seg(0,1,"quarantine")]; render(); return; }
+      const last = s[s.length-1];
+      if (last.max < 1) { segments.push(seg(last.max, 1, last.action)); render(); } // 覆盖完整时无操作（实测）
+    });
+    fillBtn.addEventListener("click", () => {
+      const s = sorted();
+      if (!s.length) { segments = [seg(0,1,"quarantine")]; render(); return; }
+      let lastMax = 0;
+      const filled = s.map(x => { const nx = x.min > lastMax + 0.001 ? { ...x, min: lastMax } : { ...x }; lastMax = x.max; return nx; });
+      if (lastMax < 0.999) filled[filled.length-1].max = 1;
+      if (filled[0].min > 0.001) filled[0].min = 0;
+      segments = filled; render();
+    });
+    document.getElementById("preset").addEventListener("change", (e) => {
+      const v = e.target.value;
+      if (v === "strict") segments = [seg(0,0.3,"quarantine"), seg(0.3,0.6,"block"), seg(0.6,1,"drop")];
+      else if (v === "standard") segments = [seg(0,0.3,"mark_deliver"), seg(0.3,0.7,"quarantine"), seg(0.7,1,"block")]; // 接收方向
+      else segments = [seg(0,0.5,"mark_deliver"), seg(0.5,0.8,"review"), seg(0.8,1,"quarantine")];
+      render();
+    });
+    render();
+  </script>
+</body>
+</html>

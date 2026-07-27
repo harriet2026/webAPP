@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级1：筛选级联与数据联动 - 规则统计</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground);
+      line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 2rem; }
+    .spec-header h1 { color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+    .meta-table td:first-child { font-weight: 600; width: 160px; color: var(--muted-foreground); white-space: nowrap; }
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 2rem; margin-bottom: 2rem; }
+    .component-toc > h2 { color: var(--primary); font-size: 1.05rem; margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .component-toc ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.5rem; }
+    .component-toc li { padding: 0.375rem 0.75rem; border-radius: calc(var(--radius) - 4px); background: var(--muted); font-size: 0.875rem; }
+    .component-toc li a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .component-toc li a:hover { text-decoration: underline; }
+    .component-toc .toc-layer-links { font-size: 0.75rem; color: var(--muted-foreground); margin-left: 1rem; }
+    .component-toc .toc-layer-links a { color: var(--muted-foreground); font-weight: 400; }
+    .component-toc .toc-badge { display: inline-block; font-size: 0.6875rem; font-weight: 600;
+      padding: 0.0625rem 0.375rem; border-radius: calc(var(--radius) - 4px); background: var(--primary); color: var(--primary-foreground); white-space: nowrap; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+    section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem; font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+    h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+    table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.spec-table th { background: var(--muted); color: var(--foreground); font-weight: 600; text-align: left;
+      padding: 0.625rem 0.75rem; border: 1px solid var(--border); white-space: nowrap; }
+    table.spec-table td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.spec-table tr:nth-child(even) td { background: var(--muted); }
+    .table-scroll { overflow-x: auto; }
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .screenshot-figure figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .component-spec { border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px);
+      padding: 1rem 1.25rem; margin: 1rem 0; background: var(--card); }
+    .component-spec > h3 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 0.75rem; }
+    pre { background: var(--muted); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px);
+      padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; margin: 1rem 0; }
+    code { font-family: var(--font-mono); font-size: 0.85em; }
+    .mermaid { text-align: center; margin: 1rem 0; padding: 1rem; background: var(--muted); border-radius: calc(var(--radius) - 2px); }
+    .diff-section { border-left: 4px solid var(--diff-border); background: var(--diff-bg); }
+    .diff-section > h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+    .diff-badge { display: inline-block; background: var(--diff-border); color: var(--primary-foreground);
+      font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); margin-right: 0.5rem; }
+    .question-section { border-left: 4px solid var(--question-border); background: var(--question-bg); }
+    .question-section > h2 { color: var(--question-border); border-bottom-color: var(--question-border); }
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); }
+    .badge-high { background: oklch(0.65 0.2 25); color: white; }
+    .badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+    .badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+    blockquote { border-left: 4px solid var(--destructive); background: var(--diff-bg); padding: 0.75rem 1rem;
+      margin: 1rem 0; font-size: 0.875rem; border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0; }
+    .component-preview { border: 2px dashed var(--primary); border-radius: var(--radius); padding: 1.5rem;
+      margin: 1rem 0; background: #f9fafb; position: relative; overflow: auto; }
+    .component-preview::before { content: "🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）"; position: absolute;
+      top: -0.625rem; left: 0.75rem; background: var(--primary); color: var(--primary-foreground); font-size: 0.6875rem;
+      font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); white-space: nowrap; z-index: 5; }
+    .component-preview * { box-sizing: border-box; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary);
+      border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1.5rem 0; background: var(--card); }
+    .interaction-layer > h4 { color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem;
+      border-radius: 50%; background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .trigger-path { background: var(--muted); border-radius: calc(var(--radius) - 4px); padding: 0.5rem 0.75rem;
+      margin: 0.5rem 0 1rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .trigger-path strong { color: var(--foreground); }
+    .dom-comparison { margin: 1rem 0; border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); overflow: hidden; }
+    .dom-comparison > h5 { background: var(--muted); padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600;
+      color: var(--foreground); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.375rem; }
+    .dom-comparison > h5::before { content: "🔍"; font-size: 0.875rem; }
+    .dom-comparison table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+    .dom-comparison th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .dom-comparison td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .dom-comparison tr:last-child td { border-bottom: none; }
+    .dom-pass { color: oklch(0.5 0.15 150); font-weight: 600; }
+    .dom-fail { color: var(--destructive); font-weight: 600; }
+    table.layer-index { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.layer-index th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+    table.layer-index td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.layer-index td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    table.layer-index td a:hover { text-decoration: underline; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem;
+      background: var(--muted); border-radius: var(--radius); margin-bottom: 1.5rem; font-size: 0.875rem; }
+    .layer-nav a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .layer-nav a:hover { text-decoration: underline; }
+    .version-history-section { margin: 1.5rem 0; }
+    .spec-version { font-weight: 600; color: oklch(0.52 0.226 262); }
+    /* 阶段色样例 */
+    .stage-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+    /* 预览区内自定义交互控件 */
+    .rs-tip { position: fixed; z-index: 9999; max-width: 280px; background: #111827; color: #fff; font-size: 12px;
+      padding: 6px 10px; border-radius: 6px; pointer-events: none; display: none; line-height: 1.5; }
+    .rs-menu { position: absolute; z-index: 60; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12); padding: 4px; min-width: 200px; max-height: 320px; overflow: auto; display: none; }
+    .rs-menu .rs-opt { padding: 6px 10px; font-size: 13px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .rs-menu .rs-opt:hover { background: #f3f4f6; }
+    .rs-menu .rs-opt.rs-checked { background: #eff6ff; font-weight: 600; }
+    .rs-menu .rs-group { padding: 6px 8px; font-size: 11px; font-weight: 600; color: #6b7280; background: #f3f4f6; border-radius: 4px; margin: 2px 0; }
+    .rs-menu .rs-foot { padding: 6px 8px; font-size: 11px; color: #9ca3af; border-top: 1px solid #e5e7eb; margin-top: 2px; }
+    /* ===== shadcn 语义色桥接（Tailwind CDN 不认识 demo 的自定义 token 类；取值来自 demo globals.css :root 亮色主题） ===== */
+    .component-preview .bg-primary { background-color: oklch(0.52 0.226 262); }
+    .component-preview .text-primary-foreground { color: oklch(0.985 0 0); }
+    .component-preview .text-primary { color: oklch(0.52 0.226 262); }
+    .component-preview .bg-secondary { background-color: oklch(0.97 0 0); }
+    .component-preview .text-secondary-foreground { color: oklch(0.205 0 0); }
+    .component-preview .bg-destructive { background-color: oklch(0.577 0.245 27.325); }
+    .component-preview .text-destructive { color: oklch(0.577 0.245 27.325); }
+    .component-preview .bg-muted { background-color: oklch(0.97 0 0); }
+    .component-preview .text-muted-foreground { color: oklch(0.556 0 0); }
+    .component-preview .bg-card { background-color: oklch(1 0 0); }
+    .component-preview .text-card-foreground { color: oklch(0.145 0 0); }
+    .component-preview .bg-popover { background-color: oklch(1 0 0); }
+    .component-preview .text-popover-foreground { color: oklch(0.145 0 0); }
+    .component-preview .bg-accent { background-color: oklch(0.52 0.226 262); }
+    .component-preview .text-accent-foreground { color: oklch(0.985 0 0); }
+    .component-preview .bg-background { background-color: oklch(0.98 0.01 205); }
+    .component-preview .text-foreground { color: oklch(0.145 0 0); }
+    .component-preview .border-border { border-color: oklch(0.922 0 0); }
+    .component-preview .border-input { border-color: oklch(0.922 0 0); }
+  /* 追加：半径/调色板对齐 demo Tailwind v4 实测计算色 */
+  .component-preview .rounded-xl { border-radius: 14px; }
+  .component-preview .rounded-lg { border-radius: 10px; }
+  .component-preview .rounded-md { border-radius: 8px; }
+  .component-preview .rounded-sm { border-radius: 6px; }
+  .component-preview .bg-blue-50 { background-color: lab(96.492 -1.14644 -5.11479); }
+  .component-preview .bg-gray-100 { background-color: lab(96.1596 -0.0823438 -1.13575); }
+  .component-preview .bg-gray-400 { background-color: lab(65.9269 -0.832707 -8.17473); }
+  .component-preview .bg-gray-50 { background-color: lab(98.2596 -0.247031 -0.706708); }
+  .component-preview .bg-gray-700 { background-color: lab(27.1134 -0.956401 -12.3224); }
+  .component-preview .bg-green-50 { background-color: lab(98.1563 -5.60117 2.75915); }
+  .component-preview .bg-green-500 { background-color: lab(70.5521 -66.5147 45.8073); }
+  .component-preview .bg-orange-50 { background-color: lab(97.7008 1.53735 5.90649); }
+  .component-preview .bg-orange-500 { background-color: lab(64.272 57.1788 90.3583); }
+  .component-preview .bg-red-50 { background-color: lab(96.5005 4.18508 1.52328); }
+  .component-preview .bg-yellow-50 { background-color: lab(98.6846 -1.79055 9.7766); }
+  .component-preview .border-blue-500 { border-color: lab(54.1736 13.3369 -74.6839); }
+  .component-preview .border-gray-200 { border-color: lab(91.6229 -0.159115 -2.26791); }
+  .component-preview .border-green-200 { border-color: lab(92.4222 -26.4702 12.9427); }
+  .component-preview .border-orange-200 { border-color: lab(88.4871 9.94918 28.8378); }
+  .component-preview .border-red-200 { border-color: lab(86.017 19.8815 7.75869); }
+  .component-preview .border-yellow-200 { border-color: lab(94.3433 -5.00429 52.9663); }
+  .component-preview .text-blue-600 { color: lab(44.0605 29.0279 -86.0352); }
+  .component-preview .text-gray-400 { color: lab(65.9269 -0.832707 -8.17473); }
+  .component-preview .text-gray-500 { color: lab(47.7841 -0.393182 -10.0268); }
+  .component-preview .text-gray-600 { color: lab(35.6337 -1.58697 -10.8425); }
+  .component-preview .text-gray-900 { color: lab(8.11897 0.811279 -12.254); }
+  .component-preview .text-green-500 { color: lab(70.5521 -66.5147 45.8073); }
+  .component-preview .text-green-600 { color: lab(59.0978 -58.6621 41.2579); }
+  .component-preview .text-green-700 { color: lab(47.0329 -47.0239 31.4788); }
+  .component-preview .text-orange-500 { color: lab(64.272 57.1788 90.3583); }
+  .component-preview .text-orange-600 { color: lab(57.1026 64.2584 89.8886); }
+  .component-preview .text-orange-700 { color: lab(46.4615 57.7275 70.8507); }
+  .component-preview .text-red-500 { color: lab(55.4814 75.0732 48.8528); }
+  .component-preview .text-red-600 { color: lab(48.4493 77.4328 61.5452); }
+  .component-preview .text-red-700 { color: lab(40.4273 67.2623 53.7441); }
+  .component-preview .text-yellow-600 { color: lab(62.7799 22.4197 86.1544); }
+  .component-preview .text-yellow-700 { color: lab(47.8202 25.2426 66.5015); }
+    .crash-overlay { border: 2px solid #ef4444; background: #fef2f2; border-radius: 8px; padding: 1rem 1.25rem; margin: 0.75rem 0; font-size: 0.85rem; }
+    .crash-overlay .crash-title { color: #b91c1c; font-weight: 700; font-family: var(--font-mono); margin-bottom: 0.4rem; }
+    .note-inline { font-size: 0.8125rem; color: var(--muted-foreground); background: var(--muted);
+      border-radius: 6px; padding: 0.4rem 0.6rem; margin: 0.5rem 0; }
+</style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="./index.html#component-2-2">← 返回主文件（组件 2.2）</a>
+  <span>交互层级 1 / 4</span>
+  <a href="./layer-2-module-detail.html">层级 2：模块明细视图 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 1：全局筛选级联与数据联动</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.2 全局筛选栏 + 2.3 KPI + 2.4 漏斗 + 2.6 卡片墙（联动目标）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">statistics-rule-stats-v2/index.html</a></td></tr>
+    <tr><td>触发路径</td><td>层级0 筛选栏 → 切换 时间范围 / 阶段 / 模块 / 观察模式 → <code>filteredKPIData / filteredFunnelData / filteredModules</code> 三个 useMemo 全页重算</td></tr>
+    <tr><td>demo 源</td><td><code>rule-stats-v2-page.tsx</code> 488-732 行（handleStageChange / handleModuleChange / getTimeMultiplier / 三个 useMemo）</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1</span> 可操作仿真（复刻 demo 级联逻辑与数据口径）</h4>
+  <div class="trigger-path"><strong>说明</strong>：下方仿真以 demo 的 <b>mockModules 原始数据 + 相同计算公式</b>（时间乘数 × 观察模式过滤 × 阶段/模块筛选）驱动，行为与浏览器实测逐项一致（见底部比对表）。可操作：
+    ① 切换阶段 → 模块下拉范围联动、漏斗只剩该阶段（宽度100%）、KPI/卡片墙重算；
+    ② 阶段切换导致所选模块失效 → 模块自动重置 + 2s 黑色气泡；
+    ③ 全部阶段下直选模块 → 反向级联自动切阶段 + 阶段触发器 300ms 橙色高亮；
+    ④ 观察模式三态过滤；⑤ 重置恢复默认。</div>
+
+  <div class="component-preview" id="sim">
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px 16px;">
+      <span style="font-size:13px; color:#6b7280;">⏱</span>
+      <div class="sim-sel" id="sel-time" style="width:150px"></div>
+      <div class="sim-sel" id="sel-stage" style="width:220px"></div>
+      <div class="sim-sel" id="sel-module" style="width:220px; position:relative"></div>
+      <div class="sim-sel" id="sel-obs" style="width:190px"></div>
+      <button id="sim-reset" style="border:none; background:none; color:#374151; font-size:13px; cursor:pointer; padding:6px 10px; border-radius:8px;" data-rs-tip="恢复默认筛选条件（近7天/全部阶段/全部模块/包含观察模式）">↺ 重置</button>
+    </div>
+    <div id="sim-kpi" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:14px;"></div>
+    <div style="display:grid; grid-template-columns:3fr 2fr; gap:14px; margin-top:14px;">
+      <div style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px;">
+        <div style="font-weight:600; margin-bottom:2px;">策略流水线漏斗</div>
+        <div style="font-size:12px; color:#6b7280; margin-bottom:10px;">邮件在5个策略阶段中的逐层衰减</div>
+        <div id="sim-funnel"></div>
+      </div>
+      <div style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px;">
+        <div style="font-weight:600; margin-bottom:2px;">策略模块效能卡片（联动摘要）</div>
+        <div style="font-size:12px; color:#6b7280; margin-bottom:10px;">按阶段分组；数值=命中×时间乘数</div>
+        <div id="sim-wall" style="font-size:12.5px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <h4>浏览器实测截图（与仿真对照）</h4>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/stage-select-open.png" alt="阶段下拉打开">
+    <figcaption>阶段下拉打开态：全部阶段 + 阶段1-5（色点 + 模块数 (4)(5)(4)(4)(2)）</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/module-select-open-grouped.png" alt="模块下拉分组">
+    <figcaption>全部阶段模式下模块下拉：19 个模块按 5 阶段灰色组头分组（listbox DOM 提取核对：24 个可选项 = 全部模块 + 19 模块 + 5 组头(非 option)…实际 option 数 20）</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/stage3-filtered.png" alt="阶段3筛选后">
+    <figcaption>选「阶段3：内容层」后整页：KPI 4,920 / 78.8% / 0 / 91/96·5条老化；漏斗仅阶段3一行（宽100%，最终投递 36,200）；卡片墙仅内容层 4 卡；模块下拉变「全部模块（阶段3）」</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/stage3-module-intent.png" alt="阶段3+意图引擎">
+    <figcaption>阶段3 下再选「意图引擎」：KPI 654 / 72% / 0 / 6/6·无老化；卡片墙仅 1 卡</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/module-reset-tooltip.png" alt="模块重置气泡">
+    <figcaption>意图引擎选中状态下切「阶段1」：模块自动重置为「全部模块（阶段1）」+ 黑色气泡「原所选不在当前阶段，已自动切换」（2s 自动消失，浏览器实测捕获）</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/reverse-cascade-result.png" alt="反向级联">
+    <figcaption>重置后在「全部阶段」直选「相似检测」：阶段自动切为「阶段5：综合策略 (2)」（反向级联；300ms 橙色高亮见仿真复刻）</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/observation-only.png" alt="仅观察模式">
+    <figcaption>「仅观察模式」：KPI 768 / 58.9% / 768 / 50/50·无老化；卡片墙仅 阶段2×发信行为管控(423) + 阶段5×高级过滤规则(345)</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/custom-date-button.png" alt="自定义时间按钮">
+    <figcaption>时间范围=自定义：出现 CalendarIcon 按钮（占位「选择日期范围」）</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/refresh-loading.png" alt="刷新loading">
+    <figcaption>刷新按钮 1s loading：disabled + 图标 animate-spin（实测 spinning=true, disabled=true）</figcaption>
+  </figure>
+
+  <h4>级联规则表</h4>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>规则</th><th>源码位置</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><b>正向级联</b>：切阶段 → 模块下拉只显示该阶段模块 + 尾部「共N个模块」；若当前所选模块不属于新阶段 → moduleFilter 重置 all + 2s 气泡；明细视图若其模块不属于新阶段 → 关闭</td><td>handleStageChange (489-506)</td></tr>
+      <tr><td>2</td><td><b>反向级联</b>：全部阶段模式下选具体模块 → stageFilter 自动切到 getModuleStage(模块) + stageHighlight 300ms（橙 ring + 橙底）</td><td>handleModuleChange (509-523)</td></tr>
+      <tr><td>3</td><td>漏斗：全部阶段=5行逐级收窄（100-10i%）；单阶段=仅该行、宽 100%</td><td>filteredFunnelData (641-665)</td></tr>
+      <tr><td>4</td><td>卡片墙：只渲染筛选后仍有模块的阶段组；空组整组消失</td><td>filteredModules + 1354 行</td></tr>
+      <tr><td>5</td><td>分布TOP10：随筛选结果重排序取前 10</td><td>filteredModuleDistribution</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison">
+    <h5>DOM/数值 比对结果（层级 1 · 仿真 vs 浏览器实测）</h5>
+    <table>
+      <thead><tr><th>状态</th><th>浏览器实测（DOM 提取）</th><th>本页仿真</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>默认（近7天/全部）</td><td>KPI 16,454 / 58.3% / 768 / 253/263·10条老化</td><td>同左（同公式同数据）</td><td class="dom-pass">✅</td></tr>
+        <tr><td>阶段3</td><td>KPI 4,920 / 78.8% / 0 / 91/96·5条老化；漏斗单行 38,300→36,200；触发器「阶段3：内容层(4)」「全部模块（阶段3）」</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        <tr><td>阶段3+意图引擎</td><td>KPI 654 / 72% / 0 / 6/6</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        <tr><td>切阶段1 触发重置</td><td>气泡「原所选不在当前阶段，已自动切换」+ 模块变「全部模块（阶段1）」</td><td>同左（2s 自动消失）</td><td class="dom-pass">✅</td></tr>
+        <tr><td>反向级联（相似检测）</td><td>阶段自动「阶段5：综合策略(2)」；ring 高亮 300ms（源码，截图未捕获）</td><td>同左（复刻 300ms 橙色高亮）</td><td class="dom-pass">✅</td></tr>
+        <tr><td>仅观察模式</td><td>KPI 768 / 58.9% / 768 / 50/50；墙=发信行为管控(423)+高级过滤规则(345)</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        <tr><td>近30天</td><td>（未实测截图）源码乘数 4.2</td><td>默认态总量 16,454×4.2≈69,107（同公式）</td><td class="dom-pass">✅（公式一致）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+
+// 简易 tooltip：绑定 [data-rs-tip] 元素，hover 显示与 demo 一致的提示文案
+(function(){
+  var tip = document.createElement('div'); tip.className = 'rs-tip'; document.body.appendChild(tip);
+  document.addEventListener('mouseover', function(e){
+    var t = e.target.closest('[data-rs-tip]');
+    if (!t) { tip.style.display = 'none'; return; }
+    tip.textContent = t.getAttribute('data-rs-tip');
+    tip.style.display = 'block';
+    var r = t.getBoundingClientRect();
+    tip.style.left = Math.min(r.left, window.innerWidth - 300) + 'px';
+    tip.style.top = (r.bottom + 6) + 'px';
+  });
+})();
+
+(function(){
+  // ===== demo 原始数据（rule-stats-v2-page.tsx mockModules / mockFunnelData 原样） =====
+  var STAGE = {
+    stage1: { name: '阶段1：IP策略', color: '#FF4D4F', bg: '#FFF2F0' },
+    stage2: { name: '阶段2：收发信人策略', color: '#FA8C16', bg: '#FFF7E6' },
+    stage3: { name: '阶段3：内容层', color: '#52C41A', bg: '#F6FFED' },
+    stage4: { name: '阶段4：智能分析层', color: '#1890FF', bg: '#F0F5FF' },
+    stage5: { name: '阶段5：综合策略', color: '#722ED1', bg: '#F9F0FF' }
+  };
+  var MODULES = {
+    stage1: [
+      { id: 'ip-frequency', name: 'IP频率限制', rules: 12, hits: 3402, blockRate: 18, status: 'normal' },
+      { id: 'ip-blacklist', name: 'IP黑白名单', rules: 33, hits: 1205, blockRate: 42, status: 'aging', agingCount: 3 },
+      { id: 'rbl-filter', name: 'RBL过滤', rules: 3, hits: 892, blockRate: 95, status: 'normal' },
+      { id: 'overseas-detection', name: '海外邮件检测', rules: 3, hits: 156, blockRate: 100, status: 'normal' }
+    ],
+    stage2: [
+      { id: 'sender-blacklist', name: '发信人黑白名单', rules: 28, hits: 2156, blockRate: 35, status: 'normal' },
+      { id: 'auth-spoofing', name: '身份认证与仿冒检测', rules: 8, hits: 567, blockRate: 78, status: 'normal' },
+      { id: 'behavior-control', name: '发信行为管控', rules: 15, hits: 423, blockRate: 62, status: 'observation' },
+      { id: 'recipient-check', name: '收信人检测', rules: 5, hits: 234, blockRate: 88, status: 'normal' },
+      { id: 'user-blacklist', name: '用户黑白名单', rules: 12, hits: 189, blockRate: 55, status: 'aging', agingCount: 2 }
+    ],
+    stage3: [
+      { id: 'attachment-security', name: '附件安全检测', rules: 22, hits: 1823, blockRate: 89, status: 'normal' },
+      { id: 'url-protection', name: 'URL检测与防护', rules: 18, hits: 1456, blockRate: 92, status: 'normal' },
+      { id: 'content-rules', name: '内容规则', rules: 45, hits: 987, blockRate: 45, status: 'aging', agingCount: 5 },
+      { id: 'intent-engine', name: '意图引擎', rules: 6, hits: 654, blockRate: 72, status: 'normal' }
+    ],
+    stage4: [
+      { id: 'sender-behavior-agent', name: '发信人行为智能体', rules: 1, hits: 432, blockRate: 85, status: 'normal' },
+      { id: 'intent-detection-agent', name: '意图检测智能体', rules: 1, hits: 321, blockRate: 78, status: 'normal' },
+      { id: 'phishing-detection-agent', name: '钓鱼邮件智能体', rules: 1, hits: 567, blockRate: 92, status: 'normal' },
+      { id: 'threat-retrospect-agent', name: '威胁回溯智能体', rules: 1, hits: 189, blockRate: 95, status: 'timeout' }
+    ],
+    stage5: [
+      { id: 'similar-detection', name: '相似检测', rules: 4, hits: 456, blockRate: 68, status: 'normal' },
+      { id: 'advanced-filter', name: '高级过滤规则', rules: 35, hits: 345, blockRate: 55, status: 'observation' }
+    ]
+  };
+  var FUNNEL = [
+    { stage: 1, key: 'stage1', enter: 50000, blocked: 8500, blockRate: 17.0, pass: 41500 },
+    { stage: 2, key: 'stage2', enter: 41500, blocked: 3200, blockRate: 7.7, pass: 38300 },
+    { stage: 3, key: 'stage3', enter: 38300, blocked: 2100, blockRate: 5.5, pass: 36200 },
+    { stage: 4, key: 'stage4', enter: 36200, blocked: 1500, blockRate: 4.1, pass: 34700 },
+    { stage: 5, key: 'stage5', enter: 34700, blocked: 800, blockRate: 2.3, pass: 33900 }
+  ];
+  var STATE = { time: '7days', stage: 'all', module: 'all', obs: 'include' };
+  var TIME_OPTS = [ ['today', '今天'], ['7days', '近7天'], ['30days', '近30天'] ];
+  var OBS_OPTS = [ ['include', '包含观察模式'], ['exclude', '排除观察模式'], ['only', '仅观察模式'] ];
+
+  function allStages() { return ['stage1','stage2','stage3','stage4','stage5']; }
+  function stageOf(mid) {
+    var res = null;
+    allStages().forEach(function(s){ MODULES[s].forEach(function(m){ if (m.id === mid) res = s; }); });
+    return res;
+  }
+  function mult() { return STATE.time === 'today' ? 0.15 : STATE.time === '30days' ? 4.2 : 1; }
+  function passObs(m) {
+    if (STATE.obs === 'exclude' && m.status === 'observation') return false;
+    if (STATE.obs === 'only' && m.status !== 'observation') return false;
+    return true;
+  }
+  function filteredModules() {
+    var out = {};
+    var stages = STATE.stage === 'all' ? allStages() : [STATE.stage];
+    stages.forEach(function(s){
+      var ms = MODULES[s].filter(function(m){
+        if (STATE.module !== 'all' && m.id !== STATE.module) return false;
+        return passObs(m);
+      });
+      if (ms.length) out[s] = ms;
+    });
+    return out;
+  }
+  function kpi() {
+    var total = 0, obs = 0, active = 0, all = 0, aging = 0, blocked = 0, k = mult();
+    var fm = filteredModules();
+    Object.keys(fm).forEach(function(s){ fm[s].forEach(function(m){
+      total += m.hits;
+      if (m.status === 'observation') obs += m.hits;
+      blocked += Math.round(m.hits * m.blockRate / 100);
+      active += m.rules;
+      all += m.rules + (m.agingCount || 0);
+      if (m.status === 'aging') aging += m.agingCount || 0;
+    }); });
+    total = Math.round(total * k); obs = Math.round(obs * k); blocked = Math.round(blocked * k);
+    var rate = total > 0 ? Math.round(blocked / total * 1000) / 10 : 0;
+    var chg = STATE.time === 'today' ? [5, 1.5, 12] : STATE.time === '30days' ? [12, 3.2, 18] : [8, 2.1, 15];
+    return { total: total, rate: rate, obs: obs, active: active, all: all, aging: aging, chg: chg };
+  }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+
+  // ===== 自定义 Select 控件 =====
+  function makeSelect(host, opts) {
+    var el = document.getElementById(host);
+    el.innerHTML = '';
+    var trig = document.createElement('button');
+    trig.className = 'sim-trigger';
+    trig.style.cssText = 'width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px;'
+      + 'border:1px solid #d1d5db; border-radius:8px; background:#fff; padding:7px 10px; font-size:13px; cursor:pointer; transition:box-shadow .3s,background .3s;';
+    var menu = document.createElement('div');
+    menu.className = 'rs-menu';
+    el.style.position = 'relative';
+    el.appendChild(trig); el.appendChild(menu);
+    trig.addEventListener('click', function(e){
+      e.stopPropagation();
+      document.querySelectorAll('#sim .rs-menu').forEach(function(m){ if (m !== menu) m.style.display = 'none'; });
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+      menu.style.top = (trig.offsetHeight + 4) + 'px';
+      menu.style.left = '0';
+    });
+    return { trig: trig, menu: menu };
+  }
+  document.addEventListener('click', function(){ document.querySelectorAll('#sim .rs-menu').forEach(function(m){ m.style.display = 'none'; }); });
+
+  var selTime = makeSelect('sel-time');
+  var selStage = makeSelect('sel-stage');
+  var selModule = makeSelect('sel-module');
+  var selObs = makeSelect('sel-obs');
+
+  function renderTimeMenu() {
+    selTime.trig.innerHTML = '<span>' + (TIME_OPTS.find(function(o){ return o[0] === STATE.time; })[1]) + '</span><span style="color:#9ca3af">▾</span>';
+    selTime.menu.innerHTML = TIME_OPTS.map(function(o){
+      return '<div class="rs-opt' + (o[0] === STATE.time ? ' rs-checked' : '') + '" data-v="' + o[0] + '">' + o[1] + '</div>';
+    }).join('') + '<div class="rs-foot">「自定义」在 demo 中另出日历（见主文件 §3.2），仿真略</div>';
+    selTime.menu.querySelectorAll('.rs-opt').forEach(function(o){
+      o.onclick = function(){ STATE.time = o.getAttribute('data-v'); renderAll(); };
+    });
+  }
+  function renderStageMenu() {
+    var cur = STATE.stage;
+    var color = cur === 'all' ? '#999' : STAGE[cur].color;
+    var label = cur === 'all' ? '全部阶段' : STAGE[cur].name + ' (' + MODULES[cur].length + ')';
+    selStage.trig.innerHTML = '<span style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:50%;background:' + color + '"></span>' + label + '</span><span style="color:#9ca3af">▾</span>';
+    selStage.trig.style.borderLeft = '4px solid ' + color;
+    selStage.trig.setAttribute('data-rs-tip', '按策略执行阶段筛选，切换后模块范围自动联动');
+    var rows = ['<div class="rs-opt' + (cur === 'all' ? ' rs-checked' : '') + '" data-v="all"><span style="width:8px;height:8px;border-radius:50%;background:#999"></span>全部阶段</div>'];
+    Object.keys(STAGE).forEach(function(s){
+      rows.push('<div class="rs-opt' + (cur === s ? ' rs-checked' : '') + '" data-v="' + s + '"><span style="width:8px;height:8px;border-radius:50%;background:' + STAGE[s].color + '"></span>' + STAGE[s].name + ' <span style="color:#9ca3af;margin-left:auto">(' + MODULES[s].length + ')</span></div>');
+    });
+    selStage.menu.innerHTML = rows.join('');
+    selStage.menu.querySelectorAll('.rs-opt').forEach(function(o){
+      o.onclick = function(){ handleStageChange(o.getAttribute('data-v')); };
+    });
+  }
+  function renderModuleMenu() {
+    var label = '全部模块';
+    if (STATE.module !== 'all') {
+      allStages().forEach(function(s){ MODULES[s].forEach(function(m){ if (m.id === STATE.module) label = m.name; }); });
+    } else if (STATE.stage !== 'all') {
+      label = '全部模块（' + STAGE[STATE.stage].name.slice(0, 3) + '）';
+    }
+    selModule.trig.innerHTML = '<span>' + label + '</span><span style="color:#9ca3af">▾</span>';
+    selModule.trig.setAttribute('data-rs-tip', STATE.stage === 'all' ? '选择具体模块可快速定位到对应阶段' : '当前仅展示所选阶段下的模块');
+    var rows = [];
+    if (STATE.stage === 'all') {
+      rows.push('<div class="rs-opt' + (STATE.module === 'all' ? ' rs-checked' : '') + '" data-v="all">全部模块</div>');
+      Object.keys(STAGE).forEach(function(s){
+        rows.push('<div class="rs-group">' + STAGE[s].name + '</div>');
+        MODULES[s].forEach(function(m){
+          rows.push('<div class="rs-opt' + (STATE.module === m.id ? ' rs-checked' : '') + '" data-v="' + m.id + '" style="padding-left:20px">' + m.name + '</div>');
+        });
+      });
+    } else {
+      rows.push('<div class="rs-opt' + (STATE.module === 'all' ? ' rs-checked' : '') + '" data-v="all">全部模块（' + STAGE[STATE.stage].name.slice(0, 3) + '）</div>');
+      MODULES[STATE.stage].forEach(function(m){
+        rows.push('<div class="rs-opt' + (STATE.module === m.id ? ' rs-checked' : '') + '" data-v="' + m.id + '">' + m.name + '</div>');
+      });
+      rows.push('<div class="rs-foot">共' + MODULES[STATE.stage].length + '个模块</div>');
+    }
+    selModule.menu.innerHTML = rows.join('');
+    selModule.menu.querySelectorAll('.rs-opt').forEach(function(o){
+      o.onclick = function(){ handleModuleChange(o.getAttribute('data-v')); };
+    });
+  }
+  function renderObsMenu() {
+    selObs.trig.innerHTML = '<span>' + OBS_OPTS.find(function(o){ return o[0] === STATE.obs; })[1] + '</span><span style="color:#9ca3af">▾</span>';
+    selObs.menu.innerHTML = OBS_OPTS.map(function(o){
+      return '<div class="rs-opt' + (o[0] === STATE.obs ? ' rs-checked' : '') + '" data-v="' + o[0] + '">' + o[1] + '</div>';
+    }).join('');
+    selObs.menu.querySelectorAll('.rs-opt').forEach(function(o){
+      o.onclick = function(){ STATE.obs = o.getAttribute('data-v'); renderAll(); };
+    });
+  }
+
+  // ===== 级联逻辑（复刻 handleStageChange / handleModuleChange） =====
+  function handleStageChange(s) {
+    STATE.stage = s;
+    if (STATE.module !== 'all' && s !== 'all' && stageOf(STATE.module) !== s) {
+      STATE.module = 'all';
+      showModuleResetTip();
+    }
+    renderAll();
+  }
+  function handleModuleChange(mid) {
+    STATE.module = mid;
+    if (mid !== 'all' && STATE.stage === 'all') {
+      var s = stageOf(mid);
+      if (s) {
+        STATE.stage = s;
+        renderAll();
+        // 300ms 橙色高亮（复刻 stageHighlight）
+        selStage.trig.style.boxShadow = '0 0 0 2px #fdba74';
+        selStage.trig.style.background = '#fff7ed';
+        setTimeout(function(){ selStage.trig.style.boxShadow = ''; selStage.trig.style.background = '#fff'; }, 300);
+        return;
+      }
+    }
+    renderAll();
+  }
+  function showModuleResetTip() {
+    var old = document.getElementById('mod-reset-tip');
+    if (old) old.remove();
+    var tip = document.createElement('div');
+    tip.id = 'mod-reset-tip';
+    tip.textContent = '原所选不在当前阶段，已自动切换';
+    tip.style.cssText = 'position:absolute; bottom:-30px; left:0; background:#1f2937; color:#fff; font-size:12px; padding:4px 8px; border-radius:6px; white-space:nowrap; z-index:70;';
+    document.getElementById('sel-module').appendChild(tip);
+    setTimeout(function(){ tip.remove(); }, 2000);
+  }
+
+  // ===== 输出区渲染 =====
+  function renderKPI() {
+    var k = kpi();
+    function card(label, val, sub, valColor) {
+      return '<div style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px;">'
+        + '<div style="font-size:12px; color:#6b7280;">' + label + ' ❔</div>'
+        + '<div style="font-size:24px; font-weight:700; color:' + (valColor || '#111827') + ';">' + val + '</div>'
+        + '<div style="font-size:12px; margin-top:4px;">' + sub + '</div></div>';
+    }
+    document.getElementById('sim-kpi').innerHTML =
+      card('策略命中总量', fmt(k.total), '<span style="color:#22c55e">↗ +' + k.chg[0] + '%</span> <span style="color:#6b7280">较上周期</span>')
+      + card('有效拦截率', k.rate + '%', '<span style="color:#22c55e">↗ +' + k.chg[1] + '%</span> <span style="color:#6b7280">较上周期</span>')
+      + card('观察模式命中', fmt(k.obs), '<span style="color:#ef4444">↗ +' + k.chg[2] + '%</span> <span style="color:#6b7280">较上周期</span>', '#ca8a04')
+      + card('活跃规则数', k.active + ' / ' + k.all,
+          k.aging > 0 ? '<span style="color:#f97316">↘ ' + k.aging + '条规则老化</span>' : '<span style="color:#22c55e">✓ 无老化规则</span>');
+  }
+  function renderFunnel() {
+    var k = mult();
+    var rows = STATE.stage === 'all' ? FUNNEL : FUNNEL.filter(function(f){ return f.key === STATE.stage; });
+    var html = rows.map(function(f, i){
+      var st = STAGE[f.key];
+      var w = rows.length === 1 ? 100 : 100 - i * 10;
+      var enter = Math.round(f.enter * k), blocked = Math.round(f.blocked * k), pass = Math.round(f.pass * k);
+      return '<div style="width:' + w + '%; margin-left:' + ((100 - w) / 2) + '%; background:' + st.bg + '; border-left:4px solid ' + st.color + '; border-radius:8px; padding:8px 12px; margin-bottom:2px; display:flex; justify-content:space-between; align-items:center; font-size:12.5px;">'
+        + '<span><span style="display:inline-flex;width:22px;height:22px;border-radius:50%;background:' + st.color + ';color:#fff;align-items:center;justify-content:center;font-weight:700;margin-right:8px;">' + f.stage + '</span>'
+        + '阶段' + f.stage + ' <span style="color:#6b7280">进入: ' + fmt(enter) + '</span></span>'
+        + '<span style="text-align:right"><span style="color:#dc2626">拦截: ' + fmt(blocked) + ' (' + f.blockRate + '%)</span><br><span style="color:#16a34a">放行: ' + fmt(pass) + '</span></span></div>'
+        + (i < rows.length - 1 ? '<div style="text-align:center; color:#22c55e; line-height:1;">⌄</div>' : '');
+    }).join('');
+    var last = rows[rows.length - 1];
+    html += '<div style="margin-top:8px; text-align:center; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:8px; color:#15803d; font-size:13px; font-weight:600;">最终投递: ' + (last ? fmt(Math.round(last.pass * k)) : 0) + '</div>';
+    document.getElementById('sim-funnel').innerHTML = html;
+  }
+  function renderWall() {
+    var fm = filteredModules(), k = mult();
+    var BADGE = { normal: ['正常', '#16a34a', '#f0fdf4'], aging: ['条老化', '#ea580c', '#fff7ed'], observation: ['观察中', '#ca8a04', '#fefce8'], timeout: ['超时异常', '#dc2626', '#fef2f2'] };
+    var html = Object.keys(fm).map(function(s){
+      var st = STAGE[s];
+      return '<div style="border:1px solid #e5e7eb; border-left:4px solid ' + st.color + '; border-radius:8px; padding:8px 10px; margin-bottom:8px;">'
+        + '<div style="font-weight:600; margin-bottom:6px;">' + st.name + ' <span style="color:#6b7280; font-weight:400;">' + fm[s].length + ' 个模块</span></div>'
+        + fm[s].map(function(m){
+            var b = BADGE[m.status];
+            var btext = m.status === 'aging' ? (m.agingCount + b[0]) : b[0];
+            return '<div style="display:flex; justify-content:space-between; padding:3px 0; border-top:1px dashed #f3f4f6;">'
+              + '<span>' + m.name + ' <span style="background:' + b[2] + '; color:' + b[1] + '; border-radius:6px; padding:0 6px; font-size:11px;">' + btext + '</span></span>'
+              + '<span><b>' + fmt(Math.round(m.hits * k)) + '</b> <span style="color:#6b7280">' + m.blockRate + '%</span></span></div>';
+          }).join('')
+        + '</div>';
+    }).join('');
+    document.getElementById('sim-wall').innerHTML = html || '<div style="color:#9ca3af; padding:12px;">（筛选结果为空——demo 中此时卡片墙无任何组，且无空态提示）</div>';
+  }
+  function renderAll() {
+    renderTimeMenu(); renderStageMenu(); renderModuleMenu(); renderObsMenu();
+    renderKPI(); renderFunnel(); renderWall();
+  }
+  document.getElementById('sim-reset').addEventListener('click', function(){
+    STATE.time = '7days'; STATE.stage = 'all'; STATE.module = 'all'; STATE.obs = 'include';
+    renderAll();
+  });
+  renderAll();
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>if (window.mermaid) mermaid.initialize({startOnLoad:true});</script>
+</body>
+</html>

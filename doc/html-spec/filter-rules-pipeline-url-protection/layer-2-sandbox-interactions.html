@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 2：沙箱Tab校验/联动/置灰 - URL检测与防护</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --sub:#6b7280; --blue:#1677ff; --red:#ef4444; --radius:.625rem; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:32px; max-width:1280px; margin-inline:auto; background:var(--bg); color:#111827; font-family:"Geist","Inter",system-ui,sans-serif; line-height:1.6; }
+    a { color:var(--blue); text-decoration:none; }
+    nav.layer-nav, .spec-header, section { margin-bottom:24px; padding:24px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); }
+    nav.layer-nav { display:flex; justify-content:space-between; padding:14px 24px; font-weight:650; }
+    h1 { margin:0 0 16px; color:var(--primary); font-size:26px; }
+    h2 { margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--primary); color:var(--primary); font-size:20px; }
+    h3 { margin:16px 0 8px; font-size:16px; }
+    .meta-table, .spec-table { width:100%; border-collapse:collapse; font-size:14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding:9px 11px; border:1px solid var(--border); vertical-align:top; }
+    .meta-table td:first-child, .spec-table th { background:var(--muted); font-weight:650; text-align:left; }
+    .layer-badge { display:inline-flex; align-items:center; justify-content:center; min-width:24px; height:24px; margin-right:8px; border-radius:999px; background:var(--blue); color:#fff; font-size:12px; font-weight:700; }
+    .component-preview { margin:12px 0; padding:18px; border:1px solid #dbeafe; border-radius:8px; background:#f8fbff; overflow:auto; }
+    .screenshot-figure { margin:14px 0; text-align:center; }
+    .screenshot-figure img { max-width:100%; border:1px solid var(--border); border-radius:8px; box-shadow:0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top:8px; color:var(--sub); font-size:13px; }
+    .cfg-block { display:block; padding:14px 16px; margin:10px 0; border:1px solid var(--border); border-radius:8px; background:#f9fafb; min-width:560px; }
+    .row-between { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .cfg-text b { display:block; font-size:14px; }
+    .cfg-text small { color:#6b7280; font-size:12px; }
+    .toggle { position:relative; width:40px; height:22px; border:0; border-radius:999px; background:#2563eb; cursor:pointer; flex-shrink:0; transition:background .15s; }
+    .toggle::after { content:""; position:absolute; top:2px; left:20px; width:18px; height:18px; border-radius:999px; background:#fff; transition:left .15s; }
+    .toggle[aria-checked="false"] { background:#d1d5db; }
+    .toggle[aria-checked="false"]::after { left:2px; }
+    .cleanup-zone { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+    .num-input { width:96px; padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; outline:none; }
+    .num-input.err { border-color:var(--red); }
+    .err-text { display:none; color:var(--red); font-size:12px; margin-top:4px; }
+    .err-text.show { display:block; }
+    .hint { color:#6b7280; font-size:12px; margin-top:4px; }
+    .dimzone { transition:opacity .2s; padding:6px 2px; }
+    .group-label { margin:10px 0 4px; font-size:14px; font-weight:650; }
+    .fake-select { display:inline-flex; align-items:center; gap:8px; min-width:220px; padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; background:#fff; font-size:13px; color:#374151; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav"><a href="layer-1-sandbox-tab.html">← 层级 1：沙箱Tab默认态</a><span>层级 2 / 3</span><a href="layer-3-link-protection.html">层级 3：链接保护 Tab →</a></nav>
+
+  <header class="spec-header">
+    <h1>交互层级 2：清理周期校验 / 本地情报库联动 / 沙箱开关置灰</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 URL沙箱检测 Tab（<code>SandboxTab</code>）</td></tr>
+      <tr><td>主文件</td><td><a href="index.html#component-2-3">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级1 沙箱Tab默认态 → ① 清理周期输入非法值；② 关闭"本地URL情报库"开关；③ 关闭"沙箱检测"开关</td></tr>
+      <tr><td>截图</td><td><code>screenshots/sandbox-cleanup-error.png</code>、<code>sandbox-local-intel-off.png</code>、<code>sandbox-switch-off.png</code></td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">2</span>状态 2A：清理周期校验错误（可交互）</h2>
+    <p>浏览器验证的关键行为：输入 <code>20</code>（&lt;30）后，<b>输入框数值回弹为上次合法值 180</b>（受控组件：非法值不写入 state），同时边框变红（<code>border-red-500</code>）并在下方显示红色错误文案。输入合法值（如 90）立即清除错误并生效；本地情报库关闭再打开后数值保留（90）。</p>
+    <div class="component-preview">
+      <div class="cfg-block" data-demo-extracted="cleanup-validation">
+        <div class="row-between">
+          <span class="cfg-text"><b>本地URL情报库</b><small>启用后，缓存URL沙箱检测结果，加速后续查询</small></span>
+          <button class="toggle" type="button" role="switch" aria-checked="true" data-intel-toggle></button>
+        </div>
+        <div class="cleanup-zone" data-cleanup-zone>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;">URL情报库清理周期</div>
+          <span><input class="num-input" type="number" value="180" min="30" max="365" data-cleanup-input> 天</span>
+          <div class="err-text" data-cleanup-err>清理周期需在 30-365 天之间</div>
+          <div class="hint">自动清理超过该天数的旧记录（有效范围：30-365天）</div>
+        </div>
+      </div>
+      <p style="margin:6px 0 0;color:#6b7280;font-size:12px;">试试输入 20 或 400（回弹+报错），再输入 90（清除错误）；关闭上方开关（隐藏整块），再打开（数值保留）。</p>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/sandbox-cleanup-error.png" alt="清理周期校验错误">
+      <figcaption>输入 20 后：输入框回弹显示 180、红色边框，下方红字"清理周期需在 30-365 天之间"。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>输入</th><th>实际表现（浏览器验证）</th><th>PRD 要求</th></tr></thead>
+      <tbody>
+        <tr><td>20（&lt;30）/ 400（&gt;365）/ 非数字</td><td>红框 + 红字"清理周期需在 30-365 天之间"；数值回弹为上次合法值；不写入配置</td><td>&lt;30、&gt;365 同文案；非数字应为"请输入有效数字"（demo 统一为范围文案，差异 D-004）</td></tr>
+        <tr><td>90（合法）</td><td>错误消失，值即时写入配置（重开情报库后保留 90）</td><td>保存成功无错误提示</td></tr>
+        <tr><td>清空</td><td>NaN → 报错（demo）</td><td>PRD 要求恢复默认 180（差异 D-004）</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h3>DOM 树比对结果（状态 2A）</h3>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>输入框</td><td>value 回弹 "180"，class 尾部追加 <code>w-24 border-red-500</code></td><td>value 回弹 + .err 红框</td><td>一致</td></tr>
+          <tr><td>错误节点</td><td><code>p.text-xs.text-red-500</code>，文案"清理周期需在 30-365 天之间"</td><td>.err-text.show 同文案</td><td>一致</td></tr>
+          <tr><td>合法输入后</td><td>value=90，无 text-red-500 节点</td><td>预览同步为无错误</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">2</span>状态 2B：本地情报库关闭（清理周期条件渲染）</h2>
+    <p>关闭"本地URL情报库"后，"URL情报库清理周期"整块（标题/输入框/说明）<b>从 DOM 移除</b>（条件渲染 <code>{config.localIntelEnabled && ...}</code>），并非置灰。上方 2A 预览的开关即可复现。</p>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/sandbox-local-intel-off.png" alt="本地情报库关闭">
+      <figcaption>本地URL情报库关闭：清理周期块消失，云端情报块上移。</figcaption>
+    </figure>
+    <div class="dom-comparison">
+      <h3>DOM 树比对结果（状态 2B）</h3>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>清理周期文本</td><td>关闭后 <code>innerText</code> 不含"URL情报库清理周期"</td><td>display:none 隐藏整块</td><td>一致（demo 为卸载，预览用隐藏等价复刻）</td></tr>
+          <tr><td>数字输入框</td><td>关闭后 <code>input[type=number]</code> 不存在</td><td>隐藏后不可见不可交互</td><td>一致</td></tr>
+          <tr><td>重新开启</td><td>输入框重建且 value 保留（验证值 90）</td><td>预览保留输入值</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">2</span>状态 2C：沙箱检测开关关闭（处置区置灰）</h2>
+    <p>关闭"沙箱检测"开关后，"检测结果处置 + 扫描异常处置"两个分组的公共容器加 <code>opacity-50 pointer-events-none</code>；情报库设置（本地/云端）<b>不受影响</b>，仍可交互。</p>
+    <div class="component-preview">
+      <div data-demo-extracted="sandbox-off">
+        <div class="cfg-block">
+          <div class="row-between">
+            <span class="cfg-text" style="display:flex;gap:10px;"><span style="color:#a855f7;">🌐</span><span><b>沙箱检测</b><small>启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁</small></span></span>
+            <button class="toggle" type="button" role="switch" aria-checked="true" data-sandbox-toggle></button>
+          </div>
+        </div>
+        <div class="dimzone" data-detect-zone>
+          <div class="group-label">检测结果处置（当前方向）</div>
+          <div style="font-size:13px;margin:4px 0;">发现恶意URL</div>
+          <span class="fake-select">隔离（邮件存入隔离区）<span style="margin-left:auto;color:#9ca3af;">⌄</span></span>
+          <div class="group-label">扫描异常处置</div>
+          <div style="font-size:13px;margin:4px 0;">沙箱分析超时（超过30秒）</div>
+          <span class="fake-select" style="width:300px;overflow:hidden;white-space:nowrap;">进行下一步检测（放行，依赖链接保护兜底）<span style="margin-left:auto;color:#9ca3af;">⌄</span></span>
+        </div>
+        <div class="cfg-block">
+          <div class="row-between">
+            <span class="cfg-text"><b>本地URL情报库</b><small>沙箱关闭时仍可交互（不在置灰范围内）</small></span>
+            <button class="toggle" type="button" role="switch" aria-checked="true"></button>
+          </div>
+        </div>
+      </div>
+      <p style="margin:6px 0 0;color:#6b7280;font-size:12px;">切换"沙箱检测"开关：下方处置区透明度变化且不可点击，情报库开关不受影响。</p>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/sandbox-switch-off.png" alt="沙箱开关关闭">
+      <figcaption>沙箱检测关闭：处置两块置灰（opacity-50 pointer-events-none），情报库设置正常。</figcaption>
+    </figure>
+    <div class="dom-comparison">
+      <h3>DOM 树比对结果（状态 2C）</h3>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>置灰容器</td><td><code>div.space-y-4.opacity-50.pointer-events-none</code>，innerText 含"检测结果处置…发现恶意URL…扫描异常处置…"</td><td>.dimzone opacity .5 + pointer-events none，同文案范围</td><td>一致</td></tr>
+          <tr><td>情报库区</td><td>不含 opacity-50，开关可点击</td><td>独立块，不随沙箱开关置灰</td><td>一致</td></tr>
+          <tr><td>沙箱开关</td><td><code>data-state=unchecked</code></td><td>aria-checked=false 灰色</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a><a href="layer-3-link-protection.html">层级 3：链接保护 Tab →</a></nav>
+
+  <script>
+    // 2A：清理周期校验（复刻 demo：非法值回弹上次合法值 + 报错；合法值写入）
+    const input = document.querySelector("[data-cleanup-input]");
+    const err = document.querySelector("[data-cleanup-err]");
+    let lastValid = 180;
+    input.addEventListener("input", () => {
+      const num = parseInt(input.value, 10);
+      if (isNaN(num) || num < 30 || num > 365) {
+        err.classList.add("show");
+        input.classList.add("err");
+        input.value = String(lastValid); // demo 受控组件回弹行为
+      } else {
+        err.classList.remove("show");
+        input.classList.remove("err");
+        lastValid = num;
+      }
+    });
+
+    // 2B：本地情报库开关 → 清理周期块条件渲染
+    const intelToggle = document.querySelector("[data-intel-toggle]");
+    const cleanupZone = document.querySelector("[data-cleanup-zone]");
+    intelToggle.addEventListener("click", () => {
+      const on = intelToggle.getAttribute("aria-checked") === "true";
+      intelToggle.setAttribute("aria-checked", String(!on));
+      cleanupZone.style.display = on ? "none" : "";
+    });
+
+    // 2C：沙箱开关 → 处置区置灰
+    const sandboxToggle = document.querySelector("[data-sandbox-toggle]");
+    const detectZone = document.querySelector("[data-detect-zone]");
+    sandboxToggle.addEventListener("click", () => {
+      const on = sandboxToggle.getAttribute("aria-checked") === "true";
+      sandboxToggle.setAttribute("aria-checked", String(!on));
+      detectZone.style.opacity = on ? ".5" : "";
+      detectZone.style.pointerEvents = on ? "none" : "";
+    });
+
+    // 其余 toggle 翻转
+    document.querySelectorAll(".toggle:not([data-intel-toggle]):not([data-sandbox-toggle])").forEach((t) => {
+      t.addEventListener("click", () => t.setAttribute("aria-checked", String(t.getAttribute("aria-checked") !== "true")));
+    });
+  </script>
+</body>
+</html>

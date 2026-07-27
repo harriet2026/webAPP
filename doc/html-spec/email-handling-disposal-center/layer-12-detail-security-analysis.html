@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级12：详情抽屉 · 模块二 安全分析 - 邮件处置中心 HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .component-preview { background:#fff; }
+  .component-preview .spec-popover { position:absolute; z-index:50; }
+  .spec-select-menu { position:absolute; }
+  .pass { color:#15803d; font-weight:600; }
+  .bad { color:#b91c1c; font-weight:600; }
+  .warn { color:#a16207; font-weight:600; }
+  .tag-base { display:inline-block; padding:.05rem .375rem; border-radius:.25rem; font-size:.6875rem; font-weight:600; background:#dbeafe; color:#1d4ed8; }
+  .tag-overlay { background:#fef3c7; color:#92400e; }
+  .tag-gap { background:#fee2e2; color:#b91c1c; }
+  .stage-1 { color:#3b82f6; } .stage-2 { color:#06b6d4; } .stage-3 { color:#f59e0b; } .stage-4 { color:#f43f5e; } .stage-5 { color:#10b981; }
+</style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#component-2-4">← 返回主文件</a><a href="./layer-11-detail-recipient-matrix.html">上一层：收件人矩阵</a><a href="./layer-13-detail-raw-logs.html">下一层：原始日志 →</a></nav>
+<header class="spec-header">
+  <h1>交互层级 12（详情层级3）：模块二 安全分析</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.4 详情抽屉 → <code>SecurityAnalysisSection</code>（<code>security-analysis-section.tsx</code>，1284 行）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html#component-2-4">index.html#component-2-4</a></td></tr>
+    <tr><td>触发路径</td><td>抽屉左侧导航「安全分析」/ 概览区「查看依据详情 →」（平滑滚动到 <code>#section-analysis</code>）</td></tr>
+  </table>
+</header>
+<section>
+  <h2>预览与截图</h2>
+  <div class="component-preview" data-preview="analysis"><div id="section-analysis" class="p-6 border-b border-gray-200"><h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-5 h-5 text-blue-600"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>安全分析</h3><div class="space-y-6"><div class="mb-6"><div class="flex items-center justify-between mb-4"><h4 class="text-sm font-semibold">检测流程</h4><span class="text-xs text-gray-500">总耗时: 536ms</span></div><div class="flex items-start gap-0 overflow-x-auto pb-2"><div class="flex items-start"><div class="relative min-w-[180px] max-w-[200px] p-3 rounded-lg border cursor-pointer transition-all hover:shadow-sm bg-emerald-50 border-emerald-300"><div class="text-center"><div class="text-xs text-gray-500 mb-1">阶段 1</div><div class="font-medium text-sm mb-2">连接层</div><div class="flex justify-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-5 h-5 text-emerald-500"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs mb-1 text-emerald-600 border-emerald-300">通过</span><div class="text-xs text-gray-500">4 项策略</div><div class="text-xs text-gray-400">12ms</div></div><div class="mt-3 pt-3 border-t border-gray-200 text-left"><p class="text-xs text-gray-600 mb-2">IP信誉检查通过，RBL清洁</p><div class="space-y-1.5"><div class="text-xs font-medium text-gray-500">命中策略</div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-emerald-500 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><span class="truncate text-gray-700">IP 信誉库匹配</span></div><span class="shrink-0 text-right text-emerald-600">清洁</span></div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-emerald-500 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><span class="truncate text-gray-700">RBL 实时黑名单</span></div><span class="shrink-0 text-right text-emerald-600">未命中</span></div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-emerald-500 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><span class="truncate text-gray-700">连接频率限制</span></div><span class="shrink-0 text-right text-emerald-600">正常</span></div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-emerald-500 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><span class="truncate text-gray-700">地理位置检查</span></div><span class="shrink-0 text-right text-emerald-600">美国</span></div></div></div></div><div class="flex items-center px-1 mt-12"><div class="w-4 h-0.5 bg-emerald-400"></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3 -ml-0.5 text-emerald-400"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></div></div><div class="flex items-start"><div class="relative min-w-[180px] max-w-[200px] p-3 rounded-lg border cursor-pointer transition-all hover:shadow-sm bg-emerald-50 border-emerald-300"><div class="text-center"><div class="text-xs text-gray-500 mb-1">阶段 2</div><div class="font-medium text-sm mb-2">身份层</div><div class="flex justify-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-5 h-5 text-emerald-500"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs mb-1 text-emerald-600 border-emerald-300">通过</span><div class="text-xs text-gray-500">5 项策略</div><div class="text-xs text-gray-400">45ms</div></div><div class="mt-3 pt-3 border-t border-gray-200 text-left"><p class="text-xs text-gray-600 mb-2">SPF: pass, DKIM: fail, DMARC: softfail</p><div class="space-y-1.5"><div class="text-xs font-medium text-gray-500">命中策略</div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-emerald-500 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><span class="truncate text-gray-700">SPF 验证</span></div><span class="shrink-0 text-right text-emerald-600">Pass</span></div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert w-3 h-3 text-amber-500 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span class="truncate text-gray-700">DKIM 签名</span></div><span class="shrink-0 text-right text-amber-600">Fail</span></div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert w-3 h-3 text-amber-500 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span class="truncate text-gray-700">DMARC 对齐</span></div><span class="shrink-0 text-right text-amber-600">SoftFail</span></div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-emerald-500 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><span class="truncate text-gray-700">显示名仿冒检查</span></div><span class="shrink-0 text-right text-emerald-600">未命中</span></div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert w-3 h-3 text-amber-500 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span class="truncate text-gray-700">域名年龄检查</span></div><span class="shrink-0 text-right text-amber-600">3 天（新域名）</span></div></div></div></div><div class="flex items-center px-1 mt-12"><div class="w-4 h-0.5 bg-emerald-400"></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3 -ml-0.5 text-emerald-400"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></div></div><div class="flex items-start"><div class="relative min-w-[180px] max-w-[200px] p-3 rounded-lg border cursor-pointer transition-all hover:shadow-sm bg-emerald-50 border-emerald-300"><div class="text-center"><div class="text-xs text-gray-500 mb-1">阶段 3</div><div class="font-medium text-sm mb-2">内容层</div><div class="flex justify-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-5 h-5 text-emerald-500"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs mb-1 text-emerald-600 border-emerald-300">通过</span><div class="text-xs text-gray-500">3 项策略</div><div class="text-xs text-gray-400">156ms</div></div><div class="mt-3 pt-3 border-t border-gray-200 text-left"><p class="text-xs text-gray-600 mb-2">反病毒引擎扫描通过</p><div class="space-y-1.5"><div class="text-xs font-medium text-gray-500">命中策略</div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-emerald-500 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><span class="truncate text-gray-700">反病毒引擎扫描</span></div><span class="shrink-0 text-right text-emerald-600">通过</span></div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-emerald-500 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><span class="truncate text-gray-700">附件类型管控</span></div><span class="shrink-0 text-right text-emerald-600">无附件</span></div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert w-3 h-3 text-amber-500 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span class="truncate text-gray-700">敏感关键词检测</span></div><span class="shrink-0 text-right text-amber-600">命中紧急话术</span></div></div></div></div><div class="flex items-center px-1 mt-12"><div class="w-4 h-0.5 bg-emerald-400"></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3 -ml-0.5 text-emerald-400"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></div></div><div class="flex items-start"><div class="relative min-w-[180px] max-w-[200px] p-3 rounded-lg border cursor-pointer transition-all hover:shadow-sm bg-emerald-50 border-emerald-300"><div class="text-center"><div class="text-xs text-gray-500 mb-1">阶段 4</div><div class="font-medium text-sm mb-2">综合策略</div><div class="flex justify-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-5 h-5 text-emerald-500"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs mb-1 text-emerald-600 border-emerald-300">通过</span><div class="text-xs text-gray-500">3 项策略</div><div class="text-xs text-gray-400">89ms</div></div><div class="mt-3 pt-3 border-t border-gray-200 text-left"><p class="text-xs text-gray-600 mb-2">综合研判通过，规则层未命中</p><div class="space-y-1.5"><div class="text-xs font-medium text-gray-500">命中策略</div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-emerald-500 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><span class="truncate text-gray-700">仿冒邮件检测</span></div><span class="shrink-0 text-right text-emerald-600">未命中</span></div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-emerald-500 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><span class="truncate text-gray-700">品牌仿冒识别</span></div><span class="shrink-0 text-right text-emerald-600">未命中</span></div><div class="flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-emerald-500 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><span class="truncate text-gray-700">规则策略匹配</span></div><span class="shrink-0 text-right text-emerald-600">通过</span></div></div></div></div><div class="flex items-center px-1 mt-12"><div class="w-4 h-0.5 bg-emerald-400"></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3 -ml-0.5 text-emerald-400"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></div></div><div class="flex items-start"><div class="relative min-w-[180px] max-w-[200px] p-3 rounded-lg border cursor-pointer transition-all hover:shadow-sm bg-red-50 border-red-300 ring-1 ring-red-400"><div class="text-center"><div class="text-xs text-gray-500 mb-1">阶段 5</div><div class="font-medium text-sm mb-2">智能分析层</div><div class="flex justify-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x w-5 h-5 text-red-500"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg></div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs mb-1 text-red-600 border-red-300">威胁</span><div class="text-xs text-gray-500">5 项策略</div><div class="text-xs text-gray-400">234ms</div></div><div class="mt-3 pt-3 border-t border-gray-200 text-left"><p class="text-xs text-gray-600 mb-2">钓鱼邮件智能体检测命中，邮件已拦截</p><div class="space-y-1.5"><div class="text-xs font-medium text-gray-500">智能体研判</div><div class="flex items-center justify-between gap-2 text-xs"><span class="truncate text-gray-700">发信人行为智能体</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs shrink-0 text-emerald-600">12%</span></div><div class="flex items-center justify-between gap-2 text-xs"><span class="truncate text-gray-700">pipeline.intentAgent</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs shrink-0 text-amber-600">67%</span></div><div class="flex items-center justify-between gap-2 text-xs"><span class="truncate text-gray-700">pipeline.marketingAgent</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs shrink-0 text-emerald-600">8%</span></div><div class="flex items-center justify-between gap-2 text-xs"><span class="truncate text-gray-700">pipeline.phishingAgent</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs shrink-0 text-red-600">92%</span></div><div class="flex items-center justify-between gap-2 text-xs"><span class="truncate text-gray-700">pipeline.retrospectAgent</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs shrink-0 text-emerald-600">15%</span></div></div></div></div></div></div><div class="mt-4 p-3 bg-red-50 rounded-lg border border-red-200 flex items-center justify-between"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x w-5 h-5 text-red-500"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg><div><div class="font-medium text-red-600 text-sm">最终判定：恶意，已拦截</div><div class="text-xs text-gray-500">耗时: 536ms</div></div></div><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 text-xs text-gray-600">时间线</button></div></div><div id="disposal-basis" class="rounded-lg border border-gray-200 bg-white p-4 scroll-mt-4"><div class="flex items-center gap-2 mb-3"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-alert w-4 h-4 text-orange-600"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><h4 class="text-sm font-semibold text-gray-800">处置依据</h4><span class="text-xs font-medium px-2 py-0.5 rounded ml-auto bg-orange-100 text-orange-700">隔离</span></div><div class="grid grid-cols-[72px_1fr] gap-x-3 gap-y-2.5 text-sm"><span class="text-gray-500">策略模块</span><div class="flex items-center gap-2 min-w-0"><span class="w-1.5 h-1.5 rounded-full shrink-0 bg-rose-500"></span><span class="font-medium text-gray-900">仿冒邮件检测智能体</span></div><span class="text-gray-500">规则</span><button class="group flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:underline text-left min-w-0" title="前往策略配置页"><span class="truncate">高管仿冒识别<span class="text-gray-400 font-mono text-xs ml-1.5">（AI-SPOOF-012）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link w-3.5 h-3.5 shrink-0 opacity-70 group-hover:opacity-100"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></button><span class="text-gray-500">命中</span><span class="text-gray-700 leading-relaxed">AI 判定为 高管 仿冒（置信度：94%）</span></div></div><div class="mb-6"><div class="flex items-center justify-between mb-4 cursor-pointer"><h4 class="text-sm font-semibold flex items-center gap-2">事后处置时间线<span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">1 个事件</span></h4><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4"><path d="m9 18 6-6-6-6"></path></svg></div></div><div class="mt-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700"><div class="flex items-center justify-between cursor-pointer"><h4 class="text-sm font-semibold flex items-center gap-2">关联分析<span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">4 个维度</span></h4><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 w-7 p-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-4 h-4"><path d="m6 9 6 6 6-6"></path></svg></button></div></div></div></div></div>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/detail-layer-3-security-analysis.png" alt="安全分析">
+    <figcaption>实时渲染（matrix 样本「Q2财务报表 - 紧急审批（多投信）」）：检测流程（5 阶段管线 + 总耗时 536ms）→ 最终判定（恶意，已拦截）→ 处置依据（隔离 · 高管仿冒识别 AI-SPOOF-012）→ 事后处置时间线（折叠）→ 关联分析（4 维度，折叠）。</figcaption>
+  </figure>
+  <p class="warn" style="margin-top:.25rem">上方预览为可交互复刻：<strong>5 个阶段明细默认全部展开</strong>，点击任一<strong>阶段卡片</strong>逐个收起该阶段命中策略明细、再点重现；<strong>事后处置时间线为两级展开</strong> —— 点击「<strong>时间线</strong>」按钮或「事后处置时间线」标题先展开到<strong>事件摘要</strong>，再点击事件卡才展开<strong>事件明细</strong>（召回范围/动作/结果/查看召回日志）；点击「<strong>关联分析</strong>」标题展开 4 维度（默认展开发信人 + 攻击活动）。</p>
+
+  <h2>子区块顺序（实测，自上而下）</h2>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>区块</th><th>渲染函数</th><th>默认态</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>检测流程（Detection Pipeline）</td><td><code>renderDetectionPipeline</code></td><td>5 卡全部展开</td><td>标题「检测流程」+ 右侧「总耗时: 536ms」；5 阶段卡片（连接层/身份层/内容层/综合策略/智能分析层）横向排列，箭头连接（命中前段 emerald、命中段 red、之后 gray）。每卡：阶段序号 · 名称 · 状态图标 · 状态徽标（通过/威胁）· 「N 项策略」· 耗时；<strong>点击卡片 <code>toggleStage</code> 收/展</strong>其命中策略明细（默认全展开，可逐个 toggle 折叠）。展开区显示 detail 摘要 + 命中策略列表（图标 + 名称 + 结果着色）。阶段 5（智能分析层）为命中段：红底 + <code>ring-1 ring-red-400</code>，展开区显示「智能体研判」5 行（智能体名 + 置信度徽标）。</td></tr>
+      <tr><td>2</td><td>最终判定摘要</td><td>（pipeline 内尾部）</td><td>—</td><td>红底卡：XCircle + 「最终判定：恶意，已拦截」+「耗时: 536ms」+ 右侧 ghost「时间线」按钮（点击展开事后处置时间线）。</td></tr>
+      <tr><td>3</td><td>处置依据</td><td><code>renderDisposalBasis</code></td><td>常显</td><td><code>#disposal-basis</code> 卡：ShieldAlert 图标 + 「处置依据」+ 右上动作徽标（隔离，橙）。网格：策略模块（stage 圆点 + 模块名「仿冒邮件检测智能体」）· 规则（可点击「高管仿冒识别（AI-SPOOF-012）」+ ExternalLink，<code>title="前往策略配置页"</code>）· 命中（「AI 判定为 高管 仿冒（置信度：94%）」）。<strong>检测标签行仅当 <code>detectionTags</code> 非空才渲染 —— 本样本无，故不出现。</strong></td></tr>
+      <tr><td>4</td><td>事后处置时间线</td><td><code>renderPostDetectionTimeline</code></td><td>折叠（chevron-right）</td><td><strong>两级展开。</strong>标题「事后处置时间线」+「N 个事件」徽标（本样本按投递状态取 1 个事件：隔离态 → 管理员手动召回）。<strong>第一级</strong>（点标题 / 「时间线」按钮 <code>setShowPostDetectionTimeline</code>）：左侧竖轴 + 「检测完成 09:15:34.500」锚点 + 事件卡<strong>摘要</strong>（09:20:00 · 管理员手动召回 · (admin_01) · 已完成 · chevron-right），此时**不显示**召回范围等明细。<strong>第二级</strong>（点事件卡 <code>toggleAction</code>）：展开事件明细「召回范围 / 召回动作 / 执行结果 + 查看召回日志」。</td></tr>
+      <tr><td>5</td><td>关联分析（4 维度）</td><td><code>renderCorrelationAnalysis</code></td><td>折叠（chevron-down）</td><td>标题「关联分析」+「4 个维度」徽标 + 右侧 ghost 图标按钮。展开：4 个维度切换按钮（发信人/收信人/攻击活动/相似邮件，默认选中发信人+攻击活动）+ 对应维度卡片（发信人：风险趋势图/关联资产/加黑；攻击活动：IOC/影响范围/处置进度条）。</td></tr>
+    </tbody>
+  </table>
+
+  <h2>元素清单（以实时渲染为准）</h2>
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>类型</th><th>文案 / 值</th><th>图标</th><th>交互</th><th>i18n key / 备注</th></tr></thead>
+    <tbody>
+      <tr><td>区块标题</td><td>h3</td><td>安全分析</td><td>lucide-shield（text-blue-600）</td><td>—</td><td>—</td></tr>
+      <tr><td>检测流程标题</td><td>h4 + span</td><td>检测流程 / 总耗时: 536ms</td><td>—</td><td>—</td><td>硬编码 <code>totalElapsed=536</code></td></tr>
+      <tr><td>阶段卡片 ×5</td><td>div.cursor-pointer</td><td>连接层4项12ms / 身份层5项45ms / 内容层3项156ms / 综合策略3项89ms / 智能分析层5项234ms</td><td>circle-check-big（前4通过）/ circle-x（阶段5威胁）</td><td>点击 <code>toggleStage</code> 收/展明细</td><td>默认全展开，可逐个 toggle 折叠</td></tr>
+      <tr><td>阶段徽标</td><td>Badge outline</td><td>通过 ×4 / 威胁 ×1</td><td>—</td><td>—</td><td>threat=红，pass=emerald</td></tr>
+      <tr><td>命中策略行</td><td>flex</td><td>如「IP 信誉库匹配 → 清洁」「DKIM 签名 → Fail」「敏感关键词检测 → 命中紧急话术」</td><td>check-big / triangle-alert</td><td>—</td><td>result 按 status 着色</td></tr>
+      <tr><td>智能体研判 ×5</td><td>flex + Badge</td><td>发信人行为智能体 12% / pipeline.intentAgent 67% / pipeline.marketingAgent 8% / pipeline.phishingAgent 92% / pipeline.retrospectAgent 15%</td><td>—</td><td>—</td><td class="bad">后 4 个渲染为原始 key（词典缺失）</td></tr>
+      <tr><td>最终判定卡</td><td>div.bg-red-50</td><td>最终判定：恶意，已拦截 / 耗时: 536ms</td><td>circle-x（红）</td><td>—</td><td>—</td></tr>
+      <tr><td>时间线按钮</td><td>Button ghost sm</td><td>时间线</td><td>—</td><td>点击展开时间线</td><td>无独立 onClick（与标题共用状态）</td></tr>
+      <tr><td>处置依据 · 动作徽标</td><td>span</td><td>隔离</td><td>—</td><td>—</td><td><code>getActionColor</code>→橙</td></tr>
+      <tr><td>处置依据 · 策略模块</td><td>span</td><td>仿冒邮件检测智能体</td><td>stage 圆点（bg-rose-500）</td><td>—</td><td><code>getModuleName</code></td></tr>
+      <tr><td>处置依据 · 规则</td><td>button</td><td>高管仿冒识别（AI-SPOOF-012）</td><td>external-link</td><td>点击 <code>router.push(basisRoute)</code></td><td>title=前往策略配置页</td></tr>
+      <tr><td>处置依据 · 命中</td><td>span</td><td>AI 判定为 高管 仿冒（置信度：94%）</td><td>—</td><td>—</td><td><code>formatHitDetail</code></td></tr>
+      <tr><td>处置依据 · 检测标签</td><td>—</td><td>（本样本不渲染）</td><td>—</td><td>—</td><td>仅 <code>detectionTags</code> 非空时</td></tr>
+      <tr><td>时间线标题</td><td>h4 + Badge</td><td>事后处置时间线 / 1 个事件</td><td>chevron-right（折叠）</td><td>点击 <code>setShowPostDetectionTimeline</code></td><td>—</td></tr>
+      <tr><td>关联分析标题</td><td>h4 + Badge + Button</td><td>关联分析 / 4 个维度</td><td>chevron-down（折叠）</td><td>点击 <code>setShowCorrelationAnalysis</code></td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="diff-block" style="border:1px solid #fecaca;background:#fef2f2;border-radius:.5rem;padding:1rem 1.25rem;margin:1.25rem 0">
+    <h3 style="color:#b91c1c;margin:0 0 .5rem">源码 vs 实时渲染差异（demo 缺陷，须以浏览器为准）</h3>
+    <ul style="margin:0;padding-left:1.25rem;line-height:1.7">
+      <li><strong class="bad">阶段 5「智能体研判」有 4 个智能体名渲染成原始 i18n key</strong>：<code>pipeline.intentAgent</code> / <code>pipeline.marketingAgent</code>（窄卡内被 <code>truncate</code> 截断为 <code>pipeline.marketingAge...</code>）/ <code>pipeline.phishingAgent</code> / <code>pipeline.retrospectAgent</code>。只有第一个「发信人行为智能体」正常显示中文。<br><span class="warn">根因：mock 数据的 <code>agent.name</code> 直接是 <code>"pipeline.xxxAgent"</code> 字符串，模板中以 <code>{agent.name}</code> 原样输出（等价于 <code>t(key)</code> 但 zh 词典缺该 key → 回落原始 key）；而「发信人行为智能体」在 mock 里本就是中文常量。预览已 1:1 保留此缺陷。</span></li>
+      <li><strong>本 layer 旧版预览用错了样本数据</strong>：曾显示「钓鱼邮件检测智能体 / BEC钓鱼识别（AI-PHISH-003）/ 置信度 91%，BEC：是 / 检测标签 attack:business_email_compromise」。实时 matrix 样本实际为「仿冒邮件检测智能体 / 高管仿冒识别（AI-SPOOF-012）/ 置信度 94% / 无检测标签」。已按实时 DOM 更正，并移除多出的「检测标签」行。</li>
+      <li><strong>「查看详情」按钮不渲染</strong>：仅当 <code>log.phishingAgent</code> 存在时，阶段 5 才用「拦截依据 + 钓鱼邮件智能体 + 查看详情」替代「智能体研判」列表。本 matrix 样本无 <code>phishingAgent</code>，故渲染的是 5 行智能体研判、无「查看详情」——与实时一致。</li>
+      <li><strong>时间线 / 关联分析展开内容为源码重建</strong>：实时截图仅捕获折叠态；预览中展开后注入的时间线事件卡与维度卡片依据 <code>security-analysis-section.tsx</code> 的 mock 结构重建（管理员手动召回场景 / 发信人 + 攻击活动维度），非 live outerHTML 逐字节。</li>
+      <li><strong>已对齐两处交互（对照运行中的 demo 逐项校准）</strong>：① <strong>阶段卡片可 toggle</strong> —— 5 个阶段明细默认全部展开（以 <code>live-analysis-collapsed.html</code> 为准，阶段1-4 命中策略 + 阶段5 智能体研判均在），点击卡片以 DOM 插入/移除命中策略明细节点在展开/折叠间切换（等价 <code>toggleStage</code> 的 <code>isExpanded &amp;&amp; (...)</code> 条件渲染，非 <code>display:none</code>）。② <strong>事后处置时间线为两级展开</strong> —— 点标题/「时间线」按钮只展开到事件摘要（不含召回范围等明细），再点事件卡才展开事件明细（召回范围/召回动作/执行结果/查看召回日志，逐字对齐 <code>live-analysis-expanded.html</code>）。两处折叠均用节点插入/移除实现，使折叠态 DOM 文本不残留被折叠内容。</li>
+    </ul>
+  </div>
+
+  <p class="warn">⚠ 本模块内容<strong>大量硬编码</strong>（风险趋势图、关联资产、攻击活动、智能体建议均为静态 mock），落地时需要对应后端数据：<code>GET /api/v1/mail-logs/:id/events</code>（时间线）+ 检测结果字段 + 关联分析（网关目前<strong>没有</strong>关联分析 API → §10 Q3）。</p>
+
+  <div class="dom-comparison">
+  <h5>DOM 树比对结果（预览 vs 实时 <code>matrix-section-analysis.html</code>）</h5>
+  <table class="spec-table">
+    <thead><tr><th>比对项</th><th>实时 DOM</th><th>预览 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>根节点</td><td><code>div#section-analysis.p-6.border-b.border-gray-200</code></td><td>同</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>子区块渲染顺序</td><td>检测流程 → 处置依据 → 事后处置时间线 → 关联分析</td><td>同</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>检测阶段卡片数</td><td>5（连接层/身份层/内容层/综合策略/智能分析层）</td><td>5</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>阶段默认态</td><td>5 阶段明细全部展开（点击 <code>toggleStage</code> 逐个收起/重现）</td><td>同（点击卡片 DOM 插入/移除明细节点）</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>阶段 5 高亮</td><td>红底 + <code>ring-1 ring-red-400</code>，威胁徽标</td><td>同</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>智能体研判文案</td><td>4 个原始 key（intentAgent/marketingAgent/phishingAgent/retrospectAgent）+ 1 中文</td><td>逐字保留缺陷</td><td class="pass">✅ 一致（含缺陷）</td></tr>
+      <tr><td>处置依据 · 模块名</td><td>仿冒邮件检测智能体</td><td>仿冒邮件检测智能体</td><td class="pass">✅ 已更正</td></tr>
+      <tr><td>处置依据 · 规则</td><td>高管仿冒识别（AI-SPOOF-012）</td><td>高管仿冒识别（AI-SPOOF-012）</td><td class="pass">✅ 已更正</td></tr>
+      <tr><td>处置依据 · 命中</td><td>AI 判定为 高管 仿冒（置信度：94%）</td><td>同</td><td class="pass">✅ 已更正</td></tr>
+      <tr><td>检测标签行</td><td>不渲染（detectionTags 空）</td><td>不渲染（旧版误加，已删）</td><td class="pass">✅ 已更正</td></tr>
+      <tr><td>时间线默认态</td><td>折叠，chevron-right，「1 个事件」</td><td>同</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>时间线展开层级</td><td>两级：标题→事件摘要（无召回范围）；事件卡→事件明细（召回范围/动作/结果）</td><td>同（点标题只出摘要，点事件卡才注入明细节点）</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>关联分析默认态</td><td>折叠，chevron-down，「4 个维度」</td><td>同</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>时间线/关联分析展开内容</td><td>未在 live 截取</td><td>按源码 mock 重建</td><td class="warn">⚠ 重建（见差异块）</td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+<script src="../assets/disposal-preview.js"></script>
+<script>
+/* 复刻 security-analysis-section.tsx 的三类交互：阶段卡片展开/收起、事后处置时间线展开、关联分析展开。
+   预览 DOM 为 live matrix outerHTML；展开注入内容按源码 mock（管理员手动召回 / 发信人+攻击活动维度）重建。 */
+(function () {
+  'use strict';
+  var CHEV_R = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4"><path d="m9 18 6-6-6-6"></path></svg>';
+  var CHEV_D = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-4 h-4"><path d="m6 9 6 6 6-6"></path></svg>';
+  var CHEV_U = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up w-4 h-4"><path d="m18 15-6-6-6 6"></path></svg>';
+  var CHECK_WHITE = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 text-white"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>';
+  var USER = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user w-4 h-4 text-gray-500"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+  var USER_WHITE = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user w-2.5 h-2.5 text-white"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+
+  function textOf(el){ return (el && el.textContent || '').trim(); }
+
+  // 事件明细（第二级）—— 逐字对齐 live-analysis-expanded.html；用 DOM 插入/移除实现折叠，
+  // 保证 textContent（自检据以断言）在折叠态**不含**「召回范围」等明细文案（等价 React `expandedActions.has(id) && (...)`）。
+  var ACTION_DETAIL_HTML =
+    '<div class="flex items-start gap-2"><span class="text-gray-500 w-20 shrink-0">召回范围:</span><span>当前邮件 + 相似邮件（共 5 封）</span></div>'+
+    '<div class="flex items-start gap-2"><span class="text-gray-500 w-20 shrink-0">召回动作:</span><span>从收件箱移除，移至隔离区</span></div>'+
+    '<div class="flex items-start gap-2"><span class="text-gray-500 w-20 shrink-0">执行结果:</span><span>成功 4 封，失败 1 封（已删除）</span></div>'+
+    '<div class="flex gap-2 mt-2"><button class="inline-flex items-center h-7 text-xs rounded-md border px-2 gap-1">查看召回日志</button></div>';
+
+  function buildTimelineBody(){
+    var w = document.createElement('div');
+    w.className = 'relative pl-6 border-l-2 border-gray-200 space-y-4';
+    // 第一级：仅事件摘要（检测完成锚点 + 管理员手动召回摘要行），**不含**事件明细
+    w.innerHTML =
+      '<div class="relative -ml-[25px]"><div class="absolute left-0 w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">'+CHECK_WHITE+'</div><div class="ml-6 text-xs text-gray-500">检测完成 09:15:34.500</div></div>'+
+      '<div class="relative -ml-[25px]"><div class="absolute left-0 w-4 h-4 rounded-full flex items-center justify-center bg-gray-500">'+USER_WHITE+'</div>'+
+        '<div class="ml-6 p-3 rounded-lg border cursor-pointer transition-all bg-gray-50 border-gray-200 hover:border-blue-300" data-action>'+
+          '<div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-xs text-gray-500">09:20:00</span>'+USER+'<span class="font-medium text-sm">管理员手动召回</span><span class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs">(admin_01)</span></div>'+
+          '<div class="flex items-center gap-2"><span class="inline-flex items-center rounded-md bg-green-100 text-green-600 px-2 py-0.5 text-xs">已完成</span><span data-achev>'+CHEV_R+'</span></div></div>'+
+        '</div>'+
+      '</div>';
+    // 第二级：点击事件卡才**插入**明细节点（再点移除），使折叠态 textContent 不含明细
+    var card = w.querySelector('[data-action]');
+    card.addEventListener('click', function(){
+      var d = card.querySelector('[data-adetail]');
+      var chev = card.querySelector('[data-achev]');
+      if (d) {
+        d.parentNode.removeChild(d);
+        if (chev) chev.innerHTML = CHEV_R;
+      } else {
+        d = document.createElement('div');
+        d.setAttribute('data-adetail', '');
+        d.className = 'mt-3 pt-3 border-t border-gray-200 space-y-2 text-sm';
+        d.innerHTML = ACTION_DETAIL_HTML;
+        card.appendChild(d);
+        if (chev) chev.innerHTML = CHEV_D;
+      }
+    });
+    return w;
+  }
+
+  function dimBtn(label, active){
+    return '<button class="inline-flex items-center h-7 text-xs rounded-md px-3 border '+(active?'bg-gray-900 text-white border-gray-900':'bg-transparent text-gray-700 border-gray-300')+'">'+label+'</button>';
+  }
+  function buildCorrelationBody(){
+    var w = document.createElement('div');
+    w.className = 'mt-4';
+    w.innerHTML =
+      '<div class="flex flex-wrap gap-2 mb-4">'+dimBtn('发信人',true)+dimBtn('收信人',false)+dimBtn('攻击活动',true)+dimBtn('相似邮件',false)+'</div>'+
+      // 发信人维度
+      '<div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200"><div class="flex items-center justify-between mb-3"><h5 class="font-medium text-sm">发信人维度</h5><span class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs bg-red-100 text-red-600 border-red-200">仿冒</span></div>'+
+        '<div class="space-y-3">'+
+          '<div class="flex items-start gap-2"><span class="text-gray-500 text-sm w-24 shrink-0">发件人标识:</span><span class="text-sm font-medium">ceo@company.com</span></div>'+
+          '<div class="flex items-start gap-2"><span class="text-gray-500 text-sm w-24 shrink-0">真实发信源:</span><span class="text-sm">203.0.113.45 / company-secure.com</span></div>'+
+          '<div class="p-3 bg-white rounded border"><div class="text-xs font-medium mb-2">风险趋势图（近30天）</div>'+
+            '<div class="space-y-2">'+
+              '<div class="flex items-center gap-2"><span class="text-xs w-16">发信总量</span><div class="flex-1 h-3 bg-gray-200 rounded overflow-hidden"><div class="h-full bg-blue-500" style="width:100%"></div></div><span class="text-xs w-8">12</span></div>'+
+              '<div class="flex items-center gap-2"><span class="text-xs w-16">策略拦截</span><div class="flex-1 h-3 bg-gray-200 rounded overflow-hidden"><div class="h-full bg-red-500" style="width:66%"></div></div><span class="text-xs w-8">8</span></div>'+
+              '<div class="flex items-center gap-2"><span class="text-xs w-16">隔离</span><div class="flex-1 h-3 bg-gray-200 rounded overflow-hidden"><div class="h-full bg-orange-500" style="width:16%"></div></div><span class="text-xs w-8">2</span></div>'+
+            '</div></div>'+
+          '<div class="p-3 bg-white rounded border"><div class="text-xs font-medium mb-2">关联资产</div><div class="space-y-1">'+
+            '<div class="flex items-center gap-2 text-xs"><span>关联域名:</span><span class="inline-flex items-center rounded-md border px-2 py-0.5 bg-red-100 text-red-600">company-secure.com 🔴</span><span class="inline-flex items-center rounded-md border px-2 py-0.5 bg-yellow-100 text-yellow-600">company-finance.com 🟡</span></div>'+
+            '<div class="flex items-center gap-2 text-xs"><span>关联IP段:</span><span class="inline-flex items-center rounded-md border px-2 py-0.5 bg-red-100 text-red-600">203.0.113.0/24</span><span class="inline-flex items-center rounded-md border px-2 py-0.5 bg-yellow-100 text-yellow-600">198.51.100.0/24</span></div>'+
+          '</div></div>'+
+          '<div class="flex flex-wrap gap-2"><button class="inline-flex items-center h-7 text-xs rounded-md border px-2 gap-1">查看该发信人全部 12 封邮件</button><button class="inline-flex items-center h-7 text-xs rounded-md border px-2 gap-1">加入全局监控</button><button class="inline-flex items-center h-7 text-xs rounded-md border border-red-500 text-red-500 px-2 gap-1">一键加黑关联资产</button></div>'+
+        '</div></div>'+
+      // 攻击活动维度
+      '<div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200"><div class="flex items-center justify-between mb-3"><h5 class="font-medium text-sm">攻击活动: Q2财务仿冒</h5><span class="inline-flex items-center rounded-md bg-red-100 text-red-600 px-2 py-0.5 text-xs">🔴 活跃中</span></div>'+
+        '<div class="space-y-3">'+
+          '<div class="grid grid-cols-2 gap-2 text-xs"><div><span class="text-gray-500">攻击状态:</span> <span class="text-red-600">活跃中（最后发现：2 小时前）</span></div><div><span class="text-gray-500">攻击窗口:</span> 2026-05-28 08:00 ~ 2026-05-30 14:00</div></div>'+
+          '<div class="p-3 bg-white rounded border"><div class="text-xs font-medium mb-2">攻击模板 IOC</div><div class="space-y-1 text-xs"><div><span class="text-gray-500">主题正则:</span> /Q2.*财务.*报表.*紧急/, /月度.*报销/</div><div><span class="text-gray-500">附件哈希:</span> d4e5f6..., a1b2c3...</div><div><span class="text-gray-500">仿冒角色:</span> CEO, CFO, 财务总监</div></div></div>'+
+          '<div class="p-3 bg-white rounded border"><div class="text-xs font-medium mb-2">影响范围全景</div><div class="flex gap-4 text-xs mb-2"><span>总邮件数：47 封</span><span>涉及用户：12 人</span><span>涉及租户：3 个</span></div>'+
+            '<div class="space-y-1 text-xs"><div class="flex items-center gap-2"><span class="w-20">已拦截:</span><span>35 (74%)</span></div><div class="flex items-center gap-2"><span class="w-20">已隔离:</span><span>7 (15%)</span></div><div class="flex items-center gap-2"><span class="w-20">已召回:</span><span>4 (9%)</span></div><div class="flex items-center gap-2"><span class="w-20">待确认:</span><span>1 (2%)</span></div></div>'+
+            '<div class="mt-3"><div class="flex items-center justify-between text-xs mb-1"><span>处置进度</span><span>74%</span></div><div class="h-2 bg-gray-200 rounded overflow-hidden"><div class="h-full bg-gray-900" style="width:74%"></div></div></div></div>'+
+          '<div class="flex flex-wrap gap-2"><button class="inline-flex items-center h-7 text-xs rounded-md border px-2 gap-1">查看 47 封邮件列表</button><button class="inline-flex items-center h-7 text-xs rounded-md bg-green-600 text-white px-2 gap-1">批量召回剩余 1 封</button><button class="inline-flex items-center h-7 text-xs rounded-md border px-2 gap-1">生成事件报告</button><button class="inline-flex items-center h-7 text-xs rounded-md border border-orange-500 text-orange-500 px-2 gap-1">关闭活动</button></div>'+
+        '</div></div>';
+    return w;
+  }
+
+  function initAnalysis(p){
+    /* 1) 阶段卡片展开/收起（DOM 插入/移除明细节点，等价 React `isExpanded && (...)` 条件渲染，
+          textContent 随之增减 —— display:none 会残留在 textContent 里，故不用它）。
+          默认态：5 个阶段明细全部展开（以 live-analysis-collapsed.html 为准）；点击卡片逐个收起，再点重现。 */
+    var pipe = p.querySelector('.overflow-x-auto');
+    if (pipe) {
+      Array.prototype.forEach.call(pipe.children, function (wrap) {
+        var card = wrap.firstElementChild;
+        if (!card) return;
+        var detail = card.querySelector('.mt-3.pt-3'); // 命中策略 / 智能体研判 明细块（卡片末尾子节点）
+        if (!detail) return;
+        // 默认全部展开：明细节点保持在 DOM 中；点击切换
+        card.addEventListener('click', function () {
+          if (detail.parentNode) { card.removeChild(detail); } // 展开 → 折叠
+          else { card.appendChild(detail); }                    // 折叠 → 展开（回到卡片末尾）
+        });
+      });
+    }
+
+    /* 2) 事后处置时间线展开（标题 + 最终判定「时间线」按钮共用状态）。
+          两级折叠：标题只展开到事件摘要层，事件明细由 buildTimelineBody 内的事件卡点击控制。
+          折叠时**移除** tlBody（而非 display:none），保证 textContent 在折叠态不含时间线文案。 */
+    var tlHeader = null, tlParent = null, tlBody = null, tlChev = null, tlOpen = false;
+    Array.prototype.forEach.call(p.querySelectorAll('.cursor-pointer'), function (h) {
+      if (!tlHeader && textOf(h).indexOf('事后处置时间线') === 0) { tlHeader = h; }
+    });
+    var tlBtn = null;
+    Array.prototype.forEach.call(p.querySelectorAll('button'), function (b) {
+      if (textOf(b) === '时间线') tlBtn = b;
+    });
+    function toggleTimeline(){
+      if (!tlHeader) return;
+      tlParent = tlHeader.parentElement; // div.mb-6
+      tlChev = tlHeader.querySelector('svg');
+      tlOpen = !tlOpen;
+      if (tlOpen) {
+        tlBody = buildTimelineBody(); tlBody.style.marginTop = '1rem'; tlParent.appendChild(tlBody);
+        if (tlChev) tlChev.outerHTML = CHEV_D;
+      } else {
+        if (tlBody && tlBody.parentNode) { tlBody.parentNode.removeChild(tlBody); }
+        tlBody = null;
+        if (tlChev) tlChev.outerHTML = CHEV_R;
+      }
+    }
+    if (tlHeader) tlHeader.addEventListener('click', toggleTimeline);
+    if (tlBtn) tlBtn.addEventListener('click', function(e){ e.stopPropagation(); toggleTimeline(); });
+
+    /* 3) 关联分析展开 */
+    var coHeader = null;
+    Array.prototype.forEach.call(p.querySelectorAll('.cursor-pointer'), function (h) {
+      if (!coHeader && textOf(h).indexOf('关联分析') === 0) { coHeader = h; }
+    });
+    if (coHeader) {
+      var coBody = null, coOpen = false;
+      coHeader.addEventListener('click', function () {
+        var parent = coHeader.parentElement; // div.mt-6
+        if (!coBody) { coBody = buildCorrelationBody(); parent.appendChild(coBody); }
+        var chevSpan = coHeader.querySelector('button svg') || coHeader.querySelectorAll('svg')[coHeader.querySelectorAll('svg').length - 1];
+        coOpen = !coOpen;
+        coBody.style.display = coOpen ? '' : 'none';
+        if (chevSpan) chevSpan.outerHTML = coOpen ? CHEV_U : CHEV_D;
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    Array.prototype.forEach.call(document.querySelectorAll('.component-preview[data-preview="analysis"]'), function (p) {
+      try { initAnalysis(p); } catch (e) { console.error('[analysis-preview]', e); }
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>IP黑白名单 - 批量选择与删除</title>
+  <style>
+    :root{font-family:Inter,"PingFang SC","Microsoft YaHei",sans-serif;color:#111827;background:#f5f7fa;letter-spacing:0}
+    *{box-sizing:border-box}body{margin:0}.top{padding:24px 32px;background:#fff;border-bottom:1px solid #e5e7eb}.top h1{margin:0 0 8px;font-size:24px}.top p{margin:4px 0;color:#4b5563;font-size:14px}.wrap{max-width:1180px;margin:auto;padding:24px}.panel{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin-bottom:20px}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.tabs{display:flex;border-bottom:1px solid #e5e7eb;margin-bottom:16px}.tab{border:0;background:none;padding:10px 16px;color:#6b7280;cursor:pointer}.tab.active{color:#1677ff;border-bottom:2px solid #1677ff;font-weight:600}.spacer{flex:1}.btn{height:34px;padding:0 12px;border:1px solid #d1d5db;border-radius:6px;background:#fff;cursor:pointer}.btn.primary{background:#1677ff;color:#fff;border-color:#1677ff}.btn.danger{background:#dc2626;color:#fff;border-color:#dc2626}.btn[hidden]{display:none}.search{height:34px;width:220px;border:1px solid #d1d5db;border-radius:6px;padding:0 10px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:11px 10px;text-align:left;border-bottom:1px solid #e5e7eb;white-space:nowrap}th{background:#fafafa;font-weight:600}.selected td{background:rgba(239,246,255,.65)}.check{width:16px;height:16px;accent-color:#1677ff}.badge{display:inline-block;padding:2px 7px;border-radius:4px;background:#fee2e2;color:#b91c1c}.ok{background:#dcfce7;color:#15803d}.note{border-left:4px solid #1677ff;background:#eff6ff;padding:12px 14px;margin:14px 0;font-size:14px}.warn{border-left-color:#f59e0b;background:#fffbeb}.shot{max-width:100%;border:1px solid #e5e7eb;border-radius:6px}.caption{font-size:13px;color:#6b7280;margin-top:8px}.spec{width:100%;border-collapse:collapse}.spec th,.spec td{white-space:normal;vertical-align:top}.status-ok{color:#15803d;font-weight:700}.status-warn{color:#b45309;font-weight:700}.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;padding:20px}.modal[hidden]{display:none}.dialog{width:min(440px,100%);background:#fff;border-radius:8px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.24)}.dialog h2{font-size:18px;margin:0 0 10px}.dialog p{color:#4b5563;line-height:1.6}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}@media(max-width:760px){.wrap{padding:12px}.top{padding:18px}.search{width:100%}.table-wrap{overflow:auto}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <h1>层级 7：IP 黑/白名单批量选择与删除</h1>
+    <p>需求依据：用户当前描述 + 当前会话历史 + demo 源码；原始 spec 仅作非权威差异对照。</p>
+    <p>demo 源：<code>components/filter-rules-new/connection-layer-page.tsx</code>，当前实现 commit：<code>6f34f80</code>。</p>
+  </header>
+  <main class="wrap">
+    <section class="panel">
+      <h2>可交互预览</h2>
+      <div class="tabs"><button class="tab active" data-tab="black">黑名单规则</button><button class="tab" data-tab="white">白名单规则</button></div>
+      <div class="toolbar">
+        <input class="search" placeholder="搜索 IP 地址、优先级">
+        <span class="spacer"></span>
+        <button class="btn primary">新增规则</button><button class="btn">批量导入</button><button class="btn">导出</button>
+        <button class="btn danger" id="deleteSelected" hidden>删除选中（0）</button>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th><input class="check" id="selectAll" type="checkbox" aria-label="全选当前页"></th><th>规则名称</th><th>IP地址/段</th><th>执行动作</th><th>优先级</th><th>有效期至</th><th>状态</th><th>修改时间</th><th>操作</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+      <div class="note">切换 Tab 后分别维护选中集合；表头全选只增删当前页 ID，其他页已选 ID 保留。点击行复选框不会触发行点击事件。</div>
+    </section>
+
+    <section class="panel">
+      <h2>运行态截图证据</h2>
+      <img class="shot" src="./screenshots/07-ipfilter-list-toolbar.png" alt="变更前 IP 黑白名单列表与工具栏运行态截图">
+      <p class="caption">既有 agent-browser 截图（2026-07-18，变更前）：当时为 8 列且没有批量选择。当前目标为新增选择列后的 9 列；本轮浏览器控制后端返回“No browser is available”，因此不伪造新的运行态截图。</p>
+    </section>
+
+    <section class="panel">
+      <h2>DOM 对比与复核</h2>
+      <table class="spec"><thead><tr><th>对比项</th><th>既有 agent-browser DOM/截图</th><th>当前源码目标</th><th>结果</th></tr></thead><tbody>
+        <tr><td>表头列数</td><td>8 列，无选择列</td><td>9 列，首列为全选 Checkbox</td><td class="status-warn">实现已变更，待浏览器复验</td></tr>
+        <tr><td>行节点</td><td>无行 Checkbox/选中高亮</td><td>首列 Checkbox；选中行为 <code>bg-blue-50/50 dark:bg-blue-950/20</code></td><td class="status-warn">源码已核对</td></tr>
+        <tr><td>工具栏</td><td>新增规则 / 批量导入 / 导出</td><td>有选中项后追加红色“删除选中（N）”</td><td class="status-warn">源码已核对</td></tr>
+        <tr><td>确认弹窗</td><td>仅有单条删除 AlertDialog 证据</td><td>共用 <code>batchDeleteIpDialogOpen</code> 批量删除 AlertDialog</td><td class="status-warn">源码已核对</td></tr>
+        <tr><td>Tab 状态隔离</td><td>旧 DOM 无批量状态</td><td><code>selectedBlacklistIds</code> / <code>selectedWhitelistIds</code> 独立</td><td class="status-ok">状态逻辑已核对</td></tr>
+      </tbody></table>
+    </section>
+
+    <section class="panel">
+      <h2>验收清单</h2>
+      <table class="spec"><thead><tr><th>项目</th><th>结论</th><th>证据</th></tr></thead><tbody>
+        <tr><td>黑/白名单选中状态互不干扰</td><td class="status-ok">已解决</td><td>两套 state + 当前 Tab 映射</td></tr>
+        <tr><td>跨页全选保留</td><td class="status-ok">已解决</td><td><code>new Set</code> 追加当前页；取消仅移除当前页</td></tr>
+        <tr><td>删除按钮条件展示及数量</td><td class="status-ok">已解决</td><td><code>currentSelectedIds.length &gt; 0</code></td></tr>
+        <tr><td>确认后删除、清空、回第 1 页</td><td class="status-ok">已解决</td><td><code>handleConfirmIpBatchDelete</code></td></tr>
+        <tr><td>当前运行态 DOM 与截图</td><td class="status-warn">待复验</td><td>agent-browser 无可用浏览器会话</td></tr>
+      </tbody></table>
+    </section>
+  </main>
+
+  <div class="modal" id="modal" hidden><div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dialogTitle">
+    <h2 id="dialogTitle">确认批量删除</h2><p id="dialogText"></p><p>此操作不可撤销。</p>
+    <div class="actions"><button class="btn" id="cancel">取消</button><button class="btn danger" id="confirm">确认删除</button></div>
+  </div></div>
+  <script>
+    const data={black:[{id:'b1',name:'恶意网段封禁',ip:'192.0.2.0/24',action:'阻断',priority:100,status:'启用'},{id:'b2',name:'扫描器地址',ip:'198.51.100.17',action:'丢弃',priority:90,status:'启用'}],white:[{id:'w1',name:'办公出口',ip:'203.0.113.8',action:'投递',priority:120,status:'启用'},{id:'w2',name:'合作伙伴',ip:'203.0.113.0/28',action:'标记投递',priority:80,status:'停用'}]};
+    const selected={black:new Set(),white:new Set()};let current='black';
+    const rows=document.getElementById('rows'),all=document.getElementById('selectAll'),del=document.getElementById('deleteSelected'),modal=document.getElementById('modal');
+    function render(){rows.innerHTML=data[current].map(r=>`<tr class="${selected[current].has(r.id)?'selected':''}"><td><input class="check rowcheck" type="checkbox" data-id="${r.id}" ${selected[current].has(r.id)?'checked':''} aria-label="选择 ${r.name}"></td><td>${r.name}</td><td><code>${r.ip}</code></td><td><span class="badge">${r.action}</span></td><td>${r.priority}</td><td>长期有效</td><td><span class="badge ok">${r.status}</span></td><td>2026-07-21</td><td>编辑　删除</td></tr>`).join('');const pageIds=data[current].map(r=>r.id);all.checked=pageIds.length>0&&pageIds.every(id=>selected[current].has(id));all.indeterminate=!all.checked&&pageIds.some(id=>selected[current].has(id));del.hidden=selected[current].size===0;del.textContent=`删除选中（${selected[current].size}）`;}
+    document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{current=t.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===t));render()});
+    rows.onclick=e=>{const c=e.target.closest('.rowcheck');if(!c)return;e.stopPropagation();c.checked?selected[current].add(c.dataset.id):selected[current].delete(c.dataset.id);render()};
+    all.onchange=()=>{data[current].forEach(r=>all.checked?selected[current].add(r.id):selected[current].delete(r.id));render()};
+    del.onclick=()=>{document.getElementById('dialogText').textContent=`确定删除当前${current==='black'?'黑':'白'}名单中选中的 ${selected[current].size} 条规则吗？`;modal.hidden=false};
+    document.getElementById('cancel').onclick=()=>modal.hidden=true;document.getElementById('confirm').onclick=()=>{data[current]=data[current].filter(r=>!selected[current].has(r.id));selected[current].clear();modal.hidden=true;render()};render();
+  </script>
+</body>
+</html>

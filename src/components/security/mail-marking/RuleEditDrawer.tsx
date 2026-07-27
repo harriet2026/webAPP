@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { AlertTriangle, Beaker, ChevronDown, ChevronUp, Eye, Info, Loader2, X } from 'lucide-react'
+import { AlertTriangle, Beaker, Eye, Info, Loader2, X } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,7 +12,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import { CollapsibleSectionTrigger } from '@/components/ui/collapsible-section-trigger'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   listMailMarkingScopes, saveMailMarkingRule,
@@ -206,23 +207,21 @@ export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriori
 
           <div className="space-y-4 overflow-y-auto bg-muted p-6" data-testid="mail-marking-editor-preview-column">
             <Collapsible open={previewOpen} onOpenChange={setPreviewOpen}>
-              <CollapsibleTrigger className="flex h-9 w-full items-center justify-between rounded-md border bg-background px-3 text-sm font-medium shadow-xs hover:bg-accent">
-                <span className="flex items-center gap-2"><Eye className="h-4 w-4" />{t('configPreview')}</span>
-                {previewOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </CollapsibleTrigger>
+              <CollapsibleSectionTrigger className="h-9 border bg-background text-foreground shadow-xs">
+                <Eye className="h-4 w-4" />{t('configPreview')}
+              </CollapsibleSectionTrigger>
               <CollapsibleContent className="mt-3">
                 <EmailPreview form={form} scopeNames={Object.fromEntries(availableScopes.map((scope) => [scope.key, scope.name]))} />
               </CollapsibleContent>
             </Collapsible>
 
             <Collapsible open={testOpen} onOpenChange={setTestOpen}>
-              <CollapsibleTrigger
-                className="flex h-9 w-full items-center justify-between rounded-md border bg-background px-3 text-sm font-medium shadow-xs hover:bg-accent"
+              <CollapsibleSectionTrigger
+                className="h-9 border bg-background text-foreground shadow-xs"
                 data-testid="mail-marking-test-toggle"
               >
-                <span className="flex items-center gap-2"><Beaker className="h-4 w-4" />{t('simulateTest')}</span>
-                {testOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </CollapsibleTrigger>
+                <Beaker className="h-4 w-4" />{t('simulateTest')}
+              </CollapsibleSectionTrigger>
               <CollapsibleContent className="mt-3">
                 <div className="rounded-lg border bg-background p-4">
                   <SimulateTestPanel payload={form} />
@@ -474,7 +473,7 @@ function ScopePicker({ placeholder, options, selected, onChange, testId }: {
           {selectedOptions.map((option) => (
             <Badge key={option.key} variant="secondary" className="gap-1">
               {option.name}
-              <button type="button" aria-label={`remove ${option.name}`} onClick={() => onChange(selected.filter((key) => key !== option.key))}>
+              <button type="button" className="rounded-sm text-muted-foreground transition-[color] duration-[120ms] ease-out motion-reduce:transition-none hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60" aria-label={`remove ${option.name}`} onClick={() => onChange(selected.filter((key) => key !== option.key))}>
                 <X className="h-3 w-3" />
               </button>
             </Badge>
@@ -499,7 +498,7 @@ function VariableBadges({ variables, onInsert }: { variables: readonly string[];
     <div className="mt-2 flex flex-wrap items-center gap-1.5" data-testid="mail-marking-variables">
       <span className="text-xs text-muted-foreground">{t('availableVariables')}:</span>
       {variables.map((variable) => (
-        <button type="button" key={variable} onClick={() => onInsert(variable)}>
+        <button type="button" key={variable} className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring/60" onClick={() => onInsert(variable)}>
           <Badge variant="outline" className="cursor-pointer font-mono text-[11px] hover:bg-primary/10">{`{${variable}}`}</Badge>
         </button>
       ))}

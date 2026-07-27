@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系统状态 - HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== 设计变量（参考 demo globals.css） ===== */
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.55;
+      font-size: 14px;
+      padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1.2rem; margin: 2.2rem 0 .8rem; padding-bottom: .35rem; border-bottom: 2px solid var(--primary); }
+    h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; }
+    h4 { font-size: .95rem; margin: 1.2rem 0 .5rem; }
+    h5 { font-size: .85rem; margin: .8rem 0 .4rem; }
+    p { margin: .45rem 0; }
+    code { font-family: var(--font-mono); font-size: .85em; background: var(--muted); padding: .1em .35em; border-radius: 4px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    a { color: oklch(0.52 0.226 262); }
+
+    /* ===== 头部 / 元信息 ===== */
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .spec-header .subtitle { color: var(--muted-foreground); font-size: .9rem; }
+    .meta-table { border-collapse: collapse; width: 100%; margin-top: .8rem; font-size: 13px; }
+    .meta-table td { border: 1px solid var(--border); padding: 5px 10px; vertical-align: top; }
+    .meta-table td:first-child { background: var(--muted); font-weight: 600; white-space: nowrap; width: 11em; }
+
+    /* ===== 组件目录 ===== */
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem; margin-top: 1.2rem; }
+    .component-toc ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .component-toc li { margin: .3rem 0; }
+    .toc-badge { display: inline-block; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 999px; padding: 0 .5em; margin-left: .4em; vertical-align: middle; }
+    .toc-layer-links { margin-left: .6em; font-size: 12px; }
+    .toc-layer-links a { margin-right: .5em; }
+
+    /* ===== 表格 ===== */
+    .spec-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0 1rem; background: var(--card); }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); font-weight: 600; white-space: nowrap; }
+    .spec-table td.num { text-align: right; font-family: var(--font-mono); }
+    .spec-table .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    /* ===== 截图 ===== */
+    .screenshot-figure { margin: .8rem 0 1.2rem; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .screenshot-figure figcaption { font-size: 12px; color: var(--muted-foreground); margin-top: .35rem; }
+
+    /* ===== 组件规格块 ===== */
+    .component-spec { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem 1.4rem; margin: 1.2rem 0; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: .9rem 1.1rem; margin: 1rem 0; background: oklch(0.99 0 0); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; background: var(--primary); color: #fff; border-radius: 999px; font-size: .8em; font-weight: 700; margin-right: .4em; }
+    .trigger-path { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .45rem .7rem; margin: .5rem 0; }
+    .layer-nav { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 13px; }
+
+    /* ===== 可交互组件预览区 ===== */
+    .component-preview { border: 2px dashed oklch(0.7 0.12 262); border-radius: 10px; padding: 18px; background: #f4f5f7; overflow-x: auto; margin: .7rem 0; position: relative; }
+    .component-preview::before { content: "可交互预览（提取自运行中的 demo）"; position: absolute; top: -9px; left: 14px; background: oklch(0.52 0.226 262); color: #fff; font-size: 10.5px; padding: 0 8px; border-radius: 999px; line-height: 16px; }
+    .preview-note { font-size: 12px; color: var(--muted-foreground); background: oklch(0.975 0.02 95); border: 1px solid oklch(0.9 0.06 95); border-radius: 6px; padding: .4rem .7rem; margin: .4rem 0 .8rem; }
+    /* demo 提取片段兜底（Tailwind CDN 未覆盖的 shadcn 主题类） */
+    .component-preview .bg-card { background: #fff; }
+    .component-preview .text-card-foreground { color: #0a0a0a; }
+    .component-preview .bg-popover { background: #fff; }
+    .component-preview .text-popover-foreground { color: #0a0a0a; }
+    .component-preview .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .component-preview .border-input { border-color: #e5e7eb; }
+    .component-preview svg { flex-shrink: 0; }
+    .component-preview .recharts-responsive-container { min-height: 320px; }
+    .component-preview [data-slot="card"] { border-color: #e5e7eb; }
+    .component-preview button { cursor: pointer; }
+    .component-preview button:disabled { cursor: default; }
+    @keyframes spec-spin { to { transform: rotate(360deg); } }
+    .component-preview .animate-spin { animation: spec-spin 1s linear infinite; }
+
+    /* 路由提示浮层 */
+    .route-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 13px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 99; opacity: 0; transition: opacity .2s; pointer-events: none; font-family: var(--font-mono); }
+    .route-toast.show { opacity: 1; }
+
+    /* ===== DOM 比对 ===== */
+    .dom-comparison { background: oklch(0.975 0.008 262); border: 1px solid oklch(0.85 0.03 262); border-radius: 8px; padding: .6rem .9rem; margin-top: .8rem; }
+    .dom-comparison h5 { margin: .2rem 0 .4rem; }
+
+    /* ===== 差异 / 需确认 ===== */
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .diff-section h2 { border-bottom-color: var(--diff-border); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .question-section h2 { border-bottom-color: var(--question-border); }
+    .diff-table td:first-child, .question-table td:first-child { font-weight: 700; white-space: nowrap; }
+
+    /* ===== 徽标 ===== */
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 .55em; line-height: 1.6; vertical-align: middle; }
+    .tag-green { background: #dcfce7; color: #15803d; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-gray { background: #f3f4f6; color: #4b5563; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+
+    .mermaid { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .6rem; margin: .8rem 0; overflow-x: auto; }
+
+    /* 头部预览需要让下拉浮层溢出容器（overflow-x:auto 会连带裁剪 y 轴） */
+    #preview-header { overflow: visible; }
+  </style>
+</head>
+<body>
+
+<!-- ============ 0. 元信息头 ============ -->
+<header class="spec-header">
+  <h1>系统状态 详细产品规格说明</h1>
+  <p class="subtitle">全站安全态势聚合入口，3 秒掌握系统健康度 —— 统一运营指挥中心，态势感知与快速处置。</p>
+  <table class="meta-table">
+    <tr><td>模块子目录</td><td><code>system-status/</code></td></tr>
+    <tr><td>demo 路由</td><td><code>/</code>（app/page.tsx，spec §0.1 定义的首页根路由）与 <code>/security-ops-dashboard</code>（侧边栏「系统状态」href）<b>渲染同一组件</b>，浏览器验证均可访问</td></tr>
+    <tr><td>demo 源</td><td><code>design/origin/demo/components/security-ops/security-ops-dashboard.tsx</code>（628 行，SecurityOpsDashboard）；依赖 <code>contexts/product-profile-context.tsx</code>、<code>contexts/agent-status-context.tsx</code>、<code>lib/product-profiles.ts</code></td></tr>
+    <tr><td>spec 源</td><td><code>design/origin/spec/0703系统状态.md</code>（§0–§11 全覆盖）</td></tr>
+    <tr><td>规格版本</td><td><b>v1</b></td></tr>
+    <tr><td>生成日期</td><td>2026-07-21</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>浏览器验证</td><td>headless Chrome CDP · <code>http://localhost:3111</code> · 视口 1440×1460（另 1024 / 1920 断点）· 形态 <code>cloud</code>（云网关，AI+多租户）× 视角 platform / tenant · 传统版 <code>legacy-multi</code></td></tr>
+    <tr><td>遵循约束</td><td><code>design/origin/implement.md</code>：四语国际化；界面依赖规则系统时复用统一规则系统（本页无规则编辑，仅聚合展示）；产品 API 定义不强制落地，优先现有网关 API 协同；与网关底层冲突处列入 §10 需确认</td></tr>
+    <tr><td>产品形态差异</td><td>AI 版专属：智能体运行概况卡（<code>capabilities.ai</code>）；平台视角专属：系统在线节点 KPI 卡 + 系统与服务健康卡（<code>resolve("monitor-infrastructure").visible</code>）；租户视角：待办与告警仅 <code>scope:"tenant"</code> 项</td></tr>
+  </table>
+</header>
+
+<!-- ============ 0.1 组件列表 ============ -->
+<nav class="component-toc">
+  <h2 style="margin-top:0;border:none;">📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 页面头部（标题 + 时间范围选择器 + 刷新按钮）</a> <span class="toc-badge">2层</span>
+      <span class="toc-layer-links"><a href="./layer-1-range-select.html">层级1：时间范围下拉与切换</a></span></li>
+    <li><a href="#component-2-2">2.2 综合健康状态条</a> <span class="toc-badge">1层·3变体</span></li>
+    <li><a href="#component-2-3">2.3 核心 KPI 卡片区（4 卡）</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-4">2.4 威胁态势趋势图</a> <span class="toc-badge">2层</span>
+      <span class="toc-layer-links"><a href="./layer-2-legend-toggle.html">层级1：图例显隐切换（含 Tooltip）</a></span></li>
+    <li><a href="#component-2-5">2.5 待办与告警</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-6">2.6 智能体运行概况</a> <span class="toc-badge">1层</span> <span class="tag tag-blue">仅 AI 版</span></li>
+    <li><a href="#component-2-7">2.7 威胁来源 TOP5</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-8">2.8 系统与服务健康</a> <span class="toc-badge">1层</span> <span class="tag tag-blue">仅平台视角</span></li>
+    <li>附加裁剪态：<span class="toc-layer-links"><a href="./layer-3-viewer-tenant.html">租户视角裁剪态</a> · <a href="./layer-4-form-legacy.html">传统版裁剪态</a></span></li>
+  </ul>
+</nav>
+
+<!-- ============ 0.2 版本历史 ============ -->
+<section id="version-history">
+  <h2>0.2 版本历史</h2>
+  <table class="spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody>
+      <tr><td>v1</td><td>2026-07-21</td><td class="mono">804efb9</td><td class="mono">804efb9</td><td>初版：8 组件全量提取（头部/健康条/4 KPI/趋势/告警/智能体/TOP5/服务健康），4 交互层级子文件（时间范围下拉、图例显隐、租户视角、传统版），11 张浏览器截图，三时间范围数据全验证</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 1. 页面布局结构 ============ -->
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <p>页面在全局布局（左侧深色侧边栏 256px + 顶栏）右侧内容区渲染，自上而下五个区块：</p>
+  <table class="spec-table">
+    <thead><tr><th>区块</th><th>结构 / Tailwind 栅格</th><th>浏览器实测（1440px 平台视角）</th></tr></thead>
+    <tbody>
+      <tr><td>① 页面头部</td><td><code>bg-white border-b px-6 py-4</code>，flex 两端对齐</td><td>1120×81px，左标题右控件</td></tr>
+      <tr><td>② 综合健康状态条</td><td><code>rounded-md border px-4 py-3</code>，flex</td><td>1072×46px，红色危险态</td></tr>
+      <tr><td>③ KPI 卡片区</td><td><code>grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4</code>（平台）/ <code>xl:grid-cols-3</code>（租户）</td><td>4 卡各 256×214px</td></tr>
+      <tr><td>④ 趋势 + 告警</td><td><code>grid lg:grid-cols-3</code>，趋势卡 <code>lg:col-span-2</code></td><td>趋势 707×468px + 告警 341×468px</td></tr>
+      <tr><td>⑤ 底部概览</td><td><code>grid lg:grid-cols-N</code>，N = 可见卡数（智能体? + TOP5 + 服务健康?）自适应 1–3</td><td>平台 AI 版 3 卡各 341×340px</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-full-default.png" alt="整页默认态（云网关 · 平台视角 · 今日）">
+    <figcaption>整页默认态截图 —— 形态 cloud（AI+多租户）· 平台视角 · 时间范围「今日」· 视口 1440px。健康条为红色危险态（2 项紧急事件）。</figcaption>
+  </figure>
+  <h3>1.1 视觉规范（浏览器 computed 实测）</h3>
+  <table class="spec-table">
+    <thead><tr><th>项</th><th>值</th></tr></thead>
+    <tbody>
+      <tr><td>字体</td><td><code>Geist, "Geist Fallback"</code>（demo 实测 body fontFamily）</td></tr>
+      <tr><td>页面背景</td><td><code>bg-gray-100</code>（内容区）；卡片 <code>--card: #fff</code></td></tr>
+      <tr><td>主色</td><td><code>--primary: oklch(0.52 0.226 262)</code>（蓝，链接/强调 <code>text-blue-600</code>）</td></tr>
+      <tr><td>圆角</td><td><code>--radius: 0.625rem</code>；卡片 <code>rounded-xl</code>，状态条 <code>rounded-md</code></td></tr>
+      <tr><td>威胁分类配色</td><td>钓鱼 <code>#ef4444</code> · 仿冒 <code>#f97316</code> · 垃圾 <code>#eab308</code> · 病毒 <code>#991b1b</code> · 恶意链接 <code>#06b6d4</code>（与邮件安全总览一致）</td></tr>
+      <tr><td>告警级别圆点</td><td>danger <code>bg-red-500</code> · warning <code>bg-orange-500</code> · info <code>bg-blue-500</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 2. 逐组件规格 ============ -->
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <!-- ===== 2.1 页面头部 ===== -->
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 页面头部（标题 + 时间范围选择器 + 刷新按钮）<span class="toc-badge">2层</span></h3>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>demo 源位置</td><td><code>security-ops-dashboard.tsx</code> L266–290</td></tr>
+        <tr><td>spec 章节</td><td>§1.1 标题区 [Base] · §1.2 全局控件 [Base]</td></tr>
+        <tr><td>交互层级</td><td>2（层级0 默认态内嵌；层级1 下拉展开与切换 → <a href="./layer-1-range-select.html">子文件</a>）</td></tr>
+      </tbody>
+    </table>
+    <div class="mermaid">
+graph LR
+  L0["层级0 默认态<br/>(今日)"] -- 点击时间范围触发器 --> L1["层级1 下拉打开<br/>(radix Select listbox)"]
+  L1 -- 选择 最近7天/最近30天 --> L0b["层级0' 数据刷新<br/>(KPI/趋势/TOP5 全联动)"]
+  L0 -- 点击刷新 --> R["图标旋转 + 趋势数据重新生成"]
+  R -- 再次点击刷新 --> L0
+    </div>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认态（今日）</h4>
+      <div class="trigger-path">触发路径：页面加载即渲染。</div>
+      <div class="component-preview" id="preview-header">
+<div class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-6 py-4"><div class="flex items-center justify-between"><div><h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">系统状态</h1><p class="text-sm text-gray-500 dark:text-gray-400">全站安全态势聚合入口，3 秒掌握系统健康度</p></div><div class="flex items-center gap-3"><button type="button" role="combobox" aria-controls="radix-_R_pinebn9lb_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-32"><span data-slot="select-value" style="pointer-events:none">今日</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw h-4 w-4 mr-2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>刷新</button></div></div></div>
+      </div>
+      <p class="preview-note">预览可操作：点击时间范围触发器展开/收起选项并可选择（选择后触发器文案更新，并联动下方 2.3 KPI 预览卡数值——与 demo 全页联动行为一致的演示；下拉浮层为规格页脚本注入的交互辅助，demo 原为 radix portal 渲染，提取态见<a href="./layer-1-range-select.html">层级1</a>）；点击「刷新」图标开始旋转，<b>再次点击才停止</b>（demo 实测行为，见差异 D2）。</p>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/refresh-spinning.png" alt="刷新按钮点击后图标旋转">
+        <figcaption>点击「刷新」后图标带 <code>animate-spin</code> 持续旋转（CDP 实测 class：<code>lucide-refresh-cw h-4 w-4 mr-2 animate-spin</code>）。</figcaption>
+      </figure>
+      <h5>UI 元素清单</h5>
+      <table class="spec-table">
+        <thead><tr><th>元素</th><th>类型</th><th>文案/图标</th><th>样式要点</th><th>交互</th></tr></thead>
+        <tbody>
+          <tr><td>主标题</td><td>h1</td><td>系统状态</td><td><code>text-xl font-bold</code></td><td>—</td></tr>
+          <tr><td>副标题</td><td>p</td><td>全站安全态势聚合入口，3 秒掌握系统健康度</td><td><code>text-sm text-gray-500</code></td><td>—</td></tr>
+          <tr><td>时间范围选择器</td><td>shadcn Select（radix）</td><td>今日 / 最近 7 天 / 最近 30 天，默认「今日」</td><td><code>w-32</code> 触发器，h-9</td><td>切换驱动全页 KPI、趋势、TOP5 刷新；详见<a href="./layer-1-range-select.html">层级1</a></td></tr>
+          <tr><td>刷新按钮</td><td>Button variant=outline size=sm</td><td>RefreshCw 图标 + 刷新</td><td><code>h-8 rounded-md px-3</code></td><td>点击 toggle <code>refreshing</code>：图标 <code>animate-spin</code>，趋势数据重新随机生成；KPI 不变（差异 D2）</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果（提取 HTML vs demo 运行时 DOM）</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>一致</th></tr></thead>
+          <tbody>
+            <tr><td>根节点</td><td><code>div.bg-white.dark:bg-gray-950.border-b.border-gray-200.px-6.py-4</code></td><td>同左（outerHTML 原样嵌入）</td><td>✅</td></tr>
+            <tr><td>节点总数</td><td>16</td><td>16</td><td>✅</td></tr>
+            <tr><td>直接子节点</td><td>1（flex 两端对齐容器）</td><td>1</td><td>✅</td></tr>
+            <tr><td>标题/副标题文案</td><td>"系统状态" / "全站安全态势聚合入口，3 秒掌握系统健康度"</td><td>一致</td><td>✅</td></tr>
+            <tr><td>触发器初值</td><td>"今日"，<code>data-slot=select-trigger</code> <code>aria-expanded=false</code></td><td>一致</td><td>✅</td></tr>
+            <tr><td>刷新按钮</td><td>button > svg.lucide-refresh-cw + 文本「刷新」</td><td>一致</td><td>✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h4>交互层级详情（拆分为独立文件）</h4>
+    <table class="spec-table layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>默认态（今日）</td><td>页面加载</td><td>上方内嵌</td></tr>
+        <tr><td>1</td><td>时间范围下拉打开与切换（含 7 天 / 30 天全页数据联动）</td><td>点击 Select 触发器</td><td><a href="./layer-1-range-select.html">查看详情 -&gt;</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- ===== 2.2 综合健康状态条 ===== -->
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 综合健康状态条 <span class="toc-badge">1层·3变体</span></h3>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>demo 源位置</td><td><code>security-ops-dashboard.tsx</code> L222–260、L293–297</td></tr>
+        <tr><td>spec 章节</td><td>§2 综合健康状态条 [Base]</td></tr>
+        <tr><td>计算依据</td><td>基于 <code>visibleAlerts</code>（当前视角过滤后的告警集合）：danger 数 &gt; 0 → 危险；否则 warning 数 &gt; 0 → 警告；否则正常</td></tr>
+      </tbody>
+    </table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：三级状态（demo 默认为危险态）</h4>
+      <div class="trigger-path">触发路径：页面加载即渲染；状态由告警数据驱动，无直接交互。下方变体切换按钮为规格预览辅助（demo 中状态不可手动切换）。</div>
+      <div style="margin:.4rem 0 .6rem;display:flex;gap:8px;">
+        <button class="tag tag-red" style="border:1px solid #fca5a5;cursor:pointer;" onclick="setHealthVariant('danger')">危险变体（demo 实测态）</button>
+        <button class="tag tag-orange" style="border:1px solid #fdba74;cursor:pointer;" onclick="setHealthVariant('warning')">警告变体</button>
+        <button class="tag tag-green" style="border:1px solid #86efac;cursor:pointer;" onclick="setHealthVariant('info')">正常变体</button>
+      </div>
+      <div class="component-preview" id="preview-healthbar">
+<div class="flex items-center gap-3 rounded-md border px-4 py-3 text-sm font-medium text-red-600 bg-red-50 border-red-200 dark:bg-red-950/40 dark:border-red-900"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-alert h-5 w-5 shrink-0"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="text-pretty">检测到 2 项紧急事件待处理，请立即查看待办与告警面板</span></div>
+      </div>
+      <p class="preview-note">危险变体为 demo 提取原样；警告/正常变体按源码 class 组合复刻（demo mock 告警恒含 danger 项，浏览器无法直接复现后两态——见差异 D8）。</p>
+      <h5>三级状态规则（spec §2 + 源码 L225–239 + 浏览器验证）</h5>
+      <table class="spec-table">
+        <thead><tr><th>状态</th><th>触发条件</th><th>图标</th><th>配色</th><th>文案模板</th><th>浏览器验证</th></tr></thead>
+        <tbody>
+          <tr><td>危险</td><td>可见告警含 <code>danger</code> 级</td><td>ShieldAlert</td><td><code>text-red-600 bg-red-50 border-red-200</code></td><td>检测到 N 项紧急事件待处理，请立即查看待办与告警面板</td><td>✅ 平台视角 N=2；租户视角 N=1（scope 过滤生效）</td></tr>
+          <tr><td>警告</td><td>无 danger、含 <code>warning</code> 级</td><td>AlertTriangle</td><td><code>text-orange-600 bg-orange-50 border-orange-200</code></td><td>检测到 N 项警告事项，请及时处理</td><td>⚠️ 源码验证（mock 数据无法复现）</td></tr>
+          <tr><td>正常</td><td>无 danger / warning</td><td>CheckCircle2</td><td><code>text-green-600 bg-green-50 border-green-200</code></td><td>系统运行正常，{时间范围}已拦截 {threats} 封威胁邮件，无待处理告警</td><td>⚠️ 源码验证（同上）</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>一致</th></tr></thead>
+          <tbody>
+            <tr><td>根节点</td><td><code>div.flex.items-center.gap-3.rounded-md.border.px-4.py-3.text-sm.font-medium.text-red-600.bg-red-50.border-red-200</code></td><td>同左</td><td>✅</td></tr>
+            <tr><td>节点总数 / 子节点</td><td>6 / 2（svg 图标 + span 文案）</td><td>6 / 2</td><td>✅</td></tr>
+            <tr><td>图标</td><td><code>svg.lucide-shield-alert.h-5.w-5</code></td><td>一致</td><td>✅</td></tr>
+            <tr><td>文案</td><td>检测到 2 项紧急事件待处理，请立即查看待办与告警面板</td><td>一致</td><td>✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.3 核心 KPI 卡片区 ===== -->
+  <article class="component-spec" id="component-2-3">
+    <h3>2.3 核心 KPI 卡片区（4 卡） <span class="toc-badge">1层</span></h3>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>demo 源位置</td><td><code>security-ops-dashboard.tsx</code> L299–378</td></tr>
+        <tr><td>spec 章节</td><td>§3 核心 KPI 卡片区</td></tr>
+        <tr><td>栅格</td><td><code>grid-cols-1 → sm:grid-cols-2 → xl:grid-cols-4</code>（平台）；租户视角节点卡隐藏收敛为 <code>xl:grid-cols-3</code>（浏览器已验证两种）</td></tr>
+      </tbody>
+    </table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认态（今日 · 平台视角）</h4>
+      <div class="trigger-path">触发路径：页面加载即渲染。整卡可点击跳转（<code>cursor-pointer hover:shadow-md</code>）。</div>
+      <div class="component-preview" id="preview-kpi">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" id="kpi-grid">
+          <div data-route="/statistics/delivery-traffic-analysis">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm cursor-pointer transition-shadow hover:shadow-md"><div data-slot="card-content" class="p-5"><div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-inbox h-4 w-4"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>收信总量</div><div class="mt-3 text-3xl font-bold text-gray-900 dark:text-gray-100">128,456</div><div class="mt-1 flex items-center gap-1 text-sm"><span class="flex items-center text-green-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right h-4 w-4"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>12<!-- -->% 环比</span></div><div class="mt-3 flex items-center text-sm font-medium text-blue-600 hover:underline">查看统计 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></div></div></div>
+          </div>
+          <div data-route="/statistics/security-overview">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm cursor-pointer transition-shadow hover:shadow-md"><div data-slot="card-content" class="p-5"><div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-x h-4 w-4"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m14.5 9.5-5 5"></path><path d="m9.5 9.5 5 5"></path></svg>拦截威胁数</div><div class="mt-3 text-3xl font-bold text-gray-900 dark:text-gray-100">1,234</div><div class="mt-1 text-sm text-gray-500 dark:text-gray-400">拦截率 <!-- -->0.96<!-- -->%</div><div class="mt-3 flex items-center text-sm font-medium text-blue-600 hover:underline">查看威胁 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></div></div></div>
+          </div>
+          <div data-route="/email-handling/disposal-center">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm cursor-pointer transition-shadow hover:shadow-md"><div data-slot="card-content" class="p-5"><div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list h-4 w-4"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>待处置邮件</div><div class="mt-3 flex items-center gap-2"><span class="text-3xl font-bold text-gray-900 dark:text-gray-100">12</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-orange-100 text-orange-700 hover:bg-orange-100">待处理</span></div><div class="mt-1 text-sm text-gray-500 dark:text-gray-400">隔离 <!-- -->3<!-- --> 封 / 举报待审 <!-- -->2<!-- --> 封</div><div class="mt-3 flex items-center text-sm font-medium text-blue-600 hover:underline">去处置 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></div></div></div>
+          </div>
+          <div data-route="/monitor/infrastructure">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm cursor-pointer transition-shadow hover:shadow-md"><div data-slot="card-content" class="p-5"><div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-server h-4 w-4"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>系统在线节点</div><div class="mt-3 flex items-center gap-2"><span class="text-3xl font-bold text-gray-900 dark:text-gray-100">5<!-- -->/<!-- -->5</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-green-100 text-green-700 hover:bg-green-100">全部在线</span></div><div class="mt-1 text-sm text-gray-500 dark:text-gray-400">节点运行正常</div><div class="mt-3 flex items-center text-sm font-medium text-blue-600 hover:underline">查看状态 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></div></div></div>
+          </div>
+        </div>
+      </div>
+      <p class="preview-note">预览可操作：hover 卡片出现阴影；点击卡片显示 demo 实际跳转路由；在 2.1 头部预览中切换时间范围，本区数值随之切换（今日/7天/30天 三组 mock 值）。</p>
+      <h5>逐卡片规格（三个时间范围的 mock 值均为浏览器切换实测）</h5>
+      <table class="spec-table">
+        <thead><tr><th>卡片</th><th>图标</th><th>主数值（今日 / 7天 / 30天）</th><th>辅助行</th><th>底部链接</th><th>点击跳转</th><th>可见性</th></tr></thead>
+        <tbody>
+          <tr><td>收信总量</td><td>Inbox</td><td class="num">128,456 / 902,331 / 3,984,210</td><td>环比 +12% / +8% / <span class="tag tag-red">-4%</span>（正=绿+ArrowUpRight，负=红+ArrowDownRight，取绝对值显示）</td><td>查看统计 ›</td><td class="mono">/statistics/delivery-traffic-analysis</td><td>全部</td></tr>
+          <tr><td>拦截威胁数</td><td>ShieldX</td><td class="num">1,234 / 9,876 / 41,203</td><td>拦截率 0.96% / 1.09% / 1.03%</td><td>查看威胁 ›</td><td class="mono">/statistics/security-overview</td><td>全部</td></tr>
+          <tr><td>待处置邮件</td><td>ClipboardList</td><td class="num">12 / 34 / 58</td><td>橙色「待处理」Badge（仅 pending&gt;0 时渲染）；隔离 3/11/19 封 · 举报待审 2/6/13 封</td><td>去处置 ›</td><td class="mono">/email-handling/disposal-center</td><td>全部</td></tr>
+          <tr><td>系统在线节点</td><td>Server</td><td class="num">5/5（三范围相同）</td><td>全部在线 → 绿 Badge「全部在线」+「节点运行正常」；有离线 → 红 Badge「N 个离线」+「存在离线节点」（后者源码验证）</td><td>查看状态 ›</td><td class="mono">/monitor/infrastructure</td><td><span class="tag tag-blue">仅平台视角</span>（<code>showInfra</code>）</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>一致</th></tr></thead>
+          <tbody>
+            <tr><td>KPI 栅格</td><td><code>grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4</code>，4 子卡</td><td>同 class，4 子卡</td><td>✅</td></tr>
+            <tr><td>单卡根节点</td><td><code>div[data-slot=card].bg-card.rounded-xl.border.py-6.shadow-sm.cursor-pointer</code></td><td>同左</td><td>✅</td></tr>
+            <tr><td>节点数（收信/拦截/待处置/节点）</td><td>15 / 12 / 17 / 15</td><td>15 / 12 / 17 / 15</td><td>✅</td></tr>
+            <tr><td>条件渲染：待处理 Badge</td><td>渲染（pending=12&gt;0）</td><td>包含</td><td>✅</td></tr>
+            <tr><td>条件渲染：全部在线 Badge</td><td>渲染绿色分支（5/5）；离线红色分支未渲染</td><td>包含绿色分支，无红色分支</td><td>✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.4 威胁态势趋势 ===== -->
+  <article class="component-spec" id="component-2-4">
+    <h3>2.4 威胁态势趋势图 <span class="toc-badge">2层</span></h3>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>demo 源位置</td><td><code>security-ops-dashboard.tsx</code> L382–445（recharts AreaChart）</td></tr>
+        <tr><td>spec 章节</td><td>§4 威胁态势趋势图 [Base]</td></tr>
+        <tr><td>图表类型</td><td><b>堆叠面积图</b>（<code>stackId="1"</code>，fillOpacity 0.5，monotone；spec 写"折线/面积图"——见差异 D6）</td></tr>
+        <tr><td>交互层级</td><td>2（层级0 默认全序列内嵌；层级1 图例显隐 → <a href="./layer-2-legend-toggle.html">子文件</a>）</td></tr>
+      </tbody>
+    </table>
+    <div class="mermaid">
+graph LR
+  T0["层级0 全序列<br/>(5 条堆叠面积)"] -- 点击图例项 --> T1["层级1 序列隐藏<br/>(图例 opacity-40, 面积 4 条重新堆叠)"]
+  T1 -- 再次点击同图例 --> T0
+  T0 -- hover 图表 --> TT["Recharts Tooltip<br/>(时间点 + 5 序列值)"]
+    </div>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认态（今日 · 5 序列全显）</h4>
+      <div class="trigger-path">触发路径：页面加载即渲染。X 轴粒度随时间范围：今日 = 00:00–22:00 共 12 点（2h 间隔）；7 天 = 7 点；30 天 = 30 点。</div>
+      <div class="component-preview" id="preview-trend">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm lg:col-span-2"><div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 flex flex-row items-center justify-between space-y-0 pb-2"><div data-slot="card-title" class="font-semibold text-base">威胁态势趋势</div><button class="flex items-center text-sm font-medium text-blue-600 hover:underline">查看邮件安全总览 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></button></div><div data-slot="card-content" class="px-6"><div class="mb-3 flex flex-wrap gap-3"><button class="flex items-center gap-1.5 text-xs transition-opacity opacity-100"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background-color:#ef4444"></span>钓鱼邮件</button><button class="flex items-center gap-1.5 text-xs transition-opacity opacity-100"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background-color:#f97316"></span>仿冒邮件</button><button class="flex items-center gap-1.5 text-xs transition-opacity opacity-100"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background-color:#eab308"></span>垃圾邮件</button><button class="flex items-center gap-1.5 text-xs transition-opacity opacity-100"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background-color:#991b1b"></span>病毒附件</button><button class="flex items-center gap-1.5 text-xs transition-opacity opacity-100"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background-color:#06b6d4"></span>恶意链接</button></div><div class="recharts-responsive-container" style="width:100%;height:320px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 320px; max-width: 657px;"><svg class="recharts-surface" width="657" height="320" viewBox="0 0 657 320" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts2-clip"><rect x="65" y="5" height="280" width="587"></rect></clipPath></defs><g class="recharts-cartesian-grid"><g class="recharts-cartesian-grid-horizontal"><line stroke-dasharray="3 3" stroke="#f0f0f0" fill="none" x="65" y="5" width="587" height="280" x1="65" y1="285" x2="652" y2="285"></line><line stroke-dasharray="3 3" stroke="#f0f0f0" fill="none" x="65" y="5" width="587" height="280" x1="65" y1="215" x2="652" y2="215"></line><line stroke-dasharray="3 3" stroke="#f0f0f0" fill="none" x="65" y="5" width="587" height="280" x1="65" y1="145" x2="652" y2="145"></line><line stroke-dasharray="3 3" stroke="#f0f0f0" fill="none" x="65" y="5" width="587" height="280" x1="65" y1="75" x2="652" y2="75"></line><line stroke-dasharray="3 3" stroke="#f0f0f0" fill="none" x="65" y="5" width="587" height="280" x1="65" y1="5" x2="652" y2="5"></line></g></g><g class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="285" x2="652" y2="285" style="font-size: 12px;"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="65" y1="291" x2="65" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="65" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="65" dy="0.71em">00:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="118.36363636363637" y1="291" x2="118.36363636363637" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="118.36363636363637" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="118.36363636363637" dy="0.71em">02:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="171.72727272727275" y1="291" x2="171.72727272727275" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="171.72727272727275" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="171.72727272727275" dy="0.71em">04:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="225.0909090909091" y1="291" x2="225.0909090909091" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="225.0909090909091" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="225.0909090909091" dy="0.71em">06:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="278.4545454545455" y1="291" x2="278.4545454545455" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="278.4545454545455" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="278.4545454545455" dy="0.71em">08:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="331.8181818181818" y1="291" x2="331.8181818181818" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="331.8181818181818" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="331.8181818181818" dy="0.71em">10:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="385.1818181818182" y1="291" x2="385.1818181818182" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="385.1818181818182" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="385.1818181818182" dy="0.71em">12:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="438.54545454545456" y1="291" x2="438.54545454545456" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="438.54545454545456" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="438.54545454545456" dy="0.71em">14:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="491.90909090909093" y1="291" x2="491.90909090909093" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="491.90909090909093" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="491.90909090909093" dy="0.71em">16:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="545.2727272727273" y1="291" x2="545.2727272727273" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="545.2727272727273" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="545.2727272727273" dy="0.71em">18:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="598.6363636363636" y1="291" x2="598.6363636363636" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="598.6363636363636" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="598.6363636363636" dy="0.71em">20:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="587" height="30" stroke="#666" x="65" y="285" class="recharts-cartesian-axis-tick-line" fill="none" x1="652" y1="291" x2="652" y2="285" style="font-size: 12px;"></line><text orientation="bottom" width="587" height="30" stroke="none" x="639.7734375" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666" style="font-size: 12px;"><tspan x="639.7734375" dy="0.71em">22:00</tspan></text></g></g></g><g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="5" x2="65" y2="285" style="font-size: 12px;"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="285" x2="65" y2="285" style="font-size: 12px;"></line><text orientation="left" width="60" height="280" stroke="none" x="57" y="285" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666" style="font-size: 12px;"><tspan x="57" dy="0.355em">0</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="215" x2="65" y2="215" style="font-size: 12px;"></line><text orientation="left" width="60" height="280" stroke="none" x="57" y="215" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666" style="font-size: 12px;"><tspan x="57" dy="0.355em">55</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="145" x2="65" y2="145" style="font-size: 12px;"></line><text orientation="left" width="60" height="280" stroke="none" x="57" y="145" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666" style="font-size: 12px;"><tspan x="57" dy="0.355em">110</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="75" x2="65" y2="75" style="font-size: 12px;"></line><text orientation="left" width="60" height="280" stroke="none" x="57" y="75" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666" style="font-size: 12px;"><tspan x="57" dy="0.355em">165</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="280" stroke="#666" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="5" x2="65" y2="5" style="font-size: 12px;"></line><text orientation="left" width="60" height="280" stroke="none" x="57" y="9" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666" style="font-size: 12px;"><tspan x="57" dy="0.355em">220</tspan></text></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><defs><clipPath id="animationClipPath-recharts-area-4"><rect x="65" y="0" width="587" height="286"></rect></clipPath></defs><g class="recharts-layer" clip-path="url(#animationClipPath-recharts-area-4)"><g class="recharts-layer"><path name="钓鱼邮件" fill="#ef4444" fill-opacity="0.5" width="587" height="280" stroke="none" class="recharts-curve recharts-area-area" d="M65,251.909C82.788,247.455,100.576,243,118.364,236.636C136.152,230.273,153.939,213.727,171.727,213.727C189.515,213.727,207.303,239.182,225.091,239.182C242.879,239.182,260.667,209.909,278.455,209.909C296.242,209.909,314.03,255.727,331.818,255.727C349.606,255.727,367.394,223.909,385.182,223.909C402.97,223.909,420.758,255.727,438.545,255.727C456.333,255.727,474.121,252.758,491.909,248.091C509.697,243.424,527.485,227.727,545.273,227.727C563.061,227.727,580.848,229,598.636,231.545C616.424,234.091,634.212,244.273,652,254.455L652,285C634.212,285,616.424,285,598.636,285C580.848,285,563.061,285,545.273,285C527.485,285,509.697,285,491.909,285C474.121,285,456.333,285,438.545,285C420.758,285,402.97,285,385.182,285C367.394,285,349.606,285,331.818,285C314.03,285,296.242,285,278.455,285C260.667,285,242.879,285,225.091,285C207.303,285,189.515,285,171.727,285C153.939,285,136.152,285,118.364,285C100.576,285,82.788,285,65,285Z"></path><path name="钓鱼邮件" stroke="#ef4444" fill="none" fill-opacity="0.5" width="587" height="280" class="recharts-curve recharts-area-curve" d="M65,251.909C82.788,247.455,100.576,243,118.364,236.636C136.152,230.273,153.939,213.727,171.727,213.727C189.515,213.727,207.303,239.182,225.091,239.182C242.879,239.182,260.667,209.909,278.455,209.909C296.242,209.909,314.03,255.727,331.818,255.727C349.606,255.727,367.394,223.909,385.182,223.909C402.97,223.909,420.758,255.727,438.545,255.727C456.333,255.727,474.121,252.758,491.909,248.091C509.697,243.424,527.485,227.727,545.273,227.727C563.061,227.727,580.848,229,598.636,231.545C616.424,234.091,634.212,244.273,652,254.455"></path></g></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><defs><clipPath id="animationClipPath-recharts-area-6"><rect x="65" y="0" width="587" height="256"></rect></clipPath></defs><g class="recharts-layer" clip-path="url(#animationClipPath-recharts-area-6)"><g class="recharts-layer"><path name="仿冒邮件" fill="#f97316" fill-opacity="0.5" width="587" height="280" stroke="none" class="recharts-curve recharts-area-area" d="M65,212.455C82.788,202.273,100.576,192.091,118.364,192.091C136.152,192.091,153.939,192.939,171.727,194.636C189.515,196.333,207.303,212.455,225.091,212.455C242.879,212.455,260.667,189.545,278.455,189.545C296.242,189.545,314.03,221.364,331.818,221.364C349.606,221.364,367.394,179.364,385.182,179.364C402.97,179.364,420.758,232.818,438.545,232.818C456.333,232.818,474.121,201,491.909,201C509.697,201,527.485,209.909,545.273,209.909C563.061,209.909,580.848,188.273,598.636,188.273C616.424,188.273,634.212,209.273,652,230.273L652,254.455C634.212,244.273,616.424,234.091,598.636,231.545C580.848,229,563.061,227.727,545.273,227.727C527.485,227.727,509.697,243.424,491.909,248.091C474.121,252.758,456.333,255.727,438.545,255.727C420.758,255.727,402.97,223.909,385.182,223.909C367.394,223.909,349.606,255.727,331.818,255.727C314.03,255.727,296.242,209.909,278.455,209.909C260.667,209.909,242.879,239.182,225.091,239.182C207.303,239.182,189.515,213.727,171.727,213.727C153.939,213.727,136.152,230.273,118.364,236.636C100.576,243,82.788,247.455,65,251.909Z"></path><path name="仿冒邮件" stroke="#f97316" fill="none" fill-opacity="0.5" width="587" height="280" class="recharts-curve recharts-area-curve" d="M65,212.455C82.788,202.273,100.576,192.091,118.364,192.091C136.152,192.091,153.939,192.939,171.727,194.636C189.515,196.333,207.303,212.455,225.091,212.455C242.879,212.455,260.667,189.545,278.455,189.545C296.242,189.545,314.03,221.364,331.818,221.364C349.606,221.364,367.394,179.364,385.182,179.364C402.97,179.364,420.758,232.818,438.545,232.818C456.333,232.818,474.121,201,491.909,201C509.697,201,527.485,209.909,545.273,209.909C563.061,209.909,580.848,188.273,598.636,188.273C616.424,188.273,634.212,209.273,652,230.273"></path></g></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><defs><clipPath id="animationClipPath-recharts-area-8"><rect x="65" y="0" width="587" height="233"></rect></clipPath></defs><g class="recharts-layer" clip-path="url(#animationClipPath-recharts-area-8)"><g class="recharts-layer"><path name="垃圾邮件" fill="#eab308" fill-opacity="0.5" width="587" height="280" stroke="none" class="recharts-curve recharts-area-area" d="M65,95.364C82.788,108.091,100.576,120.818,118.364,120.818C136.152,120.818,153.939,53.364,171.727,53.364C189.515,53.364,207.303,122.091,225.091,122.091C242.879,122.091,260.667,92.818,278.455,92.818C296.242,92.818,314.03,134.818,331.818,134.818C349.606,134.818,367.394,109.364,385.182,109.364C402.97,109.364,420.758,152.636,438.545,152.636C456.333,152.636,474.121,87.727,491.909,87.727C509.697,87.727,527.485,92.818,545.273,92.818C563.061,92.818,580.848,52.091,598.636,52.091C616.424,52.091,634.212,88.364,652,124.636L652,230.273C634.212,209.273,616.424,188.273,598.636,188.273C580.848,188.273,563.061,209.909,545.273,209.909C527.485,209.909,509.697,201,491.909,201C474.121,201,456.333,232.818,438.545,232.818C420.758,232.818,402.97,179.364,385.182,179.364C367.394,179.364,349.606,221.364,331.818,221.364C314.03,221.364,296.242,189.545,278.455,189.545C260.667,189.545,242.879,212.455,225.091,212.455C207.303,212.455,189.515,196.333,171.727,194.636C153.939,192.939,136.152,192.091,118.364,192.091C100.576,192.091,82.788,202.273,65,212.455Z"></path><path name="垃圾邮件" stroke="#eab308" fill="none" fill-opacity="0.5" width="587" height="280" class="recharts-curve recharts-area-curve" d="M65,95.364C82.788,108.091,100.576,120.818,118.364,120.818C136.152,120.818,153.939,53.364,171.727,53.364C189.515,53.364,207.303,122.091,225.091,122.091C242.879,122.091,260.667,92.818,278.455,92.818C296.242,92.818,314.03,134.818,331.818,134.818C349.606,134.818,367.394,109.364,385.182,109.364C402.97,109.364,420.758,152.636,438.545,152.636C456.333,152.636,474.121,87.727,491.909,87.727C509.697,87.727,527.485,92.818,545.273,92.818C563.061,92.818,580.848,52.091,598.636,52.091C616.424,52.091,634.212,88.364,652,124.636"></path></g></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><defs><clipPath id="animationClipPath-recharts-area-10"><rect x="65" y="0" width="587" height="153"></rect></clipPath></defs><g class="recharts-layer" clip-path="url(#animationClipPath-recharts-area-10)"><g class="recharts-layer"><path name="病毒附件" fill="#991b1b" fill-opacity="0.5" width="587" height="280" stroke="none" class="recharts-curve recharts-area-area" d="M65,89C82.788,95.364,100.576,101.727,118.364,101.727C136.152,101.727,153.939,31.727,171.727,31.727C189.515,31.727,207.303,115.727,225.091,115.727C242.879,115.727,260.667,77.545,278.455,77.545C296.242,77.545,314.03,122.091,331.818,122.091C349.606,122.091,367.394,99.182,385.182,99.182C402.97,99.182,420.758,133.545,438.545,133.545C456.333,133.545,474.121,81.364,491.909,81.364C509.697,81.364,527.485,81.364,545.273,81.364C563.061,81.364,580.848,43.182,598.636,43.182C616.424,43.182,634.212,78.818,652,114.455L652,124.636C634.212,88.364,616.424,52.091,598.636,52.091C580.848,52.091,563.061,92.818,545.273,92.818C527.485,92.818,509.697,87.727,491.909,87.727C474.121,87.727,456.333,152.636,438.545,152.636C420.758,152.636,402.97,109.364,385.182,109.364C367.394,109.364,349.606,134.818,331.818,134.818C314.03,134.818,296.242,92.818,278.455,92.818C260.667,92.818,242.879,122.091,225.091,122.091C207.303,122.091,189.515,53.364,171.727,53.364C153.939,53.364,136.152,120.818,118.364,120.818C100.576,120.818,82.788,108.091,65,95.364Z"></path><path name="病毒附件" stroke="#991b1b" fill="none" fill-opacity="0.5" width="587" height="280" class="recharts-curve recharts-area-curve" d="M65,89C82.788,95.364,100.576,101.727,118.364,101.727C136.152,101.727,153.939,31.727,171.727,31.727C189.515,31.727,207.303,115.727,225.091,115.727C242.879,115.727,260.667,77.545,278.455,77.545C296.242,77.545,314.03,122.091,331.818,122.091C349.606,122.091,367.394,99.182,385.182,99.182C402.97,99.182,420.758,133.545,438.545,133.545C456.333,133.545,474.121,81.364,491.909,81.364C509.697,81.364,527.485,81.364,545.273,81.364C563.061,81.364,580.848,43.182,598.636,43.182C616.424,43.182,634.212,78.818,652,114.455"></path></g></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><defs><clipPath id="animationClipPath-recharts-area-12"><rect x="65" y="0" width="587" height="134"></rect></clipPath></defs><g class="recharts-layer" clip-path="url(#animationClipPath-recharts-area-12)"><g class="recharts-layer"><path name="恶意链接" fill="#06b6d4" fill-opacity="0.5" width="587" height="280" stroke="none" class="recharts-curve recharts-area-area" d="M65,59.727C82.788,71.182,100.576,82.636,118.364,82.636C136.152,82.636,153.939,11.364,171.727,11.364C189.515,11.364,207.303,77.545,225.091,77.545C242.879,77.545,260.667,43.182,278.455,43.182C296.242,43.182,314.03,90.273,331.818,90.273C349.606,90.273,367.394,58.455,385.182,58.455C402.97,58.455,420.758,110.636,438.545,110.636C456.333,110.636,474.121,70.121,491.909,58.455C509.697,46.788,527.485,49.545,545.273,40.636C563.061,31.727,580.848,5,598.636,5C616.424,5,634.212,45.727,652,86.455L652,114.455C634.212,78.818,616.424,43.182,598.636,43.182C580.848,43.182,563.061,81.364,545.273,81.364C527.485,81.364,509.697,81.364,491.909,81.364C474.121,81.364,456.333,133.545,438.545,133.545C420.758,133.545,402.97,99.182,385.182,99.182C367.394,99.182,349.606,122.091,331.818,122.091C314.03,122.091,296.242,77.545,278.455,77.545C260.667,77.545,242.879,115.727,225.091,115.727C207.303,115.727,189.515,31.727,171.727,31.727C153.939,31.727,136.152,101.727,118.364,101.727C100.576,101.727,82.788,95.364,65,89Z"></path><path name="恶意链接" stroke="#06b6d4" fill="none" fill-opacity="0.5" width="587" height="280" class="recharts-curve recharts-area-curve" d="M65,59.727C82.788,71.182,100.576,82.636,118.364,82.636C136.152,82.636,153.939,11.364,171.727,11.364C189.515,11.364,207.303,77.545,225.091,77.545C242.879,77.545,260.667,43.182,278.455,43.182C296.242,43.182,314.03,90.273,331.818,90.273C349.606,90.273,367.394,58.455,385.182,58.455C402.97,58.455,420.758,110.636,438.545,110.636C456.333,110.636,474.121,70.121,491.909,58.455C509.697,46.788,527.485,49.545,545.273,40.636C563.061,31.727,580.848,5,598.636,5C616.424,5,634.212,45.727,652,86.455"></path></g></g></g></g></svg><div tabindex="-1" class="recharts-tooltip-wrapper recharts-tooltip-wrapper-right recharts-tooltip-wrapper-bottom" style="visibility: hidden; pointer-events: none; position: absolute; top: 0px; left: 0px; transform: translate(65px, 10px);"><div class="recharts-default-tooltip" style="margin: 0px; padding: 10px; background-color: rgb(255, 255, 255); border: 1px solid rgb(229, 231, 235); white-space: nowrap; border-radius: 6px; font-size: 12px; box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 8px;"><p class="recharts-tooltip-label" style="margin: 0px;"></p></div></div></div></div></div></div>
+      </div>
+      <p class="preview-note">预览可操作：点击图例项切换对应序列显隐（预览为提取 SVG 的图层显隐，demo 会重新堆叠计算 —— 完整重堆叠效果见<a href="./layer-2-legend-toggle.html">层级1 子文件</a>截图）；hover 图表区域显示 demo 提取的 Tooltip（静态复刻，数值为捕获时刻值）；点击「查看邮件安全总览」显示目标路由。</p>
+      <h5>UI 元素清单</h5>
+      <table class="spec-table">
+        <thead><tr><th>元素</th><th>类型</th><th>规格</th><th>交互</th></tr></thead>
+        <tbody>
+          <tr><td>卡片标题</td><td>CardTitle</td><td>威胁态势趋势，<code>text-base</code></td><td>—</td></tr>
+          <tr><td>右上链接</td><td>button</td><td>查看邮件安全总览 ›，<code>text-blue-600</code></td><td>跳转 <code>/statistics/security-overview</code></td></tr>
+          <tr><td>图例</td><td>button ×5</td><td>色块（2.5×2.5 rounded-sm）+ 名称，<code>text-xs</code>；隐藏时 <code>opacity-40</code></td><td>点击 toggle 该序列显隐（<code>hidden</code> Set）</td></tr>
+          <tr><td>面积序列</td><td>recharts Area ×5</td><td>钓鱼 #ef4444 / 仿冒 #f97316 / 垃圾 #eab308 / 病毒 #991b1b / 恶意链接 #06b6d4；stackId=1</td><td>随图例显隐重新堆叠</td></tr>
+          <tr><td>坐标轴/网格</td><td>XAxis/YAxis/CartesianGrid</td><td>#666 12px；网格 <code>3 3</code> 虚线，仅横线</td><td>—</td></tr>
+          <tr><td>Tooltip</td><td>RechartsTooltip</td><td>白底 1px #e5e7eb 边框 r6，12px，阴影</td><td>hover 显示时间点 + 各序列值（按序列色着色）</td></tr>
+          <tr><td>空态</td><td>div</td><td>「暂无威胁数据」，h-320 居中，<code>text-gray-400</code></td><td>trend 数组为空时（mock 恒非空，源码验证）</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>一致</th></tr></thead>
+          <tbody>
+            <tr><td>根节点</td><td><code>div[data-slot=card].bg-card.rounded-xl.lg:col-span-2</code></td><td>同左</td><td>✅</td></tr>
+            <tr><td>节点总数</td><td>155（含 SVG 子树）</td><td>155</td><td>✅</td></tr>
+            <tr><td>图例按钮数</td><td>5</td><td>5</td><td>✅</td></tr>
+            <tr><td>面积序列组 <code>.recharts-area</code></td><td>5</td><td>5</td><td>✅</td></tr>
+            <tr><td>SVG 画布</td><td><code>svg.recharts-surface</code> 657×320 viewBox</td><td>一致</td><td>✅</td></tr>
+            <tr><td>空态占位</td><td>未渲染（数据非空）</td><td>未包含</td><td>✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <h4>交互层级详情（拆分为独立文件）</h4>
+    <table class="spec-table layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>全序列默认态</td><td>页面加载</td><td>上方内嵌</td></tr>
+        <tr><td>1</td><td>图例显隐切换（含 Tooltip hover 态）</td><td>点击图例「钓鱼邮件」</td><td><a href="./layer-2-legend-toggle.html">查看详情 -&gt;</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- ===== 2.5 待办与告警 ===== -->
+  <article class="component-spec" id="component-2-5">
+    <h3>2.5 待办与告警 <span class="toc-badge">1层</span></h3>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>demo 源位置</td><td><code>security-ops-dashboard.tsx</code> L145–151（数据）、L447–487（渲染）</td></tr>
+        <tr><td>spec 章节</td><td>§5 待办与告警 [Base]</td></tr>
+        <tr><td>视角过滤</td><td><code>scope:"platform"</code> 项仅平台视角可见；租户视角只剩 <code>scope:"tenant"</code> 项（<a href="./layer-3-viewer-tenant.html">租户裁剪态子文件</a>已验证）</td></tr>
+      </tbody>
+    </table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认态（平台视角 · 5 项全量）</h4>
+      <div class="trigger-path">触发路径：页面加载即渲染。</div>
+      <div class="component-preview" id="preview-alerts">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-base">待办与告警</div></div><div data-slot="card-content" class="px-6"><div class="space-y-2"><button class="flex w-full items-center gap-3 rounded-md border border-gray-100 px-3 py-2.5 text-left dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><span class="h-2 w-2 shrink-0 rounded-full bg-red-500"></span><div class="min-w-0 flex-1"><div class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">待处置队列</div><div class="truncate text-xs text-gray-500 dark:text-gray-400">5 封待处理</div></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 shrink-0 text-gray-400"><path d="m9 18 6-6-6-6"></path></svg></button><button class="flex w-full items-center gap-3 rounded-md border border-gray-100 px-3 py-2.5 text-left dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><span class="h-2 w-2 shrink-0 rounded-full bg-red-500"></span><div class="min-w-0 flex-1"><div class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">检测引擎离线告警</div><div class="truncate text-xs text-gray-500 dark:text-gray-400">1 个节点</div></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 shrink-0 text-gray-400"><path d="m9 18 6-6-6-6"></path></svg></button><button class="flex w-full items-center gap-3 rounded-md border border-gray-100 px-3 py-2.5 text-left dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><span class="h-2 w-2 shrink-0 rounded-full bg-orange-500"></span><div class="min-w-0 flex-1"><div class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">举报待审</div><div class="truncate text-xs text-gray-500 dark:text-gray-400">2 条</div></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 shrink-0 text-gray-400"><path d="m9 18 6-6-6-6"></path></svg></button><button class="flex w-full items-center gap-3 rounded-md border border-gray-100 px-3 py-2.5 text-left dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><span class="h-2 w-2 shrink-0 rounded-full bg-orange-500"></span><div class="min-w-0 flex-1"><div class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">许可证将在 7 天后到期</div><div class="truncate text-xs text-gray-500 dark:text-gray-400">请及时续期</div></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 shrink-0 text-gray-400"><path d="m9 18 6-6-6-6"></path></svg></button><button disabled="" class="flex w-full items-center gap-3 rounded-md border border-gray-100 px-3 py-2.5 text-left dark:border-gray-800 cursor-default"><span class="h-2 w-2 shrink-0 rounded-full bg-blue-500"></span><div class="min-w-0 flex-1"><div class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">规则库已是最新版</div><div class="truncate text-xs text-gray-500 dark:text-gray-400">202604021122</div></div></button></div><button class="mt-3 flex items-center text-sm font-medium text-blue-600 hover:underline">查看全部告警 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></button></div></div>
+      </div>
+      <p class="preview-note">预览可操作：hover 可跳转项出现浅灰背景；点击有链接的项显示目标路由；「规则库已是最新版」为 info 无链接项（<code>disabled</code>，无 chevron、无 hover 效果）——与 demo 一致。</p>
+      <h5>告警项数据规格（mock TODO_ALERTS，浏览器验证渲染）</h5>
+      <table class="spec-table">
+        <thead><tr><th>#</th><th>级别</th><th>标题</th><th>说明 meta</th><th>跳转 href</th><th>归属 scope</th><th>租户视角</th></tr></thead>
+        <tbody>
+          <tr><td>a1</td><td><span class="tag tag-red">danger</span></td><td>待处置队列</td><td>5 封待处理</td><td class="mono">/email-handling/disposal-center</td><td>tenant</td><td>✅ 可见</td></tr>
+          <tr><td>a2</td><td><span class="tag tag-red">danger</span></td><td>检测引擎离线告警</td><td>1 个节点</td><td class="mono">/monitor/alerts</td><td>platform</td><td>❌ 隐藏</td></tr>
+          <tr><td>a3</td><td><span class="tag tag-orange">warning</span></td><td>举报待审</td><td>2 条</td><td class="mono">/report-center/management</td><td>tenant</td><td>✅ 可见</td></tr>
+          <tr><td>a4</td><td><span class="tag tag-orange">warning</span></td><td>许可证将在 7 天后到期</td><td>请及时续期</td><td class="mono">/admin/license</td><td>platform</td><td>❌ 隐藏</td></tr>
+          <tr><td>a5</td><td><span class="tag tag-blue">info</span></td><td>规则库已是最新版</td><td>202604021122</td><td>—（不可点击）</td><td>platform</td><td>❌ 隐藏</td></tr>
+        </tbody>
+      </table>
+      <p>列表项结构：级别圆点（h-2 w-2 rounded-full）+ 标题（text-sm font-medium truncate）+ meta（text-xs text-gray-500 truncate）+ ChevronRight（仅有 href 时渲染）。底部「查看全部告警 ›」固定跳 <code>/monitor/alerts</code>。空态：<code>PartyPopper</code> 图标（h-8 w-8 绿色）+「当前无待办事项和告警，系统运行良好」（h-280 居中，mock 恒非空，源码验证）。</p>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>一致</th></tr></thead>
+          <tbody>
+            <tr><td>根节点 / 节点总数</td><td><code>div[data-slot=card]</code> / 41</td><td>同左 / 41</td><td>✅</td></tr>
+            <tr><td>列表项数</td><td>5 个 button（平台视角）</td><td>5</td><td>✅</td></tr>
+            <tr><td>不可点击项</td><td>第 5 项 button 带 <code>disabled</code>、class 含 <code>cursor-default</code>、无 ChevronRight svg</td><td>一致</td><td>✅</td></tr>
+            <tr><td>级别圆点 class</td><td>bg-red-500 ×2 / bg-orange-500 ×2 / bg-blue-500 ×1</td><td>一致</td><td>✅</td></tr>
+            <tr><td>空态 PartyPopper</td><td>未渲染（列表非空）</td><td>未包含</td><td>✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.6 智能体运行概况 ===== -->
+  <article class="component-spec" id="component-2-6">
+    <h3>2.6 智能体运行概况 <span class="toc-badge">1层</span> <span class="tag tag-blue">仅 AI 版</span></h3>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>demo 源位置</td><td><code>security-ops-dashboard.tsx</code> L153–159（配置）、L501–544（渲染）</td></tr>
+        <tr><td>spec 章节</td><td>§6 智能体运行概况 [Overlay: AI 版]</td></tr>
+        <tr><td>可见性</td><td><code>capabilities.ai</code>；传统版不渲染（<a href="./layer-4-form-legacy.html">传统版裁剪态子文件</a>已验证）。数据从 <code>useAgentStatus()</code> 实时读取，名称/顺序与智能体中心对齐</td></tr>
+      </tbody>
+    </table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认态（3 个智能体均启用）</h4>
+      <div class="trigger-path">触发路径：页面加载即渲染（AI 形态）。</div>
+      <div class="component-preview" id="preview-agents">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm"><div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 flex flex-row items-center justify-between space-y-0 pb-2"><div data-slot="card-title" class="font-semibold flex items-center gap-2 text-base"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot h-4 w-4"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>智能体运行概况</div></div><div data-slot="card-content" class="px-6"><div class="space-y-2.5"><div class="flex items-center justify-between"><span class="text-sm text-gray-700 dark:text-gray-300">钓鱼邮件检测智能体</span><div class="flex items-center gap-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-green-100 text-green-700 hover:bg-green-100">启用</span><span class="w-16 text-right text-xs text-gray-500">今日 <!-- -->12,450</span></div></div><div class="flex items-center justify-between"><span class="text-sm text-gray-700 dark:text-gray-300">仿冒邮件检测智能体</span><div class="flex items-center gap-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-green-100 text-green-700 hover:bg-green-100">启用</span><span class="w-16 text-right text-xs text-gray-500">今日 <!-- -->8,650</span></div></div><div class="flex items-center justify-between"><span class="text-sm text-gray-700 dark:text-gray-300">威胁回溯智能体</span><div class="flex items-center gap-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-green-100 text-green-700 hover:bg-green-100">启用</span><span class="w-16 text-right text-xs text-gray-500">今日 <!-- -->326</span></div></div></div><button class="mt-4 flex items-center text-sm font-medium text-blue-600 hover:underline">智能体中心 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></button></div></div>
+      </div>
+      <p class="preview-note">预览可操作：点击「智能体中心 ›」显示目标路由 <code>/agent-center/overview</code>。</p>
+      <h5>状态渲染规则（agent-status-context 默认值，浏览器验证）</h5>
+      <table class="spec-table">
+        <thead><tr><th>智能体（statusKey）</th><th>默认状态</th><th>Badge</th><th>右侧数值</th></tr></thead>
+        <tbody>
+          <tr><td>钓鱼邮件检测智能体（phishingV1）</td><td>enabled + running</td><td><span class="tag tag-green">启用</span></td><td>今日 12,450</td></tr>
+          <tr><td>仿冒邮件检测智能体（impersonation）</td><td>enabled + running</td><td><span class="tag tag-green">启用</span></td><td>今日 8,650</td></tr>
+          <tr><td>威胁回溯智能体（retrospectV1）</td><td>enabled + running</td><td><span class="tag tag-green">启用</span></td><td>今日 326</td></tr>
+        </tbody>
+      </table>
+      <p>分支规则（源码 L511–530）：<code>enabled && status!=="paused"</code> 时 —— <code>standby</code> → 灰 Badge「待机」，否则绿 Badge「启用」，右侧「今日 {todayProcessed}」；否则灰 Badge「已停用」+「—」。demo 默认三者均 running（在智能体中心停用后本卡实时联动）。</p>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>一致</th></tr></thead>
+          <tbody>
+            <tr><td>根节点 / 节点总数</td><td><code>div[data-slot=card]</code> / 30</td><td>同左 / 30</td><td>✅</td></tr>
+            <tr><td>智能体行数</td><td>3</td><td>3</td><td>✅</td></tr>
+            <tr><td>Badge 文案</td><td>启用 ×3（无 待机/已停用 分支渲染）</td><td>一致</td><td>✅</td></tr>
+            <tr><td>标题图标</td><td>svg.lucide-bot h-4 w-4</td><td>一致</td><td>✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.7 威胁来源 TOP5 ===== -->
+  <article class="component-spec" id="component-2-7">
+    <h3>2.7 威胁来源 TOP5 <span class="toc-badge">1层</span></h3>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>demo 源位置</td><td><code>security-ops-dashboard.tsx</code> L161–184（数据）、L546–578（渲染）</td></tr>
+        <tr><td>spec 章节</td><td>§7 威胁来源 TOP5 [Base]</td></tr>
+      </tbody>
+    </table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认态（今日）</h4>
+      <div class="trigger-path">触发路径：页面加载即渲染；数据随时间范围切换。</div>
+      <div class="component-preview" id="preview-top5">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm"><div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 flex flex-row items-center justify-between space-y-0 pb-2"><div data-slot="card-title" class="font-semibold flex items-center gap-2 text-base"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe h-4 w-4"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>威胁来源 TOP5</div></div><div data-slot="card-content" class="px-6"><div class="space-y-3"><div class="space-y-1"><div class="flex items-center justify-between text-sm"><span class="flex items-center gap-2 truncate text-gray-700 dark:text-gray-300"><span class="flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-bold bg-red-500 text-white">1</span><span class="truncate font-mono text-xs">spam-sender.com</span></span><span class="shrink-0 text-xs text-gray-500">312<!-- --> 次</span></div><div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800"><div class="h-full rounded-full bg-blue-500" style="width:100%"></div></div></div><div class="space-y-1"><div class="flex items-center justify-between text-sm"><span class="flex items-center gap-2 truncate text-gray-700 dark:text-gray-300"><span class="flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-bold bg-orange-500 text-white">2</span><span class="truncate font-mono text-xs">192.168.66.12</span></span><span class="shrink-0 text-xs text-gray-500">244<!-- --> 次</span></div><div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800"><div class="h-full rounded-full bg-blue-500" style="width:78.2051282051282%"></div></div></div><div class="space-y-1"><div class="flex items-center justify-between text-sm"><span class="flex items-center gap-2 truncate text-gray-700 dark:text-gray-300"><span class="flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-bold bg-gray-200 text-gray-600">3</span><span class="truncate font-mono text-xs">bad-domain.cn</span></span><span class="shrink-0 text-xs text-gray-500">187<!-- --> 次</span></div><div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800"><div class="h-full rounded-full bg-blue-500" style="width:59.93589743589743%"></div></div></div><div class="space-y-1"><div class="flex items-center justify-between text-sm"><span class="flex items-center gap-2 truncate text-gray-700 dark:text-gray-300"><span class="flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-bold bg-gray-200 text-gray-600">4</span><span class="truncate font-mono text-xs">phish-mail.net</span></span><span class="shrink-0 text-xs text-gray-500">121<!-- --> 次</span></div><div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800"><div class="h-full rounded-full bg-blue-500" style="width:38.782051282051285%"></div></div></div><div class="space-y-1"><div class="flex items-center justify-between text-sm"><span class="flex items-center gap-2 truncate text-gray-700 dark:text-gray-300"><span class="flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-bold bg-gray-200 text-gray-600">5</span><span class="truncate font-mono text-xs">203.0.113.45</span></span><span class="shrink-0 text-xs text-gray-500">96<!-- --> 次</span></div><div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800"><div class="h-full rounded-full bg-blue-500" style="width:30.76923076923077%"></div></div></div></div><button class="mt-4 flex items-center text-sm font-medium text-blue-600 hover:underline">查看完整榜单 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></button></div></div>
+      </div>
+      <p class="preview-note">预览可操作：点击「查看完整榜单 ›」显示目标路由 <code>/statistics/ops-top-trend</code>。</p>
+      <h5>行结构与三范围数据（浏览器切换实测）</h5>
+      <table class="spec-table">
+        <thead><tr><th>#</th><th>今日</th><th>最近 7 天</th><th>最近 30 天</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>spam-sender.com · 312 次</td><td>bad-domain.cn · 1,820 次</td><td>bad-domain.cn · 7,420 次</td></tr>
+          <tr><td>2</td><td>192.168.66.12 · 244 次</td><td>spam-sender.com · 1,542 次</td><td>phish-mail.net · 6,210 次</td></tr>
+          <tr><td>3</td><td>bad-domain.cn · 187 次</td><td>phish-mail.net · 1,103 次</td><td>spam-sender.com · 5,980 次</td></tr>
+          <tr><td>4</td><td>phish-mail.net · 121 次</td><td>198.51.100.7 · 884 次</td><td>fake-bank.top · 3,140 次</td></tr>
+          <tr><td>5</td><td>203.0.113.45 · 96 次</td><td>fake-bank.top · 651 次</td><td>203.0.113.45 · 2,870 次</td></tr>
+        </tbody>
+      </table>
+      <p>行结构：排名徽标（h-5 w-5 rounded，第 1 名 <code>bg-red-500</code> 白字、第 2 名 <code>bg-orange-500</code> 白字、3–5 名 <code>bg-gray-200</code> 灰字）+ 来源（font-mono text-xs truncate）+ 次数（text-xs text-gray-500）+ 进度条（h-1.5 蓝色 <code>bg-blue-500</code>，宽度 = hits / 最大 hits × 100%，底槽 <code>bg-gray-100</code>）。</p>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>一致</th></tr></thead>
+          <tbody>
+            <tr><td>根节点 / 节点总数</td><td><code>div[data-slot=card]</code> / 52</td><td>同左 / 52</td><td>✅</td></tr>
+            <tr><td>行数</td><td>5</td><td>5</td><td>✅</td></tr>
+            <tr><td>排名徽标配色</td><td>1 红 / 2 橙 / 3–5 灰</td><td>一致</td><td>✅</td></tr>
+            <tr><td>进度条宽度</td><td>100% / 78.2% / 59.9% / 38.8% / 30.8%（312 为基准）</td><td>一致（内联 style width）</td><td>✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.8 系统与服务健康 ===== -->
+  <article class="component-spec" id="component-2-8">
+    <h3>2.8 系统与服务健康 <span class="toc-badge">1层</span> <span class="tag tag-blue">仅平台视角</span></h3>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>demo 源位置</td><td><code>security-ops-dashboard.tsx</code> L186–193（SYSTEM_HEALTH）、L580–623（渲染）</td></tr>
+        <tr><td>spec 章节</td><td>§8 系统与服务健康卡 [Overlay: platform]</td></tr>
+        <tr><td>可见性</td><td><code>resolve("monitor-infrastructure").visible</code>；租户视角隐藏（<a href="./layer-3-viewer-tenant.html">已验证</a>）</td></tr>
+      </tbody>
+    </table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认态</h4>
+      <div class="trigger-path">触发路径：页面加载即渲染（平台视角）。</div>
+      <div class="component-preview" id="preview-health">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm"><div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 flex flex-row items-center justify-between space-y-0 pb-2"><div data-slot="card-title" class="font-semibold flex items-center gap-2 text-base"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity h-4 w-4"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path></svg>系统与服务健康</div></div><div data-slot="card-content" class="px-6"><div class="space-y-2.5 text-sm"><div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-green-500"></span><span class="text-gray-600 dark:text-gray-400">节点状态：</span><span class="font-medium text-gray-900 dark:text-gray-100">5<!-- -->/<!-- -->5<!-- --> 在线</span></div><div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-green-500"></span><span class="text-gray-600 dark:text-gray-400">核心服务：</span><span class="font-medium text-gray-900 dark:text-gray-100">正常</span></div><button class="flex w-full items-center gap-2 text-left"><span class="h-2 w-2 rounded-full bg-green-500"></span><span class="text-gray-600 dark:text-gray-400">License：</span><span class="font-medium text-gray-900 hover:underline dark:text-gray-100">剩余 <!-- -->69<!-- --> 天</span></button><div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-green-500"></span><span class="text-gray-600 dark:text-gray-400">规则库：</span><span class="font-medium text-gray-900 dark:text-gray-100">202604021122</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-green-100 text-green-700 hover:bg-green-100">最新</span></div><div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-green-500"></span><span class="text-gray-600 dark:text-gray-400">反病毒：</span><span class="font-medium text-gray-900 dark:text-gray-100">ClamAV<!-- --> / <!-- -->2026-07-01<!-- --> 到期</span></div></div><button class="mt-4 flex items-center text-sm font-medium text-blue-600 hover:underline">系统状态 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></button></div></div>
+      </div>
+      <p class="preview-note">预览可操作：点击「License：剩余 69 天」行显示目标路由 <code>/admin/license</code>；点击底部「系统状态 ›」显示 <code>/system-status</code>（demo 中该路由存在，为独立系统状态详情页）。</p>
+      <h5>指标行规格</h5>
+      <table class="spec-table">
+        <thead><tr><th>指标</th><th>圆点规则</th><th>值（mock）</th><th>交互</th></tr></thead>
+        <tbody>
+          <tr><td>节点状态</td><td>全在线绿 / 有离线红（与 KPI 节点卡同源 <code>kpi.nodesOnline===nodesTotal</code>）</td><td>5/5 在线</td><td>—</td></tr>
+          <tr><td>核心服务</td><td>恒绿（mock）</td><td>正常</td><td>—</td></tr>
+          <tr><td>License</td><td>&gt;30 天绿 / 7–30 天橙 / &lt;7 天红（<code>licenseDays</code> 阈值）</td><td>剩余 69 天</td><td>整行可点击 → <code>/admin/license</code>，hover 下划线</td></tr>
+          <tr><td>规则库</td><td>恒绿（mock）</td><td>202604021122 + 绿 Badge「最新」（<code>ruleLatest</code> 时渲染）</td><td>—</td></tr>
+          <tr><td>反病毒</td><td>恒绿（mock）</td><td>ClamAV / 2026-07-01 到期</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>一致</th></tr></thead>
+          <tbody>
+            <tr><td>根节点 / 节点总数</td><td><code>div[data-slot=card]</code> / 31</td><td>同左 / 31</td><td>✅</td></tr>
+            <tr><td>指标行数</td><td>5（其中 License 行为 button，其余 div）</td><td>一致</td><td>✅</td></tr>
+            <tr><td>「最新」Badge</td><td>渲染（ruleLatest=true）</td><td>包含</td><td>✅</td></tr>
+            <tr><td>圆点配色</td><td>5 行全绿（licenseDays=69&gt;30）</td><td>一致</td><td>✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ 3. 弹窗/抽屉规格 ============ -->
+<section id="dialogs">
+  <h2>3. 弹窗 / 抽屉 / 对话框规格</h2>
+  <p>本页<b>无 Dialog / Drawer / Sheet</b>。唯一浮层为时间范围选择器的 radix Select 下拉（portal 渲染 <code>[data-slot=select-content]</code> listbox），规格见 <a href="./layer-1-range-select.html">2.1 层级1 子文件</a>。</p>
+</section>
+
+<!-- ============ 4. 数据模型与 API 映射 ============ -->
+<section id="api-mapping">
+  <h2>4. 数据模型与 API 映射</h2>
+  <h3>4.1 前端数据模型（demo 源码）</h3>
+  <pre><code>type TimeRange = "today" | "7d" | "30d"                       // 时间范围
+KPI_BY_RANGE: Record&lt;TimeRange, {
+  inbound, inboundDelta, threats, blockRate,
+  pending, pendingIsolated, pendingReport,
+  nodesOnline, nodesTotal }&gt;                                  // KPI mock（三范围值见 §2.3 表）
+
+const THREAT_SERIES = [phishing, spoofing, spam, virus, maliciousLink]  // 5 序列（key/name/color）
+buildTrend(range): { label, phishing, spoofing, spam, virus, maliciousLink }[]  // Math.random 生成（D4）
+
+type AlertLevel = "danger" | "warning" | "info"
+interface AlertItem { id; level: AlertLevel; title; meta; href?;
+  scope: "tenant" | "platform" }                              // scope 驱动视角过滤
+
+DASHBOARD_AGENTS = [phishingV1, impersonation, retrospectV1]  // 与智能体中心对齐
+// useAgentStatus() → { enabled, status: running|standby|paused, todayProcessed }
+
+THREAT_TOP5_BY_RANGE: Record&lt;TimeRange, { source, hits }[]&gt;
+SYSTEM_HEALTH = { licenseDays: 69, ruleVersion: "202604021122",
+  ruleLatest: true, avVendor: "ClamAV", avExpire: "2026-07-01" }</code></pre>
+  <h3>4.2 网关 API 映射（落地建议，均待后端契约确认 → §10 Q1）</h3>
+  <table class="spec-table">
+    <thead><tr><th>数据块</th><th>demo mock 来源</th><th>建议网关数据来源</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td>KPI 收信总量 / 拦截威胁数 / 拦截率</td><td>KPI_BY_RANGE</td><td>邮件统计聚合（与「邮件安全总览」「投递与流量分析」同源口径，按时间范围聚合；租户视角按租户过滤）</td><td><span class="tag tag-orange">待确认</span></td></tr>
+      <tr><td>待处置邮件（含隔离/举报拆分）</td><td>KPI_BY_RANGE.pending*</td><td>处置中心队列计数 + 举报中心待审计数聚合</td><td><span class="tag tag-orange">待确认</span></td></tr>
+      <tr><td>系统在线节点</td><td>nodesOnline/nodesTotal</td><td>clustermgr 集群状态（cluster-state members）/ 基础设施监控（categraf → apiserver ingest）</td><td><span class="tag tag-orange">待确认</span></tr>
+      <tr><td>威胁态势趋势（5 分类）</td><td>buildTrend 随机</td><td>拦截日志按威胁类型 × 时间桶聚合（安全总览趋势接口复用）</td><td><span class="tag tag-orange">待确认</span></td></tr>
+      <tr><td>待办与告警</td><td>TODO_ALERTS</td><td>告警中心 + 各队列计数聚合（scope 归属由平台/租户数据源天然区分）</td><td><span class="tag tag-orange">待确认</span></td></tr>
+      <tr><td>智能体运行概况</td><td>agent-status-context</td><td>智能体中心状态 API（钓鱼检测/仿冒检测/威胁回溯 三智能体的启停与当日处理量）</td><td><span class="tag tag-orange">待确认</span></td></tr>
+      <tr><td>威胁来源 TOP5</td><td>THREAT_TOP5_BY_RANGE</td><td>「运营 TOP 与趋势」榜单接口（取前 5）</td><td><span class="tag tag-orange">待确认</span></td></tr>
+      <tr><td>License / 规则库 / 反病毒</td><td>SYSTEM_HEALTH</td><td>授权与升级（CAC License 剩余天数）；规则库版本机制、反病毒引擎概念网关侧对应物 → §10 Q2/Q3</td><td><span class="tag tag-red">冲突待确认</span></td></tr>
+    </tbody>
+  </table>
+  <p>依据 implement.md：产品设计 API 不强制落地，上述均优先以现有网关 API 协同实现；确需新增的在落地 spec 阶段单独梳理确认。</p>
+</section>
+
+<!-- ============ 5. 业务逻辑规格 ============ -->
+<section id="business-logic">
+  <h2>5. 业务逻辑规格</h2>
+  <h3>5.1 形态 × 视角可见性矩阵（spec §0.2，浏览器全验证）</h3>
+  <table class="spec-table">
+    <thead><tr><th>区块</th><th>传统版</th><th>AI 版</th><th>平台视角</th><th>租户视角</th><th>判定依据</th><th>浏览器验证</th></tr></thead>
+    <tbody>
+      <tr><td>综合健康状态条</td><td>✅</td><td>✅</td><td>✅ 含平台事件（N=2）</td><td>✅ 仅本租户事件（N=1）</td><td><code>visibleAlerts</code></td><td>✅</td></tr>
+      <tr><td>KPI·收信/拦截/待处置</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>业务指标</td><td>✅</td></tr>
+      <tr><td>KPI·系统在线节点</td><td>✅</td><td>✅</td><td>✅</td><td>❌ 隐藏（栅格收敛 xl:grid-cols-3）</td><td><code>resolve("monitor-infrastructure").visible</code></td><td>✅</td></tr>
+      <tr><td>威胁态势趋势 / TOP5</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>业务指标</td><td>✅</td></tr>
+      <tr><td>待办与告警</td><td>✅</td><td>✅</td><td>✅ 全量 5 项</td><td>✅ 仅 tenant 2 项</td><td><code>scope</code> 过滤</td><td>✅</td></tr>
+      <tr><td>智能体运行概况</td><td>❌ 不渲染</td><td>✅</td><td>✅</td><td>✅（demo 仅按 capabilities.ai，未实现"本租户有权时"——差异 D7）</td><td><code>capabilities.ai</code></td><td>✅</td></tr>
+      <tr><td>系统与服务健康卡</td><td>✅</td><td>✅</td><td>✅</td><td>❌ 隐藏</td><td><code>resolve("monitor-infrastructure").visible</code></td><td>✅</td></tr>
+    </tbody>
+  </table>
+  <p>底部概览栅格列数 = 可见卡数自适应：AI+平台 3 列 → <code>lg:grid-cols-3</code>；租户或传统版 2 列 → <code>lg:grid-cols-2</code>（两种收敛均已浏览器实测）。视角判定与侧边栏同源（<code>lib/product-profiles.ts</code> 的 <code>resolveAccess</code>：<code>monitor-infrastructure</code> 定义 <code>scope:"platform", tenantAccess:"hidden"</code>）。</p>
+  <h3>5.2 健康结论计算流程</h3>
+  <div class="mermaid">
+flowchart TD
+  A[TODO_ALERTS 全量告警] --> B{当前视角?}
+  B -- 平台 --> C[visibleAlerts = 全量 5 项]
+  B -- 租户 --> D[visibleAlerts = scope==tenant 共 2 项]
+  C --> E{danger 数 > 0?}
+  D --> E
+  E -- 是 --> F[危险态: 红 ShieldAlert<br/>检测到 N 项紧急事件待处理]
+  E -- 否 --> G{warning 数 > 0?}
+  G -- 是 --> H[警告态: 橙 AlertTriangle<br/>检测到 N 项警告事项]
+  G -- 否 --> I[正常态: 绿 CheckCircle2<br/>系统运行正常 + 拦截数文案]
+  </div>
+  <h3>5.3 关键业务约束</h3>
+  <ul>
+    <li><b>数据口径</b>（spec §9）：租户视角所有业务指标为本租户范围，平台视角为全平台聚合；前端 mock 阶段仅保证可见性，数据隔离由后端按租户下发。</li>
+    <li><b>权限同源</b>：卡片显隐复用 <code>resolve(featureId)</code>，与侧边栏共用同一权威判定；权限调整仅改 <code>lib/product-profiles.ts</code>。</li>
+    <li><b>单租户形态无租户视角</b>：切到 ai-single / legacy-single 时视角自动回退 platform（product-profile-context L86–92）。</li>
+    <li><b>性能</b>（spec §10）：首屏聚合 P95 &lt; 2s；刷新交互无整页阻塞。</li>
+  </ul>
+</section>
+
+<!-- ============ 6. 交互规格 ============ -->
+<section id="interaction">
+  <h2>6. 交互规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>控件</th><th>事件</th><th>状态变化</th><th>浏览器验证</th></tr></thead>
+    <tbody>
+      <tr><td>I1</td><td>时间范围 Select</td><td>选择项</td><td><code>range</code> 状态 → KPI / 趋势（重新生成）/ TOP5 全联动；触发器文案更新，选中项在下拉中高亮 + Check 图标</td><td>✅ 三范围值与 X 轴粒度均实测（见 layer-1）</td></tr>
+      <tr><td>I2</td><td>刷新按钮</td><td>click</td><td><code>refreshing</code> toggle：图标 animate-spin；趋势 useMemo 依赖变化重新随机生成；<b>再次点击才停转</b></td><td>✅ CDP 实测两次点击 class 变化</td></tr>
+      <tr><td>I3</td><td>KPI 卡片 ×4</td><td>click / hover</td><td>hover 阴影 <code>hover:shadow-md</code>；click <code>router.push</code> 对应统计/处置/监控页</td><td>✅ cursor-pointer 与路由目标（源码+DOM）</td></tr>
+      <tr><td>I4</td><td>趋势图例 ×5</td><td>click</td><td><code>hidden</code> Set toggle：按钮 opacity-40，序列从堆叠中移除（面积组 5→4，重新堆叠）</td><td>✅ CDP 实测 areas 5→4→5（见 layer-2）</td></tr>
+      <tr><td>I5</td><td>趋势图表区</td><td>hover</td><td>Recharts Tooltip：时间点 + 各可见序列名称/数值（序列色文字）</td><td>✅ 实测 visible + 内容（见 layer-2）</td></tr>
+      <tr><td>I6</td><td>告警列表项</td><td>click / hover</td><td>有 href：hover 浅灰背景，click 跳转；无 href（a5）：disabled，无反馈</td><td>✅ disabled 属性与 hover class 实测</td></tr>
+      <tr><td>I7</td><td>卡片底部链接 ×6</td><td>click</td><td>查看统计/查看威胁/去处置/查看状态/查看邮件安全总览/查看全部告警/智能体中心/查看完整榜单/系统状态 → 各自 router.push</td><td>✅ 目标路由清单（源码+demo 路由存在性核查）</td></tr>
+      <tr><td>I8</td><td>形态/视角切换（顶栏全局控件）</td><td>切换</td><td>本页区块显隐与栅格收敛联动（见 layer-3 / layer-4）</td><td>✅ URL 参数 profile/viewer 驱动验证</td></tr>
+    </tbody>
+  </table>
+  <h3>异常与空态</h3>
+  <table class="spec-table">
+    <thead><tr><th>场景</th><th>行为</th><th>验证方式</th></tr></thead>
+    <tbody>
+      <tr><td>趋势数据为空</td><td>h-320 居中「暂无威胁数据」（text-gray-400）</td><td>源码 L410–411（mock 恒非空，浏览器不可复现）</td></tr>
+      <tr><td>告警全部处理完</td><td>PartyPopper 绿图标 + 「当前无待办事项和告警，系统运行良好」（h-280 居中）</td><td>源码 L453–457（同上）</td></tr>
+      <tr><td>节点有离线</td><td>KPI 卡红 Badge「N 个离线」+「存在离线节点」；健康卡节点圆点变红</td><td>源码 L365–371（mock 恒 5/5）</td></tr>
+      <tr><td>加载失败/超时</td><td>demo 无处理（纯前端 mock）；落地需按聚合接口失败降级设计</td><td>→ §10 Q1 契约时一并确认</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 7. 国际化规格 ============ -->
+<section id="i18n">
+  <h2>7. 国际化规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>项</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>spec 要求</td><td>§10：全部文案走 i18n（中/英/泰），中文一律 UTF-8</td></tr>
+      <tr><td>implement.md 约束</td><td>四种内置语言（落地 webapp 现有 en / ru / th / zh）—— 语言数以 implement.md 为准（差异 D3）</td></tr>
+      <tr><td>demo 现状</td><td>侧边栏入口用 <code>nav.systemStatus</code> key；<b>页面组件内全部文案硬编码中文</b>，未接 language-context</td></tr>
+      <tr><td>spec 提及 key</td><td><code>nav.systemStatus</code> / <code>systemStatus.title</code>；分页控件 <code>common.firstPage</code>（"首页"为翻页语义，与本页改名无关，spec §11）</td></tr>
+      <tr><td>落地清单</td><td>标题/副标题、时间范围 3 项、刷新、健康条 3 模板（含插值 N/范围/拦截数）、4 KPI 卡全部文案、趋势标题/图例 5 项/空态、告警标题/5 项 mock 由后端下发/空态文案、智能体卡标题/状态 Badge 3 种、TOP5 标题/次、健康卡 5 指标标签/最新/到期、底部链接 9 处</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 8. 响应式规格 ============ -->
+<section id="responsive">
+  <h2>8. 响应式规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>KPI 栅格</th><th>趋势+告警</th><th>底部概览</th><th>验证</th></tr></thead>
+    <tbody>
+      <tr><td>&lt; 640px</td><td>1 列</td><td>1 列</td><td>1 列</td><td>源码 class（未截图）</td></tr>
+      <tr><td>640–1279px（sm）</td><td>2 列</td><td>≥1024 起 3 列（趋势占 2）</td><td>≥1024 起 3 列（平台 AI）</td><td>✅ 1024px 截图</td></tr>
+      <tr><td>≥ 1280px（xl）</td><td>4 列（平台）/ 3 列（租户）</td><td>3 列</td><td>3 列 / 2 列（自适应）</td><td>✅ 1440 / 1920px 截图</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/responsive-1024px.png" alt="1024px 断点">
+    <figcaption>1024px：KPI 收敛 2 列（<code>sm:grid-cols-2</code>，实测 gridTemplateColumns 320px×2），底部保持 3 列（<code>lg</code> 生效，202.66px×3）。</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/responsive-1920px.png" alt="1920px 宽屏">
+    <figcaption>1920px 宽屏：KPI 4 列（xl 生效），内容区随宽度撑满。</figcaption>
+  </figure>
+  <p>暗色模式：源码全量携带 <code>dark:</code> class（bg-gray-900 / bg-gray-950 / red-950 等），但 demo 主题切换器仅提供蓝/绿配色，无暗色开关入口 —— 暗色态未浏览器验证，落地按 class 语义实现。</p>
+</section>
+
+<!-- ============ 9. 与 spec 的差异标注 ============ -->
+<section id="diffs" class="diff-section">
+  <h2>9. 与 spec 的差异标注</h2>
+  <table class="spec-table diff-table">
+    <thead><tr><th>#</th><th>差异点</th><th>spec 原文</th><th>demo 实际（浏览器验证）</th><th>处理建议</th></tr></thead>
+    <tbody>
+      <tr><td>D1</td><td>路由</td><td>§0.1 路由 <code>/</code>（应用首页根路由）</td><td><code>/</code> 与 <code>/security-ops-dashboard</code> 均渲染本组件，侧边栏用后者</td><td>落地确定唯一路由 + 另一路径重定向（→Q5）</td></tr>
+      <tr><td>D2</td><td>刷新按钮语义</td><td>§1.2 "刷新时图标旋转动画；重新生成趋势数据"</td><td><code>refreshing</code> 为 toggle 布尔：单击后持续旋转，<b>再次点击才停</b>；仅趋势重新随机生成，KPI 不刷新</td><td>落地应为"请求期间旋转、完成即停"，全部数据重拉（→Q4）</td></tr>
+      <tr><td>D3</td><td>i18n 语言数</td><td>§10 中/英/泰 三语</td><td>demo 硬编码中文；implement.md 要求四语（webapp 现有 en/ru/th/zh）</td><td>以四语为准（→Q6）</td></tr>
+      <tr><td>D4</td><td>趋势数据生成</td><td>§4 趋势按时间范围展示</td><td><code>buildTrend</code> 每次渲染 Math.random 随机 → 同范围两次进入数据不同</td><td>mock 行为，正式以后端接口为准（spec §11 已声明）</td></tr>
+      <tr><td>D5</td><td>X 轴标签</td><td>§4 "今日 12 点（2h 间隔）/ 7 天 / 30 天"</td><td>今日 00:00–22:00 ✅；7 天硬编码 <code>11/1–11/7</code>、30 天 <code>1/1–1/30</code>（月份写死，与当前日期无关）</td><td>mock 痕迹；落地按真实日期生成</td></tr>
+      <tr><td>D6</td><td>图表类型表述</td><td>§4 "折线/面积图"</td><td>堆叠面积图（stackId="1"，fillOpacity 0.5）</td><td>按 demo 落地为堆叠面积图</td></tr>
+      <tr><td>D7</td><td>智能体卡租户授权</td><td>§0.2 租户视角"✅（本租户有权时）"</td><td>demo 仅判 <code>capabilities.ai</code>，租户视角恒显示，无"有权时"判断</td><td>落地补租户授权判定或确认矩阵放宽（→Q1 契约）</td></tr>
+      <tr><td>D8</td><td>健康条正常/警告态</td><td>§2 三级结论</td><td>mock 告警恒含 danger，浏览器仅能复现危险态（平台 N=2 / 租户 N=1）；警告/正常态文案取自源码</td><td>无冲突；测试时需构造数据覆盖三态</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 10. 需确认事项 ============ -->
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项</h2>
+  <table class="spec-table question-table">
+    <thead><tr><th>#</th><th>事项</th><th>背景</th><th>待决策</th></tr></thead>
+    <tbody>
+      <tr><td>Q1</td><td>聚合数据 API 契约</td><td>§4.2 全部映射为"待确认"：KPI/趋势/TOP5/告警/智能体状态的时间范围参数、租户过滤、聚合口径均需后端定义；优先复用现有统计与监控 API 协同</td><td>逐块确认现有 API 是否够用、哪些需新增</td></tr>
+      <tr><td>Q2</td><td>「反病毒引擎」指标</td><td>demo 展示 ClamAV 厂商与到期日；网关当前附件深度检测为 attachd/pyhelper 体系，无"反病毒引擎到期"概念</td><td>保留该指标（对接何数据）还是裁剪</td></tr>
+      <tr><td>Q3</td><td>「规则库版本/是否最新」</td><td>demo 展示版本号 202604021122 + 最新 Badge；网关有跨部署点规则同步（rule-sync）但无"规则库版本比对"机制</td><td>指标语义与数据源（rule-sync 快照版本？特征库更新？）</td></tr>
+      <tr><td>Q4</td><td>刷新按钮落地语义</td><td>差异 D2：demo 为 toggle 旋转且仅刷新趋势</td><td>确认为"整页数据重拉、请求期间旋转"</td></tr>
+      <tr><td>Q5</td><td>webapp 路由与导航归属</td><td>差异 D1；webapp 现有导航结构需对齐（系统状态作为首页 or 独立菜单项）</td><td>路由、侧边栏位置、demo 内 <code>/system-status</code>（健康卡底部跳转的独立详情页）是否一并落地</td></tr>
+      <tr><td>Q6</td><td>i18n 语言范围</td><td>spec 三语 vs implement.md 四语</td><td>按四语（en/ru/th/zh）落地，spec 表述需产品更新</td></tr>
+      <tr><td>Q7</td><td>告警聚合口径</td><td>「查看全部告警」跳 <code>/monitor/alerts</code>；本页 5 类告警（队列/引擎/举报/License/规则库）来源分散</td><td>告警中心模块是否统一提供本页聚合摘要接口</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="route-toast" id="route-toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: "neutral" });
+
+/* ============ 交互脚本：复刻 demo 前端状态机（mock，不调用后端） ============ */
+const toast = document.getElementById("route-toast");
+let toastTimer = null;
+function showRoute(route) {
+  toast.textContent = "demo 行为：router.push(\"" + route + "\")";
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+}
+
+/* --- KPI 三范围 mock 数据（与 demo KPI_BY_RANGE 一致） --- */
+const KPI = {
+  today: { inbound: "128,456", delta: 12, threats: "1,234", rate: "0.96", pending: 12, iso: 3, rep: 2 },
+  d7:    { inbound: "902,331", delta: 8,  threats: "9,876", rate: "1.09", pending: 34, iso: 11, rep: 6 },
+  d30:   { inbound: "3,984,210", delta: -4, threats: "41,203", rate: "1.03", pending: 58, iso: 19, rep: 13 },
+};
+const RANGE_LABEL = { today: "今日", d7: "最近 7 天", d30: "最近 30 天" };
+
+function applyRange(rk) {
+  const k = KPI[rk];
+  const grid = document.getElementById("kpi-grid");
+  if (!grid) return;
+  const cards = grid.querySelectorAll("[data-slot=card]");
+  if (cards.length < 4) return;
+  // 收信总量
+  const c0 = cards[0];
+  c0.querySelector(".text-3xl").textContent = k.inbound;
+  const deltaWrap = c0.querySelector(".mt-1");
+  if (deltaWrap) {
+    const up = k.delta >= 0;
+    deltaWrap.innerHTML = up
+      ? '<span class="flex items-center text-green-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide h-4 w-4"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>' + k.delta + '% 环比</span>'
+      : '<span class="flex items-center text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide h-4 w-4"><path d="m7 7 10 10"></path><path d="M17 7v10H7"></path></svg>' + Math.abs(k.delta) + '% 环比</span>';
+  }
+  // 拦截威胁数
+  cards[1].querySelector(".text-3xl").textContent = k.threats;
+  cards[1].querySelector(".mt-1").textContent = "拦截率 " + k.rate + "%";
+  // 待处置邮件
+  cards[2].querySelector(".text-3xl").textContent = k.pending;
+  cards[2].querySelector(".mt-1").textContent = "隔离 " + k.iso + " 封 / 举报待审 " + k.rep + " 封";
+}
+
+/* --- 2.1 头部：Select 下拉 + 刷新 --- */
+(function initHeader() {
+  const hp = document.getElementById("preview-header");
+  if (!hp) return;
+  const trigger = hp.querySelector("[data-slot=select-trigger]");
+  if (trigger) {
+    // 构造下拉浮层（视觉按 demo 提取的 listbox 样式简化重建）
+    const dd = document.createElement("div");
+    dd.style.cssText = "position:absolute;z-index:50;display:none;background:#fff;color:#0a0a0a;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.12);padding:4px;min-width:8rem;font-size:14px;";
+    ["今日", "最近 7 天", "最近 30 天"].forEach((label, i) => {
+      const it = document.createElement("div");
+      it.dataset.rk = ["today", "d7", "d30"][i];
+      it.style.cssText = "display:flex;align-items:center;gap:8px;padding:6px 32px 6px 8px;border-radius:6px;cursor:default;position:relative;";
+      it.textContent = label;
+      it.onmouseenter = () => (it.style.background = "#f3f4f6");
+      it.onmouseleave = () => (it.style.background = "");
+      it.onclick = (e) => {
+        e.stopPropagation();
+        const span = trigger.querySelector("span") || trigger.firstChild;
+        if (span && span.nodeType === 1) span.textContent = label; else trigger.childNodes[0].textContent = label;
+        dd.style.display = "none";
+        trigger.setAttribute("aria-expanded", "false");
+        applyRange(it.dataset.rk);
+        markChecked();
+      };
+      dd.appendChild(it);
+    });
+    function markChecked() {
+      const cur = trigger.textContent.trim();
+      dd.querySelectorAll("div[data-rk]").forEach((it) => {
+        it.style.fontWeight = it.textContent === cur ? "600" : "400";
+        it.style.background = "";
+      });
+    }
+    markChecked();
+    trigger.parentElement.style.position = "relative";
+    trigger.parentElement.appendChild(dd);
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = dd.style.display === "block";
+      dd.style.display = open ? "none" : "block";
+      dd.style.top = trigger.offsetTop + trigger.offsetHeight + 4 + "px";
+      dd.style.left = trigger.offsetLeft + "px";
+      trigger.setAttribute("aria-expanded", String(!open));
+      markChecked();
+    });
+    document.addEventListener("click", () => (dd.style.display = "none"));
+  }
+  // 刷新按钮：toggle animate-spin（demo 实测行为）
+  const refreshBtn = Array.from(hp.querySelectorAll("button")).find((b) => b.textContent.trim() === "刷新");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", () => {
+      const svg = refreshBtn.querySelector("svg");
+      svg.classList.toggle("animate-spin");
+    });
+  }
+})();
+
+/* --- 2.2 健康条三变体 --- */
+const HEALTH_VARIANTS = {
+  danger: null, // 初始 innerHTML（demo 提取原样），init 时回填
+  warning: {
+    cls: "flex items-center gap-3 rounded-md border px-4 py-3 text-sm font-medium text-orange-600 bg-orange-50 border-orange-200",
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide h-5 w-5 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 20h16a2 2 0 0 0 1.73-2Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>',
+    text: "检测到 2 项警告事项，请及时处理",
+  },
+  info: {
+    cls: "flex items-center gap-3 rounded-md border px-4 py-3 text-sm font-medium text-green-600 bg-green-50 border-green-200",
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide h-5 w-5 shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>',
+    text: "系统运行正常，今日已拦截 1,234 封威胁邮件，无待处理告警",
+  },
+};
+function setHealthVariant(v) {
+  const wrap = document.getElementById("preview-healthbar");
+  const bar = wrap.querySelector("div.rounded-md.border") || wrap.firstElementChild;
+  if (!bar) return;
+  if (!HEALTH_VARIANTS.danger) HEALTH_VARIANTS.danger = { outer: bar.outerHTML };
+  if (v === "danger") { bar.outerHTML = HEALTH_VARIANTS.danger.outer; return; }
+  const conf = HEALTH_VARIANTS[v];
+  bar.outerHTML = '<div class="' + conf.cls + '">' + conf.icon + '<span class="text-pretty">' + conf.text + "</span></div>";
+}
+(function () { // 记录 danger 初始态
+  const wrap = document.getElementById("preview-healthbar");
+  const bar = wrap && wrap.querySelector("div.rounded-md.border");
+  if (bar) HEALTH_VARIANTS.danger = { outer: bar.outerHTML };
+})();
+
+/* --- 2.3 KPI 卡片点击路由 --- */
+document.querySelectorAll("#preview-kpi [data-route]").forEach((w) => {
+  w.addEventListener("click", () => showRoute(w.dataset.route));
+});
+
+/* --- 2.4 趋势：图例显隐 + Tooltip + 链接 --- */
+(function initTrend() {
+  const tp = document.getElementById("preview-trend");
+  if (!tp) return;
+  const legendBtns = Array.from(tp.querySelectorAll("button")).filter((b) => b.className.includes("text-xs") && /钓鱼邮件|仿冒邮件|垃圾邮件|病毒附件|恶意链接/.test(b.textContent));
+  const areas = tp.querySelectorAll(".recharts-area");
+  legendBtns.forEach((btn, i) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const hidden = btn.classList.toggle("opacity-40");
+      btn.classList.toggle("opacity-100", !hidden);
+      if (areas[i]) areas[i].style.display = hidden ? "none" : "";
+    });
+  });
+  const link = Array.from(tp.querySelectorAll("button")).find((b) => b.textContent.includes("查看邮件安全总览"));
+  if (link) link.addEventListener("click", () => showRoute("/statistics/security-overview"));
+  // Tooltip 静态复刻（数值为 demo 捕获时刻：08:00 点位）
+  const surface = tp.querySelector(".recharts-surface");
+  if (surface) {
+    const tip = document.createElement("div");
+    tip.style.cssText = "position:absolute;display:none;pointer-events:none;z-index:20;";
+    tip.innerHTML = `<div class="recharts-default-tooltip" style="margin: 0px; padding: 10px; background-color: rgb(255, 255, 255); border: 1px solid rgb(229, 231, 235); white-space: nowrap; border-radius: 6px; font-size: 12px; box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 8px;"><p class="recharts-tooltip-label" style="margin: 0px;">08:00</p><ul class="recharts-tooltip-item-list" style="padding: 0px; margin: 0px;"><li class="recharts-tooltip-item" style="display: block; padding-top: 4px; padding-bottom: 4px; color: rgb(239, 68, 68);"><span class="recharts-tooltip-item-name">钓鱼邮件</span><span class="recharts-tooltip-item-separator"> : </span><span class="recharts-tooltip-item-value">32</span><span class="recharts-tooltip-item-unit"></span></li><li class="recharts-tooltip-item" style="display: block; padding-top: 4px; padding-bottom: 4px; color: rgb(249, 115, 22);"><span class="recharts-tooltip-item-name">仿冒邮件</span><span class="recharts-tooltip-item-separator"> : </span><span class="recharts-tooltip-item-value">24</span><span class="recharts-tooltip-item-unit"></span></li><li class="recharts-tooltip-item" style="display: block; padding-top: 4px; padding-bottom: 4px; color: rgb(234, 179, 8);"><span class="recharts-tooltip-item-name">垃圾邮件</span><span class="recharts-tooltip-item-separator"> : </span><span class="recharts-tooltip-item-value">89</span><span class="recharts-tooltip-item-unit"></span></li><li class="recharts-tooltip-item" style="display: block; padding-top: 4px; padding-bottom: 4px; color: rgb(153, 27, 27);"><span class="recharts-tooltip-item-name">病毒附件</span><span class="recharts-tooltip-item-separator"> : </span><span class="recharts-tooltip-item-value">11</span><span class="recharts-tooltip-item-unit"></span></li><li class="recharts-tooltip-item" style="display: block; padding-top: 4px; padding-bottom: 4px; color: rgb(6, 182, 212);"><span class="recharts-tooltip-item-name">恶意链接</span><span class="recharts-tooltip-item-separator"> : </span><span class="recharts-tooltip-item-value">20</span><span class="recharts-tooltip-item-unit"></span></li></ul></div>`;
+    tp.style.position = "relative";
+    tp.appendChild(tip);
+    const wrap = surface.closest(".recharts-wrapper") || surface.parentElement;
+    wrap.addEventListener("mousemove", (e) => {
+      const r = tp.getBoundingClientRect();
+      tip.style.display = "block";
+      tip.style.left = e.clientX - r.left + 14 + "px";
+      tip.style.top = e.clientY - r.top - 10 + "px";
+    });
+    wrap.addEventListener("mouseleave", () => (tip.style.display = "none"));
+  }
+})();
+
+/* --- 2.5 告警列表 --- */
+(function initAlerts() {
+  const ap = document.getElementById("preview-alerts");
+  if (!ap) return;
+  const routes = { "待处置队列": "/email-handling/disposal-center", "检测引擎离线告警": "/monitor/alerts", "举报待审": "/report-center/management", "许可证将在 7 天后到期": "/admin/license", "查看全部告警": "/monitor/alerts" };
+  ap.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b || b.disabled) return;
+    const t = b.textContent.trim();
+    for (const k in routes) if (t.startsWith(k)) { showRoute(routes[k]); return; }
+  });
+})();
+
+/* --- 2.6 / 2.7 / 2.8 底部链接 --- */
+[["preview-agents", { "智能体中心": "/agent-center/overview" }],
+ ["preview-top5", { "查看完整榜单": "/statistics/ops-top-trend" }],
+ ["preview-health", { "License：": "/admin/license", "系统状态": "/system-status" }]].forEach(([id, routes]) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const t = b.textContent.trim();
+    for (const k in routes) if (t.startsWith(k)) { showRoute(routes[k]); return; }
+  });
+});
+</script>
+</body>
+</html>

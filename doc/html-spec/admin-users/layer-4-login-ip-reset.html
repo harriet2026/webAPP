@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 1：IP访问控制展开 / 重置确认 - 管理员与权限 HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/spec-style.css">
+<link rel="stylesheet" href="./preview.css">
+<style>.component-preview{background:#fff;overflow-x:auto}.pass{color:#15803d;font-weight:600}.warn{color:#a16207;font-weight:600}</style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="./index.html#c-4">← 返回主文件（2.4 登录安全）</a>
+  <span>层级 1 / 1</span>
+  <a href="./layer-5-tenant-view.html">2.5 租户视角 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 1：IP 访问控制展开 + 重置确认</h1>
+  <table class="meta-table">
+    <thead><tr><th>属性</th><th>规格</th><th>形态/角色差异</th></tr></thead>
+    <tr><td>所属组件</td><td>2.4 登录安全 Tab（LoginSecurityTab）</td><td>[Base] 全形态共用</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">admin-users/index.html</a></td><td>[Base] —</td></tr>
+    <tr><td>触发路径</td><td>「访问模式」选白名单/黑名单 → 展开 IP 规则表 + 行内新增；点「重置为默认」→ 确认弹窗</td><td>[租户管理员] 按钮文案为「重置为平台基线」</td></tr>
+    <tr><td>demo 组件</td><td><code>login-security-tab.tsx</code>（IP 表条件渲染 <code>ipMode!=="none"</code>；<code>isCidr</code> 校验；<code>&lt;AlertDialog&gt;</code> 重置确认）</td><td>[Base] 控件一致；[Overlay] 策略数据按 scope</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1a</span> IP 访问控制展开（白名单/黑名单）</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：将「访问模式」从「不限制」切到「白名单模式/黑名单模式」→ 出现 IP 规则表 + 新增行；改任意值 → 顶部「配置已变更，请保存」。</div>
+  <div class="preview-hint">点「白名单模式」展开 IP 规则表；输入非法 IP 点「新增IP」看校验（此处示意校验文案）</div>
+
+  <div class="component-preview cp">
+    <div class="cp-card">
+      <div class="cp-banner amber">⚠ 配置已变更，请保存</div>
+      <div class="cp-sec"><h5>IP访问控制</h5>
+        <div class="cp-row" data-radiogroup><span class="lab">访问模式</span>
+          <label style="display:flex;gap:.35rem;align-items:center;font-size:.875rem"><span class="cp-radio" data-radio="none" aria-checked="false"><span data-dot></span></span>不限制</label>
+          <label style="display:flex;gap:.35rem;align-items:center;font-size:.875rem"><span class="cp-radio" data-radio="whitelist" aria-checked="true"><span data-dot></span></span>白名单模式</label>
+          <label style="display:flex;gap:.35rem;align-items:center;font-size:.875rem"><span class="cp-radio" data-radio="blacklist" aria-checked="false"><span data-dot></span></span>黑名单模式</label>
+          <div data-showon style="width:100%;margin-top:.5rem">
+            <table class="cp-tbl"><thead><tr><th>IP地址/段</th><th>备注</th><th>最后修改时间</th><th style="width:90px">操作</th></tr></thead>
+              <tbody><tr><td colspan="4" style="text-align:center;color:#9ca3af">暂无 IP 规则</td></tr></tbody></table>
+            <div style="display:flex;gap:.5rem;margin-top:.5rem;align-items:flex-start">
+              <div><input class="cp-input" style="width:12rem" placeholder="如 192.168.1.0/24"><div class="cp-hint">CIDR 或 IPv4</div></div>
+              <input class="cp-input" style="width:10rem" placeholder="备注（选填）">
+              <button class="cp-btn">＋ 新增IP</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:.5rem"><button class="cp-btn">重置为默认</button><button class="cp-btn">取消</button><button class="cp-btn pri">保存</button></div>
+    </div>
+  </div>
+
+  <figure class="screenshot-figure"><img src="./screenshots/login-ip-expanded-full.png" alt="IP访问控制展开" style="max-width:560px"><figcaption>白名单模式展开：IP 规则表 + 新增行（浏览器实际渲染 · 顶部 dirty banner）</figcaption></figure>
+
+  <h4>UI 元素清单</h4>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>元素</th><th>说明</th><th>校验</th><th>形态/角色差异</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>访问模式 RadioGroup</td><td>不限制 / 白名单模式 / 黑名单模式</td><td>非"不限制"→展开表</td><td>[Base] 一致</td></tr>
+      <tr><td>2</td><td>IP 规则表</td><td>列：IP地址/段 · 备注 · 最后修改时间 · 操作（删除）；空态「暂无 IP 规则」</td><td>-</td><td>[Overlay] 规则按 scope 隔离</td></tr>
+      <tr><td>3</td><td>新增 IP Input</td><td>占位「如 192.168.1.0/24」</td><td><code>isCidr</code>：IPv4 或 CIDR（掩码 0-32）；非法 → 「请输入正确的IP地址或CIDR格式…」</td><td>[Base] 一致</td></tr>
+      <tr><td>4</td><td>备注 Input</td><td>占位「备注（选填）」</td><td>选填</td><td>[Base] 一致</td></tr>
+      <tr><td>5</td><td>新增IP 按钮</td><td>校验通过后加入表 + 清空输入</td><td>空 → 「请输入 IP 地址或 CIDR 段」</td><td>[Base] 一致</td></tr>
+      <tr><td>6</td><td>删除（行）</td><td>移除该 IP → Toast「已删除，可保存后生效」</td><td>-</td><td>[Base] 一致</td></tr>
+      <tr><td>7</td><td>底部按钮</td><td>重置为默认 / 取消（dirty 时可用，还原 saved）/ 保存（dirty 时可用，700ms loading「保存中…」→「保存成功」）</td><td>见 5.4 校验（会话超时 300-86400、连错 3-10、密码长度 8-32）</td><td>[租户管理员] 重置为平台基线且保存需基线校验</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1b</span> 重置确认弹窗</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：点「重置为默认」（租户视角为「重置为平台基线」）→ 确认弹窗。</div>
+  <div class="component-preview cp">
+    <div class="cp-dialog" style="box-shadow:none;border:1px solid #e5e7eb">
+      <h4>重置为默认配置？</h4><p>所有登录安全配置项将恢复出厂默认值，保存后生效。</p>
+      <div class="df"><button class="cp-btn">取消</button><button class="cp-btn pri">确定重置</button></div>
+    </div>
+  </div>
+  <figure class="screenshot-figure"><img src="./screenshots/login-reset-confirm.png" alt="重置确认" style="max-width:340px"><figcaption>重置确认弹窗（平台视角文案）</figcaption></figure>
+  <table class="spec-table">
+    <thead><tr><th>视角</th><th>标题</th><th>描述</th><th>确定后</th><th>形态/角色差异</th></tr></thead>
+    <tbody>
+      <tr><td>平台</td><td>重置为默认配置？</td><td>所有登录安全配置项将恢复出厂默认值，保存后生效。</td><td>还原 DEFAULT_LOGIN_POLICY → Toast「已恢复默认配置，请保存后生效」</td><td>[单租户]/[多租户平台管理员]</td></tr>
+      <tr><td>租户</td><td>重置为平台基线？</td><td>所有登录安全配置项将恢复为平台下发的安全基线，已加严的设置将被清除，保存后生效。</td><td>同上</td><td>[多租户租户管理员]</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison"><h5>DOM 树比对结果</h5><table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>IP 表条件渲染</td><td>选白名单后 <code>ipMode="whitelist"</code>，出现表头 IP地址/段·备注·最后修改时间·操作 + 空态「暂无 IP 规则」+ 新增行（占位 如 192.168.1.0/24、备注（选填））</td><td>同（137 节点态）</td><td class="pass">一致</td></tr>
+      <tr><td>dirty banner</td><td>改值后顶部 <code>.bg-amber-50</code>「配置已变更，请保存」</td><td>同</td><td class="pass">一致</td></tr>
+      <tr><td>重置弹窗</td><td><code>[role=alertdialog].sm:max-w-[360px]</code>「重置为默认配置？…恢复出厂默认值，保存后生效。」</td><td>同</td><td class="pass">一致</td></tr>
+      <tr><td>底部按钮</td><td>重置为默认 / 取消 / 保存(bg-blue-600)</td><td>同</td><td class="pass">一致</td></tr>
+    </tbody></table></div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#c-4">← 返回主文件（2.4）</a>
+  <a href="./layer-5-tenant-view.html">2.5 租户视角 →</a>
+</nav>
+
+<script src="./preview.js"></script>
+</body>
+</html>

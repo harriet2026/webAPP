@@ -6,14 +6,13 @@ import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SmartSummaryBadge } from '@/components/shared/smart-summary-badge';
-import { NON_SERIES_KEYS, type TrendData, type ViewBy, type TrendSeriesPoint } from '@/lib/api/security-overview';
+import { NON_SERIES_KEYS, type TrendData, type ViewBy } from '@/lib/api/security-overview';
 import { seriesColor, TREND_VIEW_BY_OPTIONS } from './constants';
 
 interface TrendChartCardProps {
   trend?: TrendData;
-  trendPrevious?: TrendData | null;
   isLoading: boolean;
+  isHourly?: boolean;
   viewBy: ViewBy;
   onViewByChange: (v: ViewBy) => void;
   hiddenSeries: Set<string>;
@@ -28,8 +27,8 @@ export const SECURITY_OVERVIEW_VIEW_OPTIONS: ViewBy[] = [
 
 export function TrendChartCard({
   trend,
-  trendPrevious,
   isLoading,
+  isHourly = false,
   viewBy,
   onViewByChange,
   hiddenSeries,
@@ -63,48 +62,39 @@ export function TrendChartCard({
     return result.includes('.') ? key : result;
   }
 
-  const prevData = trendPrevious?.[viewBy] ?? [];
-
   const echartsOption = useMemo(() => {
     if (seriesData.length === 0) return null;
-    // Show only MM-DD on the axis (avoid wide YYYY-MM-DD labels that overlap).
-    const mmdd = (d: string) => (d.length >= 10 ? d.slice(5) : d);
+    // Hourly view ("today"): show HH:mm (e.g. "08:00").
+    // Daily view: show MM-DD (e.g. "07-24").
+    const dateFormatter = isHourly
+      ? (d: string) => (d.length >= 16 ? d.slice(11, 16) : d)
+      : (d: string) => (d.length >= 10 ? d.slice(5, 10) : d);
     const dates = seriesData.map((p) => p.date);
     const visibleKeys = keys.filter((k) => !hiddenSeries.has(k));
-    const sumVisible = (p: TrendSeriesPoint) =>
-      visibleKeys.reduce((s, k) => s + (typeof p[k] === 'number' ? (p[k] as number) : 0), 0);
+
+    // Single data point: render as bar so the chart isn't just a dot.
+    const isSinglePoint = seriesData.length === 1;
 
     const series: Record<string, unknown>[] = visibleKeys.map((key) => ({
       name: seriesLabel(key),
-      type: 'line',
+      type: isSinglePoint ? 'bar' : 'line',
       stack: 'total',
       smooth: true,
-      areaStyle: { opacity: 0.35, color: seriesColor(key) },
-      lineStyle: { width: 2.5, color: seriesColor(key) },
-      symbol: 'circle',
-      symbolSize: 5,
+      areaStyle: { opacity: 0.5, color: seriesColor(key) },
+      lineStyle: { width: 1, color: seriesColor(key) },
+      symbol: 'none',
       itemStyle: { color: seriesColor(key) },
       data: seriesData.map((p) => (typeof p[key] === 'number' ? p[key] : 0)),
     }));
 
-    // Previous-period comparison overlay (when "compare" is enabled and data
-    // is present): a dashed total line aligned by index to the current period.
-    if (prevData.length > 0) {
-      series.push({
-        name: t('filter.comparePrevious'),
-        type: 'line',
-        smooth: true,
-        symbol: 'none',
-        z: 1,
-        lineStyle: { width: 2, type: 'dashed', color: '#9ca3af' },
-        itemStyle: { color: '#9ca3af' },
-        data: prevData.map((p) => sumVisible(p)),
-      });
-    }
-
     return {
       tooltip: {
         trigger: 'axis',
+        backgroundColor: '#fff',
+        borderColor: '#e5e7eb',
+        borderWidth: 1,
+        borderRadius: 8,
+        textStyle: { color: '#333', fontSize: 12 },
         axisPointer: { type: 'cross', label: { backgroundColor: '#6a7985' } },
       },
       grid: { left: 0, right: 0, top: 12, bottom: 28, containLabel: true },
@@ -112,18 +102,22 @@ export function TrendChartCard({
         type: 'category',
         boundaryGap: false,
         data: dates,
-        axisLabel: { fontSize: 11, color: '#9ca3af', formatter: mmdd },
-        axisLine: { lineStyle: { color: '#E4E4E4' } },
+        axisLabel: { fontSize: 11, color: '#666666', formatter: dateFormatter },
+        axisLine: { show: true, lineStyle: { color: '#E4E4E4' } },
+        axisTick: { show: true, lineStyle: { color: '#E4E4E4' } },
       },
       yAxis: {
         type: 'value',
+        splitNumber: 4,
         splitLine: { lineStyle: { color: '#E4E4E4', type: 'dashed' } },
-        axisLabel: { fontSize: 11, color: '#9ca3af' },
+        axisLine: { show: true, lineStyle: { color: '#E4E4E4' } },
+        axisTick: { show: true, lineStyle: { color: '#E4E4E4' } },
+        axisLabel: { fontSize: 11, color: '#666666' },
       },
       series,
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seriesData, keys, hiddenSeries, prevData]);
+  }, [seriesData, keys, hiddenSeries, isHourly]);
 
   const isolateSeries = (key: string) => {
     // If only this key is visible (all others hidden), show all
@@ -146,10 +140,7 @@ export function TrendChartCard({
           <div className="text-xs font-medium text-body">
             {t(`viewBy.${viewBy}` as Parameters<typeof t>[0])}
           </div>
-          <CardTitle>{t('title')}</CardTitle>
-          <SmartSummaryBadge className="mt-2">
-            {t('trendPeakHint')}
-          </SmartSummaryBadge>
+          <CardTitle>{t('trendCardTitle')}</CardTitle>
         </div>
       </CardHeader>
       <CardContent>

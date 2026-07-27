@@ -56,6 +56,11 @@ function itemTitle(item: SystemStatusAlertItem, t: TFn, tSidebar: TFn): string {
         agent: item.agent ? tSidebar(AGENT_SIDEBAR_KEY[item.agent]) : '',
         n: item.count ?? 0,
       });
+    // GT-12553: 许可证到期/规则库状态平台待办（数据源 /system/health-summary）
+    case 'license_expiry':
+      return t('itemLicenseExpiry', { n: item.days ?? 0 });
+    case 'rule_lib':
+      return item.ruleLatest ? t('itemRuleLibLatest') : t('itemRuleLibOutdated');
     default:
       return '';
   }
@@ -71,6 +76,8 @@ function itemDescription(item: SystemStatusAlertItem, t: TFn): string {
     if (!unix || !Number.isFinite(unix)) return '';
     return t('lastSeen', { time: new Date(unix * 1000).toLocaleString() });
   }
+  if (item.kind === 'license_expiry') return t('licenseRenewHint');
+  if (item.kind === 'rule_lib') return item.ruleVersion ?? '';
   return '';
 }
 

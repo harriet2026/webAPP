@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级3：方向卡片深层交互态 - 相似邮件检测 HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0); --card: #fff; --muted: #f5f7fa; --muted-foreground: #6b7280; --border: #e5e7eb; --blue: #1677ff; --amber-bg: #fffbeb; --amber-border: #fcd34d; --amber-text: #b45309; --radius: 0.625rem; --font-sans: "Geist", "Inter", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: var(--muted); border-radius: var(--radius); margin-bottom: 20px; font-size: 14px; }
+    .layer-nav a { font-weight: 600; }
+    .spec-header, section { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: visible; }
+    .trigger-path { margin: 8px 0 12px; padding: 8px 12px; border-radius: 8px; background: var(--muted); color: var(--muted-foreground); font-size: 13px; }
+    .trigger-path strong { color: var(--foreground); }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .is-hidden { display: none !important; }
+    .sw { position: relative; width: 36px; height: 20px; border-radius: 999px; background: #d1d5db; border: 0; cursor: pointer; flex-shrink: 0; transition: background .15s; }
+    .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 999px; background: #fff; transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+    .sw[aria-checked="true"] { background: #2563eb; }
+    .sw[aria-checked="true"]::after { left: 18px; }
+    .pill { display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #fef3c7; color: #b45309; border: 1px solid var(--amber-border); }
+    .fld { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 13.5px; }
+    .fld > .fl { min-width: 76px; }
+    .dd-wrap { position: relative; display: inline-block; }
+    .dd-trigger { width: 160px; height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border: 1px solid var(--border); border-radius: 7px; background: #fff; font-family: inherit; font-size: 13px; cursor: pointer; }
+    .dd-trigger:disabled { opacity: .5; cursor: not-allowed; }
+    .dd-list { position: absolute; z-index: 10; top: 34px; left: 0; width: 160px; padding: 4px; border: 1px solid var(--border); border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgba(15,23,42,.16); }
+    .dd-opt { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+    .dd-opt:hover { background: #f3f4f6; }
+    .dd-opt.selected { background: #2563eb; color: #fff; }
+    .demo-card { max-width: 420px; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; background: #fff; }
+    .demo-card.observe { border-color: var(--amber-border); background: #fffdf5; }
+    .demo-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 10px; font-weight: 650; flex-wrap: wrap; }
+    .obs-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px; margin-bottom: 8px; border-radius: 8px; background: #f9fafb; font-size: 13px; }
+    .obs-state { font-size: 12px; color: #6b7280; }
+    .obs-state.on { color: #d97706; }
+    .view-logs { font-size: 12px; color: #2563eb; background: none; border: 0; cursor: pointer; padding: 0; font-family: inherit; }
+    .sd-banner { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; margin: 10px 0; border: 1px solid var(--amber-border); border-radius: 8px; background: var(--amber-bg); color: var(--amber-text); font-size: 13.5px; }
+    .dir-checks { display: flex; gap: 18px; margin: 8px 0; flex-wrap: wrap; }
+    .dir-checks label { display: flex; align-items: center; gap: 6px; font-size: 13.5px; cursor: pointer; }
+    .dir-checks input { accent-color: #2563eb; width: 15px; height: 15px; }
+    .mini-cards { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .mini-card { padding: 8px 14px; border: 1px solid #bfdbfe; border-radius: 8px; background: #fff; font-size: 13px; }
+    .empty-note { padding: 10px 14px; border: 1px dashed #d1d5db; border-radius: 8px; color: #6b7280; font-size: 13px; }
+    .policy-wrap { border: 1px solid var(--border); border-radius: 10px; background: #fff; max-width: 640px; }
+    .policy-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .policy-status { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #2563eb; }
+    .policy-status.off { color: #6b7280; }
+    .policy-content { padding: 14px; transition: opacity .2s; }
+    .policy-content.disabled { opacity: .5; pointer-events: none; }
+    .policy-foot { padding: 8px 14px; border-top: 1px solid var(--border); min-height: 36px; font-size: 13px; color: #b45309; display: flex; align-items: center; gap: 8px; }
+    .pulse-dot { width: 8px; height: 8px; border-radius: 999px; background: #f59e0b; animation: pulse 1.4s infinite; }
+    @keyframes pulse { 50% { opacity: .3; } }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <span>层级 3 / 3</span>
+    <a href="./layer-2-aggregate-mode.html">← 层级2：全方向聚合模式</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 3：方向卡片深层交互态（5 个状态）</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 相似检测模块 SimilarDetectionModule + 2.2 抽屉宿主</td></tr>
+      <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+      <tr><td>包含状态</td><td>3A 触发动作下拉展开；3B 观察模式开启联动；3C 方向取消勾选；3D 全部方向取消（空态）；3E 策略禁用态（宿主开关）</td></tr>
+      <tr><td>浏览器验证</td><td>五个状态均在 1440×1000 运行态 demo 实际点击触发并截图 + DOM 采集</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">3A</span>触发动作下拉展开（预览可操作：点击触发器展开/选择）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：观察模式关闭的方向卡（如外发方向）→ 点击“触发动作”Select 触发器 → Radix portal 弹出选项列表。</div>
+    <div class="component-preview" style="min-height:300px;">
+      <div class="fld"><span class="fl">触发动作</span>
+        <span class="dd-wrap">
+          <button class="dd-trigger" type="button" data-dd-trigger aria-expanded="false"><span data-dd-value>隔离并告警</span><span>▾</span></button>
+          <div class="dd-list is-hidden" data-dd-list role="listbox">
+            <div class="dd-opt selected" role="option">隔离并告警 <span>✓</span></div>
+            <div class="dd-opt" role="option">隔离</div>
+            <div class="dd-opt" role="option">审核</div>
+            <div class="dd-opt" role="option">标记投递</div>
+            <div class="dd-opt" role="option">阻断</div>
+            <div class="dd-opt" role="option">丢弃</div>
+          </div>
+        </span>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/layer3-action-select-open.png" alt="触发动作下拉展开实拍">
+      <figcaption>外发方向卡下拉展开实拍：6 个选项，当前项“隔离并告警”蓝底反白 + ✓；接收方向卡（观察开启）的触发器同屏可见为置灰态。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>选项 value（源码）</th><th>文案</th><th>统一规则系统映射建议（implement.md）</th></tr></thead>
+      <tbody>
+        <tr><td>quarantine-alert</td><td>隔离并告警</td><td>quarantine + 告警通知联动（Q-2）</td></tr>
+        <tr><td>quarantine</td><td>隔离</td><td>quarantine</td></tr>
+        <tr><td>review</td><td>审核</td><td>待确认（Q-2，或隔离+人工审核队列标签）</td></tr>
+        <tr><td>mark-delivery</td><td>标记投递</td><td>accept + 添加特定 header（不新增 mark action）</td></tr>
+        <tr><td>block</td><td>阻断</td><td>reject/block</td></tr>
+        <tr><td>discard</td><td>丢弃</td><td>discard</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果（3A）</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>触发器</td><td><code>button[role=combobox]</code> 文案“隔离并告警”，w-40 h-8</td><td>.dd-trigger 同文案 160px</td><td>一致</td></tr>
+          <tr><td>选项数</td><td>截图实拍 6 项（隔离并告警/隔离/审核/标记投递/阻断/丢弃）</td><td>6 项</td><td>一致</td></tr>
+          <tr><td>选中态</td><td>当前项蓝底反白 + 勾选图标</td><td>.dd-opt.selected 蓝底 + ✓</td><td>一致</td></tr>
+          <tr><td>弹层位置</td><td>portal 渲染于触发器正下方，宽与触发器一致</td><td>absolute 下方同宽</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">3B</span>观察模式开启联动（预览可操作：切换开关观察 5 项联动）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：外发方向卡 → 点击观察模式 Switch → observeMode=true。联动（浏览器逐项验证）：① 卡片边框/底色变琥珀；② 头部出现“观察模式”Badge；③ 状态字变“开启”（琥珀色）并出现“查看观察日志”链接；④ 触发动作下拉 disabled+置灰；⑤ 全局警告条追加“外发方向”徽章（与接收方向并列）。</div>
+    <div class="component-preview">
+      <div class="sd-banner is-hidden" data-b-banner>⚠ <span><b>当前处于观察模式:</b> <span class="pill">接收方向</span> <span class="pill">外发方向</span> 正在观察中<br>命中后仅记录不拦截。确认策略效果后请及时切换为正式模式。</span></div>
+      <div class="demo-card" data-b-card>
+        <div class="demo-head"><span>➤ 外发方向 <span class="pill is-hidden" data-b-badge>◉ 观察模式</span></span></div>
+        <div class="obs-row">
+          <span style="font-weight:600;">◉ 观察模式</span>
+          <span style="display:flex;align-items:center;gap:8px;">
+            <span class="obs-state" data-b-state>关闭</span>
+            <button class="sw" role="switch" aria-checked="false" data-b-switch aria-label="外发方向观察模式"></button>
+            <button class="view-logs is-hidden" type="button" data-b-logs title="demo 中无跳转绑定">查看观察日志 ↗</button>
+          </span>
+        </div>
+        <div class="fld"><span class="fl">触发动作</span>
+          <button class="dd-trigger" type="button" data-b-act disabled-style="no"><span>隔离并告警</span><span>▾</span></button>
+        </div>
+        <p style="font-size:12.5px;color:#6b7280;margin:6px 0 0;">（说明：警告条中“接收方向”徽章来自层级0默认已开启观察的接收卡；本预览开启外发后两枚并列，与实拍一致。）</p>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/layer3-outbound-observe-on.png" alt="外发方向观察模式开启实拍">
+      <figcaption>实拍：接收+外发两卡均为琥珀观察态，警告条两枚徽章；域内卡保持正常。注意观察态卡片头部标题被 Badge+同步按钮挤压竖排（差异 D-9）。</figcaption>
+    </figure>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果（3B）</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>外发卡样式</td><td>class 含 amber（border-amber-300 bg-amber-50/50），switch data-state=checked</td><td>.observe 琥珀样式，aria-checked=true</td><td>一致</td></tr>
+          <tr><td>Badge / 日志链接</td><td>amber-100 Badge 出现；“查看观察日志”出现</td><td>联动显示</td><td>一致</td></tr>
+          <tr><td>动作下拉</td><td>combobox disabled=true（data-disabled）文案保持“隔离并告警”</td><td>trigger disabled 置灰</td><td>一致</td></tr>
+          <tr><td>警告条徽章</td><td>“接收方向”“外发方向”两枚</td><td>两枚徽章</td><td>一致</td></tr>
+          <tr><td>关闭还原</td><td>再次点击 switch 后实测各项全部还原</td><td>预览切回同还原</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">3C</span>方向取消勾选 + <span class="layer-badge" style="background:#d97706;">3D</span>全部取消的空态（预览可操作）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：3C：取消勾选“域内” → 域内卡即时消失（TC-003 反向验证通过）。3D：继续取消“接收”“外发” → 卡片区完全为空、警告条消失；<b>无</b>“至少选择一个检测方向”提示（PRD TC-013 不满足，差异 D-2）。</div>
+    <div class="component-preview">
+      <div class="dir-checks" data-c-checks>
+        <label><input type="checkbox" data-c-dir="inbound" checked> ✉ 接收</label>
+        <label><input type="checkbox" data-c-dir="outbound" checked> ➤ 外发</label>
+        <label><input type="checkbox" data-c-dir="intra" checked> ▦ 域内</label>
+      </div>
+      <div class="mini-cards" data-c-cards></div>
+      <div class="empty-note is-hidden" data-c-empty>（demo 实际空态：此处什么也不渲染——PRD 要求的“至少选择一个检测方向”提示在 demo 中缺失，本框仅为规格说明占位）</div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/layer3-intra-unchecked.png" alt="取消勾选域内实拍">
+      <figcaption>3C 实拍：取消“域内”后仅剩接收/外发两卡，栅格保持三列轨道（第三列留空）。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/layer3-all-directions-unchecked.png" alt="全部方向取消实拍">
+      <figcaption>3D 实拍：三方向全部取消后，方向配置块与豁免条之间为空白，无任何空态提示；警告条同时消失（无观察中的已选方向）。</figcaption>
+    </figure>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果（3C/3D）</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>3C 勾选状态</td><td>#dir-intra unchecked，其余 checked</td><td>预览取消域内后同状态</td><td>一致</td></tr>
+          <tr><td>3C 卡片集合</td><td>仅“接收方向”“外发方向”两卡渲染</td><td>两张 mini 卡</td><td>一致</td></tr>
+          <tr><td>3D 勾选状态</td><td>三个 checkbox 全 unchecked</td><td>同</td><td>一致</td></tr>
+          <tr><td>3D 卡片/警告条</td><td>卡片区空；bg-amber-50 警告条不渲染</td><td>卡片区空、无警告条</td><td>一致</td></tr>
+          <tr><td>3D 空态提示</td><td>“至少选择一个检测方向”<b>未渲染</b>（dialog innerText 全文检索无此串）</td><td>预览不渲染（说明占位框注明缺失）</td><td>一致（差异 D-2）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">3E</span>策略禁用态（宿主启用开关，预览可操作）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：配置卡头部“已启用”Switch → 关闭。联动（浏览器逐项验证）：① 状态文字变“已禁用”（灰色）；② 内容区 opacity-50 + pointer-events-none（不可交互）；③ 底部出现琥珀脉冲点 + “有未保存的更改”；④ 左导航该项圆点变灰空心、摘要变“已禁用”。注意：模块内字段修改<b>不会</b>触发“有未保存的更改”（仅宿主开关触发，差异 D-4）。</div>
+    <div class="component-preview">
+      <div class="policy-wrap">
+        <div class="policy-head">
+          <b>相似邮件与主题检测</b>
+          <span class="policy-status" data-e-status><span data-e-text>已启用</span><button class="sw" role="switch" aria-checked="true" data-e-switch aria-label="策略启用开关"></button></span>
+        </div>
+        <div class="policy-content" data-e-content>
+          <div class="mini-cards">
+            <span class="mini-card">✉ 接收方向 · 30分钟/80%/10封</span>
+            <span class="mini-card">➤ 外发方向 · 30分钟/80%/10封</span>
+            <span class="mini-card">▦ 域内方向 · 30分钟/80%/10封</span>
+          </div>
+        </div>
+        <div class="policy-foot"><span class="is-hidden" data-e-unsaved><span class="pulse-dot" style="display:inline-block;margin-right:6px;"></span>有未保存的更改</span></div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/layer3-policy-disabled.png" alt="策略禁用态实拍">
+      <figcaption>实拍：开关关闭后配置内容整体半透明灰化；左导航“相似邮件与主题检测”摘要变“已禁用”；底部出现“有未保存的更改”。</figcaption>
+    </figure>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果（3E）</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>宿主开关</td><td>tabpanel 外唯一 switch data-state=unchecked</td><td>aria-checked=false</td><td>一致</td></tr>
+          <tr><td>灰化容器</td><td>class 含 opacity-50 与 pointer-events-none 的内容容器出现</td><td>.policy-content.disabled 同效果</td><td>一致</td></tr>
+          <tr><td>状态文案</td><td>“已禁用”出现（dialog innerText）</td><td>同文案</td><td>一致</td></tr>
+          <tr><td>未保存提示</td><td>“有未保存的更改”出现（footerUnsaved=true）</td><td>联动显示</td><td>一致</td></tr>
+          <tr><td>导航摘要</td><td>首项 innerText 变“相似邮件与主题检测 | 已禁用”</td><td>主文件 2.2 预览同联动（本页说明）</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <a href="./layer-1-same-subject-tab.html">层级1：相同主题检测 Tab</a>
+  </nav>
+
+  <script>
+    /* 3A 下拉 */
+    (() => {
+      const trigger = document.querySelector("[data-dd-trigger]");
+      const list = document.querySelector("[data-dd-list]");
+      const valueEl = document.querySelector("[data-dd-value]");
+      trigger.addEventListener("click", () => {
+        const open = list.classList.toggle("is-hidden");
+        trigger.setAttribute("aria-expanded", String(!open));
+      });
+      list.querySelectorAll(".dd-opt").forEach(opt => opt.addEventListener("click", () => {
+        list.querySelectorAll(".dd-opt").forEach(o => { o.classList.remove("selected"); o.innerHTML = o.textContent.replace(" ✓", ""); });
+        opt.classList.add("selected");
+        valueEl.textContent = opt.textContent.trim();
+        opt.innerHTML = opt.textContent.trim() + ' <span>✓</span>';
+        list.classList.add("is-hidden");
+        trigger.setAttribute("aria-expanded", "false");
+      }));
+      document.addEventListener("click", e => {
+        if (!e.target.closest(".dd-wrap")) { list.classList.add("is-hidden"); trigger.setAttribute("aria-expanded", "false"); }
+      });
+    })();
+    /* 3B 观察联动 */
+    (() => {
+      const sw = document.querySelector("[data-b-switch]");
+      const card = document.querySelector("[data-b-card]");
+      const badge = document.querySelector("[data-b-badge]");
+      const state = document.querySelector("[data-b-state]");
+      const logs = document.querySelector("[data-b-logs]");
+      const banner = document.querySelector("[data-b-banner]");
+      const act = document.querySelector("[data-b-act]");
+      sw.addEventListener("click", () => {
+        const on = sw.getAttribute("aria-checked") !== "true";
+        sw.setAttribute("aria-checked", String(on));
+        card.classList.toggle("observe", on);
+        badge.classList.toggle("is-hidden", !on);
+        state.textContent = on ? "开启" : "关闭";
+        state.classList.toggle("on", on);
+        logs.classList.toggle("is-hidden", !on);
+        banner.classList.toggle("is-hidden", !on);
+        act.disabled = on;
+        act.style.opacity = on ? ".5" : "1";
+      });
+    })();
+    /* 3C/3D 勾选 */
+    (() => {
+      const NAMES = { inbound: "✉ 接收方向", outbound: "➤ 外发方向", intra: "▦ 域内方向" };
+      const sel = { inbound: true, outbound: true, intra: true };
+      const cards = document.querySelector("[data-c-cards]");
+      const empty = document.querySelector("[data-c-empty]");
+      function render() {
+        const on = Object.keys(sel).filter(d => sel[d]);
+        cards.innerHTML = on.map(d => `<span class="mini-card">${NAMES[d]} · 30分钟/80%/10封</span>`).join("");
+        empty.classList.toggle("is-hidden", on.length !== 0);
+      }
+      document.querySelectorAll("[data-c-dir]").forEach(cb => cb.addEventListener("change", () => {
+        sel[cb.dataset.cDir] = cb.checked;
+        render();
+      }));
+      render();
+    })();
+    /* 3E 禁用态 */
+    (() => {
+      const sw = document.querySelector("[data-e-switch]");
+      const content = document.querySelector("[data-e-content]");
+      const text = document.querySelector("[data-e-text]");
+      const status = document.querySelector("[data-e-status]");
+      const unsaved = document.querySelector("[data-e-unsaved]");
+      sw.addEventListener("click", () => {
+        const on = sw.getAttribute("aria-checked") !== "true";
+        sw.setAttribute("aria-checked", String(on));
+        content.classList.toggle("disabled", !on);
+        text.textContent = on ? "已启用" : "已禁用";
+        status.classList.toggle("off", !on);
+        unsaved.classList.remove("is-hidden");
+      });
+    })();
+  </script>
+</body>
+</html>

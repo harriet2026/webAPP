@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 1：新增 GeoIP 规则抽屉 - 海外邮件检测</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
+      --blue-50: #eff6ff;
+      --blue-200: #bfdbfe;
+      --blue-600: #2563eb;
+      --blue-700: #1d4ed8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* 导航 */
+    .layer-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.875rem;
+    }
+    .layer-nav a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .layer-nav a:hover { text-decoration: underline; }
+
+    /* 元信息头 */
+    .spec-header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .spec-header h1 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+    }
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .meta-table td {
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .meta-table td:first-child {
+      font-weight: 600;
+      width: 180px;
+      color: var(--muted-foreground);
+      white-space: nowrap;
+    }
+
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    section > h2 {
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem;
+      font-size: 1.15rem;
+    }
+    h3 { font-size: 1rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+    h4 { font-size: 0.9rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+
+    table.spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      margin: 1rem 0;
+    }
+    table.spec-table th {
+      background: var(--muted);
+      color: var(--foreground);
+      font-weight: 600;
+      text-align: left;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    table.spec-table td {
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+    table.spec-table tr:nth-child(even) td { background: var(--muted); }
+
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img {
+      max-width: 100%;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 2px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .screenshot-figure figcaption {
+      margin-top: 0.5rem;
+      font-size: 0.8125rem;
+      color: var(--muted-foreground);
+    }
+
+    pre {
+      background: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 4px);
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      margin: 1rem 0;
+    }
+    code { font-family: var(--font-mono); font-size: 0.85em; }
+
+    .dom-comparison {
+      margin: 1rem 0;
+      padding: 1rem;
+      border: 1px dashed var(--border);
+      border-radius: calc(var(--radius) - 2px);
+      background: oklch(0.985 0.01 95);
+    }
+
+    /* Sheet 组件预览 */
+    .sheet-mask {
+      position: relative;
+      width: 100%;
+      height: 700px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .sheet-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 560px;
+      max-width: 100%;
+      height: 100%;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 16px rgba(0,0,0,0.08);
+    }
+    .sheet-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .sheet-title-text { font-size: 18px; font-weight: 600; color: #262626; }
+    .sheet-desc { font-size: 13px; color: #8c8c8c; margin-top: 4px; }
+    .sheet-header-actions { display: flex; gap: 8px; }
+    .sheet-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #e8e8e8;
+      background: #fff;
+      transition: all 0.15s;
+    }
+    .sheet-btn:hover { border-color: #1890ff; color: #1890ff; }
+    .sheet-btn.primary { background: #1890ff; color: #fff; border-color: #1890ff; }
+    .sheet-btn.primary:hover { background: #40a9ff; }
+
+    .sheet-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      background: #fff;
+    }
+    .sheet-basics {
+      background: #fafafa;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .sheet-basics-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .sheet-basics-bar {
+      width: 4px;
+      height: 20px;
+      background: #1890ff;
+      border-radius: 2px;
+    }
+    .sheet-basics-title { font-size: 14px; font-weight: 500; }
+
+    .form-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .form-row:last-child { margin-bottom: 0; }
+    .form-label {
+      min-width: 100px;
+      text-align: right;
+      font-size: 14px;
+      padding-top: 6px;
+    }
+    .form-label .required { color: #ef4444; }
+    .form-input-wrap { flex: 1; }
+    .form-input {
+      width: 100%;
+      padding: 6px 12px;
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fff;
+    }
+    .form-input:focus { outline: none; border-color: #1890ff; }
+    .form-input.error { border-color: #ef4444; }
+    .form-hint { font-size: 12px; color: #8c8c8c; margin-top: 4px; }
+    .form-error { font-size: 12px; color: #ef4444; margin-top: 4px; }
+
+    .select-trigger {
+      width: 100%;
+      padding: 6px 12px;
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .select-arrow {
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+      border-right: 2px solid #999;
+      border-bottom: 2px solid #999;
+      transform: rotate(45deg);
+      margin-left: 8px;
+      margin-bottom: 2px;
+    }
+
+    .sheet-info {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--blue-50);
+      border: 1px solid var(--blue-200);
+      color: var(--blue-700);
+      font-size: 13px;
+      margin-top: 16px;
+    }
+
+    .layer-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      font-size: 0.75rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: calc(var(--radius) - 4px);
+      margin-right: 0.5rem;
+    }
+
+    blockquote {
+      border-left: 4px solid var(--destructive);
+      background: oklch(0.97 0.013 25);
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+      font-size: 0.875rem;
+      border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="index.html#comp-3">← 返回主文件（§2.3 自定义 IP 定位库）</a>
+  <a href="index.html">返回海外邮件检测主页</a>
+</nav>
+
+<header class="spec-header">
+  <h1><span class="layer-badge">1</span>交互层级 1：新增 GeoIP 规则抽屉（Sheet）</h1>
+  <p style="margin-top: 0.5rem; color: var(--muted-foreground);">
+    海外邮件检测 / 自定义 IP 定位库 / 新增规则抽屉。
+  </p>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.3 自定义 IP 定位库（GeoIP Rule Table）</td></tr>
+    <tr><td>主文件</td><td><a href="index.html">index.html</a></td></tr>
+    <tr><td>demo 入口</td><td><code>connection-layer-page.tsx</code> L2152+ <code>&lt;Sheet&gt;</code> 组件（L2152-L2258）</td></tr>
+    <tr><td>触发路径</td><td>层级0 GeoIP 表格工具栏 → 点击「新增规则」按钮（也支持空态立即创建）→ <code>setShowGeoIpDialog(true)</code> 打开 Sheet</td></tr>
+    <tr><td>抽屉尺寸</td><td>w-[560px] sm:max-w-[560px]，从右侧滑入</td></tr>
+    <tr><td>行为分支</td><td>editingGeoIp=null → 新增；editingGeoIp=rule → 编辑（IP 段输入框 disabled）</td></tr>
+  </table>
+</header>
+
+<section>
+  <h2>1. 可交互组件预览（从 demo 提取）</h2>
+  <div class="sheet-mask">
+    <div class="sheet-panel">
+      <div class="sheet-header">
+        <div>
+          <div class="sheet-title-text">新增规则</div>
+          <div class="sheet-desc">配置 IP 地址与地理位置的映射关系，用于海外邮件检测</div>
+        </div>
+        <div class="sheet-header-actions">
+          <button class="sheet-btn">取消</button>
+          <button class="sheet-btn primary">保存</button>
+        </div>
+      </div>
+      <div class="sheet-body">
+        <div class="sheet-basics">
+          <div class="sheet-basics-header">
+            <div class="sheet-basics-bar"></div>
+            <div class="sheet-basics-title">基础设置</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label"><span class="required">*</span> IP 地址/段</div>
+            <div class="form-input-wrap">
+              <input class="form-input" placeholder="请输入 IP 地址或 CIDR 网段，如 8.8.8.8 或 8.8.8.0/24"/>
+              <div class="form-hint">支持格式：IPv4 单地址或 CIDR（/8 至 /32）</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label"><span class="required">*</span> 地区代码</div>
+            <div class="form-input-wrap">
+              <div class="select-trigger">
+                <span style="color:#999;">请选择地区</span>
+                <span class="select-arrow"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">归属地</div>
+            <div class="form-input-wrap">
+              <input class="form-input" placeholder="如「Google DNS」或「阿里云香港」"/>
+              <div class="form-hint">选择地区后自动填充，可手动修改，最多 50 字符</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sheet-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>自定义 IP 定位库的优先级高于系统内置 GeoIP 库，配置后将优先使用自定义映射进行地域识别。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <figure class="screenshot-figure" style="margin-top:1.5rem;text-align:center;">
+    <img src="./screenshots/L4-geoip-create-dialog.png" alt="新增规则 Sheet-浏览器实测" style="max-width:100%;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    <figcaption style="margin-top:0.5rem;font-size:0.8125rem;color:#8c8c8c;">图 1.1「新增规则」右侧 Sheet 浏览器实测（2026-07-13，1440px；点击 GeoIP 工具栏「新增规则」触发���覆盖在 IP策略抽屉之上）。<br>⚠️ 实际渲染中「地区代码」占位为「请选择地<strong style="color:#dc2626;">��</strong>」、「归属地」占位为「如「Google DNS」<strong style="color:#dc2626;">���</strong>「阿里云香港」」、提示为「自动<strong style="color:#dc2626;">��</strong>充」——因 demo 源码 i18n UTF-8 损坏（详见主文件 <a href="./index.html#diffs">§9 差异标注</a>）；本预览用可读中文重建。</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>2. UI 元素清单</h2>
+
+  <h3>2.1 Sheet Header</h3>
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>类型</th><th>文案/属性</th><th>i18n key</th><th>交互</th></tr></thead>
+    <tbody>
+      <tr><td>Sheet 标题</td><td>h2</td><td>「新增规则」/「编辑映射」（按 editingGeoIp 判断）</td><td><code>connection.createGeoIpRule</code> / <code>connection.editGeoIpRule</code></td><td>无</td></tr>
+      <tr><td>Sheet 描述</td><td>p</td><td>「配置 IP 地址与地理位置的映射关系，用于海外邮件检测」</td><td><code>connection.geoIpRuleDesc</code></td><td>无</td></tr>
+      <tr><td>取消按钮</td><td>Button outline</td><td>「取消」</td><td><code>common.cancel</code></td><td>点关闭 Sheet + 清空 errors</td></tr>
+      <tr><td>保存按钮</td><td>Button primary</td><td>「保存」</td><td><code>common.save</code></td><td>点触发校验 → 通过则关闭 + setHasUnsavedChanges(true)；否则设置 geoErrors</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 Sheet Body - 基础设置区块</h3>
+  <table class="spec-table">
+    <thead><tr><th>字段</th><th>类型</th><th>必填</th><th>占位符</th><th>校验规则</th><th>错误文案</th><th>i18n key</th></tr></thead>
+    <tbody>
+      <tr><td>IP 地址/段</td><td>Input</td><td>是</td><td>「请输入 IP 地址或 CIDR 网段，如 8.8.8.8 或 8.8.8.0/24」</td><td>非空校验；IP 为唯一键，创建后不可编辑，编辑模式下 disabled；label 旁显示 Info tooltip 与提示文案「IP 段为唯一标识，不可修改；如需变更请删除后重新添加」</td><td>「请输入 IP 地址或 CIDR 网段」</td><td><code>connection.ipRange</code> / <code>connection.ipRangePlaceholder</code> / <code>connection.ipRangeRequired</code> / <code>connection.ipRangeLockedHint</code></td></tr>
+      <tr><td>地区代码</td><td>Select</td><td>是</td><td>「请选择地区」</td><td>必选</td><td>「请选择地区代码」</td><td><code>connection.regionCode</code> / <code>connection.selectRegion</code> / <code>connection.regionCodeRequired</code></td></tr>
+      <tr><td>归属地</td><td>Input</td><td>否</td><td>「如「Google DNS」或「阿里云香港」」</td><td>maxLength 50；选择地区后自动填充（除非手动修改过）</td><td>—</td><td><code>connection.regionName</code> / <code>connection.regionNamePlaceholder</code> / <code>connection.autoFillHint</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.3 国家选项（SelectContent）</h3>
+  <table class="spec-table">
+    <thead><tr><th>value</th><th>显示</th><th>i18n key</th></tr></thead>
+    <tbody>
+      <tr><td><code>CN</code></td><td>中国 (CN)</td><td><code>connection.countryCN</code></td></tr>
+      <tr><td><code>US</code></td><td>美国 (US)</td><td><code>connection.countryUS</code></td></tr>
+      <tr><td><code>HK</code></td><td>中国香港 (HK)</td><td><code>connection.countryHK</code></td></tr>
+      <tr><td><code>SG</code></td><td>新加坡 (SG)</td><td><code>connection.countrySG</code></td></tr>
+      <tr><td><code>JP</code></td><td>日本 (JP)</td><td><code>connection.countryJP</code></td></tr>
+      <tr><td><code>AU</code></td><td>澳大利亚 (AU)</td><td><code>connection.countryAU</code></td></tr>
+      <tr><td><code>GB</code></td><td>英国 (GB)</td><td><code>connection.countryGB</code></td></tr>
+      <tr><td><code>DE</code></td><td>德国 (DE)</td><td><code>connection.countryDE</code></td></tr>
+      <tr><td><code>FR</code></td><td>法国 (FR)</td><td><code>connection.countryFR</code></td></tr>
+      <tr><td><code>KR</code></td><td>韩国 (KR)</td><td><code>connection.countryKR</code></td></tr>
+    </tbody>
+  </table>
+  <blockquote><strong>注意：</strong>demo 仅 10 个常用国家，spec 未规定完整 ISO 列表。完整 ISO 3166-1 alpha-2 约 250 国家/地区，是否扩展需确认（见主文件 Q-03）。</blockquote>
+
+  <h3>2.4 Sheet 底部使用提示</h3>
+  <table class="spec-table">
+    <tr><td style="width: 180px;">容器</td><td>bg-blue-50 + border-blue-200 + text-blue-700</td></tr>
+    <tr><td>图标</td><td>Info icon (h-4 w-4)</td></tr>
+    <tr><td>文案</td><td>「自定义 IP 定位库的优先级高于系统内置 GeoIP 库，配置后将优先使用自定义映射进行地域识别。」</td></tr>
+    <tr><td>i18n key</td><td><code>connection.geoIpTip</code></td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>3. 校验逻辑（保存按钮点击）</h2>
+<pre><code>const handleSave = () => {
+  const errs: { ip?: string; region?: string } = {};
+
+  // IP 段非空校验
+  if (!geoFormIp.trim()) {
+    errs.ip = t("connection.ipRangeRequired");
+  }
+
+  // 地区代码必选
+  if (!geoFormRegion) {
+    errs.region = t("connection.regionCodeRequired");
+  }
+
+  setGeoErrors(errs);
+
+  // 有错误则阻止保存
+  if (Object.keys(errs).length > 0) return;
+
+  // 通过则关闭 Sheet + 标记有未保存更改
+  setShowGeoIpDialog(false);
+  setHasUnsavedChanges(true);
+};</pre>
+
+  <h3>联动行为</h3>
+  <table class="spec-table">
+    <tr><td style="width: 180px;">地区代码选中时</td><td>如 <code>geoFormRegionDirty=false</code>，自动 set <code>geoFormRegionName</code> = 该国家 i18n（如 "美国"）</td></tr>
+    <tr><td>归属地手动输入时</td><td>set <code>geoFormRegionDirty=true</code>，后续地区切换不再自动覆盖归属地</td></tr>
+    <tr><td>编辑模式</td><td>IP 段输入框 <code>disabled={!!editingGeoIp}</code>，其它字段可编辑</td></tr>
+    <tr><td>Sheet onOpenChange(false)</td><td>关闭 Sheet 并清空 <code>setGeoErrors({})</code></td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>4. DOM 树比对结果</h2>
+  <div class="dom-comparison">
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>本规格 HTML 预览</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>Sheet 容器</td><td>div[role="dialog"] / SheetContent，实测 rect 560×1200（右贴边 x=880），nodeCount≈47，控件 6 个（取消/保存/IP input/地区 combobox/归属地 input/Close）</td><td>div.sheet-panel width 560px</td><td>✅（2026-07-13 实测）</td></tr>
+        <tr><td>Sheet Header</td><td>title + desc + 取消 + 保存</td><td>同</td><td>✅</td></tr>
+        <tr><td>Sheet Header 标题</td><td>"新增规则"（editingGeoIp=null）</td><td>"新增规则"</td><td>✅</td></tr>
+        <tr><td>Sheet Header 描述</td><td>"配置IP地址与地理位置的映射关系，用于海外邮件检测"</td><td>同</td><td>✅</td></tr>
+        <tr><td>表单字段数</td><td>3（IP 段 / 地区代码 / 归属地）</td><td>3</td><td>✅</td></tr>
+        <tr><td>必填标识</td><td>红色 * 在 IP 段和地区代码 label</td><td>同</td><td>✅</td></tr>
+        <tr><td>IP 段占位符</td><td>"请输入IP地址或CIDR网段，如 8.8.8.8 或 8.8.8.0/24"</td><td>同</td><td>✅</td></tr>
+        <tr><td>IP 段提示文案</td><td>"支持格式：IPv4单地址或CIDR（/8至/32）"</td><td>同</td><td>✅</td></tr>
+        <tr><td>地区代码 Select 占位符</td><td>实测渲染 "请选择地<strong style="color:#dc2626;">��</strong>"（i18n <code>selectRegion</code> UTF-8 损坏，应为"请选择地区代码"）</td><td>预览用可读 "请选择地区"</td><td>⚠️ 编码损坏（见主文件 §9）</td></tr>
+        <tr><td>归属地 maxLength</td><td>50</td><td>50</td><td>✅</td></tr>
+        <tr><td>归属地占位符</td><td>实测渲染 "如「Google DNS」<strong style="color:#dc2626;">���</strong>「阿里云香港」"（i18n <code>regionNamePlaceholder</code> 的"或"损坏）</td><td>预览用可读 "…或…"</td><td>⚠️ 编码损坏（见主文件 §9）</td></tr>
+        <tr><td>归属地提示文案</td><td>实测渲染 "选择地区后自动<strong style="color:#dc2626;">��</strong>充，可手动修改，最多50字符"（i18n <code>autoFillHint</code> 的"填"损坏）</td><td>预览用可读 "自动填充"</td><td>⚠️ 编码损坏（见主文件 §9）</td></tr>
+        <tr><td>底部 Info 提示框</td><td>已渲染（div.flex 包含 svg + p）</td><td>已渲染</td><td>✅</td></tr>
+        <tr><td>国家 SelectContent</td><td>10 个 SelectItem（CN/US/HK/SG/JP/AU/GB/DE/FR/KR）</td><td>本预览未展开下拉（仅 trigger 可见）</td><td>N/A（trigger 一致）</td></tr>
+        <tr><td>校验错误时 Input 红框</td><td>aria-invalid="true" + border red</td><td>本预览默认无错误态</td><td>N/A（错误态需触发保存校验）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>5. 编辑模式差异</h2>
+  <table class="spec-table">
+    <thead><tr><th>差异点</th><th>新增模式</th><th>编辑模式</th></tr></thead>
+    <tbody>
+      <tr><td>Sheet 标题</td><td>「新增规则」</td><td>「编辑映射」</td></tr>
+      <tr><td>Sheet Header 描述</td><td>同</td><td>同</td></tr>
+      <tr><td>IP 段输入框</td><td>可编辑</td><td><code>disabled</code>（IP 为唯一键，创建后不可编辑）</td></tr>
+      <tr><td>IP 段约束说明</td><td>仅显示格式提示 <code>ipRangeFormat</code></td><td>label 旁显示 Info tooltip，输入框下方提示文案切换为「IP 段为唯一标识，不可修改；如需变更请删除后重新添加」（<code>ipRangeLockedHint</code>）</td></tr>
+      <tr><td>地区代码 Select</td><td>可编辑</td><td>可编辑</td></tr>
+      <tr><td>归属地 Input</td><td>可编辑</td><td>可编辑（保留 dirty 标记）</td></tr>
+      <tr><td>触发源</td><td>工具栏「新增规则」/ 空态「立即创建」</td><td>表格行操作 → 编辑按钮</td></tr>
+      <tr><td>editingGeoIp state</td><td>null</td><td>rule 对象</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>6. i18n key 清单（本子文件补充）</h2>
+  <table class="spec-table">
+    <thead><tr><th>key</th><th>中文</th><th>English</th></tr></thead>
+    <tbody>
+      <tr><td><code>connection.createGeoIpRule</code></td><td>新增规则</td><td>New Rule</td></tr>
+      <tr><td><code>connection.editGeoIpRule</code></td><td>编辑映射</td><td>Edit Mapping</td></tr>
+      <tr><td><code>connection.geoIpRuleDesc</code></td><td>配置 IP 地址与地理位置的映射关系，用于海外邮件检测</td><td>Configure IP→Region mapping for overseas mail detection</td></tr>
+      <tr><td><code>connection.basicSettings</code></td><td>基础设置</td><td>Basic Settings</td></tr>
+      <tr><td><code>connection.ipRangeRequired</code></td><td>请输入 IP 地址或 CIDR 网段</td><td>Please enter IP address or CIDR</td></tr>
+      <tr><td><code>connection.ipRangeLockedHint</code></td><td>IP 段为唯一标识，不可修改；如需变更请删除后重新添加</td><td>IP range is the unique identifier and cannot be modified. To change it, delete and re-add.</td></tr>
+      <tr><td><code>connection.regionCodeRequired</code></td><td>请选择地区代码</td><td>Please select a region code</td></tr>
+      <tr><td><code>connection.geoIpTip</code></td><td>自定义 IP 定位库的优先级高于系统内置 GeoIP 库…</td><td>Custom IP geolocation DB has higher priority than…</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</body>
+</html>

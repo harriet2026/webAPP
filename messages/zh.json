@@ -267,6 +267,8 @@
     "welcomeSubtitle": "登录管理后台以继续",
     "account": "账号",
     "accountPlaceholder": "请输入账号",
+    "usernameRequired": "请输入用户名",
+    "passwordRequired": "请输入密码",
     "passwordPlaceholder": "请输入密码",
     "forgotHint": "请通过绑定的手机/邮箱验证码重置密码",
     "loginSuccessHint": "正在进入安全运营平台…"
@@ -738,12 +740,12 @@
       "privilegedForcedNotice": "使用发信域 SPF 记录或任意发信域时，自动为特权授权，不可取消。"
     },
     "outbound": {
-      "description": "配置出站邮件的路由规则。每条规则自动包含条件 is_outbound = true。",
-      "empty": "暂无出站路由规则。创建规则将出站邮件路由到指定 SMTP 下一跳或代理服务器分组。",
+      "description": "配置邮件的路由规则。规则的生效方向由条件决定：加一条 is_outbound = 是 只对发送方向生效，is_outbound = 否 只对接收方向生效。",
+      "empty": "暂无路由规则。创建规则将邮件路由到指定 SMTP 下一跳或代理服务器分组。",
       "createRule": "创建路由规则",
       "editRule": "编辑路由规则",
       "priorityHint": "数值越大越优先，命中即止。",
-      "isOutboundFixed": "is_outbound = true（固定 — 仅出站邮件）",
+      "directionHint": "未添加 is_outbound 条件的规则对接收和发送两个方向都生效。要只作用于其中一个方向，请在下方条件中添加 is_outbound。",
       "channelSection": "投递通道",
       "saveError": "保存规则失败，请检查必填字段。",
       "nameRequired": "名称为必填项"
@@ -7087,6 +7089,7 @@
     "trendPeakHint": "单击图例可切换系列，双击可单独查看某一类",
     "subtitle": "多维度分析邮件威胁态势，掌握安全拦截全局视图",
     "title": "邮件安全总览",
+    "trendCardTitle": "安全态势分析",
     "noData": "暂无数据",
     "error": {
       "forbiddenTitle": "无权查看邮件安全总览",
@@ -7100,7 +7103,8 @@
       "totalFiltered": "过滤邮件总量",
       "blockRate": "拦截率",
       "recallRate": "召回率",
-      "pendingReview": "待审积压"
+      "pendingReview": "待审积压",
+      "vsPrevious": "较上期"
     },
     "filter": {
       "direction": {
@@ -7142,7 +7146,7 @@
       "action": "处置动作",
       "threat_level": "威胁等级",
       "delivery_result": "投递结果",
-      "email_type": "邮件类型"
+      "email_type": "威胁态势趋势"
     },
     "threatTypes": {
       "normal": "正常邮件",
@@ -7212,7 +7216,11 @@
       "mapUnavailable": "世界地图加载失败",
       "backToWorld": "返回全球",
       "topIps": "来源 IP TOP",
-      "byThreat": "威胁构成"
+      "byThreat": "威胁构成",
+      "blockRateLegend": "横条颜色 = 拦截率",
+      "blockRateGood": "≥97%  防护良好",
+      "blockRateWarn": "95–97%  需关注",
+      "blockRateBad": "<95%  风险较高"
     },
     "time": {
       "title": "攻击时段分布",
@@ -7313,6 +7321,16 @@
       "invalidOrder": "结束日期不能早于开始日期",
       "noFuture": "不能选择未来日期"
     },
+    "customRange": {
+      "start": "开始",
+      "end": "结束",
+      "error": {
+        "invalid": "日期格式无效",
+        "order": "开始日期不能晚于结束日期",
+        "tooLong": "最多 {max} 天"
+      }
+    },
+    "tenantScope": "租户范围",
     "kpi": {
       "inboundTotal": "接收总量",
       "outboundTotal": "外发总量",
@@ -7479,7 +7497,17 @@
       "7d": "近7日",
       "30d": "近30日",
       "this_month": "本月",
-      "last_month": "上月"
+      "last_month": "上月",
+      "custom": "自定义"
+    },
+    "customRange": {
+      "start": "开始",
+      "end": "结束",
+      "error": {
+        "invalid": "日期格式无效",
+        "order": "开始日期不能晚于结束日期",
+        "tooLong": "最多 {max} 天"
+      }
     },
     "kpi": {
       "totalLinkMail": "含链接邮件总量",
@@ -9490,6 +9518,7 @@
       "attention": "待处理",
       "nodesNormal": "节点运行正常",
       "nodesIssue": "存在离线节点",
+      "nodesUnavailable": "数据源不可用",
       "cta": {
         "inbound": "查看统计",
         "threats": "查看威胁",
@@ -9502,11 +9531,17 @@
       "empty": "暂无威胁数据",
       "viewOverview": "查看邮件安全总览",
       "series": {
-        "phishing": "钓鱼邮件",
-        "spoofing": "仿冒邮件",
+        "normal": "正常",
+        "subscription": "订阅资讯",
+        "advertising": "广告邮件",
         "spam": "垃圾邮件",
-        "virus": "病毒附件",
-        "malicious": "恶意链接"
+        "harmful": "有害内容邮件",
+        "suspicious": "可疑邮件",
+        "sensitive": "敏感内容邮件",
+        "spoofing": "仿冒邮件",
+        "phishing": "钓鱼邮件",
+        "virus": "病毒邮件",
+        "account_compromised": "账号沦陷"
       }
     },
     "todo": {
@@ -9517,6 +9552,10 @@
       "itemPendingDisposal": "待处置邮件 {n} 封",
       "itemPendingReport": "举报待审 {n} 封",
       "itemAgentPending": "{agent} 待审 {n} 封",
+      "itemLicenseExpiry": "许可证将在 {n} 天后到期",
+      "licenseRenewHint": "请及时续期",
+      "itemRuleLibLatest": "规则库已是最新版",
+      "itemRuleLibOutdated": "规则库有可用更新",
       "lastSeen": "最近心跳：{time}"
     },
     "agents": {

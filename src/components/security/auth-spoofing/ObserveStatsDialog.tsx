@@ -75,8 +75,8 @@ export function ObserveStatsDialog({ open, onOpenChange }: ObserveStatsDialogPro
                 <div className="flex-1 h-6 bg-muted rounded overflow-hidden">
                   <div
                     className={cn(
-                      'h-full rounded transition-all',
-                      hits > 0 ? 'bg-blue-500' : 'bg-transparent',
+                      'h-full rounded transition-[width] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+                      hits > 0 ? 'bg-chart-1' : 'bg-transparent',
                     )}
                     style={{ width: `${Math.max((hits / maxHits) * 100, hits > 0 ? 2 : 0)}%` }}
                   />

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级1：详情弹窗（顺序检测时间线） - HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .component-preview { background:#fff; overflow-x:auto; }
+  .pass { color:#15803d; font-weight:600; }
+  .bad { color:#b91c1c; font-weight:600; }
+  .warn { color:#a16207; font-weight:600; }
+  .tag-base { display:inline-block; padding:.05rem .375rem; border-radius:.25rem; font-size:.6875rem; font-weight:600; background:#dbeafe; color:#1d4ed8; }
+  .tag-overlay { background:#fef3c7; color:#92400e; }
+  .tag-gap { background:#fee2e2; color:#b91c1c; }
+  .spec-swap-bar { display:flex; align-items:center; gap:.375rem; flex-wrap:wrap; margin-bottom:.75rem; padding-bottom:.5rem; border-bottom:1px dashed var(--border); font-size:.75rem; color:var(--muted-foreground); }
+  .spec-swap-bar button { font:inherit; padding:.15rem .5rem; border:1px solid var(--border); background:#fff; border-radius:.25rem; cursor:pointer; }
+  .spec-swap-bar button.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+</style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#c-3">← 返回主文件</a><a href="./layer-2-filters.html">下一层：筛选面板 →</a></nav>
+<header class="spec-header">
+  <h1>交互层级 1：详情弹窗</h1>
+  <table class="meta-table">
+    <tr><td>触发路径</td><td>层级0 → 列表行「查看」→ 居中 Modal（<code>div.fixed.inset-0.z-50</code> + <code>bg-black/70</code> 遮罩，非 Radix Dialog）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html#c-3">index.html#c-3</a></td></tr>
+  </table>
+</header>
+<section>
+  <h2>预览与截图</h2>
+  <div class="component-preview" data-preview="static"><div class="fixed inset-0 z-50 flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/70" aria-hidden="true"></div><div class="relative bg-white rounded-lg shadow-2xl flex flex-col w-[1100px] h-[800px] max-h-[90vh]"><div class="border-b border-gray-200 p-6 flex items-center justify-between bg-white flex-shrink-0"><div class="min-w-0"><div class="text-xs text-gray-500 mb-1">邮件安全 / 链接保护日志 / 点击详情</div><h2 class="text-lg font-semibold text-gray-900 truncate">https://fake-bank-login.com/verify</h2></div><button class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded flex-shrink-0" title="关闭 (ESC)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x w-6 h-6"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div><div class="flex-1 overflow-auto bg-white min-h-0 p-6 space-y-6"><div class="rounded-lg border-2 p-5 flex items-center gap-4 bg-red-50 border-red-200"><div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-alert w-6 h-6 text-red-600"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg></div><div class="flex-1"><p class="text-xs font-medium mb-1 text-red-600">最终结果</p><p class="text-lg font-bold text-red-700">已告警<span class="text-sm font-normal text-red-600">（由「云端情报」触发）</span></p></div><div class="text-right"><p class="text-xs text-gray-500 mb-1">用户操作</p><span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">已放弃</span></div></div><div class="bg-gray-50 rounded-lg p-6 border border-gray-200"><h3 class="text-base font-semibold text-gray-900 mb-4">顺序检测过程</h3><p class="text-xs text-gray-500 mb-5">终端用户点击改写链接后，按「云端情报 → 本地黑名单 → URL沙箱/钓鱼邮件智能体」顺序检测，任一环节命中即告警并停止后续检测。</p><div class="space-y-3"><div class="flex items-start gap-4 rounded-lg border p-4 bg-red-50 border-red-200"><div class="flex flex-col items-center flex-shrink-0"><span class="text-xs font-semibold text-gray-400">1</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert w-5 h-5 mt-1 text-red-600"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></div><div class="flex-1 min-w-0"><div class="flex items-center justify-between gap-2"><span class="text-sm font-medium text-gray-900">云端情报</span><span class="text-xs text-red-700 font-semibold">命中</span></div><p class="text-xs text-gray-500 mt-0.5">查询云端威胁情报库</p><p class="text-sm text-red-700 mt-2 break-all">云端情报命中：该域名被标记为钓鱼站点（情报源 PhishTank）</p></div></div><div class="flex items-start gap-4 rounded-lg border p-4 bg-gray-50 border-gray-200 opacity-70"><div class="flex flex-col items-center flex-shrink-0"><span class="text-xs font-semibold text-gray-400">2</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-minus w-5 h-5 mt-1 text-gray-300"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path></svg></div><div class="flex-1 min-w-0"><div class="flex items-center justify-between gap-2"><span class="text-sm font-medium text-gray-900">本地黑名单</span><span class="text-xs text-gray-400">未执行（前序已命中）</span></div><p class="text-xs text-gray-500 mt-0.5">匹配用户本地 URL 黑名单</p></div></div><div class="flex items-start gap-4 rounded-lg border p-4 bg-gray-50 border-gray-200 opacity-70"><div class="flex flex-col items-center flex-shrink-0"><span class="text-xs font-semibold text-gray-400">3</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-minus w-5 h-5 mt-1 text-gray-300"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path></svg></div><div class="flex-1 min-w-0"><div class="flex items-center justify-between gap-2"><span class="text-sm font-medium text-gray-900">URL沙箱 / 钓鱼邮件智能体</span><span class="text-xs text-gray-400">未执行（前序已命中）</span></div><p class="text-xs text-gray-500 mt-0.5">触发二次深度检测</p></div></div></div></div><div class="bg-gray-50 rounded-lg p-6 border border-gray-200"><h3 class="text-base font-semibold text-gray-900 mb-4">链接信息</h3><div class="flex items-center gap-3 flex-wrap"><span class="px-3 py-2 bg-white border border-gray-200 rounded text-sm text-gray-900 break-all">https://fake-bank-login.com/verify</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-4 h-4 text-gray-400 flex-shrink-0"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span class="px-3 py-2 bg-white border border-blue-200 rounded text-sm text-blue-700 break-all">https://safelink.gateway.com/r/9f2a1c</span></div><div class="mt-4 space-y-1"><div class="flex justify-between py-2 border-b border-gray-200 gap-4"><span class="text-sm text-gray-600 flex-shrink-0">检测结论</span><span class="text-sm font-medium text-gray-900 break-all text-right">钓鱼</span></div><div class="flex justify-between py-2 border-b border-gray-200 gap-4"><span class="text-sm text-gray-600 flex-shrink-0">链接来源</span><span class="text-sm font-medium text-gray-900 break-all text-right">邮件正文</span></div></div></div><div class="bg-gray-50 rounded-lg p-6 border border-gray-200"><h3 class="text-base font-semibold text-gray-900 mb-4">邮件与点击上下文</h3><div class="space-y-1"><div class="flex justify-between py-2 border-b border-gray-200 gap-4"><span class="text-sm text-gray-600 flex-shrink-0">邮件TID</span><span class="text-sm font-medium text-gray-900 break-all text-right">TID20251103001</span></div><div class="flex justify-between py-2 border-b border-gray-200 gap-4"><span class="text-sm text-gray-600 flex-shrink-0">主题</span><span class="text-sm font-medium text-gray-900 break-all text-right">重要 - 请立即验证您的账户</span></div><div class="flex justify-between py-2 border-b border-gray-200 gap-4"><span class="text-sm text-gray-600 flex-shrink-0">发信人</span><span class="text-sm font-medium text-gray-900 break-all text-right">attacker@phishing.com</span></div><div class="flex justify-between py-2 border-b border-gray-200 gap-4"><span class="text-sm text-gray-600 flex-shrink-0">点击人</span><span class="text-sm font-medium text-gray-900 break-all text-right">alice@company.com</span></div><div class="flex justify-between py-2 border-b border-gray-200 gap-4"><span class="text-sm text-gray-600 flex-shrink-0">点击时间</span><span class="text-sm font-medium text-gray-900 break-all text-right">2025-11-03 10:31:12</span></div><div class="flex justify-between py-2 border-b border-gray-200 gap-4"><span class="text-sm text-gray-600 flex-shrink-0">客户端 IP</span><span class="text-sm font-medium text-gray-900 break-all text-right">203.0.113.45</span></div></div></div></div><div class="border-t border-gray-200 p-6 bg-gray-50 flex justify-end gap-3 flex-shrink-0"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3 bg-transparent">关闭</button></div></div></div></div>
+  <figure class="screenshot-figure"><img src="./screenshots/layer-1-detail-modal.png" alt="详情弹窗"></figure>
+  <h2>顺序检测时间线的三种态</h2>
+  <table class="spec-table">
+    <thead><tr><th>态</th><th>配色</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td>命中</td><td class="bad">红</td><td>该环节判定为恶意/钓鱼/可疑 → 告警并<strong>停止后续检测</strong></td></tr>
+      <tr><td>已检测 · 未命中</td><td class="pass">绿</td><td>该环节执行了但没命中，继续下一环节</td></tr>
+      <tr><td>未执行</td><td>灰</td><td><strong>前序已命中</strong>，本环节根本没跑</td></tr>
+    </tbody>
+  </table>
+  <p>命中环节额外展示<strong>命中说明</strong>（<code>detail</code>：情报类别 / 黑名单条目 / 引擎结论）；第三环节命中时显示实际引擎（URL沙箱 或 钓鱼邮件智能体）。</p>
+  <p class="bad">⚠ 0709 要求详情也要支持「跳过深度检测」态 —— demo 完全没有（第三环节被用户跳过时如何渲染，PRD 也没细化）。</p>
+  <div class="dom-comparison">
+  <h5>DOM 树比对结果</h5>
+  <table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody><tr><td>根节点</td><td><code>div.fixed.inset-0.z-50</code>（自定义 Modal，非 Radix Dialog）</td><td>同</td><td class="pass">一致</td></tr>
+<tr><td>后代节点数</td><td>101</td><td>101</td><td class="pass">一致</td></tr>
+<tr><td>分区</td><td>4（最终处置概览 / 顺序检测过程 / 链接信息 / 邮件与点击上下文）</td><td>4</td><td class="pass">一致</td></tr>
+<tr><td>时间线环节</td><td>3</td><td>3</td><td class="pass">一致</td></tr>
+<tr><td>底部按钮</td><td>仅「关闭」</td><td>同</td><td class="pass">一致</td></tr>
+<tr><td>「跳过深度检测」态</td><td><strong>不存在</strong></td><td>不包含</td><td class="bad">一致（0709 要求但未实现）</td></tr></tbody>
+  </table>
+</div>
+</section>
+<script src="../assets/stats-preview.js"></script>
+</body>
+</html>

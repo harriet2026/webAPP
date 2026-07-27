@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 1·2：IP 抽屉模块切换 - 策略流水线 HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{--primary:oklch(0.52 0.226 262);--primary-foreground:oklch(0.985 0 0);--background:oklch(0.98 0.01 205);
+      --foreground:oklch(0.145 0 0);--card:oklch(1 0 0);--muted:oklch(0.97 0 0);--muted-foreground:oklch(0.556 0 0);
+      --border:oklch(0.922 0 0);--destructive:oklch(0.577 0.245 27.325);--radius:0.625rem;--font-sans:"Geist",system-ui,sans-serif;--font-mono:"Geist Mono",monospace;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto;}
+    .layer-nav{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.25rem;background:var(--muted);border-radius:var(--radius);margin-bottom:1.5rem;font-size:0.875rem;}
+    .layer-nav a{color:var(--primary);text-decoration:none;font-weight:600;} .layer-nav a:hover{text-decoration:underline;}
+    .spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:2rem;}
+    .spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.4rem;}
+    .meta-table{width:100%;border-collapse:collapse;font-size:0.875rem;}
+    .meta-table td{padding:0.5rem 1rem;border-bottom:1px solid var(--border);}
+    .meta-table td:first-child{font-weight:600;width:150px;color:var(--muted-foreground);white-space:nowrap;}
+    section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem;}
+    section>h2{color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:0.5rem;margin-bottom:1.25rem;font-size:1.2rem;}
+    h4{font-size:0.95rem;margin:0.75rem 0 0.5rem;color:var(--muted-foreground);}
+    table.spec-table{width:100%;border-collapse:collapse;font-size:0.85rem;margin:1rem 0;}
+    table.spec-table th{background:var(--muted);font-weight:600;text-align:left;padding:0.6rem 0.75rem;border:1px solid var(--border);white-space:nowrap;}
+    table.spec-table td{padding:0.6rem 0.75rem;border:1px solid var(--border);vertical-align:top;}
+    table.spec-table tr:nth-child(even) td{background:var(--muted);}
+    .screenshot-figure{margin:1rem 0;text-align:center;}
+    .screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+    .screenshot-figure figcaption{margin-top:0.5rem;font-size:0.8125rem;color:var(--muted-foreground);}
+    .interaction-layer{border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.5rem 0;background:var(--card);}
+    .interaction-layer>h4{color:var(--primary);font-size:0.95rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--primary);color:var(--primary-foreground);font-size:0.75rem;font-weight:700;}
+    .trigger-path{background:var(--muted);border-radius:calc(var(--radius) - 4px);padding:0.5rem 0.75rem;margin:0.5rem 0 1rem;font-size:0.8125rem;color:var(--muted-foreground);}
+    .trigger-path strong{color:var(--foreground);}
+    .component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:1.5rem;margin:1.25rem 0 1rem;background:#fff;position:relative;overflow:auto;}
+    .component-preview::before{content:"🖥 可交互组件预览（复刻 demo 实际渲染）";position:absolute;top:-0.625rem;left:0.75rem;background:var(--primary);color:var(--primary-foreground);font-size:0.6875rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:calc(var(--radius) - 4px);}
+    .dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);overflow:hidden;}
+    .dom-comparison>h5{background:var(--muted);padding:0.5rem 0.75rem;font-size:0.8125rem;font-weight:600;border-bottom:1px solid var(--border);}
+    .dom-comparison table{width:100%;border-collapse:collapse;font-size:0.8125rem;}
+    .dom-comparison th{background:var(--muted);font-weight:600;text-align:left;padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);}
+    .dom-comparison td{padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);vertical-align:top;}
+    .dom-pass{color:oklch(0.5 0.15 150);font-weight:600;} .dom-fail{color:var(--destructive);font-weight:600;} .dom-fixed{color:oklch(0.6 0.15 90);font-weight:600;}
+    code{font-family:var(--font-mono);font-size:0.85em;}
+    /* 预览局部 */
+    .pv-nav{width:100%;display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.75rem;border:none;background:transparent;border-radius:0.5rem;text-align:left;cursor:pointer;margin-bottom:0.2rem;border-left:2px solid transparent;}
+    .pv-nav:hover{background:rgba(0,0,0,.04)} .pv-nav.act{background:#fff;border-left:2px solid #1890FF} .pv-nav.act .pv-nm{color:#1890FF}
+    .pv-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0} .pv-nm{display:block;font-size:0.85rem;font-weight:500} .pv-sub{display:block;font-size:0.7rem;color:#999}
+  </style>
+</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#component-stage-drawer">← 返回主文件 (统一阶段抽屉框架)</a>
+  <span>层级 1·2 / 共 3 层</span>
+  <a href="./layer-2-stage-variants.html">层级 3：跨阶段变体 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 1·2：IP 抽屉左侧模块切换（同壳不同模块内容）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>统一阶段抽屉框架 UnifiedStageDrawer（IP 抽屉）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+    <tr><td>触发路径</td><td>层级0 IP抽屉已打开 → 点击左侧导航「IP黑白名单 / RBL过滤 / 海外邮件检测」→ <code>switchToPolicy</code> → 右侧内容切换（面包屑不更新，D-004）</td></tr>
+    <tr><td>demo 组件</td><td><code>connection-layer-page.tsx</code>（<code>embedded</code> 模式，4 模块共用一套左导航）</td></tr>
+  </table>
+</header>
+
+<section>
+  <h2>可交互模块切换预览</h2>
+  <div class="component-preview">
+    <div style="border:1px solid #e8e8e8;border-radius:0.5rem;overflow:hidden;max-width:900px;box-shadow:0 4px 16px rgba(0,0,0,.1);">
+      <div style="display:flex;align-items:center;gap:0.5rem;padding:0.8rem 1.25rem;border-bottom:1px solid #e8e8e8;">
+        <span style="color:#1890FF;">⚙</span><b>IP策略</b><span style="color:#bbb;">/</span>
+        <span style="color:#666;">IP频率限制</span>
+        <span style="margin-left:auto;font-size:0.7rem;color:#c00;">面包屑固定不动（D-004）</span>
+      </div>
+      <div style="display:flex;min-height:300px;">
+        <div style="width:220px;background:#F5F5F5;border-right:1px solid #e8e8e8;padding:0.75rem;flex-shrink:0;">
+          <button class="pv-nav act" onclick="sw(this,'IP频率限制')"><span class="pv-dot" style="background:#1890FF"></span><span><span class="pv-nm">IP频率限制</span><span class="pv-sub">阈值: 100次/分钟</span></span></button>
+          <button class="pv-nav" onclick="sw(this,'IP黑白名单')"><span class="pv-dot" style="background:#1890FF"></span><span><span class="pv-nm">IP黑白名单</span><span class="pv-sub">黑名单: 33条 / 白名单: 22条</span></span></button>
+          <button class="pv-nav" onclick="sw(this,'RBL过滤')"><span class="pv-dot" style="background:#1890FF"></span><span><span class="pv-nm">RBL过滤</span><span class="pv-sub">3个服务器 / 超时5s</span></span></button>
+          <button class="pv-nav" onclick="sw(this,'海外邮件检测')"><span class="pv-dot" style="background:#bbb"></span><span><span class="pv-nm">海外邮件检测</span><span class="pv-sub">收件 已启用</span></span></button>
+        </div>
+        <div style="flex:1;padding:1.1rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;"><b id="m-title">IP频率限制</b>
+            <span style="font-size:0.78rem;color:#1890FF;">已启用 ✔</span></div>
+          <div id="m-body" style="margin-top:0.8rem;font-size:0.82rem;color:#555;"></div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:0.78rem;color:#64748b;margin-top:0.6rem;">👆 点击左侧四个模块，右侧标题+正文实时切换（面包屑固定，如实还原 demo）。</p>
+  </div>
+</section>
+
+<!-- 模块1 -->
+<section>
+  <h2>模块 1：IP频率限制（默认打开）</h2>
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">1</span> IP频率限制内容</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：抽屉打开默认 initialPolicy=ipFrequency</div>
+    <figure class="screenshot-figure"><img src="./screenshots/ip-drawer-ipfrequency.png" alt="IP频率限制"><figcaption>浏览器实际渲染</figcaption></figure>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>模块标题 + 已启用开关</td><td>右上角 Switch（模块级启停，默认已启用）。⚠️ demo 标题渲染「IP频率限**」（D-003）</td></tr>
+        <tr><td>说明横幅</td><td>「针对IP发信频率过滤限制，防止暴力破解或滥发邮件。各维度为"或"关系，任一达到阈值即触发处置动作。」</td></tr>
+        <tr><td>工具行</td><td>搜索(规则ID/名称/IP) · 全部▾ · 全部▾ · 重置 · +新增规则 · ⬆批量导入 · ⬇导出</td></tr>
+        <tr><td>规则表格（13 列）</td><td>☐ · ⌄ · ID · 规则名称 · 优先级 · IP地址/段 · 同时连接 · 时间窗口频率 · 每日限制 · 挂起策略 · 到期时间 · 状态 · 操作</td></tr>
+        <tr><td>示例行</td><td>1-ipgroup 可信IP组放宽限制(优先级50, IP组:可信IP, 100, 2000次/15分钟, 10000, 不启用) 等</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison"><h5>🔍 DOM 树比对结果</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>规格记录</th><th>一致</th></tr></thead><tbody>
+        <tr><td>表头列数</td><td>13（含 checkbox+chevron）</td><td>13</td><td class="dom-pass">✅</td></tr>
+        <tr><td>标题文本</td><td>「IP频率限**」（损坏）</td><td>如实记录+修正说明</td><td class="dom-fixed">⚠ 修正</td></tr>
+        <tr><td>已启用开关</td><td>右上，开态(蓝)</td><td>同</td><td class="dom-pass">✅</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- 模块2 -->
+<section>
+  <h2>模块 2：IP黑白名单</h2>
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">2</span> IP黑白名单内容（点左侧切换进入）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：左侧点「IP黑白名单」</div>
+    <figure class="screenshot-figure"><img src="./screenshots/ip-drawer-ipfilter.png" alt="IP黑白名单"><figcaption>浏览器实际渲染</figcaption></figure>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>Tab</td><td>黑名单规则 / 白名单规则</td></tr>
+        <tr><td>工具行</td><td>搜索(IP地址/段) · +新增规则 · ⬆批量导入 · ⬇导出。⚠️ 「新增规则」渲染「新增规**」(D-003)</td></tr>
+        <tr><td>表格列</td><td>IP地址/段 · 操作[阻断/隔离/丢弃/审核 彩色标签] · 状态[开关] · 修改时间 · 操作[编辑/删除]</td></tr>
+        <tr><td>示例行</td><td>192.168.1.0/24 阻断 · 10.0.0.5 隔离 · 203.0.113.0/24 丢弃(禁用) · IP组·恶意IP库 审核 …</td></tr>
+        <tr><td>分页</td><td>共 33 条规则，页码 1-4，每页 10 条</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison"><h5>🔍 DOM 树比对结果</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>规格记录</th><th>一致</th></tr></thead><tbody>
+        <tr><td>Tab 数</td><td>2（黑/白名单）</td><td>2</td><td class="dom-pass">✅</td></tr>
+        <tr><td>操作标签色</td><td>阻断红/隔离橙/丢弃红/审核紫</td><td>同</td><td class="dom-pass">✅</td></tr>
+        <tr><td>分页总数</td><td>共 33 条</td><td>33（与侧栏副标题「黑名单:33条」一致）</td><td class="dom-pass">✅</td></tr>
+        <tr><td>面包屑</td><td>切换后仍「/ IP频率限**」（未更新）</td><td>如实记录 D-004</td><td class="dom-fail">✗ demo 缺陷</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- 模块3/4 -->
+<section>
+  <h2>模块 3 / 4：RBL过滤 · 海外邮件检测</h2>
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">3</span> RBL过滤</h4>
+    <figure class="screenshot-figure"><img src="./screenshots/ip-drawer-rbl.png" alt="RBL过滤"><figcaption>浏览器实际渲染</figcaption></figure>
+    <table class="spec-table"><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody>
+      <tr><td>侧栏副标题</td><td>3个服务器 / 超时5s</td></tr>
+      <tr><td>内容</td><td>RBL 服务器配置（服务器列表 + 超时/查询设置）；模块级已启用开关</td></tr>
+    </tbody></table>
+    <h4><span class="layer-badge">4</span> 海外邮件检测（未配置态灰点）</h4>
+    <figure class="screenshot-figure"><img src="./screenshots/ip-drawer-overseas.png" alt="海外邮件检测"><figcaption>浏览器实际渲染</figcaption></figure>
+    <table class="spec-table"><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody>
+      <tr><td>侧栏副标题 / 圆点</td><td>收件 已启用；侧栏圆点为灰色（区别于前 3 个蓝点）</td></tr>
+      <tr><td>首页卡片态</td><td>该模块在首页为「未配置」橙虚线卡（「去配置」）</td></tr>
+      <tr><td>内容</td><td>收件/发件方向的海外邮件检测配置</td></tr>
+    </tbody></table>
+    <div class="dom-comparison"><h5>🔍 DOM 树比对结果（RBL / 海外）</h5>
+      <table><thead><tr><th>比对项</th><th>demo</th><th>规格</th><th>一致</th></tr></thead><tbody>
+        <tr><td>侧栏 4 项圆点</td><td>前3蓝·海外灰</td><td>同</td><td class="dom-pass">✅</td></tr>
+        <tr><td>模块切换保持外壳</td><td>头部/侧栏/关闭不变，仅右侧换</td><td>同（统一框架核心）</td><td class="dom-pass">✅</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#component-stage-drawer">← 返回主文件</a>
+  <a href="./layer-2-stage-variants.html">层级 3：跨阶段变体 →</a>
+</nav>
+
+<script>
+function sw(btn,mod){
+  btn.parentNode.querySelectorAll('.pv-nav').forEach(function(b){b.classList.remove('act')});
+  btn.classList.add('act');
+  document.getElementById('m-title').textContent = mod;
+  var map={
+    'IP频率限制':'说明横幅 + 工具行(搜索/全部/+新增规则/批量导入/导出) + 13列规则表（ID·规则名称·优先级·IP地址段·同时连接·时间窗口频率·每日限制·挂起策略·到期时间·状态·操作）',
+    'IP黑白名单':'黑名单/白名单 Tab + 规则表（IP地址段·操作[阻断/隔离/丢弃/审核]·状态·修改时间·操作）+ 分页「共 33 条」',
+    'RBL过滤':'RBL 服务器列表（3个服务器/超时5s）+ 查询与命中配置',
+    '海外邮件检测':'收件/发件方向海外邮件检测配置（当前收件已启用；首页卡为未配置态）'
+  };
+  document.getElementById('m-body').innerHTML='<div style="border:1px solid #eee;border-radius:0.4rem;padding:0.6rem;">'+map[mod]+'</div>';
+}
+sw(document.querySelector('.pv-nav.act'),'IP频率限制');
+</script>
+</body>
+</html>

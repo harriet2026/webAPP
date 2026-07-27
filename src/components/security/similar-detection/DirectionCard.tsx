@@ -50,7 +50,7 @@ export function DirectionCard({ direction, detectionType, value, onChange, onSyn
     <div
       data-testid={`similar-detection-card-${direction}`}
       className={cn(
-        'border rounded-lg p-4 transition-all',
+        'border rounded-lg p-4 transition-[background-color,border-color] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
         value.observe_mode
           ? 'border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20'
           : 'border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-950',

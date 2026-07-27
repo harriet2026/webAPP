@@ -1,0 +1,13 @@
+{
+  "module": "component-phishing-detection-agent",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": "804efb9",
+      "summary": "初版：覆盖检测总览（KPI/筛选/日志主表+URL下钻/详情抽屉）与检测引擎配置（板块1 引擎基础与URL检测、板块2 检测范围与准入规则+编辑抽屉+收件人树、板块3 智能体调查与处置+运行模式抽屉+置信度分级+区间编辑弹窗），URL 透视证据 5-Tab 抽屉，误报豁免/确认拦截/超时异步/模式冲突对话框，外套启用开关与关闭二次确认；7 个交互层级子文件 + DOM 树逐节点比对。"
+    }
+  ]
+}

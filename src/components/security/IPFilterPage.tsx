@@ -20,8 +20,6 @@ import {
   Play,
   Check,
   X,
-  ChevronDown,
-  ChevronUp,
   AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -79,7 +77,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { CollapsibleSectionTrigger } from '@/components/ui/collapsible-section-trigger';
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -964,13 +963,10 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
 
                 {/* 配置示例 */}
                 <Collapsible open={showExamples} onOpenChange={setShowExamples}>
-                  <CollapsibleTrigger className="w-full flex items-center justify-between text-blue-600 hover:text-blue-700 py-2 px-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors">
-                    <span className="flex items-center gap-2">
-                      <Lightbulb className="h-4 w-4" />
-                      {t('ipFilter.viewConfigExamples')}
-                    </span>
-                    {showExamples ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </CollapsibleTrigger>
+                  <CollapsibleSectionTrigger>
+                    <Lightbulb className="h-4 w-4" />
+                    {t('ipFilter.viewConfigExamples')}
+                  </CollapsibleSectionTrigger>
                   <CollapsibleContent className="mt-3 space-y-3">
                     {configExamples.map((example) => (
                       <div key={example.id} className="bg-background rounded-lg p-4 border">
@@ -991,13 +987,10 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
 
                 {/* 模拟测试 */}
                 <Collapsible open={showSimulator} onOpenChange={setShowSimulator}>
-                  <CollapsibleTrigger className="w-full flex items-center justify-between text-blue-600 hover:text-blue-700 py-2 px-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors">
-                    <span className="flex items-center gap-2">
-                      <Play className="h-4 w-4" />
-                      {t('ipFilter.simulationTest')}
-                    </span>
-                    {showSimulator ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </CollapsibleTrigger>
+                  <CollapsibleSectionTrigger>
+                    <Play className="h-4 w-4" />
+                    {t('ipFilter.simulationTest')}
+                  </CollapsibleSectionTrigger>
                   <CollapsibleContent className="mt-3">
                     <div className="bg-background rounded-lg p-4 border space-y-4">
                       <div>

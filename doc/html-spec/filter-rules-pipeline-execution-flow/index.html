@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略执行流程 - HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .spec-header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+    }
+    .spec-header h1 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .meta-table td {
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .meta-table td:first-child {
+      font-weight: 600;
+      width: 160px;
+      color: var(--muted-foreground);
+      white-space: nowrap;
+    }
+    .component-toc {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 2rem;
+      margin-bottom: 2rem;
+    }
+    .component-toc > h2 {
+      color: var(--primary);
+      font-size: 1.05rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+    .component-toc ul { list-style: none; }
+    .component-toc li {
+      padding: 0.375rem 0.75rem;
+      border-radius: calc(var(--radius) - 4px);
+      background: var(--muted);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+    .component-toc li a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .component-toc .toc-badge {
+      display: inline-block;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      padding: 0.0625rem 0.375rem;
+      border-radius: calc(var(--radius) - 4px);
+      background: var(--primary);
+      color: var(--primary-foreground);
+      white-space: nowrap;
+      margin-left: 0.5rem;
+    }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    section > h2 {
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem;
+      font-size: 1.25rem;
+    }
+    h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+    h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+    table.spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      margin: 1rem 0;
+    }
+    table.spec-table th {
+      background: var(--muted);
+      color: var(--foreground);
+      font-weight: 600;
+      text-align: left;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    table.spec-table td {
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+    table.spec-table tr:nth-child(even) td { background: var(--muted); }
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img {
+      max-width: 100%;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 2px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .screenshot-figure figcaption {
+      margin-top: 0.5rem;
+      font-size: 0.8125rem;
+      color: var(--muted-foreground);
+    }
+    .component-spec {
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 2px);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: var(--card);
+    }
+    .component-spec > h3 {
+      color: var(--primary);
+      border-left: 4px solid var(--primary);
+      padding-left: 0.75rem;
+    }
+    pre {
+      background: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 4px);
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      margin: 1rem 0;
+    }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+    }
+    .mermaid {
+      text-align: center;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: var(--muted);
+      border-radius: calc(var(--radius) - 2px);
+    }
+    .diff-section {
+      border-left: 4px solid var(--diff-border);
+      background: var(--diff-bg);
+    }
+    .diff-section > h2 {
+      color: var(--diff-border);
+      border-bottom-color: var(--diff-border);
+    }
+    .question-section {
+      border-left: 4px solid var(--question-border);
+      background: var(--question-bg);
+    }
+    .question-section > h2 {
+      color: var(--question-border);
+      border-bottom-color: var(--question-border);
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.125rem 0.5rem;
+      border-radius: calc(var(--radius) - 4px);
+    }
+    .badge-high { background: oklch(0.65 0.2 25); color: white; }
+    .badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+    .badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+    .component-preview {
+      border: 2px dashed var(--primary);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 1rem 0;
+      background: #fff;
+      overflow-x: auto;
+      position: relative;
+    }
+    .dom-comparison { margin: 1rem 0; }
+    .color-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
+    .color-bar { display:inline-block; width:4px; height:14px; border-radius:2px; margin-right:6px; vertical-align:middle; }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>策略执行流程 - HTML 规格说明</h1>
+    <table class="meta-table">
+      <tr><td>所属页面</td><td>策略流水线 /filter-rules/pipeline</td></tr>
+      <tr><td>模块名称</td><td>策略执行流程（模块一）</td></tr>
+      <tr><td>demo 源文件</td><td>design/origin/demo/components/filter-rules-new/strategy-pipeline-page.tsx</td></tr>
+      <tr><td>spec 源文件</td><td>design/origin/spec/策略流水线需求文档.md</td></tr>
+      <tr><td>覆盖章节</td><td>界面布局 / 交互设计 / 业务逻辑 / 响应式 / 差异 / 需确认；v2 新增「统一阶段抽屉框架」（2.3）</td></tr>
+      <tr><td>规格版本</td><td><span class="spec-version">v2</span></td></tr>
+      <tr><td>生成日期</td><td>2026-07-13（v1: 2026-07-10）</td></tr>
+      <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+      <tr><td>spec 源 commit</td><td><code>804efb9</code></td></tr>
+      <tr><td>约束声明</td><td>遵循 design/origin/implement.md：四语国际化、复用统一规则系统 action、不新增规则系统</td></tr>
+    </table>
+  </header>
+
+  <!-- 0.2 版本历史 -->
+  <section id="version-history">
+    <h2>🕑 版本历史</h2>
+    <table class="spec-table">
+      <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+      <tbody>
+        <tr><td>v2</td><td>2026-07-13</td><td><code>804efb9</code></td><td><code>804efb9</code></td>
+          <td>新增 2.3「统一阶段抽屉框架 UnifiedStageDrawer」：4 个阶段抽屉（IP/收发信人/内容/综合）共享的 80vw Sheet 外壳（面包屑头 + 左侧模块导航 + 右侧模块内容），含层级 1·2（IP 模块切换）与层级 3（跨阶段变体）两个子文件；记录 i18n 数据损坏、面包屑不随模块切换、语言仅3种等差异。</td></tr>
+        <tr><td>v1</td><td>2026-07-10</td><td><code>804efb9</code></td><td><code>804efb9</code></td>
+          <td>初版：策略执行流程卡片（19 条策略 · 5 阶段横向流水线 · 阶段间流转）+ 图例区。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="component-toc">
+    <h2>📋 组件列表（点击跳转）</h2>
+    <ul>
+      <li>
+        <a href="#component-execution-flow">2.1 策略执行流程卡片 ExecutionFlowCard</a>
+        <span class="toc-badge">1层</span>
+      </li>
+      <li>
+        <a href="#component-legend">2.2 图例区 PipelineLegend</a>
+        <span class="toc-badge">1层</span>
+      </li>
+      <li>
+        <a href="#component-stage-drawer">2.3 统一阶段抽屉框架 UnifiedStageDrawer ★</a>
+        <span class="toc-badge">3层</span>
+        <span class="toc-layer-links">
+          <a href="./layer-1-drawer-ip-modules.html">层级1·2</a>
+          <a href="./layer-2-stage-variants.html">层级3</a>
+        </span>
+      </li>
+    </ul>
+  </nav>
+
+  <section id="layout">
+    <h2>1. 页面布局结构</h2>
+    <p>策略执行流程是「策略流水线」页面的首屏核心模块，承载在 <code>Card</code> 容器内，标题为「策略执行流程」。布局采用横向五阶段等高排列，阶段之间以箭头连接，底部为图例说明区。</p>
+    <table class="spec-table">
+      <thead>
+        <tr><th>区域</th><th>位置</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>页面标题栏</td><td>顶部</td><td>左侧「策略流水线」标题，右侧「刷新」按钮</td></tr>
+        <tr><td>策略执行流程 Card</td><td>首屏主体</td><td>包含五阶段流水线 + 底部图例</td></tr>
+        <tr><td>五阶段流水线</td><td>Card 内容区</td><td>阶段1~5横向等高排列，策略卡片垂直堆叠</td></tr>
+        <tr><td>阶段间箭头</td><td>阶段之间</td><td>显示流程控制状态（阻断/继续）</td></tr>
+        <tr><td>图例区</td><td>Card 底部</td><td>执行动作、名单类型、流程控制三行图例</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/page-full-default.png" alt="整页默认态">
+      <figcaption>整页默认态截图（产品形态：云网关）</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/execution-flow-module.png" alt="策略执行流程模块">
+      <figcaption>策略执行流程模块截图（1920px 视口）</figcaption>
+    </figure>
+  </section>
+
+  <section id="components">
+    <h2>2. 逐组件规格</h2>
+
+    <article class="component-spec" id="component-execution-flow">
+      <h3>2.1 策略执行流程卡片 ExecutionFlowCard</h3>
+      <table class="spec-table">
+        <thead>
+          <tr><th>元信息</th><th>值</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>组件类型</td><td>Card + 横向 Flex 流水线</td></tr>
+          <tr><td>交互层级数</td><td>1 层（默认态，点击卡片/配置按钮打开抽屉为跨页面子模块，不在本模块内）</td></tr>
+          <tr><td>demo 源码位置</td><td>strategy-pipeline-page.tsx 中「模块一：策略执行流程」Card 区块</td></tr>
+          <tr><td>i18n key</td><td>pipeline.executionPipeline、pipeline.phase1IP、pipeline.phase2Sender 等</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interaction-layer">
+        <h4>交互层级 0：默认渲染</h4>
+        <p><strong>触发路径：</strong>页面加载后默认展示。</p>
+        <div class="component-preview" id="pipeline-preview">
+          <!-- 以下 HTML 从 demo 实际 DOM 提取，保留原始 Tailwind class -->
+          <div id="pipeline-preview-root" class="bg-white text-gray-900 flex flex-col gap-6 rounded-xl border border-gray-200 py-6 shadow-sm" style="font-family:system-ui,sans-serif;">
+            <div class="px-6 pb-3">
+              <div class="text-lg font-semibold text-[#262626]">策略执行流程</div>
+            </div>
+            <div class="px-6">
+              <div class="overflow-x-auto pb-4">
+                <div class="flex items-stretch gap-0 min-w-max" id="pipeline-stages">
+                  <!-- Stage 1: IP策略 -->
+                  <div class="flex flex-col min-w-[240px] bg-white rounded-l-lg border border-r-0 border-[#E8E8E8] p-4">
+                    <div class="mb-3"><div class="text-sm font-semibold text-[#262626]">阶段1: IP策略</div></div>
+                    <div class="flex flex-col gap-3">
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="ipFrequency">
+                        <div class="w-1 flex-shrink-0 bg-[#f5222d]"></div>
+                        <div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">IP频率限制</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div>
+                      </div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="ipFilter">
+                        <div class="w-1 flex-shrink-0 bg-[#f5222d]"></div>
+                        <div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">IP黑白名单</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div>
+                      </div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="rbl">
+                        <div class="w-1 flex-shrink-0 bg-[#f5222d]"></div>
+                        <div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">RBL过滤</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div>
+                      </div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border-2 border-dashed border-[#FA8C16] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="overseas">
+                        <div class="w-1 flex-shrink-0 bg-[#d9d9d9]"></div>
+                        <div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">海外邮件检测</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">去配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Arrow 1 -->
+                  <div class="stage-arrow flex flex-col items-center justify-center w-12 bg-white border-y border-[#E8E8E8] self-stretch cursor-help" data-flow="terminate">
+                    <div class="flex items-center justify-center relative"><svg width="24" height="24" viewBox="0 0 24 24" class="text-[#FF4D4F]"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 2"></path><path d="M15 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"></path></svg></div>
+                    <span class="text-[10px] mt-1 whitespace-nowrap text-[#FF4D4F]">阻断</span>
+                  </div>
+                  <!-- Stage 2 -->
+                  <div class="flex flex-col min-w-[240px] bg-white border border-x-0 border-[#E8E8E8] p-4">
+                    <div class="mb-3"><div class="text-sm font-semibold text-[#262626]">阶段2: 收发信人策略</div></div>
+                    <div class="flex flex-col gap-3">
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="senderFilter"><div class="w-1 flex-shrink-0 bg-[#52c41a]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">发信人黑白名单</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="authSpoofing"><div class="w-1 flex-shrink-0 bg-[#f5222d]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">身份认证与仿冒检测</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="behaviorControl"><div class="w-1 flex-shrink-0 bg-[#fa8c16]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">发信行为管控</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="recipientCheck"><div class="w-1 flex-shrink-0 bg-[#fa8c16]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">收信人检测</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="userList"><div class="w-1 flex-shrink-0 bg-[#52c41a]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">用户黑白名单</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                    </div>
+                  </div>
+                  <!-- Arrow 2 -->
+                  <div class="stage-arrow flex flex-col items-center justify-center w-12 bg-white border-y border-[#E8E8E8] self-stretch cursor-help" data-flow="terminate">
+                    <div class="flex items-center justify-center relative"><svg width="24" height="24" viewBox="0 0 24 24" class="text-[#FF4D4F]"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 2"></path><path d="M15 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"></path></svg></div>
+                    <span class="text-[10px] mt-1 whitespace-nowrap text-[#FF4D4F]">阻断</span>
+                  </div>
+                  <!-- Stage 3 -->
+                  <div class="flex flex-col min-w-[240px] bg-white border border-x-0 border-[#E8E8E8] p-4">
+                    <div class="mb-3"><div class="text-sm font-semibold text-[#262626]">阶段3: 内容层</div></div>
+                    <div class="flex flex-col gap-3">
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="attachment"><div class="w-1 flex-shrink-0 bg-[#fa8c16]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">附件安全检测</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="url"><div class="w-1 flex-shrink-0 bg-[#fa8c16]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">URL检测与防护</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="content"><div class="w-1 flex-shrink-0 bg-[#fa8c16]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">内容规则</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="intentEngine"><div class="w-1 flex-shrink-0 bg-[#f5222d]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">意图引擎</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                    </div>
+                  </div>
+                  <!-- Arrow 3 -->
+                  <div class="stage-arrow flex flex-col items-center justify-center w-12 bg-white border-y border-[#E8E8E8] self-stretch cursor-help" data-flow="terminate">
+                    <div class="flex items-center justify-center relative"><svg width="24" height="24" viewBox="0 0 24 24" class="text-[#FF4D4F]"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 2"></path><path d="M15 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"></path></svg></div>
+                    <span class="text-[10px] mt-1 whitespace-nowrap text-[#FF4D4F]">阻断</span>
+                  </div>
+                  <!-- Stage 4: AI -->
+                  <div class="flex flex-col min-w-[240px] bg-[#F6F0FF] border border-x-0 border-[#E8E8E8] p-4" id="stage4-ai">
+                    <div class="mb-3"><div class="text-sm font-semibold text-[#262626]">阶段4: 智能分析层</div></div>
+                    <div class="flex flex-col gap-3">
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[80px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="phishingAgent"><div class="w-1 flex-shrink-0 bg-[#722ed1]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">钓鱼邮件智能体</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="mt-1"><span class="text-[10px] px-1.5 py-0.5 rounded text-white bg-[#722ED1]">AI同步</span></div></div></div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[80px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="impersonationAgent"><div class="w-1 flex-shrink-0 bg-[#722ed1]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">仿冒邮件检测智能体</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="mt-1"><span class="text-[10px] px-1.5 py-0.5 rounded text-white bg-[#722ED1]">AI同步</span></div></div></div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[80px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="retrospectAgent"><div class="w-1 flex-shrink-0 bg-[#722ed1]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">威胁回溯智能体</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="mt-1"><span class="text-[10px] px-1.5 py-0.5 rounded text-white bg-[#FAAD14]">AI异步</span></div></div></div>
+                    </div>
+                  </div>
+                  <!-- Arrow 4 -->
+                  <div class="stage-arrow flex flex-col items-center justify-center w-12 bg-white border-y border-[#E8E8E8] self-stretch cursor-help" data-flow="continue">
+                    <div class="flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-[#52C41A]"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></div>
+                    <span class="text-[10px] mt-1 whitespace-nowrap text-[#52C41A]">继续</span>
+                  </div>
+                  <!-- Stage 5 -->
+                  <div class="flex flex-col min-w-[240px] bg-[#F5F5F5] rounded-r-lg border border-l-0 border-[#E8E8E8] p-4">
+                    <div class="mb-3"><div class="text-sm font-semibold text-[#262626]">阶段5: 综合策略</div></div>
+                    <div class="flex flex-col gap-3">
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="similarDetection"><div class="w-1 flex-shrink-0 bg-[#fa8c16]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">相似检测</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border-2 border-dashed border-[#FA8C16] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="advancedRules"><div class="w-1 flex-shrink-0 bg-[#d9d9d9]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">高级过滤规则</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">去配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                      <div class="policy-card w-[220px] rounded-lg bg-white transition-all duration-200 cursor-pointer overflow-hidden flex h-[60px] border border-[#E8E8E8] hover:border-[#1890FF] hover:bg-[#E6F7FF]" data-policy="mailMarking"><div class="w-1 flex-shrink-0 bg-[#fa8c16]"></div><div class="flex-1 px-3 py-2 flex flex-col justify-between"><div class="flex items-center justify-between"><span class="text-sm font-medium text-[#262626] truncate">邮件标记与声明</span><button class="config-btn text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Legend -->
+              <div class="pt-4 border-t border-[#E8E8E8] bg-[#FAFAFA] -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
+                <div class="space-y-3 text-[13px]">
+                  <div class="flex flex-wrap items-center gap-3" id="legend-actions">
+                    <span class="font-medium text-[#262626] min-w-[60px]">执行动作</span>
+                    <button class="legend-btn flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer hover:bg-[#F6FFED]" data-action="deliver"><span class="w-2.5 h-2.5 rounded-full bg-[#52C41A]"></span><span class="text-[#262626] font-medium">投递</span><span class="text-[#8C8C8C]">·</span><span class="text-[#8C8C8C]">正常投递收件箱</span></button>
+                    <button class="legend-btn flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer hover:bg-[#FFFBE6]" data-action="tagDeliver"><span class="w-2.5 h-2.5 rounded-full bg-[#FAAD14]"></span><span class="text-[#262626] font-medium">标记投递</span><span class="text-[#8C8C8C]">·</span><span class="text-[#8C8C8C]">投递并标记可疑</span></button>
+                    <button class="legend-btn flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer hover:bg-[#FFF7E6]" data-action="quarantine"><span class="w-2.5 h-2.5 rounded-full bg-[#FA8C16]"></span><span class="text-[#262626] font-medium">隔离</span><span class="text-[#8C8C8C]">·</span><span class="text-[#8C8C8C]">移至隔离区待审</span></button>
+                    <button class="legend-btn flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer hover:bg-[#F9F0FF]" data-action="review"><span class="w-2.5 h-2.5 rounded-full bg-[#722ED1]"></span><span class="text-[#262626] font-medium">审核</span><span class="text-[#8C8C8C]">·</span><span class="text-[#8C8C8C]">进入人工审核队列</span></button>
+                    <button class="legend-btn flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer hover:bg-[#FFF1F0]" data-action="block"><span class="w-2.5 h-2.5 rounded-full bg-[#F5222D]"></span><span class="text-[#262626] font-medium">阻断</span><span class="text-[#8C8C8C]">·</span><span class="text-[#8C8C8C]">拒绝并退信</span></button>
+                    <button class="legend-btn flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer hover:bg-[#F5F5F5]" data-action="drop"><span class="w-2.5 h-2.5 rounded-full bg-[#262626]"></span><span class="text-[#262626] font-medium">丢弃</span><span class="text-[#8C8C8C]">·</span><span class="text-[#8C8C8C]">直接删除不通知</span></button>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-4">
+                    <span class="font-medium text-[#262626] min-w-[60px]">名单类型</span>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-[#262626]"></span><span class="text-[#595959]">黑名单（阻断/隔离/丢弃）</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-white border border-[#D9D9D9]"></span><span class="text-[#595959]">白名单（投递/标记投递）</span></div>
+                    <span class="text-[#D9D9D9]">|</span>
+                    <span class="font-medium text-[#262626]">流程控制</span>
+                    <div class="flex items-center gap-1.5"><svg width="16" height="16" viewBox="0 0 16 16" class="text-[#FF4D4F]"><path d="M3 8h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 1.5"></path><path d="M10 5l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.5"></path></svg><span class="text-[#595959]">阻断/丢弃/隔离 → 终止并退出流水线</span></div>
+                    <div class="flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-[#52C41A]"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span class="text-[#595959]">投递/标记投递 → 继续检测</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/execution-flow-module.png" alt="策略执行流程模块">
+          <figcaption>demo 实际渲染截图（1920px）</figcaption>
+        </figure>
+
+        <h4>UI 元素清单</h4>
+        <table class="spec-table">
+          <thead>
+            <tr><th>元素</th><th>类型</th><th>文案/标签</th><th>颜色/样式</th><th>交互行为</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Card 标题</td><td>文本</td><td>策略执行流程</td><td>text-[18px] font-semibold text-[#262626]</td><td>无</td></tr>
+            <tr><td>阶段标题</td><td>文本</td><td>阶段1: IP策略 ~ 阶段5: 综合策略</td><td>text-sm font-semibold text-[#262626]</td><td>无</td></tr>
+            <tr><td>策略卡片</td><td>可点击卡片</td><td>IP频率限制、IP黑白名单等 19 个策略</td><td>左侧 4px 色条；普通卡片 60px 高；AI 卡片 80px 高</td><td>hover 变蓝；点击打开配置抽屉/页面</td></tr>
+            <tr><td>配置按钮</td><td>按钮</td><td>配置 / 去配置 + 箭头图标</td><td>text-[#1890FF] text-[13px]</td><td>点击同样打开对应策略配置</td></tr>
+            <tr><td>阶段间箭头</td><td>图标+文本</td><td>阻断 / 继续</td><td>阻断=红色虚线箭头；继续=绿色实线箭头</td><td>hover 显示 Tooltip 说明</td></tr>
+            <tr><td>AI 同步/异步标签</td><td>徽标</td><td>AI同步（紫）、AI异步（黄）</td><td>10px 圆角 白色文字</td><td>无</td></tr>
+            <tr><td>未配置状态</td><td>视觉样式</td><td>海外邮件检测、高级过滤规则</td><td>橙色虚线边框；左侧灰色色条；按钮文案「去配置」</td><td>点击打开对应配置</td></tr>
+          </tbody>
+        </table>
+
+        <div class="dom-comparison">
+          <h5>DOM 树比对结果</h5>
+          <table class="spec-table">
+            <thead>
+              <tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>根节点</td><td>div[data-slot="card"]</td><td>div#pipeline-preview-root</td><td>✅ 结构一致</td></tr>
+              <tr><td>策略卡片数量</td><td>19</td><td>19</td><td>✅</td></tr>
+              <tr><td>阶段容器数量</td><td>5 个阶段列 + 4 个箭头列</td><td>5 个阶段列 + 4 个箭头列</td><td>✅</td></tr>
+              <tr><td>AI 阶段背景</td><td>bg-[#F6F0FF]</td><td>bg-[#F6F0FF]</td><td>✅</td></tr>
+              <tr><td>综合策略背景</td><td>bg-[#F5F5F5]</td><td>bg-[#F5F5F5]</td><td>✅</td></tr>
+              <tr><td>未配置卡片边框</td><td>border-2 border-dashed border-[#FA8C16]</td><td>border-2 border-dashed border-[#FA8C16]</td><td>✅</td></tr>
+              <tr><td>Tooltip data 属性</td><td>data-slot="tooltip-trigger" data-state="closed"</td><td>已移除（避免冲突）</td><td>⚠️ 已移除不可见属性</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-legend">
+      <h3>2.2 图例区 PipelineLegend</h3>
+      <table class="spec-table">
+        <thead>
+          <tr><th>元信息</th><th>值</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>组件类型</td><td>底部图例栏</td></tr>
+          <tr><td>交互层级数</td><td>1 层（点击图例高亮对应类型策略卡片）</td></tr>
+          <tr><td>i18n key</td><td>pipeline.actionLegend、pipeline.listTypeLegend、pipeline.flowControlLegend 等</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interaction-layer">
+        <h4>交互层级 0：默认渲染与图例点击高亮</h4>
+        <p><strong>触发路径：</strong>页面加载默认显示；点击图例按钮可高亮对应策略卡片。</p>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/legend-block-highlight.png" alt="阻断图例高亮">
+          <figcaption>点击「阻断」图例后，阻断/强制型策略卡片被蓝色 ring 高亮，其余卡片 opacity 降低</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead>
+            <tr><th>图例行</th><th>项</th><th>颜色/图标</th><th>点击后高亮策略类型</th></tr>
+          </thead>
+          <tbody>
+            <tr><td rowspan="6">执行动作</td><td>投递</td><td><span class="color-dot" style="background:#52C41A"></span>绿色</td><td>exception 类型卡片（发信人黑白名单、用户黑白名单）</td></tr>
+            <tr><td>标记投递</td><td><span class="color-dot" style="background:#FAAD14"></span>黄色</td><td>当前 demo 无对应类型策略卡片，点击后全部 dim</td></tr>
+            <tr><td>隔离</td><td><span class="color-dot" style="background:#FA8C16"></span>橙色</td><td>configurable 类型卡片（海外邮件检测、发信行为管控等）</td></tr>
+            <tr><td>审核</td><td><span class="color-dot" style="background:#722ED1"></span>紫色</td><td>ai-async 类型卡片（威胁回溯智能体）</td></tr>
+            <tr><td>阻断</td><td><span class="color-dot" style="background:#F5222D"></span>红色</td><td>blocking / forced 类型卡片（IP频率限制、身份认证与仿冒检测等）</td></tr>
+            <tr><td>丢弃</td><td><span class="color-dot" style="background:#262626"></span>黑色</td><td>blocking 类型卡片（同阻断）</td></tr>
+            <tr><td rowspan="2">名单类型</td><td>黑名单</td><td><span class="color-bar" style="background:#262626"></span>黑色色条</td><td>无点击交互，仅说明</td></tr>
+            <tr><td>白名单</td><td><span class="color-bar" style="background:#fff;border:1px solid #D9D9D9"></span>白色色条</td><td>无点击交互，仅说明</td></tr>
+            <tr><td rowspan="2">流程控制</td><td>终止</td><td>红色虚线箭头</td><td>无点击交互，仅说明</td></tr>
+            <tr><td>继续</td><td>绿色实线箭头</td><td>无点击交互，仅说明</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h5>DOM 树比对结果</h5>
+          <table class="spec-table">
+            <thead>
+              <tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>图例按钮数量</td><td>6 个执行动作按钮</td><td>6 个</td><td>✅</td></tr>
+              <tr><td>高亮 class</td><td>ring-2 ring-[#1890FF] ring-offset-2 border-[#1890FF]</td><td>预览 JS 动态添加</td><td>✅ 行为一致</td></tr>
+              <tr><td>非高亮 dim</td><td>opacity-40</td><td>预览 JS 动态添加</td><td>✅ 行为一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===== 2.3 统一阶段抽屉框架（v2 合并自 filter-rules-pipeline） ===== -->
+    <style>
+      #component-stage-drawer .spec-version{font-weight:600;color:oklch(0.52 0.226 262);}
+      .component-toc .toc-layer-links{font-size:0.75rem;color:#64748b;margin-left:0.6rem;}
+      .component-toc .toc-layer-links a{color:#64748b;font-weight:400;}
+      #component-stage-drawer .interaction-layer{border:1px solid #e5e7eb;border-left:4px solid oklch(0.52 0.226 262);border-radius:0.5rem;padding:1rem 1.25rem;margin:1.5rem 0;background:#fff;}
+      #component-stage-drawer .interaction-layer>h4{color:oklch(0.52 0.226 262);font-size:0.95rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;}
+      #component-stage-drawer .layer-badge{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:oklch(0.52 0.226 262);color:#fff;font-size:0.75rem;font-weight:700;flex-shrink:0;}
+      #component-stage-drawer .trigger-path{background:#f1f5f9;border-radius:0.4rem;padding:0.5rem 0.75rem;margin:0.5rem 0 1rem;font-size:0.8125rem;color:#64748b;}
+      #component-stage-drawer .trigger-path strong{color:#0f172a;}
+      #component-stage-drawer table.layer-index{width:100%;border-collapse:collapse;font-size:0.875rem;margin:1rem 0;}
+      #component-stage-drawer table.layer-index th{background:#f1f5f9;font-weight:600;text-align:left;padding:0.6rem 0.75rem;border:1px solid #e5e7eb;}
+      #component-stage-drawer table.layer-index td{padding:0.6rem 0.75rem;border:1px solid #e5e7eb;vertical-align:top;}
+      #component-stage-drawer table.layer-index td a{color:oklch(0.52 0.226 262);text-decoration:none;font-weight:600;}
+      #component-stage-drawer .dom-comparison table{width:100%;border-collapse:collapse;font-size:0.8125rem;}
+      #component-stage-drawer .dom-comparison th{background:#f1f5f9;font-weight:600;text-align:left;padding:0.5rem 0.75rem;border-bottom:1px solid #e5e7eb;}
+      #component-stage-drawer .dom-comparison td{padding:0.5rem 0.75rem;border-bottom:1px solid #e5e7eb;vertical-align:top;}
+      #component-stage-drawer .dom-comparison h5{margin:0 0 0 0;padding:0.5rem 0;font-size:0.85rem;}
+      #component-stage-drawer .dom-pass{color:oklch(0.5 0.15 150);font-weight:600;} #component-stage-drawer .dom-fail{color:#dc2626;font-weight:600;} #component-stage-drawer .dom-fixed{color:#b45309;font-weight:600;}
+      #component-stage-drawer .legend-chip{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.8rem;margin-right:1rem;}
+      #component-stage-drawer .legend-dot{width:0.6rem;height:0.6rem;border-radius:50%;display:inline-block;}
+      #component-stage-drawer blockquote{border-left:4px solid oklch(0.52 0.226 262);background:#eef2ff;color:#1e293b;padding:0.75rem 1rem;margin:1rem 0;font-size:0.875rem;border-radius:0 0.4rem 0.4rem 0;}
+      #sd-preview .pv-nav{width:100%;display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.75rem;border:none;background:transparent;border-radius:0.5rem;text-align:left;cursor:pointer;margin-bottom:0.2rem;border-left:2px solid transparent;}
+      #sd-preview .pv-nav:hover{background:rgba(0,0,0,.04)} #sd-preview .pv-nav.act{background:#fff;border-left:2px solid #1890FF} #sd-preview .pv-nav.act .pv-nm{color:#1890FF}
+      #sd-preview .pv-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0} #sd-preview .pv-nm{display:block;font-size:0.85rem;font-weight:500} #sd-preview .pv-sub{display:block;font-size:0.7rem;color:#999}
+    </style>
+    <article class="component-spec" id="component-stage-drawer">
+      <h3>2.3 统一阶段抽屉框架 UnifiedStageDrawer ★（v2 新增）</h3>
+      <blockquote>
+        <strong>「统一框架，不同模块有不同信息」</strong>：阶段1/2/3/5 的每张策略卡片点击后，均打开一个<strong>结构一致</strong>的 <code>w-[80vw]</code> 右滑 Sheet。外壳（面包屑头 + 关闭 + 左侧模块导航 + 右侧模块内容 + 折叠柄）在 4 个阶段完全相同；<strong>差异只在</strong>：① 面包屑阶段名；② 左侧模块列表（各带专属副标题摘要）；③ 右侧内容（各模块自有的表格/表单/Tab）。抽屉内嵌各阶段完整策略页（<code>&lt;XxxStrategyPage embedded initialPolicy=... /&gt;</code>）。
+      </blockquote>
+      <table class="spec-table"><tbody>
+        <tr><td>demo 位置</td><td>外壳 <code>strategy-pipeline-page.tsx:2007-2193</code>（4 个 Sheet）；内容 <code>connection-layer-page.tsx</code> / <code>identity-strategy-page.tsx</code> / <code>content-strategy-page.tsx</code> / <code>comprehensive-strategy-page.tsx</code>（均 <code>embedded</code>）</td></tr>
+        <tr><td>状态管理</td><td><code>fullPageDrawerOpen/Policy</code>、<code>identityDrawerOpen/Policy</code>、<code>contentDrawerOpen/Policy</code>、<code>comprehensiveDrawerOpen/Policy</code>（4 组独立 state）</td></tr>
+        <tr><td>交互层级数</td><td>3 层（层级0 抽屉外壳打开=本文件内嵌；层级1·2 IP 模块切换=子文件；层级3 跨阶段变体=子文件）</td></tr>
+        <tr><td>拆分策略</td><td>层级 0 内嵌；层级1·2 → <a href="./layer-1-drawer-ip-modules.html">layer-1-drawer-ip-modules.html</a>；层级 3 → <a href="./layer-2-stage-variants.html">layer-2-stage-variants.html</a></td></tr>
+      </tbody></table>
+
+      <h4>抽屉外壳统一性对照（4 个阶段抽屉）</h4>
+      <table class="spec-table">
+        <thead><tr><th>抽屉</th><th>触发（卡片）</th><th>宽度</th><th>面包屑（阶段名 / 模块名）</th><th>嵌入组件</th></tr></thead>
+        <tbody>
+          <tr><td>IP 抽屉</td><td>ipFrequency/ipFilter/rbl/overseas</td><td><code>w-[80vw]</code></td><td>IP策略 / &lt;模块&gt;</td><td><code>ConnectionLayerPage</code></td></tr>
+          <tr><td>收发信人抽屉</td><td>senderFilter/authSpoofing/behaviorControl/recipientCheck/userList</td><td><code>w-[80vw]</code></td><td>阶段2: 收发信人策略 / &lt;模块&gt;</td><td><code>IdentityStrategyPage</code></td></tr>
+          <tr><td>内容抽屉</td><td>attachment/url/content/intentEngine</td><td><code>w-[80vw]</code></td><td>阶段3: 内容层 / &lt;模块&gt;</td><td><code>ContentStrategyPage</code></td></tr>
+          <tr><td>综合抽屉</td><td>similarDetection/advancedRules/mailMarking</td><td><code>w-[80vw]</code></td><td>阶段5: 综合策略 / &lt;模块&gt;</td><td><code>ComprehensiveStrategyPage</code></td></tr>
+          <tr><td>（阶段4 无抽屉）</td><td>phishing/impersonation/retrospect Agent</td><td>-</td><td>-</td><td><code>router.push('/agent-center/...')</code> 跳转</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span> 交互层级 0：抽屉外壳打开态（以 IP策略 / IP频率限制 为例）</h4>
+        <div class="trigger-path"><strong>触发路径</strong>：首页阶段1「IP频率限制」卡片 → <code>handleConfigClick</code> → <code>setFullPageDrawerPolicy('ipFrequency')</code> + <code>setFullPageDrawerOpen(true)</code> → 80vw Sheet 右滑</div>
+
+        <div class="component-preview" id="sd-preview">
+          <div style="border:1px solid #e8e8e8;border-radius:0.5rem;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12);max-width:960px;background:#fff;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.9rem 1.25rem;border-bottom:1px solid #e8e8e8;">
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span style="color:#1890FF;font-size:1.1rem;">⚙</span>
+                <span style="font-size:1.05rem;font-weight:600;">IP策略</span>
+                <span style="color:#bbb;">/</span>
+                <span style="font-size:0.95rem;color:#666;">IP频率限制</span>
+              </div>
+              <span title="关闭" style="font-size:1.1rem;color:#888;cursor:pointer;">✕</span>
+            </div>
+            <div class="pv-drawer-body" style="display:flex;min-height:340px;">
+              <div style="width:210px;background:#F5F5F5;border-right:1px solid #e8e8e8;padding:0.75rem;flex-shrink:0;">
+                <button class="pv-nav act" onclick="sdSwitch(this,'IP频率限制')"><span class="pv-dot" style="background:#1890FF"></span><span><span class="pv-nm">IP频率限制</span><span class="pv-sub">阈值: 100次/分钟</span></span></button>
+                <button class="pv-nav" onclick="sdSwitch(this,'IP黑白名单')"><span class="pv-dot" style="background:#1890FF"></span><span><span class="pv-nm">IP黑白名单</span><span class="pv-sub">黑名单: 33条 / 白名单: 22条</span></span></button>
+                <button class="pv-nav" onclick="sdSwitch(this,'RBL过滤')"><span class="pv-dot" style="background:#1890FF"></span><span><span class="pv-nm">RBL过滤</span><span class="pv-sub">3个服务器 / 超时5s</span></span></button>
+                <button class="pv-nav" onclick="sdSwitch(this,'海外邮件检测')"><span class="pv-dot" style="background:#bbb"></span><span><span class="pv-nm">海外邮件检测</span><span class="pv-sub">收件 已启用</span></span></button>
+              </div>
+              <div style="flex:1;padding:1.25rem;overflow:auto;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div id="sd-title" style="font-size:1.05rem;font-weight:600;">IP频率限制</div>
+                  <span style="font-size:0.8rem;color:#1890FF;">已启用 ✔</span>
+                </div>
+                <div id="sd-body" style="margin-top:1rem;font-size:0.82rem;color:#555;"></div>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:0.78rem;color:#64748b;margin-top:0.6rem;">👆 点击左侧任一模块：激活态随点切换、右侧标题同步更新（复刻 demo <code>switchToPolicy</code>）。⚠️ demo 中面包屑「/ IP频率限制」<strong>不随左侧切换更新</strong>（D-004），预览如实保留。</p>
+        </div>
+
+        <figure class="screenshot-figure">
+          <img src="./screenshots/ip-drawer-ipfrequency.png" alt="IP策略抽屉 IP频率限制">
+          <figcaption>层级 0 截图：IP策略 / IP频率限制 抽屉（浏览器实测）。demo 标题渲染为「IP频率限**」（i18n 数据损坏，见 §8 差异）</figcaption>
+        </figure>
+
+        <h4>抽屉外壳 UI 元素清单</h4>
+        <table class="spec-table">
+          <thead><tr><th>序号</th><th>区域</th><th>元素</th><th>文案/规则</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>头部</td><td>Settings 图标</td><td>蓝色 <code>#1890FF</code>，20px</td></tr>
+            <tr><td>2</td><td>头部</td><td>阶段名（粗）+ / + 模块名（灰）</td><td>IP策略 / 阶段2: 收发信人策略 / 阶段3: 内容层 / 阶段5: 综合策略</td></tr>
+            <tr><td>3</td><td>头部</td><td>关闭按钮</td><td>XCircle(20px)；亦可点遮罩/ESC 关闭</td></tr>
+            <tr><td>4</td><td>左侧导航</td><td>模块按钮（×N）</td><td><code>w-full flex gap-3 px-3 py-2.5 rounded-lg</code>；状态圆点 + 模块名 + 副标题摘要</td></tr>
+            <tr><td>5</td><td>左侧导航</td><td>激活态</td><td><code>bg-blue-50 border-l-2 border-[#1890FF] text-[#1890FF]</code></td></tr>
+            <tr><td>6</td><td>右侧内容</td><td>模块标题 + 已启用开关</td><td>右上角 Switch（模块级启停）</td></tr>
+            <tr><td>7</td><td>右侧内容</td><td>模块正文</td><td>各模块自有（表格/表单/Tab），见子文件</td></tr>
+          </tbody>
+        </table>
+
+        <h4>左侧模块导航副标题摘要（4 阶段实测）</h4>
+        <table class="spec-table">
+          <thead><tr><th>阶段</th><th>模块（副标题摘要）</th></tr></thead>
+          <tbody>
+            <tr><td>IP策略</td><td>IP频率限制（阈值: 100次/分钟）· IP黑白名单（黑名单: 33条 / 白名单: 22条）· RBL过滤（3个服务器 / 超时5s）· 海外邮件检测（收件 已启用）</td></tr>
+            <tr><td>收发信人策略</td><td>发信人黑白名单（黑名单规则: 3 / 白名单规…）· 身份认证与仿冒检测（SPF/DKIM/DMARC/PTR）· 发信行为管控（频率限制/异常检测）· 收信人检测（数量限制/存在性验证）· 用户黑白名单（黑名单规则: 20 / 白名单…）</td></tr>
+            <tr><td>内容层</td><td>附件安全检测（病毒扫描/沙箱分析/类型…）· URL检测与防护（信誉评估/沙箱分析/仿冒…）· 内容规则（关键词/正则/DLP检测）· 意图引擎（涉黄赌/涉政/钓鱼/垃圾…）</td></tr>
+            <tr><td>综合策略</td><td>相似邮件与主题检测（窗口30分钟 / 阈值80%）· 高级过滤规则（多维度条件组合规则）· 邮件标记与声明（接收标记+外发声明多规…）</td></tr>
+          </tbody>
+        </table>
+
+        <div class="dom-comparison">
+          <h5>🔍 DOM 树比对结果（IP 抽屉外壳 · 预览 vs demo 实测 DOM）</h5>
+          <table>
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>预览</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>role=dialog 直接子节点数</td><td>2（头部 + 主体）</td><td>2</td><td class="dom-pass">✅</td></tr>
+              <tr><td>头部 SheetTitle 文本</td><td>「IP策略」</td><td>IP策略</td><td class="dom-pass">✅</td></tr>
+              <tr><td>面包屑文本</td><td>「IP策略 / IP频率限**」（损坏字符）</td><td>IP策略 / IP频率限制（预览用正确字）</td><td class="dom-fixed">⚠ 修正</td></tr>
+              <tr><td>左侧模块按钮数</td><td>4</td><td>4</td><td class="dom-pass">✅</td></tr>
+              <tr><td>激活按钮 class</td><td><code>… bg-blue-50 … text-bl…</code>（首项激活）</td><td>pv-nav.act（首项激活）</td><td class="dom-pass">✅</td></tr>
+              <tr><td>右侧 IP频率限制表头</td><td>[☐, ⌄, ID, 规则名称, 优先级, IP地址/段, 同时连接, 时间窗口频率, 每日限制, 挂起策略, 到期时间, 状态, 操作]（13列）</td><td>子文件以文字列出同 13 列</td><td class="dom-pass">✅</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h4>交互层级关系图</h4>
+      <div class="mermaid">
+graph LR
+    C["首页策略卡片"] -->|点击 IP 阶段卡| L0["层级0: IP抽屉外壳打开(IP频率限制)"]
+    L0 -->|点左侧模块| L1["层级1·2: IP 4模块切换"]
+    C -->|点阶段2/3/5卡| L3["层级3: 跨阶段变体(同壳)"]
+    L0 -->|关闭/ESC/遮罩| C
+      </div>
+
+      <h4>交互层级详情（层级 1+ 拆分为独立文件）</h4>
+      <table class="layer-index">
+        <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>抽屉外壳打开（IP频率限制）</td><td>点击阶段1 IP频率限制卡片</td><td>上方内嵌</td></tr>
+          <tr><td>1·2</td><td>IP 抽屉左侧模块切换</td><td>抽屉左侧点 IP黑白名单 / RBL过滤 / 海外邮件检测</td><td><a href="./layer-1-drawer-ip-modules.html">查看详情 →</a></td></tr>
+          <tr><td>3</td><td>跨阶段抽屉变体（同壳不同模块）</td><td>点击阶段2/3/5 任一卡片</td><td><a href="./layer-2-stage-variants.html">查看详情 →</a></td></tr>
+        </tbody>
+      </table>
+
+      <h4>与 spec 的补充差异（抽屉相关）</h4>
+      <table class="spec-table">
+        <thead><tr><th>编号</th><th>差异</th><th>影响</th></tr></thead>
+        <tbody>
+          <tr><td>D-003</td><td>i18n 数据损坏：<code>connection.ipFrequencyLimit</code>=「IP频率限**」、<code>pipeline.phase4Comprehensive</code>=「阶段4:综合策**」（zh/th 含替换符 <code>�</code>）</td><td><span class="badge badge-low">中</span> 落地用正确文案</td></tr>
+          <tr><td>D-004</td><td>左侧切换模块后，顶部面包屑「/ 模块名」不同步更新</td><td><span class="badge badge-low">中</span> 建议跟随当前模块</td></tr>
+          <tr><td>D-005</td><td>demo 仅 zh/en/th 三语，implement.md 要求四语内置</td><td><span class="badge badge-low">中</span> 落地补齐</td></tr>
+          <tr><td>D-006</td><td>综合策略「相似检测」卡片名 vs 内容标题「相似邮件与主题检测」命名不一致</td><td><span class="badge badge-low">低</span> 统一命名</td></tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+  <section id="business-logic">
+    <h2>3. 业务逻辑规格</h2>
+    <h3>3.1 阶段与策略映射</h3>
+    <table class="spec-table">
+      <thead>
+        <tr><th>阶段</th><th>策略名称</th><th>类型</th><th>左侧色条</th><th>默认执行动作</th><th>是否可豁免</th></tr>
+      </thead>
+      <tbody>
+        <tr><td rowspan="4">阶段1: IP策略</td><td>IP频率限制</td><td>blocking</td><td>红色 #f5222d</td><td>阻断</td><td>是</td></tr>
+        <tr><td>IP黑白名单</td><td>blocking</td><td>红色 #f5222d</td><td>阻断</td><td>是</td></tr>
+        <tr><td>RBL过滤</td><td>blocking</td><td>红色 #f5222d</td><td>阻断</td><td>是</td></tr>
+        <tr><td>海外邮件检测</td><td>configurable</td><td>灰色 #d9d9d9（未配置）</td><td>隔离/放行</td><td>是</td></tr>
+        <tr><td rowspan="5">阶段2: 收发信人策略</td><td>发信人黑白名单</td><td>exception</td><td>绿色 #52c41a</td><td>跳过后续</td><td>是</td></tr>
+        <tr><td>身份认证与仿冒检测</td><td>forced</td><td>红色 #f5222d</td><td>阻断</td><td>否</td></tr>
+        <tr><td>发信行为管控</td><td>configurable</td><td>橙色 #fa8c16</td><td>隔离</td><td>是</td></tr>
+        <tr><td>收信人检测</td><td>configurable</td><td>橙色 #fa8c16</td><td>隔离</td><td>是</td></tr>
+        <tr><td>用户黑白名单</td><td>exception</td><td>绿色 #52c41a</td><td>跳过后续</td><td>是</td></tr>
+        <tr><td rowspan="4">阶段3: 内容层</td><td>附件安全检测</td><td>configurable</td><td>橙色 #fa8c16</td><td>隔离</td><td>是</td></tr>
+        <tr><td>URL检测与防护</td><td>configurable</td><td>橙色 #fa8c16</td><td>隔离</td><td>是</td></tr>
+        <tr><td>内容规则</td><td>configurable</td><td>橙色 #fa8c16</td><td>隔离</td><td>是</td></tr>
+        <tr><td>意图引擎</td><td>forced</td><td>红色 #f5222d</td><td>强制检测</td><td>否</td></tr>
+        <tr><td rowspan="3">阶段4: 智能分析层</td><td>钓鱼邮件智能体</td><td>ai-sync</td><td>紫色 #722ed1</td><td>同步检测</td><td>否</td></tr>
+        <tr><td>仿冒邮件检测智能体</td><td>ai-sync</td><td>紫色 #722ed1</td><td>同步检测</td><td>否</td></tr>
+        <tr><td>威胁回溯智能体</td><td>ai-async</td><td>紫色 #722ed1</td><td>异步检测</td><td>否</td></tr>
+        <tr><td rowspan="3">阶段5: 综合策略</td><td>相似检测</td><td>configurable</td><td>橙色 #fa8c16</td><td>隔离</td><td>是</td></tr>
+        <tr><td>高级过滤规则</td><td>configurable</td><td>灰色 #d9d9d9（未配置）</td><td>隔离</td><td>是</td></tr>
+        <tr><td>邮件标记与声明</td><td>configurable</td><td>橙色 #fa8c16</td><td>标记</td><td>否</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 阶段间箭头状态规则</h3>
+    <p>箭头由 <code>getStageFlowControl</code> 根据阶段内策略类型推导：</p>
+    <table class="spec-table">
+      <thead>
+        <tr><th>阶段内存在类型</th><th>箭头状态</th><th>颜色/样式</th><th>文案</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>blocking 或 forced</td><td>terminate</td><td>红色虚线箭头</td><td>阻断</td></tr>
+        <tr><td>configurable（无 blocking/forced）</td><td>quarantine</td><td>橙色虚线箭头</td><td>隔离</td></tr>
+        <tr><td>exception（无可配置/阻断）</td><td>continue</td><td>绿色实线箭头</td><td>继续</td></tr>
+        <tr><td>无策略</td><td>continue</td><td>绿色实线箭头</td><td>继续</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.3 产品形态差异</h3>
+    <table class="spec-table">
+      <thead>
+        <tr><th>产品形态</th><th>阶段4 智能分析层</th><th>综合策略阶段编号</th><th>备注</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>云网关 / AI版（capabilities.ai=true）</td><td>显示（钓鱼/仿冒/威胁回溯）</td><td>阶段5</td><td>阶段4 背景色 #F6F0FF</td></tr>
+        <tr><td>传统版（capabilities.ai=false）</td><td>隐藏</td><td>阶段4</td><td>阶段3 后直接接综合策略</td></tr>
+        <tr><td>多租户 + 租户管理员视角</td><td>阶段1 显示锁定占位</td><td>按形态正常编号</td><td>平台统一管控提示 Alert</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/traditional-profile.png" alt="传统版形态">
+      <figcaption>传统版·多租户形态：阶段4 智能分析层隐藏，综合策略重编号为阶段4</figcaption>
+    </figure>
+  </section>
+
+  <section id="interaction">
+    <h2>4. 交互规格</h2>
+    <h3>4.1 策略卡片交互</h3>
+    <table class="spec-table">
+      <thead>
+        <tr><th>交互</th><th>触发方式</th><th>效果</th><th>备注</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Hover</td><td>鼠标悬浮卡片</td><td>边框变蓝 #1890FF，背景变浅蓝 #E6F7FF</td><td>transition-all duration-200</td></tr>
+        <tr><td>Hover Tooltip</td><td>鼠标悬浮卡片</td><td>右侧显示策略/动作/影响说明</td><td>delayDuration=300ms</td></tr>
+        <tr><td>点击卡片/配置按钮</td><td>鼠标点击</td><td>打开对应策略配置抽屉或全页抽屉</td><td>海外邮件检测/高级过滤规则等未配置卡片显示「去配置」</td></tr>
+        <tr><td>图例点击高亮</td><td>点击底部执行动作图例</td><td>对应类型卡片加蓝色 ring，其余 opacity-40</td><td>再次点击取消高亮</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/card-hover-tooltip.png" alt="卡片悬浮 Tooltip">
+      <figcaption>悬浮「IP频率限制」卡片，Tooltip 显示：策略 / 动作：阻断 / 影响：黑名单命中则阻断并终止流程</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/card-click-overseas.png" alt="点击卡片">
+      <figcaption>点击「海外邮件检测」卡片（未配置状态，橙色虚线边框）</figcaption>
+    </figure>
+
+    <h3>4.2 交互状态变化规则</h3>
+    <table class="spec-table">
+      <thead>
+        <tr><th>状态</th><th>视觉表现</th><th>触发条件</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Hover</td><td>border-[#1890FF] bg-[#E6F7FF]</td><td>鼠标悬浮</td></tr>
+        <tr><td>图例高亮</td><td>ring-2 ring-[#1890FF] ring-offset-2 border-[#1890FF]</td><td>点击对应执行动作图例</td></tr>
+        <tr><td>非高亮 dim</td><td>opacity-40</td><td>存在高亮动作且卡片不匹配</td></tr>
+        <tr><td>未配置</td><td>border-2 border-dashed border-[#FA8C16]；左侧灰色色条</td><td>policy.key 在 unconfiguredPolicies 集合中</td></tr>
+        <tr><td>刚保存闪烁</td><td>animate-pulse ring-2 ring-[#52C41A]</td><td>保存配置后 2s 内</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="responsive">
+    <h2>5. 响应式规格</h2>
+    <table class="spec-table">
+      <thead>
+        <tr><th>断点</th><th>行为</th><th>截图</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>≥ 1200px（推荐）</td><td>五阶段横向等高排列，卡片 220px 宽</td><td>见上方 execution-flow-module.png</td></tr>
+        <tr><td>1280px</td><td>整体横向可滚动，底部出现滚动条，阶段标题可能被截断</td><td><img src="./screenshots/responsive-1280px.png" alt="1280px" style="max-width:100%;border:1px solid #e5e7eb;border-radius:4px;"></td></tr>
+        <tr><td>&lt; 1200px</td><td>水平滚动条，内容不被压缩换行</td><td>未单独截图（spec 要求最小宽度 1200px）</td></tr>
+      </tbody>
+    </table>
+    <p>spec 要求最小宽度 1200px，小于该宽度显示水平滚动条；demo 实际使用 <code>min-w-max</code> + <code>overflow-x-auto</code> 实现。</p>
+  </section>
+
+  <section id="i18n">
+    <h2>6. 国际化规格</h2>
+    <table class="spec-table">
+      <thead>
+        <tr><th>语言</th><th>支持状态</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>中文（zh-CN）</td><td>✅ 已支持</td></tr>
+        <tr><td>英文（en）</td><td>✅ demo 已提供 key</td></tr>
+        <tr><td>日文（ja）</td><td>✅ demo 已提供 key</td></tr>
+        <tr><td>韩文（ko）</td><td>✅ demo 已提供 key</td></tr>
+      </tbody>
+    </table>
+    <h4>关键 i18n key 清单</h4>
+    <pre><code>pipeline.executionPipeline
+pipeline.phase1IP / phase2Sender / phase3Content / phase4AI / phase5Comprehensive
+pipeline.ipFrequencyLimit / ipBlackWhiteList / rblFilter / overseasMail
+pipeline.senderBlackWhiteList / authAndSpoofDetection / sendingBehaviorControl / recipientDetection / userBlackWhiteList
+pipeline.attachmentSecurity / urlProtection / contentRules / intentEngine
+pipeline.phishingDetectionAgent / impersonationDetectionAgent / threatRetrospectAgent
+pipeline.similarDetection / advancedRules / mailMarking
+pipeline.aiSync / aiAsync
+pipeline.actionLegend / actionDeliver / actionTagDeliver / actionQuarantineAction / actionReview / actionBlockAction / actionDrop
+pipeline.listTypeLegend / blacklistType / whitelistTypeDesc
+pipeline.flowControlLegend / flowTerminate / flowContinue
+pipeline.configBtn / pipeline.goConfig
+</code></pre>
+  </section>
+
+  <section id="api-mapping">
+    <h2>7. 数据模型与 API 映射</h2>
+    <p>策略执行流程为纯展示组件，数据来源为前端 mock 的 <code>PipelinePolicy</code> 数组，实际落地需对接网关现有统一规则系统。</p>
+    <table class="spec-table">
+      <thead>
+        <tr><th>字段</th><th>类型</th><th>说明</th><th>是否来自统一规则系统</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>priority</td><td>number</td><td>优先级编号</td><td>是</td></tr>
+        <tr><td>key</td><td>string</td><td>策略唯一标识</td><td>是</td></tr>
+        <tr><td>nameKey</td><td>string</td><td>国际化 key</td><td>前端维护</td></tr>
+        <tr><td>stage</td><td>number</td><td>阶段 1~5</td><td>前端按 key 分组</td></tr>
+        <tr><td>type</td><td>blocking | forced | exception | configurable | ai-sync | ai-async</td><td>策略类型，决定色条与图例高亮</td><td>是（需规则系统暴露）</td></tr>
+        <tr><td>href</td><td>string</td><td>点击后跳转或抽屉内嵌页面路由</td><td>前端维护</td></tr>
+        <tr><td>exemptedBy / forcedBy</td><td>string</td><td>被例外规则影响</td><td>是（例外规则模块）</td></tr>
+        <tr><td>todayHits / todayBlocked / todayExempted</td><td>number</td><td>今日统计数据</td><td>demo 当前隐藏，spec 要求展示</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>8. 与 spec 的差异标注</h2>
+    <table class="spec-table">
+      <thead>
+        <tr><th>#</th><th>spec 原文</th><th>demo 实际渲染</th><th>严重度</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>策略卡片显示优先级标签、今日命中/阻断/豁免数等统计信息</td><td>当前 demo 策略卡片为极简版，仅显示策略名称 + 配置按钮，无优先级标签和统计数据</td><td><span class="badge badge-medium">中</span></td><td>spec 功能点 10 要求统计信息，demo 当前未展示</td></tr>
+        <tr><td>2</td><td>页面顶部应有「新建例外规则」「导入/导出」按钮</td><td>当前 demo 顶部仅「刷新」按钮，无新建例外/导入/导出</td><td><span class="badge badge-high">高</span></td><td>例外规则模块位于页面下方，本首页仅覆盖策略执行流程模块，故未在本模块体现</td></tr>
+        <tr><td>3</td><td>阶段标题应显示「阶段0：例外检查」</td><td>demo 无阶段0 例外检查列，例外规则以表格形式位于流水线下方（不在本截图范围内）</td><td><span class="badge badge-medium">中</span></td><td>本模块只覆盖策略执行流程五阶段卡片</td></tr>
+        <tr><td>4</td><td>策略卡片被豁免时显示黄色虚线边框，被强制时显示红色实线边框</td><td>demo 当前未渲染 exemptedBy/forcedBy 的边框效果（hover 例外规则行才高亮相关卡片，本模块未覆盖）</td><td><span class="badge badge-medium">中</span></td><td>需结合例外规则列表交互才可见</td></tr>
+        <tr><td>5</td><td>配置抽屉固定宽度 480px</td><td>demo 当前 IP策略抽屉 800px，收发信人/内容/综合策略抽屉 80vw</td><td><span class="badge badge-low">低</span></td><td>spec 中 480px 与 demo 实际不一致，需确认最终采用尺寸</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>9. 需确认事项</h2>
+    <table class="spec-table">
+      <thead>
+        <tr><th>#</th><th>问题</th><th>影响</th><th>建议</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>策略卡片的优先级标签与今日命中/阻断/豁免统计数据是否要在本模块展示？</td><td>影响卡片高度、信息密度、是否需要新增 API</td><td>若需要，需规则系统按 key 聚合统计；若不需要，保持 demo 极简卡片</td></tr>
+        <tr><td>2</td><td>配置抽屉宽度统一为 480px 还是沿用 demo 当前 800px / 80vw？</td><td>影响落地布局</td><td>请产品确认</td></tr>
+        <tr><td>3</td><td>传统版隐藏智能分析层后，意图引擎（forced）仍位于阶段3，是否仍应展示？</td><td>影响策略类型与阶段分组</td><td>demo 当前传统版仍展示意图引擎于阶段3，需确认</td></tr>
+        <tr><td>4</td><td>阶段0 例外检查是否需要在策略执行流程卡片中单独展示一列？</td><td>影响整体布局</td><td>spec 信息架构含阶段0，demo 未体现</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+
+    // 图例高亮交互（mock demo 行为）
+    document.addEventListener('DOMContentLoaded', function() {
+      const legendBtns = document.querySelectorAll('.legend-btn');
+      const cards = document.querySelectorAll('.policy-card');
+      let activeAction = null;
+
+      const actionToTypes = {
+        deliver: ['exception'],
+        tagDeliver: [],
+        quarantine: ['configurable'],
+        review: ['ai-async'],
+        block: ['blocking', 'forced'],
+        drop: ['blocking']
+      };
+
+      // 给卡片补充 data-type 用于高亮匹配
+      const typeByKey = {
+        ipFrequency:'blocking', ipFilter:'blocking', rbl:'blocking', overseas:'configurable',
+        senderFilter:'exception', authSpoofing:'forced', behaviorControl:'configurable', recipientCheck:'configurable', userList:'exception',
+        attachment:'configurable', url:'configurable', content:'configurable', intentEngine:'forced',
+        phishingAgent:'ai-sync', impersonationAgent:'ai-sync', retrospectAgent:'ai-async',
+        similarDetection:'configurable', advancedRules:'configurable', mailMarking:'configurable'
+      };
+      cards.forEach(c => {
+        const key = c.getAttribute('data-policy');
+        c.setAttribute('data-type', typeByKey[key] || '');
+      });
+
+      legendBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const action = this.getAttribute('data-action');
+          if (activeAction === action) {
+            activeAction = null;
+            cards.forEach(c => { c.classList.remove('ring-2','ring-[#1890FF]','ring-offset-2','border-[#1890FF]','opacity-40'); c.style.opacity=''; });
+            legendBtns.forEach(b => { b.classList.remove('ring-1','ring-[#1890FF]','bg-opacity-20'); });
+          } else {
+            activeAction = action;
+            const types = actionToTypes[action] || [];
+            cards.forEach(c => {
+              const t = c.getAttribute('data-type');
+              if (types.includes(t)) {
+                c.classList.add('ring-2','ring-[#1890FF]','ring-offset-2','border-[#1890FF]');
+                c.style.opacity = '1';
+              } else {
+                c.classList.remove('ring-2','ring-[#1890FF]','ring-offset-2','border-[#1890FF]');
+                c.style.opacity = '0.4';
+              }
+            });
+            legendBtns.forEach(b => { b.classList.remove('ring-1','ring-[#1890FF]'); });
+            this.classList.add('ring-1','ring-[#1890FF]');
+          }
+        });
+      });
+
+      // 配置按钮点击 mock：显示一个非 alert 的 toast
+      const previewRoot = document.getElementById('pipeline-preview-root');
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-4 right-4 bg-gray-900 text-white text-sm px-4 py-2 rounded shadow-lg hidden z-50';
+      document.body.appendChild(toast);
+      previewRoot.querySelectorAll('.config-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const card = this.closest('.policy-card');
+          const name = card.querySelector('span.truncate').textContent;
+          toast.textContent = '打开「' + name + '」配置抽屉（mock）';
+          toast.classList.remove('hidden');
+          setTimeout(() => toast.classList.add('hidden'), 1500);
+        });
+      });
+
+      // 卡片点击 mock
+      cards.forEach(card => {
+        card.addEventListener('click', function() {
+          const name = this.querySelector('span.truncate').textContent;
+          toast.textContent = '打开「' + name + '」配置抽屉（mock）';
+          toast.classList.remove('hidden');
+          setTimeout(() => toast.classList.add('hidden'), 1500);
+        });
+      });
+    });
+
+    // 2.3 统一阶段抽屉框架：左侧模块切换（复刻 demo switchToPolicy；面包屑不动=D-004）
+    function sdSwitch(btn, mod){
+      var wrap = btn.closest('.pv-drawer-body');
+      wrap.querySelectorAll('.pv-nav').forEach(function(b){ b.classList.remove('act'); });
+      btn.classList.add('act');
+      var t = document.getElementById('sd-title'); if(t) t.textContent = mod;
+      var body = document.getElementById('sd-body');
+      if(body){
+        var hint = {
+          'IP频率限制':'说明横幅 + 工具行(搜索/全部/+新增规则/批量导入/导出) + 13列规则表（ID·规则名称·优先级·IP地址段·同时连接·时间窗口频率·每日限制·挂起策略·到期时间·状态·操作）',
+          'IP黑白名单':'黑名单/白名单 Tab + 规则表（IP地址段·操作[阻断/隔离/丢弃/审核]·状态·修改时间·操作）+ 分页「共 33 条」',
+          'RBL过滤':'RBL 服务器列表（3个服务器 / 超时5s）+ 查询与命中配置',
+          '海外邮件检测':'收件/发件方向海外邮件检测配置（当前收件已启用；首页卡为未配置态）'
+        }[mod] || '';
+        body.innerHTML = '<div style="border:1px solid #eee;border-radius:0.4rem;padding:0.6rem;color:#666;"><b>'+mod+'</b> 模块内容：'+hint+' —— 各模块完整规格见 <a href="./layer-1-drawer-ip-modules.html">layer-1-drawer-ip-modules.html</a>。</div>';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+      var a = document.querySelector('#sd-preview .pv-nav.act'); if(a) sdSwitch(a, 'IP频率限制');
+    });
+  </script>
+  <style>.spec-version{font-weight:600;color:oklch(0.52 0.226 262);} #version-history{margin:1.5rem 0;}</style>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "module": "filter-rules-pipeline-rbl-filter",
+  "current_version": 2,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-10",
+      "demo_commit": "legacy",
+      "spec_commit": "legacy-comparison-only",
+      "summary": "初版：RBL 策略卡片、配置抽屉、灰名单入口与两种灰名单模式，包含当时的 agent-browser 截图和 DOM 对比。"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-21",
+      "demo_commit": "6f34f80",
+      "spec_commit": "not-used",
+      "summary": "按用户描述、历史对话与 demo 更新默认配置单一可信源、DNSBL 必填/格式/去重校验、超时 1–30 秒钳制、服务器删除二次确认和灰名单动作联动；新增 L5/L6 可交互层、5 产品形态 × 2 管理员视角矩阵，并逐项复核 D1–D13、Q1–Q9。已用 agent-browser 对新增状态、灰名单联动及 10 组产品/角色组合完成真实 DOM 对比与截图。"
+    }
+  ]
+}

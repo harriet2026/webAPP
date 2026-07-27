@@ -6,7 +6,7 @@ import { resolveSecurityScope, type SecurityScope } from '@/lib/security-scope';
 export function useSecurityScope(
   scopeTenantId: number | null,
 ): SecurityScope & { scopedRequest: ApiRequestFn } {
-  const { isSystemAdmin, selectedTenantId, user } = useAuth();
+  const { isSystemAdmin, isTenantAdmin, selectedTenantId, user } = useAuth();
   const { capabilities, viewer } = useProductForm();
 
   const scope = resolveSecurityScope({
@@ -15,6 +15,7 @@ export function useSecurityScope(
     capabilitiesLoaded: capabilities !== null,
     viewer,
     isSystemAdmin,
+    isTenantAdmin,
     selectedTenantId,
     userTenantId: user?.tenant_id ?? null,
   });

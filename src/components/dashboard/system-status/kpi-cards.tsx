@@ -119,18 +119,22 @@ export function KpiCards({ data, showInfra }: KpiCardsProps) {
       icon: Server,
       href: '/monitoring/infrastructure',
       ctaKey: 'nodes',
-      value: `${data.nodesOnline}/${data.nodesTotal}`,
-      sub: <>{allOnline ? t('nodesNormal') : t('nodesIssue')}</>,
+      // GT-12549: 节点数据源降级（TSDB 不可用/指标未初始化）时如实展示
+      // "数据源不可用"，不渲染伪 0/0。
+      value: data.nodesDegraded ? '--' : `${data.nodesOnline}/${data.nodesTotal}`,
+      sub: <>{data.nodesDegraded ? t('nodesUnavailable') : allOnline ? t('nodesNormal') : t('nodesIssue')}</>,
       badge: (
         <Badge
           data-testid="system-status-kpi-badge-nodes"
           className={
-            allOnline
+            data.nodesDegraded
+              ? 'rounded-md bg-warning-soft text-warning'
+              : allOnline
               ? 'rounded-md bg-success/10 text-success'
               : 'rounded-md bg-danger-soft text-danger'
           }
         >
-          {allOnline ? t('allOnline') : t('nOffline', { n: nOffline })}
+          {data.nodesDegraded ? t('nodesUnavailable') : allOnline ? t('allOnline') : t('nOffline', { n: nOffline })}
         </Badge>
       ),
     });

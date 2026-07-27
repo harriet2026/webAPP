@@ -1,0 +1,27 @@
+{
+  "module": "filter-rules-pipeline-overseas",
+  "title": "海外邮件检测",
+  "route": "/filter-rules/connection",
+  "component": "connection-layer-page.tsx (renderOverseasConfig / GeoIP Sheet)",
+  "current_version": 3,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-17",
+      "demo_commit": "14c2447",
+      "summary": "首次生成：覆盖方向配置、GeoIP 表格与新增/编辑 Sheet；记录 D-01/D-02 和 Q-01 至 Q-04。"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-21",
+      "demo_commit": "f98e029",
+      "summary": "依据用户描述复核分方向配置、四种动作、摘要联动和 GeoIP 配套能力；当时判定 D-01/D-02、Q-01/Q-02/Q-03 已解决，Q-04 未解决。"
+    },
+    {
+      "version": 3,
+      "generated_at": "2026-07-21",
+      "demo_commit": "6f34f80",
+      "summary": "以用户描述、历史对话和当前 demo 为准，使用 agent-browser 真实操作方向状态、GeoIP 校验/搜索/分页/删除/导入/导出，并完成 5 种产品形态 × 2 种请求角色矩阵。新增截图 19-36 与交互层 2-5。逐项结论：D-01/D-02/D-04、Q-01/Q-02/Q-03 已解决；D-03（新增/编辑保存未写回列表）和 Q-04（RFC1918 后端处理口径）未解决。"
+    }
+  ]
+}

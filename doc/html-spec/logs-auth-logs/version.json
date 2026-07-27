@@ -1,0 +1,13 @@
+{
+  "module": "logs-auth-logs",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-14",
+      "demo_commit": "804efb9",
+      "spec_commit": "8db3a98",
+      "summary": "初版：统计概览、7 项筛选、10 列日志表、详情抽屉（7 类失败原因 → 处置建议映射）；标注 9 处差异（重点：暴力破解面板组件已写但未挂载、租户视角未裁剪数据、成功率小数位）；网关 /api/v1/auth-attempts + /stats 已存在"
+    }
+  ]
+}

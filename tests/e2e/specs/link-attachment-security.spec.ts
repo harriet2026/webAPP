@@ -51,9 +51,9 @@ test.describe('Link & Attachment Security', () => {
     await receive.click();
     await expect(receive).toHaveAttribute('aria-pressed', 'true');
 
-    await page.getByRole('combobox', { name: '时间范围' }).click();
-    await page.getByRole('option', { name: '近30日' }).click();
-    await expect(page.getByRole('combobox', { name: '时间范围' })).toContainText('近30日');
+    const range = page.getByRole('button', { name: '近30日', exact: true });
+    await range.click();
+    await expect(range).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('attachment KPI and tab rebuild the attachment analysis view', async ({ authenticatedPage: page }) => {
@@ -93,7 +93,7 @@ test.describe('Link & Attachment Security ticket contracts (hermetic mock)', () 
     await installMockIdentity(page);
     await page.goto(PAGE_PATH);
 
-    const selector = page.getByTestId('tenant-selector');
+    const selector = page.getByTestId('tenant-scope-selector');
     await expect(selector).toBeVisible();
     await selector.click();
     await page.getByRole('option', { name: '示例租户 A' }).click();

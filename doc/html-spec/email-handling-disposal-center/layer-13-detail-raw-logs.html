@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级13：详情抽屉 · 模块三 原始日志 - 邮件处置中心 HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .component-preview { background:#fff; }
+  .pass { color:#15803d; font-weight:600; }
+  .bad { color:#b91c1c; font-weight:600; }
+  .warn { color:#a16207; font-weight:600; }
+  .diff-block { background:#fef2f2; border:1px solid #fecaca; border-radius:.5rem; padding:1rem 1.25rem; margin:1rem 0; }
+  .diff-block h5 { color:#b91c1c; margin:0 0 .5rem; }
+  .diff-block ul { margin:.25rem 0 0 1.1rem; }
+  .diff-block li { margin:.35rem 0; color:#7f1d1d; }
+  .swatch { display:inline-block; width:.7rem; height:.7rem; border-radius:2px; vertical-align:middle; margin-right:.3rem; }
+</style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#component-2-4">← 返回主文件</a><a href="./layer-12-detail-security-analysis.html">上一层：安全分析</a><a href="./layer-14-detail-dialogs.html">下一层：详情内弹窗组 →</a></nav>
+<header class="spec-header">
+  <h1>交互层级 13（详情层级4）：模块三 原始日志</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.4 详情抽屉 → <code>RawLogsSection</code>（<code>components/mail-investigation/raw-logs-section.tsx</code>，300 行）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html#component-2-4">index.html#component-2-4</a></td></tr>
+    <tr><td>触发路径</td><td>抽屉左侧导航「原始日志」（<code>#section-rawlogs</code>）</td></tr>
+    <tr><td>地面真值</td><td>matrix（多投信）：<code>live/matrix-section-rawlogs.html</code> + <code>matrix-shot-rawlogs.png</code></td></tr>
+  </table>
+</header>
+<section>
+  <h2>预览与截图</h2>
+  <div class="preview-hint">在搜索框输入可实时过滤日志并高亮命中（试试输入 <code>AUTH</code> 或 <code>phishing</code>）；点击标题栏折叠；点「复制全部」看按钮态切换。</div>
+  <div class="component-preview" data-preview="rawlogs"><div id="section-rawlogs" class="p-6"><h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code w-5 h-5 text-slate-600"><path d="M10 12.5 8 15l2 2.5"></path><path d="m14 12.5 2 2.5-2 2.5"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path></svg>原始日志</h3><div class="mt-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700"><div class="flex items-center justify-between cursor-pointer"><h4 class="text-sm font-semibold flex items-center gap-2">原始日志<span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 gap-1 text-foreground text-xs">22 条</span></h4><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground rounded-md gap-1.5 h-7 w-7 p-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up w-4 h-4"><path d="m18 15-6-6-6 6"></path></svg></button></div><div class="mt-4"><div class="flex items-center gap-3 mb-4"><div class="relative flex-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input data-slot="input" class="border-input w-full min-w-0 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm pl-9 h-9 bg-white dark:bg-gray-800" placeholder="搜索日志内容..." value=""></div><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium transition-all border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground rounded-md gap-1.5 px-3 h-9 text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4 mr-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>下载</button></div><div class="rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600"><div class="bg-slate-800 text-sm font-mono max-h-[400px] overflow-y-auto"><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">1</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-emerald-400">2026-05-29 02:30:45.000 [CONNECT] SMTP connection established from 203.0.113.45 (美国)</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">2</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-blue-400">2026-05-29 02:30:45.111 [INFO] Email received from ceo-fake@company-security.com</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">3</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-emerald-400">2026-05-29 02:30:45.222 [SCAN] Scanning email to finance@company.com, hr@company.com, admin@company.com, user1@company.com, user2@company.com</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">4</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-emerald-400">2026-05-29 02:30:45.333 [SCAN] Threat detection engine initialized</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">5</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-purple-400">2026-05-29 02:30:45.444 [ANALYZE] Subject line analysis: Q2财务报表 - 紧急审批（多投信）</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">6</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-purple-400">2026-05-29 02:30:45.555 [AUTH] SPF check: softfail</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">7</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-purple-400">2026-05-29 02:30:45.666 [AUTH] DKIM check: fail</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">8</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-purple-400">2026-05-29 02:30:45.777 [AUTH] DMARC check: pass</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">9</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-emerald-400">2026-05-29 02:30:46.000 [SCAN] Attachment analysis: 1 file(s) detected</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">10</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-emerald-400">2026-05-29 02:30:46.111 [SCAN] Attachment scan completed: No malware detected</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">11</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-emerald-400">2026-05-29 02:30:46.222 [SCAN] URL analysis: https://example.com/login</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">12</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-amber-400">2026-05-29 02:30:46.333 [WARN] Suspicious URL detected: https://phishing-site.com/verify</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">13</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-red-500">2026-05-29 02:30:46.444 [THREAT] Multiple threat indicators identified</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">14</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-cyan-400">2026-05-29 02:30:46.555 [DECISION] Performing decision analysis.</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">15</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-blue-400">2026-05-29 02:30:46.666 [ENGINE_1] 意图检测引擎: 威胁</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">16</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-blue-400">2026-05-29 02:30:46.777 [ENGINE_2] 深度内容分析: 可疑</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">17</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-blue-400">2026-05-29 02:30:46.888 [ENGINE_3] AI-URL势能检测: 钓鱼</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">18</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-blue-400">2026-05-29 02:30:46.999 [ENGINE_4] 本地策略检查: 通过</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">19</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-orange-400">2026-05-29 02:30:47.111 [ACTION] Email marked as malicious</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">20</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-orange-400">2026-05-29 02:30:47.222 [ACTION] Email quarantined</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">21</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-orange-400">2026-05-29 02:30:47.333 [ACTION] Email moved to quarantine zone</pre></div><div class="flex hover:bg-slate-700/50 transition-colors"><span class="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">22</span><pre class="flex-1 py-1.5 px-3 whitespace-pre-wrap break-all text-blue-400">2026-05-29 02:30:47.444 [INFO] Processing completed. Total time: 599ms</pre></div></div></div><div class="mt-3 flex items-center justify-between"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium transition-all hover:bg-accent hover:text-accent-foreground rounded-md gap-1.5 px-3 h-8 text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy w-4 h-4 mr-1"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>复制全部</button></div></div></div></div></div>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/detail-layer-4-raw-logs.png" alt="原始日志 · 多投信实时截图">
+    <figcaption>实时截图（matrix 多投信 · 22 条）：可折叠标题栏 + 「22 条」徽标 + 搜索框 + 下载 + 行号列 + 按级别着色的日志行 + 复制全部。</figcaption>
+  </figure>
+
+  <h3>日志级别配色（<code>logLevelColors</code>）</h3>
+  <table class="spec-table">
+    <thead><tr><th>级别 tag</th><th>Tailwind class</th><th>色</th><th>出现示例</th></tr></thead>
+    <tbody>
+      <tr><td>CONNECT / SCAN</td><td><code>text-emerald-400</code></td><td><span class="swatch" style="background:#34d399"></span>绿</td><td>SMTP 连接 / 扫描</td></tr>
+      <tr><td>INFO / ENGINE_1~4 / DELIVER</td><td><code>text-blue-400</code></td><td><span class="swatch" style="background:#60a5fa"></span>蓝</td><td>收信 / 检测引擎 / 投递</td></tr>
+      <tr><td>ANALYZE / AUTH</td><td><code>text-purple-400</code></td><td><span class="swatch" style="background:#c084fc"></span>紫</td><td>主题分析 / SPF·DKIM·DMARC</td></tr>
+      <tr><td>WARN</td><td><code>text-amber-400</code></td><td><span class="swatch" style="background:#fbbf24"></span>琥珀</td><td>可疑 URL</td></tr>
+      <tr><td>THREAT / ALERT / ERROR</td><td><code>text-red-500 / red-400</code></td><td><span class="swatch" style="background:#ef4444"></span>红</td><td>威胁指标 / 恶意附件</td></tr>
+      <tr><td>DECISION / POLICY</td><td><code>text-cyan-400</code></td><td><span class="swatch" style="background:#22d3ee"></span>青</td><td>决策分析</td></tr>
+      <tr><td>ACTION</td><td><code>text-orange-400</code></td><td><span class="swatch" style="background:#fb923c"></span>橙</td><td>标记 / 隔离等最终动作</td></tr>
+      <tr><td>未匹配级别</td><td><code>text-gray-400</code></td><td><span class="swatch" style="background:#9ca3af"></span>灰</td><td>兜底</td></tr>
+    </tbody>
+  </table>
+
+  <h3>元素清单</h3>
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>文案 / 图标</th><th>行为 / 说明</th><th>i18n（zh / en）</th></tr></thead>
+    <tbody>
+      <tr><td>区块标题</td><td>FileCode 图标 + 「原始日志」</td><td><code>h3</code>，与其它模块标题同款</td><td>—（硬编码）</td></tr>
+      <tr><td>卡片标题栏</td><td>「原始日志」+「N 条」徽标（<code>Badge variant="outline"</code>）+ 右侧 Chevron 按钮</td><td><strong>整行可点折叠</strong>（<code>cursor-pointer</code>，<code>onClick=setExpanded</code>）：展开显示 <code>ChevronUp</code>，折叠显示 <code>ChevronDown</code> 并隐藏正文</td><td>原始日志 / Raw Logs；N 条 / N entries</td></tr>
+      <tr><td>搜索框</td><td>Search 图标 + 占位「搜索日志内容...」</td><td><strong>实时过滤</strong>（<code>filteredLogs</code> useMemo，小写子串匹配）；命中词用 <code>&lt;mark class="bg-yellow-300"&gt;</code> 黄色高亮；无匹配显示「没有匹配的日志记录」</td><td>搜索日志内容... / Search log content...</td></tr>
+      <tr><td>下载按钮</td><td>Download 图标 +「下载」（<code>variant="outline"</code>）</td><td><span class="pass">已实现</span>：<code>handleDownload</code> 用 <code>Blob</code> 导出 <code>email-log-{id}-{date}.log</code>（导出 <strong>全部</strong> <code>rawLogs</code>，不受搜索过滤影响）</td><td>下载 / Download</td></tr>
+      <tr><td>日志查看器</td><td>深色 <code>bg-slate-800</code> 等宽字体，<code>max-h-[400px]</code> 可滚动</td><td>每行 = 行号列（<code>w-10</code> 右对齐 <code>select-none</code> 带右分隔线）+ <code>pre</code> 正文；hover <code>bg-slate-700/50</code></td><td>—</td></tr>
+      <tr><td>行号列</td><td>1..N</td><td><span class="pass">存在</span>；按 <strong>过滤后可见行</strong>重新编号（<code>index+1</code>）</td><td>—</td></tr>
+      <tr><td>复制全部</td><td>Copy 图标 +「复制全部」（<code>variant="ghost"</code>）</td><td><code>handleCopyAll</code> 写剪贴板（复制 <strong>filteredLogs</strong>）；点击后切换 Check 图标 +「已复制」，<strong>2s 后复原</strong></td><td>复制全部 / Copy All；已复制 / Copied</td></tr>
+      <tr><td>搜索计数（条件）</td><td>「找到 X / N 条记录」</td><td>底部右侧，<strong>仅在搜索框非空时</strong>渲染（<code>{searchQuery &amp;&amp; ...}</code>）</td><td>找到 X / N 条记录 / Found X / N entries</td></tr>
+      <tr><td class="warn">数据来源</td><td class="warn">前端 mock，非真实日志</td><td class="warn"><code>generateMockRawLogs(log)</code> 由该行邮件字段拼接后 <code>.sort()</code>（字典序），条数随邮件属性（附件/URL/二维码/投递状态）动态变化</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="diff-block">
+    <h5>差异 / 实测「缺陷」记录（源码 vs 实时渲染）</h5>
+    <ul>
+      <li><strong>本层旧稿的分析表判断相反，已修正</strong>：旧稿称「行号列、语法高亮、搜索命中黄色高亮」为「PRD 要求但 demo 无」、且 DOM 比对写「行号列 不存在」。<strong>实际 demo 三者都有</strong>——行号列（<code>span.w-10</code>）、按级别语法着色（<code>logLevelColors</code>）、命中黄色高亮（<code>&lt;mark class="bg-yellow-300"&gt;</code>）均已实现。</li>
+      <li><strong>旧稿称「下载 未实现」，与实际不符</strong>：<code>handleDownload</code> 已用 <code>Blob</code> + <code>a[download]</code> 落地导出（文件名 <code>email-log-{id}-{date}.log</code>）。</li>
+      <li><strong>徽标计数用 <code>rawLogs.length</code>（总数），不随搜索变化</strong>；变化的是底部「找到 X / N 条记录」。</li>
+      <li><strong>复制/下载范围不同</strong>：复制全部 = <code>filteredLogs</code>（受搜索影响）；下载 = <code>rawLogs</code>（永远全量）。此不一致来自源码，如实记录。</li>
+      <li>日志为前端 <code>generateMockRawLogs</code> 生成并 <code>.sort()</code> 字典序排列（非时间序保证）；条数因邮件而异（matrix 多投=22 条，single 单投=17 条）。抽屉面包屑第三段仍渲染原始 key <code>common.details</code>（见 layer-10/11）。</li>
+    </ul>
+  </div>
+
+  <div class="dom-comparison">
+  <h5>DOM 树比对结果（预览 HTML ↔ 实时 matrix DOM）</h5>
+  <table class="spec-table">
+    <thead><tr><th>比对项</th><th>实时 demo DOM</th><th>预览 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>区块根节点</td><td><code>div#section-rawlogs.p-6</code></td><td>同</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>卡片根</td><td><code>div.mt-6.p-4.bg-gray-50…rounded-lg.border</code></td><td>同</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>元素节点总数</td><td>99（含根）</td><td>99</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>徽标文案</td><td>「22 条」</td><td>「22 条」</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>折叠 Chevron</td><td>展开态 <code>lucide-chevron-up</code></td><td>同（展开态）</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>搜索框</td><td>1，<code>placeholder="搜索日志内容..."</code></td><td>同</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>按钮</td><td>下载（outline）/ 复制全部（ghost）</td><td>同</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>日志行数</td><td>22（多投信 matrix）</td><td>22</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>行号列</td><td><span class="pass">存在</span>（<code>span.w-10…border-r</code>）</td><td>存在</td><td class="pass">✅ 一致（已修正旧稿误判）</td></tr>
+      <tr><td>级别着色</td><td>emerald/blue/purple/amber/red/cyan/orange</td><td>同（逐行 class 一致）</td><td class="pass">✅ 一致</td></tr>
+      <tr><td>搜索计数节点</td><td>初始不渲染（<code>searchQuery</code> 为空）</td><td>预览由 JS 动态插入</td><td class="pass">✅ 一致</td></tr>
+    </tbody>
+  </table>
+  <p class="preview-hint">说明：预览为精简过 Tailwind 工具类的静态 DOM（1:1 保留结构类与文案）；上表按结构类与关键文案比对。</p>
+</div>
+</section>
+<script src="../assets/disposal-preview.js"></script>
+<script>
+/* 原始日志预览的最小交互复刻：折叠 / 实时搜索过滤+高亮 / 复制全部态切换 / 下载 */
+(function () {
+  var root = document.querySelector('.component-preview[data-preview="rawlogs"]');
+  if (!root) return;
+
+  var header  = root.querySelector('.cursor-pointer');
+  var body    = header ? header.nextElementSibling : null;      // <div class="mt-4">
+  var chevron = header ? header.querySelector('button svg') : null;
+  var input   = root.querySelector('input[placeholder="搜索日志内容..."]');
+  var viewer  = root.querySelector('.bg-slate-800');
+  var bottom  = root.querySelector('.mt-3.flex');
+  var copyBtn = bottom ? bottom.querySelector('button') : null;
+  var dlBtn   = root.querySelectorAll('button')[1];            // 搜索栏里的下载按钮
+  if (!viewer) return;
+
+  // 采集原始行（textContent + 颜色 class），作为过滤/高亮的事实源
+  var rows = Array.prototype.slice.call(viewer.querySelectorAll(':scope > div.flex'));
+  var LINES = rows.map(function (r) {
+    var pre = r.querySelector('pre');
+    return { text: pre.textContent, color: pre.className };
+  });
+
+  var CHEV_UP   = 'm18 15-6-6-6 6';
+  var CHEV_DOWN = 'm6 9 6 6 6-6';
+
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+  function render(q) {
+    var query = (q || '').trim().toLowerCase();
+    var matched = LINES.filter(function (l) {
+      return !query || l.text.toLowerCase().indexOf(query) !== -1;
+    });
+    viewer.innerHTML = '';
+    if (matched.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'p-4 text-center text-gray-400';
+      empty.textContent = '没有匹配的日志记录';
+      viewer.appendChild(empty);
+    } else {
+      matched.forEach(function (l, i) {
+        var row = document.createElement('div');
+        row.className = 'flex hover:bg-slate-700/50 transition-colors';
+        var num = document.createElement('span');
+        num.className = 'w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600';
+        num.textContent = String(i + 1);
+        var pre = document.createElement('pre');
+        pre.className = l.color;
+        if (query) {
+          var re = new RegExp('(' + escRe(query) + ')', 'gi');
+          pre.innerHTML = esc(l.text).replace(re, '<mark class="bg-yellow-300 text-gray-900 px-0.5 rounded">$1</mark>');
+        } else {
+          pre.textContent = l.text;
+        }
+        row.appendChild(num); row.appendChild(pre);
+        viewer.appendChild(row);
+      });
+    }
+    // 底部「找到 X / N 条记录」——仅搜索非空时
+    var counter = bottom.querySelector('.js-count');
+    if (query) {
+      if (!counter) {
+        counter = document.createElement('span');
+        counter.className = 'js-count text-xs text-gray-500';
+        bottom.appendChild(counter);
+      }
+      counter.textContent = '找到 ' + matched.length + ' / ' + LINES.length + ' 条记录';
+    } else if (counter) {
+      counter.remove();
+    }
+  }
+
+  // 折叠
+  if (header && body && chevron) {
+    var path = chevron.querySelector('path');
+    header.addEventListener('click', function () {
+      var hidden = body.style.display === 'none';
+      body.style.display = hidden ? '' : 'none';
+      path.setAttribute('d', hidden ? CHEV_UP : CHEV_DOWN);
+    });
+  }
+
+  // 实时搜索
+  if (input) input.addEventListener('input', function () { render(input.value); });
+
+  // 复制全部 —— 态切换（Copy →「已复制」2s）
+  if (copyBtn) {
+    var copyHTML = copyBtn.innerHTML;
+    copyBtn.addEventListener('click', function () {
+      var q = input ? input.value.trim().toLowerCase() : '';
+      var text = LINES.filter(function (l) { return !q || l.text.toLowerCase().indexOf(q) !== -1; })
+                      .map(function (l) { return l.text; }).join('\n');
+      try { navigator.clipboard && navigator.clipboard.writeText(text); } catch (e) {}
+      copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check w-4 h-4 mr-1 text-green-500"><path d="M20 6 9 17l-5-5"></path></svg>已复制';
+      setTimeout(function () { copyBtn.innerHTML = copyHTML; }, 2000);
+    });
+  }
+
+  // 下载 —— 导出全部 rawLogs
+  if (dlBtn) dlBtn.addEventListener('click', function () {
+    try {
+      var blob = new Blob([LINES.map(function (l){ return l.text; }).join('\n')], { type: 'text/plain;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'email-log-demo-' + new Date().toISOString().slice(0,10) + '.log';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级3：新建规则抽屉 - IP频率限制</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --bg: oklch(0.98 0.01 205); --card:#fff; --border:#e8e8e8; --muted:#f5f5f5; --sub:#8c8c8c; --radius:10px; }
+    * { box-sizing: border-box; }
+    body { margin: 0 auto; max-width: 1280px; padding: 28px; background: var(--bg); font-family: "Geist", system-ui, sans-serif; line-height: 1.58; }
+    nav, header, section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 18px; }
+    a { color:#1890ff; text-decoration:none; }
+    h1 { margin: 0 0 12px; color: var(--primary); font-size:24px; }
+    h2 { color:var(--primary); border-bottom:2px solid var(--primary); padding-bottom:8px; }
+    table { width:100%; border-collapse: collapse; font-size:14px; margin:12px 0; }
+    th,td { border:1px solid var(--border); padding:9px 11px; vertical-align:top; }
+    th { background:var(--muted); text-align:left; white-space:nowrap; }
+    .screenshot-figure { text-align:center; }
+    .screenshot-figure img { max-width:100%; border:1px solid var(--border); border-radius:8px; box-shadow:0 2px 10px rgb(0 0 0 / 8%); }
+    .drawer-preview {
+      min-width: 1120px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #eefcff;
+      box-shadow: 0 2px 10px rgb(0 0 0 / 8%);
+    }
+    .drawer-head {
+      height: 72px;
+      background: #f2fdff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+    .drawer-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .drawer-desc { font-size: 13px; color: #8c8c8c; }
+    .head-actions { display: flex; align-items: center; gap: 10px; }
+    .btn { height: 34px; border-radius: 8px; border: 1px solid #d9d9d9; background: #fff; padding: 0 14px; font-weight: 650; cursor: pointer; }
+    .btn:hover { border-color: #0b5be7; color: #0b5be7; }
+    .btn-primary { border-color: #0b5be7; background: #0b5be7; color: #fff; }
+    .btn-primary:hover { color: #fff; filter: brightness(.96); }
+    .close-x { color: #595959; font-size: 22px; margin-left: 2px; border: 0; background: transparent; cursor: pointer; }
+    .drawer-body {
+      display: grid;
+      grid-template-columns: minmax(560px, 1fr) 16px 360px;
+      gap: 24px;
+      padding: 34px 28px;
+      max-height: 700px;
+      overflow: hidden;
+    }
+    .left-pane, .right-pane { min-width: 0; }
+    .left-pane { max-height: 632px; overflow-y: auto; padding-right: 4px; scrollbar-width: none; }
+    .left-pane::-webkit-scrollbar { display: none; }
+    .scrollbar {
+      align-self: stretch;
+      width: 12px;
+      border-radius: 999px;
+      background: linear-gradient(#9fa4a8 0 82%, transparent 82%);
+      opacity: .9;
+    }
+    .form-card, .side-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 14px;
+      box-shadow: 0 1px 4px rgb(0 0 0 / 4%);
+    }
+    .form-card { padding: 24px; margin-bottom: 24px; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0 0 18px;
+    }
+    .stripe { width: 4px; height: 20px; border-radius: 99px; background: #1677ff; }
+    .stripe.orange { background: #fa8c16; }
+    .section-note { color: #8c8c8c; font-size: 12px; font-weight: 500; }
+    .field { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 12px; align-items: center; margin: 16px 0; font-size: 14px; }
+    .field label { text-align: right; font-weight: 650; color: #262626; white-space: nowrap; }
+    .required { color: #ff4d4f; margin-right: 4px; }
+    .help { color: #8c8c8c; font-size: 13px; }
+    .control-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .input, .select, .textarea {
+      min-height: 36px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      background: #fff;
+      padding: 7px 10px;
+      color: #595959;
+      box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+      font: inherit;
+    }
+    .input:focus, .select:focus, .textarea:focus { outline: none; border-color: #1677ff; box-shadow: 0 0 0 3px rgb(22 119 255 / 12%); }
+    .input::placeholder, .textarea::placeholder { color: #8c8c8c; }
+    .input.sm { width: 92px; text-align: center; }
+    .input.md { width: 128px; }
+    .input.lg, .textarea { width: 100%; }
+    .select { width: 145px; }
+    .textarea { height: 64px; color: #8c8c8c; }
+    .field.is-hidden { display: none; }
+    .nolimit { font-weight: 650; color: #262626; }
+    .side-card { padding: 22px; margin-bottom: 24px; }
+    .effect-title { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+    .effect-row { display: flex; gap: 12px; margin: 14px 0; color: #8c8c8c; }
+    .effect-row strong { color: #262626; font-weight: 650; }
+    .chip { display: inline-block; border-radius: 999px; background: #f0f0f0; color: #262626; padding: 2px 8px; font-weight: 650; }
+    .orange-note { color: #fa8c16; font-size: 13px; font-weight: 650; padding-left: 28px; }
+    .fold-row {
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #0b5be7;
+      font-weight: 650;
+      padding: 0 8px;
+      margin: 12px 0;
+      border: 0;
+      background: transparent;
+      width: 100%;
+      cursor: pointer;
+      font: inherit;
+    }
+    .fold-row:hover { background: #f7fbff; border-radius: 8px; }
+    .fold-panel { display: none; margin: -4px 0 14px; padding: 12px 14px; border-radius: 8px; background: #f7fbff; color: #595959; font-size: 13px; }
+    .fold-panel.is-open { display: block; }
+    .fold-panel .input { width: 100%; margin: 8px 0; }
+    .status-line { min-height: 24px; margin-top: 10px; font-size: 13px; font-weight: 650; }
+    .status-line.ok { color: #1677ff; }
+    .status-line.error { color: #ff4d4f; }
+    .tips li { margin: 8px 0; color: #8c8c8c; }
+    .tips li::marker { color: #1677ff; }
+    .action-options { display: flex; gap: 14px; flex-wrap: wrap; }
+    .action-options label { text-align: left; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .actual-extracted { max-height: 760px; overflow: auto; isolation: isolate; background:#fff; border:1px solid var(--border); border-radius:8px; padding:12px; }
+    .actual-extracted > [role="dialog"] { position: relative !important; inset: auto !important; margin-left:auto; height:720px !important; }
+  </style>
+</head>
+<body>
+  <nav><a href="index.html#component-2-3">返回主文件</a> · <a href="layer-4-examples-simulator.html">下一层：示例+模拟测试</a></nav>
+  <header>
+    <h1>交互层级 3：新建规则抽屉</h1>
+    <table>
+      <tr><td>所属组件</td><td>FrequencyRuleDrawer</td></tr>
+      <tr><td>触发路径</td><td>层级0 IP频率限制规则列表 -> 点击“新增规则”</td></tr>
+      <tr><td>尺寸</td><td>demo 组件为 920px 右侧 Sheet；本规格预览按完整三栏展开展示，保留头部操作区、左侧表单区、中间滚动条、右侧预览/帮助区，并补齐可输入、可展开、可联动的审查交互。</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2>运行态提取 HTML 预览</h2>
+    <div class="actual-extracted">
+<div role="dialog" id="radix-_r_28_" aria-describedby="radix-_r_2a_" aria-labelledby="radix-_r_29_" data-state="open" data-slot="sheet-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full border-l w-[920px] sm:max-w-[920px] p-0 flex flex-col" tabindex="-1" style="pointer-events: auto;"><div data-slot="sheet-header" class="flex flex-col gap-1.5 p-4 px-6 py-4 border-b border-[#E8E8E8] dark:border-gray-700 flex-shrink-0"><div class="flex items-center justify-between"><div><h2 id="radix-_r_29_" data-slot="sheet-title" class="text-foreground text-[18px] font-semibold">新建频率限制规则</h2><p class="text-sm text-muted-foreground mt-1">配置IP频率限制阈值和处置策略，保护SMTP连接层安全</p></div><div class="flex items-center gap-2"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5">取消</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5">保存</button></div></div></div><div class="flex flex-1 overflow-hidden"><div class="w-[560px] flex-shrink-0 overflow-y-auto p-6 border-r border-[#E8E8E8] dark:border-gray-700"><div class="space-y-6"><div class="bg-[#FAFAFA] dark:bg-gray-900 rounded-lg p-5"><div class="flex items-center gap-2 mb-4"><div class="h-5 w-1 bg-blue-500 rounded-full"></div><h3 class="font-medium">基础设置</h3></div><div class="space-y-4"><div class="flex items-center gap-3"><label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right"><span class="text-red-500">*</span> 规则名称</label><div class="flex-1"><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive" placeholder="如：合作伙伴IP限制" value=""></div></div><div class="flex items-center gap-3"><label data-slot="tooltip-trigger" class="text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right flex items-center justify-end gap-1 cursor-help" data-state="closed">生效范围<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help h-3.5 w-3.5 text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></label><div class="flex-1 flex gap-2"><button type="button" role="combobox" aria-controls="radix-_r_38_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-32"><span data-slot="select-value" style="pointer-events: none;">全部IP</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div><div class="flex items-center gap-3"><label data-slot="tooltip-trigger" class="text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right flex items-center justify-end gap-1 cursor-help" data-state="closed">有效期至<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help h-3.5 w-3.5 text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></label><div class="flex-1 flex items-center gap-2"><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-40" type="date" value=""><span class="text-xs text-muted-foreground">(留空=永久有效)</span></div></div><div class="flex items-center gap-3"><label data-slot="tooltip-trigger" class="text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right flex items-center justify-end gap-1 cursor-help" data-state="closed">优先级<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help h-3.5 w-3.5 text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></label><div class="flex-1 flex items-center gap-2"><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-24" min="0" type="number" value="100"><span class="text-xs text-muted-foreground">数值越小越先匹配</span></div></div><div class="flex items-start gap-3"><label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right pt-2">备注</label><textarea data-slot="textarea" class="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm flex-1 min-h-[60px]" placeholder="可选，规则说明..."></textarea></div></div></div><div class="bg-[#FAFAFA] dark:bg-gray-900 rounded-lg p-5"><div class="flex items-center gap-2 mb-4"><div class="h-5 w-1 bg-amber-500 rounded-full"></div><h3 class="font-medium">IP级防护</h3><span class="text-xs text-muted-foreground">(-1表示不限制)</span></div><div class="space-y-4"><div class="flex items-center gap-3"><label data-slot="tooltip-trigger" class="text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right flex items-center justify-end gap-1 cursor-help" data-state="closed">当天连接总数<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help h-3.5 w-3.5 text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></label><div class="flex-1 flex items-center gap-2"><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-24" placeholder="-1" type="number" value=""><span class="text-sm text-muted-foreground">个</span><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-xs">不限</button></div></div><div class="flex items-center gap-3"><label data-slot="tooltip-trigger" class="text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right flex items-center justify-end gap-1 cursor-help" data-state="closed">并发连接上限<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help h-3.5 w-3.5 text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></label><div class="flex-1 flex items-center gap-2"><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-24" placeholder="-1" type="number" value=""><span class="text-sm text-muted-foreground">个</span><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-xs">不限</button></div></div><div class="flex items-center gap-3"><label data-slot="tooltip-trigger" class="text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right flex items-center justify-end gap-1 cursor-help" data-state="closed">时间窗口频率<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help h-3.5 w-3.5 text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></label><div class="flex-1 flex items-center gap-2"><span class="text-sm">每</span><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-16" min="1" type="number" value="15"><span class="text-sm">分钟</span><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-24" placeholder="-1" type="number" value=""><span class="text-sm text-muted-foreground">次</span></div></div><div class="flex items-center gap-3"><label data-slot="tooltip-trigger" class="text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right flex items-center justify-end gap-1 cursor-help" data-state="closed">认证失败限制<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help h-3.5 w-3.5 text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></label><div class="flex-1 flex items-center gap-2"><span class="text-sm">每小时</span><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-24" placeholder="-1" type="number" value=""><span class="text-sm text-muted-foreground">次</span></div></div></div></div><div class="bg-[#FAFAFA] dark:bg-gray-900 rounded-lg p-5"><div class="flex items-center gap-2 mb-4"><div class="h-5 w-1 bg-green-500 rounded-full"></div><h3 class="font-medium">单连接防护</h3><span class="text-xs text-muted-foreground">(-1表示不限制)</span></div><div class="space-y-4"><div class="flex items-center gap-3"><label data-slot="tooltip-trigger" class="text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right flex items-center justify-end gap-1 cursor-help" data-state="closed">命令错误上限<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help h-3.5 w-3.5 text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></label><div class="flex-1 flex items-center gap-2"><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-24" placeholder="-1" type="number" value=""><span class="text-sm text-muted-foreground">次</span><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-xs">不限</button></div></div><div class="flex items-center gap-3"><label data-slot="tooltip-trigger" class="text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right flex items-center justify-end gap-1 cursor-help" data-state="closed">认证失败上限<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help h-3.5 w-3.5 text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></label><div class="flex-1 flex items-center gap-2"><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-24" placeholder="3" type="number" value="3"><span class="text-sm text-muted-foreground">次</span><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-xs">不限</button></div></div></div></div><div class="bg-[#FAFAFA] dark:bg-gray-900 rounded-lg p-5"><div class="flex items-center gap-2 mb-4"><div class="h-5 w-1 bg-red-500 rounded-full"></div><h3 class="font-medium">处置动作</h3></div><div class="space-y-4"><div class="flex items-center gap-3"><label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right">当次阻断</label><button type="button" role="combobox" aria-controls="radix-_r_3h_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-48"><span data-slot="select-value" style="pointer-events: none;">拒绝连接</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center gap-3"><label data-slot="tooltip-trigger" class="text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 min-w-[100px] text-right flex items-center justify-end gap-1 cursor-help" data-state="closed">IP挂起<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help h-3.5 w-3.5 text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></label><button type="button" role="combobox" aria-controls="radix-_r_3j_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-48"><span data-slot="select-value" style="pointer-events: none;">不启用</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div></div></div></div><div class="flex-1 overflow-y-auto bg-[#F5F5F5] dark:bg-gray-900 p-6"><div class="space-y-6"><div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-[#E8E8E8] dark:border-gray-700"><div class="flex items-center gap-2 mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap h-4 w-4 text-blue-500"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg><h3 class="font-medium">当前配置效果</h3></div><div class="space-y-3 text-sm"><div class="flex items-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield h-4 w-4 text-muted-foreground mt-0.5"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg><div><span class="text-muted-foreground">当IP地址</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 mx-1.5 font-mono">全部IP</span></div></div><div class="flex items-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ban h-4 w-4 text-muted-foreground mt-0.5"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg><div><span class="text-muted-foreground">触发以下任一条件时：</span><ul class="mt-1.5 space-y-1 text-[#262626] dark:text-gray-200"><li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>单连接认证失败超过 3 次</li></ul></div></div><div class="flex items-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock h-4 w-4 text-muted-foreground mt-0.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><div><span class="text-muted-foreground">系统将：</span><span class="ml-1.5 text-muted-foreground">仅记录日志，不阻断</span></div></div><div class="pl-6 text-xs text-amber-600">阈值触发后仅记录日志，不会阻断连接。如需封禁请配置挂起策略。</div><div class="flex items-center gap-2"><span class="text-muted-foreground">优先级：</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground font-mono">100</span><span class="text-xs text-muted-foreground">（越小越优先）</span></div><div class="flex items-center gap-2"><span class="text-muted-foreground">有效期：</span><span>永久有效</span></div></div></div><div data-state="closed" data-slot="collapsible"><button data-slot="collapsible-trigger" class="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[&gt;svg]:px-3 w-full justify-between text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30" type="button" aria-controls="radix-_r_3k_" aria-expanded="false" data-state="closed"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lightbulb h-4 w-4"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg><span>查看配置示例</span></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4"><path d="m6 9 6 6 6-6"></path></svg></button><div data-state="closed" id="radix-_r_3k_" hidden="" data-slot="collapsible-content" class="mt-3 space-y-3" style=""></div></div><div data-state="closed" data-slot="collapsible"><button data-slot="collapsible-trigger" class="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[&gt;svg]:px-3 w-full justify-between text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30" type="button" aria-controls="radix-_r_3l_" aria-expanded="false" data-state="closed"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play h-4 w-4"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg><span>模拟测试</span></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4"><path d="m6 9 6 6 6-6"></path></svg></button><div data-state="closed" id="radix-_r_3l_" hidden="" data-slot="collapsible-content" class="mt-3" style=""></div></div><div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-[#E8E8E8] dark:border-gray-700"><h4 class="font-medium text-sm mb-3">配置提示</h4><ul class="space-y-2 text-xs text-muted-foreground"><li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>-1 表示不限制</li><li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>优先级越小越先匹配</li><li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>留空=永久有效</li><li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>各维度为"或"关系，满足任一即触发</li></ul></div></div></div></div><button type="button" class="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x size-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="sr-only">Close</span></button></div>
+    </div>
+    <figure class="screenshot-figure"><img src="./screenshots/09-priority-tooltip.png" alt="优先级 Tooltip"><figcaption>Hover 优先级帮助图标后的运行态 Tooltip。</figcaption></figure>
+    <figure class="screenshot-figure"><img src="./screenshots/10-validation-error.png" alt="规则名称校验错误"><figcaption>空名称保存：规则名称不能为空 + 优先级冲突警告。</figcaption></figure>
+    <h2>审查交互重建（非 DOM 比对对象）</h2>
+    <div class="drawer-preview">
+      <div class="drawer-head">
+        <div>
+          <div class="drawer-title">新建频率限制规则</div>
+          <div class="drawer-desc">配置IP频率限制阈值和处置策略，保护SMTP连接层安全</div>
+        </div>
+        <div class="head-actions">
+          <button class="btn" type="button" id="cancelBtn">取消</button>
+          <button class="btn btn-primary" type="button" id="saveBtn">保存</button>
+          <button class="close-x" type="button" id="closeBtn" aria-label="关闭">×</button>
+        </div>
+      </div>
+      <div class="drawer-body">
+        <div class="left-pane">
+          <form id="ruleForm" autocomplete="off">
+          <div class="form-card">
+            <div class="section-title"><span class="stripe"></span>基础设置</div>
+            <div class="field"><label><span class="required">*</span>规则名称</label><input id="ruleName" class="input lg" placeholder="如：合作伙伴IP限制"></div>
+            <div class="field"><label>生效范围 <span class="help">⊙</span></label><select id="scope" class="select"><option>全部IP</option><option>单IP</option><option>IP段</option><option>IP组</option></select></div>
+            <div class="field is-hidden" id="scopeValueField"><label>IP地址/段 <span class="help">⊙</span></label><input id="scopeValue" class="input lg" placeholder="如：172.16.100.1 或 172.16.100.0/24"></div>
+            <div class="field"><label>有效期至 <span class="help">⊙</span></label><div class="control-row"><input id="expiresAt" class="input md" type="text" placeholder="年 / 月 / 日"><span class="help">▣</span><span class="help">(留空=永久有效)</span></div></div>
+            <div class="field"><label>优先级 <span class="help">⊙</span></label><div class="control-row"><input id="priority" class="input sm" type="number" value="100" min="1"><span class="help">数值越小越先匹配</span></div></div>
+            <div class="field"><label>备注</label><textarea id="remark" class="textarea" placeholder="可选，规则说明..."></textarea></div>
+          </div>
+
+          <div class="form-card">
+            <div class="section-title"><span class="stripe orange"></span>IP级防护 <span class="section-note">(-1表示不限制)</span></div>
+            <div class="field"><label>当天连接总数 <span class="help">⊙</span></label><div class="control-row"><input id="dailyLimit" class="input sm" type="number" value="-1"><span class="help">个</span><button class="btn" type="button" data-unlimit="dailyLimit">不限</button></div></div>
+            <div class="field"><label>并发连接上限 <span class="help">⊙</span></label><div class="control-row"><input id="concurrentLimit" class="input sm" type="number" value="-1"><span class="help">个</span><button class="btn" type="button" data-unlimit="concurrentLimit">不限</button></div></div>
+            <div class="field"><label>时间窗口频率 <span class="help">⊙</span></label><div class="control-row"><span>每</span><input id="windowMinutes" class="input sm" type="number" value="15" min="1"><span>分钟</span><input id="windowLimit" class="input sm" type="number" value="-1"><span>次</span></div></div>
+            <div class="field"><label>认证失败限制 <span class="help">⊙</span></label><div class="control-row"><span>每小时</span><input id="ipAuthFail" class="input sm" type="number" value="-1"><span>次</span></div></div>
+          </div>
+
+          <div class="form-card">
+            <div class="section-title"><span class="stripe"></span>单连接防护 <span class="section-note">(-1表示不限制)</span></div>
+            <div class="field"><label>命令错误上限 <span class="help">⊙</span></label><div class="control-row"><input id="commandError" class="input sm" type="number" value="-1"><span>次</span></div></div>
+            <div class="field"><label>认证失败上限 <span class="help">⊙</span></label><div class="control-row"><input id="singleAuthFail" class="input sm" type="number" value="3"><span>次</span></div></div>
+          </div>
+
+          <div class="form-card">
+            <div class="section-title"><span class="stripe orange"></span>处置动作</div>
+            <div class="field"><label>系统将</label><div class="action-options"><label><input type="radio" name="action" value="仅记录日志，不阻断" checked> 仅记录日志</label><label><input type="radio" name="action" value="拒绝连接"> 拒绝连接</label><label><input type="radio" name="action" value="挂起IP"> 挂起IP</label></div></div>
+            <div class="field"><label>挂起时长</label><div class="control-row"><input id="suspendMinutes" class="input sm" type="number" value="-1"><span>分钟</span><span class="help">选择“挂起IP”时生效</span></div></div>
+          </div>
+          </form>
+        </div>
+        <div class="scrollbar" aria-hidden="true"></div>
+        <div class="right-pane">
+          <div class="side-card">
+            <div class="effect-title">ϟ 当前配置效果</div>
+            <div class="effect-row"><span>♢</span><div>当IP地址 <span class="chip" id="effectScope">全部IP</span></div></div>
+            <div class="effect-row"><span>⊘</span><div>触发以下任一条件时：<br><strong style="color:#fa8c16" id="effectConditions">• 单连接认证失败超过 3 次</strong></div></div>
+            <div class="effect-row"><span>◷</span><div>系统将：<strong style="color:#8c8c8c" id="effectAction">仅记录日志，不阻断</strong></div></div>
+            <div class="orange-note">阈值触发后仅记录日志，不会阻断连接。如需封禁请配置挂起策略。</div>
+            <div class="effect-row"><span>优先级：</span><strong class="chip" id="effectPriority">100</strong><span class="help">(越小越优先)</span></div>
+            <div class="effect-row"><span>有效期：</span><strong id="effectExpiry">永久有效</strong></div>
+            <div class="status-line" id="statusLine"></div>
+          </div>
+          <button class="fold-row" type="button" data-panel="examplesPanel" aria-expanded="false">？ 查看配置示例 <span>⌄</span></button>
+          <div class="fold-panel" id="examplesPanel">示例：VPN出口IP监控可设置“单IP + 并发连接上限 100 + 时间窗口 15分钟/2000次 + 拒绝连接”。完整示例见下一层规格。</div>
+          <button class="fold-row" type="button" data-panel="simPanel" aria-expanded="false">▷ 模拟测试 <span>⌄</span></button>
+          <div class="fold-panel" id="simPanel"><label>测试IP</label><input id="simIp" class="input" placeholder="172.16.100.1"><button class="btn" type="button" id="simBtn">运行模拟</button><div class="status-line ok" id="simResult"></div></div>
+          <div class="side-card">
+            <strong>配置提示</strong>
+            <ul class="tips">
+              <li>-1 表示不限制</li>
+              <li>优先级越小越先匹配</li>
+              <li>留空=永久有效</li>
+              <li>各维度为"或"关系，满足任一即触发</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/05-new-rule-drawer.png" alt="新建规则抽屉">
+    </figure>
+  </section>
+
+  <section>
+    <h2>元素清单</h2>
+    <table>
+      <thead><tr><th>区块</th><th>字段/控件</th><th>默认值</th><th>校验/行为</th></tr></thead>
+      <tbody>
+        <tr><td>基础设置</td><td>规则名称、生效范围、IP地址/段、有效期至、优先级、备注</td><td>规则名称空；scope=全部IP；priority=100。</td><td>规则名称为空保存时报错；scope 切换到单IP/IP段/IP组时显示 IP 输入框，并同步右侧配置效果。</td></tr>
+        <tr><td>IP级防护</td><td>当天连接总数、并发连接上限、时间窗口频率、认证失败限制</td><td>daily=-1、concurrent=-1、window=15/-1、authFail=-1。</td><td>“不限”按钮写入 -1；阈值大于 0 时追加到右侧触发条件。</td></tr>
+        <tr><td>单连接防护</td><td>命令错误上限、认证失败上限</td><td>-1、3。</td><td>默认会在预览中显示“单连接认证失败超过 3 次”。</td></tr>
+        <tr><td>处置动作</td><td>当次阻断、IP挂起</td><td>拒绝连接、不启用。</td><td>挂起不启用时预览提示仅记录日志，不阻断连接。</td></tr>
+        <tr><td>底部辅助</td><td>当前配置效果、查看配置示例、模拟测试、配置提示</td><td>示例/模拟测试折叠。</td><td>点击进入层级4。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table>
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td><code>div[role=dialog].w-[920px].sm:max-w-[920px]</code></td><td>嵌入同一 <code>outerHTML</code></td><td>✅ 一致</td></tr>
+        <tr><td>子节点/节点数</td><td>directChildren=3，nodeCount=223。</td><td>3 / 223。</td><td>✅ 一致</td></tr>
+        <tr><td>可交互控件</td><td>Input、Select、Textarea、Button、折叠项</td><td>运行态提取块保留全部原生控件和关键属性。</td><td>✅ 一致</td></tr>
+        <tr><td>关键文本</td><td>新建频率限制规则、取消、保存、基础设置、IP级防护、单连接防护、处置动作、当前配置效果</td><td>全部包含</td><td>✅ 一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const numericFields = ["dailyLimit", "concurrentLimit", "windowMinutes", "windowLimit", "ipAuthFail", "commandError", "singleAuthFail", "priority", "suspendMinutes"];
+    const formFields = ["ruleName", "scope", "scopeValue", "expiresAt", "remark", ...numericFields];
+
+    function positiveValue(id) {
+      const value = Number($(id).value);
+      return Number.isFinite(value) && value > 0 ? value : null;
+    }
+
+    function selectedAction() {
+      const checked = document.querySelector('input[name="action"]:checked');
+      return checked ? checked.value : "仅记录日志，不阻断";
+    }
+
+    function updatePreview() {
+      const scope = $("scope").value;
+      const needsScopeValue = scope !== "全部IP";
+      $("scopeValueField").classList.toggle("is-hidden", !needsScopeValue);
+      const scopeValue = $("scopeValue").value.trim();
+      $("effectScope").textContent = needsScopeValue && scopeValue ? `${scope}：${scopeValue}` : scope;
+
+      const conditions = [];
+      const daily = positiveValue("dailyLimit");
+      const concurrent = positiveValue("concurrentLimit");
+      const windowLimit = positiveValue("windowLimit");
+      const windowMinutes = positiveValue("windowMinutes") || 15;
+      const ipAuthFail = positiveValue("ipAuthFail");
+      const commandError = positiveValue("commandError");
+      const singleAuthFail = positiveValue("singleAuthFail");
+      if (daily) conditions.push(`当天连接总数超过 ${daily} 个`);
+      if (concurrent) conditions.push(`并发连接超过 ${concurrent} 个`);
+      if (windowLimit) conditions.push(`${windowMinutes} 分钟内连接超过 ${windowLimit} 次`);
+      if (ipAuthFail) conditions.push(`IP每小时认证失败超过 ${ipAuthFail} 次`);
+      if (commandError) conditions.push(`单连接命令错误超过 ${commandError} 次`);
+      if (singleAuthFail) conditions.push(`单连接认证失败超过 ${singleAuthFail} 次`);
+      $("effectConditions").innerHTML = conditions.length ? conditions.map((item) => `• ${item}`).join("<br>") : "• 未设置阻断阈值，仅保存规则元信息";
+
+      const action = selectedAction();
+      const suspend = positiveValue("suspendMinutes");
+      $("effectAction").textContent = action === "挂起IP" && suspend ? `挂起IP ${suspend} 分钟` : action;
+      $("effectPriority").textContent = $("priority").value || "100";
+      $("effectExpiry").textContent = $("expiresAt").value.trim() || "永久有效";
+    }
+
+    function setStatus(text, type = "ok") {
+      $("statusLine").textContent = text;
+      $("statusLine").className = `status-line ${type}`;
+    }
+
+    formFields.forEach((id) => {
+      const el = $(id);
+      if (el) el.addEventListener("input", updatePreview);
+      if (el) el.addEventListener("change", updatePreview);
+    });
+    document.querySelectorAll('input[name="action"]').forEach((el) => el.addEventListener("change", updatePreview));
+
+    document.querySelectorAll("[data-unlimit]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        $(btn.dataset.unlimit).value = "-1";
+        updatePreview();
+      });
+    });
+
+    document.querySelectorAll("[data-panel]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const panel = $(btn.dataset.panel);
+        const open = !panel.classList.contains("is-open");
+        panel.classList.toggle("is-open", open);
+        btn.setAttribute("aria-expanded", String(open));
+        btn.querySelector("span").textContent = open ? "⌃" : "⌄";
+      });
+    });
+
+    $("saveBtn").addEventListener("click", () => {
+      if (!$("ruleName").value.trim()) {
+        setStatus("请先填写规则名称。", "error");
+        $("ruleName").focus();
+        return;
+      }
+      setStatus("已通过前端校验：保存后关闭抽屉并刷新规则列表。", "ok");
+    });
+
+    $("cancelBtn").addEventListener("click", () => {
+      $("ruleForm").reset();
+      setStatus("已恢复新建规则默认值。", "ok");
+      updatePreview();
+    });
+
+    $("closeBtn").addEventListener("click", () => {
+      setStatus("关闭动作：丢弃当前未保存修改并返回规则列表。", "ok");
+    });
+
+    $("simBtn").addEventListener("click", () => {
+      const ip = $("simIp").value.trim() || "当前输入IP";
+      $("simResult").textContent = `${ip} 将按当前规则匹配：${$("effectConditions").textContent}`;
+    });
+
+    updatePreview();
+  </script>
+</body>
+</html>

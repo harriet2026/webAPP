@@ -4,7 +4,7 @@ import path from 'node:path';
 import zh from '../../messages/zh.json';
 
 // GT-12045 / GT-12048 / GT-12049: three RBL-filter zh text labels drifted from
-// the html_spec (design/origin/html_spec/filter-rules-pipeline-rbl-filter/).
+// the html_spec (webapp/doc/html-spec/filter-rules-pipeline-rbl-filter/).
 //   GT-12045 — action field label must read "操作" (html_spec layer-1, common.action),
 //             not "动作".
 //   GT-12048 — greylist entry button must read "点击配置" (html_spec greylistConfigure,

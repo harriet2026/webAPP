@@ -2,10 +2,15 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfDay, endOfDay } from 'date-fns';
-import { PageShell } from '@/components/shared/page-shell';
+import { format } from 'date-fns';
+import { PageHeader, PageShell } from '@/components/shared/page-shell';
 import { AlertCircle, ArrowUpFromLine, Clock3, RefreshCw } from 'lucide-react';
-import { useAuth } from '@/contexts/auth-context';
+import {
+  timeRangeToDates,
+  defaultCustomRange,
+  type CustomRange,
+} from '@/components/statistics/security-overview/date-range';
+import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { Button } from '@/components/ui/button';
 import { FilterBar } from './FilterBar';
 import { KpiCards } from './KpiCards';
@@ -22,63 +27,22 @@ import { inclusiveCalendarDayCount } from './date-range';
 
 export { PageSkeleton } from './PageSkeleton';
 
-function timeRangeToDates(timeRange: TimeRange, customStart: string, customEnd: string): { startDate: string; endDate: string } {
-  const now = new Date();
-
-  switch (timeRange) {
-    case 'today':
-      return {
-        startDate: format(startOfDay(now), 'yyyy-MM-dd'),
-        endDate: format(endOfDay(now), 'yyyy-MM-dd'),
-      };
-    case '7d':
-      return {
-        startDate: format(subDays(now, 6), 'yyyy-MM-dd'),
-        endDate: format(now, 'yyyy-MM-dd'),
-      };
-    case '30d':
-      return {
-        startDate: format(subDays(now, 29), 'yyyy-MM-dd'),
-        endDate: format(now, 'yyyy-MM-dd'),
-      };
-    case 'this_month':
-      return {
-        startDate: format(startOfMonth(now), 'yyyy-MM-dd'),
-        endDate: format(now, 'yyyy-MM-dd'),
-      };
-    case 'last_month': {
-      const last = subMonths(now, 1);
-      return {
-        startDate: format(startOfMonth(last), 'yyyy-MM-dd'),
-        endDate: format(endOfMonth(last), 'yyyy-MM-dd'),
-      };
-    }
-    case 'custom':
-      return { startDate: customStart, endDate: customEnd };
-    default:
-      return {
-        startDate: format(subDays(now, 6), 'yyyy-MM-dd'),
-        endDate: format(now, 'yyyy-MM-dd'),
-      };
-  }
-}
-
 export function DeliveryTrafficPage() {
   const t = useTranslations('deliveryTraffic');
-  const { user, isSystemAdmin } = useAuth();
 
   const [direction, setDirection] = useState<Direction>('all');
   const [queryDirection, setQueryDirection] = useState<Direction>('all');
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
-  const defaultStart = format(subDays(new Date(), 6), 'yyyy-MM-dd');
-  const defaultEnd = format(new Date(), 'yyyy-MM-dd');
-  const [customStart, setCustomStart] = useState(defaultStart);
-  const [customEnd, setCustomEnd] = useState(defaultEnd);
+  const [customRange, setCustomRange] = useState<CustomRange>(() => defaultCustomRange());
   // This selector is a report filter, not the global platform/tenant viewer
   // switch. Keeping it local prevents platform-view cleanup from immediately
   // resetting the user's choice (GT-12457).
   const [scopeTenantId, setScopeTenantId] = useState<number | null>(null);
-  const queryTenantId = isSystemAdmin ? scopeTenantId : (user?.tenant_id ?? null);
+  const {
+    resolvedScopeTenant: queryTenantId,
+    scopeActive,
+    scopeResolved,
+  } = useSecurityScope(scopeTenantId);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setQueryDirection(direction), 300);
@@ -86,8 +50,8 @@ export function DeliveryTrafficPage() {
   }, [direction]);
 
   const { startDate, endDate } = useMemo(
-    () => timeRangeToDates(timeRange, customStart, customEnd),
-    [timeRange, customStart, customEnd],
+    () => timeRangeToDates(timeRange, customRange),
+    [timeRange, customRange],
   );
   const dateError = useMemo(() => {
     if (!startDate || !endDate) return t('timeRange.required');
@@ -106,7 +70,7 @@ export function DeliveryTrafficPage() {
     endDate,
     direction: queryDirection,
     tenantId: queryTenantId,
-    enabled: !dateError,
+    enabled: scopeResolved && !dateError,
   });
   const transitioning = direction !== queryDirection;
   const showLoading = isLoading || isFetching || transitioning;
@@ -119,28 +83,23 @@ export function DeliveryTrafficPage() {
       className="min-h-full space-y-0 bg-[#F8F9FB] shadow-[0_0_0_32px_#F8F9FB] dark:bg-background dark:shadow-[0_0_0_32px_var(--background)]"
       data-testid="delivery-traffic-page"
     >
-      <header className="border-b border-gray-200 bg-card px-6 py-4 dark:border-gray-700">
-        <div className="flex items-center gap-2">
-          <ArrowUpFromLine className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          <h1 className="text-xl font-medium text-foreground">{t('title')}</h1>
-        </div>
-        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
-      </header>
+      <PageHeader
+        icon={ArrowUpFromLine}
+        title={t('title')}
+        description={t('subtitle')}
+      />
 
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         <FilterBar
           direction={direction}
           onDirectionChange={setDirection}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
-          showTenant={isSystemAdmin}
+          customRange={customRange}
+          onCustomRangeChange={setCustomRange}
+          showTenant={scopeActive}
           tenantId={scopeTenantId}
           onTenantChange={setScopeTenantId}
-          customStart={customStart}
-          customEnd={customEnd}
-          onCustomStartChange={setCustomStart}
-          onCustomEndChange={setCustomEnd}
-          dateError={dateError}
         />
 
         {dataLagSeconds > 3600 && (

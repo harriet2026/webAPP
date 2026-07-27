@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 1：角色配置抽屉 / 权限矩阵 - 管理员与权限 HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/spec-style.css">
+<link rel="stylesheet" href="./preview.css">
+<style>.component-preview{background:#fff;overflow-x:auto}.pass{color:#15803d;font-weight:600}.warn{color:#a16207;font-weight:600}.mx td,.mx th{text-align:center}.mx td:first-child,.mx th:first-child{text-align:left}</style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="./index.html#c-3">← 返回主文件（2.3 角色权限）</a>
+  <span>层级 1 / 1</span>
+  <a href="./index.html#c-3">主文件 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 1：角色配置 / 查看抽屉（三级权限矩阵）</h1>
+  <table class="meta-table">
+    <thead><tr><th>属性</th><th>规格</th><th>形态/角色差异</th></tr></thead>
+    <tr><td>所属组件</td><td>2.3 角色权限 Tab（RolePermissionTab）</td><td>[Base] 全形态共用</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">admin-users/index.html</a></td><td>[Base] —</td></tr>
+    <tr><td>触发路径</td><td>「新建角色」→ 角色配置（可编辑）；行「查看」→ 只读矩阵；行「编辑」→ 编辑；行「删除」→ 删除确认（linkedAdmins&gt;0 拦截）</td><td>[租户管理员] 自定义角色才出现编辑/删除</td></tr>
+    <tr><td>demo 组件</td><td><code>role-permission-tab.tsx</code> 的 <code>&lt;Sheet sm:max-w-2xl&gt;</code>（模块可见权限 + 操作权限矩阵）</td><td>[Overlay] 模块树按 scope 裁剪</td></tr>
+    <tr><td>标题</td><td>只读=「查看角色权限」/「以下为该角色的完整权限矩阵（只读）」；新建=「角色配置」；编辑=「编辑角色」/「配置角色名称、备注与三级权限矩阵」</td><td>[Base] 一致</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1a</span> 角色配置抽屉（新建/编辑，含三态联动）</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：「新建角色」→ 空 draft。<strong>可交互</strong>：勾一级模块 → 全选/全不选其下二级并回写三态；勾二级 → 回写一级三态；操作矩阵按已勾选二级渲染。</div>
+  <div class="preview-hint">勾一级「监控中心/统计报表」查看联动；下方操作矩阵在勾选后出现（此处示意）</div>
+
+  <div class="component-preview cp">
+    <div style="border:1px solid #e5e7eb;border-radius:.5rem;overflow:hidden">
+      <div class="dh" style="padding:1.25rem 1.5rem .75rem;border-bottom:1px solid #f3f4f6">
+        <h4 style="margin:0;font-size:1rem;font-weight:600">角色配置</h4>
+        <p style="margin:.25rem 0 0;font-size:.8125rem;color:#6b7280">配置角色名称、备注与三级权限矩阵</p>
+      </div>
+      <div style="padding:1.25rem 1.5rem">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div class="cp-field"><label>角色名称<span class="req">*</span></label><input class="cp-input" placeholder="如 自定义运营"></div>
+          <div class="cp-field"><label>备注</label><input class="cp-input" placeholder="选填"></div>
+        </div>
+        <div style="border-bottom:1px solid #f3f4f6;padding-bottom:.35rem;margin-bottom:.75rem;display:flex;gap:.5rem;align-items:baseline"><span style="font-size:.875rem;font-weight:500">模块可见权限</span><span class="cp-hint">控制左侧导航菜单显隐，一级用于分组/全选，最小颗粒度为二级菜单</span></div>
+        <div class="cp-modmatrix">
+          <div class="grp">
+            <label><span class="cp-chk" data-check data-modgroup="monitor" data-state="unchecked"></span><span>监控中心</span><span class="cp-hint">（5 项）</span></label>
+            <div class="subs">
+              <label><span class="cp-chk" data-check data-modchild="monitor" data-state="unchecked"></span>监控总览</label>
+              <label><span class="cp-chk" data-check data-modchild="monitor" data-state="unchecked"></span>基础设施</label>
+              <label><span class="cp-chk" data-check data-modchild="monitor" data-state="unchecked"></span>邮件流</label>
+              <label><span class="cp-chk" data-check data-modchild="monitor" data-state="unchecked"></span>检测引擎状态</label>
+              <label><span class="cp-chk" data-check data-modchild="monitor" data-state="unchecked"></span>告警中心</label>
+            </div>
+          </div>
+          <div class="grp">
+            <label><span class="cp-chk" data-check data-modgroup="mail" data-state="unchecked"></span><span>邮件处置</span><span class="cp-hint">（4 项）</span></label>
+            <div class="subs">
+              <label><span class="cp-chk" data-check data-modchild="mail" data-state="unchecked"></span>邮件处置中心</label>
+              <label><span class="cp-chk" data-check data-modchild="mail" data-state="unchecked"></span>处置设置</label>
+              <label><span class="cp-chk" data-check data-modchild="mail" data-state="unchecked"></span>灰邮治理-策略配置</label>
+              <label><span class="cp-chk" data-check data-modchild="mail" data-state="unchecked"></span>灰邮治理-灰邮队列</label>
+            </div>
+          </div>
+        </div>
+        <div style="border-bottom:1px solid #f3f4f6;padding-bottom:.35rem;margin:1rem 0 .75rem;display:flex;gap:.5rem;align-items:baseline"><span style="font-size:.875rem;font-weight:500">操作权限</span><span class="cp-hint">「-」表示该菜单不支持此操作</span></div>
+        <table class="cp-tbl mx">
+          <thead><tr><th>菜单</th><th>查看</th><th>编辑</th><th>审批</th><th>删除</th></tr></thead>
+          <tbody>
+            <tr><td colspan="5" style="background:#f9fafb;color:#6b7280;font-size:.75rem;text-align:left">监控中心（示例：需先勾选可见）</td></tr>
+            <tr><td style="padding-left:1.5rem">监控总览</td><td><span class="cp-chk" data-check data-state="unchecked"></span></td><td><span class="cp-chk" data-check data-state="unchecked"></span></td><td style="color:#d1d5db">-</td><td style="color:#d1d5db">-</td></tr>
+            <tr><td colspan="5" style="background:#f9fafb;color:#6b7280;font-size:.75rem;text-align:left">邮件处置</td></tr>
+            <tr><td style="padding-left:1.5rem">邮件处置中心</td><td><span class="cp-chk" data-check data-state="unchecked"></span></td><td><span class="cp-chk" data-check data-state="unchecked"></span></td><td><span class="cp-chk" data-check data-state="unchecked"></span></td><td><span class="cp-chk" data-check data-state="unchecked"></span></td></tr>
+          </tbody>
+        </table>
+        <p class="cp-hint">未勾选任何模块时该表显示「请先在上方勾选「模块可见权限」」。</p>
+      </div>
+      <div class="df" style="display:flex;gap:.5rem;padding:.75rem 1.5rem;border-top:1px solid #f3f4f6"><button class="cp-btn pri">确定</button><button class="cp-btn">取消</button></div>
+    </div>
+  </div>
+
+  <figure class="screenshot-figure"><img src="./screenshots/role-layer1-new-empty.png" alt="新建角色抽屉"><figcaption>新建角色抽屉（空态 · 7 个一级模块组 · 操作矩阵提示「请先勾选」）</figcaption></figure>
+
+  <h4>权限矩阵规则</h4>
+  <table class="spec-table">
+    <thead><tr><th>规则</th><th>说明</th><th>形态/角色差异</th></tr></thead>
+    <tbody>
+      <tr><td>一级模块 checkbox</td><td>三态（全选/半选 indeterminate/未选）；勾选批量全选其下二级，取消清空这些二级操作权限</td><td>[Base] 一致</td></tr>
+      <tr><td>二级可见 checkbox</td><td>取消可见 → 清空该二级操作权限；回写一级三态</td><td>[Base] 一致</td></tr>
+      <tr><td>操作联动</td><td>勾「编辑」自动勾「查看」；取消「查看」自动取消「编辑/审批/删除」</td><td>[Base] 一致</td></tr>
+      <tr><td>不支持的操作</td><td><code>approve/delete=null</code> 显示「-」（如监控/统计/日志类不支持审批删除）</td><td>[Base] 由模块定义决定</td></tr>
+      <tr><td>作用域裁剪</td><td>平台视角 7 组（剔除安全策略/智能体/高管保护）；租户视角剔除系统管理</td><td>[平台管理员]/[租户管理员] 模块树不同</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1b</span> 只读查看态（完整权限矩阵）+ 删除确认</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：行「查看」→ 只读矩阵（全部 checkbox disabled，底部仅「关闭」）；行「删除」→ 删除确认。</div>
+  <div class="preview-hint">此为「系统管理员」的完整只读矩阵（截图为浏览器实际渲染全量）</div>
+  <figure class="screenshot-figure"><img src="./screenshots/role-layer1-view-matrix.png" alt="只读权限矩阵" style="max-width:560px"><figcaption>只读查看：模块可见权限（7 组）+ 操作权限矩阵（查看/编辑/审批/删除；邮件处置/举报支持审批删除，监控/统计/日志仅查看编辑）</figcaption></figure>
+  <div class="component-preview cp">
+    <div class="cp-dialog" style="box-shadow:none;border:1px solid #e5e7eb">
+      <h4>删除角色「自定义运营」？</h4><p>删除后该角色将不可恢复。若角色已关联管理员，需先变更其角色。</p>
+      <div class="df"><button class="cp-btn">取消</button><button class="cp-btn danger" style="background:#dc2626;color:#fff;border-color:#dc2626">删除</button></div>
+    </div>
+  </div>
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>说明</th><th>形态/角色差异</th></tr></thead>
+    <tbody>
+      <tr><td>只读矩阵</td><td>所有 checkbox <code>disabled</code>；角色名称/备注只读；底部仅「关闭」（无「确定」）</td><td>[Base] 系统默认角色只读</td></tr>
+      <tr><td>删除确认</td><td><code>linkedAdmins&gt;0</code> → Toast「该角色已关联 N 个管理员，请先变更其角色」并不删</td><td>[Overlay] 当前 demo 仅租户自定义角色有入口</td></tr>
+      <tr><td>成功 Toast</td><td>角色已创建 / 角色已更新 / 角色已删除</td><td>[Base] 一致</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison"><h5>DOM 树比对结果</h5><table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>抽屉根</td><td><code>[role=dialog] sm:max-w-2xl</code>（只读态 670 节点）</td><td>结构一致（预览取代表性子集）</td><td class="warn">精简：完整见截图</td></tr>
+      <tr><td>模块可见组数</td><td>平台视角 7 组（监控中心/统计报表/邮件处置/举报中心/日志审计/系统管理/用户与权限管理）</td><td>预览取 2 组示意</td><td class="warn">精简：截图为全 7 组</td></tr>
+      <tr><td>操作矩阵列</td><td>菜单 / 查看 / 编辑 / 审批 / 删除（5 列）</td><td>同</td><td class="pass">一致</td></tr>
+      <tr><td>审批/删除 null</td><td>监控/统计/日志显示「-」；邮件处置/举报可勾</td><td>同（示意 2 行体现）</td><td class="pass">一致</td></tr>
+      <tr><td>只读态</td><td>checkbox 全 disabled，底部仅「关闭」</td><td>说明一致</td><td class="pass">一致</td></tr>
+      <tr><td>删除确认</td><td><code>[role=alertdialog]</code>「删除角色「x」？…需先变更其角色。」</td><td>同</td><td class="pass">一致</td></tr>
+    </tbody></table></div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#c-3">← 返回主文件（2.3）</a>
+  <a href="./layer-4-login-ip-reset.html">layer-4：登录安全 IP/重置 →</a>
+</nav>
+
+<script src="./preview.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>租户视角差异 - 管理员与权限 HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/spec-style.css">
+<link rel="stylesheet" href="./preview.css">
+<style>.component-preview{background:#fff;overflow-x:auto}.pass{color:#15803d;font-weight:600}.warn{color:#a16207;font-weight:600}</style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="./index.html#c-5">← 返回主文件（2.5 租户视角差异）</a>
+  <span>租户视角 / 跨 Tab</span>
+  <a href="./index.html">主文件 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>租户视角差异（viewer=tenant · 三 Tab）</h1>
+  <table class="meta-table">
+    <thead><tr><th>属性</th><th>规格</th><th>形态/角色差异</th></tr></thead>
+    <tr><td>所属组件</td><td>2.5 租户视角差异（跨 UserPermissionPage 三 Tab）</td><td>[Overlay] 租户层覆盖基础层</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">admin-users/index.html</a></td><td>[Base] —</td></tr>
+    <tr><td>触发路径</td><td>产品形态切换器选择多租户形态 + 角色选择「租户管理员」；URL query 本身不是 demo 的状态源</td><td>[单租户] 无此角色；[多租户] 可切换</td></tr>
+    <tr><td>作用域</td><td><code>scope="tenant"</code> → 数据/角色/模块按租户裁剪；登录安全受平台基线约束</td><td>[租户管理员] 当前 tenantId</td></tr>
+  </table>
+</header>
+
+<!-- 登录安全（差异最大） -->
+<section class="interaction-layer">
+  <h4><span class="layer-badge">T1</span> 登录安全（租户）：基线 banner + 二次认证 + 加严锁定</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：租户视角「登录安全」Tab。相较平台视角新增蓝色基线 banner、「二次认证」分组；基线要求开启的复杂度项锁定；低于基线的下拉取值置灰。</div>
+  <div class="preview-hint">复杂度复选框为锁定态（disabled）；二次认证可「启用/关闭」（平台强制时锁为开）</div>
+
+  <div class="component-preview cp">
+    <div class="cp-card">
+      <div class="cp-banner blue">🔒 平台已下发登录安全基线。本租户可在基线之上为其他管理员与成员加严登录限制，但不可低于基线；置灰选项即为低于基线、不可选择的取值。</div>
+      <div class="cp-sec"><h5>二次认证</h5>
+        <div class="cp-row" style="justify-content:space-between">
+          <div style="display:flex;gap:.5rem;align-items:flex-start"><span>🛡</span><div>
+            <div style="font-size:.875rem;color:#374151">为本租户启用二次认证</div>
+            <div class="cp-hint">启用后，本租户全体成员登录需进行二次认证</div>
+          </div></div>
+          <button class="cp-btn" onclick="this.textContent=this.textContent.trim()==='关闭'?'启用':'关闭';return false">关闭</button>
+        </div>
+        <div class="cp-hint">平台强制启用时（forceTwoFactor）此处显示「🔒 已强制启用」徽标，Tooltip「平台策略要求本租户必须开启二次认证，无法关闭」，不可关闭。</div>
+      </div>
+      <div class="cp-sec"><h5>密码策略</h5>
+        <div class="cp-row"><span class="lab">最小密码长度</span><span class="cp-sel" data-disabled><span data-selval>8</span></span><span class="cp-hint">位（低于基线的取值置灰）</span></div>
+        <div class="cp-row"><span class="lab">密码复杂度要求</span>
+          <label style="display:flex;gap:.35rem;align-items:center;font-size:.875rem"><span class="cp-chk" data-check data-disabled data-state="checked"></span>大写字母</label>
+          <label style="display:flex;gap:.35rem;align-items:center;font-size:.875rem"><span class="cp-chk" data-check data-disabled data-state="checked"></span>小写字母</label>
+          <label style="display:flex;gap:.35rem;align-items:center;font-size:.875rem"><span class="cp-chk" data-check data-disabled data-state="checked"></span>数字</label>
+          <label style="display:flex;gap:.35rem;align-items:center;font-size:.875rem"><span class="cp-chk" data-check data-disabled data-state="checked"></span>特殊字符</label>
+          <span class="cp-hint">（基线要求开启，锁定不可取消）</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:.5rem"><button class="cp-btn">重置为平台基线</button><button class="cp-btn" disabled>取消</button><button class="cp-btn pri" disabled>保存</button></div>
+    </div>
+  </div>
+
+  <figure class="screenshot-figure"><img src="./screenshots/tenant-login-security.png" alt="租户登录安全" style="max-width:560px"><figcaption>租户视角登录安全（浏览器实际渲染 · 基线 banner + 二次认证「关闭」+ 复杂度锁定 + 重置为平台基线）</figcaption></figure>
+
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>租户视角行为</th><th>形态/角色差异</th></tr></thead>
+    <tbody>
+      <tr><td>基线 banner</td><td>蓝色提示：可加严不可低于基线；置灰即低于基线不可选</td><td>[Overlay] 仅租户管理员</td></tr>
+      <tr><td>二次认证</td><td>可自主「启用/关闭」→ Toast「已为本租户启用/已关闭本租户二次认证」；平台强制时显示「已强制启用」锁定</td><td>[Overlay] 仅租户管理员</td></tr>
+      <tr><td>复杂度/数值项</td><td>基线要求开启的布尔项锁定为开；低于基线严格度的下拉取值 <code>disabled</code>；保存校验「不得低于平台下发的安全基线」</td><td>[Overlay] 平台管理员不受此限制</td></tr>
+      <tr><td>底部按钮</td><td>「重置为平台基线」（而非「重置为默认」）</td><td>[Overlay] 租户专属文案</td></tr>
+    </tbody>
+  </table>
+  <div class="dom-comparison"><h5>DOM 树比对结果</h5><table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>基线 banner</td><td>租户视角 <code>hasBanner=true</code>，<code>.bg-blue-50</code></td><td>同</td><td class="pass">一致</td></tr>
+      <tr><td>二次认证分组</td><td>租户视角 <code>has2FA=true</code>，SectionCard「二次认证」，按钮「关闭」（当前启用）</td><td>同</td><td class="pass">一致</td></tr>
+      <tr><td>分组数</td><td>5（二次认证 + 密码策略 + 登录控制 + IP访问控制 + 单点登录限制）</td><td>示意 2 组（二次认证 + 密码策略），完整见截图</td><td class="warn">精简：截图为全 5 组</td></tr>
+      <tr><td>复杂度锁定</td><td>基线为 true 时 checkbox <code>disabled</code></td><td>同（disabled）</td><td class="pass">一致</td></tr>
+      <tr><td>重置按钮文案</td><td>「重置为平台基线」</td><td>同</td><td class="pass">一致</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- 账号 + 角色 -->
+<section class="interaction-layer">
+  <h4><span class="layer-badge">T2</span> 管理员账号 + 角色权限（租户作用域）</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：租户视角「管理员账号」/「角色权限」Tab。数据按租户隔离；自定义角色出现「编辑/删除」。</div>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap">
+    <figure class="screenshot-figure"><img src="./screenshots/tenant-account-table.png" alt="租户管理员表" style="max-width:520px"><figcaption>租户管理员（tenant_admin / tenant_ops01，2 人）</figcaption></figure>
+    <figure class="screenshot-figure"><img src="./screenshots/tenant-role-table.png" alt="租户角色表" style="max-width:520px"><figcaption>租户角色（安全运营/审计员/自定义运营；自定义可编辑/删除）</figcaption></figure>
+  </div>
+  <table class="spec-table">
+    <thead><tr><th>Tab</th><th>租户视角差异</th><th>形态/角色差异</th></tr></thead>
+    <tbody>
+      <tr><td>管理员账号</td><td>仅本租户管理员（<code>adminScope=tenant &amp;&amp; tenantId=当前租户</code>，2 人）；新建/编辑角色选项剔除「系统管理员」；创建者均为租户管理员</td><td>[多租户租户管理员]</td></tr>
+      <tr><td>角色权限</td><td>租户角色（安全运营/审计员/自定义运营）；<code>自定义运营</code> 非系统默认 → 有「编辑/删除」；模块矩阵剔除系统管理，含安全策略/智能体/高管保护（租户专属）</td><td>[多租户租户管理员]</td></tr>
+      <tr><td>副标题</td><td>「管理本租户的管理员账号、角色权限与登录安全策略」</td><td>[Overlay] tenant 文案</td></tr>
+    </tbody>
+  </table>
+  <div class="dom-comparison"><h5>DOM 树比对结果</h5><table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>租户管理员行</td><td>2 行（tenant_admin / tenant_ops01）</td><td>截图一致</td><td class="pass">一致</td></tr>
+      <tr><td>租户角色行</td><td>3 行；自定义运营 行动作含 查看/编辑/删除</td><td>截图一致</td><td class="pass">一致</td></tr>
+      <tr><td>副标题</td><td>「管理本租户的…」</td><td>浏览器提取一致</td><td class="pass">一致</td></tr>
+    </tbody></table></div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#c-5">← 返回主文件（2.5）</a>
+  <a href="./index.html">主文件 →</a>
+</nav>
+
+<script src="./preview.js"></script>
+</body>
+</html>

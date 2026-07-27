@@ -61,7 +61,18 @@ export function TenantScopeSelector({ value, onChange }: Props) {
         {t('label')}
       </span>
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger render={<Button variant="outline" size="sm" role="combobox" aria-expanded={open} className="w-56 justify-between" />}>
+        <PopoverTrigger
+          render={(
+            <Button
+              variant="outline"
+              size="sm"
+              role="combobox"
+              aria-expanded={open}
+              className="w-56 justify-between"
+              data-testid="tenant-scope-selector"
+            />
+          )}
+        >
           <span className="truncate">{label}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </PopoverTrigger>

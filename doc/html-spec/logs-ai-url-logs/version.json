@@ -1,0 +1,13 @@
+{
+  "module": "logs-ai-url-logs",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-18",
+      "demo_commit": "804efb9",
+      "spec_commit": "804efb9",
+      "summary": "初版：双 Tab 搜索区（6 项筛选，高级搜索与普通搜索字段完全相同）、9 列日志表、5-Tab 沙箱研判弹窗（原始日志搜索/复制实测可用）；核心发现：无专属 PRD、网关无对应 API、仅传统版可见（LEGACY_HIDE_AI 实测）、弹窗 10+ 处 zh 文案 UTF-8 损坏、筛选不参与过滤、相邻「通知日志」导航是 404 死链"
+    }
+  ]
+}

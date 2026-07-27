@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { SimilarDomainConfig, AuthSpoofingAction, CheckItem } from '@/types/auth-spoofing';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { CollapsibleCardTrigger } from '@/components/ui/collapsible-section-trigger';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,22 +39,15 @@ export function SimilarDomainSection({ config, onChange, disabled }: SimilarDoma
     <Card>
       <Collapsible open={open} onOpenChange={setOpen}>
         <CardHeader className="pb-3">
-          <CollapsibleTrigger
-            render={
-              <button
-                type="button"
-                className="flex items-center gap-2 cursor-pointer w-full text-left bg-transparent border-0 p-0"
-              >
-                <ChevronDown className={cn('h-4 w-4 transition-transform', open && 'rotate-180')} />
+          <CollapsibleCardTrigger>
+                <ChevronDown className={cn('h-4 w-4 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', open && 'rotate-180')} />
                 <CardTitle className="text-base font-semibold">{t('similarDomain.title')}</CardTitle>
                 {config.enabled && (
                   <Badge variant="secondary" className="text-[10px] ml-2">
                     {t('action.' + config.action as any)}
                   </Badge>
                 )}
-              </button>
-            }
-          />
+              </CollapsibleCardTrigger>
         </CardHeader>
         <CollapsibleContent>
           <CardContent className="space-y-4 pt-0">

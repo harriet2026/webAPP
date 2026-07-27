@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级2：详情抽屉（变更对比） - HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .component-preview { background:#fff; overflow-x:auto; }
+  .pass { color:#15803d; font-weight:600; }
+  .bad { color:#b91c1c; font-weight:600; }
+  .warn { color:#a16207; font-weight:600; }
+  .tag-base { display:inline-block; padding:.05rem .375rem; border-radius:.25rem; font-size:.6875rem; font-weight:600; background:#dbeafe; color:#1d4ed8; }
+  .tag-overlay { background:#fef3c7; color:#92400e; }
+  .tag-gap { background:#fee2e2; color:#b91c1c; }
+  .spec-swap-bar { display:flex; align-items:center; gap:.375rem; flex-wrap:wrap; margin-bottom:.75rem; padding-bottom:.5rem; border-bottom:1px dashed var(--border); font-size:.75rem; color:var(--muted-foreground); }
+  .spec-swap-bar button { font:inherit; padding:.15rem .5rem; border:1px solid var(--border); background:#fff; border-radius:.25rem; cursor:pointer; }
+  .spec-swap-bar button.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+</style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#c-5">← 返回主文件</a><a href="./layer-1-tenant-layer.html">上一层：租户层</a></nav>
+<header class="spec-header">
+  <h1>交互层级 2：详情抽屉</h1>
+  <table class="meta-table"><tr><td>触发路径</td><td>层级0 → 列表行「查看」→ 右侧 Sheet（<code>sm:max-w-2xl</code>）。本例取的是<strong>失败记录</strong>，可看到「失败原因」区块</td></tr></table>
+</header>
+<section>
+  <div class="component-preview" data-preview="static"><div role="dialog" id="radix-_r_1r_" aria-describedby="radix-_r_1t_" aria-labelledby="radix-_r_1s_" data-state="open" data-slot="sheet-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full border-l flex w-full flex-col p-0 sm:max-w-2xl" tabindex="-1" style="pointer-events: auto;"><div data-slot="sheet-header" class="flex flex-col gap-1.5 p-4 border-b border-gray-100 px-6 pt-6 pb-3 dark:border-gray-800"><div class="mb-1 text-xs text-gray-500">日志审计 / 管理员操作日志</div><h2 id="radix-_r_1s_" data-slot="sheet-title" class="text-foreground font-semibold flex items-center gap-2">停用：锐驰智能制造（T0006）<span class="inline-flex items-center rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">失败</span></h2><p id="radix-_r_1t_" data-slot="sheet-description" class="text-muted-foreground text-sm">查看该次管理员操作的详细信息与变更内容</p></div><div class="min-h-0 flex-1 space-y-4 overflow-auto bg-gray-50 p-6"><div class="rounded-lg border border-gray-200 bg-white"><div class="border-b border-gray-100 px-4 py-3"><h3 class="font-medium text-gray-900">操作概要</h3></div><div class="divide-y divide-gray-50 px-4 py-1"><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">日志编号</div><div class="flex-1 text-sm text-gray-900">OP20260622007</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">操作时间</div><div class="flex-1 text-sm text-gray-900">2026-06-22 09:12:03</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">操作者</div><div class="flex-1 text-sm text-gray-900"><span>张运维（我）<span class="ml-1.5 text-gray-400">admin</span><span class="ml-2 inline-flex items-center rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs text-gray-600">平台管理员</span></span></div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">操作层级</div><div class="flex-1 text-sm text-gray-900">平台级操作</div></div></div></div><div class="rounded-lg border border-gray-200 bg-white"><div class="border-b border-gray-100 px-4 py-3"><h3 class="font-medium text-gray-900">操作内容</h3></div><div class="divide-y divide-gray-50 px-4 py-1"><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">操作模块</div><div class="flex-1 text-sm text-gray-900">系统管理 / 租户管理</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">操作类型</div><div class="flex-1 text-sm text-gray-900">停用</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">操作对象</div><div class="flex-1 text-sm text-gray-900">锐驰智能制造（T0006）</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">操作摘要</div><div class="flex-1 text-sm text-gray-900">因欠费暂停租户</div></div><div class="flex gap-3 py-2"><div class="w-28 shrink-0 text-sm text-gray-500">来源 IP</div><div class="flex-1 text-sm text-gray-900">10.8.0.12（内网）</div></div></div></div><div class="rounded-lg border border-gray-200 bg-white"><div class="border-b border-gray-100 px-4 py-3"><h3 class="font-medium text-gray-900">变更对比</h3></div><div class="divide-y divide-gray-50 px-4 py-1"><div class="flex items-center gap-3 py-3"><div class="flex-1 rounded-lg border border-gray-200 bg-gray-50 p-3"><div class="mb-1 text-xs text-gray-500">变更前</div><div class="text-sm text-gray-700">active</div></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right h-4 w-4 shrink-0 text-gray-400"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><div class="flex-1 rounded-lg border border-blue-200 bg-blue-50 p-3"><div class="mb-1 text-xs text-blue-600">变更后</div><div class="text-sm text-gray-900">suspended</div></div></div></div></div><div class="rounded-lg border border-red-200 bg-red-50"><div class="flex items-center gap-2 border-b border-red-200 px-4 py-3"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-4 w-4 text-red-600"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><h3 class="font-medium text-red-800">失败原因</h3></div><div class="px-4 py-3"><p class="text-sm leading-relaxed text-gray-700">存在未结清工单，暂停操作被业务校验拦截</p></div></div></div><div class="flex flex-shrink-0 justify-end gap-3 border-t border-gray-200 bg-gray-50 p-6"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3 bg-transparent">关闭</button></div><button type="button" class="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x size-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="sr-only">Close</span></button></div></div>
+  <figure class="screenshot-figure"><img src="./screenshots/layer-2-detail-drawer.png" alt="管理员操作详情抽屉"></figure>
+  <table class="spec-table">
+    <thead><tr><th>分区</th><th>字段</th><th>显隐条件</th></tr></thead>
+    <tbody>
+      <tr><td>头部</td><td>面包屑「日志审计 / 管理员操作日志」+ 标题「{操作类型}：{操作对象}」+ 结果徽章</td><td>常显</td></tr>
+      <tr><td>操作概要</td><td>日志编号 / 操作时间 / 操作者（姓名 + 账号 + <strong>层级徽标</strong>「平台管理员」「租户管理员」）/ 所属租户 / 操作层级</td><td>「所属租户」仅 <code>layer==="tenant"</code></td></tr>
+      <tr><td>操作内容</td><td>操作模块（<strong>一级 / 二级</strong> 完整路径）/ 操作类型 / 操作对象 / 操作摘要（<code>detail</code>）/ 来源 IP（<code>IP（归属地）</code>）</td><td>常显</td></tr>
+      <tr><td><strong>变更对比</strong></td><td>左侧灰卡「变更前」<code>before ?? "—"</code> → ArrowRight → 右侧蓝卡「变更后」<code>after ?? "—"</code></td><td class="warn">仅 <code>before</code> 或 <code>after</code> 存在时（<strong>与 opType 无关</strong>）</td></tr>
+      <tr><td><strong>失败原因</strong></td><td>红卡 + AlertTriangle + <code>failReason</code> 自由文本</td><td class="bad">仅 <code>result==="failed" &amp;&amp; failReason</code></td></tr>
+      <tr><td>底部</td><td>「关闭」</td><td>常显</td></tr>
+    </tbody>
+  </table>
+  <p class="bad">⚠ <code>failReason</code> 是<strong>自由文本</strong>（如「存在未结清工单，暂停操作被业务校验拦截」），不是枚举 —— 与认证日志的 7 类枚举 + 处置建议映射形成对比。</p>
+  <div class="dom-comparison">
+  <h5>DOM 树比对结果</h5>
+  <table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody><tr><td>根节点</td><td><code>[data-slot=sheet-content]</code></td><td>同</td><td class="pass">一致</td></tr>
+<tr><td>后代节点数</td><td>74</td><td>74</td><td class="pass">一致</td></tr>
+<tr><td>分区</td><td>4（操作概要 / 操作内容 / 变更对比 / 失败原因）</td><td>4</td><td class="pass">一致</td></tr>
+<tr><td>失败原因区</td><td>仅失败记录（本例为失败记录 → 含该区）</td><td>同</td><td class="pass">一致</td></tr>
+<tr><td>层级徽标</td><td>仅详情里有（列表「操作者」列没有）</td><td>同</td><td class="pass">一致</td></tr></tbody>
+  </table>
+</div>
+</section>
+<script src="../assets/stats-preview.js"></script>
+</body>
+</html>

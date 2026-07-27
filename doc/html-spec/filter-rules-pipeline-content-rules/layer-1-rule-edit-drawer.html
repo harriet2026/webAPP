@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 2：新建/编辑规则抽屉 - 内容规则</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --text:#111827; --sub:#6b7280; --blue:#1677ff; --red:#f5222d; --radius:.625rem; font-family:"Geist", system-ui, sans-serif; }
+    *{box-sizing:border-box} body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:var(--text);line-height:1.6} a{color:var(--blue);text-decoration:none} nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)} h1{margin:0 0 16px;color:var(--primary);font-size:26px} h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px} h3{font-size:17px}.meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}.meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}.meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}.component-preview{margin:12px 0;padding:18px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}.drawer-preview{display:grid;grid-template-columns:560px 1fr;min-width:960px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#f8fafc}.drawer-header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-bottom:1px solid var(--border);background:#fff}.drawer-left{padding:22px;border-right:1px solid var(--border);background:#fff}.drawer-right{padding:22px;background:#f5f5f5}.block{margin-bottom:18px;padding:16px;border-radius:8px;background:#fafafa}.block-title{display:flex;gap:10px;align-items:center;margin-bottom:12px;font-weight:650}.bar{width:4px;height:20px;border-radius:999px;background:#3b82f6}.bar.amber{background:#f59e0b}.bar.red{background:#ef4444}.bar.gray{background:#9ca3af}.row{display:grid;grid-template-columns:110px 1fr;gap:12px;margin:12px 0;align-items:start}.label{padding-top:6px;text-align:right;font-weight:600;font-size:13px;cursor:help}.required{color:var(--red)}.input,.select,.textarea{padding:7px 11px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#374151;font-size:14px}.textarea{width:100%;min-height:80px;font-family:ui-monospace,monospace;font-size:13px}.hint{color:var(--sub);font-size:12px}.check{display:inline-flex;gap:6px;align-items:center;margin-right:14px;font-size:14px}.effect{margin-bottom:16px;padding:16px;border:1px solid var(--border);border-radius:8px;background:#fff}.effect p{margin:7px 0;font-size:14px}.effect .k{color:var(--sub)}.pill{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:650;background:#ffedd5;color:#c2410c}.pill.red{background:#ffe2e2;color:#d92d20}.pill.amber{background:#fef3c7;color:#92400e}.pill.blue{background:#dbeafe;color:#1d4ed8}.pill.mono{background:#f3f4f6;color:#111827;font-family:ui-monospace,monospace}.button-blue{padding:8px 14px;border:0;border-radius:8px;background:#155eef;color:#fff;font-weight:650;cursor:pointer}.button-outline{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer}.tipsbox{padding:14px;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;color:#1d4ed8;font-size:13px}.tipsbox ul{margin:6px 0 0;padding-left:18px}.collapse-link{display:block;margin:10px 0;font-weight:650}.is-hidden{display:none!important}.screenshot-figure{text-align:center}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}.screenshot-figure figcaption{margin-top:8px;color:var(--sub);font-size:13px}.layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}
+  </style>
+</head>
+<body>
+  <nav><a href="index.html#component-2-3">← 返回主文件</a> · 层级 2 / 4 · <a href="layer-2-validation-examples-simulator.html">下一层：校验/示例/模拟测试 →</a></nav>
+  <header class="spec-header">
+    <h1>交互层级 2：新建/编辑规则抽屉 RuleEditDrawer</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 内容规则编辑抽屉（<code>content-rules-module.tsx</code> 内 <code>RuleEditDrawer</code>）</td></tr>
+      <tr><td>触发路径</td><td>层级1 内容规则列表 → 点击「+ 新建规则」（新建态）或行内编辑图标（编辑态，表单预填 <code>ruleToFormData(rule)</code>）</td></tr>
+      <tr><td>抽屉形态</td><td>920px Sheet（<code>w-[920px] max-w-[920px]</code>），叠加在 80vw 内容策略抽屉之上；头部标题+副标题+取消/保存；左 560px 表单（可滚动）+ 右侧预览帮助区（灰底）</td></tr>
+      <tr><td>浏览器实测默认值</td><td>标题「新建内容规则」；接收方向勾选（direction=receive）、外发/域内未勾选；优先级 100；有效期空（永久）；类型=关键词；作用于=主题+正文；执行动作=隔离；备注 0/200。抽屉根节点 <code>[role=dialog]</code>，提取节点数 245，实测宽 920px。</td></tr>
+      <tr><td>截图</td><td><code>screenshots/edit-drawer-default.png</code></td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">2</span>HTML 预览（可交互：类型联动占位符与提示、勾选联动右侧当前配置效果、备注计数）</h2>
+    <div class="component-preview">
+      <div class="drawer-preview" data-demo-extracted="rule-edit-drawer">
+        <div class="drawer-header">
+          <span><strong style="font-size:17px;">新建内容规则</strong><br><small class="hint">配置内容关键词/正则规则，识别并处置含敏感信息的邮件</small></span>
+          <span><a class="button-outline" href="layer-3-dialogs.html#cancel-confirm">取消</a> <a class="button-blue" href="layer-2-validation-examples-simulator.html">保存</a></span>
+        </div>
+        <div class="drawer-left">
+          <div class="block">
+            <div class="block-title"><span class="bar"></span>基础设置</div>
+            <div class="row"><span class="label" title="为规则设置一个易于识别的名称，便于管理和查找"><span class="required">*</span> 规则名称 ⓘ</span><input class="input" data-f-name placeholder="如：身份证号红线规则"></div>
+            <div class="row"><span class="label" title="选择该规则需要应用的邮件流转方向"><span class="required">*</span> 生效范围 ⓘ</span><span>
+              <label class="check"><input type="checkbox" data-f-dir value="接收" checked> 接收方向</label>
+              <label class="check"><input type="checkbox" data-f-dir value="外发"> 外发方向</label>
+              <label class="check"><input type="checkbox" data-f-dir value="域内"> 域内方向</label>
+            </span></div>
+            <div class="row"><span class="label" title="数值越小优先级越高，优先级高的规则会先被匹配执行（demo 原文案，与列表排序矛盾，见主文件 D2）">优先级 ⓘ</span><span><input class="input" data-f-priority type="number" min="1" max="9999" value="100" style="width:96px;"> <span class="hint">范围1-9999，数值越小优先级越高</span></span></div>
+            <div class="row"><span class="label" title="设置规则的过期时间，过期后规则将自动失效">有效期至 ⓘ</span><span><input class="input" data-f-expire type="date"> <span class="hint">(留空表示永久有效)</span></span></div>
+          </div>
+          <div class="block">
+            <div class="block-title"><span class="bar amber"></span>匹配条件</div>
+            <div class="row"><span class="label" title="选择匹配方式：关键词匹配或正则表达式匹配"><span class="required">*</span> 类型 ⓘ</span><select class="select" data-f-type style="width:190px;">
+              <option value="keyword">关键词</option><option value="regex">正则表达式</option><option value="content_group">内容组</option>
+            </select></div>
+            <div class="row"><span class="label" title="输入需要匹配的关键词或正则表达式"><span class="required">*</span> 匹配内容 ⓘ</span><span style="width:100%;"><textarea class="textarea" data-f-content placeholder="例如：机密|绝密|内部资料"></textarea><span class="hint" data-f-hint>多个关键词用竖线 | 分隔</span></span></div>
+            <div class="row"><span class="label" title="选择需要检查的邮件部分：主题、正文或附件"><span class="required">*</span> 作用于 ⓘ</span><span>
+              <label class="check"><input type="checkbox" data-f-scope value="主题" checked> 主题</label>
+              <label class="check"><input type="checkbox" data-f-scope value="正文" checked> 正文</label>
+              <label class="check"><input type="checkbox" data-f-scope value="信头"> 信头</label>
+              <label class="check"><input type="checkbox" data-f-scope value="附件名称"> 附件名称</label>
+              <label class="check"><input type="checkbox" data-f-scope value="附件内容"> 附件内容</label>
+            </span></div>
+          </div>
+          <div class="block">
+            <div class="block-title"><span class="bar red"></span>执行动作</div>
+            <div class="row"><span class="label" title="选择匹配规则时对邮件执行的处置动作"><span class="required">*</span> 执行动作 ⓘ</span><span><select class="select" data-f-action style="width:100%;">
+              <option value="block">阻断</option><option value="block_alert">阻断+告警</option><option value="isolate" selected>隔离</option><option value="review">审核</option><option value="mark">标记</option>
+            </select><br><span class="hint">适用于所有勾选的生效范围</span></span></div>
+          </div>
+          <div class="block">
+            <div class="block-title"><span class="bar gray"></span>备注说明</div>
+            <textarea class="textarea" data-f-remark maxlength="200" placeholder="添加规则说明，最多200字" style="font-family:inherit;"></textarea>
+            <div class="hint" style="text-align:right;"><span data-remark-count>0</span>/200</div>
+          </div>
+        </div>
+        <div class="drawer-right">
+          <div class="effect">
+            <h3 style="margin-top:0;">⚡ 当前配置效果</h3>
+            <p><span class="k">规则名称:</span> <strong data-e-name>未填写</strong></p>
+            <p><span class="k">生效范围:</span> <span data-e-dirs>接收</span></p>
+            <p><span class="k">匹配内容:</span> <code data-e-content>未填写</code></p>
+            <p><span class="k">作用于:</span> <span data-e-scopes>主题、正文</span></p>
+            <p><span class="k">执行动作:</span> <span class="pill" data-e-action>隔离</span></p>
+            <p><span class="k">优先级:</span> <span class="pill mono" data-e-priority>100</span></p>
+            <p><span class="k">有效期至:</span> <span data-e-expire>永久有效</span></p>
+          </div>
+          <a class="collapse-link" style="color:#155eef;" href="layer-2-validation-examples-simulator.html#examples">💡 查看配置示例 ⌄</a>
+          <a class="collapse-link" style="color:#16a34a;" href="layer-2-validation-examples-simulator.html#simulator">▶ 模拟测试 ⌄</a>
+          <div class="tipsbox">
+            <strong>ⓘ 配置提示</strong>
+            <ul>
+              <li>优先级数值越大，规则优先级越高</li>
+              <li>正则表达式需符合JavaScript语法</li>
+              <li>关键词用竖线|分隔，支持多个关键词</li>
+              <li>附件内容匹配需要文档解析支持</li>
+              <li>建议先使用模拟测试验证规则效果</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/edit-drawer-default.png" alt="新建内容规则抽屉默认态">
+      <figcaption>新建内容规则抽屉默认态（浏览器实际渲染）：左侧四段式表单（蓝/琥珀/红/灰色条），右侧当前配置效果 + 两个折叠入口 + 配置提示。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>元素清单</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>元素</th><th>默认值/占位符</th><th>校验/联动</th><th>i18n key（内联 L）</th></tr></thead>
+      <tbody>
+        <tr><td>头部</td><td>标题 + 副标题</td><td>新建内容规则 / 配置内容关键词/正则规则，识别并处置含敏感信息的邮件</td><td>编辑态标题切换为「编辑内容规则」</td><td>L.title / L.subtitle</td></tr>
+        <tr><td>头部</td><td>取消 / 保存</td><td>右上角 outline / 主色按钮</td><td>取消在有更改时弹确认（层级4）；保存执行校验（层级3）；保存按钮始终可点</td><td>L.cancel / L.save</td></tr>
+        <tr><td>基础设置</td><td>规则名称 Input</td><td>placeholder「如：身份证号红线规则」</td><td>必填；label 带 HelpCircle Tooltip「为规则设置一个易于识别的名称…」；无长度上限（PRD 要求 1-50，见主文件 D4）</td><td>L.ruleName / L.ruleNamePlaceholder / L.ruleNameTip</td></tr>
+        <tr><td>基础设置</td><td>生效范围 Checkbox×3</td><td>接收方向 ✓ / 外发方向 / 域内方向（默认勾选 = 打开时的 direction，抽屉内固定 receive）</td><td>必须至少勾选一个；勾选时该方向 action 同步为当前统一动作</td><td>L.effectScope / L.dirReceiveFull / L.dirSendFull / L.dirInternalFull</td></tr>
+        <tr><td>基础设置</td><td>优先级 Input(number)</td><td>100，min=1 max=9999</td><td>输入自动 clamp 到 1-9999，清空失焦回落 100；Tooltip 与 hint 文案「数值越小优先级越高」（与列表排序矛盾，D2）</td><td>L.priority / L.priorityTip / L.priorityHint</td></tr>
+        <tr><td>基础设置</td><td>有效期至 Input(date)</td><td>空（mm/dd/yyyy 原生控件）</td><td>留空=永久；存储追加 T00:00:00Z</td><td>L.expireDate / L.expireDateTip / L.expireDateHint</td></tr>
+        <tr><td>匹配条件</td><td>类型 Select</td><td>关键词（选项：关键词 / 正则表达式 / 内容组）</td><td>切换联动匹配内容 placeholder 与 hint；切离 regex 清除正则错误</td><td>getMatchTypeMetadata().label/description/placeholder</td></tr>
+        <tr><td>匹配条件</td><td>匹配内容 Textarea</td><td>关键词态 placeholder「例如：机密|绝密|内部资料」；正则态「例如：\d{17}[\dXx]（身份证号）」；内容组态「选择或输入内容组名称」</td><td>必填；等宽字体 min-h-[80px]；regex 态输入实时 new RegExp 校验（层级3）</td><td>L.matchContent / L.matchContentTip / L.keywordHint / L.regexHint</td></tr>
+        <tr><td>匹配条件</td><td>作用于 Checkbox×5</td><td>主题 ✓ 正文 ✓ 信头 / 附件名称 / 附件内容</td><td>必须至少选一个</td><td>getScopeMetadata().label / L.applyTo</td></tr>
+        <tr><td>执行动作</td><td>动作 Select</td><td>隔离（选项：阻断 / 阻断+告警 / 隔离 / 审核 / 标记，选项文字按动作着色）</td><td>统一动作：变更时同步到所有已勾选方向的 action；hint「适用于所有勾选的生效范围」</td><td>getRuleActionMetadata().label / L.actionHint</td></tr>
+        <tr><td>备注说明</td><td>Textarea + 计数</td><td>placeholder「添加规则说明，最多200字」，0/200</td><td>超 200 字直接不接受输入，实时计数</td><td>L.remarkTitle / L.remarkPlaceholder</td></tr>
+        <tr><td>右侧</td><td>当前配置效果</td><td>规则名称:未填写 / 生效范围:接收 / 匹配内容:未填写 / 作用于:主题、正文 / 执行动作:隔离 / 优先级:100 / 有效期至:永久有效</td><td>随左侧表单实时联动（图标行：FileText/Mail/Search/Paperclip/AlertTriangle/Zap/Clock）</td><td>L.currentEffect / L.notFilled / L.notSelected / L.permanent</td></tr>
+        <tr><td>右侧</td><td>查看配置示例 / 模拟测试 折叠入口</td><td>蓝色 Lightbulb / 绿色 Play，ChevronDown</td><td>展开详见层级3</td><td>L.viewExamples / L.simulateTest</td></tr>
+        <tr><td>右侧</td><td>配置提示卡</td><td>5 条提示（蓝底）</td><td>静态；第1条「优先级数值越大，规则优先级越高」与优先级字段 hint 矛盾（D2）</td><td>L.configTips / L.tip1-5</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td><code>[role=dialog]</code> 920px Sheet，class 含 <code>data-[state=open]:slide-in-from-right</code>，节点数 245</td><td><code>.drawer-preview[data-demo-extracted]</code>，保留头部/左右栏/四段表单/右侧三区（结构裁剪）</td><td>一致（关键节点）</td></tr>
+        <tr><td>表单分区</td><td>h3 实测：基础设置 / 匹配条件 / 执行动作 / 备注说明 / 当前配置效果，分区色条蓝/琥珀/红/灰</td><td>同 4+1 分区与色条</td><td>一致</td></tr>
+        <tr><td>复选框状态</td><td>dir-receive checked，dir-send/internal unchecked；scope-subject/body checked，其余 unchecked（data-state 实测）</td><td>同默认勾选</td><td>一致</td></tr>
+        <tr><td>下拉默认值</td><td>combobox 实测 [关键词, 隔离]</td><td>同默认值</td><td>一致</td></tr>
+        <tr><td>输入默认值</td><td>inputs 实测：text 空(placeholder 如：身份证号红线规则)、number=100、date 空、textarea 空(placeholder 例如：机密|绝密|内部资料)</td><td>同默认值</td><td>一致</td></tr>
+        <tr><td>必填标识</td><td>规则名称/生效范围/类型/匹配内容/作用于/执行动作 label 前红色 *；优先级/有效期无 *</td><td>同必填标识</td><td>一致</td></tr>
+        <tr><td>右侧预览默认值</td><td>未填写 / 接收 / 未填写 / 主题、正文 / 隔离 / 100 / 永久有效</td><td>同文案</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav><a href="index.html#component-2-3">← 返回主文件</a> · <a href="layer-2-validation-examples-simulator.html">下一层：校验/示例/模拟测试 →</a></nav>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const typeMeta = {
+      keyword: { ph: "例如：机密|绝密|内部资料", hint: "多个关键词用竖线 | 分隔" },
+      regex: { ph: "例如：\\d{17}[\\dXx]（身份证号）", hint: "需符合 JavaScript RegExp 语法" },
+      content_group: { ph: "选择或输入内容组名称", hint: "引用预定义的关键词集合" },
+    };
+    const actionLabel = { block: "阻断", block_alert: "阻断+告警", isolate: "隔离", review: "审核", mark: "标记" };
+    const actionCls = { block: "pill red", block_alert: "pill red", isolate: "pill", review: "pill amber", mark: "pill blue" };
+    function sync() {
+      $("[data-e-name]").textContent = $("[data-f-name]").value.trim() || "未填写";
+      const dirs = [...document.querySelectorAll("[data-f-dir]:checked")].map((c) => c.value);
+      $("[data-e-dirs]").textContent = dirs.length ? dirs.join("、") : "未选择";
+      $("[data-e-content]").textContent = $("[data-f-content]").value.trim() || "未填写";
+      const scopes = [...document.querySelectorAll("[data-f-scope]:checked")].map((c) => c.value);
+      $("[data-e-scopes]").textContent = scopes.length ? scopes.join("、") : "未选择";
+      const action = $("[data-f-action]").value;
+      const pill = $("[data-e-action]");
+      pill.textContent = actionLabel[action];
+      pill.className = actionCls[action];
+      let priority = parseInt($("[data-f-priority]").value) || 100;
+      priority = Math.min(9999, Math.max(1, priority));
+      $("[data-e-priority]").textContent = priority;
+      $("[data-e-expire]").textContent = $("[data-f-expire]").value || "永久有效";
+      $("[data-remark-count]").textContent = $("[data-f-remark]").value.length;
+      const meta = typeMeta[$("[data-f-type]").value];
+      $("[data-f-content]").placeholder = meta.ph;
+      $("[data-f-hint]").textContent = meta.hint;
+    }
+    document.querySelectorAll("input,select,textarea").forEach((el) => {
+      el.addEventListener("input", sync);
+      el.addEventListener("change", sync);
+    });
+    $("[data-f-priority]").addEventListener("blur", (e) => { if (!e.target.value) { e.target.value = 100; sync(); } });
+    sync();
+  </script>
+</body>
+</html>

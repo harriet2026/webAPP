@@ -347,7 +347,7 @@ function WeekdaySection({ leaf, onChange, t }: { leaf: ConditionLeaf; onChange: 
               }}
               className={cn(
                 'rounded-md border px-2.5 py-0.5 text-xs select-none',
-                on ? 'border-blue-700 bg-blue-700 text-white' : 'hover:bg-muted',
+                on ? 'border-primary bg-primary text-primary-foreground' : 'hover:bg-muted',
               )}
             >
               {t(`v3Conditions.weekday_${d}`)}

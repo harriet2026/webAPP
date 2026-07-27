@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级4：检测详情抽屉 - 仿冒邮件检测智能体</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { corePlugins:{ preflight:false }, theme:{ extend:{ colors:{
+      background:'var(--background)', foreground:'var(--foreground)', card:'var(--card)',
+      'card-foreground':'var(--card-foreground)', muted:'var(--muted)', 'muted-foreground':'var(--muted-foreground)',
+      primary:'var(--primary)', 'primary-foreground':'var(--primary-foreground)', border:'var(--border)',
+      input:'var(--input)', ring:'var(--ring)', destructive:'var(--destructive)', accent:'var(--accent)',
+      'accent-foreground':'var(--accent-foreground)', secondary:'var(--secondary)',
+      'secondary-foreground':'var(--secondary-foreground)', popover:'var(--popover)',
+      'popover-foreground':'var(--popover-foreground)' },
+      borderRadius:{ lg:'var(--radius)', md:'calc(var(--radius) - 2px)', sm:'calc(var(--radius) - 4px)' } } } };
+  </script>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262); --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0); --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0); --destructive: oklch(0.577 0.245 27.325);
+      --diff-bg: oklch(0.97 0.013 25); --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95); --question-border: oklch(0.75 0.15 90);
+      --radius: 0.625rem;
+      --font-sans: "Geist","Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono","Geist Mono Fallback", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground);
+      line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 2rem; }
+    .spec-header h1 { color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+    .meta-table td:first-child { font-weight: 600; width: 170px; color: var(--muted-foreground); white-space: nowrap; }
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 2rem; margin-bottom: 2rem; }
+    .component-toc > h2 { color: var(--primary); font-size: 1.05rem; margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .component-toc ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.5rem; }
+    .component-toc li { padding: 0.375rem 0.75rem; border-radius: calc(var(--radius) - 4px); background: var(--muted); font-size: 0.875rem; }
+    .component-toc li a { color: var(--primary); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.375rem; }
+    .component-toc li a:hover { text-decoration: underline; }
+    .component-toc .toc-layer-links { font-size: 0.75rem; color: var(--muted-foreground); margin-left: 0.5rem; }
+    .component-toc .toc-layer-links a { color: var(--muted-foreground); font-weight: 400; }
+    .component-toc .toc-badge { display: inline-block; font-size: 0.6875rem; font-weight: 600; padding: 0.0625rem 0.375rem;
+      border-radius: calc(var(--radius) - 4px); background: var(--primary); color: var(--primary-foreground); white-space: nowrap; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+    section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem; font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+    h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+    table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+    table.spec-table th { background: var(--muted); color: var(--foreground); font-weight: 600; text-align: left;
+      padding: 0.55rem 0.7rem; border: 1px solid var(--border); }
+    table.spec-table td { padding: 0.55rem 0.7rem; border: 1px solid var(--border); vertical-align: top; }
+    table.spec-table tr:nth-child(even) td { background: var(--muted); }
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .screenshot-figure figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .component-spec { border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1rem 0; background: var(--card); }
+    .component-spec > h3 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 0.75rem; }
+    pre { background: var(--muted); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); padding: 1rem;
+      overflow-x: auto; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; margin: 1rem 0; }
+    code { font-family: var(--font-mono); font-size: 0.85em; }
+    blockquote { border-left: 4px solid var(--destructive); background: var(--diff-bg); padding: 0.75rem 1rem; margin: 1rem 0;
+      font-size: 0.875rem; border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0; }
+    .diff-section { border-left: 4px solid var(--diff-border); background: var(--diff-bg); }
+    .diff-section > h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+    .diff-badge { display: inline-block; background: var(--diff-border); color: #fff; font-size: 0.75rem; font-weight: 600;
+      padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); margin-right: 0.5rem; }
+    .question-section { border-left: 4px solid var(--question-border); background: var(--question-bg); }
+    .question-section > h2 { color: var(--question-border); border-bottom-color: var(--question-border); }
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); }
+    .badge-high { background: oklch(0.65 0.2 25); color: #fff; }
+    .badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+    .badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+    .component-preview { border: 2px dashed var(--primary); border-radius: var(--radius); padding: 1.5rem; margin: 1rem 0;
+      background: #f7f8fb; position: relative; overflow: auto; }
+    .component-preview::before { content: "🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）"; position: absolute; top: -0.625rem;
+      left: 0.75rem; background: var(--primary); color: var(--primary-foreground); font-size: 0.6875rem; font-weight: 600;
+      padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); white-space: nowrap; }
+    .component-preview * { box-sizing: border-box; }
+    /* 让被提取的 radix 弹窗/抽屉在预览区以常规流呈现（去掉 fixed 定位与全屏遮罩） */
+    .component-preview [role="dialog"], .component-preview [role="alertdialog"] {
+      position: static !important; inset: auto !important; transform: none !important; translate: none !important;
+      width: 100% !important; max-width: 100% !important; height: auto !important; max-height: none !important;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin: 0 auto; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: calc(var(--radius) - 2px);
+      padding: 1rem 1.25rem; margin: 1.5rem 0; background: var(--card); }
+    .interaction-layer > h4 { color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%;
+      background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .trigger-path { background: var(--muted); border-radius: calc(var(--radius) - 4px); padding: 0.5rem 0.75rem; margin: 0.5rem 0 1rem;
+      font-size: 0.8125rem; color: var(--muted-foreground); }
+    .trigger-path strong { color: var(--foreground); }
+    .dom-comparison { margin: 1rem 0; border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); overflow: hidden; }
+    .dom-comparison > h5 { background: var(--muted); padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600; color: var(--foreground);
+      border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.375rem; }
+    .dom-comparison > h5::before { content: "🔍"; font-size: 0.875rem; }
+    .dom-comparison table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+    .dom-comparison th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .dom-comparison td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .dom-comparison tr:last-child td { border-bottom: none; }
+    .dom-pass { color: oklch(0.5 0.15 150); font-weight: 600; }
+    .dom-fail { color: var(--destructive); font-weight: 600; }
+    .dom-fixed { color: oklch(0.6 0.15 90); font-weight: 600; }
+    table.layer-index { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.layer-index th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+    table.layer-index td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.layer-index td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    table.layer-index td a:hover { text-decoration: underline; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; background: var(--muted);
+      border-radius: var(--radius); margin-bottom: 1.5rem; font-size: 0.875rem; }
+    .layer-nav a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .layer-nav a:hover { text-decoration: underline; }
+    .version-history-section { margin: 1.5rem 0; }
+    .version-history-table td:nth-child(5) { color: var(--muted-foreground); }
+    .spec-version { font-weight: 600; color: oklch(0.52 0.226 262); }
+    .note { background: oklch(0.97 0.02 250); border: 1px solid var(--border); border-left: 4px solid var(--primary);
+      border-radius: calc(var(--radius) - 4px); padding: 0.6rem 0.9rem; font-size: 0.8rem; color: var(--muted-foreground); margin: 0.75rem 0; }
+  </style>
+/* === TW-STATIC-BEGIN (offline Tailwind, auto-generated) === */
+<style id="tw-static">
+*, ::before, ::after {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}::backdrop {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}.sr-only {position: absolute;width: 1px;height: 1px;padding: 0;margin: -1px;overflow: hidden;clip: rect(0, 0, 0, 0);white-space: nowrap;border-width: 0
+}.fixed {position: fixed
+}.sticky {position: sticky
+}.inset-y-0 {top: 0px;bottom: 0px
+}.right-0 {right: 0px
+}.top-0 {top: 0px
+}.z-10 {z-index: 10
+}.z-50 {z-index: 50
+}.block {display: block
+}.flex {display: flex
+}.inline-flex {display: inline-flex
+}.h-3\.5 {height: 0.875rem
+}.h-4 {height: 1rem
+}.h-full {height: 100%
+}.min-h-full {min-height: 100%
+}.\!w-\[680px\] {width: 680px !important
+}.w-16 {width: 4rem
+}.w-20 {width: 5rem
+}.w-3\.5 {width: 0.875rem
+}.w-3\/4 {width: 75%
+}.w-4 {width: 1rem
+}.w-fit {width: -moz-fit-content;width: fit-content
+}.w-full {width: 100%
+}.min-w-0 {min-width: 0px
+}.\!max-w-\[680px\] {max-width: 680px !important
+}.max-w-\[440px\] {max-width: 440px
+}.flex-1 {flex: 1 1 0%
+}.flex-shrink-0 {flex-shrink: 0
+}.shrink-0 {flex-shrink: 0
+}.flex-col {flex-direction: column
+}.items-start {align-items: flex-start
+}.items-center {align-items: center
+}.justify-center {justify-content: center
+}.justify-between {justify-content: space-between
+}.gap-1 {gap: 0.25rem
+}.gap-2 {gap: 0.5rem
+}.gap-3 {gap: 0.75rem
+}.gap-4 {gap: 1rem
+}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.375rem * var(--tw-space-y-reverse))
+}.space-y-2 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.5rem * var(--tw-space-y-reverse))
+}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.625rem * var(--tw-space-y-reverse))
+}.space-y-5 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(1.25rem * var(--tw-space-y-reverse))
+}.overflow-hidden {overflow: hidden
+}.overflow-y-auto {overflow-y: auto
+}.truncate {overflow: hidden;text-overflow: ellipsis;white-space: nowrap
+}.whitespace-nowrap {white-space: nowrap
+}.break-all {word-break: break-all
+}.rounded-lg {border-radius: var(--radius)
+}.rounded-md {border-radius: calc(var(--radius) - 2px)
+}.border {border-width: 1px
+}.border-b {border-bottom-width: 1px
+}.border-l {border-left-width: 1px
+}.border-gray-200 {--tw-border-opacity: 1;border-color: rgb(229 231 235 / var(--tw-border-opacity, 1))
+}.border-red-200 {--tw-border-opacity: 1;border-color: rgb(254 202 202 / var(--tw-border-opacity, 1))
+}.bg-background {background-color: var(--background)
+}.bg-red-100 {--tw-bg-opacity: 1;background-color: rgb(254 226 226 / var(--tw-bg-opacity, 1))
+}.bg-white {--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
+}.p-0 {padding: 0px
+}.p-2\.5 {padding: 0.625rem
+}.p-4 {padding: 1rem
+}.p-5 {padding: 1.25rem
+}.px-2 {padding-left: 0.5rem;padding-right: 0.5rem
+}.py-0\.5 {padding-top: 0.125rem;padding-bottom: 0.125rem
+}.pl-1 {padding-left: 0.25rem
+}.text-left {text-align: left
+}.text-2xl {font-size: 1.5rem;line-height: 2rem
+}.text-base {font-size: 1rem;line-height: 1.5rem
+}.text-sm {font-size: 0.875rem;line-height: 1.25rem
+}.text-xs {font-size: 0.75rem;line-height: 1rem
+}.font-bold {font-weight: 700
+}.font-medium {font-weight: 500
+}.font-semibold {font-weight: 600
+}.text-blue-500 {--tw-text-opacity: 1;color: rgb(59 130 246 / var(--tw-text-opacity, 1))
+}.text-foreground {color: var(--foreground)
+}.text-gray-400 {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.text-gray-500 {--tw-text-opacity: 1;color: rgb(107 114 128 / var(--tw-text-opacity, 1))
+}.text-gray-700 {--tw-text-opacity: 1;color: rgb(55 65 81 / var(--tw-text-opacity, 1))
+}.text-gray-800 {--tw-text-opacity: 1;color: rgb(31 41 55 / var(--tw-text-opacity, 1))
+}.text-gray-900 {--tw-text-opacity: 1;color: rgb(17 24 39 / var(--tw-text-opacity, 1))
+}.text-muted-foreground {color: var(--muted-foreground)
+}.text-red-600 {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.text-red-700 {--tw-text-opacity: 1;color: rgb(185 28 28 / var(--tw-text-opacity, 1))
+}.shadow-lg {--tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.transition {transition-property: color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-\[color\2c box-shadow\] {transition-property: color,box-shadow;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-colors {transition-property: color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.ease-in-out {transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1)
+}.hover\:bg-gray-50:hover {--tw-bg-opacity: 1;background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}.hover\:text-gray-600:hover {--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity, 1))
+}.focus-visible\:border-ring:focus-visible {border-color: var(--ring)
+}.focus-visible\:ring-\[3px\]:focus-visible {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.data-\[state\=closed\]\:duration-300[data-state="closed"] {transition-duration: 300ms
+}.data-\[state\=open\]\:duration-500[data-state="open"] {transition-duration: 500ms
+}@media (min-width: 640px) {.sm\:max-w-sm {max-width: 24rem
+    }
+}@media (prefers-color-scheme: dark) {.dark\:border-gray-800 {--tw-border-opacity: 1;border-color: rgb(31 41 55 / var(--tw-border-opacity, 1))
+    }.dark\:bg-gray-950 {--tw-bg-opacity: 1;background-color: rgb(3 7 18 / var(--tw-bg-opacity, 1))
+    }.dark\:text-gray-100 {--tw-text-opacity: 1;color: rgb(243 244 246 / var(--tw-text-opacity, 1))
+    }.dark\:text-gray-200 {--tw-text-opacity: 1;color: rgb(229 231 235 / var(--tw-text-opacity, 1))
+    }.dark\:text-gray-300 {--tw-text-opacity: 1;color: rgb(209 213 219 / var(--tw-text-opacity, 1))
+    }.dark\:hover\:bg-gray-800\/50:hover {background-color: rgb(31 41 55 / 0.5)
+    }
+}.\[\&\>svg\]\:pointer-events-none>svg {pointer-events: none
+}.\[\&\>svg\]\:size-3>svg {width: 0.75rem;height: 0.75rem
+}a.\[a\&\]\:hover\:bg-accent:hover {background-color: var(--accent)
+}a.\[a\&\]\:hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}
+</style>
+/* === TW-STATIC-END === */</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-3">← 返回主文件</a>
+  <span>层级 4 · 检测详情抽屉</span>
+  <a href="./layer-2-logs-tab.html">← 检测总览</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 4：检测详情抽屉（Sheet，680px 固定宽）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.3 检测总览页签 · 日志表行操作</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+    <tr><td>触发路径</td><td>日志表行「详情」按钮 → setDetailLog(log) + 清空 expandedSignalIds → <code>Sheet open={!!detailLog}</code></td></tr>
+    <tr><td>demo 组件</td><td><code>impersonation-detection-agent.tsx</code> 检测详情 Sheet（<code>!w-[680px] !max-w-[680px]</code>，hideCloseButton 自绘 X）</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">4</span> 详情抽屉打开态（首条：cfo@cacter-fake.com，风险 95）</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：点击首行「详情」。单列纵向信息流：邮件基础信息 → ①风险研判 → ②最终处置 → ③仿冒信号。</div>
+  <div class="component-preview">
+<div role="dialog" id="radix-_r_m_" aria-describedby="radix-_r_o_" aria-labelledby="radix-_r_n_" data-state="open" data-slot="sheet-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm !w-[680px] !max-w-[680px] p-0 overflow-y-auto" tabindex="-1" style="pointer-events: auto;"><h2 id="radix-_r_n_" data-slot="sheet-title" class="text-foreground font-semibold sr-only">检测详情</h2><p id="radix-_r_o_" data-slot="sheet-description" class="text-muted-foreground text-sm sr-only">仿冒邮件检测详情：邮件基础信息、风险研判、最终处置与仿冒信号</p><div class="flex flex-col min-h-full"><div class="sticky top-0 z-10 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 p-5"><div class="flex items-center justify-between"><h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">检测详情</h2><button class="text-gray-400 hover:text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-4 w-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></div><div class="p-5 space-y-5"><div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden"><div class="p-4 space-y-2.5"><div class="flex items-start gap-3"><span class="text-gray-500 text-sm w-16 shrink-0">发信人</span><span class="text-sm text-gray-800 dark:text-gray-200 break-all">cfo@cacter-fake.com</span></div><div class="flex items-start gap-3"><span class="text-gray-500 text-sm w-16 shrink-0">主题</span><span class="text-sm text-gray-800 dark:text-gray-200 truncate block max-w-[440px]" data-state="closed" data-slot="tooltip-trigger">紧急：Q2预算审批</span></div><div class="flex items-center gap-3"><span class="text-xs text-gray-400">检测时间 2026-05-19 14:23:15</span></div></div></div><div class="space-y-2"><h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check h-3.5 w-3.5 text-blue-500"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>① 风险研判</h4><div class="space-y-1.5 pl-1"><div class="flex items-center gap-2"><span class="text-gray-500 text-sm w-20 shrink-0">风险评分</span><span class="text-2xl font-bold text-red-600">95</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">高危</span></div><div class="flex gap-3 text-sm"><span class="text-gray-500 w-20 shrink-0">仿冒目标</span><span class="text-gray-900 dark:text-gray-100 break-all">发信人名称仿冒 · 张三(CFO)</span></div></div></div><div class="space-y-2"><h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check h-3.5 w-3.5 text-blue-500"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>② 最终处置</h4><div class="space-y-1.5 pl-1"><div class="flex items-center gap-2"><span class="text-gray-500 text-sm w-20 shrink-0">处置动作</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200">已隔离</span></div><div class="flex gap-3 text-sm"><span class="text-gray-500 w-20 shrink-0">命中信号</span><span class="text-gray-900 dark:text-gray-100 break-all">2 项</span></div></div></div><div class="space-y-2"><h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check h-3.5 w-3.5 text-blue-500"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>③ 仿冒信号</h4><div class="space-y-1.5 pl-1"><div class="space-y-2"><div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden"><button type="button" class="w-full flex items-center gap-2 p-2.5 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4 text-gray-400 flex-shrink-0"><path d="m9 18 6-6-6-6"></path></svg><span class="min-w-0 flex-1 text-xs text-gray-800 dark:text-gray-200">显示名仿冒</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs flex-shrink-0">命中</span></button></div><div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden"><button type="button" class="w-full flex items-center gap-2 p-2.5 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4 text-gray-400 flex-shrink-0"><path d="m9 18 6-6-6-6"></path></svg><span class="min-w-0 flex-1 text-xs text-gray-800 dark:text-gray-200">近似域名</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs flex-shrink-0">命中</span></button></div></div></div></div></div></div></div>
+</div>
+  <div class="note">预览内可点击：右上 X 或返回；③仿冒信号每条为手风琴按钮 [aria-expanded]，点击展开判定依据（预览已绑定 aria-expanded 切换）。</div>
+
+  <figure class="screenshot-figure"><img src="./screenshots/log-detail-drawer.png" alt="检测详情抽屉"><figcaption>检测详情抽屉（680px，浏览器实际渲染）</figcaption></figure>
+
+  <h4>UI 元素清单</h4>
+  <table class="spec-table">
+    <thead><tr><th>区块</th><th>字段/元素</th><th>渲染</th></tr></thead>
+    <tbody>
+      <tr><td>顶部栏(sticky)</td><td>标题「检测详情」+ 自绘 X</td><td>X 关闭抽屉</td></tr>
+      <tr><td>邮件基础信息</td><td>发信人 / 主题(hover Tooltip) / 检测时间</td><td>break-all / truncate</td></tr>
+      <tr><td>① 风险研判</td><td>风险评分(大号着色)+风险等级徽章 / 仿冒目标</td><td>仿冒目标=「品牌/发信人名称仿冒 · 名称」</td></tr>
+      <tr><td>② 最终处置</td><td>处置动作徽章 / 命中信号「N 项」</td><td>徽章：isolated→已隔离(红)，其余→已放行(绿)（见差异 D-002）</td></tr>
+      <tr><td>③ 仿冒信号</td><td>逐条手风琴（ChevronRight/Down + 命中徽章）</td><td>展开显判定依据（spoofTypeDesc.*）；无信号显「本封邮件未命中仿冒信号」</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果</h5>
+    <table>
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>抽屉根节点</td><td>div[role=dialog].bg-background（实测 680px 宽）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        <tr><td>节点总数</td><td>66</td><td>66</td><td class="dom-pass">✅</td></tr>
+        <tr><td>三信息块</td><td>①风险研判 ②最终处置 ③仿冒信号</td><td>三块齐全</td><td class="dom-pass">✅</td></tr>
+        <tr><td>风险评分</td><td>95（text-red-600）+ 高危徽章</td><td>一致</td><td class="dom-pass">✅</td></tr>
+        <tr><td>仿冒信号手风琴</td><td>2 条（显示名仿冒/近似域名），默认收起</td><td>2 条，收起（aria-expanded=false）</td><td class="dom-pass">✅</td></tr>
+        <tr><td>处置徽章</td><td>已隔离</td><td>已隔离</td><td class="dom-pass">✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#component-2-3">← 返回主文件</a>
+  <a href="./layer-2-logs-tab.html">← 检测总览</a>
+</nav>
+
+<script>
+// 让内嵌的 demo 组件预览产生与 demo 一致的最小交互反馈
+(function () {
+  function within(el, role){ return el.closest('[role="'+role+'"]'); }
+  document.querySelectorAll('.component-preview').forEach(function (scope) {
+    // 页签切换：切换 aria-selected / data-state
+    scope.addEventListener('click', function (e) {
+      var tab = e.target.closest('[role="tab"]');
+      if (tab) {
+        scope.querySelectorAll('[role="tab"]').forEach(function (t) {
+          t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+          t.setAttribute('data-state', t === tab ? 'active' : 'inactive');
+        });
+      }
+      // Radio 单选：radix RadioGroupItem 是 button[role=radio]
+      var radio = e.target.closest('[role="radio"]');
+      if (radio) {
+        var group = radio.closest('[role="radiogroup"]') || scope;
+        group.querySelectorAll('[role="radio"]').forEach(function (r) {
+          r.setAttribute('data-state', r === radio ? 'checked' : 'unchecked');
+          r.setAttribute('aria-checked', r === radio ? 'true' : 'false');
+        });
+      }
+      // Switch 开关
+      var sw = e.target.closest('[role="switch"]');
+      if (sw) {
+        var on = sw.getAttribute('data-state') === 'checked';
+        sw.setAttribute('data-state', on ? 'unchecked' : 'checked');
+        sw.setAttribute('aria-checked', on ? 'false' : 'true');
+      }
+      // 手风琴展开（详情抽屉里的仿冒信号）
+      var acc = e.target.closest('[aria-expanded]');
+      if (acc && !tab) {
+        var exp = acc.getAttribute('aria-expanded') === 'true';
+        acc.setAttribute('aria-expanded', exp ? 'false' : 'true');
+      }
+      // 关闭类按钮：隐藏所在弹窗/抽屉
+      var btn = e.target.closest('button');
+      if (btn) {
+        var label = (btn.innerText || btn.textContent || '').trim();
+        if (['取消','关闭','确认删除','确认关闭','放弃'].indexOf(label) >= 0) {
+          var dlg = within(btn, 'dialog') || within(btn, 'alertdialog');
+          if (dlg) dlg.style.display = 'none';
+        }
+      }
+    });
+  });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>try{mermaid.initialize({startOnLoad:true,theme:"default"});}catch(e){}</script>
+
+</body>
+</html>

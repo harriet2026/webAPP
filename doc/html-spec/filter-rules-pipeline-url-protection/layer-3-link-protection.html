@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 3：链接保护 Tab - URL检测与防护</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --sub:#6b7280; --blue:#1677ff; --radius:.625rem; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:32px; max-width:1280px; margin-inline:auto; background:var(--bg); color:#111827; font-family:"Geist","Inter",system-ui,sans-serif; line-height:1.6; }
+    a { color:var(--blue); text-decoration:none; }
+    nav.layer-nav, .spec-header, section { margin-bottom:24px; padding:24px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); }
+    nav.layer-nav { display:flex; justify-content:space-between; padding:14px 24px; font-weight:650; }
+    h1 { margin:0 0 16px; color:var(--primary); font-size:26px; }
+    h2 { margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--primary); color:var(--primary); font-size:20px; }
+    h3 { margin:16px 0 8px; font-size:16px; }
+    .meta-table, .spec-table { width:100%; border-collapse:collapse; font-size:14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding:9px 11px; border:1px solid var(--border); vertical-align:top; }
+    .meta-table td:first-child, .spec-table th { background:var(--muted); font-weight:650; text-align:left; }
+    .layer-badge { display:inline-flex; align-items:center; justify-content:center; min-width:24px; height:24px; margin-right:8px; border-radius:999px; background:var(--blue); color:#fff; font-size:12px; font-weight:700; }
+    .component-preview { margin:12px 0; padding:18px; border:1px solid #dbeafe; border-radius:8px; background:#f8fbff; overflow:auto; }
+    .screenshot-figure { margin:14px 0; text-align:center; }
+    .screenshot-figure img { max-width:100%; border:1px solid var(--border); border-radius:8px; box-shadow:0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top:8px; color:var(--sub); font-size:13px; }
+    .lp-panel { min-width:640px; }
+    .cfg-block { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; margin:10px 0; border:1px solid var(--border); border-radius:8px; background:#f9fafb; }
+    .cfg-text b { display:block; font-size:14px; }
+    .cfg-text small { color:#6b7280; font-size:12px; }
+    .toggle { position:relative; width:40px; height:22px; border:0; border-radius:999px; background:#2563eb; cursor:pointer; flex-shrink:0; transition:background .15s; }
+    .toggle::after { content:""; position:absolute; top:2px; left:20px; width:18px; height:18px; border-radius:999px; background:#fff; transition:left .15s; }
+    .toggle[aria-checked="false"] { background:#d1d5db; }
+    .toggle[aria-checked="false"]::after { left:2px; }
+    .fixed-cards { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:10px 0; }
+    .fixed-card { padding:14px 16px; border-radius:8px; }
+    .fixed-card.red { background:#fef2f2; border:1px solid #fecaca; }
+    .fixed-card.amber { background:#fffbeb; border:1px solid #fde68a; }
+    .fixed-card .row1 { display:flex; align-items:center; justify-content:space-between; font-size:14px; font-weight:600; }
+    .fixed-card p { margin:8px 0 0; color:#6b7280; font-size:12px; }
+    .badge-pill { padding:2px 10px; border-radius:6px; font-size:12px; font-weight:650; }
+    .badge-pill.solid-red { background:#dc2626; color:#fff; }
+    .badge-pill.line-amber { border:1px solid #f59e0b; color:#b45309; background:#fff; }
+    .lock-note { color:#6b7280; font-size:12px; }
+    .warn-bar { display:none; gap:8px; align-items:flex-start; margin-top:12px; padding:10px 12px; border:1px solid #fde68a; border-radius:8px; background:#fffbeb; color:#b45309; font-size:12px; }
+    .warn-bar.show { display:flex; }
+    .dimzone { transition:opacity .2s; }
+    .info-box { display:flex; gap:12px; padding:20px; border:1px solid var(--border); border-radius:8px; background:#f3f4f6; }
+    .info-box b { display:block; color:#6b7280; }
+    .info-box p { margin:4px 0 0; color:#6b7280; font-size:13px; }
+    .dead-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:14px; opacity:.5; }
+    .dead-card { padding:14px; border-radius:8px; background:#f3f4f6; text-align:center; }
+    .dead-card small { display:block; color:#6b7280; font-size:11px; }
+    .dead-card b { color:#6b7280; font-size:13px; }
+    .tag { display:inline-block; margin-left:6px; padding:1px 8px; border:1px solid var(--border); border-radius:999px; font-size:11px; color:#6b7280; background:#fff; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav"><a href="layer-2-sandbox-interactions.html">← 层级 2：校验/联动/置灰</a><span>层级 3 / 3</span><a href="index.html#component-2-4">返回主文件 →</a></nav>
+
+  <header class="spec-header">
+    <h1>交互层级 3：链接保护 Tab（默认 / 关闭警告 / 非接收不可达态）</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.4 链接保护 Tab（<code>LinkProtectionTab</code>，url-protection-module.tsx）</td></tr>
+      <tr><td>主文件</td><td><a href="index.html#component-2-4">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>抽屉内点击"链接保护"Tab（云网关等 AI 形态因沙箱隐藏而自动选中该 Tab）</td></tr>
+      <tr><td>浏览器验证</td><td>传统版切换后 tabs=[URL沙箱检测 inactive, 链接保护 active]，活动面板节点数 39；关闭开关后出现琥珀警告条且固定策略区 opacity-50；两形态（cloud / legacy-single）内容一致</td></tr>
+      <tr><td>截图</td><td><code>screenshots/linkprotect-tab-legacy.png</code>、<code>linkprotect-off-warning.png</code>（另见主文件 drawer-layer-0-default.png）</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">3</span>状态 3A：接收方向默认态（可交互）</h2>
+    <div class="component-preview">
+      <div class="lp-panel" data-demo-extracted="link-protection-tab">
+        <div class="cfg-block">
+          <span class="cfg-text" style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#22c55e;">🛡</span><span><b>链接保护</b><small>启用后，改写邮件中的URL，用户点击时经网关安全检查</small></span></span>
+          <button class="toggle" type="button" role="switch" aria-checked="true" data-lp-toggle></button>
+        </div>
+        <div class="dimzone" data-lp-zone>
+          <h3 style="margin:12px 0 6px;font-size:14px;">点击时安全策略（固定）</h3>
+          <div class="fixed-cards">
+            <div class="fixed-card red"><div class="row1"><span>⚠ 已知恶意URL</span><span class="badge-pill solid-red">阻断并提示</span></div><p>用户点击恶意URL时，显示警告页面并拦截访问</p></div>
+            <div class="fixed-card amber"><div class="row1"><span>🔒 未知URL</span><span class="badge-pill line-amber">阻断并提示</span></div><p>用户点击未知URL时，显示警告页面并拦截访问</p></div>
+          </div>
+          <p class="lock-note">🔒 安全策略为系统固定配置，不可修改</p>
+          <div class="warn-bar" data-lp-warn>⚠ 链接保护已禁用，用户点击邮件中的恶意链接将不受保护</div>
+        </div>
+      </div>
+      <p style="margin:6px 0 0;color:#6b7280;font-size:12px;">切换开关体验 3B 关闭警告态：固定策略区置灰 + 琥珀警告条（demo 中警告条位于置灰容器内，随之半透明）。</p>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/linkprotect-tab-legacy.png" alt="链接保护Tab（传统版）">
+      <figcaption>传统版形态点击"链接保护"Tab：与云网关形态内容一致（开关 + 两张固定策略卡 + 锁标注）。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为</th><th>对应字段</th></tr></thead>
+      <tbody>
+        <tr><td>链接保护开关</td><td>开（Shield 绿色图标）</td><td>关闭进入 3B 状态</td><td><code>linkProtection.enabled = true</code></td></tr>
+        <tr><td>已知恶意URL卡</td><td>红底红边 + AlertTriangle 红图标 + destructive Badge"阻断并提示"</td><td>纯展示，无交互控件</td><td><code>knownMaliciousPolicy: "block_alert"</code>（固定）</td></tr>
+        <tr><td>未知URL卡</td><td>琥珀底琥珀边 + Lock 琥珀图标 + outline Badge"阻断并提示"</td><td>纯展示</td><td><code>unknownPolicy: "block_alert"</code>（固定）</td></tr>
+        <tr><td>锁标注</td><td>Lock(12px) + "安全策略为系统固定配置，不可修改"</td><td>-</td><td>PRD/0704：固定策略不可在管理端修改</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h3>DOM 树比对结果（状态 3A）</h3>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>活动面板</td><td>tabpanel data-state=active，节点数 39</td><td>lp-panel 保留开关块 + 固定策略区核心结构</td><td>一致（结构裁剪展示）</td></tr>
+          <tr><td>label 列表</td><td>["链接保护","点击时安全策略（固定）"]</td><td>同两处标题</td><td>一致</td></tr>
+          <tr><td>Badge ×2</td><td>"阻断并提示"（destructive 实心红 / outline 琥珀描边 border-amber-500 text-amber-700）</td><td>solid-red / line-amber 同文案</td><td>一致</td></tr>
+          <tr><td>固定卡容器</td><td>grid grid-cols-1 md:grid-cols-2；红卡 bg-red-50 border-red-200，琥珀卡 bg-amber-50 border-amber-200</td><td>fixed-cards 双列同配色</td><td>一致</td></tr>
+          <tr><td>警告条（3A 下）</td><td>不渲染（条件 <code>{!config.enabled && ...}</code>）</td><td>默认隐藏</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">3</span>状态 3B：链接保护关闭（禁用警告）</h2>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/linkprotect-off-warning.png" alt="链接保护关闭警告">
+      <figcaption>链接保护关闭：开关变灰、固定策略区容器 opacity-50 pointer-events-none，出现琥珀警告条"链接保护已禁用，用户点击邮件中的恶意链接将不受保护"（警告条位于置灰容器内）。</figcaption>
+    </figure>
+    <div class="dom-comparison">
+      <h3>DOM 树比对结果（状态 3B）</h3>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>警告条</td><td><code>div.flex.items-start.gap-2.p-3.bg-amber-50…border-amber-200</code>，文案"链接保护已禁用，用户点击邮件中的恶意链接将不受保护"</td><td>.warn-bar.show 同文案同配色</td><td>一致</td></tr>
+          <tr><td>置灰容器</td><td><code>div.space-y-6.opacity-50.pointer-events-none</code>（含固定策略区与警告条）</td><td>.dimzone opacity .5（警告条在其内）</td><td>一致</td></tr>
+          <tr><td>开关状态</td><td>链接保护 switch data-state=unchecked；总开关仍 checked</td><td>toggle aria-checked=false</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">3</span>状态 3C：非接收方向不可用态<span class="tag">demo 运行态不可达（源码收录）</span></h2>
+    <p>源码 <code>LinkProtectionTab</code> 在 <code>direction !== "receive"</code> 时渲染下述结构，且 Tab 标签旁追加 outline Badge"仅接收"。由于 ContentStrategyPage 的 <code>direction</code> 恒为 <code>"receive"</code>（无方向切换 UI），该分支在运行 demo 中<b>不可达</b>，无法浏览器截图/DOM 比对——以下预览按源码 1:1 复刻（差异 D-001、需确认 Q1）。</p>
+    <div class="component-preview">
+      <div data-demo-extracted="link-protection-non-receive(source-only)">
+        <div class="info-box">
+          <span style="color:#6b7280;">ℹ</span>
+          <span><b>该功能仅适用于接收方向</b><p>链接保护仅支持接收方向（防外部钓鱼）。请在页面顶部切换至【接收方向】进行配置。</p></span>
+        </div>
+        <div class="dead-cards">
+          <div class="dead-card"><small>链接保护开关</small><b>已禁用</b></div>
+          <div class="dead-card"><small>安全策略</small><b>已禁用</b></div>
+        </div>
+      </div>
+    </div>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>源码定义</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>提示框</td><td>Info 图标 + "该功能仅适用于接收方向" + 切换指引文案（bg-gray-100 圆角卡）</td><td>与 PRD §2/§4 提示文案一致</td></tr>
+        <tr><td>禁用预览卡</td><td>grid-cols-3 opacity-50，两张卡：链接保护开关/安全策略 → "已禁用"</td><td>源码为 3 列网格但仅渲染 2 张卡</td></tr>
+        <tr><td>Tab 标签 Badge</td><td><code>direction !== "receive"</code> 时"链接保护"Tab 旁显示 outline Badge"仅接收"</td><td>同样不可达</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h3>DOM 树比对结果（状态 3C）</h3>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>可达性</td><td>运行态不可达（direction 恒为 receive，无入口触发）</td><td>按源码复刻并显著标注"source-only"</td><td>不适用（已标注，见差异 D-001）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>与 0709「点击时复检策略」的关系</h2>
+    <p>0709 需求要求在"点击时安全策略（固定）"下方新增可配置的「点击时复检策略」块（M1 回扫黑名单 / M2 查询情报 / M3 深度复检 + M3.1 超时上限 10-120s / M3.2 超时兜底 / M3.3 等待体验 / M3.4 允许用户跳过），深度复检引擎按形态区分（AI 版=钓鱼邮件智能体，传统版=URL沙箱）。<b>当前 demo 未实现该块</b>（差异 D-002、需确认 Q3），本层不提供其预览，落地时以 0709 文档为准补充。</p>
+  </section>
+
+  <nav class="layer-nav"><a href="index.html#component-2-4">← 返回主文件</a><a href="layer-1-sandbox-tab.html">层级 1：沙箱Tab默认态 →</a></nav>
+
+  <script>
+    const lpToggle = document.querySelector("[data-lp-toggle]");
+    const lpZone = document.querySelector("[data-lp-zone]");
+    const lpWarn = document.querySelector("[data-lp-warn]");
+    lpToggle.addEventListener("click", () => {
+      const on = lpToggle.getAttribute("aria-checked") === "true";
+      lpToggle.setAttribute("aria-checked", String(!on));
+      lpZone.style.opacity = on ? ".5" : "";
+      lpZone.style.pointerEvents = on ? "none" : "";
+      lpWarn.classList.toggle("show", on);
+    });
+  </script>
+</body>
+</html>

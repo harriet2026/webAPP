@@ -25,6 +25,8 @@ import { SimilarDetectionPage } from '@/components/security/similar-detection/Si
 import { MailMarkingPage } from '@/components/security/mail-marking/MailMarkingPage';
 import { AdvancedFilterRulesModule } from '@/components/security/advanced-filter-rules/AdvancedFilterRulesModule';
 import { ComprehensiveStrategyHeader } from '@/components/security/ComprehensiveStrategyHeader';
+import { PipelinePolicyCard, PipelineDrawerNavButton, type PipelinePolicy } from '@/components/security/pipeline-policy-card';
+import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
@@ -42,18 +44,7 @@ import { getSimilarDetection } from '@/lib/api/similar-detection';
 import { useAgentCenterOverview } from '@/hooks/use-agent-center-overview';
 import { resolveAgentPresentation } from '@/lib/agent-center/presentation';
 
-interface PipelinePolicy {
-  key: string;
-  nameKey: string;
-  descKey: string;
-  type: 'blocking' | 'forced' | 'exception' | 'configurable' | 'ai-sync' | 'ai-async' | 'unconfigured';
-  functional: boolean;
-  locked?: boolean;
-  href?: string;
-  // html_spec alignment (§2.1-7 / §4.2): 尚未配置任何规则的模块（海外邮件检测 /
-  // 高级过滤规则）以未配置态渲染（橙色虚线 + 灰色色条 + 「去配置」），但仍可点击进入配置。
-  unconfigured?: boolean;
-}
+// PipelinePolicy 类型随卡片组件收敛到 pipeline-policy-card.tsx（2026-07-25 柔和交互反馈规格整改）。
 
 interface PipelineStage {
   key: string;
@@ -215,6 +206,8 @@ export function PolicyPipelinePage() {
   const [attachmentEnabled, setAttachmentEnabled] = useState<boolean | undefined>(undefined);
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
   const [pendingDrawerPolicy, setPendingDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string } | null>(null);
+  // 抽屉导航折叠按钮的 pointer 驱动 hover（柔和交互反馈规格 §7.2，兼容 hover:none 设备）。
+  const { pointerHoverProps: collapseHoverProps } = usePointerHover<HTMLButtonElement>();
 
   const { apiRequest } = useApiRequest();
   const queryClient = useQueryClient();
@@ -520,73 +513,24 @@ export function PolicyPipelinePage() {
   };
 
   const renderPolicyCard = (policy: PipelinePolicy) => {
-    const isFunctional = policy.functional;
-    const isAI = policy.type === 'ai-sync' || policy.type === 'ai-async';
     const locked = policy.locked === true;
     // html_spec §2.1-7：未配置态 —— 橙色虚线边框 + 灰色色条 + 「去配置」，仍可点击进入配置。
     const isUnconfigured = policy.unconfigured === true && !locked;
 
     return (
       // GT-12094: 策略卡片悬浮 Tooltip（策略说明），对齐 策略流水线需求文档 §3。
+      // 卡片本体的交互反馈（pointer hover / 键盘 / locked）收敛在 PipelinePolicyCard。
       <TooltipProvider key={policy.key} delay={300}>
       <Tooltip>
-        <TooltipTrigger
-          render={
-            <div
-              data-testid={`pipeline-policy-card-${policy.key}`}
-              data-unconfigured={isUnconfigured ? 'true' : undefined}
-              className={cn(
-                'relative flex h-[60px] w-[220px] flex-none items-center gap-2 rounded-lg border p-3 transition-all',
-                'hover:border-blue-300 hover:bg-blue-50/50 dark:hover:bg-blue-950/20',
-                isUnconfigured && 'border-2 border-dashed',
-                locked ? 'cursor-not-allowed opacity-70 hover:border-border hover:bg-background' : 'cursor-pointer',
-                !isFunctional && !locked && 'opacity-70',
-              )}
-              style={isUnconfigured ? { borderColor: 'var(--action-quarantine)' } : undefined}
-              onClick={() => handleCardClick(policy)}
-            />
-          }
-        >
-          <div
-            className="absolute left-0 top-2 bottom-2 w-1 rounded-full"
-            style={{
-              backgroundColor: isUnconfigured
-                ? typeColors.unconfigured
-                : policy.key === 'mailMarking'
-                  ? 'var(--action-mark-deliver)'
-                  : typeColors[policy.type],
-            }}
-          />
-          <div className="flex-1 pl-2 min-w-0">
-            <div className="text-sm font-medium truncate">{t(policy.nameKey)}</div>
-            {isAI && (
-              <span className={cn(
-                'text-[10px] px-1.5 py-0.5 rounded text-white',
-                policy.type === 'ai-async' ? 'bg-warning' : 'bg-action-review',
-              )}>
-                {policy.type === 'ai-async' ? t('pipeline.aiAsync') : t('pipeline.aiSync')}
-              </span>
-            )}
-          </div>
-          <button
-            type="button"
-            data-testid={`pipeline-policy-config-${policy.key}`}
-            className="shrink-0 text-xs text-primary hover:underline flex items-center gap-1"
-            disabled={locked}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCardClick(policy);
-            }}
-          >
-            {locked ? <Lock className="h-3 w-3" /> : null}
-            {!isFunctional
-              ? t('pipeline.comingSoon')
-              : isUnconfigured
-                ? t('pipeline.goConfig')
-                : t('pipeline.configBtn')}
-            {isFunctional && !locked && <ArrowRight className="h-3 w-3" />}
-          </button>
-        </TooltipTrigger>
+        <PipelinePolicyCard
+          policy={policy}
+          barColor={isUnconfigured
+            ? typeColors.unconfigured
+            : policy.key === 'mailMarking'
+              ? 'var(--action-mark-deliver)'
+              : typeColors[policy.type]}
+          onActivate={() => handleCardClick(policy)}
+        />
         <TooltipContent
           side="top"
           className="max-w-[260px] text-xs"
@@ -763,55 +707,18 @@ export function PolicyPipelinePage() {
             ? t(navSummaryKey[item.key])
             : undefined;
     return (
-      <Tooltip key={item.key}>
-        <TooltipTrigger
-          render={
-            <button
-              type="button"
-              className={cn(
-                'w-full flex items-center rounded-lg transition-colors text-left',
-                navCollapsed ? 'px-2 py-2.5 justify-center' : 'px-2 py-2.5 justify-center min-[1366px]:px-3 min-[1366px]:gap-2',
-                isActive
-                  ? 'bg-background border-l-2 border-primary text-primary'
-                  : 'hover:bg-background/60 text-foreground',
-                !item.functional && !isActive && 'text-muted-foreground',
-              )}
-              onClick={() => requestDrawerPolicy({ stage: activeDrawerPolicy.stage, key: item.key })}
-              data-testid={`pipeline-drawer-nav-${item.key}`}
-            />
-          }
-        >
-            <span className={cn(
-              "w-2.5 h-2.5 rounded-full flex-shrink-0",
-              dotOn ? "bg-blue-500" : "border-2 border-muted-foreground/30"
-            )} />
-            {!navCollapsed && (
-              // html_spec §2.3-13：所有阶段的左导航模块都显示「名称 + 摘要」两行（此前仅 stage5）。
-              <span className={cn('flex-1 min-w-0', pipelineDrawerResponsiveClasses.expandedNavLabel)}>
-                <span className="text-[14px] truncate block">{t(item.nameKey)}</span>
-                {summaryText && (
-                  <span className="text-[11px] text-muted-foreground truncate block">
-                    {summaryText}
-                  </span>
-                )}
-              </span>
-            )}
-            {!navCollapsed && !item.functional && (
-              <span className="hidden min-[1366px]:block text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
-                {t('pipeline.comingSoon')}
-              </span>
-            )}
-        </TooltipTrigger>
-        <TooltipContent
-          side="right"
-          className={cn('flex flex-col gap-1', !navCollapsed && 'min-[1366px]:hidden')}
-        >
-          <span className="font-medium">{t(item.nameKey)}</span>
-          {!item.functional && (
-            <span className="text-xs text-muted-foreground">{t('pipeline.comingSoon')}</span>
-          )}
-        </TooltipContent>
-      </Tooltip>
+      <PipelineDrawerNavButton
+        key={item.key}
+        testid={`pipeline-drawer-nav-${item.key}`}
+        name={t(item.nameKey)}
+        summary={summaryText}
+        comingSoonLabel={!item.functional ? t('pipeline.comingSoon') : undefined}
+        dotOn={dotOn}
+        isActive={isActive}
+        collapsed={navCollapsed}
+        labelClassName={pipelineDrawerResponsiveClasses.expandedNavLabel}
+        onSelect={() => requestDrawerPolicy({ stage: activeDrawerPolicy.stage, key: item.key })}
+      />
     );
   });
 
@@ -1081,12 +988,19 @@ export function PolicyPipelinePage() {
               <TooltipTrigger
                 render={
                   <button
+                    type="button"
                     onClick={() => setNavCollapsed(!navCollapsed)}
                     data-testid="pipeline-drawer-nav-collapse"
+                    aria-label={navCollapsed ? t('pipeline.expandNav') : t('pipeline.collapseNav')}
                     className={cn(
-                      "absolute z-50 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-background shadow-lg border border-border/70 flex items-center justify-center hover:bg-muted hover:scale-105 transition-all duration-200",
+                      // 柔和交互反馈规格 §3/§6.2：120ms 指定属性过渡，无缩放/位移，pointer 驱动表面。
+                      'absolute z-50 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-background shadow-sm border border-border/70 flex items-center justify-center outline-none',
+                      'transition-[background-color,border-color,box-shadow] duration-[120ms] ease-out motion-reduce:transition-none',
+                      'data-[hovered=true]:bg-muted/65 data-[hovered=true]:border-border active:bg-muted',
+                      'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2',
                       navCollapsed ? 'left-[calc(56px-14px)]' : 'left-[calc(56px-14px)] min-[1366px]:left-[calc(200px-14px)]'
                     )}
+                    {...collapseHoverProps}
                   />
                 }
               >
@@ -1099,7 +1013,7 @@ export function PolicyPipelinePage() {
 
             <div
               className={cn(
-                "bg-muted/40 dark:bg-muted/20 border-r border-border/70 flex-shrink-0 overflow-y-auto transition-all duration-200 flex flex-col",
+                "bg-muted/40 dark:bg-muted/20 border-r border-border/70 flex-shrink-0 overflow-y-auto transition-[width] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none flex flex-col",
                 navCollapsed ? 'w-14' : pipelineDrawerResponsiveClasses.expandedNav
               )}
             >

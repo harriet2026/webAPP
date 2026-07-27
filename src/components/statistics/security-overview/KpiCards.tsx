@@ -47,6 +47,7 @@ function TrendIcon({ delta, positiveIsGood }: { delta: number | null | undefined
 
 export function KpiCards({ data, isLoading }: KpiCardsProps) {
   const t = useTranslations('securityOverview.kpi');
+  const vsPrevious = t('vsPrevious');
 
   const cards = [
     {
@@ -134,6 +135,9 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
                     <TrendIcon delta={card.delta} positiveIsGood={card.positiveIsGood} />
                     {deltaStr}
                   </span>
+                )}
+                {deltaStr && (
+                  <span className="text-xs text-muted-foreground">{vsPrevious}</span>
                 )}
                 {!deltaStr && !card.badgeFn && (
                   <span className="text-xs text-muted-foreground">—</span>

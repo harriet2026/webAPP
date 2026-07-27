@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级5：禁用态 / 租户视角 / 多语言变体 - 附件安全检测 HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --muted: #f5f7fa; --muted-foreground: #6b7280; --border: #e5e7eb; --blue: #1677ff; --radius: 0.625rem; --font-sans: "Geist", "Inter", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1200px; margin-inline: auto; background: var(--background); color: #111827; font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .layer-nav { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 12px 18px; background: var(--muted); border-radius: 8px; font-size: 14px; font-weight: 650; }
+    .spec-header, section { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 160px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .panel-head h5 { margin: 0; font-size: 15px; }
+    .switch { position: relative; width: 40px; height: 22px; border: 0; border-radius: 999px; background: #2563eb; cursor: pointer; transition: background .15s; }
+    .switch::after { content: ""; position: absolute; top: 2px; left: 20px; width: 18px; height: 18px; border-radius: 999px; background: #fff; transition: left .15s; }
+    .switch[aria-checked="false"] { background: #d1d5db; }
+    .switch[aria-checked="false"]::after { left: 2px; }
+    .tabs { display: inline-flex; gap: 4px; margin: 12px 0; padding: 4px; border-radius: 8px; background: #f3f4f6; }
+    .tab { padding: 5px 12px; border: 0; border-radius: 7px; font-size: 14px; background: transparent; color: #374151; }
+    .tab.active { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.06); font-weight: 650; }
+    .disable-mask.off { opacity: .5; pointer-events: none; }
+    .alert-blue { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid #bfdbfe; border-radius: 8px; background: #eff6ff; color: #1e40af; font-size: 14px; }
+    .hint { color: var(--muted-foreground); font-size: 12px; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <span>层级 5 / 5</span>
+    <a href="./layer-3-encrypted-tab.html">← 层级4：加密附件 Tab</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 5：模块禁用态 / 租户视角 / 导航折叠 / 英文模式</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 附件安全检测配置 Tab 组（状态变体合集）</td></tr>
+      <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>5A 卡头 Switch 关闭；5B URL 参数 <code>?viewer=tenant</code>（多租户形态）；5C 抽屉左导航折叠按钮；5D 顶栏语言切换器选 English</td></tr>
+      <tr><td>浏览器实测</td><td>5A：switch data-state=unchecked、卡头「已禁用」、配置区 opacity-50+pointer-events-none、左导航摘要「未启用」。5B：Tab 仅 3 个（反病毒引擎 active）、流水线页蓝色 Lock Alert。5C：导航 w-52→w-14。5D：卡片/表单标签英文、宿主与加密附件 Tab 仍中文。</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">5</span>5A 模块禁用态（可交互：点击开关切换）</h4>
+    <div class="component-preview" data-demo-extracted="disabled-state">
+      <div class="panel-head">
+        <h5>附件安全检测</h5>
+        <span><span data-lbl style="color:#6b7280;font-size:13px;margin-right:8px;">已禁用</span><button class="switch" type="button" role="switch" aria-checked="false" data-sw></button></span>
+      </div>
+      <div class="disable-mask off" data-area>
+        <div class="tabs">
+          <span class="tab active">基础限制</span><span class="tab">反病毒引擎</span><span class="tab">图片识别</span><span class="tab">加密附件</span>
+        </div>
+        <p class="hint" style="font-size:14px;">（配置表单整体 opacity: 0.5 + pointer-events: none，所有控件不可交互）</p>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/module-disabled.png" alt="模块禁用态">
+      <figcaption>禁用态（浏览器实际渲染）：卡头「已禁用」灰字 + 开关灰色；配置区半透明；左导航摘要变「未启用」、状态圆点变空心；底部出现「有未保存的更改」。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>要素</th><th>启用态</th><th>禁用态（实测）</th></tr></thead>
+      <tbody>
+        <tr><td>卡头文案/开关</td><td>「已启用」蓝字 + Switch checked</td><td>「已禁用」灰字 + Switch unchecked</td></tr>
+        <tr><td>配置区</td><td>正常交互</td><td><code>opacity-50 pointer-events-none</code>（PRD §3 一致）</td></tr>
+        <tr><td>左导航</td><td>蓝色实心圆点 + 摘要「病毒扫描/沙箱分析/类型检测」</td><td>空心灰圆点 + 摘要「未启用」</td></tr>
+        <tr><td>未保存提示</td><td>-</td><td>切换即出现「有未保存的更改」，点击保存配置清除</td></tr>
+        <tr><td>业务含义</td><td>-</td><td>PRD §5 联动：总开关禁用 → 所有子模块不生效，邮件跳过附件检测</td></tr>
+      </tbody>
+    </table>
+
+    <h4><span class="layer-badge">5</span>5B 多租户 + 租户视角（?viewer=tenant）：基础限制平台统管</h4>
+    <div class="component-preview" data-demo-extracted="tenant-view">
+      <div class="alert-blue">🔒 <span>本流水线的「阶段1：IP策略」及「附件安全 - 基础限制」由平台统一管控，此处仅展示与您租户相关的可配置阶段。如需调整，请联系平台管理员。</span></div>
+      <div class="panel-head" style="margin-top:12px;">
+        <h5>附件安全检测（租户视角）</h5>
+        <span style="color:#2563eb;font-size:13px;">已启用</span>
+      </div>
+      <div class="tabs">
+        <span class="tab active">反病毒引擎</span><span class="tab">图片识别</span><span class="tab">加密附件</span>
+      </div>
+      <p class="hint">「基础限制」Tab 不渲染（<code>hideBasicLimit = isMultiTenant && viewer === "tenant"</code>），初始选中 Tab 变为「反病毒引擎」。</p>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/tenant-pipeline-alert.png" alt="租户视角流水线 Alert">
+      <figcaption>租户视角流水线页：顶部蓝色 Lock Alert（浏览器实际渲染，?viewer=tenant）。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/tenant-drawer-no-basic.png" alt="租户视角抽屉无基础限制">
+      <figcaption>租户视角抽屉：Tab 组仅 3 项，「反病毒引擎」active（实测 data-state）。</figcaption>
+    </figure>
+
+    <h4><span class="layer-badge">5</span>5C 抽屉左导航折叠</h4>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/drawer-nav-collapsed.png" alt="左导航折叠态">
+      <figcaption>点击圆形折叠按钮后：导航 w-52(208px) → w-14(56px)，仅剩状态圆点；折叠态 hover 圆点出 Tooltip（名称+摘要，delayDuration=0）。</figcaption>
+    </figure>
+
+    <h4><span class="layer-badge">5</span>5D 英文模式（顶栏语言切换器 → English）</h4>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/drawer-english-mode.png" alt="英文模式抽屉">
+      <figcaption>英文模式实测：抽屉头「Phase 3: Content Layer / Attachment Security」与基础限制表单标签（Max attachments per email 等）为英文；但 Tab 组（基础限制/反病毒引擎/图片识别/加密附件）、左导航策略名与摘要、卡头「附件安全检测/已启用」、「保存配置」仍为硬编码中文（差异 D-9）。语言选择不持久化，刷新回中文。</figcaption>
+    </figure>
+
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>禁用态开关</td><td><code>button[role=switch] data-state=unchecked</code>，卡头文本「已禁用」</td><td>aria-checked=false + 文案联动</td><td>一致</td></tr>
+          <tr><td>禁用遮罩</td><td>存在 <code>div.opacity-50.pointer-events-none</code> 包裹 Tabs</td><td>.disable-mask.off 同效果</td><td>一致</td></tr>
+          <tr><td>租户视角 Alert</td><td><code>[role=alert]</code> 文案「本流水线的「阶段1：IP策略」及「附件安全 - 基础限制」由平台统一管控…」</td><td>同文案</td><td>一致</td></tr>
+          <tr><td>租户视角 Tab 数</td><td>3 个 tab：[反病毒引擎(active), 图片识别, 加密附件]；「基础限制」未渲染（条件节点）</td><td>3 个 tab 同顺序同选中态</td><td>一致</td></tr>
+          <tr><td>折叠导航</td><td>容器 class 含 <code>w-14</code>（由 w-52 切换）</td><td>以截图呈现（预览未复刻折叠动画）</td><td>一致（截图证据）</td></tr>
+          <tr><td>英文模式混排</td><td>面包屑/表单标签英文，tablist 与左导航中文</td><td>以截图+差异表记录</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="./layer-3-encrypted-tab.html">← 层级4：加密附件 Tab</a>
+    <a href="./index.html#component-2-3">返回主文件 →</a>
+  </nav>
+
+  <script>
+    // 5A 禁用态开关（复刻 demo：开关↔文案↔遮罩联动）
+    const sw = document.querySelector("[data-sw]");
+    const lbl = document.querySelector("[data-lbl]");
+    const area = document.querySelector("[data-area]");
+    sw.addEventListener("click", () => {
+      const on = sw.getAttribute("aria-checked") === "true";
+      sw.setAttribute("aria-checked", String(!on));
+      lbl.textContent = on ? "已禁用" : "已启用";
+      lbl.style.color = on ? "#6b7280" : "#2563eb";
+      area.classList.toggle("off", on);
+    });
+  </script>
+</body>
+</html>
