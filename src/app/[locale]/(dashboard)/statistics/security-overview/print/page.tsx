@@ -44,11 +44,9 @@ function PrintContent() {
     : direction;
 
   function seriesLabel(key: string, viewBy: ViewBy): string {
-    const nsMap: Record<ViewBy, string> = {
+    const nsMap: Partial<Record<ViewBy, string>> = {
       threat_type: 'threatTypes',
       action: 'actions',
-      threat_level: 'threatLevels',
-      delivery_result: 'deliveryResults',
       email_type: 'emailTypes',
     };
     const result = t(`${nsMap[viewBy]}.${key}` as Parameters<typeof t>[0]);

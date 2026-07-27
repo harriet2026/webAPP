@@ -7085,8 +7085,6 @@
     "viewBy": {
       "threat_type": "Threat Type",
       "action": "Action",
-      "threat_level": "Threat Level",
-      "delivery_result": "Delivery Result",
       "email_type": "Threat Posture Trend"
     },
     "threatTypes": {
@@ -7108,22 +7106,6 @@
       "block": "Block",
       "drop": "Drop",
       "recall": "Recall"
-    },
-    "deliveryResults": {
-      "delivered": "Delivered",
-      "success_rate": "Delivery Success Rate",
-      "failed": "Failed",
-      "cancelled": "Cancelled",
-      "in_delivery": "In Delivery",
-      "partial_delivered": "Partial Delivered",
-      "unknown": "Unknown"
-    },
-    "threatLevels": {
-      "normal": "Normal",
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High",
-      "critical": "Critical"
     },
     "emailTypes": {
       "normal": "Normal",

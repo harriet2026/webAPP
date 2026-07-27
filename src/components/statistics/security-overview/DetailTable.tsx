@@ -47,8 +47,6 @@ export const DETAIL_SERIES_ORDER: Partial<Record<ViewBy, readonly string[]>> = {
     'drop',
     'recall',
   ],
-  threat_level: ['normal', 'low', 'medium', 'high', 'critical'],
-  delivery_result: ['delivered', 'failed', 'cancelled', 'in_delivery', 'partial_delivered', 'unknown'],
 };
 
 function orderedSeriesKeys(row: Record<string, unknown>, viewBy: ViewBy): string[] {
@@ -88,8 +86,6 @@ export function DetailTable({ data, isLoading, viewBy }: DetailTableProps) {
     const nsMap: Partial<Record<ViewBy, string>> = {
       threat_type: 'threatTypes',
       action: 'actions',
-      threat_level: 'threatLevels',
-      delivery_result: 'deliveryResults',
       email_type: 'emailTypes',
     };
     const ns = nsMap[viewBy];
