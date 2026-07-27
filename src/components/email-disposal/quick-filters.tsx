@@ -93,6 +93,8 @@ export function QuickFilters({
     "accept",
     "reject",
     "bounce",
+    "discard",
+    "audit",
     "quarantine",
     "sideline",
     "mixed",
