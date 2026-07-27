@@ -2,6 +2,7 @@ import type {
   AdvancedFilter,
   FilterCondition,
   FilterConditionGroup,
+  FinalActionRuleDetail,
 } from "@/types/log";
 
 export interface DisposalQuickFilter {
@@ -99,6 +100,8 @@ export interface DisposalMailItem {
   correctionSource?: string;
   disposalBasis?: DisposalBasis;
   disposalPolicyKeys?: string;
+  /** Per-recipient action details; present when action === 'mixed'. */
+  finalActionRule?: Record<string, FinalActionRuleDetail>;
 }
 
 export interface DisposalListResponse {

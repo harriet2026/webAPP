@@ -1007,7 +1007,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块�����配置：灰色为「继承全局」，彩色为「另行配置」。",
+    "configDetailHint": "按阶段流水线顺序展示该规则在每个���块�����配置：灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
     "targetGroups": "适用对象",
@@ -1332,7 +1332,7 @@
     "statusQuarantined": "已隔离",
     "statusFailed": "失败",
     "statusReinjected": "已重新注入",
-    "statusReleasedPending": "已放行待复检",
+    "statusReleasedPending": "已放行待���检",
     "statusManualHold": "人工保留",
     "reason": "原因",
     "eyebrow": "旁路队列",
@@ -1722,7 +1722,7 @@
       "egress": {
         "senderDomain": "发信域",
         "name": "出口 IP",
-        "nameRequired": "请选择出口 IP",
+        "nameRequired": "请选择��口 IP",
         "empty": "请先在网络设置配置出口 IP",
         "domainNotVerified": "发信域须先完成归属校验"
       },
@@ -1739,7 +1739,7 @@
       "auth": {
         "dkimTitle": "DKIM 签名",
         "dkimDescription": "为每个发信域生成或导入 DKIM 密钥并完成 DNS 校验",
-        "activeKeys": "已启用密钥 {count} 个",
+        "activeKeys": "已启用��钥 {count} 个",
         "smtpTitle": "SMTP 凭证",
         "smtpDescription": "管理发信认证账号、后端路由与锁定状态",
         "smtpLink": "前往 SMTP 凭证管理"
@@ -1895,7 +1895,7 @@
         "save": "确定",
         "cancel": "取消",
         "close": "关闭",
-        "fixValidationErrors": "请修正表单中的校验错误"
+        "fixValidationErrors": "请��正表单中的校验错误"
       },
       "matrix": {
         "moduleColumn": "菜单",
@@ -1938,7 +1938,7 @@
     "subject": "主题",
     "status": "状态",
     "createdAt": "创建时间",
-    "notes": "备注",
+    "notes": "备��",
     "notesPlaceholder": "可选备注...",
     "approveTitle": "批准邮件",
     "rejectTitle": "拒绝邮件",
@@ -2679,7 +2679,7 @@
       "llmRankedUrlCount": "传入 LLM URL 数",
       "targetAccount": "目标账号",
       "targetCluster": "目标簇",
-      "targetCacTid": "目标 CAC 簇 ID",
+      "targetCacTid": "目标 CAC �� ID",
       "targetMailLogIds": "目标邮件日志 ID 列表",
       "targetResolvedBy": "解析方式",
       "targetMailLogCount": "目标邮件数",
@@ -3042,7 +3042,7 @@
     "descriptionField": "备注",
     "descriptionPlaceholder": "可选，规则说明...",
     "ipLevelProtection": "IP级防护",
-    "negativeOneNoLimit": "-1表示不限制",
+    "negativeOneNoLimit": "-1表示��限制",
     "timeWindowFrequency": "时间窗口频率",
     "every": "每",
     "minutesUnit": "分钟",
@@ -3181,7 +3181,7 @@
     "examples": {
       "title": "查看配置示例",
       "antiBruteforce": "防暴力破解",
-      "antiBruteforceDesc": "防止密码爆破攻击，短时间内多次认证失败将被封禁",
+      "antiBruteforceDesc": "防��密码爆破攻击，短时间内多次认证失败将被封禁",
       "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1小时。",
       "antiSpam": "防滥发邮件",
       "antiSpamDesc": "限制高频发信行为，防止垃圾邮件泛滥",
@@ -3199,7 +3199,7 @@
       "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次，超过限制 {limit} 次",
       "dailyHit": "触发\"每日连接数\"阈值，当日已连接 {count} 次，超过限制 {limit} 次",
       "notHitReason": "未触发阈值",
-      "noThresholds": "当前配置未设置有效阈值，连接将被放行"
+      "noThresholds": "当前配置未设置有效阈值，��接将被放行"
     },
     "tips": {
       "title": "配置提示",
@@ -3343,7 +3343,7 @@
     "remarkPlaceholder": "可选，规则说明或备注信息...",
     "saveAndEnable": "保存并启用",
     "blacklistRuleDesc": "配置IP黑名单规则，阻断或处置指定IP地址/段",
-    "whitelistRuleDesc": "配置IP白名单规则，信任的IP直接放行或标记",
+    "whitelistRuleDesc": "配���IP白名单规则，信任的IP直接放行或标记",
     "addBlacklistRule": "新建黑名单规则",
     "addWhitelistRule": "新建白名单规则",
     "editBlacklistRule": "编辑黑名单规则",
@@ -3810,7 +3810,7 @@
     "scheduleSection": "生效时间",
     "validFrom": "生效开始",
     "validUntil": "生效结束",
-    "recipient": "收信人",
+    "recipient": "收���人",
     "sender": "发信人",
     "currentEffect": "当前规则效果预览",
     "effectBlacklist": "发信人 [{sender}] 发往 [{recipient}] 的邮件将被{action}",
@@ -4093,7 +4093,7 @@
       "spf_temperror": "查询失败 (TempError)",
       "spf_temperrorDesc": "DNS查询超时或失败",
       "dkim_fail": "验证失败",
-      "dkim_failDesc": "DKIM签名验证不通过",
+      "dkim_failDesc": "DKIM签名验证不���过",
       "dkim_neutral": "中性 (Neutral)",
       "dkim_neutralDesc": "签名存在但无法验证",
       "dkim_partial": "部分通过",
@@ -4502,7 +4502,7 @@
     "tips": {
       "title": "配置提示",
       "item1": "优先级越大越先匹配",
-      "item2": "支持通配符如 *@domain.com",
+      "item2": "支��通配符如 *@domain.com",
       "item3": "留空有效期表示永���有效",
       "item4": "群组和组织来自群组策略配置",
       "item5": "OR条件任一超限即触发",
@@ -5137,7 +5137,7 @@
     "markTextPlaceholder": "如：【外站邮件】",
     "markTextTip": "最多 50 个字符；点击变量标签可插入动态内容",
     "availableVariables": "可用变量",
-    "markPosition": "标记位置",
+    "markPosition": "��记位置",
     "posSubjectPrefix": "主题前缀",
     "posBodyTop": "正文顶部",
     "posBodyBottom": "正文底部",
@@ -5244,7 +5244,7 @@
     },
     "switchConfirm": {
       "title": "确认切换为副本（replica）？",
-      "description": "本节点当前有 {count} 条全局规则（不含租户规则）。切换为 replica 后，首次同步会用主节点的全量快照覆盖本地全局规则：快照之外的规则会被删除，同 uid/同名的规则会被主节点版本覆盖，此操作不可逆。租户规则（tenant_id 非空）不受影响。请确认已在主节点核实规则内容后再继续。",
+      "description": "本节点当前有 {count} 条全局规则（不含租户规则）。切换为 replica 后，首次同步会用主节点的全量快照覆盖��地全局规则：快照之外的规则会被删除，同 uid/同名的规则会被主节点版本覆盖，此操作不可逆。租户规则（tenant_id 非空）不受影响。请确认已在主节点核实规则内容后再继续。",
       "confirmText": "确认切换为 replica",
       "cancelText": "取消"
     },
@@ -5315,14 +5315,13 @@
       "outgoing": "外发",
       "internal": "域内",
       "actions": {
-        "accept": "接受",
+        "accept": "投递",
         "reject": "拒收",
         "bounce": "退信",
         "discard": "丢弃",
         "audit": "审核",
         "quarantine": "隔离",
-        "sideline": "灰名单",
-        "mixed": "混合"
+        "sideline": "灰名单"
       },
       "statuses": {
         "processing": "处理中",
@@ -5998,7 +5997,7 @@
     "action": "动作",
     "operations": "操作",
     "edit": "编辑",
-    "delete": "删除",
+    "delete": "删��",
     "deleteConfirm": "确定要删除这条规则吗？",
     "saveSuccess": "规则保存成功",
     "deleteSuccess": "规则删除成功",
@@ -6217,7 +6216,7 @@
       "pending": "等待中",
       "done": "已完成",
       "deadLetter": "死信",
-      "processing": "处理中",
+      "processing": "���理中",
       "cancelled": "已取消",
       "all": "全部",
       "id": "ID",
@@ -7423,7 +7422,7 @@
     },
     "bottomActions": {
       "exportCsv": "导出 CSV",
-      "generateReport": "生成报告",
+      "generateReport": "生成���告",
       "aiAnalysis": "AI 分析"
     },
     "ai": {
@@ -9527,7 +9526,7 @@
       "title": "待办与告警",
       "empty": "当前无待办事项和告警，系统运行良好",
       "viewAll": "查看全部告警",
-      "itemNodeOffline": "节点 {node} 离线",
+      "itemNodeOffline": "节�� {node} 离线",
       "itemPendingDisposal": "待处置邮件 {n} 封",
       "itemPendingReport": "举报待审 {n} 封",
       "itemAgentPending": "{agent} 待审 {n} 封",

@@ -1,6 +1,6 @@
 import type { ApiRequestFn } from '@/lib/api/client';
 import type { DisposalBasis, DisposalListResponse, DisposalMailItem, DisplayStatus, BulkDisposeRequest, BulkDisposeResponse, ParseQueryRequest, ParseQueryResponse, SimilarSearchRequest } from '@/types/email-disposal';
-import type { AdvancedFilter } from '@/types/log';
+import type { AdvancedFilter, FinalActionRuleDetail } from '@/types/log';
 
 export function mapToDisplayStatus(action: string, deliveryStatus?: string, workflowOutcome?: string, recallStatusSummary?: string): DisplayStatus {
   // Recall status takes priority: if the message has any recall record
@@ -73,6 +73,8 @@ export interface MailLogAPIItem {
   similarity_pct?: number;
   disposal_basis?: DisposalBasis;
   disposal_policy_keys?: string;
+  /** Per-recipient action details; present when action === 'mixed'. */
+  final_action_rule?: Record<string, FinalActionRuleDetail>;
 }
 
 export function mapMailLogToDisposalItem(item: MailLogAPIItem): DisposalMailItem {
@@ -117,6 +119,7 @@ export function mapMailLogToDisposalItem(item: MailLogAPIItem): DisposalMailItem
     correctionSource: item.correction_source,
     disposalBasis: item.disposal_basis,
     disposalPolicyKeys: item.disposal_policy_keys,
+    finalActionRule: item.final_action_rule,
   };
 }
 
