@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { Search, X } from "lucide-react";
+import { Search, X, Inbox as InboxIcon } from "lucide-react";
 import { useScopedApiRequest } from "@/lib/api/client";
 import { useTenant } from "@/hooks/use-tenant";
 import { useProductForm } from "@/contexts/product-form-context";
@@ -31,7 +31,7 @@ import { MailListTable, type TableHeaderFilters, type TimeSortOrder } from "./ma
 import { DetailModal } from "./detail-modal";
 import { ReclassifyDialog } from "./components/reclassify-dialog";
 import { ServerPagination } from "@/components/shared/server-pagination";
-import { FramedPage, PageSurface } from "@/components/shared/page-shell";
+import { PageShell, PageHeader, PageSurface } from "@/components/shared/page-shell";
 import { PageFilters } from "@/components/shared/page-filters";
 import {
   AlertDialog,
@@ -507,19 +507,24 @@ export function EmailDisposalCenterPage({
   );
 
   return (
-    <FramedPage
-      title={t(mode === "investigation" ? "investigationTitle" : "pageTitle")}
-      description={t(
-        mode === "investigation"
-          ? "investigationSubtitle"
-          : "pageDescription",
-      )}
+    <PageShell
+      className="min-h-full bg-[#F8F9FB] shadow-[0_0_0_32px_#F8F9FB] dark:bg-background dark:shadow-[0_0_0_32px_var(--background)]"
       data-testid={
         mode === "investigation"
           ? "mail-investigation-page"
           : "email-disposal-center-page"
       }
     >
+      <PageHeader
+        title={t(mode === "investigation" ? "investigationTitle" : "pageTitle")}
+        description={t(
+          mode === "investigation"
+            ? "investigationSubtitle"
+            : "pageDescription",
+        )}
+        icon={InboxIcon}
+      />
+
       <PageFilters data-testid="disposal-search-workbench">
         <SearchBar
           onAiParsed={handleAiParsed}
@@ -698,6 +703,6 @@ export function EmailDisposalCenterPage({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </FramedPage>
+    </PageShell>
   );
 }
