@@ -73,9 +73,8 @@ export function TrendChartCard({
     // Single data point: render as bar so the chart isn't just a dot.
     const isSinglePoint = seriesData.length === 1;
 
-    // "威胁态势趋势" and "执行动作" use plain line style (no stacking, no fill).
-    // Other views (email_type, delivery_result …) retain the stacked area style.
-    const isLineView = viewBy === 'threat_type' || viewBy === 'action';
+    // "威胁态势趋势" (email_type) and "执行动作" (action) use plain line style (no stacking, no fill).
+    const isLineView = viewBy === 'email_type' || viewBy === 'action';
 
     const series: Record<string, unknown>[] = visibleKeys.map((key) => {
       if (isLineView && !isSinglePoint) {
