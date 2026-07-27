@@ -1,9 +1,5 @@
 {
-  "theme": {
-    "label": "主题",
-    "blue": "蓝色主题",
-    "green": "绿色主题"
-  },
+  "theme": {"label": "主题", "blue": "蓝色主题", "green": "绿色主题"},
   "branding": {
     "saasName": "云邮件安全网关",
     "selfHostedName": "邮件安全网关",
@@ -361,9 +357,7 @@
     "emailLogs": "邮件日志",
     "investigations": "Agent 调查",
     "tenantSystemManagement": "组织与成员",
-    "monitorDashboard": "监控总览",
-    "collapseNav": "折叠导航栏",
-    "expandNav": "展开导航栏"
+    "monitorDashboard": "监控总览"
   },
   "agentCenterOverview": {
     "centerTitle": "智能体管理中心",
@@ -7374,6 +7368,7 @@
       "internal_phishing": "内部钓鱼",
       "internal_virus": "内部病毒"
     },
+
     "table": {
       "title": "明细数据",
       "date": "日期",
