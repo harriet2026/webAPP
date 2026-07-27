@@ -146,18 +146,20 @@ export function LinkAttachmentSecurityPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-5 xl:items-start">
-              <div className="xl:col-span-3 xl:sticky xl:top-4">
-                <TrendChartCard
-                  trendLink={data?.trend?.link}
-                  trendAttachment={data?.trend?.attachment}
-                  viewTab={viewTab}
-                  chartType={chartType}
-                  isLoading={isLoading}
-                  embedded
-                />
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
+              <div className="xl:col-span-3">
+                <div className="sticky top-4">
+                  <TrendChartCard
+                    trendLink={data?.trend?.link}
+                    trendAttachment={data?.trend?.attachment}
+                    viewTab={viewTab}
+                    chartType={chartType}
+                    isLoading={isLoading}
+                    embedded
+                  />
+                </div>
               </div>
-              <div className="xl:col-span-2 xl:max-h-[640px] xl:overflow-y-auto xl:pr-1">
+              <div className="xl:col-span-2">
                 {viewTab === 'link' ? (
                   <LinkSidePanel
                     typeDistribution={data?.link_distributions?.type}
