@@ -15,6 +15,7 @@ interface AppShellProps {
 }
 
 function AppShellInner({ children }: AppShellProps) {
+  // Collapsible sidebar shell: persistent collapse + transient hover-peek.
   const { collapsed } = useSidebarCollapse();
   // Transient hover-peek: only meaningful while collapsed. Kept local so a
   // hover never re-renders the header or page content (children is a stable
