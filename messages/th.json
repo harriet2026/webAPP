@@ -1,5 +1,9 @@
 {
-  "theme": {"label": "ธีม", "blue": "ธีมสีน้ำเงิน", "green": "ธีมสีเขียว"},
+  "theme": {
+    "label": "ธีม",
+    "blue": "ธีมสีน้ำเงิน",
+    "green": "ธีมสีเขียว"
+  },
   "branding": {
     "saasName": "เกตเวย์ความปลอดภัยอีเมลบนคลาวด์",
     "selfHostedName": "เกตเวย์ความปลอดภัยอีเมล",
@@ -431,7 +435,9 @@
     "investigations": "Investigations",
     "tenantSystemManagement": "องค์กรและสมาชิก",
     "monitorDashboard": "ภาพรวมการเฝ้าระวัง",
-    "detectionOverview": "ภาพรวมการตรวจจับ"
+    "detectionOverview": "ภาพรวมการตรวจจับ",
+    "collapseNav": "ยุบแถบเมนู",
+    "expandNav": "ขยายแถบเมนู"
   },
   "agentCenterOverview": {
     "centerTitle": "ศูนย์จัดการ Agent",
@@ -7332,7 +7338,6 @@
       "internal_phishing": "ฟิชชิงภายใน",
       "internal_virus": "ไวรัสภายใน"
     },
-
     "table": {
       "title": "ข้อมูลรายละเอียด",
       "date": "วันที่",

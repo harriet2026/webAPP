@@ -1,5 +1,9 @@
 {
-  "theme": {"label": "Theme", "blue": "Blue Theme", "green": "Green Theme"},
+  "theme": {
+    "label": "Theme",
+    "blue": "Blue Theme",
+    "green": "Green Theme"
+  },
   "branding": {
     "saasName": "Cloud Email Security Gateway",
     "selfHostedName": "Email Security Gateway",
@@ -347,7 +351,9 @@
     "emailLogs": "Email Logs",
     "investigations": "Investigations",
     "tenantSystemManagement": "Organization & Members",
-    "monitorDashboard": "Monitor Overview"
+    "monitorDashboard": "Monitor Overview",
+    "collapseNav": "Collapse sidebar",
+    "expandNav": "Expand sidebar"
   },
   "agentCenterOverview": {
     "centerTitle": "Agent Management Center",
@@ -7311,7 +7317,6 @@
       "internal_phishing": "Internal Phishing",
       "internal_virus": "Internal Virus"
     },
-
     "table": {
       "title": "Detail Data",
       "date": "Date",

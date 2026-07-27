@@ -20,9 +20,11 @@ interface SidebarNavItemProps {
   toggleExpand: (id: string) => void;
   isItemAllowed: (item: NavItem) => boolean;
   titleKeyOverrides?: Record<string, string>;
+  /** When false, the rail is a collapsed icon-only strip (labels/chevron/children hidden). */
+  showExpanded?: boolean;
 }
 
-function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAllowed, titleKeyOverrides }: SidebarNavItemProps) {
+function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAllowed, titleKeyOverrides, showExpanded = true }: SidebarNavItemProps) {
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
@@ -61,10 +63,12 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
         {...pointerHoverProps}
         data-active={isSelected ? 'true' : undefined}
         aria-expanded={hasChildren ? isExpanded : undefined}
+        title={!showExpanded ? t(titleKeyOverrides?.[item.id] ?? item.titleKey) : undefined}
         className={cn(
           'flex w-full cursor-pointer items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium',
           'transition-[background-color,color,box-shadow] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
           'motion-reduce:transition-none',
+          !showExpanded && 'justify-center gap-0 px-0',
           level === 0 && 'text-sidebar-foreground/72',
           level > 0 && 'text-sidebar-foreground/62',
           level > 0 && 'rounded-lg px-3 py-2',
@@ -85,8 +89,10 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
             )}
           />
         )}
-        <span className="flex-1 text-left">{t(titleKeyOverrides?.[item.id] ?? item.titleKey)}</span>
-        {hasChildren && (
+        {showExpanded && (
+          <span className="flex-1 text-left">{t(titleKeyOverrides?.[item.id] ?? item.titleKey)}</span>
+        )}
+        {showExpanded && hasChildren && (
           <span className="flex-shrink-0">
             <ChevronDown
               className={cn(
@@ -99,7 +105,7 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
         )}
       </button>
 
-      {hasChildren && isExpanded && (
+      {showExpanded && hasChildren && isExpanded && (
         <div className="ml-5 mt-1 space-y-1 border-l border-white/8 pl-3">
           {filteredChildren?.map((child) => (
             <SidebarNavItem
@@ -110,6 +116,7 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
               toggleExpand={toggleExpand}
               isItemAllowed={isItemAllowed}
               titleKeyOverrides={titleKeyOverrides}
+              showExpanded={showExpanded}
             />
           ))}
         </div>
@@ -118,7 +125,17 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
   );
 }
 
-export function SidebarNav() {
+interface SidebarNavProps {
+  /**
+   * Persistent collapsed (icon-only) state. Accepted for API symmetry with the
+   * shell; rendering is driven entirely by `showExpanded`.
+   */
+  collapsed?: boolean;
+  /** Effective expanded view = not collapsed, or peeking on hover. */
+  showExpanded?: boolean;
+}
+
+export function SidebarNav({ showExpanded = true }: SidebarNavProps = {}) {
   const currentPath = usePathname();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
     // 默认展开集合刻意偏离 demo 原型（demo 展开 统计/邮件处置/系统管理）：webapp 的
@@ -198,8 +215,8 @@ export function SidebarNav() {
 
   return (
     <div className="flex h-full flex-col text-sidebar-foreground">
-      <div className="border-b border-white/8 px-5 py-5">
-        <div className="flex items-center gap-3">
+      <div className={cn('border-b border-white/8 py-5', showExpanded ? 'px-5' : 'px-3')}>
+        <div className={cn('flex items-center gap-3', !showExpanded && 'justify-center gap-0')}>
           <Image
             src="/logo_white.png"
             alt=""
@@ -207,12 +224,14 @@ export function SidebarNav() {
             height={40}
             className="h-10 w-10 shrink-0 object-contain"
           />
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold tracking-wide text-white">{brandName}</div>
-            <div className="truncate text-xs text-sidebar-foreground/55">
-              {activeTitleKey ? t(activeTitleKey) : t('sidebar.dashboard')}
+          {showExpanded && (
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold tracking-wide text-white">{brandName}</div>
+              <div className="truncate text-xs text-sidebar-foreground/55">
+                {activeTitleKey ? t(activeTitleKey) : t('sidebar.dashboard')}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -225,11 +244,12 @@ export function SidebarNav() {
             toggleExpand={toggleExpand}
             isItemAllowed={isItemAllowed}
             titleKeyOverrides={titleKeyOverrides}
+            showExpanded={showExpanded}
           />
         ))}
       </nav>
 
-      <VersionFooter />
+      {showExpanded && <VersionFooter />}
     </div>
   );
 }

@@ -1,5 +1,9 @@
 {
-  "theme": {"label": "Тема", "blue": "Синяя тема", "green": "Зелёная тема"},
+  "theme": {
+    "label": "Тема",
+    "blue": "Синяя тема",
+    "green": "Зелёная тема"
+  },
   "branding": {
     "saasName": "Облачный шлюз безопасности электронной почты",
     "selfHostedName": "Шлюз безопасности электронной почты",
@@ -432,7 +436,9 @@
     "investigations": "Investigations",
     "tenantSystemManagement": "Организация и участники",
     "monitorDashboard": "Обзор мониторинга",
-    "detectionOverview": "Обзор обнаружения"
+    "detectionOverview": "Обзор обнаружения",
+    "collapseNav": "Свернуть меню",
+    "expandNav": "Развернуть меню"
   },
   "agentCenterOverview": {
     "centerTitle": "Центр управления агентами",
@@ -6928,26 +6934,6 @@
       "normal": "Обычные письма",
       "spam": "Спам",
       "suspicious": "Подозрительный спам",
-      "high_risk_spam": "Спам высоко��о риска",
-      "phishing": "Фишинг",
-      "virus": "Вирусы",
-      "malicious": "Вредоносные письма",
-      "invalid": "Недействительные письма"
-    },
-    "actions": {
-      "deliver": "Доставить",
-      "mark_deliver": "Пометить и доставить",
-      "greylist": "Серый список",
-      "quarantine": "Карантин",
-      "review": "Проверка",
-      "block": "Отклонить",
-      "drop": "Отбросить",
-      "recall": "Отозвать"
-    },
-    "threatTypes": {
-      "normal": "Обычные письма",
-      "spam": "Спам",
-      "suspicious": "Подозрительный спам",
       "high_risk_spam": "Спам высокого риска",
       "phishing": "Фишинг",
       "virus": "Вирусы",
@@ -7169,7 +7155,6 @@
       "internal_phishing": "Внутренний фишинг",
       "internal_virus": "Внутренний вирус"
     },
-
     "table": {
       "title": "Подробные данные",
       "date": "Дата",
