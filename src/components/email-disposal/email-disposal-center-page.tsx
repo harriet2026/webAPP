@@ -72,7 +72,7 @@ export function EmailDisposalCenterPage({
   const { templates, saveTemplate, deleteTemplate } = useSearchTemplates();
   const queryClient = useQueryClient();
   const { capabilities, viewer } = useProductForm();
-  const { features, isSystemAdmin, user } = useAuth();
+  const { features, isSystemAdmin, isTenantAdmin, user } = useAuth();
   const { selectedTenantId } = useTenant();
   const { effectiveViewer } = resolveSecurityScope({
     scopeTenantId: null,
@@ -80,6 +80,7 @@ export function EmailDisposalCenterPage({
     capabilitiesLoaded: capabilities != null,
     viewer,
     isSystemAdmin,
+    isTenantAdmin,
     selectedTenantId,
     userTenantId: user?.tenant_id ?? null,
   });

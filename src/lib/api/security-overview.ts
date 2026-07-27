@@ -128,10 +128,15 @@ export interface TimeDistributionParams {
 export interface HourlyBucket {
   hour: number;
   total: number;
-  phishing: number;
+  // 8 threat email types (excludes non-threat: normal / subscription / advertising)
   spam: number;
+  harmful: number;
+  suspicious: number;
+  sensitive: number;
+  spoofing: number;
+  phishing: number;
   virus: number;
-  malicious?: number;
+  account_compromised: number;
 }
 
 export interface PeakHour {

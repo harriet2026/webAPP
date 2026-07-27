@@ -1,7 +1,7 @@
 import { apiRequest, type ApiRequestFn } from './client';
 
 export type Direction = 'all' | 'receive' | 'send' | 'internal';
-export type TimeRange = 'today' | '7d' | '30d' | 'this_month' | 'last_month';
+export type TimeRange = 'today' | '7d' | '30d' | 'this_month' | 'last_month' | 'custom';
 
 export interface LinkAttachmentKPI {
   total_link_mail: number;

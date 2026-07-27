@@ -50,6 +50,28 @@ describe('OpsTopTrendPage connection-dimension scope', () => {
     opsTopCalls.length = 0;
   });
 
+  it('uses the standard page shell and header without the legacy framed wrapper', () => {
+    const { container } = renderPage();
+
+    const shell = container.querySelector('[data-slot="page-shell"]');
+    const header = container.querySelector('[data-slot="page-header"]');
+
+    expect(shell).not.toBeNull();
+    expect(header).not.toBeNull();
+    expect(shell?.firstElementChild).toBe(header);
+    expect(header?.querySelector('svg')).not.toBeNull();
+    expect(
+      Array.from(container.querySelectorAll('div')).some((element) =>
+        element.classList.contains('-m-8'),
+      ),
+    ).toBe(false);
+    expect(
+      Array.from(container.querySelectorAll('div')).some((element) =>
+        element.classList.contains('space-y-6') && element.classList.contains('p-6'),
+      ),
+    ).toBe(false);
+  });
+
   // platform_auditor: role=system_admin but is_super_admin=false. The backend
   // serves it the connection dimension, so the tab must be visible and the
   // default dimension must stay connection.

@@ -1,17 +1,29 @@
 'use client';
 
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Building2 } from 'lucide-react';
-import { TenantSelector } from '@/components/layout/tenant-selector';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { differenceInCalendarDays, parseISO } from 'date-fns';
+import { SegmentedControl } from '@/components/shared/segmented-control';
+import { TenantScopeSelector } from '@/components/statistics/security-overview/TenantScopeSelector';
+import {
+  validateCustomRange,
+  type CustomRange,
+} from '@/components/statistics/security-overview/date-range';
 import type { Direction, TimeRange } from '@/lib/api/link-attachment-security';
+
+export const CUSTOM_RANGE_DEBOUNCE_MS = 500;
+const MAX_RANGE_DAYS = 90;
+
+const DIRECTIONS: Direction[] = ['all', 'receive', 'send', 'internal'];
+const TIME_RANGES: TimeRange[] = ['today', '7d', '30d', 'this_month', 'last_month', 'custom'];
 
 interface FilterBarProps {
   direction: Direction;
   onDirectionChange: (d: Direction) => void;
   timeRange: TimeRange;
   onTimeRangeChange: (r: TimeRange) => void;
+  customRange: CustomRange;
+  onCustomRangeChange: (r: CustomRange) => void;
   showTenantScope: boolean;
   tenantId: number | null;
   onTenantChange: (tenantId: number | null) => void;
@@ -22,50 +34,109 @@ export function FilterBar({
   onDirectionChange,
   timeRange,
   onTimeRangeChange,
+  customRange,
+  onCustomRangeChange,
   showTenantScope,
   tenantId,
   onTenantChange,
 }: FilterBarProps) {
   const t = useTranslations('linkAttachmentSecurity');
-  const directions: Direction[] = ['all', 'receive', 'send', 'internal'];
-  const ranges: TimeRange[] = ['today', '7d', '30d', 'this_month', 'last_month'];
+  const startId = useId();
+  const endId = useId();
+
+  const [draft, setDraft] = useState<CustomRange>(customRange);
+  const [error, setError] = useState<ReturnType<typeof validateCustomRange>>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelPending = useCallback(() => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+  }, []);
+
+  useEffect(() => cancelPending, [cancelPending]);
+
+  const editDraft = (patch: Partial<CustomRange>) => {
+    const next = { ...draft, ...patch };
+    setDraft(next);
+    let err = validateCustomRange(next);
+    if (
+      err === null
+      && differenceInCalendarDays(parseISO(next.end), parseISO(next.start)) > MAX_RANGE_DAYS
+    ) {
+      err = 'tooLong';
+    }
+    setError(err);
+    cancelPending();
+    if (err !== null) return;
+    timer.current = setTimeout(() => onCustomRangeChange(next), CUSTOM_RANGE_DEBOUNCE_MS);
+  };
+
+  const handleTimeRangeChange = (next: TimeRange) => {
+    cancelPending();
+    if (next === 'custom' && timeRange !== 'custom') {
+      setDraft(customRange);
+      setError(null);
+    } else if (next !== 'custom' && timeRange === 'custom') {
+      setDraft(customRange);
+      setError(null);
+    }
+    onTimeRangeChange(next);
+  };
 
   return (
-    <div className="flex min-h-[85px] flex-wrap items-center gap-4 rounded-lg bg-card p-4 shadow-sm" data-testid="link-attachment-filters">
-      {showTenantScope && <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-2.5 dark:border-gray-800">
-        <Building2 className="h-4 w-4 text-muted-foreground" />
-        <Label className="whitespace-nowrap text-sm text-muted-foreground">{t('tenantScope')}</Label>
-        <TenantSelector value={tenantId} onChange={onTenantChange} className="!w-64" />
-      </div>}
+    <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm" data-testid="link-attachment-filters">
+      {showTenantScope && (
+        <TenantScopeSelector value={tenantId} onChange={onTenantChange} />
+      )}
 
-      <div className="flex overflow-hidden rounded border border-gray-300 dark:border-gray-600" role="group" aria-label={t('direction.label')}>
-        {directions.map((item) => (
-          <button
-            key={item}
-            type="button"
-            aria-pressed={direction === item}
-            onClick={() => onDirectionChange(item)}
-            className={`border-r px-4 py-1.5 text-sm transition-colors last:border-r-0 ${
-              direction === item
-                ? 'bg-blue-500 text-white'
-                : 'bg-card text-foreground hover:bg-muted'
-            }`}
-          >
-            {t(`direction.${item}`)}
-          </button>
-        ))}
+      <div className="flex items-center gap-2">
+        <span className="whitespace-nowrap text-sm text-muted-foreground">
+          {t('direction.label')}
+        </span>
+        <SegmentedControl
+          value={direction}
+          onChange={onDirectionChange}
+          options={DIRECTIONS.map((d) => ({ value: d, label: t(`direction.${d}`) }))}
+        />
       </div>
 
-      <Select value={timeRange} onValueChange={(value) => onTimeRangeChange(value as TimeRange)}>
-        <SelectTrigger size="sm" className="w-32" aria-label={t('timeRange.label')}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {ranges.map((range) => (
-            <SelectItem key={range} value={range}>{t(`timeRange.${range}`)}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <SegmentedControl
+        value={timeRange}
+        onChange={handleTimeRangeChange}
+        size="sm"
+        options={TIME_RANGES.map((r) => ({ value: r, label: t(`timeRange.${r}`) }))}
+      />
+
+      {timeRange === 'custom' && (
+        <div className="flex flex-wrap items-center gap-2">
+          <label htmlFor={startId} className="whitespace-nowrap text-sm text-muted-foreground">
+            {t('customRange.start')}
+          </label>
+          <input
+            id={startId}
+            type="date"
+            value={draft.start}
+            onChange={(e) => editDraft({ start: e.target.value })}
+            className="h-9 rounded-md border border-border bg-card px-2 text-sm text-body"
+          />
+          <span className="text-sm text-muted-foreground">~</span>
+          <label htmlFor={endId} className="whitespace-nowrap text-sm text-muted-foreground">
+            {t('customRange.end')}
+          </label>
+          <input
+            id={endId}
+            type="date"
+            value={draft.end}
+            onChange={(e) => editDraft({ end: e.target.value })}
+            className="h-9 rounded-md border border-border bg-card px-2 text-sm text-body"
+          />
+          {error && (
+            <span role="alert" className="text-sm text-danger">
+              {t(`customRange.error.${error}`, { max: MAX_RANGE_DAYS })}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -13,6 +13,7 @@ interface SegmentedControlProps<T extends string> {
   options: SegmentedOption<T>[];
   size?: 'sm' | 'md';
   className?: string;
+  testIdPrefix?: string;
 }
 
 // Hairline-bordered button group. Active segment = primary fill + primary
@@ -25,6 +26,7 @@ export function SegmentedControl<T extends string>({
   options,
   size = 'md',
   className,
+  testIdPrefix,
 }: SegmentedControlProps<T>) {
   const pad = size === 'sm' ? 'px-3 py-1.5' : 'px-4 py-1.5';
   return (
@@ -33,6 +35,7 @@ export function SegmentedControl<T extends string>({
         <button
           key={opt.value}
           type="button"
+          data-testid={testIdPrefix ? `${testIdPrefix}-${opt.value}` : undefined}
           aria-pressed={value === opt.value}
           onClick={() => onChange(opt.value)}
           className={cn(

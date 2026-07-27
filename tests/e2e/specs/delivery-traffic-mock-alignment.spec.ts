@@ -87,12 +87,11 @@ test.describe('Delivery Traffic html_spec alignment (mock runtime)', () => {
     await expect(page.getByText('最老邮件年龄')).toBeVisible();
     await expect(page.getByText('处理速率')).toBeVisible();
 
-    await page.getByTestId('delivery-time-range').click();
-    await page.getByRole('option', { name: '自定义' }).click();
+    await page.getByTestId('delivery-time-range-custom').click();
     const dates = page.getByTestId('delivery-custom-range').locator('input[type="date"]');
     await dates.nth(0).fill('2026-01-01');
     await dates.nth(1).fill('2026-07-23');
-    await expect(page.getByText('时间范围不能超过 90 天')).toBeVisible();
+    await expect(page.getByText('最多 90 天')).toBeVisible();
 
     expect(consoleErrors).toEqual([]);
   });

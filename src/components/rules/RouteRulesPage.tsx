@@ -438,7 +438,9 @@ export function RouteRulesPage() {
                 <div className="space-y-2">
                   <Label>{t('routeRules.proxysvrGroup')} *</Label>
                   <Select
-                    value={proxysvrGroupId ? String(proxysvrGroupId) : null}
+                    // Controlled for the component's lifetime — see the same fix in
+                    // mail-routing/OutboundRoutingTab.tsx.
+                    value={proxysvrGroupId?.toString() ?? ''}
                     onValueChange={(v) => setProxysvrGroupId(v ? Number(v) : null)}
                   >
                     <SelectTrigger data-testid="route-proxysvr-group-select">

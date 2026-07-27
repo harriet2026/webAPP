@@ -7,6 +7,7 @@ import {
   getEscapeList,
   type Direction,
   type DrillDownParams,
+  type SecurityOverviewInterval,
 } from '@/lib/api/security-overview';
 import { useSecurityScope } from './useSecurityScope';
 
@@ -16,10 +17,11 @@ export function useSecurityOverview(params: {
   direction: Direction;
   comparePreviousPeriod?: boolean;
   scopeTenantId: number | null;
+  interval?: SecurityOverviewInterval;
 }) {
   const { scopedRequest, resolvedScopeTenant, scopeResolved } = useSecurityScope(params.scopeTenantId);
   return useQuery({
-    queryKey: ['security-overview', resolvedScopeTenant, params.startDate, params.endDate, params.direction, params.comparePreviousPeriod],
+    queryKey: ['security-overview', resolvedScopeTenant, params.startDate, params.endDate, params.direction, params.comparePreviousPeriod, params.interval],
     queryFn: () => getSecurityOverview(params, scopedRequest),
     enabled: scopeResolved && !!params.startDate && !!params.endDate,
     staleTime: 60_000,

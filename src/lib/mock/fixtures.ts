@@ -446,6 +446,23 @@ export function mockBootstrap(): Bootstrap {
     // 让 platform 默认视角（demo 云网关默认态）就能看到完整的阶段4+阶段5，所以
     // 这里显式设为 false，仅服务于 mock/demo 展示，不代表真实生产语义。
     featureRegistry: [
+      // 平台侧基础设施监控。系统状态页的「系统在线节点」KPI 卡与「系统与服务
+      // 健康」卡都由它门控（见 system-status/visibility.ts 的 INFRA_FEATURE_ID）。
+      // 形状对齐生产 registry.go / registry_for_test.json：scope=platform、
+      // tenantAccess=hidden、grantable=false —— 即 platform 视角只读可见，任何
+      // tenant 视角（含租户管理员、impersonation）一律 HIDDEN。
+      // 必须登记：visibility.ts 对「注册表中缺失」的特性走「未登记=放行」兜底
+      // (`: true`)，之前 mock 少了这一项，导致 mock/demo 模式下这两张平台卡片
+      // 对所有视角（含租户管理员）恒显示 —— 与生产语义不符。
+      {
+        id: "monitor-infrastructure",
+        visibility: "ALWAYS",
+        scope: "platform",
+        platformAccess: "readonly",
+        tenantAccess: "hidden",
+        platformHidden: false,
+        grantable: false,
+      },
       {
         id: "phishing-detection",
         visibility: "AI_ELSE_LOCK",
@@ -824,7 +841,12 @@ const GEO_COUNTRIES = [
 ] as const;
 
 export function mockSecurityGeo(threatFilter = "all"): GeoDistributionResponse {
-  const factor = threatFilter === "all" ? 1 : threatFilter === "spam" ? 0.52 : threatFilter === "phishing" ? 0.31 : 0.17;
+  const EMAIL_TYPE_FACTORS: Record<string, number> = {
+    normal: 0.65, subscription: 0.12, advertising: 0.10, spam: 0.52,
+    harmful: 0.18, suspicious: 0.22, sensitive: 0.08, spoofing: 0.14,
+    phishing: 0.31, virus: 0.17, account_compromised: 0.05,
+  };
+  const factor = threatFilter === "all" ? 1 : (EMAIL_TYPE_FACTORS[threatFilter] ?? 0.15);
   return {
     countries: GEO_COUNTRIES.map(([country, count, block_rate]) => ({ country, count: Math.round(count * factor), block_rate })),
     summary_top3: GEO_COUNTRIES.slice(0, 3).map(([country]) => country),
@@ -832,11 +854,29 @@ export function mockSecurityGeo(threatFilter = "all"): GeoDistributionResponse {
 }
 
 export function mockSecurityTime(mode: "daily" | "weekly" = "daily", threatFilter = "all"): TimeDistributionResponse {
-  const factor = threatFilter === "all" ? 1 : threatFilter === "spam" ? 0.5 : threatFilter === "phishing" ? 0.3 : 0.16;
+  const EMAIL_TYPE_FACTORS: Record<string, number> = {
+    normal: 0.65, subscription: 0.12, advertising: 0.10, spam: 0.52,
+    harmful: 0.18, suspicious: 0.22, sensitive: 0.08, spoofing: 0.14,
+    phishing: 0.31, virus: 0.17, account_compromised: 0.05,
+  };
+  const factor = threatFilter === "all" ? 1 : (EMAIL_TYPE_FACTORS[threatFilter] ?? 0.15);
   const hourly = Array.from({ length: 24 }, (_, hour) => {
     const wave = 80 + Math.round(130 * (1 + Math.sin((hour - 7) / 3)) / 2) + (hour === 13 ? 75 : 0);
     const total = Math.round(wave * factor);
-    return { hour, total, phishing: Math.round(total * 0.25), spam: Math.round(total * 0.5), virus: Math.round(total * 0.15), malicious: Math.round(total * 0.1) };
+    return {
+      hour, total,
+      normal:              Math.round(total * 0.20),
+      subscription:        Math.round(total * 0.05),
+      advertising:         Math.round(total * 0.04),
+      spam:                Math.round(total * 0.22),
+      harmful:             Math.round(total * 0.08),
+      suspicious:          Math.round(total * 0.10),
+      sensitive:           Math.round(total * 0.04),
+      spoofing:            Math.round(total * 0.06),
+      phishing:            Math.round(total * 0.12),
+      virus:               Math.round(total * 0.07),
+      account_compromised: Math.round(total * 0.02),
+    };
   });
   const peak_hours = [...hourly].sort((a, b) => b.total - a.total).slice(0, 4).map(({ hour, total }) => ({ hour, count: total }));
   return {

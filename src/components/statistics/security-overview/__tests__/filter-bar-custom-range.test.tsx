@@ -34,7 +34,6 @@ vi.mock('next-intl', () => ({
       'customRange.error.invalid': '请选择起止日期',
       'customRange.error.order': '结束日期不能早于开始日期',
       'customRange.error.tooLong': `时间跨度不能超过 ${vars?.max} 天`,
-      comparePrevious: '对比上一周期',
     };
     return dict[key] ?? key;
   },
@@ -58,8 +57,6 @@ function setup(timeRange: TimeRange = 'custom') {
       onTimeRangeChange={vi.fn()}
       customRange={{ start: '2026-05-15', end: '2026-05-21' }}
       onCustomRangeChange={onCustomRangeChange}
-      comparePrevious={false}
-      onComparePreviousChange={vi.fn()}
     />,
   );
 }
@@ -187,8 +184,6 @@ function Harness() {
         onTimeRangeChange={setTimeRange}
         customRange={customRange}
         onCustomRangeChange={onChange}
-        comparePrevious={false}
-        onComparePreviousChange={vi.fn()}
       />
       <output data-testid="queried">{`${customRange.start}..${customRange.end}`}</output>
     </>
@@ -269,8 +264,6 @@ function validateOK(r: CustomRange): boolean {
       onTimeRangeChange={vi.fn()}
       customRange={r}
       onCustomRangeChange={vi.fn()}
-      comparePrevious={false}
-      onComparePreviousChange={vi.fn()}
     />,
   );
   return screen.queryByRole('alert') === null;

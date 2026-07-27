@@ -728,12 +728,12 @@
       "privilegedForcedNotice": "Automatically privileged (and locked) while the sender-domain SPF record or the any-sender option is in use."
     },
     "outbound": {
-      "description": "Configure routing rules for outbound email. The condition is_outbound = true is automatically included in every rule.",
-      "empty": "No outbound routing rules. Create a rule to route outbound mail via SMTP next-hop or a proxy server group.",
+      "description": "Configure mail routing rules. A rule's direction comes from its conditions: add is_outbound = true to apply it to sending only, or is_outbound = false for receiving only.",
+      "empty": "No routing rules. Create a rule to route mail via SMTP next-hop or a proxy server group.",
       "createRule": "Create Routing Rule",
       "editRule": "Edit Routing Rule",
       "priorityHint": "Larger number = higher priority. First matching rule wins.",
-      "isOutboundFixed": "is_outbound = true (fixed — outbound mail only)",
+      "directionHint": "A rule with no is_outbound condition applies to both the receiving and the sending direction. Add an is_outbound condition below to scope it to one direction.",
       "channelSection": "Delivery Channel",
       "saveError": "Failed to save rule. Check required fields.",
       "nameRequired": "Name is required"
@@ -7030,6 +7030,7 @@
     "trendPeakHint": "Click a legend item to toggle a series; double-click to isolate one",
     "subtitle": "Multi-dimensional email threat analysis and security overview",
     "title": "Security Overview",
+    "trendCardTitle": "Security Posture Analysis",
     "noData": "No data",
     "error": {
       "forbiddenTitle": "No permission to view the email security overview",
@@ -7043,7 +7044,8 @@
       "totalFiltered": "Total Filtered",
       "blockRate": "Block Rate",
       "recallRate": "Recall Rate",
-      "pendingReview": "Pending Review"
+      "pendingReview": "Pending Review",
+      "vsPrevious": "vs last period"
     },
     "filter": {
       "direction": {
@@ -7085,7 +7087,7 @@
       "action": "Action",
       "threat_level": "Threat Level",
       "delivery_result": "Delivery Result",
-      "email_type": "Email Type"
+      "email_type": "Threat Posture Trend"
     },
     "threatTypes": {
       "normal": "Normal",
@@ -7155,7 +7157,11 @@
       "mapUnavailable": "World map failed to load",
       "backToWorld": "Back to global",
       "topIps": "Top source IPs",
-      "byThreat": "Threat breakdown"
+      "byThreat": "Threat breakdown",
+      "blockRateLegend": "Bar color = block rate",
+      "blockRateGood": "≥97%  Well protected",
+      "blockRateWarn": "95–97%  Monitor",
+      "blockRateBad": "<95%  High risk"
     },
     "time": {
       "title": "Attack Time Distribution",
@@ -7256,6 +7262,16 @@
       "invalidOrder": "The end date cannot be before the start date",
       "noFuture": "Future dates are not allowed"
     },
+    "customRange": {
+      "start": "Start",
+      "end": "End",
+      "error": {
+        "invalid": "Invalid date",
+        "order": "Start must be before end",
+        "tooLong": "Max {max} days"
+      }
+    },
+    "tenantScope": "Tenant scope",
     "kpi": {
       "inboundTotal": "Inbound Total",
       "outboundTotal": "Outbound Total",
@@ -7422,7 +7438,17 @@
       "7d": "Last 7 Days",
       "30d": "Last 30 Days",
       "this_month": "This Month",
-      "last_month": "Last Month"
+      "last_month": "Last Month",
+      "custom": "Custom"
+    },
+    "customRange": {
+      "start": "Start",
+      "end": "End",
+      "error": {
+        "invalid": "Invalid date",
+        "order": "Start must be before end",
+        "tooLong": "Max {max} days"
+      }
     },
     "kpi": {
       "totalLinkMail": "Total Link Mails",
@@ -9446,11 +9472,17 @@
       "empty": "No threat data",
       "viewOverview": "View Email Security Overview",
       "series": {
-        "phishing": "Phishing",
-        "spoofing": "Spoofing",
+        "normal": "Normal",
+        "subscription": "Subscription",
+        "advertising": "Advertising",
         "spam": "Spam",
+        "harmful": "Harmful",
+        "suspicious": "Suspicious",
+        "sensitive": "Sensitive",
+        "spoofing": "Spoofing",
+        "phishing": "Phishing",
         "virus": "Virus",
-        "malicious": "Malicious link"
+        "account_compromised": "Account Compromised"
       }
     },
     "todo": {

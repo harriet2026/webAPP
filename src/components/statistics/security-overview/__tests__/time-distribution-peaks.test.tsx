@@ -115,7 +115,7 @@ describe('TimeDistributionCard peak-hours ranking (GT-11983 / GT-11932)', () => 
 
     const chart = screen.getByTestId('time-distribution-echarts');
     const option = JSON.parse(chart.getAttribute('data-option') ?? '{}');
-    expect(option.series).toHaveLength(4);
+    expect(option.series).toHaveLength(8);
     expect(option.series.every((series: { type: string }) => series.type === 'bar')).toBe(true);
     expect(option.series.every((series: { stack: string }) => series.stack === 'threats')).toBe(true);
   });
