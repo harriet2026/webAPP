@@ -39,6 +39,16 @@ export function actionToVariant(action: string | undefined | null): ActionBadgeV
   }
 }
 
+/**
+ * Returns any extra Tailwind class string for a given action badge.
+ * Previously used for the amber 'mixed' badge; now returns '' for all actions
+ * since mixed has been replaced by per-action badge expansion.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function actionExtraClass(_action: string | undefined | null): string {
+  return '';
+}
+
 type ActionTranslator = (key: string) => string;
 
 export function actionLabel(action: string | undefined | null, t: ActionTranslator): string {

@@ -544,12 +544,21 @@ const routes: Route[] = [
       const rawDirection = p.get('direction');
       const direction = rawDirection === 'receive' || rawDirection === 'send' || rawDirection === 'internal' ? rawDirection : 'all';
       const tenant = Number(p.get('tenant_id'));
-      return { status: 200, data: mockDeliveryTrafficFor(direction, Number.isFinite(tenant) && tenant > 0 ? tenant : null) };
+      const startDate = p.get('start_date') ?? '';
+      const endDate = p.get('end_date') ?? '';
+      return { status: 200, data: mockDeliveryTrafficFor(direction, Number.isFinite(tenant) && tenant > 0 ? tenant : null, startDate, endDate) };
     },
   },
   {
     method: 'GET', pattern: '/statistics/delivery-traffic/export.csv',
-    handler: () => ({ status: 200, data: mockDeliveryTrafficCsv() }),
+    handler: (req) => {
+      const p = new URLSearchParams(rawQuery(req.path));
+      const rawDirection = p.get('direction');
+      const direction = rawDirection === 'receive' || rawDirection === 'send' || rawDirection === 'internal' ? rawDirection : 'all';
+      const startDate = p.get('start_date') ?? '';
+      const endDate = p.get('end_date') ?? '';
+      return { status: 200, data: mockDeliveryTrafficCsv(direction, startDate, endDate) };
+    },
   },
   {
     method: 'POST', pattern: '/statistics/delivery-traffic/ai-analysis',
@@ -1793,7 +1802,7 @@ const routes: Route[] = [
     pattern: '/inbound-audit',
     handler: () => ({ status: 200, data: mockInboundAuditPending() }),
   },
-  // 智能体运行概况 / 待办：钓鱼、仿冒、威胁回溯 stats。
+  // 智能体运行概况 / 待办：钓鱼、仿冒、威���回溯 stats。
   {
     method: 'GET',
     pattern: '/phishing-agent/stats',

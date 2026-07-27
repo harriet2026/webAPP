@@ -35,6 +35,8 @@ export interface TrendPoint {
 
 export interface TrendData {
   points: TrendPoint[];
+  /** 'hour' when the range is a single day (today), 'day' otherwise. */
+  granularity?: 'hour' | 'day';
 }
 
 export interface DistributionItem {

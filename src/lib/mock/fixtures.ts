@@ -1831,7 +1831,7 @@ export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
   return mockAlertSmtpConfig();
 }
 
-// ─── 待处置邮件 / 举报待审（KPI）──────────────────────────────────────────────
+// ─── 待处置邮件 / ��报待审（KPI）──────────────────────────────────────────────
 // 隔离（disposal.total）：today 3 / 7d 11 / 30d 19；举报待审（inbound-audit.total）：
 // today 2 / 7d 6 / 30d 13。两个查询都不带范围参数，故按模块级 currentSystemStatusRange 分支。
 const DISPOSAL_PENDING: Record<SystemStatusRangeKey, number> = {
@@ -3250,7 +3250,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 发信人黑白名单（sender_filter，mock）
-// 数据结���对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
+// 数���结���对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
 //   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
 //   - metadata 携带 `{feature:'sender_filter', sender_config, ip_range, list_type}`，
@@ -3491,7 +3491,7 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
       }),
       sfGroupRule({
         id: 8108,
-        name: "批量营销���征",
+        name: "���量营销���征",
         type: "feature",
         created_at: "2024-01-12T00:00:00Z",
         member_count: 2,
@@ -4874,7 +4874,7 @@ export function mockPutURLProtectionSettings(
   return { ...urlProtectionSettingsState };
 }
 
-// ─── 意图引擎（intent-engine，mock）─────────────────────��──────────
+// ─── 意图引擎（intent-engine，mock）────────────────��────��──────────
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
 // 动作映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），
 // 非 receive 方向默认区间 accept→quarantine（D-06）。
@@ -5322,7 +5322,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     sender: "newsletter@marketing.com",
     recipients:
       "user@company.com, sales1@company.com, sales2@company.com, marketing@company.com, dev@company.com, ops@company.com, support@company.com, intern@company.com",
-    subject: "本周特惠活动（���投信 - 8人）",
+    subject: "本���特惠活动（���投信 - 8人）",
     action: "deliver",
     reason: "垃圾邮件标记投递",
     mailType: "spam",
@@ -5857,7 +5857,7 @@ function disposalBasis(seed: MockDisposalSeed) {
     action: seed.disposalBasisActionOverride ?? disposalAction(seed),
     // confidence 供 disposal-basis-config.ts 里 AI-* 策略的 hitDetail() 模板
     // 使用（如 AI-PHISH 的「置信度：{cf}%」），让 ThreatSummaryCard 的
-    // 「AI判定依据」行渲染出有意义的文���，而不是模板兜底的 "-"。
+    // 「AI判定依据」行渲���出有意义的文���，而不是模板兜底的 "-"。
     hit_values: { reason: seed.reason, score: String(seed.score), confidence: String(seed.score) },
     detection_tags: [`source:${seed.basis[0].toLowerCase()}`],
   };
@@ -7246,35 +7246,93 @@ function deliveryHash(value: string) {
   return hash >>> 0;
 }
 
-export function mockDeliveryTrafficFor(direction: Direction, tenantId: number | null): DeliveryTrafficResponse {
+/** Resolve how many calendar days a [startDate, endDate] range spans (inclusive). */
+function deliverySpanDays(startDate: string, endDate: string): number {
+  const s = Date.parse(startDate);
+  const e = Date.parse(endDate);
+  if (Number.isNaN(s) || Number.isNaN(e) || e < s) return 7;
+  return Math.round((e - s) / 86_400_000) + 1;
+}
+
+/** Whether start === end (i.e. "today" single-day view). */
+function deliveryIsToday(startDate: string, endDate: string): boolean {
+  return Boolean(startDate) && startDate === endDate;
+}
+
+export function mockDeliveryTrafficFor(
+  direction: Direction,
+  tenantId: number | null,
+  startDate = '',
+  endDate = '',
+): DeliveryTrafficResponse {
   const scale = tenantId && tenantId > 0 ? 0.16 + (tenantId % 5) * 0.04 : 1;
   const n = (value: number) => Math.max(0, Math.round(value * scale));
-  const dateValues = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (6 - index));
-    return date;
-  });
-  const isoDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  const dates = dateValues.map(isoDate);
-  const trendRng = makeDeliveryRng(1 ^ deliveryHash('trend'));
-  const trendPoints = dateValues.map((date) => {
-    const value = (max: number, min: number) => Math.max(0, Math.floor((trendRng() * max + min) * scale));
-    return {
-      date: `${date.getMonth() + 1}/${date.getDate()}`,
-      receive: value(5000, 8000),
-      send: value(3000, 4000),
-      internal: value(2000, 1500),
-      receive_success: value(4800, 7500),
-      send_success: value(2800, 3700),
-      internal_success: value(1900, 1400),
-    };
-  });
+
+  const isToday = deliveryIsToday(startDate, endDate);
+  const spanDays = isToday ? 1 : deliverySpanDays(startDate, endDate);
+
+  // Use (startDate + endDate) as part of the seed so every time range renders
+  // visually distinct data while remaining stable across re-renders.
+  const rangeSeed = deliveryHash(`${startDate}:${endDate}`);
+
+  const isoDate = (date: Date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+  // For "today": 24 hourly points (00:00 – 23:00).
+  // For multi-day: one point per calendar day.
+  const trendRng = makeDeliveryRng(rangeSeed ^ deliveryHash('trend'));
+
+  let trendPoints: Array<{ date: string; receive: number; send: number; internal: number; receive_success: number; send_success: number; internal_success: number }>;
+  let dates: string[];
+
+  if (isToday) {
+    const todayDate = startDate || isoDate(new Date());
+    trendPoints = Array.from({ length: 24 }, (_, hour) => {
+      const value = (max: number, min: number) =>
+        Math.max(0, Math.floor((trendRng() * max + min) * scale * (1 / 24)));
+      return {
+        date: `${String(hour).padStart(2, '0')}:00`,
+        receive: value(5000, 8000),
+        send: value(3000, 4000),
+        internal: value(2000, 1500),
+        receive_success: value(4800, 7500),
+        send_success: value(2800, 3700),
+        internal_success: value(1900, 1400),
+      };
+    });
+    dates = [todayDate];
+  } else {
+    const startMs = startDate ? Date.parse(startDate) : Date.now() - (spanDays - 1) * 86_400_000;
+    const dateValues = Array.from({ length: spanDays }, (_, index) => {
+      const d = new Date(startMs + index * 86_400_000);
+      return d;
+    });
+    dates = dateValues.map(isoDate);
+    trendPoints = dateValues.map((date) => {
+      const value = (max: number, min: number) =>
+        Math.max(0, Math.floor((trendRng() * max + min) * scale));
+      return {
+        date: `${date.getMonth() + 1}/${date.getDate()}`,
+        receive: value(5000, 8000),
+        send: value(3000, 4000),
+        internal: value(2000, 1500),
+        receive_success: value(4800, 7500),
+        send_success: value(2800, 3700),
+        internal_success: value(1900, 1400),
+      };
+    });
+  }
+
   const detail = (kind: Direction, seedDirection = kind): DetailTableRow[] => {
-    const demoDirection = seedDirection === 'receive' ? 'inbound' : seedDirection === 'send' ? 'outbound' : seedDirection;
-    const rng = makeDeliveryRng(1 ^ deliveryHash(`detail:${demoDirection}`));
-    return dates.slice().reverse().map((date): DetailTableRow => {
+    const demoDirection =
+      seedDirection === 'receive' ? 'inbound' : seedDirection === 'send' ? 'outbound' : seedDirection;
+    const rng = makeDeliveryRng(rangeSeed ^ deliveryHash(`detail:${demoDirection}`));
+    // For today, collapse all 24 hours into a single summary row.
+    const detailDates = isToday ? (dates.length > 0 ? [dates[0]] : []) : dates.slice().reverse();
+    return detailDates.map((date): DetailTableRow => {
+      const dayMultiplier = isToday ? 1 : 1;
       if (kind === 'internal') {
-        const total = Math.floor((rng() * 2000 + 1500) * scale);
+        const total = Math.floor((rng() * 2000 + 1500) * scale * dayMultiplier);
         const success = Math.floor(total * 0.98);
         const failure = Math.floor(total * 0.015);
         return {
@@ -7288,7 +7346,7 @@ export function mockDeliveryTrafficFor(direction: Direction, tenantId: number | 
       }
 
       const outbound = kind === 'send';
-      const total = Math.floor((rng() * (outbound ? 3000 : 5000) + (outbound ? 4000 : 8000)) * scale);
+      const total = Math.floor((rng() * (outbound ? 3000 : 5000) + (outbound ? 4000 : 8000)) * scale * dayMultiplier);
       const success = Math.floor(total * (outbound ? 0.92 : 0.95));
       const failure = Math.floor(total * (outbound ? 0.05 : 0.03));
       const deferred = Math.floor(total * (outbound ? 0.02 : 0.015));
@@ -7315,7 +7373,7 @@ export function mockDeliveryTrafficFor(direction: Direction, tenantId: number | 
   if (direction === 'all') {
     return {
       kpi: { inbound_total: n(89234), outbound_total: n(45678), internal_total: n(12345), total_success_rate: 96.5, queue_backlog: n(1234), trends: { totalSuccessRate: 1.2, queueBacklog: -5.3 } },
-      trend: { points: trendPoints },
+      trend: { points: trendPoints, granularity: isToday ? 'hour' : 'day' } as DeliveryTrafficResponse['trend'] & { granularity: string },
       distribution: [{ name: 'receive', value: n(89234) }, { name: 'send', value: n(45678) }, { name: 'internal', value: n(12345) }],
       latency: { buckets: [] },
       detail_table: detail('receive', 'all'),
@@ -7324,10 +7382,10 @@ export function mockDeliveryTrafficFor(direction: Direction, tenantId: number | 
     };
   }
 
-  const trend = { points: trendPoints.map((point) => ({
-    date: point.date,
-    total: point[direction] as number,
-  })) };
+  const trend = {
+    points: trendPoints.map((point) => ({ date: point.date, total: point[direction] as number })),
+    granularity: isToday ? 'hour' : 'day',
+  } as DeliveryTrafficResponse['trend'] & { granularity: string };
 
   if (direction === 'receive') {
     return {
@@ -7370,8 +7428,31 @@ export function mockDeliveryTrafficFor(direction: Direction, tenantId: number | 
   };
 }
 
-export function mockDeliveryTrafficCsv() {
-  return 'date,total,success,failure,success_rate\n2026-07-23,12800,12416,269,97.0\n';
+export function mockDeliveryTrafficCsv(direction: Direction = 'all', startDate = '', endDate = ''): string {
+  const spanDays = deliverySpanDays(startDate, endDate);
+  const isToday = deliveryIsToday(startDate, endDate);
+  const startMs = startDate ? Date.parse(startDate) : Date.now() - (spanDays - 1) * 86_400_000;
+  const rng = makeDeliveryRng(deliveryHash(`csv:${direction}:${startDate}:${endDate}`));
+  const rows: string[] = ['date,direction,total,success,failure,success_rate'];
+  if (isToday) {
+    const todayStr = startDate || new Date().toISOString().slice(0, 10);
+    for (let hour = 0; hour < 24; hour++) {
+      const total = Math.floor(rng() * 600 + 200);
+      const success = Math.floor(total * (0.92 + rng() * 0.06));
+      const failure = total - success;
+      rows.push(`${todayStr} ${String(hour).padStart(2, '0')}:00,${direction},${total},${success},${failure},${((success / total) * 100).toFixed(1)}`);
+    }
+  } else {
+    for (let index = 0; index < spanDays; index++) {
+      const d = new Date(startMs + index * 86_400_000);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const total = Math.floor(rng() * 15000 + 8000);
+      const success = Math.floor(total * (0.92 + rng() * 0.06));
+      const failure = total - success;
+      rows.push(`${dateStr},${direction},${total},${success},${failure},${((success / total) * 100).toFixed(1)}`);
+    }
+  }
+  return rows.join('\n') + '\n';
 }
 
 export function mockDeliveryTrafficAi() {
@@ -7615,7 +7696,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
     details: { summary: '钓鱼邮件处��由隔离改为直接拒收' }, before_value: { text: '隔离' }, after_value: { text: '拒收' },
     created_at: '2026-06-22T10:15:36Z' },
   { id: 14, operation_id: 'OP20260622016', admin_user_id: 4, username: 'sunqi@lanhai.cn', operator_name: '孙琦',
-    operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'create',
+    operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流���团', action: 'create',
     resource_type: 'exec_impersonation', status: 'failed', error_message: '该邮箱已存在于保护名单，重复添加被拒绝',
     client_ip: '112.65.1.30', ip_location: '上海', details: { summary: '新增高管防仿冒保护对象' },
     created_at: '2026-06-22T08:05:17Z' },
