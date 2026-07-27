@@ -7220,7 +7220,7 @@
   },
   "deliveryTraffic": {
     "title": "Delivery & Traffic Analysis",
-    "subtitle": "Analyze email delivery status, queue health, and three-way traffic distribution",
+    "subtitle": "Analyze email delivery status and three-way traffic distribution",
     "direction": {
       "label": "Direction",
       "all": "All",
@@ -7311,24 +7311,7 @@
       "internal_phishing": "Internal Phishing",
       "internal_virus": "Internal Virus"
     },
-    "queueHealth": {
-      "title": "Queue Health",
-      "currentLength": "Current Queue Length",
-      "receiveQueue": "Inbound Queue",
-      "sendQueue": "Outbound Queue",
-      "internalQueue": "Internal Queue",
-      "internalHealthy": "Internal Queue Healthy",
-      "oldestAge": "Oldest Message Age",
-      "processingRate": "Processing Rate",
-      "healthy": "Healthy",
-      "warning": "Warning",
-      "busy": "Processing backlog",
-      "offline": "Queue monitoring service unavailable",
-      "expand": "Expand queue details",
-      "collapse": "Collapse queue details",
-      "topDomain": "Top backlogged domain",
-      "currentTooltip": "{count} messages currently queued"
-    },
+
     "table": {
       "title": "Detail Data",
       "date": "Date",

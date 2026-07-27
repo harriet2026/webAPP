@@ -2002,7 +2002,7 @@ function makeRule(input: {
   };
 }
 
-// 与 demo `generateMockRules` 对齐：5 条手工 + 15 条自动生成，共 20 条
+// 与 demo `generateMockRules` 对齐：5 条���工 + 15 条自动生成，共 20 条
 // （demo 总数 55，但只展示 20 条/页；前 5 条手工的与 demo 完全一致）
 function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
   const base = [
@@ -3250,7 +3250,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 发信人黑白名单（sender_filter，mock）
-// 数据结构对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
+// 数据结���对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
 //   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
 //   - metadata 携带 `{feature:'sender_filter', sender_config, ip_range, list_type}`，
@@ -3491,7 +3491,7 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
       }),
       sfGroupRule({
         id: 8108,
-        name: "批量营销特征",
+        name: "批量营销���征",
         type: "feature",
         created_at: "2024-01-12T00:00:00Z",
         member_count: 2,
@@ -4175,7 +4175,7 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
 }
 
 export function mockAuthSpoofingConfig(): AuthSpoofingConfig {
-  // 深拷贝：避免调用方就地修改返回值污染后续 GET。
+  // 深拷贝：避免调用方就地修改返回值污染后�� GET。
   return JSON.parse(JSON.stringify(defaultAuthSpoofingConfig()));
 }
 
@@ -5857,7 +5857,7 @@ function disposalBasis(seed: MockDisposalSeed) {
     action: seed.disposalBasisActionOverride ?? disposalAction(seed),
     // confidence 供 disposal-basis-config.ts 里 AI-* 策略的 hitDetail() 模板
     // 使用（如 AI-PHISH 的「置信度：{cf}%」），让 ThreatSummaryCard 的
-    // 「AI判定依据」行渲染出有意义的文案，而不是模板兜底的 "-"。
+    // 「AI判定依据」行渲染出有意义的文���，而不是模板兜底的 "-"。
     hit_values: { reason: seed.reason, score: String(seed.score), confidence: String(seed.score) },
     detection_tags: [`source:${seed.basis[0].toLowerCase()}`],
   };
@@ -6040,7 +6040,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
           }
         : undefined,
     // 首次出现新发信人（命中特征「首次出现」badge，isNewSender() 语义）：
-    // senderIsNewOnThisMail 的行等于自己的 received_at；其余行沿用既有的固定
+    // senderIsNewOnThisMail 的���等于自己的 received_at；其余行沿用既有的固定
     // 历史值（已知发信人场景）。
     sender_first_seen_at: seed.senderIsNewOnThisMail
       ? seed.time.replace(" ", "T") + "+08:00"
@@ -7318,7 +7318,6 @@ export function mockDeliveryTrafficFor(direction: Direction, tenantId: number | 
       trend: { points: trendPoints },
       distribution: [{ name: 'receive', value: n(89234) }, { name: 'send', value: n(45678) }, { name: 'internal', value: n(12345) }],
       latency: { buckets: [] },
-      queue_health: { receive: n(234), send: n(876), internal: n(12) },
       detail_table: detail('receive', 'all'),
       generated_at: new Date().toISOString(),
       data_lag_seconds: 420,
@@ -7336,7 +7335,6 @@ export function mockDeliveryTrafficFor(direction: Direction, tenantId: number | 
       trend,
       distribution: [{ name: 'user_not_exist', value: n(1234) }, { name: 'mailbox_full', value: n(567) }, { name: 'policy_reject', value: n(234) }],
       latency: { buckets: [] },
-      queue_health: { current: n(234), oldest_age_ms: 150000, processing_rate: 92.4 },
       detail_table: detail('receive'),
       generated_at: new Date().toISOString(), data_lag_seconds: 420,
     };
@@ -7351,7 +7349,6 @@ export function mockDeliveryTrafficFor(direction: Direction, tenantId: number | 
         { name: 'outlook.com', value: 2.1, count: n(156) }, { name: 'yahoo.com', value: 1.9, count: n(134) }, { name: '163.com', value: 1.5, count: n(98) },
       ],
       latency: { percentiles: dates.map((date, i) => ({ date, p50: 850 + i * 30, p90: 6200 + i * 120, p99: 24500 + i * 600 })), buckets: [] },
-      queue_health: { current: n(876), oldest_age_ms: 945000, processing_rate: 61.8, top_domain: 'gmail.com', top_domain_count: n(234) },
       queue_trend: dates.map((date, i) => ({ date, count: n(520 + i * 57) })),
       detail_table: detail('send'),
       generated_at: new Date().toISOString(), data_lag_seconds: 420,
@@ -7368,7 +7365,6 @@ export function mockDeliveryTrafficFor(direction: Direction, tenantId: number | 
       { name: '500ms-1s', value: 2.5, count: n(250), percent: 2.5, threshold: 4, healthy: true },
       { name: '>1s', value: 0.5, count: n(50), percent: 0.5, threshold: 1, healthy: true },
     ] },
-    queue_health: { current: n(12), oldest_age_ms: 18000, processing_rate: 128.6 },
     detail_table: detail('internal'),
     generated_at: new Date().toISOString(), data_lag_seconds: 420,
   };

@@ -18,7 +18,6 @@ import { TrendChart } from './TrendChart';
 import { SideChart } from './SideChart';
 import { LatencyChart } from './LatencyChart';
 import { QueueTrendChart } from './QueueTrendChart';
-import { QueueHealthCard } from './QueueHealthCard';
 import { DetailTable } from './DetailTable';
 import { BottomActions } from './BottomActions';
 import { useDeliveryTraffic } from './hooks/useDeliveryTraffic';
@@ -150,12 +149,6 @@ export function DeliveryTrafficPage() {
             <LatencyChart latency={visibleData?.latency} direction={direction} isLoading={showLoading} />
           </div>
         )}
-
-        <QueueHealthCard
-          queueHealth={visibleData?.queue_health}
-          direction={direction}
-          isLoading={showLoading}
-        />
 
         <DetailTable
           data={visibleData?.detail_table}
