@@ -61,6 +61,8 @@ import { ResetPasswordDialog, generatePassword } from '@/components/admin/reset-
 const userSchema = z.object({
   username: z.string().min(1, 'usernameRequired'),
   role_id: z.number().optional(),
+  // 账号状态：新建与编辑均可自由选择（原为只读展示）。取值对齐 UserStatus。
+  status: z.enum(['normal', 'disabled']).optional(),
   tenant_id: z.number().nullable().optional(),
   password: z.string().min(6, 'passwordMinLength').optional().or(z.literal('')),
   must_change_password: z.boolean().optional(),
@@ -295,7 +297,7 @@ export default function UsersPage() {
 
   const form = useForm<UserForm>({
     resolver: zodResolver(userSchema),
-    defaultValues: { username: '', password: '', must_change_password: true },
+    defaultValues: { username: '', password: '', must_change_password: true, status: 'normal' },
   });
 
   // GT-12307：schema/setError 里存的是 users.validation.* 的键名，这里集中
@@ -336,6 +338,7 @@ export default function UsersPage() {
       form.reset({
         username: user.username,
         role_id: user.roleId ?? undefined,
+        status: user.status === 'disabled' ? 'disabled' : 'normal',
         tenant_id: user.tenant_id,
         password: '',
         name: user.name ?? '',
@@ -348,6 +351,7 @@ export default function UsersPage() {
       form.reset({
         username: '',
         role_id: undefined,
+        status: 'normal',
         password: '',
         tenant_id: null,
         name: '',
@@ -407,6 +411,16 @@ export default function UsersPage() {
         } else {
           await updateUser(editingUser.id, updateData, apiRequest);
         }
+        // 账号状态改动走与行操作一致的专用接口（停用时同时终止在线会话）。
+        const nextStatus: UserStatus = data.status ?? 'normal';
+        const prevStatus: UserStatus = editingUser.status === 'disabled' ? 'disabled' : 'normal';
+        if (nextStatus !== prevStatus) {
+          if (isTenantView) {
+            await setTenantUserStatus(editingUser.id, nextStatus, apiRequest);
+          } else {
+            await setUserStatus(editingUser.id, nextStatus, apiRequest);
+          }
+        }
         toast.success(t('common.updateSuccess'));
       } else {
         // GT-12307：原型要求创建时账号/姓名/手机号/邮箱/初始密码均必填、角色必选，
@@ -423,6 +437,7 @@ export default function UsersPage() {
           // hasError 标志无法让 TS 收窄类型，故显式断言以满足 CreateUserRequest。
           password: data.password!,
           role_id: data.role_id,
+          status: data.status ?? 'normal',
           name: data.name || undefined,
           phone: data.phone || undefined,
           email: data.email || undefined,
@@ -679,7 +694,7 @@ export default function UsersPage() {
             </Button>
             {/* GT-12315：原型行操作含「查看日志」——跳到操作日志页并按该账号
                 预过滤（keyword 与 admin-audit 的关键字过滤对齐）。必须渲染成真正的
-                <button>（而��� render=<Link/> 的 <a>），否则 U13 的
+                <button>（而����� render=<Link/> 的 <a>），否则 U13 的
                 button[title="查看日志"] 定位不到——这正是此前「查看日志按钮不存在」的根因。 */}
             <Button
               variant="ghost"
@@ -935,15 +950,18 @@ export default function UsersPage() {
                     <Input type="number" {...form.register('tenant_id', { valueAsNumber: true })} />
                   </div>
                 )}
-                {/* 账号状态：对齐原型（原型固定展示「启用（正常）」）。状态的启用/停用
-                    由行操作走「确认并终止会话」的专用流程处理，这里只做只读展示，
-                    不在编辑表单里旁路那条带确认的停用流程。 */}
+                {/* 账号状态：新建与编辑均可自由选择。编辑时若改为「停用」，提交会走
+                    与行操作相同的 setUserStatus/setTenantUserStatus 接口——该接口在
+                    停用时仍会终止该账号的在线会话，安全语义不变。 */}
                 <div className="space-y-1.5">
                   <Label>{t('users.accountStatus')}</Label>
-                  <Select value={editingUser?.status === 'disabled' ? 'disabled' : 'normal'} disabled>
+                  <Select
+                    value={form.watch('status') ?? 'normal'}
+                    onValueChange={(v) => form.setValue('status', v as UserStatus)}
+                  >
                     <SelectTrigger data-testid="new-admin-status-select">
                       <SelectValue>
-                        {editingUser?.status === 'disabled'
+                        {form.watch('status') === 'disabled'
                           ? t('users.statusDisabledOption')
                           : t('users.statusEnabledOption')}
                       </SelectValue>

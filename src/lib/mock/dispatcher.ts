@@ -309,6 +309,28 @@ const routes: Route[] = [
     }),
   },
 
+  // ─── 角色列表（管理员账号 role_id 下拉 + 角色权限页）───────────────────
+  // 真实后端 GET /roles 由 GetEffectiveTenantID 做作用域裁剪；纯 mock 模式下
+  // 该接口原本未覆盖，dispatcher 兜底返回 { items: [] }，导致「新建管理员」
+  // 抽屉里的角色下拉无可选项、点开为空（表现为“锁定/无法展开”）。这里回填
+  // 平台与租户两种作用域的角色，页面再按视角（isTenantView）过滤。
+  {
+    method: 'GET', pattern: '/roles',
+    handler: () => ({
+      status: 200,
+      data: {
+        items: [
+          { id: 1, code: 'platform_super_admin', name: '超级管理员', scope: 'platform', isSuperAdmin: true, isSystemDefault: true, status: 'normal', remark: '平台内置超级管理员' },
+          { id: 2, code: 'platform_ops', name: '平台运维管理员', scope: 'platform', isSystemDefault: false, status: 'normal', remark: '负责平台运维' },
+          { id: 3, code: 'platform_auditor', name: '平台审计员', scope: 'platform', isSystemDefault: false, status: 'normal', remark: '只读审计' },
+          { id: 101, code: 'tenant_admin', name: '租户管理员', scope: 'tenant', tenantId: 1, isSystemDefault: true, status: 'normal', remark: '租户内置管理员' },
+          { id: 102, code: 'tenant_operator', name: '租户操作员', scope: 'tenant', tenantId: 1, isSystemDefault: false, status: 'normal', remark: '日常运营' },
+          { id: 103, code: 'tenant_viewer', name: '租户观察员', scope: 'tenant', tenantId: 1, isSystemDefault: false, status: 'normal', remark: '只读' },
+        ],
+      },
+    }),
+  },
+
   // ─── 邮件处置中心 ──────────────────────────────────────────────────────
   {
     method: 'GET', pattern: '/mail-logs/fields',
@@ -1312,7 +1334,7 @@ const routes: Route[] = [
         }
         // 这是 src/lib/api/groups.ts 的 GROUPS_LIST_QUERY 落地的兜底分支
         // （group_management_page / sender-filter 群组下拉 / group-policy-drawer /
-        // admission-rule-sheet 的收件人+内容群组下拉共用同一个 query，客户端各自
+        // admission-rule-sheet ���收件人+内容群组下拉共用同一个 query，客户端各自
         // 按 ruleToGroup 返回的 type 再筛选）。原先这里只有 sender/ip 两类
         // （mockSenderFilterGroupsList 的 3 条），现在把处置设置用到的收信人组
         // （mockRecipientGroupRulesList 的 9001-9005）并入同一个组合列表，而不是
