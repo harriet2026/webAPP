@@ -133,16 +133,10 @@ export function SidebarNav() {
     });
     return expanded;
   });
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
   const { hasPermission, isSystemAdmin, showAdvancedRules, canSeeRoute } = useAuth();
   const { capabilities, registry, viewer, grants } = useProductForm();
   const t = useTranslations();
-  // Defer brand name to client-only render to avoid SSR/client hydration mismatch:
-  // capabilities.saas is only known after the client-side ProductFormContext initialises.
-  const brandName = mounted
-    ? (capabilities?.saas ? t('branding.saasName') : t('branding.selfHostedName'))
-    : t('branding.selfHostedName');
+  const brandName = capabilities?.saas ? t('branding.saasName') : t('branding.selfHostedName');
 
   useEffect(() => {
     document.title = brandName;
@@ -214,7 +208,7 @@ export function SidebarNav() {
             className="h-10 w-10 shrink-0 object-contain"
           />
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold tracking-wide text-white">{brandName}</div>
+            <div className="truncate text-sm font-semibold tracking-wide text-white" suppressHydrationWarning>{brandName}</div>
             <div className="truncate text-xs text-sidebar-foreground/55">
               {activeTitleKey ? t(activeTitleKey) : t('sidebar.dashboard')}
             </div>
