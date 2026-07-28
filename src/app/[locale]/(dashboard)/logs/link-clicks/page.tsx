@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Link2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
@@ -116,9 +116,9 @@ export default function LinkClicksPage() {
   ) : null;
 
   return (
-    <PageShell>
-      <PageHeader eyebrow={t('linkLogs.eyebrow')} title={t('linkLogs.title')} description={t('linkLogs.subtitle')} />
-      <div className="space-y-4" data-testid="link-logs-page">
+    <PageShell className="min-h-full bg-[#F8F9FB] shadow-[0_0_0_32px_#F8F9FB] dark:bg-background dark:shadow-[0_0_0_32px_var(--background)]">
+      <PageHeader icon={Link2} title={t('linkLogs.title')} description={t('linkLogs.subtitle')} />
+      <div className="space-y-6" data-testid="link-logs-page">
         <PageFilters>
           <LinkFilters key={filterKey} values={filters} onChange={handleFilterChange}
             onSearch={handleSearch} onReset={handleReset} tenantScope={tenantDropdown} />
