@@ -44,7 +44,7 @@ import { AgentOverview } from './agent-overview';
 import { ThreatTop5 } from './threat-top5';
 import { SystemHealthCard } from './system-health-card';
 
-const RANGES: SystemStatusRange[] = ['today', '7d', '30d'];
+const RANGES: SystemStatusRange[] = ['24h', 'today', '7d', '30d'];
 
 export function SystemStatusDashboard() {
   const t = useTranslations('systemStatus');

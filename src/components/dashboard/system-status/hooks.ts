@@ -21,7 +21,7 @@
 // by `X-Tenant-ID` (via `useScopedApiRequest`).
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format, subDays } from 'date-fns';
+import { format, subDays, subHours } from 'date-fns';
 import { useProductForm } from '@/contexts/product-form-context';
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { ApiError, type ApiRequestFn } from '@/lib/api/client';
@@ -38,7 +38,7 @@ import { getDetectionStats } from '@/lib/api/phishing-detection';
 import { getSpoofingStats } from '@/lib/api/spoofing-detection';
 import { getThreatRetroStats } from '@/lib/api/threat-retro';
 
-export type SystemStatusRange = 'today' | '7d' | '30d';
+export type SystemStatusRange = '24h' | 'today' | '7d' | '30d';
 
 /**
  * (cur - prev) / prev * 100. Returns 0 when prev is 0 to avoid a
@@ -75,6 +75,17 @@ function fmt(d: Date): string {
  * `now` is injectable for deterministic tests; defaults to `new Date()`.
  */
 export function resolveRangeDates(range: SystemStatusRange, now: Date = new Date()): RangeDates {
+  if (range === '24h') {
+    // 过去 24 小时：以小时为粒度，前一周期取再往前 24 小时用于环比计算。
+    // 日期字段复用 fmt（yyyy-MM-dd），后端以 startDate/endDate 加 interval=hour 区分。
+    return {
+      startDate: fmt(subHours(now, 24)),
+      endDate: fmt(now),
+      prevStart: fmt(subHours(now, 48)),
+      prevEnd: fmt(subHours(now, 24)),
+      interval: 'hour',
+    };
+  }
   if (range === 'today') {
     const today = fmt(now);
     const yesterday = fmt(subDays(now, 1));

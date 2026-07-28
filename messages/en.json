@@ -9463,6 +9463,7 @@
     "title": "System Status",
     "subtitle": "Unified entry point for site-wide security posture — grasp system health in 3 seconds",
     "range": {
+      "24h": "Last 24 Hours",
       "today": "Today",
       "7d": "Last 7 Days",
       "30d": "Last 30 Days"
