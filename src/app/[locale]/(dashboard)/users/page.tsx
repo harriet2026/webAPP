@@ -46,10 +46,10 @@ import {
 import { listTenants } from '@/lib/api/tenants';
 import { getRoles, roleQueryKeys } from '@/lib/api/roles';
 import { useApiRequest } from '@/lib/api/client';
-import { formatDate, cn } from '@/lib/utils';
+
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
 import { LoginSecurityTab } from '@/components/admin/login-security/LoginSecurityTab';
 import { RolePermissionTab } from '@/components/admin/rbac/RolePermissionTab';
 import { ResetPasswordDialog, generatePassword } from '@/components/admin/reset-password-dialog';
@@ -497,9 +497,10 @@ export default function UsersPage() {
         />
       ),
     },
-    { accessorKey: 'id', header: 'ID', size: 60 },
+    // 列表仅保留与新建/编辑弹窗一致的业务字段；ID/在线/最后登录时间/创建时间等
+    // 系统派生的只读列已移除，以与表单字段严格对齐。
     // GT-12312：表头对齐原型「账号/用户名」（抽屉标签同步）。
-  { accessorKey: 'username', header: t('users.accountUsername') },
+    { accessorKey: 'username', header: t('users.accountUsername') },
     // GT-11960: name / email / last_login_at were already on the wire (see
     // storage.ListUsers) but were never rendered.
     {
@@ -569,58 +570,6 @@ export default function UsersPage() {
           />
         ),
     },
-    // Task 9: derived per-request online indicator (admin_sessions-backed).
-    {
-      id: 'online',
-      header: t('users.online'),
-      size: 90,
-      cell: ({ row }) => (
-        <span
-          data-testid={`user-online-${row.original.id}`}
-          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
-        >
-          <span
-            className={cn('h-2 w-2 rounded-full', row.original.online ? 'bg-emerald-500' : 'bg-muted-foreground/30')}
-          />
-          {row.original.online ? t('users.online') : t('users.offline')}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'last_login_at',
-      header: t('users.lastLoginAt'),
-      // GT-12312：原型在最后登录时间列以绿点标注在线账号，悬浮提示
-      // 「当前在线」（独立的在线列保留——实现已多做的能力不回退）。
-      // Tooltip 触发器必须包住日期文本本身（而非仅绿点），否则悬浮日期看不到提示；
-      // 且对离线账号也常驻渲染 tooltip（内容回落为列名），保证任意一行日期悬浮都有提示。
-      cell: ({ row }) =>
-        row.original.last_login_at ? (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <span
-                  data-testid={`user-lastlogin-${row.original.id}`}
-                  className="inline-flex items-center gap-1.5"
-                >
-                  {row.original.online && (
-                    <span
-                      data-testid={`user-lastlogin-online-dot-${row.original.id}`}
-                      className="h-2 w-2 rounded-full bg-emerald-500"
-                    />
-                  )}
-                  {formatDate(row.original.last_login_at)}
-                </span>
-              }
-            />
-            <TooltipContent>
-              {row.original.online ? t('users.currentlyOnline') : t('users.lastLoginAt')}
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <span className="text-muted-foreground">{t('users.neverLoggedIn')}</span>
-        ),
-    },
-    { accessorKey: 'created_at', header: t('logs.timestamp'), cell: ({ row }) => formatDate(row.original.created_at) },
     {
       id: 'actions',
       header: t('common.actions'),
