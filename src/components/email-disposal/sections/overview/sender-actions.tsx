@@ -171,7 +171,7 @@ export function SenderActions({
 
       {/* E1 -- 发信人加黑 */}
       <AlertDialog open={blacklistOpen} onOpenChange={(o) => !busy && setBlacklistOpen(o)}>
-        <AlertDialogContent data-testid="email-disposal-overview-blacklist-dialog">
+        <AlertDialogContent data-testid="email-disposal-overview-blacklist-dialog" overlayClassName="bg-black/60">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('blacklistDialog.title', { sender })}</AlertDialogTitle>
             <AlertDialogDescription>{t('blacklistDialog.desc')}</AlertDialogDescription>
@@ -209,7 +209,7 @@ export function SenderActions({
 
       {/* E2 -- 发信人加白 */}
       <AlertDialog open={whitelistOpen} onOpenChange={(o) => !busy && setWhitelistOpen(o)}>
-        <AlertDialogContent data-testid="email-disposal-overview-whitelist-dialog">
+        <AlertDialogContent data-testid="email-disposal-overview-whitelist-dialog" overlayClassName="bg-black/60">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('whitelistDialog.title', { sender })}</AlertDialogTitle>
             <AlertDialogDescription>{t('whitelistDialog.desc')}</AlertDialogDescription>
