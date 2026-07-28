@@ -26,12 +26,13 @@ export function ProductFormSwitcher() {
   const [tenantDialogOpen, setTenantDialogOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  // Mock 数据开关状态。仅在 switcherEnabled（开发形态切换器）可见时才有意义：
-  // 这是给前端开发/演示用的无后端 mock 层入口。组件只在登录后的 dashboard
-  // 客户端场景下挂载，因此可以安全地在 lazy initializer 里读取 localStorage
-  // 作为初值；effect 只负责订阅跨标签页同步。
-  const [mockEnabled, setMockEnabled] = useState(() => isMockEnabled());
-  useEffect(() => subscribeMockEnabled(setMockEnabled), []);
+  // Mock 数据开关状态。初始值固定为 false 确保 SSR 与客户端首次渲染一致；
+  // useEffect 在挂载后读取 localStorage 真实值并订阅跨标签页同步变化。
+  const [mockEnabled, setMockEnabled] = useState(false);
+  useEffect(() => {
+    setMockEnabled(isMockEnabled());
+    return subscribeMockEnabled(setMockEnabled);
+  }, []);
 
   // 可见性门控：服务端 layout 仅在 OSGATEWAY_PRODUCT_FORM_SWITCHER=true
   // 时才给 provider 传 switcherEnabled=true。provider 会透传此 flag；
