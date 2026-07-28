@@ -9,6 +9,7 @@
 // 多投提示，自身从不渲染投递/召回/丢弃/通知按钮）。
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Info, Loader2, MoreHorizontal, UserMinus, UserPlus } from 'lucide-react';
@@ -112,7 +113,14 @@ export function SenderActions({
     toast.info(t('notImplementedToast'));
   }
 
+  const showOverlay = blacklistOpen || whitelistOpen;
+
   return (
+    <>
+    {showOverlay && typeof document !== 'undefined' && createPortal(
+      <div className="fixed inset-0 z-[199] bg-black/60 transition-opacity duration-150" aria-hidden="true" />,
+      document.body
+    )}
     <div className="flex flex-wrap items-center gap-2">
       <Button
         size="sm"
@@ -234,5 +242,6 @@ export function SenderActions({
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </>
   );
 }
