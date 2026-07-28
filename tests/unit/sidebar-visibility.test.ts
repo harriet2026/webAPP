@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { visibleNavIds, isItemVisibleByForm, isGroupVisible, type GatedNavItem } from '@/components/layout/sidebar-visibility';
 import { sidebarNavItems, type NavItem } from '@/lib/constants';
 import registry from '@/lib/product-form/__fixtures__/registry_for_test.json';
+import { FALLBACK_FEATURE_REGISTRY } from '@/lib/product-form/fallback-registry';
 import type { FeatureDef } from '@/lib/product-form/resolve';
 
 const featureRegistry = registry as FeatureDef[];
@@ -218,6 +219,57 @@ describe('security group hidden-contract (platform hidden / tenant visible)', ()
       for (const id of SECURITY_CHILD_IDS) expect(ids).toContain(id);
     });
   }
+});
+
+// ---------------------------------------------------------------------------
+// Pre-bootstrap fail-closed contract (the bug the user reported).
+//
+// When /bootstrap has not answered (or 500s / there is no apiserver) the live
+// registry is [] and `registryReady` is false. The sidebar must NOT gate
+// against that empty array — doing so lets isItemVisibleByForm's additive
+// "未登记=放行" default fire for every item, leaking the platformHidden 安全策略
+// and 智能体中心 groups into the platform-admin view. Instead it gates against
+// FALLBACK_FEATURE_REGISTRY, reproducing production semantics. These tests lock
+// both the mirror's integrity and the resulting visibility.
+// ---------------------------------------------------------------------------
+describe('FALLBACK_FEATURE_REGISTRY integrity', () => {
+  it('mirrors the canonical registry (same length, same ids) so it can never silently go empty', () => {
+    expect(FALLBACK_FEATURE_REGISTRY.length).toBe(featureRegistry.length);
+    expect(FALLBACK_FEATURE_REGISTRY.map((f) => f.id)).toEqual(featureRegistry.map((f) => f.id));
+  });
+
+  it('keeps the security features platformHidden — the property the fallback relies on', () => {
+    for (const id of ['strategy-pipeline', 'group-policy']) {
+      const feat = FALLBACK_FEATURE_REGISTRY.find((f) => f.id === id)!;
+      expect(feat, `${id} missing from fallback registry`).toBeDefined();
+      expect(feat.platformHidden).toBe(true);
+    }
+  });
+});
+
+describe('gating against the fallback registry (pre-bootstrap window)', () => {
+  const MULTI = { ai: true, multiTenant: true, saas: false };
+
+  it('hides the security children from the platform viewer even before bootstrap loads', () => {
+    const ids = visibleNavIds(FALLBACK_FEATURE_REGISTRY, MULTI, 'platform', []);
+    expect(ids).not.toContain('strategy-pipeline');
+    expect(ids).not.toContain('group-policy');
+  });
+
+  it('collapses the whole security group for the platform viewer via the fallback', () => {
+    const securityGroup = sidebarNavItems.find((i) => i.id === 'security')!;
+    const visible = new Set(visibleNavIds(FALLBACK_FEATURE_REGISTRY, MULTI, 'platform', []));
+    const gate = (child: GatedNavItem) => isItemVisibleByForm(child, FALLBACK_FEATURE_REGISTRY, visible);
+    expect(isGroupVisible(securityGroup as GatedNavItem & { children?: GatedNavItem[] }, gate)).toBe(false);
+  });
+
+  it('regression: an EMPTY registry would instead fail OPEN (proving why the fallback is needed)', () => {
+    // This is the buggy path the fix avoids: with no registry entry, the nav
+    // item falls through to the additive "未登记=放行" default and shows.
+    const emptyVisible = new Set<string>();
+    const child: GatedNavItem = { id: 'policy-pipeline', href: '/security/pipeline' };
+    expect(isItemVisibleByForm(child, [], emptyVisible)).toBe(true);
+  });
 });
 
 describe('isGroupVisible', () => {

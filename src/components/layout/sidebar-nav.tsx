@@ -9,6 +9,7 @@ import { usePathname, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
+import { FALLBACK_FEATURE_REGISTRY } from '@/lib/product-form/fallback-registry';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { visibleNavIds, isNavItemAllowed, isGroupVisible } from './sidebar-visibility';
 import { VersionFooter } from './version-footer';
@@ -137,7 +138,7 @@ export function SidebarNav() {
     return expanded;
   });
   const { hasPermission, isSystemAdmin, showAdvancedRules, canSeeRoute } = useAuth();
-  const { capabilities, registry, viewer, grants } = useProductForm();
+  const { capabilities, registry, registryReady, viewer, grants } = useProductForm();
   const t = useTranslations();
   const brandName = capabilities?.saas ? t('branding.saasName') : t('branding.selfHostedName');
 
@@ -145,7 +146,16 @@ export function SidebarNav() {
     document.title = brandName;
   }, [brandName, currentPath]);
 
-  const formVisible = capabilities ? new Set(visibleNavIds(registry, capabilities, viewer, grants)) : null;
+  // GT-12013 fail-closed for the SIDEBAR: `registry` is [] until /bootstrap
+  // answers (and stays [] if it 500s / there is no apiserver). Gating against
+  // an empty registry lets `isItemVisibleByForm`'s "未登记=放行" default fire
+  // for every item, so platformHidden groups (安全策略 / 智能体中心) leak into
+  // the platform-admin view. Until the live registry is ready, gate against the
+  // canonical mirror so the form gate reproduces production semantics instead
+  // of failing open. Once ready, use the authoritative live registry verbatim.
+  const gateRegistry = registryReady ? registry : FALLBACK_FEATURE_REGISTRY;
+
+  const formVisible = capabilities ? new Set(visibleNavIds(gateRegistry, capabilities, viewer, grants)) : null;
   // §1.1（admin-contacts html_spec）：多租户租户视角下「系统管理」分组改名
   // 「组织与成员」（demo nav.tenantSystemManagement，sidebar-nav.tsx:297-303）。
   const titleKeyOverrides =
@@ -159,7 +169,7 @@ export function SidebarNav() {
     isSystemAdmin,
     showAdvancedRules,
     canSeeRoute,
-    registry,
+    registry: gateRegistry,
     formVisible,
     capabilities,
     viewer,
