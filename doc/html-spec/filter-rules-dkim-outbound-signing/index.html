@@ -131,12 +131,11 @@
       <code>useTenant / usePermission / useProductForm</code> 的实际判定分支。
     </p>
     <p class="warn-note">
-      <strong>验证限制（重要）：</strong>当前运行的 webapp 通过服务端代理向后端
-      <code>127.0.0.1:18080</code> 取数，而该后端在本环境未启动（日志持续 <code>ECONNREFUSED</code>）。
-      因此 <code>/tenants</code>、<code>/tenants/:id/domains</code>、<code>/dkim/keys</code> 等数据请求无法返回，
-      租户列表为空、平台视角被重定向到 <code>/tenants</code>、DKIM 页面停留在加载态。凡依赖真实数据或抽屉
-      写操作的状态本次<strong>无法在浏览器安全验证</strong>，均按技能要求标注“无法验证 · 后端离线”，
-      不伪造截图；其余信息以源码为事实源并注明。见 <a href="#questions">Q-001</a>。
+      <strong>验证说明：</strong>本环境后端 <code>127.0.0.1:18080</code> 未启动，真实网络取数会 <code>ECONNREFUSED</code>。
+      为在浏览器中真实呈现各业务状态，本规格截图均在 webapp 内置的 <strong>Mock 数据模式</strong>
+      （顶栏「Mock」开关，客户端 fixture 拦截 <code>apiRequest</code>）下、以租户管理员作用域实拍取得。
+      因此下列截图是<strong>真实 UI 渲染</strong>，其数据为代表性 Mock 样例（域名、selector、DNS 记录等为演示值）。
+      元素/字段/校验/API 信息仍以源码为事实源。见 <a href="#questions">Q-001</a>。
     </p>
   </header>
 
@@ -245,42 +244,34 @@
   <section id="components">
     <h2>4. 截图式交互预览</h2>
     <p class="warn-note">
-      因后端 <code>127.0.0.1:18080</code> 离线，下列依赖数据的默认态/空态/加载态与抽屉写操作
-      <strong>本次无法在浏览器安全获得真实渲染截图</strong>。为不伪造，本节以“环境实拍证据 + 源码级状态说明”记录：
-      环境证据展示当前 webapp 的真实加载态；每个业务状态的元素、触发路径、结果与 API 均据源码给出并标注验证状态。
+      下列截图均在 webapp 内置 <strong>Mock 数据模式</strong>下、以租户管理员作用域实拍取得，是<strong>真实 UI 渲染</strong>；
+      其中的域名、selector、DNS 记录等为代表性 Mock 样例。每个状态的元素、触发路径、结果与 API 均据源码标注。
     </p>
 
     <article class="interaction-preview" id="env-evidence">
-      <h3>4.0 环境实拍证据（后端离线）</h3>
+      <h3>4.0 实拍环境与进入路径</h3>
       <dl class="state-meta">
-        <div><dt>触发路径</dt><dd>登录后访问 DKIM 相关页面 / 租户中心</dd></div>
-        <div><dt>路由</dt><dd><code>/zh/system/dkim</code>、<code>/zh/tenants</code></dd></div>
-        <div><dt>视口</dt><dd>1473 × 847</dd></div>
-        <div><dt>形态/角色</dt><dd>AI版·多租户 / 租户管理员（顶栏“正在以租户管理员身份操作”）</dd></div>
-        <div><dt>验证依据</dt><dd>浏览器实拍；服务端日志 <code>ECONNREFUSED 127.0.0.1:18080</code></dd></div>
+        <div><dt>触发路径</dt><dd>安全策略 → 策略流水线 → 阶段2「身份认证与仿冒检测」→ 配置 → 认证协议检查 → 展开「DKIM 外发签名」→ 某行「管理」</dd></div>
+        <div><dt>路由</dt><dd><code>/zh/security/pipeline</code>（阶段2 抽屉内）</dd></div>
+        <div><dt>视口</dt><dd>1473 × 847，浅色</dd></div>
+        <div><dt>形态/角色</dt><dd>AI版·多租户 / 租户管理员（作用域固定为本租户）</dd></div>
+        <div><dt>验证依据</dt><dd>浏览器实拍（Mock 数据模式，客户端 fixture 拦截 <code>apiRequest</code>）</dd></div>
       </dl>
-      <div class="preview-sequence">
-        <figure class="screenshot-figure">
-          <span class="sequence-label">证据 1 / DKIM 总览加载态</span>
-          <img src="./screenshots/env-dkim-overview.png" alt="DKIM 总览页因后端离线停留在加载态">
-          <figcaption>共享 DKIM UI 的实拍：数据请求无响应，卡片区持续 loading 动画（同一 <code>DkimManageDrawer</code> 所在页面）</figcaption>
-        </figure>
-        <figure class="screenshot-figure">
-          <span class="sequence-label">证据 2 / 租户列表空态</span>
-          <img src="./screenshots/env-tenants-empty.png" alt="租户中心因后端离线列表为空、统计卡加载中">
-          <figcaption>租户列表为空，导致平台视角进入阶段2 流水线时被重定向到本页（无从选定租户）</figcaption>
-        </figure>
-      </div>
     </article>
 
     <article class="interaction-preview" id="state-default">
-      <h3>4.1 域名状态表 — 默认态（源码级）</h3>
+      <h3>4.1 域名状态表 — 默认态</h3>
       <dl class="state-meta">
         <div><dt>触发路径</dt><dd>阶段2 抽屉打开 authSpoofing → 认证协议检查 → 展开「DKIM 外发签名」（默认 <code>open=true</code>）</dd></div>
         <div><dt>前置条件</dt><dd>已确定租户作用域（租户管理员，或平台管理员已选租户）且该租户有发信域名</dd></div>
         <div><dt>可观察结果</dt><dd>3 列表格逐行渲染域名与签名状态</dd></div>
-        <div><dt>验证状态</dt><dd><span class="status-na">无法验证 · 后端离线</span>（元素据源码）</dd></div>
+        <div><dt>验证状态</dt><dd><span class="status-done">已实拍验证</span>（Mock 数据模式）</dd></div>
       </dl>
+      <figure class="screenshot-figure">
+        <span class="sequence-label">实拍 / DKIM 外发签名子卡</span>
+        <img src="./screenshots/subsection-list.png" alt="DKIM 外发签名子卡：发信域名×签名状态表，example-a.com 已启用 selector s2026 已验证，mail-a.cn 未签名，每行带管理按钮">
+        <figcaption>「认证协议检查」下方的可折叠区块：3 列表格（发信域名 / 签名状态 / 操作）。<code>example-a.com</code> 显示「已启用 selector：s2026」+「✅ 已验证」徽章；<code>mail-a.cn</code> 显示「未签名」；每行右侧「管理」按钮。上方另见「配置健康检查」提示条。</figcaption>
+      </figure>
       <h4>UI 元素</h4>
       <div class="table-scroll">
         <table class="spec-table">
@@ -307,7 +298,7 @@
         <div><dt>触发路径</dt><dd>多租户形态 + 平台视角 + <code>effectiveTenantId == null</code></dd></div>
         <div><dt>可观察结果</dt><dd>虚线边框提示块，不发起任何查询（<code>enabled=false</code>）</dd></div>
         <div><dt>恢复方式</dt><dd>在页面顶部选定一个租户</dd></div>
-        <div><dt>验证状态</dt><dd><span class="status-na">无法验证 · 后端离线</span></dd></div>
+        <div><dt>验证状态</dt><dd><span class="status-na">未实拍</span>（需平台管理员未选租户上下文；本次以租户管理员作用域实拍，文案/门控据源码）</dd></div>
       </dl>
       <div class="table-scroll">
         <table class="spec-table">
@@ -324,7 +315,7 @@
       <dl class="state-meta">
         <div><dt>触发路径</dt><dd>查询进行中 → 加载态；查询完成且 <code>domains.length === 0</code> → 空态</dd></div>
         <div><dt>可观察结果</dt><dd>加载态为居中 <code>Loader2</code> 旋转 + 文案；空态为虚线提示块</dd></div>
-        <div><dt>验证状态</dt><dd>加载态：<span class="status-done">环境实拍旁证</span>（见 4.0 证据1 的同类 loading）；空态：<span class="status-na">无法验证 · 后端离线</span></dd></div>
+        <div><dt>验证状态</dt><dd><span class="status-na">未实拍</span>（Mock 数据即时返回，未触发加载态；空态需该租户零发信域名。文案/结构据源码）</dd></div>
       </dl>
       <div class="table-scroll">
         <table class="spec-table">
@@ -343,8 +334,20 @@
         <div><dt>触发路径</dt><dd>默认态 → 某行「管理」→ <code>DkimManageDrawer(open, tenantId, domain)</code></dd></div>
         <div><dt>前置条件</dt><dd><code>manageDomain != null &amp;&amp; effectiveTenantId != null</code></dd></div>
         <div><dt>关闭副作用</dt><dd>关闭时 <code>invalidateQueries(['dkim-keys'])</code>，刷新子卡状态列</dd></div>
-        <div><dt>验证状态</dt><dd><span class="status-na">无法验证 · 后端离线</span>（字段/校验/接口据源码）</dd></div>
+        <div><dt>验证状态</dt><dd><span class="status-done">已实拍验证</span>（Mock 数据模式）</dd></div>
       </dl>
+      <div class="preview-sequence">
+        <figure class="screenshot-figure">
+          <span class="sequence-label">实拍 / 管理抽屉（密钥列表）</span>
+          <img src="./screenshots/manage-drawer.png" alt="DKIM 管理抽屉 example-a.com：生成新密钥/导入私钥按钮，s2026 活跃已验证、s2025 未验证两个密钥卡，各含待发布 DNS TXT 记录与复制/重新校验/设为当前/删除操作">
+          <figcaption>右侧 Sheet 抽屉「DKIM 管理 — example-a.com」：顶部「＋生成新密钥 / ＋导入私钥」与「DNS 发布教程」链接；密钥卡 <code>s2026</code>（活跃 · RSA-2048 · ✅已验证，标注「当前启用的签名密钥」）与 <code>s2025</code>（未验证 · 待轮换下线），每卡展示「待发布 DNS TXT 记录」的记录名/记录值（可复制）及「重新校验 / 设为当前 / 删除」。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <span class="sequence-label">实拍 / 生成新密钥表单</span>
+          <img src="./screenshots/generate-form.png" alt="生成新密钥表单：Selector 输入（提示只能小写字母数字连字符 1-63 字符）、算法 RSA-2048 下拉、备注、生成新密钥按钮">
+          <figcaption>点击「＋生成新密钥」后内联展开的表单：<code>Selector *</code>（占位 s2026，提示「只能是小写字母/数字/连字符，1-63 字符」）、<code>算法</code>（默认 RSA-2048）、<code>备注</code>，底部「＋生成新密钥」提交按钮。</figcaption>
+        </figure>
+      </div>
       <h4>字段、按钮与校验</h4>
       <div class="table-scroll">
         <table class="spec-table">
@@ -415,11 +418,11 @@
       <table class="spec-table">
         <thead><tr><th>状态</th><th>触发条件</th><th>页面表现</th><th>恢复方式</th><th>验证状态</th></tr></thead>
         <tbody>
-          <tr><td>selector 非法</td><td>生成/导入时 selector 不匹配正则</td><td>toast <code>selectorInvalid</code>，不提交</td><td>修正后重试</td><td><span class="status-na">无法验证 · 后端离线</span>（正则据源码）</td></tr>
-          <tr><td>PEM 为空</td><td>导入未填 PEM</td><td>toast <code>pemRequired</code></td><td>粘贴 PEM 后重试</td><td><span class="status-na">无法验证 · 后端离线</span></td></tr>
-          <tr><td>删除当前密钥</td><td>删除处于 active 的 selector</td><td>提示 <code>switchBeforeDelete</code></td><td>先「设为当前」到其它 selector</td><td><span class="status-na">无法验证 · 后端离线</span></td></tr>
-          <tr><td>接口失败</td><td>任一 mutation 抛错</td><td>toast 显示 <code>e.message</code></td><td>重试</td><td><span class="status-na">无法验证 · 后端离线</span></td></tr>
-          <tr><td>后端离线</td><td>代理目标 18080 未启动</td><td>数据请求无响应，列表/加载态卡住</td><td>启动后端后重试</td><td><span class="status-done">已实拍（4.0）</span></td></tr>
+            <tr><td>selector 非法</td><td>生成/导入时 selector 不匹配正则</td><td>toast <code>selectorInvalid</code>，不提交</td><td>修正后重试</td><td><span class="status-na">未实拍</span>（正则/提示据源码，表单校验提示已实拍见 4.4）</td></tr>
+            <tr><td>PEM 为空</td><td>导入未填 PEM</td><td>toast <code>pemRequired</code></td><td>粘贴 PEM 后重试</td><td><span class="status-na">未实拍</span>（据源码）</td></tr>
+            <tr><td>删除当前密钥</td><td>删除处于 active 的 selector</td><td>提示 <code>switchBeforeDelete</code></td><td>先「设为当前」到其它 selector</td><td><span class="status-na">未实拍</span>（据源码）</td></tr>
+            <tr><td>接口失败</td><td>任一 mutation 抛错</td><td>toast 显示 <code>e.message</code></td><td>重试</td><td><span class="status-na">未实拍</span>（据源码）</td></tr>
+            <tr><td>后端离线</td><td>真实取数目标 18080 未启动</td><td>非 Mock 模式下数据请求无响应，列表停留加载态</td><td>启用 Mock 数据模式，或启动后端后重试</td><td><span class="status-done">已实拍（Mock 模式规避）</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -434,7 +437,7 @@
           <tr><td>认证协议检查（同卡入站页签）</td><td>同卡、语义正交</td><td>共处 <code>ProtocolChecksSection</code></td><td>互不写对方状态</td><td>源码</td></tr>
           <tr><td>DKIM 总览页 <code>/system/dkim</code></td><td>跨租户查看同类密钥</td><td>共用 <code>DkimManageDrawer</code> 与 <code>/dkim/keys</code></td><td>共享密钥数据</td><td>源码</td></tr>
           <tr><td>租户域名管理 <code>/tenants/:id/domains</code></td><td>域名来源</td><td><code>GET /tenants/:id/domains</code></td><td>无域名则空态引导去添加</td><td>源码</td></tr>
-          <tr><td>身份认证与仿冒检测（父模块）</td><td>宿主页面</td><td>阶段2 authSpoofing 抽屉</td><td>决定入口可见性/重定向</td><td>源码</td></tr>
+          <tr><td>身份认证与仿冒检测（父模块）</td><td>宿主页面</td><td>阶段2 authSpoofing 抽���</td><td>决定入口可见性/重定向</td><td>源码</td></tr>
         </tbody>
       </table>
     </div>
