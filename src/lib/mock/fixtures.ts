@@ -8,6 +8,8 @@
 // 而不是 404，这样页面不会因为单个接口缺失就整页崩掉。
 
 import type { Bootstrap } from "@/lib/api/bootstrap";
+import canonicalRegistry from "@/lib/product-form/__fixtures__/registry_for_test.json";
+import type { FeatureDef } from "@/lib/product-form/resolve";
 import type { LinkClickLog } from "@/lib/api/link-clicks";
 import type { AuthAttempt, AuthAttemptStats } from "@/lib/api/auth-attempts";
 import type { AdminAuditLog } from "@/lib/api/admin-audit";
@@ -433,59 +435,24 @@ export function mockBootstrap(): Bootstrap {
     user: { role: "system_admin", tenantId: null },
     // dev mock 对齐 docker-compose.yml 的 OSG_LOCAL_AUTH_ENABLED=1 默认值。
     localAuthEnabled: true,
-    // 注册表不能真的留空：PolicyPipelinePage 的 resolvePipelinePolicy（阶段4 智能
-    // 分析层）要求 registry.find(id) 命中才会渲染对应 AI 卡片
-    // （`webapp/src/components/security/PolicyPipelinePage.tsx` ~L174），找不到
-    // 就整段隐藏 —— 空数组会让综合策略从「阶段5」退化成「阶段4」，掉了一整层。
-    // 这里登记 phishing-detection / spoofing-detection 两个 AI_ELSE_LOCK 功能
-    // （形状对齐 `src/lib/product-form/__fixtures__/registry_for_test.json`，
-    // 真源见 `internal/productform/registry.go`），threat-retro 暂不登记。
+    // 直接复用权威注册表镜像 registry_for_test.json（internal/productform.
+    // Registry 的浏览器侧镜像，由 Go/TS parity 测试守护），而不是在这里手工维护
+    // 一个残缺子集。
     //
-    // 注意 platformHidden 与生产 registry.go 的取值刻意不同：生产是 true（多
-    // 租户下该功能强制走 tenant 授权，platform 视角看不到），但手动开启的纯
-    // Mock 模式要在 platform 默认视角展示完整的阶段4+阶段5，所以这里显式设为
-    // false。登录页的显式演示会话不使用本 bootstrap，而使用本地完整标准
-    // 注册表和服务端 OSG_PRODUCT_FORM，因而无需后端也能保持生产菜单语义。
-    featureRegistry: [
-      // 平台侧基础设施监控。系统状态页的「系统在线节点」KPI 卡与「系统与服务
-      // 健康」卡都由它门控（见 system-status/visibility.ts 的 INFRA_FEATURE_ID）。
-      // 形状对齐生产 registry.go / registry_for_test.json：scope=platform、
-      // tenantAccess=hidden、grantable=false —— 即 platform 视角只读可见，任何
-      // tenant 视角（含租户管理员、impersonation）一律 HIDDEN。
-      // 必须登记：visibility.ts 对「注册表中缺失」的特性走「未登记=放行」兜底
-      // (`: true`)，之前 mock 少了这一项，导致 mock/demo 模式下这两张平台卡片
-      // 对所有视角（含租户管理员）恒显示 —— 与生产语义不符。
-      {
-        id: "monitor-infrastructure",
-        visibility: "ALWAYS",
-        scope: "platform",
-        platformAccess: "readonly",
-        tenantAccess: "hidden",
-        platformHidden: false,
-        grantable: false,
-      },
-      {
-        id: "phishing-detection",
-        visibility: "AI_ELSE_LOCK",
-        scope: "mixed",
-        platformAccess: "edit",
-        tenantAccess: "edit",
-        platformHidden: false,
-        grantable: true,
-        href: "/agent-center/overview?agent=phishing",
-      },
-      {
-        id: "spoofing-detection",
-        visibility: "AI_ELSE_LOCK",
-        scope: "mixed",
-        platformAccess: "edit",
-        tenantAccess: "edit",
-        platformHidden: false,
-        grantable: true,
-        href: "/agent-center/overview?agent=spoofing",
-      },
-    ],
-    grants: [],
+    // 为什么必须这样：可见性逻辑 isItemVisibleByForm 对「注册表里找不到的 href」
+    // 走「未登记=放行」兜底（`if (!feat) return true`）。旧的手工注册表只登记了
+    // 3 项，strategy-pipeline / group-policy（安全策略）、threat-retro（智能体
+    // 中心）等根本没登记，于是 resolve() 的 platformHidden 规则没机会执行，导致
+    // 这些 tenant-only 模块在 Mock 模式的平台管理员视角下恒显示 —— 与生产
+    // registry.go（platformHidden: true）及 parity_vectors.json 的判定完全不符。
+    // 用完整镜像后，Mock 与离线演示会话（createOfflineDemoBootstrap）、生产三者
+    // 的菜单语义完全一致，且不会再因为「漏登记某个功能」而失败开放。
+    featureRegistry: canonicalRegistry as FeatureDef[],
+    // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
+    // grantable）。这样切到租户视角能完整演示「智能体中心」——对应 parity_vectors
+    // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
+    // platformHidden:true，多租户平台视角恒隐藏，与 grants 无关）。
+    grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
   };
 }
 
@@ -1770,7 +1737,7 @@ let alertRuleState: AlertRule[] = [
   { ...ruleDefaults, id: 101, name: "数据目录使用率告警", metric_key: "data_dir_usage", module: "system", operator: "gt", threshold_warn: 95, severity: "p0" },
   { ...ruleDefaults, id: 102, name: "deferred 队列堆积", metric_key: "queue_deferred", module: "mailflow_queue", operator: "gt", threshold_warn: 50000, severity: "p0" },
   { ...ruleDefaults, id: 103, name: "Kingbase 主从延迟", metric_key: "kb_repl_delay", module: "database", operator: "gt", threshold_warn: 60, severity: "p1" },
-  { ...ruleDefaults, id: 104, name: "RBL 响应超时", metric_key: "rbl_hits", module: "detection", operator: "gt", threshold_warn: 5, severity: "p3" },
+  { ...ruleDefaults, id: 104, name: "RBL 响应超��", metric_key: "rbl_hits", module: "detection", operator: "gt", threshold_warn: 5, severity: "p3" },
   { ...ruleDefaults, id: 105, name: "备份任务失败", metric_key: "data_dir_usage", module: "system", operator: "eq", threshold_warn: 0, severity: "p1" },
 ];
 
@@ -3249,7 +3216,7 @@ export function mockDeleteGeoIpRule(id: number): void {
   if (idx !== -1) mockGeoIpRules.splice(idx, 1);
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════��═══════════
 // 发信人黑白名单（sender_filter，mock）
 // 数据结构对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
 //   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
@@ -4875,7 +4842,7 @@ export function mockPutURLProtectionSettings(
   return { ...urlProtectionSettingsState };
 }
 
-// ─── 意图引擎（intent-engine，mock）────────────────────────────────
+// ─── 意图引��（intent-engine，mock）────────────────────────────────
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
 // 动作映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），
 // 非 receive 方向默认区间 accept→quarantine（D-06）。
@@ -5857,7 +5824,7 @@ function disposalBasis(seed: MockDisposalSeed) {
     // action/deliveryStatus 字段。
     action: seed.disposalBasisActionOverride ?? disposalAction(seed),
     // confidence 供 disposal-basis-config.ts 里 AI-* 策略的 hitDetail() 模板
-    // 使用（如 AI-PHISH 的「置信度：{cf}%」），让 ThreatSummaryCard 的
+    // 使用（如 AI-PHISH 的「置信度：{cf}%���），让 ThreatSummaryCard 的
     // 「AI判定依据」行渲染出有意义的文案，而不是模板兜底的 "-"。
     hit_values: { reason: seed.reason, score: String(seed.score), confidence: String(seed.score) },
     detection_tags: [`source:${seed.basis[0].toLowerCase()}`],
