@@ -30,7 +30,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { ApiRequestFn } from '@/lib/api/client';
@@ -49,10 +48,6 @@ interface SenderActionsProps {
   // Called after a successful blacklist/whitelist rule creation so the
   // caller can refresh anything derived from it (e.g. a rule-hit list).
   onDisposed?: () => void;
-  // E7's "导出EML" item (spec §9-A: the only non-placeholder item). Reuses
-  // whatever download-EML implementation the caller's overview 下载原文
-  // button already has, rather than duplicating fetch/blob logic here.
-  onExportEml?: () => void;
 }
 
 export function SenderActions({
@@ -61,7 +56,6 @@ export function SenderActions({
   isSingleRecipient,
   readOnly = false,
   onDisposed,
-  onExportEml,
 }: SenderActionsProps) {
   const t = useTranslations('emailDisposal.detail.overview.senderActions');
   // cancel / confirmBtn already exist (four languages) at the parent
@@ -125,14 +119,6 @@ export function SenderActions({
     toast.info(t('notImplementedToast'));
   }
 
-  function exportEml() {
-    if (onExportEml) {
-      onExportEml();
-    } else {
-      notImplemented();
-    }
-  }
-
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Button
@@ -171,22 +157,11 @@ export function SenderActions({
           {t('more')}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={exportEml} data-testid="email-disposal-overview-action-more-export-eml">
-            {t('menu.exportEml')}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={notImplemented} data-testid="email-disposal-overview-action-more-export-pdf">
-            {t('menu.exportPdf')}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={notImplemented} data-testid="email-disposal-overview-action-more-mark-fp">
             {t('menu.markFalsePositive')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={notImplemented} data-testid="email-disposal-overview-action-more-mark-fn">
             {t('menu.markFalseNegative')}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={notImplemented} data-testid="email-disposal-overview-action-more-investigate">
-            {t('menu.addToInvestigation')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

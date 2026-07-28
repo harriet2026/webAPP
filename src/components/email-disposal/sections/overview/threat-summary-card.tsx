@@ -31,7 +31,6 @@ import {
   mailTypeConfig, correctionSourceLabelKey,
   stripDetailPrefix, isNewSender, deriveConfidence, deriveHitSource, isSensitiveUrgent, deriveDomainAge,
 } from '../../lib/detail-helpers';
-import { downloadEml } from '../../lib/disposal-detail-api';
 import {
   getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor, formatHitDetail, type DisposalLang,
 } from '../../lib/disposal-basis-config';
@@ -306,7 +305,6 @@ export function ThreatSummaryCard({
             isSingleRecipient={isSingleRecipient}
             readOnly={readOnly}
             onDisposed={onDisposed}
-            onExportEml={() => downloadEml(detail.id, t)}
           />
         </div>
       </div>
