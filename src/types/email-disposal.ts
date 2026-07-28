@@ -8,6 +8,7 @@ import type {
 export interface DisposalQuickFilter {
   sendReceiveTime?: { start: string; end: string };
   sendReceiveType?: string;
+  senderIp?: string;
   sender?: string;
   recipient?: string;
   subject?: string;

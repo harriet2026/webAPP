@@ -85,7 +85,7 @@ const STATUS_VARIANTS: Record<DisplayStatus, 'default' | 'secondary' | 'destruct
 // The leading select checkbox and the trailing operations column are
 // structural and always rendered.
 const TOGGLEABLE_COLUMNS = [
-  'time', 'direction', 'sender', 'recipient', 'subject',
+  'time', 'direction', 'senderIp', 'sender', 'recipient', 'subject',
   'disposalBasis', 'mailType', 'similarity', 'action', 'status',
 ] as const;
 type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
@@ -376,6 +376,7 @@ export function MailListTable({
                 </TableHead>
                 {colHead('time')}
                 {colHead('direction')}
+                {colHead('senderIp')}
                 {colHead('sender')}
                 {colHead('recipient')}
                 {colHead('subject')}
@@ -414,6 +415,7 @@ export function MailListTable({
                 </TableHead>
                 {colHead('time')}
                 {colHead('direction')}
+                {colHead('senderIp')}
                 {colHead('sender')}
                 {colHead('recipient')}
                 {colHead('subject')}
@@ -522,6 +524,7 @@ export function MailListTable({
               </TableHead>
               {colHead('time')}
               {colHead('direction')}
+              {colHead('senderIp')}
               {colHead('sender')}
               {colHead('recipient')}
               {colHead('subject')}
@@ -565,6 +568,14 @@ export function MailListTable({
                 {isColVisible('direction') && (
                 <TableCell className="text-xs">
                   <Badge variant="outline">{localizeEnum(`filters.${item.direction}` as const, item.direction)}</Badge>
+                </TableCell>
+                )}
+                {isColVisible('senderIp') && (
+                <TableCell className="text-xs max-w-[160px] truncate font-mono">
+                  <Tooltip>
+                    <TooltipTrigger render={<span className="cursor-default" />}>{item.clientIp || '—'}</TooltipTrigger>
+                    <TooltipContent className="max-w-md text-xs">{item.clientIp || '—'}</TooltipContent>
+                  </Tooltip>
                 </TableCell>
                 )}
                 {isColVisible('sender') && (

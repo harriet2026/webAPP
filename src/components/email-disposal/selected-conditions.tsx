@@ -193,7 +193,7 @@ export function SelectedConditions({
         // GT-12368 fix round 1: next-intl 默认 fallback 对缺失 key 不抛异常，
         // 而是原样返回 dot-joined 路径（如
         // "emailDisposal.filters.statuses.xxx"），try/catch 拦不住这种"假成功"
-        // ——所以改用 ft.has() 显式判断 key 是否真实存在（同
+        // ——所以改用 ft.has() 显式判断 key 是否真实���在（同
         // investigations/page.tsx 的 formatTargetType 用法），不存在则回退到
         // 原始枚举值，而不是把 i18n 路径原样展示给用户。
         if (i18nPath && ft.has(i18nPath)) {
@@ -231,6 +231,7 @@ export function SelectedConditions({
   // Only string-valued quick-filter keys; sendReceiveTime (object) is handled separately below.
   type StringQuickKey = Exclude<keyof DisposalQuickFilter, "sendReceiveTime">;
   const quickFields: [StringQuickKey, string][] = [
+    ["senderIp", ft("senderIp")],
     ["sender", ft("sender")],
     ["recipient", ft("recipient")],
     ["subject", ft("subject")],

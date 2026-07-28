@@ -51,6 +51,13 @@ export function useFilterMerger() {
       const quickConditions: FilterCondition[] = [];
 
       // sender, subject, action, geo_region_name map directly to registered backend fields
+      if (quick.senderIp) {
+        quickConditions.push({
+          field: "client_ip",
+          op: "contains",
+          value: quick.senderIp,
+        });
+      }
       if (quick.sender) {
         quickConditions.push({
           field: "sender",

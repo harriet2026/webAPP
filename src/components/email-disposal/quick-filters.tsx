@@ -246,6 +246,20 @@ export function QuickFilters({
 
           <div className="order-4 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
+              {t("senderIp")}
+            </label>
+            <Input
+              data-testid="disposal-sender-ip-filter"
+              className="h-9 text-xs"
+              value={value.senderIp || ""}
+              onChange={(e) =>
+                onChange({ ...value, senderIp: e.target.value || undefined })
+              }
+            />
+          </div>
+
+          <div className="order-5 space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">
               {t("sender")}
             </label>
             <Input
@@ -258,7 +272,7 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-5 space-y-1">
+          <div className="order-6 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
               {t("recipient")}
             </label>
@@ -272,7 +286,7 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-6 space-y-1">
+          <div className="order-7 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
               {t("subject")}
             </label>
@@ -286,7 +300,7 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-10 space-y-1">
+          <div className="order-11 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
               {t("executionAction")}
             </label>
@@ -313,7 +327,7 @@ export function QuickFilters({
             </Select>
           </div>
 
-          <div className="order-8 space-y-1" data-testid="disposal-status-filter">
+          <div className="order-9 space-y-1" data-testid="disposal-status-filter">
             <label className="text-xs font-medium text-muted-foreground">
               {t("emailStatus")}
             </label>
@@ -335,7 +349,7 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-9 space-y-1" data-testid="disposal-mail-type-filter">
+          <div className="order-10 space-y-1" data-testid="disposal-mail-type-filter">
             <label className="text-xs font-medium text-muted-foreground">
               {t("mailType")}
             </label>
@@ -358,7 +372,7 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-7 space-y-1" data-testid="disposal-policy-filter">
+          <div className="order-8 space-y-1" data-testid="disposal-policy-filter">
             <label className="text-xs font-medium text-muted-foreground">
               {t("disposalPolicyKeys")}
             </label>

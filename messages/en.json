@@ -5524,6 +5524,7 @@
       "threatLevel": "Threat Level",
       "intentLabel": "Intent Label",
       "direction": "Direction",
+      "senderIp": "Sender IP",
       "sender": "Sender",
       "recipient": "Recipient",
       "subject": "Subject",

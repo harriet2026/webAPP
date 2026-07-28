@@ -699,12 +699,12 @@
       "masterSwitchOff": "免认证中继总开关当前关闭，授权暂不生效。",
       "masterSwitch": "总开关",
       "masterSwitchOffActionable": "免认证中继总开关当前关闭，下方授权均不生效——打开右上角「总开关」后生效。",
-      "masterSwitchEnabled": "免认证中继总开关已开启",
+      "masterSwitchEnabled": "免认证中继总��关已开启",
       "masterSwitchDisabled": "免认证中继总开关已关闭",
       "add": "新增授权",
       "empty": "暂无授权",
       "created": "授权已创建",
-      "deleted": "授权已删除",
+      "deleted": "授��已删除",
       "delete": "删除",
       "deleteTitle": "删除中继授权",
       "deleteConfirm": "确定删除 {cidr} 的中继授权？该来源将立即无法免认证中继。",
@@ -2132,7 +2132,7 @@
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
-      "connectionRefused": "连接被拒绝，请检查认证服务器端口可达性与防火墙策略。",
+      "connectionRefused": "连接被拒绝，请检查认证服务器端���可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
       "unknown": "未能识别的失败原因，请查看原始失败信息并联系支持。"
@@ -2163,7 +2163,7 @@
     "allTenants": "全部租户",
     "totalRecords": "共 {count} 条记录",
     "keywordLabel": "账号 / 来源 IP",
-    "keywordPlaceholder": "输入账号或来源 IP",
+    "keywordPlaceholder": "输入账���或来源 IP",
     "domainPlaceholder": "输入域名",
     "effectiveScene": "生效场景"
   },
@@ -3214,11 +3214,11 @@
     "examples": {
       "title": "查看配置示例",
       "antiBruteforce": "防暴力破解",
-      "antiBruteforceDesc": "防止密码爆破攻击，短时间内多次认证失败将被封禁",
+      "antiBruteforceDesc": "防止密码爆破攻击，短时��内多次认证失败将被封禁",
       "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1小时。",
       "antiSpam": "防滥发邮件",
       "antiSpamDesc": "限制高频发信行为，防止垃圾邮件泛滥",
-      "antiSpamEffect": "每15分钟内连接超过200次，或当日累计超过5000次，将被封禁1小时。",
+      "antiSpamEffect": "每15分钟内连接超过200次，或当日累���超过5000次，将被封禁1小时。",
       "useThis": "使用该示例"
     },
     "simulator": {
@@ -3235,7 +3235,7 @@
       "noThresholds": "当前配置未设置有效阈值，连接将被放行"
     },
     "tips": {
-      "title": "配置提示",
+      "title": "配置提���",
       "negOne": "-1 表示不限制",
       "priorityLower": "优先级越大越先匹配",
       "permanent": "留空 = 永久有效",
@@ -3505,7 +3505,7 @@
     "deleteServer": "删除服务器",
     "keepOneServer": "请至少保留一个 RBL 服务器",
     "serverDomain": "服务器域名",
-    "timeout": "超时",
+    "timeout": "��时",
     "retry": "重试次数",
     "testServer": "测试",
     "testResult": "测试结果",
@@ -3799,7 +3799,7 @@
     "configHint4": "群组和组织来自群组策略配置",
     "scheduleSection": "生效时间",
     "complexEditTitle": "复杂条件",
-    "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑。可修改规则名称、备注、优先级与有效期；保存不会改动原有条件与执行动作。",
+    "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑。可修改规则名称、备��、优先级与有效期；保存不会改动原有条件与执行动作。",
     "statusFilter": "状态筛选",
     "statusAll": "全部状态",
     "statusEnabled": "已启用",
@@ -3969,7 +3969,7 @@
     "exampleKeywordReject": "身份证号外发管控",
     "exampleKeywordRejectDesc": "检测正文中的 18 位身份证号并阻断",
     "exampleRegexQuarantine": "银行卡号检测",
-    "exampleRegexQuarantineDesc": "检测正文中的 16–19 位银行卡号并进入审核",
+    "exampleRegexQuarantineDesc": "检测正文中的 16–19 位银行���号并进入审核",
     "exampleContentGroupAudit": "敏感词过滤",
     "exampleContentGroupAuditDesc": "主题或正文包含敏感词时阻断邮件",
     "addHeaders": "添加头部",
@@ -4109,7 +4109,7 @@
       "envelopeHeaderMismatch": "信封与头部不匹配",
       "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。",
       "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，建议阻断。",
-      "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
+      "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或��意身份仿冒。"
     },
     "protocolChecks": {
       "title": "认证协议检查",
@@ -4509,7 +4509,7 @@
       "normalEffect": "正常用户日发50封邮件，使用2个IP，未触发规则",
       "stolenName": "账号被盗场景",
       "stolenDesc": "异常高频发信，触发隔离",
-      "stolenEffect": "盗号者15分钟用10个IP发信200封，触发隔离",
+      "stolenEffect": "盗号者15分钟用10个IP发信200封，触发��离",
       "salesName": "销售部群发场景",
       "salesDesc": "正常业务群发，阈值宽松",
       "salesEffect": "销售部正常日报群发500人，域内方向阈值宽松，不触发外发规则"
@@ -4965,7 +4965,7 @@
     "actionLabel": "处置动作",
     "sendMarkUnsupported": "外发方向不支持\"标记投递\"动作，相关配置将自动降级为\"隔离\"",
     "internalMarkUnsupported": "域内方向不支持\"标记投递\"动作，相关配置将自动降级为\"隔离\"",
-    "directionMarkUnsupported": "外发/域内方向不支持\"标记投递\"，相关动作将自动降级为\"隔离\"",
+    "directionMarkUnsupported": "外发/域内方向不支持\"标记投递\"，相关动作将自���降级为\"隔离\"",
     "highRiskWarning": "高危意图采用标记投递，邮件将投递至用户邮箱，请确认风险",
     "panel": {
       "high": "高危意图",
@@ -5151,7 +5151,7 @@
     "save": "保存",
     "createReceiveRule": "新建接收标记规则",
     "editReceiveRule": "编辑接收标记规则",
-    "createSendRule": "新建外发声明规则",
+    "createSendRule": "新建���发声明规则",
     "editSendRule": "编辑外发声明规则",
     "basicConfig": "基础配置",
     "ruleNamePlaceholder": "如：高管外站警示",
@@ -5529,6 +5529,7 @@
       "threatLevel": "威胁等级",
       "intentLabel": "意图标签",
       "direction": "收发类型",
+      "senderIp": "发信 IP",
       "sender": "发信人",
       "recipient": "收信人",
       "subject": "主题",
@@ -5845,7 +5846,7 @@
           "senderList": "发信人黑白名单",
           "authSpoofing": "认证与欺骗检测",
           "behaviorControl": "发信行为管控",
-          "recipientCheck": "收信人检查",
+          "recipientCheck": "收信人检���",
           "personalList": "个人黑白名单",
           "attachmentSecurity": "附件安全",
           "urlProtection": "URL 防护",
@@ -5862,7 +5863,7 @@
         "contentDetails": "内容详情",
         "detectionPipeline": "检测流程",
         "totalElapsed": "总耗时: {ms}ms",
-        "elapsed": "耗时: {ms}ms",
+        "elapsed": "���时: {ms}ms",
         "policyCount": "{n} 项策略",
         "hitPolicyLabel": "命中策略",
         "agentJudgementLabel": "智能体研判",
@@ -6218,7 +6219,7 @@
       "noneTagsCleared": "该规则的主操作为“无”（仅附加 addon），设置的标签不会生效，保存时将被清除，可删除对应标签规则。"
     },
     "observe": {
-      "title": "观察模式",
+      "title": "��察模式",
       "desc": "启用后规则匹配但不执行动作，仅记录日志"
     },
     "hitStats": {
@@ -6503,7 +6504,7 @@
       "desc_keywordMatch": {
         "source": "内容规则模块-关键词库",
         "usage": "从预定义关键词库匹配邮件内容",
-        "note": "关键词库支持分组管理"
+        "note": "关��词库支持分组管理"
       },
       "desc_sendTime": {
         "source": "邮件头 Date 字段",
@@ -6592,7 +6593,7 @@
       },
       "desc_rblResult": {
         "source": "RBL实时黑名单服务",
-        "usage": "根据RBL查询结果过滤邮件",
+        "usage": "根据RBL查询结果过��邮件",
         "note": "支持多个RBL源联合查询"
       },
       "desc_urlSandboxResult": {
@@ -6943,7 +6944,7 @@
     "weekday_6": "周六",
     "timePoints": "通知时间点",
     "addTimePoint": "添加时间点",
-    "tzComputedIn": "通知时间按 {tz} 计算",
+    "tzComputedIn": "通知时间��� {tz} 计算",
     "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间：",
     "tzUseBrowser": "使用浏览器时区（{tz}）",
     "tzKeepCurrent": "保持当前时区（{tz}）",
@@ -8066,7 +8067,7 @@
     "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
     "admission": {
       "title": "准入规则",
-      "description": "决定哪些邮件进入钓鱼邮件检测智能体。命中后使用当前部署级运行限制。",
+      "description": "决定哪些邮件进入钓鱼邮件检测智能体。命中后使用当前部��级运行限制。",
       "loading": "加载中...",
       "empty": "暂无准入规则，点击「新建」添加。",
       "create": "新建",
@@ -9155,7 +9156,7 @@
     "fieldBaseDn": "Base DN",
     "fieldBindDn": "Bind DN",
     "fieldBindPassword": "绑定密码",
-    "fieldCorpDomain": "企业域名",
+    "fieldCorpDomain": "企���域名",
     "fieldName": "数据源名称",
     "fieldOpenId": "OpenID",
     "fieldOrgId": "组织 ID",
@@ -9349,7 +9350,7 @@
       "count": "次数",
       "action": "操作",
       "ruleName": "规则名称",
-      "condition": "条件",
+      "condition": "条��",
       "enabled": "启用",
       "channelName": "渠道",
       "target": "目标"
