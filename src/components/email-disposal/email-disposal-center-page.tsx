@@ -93,7 +93,7 @@ export function EmailDisposalCenterPage({
   const { templates, saveTemplate, deleteTemplate } = useSearchTemplates();
   const queryClient = useQueryClient();
   const { capabilities, viewer } = useProductForm();
-  const { features, isSystemAdmin, isTenantAdmin, user } = useAuth();
+  const { features, isSystemAdmin, isTenantAdmin, user, demoAuthBypassEnabled } = useAuth();
   const { selectedTenantId } = useTenant();
   const { effectiveViewer } = resolveSecurityScope({
     scopeTenantId: null,
@@ -116,8 +116,12 @@ export function EmailDisposalCenterPage({
   // + no selected tenant" -> platform normalization, leaving detail-drawer
   // dispose actions enabled while the list page correctly showed
   // platform-wide/readonly).
+  // Demo bypass 模式下超管未选租户会被规范为 platform 视角（只读），
+  // 但 demo 需要展示完整操作功能，故跳过只读限制。
   const detailReadOnly =
-    !!capabilities?.multiTenant && effectiveViewer === "platform";
+    !demoAuthBypassEnabled &&
+    !!capabilities?.multiTenant &&
+    effectiveViewer === "platform";
   // Platform-wide mail investigation is read-only, but it still needs a
   // tenant filter. Keep that filter local to this page: reusing the global
   // selectedTenantId would turn a platform admin into a tenant-scoped
