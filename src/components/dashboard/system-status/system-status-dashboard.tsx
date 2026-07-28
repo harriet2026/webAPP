@@ -51,8 +51,7 @@ export function SystemStatusDashboard() {
   const tRange = useTranslations('systemStatus.range');
   const queryClient = useQueryClient();
 
-  // Default range aligned to the demo prototype's initial view (今日).
-  const [range, setRange] = useState<SystemStatusRange>('today');
+  const [range, setRange] = useState<SystemStatusRange>('24h');
   const [spinning, setSpinning] = useState(false);
 
   const data = useSystemStatusData(range);
