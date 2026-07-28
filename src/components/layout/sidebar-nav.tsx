@@ -133,10 +133,16 @@ export function SidebarNav() {
     });
     return expanded;
   });
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const { hasPermission, isSystemAdmin, showAdvancedRules, canSeeRoute } = useAuth();
   const { capabilities, registry, viewer, grants } = useProductForm();
   const t = useTranslations();
-  const brandName = capabilities?.saas ? t('branding.saasName') : t('branding.selfHostedName');
+  // Defer brand name to client-only render to avoid SSR/client hydration mismatch:
+  // capabilities.saas is only known after the client-side ProductFormContext initialises.
+  const brandName = mounted
+    ? (capabilities?.saas ? t('branding.saasName') : t('branding.selfHostedName'))
+    : t('branding.selfHostedName');
 
   useEffect(() => {
     document.title = brandName;
