@@ -82,6 +82,39 @@ describe('rbac module mapping (spec §7.4)', () => {
     }
   });
 
+  it('系统状态 is a standalone module (both scopes), split out of 监控中心', () => {
+    const sysStatus = PERM_MODULES.find((m) => m.key === 'systemStatus');
+    expect(sysStatus).toBeDefined();
+    expect(sysStatus!.children.map((c) => c.id)).toEqual(['system-status']);
+    expect(SUBMODULE_ROUTE_MAP['system-status'].href).toBe('/dashboard');
+    // visible to BOTH scopes
+    expect(getScopedModules('platform').map((m) => m.key)).toContain('systemStatus');
+    expect(getScopedModules('tenant').map((m) => m.key)).toContain('systemStatus');
+    // the old misplaced id is gone; 监控中心 no longer carries /dashboard
+    expect(findSubModule('monitor-dashboard')).toBeUndefined();
+    const monitor = PERM_MODULES.find((m) => m.key === 'monitor')!;
+    expect(monitor.children.some((c) => SUBMODULE_ROUTE_MAP[c.id].href === '/dashboard')).toBe(false);
+  });
+
+  it('监控中心 is platform-only (its /monitoring/* pages are gated from tenants)', () => {
+    expect(PLATFORM_ONLY_MODULE_KEYS).toContain('monitor');
+    expect(getScopedModules('tenant').map((m) => m.key)).not.toContain('monitor');
+    expect(getScopedModules('platform').map((m) => m.key)).toContain('monitor');
+  });
+
+  it('组织与成员 is a standalone module visible to both scopes (not under platform-only 系统管理)', () => {
+    const org = PERM_MODULES.find((m) => m.key === 'organization');
+    expect(org).toBeDefined();
+    expect(org!.children.map((c) => c.id)).toEqual(['contacts']);
+    expect(SUBMODULE_ROUTE_MAP['contacts'].href).toBe('/organization-contacts');
+    // tenant admin must see it; platform admin too
+    expect(getScopedModules('tenant').map((m) => m.key)).toContain('organization');
+    expect(getScopedModules('platform').map((m) => m.key)).toContain('organization');
+    // contacts is no longer a child of the platform-only system module
+    const system = PERM_MODULES.find((m) => m.key === 'system')!;
+    expect(system.children.map((c) => c.id)).not.toContain('contacts');
+  });
+
   it('reverse lookup resolves a known route back to its submodule id', () => {
     // disposal-center → /email-disposal/center (see sidebar constants)
     expect(submoduleForHref('/email-disposal/center')).toBe('disposal-center');

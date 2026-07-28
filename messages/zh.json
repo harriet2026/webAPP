@@ -212,7 +212,7 @@
     "loginError": "用户名或密码错误",
     "sessionExpired": "会话已过期，请重新登录",
     "showAdvancedRules": "显示高级规则设置",
-    "showAdvancedRulesHint": "仅系统管理员勾选后可见",
+    "showAdvancedRulesHint": "仅系统管理员勾选��可见",
     "twoFactorRequired": "需要二次认证",
     "twoFactorRequiredHint": "您的账号已开启二次认证，请输入发送至 {target} 的验证码",
     "twoFactorCode": "验证码",
@@ -699,7 +699,7 @@
       "masterSwitchOff": "免认证中继总开关当前关闭，授权暂不生效。",
       "masterSwitch": "总开关",
       "masterSwitchOffActionable": "免认证中继总开关当前关闭，下方授权均不生效——打开右上角「总开关」后生效。",
-      "masterSwitchEnabled": "免认证中继总��关已开启",
+      "masterSwitchEnabled": "免认证中继总���关已开启",
       "masterSwitchDisabled": "免认证中继总开关已关闭",
       "add": "新增授权",
       "empty": "暂无授权",
@@ -1059,7 +1059,7 @@
     },
     "policyStatusNotes": {
       "inherit": "跟随全局设置，全局启用则启用、禁用则禁用；全局日后调整时本群组自动同步。",
-      "enable": "本群组固定启用，不随全局变化；即使全局关闭该模块，本群组仍保持启用。",
+      "enable": "本群组固定启用，不随全局变化；���使全局关闭该模块，本群组仍保持启用。",
       "disable": "本群组固定禁用，不随全局变化；即使全局开启该模块，本群组仍不检测。",
       "custom": "在全局默认基础上，为本群组单独调整参数，仅对本群组生效。"
     },
@@ -6482,7 +6482,7 @@
       "desc_senderOrganization": {
         "source": "组织架构模块",
         "usage": "匹配发信人所属组织",
-        "note": "支持多级组织架构匹配"
+        "note": "支持���级组织架构匹配"
       },
       "desc_featureGroup": {
         "source": "群组策略 - 特征组",
@@ -7739,7 +7739,7 @@
       "running": "运行中",
       "stopped": "已停止",
       "restarts": "重启次数",
-      "overlay2": "Overlay2 空间使用率",
+      "overlay2": "Overlay2 空间��用率",
       "coreProcs": "核心进程监控",
       "pid": "PID",
       "status": "状态",
@@ -8513,7 +8513,7 @@
       "actionQuarantineDesc": "邮件移入隔离区，等待管理员审核处理",
       "actionRejectDesc": "直接拒绝邮件，退信给发件人",
       "actionDiscardDesc": "静默丢弃，不通知发件人",
-      "actionRejectWarn": "严格模式会直接拒绝邮件，可能影响正常邮件投递，请谨慎使用",
+      "actionRejectWarn": "严格模式会直接拒绝邮件，可能影响正常邮件投递���请谨慎使用",
       "previewNotify": "预览通知内容",
       "previewNotifyUnavailable": "模板预览暂不可用",
       "previewNotifyHint": "由后端正式模板渲染，仅预览，不发送邮件",
@@ -9926,8 +9926,9 @@
       "network": "网络设置",
       "dataManagement": "数据管理",
       "authorizationUpgrade": "升级更新",
-      "userPermission": "用户与权限",
+      "userPermission": "管理员与权限",
       "rolePermission": "角色权限",
+      "organization": "组织与成员",
       "systemLogs": "通知日志"
     }
   },

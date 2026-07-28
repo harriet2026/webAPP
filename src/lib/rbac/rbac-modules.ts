@@ -66,9 +66,19 @@ const sub = (
 
 export const PERM_MODULES: ModuleMeta[] = [
   {
+    // 系统状态是一个独立的顶层导航项(/dashboard)，两视角均可见 → 独立可授模块。
+    // 之前它被错误地作为 monitor 模块的 monitor-dashboard 子项(标签「系统状态」
+    // 却挂在监控中心下)，导致租户视角矩阵里能授监控中心、却看不到系统状态。
+    key: 'systemStatus', labelKey: 'sidebar.systemStatus', supportApprove: false, supportDelete: false,
+    children: [
+      sub('system-status', 'sidebar.systemStatus', false, false),
+    ],
+  },
+  {
+    // 监控中心的全部子页均在 /monitoring/*，导航侧由 manage_tenants 门控 →
+    // 平台专属(见 PLATFORM_ONLY_MODULE_KEYS)，租户视角矩阵不再出现监控中心。
     key: 'monitor', labelKey: 'sidebar.monitoringCenter', supportApprove: false, supportDelete: false,
     children: [
-      sub('monitor-dashboard', 'sidebar.systemStatus', false, false),
       sub('monitor-infrastructure', 'sidebar.infrastructure', false, false),
       sub('monitor-mailflow', 'sidebar.mailflow', false, false),
       sub('monitor-security', 'rbac.module.monitorSecurity', false, false),
@@ -117,6 +127,14 @@ export const PERM_MODULES: ModuleMeta[] = [
       sub('tenant-management', 'sidebar.tenants', false, false),
       sub('platform-security-policy', 'sidebar.platformSecurityPolicy', false, false),
       sub('forwarding', 'sidebar.mailRouting', false, false),
+    ],
+  },
+  {
+    // 组织与成员(/organization-contacts)对租户管理员本就可访问(页面无平台门)，
+    // 之前被错误地并入平台专属的 system 模块，导致租户视角看不到。抽为独立模块，
+    // 不进 PLATFORM_ONLY / TENANT_ONLY → 两视角均可授。
+    key: 'organization', labelKey: 'rbac.module.organization', supportApprove: false, supportDelete: false,
+    children: [
       sub('contacts', 'sidebar.organizationContacts', false, false),
     ],
   },
@@ -143,8 +161,12 @@ export function findSubModule(id: string): SubModuleMeta | undefined {
   return ALL_SUB_MODULES.find((s) => s.id === id);
 }
 
-// Platform-exclusive module: only a platform admin may assign it; hidden from the tenant scope.
-export const PLATFORM_ONLY_MODULE_KEYS = ['system'];
+// Platform-exclusive modules: only a platform admin may assign them; hidden from the tenant scope.
+// - system: 系统管理(租户管理/平台安全策略/邮件路由)
+// - monitor: 监控中心(/monitoring/* 全部由导航的 manage_tenants 门控，租户不可达)
+// 注意「系统状态」(/dashboard) 与「组织与成员」(/organization-contacts) 是两视角共享，
+// 不在此列表内。
+export const PLATFORM_ONLY_MODULE_KEYS = ['system', 'monitor'];
 
 // Tenant-exclusive business modules: assignable only to tenant admins; hidden from the platform scope
 // (mirrors the product's platformHidden business capabilities — 安全策略/智能体中心).
@@ -231,8 +253,10 @@ function route(href?: string, featureId?: string): RouteEntry {
 }
 
 export const SUBMODULE_ROUTE_MAP: Record<string, RouteEntry> = {
-  // ---- monitor ----
-  'monitor-dashboard': route('/dashboard', 'system-status'),
+  // ---- systemStatus (both scopes) ----
+  'system-status': route('/dashboard', 'system-status'),
+
+  // ---- monitor (platform-only) ----
   'monitor-infrastructure': route('/monitoring/infrastructure', 'monitor-infrastructure'),
   'monitor-mailflow': route('/monitoring/mailflow'),
   'monitor-security': route('/monitoring/security'),
@@ -268,6 +292,8 @@ export const SUBMODULE_ROUTE_MAP: Record<string, RouteEntry> = {
   'tenant-management': route('/tenants', 'tenant-management'),
   'platform-security-policy': route('/system/platform-security', 'platform-security-policy'),
   forwarding: route('/mail-routing', 'forwarding'),
+
+  // ---- organization (both scopes) ----
   contacts: route('/organization-contacts', 'contacts'),
 
   // ---- userPermission ----

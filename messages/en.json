@@ -9870,8 +9870,9 @@
       "network": "Network Settings",
       "dataManagement": "Data Management",
       "authorizationUpgrade": "Authorization & Upgrade",
-      "userPermission": "User & Permissions",
+      "userPermission": "Admins & Permissions",
       "rolePermission": "Role Permissions",
+      "organization": "Organization & Members",
       "systemLogs": "System Logs"
     }
   },
