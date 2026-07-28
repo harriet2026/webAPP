@@ -319,7 +319,7 @@ export function recipientActionsForStatus(status: string, hasObjectId: boolean):
     // (see hooks/use-recipient-disposition.tsx's dispatchQuarantineOrBlock).
     case 'pending_review':
     case 'audited':
-      return hasObjectId ? ['deliver', 'quarantine', 'block', 'discard', 'recall'] : ['recall'];
+      return hasObjectId ? ['deliver', 'quarantine', 'block', 'discard'] : [];
     default:
       // blocked/rejected/discarded (no original content) -- not operable,
       // per spec §5.3's canOperate=✗ row.
