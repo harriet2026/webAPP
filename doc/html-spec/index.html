@@ -161,8 +161,8 @@
   <h1>HTML Spec 索引</h1>
 
   <div class="overview">
-    <div class="overview-item"><div class="num">46</div><div class="label">功能模块总数</div></div>
-    <div class="overview-item"><div class="num">38</div><div class="label">已生成</div></div>
+    <div class="overview-item"><div class="num">47</div><div class="label">功能模块总数</div></div>
+    <div class="overview-item"><div class="num">39</div><div class="label">已生成</div></div>
     <div class="overview-item"><div class="num">8</div><div class="label">待生成</div></div>
     <div class="overview-item"><div class="num">83%</div><div class="label">完成率</div></div>
   </div>
@@ -241,7 +241,7 @@
         <span class="chevron"></span>
         <span class="l1-icon">🛡</span>
         <h2>过滤规则</h2>
-        <span class="l1-stats"><span class="done-count">18</span> 已完成 / 18 总计</span>
+        <span class="l1-stats"><span class="done-count">19</span> 已完成 / 19 总计</span>
       </div>
     </summary>
     <div class="l1-body">
@@ -339,7 +339,7 @@
           </summary>
           <div class="card-detail">
             <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独立页）</p>
-            <p>spec: RBL检测需求文档.md</p>
+            <p>spec: RBL���测需求文档.md</p>
             <p>组件: connection-layer-page.tsx (renderRblConfig + greylistDialog)</p>
             <p>7 个交互层级（L0 内嵌 + L1–L6 子文件）· <a href="filter-rules-pipeline-rbl-filter/layer-5-rbl-validation.html">服务器/超时校验</a> · <a href="filter-rules-pipeline-rbl-filter/layer-6-rbl-delete-confirm.html">删除确认</a></p>
             <p>5 产品形态 × 2 管理员视角矩阵 · D1–D13 / Q1–Q9 已逐项复核</p>
@@ -374,7 +374,7 @@
           <span class="chevron"></span>
           <h3>阶段2 · 收发信人策略</h3>
           <span class="l2-tag">priority 2xxx</span>
-          <span class="l2-count">5 个模块</span>
+          <span class="l2-count">6 个模块</span>
         </div>
       </summary>
       <div class="l2-content">
@@ -395,6 +395,23 @@
             <p>组件: identity-strategy-page.tsx（renderAuthSpoofingConfig）</p>
             <p>子文件: <a href="filter-rules-identity-auth-spoofing/layer-1-observe-mode.html">观察模式</a> / <a href="filter-rules-identity-auth-spoofing/layer-2-check-disabled.html">检查项禁用</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-auth-protocol-tabs.html">协议Tab</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-template-dialog.html">模板Dialog</a> / <a href="filter-rules-identity-auth-spoofing/layer-2-custom-template.html">自定义模板</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-module-disabled.html">模块禁用态</a></p>
             <p>预览可交互 · 5 组件 / 6 交互层级 · 10 项差异 / 10 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-dkim-outbound-signing/index.html">DKIM 外发签名（认证协议检查子卡）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-28</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /security/pipeline（阶段2 · authSpoofing 抽屉 → 认证协议检查子卡，priority 2001）</p>
+            <p>组件: auth-spoofing/DkimOutboundSigningSection.tsx（宿主 ProtocolChecksSection.tsx，复用 dkim/dkim-manage-drawer.tsx）</p>
+            <p>接口: lib/api/dkim.ts（generate/import/verify-dns/status/delete）+ tenants.ts（发信域名）</p>
+            <p>截图式（只读）· 域名×签名状态表 + 管理抽屉 · 5×2 形态/角色矩阵 · 4 项差异 / 3 项需确认 · 业务数据态因后端 18080 离线标注无法验证，附环境实拍证据</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -459,7 +476,7 @@
           </summary>
           <div class="card-detail">
             <p>路由: /filter-rules/pipeline（阶段2收发信人策略抽屉）</p>
-            <p>spec: 策略流水线需求文档.md / 发信人黑白名单模块需求文档.md</p>
+            <p>spec: 策略流水线需求文档.md / 发信人黑白名单��块需求文档.md</p>
             <p>组件: strategy-pipeline-page.tsx + identity-strategy-page.tsx + sender-filter-module.tsx</p>
           </div>
         </details>
@@ -1162,7 +1179,7 @@
           <summary>
             <div class="card-summary">
               <span class="chevron"></span>
-              <a class="card-title" href="component-phishing-detection-agent/index.html">钓鱼邮件检测智能体（AI 同步 · Stage 4.0）</a>
+              <a class="card-title" href="component-phishing-detection-agent/index.html">钓鱼邮件检测智��体（AI 同步 · Stage 4.0）</a>
               <span class="badge badge-done">✅</span>
               <span class="card-version-badge">v1</span>
               <span class="card-generated-at">2026-07-22</span>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DKIM 外发签名 - HTML 规格说明</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --background: #f7f8fa;
+      --foreground: #172033;
+      --card: #ffffff;
+      --muted: #f1f3f7;
+      --muted-foreground: #64748b;
+      --border: #dbe1ea;
+      --danger: #b42318;
+      --danger-bg: #fff1f0;
+      --warning: #9a6700;
+      --warning-bg: #fff8db;
+      --success: #16794a;
+      --radius: 10px;
+      --font-sans: "Geist", "Noto Sans SC", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      max-width: 1440px; margin: 0 auto; padding: 32px;
+      background: var(--background); color: var(--foreground);
+      font: 14px/1.65 var(--font-sans);
+    }
+    a { color: var(--primary); }
+    code { font-family: var(--font-mono); background: var(--muted); padding: 1px 5px; border-radius: 4px; }
+    h1, h2, h3, h4 { line-height: 1.35; }
+    .spec-header, .toc, section {
+      margin-bottom: 24px; padding: 24px;
+      border: 1px solid var(--border); border-radius: var(--radius); background: var(--card);
+    }
+    .spec-header h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    section > h2 {
+      margin: 0 0 18px; padding-bottom: 8px;
+      border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 20px;
+    }
+    h3 { margin: 22px 0 10px; font-size: 17px; }
+    h4 { margin: 16px 0 8px; font-size: 15px; }
+    .meta-table, .spec-table, .matrix-table { width: 100%; margin: 12px 0; border-collapse: collapse; }
+    .meta-table th, .meta-table td, .spec-table th, .spec-table td, .matrix-table th, .matrix-table td {
+      padding: 9px 10px; border: 1px solid var(--border); text-align: left; vertical-align: top;
+    }
+    .meta-table th, .spec-table th, .matrix-table th { background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .meta-table th { width: 180px; }
+    .matrix-table td:not(:first-child), .matrix-table th:not(:first-child) { text-align: center; }
+    .toc ul {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 8px 20px; margin: 0; padding-left: 20px;
+    }
+    .toc a { text-decoration: none; }
+    .interaction-preview {
+      margin: 20px 0; padding: 18px;
+      border: 1px solid var(--border); border-left: 4px solid var(--primary);
+      border-radius: var(--radius); background: var(--card);
+    }
+    .interaction-preview > h3 { margin-top: 0; color: var(--primary); }
+    .preview-sequence {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px; align-items: start;
+    }
+    .sequence-label {
+      display: inline-block; margin-bottom: 6px; padding: 2px 8px; border-radius: 999px;
+      background: var(--primary); color: #fff; font-size: 12px; font-weight: 650;
+    }
+    .state-meta {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px 16px; margin: 10px 0 16px; padding: 12px; border-radius: 8px; background: var(--muted);
+    }
+    .state-meta dt { font-weight: 650; }
+    .state-meta dd { margin: 0; }
+    .screenshot-figure { margin: 16px 0 22px; text-align: center; }
+    .screenshot-figure img {
+      display: block; max-width: 100%; height: auto; margin: 0 auto;
+      border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 3px 14px rgb(15 23 42 / 10%);
+    }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .legend { padding: 12px 14px; border-radius: 8px; background: var(--muted); }
+    .diff-section { border-left: 4px solid var(--danger); background: var(--danger-bg); }
+    .question-section { border-left: 4px solid var(--warning); background: var(--warning-bg); }
+    .status-done { color: var(--success); font-weight: 650; }
+    .status-open { color: var(--danger); font-weight: 650; }
+    .status-na { color: var(--warning); font-weight: 650; }
+    .source-note { padding: 12px 14px; border-left: 4px solid var(--primary); background: var(--muted); }
+    .warn-note { padding: 12px 14px; border-left: 4px solid var(--warning); background: var(--warning-bg); border-radius: 6px; }
+    .ascii-flow {
+      background: var(--muted); border: 1px solid var(--border); border-radius: 8px;
+      padding: 16px; font-family: var(--font-mono); font-size: 13px; white-space: pre; overflow-x: auto;
+    }
+    @media (max-width: 760px) {
+      body { padding: 12px; }
+      .spec-header, .toc, section { padding: 16px; }
+      .table-scroll { overflow-x: auto; }
+      .meta-table th { width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>DKIM 外发签名 规格说明</h1>
+    <div class="table-scroll">
+      <table class="meta-table">
+        <tbody>
+          <tr><th>规格版本</th><td>v1</td></tr>
+          <tr><th>生成日期</th><td>2026-07-28</td></tr>
+          <tr><th>所属模块</th><td>策略流水线 → 阶段2 收发信人策略 → 身份认证与仿冒检测 → <strong>认证协议检查</strong> 子卡</td></tr>
+          <tr><th>页面路由</th><td><code>/zh/security/pipeline</code>（阶段2 · authSpoofing 抽屉内嵌 <code>AuthSpoofingPage</code>）</td></tr>
+          <tr><th>webapp 源码</th><td>
+            <code>src/components/security/auth-spoofing/DkimOutboundSigningSection.tsx</code><br>
+            宿主：<code>src/components/security/auth-spoofing/ProtocolChecksSection.tsx</code><br>
+            抽屉：<code>src/components/dkim/dkim-manage-drawer.tsx</code><br>
+            接口：<code>src/lib/api/dkim.ts</code>、<code>src/lib/api/tenants.ts</code>
+          </td></tr>
+          <tr><th>webapp commit</th><td><code>9791661</code></td></tr>
+          <tr><th>需求依据</th><td>用户当前描述（“对 DKIM 外发签名功能生成 html spec”）+ 本仓库当前实现</td></tr>
+          <tr><th>历史对话</th><td>已使用：本会话前序轮次实现了该子卡、mock 路由、i18n 与测试</td></tr>
+          <tr><th>对照 spec</th><td><code>not-used</code>（仅结构参考同模块 <code>filter-rules-identity-auth-spoofing</code>）</td></tr>
+          <tr><th>验证环境</th><td>Chromium · <code>/zh</code> · 蓝色主题 · 1473×847 · AI版·多租户 · 租户管理员视角</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="source-note">
+      webapp 同时是原型与实际项目。本规格保留交互预览，但预览仅由真实状态截图和对应信息组成，
+      不包含可操作控件、事件或脚本。元素/字段/校验/API 信息取自当前源码，权限与形态差异取自
+      <code>useTenant / usePermission / useProductForm</code> 的实际判定分支。
+    </p>
+    <p class="warn-note">
+      <strong>验证限制（重要）：</strong>当前运行的 webapp 通过服务端代理向后端
+      <code>127.0.0.1:18080</code> 取数，而该后端在本环境未启动（日志持续 <code>ECONNREFUSED</code>）。
+      因此 <code>/tenants</code>、<code>/tenants/:id/domains</code>、<code>/dkim/keys</code> 等数据请求无法返回，
+      租户列表为空、平台视角被重定向到 <code>/tenants</code>、DKIM 页面停留在加载态。凡依赖真实数据或抽屉
+      写操作的状态本次<strong>无法在浏览器安全验证</strong>，均按技能要求标注“无法验证 · 后端离线”，
+      不伪造截图；其余信息以源码为事实源并注明。见 <a href="#questions">Q-001</a>。
+    </p>
+  </header>
+
+  <nav class="toc" aria-label="规格目录">
+    <h2>目录</h2>
+    <ul>
+      <li><a href="#form-role-matrix">1. 产品形态与角色</a></li>
+      <li><a href="#overview">2. 功能概述</a></li>
+      <li><a href="#layout">3. 位置与布局</a></li>
+      <li><a href="#components">4. 截图式交互预览</a></li>
+      <li><a href="#api">5. 数据与 API</a></li>
+      <li><a href="#logic">6. 业务逻辑与权限</a></li>
+      <li><a href="#exceptions">7. 异常与边界</a></li>
+      <li><a href="#related">8. 关联功能模块</a></li>
+      <li><a href="#diffs">9. 差异标注</a></li>
+      <li><a href="#questions">10. 需确认事项</a></li>
+      <li><a href="#history">11. 版本历史</a></li>
+    </ul>
+  </nav>
+
+  <section id="form-role-matrix">
+    <h2>1. 产品形态 × 角色差异矩阵</h2>
+    <p>依据 <code>DkimOutboundSigningSectionInner</code> 的门控：<code>canQuery = (isSystemAdmin || isTenantAdmin) &amp;&amp; effectiveTenantId != null &amp;&amp; !platformWithoutTenant</code>；其中
+      <code>platformWithoutTenant = capabilities.multiTenant &amp;&amp; isSystemAdmin &amp;&amp; effectiveTenantId == null</code>。
+      子卡本身对所有形态渲染，作用域由“是否已确定租户”决定。</p>
+    <div class="table-scroll">
+      <table class="matrix-table">
+        <thead>
+          <tr><th>角色</th><th>AI-单</th><th>传统-单</th><th>云-多</th><th>AI-多</th><th>传统-多</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>平台管理员</th><td>—</td><td>—</td><td>✅*</td><td>✅*</td><td>✅*</td></tr>
+          <tr><th>租户管理员</th><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="legend">
+      ✅ 显示且可编辑（可管理本租户签名）　🔒 显示但只读　❌ 隐藏　— 无此角色　? 无法验证<br>
+      <strong>*</strong> 平台管理员在多租户形态下须先在页面顶部选定租户；未选租户时子卡显示引导空态
+      <code>dkimOutbound.selectTenant</code> 且不发起查询。注：阶段2 流水线路由对“平台视角 + 多租户 + 无作用域”整页重定向到
+      <code>/tenants</code>（<code>PolicyPipelinePage</code> 第 329–334 行），因此平台管理员通常在选定租户/进入租户上下文后才实际看到本子卡。
+    </p>
+  </section>
+
+  <section id="overview">
+    <h2>2. 功能概述</h2>
+    <p>
+      本子卡为<strong>本租户发信域名</strong>管理 DKIM 外发签名密钥：生成/导入私钥、发布 DNS 公钥、校验 DNS、
+      设为当前生效密钥、删除。它与同卡 SPF/DKIM/DMARC/PTR「入站校验」页签<strong>语义正交</strong>——
+      入站页签判定收到邮件的认证结果并决定动作；本子卡管理经本网关<strong>外发</strong>邮件的签名密钥。
+      因此本子卡走 DKIM 自有接口与内存态，不接入 <code>AuthSpoofingConfig</code> 的统一保存流。
+    </p>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead><tr><th>功能点</th><th>说明</th><th>对应区域/状态</th><th>依据</th></tr></thead>
+        <tbody>
+          <tr><td>发信域名 × 签名状态列表</td><td>列出本租户全部发信域名，每行显示当前启用 selector + DNS 状态徽章 / 待验证 / 未签名</td><td><a href="#state-default">4.1 默认态</a></td><td>源码 + i18n</td></tr>
+          <tr><td>管理入口</td><td>每行「管理」按钮打开 <code>DkimManageDrawer</code></td><td><a href="#state-drawer">4.4 抽屉</a></td><td>源码</td></tr>
+          <tr><td>生成新密钥</td><td>输入 selector/算法/备注 → 生成 → 一次性展示明文私钥</td><td><a href="#state-drawer">4.4 抽屉</a></td><td><code>generateDkimKey</code></td></tr>
+          <tr><td>导入私钥</td><td>粘贴 PEM + selector → 导入</td><td><a href="#state-drawer">4.4 抽屉</a></td><td><code>importDkimKey</code></td></tr>
+          <tr><td>发布/校验 DNS</td><td>展示待发布 TXT 记录名与记录值，可复制；「重新校验」回填 DNS 状态</td><td><a href="#state-drawer">4.4 抽屉</a></td><td><code>verifyDkimDns</code></td></tr>
+          <tr><td>设为当前 / 删除</td><td>激活某 selector 或删除（删除前须切走当前 selector）</td><td><a href="#state-drawer">4.4 抽屉</a></td><td><code>setDkimKeyStatus / deleteDkimKey</code></td></tr>
+          <tr><td>作用域门控</td><td>平台管理员未选租户显示引导空态；租户管理员直接作用于本租户</td><td><a href="#state-select-tenant">4.2 选租户引导</a></td><td>源码门控</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="layout">
+    <h2>3. 位置与布局</h2>
+    <p>
+      本子卡是「认证协议检查」模块内的<strong>可折叠区块</strong>（默认展开），渲染在 SPF/DKIM/DMARC/PTR 协议页签
+      内容<strong>下方</strong>。容器为 <code>rounded-lg border bg-muted/10</code>；头部为整宽按钮，含折叠箭头
+      <code>ChevronDown</code>（展开旋转 180°）、<code>KeyRound</code> 图标、标题
+      <code>DKIM 外发签名</code> 与副标题描述；展开区为域名状态表格。
+    </p>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead><tr><th>区域</th><th>位置</th><th>内容</th><th>尺寸/布局</th><th>响应式</th></tr></thead>
+        <tbody>
+          <tr><td>A 折叠头</td><td>子卡顶部</td><td>箭头 + KeyRound + 标题/描述</td><td><code>flex items-center gap-2 px-4 py-3</code>，整宽点击</td><td>描述 <code>truncate</code>，窄屏单行省略</td></tr>
+          <tr><td>B 内容区</td><td>头部下方</td><td>引导空态 / 加载态 / 无域名空态 / 域名状态表</td><td><code>px-4 pb-4</code></td><td>表格外层 <code>overflow-hidden rounded-md border</code></td></tr>
+          <tr><td>C 状态表</td><td>内容区</td><td>3 列：发信域名 / 签名状态 / 操作</td><td>操作列 <code>w-[120px] text-right</code></td><td>窄屏水平滚动</td></tr>
+          <tr><td>D 管理抽屉</td><td>右侧 Sheet（覆盖层）</td><td><code>DkimManageDrawer</code></td><td>由抽屉组件自管</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>DKIM 签名生命周期（预渲染流程，非脚本）</h3>
+    <div class="ascii-flow">发信域名
+   │  管理
+   ▼
+生成/导入密钥 ──►  待发布 DNS TXT（dns_status=unverified）
+   │                        │ 在 DNS 处发布 记录名/记录值
+   │                        ▼
+   │                 重新校验 verify-dns
+   │                        ├─ verified   ✅ 已验证
+   │                        ├─ mismatch   不匹配
+   │                        ├─ not_found  未找到
+   │                        └─ dns_error  DNS 错误
+   ▼
+设为当前 (is_active=true) ──►  该域“已启用 selector：xxx” + DNS 状态徽章
+                                    │
+                        （删除须先切换到其它 selector）</div>
+  </section>
+
+  <section id="components">
+    <h2>4. 截图式交互预览</h2>
+    <p class="warn-note">
+      因后端 <code>127.0.0.1:18080</code> 离线，下列依赖数据的默认态/空态/加载态与抽屉写操作
+      <strong>本次无法在浏览器安全获得真实渲染截图</strong>。为不伪造，本节以“环境实拍证据 + 源码级状态说明”记录：
+      环境证据展示当前 webapp 的真实加载态；每个业务状态的元素、触发路径、结果与 API 均据源码给出并标注验证状态。
+    </p>
+
+    <article class="interaction-preview" id="env-evidence">
+      <h3>4.0 环境实拍证据（后端离线）</h3>
+      <dl class="state-meta">
+        <div><dt>触发路径</dt><dd>登录后访问 DKIM 相关页面 / 租户中心</dd></div>
+        <div><dt>路由</dt><dd><code>/zh/system/dkim</code>、<code>/zh/tenants</code></dd></div>
+        <div><dt>视口</dt><dd>1473 × 847</dd></div>
+        <div><dt>形态/角色</dt><dd>AI版·多租户 / 租户管理员（顶栏“正在以租户管理员身份操作”）</dd></div>
+        <div><dt>验证依据</dt><dd>浏览器实拍；服务端日志 <code>ECONNREFUSED 127.0.0.1:18080</code></dd></div>
+      </dl>
+      <div class="preview-sequence">
+        <figure class="screenshot-figure">
+          <span class="sequence-label">证据 1 / DKIM 总览加载态</span>
+          <img src="./screenshots/env-dkim-overview.png" alt="DKIM 总览页因后端离线停留在加载态">
+          <figcaption>共享 DKIM UI 的实拍：数据请求无响应，卡片区持续 loading 动画（同一 <code>DkimManageDrawer</code> 所在页面）</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <span class="sequence-label">证据 2 / 租户列表空态</span>
+          <img src="./screenshots/env-tenants-empty.png" alt="租户中心因后端离线列表为空、统计卡加载中">
+          <figcaption>租户列表为空，导致平台视角进入阶段2 流水线时被重定向到本页（无从选定租户）</figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <article class="interaction-preview" id="state-default">
+      <h3>4.1 域名状态表 — 默认态（源码级）</h3>
+      <dl class="state-meta">
+        <div><dt>触发路径</dt><dd>阶段2 抽屉打开 authSpoofing → 认证协议检查 → 展开「DKIM 外发签名」（默认 <code>open=true</code>）</dd></div>
+        <div><dt>前置条件</dt><dd>已确定租户作用域（租户管理员，或平台管理员已选租户）且该租户有发信域名</dd></div>
+        <div><dt>可观察结果</dt><dd>3 列表格逐行渲染域名与签名状态</dd></div>
+        <div><dt>验证状态</dt><dd><span class="status-na">无法验证 · 后端离线</span>（元素据源码）</dd></div>
+      </dl>
+      <h4>UI 元素</h4>
+      <div class="table-scroll">
+        <table class="spec-table">
+          <thead>
+            <tr><th>#</th><th>元素</th><th>文案/图标</th><th>值/来源</th><th>状态判定</th><th>交互结果</th><th>形态/角色差异</th><th>i18n key</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>列头·发信域名</td><td>发信域名</td><td>—</td><td>—</td><td>—</td><td>[Base]</td><td><code>authSpoofing.dkimOutbound.domainCol</code></td></tr>
+            <tr><td>2</td><td>列头·签名状态</td><td>签名状态</td><td>—</td><td>—</td><td>—</td><td>[Base]</td><td><code>…statusCol</code></td></tr>
+            <tr><td>3</td><td>列头·操作</td><td>操作</td><td>—</td><td>—</td><td>—</td><td>[Base]</td><td><code>…actionsCol</code></td></tr>
+            <tr><td>4</td><td>单元格·域名</td><td><code>mono</code> 文本</td><td><code>TenantDomain.domain</code></td><td>—</td><td>—</td><td>[Base]</td><td>—</td></tr>
+            <tr><td>5</td><td>状态·已启用</td><td>已启用 selector：{selector} + DNS 徽章</td><td>该域 <code>is_active</code> 的密钥</td><td>存在 active key</td><td>—</td><td>[Base]</td><td><code>…activeSelector</code> + <code>DkimStatusBadge</code></td></tr>
+            <tr><td>6</td><td>状态·待验证</td><td>待验证（secondary 徽章）</td><td>有密钥但无 active</td><td><code>hasKey &amp;&amp; !active</code></td><td>—</td><td>[Base]</td><td><code>…pendingVerify</code></td></tr>
+            <tr><td>7</td><td>状态·未签名</td><td>未签名（outline 徽章）</td><td>该域无任何密钥</td><td><code>!hasKey</code></td><td>—</td><td>[Base]</td><td><code>…notSigned</code></td></tr>
+            <tr><td>8</td><td>行操作·管理</td><td><code>Settings2</code> + 管理</td><td>—</td><td>outline / sm</td><td>点击 → <code>setManageDomain(domain)</code> 打开抽屉</td><td>[Base]</td><td><code>…manage</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="interaction-preview" id="state-select-tenant">
+      <h3>4.2 平台管理员未选租户 — 引导空态（源码级）</h3>
+      <dl class="state-meta">
+        <div><dt>触发路径</dt><dd>多租户形态 + 平台视角 + <code>effectiveTenantId == null</code></dd></div>
+        <div><dt>可观察结果</dt><dd>虚线边框提示块，不发起任何查询（<code>enabled=false</code>）</dd></div>
+        <div><dt>恢复方式</dt><dd>在页面顶部选定一个租户</dd></div>
+        <div><dt>验证状态</dt><dd><span class="status-na">无法验证 · 后端离线</span></dd></div>
+      </dl>
+      <div class="table-scroll">
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>文案</th><th>i18n key</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>引导提示</td><td>请先在页面顶部选择一个租户，再管理其 DKIM 外发签名。</td><td><code>…selectTenant</code></td><td>虚线边框居中提示，无表格</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="interaction-preview" id="state-empty-loading">
+      <h3>4.3 加载态 / 无域名空态（源码级）</h3>
+      <dl class="state-meta">
+        <div><dt>触发路径</dt><dd>查询进行中 → 加载态；查询完成且 <code>domains.length === 0</code> → 空态</dd></div>
+        <div><dt>可观察结果</dt><dd>加载态为居中 <code>Loader2</code> 旋转 + 文案；空态为虚线提示块</dd></div>
+        <div><dt>验证状态</dt><dd>加载态：<span class="status-done">环境实拍旁证</span>（见 4.0 证据1 的同类 loading）；空态：<span class="status-na">无法验证 · 后端离线</span></dd></div>
+      </dl>
+      <div class="table-scroll">
+        <table class="spec-table">
+          <thead><tr><th>状态</th><th>文案</th><th>i18n key</th></tr></thead>
+          <tbody>
+            <tr><td>加载中</td><td>加载中…</td><td><code>…loading</code></td></tr>
+            <tr><td>无域名</td><td>该租户暂无发信域名，请先在「租户域名管理」中添加域名后再配置签名。</td><td><code>…noDomains</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="interaction-preview" id="state-drawer">
+      <h3>4.4 DKIM 管理抽屉 — 打开态与操作（源码级）</h3>
+      <dl class="state-meta">
+        <div><dt>触发路径</dt><dd>默认态 → 某行「管理」→ <code>DkimManageDrawer(open, tenantId, domain)</code></dd></div>
+        <div><dt>前置条件</dt><dd><code>manageDomain != null &amp;&amp; effectiveTenantId != null</code></dd></div>
+        <div><dt>关闭副作用</dt><dd>关闭时 <code>invalidateQueries(['dkim-keys'])</code>，刷新子卡状态列</dd></div>
+        <div><dt>验证状态</dt><dd><span class="status-na">无法验证 · 后端离线</span>（字段/校验/接口据源码）</dd></div>
+      </dl>
+      <h4>字段、按钮与校验</h4>
+      <div class="table-scroll">
+        <table class="spec-table">
+          <thead><tr><th>字段/按钮</th><th>类型</th><th>默认值</th><th>校验</th><th>操作结果</th><th>数据/API</th></tr></thead>
+          <tbody>
+            <tr><td>标题</td><td>文本</td><td>DKIM 管理 — {domain}</td><td>—</td><td>—</td><td><code>dkim.manageTitle</code></td></tr>
+            <tr><td>+ 生成新密钥</td><td>Button</td><td>—</td><td>—</td><td>展开生成表单</td><td><code>dkim.generateNew</code></td></tr>
+            <tr><td>Selector（生成/导入）</td><td>Input</td><td>空</td><td><code>/^[a-z0-9-]{1,63}$/</code>，失败 toast <code>selectorInvalid</code></td><td>—</td><td>请求 <code>selector</code></td></tr>
+            <tr><td>算法</td><td>Select</td><td>RSA-2048</td><td>枚举 rsa-2048/3072/4096、ed25519</td><td>决定 <code>algorithm</code>+<code>key_size</code></td><td><code>dkim.algo.*</code></td></tr>
+            <tr><td>备注</td><td>Input</td><td>空</td><td>可选</td><td>—</td><td><code>note</code></td></tr>
+            <tr><td>生成提交</td><td>Button</td><td>—</td><td>selector 合法</td><td>成功 toast <code>generateSuccess</code> + 弹一次性私钥</td><td><code>POST /dkim/keys/generate</code></td></tr>
+            <tr><td>私钥 (PEM)（导入）</td><td>Textarea</td><td>空</td><td>非空，否则 toast <code>pemRequired</code></td><td>—</td><td><code>private_key_pem</code></td></tr>
+            <tr><td>导入提交</td><td>Button</td><td>—</td><td>selector 合法 + PEM 非空</td><td>成功 toast <code>importSuccess</code></td><td><code>POST /dkim/keys/import</code></td></tr>
+            <tr><td>一次性私钥弹窗</td><td>Dialog</td><td>明文 PEM</td><td>—</td><td>复制/下载 .pem；关闭后不可再看</td><td><code>privateKeyOnceWarning</code></td></tr>
+            <tr><td>待发布 DNS TXT</td><td>只读展示</td><td>记录名 / 记录值</td><td>—</td><td>可复制</td><td><code>dns_record_name / dns_record</code></td></tr>
+            <tr><td>重新校验</td><td>Button</td><td>—</td><td>—</td><td>回填 DNS 状态 + toast <code>dnsStatus.*</code></td><td><code>POST /dkim/keys/:id/verify-dns</code></td></tr>
+            <tr><td>设为当前</td><td>Button → 确认弹窗</td><td>—</td><td>确认 <code>activateConfirmDesc</code></td><td>成功 toast <code>activateSuccess</code></td><td><code>PUT /dkim/keys/:id/status</code></td></tr>
+            <tr><td>删除</td><td>Button → 确认弹窗</td><td>—</td><td>当前 selector 需先切换（<code>switchBeforeDelete</code>）；确认 <code>deleteConfirmDesc</code></td><td>成功 toast <code>deleteSuccess</code></td><td><code>DELETE /dkim/keys/:id</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section id="api">
+    <h2>5. 数据模型与 API 映射</h2>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead><tr><th>界面元素</th><th>前端字段</th><th>API</th><th>请求/响应字段</th><th>格式化/转换</th><th>依据</th></tr></thead>
+        <tbody>
+          <tr><td>发信域名列</td><td><code>domains</code></td><td><code>GET /tenants/:id/domains</code></td><td><code>TenantDomain[]</code>（id, domain, is_active…）</td><td>—</td><td><code>getTenantDomains</code></td></tr>
+          <tr><td>签名状态列</td><td><code>keyList.items</code></td><td><code>GET /dkim/keys?tenant_id&amp;page&amp;page_size</code></td><td><code>DkimKeyListResponse</code></td><td>按 <code>domain</code> 归并；<code>is_active</code>→activeKeyByDomain</td><td><code>listDkimKeys</code></td></tr>
+          <tr><td>DNS 徽章</td><td><code>active.dns_status</code></td><td>（随 keys 返回）</td><td><code>unverified/verified/mismatch/not_found/dns_error</code></td><td><code>DkimStatusBadge</code></td><td><code>dkim.dnsStatus.*</code></td></tr>
+          <tr><td>生成密钥</td><td>gen 表单</td><td><code>POST /dkim/keys/generate</code></td><td>req: tenant_id/domain/selector/algorithm/key_size/note；res: <code>DkimKeyWithPrivate</code>（含一次性 <code>private_key_pem</code>）</td><td>—</td><td><code>generateDkimKey</code></td></tr>
+          <tr><td>导入密钥</td><td>imp 表单</td><td><code>POST /dkim/keys/import</code></td><td>req: tenant_id/domain/selector/private_key_pem/note</td><td>—</td><td><code>importDkimKey</code></td></tr>
+          <tr><td>校验 DNS</td><td>—</td><td><code>POST /dkim/keys/:id/verify-dns</code></td><td>res: <code>VerifyDnsResult</code></td><td>回填 dns_status/dns_checked_at/observed</td><td><code>verifyDkimDns</code></td></tr>
+          <tr><td>设为当前</td><td>—</td><td><code>PUT /dkim/keys/:id/status</code></td><td>req: <code>{ is_active: true }</code></td><td>—</td><td><code>setDkimKeyStatus</code></td></tr>
+          <tr><td>删除</td><td>—</td><td><code>DELETE /dkim/keys/:id</code></td><td>—</td><td>—</td><td><code>deleteDkimKey</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="source-note">
+      前端在 dev 下由 <code>src/lib/mock/dispatcher.ts</code> 拦截以上路由（本会话新增 <code>/dkim/keys*</code> 与
+      <code>/tenants/:id/domains</code> mock + 内存态）。但生产/当前预览的<strong>服务端代理</strong>仍指向
+      <code>127.0.0.1:18080</code>，该后端离线导致数据无法返回（见验证限制与 Q-001）。
+    </p>
+  </section>
+
+  <section id="logic">
+    <h2>6. 业务逻辑、权限与交互结果</h2>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead><tr><th>场景</th><th>前置条件</th><th>操作</th><th>预期可观察结果</th><th>权限/租户边界</th><th>依据</th></tr></thead>
+        <tbody>
+          <tr><td>作用域判定</td><td>多租户 + 平台 + 未选租户</td><td>展开子卡</td><td>显示引导空态，<code>enabled=false</code> 不发查询</td><td>仅本租户可管理</td><td>源码</td></tr>
+          <tr><td>查询开启</td><td>租户管理员或平台已选租户</td><td>展开子卡</td><td>并行拉取 domains + keys</td><td><code>tenant_id</code> 作用域</td><td>源码</td></tr>
+          <tr><td>状态派生</td><td>keys 返回</td><td>—</td><td>按域名归并出 active / 待验证 / 未签名</td><td>—</td><td>源码 <code>useMemo</code></td></tr>
+          <tr><td>抽屉关闭刷新</td><td>抽屉内发生写操作</td><td>关闭抽屉</td><td><code>invalidateQueries(['dkim-keys'])</code> → 状态列刷新</td><td>—</td><td>源码</td></tr>
+          <tr><td>正交隔离</td><td>—</td><td>子卡任意写操作</td><td>不触发 AuthSpoofingConfig 保存流</td><td>—</td><td>源码注释/实现</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="exceptions">
+    <h2>7. 异常与边界状态</h2>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead><tr><th>状态</th><th>触发条件</th><th>页面表现</th><th>恢复方式</th><th>验证状态</th></tr></thead>
+        <tbody>
+          <tr><td>selector 非法</td><td>生成/导入时 selector 不匹配正则</td><td>toast <code>selectorInvalid</code>，不提交</td><td>修正后重试</td><td><span class="status-na">无法验证 · 后端离线</span>（正则据源码）</td></tr>
+          <tr><td>PEM 为空</td><td>导入未填 PEM</td><td>toast <code>pemRequired</code></td><td>粘贴 PEM 后重试</td><td><span class="status-na">无法验证 · 后端离线</span></td></tr>
+          <tr><td>删除当前密钥</td><td>删除处于 active 的 selector</td><td>提示 <code>switchBeforeDelete</code></td><td>先「设为当前」到其它 selector</td><td><span class="status-na">无法验证 · 后端离线</span></td></tr>
+          <tr><td>接口失败</td><td>任一 mutation 抛错</td><td>toast 显示 <code>e.message</code></td><td>重试</td><td><span class="status-na">无法验证 · 后端离线</span></td></tr>
+          <tr><td>后端离线</td><td>代理目标 18080 未启动</td><td>数据请求无响应，列表/加载态卡住</td><td>启动后端后重试</td><td><span class="status-done">已实拍（4.0）</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="related">
+    <h2>8. 关联功能模块</h2>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead><tr><th>模块</th><th>关系</th><th>数据/跳转</th><th>影响</th><th>依据</th></tr></thead>
+        <tbody>
+          <tr><td>认证协议检查（同卡入站页签）</td><td>同卡、语义正交</td><td>共处 <code>ProtocolChecksSection</code></td><td>互不写对方状态</td><td>源码</td></tr>
+          <tr><td>DKIM 总览页 <code>/system/dkim</code></td><td>跨租户查看同类密钥</td><td>共用 <code>DkimManageDrawer</code> 与 <code>/dkim/keys</code></td><td>共享密钥数据</td><td>源码</td></tr>
+          <tr><td>租户域名管理 <code>/tenants/:id/domains</code></td><td>域名来源</td><td><code>GET /tenants/:id/domains</code></td><td>无域名则空态引导去添加</td><td>源码</td></tr>
+          <tr><td>身份认证与仿冒检测（父模块）</td><td>宿主页面</td><td>阶段2 authSpoofing 抽屉</td><td>决定入口可见性/重定向</td><td>源码</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>9. 差异标注</h2>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead><tr><th>编号</th><th>目标要求</th><th>webapp 当前实现</th><th>状态</th><th>复核日期</th><th>验证依据</th><th>处理说明</th></tr></thead>
+        <tbody>
+          <tr><td>D-001</td><td>在认证协议检查下管理本租户 DKIM 外发签名</td><td>已实现独立可折叠子卡 + 复用 DkimManageDrawer</td><td class="status-done">已解决</td><td>2026-07-28</td><td>源码 + 单测（子卡3 + mock7 + 既有9 全绿）</td><td>本会话新增，v1</td></tr>
+          <tr><td>D-002</td><td>平台管理员与租户管理员均可管理</td><td><code>canQuery = (isSystemAdmin||isTenantAdmin)&amp;&amp;tenant!=null</code>；平台未选租户显示引导</td><td class="status-done">已解决</td><td>2026-07-28</td><td>源码门控 + 单测覆盖</td><td>形态/角色矩阵见 §1</td></tr>
+          <tr><td>D-003</td><td>与入站 DKIM 校验语义解耦</td><td>走 DKIM 独立接口/内存态，不入 AuthSpoofingConfig 保存流</td><td class="status-done">已解决</td><td>2026-07-28</td><td>源码实现与注释</td><td>正交设计</td></tr>
+          <tr><td>D-004</td><td>规格应含真实运行截图</td><td>后端 18080 离线，业务数据态无法真实呈现</td><td class="status-open">未解决</td><td>2026-07-28</td><td>服务端日志 ECONNREFUSED；4.0 实拍加载态</td><td>待后端可用后补拍，见 Q-001</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>10. 需确认事项</h2>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead><tr><th>编号</th><th>事项</th><th>原因</th><th>状态</th><th>复核日期</th><th>验证依据</th><th>处理说明</th></tr></thead>
+        <tbody>
+          <tr><td>Q-001</td><td>业务数据态（默认/空/抽屉/校验/激活/删除）的真实截图</td><td>预览环境后端 <code>127.0.0.1:18080</code> 未启动，数据请求 ECONNREFUSED</td><td class="status-na">无法验证</td><td>2026-07-28</td><td>服务端日志；<code>/system/dkim</code>、<code>/tenants</code> 实拍均为加载/空态</td><td>后端恢复后按 §4 逐状态补拍</td></tr>
+          <tr><td>Q-002</td><td>平台管理员进入阶段2 抽屉的完整路径（选定租户后是否解除重定向）</td><td>租户列表为空，无法在 UI 选定租户复现</td><td class="status-na">无法验证</td><td>2026-07-28</td><td><code>PolicyPipelinePage</code> 329–334 源码 + 实拍重定向</td><td>需后端返回租户后确认</td></tr>
+          <tr><td>Q-003</td><td>dev mock 与生产后端对 <code>/dkim/keys</code> 响应结构是否完全一致</td><td>当前仅前端 mock 可用，后端契约未在本环境联调</td><td class="status-open">待确认</td><td>2026-07-28</td><td>mock 依据 <code>DkimKey</code> 类型；后端未联通</td><td>联调时以后端为准</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="history">
+    <h2>11. 版本历史</h2>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead><tr><th>版本</th><th>日期</th><th>webapp commit</th><th>对照 spec commit</th><th>摘要</th></tr></thead>
+        <tbody>
+          <tr><td>v1</td><td>2026-07-28</td><td><code>9791661</code></td><td><code>not-used</code></td><td>初版：DKIM 外发签名子卡（域名×签名状态表、管理抽屉生成/导入/发布DNS/校验/激活/删除、作用域门控、形态×角色矩阵）。业务数据态受后端离线限制标注为无法验证，附环境实拍证据。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</body>
+</html>
