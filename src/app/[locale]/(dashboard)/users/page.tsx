@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { ColumnDef } from '@tanstack/react-table';
-import { Plus, Pencil, Trash2, Loader2, Search, AlertCircle, LockOpen, Power, LogOut, FileText, KeyRound, Filter } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Search, LockOpen, Power, LogOut, FileText, KeyRound, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTable } from '@/components/shared/data-table';
@@ -551,7 +551,8 @@ export default function UsersPage() {
     // wire — absent means normal (the pre-Plan-B default).
     {
       id: 'status',
-      header: t('users.status'),
+      // 与新建/编辑弹窗共用同一文案 key（账号状态），避免两处命名漂移。
+      header: t('users.accountStatus'),
       size: 90,
       cell: ({ row }) =>
         row.original.status === 'disabled' ? (
@@ -583,21 +584,6 @@ export default function UsersPage() {
           />
           {row.original.online ? t('users.online') : t('users.offline')}
         </span>
-      ),
-    },
-    {
-      accessorKey: 'must_change_password',
-      header: t('users.mustChangeColumnHeader'),
-      size: 100,
-      cell: ({ row }) => (
-        row.original.must_change_password ? (
-          <Badge variant="secondary" className="gap-1" data-testid={`user-must-change-badge-${row.original.id}`}>
-            <AlertCircle className="h-3 w-3" />
-            {t('users.mustChangeBadge')}
-          </Badge>
-        ) : (
-          <span className="text-muted-foreground">-</span>
-        )
       ),
     },
     {
@@ -894,15 +880,16 @@ export default function UsersPage() {
                   <Input {...form.register('name')} />
                   {fieldError('name')}
                 </div>
-                <div className="space-y-2">
-                  <Label>{t('users.phone')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
-                  <Input data-testid="new-admin-phone" {...form.register('phone')} />
-                  {fieldError('phone')}
-                </div>
+                {/* 字段顺序与列表列序保持一致：姓名 → 邮箱 → 手机号 */}
                 <div className="space-y-2">
                   <Label>{t('users.email')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
                   <Input type="email" {...form.register('email')} />
                   {fieldError('email')}
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('users.phone')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
+                  <Input data-testid="new-admin-phone" {...form.register('phone')} />
+                  {fieldError('phone')}
                 </div>
                 <div className="space-y-2">
                   <Label>
