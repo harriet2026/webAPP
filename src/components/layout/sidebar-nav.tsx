@@ -156,7 +156,6 @@ export function SidebarNav() {
   const gateRegistry = registryReady ? registry : FALLBACK_FEATURE_REGISTRY;
 
   const formVisible = capabilities ? new Set(visibleNavIds(gateRegistry, capabilities, viewer, grants)) : null;
-  console.log("[v0] sidebar gate", { viewer, registryReady, grants, registryLen: gateRegistry.length, phishingVisible: formVisible?.has("phishing-detection"), agentIds: gateRegistry.filter((f) => (f.href || "").startsWith("/agent-center")).map((f) => f.id) });
   // §1.1（admin-contacts html_spec）：多租户租户视角下「系统管理」分组改名
   // 「组织与成员」（demo nav.tenantSystemManagement，sidebar-nav.tsx:297-303）。
   const titleKeyOverrides =
