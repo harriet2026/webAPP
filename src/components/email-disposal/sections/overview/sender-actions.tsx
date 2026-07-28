@@ -15,6 +15,7 @@ import { Info, Loader2, MoreHorizontal, UserMinus, UserPlus } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +35,7 @@ import {
 import type { ApiRequestFn } from '@/lib/api/client';
 import { addSenderFilterRule } from '../../lib/disposal-detail-api';
 
-
+type ScopeValue = 'tenant' | 'global';
 
 interface SenderActionsProps {
   sender: string;
@@ -65,6 +66,8 @@ export function SenderActions({
 
   const [blacklistOpen, setBlacklistOpen] = useState(false);
   const [whitelistOpen, setWhitelistOpen] = useState(false);
+  const [blacklistScope, setBlacklistScope] = useState<ScopeValue>('tenant');
+  const [whitelistScope, setWhitelistScope] = useState<ScopeValue>('tenant');
   const [includeSubdomains, setIncludeSubdomains] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -83,7 +86,7 @@ export function SenderActions({
     setBusy(true);
     try {
       await addSenderFilterRule(sender, 'blacklist', apiRequest, {
-        scope: 'tenant',
+        scope: blacklistScope,
         includeSubdomains,
       });
       toast.success(t('blacklistDialog.success'));
@@ -100,7 +103,7 @@ export function SenderActions({
     setBusy(true);
     try {
       await addSenderFilterRule(sender, 'whitelist', apiRequest, {
-        scope: 'tenant',
+        scope: whitelistScope,
       });
       toast.success(t('whitelistDialog.success'));
       setWhitelistOpen(false);
@@ -175,10 +178,7 @@ export function SenderActions({
 
       {/* E1 -- 发信人加黑 */}
       <AlertDialog open={blacklistOpen} onOpenChange={(o) => !busy && setBlacklistOpen(o)}>
-        <AlertDialogContent
-          data-testid="email-disposal-overview-blacklist-dialog"
-          overlayClassName="bg-black/60"
-        >
+        <AlertDialogContent data-testid="email-disposal-overview-blacklist-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('blacklistDialog.title', { sender })}</AlertDialogTitle>
             <AlertDialogDescription>{t('blacklistDialog.desc')}</AlertDialogDescription>
@@ -186,7 +186,24 @@ export function SenderActions({
           <div className="space-y-3 py-1">
             <div className="space-y-1.5">
               <p className="text-sm font-medium">{t('blacklistDialog.scopeLabel')}</p>
-              <p className="text-sm text-muted-foreground">{t('blacklistDialog.scopeTenant')}</p>
+              <RadioGroup
+                value={blacklistScope}
+                onValueChange={(v) => setBlacklistScope(v as ScopeValue)}
+                className="flex gap-4"
+              >
+                <InteractiveSurface asChild variant="control" className="flex items-center gap-2 text-sm focus-within:ring-2 focus-within:ring-ring/60">
+                  <label>
+                    <RadioGroupItem value="tenant" data-testid="email-disposal-overview-blacklist-scope-tenant" />
+                    {t('blacklistDialog.scopeTenant')}
+                  </label>
+                </InteractiveSurface>
+                <InteractiveSurface asChild variant="control" className="flex items-center gap-2 text-sm focus-within:ring-2 focus-within:ring-ring/60">
+                  <label>
+                    <RadioGroupItem value="global" data-testid="email-disposal-overview-blacklist-scope-global" />
+                    {t('blacklistDialog.scopeGlobal')}
+                  </label>
+                </InteractiveSurface>
+              </RadioGroup>
             </div>
             <InteractiveSurface asChild variant="control" className="flex items-center gap-2 text-sm focus-within:ring-2 focus-within:ring-ring/60">
               <label>
@@ -220,17 +237,31 @@ export function SenderActions({
 
       {/* E2 -- 发信人加白 */}
       <AlertDialog open={whitelistOpen} onOpenChange={(o) => !busy && setWhitelistOpen(o)}>
-        <AlertDialogContent
-          data-testid="email-disposal-overview-whitelist-dialog"
-          overlayClassName="bg-black/60"
-        >
+        <AlertDialogContent data-testid="email-disposal-overview-whitelist-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('whitelistDialog.title', { sender })}</AlertDialogTitle>
             <AlertDialogDescription>{t('whitelistDialog.desc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-1.5 py-1">
             <p className="text-sm font-medium">{t('whitelistDialog.scopeLabel')}</p>
-            <p className="text-sm text-muted-foreground">{t('whitelistDialog.scopeTenant')}</p>
+            <RadioGroup
+              value={whitelistScope}
+              onValueChange={(v) => setWhitelistScope(v as ScopeValue)}
+              className="flex gap-4"
+            >
+              <InteractiveSurface asChild variant="control" className="flex items-center gap-2 text-sm focus-within:ring-2 focus-within:ring-ring/60">
+                <label>
+                  <RadioGroupItem value="tenant" data-testid="email-disposal-overview-whitelist-scope-tenant" />
+                  {t('whitelistDialog.scopeTenant')}
+                </label>
+              </InteractiveSurface>
+              <InteractiveSurface asChild variant="control" className="flex items-center gap-2 text-sm focus-within:ring-2 focus-within:ring-ring/60">
+                <label>
+                  <RadioGroupItem value="global" data-testid="email-disposal-overview-whitelist-scope-global" />
+                  {t('whitelistDialog.scopeGlobal')}
+                </label>
+              </InteractiveSurface>
+            </RadioGroup>
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={busy} data-testid="email-disposal-overview-whitelist-cancel">
