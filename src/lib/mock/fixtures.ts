@@ -483,6 +483,26 @@ export function mockBootstrap(): Bootstrap {
         grantable: true,
         href: "/agent-center/overview?agent=spoofing",
       },
+      // 处置设置（email-disposal/disposal-settings）。这里刻意保留生产
+      // registry.go 的 platformHidden=true 语义（与上面 phishing/spoofing 的
+      // mock-only false 约定相反）：处置设置是租户自有配置，多租户形态
+      // （cloud / ai-multi / legacy-multi）下 platform 视角必须看不到，只有
+      // 租户视角可见并可编辑；单租户形态（ai-single / legacy-single）因
+      // multiTenant=false，platformHidden 不触发，platform 视角仍可见。
+      // 之前 mock 漏登记此项，导致 visibility.ts 走「未登记=放行」兜底，使
+      // 处置设置在 platform 默认视角恒显示 —— 与生产语义及 parity_vectors 不符。
+      // 形状对齐 src/lib/product-form/__fixtures__/registry_for_test.json。
+      // href 必须与 constants.ts 的侧栏项完全一致，isItemVisibleByForm 靠 href 关联。
+      {
+        id: "disposal-settings",
+        visibility: "ALWAYS",
+        scope: "mixed",
+        platformAccess: "edit",
+        tenantAccess: "edit",
+        platformHidden: true,
+        grantable: false,
+        href: "/email-disposal/disposal-settings",
+      },
     ],
     grants: [],
   };
@@ -1831,7 +1851,7 @@ export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
   return mockAlertSmtpConfig();
 }
 
-// ─── 待处置邮件 / 举报待审（KPI）──────────────────────────────────────────────
+// ─── 待处置邮件 / ��报待审（KPI）──────────────────────────────────────────────
 // 隔离（disposal.total）：today 3 / 7d 11 / 30d 19；举报待审（inbound-audit.total）：
 // today 2 / 7d 6 / 30d 13。两个查询都不带范围参数，故按模块级 currentSystemStatusRange 分支。
 const DISPOSAL_PENDING: Record<SystemStatusRangeKey, number> = {
@@ -3250,7 +3270,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 发信人黑白名单（sender_filter，mock）
-// 数据结构对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
+// 数据结���对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
 //   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
 //   - metadata 携带 `{feature:'sender_filter', sender_config, ip_range, list_type}`，
@@ -3491,7 +3511,7 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
       }),
       sfGroupRule({
         id: 8108,
-        name: "批量营销特征",
+        name: "批量营销���征",
         type: "feature",
         created_at: "2024-01-12T00:00:00Z",
         member_count: 2,
@@ -5857,7 +5877,7 @@ function disposalBasis(seed: MockDisposalSeed) {
     action: seed.disposalBasisActionOverride ?? disposalAction(seed),
     // confidence 供 disposal-basis-config.ts 里 AI-* 策略的 hitDetail() 模板
     // 使用（如 AI-PHISH 的「置信度：{cf}%」），让 ThreatSummaryCard 的
-    // 「AI判定依据」行渲染出有意义的文案，而不是模板兜底的 "-"。
+    // 「AI判定依据」行渲染出有意义的文案，而���是模板兜底的 "-"。
     hit_values: { reason: seed.reason, score: String(seed.score), confidence: String(seed.score) },
     detection_tags: [`source:${seed.basis[0].toLowerCase()}`],
   };
