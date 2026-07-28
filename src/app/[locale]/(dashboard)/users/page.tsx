@@ -679,7 +679,7 @@ export default function UsersPage() {
             </Button>
             {/* GT-12315：原型行操作含「查看日志」——跳到操作日志页并按该账号
                 预过滤（keyword 与 admin-audit 的关键字过滤对齐）。必须渲染成真正的
-                <button>（而非 render=<Link/> 的 <a>），否则 U13 的
+                <button>（而��� render=<Link/> 的 <a>），否则 U13 的
                 button[title="查看日志"] 定位不到——这正是此前「查看日志按钮不存在」的根因。 */}
             <Button
               variant="ghost"
@@ -1062,7 +1062,10 @@ export default function UsersPage() {
   }
 
   return (
-    <PageShell>
+    // GT: 页面底色与「邮件安全总览」页对齐——沿用其 PageShell 的底色处理
+    // （浅灰 #F8F9FB + 32px 外扩阴影抵消父容器 padding，让灰底铺满内容区；
+    // 深色模式回落到 --background）。避免各页底色逐页漂移。
+    <PageShell className="min-h-full bg-[#F8F9FB] shadow-[0_0_0_32px_#F8F9FB] dark:bg-background dark:shadow-[0_0_0_32px_var(--background)]">
       {/* GT: 对齐原型页面框架——页头只保留标题 + 副标题（无 eyebrow），
           「新建」按钮下沉到账号页签的工具条右侧（见 accountsTab）。 */}
       <PageHeader
