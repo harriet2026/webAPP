@@ -10,7 +10,7 @@ import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
-import { visibleNavIds, isNavItemAllowed } from './sidebar-visibility';
+import { visibleNavIds, isNavItemAllowed, isGroupVisible } from './sidebar-visibility';
 import { VersionFooter } from './version-footer';
 
 interface SidebarNavItemProps {
@@ -42,7 +42,10 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
 
   const filteredChildren = item.children?.filter(isItemAllowed);
 
-  if (hasChildren && filteredChildren?.length === 0) {
+  // A group collapses when none of its children survive the gate — this is the
+  // explicit contract that hides the「安全策略」group from the multi-tenant
+  // platform admin (both children are platformHidden). See isGroupVisible.
+  if (hasChildren && !isGroupVisible(item, isItemAllowed)) {
     return null;
   }
 

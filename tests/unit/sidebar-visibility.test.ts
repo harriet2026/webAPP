@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { visibleNavIds, isItemVisibleByForm } from '@/components/layout/sidebar-visibility';
+import { visibleNavIds, isItemVisibleByForm, isGroupVisible, type GatedNavItem } from '@/components/layout/sidebar-visibility';
 import { sidebarNavItems, type NavItem } from '@/lib/constants';
 import registry from '@/lib/product-form/__fixtures__/registry_for_test.json';
 import type { FeatureDef } from '@/lib/product-form/resolve';
@@ -150,5 +150,89 @@ describe('isItemVisibleByForm (C1 regression: nav↔registry join by href, not n
     const item = leafNavItems().find((i) => i.id === 'password-policy')!;
     expect(item.href).toBe('/system/password-policy');
     expect(isItemVisibleByForm(item, featureRegistry, visible)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 「安全策略」(security) group hidden-contract lock.
+//
+// Contract: under EVERY multi-tenant form (cloud / ai-multi / legacy-multi)
+// the platform admin sees NO security children (both are platformHidden), and
+// therefore the whole group collapses; the tenant admin sees them. Under the
+// single-tenant forms platformHidden never triggers, so the platform admin
+// sees them. These tests fail loudly if a future change flips platformHidden,
+// adds a non-platformHidden child, or breaks the group-collapse rule.
+// ---------------------------------------------------------------------------
+describe('security group hidden-contract (platform hidden / tenant visible)', () => {
+  const SECURITY_CHILD_IDS = ['strategy-pipeline', 'group-policy'] as const;
+
+  const securityGroup = sidebarNavItems.find((i) => i.id === 'security')!;
+
+  it('the security group in the nav tree has exactly the two contract children', () => {
+    expect(securityGroup).toBeDefined();
+    expect(securityGroup.href).toBeUndefined(); // it is a group, not a leaf
+    expect(securityGroup.children?.map((c) => c.href)).toEqual([
+      '/security/pipeline',
+      '/security/groups',
+    ]);
+  });
+
+  const MULTI_FORMS: Array<[string, { ai: boolean; multiTenant: boolean; saas: boolean }]> = [
+    ['cloud', { ai: true, multiTenant: true, saas: true }],
+    ['ai-multi', { ai: true, multiTenant: true, saas: false }],
+    ['legacy-multi', { ai: false, multiTenant: true, saas: false }],
+  ];
+
+  for (const [form, caps] of MULTI_FORMS) {
+    it(`hides both security children from the platform viewer in ${form}`, () => {
+      const ids = visibleNavIds(featureRegistry, caps, 'platform', []);
+      for (const id of SECURITY_CHILD_IDS) expect(ids).not.toContain(id);
+    });
+
+    it(`shows both security children to the tenant viewer in ${form}`, () => {
+      const ids = visibleNavIds(featureRegistry, caps, 'tenant', []);
+      for (const id of SECURITY_CHILD_IDS) expect(ids).toContain(id);
+    });
+
+    it(`collapses the whole security group for the platform viewer in ${form}`, () => {
+      const visible = new Set(visibleNavIds(featureRegistry, caps, 'platform', []));
+      const gate = (child: GatedNavItem) => isItemVisibleByForm(child, featureRegistry, visible);
+      expect(isGroupVisible(securityGroup as GatedNavItem & { children?: GatedNavItem[] }, gate)).toBe(false);
+    });
+
+    it(`keeps the security group visible for the tenant viewer in ${form}`, () => {
+      const visible = new Set(visibleNavIds(featureRegistry, caps, 'tenant', []));
+      const gate = (child: GatedNavItem) => isItemVisibleByForm(child, featureRegistry, visible);
+      expect(isGroupVisible(securityGroup as GatedNavItem & { children?: GatedNavItem[] }, gate)).toBe(true);
+    });
+  }
+
+  const SINGLE_FORMS: Array<[string, { ai: boolean; multiTenant: boolean; saas: boolean }]> = [
+    ['ai-single', { ai: true, multiTenant: false, saas: false }],
+    ['legacy-single', { ai: false, multiTenant: false, saas: false }],
+  ];
+
+  for (const [form, caps] of SINGLE_FORMS) {
+    it(`shows both security children to the platform viewer in ${form} (platformHidden inert)`, () => {
+      const ids = visibleNavIds(featureRegistry, caps, 'platform', []);
+      for (const id of SECURITY_CHILD_IDS) expect(ids).toContain(id);
+    });
+  }
+});
+
+describe('isGroupVisible', () => {
+  it('is true for a leaf item (no children) regardless of the gate', () => {
+    expect(isGroupVisible({ children: undefined }, () => false)).toBe(true);
+    expect(isGroupVisible({ children: [] }, () => false)).toBe(true);
+  });
+
+  it('is true when at least one child passes the gate', () => {
+    const children: GatedNavItem[] = [{ id: 'a' }, { id: 'b' }];
+    expect(isGroupVisible({ children }, (c) => c.id === 'b')).toBe(true);
+  });
+
+  it('is false when every child fails the gate', () => {
+    const children: GatedNavItem[] = [{ id: 'a' }, { id: 'b' }];
+    expect(isGroupVisible({ children }, () => false)).toBe(false);
   });
 });
