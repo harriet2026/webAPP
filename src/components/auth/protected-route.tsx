@@ -18,18 +18,21 @@ export function ProtectedRoute({ children, requiredPermission }: ProtectedRouteP
   const pathname = usePathname();
   const t = useTranslations();
 
+  // Preview: product-form switcher is on — skip auth gate entirely.
+  const DEMO_BYPASS = true;
+
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!DEMO_BYPASS && !isLoading && !user) {
       const locale = pathname.split('/')[1] || 'zh';
       router.push(`/${locale}/login`);
     }
   }, [user, isLoading, router, pathname]);
 
-  if (isLoading) {
+  if (!DEMO_BYPASS && isLoading) {
     return <Loading />;
   }
 
-  if (!user) {
+  if (!DEMO_BYPASS && !user) {
     return null;
   }
 

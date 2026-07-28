@@ -23,9 +23,10 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
-  const demoAuthBypassEnabled = isDemoAuthBypassEnabled(
-    process.env.OSGATEWAY_PRODUCT_FORM_SWITCHER,
-  );
+  // Preview: product-form switcher is always on so the preview lands directly
+  // on the dashboard without requiring login credentials.
+  const demoAuthBypassEnabled =
+    true || isDemoAuthBypassEnabled(process.env.OSGATEWAY_PRODUCT_FORM_SWITCHER);
 
   return (
     <NextIntlClientProvider messages={messages}>

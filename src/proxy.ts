@@ -79,7 +79,9 @@ export default function proxy(request: NextRequest) {
   // Demo deployments explicitly opt into a login bypass by setting the same
   // server-side switch used to expose the product-form switcher to exactly
   // "true". Otherwise preserve the normal HttpOnly-token gate.
+  // Preview: product-form switcher is always on so the preview skips login.
   const hasAuth =
+    true ||
     isDemoAuthBypassEnabled(process.env.OSGATEWAY_PRODUCT_FORM_SWITCHER) ||
     !!request.cookies.get(AUTH_COOKIE)?.value;
 
