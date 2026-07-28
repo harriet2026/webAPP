@@ -170,6 +170,7 @@ import type { DisposalSettings } from '@/types/disposal-settings';
 import { GROUPS_PAGE_KEY } from '@/types/groups';
 import { GROUP_POLICY_PAGE_KEY } from '@/types/group-policy';
 import type { OpsDimension, OpsTopCount } from '@/lib/api/ops-top';
+import { rbacSubmodulesForScope, type RbacScope } from '@/lib/rbac/rbac-modules';
 
 export interface MockRequest {
   method: string;
@@ -266,6 +267,69 @@ const mockSecurityModules: Record<string, boolean> = {
   url_protection: true,
 };
 
+// ─── 角色（RBAC）mock 数据 ──────────────────────────────────────────────
+// 平台/租户两套内置角色。`_level` 仅用于本地生成权限矩阵，不属于 Role 线上
+// 字段，列表响应里会被剥离。真实后端按 GetEffectiveTenantID 裁剪作用域，这里
+// 返回全集、由页面按视角（platform/tenant）过滤。
+type RoleLevel = 'admin' | 'operator' | 'viewer';
+interface MockRoleSeed {
+  id: number;
+  code: string;
+  name: string;
+  scope: RbacScope;
+  tenantId?: number;
+  isSuperAdmin?: boolean;
+  isSystemDefault: boolean;
+  status: string;
+  remark: string;
+  _level: RoleLevel;
+}
+
+const MOCK_ROLES: MockRoleSeed[] = [
+  { id: 1, code: 'platform_super_admin', name: '超级管理员', scope: 'platform', isSuperAdmin: true, isSystemDefault: true, status: 'normal', remark: '平台内置超级管理员', _level: 'admin' },
+  { id: 2, code: 'platform_ops', name: '平台运维管理员', scope: 'platform', isSystemDefault: false, status: 'normal', remark: '负责平台运维', _level: 'operator' },
+  { id: 3, code: 'platform_auditor', name: '平台审计员', scope: 'platform', isSystemDefault: false, status: 'normal', remark: '只读审计', _level: 'viewer' },
+  { id: 101, code: 'tenant_admin', name: '租户管理员', scope: 'tenant', tenantId: 1, isSystemDefault: true, status: 'normal', remark: '租户内置管理员', _level: 'admin' },
+  { id: 102, code: 'tenant_operator', name: '租户操作员', scope: 'tenant', tenantId: 1, isSystemDefault: false, status: 'normal', remark: '日常运营', _level: 'operator' },
+  { id: 103, code: 'tenant_viewer', name: '租户观察员', scope: 'tenant', tenantId: 1, isSystemDefault: false, status: 'normal', remark: '只读', _level: 'viewer' },
+];
+
+/** 列表响应：剥离内部的 `_level`，保持与 Role 线上结构一致。 */
+function roleListItem({ _level, ...rest }: MockRoleSeed) {
+  return rest;
+}
+
+/**
+ * 按角色作用域生成权限矩阵——这是让"平台视角 / 租户视角内置角色反映各自可用
+ * 授权范围"的关键：矩阵覆盖的子模块集合来自 `rbacSubmodulesForScope(scope)`，
+ * 平台角色得到平台专属模块（系统管理/监控等），租户角色得到租户专属模块
+ * （安全策略/智能体等）。行内 can* 的粒度按角色层级区分：
+ *   - admin  ：可见 + 查看/编辑/审批/删除（受子模块能力约束）
+ *   - operator：可见 + 查看/编辑（审批/删除留空）
+ *   - viewer ：可见 + 仅查看（只读）
+ * canApprove/canDelete 对不支持该操作的子模块回落为 null（"不适用"）。
+ */
+function buildRoleMatrix(scope: RbacScope, level: RoleLevel) {
+  return rbacSubmodulesForScope(scope).map((meta) => {
+    const approveBase = meta.supportApprove ? false : null;
+    const deleteBase = meta.supportDelete ? false : null;
+    if (level === 'admin') {
+      return {
+        submoduleId: meta.id,
+        visible: true,
+        canView: true,
+        canEdit: true,
+        canApprove: meta.supportApprove ? true : null,
+        canDelete: meta.supportDelete ? true : null,
+      };
+    }
+    if (level === 'operator') {
+      return { submoduleId: meta.id, visible: true, canView: true, canEdit: true, canApprove: approveBase, canDelete: deleteBase };
+    }
+    return { submoduleId: meta.id, visible: true, canView: true, canEdit: false, canApprove: approveBase, canDelete: deleteBase };
+  });
+}
+
 // 用并表替代大 switch，便于扩展。按注册顺序遍历，第一个匹配即返回。
 const routes: Route[] = [
   // 认证接口（/auth/**）刻意不 mock：登录必须走真实后端，确保拿到有效的
@@ -314,21 +378,27 @@ const routes: Route[] = [
   // 该接口原本未覆盖，dispatcher 兜底返回 { items: [] }，导致「新建管理员」
   // 抽屉里的角色下拉无可选项、点开为空（表现为“锁定/无法展开”）。这里回填
   // 平台与租户两种作用域的角色，页面再按视角（isTenantView）过滤。
+  // 列表不含 permissions（与真实后端 ListRoles 一致），矩阵在详情端点返回。
   {
     method: 'GET', pattern: '/roles',
-    handler: () => ({
-      status: 200,
-      data: {
-        items: [
-          { id: 1, code: 'platform_super_admin', name: '超级管理员', scope: 'platform', isSuperAdmin: true, isSystemDefault: true, status: 'normal', remark: '平台内置超级管理员' },
-          { id: 2, code: 'platform_ops', name: '平台运维管理员', scope: 'platform', isSystemDefault: false, status: 'normal', remark: '负责平台运维' },
-          { id: 3, code: 'platform_auditor', name: '平台审计员', scope: 'platform', isSystemDefault: false, status: 'normal', remark: '只读审计' },
-          { id: 101, code: 'tenant_admin', name: '租户管理员', scope: 'tenant', tenantId: 1, isSystemDefault: true, status: 'normal', remark: '租户内置管理员' },
-          { id: 102, code: 'tenant_operator', name: '租户操作员', scope: 'tenant', tenantId: 1, isSystemDefault: false, status: 'normal', remark: '日常运营' },
-          { id: 103, code: 'tenant_viewer', name: '租户观察员', scope: 'tenant', tenantId: 1, isSystemDefault: false, status: 'normal', remark: '只读' },
-        ],
-      },
-    }),
+    handler: () => ({ status: 200, data: { items: MOCK_ROLES.map(roleListItem) } }),
+  },
+  // ─── 角色详情（点击「查看/编辑」时 useRole 拉取权限矩阵）─────────────────
+  // 该端点原本未被 mock：GET /roles/:id 落到 dispatcher 兜底返回 {}（无 id），
+  // RolePermissionTab 的 `roleDetail.id === editingId` 判定失败 → drawerReady
+  // 恒为 false → 抽屉打不开（表现为「内置角色不可查看/编辑」）。这里按角色
+  // 作用域返回对应的权限矩阵，使平台/租户内置角色分别展示各自的授权范围。
+  {
+    method: 'GET', pattern: /^\/roles\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const seed = MOCK_ROLES.find((r) => r.id === id);
+      if (!seed) return { status: 404, data: {} };
+      return {
+        status: 200,
+        data: { ...roleListItem(seed), permissions: buildRoleMatrix(seed.scope, seed._level) },
+      };
+    },
   },
 
   // ─── 邮件处置中心 ──────────────────────────────────────────────────────
@@ -1299,7 +1369,7 @@ const routes: Route[] = [
   //     `include=member_count`（恰好这个值）→ 返回 `mockBehaviorControlGroupsList()`
   //     （sender/ip/org 三类）。
   // 用 `matchQuery` 精确收窄到这些 query（用 URLSearchParams 按参数值匹配，而非
-  // 子串 `.includes`，避免误伤例如 `rule_page=groups` 这类恰好含有子串但语义
+  // 子串 `.includes`，避免误伤例如 `rule_page=groups` ��类恰好含有子串但语义
   // 不同的查询），其余模块的 `/unified-rules` GET 一律不 mockable，继续放行到
   // 真实后端 —— 保持它们 "接口缺失 → 由后端返回真实数据/错误" 的原有行为，
   // 不再落到本路由的空壳。
