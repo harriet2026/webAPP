@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, QueryClientContext } from '@tanstack/react-query';
 import { ChevronDown, KeyRound, Loader2, Settings2 } from 'lucide-react';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { getTenantDomains } from '@/lib/api/tenants';
 import { listDkimKeys, type DkimKey } from '@/lib/api/dkim';
 import { useTenant } from '@/hooks/use-tenant';
 import { usePermission } from '@/hooks/use-permission';
+import { AuthContext } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
 import { cn } from '@/lib/utils';
 
@@ -29,8 +30,22 @@ import { cn } from '@/lib/utils';
  * 权限（本次需求）：平台管理员（需先选定租户）与租户管理员均可管理本租户签名。
  * 平台管理员未选租户时（多租户形态）显示引导空态，不发起查询 —— 复刻
  * group-policy-page 的 platformWithoutTenant 约定。
+ *
+ * Provider 守卫：本子卡依赖 AuthProvider（租户/权限）与 QueryClientProvider。
+ * ProtocolChecksSection 在纯展示单测里会被 intl-only 包裹渲染（无这两个
+ * Provider）。为遵守既有「leaf 安全组件可在裸宿主中挂载而不崩溃」约定，这里
+ * 用 useContext 探测两个 Provider 是否存在，缺任一则整块渲染为 null —— 生产
+ * dashboard 始终具备二者，功能完整。探测用 useContext 而非 useAuth/
+ * useQueryClient，避免后者在缺失时抛错。
  */
 export function DkimOutboundSigningSection() {
+  const hasQueryClient = useContext(QueryClientContext) != null;
+  const hasAuth = useContext(AuthContext) != null;
+  if (!hasQueryClient || !hasAuth) return null;
+  return <DkimOutboundSigningSectionInner />;
+}
+
+function DkimOutboundSigningSectionInner() {
   const t = useTranslations('authSpoofing');
   const queryClient = useQueryClient();
   const { effectiveTenantId, isSystemAdmin } = useTenant();

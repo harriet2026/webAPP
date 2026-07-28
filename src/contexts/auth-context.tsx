@@ -106,7 +106,13 @@ const TENANT_ADMIN_FALLBACK_PERMISSIONS: ReadonlySet<Permission> = new Set([
   'view_admin_audit_logs',
 ]);
 
-const AuthContext = createContext<AuthContextType | null>(null);
+// Exported so optional, self-contained feature blocks (e.g. the DKIM outbound
+// signing subsection embedded in ProtocolChecksSection) can *probe* for the
+// provider via useContext without triggering useAuth()'s throw. This keeps the
+// "leaf security components may be mounted in bare test/Storybook hosts without
+// the dashboard providers" convention intact — such hosts simply render the
+// optional block as null instead of crashing.
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 const DEMO_SUPER_ADMIN: User = {
   id: 0,
