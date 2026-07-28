@@ -146,7 +146,7 @@ export default function UsersPage() {
   // canManageAccounts so a tenant admin's own /tenant-users query is equally lazy.
   // GT-12290：平台视角下若带了 ?tenant=<id>（来自租户抽屉的"在用户管理中查看"
   // 深链），必须显式按该租户取数——平台作用域的 /users 里没有任何租户账号
-  // （GT-12393），继续拉全量再客户端过滤只会得到空列表。queryKey 带上
+  // （GT-12393），继��拉全量再客户端过滤只会得到空列表。queryKey 带上
   // tenantFilter，否则从 ?tenant=A 切到 ?tenant=B 会读到 A 的缓存。
   const { data: users, isLoading } = useQuery({
     queryKey: [usersQueryKey, tenantFilter],
@@ -865,7 +865,7 @@ export default function UsersPage() {
           data-testid="create-user-dialog"
           className="flex w-full flex-col p-0 sm:max-w-xl"
         >
-          <SheetHeader className="gap-1.5 border-b border-border px-6 pt-6 pb-3">
+          <SheetHeader className="border-b border-border px-6 pt-6 pb-3">
             <SheetTitle>{t('users.drawerTitle')}</SheetTitle>
             <SheetDescription>
               {editingUser ? t('users.drawerDescriptionEdit') : t('users.drawerDescriptionCreate')}
@@ -876,33 +876,35 @@ export default function UsersPage() {
             onSubmit={form.handleSubmit(handleSubmit, onInvalidSubmit)}
             className="flex min-h-0 flex-1 flex-col"
           >
-            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4">
-              {/* 分组卡片一：基础信息 */}
-              <div className="space-y-3 rounded-lg border border-border p-4">
-                <h4 className="text-sm font-medium text-foreground">{t('users.basicInfo')}</h4>
-                <div className="space-y-1.5">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-4">
+              {/* 分区一：基础信息（对齐角色权限抽屉的「下划线分区标题」规范） */}
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2 border-b border-border pb-1.5">
+                  <span className="text-sm font-medium text-foreground">{t('users.basicInfo')}</span>
+                </div>
+                <div className="space-y-2">
                   <Label>{t('users.accountUsername')}<span className="ml-0.5 text-destructive">*</span></Label>
                   {/* GT-12313：用户名是账号唯一标识，编辑时一律不可改（原型
                       "账号不可修改，密码留空表示不修改"），不再区分平台/租户视角。 */}
                   <Input {...form.register('username')} disabled={!!editingUser} />
                   {fieldError('username')}
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label>{t('users.name')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
                   <Input {...form.register('name')} />
                   {fieldError('name')}
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label>{t('users.phone')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
                   <Input data-testid="new-admin-phone" {...form.register('phone')} />
                   {fieldError('phone')}
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label>{t('users.email')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
                   <Input type="email" {...form.register('email')} />
                   {fieldError('email')}
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label>
                     {editingUser ? t('common.password') : t('users.initialPassword')}
                     {!editingUser && <span className="ml-0.5 text-destructive">*</span>}
@@ -924,10 +926,12 @@ export default function UsersPage() {
                 </div>
               </div>
 
-              {/* 分组卡片二：角色与状态 */}
-              <div className="space-y-3 rounded-lg border border-border p-4">
-                <h4 className="text-sm font-medium text-foreground">{t('users.roleAndStatus')}</h4>
-                <div className="space-y-1.5">
+              {/* 分区二：角色与状态（同样使用下划线分区标题规范） */}
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2 border-b border-border pb-1.5">
+                  <span className="text-sm font-medium text-foreground">{t('users.roleAndStatus')}</span>
+                </div>
+                <div className="space-y-2">
                   <Label>{t('users.role')}<span className="ml-0.5 text-destructive">*</span></Label>
                   <Select
                     value={form.watch('role_id') !== undefined ? String(form.watch('role_id')) : ''}
@@ -945,7 +949,7 @@ export default function UsersPage() {
                   {fieldError('role_id')}
                 </div>
                 {!isTenantView && selectedRole?.scope === 'tenant' && (
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <Label>{t('users.tenant')}</Label>
                     <Input type="number" {...form.register('tenant_id', { valueAsNumber: true })} />
                   </div>
@@ -953,7 +957,7 @@ export default function UsersPage() {
                 {/* 账号状态：新建与编辑均可自由选择。编辑时若改为「停用」，提交会走
                     与行操作相同的 setUserStatus/setTenantUserStatus 接口——该接口在
                     停用时仍会终止该账号的在线会话，安全语义不变。 */}
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label>{t('users.accountStatus')}</Label>
                   <Select
                     value={form.watch('status') ?? 'normal'}
