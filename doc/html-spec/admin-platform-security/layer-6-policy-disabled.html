@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>交互层级：策略禁用态（启用开关关闭） - 平台安全策略</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { darkMode: 'class', theme: { extend: { colors: {
+  background: 'oklch(1 0 0)', foreground: 'oklch(0.145 0 0)',
+  primary: { DEFAULT: 'oklch(0.52 0.226 262)', foreground: 'oklch(0.985 0 0)' },
+  muted: { DEFAULT: 'oklch(0.97 0 0)', foreground: 'oklch(0.556 0 0)' },
+  accent: { DEFAULT: 'oklch(0.97 0 0)', foreground: 'oklch(0.205 0 0)' },
+  popover: { DEFAULT: 'oklch(1 0 0)', foreground: 'oklch(0.145 0 0)' },
+  border: 'oklch(0.922 0 0)', input: 'oklch(0.922 0 0)', ring: 'oklch(0.52 0.226 262)',
+  destructive: 'oklch(0.577 0.245 27.325)',
+}}}};
+</script>
+<style>
+:root {
+  --primary: oklch(0.52 0.226 262); --primary-foreground: oklch(0.985 0 0);
+  --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0); --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0);
+  --border: oklch(0.922 0 0); --destructive: oklch(0.577 0.245 27.325); --radius: 0.625rem;
+  --diff-bg: oklch(0.97 0.013 25); --diff-border: oklch(0.65 0.2 25);
+  --question-bg: oklch(0.97 0.05 95); --question-border: oklch(0.75 0.15 90);
+  --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+  --font-mono: "Geist Mono", monospace;
+}
+* { box-sizing: border-box; }
+body { font-family: var(--font-sans); background: var(--background); color: var(--foreground); line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+.spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 2rem; margin-bottom: 2rem; }
+.spec-header h1 { color: var(--primary); margin: 0 0 1rem; font-size: 1.5rem; }
+.meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+.meta-table td:first-child { font-weight: 600; width: 160px; color: var(--muted-foreground); white-space: nowrap; }
+.component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 2rem; margin-bottom: 2rem; }
+.component-toc > h2 { color: var(--primary); font-size: 1.05rem; margin: 0 0 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+.component-toc ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.5rem; margin: 0; padding: 0; }
+.component-toc li { padding: 0.375rem 0.75rem; border-radius: calc(var(--radius) - 4px); background: var(--muted); font-size: 0.875rem; }
+.component-toc li a { color: var(--primary); text-decoration: none; font-weight: 500; }
+.component-toc li a:hover { text-decoration: underline; }
+.component-toc .toc-layer-links { font-size: 0.75rem; color: var(--muted-foreground); margin-left: 0.5rem; }
+.component-toc .toc-layer-links a { color: var(--muted-foreground); font-weight: 400; }
+.component-toc .toc-badge { display: inline-block; font-size: 0.6875rem; font-weight: 600; padding: 0.0625rem 0.375rem; border-radius: calc(var(--radius) - 4px); background: var(--primary); color: var(--primary-foreground); white-space: nowrap; margin-left: 0.25rem; }
+section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; margin: 0 0 1.25rem; font-size: 1.25rem; }
+h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+table.spec-table th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); white-space: nowrap; }
+table.spec-table td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+table.spec-table tr:nth-child(even) td { background: var(--muted); }
+.screenshot-figure { margin: 1rem 0; text-align: center; }
+.screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.screenshot-figure figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+.component-spec { border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1rem 0; background: var(--card); }
+.component-spec > h3 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 0.75rem; margin-top: 0.25rem; }
+pre { background: var(--muted); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; margin: 1rem 0; }
+code { font-family: var(--font-mono); font-size: 0.85em; }
+.mermaid { text-align: center; margin: 1rem 0; padding: 1rem; background: var(--muted); border-radius: calc(var(--radius) - 2px); }
+.diff-section { border-left: 4px solid var(--diff-border); background: var(--diff-bg); }
+.diff-section > h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+.question-section { border-left: 4px solid var(--question-border); background: var(--question-bg); }
+.question-section > h2 { color: var(--question-border); border-bottom-color: var(--question-border); }
+.badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); }
+.badge-high { background: oklch(0.65 0.2 25); color: white; }
+.badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+.badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+.component-preview { border: 2px dashed var(--primary); border-radius: var(--radius); padding: 1.5rem; margin: 1rem 0; background: #fff; position: relative; overflow: auto; }
+.component-preview::before { content: "🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）"; position: absolute; top: -0.625rem; left: 0.75rem; background: var(--primary); color: var(--primary-foreground); font-size: 0.6875rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); white-space: nowrap; }
+.component-preview { padding-top: 2rem; }
+/* radix 弹层在预览区静态化展示 */
+.component-preview [data-radix-popper-content-wrapper] { position: static !important; transform: none !important; min-width: 280px !important; z-index: auto !important; }
+.component-preview [role=listbox] { max-height: none !important; }
+/* Tailwind v4 类兜底 */
+.component-preview .shadow-xs { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+.component-preview .outline-hidden { outline: none; }
+.component-preview .size-4 { width: 1rem; height: 1rem; }
+.component-preview .size-3\.5 { width: 0.875rem; height: 0.875rem; }
+.interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1.5rem 0; background: var(--card); }
+.interaction-layer > h4 { color: var(--primary); font-size: 0.95rem; margin: 0 0 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+.layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+.trigger-path { background: var(--muted); border-radius: calc(var(--radius) - 4px); padding: 0.5rem 0.75rem; margin: 0.5rem 0 1rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+.trigger-path strong { color: var(--foreground); }
+.dom-comparison { margin: 1rem 0; border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); overflow: hidden; }
+.dom-comparison > h5 { background: var(--muted); padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600; margin: 0; border-bottom: 1px solid var(--border); }
+.dom-comparison > h5::before { content: "🔍 "; }
+.dom-comparison table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.dom-comparison th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+.dom-comparison td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+.dom-comparison tr:last-child td { border-bottom: none; }
+.dom-pass { color: oklch(0.5 0.15 150); font-weight: 600; }
+table.layer-index { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+table.layer-index th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+table.layer-index td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+table.layer-index td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+table.layer-index td a:hover { text-decoration: underline; }
+.layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; background: var(--muted); border-radius: var(--radius); margin-bottom: 1.5rem; font-size: 0.875rem; }
+.layer-nav a { color: var(--primary); text-decoration: none; font-weight: 600; }
+.layer-nav a:hover { text-decoration: underline; }
+.version-history-table td:nth-child(5) { color: var(--muted-foreground); }
+.spec-version { font-weight: 600; color: oklch(0.52 0.226 262); }
+</style>
+</head>
+<body>
+
+<script>
+/* IP 策略面板预览交互：左侧导航切换 + 启用开关（复刻 demo connection-layer-page 状态机） */
+function wireIpPanel(rootId, initialSelected, initialEnabledMap) {
+  const root = document.getElementById(rootId);
+  if (!root) return;
+  const SUMMARY = { 'IP频率限制': '阈值: 100次/分钟', 'IP黑白名单': '黑名单: 33条 / 白名单: 22条', 'RBL过滤': '3个服务器 / 超时5s', '海外邮件检测': '收件 已启用' };
+  const enabled = Object.assign({ 'IP频率限制': true, 'IP黑白名单': true, 'RBL过滤': true, '海外邮件检测': true }, initialEnabledMap || {});
+  let selected = initialSelected;
+  const navBtns = Array.from(root.querySelectorAll('nav button'));
+  const nameOf = b => { const s = b.querySelector(':scope > div > span'); return s ? s.textContent.trim() : ''; };
+  const title = root.querySelector('h2');
+  const statusTxt = root.querySelector('.js-status');
+  const sw = root.querySelector('[role=switch]');
+  const thumb = sw ? sw.querySelector('span') : null;
+  const content = root.querySelector('.js-content');
+  const unsaved = root.querySelector('.js-unsaved');
+  function render() {
+    navBtns.forEach(b => {
+      const n = nameOf(b);
+      const on = n === selected;
+      b.classList.toggle('bg-blue-50', on); b.classList.toggle('text-blue-700', on);
+      b.classList.toggle('hover:bg-gray-100', !on); b.classList.toggle('text-gray-700', !on);
+      const dot = b.querySelector(':scope > span');
+      if (dot) {
+        dot.className = enabled[n]
+          ? 'w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors bg-blue-500'
+          : 'w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors border-2 border-gray-300';
+      }
+      const sum = b.querySelectorAll(':scope > div > span')[1];
+      if (sum) sum.textContent = enabled[n] ? SUMMARY[n] : '未启用';
+    });
+    if (title) title.textContent = selected;
+    const en = enabled[selected];
+    if (statusTxt) { statusTxt.textContent = en ? '已启用' : '已禁用'; statusTxt.className = 'js-status text-sm ' + (en ? 'text-blue-600' : 'text-gray-500'); }
+    if (sw) { sw.setAttribute('data-state', en ? 'checked' : 'unchecked'); sw.setAttribute('aria-checked', en); }
+    if (thumb) thumb.setAttribute('data-state', en ? 'checked' : 'unchecked');
+    if (content) { content.classList.toggle('opacity-50', !en); content.classList.toggle('pointer-events-none', !en); }
+  }
+  navBtns.forEach(b => b.addEventListener('click', () => { selected = nameOf(b); render(); }));
+  if (sw) sw.addEventListener('click', () => { enabled[selected] = !enabled[selected]; if (unsaved) unsaved.style.display = 'flex'; render(); });
+  render();
+}
+</script>
+<nav class="layer-nav"><a href="./index.html">← 返回主文件</a><a href="./layer-5-ip-nav-ipfilter.html">← 层级：导航切换</a></nav><header class="spec-header"><h1>交互层级：策略禁用态（启用开关关闭）</h1><table class="meta-table"><tr><td>所属组件</td><td>2.3 IP 策略面板（<a href="./index.html#component-2-3">主文件 §2.3</a>）层级 2</td></tr><tr><td>主文件</td><td><a href="./index.html">admin-platform-security/index.html</a></td></tr><tr><td>触发路径</td><td>层级0 点击卡片头部启用开关（checked→unchecked）→ <code>togglePolicyEnabled</code> + <code>setHasUnsavedChanges(true)</code></td></tr></table></header><section class="interaction-layer"><h4><span class="layer-badge">2</span> 交互层级：策略禁用态（启用开关关闭）</h4>
+<div class="component-preview">
+  <div id="pv-l6" class="flex rounded-lg border border-gray-200 overflow-hidden bg-white" style="min-height:340px">
+    <div class="w-52 border-r border-gray-200 bg-gray-50 flex flex-col"><nav class="flex-1 p-2 space-y-1 pt-4"><button class="w-full flex items-center gap-3 rounded-lg text-left transition-colors px-3 py-2.5 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300" data-state="closed" data-slot="tooltip-trigger"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors border-2 border-gray-300 dark:border-gray-600"></span><div class="flex-1 min-w-0"><span class="text-sm font-medium block truncate">IP频率限制</span><span class="text-xs text-gray-500 dark:text-gray-400 block truncate">未启用</span></div></button><button class="w-full flex items-center gap-3 rounded-lg text-left transition-colors px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" data-state="closed" data-slot="tooltip-trigger"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors bg-blue-500"></span><div class="flex-1 min-w-0"><span class="text-sm font-medium block truncate">IP黑白名单</span><span class="text-xs text-gray-500 dark:text-gray-400 block truncate">黑名单: 33条 / 白名单: 22条</span></div></button><button class="w-full flex items-center gap-3 rounded-lg text-left transition-colors px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" data-state="closed" data-slot="tooltip-trigger"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors bg-blue-500"></span><div class="flex-1 min-w-0"><span class="text-sm font-medium block truncate">RBL过滤</span><span class="text-xs text-gray-500 dark:text-gray-400 block truncate">3个服务器 / 超时5s</span></div></button><button class="w-full flex items-center gap-3 rounded-lg text-left transition-colors px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" data-state="closed" data-slot="tooltip-trigger"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors bg-blue-500"></span><div class="flex-1 min-w-0"><span class="text-sm font-medium block truncate">海外邮件检测</span><span class="text-xs text-gray-500 dark:text-gray-400 block truncate">收件 已启用</span></div></button></nav></div>
+    <div class="flex-1 bg-gray-100 p-4">
+      <div class="bg-white rounded-lg border border-gray-200 shadow-md flex flex-col h-full">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0"><h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">IP频率限制</h2><div class="flex items-center gap-2"><span class="js-status text-sm text-gray-500">已禁用</span><button type="button" role="switch" aria-checked="false" data-state="unchecked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="unchecked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button></div></div>
+        <div class="js-content flex-1 px-6 py-4 text-sm text-gray-400 transition-opacity duration-200 opacity-50 pointer-events-none">（策略配置内容区 —— 每个策略的完整配置界面见 §2.3 交叉引用表对应模块规格）</div>
+        <div class="js-unsaved px-6 py-3 border-t border-gray-200 items-center" style="display:flex">
+          <span class="inline-flex items-center gap-2 text-amber-600 text-sm"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>有未保存的更改</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><script>wireIpPanel('pv-l6', 'IP频率限制', { 'IP频率限制': false });</script>
+<figure class="screenshot-figure">
+  <img src="./screenshots/ip-policy-disabled.png" alt="策略禁用态">
+  <figcaption>层级截图（浏览器实际渲染）——IP频率限制关闭：状态「已禁用」、导航圆点空心 + 摘要「未启用」、内容区变灰、底部「有未保存的更改」</figcaption>
+</figure>
+<h4>禁用态状态清单（浏览器验证）</h4>
+<table class="spec-table"><thead><tr><th>元素</th><th>启用态</th><th>禁用态（本层）</th></tr></thead><tbody><tr><td>Switch</td><td>data-state=checked（bg-primary）</td><td>data-state=unchecked（bg-input 灰）</td></tr><tr><td>状态文字</td><td>已启用（text-blue-600）</td><td>已禁用（text-gray-500）</td></tr><tr><td>内容区</td><td>正常可交互</td><td><code>opacity-50 pointer-events-none</code>（变灰且不可点）</td></tr><tr><td>导航圆点</td><td>bg-blue-500 实心</td><td>border-2 border-gray-300 空心</td></tr><tr><td>导航摘要</td><td>阈值: 100次/分钟</td><td>未启用</td></tr><tr><td>底部操作栏</td><td>无提示</td><td>琥珀脉冲圆点 + 「有未保存的更改」（无二次确认，即时切换）</td></tr></tbody></table><div class="dom-comparison"><h5>DOM 树比对结果（提取自运行中 demo，逐节点比对一致）</h5><table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody><tr><td>根节点</td><td><code>div.flex.items-center.justify-between</code></td><td><code>div.flex.items-center.justify-between</code></td><td class="dom-pass">✅</td></tr><tr><td>直接子节点数</td><td><code>2</code></td><td><code>2</code></td><td class="dom-pass">✅</td></tr><tr><td>节点总数</td><td><code>6</code></td><td><code>6</code></td><td class="dom-pass">✅</td></tr><tr><td>开关状态</td><td>data-state=unchecked / aria-checked=false</td><td>一致</td><td class="dom-pass">✅</td></tr><tr><td>状态文字</td><td>「已禁用」text-gray-500</td><td>一致</td><td class="dom-pass">✅</td></tr></tbody></table></div><h4>预览交互回放要点（与 demo 逐项一致，生成后已实测）</h4><ul style="font-size:0.875rem; padding-left:1.25rem"><li>预览中点击开关：恢复启用态（圆点实心、摘要恢复、内容区解除变灰）——「有未保存的更改」保持显示（demo 中 hasUnsavedChanges 不回退）</li><li>切换其他策略后各自开关状态独立</li></ul></section></body></html>

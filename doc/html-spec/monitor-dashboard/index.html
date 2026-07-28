@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>监控总览 - HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== 设计变量（参考 demo globals.css） ===== */
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground); line-height: 1.55; font-size: 14px; padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem; max-width: 1280px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1.2rem; margin: 2.2rem 0 .8rem; padding-bottom: .35rem; border-bottom: 2px solid var(--primary); }
+    h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; }
+    h4 { font-size: .95rem; margin: 1.2rem 0 .5rem; }
+    h5 { font-size: .85rem; margin: .8rem 0 .4rem; }
+    p { margin: .45rem 0; }
+    code { font-family: var(--font-mono); font-size: .85em; background: var(--muted); padding: .1em .35em; border-radius: 4px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    a { color: oklch(0.52 0.226 262); }
+
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .spec-header .subtitle { color: var(--muted-foreground); font-size: .9rem; }
+    .meta-table { border-collapse: collapse; width: 100%; margin-top: .8rem; font-size: 13px; }
+    .meta-table td { border: 1px solid var(--border); padding: 5px 10px; vertical-align: top; }
+    .meta-table td:first-child { background: var(--muted); font-weight: 600; white-space: nowrap; width: 11em; }
+
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem; margin-top: 1.2rem; }
+    .component-toc ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .component-toc li { margin: .3rem 0; }
+    .toc-badge { display: inline-block; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 999px; padding: 0 .5em; margin-left: .4em; vertical-align: middle; }
+    .toc-layer-links { margin-left: .6em; font-size: 12px; }
+    .toc-layer-links a { margin-right: .5em; }
+
+    .spec-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0 1rem; background: var(--card); }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); font-weight: 600; white-space: nowrap; }
+    .spec-table td.num { text-align: right; font-family: var(--font-mono); }
+    .spec-table .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    .matrix-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0; background: var(--card); }
+    .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: center; }
+    .matrix-table th { background: var(--muted); font-weight: 600; }
+    .matrix-table td:first-child { text-align: left; font-weight: 600; background: var(--muted); }
+    .legend { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .5rem .8rem; }
+
+    .screenshot-figure { margin: .8rem 0 1.2rem; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .screenshot-figure figcaption { font-size: 12px; color: var(--muted-foreground); margin-top: .35rem; }
+
+    .component-spec { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem 1.4rem; margin: 1.2rem 0; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: .9rem 1.1rem; margin: 1rem 0; background: oklch(0.99 0 0); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; background: var(--primary); color: #fff; border-radius: 999px; font-size: .8em; font-weight: 700; margin-right: .4em; }
+    .trigger-path { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .45rem .7rem; margin: .5rem 0; }
+    .layer-nav { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 13px; }
+    .layer-index a { font-weight: 600; }
+
+    .component-preview { border: 2px dashed oklch(0.7 0.12 262); border-radius: 10px; padding: 18px; background: #f4f5f7; overflow-x: auto; margin: .7rem 0; position: relative; }
+    .component-preview::before { content: "可交互预览（提取自运行中的 demo）"; position: absolute; top: -9px; left: 14px; background: oklch(0.52 0.226 262); color: #fff; font-size: 10.5px; padding: 0 8px; border-radius: 999px; line-height: 16px; z-index: 5; }
+    .preview-note { font-size: 12px; color: var(--muted-foreground); background: oklch(0.975 0.02 95); border: 1px solid oklch(0.9 0.06 95); border-radius: 6px; padding: .4rem .7rem; margin: .4rem 0 .8rem; }
+    .component-preview .bg-card { background: #fff; }
+    .component-preview .text-card-foreground { color: #0a0a0a; }
+    .component-preview .bg-popover { background: #fff; }
+    .component-preview .text-popover-foreground { color: #0a0a0a; }
+    .component-preview .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .component-preview .border-input { border-color: #e5e7eb; }
+    .component-preview svg { flex-shrink: 0; }
+    .component-preview [data-slot="card"] { border-color: #e5e7eb; background: #fff; }
+    .component-preview button { cursor: pointer; }
+    .component-preview button:disabled { cursor: default; }
+    .component-preview .text-gray-900 { color: #111827; }
+    .component-preview .text-gray-500 { color: #6b7280; }
+    .component-preview .text-gray-400 { color: #9ca3af; }
+    .component-preview .bg-gray-50 { background: #f9fafb; }
+    @keyframes spec-spin { to { transform: rotate(360deg); } }
+    .component-preview .animate-spin { animation: spec-spin 1s linear infinite; }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .component-preview .animate-marquee { animation: marquee 30s linear infinite; }
+    .component-preview .animate-marquee:hover { animation-play-state: paused; }
+
+    .route-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 13px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 99; opacity: 0; transition: opacity .2s; pointer-events: none; font-family: var(--font-mono); }
+    .route-toast.show { opacity: 1; }
+
+    .dom-comparison { background: oklch(0.975 0.008 262); border: 1px solid oklch(0.85 0.03 262); border-radius: 8px; padding: .6rem .9rem; margin-top: .8rem; }
+    .dom-comparison h5 { margin: .2rem 0 .4rem; }
+
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .diff-section h2 { border-bottom-color: var(--diff-border); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .question-section h2 { border-bottom-color: var(--question-border); }
+    .diff-table td:first-child, .question-table td:first-child { font-weight: 700; white-space: nowrap; }
+
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 .55em; line-height: 1.6; vertical-align: middle; }
+    .tag-green { background: #dcfce7; color: #15803d; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-gray { background: #f3f4f6; color: #4b5563; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+    .mermaid { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .6rem; margin: .8rem 0; overflow-x: auto; }
+
+    /* 静态展示的 radix 浮层去绝对定位 */
+    .component-preview [data-radix-popper-content-wrapper] { position: static !important; transform: none !important; }
+    .component-preview [role="listbox"] { max-width: 220px; }
+  </style>
+</head>
+<body>
+
+<header class="spec-header">
+  <h1>监控总览 详细产品规格说明</h1>
+  <p class="subtitle">监控中心首屏：6 项核心 KPI + 四模块健康看板 + 双趋势图 + 告警跑马灯，一屏掌握邮件网关运行态势。</p>
+  <table class="meta-table">
+    <tr><td>模块子目录</td><td><code>monitor-dashboard/</code></td></tr>
+    <tr><td>demo 路由</td><td><code>/monitor/dashboard</code>（侧边栏「监控中心 &gt; 监控总览」）</td></tr>
+    <tr><td>demo 源</td><td><code>demo/app/monitor/dashboard/page.tsx</code> → <code>demo/components/monitor/monitor-dashboard-page.tsx</code>（752 行，MonitorDashboardPage）</td></tr>
+    <tr><td>spec 源</td><td>未提供/未使用 —— <code>demo/docs/</code> 下无监控中心需求文档，以浏览器运行中的 demo 与用户描述为准</td></tr>
+    <tr><td>规格版本</td><td><b>v2</b></td></tr>
+    <tr><td>生成日期</td><td>2026-07-22</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td>—（无 spec）</td></tr>
+    <tr><td>浏览器验证</td><td>playwright-core + 系统 Chrome（headless）· <code>http://localhost:3100</code> · 视口 1920×1080（另 1366 / 1024 断点）· 形态×角色矩阵 5×2 全遍历</td></tr>
+    <tr><td>遵循约束</td><td><code>implement.md</code>：四语国际化（demo 当前 zh/en/th 三语，且 th 缺 monitor.* key，见差异 D-05）；不新增规则系统；冲突列 §10 需确认</td></tr>
+    <tr><td>v1 → v2 复核</td><td>v1（2026-07-20）3 条历史事项已逐项复核，结论见 §9 差异表 D-01~D-03 与 §10 Q-01；v1 称"切换时间范围后数据刷新"经浏览器实测<b>不成立</b>（数据为静态 mock，DOM 无变化），v2 已纠正</td></tr>
+  </table>
+</header>
+
+<!-- ============ 0.1 产品形态 × 角色差异矩阵 ============ -->
+<section id="form-role-matrix" class="component-spec">
+  <h2 style="margin-top:0;">0.1 产品形态 × 角色差异矩阵（浏览器全遍历实测）</h2>
+  <table class="matrix-table">
+    <thead><tr><th>角色 / 形态</th><th>AI-单</th><th>传统-单</th><th>云-多</th><th>AI-多</th><th>传统-多</th></tr></thead>
+    <tbody>
+      <tr><td>平台管理员</td><td>—</td><td>—</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>租户管理员</td><td>✅</td><td>✅</td><td>🔒</td><td>🔒</td><td>🔒</td></tr>
+    </tbody>
+  </table>
+  <p class="legend">图例：✅ 显示且可编辑 ｜ 🔒 显示但只读 ｜ ❌ 隐藏 ｜ — 无此角色（单租户形态无平台管理员）。</p>
+  <table class="spec-table">
+    <thead><tr><th>依据</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">FEATURE_MAP["monitor-dashboard"]</td><td><code>visibility: ALL_SHOW</code>（5 形态全部显示）；<code>tenantAccess: "readonly"</code> → 多租户形态下租户管理员只读 🔒；<code>capability: "platform"</code>、<code>scope: "form-dependent"</code></td></tr>
+      <tr><td>浏览器实测（10 组合）</td><td>5 形态 × 2 视角逐一设置 localStorage（<code>product-form</code>/<code>product-viewer</code>）后刷新验证：侧边栏「监控总览」入口 10 组合全部可见；单租户形态下 viewer=tenant 自动回退 platform（product-profile-context），故单租户租户管理员实为 ✅</td></tr>
+      <tr><td>页面内部</td><td>本页组件<b>不消费</b> useProductProfile，页面内容在所有形态/角色下渲染一致；差异仅体现在导航入口与"只读"语义（demo 中只读未做控件级禁用，见差异 D-06）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 0.2 组件列表 ============ -->
+<nav class="component-toc">
+  <h2 style="margin-top:0;border:none;">📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 页面头部控制条（标题 + 时间范围 + 刷新间隔 + 手动刷新）</a> <span class="toc-badge">3层</span>
+      <span class="toc-layer-links"><a href="./layer-1-range-select.html">层级1：时间范围下拉</a><a href="./layer-2-refresh-select.html">层级2：刷新间隔下拉</a></span></li>
+    <li><a href="#component-2-2">2.2 KPI 卡片区（6 卡）</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-3">2.3 四模块健康看板（4 卡）</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-4">2.4 双趋势图（邮件流 24h + 引擎性能 24h）</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-5">2.5 告警跑马灯</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-6">2.6 底部更新栏 + 导出PDF</a> <span class="toc-badge">1层</span></li>
+  </ul>
+</nav>
+
+<!-- ============ 0.3 版本历史 ============ -->
+<section id="version-history">
+  <h2>0.3 版本历史</h2>
+  <table class="spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody>
+      <tr><td><b>v2</b></td><td>2026-07-22</td><td class="mono">804efb9</td><td class="mono">—</td><td>全量重生成：6 组件逐一提取+可交互预览；形态×角色 5×2 矩阵浏览器实测；纠正 v1「切换时间范围数据刷新」错误结论（实测数据静态不变）；新增导出PDF无响应、内联 i18n、Thai 缺 key 等 6 项差异</td></tr>
+      <tr><td>v1</td><td>2026-07-20</td><td class="mono">804efb9</td><td class="mono">—</td><td>初版：整页 main 提取 + 时间范围/刷新间隔 2 个 Select 交互验证，4 张截图</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 1. 页面布局结构 ============ -->
+<section id="layout" class="component-spec">
+  <h2 style="margin-top:0;">1. 页面布局结构</h2>
+  <h3>1.1 区域划分</h3>
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>名称</th><th>元素概览</th><th>布局</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td>页面头部</td><td>H1「监控总览」+ 时间范围 Select（w-28）+ 刷新间隔 Select（w-24）+ 手动刷新图标按钮</td><td>flex 两端对齐</td></tr>
+      <tr><td>B</td><td>KPI 卡片区</td><td>6 张指标卡（今日邮件量/投递成功率/队列深度/检测引擎/基础设施/未处理告警）</td><td>grid-cols-6, gap-4</td></tr>
+      <tr><td>C</td><td>四模块健康看板</td><td>基础设施（CPU/内存/磁盘/数据库）· 邮件流（迷你面积图+队列/延时）· 检测引擎（4 引擎状态点）· 告警中心（饼图+三态计数）</td><td>grid-cols-4, gap-4</td></tr>
+      <tr><td>D</td><td>双趋势图</td><td>邮件流健康趋势（24h，双 Y 轴折线）· 检测引擎性能趋势（24h，堆叠面积图）；各带外链按钮</td><td>grid-cols-2, gap-6, h=280</td></tr>
+      <tr><td>E</td><td>告警跑马灯</td><td>红色脉冲告警图标 + 4 条告警横向滚动（hover 暂停）+「查看全部」</td><td>单卡片通栏</td></tr>
+      <tr><td>F</td><td>底部栏</td><td>最后更新时间（30s 自动刷新）+「导出PDF」按钮</td><td>flex 两端对齐</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.2 整页默认态截图</h3>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-full-default.png" alt="整页默认态">
+    <figcaption>整页默认态（1920×1080，形态 cloud × 平台管理员，时间范围=今天，刷新=30s）——浏览器实际渲染</figcaption>
+  </figure>
+
+  <h3>1.3 视觉规范</h3>
+  <table class="spec-table">
+    <thead><tr><th>属性</th><th>值</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>页面背景</td><td><code>bg-gray-50</code>（暗色 <code>dark:bg-gray-900</code>）</td><td>根 div class</td></tr>
+      <tr><td>状态色</td><td>normal=green-500 / warning=yellow-500 / critical=red-500（<code>getStatusColor</code>）</td><td>源码 + 截图</td></tr>
+      <tr><td>引擎配色</td><td>反垃圾 #1890FF · 反病毒 #52C41A · 沙箱 #FA8C16 · RBL #722ED1</td><td>ENGINE_COLORS 常量</td></tr>
+      <tr><td>图表库</td><td>recharts（LineChart / AreaChart / PieChart + ResponsiveContainer）</td><td>import</td></tr>
+      <tr><td>图标库</td><td>lucide-react，w-4 h-4（16px）</td><td>import</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 2. 逐组件规格 ============ -->
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <!-- ===== 2.1 页面头部控制条 ===== -->
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 页面头部控制条（多层交互）</h3>
+    <h4>组件元信息</h4>
+    <table class="spec-table">
+      <tbody>
+        <tr><td>demo 组件路径</td><td><code>components/monitor/monitor-dashboard-page.tsx</code> L205-238</td></tr>
+        <tr><td>状态管理</td><td><code>useState("today")</code> timeRange · <code>useState("30s")</code> refreshInterval · <code>useState</code> lastUpdate/isRefreshing</td></tr>
+        <tr><td>交互层级数</td><td>3 层（初始态 → 时间范围下拉 → 刷新间隔下拉）</td></tr>
+        <tr><td>形态/角色差异</td><td>[Base] 所有形态/角色一致（组件不消费 productProfile）</td></tr>
+      </tbody>
+    </table>
+
+    <h4>交互层级关系图</h4>
+    <div class="mermaid">
+graph LR
+    L0["层级0: 初始态"] -->|点击时间范围 Select| L1["层级1: 范围下拉打开"]
+    L1 -->|选择 7天| L0b["回层级0（仅 label 变化）"]
+    L0 -->|点击刷新间隔 Select| L2["层级2: 间隔下拉打开"]
+    L0 -->|点击手动刷新按钮| L0c["图标旋转 1s + 更新最后更新时间"]
+    </div>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：初始态（时间范围=今天，刷新=30s）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染，无需交互</div>
+      <div class="component-preview" id="preview-header" style="overflow:visible;">
+<div class="flex items-center justify-between"><h1 class="text-2xl font-bold text-gray-900 dark:text-white">监控总览</h1><div class="flex items-center gap-3"><button type="button" role="combobox" aria-controls="radix-_R_335esnebn9lb_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-28"><span data-slot="select-value" style="pointer-events:none">今天</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button type="button" role="combobox" aria-controls="radix-_R_535esnebn9lb_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-24"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw w-4 h-4 mr-1"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg><span data-slot="select-value" style="pointer-events:none">30s</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 size-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw w-4 h-4"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg></button></div></div>
+      </div>
+      <div class="preview-note">两个 Select 均为 shadcn/Radix Select（button role="combobox"）。预览中点击可展开选项列表（行为复刻 demo：选择仅更新选中值，<b>不触发数据重取</b>——demo 数据为静态 mock，详见差异 D-01）。</div>
+
+      <h4>UI 元素清单</h4>
+      <table class="spec-table">
+        <thead><tr><th>序号</th><th>元素类型</th><th>文案/默认值</th><th>选项</th><th>交互行为（浏览器实测）</th><th>i18n</th><th>形态/角色差异</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>H1</td><td>监控总览</td><td>—</td><td>text-2xl font-bold</td><td>内联 zh/en（不走 i18n key）</td><td>[Base]</td></tr>
+          <tr><td>2</td><td>Select（时间范围，w-28）</td><td>默认「今天」</td><td>今天 / 24小时 / 7天 / 30天</td><td>点击展开下拉（截图 layer-1）；选择后仅 setTimeRange，KPI/图表<b>无变化</b>（静态 mock）</td><td>内联 zh/en</td><td>[Base]</td></tr>
+          <tr><td>3</td><td>Select（刷新间隔，w-24，带 RefreshCw 图标）</td><td>默认「30s」</td><td>5s / 30s / 1m / 关闭</td><td>点击展开下拉（截图 layer-3）；选择仅 setRefreshInterval，<b>不影响</b> useEffect 中固定 30000ms 的定时器（见差异 D-02）</td><td>「关闭」内联 zh/en</td><td>[Base]</td></tr>
+          <tr><td>4</td><td>Button（手动刷新，outline size=icon）</td><td>RefreshCw 图标</td><td>—</td><td>点击 → isRefreshing=true 图标 animate-spin，1s 后更新 lastUpdate 并停止；<b>不重新获取数据</b></td><td>—</td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果（提取 HTML vs demo 实际 DOM）</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>根节点</td><td>div.flex.items-center.justify-between</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>H1 文案</td><td>"监控总览"（text-2xl font-bold）</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>combobox 数</td><td>2（时间范围 + 刷新间隔）</td><td>2</td><td class="dom-pass">✅</td></tr>
+            <tr><td>刷新按钮</td><td>button[data-slot="button"] size-9，仅 RefreshCw 图标</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>默认选中值</td><td>今天 / 30s</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>时间范围选项（下拉打开实测）</td><td>今天/24小时/7天/30天（extract-range-options.html）</td><td>同（见层级 1 子文件）</td><td class="dom-pass">✅</td></tr>
+            <tr><td>刷新间隔选项（下拉打开实测）</td><td>5s/30s/1m/关闭，30s 为 aria-selected=true</td><td>同（见层级 2 子文件）</td><td class="dom-pass">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h4>交互层级详情（层级 1+ 拆分为独立文件）</h4>
+    <table class="spec-table layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>初始态</td><td>页面加载</td><td>上方内嵌</td></tr>
+        <tr><td>1</td><td>时间范围下拉打开 → 选 7 天</td><td>点击「今天」Select → 点击选项「7天」</td><td><a href="./layer-1-range-select.html">查看详情 -&gt;</a></td></tr>
+        <tr><td>2</td><td>刷新间隔下拉打开</td><td>点击「30s」Select</td><td><a href="./layer-2-refresh-select.html">查看详情 -&gt;</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- ===== 2.2 KPI 卡片区 ===== -->
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 KPI 卡片区（6 卡）</h3>
+    <h4>组件元信息</h4>
+    <table class="spec-table">
+      <tbody>
+        <tr><td>数据源</td><td><code>kpiData</code> 模块级静态常量（L58-65）——非接口、非随机，刷新/切范围均不变</td></tr>
+        <tr><td>交互层级数</td><td>1 层（点击卡片 = 下钻跳转，无页内状态变化）</td></tr>
+        <tr><td>形态/角色差异</td><td>[Base]；多租户租户视角为 🔒 只读语义（demo 未禁用点击，见 D-06）</td></tr>
+      </tbody>
+    </table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认渲染</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染</div>
+      <div class="component-preview" id="preview-kpi">
+<div class="grid grid-cols-6 gap-4"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 border cursor-pointer hover:shadow-md transition-all group"><div data-slot="card-content" class="p-4"><div class="flex items-center justify-between mb-1"><span class="text-sm text-gray-500 dark:text-gray-400">今日邮件量</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg></div><div class="text-2xl font-bold text-gray-900 dark:text-white">125,847</div><div class="flex items-center gap-1 mt-1 text-sm text-green-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-4 h-4"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span>+<!-- -->8.3<!-- -->%</span><span class="text-gray-400 text-xs ml-1">较昨日</span></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 border cursor-pointer hover:shadow-md transition-all group"><div data-slot="card-content" class="p-4"><div class="flex items-center justify-between mb-1"><span class="text-sm text-gray-500 dark:text-gray-400">投递成功率</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check w-4 h-4 text-gray-400 group-hover:text-green-500 transition-colors"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></div><div class="text-2xl font-bold text-green-500">97.2<!-- -->%</div><div class="text-xs text-gray-500 mt-1">阈值<!-- -->: <!-- -->&lt;<!-- -->95<!-- -->% <!-- -->警告</div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 border cursor-pointer hover:shadow-md transition-all group"><div data-slot="card-content" class="p-4"><div class="flex items-center justify-between mb-1"><span class="text-sm text-gray-500 dark:text-gray-400">队列深度</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-inbox w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-colors"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg></div><div class="text-2xl font-bold text-yellow-500">1,240</div><div class="flex items-center gap-1 mt-1"><span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span><span class="text-xs text-yellow-600 dark:text-yellow-400">&gt;<!-- -->1000<!-- --> <!-- -->警告</span></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 border cursor-pointer hover:shadow-md transition-all group"><div data-slot="card-content" class="p-4"><div class="flex items-center justify-between mb-1"><span class="text-sm text-gray-500 dark:text-gray-400">检测引擎</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg></div><div class="text-2xl font-bold text-green-500">4<!-- -->/<!-- -->4</div><div class="flex items-center gap-1 mt-1"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-xs text-green-600 dark:text-green-400">全部正常</span></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 border cursor-pointer hover:shadow-md transition-all group"><div data-slot="card-content" class="p-4"><div class="flex items-center justify-between mb-1"><span class="text-sm text-gray-500 dark:text-gray-400">基础设施</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-server w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg></div><div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span></div><div class="flex items-center gap-1 mt-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-xs text-green-600 dark:text-green-400">全部正常</span></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 border cursor-pointer hover:shadow-md transition-all group animate-pulse"><div data-slot="card-content" class="p-4"><div class="flex items-center justify-between mb-1"><span class="text-sm text-gray-500 dark:text-gray-400">未处理告警</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert w-4 h-4 text-red-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></div><div class="text-2xl font-bold text-red-500">2</div><div class="flex items-center gap-2 mt-1 text-xs"><span class="text-red-500">Critical: <!-- -->1</span><span class="text-yellow-500">Major: <!-- -->1</span></div></div></div></div>
+      </div>
+      <div class="preview-note">每张卡片均可点击下钻（demo 行为：<code>router.push</code>）。预览中点击卡片会弹出目标路由提示。</div>
+      <h4>卡片清单（浏览器实测值）</h4>
+      <table class="spec-table">
+        <thead><tr><th>#</th><th>卡片</th><th>主值</th><th>副信息</th><th>状态着色</th><th>点击跳转</th><th>特殊样式</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>今日邮件量</td><td>125,847</td><td>↗ +8.3% 较昨日（绿）</td><td>normal（白底）</td><td class="mono">/monitor/mailflow?tab=delivery</td><td>—</td></tr>
+          <tr><td>2</td><td>投递成功率</td><td>97.2%（绿字）</td><td>阈值: &lt;95% 警告</td><td>normal</td><td class="mono">/monitor/mailflow?tab=delivery</td><td>阈值 warn=95/critical=90</td></tr>
+          <tr><td>3</td><td>队列深度</td><td>1,240（黄字）</td><td>黄点脉冲 + &gt;1000 警告</td><td>warning（黄底黄边）</td><td class="mono">/monitor/mailflow?tab=queue</td><td>阈值 warn=1000/critical=5000</td></tr>
+          <tr><td>4</td><td>检测引擎</td><td>4/4（绿字）</td><td>绿点 + 全部正常</td><td>normal</td><td class="mono">/monitor/security</td><td>—</td></tr>
+          <tr><td>5</td><td>基础设施</td><td>5 个绿色圆点</td><td>绿点 + 全部正常</td><td>normal</td><td class="mono">/monitor/infrastructure</td><td>healthy&lt;total 时圆点变红</td></tr>
+          <tr><td>6</td><td>未处理告警</td><td>2（红字）</td><td>Critical: 1 · Major: 1</td><td>critical（红底红边）</td><td class="mono">/monitor/alerts</td><td>value&gt;0 时整卡 animate-pulse</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>卡片数</td><td>6（grid-cols-6 下 [data-slot="card"]）</td><td>6</td><td class="dom-pass">✅</td></tr>
+            <tr><td>主值文案</td><td>125,847 / 97.2% / 1,240 / 4/4 / 5圆点 / 2</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>warning 卡底色</td><td>bg-yellow-50 border-yellow-200（队列深度）</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>critical 卡脉冲</td><td>animate-pulse（未处理告警）</td><td>同</td><td class="dom-pass">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.3 四模块健康看板 ===== -->
+  <article class="component-spec" id="component-2-3">
+    <h3>2.3 四模块健康看板（4 卡）</h3>
+    <h4>组件元信息</h4>
+    <table class="spec-table">
+      <tbody>
+        <tr><td>数据源</td><td><code>moduleHealthData</code> 静态常量（L68-107）</td></tr>
+        <tr><td>交互层级数</td><td>1 层（点击卡片下钻）</td></tr>
+        <tr><td>形态/角色差异</td><td>[Base]</td></tr>
+      </tbody>
+    </table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认渲染</h4>
+      <div class="component-preview" id="preview-health">
+<div class="grid grid-cols-4 gap-4"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-white dark:bg-gray-800 border cursor-pointer hover:shadow-md transition-all group"><div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2 flex flex-row items-center justify-between"><div data-slot="card-title" class="text-sm font-medium flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-server w-4 h-4"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>基础设施</div><div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform"><path d="m9 18 6-6-6-6"></path></svg></div></div><div data-slot="card-content" class="px-6 space-y-3"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cpu w-4 h-4 text-gray-400"><rect width="16" height="16" x="4" y="4" rx="2"></rect><rect width="6" height="6" x="9" y="9" rx="1"></rect><path d="M15 2v2"></path><path d="M15 20v2"></path><path d="M2 15h2"></path><path d="M2 9h2"></path><path d="M20 15h2"></path><path d="M20 9h2"></path><path d="M9 2v2"></path><path d="M9 20v2"></path></svg><span class="text-sm text-gray-600 dark:text-gray-400 w-12">CPU</span><div class="flex-1 flex items-center gap-2"><div aria-valuemax="100" aria-valuemin="0" role="progressbar" data-state="indeterminate" data-max="100" data-slot="progress" class="bg-primary/20 relative w-full overflow-hidden rounded-full h-2 flex-1 [&amp;&gt;div]:bg-green-500"><div data-state="indeterminate" data-max="100" data-slot="progress-indicator" class="bg-primary h-full w-full flex-1 transition-all" style="transform:translateX(-55%)"></div></div><span class="text-sm font-medium text-green-500">45<!-- -->%</span></div></div><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-memory-stick w-4 h-4 text-gray-400"><path d="M6 19v-3"></path><path d="M10 19v-3"></path><path d="M14 19v-3"></path><path d="M18 19v-3"></path><path d="M8 11V9"></path><path d="M16 11V9"></path><path d="M12 11V9"></path><path d="M2 15h20"></path><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.1a2 2 0 0 0 0 3.837V17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5.1a2 2 0 0 0 0-3.837Z"></path></svg><span class="text-sm text-gray-600 dark:text-gray-400 w-12">内存</span><div class="flex-1 flex items-center gap-2"><div aria-valuemax="100" aria-valuemin="0" role="progressbar" data-state="indeterminate" data-max="100" data-slot="progress" class="bg-primary/20 relative w-full overflow-hidden rounded-full h-2 flex-1 [&amp;&gt;div]:bg-green-500"><div data-state="indeterminate" data-max="100" data-slot="progress-indicator" class="bg-primary h-full w-full flex-1 transition-all" style="transform:translateX(-38%)"></div></div><span class="text-sm font-medium text-green-500">62<!-- -->%</span></div></div><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hard-drive w-4 h-4 text-gray-400"><line x1="22" x2="2" y1="12" y2="12"></line><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path><line x1="6" x2="6.01" y1="16" y2="16"></line><line x1="10" x2="10.01" y1="16" y2="16"></line></svg><span class="text-sm text-gray-600 dark:text-gray-400 w-12">磁盘</span><div class="flex-1 flex items-center gap-2"><div aria-valuemax="100" aria-valuemin="0" role="progressbar" data-state="indeterminate" data-max="100" data-slot="progress" class="bg-primary/20 relative w-full overflow-hidden rounded-full h-2 flex-1 [&amp;&gt;div]:bg-green-500"><div data-state="indeterminate" data-max="100" data-slot="progress-indicator" class="bg-primary h-full w-full flex-1 transition-all" style="transform:translateX(-22%)"></div></div><span class="text-sm font-medium text-green-500">78<!-- -->%</span></div></div><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database w-4 h-4 text-gray-400"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg><span class="text-sm text-gray-600 dark:text-gray-400 w-12">数据库</span><span class="text-sm font-medium text-green-500">正常</span></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-white dark:bg-gray-800 border cursor-pointer hover:shadow-md transition-all group"><div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2 flex flex-row items-center justify-between"><div data-slot="card-title" class="text-sm font-medium flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail w-4 h-4"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>邮件流</div><div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-500"></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform"><path d="m9 18 6-6-6-6"></path></svg></div></div><div data-slot="card-content" class="px-6"><div class="h-16 mb-2"><div class="recharts-responsive-container" style="width:100%;height:100%;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 64px; max-width: 326px;"><svg class="recharts-surface" width="326" height="64" viewBox="0 0 326 64" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts2-clip"><rect x="5" y="5" height="54" width="316"></rect></clipPath></defs><g class="recharts-layer recharts-area"><g class="recharts-layer"><g class="recharts-layer" ><g class="recharts-layer"><path fill="#FAAD14" fill-opacity="0.2" stroke-width="2" width="316" height="54" stroke="none" class="recharts-curve recharts-area-area" d="M5,32C26.067,34.531,47.133,37.063,68.2,37.063C89.267,37.063,110.333,23.281,131.4,18.5C152.467,13.719,173.533,8.375,194.6,8.375C215.667,8.375,236.733,21.875,257.8,21.875C278.867,21.875,299.933,19.513,321,17.15L321,59C299.933,59,278.867,59,257.8,59C236.733,59,215.667,59,194.6,59C173.533,59,152.467,59,131.4,59C110.333,59,89.267,59,68.2,59C47.133,59,26.067,59,5,59Z"></path><path stroke="#FAAD14" fill="none" fill-opacity="0.2" stroke-width="2" width="316" height="54" class="recharts-curve recharts-area-curve" d="M5,32C26.067,34.531,47.133,37.063,68.2,37.063C89.267,37.063,110.333,23.281,131.4,18.5C152.467,13.719,173.533,8.375,194.6,8.375C215.667,8.375,236.733,21.875,257.8,21.875C278.867,21.875,299.933,19.513,321,17.15"></path></g></g></g></g></svg></div></div></div><div class="flex items-center justify-between text-sm"><div><span class="text-gray-500">队列深度<!-- -->: </span><span class="font-medium text-yellow-500">1,240</span></div><div><span class="text-gray-500">延时<!-- -->: </span><span class="font-medium text-gray-900 dark:text-white">1.2<!-- -->s</span></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-white dark:bg-gray-800 border cursor-pointer hover:shadow-md transition-all group"><div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2 flex flex-row items-center justify-between"><div data-slot="card-title" class="text-sm font-medium flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-4 h-4"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>检测引擎</div><div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform"><path d="m9 18 6-6-6-6"></path></svg></div></div><div data-slot="card-content" class="px-6"><div class="grid grid-cols-2 gap-2"><div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"><div class="w-3 h-3 rounded-full" style="background-color:#1890FF"></div><span class="text-xs text-gray-600 dark:text-gray-400">反垃圾</span><span class="ml-auto w-2 h-2 rounded-full bg-green-500"></span></div><div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"><div class="w-3 h-3 rounded-full" style="background-color:#52C41A"></div><span class="text-xs text-gray-600 dark:text-gray-400">反病毒</span><span class="ml-auto w-2 h-2 rounded-full bg-green-500"></span></div><div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"><div class="w-3 h-3 rounded-full" style="background-color:#FA8C16"></div><span class="text-xs text-gray-600 dark:text-gray-400">沙箱</span><span class="ml-auto w-2 h-2 rounded-full bg-green-500"></span></div><div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"><div class="w-3 h-3 rounded-full" style="background-color:#722ED1"></div><span class="text-xs text-gray-600 dark:text-gray-400">RBL</span><span class="ml-auto w-2 h-2 rounded-full bg-green-500"></span></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm bg-white dark:bg-gray-800 border cursor-pointer hover:shadow-md transition-all group"><div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2 flex flex-row items-center justify-between"><div data-slot="card-title" class="text-sm font-medium flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert w-4 h-4"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>告警中心</div><div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-500"></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform"><path d="m9 18 6-6-6-6"></path></svg></div></div><div data-slot="card-content" class="px-6"><div class="flex items-center gap-4"><div class="w-20 h-20"><div class="recharts-responsive-container" style="width:100%;height:100%;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 80px; max-width: 80px;"><svg cx="50%" cy="50%" class="recharts-surface" width="80" height="80" viewBox="0 0 80 80" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts8-clip"><rect x="5" y="5" height="70" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-pie" tabindex="0"><g class="recharts-layer"><g class="recharts-layer recharts-pie-sector" tabindex="-1"><path cx="40" cy="40" name="未确认" stroke="#fff" fill="#FF4D4F" tabindex="-1" class="recharts-sector" d="M 75,40
+    A 35,35,0,
+    0,0,
+    67.61991782887378,18.502555055861627
+  L 55.78281018792787,27.715745746206643
+            A 20,20,0,
+            0,1,
+            60,40 Z" role="img"></path></g><g class="recharts-layer recharts-pie-sector" tabindex="-1"><path cx="40" cy="40" name="处理中" stroke="#fff" fill="#FAAD14" tabindex="-1" class="recharts-sector" d="M 67.61991782887378,18.502555055861627
+    A 35,35,0,
+    0,0,
+    16.29514499309907,14.249663126440385
+  L 26.454368567485183,25.285521786537366
+            A 20,20,0,
+            0,1,
+            55.78281018792787,27.715745746206643 Z" role="img"></path></g><g class="recharts-layer recharts-pie-sector" tabindex="-1"><path cx="40" cy="40" name="已解决" stroke="#fff" fill="#52C41A" tabindex="-1" class="recharts-sector" d="M 16.29514499309907,14.249663126440385
+    A 35,35,0,
+    1,0,
+    75,40.00000000000001
+  L 60,40.00000000000001
+            A 20,20,0,
+            1,1,
+            26.454368567485183,25.285521786537366 Z" role="img"></path></g></g></g></svg></div></div></div><div class="flex-1 space-y-1 text-sm"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="text-gray-600 dark:text-gray-400">未确认</span><span class="ml-auto font-medium text-red-500">2</span></div><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="text-gray-600 dark:text-gray-400">处理中</span><span class="ml-auto font-medium text-yellow-500">5</span></div><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-gray-600 dark:text-gray-400">已解决</span><span class="ml-auto font-medium text-green-500">12</span></div></div></div></div></div></div>
+      </div>
+      <table class="spec-table">
+        <thead><tr><th>卡片</th><th>头部状态点</th><th>内容</th><th>点击跳转</th></tr></thead>
+        <tbody>
+          <tr><td>基础设施</td><td>绿（normal）</td><td>CPU 45% / 内存 62% / 磁盘 78%（Progress 进度条按阈值着色）+ 数据库「正常」</td><td class="mono">/monitor/infrastructure</td></tr>
+          <tr><td>邮件流</td><td>黄（warning）</td><td>队列趋势迷你面积图（#FAAD14，h-16）+ 队列深度 1,240（黄）+ 延时 1.2s</td><td class="mono">/monitor/mailflow</td></tr>
+          <tr><td>检测引擎</td><td>绿（normal）</td><td>2×2 引擎状态格：反垃圾/反病毒/沙箱/RBL，各带彩色圆点 + 绿色状态点</td><td class="mono">/monitor/security</td></tr>
+          <tr><td>告警中心</td><td>黄（warning）</td><td>甜甜圈饼图（未确认2红/处理中5黄/已解决12绿）+ 三行计数</td><td class="mono">/monitor/alerts</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>卡片数</td><td>4</td><td>4</td><td class="dom-pass">✅</td></tr>
+            <tr><td>进度条</td><td>3 个 role="progressbar"（CPU/内存/磁盘）</td><td>3</td><td class="dom-pass">✅</td></tr>
+            <tr><td>引擎状态格</td><td>4 格（grid-cols-2）</td><td>4</td><td class="dom-pass">✅</td></tr>
+            <tr><td>饼图图例行</td><td>3 行（未确认/处理中/已解决 = 2/5/12）</td><td>同</td><td class="dom-pass">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.4 双趋势图 ===== -->
+  <article class="component-spec" id="component-2-4">
+    <h3>2.4 双趋势图（24h）</h3>
+    <h4>组件元信息</h4>
+    <table class="spec-table">
+      <tbody>
+        <tr><td>数据源</td><td><code>mailflowTrendData</code> / <code>engineTrendData</code>：模块加载时 <code>Math.random()</code> 生成 24 点，每次页面加载数值不同，与会话内交互无关</td></tr>
+        <tr><td>交互层级数</td><td>1 层（外链按钮下钻；图表 hover 出 recharts Tooltip）</td></tr>
+        <tr><td>形态/角色差异</td><td>[Base]</td></tr>
+      </tbody>
+    </table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认渲染</h4>
+      <div class="component-preview" id="preview-trend">
+<div class="grid grid-cols-2 gap-6"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2 flex flex-row items-center justify-between"><div data-slot="card-title" class="font-semibold text-base">邮件流健康趋势（24h）</div><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link w-4 h-4"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></button></div><div data-slot="card-content" class="px-6"><div class="recharts-responsive-container" style="width:100%;height:280px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 280px; max-width: 714px;"><svg class="recharts-surface" width="714" height="280" viewBox="0 0 714 280" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts12-clip"><rect x="65" y="5" height="216" width="584"></rect></clipPath></defs><g class="recharts-cartesian-grid"><g class="recharts-cartesian-grid-horizontal"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="65" y1="221" x2="649" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="65" y1="167" x2="649" y2="167"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="65" y1="113" x2="649" y2="113"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="65" y1="59" x2="649" y2="59"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="65" y1="5" x2="649" y2="5"></line></g><g class="recharts-cartesian-grid-vertical"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="65" y1="5" x2="65" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="141.17391304347825" y1="5" x2="141.17391304347825" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="217.3478260869565" y1="5" x2="217.3478260869565" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="293.52173913043475" y1="5" x2="293.52173913043475" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="369.695652173913" y1="5" x2="369.695652173913" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="445.8695652173913" y1="5" x2="445.8695652173913" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="522.0434782608695" y1="5" x2="522.0434782608695" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="598.2173913043478" y1="5" x2="598.2173913043478" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="584" height="216" x1="649" y1="5" x2="649" y2="221"></line></g></g><g class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"><line orientation="bottom" width="584" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="221" x2="649" y2="221"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="584" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="65" y1="227" x2="65" y2="221"></line><text orientation="bottom" width="584" height="30" stroke="none" font-size="10" x="65" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="65" dy="0.71em">00:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="584" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="141.17391304347825" y1="227" x2="141.17391304347825" y2="221"></line><text orientation="bottom" width="584" height="30" stroke="none" font-size="10" x="141.17391304347825" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="141.17391304347825" dy="0.71em">03:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="584" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="217.3478260869565" y1="227" x2="217.3478260869565" y2="221"></line><text orientation="bottom" width="584" height="30" stroke="none" font-size="10" x="217.3478260869565" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="217.3478260869565" dy="0.71em">06:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="584" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="293.52173913043475" y1="227" x2="293.52173913043475" y2="221"></line><text orientation="bottom" width="584" height="30" stroke="none" font-size="10" x="293.52173913043475" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="293.52173913043475" dy="0.71em">09:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="584" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="369.695652173913" y1="227" x2="369.695652173913" y2="221"></line><text orientation="bottom" width="584" height="30" stroke="none" font-size="10" x="369.695652173913" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="369.695652173913" dy="0.71em">12:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="584" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="445.8695652173913" y1="227" x2="445.8695652173913" y2="221"></line><text orientation="bottom" width="584" height="30" stroke="none" font-size="10" x="445.8695652173913" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="445.8695652173913" dy="0.71em">15:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="584" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="522.0434782608695" y1="227" x2="522.0434782608695" y2="221"></line><text orientation="bottom" width="584" height="30" stroke="none" font-size="10" x="522.0434782608695" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="522.0434782608695" dy="0.71em">18:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="584" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="598.2173913043478" y1="227" x2="598.2173913043478" y2="221"></line><text orientation="bottom" width="584" height="30" stroke="none" font-size="10" x="598.2173913043478" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="598.2173913043478" dy="0.71em">21:00</tspan></text></g></g></g><g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis"><line orientation="left" width="60" height="216" stroke="#1890FF" x="5" y="5" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="5" x2="65" y2="221"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="216" stroke="#1890FF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="221" x2="65" y2="221"></line><text orientation="left" width="60" height="216" stroke="none" font-size="10" x="57" y="221" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#1890FF"><tspan x="57" dy="0.355em">0</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="216" stroke="#1890FF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="167" x2="65" y2="167"></line><text orientation="left" width="60" height="216" stroke="none" font-size="10" x="57" y="167" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#1890FF"><tspan x="57" dy="0.355em">2000</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="216" stroke="#1890FF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="113" x2="65" y2="113"></line><text orientation="left" width="60" height="216" stroke="none" font-size="10" x="57" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#1890FF"><tspan x="57" dy="0.355em">4000</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="216" stroke="#1890FF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="59" x2="65" y2="59"></line><text orientation="left" width="60" height="216" stroke="none" font-size="10" x="57" y="59" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#1890FF"><tspan x="57" dy="0.355em">6000</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="216" stroke="#1890FF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="5" x2="65" y2="5"></line><text orientation="left" width="60" height="216" stroke="none" font-size="10" x="57" y="7.5" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#1890FF"><tspan x="57" dy="0.355em">8000</tspan></text></g></g></g><g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis"><line orientation="right" width="60" height="216" stroke="#FA8C16" x="649" y="5" class="recharts-cartesian-axis-line" fill="none" x1="649" y1="5" x2="649" y2="221"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="right" width="60" height="216" stroke="#FA8C16" x="649" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="655" y1="221" x2="649" y2="221"></line><text orientation="right" width="60" height="216" stroke="none" font-size="10" x="657" y="221" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="start" fill="#FA8C16"><tspan x="657" dy="0.355em">0</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="right" width="60" height="216" stroke="#FA8C16" x="649" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="655" y1="167" x2="649" y2="167"></line><text orientation="right" width="60" height="216" stroke="none" font-size="10" x="657" y="167" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="start" fill="#FA8C16"><tspan x="657" dy="0.355em">2</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="right" width="60" height="216" stroke="#FA8C16" x="649" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="655" y1="113" x2="649" y2="113"></line><text orientation="right" width="60" height="216" stroke="none" font-size="10" x="657" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="start" fill="#FA8C16"><tspan x="657" dy="0.355em">4</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="right" width="60" height="216" stroke="#FA8C16" x="649" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="655" y1="59" x2="649" y2="59"></line><text orientation="right" width="60" height="216" stroke="none" font-size="10" x="657" y="59" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="start" fill="#FA8C16"><tspan x="657" dy="0.355em">6</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="right" width="60" height="216" stroke="#FA8C16" x="649" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="655" y1="5" x2="649" y2="5"></line><text orientation="right" width="60" height="216" stroke="none" font-size="10" x="657" y="7.5" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="start" fill="#FA8C16"><tspan x="657" dy="0.355em">8</tspan></text></g></g></g><g class="recharts-layer recharts-line"><path stroke="#1890FF" stroke-width="2" name="volume" width="584" height="216" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="828.2054443359375px 0px" d="M65,68.396C73.464,89.389,81.928,110.381,90.391,110.381C98.855,110.381,107.319,75.641,115.783,71.933C124.246,68.225,132.71,66.371,141.174,66.371C149.638,66.371,158.101,75.515,166.565,79.223C175.029,82.931,183.493,83.773,191.957,88.619C200.42,93.466,208.884,108.302,217.348,108.302C225.812,108.302,234.275,107.285,242.739,105.251C251.203,103.217,259.667,41.369,268.13,36.401C276.594,31.433,285.058,28.949,293.522,28.949C301.986,28.949,310.449,30.56,318.913,33.782C327.377,37.004,335.841,53.573,344.304,53.573C352.768,53.573,361.232,20.201,369.696,20.201C378.159,20.201,386.623,23.126,395.087,28.976C403.551,34.826,412.014,57.731,420.478,57.731C428.942,57.731,437.406,56.993,445.87,55.517C454.333,54.041,462.797,10.049,471.261,10.049C479.725,10.049,488.188,26.604,496.652,32.621C505.116,38.637,513.58,37.13,522.043,46.148C530.507,55.166,538.971,99.932,547.435,99.932C555.899,99.932,564.362,92.894,572.826,90.455C581.29,88.016,589.754,88.736,598.217,85.298C606.681,81.86,615.145,63.941,623.609,63.941C632.072,63.941,640.536,71.744,649,79.547"></path><g class="recharts-layer"></g></g><g class="recharts-layer recharts-line"><path stroke="#FA8C16" stroke-width="2" stroke-dasharray="5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 5px, 1.196533203125px, 0px" name="latencyP95" width="584" height="216" fill="none" class="recharts-curve recharts-line-curve" d="M65,148.1C73.464,146.75,81.928,145.4,90.391,145.4C98.855,145.4,107.319,172.4,115.783,172.4C124.246,172.4,132.71,156.2,141.174,156.2C149.638,156.2,158.101,175.1,166.565,175.1C175.029,175.1,183.493,149.9,191.957,148.1C200.42,146.3,208.884,145.4,217.348,145.4C225.812,145.4,234.275,177.8,242.739,177.8C251.203,177.8,259.667,164.3,268.13,150.8C276.594,137.3,285.058,98.6,293.522,96.8C301.986,95,310.449,95.9,318.913,94.1C327.377,92.3,335.841,86,344.304,86C352.768,86,361.232,158.9,369.696,158.9C378.159,158.9,386.623,129.2,395.087,129.2C403.551,129.2,412.014,164.3,420.478,164.3C428.942,164.3,437.406,129.2,445.87,129.2C454.333,129.2,462.797,149.9,471.261,153.5C479.725,157.1,488.188,156.65,496.652,158.9C505.116,161.15,513.58,167,522.043,167C530.507,167,538.971,158,547.435,153.5C555.899,149,564.362,140,572.826,140C581.29,140,589.754,145.4,598.217,148.1C606.681,150.8,615.145,156.2,623.609,156.2C632.072,156.2,640.536,142.7,649,129.2"></path><g class="recharts-layer"></g></g></svg><div class="recharts-legend-wrapper" style="position: absolute; width: 704px; height: auto; left: 5px; bottom: 5px;"><ul class="recharts-default-legend" style="padding: 0px; margin: 0px; text-align: center;"><li class="recharts-legend-item legend-item-0" style="display: inline-block; margin-right: 10px;"><svg class="recharts-surface" width="14" height="14" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 4px;"><title></title><desc></desc><path stroke-width="4" fill="none" stroke="#1890FF" d="M0,16h10.666666666666666
+            A5.333333333333333,5.333333333333333,0,1,1,21.333333333333332,16
+            H32M21.333333333333332,16
+            A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16" class="recharts-legend-icon"></path></svg><span class="recharts-legend-item-text" style="color: rgb(24, 144, 255);">邮件量</span></li><li class="recharts-legend-item legend-item-1" style="display: inline-block; margin-right: 10px;"><svg class="recharts-surface" width="14" height="14" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 4px;"><title></title><desc></desc><path stroke-width="4" fill="none" stroke="#FA8C16" d="M0,16h10.666666666666666
+            A5.333333333333333,5.333333333333333,0,1,1,21.333333333333332,16
+            H32M21.333333333333332,16
+            A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16" class="recharts-legend-icon"></path></svg><span class="recharts-legend-item-text" style="color: rgb(250, 140, 22);">投递延时P95</span></li></ul></div><div tabindex="-1" class="recharts-tooltip-wrapper recharts-tooltip-wrapper-right recharts-tooltip-wrapper-bottom" style="visibility: hidden; pointer-events: none; position: absolute; top: 0px; left: 0px; transform: translate(65px, 10px);"><div class="recharts-default-tooltip" style="margin: 0px; padding: 10px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); white-space: nowrap; font-size: 12px;"><p class="recharts-tooltip-label" style="margin: 0px;"></p></div></div></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2 flex flex-row items-center justify-between"><div data-slot="card-title" class="font-semibold text-base">检测引擎性能趋势（24h）</div><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link w-4 h-4"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></button></div><div data-slot="card-content" class="px-6"><div class="recharts-responsive-container" style="width:100%;height:280px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 280px; max-width: 714px;"><svg class="recharts-surface" width="714" height="280" viewBox="0 0 714 280" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts22-clip"><rect x="65" y="5" height="216" width="644"></rect></clipPath></defs><g class="recharts-cartesian-grid"><g class="recharts-cartesian-grid-horizontal"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="65" y1="221" x2="709" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="65" y1="167" x2="709" y2="167"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="65" y1="113" x2="709" y2="113"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="65" y1="59" x2="709" y2="59"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="65" y1="5" x2="709" y2="5"></line></g><g class="recharts-cartesian-grid-vertical"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="65" y1="5" x2="65" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="149" y1="5" x2="149" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="233" y1="5" x2="233" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="317" y1="5" x2="317" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="401" y1="5" x2="401" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="485" y1="5" x2="485" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="569" y1="5" x2="569" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="653" y1="5" x2="653" y2="221"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="644" height="216" x1="709" y1="5" x2="709" y2="221"></line></g></g><g class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"><line orientation="bottom" width="644" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="221" x2="709" y2="221"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="644" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="65" y1="227" x2="65" y2="221"></line><text orientation="bottom" width="644" height="30" stroke="none" font-size="10" x="65" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="65" dy="0.71em">00:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="644" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="149" y1="227" x2="149" y2="221"></line><text orientation="bottom" width="644" height="30" stroke="none" font-size="10" x="149" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="149" dy="0.71em">03:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="644" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="233" y1="227" x2="233" y2="221"></line><text orientation="bottom" width="644" height="30" stroke="none" font-size="10" x="233" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="233" dy="0.71em">06:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="644" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="317" y1="227" x2="317" y2="221"></line><text orientation="bottom" width="644" height="30" stroke="none" font-size="10" x="317" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="317" dy="0.71em">09:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="644" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="401" y1="227" x2="401" y2="221"></line><text orientation="bottom" width="644" height="30" stroke="none" font-size="10" x="401" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="401" dy="0.71em">12:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="644" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="485" y1="227" x2="485" y2="221"></line><text orientation="bottom" width="644" height="30" stroke="none" font-size="10" x="485" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="485" dy="0.71em">15:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="644" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="569" y1="227" x2="569" y2="221"></line><text orientation="bottom" width="644" height="30" stroke="none" font-size="10" x="569" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="569" dy="0.71em">18:00</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="644" height="30" stroke="#9CA3AF" x="65" y="221" class="recharts-cartesian-axis-tick-line" fill="none" x1="653" y1="227" x2="653" y2="221"></line><text orientation="bottom" width="644" height="30" stroke="none" font-size="10" x="653" y="229" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="653" dy="0.71em">21:00</tspan></text></g></g></g><g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis"><line orientation="left" width="60" height="216" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="5" x2="65" y2="221"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="216" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="221" x2="65" y2="221"></line><text orientation="left" width="60" height="216" stroke="none" font-size="10" x="57" y="221" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">0</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="216" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="167" x2="65" y2="167"></line><text orientation="left" width="60" height="216" stroke="none" font-size="10" x="57" y="167" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">1500</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="216" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="113" x2="65" y2="113"></line><text orientation="left" width="60" height="216" stroke="none" font-size="10" x="57" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">3000</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="216" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="59" x2="65" y2="59"></line><text orientation="left" width="60" height="216" stroke="none" font-size="10" x="57" y="59" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">4500</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="216" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="5" x2="65" y2="5"></line><text orientation="left" width="60" height="216" stroke="none" font-size="10" x="57" y="7.5" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">6000</tspan></text></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><g class="recharts-layer" ><g class="recharts-layer"><path fill="#1890FF" fill-opacity="0.6" width="644" height="216" stroke="none" class="recharts-curve recharts-area-area" d="M65,191.984C74.333,191.453,83.667,190.922,93,190.004C102.333,189.086,111.667,186.476,121,186.476C130.333,186.476,139.667,189.176,149,189.32C158.333,189.464,167.667,189.392,177,189.536C186.333,189.68,195.667,191.156,205,191.156C214.333,191.156,223.667,187.88,233,187.88C242.333,187.88,251.667,192.812,261,192.812C270.333,192.812,279.667,178.772,289,178.772C298.333,178.772,307.667,183.098,317,184.496C326.333,185.894,335.667,187.16,345,187.16C354.333,187.16,363.667,182.606,373,181.076C382.333,179.546,391.667,177.98,401,177.98C410.333,177.98,419.667,178.652,429,179.996C438.333,181.34,447.667,186.764,457,186.764C466.333,186.764,475.667,179.276,485,179.276C494.333,179.276,503.667,180.374,513,181.4C522.333,182.426,531.667,185.432,541,185.432C550.333,185.432,559.667,178.916,569,178.916C578.333,178.916,587.667,184.19,597,186.08C606.333,187.97,615.667,190.256,625,190.256C634.333,190.256,643.667,185.864,653,185.864C662.333,185.864,671.667,194.18,681,194.18C690.333,194.18,699.667,193.064,709,191.948L709,221C699.667,221,690.333,221,681,221C671.667,221,662.333,221,653,221C643.667,221,634.333,221,625,221C615.667,221,606.333,221,597,221C587.667,221,578.333,221,569,221C559.667,221,550.333,221,541,221C531.667,221,522.333,221,513,221C503.667,221,494.333,221,485,221C475.667,221,466.333,221,457,221C447.667,221,438.333,221,429,221C419.667,221,410.333,221,401,221C391.667,221,382.333,221,373,221C363.667,221,354.333,221,345,221C335.667,221,326.333,221,317,221C307.667,221,298.333,221,289,221C279.667,221,270.333,221,261,221C251.667,221,242.333,221,233,221C223.667,221,214.333,221,205,221C195.667,221,186.333,221,177,221C167.667,221,158.333,221,149,221C139.667,221,130.333,221,121,221C111.667,221,102.333,221,93,221C83.667,221,74.333,221,65,221Z"></path><path stroke="#1890FF" fill="none" fill-opacity="0.6" width="644" height="216" class="recharts-curve recharts-area-curve" d="M65,191.984C74.333,191.453,83.667,190.922,93,190.004C102.333,189.086,111.667,186.476,121,186.476C130.333,186.476,139.667,189.176,149,189.32C158.333,189.464,167.667,189.392,177,189.536C186.333,189.68,195.667,191.156,205,191.156C214.333,191.156,223.667,187.88,233,187.88C242.333,187.88,251.667,192.812,261,192.812C270.333,192.812,279.667,178.772,289,178.772C298.333,178.772,307.667,183.098,317,184.496C326.333,185.894,335.667,187.16,345,187.16C354.333,187.16,363.667,182.606,373,181.076C382.333,179.546,391.667,177.98,401,177.98C410.333,177.98,419.667,178.652,429,179.996C438.333,181.34,447.667,186.764,457,186.764C466.333,186.764,475.667,179.276,485,179.276C494.333,179.276,503.667,180.374,513,181.4C522.333,182.426,531.667,185.432,541,185.432C550.333,185.432,559.667,178.916,569,178.916C578.333,178.916,587.667,184.19,597,186.08C606.333,187.97,615.667,190.256,625,190.256C634.333,190.256,643.667,185.864,653,185.864C662.333,185.864,671.667,194.18,681,194.18C690.333,194.18,699.667,193.064,709,191.948"></path></g></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><g class="recharts-layer" ><g class="recharts-layer"><path fill="#52C41A" fill-opacity="0.6" width="644" height="216" stroke="none" class="recharts-curve recharts-area-area" d="M65,188.564C74.333,187.751,83.667,186.938,93,186.008C102.333,185.078,111.667,182.984,121,182.984C130.333,182.984,139.667,184.28,149,184.712C158.333,185.144,167.667,185.324,177,185.576C186.333,185.828,195.667,186.224,205,186.224C214.333,186.224,223.667,183.236,233,183.236C242.333,183.236,251.667,188.888,261,188.888C270.333,188.888,279.667,174.308,289,174.308C298.333,174.308,307.667,177.05,317,178.196C326.333,179.342,335.667,181.184,345,181.184C354.333,181.184,363.667,176.636,373,175.388C382.333,174.14,391.667,173.516,401,173.516C410.333,173.516,419.667,173.84,429,174.488C438.333,175.136,447.667,182.084,457,182.084C466.333,182.084,475.667,174.596,485,174.596C494.333,174.596,503.667,174.92,513,175.568C522.333,176.216,531.667,180.788,541,180.788C550.333,180.788,559.667,173.948,569,173.948C578.333,173.948,587.667,179.594,597,181.76C606.333,183.926,615.667,186.944,625,186.944C634.333,186.944,643.667,181.364,653,181.364C662.333,181.364,671.667,191.12,681,191.12C690.333,191.12,699.667,190.058,709,188.996L709,191.948C699.667,193.064,690.333,194.18,681,194.18C671.667,194.18,662.333,185.864,653,185.864C643.667,185.864,634.333,190.256,625,190.256C615.667,190.256,606.333,187.97,597,186.08C587.667,184.19,578.333,178.916,569,178.916C559.667,178.916,550.333,185.432,541,185.432C531.667,185.432,522.333,182.426,513,181.4C503.667,180.374,494.333,179.276,485,179.276C475.667,179.276,466.333,186.764,457,186.764C447.667,186.764,438.333,181.34,429,179.996C419.667,178.652,410.333,177.98,401,177.98C391.667,177.98,382.333,179.546,373,181.076C363.667,182.606,354.333,187.16,345,187.16C335.667,187.16,326.333,185.894,317,184.496C307.667,183.098,298.333,178.772,289,178.772C279.667,178.772,270.333,192.812,261,192.812C251.667,192.812,242.333,187.88,233,187.88C223.667,187.88,214.333,191.156,205,191.156C195.667,191.156,186.333,189.68,177,189.536C167.667,189.392,158.333,189.464,149,189.32C139.667,189.176,130.333,186.476,121,186.476C111.667,186.476,102.333,189.086,93,190.004C83.667,190.922,74.333,191.453,65,191.984Z"></path><path stroke="#52C41A" fill="none" fill-opacity="0.6" width="644" height="216" class="recharts-curve recharts-area-curve" d="M65,188.564C74.333,187.751,83.667,186.938,93,186.008C102.333,185.078,111.667,182.984,121,182.984C130.333,182.984,139.667,184.28,149,184.712C158.333,185.144,167.667,185.324,177,185.576C186.333,185.828,195.667,186.224,205,186.224C214.333,186.224,223.667,183.236,233,183.236C242.333,183.236,251.667,188.888,261,188.888C270.333,188.888,279.667,174.308,289,174.308C298.333,174.308,307.667,177.05,317,178.196C326.333,179.342,335.667,181.184,345,181.184C354.333,181.184,363.667,176.636,373,175.388C382.333,174.14,391.667,173.516,401,173.516C410.333,173.516,419.667,173.84,429,174.488C438.333,175.136,447.667,182.084,457,182.084C466.333,182.084,475.667,174.596,485,174.596C494.333,174.596,503.667,174.92,513,175.568C522.333,176.216,531.667,180.788,541,180.788C550.333,180.788,559.667,173.948,569,173.948C578.333,173.948,587.667,179.594,597,181.76C606.333,183.926,615.667,186.944,625,186.944C634.333,186.944,643.667,181.364,653,181.364C662.333,181.364,671.667,191.12,681,191.12C690.333,191.12,699.667,190.058,709,188.996"></path></g></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><g class="recharts-layer" ><g class="recharts-layer"><path fill="#FA8C16" fill-opacity="0.6" width="644" height="216" stroke="none" class="recharts-curve recharts-area-area" d="M65,188.204C74.333,187.4,83.667,186.596,93,185.648C102.333,184.7,111.667,182.516,121,182.516C130.333,182.516,139.667,183.812,149,184.244C158.333,184.676,167.667,184.85,177,185.108C186.333,185.366,195.667,185.792,205,185.792C214.333,185.792,223.667,182.876,233,182.876C242.333,182.876,251.667,188.42,261,188.42C270.333,188.42,279.667,173.444,289,173.444C298.333,173.444,307.667,176.354,317,177.548C326.333,178.742,335.667,180.608,345,180.608C354.333,180.608,363.667,176.054,373,174.74C382.333,173.426,391.667,172.724,401,172.724C410.333,172.724,419.667,173.06,429,173.732C438.333,174.404,447.667,181.544,457,181.544C466.333,181.544,475.667,174.02,485,174.02C494.333,174.02,503.667,174.26,513,174.74C522.333,175.22,531.667,180.176,541,180.176C550.333,180.176,559.667,173.228,569,173.228C578.333,173.228,587.667,179.162,597,181.364C606.333,183.566,615.667,186.44,625,186.44C634.333,186.44,643.667,181.004,653,181.004C662.333,181.004,671.667,190.472,681,190.472C690.333,190.472,699.667,189.428,709,188.384L709,188.996C699.667,190.058,690.333,191.12,681,191.12C671.667,191.12,662.333,181.364,653,181.364C643.667,181.364,634.333,186.944,625,186.944C615.667,186.944,606.333,183.926,597,181.76C587.667,179.594,578.333,173.948,569,173.948C559.667,173.948,550.333,180.788,541,180.788C531.667,180.788,522.333,176.216,513,175.568C503.667,174.92,494.333,174.596,485,174.596C475.667,174.596,466.333,182.084,457,182.084C447.667,182.084,438.333,175.136,429,174.488C419.667,173.84,410.333,173.516,401,173.516C391.667,173.516,382.333,174.14,373,175.388C363.667,176.636,354.333,181.184,345,181.184C335.667,181.184,326.333,179.342,317,178.196C307.667,177.05,298.333,174.308,289,174.308C279.667,174.308,270.333,188.888,261,188.888C251.667,188.888,242.333,183.236,233,183.236C223.667,183.236,214.333,186.224,205,186.224C195.667,186.224,186.333,185.828,177,185.576C167.667,185.324,158.333,185.144,149,184.712C139.667,184.28,130.333,182.984,121,182.984C111.667,182.984,102.333,185.078,93,186.008C83.667,186.938,74.333,187.751,65,188.564Z"></path><path stroke="#FA8C16" fill="none" fill-opacity="0.6" width="644" height="216" class="recharts-curve recharts-area-curve" d="M65,188.204C74.333,187.4,83.667,186.596,93,185.648C102.333,184.7,111.667,182.516,121,182.516C130.333,182.516,139.667,183.812,149,184.244C158.333,184.676,167.667,184.85,177,185.108C186.333,185.366,195.667,185.792,205,185.792C214.333,185.792,223.667,182.876,233,182.876C242.333,182.876,251.667,188.42,261,188.42C270.333,188.42,279.667,173.444,289,173.444C298.333,173.444,307.667,176.354,317,177.548C326.333,178.742,335.667,180.608,345,180.608C354.333,180.608,363.667,176.054,373,174.74C382.333,173.426,391.667,172.724,401,172.724C410.333,172.724,419.667,173.06,429,173.732C438.333,174.404,447.667,181.544,457,181.544C466.333,181.544,475.667,174.02,485,174.02C494.333,174.02,503.667,174.26,513,174.74C522.333,175.22,531.667,180.176,541,180.176C550.333,180.176,559.667,173.228,569,173.228C578.333,173.228,587.667,179.162,597,181.364C606.333,183.566,615.667,186.44,625,186.44C634.333,186.44,643.667,181.004,653,181.004C662.333,181.004,671.667,190.472,681,190.472C690.333,190.472,699.667,189.428,709,188.384"></path></g></g></g></g><g class="recharts-layer recharts-area"><g class="recharts-layer"><g class="recharts-layer" ><g class="recharts-layer"><path fill="#722ED1" fill-opacity="0.6" width="644" height="216" stroke="none" class="recharts-curve recharts-area-area" d="M65,102.164C74.333,103.388,83.667,104.612,93,104.612C102.333,104.612,111.667,104.264,121,103.568C130.333,102.872,139.667,84.2,149,84.2C158.333,84.2,167.667,85.184,177,87.152C186.333,89.12,195.667,98.456,205,98.456C214.333,98.456,223.667,87.008,233,87.008C242.333,87.008,251.667,88.196,261,88.196C270.333,88.196,279.667,52.772,289,52.772C298.333,52.772,307.667,69.332,317,69.332C326.333,69.332,335.667,66.92,345,66.92C354.333,66.92,363.667,71.564,373,71.564C382.333,71.564,391.667,53.672,401,53.672C410.333,53.672,419.667,78.044,429,78.044C438.333,78.044,447.667,66.194,457,61.808C466.333,57.422,475.667,51.728,485,51.728C494.333,51.728,503.667,54.104,513,57.164C522.333,60.224,531.667,69.248,541,70.088C550.333,70.928,559.667,70.508,569,71.348C578.333,72.188,587.667,81.392,597,87.944C606.333,94.496,615.667,110.66,625,110.66C634.333,110.66,643.667,90.68,653,90.68C662.333,90.68,671.667,96.692,681,96.692C690.333,96.692,699.667,92.498,709,88.304L709,188.384C699.667,189.428,690.333,190.472,681,190.472C671.667,190.472,662.333,181.004,653,181.004C643.667,181.004,634.333,186.44,625,186.44C615.667,186.44,606.333,183.566,597,181.364C587.667,179.162,578.333,173.228,569,173.228C559.667,173.228,550.333,180.176,541,180.176C531.667,180.176,522.333,175.22,513,174.74C503.667,174.26,494.333,174.02,485,174.02C475.667,174.02,466.333,181.544,457,181.544C447.667,181.544,438.333,174.404,429,173.732C419.667,173.06,410.333,172.724,401,172.724C391.667,172.724,382.333,173.426,373,174.74C363.667,176.054,354.333,180.608,345,180.608C335.667,180.608,326.333,178.742,317,177.548C307.667,176.354,298.333,173.444,289,173.444C279.667,173.444,270.333,188.42,261,188.42C251.667,188.42,242.333,182.876,233,182.876C223.667,182.876,214.333,185.792,205,185.792C195.667,185.792,186.333,185.366,177,185.108C167.667,184.85,158.333,184.676,149,184.244C139.667,183.812,130.333,182.516,121,182.516C111.667,182.516,102.333,184.7,93,185.648C83.667,186.596,74.333,187.4,65,188.204Z"></path><path stroke="#722ED1" fill="none" fill-opacity="0.6" width="644" height="216" class="recharts-curve recharts-area-curve" d="M65,102.164C74.333,103.388,83.667,104.612,93,104.612C102.333,104.612,111.667,104.264,121,103.568C130.333,102.872,139.667,84.2,149,84.2C158.333,84.2,167.667,85.184,177,87.152C186.333,89.12,195.667,98.456,205,98.456C214.333,98.456,223.667,87.008,233,87.008C242.333,87.008,251.667,88.196,261,88.196C270.333,88.196,279.667,52.772,289,52.772C298.333,52.772,307.667,69.332,317,69.332C326.333,69.332,335.667,66.92,345,66.92C354.333,66.92,363.667,71.564,373,71.564C382.333,71.564,391.667,53.672,401,53.672C410.333,53.672,419.667,78.044,429,78.044C438.333,78.044,447.667,66.194,457,61.808C466.333,57.422,475.667,51.728,485,51.728C494.333,51.728,503.667,54.104,513,57.164C522.333,60.224,531.667,69.248,541,70.088C550.333,70.928,559.667,70.508,569,71.348C578.333,72.188,587.667,81.392,597,87.944C606.333,94.496,615.667,110.66,625,110.66C634.333,110.66,643.667,90.68,653,90.68C662.333,90.68,671.667,96.692,681,96.692C690.333,96.692,699.667,92.498,709,88.304"></path></g></g></g></g></svg><div class="recharts-legend-wrapper" style="position: absolute; width: 704px; height: auto; left: 5px; bottom: 5px;"><ul class="recharts-default-legend" style="padding: 0px; margin: 0px; text-align: center;"><li class="recharts-legend-item legend-item-0" style="display: inline-block; margin-right: 10px;"><svg class="recharts-surface" width="14" height="14" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 4px;"><title></title><desc></desc><path stroke-width="4" fill="none" stroke="#1890FF" d="M0,16h10.666666666666666
+            A5.333333333333333,5.333333333333333,0,1,1,21.333333333333332,16
+            H32M21.333333333333332,16
+            A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16" class="recharts-legend-icon"></path></svg><span class="recharts-legend-item-text" style="color: rgb(24, 144, 255);">反垃圾</span></li><li class="recharts-legend-item legend-item-1" style="display: inline-block; margin-right: 10px;"><svg class="recharts-surface" width="14" height="14" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 4px;"><title></title><desc></desc><path stroke-width="4" fill="none" stroke="#52C41A" d="M0,16h10.666666666666666
+            A5.333333333333333,5.333333333333333,0,1,1,21.333333333333332,16
+            H32M21.333333333333332,16
+            A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16" class="recharts-legend-icon"></path></svg><span class="recharts-legend-item-text" style="color: rgb(82, 196, 26);">反病毒</span></li><li class="recharts-legend-item legend-item-2" style="display: inline-block; margin-right: 10px;"><svg class="recharts-surface" width="14" height="14" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 4px;"><title></title><desc></desc><path stroke-width="4" fill="none" stroke="#FA8C16" d="M0,16h10.666666666666666
+            A5.333333333333333,5.333333333333333,0,1,1,21.333333333333332,16
+            H32M21.333333333333332,16
+            A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16" class="recharts-legend-icon"></path></svg><span class="recharts-legend-item-text" style="color: rgb(250, 140, 22);">沙箱</span></li><li class="recharts-legend-item legend-item-3" style="display: inline-block; margin-right: 10px;"><svg class="recharts-surface" width="14" height="14" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 4px;"><title></title><desc></desc><path stroke-width="4" fill="none" stroke="#722ED1" d="M0,16h10.666666666666666
+            A5.333333333333333,5.333333333333333,0,1,1,21.333333333333332,16
+            H32M21.333333333333332,16
+            A5.333333333333333,5.333333333333333,0,1,1,10.666666666666666,16" class="recharts-legend-icon"></path></svg><span class="recharts-legend-item-text" style="color: rgb(114, 46, 209);">RBL</span></li></ul></div><div tabindex="-1" class="recharts-tooltip-wrapper recharts-tooltip-wrapper-right recharts-tooltip-wrapper-bottom" style="visibility: hidden; pointer-events: none; position: absolute; top: 0px; left: 0px; transform: translate(65px, 10px);"><div class="recharts-default-tooltip" style="margin: 0px; padding: 10px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); white-space: nowrap; font-size: 12px;"><p class="recharts-tooltip-label" style="margin: 0px;"></p></div></div></div></div></div></div></div>
+      </div>
+      <table class="spec-table">
+        <thead><tr><th>图</th><th>类型</th><th>系列</th><th>轴</th><th>外链按钮</th></tr></thead>
+        <tbody>
+          <tr><td>邮件流健康趋势（24h）</td><td>LineChart 双系列</td><td>邮件量（#1890FF 实线）· 投递延时P95（#FA8C16 虚线 5 5）</td><td>左 Y=邮件量（蓝）· 右 Y=P95（橙）· X=小时（interval=2）</td><td class="mono">/monitor/mailflow</td></tr>
+          <tr><td>检测引擎性能趋势（24h）</td><td>AreaChart 堆叠（stackId=1）</td><td>反垃圾/反病毒/沙箱/RBL（引擎配色，fillOpacity 0.6）</td><td>单 Y + X=小时；Tooltip 单位「/秒」</td><td class="mono">/monitor/security</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>图表容器</td><td>2 个 ResponsiveContainer（h=280）</td><td>2</td><td class="dom-pass">✅</td></tr>
+            <tr><td>折线系列</td><td>2（volume + latencyP95）</td><td>2</td><td class="dom-pass">✅</td></tr>
+            <tr><td>面积系列</td><td>4（四引擎堆叠）</td><td>4</td><td class="dom-pass">✅</td></tr>
+            <tr><td>图例文案</td><td>邮件量/投递延时P95 ｜ 反垃圾/反病毒/沙箱/RBL</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>入场动画裁剪</td><td>动画结束后区域完整可见</td><td>已移除 width=0 的 animationClipPath（修正）</td><td class="dom-fixed">🔧 修正</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.5 告警跑马灯 ===== -->
+  <article class="component-spec" id="component-2-5">
+    <h3>2.5 告警跑马灯</h3>
+    <h4>组件元信息</h4>
+    <table class="spec-table">
+      <tbody>
+        <tr><td>数据源</td><td><code>alertMarquee</code> 静态常量 4 条（L126-131）</td></tr>
+        <tr><td>动画</td><td><code>@keyframes marquee</code> 30s linear infinite，translateX(0→-50%)；<b>hover 暂停</b>（globals.css L128-142）</td></tr>
+        <tr><td>形态/角色差异</td><td>[Base]</td></tr>
+      </tbody>
+    </table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：滚动态</h4>
+      <div class="component-preview" id="preview-marquee">
+<div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="p-3"><div class="flex items-center gap-4 overflow-hidden"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert w-5 h-5 text-red-500 flex-shrink-0 animate-pulse"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><div class="flex-1 overflow-hidden"><div class="flex gap-8 animate-marquee"><div class="flex items-center gap-2 whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity text-red-500"><span class="font-medium">[<!-- -->10:03<!-- -->]</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">基础设施</span><span>数据目录使用率 96%</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-destructive text-white [a&amp;]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-xs">未确认</span></div><div class="flex items-center gap-2 whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity text-red-500"><span class="font-medium">[<!-- -->09:51<!-- -->]</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">邮件流</span><span>deferred队列堆积 62,341</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-primary text-primary-foreground [a&amp;]:hover:bg-primary/90 text-xs">处理中</span></div><div class="flex items-center gap-2 whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity text-yellow-500"><span class="font-medium">[<!-- -->09:30<!-- -->]</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">检测引擎</span><span>RBL响应超时 &gt;5s</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 text-xs">已确认</span></div><div class="flex items-center gap-2 whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity text-yellow-500"><span class="font-medium">[<!-- -->09:15<!-- -->]</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">邮件流</span><span>投递延时P95 &gt;10s</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 text-xs">已解决</span></div></div></div><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 flex-shrink-0">查看全部<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4 ml-1"><path d="m9 18 6-6-6-6"></path></svg></button></div></div></div>
+      </div>
+      <div class="preview-note">预览复刻 demo 的 30s 无限滚动与 hover 暂停；点击单条告警 → <code>/monitor/alerts?id=N</code>，「查看全部」→ <code>/monitor/alerts</code>（路由 toast 演示）。</div>
+      <table class="spec-table">
+        <thead><tr><th>#</th><th>时间</th><th>模块徽标</th><th>内容</th><th>状态徽标</th><th>文案色</th><th>点击跳转</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>10:03</td><td>基础设施</td><td>数据目录使用率 96%</td><td>未确认（destructive 红）</td><td>critical→text-red-500</td><td class="mono">/monitor/alerts?id=1</td></tr>
+          <tr><td>2</td><td>09:51</td><td>邮件流</td><td>deferred队列堆积 62,341</td><td>处理中（default 蓝）</td><td>critical→text-red-500</td><td class="mono">/monitor/alerts?id=2</td></tr>
+          <tr><td>3</td><td>09:30</td><td>检测引擎</td><td>RBL响应超时 &gt;5s</td><td>已确认（secondary 灰）</td><td>warning→text-yellow-500</td><td class="mono">/monitor/alerts?id=3</td></tr>
+          <tr><td>4</td><td>09:15</td><td>邮件流</td><td>投递延时P95 &gt;10s</td><td>已解决（secondary 灰）</td><td>warning→text-yellow-500</td><td class="mono">/monitor/alerts?id=4</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>告警条数</td><td>4（animate-marquee 容器内）</td><td>4</td><td class="dom-pass">✅</td></tr>
+            <tr><td>徽标数</td><td>8（模块 4 + 状态 4）</td><td>8</td><td class="dom-pass">✅</td></tr>
+            <tr><td>左侧告警图标</td><td>AlertTriangle text-red-500 animate-pulse</td><td>同</td><td class="dom-pass">✅</td></tr>
+            <tr><td>「查看全部」按钮</td><td>ghost 按钮 + ChevronRight</td><td>同</td><td class="dom-pass">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.6 底部更新栏 ===== -->
+  <article class="component-spec" id="component-2-6">
+    <h3>2.6 底部更新栏 + 导出PDF</h3>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认渲染</h4>
+      <div class="component-preview" id="preview-footer">
+<div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock w-4 h-4"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>最后更新<!-- -->: <!-- -->7/22/2026, 3:08:06 PM</span></div><div class="flex items-center gap-2"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md px-3 has-[&gt;svg]:px-2.5 gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>导出PDF</button></div></div>
+      </div>
+      <table class="spec-table">
+        <thead><tr><th>元素</th><th>行为（浏览器实测）</th></tr></thead>
+        <tbody>
+          <tr><td>最后更新时间</td><td><code>useEffect setInterval(30000)</code> 每 30s 更新一次（<b>固定 30s，不随刷新间隔 Select 变化</b>，差异 D-02）；手动刷新按钮点击 1s 后也会更新</td></tr>
+          <tr><td>导出PDF 按钮</td><td>outline 按钮（Download 图标 + 文案），<b>源码无 onClick 处理函数</b>；浏览器实测点击无任何响应（无下载/无提示），见差异 D-03</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<!-- ============ 3. 数据模型与 mock ============ -->
+<section id="api-mapping" class="component-spec">
+  <h2 style="margin-top:0;">3. 数据模型与 API 映射</h2>
+  <blockquote style="border-left:4px solid var(--destructive);background:var(--diff-bg);padding:.75rem 1rem;border-radius:0 8px 8px 0;">⚠️ 本页全部数据为前端 mock（静态常量 + Math.random 趋势），demo 不发起任何后端请求。落地实现所需 API 契约未定义，列入 §10 Q-01。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>数据</th><th>来源（demo）</th><th>类型</th><th>落地所需 API（待定义）</th></tr></thead>
+    <tbody>
+      <tr><td>6 项 KPI</td><td><code>kpiData</code> 静态常量</td><td>静态</td><td>监控 KPI 聚合查询（邮件量/成功率/队列/引擎健康/基建健康/未处理告警）</td></tr>
+      <tr><td>四模块健康</td><td><code>moduleHealthData</code> 静态常量</td><td>静态</td><td>分模块健康摘要</td></tr>
+      <tr><td>双趋势图</td><td><code>Array.from(24, Math.random)</code></td><td>随机/每次加载不同</td><td>24h 时序指标查询（按 timeRange）</td></tr>
+      <tr><td>跑马灯告警</td><td><code>alertMarquee</code> 静态 4 条</td><td>静态</td><td>最新未闭环告警流</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 4. 关联功能模块 ============ -->
+<section id="related-modules" class="component-spec">
+  <h2 style="margin-top:0;">4. 关联功能模块</h2>
+  <table class="spec-table">
+    <thead><tr><th>关联类型</th><th>模块</th><th>关系说明</th><th>流向</th></tr></thead>
+    <tbody>
+      <tr><td>下游跳转</td><td><a href="../monitor-infrastructure/index.html">基础设施 monitor-infrastructure</a></td><td>KPI 卡「基础设施」+ 看板卡「基础设施」点击下钻</td><td class="mono">/monitor/infrastructure</td></tr>
+      <tr><td>下游跳转</td><td><a href="../monitor-mailflow/index.html">邮件流 monitor-mailflow</a></td><td>KPI 卡（邮件量→tab=delivery、成功率→tab=delivery、队列深度→tab=queue）+ 看板卡 + 趋势图外链</td><td class="mono">/monitor/mailflow?tab=delivery|queue</td></tr>
+      <tr><td>下游跳转</td><td><a href="../monitor-security/index.html">检测引擎状态 monitor-security</a></td><td>KPI 卡「检测引擎」+ 看板卡 + 趋势图外链</td><td class="mono">/monitor/security</td></tr>
+      <tr><td>下游跳转</td><td><a href="../monitor-alerts/index.html">告警中心 monitor-alerts</a></td><td>KPI 卡「未处理告警」+ 看板卡 + 跑马灯单条（?id=N）+ 查看全部</td><td class="mono">/monitor/alerts[?id=N]</td></tr>
+      <tr><td>同组近义</td><td>系统状态（安全运营驾驶舱 /security-ops-dashboard）</td><td>与本页定位近似（首屏态势聚合），边界见 §10 Q-03</td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 5. 业务逻辑 / 交互 / 异常 ============ -->
+<section id="business-logic" class="component-spec">
+  <h2 style="margin-top:0;">5. 业务逻辑与交互规格</h2>
+  <h3>5.1 状态着色规则（阈值）</h3>
+  <table class="spec-table">
+    <thead><tr><th>指标</th><th>normal</th><th>warning</th><th>critical</th></tr></thead>
+    <tbody>
+      <tr><td>投递成功率</td><td>≥95%</td><td>&lt;95%</td><td>&lt;90%</td></tr>
+      <tr><td>队列深度</td><td>&lt;1000</td><td>≥1000</td><td>≥5000</td></tr>
+      <tr><td>CPU / 内存</td><td>&lt;80%</td><td>≥80%</td><td>≥95%</td></tr>
+      <tr><td>磁盘</td><td>&lt;80%</td><td>≥80%</td><td>≥90%</td></tr>
+    </tbody>
+  </table>
+  <h3>5.2 多租户数据隔离表现</h3>
+  <p>demo 中本页为平台级全局视图（<code>scope: "form-dependent"</code>）：多租户形态下租户管理员可进入（导航可见）但语义只读；页面本身未按租户过滤数据（全局 mock）。落地时租户视角的数据范围（本租户 vs 全平台）需确认，见 §10 Q-04。</p>
+  <h3>5.3 异常场景</h3>
+  <table class="spec-table">
+    <thead><tr><th>异常类别</th><th>触发条件</th><th>demo 表现（实测/源码）</th></tr></thead>
+    <tbody>
+      <tr><td>数据为空</td><td>告警为 0</td><td>未处理告警卡 animate-pulse 关闭（value&gt;0 才脉冲）；饼图仍渲染</td></tr>
+      <tr><td>后端超时/降级</td><td>接口不可用</td><td>demo 无接口，未覆盖 → §10 Q-01</td></tr>
+      <tr><td>路由直达</td><td>租户视角直接访问 URL</td><td>demo 无前端拦截，页面照常渲染（见差异 D-06）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 6. 国际化 ============ -->
+<section id="i18n" class="component-spec">
+  <h2 style="margin-top:0;">6. 国际化规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>语言</th><th>支持情况（浏览器/源码实测）</th></tr></thead>
+    <tbody>
+      <tr><td>简体中文 zh</td><td>✅ 完整（本规格截图即中文态）</td></tr>
+      <tr><td>English en</td><td>✅ 完整（内联 zh/en 判断 + language-context en 段）</td></tr>
+      <tr><td>泰文 th</td><td>⚠️ 本页大量文案为 <code>language === "zh" ? 中文 : 英文</code> 内联二值判断，泰文下显示英文；且 language-context 泰文段<b>缺失全部 monitor.* key</b>（差异 D-05）</td></tr>
+      <tr><td>第四语言</td><td>❌ demo 仅 zh/en/th 三语；implement.md 要求四语（差异 D-05）</td></tr>
+    </tbody>
+  </table>
+  <p>注：本页文案<b>不走 i18n key</b>（无 nav.monitorDashboard 之外的 key 引用），标题/卡片/图例均内联 <code>language === "zh" ? ... : ...</code>。落地时应抽为 i18n key 并补齐四语。</p>
+</section>
+
+<!-- ============ 7. 响应式 ============ -->
+<section id="responsive" class="component-spec">
+  <h2 style="margin-top:0;">7. 响应式规格（浏览器三断点实测）</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>KPI 区（grid-cols-6）</th><th>看板（grid-cols-4）</th><th>趋势（grid-cols-2）</th><th>截图</th></tr></thead>
+    <tbody>
+      <tr><td>1920px</td><td>6 列</td><td>4 列</td><td>2 列</td><td>page-full-default.png</td></tr>
+      <tr><td>1366px</td><td>6 列（卡片变窄， grid 无响应式断点类）</td><td>4 列</td><td>2 列</td><td><a href="./screenshots/responsive-1366px.png">responsive-1366px.png</a></td></tr>
+      <tr><td>1024px</td><td>6 列（内容挤压换行）</td><td>4 列（挤压）</td><td>2 列（图表压缩）</td><td><a href="./screenshots/responsive-1024px.png">responsive-1024px.png</a></td></tr>
+    </tbody>
+  </table>
+  <p>注：demo 栅格<b>未定义响应式断点</b>（无 sm:/md:/lg: 前缀），窄屏下布局等比压缩而非折行/堆叠，小屏可用性差 —— 见差异 D-07。</p>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1366px.png"><figcaption>1366px 断点</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1024px.png"><figcaption>1024px 断点</figcaption></figure>
+</section>
+
+<!-- ============ 8. 暗色模式 ============ -->
+<section id="darkmode" class="component-spec">
+  <h2 style="margin-top:0;">8. 暗色模式</h2>
+  <p>组件全部带有 <code>dark:</code> 变体类（dark:bg-gray-800/900 等），但 demo 的 theme-context 仅提供<b>蓝色/绿色主题色</b>切换（localStorage <code>theme-color</code>），<b>未提供暗色开关</b>；浏览器实测设置 <code>localStorage.theme=dark</code> 后 <code>&lt;html&gt;</code> 不会获得 <code>.dark</code> 类，暗色变体永不生效 —— 见差异 D-08。</p>
+</section>
+
+<!-- ============ 9. 与 spec 的差异标注 ============ -->
+<section id="diffs" class="diff-section">
+  <h2>9. 差异标注（含 v1 历史事项复核）</h2>
+  <table class="spec-table diff-table">
+    <thead><tr><th>编号</th><th>位置</th><th>差异/事项</th><th>影响</th><th>状态（2026-07-22 复核）</th><th>验证依据</th></tr></thead>
+    <tbody>
+      <tr><td>D-01<br><span class="tag tag-gray">v1遗留</span></td><td>§2.1 时间范围 Select</td><td>v1 称「选择 7 天后 KPI 与数据刷新」。<b>实测不成立</b>：kpiData 为静态常量，趋势图为加载时随机值；切范围后 DOM 统计完全一致（cards 13/buttons 7 不变）</td><td><span class="tag tag-orange">中</span></td><td>已解决（v2 纠正结论）</td><td>act-dash2.json 实测：选 7d 后 domstats 与初始完全一致；源码 L58-65/L110-123</td></tr>
+      <tr><td>D-02</td><td>§2.1 刷新间隔 Select</td><td>选项 5s/30s/1m/关闭 仅写入 state；useEffect 定时器<b>硬编码 30000ms</b>，与选中值无关；「关闭」也不会停表</td><td><span class="tag tag-orange">中</span></td><td>未解决（demo 现状，落地时修正）</td><td>源码 L152-157 vs L222-232；浏览器切 5s 后 lastUpdate 仍 30s 一跳</td></tr>
+      <tr><td>D-03</td><td>§2.6 导出PDF</td><td>按钮无 onClick，点击无任何响应（无下载/无提示/无报错）</td><td><span class="tag tag-red">高</span></td><td>未解决（demo 缺实现）</td><td>源码 L744-747 无 onClick；act-dash2.json 点击后截图无变化</td></tr>
+      <tr><td>D-04</td><td>§2.1 手动刷新按钮</td><td>点击仅 1s 旋转动画 + 更新 lastUpdate 时间戳，不重新获取任何数据</td><td><span class="tag tag-gray">低</span></td><td>未解决（demo 现状）</td><td>源码 L159-165</td></tr>
+      <tr><td>D-05<br><span class="tag tag-gray">v1遗留(i18n)</span></td><td>§6 国际化</td><td>demo 三语（zh/en/th）≠ implement.md 四语；泰文段缺全部 monitor.* key；本页文案内联 zh/en 判断不走 i18n key，泰文下退化英文</td><td><span class="tag tag-orange">中</span></td><td>部分解决（已定位缺口，待落地补齐）</td><td>language-context L4（3 语）、th 段 0 条 monitor.* key、页面内联判断</td></tr>
+      <tr><td>D-06<br><span class="tag tag-gray">v1遗留(路由)</span></td><td>§0.1 权限</td><td>多租户租户视角：监控总览/邮件流为 🔒 只读语义，但 demo 未做控件级禁用；基础设施/检测引擎/告警中心导航隐藏，但 <b>URL 直连仍可渲染</b>（无 403/404）</td><td><span class="tag tag-orange">中</span></td><td>未解决（demo 未实现拦截）</td><td>directurl.js 实测：tenant 视角直连 /monitor/infrastructure|security|alerts 均 200 完整渲染</td></tr>
+      <tr><td>D-07</td><td>§7 响应式</td><td>栅格无响应式断点类，1024px 下 6 列 KPI 挤压不换行</td><td><span class="tag tag-gray">低</span></td><td>未解决（demo 现状）</td><td>responsive-1024px.png 实测</td></tr>
+      <tr><td>D-08</td><td>§8 暗色</td><td>dark: 类齐全但无切换机制，暗色不可达</td><td><span class="tag tag-gray">低</span></td><td>未解决（demo 现状）</td><td>theme-context.tsx 仅 theme-color；darkmode.js 实测 .dark 未挂载</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 10. 需确认事项 ============ -->
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项</h2>
+  <table class="spec-table question-table">
+    <thead><tr><th>编号</th><th>事项</th><th>类型</th><th>说明</th><th>状态（2026-07-22 复核）</th></tr></thead>
+    <tbody>
+      <tr><td>Q-01<br><span class="tag tag-gray">v1遗留(mock)</span></td><td>监控数据 API 契约</td><td><span class="tag tag-orange">新增 API</span></td><td>KPI 聚合 / 24h 时序 / 告警流 三类接口需定义；是否可复用网关现有统计/日志 API 协同完成</td><td>未解决 —— spec 未提供，demo 全 mock</td></tr>
+      <tr><td>Q-02</td><td>导出PDF 目标行为</td><td><span class="tag tag-orange">新功能</span></td><td>导出范围（当前视图/全报表）、格式、是否后端生成</td><td>未解决</td></tr>
+      <tr><td>Q-03</td><td>与「系统状态」页面边界</td><td><span class="tag tag-blue">产品决策</span></td><td>/security-ops-dashboard（安全运营驾驶舱）与本页定位近似，需产品确认分工/合并策略</td><td>未解决（v1 遗留，本次仍无 spec 依据）</td></tr>
+      <tr><td>Q-04</td><td>租户视角数据范围</td><td><span class="tag tag-blue">产品决策</span></td><td>多租户下租户管理员打开本页看到全平台还是本租户数据？demo 未体现</td><td>未解决</td></tr>
+    </tbody>
+  </table>
+</section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true, theme: 'default' });</script>
+<script>
+  function showRouteToast(path) {
+    let el = document.querySelector('.route-toast');
+    if (!el) { el = document.createElement('div'); el.className = 'route-toast'; document.body.appendChild(el); }
+    el.textContent = 'demo 行为：router.push("' + path + '")';
+    el.classList.add('show');
+    clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+  // 简易下拉：点击 trigger 切换 option 列表；点选项更新 trigger 文案并触发回调
+  function bindSpecSelect(triggerSel, options, onPick) {
+    const trigger = document.querySelector(triggerSel);
+    if (!trigger) return;
+    trigger.style.position = 'relative';
+    let list = null;
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (list) { list.remove(); list = null; trigger.setAttribute('data-state','closed'); return; }
+      trigger.setAttribute('data-state','open');
+      list = document.createElement('div');
+      list.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:50;padding:4px;font-size:14px;';
+      options.forEach(opt => {
+        const item = document.createElement('div');
+        item.textContent = opt.label;
+        item.style.cssText = 'padding:6px 10px;border-radius:5px;cursor:pointer;white-space:nowrap;' + (opt.active ? 'background:#eff6ff;color:#1d4ed8;font-weight:600;' : '');
+        item.onmouseenter = () => { if (!opt.active) item.style.background = '#f3f4f6'; };
+        item.onmouseleave = () => { if (!opt.active) item.style.background = opt.active ? '#eff6ff' : ''; };
+        item.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const valSpan = trigger.querySelector('[data-slot="select-value"]');
+          if (valSpan) valSpan.textContent = opt.label;
+          list.remove(); list = null; trigger.setAttribute('data-state','closed');
+          if (onPick) onPick(opt);
+        });
+        list.appendChild(item);
+      });
+      trigger.appendChild(list);
+      document.addEventListener('click', function h() { if (list) { list.remove(); list = null; trigger.setAttribute('data-state','closed'); } document.removeEventListener('click', h); });
+    });
+  }
+
+  // 头部两个 Select
+  bindSpecSelect('#preview-header [role="combobox"]:nth-of-type(1)', [
+    {label:'今天',active:true},{label:'24小时'},{label:'7天'},{label:'30天'}
+  ]);
+  bindSpecSelect('#preview-header [role="combobox"]:nth-of-type(2)', [
+    {label:'5s'},{label:'30s',active:true},{label:'1m'},{label:'关闭'}
+  ]);
+  // 手动刷新按钮：旋转 1s
+  const refreshBtn = document.querySelector('#preview-header button[data-slot="button"]');
+  if (refreshBtn) refreshBtn.addEventListener('click', () => {
+    const icon = refreshBtn.querySelector('svg');
+    icon.classList.add('animate-spin');
+    setTimeout(() => icon.classList.remove('animate-spin'), 1000);
+  });
+  // KPI 卡片下钻
+  const kpiRoutes = ['/monitor/mailflow?tab=delivery','/monitor/mailflow?tab=delivery','/monitor/mailflow?tab=queue','/monitor/security','/monitor/infrastructure','/monitor/alerts'];
+  document.querySelectorAll('#preview-kpi [data-slot="card"]').forEach((c, i) => c.addEventListener('click', () => showRouteToast(kpiRoutes[i])));
+  // 健康看板下钻
+  const healthRoutes = ['/monitor/infrastructure','/monitor/mailflow','/monitor/security','/monitor/alerts'];
+  document.querySelectorAll('#preview-health [data-slot="card"]').forEach((c, i) => c.addEventListener('click', () => showRouteToast(healthRoutes[i])));
+  // 趋势图外链按钮
+  const trendRoutes = ['/monitor/mailflow','/monitor/security'];
+  document.querySelectorAll('#preview-trend [data-slot="card"] button').forEach((b, i) => b.addEventListener('click', (e) => { e.stopPropagation(); showRouteToast(trendRoutes[i]); }));
+  // 跑马灯
+  document.querySelectorAll('#preview-marquee .animate-marquee > div').forEach((d, i) => d.addEventListener('click', () => showRouteToast('/monitor/alerts?id=' + (i + 1))));
+  const viewAll = document.querySelector('#preview-marquee button');
+  if (viewAll) viewAll.addEventListener('click', () => showRouteToast('/monitor/alerts'));
+  // 导出PDF：demo 无 onClick
+  const pdfBtn = document.querySelector('#preview-footer button');
+  if (pdfBtn) pdfBtn.addEventListener('click', () => showRouteToast('demo 中该按钮未绑定 onClick（点击无响应）'));
+</script>
+</body>
+</html>

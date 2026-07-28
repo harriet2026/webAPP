@@ -1,0 +1,20 @@
+{
+  "module": "email-handling-disposal-center",
+  "current_version": 2,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-14",
+      "demo_commit": "804efb9",
+      "spec_commit": "8db3a98",
+      "summary": "初版：搜索/筛选（27 精确字段条件组）、日志表格（批量处置 + 改判 finalType + 召回 10 封上限）、详情抽屉三模块与按收件人处置矩阵；标注 9 篇 PRD 的 12 处互相冲突、demo 的 14 处实现差异、与网关 /mail-logs/* 现有 API 的映射与缺口"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-23",
+      "demo_commit": "2cdad33",
+      "spec_commit": "804efb9",
+      "summary": "对齐详情抽屉（日志查看详情）三模块与实时渲染：明确真实详情组件为 mail-investigation Sheet 抽屉（overview-action-section / security-analysis-section / raw-logs-section），email-disposal-center/detail-modal + tabs/ 为死代码；逐层修正 layer-10~14 的 component-preview / 元素表 / DOM 树比对表 / 交互 JS 使其对齐 demo 当前渲染；记录 demo 实测未翻译 i18n key（面包屑 common.details、安全分析阶段5 智能体名 pipeline.intentAgent/marketingAgent/phishingAgent/retrospectAgent）等交互与样式差异"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级4：小屏（<768px） - HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .component-preview { background:#fff; overflow-x:auto; }
+  .pass { color:#15803d; font-weight:600; }
+  .bad { color:#b91c1c; font-weight:600; }
+  .warn { color:#a16207; font-weight:600; }
+  .tag-base { display:inline-block; padding:.05rem .375rem; border-radius:.25rem; font-size:.6875rem; font-weight:600; background:#dbeafe; color:#1d4ed8; }
+  .tag-overlay { background:#fef3c7; color:#92400e; }
+  .tag-gap { background:#fee2e2; color:#b91c1c; }
+  .swatch { display:inline-block; width:.75rem; height:.75rem; border-radius:2px; vertical-align:-1px; margin-right:.25rem; border:1px solid rgba(0,0,0,.1); }
+  .fix-table td:nth-child(2) { color:#b91c1c; font-family:var(--font-mono); }
+  .spec-swap-bar { display:flex; align-items:center; gap:.375rem; flex-wrap:wrap; margin-bottom:.75rem; padding-bottom:.5rem; border-bottom:1px dashed var(--border); font-size:.75rem; color:var(--muted-foreground); }
+  .spec-swap-bar button { font:inherit; padding:.15rem .5rem; border:1px solid var(--border); background:#fff; border-radius:.25rem; cursor:pointer; color:var(--foreground); }
+  .spec-swap-bar button:hover { background:var(--muted); }
+  .spec-swap-bar button.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+  .fix-table td:nth-child(3) { color:#15803d; font-weight:600; }
+</style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#c-6">← 返回主文件</a><a href="./layer-3-top-count.html">上一层：TOP 数量</a></nav>
+<header class="spec-header">
+  <h1>交互层级 4：&lt;768px 小屏提示条</h1>
+  <table class="meta-table"><tr><td>触发路径</td><td>视口宽度 &lt; 768px（Tailwind <code>md</code> 断点）</td></tr></table>
+</header>
+<section>
+  <figure class="screenshot-figure"><img src="./screenshots/layer-5-narrow-screen.png" alt="小屏"><figcaption>700px 实测：看板主体全部隐藏，只剩黄色提示条「请使用大屏查看运营分析」。</figcaption></figure>
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>class</th><th>&lt;768px</th><th>≥768px</th></tr></thead>
+    <tbody>
+      <tr><td>提示条</td><td><code>block md:hidden bg-yellow-50 border-yellow-200</code></td><td class="pass">显示</td><td>隐藏</td></tr>
+      <tr><td>筛选条</td><td><code>hidden md:flex</code></td><td>隐藏</td><td class="pass">显示</td></tr>
+      <tr><td>维度 Tab</td><td><code>hidden md:block</code></td><td>隐藏</td><td class="pass">显示</td></tr>
+      <tr><td>操作栏</td><td><code>hidden md:flex</code></td><td>隐藏</td><td class="pass">显示</td></tr>
+      <tr><td>TOP 列表卡</td><td>—</td><td class="warn">仍渲染（未加 md:hidden）</td><td>显示</td></tr>
+    </tbody>
+  </table>
+  <p class="pass">✅ 这是四个统计页里<strong>唯一实现了小屏降级</strong>的页面（PRD §8 明确要求）。</p>
+  <div class="dom-comparison">
+  <h5>DOM 树比对结果</h5>
+  <table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody><tr><td>提示条</td><td><code>div.block.md:hidden</code>，文案「请使用大屏查看运营分析」</td><td>同</td><td class="pass">一致</td></tr>
+<tr><td>看板主体</td><td><code>hidden md:flex</code> / <code>hidden md:block</code></td><td>同</td><td class="pass">一致</td></tr>
+<tr><td>PRD 文案</td><td>「请使用更宽屏幕查看」</td><td>demo 用「请使用大屏查看运营分析」</td><td class="warn">措辞不同</td></tr></tbody>
+  </table>
+</div>
+</section>
+<script src="../assets/stats-preview.js"></script>
+</body>
+</html>

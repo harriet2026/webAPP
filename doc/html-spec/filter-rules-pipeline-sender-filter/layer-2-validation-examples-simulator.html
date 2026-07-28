@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 3：校验错误、配置示例与模拟测试 - 发信人黑白名单</title>
+  <style>
+    :root{--primary:oklch(0.52 0.226 262);--bg:oklch(0.98 0.01 205);--card:#fff;--border:#e5e7eb;--muted:#f5f7fa;--blue:#1677ff;--red:#f5222d;--green:#16a34a;--radius:.625rem;font-family:"Geist",system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);line-height:1.6}a{color:var(--blue);text-decoration:none}nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}h1{margin:0 0 16px;color:var(--primary);font-size:26px}h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px}.meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}.meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}.meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}.screenshot-figure{text-align:center}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}.component-preview{margin:12px 0;padding:18px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}.state-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.state-card{padding:18px;border:1px solid var(--border);border-radius:8px;background:#fff}.field-error,.sim-input{display:block;width:100%;padding:9px 12px;border:1px solid var(--red);border-radius:8px;color:#374151;background:#fff}.sim-input{border-color:#d1d5db}.error-text{color:var(--red);font-size:12px}.example{margin:10px 0;padding:12px;border:1px solid var(--border);border-radius:8px;background:#fff}.button{display:inline-block;padding:7px 12px;border:0;border-radius:8px;background:#155eef;color:#fff;cursor:pointer}.result{padding:12px;border:1px solid #bbf7d0;border-radius:8px;background:#f0fdf4;color:var(--green)}.result.hit{border-color:#fecaca;background:#fef2f2;color:#dc2626}.layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}@media(max-width:900px){.state-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <nav><a href="index.html#component-2-3">返回主文件</a> · <a href="layer-1-new-rule-drawer.html">上一层：新建规则抽屉</a></nav>
+  <header class="spec-header">
+    <h1>交互层级 3：校验错误、配置示例与模拟测试</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>SenderFilterDrawer</td></tr>
+      <tr><td>触发路径</td><td>层级2 新建规则抽屉 → 点击“保存”；展开“查看配置示例”/“模拟测试”；切换发信人类型。</td></tr>
+      <tr><td>截图</td><td><code>rule-drawer-validation.png</code>、<code>rule-drawer-examples-simulator.png</code>、<code>rule-drawer-sender-group.png</code>、<code>rule-drawer-use-example-click.png</code></td></tr>
+      <tr><td>浏览器事实</td><td>保存空表单出现字段红框（规则名称不能为空/请输入发信人邮箱）；配置示例展开显示 2 张卡；模拟测试默认 <code>test@example.com</code>，结果“✓ 未命中当前规则”；发信人切“群组”出现“选择群组...”下拉；点击“使用该示例”抛 <code>Uncaught ReferenceError: setSkipSpf is not defined</code>。</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">3A</span>保存空表单校验错误</h2>
+    <div class="component-preview">
+      <div class="state-card" data-demo-extracted="validation-state">
+        <h3>基础设置</h3>
+        <p><strong>* 规则名称</strong></p>
+        <div class="field-error">如：可疑发件人</div>
+        <div class="error-text">规则名称不能为空</div>
+        <p><strong>* 发信人</strong></p>
+        <div class="field-error">个人　如: user@example.com 或 *@domain.com</div>
+        <div class="error-text">请输入发信人邮箱</div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-drawer-validation.png" alt="新建规则抽屉校验错误">
+      <figcaption>保存空表单后，规则名称与发信人两个必填字段展示红框和错误文案。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>字段</th><th>触发条件</th><th>实际错误文案</th><th>规格</th></tr></thead>
+      <tbody>
+        <tr><td>规则名称</td><td>空值点击保存</td><td>规则名称不能为空</td><td>字段红框，抽屉保持打开。</td></tr>
+        <tr><td>发信人</td><td>个人类型但邮箱为空</td><td>请输入发信人邮箱</td><td>字段红框，切换群组/组织后校验切换为选择项。</td></tr>
+        <tr><td>IP范围</td><td>全部IP</td><td>无错误</td><td>仅 IP组/单IP/IP段为空时校验。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">3B</span>配置示例与模拟测试展开态</h2>
+    <div class="component-preview">
+      <div class="state-grid" data-demo-extracted="examples-simulator-state">
+        <div class="state-card">
+          <h3>查看配置示例</h3>
+          <div class="example"><strong>阻断垃圾邮件发送者</strong><br><small>直接阻断已知的垃圾邮件发送者</small><br><button class="button" type="button" data-use-example="block">使用该示例</button><p>来自该发信人的邮件将被直接阻断，不会到达收件人。</p></div>
+          <div class="example"><strong>隔离可疑来源</strong><br><small>将特定IP段的可疑邮件隔离待审</small><br><button class="button" type="button" data-use-example="quarantine">使用该示例</button><p>来自该发信人特定IP段的邮件将被隔离，等待管理员审核后决定是否投递。</p></div>
+          <p><strong>已选示例：</strong><span data-example-state>未选择</span></p>
+        </div>
+        <div class="state-card">
+          <h3>模拟测试</h3>
+          <p>模拟发信人邮箱</p>
+          <input class="sim-input" data-sim-email value="test@example.com">
+          <p><button class="button" type="button" data-run-sim>开始测试</button></p>
+          <div class="result" data-sim-result><strong>未命中</strong><br>未命中当前规则</div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-drawer-examples-simulator.png" alt="配置示例与模拟测试展开态">
+      <figcaption>配置示例 + 模拟测试展开态：两个示例卡、默认测试邮箱、未命中结果均经浏览器点击验证。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>实际行为</th><th>实现注意</th></tr></thead>
+      <tbody>
+        <tr><td>展开配置示例</td><td>显示“阻断垃圾邮件发送者”“隔离可疑来源”两张示例卡</td><td>点击“使用该示例”按 PRD 应填充动作/IP范围；源码当前引用未定义 <code>setSkipSpf</code>，需修复。</td></tr>
+        <tr><td>展开模拟测试</td><td>显示邮箱输入框和“开始测试”按钮</td><td>默认值为 <code>test@example.com</code>。</td></tr>
+        <tr><td>开始测试</td><td>当前规则为空，显示绿色“未命中 / 未命中当前规则”</td><td>如果个人邮箱与规则邮箱相等，或规则为 <code>*@domain.com</code> 且邮箱后缀匹配，则显示命中。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">3C</span>发信人类型联动</h2>
+    <div class="component-preview">
+      <div class="state-card" data-demo-extracted="sender-linkage-state">
+        <p><strong>* 发信人</strong>
+          <select id="linkType" style="padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;">
+            <option value="个人">个人</option><option value="群组">群组</option><option value="组织域名">组织域名</option>
+          </select>
+          <input id="linkInput" style="padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;" placeholder="如: user@example.com 或 *@domain.com">
+          <select id="linkGroup" class="is-hidden" style="padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;">
+            <option>选择群组...</option><option>财务部门 (12个成员)</option><option>技术部门 (8个成员)</option><option>合作伙伴 (15个成员)</option>
+          </select>
+          <select id="linkOrg" class="is-hidden" style="padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;">
+            <option>选择组织...</option><option>example.com</option><option>partner.com</option><option>vendor.cn</option>
+          </select>
+        </p>
+        <p style="color:#6b7280;font-size:13px;">当前配置效果 · 当发信人为 <strong id="linkEffect">未填写</strong></p>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-drawer-sender-group.png" alt="发信人类型切换为群组">
+      <figcaption>发信人切“群组”→ 邮箱输入框替换为“选择群组...”下拉，配置效果变为“当发信人为 未选择”；右下角同时可见模拟测试“✓ 未命中”。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>发信人类型</th><th>动态控件</th><th>校验（空值保存）</th></tr></thead>
+      <tbody>
+        <tr><td>个人</td><td>邮箱输入框（支持 <code>*@domain.com</code>）</td><td>请输入发信人邮箱</td></tr>
+        <tr><td>群组</td><td>“选择群组...”下拉，选项显示成员数</td><td>请选择发信人群组</td></tr>
+        <tr><td>组织域名</td><td>“选择组织...”下拉，选项显示域名描述</td><td>请选择发信人组织</td></tr>
+      </tbody>
+    </table>
+    <p style="color:#6b7280;font-size:13px;">发信 IP 范围同理：全部IP→无附加控件；IP组→“选择IP组...”下拉；单IP→<code>192.168.1.1</code> 输入框；IP段→<code>192.168.1.0/24</code> 输入框。</p>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">3D</span>“使用该示例”运行时缺陷（浏览器实测）</h2>
+    <div class="component-preview">
+      <div class="state-card" style="border-left:4px solid #f5222d;background:#fff7f7;">
+        <p>点击配置示例卡上的“使用该示例”按钮，控制台抛出：</p>
+        <pre style="background:#2d2d2d;color:#ff8585;padding:12px;border-radius:8px;overflow:auto;">Uncaught ReferenceError: setSkipSpf is not defined</pre>
+        <p style="color:#6b7280;font-size:13px;">源码 <code>onClick</code> 调用 <code>setSkipSpf(example.config.skipSpf)</code>，但 <code>SenderFilterDrawer</code> 内并无 <code>setSkipSpf</code> 状态，<code>example.config</code> 也只含 <code>action</code>/<code>ipRangeType</code>。结果：示例配置<strong>未被应用</strong>，抽屉保持打开，无 Next.js 崩溃遮罩（错误被 React 事件系统吞掉）。</p>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-drawer-use-example-click.png" alt="使用该示例点击后状态">
+      <figcaption>点击“使用该示例”后抽屉无变化（示例未应用）；控制台报 <code>setSkipSpf is not defined</code>。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>PRD 期望</th><th>demo 实际</th><th>落地建议</th></tr></thead>
+      <tbody>
+        <tr><td>点击一键填充示例配置（动作/IP范围等）到表单</td><td>抛 <code>ReferenceError</code>，示例未应用</td><td>移除 <code>setSkipSpf</code>，改为 <code>setAction(example.config.action)</code> + <code>setIpRangeType(example.config.ipRangeType)</code> 等本模块 setter。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>校验节点</td><td>错误文本“规则名称不能为空”“请输入发信人邮箱”实际渲染</td><td>预览包含同文案与红框状态</td><td>一致</td></tr>
+        <tr><td>示例节点</td><td>2个示例卡，每个包含标题、描述、使用按钮、效果说明</td><td>2个示例卡，同结构</td><td>一致</td></tr>
+        <tr><td>模拟测试节点</td><td>输入框、开始测试按钮、结果卡</td><td>同结构和默认值</td><td>一致</td></tr>
+        <tr><td>结果状态</td><td>绿色未命中态</td><td>绿色未命中态</td><td>✅ 一致</td></tr>
+        <tr><td>发信人联动</td><td>切“群组”→ 出现“选择群组...”下拉，效果“当发信人为 未选择”</td><td>预览下拉切换同步，效果文案一致</td><td>✅ 一致</td></tr>
+        <tr><td>“使用该示例”</td><td>点击抛 <code>ReferenceError: setSkipSpf is not defined</code>，示例未应用</td><td>3D 记录错误信息与截图</td><td>✅ 一致（记录为缺陷）</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <script>
+    // 3C 发信人类型联动
+    (function () {
+      const t = document.getElementById("linkType");
+      const input = document.getElementById("linkInput");
+      const group = document.getElementById("linkGroup");
+      const org = document.getElementById("linkOrg");
+      const effect = document.getElementById("linkEffect");
+      function sync() {
+        input.classList.toggle("is-hidden", t.value !== "个人");
+        group.classList.toggle("is-hidden", t.value !== "群组");
+        org.classList.toggle("is-hidden", t.value !== "组织域名");
+        let v = "";
+        if (t.value === "个人") v = input.value.trim();
+        else if (t.value === "群组") v = group.selectedIndex > 0 ? group.value : "";
+        else v = org.selectedIndex > 0 ? org.value : "";
+        effect.textContent = v || (t.value === "个人" ? "未填写" : "未选择");
+      }
+      [t, input, group, org].forEach((el) => { el.addEventListener("input", sync); el.addEventListener("change", sync); });
+      sync();
+    })();
+  </script>
+  <script>
+    const exampleState = document.querySelector("[data-example-state]");
+    const result = document.querySelector("[data-sim-result]");
+    let selectedExample = "";
+
+    document.querySelectorAll("[data-use-example]").forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedExample = button.dataset.useExample;
+        exampleState.textContent = selectedExample === "block" ? "阻断垃圾邮件发送者（spam@bad.com）" : "隔离可疑来源（*@suspicious.test）";
+      });
+    });
+
+    document.querySelector("[data-run-sim]").addEventListener("click", () => {
+      const email = document.querySelector("[data-sim-email]").value.trim();
+      const hit = selectedExample === "block"
+        ? email === "spam@bad.com"
+        : selectedExample === "quarantine" && email.endsWith("@suspicious.test");
+      result.classList.toggle("hit", hit);
+      result.innerHTML = hit
+        ? "<strong>命中规则</strong><br>" + (selectedExample === "block" ? "命中阻断垃圾邮件发送者，执行动作：阻断" : "命中隔离可疑来源，执行动作：隔离")
+        : "<strong>未命中</strong><br>未命中当前规则";
+    });
+  </script>
+</body>
+</html>

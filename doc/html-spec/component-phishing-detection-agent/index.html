@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>钓鱼邮件检测智能体 - HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['class', '[data-theme="dark"]'],
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          colors: {
+            background: 'var(--background)', foreground: 'var(--foreground)',
+            card: 'var(--card)', 'card-foreground': 'var(--card-foreground)',
+            popover: 'var(--popover)', 'popover-foreground': 'var(--popover-foreground)',
+            primary: 'var(--primary)', 'primary-foreground': 'var(--primary-foreground)',
+            secondary: 'var(--secondary)', 'secondary-foreground': 'var(--secondary-foreground)',
+            muted: 'var(--muted)', 'muted-foreground': 'var(--muted-foreground)',
+            accent: 'var(--accent)', 'accent-foreground': 'var(--accent-foreground)',
+            destructive: 'var(--destructive)', 'destructive-foreground': 'var(--destructive-foreground)',
+            border: 'var(--border)', input: 'var(--input)', ring: 'var(--ring)',
+            'chart-1': 'var(--chart-1)', 'chart-2': 'var(--chart-2)', 'chart-3': 'var(--chart-3)',
+            'chart-4': 'var(--chart-4)', 'chart-5': 'var(--chart-5)',
+            sidebar: 'var(--sidebar)', 'sidebar-foreground': 'var(--sidebar-foreground)',
+            'sidebar-primary': 'var(--sidebar-primary)', 'sidebar-accent': 'var(--sidebar-accent)',
+            'sidebar-border': 'var(--sidebar-border)',
+          },
+          borderRadius: {
+            lg: 'var(--radius)', md: 'calc(var(--radius) - 2px)',
+            sm: 'calc(var(--radius) - 4px)', xl: 'calc(var(--radius) + 4px)',
+          },
+          fontFamily: {
+            sans: ['Geist', 'Geist Fallback', 'system-ui', 'sans-serif'],
+            mono: ['Geist Mono', 'Geist Mono Fallback', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <style id="shadcn-tokens">
+    /* demo globals.css tokens injected so semantic classes (bg-card / text-muted-foreground /
+       border-border / bg-primary / bg-destructive ...) resolve identically to the running demo */
+    :root {
+      --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0); --card-foreground: oklch(0.145 0 0);
+      --popover: oklch(1 0 0); --popover-foreground: oklch(0.145 0 0);
+      --primary: oklch(0.52 0.226 262); --primary-foreground: oklch(0.985 0 0);
+      --secondary: oklch(0.97 0 0); --secondary-foreground: oklch(0.205 0 0);
+      --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0);
+      --accent: oklch(0.52 0.226 262); --accent-foreground: oklch(0.985 0 0);
+      --destructive: oklch(0.577 0.245 27.325); --destructive-foreground: oklch(0.577 0.245 27.325);
+      --border: oklch(0.922 0 0); --input: oklch(0.922 0 0); --ring: oklch(0.52 0.226 262);
+      --chart-1: oklch(0.52 0.226 262); --chart-2: oklch(0.6 0.118 184.704);
+      --chart-3: oklch(0.398 0.07 227.392); --chart-4: oklch(0.828 0.189 84.429);
+      --chart-5: oklch(0.769 0.188 70.08);
+      --sidebar: oklch(0.175 0.02 260); --sidebar-foreground: oklch(0.985 0 0);
+      --sidebar-primary: oklch(0.52 0.226 262); --sidebar-accent: oklch(0.269 0 0);
+      --sidebar-border: oklch(0.269 0 0);
+      --radius: 0.625rem;
+      --font-sans: "Geist","Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono","Geist Mono Fallback", monospace;
+    }
+    .dark, [data-theme="dark"] {
+      --background: oklch(0.145 0 0); --foreground: oklch(0.985 0 0);
+      --card: oklch(0.145 0 0); --card-foreground: oklch(0.985 0 0);
+      --popover: oklch(0.145 0 0); --popover-foreground: oklch(0.985 0 0);
+      --primary: oklch(0.52 0.226 262); --primary-foreground: oklch(0.985 0 0);
+      --secondary: oklch(0.269 0 0); --secondary-foreground: oklch(0.985 0 0);
+      --muted: oklch(0.269 0 0); --muted-foreground: oklch(0.708 0 0);
+      --accent: oklch(0.52 0.226 262); --accent-foreground: oklch(0.985 0 0);
+      --destructive: oklch(0.396 0.141 25.723); --destructive-foreground: oklch(0.637 0.237 25.331);
+      --border: oklch(0.269 0 0); --input: oklch(0.269 0 0); --ring: oklch(0.52 0.226 262);
+    }
+  </style>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground); line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 2rem; margin-bottom: 2rem; }
+    .spec-header h1 { color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+    .meta-table td:first-child { font-weight: 600; width: 160px; color: var(--muted-foreground); white-space: nowrap; }
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 2rem; margin-bottom: 2rem; }
+    .component-toc > h2 { color: var(--primary); font-size: 1.05rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .component-toc ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.5rem; }
+    .component-toc li { padding: 0.375rem 0.75rem; border-radius: calc(var(--radius) - 4px); background: var(--muted); font-size: 0.875rem; }
+    .component-toc li a { color: var(--primary); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.375rem; }
+    .component-toc li a:hover { text-decoration: underline; }
+    .component-toc .toc-layer-links { font-size: 0.75rem; color: var(--muted-foreground); margin-left: 0.5rem; }
+    .component-toc .toc-layer-links a { color: var(--muted-foreground); font-weight: 400; }
+    .component-toc .toc-badge { display: inline-block; font-size: 0.6875rem; font-weight: 600; padding: 0.0625rem 0.375rem; border-radius: calc(var(--radius) - 4px); background: var(--primary); color: var(--primary-foreground); white-space: nowrap; margin-left: 0.375rem; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+    section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; margin-bottom: 1.25rem; font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+    h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+    table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+    table.spec-table th { background: var(--muted); color: var(--foreground); font-weight: 600; text-align: left; padding: 0.55rem 0.7rem; border: 1px solid var(--border); white-space: nowrap; }
+    table.spec-table td { padding: 0.55rem 0.7rem; border: 1px solid var(--border); vertical-align: top; }
+    table.spec-table tr:nth-child(even) td { background: var(--muted); }
+    .table-scroll { overflow-x: auto; }
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .screenshot-figure figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .component-spec { border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1rem 0; background: var(--card); }
+    .component-spec > h3 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 0.75rem; }
+    pre { background: var(--muted); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; margin: 1rem 0; }
+    code { font-family: var(--font-mono); font-size: 0.85em; }
+    .mermaid { text-align: center; margin: 1rem 0; padding: 1rem; background: var(--muted); border-radius: calc(var(--radius) - 2px); }
+    .diff-section { border-left: 4px solid var(--diff-border); background: var(--diff-bg); }
+    .diff-section > h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+    .diff-badge { display: inline-block; background: var(--diff-border); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); margin-right: 0.5rem; }
+    .question-section { border-left: 4px solid var(--question-border); background: var(--question-bg); }
+    .question-section > h2 { color: var(--question-border); border-bottom-color: var(--question-border); }
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); }
+    .badge-high { background: oklch(0.65 0.2 25); color: white; }
+    .badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+    .badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+    blockquote { border-left: 4px solid var(--destructive); background: var(--diff-bg); padding: 0.75rem 1rem; margin: 1rem 0; font-size: 0.875rem; border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0; }
+    .component-preview { border: 2px dashed var(--primary); border-radius: var(--radius); padding: 1.5rem; margin: 1rem 0; background: #f8fafc; position: relative; overflow: auto; }
+    .component-preview::before { content: "🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）"; position: absolute; top: -0.625rem; left: 0.75rem; background: var(--primary); color: var(--primary-foreground); font-size: 0.6875rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); white-space: nowrap; }
+    .component-preview * { box-sizing: border-box; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1.5rem 0; background: var(--card); }
+    .interaction-layer > h4 { color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .trigger-path { background: var(--muted); border-radius: calc(var(--radius) - 4px); padding: 0.5rem 0.75rem; margin: 0.5rem 0 1rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .trigger-path strong { color: var(--foreground); }
+    .dom-comparison { margin: 1rem 0; border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); overflow: hidden; }
+    .dom-comparison > h5 { background: var(--muted); padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600; color: var(--foreground); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.375rem; }
+    .dom-comparison > h5::before { content: "🔍"; font-size: 0.875rem; }
+    .dom-comparison table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+    .dom-comparison th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .dom-comparison td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .dom-comparison tr:last-child td { border-bottom: none; }
+    .dom-pass { color: oklch(0.5 0.15 150); font-weight: 600; }
+    .dom-fail { color: var(--destructive); font-weight: 600; }
+    .dom-fixed { color: oklch(0.6 0.15 90); font-weight: 600; }
+    table.layer-index { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.layer-index th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+    table.layer-index td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.layer-index td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    table.layer-index td a:hover { text-decoration: underline; }
+    .version-history-section { margin: 1.5rem 0; }
+    .version-history-table td:nth-child(5) { color: var(--muted-foreground); }
+    .spec-version { font-weight: 600; color: oklch(0.52 0.226 262); }
+  </style>
+/* === TW-STATIC-BEGIN (offline Tailwind, auto-generated) === */
+<style id="tw-static">
+*, ::before, ::after {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}::backdrop {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}.pointer-events-none {pointer-events: none
+}.absolute {position: absolute
+}.relative {position: relative
+}.sticky {position: sticky
+}.left-2\.5 {left: 0.625rem
+}.left-3 {left: 0.75rem
+}.right-0 {right: 0px
+}.top-1\/2 {top: 50%
+}.mb-3 {margin-bottom: 0.75rem
+}.mb-6 {margin-bottom: 1.5rem
+}.ml-1 {margin-left: 0.25rem
+}.mt-0\.5 {margin-top: 0.125rem
+}.mt-1 {margin-top: 0.25rem
+}.mt-2 {margin-top: 0.5rem
+}.block {display: block
+}.flex {display: flex
+}.inline-flex {display: inline-flex
+}.grid {display: grid
+}.size-4 {width: 1rem;height: 1rem
+}.h-1\.5 {height: 0.375rem
+}.h-3 {height: 0.75rem
+}.h-3\.5 {height: 0.875rem
+}.h-4 {height: 1rem
+}.h-5 {height: 1.25rem
+}.h-6 {height: 1.5rem
+}.h-7 {height: 1.75rem
+}.h-8 {height: 2rem
+}.h-9 {height: 2.25rem
+}.h-\[1\.15rem\] {height: 1.15rem
+}.h-\[calc\(100\%-1px\)\] {height: calc(100% - 1px)
+}.w-1\.5 {width: 0.375rem
+}.w-28 {width: 7rem
+}.w-3 {width: 0.75rem
+}.w-3\.5 {width: 0.875rem
+}.w-4 {width: 1rem
+}.w-5 {width: 1.25rem
+}.w-8 {width: 2rem
+}.w-\[120px\] {width: 120px
+}.w-\[150px\] {width: 150px
+}.w-\[160px\] {width: 160px
+}.w-\[260px\] {width: 260px
+}.w-fit {width: -moz-fit-content;width: fit-content
+}.w-full {width: 100%
+}.min-w-0 {min-width: 0px
+}.min-w-\[240px\] {min-width: 240px
+}.max-w-40 {max-width: 10rem
+}.max-w-48 {max-width: 12rem
+}.max-w-56 {max-width: 14rem
+}.max-w-\[260px\] {max-width: 260px
+}.max-w-full {max-width: 100%
+}.max-w-md {max-width: 28rem
+}.flex-1 {flex: 1 1 0%
+}.flex-shrink-0 {flex-shrink: 0
+}.shrink-0 {flex-shrink: 0
+}.-translate-y-1\/2 {--tw-translate-y: -50%;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.scale-75 {--tw-scale-x: .75;--tw-scale-y: .75;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}@keyframes spin {to {transform: rotate(360deg)
+    }
+}.animate-spin {animation: spin 1s linear infinite
+}.cursor-default {cursor: default
+}.cursor-pointer {cursor: pointer
+}.select-none {-webkit-user-select: none;user-select: none
+}.auto-rows-min {grid-auto-rows: min-content
+}.grid-cols-2 {grid-template-columns: repeat(2, minmax(0, 1fr))
+}.grid-rows-\[auto_auto\] {grid-template-rows: auto auto
+}.flex-col {flex-direction: column
+}.flex-wrap {flex-wrap: wrap
+}.items-start {align-items: flex-start
+}.items-center {align-items: center
+}.justify-end {justify-content: flex-end
+}.justify-center {justify-content: center
+}.justify-between {justify-content: space-between
+}.gap-0\.5 {gap: 0.125rem
+}.gap-1 {gap: 0.25rem
+}.gap-1\.5 {gap: 0.375rem
+}.gap-2 {gap: 0.5rem
+}.gap-3 {gap: 0.75rem
+}.gap-4 {gap: 1rem
+}.gap-6 {gap: 1.5rem
+}.gap-x-3 {column-gap: 0.75rem
+}.gap-x-6 {column-gap: 1.5rem
+}.gap-y-1 {row-gap: 0.25rem
+}.space-y-2 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.5rem * var(--tw-space-y-reverse))
+}.space-y-3 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.75rem * var(--tw-space-y-reverse))
+}.space-y-4 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(1rem * var(--tw-space-y-reverse))
+}.space-y-6 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(1.5rem * var(--tw-space-y-reverse))
+}.overflow-auto {overflow: auto
+}.overflow-hidden {overflow: hidden
+}.overflow-x-auto {overflow-x: auto
+}.truncate {overflow: hidden;text-overflow: ellipsis;white-space: nowrap
+}.whitespace-nowrap {white-space: nowrap
+}.rounded {border-radius: 0.25rem
+}.rounded-full {border-radius: 9999px
+}.rounded-lg {border-radius: var(--radius)
+}.rounded-md {border-radius: calc(var(--radius) - 2px)
+}.rounded-xl {border-radius: calc(var(--radius) + 4px)
+}.border {border-width: 1px
+}.border-b {border-bottom-width: 1px
+}.border-l-4 {border-left-width: 4px
+}.border-t {border-top-width: 1px
+}.border-\[\#B5F5EC\] {--tw-border-opacity: 1;border-color: rgb(181 245 236 / var(--tw-border-opacity, 1))
+}.border-\[\#B7EB8F\] {--tw-border-opacity: 1;border-color: rgb(183 235 143 / var(--tw-border-opacity, 1))
+}.border-\[\#D6E4FF\] {--tw-border-opacity: 1;border-color: rgb(214 228 255 / var(--tw-border-opacity, 1))
+}.border-\[\#D9D9D9\] {--tw-border-opacity: 1;border-color: rgb(217 217 217 / var(--tw-border-opacity, 1))
+}.border-\[\#EFDBFF\] {--tw-border-opacity: 1;border-color: rgb(239 219 255 / var(--tw-border-opacity, 1))
+}.border-\[\#FFCCC7\] {--tw-border-opacity: 1;border-color: rgb(255 204 199 / var(--tw-border-opacity, 1))
+}.border-\[\#FFD591\] {--tw-border-opacity: 1;border-color: rgb(255 213 145 / var(--tw-border-opacity, 1))
+}.border-amber-200 {--tw-border-opacity: 1;border-color: rgb(253 230 138 / var(--tw-border-opacity, 1))
+}.border-blue-200 {--tw-border-opacity: 1;border-color: rgb(191 219 254 / var(--tw-border-opacity, 1))
+}.border-gray-100 {--tw-border-opacity: 1;border-color: rgb(243 244 246 / var(--tw-border-opacity, 1))
+}.border-gray-200 {--tw-border-opacity: 1;border-color: rgb(229 231 235 / var(--tw-border-opacity, 1))
+}.border-gray-50 {--tw-border-opacity: 1;border-color: rgb(249 250 251 / var(--tw-border-opacity, 1))
+}.border-input {border-color: var(--input)
+}.border-red-200 {--tw-border-opacity: 1;border-color: rgb(254 202 202 / var(--tw-border-opacity, 1))
+}.border-transparent {border-color: transparent
+}.border-l-blue-500 {--tw-border-opacity: 1;border-left-color: rgb(59 130 246 / var(--tw-border-opacity, 1))
+}.border-l-red-500 {--tw-border-opacity: 1;border-left-color: rgb(239 68 68 / var(--tw-border-opacity, 1))
+}.bg-\[\#E6FFFB\] {--tw-bg-opacity: 1;background-color: rgb(230 255 251 / var(--tw-bg-opacity, 1))
+}.bg-\[\#F0F5FF\] {--tw-bg-opacity: 1;background-color: rgb(240 245 255 / var(--tw-bg-opacity, 1))
+}.bg-\[\#F5F5F5\] {--tw-bg-opacity: 1;background-color: rgb(245 245 245 / var(--tw-bg-opacity, 1))
+}.bg-\[\#F6FFED\] {--tw-bg-opacity: 1;background-color: rgb(246 255 237 / var(--tw-bg-opacity, 1))
+}.bg-\[\#F9F0FF\] {--tw-bg-opacity: 1;background-color: rgb(249 240 255 / var(--tw-bg-opacity, 1))
+}.bg-\[\#FFF2F0\] {--tw-bg-opacity: 1;background-color: rgb(255 242 240 / var(--tw-bg-opacity, 1))
+}.bg-\[\#FFF7E6\] {--tw-bg-opacity: 1;background-color: rgb(255 247 230 / var(--tw-bg-opacity, 1))
+}.bg-amber-100 {--tw-bg-opacity: 1;background-color: rgb(254 243 199 / var(--tw-bg-opacity, 1))
+}.bg-amber-500 {--tw-bg-opacity: 1;background-color: rgb(245 158 11 / var(--tw-bg-opacity, 1))
+}.bg-background {background-color: var(--background)
+}.bg-blue-50 {--tw-bg-opacity: 1;background-color: rgb(239 246 255 / var(--tw-bg-opacity, 1))
+}.bg-blue-600 {--tw-bg-opacity: 1;background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1))
+}.bg-card {background-color: var(--card)
+}.bg-gray-50 {--tw-bg-opacity: 1;background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}.bg-gray-50\/60 {background-color: rgb(249 250 251 / 0.6)
+}.bg-gray-50\/70 {background-color: rgb(249 250 251 / 0.7)
+}.bg-green-500 {--tw-bg-opacity: 1;background-color: rgb(34 197 94 / var(--tw-bg-opacity, 1))
+}.bg-muted {background-color: var(--muted)
+}.bg-red-100 {--tw-bg-opacity: 1;background-color: rgb(254 226 226 / var(--tw-bg-opacity, 1))
+}.bg-red-500 {--tw-bg-opacity: 1;background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1))
+}.bg-red-600 {--tw-bg-opacity: 1;background-color: rgb(220 38 38 / var(--tw-bg-opacity, 1))
+}.bg-secondary {background-color: var(--secondary)
+}.bg-transparent {background-color: transparent
+}.bg-white {--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
+}.p-3 {padding: 0.75rem
+}.p-4 {padding: 1rem
+}.p-\[3px\] {padding: 3px
+}.px-2 {padding-left: 0.5rem;padding-right: 0.5rem
+}.px-3 {padding-left: 0.75rem;padding-right: 0.75rem
+}.px-4 {padding-left: 1rem;padding-right: 1rem
+}.px-6 {padding-left: 1.5rem;padding-right: 1.5rem
+}.py-0\.5 {padding-top: 0.125rem;padding-bottom: 0.125rem
+}.py-1 {padding-top: 0.25rem;padding-bottom: 0.25rem
+}.py-2 {padding-top: 0.5rem;padding-bottom: 0.5rem
+}.py-2\.5 {padding-top: 0.625rem;padding-bottom: 0.625rem
+}.py-3 {padding-top: 0.75rem;padding-bottom: 0.75rem
+}.py-4 {padding-top: 1rem;padding-bottom: 1rem
+}.py-6 {padding-top: 1.5rem;padding-bottom: 1.5rem
+}.pl-8 {padding-left: 2rem
+}.pl-9 {padding-left: 2.25rem
+}.pt-4 {padding-top: 1rem
+}.text-left {text-align: left
+}.text-right {text-align: right
+}.align-middle {vertical-align: middle
+}.font-mono {font-family: Geist Mono, Geist Mono Fallback, monospace
+}.text-2xl {font-size: 1.5rem;line-height: 2rem
+}.text-\[10px\] {font-size: 10px
+}.text-\[11px\] {font-size: 11px
+}.text-base {font-size: 1rem;line-height: 1.5rem
+}.text-lg {font-size: 1.125rem;line-height: 1.75rem
+}.text-sm {font-size: 0.875rem;line-height: 1.25rem
+}.text-xs {font-size: 0.75rem;line-height: 1rem
+}.font-bold {font-weight: 700
+}.font-medium {font-weight: 500
+}.font-normal {font-weight: 400
+}.font-semibold {font-weight: 600
+}.leading-none {line-height: 1
+}.text-\[\#13C2C2\] {--tw-text-opacity: 1;color: rgb(19 194 194 / var(--tw-text-opacity, 1))
+}.text-\[\#1677FF\] {--tw-text-opacity: 1;color: rgb(22 119 255 / var(--tw-text-opacity, 1))
+}.text-\[\#1D39C4\] {--tw-text-opacity: 1;color: rgb(29 57 196 / var(--tw-text-opacity, 1))
+}.text-\[\#389E0D\] {--tw-text-opacity: 1;color: rgb(56 158 13 / var(--tw-text-opacity, 1))
+}.text-\[\#595959\] {--tw-text-opacity: 1;color: rgb(89 89 89 / var(--tw-text-opacity, 1))
+}.text-\[\#722ED1\] {--tw-text-opacity: 1;color: rgb(114 46 209 / var(--tw-text-opacity, 1))
+}.text-\[\#8C8C8C\] {--tw-text-opacity: 1;color: rgb(140 140 140 / var(--tw-text-opacity, 1))
+}.text-\[\#CF1322\] {--tw-text-opacity: 1;color: rgb(207 19 34 / var(--tw-text-opacity, 1))
+}.text-\[\#D46B08\] {--tw-text-opacity: 1;color: rgb(212 107 8 / var(--tw-text-opacity, 1))
+}.text-amber-600 {--tw-text-opacity: 1;color: rgb(217 119 6 / var(--tw-text-opacity, 1))
+}.text-amber-700 {--tw-text-opacity: 1;color: rgb(180 83 9 / var(--tw-text-opacity, 1))
+}.text-blue-300 {--tw-text-opacity: 1;color: rgb(147 197 253 / var(--tw-text-opacity, 1))
+}.text-blue-600 {--tw-text-opacity: 1;color: rgb(37 99 235 / var(--tw-text-opacity, 1))
+}.text-blue-700 {--tw-text-opacity: 1;color: rgb(29 78 216 / var(--tw-text-opacity, 1))
+}.text-card-foreground {color: var(--card-foreground)
+}.text-foreground {color: var(--foreground)
+}.text-gray-300 {--tw-text-opacity: 1;color: rgb(209 213 219 / var(--tw-text-opacity, 1))
+}.text-gray-400 {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.text-gray-500 {--tw-text-opacity: 1;color: rgb(107 114 128 / var(--tw-text-opacity, 1))
+}.text-gray-600 {--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity, 1))
+}.text-gray-700 {--tw-text-opacity: 1;color: rgb(55 65 81 / var(--tw-text-opacity, 1))
+}.text-gray-900 {--tw-text-opacity: 1;color: rgb(17 24 39 / var(--tw-text-opacity, 1))
+}.text-green-600 {--tw-text-opacity: 1;color: rgb(22 163 74 / var(--tw-text-opacity, 1))
+}.text-muted-foreground {color: var(--muted-foreground)
+}.text-orange-500 {--tw-text-opacity: 1;color: rgb(249 115 22 / var(--tw-text-opacity, 1))
+}.text-primary-foreground {color: var(--primary-foreground)
+}.text-red-600 {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.text-red-700 {--tw-text-opacity: 1;color: rgb(185 28 28 / var(--tw-text-opacity, 1))
+}.text-secondary-foreground {color: var(--secondary-foreground)
+}.text-white {--tw-text-opacity: 1;color: rgb(255 255 255 / var(--tw-text-opacity, 1))
+}.opacity-50 {opacity: 0.5
+}.shadow-sm {--tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.outline-none {outline: 2px solid transparent;outline-offset: 2px
+}.ring-0 {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.transition-\[color\2c box-shadow\] {transition-property: color,box-shadow;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-all {transition-property: all;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-transform {transition-property: transform;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition {transition-property: color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.duration-150 {transition-duration: 150ms
+}.selection\:bg-primary *::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground *::selection {color: var(--primary-foreground)
+}.selection\:bg-primary::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground::selection {color: var(--primary-foreground)
+}.file\:inline-flex::file-selector-button {display: inline-flex
+}.file\:h-7::file-selector-button {height: 1.75rem
+}.file\:border-0::file-selector-button {border-width: 0px
+}.file\:bg-transparent::file-selector-button {background-color: transparent
+}.file\:text-sm::file-selector-button {font-size: 0.875rem;line-height: 1.25rem
+}.file\:font-medium::file-selector-button {font-weight: 500
+}.file\:text-foreground::file-selector-button {color: var(--foreground)
+}.placeholder\:text-muted-foreground::placeholder {color: var(--muted-foreground)
+}.last\:border-0:last-child {border-width: 0px
+}.hover\:-translate-y-0\.5:hover {--tw-translate-y: -0.125rem;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.hover\:bg-accent:hover {background-color: var(--accent)
+}.hover\:bg-blue-700:hover {--tw-bg-opacity: 1;background-color: rgb(29 78 216 / var(--tw-bg-opacity, 1))
+}.hover\:bg-gray-100:hover {--tw-bg-opacity: 1;background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1))
+}.hover\:bg-gray-50:hover {--tw-bg-opacity: 1;background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}.hover\:bg-gray-50\/60:hover {background-color: rgb(249 250 251 / 0.6)
+}.hover\:bg-red-100:hover {--tw-bg-opacity: 1;background-color: rgb(254 226 226 / var(--tw-bg-opacity, 1))
+}.hover\:bg-red-700:hover {--tw-bg-opacity: 1;background-color: rgb(185 28 28 / var(--tw-bg-opacity, 1))
+}.hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}.hover\:text-blue-600:hover {--tw-text-opacity: 1;color: rgb(37 99 235 / var(--tw-text-opacity, 1))
+}.hover\:text-blue-700:hover {--tw-text-opacity: 1;color: rgb(29 78 216 / var(--tw-text-opacity, 1))
+}.hover\:text-gray-700:hover {--tw-text-opacity: 1;color: rgb(55 65 81 / var(--tw-text-opacity, 1))
+}.hover\:text-red-600:hover {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.hover\:shadow-md:hover {--tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.focus-visible\:border-ring:focus-visible {border-color: var(--ring)
+}.focus-visible\:outline-1:focus-visible {outline-width: 1px
+}.focus-visible\:outline-ring:focus-visible {outline-color: var(--ring)
+}.focus-visible\:ring-\[3px\]:focus-visible {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.disabled\:pointer-events-none:disabled {pointer-events: none
+}.disabled\:cursor-not-allowed:disabled {cursor: not-allowed
+}.disabled\:opacity-50:disabled {opacity: 0.5
+}.peer:disabled ~ .peer-disabled\:cursor-not-allowed {cursor: not-allowed
+}.peer:disabled ~ .peer-disabled\:opacity-50 {opacity: 0.5
+}.has-\[\>svg\]\:px-2\.5:has(>svg) {padding-left: 0.625rem;padding-right: 0.625rem
+}.has-\[\>svg\]\:px-3:has(>svg) {padding-left: 0.75rem;padding-right: 0.75rem
+}.data-\[size\=default\]\:h-9[data-size="default"] {height: 2.25rem
+}.data-\[size\=sm\]\:h-8[data-size="sm"] {height: 2rem
+}.data-\[state\=checked\]\:translate-x-\[calc\(100\%-2px\)\][data-state="checked"] {--tw-translate-x: calc(100% - 2px);transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.data-\[state\=unchecked\]\:translate-x-0[data-state="unchecked"] {--tw-translate-x: 0px;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.data-\[state\=active\]\:bg-background[data-state="active"] {background-color: var(--background)
+}.data-\[state\=checked\]\:bg-primary[data-state="checked"] {background-color: var(--primary)
+}.data-\[state\=unchecked\]\:bg-input[data-state="unchecked"] {background-color: var(--input)
+}.data-\[placeholder\]\:text-muted-foreground[data-placeholder] {color: var(--muted-foreground)
+}.data-\[state\=active\]\:shadow-sm[data-state="active"] {--tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.\*\:data-\[slot\=select-value\]\:line-clamp-1[data-slot="select-value"] > * {overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1
+}.\*\:data-\[slot\=select-value\]\:flex[data-slot="select-value"] > * {display: flex
+}.\*\:data-\[slot\=select-value\]\:items-center[data-slot="select-value"] > * {align-items: center
+}.\*\:data-\[slot\=select-value\]\:gap-2[data-slot="select-value"] > * {gap: 0.5rem
+}.group[data-disabled="true"] .group-data-\[disabled\=true\]\:pointer-events-none {pointer-events: none
+}.group[data-disabled="true"] .group-data-\[disabled\=true\]\:opacity-50 {opacity: 0.5
+}.dark\:border-gray-700:is([data-theme="dark"] *) {--tw-border-opacity: 1;border-color: rgb(55 65 81 / var(--tw-border-opacity, 1))
+}.dark\:border-gray-800:is([data-theme="dark"] *) {--tw-border-opacity: 1;border-color: rgb(31 41 55 / var(--tw-border-opacity, 1))
+}.dark\:border-gray-900:is([data-theme="dark"] *) {--tw-border-opacity: 1;border-color: rgb(17 24 39 / var(--tw-border-opacity, 1))
+}.dark\:border-input:is([data-theme="dark"] *) {border-color: var(--input)
+}.dark\:bg-blue-950\/30:is([data-theme="dark"] *) {background-color: rgb(23 37 84 / 0.3)
+}.dark\:bg-gray-800:is([data-theme="dark"] *) {--tw-bg-opacity: 1;background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1))
+}.dark\:bg-gray-900:is([data-theme="dark"] *) {--tw-bg-opacity: 1;background-color: rgb(17 24 39 / var(--tw-bg-opacity, 1))
+}.dark\:bg-gray-900\/40:is([data-theme="dark"] *) {background-color: rgb(17 24 39 / 0.4)
+}.dark\:bg-gray-950:is([data-theme="dark"] *) {--tw-bg-opacity: 1;background-color: rgb(3 7 18 / var(--tw-bg-opacity, 1))
+}.dark\:bg-red-950\/40:is([data-theme="dark"] *) {background-color: rgb(69 10 10 / 0.4)
+}.dark\:text-blue-300:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(147 197 253 / var(--tw-text-opacity, 1))
+}.dark\:text-blue-400:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(96 165 250 / var(--tw-text-opacity, 1))
+}.dark\:text-gray-100:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(243 244 246 / var(--tw-text-opacity, 1))
+}.dark\:text-gray-200:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(229 231 235 / var(--tw-text-opacity, 1))
+}.dark\:text-gray-300:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(209 213 219 / var(--tw-text-opacity, 1))
+}.dark\:text-gray-400:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.dark\:text-muted-foreground:is([data-theme="dark"] *) {color: var(--muted-foreground)
+}.dark\:text-red-300:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(252 165 165 / var(--tw-text-opacity, 1))
+}.dark\:hover\:bg-gray-800:hover:is([data-theme="dark"] *) {--tw-bg-opacity: 1;background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1))
+}.dark\:hover\:bg-gray-800\/50:hover:is([data-theme="dark"] *) {background-color: rgb(31 41 55 / 0.5)
+}.dark\:hover\:bg-gray-900\/40:hover:is([data-theme="dark"] *) {background-color: rgb(17 24 39 / 0.4)
+}.dark\:data-\[state\=active\]\:border-input[data-state="active"]:is([data-theme="dark"] *) {border-color: var(--input)
+}.dark\:data-\[state\=checked\]\:bg-primary-foreground[data-state="checked"]:is([data-theme="dark"] *) {background-color: var(--primary-foreground)
+}.dark\:data-\[state\=unchecked\]\:bg-foreground[data-state="unchecked"]:is([data-theme="dark"] *) {background-color: var(--foreground)
+}.dark\:data-\[state\=active\]\:text-foreground[data-state="active"]:is([data-theme="dark"] *) {color: var(--foreground)
+}@media (min-width: 768px) {.md\:grid-cols-2 {grid-template-columns: repeat(2, minmax(0, 1fr))
+    }.md\:grid-cols-3 {grid-template-columns: repeat(3, minmax(0, 1fr))
+    }.md\:text-sm {font-size: 0.875rem;line-height: 1.25rem
+    }
+}@media (min-width: 1024px) {.lg\:grid-cols-6 {grid-template-columns: repeat(6, minmax(0, 1fr))
+    }
+}.\[\&\>svg\]\:pointer-events-none>svg {pointer-events: none
+}.\[\&\>svg\]\:size-3>svg {width: 0.75rem;height: 0.75rem
+}.\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-4 svg:not([class*='size-']) {width: 1rem;height: 1rem
+}.\[\&_svg\:not\(\[class\*\=\'text-\'\]\)\]\:text-muted-foreground svg:not([class*='text-']) {color: var(--muted-foreground)
+}.\[\&_svg\]\:pointer-events-none svg {pointer-events: none
+}.\[\&_svg\]\:shrink-0 svg {flex-shrink: 0
+}a.\[a\&\]\:hover\:bg-accent:hover {background-color: var(--accent)
+}a.\[a\&\]\:hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}
+</style>
+/* === TW-STATIC-END === */</head>
+<body>
+
+<!-- ========== 0. 元信息头 ========== -->
+<header class="spec-header">
+  <h1>钓鱼邮件检测智能体 详细产品规格说明</h1>
+  <table class="meta-table">
+    <tr><td>spec 源</td><td><code>design/origin/spec/V2-钓鱼邮件检测智能体模块 · 需求文档（PRD）.md</code>（交叉核对 <code>spec/钓鱼邮件智能体.md</code>）</td></tr>
+    <tr><td>demo 源</td><td><code>demo/components/agent-center/agent-center-page.tsx</code>（wrapper） → <code>phishing-detection-agent-v1.tsx</code>（3629 行主组件） + <code>phishing-detection-types.ts</code> + <code>phishing-url-evidence-drawer.tsx</code></td></tr>
+    <tr><td>覆盖 spec 章节</td><td>§1–§7（全量：功能点 A1–A8 / B1–B16、业务逻辑、异常场景、关联模块、测试用例）</td></tr>
+    <tr><td>遵循约束</td><td><code>design/origin/implement.md</code>（四语国际化、复用统一规则系统 action、冲突先确认）</td></tr>
+    <tr><td>页面名称</td><td>钓鱼邮件检测智能体（Phishing Email Detection Agent，key <code>phishingV1</code>，Stage 4.0）</td></tr>
+    <tr><td>路由路径</td><td><code>/agent-center/overview?agent=phishingV1</code></td></tr>
+    <tr><td>组件入口</td><td><code>&lt;PhishingDetectionAgentV1 /&gt;</code>（由 <code>AgentCenterPage</code> 的 <code>renderAgentConfig("phishingV1")</code> 渲染，外套左侧智能体导航 + 头部启用开关卡片）</td></tr>
+    <tr><td>导航层级</td><td>智能体管理中心 &gt; 钓鱼邮件检测智能体</td></tr>
+    <tr><td>权限矩阵</td><td>安全管理员=全量；安全审计员=只读（<code>readOnly</code>/仅审计模式）；普通运维=无访问权（spec §1.4）</td></tr>
+    <tr><td>规格版本</td><td><span class="spec-version">v1</span></td></tr>
+    <tr><td>生成日期</td><td>2026-07-22</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td><code>804efb9</code></td></tr>
+  </table>
+</header>
+
+<!-- ========== 0.1 组件列表 ========== -->
+<nav class="component-toc">
+  <h2>📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 外套控制栏与启用开关</a><span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-2">2.2 顶部面包屑与 Tab 切换</a><span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-3">2.3 KPI 概览卡（6 指标）</a><span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-4">2.4 检测日志筛选区</a><span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-5">2.5 检测日志主表</a><span class="toc-badge">2层</span></li>
+    <li><a href="#component-2-6">2.6 配置·板块1 引擎基础与 URL 检测</a><span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-7">2.7 配置·板块2 检测范围与准入规则</a><span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-8">2.8 配置·板块3 智能体调查与处置（摘要卡）</a><span class="toc-badge">1层</span></li>
+    <li><a href="#dialog-3-1">3.1 检测详情抽屉</a><span class="toc-badge">2层</span><span class="toc-layer-links"><a href="./layer-1-detail-drawer.html">层级1</a></span></li>
+    <li><a href="#dialog-3-2">3.2 准入规则编辑抽屉</a><span class="toc-badge">2层</span><span class="toc-layer-links"><a href="./layer-2-rule-drawer.html">层级2</a></span></li>
+    <li><a href="#dialog-3-3">3.3 运行模式配置抽屉</a><span class="toc-badge">2层</span><span class="toc-layer-links"><a href="./layer-3-mode-drawer.html">层级3</a></span></li>
+    <li><a href="#dialog-3-4">3.4 置信度区间编辑弹窗</a><span class="toc-badge">1层</span><span class="toc-layer-links"><a href="./layer-4-band-edit.html">层级4</a></span></li>
+    <li><a href="#dialog-3-5">3.5 URL 透视证据抽屉（5 Tab）</a><span class="toc-badge">5层</span><span class="toc-layer-links"><a href="./layer-5-url-evidence.html">层级5</a></span></li>
+    <li><a href="#dialog-3-6">3.6 处置/确认类对话框（4 个）</a><span class="toc-badge">1层</span><span class="toc-layer-links"><a href="./layer-6-action-dialogs.html">层级6</a></span></li>
+    <li><a href="#dialog-3-7">3.7 关闭检测二次确认（外套）</a><span class="toc-badge">1层</span><span class="toc-layer-links"><a href="./layer-7-disable-confirm.html">层级7</a></span></li>
+  </ul>
+</nav>
+
+<!-- ========== 0.2 版本历史 ========== -->
+<section id="version-history" class="version-history-section">
+  <h2>🕑 版本历史</h2>
+  <table class="version-history-table spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody>
+      <tr><td>v1</td><td>2026-07-22</td><td><code>804efb9</code></td><td><code>804efb9</code></td><td>初版：覆盖检测总览（KPI/筛选/日志主表/详情抽屉）与检测引擎配置（板块1 引擎参数、板块2 准入规则、板块3 运行模式与置信度分级）、URL 透视证据 5-Tab 抽屉、区间编辑弹窗、误报豁免/拦截/超时异步/模式冲突对话框、外套启用开关与关闭二次确认。</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 1. 页面布局结构 ========== -->
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <h3>1.1 区域划分</h3>
+  <div class="table-scroll">
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>名称</th><th>元素概览</th><th>尺寸/位置</th><th>响应式</th></tr></thead>
+    <tbody>
+      <tr><td>W1</td><td>外套左侧导航（wrapper）</td><td>4 个智能体条目（总览/仿冒/钓鱼/威胁回溯），可折叠</td><td>展开 w-52 / 折叠 w-14</td><td>折叠按钮悬浮切换</td></tr>
+      <tr><td>W2</td><td>外套卡片头部（wrapper）</td><td>智能体名 + 已启用/已禁用文字 + Switch 开关</td><td>px-6 py-4，卡片顶部</td><td>固定</td></tr>
+      <tr><td>W3</td><td>外套底部操作栏（wrapper）</td><td>未保存提示 + 「保存配置」按钮（sticky）</td><td>sticky bottom-0</td><td>固定</td></tr>
+      <tr><td>A</td><td>顶部控制栏</td><td>面包屑：智能体管理中心 → Stage 4: AI 检测层 → 钓鱼邮件检测智能体</td><td>px-4 py-3 圆角条</td><td>全断点固定</td></tr>
+      <tr><td>B</td><td>一级 Tab</td><td>检测总览 / 检测引擎配置</td><td>TabsList</td><td>固定</td></tr>
+      <tr><td>C</td><td>KPI 概览卡区（总览）</td><td>6 张卡片（今日检测/拦截/待审核/召回/召回成功/准确率）</td><td>grid 2→3→6 列</td><td>grid-cols-2 md:3 lg:6</td></tr>
+      <tr><td>D</td><td>检测日志筛选区（总览）</td><td>关键字 + 时间 + 处置 + 检测模式 + 召回 + 风险 + 搜索/重置</td><td>flex-wrap</td><td>窄屏折行</td></tr>
+      <tr><td>E</td><td>检测日志主表（总览）</td><td>13 列，行可展开 URL 下钻，行操作「详情」</td><td>overflow-auto</td><td>横向滚动</td></tr>
+      <tr><td>F</td><td>配置·板块1（配置）</td><td>引擎基础参数 + 网盘链接检测</td><td>Card 左蓝边</td><td>md:双列</td></tr>
+      <tr><td>G</td><td>配置·板块2（配置）</td><td>准入规则列表 + 搜索 + 新增（编辑抽屉）</td><td>Card 左蓝边</td><td>表格横滚</td></tr>
+      <tr><td>H</td><td>配置·板块3（配置）</td><td>只读信息条 + 运行模式摘要卡（编辑抽屉）+ 保存配置</td><td>Card 左红边</td><td>flex-wrap</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>1.2 整页默认态截图（检测总览 Tab）</h3>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-full-default.png" alt="整页默认态-检测总览">
+    <figcaption>整页默认态截图（检测总览 Tab，含外套侧栏、头部启用开关、面包屑、KPI、筛选、日志表）· 浏览器实际渲染 1440px</figcaption>
+  </figure>
+
+  <h3>1.3 视觉规范</h3>
+  <table class="spec-table">
+    <thead><tr><th>属性</th><th>值</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>主色（操作/链接）</td><td><code>blue-600</code> / <code>#1677FF</code></td><td>demo 组件 + spec §2.4</td></tr>
+      <tr><td>语义色</td><td>红=高危/隔离、橙=中危/审核、蓝=低危/标记、绿=安全/通过</td><td>spec §2.4</td></tr>
+      <tr><td>标签样式</td><td>浅底 + 彩色文字 + 细边框（如 <code>bg-[#FFF2F0] text-[#CF1322] border-[#FFCCC7]</code>）</td><td>demo <code>FINAL_ACTION_STYLES</code> 等</td></tr>
+      <tr><td>圆角</td><td><code>rounded-lg</code> = 0.5rem（卡片/抽屉）</td><td>demo</td></tr>
+      <tr><td>字体</td><td>Geist / Geist Fallback</td><td>demo globals.css</td></tr>
+      <tr><td>图标库</td><td>lucide-react，14/16px（禁 emoji 作图标）</td><td>demo import + spec §2.4</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 2. 逐组件规格 ========== -->
+<section id="components">
+  <h2>2. 逐组件规格（层级 0）</h2>
+  <blockquote>本节所有组件均为交互层级 0（默认渲染态），内嵌可交互预览。层级 1+ 的抽屉/弹窗见 §3 及各 <code>layer-*.html</code> 子文件。</blockquote>
+
+  <!-- 2.1 外套控制栏与启用开关 -->
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 外套控制栏与启用开关（wrapper）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 组件路径</td><td><code>components/agent-center/agent-center-page.tsx</code></td></tr>
+      <tr><td>状态管理</td><td><code>useAgentStatus()</code> 上下文（<code>agentStatus.phishingV1.enabled</code>）、<code>pendingDisableAgent</code></td></tr>
+      <tr><td>交互层级数</td><td>1 层（关闭时弹二次确认 → 见 §3.7 / layer-7）</td></tr>
+    </tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 卡片头部：启用/已禁用 + Switch</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染于卡片头部右上角；关闭开关（phishingV1）时不直接关闭，弹二次确认（§3.7）。</div>
+      <div class="component-preview">
+<div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0"><h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">钓鱼邮件检测智能体</h2><div class="flex items-center gap-2"><span class="text-sm text-blue-600 dark:text-blue-400">已启用</span><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button></div></div>
+</div>
+      <table class="spec-table">
+        <thead><tr><th>序号</th><th>元素</th><th>文案</th><th>禁用条件</th><th>交互行为</th><th>i18n key（wrapper）</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>状态文字</td><td>已启用 / 已禁用</td><td>—</td><td>随开关同步；启用蓝色、禁用灰色</td><td><code>common.enabled</code> / <code>common.disabled</code></td></tr>
+          <tr><td>2</td><td>Switch 开关</td><td>—</td><td>—</td><td>phishingV1 关闭 → 弹 <code>pendingDisableAgent</code> 确认；启用直接生效</td><td>—（硬编码逻辑）</td></tr>
+          <tr><td>3</td><td>关闭后危险横幅</td><td>钓鱼邮件检测已关闭 + 「重新启用」</td><td>仅 <code>!enabled</code> 时显示</td><td>点「重新启用」直接置回 enabled</td><td>硬编码中文</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody>
+        <tr><td>头部根节点</td><td>div.flex.items-center.justify-between（px-6 py-4 border-b）</td><td>div.flex.items-center.justify-between</td><td class="dom-pass">✅</td></tr>
+        <tr><td>状态文字（启用）</td><td>"已启用" text-blue-600</td><td>"已启用" text-blue-600</td><td class="dom-pass">✅</td></tr>
+        <tr><td>Switch role</td><td>button[role=switch] aria-checked=true</td><td>button[role=switch] aria-checked=true</td><td class="dom-pass">✅</td></tr>
+        <tr><td>危险横幅</td><td>启用态未渲染（<code>!enabled</code> 条件）</td><td>display:none 默认隐藏</td><td class="dom-pass">✅</td></tr>
+      </tbody></table></div>
+    </div>
+  </article>
+
+  <!-- 2.2 面包屑 + Tab -->
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 顶部面包屑与一级 Tab 切换</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 组件路径</td><td><code>phishing-detection-agent-v1.tsx</code>（顶部控制栏 + <code>&lt;Tabs&gt;</code>）</td></tr>
+      <tr><td>状态管理</td><td><code>activeTab</code>（"overview" / "config"），<code>enabled</code>（仅审计横幅）</td></tr>
+      <tr><td>交互层级数</td><td>1 层（Tab 切换内容互斥）</td></tr>
+    </tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 面包屑 + 仅审计横幅 + 两个 Tab（可点击切换）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载默认选中「检测总览」。点 Tab 切换内容；<code>enabled=false</code> 时在 Tab 上方显示「仅审计」黄色横幅，且配置 Tab 整体置灰（<code>readOnly</code>）。</div>
+      <div class="component-preview" style="font-family:var(--font-sans)">
+<div class="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 px-4 py-3"><div class="flex items-center gap-2 text-sm text-gray-500"><span>智能体管理中心</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span>Stage 4: AI 检测层</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span class="font-medium text-gray-900 dark:text-gray-100">钓鱼邮件检测智能体</span></div></div>
+<div style="height:0.75rem"></div>
+<div role="tablist" aria-orientation="horizontal" data-slot="tabs-list" class="bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]" tabindex="0" data-orientation="horizontal" style="outline: none;"><button type="button" role="tab" aria-selected="true" aria-controls="radix-_r_0_-content-overview" data-state="active" id="radix-_r_0_-trigger-overview" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">检测总览</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_0_-content-config" data-state="inactive" id="radix-_r_0_-trigger-config" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">检测引擎配置</button></div>
+</div>
+      <table class="spec-table">
+        <thead><tr><th>序号</th><th>元素</th><th>文案</th><th>交互</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>面包屑</td><td>智能体管理中心 → Stage 4: AI 检测层 → 钓鱼邮件检测智能体</td><td>纯展示</td><td>硬编码中文</td></tr>
+          <tr><td>2</td><td>仅审计横幅</td><td>已进入「仅审计」模式：检测流程仍运行，但处置动作统一降级为「标记投递」，下方配置项不可编辑。</td><td><code>!enabled</code> 时显示（Info 图标，amber）</td><td>硬编码中文</td></tr>
+          <tr><td>3</td><td>Tab 触发器</td><td>检测总览 / 检测引擎配置</td><td>切换 <code>activeTab</code>，内容互斥</td><td>硬编码中文</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody>
+        <tr><td>TabsList 根</td><td>div[role=tablist] bg-muted h-9（childCount=2）</td><td>div[role=tablist] （2 tab）</td><td class="dom-pass">✅</td></tr>
+        <tr><td>Tab 数量</td><td>2（检测总览 / 检测引擎配置）</td><td>2</td><td class="dom-pass">✅</td></tr>
+        <tr><td>默认选中</td><td>检测总览（data-state=active）</td><td>检测总览高亮</td><td class="dom-pass">✅</td></tr>
+      </tbody></table></div>
+    </div>
+  </article>
+
+  <!-- 2.3 KPI -->
+  <article class="component-spec" id="component-2-3">
+    <h3>2.3 KPI 概览卡（6 指标，总览 Tab）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 子组件</td><td><code>KpiCard</code>（Tooltip 包裹，clickable 联动筛选）</td></tr>
+      <tr><td>数据源</td><td><code>KPI_DATA</code>（mock 常量）</td></tr>
+      <tr><td>交互层级数</td><td>1 层（点击卡片重置筛选并按处置/召回过滤日志表）</td></tr>
+    </tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 6 张指标卡（hover 显示 hint，可点击联动）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：总览 Tab 顶部渲染。hover 卡片显示指标口径 Tooltip；点击 clickable 卡片 → <code>resetLogFilters()</code> + 设定对应筛选（如「今日拦截」→ 处置=隔离）。</div>
+      <div class="component-preview" style="font-family:var(--font-sans)">
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"><div role="button" tabindex="0" class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 transition-all duration-150 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">今日检测</p><p class="text-2xl font-bold mt-2 text-gray-900 dark:text-gray-100">12,450<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div role="button" tabindex="0" class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 transition-all duration-150 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">今日拦截</p><p class="text-2xl font-bold mt-2 text-red-600">156<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div role="button" tabindex="0" class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 transition-all duration-150 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">待审核</p><p class="text-2xl font-bold mt-2 text-orange-500">23<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div role="button" tabindex="0" class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 transition-all duration-150 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">今日召回</p><p class="text-2xl font-bold mt-2 text-orange-500">89<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div role="button" tabindex="0" class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 transition-all duration-150 cursor-pointer hover:shadow-md hover:-translate-y-0.5" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">召回成功</p><p class="text-2xl font-bold mt-2 text-green-600">82<span class="text-sm font-normal text-gray-400 ml-1">封</span></p></div><div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-4 transition-all duration-150" data-state="closed" data-slot="tooltip-trigger"><p class="text-sm text-[#8C8C8C]">检测准确率</p><p class="text-2xl font-bold mt-2 text-green-600">98.5%</p></div></div>
+</div>
+      <table class="spec-table">
+        <thead><tr><th>#</th><th>指标</th><th>值</th><th>着色</th><th>点击联动</th><th>hint（Tooltip）</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>今日检测</td><td>12,450 封</td><td>默认</td><td><code>resetLogFilters()</code></td><td>进入本智能体的邮件总量（含实时/异步/实时+异步）</td></tr>
+          <tr><td>2</td><td>今日拦截</td><td>156 封</td><td>红</td><td>处置=quarantine</td><td>置信度≥90 且处置为隔离/丢弃/阻断</td></tr>
+          <tr><td>3</td><td>待审核</td><td>23 封</td><td>橙</td><td>处置=audit</td><td>置信度 70-89 且处置为审核</td></tr>
+          <tr><td>4</td><td>今日召回</td><td>89 封</td><td>橙</td><td>召回∈{待召回,已召回,召回失败}</td><td>今日触发强制召回动作总数</td></tr>
+          <tr><td>5</td><td>召回成功</td><td>82 封</td><td>绿</td><td>召回=recalled</td><td>召回成功生效数</td></tr>
+          <tr><td>6</td><td>检测准确率</td><td>98.5%</td><td>绿</td><td>不可点击</td><td>近 7 日正确判定/总判定</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody>
+        <tr><td>卡片网格</td><td>grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6</td><td>同上</td><td class="dom-pass">✅</td></tr>
+        <tr><td>卡片数</td><td>6</td><td>6</td><td class="dom-pass">✅</td></tr>
+        <tr><td>数值着色</td><td>拦截红/待审橙/召回橙/成功绿/准确率绿</td><td>一致</td><td class="dom-pass">✅</td></tr>
+        <tr><td>clickable</td><td>前 5 张 role=button 可点击；准确率不可点</td><td>前 5 张 cursor-pointer hover:shadow-md，准确率无</td><td class="dom-pass">✅</td></tr>
+      </tbody></table></div>
+    </div>
+  </article>
+
+  <!-- 2.4 filter -->
+  <article class="component-spec" id="component-2-4">
+    <h3>2.4 检测日志筛选区（总览 Tab）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 子组件</td><td>Input + Popover（时间范围）+ Select（处置）+ <code>MultiSelectFilter</code>×3（模式/召回/风险）+ 搜索/重置按钮</td></tr>
+      <tr><td>状态管理</td><td><code>logSearch / logTimePreset / logActionFilter / logModeFilter / logRecallFilter / logRiskFilter</code></td></tr>
+      <tr><td>交互层级数</td><td>1 层（各下拉在本区展开，AND 组合过滤主表）</td></tr>
+    </tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 筛选控件行（处置下拉可展开）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：总览 Tab 渲染。多条件 AND 组合过滤主表；「重置」恢复默认（今日 + 全部）。此预览演示「处置」下拉展开。</div>
+      <div class="component-preview" style="font-family:var(--font-sans)">
+<div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4 mb-3"><div class="flex items-center gap-3 flex-wrap"><div class="flex-1 min-w-[240px] relative"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 pl-9 w-full" placeholder="搜索发信人 / 主题 / 判定依据" value=""></div><button data-slot="popover-trigger" class="inline-flex items-center justify-center whitespace-nowrap text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md has-[&gt;svg]:px-2.5 h-9 px-3 gap-1.5 flex-shrink-0 font-normal" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_r_9_" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock w-4 h-4 text-gray-400"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>今日<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-3.5 h-3.5 text-gray-400"><path d="m6 9 6 6 6-6"></path></svg></button><button type="button" role="combobox" aria-controls="radix-_r_a_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 h-9 w-[120px] flex-shrink-0"><span data-slot="select-value" style="pointer-events: none;">全部处置</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="popover-trigger" class="inline-flex items-center whitespace-nowrap text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 h-9 justify-between flex-shrink-0 font-normal w-[150px]" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_r_b_" data-state="closed"><span class="truncate text-gray-600 dark:text-gray-300">检测模式：全部</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-3.5 h-3.5 ml-1 text-gray-400 flex-shrink-0"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="popover-trigger" class="inline-flex items-center whitespace-nowrap text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 h-9 justify-between flex-shrink-0 font-normal w-[160px]" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_r_c_" data-state="closed"><span class="truncate text-gray-600 dark:text-gray-300">召回/通知：全部</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-3.5 h-3.5 ml-1 text-gray-400 flex-shrink-0"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="popover-trigger" class="inline-flex items-center whitespace-nowrap text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 h-9 justify-between flex-shrink-0 font-normal w-[150px]" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_r_d_" data-state="closed"><span class="truncate text-gray-600 dark:text-gray-300">风险等级：全部</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-3.5 h-3.5 ml-1 text-gray-400 flex-shrink-0"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground rounded-md has-[&gt;svg]:px-2.5 h-9 px-4 bg-blue-600 hover:bg-blue-700 gap-1.5 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search w-4 h-4"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>搜索</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md has-[&gt;svg]:px-2.5 h-9 px-3 gap-1.5 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw w-4 h-4"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>重置</button></div></div>
+</div>
+      <table class="spec-table">
+        <thead><tr><th>#</th><th>控件</th><th>默认值</th><th>选项</th><th>行为</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>关键字 Input</td><td>空</td><td>—</td><td>按空格分词，匹配 发信人/主题/判定依据（OR）</td></tr>
+          <tr><td>2</td><td>时间范围 Popover</td><td>今日</td><td>今日/近7日/近30日/自定义（最大 90 天，超限截断提示）</td><td>基准日 2026-06-08</td></tr>
+          <tr><td>3</td><td>处置 Select</td><td>全部处置</td><td>全部/隔离/审核/标记投递/正常投递</td><td>单选过滤 finalAction</td></tr>
+          <tr><td>4</td><td>检测模式 MultiSelect</td><td>全部（3 项）</td><td>实时/异步/实时+异步</td><td>多选，支持全选/清空</td></tr>
+          <tr><td>5</td><td>召回/通知 MultiSelect</td><td>全部（7 项）</td><td>无召回/后台检测中/待召回/已召回/召回失败/已通知/通知失败</td><td>多选</td></tr>
+          <tr><td>6</td><td>风险等级 MultiSelect</td><td>全部（4 项）</td><td>高危/中危/低危/安全</td><td>多选（按 confidence 落档）</td></tr>
+          <tr><td>7</td><td>搜索按钮</td><td>—</td><td>—</td><td>trim 关键字触发</td></tr>
+          <tr><td>8</td><td>重置按钮</td><td>—</td><td>—</td><td><code>resetLogFilters()</code></td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody>
+        <tr><td>筛选卡根</td><td>div.bg-white.rounded-lg.border.p-4</td><td>同上</td><td class="dom-pass">✅</td></tr>
+        <tr><td>控件数</td><td>8（1 输入 + 1 时间 + 1 处置 + 3 多选 + 搜索 + 重置）</td><td>8</td><td class="dom-pass">✅</td></tr>
+        <tr><td>处置下拉选项</td><td>5（全部/隔离/审核/标记投递/正常投递）</td><td>5</td><td class="dom-pass">✅</td></tr>
+        <tr><td>搜索按钮</td><td>bg-blue-600 白字 + Search 图标</td><td>bg-blue-600 白字</td><td class="dom-pass">✅</td></tr>
+      </tbody></table></div>
+    </div>
+  </article>
+
+  <!-- 2.5 detection log table (multi-layer) -->
+  <article class="component-spec" id="component-2-5">
+    <h3>2.5 检测日志主表（多层交互）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 位置</td><td><code>phishing-detection-agent-v1.tsx</code> Tab overview 内的原生 <code>&lt;table&gt;</code></td></tr>
+      <tr><td>数据源</td><td><code>DETECTION_LOGS</code>（7 条 mock），经 <code>filteredLogs</code> 过滤</td></tr>
+      <tr><td>交互层级数</td><td>2 层：层级 0 主表（含行展开 URL 下钻，内嵌本文件）；层级 1「详情」抽屉 → 见 §3.1 / <a href="./layer-1-detail-drawer.html">layer-1</a></td></tr>
+    </tbody></table>
+    <h4>交互层级关系图</h4>
+    <div class="mermaid">
+graph LR
+  L0["层级0: 主表（13列）"] -->|点行首箭头/URL汇总| L0e["行展开: URL 维度子表（内嵌）"]
+  L0e -->|单条URL「查看」| M1["AI-URL 沙箱详情弹窗（复用）"]
+  L0 -->|点「详情」| L1["层级1: 检测详情抽屉 (layer-1)"]
+    </div>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 主表 + 行展开 URL 下钻（可点击箭头展开）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：总览 Tab 渲染。有 URL 的行首箭头/URL 汇总可点击就地展开该邮件的链接沙箱子表；行右「详情」打开抽屉（层级 1）。</div>
+      <div class="component-preview" style="font-family:var(--font-sans)">
+<div class="overflow-auto border border-gray-200 dark:border-gray-800 rounded-lg"><table class="w-full text-sm"><thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"><tr><th class="w-8 px-2 py-2.5" aria-label="展开"></th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">时间</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100">发信人</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100">主题</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">检测模式</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">沙箱透视</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">URL检测</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">调查轮次</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">置信度</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">最终处置</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">召回/通知</th><th class="px-3 py-2.5 text-left font-medium text-gray-900 dark:text-gray-100">判定依据</th><th class="px-3 py-2.5 text-right font-medium text-gray-900 dark:text-gray-100 sticky right-0 bg-gray-50 dark:bg-gray-800">操作</th></tr></thead><tbody><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-2 py-2.5 align-middle"><button type="button" class="flex items-center justify-center w-5 h-5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="收起链接" aria-expanded="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-4 h-4"><path d="m6 9 6 6 6-6"></path></svg></button></td><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-06-08 14:23:15</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 truncate text-xs max-w-40">security@cacter-fake.com</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">【紧急】您的账户存在异常登录，请立即验证</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#E6FFFB] text-[#13C2C2] border-[#B5F5EC]">实时+异步</span></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">灰度</td><td class="px-3 py-2.5 whitespace-nowrap"><button type="button" class="cursor-pointer" aria-label="展开查看链接详情"><div class="flex items-center gap-1.5"><span class="text-xs text-gray-700 dark:text-gray-200 whitespace-nowrap">2 链接</span><div class="flex items-center gap-1"><span class="inline-flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span><span class="text-[11px] text-red-600">1</span></span><span class="inline-flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span><span class="text-[11px] text-amber-600">1</span></span></div></div></button></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">2 轮</td><td class="px-3 py-2.5 whitespace-nowrap"><span class="text-sm cursor-default text-[#CF1322] font-bold" data-state="closed" data-slot="tooltip-trigger">92</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#FFF2F0] text-[#CF1322] border-[#FFCCC7]">隔离</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="tooltip-trigger" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs cursor-default gap-1 bg-[#F6FFED] text-[#389E0D] border-[#B7EB8F]" data-state="closed">已召回</span></td><td class="px-3 py-2.5 text-xs max-w-48"><div class="truncate">新注册域名 + urgency 话术</div></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="bg-gray-50/70 dark:bg-gray-900/40"><td></td><td colspan="12" class="px-3 py-3"><div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-950"><div class="flex items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link2 w-3.5 h-3.5 text-gray-500"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" x2="16" y1="12" y2="12"></line></svg><span class="text-xs font-medium text-gray-700 dark:text-gray-200">本封邮件的链接沙箱检测（2 个链接）</span></div><table class="w-full text-xs"><thead class="bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800"><tr class="text-gray-500"><th class="px-3 py-2 text-left font-medium">URL</th><th class="px-3 py-2 text-left font-medium whitespace-nowrap">来源</th><th class="px-3 py-2 text-left font-medium whitespace-nowrap">URL结果</th><th class="px-3 py-2 text-left font-medium whitespace-nowrap">威胁类型</th><th class="px-3 py-2 text-right font-medium whitespace-nowrap">操作</th></tr></thead><tbody><tr class="border-b border-gray-100 dark:border-gray-800 last:border-0"><td class="px-3 py-2 text-gray-700 dark:text-gray-200 max-w-md"><span class="block truncate">https://cacter-fake.com/account/verify?id=88213</span></td><td class="px-3 py-2 text-gray-500 whitespace-nowrap">邮件正文</td><td class="px-3 py-2 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground gap-1 bg-red-100 text-red-700 border-red-200"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>钓鱼</span></td><td class="px-3 py-2 text-gray-500 whitespace-nowrap">仿冒登录页</td><td class="px-3 py-2 text-right whitespace-nowrap"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-6 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3 h-3"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>查看</button></td></tr><tr class="border-b border-gray-100 dark:border-gray-800 last:border-0"><td class="px-3 py-2 text-gray-700 dark:text-gray-200 max-w-md"><span class="block truncate">https://cdn.cacter-fake.com/static/logo.png</span></td><td class="px-3 py-2 text-gray-500 whitespace-nowrap">邮件正文</td><td class="px-3 py-2 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground gap-1 bg-amber-100 text-amber-700 border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>可疑</span></td><td class="px-3 py-2 text-gray-500 whitespace-nowrap">可疑资源域名</td><td class="px-3 py-2 text-right whitespace-nowrap"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-6 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3 h-3"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>查看</button></td></tr></tbody></table></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-2 py-2.5 align-middle"><button type="button" class="flex items-center justify-center w-5 h-5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="展开链接" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4"><path d="m9 18 6-6-6-6"></path></svg></button></td><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-06-08 13:45:22</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 truncate text-xs max-w-40">noreply@pan-baidu-fake.com</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">您有一份待领取的财务文件（百度网盘）</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#F9F0FF] text-[#722ED1] border-[#EFDBFF]">异步检测</span></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">无法判定</td><td class="px-3 py-2.5 whitespace-nowrap"><button type="button" class="cursor-pointer" aria-label="展开查看链接详情"><div class="flex items-center gap-1.5"><span class="text-xs text-gray-700 dark:text-gray-200 whitespace-nowrap">1 链接</span><div class="flex items-center gap-1"><span class="inline-flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span><span class="text-[11px] text-amber-600">1</span></span></div></div></button></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">3 轮</td><td class="px-3 py-2.5 whitespace-nowrap"><span class="text-sm cursor-default text-[#D46B08] font-bold" data-state="closed" data-slot="tooltip-trigger">85</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#FFF7E6] text-[#D46B08] border-[#FFD591]">审核</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="tooltip-trigger" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs cursor-default gap-1 bg-[#FFF7E6] text-[#D46B08] border-[#FFD591]" data-state="closed">待召回</span></td><td class="px-3 py-2.5 text-xs max-w-48"><div class="truncate">网盘仿冒域名 + 可疑附件</div></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-2 py-2.5 align-middle"><button type="button" class="flex items-center justify-center w-5 h-5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="展开链接" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4"><path d="m9 18 6-6-6-6"></path></svg></button></td><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-06-08 12:30:08</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 truncate text-xs max-w-40">finance@partner-corp.com</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">Q1 对账单确认</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#F9F0FF] text-[#722ED1] border-[#EFDBFF]">异步检测</span></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">判白但可疑</td><td class="px-3 py-2.5 whitespace-nowrap"><button type="button" class="cursor-pointer" aria-label="展开查看链接详情"><div class="flex items-center gap-1.5"><span class="text-xs text-gray-700 dark:text-gray-200 whitespace-nowrap">1 链接</span><div class="flex items-center gap-1"><span class="inline-flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span><span class="text-[11px] text-green-600">1</span></span></div></div></button></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">1 轮</td><td class="px-3 py-2.5 whitespace-nowrap"><span class="text-sm cursor-default text-[#1D39C4] font-bold" data-state="closed" data-slot="tooltip-trigger">62</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#F0F5FF] text-[#1D39C4] border-[#D6E4FF]">标记投递</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="tooltip-trigger" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs cursor-default gap-1 bg-[#F0F5FF] text-[#1D39C4] border-[#D6E4FF]" data-state="closed">已通知用户</span></td><td class="px-3 py-2.5 text-xs max-w-48"><div class="truncate">发信人首次出现</div><div class="text-[11px] text-green-600 mt-0.5 truncate">豁免「财务部对账豁免」：审核→标记投递</div></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-2 py-2.5 align-middle"><span class="block w-5"></span></td><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-06-08 11:08:41</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 truncate text-xs max-w-40">newsletter@known-vendor.com</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">本周产品更新与活动通知</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#F0F5FF] text-[#1677FF] border-[#D6E4FF]">实时检测</span></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">判白</td><td class="px-3 py-2.5 whitespace-nowrap"><span class="text-xs text-gray-400">—</span></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">0 轮</td><td class="px-3 py-2.5 whitespace-nowrap"><span class="text-sm cursor-default text-[#389E0D] font-bold" data-state="closed" data-slot="tooltip-trigger">18</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#F6FFED] text-[#389E0D] border-[#B7EB8F]">通过</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span class="text-xs text-gray-300">—</span></td><td class="px-3 py-2.5 text-xs max-w-48"><div class="truncate">无风险信号</div></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-2 py-2.5 align-middle"><button type="button" class="flex items-center justify-center w-5 h-5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="展开链接" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4"><path d="m9 18 6-6-6-6"></path></svg></button></td><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-06-08 10:52:33</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 truncate text-xs max-w-40">it-support@micr0soft-fake.com</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">您的企业邮箱容量已满，请立即扩容</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#E6FFFB] text-[#13C2C2] border-[#B5F5EC]">实时+异步</span></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">灰度</td><td class="px-3 py-2.5 whitespace-nowrap"><button type="button" class="cursor-pointer" aria-label="展开查看链接详情"><div class="flex items-center gap-1.5"><span class="text-xs text-gray-700 dark:text-gray-200 whitespace-nowrap">1 链接</span><div class="flex items-center gap-1"><span class="inline-flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span><span class="text-[11px] text-red-600">1</span></span></div></div></button></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">2 轮</td><td class="px-3 py-2.5 whitespace-nowrap"><span class="text-sm cursor-default text-[#CF1322] font-bold" data-state="closed" data-slot="tooltip-trigger">94</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#FFF2F0] text-[#CF1322] border-[#FFCCC7]">隔离</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="tooltip-trigger" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs cursor-default gap-1 bg-[#FFF2F0] text-[#CF1322] border-[#FFCCC7]" data-state="closed">召回失败</span></td><td class="px-3 py-2.5 text-xs max-w-48"><div class="truncate">仿冒品牌域名 + 容量诱导</div></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-2 py-2.5 align-middle"><span class="block w-5"></span></td><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-06-08 10:18:07</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 truncate text-xs max-w-40">hr@recruit-portal.com</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">入职材料补充通知</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#F9F0FF] text-[#722ED1] border-[#EFDBFF]">异步检测</span></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">检测中</td><td class="px-3 py-2.5 whitespace-nowrap"><span class="text-xs text-gray-400">—</span></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">0 轮</td><td class="px-3 py-2.5 whitespace-nowrap"><span class="text-sm cursor-default text-[#389E0D] font-bold" data-state="closed" data-slot="tooltip-trigger">0</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#F0F5FF] text-[#1D39C4] border-[#D6E4FF]">标记投递</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="tooltip-trigger" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs cursor-default gap-1 bg-[#F5F5F5] text-[#595959] border-[#D9D9D9]" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw w-3 h-3 animate-spin"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>后台检测中</span></td><td class="px-3 py-2.5 text-xs max-w-48"><div class="truncate">后台检测中</div></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr><tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-2 py-2.5 align-middle"><button type="button" class="flex items-center justify-center w-5 h-5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="展开链接" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-4 h-4"><path d="m9 18 6-6-6-6"></path></svg></button></td><td class="px-3 py-2.5 text-gray-900 dark:text-gray-100 text-xs whitespace-nowrap">2026-06-08 09:41:55</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 truncate text-xs max-w-40">billing@invoice-cloud-fake.com</td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs max-w-56"><span class="block truncate cursor-default" data-state="closed" data-slot="tooltip-trigger">未结清账单提醒（含发票链接）</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#F9F0FF] text-[#722ED1] border-[#EFDBFF]">异步检测</span></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">判白但可疑</td><td class="px-3 py-2.5 whitespace-nowrap"><button type="button" class="cursor-pointer" aria-label="展开查看链接详情"><div class="flex items-center gap-1.5"><span class="text-xs text-gray-700 dark:text-gray-200 whitespace-nowrap">1 链接</span><div class="flex items-center gap-1"><span class="inline-flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span><span class="text-[11px] text-amber-600">1</span></span></div></div></button></td><td class="px-3 py-2.5 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">1 轮</td><td class="px-3 py-2.5 whitespace-nowrap"><span class="text-sm cursor-default text-[#1D39C4] font-bold" data-state="closed" data-slot="tooltip-trigger">58</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs bg-[#F0F5FF] text-[#1D39C4] border-[#D6E4FF]">标记投递</span></td><td class="px-3 py-2.5 whitespace-nowrap"><span data-slot="tooltip-trigger" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs cursor-default gap-1 bg-[#FFF2F0] text-[#CF1322] border-[#FFCCC7]" data-state="closed">通知失败</span></td><td class="px-3 py-2.5 text-xs max-w-48"><div class="truncate">陌生计费域名 + 链接诱导</div></td><td class="px-3 py-2.5 sticky right-0 bg-white dark:bg-gray-950"><div class="flex gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md has-[&gt;svg]:px-2.5 text-blue-600 hover:text-blue-700 gap-1 h-7 px-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3.5 h-3.5"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></div></td></tr></tbody></table></div>
+</div>
+      <h4>表格列定义</h4>
+      <div class="table-scroll">
+      <table class="spec-table">
+        <thead><tr><th>列</th><th>列名</th><th>字段</th><th>渲染规则</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>展开</td><td>—</td><td>有 URL 时显示 ChevronRight/Down 按钮，否则空占位</td></tr>
+          <tr><td>2</td><td>时间</td><td><code>time</code></td><td>YYYY-MM-DD HH:mm:ss，关键词高亮</td></tr>
+          <tr><td>3</td><td>发信人</td><td><code>sender</code></td><td>truncate，<code>HighlightText</code> 高亮关键词</td></tr>
+          <tr><td>4</td><td>主题</td><td><code>subject</code></td><td>truncate + Tooltip 全文</td></tr>
+          <tr><td>5</td><td>检测模式</td><td><code>detectionMode</code></td><td>Badge：实时检测/异步检测/实时+异步（<code>DETECTION_MODE_STYLES</code>）</td></tr>
+          <tr><td>6</td><td>沙箱透视</td><td><code>sandboxVerdict</code></td><td>文本：灰度/无法判定/判白但可疑/判白/检测中</td></tr>
+          <tr><td>7</td><td>URL检测</td><td><code>urls</code></td><td><code>UrlSummary</code>：N 链接 + 红/橙/绿计数圆点，0 时「—」</td></tr>
+          <tr><td>8</td><td>调查轮次</td><td><code>agentRounds</code></td><td>N 轮</td></tr>
+          <tr><td>9</td><td>置信度</td><td><code>confidence</code></td><td><code>riskScoreClass</code> 着色 + Tooltip「沙箱X+智能体Y=综合Z」</td></tr>
+          <tr><td>10</td><td>最终处置</td><td><code>finalAction</code></td><td>Badge：隔离/审核/标记投递/通过（<code>FINAL_ACTION_STYLES</code>）</td></tr>
+          <tr><td>11</td><td>召回/通知</td><td><code>recallStatus</code></td><td>Badge（7 态），none 时「—」，后台检测中带 loading spin，hover Tooltip</td></tr>
+          <tr><td>12</td><td>判定依据</td><td><code>basis</code>/<code>exemption</code></td><td>truncate；有豁免则下方绿色「豁免『X』：A→B」</td></tr>
+          <tr><td>13</td><td>操作</td><td>—</td><td>sticky right，仅「详情」按钮（Eye 图标）</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <h4>行展开子表（URL 下钻）列</h4>
+      <table class="spec-table">
+        <thead><tr><th>列</th><th>字段</th><th>渲染</th></tr></thead>
+        <tbody>
+          <tr><td>URL</td><td><code>url</code></td><td>truncate</td></tr>
+          <tr><td>来源</td><td><code>source</code></td><td>邮件正文 / 附件内链接 …</td></tr>
+          <tr><td>URL结果</td><td><code>urlResult</code></td><td>Badge + 圆点：钓鱼(红)/可疑(橙)/正常(绿)（<code>URL_RESULT_STYLES</code>）</td></tr>
+          <tr><td>威胁类型</td><td><code>threatType</code></td><td>文本</td></tr>
+          <tr><td>操作</td><td>—</td><td>「查看」→ <code>AiUrlDetailModal</code>（复用 AI-URL 沙箱日志弹窗）</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody>
+        <tr><td>表头列数</td><td>13</td><td>13</td><td class="dom-pass">✅</td></tr>
+        <tr><td>首行检测模式标签</td><td>"实时+异步" bg-[#E6FFFB]</td><td>"实时+异步" 同色</td><td class="dom-pass">✅</td></tr>
+        <tr><td>置信度着色</td><td>92 → text-[#CF1322] font-bold（≥90 红）</td><td>92 红加粗</td><td class="dom-pass">✅</td></tr>
+        <tr><td>行展开子表</td><td>展开后显示 "本封邮件的链接沙箱检测（2 个链接）" + 5 列 URL 表（nodeCount≈6 头部）</td><td>展开后一致</td><td class="dom-pass">✅</td></tr>
+        <tr><td>操作列</td><td>仅「详情」（无独立「配置/日志」按钮，符合 TC-04）</td><td>仅「详情」</td><td class="dom-pass">✅</td></tr>
+      </tbody></table></div>
+    </div>
+    <h4>交互层级详情（层级 1 拆分为独立文件）</h4>
+    <table class="layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>主表 + 行展开</td><td>页面加载 / 点行首箭头</td><td>上方内嵌</td></tr>
+        <tr><td>1</td><td>检测详情抽屉</td><td>行「详情」→ <code>setDetailLog(log)</code></td><td><a href="./layer-1-detail-drawer.html">查看详情 →</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- 2.6 config block 1 -->
+  <article class="component-spec" id="component-2-6">
+    <h3>2.6 配置·板块 1 引擎基础与 URL 检测</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>状态管理</td><td><code>maxTrackLevel / mailTimeout / netdiskDomain / netdiskExtract / netdiskSpoof</code></td></tr>
+      <tr><td>交互层级数</td><td>1 层（网盘开关联动置灰）</td></tr>
+    </tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 引擎参数 + 网盘检测（网盘域名识别关 → 下两项置灰）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：配置 Tab 首个 Card（左蓝边）。关闭「网盘域名识别」时「网盘内容提取」「网盘仿冒域名检测」置灰并提示。</div>
+      <div class="component-preview" style="font-family:var(--font-sans)">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm border-l-4 border-l-blue-500 mb-6"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6"><div data-slot="card-title" class="font-semibold flex items-center gap-2 text-base"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link2 h-4 w-4 text-blue-600"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" x2="16" y1="12" y2="12"></line></svg>引擎基础与 URL 检测</div><div data-slot="card-description" class="text-muted-foreground text-sm">URL 跳转追踪、网盘链接识别与内容提取的基础参数</div></div><div data-slot="card-content" class="px-6 space-y-6"><div class="space-y-4"><h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">引擎基础参数</h4><div class="grid md:grid-cols-2 gap-4"><div class="space-y-2"><label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">最大追踪层级</label><div class="flex items-center gap-3"><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-28" min="1" max="10" type="number" value="5"><span class="text-xs text-gray-500">当前层级下平均检测耗时约 2.3 秒/URL</span></div><p class="text-xs text-gray-500">URL 短链接/重定向的最大跳转层数（1-10），层级越深越能捕获多级跳转钓鱼，但耗时增加</p></div><div class="space-y-2"><label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">单封检测超时</label><div class="flex items-center gap-2"><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive w-28" min="5" max="300" type="number" value="30"><span class="text-sm text-gray-500">秒</span></div><p class="text-xs text-gray-500">整封邮件从进入智能体到必须出结论的总超时（5-300 秒，含沙箱透视 + 智能体调查），超时未出结论按超时临时处置处理</p></div></div></div><div class="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800"><h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">网盘链接检测配置</h4><div class="flex items-center justify-between"><div><label data-slot="label" class="flex items-center gap-2 text-sm leading-none select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 font-normal">网盘域名识别</label><p class="text-xs text-gray-500 mt-1">支持识别百度网盘、蓝奏云、微云、天翼云盘、OneDrive 等主流网盘域名</p></div><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button></div><div class="flex items-center justify-between"><div><label data-slot="label" class="flex items-center gap-2 text-sm leading-none select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 font-normal">网盘内容提取</label><p class="text-xs text-gray-500 mt-1">无头浏览器自动提取网盘分享页的文件列表、文件类型</p></div><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button></div><div class="flex items-center justify-between"><div><label data-slot="label" class="flex items-center gap-2 text-sm leading-none select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 font-normal">网盘仿冒域名检测</label><p class="text-xs text-gray-500 mt-1">检测仿冒官方网盘域名的钓鱼链接（基于编辑距离、同形字比对官方域名库）</p></div><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button></div><div class="space-y-2"><label data-slot="label" class="flex items-center gap-2 font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 text-xs text-gray-500">官方网盘域名库（系统后台更新，不可编辑）</label><div class="flex flex-wrap gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono text-xs">pan.baidu.com</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono text-xs">lanzou.com</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono text-xs">weiyun.com</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono text-xs">cloud.189.cn</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono text-xs">onedrive.live.com</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono text-xs">drive.google.com</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono text-xs">aliyundrive.com</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono text-xs">123pan.com</span></div></div></div></div></div>
+</div>
+      <table class="spec-table">
+        <thead><tr><th>#</th><th>参数</th><th>字段</th><th>默认</th><th>范围/校验</th><th>联动</th></tr></thead>
+        <tbody>
+          <tr><td>B1</td><td>最大追踪层级</td><td><code>maxTrackLevel</code></td><td>5</td><td>1-10，blur 越界截断；显示耗时估算 level×0.46s</td><td>—</td></tr>
+          <tr><td>B2</td><td>单封检测超时</td><td><code>mailTimeout</code></td><td>30 秒</td><td>5-300，&lt;10 或 &gt;120 amber 提示，&gt;300 红字</td><td>—</td></tr>
+          <tr><td>B3</td><td>网盘域名识别</td><td><code>netdiskDomain</code></td><td>开</td><td>—</td><td>关 → B4/B5 置灰</td></tr>
+          <tr><td>B4</td><td>网盘内容提取</td><td><code>netdiskExtract</code></td><td>开</td><td>—</td><td>依赖 B3，disabledTip「请先开启网盘域名识别」</td></tr>
+          <tr><td>B5</td><td>网盘仿冒域名检测</td><td><code>netdiskSpoof</code></td><td>开</td><td>—</td><td>依赖 B3；开时展示 8 个官方域名（只读）</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody>
+        <tr><td>Card 标题</td><td>"引擎基础与 URL 检测" + Link2 图标（左蓝边）</td><td>真实提取 DOM（含 Link2 lucide SVG）</td><td class="dom-pass">✅</td></tr>
+        <tr><td>参数输入</td><td>2 个 number（值 5 / 30）</td><td>5 / 30</td><td class="dom-pass">✅</td></tr>
+        <tr><td>官方域名库</td><td>8 个 Badge（pan.baidu.com … 123pan.com）</td><td>8 个</td><td class="dom-pass">✅</td></tr>
+        <tr><td>置灰联动</td><td>B3 关 → B4/B5 opacity-50 pointer-events-none</td><td>真实提取 DOM（默认开；B3→B4/B5 置灰为 React 运行时联动，以源码/说明为准）</td><td class="dom-pass">✅</td></tr>
+      </tbody></table></div>
+    </div>
+  </article>
+
+  <!-- 2.7 config block 2 -->
+  <article class="component-spec" id="component-2-7">
+    <h3>2.7 配置·板块 2 检测范围与准入规则（列表）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>状态管理</td><td><code>accessRules（INITIAL_ACCESS_RULES 3 条）/ ruleSearch / ruleDrawerOpen / editingRuleId</code></td></tr>
+      <tr><td>交互层级数</td><td>1 层（列表操作）；「新增/编辑」→ 规则抽屉见 §3.2 / <a href="./layer-2-rule-drawer.html">layer-2</a></td></tr>
+    </tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 规则列表（搜索 + 新增 + 每行启用/编辑/克隆/删除）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：配置 Tab 第二个 Card（左蓝边）。命中<strong>任一启用规则</strong>的邮件进入检测；点规则名/「编辑」打开抽屉。此预览演示行内启用开关。</div>
+      <div class="component-preview" style="font-family:var(--font-sans)">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm border-l-4 border-l-blue-500 mb-6"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6"><div data-slot="card-title" class="font-semibold flex items-center gap-2 text-base"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail h-4 w-4 text-blue-600"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>检测范围与准入规则</div><div data-slot="card-description" class="text-muted-foreground text-sm">以规则列表方式管理准入条件，可创建多条规则。命中<strong>任一启用规则</strong>的邮件将进入本智能体检测；其余邮件跳过本层，按前置引擎结果处置。</div></div><div data-slot="card-content" class="px-6 space-y-6"><div class="flex flex-wrap items-center justify-between gap-2"><div class="relative w-[260px] max-w-full"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 pl-8" placeholder="搜索规则名称 / 范围 / 风险信号" value=""></div><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground rounded-md px-3 has-[&gt;svg]:px-2.5 h-9 gap-1.5 bg-blue-600 hover:bg-blue-700"><span class="text-base leading-none">+</span> 新增规则</button></div><div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-100 dark:border-gray-800 text-left text-xs text-gray-500 bg-gray-50/60 dark:bg-gray-900/40"><th class="px-4 py-2.5 font-medium whitespace-nowrap">规则名称</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">状态</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">检测范围</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">收件人</th><th class="px-2 py-2.5 font-medium whitespace-nowrap">风险信号</th><th class="px-2 py-2.5 font-medium whitespace-nowrap text-right">操作</th></tr></thead><tbody><tr class="border-b border-gray-50 dark:border-gray-900 hover:bg-gray-50/60 dark:hover:bg-gray-900/40"><td class="px-4 py-3"><button class="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 text-left">外部来信首发筛查</button></td><td class="px-2 py-3 whitespace-nowrap"><div class="flex items-center gap-2"><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 scale-75"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-[10px] font-normal border-blue-200 bg-blue-50 text-blue-600">已启用</span></div></td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">接收</td><td class="px-2 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">全部收件人</td><td class="px-2 py-3 text-gray-600 dark:text-gray-400 max-w-[260px] truncate" title="发信人首次出现、含二维码">发信人首次出现、含二维码</td><td class="px-2 py-3 whitespace-nowrap text-right"><div class="flex items-center justify-end gap-0.5"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-blue-600">编辑</button><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-gray-500" aria-label="克隆" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy w-3.5 h-3.5"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-gray-500 hover:text-red-600" aria-label="删除"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x w-3.5 h-3.5"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></td></tr><tr class="border-b border-gray-50 dark:border-gray-900 hover:bg-gray-50/60 dark:hover:bg-gray-900/40"><td class="px-4 py-3"><button class="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 text-left">财务/高管重点防护</button></td><td class="px-2 py-3 whitespace-nowrap"><div class="flex items-center gap-2"><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 scale-75"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-[10px] font-normal border-blue-200 bg-blue-50 text-blue-600">已启用</span></div></td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">接收</td><td class="px-2 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">指定收件人（0 项）</td><td class="px-2 py-3 text-gray-600 dark:text-gray-400 max-w-[260px] truncate" title="发信人首次出现、含二维码、含可点击附件">发信人首次出现、含二维码、含可点击附件</td><td class="px-2 py-3 whitespace-nowrap text-right"><div class="flex items-center justify-end gap-0.5"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-blue-600">编辑</button><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-gray-500" aria-label="克隆" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy w-3.5 h-3.5"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-gray-500 hover:text-red-600" aria-label="删除"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x w-3.5 h-3.5"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></td></tr><tr class="border-b border-gray-50 dark:border-gray-900 hover:bg-gray-50/60 dark:hover:bg-gray-900/40"><td class="px-4 py-3"><button class="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 text-left">域内横向钓鱼监测</button></td><td class="px-2 py-3 whitespace-nowrap"><div class="flex items-center gap-2"><button type="button" role="switch" aria-checked="false" data-state="unchecked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 scale-75"><span data-state="unchecked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-[10px] font-normal border-gray-200 bg-gray-50 text-gray-400">已禁用</span></div></td><td class="px-2 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">域内</td><td class="px-2 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">全部收件人</td><td class="px-2 py-3 text-gray-600 dark:text-gray-400 max-w-[260px] truncate" title="含可点击附件">含可点击附件</td><td class="px-2 py-3 whitespace-nowrap text-right"><div class="flex items-center justify-end gap-0.5"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-blue-600">编辑</button><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-gray-500" aria-label="克隆" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy w-3.5 h-3.5"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-7 px-2 text-gray-500 hover:text-red-600" aria-label="删除"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x w-3.5 h-3.5"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></td></tr></tbody></table></div><div class="px-4 py-2.5 text-xs text-gray-500 border-t border-gray-100 dark:border-gray-800">共 3 条规则 · 已启用 2 条</div></div></div></div>
+</div>
+      <table class="spec-table">
+        <thead><tr><th>列</th><th>内容</th><th>行为</th></tr></thead>
+        <tbody>
+          <tr><td>规则名称</td><td><code>name</code>（可点击）</td><td>点击 → <code>openEditRule</code></td></tr>
+          <tr><td>状态</td><td>Switch + 已启用/已禁用 Badge</td><td><code>toggleRuleEnabled</code>（就地）</td></tr>
+          <tr><td>检测范围</td><td><code>ruleDirText</code>：接收/外发/域内</td><td>展示</td></tr>
+          <tr><td>收件人</td><td>全部收件人 / 指定收件人（N 项）</td><td>展示</td></tr>
+          <tr><td>风险信号</td><td>发信人首次出现、含二维码、含可点击附件</td><td>truncate + title</td></tr>
+          <tr><td>操作</td><td>编辑 / 克隆(Copy) / 删除(X)</td><td>克隆生成「-副本」，删除即时移除</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody>
+        <tr><td>规则行数</td><td>3（外部来信首发筛查/财务高管/域内横向）</td><td>3</td><td class="dom-pass">✅</td></tr>
+        <tr><td>状态徽标</td><td>前 2 行「已启用」蓝、第 3 行「已禁用」灰</td><td>一致</td><td class="dom-pass">✅</td></tr>
+        <tr><td>合计行</td><td>"共 3 条规则 · 已启用 2 条"</td><td>一致</td><td class="dom-pass">✅</td></tr>
+        <tr><td>操作按钮</td><td>编辑 + 克隆 + 删除（3 个）</td><td>3 个</td><td class="dom-pass">✅</td></tr>
+      </tbody></table></div>
+    </div>
+    <table class="layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>规则列表</td><td>页面加载</td><td>上方内嵌</td></tr>
+        <tr><td>1</td><td>准入规则编辑抽屉</td><td>「新增规则」/ 规则名 / 「编辑」</td><td><a href="./layer-2-rule-drawer.html">查看详情 →</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- 2.8 config block 3 summary -->
+  <article class="component-spec" id="component-2-8">
+    <h3>2.8 配置·板块 3 智能体调查与处置（摘要卡）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>状态管理</td><td><code>detectionMode / observeEnabled / enableTimeoutAsync / bands / modeDrawerOpen</code></td></tr>
+      <tr><td>交互层级数</td><td>1 层（摘要卡）；「编辑」→ 运行模式抽屉见 §3.3 / <a href="./layer-3-mode-drawer.html">layer-3</a></td></tr>
+    </tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 只读信息条 + 运行模式摘要卡 + 保存配置</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：配置 Tab 第三个 Card（左红边）。摘要卡显示当前模式徽标 + 摘要文字；「编辑」打开运行模式抽屉（含分级策略表）。底部「保存配置」做全量校验。</div>
+      <div class="component-preview" style="font-family:var(--font-sans)">
+<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm border-l-4 border-l-red-500"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6"><div data-slot="card-title" class="font-semibold flex items-center gap-2 text-base"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-alert h-4 w-4 text-red-600"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>智能体调查与处置</div><div data-slot="card-description" class="text-muted-foreground text-sm">当 URL 检测引擎无法直接判黑时，系统自动启动智能体关联调查，无需手动配置触发条件与调查维度。</div></div><div data-slot="card-content" class="px-6 space-y-6"><div class="flex flex-wrap items-center gap-x-6 gap-y-1 rounded-lg bg-blue-50 dark:bg-blue-950/30 px-4 py-2.5 text-sm text-blue-700 dark:text-blue-300"><span>LLM 最大推理轮次: <strong>6 轮</strong></span><span class="text-blue-300">|</span><span>单封 URL 调查预算: <strong>3 个</strong></span><span class="text-blue-300">|</span><span>第 5 轮强制收敛</span></div><div class="space-y-3"><div class="flex items-center gap-2"><h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">运行模式</h4><span class="text-xs text-gray-400">两种模式互斥，同一时间仅生效一种</span></div><div class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 dark:border-gray-800 px-4 py-3"><div class="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 border-transparent bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-300">实时检测</span><span class="text-sm text-gray-500 dark:text-gray-400 truncate">超时异步处理：开启 · 超时临时处置：标记投递 · 分级策略：4 个区间</span></div><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md px-3 has-[&gt;svg]:px-2.5 h-8 shrink-0 gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil h-3.5 w-3.5"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>编辑</button></div></div><div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[&gt;svg]:px-3 bg-red-600 hover:bg-red-700 text-white">保存配置</button></div></div></div>
+</div>
+      <table class="spec-table">
+        <thead><tr><th>#</th><th>元素</th><th>内容</th><th>行为</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>只读信息条</td><td>LLM 最大推理轮次 6 · 单封 URL 调查预算 3 · 第 5 轮强制收敛</td><td>纯展示（不可配）</td></tr>
+          <tr><td>2</td><td>模式徽标</td><td>实时检测（红）/ 观察模式（橙）</td><td>随 <code>observeEnabled</code> 变色</td></tr>
+          <tr><td>3</td><td>摘要文字</td><td><code>modeSummaryText</code>（超时异步/临时处置/区间数 或 观察动作）</td><td>随配置更新</td></tr>
+          <tr><td>4</td><td>编辑按钮</td><td>✎ 编辑</td><td><code>openModeDrawer</code>（<code>readOnly</code> 时禁用）</td></tr>
+          <tr><td>5</td><td>保存配置</td><td>红底按钮</td><td><code>handleSaveConfig</code>：区间连续性校验 + 模式冲突警告</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+      <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody>
+        <tr><td>Card 左边框</td><td>border-l-4 border-l-red-500</td><td>border-l-4 border-red-500</td><td class="dom-pass">✅</td></tr>
+        <tr><td>只读信息条</td><td>6 轮 / 3 个 / 第 5 轮强制收敛（蓝底）</td><td>一致</td><td class="dom-pass">✅</td></tr>
+        <tr><td>模式徽标</td><td>"实时检测" bg-red-100 text-red-700</td><td>一致</td><td class="dom-pass">✅</td></tr>
+        <tr><td>保存配置按钮</td><td>bg-red-600 白字</td><td>一致</td><td class="dom-pass">✅</td></tr>
+      </tbody></table></div>
+    </div>
+    <table class="layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>摘要卡</td><td>页面加载</td><td>上方内嵌</td></tr>
+        <tr><td>1</td><td>运行模式配置抽屉（含分级策略表）</td><td>点「编辑」→ <code>openModeDrawer</code></td><td><a href="./layer-3-mode-drawer.html">查看详情 →</a></td></tr>
+        <tr><td>2</td><td>置信度区间编辑弹窗</td><td>抽屉内分级表点「修改」</td><td><a href="./layer-4-band-edit.html">查看详情 →</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+</section>
+
+<!-- ========== 3. 弹窗/抽屉/对话框规格 ========== -->
+<section id="dialogs">
+  <h2>3. 弹窗 / 抽屉 / 对话框规格（层级 1+，拆分子文件）</h2>
+  <blockquote>以下 7 组交互层级均拆分为独立 <code>layer-*.html</code> 子文件，含可交互预览 + 截图 + 元素表 + DOM 树比对。</blockquote>
+  <div class="table-scroll">
+  <table class="layer-index">
+    <thead><tr><th>#</th><th>id</th><th>名称</th><th>载体 / 尺寸</th><th>触发路径</th><th>子文件</th></tr></thead>
+    <tbody>
+      <tr id="dialog-3-1"><td>3.1</td><td>检测详情抽屉</td><td>A5</td><td>右侧 Sheet · !w-[680px]</td><td>日志行「详情」</td><td><a href="./layer-1-detail-drawer.html">layer-1-detail-drawer.html →</a></td></tr>
+      <tr id="dialog-3-2"><td>3.2</td><td>准入规则编辑抽屉</td><td>B8</td><td>右侧 Sheet · sm:max-w-xl（草稿缓冲）</td><td>板块2「新增规则」/ 规则名 / 「编辑」</td><td><a href="./layer-2-rule-drawer.html">layer-2-rule-drawer.html →</a></td></tr>
+      <tr id="dialog-3-3"><td>3.3</td><td>运行模式配置抽屉</td><td>B10/B15</td><td>右侧 Sheet · sm:max-w-xl（草稿快照，内含分级策略表）</td><td>板块3 运行模式摘要卡「编辑」</td><td><a href="./layer-3-mode-drawer.html">layer-3-mode-drawer.html →</a></td></tr>
+      <tr id="dialog-3-4"><td>3.4</td><td>置信度区间编辑弹窗</td><td>B16</td><td>右侧 Sheet · 80vw / min 720px / max 1200px（嵌套）</td><td>运行模式抽屉内分级表「修改」</td><td><a href="./layer-4-band-edit.html">layer-4-band-edit.html →</a></td></tr>
+      <tr id="dialog-3-5"><td>3.5</td><td>URL 透视证据抽屉</td><td>A5</td><td>右侧 Sheet · !w-[55vw] max 900px · 5 Tab</td><td>详情抽屉「查看透视证据」/ 正文高亮 URL</td><td><a href="./layer-5-url-evidence.html">layer-5-url-evidence.html →</a></td></tr>
+      <tr id="dialog-3-6"><td>3.6</td><td>处置/确认类对话框</td><td>A8/异常</td><td>AlertDialog（居中）× 4</td><td>误报豁免 / 确认拦截 / 关闭超时异步 / 保存冲突</td><td><a href="./layer-6-action-dialogs.html">layer-6-action-dialogs.html →</a></td></tr>
+      <tr id="dialog-3-7"><td>3.7</td><td>关闭检测二次确认（外套）</td><td>wrapper</td><td>AlertDialog（居中）</td><td>头部开关关闭 phishingV1</td><td><a href="./layer-7-disable-confirm.html">layer-7-disable-confirm.html →</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ========== 4. 数据模型与 API 映射 ========== -->
+<section id="api-mapping">
+  <h2>4. 数据模型与 API 映射</h2>
+  <h3>4.1 前端数据模型（demo 原样提取）</h3>
+  <pre><code>interface DetectionLog {
+  id, time, sender, subject
+  sandboxVerdict: string           // 灰度/无法判定/判白但可疑/判白/检测中
+  agentRounds: number; confidence: number
+  finalAction: "quarantine"|"audit"|"tag"|"pass"
+  basis: string; exemption: {ruleName, from, to} | null
+  sandboxScore: number; agentScore: number; urls: AiUrlLogItem[]
+  detectionMode: "realtime"|"async"|"realtime_async"
+  recallStatus: "none"|"pending_processing"|"pending_recall"|"recalled"
+              |"recall_failed"|"notified_user"|"notify_failed"
+  recallPolicy: "recall"|"notify_user"|"none"
+  recipients: string[]; recipientDept; direction: "inbound"|"outbound"|"internal"
+  bodySnippet; highlightedUrl; hitConditions: string[]; trackLevel
+  sandboxElapsedMs; agentTrigger; agentElapsedMs; hitTags: string[]
+  sandboxTimeout?: boolean; disposalHistory: {time,operator,action}[]
+}
+interface AccessRule { id,name,enabled, dirInbound/Outbound/Internal,
+  internalBurstThreshold, internalFirstUrl, recipientFilterEnabled,
+  selectedGroups/Depts/Users[], senderFirstSeen, contentQrcode, contentAttachment }
+interface ConfidenceBand { id,min,max,level,levelColor,
+  action: DisposalAction, recallPolicy: RecallPolicy, notify, notifyEmails,
+  notifyTitleTemplate, notifyContentTemplate, writeLog, traceback }</code></pre>
+
+  <h3>4.2 spec 定义的 API（§5.4，产品设计口径）</h3>
+  <table class="spec-table">
+    <thead><tr><th>接口</th><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>日志列表</td><td>GET</td><td>/phishing/logs</td><td>多条件筛选、分页</td></tr>
+      <tr><td>日志详情</td><td>GET</td><td>/phishing/logs/{id}</td><td>详情 + 配置快照 + 运行日志</td></tr>
+      <tr><td>拦截/豁免</td><td>POST</td><td>/phishing/logs/{id}/block、/exempt</td><td>单封处置</td></tr>
+      <tr><td>引擎参数</td><td>GET/PUT</td><td>/phishing/config/engine</td><td>板块1</td></tr>
+      <tr><td>准入规则</td><td>GET/POST/PUT/DELETE</td><td>/phishing/access-rules</td><td>CRUD</td></tr>
+      <tr><td>运行模式+分级</td><td>GET/PUT</td><td>/phishing/config/runtime</td><td>板块3</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.3 网关现有 API 映射</h3>
+  <blockquote>⚠️ 遵循 implement.md：spec API 为产品设计口径，落地尽量复用网关现有 API；需新增的标 <code>[需确认]</code>，见 §10。规则类依赖统一规则系统（加 <code>page</code> 字段区分），不新增规则系统。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>spec API</th><th>网关现有能力（候选）</th><th>映射方式</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td>GET /phishing/logs</td><td>邮件/拦截日志查询（<code>internal/api</code> 日志接口）</td><td>字段映射 + <code>page</code> 维度</td><td>demo 字段多于现有，需扩展</td></tr>
+      <tr><td>POST .../block、/exempt</td><td>统一处置动作（accept + header / quarantine）</td><td>mark=accept+header</td><td>豁免=误报样本回流 <code>[需确认]</code></td></tr>
+      <tr><td>准入规则 CRUD</td><td>统一规则系统（新增 <code>page=phishingV1</code>）</td><td>规则条件映射</td><td>不新增规则系统</td></tr>
+      <tr><td>运行模式+分级</td><td>ConfigManager / 配置系统</td><td>置信度分档落配置</td><td>召回状态机需后端支持 <code>[需确认]</code></td></tr>
+    </tbody>
+  </table>
+  <h3>4.4 数据库表映射（spec 建议，非硬性）</h3>
+  <table class="spec-table">
+    <thead><tr><th>spec 表</th><th>说明</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td>phishing_detection_log</td><td>检测日志</td><td>可复用现有日志表 + 扩展列；信创多后端</td></tr>
+      <tr><td>phishing_config_snapshot</td><td>配置快照（随邮件落库）</td><td>历史可追溯，见 §4.4 一致性</td></tr>
+      <tr><td>phishing_access_rule / _confidence_band / _recall_task</td><td>准入规则/分级/召回任务</td><td>规则走统一规则系统</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 5. 业务逻辑规格 ========== -->
+<section id="business-logic">
+  <h2>5. 业务逻辑规格</h2>
+  <h3>5.1 两层检测 + 分级处置数据流（spec §1.3）</h3>
+  <div class="mermaid">
+graph TD
+  A[邮件进入] --> B{URL数 ≥ minUrlCount}
+  B -->|否| Z[跳过本层, 按前置引擎处置]
+  B -->|是| C{命中任一启用准入规则?}
+  C -->|否| Z
+  C -->|是| D[URL 检测引擎: 跳转追踪/网盘识别/沙箱透视]
+  D -->|直接判黑| E[按沙箱结果处置]
+  D -->|灰度/无法判定| F[智能体关联调查: 多轮 DNS/WHOIS/信誉/语义]
+  F --> G[输出 0-100 置信度]
+  G --> H[匹配置信度分档 → 实时处置策略]
+  H --> I{运行模式涉及超时/异步?}
+  I -->|是| J[临时处置放行 + 后台续测 → 异步召回策略]
+  I -->|否| K[写检测日志 + 配置快照 + 运行日志]
+  J --> K
+  </div>
+  <h3>5.2 召回状态机（spec §6.1）</h3>
+  <div class="mermaid">
+stateDiagram-v2
+  [*] --> none: 实时完成/无需异步
+  [*] --> pending_processing: 后台检测中
+  pending_processing --> pending_recall: 检测结论就绪
+  pending_recall --> recalled: 召回成功
+  pending_recall --> recall_failed: 已读/已删/超时
+  pending_processing --> notified_user: 通知用户成功
+  pending_processing --> notify_failed: 通知发送失败
+  </div>
+  <h3>5.3 模式与处置映射（spec §1.3）</h3>
+  <table class="spec-table">
+    <thead><tr><th>模式</th><th>行为</th><th>日志模式标记</th></tr></thead>
+    <tbody>
+      <tr><td>实时检测 + 超时异步开</td><td>超时前完成→实时处置策略；超时→超时临时处置放行→续测→异步召回策略</td><td>实时 / 实时+异步</td></tr>
+      <tr><td>实时检测 + 超时异步关</td><td>超时→直接超时临时处置，后台不再检测</td><td>实时</td></tr>
+      <tr><td>观察模式</td><td>执行完整检测，但实质处置替换为观察动作（正常/标记投递）</td><td>—（仅标记）</td></tr>
+    </tbody>
+  </table>
+  <h3>5.4 权限与可见性（spec §1.4）</h3>
+  <table class="spec-table">
+    <thead><tr><th>角色</th><th>权限</th><th>demo 控制</th></tr></thead>
+    <tbody>
+      <tr><td>安全管理员</td><td>全量：查看/编辑/处置/导出</td><td>默认</td></tr>
+      <tr><td>安全审计员</td><td>只读：查看+导出，不可编辑/处置</td><td><code>readOnly = !enabled</code>：配置 Tab <code>opacity-50 pointer-events-none</code></td></tr>
+      <tr><td>普通运维</td><td>无访问权</td><td>上层菜单权限控制（本组件外）</td></tr>
+    </tbody>
+  </table>
+  <blockquote>差异提示：demo 用同一个 <code>enabled</code> 开关同时表达「智能体启用」与「仅审计只读」，与 spec「审计员只读」是两个概念，见 §9 D-02。</blockquote>
+  <h3>5.5 关键业务约束</h3>
+  <table class="spec-table">
+    <thead><tr><th>约束</th><th>值</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>置信度区间</td><td>必须连续覆盖 0-100，不可重叠/留空，否则禁用保存</td><td>spec §4.1 / B15</td></tr>
+      <tr><td>主题标记前缀</td><td>≤20 字符，超长截断提示</td><td>spec §4.1 / TC-14</td></tr>
+      <tr><td>时间范围</td><td>最大 90 天，超限截断提示</td><td>demo <code>MAX_RANGE_DAYS</code></td></tr>
+      <tr><td>管理员通知</td><td>启用时邮箱必填且格式正确</td><td>spec §4.1</td></tr>
+      <tr><td>默认分级</td><td>高危 90-100 / 中危 70-89 / 低危 50-69 / 安全 0-49</td><td><code>INITIAL_BANDS</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 6. 交互规格 ========== -->
+<section id="interaction">
+  <h2>6. 交互规格</h2>
+  <h3>6.1 状态变化规则</h3>
+  <table class="spec-table">
+    <thead><tr><th>状态</th><th>触发</th><th>页面表现</th></tr></thead>
+    <tbody>
+      <tr><td>加载</td><td>召回后台检测中</td><td>Badge 带 RefreshCw 旋转 + Tooltip「预计检测完成时间」</td></tr>
+      <tr><td>空态</td><td>日志无匹配</td><td>空表占位「无匹配日志 / 尝试调整筛选条件 / 重置筛选」</td></tr>
+      <tr><td>空态</td><td>URL 汇总无链接</td><td>「—」</td></tr>
+      <tr><td>成功</td><td>保存配置</td><td><code>savedToast</code>「配置已保存」（CheckCircle2，2.5s）</td></tr>
+      <tr><td>失败</td><td>召回失败/通知失败</td><td>红色 Badge + Tooltip 原因</td></tr>
+    </tbody>
+  </table>
+  <h3>6.2 Tooltip 规格（部分）</h3>
+  <table class="spec-table">
+    <thead><tr><th>位置</th><th>文案</th></tr></thead>
+    <tbody>
+      <tr><td>置信度单元格</td><td>沙箱透视得分: X + 智能体调查得分: Y = 综合置信度: Z</td></tr>
+      <tr><td>召回状态 pending_recall</td><td>检测结论就绪，等待执行召回</td></tr>
+      <tr><td>召回状态 recall_failed</td><td>强制召回执行失败（邮件已读/已删/超时）</td></tr>
+      <tr><td>分级表置灰列</td><td>当前检测模式下该策略不生效</td></tr>
+      <tr><td>KPI 卡</td><td>各指标口径 hint（见 2.3）</td></tr>
+    </tbody>
+  </table>
+  <h3>6.3 异常场景（spec §4）</h3>
+  <table class="spec-table">
+    <thead><tr><th>场景</th><th>表现</th></tr></thead>
+    <tbody>
+      <tr><td>跳转层数/超时越界</td><td>限制 1-10 / 5-300，截断或红字提示</td></tr>
+      <tr><td>分级区间不连续</td><td>红字「置信度区间必须连续覆盖 0-100…」+ 禁用保存</td></tr>
+      <tr><td>准入规则方向未选/收件人筛选空</td><td>红字提示，保存按钮 disabled</td></tr>
+      <tr><td>关闭超时异步</td><td>二次确认弹窗</td></tr>
+      <tr><td>模式冲突（超时异步关+按沙箱透视 / 异步+按沙箱透视）</td><td><code>modeWarning</code> 弹窗「返回修改 / 仍要保存」</td></tr>
+      <tr><td>智能体不可用</td><td>降级「仅审计」：处置降级标记投递 + 配置置灰 + 横幅</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 7. 国际化规格 ========== -->
+<section id="i18n">
+  <h2>7. 国际化规格</h2>
+  <h3>7.1 支持语言（implement.md：四种内置语言）</h3>
+  <table class="spec-table">
+    <thead><tr><th>语言</th><th>locale</th></tr></thead>
+    <tbody>
+      <tr><td>简体中文</td><td>zh-CN</td></tr><tr><td>English</td><td>en-US</td></tr>
+      <tr><td>泰文</td><td>th-TH</td></tr><tr><td>繁体中文（示意第四语言）</td><td>zh-TW</td></tr>
+    </tbody>
+  </table>
+  <h3>7.2 i18n key 现状</h3>
+  <blockquote>⚠️ 重要现状：<strong>外套 <code>agent-center-page.tsx</code> 使用 <code>t()</code> key</strong>（下表），但<strong>钓鱼智能体主组件 <code>phishing-detection-agent-v1.tsx</code> 与 URL 证据抽屉几乎全为硬编码中文，无 i18n key</strong>。落地时需按 implement.md 四语要求补齐（见 §9 D-01 / §10 Q-01）。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>i18n key（外套）</th><th>中文</th><th>使用位置</th></tr></thead>
+    <tbody>
+      <tr><td>agent.title</td><td>智能体管理中心</td><td>头部面包屑</td></tr>
+      <tr><td>common.enabled / common.disabled</td><td>已启用 / 已禁用</td><td>卡片头部开关文字</td></tr>
+      <tr><td>agent.saveConfig</td><td>保存配置</td><td>外套底部操作栏</td></tr>
+      <tr><td>agent.unsavedChanges</td><td>有未保存更改</td><td>外套底部提示</td></tr>
+      <tr><td>agent.overview / configure / detectionRate …</td><td>总览 / 配置 / 检出率 …</td><td>总览网格/侧栏</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 8. 响应式规格 ========== -->
+<section id="responsive">
+  <h2>8. 响应式规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>KPI</th><th>筛选区</th><th>配置表单</th><th>主表/抽屉</th></tr></thead>
+    <tbody>
+      <tr><td>≥1440px</td><td>6 列</td><td>单行</td><td>md:双列</td><td>抽屉定宽</td></tr>
+      <tr><td>1024-1439px</td><td>3 列（lg 前）</td><td>可折行</td><td>双列</td><td>主表横滚</td></tr>
+      <tr><td>&lt;768px</td><td>2 列</td><td>折行</td><td>单列</td><td>抽屉全屏 w-full</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure"><img src="./screenshots/page-full-default.png" alt="1440px"><figcaption>1440px 断点（检测总览）</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1024px.png" alt="1024px"><figcaption>1024px 断点（KPI 收为 3 列，筛选折行）</figcaption></figure>
+</section>
+
+<!-- ========== 9. 差异标注 ========== -->
+<section id="diffs" class="diff-section">
+  <h2>9. 与 spec 的差异标注</h2>
+  <div class="table-scroll">
+  <table class="spec-table">
+    <thead><tr><th>编号</th><th>位置</th><th>spec 描述</th><th>demo 实际渲染</th><th>影响</th><th>建议</th></tr></thead>
+    <tbody>
+      <tr><td><span class="diff-badge">D-01</span></td><td>§2.4 / implement.md</td><td>页面支持四种内置语言</td><td>主组件与 URL 证据抽屉全硬编码中文，无 i18n key（仅外套用 t()）</td><td><span class="badge badge-high">高</span></td><td>落地补齐四语 key</td></tr>
+      <tr><td><span class="diff-badge">D-02</span></td><td>§1.4 权限</td><td>审计员只读由角色控制（readOnly）</td><td>demo 用同一 <code>enabled</code> 开关兼表「启用/仅审计只读」，非按角色</td><td><span class="badge badge-medium">中</span></td><td>落地按角色分离 readOnly 与 enabled</td></tr>
+      <tr><td><span class="diff-badge">D-03</span></td><td>§1.2 B15</td><td>每档可配「是否溯源(traceback)」</td><td>区间编辑弹窗仅有 阈值/实时策略/异步策略/管理员通知，未见溯源开关 UI</td><td><span class="badge badge-low">低</span></td><td>确认 traceback 是否需 UI 暴露</td></tr>
+      <tr><td><span class="diff-badge">D-04</span></td><td>§2.1 观察模式</td><td>「实时/异步/观察」三种运行模式</td><td>运行模式抽屉仅「实时检测 / 观察模式」两个单选；「异步检测」作为独立 <code>DetectionMode</code> 存在于逻辑但抽屉未直接暴露为顶层选项</td><td><span class="badge badge-medium">中</span></td><td>确认异步模式的入口是否遗漏</td></tr>
+      <tr><td><span class="diff-badge">D-05</span></td><td>§5.4 处置动作</td><td>mark（标记投递）作为独立动作</td><td>demo <code>ACTION_LABELS</code> 含 tag/mark 概念；implement.md 要求 mark=accept+header 复用统一 action</td><td><span class="badge badge-medium">中</span></td><td>落地映射为 accept+header，不新增 action</td></tr>
+      <tr><td><span class="diff-badge">D-06</span></td><td>§1.2 A6/A7</td><td>配置快照/运行日志为独立行按钮</td><td>demo 已整合进详情抽屉底部两个 Collapsible（符合 TC-04 期望的整合结果）</td><td><span class="badge badge-low">低</span></td><td>以 demo 为准</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ========== 10. 需确认事项 ========== -->
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项</h2>
+  <blockquote>遵循 implement.md：冲突 / 新增 API / 底层不支持项列此待确认，不自行决定。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>编号</th><th>事项</th><th>类型</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>Q-01</td><td>四语国际化补齐</td><td><span class="badge badge-high">约束</span></td><td>主组件全硬编码中文，需按 implement.md 补齐 zh/en/th/第四语言 key（工作量大）</td></tr>
+      <tr><td>Q-02</td><td>召回状态机后端支持</td><td><span class="badge badge-medium">新增 API</span></td><td>后台检测中→待召回→已召回/失败/通知的状态机需网关侧异步任务 + 强制召回能力，现有 API 是否覆盖待确认</td></tr>
+      <tr><td>Q-03</td><td>误报豁免样本回流</td><td><span class="badge badge-medium">新增能力</span></td><td>豁免作为误报样本反馈检测引擎，网关是否有样本回流通道</td></tr>
+      <tr><td>Q-04</td><td>准入规则映射统一规则系统</td><td><span class="badge badge-medium">规则系统</span></td><td>方向/收件人筛选树/风险信号如何映射到统一规则系统（加 <code>page=phishingV1</code>），三态收件人「动态整组/整部门」如何表达</td></tr>
+      <tr><td>Q-05</td><td>配置快照落库</td><td><span class="badge badge-low">存储</span></td><td>每封邮件随附配置快照（历史可追溯），是否新增快照表 / 复用现有配置版本化</td></tr>
+      <tr><td>Q-06</td><td>沙箱透视 = AI-URL 沙箱</td><td><span class="badge badge-low">依赖</span></td><td>URL 证据抽屉复用 AI-URL 沙箱日志组件；确认与现有 AI-URL 沙箱模块的数据/接口一致性</td></tr>
+      <tr><td>Q-07</td><td>异步模式入口</td><td><span class="badge badge-medium">交互</span></td><td>D-04：运行模式抽屉是否需显式暴露「异步检测」为第三个顶层选项</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+// 统一交互：让内嵌 demo 预览与 demo 行为一致（页签/单选/开关/手风琴/弹窗关闭）
+(function(){
+  function within(el, role){ return el.closest('[role="'+role+'"]'); }
+  document.querySelectorAll('.component-preview').forEach(function(scope){
+    scope.addEventListener('click', function(e){
+      var tab = e.target.closest('[role="tab"]');
+      if (tab){
+        var list = tab.closest('[role="tablist"]') || scope;
+        list.querySelectorAll('[role="tab"]').forEach(function(t){
+          t.setAttribute('aria-selected', t===tab?'true':'false');
+          t.setAttribute('data-state', t===tab?'active':'inactive');
+        });
+      }
+      var radio = e.target.closest('[role="radio"]');
+      if (radio){
+        var g = radio.closest('[role="radiogroup"]') || scope;
+        g.querySelectorAll('[role="radio"]').forEach(function(r){
+          r.setAttribute('data-state', r===radio?'checked':'unchecked');
+          r.setAttribute('aria-checked', r===radio?'true':'false');
+        });
+      }
+      var sw = e.target.closest('[role="switch"]');
+      if (sw){
+        var on = sw.getAttribute('data-state')==='checked' || sw.getAttribute('aria-checked')==='true';
+        sw.setAttribute('data-state', on?'unchecked':'checked');
+        sw.setAttribute('aria-checked', on?'false':'true');
+      }
+      var acc = e.target.closest('[aria-expanded]');
+      if (acc && !tab){
+        var exp = acc.getAttribute('aria-expanded')==='true';
+        acc.setAttribute('aria-expanded', exp?'false':'true');
+        var sub = acc.getAttribute('data-target') && scope.querySelector(acc.getAttribute('data-target'));
+        if (sub) sub.style.display = exp?'none':'';
+      }
+      var btn = e.target.closest('button');
+      if (btn){
+        var label=(btn.innerText||btn.textContent||'').trim();
+        if (['取消','关闭','返回修改','确认关闭','确认拦截','提交豁免','仍要保存','放弃'].indexOf(label)>=0){
+          var dlg = within(btn,'dialog') || within(btn,'alertdialog');
+          if (dlg && !scope.querySelector('.d6-switcher')) dlg.style.display='none';
+        }
+      }
+    });
+  });
+})();
+</script>
+<script>if(window.mermaid){mermaid.initialize({startOnLoad:true,theme:'default'});}</script>
+</body>
+</html>

@@ -1831,7 +1831,7 @@ export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
   return mockAlertSmtpConfig();
 }
 
-// ─── 待处置邮件 / ��报待审（KPI）──────────────────────────────────────────────
+// ─── 待处置邮件 / 举报待审（KPI）──────────────────────────────────────────────
 // 隔离（disposal.total）：today 3 / 7d 11 / 30d 19；举报待审（inbound-audit.total）：
 // today 2 / 7d 6 / 30d 13。两个查询都不带范围参数，故按模块级 currentSystemStatusRange 分支。
 const DISPOSAL_PENDING: Record<SystemStatusRangeKey, number> = {
@@ -2002,7 +2002,7 @@ function makeRule(input: {
   };
 }
 
-// 与 demo `generateMockRules` 对齐：5 条���工 + 15 条自动生成，共 20 条
+// 与 demo `generateMockRules` 对齐：5 条手工 + 15 条自动生成，共 20 条
 // （demo 总数 55，但只展示 20 条/页；前 5 条手工的与 demo 完全一致）
 function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
   const base = [
@@ -3250,7 +3250,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 发信人黑白名单（sender_filter，mock）
-// 数���结���对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
+// 数据结构对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
 //   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
 //   - metadata 携带 `{feature:'sender_filter', sender_config, ip_range, list_type}`，
@@ -3491,7 +3491,7 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
       }),
       sfGroupRule({
         id: 8108,
-        name: "���量营销���征",
+        name: "批量营销特征",
         type: "feature",
         created_at: "2024-01-12T00:00:00Z",
         member_count: 2,
@@ -4175,7 +4175,7 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
 }
 
 export function mockAuthSpoofingConfig(): AuthSpoofingConfig {
-  // 深拷贝：避免调用方就地修改返回值污染后�� GET。
+  // 深拷贝：避免调用方就地修改返回值污染后续 GET。
   return JSON.parse(JSON.stringify(defaultAuthSpoofingConfig()));
 }
 
@@ -4874,7 +4874,7 @@ export function mockPutURLProtectionSettings(
   return { ...urlProtectionSettingsState };
 }
 
-// ─── 意图引擎（intent-engine，mock）────────────────��────��──────────
+// ─── 意图引擎（intent-engine，mock）────────────────────────────────
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
 // 动作映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），
 // 非 receive 方向默认区间 accept→quarantine（D-06）。
@@ -5322,7 +5322,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     sender: "newsletter@marketing.com",
     recipients:
       "user@company.com, sales1@company.com, sales2@company.com, marketing@company.com, dev@company.com, ops@company.com, support@company.com, intern@company.com",
-    subject: "本���特惠活动（���投信 - 8人）",
+    subject: "本周特惠活动（多投信 - 8人）",
     action: "deliver",
     reason: "垃圾邮件标记投递",
     mailType: "spam",
@@ -5857,7 +5857,7 @@ function disposalBasis(seed: MockDisposalSeed) {
     action: seed.disposalBasisActionOverride ?? disposalAction(seed),
     // confidence 供 disposal-basis-config.ts 里 AI-* 策略的 hitDetail() 模板
     // 使用（如 AI-PHISH 的「置信度：{cf}%」），让 ThreatSummaryCard 的
-    // 「AI判定依据」行渲���出有意义的文���，而不是模板兜底的 "-"。
+    // 「AI判定依据」行渲染出有意义的文案，而不是模板兜底的 "-"。
     hit_values: { reason: seed.reason, score: String(seed.score), confidence: String(seed.score) },
     detection_tags: [`source:${seed.basis[0].toLowerCase()}`],
   };
@@ -6040,7 +6040,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
           }
         : undefined,
     // 首次出现新发信人（命中特征「首次出现」badge，isNewSender() 语义）：
-    // senderIsNewOnThisMail 的���等于自己的 received_at；其余行沿用既有的固定
+    // senderIsNewOnThisMail 的行等于自己的 received_at；其余行沿用既有的固定
     // 历史值（已知发信人场景）。
     sender_first_seen_at: seed.senderIsNewOnThisMail
       ? seed.time.replace(" ", "T") + "+08:00"
@@ -7693,10 +7693,10 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 10, operation_id: 'OP20260622012', admin_user_id: 3, username: 'chenjing@lanhai.cn', operator_name: '陈静（我）',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'update',
     resource_type: 'policy_pipeline', status: 'success', client_ip: '112.65.1.18', ip_location: '上海',
-    details: { summary: '钓鱼邮件处��由隔离改为直接拒收' }, before_value: { text: '隔离' }, after_value: { text: '拒收' },
+    details: { summary: '钓鱼邮件处置由隔离改为直接拒收' }, before_value: { text: '隔离' }, after_value: { text: '拒收' },
     created_at: '2026-06-22T10:15:36Z' },
   { id: 14, operation_id: 'OP20260622016', admin_user_id: 4, username: 'sunqi@lanhai.cn', operator_name: '孙琦',
-    operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流���团', action: 'create',
+    operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'create',
     resource_type: 'exec_impersonation', status: 'failed', error_message: '该邮箱已存在于保护名单，重复添加被拒绝',
     client_ip: '112.65.1.30', ip_location: '上海', details: { summary: '新增高管防仿冒保护对象' },
     created_at: '2026-06-22T08:05:17Z' },

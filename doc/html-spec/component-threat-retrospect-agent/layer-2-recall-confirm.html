@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 2：召回二次确认 - 威胁回溯智能体 HTML 规格说明</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: ['class','[data-theme="dark"]'],
+    corePlugins: { preflight: false },
+    theme: { extend: {
+      colors: {
+        background:'var(--background)', foreground:'var(--foreground)',
+        card:'var(--card)', 'card-foreground':'var(--card-foreground)',
+        popover:'var(--popover)', 'popover-foreground':'var(--popover-foreground)',
+        primary:'var(--primary)', 'primary-foreground':'var(--primary-foreground)',
+        secondary:'var(--secondary)', 'secondary-foreground':'var(--secondary-foreground)',
+        muted:'var(--muted)', 'muted-foreground':'var(--muted-foreground)',
+        accent:'var(--accent)', 'accent-foreground':'var(--accent-foreground)',
+        destructive:'var(--destructive)', 'destructive-foreground':'var(--destructive-foreground)',
+        border:'var(--border)', input:'var(--input)', ring:'var(--ring)',
+        'chart-1':'var(--chart-1)','chart-2':'var(--chart-2)','chart-3':'var(--chart-3)','chart-4':'var(--chart-4)','chart-5':'var(--chart-5)',
+        sidebar:'var(--sidebar)','sidebar-foreground':'var(--sidebar-foreground)','sidebar-primary':'var(--sidebar-primary)','sidebar-accent':'var(--sidebar-accent)','sidebar-border':'var(--sidebar-border)'
+      },
+      borderRadius: { lg:'var(--radius)', md:'calc(var(--radius) - 2px)', sm:'calc(var(--radius) - 4px)', xl:'calc(var(--radius) + 4px)' },
+      fontFamily: { sans:['Geist','Geist Fallback','system-ui','sans-serif'], mono:['Geist Mono','Geist Mono Fallback','monospace'] }
+    } }
+  };
+</script>
+<style id="shadcn-tokens">
+  :root{
+    --background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);
+    --card:oklch(1 0 0);--card-foreground:oklch(0.145 0 0);
+    --popover:oklch(1 0 0);--popover-foreground:oklch(0.145 0 0);
+    --primary:oklch(0.52 0.226 262);--primary-foreground:oklch(0.985 0 0);
+    --secondary:oklch(0.97 0 0);--secondary-foreground:oklch(0.205 0 0);
+    --muted:oklch(0.97 0 0);--muted-foreground:oklch(0.556 0 0);
+    --accent:oklch(0.52 0.226 262);--accent-foreground:oklch(0.985 0 0);
+    --destructive:oklch(0.577 0.245 27.325);--destructive-foreground:oklch(0.577 0.245 27.325);
+    --border:oklch(0.922 0 0);--input:oklch(0.922 0 0);--ring:oklch(0.52 0.226 262);
+    --chart-1:oklch(0.52 0.226 262);--chart-2:oklch(0.6 0.118 184.704);--chart-3:oklch(0.398 0.07 227.392);--chart-4:oklch(0.828 0.189 84.429);--chart-5:oklch(0.769 0.188 70.08);
+    --sidebar:oklch(0.175 0.02 260);--sidebar-foreground:oklch(0.985 0 0);--sidebar-primary:oklch(0.52 0.226 262);--sidebar-accent:oklch(0.269 0 0);--sidebar-border:oklch(0.269 0 0);
+    --radius:0.625rem;
+    --font-sans:"Geist","Geist Fallback",system-ui,sans-serif;--font-mono:"Geist Mono","Geist Mono Fallback",monospace;
+  }
+  .dark,[data-theme="dark"]{
+    --background:oklch(0.145 0 0);--foreground:oklch(0.985 0 0);
+    --card:oklch(0.145 0 0);--card-foreground:oklch(0.985 0 0);
+    --popover:oklch(0.145 0 0);--popover-foreground:oklch(0.985 0 0);
+    --secondary:oklch(0.269 0 0);--secondary-foreground:oklch(0.985 0 0);
+    --muted:oklch(0.269 0 0);--muted-foreground:oklch(0.708 0 0);
+    --destructive:oklch(0.396 0.141 25.723);--destructive-foreground:oklch(0.637 0.237 25.331);
+    --border:oklch(0.269 0 0);--input:oklch(0.269 0 0);
+  }
+  /* 让被提取的 radix 弹窗/抽屉在预览区内以常规流呈现（去掉 fixed 全屏定位） */
+  .component-preview [role="dialog"], .component-preview [role="alertdialog"]{
+    position:static !important; inset:auto !important; transform:none !important; translate:none !important;
+    height:auto !important; max-height:none !important; box-shadow:0 1px 6px rgba(0,0,0,.12); margin:0 auto; }
+  .component-preview [role="alertdialog"]{ width:100% !important; max-width:32rem !important; }
+  .component-preview [role="dialog"]{ width:100% !important; max-width:46rem !important; }
+  /* radix radio 视觉点（提取 DOM 只在选中项含 indicator，这里用伪元素统一渲染选中态） */
+  .component-preview [role="radio"]{ position:relative; }
+  .component-preview [role="radio"] [data-slot="radio-group-indicator"]{ display:none; }
+  .component-preview [role="radio"][data-state="checked"]::after{ content:""; position:absolute; top:50%; left:50%; width:.5rem; height:.5rem; border-radius:9999px; background:var(--primary); transform:translate(-50%,-50%); }
+</style>
+<style>
+:root{--primary:oklch(0.52 0.226 262);--background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);--card:oklch(1 0 0);--muted:oklch(0.97 0 0);--muted-foreground:oklch(0.556 0 0);--border:oklch(0.922 0 0);--radius:0.625rem;--font-sans:"Geist",system-ui,sans-serif;--font-mono:"Geist Mono",monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto}
+.layer-nav{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1.25rem;background:var(--muted);border-radius:var(--radius);margin-bottom:1.5rem;font-size:.875rem}
+.layer-nav a{color:var(--primary);text-decoration:none;font-weight:600}
+.spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:2rem}
+.spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.4rem}
+.meta-table{width:100%;border-collapse:collapse;font-size:.875rem}
+.meta-table td{padding:.5rem 1rem;border-bottom:1px solid var(--border)}
+.meta-table td:first-child{font-weight:600;width:150px;color:var(--muted-foreground)}
+.interaction-layer{border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.5rem 0;background:var(--card)}
+.interaction-layer>h4{color:var(--primary);font-size:.95rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+.layer-badge{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--primary);color:#fff;font-size:.75rem;font-weight:700}
+.trigger-path{background:var(--muted);border-radius:calc(var(--radius) - 4px);padding:.5rem .75rem;margin:.5rem 0 1rem;font-size:.8125rem;color:var(--muted-foreground)}
+.trigger-path strong{color:var(--foreground)}
+.component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:2rem 1.5rem;margin:1.5rem 0 1rem;background:#eef2f7;position:relative}
+.component-preview::before{content:"🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）";position:absolute;top:-.625rem;left:.75rem;background:var(--primary);color:#fff;font-size:.6875rem;font-weight:600;padding:.125rem .5rem;border-radius:calc(var(--radius) - 4px)}
+.screenshot-figure{margin:1rem 0;text-align:center}
+.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.screenshot-figure figcaption{margin-top:.5rem;font-size:.8125rem;color:var(--muted-foreground)}
+table.spec-table{width:100%;border-collapse:collapse;font-size:.875rem;margin:1rem 0}
+table.spec-table th{background:var(--muted);font-weight:600;text-align:left;padding:.625rem .75rem;border:1px solid var(--border)}
+table.spec-table td{padding:.625rem .75rem;border:1px solid var(--border);vertical-align:top}
+.dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);overflow:hidden}
+.dom-comparison>h5{background:var(--muted);padding:.5rem .75rem;font-size:.8125rem;font-weight:600}
+.dom-comparison>h5::before{content:"🔍 "}
+.dom-comparison table{width:100%;border-collapse:collapse;font-size:.8125rem}
+.dom-comparison th{background:var(--muted);text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--border)}
+.dom-comparison td{padding:.5rem .75rem;border-bottom:1px solid var(--border)}
+.dom-pass{color:oklch(0.5 0.15 150);font-weight:600}
+</style>
+/* === TW-STATIC-BEGIN (offline Tailwind, auto-generated) === */
+<style id="tw-static">
+*, ::before, ::after {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}::backdrop {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}.fixed {position: fixed
+}.left-\[50\%\] {left: 50%
+}.top-\[50\%\] {top: 50%
+}.z-50 {z-index: 50
+}.flex {display: flex
+}.inline-flex {display: inline-flex
+}.grid {display: grid
+}.h-9 {height: 2.25rem
+}.w-full {width: 100%
+}.max-w-\[calc\(100\%-2rem\)\] {max-width: calc(100% - 2rem)
+}.shrink-0 {flex-shrink: 0
+}.translate-x-\[-50\%\] {--tw-translate-x: -50%;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.translate-y-\[-50\%\] {--tw-translate-y: -50%;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.flex-col {flex-direction: column
+}.flex-col-reverse {flex-direction: column-reverse
+}.items-center {align-items: center
+}.justify-center {justify-content: center
+}.gap-2 {gap: 0.5rem
+}.gap-4 {gap: 1rem
+}.whitespace-nowrap {white-space: nowrap
+}.rounded-lg {border-radius: var(--radius)
+}.rounded-md {border-radius: calc(var(--radius) - 2px)
+}.border {border-width: 1px
+}.bg-background {background-color: var(--background)
+}.bg-green-600 {--tw-bg-opacity: 1;background-color: rgb(22 163 74 / var(--tw-bg-opacity, 1))
+}.p-6 {padding: 1.5rem
+}.px-4 {padding-left: 1rem;padding-right: 1rem
+}.py-2 {padding-top: 0.5rem;padding-bottom: 0.5rem
+}.text-center {text-align: center
+}.text-lg {font-size: 1.125rem;line-height: 1.75rem
+}.text-sm {font-size: 0.875rem;line-height: 1.25rem
+}.font-medium {font-weight: 500
+}.font-semibold {font-weight: 600
+}.text-muted-foreground {color: var(--muted-foreground)
+}.text-primary-foreground {color: var(--primary-foreground)
+}.shadow-lg {--tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.outline-none {outline: 2px solid transparent;outline-offset: 2px
+}.transition-all {transition-property: all;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.duration-200 {transition-duration: 200ms
+}.hover\:bg-accent:hover {background-color: var(--accent)
+}.hover\:bg-green-700:hover {--tw-bg-opacity: 1;background-color: rgb(21 128 61 / var(--tw-bg-opacity, 1))
+}.hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}.focus-visible\:border-ring:focus-visible {border-color: var(--ring)
+}.focus-visible\:ring-\[3px\]:focus-visible {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.disabled\:pointer-events-none:disabled {pointer-events: none
+}.disabled\:opacity-50:disabled {opacity: 0.5
+}.has-\[\>svg\]\:px-3:has(>svg) {padding-left: 0.75rem;padding-right: 0.75rem
+}.dark\:border-input:is([data-theme="dark"] *) {border-color: var(--input)
+}@media (min-width: 640px) {.sm\:max-w-lg {max-width: 32rem
+    }.sm\:flex-row {flex-direction: row
+    }.sm\:justify-end {justify-content: flex-end
+    }.sm\:text-left {text-align: left
+    }
+}.\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-4 svg:not([class*='size-']) {width: 1rem;height: 1rem
+}.\[\&_svg\]\:pointer-events-none svg {pointer-events: none
+}.\[\&_svg\]\:shrink-0 svg {flex-shrink: 0
+}
+</style>
+/* === TW-STATIC-END === */</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#dialog-3-2">← 返回主文件</a>
+  <span>层级 2 · 召回二次确认</span>
+  <a href="./layer-3-false-positive-confirm.html">层级：标记误报 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 2：召回二次确认弹窗（AlertDialog）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.5 任务表格 → 漏报明细行 → 3.2 召回确认</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+    <tr><td>触发路径</td><td>展开漏报明细 → 某漏报“确认召回”（仅当 effRecall∉{recalled,no_need}）→ setRecallTarget(leak)</td></tr>
+    <tr><td>demo 源</td><td><code>threat-retrospect-agent-v1.tsx</code> 583-600 行</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">2</span> 弹窗打开态</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：漏报明细行“确认召回” → 描述携带该漏报 subject。示例：L3 主题“您的账户需要重新验证”。</div>
+
+    <div class="component-preview" id="pvRecall">
+  <div style="background:rgba(15,23,42,.04);border-radius:var(--radius);padding:1.5rem 1rem">
+<div role="alertdialog" id="radix-_r_h_" aria-describedby="radix-_r_j_" aria-labelledby="radix-_r_i_" data-state="open" data-slot="alert-dialog-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg" tabindex="-1" style="pointer-events: auto;"><div data-slot="alert-dialog-header" class="flex flex-col gap-2 text-center sm:text-left"><h2 id="radix-_r_i_" data-slot="alert-dialog-title" class="text-lg font-semibold">确认召回该邮件？</h2><p id="radix-_r_j_" data-slot="alert-dialog-description" class="text-muted-foreground text-sm">将从用户邮箱移动至隔离区。邮件主题：您的账户需要重新验证</p></div><div data-slot="alert-dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3">取消</button><button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground h-9 px-4 py-2 has-[&gt;svg]:px-3 bg-green-600 hover:bg-green-700">确认召回</button></div></div>
+  </div>
+  <p class="pv-toast" style="margin-top:1rem;font-size:.8125rem;color:#16a34a;text-align:center"></p>
+</div>
+
+  <figure class="screenshot-figure"><img src="./screenshots/recall-confirm.png" alt="召回二次确认"><figcaption>浏览器实际渲染（背后为展开的漏报明细）</figcaption></figure>
+
+  <h4>UI 元素清单</h4>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>元素</th><th>文案</th><th>交互</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>标题</td><td>确认召回该邮件？</td><td>-</td></tr>
+      <tr><td>2</td><td>描述</td><td>将从用户邮箱移动至隔离区。邮件主题：{subject}</td><td>-</td></tr>
+      <tr><td>3</td><td>Button(Cancel)</td><td>取消</td><td>关闭</td></tr>
+      <tr><td>4</td><td>Button(Action,绿)</td><td>确认召回</td><td>recallOverrides[id]=recalled；关闭；Toast“召回成功，邮件已移动至隔离区”；该行召回状态 Badge 变“已召回”，“确认召回”按钮消失</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison"><h5>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h5>
+  <table><thead><tr><th>比对项</th><th>demo 实际 DOM（提取）</th><th>预览 HTML</th><th>一致</th></tr></thead><tbody>
+    <tr><td>根节点</td><td>div[role=alertdialog][data-slot=alert-dialog-content] .grid.gap-4.rounded-lg.border.p-6.sm:max-w-lg</td><td>真实提取 DOM（预览中去除 fixed 定位）</td><td class="dom-pass">✅</td></tr>
+    <tr><td>Header</td><td>div[data-slot=alert-dialog-header].flex.flex-col.gap-2.text-center.sm:text-left</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+    <tr><td>标题</td><td>h2[data-slot=alert-dialog-title].text-lg.font-semibold “确认召回该邮件？”</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+    <tr><td>描述</td><td>p[data-slot=alert-dialog-description].text-muted-foreground.text-sm “…邮件主题：您的账户需要重新验证”</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+    <tr><td>确认按钮</td><td>“确认召回” bg-green-600 hover:bg-green-700</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+    <tr><td>Footer 结构</td><td>div[data-slot=alert-dialog-footer].flex.flex-col-reverse.gap-2.sm:flex-row.sm:justify-end</td><td>真实提取 DOM</td><td class="dom-pass">✅</td></tr>
+  </tbody></table></div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#dialog-3-2">← 返回主文件</a>
+  <a href="./layer-3-false-positive-confirm.html">层级：标记误报 →</a>
+</nav>
+<script>
+(function(){var box=document.getElementById("pvRecall");if(!box)return;var t=box.querySelector(".pv-toast");
+  box.querySelectorAll("button").forEach(function(b){var tx=(b.textContent||"").trim();
+    if(tx==="确认召回")b.onclick=function(){t.style.color="#16a34a";t.textContent="召回成功，邮件已移动至隔离区";};
+    else if(tx==="取消")b.onclick=function(){t.style.color="#6b7280";t.textContent="（已取消 — 预览仅演示状态）";};});
+})();
+</script></script>
+</body>
+</html>

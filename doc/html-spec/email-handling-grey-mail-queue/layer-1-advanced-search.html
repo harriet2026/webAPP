@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级1：高级搜索 - 灰邮队列</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    window.tailwind && (tailwind.config={corePlugins:{preflight:false},theme:{extend:{colors:{
+      border:'#e2e8f0',input:'#e2e8f0',ring:'#2563eb',background:'#ffffff',foreground:'#0f172a',
+      primary:{DEFAULT:'#2563eb',foreground:'#ffffff'},card:{DEFAULT:'#ffffff',foreground:'#0f172a'},
+      muted:{DEFAULT:'#f1f5f9',foreground:'#64748b'},accent:{DEFAULT:'#f1f5f9',foreground:'#0f172a'},
+      destructive:{DEFAULT:'#dc2626',foreground:'#ffffff'},popover:{DEFAULT:'#ffffff',foreground:'#0f172a'},
+      secondary:{DEFAULT:'#f1f5f9',foreground:'#0f172a'}}}}});
+  </script>
+
+  <style>
+    :root{
+      --primary:#2563eb; --primary-foreground:#ffffff;
+      --background:oklch(0.98 0.01 205); --foreground:#0f172a;
+      --card:#ffffff; --muted:#f1f5f9; --muted-foreground:#64748b;
+      --border:#e2e8f0; --destructive:#dc2626; --radius:0.625rem;
+      --diff-bg:#fef2f2; --diff-border:#dc2626; --question-bg:#fffbeb; --question-border:#d97706;
+      --font-sans:"Geist","Geist Fallback",system-ui,sans-serif; --font-mono:"Geist Mono",monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto;}
+    .spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:2rem;}
+    .spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.5rem;}
+    .meta-table{width:100%;border-collapse:collapse;font-size:0.875rem;}
+    .meta-table td{padding:0.5rem 1rem;border-bottom:1px solid var(--border);}
+    .meta-table td:first-child{font-weight:600;width:170px;color:var(--muted-foreground);white-space:nowrap;}
+    .component-toc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 2rem;margin-bottom:2rem;}
+    .component-toc>h2{color:var(--primary);font-size:1.05rem;margin-bottom:0.75rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;}
+    .component-toc ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0.5rem;}
+    .component-toc li{padding:0.375rem 0.75rem;border-radius:calc(var(--radius) - 4px);background:var(--muted);font-size:0.875rem;}
+    .component-toc li a{color:var(--primary);text-decoration:none;font-weight:500;display:inline-flex;align-items:center;gap:0.375rem;}
+    .component-toc li a:hover{text-decoration:underline;}
+    .component-toc .toc-layer-links{font-size:0.75rem;color:var(--muted-foreground);margin-left:0.5rem;}
+    .component-toc .toc-layer-links a{color:var(--muted-foreground);font-weight:400;}
+    .component-toc .toc-badge{display:inline-block;font-size:0.6875rem;font-weight:600;padding:0.0625rem 0.375rem;border-radius:calc(var(--radius) - 4px);background:var(--primary);color:#fff;white-space:nowrap;}
+    section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem;}
+    section>h2{color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:0.5rem;margin-bottom:1.25rem;font-size:1.25rem;}
+    h3{font-size:1.05rem;margin:1rem 0 0.75rem;color:var(--foreground);}
+    h4{font-size:0.95rem;margin:0.75rem 0 0.5rem;color:var(--muted-foreground);}
+    table.spec-table{width:100%;border-collapse:collapse;font-size:0.85rem;margin:1rem 0;}
+    table.spec-table th{background:var(--muted);color:var(--foreground);font-weight:600;text-align:left;padding:0.55rem 0.7rem;border:1px solid var(--border);white-space:nowrap;}
+    table.spec-table td{padding:0.55rem 0.7rem;border:1px solid var(--border);vertical-align:top;}
+    table.spec-table tr:nth-child(even) td{background:#f8fafc;}
+    .screenshot-figure{margin:1rem 0;text-align:center;}
+    .screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+    .screenshot-figure figcaption{margin-top:0.5rem;font-size:0.8125rem;color:var(--muted-foreground);}
+    .component-spec{border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.25rem 0;background:var(--card);}
+    .component-spec>h3{color:var(--primary);border-left:4px solid var(--primary);padding-left:0.75rem;}
+    pre{background:var(--muted);border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);padding:1rem;overflow-x:auto;font-family:var(--font-mono);font-size:0.8125rem;line-height:1.5;margin:1rem 0;}
+    code{font-family:var(--font-mono);font-size:0.85em;}
+    .mermaid{text-align:center;margin:1rem 0;padding:1rem;background:var(--muted);border-radius:calc(var(--radius) - 2px);}
+    .diff-section{border-left:4px solid var(--diff-border);background:var(--diff-bg);}
+    .diff-section>h2{color:var(--diff-border);border-bottom-color:var(--diff-border);}
+    .diff-badge{display:inline-block;background:var(--diff-border);color:#fff;font-size:0.75rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:calc(var(--radius) - 4px);}
+    .question-section{border-left:4px solid var(--question-border);background:var(--question-bg);}
+    .question-section>h2{color:var(--question-border);border-bottom-color:var(--question-border);}
+    .badge{display:inline-block;font-size:0.75rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:calc(var(--radius) - 4px);}
+    .badge-high{background:#dc2626;color:#fff;} .badge-medium{background:#f59e0b;color:#1e293b;} .badge-low{background:#bbf7d0;color:#14532d;}
+    blockquote{border-left:4px solid var(--destructive);background:var(--diff-bg);padding:0.75rem 1rem;margin:1rem 0;font-size:0.875rem;border-radius:0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0;}
+    .component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:2rem 1.5rem 1.5rem;margin:1.5rem 0 1.25rem;background:#fff;position:relative;overflow:auto;color:#0f172a;font-size:14px;line-height:1.5;}
+    .component-preview::before{content:"🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）";position:absolute;top:-0.625rem;left:0.75rem;background:var(--primary);color:#fff;font-size:0.6875rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:calc(var(--radius) - 4px);white-space:nowrap;z-index:2;}
+    /* ===== 预览区作用域内的 Tailwind Preflight 等价基座 =====
+       全局 preflight 已关闭以保护规格文档；此处用 :where() 保持 0 特异性，
+       与 Tailwind 真实 preflight 一致——任何 demo 上的 Tailwind 工具类（bg-*/border-*/text-* 等）
+       都能以同等或更高优先级覆盖这些基座，不会被基座反向压制。 */
+    .component-preview *,.component-preview *::before,.component-preview *::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb;}
+    .component-preview :where(h1,h2,h3,h4,h5,h6,p){margin:0;font-size:inherit;font-weight:inherit;color:inherit;border:0;padding:0;background:none;}
+    .component-preview :where(ul,ol){margin:0;padding:0;list-style:none;}
+    .component-preview :where(button,[role=button]){background-color:transparent;background-image:none;font:inherit;color:inherit;cursor:pointer;padding:0;line-height:inherit;letter-spacing:inherit;-webkit-appearance:none;appearance:none;border-width:0;border-style:solid;border-color:#e5e7eb;}
+    .component-preview :where(button:disabled,[role=button]:disabled){cursor:not-allowed;}
+    .component-preview :where(input,select,textarea){font:inherit;color:inherit;line-height:inherit;background-color:transparent;margin:0;border-width:0;border-style:solid;border-color:#e5e7eb;-webkit-appearance:none;appearance:none;}
+    .component-preview :where(input::placeholder,textarea::placeholder){color:#9ca3af;opacity:1;}
+    .component-preview :where(svg){display:block;vertical-align:middle;}
+    .component-preview :where(img,svg){max-width:100%;}
+    .component-preview :where(table){border-collapse:collapse;border-spacing:0;font-size:inherit;margin:0;}
+    .component-preview :where(th,td){padding:0;border:0;background:none;text-align:inherit;vertical-align:inherit;}
+    .component-preview :where(a){color:inherit;text-decoration:inherit;}
+    .component-preview :where(label){cursor:default;}
+    .component-preview :where(hr){border-top-width:1px;}
+    .preview-hint{font-size:0.75rem;color:var(--muted-foreground);margin:0.25rem 0 0.75rem;font-style:italic;}
+    .interaction-layer{border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.5rem 0;background:var(--card);}
+    .interaction-layer>h4{color:var(--primary);font-size:0.95rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--primary);color:#fff;font-size:0.75rem;font-weight:700;flex-shrink:0;}
+    .trigger-path{background:var(--muted);border-radius:calc(var(--radius) - 4px);padding:0.5rem 0.75rem;margin:0.5rem 0 1rem;font-size:0.8125rem;color:var(--muted-foreground);}
+    .trigger-path strong{color:var(--foreground);}
+    .dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);overflow:hidden;}
+    .dom-comparison>h5{background:var(--muted);padding:0.5rem 0.75rem;font-size:0.8125rem;font-weight:600;color:var(--foreground);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.375rem;}
+    .dom-comparison>h5::before{content:"🔍";font-size:0.875rem;}
+    .dom-comparison table{width:100%;border-collapse:collapse;font-size:0.8125rem;}
+    .dom-comparison th{background:var(--muted);font-weight:600;text-align:left;padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);}
+    .dom-comparison td{padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);vertical-align:top;}
+    .dom-comparison tr:last-child td{border-bottom:none;}
+    .dom-pass{color:#16a34a;font-weight:600;} .dom-fail{color:var(--destructive);font-weight:600;} .dom-fixed{color:#d97706;font-weight:600;}
+    table.layer-index{width:100%;border-collapse:collapse;font-size:0.875rem;margin:1rem 0;}
+    table.layer-index th{background:var(--muted);font-weight:600;text-align:left;padding:0.6rem 0.75rem;border:1px solid var(--border);}
+    table.layer-index td{padding:0.6rem 0.75rem;border:1px solid var(--border);vertical-align:top;}
+    table.layer-index td a{color:var(--primary);text-decoration:none;font-weight:600;} table.layer-index td a:hover{text-decoration:underline;}
+    .layer-nav{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.25rem;background:var(--muted);border-radius:var(--radius);margin-bottom:1.5rem;font-size:0.875rem;}
+    .layer-nav a{color:var(--primary);text-decoration:none;font-weight:600;} .layer-nav a:hover{text-decoration:underline;}
+    .version-history-section{margin:1.5rem 0;}
+    .spec-version{font-weight:600;color:var(--primary);}
+    .note{background:#eff6ff;border:1px solid #bfdbfe;border-radius:calc(var(--radius) - 4px);padding:0.75rem 1rem;margin:1rem 0;font-size:0.85rem;color:#1e3a8a;}
+  </style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#c-2-1">← 返回主文件</a><span>层级 1 / 2 · 查询筛选区</span><span></span></nav>
+<header class="spec-header"><h1>交互层级 1：高级搜索</h1><table class="meta-table"><tr><td>所属组件</td><td>2.1 查询筛选区 GreyMailSearchFilters</td></tr><tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr><tr><td>触发路径</td><td>层级0 → 点击"高级搜索"Tab → onModeChange("advanced")</td></tr><tr><td>demo 组件</td><td><code>grey-mail-search-filters.tsx</code>（mode==="advanced" 分支）</td></tr></table></header>
+<section class="interaction-layer"><h4><span class="layer-badge">1</span> 交互层级 1：高级搜索</h4>
+<div class="trigger-path"><strong>触发路径</strong>：点击"高级搜索"Tab，激活下划线切至高级；渲染 4 字段单行 + 重置/查询</div>
+<div class="component-preview">
+<div class="bg-white rounded-lg border border-gray-200 p-6 mx-4 my-4"><div class="flex items-center gap-4 mb-6"><button class="text-base font-medium text-gray-500 pb-1 hover:text-gray-700">普通搜索</button><button class="text-base font-semibold text-blue-600 pb-1 border-b-2 border-blue-600">高级搜索</button></div><div class="grid grid-cols-4 gap-4 mb-6 pb-6 border-b border-gray-200 items-end"><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">收发时间</label><input type="date" data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="yyyy/mm/日"></div><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">收发类型</label><button type="button" role="combobox" aria-controls="radix-_R_4iaatpesnebn9lb_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-placeholder="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 h-10 w-full"><span data-slot="select-value" style="pointer-events:none">全部</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">TID</label><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-w-0 border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-10 rounded-lg w-full" placeholder="邮件唯一ID"></div><div class="flex flex-col w-full"><label class="text-sm text-gray-700 mb-1.5 leading-none">集群节点</label><button type="button" role="combobox" aria-controls="radix-_r_a_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-placeholder="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 h-10 w-full"><span data-slot="select-value" style="pointer-events: none;">全部</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div><div class="flex gap-3 justify-start"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 py-2 has-[&gt;svg]:px-3 h-10 px-6 bg-transparent">重置</button><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground py-2 has-[&gt;svg]:px-3 h-10 px-6 bg-blue-600 hover:bg-blue-700">查询</button></div></div>
+</div>
+<p class="preview-hint">从 demo advanced 态提取的真实 HTML；输入框可键入。</p>
+<figure class="screenshot-figure"><img src="./screenshots/layer-1-advanced-search.png" alt="高级搜索"><figcaption>高级搜索态（浏览器实际渲染）</figcaption></figure>
+<h4>UI 元素清单（高级搜索）</h4>
+<table class="spec-table"><thead><tr><th>序号</th><th>元素</th><th>标签</th><th>占位/默认</th><th>选项</th></tr></thead><tbody>
+<tr><td>1</td><td>Input(date)</td><td>收发时间</td><td>yyyy/mm/dd</td><td>-</td></tr>
+<tr><td>2</td><td>Select</td><td>收发类型</td><td>全部</td><td>全部/接收/外发/域内</td></tr>
+<tr><td>3</td><td>Input</td><td>TID</td><td>邮件唯一ID</td><td>-</td></tr>
+<tr><td>4</td><td>Select</td><td>集群节点</td><td>全部</td><td>全部/Node 1/Node 2</td></tr>
+<tr><td>5</td><td>Button</td><td>重置</td><td>-</td><td>handleReset</td></tr>
+<tr><td>6</td><td>Button(primary)</td><td>查询</td><td>-</td><td>onSearch</td></tr>
+</tbody></table>
+<div class="dom-comparison"><h5>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h5>
+<table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+<tbody><tr><td>根节点</td><td>div.bg-white.rounded-lg.border.mx-4.my-4</td><td>同</td><td class="dom-pass">✅</td></tr>
+<tr><td>直接子节点数</td><td>3（Tab行+字段网格+按钮行）</td><td>3</td><td class="dom-pass">✅</td></tr>
+<tr><td>字段数</td><td>4</td><td>4</td><td class="dom-pass">✅</td></tr>
+<tr><td>nodeCount</td><td>26</td><td>26</td><td class="dom-pass">✅</td></tr>
+<tr><td>条件组渲染</td><td>无（conditionGroups state 存在但未渲染）</td><td>未包含</td><td class="dom-pass">✅</td></tr></tbody></table></div>
+</section>
+<nav class="layer-nav"><a href="./index.html#c-2-1">← 返回主文件</a><span>层级 1 / 2 · 查询筛选区</span><span></span></nav>
+
+<script>
+document.addEventListener('click',function(e){
+  // tab highlight (search mode / modal tabs)
+  var t=e.target.closest('[data-specflip]');
+  if(t){var g=t.getAttribute('data-specflip');
+    document.querySelectorAll('[data-specflip="'+g+'"]').forEach(function(b){b.setAttribute('data-on','0');});
+    t.setAttribute('data-on','1');
+    var show=t.getAttribute('data-show');
+    if(show){document.querySelectorAll('[data-panel="'+g+'"]').forEach(function(p){p.style.display='none';});
+      var pn=document.querySelector('[data-panel="'+g+'"][data-key="'+show+'"]'); if(pn)pn.style.display='';}
+  }
+  // checkbox toggle inside previews -> recompute batch buttons
+  var cb=e.target.closest('.component-preview [role="checkbox"]');
+  if(cb){
+    var setCb=function(el,checked){el.setAttribute('data-state',checked?'checked':'unchecked');el.setAttribute('aria-checked',checked);
+      el.querySelectorAll('svg').forEach(function(s){s.style.visibility=checked?'visible':'hidden';});};
+    var now=cb.getAttribute('data-state')!=='checked';
+    setCb(cb,now);
+    var host=cb.closest('[data-batchhost]');
+    if(host){
+      // header (thead) checkbox toggles all rows
+      if(cb.closest('thead')){host.querySelectorAll('tbody [role="checkbox"]').forEach(function(x){setCb(x,now);});}
+      var any=host.querySelectorAll('tbody [role="checkbox"][data-state="checked"]').length>0;
+      var labels=['放行','删除','加黑','标记误判','加白名单'];
+      host.querySelectorAll('button').forEach(function(b){
+        var tx=(b.textContent||'').trim();
+        if(labels.indexOf(tx)>=0){b.disabled=!any; b.style.opacity=any?'1':'0.6'; b.style.cursor=any?'pointer':'not-allowed';}
+      });
+    }
+  }
+},true);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>try{mermaid.initialize({startOnLoad:true,theme:'default'});}catch(e){}</script>
+</body>
+</html>

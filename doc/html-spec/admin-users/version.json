@@ -1,0 +1,27 @@
+{
+  "module": "admin-users",
+  "current_version": 3,
+  "history": [
+    {
+      "version": 3,
+      "generated_at": "2026-07-21",
+      "demo_commit": "workspace",
+      "spec_commit": "e262be9",
+      "summary": "承接对话中租户首管理员生命周期三处修复重生成：①租户中心创建租户时 createTenantPrimaryAdmin 与租户同 id 入库主管理员，管理员账号 Tab 以「主管理员」徽标展示并隐藏删除入口（删除保护）；②代登录（租户中心「管理」）动态写入 activeTenantId 贯通管理员账号 Tab 隔离过滤与新建赋值，取代写死 CURRENT_TENANT_ID；③首登强制改密 mustChangePassword 承接：凭据弹窗一次性遮罩展示初始密码、重置密码后清除待改密标记。新增子文件 layer-6-tenant-primary-admin-lifecycle.html（凭据弹窗/改密/再建三交互层）；新增 §0.5 章节明确产品形态×视角下「新建管理员」语义并回答首管理员改密路径与再建管理员路径；用 agent-browser 在云网关·租户视角实测采集 5 张截图 + DOM 比对证据(tenant-primary-admin-badge.json)；D-006 标记已解决，新增 D-008/D-009，新增 Q-008/Q-009。"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-16",
+      "demo_commit": "804efb9",
+      "spec_commit": "e262be9",
+      "summary": "按最新 html-spec 生成规范重生成：新增 5 种产品形态 × 平台/租户角色支持矩阵；以 demo/docs/prd-admin-user-permission.md 为主业务源补齐功能概览、关联模块、多租户隔离、异常处理、批量与单条操作差异、国际化和响应式章节；所有组件元数据与 UI 元素表补齐 [Base]/[Overlay]/[单租户]/[多租户] 差异；浏览器真实切换验证账号 CRUD/批量栏、角色权限矩阵、登录安全 IP/重置/Tooltip、租户基线与二次认证、1024/1920px 及暗色类，并保存截图和 DOM/计算样式 JSON 证据。差异增至 7 项、需确认增至 7 项。"
+    },
+    {
+      "version": 1,
+      "generated_at": "2026-07-15",
+      "demo_commit": "804efb9",
+      "spec_commit": "804efb9",
+      "summary": "初版：三 Tab（管理员账号/角色权限/登录安全）、平台/租户双视角作用域隔离、管理员 CRUD + 重置密码 + 强制下线 + 批量操作、三级 RBAC 权限矩阵（模块可见 × view/edit/approve/delete + 三态联动）、登录安全策略（密码策略/登录控制/IP访问控制/单点登录）+ 租户基线加严 + 二次认证。5 个交互层级子文件；标注 6 处差异（重点 D-001 全页无 i18n、D-006 生成密码明文）；6 项需确认（管理员/角色/登录策略与网关 users/RBAC/authd 映射、强制下线会话吊销、分层基线支持）"
+    }
+  ]
+}

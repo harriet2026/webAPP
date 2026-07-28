@@ -1,0 +1,13 @@
+{
+  "module": "statistics-rule-stats-v2",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": "804efb9",
+      "summary": "初版：五阶段漏斗/KPI/级联筛选/19模块卡片墙/明细视图（14套专属列集+准确率反馈闭环）；发现RBL过滤与身份认证明细点入即整页崩溃（feedbackSamples undefined）、订阅告警与明细操作类型列渲染原始i18n key等14项差异；无独立PRD，口径以demo为准列入8项需确认"
+    }
+  ]
+}

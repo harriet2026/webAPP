@@ -98,8 +98,8 @@ import { Badge } from '@/components/ui/badge';
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { CollapsibleSectionTrigger } from '@/components/ui/collapsible-section-trigger';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { StatusBadge } from '@/components/shared/status-badge';
@@ -1837,15 +1837,10 @@ export function IPFrequencyPage({
 
                 {/* Configuration Examples */}
                 <Collapsible open={showExamples} onOpenChange={setShowExamples}>
-                  <CollapsibleTrigger
-                    className="w-full flex items-center justify-between text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md px-3 py-1.5 text-xs transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Lightbulb className="h-4 w-4" />
-                      <span>{t('ipFrequency.examples.title')}</span>
-                    </div>
-                    {showExamples ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </CollapsibleTrigger>
+                  <CollapsibleSectionTrigger className="px-3 py-1.5 text-xs">
+                    <Lightbulb className="h-4 w-4" />
+                    <span>{t('ipFrequency.examples.title')}</span>
+                  </CollapsibleSectionTrigger>
                   <CollapsibleContent className="mt-2 space-y-2">
                     {[
                       {
@@ -1886,15 +1881,10 @@ export function IPFrequencyPage({
 
                 {/* Simulation Test */}
                 <Collapsible open={showSimulator} onOpenChange={setShowSimulator}>
-                  <CollapsibleTrigger
-                    className="w-full flex items-center justify-between text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md px-3 py-1.5 text-xs transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Play className="h-4 w-4" />
-                      <span>{t('ipFrequency.simulator.title')}</span>
-                    </div>
-                    {showSimulator ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </CollapsibleTrigger>
+                  <CollapsibleSectionTrigger className="px-3 py-1.5 text-xs">
+                    <Play className="h-4 w-4" />
+                    <span>{t('ipFrequency.simulator.title')}</span>
+                  </CollapsibleSectionTrigger>
                   <CollapsibleContent className="mt-2">
                     <div className="rounded-lg border p-3 bg-muted/30 space-y-3">
                       <div className="grid grid-cols-1 gap-2">
@@ -2237,7 +2227,7 @@ export function IPFrequencyPage({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 text-blue-600 hover:text-blue-700"
+                            className="h-7 text-primary"
                             onClick={() => {
                               releaseMutation.mutate(s.ip);
                               setRuleSuspendedIPs(ruleSuspendedIPs.filter((item) => item.ip !== s.ip));

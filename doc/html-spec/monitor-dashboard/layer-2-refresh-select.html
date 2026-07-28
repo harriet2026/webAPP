@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 2：刷新间隔下拉 - 监控总览</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== 设计变量（参考 demo globals.css） ===== */
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground); line-height: 1.55; font-size: 14px; padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem; max-width: 1280px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1.2rem; margin: 2.2rem 0 .8rem; padding-bottom: .35rem; border-bottom: 2px solid var(--primary); }
+    h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; }
+    h4 { font-size: .95rem; margin: 1.2rem 0 .5rem; }
+    h5 { font-size: .85rem; margin: .8rem 0 .4rem; }
+    p { margin: .45rem 0; }
+    code { font-family: var(--font-mono); font-size: .85em; background: var(--muted); padding: .1em .35em; border-radius: 4px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    a { color: oklch(0.52 0.226 262); }
+
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .spec-header .subtitle { color: var(--muted-foreground); font-size: .9rem; }
+    .meta-table { border-collapse: collapse; width: 100%; margin-top: .8rem; font-size: 13px; }
+    .meta-table td { border: 1px solid var(--border); padding: 5px 10px; vertical-align: top; }
+    .meta-table td:first-child { background: var(--muted); font-weight: 600; white-space: nowrap; width: 11em; }
+
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem; margin-top: 1.2rem; }
+    .component-toc ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .component-toc li { margin: .3rem 0; }
+    .toc-badge { display: inline-block; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 999px; padding: 0 .5em; margin-left: .4em; vertical-align: middle; }
+    .toc-layer-links { margin-left: .6em; font-size: 12px; }
+    .toc-layer-links a { margin-right: .5em; }
+
+    .spec-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0 1rem; background: var(--card); }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); font-weight: 600; white-space: nowrap; }
+    .spec-table td.num { text-align: right; font-family: var(--font-mono); }
+    .spec-table .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    .matrix-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0; background: var(--card); }
+    .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: center; }
+    .matrix-table th { background: var(--muted); font-weight: 600; }
+    .matrix-table td:first-child { text-align: left; font-weight: 600; background: var(--muted); }
+    .legend { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .5rem .8rem; }
+
+    .screenshot-figure { margin: .8rem 0 1.2rem; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .screenshot-figure figcaption { font-size: 12px; color: var(--muted-foreground); margin-top: .35rem; }
+
+    .component-spec { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem 1.4rem; margin: 1.2rem 0; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: .9rem 1.1rem; margin: 1rem 0; background: oklch(0.99 0 0); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; background: var(--primary); color: #fff; border-radius: 999px; font-size: .8em; font-weight: 700; margin-right: .4em; }
+    .trigger-path { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .45rem .7rem; margin: .5rem 0; }
+    .layer-nav { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 13px; }
+    .layer-index a { font-weight: 600; }
+
+    .component-preview { border: 2px dashed oklch(0.7 0.12 262); border-radius: 10px; padding: 18px; background: #f4f5f7; overflow-x: auto; margin: .7rem 0; position: relative; }
+    .component-preview::before { content: "可交互预览（提取自运行中的 demo）"; position: absolute; top: -9px; left: 14px; background: oklch(0.52 0.226 262); color: #fff; font-size: 10.5px; padding: 0 8px; border-radius: 999px; line-height: 16px; z-index: 5; }
+    .preview-note { font-size: 12px; color: var(--muted-foreground); background: oklch(0.975 0.02 95); border: 1px solid oklch(0.9 0.06 95); border-radius: 6px; padding: .4rem .7rem; margin: .4rem 0 .8rem; }
+    .component-preview .bg-card { background: #fff; }
+    .component-preview .text-card-foreground { color: #0a0a0a; }
+    .component-preview .bg-popover { background: #fff; }
+    .component-preview .text-popover-foreground { color: #0a0a0a; }
+    .component-preview .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .component-preview .border-input { border-color: #e5e7eb; }
+    .component-preview svg { flex-shrink: 0; }
+    .component-preview [data-slot="card"] { border-color: #e5e7eb; background: #fff; }
+    .component-preview button { cursor: pointer; }
+    .component-preview button:disabled { cursor: default; }
+    .component-preview .text-gray-900 { color: #111827; }
+    .component-preview .text-gray-500 { color: #6b7280; }
+    .component-preview .text-gray-400 { color: #9ca3af; }
+    .component-preview .bg-gray-50 { background: #f9fafb; }
+    @keyframes spec-spin { to { transform: rotate(360deg); } }
+    .component-preview .animate-spin { animation: spec-spin 1s linear infinite; }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .component-preview .animate-marquee { animation: marquee 30s linear infinite; }
+    .component-preview .animate-marquee:hover { animation-play-state: paused; }
+
+    .route-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 13px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 99; opacity: 0; transition: opacity .2s; pointer-events: none; font-family: var(--font-mono); }
+    .route-toast.show { opacity: 1; }
+
+    .dom-comparison { background: oklch(0.975 0.008 262); border: 1px solid oklch(0.85 0.03 262); border-radius: 8px; padding: .6rem .9rem; margin-top: .8rem; }
+    .dom-comparison h5 { margin: .2rem 0 .4rem; }
+
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .diff-section h2 { border-bottom-color: var(--diff-border); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .question-section h2 { border-bottom-color: var(--question-border); }
+    .diff-table td:first-child, .question-table td:first-child { font-weight: 700; white-space: nowrap; }
+
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 .55em; line-height: 1.6; vertical-align: middle; }
+    .tag-green { background: #dcfce7; color: #15803d; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-gray { background: #f3f4f6; color: #4b5563; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+    .mermaid { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .6rem; margin: .8rem 0; overflow-x: auto; }
+
+    /* 静态展示的 radix 浮层去绝对定位 */
+    .component-preview [data-radix-popper-content-wrapper] { position: static !important; transform: none !important; }
+    .component-preview [role="listbox"] { max-width: 220px; }
+  </style>
+</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-1">&larr; 返回主文件</a>
+  <span>层级 2 / 2</span>
+  <a href="./layer-1-range-select.html">&larr; 层级 1：时间范围下拉</a>
+</nav>
+<header class="spec-header">
+  <h1>交互层级 2：刷新间隔下拉打开</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.1 页面头部控制条</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">monitor-dashboard/index.html</a></td></tr>
+    <tr><td>触发路径</td><td>层级0 → 点击「30s」Select（带 RefreshCw 图标）→ Radix Popper 浮层展开</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">2</span> 下拉打开态（浏览器实测）</h4>
+  <figure class="screenshot-figure"><img src="./screenshots/layer-3-refresh-open.png"><figcaption>下拉打开：5s / 30s（选中态 aria-selected=true）/ 1m / 关闭</figcaption></figure>
+
+  <h4>可交互预览（点击「30s」trigger 展开选项，选择更新文案）</h4>
+  <div class="component-preview" id="preview-refresh" style="overflow:visible;">
+<div class="flex items-center gap-3"><button type="button" role="combobox" aria-controls="radix-_R_535esnebn9lb_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-24"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw w-4 h-4 mr-1"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg><span data-slot="select-value" style="pointer-events:none">30s</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div>
+  </div>
+  <div class="preview-note">对齐 demo D-02：选择仅改文案，实际轮询固定 30s 不受影响（useEffect 硬编码 30s 定时器，忽略本 Select 的取值；选「关闭」定时器也不会停）。</div>
+
+  <h4>选项清单（实测）</h4>
+  <table class="spec-table">
+    <thead><tr><th>选项</th><th>value</th><th>aria-selected</th><th>选择后行为（实测）</th></tr></thead>
+    <tbody>
+      <tr><td>5s</td><td class="mono">5s</td><td>false</td><td rowspan="4">仅 setRefreshInterval 更新选中值；<b>实际定时器恒为 30s</b>（useEffect 硬编码，差异 D-02）；选「关闭」定时器也不会停</td></tr>
+      <tr><td>30s</td><td class="mono">30s</td><td>true（默认）</td></tr>
+      <tr><td>1m</td><td class="mono">1m</td><td>false</td></tr>
+      <tr><td>关闭</td><td class="mono">off</td><td>false</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>选项数（role=option）</td><td>4</td><td>4</td><td class="dom-pass">✅</td></tr>
+        <tr><td>选项文案</td><td>5s / 30s / 1m / 关闭</td><td>同</td><td class="dom-pass">✅</td></tr>
+        <tr><td>默认选中</td><td>30s（aria-selected=true + data-state=checked）</td><td>同</td><td class="dom-pass">✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-1">&larr; 返回主文件</a>
+  <a href="./layer-1-range-select.html">&larr; 层级 1：时间范围下拉</a>
+</nav>
+<script>
+  function showRouteToast(path) {
+    let el = document.querySelector('.route-toast');
+    if (!el) { el = document.createElement('div'); el.className = 'route-toast'; document.body.appendChild(el); }
+    el.textContent = 'demo 行为：router.push("' + path + '")';
+    el.classList.add('show');
+    clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+  // 简易下拉：点击 trigger 切换 option 列表；点选项更新 trigger 文案并触发回调
+  function bindSpecSelect(triggerSel, options, onPick) {
+    const trigger = document.querySelector(triggerSel);
+    if (!trigger) return;
+    trigger.style.position = 'relative';
+    let list = null;
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (list) { list.remove(); list = null; trigger.setAttribute('data-state','closed'); return; }
+      trigger.setAttribute('data-state','open');
+      list = document.createElement('div');
+      list.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:50;padding:4px;font-size:14px;';
+      options.forEach(opt => {
+        const item = document.createElement('div');
+        item.textContent = opt.label;
+        item.style.cssText = 'padding:6px 10px;border-radius:5px;cursor:pointer;white-space:nowrap;' + (opt.active ? 'background:#eff6ff;color:#1d4ed8;font-weight:600;' : '');
+        item.onmouseenter = () => { if (!opt.active) item.style.background = '#f3f4f6'; };
+        item.onmouseleave = () => { if (!opt.active) item.style.background = opt.active ? '#eff6ff' : ''; };
+        item.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const valSpan = trigger.querySelector('[data-slot="select-value"]');
+          if (valSpan) valSpan.textContent = opt.label;
+          list.remove(); list = null; trigger.setAttribute('data-state','closed');
+          if (onPick) onPick(opt);
+        });
+        list.appendChild(item);
+      });
+      trigger.appendChild(list);
+      document.addEventListener('click', function h() { if (list) { list.remove(); list = null; trigger.setAttribute('data-state','closed'); } document.removeEventListener('click', h); });
+    });
+  }
+
+  // 刷新间隔 Select（对齐 demo D-02：选择仅更新 trigger 文案，实际轮询固定 30s）
+  bindSpecSelect('#preview-refresh [role="combobox"]', [
+    {label:'5s'},{label:'30s',active:true},{label:'1m'},{label:'关闭'}
+  ]);
+</script>
+</body>
+</html>

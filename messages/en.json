@@ -1,5 +1,9 @@
 {
-  "theme": {"label": "Theme", "blue": "Blue Theme", "green": "Green Theme"},
+  "theme": {
+    "label": "Theme",
+    "blue": "Blue Theme",
+    "green": "Green Theme"
+  },
   "branding": {
     "saasName": "Cloud Email Security Gateway",
     "selfHostedName": "Email Security Gateway",
@@ -273,6 +277,8 @@
     "welcomeSubtitle": "Sign in to the admin console to continue",
     "account": "Account",
     "accountPlaceholder": "Enter your account",
+    "usernameRequired": "Please enter your username",
+    "passwordRequired": "Please enter your password",
     "passwordPlaceholder": "Enter your password",
     "forgotHint": "Reset your password with a code sent to your bound phone or email",
     "loginSuccessHint": "Entering the security operations console…"
@@ -5316,7 +5322,8 @@
         "discard": "Discard",
         "audit": "Audit",
         "quarantine": "Quarantine",
-        "sideline": "Greylist"
+        "sideline": "Greylist",
+        "mixed": "Mixed"
       },
       "statuses": {
         "processing": "Processing",
@@ -7084,7 +7091,9 @@
     "viewBy": {
       "threat_type": "Threat Type",
       "action": "Execute Action",
-      "email_type": "Threat Posture Trend"
+      "email_type": "Threat Posture Trend",
+      "threat_level": "Threat Level",
+      "delivery_result": "Delivery Result"
     },
     "threatTypes": {
       "normal": "Normal",
@@ -7216,7 +7225,23 @@
       "noData": "No data available",
       "loading": "Loading…"
     },
-    "normalHiddenHint": "Normal mail is hidden by default so its volume does not flatten the threat curves — click its legend entry to show it"
+    "normalHiddenHint": "Normal mail is hidden by default so its volume does not flatten the threat curves — click its legend entry to show it",
+    "deliveryResults": {
+      "delivered": "Delivered",
+      "success_rate": "Delivery Success Rate",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "in_delivery": "In Delivery",
+      "partial_delivered": "Partial Delivered",
+      "unknown": "Unknown"
+    },
+    "threatLevels": {
+      "normal": "Normal",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    }
   },
   "deliveryTraffic": {
     "title": "Delivery & Traffic Analysis",
@@ -7311,7 +7336,6 @@
       "internal_phishing": "Internal Phishing",
       "internal_virus": "Internal Virus"
     },
-
     "table": {
       "title": "Detail Data",
       "date": "Date",
@@ -9424,6 +9448,7 @@
       "attention": "Needs Attention",
       "nodesNormal": "Nodes running normally",
       "nodesIssue": "Some nodes offline",
+      "nodesUnavailable": "Data source unavailable",
       "cta": {
         "inbound": "View stats",
         "threats": "View threats",
@@ -9457,6 +9482,10 @@
       "itemPendingDisposal": "{n} email(s) pending disposal",
       "itemPendingReport": "{n} report(s) awaiting review",
       "itemAgentPending": "{agent}: {n} pending review",
+      "itemLicenseExpiry": "License expires in {n} days",
+      "licenseRenewHint": "Please renew in time",
+      "itemRuleLibLatest": "Rule library is up to date",
+      "itemRuleLibOutdated": "Rule library update available",
       "lastSeen": "Last seen: {time}"
     },
     "agents": {

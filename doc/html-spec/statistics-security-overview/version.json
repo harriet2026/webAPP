@@ -1,0 +1,27 @@
+{
+  "module": "statistics-security-overview",
+  "current_version": 3,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-14",
+      "demo_commit": "804efb9",
+      "spec_commit": "8db3a98",
+      "summary": "初版：8 区域 + 3 视角趋势图 + 地理/时段双卡 + 数据点下钻 + 明细行展开；修复 9 条 UTF-8 损坏中文；标注 A/B 两篇 PRD 的 9 处冲突与 demo 的 12 处差异；网关 /statistics/security-overview 全套端点已存在"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-21",
+      "demo_commit": "2cdad33",
+      "spec_commit": "804efb9",
+      "summary": "邮件类型视角由 9 类改为与邮件处置/调查中心统一的 11 类（标签取自公共类 lib/mail-type-taxonomy）；删除「威胁等级」视角（viewBy 只剩 threat_type|action）；删除「对比去年同期」勾选框（compareMode）；列头 Tooltip 改用 colTip 回退逻辑。重抓 c-1/c-5/c-8 与 layer-1/2/5 的真实 DOM 快照与截图；为 c-3 地理卡、c-4 时段卡补齐可交互预览（时段卡日内↔周内 swap）；修复 assets/spec-style.css 的全局 `*{padding/margin:0}` 无层级 reset 会盖掉 demo-app.css @layer 工具类、导致预览内按钮/分段/Tab 塌成无内边距的样式 bug（改为 :where(:not(.component-preview *)) 排除预览子树）；更正 v1 误记的「图例仅单击」（实为单击+双击独显 onDoubleClick）；新增差异 D13（11 类口径）、D14（威胁等级视角删除）"
+    },
+    {
+      "version": 3,
+      "generated_at": "2026-07-22",
+      "demo_commit": "2cdad33",
+      "spec_commit": "804efb9",
+      "summary": "纠正 v2 将 demo 的两视角现状误写为产品裁决：产品规格恢复四视角（邮件类型/处置动作/威胁等级/投递结果）；demo 运行态仍仅有前两项，改列为原型缺口；Q4 关闭为已确认决策"
+    }
+  ]
+}

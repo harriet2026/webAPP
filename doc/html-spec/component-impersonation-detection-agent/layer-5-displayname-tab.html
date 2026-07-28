@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级5：发信人名称仿冒页签 - 仿冒邮件检测智能体</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { corePlugins:{ preflight:false }, theme:{ extend:{ colors:{
+      background:'var(--background)', foreground:'var(--foreground)', card:'var(--card)',
+      'card-foreground':'var(--card-foreground)', muted:'var(--muted)', 'muted-foreground':'var(--muted-foreground)',
+      primary:'var(--primary)', 'primary-foreground':'var(--primary-foreground)', border:'var(--border)',
+      input:'var(--input)', ring:'var(--ring)', destructive:'var(--destructive)', accent:'var(--accent)',
+      'accent-foreground':'var(--accent-foreground)', secondary:'var(--secondary)',
+      'secondary-foreground':'var(--secondary-foreground)', popover:'var(--popover)',
+      'popover-foreground':'var(--popover-foreground)' },
+      borderRadius:{ lg:'var(--radius)', md:'calc(var(--radius) - 2px)', sm:'calc(var(--radius) - 4px)' } } } };
+  </script>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262); --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0); --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0); --destructive: oklch(0.577 0.245 27.325);
+      --diff-bg: oklch(0.97 0.013 25); --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95); --question-border: oklch(0.75 0.15 90);
+      --radius: 0.625rem;
+      --font-sans: "Geist","Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono","Geist Mono Fallback", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground);
+      line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 2rem; }
+    .spec-header h1 { color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+    .meta-table td:first-child { font-weight: 600; width: 170px; color: var(--muted-foreground); white-space: nowrap; }
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 2rem; margin-bottom: 2rem; }
+    .component-toc > h2 { color: var(--primary); font-size: 1.05rem; margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .component-toc ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.5rem; }
+    .component-toc li { padding: 0.375rem 0.75rem; border-radius: calc(var(--radius) - 4px); background: var(--muted); font-size: 0.875rem; }
+    .component-toc li a { color: var(--primary); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.375rem; }
+    .component-toc li a:hover { text-decoration: underline; }
+    .component-toc .toc-layer-links { font-size: 0.75rem; color: var(--muted-foreground); margin-left: 0.5rem; }
+    .component-toc .toc-layer-links a { color: var(--muted-foreground); font-weight: 400; }
+    .component-toc .toc-badge { display: inline-block; font-size: 0.6875rem; font-weight: 600; padding: 0.0625rem 0.375rem;
+      border-radius: calc(var(--radius) - 4px); background: var(--primary); color: var(--primary-foreground); white-space: nowrap; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+    section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem; font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+    h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+    table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+    table.spec-table th { background: var(--muted); color: var(--foreground); font-weight: 600; text-align: left;
+      padding: 0.55rem 0.7rem; border: 1px solid var(--border); }
+    table.spec-table td { padding: 0.55rem 0.7rem; border: 1px solid var(--border); vertical-align: top; }
+    table.spec-table tr:nth-child(even) td { background: var(--muted); }
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .screenshot-figure figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .component-spec { border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1rem 0; background: var(--card); }
+    .component-spec > h3 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 0.75rem; }
+    pre { background: var(--muted); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); padding: 1rem;
+      overflow-x: auto; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; margin: 1rem 0; }
+    code { font-family: var(--font-mono); font-size: 0.85em; }
+    blockquote { border-left: 4px solid var(--destructive); background: var(--diff-bg); padding: 0.75rem 1rem; margin: 1rem 0;
+      font-size: 0.875rem; border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0; }
+    .diff-section { border-left: 4px solid var(--diff-border); background: var(--diff-bg); }
+    .diff-section > h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+    .diff-badge { display: inline-block; background: var(--diff-border); color: #fff; font-size: 0.75rem; font-weight: 600;
+      padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); margin-right: 0.5rem; }
+    .question-section { border-left: 4px solid var(--question-border); background: var(--question-bg); }
+    .question-section > h2 { color: var(--question-border); border-bottom-color: var(--question-border); }
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); }
+    .badge-high { background: oklch(0.65 0.2 25); color: #fff; }
+    .badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+    .badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+    .component-preview { border: 2px dashed var(--primary); border-radius: var(--radius); padding: 1.5rem; margin: 1rem 0;
+      background: #f7f8fb; position: relative; overflow: auto; }
+    .component-preview::before { content: "🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）"; position: absolute; top: -0.625rem;
+      left: 0.75rem; background: var(--primary); color: var(--primary-foreground); font-size: 0.6875rem; font-weight: 600;
+      padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); white-space: nowrap; }
+    .component-preview * { box-sizing: border-box; }
+    /* 让被提取的 radix 弹窗/抽屉在预览区以常规流呈现（去掉 fixed 定位与全屏遮罩） */
+    .component-preview [role="dialog"], .component-preview [role="alertdialog"] {
+      position: static !important; inset: auto !important; transform: none !important; translate: none !important;
+      width: 100% !important; max-width: 100% !important; height: auto !important; max-height: none !important;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin: 0 auto; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: calc(var(--radius) - 2px);
+      padding: 1rem 1.25rem; margin: 1.5rem 0; background: var(--card); }
+    .interaction-layer > h4 { color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%;
+      background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .trigger-path { background: var(--muted); border-radius: calc(var(--radius) - 4px); padding: 0.5rem 0.75rem; margin: 0.5rem 0 1rem;
+      font-size: 0.8125rem; color: var(--muted-foreground); }
+    .trigger-path strong { color: var(--foreground); }
+    .dom-comparison { margin: 1rem 0; border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); overflow: hidden; }
+    .dom-comparison > h5 { background: var(--muted); padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600; color: var(--foreground);
+      border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.375rem; }
+    .dom-comparison > h5::before { content: "🔍"; font-size: 0.875rem; }
+    .dom-comparison table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+    .dom-comparison th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .dom-comparison td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .dom-comparison tr:last-child td { border-bottom: none; }
+    .dom-pass { color: oklch(0.5 0.15 150); font-weight: 600; }
+    .dom-fail { color: var(--destructive); font-weight: 600; }
+    .dom-fixed { color: oklch(0.6 0.15 90); font-weight: 600; }
+    table.layer-index { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.layer-index th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+    table.layer-index td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.layer-index td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    table.layer-index td a:hover { text-decoration: underline; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; background: var(--muted);
+      border-radius: var(--radius); margin-bottom: 1.5rem; font-size: 0.875rem; }
+    .layer-nav a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .layer-nav a:hover { text-decoration: underline; }
+    .version-history-section { margin: 1.5rem 0; }
+    .version-history-table td:nth-child(5) { color: var(--muted-foreground); }
+    .spec-version { font-weight: 600; color: oklch(0.52 0.226 262); }
+    .note { background: oklch(0.97 0.02 250); border: 1px solid var(--border); border-left: 4px solid var(--primary);
+      border-radius: calc(var(--radius) - 4px); padding: 0.6rem 0.9rem; font-size: 0.8rem; color: var(--muted-foreground); margin: 0.75rem 0; }
+  </style>
+/* === TW-STATIC-BEGIN (offline Tailwind, auto-generated) === */
+<style id="tw-static">
+*, ::before, ::after {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}::backdrop {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}.pointer-events-none {pointer-events: none
+}.absolute {position: absolute
+}.relative {position: relative
+}.left-3 {left: 0.75rem
+}.top-1\/2 {top: 50%
+}.mr-2 {margin-right: 0.5rem
+}.mt-1 {margin-top: 0.25rem
+}.mt-6 {margin-top: 1.5rem
+}.block {display: block
+}.flex {display: flex
+}.inline-flex {display: inline-flex
+}.grid {display: grid
+}.hidden {display: none
+}.size-4 {width: 1rem;height: 1rem
+}.size-9 {width: 2.25rem;height: 2.25rem
+}.h-3 {height: 0.75rem
+}.h-3\.5 {height: 0.875rem
+}.h-4 {height: 1rem
+}.h-8 {height: 2rem
+}.h-9 {height: 2.25rem
+}.h-\[1\.15rem\] {height: 1.15rem
+}.w-16 {width: 4rem
+}.w-28 {width: 7rem
+}.w-3 {width: 0.75rem
+}.w-3\.5 {width: 0.875rem
+}.w-36 {width: 9rem
+}.w-4 {width: 1rem
+}.w-8 {width: 2rem
+}.w-fit {width: -moz-fit-content;width: fit-content
+}.w-full {width: 100%
+}.min-w-0 {min-width: 0px
+}.flex-1 {flex: 1 1 0%
+}.shrink-0 {flex-shrink: 0
+}.-translate-y-1\/2 {--tw-translate-y: -50%;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.cursor-pointer {cursor: pointer
+}.auto-rows-min {grid-auto-rows: min-content
+}.grid-rows-\[auto_auto\] {grid-template-rows: auto auto
+}.flex-row {flex-direction: row
+}.flex-col {flex-direction: column
+}.items-start {align-items: flex-start
+}.items-center {align-items: center
+}.items-stretch {align-items: stretch
+}.justify-center {justify-content: center
+}.justify-between {justify-content: space-between
+}.gap-0\.5 {gap: 0.125rem
+}.gap-1 {gap: 0.25rem
+}.gap-1\.5 {gap: 0.375rem
+}.gap-2 {gap: 0.5rem
+}.gap-3 {gap: 0.75rem
+}.gap-6 {gap: 1.5rem
+}.space-y-2 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.5rem * var(--tw-space-y-reverse))
+}.space-y-4 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(1rem * var(--tw-space-y-reverse))
+}.space-y-6 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(1.5rem * var(--tw-space-y-reverse))
+}.overflow-hidden {overflow: hidden
+}.truncate {overflow: hidden;text-overflow: ellipsis;white-space: nowrap
+}.whitespace-nowrap {white-space: nowrap
+}.rounded-\[4px\] {border-radius: 4px
+}.rounded-full {border-radius: 9999px
+}.rounded-lg {border-radius: var(--radius)
+}.rounded-md {border-radius: calc(var(--radius) - 2px)
+}.rounded-xl {border-radius: 0.75rem
+}.border {border-width: 1px
+}.border-dashed {border-style: dashed
+}.border-amber-300 {--tw-border-opacity: 1;border-color: rgb(252 211 77 / var(--tw-border-opacity, 1))
+}.border-blue-200 {--tw-border-opacity: 1;border-color: rgb(191 219 254 / var(--tw-border-opacity, 1))
+}.border-gray-200 {--tw-border-opacity: 1;border-color: rgb(229 231 235 / var(--tw-border-opacity, 1))
+}.border-input {border-color: var(--input)
+}.border-red-200 {--tw-border-opacity: 1;border-color: rgb(254 202 202 / var(--tw-border-opacity, 1))
+}.border-transparent {border-color: transparent
+}.bg-background {background-color: var(--background)
+}.bg-blue-100 {--tw-bg-opacity: 1;background-color: rgb(219 234 254 / var(--tw-bg-opacity, 1))
+}.bg-blue-50 {--tw-bg-opacity: 1;background-color: rgb(239 246 255 / var(--tw-bg-opacity, 1))
+}.bg-card {background-color: var(--card)
+}.bg-primary {background-color: var(--primary)
+}.bg-red-100 {--tw-bg-opacity: 1;background-color: rgb(254 226 226 / var(--tw-bg-opacity, 1))
+}.bg-transparent {background-color: transparent
+}.bg-white {--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
+}.px-1\.5 {padding-left: 0.375rem;padding-right: 0.375rem
+}.px-3 {padding-left: 0.75rem;padding-right: 0.75rem
+}.px-4 {padding-left: 1rem;padding-right: 1rem
+}.px-6 {padding-left: 1.5rem;padding-right: 1.5rem
+}.py-0 {padding-top: 0px;padding-bottom: 0px
+}.py-1 {padding-top: 0.25rem;padding-bottom: 0.25rem
+}.py-2 {padding-top: 0.5rem;padding-bottom: 0.5rem
+}.py-2\.5 {padding-top: 0.625rem;padding-bottom: 0.625rem
+}.py-6 {padding-top: 1.5rem;padding-bottom: 1.5rem
+}.pl-9 {padding-left: 2.25rem
+}.text-left {text-align: left
+}.text-\[10px\] {font-size: 10px
+}.text-\[11px\] {font-size: 11px
+}.text-base {font-size: 1rem;line-height: 1.5rem
+}.text-lg {font-size: 1.125rem;line-height: 1.75rem
+}.text-sm {font-size: 0.875rem;line-height: 1.25rem
+}.text-xs {font-size: 0.75rem;line-height: 1rem
+}.font-medium {font-weight: 500
+}.font-semibold {font-weight: 600
+}.text-amber-600 {--tw-text-opacity: 1;color: rgb(217 119 6 / var(--tw-text-opacity, 1))
+}.text-blue-600 {--tw-text-opacity: 1;color: rgb(37 99 235 / var(--tw-text-opacity, 1))
+}.text-blue-700 {--tw-text-opacity: 1;color: rgb(29 78 216 / var(--tw-text-opacity, 1))
+}.text-card-foreground {color: var(--card-foreground)
+}.text-gray-400 {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.text-gray-500 {--tw-text-opacity: 1;color: rgb(107 114 128 / var(--tw-text-opacity, 1))
+}.text-gray-600 {--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity, 1))
+}.text-gray-900 {--tw-text-opacity: 1;color: rgb(17 24 39 / var(--tw-text-opacity, 1))
+}.text-primary-foreground {color: var(--primary-foreground)
+}.text-red-500 {--tw-text-opacity: 1;color: rgb(239 68 68 / var(--tw-text-opacity, 1))
+}.text-red-600 {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.text-red-700 {--tw-text-opacity: 1;color: rgb(185 28 28 / var(--tw-text-opacity, 1))
+}.opacity-50 {opacity: 0.5
+}.shadow-sm {--tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.outline-none {outline: 2px solid transparent;outline-offset: 2px
+}.ring-0 {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.transition-\[color\2c box-shadow\] {transition-property: color,box-shadow;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-all {transition-property: all;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-colors {transition-property: color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-shadow {transition-property: box-shadow;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-transform {transition-property: transform;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.selection\:bg-primary *::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground *::selection {color: var(--primary-foreground)
+}.selection\:bg-primary::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground::selection {color: var(--primary-foreground)
+}.file\:inline-flex::file-selector-button {display: inline-flex
+}.file\:h-7::file-selector-button {height: 1.75rem
+}.file\:border-0::file-selector-button {border-width: 0px
+}.file\:bg-transparent::file-selector-button {background-color: transparent
+}.file\:text-sm::file-selector-button {font-size: 0.875rem;line-height: 1.25rem
+}.file\:font-medium::file-selector-button {font-weight: 500
+}.file\:text-foreground::file-selector-button {color: var(--foreground)
+}.placeholder\:text-muted-foreground::placeholder {color: var(--muted-foreground)
+}.hover\:bg-accent:hover {background-color: var(--accent)
+}.hover\:bg-gray-50:hover {--tw-bg-opacity: 1;background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}.hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}.hover\:text-red-600:hover {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.focus-visible\:border-ring:focus-visible {border-color: var(--ring)
+}.focus-visible\:ring-\[3px\]:focus-visible {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.disabled\:pointer-events-none:disabled {pointer-events: none
+}.disabled\:cursor-not-allowed:disabled {cursor: not-allowed
+}.disabled\:opacity-50:disabled {opacity: 0.5
+}.group:hover .group-hover\:underline {-webkit-text-decoration-line: underline;text-decoration-line: underline
+}.has-\[\>svg\]\:px-3:has(>svg) {padding-left: 0.75rem;padding-right: 0.75rem
+}.data-\[size\=default\]\:h-9[data-size="default"] {height: 2.25rem
+}.data-\[size\=sm\]\:h-8[data-size="sm"] {height: 2rem
+}.data-\[state\=checked\]\:translate-x-\[calc\(100\%-2px\)\][data-state="checked"] {--tw-translate-x: calc(100% - 2px);transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.data-\[state\=unchecked\]\:translate-x-0[data-state="unchecked"] {--tw-translate-x: 0px;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.data-\[state\=checked\]\:border-primary[data-state="checked"] {border-color: var(--primary)
+}.data-\[state\=checked\]\:bg-primary[data-state="checked"] {background-color: var(--primary)
+}.data-\[state\=unchecked\]\:bg-input[data-state="unchecked"] {background-color: var(--input)
+}.data-\[placeholder\]\:text-muted-foreground[data-placeholder] {color: var(--muted-foreground)
+}.data-\[state\=checked\]\:text-primary-foreground[data-state="checked"] {color: var(--primary-foreground)
+}.\*\:data-\[slot\=select-value\]\:line-clamp-1[data-slot="select-value"] > * {overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1
+}.\*\:data-\[slot\=select-value\]\:flex[data-slot="select-value"] > * {display: flex
+}.\*\:data-\[slot\=select-value\]\:items-center[data-slot="select-value"] > * {align-items: center
+}.\*\:data-\[slot\=select-value\]\:gap-2[data-slot="select-value"] > * {gap: 0.5rem
+}@media (min-width: 640px) {.sm\:inline {display: inline
+    }.sm\:w-\[140px\] {width: 140px
+    }.sm\:flex-row {flex-direction: row
+    }.sm\:items-center {align-items: center
+    }
+}@media (min-width: 768px) {.md\:flex {display: flex
+    }.md\:text-sm {font-size: 0.875rem;line-height: 1.25rem
+    }
+}@media (min-width: 1024px) {.lg\:flex {display: flex
+    }
+}@media (prefers-color-scheme: dark) {.dark\:border-gray-800 {--tw-border-opacity: 1;border-color: rgb(31 41 55 / var(--tw-border-opacity, 1))
+    }.dark\:bg-gray-900 {--tw-bg-opacity: 1;background-color: rgb(17 24 39 / var(--tw-bg-opacity, 1))
+    }.dark\:text-gray-100 {--tw-text-opacity: 1;color: rgb(243 244 246 / var(--tw-text-opacity, 1))
+    }.dark\:text-gray-300 {--tw-text-opacity: 1;color: rgb(209 213 219 / var(--tw-text-opacity, 1))
+    }.dark\:hover\:bg-gray-800\/40:hover {background-color: rgb(31 41 55 / 0.4)
+    }.dark\:data-\[state\=checked\]\:bg-primary[data-state="checked"] {background-color: var(--primary)
+    }.dark\:data-\[state\=checked\]\:bg-primary-foreground[data-state="checked"] {background-color: var(--primary-foreground)
+    }.dark\:data-\[state\=unchecked\]\:bg-foreground[data-state="unchecked"] {background-color: var(--foreground)
+    }
+}.\[\&\>svg\]\:pointer-events-none>svg {pointer-events: none
+}.\[\&\>svg\]\:size-3>svg {width: 0.75rem;height: 0.75rem
+}.\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-4 svg:not([class*='size-']) {width: 1rem;height: 1rem
+}.\[\&_svg\:not\(\[class\*\=\'text-\'\]\)\]\:text-muted-foreground svg:not([class*='text-']) {color: var(--muted-foreground)
+}.\[\&_svg\]\:pointer-events-none svg {pointer-events: none
+}.\[\&_svg\]\:shrink-0 svg {flex-shrink: 0
+}a.\[a\&\]\:hover\:bg-accent:hover {background-color: var(--accent)
+}a.\[a\&\]\:hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}
+</style>
+/* === TW-STATIC-END === */</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-4">← 返回主文件</a>
+  <span>层级 5 · 发信人名称仿冒页签</span>
+  <a href="./layer-2-logs-tab.html">检测总览 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 5：发信人名称仿冒页签 · 保护对象列表</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.4 发信人名称仿冒页签（子组件 DisplayNameSpoofDetection）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+    <tr><td>触发路径</td><td>一级页签点击「发信人名称仿冒」→ activeTab="displayname" → &lt;DisplayNameSpoofDetection /&gt;</td></tr>
+    <tr><td>demo 组件</td><td><code>components/agent-center/display-name-spoof-detection.tsx</code></td></tr>
+    <tr><td>覆盖范围</td><td>层级 0 对象列表；深层向导/抽屉见需确认 Q-004（建议独立组件规格）</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">5</span> 保护对象列表初始态（3 个 mock 对象）</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：点击「发信人名称仿冒」页签。对象含张三(CEO,高,已学习)、李四(CFO,高,自定义)、王五(采购经理,中,学习中 3/7,观察)。</div>
+  <div class="component-preview">
+<div data-state="active" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_0_-trigger-displayname" id="radix-_r_0_-content-displayname" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none space-y-6 mt-6"><div class="space-y-6"><div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 space-y-4"><div class="flex flex-row items-center justify-between"><div><div data-slot="card-title" class="font-semibold text-lg">保护对象</div><p class="text-xs text-gray-500 mt-1">每个对象独立维护观察模式、基线、阈值与绑定规则</p></div><div class="flex items-center gap-2"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[&gt;svg]:px-3"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-4 w-4 mr-2"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>添加保护对象</button></div></div><div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2"><div class="relative flex-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive pl-9" placeholder="按姓名、邮箱、岗位搜索" value=""></div><button type="button" role="combobox" aria-controls="radix-_r_t_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-full sm:w-[140px]"><span data-slot="select-value" style="pointer-events: none;">全部等级</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button type="button" role="combobox" aria-controls="radix-_r_u_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-full sm:w-[140px]"><span data-slot="select-value" style="pointer-events: none;">全部状态</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer"><button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" data-slot="checkbox" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"></button>全选当前列表</label></div><div data-slot="card-content" class="px-6 space-y-2"><div class="flex items-center gap-3 rounded-lg border bg-white dark:bg-gray-900 px-3 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/40 border-gray-200 dark:border-gray-800"><button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" data-slot="checkbox" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"></button><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-medium shrink-0">张</div><div class="min-w-0 flex-1"><div class="flex items-center gap-1.5"><span class="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">张三</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border font-medium w-fit whitespace-nowrap [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-[10px] px-1.5 py-0 shrink-0 bg-red-100 text-red-700 border-red-200">高</span></div><p class="text-xs text-gray-500 truncate">CEO · zhangsan@company.com</p></div><div class="hidden md:flex flex-col w-28 shrink-0"><span class="text-[11px] text-gray-400">基线</span><span class="text-xs text-gray-600 dark:text-gray-300 truncate">已学习 · 142 条</span></div><div class="hidden lg:flex flex-col w-36 shrink-0"><span class="text-[11px] text-gray-400">今日</span><span class="text-xs text-gray-600 dark:text-gray-300">命中 <b class="text-red-600">2</b> · 隔 1 · 标 1</span></div><button class="hidden lg:flex flex-col items-start w-16 shrink-0 text-left group"><span class="text-[11px] text-gray-400">规则</span><span class="text-xs text-blue-600 group-hover:underline flex items-center gap-0.5">3 条 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-3 w-3"><path d="m9 18 6-6-6-6"></path></svg></span></button><div class="flex items-center gap-1.5 shrink-0"><span class="text-xs hidden sm:inline text-gray-500">检测</span><button type="button" role="switch" aria-checked="false" data-state="unchecked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="unchecked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button></div><div class="flex items-center shrink-0"><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 h-8 w-8" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text h-3.5 w-3.5"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg></button><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 h-8 w-8" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-pen h-3.5 w-3.5"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg></button><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 size-9 h-8 w-8 text-red-500 hover:text-red-600" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 h-3.5 w-3.5"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></div></div><div class="flex items-center gap-3 rounded-lg border bg-white dark:bg-gray-900 px-3 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/40 border-gray-200 dark:border-gray-800"><button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" data-slot="checkbox" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"></button><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-medium shrink-0">李</div><div class="min-w-0 flex-1"><div class="flex items-center gap-1.5"><span class="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">李四</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border font-medium w-fit whitespace-nowrap [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-[10px] px-1.5 py-0 shrink-0 bg-red-100 text-red-700 border-red-200">高</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border font-medium w-fit whitespace-nowrap [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-[10px] px-1.5 py-0 shrink-0 bg-blue-50 text-blue-600 border-blue-200">自定义</span></div><p class="text-xs text-gray-500 truncate">CFO · lisi@company.com</p></div><div class="hidden md:flex flex-col w-28 shrink-0"><span class="text-[11px] text-gray-400">基线</span><span class="text-xs text-gray-600 dark:text-gray-300 truncate">已学习 · 98 条</span></div><div class="hidden lg:flex flex-col w-36 shrink-0"><span class="text-[11px] text-gray-400">今日</span><span class="text-xs text-gray-600 dark:text-gray-300">命中 <b class="text-red-600">0</b> · 隔 0 · 标 0</span></div><button class="hidden lg:flex flex-col items-start w-16 shrink-0 text-left group"><span class="text-[11px] text-gray-400">规则</span><span class="text-xs text-blue-600 group-hover:underline flex items-center gap-0.5">1 条 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-3 w-3"><path d="m9 18 6-6-6-6"></path></svg></span></button><div class="flex items-center gap-1.5 shrink-0"><span class="text-xs hidden sm:inline text-gray-500">检测</span><button type="button" role="switch" aria-checked="false" data-state="unchecked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="unchecked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button></div><div class="flex items-center shrink-0"><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 h-8 w-8" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text h-3.5 w-3.5"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg></button><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 h-8 w-8" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-pen h-3.5 w-3.5"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg></button><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 size-9 h-8 w-8 text-red-500 hover:text-red-600" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 h-3.5 w-3.5"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></div></div><div class="flex items-center gap-3 rounded-lg border bg-white dark:bg-gray-900 px-3 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/40 border-amber-300 border-dashed"><button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" data-slot="checkbox" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"></button><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-medium shrink-0">王</div><div class="min-w-0 flex-1"><div class="flex items-center gap-1.5"><span class="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">王五</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border font-medium w-fit whitespace-nowrap [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-[10px] px-1.5 py-0 shrink-0 bg-blue-100 text-blue-700 border-blue-200">中</span></div><p class="text-xs text-gray-500 truncate">采购经理 · wangwu@company.com</p></div><div class="hidden md:flex flex-col w-28 shrink-0"><span class="text-[11px] text-gray-400">基线</span><span class="text-xs text-amber-600 truncate">学习中 3/7</span></div><div class="hidden lg:flex flex-col w-36 shrink-0"><span class="text-[11px] text-gray-400">今日</span><span class="text-xs text-gray-600 dark:text-gray-300">命中 <b class="text-red-600">1</b> · 隔 0 · 标 1</span></div><button class="hidden lg:flex flex-col items-start w-16 shrink-0 text-left group"><span class="text-[11px] text-gray-400">规则</span><span class="text-xs text-blue-600 group-hover:underline flex items-center gap-0.5">1 条 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-3 w-3"><path d="m9 18 6-6-6-6"></path></svg></span></button><div class="flex items-center gap-1.5 shrink-0"><span class="text-xs hidden sm:inline text-amber-600">观察</span><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button></div><div class="flex items-center shrink-0"><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 h-8 w-8" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text h-3.5 w-3.5"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg></button><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 h-8 w-8" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-pen h-3.5 w-3.5"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg></button><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 size-9 h-8 w-8 text-red-500 hover:text-red-600" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 h-3.5 w-3.5"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></div></div></div></div></div></div>
+</div>
+  <div class="note">上方为从 demo 提取的对象列表真实 DOM（160 节点）。行内「观察/检测」Switch 可点击（切换走二次确认弹窗，此处仅视觉）；FileText/编辑/删除 图标分别打开日志/编辑抽屉/删除确认（深层，见 Q-004）。</div>
+
+  <figure class="screenshot-figure"><img src="./screenshots/displayname-tab-default.png" alt="发信人名称仿冒页签"><figcaption>保护对象列表（浏览器实际渲染）</figcaption></figure>
+
+  <h4>UI 元素清单</h4>
+  <table class="spec-table">
+    <thead><tr><th>序号</th><th>元素</th><th>文案/字段</th><th>默认</th><th>交互</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>标题+描述</td><td>保护对象 / 每个对象独立维护观察模式、基线、阈值与绑定规则</td><td>-</td><td>纯展示</td></tr>
+      <tr><td>2</td><td>Button</td><td>+ 添加保护对象</td><td>-</td><td>打开两步向导（80vw，Q-004）</td></tr>
+      <tr><td>3</td><td>Button</td><td>批量操作（N）</td><td>选中>0 时显示</td><td>打开批量弹窗</td></tr>
+      <tr><td>4</td><td>Input(搜索)</td><td>按姓名、邮箱、岗位搜索</td><td>空</td><td>过滤</td></tr>
+      <tr><td>5</td><td>Select(等级)</td><td>全部等级/高保护/中保护/低保护</td><td>全部等级</td><td>levelFilter</td></tr>
+      <tr><td>6</td><td>Select(观察)</td><td>全部状态/观察中/检测中</td><td>全部状态</td><td>observeFilter</td></tr>
+      <tr><td>7</td><td>全选</td><td>全选当前列表</td><td>-</td><td>selectedIds</td></tr>
+      <tr><td>8</td><td>对象卡</td><td>姓名+等级徽章(+自定义)+岗位·邮箱 / 基线 / 今日命中·隔·标 / 规则N条 / 观察检测Switch</td><td>-</td><td>规则点击打开绑定规则抽屉</td></tr>
+      <tr><td>9</td><td>行操作</td><td>日志(FileText)/编辑(Pencil)/删除(Trash 红)</td><td>-</td><td>打开对应抽屉/弹窗</td></tr>
+      <tr><td>10</td><td>空态</td><td>暂无保护对象 + 引导「引擎需至少 1 个对象才能启用」</td><td>objects=0 时</td><td>纯展示</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果</h5>
+    <table>
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>面板根节点</td><td>div[role=tabpanel][data-state=active].space-y-6</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        <tr><td>节点总数</td><td>160</td><td>160</td><td class="dom-pass">✅</td></tr>
+        <tr><td>对象卡数量</td><td>3（张三/李四/王五）</td><td>3</td><td class="dom-pass">✅</td></tr>
+        <tr><td>王五观察态</td><td>虚线琥珀边框 + 学习中 3/7 + 观察 Switch on</td><td>一致</td><td class="dom-pass">✅</td></tr>
+        <tr><td>李四自定义徽章</td><td>「自定义」badge 存在</td><td>存在</td><td class="dom-pass">✅</td></tr>
+        <tr><td>添加保护对象按钮</td><td>存在</td><td>存在</td><td class="dom-pass">✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#component-2-4">← 返回主文件</a>
+  <a href="./layer-2-logs-tab.html">检测总览 →</a>
+</nav>
+
+<script>
+// 让内嵌的 demo 组件预览产生与 demo 一致的最小交互反馈
+(function () {
+  function within(el, role){ return el.closest('[role="'+role+'"]'); }
+  document.querySelectorAll('.component-preview').forEach(function (scope) {
+    // 页签切换：切换 aria-selected / data-state
+    scope.addEventListener('click', function (e) {
+      var tab = e.target.closest('[role="tab"]');
+      if (tab) {
+        scope.querySelectorAll('[role="tab"]').forEach(function (t) {
+          t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+          t.setAttribute('data-state', t === tab ? 'active' : 'inactive');
+        });
+      }
+      // Radio 单选：radix RadioGroupItem 是 button[role=radio]
+      var radio = e.target.closest('[role="radio"]');
+      if (radio) {
+        var group = radio.closest('[role="radiogroup"]') || scope;
+        group.querySelectorAll('[role="radio"]').forEach(function (r) {
+          r.setAttribute('data-state', r === radio ? 'checked' : 'unchecked');
+          r.setAttribute('aria-checked', r === radio ? 'true' : 'false');
+        });
+      }
+      // Switch 开关
+      var sw = e.target.closest('[role="switch"]');
+      if (sw) {
+        var on = sw.getAttribute('data-state') === 'checked';
+        sw.setAttribute('data-state', on ? 'unchecked' : 'checked');
+        sw.setAttribute('aria-checked', on ? 'false' : 'true');
+      }
+      // 手风琴展开（详情抽屉里的仿冒信号）
+      var acc = e.target.closest('[aria-expanded]');
+      if (acc && !tab) {
+        var exp = acc.getAttribute('aria-expanded') === 'true';
+        acc.setAttribute('aria-expanded', exp ? 'false' : 'true');
+      }
+      // 关闭类按钮：隐藏所在弹窗/抽屉
+      var btn = e.target.closest('button');
+      if (btn) {
+        var label = (btn.innerText || btn.textContent || '').trim();
+        if (['取消','关闭','确认删除','确认关闭','放弃'].indexOf(label) >= 0) {
+          var dlg = within(btn, 'dialog') || within(btn, 'alertdialog');
+          if (dlg) dlg.style.display = 'none';
+        }
+      }
+    });
+  });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>try{mermaid.initialize({startOnLoad:true,theme:"default"});}catch(e){}</script>
+
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 6：标记文案空值 onBlur 回填 + Pipeline Tooltip 解耦 - 意图引擎</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --sub:#6b7280; --blue:#1677ff; --amber:#d97706; --green:#16a34a; --radius:.625rem; }
+    *{box-sizing:border-box}
+    body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:#111827;line-height:1.6;font-family:"Geist","Inter",system-ui,sans-serif}
+    a{color:var(--blue);text-decoration:none}
+    nav.layer-nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+    h1{margin:0 0 16px;color:var(--primary);font-size:26px}
+    h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px}
+    h4{margin:16px 0 8px;color:#374151;font-size:15px}
+    .meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+    .meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}
+    .meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}
+    .meta-table td:first-child{width:160px}
+    .component-preview{margin:12px 0;padding:18px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}
+    .screenshot-figure{margin:14px 0;text-align:center}
+    .screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}
+    .screenshot-figure figcaption{margin-top:8px;color:var(--sub);font-size:13px}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}
+    .is-hidden{display:none!important}
+    .new-badge{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:700}
+    .diff-section{border-left:4px solid var(--green);background:#f0fdf4;border:1px solid #bbf7d0;padding:16px;border-radius:8px;margin:12px 0}
+    .step-note{margin:8px 0;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;font-size:13px;color:#4b5563}
+
+    /* 预览控件：标记文案输入区 */
+    .preview-mark-config{background:#fff;border:1px solid #dbeafe;border-radius:10px;padding:16px 18px;max-width:660px}
+    .preview-mark-config .section-title{font-size:13px;font-weight:700;color:#1d4ed8;margin-bottom:12px}
+    .preview-row{display:flex;align-items:center;gap:8px;margin:8px 0;flex-wrap:wrap}
+    .preview-label{font-size:13px;color:#374151;font-weight:600}
+    .preview-input{height:32px;padding:0 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;font-family:inherit;background:#fff;width:128px}
+    .preview-input:focus{outline:2px solid #2563eb;border-color:#2563eb}
+    .preview-input.empty{border-color:#f59e0b}
+    .preview-checkbox{width:16px;height:16px;accent-color:#2563eb;cursor:pointer}
+    .preview-radio{width:16px;height:16px;accent-color:#2563eb;cursor:pointer}
+    .radio-group{display:flex;align-items:center;gap:10px;font-size:13px}
+    .feedback-bar{margin-top:10px;padding:6px 12px;border-radius:6px;font-size:13px;font-weight:600}
+    .feedback-bar.ok{background:#dcfce7;color:#15803d}
+    .feedback-bar.warn{background:#fef3c7;color:#b45309}
+    .feedback-bar.hidden{display:none}
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="index.html#component-2-2">← 返回主文件</a>
+    &nbsp;·&nbsp;
+    <a href="layer-5-copy-save-state.html">← 层级5：复制/保存状态</a>
+    &nbsp;·&nbsp;
+    层级 6 / 6（新增项）
+  </nav>
+
+  <header class="spec-header">
+    <h1>
+      交互层级 6：标记文案空值 onBlur 默认回填
+      <span class="new-badge">已修复 D-11</span>
+      &nbsp;+&nbsp; Pipeline Tooltip effectKey 解耦
+      <span class="new-badge">已修复 D-08</span>
+    </h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>
+        <b>D-11</b>：意图分类卡片 → 标记投递子配置（<code>MarkDeliverSubConfig</code>），源文件 <code>intent-engine-module.tsx</code><br>
+        <b>D-08</b>：策略执行流程图卡片 Tooltip（<code>getPolicyTooltipContent()</code>），源文件 <code>strategy-pipeline-page.tsx</code> + <code>contexts/language-context.tsx</code>
+      </td></tr>
+      <tr><td>主文件</td><td><a href="index.html">filter-rules-pipeline-intent-engine/index.html</a></td></tr>
+      <tr><td>触发路径（D-11）</td>
+        <td>层级1 分类卡片展开 → 处置动作选「标记投递」→ 标记投递配置展开 → 用户清空「主题标记」或「正文标记」输入框 → 输入框失焦（Tab / 点击其他区域）→ 输入框自动回填默认文案 <code>[意图类型名]</code></td></tr>
+      <tr><td>触发路径（D-08）</td>
+        <td>策略执行流程图（<code>/filter-rules/pipeline</code>）→ hover 意图引擎卡片 → Tooltip 显示专属 effectKey 文案，无「黑名单」误用</td></tr>
+      <tr><td>规格版本</td><td>v3（2026-07-17）· demo 源 commit <code>5d17c2e</code>（intent-engine-module.tsx）/ <code>b75c3cc</code>（language-context.tsx）</td></tr>
+      <tr><td>浏览器验证</td><td>
+        2026-07-17，headless Chromium，viewport 1405×936。<br>
+        <b>D-11</b>：<code>/filter-rules/content</code> 意图引擎 → 展开「订阅」卡片 → 主题标记输入框初始值 <code>[订阅]</code>（截图 v3-mark-label-subconfig.png）→ fill 清空 → placeholder 显示 <code>[订阅]</code>（截图 v3-mark-label-cleared.png）→ Tab 失焦 → 自动回填 <code>[订阅]</code>（截图 v3-mark-label-fallback.png）。<br>
+        <b>D-08</b>：<code>/filter-rules/pipeline</code> → hover 意图引擎卡片 → Tooltip 显示「按分段阈值配置…」+「按意图分类得分与分段阈值区间…」（截图 v3-pipeline-tooltip-intent.png）。<br>
+        另外截图 v3-outbound-direction.png：外发方向默认区间无「标记投递」动作（downgradeAction 生效）。
+      </td></tr>
+    </table>
+  </header>
+
+  <!-- =============== 层级 0（初始态）：标记文案有值 =============== -->
+  <section>
+    <h2><span class="layer-badge">A</span>状态 A：标记文案初始态（有值）</h2>
+    <p class="step-note">触发路径：层级1 展开「订阅」分类卡片 → 处置动作为「标记投递」→ 标记投递配置区自动展开，主题标记输入框显示 <code>[订阅]</code>（意图类型默认文案）。</p>
+
+    <figure class="screenshot-figure">
+      <img src="./screenshots/v3-mark-label-subconfig.png" alt="标记文案初始态截图">
+      <figcaption>状态 A：标记文案子配置展开，主题标记输入框值为 [订阅]，正文标记未勾选</figcaption>
+    </figure>
+
+    <h4>可交互预览（复刻 demo 初始态）</h4>
+    <div class="component-preview">
+      <div class="preview-mark-config">
+        <div class="section-title">标记投递配置</div>
+        <div class="preview-row">
+          <span class="preview-label">投递目标</span>
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:13px"><input type="radio" name="dest-a" class="preview-radio"> 收件箱（仅标记）</label>
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:13px"><input type="radio" name="dest-a" class="preview-radio" checked> 垃圾邮件文件夹</label>
+        </div>
+        <div class="preview-row">
+          <input type="checkbox" class="preview-checkbox" id="subj-check-a" checked>
+          <label for="subj-check-a" class="preview-label">主题标记</label>
+          <input type="text" id="subj-input-a" class="preview-input" value="[订阅]" maxlength="20"
+            placeholder="[订阅]"
+            oninput="document.getElementById('subj-input-a').classList.toggle('empty', !this.value.trim())"
+            onblur="if(!this.value.trim()){ this.value='[订阅]'; this.classList.remove('empty'); }">
+          <span class="radio-group">
+            <label style="display:inline-flex;align-items:center;gap:4px"><input type="radio" name="pos-a" class="preview-radio" checked> 前缀</label>
+            <label style="display:inline-flex;align-items:center;gap:4px"><input type="radio" name="pos-a" class="preview-radio"> 后缀</label>
+          </span>
+        </div>
+        <div class="preview-row">
+          <input type="checkbox" class="preview-checkbox" id="body-check-a">
+          <label for="body-check-a" class="preview-label">正文标记</label>
+          <input type="text" id="body-input-a" class="preview-input" style="opacity:0.4" value="" maxlength="20"
+            placeholder="[订阅]" disabled>
+        </div>
+        <div class="feedback-bar hidden" id="feedback-a">文案已回填为默认值 [订阅]</div>
+      </div>
+      <p style="font-size:12px;color:#9ca3af;margin:8px 0 0">操作提示：清空主题标记输入框，然后点击其他位置（失焦），观察自动回填效果。</p>
+    </div>
+
+    <h4>UI 元素清单（状态 A）</h4>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>类型</th><th>文案 / 值</th><th>状态</th><th>行为说明</th><th>形态/角色差异</th></tr></thead>
+      <tbody>
+        <tr><td>投递目标</td><td>radio group</td><td>收件箱（仅标记）/ 垃圾邮件文件夹</td><td>默认选中「垃圾邮件文件夹」</td><td>切换投递目标文件夹</td><td>[Base]</td></tr>
+        <tr><td>主题标记 checkbox</td><td>checkbox</td><td>主题标记</td><td>默认勾选</td><td>勾选时显示主题标记输入框与前/后缀选项</td><td>[Base]</td></tr>
+        <tr><td>主题标记输入框</td><td>input[type=text]</td><td>初始值 <code>[意图类型名]</code>，如 <code>[订阅]</code></td><td>可编辑，maxLength=20</td><td>用户输入自定义文案；失焦时若值为空则回填默认值</td><td>[Base]</td></tr>
+        <tr><td>主题标记 placeholder</td><td>input placeholder</td><td><code>[意图类型名]</code></td><td>仅在值为空时显示</td><td>给用户提示默认回填文案</td><td>[Base]</td></tr>
+        <tr><td>前/后缀 radio</td><td>radio group</td><td>前缀 / 后缀</td><td>默认选「前缀」</td><td>控制标记文案插入位置</td><td>[Base]</td></tr>
+        <tr><td>正文标记 checkbox</td><td>checkbox</td><td>正文标记</td><td>默认未勾选</td><td>勾选时显示正文标记输入框</td><td>[Base]</td></tr>
+      </tbody>
+    </table>
+
+    <h4>DOM 树比对结果（状态 A）</h4>
+    <div class="dom-comparison" style="overflow:auto">
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM（accessibility snapshot）</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>主题标记 textbox</td><td><code>textbox "[订阅]"</code> ref=e50</td><td><code>input value="[订阅]" placeholder="[订阅]"</code></td><td>&#x2705;</td></tr>
+          <tr><td>正文标记 checkbox</td><td><code>checkbox "正文标记" checked=false</code> ref=e52</td><td><code>input[type=checkbox] unchecked</code></td><td>&#x2705;</td></tr>
+          <tr><td>主题标记 checkbox</td><td><code>checkbox "主题标记" checked=true</code> ref=e49</td><td><code>input[type=checkbox] checked</code></td><td>&#x2705;</td></tr>
+          <tr><td>前/后缀 radiogroup</td><td><code>radiogroup "前缀后缀"</code> ref=e51，默认前缀 checked</td><td>radio group，默认前缀 checked</td><td>&#x2705;</td></tr>
+          <tr><td>投递目标 radiogroup</td><td><code>radiogroup "收件箱（仅标记）垃圾邮件文件夹"</code> ref=e48，垃圾邮件文件夹 checked</td><td>radio group，垃圾邮件文件夹 checked</td><td>&#x2705;</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =============== 状态 B：清空态 =============== -->
+  <section>
+    <h2><span class="layer-badge">B</span>状态 B：用户清空标记文案（输入框为空）</h2>
+    <p class="step-note">触发路径：状态 A → 用户选中主题标记输入框，删除全部内容（值变为空字符串）。此时 onChange 实时写入空值，placeholder <code>[订阅]</code> 浮现，输入框边框变为琥珀色警示。</p>
+
+    <figure class="screenshot-figure">
+      <img src="./screenshots/v3-mark-label-cleared.png" alt="标记文案清空态截图">
+      <figcaption>状态 B：用户清空输入框，placeholder 显示 [订阅]，输入框获焦中</figcaption>
+    </figure>
+
+    <h4>关键行为说明</h4>
+    <ul style="font-size:14px;line-height:1.8">
+      <li>onChange 实时将空字符串写入 <code>config.subjectMark.text</code>（React state）。</li>
+      <li>placeholder 属性值为 <code>defaultText</code>（即 <code>[订阅]</code>），此时浮现，提示用户默认文案。</li>
+      <li>onBlur 尚未触发，回填未发生；若此时保存，写入的是空字符串（会导致标记文案为空）。</li>
+      <li>这就是本修复针对的空值写入问题。</li>
+    </ul>
+
+    <h4>UI 元素清单（状态 B）</h4>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>值</th><th>状态变化</th><th>onBlur 时机</th></tr></thead>
+      <tbody>
+        <tr><td>主题标记输入框</td><td>空字符串 <code>""</code></td><td>获焦中，显示 placeholder <code>[订阅]</code></td><td>尚未失焦，回填未触发</td></tr>
+        <tr><td>React state subjectMark.text</td><td><code>""</code>（空）</td><td>onChange 已写入</td><td>onBlur 后将回填</td></tr>
+      </tbody>
+    </table>
+
+    <h4>DOM 树比对结果（状态 B）</h4>
+    <div class="dom-comparison" style="overflow:auto">
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>textbox 值</td><td>空字符串，placeholder "[订阅]" 可见</td><td>value="" placeholder="[订阅]"</td><td>&#x2705;</td></tr>
+          <tr><td>输入框获焦</td><td>输入框 :focus 态，蓝色轮廓</td><td>:focus CSS 已内联</td><td>&#x2705;</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =============== 状态 C：onBlur 回填态 =============== -->
+  <section>
+    <h2><span class="layer-badge">C</span>状态 C：onBlur 触发，空值自动回填为 <code>[订阅]</code></h2>
+    <p class="step-note">触发路径：状态 B → 用户按 Tab 或点击其他区域，主题标记输入框失焦 → onBlur 检测到 <code>value.trim() === ""</code> → 调用 <code>onChange({ ...config, subjectMark: { ...config.subjectMark, text: "[订阅]" } })</code> → 输入框值恢复为 <code>[订阅]</code>。</p>
+
+    <figure class="screenshot-figure">
+      <img src="./screenshots/v3-mark-label-fallback.png" alt="标记文案回填态截图">
+      <figcaption>状态 C：失焦后输入框自动回填为 [订阅]，与初始态一致</figcaption>
+    </figure>
+
+    <h4>可交互预览（复刻 onBlur 回填态）</h4>
+    <div class="component-preview">
+      <div class="preview-mark-config">
+        <div class="section-title">标记投递配置</div>
+        <div class="preview-row">
+          <span class="preview-label">投递目标</span>
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:13px"><input type="radio" name="dest-c" class="preview-radio"> 收件箱（仅标记）</label>
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:13px"><input type="radio" name="dest-c" class="preview-radio" checked> 垃圾邮件文件夹</label>
+        </div>
+        <div class="preview-row">
+          <input type="checkbox" class="preview-checkbox" id="subj-check-c" checked>
+          <label for="subj-check-c" class="preview-label">主题标记</label>
+          <input type="text" id="subj-input-c" class="preview-input" value="[订阅]" maxlength="20"
+            placeholder="[订阅]"
+            oninput="
+              this.classList.toggle('empty', !this.value.trim());
+              document.getElementById('feedback-c').classList.add('hidden');
+            "
+            onblur="
+              if(!this.value.trim()){
+                this.value='[订阅]';
+                this.classList.remove('empty');
+                var fb = document.getElementById('feedback-c');
+                fb.classList.remove('hidden');
+                setTimeout(function(){ fb.classList.add('hidden'); }, 3000);
+              }
+            ">
+          <span class="radio-group">
+            <label style="display:inline-flex;align-items:center;gap:4px"><input type="radio" name="pos-c" class="preview-radio" checked> 前缀</label>
+            <label style="display:inline-flex;align-items:center;gap:4px"><input type="radio" name="pos-c" class="preview-radio"> 后缀</label>
+          </span>
+        </div>
+        <div class="preview-row">
+          <input type="checkbox" class="preview-checkbox" id="body-check-c">
+          <label for="body-check-c" class="preview-label" id="body-label-c" style="opacity:0.5">正文标记</label>
+          <input type="text" id="body-input-c" class="preview-input" style="opacity:0.4" value="" maxlength="20"
+            placeholder="[订阅]" disabled>
+        </div>
+        <script>
+          document.getElementById('body-check-c').addEventListener('change', function(){
+            var inp = document.getElementById('body-input-c');
+            var lbl = document.getElementById('body-label-c');
+            inp.disabled = !this.checked;
+            inp.style.opacity = this.checked ? '1' : '0.4';
+            lbl.style.opacity = this.checked ? '1' : '0.5';
+            if(this.checked && !inp.value.trim()) inp.value = '[订阅]';
+          });
+          document.getElementById('body-input-c').addEventListener('blur', function(){
+            if(!this.value.trim() && !this.disabled) this.value = '[订阅]';
+          });
+        </script>
+        <div class="feedback-bar ok hidden" id="feedback-c">标记文案已自动回填为默认值 [订阅]（onBlur 触发）</div>
+      </div>
+      <p style="font-size:12px;color:#9ca3af;margin:8px 0 0">操作提示：清空主题标记输入框后点击其他区域，观察「绿色提示条 + 输入框回填」。</p>
+    </div>
+
+    <h4>UI 元素清单（状态 C）</h4>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>值（回填后）</th><th>触发逻辑</th><th>对应源码</th></tr></thead>
+      <tbody>
+        <tr><td>主题标记输入框</td><td><code>[订阅]</code>（回填）</td><td>onBlur: <code>if (!value.trim()) onChange({ ...config, subjectMark: { ...config.subjectMark, text: defaultText } })</code></td><td><code>intent-engine-module.tsx</code> MarkDeliverSubConfig L497–501</td></tr>
+        <tr><td>正文标记输入框</td><td><code>[订阅]</code>（如已勾选且清空）</td><td>onBlur: 同上，作用于 <code>config.bodyMark.text</code></td><td><code>intent-engine-module.tsx</code> MarkDeliverSubConfig L548–552</td></tr>
+        <tr><td>defaultText prop</td><td><code>[${INTENT_METADATA[intentType].labelZh}]</code></td><td>由 IntentCard 调用处传入，格式固定为 <code>[意图类型中文名]</code></td><td><code>intent-engine-module.tsx</code> IntentCard L968</td></tr>
+        <tr><td>placeholder 属性</td><td>同 <code>defaultText</code></td><td>空值时浮现，为用户提示回填文案</td><td>同 L504 / L555</td></tr>
+      </tbody>
+    </table>
+
+    <h4>DOM 树比对结果（状态 C）</h4>
+    <div class="dom-comparison" style="overflow:auto">
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM（Tab 失焦后）</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>textbox 值（失焦后）</td><td><code>textbox "[订阅]"</code>（回填）</td><td><code>value="[订阅]"</code></td><td>&#x2705;</td></tr>
+          <tr><td>placeholder</td><td>文本框 placeholder="[订阅]"</td><td>placeholder="[订阅]"</td><td>&#x2705;</td></tr>
+          <tr><td>React state 写回</td><td>onChange 被 onBlur 调用，state 更新为 "[订阅]"</td><td>内联 onblur 脚本模拟</td><td>&#x2705; 行为一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =============== 正文标记联动说明 =============== -->
+  <section>
+    <h2>正文标记勾选时的联动回填</h2>
+    <p style="font-size:14px;line-height:1.8">正文标记 checkbox 初始未勾选，输入框禁用（<code>disabled</code>）。勾选后：</p>
+    <ul style="font-size:14px;line-height:1.8">
+      <li>输入框变为可编辑，初始值来自 <code>config.bodyMark.text</code>（由 <code>createDefaultMarkDeliverConfig</code> 初始化为 <code>[意图类型名]</code>）。</li>
+      <li>与主题标记同理，若用户清空后失焦，onBlur 回填 <code>defaultText</code>。</li>
+      <li>正文标记 placeholder 同样为 <code>defaultText</code>，空值时浮现。</li>
+    </ul>
+
+    <h4>UI 元素清单（正文标记勾选后）</h4>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>类型</th><th>初始值</th><th>onBlur 行为</th></tr></thead>
+      <tbody>
+        <tr><td>正文标记 checkbox</td><td>checkbox</td><td>未勾选</td><td>无</td></tr>
+        <tr><td>正文标记输入框（勾选后）</td><td>input[text]，disabled → enabled</td><td><code>[意图类型名]</code></td><td>空值时回填 <code>defaultText</code></td></tr>
+        <tr><td>正文标记 placeholder</td><td>input placeholder</td><td><code>[意图类型名]</code></td><td>—</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- =============== 关联影响：Pipeline Tooltip effectKey 解耦 =============== -->
+  <section>
+    <h2>关联变更：Pipeline Tooltip — effectKey 解耦（方案C）</h2>
+    <p style="font-size:14px;line-height:1.8">
+      本次 v3 同步落地方案C：<code>PipelinePolicy</code> 接口新增 <code>actionKeys</code>、<code>effectKey</code> 字段，每条策略在数据定义处独立填写专属 i18n key，
+      <code>getPolicyTooltipContent()</code> 改为直接读取这两个字段，删除了原来按 <code>type</code> 分支共用文案的逻辑。
+    </p>
+    <p style="font-size:14px;line-height:1.8">
+      以「意图引擎」为例，原 tooltip 误用「黑名单命中则阻断并终止流程」（与 IP/RBL 等黑名单策略共用的 <code>policyEffectBlock</code> key）；
+      修复后使用专属 key <code>pipeline.effect.intentEngine</code>，文案为「按意图分类得分与分段阈值区间执行对应动作；命中高危区间默认阻断并终止流程」。
+    </p>
+
+    <figure class="screenshot-figure">
+      <img src="./screenshots/v3-pipeline-tooltip-intent.png" alt="意图引擎 Pipeline Tooltip 截图">
+      <figcaption>意图引擎 Pipeline Tooltip（v3）：动作与影响文案已解耦，无「黑名单」误用文案</figcaption>
+    </figure>
+
+    <h4>Tooltip 元素清单（意图引擎）</h4>
+    <table class="spec-table">
+      <thead><tr><th>字段</th><th>v2 文案（误用共用 key）</th><th>v3 文案（专属 effectKey）</th><th>来源 key</th></tr></thead>
+      <tbody>
+        <tr><td>策略名</td><td>意图引擎</td><td>意图引擎</td><td>pipeline.intentEngine</td></tr>
+        <tr><td>动作</td><td>（无独立动作 key）</td><td>按分段阈值配置（标记投递 / 隔离 / 审核 / 阻断 / 丢弃）</td><td>pipeline.action.intentEngine</td></tr>
+        <tr><td>影响</td><td>黑名单命中则阻断并终止流程（❌ 误用）</td><td>按意图分类得分与分段阈值区间执行对应动作；命中高危区间默认阻断并终止流程</td><td>pipeline.effect.intentEngine</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- =============== D-08：Pipeline Tooltip 解耦 =============== -->
+  <section>
+    <h2>关联变更：Pipeline Tooltip effectKey 解耦（方案C，已修复 D-08）</h2>
+
+    <h4>问题与修复对照</h4>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>修复前（v1/v2 · 差异 D-08）</th><th>修复后（v3 · 方案C）</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Tooltip 影响文案</td>
+          <td>「黑名单命中则阻断并终止流程」（<code>pipeline.policyEffectBlock</code>，所有 forced/blocking 类型共用，语义错误）</td>
+          <td>「按意图分类得分与分段阈值区间执行对应动作；命中高危区间默认阻断并终止流程」（<code>pipeline.effect.intentEngine</code>，专属 key）</td>
+        </tr>
+        <tr>
+          <td>Tooltip 动作文案</td>
+          <td>「阻断」（固定写死）</td>
+          <td>「按分段阈值配置（标记投递 / 隔离 / 审核 / 阻断 / 丢弃）」（<code>pipeline.action.intentEngine</code>，专属 key）</td>
+        </tr>
+        <tr>
+          <td>文案耦合方式</td>
+          <td><code>getPolicyTooltipContent()</code> 按 <code>policy.type</code> 分支，所有 forced 类型共用一套文案</td>
+          <td><code>PipelinePolicy</code> 新增 <code>actionKeys?: string[]</code> / <code>effectKey?: string</code> 字段；函数直接读字段，删除 type 分支逻辑；zh/en 各新增 38 个专属 i18n key</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>截图：修复后 Tooltip（hover 意图引擎卡片）</h4>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/v3-pipeline-tooltip-intent.png" alt="意图引擎 Pipeline Tooltip 修复后截图">
+      <figcaption>hover 意图引擎卡片：动作显示「按分段阈值配置…」，影响文案无「黑名单」字样，与意图引擎实际行为准确对应</figcaption>
+    </figure>
+
+    <h4>截图：外发方向默认区间无「标记投递」</h4>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/v3-outbound-direction.png" alt="外发方向默认阈值区间截图">
+      <figcaption>外发方向打开后，分段阈值默认区间中「标记投递」已被 downgradeAction 替换为「隔离」，无「标记投递」出现在非接收方向默认配置中</figcaption>
+    </figure>
+
+    <h4>可交互预览（Tooltip 修复前后对比）</h4>
+    <p class="step-note">将鼠标悬停到下方卡片上，查看修复前后 Tooltip 文案差异。</p>
+    <div class="component-preview" style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start">
+      <div>
+        <p style="font-size:12px;color:#dc2626;font-weight:600;margin:0 0 8px">修复前 — 误用「黑名单」文案</p>
+        <div style="position:relative;display:inline-block">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:#fff;border:1px solid #fca5a5;border-radius:8px;min-width:260px;cursor:default">
+            <span style="font-size:14px;font-weight:600">意图引擎</span>
+            <span style="padding:2px 8px;border-radius:999px;background:#ede9fe;color:#7c3aed;font-size:11px;font-weight:700">强制</span>
+            <span style="color:#1677ff;font-size:13px">配置 →</span>
+          </div>
+          <div style="position:absolute;bottom:calc(100% + 8px);left:0;width:340px;background:#111827;color:#f3f4f6;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.7;z-index:10;box-shadow:0 4px 20px rgba(0,0,0,.4)">
+            <div style="font-size:11px;color:#9ca3af">策略</div><div style="font-weight:600;margin-bottom:4px">意图引擎</div>
+            <div style="font-size:11px;color:#9ca3af">动作</div><div style="font-weight:600;color:#f87171;margin-bottom:4px">阻断</div>
+            <div style="font-size:11px;color:#9ca3af">影响</div><div style="color:#fca5a5">黑名单命中则阻断并终止流程</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:80px">
+        <p style="font-size:12px;color:#16a34a;font-weight:600;margin:0 0 8px">修复后 — 专属 effectKey 文案</p>
+        <div style="position:relative;display:inline-block">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:#fff;border:1px solid #bbf7d0;border-radius:8px;min-width:260px;cursor:default">
+            <span style="font-size:14px;font-weight:600">意图引擎</span>
+            <span style="padding:2px 8px;border-radius:999px;background:#ede9fe;color:#7c3aed;font-size:11px;font-weight:700">强制</span>
+            <span style="color:#1677ff;font-size:13px">配置 →</span>
+          </div>
+          <div style="position:absolute;bottom:calc(100% + 8px);left:0;width:380px;background:#111827;color:#f3f4f6;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.7;z-index:10;box-shadow:0 4px 20px rgba(0,0,0,.4)">
+            <div style="font-size:11px;color:#9ca3af">策略</div><div style="font-weight:600;margin-bottom:4px">意图引擎</div>
+            <div style="font-size:11px;color:#9ca3af">动作</div><div style="font-weight:600;color:#34d399;margin-bottom:4px">按分段阈值配置（标记投递 / 隔离 / 审核 / 阻断 / 丢弃）</div>
+            <div style="font-size:11px;color:#9ca3af">影响</div><div style="color:#f3f4f6">按意图分类得分与分段阈值区间执行对应动作；命中高危区间默认阻断并终止流程</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h4>DOM 树比对结果（D-08 Tooltip）</h4>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM（agent-browser 快照）</th><th>预览 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>策略名</td><td>「意图引擎」</td><td>修复后卡片 Tooltip 策略行「意图引擎」</td><td>&#x2705;</td></tr>
+        <tr><td>动作文案</td><td>「按分段阈值配置（标记投递 / 隔离 / 审核 / 阻断 / 丢弃）」</td><td>绿色动作行同文案</td><td>&#x2705;</td></tr>
+        <tr><td>影响文案</td><td>「按意图分类得分与分段阈值区间执行对应动作；命中高危区间默认阻断并终止流程」</td><td>影响行同文案</td><td>&#x2705;</td></tr>
+        <tr><td>「黑名单」字样</td><td>不出现（demo 快照已验证）</td><td>修复后卡片无「黑名单」</td><td>&#x2705;</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- =============== 本层差异汇总 =============== -->
+  <section style="border-left:4px solid #16a34a;background:#f0fdf4">
+    <h2>本层差异汇总（v3 修复项）</h2>
+    <table class="spec-table">
+      <thead><tr><th>ID</th><th>问题</th><th>修复前行为</th><th>修复后行为</th><th>源码位置</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>D-11</b> <span class="new-badge">已修复</span></td>
+          <td>标记文案空值：用户清空主题标记/正文标记后失焦，写入空字符串，后续保存标记文案为空</td>
+          <td>无回填逻辑；onChange 即时写入 <code>""</code>；placeholder 固定为「标记文案」无法预示默认值</td>
+          <td>onBlur 检测 <code>value.trim() === ""</code>，回调 onChange 写入 <code>defaultText</code>（<code>[意图类型名]</code>）；placeholder 同步改为 defaultText</td>
+          <td><code>intent-engine-module.tsx</code> MarkDeliverSubConfig</td>
+        </tr>
+        <tr>
+          <td><b>D-08</b> <span class="new-badge">已修复</span></td>
+          <td>Pipeline Tooltip 文案误用：意图引擎卡片 hover 影响文案显示「黑名单命中则阻断」，与策略实际行为不符</td>
+          <td>getPolicyTooltipContent() 按 type="forced" 返回共用 policyEffectBlock 文案</td>
+          <td>方案C：PipelinePolicy 新增 actionKeys/effectKey 字段；函数直接读字段；意图引擎使用专属 key pipeline.effect.intentEngine 文案</td>
+          <td><code>strategy-pipeline-page.tsx</code> + <code>contexts/language-context.tsx</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</body>
+</html>

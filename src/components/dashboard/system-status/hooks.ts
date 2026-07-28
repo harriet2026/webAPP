@@ -113,12 +113,34 @@ export interface SystemStatusAlertItem {
   id: string;
   level: SystemStatusAlertLevel;
   scope: SystemStatusAlertScope;
-  kind: 'monitor' | 'node_offline' | 'pending_disposal' | 'pending_report' | 'agent_pending';
+  kind:
+    | 'monitor'
+    | 'node_offline'
+    | 'pending_disposal'
+    | 'pending_report'
+    | 'agent_pending'
+    | 'license_expiry'
+    | 'rule_lib';
   href: string;
   count?: number;
   node?: NodeInfo;
   alert?: AlertEvent;
   agent?: 'phishing' | 'spoofing' | 'threat-retro';
+  // GT-12553: license_expiry / rule_lib 平台待办的展示字段
+  days?: number;
+  ruleVersion?: string;
+  ruleLatest?: boolean;
+}
+
+// GT-12553: GET /system/health-summary 的形状（与 system-health-card.tsx 及
+// mock/fixtures.ts mockSystemHealthSummary 同契约；后端聚合接口由 GT-12346
+// 落地，未上线时该接口 404，对应待办项整体缺席）。
+export interface SystemHealthSummary {
+  license_days: number | null;
+  rule_version: string | null;
+  rule_latest: boolean;
+  av_vendor: string | null;
+  av_expire: string | null;
 }
 
 // Agent stats fields are FIXED per the plan's Global Constraints — the three
@@ -144,6 +166,9 @@ export interface SystemStatusData {
   pendingReport: number;
   nodesOnline: number;
   nodesTotal: number;
+  // GT-12549: /monitor/nodes 数据源降级（TSDB 不可用/指标未初始化）时为 true，
+  // KPI 与健康卡据此展示"数据源不可用"，不得把降级伪装成有效的 0/0。
+  nodesDegraded: boolean;
   // 威胁态势趋势 series (security-overview threat_type trend), aligned to the
   // demo's 5-class stacked threat chart. See threat-trend-config.ts.
   threatTrend: TrendSeriesPoint[];
@@ -295,7 +320,11 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
 
   let nodesOnline = 0;
   let nodesTotal = 0;
+  let nodesDegraded = false;
   const platformAlerts: SystemStatusAlertItem[] = [];
+  // GT-12553: 许可证/规则库两项在 demo（a4/a5）位于列表尾部，单独收集后
+  // 追加在 tenant 项之后，保持相对顺序与原型一致。
+  const platformTailAlerts: SystemStatusAlertItem[] = [];
 
   if (isPlatform) {
     // Tenant viewers must NEVER reach this branch — /monitor/* is adminOnly
@@ -310,6 +339,7 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
     ]);
     nodesTotal = nodesResp.items.length;
     nodesOnline = nodesResp.items.filter((n) => n.online).length;
+    nodesDegraded = !!nodesResp.degraded;
     for (const n of nodesResp.items) {
       if (!n.online) {
         platformAlerts.push({
@@ -331,6 +361,42 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
         href: '/monitoring/alerts',
         alert: a,
       });
+    }
+
+    // GT-12553: 许可证/规则库平台待办，数据源为健康聚合接口（GT-12346）。
+    // 接口未上线（404）时按"无该类待办"处理，其余错误如实抛出（不吞 500）。
+    let health: SystemHealthSummary | null = null;
+    try {
+      health = await apiRequest<SystemHealthSummary>('/system/health-summary');
+    } catch (err) {
+      if (!(err instanceof ApiError && err.status === 404)) throw err;
+    }
+    if (health) {
+      if (health.license_days != null) {
+        const days = health.license_days;
+        platformTailAlerts.push({
+          // demo(a4) 链接 /admin/license，webapp 无授权/许可证页面，链过去
+          // 会 404 —— 与健康卡 License 行同口径做展示项（无跳转）。
+          id: 'license-expiry',
+          // demo(a4): 7 天后到期为 warning 级；30 天内提醒，其余 info
+          level: days <= 30 ? 'warning' : 'info',
+          scope: 'platform',
+          kind: 'license_expiry',
+          href: '',
+          days,
+        });
+      }
+      if (health.rule_version) {
+        platformTailAlerts.push({
+          id: 'rule-lib',
+          level: health.rule_latest ? 'info' : 'warning',
+          scope: 'platform',
+          kind: 'rule_lib',
+          href: '',
+          ruleVersion: health.rule_version,
+          ruleLatest: health.rule_latest,
+        });
+      }
     }
   }
 
@@ -407,9 +473,10 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
     pendingReport,
     nodesOnline,
     nodesTotal,
+    nodesDegraded,
     threatTrend: securityOverview.trend?.email_type ?? [],
     top5,
-    alerts: [...platformAlerts, ...tenantAlerts],
+    alerts: [...platformAlerts, ...tenantAlerts, ...platformTailAlerts],
     agents,
   };
 }
@@ -454,6 +521,7 @@ export function useSystemStatusData(range: SystemStatusRange): SystemStatusData 
     pendingReport: data?.pendingReport ?? 0,
     nodesOnline: data?.nodesOnline ?? 0,
     nodesTotal: data?.nodesTotal ?? 0,
+    nodesDegraded: data?.nodesDegraded ?? false,
     threatTrend: data?.threatTrend ?? [],
     top5: data?.top5 ?? [],
     alerts: data?.alerts ?? [],

@@ -1802,7 +1802,7 @@ const routes: Route[] = [
     pattern: '/inbound-audit',
     handler: () => ({ status: 200, data: mockInboundAuditPending() }),
   },
-  // 智能体运行概况 / 待办：钓鱼、仿冒、威���回溯 stats。
+  // 智能体运行概况 / 待办：钓鱼、仿冒、威胁回溯 stats。
   {
     method: 'GET',
     pattern: '/phishing-agent/stats',

@@ -9,7 +9,8 @@ export type KnownAction =
   | 'sideline'
   | 'audit'
   | 'discard'
-  | 'bounce';
+  | 'bounce'
+  | 'mixed';
 
 // Severity order: higher index = more severe. Used to sort multi-action badges.
 const ACTION_SEVERITY: Record<string, number> = {
@@ -33,19 +34,19 @@ export function actionToVariant(action: string | undefined | null): ActionBadgeV
     case 'quarantine':
     case 'sideline':
     case 'audit':
+    case 'mixed':
       return 'outline';
     default:
       return 'default';
   }
 }
 
-/**
- * Returns any extra Tailwind class string for a given action badge.
- * Previously used for the amber 'mixed' badge; now returns '' for all actions
- * since mixed has been replaced by per-action badge expansion.
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function actionExtraClass(_action: string | undefined | null): string {
+// A mixed badge is only rendered when per-recipient details are unavailable.
+// Keep it visually distinct from the neutral outline actions.
+export function actionExtraClass(action: string | undefined | null): string {
+  if ((action || '').toLowerCase() === 'mixed') {
+    return 'border-amber-500 bg-amber-50 text-amber-900 dark:border-amber-400 dark:bg-amber-950/40 dark:text-amber-200';
+  }
   return '';
 }
 

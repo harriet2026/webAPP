@@ -130,6 +130,7 @@ export function SystemStatusDashboard() {
           <SystemHealthCard
             nodesOnline={data.nodesOnline}
             nodesTotal={data.nodesTotal}
+            nodesDegraded={data.nodesDegraded}
             isLoading={data.isLoading}
           />
         )}

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 1：管控对象类型联动 - 发信行为管控 HTML 规格说明</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{
+ border:'hsl(var(--sc-border) / <alpha-value>)',input:'hsl(var(--sc-input) / <alpha-value>)',ring:'hsl(var(--sc-ring) / <alpha-value>)',
+ background:'hsl(var(--sc-background) / <alpha-value>)',foreground:'hsl(var(--sc-foreground) / <alpha-value>)',
+ primary:{DEFAULT:'hsl(var(--sc-primary) / <alpha-value>)',foreground:'hsl(var(--sc-primary-foreground) / <alpha-value>)'},
+ muted:{DEFAULT:'hsl(var(--sc-muted) / <alpha-value>)',foreground:'hsl(var(--sc-muted-foreground) / <alpha-value>)'}},
+ borderRadius:{lg:'var(--sc-radius)',md:'calc(var(--sc-radius) - 2px)',sm:'calc(var(--sc-radius) - 4px)'}}}}
+</script>
+<style>
+:root{--primary:oklch(0.52 0.226 262);--primary-foreground:oklch(0.985 0 0);--background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);--card:oklch(1 0 0);--muted:oklch(0.97 0 0);--muted-foreground:oklch(0.556 0 0);--border:oklch(0.922 0 0);--destructive:oklch(0.577 0.245 27.325);--radius:0.625rem;--font-sans:"Geist",system-ui,sans-serif;--font-mono:ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto}
+.layer-nav{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1.25rem;background:var(--muted);border-radius:var(--radius);margin-bottom:1.5rem;font-size:.875rem}
+.layer-nav a{color:var(--primary);text-decoration:none;font-weight:600}.layer-nav a:hover{text-decoration:underline}
+.spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem}
+.spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.4rem}
+.meta-table{width:100%;border-collapse:collapse;font-size:.875rem}
+.meta-table td{padding:.5rem 1rem;border-bottom:1px solid var(--border)}
+.meta-table td:first-child{font-weight:600;width:150px;color:var(--muted-foreground)}
+.meta-table td a{color:var(--primary)}
+section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem}
+section>h2{color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:.5rem;margin-bottom:1rem;font-size:1.2rem}
+h4{font-size:.95rem;margin:.75rem 0 .5rem;color:var(--muted-foreground)}
+table.spec-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:1rem 0}
+table.spec-table th{background:var(--muted);font-weight:600;text-align:left;padding:.6rem .7rem;border:1px solid var(--border)}
+table.spec-table td{padding:.55rem .7rem;border:1px solid var(--border);vertical-align:top}
+.screenshot-figure{margin:1rem 0;text-align:center}
+.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.screenshot-figure figcaption{margin-top:.5rem;font-size:.8125rem;color:var(--muted-foreground)}
+.trigger-path{background:var(--muted);border-radius:calc(var(--radius) - 4px);padding:.5rem .75rem;margin:.5rem 0 1rem;font-size:.8125rem;color:var(--muted-foreground)}
+.trigger-path strong{color:var(--foreground)}
+.component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:1.75rem 1.25rem 1.25rem;margin:1rem 0;background:#fff;position:relative;overflow:auto}
+.component-preview::before{content:"🖥 可交互组件预览（切换下拉观察字段联动）";position:absolute;top:-.65rem;left:.75rem;background:var(--primary);color:var(--primary-foreground);font-size:.6875rem;font-weight:600;padding:.125rem .5rem;border-radius:calc(var(--radius) - 4px)}
+.sc{--sc-background:0 0% 100%;--sc-foreground:222 47% 11%;--sc-muted:210 40% 96%;--sc-muted-foreground:215 16% 47%;--sc-border:214 32% 91%;--sc-input:214 32% 91%;--sc-primary:221 83% 53%;--sc-primary-foreground:210 40% 98%;--sc-ring:221 83% 53%;--sc-radius:0.625rem;color:hsl(var(--sc-foreground));font-size:14px}
+.sc *{box-sizing:border-box}
+.dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);overflow:hidden}
+.dom-comparison>h5{background:var(--muted);padding:.5rem .75rem;font-size:.8125rem;font-weight:600;border-bottom:1px solid var(--border)}
+.dom-comparison>h5::before{content:"🔍 "}
+.dom-comparison table{width:100%;border-collapse:collapse;font-size:.8rem}
+.dom-comparison th{background:var(--muted);text-align:left;padding:.45rem .7rem;border-bottom:1px solid var(--border);font-weight:600}
+.dom-comparison td{padding:.45rem .7rem;border-bottom:1px solid var(--border)}
+.dom-pass{color:oklch(0.5 0.15 150);font-weight:600}
+.state-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+.state-tabs button{border:1px solid hsl(214 32% 91%);background:#fff;border-radius:6px;padding:4px 12px;font-size:13px;cursor:pointer}
+.state-tabs button.on{background:hsl(221 83% 53%);color:#fff;border-color:hsl(221 83% 53%)}
+</style>
+</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-4">← 返回主文件</a>
+  <span>层级 1 / 3（规则编辑抽屉）</span>
+  <a href="./layer-2-detection-preview-validation.html">层级 2：检测条件+校验+预览 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 1：管控对象类型联动</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.4 规则编辑抽屉 BehaviorRuleDrawer</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+    <tr><td>层级编号</td><td>层级 1 / 3</td></tr>
+    <tr><td>触发路径</td><td>抽屉「管控对象类型」下拉 onChange → <code>updateField("objectType",…)</code> + 清空关联字段 → 条件渲染子字段</td></tr>
+    <tr><td>demo 组件</td><td><code>behavior-rule-drawer.tsx</code>（objectType/senderSubType/ipSubType 条件块）</td></tr>
+  </table>
+</header>
+
+<section>
+  <h2>层级 1：对象类型 → 子字段联动</h2>
+  <div class="trigger-path"><strong>联动规则</strong>：<code>global</code>→无子字段；<code>sender</code>→发信人类型（个人→邮箱地址 / 群组→发信人群组 / 组织→组织部门）；<code>senderIp</code>→IP类型（单个IP→IP地址/IP段 / IP群组→IP群组）；<code>senderDomain</code>→域名。切换对象类型/子类型会清空上一分支已填字段。</div>
+
+  <h4>可交互预览（切换下拉即时联动，与 demo 一致）</h4>
+  <div class="component-preview"><div class="sc" style="max-width:560px">
+    <div style="display:flex;flex-direction:column;gap:14px;font-size:13px">
+      <div style="display:flex;align-items:center;gap:12px"><label style="min-width:110px;text-align:right"><span style="color:#ef4444">*</span> 管控对象类型</label>
+        <select id="o" onchange="L1obj(this.value)" class="border rounded-md" style="width:200px;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)">
+          <option value="global">全局</option><option value="sender" selected>发信人</option><option value="senderIp">发信IP</option><option value="senderDomain">发信域名</option></select></div>
+      <div id="o-sender">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><label style="min-width:110px;text-align:right"><span style="color:#ef4444">*</span> 发信人类型</label>
+          <select id="s" onchange="L1sub(this.value)" class="border rounded-md" style="width:200px;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option value="individual" selected>个人</option><option value="group">群组</option><option value="organization">组织</option></select></div>
+        <div id="s-ind" style="display:flex;align-items:center;gap:12px"><label style="min-width:110px;text-align:right"><span style="color:#ef4444">*</span> 邮箱地址</label><input placeholder="如：user@corp.com 或 *@domain.com" class="border rounded-md" style="flex:1;height:34px;padding:0 10px;border-color:hsl(214 32% 91%)"></div>
+        <div id="s-grp" style="display:none;align-items:center;gap:12px"><label style="min-width:110px;text-align:right"><span style="color:#ef4444">*</span> 发信人群组</label><select class="border rounded-md" style="flex:1;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option>请选择群组</option><option>VIP客户 (50人)</option><option>销售团队 (120人)</option></select></div>
+        <div id="s-org" style="display:none;align-items:center;gap:12px"><label style="min-width:110px;text-align:right"><span style="color:#ef4444">*</span> 组织部门</label><select class="border rounded-md" style="flex:1;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option>请选择部门</option><option>销售部 (85人)</option><option>技术部 (156人)</option></select></div>
+      </div>
+      <div id="o-ip" style="display:none">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><label style="min-width:110px;text-align:right"><span style="color:#ef4444">*</span> IP类型</label>
+          <select id="ip" onchange="L1ip(this.value)" class="border rounded-md" style="width:200px;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option value="single" selected>单个IP</option><option value="ipGroup">IP群组</option></select></div>
+        <div id="ip-s" style="display:flex;align-items:center;gap:12px"><label style="min-width:110px;text-align:right"><span style="color:#ef4444">*</span> IP地址/IP段</label><input placeholder="如：1.2.3.4 或 1.2.3.0/24" class="border rounded-md" style="flex:1;height:34px;padding:0 10px;border-color:hsl(214 32% 91%)"></div>
+        <div id="ip-g" style="display:none;align-items:center;gap:12px"><label style="min-width:110px;text-align:right"><span style="color:#ef4444">*</span> IP群组</label><select class="border rounded-md" style="flex:1;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option>请选择IP群组</option><option>海外IP (45个IP)</option><option>可信代理IP (8个IP)</option></select></div>
+      </div>
+      <div id="o-dom" style="display:none;align-items:center;gap:12px"><label style="min-width:110px;text-align:right"><span style="color:#ef4444">*</span> 域名</label><input placeholder="如：example.com" class="border rounded-md" style="flex:1;height:34px;padding:0 10px;border-color:hsl(214 32% 91%)"></div>
+    </div>
+  </div></div>
+
+  <h4>各对象类型的可见字段（浏览器逐态验证）</h4>
+  <table class="spec-table">
+    <thead><tr><th>对象类型</th><th>子类型</th><th>显示的输入控件</th><th>校验</th><th>数据来源</th><th>截图</th></tr></thead>
+    <tbody>
+      <tr><td>全局 global</td><td>-</td><td>无（仅公共字段）</td><td>-</td><td>-</td><td>global</td></tr>
+      <tr><td rowspan="3">发信人 sender</td><td>个人 individual</td><td>邮箱地址 Input（+「支持通配符 *@domain.com」提示）</td><td>非空 + 邮箱正则</td><td>-</td><td>default</td></tr>
+      <tr><td>群组 group</td><td>发信人群组 Select（+「管理群组」链接）</td><td>非空</td><td>群组策略配置</td><td>-</td></tr>
+      <tr><td>组织 organization</td><td>组织部门 Select（2 级缩进，+「管理组织」链接）</td><td>非空</td><td>组织架构</td><td>-</td></tr>
+      <tr><td rowspan="2">发信IP senderIp</td><td>单个IP single</td><td>IP地址/IP段 Input</td><td>非空 + IP/CIDR 正则</td><td>-</td><td>senderip</td></tr>
+      <tr><td>IP群组 ipGroup</td><td>IP群组 Select（+「管理IP群组」链接）</td><td>非空</td><td>IP群组管理</td><td>-</td></tr>
+      <tr><td>发信域名 senderDomain</td><td>-</td><td>域名 Input</td><td>非空 + 域名正则</td><td>-</td><td>domain</td></tr>
+    </tbody>
+  </table>
+
+  <h4>截图：发信IP（IP类型 + IP地址/IP段）</h4>
+  <figure class="screenshot-figure"><img src="./screenshots/layer2-object-senderip.png" alt="对象类型=发信IP"><figcaption>对象类型切为「发信IP」→ 出现 IP类型（单个IP）+ IP地址/IP段 输入框（浏览器实际渲染）</figcaption></figure>
+  <h4>截图：全局（无子字段） / 发信域名（域名输入）</h4>
+  <figure class="screenshot-figure"><img src="./screenshots/layer2-object-global.png" alt="对象类型=全局"><figcaption>对象类型=全局：基础设置区仅保留公共字段（无发信人/IP/域名子字段）</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/layer2-object-domain.png" alt="对象类型=发信域名"><figcaption>对象类型=发信域名：出现「域名」输入框</figcaption></figure>
+
+  <div class="dom-comparison"><h5>DOM 树比对结果（逐态 label 集合，浏览器验证）</h5><table>
+    <thead><tr><th>对象类型</th><th>demo 实际可见 label</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>发信人/个人（默认）</td><td>…管控对象类型 / 发信人类型 / 邮箱地址 …</td><td>同左</td><td class="dom-pass">✅</td></tr>
+      <tr><td>发信IP/单个IP</td><td>…管控对象类型 / IP类型 / IP地址/IP段 …</td><td>同左</td><td class="dom-pass">✅</td></tr>
+      <tr><td>全局</td><td>…管控对象类型 / 有效期至 / 优先级 …（无发信人/IP/域名字段）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+      <tr><td>发信域名</td><td>…管控对象类型 / 域名 …</td><td>同左</td><td class="dom-pass">✅</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#component-2-4">← 返回主文件</a>
+  <a href="./layer-2-detection-preview-validation.html">层级 2：检测条件+校验+预览 →</a>
+</nav>
+<script>
+function L1obj(v){document.getElementById('o-sender').style.display=v==='sender'?'block':'none';document.getElementById('o-ip').style.display=v==='senderIp'?'block':'none';document.getElementById('o-dom').style.display=v==='senderDomain'?'flex':'none';}
+function L1sub(v){document.getElementById('s-ind').style.display=v==='individual'?'flex':'none';document.getElementById('s-grp').style.display=v==='group'?'flex':'none';document.getElementById('s-org').style.display=v==='organization'?'flex':'none';}
+function L1ip(v){document.getElementById('ip-s').style.display=v==='single'?'flex':'none';document.getElementById('ip-g').style.display=v==='ipGroup'?'flex':'none';}
+</script>
+</body>
+</html>

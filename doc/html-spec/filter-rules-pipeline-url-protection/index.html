@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - URL检测与防护 HTML 规格说明</title>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: #fff;
+      --muted: #f5f7fa;
+      --muted-foreground: #6b7280;
+      --border: #e5e7eb;
+      --blue: #1677ff;
+      --red: #f5222d;
+      --orange: #fa8c16;
+      --green: #52c41a;
+      --purple: #722ed1;
+      --radius: 0.625rem;
+      --font-sans: "Geist", "Inter", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1, h2, h3 { line-height: 1.3; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 28px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 20px; }
+    h3 { margin: 18px 0 10px; color: #111827; font-size: 17px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .spec-header, section, .component-toc { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .toc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; padding: 0; list-style: none; margin: 0; }
+    .toc-list li { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa; }
+    .toc-badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #eef4ff; color: #155eef; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-spec, .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    /* 策略卡预览 */
+    .preview-card { width: 220px; height: 60px; display: flex; overflow: hidden; border: 1px solid #e8e8e8; border-radius: 8px; background: #fff; cursor: pointer; }
+    .preview-card:hover { border-color: #1890ff; background: #e6f7ff; }
+    .preview-bar { width: 4px; background: var(--orange); flex-shrink: 0; }
+    .preview-card-body { flex: 1; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
+    .preview-title { font-size: 14px; font-weight: 650; color: #262626; }
+    .preview-config { color: #1890ff; font-size: 13px; }
+    /* 抽屉预览 */
+    .drawer-shell { display: grid; grid-template-columns: 208px 1fr; min-width: 900px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #f3f4f6; }
+    .drawer-header { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--border); background: #fff; font-size: 16px; font-weight: 650; }
+    .drawer-header small { color: #6b7280; font-weight: 400; }
+    .drawer-nav { padding: 12px 8px; background: #f9fafb; border-right: 1px solid var(--border); }
+    .nav-row { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0; padding: 10px 12px; border-radius: 8px; color: #374151; font-size: 13px; cursor: default; }
+    .nav-row.active { background: #eff6ff; color: #1d4ed8; }
+    .nav-dot { width: 10px; height: 10px; margin-top: 5px; border-radius: 999px; background: #3b82f6; flex-shrink: 0; }
+    .nav-dot.off { background: transparent; border: 2px solid #d1d5db; }
+    .nav-row small { display: block; color: #6b7280; font-size: 11px; }
+    .drawer-main { padding: 16px; }
+    .policy-panel { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 8px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: 600; }
+    .panel-body { padding: 16px 20px; transition: opacity .2s; }
+    .panel-body.disabled { opacity: .5; pointer-events: none; }
+    .panel-foot { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-top: 1px solid var(--border); }
+    .unsaved { display: none; align-items: center; gap: 8px; color: #d97706; font-size: 13px; }
+    .unsaved.show { display: inline-flex; }
+    .unsaved-dot { width: 8px; height: 8px; border-radius: 999px; background: #f59e0b; }
+    .btn-save { padding: 8px 16px; border: 0; border-radius: 8px; background: #2563eb; color: #fff; font-weight: 650; cursor: pointer; }
+    /* 开关 */
+    .toggle { position: relative; width: 40px; height: 22px; border: 0; border-radius: 999px; background: #2563eb; cursor: pointer; transition: background .15s; flex-shrink: 0; }
+    .toggle::after { content: ""; position: absolute; top: 2px; left: 20px; width: 18px; height: 18px; border-radius: 999px; background: #fff; transition: left .15s; }
+    .toggle[aria-checked="false"] { background: #d1d5db; }
+    .toggle[aria-checked="false"]::after { left: 2px; }
+    .status-text { font-size: 13px; color: #2563eb; margin-right: 8px; }
+    .status-text.off { color: #6b7280; }
+    /* Tab 条 */
+    .tabs { display: inline-flex; gap: 4px; margin-bottom: 14px; padding: 4px; border-radius: 8px; background: #f3f4f6; }
+    .tab { padding: 5px 12px; border: 0; border-radius: 7px; font-size: 13px; font-weight: 650; background: transparent; color: #4b5563; cursor: pointer; }
+    .tab.active { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    /* 配置块 */
+    .cfg-block { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; background: #f9fafb; }
+    .cfg-block .cfg-text b { display: block; font-size: 14px; }
+    .cfg-block .cfg-text small { color: #6b7280; font-size: 12px; }
+    .fixed-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 10px 0; }
+    .fixed-card { padding: 14px 16px; border-radius: 8px; }
+    .fixed-card.red { background: #fef2f2; border: 1px solid #fecaca; }
+    .fixed-card.amber { background: #fffbeb; border: 1px solid #fde68a; }
+    .fixed-card .row1 { display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; }
+    .fixed-card p { margin: 8px 0 0; color: #6b7280; font-size: 12px; }
+    .badge-pill { padding: 2px 10px; border-radius: 6px; font-size: 12px; font-weight: 650; }
+    .badge-pill.solid-red { background: #dc2626; color: #fff; }
+    .badge-pill.line-amber { border: 1px solid #f59e0b; color: #b45309; background: #fff; }
+    .lock-note { color: #6b7280; font-size: 12px; }
+    .warn-bar { display: none; gap: 8px; align-items: flex-start; margin-top: 12px; padding: 10px 12px; border: 1px solid #fde68a; border-radius: 8px; background: #fffbeb; color: #b45309; font-size: 12px; }
+    .warn-bar.show { display: flex; }
+    .is-hidden { display: none !important; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .diff-section { border-left: 4px solid var(--red); background: #fff7f7; }
+    .question-section { border-left: 4px solid #d97706; background: #fffbeb; }
+    .mermaid { padding: 16px; border-radius: 8px; background: #f8fafc; text-align: center; }
+    pre { padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; overflow: auto; font-family: var(--font-mono); font-size: 13px; }
+    code { font-family: var(--font-mono); font-size: .9em; }
+    table.layer-index td a { font-weight: 650; }
+    @media (max-width: 900px) { body { padding: 16px; } .drawer-shell { grid-template-columns: 1fr; } .drawer-nav { border-right: 0; border-bottom: 1px solid var(--border); } .fixed-cards { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>策略流水线 - URL检测与防护 HTML 规格说明</h1>
+    <table class="meta-table">
+      <tr><td>目标模块</td><td>策略流水线 / 阶段3：内容层 / URL检测与防护（policy key <code>url</code>，优先级 3001，号段 #3070-3079，type = configurable）</td></tr>
+      <tr><td>demo 地址</td><td><a href="http://localhost:3000/filter-rules/pipeline">http://localhost:3000/filter-rules/pipeline</a>（传统版形态验证使用 <code>?profile=legacy-single</code>）</td></tr>
+      <tr><td>demo 源码</td><td><code>design/origin/demo/components/filter-rules-new/strategy-pipeline-page.tsx</code>（抽屉宿主）<br><code>design/origin/demo/components/filter-rules-new/content-strategy-page.tsx</code>（抽屉页宿主，initialPolicy=url）<br><code>design/origin/demo/components/filter-rules-new/url-protection-module.tsx</code>（模块 UI 主体）</td></tr>
+      <tr><td>关联 PRD</td><td><code>design/origin/spec/URL检测与防护模块 - 需求文档.md</code>（第一来源）<br><code>design/origin/spec/0704链接保护.md</code>、<code>design/origin/spec/0709链接保护-「点击时复检策略」需求文档.md</code>、<code>design/origin/spec/链接与附件安全 功能需求文档.md</code>（相关）<br><code>design/origin/spec/策略流水线需求文档.md</code>（流水线上下文）</td></tr>
+      <tr><td>落地约束</td><td><code>design/origin/implement.md</code>：管理员可见可改配置优先走配置系统；处置动作复用统一规则系统 action（如"标记"= accept + 特定 header，不新增 mark action）；PRD API 不等于必须新增后端 API；四语国际化。</td></tr>
+      <tr><td>浏览器验证</td><td>2026-07-11，headless Chromium CDP 访问运行态 demo（1440×1000 与 1024×900 视口）。覆盖：流水线默认态、URL 策略卡、内容策略抽屉默认态（云网关形态）、URL沙箱检测 Tab 全交互（传统版 <code>?profile=legacy-single</code>：两个下拉展开、清理周期非法/合法输入、本地情报库开关联动、沙箱开关置灰）、链接保护 Tab（开/关警告条）、模块总开关禁用、左导航折叠/切换、未保存提示、1024px 响应式。共 15 张截图。</td></tr>
+      <tr><td>产品形态差异</td><td>URL沙箱检测 Tab 仅传统版形态（<code>capabilities.ai === false</code>，即 legacy-multi / legacy-single）渲染；云网关 / AI 多租户 / AI 单租户隐藏该 Tab 并兜底选中链接保护。demo 默认形态为 <code>cloud</code>，因此默认打开只见「链接保护」一个 Tab（浏览器已验证两种形态）。</td></tr>
+    </table>
+  </header>
+
+  <nav class="component-toc">
+    <h2>组件列表</h2>
+    <ul class="toc-list">
+      <li><a href="#component-2-1">2.1 策略流水线入口卡片</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-2">2.2 内容策略抽屉容器（总开关/左导航/保存栏）</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-3">2.3 URL沙箱检测 Tab</a><span class="toc-badge">3层</span><br><a href="layer-1-sandbox-tab.html">层级1：沙箱Tab默认态与下拉</a> · <a href="layer-2-sandbox-interactions.html">层级2：校验/联动/置灰</a></li>
+      <li><a href="#component-2-4">2.4 链接保护 Tab</a><span class="toc-badge">2层</span><br><a href="layer-3-link-protection.html">层级3：链接保护默认/禁用警告/不可达态</a></li>
+      <li><a href="#api-mapping">4. 数据模型与 API 映射</a><span class="toc-badge">配置系统映射</span></li>
+    </ul>
+  </nav>
+
+  <section id="layout">
+    <h2>1. 页面布局结构</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>实际渲染</th><th>规格含义</th></tr></thead>
+      <tbody>
+        <tr><td>左侧产品导航</td><td>深色侧边栏；云网关形态与传统版形态的菜单项不同（传统版多"处置设置/灰邮治理/安全策略/高管保护"等）</td><td>全局导航容器，不属于本模块配置表单。</td></tr>
+        <tr><td>策略流水线主内容</td><td>五个阶段的策略卡区；阶段3"内容层"含 附件安全检测 / URL检测与防护 / 内容规则 / 意图引擎 四张卡</td><td>URL检测与防护以阶段3策略卡进入，无独立页面首屏。</td></tr>
+        <tr><td>内容策略抽屉</td><td>右侧 80vw Sheet，头部"阶段3: 内容层 / URL检测与防护"+ 关闭按钮（XCircle）；左侧 208px 策略导航（可折叠至 56px），右侧策略配置白卡</td><td>阶段3四个子策略共用的承载容器，内嵌 <code>ContentStrategyPage embedded initialPolicy=url</code>。</td></tr>
+        <tr><td>策略配置白卡</td><td>卡头（策略名 + 已启用/已禁用 + 总开关）、可滚动内容区（Tab + 配置表单）、Sticky 底栏（未保存提示 + 保存配置按钮）</td><td>模块级启停与保存的统一框架，内容由 <code>UrlProtectionModule embedded</code> 渲染。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/page-full-default.png" alt="策略流水线整页默认态">
+      <figcaption>整页默认态（1440×1000，云网关形态）：URL检测与防护卡片位于阶段3内容层第二张。</figcaption>
+    </figure>
+    <h3>1.2 视觉规范（浏览器验证）</h3>
+    <table class="spec-table">
+      <thead><tr><th>属性</th><th>实际值</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>策略卡左色条</td><td>橙色 <code>#fa8c16</code>（configurable 类型 = 隔离主动作）</td><td>strategy-pipeline-page.tsx <code>getColorBar()</code>；截图确认</td></tr>
+        <tr><td>卡片尺寸</td><td>220px × 60px，圆角 8px，边框 <code>#E8E8E8</code>，hover 变 <code>#1890FF</code> 边框 + <code>#E6F7FF</code> 背景</td><td>浏览器 rect 954,411,220,60</td></tr>
+        <tr><td>模块图标</td><td>lucide：Globe（沙箱，紫 text-purple-500）、Database（情报库，绿）、Cloud（云端，蓝）、Shield（链接保护，绿）、AlertTriangle（恶意，红）、Lock（未知/固定，琥珀）</td><td>DOM icons 提取：lucide-globe/chevron-down/database/cloud</td></tr>
+        <tr><td>固定策略卡</td><td>已知恶意URL：红底 <code>bg-red-50 border-red-200</code> + 实心红 Badge；未知URL：琥珀底 <code>bg-amber-50 border-amber-800</code> + 琥珀描边 Badge</td><td>DOM class 提取 + 截图</td></tr>
+        <tr><td>PRD 主色标注</td><td>PRD 要求模块标识紫 <code>#a855f7</code> 左边框——仅非嵌入独立卡片（demo 未使用路径）有 <code>border-purple-500</code>；流水线卡实际为橙色</td><td>见差异 D-008</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="components">
+    <h2>2. 逐组件规格</h2>
+
+    <article class="component-spec" id="component-2-1">
+      <h3>2.1 策略流水线入口卡片 UrlProtection Policy Card</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级0：页面默认态中的策略入口卡片</td></tr>
+          <tr><th>触发路径</th><td>打开 <code>/filter-rules/pipeline</code>，在阶段3内容层定位"URL检测与防护"卡片。</td></tr>
+          <tr><th>点击行为</th><td>卡片整体与"配置 →"按钮均执行 <code>setContentDrawerPolicy("url"); setContentDrawerOpen(true)</code>，打开内容策略抽屉并选中 URL检测与防护。</td></tr>
+          <tr><th>卡片数据</th><td><code>priority 3001 · stage 3 · type configurable · todayHits 45 / todayBlocked 35 / todayExempted 10 · action "隔离并记录日志"</code>（极简卡不渲染这些数字，仅存于数据模型/Tooltip）</td></tr>
+        </tbody>
+      </table>
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：策略卡默认态</h4>
+        <div class="component-preview">
+          <div class="preview-card" data-demo-extracted="url-policy-card" onclick="document.getElementById('component-2-2').scrollIntoView({behavior:'smooth'})" title="悬浮300ms显示Tooltip：策略：URL检测与防护 / 动作：隔离、投递 / 效果：命中则隔离，邮件保留至隔离区">
+            <div class="preview-bar"></div>
+            <div class="preview-card-body">
+              <span class="preview-title">URL检测与防护</span>
+              <span class="preview-config">配置 →</span>
+            </div>
+          </div>
+          <p style="margin:8px 0 0;color:#6b7280;font-size:12px;">点击卡片跳转本文档 2.2 抽屉规格（demo 中打开 80vw 抽屉）；title 属性模拟 hover Tooltip 文案。</p>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/url-card-layer-0.png" alt="URL检测与防护策略卡" style="width:246px;">
+          <figcaption>策略卡局部截图：橙色左色条（configurable/隔离），名称 + "配置 →"。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th><th>i18n key</th></tr></thead>
+          <tbody>
+            <tr><td>卡片标题</td><td>URL检测与防护</td><td>点击卡片打开内容策略抽屉</td><td><code>pipeline.urlProtection</code>（zh/en/th）</td></tr>
+            <tr><td>配置入口</td><td>配置 + ArrowRight(12px)</td><td>stopPropagation 后同样打开抽屉</td><td><code>pipeline.configBtn</code></td></tr>
+            <tr><td>左侧色条</td><td>橙 <code>#fa8c16</code>，宽 4px</td><td>无独立交互</td><td>-（由 type=configurable 推导）</td></tr>
+            <tr><td>Hover Tooltip</td><td>右侧弹出：策略：URL检测与防护 / 动作：隔离、投递 / 效果：命中则隔离，邮件保留至隔离区 / 底部隔离区跳转说明</td><td>delayDuration 300ms</td><td><code>pipeline.policyTooltip*</code>、<code>pipeline.actionQuarantineAction</code>、<code>pipeline.actionDeliver</code>、<code>pipeline.policyEffectQuarantine</code>、<code>pipeline.quarantineModuleLink</code></td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>根节点</td><td><code>div.w-[220px].rounded-lg.cursor-pointer.h-[60px]</code>，rect 220×60</td><td><code>.preview-card</code> 220×60</td><td>一致</td></tr>
+              <tr><td>子结构</td><td>色条 div.w-1 + 内容 div（标题 span + 配置 button）</td><td>同结构（.preview-bar + .preview-card-body）</td><td>一致</td></tr>
+              <tr><td>关键文案</td><td>URL检测与防护 / 配置</td><td>URL检测与防护 / 配置 →</td><td>一致</td></tr>
+              <tr><td>触发结果</td><td>打开阶段3内容策略抽屉（80vw Sheet）</td><td>规格描述同一路径</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-2">
+      <h3>2.2 内容策略抽屉容器 ContentStrategyPage（层级0 默认打开态）</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>渲染组件</th><td><code>Sheet w-[80vw] hideCloseButton</code> → SheetHeader（Settings 图标 + "阶段3: 内容层 / URL检测与防护" + XCircle 关闭）→ <code>ContentStrategyPage embedded initialPolicy=url</code> → <code>UrlProtectionModule direction="receive" embedded</code></td></tr>
+          <tr><th>实际状态（云网关默认形态）</th><td>抽屉节点数 100；Tab 仅"链接保护"（active）；左导航 4 项、URL检测与防护 active（bg-blue-50 + 蓝色圆点）；卡头"URL检测与防护 已启用"+ 总开关 checked；底栏"保存配置"。</td></tr>
+          <tr><th>方向状态</th><td><code>direction</code> 恒为 <code>"receive"</code>——ContentStrategyPage 声明了 <code>setDirection</code> 但界面无方向切换控件（见差异 D-001）。</td></tr>
+        </tbody>
+      </table>
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：抽屉打开默认态（云网关形态）</h4>
+        <div class="component-preview">
+          <div class="drawer-shell" data-demo-extracted="content-drawer-url">
+            <div class="drawer-header">
+              <span>⚙ 阶段3: 内容层 <small>/ URL检测与防护</small></span>
+              <button type="button" style="border:0;background:transparent;font-size:16px;cursor:pointer;" title="关闭抽屉（XCircle）">⊗</button>
+            </div>
+            <div class="drawer-nav" data-nav>
+              <div class="nav-row"><span class="nav-dot"></span><span data-nav-label>附件安全检测<small>病毒扫描/沙箱分析/类型检测</small></span></div>
+              <div class="nav-row active"><span class="nav-dot" data-url-dot></span><span data-nav-label>URL检测与防护<small data-url-summary>信誉评估/沙箱分析/仿冒检测</small></span></div>
+              <div class="nav-row"><span class="nav-dot"></span><span data-nav-label>内容规则<small>关键词/正则/DLP检测</small></span></div>
+              <div class="nav-row"><span class="nav-dot"></span><span data-nav-label>意图引擎<small>涉黄赌/涉政/钓鱼/垃圾/订阅</small></span></div>
+              <button type="button" data-nav-collapse style="margin-top:10px;padding:4px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12px;cursor:pointer;">⟨ 折叠导航</button>
+            </div>
+            <div class="drawer-main">
+              <div class="policy-panel">
+                <div class="panel-head">
+                  <span>URL检测与防护</span>
+                  <span style="display:inline-flex;align-items:center;">
+                    <span class="status-text" data-status>已启用</span>
+                    <button class="toggle" type="button" role="switch" aria-checked="true" data-master-toggle></button>
+                  </span>
+                </div>
+                <div class="panel-body" data-panel-body>
+                  <div class="tabs"><button class="tab active" type="button">链接保护</button></div>
+                  <div class="cfg-block">
+                    <span class="cfg-text">🛡 <b>链接保护</b><small>启用后，改写邮件中的URL，用户点击时经网关安全检查</small></span>
+                    <button class="toggle" type="button" role="switch" aria-checked="true" data-lp-toggle></button>
+                  </div>
+                  <div data-lp-zone>
+                    <h4 style="margin:12px 0 6px;font-size:14px;">点击时安全策略（固定）</h4>
+                    <div class="fixed-cards">
+                      <div class="fixed-card red"><div class="row1"><span>⚠ 已知恶意URL</span><span class="badge-pill solid-red">阻断并提示</span></div><p>用户点击恶意URL时，显示警告页面并拦截访问</p></div>
+                      <div class="fixed-card amber"><div class="row1"><span>🔒 未知URL</span><span class="badge-pill line-amber">阻断并提示</span></div><p>用户点击未知URL时，显示警告页面并拦截访问</p></div>
+                    </div>
+                    <p class="lock-note">🔒 安全策略为系统固定配置，不可修改</p>
+                    <div class="warn-bar" data-lp-warn>⚠ 链接保护已禁用，用户点击邮件中的恶意链接将不受保护</div>
+                  </div>
+                </div>
+                <div class="panel-foot">
+                  <span class="unsaved" data-unsaved><span class="unsaved-dot"></span>有未保存的更改</span>
+                  <button class="btn-save" type="button" data-save>保存配置</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-layer-0-default.png" alt="内容策略抽屉默认态（云网关）">
+          <figcaption>抽屉默认态（云网关形态）：仅"链接保护"Tab；左导航 URL检测与防护 选中。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为（预览区可操作）</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>抽屉头部</td><td>阶段3: 内容层 / URL检测与防护 + XCircle</td><td>XCircle 或点击遮罩关闭抽屉</td><td>子标题固定为打开时的策略名，不随左导航切换（差异 D-009）</td></tr>
+            <tr><td>左导航项 ×4</td><td>附件安全检测 / URL检测与防护(active) / 内容规则 / 意图引擎，均带蓝色状态圆点 + 摘要</td><td>点击切换右侧策略；折叠按钮 208px↔56px（折叠后仅圆点 + Tooltip）</td><td>URL 摘要：启用"信誉评估/沙箱分析/仿冒检测"，禁用"未启用"</td></tr>
+            <tr><td>卡头总开关</td><td>已启用 + Switch(checked)</td><td>关闭 → 文案"已禁用"、内容区 opacity-50 pointer-events-none、左导航圆点变灰边框、摘要变"未启用"、触发未保存提示</td><td>截图 drawer-module-disabled.png</td></tr>
+            <tr><td>Tab 条</td><td>云网关：仅 链接保护；传统版：URL沙箱检测(默认active) + 链接保护</td><td>点击切换 TabsContent</td><td><code>showSandbox = !capabilities.ai</code>；沙箱隐藏时 effectiveTab 兜底 linkProtection</td></tr>
+            <tr><td>底部保存栏</td><td>保存配置（蓝底）；左侧未保存提示默认隐藏</td><td>任何开关/配置变更 → "● 有未保存的更改"（琥珀脉冲）；点保存后消失</td><td>PRD 说"实时生效无需保存按钮"，见差异 D-005</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>根节点</td><td><code>[role=dialog]</code> Sheet，class 含 <code>data-[state=open]</code>，节点数 100（云网关默认态）</td><td><code>.drawer-shell[data-demo-extracted]</code>，保留头部/导航/卡头/Tab/内容/底栏核心结构</td><td>一致（结构裁剪展示）</td></tr>
+              <tr><td>Tab 列表</td><td>[{链接保护, active}]（云网关）</td><td>单个 tab.active 链接保护</td><td>一致</td></tr>
+              <tr><td>开关列表</td><td>[总开关 checked（近旁文本"URL检测与防护 | 已启用"）, 链接保护 checked]</td><td>两个 toggle aria-checked=true</td><td>一致</td></tr>
+              <tr><td>左导航</td><td>4 个 button：附件安全检测/URL检测与防护/内容规则/意图引擎，URL 项 bg-blue-50，圆点 bg-blue-500；导航宽 208px，折叠后 56px</td><td>4 个 nav-row，URL active；折叠按钮模拟</td><td>一致</td></tr>
+              <tr><td>固定策略卡</td><td>grid 2 列：红卡(bg-red-50)+destructive Badge；琥珀卡(bg-amber-50)+outline Badge，文案同左</td><td>fixed-cards 同文案同配色</td><td>一致</td></tr>
+              <tr><td>底栏</td><td>保存配置按钮；变更后出现"有未保存的更改"（w-2 h-2 amber pulse 圆点）</td><td>data-unsaved 复刻显示逻辑</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <h4>其余层级0状态截图</h4>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/drawer-module-disabled.png" alt="模块总开关禁用态">
+        <figcaption>总开关关闭：卡头"已禁用"、内容整体置灰、左导航 URL 圆点变灰边框、摘要"未启用"、底栏出现"有未保存的更改"。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/drawer-nav-collapsed.png" alt="左导航折叠态">
+        <figcaption>左导航折叠态：宽度 208px → 56px，仅保留状态圆点，悬浮显示策略名 Tooltip。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/drawer-unsaved-hint.png" alt="未保存更改提示">
+        <figcaption>配置变更后底栏左侧出现琥珀色"● 有未保存的更改"提示（截图为切换回 URL检测与防护 后的状态）。</figcaption>
+      </figure>
+    </article>
+
+    <article class="component-spec" id="component-2-3">
+      <h3>2.3 URL沙箱检测 Tab SandboxTab（多层交互）</h3>
+      <p>仅传统版形态（legacy-multi / legacy-single）渲染。层级1及以后拆分为独立文件，主文件保留关系图与索引。</p>
+      <div class="mermaid">
+graph LR
+  A[层级0 策略卡] --> B[层级0 抽屉默认态]
+  B --> C[层级1 URL沙箱检测Tab 默认态与下拉选项]
+  C --> D[层级2 清理周期校验错误]
+  C --> E[层级2 本地情报库关闭联动]
+  C --> F[层级2 沙箱开关关闭置灰]
+  B --> G[层级3 链接保护Tab]
+  G --> H[层级3 链接保护关闭警告]
+      </div>
+      <table class="spec-table layer-index">
+        <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>策略卡 + 抽屉默认态</td><td>页面加载 / 点击策略卡</td><td>上方内嵌（2.1 / 2.2）</td></tr>
+          <tr><td>1</td><td>URL沙箱检测 Tab 默认态、两个处置下拉展开</td><td>传统版形态打开抽屉即默认选中该 Tab</td><td><a href="layer-1-sandbox-tab.html">查看详情</a></td></tr>
+          <tr><td>2</td><td>清理周期校验错误 / 本地情报库关闭 / 沙箱开关关闭</td><td>沙箱 Tab 内输入非法值、切换开关</td><td><a href="layer-2-sandbox-interactions.html">查看详情</a></td></tr>
+          <tr><td>3</td><td>链接保护 Tab（默认 / 关闭警告 / 非接收不可达态）</td><td>点击"链接保护"Tab</td><td><a href="layer-3-link-protection.html">查看详情</a></td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="component-spec" id="component-2-4">
+      <h3>2.4 链接保护 Tab LinkProtectionTab</h3>
+      <p>全形态可用；接收方向渲染开关 + 固定策略卡，非接收方向渲染"仅适用于接收方向"提示（demo 中因方向恒为 receive 而不可达）。完整规格见 <a href="layer-3-link-protection.html">层级3 子文件</a>；层级0 预览已在 2.2 中可交互（关闭链接保护开关可看到琥珀警告条与配置区置灰）。</p>
+    </article>
+  </section>
+
+  <section id="dialogs">
+    <h2>3. 弹窗/抽屉/对话框规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>名称</th><th>触发条件</th><th>实际渲染</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>内容策略抽屉（Sheet）</td><td>点击"URL检测与防护"策略卡或"配置 →"</td><td>80vw，右滑入，hideCloseButton + 自绘 XCircle；头部 Settings 图标 + 面包屑；内容为 ContentStrategyPage</td><td>点击抽屉外部区域或关闭按钮关闭，返回策略流水线（PRD §3 触发条件一致）</td></tr>
+        <tr><td>处置动作下拉（Radix Select）</td><td>点击"发现恶意URL"/"沙箱分析超时"触发器</td><td>Portal 弹出 listbox；当前项打勾；点击选项选中并收起</td><td>PRD"展开选项列表，选中后收起"一致；见层级1</td></tr>
+        <tr><td>保存成功/失败 Toast</td><td>点击"保存配置"</td><td>demo 仅清除未保存标记，无 Toast</td><td>PRD 要求 Toast"保存成功"绿勾 /"保存失败"红叉——落地需补（差异 D-005 关联）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="api-mapping">
+    <h2>4. 数据模型与 API 映射</h2>
+    <pre><code>type Direction = "receive" | "send" | "internal"
+type SandboxActionType = "isolate" | "block" | "mark" | "discard"
+type TimeoutActionType = "continue" | "treat_malicious" | "pass"
+
+interface UrlSandboxConfig {
+  enabled: boolean               // 沙箱检测开关，默认 true
+  maliciousAction: SandboxActionType  // 默认 receive→isolate，send/internal→block
+  timeoutAction: TimeoutActionType    // 默认 continue
+  localIntelEnabled: boolean     // 默认 true
+  intelCleanupDays: number       // 默认 180，范围 30-365
+  cloudIntelEnabled: boolean     // 默认 true
+}
+interface LinkProtectionConfig {
+  enabled: boolean               // 默认 true
+  knownMaliciousPolicy: "block_alert"  // 固定
+  unknownPolicy: "block_alert"         // 固定
+}
+interface UrlProtectionConfig {
+  sandbox: Record&lt;Direction, UrlSandboxConfig&gt;  // 按方向存储
+  linkProtection: LinkProtectionConfig           // 全局（不分方向）
+}</code></pre>
+    <table class="spec-table">
+      <thead><tr><th>PRD API / 数据表</th><th>用途</th><th>落地映射建议</th><th>需确认</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET/PUT /api/config/url-protection?direction=</code></td><td>按方向读写模块配置</td><td>属管理员可见可改配置——按 implement.md/CLAUDE.md 优先走配置系统（ConfigManager，<code>/apiserver.cf/&lt;section&gt;/&lt;key&gt;</code> + DB config_overrides），不必新增专用 API。</td><td>Q4：配置存储路径与租户维度</td></tr>
+        <tr><td><code>POST /api/sandbox/analyze</code></td><td>提交 URL 沙箱分析</td><td>后端内部对接沙箱引擎（HTTP API 异步），不暴露前端 API。</td><td>Q6：沙箱引擎与云端情报上游服务现状</td></tr>
+        <tr><td><code>GET /api/intel/query?url=</code></td><td>查询 URL 情报</td><td>本地缓存（Redis + DB 持久化）+ 云端查询降级（&gt;5s 降级本地），内部链路。</td><td>Q6</td></tr>
+        <tr><td><code>GET /api/link-protect/redirect?token=</code></td><td>链接保护点击重定向</td><td>网关需提供公网可达的 safelink 重定向端点（原始 URL 加密编码进 token），命中→警告页，安全→302。</td><td>Q7：safelink 域名/证书/部署形态</td></tr>
+        <tr><td>处置动作 isolate/block/mark/discard</td><td>沙箱恶意 URL 处置</td><td>复用统一规则系统 action：isolate→quarantine，block→reject，mark→accept+添加风险 header（不新增 mark action），discard→discard。</td><td>Q2：mark 的 header 约定</td></tr>
+        <tr><td><code>url_protection_config / url_intel_cache / url_detection_log / url_click_log</code></td><td>PRD 设计表</td><td>非硬性要求；配置并入 config_overrides；情报缓存/检测日志/点击日志需评估复用现有日志体系（JSONL/DB）。"PostgreSQL 存储"非硬性，需支持全部信创后端。</td><td>Q6/Q7</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="business-logic">
+    <h2>5. 业务逻辑规格</h2>
+    <div class="mermaid">
+graph TD
+  A[邮件进入模块] --> B[Step1 URL提取: 正文/HTML/附件 + 短链接展开]
+  B --> C{Step2 URL沙箱检测 按方向配置}
+  C -->|本地情报命中| R[直接返回结果]
+  C -->|云端情报命中 如启用| R
+  C -->|未知URL| D[沙箱动态分析]
+  D -->|完成| R
+  D -->|超时>30s| E[超时处置: 进行下一步检测/按恶意处置/放行]
+  R -->|恶意| F[处置: 隔离/阻断/标记/丢弃]
+  R -->|安全| G[Step3 链接保护 仅接收方向: URL改写为代理链接]
+  E --> G
+  G --> H[投递]
+  H --> I[Step4 用户点击时实时检测]
+  I -->|已知恶意/未知| J[警告页拦截 阻断并提示-固定]
+  I -->|安全| K[302 跳转原始目标]
+      </div>
+    <table class="spec-table">
+      <thead><tr><th>逻辑</th><th>PRD 要求</th><th>demo 实际</th><th>落地说明</th></tr></thead>
+      <tbody>
+        <tr><td>模块总开关</td><td>禁用时沙箱与链接保护均不生效，配置区透明度50%禁止交互</td><td>卡头开关关闭 → 内容 opacity-50 pointer-events-none（浏览器已验证）</td><td>与 PRD 一致</td></tr>
+        <tr><td>沙箱按方向配置</td><td>切换方向 Tab 加载对应方向配置；默认 receive→隔离、send→阻断</td><td>数据模型按方向存储且默认值符合，但 UI 无方向切换，恒为 receive</td><td>差异 D-001 / 需确认 Q1</td></tr>
+        <tr><td>沙箱与链接保护联动</td><td>超时"进行下一步检测"依赖链接保护点击时兜底；沙箱禁用不影响链接保护</td><td>选项文案"进行下一步检测（放行，依赖链接保护兜底）"；两开关独立</td><td>一致</td></tr>
+        <tr><td>链接保护方向约束</td><td>仅接收方向可用；非接收显示灰色提示 + 配置禁用</td><td>源码有非接收分支（Info 提示 + 半透明禁用预览卡），但运行态不可达</td><td>差异 D-001</td></tr>
+        <tr><td>点击时策略固定</td><td>已知恶意/未知 URL 均"阻断并提示"，管理端不可改</td><td>两张固定卡 + 锁标注，无任何可交互控件</td><td>一致；0709 提出的可配置"点击时复检策略"未实现（差异 D-002）</td></tr>
+        <tr><td>本地情报库联动</td><td>禁用时清理周期配置项隐藏</td><td>浏览器验证：关闭后"URL情报库清理周期"整块（含输入框）从 DOM 移除，重开后数值保留</td><td>一致</td></tr>
+        <tr><td>权限矩阵</td><td>超管/安全管理员可改；审计员只读（改则提示"您没有修改此配置的权限"）；普通用户不可见</td><td>demo 未实现权限拦截</td><td>落地由后端鉴权 + 前端只读态实现</td></tr>
+      </tbody>
+    </table>
+    <h3>5.2 产品形态可见性矩阵（浏览器验证）</h3>
+    <table class="spec-table">
+      <thead><tr><th>形态</th><th>capabilities.ai</th><th>URL沙箱检测 Tab</th><th>链接保护 Tab</th></tr></thead>
+      <tbody>
+        <tr><td>云网关（demo 默认）</td><td>true</td><td>隐藏</td><td>显示（自动选中）</td></tr>
+        <tr><td>AI版·多租户 / AI版·单租户</td><td>true</td><td>隐藏</td><td>显示（自动选中）</td></tr>
+        <tr><td>传统版·多租户 / 传统版·单租户</td><td>false</td><td>显示（默认选中）</td><td>显示</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interaction">
+    <h2>6. 交互规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>实际行为（浏览器验证）</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>模块总开关</td><td>关闭：卡头"已禁用"、内容置灰不可交互、左导航圆点灰边框、摘要"未启用"、出现未保存提示</td><td>PRD"禁用时配置区透明度50%且禁止交互"一致</td></tr>
+        <tr><td>Tab 切换</td><td>Radix Tabs，点击切换 data-state；传统版默认沙箱 Tab</td><td>一致</td></tr>
+        <tr><td>处置动作下拉</td><td>点击展开 Portal listbox，当前项打勾，选中收起；超时下拉触发器 w-[300px] 文案截断显示</td><td>一致</td></tr>
+        <tr><td>清理周期输入</td><td>输入即校验（onChange 而非失焦）：非法值报红并回弹为上次合法值；合法值即时生效</td><td>PRD 说"失焦时校验"；空值恢复默认180未实现（差异 D-004）</td></tr>
+        <tr><td>沙箱检测开关</td><td>关闭后"检测结果处置 + 扫描异常处置"两块 opacity-50 pointer-events-none；情报库设置不受影响</td><td>PRD"检测结果处置和扫描异常处置区域 opacity 0.5"一致</td></tr>
+        <tr><td>链接保护开关</td><td>关闭后固定策略卡区置灰 + 出现琥珀警告条"链接保护已禁用，用户点击邮件中的恶意链接将不受保护"</td><td>一致</td></tr>
+        <tr><td>左导航折叠</td><td>圆形悬浮按钮，208px↔56px，折叠后 Tooltip 即时（delayDuration 0）显示名称+摘要</td><td>demo 特有，PRD 未述</td></tr>
+        <tr><td>保存配置</td><td>点击清除"有未保存的更改"；无 Toast、无 API</td><td>PRD 要求保存成功/失败 Toast，落地需补</td></tr>
+      </tbody>
+    </table>
+    <h3>6.2 关键字段 Hover Tooltip（PRD §3 要求，demo 未实现字段级 Tooltip）</h3>
+    <table class="spec-table">
+      <thead><tr><th>字段</th><th>PRD 悬浮提示内容</th></tr></thead>
+      <tbody>
+        <tr><td>沙箱检测</td><td>对未知URL进行动态行为分析，模拟用户访问以检测恶意行为</td></tr>
+        <tr><td>发现恶意URL</td><td>当沙箱分析判定URL为恶意时执行的动作</td></tr>
+        <tr><td>隔离 / 阻断 / 标记 / 丢弃</td><td>邮件存入隔离区… / 拒绝接收该邮件，发件人收到退信通知 / 邮件正常投递，但添加风险标签提醒用户 / 静默删除邮件，不通知发件人</td></tr>
+        <tr><td>进行下一步检测 / 按恶意处置</td><td>超时后放行邮件，依赖链接保护在用户点击时进行实时检测 / 超时后按照恶意URL的处置策略执行</td></tr>
+        <tr><td>本地URL情报库 / 情报库清理周期 / 云端URL情报查询 / 链接保护</td><td>缓存历史检测结果… / 自动清理超过指定天数的旧记录… / 查询云端威胁情报库… / 将邮件中的URL改写为网关代理链接…</td></tr>
+      </tbody>
+    </table>
+    <h3>6.3 异常场景（PRD §4）</h3>
+    <table class="spec-table">
+      <thead><tr><th>场景</th><th>处理方式</th><th>demo 现状</th></tr></thead>
+      <tbody>
+        <tr><td>清理周期 &lt;30 / &gt;365 / 非数字</td><td>红色错误提示，不保存</td><td>已实现（错误文案统一"清理周期需在 30-365 天之间"；非数字同样触发）</td></tr>
+        <tr><td>清理周期为空</td><td>恢复默认值180天</td><td>未实现：空→NaN→报错（差异 D-004）</td></tr>
+        <tr><td>沙箱分析超时 &gt;30s</td><td>执行配置的超时处置策略</td><td>配置项已提供</td></tr>
+        <tr><td>云端情报查询超时 &gt;5s</td><td>降级为仅本地沙箱分析</td><td>后端逻辑，UI 无体现</td></tr>
+        <tr><td>配置保存超时 / 情报库查询失败</td><td>错误 Toast"保存失败，请重试" / 继续沙箱分析并记录日志</td><td>后端逻辑 + Toast 待落地</td></tr>
+        <tr><td>无编辑权限修改</td><td>提示"您没有修改此配置的权限"</td><td>未实现</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="i18n">
+    <h2>7. 国际化规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>语言</th><th>demo 覆盖</th><th>缺口</th></tr></thead>
+      <tbody>
+        <tr><td>中文 zh</td><td>完整</td><td>-</td></tr>
+        <tr><td>英文 en / 泰语 th</td><td>流水线外层（卡片名、抽屉标题、图例）走全局 <code>t()</code>，zh/en/th 齐备</td><td>模块内部（沙箱/链接保护 Tab 全部文案）硬编码中文，未走 t()（差异 D-006）</td></tr>
+        <tr><td>第4语言</td><td>无</td><td>implement.md 要求四种内置语言，demo 仅 zh/en/th（差异 D-007）</td></tr>
+      </tbody>
+    </table>
+    <h3>7.2 相关 i18n key 清单（外层已存在）</h3>
+    <table class="spec-table">
+      <thead><tr><th>i18n key</th><th>中文文案</th><th>使用位置</th></tr></thead>
+      <tbody>
+        <tr><td><code>pipeline.urlProtection</code></td><td>URL检测与防护</td><td>策略卡标题 / 抽屉面包屑 / 左导航（en: URL Protection，th: การป้องกัน URL）</td></tr>
+        <tr><td><code>pipeline.urlDesc</code></td><td>检测邮件中的恶意链接</td><td>策略数据模型 description</td></tr>
+        <tr><td><code>pipeline.phase3Content</code></td><td>阶段3: 内容层</td><td>阶段标题 / 抽屉头部</td></tr>
+        <tr><td><code>pipeline.configBtn</code> / <code>pipeline.goConfig</code></td><td>配置 / 去配置</td><td>卡片按钮（已配置/未配置）</td></tr>
+        <tr><td><code>pipeline.actionQuarantine</code></td><td>隔离并记录日志</td><td>策略数据模型 action</td></tr>
+        <tr><td><code>pipeline.actionQuarantineAction</code> / <code>pipeline.actionDeliver</code> / <code>pipeline.policyEffectQuarantine</code></td><td>隔离 / 投递 / 命中则隔离，邮件保留至隔离区</td><td>卡片 Hover Tooltip</td></tr>
+        <tr><td>（待新增）模块内文案 key</td><td>沙箱检测、检测结果处置、发现恶意URL、四个处置选项、扫描异常处置、三个超时选项、情报库设置、本地URL情报库、URL情报库清理周期、清理周期需在 30-365 天之间、云端URL情报查询、链接保护、点击时安全策略（固定）、已知恶意URL、未知URL、阻断并提示、安全策略为系统固定配置不可修改、链接保护已禁用警告、该功能仅适用于接收方向等</td><td>UrlProtectionModule 内部（落地时补 zh/en/th/第4语言）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="responsive">
+    <h2>8. 响应式规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>断点</th><th>浏览器验证</th><th>表现</th></tr></thead>
+      <tbody>
+        <tr><td>1440px</td><td>默认截图</td><td>阶段卡横向排布；抽屉 80vw 内左导航 + 配置卡有充足空间；沙箱处置下拉区 <code>md:grid-cols-2</code> 双列（当前仅一个子项占左列）。</td></tr>
+        <tr><td>1024px</td><td>已截图</td><td>主页面横向布局压缩，阶段卡换行；PRD 要求 ≥1024 双列、768-1023 单列、&lt;768 抽屉全屏。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/responsive-1024-default.png" alt="1024px 响应式截图">
+      <figcaption>1024×900 默认态：左侧导航固定宽度，流水线卡片区压缩换行。</figcaption>
+    </figure>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>9. 与 PRD / 源码 / 浏览器渲染的差异标注</h2>
+    <table class="spec-table">
+      <thead><tr><th>#</th><th>差异点</th><th>PRD 描述</th><th>demo 实际</th><th>建议处理</th></tr></thead>
+      <tbody>
+        <tr><td>D-001</td><td>方向切换 UI 缺失</td><td>沙箱按方向配置，"切换顶部方向Tab加载对应方向配置"；链接保护非接收方向显示禁用提示</td><td>内容策略抽屉无方向切换控件，<code>direction</code> 恒为 receive；非接收禁用态与 send→block 默认值均不可达（仅存于源码）</td><td>落地需明确是否补方向 Tab（Q1）；本规格将非接收态按源码收录于层级3</td></tr>
+        <tr><td>D-002</td><td>「点击时复检策略」未实现</td><td>0709 需求：链接保护 Tab 固定策略下方应有 回扫黑名单/查询情报/深度复检(超时上限/兜底/等待体验/允许跳过) 配置块</td><td>链接保护 Tab 仅有开关 + 两张固定策略卡</td><td>需确认是否纳入本期（Q3）</td></tr>
+        <tr><td>D-003</td><td>沙箱 Tab 形态可见性</td><td>主 PRD 未提形态约束（0704 补充：仅传统版展示）</td><td><code>showSandbox = !capabilities.ai</code>；demo 默认 cloud 形态导致默认打开只见链接保护</td><td>以 0704/demo 为准，规格已按形态矩阵标注</td></tr>
+        <tr><td>D-004</td><td>清理周期校验细节</td><td>失焦校验；空值恢复默认180</td><td>onChange 即时校验；非法值输入框回弹为上次合法值 + 红框 + 红字；空值报错而非恢复180；非数字与越界共用同一文案</td><td>回弹行为可保留；空值恢复180按 PRD 落地或确认</td></tr>
+        <tr><td>D-005</td><td>保存模型不一致</td><td>"配置修改实时生效，无需手动保存按钮"；另要求保存成功/失败 Toast</td><td>抽屉有"保存配置"按钮 + "有未保存的更改"提示，点击仅清标记，无 Toast</td><td>以 demo 显式保存为准（与其他策略页一致），落地补 Toast 与失败态</td></tr>
+        <tr><td>D-006</td><td>模块内文案未国际化</td><td>PRD/implement.md 要求多语言</td><td>UrlProtectionModule 内部文案全部硬编码中文（外层卡片/抽屉标题已走 t()）</td><td>落地时为模块内文案补 i18n key</td></tr>
+        <tr><td>D-007</td><td>语言数量</td><td>implement.md 要求四种内置语言</td><td>demo language-context 仅 zh/en/th</td><td>确认第4语言（Q5）</td></tr>
+        <tr><td>D-008</td><td>模块主色</td><td>PRD 视觉规范：模块标识紫色 #a855f7 左边框</td><td>流水线卡片左色条为橙色 #fa8c16（configurable 类型统一推导）；紫色仅出现在沙箱 Globe 图标与非嵌入独立卡片（未使用路径）</td><td>以 demo 流水线配色体系为准</td></tr>
+        <tr><td>D-009</td><td>抽屉头部子标题不联动</td><td>-（PRD 未述）</td><td>Sheet 头部"/ URL检测与防护"固定为打开时策略，左导航切到附件安全检测后头部不变（浏览器验证 h2 仍为 URL检测与防护）</td><td>体验问题，落地建议联动更新</td></tr>
+        <tr><td>D-010</td><td>字段级 Tooltip 缺失</td><td>PRD §3 列出 12 条字段悬浮提示</td><td>demo 模块内无任何字段 Tooltip（仅流水线卡片与折叠导航有 Tooltip）</td><td>落地按 PRD 补齐（文案见 §6.2）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>10. 需确认事项</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>问题</th><th>影响</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td>沙箱配置的方向维度如何落地：抽屉内是否需要接收/外发/域内方向 Tab？若不做方向切换，send/internal 方向配置是否仍需存储与生效？</td><td>影响配置模型、UI 结构与 antispam 方向判定链路。</td></tr>
+        <tr><td>Q2</td><td>沙箱处置动作映射统一规则系统：isolate→quarantine、block→reject、discard→discard 是否成立；"标记 mark"按 implement.md 映射 accept+特定 header，header 名称与下游（审核队列可选路由）如何约定？</td><td>影响 antispam 决策链与统一 action 集。</td></tr>
+        <tr><td>Q3</td><td>0709「点击时复检策略」（回扫黑名单/查询情报/深度复检及 M3.1-M3.4）是否纳入本期实现范围？若纳入，其在链接保护 Tab 的布局按 0709 文档补充。</td><td>影响 LinkProtectionConfig 字段集与用户端等待页/跳过审计。</td></tr>
+        <tr><td>Q4</td><td>配置存储：走 ConfigManager 配置系统（管理员可见可改，含租户维度覆盖）还是专表？多租户隔离粒度？</td><td>影响 PUT /api/config/url-protection 的映射方式。</td></tr>
+        <tr><td>Q5</td><td>四语国际化的第4种语言是哪一种？模块内硬编码文案补 key 的范围以本规格 §7.2 为准是否可行？</td><td>影响 i18n key 清单与验收。</td></tr>
+        <tr><td>Q6</td><td>URL 沙箱引擎与云端威胁情报的上游服务现状：网关当前是否已有可对接的沙箱/情报服务（textsim/attachd 之外）？超时（30s/5s）与降级策略由谁执行？</td><td>影响 Step2 检测链路是否本期可实现。</td></tr>
+        <tr><td>Q7</td><td>链接保护重定向端点（safelink 域名、token 加解密密钥、点击日志 url_click_log）部署与存储形态？用户端警告页（0704 §3）是否随本模块一并落地？</td><td>影响 URL 改写与点击时检测闭环。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    if (window.mermaid) mermaid.initialize({ startOnLoad: true });
+
+    // ===== 2.2 抽屉容器可交互预览 =====
+    const masterToggle = document.querySelector("[data-master-toggle]");
+    const lpToggle = document.querySelector("[data-lp-toggle]");
+    const panelBody = document.querySelector("[data-panel-body]");
+    const statusText = document.querySelector("[data-status]");
+    const urlDot = document.querySelector("[data-url-dot]");
+    const urlSummary = document.querySelector("[data-url-summary]");
+    const lpZone = document.querySelector("[data-lp-zone]");
+    const lpWarn = document.querySelector("[data-lp-warn]");
+    const unsaved = document.querySelector("[data-unsaved]");
+    const saveBtn = document.querySelector("[data-save]");
+    const navCollapse = document.querySelector("[data-nav-collapse]");
+    const navLabels = [...document.querySelectorAll("[data-nav-label]")];
+
+    function markUnsaved() { unsaved.classList.add("show"); }
+
+    function flip(btn) {
+      const on = btn.getAttribute("aria-checked") === "true";
+      btn.setAttribute("aria-checked", String(!on));
+      return !on;
+    }
+
+    masterToggle.addEventListener("click", () => {
+      const on = flip(masterToggle);
+      statusText.textContent = on ? "已启用" : "已禁用";
+      statusText.classList.toggle("off", !on);
+      panelBody.classList.toggle("disabled", !on);
+      urlDot.classList.toggle("off", !on);
+      urlSummary.textContent = on ? "信誉评估/沙箱分析/仿冒检测" : "未启用";
+      markUnsaved();
+    });
+
+    lpToggle.addEventListener("click", () => {
+      const on = flip(lpToggle);
+      lpZone.style.opacity = on ? "" : ".5";
+      lpZone.style.pointerEvents = on ? "" : "none";
+      lpWarn.classList.toggle("show", !on);
+      lpWarn.style.pointerEvents = "auto";
+      markUnsaved();
+    });
+
+    saveBtn.addEventListener("click", () => unsaved.classList.remove("show"));
+
+    let collapsed = false;
+    navCollapse.addEventListener("click", () => {
+      collapsed = !collapsed;
+      navLabels.forEach((el) => el.classList.toggle("is-hidden", collapsed));
+      navCollapse.textContent = collapsed ? "⟩ 展开导航" : "⟨ 折叠导航";
+      document.querySelector(".drawer-shell").style.gridTemplateColumns = collapsed ? "56px 1fr" : "208px 1fr";
+    });
+  </script>
+</body>
+</html>

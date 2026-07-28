@@ -1,0 +1,9 @@
+{
+  "module": "email-handling-grey-mail-queue",
+  "current_version": 1,
+  "history": [
+    { "version": 1, "generated_at": "2026-07-18",
+      "demo_commit": "2cdad33", "spec_commit": "804efb9",
+      "summary": "初版：查询筛选（普通/高级双Tab）、批量操作5动作、9列数据表格、分页、复用共享详情弹窗（灰邮快速处置面板+意图分析）" }
+  ]
+}

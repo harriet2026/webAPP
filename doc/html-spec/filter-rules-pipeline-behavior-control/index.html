@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>发信行为管控 - HTML 规格说明</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  colors: {
+    border:'hsl(var(--sc-border) / <alpha-value>)', input:'hsl(var(--sc-input) / <alpha-value>)', ring:'hsl(var(--sc-ring) / <alpha-value>)',
+    background:'hsl(var(--sc-background) / <alpha-value>)', foreground:'hsl(var(--sc-foreground) / <alpha-value>)',
+    primary:{DEFAULT:'hsl(var(--sc-primary) / <alpha-value>)',foreground:'hsl(var(--sc-primary-foreground) / <alpha-value>)'},
+    secondary:{DEFAULT:'hsl(var(--sc-secondary) / <alpha-value>)',foreground:'hsl(var(--sc-secondary-foreground) / <alpha-value>)'},
+    destructive:{DEFAULT:'hsl(var(--sc-destructive) / <alpha-value>)',foreground:'hsl(var(--sc-destructive-foreground) / <alpha-value>)'},
+    muted:{DEFAULT:'hsl(var(--sc-muted) / <alpha-value>)',foreground:'hsl(var(--sc-muted-foreground) / <alpha-value>)'},
+    accent:{DEFAULT:'hsl(var(--sc-accent) / <alpha-value>)',foreground:'hsl(var(--sc-accent-foreground) / <alpha-value>)'},
+    card:{DEFAULT:'hsl(var(--sc-card) / <alpha-value>)',foreground:'hsl(var(--sc-card-foreground) / <alpha-value>)'},
+  },
+  borderRadius:{lg:'var(--sc-radius)',md:'calc(var(--sc-radius) - 2px)',sm:'calc(var(--sc-radius) - 4px)'}
+}}}
+</script>
+<style>
+:root{
+  --primary:oklch(0.52 0.226 262);--primary-foreground:oklch(0.985 0 0);--background:oklch(0.98 0.01 205);
+  --foreground:oklch(0.145 0 0);--card:oklch(1 0 0);--muted:oklch(0.97 0 0);--muted-foreground:oklch(0.556 0 0);
+  --border:oklch(0.922 0 0);--destructive:oklch(0.577 0.245 27.325);--radius:0.625rem;
+  --diff-bg:oklch(0.97 0.013 25);--diff-border:oklch(0.65 0.2 25);--question-bg:oklch(0.97 0.05 95);--question-border:oklch(0.75 0.15 90);
+  --font-sans:"Geist","Geist Fallback",system-ui,sans-serif;--font-mono:"Geist Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto}
+.spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:2rem}
+.spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.5rem}
+.meta-table{width:100%;border-collapse:collapse;font-size:.875rem}
+.meta-table td{padding:.5rem 1rem;border-bottom:1px solid var(--border)}
+.meta-table td:first-child{font-weight:600;width:160px;color:var(--muted-foreground);white-space:nowrap}
+.component-toc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 2rem;margin-bottom:2rem}
+.component-toc>h2{color:var(--primary);font-size:1.05rem;margin-bottom:.75rem;border-bottom:1px solid var(--border);padding-bottom:.5rem}
+.component-toc ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.5rem}
+.component-toc li{padding:.375rem .75rem;border-radius:calc(var(--radius) - 4px);background:var(--muted);font-size:.875rem}
+.component-toc li a{color:var(--primary);text-decoration:none;font-weight:500}
+.component-toc li a:hover{text-decoration:underline}
+.component-toc .toc-layer-links{font-size:.75rem;color:var(--muted-foreground);margin-left:.5rem}
+.component-toc .toc-badge{display:inline-block;font-size:.6875rem;font-weight:600;padding:.0625rem .375rem;border-radius:calc(var(--radius) - 4px);background:var(--primary);color:var(--primary-foreground);white-space:nowrap;margin-left:.35rem}
+section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem}
+section>h2{color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:.5rem;margin-bottom:1.25rem;font-size:1.25rem}
+h3{font-size:1.05rem;margin:1rem 0 .75rem;color:var(--foreground)}
+h4{font-size:.95rem;margin:.75rem 0 .5rem;color:var(--muted-foreground)}
+table.spec-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:1rem 0}
+table.spec-table th{background:var(--muted);font-weight:600;text-align:left;padding:.6rem .7rem;border:1px solid var(--border);white-space:nowrap}
+table.spec-table td{padding:.55rem .7rem;border:1px solid var(--border);vertical-align:top}
+table.spec-table tr:nth-child(even) td{background:color-mix(in oklch,var(--muted) 55%,transparent)}
+.screenshot-figure{margin:1rem 0;text-align:center}
+.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.screenshot-figure figcaption{margin-top:.5rem;font-size:.8125rem;color:var(--muted-foreground)}
+.component-spec{border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.25rem 0;background:var(--card)}
+.component-spec>h3{color:var(--primary);border-left:4px solid var(--primary);padding-left:.75rem}
+pre{background:var(--muted);border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);padding:1rem;overflow-x:auto;font-family:var(--font-mono);font-size:.8rem;line-height:1.5;margin:1rem 0}
+code{font-family:var(--font-mono);font-size:.85em}
+.mermaid{text-align:center;margin:1rem 0;padding:1rem;background:var(--muted);border-radius:calc(var(--radius) - 2px);overflow-x:auto}
+.diff-section{border-left:4px solid var(--diff-border);background:var(--diff-bg)}
+.diff-section>h2{color:var(--diff-border);border-bottom-color:var(--diff-border)}
+.diff-badge{display:inline-block;background:var(--diff-border);color:#fff;font-size:.7rem;font-weight:600;padding:.1rem .45rem;border-radius:calc(var(--radius) - 4px);margin-right:.4rem;white-space:nowrap}
+.question-section{border-left:4px solid var(--question-border);background:var(--question-bg)}
+.question-section>h2{color:var(--question-border);border-bottom-color:var(--question-border)}
+.badge{display:inline-block;font-size:.72rem;font-weight:600;padding:.1rem .45rem;border-radius:calc(var(--radius) - 4px)}
+.badge-high{background:oklch(0.65 0.2 25);color:#fff}.badge-medium{background:oklch(0.78 0.15 90);color:var(--foreground)}.badge-low{background:oklch(0.85 0.05 150);color:var(--foreground)}
+blockquote{border-left:4px solid var(--destructive);background:var(--diff-bg);padding:.75rem 1rem;margin:1rem 0;font-size:.875rem;border-radius:0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0}
+.component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:1.75rem 1.25rem 1.25rem;margin:1rem 0;background:#fff;position:relative;overflow:auto}
+.component-preview::before{content:"🖥 可交互组件预览（demo 类名 + shadcn shim；可点击/输入/联动）";position:absolute;top:-.65rem;left:.75rem;background:var(--primary);color:var(--primary-foreground);font-size:.6875rem;font-weight:600;padding:.125rem .5rem;border-radius:calc(var(--radius) - 4px);white-space:nowrap}
+.sc{--sc-background:0 0% 100%;--sc-foreground:222 47% 11%;--sc-card:0 0% 100%;--sc-card-foreground:222 47% 11%;
+  --sc-muted:210 40% 96%;--sc-muted-foreground:215 16% 47%;--sc-border:214 32% 91%;--sc-input:214 32% 91%;
+  --sc-primary:221 83% 53%;--sc-primary-foreground:210 40% 98%;--sc-secondary:210 40% 96%;--sc-secondary-foreground:222 47% 11%;
+  --sc-accent:210 40% 96%;--sc-accent-foreground:222 47% 11%;--sc-destructive:0 84% 60%;--sc-destructive-foreground:210 40% 98%;
+  --sc-ring:221 83% 53%;--sc-radius:0.625rem;color:hsl(var(--sc-foreground));font-size:14px}
+.sc *{box-sizing:border-box}
+.interaction-layer{border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.5rem 0;background:var(--card)}
+.interaction-layer>h4{color:var(--primary);font-size:.95rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+.layer-badge{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--primary);color:var(--primary-foreground);font-size:.75rem;font-weight:700;flex-shrink:0}
+.trigger-path{background:var(--muted);border-radius:calc(var(--radius) - 4px);padding:.5rem .75rem;margin:.5rem 0 1rem;font-size:.8125rem;color:var(--muted-foreground)}
+.trigger-path strong{color:var(--foreground)}
+.dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);overflow:hidden}
+.dom-comparison>h5{background:var(--muted);padding:.5rem .75rem;font-size:.8125rem;font-weight:600;border-bottom:1px solid var(--border)}
+.dom-comparison>h5::before{content:"🔍 ";}
+.dom-comparison table{width:100%;border-collapse:collapse;font-size:.8rem}
+.dom-comparison th{background:var(--muted);font-weight:600;text-align:left;padding:.45rem .7rem;border-bottom:1px solid var(--border)}
+.dom-comparison td{padding:.45rem .7rem;border-bottom:1px solid var(--border);vertical-align:top}
+.dom-comparison tr:last-child td{border-bottom:none}
+.dom-pass{color:oklch(0.5 0.15 150);font-weight:600}.dom-fail{color:var(--destructive);font-weight:600}.dom-fixed{color:oklch(0.6 0.15 90);font-weight:600}
+table.layer-index{width:100%;border-collapse:collapse;font-size:.875rem;margin:1rem 0}
+table.layer-index th{background:var(--muted);font-weight:600;text-align:left;padding:.6rem .7rem;border:1px solid var(--border)}
+table.layer-index td{padding:.6rem .7rem;border:1px solid var(--border);vertical-align:top}
+table.layer-index td a{color:var(--primary);text-decoration:none;font-weight:600}
+table.layer-index td a:hover{text-decoration:underline}
+.version-history-table td:nth-child(5){color:var(--muted-foreground)}
+.spec-version{font-weight:600;color:var(--primary)}
+.legend{font-size:.8rem;color:var(--muted-foreground);margin:.25rem 0 .75rem}
+.kv{font-size:.8rem;color:var(--muted-foreground)}
+</style>
+</head>
+<body>
+
+<header class="spec-header">
+  <h1>发信行为管控 详细产品规格说明</h1>
+  <table class="meta-table">
+    <tr><td>spec 源</td><td><code>design/origin/spec/发信行为管控模块需求文档.md</code></td></tr>
+    <tr><td>demo 源</td><td><code>demo/app/filter-rules/identity/page.tsx</code> → <code>components/filter-rules-new/identity-strategy-page.tsx</code> → <code>components/sender-behavior-control/</code></td></tr>
+    <tr><td>覆盖 spec 章节</td><td>§1–§7（全量）</td></tr>
+    <tr><td>遵循约束</td><td><code>design/origin/implement.md</code></td></tr>
+    <tr><td>页面名称</td><td>发信行为管控（安全策略 · 策略流水线 · 阶段2 收发信人策略）</td></tr>
+    <tr><td>路由路径</td><td><code>/filter-rules/identity</code> → 流水线节点「发信行为管控」（behaviorControl 策略）</td></tr>
+    <tr><td>组件入口</td><td><code>SenderBehaviorControlModule</code>（以 <code>showHeader=false</code> 挂载在身份认证策略页的策略卡内）</td></tr>
+    <tr><td>i18n 标题 key</td><td><code>identity.sendingBehaviorControl</code>（导航节点）</td></tr>
+    <tr><td>导航层级</td><td>收发信策略 / 发信行为管控</td></tr>
+    <tr><td>权限矩阵</td><td>系统管理员=读写+导入导出；安全管理员=创建/编辑（不可删预置）；审计员=只读+导出；普通用户=无权限（spec §1 权限表）</td></tr>
+    <tr><td>规格版本</td><td><span class="spec-version">v1</span></td></tr>
+    <tr><td>生成日期</td><td>2026-07-14</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td><code>804efb9</code></td></tr>
+  </table>
+</header>
+
+<nav class="component-toc">
+  <h2>📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 面板头部与功能说明</a><span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-2">2.2 筛选操作栏</a><span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-3">2.3 规则表格与分页</a><span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-4">2.4 规则编辑抽屉</a><span class="toc-badge">4层</span>
+      <span class="toc-layer-links">
+        <a href="./layer-1-object-linkage.html">层级1</a>
+        <a href="./layer-2-detection-preview-validation.html">层级2</a>
+        <a href="./layer-3-examples-simulator.html">层级3</a>
+      </span></li>
+    <li><a href="#dialog-3-1">3.1 删除确认对话框</a><span class="toc-badge">1层</span></li>
+    <li><a href="#dialog-3-2">3.2 未保存确认对话框</a><span class="toc-badge">1层</span></li>
+  </ul>
+</nav>
+
+<section id="version-history">
+  <h2>🕑 版本历史</h2>
+  <table class="version-history-table spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody>
+      <tr><td>v1</td><td>2026-07-14</td><td><code>804efb9</code></td><td><code>804efb9</code></td>
+        <td>初版：按 demo 实际渲染建档——规则表格（8列，状态为只读 Badge）、方向/类型/状态筛选、920px 双栏编辑抽屉（3 区块 + 对象类型联动 + OR 组合 + 实时效果预览 + 配置示例 + 模拟测试）、删除/未保存确认对话框；标注与 spec 的 6 处差异。</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <p class="legend">发信行为管控不是独立路由，而是「身份认证与仿冒检测」策略页（<code>/filter-rules/identity</code>）左侧流水线导航中的一个策略节点。点击「发信行为管控」节点，右侧策略卡内渲染 <code>SenderBehaviorControlModule</code>（<code>showHeader=false</code>）。策略卡的标题「发信行为管控」与「已启用」开关由父页面渲染，非模块自身。</p>
+  <h3>1.1 区域划分</h3>
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>名称</th><th>元素概览</th><th>尺寸/样式</th><th>响应式</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td>策略卡头部（父页面）</td><td>标题「发信行为管控」+ 模块启用开关（已启用）</td><td>px-6 py-4 border-b</td><td>固定</td></tr>
+      <tr><td>B</td><td>功能说明条</td><td>Info 图标 + 说明文案（蓝色提示条）</td><td>p-3 bg-blue-50 rounded-lg</td><td>固定</td></tr>
+      <tr><td>C</td><td>筛选操作栏</td><td>搜索框 + 方向/类型/状态下拉 + 重置 + 新建规则 + 导入 + 导出</td><td>flex justify-between</td><td>flex 自适应</td></tr>
+      <tr><td>D</td><td>规则表格</td><td>8 列表格 + 悬浮高亮行 + 空态</td><td>border rounded-lg overflow-hidden</td><td>水平滚动</td></tr>
+      <tr><td>E</td><td>分页区</td><td>总数统计 + 页码 + 前往第N页 + 每页条数</td><td>px-4 py-3 border-t</td><td>≤1 页时仅显总数</td></tr>
+      <tr><td>F</td><td>规则编辑抽屉（覆盖层）</td><td>920px 右侧 Sheet，左表单 560px + 右预览</td><td>w-[920px] p-0</td><td>&lt;1024 → 全宽</td></tr>
+    </tbody>
+  </table>
+  <h3>1.2 整页默认态截图（浏览器实际渲染）</h3>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/module-layer-0-default.png" alt="整页默认态：发信行为管控面板">
+    <figcaption>路由 /filter-rules/identity → 选中「发信行为管控」节点，视口 1440×1000。表格列：规则ID / 规则名称 / 管控方向 / 管控对象 / 执行动作 / 状态 / 修改时间 / 操作。</figcaption>
+  </figure>
+  <h3>1.3 视觉规范</h3>
+  <table class="spec-table">
+    <thead><tr><th>属性</th><th>值</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>主色</td><td><code>oklch(0.52 0.226 262)</code>（紫蓝）</td><td>demo globals.css --primary</td></tr>
+      <tr><td>圆角</td><td><code>0.625rem</code></td><td>demo globals.css --radius</td></tr>
+      <tr><td>字体</td><td>Geist / Geist Mono</td><td>demo globals.css</td></tr>
+      <tr><td>图标库</td><td>lucide-react，14–20px</td><td>组件 import</td></tr>
+      <tr><td>表头底色</td><td><code>bg-gray-50 dark:bg-gray-900</code></td><td>表格 TableRow</td></tr>
+      <tr><td>说明条</td><td><code>bg-blue-50 border-blue-200 text-blue-700</code></td><td>功能说明</td></tr>
+      <tr><td>抽屉区块色条</td><td>基础设置=蓝 / 检测条件=琥珀 / 执行动作=红</td><td>drawer 区块 <code>h-5 w-1 rounded-full</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 面板头部与功能说明</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 组件路径</td><td><code>sender-behavior-control-module.tsx</code>（父头部来自 <code>identity-strategy-page.tsx</code>）</td></tr>
+      <tr><td>Props</td><td><code>{ disabled?, borderStyle?, showHeader? }</code>（本页 <code>showHeader=false</code>）</td></tr>
+      <tr><td>状态管理</td><td><code>useState(enabled=true)</code>；<code>useLanguage()</code> 取四语标签 LABELS</td></tr>
+      <tr><td>交互层级数</td><td>1 层（静态说明 + 开关）</td></tr>
+    </tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认渲染</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：选中「发信行为管控」流水线节点即渲染</div>
+      <div class="component-preview"><div class="sc">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">发信行为管控</h3>
+          <button type="button" onclick="this.dataset.on=this.dataset.on==='0'?'1':'0';this.style.background=this.dataset.on==='0'?'#cbd5e1':'hsl(221 83% 53%)';this.firstElementChild.style.transform=this.dataset.on==='0'?'translateX(2px)':'translateX(18px)'" data-on="1" style="width:40px;height:22px;border-radius:999px;background:hsl(221 83% 53%);position:relative;border:none;cursor:pointer" title="模块启用开关（父页面渲染）"><span style="position:absolute;top:2px;left:0;width:18px;height:18px;border-radius:50%;background:#fff;transform:translateX(18px);transition:.15s"></span></button>
+        </div>
+        <div class="p-3 mt-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div class="flex items-center gap-2 text-sm text-blue-700">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <span>检测并处置异常发信行为（僵尸网络、代理池、账号被盗、内部滥发等），各规则按优先级顺序匹配。</span>
+          </div>
+        </div>
+      </div></div>
+      <table class="spec-table">
+        <thead><tr><th>序号</th><th>元素</th><th>文案</th><th>图标</th><th>行为</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>标题 h3</td><td>发信行为管控</td><td>-</td><td>静态（父页面策略卡标题）</td><td>identity.sendingBehaviorControl</td></tr>
+          <tr><td>2</td><td>Switch（父页面）</td><td>已启用 / 已禁用</td><td>-</td><td>切换策略启用；禁用时下方 <code>opacity-50 pointer-events-none</code></td><td>-</td></tr>
+          <tr><td>3</td><td>说明条 Alert</td><td>检测并处置异常发信行为（僵尸网络、代理池、账号被盗、内部滥发等），各规则按优先级顺序匹配。</td><td>Info(16px)</td><td>静态</td><td>LABELS.infoTip</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5><table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>说明条根节点</td><td>div.p-3.bg-blue-50.rounded-lg.border-blue-200</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>说明条文案</td><td>"检测并处置异常发信行为…各规则按优先级顺序匹配。"</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>Info 图标</td><td>svg.lucide-info(16px)</td><td>inline svg(16px)</td><td class="dom-pass">✅</td></tr>
+          <tr><td>启用开关</td><td>父页面 Switch（策略卡头部，非模块自身 header）</td><td>预览含开关并标注来源</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </article>
+
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 筛选操作栏</h3>
+    <blockquote>⚠️ 事实源说明：仓库内 <code>behavior-rule-filters.tsx</code> 与 <code>behavior-rule-table.tsx</code> 为<strong>未被引用的死代码</strong>（其筛选栏无方向筛选、按钮文案为“添加规则”）。实际渲染的筛选栏/表格由 <code>sender-behavior-control-module.tsx</code> 内联实现，本规格以内联实现为准。</blockquote>
+    <table class="spec-table"><tbody>
+      <tr><td>状态管理</td><td><code>searchTerm / directionFilter / objectTypeFilter / statusFilter / sortAscending</code>；任一变更 <code>setCurrentPage(1)</code></td></tr>
+      <tr><td>过滤逻辑</td><td><code>useMemo(filteredRules)</code>：方向→类型→状态→关键字（名称/ID/邮箱/群组名/组织名/域名/IP/IP组名）→ <code>sortRulesByPriority</code></td></tr>
+      <tr><td>交互层级数</td><td>1 层</td></tr>
+    </tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认渲染（可搜索/筛选，联动下方 2.3 表格）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：随面板渲染；在预览中输入关键字或切换「方向」下拉会实时过滤下方 2.3 表格</div>
+      <div class="component-preview"><div class="sc">
+        <div class="flex items-center justify-between gap-4" style="flex-wrap:wrap">
+          <div class="flex items-center gap-2" style="flex:1;flex-wrap:wrap">
+            <div class="relative" style="min-width:220px">
+              <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input id="pv-search" oninput="bcFilter()" placeholder="搜索规则名称、管控对象..." class="border rounded-md" style="height:36px;padding:0 10px 0 32px;width:100%;border-color:hsl(214 32% 91%);font-size:14px">
+            </div>
+            <select id="pv-dir" onchange="bcFilter()" class="border rounded-md" style="height:36px;width:120px;padding:0 8px;font-size:14px;background:#fff;border-color:hsl(214 32% 91%)">
+              <option value="all">全部方向</option><option value="inbound">接收</option><option value="outbound">外发</option><option value="internal">域内</option><option value="bidirectional">双向</option>
+            </select>
+            <select id="pv-type" onchange="bcFilter()" class="border rounded-md" style="height:36px;width:120px;padding:0 8px;font-size:14px;background:#fff;border-color:hsl(214 32% 91%)">
+              <option value="all">全部类型</option><option value="global">全局</option><option value="sender">发信人</option><option value="senderIp">发信IP</option><option value="senderDomain">发信域名</option>
+            </select>
+            <select id="pv-status" onchange="bcFilter()" class="border rounded-md" style="height:36px;width:120px;padding:0 8px;font-size:14px;background:#fff;border-color:hsl(214 32% 91%)">
+              <option value="all">全部状态</option><option value="enabled">启用</option><option value="disabled">禁用</option>
+            </select>
+            <button onclick="document.getElementById('pv-search').value='';document.getElementById('pv-dir').value='all';document.getElementById('pv-type').value='all';document.getElementById('pv-status').value='all';bcFilter()" class="border rounded-md" style="height:32px;width:32px;display:inline-flex;align-items:center;justify-content:center;background:#fff;border-color:hsl(214 32% 91%);cursor:pointer" title="重置">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="rounded-md" style="height:32px;padding:0 12px;background:hsl(221 83% 53%);color:#fff;border:none;font-size:13px;display:inline-flex;align-items:center;gap:4px;cursor:pointer" onclick="document.getElementById('pv-drawer-note').scrollIntoView({behavior:'smooth'})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>新建规则</button>
+            <button class="border rounded-md" style="height:32px;width:34px;display:inline-flex;align-items:center;justify-content:center;background:#fff;border-color:hsl(214 32% 91%);cursor:pointer" title="导入"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></button>
+            <button class="border rounded-md" style="height:32px;width:34px;display:inline-flex;align-items:center;justify-content:center;background:#fff;border-color:hsl(214 32% 91%);cursor:pointer" title="导出"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></button>
+          </div>
+        </div>
+      </div></div>
+      <table class="spec-table">
+        <thead><tr><th>序号</th><th>元素</th><th>文案/占位</th><th>图标</th><th>默认值</th><th>选项</th><th>行为</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Input(搜索)</td><td>搜索规则名称、管控对象...</td><td>Search</td><td>空</td><td>-</td><td>输入即过滤（名称/ID/邮箱/群组/组织/域名/IP/IP组名），回到第1页</td></tr>
+          <tr><td>2</td><td>Select 方向</td><td>全部方向</td><td>-</td><td>all</td><td>全部方向/接收/外发/域内/双向</td><td>按 direction 过滤</td></tr>
+          <tr><td>3</td><td>Select 类型</td><td>全部类型</td><td>-</td><td>all</td><td>全部类型/全局/发信人/发信IP/发信域名</td><td>按 objectType 过滤</td></tr>
+          <tr><td>4</td><td>Select 状态</td><td>全部状态</td><td>-</td><td>all</td><td>全部状态/启用/禁用</td><td>按 enabled 过滤</td></tr>
+          <tr><td>5</td><td>Button 重置</td><td>-（图标）</td><td>RotateCcw</td><td>-</td><td>-</td><td>清空搜索+三个筛选，回到第1页</td></tr>
+          <tr><td>6</td><td>Button 新建</td><td>新建规则</td><td>Plus</td><td>-</td><td>-</td><td>打开编辑抽屉（空表单）→ 见 2.4</td></tr>
+          <tr><td>7</td><td>Button 导入</td><td>-（图标）</td><td>Upload</td><td>-</td><td>-</td><td>demo 中无 onClick（占位，未实现）</td></tr>
+          <tr><td>8</td><td>Button 导出</td><td>-（图标）</td><td>Download</td><td>-</td><td>-</td><td>demo 中无 onClick（占位，未实现）</td></tr>
+        </tbody>
+      </table>
+      <figure class="screenshot-figure"><img src="./screenshots/layer0-direction-filtered.png" alt="按方向筛选=域内"><figcaption>方向筛选选「域内」→ 表格仅显示域内规则（35 条中命中 8 条），验证筛选生效（浏览器实际渲染）。方向下拉选项：全部方向/接收/外发/域内/双向。</figcaption></figure>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5><table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>搜索占位符</td><td>"搜索规则名称、管控对象..."</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>方向筛选生效</td><td>选「域内」→ 8 条（全部域内）</td><td>预览下拉过滤同逻辑</td><td class="dom-pass">✅</td></tr>
+          <tr><td>方向下拉选项</td><td>全部方向/接收/外发/域内/双向</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>类型下拉选项</td><td>全部类型/全局/发信人/发信IP/发信域名</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>状态下拉选项</td><td>全部状态/启用/禁用</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>右侧按钮</td><td>新建规则(文字)+导入(图标)+导出(图标)</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>导入/导出 onClick</td><td>无（demo 未绑定）</td><td>标注为占位</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </article>
+
+  <article class="component-spec" id="component-2-3">
+    <h3>2.3 规则表格与分页</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>数据源</td><td><code>mockBehaviorRules</code>（7 条命名规则 + #8–#35 演示数据，共 35 条）</td></tr>
+      <tr><td>排序</td><td>默认按 priority 升序（数值越小越先匹配）。<em>注：内联表格未渲染优先级列，排序作用于行顺序</em></td></tr>
+      <tr><td>分页</td><td>每页 10/20/50/100，页码 + 前往第N页；≤1 页时仅显示总数</td></tr>
+      <tr><td>交互层级数</td><td>1 层（筛选/排序/分页均为就地状态变化）</td></tr>
+    </tbody></table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：表格初始态（与 2.2 联动，可搜索/筛选）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：随面板渲染。此预览内嵌 7 条命名规则，受 2.2 的搜索框/方向下拉过滤；行悬浮高亮，可点编辑/删除按钮（删除见 3.1）。</div>
+      <div class="component-preview"><div class="sc">
+        <div class="border rounded-lg" style="overflow:auto;border-color:hsl(214 32% 91%)">
+          <table style="width:100%;border-collapse:collapse;font-size:13px" id="pv-table">
+            <thead><tr style="background:hsl(210 40% 96%)">
+              <th style="text-align:left;padding:8px 10px;white-space:nowrap">规则ID</th>
+              <th style="text-align:left;padding:8px 10px">规则名称</th>
+              <th style="text-align:left;padding:8px 10px">管控方向</th>
+              <th style="text-align:left;padding:8px 10px">管控对象</th>
+              <th style="text-align:left;padding:8px 10px">执行动作</th>
+              <th style="text-align:left;padding:8px 10px">状态</th>
+              <th style="text-align:left;padding:8px 10px;white-space:nowrap">修改时间</th>
+              <th style="text-align:left;padding:8px 10px">操作</th>
+            </tr></thead>
+            <tbody id="pv-tbody"></tbody>
+          </table>
+        </div>
+        <div class="flex items-center" style="padding:10px 14px;color:hsl(215 16% 47%);font-size:13px">共 <span id="pv-count">7</span> 条规则（演示内嵌 7 条命名规则；实际 35 条分页）</div>
+      </div></div>
+      <h4>表格列定义</h4>
+      <table class="spec-table">
+        <thead><tr><th>列序</th><th>列名</th><th>字段</th><th>宽度</th><th>渲染规则</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>规则ID</td><td>id</td><td>w-32</td><td>等宽字体、灰色、text-xs（如 rule-1）</td><td>LABELS.ruleId</td></tr>
+          <tr><td>2</td><td>规则名称</td><td>name</td><td>min-w-32</td><td>font-medium</td><td>LABELS.ruleName</td></tr>
+          <tr><td>3</td><td>管控方向</td><td>direction</td><td>w-24</td><td>Badge：接收=蓝/外发=绿/域内=紫/双向=灰</td><td>LABELS.direction</td></tr>
+          <tr><td>4</td><td>管控对象</td><td>objectType(+子类型)</td><td>min-w-40</td><td>图标(Globe/User/Server/Mail)+等宽值+secondary 子类型 Badge</td><td>LABELS.objectType</td></tr>
+          <tr><td>5</td><td>执行动作</td><td>action</td><td>w-24</td><td>Badge：审核=黄/隔离=橙/丢弃=红/阻断=红</td><td>LABELS.action</td></tr>
+          <tr><td>6</td><td>状态</td><td>enabled</td><td>w-20</td><td><strong>只读 Badge</strong>（启用=default/蓝、禁用=secondary/灰）——非开关</td><td>LABELS.status</td></tr>
+          <tr><td>7</td><td>修改时间</td><td>modifiedAt</td><td>w-28</td><td>text-sm text-muted-foreground（YYYY-MM-DD HH:mm）</td><td>LABELS.modifyTime</td></tr>
+          <tr><td>8</td><td>操作</td><td>-</td><td>w-20</td><td>Edit(ghost) + Trash2(ghost,红图标)</td><td>LABELS.operation</td></tr>
+        </tbody>
+      </table>
+      <h4>分页区（另见截图）</h4>
+      <figure class="screenshot-figure"><img src="./screenshots/layer0-pagination-page2.png" alt="分页第2页"><figcaption>翻到第 2 页：首行为 rule-12（按优先级升序），底部「共 35 条规则」+ 页码 1/2/3/4 + 前往第N页 + 每页条数（10/20/50/100 条/页）</figcaption></figure>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5><table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>表头列数/文案</td><td>8 列：规则ID/规则名称/管控方向/管控对象/执行动作/状态/修改时间/操作</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>每页行数</td><td>10（默认 pageSize）</td><td>预览内嵌 7 条命名规则</td><td class="dom-fixed">≈（演示数据）</td></tr>
+          <tr><td>状态列控件</td><td>Badge（启用/禁用，只读）</td><td>Badge（只读）</td><td class="dom-pass">✅</td></tr>
+          <tr><td>操作列按钮</td><td>2× ghost button（Edit + Trash2 红）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>方向 Badge 配色</td><td>接收=blue,外发=green,域内=purple,双向=gray</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>动作 Badge 配色</td><td>审核=yellow,隔离=orange,丢弃=red,阻断=red</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>总数统计</td><td>"共 35 条规则"</td><td>预览标注 35 条</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </article>
+
+  <article class="component-spec" id="component-2-4">
+    <h3>2.4 规则编辑抽屉 BehaviorRuleDrawer（多层）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 组件路径</td><td><code>behavior-rule-drawer.tsx</code></td></tr>
+      <tr><td>Props</td><td><code>{ open, onOpenChange, editingRule, existingRules, currentDirection, onSave }</code></td></tr>
+      <tr><td>形态/尺寸</td><td>右侧 Sheet <code>w-[920px] p-0</code>，左表单 <code>w-[560px]</code> + 右预览 <code>flex-1</code></td></tr>
+      <tr><td>区块（3 个，色条）</td><td>基础设置(蓝) · 检测条件(琥珀) · 执行动作(红)</td></tr>
+      <tr><td>交互层级数</td><td>4 层（默认态 + 对象类型联动 + 检测/校验/预览 + 折叠区示例/模拟）</td></tr>
+      <tr><td>拆分策略</td><td>层级 0 内嵌本文件；层级 1–3 拆为独立子文件</td></tr>
+    </tbody></table>
+    <h4>交互层级关系图</h4>
+    <div class="mermaid">
+graph LR
+  L0["层级0: 抽屉默认态<br/>(新建·发信人/个人)"] -->|切换'管控对象类型'| L1["层级1: 对象类型联动<br/>全局/发信人/发信IP/发信域名"]
+  L0 -->|填检测条件·勾选OR| L2["层级2: 检测条件+校验+实时预览"]
+  L0 -->|展开右栏折叠区| L3["层级3: 配置示例 + 模拟测试"]
+  L2 -->|点保存(校验通过)| SAVE["关闭抽屉·刷新表格"]
+  L0 -->|取消/ESC(脏)| DLG["未保存确认(见3.2)"]
+    </div>
+
+    <div class="interaction-layer" id="pv-drawer-note">
+      <h4><span class="layer-badge">0</span> 交互层级 0：抽屉默认态（新建规则）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：2.2「新建规则」按钮 → <code>handleAdd()</code> → <code>setShowRuleDrawer(true)</code>（<code>editingRule=null</code>，标题「新建规则」）；编辑入口为 2.3 行内 Edit 按钮（标题「编辑规则」，表单回填）。默认 <code>direction=外发防护</code>、<code>objectType=发信人/个人</code>、<code>timeWindow=15分钟</code>、<code>dimensionA=使用发信IP个数上限</code>、<code>action=审核</code>、<code>priority=2000</code>。</div>
+      <div class="component-preview"><div class="sc" style="max-width:920px">
+        <div style="border:1px solid hsl(214 32% 91%);border-radius:8px;overflow:hidden">
+          <div class="flex items-center justify-between" style="padding:14px 20px;border-bottom:1px solid #E8E8E8">
+            <div><div style="font-size:18px;font-weight:600">新建规则</div><div style="font-size:13px;color:hsl(215 16% 47%);margin-top:2px">配置发信人行为管控规则</div></div>
+            <div class="flex items-center gap-2"><button class="border rounded-md" style="height:32px;padding:0 12px;background:#fff;font-size:13px;cursor:pointer">取消</button><button class="rounded-md" style="height:32px;padding:0 12px;background:hsl(221 83% 53%);color:#fff;border:none;font-size:13px;cursor:pointer">保存</button></div>
+          </div>
+          <div style="display:flex">
+            <div style="width:560px;flex-shrink:0;padding:20px;border-right:1px solid #E8E8E8">
+              <div style="background:#FAFAFA;border-radius:8px;padding:18px;margin-bottom:20px">
+                <div class="flex items-center gap-2" style="margin-bottom:14px"><span style="height:20px;width:4px;background:#3b82f6;border-radius:999px"></span><strong style="font-size:14px">基础设置</strong></div>
+                <div style="display:flex;flex-direction:column;gap:14px;font-size:13px">
+                  <div class="flex items-center gap-3"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 规则名称</label><input placeholder="如：销售部外发限制" class="border rounded-md" style="flex:1;height:34px;padding:0 10px;border-color:hsl(214 32% 91%)"></div>
+                  <div class="flex items-center gap-3"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 管控方向</label><select class="border rounded-md" style="width:192px;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option>入站防护</option><option selected>外发防护</option><option>域内防护</option><option>双向合计</option></select></div>
+                  <div class="flex items-center gap-3"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 管控对象类型</label><select id="pv-otype" onchange="bcObj(this.value)" class="border rounded-md" style="width:192px;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option value="global">全局</option><option value="sender" selected>发信人</option><option value="senderIp">发信IP</option><option value="senderDomain">发信域名</option></select></div>
+                  <div id="pv-o-sender">
+                    <div class="flex items-center gap-3" style="margin-bottom:14px"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 发信人类型</label><select id="pv-stype" onchange="bcSub(this.value)" class="border rounded-md" style="width:192px;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option value="individual" selected>个人</option><option value="group">群组</option><option value="organization">组织</option></select></div>
+                    <div id="pv-s-individual" class="flex items-center gap-3"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 邮箱地址</label><div style="flex:1"><input placeholder="如：user@corp.com 或 *@domain.com" class="border rounded-md" style="width:100%;height:34px;padding:0 10px;border-color:hsl(214 32% 91%)"><div style="font-size:11px;color:hsl(215 16% 47%);margin-top:4px">支持通配符 *@domain.com</div></div></div>
+                    <div id="pv-s-group" class="flex items-center gap-3" style="display:none"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 发信人群组</label><select class="border rounded-md" style="flex:1;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option>请选择群组</option><option>VIP客户 (50人)</option><option>销售团队 (120人)</option></select></div>
+                    <div id="pv-s-org" class="flex items-center gap-3" style="display:none"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 组织部门</label><select class="border rounded-md" style="flex:1;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option>请选择部门</option><option>销售部 (85人)</option><option>技术部 (156人)</option></select></div>
+                  </div>
+                  <div id="pv-o-ip" style="display:none">
+                    <div class="flex items-center gap-3" style="margin-bottom:14px"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> IP类型</label><select id="pv-iptype" onchange="bcIp(this.value)" class="border rounded-md" style="width:192px;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option value="single" selected>单个IP</option><option value="ipGroup">IP群组</option></select></div>
+                    <div id="pv-ip-single" class="flex items-center gap-3"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> IP地址/IP段</label><input placeholder="如：1.2.3.4 或 1.2.3.0/24" class="border rounded-md" style="flex:1;height:34px;padding:0 10px;border-color:hsl(214 32% 91%)"></div>
+                    <div id="pv-ip-group" class="flex items-center gap-3" style="display:none"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> IP群组</label><select class="border rounded-md" style="flex:1;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option>请选择IP群组</option><option>海外IP (45个IP)</option></select></div>
+                  </div>
+                  <div id="pv-o-domain" class="flex items-center gap-3" style="display:none"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 域名</label><input placeholder="如：example.com" class="border rounded-md" style="flex:1;height:34px;padding:0 10px;border-color:hsl(214 32% 91%)"></div>
+                  <div class="flex items-center gap-3"><label style="min-width:100px;text-align:right">有效期至 ⓘ</label><input type="date" class="border rounded-md" style="width:160px;height:34px;padding:0 8px;border-color:hsl(214 32% 91%)"><span style="font-size:11px;color:hsl(215 16% 47%)">(留空=永久有效)</span></div>
+                  <div class="flex items-center gap-3"><label style="min-width:100px;text-align:right">优先级 ⓘ</label><input type="number" value="2000" min="2000" max="2049" class="border rounded-md" style="width:96px;height:34px;padding:0 8px;border-color:hsl(214 32% 91%)"><span style="font-size:11px;color:hsl(215 16% 47%)">2000-2049</span></div>
+                </div>
+              </div>
+              <div style="background:#FAFAFA;border-radius:8px;padding:18px;margin-bottom:20px">
+                <div class="flex items-center gap-2" style="margin-bottom:14px"><span style="height:20px;width:4px;background:#f59e0b;border-radius:999px"></span><strong style="font-size:14px">检测条件</strong></div>
+                <div style="display:flex;flex-direction:column;gap:14px;font-size:13px">
+                  <div class="flex items-center gap-3"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 时间窗口</label><select class="border rounded-md" style="width:192px;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option>1分钟</option><option>5分钟</option><option selected>15分钟</option><option>1小时</option><option>6小时</option><option>24小时</option><option>当天（自然日）</option></select></div>
+                  <div class="flex items-center gap-3"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 检测维度A</label><select class="border rounded-md" style="flex:1;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option selected>使用发信IP个数上限</option><option>收信人总人数上限</option><option>发出邮件的总数上限</option><option>发出附件总大小上限(MB)</option></select></div>
+                  <div class="flex items-center gap-3"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 阈值A</label><input type="number" placeholder="请输入阈值" class="border rounded-md" style="width:128px;height:34px;padding:0 8px;border-color:hsl(214 32% 91%)"><span style="font-size:13px;color:hsl(215 16% 47%)">个</span></div>
+                  <div class="flex items-center gap-3"><span style="min-width:100px"></span><label class="flex items-center gap-2" style="cursor:pointer"><input type="checkbox" id="pv-or" onchange="document.getElementById('pv-dimb').style.display=this.checked?'flex':'none';document.getElementById('pv-thb').style.display=this.checked?'flex':'none'"> 启用OR组合条件</label></div>
+                  <div id="pv-dimb" class="flex items-center gap-3" style="display:none"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 检测维度B</label><select class="border rounded-md" style="flex:1;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option>使用发信IP个数上限</option><option selected>发出邮件的总数上限</option><option>收信人总人数上限</option><option>发出附件总大小上限(MB)</option></select></div>
+                  <div id="pv-thb" class="flex items-center gap-3" style="display:none"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 阈值B</label><input type="number" placeholder="请输入阈值" class="border rounded-md" style="width:128px;height:34px;padding:0 8px;border-color:hsl(214 32% 91%)"><span style="font-size:13px;color:hsl(215 16% 47%)">封</span></div>
+                </div>
+              </div>
+              <div style="background:#FAFAFA;border-radius:8px;padding:18px">
+                <div class="flex items-center gap-2" style="margin-bottom:14px"><span style="height:20px;width:4px;background:#ef4444;border-radius:999px"></span><strong style="font-size:14px">执行动作</strong></div>
+                <div style="display:flex;flex-direction:column;gap:14px;font-size:13px">
+                  <div class="flex items-center gap-3"><label style="min-width:100px;text-align:right"><span style="color:#ef4444">*</span> 执行动作</label><select class="border rounded-md" style="width:192px;height:34px;padding:0 8px;background:#fff;border-color:hsl(214 32% 91%)"><option selected>审核</option><option>隔离</option><option>丢弃</option><option>阻断</option></select></div>
+                  <div class="flex items-start gap-3"><label style="min-width:100px;text-align:right;margin-top:8px">备注</label><div style="flex:1"><textarea rows="3" placeholder="添加备注信息（最多200字）" class="border rounded-md" style="width:100%;padding:8px 10px;border-color:hsl(214 32% 91%)"></textarea><div style="font-size:11px;color:hsl(215 16% 47%);text-align:right;margin-top:4px">0/200</div></div></div>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1;background:#F5F5F5;padding:20px;min-width:300px">
+              <div style="background:#fff;border:1px solid #E8E8E8;border-radius:8px;padding:18px;margin-bottom:20px">
+                <div class="flex items-center gap-2" style="margin-bottom:14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg><strong style="font-size:14px">当前配置效果</strong></div>
+                <div style="border:1px solid #f59e0b;background:#fffbeb;border-radius:6px;padding:10px;color:#b45309;font-size:13px;display:flex;gap:8px;align-items:center"><span>⚠</span> 请完善检测阈值以预览效果</div>
+              </div>
+              <div style="color:#2563eb;font-size:13px;padding:8px 0;cursor:pointer">💡 查看配置示例 ⌄</div>
+              <div style="color:#2563eb;font-size:13px;padding:8px 0;cursor:pointer">▷ 模拟测试 ⌄</div>
+              <div style="background:#fff;border:1px solid #E8E8E8;border-radius:8px;padding:14px;margin-top:12px">
+                <strong style="font-size:13px">配置提示</strong>
+                <ul style="margin-top:8px;font-size:11px;color:hsl(215 16% 47%);list-style:none;display:flex;flex-direction:column;gap:6px">
+                  <li>• 优先级越小越先匹配</li><li>• 支持通配符如 *@domain.com</li><li>• 留空有效期表示永久有效</li><li>• 群组和组织来自群组策略配置</li><li>• OR条件任一超限即触发</li><li>• IP群组来自IP群组管理模块</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <figure class="screenshot-figure"><img src="./screenshots/layer1-drawer-default.png" alt="抽屉默认态"><figcaption>抽屉默认态（浏览器实际渲染）：左栏 3 区块，右栏「当前配置效果」为未完善提示。</figcaption></figure>
+      <h4>基础设置区 · 字段清单</h4>
+      <table class="spec-table">
+        <thead><tr><th>字段</th><th>类型</th><th>必填</th><th>默认/占位</th><th>选项</th><th>校验</th></tr></thead>
+        <tbody>
+          <tr><td>规则名称</td><td>Input</td><td>是</td><td>如：销售部外发限制</td><td>-</td><td>非空</td></tr>
+          <tr><td>管控方向</td><td>Select</td><td>是</td><td>外发防护</td><td>入站防护/外发防护/域内防护/双向合计</td><td>-</td></tr>
+          <tr><td>管控对象类型</td><td>Select</td><td>是</td><td>发信人</td><td>全局/发信人/发信IP/发信域名</td><td>切换清空关联字段 → 联动见层级1</td></tr>
+          <tr><td>发信人类型</td><td>Select（objectType=sender）</td><td>是</td><td>个人</td><td>个人/群组/组织</td><td>-</td></tr>
+          <tr><td>邮箱地址</td><td>Input（个人）</td><td>是</td><td>如：user@corp.com 或 *@domain.com</td><td>-</td><td>非空 + 邮箱正则（支持 *@domain.com）</td></tr>
+          <tr><td>发信人群组 / 组织部门</td><td>Select（群组/组织）</td><td>是</td><td>请选择…</td><td>来自群组策略/组织架构（附「管理群组/组织」链接）</td><td>非空</td></tr>
+          <tr><td>有效期至</td><td>Input(date)</td><td>否</td><td>留空=永久有效（Tooltip）</td><td>-</td><td>不早于当前日期</td></tr>
+          <tr><td>优先级</td><td>Input(number)</td><td>是</td><td>2000</td><td>2000–2049（Tooltip：越小越先匹配）</td><td>范围 2000–2049</td></tr>
+        </tbody>
+      </table>
+      <h4>检测条件区 / 执行动作区 · 字段清单</h4>
+      <table class="spec-table">
+        <thead><tr><th>字段</th><th>类型</th><th>默认</th><th>选项 / 单位</th><th>校验</th></tr></thead>
+        <tbody>
+          <tr><td>时间窗口</td><td>Select</td><td>15分钟</td><td>1分钟/5分钟/15分钟/1小时/6小时/24小时/当天（自然日）</td><td>-</td></tr>
+          <tr><td>检测维度A</td><td>Select</td><td>使用发信IP个数上限</td><td>发信IP个数/收信人总人数/发出邮件总数/发出附件总大小(MB)</td><td>-</td></tr>
+          <tr><td>阈值A</td><td>Input(number)</td><td>空</td><td>单位随维度：个/人/封/MB</td><td>&gt;0</td></tr>
+          <tr><td>启用OR组合条件</td><td>Checkbox</td><td>关</td><td>-</td><td>勾选后显示维度B/阈值B → 层级2</td></tr>
+          <tr><td>检测维度B / 阈值B</td><td>Select / Input</td><td>发出邮件总数 / 空</td><td>同维度A</td><td>OR 启用时阈值B&gt;0</td></tr>
+          <tr><td>执行动作</td><td>Select</td><td>审核</td><td>审核/隔离/丢弃/阻断</td><td>-</td></tr>
+          <tr><td>备注</td><td>Textarea</td><td>空</td><td>最多 200 字，右下计数</td><td>slice(0,200)</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5><table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>抽屉宽度</td><td>Sheet w-[920px]，左栏 w-[560px]</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>左栏区块 h3</td><td>基础设置 / 检测条件 / 执行动作（3 个）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>区块色条</td><td>蓝 / 琥珀 / 红（h-5 w-1 rounded-full）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>默认可见 label</td><td>规则名称/管控方向/管控对象类型/发信人类型/邮箱地址/有效期至/优先级/时间窗口/检测维度A/阈值A/启用OR组合条件/执行动作/备注</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>默认 combobox 值</td><td>外发防护 / 发信人 / 个人 / 15分钟 / 使用发信IP个数上限 / 审核</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>右栏「当前配置效果」</td><td>未完善 → amber Alert「请完善检测阈值以预览效果」</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>右栏折叠区 + 配置提示</td><td>查看配置示例 / 模拟测试 / 配置提示(6条)</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <h4>交互层级详情（层级 1–3 拆分为独立文件）</h4>
+    <table class="layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>抽屉默认态</td><td>点击「新建规则」/ 行内「编辑」</td><td>上方内嵌</td></tr>
+        <tr><td>1</td><td>管控对象类型联动</td><td>切换「管控对象类型」→ 条件渲染子字段</td><td><a href="./layer-1-object-linkage.html">查看详情 →</a></td></tr>
+        <tr><td>2</td><td>检测条件 + 校验 + 实时预览</td><td>填阈值/勾选OR/点保存 → 校验标红 + 右栏效果句</td><td><a href="./layer-2-detection-preview-validation.html">查看详情 →</a></td></tr>
+        <tr><td>3</td><td>配置示例 + 模拟测试</td><td>展开右栏「查看配置示例」/「模拟测试」</td><td><a href="./layer-3-examples-simulator.html">查看详情 →</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+</section>
+
+<section id="dialogs">
+  <h2>3. 弹窗/对话框规格</h2>
+
+  <article class="component-spec" id="dialog-3-1">
+    <h3>3.1 删除确认对话框（AlertDialog）</h3>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 打开态</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：2.3 行内 Trash2 按钮 → <code>handleDelete(rule)</code> → <code>setDeleteConfirm(rule)</code>。确认 → 从列表移除。</div>
+      <div class="component-preview"><div class="sc">
+        <button class="rounded-md" style="height:32px;padding:0 12px;background:#fff;border:1px solid hsl(214 32% 91%);cursor:pointer" onclick="document.getElementById('pv-del').style.display='flex'">▶ 打开删除确认</button>
+        <div id="pv-del" style="display:none;position:relative;margin-top:12px">
+          <div style="background:#fff;border:1px solid hsl(214 32% 91%);border-radius:8px;padding:22px;max-width:460px;box-shadow:0 10px 30px rgba(0,0,0,.12)">
+            <div style="font-size:16px;font-weight:600;margin-bottom:8px">确认删除</div>
+            <div style="font-size:13px;color:hsl(215 16% 47%);margin-bottom:18px">确定要删除规则吗？此操作无法撤销。</div>
+            <div class="flex" style="justify-content:flex-end;gap:8px">
+              <button class="border rounded-md" style="height:34px;padding:0 14px;background:#fff;cursor:pointer" onclick="document.getElementById('pv-del').style.display='none'">取消</button>
+              <button class="rounded-md" style="height:34px;padding:0 14px;background:hsl(0 84% 60%);color:#fff;border:none;cursor:pointer" onclick="document.getElementById('pv-del').style.display='none'">删除</button>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <figure class="screenshot-figure"><img src="./screenshots/layer4-delete-dialog.png" alt="删除确认对话框"><figcaption>删除确认（浏览器实际渲染）</figcaption></figure>
+      <table class="spec-table"><tbody>
+        <tr><td>触发条件</td><td>点击规则行 Trash2 删除按钮</td></tr>
+        <tr><td>标题 / 描述</td><td>确认删除 / 确定要删除规则吗？此操作无法撤销。</td></tr>
+        <tr><td>按钮</td><td>取消（关闭）/ 删除（destructive，确认删除）</td></tr>
+        <tr><td>关闭方式</td><td>取消 / 删除 / 点击遮罩 / ESC</td></tr>
+      </tbody></table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5><table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>标题</td><td>"确认删除"</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>描述</td><td>"确定要删除规则吗？此操作无法撤销。"</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>确认按钮样式</td><td>bg-destructive（红）文案「删除」</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </article>
+
+  <article class="component-spec" id="dialog-3-2">
+    <h3>3.2 未保存确认对话框（Dialog）</h3>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 打开态</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：抽屉有未保存修改（<code>isDirty</code>）时点「取消」/关闭/点遮罩 → <code>handleClose()</code> → <code>setShowUnsavedDialog(true)</code>。</div>
+      <div class="component-preview"><div class="sc">
+        <button class="rounded-md" style="height:32px;padding:0 12px;background:#fff;border:1px solid hsl(214 32% 91%);cursor:pointer" onclick="document.getElementById('pv-un').style.display='block'">▶ 打开未保存确认</button>
+        <div id="pv-un" style="display:none;margin-top:12px">
+          <div style="background:#fff;border:1px solid hsl(214 32% 91%);border-radius:8px;padding:22px;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,.12)">
+            <div style="font-size:16px;font-weight:600;margin-bottom:8px">确认离开</div>
+            <div style="font-size:13px;color:hsl(215 16% 47%);margin-bottom:18px">当前配置未保存，是否放弃修改？</div>
+            <div class="flex" style="justify-content:flex-end;gap:8px">
+              <button class="border rounded-md" style="height:34px;padding:0 14px;background:#fff;cursor:pointer" onclick="document.getElementById('pv-un').style.display='none'">继续编辑</button>
+              <button class="rounded-md" style="height:34px;padding:0 14px;background:hsl(0 84% 60%);color:#fff;border:none;cursor:pointer" onclick="document.getElementById('pv-un').style.display='none'">放弃并关闭</button>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <figure class="screenshot-figure"><img src="./screenshots/layer4-unsaved-dialog.png" alt="未保存确认对话框"><figcaption>未保存确认（浏览器实际渲染）</figcaption></figure>
+      <table class="spec-table"><tbody>
+        <tr><td>触发条件</td><td>抽屉 isDirty 时尝试关闭</td></tr>
+        <tr><td>标题 / 描述</td><td>确认离开 / 当前配置未保存，是否放弃修改？</td></tr>
+        <tr><td>按钮</td><td>继续编辑（留在抽屉）/ 放弃并关闭（destructive，丢弃并关闭）</td></tr>
+        <tr><td>尺寸</td><td>sm:max-w-[400px]</td></tr>
+      </tbody></table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5><table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>标题</td><td>"确认离开"</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>描述</td><td>"当前配置未保存，是否放弃修改？"</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>按钮文案</td><td>继续编辑 / 放弃并关闭</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </article>
+</section>
+
+<section id="api-mapping">
+  <h2>4. 数据模型与 API 映射</h2>
+  <h3>4.1 前端数据模型（demo types.ts 原样）</h3>
+  <pre><code>interface BehaviorRule {
+  id: string; name: string
+  direction: "inbound"|"outbound"|"internal"|"bidirectional"
+  objectType: "global"|"sender"|"senderIp"|"senderDomain"
+  senderSubType?: "individual"|"group"|"organization"
+  senderEmail?; senderGroupId?; senderGroupName?; senderOrgId?; senderOrgName?
+  ipSubType?: "single"|"ipGroup"; ipAddress?; ipGroupId?; ipGroupName?; domain?
+  timeWindow: "1min"|"5min"|"15min"|"1hour"|"6hour"|"24hour"|"day"
+  dimensionA: "ip_count"|"recipient_count"|"mail_count"|"attachment_size"
+  thresholdA: number; enableOrCondition: boolean; dimensionB?; thresholdB?
+  action: "review"|"quarantine"|"drop"|"block"
+  priority: number; expireTime?; remark?; enabled: boolean
+  createdAt: string; modifiedAt: string
+}</code></pre>
+  <h3>4.2 spec 定义的 API（§5.4，产品视角）</h3>
+  <table class="spec-table">
+    <thead><tr><th>用途</th><th>方法</th><th>路径</th></tr></thead>
+    <tbody>
+      <tr><td>规则列表</td><td>GET</td><td>/api/behavior-control/rules</td></tr>
+      <tr><td>创建/更新/删除</td><td>POST/PUT/DELETE</td><td>/api/behavior-control/rules[/id]</td></tr>
+      <tr><td>切换状态</td><td>PUT</td><td>/api/behavior-control/rules/id/status</td></tr>
+      <tr><td>导入 / 导出</td><td>POST / GET</td><td>/api/behavior-control/rules/import|export</td></tr>
+      <tr><td>模拟测试</td><td>POST</td><td>/api/behavior-control/simulate</td></tr>
+      <tr><td>群组/组织/IP组</td><td>GET</td><td>/api/sender-groups | /api/organizations | /api/ip-groups</td></tr>
+    </tbody>
+  </table>
+  <h3>4.3 网关现有 API 映射</h3>
+  <blockquote>⚠️ 遵循 implement.md：spec 的 API 属产品定义，不一定直接实现；界面依赖规则系统的须复用<strong>统一规则系统</strong>（加 <code>page</code> 字段区分来源），不新增规则系统/action。发信行为管控本质是「时间窗口内累计指标超阈 → 统一规则 action」，需确认能否用统一规则系统承载多维/OR/滑动窗口语义。详见 §10。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>spec API</th><th>网关侧建议</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td>规则 CRUD</td><td>复用统一规则系统 CRUD（page=behaviorControl）</td><td>[需确认] 多维/OR/时间窗口字段是否可承载</td></tr>
+      <tr><td>行为统计</td><td>Redis 滑动窗口计数（spec §6）</td><td>[需确认] 网关是否已有对应统计</td></tr>
+      <tr><td>模拟测试</td><td>demo 为纯前端 mock</td><td>[需确认] 是否落地后端</td></tr>
+      <tr><td>动作 review/quarantine/drop/block</td><td>映射统一规则 action</td><td>「审核/隔离」对应现有审核/隔离；drop/block 映射拒绝语义</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="business-logic">
+  <h2>5. 业务逻辑规格</h2>
+  <h3>5.1 规则匹配与触发</h3>
+  <div class="mermaid">
+graph TD
+  A[发信事件] --> B[按 priority 升序遍历规则]
+  B --> C{管控对象匹配?<br/>全局/发信人/IP/域名}
+  C -->|否| B
+  C -->|是| D{方向匹配?<br/>接收/外发/域内/双向}
+  D -->|否| B
+  D -->|是| E[取时间窗口内累计指标]
+  E --> F{维度A超阈?}
+  F -->|否, 且启用OR| G{维度B超阈?}
+  F -->|是| H[执行动作: 审核/隔离/丢弃/阻断]
+  G -->|是| H
+  G -->|否| B
+  H --> Z[首个匹配即生效, 停止]
+  </div>
+  <h3>5.2 关键业务约束</h3>
+  <table class="spec-table">
+    <thead><tr><th>约束</th><th>值</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>匹配优先级</td><td>priority 升序，首个匹配生效（数值越小越先）</td><td>spec §1.34；demo utils sortRulesByPriority</td></tr>
+      <tr><td>优先级范围</td><td>2000–2049（demo 校验）</td><td>demo validate</td></tr>
+      <tr><td>OR 组合</td><td>维度A 或 维度B 任一超阈即触发</td><td>spec §1.25；demo runSimulation</td></tr>
+      <tr><td>阈值单位</td><td>ip_count=个 / recipient_count=人 / mail_count=封 / attachment_size=MB</td><td>demo 阈值单位</td></tr>
+      <tr><td>域内豁免</td><td>spec §1.15 提及「域内是否执行检测」（demo 以 direction=internal 承载）</td><td>spec §1</td></tr>
+    </tbody>
+  </table>
+  <h3>5.3 权限与可见性</h3>
+  <p class="kv">spec §1 权限矩阵：系统管理员=读写+导入导出；安全管理员=创建/编辑（不可删预置）；审计员=只读+导出；普通用户=无权限。demo 未实现角色差异（所有按钮常显），落地时按角色隐藏新建/编辑/删除。</p>
+</section>
+
+<section id="interaction">
+  <h2>6. 交互规格</h2>
+  <h3>6.1 状态变化</h3>
+  <table class="spec-table">
+    <thead><tr><th>状态</th><th>触发</th><th>页面表现</th></tr></thead>
+    <tbody>
+      <tr><td>空态</td><td>无匹配规则</td><td>「暂无规则」+「点击下方按钮创建第一条规则」+「立即创建」按钮</td></tr>
+      <tr><td>禁用规则</td><td>enabled=false</td><td>状态列 secondary Badge「禁用」（无行变淡处理）</td></tr>
+      <tr><td>保存阻断</td><td>存在 blocking 校验错误</td><td>字段标红 + 内联错误文案；保存按钮 disabled</td></tr>
+      <tr><td>实时预览</td><td>表单变更</td><td>右栏「当前配置效果」按自然语言句实时更新（未完善时显示 amber 提示）</td></tr>
+    </tbody>
+  </table>
+  <h3>6.2 Tooltip / 校验文案（浏览器验证）</h3>
+  <table class="spec-table">
+    <thead><tr><th>位置</th><th>文案</th><th>触发</th></tr></thead>
+    <tbody>
+      <tr><td>有效期至（HelpCircle）</td><td>留空表示永久有效</td><td>hover</td></tr>
+      <tr><td>优先级（HelpCircle）</td><td>数值越小越先匹配，范围 2000-2049</td><td>hover</td></tr>
+      <tr><td>规则名称空</td><td>请输入规则名称</td><td>保存</td></tr>
+      <tr><td>邮箱空/格式</td><td>请输入邮箱地址 / 邮箱格式不正确，支持 *@domain.com 通配符</td><td>保存</td></tr>
+      <tr><td>阈值A</td><td>阈值A必须大于0</td><td>保存</td></tr>
+      <tr><td>OR 阈值B</td><td>启用OR组合时，阈值B必须大于0</td><td>保存</td></tr>
+      <tr><td>IP/域名格式</td><td>IP格式不正确，支持 1.2.3.4 或 1.2.3.0/24 · 域名格式不正确</td><td>保存</td></tr>
+      <tr><td>优先级范围</td><td>优先级范围应为 2000-2049</td><td>保存</td></tr>
+      <tr><td>有效期</td><td>有效期不能早于当前日期</td><td>保存</td></tr>
+    </tbody>
+  </table>
+  <h3>6.3 异常场景（spec §4）</h3>
+  <table class="spec-table">
+    <thead><tr><th>场景</th><th>处理</th></tr></thead>
+    <tbody>
+      <tr><td>列表加载超时(5s)/保存超时(10s)</td><td>提示重试，表单数据保留（spec §4.3）</td></tr>
+      <tr><td>群组/IP组已删除</td><td>提示「所引用的群组/IP组已被删除，请重新选择」（spec §4.2）</td></tr>
+      <tr><td>版本冲突</td><td>乐观锁：「数据已被他人修改，请刷新后重试」（spec §4.4）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="i18n">
+  <h2>7. 国际化规格</h2>
+  <h3>7.1 支持语言</h3>
+  <table class="spec-table">
+    <thead><tr><th>语言</th><th>locale</th><th>标题示例</th><th>demo 覆盖</th></tr></thead>
+    <tbody>
+      <tr><td>简体中文</td><td>zh</td><td>发信行为管控</td><td>✅ LABELS.zh</td></tr>
+      <tr><td>English</td><td>en</td><td>Sender Behavior Control</td><td>✅ LABELS.en</td></tr>
+      <tr><td>泰文</td><td>th</td><td>การควบคุมพฤติกรรมผู้ส่ง</td><td>✅ LABELS.th</td></tr>
+      <tr><td>俄文</td><td>ru</td><td>—</td><td class="dom-fail">⚠ demo LABELS 仅 zh/en/th；落地需补第四语言（implement.md 要求四语）</td></tr>
+    </tbody>
+  </table>
+  <h3>7.2 i18n key 清单（demo LABELS，节选）</h3>
+  <table class="spec-table">
+    <thead><tr><th>key</th><th>中文</th><th>使用位置</th></tr></thead>
+    <tbody>
+      <tr><td>title</td><td>发信行为管控</td><td>模块标题</td></tr>
+      <tr><td>searchPlaceholder</td><td>搜索规则名称、管控对象...</td><td>搜索框</td></tr>
+      <tr><td>addRule</td><td>新建规则</td><td>新建按钮</td></tr>
+      <tr><td>ruleId/ruleName/direction/objectType/action/status/modifyTime/operation</td><td>规则ID/规则名称/管控方向/管控对象/执行动作/状态/修改时间/操作</td><td>表头</td></tr>
+      <tr><td>inbound/outbound/internal/bidirectional</td><td>接收/外发/域内/双向</td><td>方向筛选+Badge</td></tr>
+      <tr><td>global/sender/senderIp/senderDomain</td><td>全局/发信人/发信IP/发信域名</td><td>类型筛选+Badge</td></tr>
+      <tr><td>review/quarantine/drop/block</td><td>审核/隔离/丢弃/阻断</td><td>动作 Badge</td></tr>
+      <tr><td>infoTip</td><td>检测并处置异常发信行为…按优先级顺序匹配。</td><td>说明条</td></tr>
+      <tr><td>confirmDelete/deleteWarning</td><td>确认删除 / 确定要删除规则吗？此操作无法撤销。</td><td>删除确认</td></tr>
+    </tbody>
+  </table>
+  <blockquote>注：抽屉内文案（新建规则、配置发信人行为管控规则、各区块标题、字段标签、配置示例、模拟测试等）在 <code>behavior-rule-drawer.tsx</code> 中为<strong>硬编码中文</strong>，未走 LABELS/i18n —— 落地须补齐四语。</blockquote>
+</section>
+
+<section id="responsive">
+  <h2>8. 响应式规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>筛选栏</th><th>表格</th><th>抽屉</th></tr></thead>
+    <tbody>
+      <tr><td>≥1440px</td><td>单行</td><td>列全展示</td><td>920px 固定</td></tr>
+      <tr><td>1024–1439px</td><td>flex 自动换行</td><td>水平滚动</td><td>920px（接近视口）</td></tr>
+      <tr><td>&lt;1024px（spec 最小 900px）</td><td>换行</td><td>水平滚动</td><td>≈全宽</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1024.png" alt="1024px 响应式"><figcaption>1024px 断点：筛选栏紧凑，表格水平滚动（浏览器实际渲染）</figcaption></figure>
+</section>
+
+<section id="diffs" class="diff-section">
+  <h2>9. 与 spec 的差异标注（以 demo 浏览器渲染为准）</h2>
+  <table class="spec-table">
+    <thead><tr><th>编号</th><th>位置</th><th>spec 描述</th><th>demo 实际渲染</th><th>影响</th><th>建议</th></tr></thead>
+    <tbody>
+      <tr><td><span class="diff-badge">D-001</span></td><td>§2 状态列</td><td>状态列为「启用/禁用<strong>开关</strong>」，切换即时生效</td><td>状态列为<strong>只读 Badge</strong>（启用/禁用）；无行内开关（切换仅能进抽屉编辑）</td><td><span class="badge badge-medium">中</span></td><td>落地按 spec 补行内开关，或确认以 Badge + 编辑为准</td></tr>
+      <tr><td><span class="diff-badge">D-002</span></td><td>§2 表格列</td><td>列含「规则ID 150px」，另有独立「优先级」概念但未列为表格列</td><td>内联表格无「优先级」列（优先级仅在抽屉/排序中体现）；列宽用 tailwind（w-32 等）非固定 px</td><td><span class="badge badge-low">低</span></td><td>以 demo 为准</td></tr>
+      <tr><td><span class="diff-badge">D-003</span></td><td>§2.1 抽屉区块</td><td>抽屉分 <strong>6 区块</strong>（基本信息/管控方向/管控对象/检测条件/执行动作/其他配置）</td><td>抽屉合并为 <strong>3 区块</strong>（基础设置含方向+对象+有效期+优先级；检测条件；执行动作含备注）</td><td><span class="badge badge-low">低</span></td><td>以 demo 为准（信息架构等价）</td></tr>
+      <tr><td><span class="diff-badge">D-004</span></td><td>§3 配置示例</td><td>示例卡片含「使用该示例」一键填充按钮；模板为 防僵尸网络/防账号被盗/防内部滥发</td><td>示例卡片<strong>无「使用该示例」按钮</strong>（仅说明，不可填充）；模板为 正常用户场景/账号被盗场景/销售部群发场景</td><td><span class="badge badge-medium">中</span></td><td>确认是否需要一键填充；文案以 demo 为准</td></tr>
+      <tr><td><span class="diff-badge">D-005</span></td><td>§2 配色</td><td>审核=紫；双向=橙；丢弃=深红(red-200)</td><td>审核=黄(yellow)；双向=灰(gray)；丢弃=红(red-100)</td><td><span class="badge badge-low">低</span></td><td>以 demo 为准</td></tr>
+      <tr><td><span class="diff-badge">D-006</span></td><td>§1 权限 / 导入导出</td><td>角色权限差异、导入/导出功能</td><td>demo 未实现角色差异；导入/导出按钮<strong>无 onClick（占位）</strong>；模拟测试为纯前端 mock</td><td><span class="badge badge-medium">中</span></td><td>落地补角色控制与导入导出后端</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项</h2>
+  <blockquote>遵循 implement.md：冲突 / 新增 API / 底层不支持 / 规则系统承载，列此待确认，不自行决定。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>编号</th><th>事项</th><th>类型</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>Q-001</td><td>统一规则系统承载多维/OR/时间窗口</td><td><span class="badge badge-medium">规则系统</span></td><td>发信行为管控为「时间窗口内累计指标超阈」，须复用统一规则系统（加 page=behaviorControl），确认能否表达 时间窗口 + 4 维度 + OR 组合 语义，避免新增规则系统。</td></tr>
+      <tr><td>Q-002</td><td>行为统计数据源</td><td><span class="badge badge-medium">底层能力</span></td><td>spec §6 要求 Redis 滑动窗口统计（IP数/收信人数/邮件数/附件大小）。确认网关是否已有该统计，或需新增。</td></tr>
+      <tr><td>Q-003</td><td>动作映射</td><td><span class="badge badge-low">action</span></td><td>review/quarantine/drop/block 映射统一规则 action（不新增 action）；确认 drop 与 block 是否都归到拒绝语义。</td></tr>
+      <tr><td>Q-004</td><td>模拟测试 / 导入导出落地</td><td><span class="badge badge-medium">新增 API</span></td><td>demo 中模拟测试为前端 mock、导入导出为占位。确认是否落地后端接口。</td></tr>
+      <tr><td>Q-005</td><td>状态列开关（D-001）</td><td><span class="badge badge-low">交互确认</span></td><td>是否需按 spec 恢复状态列行内启用/禁用开关。</td></tr>
+      <tr><td>Q-006</td><td>第四语言（俄文）与抽屉硬编码文案</td><td><span class="badge badge-medium">i18n</span></td><td>demo LABELS 仅 zh/en/th，且抽屉文案硬编码中文；落地须补齐四语（implement.md）。</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+if(window.mermaid) mermaid.initialize({startOnLoad:true,theme:'default'});
+const BC_RULES=[
+ {id:'rule-1',name:'全局入站IP数量限制',dir:'inbound',obj:'global',sub:'全局',oi:'globe',action:'quarantine',en:true,t:'2024-03-15 10:30'},
+ {id:'rule-2',name:'海外IP收信人限制',dir:'inbound',obj:'senderIp',sub:'发信IP',oi:'server',val:'海外IP',action:'block',en:true,t:'2024-03-14 09:15'},
+ {id:'rule-3',name:'销售部外发限制',dir:'outbound',obj:'sender',sub:'组织',oi:'user',val:'销售部',action:'quarantine',en:true,t:'2024-03-13 14:20'},
+ {id:'rule-4',name:'个人账号发信限制',dir:'outbound',obj:'sender',sub:'个人',oi:'user',val:'user@company.com',action:'drop',en:true,t:'2024-03-12 11:00'},
+ {id:'rule-5',name:'VIP客户附件限制',dir:'outbound',obj:'sender',sub:'群组',oi:'user',val:'VIP客户',action:'review',en:true,t:'2024-03-11 16:45'},
+ {id:'rule-6',name:'域内全局发信限制',dir:'internal',obj:'global',sub:'全局',oi:'globe',action:'quarantine',en:true,t:'2024-03-10 08:30'},
+ {id:'rule-7',name:'双向合计发信限制',dir:'bidirectional',obj:'global',sub:'全局',oi:'globe',action:'block',en:false,t:'2024-03-09 15:00'},
+];
+const DIRB={inbound:['接收','#1e40af','#dbeafe'],outbound:['外发','#15803d','#dcfce7'],internal:['域内','#7e22ce','#f3e8ff'],bidirectional:['双向','#374151','#f3f4f6']};
+const ACTB={review:['审核','#a16207','#fef9c3'],quarantine:['隔离','#c2410c','#ffedd5'],drop:['丢弃','#b91c1c','#fee2e2'],block:['阻断','#b91c1c','#fee2e2']};
+const OICON={globe:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg>',
+ user:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>',
+ server:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/></svg>',
+ mail:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>'};
+function badge(txt,fg,bg){return '<span style="display:inline-block;padding:1px 8px;border-radius:6px;font-size:12px;background:'+bg+';color:'+fg+'">'+txt+'</span>'}
+function bcRow(r){
+ const d=DIRB[r.dir],a=ACTB[r.action];
+ const objVal=r.obj==='global'?'全局':(r.val||r.sub);
+ return '<tr style="border-top:1px solid hsl(214 32% 91%)" onmouseover="this.style.background=\'hsl(210 40% 98%)\'" onmouseout="this.style.background=\'\'">'
+  +'<td style="padding:9px 10px;font-family:monospace;font-size:11px;color:#6b7280">'+r.id+'</td>'
+  +'<td style="padding:9px 10px;font-weight:500">'+r.name+'</td>'
+  +'<td style="padding:9px 10px">'+badge(d[0],d[1],d[2])+'</td>'
+  +'<td style="padding:9px 10px"><span style="display:inline-flex;align-items:center;gap:6px">'+OICON[r.oi]+'<span style="font-family:monospace;font-size:12px">'+objVal+'</span>'+badge(r.sub,'#334155','#e2e8f0')+'</span></td>'
+  +'<td style="padding:9px 10px">'+badge(a[0],a[1],a[2])+'</td>'
+  +'<td style="padding:9px 10px">'+(r.en?badge('启用','#fff','hsl(221 83% 53%)'):badge('禁用','#475569','#e2e8f0'))+'</td>'
+  +'<td style="padding:9px 10px;font-size:12px;color:#6b7280;white-space:nowrap">'+r.t+'</td>'
+  +'<td style="padding:9px 10px"><span style="display:inline-flex;gap:4px">'
+   +'<button title="编辑" style="border:none;background:none;cursor:pointer;padding:4px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'
+   +'<button title="删除" onclick="document.getElementById(\'pv-del\').style.display=\'flex\';document.getElementById(\'dialog-3-1\').scrollIntoView({behavior:\'smooth\'})" style="border:none;background:none;cursor:pointer;padding:4px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>'
+   +'</span></td></tr>';
+}
+function bcFilter(){
+ const q=(document.getElementById('pv-search').value||'').toLowerCase();
+ const d=document.getElementById('pv-dir').value, ty=document.getElementById('pv-type').value, st=document.getElementById('pv-status').value;
+ const rows=BC_RULES.filter(function(r){
+  if(d!=='all'&&r.dir!==d)return false;
+  if(ty!=='all'&&r.obj!==ty)return false;
+  if(st==='enabled'&&!r.en)return false; if(st==='disabled'&&r.en)return false;
+  if(q){const hay=(r.name+r.id+(r.val||'')+r.sub).toLowerCase(); if(hay.indexOf(q)<0)return false;}
+  return true;
+ });
+ document.getElementById('pv-tbody').innerHTML=rows.map(bcRow).join('')||'<tr><td colspan="8" style="padding:24px;text-align:center;color:#94a3b8">暂无规则</td></tr>';
+ document.getElementById('pv-count').textContent=rows.length;
+}
+function bcObj(v){
+ document.getElementById('pv-o-sender').style.display=v==='sender'?'block':'none';
+ document.getElementById('pv-o-ip').style.display=v==='senderIp'?'block':'none';
+ document.getElementById('pv-o-domain').style.display=v==='senderDomain'?'block':'none';
+}
+function bcSub(v){
+ document.getElementById('pv-s-individual').style.display=v==='individual'?'flex':'none';
+ document.getElementById('pv-s-group').style.display=v==='group'?'flex':'none';
+ document.getElementById('pv-s-org').style.display=v==='organization'?'flex':'none';
+}
+function bcIp(v){
+ document.getElementById('pv-ip-single').style.display=v==='single'?'flex':'none';
+ document.getElementById('pv-ip-group').style.display=v==='ipGroup'?'flex':'none';
+}
+bcFilter();
+</script>
+</body>
+</html>

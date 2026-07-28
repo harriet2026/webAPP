@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 3：跨阶段抽屉变体（同壳不同模块） - 策略流水线 HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{--primary:oklch(0.52 0.226 262);--primary-foreground:oklch(0.985 0 0);--background:oklch(0.98 0.01 205);
+      --foreground:oklch(0.145 0 0);--card:oklch(1 0 0);--muted:oklch(0.97 0 0);--muted-foreground:oklch(0.556 0 0);
+      --border:oklch(0.922 0 0);--destructive:oklch(0.577 0.245 27.325);--radius:0.625rem;--font-sans:"Geist",system-ui,sans-serif;--font-mono:"Geist Mono",monospace;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto;}
+    .layer-nav{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.25rem;background:var(--muted);border-radius:var(--radius);margin-bottom:1.5rem;font-size:0.875rem;}
+    .layer-nav a{color:var(--primary);text-decoration:none;font-weight:600;} .layer-nav a:hover{text-decoration:underline;}
+    .spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:2rem;}
+    .spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.4rem;}
+    .meta-table{width:100%;border-collapse:collapse;font-size:0.875rem;}
+    .meta-table td{padding:0.5rem 1rem;border-bottom:1px solid var(--border);}
+    .meta-table td:first-child{font-weight:600;width:150px;color:var(--muted-foreground);white-space:nowrap;}
+    section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem;}
+    section>h2{color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:0.5rem;margin-bottom:1.25rem;font-size:1.2rem;}
+    h4{font-size:0.95rem;margin:0.75rem 0 0.5rem;color:var(--muted-foreground);}
+    table.spec-table{width:100%;border-collapse:collapse;font-size:0.85rem;margin:1rem 0;}
+    table.spec-table th{background:var(--muted);font-weight:600;text-align:left;padding:0.6rem 0.75rem;border:1px solid var(--border);white-space:nowrap;}
+    table.spec-table td{padding:0.6rem 0.75rem;border:1px solid var(--border);vertical-align:top;}
+    table.spec-table tr:nth-child(even) td{background:var(--muted);}
+    .screenshot-figure{margin:1rem 0;text-align:center;}
+    .screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+    .screenshot-figure figcaption{margin-top:0.5rem;font-size:0.8125rem;color:var(--muted-foreground);}
+    .interaction-layer{border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.5rem 0;background:var(--card);}
+    .interaction-layer>h4{color:var(--primary);font-size:0.95rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--primary);color:var(--primary-foreground);font-size:0.75rem;font-weight:700;}
+    .trigger-path{background:var(--muted);border-radius:calc(var(--radius) - 4px);padding:0.5rem 0.75rem;margin:0.5rem 0 1rem;font-size:0.8125rem;color:var(--muted-foreground);}
+    .trigger-path strong{color:var(--foreground);}
+    .component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:1.5rem;margin:1.25rem 0 1rem;background:#fff;position:relative;overflow:auto;}
+    .component-preview::before{content:"🖥 可交互组件预览（复刻 demo 统一外壳）";position:absolute;top:-0.625rem;left:0.75rem;background:var(--primary);color:var(--primary-foreground);font-size:0.6875rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:calc(var(--radius) - 4px);}
+    .dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);overflow:hidden;}
+    .dom-comparison>h5{background:var(--muted);padding:0.5rem 0.75rem;font-size:0.8125rem;font-weight:600;border-bottom:1px solid var(--border);}
+    .dom-comparison table{width:100%;border-collapse:collapse;font-size:0.8125rem;}
+    .dom-comparison th{background:var(--muted);font-weight:600;text-align:left;padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);}
+    .dom-comparison td{padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);vertical-align:top;}
+    .dom-pass{color:oklch(0.5 0.15 150);font-weight:600;} .dom-fail{color:var(--destructive);font-weight:600;}
+    code{font-family:var(--font-mono);font-size:0.85em;}
+    .tabbtn{border:none;background:transparent;padding:0.4rem 0.9rem;border-radius:0.4rem;cursor:pointer;font-size:0.85rem;}
+    .tabbtn.act{background:#1890FF;color:#fff;}
+  </style>
+</head>
+<body>
+<nav class="layer-nav">
+  <a href="./layer-1-drawer-ip-modules.html">← 层级 1·2：IP 模块切换</a>
+  <span>层级 3 / 共 3 层</span>
+  <a href="./index.html#component-stage-drawer">返回主文件 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 3：跨阶段抽屉变体（统一外壳 · 不同阶段/模块内容）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>统一阶段抽屉框架 UnifiedStageDrawer</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+    <tr><td>本层目的</td><td>用收发信人/内容/综合三个阶段抽屉，验证「外壳完全一致、仅阶段名+模块列表+右侧内容不同」这一统一框架结论</td></tr>
+    <tr><td>触发路径</td><td>首页点击阶段2/3/5 任一策略卡片</td></tr>
+    <tr><td>demo 组件</td><td><code>identity-strategy-page.tsx</code> / <code>content-strategy-page.tsx</code> / <code>comprehensive-strategy-page.tsx</code>（均 <code>embedded</code>）</td></tr>
+  </table>
+</header>
+
+<section>
+  <h2>统一外壳 · 阶段切换预览</h2>
+  <div class="component-preview">
+    <div style="margin-bottom:0.6rem;">
+      <button class="tabbtn act" onclick="stg(this,'ip')">IP策略</button>
+      <button class="tabbtn" onclick="stg(this,'id')">收发信人策略</button>
+      <button class="tabbtn" onclick="stg(this,'ct')">内容层</button>
+      <button class="tabbtn" onclick="stg(this,'cp')">综合策略</button>
+    </div>
+    <div style="border:1px solid #e8e8e8;border-radius:0.5rem;overflow:hidden;max-width:900px;box-shadow:0 4px 16px rgba(0,0,0,.1);">
+      <div style="display:flex;align-items:center;gap:0.5rem;padding:0.8rem 1.25rem;border-bottom:1px solid #e8e8e8;">
+        <span style="color:#1890FF;">⚙</span><b id="s-phase">IP策略</b><span style="color:#bbb;">/</span>
+        <span id="s-mod" style="color:#666;">IP频率限制</span>
+        <span title="关闭" style="margin-left:auto;color:#888;cursor:pointer;">✕</span>
+      </div>
+      <div style="display:flex;min-height:240px;">
+        <div id="s-nav" style="width:220px;background:#F5F5F5;border-right:1px solid #e8e8e8;padding:0.75rem;flex-shrink:0;font-size:0.82rem;"></div>
+        <div style="flex:1;padding:1.1rem;">
+          <div style="display:flex;justify-content:space-between;"><b id="s-title">IP频率限制</b><span style="font-size:0.78rem;color:#1890FF;">已启用 ✔</span></div>
+          <div id="s-body" style="margin-top:0.7rem;font-size:0.82rem;color:#555;"></div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:0.78rem;color:#64748b;margin-top:0.6rem;">👆 顶部切阶段：外壳（头/关闭/左导航/右内容布局）保持不变，仅阶段名、左侧模块列表、右侧内容随阶段替换 —— 这正是「统一框架，不同模块有不同信息」。</p>
+  </div>
+</section>
+
+<!-- 收发信人 -->
+<section>
+  <h2>阶段2：收发信人策略抽屉</h2>
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">3a</span> 阶段2: 收发信人策略 / 发信人黑白名单</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：首页点「发信人黑白名单」卡片 → identityDrawer</div>
+    <figure class="screenshot-figure"><img src="./screenshots/identity-drawer.png" alt="收发信人抽屉"><figcaption>浏览器实际渲染</figcaption></figure>
+    <table class="spec-table"><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody>
+      <tr><td>面包屑</td><td>阶段2: 收发信人策略 / 发信人黑白名单</td></tr>
+      <tr><td>左侧模块（5）</td><td>发信人黑白名单(黑名单规则:3/白名单规…) · 身份认证与仿冒检测(SPF/DKIM/DMARC/PTR) · 发信行为管控(频率限制/异常检测) · 收信人检测(数量限制/存在性验证) · 用户黑白名单(黑名单规则:20/白名单…)</td></tr>
+      <tr><td>右侧内容</td><td>黑名单规则/白名单规则 Tab + 表格（规则ID·规则名称·发信人[个人/组织域名/群组标签]·执行动作[阻断/隔离/审核]·状态[启用/禁用]·修改时间·操作）+ 分页「共 35 条」</td></tr>
+    </tbody></table>
+  </div>
+</section>
+
+<!-- 内容 -->
+<section>
+  <h2>阶段3：内容层抽屉</h2>
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">3b</span> 阶段3: 内容层 / 附件安全检测</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：首页点「附件安全检测」卡片 → contentDrawer</div>
+    <figure class="screenshot-figure"><img src="./screenshots/content-drawer.png" alt="内容层抽屉"><figcaption>浏览器实际渲染</figcaption></figure>
+    <table class="spec-table"><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody>
+      <tr><td>面包屑</td><td>阶段3: 内容层 / 附件安全检测</td></tr>
+      <tr><td>左侧模块（4）</td><td>附件安全检测(病毒扫描/沙箱分析/类型…) · URL检测与防护(信誉评估/沙箱分析/仿冒…) · 内容规则(关键词/正则/DLP检测) · 意图引擎(涉黄赌/涉政/钓鱼/垃圾…)</td></tr>
+      <tr><td>右侧内容</td><td><strong>表单型</strong>：Tab(基础限制/反病毒引擎/图片识别/加密附件) + 附件结构限制(个数上限/大小上限) + 嵌套防护(防压缩包炸弹) + 性能保护(扫描超时/超出处置=隔离) + 底部「保存配置」按钮</td></tr>
+    </tbody></table>
+  </div>
+</section>
+
+<!-- 综合 -->
+<section>
+  <h2>阶段5：综合策略抽屉</h2>
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">3c</span> 阶段5: 综合策略 / 相似检测</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：首页横向滚动到阶段5 → 点「相似检测」卡片 → comprehensiveDrawer</div>
+    <figure class="screenshot-figure"><img src="./screenshots/comprehensive-drawer.png" alt="综合策略抽屉"><figcaption>浏览器实际渲染</figcaption></figure>
+    <table class="spec-table"><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody>
+      <tr><td>面包屑</td><td>阶段5: 综合策略 / 相似检测（右侧内容标题却为「相似邮件与主题检测」，命名不一致 D-006）</td></tr>
+      <tr><td>左侧模块（3）</td><td>相似邮件与主题检测(窗口30分钟/阈值80%) · 高级过滤规则(多维度条件组合规则) · 邮件标记与声明(接收标记+外发声明多规…)</td></tr>
+      <tr><td>右侧内容</td><td>观察模式横幅 + Tab(相似邮件检测/相同主题检测) + 检测方向配置(全方向聚合 / 按方向独立：接收/外发/域内) + 每方向卡片(观察模式/检测窗口/相似度阈值/触发数量/触发动作)</td></tr>
+    </tbody></table>
+  </div>
+</section>
+
+<section>
+  <h2>统一框架一致性 DOM 比对（4 抽屉横向对照）</h2>
+  <div class="dom-comparison"><h5>🔍 四个阶段抽屉外壳一致性</h5>
+    <table>
+      <thead><tr><th>外壳特征</th><th>IP策略</th><th>收发信人</th><th>内容层</th><th>综合策略</th><th>一致</th></tr></thead>
+      <tbody>
+        <tr><td>Sheet 宽度</td><td>80vw</td><td>80vw</td><td>80vw</td><td>80vw</td><td class="dom-pass">✅</td></tr>
+        <tr><td>头部结构</td><td colspan="4">⚙图标 + 阶段名(粗) + / + 模块名(灰) + 右上关闭 XCircle</td><td class="dom-pass">✅</td></tr>
+        <tr><td>SheetTitle（实测）</td><td>IP策略</td><td>阶段2: 收发信人策略</td><td>阶段3: 内容层</td><td>阶段5: 综合策略</td><td class="dom-pass">✅</td></tr>
+        <tr><td>左侧模块导航</td><td>4项</td><td>5项</td><td>4项</td><td>3项</td><td class="dom-pass">✅ 结构同/数量随阶段</td></tr>
+        <tr><td>每项含副标题摘要</td><td>✔</td><td>✔</td><td>✔</td><td>✔</td><td class="dom-pass">✅</td></tr>
+        <tr><td>右侧内容形态</td><td>表格</td><td>表格+Tab</td><td>表单+Tab</td><td>表单+Tab+方向卡</td><td class="dom-pass">✅ 各模块不同（预期）</td></tr>
+        <tr><td>关闭方式</td><td colspan="4">XCircle / 点遮罩 / ESC</td><td class="dom-pass">✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:0.85rem;color:#334155;"><strong>结论</strong>：4 个阶段抽屉复用同一 <code>Sheet w-[80vw]</code> 外壳与「面包屑头 + 左模块导航 + 右模块内容」布局，差异仅在阶段名、模块列表与右侧内容形态 —— 印证用户诉求「这些地方需要统一框架，不同模块有不同信息」。落地建议抽象为公共 <code>&lt;StageDrawer stage moduleList&gt;</code> 壳组件，各模块内容作为 children/slot 注入。</p>
+</section>
+
+<nav class="layer-nav">
+  <a href="./layer-1-drawer-ip-modules.html">← 层级 1·2：IP 模块切换</a>
+  <a href="./index.html#component-stage-drawer">返回主文件 →</a>
+</nav>
+
+<script>
+var DATA={
+  ip:{phase:'IP策略',mods:[['IP频率限制','阈值: 100次/分钟'],['IP黑白名单','黑名单: 33条 / 白名单: 22条'],['RBL过滤','3个服务器 / 超时5s'],['海外邮件检测','收件 已启用']],
+      body:'说明横幅 + 工具行 + 13列规则表'},
+  id:{phase:'阶段2: 收发信人策略',mods:[['发信人黑白名单','黑名单规则: 3 / 白名单规…'],['身份认证与仿冒检测','SPF/DKIM/DMARC/PTR'],['发信行为管控','频率限制/异常检测'],['收信人检测','数量限制/存在性验证'],['用户黑白名单','黑名单规则: 20 / 白名单…']],
+      body:'黑/白名单 Tab + 规则表（规则ID·规则名称·发信人·执行动作·状态·修改时间·操作）+ 分页共35条'},
+  ct:{phase:'阶段3: 内容层',mods:[['附件安全检测','病毒扫描/沙箱分析/类型…'],['URL检测与防护','信誉评估/沙箱分析/仿冒…'],['内容规则','关键词/正则/DLP检测'],['意图引擎','涉黄赌/涉政/钓鱼/垃圾…']],
+      body:'Tab(基础限制/反病毒引擎/图片识别/加密附件) + 附件结构/嵌套防护/性能保护 表单 + 底部保存配置'},
+  cp:{phase:'阶段5: 综合策略',mods:[['相似邮件与主题检测','窗口30分钟 / 阈值80%'],['高级过滤规则','多维度条件组合规则'],['邮件标记与声明','接收标记+外发声明多规…']],
+      body:'观察模式横幅 + Tab(相似/相同主题) + 检测方向配置(接收/外发/域内 方向卡)'}
+};
+function stg(btn,k){
+  btn.parentNode.querySelectorAll('.tabbtn').forEach(function(b){b.classList.remove('act')});btn.classList.add('act');
+  var d=DATA[k];document.getElementById('s-phase').textContent=d.phase;
+  document.getElementById('s-mod').textContent=d.mods[0][0];document.getElementById('s-title').textContent=d.mods[0][0];
+  var nav=d.mods.map(function(m,i){return '<div style="display:flex;gap:0.5rem;align-items:center;padding:0.4rem 0.5rem;border-radius:0.4rem;margin-bottom:0.2rem;'+(i===0?'background:#fff;border-left:2px solid #1890FF;':'')+'"><span style="width:8px;height:8px;border-radius:50%;background:'+(k==='ip'&&i===3?'#bbb':'#1890FF')+';flex-shrink:0"></span><span><b style="font-weight:500;'+(i===0?'color:#1890FF;':'')+'">'+m[0]+'</b><br><span style="font-size:0.68rem;color:#999">'+m[1]+'</span></span></div>';}).join('');
+  document.getElementById('s-nav').innerHTML=nav;
+  document.getElementById('s-body').innerHTML='<div style="border:1px solid #eee;border-radius:0.4rem;padding:0.6rem;">'+d.body+'</div>';
+}
+stg(document.querySelector('.tabbtn.act'),'ip');
+</script>
+</body>
+</html>

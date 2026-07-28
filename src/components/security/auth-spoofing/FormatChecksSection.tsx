@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { AuthSpoofingAction, CheckItem, FormatChecksConfig } from '@/types/auth-spoofing';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { CollapsibleCardTrigger } from '@/components/ui/collapsible-section-trigger';
 import { Switch } from '@/components/ui/switch';
 import {
   Select,
@@ -158,7 +159,7 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
             <AlertDialogFooter>
               <AlertDialogCancel>{t(`${warningKey}.cancel` as any)}</AlertDialogCancel>
               <AlertDialogAction
-                className="bg-amber-600 text-white hover:bg-amber-700"
+                className="border-warning/80 bg-warning text-white data-[hovered=true]:bg-warning/90 active:bg-warning/85"
                 onClick={() => {
                   onChange({ ...item, enabled: true });
                   setPendingEnable(false);
@@ -186,17 +187,10 @@ export function FormatChecksSection({ config, onChange, disabled }: FormatChecks
     <Card>
       <Collapsible open={open} onOpenChange={setOpen}>
         <CardHeader className="pb-3">
-          <CollapsibleTrigger
-            render={
-              <button
-                type="button"
-                className="flex items-center gap-2 cursor-pointer w-full text-left bg-transparent border-0 p-0"
-              >
-                <ChevronDown className={cn('h-4 w-4 transition-transform', open && 'rotate-180')} />
+          <CollapsibleCardTrigger>
+                <ChevronDown className={cn('h-4 w-4 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', open && 'rotate-180')} />
                 <CardTitle className="text-base font-semibold">{t('formatChecks.title')}</CardTitle>
-              </button>
-            }
-          />
+              </CollapsibleCardTrigger>
         </CardHeader>
         <CollapsibleContent>
           <CardContent className="space-y-3 pt-0">

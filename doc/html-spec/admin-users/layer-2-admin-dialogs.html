@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 2：管理员弹窗组 - 管理员与权限 HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/spec-style.css">
+<link rel="stylesheet" href="./preview.css">
+<style>.component-preview{background:#fff;overflow-x:auto}.pass{color:#15803d;font-weight:600}.warn{color:#a16207;font-weight:600}</style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="./layer-1-admin-drawer.html">← 层级 1：抽屉</a>
+  <span>层级 2 / 2</span>
+  <a href="./index.html#c-2">返回主文件（2.2）→</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 2：管理员弹窗组（重置密码 / 强制下线 / 删除 / 批量删除 / 筛选 / 批量操作栏）</h1>
+  <table class="meta-table">
+    <thead><tr><th>属性</th><th>规格</th><th>形态/角色差异</th></tr></thead>
+    <tr><td>所属组件</td><td>2.2 管理员账号 Tab（AdminAccountTab）</td><td>[Base] 全形态共用</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">admin-users/index.html</a></td><td>[Base] —</td></tr>
+    <tr><td>触发路径</td><td>行「重置密码」/「强制下线」/「删除」；工具栏「筛选」；勾选复选框 → 批量操作栏 → 「批量删除」</td><td>[Base] 一致</td></tr>
+    <tr><td>demo 组件</td><td><code>admin-account-tab.tsx</code> 的 <code>&lt;Dialog&gt;</code>（重置密码）+ 3×<code>&lt;AlertDialog&gt;</code> + <code>&lt;Popover&gt;</code>（筛选，复用 mail-routing ListToolbar）</td><td>[Base] 一致</td></tr>
+  </table>
+</header>
+
+<!-- 重置密码 -->
+<section class="interaction-layer">
+  <h4><span class="layer-badge">2a</span> 重置密码弹窗（Dialog）</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：行「重置密码」→ <code>setResetTarget(a)</code>。<strong>可交互</strong>：点「生成」填 16 位随机密码；有值时出现「复制密码」。</div>
+  <div class="preview-hint">点「生成」，再点「复制密码」</div>
+  <div class="component-preview cp">
+    <div class="cp-dialog" style="box-shadow:none;border:1px solid #e5e7eb">
+      <h4>重置密码</h4>
+      <p>为管理员「admin」设置新密码，重置后需用新密码登录。</p>
+      <div class="cp-field"><label>新密码<span class="req">*</span></label>
+        <div style="display:flex;gap:.5rem"><input class="cp-input" id="rpwd" placeholder="请输入或生成新密码"><button class="cp-btn" onclick="var g='ABCDEFGHJKLMNP2345678!@#$';var s='';for(var i=0;i&lt;16;i++)s+=g[Math.floor(Math.random()*g.length)];document.getElementById('rpwd').value=s;document.getElementById('cpy').style.display='inline-flex';return false">🔑 生成</button></div>
+        <div class="cp-hint">可自动生成 16 位随机密码</div>
+      </div>
+      <a id="cpy" href="#" onclick="return false" class="cp-btn blue sm" style="display:none;border:none;padding:0">⧉ 复制密码</a>
+      <div class="df" style="margin-top:.75rem"><button class="cp-btn">取消</button><button class="cp-btn pri">确定</button></div>
+    </div>
+  </div>
+  <figure class="screenshot-figure"><img src="./screenshots/account-layer2-reset-pwd.png" alt="重置密码弹窗"><figcaption>重置密码弹窗（浏览器实际渲染）</figcaption></figure>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>元素</th><th>说明</th><th>形态/角色差异</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>新密码 Input(text) + 生成</td><td>校验 <code>checkPasswordAgainstPolicy</code>（默认策略）；失败 Toast 首条错误</td><td>[Overlay] 落地应按 scope 策略校验</td></tr>
+      <tr><td>2</td><td>复制密码</td><td>有值时显示；<code>navigator.clipboard.writeText</code> → Toast「密码已复制」</td><td>[Base] 一致</td></tr>
+      <tr><td>3</td><td>确定/取消</td><td>确定成功 → Toast「密码已重置」并关闭</td><td>[Base] 一致</td></tr>
+    </tbody>
+  </table>
+  <div class="dom-comparison"><h5>DOM 树比对结果</h5><table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>弹窗根</td><td><code>[role=dialog].sm:max-w-[400px]</code>（23 节点）</td><td>同</td><td class="pass">一致</td></tr>
+      <tr><td>标题/描述</td><td>「重置密码」/「为管理员「admin」设置新密码…」</td><td>同</td><td class="pass">一致</td></tr>
+      <tr><td>复制密码</td><td>仅 resetPwd 非空时渲染</td><td>生成后显示（JS 复刻）</td><td class="pass">一致</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- 强制下线 + 删除 + 批量删除 -->
+<section class="interaction-layer">
+  <h4><span class="layer-badge">2b</span> 确认类弹窗（AlertDialog × 3）</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：行「强制下线」（仅 online）/「删除」；批量栏「批量删除」。</div>
+  <div class="component-preview cp" style="display:flex;gap:1rem;flex-wrap:wrap">
+    <div class="cp-dialog" style="box-shadow:none;border:1px solid #e5e7eb;margin:0;width:22rem">
+      <h4>强制下线</h4><p>确定强制下线管理员「admin」？该操作将立即终止其所有会话。</p>
+      <div class="df"><button class="cp-btn">取消</button><button class="cp-btn amber" style="background:#d97706;color:#fff;border-color:#d97706">确定下线</button></div>
+    </div>
+    <div class="cp-dialog" style="box-shadow:none;border:1px solid #e5e7eb;margin:0;width:22rem">
+      <h4>删除管理员「admin」？</h4><p>删除后该账号将无法登录，历史操作日志仍会保留。此操作不可撤销。</p>
+      <div class="df"><button class="cp-btn">取消</button><button class="cp-btn danger" style="background:#dc2626;color:#fff;border-color:#dc2626">删除</button></div>
+    </div>
+    <div class="cp-dialog" style="box-shadow:none;border:1px solid #e5e7eb;margin:0;width:22rem">
+      <h4>批量删除 2 个管理员？</h4><p>删除后这些账号将无法登录，历史操作日志仍会保留。此操作不可撤销。</p>
+      <div class="df"><button class="cp-btn">取消</button><button class="cp-btn danger" style="background:#dc2626;color:#fff;border-color:#dc2626">删除</button></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap">
+    <figure class="screenshot-figure"><img src="./screenshots/account-layer2-force-offline.png" alt="强制下线" style="max-width:340px"><figcaption>强制下线</figcaption></figure>
+    <figure class="screenshot-figure"><img src="./screenshots/account-layer2-delete-confirm.png" alt="删除确认" style="max-width:340px"><figcaption>删除确认</figcaption></figure>
+  </div>
+  <table class="spec-table">
+    <thead><tr><th>弹窗</th><th>确认按钮</th><th>业务约束</th><th>成功 Toast</th><th>形态/角色差异</th></tr></thead>
+    <tbody>
+      <tr><td>强制下线</td><td>确定下线（amber）</td><td>-</td><td>已强制下线</td><td>[Base] 一致</td></tr>
+      <tr><td>删除</td><td>删除（red）</td><td>最后 1 个系统管理员不可删（Toast「系统至少保留一个启用的系统管理员」）</td><td>管理员已删除</td><td>[平台管理员] 最后系统管理员保护；[租户管理员] 不存在系统管理员角色</td></tr>
+      <tr><td>批量删除</td><td>删除（red）</td><td>含最后系统管理员则整体拦截</td><td>已批量删除</td><td>[平台管理员] 需保护 role_sys；[租户管理员] 仅当前租户</td></tr>
+    </tbody>
+  </table>
+  <div class="dom-comparison"><h5>DOM 树比对结果</h5><table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>弹窗根</td><td>3× <code>[role=alertdialog].sm:max-w-[360px]</code></td><td>同</td><td class="pass">一致</td></tr>
+      <tr><td>强制下线文案</td><td>「确定强制下线管理员「admin」？…终止其所有会话。」</td><td>同（浏览器提取原文）</td><td class="pass">一致</td></tr>
+      <tr><td>删除文案</td><td>「删除后该账号将无法登录，历史操作日志仍会保留。此操作不可撤销。」</td><td>同</td><td class="pass">一致</td></tr>
+      <tr><td>多状态合并</td><td>demo 同一时刻仅 1 个弹窗</td><td>3 弹窗并排嵌入便于审查</td><td class="warn">已修正：并排展示</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- 筛选 + 批量栏 -->
+<section class="interaction-layer">
+  <h4><span class="layer-badge">2c</span> 筛选弹层（Popover）+ 批量操作栏</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：工具栏「筛选」→ Popover（状态 + 角色）；勾选行复选框 → 批量操作栏（已选 N 项）。</div>
+  <div class="component-preview cp" style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start">
+    <div style="border:1px solid #e5e7eb;border-radius:.5rem;padding:1rem;width:18rem">
+      <div style="font-size:.75rem;color:#6b7280;margin-bottom:.35rem">筛选弹层</div>
+      <div class="cp-field"><label>状态</label><span class="cp-sel" data-sel="fstat" style="width:100%"><span data-selval>全部</span></span>
+        <div class="cp-selmenu" data-selmenu="fstat" hidden><span class="cp-selopt" data-selopt>全部</span><span class="cp-selopt" data-selopt>正常</span><span class="cp-selopt" data-selopt>异常</span></div></div>
+      <div class="cp-field"><label>角色</label><span class="cp-sel" data-sel="frole" style="width:100%"><span data-selval>全部</span></span>
+        <div class="cp-selmenu" data-selmenu="frole" hidden><span class="cp-selopt" data-selopt>全部</span><span class="cp-selopt" data-selopt>系统管理员</span><span class="cp-selopt" data-selopt>安全运营</span><span class="cp-selopt" data-selopt>审计员</span></div></div>
+    </div>
+    <div style="flex:1;min-width:20rem">
+      <div class="cp-selbar"><span style="color:#1d4ed8">已选 1 项</span><div class="grow"><button class="cp-btn sm">批量启用</button><button class="cp-btn sm">批量禁用</button><button class="cp-btn sm danger">批量删除</button></div></div>
+      <div class="cp-hint">勾选行复选框后出现此栏；批量启用/禁用跳过当前登录账号。</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap">
+    <figure class="screenshot-figure"><img src="./screenshots/account-layer2-filter-popover.png" alt="筛选弹层" style="max-width:280px"><figcaption>筛选弹层（状态/角色）</figcaption></figure>
+    <figure class="screenshot-figure"><img src="./screenshots/account-layer2-batch-bar.png" alt="批量操作栏" style="max-width:520px"><figcaption>批量操作栏（已选 1 项）</figcaption></figure>
+  </div>
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>选项/说明</th><th>形态/角色差异</th></tr></thead>
+    <tbody>
+      <tr><td>筛选·状态</td><td>全部 / 正常 / 异常</td><td>[Base] 一致</td></tr>
+      <tr><td>筛选·角色</td><td>全部 + 当前作用域角色（租户视角剔除系统管理员）；筛选计数徽标</td><td>[Overlay] 选项按 scope</td></tr>
+      <tr><td>批量启用/禁用</td><td>对 selected 批量置状态（跳过 CURRENT_ADMIN_ID）；Toast「已批量启用/禁用」</td><td>[Base] 当前账号保护</td></tr>
+      <tr><td>批量删除</td><td>打开批量删除确认（见 2b）</td><td>[Overlay] 平台侧额外保护最后系统管理员</td></tr>
+    </tbody>
+  </table>
+  <div class="dom-comparison"><h5>DOM 树比对结果</h5><table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>Popover 内容</td><td><code>[data-radix-popper-content-wrapper]</code>，含 状态/角色 两个 Select（全部）</td><td>同（状态/角色）</td><td class="pass">一致</td></tr>
+      <tr><td>批量栏</td><td><code>.bg-blue-50.border-blue-200</code>「已选 1 项」+ 3 按钮</td><td>同</td><td class="pass">一致</td></tr>
+      <tr><td>批量删除按钮色</td><td>红字 <code>text-red-600</code></td><td>同</td><td class="pass">一致</td></tr>
+    </tbody></table></div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./layer-1-admin-drawer.html">← 层级 1：抽屉</a>
+  <a href="./index.html#c-2">返回主文件（2.2）→</a>
+</nav>
+
+<script src="./preview.js"></script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 1：时间范围下拉与切换 - 系统状态</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== 设计变量（参考 demo globals.css） ===== */
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.55;
+      font-size: 14px;
+      padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1.2rem; margin: 2.2rem 0 .8rem; padding-bottom: .35rem; border-bottom: 2px solid var(--primary); }
+    h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; }
+    h4 { font-size: .95rem; margin: 1.2rem 0 .5rem; }
+    h5 { font-size: .85rem; margin: .8rem 0 .4rem; }
+    p { margin: .45rem 0; }
+    code { font-family: var(--font-mono); font-size: .85em; background: var(--muted); padding: .1em .35em; border-radius: 4px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    a { color: oklch(0.52 0.226 262); }
+
+    /* ===== 头部 / 元信息 ===== */
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .spec-header .subtitle { color: var(--muted-foreground); font-size: .9rem; }
+    .meta-table { border-collapse: collapse; width: 100%; margin-top: .8rem; font-size: 13px; }
+    .meta-table td { border: 1px solid var(--border); padding: 5px 10px; vertical-align: top; }
+    .meta-table td:first-child { background: var(--muted); font-weight: 600; white-space: nowrap; width: 11em; }
+
+    /* ===== 组件目录 ===== */
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem; margin-top: 1.2rem; }
+    .component-toc ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .component-toc li { margin: .3rem 0; }
+    .toc-badge { display: inline-block; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 999px; padding: 0 .5em; margin-left: .4em; vertical-align: middle; }
+    .toc-layer-links { margin-left: .6em; font-size: 12px; }
+    .toc-layer-links a { margin-right: .5em; }
+
+    /* ===== 表格 ===== */
+    .spec-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0 1rem; background: var(--card); }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); font-weight: 600; white-space: nowrap; }
+    .spec-table td.num { text-align: right; font-family: var(--font-mono); }
+    .spec-table .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    /* ===== 截图 ===== */
+    .screenshot-figure { margin: .8rem 0 1.2rem; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .screenshot-figure figcaption { font-size: 12px; color: var(--muted-foreground); margin-top: .35rem; }
+
+    /* ===== 组件规格块 ===== */
+    .component-spec { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem 1.4rem; margin: 1.2rem 0; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: .9rem 1.1rem; margin: 1rem 0; background: oklch(0.99 0 0); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; background: var(--primary); color: #fff; border-radius: 999px; font-size: .8em; font-weight: 700; margin-right: .4em; }
+    .trigger-path { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .45rem .7rem; margin: .5rem 0; }
+    .layer-nav { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 13px; }
+
+    /* ===== 可交互组件预览区 ===== */
+    .component-preview { border: 2px dashed oklch(0.7 0.12 262); border-radius: 10px; padding: 18px; background: #f4f5f7; overflow-x: auto; margin: .7rem 0; position: relative; }
+    .component-preview::before { content: "可交互预览（提取自运行中的 demo）"; position: absolute; top: -9px; left: 14px; background: oklch(0.52 0.226 262); color: #fff; font-size: 10.5px; padding: 0 8px; border-radius: 999px; line-height: 16px; }
+    .preview-note { font-size: 12px; color: var(--muted-foreground); background: oklch(0.975 0.02 95); border: 1px solid oklch(0.9 0.06 95); border-radius: 6px; padding: .4rem .7rem; margin: .4rem 0 .8rem; }
+    /* demo 提取片段兜底（Tailwind CDN 未覆盖的 shadcn 主题类） */
+    .component-preview .bg-card { background: #fff; }
+    .component-preview .text-card-foreground { color: #0a0a0a; }
+    .component-preview .bg-popover { background: #fff; }
+    .component-preview .text-popover-foreground { color: #0a0a0a; }
+    .component-preview .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .component-preview .border-input { border-color: #e5e7eb; }
+    .component-preview svg { flex-shrink: 0; }
+    .component-preview .recharts-responsive-container { min-height: 320px; }
+    .component-preview [data-slot="card"] { border-color: #e5e7eb; }
+    .component-preview button { cursor: pointer; }
+    .component-preview button:disabled { cursor: default; }
+    @keyframes spec-spin { to { transform: rotate(360deg); } }
+    .component-preview .animate-spin { animation: spec-spin 1s linear infinite; }
+
+    /* 路由提示浮层 */
+    .route-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 13px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 99; opacity: 0; transition: opacity .2s; pointer-events: none; font-family: var(--font-mono); }
+    .route-toast.show { opacity: 1; }
+
+    /* ===== DOM 比对 ===== */
+    .dom-comparison { background: oklch(0.975 0.008 262); border: 1px solid oklch(0.85 0.03 262); border-radius: 8px; padding: .6rem .9rem; margin-top: .8rem; }
+    .dom-comparison h5 { margin: .2rem 0 .4rem; }
+
+    /* ===== 差异 / 需确认 ===== */
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .diff-section h2 { border-bottom-color: var(--diff-border); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .question-section h2 { border-bottom-color: var(--question-border); }
+    .diff-table td:first-child, .question-table td:first-child { font-weight: 700; white-space: nowrap; }
+
+    /* ===== 徽标 ===== */
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 .55em; line-height: 1.6; vertical-align: middle; }
+    .tag-green { background: #dcfce7; color: #15803d; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-gray { background: #f3f4f6; color: #4b5563; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+
+    .mermaid { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .6rem; margin: .8rem 0; overflow-x: auto; }
+
+    /* 提取的 radix listbox 在文档流内静态展示 */
+    .select-demo [data-slot=select-content] { position: static !important; transform: none !important; width: 8rem; }
+  </style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="./index.html#component-2-1">← 返回主文件（2.1 页面头部）</a>
+  <a href="./layer-2-legend-toggle.html">层级：图例显隐切换 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 1：时间范围下拉打开与切换</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.1 页面头部（时间范围选择器，shadcn Select / radix）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">system-status/index.html</a></td></tr>
+    <tr><td>触发路径</td><td>层级0 头部右侧 Select 触发器（初值「今日」）→ click → radix portal 弹出 listbox（<code>data-state=open</code>）→ 选择任一项 → 关闭并全页数据联动</td></tr>
+    <tr><td>浏览器验证</td><td>CDP 可信鼠标事件点击触发器与选项；三个范围的 KPI / 趋势 X 轴 / TOP5 数据全部实测</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1</span> 下拉打开态</h4>
+  <div class="component-preview select-demo" id="preview-listbox">
+<div data-side="bottom" data-align="start" role="listbox" id="radix-_R_pinebn9lb_" data-state="open" dir="ltr" data-slot="select-content" class="bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border shadow-md data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1" tabindex="-1" style="box-sizing: border-box; display: flex; flex-direction: column; outline: none; --radix-select-content-transform-origin: var(--radix-popper-transform-origin); --radix-select-content-available-width: var(--radix-popper-available-width); --radix-select-content-available-height: var(--radix-popper-available-height); --radix-select-trigger-width: var(--radix-popper-anchor-width); --radix-select-trigger-height: var(--radix-popper-anchor-height); pointer-events: auto;"><style>[data-radix-select-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-select-viewport]::-webkit-scrollbar{display:none}</style><div data-radix-select-viewport="" role="presentation" class="p-1 h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1" style="position: relative; flex: 1 1 0%; overflow: hidden auto;"><div role="option" aria-labelledby="radix-_r_3_" aria-selected="true" data-state="checked" tabindex="-1" data-slot="select-item" class="focus:bg-accent focus:text-accent-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2" data-radix-collection-item="" data-highlighted=""><span class="absolute right-2 flex size-3.5 items-center justify-center"><span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check size-4"><path d="M20 6 9 17l-5-5"></path></svg></span></span><span id="radix-_r_3_">今日</span></div><div role="option" aria-labelledby="radix-_r_4_" aria-selected="false" data-state="unchecked" tabindex="-1" data-slot="select-item" class="focus:bg-accent focus:text-accent-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2" data-radix-collection-item=""><span class="absolute right-2 flex size-3.5 items-center justify-center"></span><span id="radix-_r_4_">最近 7 天</span></div><div role="option" aria-labelledby="radix-_r_5_" aria-selected="false" data-state="unchecked" tabindex="-1" data-slot="select-item" class="focus:bg-accent focus:text-accent-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2" data-radix-collection-item=""><span class="absolute right-2 flex size-3.5 items-center justify-center"></span><span id="radix-_r_5_">最近 30 天</span></div></div></div>
+  </div>
+  <p class="preview-note">预览可操作：上方为 demo 提取的 radix listbox（原为 portal 浮层，此处静态置于文档流展示）。点击任一选项可切换选中态（<code>data-state=checked</code> 高亮 + 右侧 Check 图标迁移），行为与 demo 一致；demo 中选择后 listbox 关闭并驱动全页刷新。</p>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/range-select-open.png" alt="下拉打开态">
+    <figcaption>下拉打开态：listbox 出现在触发器下方（data-side=bottom），当前值「今日」高亮并带 Check 图标。</figcaption>
+  </figure>
+
+  <h5>UI 元素清单</h5>
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>类型 / 属性</th><th>规格</th></tr></thead>
+    <tbody>
+      <tr><td>listbox 容器</td><td><code>role=listbox</code> <code>data-slot=select-content</code> <code>data-state=open</code> <code>data-side=bottom</code></td><td><code>bg-popover rounded-md border shadow-md z-50 min-w-[8rem]</code>，入场动画 fade-in + zoom-in-95 + slide-in-from-top-2</td></tr>
+      <tr><td>选项 ×3</td><td><code>role=option</code>（SelectItem）</td><td>今日 / 最近 7 天 / 最近 30 天；<code>py-1.5 pr-8 pl-2 rounded-sm text-sm</code>，focus 态 <code>bg-accent</code></td></tr>
+      <tr><td>选中标记</td><td><code>data-state=checked</code></td><td>选中项右侧 <code>size-3.5</code> Check 图标（span absolute right-2）</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td><code>div[role=listbox][data-slot=select-content][data-state=open]</code></td><td>同左（outerHTML 原样）</td><td>✅</td></tr>
+        <tr><td>选项数</td><td>3 个 <code>[role=option]</code></td><td>3</td><td>✅</td></tr>
+        <tr><td>选项文案</td><td>今日 / 最近 7 天 / 最近 30 天</td><td>一致</td><td>✅</td></tr>
+        <tr><td>选中态</td><td>「今日」<code>data-state=checked</code>，其余 unchecked</td><td>一致</td><td>✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1a</span> 切换到「最近 7 天」后的全页态</h4>
+  <div class="trigger-path">触发路径：下拉打开 → 点击「最近 7 天」→ listbox 关闭，触发器文案变更，KPI / 趋势 / TOP5 联动刷新。</div>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-range-7d.png" alt="最近 7 天全页态">
+    <figcaption>最近 7 天：收信 902,331（+8%）· 拦截 9,876（1.09%）· 待处置 34（隔离 11 / 举报 6）· 趋势 X 轴 11/1–11/7 共 7 点 · TOP5 榜单换为 7 天数据。</figcaption>
+  </figure>
+</section>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1b</span> 切换到「最近 30 天」后的全页态</h4>
+  <div class="trigger-path">触发路径：下拉打开 → 点击「最近 30 天」。</div>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-range-30d.png" alt="最近 30 天全页态">
+    <figcaption>最近 30 天：收信 3,984,210（<b>-4% 环比：红色 + ArrowDownRight，取绝对值显示</b>）· 拦截 41,203（1.03%）· 待处置 58（19/13）· 趋势 X 轴 1/1–1/30 共 30 点（轴标签隔点显示 1/2、1/4…）。</figcaption>
+  </figure>
+  <h5>切换联动数据表（CDP 实测）</h5>
+  <table class="spec-table">
+    <thead><tr><th>指标</th><th>今日</th><th>最近 7 天</th><th>最近 30 天</th></tr></thead>
+    <tbody>
+      <tr><td>触发器文案</td><td>今日</td><td>最近 7 天</td><td>最近 30 天</td></tr>
+      <tr><td>收信总量 / 环比</td><td class="num">128,456 / +12%</td><td class="num">902,331 / +8%</td><td class="num">3,984,210 / -4%（红）</td></tr>
+      <tr><td>拦截威胁数 / 拦截率</td><td class="num">1,234 / 0.96%</td><td class="num">9,876 / 1.09%</td><td class="num">41,203 / 1.03%</td></tr>
+      <tr><td>待处置（隔离/举报）</td><td class="num">12（3/2）</td><td class="num">34（11/6）</td><td class="num">58（19/13）</td></tr>
+      <tr><td>趋势 X 轴</td><td>00:00–22:00 ×12（2h）</td><td>11/1–11/7 ×7</td><td>1/1–1/30 ×30</td></tr>
+      <tr><td>健康条 / 节点卡</td><td colspan="3">三范围不变（危险态 N=2；节点 5/5）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="route-toast" id="route-toast"></div>
+<script>
+/* 选项选中态切换（复刻 radix data-state 行为） */
+(function () {
+  const box = document.getElementById("preview-listbox");
+  const opts = box.querySelectorAll("[role=option]");
+  opts.forEach((o) => {
+    o.addEventListener("click", () => {
+      opts.forEach((x) => {
+        x.setAttribute("data-state", x === o ? "checked" : "unchecked");
+        x.setAttribute("aria-selected", x === o ? "true" : "false");
+        const mark = x.querySelector("span.absolute");
+        if (mark) mark.style.display = x === o ? "" : "none";
+      });
+      const toast = document.getElementById("route-toast");
+      toast.textContent = "demo 行为：setRange(\"" + o.textContent.trim() + "\") → 全页 KPI/趋势/TOP5 联动刷新，listbox 关闭";
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2200);
+    });
+  });
+  // 初始：非选中项隐藏 check 标记（提取 HTML 中未选中项本就无标记，此处兜底）
+  opts.forEach((x) => {
+    if (x.getAttribute("data-state") !== "checked") {
+      const mark = x.querySelector("span.absolute");
+      if (mark) mark.style.display = "none";
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "module": "filter-rules-pipeline-sender-filter",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-14",
+      "demo_commit": "3c2bb69",
+      "spec_commit": "804efb9",
+      "summary": "初版：策略卡入口(绿色例外) → 阶段2抽屉黑/白名单列表(7列, 无发信IP范围列, 状态为只读Badge非开关) → 920px 新建规则抽屉(基础设置蓝条+执行动作红条两分区+右栏预览/示例/模拟测试)。含发信人类型联动、空表单校验、模拟测试；记录删除/导入导出未接线、白名单全局策略缺UI、审核Badge黄非紫、图标配色差异, 以及浏览器实测'使用该示例'触发 setSkipSpf is not defined 运行时报错。"
+    }
+  ]
+}

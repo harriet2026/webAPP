@@ -1,0 +1,13 @@
+{
+  "module": "component-sidebar-nav",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-25",
+      "demo_commit": "804efb9",
+      "spec_commit": "—",
+      "summary": "初版：aside 容器/Logo 头/MenuItem 递归/锁定弹窗；覆盖三级嵌套、展开收起、激活高亮、5×2 形态×视角可见性矩阵、蓝/绿主题、zh/en/th 国际化。锁定弹窗当前数据不可达（记录为差异）。"
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 2：新建规则抽屉 - 发信人黑白名单</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --text:#111827; --sub:#6b7280; --blue:#1677ff; --red:#f5222d; --radius:.625rem; font-family:"Geist", system-ui, sans-serif; }
+    *{box-sizing:border-box} body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:var(--text);line-height:1.6} a{color:var(--blue);text-decoration:none} nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)} h1{margin:0 0 16px;color:var(--primary);font-size:26px} h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px} h3{font-size:17px}.meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}.meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}.meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}.component-preview{margin:12px 0;padding:18px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}.drawer-preview{display:grid;grid-template-columns:560px 1fr;min-width:960px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#f8fafc}.drawer-left{padding:22px;background:#eefbff}.drawer-right{padding:22px;background:#f3f4f6;border-left:1px solid var(--border)}.block{margin-bottom:22px;padding:18px;border-radius:8px;background:#fff}.block-title{display:flex;gap:10px;align-items:center;margin-bottom:14px;font-weight:650}.bar{width:4px;height:22px;border-radius:999px;background:var(--blue)}.bar.red{background:var(--red)}.row{display:grid;grid-template-columns:100px 1fr;gap:12px;margin:12px 0;align-items:center}.label{text-align:right;font-weight:600}.required{color:var(--red)}.input,.select,.textarea{display:inline-block;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#374151}.select{min-width:112px}.textarea{height:80px;width:100%}.is-hidden{display:none!important}.effect{padding:18px;border:1px solid var(--border);border-radius:8px;background:#fff}.button-blue{display:inline-block;padding:8px 14px;border:0;border-radius:8px;background:#155eef;color:#fff;font-weight:650;cursor:pointer}.button-outline{display:inline-block;padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer}.screenshot-figure{text-align:center}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}.layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}
+  </style>
+</head>
+<body>
+  <nav><a href="index.html#component-2-3">返回主文件</a> · <a href="layer-2-validation-examples-simulator.html">下一层：校验/示例/模拟测试</a></nav>
+  <header class="spec-header">
+    <h1>交互层级 2：新建规则抽屉</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>SenderFilterDrawer</td></tr>
+      <tr><td>触发路径</td><td>层级1 发信人列表默认态 → 点击“新建规则”按钮</td></tr>
+      <tr><td>截图</td><td><code>screenshots/rule-drawer-new-default.png</code></td></tr>
+      <tr><td>DOM 提取</td><td>浏览器实测规则 Sheet 宽度 <strong>920px</strong>（区别于 80vw=1152px 的阶段2抽屉），根节点 <code>[role=dialog]</code>。表单 <code>&lt;label&gt;</code> 实际为：规则名称*、发信人*、发信IP范围、有效期至、优先级、执行动作、备注；<code>&lt;h3&gt;</code> 色条分区实际为：基础设置、执行动作、当前配置效果（<strong>仅 2 个表单分区</strong>）。</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">2</span>HTML 预览</h2>
+    <div class="component-preview">
+      <div class="drawer-preview" data-demo-extracted="new-rule-drawer">
+        <div class="drawer-left">
+          <div class="block">
+            <div class="block-title"><span class="bar"></span>基础设置</div>
+            <div class="row"><span class="label"><span class="required">*</span> 规则名称</span><input class="input" data-rule-name placeholder="如：可疑发件人"></div>
+            <div class="row"><span class="label"><span class="required">*</span> 发信人</span><span><select class="select" data-sender-type><option value="个人">个人</option><option value="群组">群组</option><option value="组织域名">组织域名</option></select> <input class="input" data-sender-value placeholder="如: user@example.com 或 *@domain.com"><select class="select is-hidden" data-sender-group><option>财务部门</option><option>技术部门</option><option>合作伙伴</option><option>example.com</option><option>partner.com</option></select></span></div>
+            <div class="row"><span class="label">发信IP范围</span><span><select class="select" data-ip-type><option value="全部IP">全部IP</option><option value="IP组">IP组</option><option value="单IP">单IP</option><option value="IP段">IP段</option></select> <input class="input is-hidden" data-ip-value placeholder="如: 192.168.1.1 或 192.168.1.0/24"></span></div>
+            <div class="row"><span class="label">有效期至</span><span><input class="input" data-expire type="date"> <small>(留空表示永久有效)</small></span></div>
+            <div class="row"><span class="label">优先级</span><span><input class="input" data-priority type="number" min="2000" max="2049" value="2000" style="width:96px;"> <small>2000-2049</small></span></div>
+          </div>
+          <div class="block">
+            <div class="block-title"><span class="bar red"></span>执行动作</div>
+            <div class="row"><span class="label">执行动作</span><select class="select" data-action><option>阻断</option><option>隔离</option><option>审核</option><option>放行</option></select></div>
+          </div>
+          <div class="row"><span class="label">备注</span><span><textarea class="textarea" data-remark maxlength="200" placeholder="添加备注信息（最多200字）"></textarea><br><small><span data-remark-count>0</span>/200</small></span></div>
+        </div>
+        <div class="drawer-right">
+          <div class="effect">
+            <h3>当前配置效果</h3>
+            <p>当发信人为 <strong data-effect-sender>未填写</strong></p>
+            <p>系统将执行：<strong data-effect-action>阻断</strong></p>
+            <p>有效期至：<span data-effect-expire>永久</span></p>
+            <p>优先级：<code data-effect-priority>2000</code></p>
+          </div>
+          <p><a style="color:#155eef;" href="layer-2-validation-examples-simulator.html">查看配置示例⌄</a></p>
+          <p><a style="color:#155eef;" href="layer-2-validation-examples-simulator.html">模拟测试⌄</a></p>
+          <div class="effect">
+            <h3>配置提示</h3>
+            <ul><li>优先级越小越先匹配</li><li>支持通配符如 *@domain.com</li><li>留空有效期表示永久有效</li><li>群组和组织来自群组策略配置</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-drawer-new-default.png" alt="新建规则抽屉默认态">
+      <figcaption>新建规则抽屉默认态（920px）：左侧“基础设置”(蓝条)+“执行动作”(红条)+备注，右侧“当前配置效果”“查看配置示例”“模拟测试”“配置提示”。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>元素清单</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>元素</th><th>默认值/占位符</th><th>交互行为</th></tr></thead>
+      <tbody>
+        <tr><td>头部</td><td>标题</td><td>新建规则</td><td>新建态；编辑态切换为“编辑规则”。</td></tr>
+        <tr><td>头部</td><td>取消 / 保存</td><td>右上角按钮</td><td>取消有脏数据时触发未保存确认；保存执行校验。</td></tr>
+        <tr><td>基础设置</td><td>规则名称</td><td>如：可疑发件人</td><td>必填，空值保存提示“规则名称不能为空”。</td></tr>
+        <tr><td>基础设置</td><td>发信人类型</td><td>个人</td><td>可选个人/群组/组织域名；切换会清空当前发信人值。</td></tr>
+        <tr><td>基础设置</td><td>发信人输入</td><td>如: user@example.com 或 *@domain.com</td><td>个人类型必填；群组/组织时替换为 Select。</td></tr>
+        <tr><td>基础设置</td><td>发信IP范围</td><td>全部IP</td><td>可选全部IP/IP组/单IP/IP段；后3项会显示额外控件。</td></tr>
+        <tr><td>基础设置</td><td>有效期至</td><td>空，日期选择</td><td>留空表示永久。</td></tr>
+        <tr><td>基础设置</td><td>优先级</td><td>2000，范围 2000-2049</td><td>数值越小越先匹配。</td></tr>
+        <tr><td>执行动作</td><td>动作 Select</td><td>黑名单默认阻断</td><td>黑名单可选阻断/隔离/审核；白名单仅允许放行。</td></tr>
+        <tr><td>右侧预览</td><td>当前配置效果</td><td>未填写 / 阻断 / 永久 / 2000</td><td>随表单实时更新。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点/宽度</td><td><code>[role=dialog]</code> Sheet，宽度 920px</td><td><code>.drawer-preview[data-demo-extracted]</code>，网格 560px + 右栏</td><td>✅ 一致（预览裁剪展示）</td></tr>
+        <tr><td>表单 label</td><td>规则名称* / 发信人* / 发信IP范围 / 有效期至 / 优先级 / 执行动作 / 备注</td><td>同 7 个 label，同顺序</td><td>✅ 一致</td></tr>
+        <tr><td>色条分区(h3)</td><td>基础设置 / 执行动作（+右栏 当前配置效果）——<strong>仅 2 个表单分区</strong></td><td>基础设置(蓝条) + 执行动作(红条)</td><td>✅ 一致（与 PRD 5 分区差异见主文件差异表）</td></tr>
+        <tr><td>必填字段</td><td>规则名称、发信人显示红色星号</td><td>同文案和必填标识</td><td>✅ 一致</td></tr>
+        <tr><td>默认值</td><td>个人、全部IP、阻断、永久、优先级 2000（范围 2000-2049）</td><td>同默认值</td><td>✅ 一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <script>
+    const $ = (selector) => document.querySelector(selector);
+    const senderType = $("[data-sender-type]");
+    const senderValue = $("[data-sender-value]");
+    const senderGroup = $("[data-sender-group]");
+    const ipType = $("[data-ip-type]");
+    const ipValue = $("[data-ip-value]");
+    const expire = $("[data-expire]");
+    const priority = $("[data-priority]");
+    const action = $("[data-action]");
+    const remark = $("[data-remark]");
+
+    function syncDrawerPreview() {
+      const grouped = senderType.value !== "个人";
+      senderValue.classList.toggle("is-hidden", grouped);
+      senderGroup.classList.toggle("is-hidden", !grouped);
+      ipValue.classList.toggle("is-hidden", ipType.value === "全部IP" || ipType.value === "IP组");
+      ipValue.placeholder = ipType.value === "单IP" ? "如: 192.168.1.1" : "如: 192.168.1.0/24";
+      const sender = grouped ? senderGroup.value : senderValue.value.trim();
+      $("[data-effect-sender]").textContent = sender || "未填写";
+      $("[data-effect-action]").textContent = action.value;
+      $("[data-effect-expire]").textContent = expire.value || "永久";
+      $("[data-effect-priority]").textContent = priority.value || "2000";
+      $("[data-remark-count]").textContent = remark.value.length;
+    }
+
+    document.querySelectorAll("[data-rule-name],[data-sender-type],[data-sender-value],[data-sender-group],[data-ip-type],[data-ip-value],[data-expire],[data-priority],[data-action],[data-remark]")
+      .forEach((el) => el.addEventListener("input", syncDrawerPreview));
+    document.querySelectorAll("select").forEach((el) => el.addEventListener("change", syncDrawerPreview));
+    syncDrawerPreview();
+  </script>
+</body>
+</html>

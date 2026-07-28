@@ -28,11 +28,16 @@ type FieldEntry = {
   unit?: string;
 };
 
+// GT-12422: 为空/不为空 排在 属于/不属于 前，对齐原型（layer-2）操作符顺序
+// 「… 正则匹配 → 为空 → (数值类:大于/小于/范围内) → 属于 → 不属于」。
+// 大于/小于/范围内 仅数值/日期字段提供——与后端 field_registry.go 的
+// searchOperatorsByType 一致（文本字段选数值操作符后端会 400），原型 demo
+// 的下拉是未按字段类型区分的静态列表，不照抄。
 const OPERATORS_BY_TYPE: Record<FieldType, string[]> = {
-  text: ['eq', 'neq', 'contains', 'not_contains', 'starts_with', 'ends_with', 'regex', 'in', 'not_in', 'is_null', 'is_not_null'],
-  number: ['eq', 'neq', 'gt', 'lt', 'gte', 'lte', 'between', 'in', 'not_in', 'is_null', 'is_not_null'],
+  text: ['eq', 'neq', 'contains', 'not_contains', 'starts_with', 'ends_with', 'regex', 'is_null', 'is_not_null', 'in', 'not_in'],
+  number: ['eq', 'neq', 'is_null', 'is_not_null', 'gt', 'lt', 'gte', 'lte', 'between', 'in', 'not_in'],
   boolean: ['eq', 'neq', 'is_null', 'is_not_null'],
-  enum: ['eq', 'neq', 'in', 'not_in', 'is_null', 'is_not_null'],
+  enum: ['eq', 'neq', 'is_null', 'is_not_null', 'in', 'not_in'],
 };
 
 // Operators allowed for a given field definition. Falls back to the type's

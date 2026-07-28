@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>仿冒邮件检测智能体 - HTML 规格说明</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { corePlugins:{ preflight:false }, theme:{ extend:{ colors:{
+      background:'var(--background)', foreground:'var(--foreground)', card:'var(--card)',
+      'card-foreground':'var(--card-foreground)', muted:'var(--muted)', 'muted-foreground':'var(--muted-foreground)',
+      primary:'var(--primary)', 'primary-foreground':'var(--primary-foreground)', border:'var(--border)',
+      input:'var(--input)', ring:'var(--ring)', destructive:'var(--destructive)', accent:'var(--accent)',
+      'accent-foreground':'var(--accent-foreground)', secondary:'var(--secondary)',
+      'secondary-foreground':'var(--secondary-foreground)', popover:'var(--popover)',
+      'popover-foreground':'var(--popover-foreground)' },
+      borderRadius:{ lg:'var(--radius)', md:'calc(var(--radius) - 2px)', sm:'calc(var(--radius) - 4px)' } } } };
+  </script>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262); --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0); --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0); --destructive: oklch(0.577 0.245 27.325);
+      --diff-bg: oklch(0.97 0.013 25); --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95); --question-border: oklch(0.75 0.15 90);
+      --radius: 0.625rem;
+      --font-sans: "Geist","Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono","Geist Mono Fallback", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground);
+      line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 2rem; }
+    .spec-header h1 { color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+    .meta-table td:first-child { font-weight: 600; width: 170px; color: var(--muted-foreground); white-space: nowrap; }
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 2rem; margin-bottom: 2rem; }
+    .component-toc > h2 { color: var(--primary); font-size: 1.05rem; margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .component-toc ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.5rem; }
+    .component-toc li { padding: 0.375rem 0.75rem; border-radius: calc(var(--radius) - 4px); background: var(--muted); font-size: 0.875rem; }
+    .component-toc li a { color: var(--primary); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.375rem; }
+    .component-toc li a:hover { text-decoration: underline; }
+    .component-toc .toc-layer-links { font-size: 0.75rem; color: var(--muted-foreground); margin-left: 0.5rem; }
+    .component-toc .toc-layer-links a { color: var(--muted-foreground); font-weight: 400; }
+    .component-toc .toc-badge { display: inline-block; font-size: 0.6875rem; font-weight: 600; padding: 0.0625rem 0.375rem;
+      border-radius: calc(var(--radius) - 4px); background: var(--primary); color: var(--primary-foreground); white-space: nowrap; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+    section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem; font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+    h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+    table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+    table.spec-table th { background: var(--muted); color: var(--foreground); font-weight: 600; text-align: left;
+      padding: 0.55rem 0.7rem; border: 1px solid var(--border); }
+    table.spec-table td { padding: 0.55rem 0.7rem; border: 1px solid var(--border); vertical-align: top; }
+    table.spec-table tr:nth-child(even) td { background: var(--muted); }
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .screenshot-figure figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .component-spec { border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1rem 0; background: var(--card); }
+    .component-spec > h3 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 0.75rem; }
+    pre { background: var(--muted); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); padding: 1rem;
+      overflow-x: auto; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; margin: 1rem 0; }
+    code { font-family: var(--font-mono); font-size: 0.85em; }
+    blockquote { border-left: 4px solid var(--destructive); background: var(--diff-bg); padding: 0.75rem 1rem; margin: 1rem 0;
+      font-size: 0.875rem; border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0; }
+    .diff-section { border-left: 4px solid var(--diff-border); background: var(--diff-bg); }
+    .diff-section > h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+    .diff-badge { display: inline-block; background: var(--diff-border); color: #fff; font-size: 0.75rem; font-weight: 600;
+      padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); margin-right: 0.5rem; }
+    .question-section { border-left: 4px solid var(--question-border); background: var(--question-bg); }
+    .question-section > h2 { color: var(--question-border); border-bottom-color: var(--question-border); }
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); }
+    .badge-high { background: oklch(0.65 0.2 25); color: #fff; }
+    .badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+    .badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+    .component-preview { border: 2px dashed var(--primary); border-radius: var(--radius); padding: 1.5rem; margin: 1rem 0;
+      background: #f7f8fb; position: relative; overflow: auto; }
+    .component-preview::before { content: "🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）"; position: absolute; top: -0.625rem;
+      left: 0.75rem; background: var(--primary); color: var(--primary-foreground); font-size: 0.6875rem; font-weight: 600;
+      padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); white-space: nowrap; }
+    .component-preview * { box-sizing: border-box; }
+    /* 让被提取的 radix 弹窗/抽屉在预览区以常规流呈现（去掉 fixed 定位与全屏遮罩） */
+    .component-preview [role="dialog"], .component-preview [role="alertdialog"] {
+      position: static !important; inset: auto !important; transform: none !important; translate: none !important;
+      width: 100% !important; max-width: 100% !important; height: auto !important; max-height: none !important;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin: 0 auto; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: calc(var(--radius) - 2px);
+      padding: 1rem 1.25rem; margin: 1.5rem 0; background: var(--card); }
+    .interaction-layer > h4 { color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%;
+      background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .trigger-path { background: var(--muted); border-radius: calc(var(--radius) - 4px); padding: 0.5rem 0.75rem; margin: 0.5rem 0 1rem;
+      font-size: 0.8125rem; color: var(--muted-foreground); }
+    .trigger-path strong { color: var(--foreground); }
+    .dom-comparison { margin: 1rem 0; border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); overflow: hidden; }
+    .dom-comparison > h5 { background: var(--muted); padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600; color: var(--foreground);
+      border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.375rem; }
+    .dom-comparison > h5::before { content: "🔍"; font-size: 0.875rem; }
+    .dom-comparison table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+    .dom-comparison th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .dom-comparison td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .dom-comparison tr:last-child td { border-bottom: none; }
+    .dom-pass { color: oklch(0.5 0.15 150); font-weight: 600; }
+    .dom-fail { color: var(--destructive); font-weight: 600; }
+    .dom-fixed { color: oklch(0.6 0.15 90); font-weight: 600; }
+    table.layer-index { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.layer-index th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+    table.layer-index td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.layer-index td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    table.layer-index td a:hover { text-decoration: underline; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; background: var(--muted);
+      border-radius: var(--radius); margin-bottom: 1.5rem; font-size: 0.875rem; }
+    .layer-nav a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .layer-nav a:hover { text-decoration: underline; }
+    .version-history-section { margin: 1.5rem 0; }
+    .version-history-table td:nth-child(5) { color: var(--muted-foreground); }
+    .spec-version { font-weight: 600; color: oklch(0.52 0.226 262); }
+    .note { background: oklch(0.97 0.02 250); border: 1px solid var(--border); border-left: 4px solid var(--primary);
+      border-radius: calc(var(--radius) - 4px); padding: 0.6rem 0.9rem; font-size: 0.8rem; color: var(--muted-foreground); margin: 0.75rem 0; }
+  </style>
+/* === TW-STATIC-BEGIN (offline Tailwind, auto-generated) === */
+<style id="tw-static">
+*, ::before, ::after {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}::backdrop {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}.pointer-events-none {pointer-events: none
+}.absolute {position: absolute
+}.relative {position: relative
+}.left-3 {left: 0.75rem
+}.top-1\/2 {top: 50%
+}.mb-1 {margin-bottom: 0.25rem
+}.mb-2 {margin-bottom: 0.5rem
+}.ml-1 {margin-left: 0.25rem
+}.mr-2 {margin-right: 0.5rem
+}.mt-1 {margin-top: 0.25rem
+}.mt-6 {margin-top: 1.5rem
+}.block {display: block
+}.flex {display: flex
+}.inline-flex {display: inline-flex
+}.grid {display: grid
+}.size-4 {width: 1rem;height: 1rem
+}.size-9 {width: 2.25rem;height: 2.25rem
+}.h-12 {height: 3rem
+}.h-4 {height: 1rem
+}.h-6 {height: 1.5rem
+}.h-9 {height: 2.25rem
+}.h-\[1\.15rem\] {height: 1.15rem
+}.h-\[calc\(100\%-1px\)\] {height: calc(100% - 1px)
+}.w-12 {width: 3rem
+}.w-4 {width: 1rem
+}.w-6 {width: 1.5rem
+}.w-8 {width: 2rem
+}.w-fit {width: -moz-fit-content;width: fit-content
+}.w-full {width: 100%
+}.min-w-0 {min-width: 0px
+}.flex-1 {flex: 1 1 0%
+}.shrink-0 {flex-shrink: 0
+}.-translate-y-1\/2 {--tw-translate-y: -50%;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.cursor-default {cursor: default
+}.auto-rows-min {grid-auto-rows: min-content
+}.grid-rows-\[auto_auto\] {grid-template-rows: auto auto
+}.flex-row {flex-direction: row
+}.flex-col {flex-direction: column
+}.flex-wrap {flex-wrap: wrap
+}.items-start {align-items: flex-start
+}.items-center {align-items: center
+}.items-stretch {align-items: stretch
+}.justify-end {justify-content: flex-end
+}.justify-center {justify-content: center
+}.justify-between {justify-content: space-between
+}.gap-1 {gap: 0.25rem
+}.gap-1\.5 {gap: 0.375rem
+}.gap-2 {gap: 0.5rem
+}.gap-4 {gap: 1rem
+}.gap-6 {gap: 1.5rem
+}.gap-x-4 {column-gap: 1rem
+}.gap-y-1 {row-gap: 0.25rem
+}.space-y-4 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(1rem * var(--tw-space-y-reverse))
+}.space-y-6 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(1.5rem * var(--tw-space-y-reverse))
+}.overflow-hidden {overflow: hidden
+}.truncate {overflow: hidden;text-overflow: ellipsis;white-space: nowrap
+}.whitespace-nowrap {white-space: nowrap
+}.rounded {border-radius: 0.25rem
+}.rounded-full {border-radius: 9999px
+}.rounded-lg {border-radius: var(--radius)
+}.rounded-md {border-radius: calc(var(--radius) - 2px)
+}.rounded-xl {border-radius: 0.75rem
+}.border {border-width: 1px
+}.border-b {border-bottom-width: 1px
+}.border-dashed {border-style: dashed
+}.border-blue-200 {--tw-border-opacity: 1;border-color: rgb(191 219 254 / var(--tw-border-opacity, 1))
+}.border-gray-200 {--tw-border-opacity: 1;border-color: rgb(229 231 235 / var(--tw-border-opacity, 1))
+}.border-gray-300 {--tw-border-opacity: 1;border-color: rgb(209 213 219 / var(--tw-border-opacity, 1))
+}.border-input {border-color: var(--input)
+}.border-transparent {border-color: transparent
+}.bg-background {background-color: var(--background)
+}.bg-blue-100 {--tw-bg-opacity: 1;background-color: rgb(219 234 254 / var(--tw-bg-opacity, 1))
+}.bg-card {background-color: var(--card)
+}.bg-gray-100 {--tw-bg-opacity: 1;background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1))
+}.bg-muted {background-color: var(--muted)
+}.bg-primary {background-color: var(--primary)
+}.bg-transparent {background-color: transparent
+}.bg-white {--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
+}.p-4 {padding: 1rem
+}.p-\[3px\] {padding: 3px
+}.px-2 {padding-left: 0.5rem;padding-right: 0.5rem
+}.px-3 {padding-left: 0.75rem;padding-right: 0.75rem
+}.px-4 {padding-left: 1rem;padding-right: 1rem
+}.px-6 {padding-left: 1.5rem;padding-right: 1.5rem
+}.py-0\.5 {padding-top: 0.125rem;padding-bottom: 0.125rem
+}.py-1 {padding-top: 0.25rem;padding-bottom: 0.25rem
+}.py-2 {padding-top: 0.5rem;padding-bottom: 0.5rem
+}.py-6 {padding-top: 1.5rem;padding-bottom: 1.5rem
+}.pl-9 {padding-left: 2.25rem
+}.text-right {text-align: right
+}.text-2xl {font-size: 1.5rem;line-height: 2rem
+}.text-base {font-size: 1rem;line-height: 1.5rem
+}.text-lg {font-size: 1.125rem;line-height: 1.75rem
+}.text-sm {font-size: 0.875rem;line-height: 1.25rem
+}.text-xs {font-size: 0.75rem;line-height: 1rem
+}.font-bold {font-weight: 700
+}.font-medium {font-weight: 500
+}.font-semibold {font-weight: 600
+}.text-blue-700 {--tw-text-opacity: 1;color: rgb(29 78 216 / var(--tw-text-opacity, 1))
+}.text-card-foreground {color: var(--card-foreground)
+}.text-foreground {color: var(--foreground)
+}.text-gray-400 {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.text-gray-500 {--tw-text-opacity: 1;color: rgb(107 114 128 / var(--tw-text-opacity, 1))
+}.text-gray-600 {--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity, 1))
+}.text-gray-900 {--tw-text-opacity: 1;color: rgb(17 24 39 / var(--tw-text-opacity, 1))
+}.text-green-500 {--tw-text-opacity: 1;color: rgb(34 197 94 / var(--tw-text-opacity, 1))
+}.text-muted-foreground {color: var(--muted-foreground)
+}.text-primary-foreground {color: var(--primary-foreground)
+}.text-red-500 {--tw-text-opacity: 1;color: rgb(239 68 68 / var(--tw-text-opacity, 1))
+}.text-red-600 {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.opacity-0 {opacity: 0
+}.opacity-50 {opacity: 0.5
+}.shadow-sm {--tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.outline-none {outline: 2px solid transparent;outline-offset: 2px
+}.ring-0 {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.transition-\[color\2c box-shadow\] {transition-property: color,box-shadow;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-all {transition-property: all;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-colors {transition-property: color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-opacity {transition-property: opacity;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-transform {transition-property: transform;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.selection\:bg-primary *::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground *::selection {color: var(--primary-foreground)
+}.selection\:bg-primary::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground::selection {color: var(--primary-foreground)
+}.file\:inline-flex::file-selector-button {display: inline-flex
+}.file\:h-7::file-selector-button {height: 1.75rem
+}.file\:border-0::file-selector-button {border-width: 0px
+}.file\:bg-transparent::file-selector-button {background-color: transparent
+}.file\:text-sm::file-selector-button {font-size: 0.875rem;line-height: 1.25rem
+}.file\:font-medium::file-selector-button {font-weight: 500
+}.file\:text-foreground::file-selector-button {color: var(--foreground)
+}.placeholder\:text-muted-foreground::placeholder {color: var(--muted-foreground)
+}.hover\:border-blue-300:hover {--tw-border-opacity: 1;border-color: rgb(147 197 253 / var(--tw-border-opacity, 1))
+}.hover\:border-gray-300:hover {--tw-border-opacity: 1;border-color: rgb(209 213 219 / var(--tw-border-opacity, 1))
+}.hover\:bg-accent:hover {background-color: var(--accent)
+}.hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}.hover\:text-red-600:hover {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.hover\:shadow-md:hover {--tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.focus-visible\:border-ring:focus-visible {border-color: var(--ring)
+}.focus-visible\:outline-1:focus-visible {outline-width: 1px
+}.focus-visible\:outline-ring:focus-visible {outline-color: var(--ring)
+}.focus-visible\:ring-\[3px\]:focus-visible {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.disabled\:pointer-events-none:disabled {pointer-events: none
+}.disabled\:cursor-not-allowed:disabled {cursor: not-allowed
+}.disabled\:opacity-50:disabled {opacity: 0.5
+}.group:hover .group-hover\:opacity-100 {opacity: 1
+}.has-\[\>svg\]\:px-3:has(>svg) {padding-left: 0.75rem;padding-right: 0.75rem
+}.data-\[size\=default\]\:h-9[data-size="default"] {height: 2.25rem
+}.data-\[size\=sm\]\:h-8[data-size="sm"] {height: 2rem
+}.data-\[state\=checked\]\:translate-x-\[calc\(100\%-2px\)\][data-state="checked"] {--tw-translate-x: calc(100% - 2px);transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.data-\[state\=unchecked\]\:translate-x-0[data-state="unchecked"] {--tw-translate-x: 0px;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.data-\[state\=active\]\:bg-background[data-state="active"] {background-color: var(--background)
+}.data-\[state\=checked\]\:bg-primary[data-state="checked"] {background-color: var(--primary)
+}.data-\[state\=unchecked\]\:bg-input[data-state="unchecked"] {background-color: var(--input)
+}.data-\[placeholder\]\:text-muted-foreground[data-placeholder] {color: var(--muted-foreground)
+}.data-\[state\=active\]\:shadow-sm[data-state="active"] {--tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.\*\:data-\[slot\=select-value\]\:line-clamp-1[data-slot="select-value"] > * {overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1
+}.\*\:data-\[slot\=select-value\]\:flex[data-slot="select-value"] > * {display: flex
+}.\*\:data-\[slot\=select-value\]\:items-center[data-slot="select-value"] > * {align-items: center
+}.\*\:data-\[slot\=select-value\]\:gap-2[data-slot="select-value"] > * {gap: 0.5rem
+}@media (min-width: 640px) {.sm\:w-\[160px\] {width: 160px
+    }.sm\:flex-row {flex-direction: row
+    }.sm\:items-center {align-items: center
+    }
+}@media (min-width: 768px) {.md\:text-sm {font-size: 0.875rem;line-height: 1.25rem
+    }
+}@media (prefers-color-scheme: dark) {.dark\:border-gray-800 {--tw-border-opacity: 1;border-color: rgb(31 41 55 / var(--tw-border-opacity, 1))
+    }.dark\:bg-gray-800 {--tw-bg-opacity: 1;background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1))
+    }.dark\:bg-gray-900 {--tw-bg-opacity: 1;background-color: rgb(17 24 39 / var(--tw-bg-opacity, 1))
+    }.dark\:text-gray-100 {--tw-text-opacity: 1;color: rgb(243 244 246 / var(--tw-text-opacity, 1))
+    }.dark\:text-gray-400 {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+    }.dark\:text-muted-foreground {color: var(--muted-foreground)
+    }.dark\:data-\[state\=active\]\:border-input[data-state="active"] {border-color: var(--input)
+    }.dark\:data-\[state\=checked\]\:bg-primary-foreground[data-state="checked"] {background-color: var(--primary-foreground)
+    }.dark\:data-\[state\=unchecked\]\:bg-foreground[data-state="unchecked"] {background-color: var(--foreground)
+    }.dark\:data-\[state\=active\]\:text-foreground[data-state="active"] {color: var(--foreground)
+    }
+}.\[\&\>svg\]\:pointer-events-none>svg {pointer-events: none
+}.\[\&\>svg\]\:size-3>svg {width: 0.75rem;height: 0.75rem
+}.\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-4 svg:not([class*='size-']) {width: 1rem;height: 1rem
+}.\[\&_svg\:not\(\[class\*\=\'text-\'\]\)\]\:text-muted-foreground svg:not([class*='text-']) {color: var(--muted-foreground)
+}.\[\&_svg\]\:pointer-events-none svg {pointer-events: none
+}.\[\&_svg\]\:shrink-0 svg {flex-shrink: 0
+}a.\[a\&\]\:hover\:bg-accent:hover {background-color: var(--accent)
+}a.\[a\&\]\:hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}
+</style>
+/* === TW-STATIC-END === */</head>
+<body>
+<!-- ========== 0. 元信息头 ========== -->
+<header class="spec-header">
+  <h1>仿冒邮件检测智能体 详细产品规格说明（HTML 可视化）</h1>
+  <table class="meta-table">
+    <tr><td>spec 源</td><td><code>design/origin/spec/V2仿冒邮件检测智能体 需求文档（PRD.md</code>（交叉核对 <code>spec/身份认证与仿冒检测模块需求文档.md</code>）</td></tr>
+    <tr><td>demo 源</td><td><code>demo/components/agent-center/impersonation-detection-agent.tsx</code>（子组件 <code>display-name-spoof-detection.tsx</code>），包裹层 <code>agent-center-page.tsx</code></td></tr>
+    <tr><td>路由</td><td><code>/agent-center/overview?agent=impersonation</code></td></tr>
+    <tr><td>覆盖 spec 章节</td><td>§1.2 功能点清单（L1-L5 / D1-D8 / B1-B6）、§1.3 业务逻辑、§2 界面布局、§3 交互、§4 异常、§5 关联模块（全量）</td></tr>
+    <tr><td>遵循约束</td><td><code>design/origin/implement.md</code>（四语国际化、复用统一规则系统 action、冲突先确认、不新增规则系统）</td></tr>
+    <tr><td>组件入口</td><td><code>ImpersonationDetectionAgent</code>（在 <code>AgentCenterPage</code> 的 <code>renderAgentConfig("impersonation")</code> 内渲染）</td></tr>
+    <tr><td>i18n 标题 key</td><td><code>impersonation.agentTitle</code> = 仿冒邮件检测智能体</td></tr>
+    <tr><td>导航层级</td><td>智能体管理中心 &gt; 仿冒邮件检测智能体（Stage 4.1 · AI 检测层）</td></tr>
+    <tr><td>产品形态/视角</td><td>demo 顶栏为「云网关」形态、管理员视角；本智能体不做形态/视角分支渲染（PRD §1.4：前端以管理员视角呈现全部配置，RBAC 以后端为准）</td></tr>
+    <tr><td>规格版本</td><td><span class="spec-version">v1</span></td></tr>
+    <tr><td>生成日期</td><td>2026-07-22</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td><code>804efb9</code></td></tr>
+  </table>
+</header>
+
+<!-- ========== 0.1 组件列表 ========== -->
+<nav class="component-toc">
+  <h2>📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 包裹层：顶部/页签/启用开关</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-2">2.2 品牌保护页签·品牌列表</a> <span class="toc-badge">1层</span>
+      <span class="toc-layer-links"><a href="./layer-1-brand-sheet.html">品牌抽屉</a> · <a href="./layer-6-delete-brand.html">删除确认</a></span></li>
+    <li><a href="#component-2-3">2.3 检测总览页签（logs）</a> <span class="toc-badge">2层</span>
+      <span class="toc-layer-links"><a href="./layer-2-logs-tab.html">列表</a> · <a href="./layer-4-log-detail-drawer.html">详情抽屉</a></span></li>
+    <li><a href="#component-2-4">2.4 发信人名称仿冒页签</a> <span class="toc-badge">1层</span>
+      <span class="toc-layer-links"><a href="./layer-5-displayname-tab.html">对象列表</a></span></li>
+    <li><a href="#dialog-3-1">3.1 添加/编辑品牌抽屉（80vw）</a> <span class="toc-badge">3层</span>
+      <span class="toc-layer-links"><a href="./layer-1-brand-sheet.html">查看</a></span></li>
+    <li><a href="#dialog-3-2">3.2 检测详情抽屉（680px）</a> <span class="toc-badge">2层</span>
+      <span class="toc-layer-links"><a href="./layer-4-log-detail-drawer.html">查看</a></span></li>
+    <li><a href="#dialog-3-3">3.3 关闭检测二次确认</a> <span class="toc-badge">1层</span>
+      <span class="toc-layer-links"><a href="./layer-3-disable-confirm.html">查看</a></span></li>
+    <li><a href="#dialog-3-4">3.4 删除品牌二次确认</a> <span class="toc-badge">1层</span>
+      <span class="toc-layer-links"><a href="./layer-6-delete-brand.html">查看</a></span></li>
+    <li><a href="#dialog-3-5">3.5 告警通知预览</a> <span class="toc-badge">1层</span></li>
+  </ul>
+</nav>
+
+<!-- ========== 0.2 版本历史 ========== -->
+<section id="version-history" class="version-history-section">
+  <h2>🕑 版本历史</h2>
+  <table class="version-history-table spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody>
+      <tr><td>v1</td><td>2026-07-22</td><td><code>804efb9</code></td><td><code>804efb9</code></td>
+        <td>初版：覆盖三页签（检测总览/发信人名称仿冒/品牌保护）、品牌 80vw 三段式抽屉（含处置模式-动作联动、审核超时 Select、告警预览）、检测详情 680px 抽屉、关闭检测/删除品牌二次确认，及数据模型/API/业务逻辑/差异/需确认。</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 1. 页面布局结构 ========== -->
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <h3>1.1 区域划分</h3>
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>名称</th><th>元素概览</th><th>来源组件</th><th>响应式</th></tr></thead>
+    <tbody>
+      <tr><td>W-A</td><td>包裹层 Header</td><td>面包屑标题「智能体管理中心 / 仿冒邮件检测智能体」</td><td>agent-center-page.tsx</td><td>固定</td></tr>
+      <tr><td>W-B</td><td>左侧智能体导航</td><td>智能体总览 / 仿冒 / 钓鱼 / 威胁回溯（可折叠 w-52↔w-14）</td><td>agent-center-page.tsx</td><td>折叠按钮</td></tr>
+      <tr><td>W-C</td><td>卡片头 + 启用开关</td><td>标题「仿冒邮件检测智能体」+「已启用/已停用」文字 + Switch</td><td>agent-center-page.tsx</td><td>固定</td></tr>
+      <tr><td>W-D</td><td>底部操作栏</td><td>未保存提示 + 「保存配置」按钮（sticky 底部）</td><td>agent-center-page.tsx</td><td>sticky</td></tr>
+      <tr><td>A</td><td>智能体内顶部控制栏</td><td>面包屑「智能体管理中心 › Stage 4: AI 检测层 › 仿冒邮件检测智能体」</td><td>impersonation-detection-agent.tsx</td><td>固定</td></tr>
+      <tr><td>A2</td><td>仅审计提示条</td><td>停用时显示琥珀条：进入「仅审计」模式说明</td><td>同上（<code>!enabled</code>）</td><td>条件渲染</td></tr>
+      <tr><td>B</td><td>一级页签 Tabs</td><td>检测总览 / 发信人名称仿冒 / 品牌保护（默认激活「品牌保护」）</td><td>同上</td><td>固定</td></tr>
+      <tr><td>C1</td><td>品牌保护面板</td><td>品牌列表 + 搜索 + 模式筛选 + 添加品牌</td><td>同上（默认可见）</td><td>卡片流</td></tr>
+      <tr><td>C2</td><td>检测总览面板</td><td>5 KPI 卡 + 搜索栏 + 计数行 + 日志表 + 详情抽屉</td><td>同上（子文件层级2）</td><td>表格横向滚动</td></tr>
+      <tr><td>C3</td><td>发信人名称仿冒面板</td><td>保护对象列表 + 搜索/筛选 + 批量 + 添加向导</td><td>display-name-spoof-detection.tsx</td><td>卡片流</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.2 整页默认态截图（品牌保护为默认激活页签）</h3>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-full-default.png" alt="整页默认态（品牌保护页签）">
+    <figcaption>整页默认态截图 · 视口 1440×1000 · <code>?agent=impersonation</code> · 默认激活「品牌保护」页签</figcaption>
+  </figure>
+
+  <h3>1.3 视觉规范</h3>
+  <table class="spec-table">
+    <thead><tr><th>属性</th><th>值</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>主色</td><td><code>oklch(0.52 0.226 262)</code> 紫蓝；页内主按钮/链接多用 <code>bg-blue-600</code></td><td>demo globals.css / 组件</td></tr>
+      <tr><td>圆角</td><td><code>0.625rem</code>（--radius），卡片 rounded-lg</td><td>demo globals.css</td></tr>
+      <tr><td>字体</td><td>Geist / Geist Fallback；发信人列 font-mono</td><td>demo globals.css</td></tr>
+      <tr><td>图标库</td><td>lucide-react，14/16px（h-3.5/h-4）</td><td>组件 import</td></tr>
+      <tr><td>风险配色</td><td>≥80 红 <code>text-red-600</code> / ≥50 黄 <code>text-yellow-600</code> / 其余绿 <code>text-green-600</code></td><td>组件 getRiskLevelBadge</td></tr>
+      <tr><td>模式徽章</td><td>观察-灰 / 标准-蓝 / 严格-红（MODE_META）</td><td>组件</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 2. 逐组件规格 ========== -->
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <!-- ===== 2.1 包裹层 ===== -->
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 包裹层：顶部标题 / 页签导航 / 启用开关</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 组件路径</td><td><code>components/agent-center/agent-center-page.tsx</code> + 智能体内 <code>impersonation-detection-agent.tsx</code> 顶部</td></tr>
+      <tr><td>状态管理</td><td>包裹层 <code>useAgentStatus()</code>（enabled 等）+ 智能体内 <code>activeTab</code>（默认 <code>"brand"</code>）、<code>enabled</code>（默认 true）</td></tr>
+      <tr><td>交互层级数</td><td>1 层（页签切换、启用开关触发确认弹窗见 3.3）</td></tr>
+    </tbody></table>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：初始态（顶部控制栏 + 页签）</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染。启用开关默认「已启用」；关闭时（见 <a href="./layer-3-disable-confirm.html">层级3</a>）弹二次确认，确认后顶部出现「仅审计」琥珀提示条。</div>
+      <div class="component-preview">
+<div role="tablist" aria-orientation="horizontal" data-slot="tabs-list" class="bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]" tabindex="0" data-orientation="horizontal" style="outline: none;"><button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_0_-content-logs" data-state="inactive" id="radix-_r_0_-trigger-logs" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">检测总览</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_0_-content-displayname" data-state="inactive" id="radix-_r_0_-trigger-displayname" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">发信人名称仿冒</button><button type="button" role="tab" aria-selected="true" aria-controls="radix-_r_0_-content-brand" data-state="active" id="radix-_r_0_-trigger-brand" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">品牌保护</button></div>
+</div>
+      <p class="note">上方为从 demo 提取的一级页签 <code>[role=tablist]</code> 真实 DOM（可点击切换激活态）。下方为卡片头启用开关 <code>[role=switch]</code>（可点击切换视觉态；demo 中由「已启用/已停用」文字联动，关闭走确认弹窗）。</p>
+      <div class="component-preview">
+<button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button>
+</div>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/page-full-default.png" alt="包裹层与页签初始态">
+        <figcaption>包裹层 Header + 启用开关 + 智能体内顶部控制栏 + 一级页签（浏览器实际渲染）</figcaption>
+      </figure>
+      <h4>UI 元素清单</h4>
+      <table class="spec-table">
+        <thead><tr><th>序号</th><th>元素</th><th>文案</th><th>默认/状态</th><th>交互行为</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Tab</td><td>检测总览</td><td>inactive</td><td>切到 logs 面板</td><td>impersonation.tabLogs</td></tr>
+          <tr><td>2</td><td>Tab</td><td>发信人名称仿冒</td><td>inactive</td><td>切到 displayname 面板</td><td>硬编码中文（无 i18n）</td></tr>
+          <tr><td>3</td><td>Tab</td><td>品牌保护</td><td><b>active（默认）</b></td><td>切到 brand 面板</td><td>impersonation.tabBrand</td></tr>
+          <tr><td>4</td><td>文本+Switch</td><td>已启用 / 已停用</td><td>已启用</td><td>关闭时弹二次确认（layer-3），关闭后处置统一降级「标记投递」</td><td>common.enabled / common.disabled</td></tr>
+          <tr><td>5</td><td>面包屑</td><td>智能体管理中心 › Stage 4: AI 检测层 › 仿冒邮件检测智能体</td><td>-</td><td>纯展示</td><td>impersonation.agentTitle</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h5>
+        <table>
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>tablist 根节点</td><td>div[role=tablist].bg-muted.inline-flex（h-9）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+            <tr><td>tab 数量</td><td>3</td><td>3</td><td class="dom-pass">✅</td></tr>
+            <tr><td>激活 tab</td><td>品牌保护 data-state=active</td><td>品牌保护 data-state=active</td><td class="dom-pass">✅</td></tr>
+            <tr><td>switch 根节点</td><td>button[role=switch] data-state=checked</td><td>同左</td><td class="dom-pass">✅</td></tr>
+            <tr><td>switch 子节点(thumb)</td><td>1</td><td>1</td><td class="dom-pass">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.2 品牌保护面板（层级0 内嵌） ===== -->
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 品牌保护页签 · 品牌列表（默认激活）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 组件路径</td><td><code>impersonation-detection-agent.tsx</code> TabsContent value="brand"</td></tr>
+      <tr><td>数据源</td><td><code>MOCK_BRANDS</code>（2 条：CACTER科技 / 阿里云）经 <code>filteredBrands</code>（名称/域名搜索 + 模式筛选）</td></tr>
+      <tr><td>状态管理</td><td><code>brands</code> / <code>brandSearch</code> / <code>brandModeFilter</code> / <code>deletingBrand</code> / <code>showAddBrandSheet</code></td></tr>
+      <tr><td>交互层级数</td><td>1 层内嵌 + 3 个下钻（品牌抽屉 layer-1、删除确认 layer-6、快捷模式切换 hover 内联）</td></tr>
+    </tbody></table>
+
+    <h4>交互层级关系图</h4>
+    <div class="mermaid">
+graph LR
+    L0["层级0: 品牌列表(默认)"] -->|点击 添加品牌| S1["品牌抽屉(layer-1)"]
+    L0 -->|点击 编辑 铅笔| S1
+    L0 -->|点击 删除 垃圾桶| D6["删除确认(layer-6)"]
+    L0 -->|hover 卡片右侧 观/标/严| L0b["快捷切换处置模式(内联)"]
+    S1 -->|保存/取消| L0
+    D6 -->|确认删除/取消| L0
+    </div>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：品牌列表初始态</h4>
+      <div class="trigger-path"><strong>触发路径</strong>：页面加载默认激活「品牌保护」页签即渲染。</div>
+      <div class="component-preview">
+<div data-state="active" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_0_-trigger-brand" id="radix-_r_0_-content-brand" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none space-y-6 mt-6" style="animation-duration: 0s;"><div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 space-y-4"><div class="flex flex-row items-center justify-between"><div><div data-slot="card-title" class="font-semibold text-lg">保护品牌列表</div><p class="text-xs text-gray-500 mt-1">针对重点品牌资产的精细化专项防护</p></div><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[&gt;svg]:px-3"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-4 w-4 mr-2"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>添加品牌</button></div><div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2"><div class="relative flex-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive pl-9" placeholder="按品牌名称、保护域名搜索" value=""></div><button type="button" role="combobox" aria-controls="radix-_r_4_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-full sm:w-[160px]"><span data-slot="select-value" style="pointer-events: none;">全部模式</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div><div data-slot="card-content" class="px-6 space-y-4"><div class="group flex items-start gap-4 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 hover:shadow-md hover:border-blue-300 transition-all"><div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield h-6 w-6 text-gray-400"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg></div><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-1"><h4 class="font-medium text-gray-900 dark:text-gray-100">CACTER科技</h4><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check h-4 w-4 text-green-500"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground ml-1 text-xs bg-gray-100 text-gray-600 border-gray-200">观察模式</span></div><p class="text-sm text-gray-600 dark:text-gray-400 mb-2 truncate">保护域名: cacter.com, cacter.cn, *.cacter.com, mail.cacter.com</p><div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500"><span>相似度阈值: 90%</span><span class="cursor-default border-b border-dashed border-gray-300" data-state="closed" data-slot="tooltip-trigger">品牌关键词: 5个</span></div></div><div class="text-right shrink-0"><div class="text-sm text-gray-500 mb-1">最近仿冒发现</div><div class="text-2xl font-bold text-red-600">23</div><div class="flex items-center justify-end gap-1 text-xs text-gray-400"><span>今日: 3</span><span class="flex items-center font-medium text-red-500">↑2</span></div></div><div class="flex flex-col gap-2 shrink-0"><div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><button type="button" class="w-6 h-6 rounded text-xs flex items-center justify-center border transition-colors bg-gray-100 text-gray-600 border-gray-200" data-state="closed" data-slot="tooltip-trigger">观</button><button type="button" class="w-6 h-6 rounded text-xs flex items-center justify-center border transition-colors border-gray-200 text-gray-400 hover:border-gray-300" data-state="closed" data-slot="tooltip-trigger">标</button><button type="button" class="w-6 h-6 rounded text-xs flex items-center justify-center border transition-colors border-gray-200 text-gray-400 hover:border-gray-300" data-state="closed" data-slot="tooltip-trigger">严</button></div><div class="flex items-center gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-pen h-4 w-4"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg></button><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 size-9 text-red-500 hover:text-red-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 h-4 w-4"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></div></div></div><div class="group flex items-start gap-4 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 hover:shadow-md hover:border-blue-300 transition-all"><div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield h-6 w-6 text-gray-400"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg></div><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-1"><h4 class="font-medium text-gray-900 dark:text-gray-100">阿里云</h4><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check h-4 w-4 text-green-500"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground ml-1 text-xs bg-blue-100 text-blue-700 border-blue-200">标准模式</span></div><p class="text-sm text-gray-600 dark:text-gray-400 mb-2 truncate">保护域名: aliyun.com, alibabacloud.com</p><div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500"><span>相似度阈值: 85%</span><span class="cursor-default border-b border-dashed border-gray-300" data-state="closed" data-slot="tooltip-trigger">品牌关键词: 3个</span></div></div><div class="text-right shrink-0"><div class="text-sm text-gray-500 mb-1">最近仿冒发现</div><div class="text-2xl font-bold text-red-600">156</div><div class="flex items-center justify-end gap-1 text-xs text-gray-400"><span>今日: 12</span><span class="flex items-center font-medium text-green-500">↓3</span></div></div><div class="flex flex-col gap-2 shrink-0"><div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><button type="button" class="w-6 h-6 rounded text-xs flex items-center justify-center border transition-colors border-gray-200 text-gray-400 hover:border-gray-300" data-state="closed" data-slot="tooltip-trigger">观</button><button type="button" class="w-6 h-6 rounded text-xs flex items-center justify-center border transition-colors bg-blue-100 text-blue-700 border-blue-200" data-state="closed" data-slot="tooltip-trigger">标</button><button type="button" class="w-6 h-6 rounded text-xs flex items-center justify-center border transition-colors border-gray-200 text-gray-400 hover:border-gray-300" data-state="closed" data-slot="tooltip-trigger">严</button></div><div class="flex items-center gap-1 justify-end"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-pen h-4 w-4"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg></button><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent dark:hover:bg-accent/50 size-9 text-red-500 hover:text-red-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 h-4 w-4"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></div></div></div></div></div></div>
+</div>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/page-full-default.png" alt="品牌列表初始态">
+        <figcaption>品牌列表初始态（浏览器实际渲染）</figcaption>
+      </figure>
+      <h4>UI 元素清单</h4>
+      <table class="spec-table">
+        <thead><tr><th>序号</th><th>元素</th><th>文案/字段</th><th>占位/默认</th><th>禁用条件</th><th>交互行为</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>标题+描述</td><td>保护品牌列表 / 针对重点品牌资产的精细化专项防护</td><td>-</td><td>-</td><td>纯展示</td><td>impersonation.protectedBrands</td></tr>
+          <tr><td>2</td><td>Button(主)</td><td>+ 添加品牌</td><td>-</td><td>-</td><td>resetBrandForm() 打开品牌抽屉</td><td>impersonation.addBrand</td></tr>
+          <tr><td>3</td><td>Input(搜索)</td><td>—</td><td>「按品牌名称、保护域名搜索」</td><td>-</td><td>实时过滤 brandSearch</td><td>—（硬编码）</td></tr>
+          <tr><td>4</td><td>Select(模式)</td><td>全部模式/观察模式/标准模式/严格模式</td><td>全部模式</td><td>-</td><td>过滤 brandModeFilter</td><td>—（硬编码）</td></tr>
+          <tr><td>5</td><td>品牌卡·名称</td><td>CACTER科技 / 阿里云 + 所有权图标</td><td>已验证=绿勾；未验证=琥珀警告(Tooltip)</td><td>-</td><td>Tooltip「主域名所有权未验证」</td><td>-</td></tr>
+          <tr><td>6</td><td>模式徽章</td><td>观察模式/标准模式/严格模式</td><td>按 brand.mode</td><td>-</td><td>纯展示（灰/蓝/红）</td><td>-</td></tr>
+          <tr><td>7</td><td>域名/阈值/关键词</td><td>保护域名: … / 相似度阈值: N% / 品牌关键词: N个</td><td>-</td><td>-</td><td>关键词数 hover 展示全部（Tooltip）</td><td>impersonation.protectedDomains / similarityThreshold</td></tr>
+          <tr><td>8</td><td>仿冒统计</td><td>最近仿冒发现 + 今日:N ↑/↓环比</td><td>红色大数</td><td>-</td><td>纯展示（delta 着色）</td><td>impersonation.recentSpoofs / today</td></tr>
+          <tr><td>9</td><td>快捷模式钮</td><td>观 / 标 / 严（hover 显示）</td><td>opacity-0，group-hover 显示</td><td>-</td><td>handleQuickModeSwitch 立即改 mode</td><td>-</td></tr>
+          <tr><td>10</td><td>Button(icon)</td><td>编辑（Pencil）</td><td>-</td><td>-</td><td>handleEditBrand → 打开抽屉(layer-1)</td><td>-</td></tr>
+          <tr><td>11</td><td>Button(icon)</td><td>删除（Trash，红）</td><td>-</td><td>-</td><td>setDeletingBrand → 确认弹窗(layer-6)</td><td>-</td></tr>
+          <tr><td>12</td><td>空态</td><td>未找到匹配的品牌</td><td>filteredBrands.length===0 时</td><td>-</td><td>纯展示</td><td>-</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果</h5>
+        <table>
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>面板根节点</td><td>div[role=tabpanel][data-state=active].space-y-6</td><td>同左</td><td class="dom-pass">✅</td></tr>
+            <tr><td>面板节点总数</td><td>98</td><td>98</td><td class="dom-pass">✅</td></tr>
+            <tr><td>品牌卡数量</td><td>2（CACTER科技 / 阿里云）</td><td>2</td><td class="dom-pass">✅</td></tr>
+            <tr><td>模式徽章文案</td><td>观察模式 / 标准模式</td><td>观察模式 / 标准模式</td><td class="dom-pass">✅</td></tr>
+            <tr><td>添加品牌按钮</td><td>存在（Plus 图标）</td><td>存在</td><td class="dom-pass">✅</td></tr>
+            <tr><td>快捷模式钮</td><td>渲染但 opacity-0（hover 显现）</td><td>已包含（opacity-0 类保留）</td><td class="dom-pass">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h4>下钻交互层级（拆分为独立文件）</h4>
+    <table class="layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>品牌列表初始态</td><td>页面加载</td><td>上方内嵌</td></tr>
+        <tr><td>1</td><td>添加/编辑品牌抽屉</td><td>点击「+ 添加品牌」或卡片「编辑」</td><td><a href="./layer-1-brand-sheet.html">查看详情 →</a></td></tr>
+        <tr><td>-</td><td>删除品牌二次确认</td><td>点击卡片「删除」垃圾桶</td><td><a href="./layer-6-delete-brand.html">查看详情 →</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- ===== 2.3 检测总览页签 ===== -->
+  <article class="component-spec" id="component-2-3">
+    <h3>2.3 检测总览页签（logs，含 5 KPI + 日志表）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 组件路径</td><td><code>impersonation-detection-agent.tsx</code> TabsContent value="logs"</td></tr>
+      <tr><td>数据源</td><td><code>MOCK_DETECTION_LOGS</code>（8 条）经 <code>filteredLogs</code>（处置+类别+搜索+仿冒手法+时间 AND 组合）</td></tr>
+      <tr><td>交互层级数</td><td>2 层（列表 + 详情抽屉），均拆为子文件</td></tr>
+    </tbody></table>
+    <div class="note">该页签内容较大（提取 DOM 262 节点，含 5 KPI + 搜索栏 + 时间选择器 + 8 列表格），完整可交互预览、元素表与 DOM 比对见子文件。</div>
+    <table class="layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>KPI + 日志列表</td><td>点击「检测总览」页签</td><td><a href="./layer-2-logs-tab.html">查看详情 →</a></td></tr>
+        <tr><td>1</td><td>检测详情抽屉（680px）</td><td>列表行「详情」按钮</td><td><a href="./layer-4-log-detail-drawer.html">查看详情 →</a></td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/logs-tab-default.png" alt="检测总览页签">
+      <figcaption>检测总览页签概览（详见 layer-2）</figcaption>
+    </figure>
+  </article>
+
+  <!-- ===== 2.4 发信人名称仿冒页签 ===== -->
+  <article class="component-spec" id="component-2-4">
+    <h3>2.4 发信人名称仿冒页签（子组件 DisplayNameSpoofDetection）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>demo 组件路径</td><td><code>components/agent-center/display-name-spoof-detection.tsx</code>（2080 行独立子组件）</td></tr>
+      <tr><td>数据源</td><td><code>MOCK_OBJECTS</code>（3 条：张三CEO / 李四CFO / 王五采购经理）</td></tr>
+      <tr><td>交互层级数</td><td>1 层内嵌（对象列表）+ 多个下钻（添加向导 80vw、编辑抽屉、绑定规则、批量、日志、删除/观察确认）</td></tr>
+    </tbody></table>
+    <div class="note">该子组件规模庞大（添加对象两步向导、编辑抽屉、绑定规则抽屉、批量弹窗、观察模式二次确认等）。本规格以「对象列表」层级 0 为覆盖重点（见子文件 layer-5），其余深层向导标注在需确认表 Q-004，作为后续独立规格补充。</div>
+    <table class="layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>保护对象列表</td><td>点击「发信人名称仿冒」页签</td><td><a href="./layer-5-displayname-tab.html">查看详情 →</a></td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/displayname-tab-default.png" alt="发信人名称仿冒页签">
+      <figcaption>发信人名称仿冒页签 · 保护对象列表（详见 layer-5）</figcaption>
+    </figure>
+  </article>
+</section>
+
+<!-- ========== 3. 弹窗/抽屉/对话框规格 ========== -->
+<section id="dialogs">
+  <h2>3. 弹窗/抽屉/对话框规格</h2>
+
+  <article class="component-spec" id="dialog-3-1">
+    <h3>3.1 添加/编辑品牌抽屉（Sheet，80vw，三段式）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>触发</td><td>「+ 添加品牌」（新增）/ 卡片「编辑」铅笔（编辑，主域名只读）</td></tr>
+      <tr><td>形态/尺寸</td><td>右侧 Sheet，<code>w-[80vw] sm:max-w-[80vw]</code>，头/体/脚三段，体区内部滚动</td></tr>
+      <tr><td>关闭</td><td>右上 X / 取消 / 保存 / ESC / 点遮罩</td></tr>
+      <tr><td>三段</td><td>① 品牌身份 → ② 检测规则（相似度阈值） → ③ 处置策略（模式/动作/二级配置/通知/检测预览）</td></tr>
+    </tbody></table>
+    <p class="note">完整可交互预览（含处置模式-动作联动、审核超时 Select、告警预览触发）、逐字段元素表与 DOM 比对，见 <a href="./layer-1-brand-sheet.html">layer-1-brand-sheet.html →</a></p>
+    <figure class="screenshot-figure"><img src="./screenshots/brand-sheet-add.png" alt="品牌抽屉·上半段"><figcaption>品牌抽屉 ① 品牌身份 + ② 检测规则</figcaption></figure>
+  </article>
+
+  <article class="component-spec" id="dialog-3-2">
+    <h3>3.2 检测详情抽屉（Sheet，680px 固定宽）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>触发</td><td>日志表行「详情」按钮</td></tr>
+      <tr><td>形态/尺寸</td><td><code>!w-[680px] !max-w-[680px]</code>，单列纵向流，hideCloseButton（自绘 X）</td></tr>
+      <tr><td>信息流</td><td>邮件基础信息 → ① 风险研判 → ② 最终处置 → ③ 仿冒信号（逐条可展开 expandedSignalIds）</td></tr>
+    </tbody></table>
+    <p class="note">完整预览与元素表见 <a href="./layer-4-log-detail-drawer.html">layer-4-log-detail-drawer.html →</a></p>
+    <figure class="screenshot-figure"><img src="./screenshots/log-detail-drawer.png" alt="检测详情抽屉"><figcaption>检测详情抽屉（680px）</figcaption></figure>
+  </article>
+
+  <article class="component-spec" id="dialog-3-3">
+    <h3>3.3 关闭检测二次确认（AlertDialog）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>触发</td><td>卡片头启用开关由「已启用」切「已停用」（<code>selectedAgent==="impersonation" &amp;&amp; !checked</code>）</td></tr>
+      <tr><td>标题/正文</td><td>「确认关闭仿冒邮件检测？」+ 红色强调「跳过仿冒邮件检测」漏检风险说明</td></tr>
+      <tr><td>动作</td><td>取消（关闭弹窗，不改状态）/ 确认关闭（toggleAgentEnabled(false)）</td></tr>
+    </tbody></table>
+    <p class="note">完整预览见 <a href="./layer-3-disable-confirm.html">layer-3-disable-confirm.html →</a></p>
+    <figure class="screenshot-figure"><img src="./screenshots/disable-confirm.png" alt="关闭确认弹窗"><figcaption>关闭仿冒邮件检测二次确认</figcaption></figure>
+  </article>
+
+  <article class="component-spec" id="dialog-3-4">
+    <h3>3.4 删除品牌二次确认（AlertDialog）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>触发</td><td>品牌卡「删除」垃圾桶（或编辑抽屉底部「删除品牌」）</td></tr>
+      <tr><td>标题/正文</td><td>「删除品牌「{name}」？」+「删除品牌将移除其全部保护域名与检测配置，是否继续？此操作不可撤销。」</td></tr>
+      <tr><td>动作</td><td>取消 / 确认删除（红，handleConfirmDeleteBrand，Toast「品牌已删除」）</td></tr>
+    </tbody></table>
+    <p class="note">完整预览见 <a href="./layer-6-delete-brand.html">layer-6-delete-brand.html →</a></p>
+    <figure class="screenshot-figure"><img src="./screenshots/delete-brand-confirm.png" alt="删除品牌确认"><figcaption>删除品牌二次确认</figcaption></figure>
+  </article>
+
+  <article class="component-spec" id="dialog-3-5">
+    <h3>3.5 告警通知预览（Dialog，max-w-lg）</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>触发</td><td>品牌抽屉「通知设置」区（alertEnabled 开启时）点「预览通知内容」</td></tr>
+      <tr><td>内容</td><td>收件人 + 主题「【仿冒告警】检测到针对「{品牌名}」的仿冒邮件」+ 示例正文（仿冒域名/检测方向/处置动作，随表单联动）</td></tr>
+      <tr><td>关闭</td><td>右上 X / 「关闭」按钮</td></tr>
+    </tbody></table>
+    <figure class="screenshot-figure"><img src="./screenshots/notify-preview.png" alt="告警通知预览"><figcaption>告警通知预览 Dialog（浏览器实际渲染）</figcaption></figure>
+  </article>
+</section>
+
+<!-- ========== 4. 数据模型与 API 映射 ========== -->
+<section id="api-mapping">
+  <h2>4. 数据模型与 API 映射</h2>
+  <h3>4.1 前端数据模型（demo 原样提取）</h3>
+  <pre><code>// 品牌（MOCK_BRANDS）
+interface Brand {
+  id: string; name: string; mainDomain: string; protectedDomains: string[];
+  threshold: number; keywords: string[];
+  recentSpoofs: number; todaySpoofs: number; yesterdaySpoofs: number;
+  ownershipVerified: boolean;
+  mode: "observer" | "standard" | "strict";
+}
+// 检测日志（MOCK_DETECTION_LOGS）
+interface DetectionLog {
+  id: string; time: string; sender: string; subject: string;
+  riskScore: number; riskLevel: "high" | "medium" | "low" | "none";
+  spoofTypes: ("brand_keyword_abuse"|"domain_typosquatting"|"newly_registered_domain"|"display_name_spoof")[];
+  impersonatedEntity: { type: "brand" | "displayname"; name: string } | null;
+  action: "isolated" | "blocked" | "dropped" | "audit" | "passed";
+}
+// 保护对象（display-name-spoof-detection.tsx · ProtectedObject）
+interface ProtectedObject {
+  id; name; email; title;
+  category: "executive"|"finance"|"business"|"hr"|"tech"|"custom";
+  level: "high"|"medium"|"low"; observe: boolean;
+  baseline: "not_started"|"learning"|"learned"|"failed";
+  baselineDay; baselineSamples; todayHit; todayQuarantine; todayTag;
+  thresholds:{observe;standard;strict}; customThreshold: boolean;
+  rules: { id; displayName; email; matchType:"exact"|"wildcard"|"regex"; bonus }[];
+  sensitivity?; confidenceThreshold?; disposalMode?; disposalAction?; markStyle?; notify?; adminEmails?;
+}</code></pre>
+
+  <h3>4.2 PRD 建议 API（§5.4，设计口径，非网关必实现）</h3>
+  <table class="spec-table">
+    <thead><tr><th>接口</th><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>检测日志列表</td><td>GET</td><td>/impersonation/logs</td><td>多条件筛选分页</td></tr>
+      <tr><td>日志详情</td><td>GET</td><td>/impersonation/logs/{id}</td><td>风险研判 + 仿冒信号</td></tr>
+      <tr><td>保护对象 CRUD</td><td>GET/POST/PUT/DELETE</td><td>/impersonation/objects</td><td>含绑定规则</td></tr>
+      <tr><td>品牌 CRUD</td><td>GET/POST/PUT/DELETE</td><td>/impersonation/brands</td><td>保护域名/关键词/处置</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.3 网关现有能力映射</h3>
+  <blockquote>⚠️ 遵循 implement.md：PRD API 为产品设计口径，网关尽量用现有 API/统一规则系统完成；确需新增或语义不足处标 <code>[需确认]</code>，见 §10。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>PRD 能力</th><th>网关现有对应</th><th>映射方式</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td>品牌/发信人名称仿冒检测规则</td><td>统一规则系统（加 <code>page</code> 字段区分本功能页）</td><td>装入本页专属规则集</td><td>implement.md：不新增规则系统</td></tr>
+      <tr><td>处置动作：标记投递</td><td>统一规则 action=accept + 注入 header</td><td>mark→accept+header（如 X-CACTER-Brand-Fake）</td><td>implement.md：不新增 mark action</td></tr>
+      <tr><td>处置动作：隔离/审核/阻断/丢弃</td><td>现有 quarantine/audit/reject/drop 语义</td><td>动作枚举对齐</td><td>[需确认] 审核队列加急/超时策略</td></tr>
+      <tr><td>检测日志/详情</td><td>现有邮件日志 + 拦截事件</td><td>字段映射 + 仿冒信号扩展</td><td>[需确认] 仿冒信号(spoofTypes)存储</td></tr>
+      <tr><td>主域名所有权验证</td><td>DKIM/DNS TXT 校验能力</td><td>复用 DNS 校验</td><td>[需确认] 品牌所有权 TXT 约定</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 5. 业务逻辑规格 ========== -->
+<section id="business-logic">
+  <h2>5. 业务逻辑规格（引用 PRD §1.3 / §3 / §5）</h2>
+  <h3>5.1 两路检测与处置数据流（PRD §1.3）</h3>
+  <div class="mermaid">
+graph TD
+    IN[入站邮件] --> EN{智能体启用?}
+    EN -->|否| DEG[仅审计: 检测仍运行, 处置降级为标记投递]
+    EN -->|是| SPLIT[两路检测]
+    SPLIT --> DN[发信人名称仿冒: 显示名vs对象基线<br/>编辑距离+语义匹配+绑定规则加分 → 置信度]
+    SPLIT --> BR[品牌仿冒: 发件域名/关键词vs品牌域名集+关键词指纹<br/>域名相似度+关键词命中 → 相似度]
+    DN --> HIT{置信度/相似度 >= 阈值?}
+    BR --> HIT
+    HIT -->|命中(可多信号叠加)| ACT[按对象/品牌 模式+动作处置]
+    ACT --> LOG[写检测日志 + 触发告警]
+    DEG --> LOG
+    LOG --> KPI[检测总览 KPI 与列表实时呈现]
+  </div>
+
+  <h3>5.2 处置模式 → 动作联动（PRD §1.3 映射表 / 组件 handleDisposalModeChange）</h3>
+  <table class="spec-table">
+    <thead><tr><th>模式</th><th>可选动作</th><th>切模式默认动作</th><th>适用</th></tr></thead>
+    <tbody>
+      <tr><td>观察 observer</td><td>标记投递</td><td>mark_deliver</td><td>基线学习期/灰度调优</td></tr>
+      <tr><td>标准 standard</td><td>隔离 / 审核</td><td>quarantine</td><td>一般企业</td></tr>
+      <tr><td>严格 strict</td><td>阻断 / 丢弃</td><td>block</td><td>金融/政府/核心高管</td></tr>
+      <tr><td>自定义 custom</td><td>标记投递/隔离/审核/阻断/丢弃</td><td>-（动作偏离模式默认时自动切入）</td><td>手动精细化</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 关键业务约束</h3>
+  <table class="spec-table">
+    <thead><tr><th>约束</th><th>值/规则</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>品牌名长度</td><td>≤30 字符，超出截断 + 计数 0/30</td><td>PRD §4.1 / 组件 maxLength=30</td></tr>
+      <tr><td>品牌关键词</td><td>单个 ≤30 字符，最多 20 个，达上限禁用输入</td><td>PRD B4 / 组件 disabled≥20</td></tr>
+      <tr><td>主域名（编辑态）</td><td>只读不可改（保护已学习基线）</td><td>PRD §4.1 / 组件 disabled={!!editingBrand}</td></tr>
+      <tr><td>丢弃动作</td><td>必须开启告警，否则保存禁用（isSaveDisabled）</td><td>PRD §4.3 / 组件</td></tr>
+      <tr><td>自定义时间范围</td><td>最大 90 天，超限截断 + 琥珀提示</td><td>PRD §4.1 / 组件 MAX_RANGE_DAYS</td></tr>
+      <tr><td>批量添加对象</td><td>单次最多 20 人</td><td>PRD D7 / 子组件</td></tr>
+      <tr><td>灵敏度极高告警</td><td>灵敏度≥95 且置信度<80 → 非阻断提醒</td><td>PRD §4.1 / 子组件 sensThresholdWarn</td></tr>
+      <tr><td>保护对象数=0</td><td>发信人名称仿冒检测无法启用</td><td>PRD §5.3</td></tr>
+      <tr><td>删除对象基线保留</td><td>30 天后清除，期间可恢复</td><td>PRD §4.4 / 子组件</td></tr>
+      <tr><td>停用智能体</td><td>全局仅审计，处置统一降级标记投递</td><td>PRD §5.3 / 包裹层</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.4 权限与可见性（PRD §1.4）</h3>
+  <table class="spec-table">
+    <thead><tr><th>角色</th><th>权限</th></tr></thead>
+    <tbody>
+      <tr><td>邮件安全管理员</td><td>全部：启停智能体、增删改对象/品牌、配置处置、查看/导出日志、二次处置</td></tr>
+      <tr><td>安全审计员</td><td>只读：检测总览/日志/详情，不可改配置与处置</td></tr>
+      <tr><td>审核处置员</td><td>处理「审核」队列待审邮件（放行/隔离/阻断），不可改策略</td></tr>
+    </tbody>
+  </table>
+  <div class="note">demo 当前以管理员视角呈现全部配置能力，未按角色分支渲染；实际 RBAC 以后端为准（PRD §1.4 说明）。</div>
+</section>
+
+<!-- ========== 6. 交互规格 ========== -->
+<section id="interaction">
+  <h2>6. 交互规格</h2>
+  <h3>6.1 主流程交互（PRD §3.1）</h3>
+  <table class="spec-table">
+    <thead><tr><th>操作</th><th>表现</th></tr></thead>
+    <tbody>
+      <tr><td>点击 KPI 卡</td><td>联动日志列表按 logCategory 筛选（all/intercepted/audit/displayname/brand），计数行出现可移除类别 Badge</td></tr>
+      <tr><td>悬浮主题/关键词/未验证图标</td><td>Tooltip 展示完整主题、全部关键词、「主域名所有权未验证」</td></tr>
+      <tr><td>时间范围选择</td><td>快捷（今日/近7天/近30天）+ 自定义起止（≤90天），超限琥珀提示</td></tr>
+      <tr><td>仿冒手法多选</td><td>默认全选，变更实时过滤</td></tr>
+      <tr><td>点击「详情」</td><td>打开 680px 抽屉；仿冒信号默认收起，逐条展开/收起</td></tr>
+      <tr><td>处置模式切换</td><td>联动动作可选集合（观察=标记投递；标准=隔离/审核；严格=阻断/丢弃）</td></tr>
+      <tr><td>处置动作切换</td><td>联动二级配置（标记方式 / 审核加急+超时 / 阻断退信 / 丢弃强制告警）；偏离模式默认→自动切「自定义」</td></tr>
+    </tbody>
+  </table>
+  <h3>6.2 状态变化（PRD §3.2）</h3>
+  <table class="spec-table">
+    <thead><tr><th>状态</th><th>表现</th></tr></thead>
+    <tbody>
+      <tr><td>空态</td><td>日志「暂无检测日志」；筛选无结果「未找到匹配的品牌/保护对象」；对象为空引导「添加保护对象后开启防护，引擎需至少 1 个对象才能启用」</td></tr>
+      <tr><td>成功</td><td>Toast：如「品牌保护策略已保存（预计 30 秒内生效；编辑触发历史邮件回扫）」「成功添加 N 个保护对象」「批量操作已完成」</td></tr>
+      <tr><td>失败</td><td>Toast destructive：如「无可添加对象（邮箱均已存在）」</td></tr>
+      <tr><td>基线</td><td>未开始(灰)/学习中 N/7(琥珀)/已学习(绿)/学习失败(红)</td></tr>
+    </tbody>
+  </table>
+  <h3>6.3 异常场景（PRD §4）</h3>
+  <table class="spec-table">
+    <thead><tr><th>场景</th><th>处理</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>时间范围>90天</td><td>拦截+截断到 90 天+琥珀提示，范围不生效</td><td>§4.1</td></tr>
+      <tr><td>邮箱重复</td><td>「该邮箱已作为保护对象存在」并禁止添加</td><td>§4.2</td></tr>
+      <tr><td>基线学习失败</td><td>状态置「学习失败」，提示重试/导入历史邮件</td><td>§4.3</td></tr>
+      <tr><td>丢弃未开告警</td><td>保存禁用 + 红字「丢弃动作必须开启告警通知」</td><td>§4.3</td></tr>
+      <tr><td>检测引擎不可用</td><td>降级仅审计/观察（仅标记不实质处置）</td><td>§4.3</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 7. 国际化规格 ========== -->
+<section id="i18n">
+  <h2>7. 国际化规格</h2>
+  <h3>7.1 支持语言</h3>
+  <table class="spec-table">
+    <thead><tr><th>语言</th><th>Language</th><th>示例（agentTitle）</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td>简体中文</td><td>zh</td><td>仿冒邮件检测智能体</td><td>✅ demo 已提供</td></tr>
+      <tr><td>English</td><td>en</td><td>Impersonation Detection Agent</td><td>✅ demo 已提供</td></tr>
+      <tr><td>ไทย（泰文）</td><td>th</td><td>เอเจนต์ตรวจจับการปลอมแปลง</td><td>✅ demo 已提供</td></tr>
+      <tr><td>第四语言</td><td>-</td><td>-</td><td>⚠️ implement.md 要求四语，demo 现仅 3 语（见差异 D-003）</td></tr>
+    </tbody>
+  </table>
+  <h3>7.2 i18n key 清单（本智能体使用，节选带中文）</h3>
+  <table class="spec-table">
+    <thead><tr><th>i18n key</th><th>中文</th><th>使用位置</th></tr></thead>
+    <tbody>
+      <tr><td>impersonation.agentTitle</td><td>仿冒邮件检测智能体</td><td>面包屑/标题</td></tr>
+      <tr><td>impersonation.tabLogs / tabBrand</td><td>检测总览 / 品牌保护</td><td>页签</td></tr>
+      <tr><td>impersonation.protectedBrands</td><td>保护品牌列表</td><td>品牌区标题</td></tr>
+      <tr><td>impersonation.addBrand / addProtectedBrand / editBrand / deleteBrand</td><td>添加品牌 / 添加保护品牌 / 编辑保护品牌 / 删除品牌</td><td>品牌操作/抽屉</td></tr>
+      <tr><td>impersonation.protectedDomains / protectedDomainsList</td><td>保护域名 / 保护域名列表</td><td>品牌卡/抽屉</td></tr>
+      <tr><td>impersonation.similarityThreshold</td><td>相似度阈值</td><td>品牌卡/抽屉</td></tr>
+      <tr><td>impersonation.recentSpoofs / today</td><td>最近仿冒发现 / 今日</td><td>品牌卡统计</td></tr>
+      <tr><td>impersonation.brandName / mainDomain / mainDomainLocked / brandFormDesc</td><td>品牌名称 / 主域名 / 主域名不可修改… / 配置需要保护的品牌域名和相关检测参数</td><td>品牌抽屉</td></tr>
+      <tr><td>impersonation.addKeyword / addDomain</td><td>添加关键词 / 添加域名</td><td>品牌抽屉</td></tr>
+      <tr><td>impersonation.kpiTodayDetected / kpiTodayIntercepted / kpiPendingAudit / kpiDisplayNameSpoof / kpiBrandHit</td><td>今日检测 / 今日拦截 / 待审核 / 发信人名称仿冒 / 品牌保护命中</td><td>KPI 卡</td></tr>
+      <tr><td>impersonation.detectionLogs / searchLogs / spoofMethod / allDisposal</td><td>仿冒检测日志 / 搜索发件人… / 仿冒手法 / 全部处置</td><td>日志筛选</td></tr>
+      <tr><td>impersonation.time / sender / subject / riskScore / spoofTypes / impersonatedTarget / action</td><td>时间 / 发信人 / 主题 / 风险分 / 仿冒类型 / 仿冒对象 / 处置动作</td><td>日志表头</td></tr>
+      <tr><td>impersonation.isolated / blocked / dropped / auditAction / passed</td><td>已隔离 / 已阻断 / 已丢弃 / 待审核 / 已放行</td><td>处置枚举</td></tr>
+      <tr><td>impersonation.riskHigh / riskMedium / riskLow / riskNone</td><td>高危 / 中危 / 低危 / 无风险</td><td>风险徽章</td></tr>
+      <tr><td>impersonation.spoofType.display_name_spoof / domain_typosquatting / brand_keyword_abuse / newly_registered_domain</td><td>显示名仿冒 / 近似域名 / 品牌关键词滥用 / 新注册域名</td><td>仿冒手法标签</td></tr>
+      <tr><td>impersonation.brand / unitCount</td><td>品牌 / 封</td><td>仿冒对象/KPI 单位</td></tr>
+    </tbody>
+  </table>
+  <div class="note">硬编码中文（无 i18n key，见差异 D-004）：页签「发信人名称仿冒」、搜索占位「按品牌名称、保护域名搜索」、模式下拉四项、品牌抽屉三段区块标题与大量说明文案、发信人名称仿冒子组件几乎全部文案。</div>
+</section>
+
+<!-- ========== 8. 响应式规格 ========== -->
+<section id="responsive">
+  <h2>8. 响应式规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>KPI 网格</th><th>品牌/对象工具栏</th><th>抽屉</th></tr></thead>
+    <tbody>
+      <tr><td>≥1440px</td><td>grid-cols-5</td><td>搜索+筛选同行（sm:flex-row）</td><td>品牌/向导 80vw；详情 680px</td></tr>
+      <tr><td>1024–1439px</td><td>lg:grid-cols-5（≥lg 5列）</td><td>同行</td><td>同上（80vw 更贴近全宽）</td></tr>
+      <tr><td>768–1023px</td><td>md:grid-cols-3</td><td>可折行</td><td>80vw</td></tr>
+      <tr><td>&lt;768px</td><td>grid-cols-2</td><td>flex-col 堆叠</td><td>sm:max-w-[80vw]</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure"><img src="./screenshots/page-full-default.png" alt="1440 断点"><figcaption>1440px 断点（品牌页签）</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1024.png" alt="1024 断点品牌"><figcaption>1024px 断点（品牌页签）</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1024-logs.png" alt="1024 断点日志"><figcaption>1024px 断点（检测总览 KPI 仍 5 列）</figcaption></figure>
+</section>
+
+<!-- ========== 9. 差异标注 ========== -->
+<section id="diffs" class="diff-section">
+  <h2>9. 与 spec / 约束的差异标注</h2>
+  <table class="spec-table">
+    <thead><tr><th>差异编号</th><th>位置</th><th>spec/约束 描述</th><th>demo 实际渲染</th><th>影响</th><th>建议</th></tr></thead>
+    <tbody>
+      <tr><td><span class="diff-badge">D-001</span></td><td>检测详情抽屉宽度</td><td>PRD §1.2 L4 / §3.4 称「680px 抽屉」；组件注释一处写「680px 固定宽」但代码另有「80% 宽 + 信息分层」旧注释</td><td>实际渲染 <code>!w-[680px]</code>（浏览器实测 680px）</td><td><span class="badge badge-low">低</span></td><td>以 demo 实测 680px 为准</td></tr>
+      <tr><td><span class="diff-badge">D-002</span></td><td>检测详情·②最终处置</td><td>PRD 处置枚举含隔离/阻断/丢弃/审核/放行</td><td>详情抽屉②仅二分渲染 isolated→已隔离，其余一律→已放行（<code>action==="isolated"?…:passed</code>）</td><td><span class="badge badge-medium">中</span></td><td>补齐 blocked/dropped/audit 的徽章文案</td></tr>
+      <tr><td><span class="diff-badge">D-003</span></td><td>国际化语言数</td><td>implement.md 要求初始四语</td><td>demo 仅 zh/en/th 三语</td><td><span class="badge badge-medium">中</span></td><td>落地时补第四语言</td></tr>
+      <tr><td><span class="diff-badge">D-004</span></td><td>硬编码文案</td><td>implement.md 要求国际化</td><td>页签「发信人名称仿冒」、模式下拉、抽屉三段标题及子组件大量文案未走 i18n</td><td><span class="badge badge-medium">中</span></td><td>落地时补 i18n key</td></tr>
+      <tr><td><span class="diff-badge">D-005</span></td><td>处置动作命名</td><td>implement.md：mark = accept + header，不新增 action</td><td>demo 前端使用 mark_deliver/quarantine/audit/block/drop 语义枚举</td><td><span class="badge badge-low">低</span></td><td>落地映射到统一规则 action（mark→accept+header）</td></tr>
+      <tr><td><span class="diff-badge">D-006</span></td><td>检测方向</td><td>抽屉「检测预览」固定写「对接收方向」；state <code>newDirections</code> 存在但抽屉内无方向选择 UI</td><td>方向多选为死代码（仅告警预览引用），抽屉恒按 inbound</td><td><span class="badge badge-low">低</span></td><td>确认是否需暴露方向选择</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 10. 需确认事项 ========== -->
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项</h2>
+  <blockquote>遵循 implement.md：冲突/新增 API/底层不支持事项列此，不自行决定。</blockquote>
+  <table class="spec-table">
+    <thead><tr><th>编号</th><th>事项</th><th>类型</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>Q-001</td><td>仿冒信号(spoofTypes)存储与判定依据</td><td><span class="badge badge-medium">数据/API</span></td><td>检测日志需持久化仿冒手法枚举与逐条判定依据（详情抽屉③展开内容），现有邮件日志是否有承载字段待确认</td></tr>
+      <tr><td>Q-002</td><td>审核队列加急/超时自动处置</td><td><span class="badge badge-medium">能力</span></td><td>审核动作的「加急标记置顶」「超时24h 自动隔离/阻断/丢弃」是否由现有审核/隔离能力支持</td></tr>
+      <tr><td>Q-003</td><td>品牌主域名所有权 TXT 约定</td><td><span class="badge badge-medium">能力</span></td><td>是否复用 DKIM/DNS 校验做品牌所有权 TXT 验证；未验证是否约束严格处置生效</td></tr>
+      <tr><td>Q-004</td><td>发信人名称仿冒子组件深层向导</td><td><span class="badge badge-low">范围</span></td><td>添加对象两步向导、编辑/绑定规则/批量抽屉规模大，建议单独出一份组件规格；本文件仅覆盖对象列表层级 0</td></tr>
+      <tr><td>Q-005</td><td>检测方向选择是否落地</td><td><span class="badge badge-low">交互</span></td><td>newDirections 为前端死代码；产品是否要求品牌抽屉暴露 接收/外发/域内 方向选择</td></tr>
+      <tr><td>Q-006</td><td>身份基线学习（7 天）</td><td><span class="badge badge-medium">能力</span></td><td>发信人名称仿冒依赖对象基线学习，网关是否有历史发信特征学习/存储能力</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<script>
+// 让内嵌的 demo 组件预览产生与 demo 一致的最小交互反馈
+(function () {
+  function within(el, role){ return el.closest('[role="'+role+'"]'); }
+  document.querySelectorAll('.component-preview').forEach(function (scope) {
+    // 页签切换：切换 aria-selected / data-state
+    scope.addEventListener('click', function (e) {
+      var tab = e.target.closest('[role="tab"]');
+      if (tab) {
+        scope.querySelectorAll('[role="tab"]').forEach(function (t) {
+          t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+          t.setAttribute('data-state', t === tab ? 'active' : 'inactive');
+        });
+      }
+      // Radio 单选：radix RadioGroupItem 是 button[role=radio]
+      var radio = e.target.closest('[role="radio"]');
+      if (radio) {
+        var group = radio.closest('[role="radiogroup"]') || scope;
+        group.querySelectorAll('[role="radio"]').forEach(function (r) {
+          r.setAttribute('data-state', r === radio ? 'checked' : 'unchecked');
+          r.setAttribute('aria-checked', r === radio ? 'true' : 'false');
+        });
+      }
+      // Switch 开关
+      var sw = e.target.closest('[role="switch"]');
+      if (sw) {
+        var on = sw.getAttribute('data-state') === 'checked';
+        sw.setAttribute('data-state', on ? 'unchecked' : 'checked');
+        sw.setAttribute('aria-checked', on ? 'false' : 'true');
+      }
+      // 手风琴展开（详情抽屉里的仿冒信号）
+      var acc = e.target.closest('[aria-expanded]');
+      if (acc && !tab) {
+        var exp = acc.getAttribute('aria-expanded') === 'true';
+        acc.setAttribute('aria-expanded', exp ? 'false' : 'true');
+      }
+      // 关闭类按钮：隐藏所在弹窗/抽屉
+      var btn = e.target.closest('button');
+      if (btn) {
+        var label = (btn.innerText || btn.textContent || '').trim();
+        if (['取消','关闭','确认删除','确认关闭','放弃'].indexOf(label) >= 0) {
+          var dlg = within(btn, 'dialog') || within(btn, 'alertdialog');
+          if (dlg) dlg.style.display = 'none';
+        }
+      }
+    });
+  });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>try{mermaid.initialize({startOnLoad:true,theme:"default"});}catch(e){}</script>
+
+</body>
+</html>

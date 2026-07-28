@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 1：综合策略抽屉 - 规则列表视图 - 高级过滤规则</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --border: oklch(0.922 0 0); --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0); --radius: 0.625rem; --font-sans: "Geist", system-ui, sans-serif; --font-mono: "Geist Mono", monospace; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { margin: 0 auto; max-width: 1280px; padding: 2rem; font-family: var(--font-sans); background: var(--background); color: #1f2937; line-height: 1.6; }
+    .layer-nav, header, section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+    .layer-nav { display: flex; justify-content: space-between; }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1 { color: var(--primary); font-size: 1.3rem; margin-bottom: 0.75rem; }
+    h2 { font-size: 1.1rem; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.4rem; margin-bottom: 1rem; }
+    h4 { margin: 0.75rem 0 0.5rem; }
+    table.spec-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 0.55rem 0.7rem; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); white-space: nowrap; }
+    img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    figure { margin: 1rem 0; text-align: center; }
+    figcaption { font-size: 0.8rem; color: var(--muted-foreground); margin-top: 0.4rem; }
+    code { font-family: var(--font-mono); font-size: 0.85em; background: var(--muted); padding: 0.1em 0.35em; border-radius: 4px; }
+    .pass { color: #15803d; font-weight: 700; }
+    .component-preview { border: 2px dashed oklch(0.75 0.1 262); border-radius: var(--radius); padding: 1.25rem; margin: 1rem 0; background: #f5f7fa; overflow-x: auto; }
+    .component-preview::before { content: "▶ 可交互组件预览（搜索/筛选/重置/启停/删除/开关均可操作，行为与 demo 一致）"; display: block; font-size: 0.75rem; color: var(--primary); margin-bottom: 0.9rem; font-weight: 600; }
+    .dom-comparison { background: oklch(0.97 0.02 150); border: 1px solid oklch(0.8 0.08 150); border-radius: var(--radius); padding: 0.75rem 1rem; margin: 0.75rem 0; }
+    .note { font-size: 0.8rem; color: #b45309; background: #fef3c7; border-radius: 6px; padding: 0.4rem 0.7rem; margin: 0.5rem 0; }
+
+    /* ===== 预览：还原 demo 列表视图 ===== */
+    .m-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; max-width: 1100px; margin: 0 auto; }
+    .m-outer-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #e5e7eb; }
+    .m-outer-head .t { font-size: 17px; font-weight: 600; }
+    .sw { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #1890ff; cursor: pointer; user-select: none; }
+    .sw .track { width: 36px; height: 20px; border-radius: 999px; background: #1890ff; position: relative; transition: background .2s; }
+    .sw .track::after { content: ""; position: absolute; top: 2px; left: 18px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: left .2s; }
+    .sw.off { color: #9ca3af; } .sw.off .track { background: #d1d5db; } .sw.off .track::after { left: 2px; }
+    .m-content { padding: 18px 20px; transition: opacity .2s; }
+    .m-content.disabled { opacity: 0.5; pointer-events: none; }
+    .f-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .f-head .ico { width: 34px; height: 34px; border-radius: 50%; background: #f3f4f6; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; }
+    .f-title { font-size: 15px; font-weight: 600; }
+    .f-desc { font-size: 12.5px; color: #6b7280; }
+    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    .toolbar input[type=text] { flex: 1; min-width: 180px; border: 1px solid #d1d5db; border-radius: 8px; padding: 7px 10px 7px 30px; font-size: 13px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") no-repeat 9px center; }
+    .toolbar select, .toolbar button { border: 1px solid #d1d5db; border-radius: 8px; padding: 7px 10px; font-size: 13px; background: #fff; cursor: pointer; }
+    .toolbar .primary { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+    .toolbar .count { font-size: 12.5px; color: #6b7280; white-space: nowrap; }
+    table.rt { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .rt th { text-align: left; color: #6b7280; font-weight: 500; padding: 8px 10px; border-bottom: 1px solid #e5e7eb; background: #fafafa; }
+    .rt td { padding: 10px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+    .rt .id { font-family: var(--font-mono); }
+    .kw { display: inline-block; background: #f3f4f6; color: #374151; border-radius: 6px; padding: 1px 8px; font-size: 11.5px; margin: 1px 2px; }
+    .bdg { display: inline-block; border-radius: 6px; padding: 1px 8px; font-size: 11.5px; border: 1px solid transparent; }
+    .st-on { color: #16a34a; border-color: #86efac; background: #f0fdf4; }
+    .st-off { color: #6b7280; border-color: #d1d5db; background: #f9fafb; }
+    .ac-quarantine { color: #d97706; background: #fef3c7; }
+    .ac-review { color: #4f46e5; background: #e0e7ff; }
+    .ac-block { color: #dc2626; background: #fee2e2; }
+    .perm { color: #16a34a; font-weight: 600; }
+    .ops button { border: 0; background: none; cursor: pointer; font-size: 13px; padding: 3px 6px; }
+    .ops .edit { color: #374151; } .ops .toggle { color: #374151; } .ops .del { color: #dc2626; }
+    .pager { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; font-size: 13px; color: #6b7280; }
+    .pager select { border: 1px solid #d1d5db; border-radius: 8px; padding: 4px 8px; }
+    .pager .pg button { border: 1px solid #e5e7eb; background: #f9fafb; color: #9ca3af; border-radius: 8px; padding: 5px 12px; margin-left: 8px; cursor: not-allowed; }
+    .info-card { margin-top: 14px; background: #fafafa; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #6b7280; }
+    .hint-jump { display: none; margin-top: 0.75rem; font-size: 0.82rem; color: #0369a1; background: #e0f2fe; border-radius: 6px; padding: 0.5rem 0.75rem; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-2">← 返回主文件</a>
+    <a href="./layer-2-edit-basic.html">层级 2：规则编辑抽屉-基础设置 →</a>
+  </nav>
+
+  <header>
+    <h1>交互层级 1：综合策略抽屉 - 规则列表视图</h1>
+    <table class="spec-table">
+      <tr><td style="width:120px"><b>所属组件</b></td><td>2.2 高级过滤规则模块 AdvancedFilterRulesModule</td></tr>
+      <tr><td><b>主文件</b></td><td><a href="./index.html">filter-rules-pipeline-advanced-rules/index.html</a></td></tr>
+      <tr><td><b>触发路径</b></td><td>层级0 流水线阶段5 节点卡片「高级过滤规则」→ onClick → 打开综合策略抽屉（80vw Sheet，initialPolicy=advancedRules）→ 右栏渲染本列表视图</td></tr>
+      <tr><td><b>demo 源</b></td><td><code>advanced-filter-rules-module.tsx</code> L5020-5248（列表）＋ <code>comprehensive-strategy-page.tsx</code>（宿主）</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h2>可交互组件预览</h2>
+    <div class="component-preview">
+      <div class="m-card" id="mcard">
+        <!-- 页级策略开关（综合策略页级） -->
+        <div class="m-outer-head">
+          <span class="t">高级过滤规则</span>
+          <span class="sw" id="pageSw"><span class="lbl">已启用</span><span class="track"></span></span>
+        </div>
+        <div class="m-content" id="pageContent">
+          <div class="m-card" style="border-radius:10px">
+            <div style="padding:16px 18px">
+              <div class="f-head">
+                <div style="display:flex">
+                  <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></span>
+                  <div>
+                    <div class="f-title">高级过滤规则</div>
+                    <div class="f-desc">多维度条件组合过滤，支持52种条件类型与AND/OR逻辑</div>
+                  </div>
+                </div>
+                <span class="sw" id="modSw"><span class="track"></span><span class="lbl" style="color:#1890ff">已启用</span></span>
+              </div>
+              <div class="m-content" id="modContent" style="padding:0">
+
+              <div class="toolbar">
+                <input type="text" id="q" placeholder="搜索规则名称/关键词...">
+                <select id="fStatus"><option value="all">全部状态</option><option value="enabled">已启用</option><option value="disabled">已禁用</option></select>
+                <select id="fScope"><option value="all">全部范围</option><option value="incoming">收件</option><option value="outgoing">发件</option><option value="internal">内部</option></select>
+                <button id="reset">⟳ 重置</button>
+                <span class="count">共 <b id="cnt">4</b> 条记录</span>
+                <button class="primary" id="newRule">＋ 新建规则</button>
+              </div>
+              <table class="rt">
+                <thead><tr><th style="width:48px">ID</th><th>规则名称</th><th>关键字</th><th>范围</th><th>状态</th><th>动作</th><th>到期时间</th><th style="text-align:right">操作</th></tr></thead>
+                <tbody id="tb"></tbody>
+              </table>
+              <div class="pager" id="pager">
+                <span>每页显示 <select><option>50</option><option>100</option><option>200</option></select> 条</span>
+                <span class="pg"><button>上一页</button><button>下一页</button></span>
+              </div>
+              <div class="info-card">ⓘ 支持21种条件类型：<b>邮件基础信息:</b> 发信人·收信人·主题·抄送·密送·正文·信头　<b>附件相关:</b> 附件内容·附件名·附件类型·附件数量·加密附件·附件MD5　<b>安全检测:</b> 二维码检测·URL数量·二维码数量·URL　<b>系统限制:</b> 邮件大小·15分钟限制·当日限制·域名认证</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hint-jump" id="jumpHint">✔ demo 行为：打开规则编辑抽屉（75vw，4 Tab）→ 见 <a href="./layer-2-edit-basic.html">层级 2：基础设置 Tab</a></div>
+      <div class="note">⚠ 预览忠实复刻 demo 两处现状缺陷：① 描述写「52种」而底部提示写「21种」（实际 54 种，主文件 §9 D-1）；② 范围筛选选任何具体值都会「暂无数据」（scope 数组===字符串恒 false，D-4）。</div>
+    </div>
+
+    <figure>
+      <img src="./screenshots/layer1-drawer-default.png" alt="列表默认态">
+      <figcaption>demo 实际渲染：综合策略抽屉内的规则列表默认态（4 条 mock 规则）。</figcaption>
+    </figure>
+    <figure>
+      <img src="./screenshots/layer1-search-filtered.png" alt="搜索过滤">
+      <figcaption>搜索「钓鱼」→ 仅剩 1 行，「共 1 条记录」。</figcaption>
+    </figure>
+    <figure>
+      <img src="./screenshots/layer1-status-filter-open.png" alt="状态筛选下拉">
+      <figcaption>状态筛选下拉：全部状态 / 已启用 / 已禁用。</figcaption>
+    </figure>
+    <figure>
+      <img src="./screenshots/layer1-scope-filter-incoming.png" alt="范围筛选缺陷">
+      <figcaption>缺陷实证：范围筛选选「收件」→ 暂无数据（应剩 3 条）。</figcaption>
+    </figure>
+    <figure>
+      <img src="./screenshots/layer1-after-disable-row1.png" alt="行启停切换">
+      <figcaption>行内「禁用」点击后：状态 Badge 变灰「禁用」、操作按钮变「启用」。</figcaption>
+    </figure>
+    <figure>
+      <img src="./screenshots/layer1-module-disabled.png" alt="页级开关关闭">
+      <figcaption>页级策略开关关闭：内容半透明、左导航摘要「已禁用」、底部出现「有未保存的更改」。</figcaption>
+    </figure>
+    <figure>
+      <img src="./screenshots/layer1-inner-switch-disabled.png" alt="模块级开关关闭">
+      <figcaption>模块级开关关闭：仅模块卡片内容半透明（opacity-50 + pointer-events-none），外层策略头不受影响。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>UI 元素清单</h2>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>类型</th><th>文案/默认值</th><th>行为</th></tr></thead>
+      <tbody>
+        <tr><td>页级策略开关</td><td>Switch</td><td>已启用（默认 on）</td><td>关闭→右栏整体半透明+「有未保存的更改」提示条（综合策略页 state）</td></tr>
+        <tr><td>模块头图标+标题</td><td>Filter 图标 + h 标题</td><td>「高级过滤规则」+ 描述「多维度条件组合过滤，支持52种条件类型与AND/OR逻辑」</td><td>—（描述计数缺陷 D-1）</td></tr>
+        <tr><td>模块级开关</td><td>Switch + 文案</td><td>已启用 / 已禁用（<code>t("common.enabled/disabled")</code>，全模块唯一 t() 用法）</td><td>关闭→模块内容 opacity-50 + pointer-events-none</td></tr>
+        <tr><td>搜索框</td><td>Input + Search 图标</td><td>placeholder「搜索规则名称/关键词...」</td><td>按名称或 keywords 不区分大小写模糊过滤，实时</td></tr>
+        <tr><td>状态筛选</td><td>Select</td><td>全部状态 | 已启用 | 已禁用</td><td>按 status 过滤</td></tr>
+        <tr><td>范围筛选</td><td>Select</td><td>全部范围 | 收件 | 发件 | 内部</td><td><b>缺陷 D-4</b>：选具体值恒空结果</td></tr>
+        <tr><td>重置按钮</td><td>Button（RotateCcw 图标）</td><td>「重置」</td><td>清空三个筛选</td></tr>
+        <tr><td>记录数</td><td>span</td><td>「共 N 条记录」</td><td>随筛选实时更新</td></tr>
+        <tr><td>新建规则</td><td>Button primary（Plus 图标）</td><td>「新建规则」</td><td>打开规则编辑抽屉（editingRule=null，标题「新建规则」）→ 层级2</td></tr>
+        <tr><td>表格列 ID</td><td>td font-mono</td><td>显示 <code>rule.priority</code>（列名 ID 但渲染优先级值，spec §4.3 如此定义）</td><td>—</td></tr>
+        <tr><td>表格列 关键字</td><td>Badge×≤3</td><td>keywords 前 3 个，超出折叠为「+N」Badge（mock 数据最多 3 个，+N 态源码 L5136 定义、默认数据不可见）</td><td>—</td></tr>
+        <tr><td>表格列 范围</td><td>outline Badge</td><td>单值映射 收件/发件/内部；多值出现原始拼接（缺陷 D-5）</td><td>—</td></tr>
+        <tr><td>表格列 状态</td><td>outline Badge</td><td>启用（绿）/ 禁用（灰）</td><td>—</td></tr>
+        <tr><td>表格列 动作</td><td>Badge</td><td>投递绿/标记投递青/隔离琥珀/审核紫蓝/丢弃灰/阻断红</td><td>—</td></tr>
+        <tr><td>表格列 到期时间</td><td>Clock 图标+日期 / 绿字</td><td>有值：<code>toLocaleDateString()</code>（实测 en-US 格式 1/1/2027，Q-9）；空：「永久」绿字</td><td>—</td></tr>
+        <tr><td>行操作 编辑</td><td>icon Button（Edit2 ✎）</td><td>—</td><td>打开编辑抽屉（标题带规则名；表单回填缺陷 D-3 见层级2）</td></tr>
+        <tr><td>行操作 启用/禁用</td><td>文字 Button</td><td>显示与当前状态相反的动作词</td><td>即时切换，无确认</td></tr>
+        <tr><td>行操作 删除</td><td>icon Button（Trash2 红）</td><td>—</td><td>直接移除，无确认框（Q-6）</td></tr>
+        <tr><td>空态行</td><td>td colSpan=8</td><td>「暂无数据」</td><td>筛选无结果时；分页区隐藏</td></tr>
+        <tr><td>分页</td><td>Select + 2 Button</td><td>每页显示 50（可选 50/100/200）条；上一页/下一页恒 disabled</td><td>占位交互（spec §4.5 已注明）</td></tr>
+        <tr><td>底部提示卡</td><td>Info 卡</td><td>「支持21种条件类型：…」四分组静态文案</td><td>—（计数缺陷 D-1）</td></tr>
+      </tbody>
+    </table>
+    <h4>Mock 数据（demo <code>mockFilterRules</code> L1164-1300，浏览器渲染核对一致）</h4>
+    <table class="spec-table">
+      <thead><tr><th>ID(优先级)</th><th>名称</th><th>关键字</th><th>范围</th><th>状态</th><th>动作</th><th>到期</th></tr></thead>
+      <tbody>
+        <tr><td>85</td><td>拦截可疑附件邮件</td><td>可执行文件 / SPF失败</td><td>收件</td><td>启用</td><td>隔离</td><td>1/1/2027</td></tr>
+        <tr><td>70</td><td>限制大附件群发</td><td>大附件 / 群发限制</td><td>发件</td><td>启用</td><td>审核</td><td>7/1/2026</td></tr>
+        <tr><td>95</td><td>钓鱼邮件检测</td><td>钓鱼 / 紧急 / DMARC</td><td>收件</td><td>启用</td><td>阻断</td><td>永久</td></tr>
+        <tr><td>80</td><td>二维码恶意检测</td><td>二维码 / 恶意</td><td>incomingoutgoinginternal（缺陷D-5）</td><td>禁用</td><td>隔离</td><td>1/1/2026</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="dom-comparison">
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM（Playwright 提取，总节点 255）</th><th>预览还原 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td>SheetContent <code>div[data-state=open].w-[80vw]</code>，flex-col：SheetHeader + 内容区</td><td><code>.m-card</code>（仅还原右栏模块区；抽屉壳/左导航以截图+3.1 表格呈现）</td><td class="pass">一致（还原范围已声明）</td></tr>
+        <tr><td>模块头结构</td><td>Filter 圆底图标 + 标题/描述 + Switch（role=switch, data-state=checked）</td><td>同结构（.f-head + .sw）</td><td class="pass">一致</td></tr>
+        <tr><td>工具栏子节点</td><td>Input + 2×combobox + 重置 Button + 记录数 + 新建 Button（共 6 项）</td><td>同 6 项同顺序</td><td class="pass">一致</td></tr>
+        <tr><td>表格</td><td>thead 8 列（ID/规则名称/关键字/范围/状态/动作/到期时间/操作）；tbody 4 行</td><td>同 8 列 4 行，行内文案逐字一致（含 <code>incomingoutgoinginternal</code> 缺陷）</td><td class="pass">一致</td></tr>
+        <tr><td>状态/动作 Badge</td><td>outline 绿「启用」×3 灰「禁用」×1；琥珀「隔离」×2 紫蓝「审核」×1 红「阻断」×1</td><td>同色同文案</td><td class="pass">一致</td></tr>
+        <tr><td>条件渲染</td><td>「+N」关键字 Badge 未渲染（无规则超 3 关键字）；空态「暂无数据」行未渲染（有数据）</td><td>未包含默认渲染，空态在筛选后动态出现（与 demo 相同逻辑）</td><td class="pass">一致</td></tr>
+        <tr><td>分页/提示卡</td><td>每页显示 Select(50) + 禁用双钮 + Info 提示卡「支持21种…」</td><td>同文案同禁用态</td><td class="pass">一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+<script>
+(function () {
+  var rules = [
+    { id: 1, pri: 85, name: "拦截可疑附件邮件", kw: ["可执行文件", "SPF失败"], scope: ["incoming"], scopeLabel: "收件", enabled: true, action: "隔离", ac: "ac-quarantine", exp: "1/1/2027" },
+    { id: 2, pri: 70, name: "限制大附件群发", kw: ["大附件", "群发限制"], scope: ["outgoing"], scopeLabel: "发件", enabled: true, action: "审核", ac: "ac-review", exp: "7/1/2026" },
+    { id: 3, pri: 95, name: "钓鱼邮件检测", kw: ["钓鱼", "紧急", "DMARC"], scope: ["incoming"], scopeLabel: "收件", enabled: true, action: "阻断", ac: "ac-block", exp: "" },
+    { id: 4, pri: 80, name: "二维码恶意检测", kw: ["二维码", "恶意"], scope: ["incoming","outgoing","internal"], scopeLabel: "incomingoutgoinginternal", enabled: false, action: "隔离", ac: "ac-quarantine", exp: "1/1/2026" }
+  ];
+  var q = document.getElementById('q'), fs = document.getElementById('fStatus'), fc = document.getElementById('fScope');
+  var tb = document.getElementById('tb'), cnt = document.getElementById('cnt'), pager = document.getElementById('pager');
+  function filtered() {
+    var term = q.value.trim().toLowerCase();
+    return rules.filter(function (r) {
+      var mQ = !term || r.name.toLowerCase().includes(term) || r.kw.some(function (k) { return k.toLowerCase().includes(term); });
+      var mS = fs.value === 'all' || (fs.value === 'enabled') === r.enabled;
+      // 忠实复刻 demo 缺陷 D-4：scope(数组) === 筛选值(字符串) 恒 false
+      var mC = fc.value === 'all' || String(r.scope) === fc.value && false;
+      return mQ && mS && mC;
+    });
+  }
+  function render() {
+    var list = filtered();
+    cnt.textContent = list.length;
+    if (!list.length) { tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:22px">暂无数据</td></tr>'; pager.style.display = 'none'; return; }
+    pager.style.display = 'flex';
+    tb.innerHTML = list.map(function (r) {
+      return '<tr>' +
+        '<td class="id">' + r.pri + '</td>' +
+        '<td style="font-weight:500">' + r.name + '</td>' +
+        '<td>' + r.kw.map(function (k) { return '<span class="kw">' + k + '</span>'; }).join('') + '</td>' +
+        '<td><span class="bdg st-off">' + r.scopeLabel + '</span></td>' +
+        '<td><span class="bdg ' + (r.enabled ? 'st-on">启用' : 'st-off">禁用') + '</span></td>' +
+        '<td><span class="bdg ' + r.ac + '">' + r.action + '</span></td>' +
+        '<td>' + (r.exp ? '🕐 ' + r.exp : '<span class="perm">永久</span>') + '</td>' +
+        '<td class="ops" style="text-align:right">' +
+          '<button class="edit" data-act="edit" data-id="' + r.id + '" title="编辑">✎</button>' +
+          '<button class="toggle" data-act="toggle" data-id="' + r.id + '">' + (r.enabled ? '禁用' : '启用') + '</button>' +
+          '<button class="del" data-act="del" data-id="' + r.id + '" title="删除">🗑</button>' +
+        '</td></tr>';
+    }).join('');
+  }
+  q.addEventListener('input', render); fs.addEventListener('change', render); fc.addEventListener('change', render);
+  document.getElementById('reset').addEventListener('click', function () { q.value = ''; fs.value = 'all'; fc.value = 'all'; render(); });
+  tb.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var r = rules.find(function (x) { return x.id === +b.dataset.id; });
+    if (b.dataset.act === 'toggle') { r.enabled = !r.enabled; render(); }
+    if (b.dataset.act === 'del') { rules = rules.filter(function (x) { return x !== r; }); render(); }
+    if (b.dataset.act === 'edit') { showJump(); }
+  });
+  function showJump() { document.getElementById('jumpHint').style.display = 'block'; }
+  document.getElementById('newRule').addEventListener('click', showJump);
+  function bindSw(id, onToggle) {
+    var el = document.getElementById(id);
+    el.addEventListener('click', function () {
+      var off = el.classList.toggle('off');
+      el.querySelector('.lbl').textContent = off ? '已禁用' : '已启用';
+      el.querySelector('.lbl').style.color = off ? '#9ca3af' : '#1890ff';
+      onToggle(off);
+    });
+  }
+  bindSw('pageSw', function (off) { document.getElementById('pageContent').classList.toggle('disabled', off); });
+  bindSw('modSw', function (off) { document.getElementById('modContent').classList.toggle('disabled', off); });
+  render();
+})();
+</script>
+</body>
+</html>

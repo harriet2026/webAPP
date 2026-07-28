@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - 用户黑白名单 HTML 规格说明</title>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: #fff;
+      --muted: #f5f7fa;
+      --muted-foreground: #6b7280;
+      --border: #e5e7eb;
+      --blue: #1677ff;
+      --red: #f5222d;
+      --orange: #fa8c16;
+      --green: #52c41a;
+      --radius: 0.625rem;
+      --font-sans: "Geist", "Inter", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1, h2, h3 { line-height: 1.3; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 28px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 20px; }
+    h3 { margin: 18px 0 10px; color: #111827; font-size: 17px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .spec-header, section, .component-toc { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .toc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+    .toc-list li { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa; }
+    .toc-badge, .badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #eef4ff; color: #155eef; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-spec, .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .preview-card { width: 220px; min-height: 60px; display: flex; overflow: hidden; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); color: inherit; cursor: pointer; }
+    .preview-card:hover { border-color: #93c5fd; box-shadow: 0 4px 12px rgba(21,94,239,.14); }
+    .preview-bar { width: 4px; background: var(--green); }
+    .preview-card-body { flex: 1; padding: 8px 10px; }
+    .preview-title { display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 650; }
+    .preview-sub { margin-top: 4px; color: #6b7280; font-size: 12px; }
+    .preview-shell { display: grid; grid-template-columns: 190px 1fr; gap: 24px; min-width: 900px; }
+    .preview-nav { padding: 12px; border-right: 1px solid var(--border); background: #f9fafb; }
+    .preview-nav-row { margin: 6px 0; padding: 10px; border-radius: 8px; color: #4b5563; font-size: 14px; }
+    .preview-nav-row.active { background: #eaf3ff; color: #155eef; }
+    .preview-panel { padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .preview-panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .preview-switch { display: inline-flex; align-items: center; gap: 8px; color: #155eef; font-size: 13px; cursor: pointer; user-select: none; }
+    .preview-toolbar { display: flex; justify-content: space-between; gap: 12px; margin: 14px 0; align-items: center; }
+    .preview-input { min-width: 280px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; color: #374151; background: #fff; }
+    .button-red { padding: 8px 12px; border: 0; border-radius: 8px; background: #dc2626; color: #fff; font-weight: 650; cursor: pointer; }
+    .button-icon { padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; cursor: pointer; }
+    .tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 8px; background: #f3f4f6; }
+    .tab { padding: 5px 10px; border: 0; border-radius: 7px; font-size: 14px; font-weight: 650; background: transparent; cursor: pointer; }
+    .tab.active { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mini-table th, .mini-table td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; }
+    .mini-table th { background: #f8fafc; color: #374151; }
+    .mini-table tr.selected td { background: #eff6ff; }
+    .mono { font-family: var(--font-mono); font-size: 12px; }
+    .pill { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #f3f4f6; }
+    .pill.red { background: #ffe2e2; color: #d92d20; }
+    .pill.orange { background: #ffedd5; color: #c2410c; }
+    .pill.green { background: #dcfce7; color: #15803d; }
+    .pill.gray { background: #f3f4f6; color: #4b5563; }
+    .preview-pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 13px; color: #4b5563; }
+    .page-btn { min-width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; background: #fff; cursor: pointer; }
+    .page-btn.active { background: #155eef; color: #fff; border-color: #155eef; }
+    .preview-tip { display: flex; gap: 8px; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: #f9fafb; color: #6b7280; font-size: 12px; }
+    .is-hidden { display: none !important; }
+    .disabled-panel { opacity: .5; pointer-events: none; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .diff-section { border-left: 4px solid var(--red); background: #fff7f7; }
+    .question-section { border-left: 4px solid #d97706; background: #fffbeb; }
+    .mermaid { padding: 16px; border-radius: 8px; background: #f8fafc; text-align: center; }
+    pre { padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; overflow: auto; font-family: var(--font-mono); font-size: 13px; }
+    @media (max-width: 900px) { body { padding: 16px; } .preview-shell { grid-template-columns: 1fr; } .preview-nav { border-right: 0; border-bottom: 1px solid var(--border); } }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>策略流水线 - 用户黑白名单 HTML 规格说明</h1>
+    <table class="meta-table">
+      <tr><td>目标模块</td><td>策略流水线 / 阶段2：收发信人策略 / 用户黑白名单（policy key: <code>userList</code>，priority 2004，type=exception）</td></tr>
+      <tr><td>demo 地址</td><td><a href="http://localhost:3000/filter-rules/pipeline">http://localhost:3000/filter-rules/pipeline</a>（独立路由 <code>/filter-rules/identity</code> 渲染同一组件）</td></tr>
+      <tr><td>demo 源码</td><td><code>design/origin/demo/components/filter-rules-new/strategy-pipeline-page.tsx</code>（策略卡 + 阶段2抽屉宿主）<br><code>design/origin/demo/components/filter-rules-new/identity-strategy-page.tsx</code>（<code>renderUserListConfig</code>、<code>userListLabels</code>、<code>generateUserBlacklistRules/generateUserWhitelistRules</code>）</td></tr>
+      <tr><td>关联 PRD</td><td><code>design/origin/spec/用户黑白名单.md</code><br><code>design/origin/spec/策略流水线需求文档.md</code></td></tr>
+      <tr><td>落地约束</td><td><code>design/origin/implement.md</code>：复用统一规则系统（可加 <code>page</code> 字段区分功能页），不新增规则系统与 action；PRD API 非必须原样实现；四语国际化；与网关底层冲突先确认。</td></tr>
+      <tr><td>浏览器验证</td><td>2026-07-11 Asia/Shanghai，headless Chromium CDP 驱动运行态 demo（1440×1000 主参数 + 1024×900 响应式），完成默认态、策略卡、抽屉、黑/白名单 Tab、搜索、空态、行选中、批量删除弹窗、单条删除点击、分页、跳页、每页条数、模块禁用、Tooltip、操作列横向滚动共 16 张截图与逐状态 DOM 事实提取。</td></tr>
+    </table>
+  </header>
+
+  <nav class="component-toc">
+    <h2>组件列表</h2>
+    <ul class="toc-list">
+      <li><a href="#component-2-1">2.1 策略流水线入口卡片</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-2">2.2 收发信人策略抽屉 + 用户黑白名单列表</a><span class="toc-badge">2层</span></li>
+      <li><a href="#component-2-3">2.3 列表操作交互（多层）</a><span class="toc-badge">3层</span><br><a href="layer-1-selection-delete-dialogs.html">层级1：选中与删除确认弹窗</a> · <a href="layer-2-search-pagination-states.html">层级2：搜索/分页/禁用态</a></li>
+      <li><a href="#api-mapping">4. 数据模型与 API 映射</a><span class="toc-badge">规则系统映射</span></li>
+    </ul>
+  </nav>
+
+  <section id="layout">
+    <h2>1. 页面布局结构</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>实际渲染</th><th>规格含义</th></tr></thead>
+      <tbody>
+        <tr><td>左侧产品导航</td><td>深色侧边栏，当前位于“平台安全策略”功能域</td><td>全局导航容器，不属于本模块配置表单。</td></tr>
+        <tr><td>策略流水线主内容</td><td>阶段1-4 流水线卡片区；用户黑白名单卡片位于阶段2 最后一张（绿色左色条）</td><td>用户黑白名单以阶段2策略卡进入，不是独立页面首屏。</td></tr>
+        <tr><td>收发信人策略抽屉</td><td>右侧 80vw Sheet，顶部“阶段2: 收发信人策略 / 个人黑白名单”（文案差异见 D-001），左侧子策略导航（用户黑白名单为第5项），右侧白色配置卡</td><td>阶段2 子模块承载容器，内嵌 <code>IdentityStrategyPage embedded=true initialPolicy=userList</code>。</td></tr>
+        <tr><td>用户黑白名单配置卡</td><td>卡头（标题 + 已启用开关）+ 可滚动内容（Tab / 搜索 / 表格 / 分页 / 底部说明）+ sticky 底栏（空）</td><td>本规格主体，详见 §2.2 与层级子文件。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/page-full-default.png" alt="策略流水线整页默认态">
+      <figcaption>整页默认态：阶段2 收发信人策略列，最下方为“用户黑白名单”卡片（绿色色条 + 配置 →）。</figcaption>
+    </figure>
+  </section>
+
+  <section id="components">
+    <h2>2. 逐组件规格</h2>
+
+    <article class="component-spec" id="component-2-1">
+      <h3>2.1 策略流水线入口卡片 UserList Policy Card</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级0：页面默认态中的策略入口卡片</td></tr>
+          <tr><th>触发路径</th><td>打开 <code>/filter-rules/pipeline</code>，在阶段2 收发信人策略列定位“用户黑白名单”卡片（第5张）。</td></tr>
+          <tr><th>源码定义</th><td><code>priority: 2004, key: "userList", stage: 2, type: "exception", todayHits: 38, todayBlocked: 25, todayExempted: 13, action: "pipeline.actionPass"(跳过后续策略)</code></td></tr>
+        </tbody>
+      </table>
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：策略卡默认态</h4>
+        <div class="component-preview">
+          <a class="preview-card" data-demo-extracted="userlist-strategy-card" href="#component-2-2" aria-label="打开用户黑白名单列表规格">
+            <div class="preview-bar"></div>
+            <div class="preview-card-body">
+              <div class="preview-title"><span>用户黑白名单</span><span style="color:#1890FF;font-size:13px;">配置 →</span></div>
+              <div class="preview-sub">阶段2 · exception · 优先级 2004 · 今日命中 38 / 阻断 25 / 豁免 13</div>
+            </div>
+          </a>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/userlist-card-layer-0-default.png" alt="用户黑白名单策略卡">
+          <figcaption>策略卡局部截图（CDP clip 裁切）：标题 + 蓝色“配置 →”按钮；绿色左色条由 <code>type=exception</code> 推导。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>卡片标题</td><td>用户黑白名单</td><td>点击卡片整体打开阶段2抽屉并选中用户黑白名单</td><td>i18n <code>pipeline.userBlackWhiteList</code></td></tr>
+            <tr><td>配置入口</td><td>配置 →（蓝色 <code>#1890FF</code>，含右箭头 svg）</td><td>与卡片整体共用打开逻辑（<code>setIdentityDrawerPolicy("userList")</code>）</td><td>浏览器验证点击 button 成功打开抽屉</td></tr>
+            <tr><td>左侧色条</td><td>绿色（例外/投递类策略）</td><td>无独立交互</td><td>与发信人黑白名单卡片同色系</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>根节点</td><td><code>div.flex.items-center.justify-between</code>，节点总数 6</td><td><code>.preview-card[data-demo-extracted]</code>（结构等价重排）</td><td>一致（视觉重排展示）</td></tr>
+              <tr><td>子节点</td><td>2：<code>span</code>(标题, truncate) + <code>button</code>(配置, 含 svg 箭头)</td><td>2：标题 span + 配置 span</td><td>一致</td></tr>
+              <tr><td>关键文案</td><td>用户黑白名单 / 配置</td><td>用户黑白名单 / 配置 →</td><td>一致</td></tr>
+              <tr><td>触发结果</td><td>打开阶段2收发信人策略抽屉并选中用户黑白名单</td><td>锚点跳转至 §2.2</td><td>一致（规格内等价导航）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-2">
+      <h3>2.2 收发信人策略抽屉 + 用户黑白名单列表 renderUserListConfig</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级1：点击策略卡后打开 80vw 收发信人策略抽屉，左侧导航选中“用户黑白名单”（摘要：黑名单规则: 20 / 白名单规则: 15）。</td></tr>
+          <tr><th>渲染组件</th><td><code>IdentityStrategyPage embedded=true initialPolicy=userList</code> → <code>renderUserListConfig()</code></td></tr>
+          <tr><th>实际状态</th><td>卡头开关“已启用”；默认黑名单 Tab；表格 9 列首屏 10 行，共 20 条；白名单 Tab 15 条；1440px 视口下表格横向滚动（操作列首屏被裁切，scrollWidth 1150 &gt; clientWidth 843）。</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">1</span>交互层级 1A：黑名单规则列表默认态</h4>
+        <div class="trigger-path"><strong>触发路径</strong>：点击层级0 策略卡 → Sheet 抽屉打开（约 500ms 动画）→ 默认渲染黑名单 Tab。</div>
+        <div class="component-preview">
+          <div class="preview-shell" data-demo-extracted="userlist-blacklist">
+            <div class="preview-nav">
+              <div class="preview-nav-row">发信人黑白名单<br><small>黑名单规则: 3 / 白名单规则: 2</small></div>
+              <div class="preview-nav-row">身份认证与仿冒检测<br><small>SPF/DKIM/DMARC/PTR</small></div>
+              <div class="preview-nav-row">发信行为管控<br><small>频率限制/异常检测</small></div>
+              <div class="preview-nav-row">收信人检测<br><small>数量限制/存在性验证</small></div>
+              <div class="preview-nav-row active">用户黑白名单<br><small>黑名单规则: 20 / 白名单规则: 15</small></div>
+            </div>
+            <div class="preview-panel" data-ul-root>
+              <div class="preview-panel-head">
+                <h3 style="margin:0;">用户黑白名单</h3>
+                <label class="preview-switch"><span data-switch-label>已启用</span><input type="checkbox" checked data-module-switch></label>
+              </div>
+              <div data-ul-body>
+                <div class="tabs" data-rule-tabs>
+                  <button class="tab active" type="button" data-rule-tab="blacklist">黑名单规则</button>
+                  <button class="tab" type="button" data-rule-tab="whitelist">白名单规则</button>
+                </div>
+                <div class="preview-toolbar">
+                  <span>
+                    <input class="preview-input" type="search" data-preview-search placeholder="搜索规则ID、发信人或收信人...">
+                    <button class="button-icon" type="button" data-preview-reset title="重置">⟳</button>
+                  </span>
+                  <button class="button-red is-hidden" type="button" data-batch-delete>🗑 删除选中(0)</button>
+                </div>
+                <table class="mini-table">
+                  <thead><tr><th></th><th>规则ID</th><th>发信人</th><th>收信人</th><th>执行动作</th><th>状态</th><th>创建者</th><th>修改时间</th><th>操作</th></tr></thead>
+                  <tbody data-rule-body="blacklist">
+                    <tr data-search-text="UB-20260320-001 spam@bad-actor.com alice@company.com"><td><input type="checkbox" data-row-check></td><td class="mono">UB-20260320-001</td><td class="mono">✉ spam@bad-actor.com</td><td class="mono">👤 alice@company.com</td><td><span class="pill orange">隔离</span></td><td><span class="pill green">启用</span></td><td class="mono">admin@company.com</td><td>2026-03-20 10:30</td><td><a href="layer-1-selection-delete-dialogs.html">✎ 🗑</a></td></tr>
+                    <tr data-search-text="UB-20260319-002 *@promo-blast.net bob@company.com"><td><input type="checkbox" data-row-check></td><td class="mono">UB-20260319-002</td><td class="mono">✉ *@promo-blast.net</td><td class="mono">👤 bob@company.com</td><td><span class="pill orange">隔离</span></td><td><span class="pill green">启用</span></td><td class="mono">admin@company.com</td><td>2026-03-19 14:15</td><td><a href="layer-1-selection-delete-dialogs.html">✎ 🗑</a></td></tr>
+                    <tr data-search-text="UB-20260318-003 ads@newsletter.io *@sales.company.com"><td><input type="checkbox" data-row-check></td><td class="mono">UB-20260318-003</td><td class="mono">✉ ads@newsletter.io</td><td class="mono">👤 *@sales.company.com</td><td><span class="pill orange">隔离</span></td><td><span class="pill gray">禁用</span></td><td class="mono">admin@company.com</td><td>2026-03-18 09:00</td><td><a href="layer-1-selection-delete-dialogs.html">✎ 🗑</a></td></tr>
+                    <tr data-search-text="UB-20260317-004 marketing@spam.org charlie@company.com"><td><input type="checkbox" data-row-check></td><td class="mono">UB-20260317-004</td><td class="mono">✉ marketing@spam.org</td><td class="mono">👤 charlie@company.com</td><td><span class="pill orange">隔离</span></td><td><span class="pill green">启用</span></td><td class="mono">security@company.com</td><td>2026-03-17 15:49</td><td><a href="layer-1-selection-delete-dialogs.html">✎ 🗑</a></td></tr>
+                    <tr data-search-text="UB-20260316-005 *@junk-mail.com *@company.com"><td><input type="checkbox" data-row-check></td><td class="mono">UB-20260316-005</td><td class="mono">✉ *@junk-mail.com</td><td class="mono">👤 *@company.com</td><td><span class="pill orange">隔离</span></td><td><span class="pill green">启用</span></td><td class="mono">admin@company.com</td><td>2026-03-16 14:42</td><td><a href="layer-1-selection-delete-dialogs.html">✎ 🗑</a></td></tr>
+                  </tbody>
+                  <tbody data-rule-body="whitelist" class="is-hidden">
+                    <tr data-search-text="UW-20260320-001 support@trusted.com alice@company.com"><td><input type="checkbox" data-row-check></td><td class="mono">UW-20260320-001</td><td class="mono">✉ support@trusted.com</td><td class="mono">👤 alice@company.com</td><td><span class="pill green">放行</span></td><td><span class="pill green">启用</span></td><td class="mono">admin@company.com</td><td>2026-03-20 08:45</td><td><a href="layer-1-selection-delete-dialogs.html">✎ 🗑</a></td></tr>
+                    <tr data-search-text="UW-20260319-002 *@partner-corp.com *@company.com"><td><input type="checkbox" data-row-check></td><td class="mono">UW-20260319-002</td><td class="mono">✉ *@partner-corp.com</td><td class="mono">👤 *@company.com</td><td><span class="pill green">放行</span></td><td><span class="pill green">启用</span></td><td class="mono">admin@company.com</td><td>2026-03-19 16:20</td><td><a href="layer-1-selection-delete-dialogs.html">✎ 🗑</a></td></tr>
+                    <tr data-search-text="UW-20260318-003 vip@important.com bob@company.com"><td><input type="checkbox" data-row-check></td><td class="mono">UW-20260318-003</td><td class="mono">✉ vip@important.com</td><td class="mono">👤 bob@company.com</td><td><span class="pill green">放行</span></td><td><span class="pill green">启用</span></td><td class="mono">security@company.com</td><td>2026-03-18 10:30</td><td><a href="layer-1-selection-delete-dialogs.html">✎ 🗑</a></td></tr>
+                  </tbody>
+                </table>
+                <div data-empty-row class="is-hidden" style="text-align:center;padding:20px;color:#9ca3af;">暂无数据</div>
+                <div class="preview-pagination" data-pagination>
+                  <span data-total-label>共 20 条</span>
+                  <span style="display:inline-flex;gap:6px;align-items:center;">
+                    <button class="page-btn active" type="button">1</button><button class="page-btn" type="button">2</button>
+                    前往 <input class="preview-input" style="min-width:48px;width:48px;padding:4px 6px;" type="number" min="1"> 页
+                    <a href="layer-2-search-pagination-states.html" class="button-icon" style="text-decoration:none;">10条/页 ▾</a>
+                  </span>
+                </div>
+                <div class="preview-tip">ⓘ 管理员配置的用户级规则，可针对特定收信人或收信人组设置发信人黑白名单，优先级高于个人黑白名单。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-layer-1-blacklist-default.png" alt="用户黑白名单抽屉默认态（黑名单 Tab）">
+          <figcaption>抽屉默认态：抽屉头显示“阶段2: 收发信人策略 / 个人黑白名单”（差异 D-001）；卡头“用户黑白名单 + 已启用开关”；表格 9 列，操作列在 1440px 下被横向裁切。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为</th><th>差异/备注</th></tr></thead>
+          <tbody>
+            <tr><td>卡头启用开关</td><td>已启用（<code>role=switch data-state=checked</code>）</td><td>切换后内容区加 <code>opacity-50 pointer-events-none</code>，标签变“已禁用”，左导航圆点变空心</td><td>符合 PRD §3.3 模块禁用；开关本身在禁用区外，可再次启用。见<a href="layer-2-search-pagination-states.html">层级2</a></td></tr>
+            <tr><td>Tab</td><td>黑名单规则（默认 active）/ 白名单规则</td><td>切换时清空搜索词、清空选中、重置页码到第1页</td><td>与 PRD §3.1 一致（源码 <code>setSelectedUserListIds([]);setUserListCurrentPage(1);setUserListSearchTerm("")</code>）</td></tr>
+            <tr><td>搜索框</td><td>placeholder：搜索规则ID、发信人或收信人...（左侧 Search 图标）</td><td>输入即时过滤 <code>id/sender/recipient</code>（大小写不敏感 includes），页码重置为1</td><td>与 PRD 功能点3 一致；无提交按钮</td></tr>
+            <tr><td>重置按钮</td><td>图标按钮（RotateCcw）</td><td>清空搜索词并回第1页；hover/focus 显示 Tooltip“重置”</td><td>浏览器 focus 验证 Tooltip 文案“重置”</td></tr>
+            <tr><td>删除选中按钮</td><td>默认不渲染；选中 N 行后显示红色 <code>删除选中(N)</code>（Trash2 图标）</td><td>点击打开批量删除确认弹窗</td><td>详见<a href="layer-1-selection-delete-dialogs.html">层级1子文件</a></td></tr>
+            <tr><td>表格列</td><td>复选框 / 规则ID / 发信人 / 收信人 / 执行动作 / 状态 / 创建者 / 修改时间 / 操作</td><td>表头复选框全选当前页；行 hover 灰底；选中行蓝底 <code>bg-blue-50/50</code></td><td>比 PRD §2.1 多“创建者”列（D-004）；发信人列 Mail 图标、收信人列 User 图标，等宽字体</td></tr>
+            <tr><td>执行动作 Badge</td><td>阻断=红(destructive) / 隔离=橙 / 放行=绿</td><td>纯展示</td><td>mock 黑名单数据全为“隔离”，“阻断”不可见（D-006）</td></tr>
+            <tr><td>状态 Badge</td><td>启用=绿 / 禁用=灰（secondary）</td><td>纯展示，不可点击切换</td><td>PRD 功能点7 仅要求“显示”，一致</td></tr>
+            <tr><td>操作列</td><td>编辑（SquarePen）+ 删除（Trash2 红色）图标按钮，各带 Tooltip</td><td>删除应弹确认框（运行态未弹出，D-002）；编辑无 onClick（D-003）</td><td>操作列需横向滚动可见，见 <code>ops-column-scrolled.png</code></td></tr>
+            <tr><td>分页</td><td>共 20 条；页码 1、2（最多显示5个页码，超出显示“...”）；前往 N 页（Enter 提交）；10/20/50/100条/页</td><td>页码点击跳页；跳页越界或非数字忽略；改每页条数回第1页</td><td>PRD §3.1 一致；越界处理与 PRD §4.1“跳最近有效页”不同（D-007）</td></tr>
+            <tr><td>底部说明</td><td>ⓘ 管理员配置的用户级规则，可针对特定收信人或收信人组设置发信人黑白名单，优先级高于个人黑白名单。</td><td>纯展示</td><td>“管理员配置”与 PRD §1.4“终端用户创建”矛盾（D-008 / Q1）</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>配置根节点</td><td><code>div.space-y-4</code>，子节点 5（Tabs / 工具栏 / 表格容器 / 分页 / 底部说明），节点总数 403</td><td>预览保留同序 5 个区块（表格行数裁剪为 5+3 示例行）</td><td>一致（结构裁剪展示）</td></tr>
+              <tr><td>表头列</td><td>["", 规则ID, 发信人, 收信人, 执行动作, 状态, 创建者, 修改时间, 操作]（9 列）</td><td>同 9 列同顺序</td><td>一致</td></tr>
+              <tr><td>首行数据</td><td>UB-20260320-001 / spam@bad-actor.com / alice@company.com / 隔离 / 启用 / admin@company.com / 2026-03-20 10:30</td><td>同文案</td><td>一致</td></tr>
+              <tr><td>行数/分页</td><td>tbody 10 行；分页文本“共 20 条 | 1 | 2 | 前往 | 页 | 10条/页”</td><td>示例 5 行 + 共 20 条 + 页码 1/2</td><td>一致（行数裁剪展示）</td></tr>
+              <tr><td>卡头开关</td><td><code>[role=switch] data-state=checked</code>，标签“已启用”</td><td>checkbox 复刻 checked 态</td><td>一致</td></tr>
+              <tr><td>隐藏条件节点</td><td>删除选中按钮未渲染（无选中）；白名单 tbody 未渲染；“暂无数据”行未渲染</td><td>预览中对应元素 <code>.is-hidden</code></td><td>一致</td></tr>
+              <tr><td>抽屉头部文案</td><td>阶段2: 收发信人策略 / <strong>个人黑白名单</strong></td><td>规格按实际渲染记录并标注差异 D-001</td><td>一致（差异已标注）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">1</span>交互层级 1B：白名单规则 Tab</h4>
+        <div class="trigger-path"><strong>触发路径</strong>：层级1A 点击“白名单规则” Tab（<code>button[role=tab]</code>）。上方预览可直接点击 Tab 切换体验。</div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-layer-1-whitelist-tab.png" alt="白名单规则 Tab">
+          <figcaption>白名单 Tab：15 条规则（UW- 前缀），执行动作统一为绿色“放行”，分页 1-2 页。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为</th></tr></thead>
+          <tbody>
+            <tr><td>Tab 状态</td><td>白名单规则 <code>data-state=active</code>，黑名单规则 inactive</td><td>切换时搜索/选中/页码全部重置</td></tr>
+            <tr><td>白名单数据</td><td>首行 UW-20260320-001 / support@trusted.com / alice@company.com / 放行 / 启用 / admin@company.com / 2026-03-20 08:45</td><td>与黑名单共享搜索、分页、选中、删除入口</td></tr>
+            <tr><td>总数</td><td>共 15 条（源码生成 15 条白名单）；分页“共 15 条 | 1 | 2”</td><td>分页组件同黑名单</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>规则ID 前缀</td><td><code>UW-</code></td><td><code>UW-</code></td><td>一致</td></tr>
+              <tr><td>动作 Badge</td><td>放行，绿色 <code>bg-green-100 text-green-700</code></td><td>放行，绿色 pill</td><td>一致</td></tr>
+              <tr><td>行数</td><td>10 行（第1页）/ 共 15 条</td><td>示例 3 行 + 共 15 条标签（JS 切换）</td><td>一致（行数裁剪展示）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-3">
+      <h3>2.3 列表操作交互（多层交互）</h3>
+      <p>行选中、删除确认弹窗、搜索/分页/禁用等深层状态拆分为独立子文件。主文件保留关系图与索引。</p>
+      <div class="mermaid">
+        graph LR
+          A[层级0 策略卡] --> B[层级1 用户黑白名单列表]
+          B --> C[层级2 行选中 → 删除选中按钮]
+          C --> D[层级3 批量删除确认弹窗]
+          B --> E[层级3 单条删除确认弹窗<br/>源码绑定/运行态未弹出 D-002]
+          B --> F[层级2 搜索过滤/空态]
+          B --> G[层级2 分页/跳页/每页条数]
+          B --> H[层级2 模块禁用态]
+      </div>
+      <table class="spec-table layer-index">
+        <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>策略卡默认态</td><td>页面加载</td><td>上方内嵌（§2.1）</td></tr>
+          <tr><td>1</td><td>黑/白名单列表</td><td>点击策略卡</td><td>上方内嵌（§2.2）</td></tr>
+          <tr><td>2-3</td><td>行选中、批量/单条删除确认弹窗、操作列</td><td>勾选行复选框 → “删除选中(N)” / 行内 Trash2 图标</td><td><a href="layer-1-selection-delete-dialogs.html">查看详情</a></td></tr>
+          <tr><td>2</td><td>搜索/空态/分页/每页条数/跳页/禁用态/Tooltip</td><td>搜索框输入 / 页码点击 / 下拉选择 / 卡头开关</td><td><a href="layer-2-search-pagination-states.html">查看详情</a></td></tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+  <section id="dialogs">
+    <h2>3. 弹窗/抽屉/对话框规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>名称</th><th>触发条件</th><th>实际渲染</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>阶段2收发信人策略抽屉</td><td>点击“用户黑白名单”策略卡或“配置”按钮</td><td>80vw Sheet，顶部标题 + 子策略名（当前误显示“个人黑白名单”，D-001），右上 XCircle 关闭</td><td>嵌入式配置页面容器</td></tr>
+        <tr><td>批量删除确认 Dialog</td><td>选中 N 行后点击“删除选中(N)”</td><td>居中 Dialog：标题“确认删除”，描述“确认删除选中的 N 条规则 ? 此操作不可撤销”，取消（outline）/ 确认（destructive 红）/ 右上 X</td><td>PRD §3.5 要求 AlertDialog；demo 用普通 Dialog（可 X/遮罩关闭），语义略弱，落地建议 AlertDialog</td></tr>
+        <tr><td>单条删除确认 Dialog</td><td>点击行内删除（Trash2）图标</td><td><strong>运行态未弹出</strong>（浏览器验证：按钮 onClick 已触发但 Dialog 未挂载，D-002）；源码定义文案“确认删除规则 [规则ID] ? 此操作不可撤销”</td><td>PRD §3.5 要求确认弹窗，落地必须实现</td></tr>
+        <tr><td>添加规则 Dialog</td><td>无触发入口（UI 无“新建规则”按钮）</td><td>源码存在 <code>showAddUserListRuleDialog</code> 弹窗（用户/发信人/动作三字段）但不可达，且引用未定义 label 与字段（D-010）</td><td>PRD §1.4 管理员不可创建规则——UI 无入口符合 PRD，死代码应清理</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="api-mapping">
+    <h2>4. 数据模型与 API 映射</h2>
+    <pre><code>interface UserListRule {
+  id: string                 // 规则ID：UB-YYYYMMDD-NNN（黑）/ UW-YYYYMMDD-NNN（白）
+  sender: string             // 发信人：精确邮箱或通配符 *@domain.com
+  recipient: string          // 收信人：精确邮箱或通配符 *@dept.company.com
+  action: "block" | "quarantine" | "whitelist"   // 阻断 / 隔离 / 放行
+  createdAt: string
+  modifiedAt: string
+  enabled: boolean
+  createdBy: string          // demo 扩展字段，PRD 表格未定义
+}</code></pre>
+    <table class="spec-table">
+      <thead><tr><th>PRD API / 数据表</th><th>用途</th><th>落地映射建议</th><th>需确认</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/personal-list/rules</code></td><td>分页、搜索（规则ID/发信人/收信人）、黑白 Tab</td><td>映射统一规则系统列表接口，<code>page=user-list</code> + <code>type=blacklist/whitelist</code>；搜索走规则内容模糊匹配</td><td>统一规则系统是否支持 sender+recipient 双条件规则的列表检索（Q2）</td></tr>
+        <tr><td><code>DELETE /api/personal-list/rules/{id}</code></td><td>单条删除</td><td>复用统一规则 DELETE</td><td>-</td></tr>
+        <tr><td><code>DELETE /api/personal-list/rules/batch</code></td><td>批量删除（PRD §6.2 单次上限 1000）</td><td>统一规则系统批量删除或循环调用单条 DELETE（implement.md：多 API 协同优先于新增）</td><td>是否需要新增批量端点（Q6）</td></tr>
+        <tr><td><code>GET /api/personal-list/export</code></td><td>导出规则列表（PRD 功能点5）</td><td>demo 未实现导出按钮（D-005）；若落地可复用统一规则导出</td><td>是否要做导出、文件格式（Q3）</td></tr>
+        <tr><td><code>personal_blacklist_rules</code> / <code>personal_whitelist_rules</code></td><td>PRD 设计表</td><td>非硬性要求；优先落入统一规则表（action: block→reject、quarantine→quarantine、whitelist→accept/例外），黑白名单用 type 或 action 区分，避免新表</td><td>规则归属（用户创建 vs 管理员创建）字段与用户空间联动（Q1）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="business-logic">
+    <h2>5. 业务逻辑规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>逻辑</th><th>PRD 要求</th><th>demo 实际</th><th>落地说明</th></tr></thead>
+      <tbody>
+        <tr><td>流水线位置</td><td>阶段2 收发信人策略内的用户级规则</td><td>策略卡 priority 2004、type=exception、动作“跳过后续策略”（白名单命中语义）</td><td>统一规则系统优先级定义为数值越大越优先；PRD“全局&gt;用户&gt;个人”的层级需映射为优先级区间，不能只靠 2004 单值（Q4）</td></tr>
+        <tr><td>规则归属与权限</td><td>终端用户在隔离区/用户空间创建；管理员仅查看+删除，不可创建/编辑；超管可禁用模块</td><td>UI 无新建/编辑入口（符合只读+删除）；但底部说明与 mock createdBy 均为管理员（矛盾，D-008）</td><td>数据来源二选一需确认（Q1）；网关侧管理员界面按只读+删除实现</td></tr>
+        <tr><td>匹配逻辑</td><td>按收信人查询其规则；发信人精确或通配符匹配；白名单优先于黑名单（可配置）</td><td>mock 数据 sender/recipient 均支持 <code>*@domain</code> 通配；无匹配模拟入口</td><td>通配符语义与统一规则 pattern 类型对齐；白名单优先需在引擎侧显式排序</td></tr>
+        <tr><td>命中动作</td><td>黑名单：阻断/隔离/放行三档展示；白名单：放行</td><td>Badge 映射 block→红“阻断”、quarantine→橙“隔离”、whitelist→绿“放行”；mock 黑名单全为隔离</td><td>沿用统一 action：阻断=reject、隔离=quarantine、放行=accept；不新增 action</td></tr>
+        <tr><td>模块禁用联动</td><td>禁用后管理界面只读灰显、网关不匹配该类规则</td><td>开关切换 → 内容区 <code>opacity-50 pointer-events-none</code>、标签“已禁用”、左导航圆点空心（浏览器验证）</td><td>网关侧禁用 = 停用该 page 下全部规则的求值</td></tr>
+        <tr><td>批量删除</td><td>上限 1000 条/次；部分失败返回明细</td><td>demo 仅当前页选择（最多每页条数），无上限校验与失败明细</td><td>落地需按 PRD 补齐（Q6）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interaction">
+    <h2>6. 交互规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>实际行为（浏览器验证）</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>Tab 切换</td><td><code>role=tab</code> 点击后 <code>data-state</code> 更新；搜索词清空、选中清空、页码回1</td><td>与 PRD §3.1 一致</td></tr>
+        <tr><td>搜索</td><td>输入“alice”即时过滤出 1 行（UB-20260320-001）；页码回1；选中状态保留</td><td>PRD §3.4：搜索保留选中 ✓</td></tr>
+        <tr><td>搜索无结果</td><td>表格单行“暂无数据”居中；分页控件整体隐藏（<code>filtered.length&gt;0</code> 条件渲染）</td><td>PRD §3.3 空态 ✓；分页隐藏为 demo 行为</td></tr>
+        <tr><td>重置</td><td>点击后搜索框清空、恢复 10 行、页码回1；Tooltip“重置”</td><td>PRD §3.1 ✓</td></tr>
+        <tr><td>全选/单选</td><td>表头复选框全选当前页；行选中背景 <code>bg-blue-50/50</code>；选中数实时反映在“删除选中(N)”</td><td>PRD §3.1/TC005-007 ✓</td></tr>
+        <tr><td>批量删除</td><td>“删除选中(2)”→ 弹窗“确认删除选中的 2 条规则 ? 此操作不可撤销”；取消关闭弹窗、选中保留；确认关闭并清空选中（mock 不真删数据）</td><td>PRD §3.4 ✓（demo 为前端 mock，不刷新数据）</td></tr>
+        <tr><td>单条删除</td><td>点击 Trash2 图标：onClick 触发但确认弹窗未挂载（复现于抽屉与独立路由，无控制台报错）</td><td>PRD §3.5 要求确认弹窗——落地必须实现（D-002）</td></tr>
+        <tr><td>分页/跳页</td><td>点击页码2 → 首行变 UB-20260309-011；跳页输入 2 + Enter 同效；非数字/越界忽略</td><td>PRD §3.1 ✓；越界处理差异 D-007</td></tr>
+        <tr><td>每页条数</td><td>下拉 10/20/50/100条/页；选 20 → 单页 20 行、页码回1</td><td>PRD §3.1/TC013 ✓</td></tr>
+        <tr><td>Tooltip</td><td>重置（已验证）；编辑/删除按钮源码含 TooltipContent“编辑”/“删除”</td><td>PRD §3.2 ✓（导出按钮不存在故无对应 Tooltip）</td></tr>
+        <tr><td>加载/超时/权限异常</td><td>demo 纯本地 mock，无 loading 骨架、失败重试、权限 Toast</td><td>PRD §3.3/§4.2/§4.3 要求，落地补齐（D-009）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="i18n">
+    <h2>7. 国际化规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>语言</th><th>demo 覆盖</th><th>缺口</th></tr></thead>
+      <tbody>
+        <tr><td>中文 zh</td><td><code>userListLabels</code> 34 key 全覆盖本模块文案</td><td>-</td></tr>
+        <tr><td>英文 en</td><td>同上（fallback 语言）</td><td>-</td></tr>
+        <tr><td>泰语 th</td><td>同上</td><td>-</td></tr>
+        <tr><td>第4语言</td><td>无</td><td>implement.md 要求四种内置语言（D-011 / Q5）</td></tr>
+      </tbody>
+    </table>
+    <h4>i18n key 清单（模块内联 <code>userListLabels</code>，中文值）</h4>
+    <table class="spec-table">
+      <thead><tr><th>key</th><th>中文文案</th><th>使用位置</th></tr></thead>
+      <tbody>
+        <tr><td>blacklistRules / whitelistRules</td><td>黑名单规则 / 白名单规则</td><td>Tab</td></tr>
+        <tr><td>searchPlaceholder</td><td>搜索规则ID、发信人或收信人...</td><td>搜索框</td></tr>
+        <tr><td>ruleId / sender / recipient / action / status / createdBy / modifyTime / operation</td><td>规则ID / 发信人 / 收信人 / 执行动作 / 状态 / 创建者 / 修改时间 / 操作</td><td>表头</td></tr>
+        <tr><td>block / quarantine / allow</td><td>阻断 / 隔离 / 放行</td><td>动作 Badge</td></tr>
+        <tr><td>enabled / disabled</td><td>启用 / 禁用</td><td>状态 Badge</td></tr>
+        <tr><td>noData</td><td>暂无数据</td><td>空态</td></tr>
+        <tr><td>deleteSelected / reset / delete / edit</td><td>删除选中 / 重置 / 删除 / 编辑</td><td>按钮与 Tooltip</td></tr>
+        <tr><td>total / items / goToPage / page / itemsPerPage</td><td>共 / 条 / 前往 / 页 / 条/页</td><td>分页</td></tr>
+        <tr><td>tip</td><td>管理员配置的用户级规则，可针对特定收信人或收信人组设置发信人黑白名单，优先级高于个人黑白名单。</td><td>底部说明</td></tr>
+        <tr><td>confirmDeleteTitle / confirmDeleteSingle / confirmDeleteBatch / rulesText / cannotUndo / cancel / confirm</td><td>确认删除 / 确认删除规则 / 确认删除选中的 / 条规则 / 此操作不可撤销 / 取消 / 确认</td><td>删除确认弹窗</td></tr>
+        <tr><td>senderPlaceholder / recipientPlaceholder</td><td>输入发信人邮箱或通配符 (如: *@spam.com) / 输入收信人邮箱或通配符 (如: *@dept.company.com)</td><td>（不可达的添加规则弹窗）</td></tr>
+        <tr><td>pipeline.userBlackWhiteList / pipeline.userListDesc / common.userList / pipeline.actionPass</td><td>用户黑白名单 / 管理员配置的用户级黑白名单规则 / 用户黑白名单 / 跳过后续策略</td><td>全局 <code>t()</code>：策略卡、左导航</td></tr>
+        <tr><td>pipeline.personalBlackWhiteList</td><td>个人黑白名单</td><td>抽屉头部（误用，D-001）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="responsive">
+    <h2>8. 响应式规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>断点</th><th>浏览器验证</th><th>表现</th></tr></thead>
+      <tbody>
+        <tr><td>1440px</td><td>默认截图</td><td>80vw 抽屉内表格出现横向滚动（scrollWidth 1150 &gt; clientWidth 843），“操作”列首屏被裁切，需横向滚动可见（见层级1子文件 ops 截图）。</td></tr>
+        <tr><td>1024px</td><td>已截图</td><td>表格可视宽度进一步压缩到 510px，横向滚动幅度加大；左侧子策略导航仍固定宽度。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/responsive-1024-drawer.png" alt="1024px 抽屉响应式截图">
+      <figcaption>1024px 抽屉默认态：表格仅能显示前几列，操作/创建者/修改时间列需横向滚动。</figcaption>
+    </figure>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>9. 与 PRD / 源码 / 浏览器渲染的差异标注</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>差异点</th><th>PRD / 预期</th><th>demo 实际（浏览器渲染）</th><th>建议处理</th></tr></thead>
+      <tbody>
+        <tr><td>D-001</td><td>抽屉头部子策略名错误</td><td>应显示“用户黑白名单”</td><td>显示“个人黑白名单”——<code>strategy-pipeline-page.tsx</code> 抽屉标题三元分支 else 落到 <code>t("pipeline.personalBlackWhiteList")</code></td><td>落地时用 <code>pipeline.userBlackWhiteList</code>；高影响（模块命名混淆）</td></tr>
+        <tr><td>D-002</td><td>单条删除确认弹窗不弹出</td><td>PRD §3.5：删除按钮 → AlertDialog 确认</td><td>源码已绑定 <code>setShowUserListDeleteConfirm(true)</code>，但运行态点击（native click / React onClick 直调均验证）Dialog 均未挂载、无报错；抽屉与 <code>/filter-rules/identity</code> 独立路由均复现；批量删除弹窗正常</td><td>落地必须实现单条删除确认；demo 缺陷需修复；高影响</td></tr>
+        <tr><td>D-003</td><td>编辑按钮无功能</td><td>PRD §1.4：管理员不可编辑规则（界面不应展示编辑按钮，§4.2）</td><td>操作列渲染编辑（SquarePen）图标按钮但无 onClick，点击无响应</td><td>按 PRD 移除编辑按钮，或确认管理员是否允许编辑；中影响</td></tr>
+        <tr><td>D-004</td><td>表格多“创建者”列</td><td>PRD §2.1 列：复选框/规则ID/发信人/收信人/执行动作/状态/修改时间/操作</td><td>额外渲染“创建者”列（admin@company.com / security@company.com）</td><td>以 demo 为准保留；与 D-008 的规则归属问题一并确认；低影响</td></tr>
+        <tr><td>D-005</td><td>无导出按钮</td><td>PRD 功能点5 + §2.2 操作区含导出按钮（含 Tooltip“导出”）</td><td>工具栏仅搜索/重置/条件渲染的删除选中，无导出</td><td>需确认是否补齐导出（Q3）；中影响</td></tr>
+        <tr><td>D-006</td><td>“阻断”动作在列表不可见</td><td>PRD §2.2 动作徽章三色：阻断红/隔离橙/放行绿</td><td>Badge 映射代码齐全，但 mock 黑名单 20 条全为“隔离”，红色“阻断”无处呈现</td><td>mock 数据问题，落地不受影响；低影响</td></tr>
+        <tr><td>D-007</td><td>跳页越界处理</td><td>PRD §4.1：跳转到最近有效页（1 或最大页）</td><td>越界/非数字输入被忽略，停留当前页</td><td>落地按 PRD 实现钳位；低影响</td></tr>
+        <tr><td>D-008</td><td>规则归属口径矛盾</td><td>PRD §1.1/§1.4：终端用户自主创建，管理员不可创建/编辑</td><td>底部说明与卡片描述均写“管理员配置的用户级规则”，mock createdBy 全为管理员账号</td><td>需产品确认唯一口径（Q1）；影响数据模型与上游依赖；高影响</td></tr>
+        <tr><td>D-009</td><td>加载/异常态缺失</td><td>PRD §3.3 骨架屏、§4.3 超时重试、§4.2 权限 Toast</td><td>纯本地 mock，无任何加载/失败/权限反馈</td><td>落地按 PRD 补齐；低影响（demo 局限）</td></tr>
+        <tr><td>D-010</td><td>不可达的“添加规则”死代码</td><td>PRD 无管理员新建功能</td><td>源码存在无触发入口的添加规则 Dialog，且引用未定义 label（<code>UL.addRuleTitle/user/userPlaceholder</code>）与未初始化字段 <code>userListRuleForm.user</code>（初始态为 sender/recipient/action）</td><td>清理死代码，避免误落地；低影响</td></tr>
+        <tr><td>D-011</td><td>国际化语言数</td><td>implement.md 要求四种内置语言</td><td><code>userListLabels</code> 仅 zh/en/th 三套</td><td>补第4语言（Q5）；中影响</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>10. 需确认事项</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>问题</th><th>影响</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td>规则数据来源口径：PRD 说终端用户在隔离区/用户空间创建（管理员只读+删除），demo 文案与数据却是“管理员配置”。最终以哪个为准？若用户创建，网关需要用户侧创建入口/API 与规则归属字段。</td><td>决定数据模型（createdBy/owner）、上游依赖与权限矩阵实现。</td></tr>
+        <tr><td>Q2</td><td>落地映射：sender+recipient 双维度匹配规则是否直接落统一规则系统（<code>page=user-list</code>）？现有规则条件是否支持“收信人+发信人”组合与通配符？</td><td>决定是否需要扩展统一规则条件字段，遵循 implement.md 不新增规则系统。</td></tr>
+        <tr><td>Q3</td><td>导出功能（PRD 功能点5）是否本期实现？格式 CSV/JSON？demo 未实现。</td><td>影响 API 与前端工具栏布局。</td></tr>
+        <tr><td>Q4</td><td>优先级语义映射：PRD“全局黑白名单 &gt; 用户黑白名单 &gt; 个人黑白名单”与统一规则系统“数值越大越优先”的区间划分（策略卡 priority=2004 仅为流水线展示值）；以及“白名单优先于黑名单（可配置）”是否需要配置项。</td><td>影响规则引擎求值顺序与配置系统项。</td></tr>
+        <tr><td>Q5</td><td>四语国际化的第4种语言是哪一种？（demo 全站均只有 zh/en/th）</td><td>影响 i18n key 清单与验收范围。</td></tr>
+        <tr><td>Q6</td><td>批量删除：PRD §6.2 上限 1000 条/次、§4.4 部分失败返回明细。统一规则系统是否已有批量删除端点，还是循环单条删除？前端是否要跨页选择？</td><td>影响 API 形态与前端选中模型（demo 仅当前页选择）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({ startOnLoad: true });
+    }
+
+    (function () {
+      const root = document.querySelector("[data-ul-root]");
+      if (!root) return;
+      const search = root.querySelector("[data-preview-search]");
+      const resetBtn = root.querySelector("[data-preview-reset]");
+      const tabs = [...root.querySelectorAll("[data-rule-tab]")];
+      const bodies = [...root.querySelectorAll("[data-rule-body]")];
+      const emptyRow = root.querySelector("[data-empty-row]");
+      const batchBtn = root.querySelector("[data-batch-delete]");
+      const totalLabel = root.querySelector("[data-total-label]");
+      const moduleSwitch = root.querySelector("[data-module-switch]");
+      const switchLabel = root.querySelector("[data-switch-label]");
+      const ulBody = root.querySelector("[data-ul-body]");
+      const totals = { blacklist: "共 20 条", whitelist: "共 15 条" };
+
+      const activeBody = () => root.querySelector("[data-rule-body]:not(.is-hidden)");
+
+      function refreshSelection() {
+        const checked = activeBody().querySelectorAll("[data-row-check]:checked").length;
+        batchBtn.textContent = "🗑 删除选中(" + checked + ")";
+        batchBtn.classList.toggle("is-hidden", checked === 0);
+        activeBody().querySelectorAll("tr").forEach((tr) => {
+          tr.classList.toggle("selected", tr.querySelector("[data-row-check]").checked);
+        });
+      }
+
+      function filterRows() {
+        const term = (search.value || "").trim().toLowerCase();
+        let visible = 0;
+        activeBody().querySelectorAll("tr").forEach((tr) => {
+          const hit = term === "" || tr.dataset.searchText.toLowerCase().includes(term);
+          tr.classList.toggle("is-hidden", !hit);
+          if (hit) visible++;
+        });
+        emptyRow.classList.toggle("is-hidden", visible > 0);
+        root.querySelector("[data-pagination]").classList.toggle("is-hidden", visible === 0);
+      }
+
+      tabs.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          tabs.forEach((t) => t.classList.toggle("active", t === btn));
+          bodies.forEach((b) => {
+            b.classList.toggle("is-hidden", b.dataset.ruleBody !== btn.dataset.ruleTab);
+            b.querySelectorAll("[data-row-check]").forEach((c) => (c.checked = false));
+          });
+          search.value = "";               // Tab 切换：清空搜索
+          totalLabel.textContent = totals[btn.dataset.ruleTab];
+          filterRows();                    // 重置过滤
+          refreshSelection();              // 清空选中
+        });
+      });
+
+      search.addEventListener("input", filterRows);
+      resetBtn.addEventListener("click", () => { search.value = ""; filterRows(); });
+      root.querySelectorAll("[data-row-check]").forEach((c) => c.addEventListener("change", refreshSelection));
+      batchBtn.addEventListener("click", () => {
+        window.location.href = "layer-1-selection-delete-dialogs.html";
+      });
+      moduleSwitch.addEventListener("change", () => {
+        const on = moduleSwitch.checked;
+        switchLabel.textContent = on ? "已启用" : "已禁用";
+        switchLabel.parentElement.style.color = on ? "#155eef" : "#6b7280";
+        ulBody.classList.toggle("disabled-panel", !on);
+      });
+    })();
+  </script>
+</body>
+</html>

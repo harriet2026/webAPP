@@ -1,7 +1,7 @@
 import { test, expect } from '../fixtures/auth.fixture';
 import { MonitorDashboardPage } from '../pages/monitor-dashboard.page';
 
-// 按 design/origin/demo/docs/html_spec/monitor-dashboard/ 生成监控总览用例。
+// 按 webapp/doc/html-spec/monitor-dashboard/ 生成监控总览用例。
 // 三类：UI（界面还原）/ 业务（后端聚合生效）/ API（接口契约）。
 // 如实验证原型，不为通过而测试。
 

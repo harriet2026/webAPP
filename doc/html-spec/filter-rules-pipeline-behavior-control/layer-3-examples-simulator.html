@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 3：配置示例 + 模拟测试 - 发信行为管控 HTML 规格说明</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{--primary:oklch(0.52 0.226 262);--primary-foreground:oklch(0.985 0 0);--background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);--card:oklch(1 0 0);--muted:oklch(0.97 0 0);--muted-foreground:oklch(0.556 0 0);--border:oklch(0.922 0 0);--radius:0.625rem;--font-sans:"Geist",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto}
+.layer-nav{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1.25rem;background:var(--muted);border-radius:var(--radius);margin-bottom:1.5rem;font-size:.875rem}
+.layer-nav a{color:var(--primary);text-decoration:none;font-weight:600}.layer-nav a:hover{text-decoration:underline}
+.spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem}
+.spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.4rem}
+.meta-table{width:100%;border-collapse:collapse;font-size:.875rem}.meta-table td{padding:.5rem 1rem;border-bottom:1px solid var(--border)}.meta-table td:first-child{font-weight:600;width:150px;color:var(--muted-foreground)}.meta-table td a{color:var(--primary)}
+section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem}
+section>h2{color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:.5rem;margin-bottom:1rem;font-size:1.2rem}
+h4{font-size:.95rem;margin:.75rem 0 .5rem;color:var(--muted-foreground)}
+table.spec-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:1rem 0}
+table.spec-table th{background:var(--muted);font-weight:600;text-align:left;padding:.6rem .7rem;border:1px solid var(--border)}
+table.spec-table td{padding:.55rem .7rem;border:1px solid var(--border);vertical-align:top}
+.screenshot-figure{margin:1rem 0;text-align:center}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,.08)}.screenshot-figure figcaption{margin-top:.5rem;font-size:.8125rem;color:var(--muted-foreground)}
+.trigger-path{background:var(--muted);border-radius:calc(var(--radius) - 4px);padding:.5rem .75rem;margin:.5rem 0 1rem;font-size:.8125rem;color:var(--muted-foreground)}.trigger-path strong{color:var(--foreground)}
+.component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:1.75rem 1.25rem 1.25rem;margin:1rem 0;background:#fff;position:relative;overflow:auto}
+.component-preview::before{content:"🖥 可交互组件预览（展开折叠区 / 执行模拟测试）";position:absolute;top:-.65rem;left:.75rem;background:var(--primary);color:var(--primary-foreground);font-size:.6875rem;font-weight:600;padding:.125rem .5rem;border-radius:calc(var(--radius) - 4px)}
+.sc{color:hsl(222 47% 11%);font-size:14px}.sc *{box-sizing:border-box}
+.dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);overflow:hidden}
+.dom-comparison>h5{background:var(--muted);padding:.5rem .75rem;font-size:.8125rem;font-weight:600;border-bottom:1px solid var(--border)}.dom-comparison>h5::before{content:"🔍 "}
+.dom-comparison table{width:100%;border-collapse:collapse;font-size:.8rem}.dom-comparison th{background:var(--muted);text-align:left;padding:.45rem .7rem;border-bottom:1px solid var(--border);font-weight:600}.dom-comparison td{padding:.45rem .7rem;border-bottom:1px solid var(--border)}
+.dom-pass{color:oklch(0.5 0.15 150);font-weight:600}
+</style>
+</head>
+<body>
+<nav class="layer-nav">
+  <a href="./layer-2-detection-preview-validation.html">← 层级 2：检测条件+校验+预览</a>
+  <span>层级 3 / 3（规则编辑抽屉）</span>
+  <a href="./index.html#component-2-4">返回主文件 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 3：配置示例 + 模拟测试（右栏折叠区）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.4 规则编辑抽屉 BehaviorRuleDrawer（右栏 Collapsible）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+    <tr><td>层级编号</td><td>层级 3 / 3</td></tr>
+    <tr><td>触发路径</td><td>右栏点击「查看配置示例」/「模拟测试」→ Collapsible 展开；模拟测试点「执行测试」→ <code>runSimulation()</code> 输出命中/未命中</td></tr>
+    <tr><td>demo 组件</td><td><code>behavior-rule-drawer.tsx</code>（CONFIG_EXAMPLES / Collapsible / runSimulation）</td></tr>
+  </table>
+</header>
+
+<section>
+  <h2>3A. 配置示例（Collapsible）</h2>
+  <div class="trigger-path"><strong>触发路径</strong>：右栏「查看配置示例」→ 展开 3 张说明卡。<strong>差异</strong>：卡片仅含名称+描述+效果说明，<u>无「使用该示例」一键填充按钮</u>（详见主文件 §9 D-004）。</div>
+  <div class="component-preview"><div class="sc" style="max-width:420px">
+    <div onclick="var b=document.getElementById('ex');b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.chev').textContent=b.style.display==='none'?'⌄':'⌃'" style="color:#2563eb;font-size:13px;padding:8px;cursor:pointer;display:flex;justify-content:space-between"><span>💡 查看配置示例</span><span class="chev">⌄</span></div>
+    <div id="ex" style="display:none;margin-top:8px;display:flex;flex-direction:column;gap:10px">
+      <div style="background:#fff;border:1px solid #E8E8E8;border-radius:8px;padding:12px"><div style="font-size:13px;font-weight:600">正常用户场景</div><div style="font-size:11px;color:#64748b">日常办公发信，不触发规则</div><div style="font-size:11px;color:#64748b;background:#F5F5F5;border-radius:4px;padding:6px;margin-top:6px">正常用户日发50封邮件，使用2个IP，未触发规则</div></div>
+      <div style="background:#fff;border:1px solid #E8E8E8;border-radius:8px;padding:12px"><div style="font-size:13px;font-weight:600">账号被盗场景</div><div style="font-size:11px;color:#64748b">异常高频发信，触发隔离</div><div style="font-size:11px;color:#64748b;background:#F5F5F5;border-radius:4px;padding:6px;margin-top:6px">盗号者15分钟用10个IP发信200封，触发隔离</div></div>
+      <div style="background:#fff;border:1px solid #E8E8E8;border-radius:8px;padding:12px"><div style="font-size:13px;font-weight:600">销售部群发场景</div><div style="font-size:11px;color:#64748b">正常业务群发，阈值宽松</div><div style="font-size:11px;color:#64748b;background:#F5F5F5;border-radius:4px;padding:6px;margin-top:6px">销售部正常日报群发500人，域内方向阈值宽松，不触发外发规则</div></div>
+    </div>
+  </div></div>
+  <figure class="screenshot-figure"><img src="./screenshots/layer3-examples.png" alt="配置示例展开"><figcaption>右栏「查看配置示例」展开：3 张说明卡（正常用户场景 / 账号被盗场景 / 销售部群发场景）——浏览器实际渲染</figcaption></figure>
+  <table class="spec-table">
+    <thead><tr><th>示例</th><th>描述</th><th>效果说明</th></tr></thead>
+    <tbody>
+      <tr><td>正常用户场景</td><td>日常办公发信，不触发规则</td><td>正常用户日发50封邮件，使用2个IP，未触发规则</td></tr>
+      <tr><td>账号被盗场景</td><td>异常高频发信，触发隔离</td><td>盗号者15分钟用10个IP发信200封，触发隔离</td></tr>
+      <tr><td>销售部群发场景</td><td>正常业务群发，阈值宽松</td><td>销售部正常日报群发500人，域内方向阈值宽松，不触发外发规则</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>3B. 模拟测试（Collapsible）</h2>
+  <div class="trigger-path"><strong>触发路径</strong>：右栏「模拟测试」展开 → 输入 测试发信人/测试IP/测试邮件数/测试收信人数 → 点「执行测试」→ 依据当前维度A/B 与阈值判断命中。<em>注：demo 的 runSimulation 仅对 mail_count / recipient_count 维度做判断（ip_count / attachment_size 不参与，故默认维度=发信IP个数时恒为未命中）。</em></div>
+  <div class="component-preview"><div class="sc" style="max-width:420px">
+    <div onclick="var b=document.getElementById('sim');b.style.display=b.style.display==='none'?'block':'none'" style="color:#2563eb;font-size:13px;padding:8px;cursor:pointer;display:flex;justify-content:space-between"><span>▷ 模拟测试</span><span>⌄</span></div>
+    <div id="sim" style="display:none;background:#fff;border:1px solid #E8E8E8;border-radius:8px;padding:14px;margin-top:8px">
+      <div style="font-size:12px;color:#64748b;margin-bottom:8px">当前规则维度A：
+        <select id="sdim" class="border rounded" style="border-color:hsl(214 32% 91%);font-size:12px;padding:2px 4px"><option value="mail_count">发出邮件的总数</option><option value="recipient_count">收信人总人数</option><option value="ip_count">使用发信IP个数(不参与模拟)</option></select>
+        阈值A <input id="sth" type="number" value="100" class="border rounded" style="width:70px;border-color:hsl(214 32% 91%);font-size:12px;padding:2px 4px"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px">
+        <div><div style="margin-bottom:4px">测试发信人</div><input value="" placeholder="user@example.com" class="border rounded" style="width:100%;height:30px;padding:0 6px;border-color:hsl(214 32% 91%)"></div>
+        <div><div style="margin-bottom:4px">测试IP</div><input value="192.168.1.1" class="border rounded" style="width:100%;height:30px;padding:0 6px;border-color:hsl(214 32% 91%)"></div>
+        <div><div style="margin-bottom:4px">测试邮件数</div><input id="smail" type="number" value="50" class="border rounded" style="width:100%;height:30px;padding:0 6px;border-color:hsl(214 32% 91%)"></div>
+        <div><div style="margin-bottom:4px">测试收信人数</div><input id="srec" type="number" value="30" class="border rounded" style="width:100%;height:30px;padding:0 6px;border-color:hsl(214 32% 91%)"></div>
+      </div>
+      <button onclick="L3sim()" class="rounded-md" style="width:100%;height:32px;margin-top:10px;background:hsl(221 83% 53%);color:#fff;border:none;cursor:pointer;font-size:13px">执行测试</button>
+      <div id="sres" style="margin-top:10px"></div>
+    </div>
+  </div></div>
+  <figure class="screenshot-figure"><img src="./screenshots/layer3-simulator-open.png" alt="模拟测试展开"><figcaption>「模拟测试」展开：测试发信人/测试IP/测试邮件数/测试收信人数 + 执行测试（浏览器实际渲染）</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/layer3-simulator-miss.png" alt="模拟测试未命中"><figcaption>默认维度=发信IP个数、测试邮件50/收信人30 → 点执行测试：绿色「未命中 / 未触发阈值，当前测试数据未命中规则」（浏览器实际渲染）</figcaption></figure>
+  <table class="spec-table">
+    <thead><tr><th>输入</th><th>默认</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>测试发信人</td><td>空（占位 user@example.com）</td><td>展示用，不参与判定</td></tr>
+      <tr><td>测试IP</td><td>192.168.1.1</td><td>展示用，不参与判定</td></tr>
+      <tr><td>测试邮件数</td><td>50</td><td>与 mail_count 维度阈值比较</td></tr>
+      <tr><td>测试收信人数</td><td>30</td><td>与 recipient_count 维度阈值比较</td></tr>
+    </tbody>
+  </table>
+  <table class="spec-table">
+    <thead><tr><th>结果</th><th>视觉</th><th>文案</th></tr></thead>
+    <tbody>
+      <tr><td>命中（≥阈值）</td><td>红底 + X 图标</td><td>命中规则 · 触发维度A/B「…」，当前X封/人，超过阈值Y封/人</td></tr>
+      <tr><td>未命中</td><td>绿底 + ✓ 图标</td><td>未命中 · 未触发阈值，当前测试数据未命中规则</td></tr>
+    </tbody>
+  </table>
+  <div class="dom-comparison"><h5>DOM 树比对结果（浏览器验证）</h5><table>
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>配置示例卡片数</td><td>3（正常用户/账号被盗/销售部群发）</td><td>3</td><td class="dom-pass">✅</td></tr>
+      <tr><td>「使用该示例」按钮</td><td>不存在（仅说明卡）</td><td>不含（预览无该按钮）</td><td class="dom-pass">✅</td></tr>
+      <tr><td>模拟测试 4 输入</td><td>测试发信人/测试IP/测试邮件数/测试收信人数</td><td>同左</td><td class="dom-pass">✅</td></tr>
+      <tr><td>默认维度未命中</td><td>ip_count 不参与 → 未命中「未触发阈值…」</td><td>预览同逻辑</td><td class="dom-pass">✅</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./layer-2-detection-preview-validation.html">← 层级 2：检测条件+校验+预览</a>
+  <a href="./index.html#component-2-4">返回主文件 →</a>
+</nav>
+<script>
+function L3sim(){
+ const dim=document.getElementById('sdim').value, th=parseInt(document.getElementById('sth').value)||0;
+ const mail=parseInt(document.getElementById('smail').value)||0, rec=parseInt(document.getElementById('srec').value)||0;
+ let hit=false,reason='';
+ if(dim==='mail_count'&&mail>=th){hit=true;reason='触发维度A「发出邮件的总数上限」，当前'+mail+'封，超过阈值'+th+'封';}
+ else if(dim==='recipient_count'&&rec>=th){hit=true;reason='触发维度A「收信人总人数上限」，当前'+rec+'人，超过阈值'+th+'人';}
+ const el=document.getElementById('sres');
+ if(hit) el.innerHTML='<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px"><div style="color:#b91c1c;font-weight:600">✗ 命中规则</div><div style="color:#dc2626;font-size:12px;margin-top:2px">'+reason+'</div></div>';
+ else el.innerHTML='<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px"><div style="color:#15803d;font-weight:600">✓ 未命中</div><div style="color:#16a34a;font-size:12px;margin-top:2px">未触发阈值，当前测试数据未命中规则</div></div>';
+}
+</script>
+</body>
+</html>

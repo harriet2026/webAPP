@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级9：人员详情抽屉 - 组织通讯录</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .component-preview { background:#fff; overflow-x:auto; }
+  .pass { color:#15803d; font-weight:600; }
+  .bad { color:#b91c1c; font-weight:600; }
+  .warn { color:#a16207; font-weight:600; }
+  /* 规格侧呈现层修正（快照 DOM 本身未改动）：
+     - Radix Sheet 抽屉：视口级 fixed → 内联卡片
+     - Radix AlertDialog：fixed 居中 → 内联卡片
+     - Radix Popper（筛选弹层）：绝对定位 → 文档流内 */
+  .component-preview [data-slot="sheet-content"] { position:relative !important; inset:auto !important; height:auto !important; border:1px solid var(--border); border-radius:.5rem; }
+  .component-preview [role="alertdialog"] { position:relative !important; top:auto !important; left:auto !important; transform:none !important; margin:0; max-width:32rem; }
+  .component-preview [data-radix-popper-content-wrapper] { position:static !important; transform:none !important; min-width:0 !important; display:inline-block; margin:.5rem 0; }
+  .component-preview [role="menu"] { position:relative !important; inset:auto !important; transform:none !important; display:inline-block; }
+  .component-preview [role="tooltip"] { position:relative !important; inset:auto !important; transform:none !important; display:inline-block; }
+  .layer-nav { display:flex; gap:1rem; margin-bottom:1rem; font-size:.875rem; }
+</style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#c-3">← 返回主文件</a><a href="./layer-8-book-batch.html">← 层级8 批量标记</a><a href="./layer-10-log-detail.html">层级10 日志详情 →</a></nav>
+<header class="spec-header"><h1>交互层级 3（通讯录查询）：人员详情抽屉</h1><table class="meta-table"><tr><td>所属组件</td><td><a href="./index.html#c-3">2.3 通讯录查询 Tab</a></td></tr><tr><td>触发路径</td><td>点击行内用户名（蓝色链接按钮，实测「张三」）→ 右侧 Sheet 抽屉（sm:max-w-xl）</td></tr></table></header>
+<section class="interaction-layer">
+  <p>预览可操作：右上角 X 关闭（demo 还支持 Esc / 点击遮罩）。「关联策略」三行为<strong>条件渲染</strong>：随当前标记实时变化，见元素表。</p>
+  <div class="component-preview" data-preview="person-detail"><div role="dialog" id="radix-_r_1c_" aria-describedby="radix-_r_1e_" aria-labelledby="radix-_r_1d_" data-state="open" data-slot="sheet-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full border-l flex w-full flex-col p-0 sm:max-w-xl" tabindex="-1" style="pointer-events: auto;"><div data-slot="sheet-header" class="flex flex-col gap-1.5 p-4 border-b border-gray-100 px-6 pb-3 pt-6 dark:border-gray-800"><h2 id="radix-_r_1d_" data-slot="sheet-title" class="text-foreground font-semibold">人员详情</h2><p id="radix-_r_1e_" data-slot="sheet-description" class="text-muted-foreground text-sm">展示该人员的完整通讯录信息与关联策略</p></div><div class="flex-1 space-y-4 overflow-y-auto px-6 py-4"><div class="grid grid-cols-2 gap-y-3 text-sm"><div><p class="text-xs text-gray-400">用户名</p><p class="mt-0.5 text-gray-800 dark:text-gray-200">张三</p></div><div><p class="text-xs text-gray-400">职务</p><p class="mt-0.5 text-gray-800 dark:text-gray-200">工程师</p></div><div><p class="text-xs text-gray-400">数据源</p><p class="mt-0.5 text-gray-800 dark:text-gray-200">总部 AD</p></div><div><p class="text-xs text-gray-400">当前标记</p><p class="mt-0.5 text-gray-800 dark:text-gray-200">高管</p></div><div class="col-span-2"><div><p class="text-xs text-gray-400">主邮箱</p><p class="mt-0.5 text-gray-800 dark:text-gray-200">zhangsan@corp.cn</p></div></div><div class="col-span-2"><div><p class="text-xs text-gray-400">部门路径</p><p class="mt-0.5 text-gray-800 dark:text-gray-200">研发部 / 后端组</p></div></div><div class="col-span-2"><div><p class="text-xs text-gray-400">邮箱别名</p><p class="mt-0.5 text-gray-800 dark:text-gray-200">张三.alias@corp.cn</p></div></div></div><div class="rounded-lg border border-gray-200 p-4 dark:border-gray-800"><h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">关联策略</h4><ul class="mt-2 space-y-1.5 text-sm text-gray-600 dark:text-gray-400"><li>高管邮件保护：已纳入候选池</li><li>显示名仿冒检测：重点对象</li><li>收件人合法性校验：内部白名单</li></ul></div></div><button type="button" class="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x size-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="sr-only">Close</span></button></div></div>
+<figure class="screenshot-figure"><img src="./screenshots/book-person-detail.png" alt="人员详情实测（张三，标记=高管）"><figcaption>人员详情实测（张三，标记=高管）</figcaption></figure>
+<table class="spec-table"><thead><tr><th>分区</th><th>字段与规则（浏览器实测）</th></tr></thead><tbody><tr><td>头部</td><td>标题「人员详情」+ 描述「展示该人员的完整通讯录信息与关联策略」</td></tr><tr><td>信息网格</td><td>两列：用户名 / 职务 / 数据源 / 当前标记（无标记→「无标记」）；整行：主邮箱 / 部门路径 / 邮箱别名（demo 由用户名拼接 <code>{username}.alias@corp.cn</code>，mock 生成）</td></tr><tr><td>关联策略卡</td><td>高管邮件保护：标记=高管 →「已纳入候选池」否则「未纳入」；显示名仿冒检测：标记=高管或关键岗位 →「重点对象」否则「普通对象」；收件人合法性校验：恒「内部白名单」</td></tr><tr><td>无底部按钮</td><td>该抽屉无 footer（关闭仅靠 X / Esc / 遮罩）</td></tr></tbody></table>
+<div class="dom-comparison">
+  <h5>DOM 树比对结果</h5>
+  <table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>嵌入的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody><tr><td>根节点</td><td><code>[role=dialog][data-slot=sheet-content]</code></td><td>同（b2 快照）</td><td class="pass">一致</td></tr><tr><td>节点数</td><td>41</td><td>41</td><td class="pass">一致</td></tr><tr><td>关联策略条件文案</td><td>张三=高管 →「已纳入候选池」「重点对象」「内部白名单」</td><td>同</td><td class="pass">一致</td></tr><tr><td>邮箱别名</td><td>「张三.alias@corp.cn」（用户名小写拼接，中文名原样）</td><td>同</td><td class="pass">一致</td></tr></tbody>
+  </table>
+</div></section>
+<script src="../assets/contacts-preview.js"></script>
+</body>
+</html>

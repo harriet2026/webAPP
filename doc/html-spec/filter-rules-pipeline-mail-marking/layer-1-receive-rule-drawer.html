@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 2：接收标记规则抽屉 - 邮件标记与声明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --text:#111827; --sub:#6b7280; --blue:#1677ff; --red:#ef4444; --radius:.625rem; }
+    * { box-sizing: border-box; }
+    body { margin:0; padding:32px; max-width:1320px; margin-inline:auto; background:var(--bg); color:var(--text); font-family:"Geist","Inter",system-ui,sans-serif; line-height:1.6; }
+    a { color:var(--blue); text-decoration:none; }
+    nav.layer-nav, .spec-header, section { margin-bottom:24px; padding:24px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); }
+    nav.layer-nav { display:flex; justify-content:space-between; padding:14px 24px; font-weight:600; }
+    h1 { margin:0 0 16px; color:var(--primary); font-size:26px; }
+    h2 { margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--primary); color:var(--primary); font-size:20px; }
+    .meta-table, .spec-table { width:100%; border-collapse:collapse; font-size:14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding:9px 11px; border:1px solid var(--border); vertical-align:top; }
+    .meta-table td:first-child, .spec-table th { background:var(--muted); font-weight:650; text-align:left; }
+    .meta-table td:first-child { width:180px; color:var(--sub); }
+    .layer-badge { display:inline-flex; align-items:center; justify-content:center; min-width:24px; height:24px; margin-right:8px; border-radius:999px; background:var(--blue); color:#fff; font-size:12px; font-weight:700; }
+    .component-preview { margin:12px 0; padding:16px; border:1px solid #dbeafe; border-radius:8px; background:#f8fbff; overflow:auto; }
+    .sheet { display:grid; grid-template-columns:560px 1fr; min-width:920px; border:1px solid var(--border); border-radius:8px; overflow:hidden; background:#fff; }
+    .sheet-head { grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; padding:14px 22px; border-bottom:1px solid #e8e8e8; }
+    .sheet-head h3 { margin:0; font-size:18px; }
+    .sheet-head p { margin:2px 0 0; color:var(--sub); font-size:13px; }
+    .btn { padding:7px 14px; border-radius:8px; font-weight:650; font-size:13px; cursor:pointer; }
+    .btn-outline { border:1px solid var(--border); background:#fff; }
+    .btn-blue { border:0; background:#155eef; color:#fff; }
+    .sheet-left { padding:20px; border-right:1px solid #e8e8e8; }
+    .sheet-right { padding:20px; background:#f5f5f5; }
+    .blk { margin-bottom:18px; padding:16px; border-radius:8px; background:#fafafa; }
+    .blk-title { display:flex; gap:8px; align-items:center; margin-bottom:12px; font-weight:650; }
+    .bar { width:4px; height:20px; border-radius:999px; }
+    .bar.blue{background:#3b82f6;} .bar.amber{background:#f59e0b;} .bar.green{background:#22c55e;}
+    .row { display:grid; grid-template-columns:110px 1fr; gap:12px; margin:12px 0; align-items:start; }
+    .lbl { text-align:right; font-weight:600; font-size:14px; padding-top:6px; }
+    .req { color:var(--red); }
+    .help { color:#9ca3af; cursor:help; font-size:12px; border-bottom:1px dotted #9ca3af; }
+    .input, .select, .textarea { padding:7px 11px; border:1px solid #d1d5db; border-radius:8px; background:#fff; color:#374151; font-size:14px; }
+    .input.invalid { border-color:var(--red); }
+    .input.w-full, .select.w-full { width:100%; }
+    .err { display:none; margin-top:4px; color:var(--red); font-size:12px; }
+    .err.show { display:block; }
+    .radio-line { display:flex; flex-wrap:wrap; gap:16px; padding-top:6px; }
+    .radio-line label { display:inline-flex; gap:6px; align-items:center; font-size:14px; cursor:pointer; }
+    .var-badge { display:inline-block; margin:2px 4px 2px 0; padding:1px 8px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:12px; font-family:ui-monospace,monospace; cursor:pointer; }
+    .var-badge:hover { background:#eff6ff; }
+    .chip { display:inline-flex; gap:5px; align-items:center; margin:0 6px 6px 0; padding:2px 9px; border-radius:8px; background:#f3f4f6; font-size:12px; font-weight:600; }
+    .chip button { border:0; background:none; cursor:pointer; color:#6b7280; font-size:12px; padding:0; }
+    .custom-panel { display:none; margin-top:10px; padding:14px; border:1px solid var(--border); border-radius:8px; background:#fff; }
+    .custom-panel.show { display:block; }
+    .custom-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .custom-grid > div { display:flex; gap:6px; align-items:center; font-size:13px; }
+    .preview-box { margin-top:10px; padding:14px; border:1px solid var(--border); border-radius:8px; background:#fff; }
+    .mark-sample { display:inline-block; padding:3px 8px; font-size:14px; border-radius:4px; }
+    .mark-sample.blueTag { background:#dbeafe; color:#1d4ed8; border:1px solid #93c5fd; }
+    .mark-sample.orangeWarning { background:#ffedd5; color:#c2410c; border:1px solid #fdba74; }
+    .mark-sample.plainText { background:transparent; color:inherit; border:0; }
+    .warn { display:none; margin-top:8px; color:#d97706; font-size:12px; }
+    .warn.show { display:flex; gap:4px; align-items:center; }
+    .rail-btn { display:flex; justify-content:space-between; width:100%; margin-bottom:10px; padding:9px 14px; border:1px solid var(--border); border-radius:8px; background:#fff; font-weight:600; font-size:14px; cursor:pointer; }
+    .rail-panel { margin:-4px 0 12px; padding:14px; border:1px solid var(--border); border-radius:8px; background:#fff; font-size:13px; }
+    .tips { padding:14px; border-radius:8px; background:#dbeafe66; color:#1d4ed8; font-size:12px; }
+    .tips b { display:flex; gap:4px; font-size:13px; margin-bottom:6px; }
+    .is-hidden { display:none !important; }
+    .screenshot-figure { margin:14px 0; text-align:center; }
+    .screenshot-figure img { max-width:100%; border:1px solid var(--border); border-radius:8px; box-shadow:0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top:8px; color:var(--sub); font-size:13px; }
+    @media (max-width:1000px){ .sheet{grid-template-columns:1fr;min-width:0;} .sheet-left{border-right:0;border-bottom:1px solid #e8e8e8;} }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="index.html#component-2-3">← 返回主文件</a>
+    <span>层级 2 / 3</span>
+    <a href="layer-2-send-rule-drawer.html">层级 2B：外发声明规则抽屉 →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 2：新建/编辑接收标记规则抽屉</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 规则编辑抽屉 MailMarking RuleSheet（接收标记分支 <code>renderReceiveMarkForm</code>）</td></tr>
+      <tr><td>主文件</td><td><a href="index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级1 列表「接收标记」Tab → 点击「+ 新建规则」（预填默认值）或行内编辑图标（预填规则数据，标题变「编辑接收标记规则」）</td></tr>
+      <tr><td>demo 组件</td><td><code>mail-marking-module.tsx</code> L824-1204（表单）+ L1524-1662（Sheet 骨架与右栏）</td></tr>
+      <tr><td>DOM 提取</td><td>抽屉根节点 <code>[role=dialog]</code>，class 含 <code>w-[920px] sm:max-w-[920px] p-0 flex flex-col</code>，实测 920×1000，节点数 185</td></tr>
+      <tr><td>截图</td><td><code>rule-sheet-layer2-receive-default.png</code> / <code>-validation-error.png</code> / <code>-custom-colors.png</code> / <code>-dept-selected.png</code></td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">2</span>可交互 HTML 预览（表单联动 / 校验 / 自定义配色 / 变量插入均可操作）</h2>
+    <div class="component-preview">
+      <div class="sheet" data-demo-extracted="receive-rule-sheet">
+        <div class="sheet-head">
+          <div>
+            <h3 data-sheet-title>新建接收标记规则</h3>
+            <p>为接收邮件添加外站来源标记，为外发邮件追加免责声明</p>
+          </div>
+          <div>
+            <button class="btn btn-outline" type="button" onclick="alert('demo：关闭抽屉，不保存修改（无脏数据确认）')">取消</button>
+            <button class="btn btn-blue" type="button" data-save>保存</button>
+          </div>
+        </div>
+        <div class="sheet-left">
+          <div class="blk">
+            <div class="blk-title"><span class="bar blue"></span>基础配置</div>
+            <div class="row"><span class="lbl"><span class="req">*</span> 规则名称 <span class="help" title="设置一个易于识别的规则名称">?</span></span>
+              <span><input class="input w-full" data-name placeholder="如：高管外站警示"><span class="err" data-err-name>请输入规则名称</span></span></div>
+            <div class="row"><span class="lbl"><span class="req">*</span> 优先级 <span class="help" title="数字越小优先级越高，命中多条规则时优先执行数字小的规则">?</span></span>
+              <span><input class="input" data-priority type="number" min="1" value="5" style="width:90px;"> <small style="color:#6b7280;">(数字越小优先级越高，命中多条规则时优先执行数字小的规则)</small></span></div>
+            <div class="row"><span class="lbl">状态</span>
+              <span class="radio-line">
+                <label><input type="radio" name="status" value="disabled"> 禁用</label>
+                <label><input type="radio" name="status" value="enabled" checked> 启用</label>
+              </span></div>
+          </div>
+          <div class="blk">
+            <div class="blk-title"><span class="bar amber"></span>适用对象 <small style="color:#6b7280;font-weight:400;">(收信人维度)</small></div>
+            <div class="row"><span class="lbl">适用部门</span>
+              <span><span data-dept-chips></span>
+                <select class="select w-full" data-dept-select>
+                  <option value="">选择部门...</option>
+                  <option>高管部</option><option>财务部</option><option>销售部</option><option>研发部</option><option>人力资源部</option><option>法务部</option>
+                </select></span></div>
+            <div class="row"><span class="lbl">适用群组</span>
+              <span><span data-group-chips></span>
+                <select class="select w-full" data-group-select>
+                  <option value="">选择群组...</option>
+                  <option>全体员工</option><option>外包人员</option><option>全体管理层</option><option>海外办事处</option>
+                </select></span></div>
+            <div style="margin-left:122px;color:#6b7280;font-size:12px;">ⓘ 不选任何部门/群组 = 适用于全部用户</div>
+          </div>
+          <div class="blk">
+            <div class="blk-title"><span class="bar green"></span>标记配置</div>
+            <div class="row"><span class="lbl"><span class="req">*</span> 标记文案 <span class="help" title="设置显示给收信人的标记文案">?</span></span>
+              <span><input class="input w-full" data-marktext maxlength="50" value="【外站邮件】" placeholder="如：【外站邮件】"><span class="err" data-err-marktext>请输入标记文本</span>
+                <div style="margin-top:6px;font-size:12px;color:#6b7280;">可用变量:
+                  <span class="var-badge" data-var>{sender_domain}</span><span class="var-badge" data-var>{sender_ip}</span><span class="var-badge" data-var>{recipient_name}</span><span class="var-badge" data-var>{date}</span>
+                </div></span></div>
+            <div class="row"><span class="lbl">标记位置</span>
+              <span class="radio-line" data-pos-group>
+                <label><input type="radio" name="pos" value="subjectPrefix" checked> 主题前缀</label>
+                <label><input type="radio" name="pos" value="bodyTop"> 正文顶部</label>
+                <label><input type="radio" name="pos" value="header"> 邮件头标记</label>
+                <label><input type="radio" name="pos" value="multiple"> 多位置同时生效</label>
+              </span></div>
+            <div class="row"><span class="lbl">标记样式</span>
+              <span>
+                <span class="radio-line" data-style-group>
+                  <label><input type="radio" name="style" value="blueTag" checked> 蓝色标签</label>
+                  <label><input type="radio" name="style" value="orangeWarning"> 橙色警告</label>
+                  <label><input type="radio" name="style" value="plainText"> 纯文本</label>
+                  <label><input type="radio" name="style" value="custom"> 自定义配色</label>
+                </span>
+                <div class="custom-panel" data-custom-panel>
+                  <b style="font-size:13px;">自定义配色参数</b>
+                  <div class="custom-grid" style="margin-top:8px;">
+                    <div>背景色: <input type="color" data-c-bg value="#FFF3E0"><input class="input" data-c-bg-hex value="#FFF3E0" style="width:92px;"></div>
+                    <div>文字色: <input type="color" data-c-fg value="#E65100"><input class="input" data-c-fg-hex value="#E65100" style="width:92px;"></div>
+                    <div>边框色: <input type="color" data-c-bd value="#FF9800"><input class="input" data-c-bd-hex value="#FF9800" style="width:92px;"></div>
+                    <div>圆角: <input class="input" data-c-radius type="number" min="0" max="20" value="4" style="width:70px;"> px</div>
+                  </div>
+                </div>
+                <div class="preview-box">
+                  <b style="font-size:13px;">预览效果</b><br>
+                  <span class="mark-sample blueTag" data-mark-sample>【外站邮件】</span>
+                  <div class="warn" data-prefix-warn>⚠ 主题前缀位置将自动降级为纯文本，不携带颜色样式</div>
+                </div>
+              </span></div>
+          </div>
+        </div>
+        <div class="sheet-right">
+          <button class="rail-btn" type="button" data-coll="preview">👁 配置效果预览 <span data-coll-ic="preview">⌃</span></button>
+          <div class="rail-panel" data-panel="preview">
+            <div style="color:#6b7280;">发件: test@gmail.com<br>收件: <span data-pv-rcpt>张三</span></div>
+            <div style="margin:10px 0;"><span class="mark-sample blueTag" data-pv-mark>【外站邮件】</span></div>
+            <div>这是邮件正文内容...</div>
+          </div>
+          <button class="rail-btn" type="button" data-coll="test">🧪 模拟测试 <span data-coll-ic="test">⌄</span></button>
+          <div class="rail-panel is-hidden" data-panel="test">
+            <a href="layer-3-preview-test-delete.html">模拟测试面板完整规格见层级 3 子文件 →</a>
+          </div>
+          <div class="tips">
+            <b>ⓘ 配置提示</b>
+            1. 高风险部门建议使用橙色警告样式<br>
+            2. 主题前缀位置不支持颜色样式<br>
+            3. 邮件头标记仅供邮件客户端程序识别<br>
+            4. 默认规则将匹配所有未命中其他规则的用户<br>
+            5. 优先级数字越小越优先执行
+          </div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-sheet-layer2-receive-default.png" alt="新建接收标记规则抽屉默认态">
+      <figcaption>默认态：标记文案预填【外站邮件】、位置=主题前缀、样式=蓝色标签、优先级=5（当前规则数4+1）、状态=启用；右栏「配置效果预览」默认展开、「模拟测试」默认收起；预览区因「主题前缀+蓝色标签」显示降级警告。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-sheet-layer2-validation-error.png" alt="空表单保存校验">
+      <figcaption>清空标记文案后点「保存」：规则名称与标记文案红框（aria-invalid=true）+ 红字「请输入规则名称」「请输入标记文本」；抽屉保持打开，保存按钮不置灰。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-sheet-layer2-custom-colors.png" alt="自定义配色展开">
+      <figcaption>选中「自定义配色」：展开配色参数（背景 #FFF3E0 / 文字 #E65100 / 边框 #FF9800 / 圆角 4px，color+hex 双输入），预览标记即时应用内联 style。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-sheet-layer2-dept-selected.png" alt="选择适用部门">
+      <figcaption>适用部门下拉（6 项：高管部/财务部/销售部/研发部/人力资源部/法务部）选择「高管部」后生成可删除的 Badge，且该项从下拉中移除；配置效果预览的收件人同步显示部门名。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>元素清单</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>元素</th><th>默认值/占位符</th><th>校验</th><th>交互行为</th></tr></thead>
+      <tbody>
+        <tr><td>头部</td><td>标题 + 副标题</td><td>新建接收标记规则 / 模块副标题</td><td>-</td><td>编辑态标题「编辑接收标记规则」；外发 Tab 打开时为外发标题（层级2B）。</td></tr>
+        <tr><td>头部</td><td>取消 / 保存</td><td>右上角 outline / 蓝色按钮</td><td>保存执行 validateForm</td><td>取消直接关闭不保存（无脏数据确认）；保存通过后写入列表并关闭。</td></tr>
+        <tr><td>基础配置</td><td>规则名称 Input</td><td>空；placeholder「如：高管外站警示」</td><td>必填；空值保存红字「请输入规则名称」</td><td>Label 带 HelpCircle Tooltip「设置一个易于识别的规则名称」。</td></tr>
+        <tr><td>基础配置</td><td>优先级 number Input</td><td>5（=当前 Tab 规则数 4 + 1）；min=1</td><td>非法输入回退 1；允许重复</td><td>右侧常显括号说明「数字越小优先级越高…」。</td></tr>
+        <tr><td>基础配置</td><td>状态 RadioGroup</td><td>启用</td><td>-</td><td>禁用/启用两项；对应规则行 opacity 与 Badge。</td></tr>
+        <tr><td>适用对象</td><td>适用部门 Select + Badge</td><td>空（=全部用户）；placeholder「选择部门...」</td><td>-</td><td>选中追加 secondary Badge（带 X 可移除），下拉隐藏已选项；标题旁小字「(收信人维度)」。</td></tr>
+        <tr><td>适用对象</td><td>适用群组 Select + Badge</td><td>空；placeholder「选择群组...」；选项 全体员工/外包人员/全体管理层/海外办事处</td><td>-</td><td>同部门；底部 Info 常显「不选任何部门/群组 = 适用于全部用户」。</td></tr>
+        <tr><td>标记配置</td><td>标记文案 Input</td><td>【外站邮件】（新建预填）；maxLength=50</td><td>必填；空值红字「请输入标记文本」</td><td>下方 4 个变量 Badge：{sender_domain} {sender_ip} {recipient_name} {date}，点击追加「 {var}」。</td></tr>
+        <tr><td>标记配置</td><td>标记位置 RadioGroup</td><td>主题前缀</td><td>-</td><td>主题前缀 / 正文顶部 / 邮件头标记 / 多位置同时生效（=主题前缀+正文顶部同时生效）。</td></tr>
+        <tr><td>标记配置</td><td>标记样式 RadioGroup</td><td>蓝色标签</td><td>-</td><td>蓝色标签 / 橙色警告 / 纯文本 / 自定义配色；选自定义展开配色面板。</td></tr>
+        <tr><td>标记配置</td><td>自定义配色面板</td><td>背景 #FFF3E0、文字 #E65100、边框 #FF9800、圆角 4px（0-20）</td><td>color 控件限制格式；hex 文本未校验</td><td>仅 markStyle=custom 渲染；四参实时映射预览 inline style。</td></tr>
+        <tr><td>标记配置</td><td>预览效果</td><td>显示标记文案（空时回退【外站邮件】）</td><td>-</td><td>样式随单选与自定义参数实时变化；位置=主题前缀且样式≠纯文本时显示琥珀色降级警告。</td></tr>
+        <tr><td>右栏</td><td>配置效果预览 Collapsible</td><td>默认展开</td><td>-</td><td>模拟邮件：发件 test@gmail.com、收件=首个已选部门名（无则「张三」）、标记块、正文占位。</td></tr>
+        <tr><td>右栏</td><td>模拟测试 Collapsible</td><td>默认收起</td><td>-</td><td>展开后邮箱输入 + 测试/重置，详见 <a href="layer-3-preview-test-delete.html">层级 3</a>。</td></tr>
+        <tr><td>右栏</td><td>配置提示卡</td><td>蓝底 5 条固定提示</td><td>-</td><td>常显非折叠（PRD §3.5 称折叠面板，demo 为常显，差异随 D-07 一类记录于主文件 §9）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td><code>[role=dialog]</code> class 含 <code>w-[920px] sm:max-w-[920px] p-0 flex flex-col</code>，实测 920×1000</td><td><code>.sheet[data-demo-extracted]</code> 920px 双栏（左 560px）</td><td>一致（预览裁剪展示）</td></tr>
+        <tr><td>节点数</td><td>185</td><td>保留头部、三个配置块全部字段、右栏三区</td><td>一致（关键节点全保留）</td></tr>
+        <tr><td>分区标题</td><td>h3：基础配置 / 适用对象 / 标记配置（左侧色条 蓝/琥珀/绿）</td><td>同三块同色条</td><td>一致</td></tr>
+        <tr><td>Radio 默认态</td><td>status-enabled、pos-subject、style-blue 为 <code>data-state=checked</code>，其余 unchecked</td><td>同默认选中</td><td>一致</td></tr>
+        <tr><td>输入默认值</td><td>规则名称=空、优先级=5、标记文案=【外站邮件】</td><td>同默认值</td><td>一致</td></tr>
+        <tr><td>校验后</td><td>2 个 <code>aria-invalid=true</code> input；红字 p 文案「请输入规则名称」「请输入标记文本」；保存按钮 disabled=false</td><td>JS 复刻同状态（红框+红字，按钮可点击）</td><td>一致</td></tr>
+        <tr><td>自定义配色</td><td>color input 值 #fff3e0/#e65100/#ff9800、number=4；预览 style「background-color: rgb(255,243,224); color: rgb(230,81,0); border: 1px solid rgb(255,152,0); border-radius: 4px;」</td><td>同四参 + 同 inline style 映射</td><td>一致</td></tr>
+        <tr><td>部门选择</td><td>listbox 6 个 <code>[role=option]</code>；选中后 Badge「高管部」出现且选项隐藏</td><td>原生 select 复刻同数据与联动</td><td>一致（控件形态简化：Radix Select → 原生 select）</td></tr>
+        <tr><td>降级警告</td><td>默认态即渲染（主题前缀+蓝色标签）：「主题前缀位置将自动降级为纯文本，不携带颜色样式」</td><td>同条件渲染逻辑</td><td>一致</td></tr>
+        <tr><td>右栏折叠态</td><td>配置效果预览 <code>data-state=open</code>；模拟测试 <code>data-state=closed</code></td><td>同默认开合</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="index.html#component-2-3">← 返回主文件</a>
+    <a href="layer-2-send-rule-drawer.html">层级 2B：外发声明规则抽屉 →</a>
+  </nav>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const name = $("[data-name]"), markText = $("[data-marktext]");
+    const errName = $("[data-err-name]"), errMark = $("[data-err-marktext]");
+    const sample = $("[data-mark-sample]"), pvMark = $("[data-pv-mark]"), pvRcpt = $("[data-pv-rcpt]");
+    const warn = $("[data-prefix-warn]"), customPanel = $("[data-custom-panel]");
+    const state = { pos: "subjectPrefix", style: "blueTag", depts: [], groups: [] };
+
+    function applyMarkStyle(el) {
+      el.className = "mark-sample " + (state.style === "custom" ? "" : state.style);
+      if (state.style === "custom") {
+        el.style.cssText = "display:inline-block;padding:3px 8px;font-size:14px;" +
+          "background:" + $("[data-c-bg-hex]").value + ";color:" + $("[data-c-fg-hex]").value +
+          ";border:1px solid " + $("[data-c-bd-hex]").value + ";border-radius:" + $("[data-c-radius]").value + "px;";
+      } else { el.style.cssText = ""; }
+      el.textContent = markText.value.trim() || "【外站邮件】";
+    }
+    function sync() {
+      applyMarkStyle(sample); applyMarkStyle(pvMark);
+      warn.classList.toggle("show", state.pos === "subjectPrefix" && state.style !== "plainText");
+      customPanel.classList.toggle("show", state.style === "custom");
+      pvRcpt.textContent = state.depts[0] || "张三";
+    }
+    document.querySelectorAll("[data-pos-group] input").forEach((r) =>
+      r.addEventListener("change", () => { state.pos = r.value; sync(); }));
+    document.querySelectorAll("[data-style-group] input").forEach((r) =>
+      r.addEventListener("change", () => { state.style = r.value; sync(); }));
+    markText.addEventListener("input", sync);
+    [["bg"],["fg"],["bd"]].forEach(([k]) => {
+      $("[data-c-" + k + "]").addEventListener("input", (e) => { $("[data-c-" + k + "-hex]").value = e.target.value.toUpperCase(); sync(); });
+      $("[data-c-" + k + "-hex]").addEventListener("input", sync);
+    });
+    $("[data-c-radius]").addEventListener("input", sync);
+
+    // 优先级：非法输入回退 1（复刻 parseInt(...) || 1，min=1）
+    $("[data-priority]").addEventListener("change", (e) => {
+      const v = parseInt(e.target.value); e.target.value = (!v || v < 1) ? 1 : v;
+    });
+
+    // 变量徽标：追加 " {var}"
+    document.querySelectorAll("[data-var]").forEach((b) =>
+      b.addEventListener("click", () => { markText.value = markText.value + " " + b.textContent; sync(); }));
+
+    // 适用对象：select -> chips（复刻已选项从下拉隐藏 + Badge X 移除）
+    function bindPicker(selectSel, chipsSel, key) {
+      const sel = $(selectSel), chips = $(chipsSel);
+      sel.addEventListener("change", () => {
+        const v = sel.value; if (!v || state[key].includes(v)) return;
+        state[key].push(v);
+        const chip = document.createElement("span");
+        chip.className = "chip"; chip.dataset.v = v;
+        chip.innerHTML = v + ' <button type="button" aria-label="移除">✕</button>';
+        chip.querySelector("button").addEventListener("click", () => {
+          state[key] = state[key].filter((x) => x !== v); chip.remove();
+          [...sel.options].find((o) => o.value === v).hidden = false; sync();
+        });
+        chips.appendChild(chip);
+        [...sel.options].find((o) => o.value === v).hidden = true;
+        sel.value = ""; sync();
+      });
+    }
+    bindPicker("[data-dept-select]", "[data-dept-chips]", "depts");
+    bindPicker("[data-group-select]", "[data-group-chips]", "groups");
+
+    // 保存校验：点击后才显示红字（复刻 showErrors 机制，按钮不置灰）
+    $("[data-save]").addEventListener("click", () => {
+      const okName = !!name.value.trim(), okMark = !!markText.value.trim();
+      name.classList.toggle("invalid", !okName); errName.classList.toggle("show", !okName);
+      markText.classList.toggle("invalid", !okMark); errMark.classList.toggle("show", !okMark);
+      if (okName && okMark) alert("demo：校验通过 → 规则写入列表并关闭抽屉（无保存成功 Toast，见主文件 §9 D-07）");
+    });
+    name.addEventListener("input", () => { if (name.value.trim()) { name.classList.remove("invalid"); errName.classList.remove("show"); } });
+    markText.addEventListener("input", () => { if (markText.value.trim()) { markText.classList.remove("invalid"); errMark.classList.remove("show"); } });
+
+    // 右栏折叠面板
+    document.querySelectorAll("[data-coll]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const panel = $("[data-panel=" + btn.dataset.coll + "]");
+        const hidden = panel.classList.toggle("is-hidden");
+        $("[data-coll-ic=" + btn.dataset.coll + "]").textContent = hidden ? "⌄" : "⌃";
+      });
+    });
+    sync();
+  </script>
+</body>
+</html>

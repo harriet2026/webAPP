@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级5：批量删除确认弹窗 - IP频率限制</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --bg: oklch(0.98 0.01 205); --card: #fff; --border: #e8e8e8; --muted: #f5f5f5; --fg: #262626; --sub: #8c8c8c; --radius: 10px; --destructive: #dc2626; }
+    * { box-sizing: border-box; }
+    body { margin: 0 auto; max-width: 1260px; padding: 28px; background: var(--bg); color: var(--fg); font-family: "Geist", system-ui, sans-serif; line-height: 1.58; }
+    nav, header, section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 18px; }
+    a { color: #1890ff; text-decoration: none; }
+    h1 { margin: 0 0 12px; color: var(--primary); font-size: 24px; }
+    h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0; }
+    th, td { border: 1px solid var(--border); padding: 9px 11px; vertical-align: top; }
+    th { background: var(--muted); text-align: left; white-space: nowrap; }
+    .screenshot-figure { text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgb(0 0 0 / 8%); }
+    .component-preview { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow: auto; }
+    .actual-extracted { max-height: 680px; overflow: auto; isolation: isolate; }
+    .badge-new { display: inline-block; background: #7c3aed; color: #fff; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+    .dom-comparison { margin-top: 14px; }
+    .dom-pass { color: #389e0d; font-weight: 600; }
+    .trigger-path { background: var(--muted); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--sub); margin: 8px 0 14px; }
+  </style>
+</head>
+<body>
+  <nav><a href="index.html#component-2-3">← 返回主文件</a> · <a href="layer-4-examples-simulator.html">上一层：示例+模拟测试</a> · <a href="layer-6-batch-import.html">下一层：批量导入 →</a></nav>
+  <header>
+    <h1>交互层级 5：批量删除确认弹窗 <span class="badge-new">v2 新增</span></h1>
+    <table>
+      <tr><td>所属组件</td><td>2.3 IP频率限制规则列表模块</td></tr>
+      <tr><td>主文件</td><td><a href="index.html">index.html</a></td></tr>
+      <tr><td>层级编号</td><td>层级 5 / 8</td></tr>
+      <tr><td>触发路径</td><td>层级0 规则列表 -> 勾选 1 行或多行（出现「删除选中（N）」按钮）-> 点击「删除选中（N）」-> 弹出批量删除确认 AlertDialog</td></tr>
+      <tr><td>demo 组件</td><td><code>components/ip-frequency-limit/ip-frequency-limit-module.tsx</code>（batchDeleteDialogOpen AlertDialog）+ <code>frequency-rule-filters.tsx</code>（删除选中按钮）+ <code>frequency-rule-table.tsx</code>（全选/单选 Checkbox）</td></tr>
+      <tr><td>浏览器验证</td><td>agent-browser，2026-07-20，视口 1440×1000</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2>前置交互：全选/单选 与「删除选中（N）」按钮</h2>
+    <p>进入本层级前，需先在表格勾选规则行。勾选行为是 v2 的核心新增逻辑：</p>
+    <table>
+      <thead><tr><th>元素</th><th>浏览器实际行为</th><th>规格说明</th></tr></thead>
+      <tbody>
+        <tr><td>表头全选 Checkbox</td><td>三态：全选（checked）/ 半选（indeterminate）/ 未选。当前页 20 行均渲染 <code>[role="checkbox"]</code>。</td><td><strong>跨页保留</strong>：点击全选仅追加当前页未选中项到选中集；点击取消仅移除当前页项，不影响其他页已选项。</td></tr>
+        <tr><td>行单选 Checkbox</td><td>每行首列一个，点击切换选中；选中行背景高亮 <code>bg-primary/5</code>。</td><td>切换页码时清空全部选中（handlePageChange）。</td></tr>
+        <tr><td>「删除选中（N）」按钮</td><td>红色 destructive 样式 + Trash2 图标，文案动态显示当前选中数，如「删除选中（2）」；<strong>仅在 selectedCount &gt; 0 时渲染</strong>，位于「新增规则」按钮之前。</td><td>点击打开批量删除确认弹窗；selectedIds 为空时按钮不渲染，点击无效。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/13-batch-selected-button.png" alt="勾选两行后出现删除选中按钮">
+      <figcaption>勾选 2 行后，操作栏最前出现红色「删除选中（2）」按钮（agent-browser 实际渲染）。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>批量删除确认弹窗</h2>
+    <div class="trigger-path"><strong>触发路径</strong>：点击「删除选中（2）」-> setBatchDeleteDialogOpen(true) -> 渲染 AlertDialog</div>
+
+    <h3>运行态提取 HTML（agent-browser page.evaluate outerHTML）</h3>
+    <p style="color:#8c8c8c;font-size:12px;margin:0 0 8px">🖥 可交互：「取消」关闭弹窗（视觉淡出），「确认删除」演示删除后提示并返回主文件。</p>
+    <div class="component-preview actual-extracted" id="pv-bd">
+<div role="alertdialog" id="radix-_r_8g_" aria-describedby="radix-_r_8i_" aria-labelledby="radix-_r_8h_" data-state="open" data-slot="alert-dialog-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg" tabindex="-1" style="pointer-events: auto; position:relative; top:auto; left:auto; transform:none; margin:0 auto;"><div data-slot="alert-dialog-header" class="flex flex-col gap-2 text-center sm:text-left"><h2 id="radix-_r_8h_" data-slot="alert-dialog-title" class="text-lg font-semibold">批量删除规则</h2><p id="radix-_r_8i_" data-slot="alert-dialog-description" class="text-muted-foreground text-sm">确定要删除选中的 2 条规则吗？此操作不可撤销。</p></div><div data-slot="alert-dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" id="pv-bd-cancel" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium border bg-background shadow-xs hover:bg-accent h-9 px-4 py-2">取消</button><button type="button" id="pv-bd-confirm" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 py-2 bg-destructive text-white hover:bg-destructive/90">确认删除</button></div></div>
+    <div id="pv-bd-msg" style="margin-top:10px;font-size:13px;color:#389e0d;min-height:18px;"></div>
+    </div>
+    <script>(function(){
+      var root=document.getElementById('pv-bd');if(!root)return;
+      var dlg=root.querySelector('[role="alertdialog"]'), msg=root.querySelector('#pv-bd-msg');
+      root.querySelector('#pv-bd-cancel').addEventListener('click',function(){
+        dlg.style.transition='opacity .18s';dlg.style.opacity='0';
+        setTimeout(function(){dlg.style.opacity='1';msg.style.color='#8c8c8c';msg.textContent='已取消：弹窗关闭，不删除，保留勾选（demo 行为）。';},200);
+      });
+      root.querySelector('#pv-bd-confirm').addEventListener('click',function(){
+        dlg.style.transition='opacity .18s';dlg.style.opacity='0';
+        setTimeout(function(){msg.style.color='#389e0d';msg.textContent='已删除选中的 2 条规则并清空选中（demo 行为），2s 后返回主文件…';},200);
+        setTimeout(function(){location.href='index.html#component-2-3';},2000);
+      });
+    })();</script>
+
+    <figure class="screenshot-figure">
+      <img src="./screenshots/14-batch-delete-dialog.png" alt="批量删除确认弹窗">
+      <figcaption>批量删除确认弹窗（agent-browser 实际渲染）：标题「批量删除规则」+ 文案 + 取消/确认删除。</figcaption>
+    </figure>
+
+    <h3>UI 元素清单</h3>
+    <table>
+      <thead><tr><th>序号</th><th>元素类型</th><th>文案/标签</th><th>默认值</th><th>交互行为</th><th>跳转层级</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>AlertDialogTitle</td><td>批量删除规则</td><td>-</td><td>只读标题</td><td>-</td></tr>
+        <tr><td>2</td><td>AlertDialogDescription</td><td>确定要删除选中的 N 条规则吗？此操作不可撤销。</td><td>N=selectedIds.length</td><td>只读；N 随勾选数动态变化</td><td>-</td></tr>
+        <tr><td>3</td><td>Button（取消）</td><td>取消</td><td>-</td><td>关闭弹窗，不删除，保留勾选</td><td>-> 层级0</td></tr>
+        <tr><td>4</td><td>Button（确认删除，destructive）</td><td>确认删除</td><td>-</td><td>过滤删除所有 selectedIds 规则、清空选中、关闭弹窗</td><td>-> 层级0</td></tr>
+      </tbody>
+    </table>
+
+    <div class="dom-comparison">
+      <h3>🔍 DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h3>
+      <table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>根节点</td><td><code>div[role="alertdialog"][data-state="open"]</code>，class 含 <code>sm:max-w-lg</code>、居中 translate</td><td>同左，完整 outerHTML</td><td class="dom-pass">✅</td></tr>
+          <tr><td>子结构</td><td>alert-dialog-header + alert-dialog-footer 两块</td><td>同左，directChildren=2</td><td class="dom-pass">✅</td></tr>
+          <tr><td>标题文案</td><td>「批量删除规则」</td><td>「批量删除规则」</td><td class="dom-pass">✅</td></tr>
+          <tr><td>描述文案</td><td>「确定要删除选中的 2 条规则吗？此操作不可撤销。」</td><td>同左（N=2 为实测勾选数）</td><td class="dom-pass">✅</td></tr>
+          <tr><td>按钮</td><td>取消（outline）+ 确认删除（bg-destructive text-white）</td><td>同左，均 type=button</td><td class="dom-pass">✅</td></tr>
+          <tr><td>截图校验</td><td>14-batch-delete-dialog.png 可见该弹窗</td><td>本节引用同一截图</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav><a href="index.html#component-2-3">← 返回主文件</a> · <a href="layer-6-batch-import.html">下一层：批量导入 →</a></nav>
+</body>
+</html>

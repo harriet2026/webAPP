@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   mailTypeTone, mailTypeConfig, correctionSourceLabelKey, recipientActionsForStatus, derivePhishAgentThreatLevel,
   isNewSender, mailTypeLabelKey, deriveIntentLabels, deriveConfidence, deriveHitSource, deriveDomainName,
-  isSensitiveUrgent,
+  isSensitiveUrgent, RECLASSIFY_TYPE_ORDER,
 } from './detail-helpers';
 import type { MailLogDetail } from '@/types/email-disposal-detail';
 import zhMessages from '../../../../messages/zh.json';
@@ -353,5 +353,20 @@ describe('isSensitiveUrgent', () => {
   });
   test('false when sensitive_keyword_hit is explicitly false', () => {
     expect(isSensitiveUrgent({ sensitive_keyword_hit: false } as unknown as MailLogDetail)).toBe(false);
+  });
+});
+
+// GT-12422: 改判下拉顺序对齐原型（html_spec layer-6 opts-reclassify）。
+describe('RECLASSIFY_TYPE_ORDER', () => {
+  test('matches the prototype order exactly', () => {
+    expect(RECLASSIFY_TYPE_ORDER).toEqual([
+      'normal', 'subscription', 'spam', 'advertising', 'harmful', 'phishing',
+      'account_compromised', 'suspicious', 'spoofing', 'virus', 'sensitive',
+    ]);
+  });
+  test('covers every mailTypeConfig key exactly once (11 types)', () => {
+    expect([...RECLASSIFY_TYPE_ORDER].sort()).toEqual(
+      Object.keys(mailTypeConfig).sort(),
+    );
   });
 });

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 2：灰名单入口卡片 - 策略流水线 · RBL过滤</title>
+<style>
+:root{
+  --primary:oklch(0.52 0.226 262);--background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);
+  --card:#fff;--border:#e5e7eb;--subtle:#64748b;--danger:#d92d20;--warn:#b7791f;--ok:#14804a;
+  --font:"Geist","Inter",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --dp-fg:lab(2.75381 0 0);--dp-border:lab(90.952 0 -0.0000119209);
+  --dp-muted-bg:lab(96.52 0 0);--dp-input-bg:lab(97.7711 -3.04654 -1.63313);
+  --dp-primary:lab(41.4441 24.5539 -79.1878);--dp-primary-fg:lab(98.26 0 0);
+  --dp-blue50:lab(96.492 -1.14644 -5.11479);--dp-blue200:lab(86.15 -4.04379 -21.0797);
+  --dp-blue300:lab(77.5052 -6.4629 -36.42);--dp-blue600:lab(44.0605 29.0279 -86.0352);
+  --dp-blue700:lab(36.9089 35.0961 -85.6872);
+  --dp-font:Geist,"Geist Fallback","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:28px;color:var(--foreground);background:var(--background);font-family:var(--font);line-height:1.62}
+.wrap{max-width:1380px;margin:0 auto}
+header,nav,section{background:var(--card);border:1px solid var(--border);border-radius:10px}
+header{padding:24px 28px;margin-bottom:18px}
+h1{margin:0 0 14px;color:var(--primary);font-size:23px}
+h2{margin:0 0 16px;padding-bottom:8px;border-bottom:2px solid var(--primary);color:var(--primary);font-size:19px}
+h5{margin:14px 0 6px;color:#475569;font-size:13.5px}
+code{font-family:var(--mono);background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12.5px}
+a{color:#1677ff;text-decoration:none}a:hover{text-decoration:underline}
+section{padding:22px 26px;margin-bottom:18px}
+.layer-nav{display:flex;gap:16px;padding:12px 18px;margin-bottom:18px;font-size:14px;font-weight:600}
+.meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+.meta-table td,.spec-table th,.spec-table td{border:1px solid var(--border);padding:9px 11px;vertical-align:top}
+.meta-table td:first-child{width:170px;color:var(--subtle);font-weight:650;background:#f8fafc}
+.spec-table th{background:#f1f5f9;text-align:left;white-space:nowrap}
+.spec-table tr:nth-child(even) td{background:#fbfdff}
+.overflow{overflow-x:auto}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.badge-red{background:#fff1f0;color:var(--danger)}.badge-amber{background:#fff7e6;color:var(--warn)}
+.figure{margin:14px 0}
+.figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 18px rgba(15,23,42,.08)}
+.figure figcaption{margin-top:7px;color:var(--subtle);font-size:13px}
+.trigger-path{margin:8px 0 12px;padding:9px 11px;background:#f8fafc;border-radius:8px;color:#475569;font-size:13px}
+.component-preview{margin:14px 0;padding:22px;border:2px dashed #91caff;border-radius:10px;background:#f8fbff}
+.preview-note{margin:0 0 14px;color:#0958d9;font-size:12.5px;font-weight:650}
+.dom-comparison{margin:14px 0;padding:12px 14px;background:#f8fafc;border:1px solid var(--border);border-radius:8px}
+.dom-comparison h5{margin-top:0}
+.mojibake{color:var(--danger);font-weight:700}
+/* ============ demo 1:1 预览 ============ */
+.dp{font-family:var(--dp-font);color:var(--dp-fg);font-size:16px;line-height:1.5;background:#fff;border:1px solid var(--dp-border);border-radius:10px;padding:24px}
+.dp-col-r{display:flex;flex-direction:column;gap:16px;max-width:430px}
+.dp-field{display:flex;flex-direction:column;gap:8px}
+.dp-label{font-size:14px;font-weight:500;line-height:1}
+.dp-select{position:relative;width:200px}
+.dp-trigger{display:flex;align-items:center;justify-content:space-between;width:200px;height:36px;padding:8px 12px;border:1px solid var(--dp-border);
+  border-radius:8px;background:transparent;color:var(--dp-fg);font-size:14px;font-family:inherit;cursor:pointer}
+.dp-trigger svg{opacity:.5;flex-shrink:0}
+.dp-content{position:absolute;top:calc(100% + 4px);left:0;z-index:30;width:200px;padding:4px;border:1px solid var(--dp-border);border-radius:8px;
+  background:var(--dp-input-bg);box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);display:none}
+.dp-content.on{display:block}
+.dp-option{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;font-size:14px;cursor:pointer}
+.dp-option:hover{background:var(--dp-muted-bg)}
+.dp-option[data-state="checked"]{background:var(--dp-primary);color:var(--dp-primary-fg)}
+.dp-check{display:none}
+.dp-option[data-state="checked"] .dp-check{display:inline-flex}
+.dp-gl-wrap{padding-top:4px;display:none}
+.dp-gl-wrap.on{display:block}
+.dp-gl-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--dp-blue200);border-radius:10px;background:var(--dp-blue50)}
+.dp-gl-body{flex:1}
+.dp-gl-title{margin:0;font-size:14px;font-weight:500;color:var(--dp-blue700)}
+.dp-gl-sum{margin:2px 0 0;font-size:12px;color:var(--dp-blue600)}
+.dp-gl-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 12px;border:1px solid var(--dp-blue300);
+  border-radius:8px;background:var(--dp-input-bg);color:var(--dp-blue700);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer}
+.dp-gl-btn:hover{background:#dbeafe}
+.dp-hint{margin-top:16px;padding:10px 12px;border-radius:8px;background:#e6f4ff;border:1px solid #91caff;color:#0958d9;font-size:13px;display:none}
+.dp-hint.on{display:block}
+.dp-state{margin-top:14px;font-size:12.5px;color:var(--subtle);font-family:var(--mono)}
+.mode-switch{margin:12px 0 0;font-size:13px;color:var(--subtle)}
+.mode-switch button{margin-right:8px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;font-size:12.5px}
+.mode-switch button[aria-pressed="true"]{background:var(--dp-primary);color:#fff;border-color:var(--dp-primary)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="layer-nav">
+  <a href="./index.html#component-2-2">← 返回主文件</a>
+  <a href="./layer-1-rbl-drawer.html">← 层级 1：抽屉 + 面板</a>
+  <a href="./layer-3-greylist-dialog.html">层级 3：灰名单 Dialog →</a>
+</nav>
+
+<header>
+  <h1>交互层级 2：灰名单入口卡片（<code>rblAction === "greylist"</code>）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.2 RBL 配置面板 <code>renderRblConfig()</code></td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">filter-rules-pipeline-rbl-filter/index.html</a></td></tr>
+    <tr><td>demo 源</td><td><code>connection-layer-page.tsx</code> L1075–1109（<code>{rblAction === "greylist" &amp;&amp; (…)}</code>）</td></tr>
+    <tr><td>触发路径</td><td>层级 1 → 右栏「操作」下拉 → 选中「灰名单」→ <code>setRblAction("greylist")</code> + <code>setHasUnsavedChanges(true)</code> → 条件渲染入口卡片</td></tr>
+    <tr><td>DOM 节点数</td><td>面板 <strong>44</strong>（层级 1 的 38 + 6）｜ 入口卡根 <strong>5</strong></td></tr>
+  </table>
+</header>
+
+<section>
+  <h2>1. 该层级 UI 全貌</h2>
+  <div class="trigger-path"><strong>触发路径：</strong>层级 1 面板 →「操作」下拉 →「灰名单」</div>
+  <figure class="figure">
+    <img src="./screenshots/05-rbl-panel-greylist.png" alt="面板（灰名单态）">
+    <figcaption>RBL 配置面板在 <code>action = greylist</code> 时的全貌：右栏底部多出蓝色灰名单入口卡</figcaption>
+  </figure>
+  <figure class="figure">
+    <img src="./screenshots/06-greylist-entry-card.png" alt="灰名单入口卡片" style="max-width:520px">
+    <figcaption>入口卡元素截图（410.5 × 64 px）。注意按钮文案「点<span class="mojibake">���</span>配置」为 demo 实际渲染的乱码</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>2. 可交互组件预览</h2>
+  <div class="component-preview">
+    <p class="preview-note">↓ 可操作预览：切换「操作」下拉可让入口卡出现/消失（层级 1 ↔ 层级 2）；下方按钮切换摘要模式，可看到 <code>greylistModeSummaryDelay</code> / <code>greylistModeSummaryRate</code> 两种文案；点入口卡按钮进入层级 3。</p>
+    <div class="dp">
+      <div class="dp-col-r">
+        <div class="dp-field">
+          <span class="dp-label">操作</span>
+          <div class="dp-select">
+            <button class="dp-trigger" id="trigger" type="button" role="combobox" aria-expanded="false" data-state="closed">
+              <span id="triggerLabel">灰名单</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+            <div class="dp-content" id="content" role="listbox">
+              <div class="dp-option" role="option" data-value="block"      data-state="unchecked">阻断<span class="dp-check">✓</span></div>
+              <div class="dp-option" role="option" data-value="quarantine" data-state="unchecked">隔离<span class="dp-check">✓</span></div>
+              <div class="dp-option" role="option" data-value="mark"       data-state="unchecked">标记<span class="dp-check">✓</span></div>
+              <div class="dp-option" role="option" data-value="greylist"   data-state="checked">灰名单<span class="dp-check">✓</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 入口卡（条件渲染，5 节点：div > div.flex-1 > p + p , button） -->
+        <div class="dp-gl-wrap on" id="glWrap">
+          <div class="dp-gl-card">
+            <div class="dp-gl-body">
+              <p class="dp-gl-title">灰名单配置</p>
+              <p class="dp-gl-sum" id="glSum">延迟接收：600秒内阻断首次请求</p>
+            </div>
+            <button class="dp-gl-btn" type="button" id="glBtn">点<span class="mojibake">���</span>配置</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mode-switch">
+        摘要模式（对应 Dialog 内 <code>greylistMode</code> 的两种已生效值）：
+        <button type="button" id="mDelay" aria-pressed="true">delay</button>
+        <button type="button" id="mRate"  aria-pressed="false">rateLimit</button>
+      </div>
+
+      <div class="dp-hint" id="blockHint">已切回 <code>action = "<span id="actName">block</span>"</code>，入口卡按条件渲染规则消失 → 这就是 <a href="./layer-1-rbl-drawer.html">层级 1</a>。</div>
+      <div class="dp-hint" id="dlgHint">点击「点<span class="mojibake">���</span>配置」→ demo 先把 8 个已生效状态拷进 <code>greylistDraft</code>，再 <code>setShowGreylistDialog(true)</code>。
+        详见 <a href="./layer-3-greylist-dialog.html">层级 3 · 灰名单 Dialog →</a></div>
+      <div class="dp-state" id="stateLine"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>3. UI 元素清单（入口卡片，5 节点）</h2>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>元素</th><th>类型</th><th>文案（实际渲染）</th><th>样式（实测）</th><th>交互</th><th>i18n key</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>卡片根</td><td>div</td><td>—</td><td>410.5 × 64 px；padding 12px；radius 10px；bg <code>lab(96.492 -1.146 -5.115)</code>（blue-50）；border 1px <code>lab(86.15 -4.04 -21.08)</code>（blue-200）</td><td>无</td><td>—</td></tr>
+      <tr><td>2</td><td>文本容器</td><td>div <code>.flex-1</code></td><td>—</td><td>宽 262.5px</td><td>无</td><td>—</td></tr>
+      <tr><td>3</td><td>标题</td><td>p</td><td>「灰名单配置」</td><td>14px / 500；色 <code>lab(36.91 35.10 -85.69)</code>（blue-700）</td><td>无</td><td><code>connection.greylistConfig</code></td></tr>
+      <tr><td>4</td><td>摘要</td><td>p</td><td>delay：「延迟接收：600秒内阻断首次请求」<br>rateLimit：「频率限制：600秒内最多5次」</td><td>12px；色 <code>lab(44.06 29.03 -86.04)</code>（blue-600）；<code>mt-0.5</code></td><td>随 <code>greylistMode</code> 切换文案。<strong><code>{max}</code> 恒为 5</strong>（无 UI 可改，见主文件 D2）</td><td><code>connection.greylistModeSummaryDelay</code> / <code>…Rate</code></td></tr>
+      <tr><td>5</td><td>配置按钮</td><td>button outline</td><td>「点<span class="mojibake">���</span>配置」<span class="badge badge-red">乱码</span></td><td>110 × 32 px；radius 8px；border <code>lab(77.51 -6.46 -36.42)</code>（blue-300）；文字 blue-700；<code>shrink-0</code></td><td>click → 拷贝 8 个状态到 <code>greylistDraft</code> → <code>setShowGreylistDialog(true)</code></td><td><code>connection.greylistConfigure</code>（zh 值损坏，见主文件 D5）</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2>4. DOM 树比对结果</h2>
+  <div class="dom-comparison">
+    <h5>提取的 HTML vs demo 实际 DOM（<code>[data-spec='greylist-entry']</code>）</h5>
+    <div class="overflow">
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>预览 HTML</th><th>一致</th></tr></thead>
+      <tbody>
+        <tr><td>入口卡根节点</td><td><code>div.flex.items-center.gap-3.p-3.rounded-lg.border.border-blue-200.bg-blue-50…</code></td><td><code>div.dp-gl-card</code>（同 padding / radius / 蓝 50 底 / 蓝 200 边）</td><td>✅</td></tr>
+        <tr><td>入口卡节点总数</td><td><strong>5</strong>（div &gt; div.flex-1 &gt; p + p，兄弟 button）</td><td>5</td><td>✅</td></tr>
+        <tr><td>外层包裹</td><td><code>div.pt-1</code>（条件渲染的外壳，第 6 个节点）</td><td><code>div.dp-gl-wrap</code>（<code>padding-top:4px</code>）</td><td>✅</td></tr>
+        <tr><td>面板节点数增量</td><td>38（block）→ <strong>44</strong>（greylist），+6</td><td>+6（<code>.dp-gl-wrap</code> 1 + 卡片 5）</td><td>✅</td></tr>
+        <tr><td>标题文案</td><td>"灰名单配置"</td><td>"灰名单配置"</td><td>✅</td></tr>
+        <tr><td>摘要文案（delay）</td><td>"延迟接收：600秒内阻断首次请求"</td><td>逐字一致</td><td>✅</td></tr>
+        <tr><td>摘要文案（rateLimit，确认后实测）</td><td>"频率限制：600秒内最多5次"</td><td>逐字一致（切 rateLimit 按钮可见）</td><td>✅</td></tr>
+        <tr><td>按钮文案</td><td>"点<span class="mojibake">���</span>配置"（3 个 U+FFFD）</td><td>如实保留 3 个 <span class="mojibake">�</span>，未擅自「修好」</td><td>✅</td></tr>
+        <tr><td>按钮是否含图标</td><td><strong>无 svg</strong>（纯文字 button）</td><td>无 svg</td><td>✅</td></tr>
+        <tr><td>action=block 时</td><td>整个 <code>div.pt-1</code> 子树<strong>不渲染</strong></td><td>移除 <code>.on</code> 后不显示</td><td>✅</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="margin:8px 0 0;font-size:13px;color:var(--subtle)"><strong>验证方法：</strong>先点击「操作」下拉选中「灰名单」，再对 <code>[data-spec='rbl-panel']</code> 与 <code>[data-spec='greylist-entry']</code> 各做一次 <code>outerHTML</code> + DOM 树提取；随后在 Dialog 中切到 rateLimit 并点「确认」，重新读取入口卡 <code>innerText</code>，得到 <code>"灰名单配置 | 频率限制：600秒内最多5次 | 点���配置"</code>——证实摘要随已生效模式更新，且 <code>{max}</code> 渲染为 <code>5</code>。</p>
+  </div>
+  <figure class="figure">
+    <img src="./screenshots/11-greylist-entry-rate-summary.png" alt="确认 rateLimit 后的入口卡摘要" style="max-width:520px">
+    <figcaption>Dialog 内选 rateLimit 并「确认」后，入口卡摘要变为「频率限制：600秒内最多5次」</figcaption>
+  </figure>
+</section>
+
+</div>
+
+<script>
+(function () {
+  var action = 'greylist';
+  var mode = 'delay';
+  var trigger = document.getElementById('trigger');
+  var trigLbl = document.getElementById('triggerLabel');
+  var content = document.getElementById('content');
+  var glWrap  = document.getElementById('glWrap');
+  var glSum   = document.getElementById('glSum');
+  var glBtn   = document.getElementById('glBtn');
+  var blockHint = document.getElementById('blockHint');
+  var dlgHint = document.getElementById('dlgHint');
+  var actName = document.getElementById('actName');
+  var stateLn = document.getElementById('stateLine');
+  var mDelay  = document.getElementById('mDelay');
+  var mRate   = document.getElementById('mRate');
+
+  /* demo i18n（zh，如实含 U+FFFD 的键此处不涉及） */
+  var SUM_DELAY = '延迟接收：600秒内阻断首次请求';
+  var SUM_RATE  = '频率限制：600秒内最多5次';   /* {max} 恒为 5 —— 无 UI 可改 */
+
+  function paint() {
+    glSum.textContent = (mode === 'delay') ? SUM_DELAY : SUM_RATE;
+    mDelay.setAttribute('aria-pressed', mode === 'delay' ? 'true' : 'false');
+    mRate.setAttribute('aria-pressed', mode === 'rateLimit' ? 'true' : 'false');
+    stateLn.textContent = 'state: rblAction="' + action + '" greylistMode="' + mode +
+      '" maxRequests="5"(只读) entryCard=' + (action === 'greylist' ? 'rendered' : 'not rendered');
+  }
+
+  function setOpen(open) {
+    content.classList.toggle('on', open);
+    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    trigger.setAttribute('data-state', open ? 'open' : 'closed');
+  }
+  trigger.addEventListener('click', function (e) { e.stopPropagation(); setOpen(!content.classList.contains('on')); });
+  document.addEventListener('click', function () { setOpen(false); });
+  content.addEventListener('click', function (e) { e.stopPropagation(); });
+
+  content.querySelectorAll('.dp-option').forEach(function (opt) {
+    opt.addEventListener('click', function () {
+      action = opt.getAttribute('data-value');
+      content.querySelectorAll('.dp-option').forEach(function (o) {
+        o.setAttribute('data-state', o === opt ? 'checked' : 'unchecked');
+      });
+      trigLbl.textContent = opt.textContent.replace('✓', '').trim();
+      var isGrey = action === 'greylist';
+      glWrap.classList.toggle('on', isGrey);
+      blockHint.classList.toggle('on', !isGrey);
+      actName.textContent = action;
+      if (!isGrey) { dlgHint.classList.remove('on'); }
+      setOpen(false);
+      paint();
+    });
+  });
+
+  mDelay.addEventListener('click', function () { mode = 'delay'; paint(); });
+  mRate.addEventListener('click', function () { mode = 'rateLimit'; paint(); });
+  glBtn.addEventListener('click', function () { dlgHint.classList.add('on'); });
+
+  paint();
+})();
+</script>
+</body>
+</html>

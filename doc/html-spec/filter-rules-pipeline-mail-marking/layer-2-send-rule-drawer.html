@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 2B：外发声明规则抽屉 - 邮件标记与声明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --text:#111827; --sub:#6b7280; --blue:#1677ff; --red:#ef4444; --radius:.625rem; }
+    * { box-sizing: border-box; }
+    body { margin:0; padding:32px; max-width:1320px; margin-inline:auto; background:var(--bg); color:var(--text); font-family:"Geist","Inter",system-ui,sans-serif; line-height:1.6; }
+    a { color:var(--blue); text-decoration:none; }
+    nav.layer-nav, .spec-header, section { margin-bottom:24px; padding:24px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); }
+    nav.layer-nav { display:flex; justify-content:space-between; padding:14px 24px; font-weight:600; }
+    h1 { margin:0 0 16px; color:var(--primary); font-size:26px; }
+    h2 { margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--primary); color:var(--primary); font-size:20px; }
+    .meta-table, .spec-table { width:100%; border-collapse:collapse; font-size:14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding:9px 11px; border:1px solid var(--border); vertical-align:top; }
+    .meta-table td:first-child, .spec-table th { background:var(--muted); font-weight:650; text-align:left; }
+    .meta-table td:first-child { width:180px; color:var(--sub); }
+    .layer-badge { display:inline-flex; align-items:center; justify-content:center; min-width:24px; height:24px; margin-right:8px; border-radius:999px; background:var(--blue); color:#fff; font-size:12px; font-weight:700; }
+    .component-preview { margin:12px 0; padding:16px; border:1px solid #dbeafe; border-radius:8px; background:#f8fbff; overflow:auto; }
+    .sheet { display:grid; grid-template-columns:560px 1fr; min-width:920px; border:1px solid var(--border); border-radius:8px; overflow:hidden; background:#fff; }
+    .sheet-head { grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; padding:14px 22px; border-bottom:1px solid #e8e8e8; }
+    .sheet-head h3 { margin:0; font-size:18px; }
+    .sheet-head p { margin:2px 0 0; color:var(--sub); font-size:13px; }
+    .btn { padding:7px 14px; border-radius:8px; font-weight:650; font-size:13px; cursor:pointer; }
+    .btn-outline { border:1px solid var(--border); background:#fff; }
+    .btn-blue { border:0; background:#155eef; color:#fff; }
+    .sheet-left { padding:20px; border-right:1px solid #e8e8e8; }
+    .sheet-right { padding:20px; background:#f5f5f5; }
+    .blk { margin-bottom:18px; padding:16px; border-radius:8px; background:#fafafa; }
+    .blk-title { display:flex; gap:8px; align-items:center; margin-bottom:12px; font-weight:650; }
+    .bar { width:4px; height:20px; border-radius:999px; }
+    .bar.blue{background:#3b82f6;} .bar.amber{background:#f59e0b;} .bar.green{background:#22c55e;}
+    .row { display:grid; grid-template-columns:110px 1fr; gap:12px; margin:12px 0; align-items:start; }
+    .lbl { text-align:right; font-weight:600; font-size:14px; padding-top:6px; }
+    .req { color:var(--red); }
+    .help { color:#9ca3af; cursor:help; font-size:12px; border-bottom:1px dotted #9ca3af; }
+    .input, .select, .textarea { padding:7px 11px; border:1px solid #d1d5db; border-radius:8px; background:#fff; color:#374151; font-size:14px; font-family:inherit; }
+    .input.invalid, .textarea.invalid { border-color:var(--red); }
+    .w-full { width:100%; }
+    .textarea { min-height:120px; resize:vertical; }
+    .err { display:none; margin-top:4px; color:var(--red); font-size:12px; }
+    .err.show { display:block; }
+    .radio-line { display:flex; flex-wrap:wrap; gap:16px; padding-top:6px; }
+    .radio-line label { display:inline-flex; gap:6px; align-items:center; font-size:14px; cursor:pointer; }
+    .var-badge { display:inline-block; margin:2px 4px 2px 0; padding:1px 8px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:12px; font-family:ui-monospace,monospace; cursor:pointer; }
+    .var-badge:hover { background:#eff6ff; }
+    .counter { margin-top:4px; color:var(--sub); font-size:12px; }
+    .rail-btn { display:flex; justify-content:space-between; width:100%; margin-bottom:10px; padding:9px 14px; border:1px solid var(--border); border-radius:8px; background:#fff; font-weight:600; font-size:14px; cursor:pointer; }
+    .rail-panel { margin:-4px 0 12px; padding:14px; border:1px solid var(--border); border-radius:8px; background:#fff; font-size:13px; }
+    .disclaimer-block { display:none; margin-top:12px; padding-top:12px; border-top:1px dashed #d1d5db; color:var(--sub); font-size:12px; white-space:pre-wrap; }
+    .disclaimer-block.show { display:block; }
+    .tips { padding:14px; border-radius:8px; background:#dbeafe66; color:#1d4ed8; font-size:12px; }
+    .tips b { display:flex; gap:4px; font-size:13px; margin-bottom:6px; }
+    .is-hidden { display:none !important; }
+    .screenshot-figure { margin:14px 0; text-align:center; }
+    .screenshot-figure img { max-width:100%; border:1px solid var(--border); border-radius:8px; box-shadow:0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top:8px; color:var(--sub); font-size:13px; }
+    @media (max-width:1000px){ .sheet{grid-template-columns:1fr;min-width:0;} .sheet-left{border-right:0;border-bottom:1px solid #e8e8e8;} }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="layer-1-receive-rule-drawer.html">← 层级 2：接收标记规则抽屉</a>
+    <span>层级 2B / 3</span>
+    <a href="layer-3-preview-test-delete.html">层级 3：预览/模拟测试/删除确认 →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 2B：新建/编辑外发声明规则抽屉</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 规则编辑抽屉 MailMarking RuleSheet（外发声明分支 <code>renderSendDisclaimerForm</code>）</td></tr>
+      <tr><td>主文件</td><td><a href="index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级1 列表「外发声明」Tab → 点击「+ 新建规则」或行内编辑图标（标题变「编辑外发声明规则」）</td></tr>
+      <tr><td>demo 组件</td><td><code>mail-marking-module.tsx</code> L1207-1485（表单）+ L1524-1662（Sheet 骨架，与接收态共用）</td></tr>
+      <tr><td>DOM 提取</td><td>同一 <code>[role=dialog]</code> 920px Sheet，外发态实测节点数 176；与接收态差异：适用对象小字「(发件人维度)」、第三块为「声明配置」（Textarea + 位置/格式单选），无标记样式/自定义配色区</td></tr>
+      <tr><td>截图</td><td><code>rule-sheet-layer3-send-default.png</code> / <code>-send-validation.png</code> / <code>-send-preview.png</code></td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">2B</span>可交互 HTML 预览（声明输入 / 字节计数 / 校验 / 预览联动可操作）</h2>
+    <div class="component-preview">
+      <div class="sheet" data-demo-extracted="send-rule-sheet">
+        <div class="sheet-head">
+          <div>
+            <h3>新建外发声明规则</h3>
+            <p>为接收邮件添加外站来源标记，为外发邮件追加免责声明</p>
+          </div>
+          <div>
+            <button class="btn btn-outline" type="button" onclick="alert('demo：关闭抽屉，不保存修改')">取消</button>
+            <button class="btn btn-blue" type="button" data-save>保存</button>
+          </div>
+        </div>
+        <div class="sheet-left">
+          <div class="blk">
+            <div class="blk-title"><span class="bar blue"></span>基础配置</div>
+            <div class="row"><span class="lbl"><span class="req">*</span> 规则名称 <span class="help" title="设置一个易于识别的规则名称">?</span></span>
+              <span><input class="input w-full" data-name placeholder="如：高管外站警示"><span class="err" data-err-name>请输入规则名称</span></span></div>
+            <div class="row"><span class="lbl"><span class="req">*</span> 优先级 <span class="help" title="数字越小优先级越高，命中多条规则时优先执行数字小的规则">?</span></span>
+              <span><input class="input" data-priority type="number" min="1" value="3" style="width:90px;"> <small style="color:#6b7280;">(数字越小优先级越高，命中多条规则时优先执行数字小的规则)</small></span></div>
+            <div class="row"><span class="lbl">状态</span>
+              <span class="radio-line">
+                <label><input type="radio" name="status" value="disabled"> 禁用</label>
+                <label><input type="radio" name="status" value="enabled" checked> 启用</label>
+              </span></div>
+          </div>
+          <div class="blk">
+            <div class="blk-title"><span class="bar amber"></span>适用对象 <small style="color:#6b7280;font-weight:400;">(发件人维度)</small></div>
+            <div class="row"><span class="lbl">适用部门</span>
+              <span><select class="select w-full"><option value="">选择部门...</option><option>高管部</option><option>财务部</option><option>销售部</option><option>研发部</option><option>人力资源部</option><option>法务部</option></select></span></div>
+            <div class="row"><span class="lbl">适用群组</span>
+              <span><select class="select w-full"><option value="">选择群组...</option><option>全体员工</option><option>外包人员</option><option>全体管理层</option><option>海外办事处</option></select></span></div>
+            <div style="margin-left:122px;color:#6b7280;font-size:12px;">ⓘ 不选任何部门/群组 = 适用于全部用户（选择联动与 Badge 移除逻辑同层级 2，此处不重复实现）</div>
+          </div>
+          <div class="blk">
+            <div class="blk-title"><span class="bar green"></span>声明配置</div>
+            <div class="row"><span class="lbl"><span class="req">*</span> 声明内容 <span class="help" title="支持HTML格式和变量插入">?</span></span>
+              <span><textarea class="textarea w-full" data-content placeholder="输入免责声明内容，支持HTML格式和变量"></textarea>
+                <span class="err" data-err-content>请输入免责声明内容</span>
+                <div style="margin-top:6px;font-size:12px;color:#6b7280;">可用变量:
+                  <span class="var-badge" data-var>{sender_name}</span><span class="var-badge" data-var>{sender_email}</span><span class="var-badge" data-var>{organization}</span><span class="var-badge" data-var>{date}</span><span class="var-badge" data-var>{time}</span><span class="var-badge" data-var>{legal_contact}</span>
+                </div>
+                <div class="counter"><span data-count>0</span> / 10240 bytes</div></span></div>
+            <div class="row"><span class="lbl">声明位置</span>
+              <span class="radio-line">
+                <label><input type="radio" name="pos" value="bodyTop"> 正文顶部</label>
+                <label><input type="radio" name="pos" value="bodyBottom" checked> 正文底部</label>
+                <label><input type="radio" name="pos" value="header"> 邮件头 X-Disclaimer</label>
+                <label><input type="radio" name="pos" value="multiple"> 多位置同时生效</label>
+              </span></div>
+            <div class="row"><span class="lbl">声明格式</span>
+              <span class="radio-line">
+                <label><input type="radio" name="fmt" value="auto" checked> 自动适配(HTML+纯文本)</label>
+                <label><input type="radio" name="fmt" value="htmlOnly"> 仅 HTML 邮件生效</label>
+                <label><input type="radio" name="fmt" value="plainOnly"> 强制纯文本追加</label>
+              </span></div>
+          </div>
+        </div>
+        <div class="sheet-right">
+          <button class="rail-btn" type="button" data-coll="preview">👁 配置效果预览 <span data-coll-ic="preview">⌃</span></button>
+          <div class="rail-panel" data-panel="preview">
+            <div style="color:#6b7280;">发件: test@gmail.com<br>收件: 张三</div>
+            <div style="margin-top:8px;">这是邮件正文内容...</div>
+            <div class="disclaimer-block" data-pv-disclaimer></div>
+          </div>
+          <button class="rail-btn" type="button" data-coll="test">🧪 模拟测试 <span data-coll-ic="test">⌄</span></button>
+          <div class="rail-panel is-hidden" data-panel="test">
+            <a href="layer-3-preview-test-delete.html">模拟测试面板完整规格见层级 3 子文件 →</a>
+          </div>
+          <div class="tips">
+            <b>ⓘ 配置提示</b>
+            1. 高风险部门建议使用橙色警告样式<br>
+            2. 主题前缀位置不支持颜色样式<br>
+            3. 邮件头标记仅供邮件客户端程序识别<br>
+            4. 默认规则将匹配所有未命中其他规则的用户<br>
+            5. 优先级数字越小越优先执行
+          </div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-sheet-layer3-send-default.png" alt="新建外发声明规则抽屉默认态">
+      <figcaption>默认态：声明内容为空（计数 0 / 10240 bytes）、位置=正文底部、格式=自动适配、优先级=3（当前外发规则数2+1）；适用对象小字为「(发件人维度)」；预览区无声明块。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-sheet-layer3-send-validation.png" alt="外发声明空表单校验">
+      <figcaption>空表单点「保存」：红字「请输入规则名称」「请输入免责声明内容」，两字段红框，抽屉保持打开。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/rule-sheet-layer3-send-preview.png" alt="声明内容实时预览">
+      <figcaption>输入声明内容（含变量）后：预览区正文下方以虚线分隔追加声明文本；计数器实时更新（实测输入 32 字符显示「32 / 10240 bytes」——按字符计数，见主文件 §9 D-11）。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>元素清单</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>元素</th><th>默认值/占位符</th><th>校验</th><th>交互行为</th></tr></thead>
+      <tbody>
+        <tr><td>头部</td><td>标题 / 取消 / 保存</td><td>新建外发声明规则（编辑态「编辑外发声明规则」）</td><td>保存执行校验</td><td>同层级 2。</td></tr>
+        <tr><td>基础配置</td><td>规则名称 / 优先级 / 状态</td><td>空 / 3（外发规则数2+1，min=1）/ 启用</td><td>名称必填；优先级非法回退 1</td><td>同层级 2（Tooltip 文案一致）。</td></tr>
+        <tr><td>适用对象</td><td>部门/群组 Select + Badge</td><td>空（=全部用户）</td><td>-</td><td>同层级 2；区别仅小字标注「(发件人维度)」——外发按发件人归属匹配。</td></tr>
+        <tr><td>声明配置</td><td>声明内容 Textarea</td><td>空；placeholder「输入免责声明内容，支持HTML格式和变量」；min-h 120px</td><td>必填；空值红字「请输入免责声明内容」</td><td>Label Tooltip「支持HTML格式和变量插入」；下方 6 个变量 Badge（{sender_name} {sender_email} {organization} {date} {time} {legal_contact}）点击追加；实时计数「N / 10240 bytes」。</td></tr>
+        <tr><td>声明配置</td><td>声明位置 RadioGroup</td><td>正文底部</td><td>-</td><td>正文顶部 / 正文底部 / 邮件头 X-Disclaimer / 多位置同时生效。</td></tr>
+        <tr><td>声明配置</td><td>声明格式 RadioGroup</td><td>自动适配(HTML+纯文本)</td><td>-</td><td>自动适配 / 仅 HTML 邮件生效 / 强制纯文本追加。</td></tr>
+        <tr><td>右栏</td><td>配置效果预览</td><td>默认展开</td><td>-</td><td>有声明内容时，正文下方以 <code>border-t border-dashed</code> 虚线块追加声明文本（实时联动）。</td></tr>
+        <tr><td>右栏</td><td>模拟测试 / 配置提示</td><td>收起 / 常显 5 条</td><td>-</td><td>同层级 2；配置提示 5 条为两 Tab 共用固定文案（含标记类提示，对外发场景相关性弱）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td>同一 <code>[role=dialog]</code> 920px Sheet（切换 Tab 后重开），外发态节点数 176</td><td><code>.sheet[data-demo-extracted]</code> 同骨架</td><td>一致（预览裁剪展示）</td></tr>
+        <tr><td>分区标题</td><td>h3：基础配置 / 适用对象 / 声明配置</td><td>同三块</td><td>一致</td></tr>
+        <tr><td>Radio 默认态</td><td>status-enabled-send、discl-pos-bottom、format-auto 为 checked；共 9 个 radio（状态2+位置4+格式3）</td><td>同默认选中与分组数</td><td>一致</td></tr>
+        <tr><td>Textarea</td><td>placeholder「输入免责声明内容，支持HTML格式和变量」，min-h-[120px]</td><td>同占位与高度</td><td>一致</td></tr>
+        <tr><td>计数器</td><td>「0 / 10240 bytes」；输入 32 字符后「32 / 10240 bytes」</td><td>JS 按 .length 复刻同计数行为</td><td>一致</td></tr>
+        <tr><td>变量徽标</td><td>6 个 outline Badge，文案 {sender_name} {sender_email} {organization} {date} {time} {legal_contact}</td><td>同 6 个</td><td>一致</td></tr>
+        <tr><td>校验后</td><td>红字「请输入规则名称」「请输入免责声明内容」，input/textarea aria-invalid=true</td><td>JS 复刻同状态</td><td>一致</td></tr>
+        <tr><td>预览联动</td><td>输入声明后预览出现虚线分隔声明块「…本邮件仅供收件人使用 {organization} {date}」（变量不在预览中替换）</td><td>同行为（变量原样显示）</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="index.html#component-2-3">← 返回主文件</a>
+    <a href="layer-3-preview-test-delete.html">层级 3：预览/模拟测试/删除确认 →</a>
+  </nav>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const name = $("[data-name]"), content = $("[data-content]");
+    const errName = $("[data-err-name]"), errContent = $("[data-err-content]");
+    const count = $("[data-count]"), pv = $("[data-pv-disclaimer]");
+
+    function sync() {
+      count.textContent = content.value.length; // 复刻 demo：按字符数计（D-11）
+      pv.textContent = content.value;
+      pv.classList.toggle("show", !!content.value.trim());
+      if (content.value.trim()) { content.classList.remove("invalid"); errContent.classList.remove("show"); }
+    }
+    content.addEventListener("input", sync);
+    name.addEventListener("input", () => { if (name.value.trim()) { name.classList.remove("invalid"); errName.classList.remove("show"); } });
+
+    document.querySelectorAll("[data-var]").forEach((b) =>
+      b.addEventListener("click", () => { content.value = content.value + " " + b.textContent; sync(); }));
+
+    $("[data-priority]").addEventListener("change", (e) => {
+      const v = parseInt(e.target.value); e.target.value = (!v || v < 1) ? 1 : v;
+    });
+
+    $("[data-save]").addEventListener("click", () => {
+      const okName = !!name.value.trim(), okContent = !!content.value.trim();
+      name.classList.toggle("invalid", !okName); errName.classList.toggle("show", !okName);
+      content.classList.toggle("invalid", !okContent); errContent.classList.toggle("show", !okContent);
+      if (okName && okContent) alert("demo：校验通过 → 规则写入外发声明列表并关闭抽屉");
+    });
+
+    document.querySelectorAll("[data-coll]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const panel = $("[data-panel=" + btn.dataset.coll + "]");
+        const hidden = panel.classList.toggle("is-hidden");
+        $("[data-coll-ic=" + btn.dataset.coll + "]").textContent = hidden ? "⌄" : "⌃";
+      });
+    });
+  </script>
+</body>
+</html>

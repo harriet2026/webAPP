@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级1：详情弹窗 - 灰邮队列</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    window.tailwind && (tailwind.config={corePlugins:{preflight:false},theme:{extend:{colors:{
+      border:'#e2e8f0',input:'#e2e8f0',ring:'#2563eb',background:'#ffffff',foreground:'#0f172a',
+      primary:{DEFAULT:'#2563eb',foreground:'#ffffff'},card:{DEFAULT:'#ffffff',foreground:'#0f172a'},
+      muted:{DEFAULT:'#f1f5f9',foreground:'#64748b'},accent:{DEFAULT:'#f1f5f9',foreground:'#0f172a'},
+      destructive:{DEFAULT:'#dc2626',foreground:'#ffffff'},popover:{DEFAULT:'#ffffff',foreground:'#0f172a'},
+      secondary:{DEFAULT:'#f1f5f9',foreground:'#0f172a'}}}}});
+  </script>
+
+  <style>
+    :root{
+      --primary:#2563eb; --primary-foreground:#ffffff;
+      --background:oklch(0.98 0.01 205); --foreground:#0f172a;
+      --card:#ffffff; --muted:#f1f5f9; --muted-foreground:#64748b;
+      --border:#e2e8f0; --destructive:#dc2626; --radius:0.625rem;
+      --diff-bg:#fef2f2; --diff-border:#dc2626; --question-bg:#fffbeb; --question-border:#d97706;
+      --font-sans:"Geist","Geist Fallback",system-ui,sans-serif; --font-mono:"Geist Mono",monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto;}
+    .spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:2rem;}
+    .spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.5rem;}
+    .meta-table{width:100%;border-collapse:collapse;font-size:0.875rem;}
+    .meta-table td{padding:0.5rem 1rem;border-bottom:1px solid var(--border);}
+    .meta-table td:first-child{font-weight:600;width:170px;color:var(--muted-foreground);white-space:nowrap;}
+    .component-toc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 2rem;margin-bottom:2rem;}
+    .component-toc>h2{color:var(--primary);font-size:1.05rem;margin-bottom:0.75rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;}
+    .component-toc ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0.5rem;}
+    .component-toc li{padding:0.375rem 0.75rem;border-radius:calc(var(--radius) - 4px);background:var(--muted);font-size:0.875rem;}
+    .component-toc li a{color:var(--primary);text-decoration:none;font-weight:500;display:inline-flex;align-items:center;gap:0.375rem;}
+    .component-toc li a:hover{text-decoration:underline;}
+    .component-toc .toc-layer-links{font-size:0.75rem;color:var(--muted-foreground);margin-left:0.5rem;}
+    .component-toc .toc-layer-links a{color:var(--muted-foreground);font-weight:400;}
+    .component-toc .toc-badge{display:inline-block;font-size:0.6875rem;font-weight:600;padding:0.0625rem 0.375rem;border-radius:calc(var(--radius) - 4px);background:var(--primary);color:#fff;white-space:nowrap;}
+    section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem;}
+    section>h2{color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:0.5rem;margin-bottom:1.25rem;font-size:1.25rem;}
+    h3{font-size:1.05rem;margin:1rem 0 0.75rem;color:var(--foreground);}
+    h4{font-size:0.95rem;margin:0.75rem 0 0.5rem;color:var(--muted-foreground);}
+    table.spec-table{width:100%;border-collapse:collapse;font-size:0.85rem;margin:1rem 0;}
+    table.spec-table th{background:var(--muted);color:var(--foreground);font-weight:600;text-align:left;padding:0.55rem 0.7rem;border:1px solid var(--border);white-space:nowrap;}
+    table.spec-table td{padding:0.55rem 0.7rem;border:1px solid var(--border);vertical-align:top;}
+    table.spec-table tr:nth-child(even) td{background:#f8fafc;}
+    .screenshot-figure{margin:1rem 0;text-align:center;}
+    .screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+    .screenshot-figure figcaption{margin-top:0.5rem;font-size:0.8125rem;color:var(--muted-foreground);}
+    .component-spec{border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.25rem 0;background:var(--card);}
+    .component-spec>h3{color:var(--primary);border-left:4px solid var(--primary);padding-left:0.75rem;}
+    pre{background:var(--muted);border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);padding:1rem;overflow-x:auto;font-family:var(--font-mono);font-size:0.8125rem;line-height:1.5;margin:1rem 0;}
+    code{font-family:var(--font-mono);font-size:0.85em;}
+    .mermaid{text-align:center;margin:1rem 0;padding:1rem;background:var(--muted);border-radius:calc(var(--radius) - 2px);}
+    .diff-section{border-left:4px solid var(--diff-border);background:var(--diff-bg);}
+    .diff-section>h2{color:var(--diff-border);border-bottom-color:var(--diff-border);}
+    .diff-badge{display:inline-block;background:var(--diff-border);color:#fff;font-size:0.75rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:calc(var(--radius) - 4px);}
+    .question-section{border-left:4px solid var(--question-border);background:var(--question-bg);}
+    .question-section>h2{color:var(--question-border);border-bottom-color:var(--question-border);}
+    .badge{display:inline-block;font-size:0.75rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:calc(var(--radius) - 4px);}
+    .badge-high{background:#dc2626;color:#fff;} .badge-medium{background:#f59e0b;color:#1e293b;} .badge-low{background:#bbf7d0;color:#14532d;}
+    blockquote{border-left:4px solid var(--destructive);background:var(--diff-bg);padding:0.75rem 1rem;margin:1rem 0;font-size:0.875rem;border-radius:0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0;}
+    .component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:2rem 1.5rem 1.5rem;margin:1.5rem 0 1.25rem;background:#fff;position:relative;overflow:auto;color:#0f172a;font-size:14px;line-height:1.5;}
+    .component-preview::before{content:"🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）";position:absolute;top:-0.625rem;left:0.75rem;background:var(--primary);color:#fff;font-size:0.6875rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:calc(var(--radius) - 4px);white-space:nowrap;z-index:2;}
+    /* ===== 预览区作用域内的 Tailwind Preflight 等价基座 =====
+       全局 preflight 已关闭以保护规格文档；此处用 :where() 保持 0 特异性，
+       与 Tailwind 真实 preflight 一致——任何 demo 上的 Tailwind 工具类（bg-*/border-*/text-* 等）
+       都能以同等或更高优先级覆盖这些基座，不会被基座反向压制。 */
+    .component-preview *,.component-preview *::before,.component-preview *::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb;}
+    .component-preview :where(h1,h2,h3,h4,h5,h6,p){margin:0;font-size:inherit;font-weight:inherit;color:inherit;border:0;padding:0;background:none;}
+    .component-preview :where(ul,ol){margin:0;padding:0;list-style:none;}
+    .component-preview :where(button,[role=button]){background-color:transparent;background-image:none;font:inherit;color:inherit;cursor:pointer;padding:0;line-height:inherit;letter-spacing:inherit;-webkit-appearance:none;appearance:none;border-width:0;border-style:solid;border-color:#e5e7eb;}
+    .component-preview :where(button:disabled,[role=button]:disabled){cursor:not-allowed;}
+    .component-preview :where(input,select,textarea){font:inherit;color:inherit;line-height:inherit;background-color:transparent;margin:0;border-width:0;border-style:solid;border-color:#e5e7eb;-webkit-appearance:none;appearance:none;}
+    .component-preview :where(input::placeholder,textarea::placeholder){color:#9ca3af;opacity:1;}
+    .component-preview :where(svg){display:block;vertical-align:middle;}
+    .component-preview :where(img,svg){max-width:100%;}
+    .component-preview :where(table){border-collapse:collapse;border-spacing:0;font-size:inherit;margin:0;}
+    .component-preview :where(th,td){padding:0;border:0;background:none;text-align:inherit;vertical-align:inherit;}
+    .component-preview :where(a){color:inherit;text-decoration:inherit;}
+    .component-preview :where(label){cursor:default;}
+    .component-preview :where(hr){border-top-width:1px;}
+    .preview-hint{font-size:0.75rem;color:var(--muted-foreground);margin:0.25rem 0 0.75rem;font-style:italic;}
+    .interaction-layer{border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1.5rem 0;background:var(--card);}
+    .interaction-layer>h4{color:var(--primary);font-size:0.95rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--primary);color:#fff;font-size:0.75rem;font-weight:700;flex-shrink:0;}
+    .trigger-path{background:var(--muted);border-radius:calc(var(--radius) - 4px);padding:0.5rem 0.75rem;margin:0.5rem 0 1rem;font-size:0.8125rem;color:var(--muted-foreground);}
+    .trigger-path strong{color:var(--foreground);}
+    .dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);overflow:hidden;}
+    .dom-comparison>h5{background:var(--muted);padding:0.5rem 0.75rem;font-size:0.8125rem;font-weight:600;color:var(--foreground);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.375rem;}
+    .dom-comparison>h5::before{content:"🔍";font-size:0.875rem;}
+    .dom-comparison table{width:100%;border-collapse:collapse;font-size:0.8125rem;}
+    .dom-comparison th{background:var(--muted);font-weight:600;text-align:left;padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);}
+    .dom-comparison td{padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);vertical-align:top;}
+    .dom-comparison tr:last-child td{border-bottom:none;}
+    .dom-pass{color:#16a34a;font-weight:600;} .dom-fail{color:var(--destructive);font-weight:600;} .dom-fixed{color:#d97706;font-weight:600;}
+    table.layer-index{width:100%;border-collapse:collapse;font-size:0.875rem;margin:1rem 0;}
+    table.layer-index th{background:var(--muted);font-weight:600;text-align:left;padding:0.6rem 0.75rem;border:1px solid var(--border);}
+    table.layer-index td{padding:0.6rem 0.75rem;border:1px solid var(--border);vertical-align:top;}
+    table.layer-index td a{color:var(--primary);text-decoration:none;font-weight:600;} table.layer-index td a:hover{text-decoration:underline;}
+    .layer-nav{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.25rem;background:var(--muted);border-radius:var(--radius);margin-bottom:1.5rem;font-size:0.875rem;}
+    .layer-nav a{color:var(--primary);text-decoration:none;font-weight:600;} .layer-nav a:hover{text-decoration:underline;}
+    .version-history-section{margin:1.5rem 0;}
+    .spec-version{font-weight:600;color:var(--primary);}
+    .note{background:#eff6ff;border:1px solid #bfdbfe;border-radius:calc(var(--radius) - 4px);padding:0.75rem 1rem;margin:1rem 0;font-size:0.85rem;color:#1e3a8a;}
+  </style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#d-3-1">← 返回主文件</a><span>层级 1 · 详情弹窗</span><span></span></nav>
+<header class="spec-header"><h1>交互层级 1：邮件详情弹窗（概览与处置）</h1><table class="meta-table"><tr><td>所属组件</td><td>3.1 DetailModal（共享）</td></tr><tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr><tr><td>触发路径</td><td>层级0 表格 → 点击"查看"(Eye) → setSelectedMail → 弹窗（默认 overview Tab）</td></tr><tr><td>demo 组件</td><td><code>components/log-detail/detail-modal.tsx</code> + <code>tabs/overview-tab.tsx</code></td></tr></table></header>
+<section class="interaction-layer"><h4><span class="layer-badge">1</span> 弹窗打开态（概览与处置）</h4>
+<div class="trigger-path"><strong>触发路径</strong>：点击"查看" → 居中模态 w-[1200px]×h-[800px]，遮罩 bg-black/70</div>
+<div class="note">这是全站共享的 DetailModal（与邮件处置中心同组件）。灰邮特化仅在"概览与处置"Tab：右侧"灰邮快速处置"面板、左侧"灰色邮件意图分析"。其余 4 个 Tab 结构与处置中心一致，详见 <code>email-handling-disposal-center</code> 模块 layer-10~14。</div>
+<div style="margin-bottom:0.5rem;font-size:0.8rem">Tab（高亮切换，overview 内容为实际提取，其余见 disposal-center 模块）：<button data-specflip="mtab" data-on="1" style="cursor:pointer;padding:2px 8px;margin-right:3px;border:1px solid #2563eb;border-radius:6px;background:#2563eb;color:#fff">概览与处置</button><button data-specflip="mtab" data-on="0" style="cursor:pointer;padding:2px 8px;margin-right:3px;border:1px solid #2563eb;border-radius:6px;background:#fff;color:#2563eb">安全分析</button><button data-specflip="mtab" data-on="0" style="cursor:pointer;padding:2px 8px;margin-right:3px;border:1px solid #2563eb;border-radius:6px;background:#fff;color:#2563eb">详细特征</button><button data-specflip="mtab" data-on="0" style="cursor:pointer;padding:2px 8px;margin-right:3px;border:1px solid #2563eb;border-radius:6px;background:#fff;color:#2563eb">投递状态</button><button data-specflip="mtab" data-on="0" style="cursor:pointer;padding:2px 8px;margin-right:3px;border:1px solid #2563eb;border-radius:6px;background:#fff;color:#2563eb">原始日志</button></div>
+<div class="component-preview">
+<div class="relative bg-white rounded-lg shadow-2xl flex flex-col w-[1200px] h-[800px]"><div class="border-b border-gray-200 p-6 flex items-center justify-between bg-white flex-shrink-0"><div><div class="text-xs text-gray-500 mb-1">AI邮件安全网关 / 投递状态</div><h2 class="text-lg font-semibold text-gray-900">双11狂欢盛典 - 全场5折起</h2></div><div class="flex items-center gap-3"><button class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded" title="Fullscreen"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize2 w-5 h-5"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" x2="14" y1="3" y2="10"></line><line x1="3" x2="10" y1="21" y2="14"></line></svg></button><button class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded" title="ESC"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x w-6 h-6"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></div><div class="flex-1 overflow-auto bg-white min-h-0"><div dir="ltr" data-orientation="horizontal" data-slot="tabs" class="flex flex-col gap-2 w-full"><div class="border-b border-gray-200 bg-white sticky top-0 z-10"><div class="px-6"><div role="tablist" aria-orientation="horizontal" data-slot="tabs-list" class="text-muted-foreground inline-flex items-center rounded-lg p-[3px] gap-8 w-full justify-start bg-transparent border-0 h-12" tabindex="0" data-orientation="horizontal" style="outline: none;"><button type="button" role="tab" aria-selected="true" aria-controls="radix-_r_l_-content-overview" data-state="active" id="radix-_r_l_-trigger-overview" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-gray-900 rounded-none pb-3 text-gray-600 px-0" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">概览与处置</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_l_-content-analysis" data-state="inactive" id="radix-_r_l_-trigger-analysis" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-gray-900 rounded-none pb-3 text-gray-600 px-0" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">安全分析</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_l_-content-features" data-state="inactive" id="radix-_r_l_-trigger-features" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-gray-900 rounded-none pb-3 text-gray-600 px-0" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">详细特征</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_l_-content-delivery" data-state="inactive" id="radix-_r_l_-trigger-delivery" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-gray-900 rounded-none pb-3 text-gray-600 px-0" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">投递状态</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_l_-content-rawlogs" data-state="inactive" id="radix-_r_l_-trigger-rawlogs" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-gray-900 rounded-none pb-3 text-gray-600 px-0" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">原始日志</button></div></div></div><div class="p-6"><div data-state="active" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_l_-trigger-overview" id="radix-_r_l_-content-overview" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none mt-0" style="animation-duration: 0s;"><div class="grid grid-cols-3 gap-6"><div class="col-span-2 space-y-6"><div class="bg-green-50 border-2 border-green-200 rounded-lg p-5 space-y-4"><div class="flex items-start gap-3"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-6 h-6 text-green-600 flex-shrink-0 mt-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg><div class="flex-1 space-y-3"><div><p class="text-xs text-green-600 font-medium mb-1">邮件类型</p><div class="flex items-center gap-2"><span class="text-base font-bold text-green-700">灰���邮件</span><span class="text-sm text-gray-600">-</span><span class="text-sm text-gray-700">促销��销类</span></div></div><div><p class="text-xs text-green-600 font-medium mb-1">判定结果</p><div class="flex items-center gap-2"><span class="text-sm text-gray-700">置信度 85%</span><span class="text-sm text-gray-600">·</span><span class="text-sm text-gray-700">已归档至灰色邮件文件夹</span></div></div><button class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"><span>判定过程</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-4 h-4"><path d="m6 9 6 6 6-6"></path></svg></button></div></div></div><div class="space-y-4"><div class="bg-green-50 rounded-lg border border-green-200 overflow-hidden"><button class="w-full flex items-center justify-between p-4 hover:bg-green-100 transition-colors"><div class="flex items-center gap-3"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-5 h-5 text-green-600"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg><h3 class="font-semibold text-gray-900">安全检测（全部通过）</h3></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-5 h-5 text-gray-600"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="bg-yellow-50 rounded-lg border border-yellow-200 overflow-hidden"><div class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-yellow-100 to-yellow-50"><div class="flex items-center gap-3"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail w-5 h-5 text-yellow-600"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg><h3 class="font-semibold text-gray-900">灰色邮件意图分析</h3><span class="px-2 py-1 bg-yellow-200 text-yellow-800 text-xs font-medium rounded">当前</span></div></div><div class="p-4 space-y-3"><div class="flex gap-3 items-start"><span class="text-yellow-600 text-lg">⚡</span><div class="flex-1"><span class="text-sm text-gray-700">检测到营销关键词「狂欢」「折扣」</span></div><span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">+25</span></div><div class="flex gap-3 items-start"><span class="text-yellow-600 text-lg">⚡</span><div class="flex-1"><span class="text-sm text-gray-700">发信人域名为商业推广类</span></div><span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">+30</span></div><div class="flex gap-3 items-start"><span class="text-yellow-600 text-lg">⚡</span><div class="flex-1"><span class="text-sm text-gray-700">邮件包含促销链接和优惠券</span></div><span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">+35</span></div><div class="mt-4 p-3 bg-white rounded border border-yellow-100"><p class="text-sm font-semibold text-gray-900 mb-1">处置建议</p><p class="text-sm text-gray-700">已归档至灰色邮件文件夹</p></div></div></div></div><div class="bg-gray-50 rounded-lg p-6 border border-gray-200"><h3 class="text-base font-semibold text-gray-900 mb-4">基本信息</h3><div class="space-y-3"><div class="flex justify-between py-2 border-b border-gray-200"><span class="text-sm text-gray-600">邮件类型</span><span class="text-sm font-medium text-gray-900"><div class="flex items-center gap-2"><span class="text-base font-bold text-green-700">灰���邮件</span><span class="text-sm text-gray-600">-</span><span class="text-sm text-gray-700">促销��销类</span></div></span></div><div class="flex justify-between py-2 border-b border-gray-200"><span class="text-sm text-gray-600">执行动作</span><span class="text-sm font-medium px-3 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200">归档</span></div><div class="flex justify-between py-2 border-b border-gray-200"><span class="text-sm text-gray-600">置信度</span><div class="flex items-center gap-3"><div aria-valuemax="100" aria-valuemin="0" role="progressbar" data-state="indeterminate" data-max="100" data-slot="progress" class="bg-primary/20 relative overflow-hidden rounded-full w-32 h-2"><div data-state="indeterminate" data-max="100" data-slot="progress-indicator" class="bg-primary h-full w-full flex-1 transition-all" style="transform: translateX(-15%);"></div></div><span class="text-sm font-medium text-gray-900">85% (高置信度)</span></div></div><div class="flex justify-between py-2 border-b border-gray-200"><span class="text-sm text-gray-600">策略�������</span><button class="text-sm text-blue-600 hover:text-blue-700 font-medium underline">营销邮件识别策略</button></div><div class="flex justify-between py-2 border-b border-gray-200"><span class="text-sm text-gray-600">模型�������本</span><span class="text-sm px-2 py-1 bg-gray-100 text-gray-700 rounded font-mono">v2.3.1</span></div><div class="flex justify-between py-2 border-b border-gray-200"><span class="text-sm text-gray-600">主题</span><span class="text-sm font-medium text-gray-900 truncate ml-2">双11狂欢盛典 - 全场5折起</span></div><div class="flex justify-between py-2 border-b border-gray-200"><span class="text-sm text-gray-600">发信人</span><span class="text-sm font-medium text-gray-900 truncate ml-2">promo@shop.com</span></div><div class="flex justify-between py-2"><span class="text-sm text-gray-600">收信人</span><span class="text-sm font-medium text-gray-900 truncate ml-2">user@company.com</span></div></div></div><div class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden"><div class="p-6 border-b border-gray-200 flex items-center justify-between"><h3 class="text-base font-semibold text-gray-900">邮件原文</h3><div class="flex gap-2"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground h-8 rounded-md px-3 has-[&gt;svg]:px-2.5 bg-blue-600 hover:bg-blue-700 gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-4 h-4"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>查看原文</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md px-3 has-[&gt;svg]:px-2.5 gap-2 bg-transparent"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>下载原文</button></div></div><div class="p-6"><div class="bg-white border border-gray-200 rounded p-4 overflow-auto transition-all h-40"><pre class="text-xs text-gray-600 whitespace-pre-wrap break-words">From: promo@shop.com
+To: user@company.com
+Subject: 双11狂欢盛典 - 全场5折起
+Date: 2025-11-18 09:15:30
+
+Dear User,
+
+Please click the link below to verify your account:
+https://verify-account.example.com/update?user=user@company.com&amp;token=xxx
+
+Best regards,
+System Administrator</pre></div><button class="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-4 h-4"><path d="m6 9 6 6 6-6"></path></svg>展开</button></div></div></div><div class="col-span-1"><div class="bg-gray-50 rounded-lg p-6 border border-gray-200 sticky top-6 space-y-3"><h3 class="text-base font-semibold text-gray-900 mb-4">灰邮快速处置</h3><button data-slot="button" class="whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[&gt;svg]:px-3 w-full bg-green-600 hover:bg-green-700 text-white font-medium flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-4 h-4"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>放行到收件箱</button><button data-slot="button" class="whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3 w-full bg-transparent font-medium flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>加入灰邮黑名单</button><button data-slot="button" class="whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3 w-full bg-transparent font-medium flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell w-4 h-4"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>一键退订</button><div class="border-t border-gray-200 my-3"></div><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3 w-full bg-transparent text-blue-600 hover:text-blue-700">查看灰邮策略</button><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3 w-full bg-transparent text-red-600 hover:text-red-700">标记为误判</button></div></div></div></div><div data-state="inactive" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_l_-trigger-analysis" hidden="" id="radix-_r_l_-content-analysis" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none mt-0"></div><div data-state="inactive" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_l_-trigger-features" hidden="" id="radix-_r_l_-content-features" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none mt-0"></div><div data-state="inactive" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_l_-trigger-delivery" hidden="" id="radix-_r_l_-content-delivery" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none mt-0"></div><div data-state="inactive" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_l_-trigger-rawlogs" hidden="" id="radix-_r_l_-content-rawlogs" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none mt-0"></div></div></div></div><div class="border-t border-gray-200 p-6 bg-gray-50 flex justify-end gap-3 flex-shrink-0"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3 bg-transparent">取消</button></div></div>
+</div>
+<p class="preview-hint">从 demo 提取的概览与处置 Tab 真实 HTML（含意图分析命中规则打分 + 快速处置 5 动作）。</p>
+<figure class="screenshot-figure"><img src="./screenshots/layer-3-detail-modal.png" alt="详情弹窗"><figcaption>GM001 详情弹窗（概览与处置，置信度 85%）</figcaption></figure>
+<h4>头部 / Tab</h4>
+<table class="spec-table"><thead><tr><th>元素</th><th>文案/行为</th></tr></thead><tbody>
+<tr><td>面包屑</td><td>AI邮件安全网关 / 投递状态</td></tr>
+<tr><td>标题</td><td>邮件主题（如"双11狂欢盛典 - 全场5折起"）</td></tr>
+<tr><td>全屏按钮</td><td>Maximize2/Minimize2 切换全屏</td></tr>
+<tr><td>关闭</td><td>✕ / ESC / 点遮罩</td></tr>
+<tr><td>5 Tab</td><td>概览与处置 / 安全分析 / 详细特征 / 投递状态 / 原始日志</td></tr>
+</tbody></table>
+<h4>灰邮快速处置面板（概览 Tab 右侧，灰邮特化）</h4>
+<table class="spec-table"><thead><tr><th>序号</th><th>元素</th><th>文案</th><th>样式</th><th>落地建议</th></tr></thead><tbody>
+<tr><td>1</td><td>Button(primary)</td><td>放行到收件箱</td><td>绿色</td><td>accept</td></tr>
+<tr><td>2</td><td>Button</td><td>加入灰邮黑名单</td><td>outline</td><td>发信人黑名单</td></tr>
+<tr><td>3</td><td>Button</td><td>一键退订</td><td>outline</td><td>[需确认] 退订链接/List-Unsubscribe</td></tr>
+<tr><td>4</td><td>Button(link)</td><td>查看灰邮策略</td><td>蓝字</td><td>跳转灰邮策略配置</td></tr>
+<tr><td>5</td><td>Button(link)</td><td>标记为误判</td><td>红字</td><td>[需确认] 样本回流</td></tr>
+</tbody></table>
+<h4>灰色邮件意图分析（概览 Tab 左侧）</h4>
+<table class="spec-table"><thead><tr><th>项</th><th>内容（GM001 实测）</th></tr></thead><tbody>
+<tr><td>判定结果</td><td>置信度 85% · 已归档至灰色邮件文件夹</td></tr>
+<tr><td>命中规则 1</td><td>检测到营销关键词「狂欢」「折扣」 <code>+25</code></td></tr>
+<tr><td>命中规则 2</td><td>发信人域名为商业推广类 <code>+30</code></td></tr>
+<tr><td>命中规则 3</td><td>邮件包含促销链接和优惠券 <code>+35</code></td></tr>
+<tr><td>处置建议</td><td>已归档至灰色邮件文件夹</td></tr>
+<tr><td>数据来源</td><td><code>greyMail.hitRules / confidence / strategyName / modelVersion</code></td></tr>
+</tbody></table>
+<div class="dom-comparison"><h5>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h5>
+<table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+<tbody><tr><td>弹窗根</td><td>div.fixed.inset-0.z-[100]</td><td>同</td><td class="dom-pass">✅</td></tr>
+<tr><td>遮罩</td><td>div.absolute.inset-0.bg-black/70</td><td>同</td><td class="dom-pass">✅</td></tr>
+<tr><td>模态容器</td><td>div.w-[1200px].h-[800px]</td><td>同</td><td class="dom-pass">✅</td></tr>
+<tr><td>Tab 数</td><td>5</td><td>5</td><td class="dom-pass">✅</td></tr>
+<tr><td>快速处置按钮</td><td>5（放行/加黑/退订/查看策略/误判）</td><td>5</td><td class="dom-pass">✅</td></tr>
+<tr><td>意图分析命中规则</td><td>3 条 + 打分</td><td>3 条 + 打分</td><td class="dom-pass">✅</td></tr>
+<tr><td>nodeCount(弹窗)</td><td>168</td><td>168</td><td class="dom-pass">✅</td></tr></tbody></table></div>
+<p style="font-size:0.78rem;color:#94a3b8">注：headless 截图中部分中文（"灰色邮件""促销营销类"）出现字形缺字 <code>��</code>，为无头 Chrome 字体渲染问题，非 demo 缺陷；DOM 文本实际完整。</p>
+</section>
+<nav class="layer-nav"><a href="./index.html#d-3-1">← 返回主文件</a><span>层级 1 · 详情弹窗</span><span></span></nav>
+
+<script>
+document.addEventListener('click',function(e){
+  // tab highlight (search mode / modal tabs)
+  var t=e.target.closest('[data-specflip]');
+  if(t){var g=t.getAttribute('data-specflip');
+    document.querySelectorAll('[data-specflip="'+g+'"]').forEach(function(b){b.setAttribute('data-on','0');});
+    t.setAttribute('data-on','1');
+    var show=t.getAttribute('data-show');
+    if(show){document.querySelectorAll('[data-panel="'+g+'"]').forEach(function(p){p.style.display='none';});
+      var pn=document.querySelector('[data-panel="'+g+'"][data-key="'+show+'"]'); if(pn)pn.style.display='';}
+  }
+  // checkbox toggle inside previews -> recompute batch buttons
+  var cb=e.target.closest('.component-preview [role="checkbox"]');
+  if(cb){
+    var setCb=function(el,checked){el.setAttribute('data-state',checked?'checked':'unchecked');el.setAttribute('aria-checked',checked);
+      el.querySelectorAll('svg').forEach(function(s){s.style.visibility=checked?'visible':'hidden';});};
+    var now=cb.getAttribute('data-state')!=='checked';
+    setCb(cb,now);
+    var host=cb.closest('[data-batchhost]');
+    if(host){
+      // header (thead) checkbox toggles all rows
+      if(cb.closest('thead')){host.querySelectorAll('tbody [role="checkbox"]').forEach(function(x){setCb(x,now);});}
+      var any=host.querySelectorAll('tbody [role="checkbox"][data-state="checked"]').length>0;
+      var labels=['放行','删除','加黑','标记误判','加白名单'];
+      host.querySelectorAll('button').forEach(function(b){
+        var tx=(b.textContent||'').trim();
+        if(labels.indexOf(tx)>=0){b.disabled=!any; b.style.opacity=any?'1':'0.6'; b.style.cursor=any?'pointer':'not-allowed';}
+      });
+    }
+  }
+},true);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>try{mermaid.initialize({startOnLoad:true,theme:'default'});}catch(e){}</script>
+</body>
+</html>

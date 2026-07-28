@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 2：检测条件 + 校验 + 实时预览 - 发信行为管控 HTML 规格说明</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{--primary:oklch(0.52 0.226 262);--primary-foreground:oklch(0.985 0 0);--background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);--card:oklch(1 0 0);--muted:oklch(0.97 0 0);--muted-foreground:oklch(0.556 0 0);--border:oklch(0.922 0 0);--destructive:oklch(0.577 0.245 27.325);--radius:0.625rem;--font-sans:"Geist",system-ui,sans-serif;--font-mono:ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto}
+.layer-nav{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1.25rem;background:var(--muted);border-radius:var(--radius);margin-bottom:1.5rem;font-size:.875rem}
+.layer-nav a{color:var(--primary);text-decoration:none;font-weight:600}.layer-nav a:hover{text-decoration:underline}
+.spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem}
+.spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.4rem}
+.meta-table{width:100%;border-collapse:collapse;font-size:.875rem}.meta-table td{padding:.5rem 1rem;border-bottom:1px solid var(--border)}.meta-table td:first-child{font-weight:600;width:150px;color:var(--muted-foreground)}.meta-table td a{color:var(--primary)}
+section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem}
+section>h2{color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:.5rem;margin-bottom:1rem;font-size:1.2rem}
+h4{font-size:.95rem;margin:.75rem 0 .5rem;color:var(--muted-foreground)}
+table.spec-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:1rem 0}
+table.spec-table th{background:var(--muted);font-weight:600;text-align:left;padding:.6rem .7rem;border:1px solid var(--border)}
+table.spec-table td{padding:.55rem .7rem;border:1px solid var(--border);vertical-align:top}
+.screenshot-figure{margin:1rem 0;text-align:center}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,.08)}.screenshot-figure figcaption{margin-top:.5rem;font-size:.8125rem;color:var(--muted-foreground)}
+.trigger-path{background:var(--muted);border-radius:calc(var(--radius) - 4px);padding:.5rem .75rem;margin:.5rem 0 1rem;font-size:.8125rem;color:var(--muted-foreground)}.trigger-path strong{color:var(--foreground)}
+.component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:1.75rem 1.25rem 1.25rem;margin:1rem 0;background:#fff;position:relative;overflow:auto}
+.component-preview::before{content:"🖥 可交互组件预览（勾选OR / 改阈值 → 观察字段与效果句联动）";position:absolute;top:-.65rem;left:.75rem;background:var(--primary);color:var(--primary-foreground);font-size:.6875rem;font-weight:600;padding:.125rem .5rem;border-radius:calc(var(--radius) - 4px)}
+.sc{--sc-border:214 32% 91%;color:hsl(222 47% 11%);font-size:14px}.sc *{box-sizing:border-box}
+.dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);overflow:hidden}
+.dom-comparison>h5{background:var(--muted);padding:.5rem .75rem;font-size:.8125rem;font-weight:600;border-bottom:1px solid var(--border)}.dom-comparison>h5::before{content:"🔍 "}
+.dom-comparison table{width:100%;border-collapse:collapse;font-size:.8rem}.dom-comparison th{background:var(--muted);text-align:left;padding:.45rem .7rem;border-bottom:1px solid var(--border);font-weight:600}.dom-comparison td{padding:.45rem .7rem;border-bottom:1px solid var(--border)}
+.dom-pass{color:oklch(0.5 0.15 150);font-weight:600}
+</style>
+</head>
+<body>
+<nav class="layer-nav">
+  <a href="./layer-1-object-linkage.html">← 层级 1：对象类型联动</a>
+  <span>层级 2 / 3（规则编辑抽屉）</span>
+  <a href="./layer-3-examples-simulator.html">层级 3：配置示例 + 模拟测试 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 2：检测条件 + 表单校验 + 实时效果预览</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.4 规则编辑抽屉 BehaviorRuleDrawer</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+    <tr><td>层级编号</td><td>层级 2 / 3</td></tr>
+    <tr><td>触发路径</td><td>检测条件区勾选「启用OR组合条件」→ 显示维度B/阈值B；点「保存」触发 <code>validateBehaviorRuleForm</code>；表单变更 → 右栏「当前配置效果」实时更新</td></tr>
+    <tr><td>demo 组件</td><td><code>behavior-rule-drawer.tsx</code>（检测条件块 / previewContent / handleSave）</td></tr>
+  </table>
+</header>
+
+<section>
+  <h2>2A. OR 组合条件 + 实时效果预览</h2>
+  <div class="trigger-path"><strong>联动</strong>：勾选「启用OR组合条件」→ 显示「检测维度B」「阈值B」；右栏效果句由 <code>objectDesc/direction/timeWindow/dimension/threshold/action</code> 组装；当 <code>!name || thresholdA≤0 || (OR && thresholdB≤0)</code> 时右栏显示 amber「请完善检测阈值以预览效果」。</div>
+  <div class="component-preview"><div class="sc">
+    <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <div style="flex:1;min-width:300px;background:#FAFAFA;border-radius:8px;padding:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="height:18px;width:4px;background:#f59e0b;border-radius:999px"></span><strong>检测条件</strong></div>
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:13px">
+          <div style="display:flex;align-items:center;gap:10px"><label style="min-width:96px;text-align:right">时间窗口</label><select id="tw" onchange="L2p()" class="border rounded-md" style="width:170px;height:32px;background:#fff;border-color:hsl(214 32% 91%)"><option value="1分钟">1分钟</option><option value="15分钟" selected>15分钟</option><option value="1小时">1小时</option><option value="当天">当天（自然日）</option></select></div>
+          <div style="display:flex;align-items:center;gap:10px"><label style="min-width:96px;text-align:right">维度A</label><select id="dA" onchange="L2p()" class="border rounded-md" style="flex:1;height:32px;background:#fff;border-color:hsl(214 32% 91%)"><option value="使用发信IP个数">使用发信IP个数上限</option><option value="收信人总人数">收信人总人数上限</option><option value="发出邮件的总数">发出邮件的总数上限</option><option value="发出附件总大小">发出附件总大小上限(MB)</option></select></div>
+          <div style="display:flex;align-items:center;gap:10px"><label style="min-width:96px;text-align:right">阈值A</label><input id="tA" type="number" oninput="L2p()" placeholder="请输入阈值" class="border rounded-md" style="width:120px;height:32px;padding:0 8px;border-color:hsl(214 32% 91%)"></div>
+          <div style="display:flex;align-items:center;gap:10px"><span style="min-width:96px"></span><label style="cursor:pointer"><input id="or" type="checkbox" onchange="document.getElementById('bwrap').style.display=this.checked?'block':'none';L2p()"> 启用OR组合条件</label></div>
+          <div id="bwrap" style="display:none">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><label style="min-width:96px;text-align:right">维度B</label><select id="dB" onchange="L2p()" class="border rounded-md" style="flex:1;height:32px;background:#fff;border-color:hsl(214 32% 91%)"><option value="发出邮件的总数" selected>发出邮件的总数上限</option><option value="收信人总人数">收信人总人数上限</option></select></div>
+            <div style="display:flex;align-items:center;gap:10px"><label style="min-width:96px;text-align:right">阈值B</label><input id="tB" type="number" oninput="L2p()" placeholder="请输入阈值" class="border rounded-md" style="width:120px;height:32px;padding:0 8px;border-color:hsl(214 32% 91%)"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px"><label style="min-width:96px;text-align:right">执行动作</label><select id="ac" onchange="L2p()" class="border rounded-md" style="width:120px;height:32px;background:#fff;border-color:hsl(214 32% 91%)"><option>审核</option><option>隔离</option><option>丢弃</option><option>阻断</option></select></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px;background:#F5F5F5;border-radius:8px;padding:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg><strong>当前配置效果</strong></div>
+        <div id="prev" style="font-size:13px;line-height:2"></div>
+      </div>
+    </div>
+  </div></div>
+  <figure class="screenshot-figure"><img src="./screenshots/layer2-or-condition.png" alt="启用OR组合条件"><figcaption>勾选「启用OR组合条件」→ 显示检测维度B + 阈值B（浏览器实际渲染）</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/layer2-preview-filled.png" alt="实时效果预览已填充"><figcaption>填入名称+阈值（对象=全局、阈值A=500、动作=审核）后，右栏效果句实时渲染：「当发信人为 任意对象 · 方向为 外发防护 · 在 15分钟 内 · 使用发信IP个数超过 500 · 系统将执行：审核 · 优先级 2000」（浏览器实际渲染）</figcaption></figure>
+</section>
+
+<section>
+  <h2>2B. 表单校验（点保存触发）</h2>
+  <div class="trigger-path"><strong>触发路径</strong>：点「保存」→ <code>validateBehaviorRuleForm</code>；存在 <code>type==="error"</code> 的错误则阻断保存、字段标红并显示内联错误；保存按钮在 <code>hasBlockingErrors</code> 时 disabled。</div>
+  <figure class="screenshot-figure"><img src="./screenshots/layer2-validation-errors.png" alt="表单校验错误"><figcaption>空表单点保存：规则名称/邮箱地址红框 + 内联「请输入规则名称」「请输入邮箱地址」「阈值A必须大于0」（浏览器实际渲染）</figcaption></figure>
+  <table class="spec-table">
+    <thead><tr><th>字段</th><th>校验条件</th><th>错误文案（浏览器验证）</th></tr></thead>
+    <tbody>
+      <tr><td>规则名称</td><td>trim 为空</td><td>请输入规则名称</td></tr>
+      <tr><td>邮箱地址（个人）</td><td>空 / 正则不匹配</td><td>请输入邮箱地址 · 邮箱格式不正确，支持 *@domain.com 通配符</td></tr>
+      <tr><td>发信人群组 / 组织部门</td><td>未选择</td><td>请选择发信人群组 · 请选择组织部门</td></tr>
+      <tr><td>IP地址/IP段（单个IP）</td><td>空 / 正则不匹配</td><td>请输入IP地址或IP段 · IP格式不正确，支持 1.2.3.4 或 1.2.3.0/24</td></tr>
+      <tr><td>IP群组</td><td>未选择</td><td>请选择IP群组</td></tr>
+      <tr><td>域名</td><td>空 / 正则不匹配</td><td>请输入域名 · 域名格式不正确</td></tr>
+      <tr><td>阈值A</td><td>≤0</td><td>阈值A必须大于0</td></tr>
+      <tr><td>阈值B（OR 启用）</td><td>≤0</td><td>启用OR组合时，阈值B必须大于0</td></tr>
+      <tr><td>优先级</td><td>&lt;2000 或 &gt;2049</td><td>优先级范围应为 2000-2049</td></tr>
+      <tr><td>有效期至</td><td>早于当前日期</td><td>有效期不能早于当前日期</td></tr>
+    </tbody>
+  </table>
+  <div class="dom-comparison"><h5>DOM 树比对结果（浏览器验证）</h5><table>
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody>
+      <tr><td>OR 勾选后新增字段</td><td>检测维度B + 阈值B（label 出现）</td><td>预览勾选后显示维度B/阈值B</td><td class="dom-pass">✅</td></tr>
+      <tr><td>空表单保存错误集</td><td>请输入规则名称 / 请输入邮箱地址 / 阈值A必须大于0 /（OR 时）启用OR组合时，阈值B必须大于0</td><td>同左（校验表全量列出）</td><td class="dom-pass">✅</td></tr>
+      <tr><td>完善后效果句</td><td>「当发信人为任意对象 · 方向为外发防护 · 15分钟内 · 使用发信IP个数超过500 · 执行：审核 · 优先级2000」</td><td>预览 L2p() 生成同结构句</td><td class="dom-pass">✅</td></tr>
+      <tr><td>未完善提示</td><td>amber Alert「请完善检测阈值以预览效果」</td><td>预览同条件显示 amber</td><td class="dom-pass">✅</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./layer-1-object-linkage.html">← 层级 1：对象类型联动</a>
+  <a href="./layer-3-examples-simulator.html">层级 3：配置示例 + 模拟测试 →</a>
+</nav>
+<script>
+function L2p(){
+ const name=true; // 预览默认视为已填名称，突出阈值联动
+ const tA=parseInt(document.getElementById('tA').value)||0;
+ const or=document.getElementById('or').checked;
+ const tB=parseInt(document.getElementById('tB').value)||0;
+ const el=document.getElementById('prev');
+ if(tA<=0||(or&&tB<=0)){el.innerHTML='<div style="border:1px solid #f59e0b;background:#fffbeb;border-radius:6px;padding:10px;color:#b45309">⚠ 请完善检测阈值以预览效果</div>';return;}
+ const tw=document.getElementById('tw').value, dA=document.getElementById('dA').value, dB=document.getElementById('dB').value, ac=document.getElementById('ac').value;
+ let s='<div>👥 当发信人为 <b>任意对象</b></div><div>🌐 且方向为 <b>外发防护</b></div><div>⏱ 在 <b>'+tw+'</b> 内</div>';
+ s+='<div>🚫 '+dA+'超过 <b>'+tA+'</b>';
+ if(or) s+=' 或 '+dB+'超过 <b>'+tB+'</b>';
+ s+='</div><div>🛡 系统将执行：<b>'+ac+'</b></div><div>优先级：<b>2000</b></div>';
+ el.innerHTML=s;
+}
+L2p();
+</script>
+</body>
+</html>

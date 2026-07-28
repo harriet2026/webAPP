@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级2：全方向聚合模式 - 相似邮件检测 HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0); --card: #fff; --muted: #f5f7fa; --muted-foreground: #6b7280; --border: #e5e7eb; --blue: #1677ff; --amber-bg: #fffbeb; --amber-border: #fcd34d; --amber-text: #b45309; --radius: 0.625rem; --font-sans: "Geist", "Inter", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: var(--muted); border-radius: var(--radius); margin-bottom: 20px; font-size: 14px; }
+    .layer-nav a { font-weight: 600; }
+    .spec-header, section { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .trigger-path { margin: 8px 0 12px; padding: 8px 12px; border-radius: 8px; background: var(--muted); color: var(--muted-foreground); font-size: 13px; }
+    .trigger-path strong { color: var(--foreground); }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .is-hidden { display: none !important; }
+    .sw { position: relative; width: 36px; height: 20px; border-radius: 999px; background: #d1d5db; border: 0; cursor: pointer; flex-shrink: 0; transition: background .15s; }
+    .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 999px; background: #fff; transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+    .sw[aria-checked="true"] { background: #2563eb; }
+    .sw[aria-checked="true"]::after { left: 18px; }
+    .pill { display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #fef3c7; color: #b45309; border: 1px solid var(--amber-border); }
+    .sd-app { min-width: 820px; font-size: 14px; }
+    .sd-banner { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; margin-bottom: 14px; border: 1px solid var(--amber-border); border-radius: 8px; background: var(--amber-bg); color: var(--amber-text); }
+    .sd-banner .b-title { font-weight: 650; }
+    .sd-banner p { margin: 4px 0 0; font-size: 13px; }
+    .sd-block { padding: 14px; margin: 12px 0; border: 1px solid var(--border); border-radius: 8px; background: #f9fafb; }
+    .sd-block h5 { margin: 0 0 10px; font-size: 14.5px; }
+    .radio-row { display: flex; align-items: flex-start; gap: 8px; margin: 6px 0; }
+    .radio-row input[type=radio] { margin-top: 4px; accent-color: #2563eb; }
+    .agg-card { border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; background: #fff; }
+    .agg-card.observe { border-color: var(--amber-border); background: #fffdf5; }
+    .agg-head { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; font-weight: 650; }
+    .obs-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px; margin-bottom: 12px; border-radius: 8px; background: #f9fafb; font-size: 13px; }
+    .obs-row .lab { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+    .obs-state { font-size: 12px; color: #6b7280; }
+    .obs-state.on { color: #d97706; }
+    .agg-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .agg-grid .cell label { display: block; font-size: 13.5px; margin-bottom: 6px; }
+    .agg-grid input[type=number] { width: 76px; height: 30px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 7px; font-family: inherit; }
+    .agg-grid input[type=range] { width: calc(100% - 52px); accent-color: #2563eb; vertical-align: middle; }
+    .agg-grid select { width: 100%; height: 30px; border: 1px solid var(--border); border-radius: 7px; background: #fff; font-family: inherit; font-size: 13px; padding: 0 6px; }
+    .agg-grid select:disabled { opacity: .5; cursor: not-allowed; }
+    .unit { color: #6b7280; font-size: 13px; }
+    .pct { font-weight: 650; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <span>层级 2 / 3</span>
+    <a href="./layer-3-card-interactions.html">层级3：方向卡片深层交互态 →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 2：全方向聚合模式（合并统计）</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 相似检测模块 SimilarDetectionModule</td></tr>
+      <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级0/层级1 → “检测方向配置”RadioGroup 选中“全方向聚合（合并统计）” → directionMode=aggregate → 方向复选框行与三张方向卡隐藏，渲染统一配置卡（<code>renderAggregateConfig()</code>）</td></tr>
+      <tr><td>demo 组件</td><td><code>similar-detection-module.tsx</code> renderAggregateConfig()</td></tr>
+      <tr><td>与 split 模式差异</td><td>① 单卡横向 4 列栅格（<code>md:grid-cols-2 lg:grid-cols-4</code>）而非纵向字段列表；② 头部 Layers 图标、<b>无“同步到其他方向”按钮</b>；③ 观察开关开启后<b>无“查看观察日志”链接</b>（split 卡有）；④ aggregateConfig 两个 Tab 共享同一份；⑤ PRD 称聚合是“默认兼容模式”，demo 默认却是 split（差异 D-7）。</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">2</span>交互层级 2：聚合统一配置卡（预览可操作：单选切换、观察开关、滑块、下拉）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：选中“全方向聚合（合并统计）”单选。默认态：观察=关、30分钟、80%、10封、隔离并告警；警告条隐藏（aggregateConfig.observeMode=false）。</div>
+
+    <div class="component-preview">
+      <div class="sd-app">
+        <div class="sd-banner is-hidden" data-agg-banner>
+          <span>⚠</span>
+          <div>
+            <span class="b-title">当前处于观察模式:</span>
+            <span class="pill">全方向聚合（合并统计）</span>
+            <span>正在观察中</span>
+            <p>命中后仅记录不拦截。确认策略效果后请及时切换为正式模式。</p>
+          </div>
+        </div>
+        <div class="sd-block">
+          <h5>检测方向配置</h5>
+          <div class="radio-row"><input type="radio" name="agg-mode" id="l2-agg" value="aggregate" checked><label for="l2-agg">全方向聚合（合并统计）</label></div>
+          <div class="radio-row"><input type="radio" name="agg-mode" id="l2-split" value="split"><label for="l2-split">按方向独立检测（可勾选多个）—— 切回将恢复三张方向卡（见<a href="./index.html#component-2-3">主文件层级0</a>）</label></div>
+        </div>
+        <div class="agg-card" data-agg-card>
+          <div class="agg-head">≋ 全方向聚合（合并统计）<span class="pill is-hidden" data-agg-badge>◉ 观察模式</span></div>
+          <div class="obs-row">
+            <span class="lab">◉ 观察模式</span>
+            <span style="display:flex;align-items:center;gap:8px;">
+              <span class="obs-state" data-agg-state>关闭</span>
+              <button class="sw" role="switch" aria-checked="false" data-agg-switch aria-label="聚合观察模式"></button>
+            </span>
+          </div>
+          <div class="agg-grid">
+            <div class="cell"><label>检测窗口</label><input type="number" value="30"> <span class="unit">分钟</span></div>
+            <div class="cell"><label>相似度阈值</label><input type="range" min="50" max="100" step="5" value="80" data-agg-thr> <span class="pct" data-agg-pct>80%</span></div>
+            <div class="cell"><label>触发数量</label><input type="number" value="10"> <span class="unit">封</span></div>
+            <div class="cell"><label>触发动作</label>
+              <select data-agg-act>
+                <option selected>隔离并告警</option><option>隔离</option><option>审核</option><option>标记投递</option><option>阻断</option><option>丢弃</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <figure class="screenshot-figure">
+      <img src="./screenshots/layer2-aggregate-mode.png" alt="全方向聚合模式实拍">
+      <figcaption>聚合模式实拍（相似邮件检测 Tab）：三方向卡与方向复选框行隐藏；统一配置卡 4 列布局（检测窗口 / 相似度阈值 / 触发数量 / 触发动作）；无警告条（观察未开启）。</figcaption>
+    </figure>
+
+    <h4>UI 元素清单（层级2）</h4>
+    <table class="spec-table">
+      <thead><tr><th>序号</th><th>元素</th><th>实际文案/默认值</th><th>校验</th><th>交互行为</th><th>i18n key（模块内 L.*）</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>RadioGroup</td><td>“全方向聚合（合并统计）”选中</td><td>单选</td><td>选中即隐藏方向复选框行与三卡片；切回 split 恢复（TC-010 验证通过）</td><td>L.aggregateMode / L.splitMode</td></tr>
+        <tr><td>2</td><td>卡片头部</td><td>Layers 图标 + “全方向聚合（合并统计）”；观察开启时追加琥珀 Badge</td><td>—</td><td>无同步按钮（仅 split 卡有）</td><td>L.aggregateMode / L.observeMode</td></tr>
+        <tr><td>3</td><td>观察模式开关行</td><td>Eye 图标 + “观察模式” + 状态字 + Switch（默认关）</td><td>—</td><td>开启：卡片变琥珀、Badge 出现、触发动作 disabled、全局警告条出现（徽章文案=“全方向聚合（合并统计）”）；<b>不出现</b>“查看观察日志”链接</td><td>L.observeMode / L.observeModeOn / L.observeModeOff</td></tr>
+        <tr><td>4</td><td>检测窗口 / 触发数量</td><td>30 分钟 / 10 封（number input）</td><td>无前端校验（差异 D-3）</td><td>onChange 直接写入 aggregateConfig</td><td>L.detectionWindow / L.triggerCount</td></tr>
+        <tr><td>5</td><td>相似度阈值</td><td>Slider 50-100 步进5，默认 80%</td><td>范围由组件限定</td><td>仅相似邮件检测 Tab 渲染（相同主题 Tab 的聚合卡为 3 字段）</td><td>L.similarityThreshold</td></tr>
+        <tr><td>6</td><td>触发动作</td><td>Select 全宽，默认“隔离并告警”，6 选项</td><td>观察开启时 disabled</td><td>同层级0</td><td>L.triggerAction 等</td></tr>
+      </tbody>
+    </table>
+
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果（层级2，1440px 实测）</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>Radio 状态</td><td>aggregate=checked，split=unchecked</td><td>aggregate checked</td><td>一致</td></tr>
+          <tr><td>方向复选框行</td><td>不渲染（checkboxes 采集为空数组）</td><td>预览不渲染复选框行</td><td>一致</td></tr>
+          <tr><td>三张方向卡</td><td>不渲染，仅“检测方向配置”块（节点数13）+ 聚合卡</td><td>预览同构</td><td>一致</td></tr>
+          <tr><td>聚合卡</td><td>蓝边、switch unchecked、inputs [30,10]、slider aria-valuenow=80、combobox “隔离并告警”可用、无同步按钮、节点数 44</td><td>预览同状态</td><td>一致</td></tr>
+          <tr><td>全局警告条</td><td>不渲染（观察关）</td><td>预览隐藏，开启开关后出现且徽章为“全方向聚合（合并统计）”</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="./layer-1-same-subject-tab.html">← 层级1：相同主题检测 Tab</a>
+    <a href="./layer-3-card-interactions.html">层级3：方向卡片深层交互态 →</a>
+  </nav>
+
+  <script>
+    (() => {
+      const sw = document.querySelector("[data-agg-switch]");
+      const card = document.querySelector("[data-agg-card]");
+      const badge = document.querySelector("[data-agg-badge]");
+      const stateEl = document.querySelector("[data-agg-state]");
+      const banner = document.querySelector("[data-agg-banner]");
+      const act = document.querySelector("[data-agg-act]");
+      sw.addEventListener("click", () => {
+        const on = sw.getAttribute("aria-checked") !== "true";
+        sw.setAttribute("aria-checked", String(on));
+        card.classList.toggle("observe", on);
+        badge.classList.toggle("is-hidden", !on);
+        stateEl.textContent = on ? "开启" : "关闭";
+        stateEl.classList.toggle("on", on);
+        banner.classList.toggle("is-hidden", !on);
+        act.disabled = on;
+      });
+      document.querySelector("[data-agg-thr]").addEventListener("input", e => {
+        document.querySelector("[data-agg-pct]").textContent = e.target.value + "%";
+      });
+      document.getElementById("l2-split").addEventListener("change", () => {
+        card.style.opacity = ".35";
+        card.title = "split 模式下本卡隐藏——完整三卡片预览见主文件层级0";
+      });
+      document.getElementById("l2-agg").addEventListener("change", () => {
+        card.style.opacity = "1";
+        card.title = "";
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级1：新建/编辑规则抽屉 - 发信行为管控 HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --muted: #f5f7fa; --muted-foreground: #6b7280; --border: #e5e7eb; --blue: #1677ff; --red: #f5222d; --radius: 0.625rem; --font-sans: "Geist", "Inter", system-ui, sans-serif; --font-mono: "Geist Mono", ui-monospace, monospace; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: #111827; font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 19px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .layer-nav { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 12px 18px; background: var(--muted); border-radius: 8px; font-size: 14px; }
+    .spec-header, section { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 160px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    /* ==== 抽屉复刻 ==== */
+    .drawer { min-width: 900px; max-width: 920px; border: 1px solid var(--border); border-radius: 10px; background: #fff; box-shadow: 0 8px 30px rgba(15,23,42,.15); overflow: hidden; }
+    .drawer-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #E8E8E8; }
+    .drawer-head h5 { margin: 0; font-size: 17px; }
+    .drawer-head p { margin: 2px 0 0; font-size: 13px; color: #6b7280; }
+    .drawer-body { display: grid; grid-template-columns: 560px 1fr; }
+    .form-col { padding: 20px; border-right: 1px solid #E8E8E8; }
+    .prev-col { padding: 20px; background: #F5F5F5; }
+    .fgroup { margin-bottom: 18px; padding: 16px; border-radius: 8px; background: #FAFAFA; }
+    .fgroup-title { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 650; font-size: 14px; }
+    .fgroup-bar { width: 4px; height: 18px; border-radius: 999px; }
+    .frow { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 13px; }
+    .frow > label { min-width: 96px; text-align: right; color: #374151; }
+    .req::before { content: "* "; color: #ef4444; }
+    .fin { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: #fff; }
+    .fin.err { border-color: #ef4444; }
+    .fsel { padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: #fff; }
+    .fhint { margin: 2px 0 0 106px; font-size: 12px; color: #9ca3af; }
+    .ferr { margin: 2px 0 0 106px; font-size: 12px; color: #ef4444; }
+    .unit { color: #6b7280; font-size: 13px; }
+    .button-blue { padding: 7px 14px; border: 0; border-radius: 8px; background: #155eef; color: #fff; font-weight: 650; font-size: 13px; cursor: pointer; }
+    .button-blue:disabled { opacity: .5; cursor: not-allowed; }
+    .button-icon { padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; font-size: 13px; cursor: pointer; }
+    .pcard { margin-bottom: 14px; padding: 14px; border: 1px solid #E8E8E8; border-radius: 8px; background: #fff; font-size: 13px; }
+    .pcard h6 { margin: 0 0 10px; font-size: 14px; }
+    .amber { padding: 10px; border: 1px solid #f59e0b; border-radius: 8px; background: #fffbeb; color: #b45309; font-size: 13px; }
+    .pill { display: inline-flex; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #f3f4f6; }
+    .pill.red { background: #fee2e2; color: #b91c1c; }
+    .tips li { margin: 4px 0; font-size: 12px; color: #6b7280; }
+    .is-hidden { display: none !important; }
+    .mini-dialog-mask { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,.45); border-radius: 8px; z-index: 5; }
+    .mini-dialog { width: 360px; padding: 18px; border-radius: 10px; background: #fff; box-shadow: 0 12px 30px rgba(0,0,0,.25); font-size: 14px; }
+    .mini-dialog .btn-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+    .button-redout { padding: 7px 12px; border: 0; border-radius: 8px; background: #dc2626; color: #fff; font-weight: 650; font-size: 13px; cursor: pointer; }
+    @media (max-width: 1000px) { .drawer { min-width: 0; } .drawer-body { grid-template-columns: 1fr; } .form-col { border-right: 0; } }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <span>层级 1 / 3</span>
+    <a href="./layer-2-validation-examples-simulator.html">层级 2：校验/示例/模拟测试 →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 1：新建/编辑规则抽屉 BehaviorRuleDrawer</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 规则编辑抽屉（发信行为管控）</td></tr>
+      <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级0 规则列表 → "+ 新建规则"按钮（editingRule=null）或行内编辑图标（editingRule=规则，<code>ruleToFormData</code> 预填）→ 打开 920px Sheet</td></tr>
+      <tr><td>demo 组件</td><td><code>design/origin/demo/components/sender-behavior-control/behavior-rule-drawer.tsx</code></td></tr>
+      <tr><td>浏览器验证</td><td>抽屉实测 920×1000；标题"新建规则 / 配置发信人行为管控规则"；头部右侧 取消 / 保存；左栏3个表单区块 + 右栏预览帮助区。</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">1</span>抽屉默认态 + 对象类型联动 + 实时预览（可交互复刻）</h2>
+    <p style="font-size:13px;color:#6b7280;">下方预览可操作：切换管控对象类型/发信人类型/IP类型联动子字段；填写名称与阈值后右侧"当前配置效果"实时更新；勾选 OR 出现维度B；点"保存"触发校验（详见层级2）；修改任意字段后点"取消"弹出未保存确认（详见层级3）。</p>
+    <div class="component-preview" style="position:relative;" id="drawer-root">
+      <div class="drawer" data-demo-extracted="behavior-rule-drawer">
+        <div class="drawer-head">
+          <div><h5>新建规则</h5><p>配置发信人行为管控规则</p></div>
+          <div><button class="button-icon" type="button" data-d-cancel>取消</button> <button class="button-blue" type="button" data-d-save>保存</button></div>
+        </div>
+        <div class="drawer-body">
+          <div class="form-col">
+            <div class="fgroup">
+              <div class="fgroup-title"><span class="fgroup-bar" style="background:#3b82f6;"></span>基础设置</div>
+              <div class="frow"><label class="req">规则名称</label><input class="fin" data-f="name" placeholder="如：销售部外发限制"></div>
+              <div class="ferr is-hidden" data-err="name">请输入规则名称</div>
+              <div class="frow"><label class="req">管控方向</label>
+                <select class="fsel" data-f="direction" style="width:190px;">
+                  <option value="inbound">入站防护</option><option value="outbound" selected>外发防护</option><option value="internal">域内防护</option><option value="bidirectional">双向合计</option>
+                </select></div>
+              <div class="frow"><label class="req">管控对象类型</label>
+                <select class="fsel" data-f="objectType" style="width:190px;">
+                  <option value="global">全局</option><option value="sender" selected>发信人</option><option value="senderIp">发信IP</option><option value="senderDomain">发信域名</option>
+                </select></div>
+              <div data-sub="sender">
+                <div class="frow"><label class="req">发信人类型</label>
+                  <select class="fsel" data-f="senderSubType" style="width:190px;">
+                    <option value="individual" selected>个人</option><option value="group">群组</option><option value="organization">组织</option>
+                  </select></div>
+                <div data-sub2="individual">
+                  <div class="frow"><label class="req">邮箱地址</label><input class="fin" data-f="senderEmail" placeholder="如：user@corp.com 或 *@domain.com"></div>
+                  <div class="fhint">支持通配符 *@domain.com</div>
+                  <div class="ferr is-hidden" data-err="senderEmail">请输入邮箱地址</div>
+                </div>
+                <div data-sub2="group" class="is-hidden">
+                  <div class="frow"><label class="req">发信人群组</label>
+                    <select class="fsel" data-f="senderGroup" style="flex:1;">
+                      <option value="">请选择群组</option><option>VIP客户 (50人)</option><option>销售团队 (120人)</option><option>营销账号 (15人)</option><option>系统通知 (5人)</option><option>外部供应商 (35人)</option>
+                    </select></div>
+                  <div class="fhint">数据来源：群组策略配置 <a href="#">管理群组 ↗</a></div>
+                </div>
+                <div data-sub2="organization" class="is-hidden">
+                  <div class="frow"><label class="req">组织部门</label>
+                    <select class="fsel" data-f="senderOrg" style="flex:1;">
+                      <option value="">请选择部门</option><option>销售部 (85人)</option><option>市场部 (42人)</option><option>技术部 (156人)</option><option>人事部 (28人)</option><option>财务部 (35人)</option><option>&nbsp;&nbsp;- 华东区销售 (32人)</option><option>&nbsp;&nbsp;- 华南区销售 (28人)</option>
+                    </select></div>
+                  <div class="fhint">数据来源：组织架构 <a href="#">管理组织 ↗</a></div>
+                </div>
+              </div>
+              <div data-sub="senderIp" class="is-hidden">
+                <div class="frow"><label class="req">IP类型</label>
+                  <select class="fsel" data-f="ipSubType" style="width:190px;">
+                    <option value="single" selected>单个IP</option><option value="ipGroup">IP群组</option>
+                  </select></div>
+                <div data-sub2="single">
+                  <div class="frow"><label class="req">IP地址/IP段</label><input class="fin" data-f="ipAddress" placeholder="如：1.2.3.4 或 1.2.3.0/24"></div>
+                  <div class="ferr is-hidden" data-err="ipAddress">请输入IP地址或IP段</div>
+                </div>
+                <div data-sub2="ipGroup" class="is-hidden">
+                  <div class="frow"><label class="req">IP群组</label>
+                    <select class="fsel" data-f="ipGroup" style="flex:1;">
+                      <option value="">请选择IP群组</option><option>海外IP (45个IP)</option><option>可信代理IP (8个IP)</option><option>CDN节点 (120个IP)</option><option>VPN出口 (5个IP)</option><option>可疑来源 (200个IP)</option>
+                    </select></div>
+                  <div class="fhint">数据来源：IP群组管理 <a href="#">管理IP群组 ↗</a></div>
+                </div>
+              </div>
+              <div data-sub="senderDomain" class="is-hidden">
+                <div class="frow"><label class="req">域名</label><input class="fin" data-f="domain" placeholder="如：example.com"></div>
+                <div class="ferr is-hidden" data-err="domain">请输入域名</div>
+              </div>
+              <div class="frow"><label title="留空表示永久有效">有效期至 ⓘ</label><input class="fin" type="date" data-f="expireTime" style="flex:0 0 150px;"> <span class="unit">(留空=永久有效)</span></div>
+              <div class="frow"><label title="数值越小越先匹配，范围 2000-2049">优先级 ⓘ</label><input class="fin" type="number" data-f="priority" value="2000" min="2000" max="2049" style="flex:0 0 90px;"> <span class="unit">2000-2049</span></div>
+            </div>
+            <div class="fgroup">
+              <div class="fgroup-title"><span class="fgroup-bar" style="background:#f59e0b;"></span>检测条件</div>
+              <div class="frow"><label class="req">时间窗口</label>
+                <select class="fsel" data-f="timeWindow" style="width:190px;">
+                  <option value="1min">1分钟</option><option value="5min">5分钟</option><option value="15min" selected>15分钟</option><option value="1hour">1小时</option><option value="6hour">6小时</option><option value="24hour">24小时</option><option value="day">当天（自然日）</option>
+                </select></div>
+              <div class="frow"><label class="req">检测维度A</label>
+                <select class="fsel" data-f="dimensionA" style="flex:1;">
+                  <option value="ip_count" selected>使用发信IP个数上限</option><option value="recipient_count">收信人总人数上限</option><option value="mail_count">发出邮件的总数上限</option><option value="attachment_size">发出附件总大小上限(MB)</option>
+                </select></div>
+              <div class="frow"><label class="req">阈值A</label><input class="fin" type="number" min="1" data-f="thresholdA" placeholder="请输入阈值" style="flex:0 0 120px;"> <span class="unit" data-unit="A">个</span></div>
+              <div class="ferr is-hidden" data-err="thresholdA">阈值A必须大于0</div>
+              <div class="frow"><label></label><label style="min-width:0;text-align:left;cursor:pointer;"><input type="checkbox" data-f="enableOr"> 启用OR组合条件</label></div>
+              <div data-or class="is-hidden">
+                <div class="frow"><label class="req">检测维度B</label>
+                  <select class="fsel" data-f="dimensionB" style="flex:1;">
+                    <option value="ip_count">使用发信IP个数上限</option><option value="recipient_count">收信人总人数上限</option><option value="mail_count" selected>发出邮件的总数上限</option><option value="attachment_size">发出附件总大小上限(MB)</option>
+                  </select></div>
+                <div class="frow"><label class="req">阈值B</label><input class="fin" type="number" min="1" data-f="thresholdB" placeholder="请输入阈值" style="flex:0 0 120px;"> <span class="unit" data-unit="B">封</span></div>
+                <div class="ferr is-hidden" data-err="thresholdB">启用OR组合时，阈值B必须大于0</div>
+              </div>
+            </div>
+            <div class="fgroup">
+              <div class="fgroup-title"><span class="fgroup-bar" style="background:#ef4444;"></span>执行动作</div>
+              <div class="frow"><label class="req">执行动作</label>
+                <select class="fsel" data-f="action" style="width:190px;">
+                  <option value="review" selected>审核</option><option value="quarantine">隔离</option><option value="drop">丢弃</option><option value="block">阻断</option>
+                </select></div>
+              <div class="frow" style="align-items:flex-start;"><label style="margin-top:6px;">备注</label>
+                <div style="flex:1;"><textarea class="fin" data-f="remark" rows="3" maxlength="200" placeholder="添加备注信息（最多200字）" style="width:100%;resize:vertical;"></textarea>
+                <div style="text-align:right;font-size:12px;color:#9ca3af;"><span data-remark-count>0</span>/200</div></div></div>
+            </div>
+          </div>
+          <div class="prev-col">
+            <div class="pcard"><h6>⚡ 当前配置效果</h6>
+              <div class="amber" data-preview-incomplete>⚠ 请完善检测阈值以预览效果</div>
+              <div class="is-hidden" data-preview-full>
+                <div>👥 当发信人为 <span class="pill" data-p="obj"></span></div>
+                <div>🌐 且方向为 <span class="pill" data-p="dir"></span></div>
+                <div>🕒 在 <span class="pill" data-p="win"></span> 内</div>
+                <div>🚫 <span data-p="dimA"></span>超过 <span class="pill" data-p="thA"></span><span data-p="orpart" class="is-hidden"> 或 <span data-p="dimB"></span>超过 <span class="pill" data-p="thB"></span></span></div>
+                <div>🛡 系统将执行：<span class="pill red" data-p="act"></span></div>
+                <div style="color:#6b7280;">有效期至：<span data-p="expire">永久</span></div>
+                <div style="color:#6b7280;">优先级：<span class="pill" data-p="prio">2000</span></div>
+              </div>
+            </div>
+            <div class="pcard" style="padding:8px 14px;"><a href="./layer-2-validation-examples-simulator.html">💡 查看配置示例 ∨</a></div>
+            <div class="pcard" style="padding:8px 14px;"><a href="./layer-2-validation-examples-simulator.html">▶ 模拟测试 ∨</a></div>
+            <div class="pcard"><h6>配置提示</h6>
+              <ul class="tips" style="margin:0;padding-left:16px;">
+                <li>优先级越小越先匹配</li><li>支持通配符如 *@domain.com</li><li>留空有效期表示永久有效</li>
+                <li>群组和组织来自群组策略配置</li><li>OR条件任一超限即触发</li><li>IP群组来自IP群组管理模块</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mini-dialog-mask is-hidden" data-unsaved-mask>
+        <div class="mini-dialog">
+          <h5 style="margin:0 0 8px;">确认离开</h5>
+          <p style="margin:0;color:#6b7280;">当前配置未保存，是否放弃修改？</p>
+          <div class="btn-row"><button class="button-icon" type="button" data-unsaved-stay>继续编辑</button><button class="button-redout" type="button" data-unsaved-discard>放弃并关闭</button></div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/behavior-rule-drawer-layer-1-default.png" alt="新建规则抽屉默认态">
+      <figcaption>抽屉默认态（浏览器实际渲染）：左栏 基础设置/检测条件/执行动作 三区块，右栏 当前配置效果（黄色未完善提示）+ 配置示例/模拟测试折叠项 + 配置提示。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/behavior-rule-drawer-objecttype-senderip.png" alt="对象类型切换为发信IP">
+      <figcaption>对象类型联动：切换为"发信IP"后出现 IP类型（单个IP/IP群组）与 IP地址/IP段 输入框，发信人相关字段隐藏并被清空。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/behavior-rule-drawer-or-condition.png" alt="OR组合条件展开">
+      <figcaption>勾选"启用OR组合条件"后出现 检测维度B（默认 发出邮件的总数上限）+ 阈值B（单位随维度：封）。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/behavior-rule-drawer-preview-filled.png" alt="填表后实时预览">
+      <figcaption>实时预览：填入名称 + 邮箱 sales@corp.com + 阈值A=30 / 阈值B=100 后，右栏显示"当发信人为个人「sales@corp.com」/ 且方向为外发防护 / 在15分钟内 / 使用发信IP个数超过30或发出邮件的总数超过100 / 系统将执行：审核 / 有效期至：永久 / 优先级：2000"。</figcaption>
+    </figure>
+
+    <h4>UI 元素清单（浏览器验证 + 源码补充）</h4>
+    <table class="spec-table">
+      <thead><tr><th>区块</th><th>元素</th><th>默认值</th><th>校验/联动</th><th>跳转层级</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="2">头部</td><td>标题 + 副标题</td><td>新建规则（编辑态"编辑规则"）/ 配置发信人行为管控规则</td><td>—</td><td>—</td></tr>
+        <tr><td>取消 / 保存按钮</td><td>outline / primary</td><td>取消：isDirty 时弹未保存确认；保存：校验失败留在本层，存在阻断错误时禁用直至修改出错字段</td><td>取消→层级3；保存失败→层级2</td></tr>
+        <tr><td rowspan="7">基础设置（蓝色条）</td><td>规则名称 Input</td><td>空，placeholder"如：销售部外发限制"</td><td>必填"请输入规则名称"；无长度上限（D-14）</td><td>—</td></tr>
+        <tr><td>管控方向 Select</td><td>外发防护</td><td>入站防护/外发防护/域内防护/双向合计</td><td>—</td></tr>
+        <tr><td>管控对象类型 Select</td><td>发信人</td><td>全局/发信人/发信IP/发信域名；切换时清空全部对象值字段</td><td>—</td></tr>
+        <tr><td>发信人类型 Select（objectType=sender）</td><td>个人</td><td>个人→邮箱输入；群组→群组下拉(5项+管理群组链接)；组织→部门下拉(7项2级+管理组织链接)</td><td>—</td></tr>
+        <tr><td>IP类型 Select（objectType=senderIp）</td><td>单个IP</td><td>单个IP→IP输入(IPv4/CIDR校验)；IP群组→下拉(5项+管理IP群组链接)</td><td>—</td></tr>
+        <tr><td>有效期至 date + ⓘ</td><td>空（留空=永久有效）</td><td>tooltip"留空表示永久有效"；不得早于当天</td><td>—</td></tr>
+        <tr><td>优先级 number + ⓘ</td><td>2000</td><td>tooltip"数值越小越先匹配，范围 2000-2049"；范围校验；无重复校验（D-14）</td><td>—</td></tr>
+        <tr><td rowspan="4">检测条件（amber条）</td><td>时间窗口 Select</td><td>15分钟</td><td>1分钟/5分钟/15分钟/1小时/6小时/24小时/当天（自然日）</td><td>—</td></tr>
+        <tr><td>检测维度A Select</td><td>使用发信IP个数上限</td><td>4维度；单位联动：个/人/封/MB</td><td>—</td></tr>
+        <tr><td>阈值A number</td><td>空，placeholder"请输入阈值"</td><td>必填且&gt;0，"阈值A必须大于0"</td><td>—</td></tr>
+        <tr><td>启用OR组合条件 Checkbox → 维度B/阈值B</td><td>未勾选；维度B默认 发出邮件的总数上限</td><td>勾选后显示；阈值B&gt;0 否则"启用OR组合时，阈值B必须大于0"</td><td>—</td></tr>
+        <tr><td rowspan="2">执行动作（红色条）</td><td>执行动作 Select</td><td>审核</td><td>审核/隔离/丢弃/阻断</td><td>—</td></tr>
+        <tr><td>备注 Textarea</td><td>空，"添加备注信息（最多200字）"+ 计数 0/200</td><td>slice(0,200) 截断</td><td>—</td></tr>
+        <tr><td rowspan="4">右栏预览区</td><td>当前配置效果</td><td>未完善时黄色提示"请完善检测阈值以预览效果"</td><td>名称非空且阈值有效时切换为 7 行效果描述，随表单实时更新</td><td>—</td></tr>
+        <tr><td>查看配置示例 Collapsible</td><td>收起</td><td>展开显示3示例卡</td><td>→ 层级2</td></tr>
+        <tr><td>模拟测试 Collapsible</td><td>收起</td><td>展开显示4输入+执行测试</td><td>→ 层级2</td></tr>
+        <tr><td>配置提示卡</td><td>6条静态提示</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果（提取的 HTML vs demo 实际 DOM）</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>抽屉容器</td><td>第2个 role=dialog，rect 920×1000，节点数 167</td><td>.drawer 920px 双栏（结构等价复刻）</td><td>一致</td></tr>
+          <tr><td>表单区块（h3）</td><td>基础设置 / 检测条件 / 执行动作 + 右栏 当前配置效果</td><td>同4个标题</td><td>一致</td></tr>
+          <tr><td>默认 label 列表</td><td>*规则名称 / *管控方向 / *管控对象类型 / *发信人类型 / *邮箱地址 / 有效期至 / 优先级 / *时间窗口 / *检测维度A / *阈值A / 启用OR组合条件 / *执行动作 / 备注（13项）</td><td>同13项</td><td>一致</td></tr>
+          <tr><td>默认 Select 值</td><td>外发防护 / 发信人 / 个人 / 15分钟 / 使用发信IP个数上限 / 审核</td><td>同6个默认值</td><td>一致</td></tr>
+          <tr><td>对象类型=发信IP 时 label</td><td>*IP类型、*IP地址/IP段 替换发信人字段（实测13项列表）</td><td>联动一致</td><td>一致</td></tr>
+          <tr><td>OR 勾选后 label</td><td>新增 *检测维度B、*阈值B（实测15项列表）</td><td>联动一致</td><td>一致</td></tr>
+          <tr><td>右栏默认态</td><td>amber Alert"请完善检测阈值以预览效果"；填表后 7 行效果描述（实测文本）</td><td>同两态切换</td><td>一致</td></tr>
+          <tr><td>控件形态</td><td>Radix Select/Checkbox/Tooltip（role=combobox/checkbox）</td><td>原生 select/checkbox 简化</td><td>一致（形态简化，文案/联动逻辑一致）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-3">← 返回主文件</a>
+    <a href="./layer-2-validation-examples-simulator.html">层级 2：校验/示例/模拟测试 →</a>
+  </nav>
+
+  <script>
+    // ===== 抽屉可交互复刻：联动 + 实时预览 + 校验 + 未保存确认（复刻 behavior-rule-drawer.tsx 状态机） =====
+    const $$ = (sel) => document.querySelector(sel);
+    const all = (sel) => [...document.querySelectorAll(sel)];
+    const F = (name) => document.querySelector(`[data-f="${name}"]`);
+    let isDirty = false;
+    let savedTried = false;
+    const UNIT = { ip_count: "个", recipient_count: "人", mail_count: "封", attachment_size: "MB" };
+    const DIM = { ip_count: "使用发信IP个数", recipient_count: "收信人总人数", mail_count: "发出邮件的总数", attachment_size: "发出附件总大小(MB)" };
+    const DIRT = { inbound: "入站防护", outbound: "外发防护", internal: "域内防护", bidirectional: "双向合计" };
+    const WINT = { "1min": "1分钟", "5min": "5分钟", "15min": "15分钟", "1hour": "1小时", "6hour": "6小时", "24hour": "24小时", day: "当天" };
+    const ACTT = { review: "审核", quarantine: "隔离", drop: "丢弃", block: "阻断" };
+
+    function objDesc() {
+      const t = F("objectType").value;
+      if (t === "global") return "任意对象";
+      if (t === "sender") {
+        const st = F("senderSubType").value;
+        if (st === "individual") return F("senderEmail").value ? `个人「${F("senderEmail").value}」` : "个人（未填写）";
+        if (st === "group") return F("senderGroup").value ? `群组「${F("senderGroup").value.split(" ")[0]}」` : "群组（未选择）";
+        return F("senderOrg").value ? `组织「${F("senderOrg").value.trim().replace(/^-\s*/, "").split(" ")[0]}」` : "组织（未选择）";
+      }
+      if (t === "senderIp") {
+        if (F("ipSubType").value === "single") return F("ipAddress").value ? `IP「${F("ipAddress").value}」` : "IP（未填写）";
+        return F("ipGroup").value ? `IP群组「${F("ipGroup").value.split(" ")[0]}」` : "IP群组（未选择）";
+      }
+      return F("domain").value ? `域名「${F("domain").value}」` : "域名（未填写）";
+    }
+    function refresh() {
+      // 联动显隐
+      const t = F("objectType").value;
+      all("[data-sub]").forEach(el => el.classList.toggle("is-hidden", el.dataset.sub !== t));
+      const st = F("senderSubType").value;
+      all('[data-sub="sender"] [data-sub2]').forEach(el => el.classList.toggle("is-hidden", el.dataset.sub2 !== st));
+      const ipt = F("ipSubType").value;
+      all('[data-sub="senderIp"] [data-sub2]').forEach(el => el.classList.toggle("is-hidden", el.dataset.sub2 !== ipt));
+      $$("[data-or]").classList.toggle("is-hidden", !F("enableOr").checked);
+      // 单位
+      $$('[data-unit="A"]').textContent = UNIT[F("dimensionA").value];
+      $$('[data-unit="B"]').textContent = UNIT[F("dimensionB").value];
+      $$("[data-remark-count]").textContent = String(F("remark").value.length);
+      // 实时预览（isFormIncomplete: !name || thresholdA<=0 || (or && thresholdB<=0)）
+      const thA = parseInt(F("thresholdA").value) || 0;
+      const thB = parseInt(F("thresholdB").value) || 0;
+      const incomplete = !F("name").value.trim() || thA <= 0 || (F("enableOr").checked && thB <= 0);
+      $$("[data-preview-incomplete]").classList.toggle("is-hidden", !incomplete);
+      $$("[data-preview-full]").classList.toggle("is-hidden", incomplete);
+      if (!incomplete) {
+        $$('[data-p="obj"]').textContent = objDesc();
+        $$('[data-p="dir"]').textContent = DIRT[F("direction").value];
+        $$('[data-p="win"]').textContent = WINT[F("timeWindow").value];
+        $$('[data-p="dimA"]').textContent = DIM[F("dimensionA").value];
+        $$('[data-p="thA"]').textContent = thA;
+        $$('[data-p="orpart"]').classList.toggle("is-hidden", !F("enableOr").checked);
+        $$('[data-p="dimB"]').textContent = DIM[F("dimensionB").value];
+        $$('[data-p="thB"]').textContent = thB;
+        $$('[data-p="act"]').textContent = ACTT[F("action").value];
+        $$('[data-p="expire"]').textContent = F("expireTime").value || "永久";
+        $$('[data-p="prio"]').textContent = F("priority").value || "2000";
+      }
+    }
+    function validate() {
+      const errs = {};
+      if (!F("name").value.trim()) errs.name = true;
+      const t = F("objectType").value;
+      if (t === "sender" && F("senderSubType").value === "individual") {
+        const v = F("senderEmail").value.trim();
+        if (!v) { errs.senderEmail = "请输入邮箱地址"; }
+        else if (!/^(\*@[\w.-]+\.\w+|[\w.-]+@[\w.-]+\.\w+)$/.test(v)) { errs.senderEmail = "邮箱格式不正确，支持 *@domain.com 通配符"; }
+      }
+      if (t === "senderIp" && F("ipSubType").value === "single") {
+        const v = F("ipAddress").value.trim();
+        if (!v) { errs.ipAddress = "请输入IP地址或IP段"; }
+        else if (!/^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/.test(v)) { errs.ipAddress = "IP格式不正确，支持 1.2.3.4 或 1.2.3.0/24"; }
+      }
+      if (t === "senderDomain" && !F("domain").value.trim()) errs.domain = true;
+      if ((parseInt(F("thresholdA").value) || 0) <= 0) errs.thresholdA = true;
+      if (F("enableOr").checked && (parseInt(F("thresholdB").value) || 0) <= 0) errs.thresholdB = true;
+      all("[data-err]").forEach(el => {
+        const key = el.dataset.err;
+        const bad = !!errs[key];
+        el.classList.toggle("is-hidden", !bad);
+        if (typeof errs[key] === "string") el.textContent = errs[key];
+        const field = F(key);
+        if (field) field.classList.toggle("err", bad);
+      });
+      return Object.keys(errs).length === 0;
+    }
+    all("[data-f]").forEach(el => {
+      el.addEventListener("input", () => { isDirty = true; el.classList.remove("err"); const e = document.querySelector(`[data-err="${el.dataset.f}"]`); if (e) e.classList.add("is-hidden"); if (savedTried) $$("[data-d-save]").disabled = false; refresh(); });
+      el.addEventListener("change", () => { isDirty = true; refresh(); });
+    });
+    $$("[data-d-save]").addEventListener("click", () => {
+      savedTried = true;
+      if (!validate()) { $$("[data-d-save]").disabled = true; return; }
+      isDirty = false;
+      $$("[data-d-save]").textContent = "已保存（demo 中此时关闭抽屉并刷新列表）";
+      setTimeout(() => { $$("[data-d-save]").textContent = "保存"; }, 2000);
+    });
+    $$("[data-d-cancel]").addEventListener("click", () => {
+      if (isDirty) { $$("[data-unsaved-mask]").classList.remove("is-hidden"); }
+      else { window.location.href = "./index.html#component-2-2"; }
+    });
+    $$("[data-unsaved-stay]").addEventListener("click", () => $$("[data-unsaved-mask]").classList.add("is-hidden"));
+    $$("[data-unsaved-discard]").addEventListener("click", () => { window.location.href = "./index.html#component-2-2"; });
+    refresh();
+  </script>
+</body>
+</html>

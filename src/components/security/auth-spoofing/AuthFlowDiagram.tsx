@@ -1,9 +1,11 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronRight } from 'lucide-react';
 import type { AuthSpoofingAction } from '@/types/auth-spoofing';
 import { flowSubKey } from '@/lib/auth-spoofing-labels';
+import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { cn } from '@/lib/utils';
 
 type ProtocolTab = 'spf' | 'dkim' | 'dmarc' | 'ptr';
@@ -71,20 +73,15 @@ export function AuthFlowDiagram({ failActions, activeTab, onNodeClick }: AuthFlo
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
         {nodes.map((node, idx) => (
           <div key={node.id} className="flex items-center gap-2">
-            <button
-              type="button"
+            <FlowNodeButton
+              active={node.clickable && activeTab === node.id}
+              clickable={node.clickable}
+              colorClass={node.color}
               onClick={node.clickable ? () => onNodeClick(node.id as ProtocolTab) : undefined}
-              disabled={!node.clickable}
-              className={cn(
-                'min-w-[70px] rounded-lg px-3 py-2 text-center transition-all',
-                node.color,
-                node.clickable ? 'cursor-pointer' : 'cursor-default',
-                node.clickable && activeTab === node.id && 'ring-2 ring-primary ring-offset-2',
-              )}
             >
               <div className="text-xs font-medium">{node.label}</div>
               {node.sub && <div className="mt-0.5 text-[10px] opacity-70">{node.sub}</div>}
-            </button>
+            </FlowNodeButton>
             {idx < nodes.length - 1 && (
               <ChevronRight className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
             )}
@@ -92,5 +89,43 @@ export function AuthFlowDiagram({ failActions, activeTab, onNodeClick }: AuthFlo
         ))}
       </div>
     </div>
+  );
+}
+
+// 流程节点按钮：可点节点的 hover 为 pointer 驱动的内嵌 hairline（柔和交互反馈规格 §7.2），
+// 不做位移/缩放；selected(ring-primary) 与 hover 分层，focus-visible 独立 ring。
+function FlowNodeButton({
+  active,
+  clickable,
+  colorClass,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  clickable: boolean;
+  colorClass: string;
+  onClick?: () => void;
+  children: ReactNode;
+}) {
+  const { pointerHoverProps } = usePointerHover<HTMLButtonElement>({ disabled: !clickable });
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={!clickable}
+      className={cn(
+        'min-w-[70px] rounded-lg px-3 py-2 text-center outline-none',
+        'transition-[box-shadow] duration-[120ms] ease-out motion-reduce:transition-none',
+        colorClass,
+        clickable ? 'cursor-pointer' : 'cursor-default',
+        clickable && 'data-[hovered=true]:shadow-[inset_0_0_0_1px_color-mix(in_oklab,currentColor_35%,transparent)]',
+        'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2',
+        active && 'ring-2 ring-primary ring-offset-2',
+      )}
+      {...pointerHoverProps}
+    >
+      {children}
+    </button>
   );
 }

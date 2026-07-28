@@ -48,9 +48,11 @@ export function TrendChartCard({
   }, [seriesData]);
 
   function seriesLabel(key: string): string {
-    const nsMap: Partial<Record<ViewBy, string>> = {
+    const nsMap: Record<ViewBy, string> = {
       threat_type: 'threatTypes',
       action: 'actions',
+      threat_level: 'threatLevels',
+      delivery_result: 'deliveryResults',
       email_type: 'emailTypes',
     };
     const ns = nsMap[viewBy];

@@ -1,0 +1,20 @@
+{
+  "module": "statistics-delivery-traffic-analysis",
+  "current_version": 2,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-14",
+      "demo_commit": "804efb9",
+      "spec_commit": "8db3a98",
+      "summary": "初版：4 个方向的 KPI/图表/明细表矩阵、扩展分析区（仅外发/域内）、队列健康卡；修复 12 条 UTF-8 损坏中文；标注 PRD 自相矛盾 2 处 + demo 差异 10 处；网关 /statistics/delivery-traffic 已存在"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": "8db3a98",
+      "summary": "修复预览区样式并补齐交互：补 Tailwind CDN + shadcn 语义色桥接 + 半径/调色板按 demo v4 实测对齐；在共享 swap 快照引擎之上补齐静态操作栏方向联动、时间/租户下拉、队列卡展开折叠（接收/外发两行明细）、无行为按钮说明。demo/spec 源未变，24 项浏览器对照断言全过"
+    }
+  ]
+}

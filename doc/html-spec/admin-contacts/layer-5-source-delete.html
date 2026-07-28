@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级5：删除数据源确认 - 组织通讯录</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .component-preview { background:#fff; overflow-x:auto; }
+  .pass { color:#15803d; font-weight:600; }
+  .bad { color:#b91c1c; font-weight:600; }
+  .warn { color:#a16207; font-weight:600; }
+  /* 规格侧呈现层修正（快照 DOM 本身未改动）：
+     - Radix Sheet 抽屉：视口级 fixed → 内联卡片
+     - Radix AlertDialog：fixed 居中 → 内联卡片
+     - Radix Popper（筛选弹层）：绝对定位 → 文档流内 */
+  .component-preview [data-slot="sheet-content"] { position:relative !important; inset:auto !important; height:auto !important; border:1px solid var(--border); border-radius:.5rem; }
+  .component-preview [role="alertdialog"] { position:relative !important; top:auto !important; left:auto !important; transform:none !important; margin:0; max-width:32rem; }
+  .component-preview [data-radix-popper-content-wrapper] { position:static !important; transform:none !important; min-width:0 !important; display:inline-block; margin:.5rem 0; }
+  .component-preview [role="menu"] { position:relative !important; inset:auto !important; transform:none !important; display:inline-block; }
+  .component-preview [role="tooltip"] { position:relative !important; inset:auto !important; transform:none !important; display:inline-block; }
+  .layer-nav { display:flex; gap:1rem; margin-bottom:1rem; font-size:.875rem; }
+</style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#c-2">← 返回主文件</a><a href="./layer-4-source-edit.html">← 层级4 编辑抽屉</a><a href="./layer-6-source-sync.html">层级6 行内同步 →</a></nav>
+<header class="spec-header"><h1>交互层级 5：删除二次确认（AlertDialog）</h1><table class="meta-table"><tr><td>所属组件</td><td><a href="./index.html#c-2">2.2 数据源管理 Tab</a></td></tr><tr><td>触发路径</td><td>层级0 行内「删除」（实测第 5 行「分支机构 LDAP」）→ 居中 AlertDialog + 遮罩</td></tr></table></header>
+<section class="interaction-layer">
+  <p>预览可操作：「取消」关闭；「确认删除」→ toast「数据源已删除」（demo 同时从列表移除该行）。</p>
+  <div class="component-preview" data-preview="delete-confirm"><div role="alertdialog" id="radix-_R_hd5esnebn9lb_" aria-describedby="radix-_R_hd5esnebn9lbH2_" aria-labelledby="radix-_R_hd5esnebn9lbH1_" data-state="open" data-slot="alert-dialog-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg" tabindex="-1" style="pointer-events: auto;"><div data-slot="alert-dialog-header" class="flex flex-col gap-2 text-center sm:text-left"><h2 id="radix-_R_hd5esnebn9lbH1_" data-slot="alert-dialog-title" class="text-lg font-semibold">删除数据源「分支机构 LDAP」？</h2><p id="radix-_R_hd5esnebn9lbH2_" data-slot="alert-dialog-description" class="text-muted-foreground text-sm">删除后将同步清除该数据源下的通讯录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略将受影响（引用人员降级为未匹配）。是否继续？</p></div><div data-slot="alert-dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3">取消</button><button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground h-9 px-4 py-2 has-[&gt;svg]:px-3 bg-red-600 hover:bg-red-700">确认删除</button></div></div></div>
+<figure class="screenshot-figure"><img src="./screenshots/source-delete-confirm.png" alt="删除确认实测：标题带数据源名，正文列出受影响策略"><figcaption>删除确认实测：标题带数据源名，正文列出受影响策略</figcaption></figure>
+<table class="spec-table"><thead><tr><th>元素</th><th>规格（浏览器实测）</th></tr></thead><tbody><tr><td>标题</td><td>「删除数据源「分支机构 LDAP」？」（动态插入数据源名）</td></tr><tr><td>正文</td><td>「删除后将同步清除该数据源下的通讯录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略将受影响（引用人员降级为未匹配）。是否继续？」——<span class="bad">无「共 X 条」数据量，策略列表写死，§9-D5</span></td></tr><tr><td>按钮</td><td>「取消」/ 「确认删除」红色 <code>bg-red-600 hover:bg-red-700</code></td></tr><tr><td>确认后</td><td>行移除 + toast「数据源已删除」（无撤销）</td></tr></tbody></table>
+<div class="dom-comparison">
+  <h5>DOM 树比对结果</h5>
+  <table class="spec-table">
+    <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>嵌入的 HTML</th><th>是否一致</th></tr></thead>
+    <tbody><tr><td>根节点</td><td><code>[role=alertdialog]</code>（Radix AlertDialogContent，居中 max-w-lg）</td><td>同（规格侧中和 fixed 居中定位）</td><td class="pass">一致</td></tr><tr><td>节点数</td><td>7</td><td>7</td><td class="pass">一致</td></tr><tr><td>标题动态名</td><td>「分支机构 LDAP」</td><td>同</td><td class="pass">一致</td></tr><tr><td>确认按钮配色</td><td>红色 bg-red-600</td><td>同</td><td class="pass">一致</td></tr></tbody>
+  </table>
+</div></section>
+<script src="../assets/contacts-preview.js"></script>
+</body>
+</html>

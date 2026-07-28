@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>规则统计 - HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground);
+      line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 2rem; }
+    .spec-header h1 { color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+    .meta-table td:first-child { font-weight: 600; width: 160px; color: var(--muted-foreground); white-space: nowrap; }
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 2rem; margin-bottom: 2rem; }
+    .component-toc > h2 { color: var(--primary); font-size: 1.05rem; margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .component-toc ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.5rem; }
+    .component-toc li { padding: 0.375rem 0.75rem; border-radius: calc(var(--radius) - 4px); background: var(--muted); font-size: 0.875rem; }
+    .component-toc li a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .component-toc li a:hover { text-decoration: underline; }
+    .component-toc .toc-layer-links { font-size: 0.75rem; color: var(--muted-foreground); margin-left: 1rem; }
+    .component-toc .toc-layer-links a { color: var(--muted-foreground); font-weight: 400; }
+    .component-toc .toc-badge { display: inline-block; font-size: 0.6875rem; font-weight: 600;
+      padding: 0.0625rem 0.375rem; border-radius: calc(var(--radius) - 4px); background: var(--primary); color: var(--primary-foreground); white-space: nowrap; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+    section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem; font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+    h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+    table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.spec-table th { background: var(--muted); color: var(--foreground); font-weight: 600; text-align: left;
+      padding: 0.625rem 0.75rem; border: 1px solid var(--border); white-space: nowrap; }
+    table.spec-table td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.spec-table tr:nth-child(even) td { background: var(--muted); }
+    .table-scroll { overflow-x: auto; }
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .screenshot-figure figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .component-spec { border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px);
+      padding: 1rem 1.25rem; margin: 1rem 0; background: var(--card); }
+    .component-spec > h3 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 0.75rem; }
+    pre { background: var(--muted); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px);
+      padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; margin: 1rem 0; }
+    code { font-family: var(--font-mono); font-size: 0.85em; }
+    .mermaid { text-align: center; margin: 1rem 0; padding: 1rem; background: var(--muted); border-radius: calc(var(--radius) - 2px); }
+    .diff-section { border-left: 4px solid var(--diff-border); background: var(--diff-bg); }
+    .diff-section > h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+    .diff-badge { display: inline-block; background: var(--diff-border); color: var(--primary-foreground);
+      font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); margin-right: 0.5rem; }
+    .question-section { border-left: 4px solid var(--question-border); background: var(--question-bg); }
+    .question-section > h2 { color: var(--question-border); border-bottom-color: var(--question-border); }
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); }
+    .badge-high { background: oklch(0.65 0.2 25); color: white; }
+    .badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+    .badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+    blockquote { border-left: 4px solid var(--destructive); background: var(--diff-bg); padding: 0.75rem 1rem;
+      margin: 1rem 0; font-size: 0.875rem; border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0; }
+    .component-preview { border: 2px dashed var(--primary); border-radius: var(--radius); padding: 1.5rem;
+      margin: 1rem 0; background: #f9fafb; position: relative; overflow: auto; }
+    .component-preview::before { content: "🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）"; position: absolute;
+      top: -0.625rem; left: 0.75rem; background: var(--primary); color: var(--primary-foreground); font-size: 0.6875rem;
+      font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); white-space: nowrap; z-index: 5; }
+    .component-preview * { box-sizing: border-box; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary);
+      border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1.5rem 0; background: var(--card); }
+    .interaction-layer > h4 { color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem;
+      border-radius: 50%; background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .trigger-path { background: var(--muted); border-radius: calc(var(--radius) - 4px); padding: 0.5rem 0.75rem;
+      margin: 0.5rem 0 1rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .trigger-path strong { color: var(--foreground); }
+    .dom-comparison { margin: 1rem 0; border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); overflow: hidden; }
+    .dom-comparison > h5 { background: var(--muted); padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600;
+      color: var(--foreground); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.375rem; }
+    .dom-comparison > h5::before { content: "🔍"; font-size: 0.875rem; }
+    .dom-comparison table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+    .dom-comparison th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .dom-comparison td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .dom-comparison tr:last-child td { border-bottom: none; }
+    .dom-pass { color: oklch(0.5 0.15 150); font-weight: 600; }
+    .dom-fail { color: var(--destructive); font-weight: 600; }
+    table.layer-index { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.layer-index th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+    table.layer-index td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.layer-index td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    table.layer-index td a:hover { text-decoration: underline; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem;
+      background: var(--muted); border-radius: var(--radius); margin-bottom: 1.5rem; font-size: 0.875rem; }
+    .layer-nav a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .layer-nav a:hover { text-decoration: underline; }
+    .version-history-section { margin: 1.5rem 0; }
+    .spec-version { font-weight: 600; color: oklch(0.52 0.226 262); }
+    /* 阶段色样例 */
+    .stage-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+    /* 预览区内自定义交互控件 */
+    .rs-tip { position: fixed; z-index: 9999; max-width: 280px; background: #111827; color: #fff; font-size: 12px;
+      padding: 6px 10px; border-radius: 6px; pointer-events: none; display: none; line-height: 1.5; }
+    .rs-menu { position: absolute; z-index: 60; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12); padding: 4px; min-width: 200px; max-height: 320px; overflow: auto; display: none; }
+    .rs-menu .rs-opt { padding: 6px 10px; font-size: 13px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .rs-menu .rs-opt:hover { background: #f3f4f6; }
+    .rs-menu .rs-opt.rs-checked { background: #eff6ff; font-weight: 600; }
+    .rs-menu .rs-group { padding: 6px 8px; font-size: 11px; font-weight: 600; color: #6b7280; background: #f3f4f6; border-radius: 4px; margin: 2px 0; }
+    .rs-menu .rs-foot { padding: 6px 8px; font-size: 11px; color: #9ca3af; border-top: 1px solid #e5e7eb; margin-top: 2px; }
+    /* ===== shadcn 语义色桥接（Tailwind CDN 不认识 demo 的自定义 token 类；取值来自 demo globals.css :root 亮色主题） ===== */
+    .component-preview .bg-primary { background-color: oklch(0.52 0.226 262); }
+    .component-preview .text-primary-foreground { color: oklch(0.985 0 0); }
+    .component-preview .text-primary { color: oklch(0.52 0.226 262); }
+    .component-preview .bg-secondary { background-color: oklch(0.97 0 0); }
+    .component-preview .text-secondary-foreground { color: oklch(0.205 0 0); }
+    .component-preview .bg-destructive { background-color: oklch(0.577 0.245 27.325); }
+    .component-preview .text-destructive { color: oklch(0.577 0.245 27.325); }
+    .component-preview .bg-muted { background-color: oklch(0.97 0 0); }
+    .component-preview .text-muted-foreground { color: oklch(0.556 0 0); }
+    .component-preview .bg-card { background-color: oklch(1 0 0); }
+    .component-preview .text-card-foreground { color: oklch(0.145 0 0); }
+    .component-preview .bg-popover { background-color: oklch(1 0 0); }
+    .component-preview .text-popover-foreground { color: oklch(0.145 0 0); }
+    .component-preview .bg-accent { background-color: oklch(0.52 0.226 262); }
+    .component-preview .text-accent-foreground { color: oklch(0.985 0 0); }
+    .component-preview .bg-background { background-color: oklch(0.98 0.01 205); }
+    .component-preview .text-foreground { color: oklch(0.145 0 0); }
+    .component-preview .border-border { border-color: oklch(0.922 0 0); }
+    .component-preview .border-input { border-color: oklch(0.922 0 0); }
+  /* 追加：半径/调色板对齐 demo Tailwind v4 实测计算色 */
+  .component-preview .rounded-xl { border-radius: 14px; }
+  .component-preview .rounded-lg { border-radius: 10px; }
+  .component-preview .rounded-md { border-radius: 8px; }
+  .component-preview .rounded-sm { border-radius: 6px; }
+  .component-preview .bg-blue-50 { background-color: lab(96.492 -1.14644 -5.11479); }
+  .component-preview .bg-gray-100 { background-color: lab(96.1596 -0.0823438 -1.13575); }
+  .component-preview .bg-gray-400 { background-color: lab(65.9269 -0.832707 -8.17473); }
+  .component-preview .bg-gray-50 { background-color: lab(98.2596 -0.247031 -0.706708); }
+  .component-preview .bg-gray-700 { background-color: lab(27.1134 -0.956401 -12.3224); }
+  .component-preview .bg-green-50 { background-color: lab(98.1563 -5.60117 2.75915); }
+  .component-preview .bg-green-500 { background-color: lab(70.5521 -66.5147 45.8073); }
+  .component-preview .bg-orange-50 { background-color: lab(97.7008 1.53735 5.90649); }
+  .component-preview .bg-orange-500 { background-color: lab(64.272 57.1788 90.3583); }
+  .component-preview .bg-red-50 { background-color: lab(96.5005 4.18508 1.52328); }
+  .component-preview .bg-yellow-50 { background-color: lab(98.6846 -1.79055 9.7766); }
+  .component-preview .border-blue-500 { border-color: lab(54.1736 13.3369 -74.6839); }
+  .component-preview .border-gray-200 { border-color: lab(91.6229 -0.159115 -2.26791); }
+  .component-preview .border-green-200 { border-color: lab(92.4222 -26.4702 12.9427); }
+  .component-preview .border-orange-200 { border-color: lab(88.4871 9.94918 28.8378); }
+  .component-preview .border-red-200 { border-color: lab(86.017 19.8815 7.75869); }
+  .component-preview .border-yellow-200 { border-color: lab(94.3433 -5.00429 52.9663); }
+  .component-preview .text-blue-600 { color: lab(44.0605 29.0279 -86.0352); }
+  .component-preview .text-gray-400 { color: lab(65.9269 -0.832707 -8.17473); }
+  .component-preview .text-gray-500 { color: lab(47.7841 -0.393182 -10.0268); }
+  .component-preview .text-gray-600 { color: lab(35.6337 -1.58697 -10.8425); }
+  .component-preview .text-gray-900 { color: lab(8.11897 0.811279 -12.254); }
+  .component-preview .text-green-500 { color: lab(70.5521 -66.5147 45.8073); }
+  .component-preview .text-green-600 { color: lab(59.0978 -58.6621 41.2579); }
+  .component-preview .text-green-700 { color: lab(47.0329 -47.0239 31.4788); }
+  .component-preview .text-orange-500 { color: lab(64.272 57.1788 90.3583); }
+  .component-preview .text-orange-600 { color: lab(57.1026 64.2584 89.8886); }
+  .component-preview .text-orange-700 { color: lab(46.4615 57.7275 70.8507); }
+  .component-preview .text-red-500 { color: lab(55.4814 75.0732 48.8528); }
+  .component-preview .text-red-600 { color: lab(48.4493 77.4328 61.5452); }
+  .component-preview .text-red-700 { color: lab(40.4273 67.2623 53.7441); }
+  .component-preview .text-yellow-600 { color: lab(62.7799 22.4197 86.1544); }
+  .component-preview .text-yellow-700 { color: lab(47.8202 25.2426 66.5015); }
+    .crash-overlay { border: 2px solid #ef4444; background: #fef2f2; border-radius: 8px; padding: 1rem 1.25rem; margin: 0.75rem 0; font-size: 0.85rem; }
+    .crash-overlay .crash-title { color: #b91c1c; font-weight: 700; font-family: var(--font-mono); margin-bottom: 0.4rem; }
+    .note-inline { font-size: 0.8125rem; color: var(--muted-foreground); background: var(--muted);
+      border-radius: 6px; padding: 0.4rem 0.6rem; margin: 0.5rem 0; }
+</style>
+</head>
+<body>
+
+<header class="spec-header">
+  <h1>规则统计（rule-stats-v2）详细产品规格说明</h1>
+  <table class="meta-table">
+    <tr><td>spec 源</td><td><b>无独立 PRD</b>。业务口径关联：<code>design/origin/spec/策略流水线需求文档.md</code>（五阶段模型与各阶段子策略）、<code>design/origin/spec/0708（多租户视角）安全策略体系 功能需求文档（PRD）.md</code>（多租户/形态差异）。KPI/漏斗/健康度/准确率等页面级口径以 demo 为唯一事实源（见 §10 需确认）。</td></tr>
+    <tr><td>demo 源</td><td><code>design/origin/demo/app/statistics/rule-stats-v2/page.tsx</code> → <code>components/statistics/rule-stats-v2-page.tsx</code>（1451 行）+ <code>components/statistics/module-detail-view.tsx</code>（1770 行）</td></tr>
+    <tr><td>覆盖范围</td><td>页面级全量：页头操作区 / 全局筛选栏（级联）/ KPI×4 / 策略流水线漏斗 / 模块命中分布TOP10 / 五阶段模块卡片墙 / 模块明细视图（规则级明细 + 右侧辅助面板）</td></tr>
+    <tr><td>遵循约束</td><td><code>design/origin/implement.md</code>（四语国际化、复用统一规则系统、不新增规则系统等）</td></tr>
+    <tr><td>页面名称</td><td>规则统计（副标题：策略效能分析与规则命中统计）</td></tr>
+    <tr><td>路由路径</td><td><code>/statistics/rule-stats-v2</code></td></tr>
+    <tr><td>组件入口</td><td><code>RuleStatsV2Page</code>；明细视图 <code>ModuleDetailView</code></td></tr>
+    <tr><td>i18n 标题 key</td><td><code>nav.ruleStatsV2</code> / <code>ruleStatsV2.pageTitle</code></td></tr>
+    <tr><td>导航层级</td><td>统计报表 &gt; 规则统计</td></tr>
+    <tr><td>产品形态/视角</td><td>租户范围选择器仅在「多租户形态（cloud / ai-multi / trad-multi）+ 平台管理员视角」显示（<code>getCapabilities(form).multiTenant && viewer === "platform"</code>）；demo 默认 cloud + platform → 显示。选中单租户时全部统计按确定性系数（seed∈[0.08,0.4]）缩放。</td></tr>
+    <tr><td>浏览器验证</td><td>http://localhost:3111/statistics/rule-stats-v2，视口 1600×1000（响应式另验 1366/1024），headless Chrome + CDP，29 张截图 + 逐层 DOM 提取比对</td></tr>
+    <tr><td>规格版本</td><td><span class="spec-version">v1</span></td></tr>
+    <tr><td>生成日期</td><td>2026-07-22</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td><code>804efb9</code>（策略流水线需求文档.md）</td></tr>
+  </table>
+</header>
+
+<nav class="component-toc">
+  <h2>📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 页面头部操作区</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-2">2.2 全局筛选栏（级联）</a> <span class="toc-badge">2层</span>
+      <span class="toc-layer-links"><a href="./layer-1-filter-cascade.html">层级1</a></span></li>
+    <li><a href="#component-2-3">2.3 KPI 指标卡 ×4</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-4">2.4 策略流水线漏斗</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-5">2.5 模块命中分布TOP10</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-6">2.6 策略模块效能卡片墙</a> <span class="toc-badge">4层</span>
+      <span class="toc-layer-links">
+        <a href="./layer-2-module-detail.html">层级2</a>
+        <a href="./layer-3-detail-table.html">层级3</a>
+        <a href="./layer-4-module-columns.html">层级4</a>
+      </span></li>
+    <li><a href="#dialog-3-1">3.1 租户选择 Popover</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#dialog-3-2">3.2 自定义日期范围日历 Popover</a> <span class="toc-badge">1层</span></li>
+  </ul>
+</nav>
+
+<section id="version-history" class="version-history-section">
+  <h2>🕑 版本历史</h2>
+  <table class="version-history-table spec-table">
+    <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+    <tbody>
+      <tr><td>v1</td><td>2026-07-22</td><td><code>804efb9</code></td><td><code>804efb9</code></td>
+        <td>初版：五阶段漏斗/KPI/卡片墙/明细视图全量；发现 2 个崩溃级缺陷（RBL、身份认证明细）+ 2 个 i18n 原始 key 渲染缺陷；无独立 PRD，口径全部以 demo 为准并列入需确认</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <h3>1.1 区域划分</h3>
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>名称</th><th>元素概览</th><th>布局</th><th>响应式</th></tr></thead>
+    <tbody>
+      <tr><td>A区</td><td>页面头部</td><td>Layers 图标 + 标题「规则统计」+ 副标题；右侧：刷新 / 导出下拉 / 订阅告警</td><td>白底 border-b，px-6 py-4，flex 两端对齐</td><td>全断点固定</td></tr>
+      <tr><td>B区</td><td>全局筛选栏</td><td>[租户范围] + 时间范围 + 阶段 + 模块 + 观察模式 + 重置</td><td>Card，flex gap-4 flex-wrap</td><td>窄屏换行</td></tr>
+      <tr><td>C区</td><td>KPI 指标卡</td><td>策略命中总量 / 有效拦截率 / 观察模式命中 / 活跃规则数</td><td>grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4</td><td>1 / 2 / 4 列</td></tr>
+      <tr><td>D区</td><td>图表区</td><td>左：策略流水线漏斗（xl:col-span-3）；右：模块命中分布TOP10（xl:col-span-2）</td><td>grid grid-cols-1 xl:grid-cols-5 gap-6</td><td>&lt;xl 上下堆叠</td></tr>
+      <tr><td>E区</td><td>策略模块效能卡片墙</td><td>5 个阶段折叠组 × 19 张模块卡片</td><td>Card；组内 grid md:2 lg:4 列</td><td>1 / 2 / 4 列</td></tr>
+      <tr><td>F区</td><td>模块明细视图（条件渲染）</td><td>viewMode==="detail" 时追加在卡片墙下方：返回栏 + 概览 + 规则明细表 + 右侧辅助面板</td><td>flex：左 flex-1 + 右 w-72 sticky</td><td>见 §8</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.2 整页默认态截图</h3>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-full-default.png" alt="整页默认态">
+    <figcaption>整页默认态（浏览器实际渲染，1600×1000 全页；默认筛选：全部租户 / 近7天 / 全部阶段 / 全部模块 / 包含观察模式）。注意右上角「订阅告警」按钮渲染为原始 key（见 §9-D2）、导出触发器截断为「导出CS」（§9-D5）。</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-full-dark.png" alt="整页暗色态">
+    <figcaption>暗色态（页面全组件带 dark: 样式；demo 未提供暗色切换入口，本图为验证时手动为 &lt;html&gt; 添加 .dark class 渲染，见 §9-D12）。</figcaption>
+  </figure>
+
+  <h3>1.3 视觉规范</h3>
+  <table class="spec-table">
+    <thead><tr><th>属性</th><th>值</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td>页面底色</td><td><code>bg-gray-50</code>（暗色 <code>dark:bg-gray-900</code>）</td><td>组件根 div</td></tr>
+      <tr><td>阶段色（贯穿全页）</td><td>
+        <span class="stage-dot" style="background:#FF4D4F"></span>阶段1 IP策略 <code>#FF4D4F</code>/bg <code>#FFF2F0</code>；
+        <span class="stage-dot" style="background:#FA8C16"></span>阶段2 收发信人 <code>#FA8C16</code>/<code>#FFF7E6</code>；
+        <span class="stage-dot" style="background:#52C41A"></span>阶段3 内容层 <code>#52C41A</code>/<code>#F6FFED</code>；
+        <span class="stage-dot" style="background:#1890FF"></span>阶段4 智能分析 <code>#1890FF</code>/<code>#F0F5FF</code>；
+        <span class="stage-dot" style="background:#722ED1"></span>阶段5 综合策略 <code>#722ED1</code>/<code>#F9F0FF</code>
+      </td><td>STAGE_COLORS 常量（两个组件文件各一份）</td></tr>
+      <tr><td>处置动作色</td><td>阻断 <code>#F5222D</code> / 隔离 <code>#FA8C16</code> / 审核 <code>#722ED1</code> / 标记 <code>#1890FF</code> / 放行 <code>#E8E8E8</code></td><td>ACTION_COLORS（module-detail-view.tsx）</td></tr>
+      <tr><td>图标库</td><td>lucide-react（Layers/RefreshCw/Download/Bell/Shield/Users/FileText/Brain/TrendingUp/TrendingDown/Clock/AlertTriangle/CheckCircle/Eye/HelpCircle/Filter/RotateCcw/ArrowRight/ArrowLeft/Search/ExternalLink/Minus 等）</td><td>demo import</td></tr>
+      <tr><td>图表库</td><td>recharts：LineChart（趋势/迷你趋势）、BarChart（横向 TOP10）、PieChart（处置分布环图）</td><td>demo import</td></tr>
+      <tr><td>状态徽标</td><td>正常=绿（CheckCircle）；N条老化=橙（Clock）；观察中=黄（Eye）；超时异常=红（AlertTriangle）</td><td>getStatusBadge()，浏览器验证</td></tr>
+    </tbody>
+  </table>
+</section>
+<section id="components">
+<h2>2. 逐组件规格</h2>
+
+<article class="component-spec" id="component-2-1">
+  <h3>2.1 页面头部操作区</h3>
+  <h4>组件元信息</h4>
+  <table class="spec-table"><tbody>
+    <tr><td>demo 位置</td><td><code>rule-stats-v2-page.tsx</code> 846-880 行（页面内嵌，非独立组件）</td></tr>
+    <tr><td>状态管理</td><td><code>isLoading</code>（刷新按钮 1s 假加载）；导出 Select 为非受控 <code>defaultValue="csv"</code></td></tr>
+    <tr><td>交互层级数</td><td>1 层</td></tr>
+  </tbody></table>
+
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">0</span> 交互层级 0：初始态（默认渲染）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染。预览区内：点击「导出CS」触发下拉（复刻 demo 选项）；点击「刷新」复刻 1s 旋转禁用态；「订阅告警」在 demo 中无绑定行为（hover 查看说明）。</div>
+    <div class="component-preview" id="pv-header"><div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4"><div class="flex items-center justify-between"><div><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers w-5 h-5 text-blue-600"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"></path><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"></path></svg><h1 class="text-xl font-medium text-gray-900 dark:text-gray-100">规则统计</h1></div><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">策略效能分析与规则命中统计</p></div><div class="flex items-center gap-3"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw w-4 h-4 mr-2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>刷新</button><button type="button" role="combobox" aria-controls="radix-_R_2j5esnebn9lb_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-32"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg><span data-slot="select-value" style="pointer-events:none">导出CSV</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell w-4 h-4 mr-2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>ruleStatsV2.subscribeAlert</button></div></div></div></div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/header-export-open.png" alt="导出下拉打开">
+      <figcaption>导出下拉打开态（浏览器实际渲染；listbox 含「导出CSV / 导出PDF报告」两项，当前值 csv 选中）</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>序号</th><th>元素</th><th>文案/图标</th><th>默认值</th><th>禁用条件</th><th>交互行为</th><th>i18n key</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>标题行</td><td>Layers(20px, text-blue-600) + 「规则统计」(text-xl font-medium)</td><td>-</td><td>-</td><td>无</td><td>ruleStatsV2.pageTitle</td></tr>
+        <tr><td>2</td><td>副标题</td><td>「策略效能分析与规则命中统计」(text-sm text-gray-500)</td><td>-</td><td>-</td><td>无</td><td>ruleStatsV2.pageSubtitle</td></tr>
+        <tr><td>3</td><td>Button(outline sm)</td><td>RefreshCw(16px) + 「刷新」</td><td>-</td><td>isLoading 时 disabled + 图标 animate-spin</td><td>点击 → setTimeout 1000ms 解除；<b>无真实数据刷新</b>（§9-D11）</td><td>common.refresh</td></tr>
+        <tr><td>4</td><td>Select(w-32)</td><td>Download(16px) + 当前值</td><td>csv（显示「导出CSV」，被 w-32 截断为「导出CS」§9-D5）</td><td>-</td><td>选项：导出CSV / 导出PDF报告；选择仅改值，<b>demo 未绑定导出动作</b></td><td>ruleStatsV2.exportCSV / exportPDF</td></tr>
+        <tr><td>5</td><td>Button(outline sm)</td><td>Bell(16px) + <b>「ruleStatsV2.subscribeAlert」原始 key</b></td><td>-</td><td>-</td><td><b>demo 无绑定行为</b>；文案 key 在 zh/en/th 语言表中均不存在（存在的是 alertSettings=告警设置，§9-D2）</td><td>ruleStatsV2.subscribeAlert（缺失）</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h5>DOM 树比对结果（层级 0 · 页面头部）</h5>
+      <table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>根节点</td><td>div.bg-white.border-b（class 前 60 字符：bg-white dark:bg-gray-800 border-b border-gray-200 dark:bord…）</td><td>同左（outerHTML 原样嵌入）</td><td class="dom-pass">✅</td></tr>
+          <tr><td>节点总数</td><td>29</td><td>29</td><td class="dom-pass">✅</td></tr>
+          <tr><td>右侧操作数</td><td>3（刷新 / 导出 Select / 订阅告警）</td><td>3</td><td class="dom-pass">✅</td></tr>
+          <tr><td>「订阅告警」文案</td><td>渲染为原始 key <code>ruleStatsV2.subscribeAlert</code></td><td>同左（如实保留，缺陷记入 §9-D2）</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</article>
+
+<article class="component-spec" id="component-2-2">
+  <h3>2.2 全局筛选栏（阶段-模块级联，多层交互）</h3>
+  <h4>组件元信息</h4>
+  <table class="spec-table"><tbody>
+    <tr><td>demo 位置</td><td><code>rule-stats-v2-page.tsx</code> 884-1122 行；租户选择器复用 <code>components/email-disposal-center/tenant-selector.tsx</code></td></tr>
+    <tr><td>状态管理</td><td><code>timeRange / customDateRange / stageFilter / moduleFilter / observationMode / selectedTenant / stageHighlight / moduleTooltip</code>（8 个 useState）</td></tr>
+    <tr><td>交互层级数</td><td>2 层（层级 0 初始态内嵌；层级 1 级联与数据联动拆分为子文件）</td></tr>
+  </tbody></table>
+
+  <h4>交互层级关系图</h4>
+  <div class="mermaid">
+graph LR
+    L0["层级0: 筛选栏初始态"] -->|"切换阶段/模块/观察模式/时间"| L1["层级1: 级联联动 + 全页数据重算"]
+    L1 -->|"重置按钮"| L0
+    L1 -->|"阶段切换致所选模块失效"| T["自动重置模块 + 2s 气泡提示"]
+    L1 -->|"全部阶段下直选模块"| R["反向级联: 阶段自动切换 + 300ms 橙色高亮"]
+  </div>
+
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">0</span> 交互层级 0：初始态（默认渲染）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染。默认值：全部租户 / 近7天 / 全部阶段 / 全部模块 / 包含观察模式。预览区内各下拉可点击展开查看真实选项（含分组）；<b>完整级联行为（含 KPI/漏斗/卡片墙联动重算）在 <a href="./layer-1-filter-cascade.html">层级 1 子文件</a> 中可完整操作</b>。</div>
+    <div class="component-preview" id="pv-filterbar"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-content" class="px-6 py-3"><div class="flex items-center gap-4 flex-wrap"><div class="flex items-center gap-2 border-b border-gray-200 bg-white px-4 py-2.5 dark:border-gray-800 dark:bg-gray-950"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-building2 h-4 w-4 flex-shrink-0 text-gray-500" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg><span class="text-sm text-gray-600 dark:text-gray-400">租户范围</span><button data-slot="popover-trigger" class="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 px-4 py-2 has-[&gt;svg]:px-3 justify-between font-normal h-8 w-64" role="combobox" aria-expanded="false" aria-label="选择租户范围" type="button" aria-haspopup="dialog" aria-controls="radix-_R_1id5esnebn9lb_" data-state="closed"><span class="truncate">全部租户</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-up-down ml-2 h-4 w-4 flex-shrink-0 opacity-50" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button></div><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-filter w-4 h-4 text-gray-500"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg><button type="button" role="combobox" aria-controls="radix-_R_14d5esnebn9lb_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-36"><span data-slot="select-value" style="pointer-events:none">近7天</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="relative" data-state="closed" data-slot="tooltip-trigger"><button type="button" role="combobox" aria-controls="radix-_R_1md5esnebn9lb_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-52 transition-all duration-300" style="border-left-color:#999999;border-left-width:4px"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color:#999999"></span><span data-slot="select-value" style="pointer-events:none"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-400"></span><span>全部阶段</span></div></span></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="relative" data-state="closed" data-slot="tooltip-trigger"><button type="button" role="combobox" aria-controls="radix-_R_5od5esnebn9lb_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-52"><span data-slot="select-value" style="pointer-events:none">全部模块</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><button type="button" role="combobox" aria-controls="radix-_R_ad5esnebn9lb_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-48"><span data-slot="select-value" style="pointer-events:none">包含观察模式</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="tooltip-trigger" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw w-4 h-4 mr-1"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>重置</button></div></div></div></div>
+    <table class="spec-table">
+      <thead><tr><th>序号</th><th>元素</th><th>宽度</th><th>默认值</th><th>选项</th><th>交互行为</th><th>i18n key</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>租户范围（Popover combobox，条件渲染）</td><td>自适应</td><td>全部租户</td><td>全部租户 + MOCK_TENANTS 列表（可搜索）</td><td>仅多租户形态+平台视角显示；选中单租户后全页数据按确定性系数缩放（§5.4）</td><td>组件内部</td></tr>
+        <tr><td>2</td><td>时间范围 Select</td><td>w-36</td><td>近7天</td><td>今天 / 近7天 / 近30天 / 自定义</td><td>切换→时间乘数重算（0.15 / 1 / 4.2 / 按周数）；自定义→出现日历按钮（§3.2）</td><td>common.today / ruleStatsV2.last7Days / last30Days / common.custom</td></tr>
+        <tr><td>3</td><td>阶段 Select</td><td>w-52，左边框 4px 阶段色 + 色点</td><td>全部阶段</td><td>全部阶段 / 阶段1-5（各带色点 + 模块数 (4)(5)(4)(4)(2)）</td><td>切换→漏斗/KPI/卡片墙/模块下拉全部联动；触发器整体带 Tooltip「按策略执行阶段筛选，切换后模块范围自动联动」</td><td>ruleStatsV2.stage1-5 + stageName1-5</td></tr>
+        <tr><td>4</td><td>模块 Select</td><td>w-52</td><td>全部模块</td><td>全部阶段模式：19 个模块按 5 阶段分组（灰色组头）；单阶段模式：该阶段模块 + 底部「共N个模块」计数行</td><td>级联/反向级联（层级 1）；Tooltip 文案随模式切换</td><td>ruleStatsV2.module.*</td></tr>
+        <tr><td>5</td><td>观察模式 Select</td><td>w-48</td><td>包含观察模式</td><td>包含观察模式 / 排除观察模式 / 仅观察模式</td><td>过滤 status==="observation" 的模块（发信行为管控、高级过滤规则）</td><td>ruleStatsV2.includeObservation / exclude / only</td></tr>
+        <tr><td>6</td><td>重置 Button(ghost sm)</td><td>-</td><td>-</td><td>-</td><td>恢复默认四项 + 关闭明细视图；Tooltip「恢复默认筛选条件（近7天/全部阶段/全部模块/包含观察模式）」</td><td>common.reset</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h5>DOM 树比对结果（层级 0 · 筛选栏）</h5>
+      <table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>根节点</td><td>Card（rounded-xl border）</td><td>同左（outerHTML 原样嵌入）</td><td class="dom-pass">✅</td></tr>
+          <tr><td>节点总数</td><td>48</td><td>48</td><td class="dom-pass">✅</td></tr>
+          <tr><td>combobox 触发器文本</td><td>全部租户 | 近7天 | 全部阶段 | 全部模块 | 包含观察模式（浏览器实测）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>租户选择器（条件渲染）</td><td>cloud+platform 默认形态下渲染</td><td>已包含</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h4>交互层级详情（层级 1 拆分为独立文件）</h4>
+  <table class="layer-index">
+    <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>筛选栏初始态</td><td>页面加载</td><td>上方内嵌</td></tr>
+      <tr><td>1</td><td>级联与数据联动（可完整操作的仿真）</td><td>切换阶段/模块/观察模式/时间范围</td><td><a href="./layer-1-filter-cascade.html">查看详情 →</a></td></tr>
+    </tbody>
+  </table>
+</article>
+
+<article class="component-spec" id="component-2-3">
+  <h3>2.3 KPI 指标卡 ×4</h3>
+  <h4>组件元信息</h4>
+  <table class="spec-table"><tbody>
+    <tr><td>demo 位置</td><td><code>rule-stats-v2-page.tsx</code> 1125-1247 行；数据 <code>filteredKPIData</code>（useMemo，随全部筛选联动）</td></tr>
+    <tr><td>交互层级数</td><td>1 层（hover 阴影 + HelpCircle Tooltip；数值联动见层级 1 子文件）</td></tr>
+  </tbody></table>
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">0</span> 交互层级 0：初始态（默认筛选）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染。预览区内 hover 各卡片标签旁 ❔ 图标可查看与 demo 一致的口径 Tooltip。</div>
+    <div class="component-preview" id="pv-kpi"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer"><div data-slot="card-content" class="p-5"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400" data-state="closed" data-slot="tooltip-trigger">策略命中总量<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help w-3.5 h-3.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></div></div><div class="text-3xl font-bold text-gray-900 dark:text-white">16,454</div><div class="flex items-center gap-1 mt-2 text-sm"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-4 h-4 text-green-500"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span class="text-green-500">+<!-- -->8<!-- -->%</span><span class="text-gray-500 dark:text-gray-400">较上周期</span></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer"><div data-slot="card-content" class="p-5"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400" data-state="closed" data-slot="tooltip-trigger">有效拦截率<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help w-3.5 h-3.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></div></div><div class="text-3xl font-bold text-gray-900 dark:text-white">58.3<!-- -->%</div><div class="flex items-center gap-1 mt-2 text-sm"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-4 h-4 text-green-500"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span class="text-green-500">+<!-- -->2.1<!-- -->%</span><span class="text-gray-500 dark:text-gray-400">较上周期</span></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer"><div data-slot="card-content" class="p-5"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400" data-state="closed" data-slot="tooltip-trigger">观察模式命中<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help w-3.5 h-3.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></div></div><div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">768</div><div class="flex items-center gap-1 mt-2 text-sm"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-4 h-4 text-red-500"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span class="text-red-500">+<!-- -->15<!-- -->%</span><span class="text-gray-500 dark:text-gray-400">较上周期</span></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer"><div data-slot="card-content" class="p-5"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400" data-state="closed" data-slot="tooltip-trigger">活跃规则数<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help w-3.5 h-3.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></div></div><div class="text-3xl font-bold text-gray-900 dark:text-white">253<!-- --> / <!-- -->263</div><div class="flex items-center gap-1 mt-2 text-sm"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-down w-4 h-4 text-orange-500"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline><polyline points="16 17 22 17 22 11"></polyline></svg><span class="text-orange-500">10<!-- -->条规则老化</span></div></div></div></div></div>
+    <table class="spec-table">
+      <thead><tr><th>卡片</th><th>默认值（近7天/全部）</th><th>数值样式</th><th>趋势行</th><th>Tooltip 口径（i18n 原文）</th></tr></thead>
+      <tbody>
+        <tr><td>策略命中总量</td><td>16,454</td><td>text-3xl font-bold</td><td>TrendingUp 绿 +8% 较上周期</td><td>统计周期内,所有策略模块的命中次数总和(含观察模式命中)</td></tr>
+        <tr><td>有效拦截率</td><td>58.3%</td><td>text-3xl font-bold</td><td>+2.1% 较上周期（正绿负红，图标随符号切换）</td><td>(阻断+隔离+丢弃) / 命中总量 x 100%。观察模式命中不计入分子</td></tr>
+        <tr><td>观察模式命中</td><td>768</td><td>text-3xl <b>text-yellow-600</b></td><td>TrendingUp <b>红色</b> +15% 较上周期（上升=风险）</td><td>观察模式下仅记录命中但不执行处置，建议评估后切换为正式模式</td></tr>
+        <tr><td>活跃规则数</td><td>253 / 263</td><td>text-3xl font-bold</td><td>老化&gt;0：TrendingDown 橙「10条规则老化」；否则 CheckCircle 绿「无老化规则」</td><td>近30天有命中的启用规则数 / 总启用规则数。老化规则指近90天零命中的启用规则</td></tr>
+      </tbody>
+    </table>
+    <div class="note-inline">变化百分比为按时间范围写死的 mock（today:+5/+1.5/+12；7days:+8/+2.1/+15；30days:+12/+3.2/+18），非真实环比（§9-D10）。「活跃规则数」实际计算与 Tooltip 口径不符（§9-D14）。</div>
+    <div class="dom-comparison">
+      <h5>DOM 树比对结果（层级 0 · KPI 区）</h5>
+      <table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>根节点</td><td><code>div.grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-4.gap-4</code></td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>子卡片数 / 节点总数</td><td>4 / 60</td><td>4 / 60</td><td class="dom-pass">✅</td></tr>
+          <tr><td>四卡数值文本</td><td>16,454 · 58.3% · 768 · 253 / 263（浏览器实测）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</article>
+
+<article class="component-spec" id="component-2-4">
+  <h3>2.4 策略流水线漏斗</h3>
+  <h4>组件元信息</h4>
+  <table class="spec-table"><tbody>
+    <tr><td>demo 位置</td><td><code>rule-stats-v2-page.tsx</code> 1252-1318 行；数据 <code>filteredFunnelData</code>（mockFunnelData × 时间乘数 × 租户系数）</td></tr>
+    <tr><td>交互层级数</td><td>1 层（行 hover 阴影；单阶段筛选时只显示该阶段且宽度 100%，见层级 1 子文件）</td></tr>
+  </tbody></table>
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">0</span> 交互层级 0：初始态（全部阶段）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染。非 SVG 图表——用 div 宽度逐级收窄模拟漏斗：第 i 行宽度 100-10×i %，水平居中。</div>
+    <div class="component-preview" id="pv-funnel"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800 xl:col-span-3"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6"><div data-slot="card-title" class="font-semibold text-lg">策略流水线漏斗</div><div data-slot="card-description" class="text-muted-foreground text-sm">邮件在5个策略阶段中的逐层衰减</div></div><div data-slot="card-content" class="px-6"><div class="space-y-4"><div class="relative"><div class="rounded-lg p-4 transition-all cursor-pointer hover:shadow-md" style="background-color:#FFF2F0;border-left:4px solid #FF4D4F;width:100%;margin-left:0%"><div class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color:#FF4D4F">1</div><div><div class="font-medium text-gray-900 dark:text-gray-100">阶段1</div><div class="text-sm text-gray-500 dark:text-gray-400">进入<!-- -->: <!-- -->50,000</div></div></div><div class="text-right"><div class="text-red-600 dark:text-red-400 font-medium">拦截<!-- -->: <!-- -->8,500<!-- --> (<!-- -->17<!-- -->%)</div><div class="text-green-600 dark:text-green-400 text-sm">放行<!-- -->: <!-- -->41,500</div></div></div></div><div class="flex justify-center py-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-5 h-5 text-green-500"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="relative"><div class="rounded-lg p-4 transition-all cursor-pointer hover:shadow-md" style="background-color:#FFF7E6;border-left:4px solid #FA8C16;width:90%;margin-left:5%"><div class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color:#FA8C16">2</div><div><div class="font-medium text-gray-900 dark:text-gray-100">阶段2</div><div class="text-sm text-gray-500 dark:text-gray-400">进入<!-- -->: <!-- -->41,500</div></div></div><div class="text-right"><div class="text-red-600 dark:text-red-400 font-medium">拦截<!-- -->: <!-- -->3,200<!-- --> (<!-- -->7.7<!-- -->%)</div><div class="text-green-600 dark:text-green-400 text-sm">放行<!-- -->: <!-- -->38,300</div></div></div></div><div class="flex justify-center py-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-5 h-5 text-green-500"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="relative"><div class="rounded-lg p-4 transition-all cursor-pointer hover:shadow-md" style="background-color:#F6FFED;border-left:4px solid #52C41A;width:80%;margin-left:10%"><div class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color:#52C41A">3</div><div><div class="font-medium text-gray-900 dark:text-gray-100">阶段3</div><div class="text-sm text-gray-500 dark:text-gray-400">进入<!-- -->: <!-- -->38,300</div></div></div><div class="text-right"><div class="text-red-600 dark:text-red-400 font-medium">拦截<!-- -->: <!-- -->2,100<!-- --> (<!-- -->5.5<!-- -->%)</div><div class="text-green-600 dark:text-green-400 text-sm">放行<!-- -->: <!-- -->36,200</div></div></div></div><div class="flex justify-center py-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-5 h-5 text-green-500"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="relative"><div class="rounded-lg p-4 transition-all cursor-pointer hover:shadow-md" style="background-color:#F0F5FF;border-left:4px solid #1890FF;width:70%;margin-left:15%"><div class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color:#1890FF">4</div><div><div class="font-medium text-gray-900 dark:text-gray-100">阶段4</div><div class="text-sm text-gray-500 dark:text-gray-400">进入<!-- -->: <!-- -->36,200</div></div></div><div class="text-right"><div class="text-red-600 dark:text-red-400 font-medium">拦截<!-- -->: <!-- -->1,500<!-- --> (<!-- -->4.1<!-- -->%)</div><div class="text-green-600 dark:text-green-400 text-sm">放行<!-- -->: <!-- -->34,700</div></div></div></div><div class="flex justify-center py-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-5 h-5 text-green-500"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="relative"><div class="rounded-lg p-4 transition-all cursor-pointer hover:shadow-md" style="background-color:#F9F0FF;border-left:4px solid #722ED1;width:60%;margin-left:20%"><div class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color:#722ED1">5</div><div><div class="font-medium text-gray-900 dark:text-gray-100">阶段5</div><div class="text-sm text-gray-500 dark:text-gray-400">进入<!-- -->: <!-- -->34,700</div></div></div><div class="text-right"><div class="text-red-600 dark:text-red-400 font-medium">拦截<!-- -->: <!-- -->800<!-- --> (<!-- -->2.3<!-- -->%)</div><div class="text-green-600 dark:text-green-400 text-sm">放行<!-- -->: <!-- -->33,900</div></div></div></div></div><div class="text-center py-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800"><div class="text-green-700 dark:text-green-400 font-medium">最终投递<!-- -->: <!-- -->33,900</div></div></div></div></div></div>
+    <table class="spec-table">
+      <thead><tr><th>行</th><th>阶段</th><th>进入</th><th>拦截（率）</th><th>放行</th><th>行宽</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><span class="stage-dot" style="background:#FF4D4F"></span>阶段1</td><td>50,000</td><td>8,500 (17%)</td><td>41,500</td><td>100%</td></tr>
+        <tr><td>2</td><td><span class="stage-dot" style="background:#FA8C16"></span>阶段2</td><td>41,500</td><td>3,200 (7.7%)</td><td>38,300</td><td>90%</td></tr>
+        <tr><td>3</td><td><span class="stage-dot" style="background:#52C41A"></span>阶段3</td><td>38,300</td><td>2,100 (5.5%)</td><td>36,200</td><td>80%</td></tr>
+        <tr><td>4</td><td><span class="stage-dot" style="background:#1890FF"></span>阶段4</td><td>36,200</td><td>1,500 (4.1%)</td><td>34,700</td><td>70%</td></tr>
+        <tr><td>5</td><td><span class="stage-dot" style="background:#722ED1"></span>阶段5</td><td>34,700</td><td>800 (2.3%)</td><td>33,900</td><td>60%</td></tr>
+        <tr><td>尾</td><td colspan="4">「最终投递: 33,900」绿色汇总条（bg-green-50 + border-green-200）</td><td>100%</td></tr>
+      </tbody>
+    </table>
+    <div class="note-inline">每行结构：左=圆形阶段号(阶段主色) + 阶段名 + 「进入: n」；右=「拦截: n (率%)」红字 + 「放行: n」绿字；行左边框 4px 阶段主色、底色为阶段浅色；行间居中 ChevronDown 绿色箭头。</div>
+    <div class="dom-comparison">
+      <h5>DOM 树比对结果（层级 0 · 漏斗）</h5>
+      <table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>根节点</td><td>Card（xl:col-span-3）</td><td>同左（outerHTML 原样嵌入）</td><td class="dom-pass">✅</td></tr>
+          <tr><td>节点总数</td><td>75</td><td>75</td><td class="dom-pass">✅</td></tr>
+          <tr><td>阶段行数 + 汇总条</td><td>5 + 1</td><td>5 + 1</td><td class="dom-pass">✅</td></tr>
+          <tr><td>数值</td><td>50,000/8,500(17%)/41,500 … 33,900（浏览器实测与 mock 一致）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</article>
+
+<article class="component-spec" id="component-2-5">
+  <h3>2.5 模块命中分布TOP10</h3>
+  <h4>组件元信息</h4>
+  <table class="spec-table"><tbody>
+    <tr><td>demo 位置</td><td><code>rule-stats-v2-page.tsx</code> 1321-1337 行；数据 <code>filteredModuleDistribution</code>（按筛选后模块命中量降序取前 10）</td></tr>
+    <tr><td>图表</td><td>recharts 横向 BarChart（layout="vertical"，高 320，YAxis category 宽 120 / fontSize 11，Bar 圆角 [0,4,4,0]）</td></tr>
+    <tr><td>交互层级数</td><td>1 层（recharts 原生 hover Tooltip 显示数值）</td></tr>
+  </tbody></table>
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">0</span> 交互层级 0：初始态</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染。预览为提取的实际 SVG 快照（recharts 运行时渲染产物，静态）。</div>
+    <div class="component-preview" id="pv-dist"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800 xl:col-span-2"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6"><div data-slot="card-title" class="font-semibold text-lg">模块命中分布TOP10</div><div data-slot="card-description" class="text-muted-foreground text-sm">按命中量排序的策略模块</div></div><div data-slot="card-content" class="px-6"><div class="recharts-responsive-container" style="width:100%;height:320px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 320px; max-width: 422px;"><svg class="recharts-surface" width="422" height="320" viewBox="0 0 422 320" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts2-clip"><rect x="125" y="5" height="280" width="292"></rect></clipPath></defs><g class="recharts-cartesian-grid"><g class="recharts-cartesian-grid-horizontal"><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="125" y1="47" x2="417" y2="47"></line><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="125" y1="103" x2="417" y2="103"></line><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="125" y1="159" x2="417" y2="159"></line><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="125" y1="215" x2="417" y2="215"></line><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="125" y1="271" x2="417" y2="271"></line><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="125" y1="5" x2="417" y2="5"></line><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="125" y1="285" x2="417" y2="285"></line></g><g class="recharts-cartesian-grid-vertical"><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="125" y1="5" x2="125" y2="285"></line><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="198" y1="5" x2="198" y2="285"></line><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="271" y1="5" x2="271" y2="285"></line><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="344" y1="5" x2="344" y2="285"></line><line stroke-dasharray="3 3" stroke="#ccc" fill="none" x="125" y="5" width="292" height="280" x1="417" y1="5" x2="417" y2="285"></line></g></g><g class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"><line orientation="bottom" width="292" height="30" x="125" y="285" class="recharts-cartesian-axis-line" stroke="#666" fill="none" x1="125" y1="285" x2="417" y2="285"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="292" height="30" x="125" y="285" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="125" y1="291" x2="125" y2="285"></line><text orientation="bottom" width="292" height="30" stroke="none" x="125" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666"><tspan x="125" dy="0.71em">0</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="292" height="30" x="125" y="285" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="198" y1="291" x2="198" y2="285"></line><text orientation="bottom" width="292" height="30" stroke="none" x="198" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666"><tspan x="198" dy="0.71em">900</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="292" height="30" x="125" y="285" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="271" y1="291" x2="271" y2="285"></line><text orientation="bottom" width="292" height="30" stroke="none" x="271" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666"><tspan x="271" dy="0.71em">1800</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="292" height="30" x="125" y="285" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="344" y1="291" x2="344" y2="285"></line><text orientation="bottom" width="292" height="30" stroke="none" x="344" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666"><tspan x="344" dy="0.71em">2700</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="292" height="30" x="125" y="285" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="417" y1="291" x2="417" y2="285"></line><text orientation="bottom" width="292" height="30" stroke="none" x="401.65625" y="293" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#666"><tspan x="401.65625" dy="0.71em">3600</tspan></text></g></g></g><g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis"><line orientation="left" width="120" height="280" x="5" y="5" class="recharts-cartesian-axis-line" stroke="#666" fill="none" x1="125" y1="5" x2="125" y2="285"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="120" height="280" x="5" y="5" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="119" y1="19" x2="125" y2="19"></line><text orientation="left" width="120" height="280" stroke="none" font-size="11" x="117" y="19" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666"><tspan x="117" dy="0.355em">IP频率限制</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="120" height="280" x="5" y="5" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="119" y1="47" x2="125" y2="47"></line><text orientation="left" width="120" height="280" stroke="none" font-size="11" x="117" y="47" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666"><tspan x="117" dy="0.355em">发信人黑白名单</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="120" height="280" x="5" y="5" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="119" y1="75" x2="125" y2="75"></line><text orientation="left" width="120" height="280" stroke="none" font-size="11" x="117" y="75" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666"><tspan x="117" dy="0.355em">附件安全检测</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="120" height="280" x="5" y="5" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="119" y1="103" x2="125" y2="103"></line><text orientation="left" width="120" height="280" stroke="none" font-size="11" x="117" y="103" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666"><tspan x="117" dy="0.355em">URL检测与防护</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="120" height="280" x="5" y="5" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="119" y1="131" x2="125" y2="131"></line><text orientation="left" width="120" height="280" stroke="none" font-size="11" x="117" y="131" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666"><tspan x="117" dy="0.355em">IP黑白名单</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="120" height="280" x="5" y="5" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="119" y1="159" x2="125" y2="159"></line><text orientation="left" width="120" height="280" stroke="none" font-size="11" x="117" y="159" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666"><tspan x="117" dy="0.355em">内容规则</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="120" height="280" x="5" y="5" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="119" y1="187" x2="125" y2="187"></line><text orientation="left" width="120" height="280" stroke="none" font-size="11" x="117" y="187" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666"><tspan x="117" dy="0.355em">RBL过滤</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="120" height="280" x="5" y="5" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="119" y1="215" x2="125" y2="215"></line><text orientation="left" width="120" height="280" stroke="none" font-size="11" x="117" y="215" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666"><tspan x="117" dy="0.355em">意图引擎</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="120" height="280" x="5" y="5" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="119" y1="243" x2="125" y2="243"></line><text orientation="left" width="120" height="280" stroke="none" font-size="11" x="117" y="243" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666"><tspan x="117" dy="0.355em">身份认证与仿冒检测</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="120" height="280" x="5" y="5" class="recharts-cartesian-axis-tick-line" stroke="#666" fill="none" x1="119" y1="271" x2="125" y2="271"></line><text orientation="left" width="120" height="280" stroke="none" font-size="11" x="117" y="271" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#666"><tspan x="117" dy="0.355em">钓鱼邮件智能体</tspan></text></g></g></g><g class="recharts-layer recharts-bar"><g class="recharts-layer recharts-bar-rectangles"><g class="recharts-layer"><g class="recharts-layer recharts-bar-rectangle"><path x="125" y="7.8" width="275.94" height="22" radius="0,4,4,0" fill="#FF4D4F" name="IP频率限制" class="recharts-rectangle" d="M125,7.8L 396.94,7.8A 4,4,0,0,1,
+        400.94,11.8L 400.94,25.8A 4,4,0,0,1,
+        396.94,29.8L 125,29.8Z"></path></g><g class="recharts-layer recharts-bar-rectangle"><path x="125" y="35.8" width="174.8755555555556" height="22" radius="0,4,4,0" fill="#FA8C16" name="发信人黑白名单" class="recharts-rectangle" d="M125,35.8L 295.8755555555556,35.8A 4,4,0,0,1,
+        299.8755555555556,39.8L 299.8755555555556,53.8A 4,4,0,0,1,
+        295.8755555555556,57.8L 125,57.8Z"></path></g><g class="recharts-layer recharts-bar-rectangle"><path x="125" y="63.8" width="147.86555555555555" height="22" radius="0,4,4,0" fill="#52C41A" name="附件安全检测" class="recharts-rectangle" d="M125,63.8L 268.86555555555555,63.8A 4,4,0,0,1,
+        272.86555555555555,67.8L 272.86555555555555,81.8A 4,4,0,0,1,
+        268.86555555555555,85.8L 125,85.8Z"></path></g><g class="recharts-layer recharts-bar-rectangle"><path x="125" y="91.8" width="118.0977777777778" height="22" radius="0,4,4,0" fill="#52C41A" name="URL检测与防护" class="recharts-rectangle" d="M125,91.8L 239.0977777777778,91.8A 4,4,0,0,1,
+        243.0977777777778,95.8L 243.0977777777778,109.8A 4,4,0,0,1,
+        239.0977777777778,113.8L 125,113.8Z"></path></g><g class="recharts-layer recharts-bar-rectangle"><path x="125" y="119.8" width="97.73888888888888" height="22" radius="0,4,4,0" fill="#FF4D4F" name="IP黑白名单" class="recharts-rectangle" d="M125,119.8L 218.73888888888888,119.8A 4,4,0,0,1,
+        222.73888888888888,123.8L 222.73888888888888,137.8A 4,4,0,0,1,
+        218.73888888888888,141.8L 125,141.8Z"></path></g><g class="recharts-layer recharts-bar-rectangle"><path x="125" y="147.8" width="80.05666666666667" height="22" radius="0,4,4,0" fill="#52C41A" name="内容规则" class="recharts-rectangle" d="M125,147.8L 201.05666666666667,147.8A 4,4,0,0,1,
+        205.05666666666667,151.8L 205.05666666666667,165.8A 4,4,0,0,1,
+        201.05666666666667,169.8L 125,169.8Z"></path></g><g class="recharts-layer recharts-bar-rectangle"><path x="125" y="175.8" width="72.35111111111112" height="22" radius="0,4,4,0" fill="#FF4D4F" name="RBL过滤" class="recharts-rectangle" d="M125,175.8L 193.35111111111112,175.8A 4,4,0,0,1,
+        197.35111111111112,179.8L 197.35111111111112,193.8A 4,4,0,0,1,
+        193.35111111111112,197.8L 125,197.8Z"></path></g><g class="recharts-layer recharts-bar-rectangle"><path x="125" y="203.8" width="53.04666666666668" height="22" radius="0,4,4,0" fill="#52C41A" name="意图引擎" class="recharts-rectangle" d="M125,203.8L 174.04666666666668,203.8A 4,4,0,0,1,
+        178.04666666666668,207.8L 178.04666666666668,221.8A 4,4,0,0,1,
+        174.04666666666668,225.8L 125,225.8Z"></path></g><g class="recharts-layer recharts-bar-rectangle"><path x="125" y="231.8" width="45.99000000000001" height="22" radius="0,4,4,0" fill="#FA8C16" name="身份认证与仿冒检测" class="recharts-rectangle" d="M125,231.8L 166.99,231.8A 4,4,0,0,1,
+        170.99,235.8L 170.99,249.8A 4,4,0,0,1,
+        166.99,253.8L 125,253.8Z"></path></g><g class="recharts-layer recharts-bar-rectangle"><path x="125" y="259.8" width="45.99000000000001" height="22" radius="0,4,4,0" fill="#1890FF" name="钓鱼邮件智能体" class="recharts-rectangle" d="M125,259.8L 166.99,259.8A 4,4,0,0,1,
+        170.99,263.8L 170.99,277.8A 4,4,0,0,1,
+        166.99,281.8L 125,281.8Z"></path></g></g></g><g class="recharts-layer"></g></g></svg><div tabindex="-1" class="recharts-tooltip-wrapper recharts-tooltip-wrapper-right recharts-tooltip-wrapper-bottom" style="visibility: hidden; pointer-events: none; position: absolute; top: 0px; left: 0px; transform: translate(125px, 10px);"><div class="recharts-default-tooltip" style="margin: 0px; padding: 10px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); white-space: nowrap;"><p class="recharts-tooltip-label" style="margin: 0px;"></p></div></div></div></div></div></div></div>
+    <table class="spec-table">
+      <thead><tr><th>#</th><th>模块（默认态降序）</th><th>命中量</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>IP频率限制</td><td>3,402</td></tr>
+        <tr><td>2</td><td>发信人黑白名单</td><td>2,156</td></tr>
+        <tr><td>3</td><td>附件安全检测</td><td>1,823</td></tr>
+        <tr><td>4</td><td>URL检测与防护</td><td>1,456</td></tr>
+        <tr><td>5</td><td>IP黑白名单</td><td>1,205</td></tr>
+        <tr><td>6</td><td>内容规则</td><td>987</td></tr>
+        <tr><td>7</td><td>RBL过滤</td><td>892</td></tr>
+        <tr><td>8</td><td>意图引擎</td><td>654</td></tr>
+        <tr><td>9</td><td>身份认证与仿冒检测</td><td>567</td></tr>
+        <tr><td>10</td><td>钓鱼邮件智能体</td><td>567</td></tr>
+      </tbody>
+    </table>
+    <div class="note-inline">源码为每条数据准备了阶段色 <code>fill</code> 字段，但 Bar 未用 &lt;Cell&gt; 逐条渲染，实际全部条形为统一蓝色 <code>#1890FF</code>（§9-D8b，以浏览器渲染为准）。</div>
+    <div class="dom-comparison">
+      <h5>DOM 树比对结果（层级 0 · 分布TOP10）</h5>
+      <table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>根节点</td><td>Card（xl:col-span-2）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+          <tr><td>节点总数</td><td>121</td><td>121</td><td class="dom-pass">✅</td></tr>
+          <tr><td>条形数量</td><td>10</td><td>10</td><td class="dom-pass">✅</td></tr>
+          <tr><td>条形颜色</td><td>统一 #1890FF（非源码 fill 字段的阶段色）</td><td>同左（快照如实保留）</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</article>
+
+<article class="component-spec" id="component-2-6">
+  <h3>2.6 策略模块效能卡片墙（多层交互）</h3>
+  <h4>组件元信息</h4>
+  <table class="spec-table"><tbody>
+    <tr><td>demo 位置</td><td><code>rule-stats-v2-page.tsx</code> 1341-1434 行；明细视图 <code>module-detail-view.tsx</code>（整文件）</td></tr>
+    <tr><td>状态管理</td><td><code>expandedStages</code>（Set，默认 5 阶段全展开）、<code>selectedModule</code>（默认 "ip-blacklist"，仅卡片高亮）、<code>viewMode</code>（cards/detail）、<code>detailModule</code></td></tr>
+    <tr><td>交互层级数</td><td>4 层（0 卡片墙 → 2 明细视图 → 3 明细表格交互；4 为逐模块列集差异横切层）</td></tr>
+    <tr><td>拆分策略</td><td>层级 0 内嵌本文件；层级 2/3/4 拆分为独立子文件（层级 1 归属组件 2.2 筛选栏）</td></tr>
+  </tbody></table>
+
+  <h4>交互层级关系图</h4>
+  <div class="mermaid">
+graph LR
+    F["层级1: 全局筛选级联<br/>(组件2.2)"] -->|过滤| L0
+    L0["层级0: 五阶段卡片墙"] -->|"卡片『查看详情』"| L2["层级2: 模块明细视图<br/>(IP黑白名单)"]
+    L2 -->|"表格筛选/排序/搜索/分页"| L3["层级3: 明细表格交互"]
+    L2 -->|"返回全部模块"| L0
+    L0 -->|"不同模块进入"| L4["层级4: 模块专属列集差异"]
+    L4 -.->|"RBL过滤 / 身份认证与仿冒检测"| X["💥 页面崩溃<br/>(§9-D1)"]
+  </div>
+
+  <div class="interaction-layer">
+    <h4><span class="layer-badge">0</span> 交互层级 0：卡片墙初始态（5 组全展开）</h4>
+    <div class="trigger-path"><strong>触发路径</strong>：页面加载即渲染。预览区内：点击组头可折叠/展开该阶段；点击卡片本体切换选中高亮（蓝边+浅蓝底）；点击「查看详情」→ IP黑白名单跳转层级 2 子文件，RBL过滤/身份认证与仿冒检测复刻 demo 崩溃浮层（§9-D1），其余模块提示见层级 4。</div>
+    <div class="component-preview" id="pv-wall"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm bg-white dark:bg-gray-800"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6"><div data-slot="card-title" class="font-semibold text-lg">策略模块效能卡片</div><div data-slot="card-description" class="text-muted-foreground text-sm">按5个阶段分组展示各策略模块的命中效果</div></div><div data-slot="card-content" class="px-6 space-y-6"><div class="border rounded-lg dark:border-gray-700"><button class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" style="border-left:4px solid #FF4D4F"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background-color:#FF4D4F"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-5 h-5"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg></div><span class="font-medium text-gray-900 dark:text-white">阶段1<!-- -->: <!-- -->IP策略</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90">4<!-- --> <!-- -->个模块</span></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-5 h-5 text-gray-500"><path d="m6 9 6 6 6-6"></path></svg></button><div class="p-4 pt-0"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">IP频率限制</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">12<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">3,402</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->18<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts8-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#FF4D4F" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="72.04989624023438px 0px" d="M5,15C8.889,14,12.778,13,16.667,12C20.556,11,24.444,9,28.333,9C32.222,9,36.111,11,40,11C43.889,11,47.778,7,51.667,7C55.556,7,59.444,8,63.333,8C67.222,8,71.111,7,75,6"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-blue-500 bg-blue-50 dark:bg-blue-900/20"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">IP黑白名单</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock w-3 h-3 mr-1"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>3<!-- -->条老化</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">33<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">1,205</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->42<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts14-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#FF4D4F" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="72.12433624267578px 0px" d="M5,9.4C8.889,8.3,12.778,7.2,16.667,7.2C20.556,7.2,24.444,11.6,28.333,11.6C32.222,11.6,36.111,9.217,40,8.3C43.889,7.383,47.778,6.1,51.667,6.1C55.556,6.1,59.444,7.163,63.333,7.64C67.222,8.117,71.111,8.538,75,8.96"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">RBL过滤</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">3<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">892</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->95<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts20-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#FF4D4F" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="72.33616638183594px 0px" d="M5,13.25C8.889,11.875,12.778,10.5,16.667,10.5C20.556,10.5,24.444,11.875,28.333,11.875C32.222,11.875,36.111,7.75,40,7.75C43.889,7.75,47.778,9.125,51.667,9.125C55.556,9.125,59.444,5,63.333,5C67.222,5,71.111,5.688,75,6.375"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">海外邮件检测</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">3<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">156</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->100<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts26-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#FF4D4F" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="77.85889434814453px 0px" d="M5,16C8.889,13.25,12.778,10.5,16.667,10.5C20.556,10.5,24.444,13.8,28.333,13.8C32.222,13.8,36.111,7.2,40,7.2C43.889,7.2,47.778,11.6,51.667,11.6C55.556,11.6,59.444,5,63.333,5C67.222,5,71.111,7.2,75,9.4"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div></div><div class="border rounded-lg dark:border-gray-700"><button class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" style="border-left:4px solid #FA8C16"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background-color:#FA8C16"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div><span class="font-medium text-gray-900 dark:text-white">阶段2<!-- -->: <!-- -->收发信人策略</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90">5<!-- --> <!-- -->个模块</span></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-5 h-5 text-gray-500"><path d="m6 9 6 6 6-6"></path></svg></button><div class="p-4 pt-0"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">发信人黑白名单</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">28<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">2,156</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->35<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts32-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#FA8C16" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="71.45680236816406px 0px" d="M5,11.286C8.889,9.714,12.778,8.143,16.667,8.143C20.556,8.143,24.444,9.714,28.333,9.714C32.222,9.714,36.111,6.571,40,6.571C43.889,6.571,47.778,7.357,51.667,7.357C55.556,7.357,59.444,5,63.333,5C67.222,5,71.111,5.393,75,5.786"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">身份认证与仿冒检测</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">8<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">567</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->78<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts38-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#FA8C16" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="70.9719009399414px 0px" d="M5,12.333C8.889,11.722,12.778,11.111,16.667,10.5C20.556,9.889,24.444,8.667,28.333,8.667C32.222,8.667,36.111,9.4,40,9.4C43.889,9.4,47.778,6.833,51.667,6.833C55.556,6.833,59.444,7.933,63.333,7.933C67.222,7.933,71.111,6.833,75,5.733"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">发信行为管控</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3 h-3 mr-1"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>观察中</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">15<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">423</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->62<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts44-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#FA8C16" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="71.43038940429688px 0px" d="M5,10.5C8.889,9.125,12.778,7.75,16.667,7.75C20.556,7.75,24.444,9.4,28.333,9.4C32.222,9.4,36.111,6.1,40,6.1C43.889,6.1,47.778,7.2,51.667,7.2C55.556,7.2,59.444,5,63.333,5C67.222,5,71.111,5.55,75,6.1"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">收信人检测</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">5<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">234</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->88<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts50-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#FA8C16" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="71.44508361816406px 0px" d="M5,13.25C8.889,12.849,12.778,12.448,16.667,11.875C20.556,11.302,24.444,9.813,28.333,9.813C32.222,9.813,36.111,11.188,40,11.188C43.889,11.188,47.778,7.75,51.667,7.75C55.556,7.75,59.444,9.125,63.333,9.125C67.222,9.125,71.111,7.75,75,6.375"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">用户黑白名单</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock w-3 h-3 mr-1"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>2<!-- -->条老化</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">12<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">189</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->55<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts56-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#FA8C16" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="71.68180847167969px 0px" d="M5,13.25C8.889,11.875,12.778,10.5,16.667,10.5C20.556,10.5,24.444,12.333,28.333,12.333C32.222,12.333,36.111,8.667,40,8.667C43.889,8.667,47.778,9.583,51.667,9.583C55.556,9.583,59.444,6.833,63.333,6.833C67.222,6.833,71.111,7.292,75,7.75"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div></div><div class="border rounded-lg dark:border-gray-700"><button class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" style="border-left:4px solid #52C41A"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background-color:#52C41A"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-5 h-5"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg></div><span class="font-medium text-gray-900 dark:text-white">阶段3<!-- -->: <!-- -->内容层</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90">4<!-- --> <!-- -->个模块</span></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-5 h-5 text-gray-500"><path d="m6 9 6 6 6-6"></path></svg></button><div class="p-4 pt-0"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">附件安全检测</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">22<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">1,823</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->89<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts62-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#52C41A" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="70.82389068603516px 0px" d="M5,10.5C8.889,9.583,12.778,8.667,16.667,8.667C20.556,8.667,24.444,9.583,28.333,9.583C32.222,9.583,36.111,6.833,40,6.833C43.889,6.833,47.778,7.75,51.667,7.75C55.556,7.75,59.444,5.917,63.333,5.917C67.222,5.917,71.111,6.192,75,6.467"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">URL检测与防护</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">18<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">1,456</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->92<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts68-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#52C41A" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="70.74261474609375px 0px" d="M5,11.6C8.889,10.5,12.778,9.4,16.667,9.4C20.556,9.4,24.444,10.5,28.333,10.5C32.222,10.5,36.111,8.3,40,8.3C43.889,8.3,47.778,8.96,51.667,8.96C55.556,8.96,59.444,7.2,63.333,7.2C67.222,7.2,71.111,7.42,75,7.64"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">内容规则</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock w-3 h-3 mr-1"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>5<!-- -->条老化</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">45<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">987</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->45<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts74-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#52C41A" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="70.64363098144531px 0px" d="M5,8.667C8.889,7.75,12.778,6.833,16.667,6.833C20.556,6.833,24.444,7.933,28.333,7.933C32.222,7.933,36.111,5.733,40,5.733C43.889,5.733,47.778,6.467,51.667,6.467C55.556,6.467,59.444,5,63.333,5C67.222,5,71.111,5.367,75,5.733"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">意图引擎</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">6<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">654</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->72<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts80-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#52C41A" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="70.53499603271484px 0px" d="M5,14.167C8.889,13.25,12.778,12.333,16.667,12.333C20.556,12.333,24.444,13.067,28.333,13.067C32.222,13.067,36.111,11.6,40,11.6C43.889,11.6,47.778,12.333,51.667,12.333C55.556,12.333,59.444,10.5,63.333,10.5C67.222,10.5,71.111,10.867,75,11.233"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div></div><div class="border rounded-lg dark:border-gray-700"><button class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" style="border-left:4px solid #1890FF"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background-color:#1890FF"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-brain w-5 h-5"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"></path><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"></path><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"></path><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"></path><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"></path><path d="M3.477 10.896a4 4 0 0 1 .585-.396"></path><path d="M19.938 10.5a4 4 0 0 1 .585.396"></path><path d="M6 18a4 4 0 0 1-1.967-.516"></path><path d="M19.967 17.484A4 4 0 0 1 18 18"></path></svg></div><span class="font-medium text-gray-900 dark:text-white">阶段4<!-- -->: <!-- -->智能分析层</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90">4<!-- --> <!-- -->个模块</span></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-5 h-5 text-gray-500"><path d="m6 9 6 6 6-6"></path></svg></button><div class="p-4 pt-0"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">发信人行为智能体</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">1<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">432</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->85<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts86-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#1890FF" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="71.46514129638672px 0px" d="M5,11.722C8.889,10.194,12.778,8.667,16.667,8.667C20.556,8.667,24.444,9.889,28.333,9.889C32.222,9.889,36.111,7.444,40,7.444C43.889,7.444,47.778,8.667,51.667,8.667C55.556,8.667,59.444,5.611,63.333,5.611C67.222,5.611,71.111,6.222,75,6.833"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">意图检测智能体</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">1<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">321</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->78<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts92-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#1890FF" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="72.38932037353516px 0px" d="M5,12.857C8.889,11.286,12.778,9.714,16.667,9.714C20.556,9.714,24.444,11.286,28.333,11.286C32.222,11.286,36.111,7.357,40,7.357C43.889,7.357,47.778,8.929,51.667,8.929C55.556,8.929,59.444,5,63.333,5C67.222,5,71.111,5.786,75,6.571"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">钓鱼邮件智能体</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">1<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">567</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->92<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts98-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#1890FF" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="71.19149017333984px 0px" d="M5,10.5C8.889,9.125,12.778,7.75,16.667,7.75C20.556,7.75,24.444,8.85,28.333,8.85C32.222,8.85,36.111,6.1,40,6.1C43.889,6.1,47.778,7.2,51.667,7.2C55.556,7.2,59.444,5,63.333,5C67.222,5,71.111,5.55,75,6.1"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">威胁回溯智能体</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert w-3 h-3 mr-1"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>超时异常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">1<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">189</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->95<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts104-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#1890FF" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="71.88324737548828px 0px" d="M5,13.25C8.889,11.875,12.778,10.5,16.667,10.5C20.556,10.5,24.444,11.875,28.333,11.875C32.222,11.875,36.111,7.75,40,7.75C43.889,7.75,47.778,9.125,51.667,9.125C55.556,9.125,59.444,6.375,63.333,6.375C67.222,6.375,71.111,7.063,75,7.75"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div></div><div class="border rounded-lg dark:border-gray-700"><button class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" style="border-left:4px solid #722ED1"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background-color:#722ED1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers w-5 h-5"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"></path><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"></path></svg></div><span class="font-medium text-gray-900 dark:text-white">阶段5<!-- -->: <!-- -->综合策略</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90">2<!-- --> <!-- -->个模块</span></div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-5 h-5 text-gray-500"><path d="m6 9 6 6 6-6"></path></svg></button><div class="p-4 pt-0"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">相似检测</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big w-3 h-3 mr-1"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>正常</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">4<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">456</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->68<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts110-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#722ED1" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="70.72106170654297px 0px" d="M5,9.813C8.889,8.781,12.778,7.75,16.667,7.75C20.556,7.75,24.444,8.438,28.333,8.438C32.222,8.438,36.111,6.375,40,6.375C43.889,6.375,47.778,7.063,51.667,7.063C55.556,7.063,59.444,5,63.333,5C67.222,5,71.111,5.344,75,5.688"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div><div class="p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"><div class="flex items-center justify-between mb-3"><div class="font-medium text-gray-900 dark:text-white text-sm">高级过滤规则</div><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3 h-3 mr-1"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>观察中</span></div><div class="flex items-center gap-2 mb-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-xs">35<!-- --> <!-- -->条规则</span></div><div class="text-2xl font-bold text-gray-900 dark:text-white mb-1">345</div><div class="text-sm text-gray-500 dark:text-gray-400 mb-3">拦截率<!-- -->: <!-- -->55<!-- -->%</div><div class="mb-3"><div class="recharts-responsive-container" style="width:80px;height:32px;min-width:0"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 32px; max-width: 80px;"><svg class="recharts-surface" width="80" height="32" viewBox="0 0 80 32" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts116-clip"><rect x="5" y="5" height="22" width="70"></rect></clipPath></defs><g class="recharts-layer recharts-line"><path stroke="#722ED1" stroke-width="1.5" width="70" height="22" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="71.06063079833984px 0px" d="M5,10.5C8.889,9.583,12.778,8.667,16.667,8.667C20.556,8.667,24.444,9.583,28.333,9.583C32.222,9.583,36.111,6.833,40,6.833C43.889,6.833,47.778,7.75,51.667,7.75C55.556,7.75,59.444,5,63.333,5C67.222,5,71.111,5.458,75,5.917"></path><g class="recharts-layer"></g></g></svg></div></div></div><button class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">查看详情<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-3 h-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div></div></div></div></div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/module-wall-stage5-collapsed.png" alt="阶段5折叠态">
+      <figcaption>点击「阶段5: 综合策略」组头后的折叠态（浏览器实测：组内卡片隐藏，Chevron 变右向；再次点击恢复）</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/module-card-selected.png" alt="卡片选中态">
+      <figcaption>点击「RBL过滤」卡片本体后的选中态（border-blue-500 + bg-blue-50；同一时刻仅一张卡片选中）</figcaption>
+    </figure>
+
+    <h4>阶段组结构</h4>
+    <table class="spec-table">
+      <thead><tr><th>组</th><th>组头图标</th><th>标题</th><th>徽标</th><th>模块卡片</th></tr></thead>
+      <tbody>
+        <tr><td>阶段1</td><td>Shield（圆形 #FF4D4F 底）</td><td>阶段1: IP策略</td><td>4 个模块</td><td>IP频率限制(12规则/3,402/18%)、IP黑白名单(33/1,205/42%·3条老化)、RBL过滤(3/892/95%)、海外邮件检测(3/156/100%)</td></tr>
+        <tr><td>阶段2</td><td>Users（#FA8C16）</td><td>阶段2: 收发信人策略</td><td>5 个模块</td><td>发信人黑白名单(28/2,156/35%)、身份认证与仿冒检测(8/567/78%)、发信行为管控(15/423/62%·观察中)、收信人检测(5/234/88%)、用户黑白名单(12/189/55%·2条老化)</td></tr>
+        <tr><td>阶段3</td><td>FileText（#52C41A）</td><td>阶段3: 内容层</td><td>4 个模块</td><td>附件安全检测(22/1,823/89%)、URL检测与防护(18/1,456/92%)、内容规则(45/987/45%·5条老化)、意图引擎(6/654/72%)</td></tr>
+        <tr><td>阶段4</td><td>Brain（#1890FF）</td><td>阶段4: 智能分析层</td><td>4 个模块</td><td>发信人行为智能体(1/432/85%)、意图检测智能体(1/321/78%)、钓鱼邮件智能体(1/567/92%)、威胁回溯智能体(1/189/95%·超时异常)</td></tr>
+        <tr><td>阶段5</td><td>Layers（#722ED1）</td><td>阶段5: 综合策略</td><td>2 个模块</td><td>相似检测(4/456/68%)、高级过滤规则(35/345/55%·观察中)</td></tr>
+      </tbody>
+    </table>
+
+    <h4>单张模块卡片元素</h4>
+    <table class="spec-table">
+      <thead><tr><th>序号</th><th>元素</th><th>规则</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>模块名（text-sm font-medium）+ 状态徽标</td><td>正常(绿·CheckCircle) / N条老化(橙·Clock，N=agingCount) / 观察中(黄·Eye) / 超时异常(红·AlertTriangle)</td></tr>
+        <tr><td>2</td><td>Badge(outline)</td><td>「N 条规则」</td></tr>
+        <tr><td>3</td><td>命中数（text-2xl font-bold）</td><td>随时间乘数/租户系数缩放，toLocaleString 千分位</td></tr>
+        <tr><td>4</td><td>「拦截率: N%」（text-sm 灰）</td><td>模块固定 mock 值，不随筛选缩放</td></tr>
+        <tr><td>5</td><td>迷你趋势线（recharts 80×32）</td><td>7 点折线，颜色=所属阶段主色</td></tr>
+        <tr><td>6</td><td>「查看详情 →」链接钮（text-blue-600）</td><td>stopPropagation；setDetailModule + viewMode="detail" + 100ms 后平滑滚动到明细区</td></tr>
+      </tbody>
+    </table>
+
+    <div class="dom-comparison">
+      <h5>DOM 树比对结果（层级 0 · 卡片墙）</h5>
+      <table>
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>根节点 / 节点总数</td><td>Card / 596</td><td>Card / 596</td><td class="dom-pass">✅</td></tr>
+          <tr><td>模块卡片数</td><td>19（4+5+4+4+2）</td><td>19</td><td class="dom-pass">✅</td></tr>
+          <tr><td>「查看详情」按钮数</td><td>19</td><td>19</td><td class="dom-pass">✅</td></tr>
+          <tr><td>折叠行为</td><td>点击组头后组内卡片从 DOM 移除（条件渲染，浏览器实测「相似检测」文本消失）</td><td>预览用 display 切换复刻视觉（实现差异已注明）</td><td class="dom-pass">✅</td></tr>
+          <tr><td>默认选中卡片</td><td>IP黑白名单（selectedModule 初始值，蓝边高亮）</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h4>交互层级详情（层级 2+ 拆分为独立文件）</h4>
+  <table class="layer-index">
+    <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>五阶段卡片墙</td><td>页面加载</td><td>上方内嵌</td></tr>
+      <tr><td>1</td><td>全局筛选级联与数据联动</td><td>筛选栏操作（组件 2.2）</td><td><a href="./layer-1-filter-cascade.html">查看详情 →</a></td></tr>
+      <tr><td>2</td><td>模块明细视图（IP黑白名单样例）</td><td>卡片「查看详情」→ viewMode="detail"</td><td><a href="./layer-2-module-detail.html">查看详情 →</a></td></tr>
+      <tr><td>3</td><td>明细表格交互（筛选/排序/搜索/分页）</td><td>明细视图内操作规则表</td><td><a href="./layer-3-detail-table.html">查看详情 →</a></td></tr>
+      <tr><td>4</td><td>模块专属列集差异 + 崩溃缺陷</td><td>不同模块卡片「查看详情」</td><td><a href="./layer-4-module-columns.html">查看详情 →</a></td></tr>
+    </tbody>
+  </table>
+</article>
+</section>
+
+<section id="dialogs">
+  <h2>3. 弹窗/抽屉/Popover 规格</h2>
+  <p class="note-inline">本页无 Dialog/Sheet；共 2 个 Popover。</p>
+  <article class="component-spec" id="dialog-3-1">
+    <h3>3.1 租户选择 Popover</h3>
+    <table class="spec-table"><tbody>
+      <tr><td>触发条件</td><td>点击筛选栏最左「租户范围」combobox（仅多租户形态+平台视角渲染）</td></tr>
+      <tr><td>demo 组件</td><td><code>components/email-disposal-center/tenant-selector.tsx</code>（复用邮件处置中心组件，variant="bar"：左侧 Building 图标 + 「租户范围」标签 + 下划线触发器）</td></tr>
+      <tr><td>内容</td><td>Command 搜索框 + 「全部租户」+ MOCK_TENANTS 租户列表（name+code），单选，选中项打勾</td></tr>
+      <tr><td>关闭方式</td><td>选中任一项 / ESC / 点击外部</td></tr>
+      <tr><td>选中效果</td><td>触发器文案变为租户名；全页统计数值按 seed 确定性缩放（§5.4）</td></tr>
+    </tbody></table>
+  </article>
+  <article class="component-spec" id="dialog-3-2">
+    <h3>3.2 自定义日期范围日历 Popover</h3>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/custom-date-calendar.png" alt="日历弹层">
+      <figcaption>时间范围选「自定义」后出现日期按钮，点击弹出双月 range 日历（浏览器实测：2026-07/08 双月、今天之后日期禁用）</figcaption>
+    </figure>
+    <table class="spec-table"><tbody>
+      <tr><td>触发条件</td><td>时间范围 Select 选「自定义」→ 出现 CalendarIcon 按钮（占位「选择日期范围」）→ 点击打开</td></tr>
+      <tr><td>形态</td><td>Popover（align="start"）内嵌 <code>Calendar mode="range" numberOfMonths=2 disabled={after: today}</code></td></tr>
+      <tr><td>选中效果</td><td>按钮文案变为「yyyy-MM-dd ~ yyyy-MM-dd」（仅起点时显示单日期）；时间乘数=ceil(天数/7)（§5.3）</td></tr>
+      <tr><td>关闭方式</td><td>ESC / 点击外部（选完不自动关闭）</td></tr>
+    </tbody></table>
+  </article>
+</section>
+
+<section id="api-mapping">
+  <h2>4. 数据模型与 API 映射</h2>
+  <h3>4.1 前端数据模型（demo 源码原样提取）</h3>
+  <pre><code>// KPI（filteredKPIData）
+{ totalHits, totalHitsChange, effectiveBlockRate, effectiveBlockRateChange,
+  observationHits, observationHitsChange, activeRules: { active, total }, agingRules }
+
+// 漏斗行（mockFunnelData）
+{ stage: 1-5, name: "stageN", enter, blocked, blockRate, pass }
+
+// 模块卡（mockModules[stageN][]）
+{ id, nameKey, rules, hits, blockRate, status: "normal"|"aging"|"observation"|"timeout",
+  agingCount?, trend: number[7] }
+
+// 明细概览（generateMockDetailData）
+{ overview: { totalHits, blockRate, observationHits,
+    rules: { enabled, disabled, aging }, healthScore,
+    accuracy: { rate, confidence: "high"|"medium"|"low"|"none", feedbackSamples,
+      totalDisposal, feedbackCoverage, correctCount, falseCount, pendingCount,
+      change, ruleType: "blacklist"|"whitelist"|"mixed" } },
+  trendData: [{ date, hits, blocked, passed }],
+  actionDistribution: [{ name, value, color }],
+  top5Rules: [{ id, name, hits }],
+  accuracyTrendData: [{ date, accuracy, samples }],
+  falseSourceDistribution: [{ source, count, percent }] }
+
+// 规则行（generateMockRulesData，基础字段 + 模块专属字段见层级4）
+{ id, name, hits, status: "enabled"|"disabled"|"aging", trend: number[7],
+  accuracyRate, accuracyConfidence, feedbackSamples, falseCount, ruleType, ...模块专属 }</code></pre>
+
+  <h3>4.2 spec 定义的 API</h3>
+  <blockquote>本页面无独立 PRD，spec 未定义任何接口。以下映射基于 demo 数据需求推导。</blockquote>
+
+  <h3>4.3 网关现有 API 映射</h3>
+  <table class="spec-table">
+    <thead><tr><th>demo 数据需求</th><th>网关现有能力</th><th>映射方式</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td>KPI/漏斗/模块命中聚合</td><td><code>GET /api/v1/statistics/filter</code>（GetFilterStatistics，按过滤类型统计）；<code>GET /api/v1/statistics/dashboard</code></td><td>部分可映射</td><td>现有接口无「五阶段」「观察模式」「老化规则」维度，需新增聚合端点 <b>[需确认 Q2]</b></td></tr>
+      <tr><td>规则级命中明细（逐模块列集）</td><td>各规则模块自有 CRUD API（ip-filter / sender-filter / rules 等）+ <code>intercept_events</code> 命中流水</td><td>需按模块 join 聚合</td><td>规则表有 hit_count/last_hit 类字段的模块可直接读；逐日趋势需流水聚合 <b>[需确认 Q2]</b></td></tr>
+      <tr><td>准确率反馈闭环（误判/漏判来源）</td><td>处置/放行/召回操作已有审计与事件记录</td><td>需新增反馈归因统计</td><td>「30天无反馈自动归档为正确」为 demo 定义的口径 <b>[需确认 Q5]</b></td></tr>
+      <tr><td>权限子模块</td><td><code>internal/api/rbac_submodules.go</code> 已注册 <code>{"rule-stats-v2", "statistics", false, false}</code></td><td>直接使用</td><td>菜单/RBAC 键已就绪</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.4 数据库表映射</h3>
+  <table class="spec-table">
+    <thead><tr><th>demo 数据</th><th>网关候选表</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td>模块/规则命中计数、最后命中时间</td><td>各规则表（ip_filter_rules、sender_rules、keyword_rules…）+ <code>intercept_events</code></td><td>老化=近90天零命中，可由 last_hit 推导</td></tr>
+      <tr><td>阶段漏斗（进入/拦截/放行）</td><td><code>email_logs</code> / <code>intercept_events</code> 按 milter 阶段聚合</td><td>需要阶段标签口径（§5.1 映射表）<b>[需确认 Q3]</b></td></tr>
+      <tr><td>准确率反馈样本</td><td>处置审计（放行/召回/取回事件）</td><td>需新增归因关联（规则 ← 处置反馈）<b>[需确认 Q5]</b></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="business-logic">
+  <h2>5. 业务逻辑规格</h2>
+
+  <h3>5.1 五阶段模型（demo vs 策略流水线 spec 对照）</h3>
+  <table class="spec-table">
+    <thead><tr><th>阶段</th><th>spec（策略流水线需求文档）</th><th>demo（本页 STAGE_MODULE_MAP）</th><th>差异</th></tr></thead>
+    <tbody>
+      <tr><td>阶段1 IP策略</td><td>IP频率限制、IP黑白名单、RBL实时黑名单、境外邮件检测（4）</td><td>同 spec（4）</td><td class="dom-pass">一致</td></tr>
+      <tr><td>阶段2 收发信人策略</td><td>发信人黑白名单、身份认证与仿冒检测、发信行为管控、收信人检测、个人黑白名单（5）</td><td>同 spec（5，「个人黑白名单」在 demo 中名为「用户黑白名单」）</td><td class="dom-pass">命名微差</td></tr>
+      <tr><td>阶段3 内容层</td><td>附件安全、URL防护、内容规则（3）</td><td>附件安全、URL防护、内容规则、<b>意图引擎</b>（4）</td><td class="dom-fail">意图引擎归属不同（§9-D4）</td></tr>
+      <tr><td>阶段4 智能分析层</td><td>发信人行为/意图识别/钓鱼检测/威胁回溯 4 个 Agent</td><td>同 spec（4）</td><td class="dom-pass">一致</td></tr>
+      <tr><td>阶段5 综合策略</td><td><b>意图引擎</b>、相似邮件检测、高级规则（3）</td><td>相似检测、高级过滤规则（2）</td><td class="dom-fail">意图引擎被移至阶段3（§9-D4）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 KPI 口径（demo 实现）</h3>
+  <table class="spec-table">
+    <thead><tr><th>指标</th><th>计算（源码 filteredKPIData）</th></tr></thead>
+    <tbody>
+      <tr><td>策略命中总量</td><td>Σ(筛选后模块 hits) × 时间乘数 × 租户系数</td></tr>
+      <tr><td>有效拦截率</td><td>Σ(hits×blockRate) / Σhits，四舍五入 1 位小数；Tooltip 口径为 (阻断+隔离+丢弃)/命中总量、观察命中不计入分子</td></tr>
+      <tr><td>观察模式命中</td><td>Σ(status==="observation" 模块 hits) × 乘数</td></tr>
+      <tr><td>活跃规则数</td><td>active=Σmodule.rules；total=Σ(rules+agingCount)；老化数=Σ(aging 模块 agingCount)。<b>与 Tooltip「近30天有命中」口径不符（§9-D14）</b></td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 时间范围乘数</h3>
+  <table class="spec-table">
+    <thead><tr><th>时间范围</th><th>乘数</th></tr></thead>
+    <tbody>
+      <tr><td>今天</td><td>0.15</td></tr>
+      <tr><td>近7天（默认）</td><td>1</td></tr>
+      <tr><td>近30天</td><td>4.2</td></tr>
+      <tr><td>自定义</td><td>ceil((to-from)/7天)，未选完整区间时为 1</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.4 租户范围缩放（多租户形态 + 平台视角）</h3>
+  <p>选「全部租户」时系数=1；选中单租户时以租户 id 的 FNV 哈希为种子，确定性映射到 [0.08, 0.4] 区间（同一租户每次进入数值一致、可复现）。KPI/漏斗/卡片命中数/迷你趋势全部乘以该系数。</p>
+
+  <h3>5.5 观察模式三态</h3>
+  <table class="spec-table">
+    <thead><tr><th>选项</th><th>行为</th><th>默认态受影响模块</th></tr></thead>
+    <tbody>
+      <tr><td>包含观察模式（默认）</td><td>不过滤</td><td>-</td></tr>
+      <tr><td>排除观察模式</td><td>剔除 status==="observation" 的模块</td><td>发信行为管控、高级过滤规则被剔除</td></tr>
+      <tr><td>仅观察模式</td><td>只保留观察模块</td><td>KPI 变为 768 / 58.9% / 768 / 50/50，卡片墙仅阶段2+阶段5 各 1 卡（浏览器实测）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.6 明细视图口径（module-detail-view）</h3>
+  <table class="spec-table">
+    <thead><tr><th>项</th><th>口径（demo）</th></tr></thead>
+    <tbody>
+      <tr><td>模块健康度评分</td><td>100 − (老化规则占比×50) − (超时率×30) − (零命中规则占比×20)；≥90 绿「健康」，70-89 橙「需关注」，&lt;70 红「需优化」</td></tr>
+      <tr><td>准确率</td><td>正确反馈 / 反馈样本；样本≥100 高置信(绿点)、≥30 中置信(橙点)、&gt;0 低置信(灰点)、样本&lt;30 时不显示数值（显示 -）。30 天无反馈的处置自动归档为「正确」</td></tr>
+      <tr><td>误判/漏判方向</td><td>黑名单类规则 → 「误判」（拦了不该拦），来源分布：管理员隔离区放行 44% / 管理员审核队列放行 22% / 用户隔离区取回 28% / 用户通知信取回 6%；白名单类（用户黑白名单）→「漏判」，来源：管理员召回 65% / 回溯智能体召回 35%</td></tr>
+      <tr><td>反馈闭环健康度</td><td>反馈覆盖率 = 已反馈/总处置；≥70% 绿、≥50% 橙、&lt;50% 红并显示「反馈覆盖率较低，准确率可能存在偏差」警示</td></tr>
+      <tr><td>规则状态</td><td>已启用（绿）/ 已禁用（灰，行文字变淡）/ 老化规则（橙，行底灰）；行内观察态底黄（本模块 mock 未出现）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="interaction">
+  <h2>6. 交互规格</h2>
+  <h3>6.1 状态变化规则</h3>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>操作</th><th>状态变化</th><th>浏览器验证</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>切换阶段（含所选模块不属新阶段）</td><td>stageFilter 更新；moduleFilter 重置为 all + 2s 黑色气泡「原所选不在当前阶段，已自动切换」；明细视图若模块失效则关闭</td><td>✅ module-reset-tooltip.png</td></tr>
+      <tr><td>2</td><td>全部阶段下直选具体模块</td><td>反向级联：stageFilter 自动切到该模块所属阶段 + 阶段触发器 300ms 橙色 ring 高亮</td><td>✅ 触发器实测变「阶段5：综合策略 (2)」「相似检测」（高亮 300ms 截图未捕获，以源码为准）</td></tr>
+      <tr><td>3</td><td>重置</td><td>近7天/全部阶段/全部模块/包含观察模式 + 关闭明细视图</td><td>✅ 触发器全部恢复默认</td></tr>
+      <tr><td>4</td><td>刷新</td><td>isLoading=true 1s：按钮禁用 + RefreshCw animate-spin</td><td>✅ refresh-loading.png（spinning=true, disabled=true）</td></tr>
+      <tr><td>5</td><td>卡片「查看详情」</td><td>viewMode="detail" + 100ms 后 scrollIntoView(smooth) 至明细区；切换模块时明细筛选重置</td><td>✅（RBL/身份认证除外，崩溃 §9-D1）</td></tr>
+      <tr><td>6</td><td>明细「返回全部模块」</td><td>viewMode="cards"，明细 DOM 移除</td><td>✅ detail_gone=true</td></tr>
+      <tr><td>7</td><td>明细表点「命中次数」表头</td><td>首点降序（TrendingDown 图标），再点升序切换</td><td>✅ 1040→320 / 320→1040</td></tr>
+      <tr><td>8</td><td>明细筛选 操作类型=阻断</td><td>10 行 → 2 行（Rule 1 / Rule 6），底部「共: 2 条规则」</td><td>✅ detail-filter-block.png</td></tr>
+      <tr><td>9</td><td>明细状态筛选=老化规则</td><td>10 行 → 1 行（Rule 10）</td><td>✅ detail-filter-aging.png</td></tr>
+      <tr><td>10</td><td>明细搜索「192.168.3」</td><td>1 行（Rule 4，全字段 includes 匹配）</td><td>✅ detail-search-result.png</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 Tooltip 清单</h3>
+  <table class="spec-table">
+    <thead><tr><th>位置</th><th>触发</th><th>文案</th></tr></thead>
+    <tbody>
+      <tr><td>KPI ×4 标签 ❔</td><td>hover</td><td>见 §2.3 表（i18n kpi.*Tooltip）</td></tr>
+      <tr><td>阶段 Select 触发器</td><td>hover</td><td>按策略执行阶段筛选，切换后模块范围自动联动</td></tr>
+      <tr><td>模块 Select 触发器</td><td>hover</td><td>全部阶段：「选择具体模块可快速定位到对应阶段」；单阶段：「当前仅展示所选阶段下的模块」</td></tr>
+      <tr><td>重置按钮</td><td>hover</td><td>恢复默认筛选条件（近7天/全部阶段/全部模块/包含观察模式）</td></tr>
+      <tr><td>明细表「命中次数」单元格（蓝色链接）</td><td>hover</td><td>点击查看命中该规则的具体邮件列表（✅ 浏览器实测；点击本身无跳转实现，§10-Q8）</td></tr>
+      <tr><td>明细「规则总数」「准确率」「健康度」「反馈闭环」❔</td><td>hover</td><td>见层级 2 子文件元素表</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.3 异常场景</h3>
+  <table class="spec-table">
+    <thead><tr><th>场景</th><th>demo 行为</th><th>落地要求</th></tr></thead>
+    <tbody>
+      <tr><td>RBL过滤 / 身份认证与仿冒检测 点「查看详情」</td><td><b>页面崩溃</b>（Runtime TypeError，§9-D1）</td><td>落地必须修复：规则行缺准确率字段时按「-」渲染</td></tr>
+      <tr><td>筛选结果为空（如单阶段+排除观察后无模块）</td><td>该阶段组整组不渲染；卡片墙可能为空（无空态提示）</td><td>建议补空态文案 [需确认]</td></tr>
+      <tr><td>观察模式命中为 0</td><td>KPI 显示 0，趋势行仍显示 mock 涨幅</td><td>落地按真实数据</td></tr>
+      <tr><td>自定义时间未选完整区间</td><td>乘数按 1 处理，按钮显示单日期或占位符</td><td>-</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="i18n">
+  <h2>7. 国际化规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>项</th><th>值</th></tr></thead>
+    <tbody>
+      <tr><td>demo 支持语言</td><td>zh / en / th（language-context.tsx，默认 zh）。<b>implement.md 要求四语</b>——落地需补第四语（§10-Q7）</td></tr>
+      <tr><td>key 前缀</td><td><code>ruleStatsV2.*</code>（页面级）、<code>ruleStatsV2.detail.*</code>（明细/模块专属列）、<code>ruleStatsV2.accuracy.*</code>（准确率）、<code>ruleStatsV2.details.*</code>（表格基础列）、<code>ruleStatsV2.action.*</code>（动作）、<code>common.*</code></td></tr>
+      <tr><td>key 数量</td><td>zh 语言表约 249 个 ruleStatsV2 前缀 key（三语共 ~747 行）</td></tr>
+    </tbody>
+  </table>
+  <h3>7.1 缺失/失效 key（浏览器实测渲染为原始 key）</h3>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>位置</th><th>引用 key</th><th>问题</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>页头「订阅告警」按钮</td><td><code>ruleStatsV2.subscribeAlert</code></td><td>三语均未定义（语言表中为 <code>alertSettings</code>=告警设置），按钮显示原始 key（§9-D2）</td></tr>
+      <tr><td>2</td><td>明细表 badge 型单元格（操作类型/挂起策略/对象类型等）</td><td><code>ruleStatsV2.detail.block</code> 等 <code>detail.${value}</code></td><td>t() 缺失时返回 key 本身（truthy），回退链 <code>t(detail.*) || t(action.*)</code> 永不生效 → 全部 badge 显示原始 key（§9-D3）</td></tr>
+    </tbody>
+  </table>
+  <h3>7.2 关键 key 节选（zh）</h3>
+  <table class="spec-table">
+    <thead><tr><th>key</th><th>zh 文案</th></tr></thead>
+    <tbody>
+      <tr><td>ruleStatsV2.pageTitle / pageSubtitle</td><td>规则统计 / 策略效能分析与规则命中统计</td></tr>
+      <tr><td>ruleStatsV2.funnel.title / description</td><td>策略流水线漏斗 / 邮件在5个策略阶段中的逐层衰减</td></tr>
+      <tr><td>ruleStatsV2.distribution.title / description</td><td>模块命中分布TOP10 / 按命中量排序的策略模块</td></tr>
+      <tr><td>ruleStatsV2.modules.title / description</td><td>策略模块效能卡片 / 按5个阶段分组展示各策略模块的命中效果</td></tr>
+      <tr><td>ruleStatsV2.cascade.moduleReset</td><td>原所选不在当前阶段，已自动切换</td></tr>
+      <tr><td>ruleStatsV2.detail.backToModules / ruleEfficiencyAnalysis</td><td>返回全部模块 / 规则效能分析</td></tr>
+      <tr><td>ruleStatsV2.accuracy.tooltip</td><td>准确率基于管理员放行/取回/召回的反馈闭环计算。仅统计有明确反馈的处置记录，30天无反馈自动归档为正确。</td></tr>
+      <tr><td>ruleStatsV2.status.normal / aging / observation / timeout</td><td>正常 / 条老化 / 观察中 / 超时异常</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="responsive">
+  <h2>8. 响应式规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>KPI 区</th><th>图表区</th><th>卡片墙</th><th>明细视图</th></tr></thead>
+    <tbody>
+      <tr><td>≥1280 (xl)</td><td>4 列</td><td>漏斗 3/5 + 分布 2/5 并排</td><td>lg:4 列卡片</td><td>左表 flex-1 + 右栏 w-72 sticky top-5</td></tr>
+      <tr><td>1024-1279 (lg)</td><td>4 列</td><td>上下堆叠（&lt;xl）</td><td>4 列</td><td>同上；规则表横向滚动（overflow-x-auto）</td></tr>
+      <tr><td>768-1023 (md)</td><td>2 列</td><td>上下堆叠</td><td>2 列</td><td>右栏仍 w-72（无断点降级，窄屏挤压 [需确认]）</td></tr>
+      <tr><td>&lt;768</td><td>1 列</td><td>上下堆叠</td><td>1 列</td><td>同上</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/responsive-1366.png" alt="1366 视口">
+    <figcaption>1366×900：图表区上下堆叠（&lt;xl=1280 时 col-span 失效前的过渡……实测 1366≥1280 仍并排，见图）；KPI 保持 4 列</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/responsive-1024.png" alt="1024 视口">
+    <figcaption>1024×900：KPI 4 列（lg 生效）、漏斗/分布上下堆叠（&lt;xl）</figcaption>
+  </figure>
+</section>
+
+<section id="diffs" class="diff-section">
+  <h2>9. 与 spec / 源码意图的差异标注（以浏览器实际渲染为准）</h2>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>级别</th><th>差异</th><th>证据</th></tr></thead>
+    <tbody>
+      <tr><td>D1</td><td><span class="badge badge-high">崩溃</span></td><td><b>「RBL过滤」「身份认证与仿冒检测」两个模块点「查看详情」直接崩溃整页</b>：这两个模块的规则 mock 为手写数组，缺少 accuracyRate/feedbackSamples/falseCount 字段，而明细表无条件渲染 <code>(rule.feedbackSamples as number).toLocaleString()</code> → Runtime TypeError: Cannot read properties of undefined (reading 'toLocaleString')，位置 <code>module-detail-view.tsx:1441</code>。崩溃后整页白屏（Next dev 错误浮层），需刷新恢复。</td><td>detail-rbl-crash.png；层级4子文件复刻</td></tr>
+      <tr><td>D2</td><td><span class="badge badge-high">i18n</span></td><td>页头第三个按钮显示原始 key <code>ruleStatsV2.subscribeAlert</code>——源码引用该 key，但三语语言表均只有 <code>ruleStatsV2.alertSettings</code>（告警设置）。按钮亦无点击行为。</td><td>page-full-default.png 右上角；grep 语言表无 subscribeAlert</td></tr>
+      <tr><td>D3</td><td><span class="badge badge-high">i18n</span></td><td>明细表 badge 型单元格（操作类型/挂起策略等）全部显示原始 key（如 <code>ruleStatsV2.detail.block</code>）。t() 对缺失 key 返回 key 本身，导致 <code>t(`detail.${value}`) || t(`action.${value}`)</code> 回退永不生效——语言表只有 action.block=阻断，页面却显示 detail.block 原文。</td><td>detail-view-full.png 操作类型列；fx-badge-rawkey dump（5 种动作值全部原样）</td></tr>
+      <tr><td>D4</td><td><span class="badge badge-medium">口径</span></td><td>意图引擎归属：demo 放在阶段3内容层（阶段3 共 4 模块、阶段5 仅 2 模块）；策略流水线 spec 定义意图引擎属于阶段5综合策略（阶段3 应 3 模块、阶段5 应 3 模块）。</td><td>§5.1 对照表</td></tr>
+      <tr><td>D5</td><td><span class="badge badge-low">视觉</span></td><td>导出 Select 触发器 w-32 过窄，「导出CSV」被截断显示为「导出CS」。</td><td>page-full-default.png 页头</td></tr>
+      <tr><td>D6</td><td><span class="badge badge-low">一致性</span></td><td>用户黑白名单明细：模块级按白名单显示「漏判来源分布」，但规则行级 ruleType 恒为 blacklist → 行内仍显示「误判N」前缀，模块级与行级方向不一致。</td><td>detail-user-blacklist.png；fx-l4-user-bl dump</td></tr>
+      <tr><td>D7</td><td><span class="badge badge-low">列定义</span></td><td>用户黑白名单明细表「命中次数」列出现两次（基础列 hits + 模块专属列 hits 重复）。</td><td>fx-l4-user-bl headers</td></tr>
+      <tr><td>D8</td><td><span class="badge badge-low">数据</span></td><td>明细表每行「处置分布」进度条硬编码 60/25/15（阻断/隔离/审核），与该行真实数据无关。</td><td>源码 1377-1381 行 + 浏览器逐行同一分布</td></tr>
+      <tr><td>D8b</td><td><span class="badge badge-low">视觉</span></td><td>分布TOP10 源码为每条准备阶段色 fill 字段，但未用 &lt;Cell&gt; 渲染，实际条形统一蓝色 #1890FF。</td><td>page-full-default.png 右图</td></tr>
+      <tr><td>D10</td><td><span class="badge badge-low">数据</span></td><td>多处环比/统计为硬编码 mock：KPI 变化率按时间范围写死；明细概览 +12%/+5%；准确率波动范围 82%-94%；健康度扣分明细文案固定。</td><td>源码 + 浏览器一致</td></tr>
+      <tr><td>D11</td><td><span class="badge badge-low">行为</span></td><td>「刷新」仅 1s loading 动画，无数据刷新；「导出CSV/PDF」「订阅告警」「明细导出」「规则行查看/外链」均无绑定行为。</td><td>refresh-loading.png；源码无 handler</td></tr>
+      <tr><td>D12</td><td><span class="badge badge-low">形态</span></td><td>全页组件带 dark: 样式，但 demo 布局未提供暗色切换入口（theme-context 仅管理主题色）。暗色截图为手动加 .dark class 所得。</td><td>page-full-dark.png</td></tr>
+      <tr><td>D13</td><td><span class="badge badge-low">分页</span></td><td>明细规则表 pageSize=10 且各模块 mock 恰好 ≤10 条 → 「上一页/下一页」恒禁用、页码仅「1」，分页逻辑（最多显示 5 个页码钮）未被 mock 覆盖。</td><td>l3-pagination dump</td></tr>
+      <tr><td>D14</td><td><span class="badge badge-low">口径</span></td><td>KPI「活跃规则数」实现为 Σrules / Σ(rules+agingCount)，与 Tooltip 定义「近30天有命中的启用规则数/总启用规则数」不符；且把 agingCount 当作额外规则数累加。</td><td>源码 filteredKPIData</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项</h2>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>事项</th><th>背景</th></tr></thead>
+    <tbody>
+      <tr><td>Q1</td><td>本页无独立 PRD——KPI 口径、漏斗口径、健康度评分公式、准确率反馈闭环（含 30 天自动归档为正确）等是否按 demo 实现为准？</td><td>demo 是唯一事实源，多处口径自定义（§5）</td></tr>
+      <tr><td>Q2</td><td>网关需新增哪些聚合 API？现有 /statistics/filter 无五阶段/观察模式/老化维度；规则级明细需逐模块列集（14 套列定义）</td><td>§4.3</td></tr>
+      <tr><td>Q3</td><td>意图引擎的阶段归属以 demo（阶段3）还是策略流水线 spec（阶段5）为准？漏斗的「阶段进入/拦截」与 milter 实际检测顺序如何映射？</td><td>§5.1 / §9-D4</td></tr>
+      <tr><td>Q4</td><td>「观察模式」目前在网关侧哪些模块有运行时概念与埋点？（demo 中发信行为管控、高级过滤规则、身份认证部分检查项为观察态）</td><td>§5.5</td></tr>
+      <tr><td>Q5</td><td>准确率反馈闭环需要「处置 → 管理员/用户放行·取回·召回」归因链路与存储，是否本期实现？误判/漏判来源四分类口径确认</td><td>§5.6</td></tr>
+      <tr><td>Q6</td><td>导出 CSV/PDF、订阅告警、规则行「查看/外链」的目标行为定义（demo 均无实现）；「点击命中次数查看邮件列表」跳转到哪个页面（邮件处置中心？）</td><td>§9-D11 / 6.2</td></tr>
+      <tr><td>Q7</td><td>implement.md 要求四语，demo 语言表仅 zh/en/th——第四语清单与本页 ~249 个 key 的翻译落地</td><td>§7</td></tr>
+      <tr><td>Q8</td><td>明细表模块专属列中的随机 mock 字段（阻断/隔离/丢弃/审核次数等）真实数据来源；「反馈样本&lt;30 显示警告」阈值是否可配置</td><td>层级3/4 子文件</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<script>
+
+// 简易 tooltip：绑定 [data-rs-tip] 元素，hover 显示与 demo 一致的提示文案
+(function(){
+  var tip = document.createElement('div'); tip.className = 'rs-tip'; document.body.appendChild(tip);
+  document.addEventListener('mouseover', function(e){
+    var t = e.target.closest('[data-rs-tip]');
+    if (!t) { tip.style.display = 'none'; return; }
+    tip.textContent = t.getAttribute('data-rs-tip');
+    tip.style.display = 'block';
+    var r = t.getBoundingClientRect();
+    tip.style.left = Math.min(r.left, window.innerWidth - 300) + 'px';
+    tip.style.top = (r.bottom + 6) + 'px';
+  });
+})();
+
+// ===== 2.1 页头交互 =====
+(function(){
+  var pv = document.getElementById('pv-header');
+  if (!pv) return;
+  var btns = pv.querySelectorAll('button');
+  btns.forEach(function(b){
+    var t = (b.innerText || '').trim();
+    if (t.indexOf('刷新') >= 0) {
+      b.addEventListener('click', function(){
+        if (b.disabled) return;
+        b.disabled = true;
+        var svg = b.querySelector('svg');
+        if (svg) svg.classList.add('animate-spin');
+        setTimeout(function(){ b.disabled = false; if (svg) svg.classList.remove('animate-spin'); }, 1000);
+      });
+    }
+    if (t.indexOf('subscribeAlert') >= 0) {
+      b.setAttribute('data-rs-tip', 'demo 中此按钮无绑定行为；文案为缺失的 i18n key（§9-D2）');
+    }
+  });
+  // 导出下拉（radix 触发器复刻为自定义菜单）
+  var trigger = pv.querySelector('[role=combobox]');
+  if (trigger) {
+    var menu = document.createElement('div');
+    menu.className = 'rs-menu';
+    menu.innerHTML = '<div class="rs-opt rs-checked" data-v="导出CSV">导出CSV</div><div class="rs-opt" data-v="导出PDF报告">导出PDF报告</div>';
+    trigger.parentElement.style.position = 'relative';
+    trigger.parentElement.appendChild(menu);
+    trigger.addEventListener('click', function(e){
+      e.preventDefault();
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+      menu.style.top = (trigger.offsetTop + trigger.offsetHeight + 4) + 'px';
+      menu.style.left = trigger.offsetLeft + 'px';
+    });
+    menu.querySelectorAll('.rs-opt').forEach(function(o){
+      o.addEventListener('click', function(){
+        menu.querySelectorAll('.rs-opt').forEach(function(x){ x.classList.remove('rs-checked'); });
+        o.classList.add('rs-checked');
+        var span = trigger.querySelector('span[data-slot=select-value], span');
+        if (span) span.textContent = o.getAttribute('data-v');
+        menu.style.display = 'none';
+      });
+    });
+    document.addEventListener('click', function(e){ if (!trigger.contains(e.target) && !menu.contains(e.target)) menu.style.display = 'none'; });
+  }
+})();
+// ===== 2.2 筛选栏：下拉展开查看选项（完整级联在层级1子文件） =====
+(function(){
+  var pv = document.getElementById('pv-filterbar');
+  if (!pv) return;
+  var OPTIONS = {
+    '近7天': ['今天','近7天 ✓','近30天','自定义'],
+    '全部阶段': ['全部阶段 ✓','● 阶段1：IP策略 (4)','● 阶段2：收发信人策略 (5)','● 阶段3：内容层 (4)','● 阶段4：智能分析层 (4)','● 阶段5：综合策略 (2)'],
+    '全部模块': ['全部模块 ✓','— 阶段1：IP策略 —','IP频率限制','IP黑白名单','RBL过滤','海外邮件检测','— 阶段2：收发信人策略 —','发信人黑白名单','身份认证与仿冒检测','发信行为管控','收信人检测','用户黑白名单','— 阶段3：内容层 —','附件安全检测','URL检测与防护','内容规则','意图引擎','— 阶段4：智能分析层 —','发信人行为智能体','意图检测智能体','钓鱼邮件智能体','威胁回溯智能体','— 阶段5：综合策略 —','相似检测','高级过滤规则'],
+    '包含观察模式': ['包含观察模式 ✓','排除观察模式','仅观察模式'],
+    '全部租户': ['🔍 (搜索框)','全部租户 ✓','杭州分公司 HZ01','上海分公司 SH01','…MOCK_TENANTS 列表']
+  };
+  pv.querySelectorAll('[role=combobox]').forEach(function(trigger){
+    var key = Object.keys(OPTIONS).find(function(k){ return (trigger.innerText || '').indexOf(k) >= 0; });
+    if (!key) return;
+    var menu = document.createElement('div');
+    menu.className = 'rs-menu';
+    menu.innerHTML = OPTIONS[key].map(function(o){
+      if (o.indexOf('—') === 0) return '<div class="rs-group">' + o.replace(/—/g, '').trim() + '</div>';
+      return '<div class="rs-opt' + (o.indexOf('✓') > 0 ? ' rs-checked' : '') + '">' + o.replace(' ✓','') + '</div>';
+    }).join('') + '<div class="rs-foot">选项与 demo listbox 一致（提取自浏览器 DOM）；选择联动请到层级1子文件操作</div>';
+    trigger.parentElement.style.position = 'relative';
+    trigger.parentElement.appendChild(menu);
+    trigger.addEventListener('click', function(e){
+      e.preventDefault();
+      document.querySelectorAll('#pv-filterbar .rs-menu').forEach(function(m){ if (m !== menu) m.style.display = 'none'; });
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+      menu.style.top = (trigger.offsetTop + trigger.offsetHeight + 4) + 'px';
+      menu.style.left = trigger.offsetLeft + 'px';
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!pv.contains(e.target)) pv.querySelectorAll('.rs-menu').forEach(function(m){ m.style.display = 'none'; });
+  });
+})();
+// ===== 2.3 KPI tooltips =====
+(function(){
+  var pv = document.getElementById('pv-kpi');
+  if (!pv) return;
+  var TIPS = {
+    '策略命中总量': '统计周期内,所有策略模块的命中次数总和(含观察模式命中)',
+    '有效拦截率': '(阻断+隔离+丢弃) / 命中总量 x 100%。观察模式命中不计入分子',
+    '观察模式命中': '观察模式下仅记录命中但不执行处置，建议评估后切换为正式模式',
+    '活跃规则数': '近30天有命中的启用规则数 / 总启用规则数。老化规则指近90天零命中的启用规则'
+  };
+  pv.querySelectorAll('div').forEach(function(d){
+    var t = (d.childElementCount <= 1 ? (d.innerText || '').trim() : '');
+    Object.keys(TIPS).forEach(function(k){
+      if (t.indexOf(k) === 0 && t.length < k.length + 3) d.setAttribute('data-rs-tip', TIPS[k]);
+    });
+  });
+})();
+// ===== 2.6 卡片墙：折叠 / 选中 / 查看详情 =====
+(function(){
+  var pv = document.getElementById('pv-wall');
+  if (!pv) return;
+  // 组折叠：组容器 = border rounded-lg，首子为组头 button
+  pv.querySelectorAll(':scope > div > div > div').forEach(function(){ /* no-op 占位 */ });
+  var groups = Array.prototype.filter.call(pv.querySelectorAll('div'), function(d){
+    return d.className && String(d.className).indexOf('border rounded-lg') >= 0 && d.querySelector(':scope > button');
+  });
+  groups.forEach(function(g){
+    var head = g.querySelector(':scope > button');
+    var body = g.children[1];
+    if (!head) return;
+    head.addEventListener('click', function(){
+      if (!body) return;
+      var hidden = body.style.display === 'none';
+      body.style.display = hidden ? '' : 'none';
+      var chev = head.querySelector('svg:last-of-type');
+      if (chev) chev.style.transform = hidden ? '' : 'rotate(-90deg)';
+    });
+  });
+  // 卡片选中 + 查看详情
+  var cards = Array.prototype.filter.call(pv.querySelectorAll('div'), function(d){
+    return d.className && String(d.className).indexOf('rounded-lg border cursor-pointer') >= 0;
+  });
+  var CRASH = ['RBL过滤', '身份认证与仿冒检测'];
+  cards.forEach(function(c){
+    c.addEventListener('click', function(){
+      cards.forEach(function(x){
+        x.classList.remove('border-blue-500','bg-blue-50');
+        x.classList.add('border-gray-200');
+      });
+      c.classList.remove('border-gray-200');
+      c.classList.add('border-blue-500','bg-blue-50');
+    });
+    var btn = Array.prototype.find.call(c.querySelectorAll('button'), function(b){ return (b.innerText||'').indexOf('查看详情') >= 0; });
+    if (!btn) return;
+    var name = (c.querySelector('div') && c.querySelector('div').innerText || '').split('\n')[0].trim();
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var old = document.getElementById('wall-crash-note');
+      if (old) old.remove();
+      if (CRASH.indexOf(name) >= 0) {
+        var note = document.createElement('div');
+        note.id = 'wall-crash-note';
+        note.className = 'crash-overlay';
+        note.innerHTML = '<div class="crash-title">Runtime TypeError（demo 实际行为复刻）</div>' +
+          'Cannot read properties of undefined (reading \'toLocaleString\') — module-detail-view.tsx:1441。' +
+          '「' + name + '」的规则 mock 缺少准确率字段，demo 中点击后<b>整页崩溃白屏</b>。详见 <a href="./layer-4-module-columns.html#crash">层级4子文件</a> 与 §9-D1。';
+        pv.parentElement.insertBefore(note, pv.nextSibling);
+        note.scrollIntoView({block: 'center', behavior: 'smooth'});
+      } else if (name === 'IP黑白名单') {
+        location.href = './layer-2-module-detail.html';
+      } else {
+        var note2 = document.createElement('div');
+        note2.id = 'wall-crash-note';
+        note2.className = 'note-inline';
+        note2.innerHTML = '「' + name + '」明细与 IP黑白名单同构（仅列集不同）——列集差异见 <a href="./layer-4-module-columns.html">层级4子文件</a>，通用结构见 <a href="./layer-2-module-detail.html">层级2子文件</a>。';
+        pv.parentElement.insertBefore(note2, pv.nextSibling);
+        note2.scrollIntoView({block: 'center', behavior: 'smooth'});
+      }
+    });
+  });
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>if (window.mermaid) mermaid.initialize({startOnLoad:true});</script>
+</body>
+</html>

@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import {
-  HelpCircle, ChevronDown, ChevronUp, Lightbulb, Play, Check, X, Zap,
+  HelpCircle, Lightbulb, Play, Check, X, Zap,
   Shield, Clock, Ban, Users, Globe, ExternalLink, AlertTriangle,
 } from 'lucide-react';
 import {
@@ -29,8 +29,9 @@ import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  Collapsible, CollapsibleContent, CollapsibleTrigger,
+  Collapsible, CollapsibleContent,
 } from '@/components/ui/collapsible';
+import { CollapsibleSectionTrigger } from '@/components/ui/collapsible-section-trigger';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   createBehaviorControlRule, updateBehaviorControlRule,
@@ -845,21 +846,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
 
                       {/* 配置示例 */}
                       <Collapsible open={showExamples} onOpenChange={setShowExamples}>
-                        <CollapsibleTrigger
-                          render={(
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="w-full justify-between text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                            />
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            <Lightbulb className="h-4 w-4" />
-                            <span>{t('behaviorControl.examples.toggle')}</span>
-                          </div>
-                          {showExamples ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                        </CollapsibleTrigger>
+                        <CollapsibleSectionTrigger>
+                          <Lightbulb className="h-4 w-4" />
+                          <span>{t('behaviorControl.examples.toggle')}</span>
+                        </CollapsibleSectionTrigger>
                         <CollapsibleContent className="mt-3 space-y-3">
                           {[
                             { name: t('behaviorControl.examples.normalName'), desc: t('behaviorControl.examples.normalDesc'), effect: t('behaviorControl.examples.normalEffect') },
@@ -879,21 +869,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
 
                       {/* 模拟测试 */}
                       <Collapsible open={showSimulator} onOpenChange={setShowSimulator}>
-                        <CollapsibleTrigger
-                          render={(
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="w-full justify-between text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                            />
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            <Play className="h-4 w-4" />
-                            <span>{t('behaviorControl.simulator.toggle')}</span>
-                          </div>
-                          {showSimulator ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                        </CollapsibleTrigger>
+                        <CollapsibleSectionTrigger>
+                          <Play className="h-4 w-4" />
+                          <span>{t('behaviorControl.simulator.toggle')}</span>
+                        </CollapsibleSectionTrigger>
                         <CollapsibleContent className="mt-3">
                           <div className="bg-background rounded-lg p-4 border space-y-4">
                             <div className="grid grid-cols-2 gap-3">

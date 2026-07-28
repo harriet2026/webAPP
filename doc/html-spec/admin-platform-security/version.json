@@ -1,0 +1,13 @@
+{
+  "module": "admin-platform-security",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-19",
+      "demo_commit": "804efb9",
+      "spec_commit": "85c400d",
+      "summary": "初版：页面头部+双Tab；IP策略复用连接层页（4策略导航/启停/禁用态）；附件基础限制三方向表单与-1警告/处置下拉；形态与视角可见性浏览器验证"
+    }
+  ]
+}

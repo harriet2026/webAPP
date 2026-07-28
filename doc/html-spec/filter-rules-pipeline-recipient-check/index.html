@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - 收信人检测 HTML 规格说明</title>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: #fff;
+      --muted: #f5f7fa;
+      --muted-foreground: #6b7280;
+      --border: #e5e7eb;
+      --blue: #1677ff;
+      --red: #f5222d;
+      --orange: #fa8c16;
+      --green: #52c41a;
+      --purple: #722ed1;
+      --radius: 0.625rem;
+      --font-sans: "Geist", "Inter", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1, h2, h3 { line-height: 1.3; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 28px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 20px; }
+    h3 { margin: 18px 0 10px; color: #111827; font-size: 17px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .spec-header, section, .component-toc { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .toc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+    .toc-list li { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa; }
+    .toc-badge, .badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #eef4ff; color: #155eef; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-spec, .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .preview-card { width: 220px; height: 60px; display: flex; overflow: hidden; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); color: inherit; cursor: pointer; }
+    .preview-card:hover { border-color: #1890FF; background: #E6F7FF; }
+    .preview-bar { width: 4px; background: var(--orange); flex-shrink: 0; }
+    .preview-card-body { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; justify-content: space-between; }
+    .preview-title { display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 650; }
+    .preview-config { color: #1890FF; font-size: 13px; font-weight: 400; }
+    .preview-shell { display: grid; grid-template-columns: 200px 1fr; gap: 20px; min-width: 900px; }
+    .preview-nav { padding: 12px 8px; border-right: 1px solid var(--border); background: #f9fafb; border-radius: 8px 0 0 8px; }
+    .preview-nav-row { display: flex; align-items: flex-start; gap: 8px; margin: 4px 0; padding: 10px; border-radius: 8px; color: #4b5563; font-size: 13px; }
+    .preview-nav-row.active { background: #eaf3ff; color: #155eef; }
+    .nav-dot { width: 10px; height: 10px; margin-top: 4px; border-radius: 999px; background: #3b82f6; flex-shrink: 0; }
+    .nav-dot.off { background: transparent; border: 2px solid #d1d5db; }
+    .preview-nav-row small { display: block; color: #9ca3af; font-size: 11px; }
+    .preview-panel { border: 1px solid var(--border); border-radius: 8px; background: #fff; overflow: hidden; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .panel-head h3 { margin: 0; font-size: 17px; }
+    .panel-status { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #2563eb; }
+    .panel-status.off { color: #6b7280; }
+    .panel-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 18px; }
+    .panel-body.module-off { opacity: .5; pointer-events: none; }
+    .sw { position: relative; width: 32px; height: 18.4px; border: 0; border-radius: 999px; background: #2563eb; cursor: pointer; transition: background .15s; flex-shrink: 0; }
+    .sw::after { content: ""; position: absolute; top: 2px; left: 15px; width: 14px; height: 14px; border-radius: 999px; background: #fff; transition: left .15s; }
+    .sw[aria-checked="false"] { background: #e5e7eb; }
+    .sw[aria-checked="false"]::after { left: 3px; }
+    .note { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; }
+    .note.blue { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+    .note.amber { background: #fffbeb; border: 1px solid #fde68a; color: #b45309; font-size: 12px; }
+    .note.gray { background: #f9fafb; border: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+    .policy-block { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .policy-block-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); background: #f9fafb; }
+    .policy-block-head b { display: block; font-size: 14px; }
+    .policy-block-head small { color: #6b7280; font-size: 12px; }
+    .policy-block-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .radio-row { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+    .direction-card { padding: 14px 16px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; display: flex; flex-direction: column; gap: 10px; }
+    .dir-badge { display: inline-flex; padding: 2px 8px; border-radius: 6px; border: 1px solid; font-size: 12px; font-weight: 600; }
+    .dir-badge.in { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .dir-badge.out { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .dir-badge.internal { background: #faf5ff; color: #7e22ce; border-color: #e9d5ff; }
+    .dir-badge.merged { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+    .dir-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .dir-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .field label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600; color: #374151; }
+    .num-input { width: 80px; padding: 7px 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; }
+    .unit { margin-left: 6px; color: #6b7280; font-size: 13px; }
+    .action-select { min-width: 140px; padding: 7px 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; font-size: 14px; }
+    .action-desc { margin: 0; color: #6b7280; font-size: 12px; }
+    .pill { display: inline-flex; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; background: #f3f4f6; color: #374151; }
+    .is-hidden { display: none !important; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .diff-section { border-left: 4px solid var(--red); background: #fff7f7; }
+    .question-section { border-left: 4px solid #d97706; background: #fffbeb; }
+    .mermaid { padding: 16px; border-radius: 8px; background: #f8fafc; text-align: center; }
+    pre { padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; overflow: auto; font-family: var(--font-mono); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>策略流水线 - 收信人检测 HTML 规格说明</h1>
+    <table class="meta-table">
+      <tr><td>目标模块</td><td>策略流水线 / 阶段2：收发信人策略 / 收信人检测（policy key: <code>recipientCheck</code>，priority 2003，type=configurable）</td></tr>
+      <tr><td>demo 地址</td><td><a href="http://localhost:3000/filter-rules/pipeline">http://localhost:3000/filter-rules/pipeline</a></td></tr>
+      <tr><td>demo 源码</td><td><code>design/origin/demo/app/filter-rules/pipeline/page.tsx</code><br><code>design/origin/demo/components/filter-rules-new/strategy-pipeline-page.tsx</code>（抽屉宿主）<br><code>design/origin/demo/components/filter-rules-new/identity-strategy-page.tsx</code>（<code>renderRecipientCheckConfig()</code>，行 1774-2143）</td></tr>
+      <tr><td>关联 PRD</td><td><code>design/origin/spec/收信人检测需求文档.md</code><br><code>design/origin/spec/策略流水线需求文档.md</code></td></tr>
+      <tr><td>落地约束</td><td><code>design/origin/implement.md</code>：管理员可见可改配置优先走配置系统；涉及规则系统时复用统一规则系统 action，不新增独立规则系统与 action；产品 PRD API 不等于必须新增后端 API；四语国际化。</td></tr>
+      <tr><td>浏览器验证</td><td>2026-07-11 19:50-20:05 Asia/Shanghai，headless Chromium CDP，viewport 1440×1000 / 1024×900。完成：整页默认态、策略卡定位与坐标点击、抽屉默认态（上/下半屏）、执行动作下拉展开、合并模式切换、数量限制/存在性验证/模块三级开关禁用态、动作切换联动说明文案、1024px 响应式，共 10 张截图；每个状态提取 DOM 结构事实（节点数/开关态/radio 态/下拉值/输入值/Badge 清单）。</td></tr>
+    </table>
+  </header>
+
+  <nav class="component-toc">
+    <h2>组件列表</h2>
+    <ul class="toc-list">
+      <li><a href="#component-2-1">2.1 策略流水线入口卡片</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-2">2.2 收发信人策略抽屉 + 收信人检测配置面板</a><span class="toc-badge">2层</span></li>
+      <li><a href="#component-2-3">2.3 多层交互索引（合并模式 / 禁用态与动作下拉）</a><span class="toc-badge">4层</span><br><a href="layer-1-merged-mode.html">层级2：合并模式</a> · <a href="layer-2-disabled-and-dropdown.html">层级3：禁用态与动作下拉</a></li>
+      <li><a href="#api-mapping">4. 数据模型与 API 映射</a><span class="toc-badge">配置系统映射</span></li>
+    </ul>
+  </nav>
+
+  <section id="layout">
+    <h2>1. 页面布局结构</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>实际渲染</th><th>规格含义</th></tr></thead>
+      <tbody>
+        <tr><td>左侧产品导航</td><td>深色侧边栏，当前位于“平台安全策略”功能域</td><td>全局导航容器，不属于本模块配置表单。</td></tr>
+        <tr><td>策略流水线主内容</td><td>阶段1-5 策略卡矩阵；收信人检测位于阶段2第4张卡（发信人黑白名单、身份认证与仿冒检测、发信行为管控之后，用户黑白名单之前）</td><td>收信人检测以阶段2策略卡进入，不是独立页面首屏。</td></tr>
+        <tr><td>收发信人策略抽屉</td><td>右侧 80vw Sheet，顶部“阶段2: 收发信人策略 / 收信人检测”，右上角 XCircle 关闭按钮</td><td>阶段2 五个子策略共用的承载容器：左侧子策略导航（宽208px，可折叠至56px），右侧白色配置卡片（标题+启用开关+可滚动内容+底部空操作栏）。</td></tr>
+        <tr><td>收信人检测配置面板</td><td>蓝色功能说明横幅 + “数量限制策略”区块 + “存在性验证策略”区块 + 底部灰色说明；内容超高时面板内部滚动（scrollHeight 1250 / clientHeight 641）</td><td>本模块主体，无规则列表/表格，纯配置型面板。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/page-full-default.png" alt="策略流水线整页默认态">
+      <figcaption>整页默认态：收信人检测入口卡片位于阶段2收发信人策略卡片列。</figcaption>
+    </figure>
+    <h3>视觉规范（浏览器 computed 实测）</h3>
+    <table class="spec-table">
+      <thead><tr><th>属性</th><th>值</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>策略卡尺寸</td><td>220px × 60px（<code>w-[220px] h-[60px]</code>）</td><td>卡片 rect 实测 220×60</td></tr>
+        <tr><td>卡片左色条</td><td>橙色 <code>#fa8c16</code>（<code>type=configurable</code> → 隔离类）</td><td><code>div.w-1.bg-[#fa8c16]</code></td></tr>
+        <tr><td>卡片 hover</td><td><code>hover:border-[#1890FF] hover:bg-[#E6F7FF]</code></td><td>卡片 class 实测</td></tr>
+        <tr><td>方向 Badge 配色</td><td>接收=蓝（blue-50/700）、外发=绿（green-50/700）、域内=紫（purple-50/700）、内部发信（合并）=橙（orange-50/700）</td><td>抽屉 Badge 实测</td></tr>
+        <tr><td>信息横幅</td><td>功能说明/方向说明=蓝（blue-50 边 blue-200）；合并模式提示=amber（amber-50 边 amber-200）；底部说明=灰（gray-50 边 gray-200）</td><td>DOM class 实测</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="components">
+    <h2>2. 逐组件规格</h2>
+
+    <article class="component-spec" id="component-2-1">
+      <h3>2.1 策略流水线入口卡片 RecipientCheck Policy Card</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级0：页面默认态中的策略入口卡片</td></tr>
+          <tr><th>触发路径</th><td>打开 <code>/filter-rules/pipeline</code>，在阶段2收发信人策略中定位“收信人检测”卡片。</td></tr>
+          <tr><th>可点击目标</th><td>整卡可点（<code>cursor-pointer</code>），“配置 →”按钮共用打开逻辑；点击后 <code>setIdentityDrawerPolicy("recipientCheck")</code> 打开阶段2收发信人策略抽屉并选中收信人检测。</td></tr>
+          <tr><th>卡片数据</th><td><code>priority 2003 · stage 2 · type configurable · todayHits 15 / todayBlocked 10 / todayExempted 5 · action pipeline.actionQuarantine（隔离）· canExempt true</code></td></tr>
+        </tbody>
+      </table>
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：策略卡默认态</h4>
+        <div class="component-preview">
+          <a class="preview-card" data-demo-extracted="recipient-card" href="#component-2-2" aria-label="打开收信人检测配置面板规格">
+            <div class="preview-bar"></div>
+            <div class="preview-card-body">
+              <div class="preview-title"><span>收信人检测</span><span class="preview-config">配置 →</span></div>
+            </div>
+          </a>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/recipient-card-layer-0-default.png" alt="收信人检测策略卡">
+          <figcaption>策略卡局部截图：橙色左色条表示 configurable/隔离类策略。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>卡片标题</td><td>收信人检测</td><td>点击卡片整体打开阶段2抽屉</td><td>i18n <code>pipeline.recipientDetection</code></td></tr>
+            <tr><td>配置入口</td><td>配置 + ArrowRight 图标（12px）</td><td>同卡片点击，打开抽屉并选中收信人检测</td><td>class <code>text-[#1890FF] hover:text-[#40A9FF]</code></td></tr>
+            <tr><td>左侧色条</td><td>橙色 <code>#fa8c16</code></td><td>无独立交互</td><td>由 <code>type=configurable</code> 推导（隔离类）</td></tr>
+            <tr><td>卡片 Tooltip</td><td>卡片是 tooltip-trigger（描述“检测收信人地址是否有效”）</td><td>hover 延迟展示</td><td>i18n <code>pipeline.recipientCheckDesc</code></td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>根节点</td><td><code>div.w-[220px].h-[60px].cursor-pointer</code>，<code>data-slot=tooltip-trigger</code></td><td><code>.preview-card[data-demo-extracted]</code> 220×60</td><td>一致</td></tr>
+              <tr><td>节点数 / 子节点数</td><td>9 / 2（色条 + 内容列）</td><td>预览保留色条 + 内容列两分支</td><td>一致（结构等价）</td></tr>
+              <tr><td>色条</td><td><code>div.w-1.flex-shrink-0.bg-[#fa8c16]</code></td><td><code>.preview-bar</code> 4px 橙色</td><td>一致</td></tr>
+              <tr><td>关键文案</td><td>收信人检测 / 配置（+ArrowRight svg）</td><td>收信人检测 / 配置 →</td><td>一致（svg 以“→”等价示意）</td></tr>
+              <tr><td>触发结果</td><td>打开阶段2收发信人策略抽屉（选中 recipientCheck）</td><td>预览点击跳转 2.2 规格锚点</td><td>一致（规格内等价）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-2">
+      <h3>2.2 收发信人策略抽屉 + 收信人检测配置面板 renderRecipientCheckConfig</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级1：点击策略卡后打开 80vw 抽屉，左侧导航选中“收信人检测”，右侧渲染配置面板（默认精细化分方向配置模式）。</td></tr>
+          <tr><th>渲染组件</th><td><code>Sheet(80vw) → IdentityStrategyPage embedded=true initialPolicy=recipientCheck → renderRecipientCheckConfig()</code></td></tr>
+          <tr><th>实际状态</th><td>抽屉 dialog 树 188 节点；面板 3 个开关全开；配置模式 detailed 选中；三方向卡默认 30/50/20，动作 阻断/审核/隔离；存在性验证动作 阻断。</td></tr>
+          <tr><th>状态管理</th><td>13 个 useState：<code>recipientCheckEnabled / recipientLimitEnabled / recipientLimitMode / inboundRecipientLimit·Scope·Action / outboundRecipientLimit·Action / internalRecipientLimit·Action / mergedRecipientLimit·Action / existenceCheckEnabled·Action / ldapConnected</code></td></tr>
+        </tbody>
+      </table>
+
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">1</span>交互层级 1：抽屉默认态（精细化分方向配置）</h4>
+        <p style="font-size:13px;color:#6b7280;">预览为可交互复刻：顶部开关切换 已启用/已禁用 并灰化面板；区块开关折叠内容；配置模式 radio 切换详细/合并；执行动作下拉联动动作说明；数字输入实时生效。合并模式与禁用态的完整规格见子文件。</p>
+        <div class="component-preview">
+          <div class="preview-shell" data-demo-extracted="recipient-check-panel">
+            <div class="preview-nav">
+              <div class="preview-nav-row"><span class="nav-dot"></span><span>发信人黑白名单<small>黑名单规则: 3 / 白名单规则: 2</small></span></div>
+              <div class="preview-nav-row"><span class="nav-dot"></span><span>身份认证与仿冒检测<small>SPF/DKIM/DMARC/PTR</small></span></div>
+              <div class="preview-nav-row"><span class="nav-dot"></span><span>发信行为管控<small>频率限制/异常检测</small></span></div>
+              <div class="preview-nav-row active"><span class="nav-dot" data-nav-dot></span><span>收信人检测<small>数量限制/存在性验证</small></span></div>
+              <div class="preview-nav-row"><span class="nav-dot"></span><span>用户黑白名单<small>黑名单规则: 20 / 白名单规则: 15</small></span></div>
+            </div>
+            <div class="preview-panel">
+              <div class="panel-head">
+                <h3>收信人检测</h3>
+                <span class="panel-status" data-module-status>已启用 <button class="sw" type="button" role="switch" aria-checked="true" data-module-switch aria-label="模块启用开关"></button></span>
+              </div>
+              <div class="panel-body" data-module-body>
+                <div class="note blue">ⓘ 在 RCPT TO 阶段检测收件人地址，防范目录收割攻击（DHA）、邮件轰炸及域内横向钓鱼</div>
+
+                <div class="policy-block">
+                  <div class="policy-block-head">
+                    <button class="sw" type="button" role="switch" aria-checked="true" data-limit-switch aria-label="数量限制策略开关"></button>
+                    <span><b>数量限制策略</b><small>限制单封邮件最大收件人数量</small></span>
+                  </div>
+                  <div class="policy-block-body" data-limit-body>
+                    <div>
+                      <div style="font-size:13px;font-weight:600;margin-bottom:8px;">配置模式</div>
+                      <label class="radio-row"><input type="radio" name="limit-mode" value="detailed" checked data-mode-radio> 精细化分方向配置</label>
+                      <label class="radio-row"><input type="radio" name="limit-mode" value="merged" data-mode-radio> 外发+域内合并控制</label>
+                    </div>
+                    <div data-mode-body="detailed" style="display:flex;flex-direction:column;gap:14px;">
+                      <div class="direction-card">
+                        <div><span class="dir-badge in">接收方向</span> <small style="color:#6b7280;">（外部→内部）</small></div>
+                        <div class="dir-grid">
+                          <div class="field"><label>最大收信人</label><input class="num-input" type="number" min="1" max="1000" value="30"><span class="unit">个</span></div>
+                          <div class="field"><label>计数范围</label>
+                            <label class="radio-row" style="display:inline-flex;"><input type="radio" name="in-scope" checked> 仅本域</label>
+                            <label class="radio-row" style="display:inline-flex;"><input type="radio" name="in-scope"> 所有</label>
+                          </div>
+                          <div class="field"><label>执行动作</label>
+                            <select class="action-select" data-action-select data-desc-target="in-desc">
+                              <option value="quarantine">隔离</option><option value="review">审核</option><option value="block" selected>阻断</option><option value="drop">丢弃</option>
+                            </select>
+                          </div>
+                        </div>
+                        <p class="action-desc" data-desc="in-desc">拒绝接收，发送方收到退信通知（452/550）</p>
+                      </div>
+                      <div class="direction-card">
+                        <div><span class="dir-badge out">外发方向</span> <small style="color:#6b7280;">（内部→外部）</small></div>
+                        <div class="dir-grid cols-2">
+                          <div class="field"><label>最大收信人</label><input class="num-input" type="number" min="1" max="1000" value="50"><span class="unit">个</span></div>
+                          <div class="field"><label>执行动作</label>
+                            <select class="action-select" data-action-select data-desc-target="out-desc">
+                              <option value="quarantine">隔离</option><option value="review" selected>审核</option><option value="block">阻断</option><option value="drop">丢弃</option>
+                            </select>
+                          </div>
+                        </div>
+                        <p class="action-desc" data-desc="out-desc">邮件进入待审核队列，人工确认后投递或退回</p>
+                      </div>
+                      <div class="direction-card">
+                        <div><span class="dir-badge internal">域内方向</span> <small style="color:#6b7280;">（内部→内部）</small></div>
+                        <div class="dir-grid cols-2">
+                          <div class="field"><label>最大收信人</label><input class="num-input" type="number" min="1" max="1000" value="20"><span class="unit">个</span></div>
+                          <div class="field"><label>执行动作</label>
+                            <select class="action-select" data-action-select data-desc-target="internal-desc">
+                              <option value="quarantine" selected>隔离</option><option value="review">审核</option><option value="block">阻断</option><option value="drop">丢弃</option>
+                            </select>
+                          </div>
+                        </div>
+                        <p class="action-desc" data-desc="internal-desc">邮件进入隔离区，管理员审核后可放行或删除</p>
+                      </div>
+                    </div>
+                    <div data-mode-body="merged" class="is-hidden" style="flex-direction:column;gap:14px;">
+                      <div class="direction-card">
+                        <div><span class="dir-badge in">接收方向</span> <small style="color:#6b7280;">（外部→内部）</small></div>
+                        <div class="dir-grid">
+                          <div class="field"><label>最大收信人</label><input class="num-input" type="number" min="1" max="1000" value="30"><span class="unit">个</span></div>
+                          <div class="field"><label>计数范围</label>
+                            <label class="radio-row" style="display:inline-flex;"><input type="radio" name="in-scope-m" checked> 仅本域</label>
+                            <label class="radio-row" style="display:inline-flex;"><input type="radio" name="in-scope-m"> 所有</label>
+                          </div>
+                          <div class="field"><label>执行动作</label>
+                            <select class="action-select" data-action-select data-desc-target="in-desc-m">
+                              <option value="quarantine">隔离</option><option value="review">审核</option><option value="block" selected>阻断</option><option value="drop">丢弃</option>
+                            </select>
+                          </div>
+                        </div>
+                        <p class="action-desc" data-desc="in-desc-m">拒绝接收，发送方收到退信通知（452/550）</p>
+                      </div>
+                      <div class="direction-card">
+                        <div><span class="dir-badge merged">内部发信</span> <small style="color:#6b7280;">（外发+域内合并控制）</small></div>
+                        <div class="dir-grid cols-2">
+                          <div class="field"><label>最大收信人</label><input class="num-input" type="number" min="1" max="1000" value="50"><span class="unit">个</span></div>
+                          <div class="field"><label>执行动作</label>
+                            <select class="action-select" data-action-select data-desc-target="merged-desc">
+                              <option value="quarantine">隔离</option><option value="review" selected>审核</option><option value="block">阻断</option><option value="drop">丢弃</option>
+                            </select>
+                          </div>
+                        </div>
+                        <p class="action-desc" data-desc="merged-desc">邮件进入待审核队列，人工确认后投递或退回</p>
+                        <div class="note amber">ⓘ 合并模式下外发和域内方向使用统一配置，防止通过切换方向绕过限制</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="policy-block">
+                  <div class="policy-block-head">
+                    <button class="sw" type="button" role="switch" aria-checked="true" data-existence-switch aria-label="存在性验证策略开关"></button>
+                    <span><b>存在性验证策略</b><small>验证收件人在目录服务的真实存在性</small></span>
+                  </div>
+                  <div class="policy-block-body" data-existence-body>
+                    <div class="note blue">ⓘ 仅接收方向（外部→内部）生效，内部发信自动跳过验证</div>
+                    <div class="direction-card">
+                      <b style="font-size:13px;">严格模式</b>
+                      <div><span class="pill">LDAP/AD验证</span> <span class="pill">API实时校验</span> <span class="pill">别名递归解析</span></div>
+                      <div class="field"><label>验证失败执行动作</label>
+                        <select class="action-select" style="width:200px;" data-action-select data-desc-target="exist-desc">
+                          <option value="quarantine">隔离</option><option value="review">审核</option><option value="block" selected>阻断</option><option value="drop">丢弃</option>
+                        </select>
+                      </div>
+                      <p class="action-desc" data-desc="exist-desc">拒绝接收，发送方收到退信通知（452/550）</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="note gray">ⓘ 收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-layer-1-default.png" alt="收信人检测抽屉默认态（上半屏）">
+          <figcaption>抽屉默认态上半屏：面包屑、左导航选中态、功能说明横幅、数量限制策略（接收/外发方向）。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-layer-1-default-bottom.png" alt="收信人检测抽屉默认态（下半屏）">
+          <figcaption>抽屉默认态滚动到底：域内方向、存在性验证策略、底部说明。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为</th><th>差异/备注</th></tr></thead>
+          <tbody>
+            <tr><td>抽屉标题</td><td>阶段2: 收发信人策略 / 收信人检测（Settings 图标蓝色）</td><td>右上角 XCircle 关闭抽屉</td><td>i18n <code>pipeline.phase2Sender</code> / <code>pipeline.recipientDetection</code></td></tr>
+            <tr><td>左侧导航</td><td>5 行子策略；收信人检测选中态 <code>bg-blue-50 text-blue-700</code>，摘要“数量限制/存在性验证”；状态圆点启用=实心蓝 <code>bg-blue-500</code></td><td>点击切换子策略；中缝圆形按钮折叠导航至 56px（折叠后 hover 出 Tooltip）</td><td>摘要 i18n <code>common.limitAndValidation</code></td></tr>
+            <tr><td>面板头</td><td>标题“收信人检测” + “已启用”蓝字 + Switch(开)</td><td>Switch 切模块启用；关闭 → “已禁用”灰字，内容区 <code>opacity-50 pointer-events-none</code>，导航圆点变空心</td><td>详见子文件层级3</td></tr>
+            <tr><td>功能说明横幅</td><td>蓝色：在 RCPT TO 阶段检测收件人地址，防范目录收割攻击（DHA）、邮件轰炸及域内横向钓鱼</td><td>纯展示</td><td>硬编码中文，未走 i18n</td></tr>
+            <tr><td>数量限制策略开关</td><td>开；副标题“限制单封邮件最大收件人数量”</td><td>关闭 → 区块 body 整体卸载（配置模式/方向卡消失，仅剩头部）</td><td>详见子文件层级3</td></tr>
+            <tr><td>配置模式</td><td>RadioGroup：精细化分方向配置（默认选中）/ 外发+域内合并控制</td><td>切换重渲染方向卡区域；合并模式详见子文件层级2</td><td>PRD 称“详细/合并模式”，语义见差异 D-002</td></tr>
+            <tr><td>接收方向卡</td><td>蓝 Badge（外部→内部）；最大收信人 30 个（min1/max1000）；计数范围 radio 仅本域(默认)/所有；执行动作 Select 阻断</td><td>动作切换后下方说明文案实时更新</td><td>唯一带“计数范围”的方向</td></tr>
+            <tr><td>外发方向卡</td><td>绿 Badge（内部→外部）；50 个；动作 审核</td><td>同上</td><td>无计数范围</td></tr>
+            <tr><td>域内方向卡</td><td>紫 Badge（内部→内部）；20 个；动作 隔离</td><td>同上</td><td>无计数范围</td></tr>
+            <tr><td>执行动作下拉</td><td>4 项：隔离 / 审核 / 阻断 / 丢弃（下拉展开顺序）</td><td>选中项打勾；动作说明映射：隔离=进隔离区待审、审核=待审核队列、阻断=退信 452/550、丢弃=静默丢弃无退信</td><td>展开态截图见子文件层级3</td></tr>
+            <tr><td>存在性验证策略开关</td><td>开；副标题“验证收件人在目录服务的真实存在性”</td><td>关闭 → 区块 body 卸载</td><td>-</td></tr>
+            <tr><td>方向说明横幅</td><td>蓝色：仅接收方向（外部→内部）生效，内部发信自动跳过验证</td><td>纯展示</td><td>-</td></tr>
+            <tr><td>严格模式卡</td><td>标题“严格模式” + 3 个 secondary Badge：LDAP/AD验证、API实时校验、别名递归解析；验证失败执行动作 Select(200px) 阻断</td><td>动作切换联动说明</td><td>无宽松/严格切换控件，见 Q-005</td></tr>
+            <tr><td>目录服务离线警告</td><td>默认不渲染（<code>ldapConnected=true</code>）；离线时 amber 警告“目录服务离线 / 存在性验证暂时失效，已降级为放行”</td><td>条件渲染</td><td>源码分支，本次浏览器未触发</td></tr>
+            <tr><td>底部说明</td><td>灰色：收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。</td><td>纯展示</td><td>“-1 无限制”与输入框 min=1 矛盾，见 D-003</td></tr>
+            <tr><td>底部操作栏</td><td>sticky 空操作栏（无保存按钮）</td><td>-</td><td>PRD 要求保存+Toast，见 D-008</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>根节点</td><td><code>[role=dialog][data-state=open]</code> 80vw Sheet，总节点 188</td><td>预览保留导航/面板头/横幅/两区块/底部说明核心结构（裁剪展示）</td><td>一致（结构裁剪）</td></tr>
+              <tr><td>h2 标题</td><td>["阶段2: 收发信人策略", "收信人检测"]</td><td>面板头 h3“收信人检测”（抽屉头以截图呈现）</td><td>一致</td></tr>
+              <tr><td>开关数 / 状态</td><td>3 个 <code>button[role=switch]</code>，全部 <code>data-state=checked</code></td><td>3 个 <code>.sw[aria-checked=true]</code></td><td>一致</td></tr>
+              <tr><td>radio 数 / 状态</td><td>4 个 <code>button[role=radio]</code>：detailed=checked、merged=unchecked、scope-local=checked、scope-all=unchecked</td><td>detailed 模式 radio 选中、仅本域选中</td><td>一致</td></tr>
+              <tr><td>下拉框值</td><td>4 个 <code>[role=combobox]</code>：阻断 / 审核 / 隔离 / 阻断</td><td>4 个 select 默认同值</td><td>一致</td></tr>
+              <tr><td>数字输入</td><td>3 个 <code>input[type=number]</code>：30 / 50 / 20，均 min=1 max=1000</td><td>同值同属性</td><td>一致</td></tr>
+              <tr><td>Badge 清单</td><td>接收方向 / 外发方向 / 域内方向 / LDAP/AD验证 / API实时校验 / 别名递归解析</td><td>同清单</td><td>一致</td></tr>
+              <tr><td>区块节点数</td><td>数量限制策略 86 节点；存在性验证策略 29 节点</td><td>预览保留全部叶子控件与文案</td><td>一致（关键节点）</td></tr>
+              <tr><td>隐藏条件节点</td><td>目录服务离线警告未渲染（ldapConnected=true）；合并模式方向卡未渲染</td><td>预览未含离线警告；合并模式体默认 is-hidden</td><td>一致</td></tr>
+              <tr><td>导航选中行</td><td><code>bg-blue-50 text-blue-700</code>，圆点 <code>bg-blue-500</code></td><td><code>.preview-nav-row.active</code> + 实心蓝点</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-3">
+      <h3>2.3 多层交互索引（多层交互）</h3>
+      <p>合并模式与三级开关禁用态、动作下拉展开态拆分为独立子文件。主文件保留关系图与索引。</p>
+      <div class="mermaid">
+        graph LR
+          A[层级0 策略卡] --> B[层级1 抽屉默认态 精细化分方向配置]
+          B --> C[层级2 外发+域内合并控制]
+          C -->|切回 detailed| B
+          B --> D[层级3A 数量限制策略关闭]
+          B --> E[层级3B 存在性验证策略关闭]
+          B --> F[层级3C 模块整体禁用 灰化]
+          B --> G[层级3D 执行动作下拉展开/切换]
+      </div>
+      <table class="spec-table layer-index">
+        <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>策略卡默认态</td><td>页面加载</td><td>上方内嵌（2.1）</td></tr>
+          <tr><td>1</td><td>抽屉默认态（精细化分方向配置）</td><td>点击策略卡</td><td>上方内嵌（2.2）</td></tr>
+          <tr><td>2</td><td>合并模式（外发+域内合并控制）</td><td>配置模式选择“外发+域内合并控制”</td><td><a href="layer-1-merged-mode.html">查看详情</a></td></tr>
+          <tr><td>3</td><td>禁用态（子策略/模块）与执行动作下拉</td><td>关闭数量限制/存在性验证/模块开关；点击执行动作下拉</td><td><a href="layer-2-disabled-and-dropdown.html">查看详情</a></td></tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+  <section id="dialogs">
+    <h2>3. 弹窗/抽屉/对话框规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>名称</th><th>触发条件</th><th>实际渲染</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>阶段2收发信人策略抽屉</td><td>点击“收信人检测”策略卡或配置入口</td><td>80vw Sheet（<code>hideCloseButton</code>，右上自绘 XCircle），左子策略导航 + 右配置卡片，内容区内部滚动</td><td>嵌入式配置页面；关闭即收起，无未保存拦截</td></tr>
+        <tr><td>添加规则 Dialog（PRD）</td><td>PRD：点击“添加规则/添加全局合并规则”</td><td>demo 收信人检测面板<strong>无此入口</strong>（行为规则表格位于“发信行为管控”策略）</td><td>见差异 D-001 / 需确认 Q-001</td></tr>
+        <tr><td>未保存确认 Dialog（PRD）</td><td>PRD：有未保存修改时切换策略</td><td>demo 未实现；切换子策略/关闭抽屉直接生效</td><td>见差异 D-008</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="api-mapping">
+    <h2>4. 数据模型与 API 映射</h2>
+    <h3>4.1 前端数据模型（依 demo state 归纳）</h3>
+    <pre><code>interface RecipientCheckConfig {
+  enabled: boolean                       // 模块开关（recipientCheckEnabled，默认 true）
+  limit: {
+    enabled: boolean                     // 数量限制策略开关（默认 true）
+    mode: "detailed" | "merged"          // 配置模式（默认 detailed）
+    inbound:  { max: number; scope: "local" | "all"; action: Action }   // 30 / local / block
+    outbound: { max: number; action: Action }                            // 50 / review（detailed 模式）
+    internal: { max: number; action: Action }                            // 20 / quarantine（detailed 模式）
+    merged:   { max: number; action: Action }                            // 50 / review（merged 模式，外发+域内共用）
+  }
+  existence: {
+    enabled: boolean                     // 存在性验证开关（默认 true）
+    action: Action                       // 验证失败动作（默认 block）；仅接收方向生效
+  }
+}
+type Action = "quarantine" | "review" | "block" | "drop"  // 阈值范围 1-1000（demo input min/max）</code></pre>
+    <h3>4.2 PRD API / 数据表 → 网关落地映射</h3>
+    <table class="spec-table">
+      <thead><tr><th>PRD API / 数据表</th><th>用途</th><th>落地映射建议</th><th>需确认</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET/PUT /api/recipient-check/config</code></td><td>读/写收信人检测配置</td><td>本模块为纯配置（无规则列表），按 CLAUDE.md 应走配置系统 ConfigManager（<code>/apiserver.cf 或 antispam.cf/&lt;section&gt;/&lt;key&gt;</code> + DB <code>config_overrides</code> 在线覆盖），不必新增专用 API。</td><td>配置路径归属（antispam RCPT TO 阶段消费）见 Q-004</td></tr>
+        <tr><td><code>GET/POST/DELETE /api/recipient-check/rules</code></td><td>行为规则 CRUD</td><td>demo 已把行为规则移入“发信行为管控”策略；本模块不落地行为规则 API。</td><td>归属确认见 Q-001</td></tr>
+        <tr><td><code>GET /api/recipient-check/stats</code></td><td>检测统计</td><td>映射统一拦截统计/规则统计（策略卡 todayHits/Blocked/Exempted 数据源）。</td><td>统计口径</td></tr>
+        <tr><td><code>POST /api/users/validate</code></td><td>验证收信人存在</td><td>网关侧由 antispam 在 RCPT TO 阶段查询用户目录（LDAP/AD/本地），配合 Redis 缓存；不需要暴露前端 API。</td><td>目录源配置入口与 LDAP TLS fail-closed 约束，见 Q-007</td></tr>
+        <tr><td><code>t_recipient_check_config / t_recipient_behavior_rules</code></td><td>产品设计表</td><td>非硬性要求；配置走 <code>config_overrides</code>，避免新建独立配置表；行为规则表随发信行为管控统一设计。</td><td>-</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="business-logic">
+    <h2>5. 业务逻辑规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>逻辑</th><th>PRD 要求</th><th>demo 实际</th><th>落地说明</th></tr></thead>
+      <tbody>
+        <tr><td>执行时机</td><td>邮件处理引擎检测收信人数量和有效性</td><td>面板明示“在 RCPT TO 阶段执行”，与发信行为管控形成「发信+收件」全链路防护</td><td>对应 antispam milter RCPT TO 回调；超限动作在协议阶段返回。</td></tr>
+        <tr><td>数量限制-方向</td><td>接收/外发/域内三方向独立配置</td><td>detailed 模式三方向卡（蓝/绿/紫 Badge），各自 max+action；仅接收方向有“计数范围”</td><td>方向判定依赖内部域名配置 + 认证状态（{auth_authen}）。</td></tr>
+        <tr><td>检测模式</td><td>detailed=三方向不同值；merged=三方向统一值</td><td>merged 模式=<strong>接收方向仍独立</strong> + 外发/域内合并为“内部发信”统一配置（防切换方向绕过）</td><td>以 demo 语义为准，见差异 D-002。</td></tr>
+        <tr><td>统计范围</td><td>各方向可选 仅本域/全部（下拉）</td><td>仅接收方向有 radio“仅本域(默认)/所有”</td><td>见差异 D-006。</td></tr>
+        <tr><td>存在性验证</td><td>查 LDAP/AD/本地目录；不存在可选 接受/拒绝/隔离/静默丢弃</td><td>严格模式（LDAP/AD验证+API实时校验+别名递归解析）；动作枚举 隔离/审核/阻断/丢弃；仅接收方向生效</td><td>动作枚举差异见 D-005；“接受”即关闭该开关。</td></tr>
+        <tr><td>降级</td><td>用户目录不可用显示警告；查询超时降级为允许</td><td>源码有 <code>ldapConnected=false</code> 分支：amber 警告“目录服务离线…已降级为放行”（默认不渲染）</td><td>与 PRD 一致；触发条件需后端探活。</td></tr>
+        <tr><td>动作语义</td><td>block/quarantine/review/tag</td><td>quarantine/review/block/drop，各带一句说明（452/550 退信、静默丢弃等）</td><td>PRD 的 tag 不在本面板；drop 为 demo 新增，需映射统一规则系统 action，见 Q-003。</td></tr>
+        <tr><td>启用控制</td><td>模块整体启用/禁用；禁用整体灰度 opacity 0.5</td><td>三级开关：模块（灰化+pointer-events-none+导航圆点空心）→ 数量限制（body 卸载）→ 存在性验证（body 卸载）</td><td>与 PRD 状态规则一致。</td></tr>
+        <tr><td>权限</td><td>系统管理员读写；安全管理员配置；审计员只读；普通用户无权限</td><td>demo 未实现权限差异</td><td>落地按统一权限矩阵处理。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interaction">
+    <h2>6. 交互规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>实际行为（浏览器验证）</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>点击策略卡</td><td>打开 80vw 抽屉，左导航自动选中“收信人检测”，面包屑更新</td><td>卡片整体与“配置”按钮共用打开逻辑。</td></tr>
+        <tr><td>切换模块开关</td><td>已启用↔已禁用；禁用时内容 <code>opacity-50 pointer-events-none</code>（控件视觉保留但不可点），左导航圆点实心蓝→空心灰</td><td>配置值保留，重新启用后原样恢复。</td></tr>
+        <tr><td>切换配置模式</td><td>detailed↔merged 即时重渲染；两模式共享 inbound 配置（radio id 变为 scope-local-m）；merged 出现 amber 提示</td><td>模式切换不丢失已填值。</td></tr>
+        <tr><td>切换执行动作</td><td>下拉 4 项，当前项打勾；选“丢弃”后说明变“静默丢弃，发送方无感知，无退信”</td><td>说明文案随动作实时联动（getActionDescription 映射）。</td></tr>
+        <tr><td>修改最大收信人</td><td>数字输入 min=1 max=1000；demo 无超范围错误提示（onChange <code>parseInt||0</code>）</td><td>PRD 要求实时校验+错误提示，见 D-003/D-007。</td></tr>
+        <tr><td>关闭数量限制/存在性验证</td><td>对应区块 body 卸载（非灰化），仅剩头部开关行</td><td>配置值内存保留，重开恢复。</td></tr>
+        <tr><td>Tooltip</td><td>面板内字段无悬浮提示；仅导航折叠态与策略卡有 Tooltip</td><td>PRD 的 12 条字段悬浮提示未实现，见 D-007。</td></tr>
+        <tr><td>保存</td><td>无保存按钮，底部 sticky 操作栏为空；所有变更仅存于组件 state</td><td>PRD 要求保存/Toast/超时提示/乐观锁，见 D-008。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="i18n">
+    <h2>7. 国际化规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>i18n key</th><th>zh</th><th>en</th><th>th</th><th>使用位置</th></tr></thead>
+      <tbody>
+        <tr><td><code>pipeline.recipientDetection</code></td><td>收信人检测</td><td>Recipient Detection</td><td>（语言包内提供）</td><td>策略卡标题 / 抽屉面包屑</td></tr>
+        <tr><td><code>pipeline.recipientCheckDesc</code></td><td>检测收信人地址是否有效</td><td>Validate recipient address</td><td>（语言包内提供）</td><td>策略卡 Tooltip 描述</td></tr>
+        <tr><td><code>pipeline.phase2Sender</code></td><td>阶段2: 收发信人策略</td><td>Phase 2: Sender/Recipient Policies</td><td>（语言包内提供）</td><td>抽屉标题</td></tr>
+        <tr><td><code>common.recipientDetection</code></td><td>收信人检测</td><td>Recipient Detection</td><td>การตรวจจับผู้รับ（policyLabels 内联）</td><td>左导航行 / 面板标题（getPolicyLabel）</td></tr>
+        <tr><td><code>common.limitAndValidation</code></td><td>数量限制/存在性验证</td><td>-</td><td>-</td><td>左导航摘要</td></tr>
+        <tr><td><code>common.enabled / common.disabled</code></td><td>已启用 / 已禁用</td><td>Enabled / Disabled</td><td>-</td><td>面板头状态字</td></tr>
+      </tbody>
+    </table>
+    <table class="spec-table">
+      <thead><tr><th>语言</th><th>demo 覆盖</th><th>缺口</th></tr></thead>
+      <tbody>
+        <tr><td>中文 zh</td><td>完整</td><td>-</td></tr>
+        <tr><td>英文 en / 泰语 th</td><td>导航、标题、状态字走 <code>t()</code>/policyLabels</td><td><strong>面板正文全部硬编码中文</strong>：数量限制策略、配置模式、方向卡、动作选项、说明横幅、动作描述等均未走 i18n，切英/泰后仍显示中文（见 D-009）。</td></tr>
+        <tr><td>第4语言</td><td>demo <code>Language = "zh" | "en" | "th"</code> 仅三语</td><td>implement.md 要求四种内置语言，缺第4语言，见 Q-006。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="responsive">
+    <h2>8. 响应式规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>断点</th><th>浏览器验证</th><th>表现</th></tr></thead>
+      <tbody>
+        <tr><td>1440px</td><td>默认截图</td><td>阶段列横排；80vw 抽屉内左导航 208px + 右卡片；方向卡内 grid 三列（接收）/两列（外发/域内）。</td></tr>
+        <tr><td>1024px</td><td>已截图</td><td>阶段列换行（阶段1/2 一屏），策略卡尺寸不变；抽屉 80vw 相应变窄，面板内部滚动。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/responsive-1024-default.png" alt="1024px 响应式截图">
+      <figcaption>1024px 默认态：阶段1/2 并排，收信人检测卡片可见（橙色条）。</figcaption>
+    </figure>
+    <p style="font-size:13px;color:#6b7280;">PRD 要求最小宽度 800px、方向配置小屏纵向排列；demo 方向卡 grid 未随断点降列（固定 grid-cols-3/2），见差异 D-010。</p>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>9. 与 PRD / 源码 / 浏览器渲染的差异标注</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>差异点</th><th>PRD 描述</th><th>demo 实际</th><th>建议处理</th></tr></thead>
+      <tbody>
+        <tr><td>D-001</td><td>行为规则/全局合并规则缺失</td><td>收信人检测模块含“行为检测规则区块”（方向Tab+规则表格+添加规则Dialog）与 amber 色“全局合并规则表格（防盗号专用）”</td><td>收信人检测面板只有数量限制+存在性验证；行为规则与全局合并规则整体位于“发信行为管控”策略（同抽屉另一子策略）</td><td>以 demo 信息架构为准；PRD 行为规则部分由发信行为管控模块规格覆盖，见 Q-001。</td></tr>
+        <tr><td>D-002</td><td>合并模式语义不同</td><td>merged=三方向使用统一限制值</td><td>merged=仅外发+域内合并为“内部发信”，接收方向仍独立配置</td><td>以 demo 为准（更合理：接收方向阈值语义不同）。</td></tr>
+        <tr><td>D-003</td><td>阈值范围不一致</td><td>数量输入 1-9999，超范围报错</td><td>input min=1 max=1000；底部说明写“1-1000，-1 表示无限制”，但 min=1 实际输不进 -1；无错误提示</td><td>落地需统一：确认上限（1000 vs 9999）与 -1 无限制是否保留，并补校验，见 Q-002。</td></tr>
+        <tr><td>D-004</td><td>数量限制动作枚举</td><td>动作=阻断/隔离/审核/标记(tag)</td><td>动作=隔离/审核/阻断/丢弃(drop)，无“标记”</td><td>需确认 drop 与 tag 的取舍及统一规则系统 action 映射，见 Q-003。</td></tr>
+        <tr><td>D-005</td><td>无效收信人动作枚举</td><td>接受/拒绝/隔离/静默丢弃</td><td>隔离/审核/阻断/丢弃（无“接受”选项，多“审核”）</td><td>“接受”语义可由关闭开关承担；以 demo 枚举为准并确认，见 Q-003。</td></tr>
+        <tr><td>D-006</td><td>统计范围控件与作用域</td><td>各方向均有统计范围，下拉选择“仅本域/全部”</td><td>仅接收方向有，RadioGroup“仅本域/所有”</td><td>以 demo 为准（外发/域内计数范围意义弱）。</td></tr>
+        <tr><td>D-007</td><td>悬浮提示未实现</td><td>12 条字段级 Tooltip（收信人数量上限、仅本域、详细模式…）</td><td>面板内无任何字段 Tooltip</td><td>落地时补齐 PRD §3 悬浮提示。</td></tr>
+        <tr><td>D-008</td><td>保存/异常流缺失</td><td>保存成功 Toast、保存超时提示、乐观锁版本冲突、未保存确认 Dialog</td><td>无保存按钮（底部 sticky 操作栏为空），变更仅存组件 state；无未保存拦截</td><td>落地需补保存链路与异常处理。</td></tr>
+        <tr><td>D-009</td><td>面板正文未国际化</td><td>兼容性要求支持中/英/泰</td><td>面板正文（区块标题、模式、方向、动作、说明）硬编码中文，仅导航/标题/状态字走 i18n</td><td>落地时全部文案入语言包（四语）。</td></tr>
+        <tr><td>D-010</td><td>可折叠区块与响应式</td><td>区块可折叠（默认展开数量限制）；小屏方向配置纵向排列；最小宽度 800px</td><td>区块不可折叠（仅随开关显隐）；方向卡 grid 固定列数</td><td>以 demo 为准记录；小屏适配落地时确认。</td></tr>
+        <tr><td>D-011</td><td>收信人格式检测缺失</td><td>功能点5：检测收信人邮箱 RFC 格式</td><td>面板无对应 UI（无格式检测开关/动作）</td><td>需确认是否由网关协议层默认承担，见 Q-004。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>10. 需确认事项</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>问题</th><th>影响</th></tr></thead>
+      <tbody>
+        <tr><td>Q-001</td><td>PRD 把“行为检测规则+全局合并规则（防盗号）”放在收信人检测模块，demo 放在“发信行为管控”策略。落地信息架构以哪个为准？（本规格按 demo 处理，行为规则不在本模块）</td><td>决定本模块 API/配置面与另一模块的边界。</td></tr>
+        <tr><td>Q-002</td><td>最大收信人阈值上限取 1000（demo input）还是 9999（PRD）？“-1 表示无限制”（demo 底部说明）是否保留？如保留需放开 min=1 限制并定义校验规则。</td><td>影响输入校验、后端配置校验与文案。</td></tr>
+        <tr><td>Q-003</td><td>动作枚举落地映射：drop（静默丢弃）、review（审核）在统一规则系统中的对应 action 是什么？PRD 的 tag（标记）是否需要保留（按 implement.md 应映射 accept+加 header，不新增 action）？</td><td>影响 RCPT TO 阶段处置链路与统一规则系统复用。</td></tr>
+        <tr><td>Q-004</td><td>收信人检测为纯配置型策略（无规则列表）：配置存储走配置系统 ConfigManager（config_overrides 在线覆盖，antispam 消费）是否成立？“收信人格式检测”（PRD 功能点5）是否由网关 SMTP 协议层/地址解析默认承担而无需 UI？</td><td>决定是否新增 API/表；影响 D-011 结论。</td></tr>
+        <tr><td>Q-005</td><td>存在性验证“严格模式”当前为静态展示（LDAP/AD验证、API实时校验、别名递归解析三个 Badge）。是否规划“宽松/严格”模式切换？别名递归解析在网关目录同步（internal/directory）中的落地能力是否具备？</td><td>影响存在性验证配置面与目录服务集成。</td></tr>
+        <tr><td>Q-006</td><td>四语国际化的第4种语言是哪一种？demo 语言包仅 zh/en/th。</td><td>影响 i18n key 清单与验收范围。</td></tr>
+        <tr><td>Q-007</td><td>存在性验证依赖的用户目录（LDAP/AD/本地）配置入口在哪个模块？网关 LDAP 强制 TLS（fail-closed）约束下，目录服务离线降级“放行”的探活与告警口径如何定义？</td><td>影响降级行为、告警展示（amber 警告条）与安全合规。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    if (window.mermaid) { mermaid.initialize({ startOnLoad: true }); }
+
+    // 动作说明映射（与 demo getActionDescription 一致）
+    const ACTION_DESC = {
+      quarantine: "邮件进入隔离区，管理员审核后可放行或删除",
+      review: "邮件进入待审核队列，人工确认后投递或退回",
+      block: "拒绝接收，发送方收到退信通知（452/550）",
+      drop: "静默丢弃，发送方无感知，无退信"
+    };
+    document.querySelectorAll("[data-action-select]").forEach((sel) => {
+      sel.addEventListener("change", () => {
+        const target = document.querySelector('[data-desc="' + sel.dataset.descTarget + '"]');
+        if (target) target.textContent = ACTION_DESC[sel.value];
+      });
+    });
+
+    // 配置模式切换（detailed / merged）
+    document.querySelectorAll("[data-mode-radio]").forEach((radio) => {
+      radio.addEventListener("change", () => {
+        document.querySelectorAll("[data-mode-body]").forEach((body) => {
+          const show = body.dataset.modeBody === radio.value;
+          body.classList.toggle("is-hidden", !show);
+          if (show) body.style.display = "flex";
+        });
+      });
+    });
+
+    // 区块开关：关闭卸载 body（与 demo 条件渲染一致）
+    function bindBlockSwitch(swSel, bodySel) {
+      const sw = document.querySelector(swSel), body = document.querySelector(bodySel);
+      sw.addEventListener("click", () => {
+        const on = sw.getAttribute("aria-checked") === "true";
+        sw.setAttribute("aria-checked", String(!on));
+        body.classList.toggle("is-hidden", on);
+      });
+    }
+    bindBlockSwitch("[data-limit-switch]", "[data-limit-body]");
+    bindBlockSwitch("[data-existence-switch]", "[data-existence-body]");
+
+    // 模块开关：灰化 + 状态字 + 导航圆点
+    const moduleSwitch = document.querySelector("[data-module-switch]");
+    moduleSwitch.addEventListener("click", () => {
+      const on = moduleSwitch.getAttribute("aria-checked") === "true";
+      moduleSwitch.setAttribute("aria-checked", String(!on));
+      const status = document.querySelector("[data-module-status]");
+      status.classList.toggle("off", on);
+      status.childNodes[0].textContent = on ? "已禁用 " : "已启用 ";
+      document.querySelector("[data-module-body]").classList.toggle("module-off", on);
+      document.querySelector("[data-nav-dot]").classList.toggle("off", on);
+    });
+  </script>
+</body>
+</html>

@@ -21,14 +21,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { mailTypeConfig, stripDetailPrefix } from "../lib/detail-helpers";
+import {
+  mailTypeConfig,
+  RECLASSIFY_TYPE_ORDER,
+  stripDetailPrefix,
+} from "../lib/detail-helpers";
 import type { EmailType } from "@/types/email-disposal-detail";
 
 // Sentinel for the shadcn/base-ui Select, which does not allow an empty-string
 // item value; resolves to `undefined` (== "暂不改判" / no reclassify) in onConfirm.
 const NO_RECLASSIFY = "__no_reclassify__";
 
-const EMAIL_TYPES = Object.keys(mailTypeConfig) as EmailType[];
+// GT-12422: 顺序对齐原型（layer-6/8），「暂不改判」按原型放在最后。
+const EMAIL_TYPES = RECLASSIFY_TYPE_ORDER;
 
 interface ReclassifyDialogProps {
   open: boolean;
@@ -77,7 +82,13 @@ export function ReclassifyDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
+      {/*
+        html_spec layer-6/8 要求弹窗 sm:max-w-md(448px)。基类宽度是
+        data-[size=default]:sm:max-w-sm，带 data 变体前缀、特异性高于裸
+        sm:max-w-md，必须用同前缀写法才能被 tailwind-merge 正确替换。
+      */}
       <AlertDialogContent
+        className="data-[size=default]:sm:max-w-md"
         data-testid={`disposal-${action ?? "reclassify"}-dialog`}
       >
         <AlertDialogHeader>
@@ -140,14 +151,14 @@ export function ReclassifyDialog({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={NO_RECLASSIFY}>
-                {t("reclassify.noChange")}
-              </SelectItem>
               {EMAIL_TYPES.map((type) => (
                 <SelectItem key={type} value={type}>
                   {tDetail(stripDetailPrefix(mailTypeConfig[type].labelKey))}
                 </SelectItem>
               ))}
+              <SelectItem value={NO_RECLASSIFY}>
+                {t("reclassify.noChange")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -163,7 +174,20 @@ export function ReclassifyDialog({
         )}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={busy}>{t("cancel")}</AlertDialogCancel>
+          {/*
+            html_spec layer-6/8: 确认按钮语义色, 放行 bg-green-500 hover 600 /
+            召回 bg-orange-500 hover 600 白字。Button 的 hover 走
+            data-[hovered=true] 机制, 用同前缀覆盖默认 variant 的
+            data-[hovered=true]:bg-primary/90。无 action 的纯改判弹窗保持默认。
+          */}
           <AlertDialogAction
+            className={
+              action === "release"
+                ? "border-green-500/20 bg-green-500 text-white data-[hovered=true]:bg-green-600 active:bg-green-600"
+                : action === "recall"
+                  ? "border-orange-500/20 bg-orange-500 text-white data-[hovered=true]:bg-orange-600 active:bg-orange-600"
+                  : undefined
+            }
             disabled={busy}
             onClick={(e) => {
               e.preventDefault();

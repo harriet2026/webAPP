@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 2：规则编辑抽屉 - 基础设置 Tab - 高级过滤规则</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --border: oklch(0.922 0 0); --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0); --radius: 0.625rem; --font-sans: "Geist", system-ui, sans-serif; --font-mono: "Geist Mono", monospace; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { margin: 0 auto; max-width: 1280px; padding: 2rem; font-family: var(--font-sans); background: var(--background); color: #1f2937; line-height: 1.6; }
+    .layer-nav, header, section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+    .layer-nav { display: flex; justify-content: space-between; }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1 { color: var(--primary); font-size: 1.3rem; margin-bottom: 0.75rem; }
+    h2 { font-size: 1.1rem; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.4rem; margin-bottom: 1rem; }
+    table.spec-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 0.55rem 0.7rem; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); white-space: nowrap; }
+    img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    figure { margin: 1rem 0; text-align: center; }
+    figcaption { font-size: 0.8rem; color: var(--muted-foreground); margin-top: 0.4rem; }
+    code { font-family: var(--font-mono); font-size: 0.85em; background: var(--muted); padding: 0.1em 0.35em; border-radius: 4px; }
+    .pass { color: #15803d; font-weight: 700; } .fail { color: #b91c1c; font-weight: 700; }
+    .component-preview { border: 2px dashed oklch(0.75 0.1 262); border-radius: var(--radius); padding: 1.25rem; margin: 1rem 0; background: #f5f7fa; }
+    .component-preview::before { content: "▶ 可交互组件预览（Tab 切换 / 必填校验 / 字数计数可操作，行为与 demo 一致）"; display: block; font-size: 0.75rem; color: var(--primary); margin-bottom: 0.9rem; font-weight: 600; }
+    .dom-comparison { background: oklch(0.97 0.02 150); border: 1px solid oklch(0.8 0.08 150); border-radius: var(--radius); padding: 0.75rem 1rem; margin: 0.75rem 0; }
+    .diffnote { border-left: 4px solid oklch(0.65 0.2 25); background: oklch(0.97 0.013 25); border-radius: 6px; padding: 0.6rem 0.9rem; margin: 0.75rem 0; font-size: 0.85rem; }
+
+    /* ===== 预览：抽屉基础设置表单 ===== */
+    .dw { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; max-width: 1000px; margin: 0 auto; overflow: hidden; }
+    .dw-head { padding: 16px 22px; border-bottom: 1px solid #f3f4f6; }
+    .dw-head .t { font-size: 16px; font-weight: 700; }
+    .dw-head .d { font-size: 12.5px; color: #6b7280; }
+    .tabs { display: inline-flex; gap: 2px; background: #f3f4f6; border-radius: 8px; padding: 3px; margin: 14px 22px 0; }
+    .tabs button { border: 0; background: none; border-radius: 6px; padding: 5px 12px; font-size: 13px; cursor: pointer; color: #374151; }
+    .tabs button.on { background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.08); font-weight: 600; }
+    .dw-body { padding: 16px 22px 22px; }
+    .grp { margin-bottom: 18px; }
+    .grp > .gt { font-weight: 600; font-size: 14px; margin-bottom: 10px; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    label.fl { display: block; font-size: 13px; margin-bottom: 4px; color: #374151; }
+    .fl .req { color: #dc2626; }
+    .fl .hint { color: #9ca3af; }
+    input[type=text], input[type=number], input[type=date], textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 10px; font-size: 13px; font-family: inherit; }
+    .err input { border-color: #dc2626 !important; box-shadow: 0 0 0 1px #dc2626; }
+    .errmsg { color: #dc2626; font-size: 12px; margin-top: 3px; display: none; }
+    .err .errmsg { display: block; }
+    .radio, .chk { display: inline-flex; align-items: center; gap: 6px; margin-right: 18px; font-size: 13.5px; cursor: pointer; }
+    .cc { text-align: right; font-size: 12px; color: #9ca3af; }
+    .dw-foot { border-top: 1px solid #f3f4f6; padding: 14px 22px; }
+    .dw-foot button { display: block; width: 100%; border-radius: 8px; padding: 9px; font-size: 14px; cursor: pointer; }
+    .dw-foot .cancel { background: #fff; border: 1px solid #e5e7eb; margin-bottom: 8px; }
+    .dw-foot .ok { background: #1d4ed8; border: 1px solid #1d4ed8; color: #fff; }
+    .tabhint { display: none; margin: 0 22px; font-size: 0.82rem; color: #0369a1; background: #e0f2fe; border-radius: 6px; padding: 0.5rem 0.75rem; }
+    .savemsg { display: none; margin: 0 22px 10px; font-size: 0.82rem; color: #15803d; background: #dcfce7; border-radius: 6px; padding: 0.5rem 0.75rem; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-2">← 返回主文件</a>
+    <span><a href="./layer-1-list-view.html">← 层级 1</a>　<a href="./layer-3-conditions.html">层级 3：条件配置 →</a></span>
+  </nav>
+
+  <header>
+    <h1>交互层级 2：规则编辑抽屉 - 基础设置 Tab</h1>
+    <table class="spec-table">
+      <tr><td style="width:120px"><b>所属组件</b></td><td>3.2 规则编辑抽屉 RuleEditorDrawer（75vw Sheet）</td></tr>
+      <tr><td><b>主文件</b></td><td><a href="./index.html">filter-rules-pipeline-advanced-rules/index.html</a></td></tr>
+      <tr><td><b>触发路径</b></td><td>层级1 点击「新建规则」（标题「新建规则」）或行内 ✎ 编辑（标题「编辑规则: {名称}」）→ 抽屉默认停在「基础设置」Tab</td></tr>
+      <tr><td><b>demo 源</b></td><td><code>advanced-filter-rules-module.tsx</code> L3319-3459（basic Tab）、L3008-3038（handleSave 校验）</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h2>可交互组件预览</h2>
+    <div class="component-preview">
+      <div class="dw">
+        <div class="dw-head"><div class="t">新建规则</div><div class="d">配置过滤规则的基础信息、条件和处置策略</div></div>
+        <div class="tabs">
+          <button class="on">基础设置</button><button data-jump="./layer-3-conditions.html">条件配置</button><button data-jump="./layer-4-actions.html">处置策略</button><button data-jump="./layer-5-test-analysis.html">测试与分析</button>
+        </div>
+        <div class="tabhint" id="tabHint"></div>
+        <div class="dw-body">
+          <div class="grp">
+            <div class="gt">基础信息</div>
+            <div class="row2">
+              <div id="fName">
+                <label class="fl">规则名称 <span class="req">*</span></label>
+                <input type="text" id="iName" placeholder="输入规则名称">
+                <div class="errmsg">规则名称不能为空</div>
+              </div>
+              <div>
+                <label class="fl">优先级 <span class="req">*</span> <span class="hint">(1-100，数值越大优先级越高)</span></label>
+                <input type="number" id="iPri" min="1" max="100" value="50">
+              </div>
+            </div>
+            <div style="margin-top:12px">
+              <label class="fl">规则状态</label>
+              <label class="radio"><input type="radio" name="st" checked> 启用</label>
+              <label class="radio"><input type="radio" name="st"> 禁用</label>
+            </div>
+          </div>
+          <div class="grp">
+            <div class="gt">生效范围</div>
+            <div id="fScope">
+              <label class="fl">作用范围 <span class="req">*</span></label>
+              <label class="chk"><input type="checkbox" class="sc" checked> 接收</label>
+              <label class="chk"><input type="checkbox" class="sc" checked> 外发</label>
+              <label class="chk"><input type="checkbox" class="sc" checked> 域内</label>
+              <div class="errmsg" id="scopeErr" style="display:none">请至少选择一个生效范围</div>
+            </div>
+          </div>
+          <div class="grp">
+            <div class="gt">有效期设置</div>
+            <label class="fl">有效期至 <span class="hint">(留空=永久有效)</span></label>
+            <input type="date" style="max-width:220px">
+          </div>
+          <div class="grp">
+            <div class="gt">备注说明</div>
+            <label class="fl">规则描述</label>
+            <textarea id="iDesc" rows="3" maxlength="500" placeholder="输入规则描述（最多500字）"></textarea>
+            <div class="cc"><span id="cc">0</span>/500</div>
+          </div>
+        </div>
+        <div class="savemsg" id="saveMsg">✔ 校验通过：demo 行为为组装 FilterRule → onSave → 关闭抽屉并刷新列表（新建 push / 编辑按 id 替换）</div>
+        <div class="dw-foot">
+          <button class="cancel">取消</button>
+          <button class="ok" id="okBtn">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <figure>
+      <img src="./screenshots/layer2-new-rule-basic.png" alt="新建规则基础设置默认态">
+      <figcaption>demo 实际渲染：新建规则 → 基础设置 Tab 默认态（优先级 50、启用、三范围全选、0/500）。</figcaption>
+    </figure>
+    <figure>
+      <img src="./screenshots/layer2-validation-error.png" alt="必填校验">
+      <figcaption>名称为空点「确定」→ 红框 + 红字「规则名称不能为空」（作用范围全不选则为「请至少选择一个生效范围」），并强制跳回基础设置 Tab。</figcaption>
+    </figure>
+    <figure>
+      <img src="./screenshots/layer2-edit-rule1-basic.png" alt="编辑态回填缺陷">
+      <figcaption>缺陷实证（D-3）：点行内 ✎ 编辑规则「拦截可疑附件邮件」→ 标题为编辑态，但表单仍是默认值/上次输入（不回填）。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>UI 元素清单（基础设置 Tab）</h2>
+    <table class="spec-table">
+      <thead><tr><th>分区</th><th>字段</th><th>控件</th><th>默认值</th><th>校验/说明</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="3">基础信息</td><td>规则名称 *</td><td>Input text，placeholder「输入规则名称」</td><td>空</td><td>必填；空提交→「规则名称不能为空」红框红字；输入时清除错误</td></tr>
+        <tr><td>优先级 *</td><td>Input number min=1 max=100</td><td>50</td><td>label 附注「(1-100，数值越大优先级越高)」——与网关统一规则系统优先级语义一致</td></tr>
+        <tr><td>规则状态</td><td>RadioGroup 启用/禁用</td><td>启用</td><td>—</td></tr>
+        <tr><td>生效范围</td><td>作用范围 *</td><td>Checkbox×3 接收/外发/域内</td><td>三项全选</td><td>至少选一；全不选提交→「请至少选择一个生效范围」</td></tr>
+        <tr><td>有效期设置</td><td>有效期至</td><td>Input date</td><td>空</td><td>附注「(留空=永久有效)」；保存时写入 <code>expiryTime</code></td></tr>
+        <tr><td>备注说明</td><td>规则描述</td><td>Textarea maxLength=500</td><td>空</td><td>右下实时字数「N/500」</td></tr>
+        <tr><td colspan="2">Footer 取消 / 确定</td><td>Button×2（1440px 实测上下通栏堆叠）</td><td>确定 <code>disabled=!canSaveActions</code></td><td>确定点击先校验 name/scope（失败跳回本 Tab），再校验处置策略（层级4）</td></tr>
+      </tbody>
+    </table>
+    <div class="diffnote"><b>D-3 编辑不回填（高严重度）</b>：demo L2991 用 <code>useState(() =&gt; { if (rule) {…} })</code> 做“初始化回填”，但该初始化只在组件<b>首次挂载</b>执行（此时 rule 恒为 null），且 <code>RuleEditorDrawer</code> 未按 <code>rule.id</code> 加 key 强制重挂载 → 编辑任何规则表单都不回填，且保留上一次的输入。spec §4.4 要求「打开规则编辑抽屉并回填数据」。详见主文件 §9。</div>
+  </section>
+
+  <section class="dom-comparison">
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM（Playwright 提取，抽屉总节点 82）</th><th>预览还原 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td>SheetContent <code>div.w-[75vw]</code>，子结构：SheetHeader（标题+副标题）+ TabsList(4 tab) + ScrollArea 表单 + Footer</td><td><code>.dw</code> &gt; .dw-head + .tabs + .dw-body + .dw-foot</td><td class="pass">一致</td></tr>
+        <tr><td>Tab 数量与文案</td><td>4：基础设置(active) / 条件配置 / 处置策略 / 测试与分析</td><td>同 4 项同顺序，active 样式同</td><td class="pass">一致</td></tr>
+        <tr><td>表单控件</td><td>inputs: text("")/number("50")/date("")/textarea("")；radio 启用=checked；checkbox 接收/外发/域内 全 checked（Playwright 逐项断言）</td><td>同默认值</td><td class="pass">一致</td></tr>
+        <tr><td>四个分区标题</td><td>基础信息 / 生效范围 / 有效期设置 / 备注说明</td><td>同 4 分区</td><td class="pass">一致</td></tr>
+        <tr><td>错误态</td><td>空名提交后 input 红框 + p「规则名称不能为空」出现</td><td>同逻辑同文案（点确定复现）</td><td class="pass">一致</td></tr>
+        <tr><td>编辑态差异</td><td>编辑规则1时：标题「编辑规则: 拦截可疑附件邮件」+ nameInput=""（缺陷）</td><td>预览以「新建规则」呈现；编辑态缺陷以截图+D-3 说明呈现</td><td class="pass">一致（呈现方式已声明）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+<script>
+(function () {
+  var name = document.getElementById('iName'), fName = document.getElementById('fName');
+  var scopeErr = document.getElementById('scopeErr');
+  var desc = document.getElementById('iDesc'), cc = document.getElementById('cc');
+  desc.addEventListener('input', function () { cc.textContent = desc.value.length; });
+  name.addEventListener('input', function () { fName.classList.remove('err'); });
+  document.querySelectorAll('.sc').forEach(function (c) { c.addEventListener('change', function () { scopeErr.style.display = 'none'; }); });
+  document.getElementById('okBtn').addEventListener('click', function () {
+    var ok = true;
+    if (!name.value.trim()) { fName.classList.add('err'); ok = false; }
+    var anyScope = [].some.call(document.querySelectorAll('.sc'), function (c) { return c.checked; });
+    if (!anyScope) { scopeErr.style.display = 'block'; ok = false; }
+    document.getElementById('saveMsg').style.display = ok ? 'block' : 'none';
+  });
+  var hint = document.getElementById('tabHint');
+  document.querySelectorAll('.tabs button[data-jump]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      hint.innerHTML = '✔ demo 行为：切换到「' + b.textContent + '」Tab → 见 <a href="' + b.dataset.jump + '">' + b.dataset.jump.replace('./', '') + '</a>';
+      hint.style.display = 'block';
+    });
+  });
+})();
+</script>
+</body>
+</html>

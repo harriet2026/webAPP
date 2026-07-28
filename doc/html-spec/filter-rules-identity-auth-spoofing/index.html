@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - 身份认证与仿冒检测 - HTML 规格说明</title>
+  <link rel="stylesheet" href="../assets/spec-style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+</head>
+<body>
+<header class="spec-header">
+  <h1>策略流水线 · 阶段2 收发信人策略 — 身份认证与仿冒检测 · HTML 规格说明</h1>
+  <table class="meta-table">
+    <tr><td>模块名称</td><td>身份认证与仿冒检测（authSpoofing，策略流水线 Stage 2，priority 2001，type=forced）</td></tr>
+    <tr><td>demo 路由</td><td><code>/filter-rules/identity</code> → 左侧策略导航第 2 项；亦可由 <code>/filter-rules/pipeline</code> 点击「身份认证与仿冒检测」卡片经抽屉（Sheet）进入</td></tr>
+    <tr><td>demo 源文件</td><td><code>design/origin/demo/components/filter-rules-new/identity-strategy-page.tsx</code>（<code>renderAuthSpoofingConfig</code>, L445-L1140）<br><code>design/origin/demo/components/filter-rules-new/strategy-pipeline-page.tsx</code>（抽屉入口 L226-L227, L886-L910, L2055）</td></tr>
+    <tr><td>spec 源文件</td><td><code>design/origin/spec/身份认证与仿冒检测模块需求文档.md</code>（主）<br><code>design/origin/spec/策略流水线需求文档.md</code>（流水线上下文）</td></tr>
+    <tr><td>覆盖章节</td><td>页面布局 / 逐组件规格（含 6 个交互层级）/ 数据模型与 API 映射 / 业务逻辑 / 交互 / 国际化 / 响应式 / 差异 / 需确认</td></tr>
+    <tr><td>浏览器验证</td><td>Chromium 149（Playwright），viewport 1600×1200，demo dev server <code>http://localhost:3111</code>，中文 + 亮色 + 默认产品形态（AI 能力开启）</td></tr>
+    <tr><td>规格版本</td><td><span class="spec-version">v1</span></td></tr>
+    <tr><td>生成日期</td><td>2026-07-10</td></tr>
+    <tr><td>demo 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>spec 源 commit</td><td><code>804efb9</code></td></tr>
+    <tr><td>约束声明</td><td>遵循 <code>design/origin/implement.md</code>：四语国际化、复用统一规则系统 action（不新增 action，<code>mark</code> = accept + header）、不新增规则系统、冲突先确认</td></tr>
+    <tr><td>产品形态差异</td><td>默认形态（<code>capabilities.ai === true</code>）下 <code>showSpoofFeature = !capabilities.ai</code> 为 false，<strong>「相似域名检测」与「显示名仿冒检测」两个区块不渲染</strong>（浏览器实测：命中节点数 0）。二者仅在传统版可见，AI 形态由仿冒检测智能体替代。</td></tr>
+  </table>
+</header>
+
+<nav class="component-toc">
+  <h2>📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 基础格式检查 BasicFormatCheck</a><span class="toc-badge">3 层</span>
+      <span class="toc-layer-links"><a href="./layer-1-observe-mode.html">层级1 观察模式</a><a href="./layer-2-check-disabled.html">层级2 检查项禁用</a></span></li>
+    <li><a href="#component-2-2">2.2 认证协议检查 AuthProtocolCheck</a><span class="toc-badge">4 层</span>
+      <span class="toc-layer-links"><a href="./layer-1-auth-protocol-tabs.html">层级1 协议Tab</a><a href="./layer-1-template-dialog.html">层级1 模板Dialog</a><a href="./layer-2-custom-template.html">层级2 自定义模板</a></span></li>
+    <li><a href="#component-2-3">2.3 例外规则入口 ExceptionRulesEntry</a><span class="toc-badge">1 层</span></li>
+    <li><a href="#component-2-4">2.4 模块启用开关 / 禁用态</a><span class="toc-badge">2 层</span>
+      <span class="toc-layer-links"><a href="./layer-1-module-disabled.html">层级1 模块禁用态</a></span></li>
+    <li><a href="#component-2-5">2.5 仿冒特征检测 SpoofFeatureDetection</a><span class="toc-badge">0 层 · 当前形态不渲染</span></li>
+  </ul>
+</nav>
+
+<!-- ========== 0.2 版本历史（从 version.json 的 history 渲染，最新在上） ========== -->
+<section id="version-history" class="version-history-section">
+  <h2>🕑 版本历史</h2>
+  <table class="version-history-table spec-table">
+    <thead>
+      <tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="spec-version">v1</span></td><td>2026-07-10</td>
+        <td><code>804efb9</code></td><td><code>804efb9</code></td>
+        <td>初版：身份认证与仿冒检测面板 — 基础格式检查（Mail From 为空 / 格式错误 / 信封-信头一致性 3 项，含观察模式）+ 认证协议检查（SPF/DKIM/DMARC/PTR，策略模板 宽松/标准/严格/自定义、观察模式、流程可视化、模板变更确认弹窗）+ 例外规则入口 + 模块启用开关/禁用态；仿冒特征检测在当前（云网关 AI）形态不渲染。</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <p>「身份认证与仿冒检测」是收发信人策略页（<code>/filter-rules/identity</code>）左侧导航的第 2 个策略。选中后右侧渲染一张策略卡片：卡片头部是模块标题 + 启用状态 + 启用开关；卡片正文由 <code>renderAuthSpoofingConfig()</code> 输出，自上而下为「基础格式检查」Collapsible、「认证协议检查」Collapsible、（仅传统版）仿冒特征检测、底部「例外规则入口」。</p>
+  <table class="spec-table">
+<thead><tr><th>区域</th><th>位置</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>左侧策略导航</td><td>左栏，可折叠</td><td>发信人黑白名单 / <strong>身份认证与仿冒检测</strong> / 发信行为管控 / 收信人检测 / 用户黑白名单</td></tr>
+<tr><td>卡片头部</td><td>右侧卡片顶部 <code>px-6 py-4 border-b</code></td><td>模块标题「身份认证与仿冒检测」+ 状态文案「已启用/已禁用」+ Switch</td></tr>
+<tr><td>基础格式检查</td><td>正文第 1 块（默认展开）</td><td>3 个独立检查项：Mail From 为空 / Mail From 格式错误 / 信封-信头一致性</td></tr>
+<tr><td>认证协议检查</td><td>正文第 2 块（默认展开）</td><td>策略模板栏 + 观察模式 + 例外提示 + 身份验证流程图 + SPF/DKIM/DMARC/PTR Tab + 配置健康检查</td></tr>
+<tr><td>仿冒特征检测</td><td>正文第 3 块</td><td><strong>当前形态不渲染</strong>（<code>showSpoofFeature = !capabilities.ai</code>）</td></tr>
+<tr><td>例外规则入口</td><td>正文底部 <code>div.pt-4 border-t</code></td><td>提示不在本模块配置例外，提供「前往策略流水线」「查看当前例外: 12条」两个按钮</td></tr>
+</tbody>
+</table>
+  <figure class="screenshot-figure"><img src="./screenshots/page-full-auth-spoofing-default.png" alt="整页默认态（1600×1200，中文，AI 形态）"><figcaption>整页默认态（1600×1200，中文，AI 形态）</figcaption></figure>
+  <h4>视觉规范（取自 demo 实际 class）</h4>
+  <table class="spec-table">
+<thead><tr><th>元素</th><th>class</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>检查项卡片</td><td><code>ml-6 p-4 bg-gray-50 rounded-lg border border-gray-200</code></td><td>每个检查项一张浅灰卡片</td></tr>
+<tr><td>策略模板栏</td><td><code>bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200</code></td><td>蓝→靛蓝渐变</td></tr>
+<tr><td>「观察中」标签</td><td><code>bg-amber-100 text-amber-700</code> + <code>animate-pulse</code> 圆点</td><td>琥珀色脉冲</td></tr>
+<tr><td>高风险告警</td><td><code>bg-amber-50 border-amber-200</code> + AlertTriangle</td><td>reject/drop 时出现</td></tr>
+<tr><td>SPF drop 告警</td><td><code>bg-red-50 border-red-200</code> + AlertTriangle</td><td>仅 SPF 硬拒绝 = drop</td></tr>
+<tr><td>说明提示</td><td><code>bg-blue-100/50 border-blue-200</code> + Info</td><td>例外机制说明</td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 基础格式检查 BasicFormatCheck</h3>
+    <table class="spec-table">
+<thead><tr><th>元信息</th><th>值</th></tr></thead>
+<tbody>
+<tr><td>组件类型</td><td>Collapsible + 3 × (Switch 启用 + Switch 观察模式 + Select 失败动作)</td></tr>
+<tr><td>交互层级数</td><td>3 层（层级 0 内嵌；层级 1「观察模式」、层级 2「检查项禁用」拆分为子文件）</td></tr>
+<tr><td>demo 源码</td><td>identity-strategy-page.tsx L448-L736</td></tr>
+<tr><td>状态字段</td><td><code>basicFormatOpen</code>；每项 3 个：<code>xxxCheck</code> / <code>xxxAction</code> / <code>xxxObserve</code>，另有 <code>xxxPrevAction</code> 缓存</td></tr>
+<tr><td>i18n key</td><td><code>identity.basicFormatCheck</code> / <code>identity.protocolBasicValidation</code> / <code>identity.failureAction</code> / <code>identity.mailFromEmptyCheck</code> 等</td></tr>
+</tbody>
+</table>
+
+    <h4>交互层级关系图</h4>
+    <pre class="mermaid">
+flowchart LR
+  L0["层级 0<br/>基础格式检查（默认展开）"]
+  L1["层级 1<br/>观察模式开启"]
+  L2["层级 2<br/>检查项禁用"]
+  L0 -- "观察模式 Switch → on" --> L1
+  L1 -- "观察模式 Switch → off（恢复缓存动作）" --> L0
+  L0 -- "启用 Switch → off" --> L2
+  L1 -- "启用 Switch → off（同步关闭观察模式）" --> L2
+  L2 -- "启用 Switch → on" --> L0
+</pre>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认渲染</h4>
+      <p><strong>触发路径：</strong>页面加载 → 点击左侧导航「身份认证与仿冒检测」→ 默认展开</p>
+      <p class="preview-hint">折叠标题可收起；三个检查项的启用/观察开关、失败动作下拉均可操作，联动与 demo 一致</p>
+<div class="component-preview">
+<div data-state="open" data-slot="collapsible" data-preview="basic-format"><button type="button" aria-controls="radix-_r_0_" aria-expanded="true" data-state="open" data-slot="collapsible-trigger" class="flex items-center gap-2 w-full text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 -mx-2 px-2 py-1 rounded"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4"><path d="m6 9 6 6 6-6"></path></svg><span class="font-medium">基础格式检查</span><span class="text-xs text-muted-foreground ml-1">(协议层基础验证)</span></button><div data-state="open" id="radix-_r_0_" data-slot="collapsible-content" class="mt-4 space-y-4" style="transition-duration: 0s; animation-name: none; --radix-collapsible-content-height: 476px; --radix-collapsible-content-width: 974px;"><div class="ml-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-3 border border-gray-200 dark:border-gray-800" data-card="empty"><div class="flex items-center justify-between" data-role="header"><div class="flex items-center gap-2"><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50" data-role="enable"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><span class="text-sm font-medium" data-role="check-name">Mail From为空检查</span><span class="text-xs text-muted-foreground">(空信封/退信通知)</span></div><div class="flex items-center gap-2"><button type="button" role="switch" aria-checked="false" data-state="unchecked" value="on" data-slot="switch" class="peer data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-blue-500" data-role="observe"><span data-state="unchecked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><span class="text-xs">观察模式</span></div></div><div class="flex items-center gap-3 pl-12" data-body-part="1" data-role="action-row"><span class="text-sm text-muted-foreground">失败动作：</span><button type="button" role="combobox" aria-controls="radix-_r_1_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[200px]" data-role="action-select" data-opts="base" data-value="pass"><span data-slot="select-value" style="pointer-events: none;">允许（进行下一步检测）</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-start gap-2 pl-12" data-body-part="1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><p class="text-xs text-muted-foreground">检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。</p></div></div><div class="ml-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-3 border border-gray-200 dark:border-gray-800" data-card="format"><div class="flex items-center justify-between" data-role="header"><div class="flex items-center gap-2"><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50" data-role="enable"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><span class="text-sm font-medium" data-role="check-name">Mail From格式错误检查</span><span class="text-xs text-muted-foreground">(非法字符/格式异常)</span></div><div class="flex items-center gap-2"><button type="button" role="switch" aria-checked="false" data-state="unchecked" value="on" data-slot="switch" class="peer data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-blue-500" data-role="observe"><span data-state="unchecked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><span class="text-xs">观察模式</span></div></div><div class="flex items-center gap-3 pl-12" data-body-part="1" data-role="action-row"><span class="text-sm text-muted-foreground">失败动作:</span><button type="button" role="combobox" aria-controls="radix-_r_2_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[200px]" data-role="action-select" data-opts="base" data-value="reject"><span data-slot="select-value" style="pointer-events: none;">阻断并退信</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-start gap-2 p-2 bg-amber-50 dark:bg-amber-950/30 rounded border border-amber-200 dark:border-amber-800 ml-12" data-body-part="1" data-role="risk-warning"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><p class="text-xs text-amber-700 dark:text-amber-300">高风险动作：建议先开启观察模式测试影响范围</p></div><div class="flex items-start gap-2 pl-12" data-body-part="1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><p class="text-xs text-muted-foreground">检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，建议阻断。</p></div></div><div class="ml-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-3 border border-gray-200 dark:border-gray-800" data-card="envelope"><div class="flex items-center justify-between" data-role="header"><div class="flex items-center gap-2"><button type="button" role="switch" aria-checked="true" data-state="checked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50" data-role="enable"><span data-state="checked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><span class="text-sm font-medium" data-role="check-name">信封-信头发信人一致性检查</span><span class="text-xs text-muted-foreground">(From头必须等于Mail From)</span></div><div class="flex items-center gap-2"><button type="button" role="switch" aria-checked="false" data-state="unchecked" value="on" data-slot="switch" class="peer data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-blue-500" data-role="observe"><span data-state="unchecked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><span class="text-xs">观察模式</span></div></div><div class="flex items-center gap-3 pl-12" data-body-part="1" data-role="action-row"><span class="text-sm text-muted-foreground">失败动作:</span><button type="button" role="combobox" aria-controls="radix-_r_3_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[200px]" data-role="action-select" data-opts="base" data-value="quarantine"><span data-slot="select-value" style="pointer-events: none;">隔离/审核</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-start gap-2 pl-12" data-body-part="1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><p class="text-xs text-muted-foreground">检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。</p></div></div></div></div>
+</div>
+      <figure class="screenshot-figure"><img src="./screenshots/layer-0-basic-format-check.png" alt="交互层级 0：基础格式检查（默认展开）"><figcaption>交互层级 0：基础格式检查（默认展开）</figcaption></figure>
+      <h5>UI 元素清单</h5>
+      <table class="spec-table">
+<thead><tr><th>检查项</th><th>启用</th><th>失败动作（默认）</th><th>默认告警</th><th>说明文案</th></tr></thead>
+<tbody>
+<tr><td>Mail From 为空检查<br><small>(空信封/退信通知)</small></td><td>开</td><td>pass 允许（进行下一步检测）</td><td>无</td><td>检查SMTP信封发信人是否为空…空信封常用于退信通知、自动回复、邮件列表等系统邮件</td></tr>
+<tr><td>Mail From 格式错误检查<br><small>(非法字符/格式异常)</small></td><td>开</td><td>reject 阻断并退信</td><td><strong>amber 高风险</strong>「高风险动作：建议先开启观察模式测试影响范围」</td><td>检查发信人地址格式是否符合RFC标准</td></tr>
+<tr><td>信封-信头发信人一致性检查<br><small>(From头必须等于Mail From)</small></td><td>开</td><td>quarantine 隔离/审核</td><td>无</td><td>检查邮件头中的From发信人与SMTP信封Mail From是否一致</td></tr>
+</tbody>
+</table>
+      <h5>失败动作下拉选项（4 项，全部检查项共用）</h5>
+      <table class="spec-table">
+<thead><tr><th>value</th><th>中文文案</th><th>统一规则系统 action 映射建议</th></tr></thead>
+<tbody>
+<tr><td>pass</td><td>允许（进行下一步检测）</td><td>accept</td></tr>
+<tr><td>quarantine</td><td>隔离/审核</td><td>quarantine</td></tr>
+<tr><td>reject</td><td>阻断并退信</td><td>reject（5xx）</td></tr>
+<tr><td>drop</td><td>静默丢弃</td><td>discard</td></tr>
+</tbody>
+</table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+<table class="spec-table">
+<thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>嵌入 spec 的 HTML</th><th>是否一致</th></tr></thead>
+<tbody>
+<tr><td>根节点</td><td>div[data-slot=collapsible][data-state=open]</td><td>同</td><td>✅</td></tr>
+<tr><td>节点总数</td><td>82</td><td>82</td><td>✅</td></tr>
+<tr><td>直接子节点数</td><td>2（trigger button + content div）</td><td>2</td><td>✅</td></tr>
+<tr><td>检查项卡片数</td><td>3</td><td>3</td><td>✅</td></tr>
+<tr><td>高风险告警块</td><td>仅「Mail From 格式错误」渲染 1 个（action=reject）</td><td>1 个（复用 demo 节点）+ 另 2 张卡片预置 hidden 告警节点供交互</td><td><span class="bad">⚠ 有意差异</span></td></tr>
+<tr><td>「观察中」标签</td><td>未渲染（3 项观察模式均关闭）</td><td>预置 hidden，开启观察模式时显示</td><td><span class="bad">⚠ 有意差异</span></td></tr>
+<tr><td>观察模式 Switch</td><td><code>data-state=unchecked</code>，未 disabled</td><td>同</td><td>✅</td></tr>
+</tbody>
+</table></div>
+      <p><strong>差异说明：</strong>demo 用条件渲染<strong>卸载</strong>「观察中」标签与另两张卡片的告警块。为让预览可反复开关，spec 预置这些节点并置 <code>hidden</code>（不参与布局，视觉等效）。其余节点逐一对应。</p>
+    </div>
+
+    <h4>交互层级详情（拆分为独立文件）</h4>
+    <table class="spec-table">
+<thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>默认渲染</td><td>页面加载</td><td>上方内嵌</td></tr>
+<tr><td>1</td><td>观察模式开启</td><td>检查项右上「观察模式」Switch → on</td><td><a href="./layer-1-observe-mode.html">查看详情 →</a></td></tr>
+<tr><td>2</td><td>检查项禁用</td><td>检查项左侧「启用」Switch → off</td><td><a href="./layer-2-check-disabled.html">查看详情 →</a></td></tr>
+</tbody>
+</table>
+  </article>
+
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 认证协议检查 AuthProtocolCheck</h3>
+    <table class="spec-table">
+<thead><tr><th>元信息</th><th>值</th></tr></thead>
+<tbody>
+<tr><td>组件类型</td><td>Collapsible + 模板按钮组 + Switch + 流程图 + Tabs(4) + Select(15) + Dialog + 健康检查面板</td></tr>
+<tr><td>交互层级数</td><td>4 层（层级 0 内嵌；协议 Tab / 模板 Dialog / 自定义模板 拆分为子文件）</td></tr>
+<tr><td>demo 源码</td><td>identity-strategy-page.tsx L738-L1082（配置区）+ L1088-L1128（Dialog）</td></tr>
+<tr><td>状态字段</td><td><code>authPolicyTemplate</code> / <code>observeMode</code> / <code>activeProtocolTab</code> / <code>showTemplateChangeDialog</code> / <code>pendingTemplate</code> + 15 个 <code>xxxAction</code></td></tr>
+<tr><td>关键约束</td><td>动作 Select <code>disabled={authPolicyTemplate !== "custom"}</code>——非自定义模板下全部只读</td></tr>
+</tbody>
+</table>
+
+    <h4>交互层级关系图</h4>
+    <pre class="mermaid">
+flowchart TD
+  L0["层级 0：认证协议检查（默认展开，SPF Tab 激活，标准模板）"]
+  T1["层级 1：协议 Tab 切换<br/>SPF / DKIM / DMARC / PTR"]
+  D1["层级 1：策略模板变更确认 Dialog"]
+  C2["层级 2：自定义模板生效<br/>（动作下拉解除禁用）"]
+  H["配置健康检查面板<br/>（spf.fail=drop ∥ spf.softfail=drop ∥ !observeMode）"]
+  L0 -- "点击 Tab / 点击流程图节点" --> T1
+  T1 -- "点击其它 Tab" --> T1
+  L0 -- "点击非当前模板按钮" --> D1
+  D1 -- "取消" --> L0
+  D1 -- "确认切换（pending=custom）" --> C2
+  D1 -- "确认切换（pending=strict）→ 强制 observeMode=true" --> L0
+  C2 -- "修改任一动作 → 流程图节点颜色/文案联动" --> C2
+  L0 -.-> H
+  C2 -.-> H
+</pre>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认渲染（标准模板 + SPF Tab）</h4>
+      <p><strong>触发路径：</strong>页面加载 → 点击左侧导航「身份认证与仿冒检测」→ 默认展开，<code>authPolicyTemplate="standard"</code>，<code>activeProtocolTab="spf"</code>，<code>observeMode=false</code></p>
+      <p class="preview-hint">切 Tab / 点流程图节点 / 切模板（弹确认框）/ 开观察模式；自定义模板下可改动作并看到流程图与健康检查联动</p>
+<div class="component-preview">
+<div data-state="open" data-slot="collapsible" data-preview="auth-protocol"><button type="button" aria-controls="radix-_r_4_" aria-expanded="true" data-state="open" data-slot="collapsible-trigger" class="flex items-center gap-2 w-full text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 -mx-2 px-2 py-1 rounded"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4"><path d="m6 9 6 6 6-6"></path></svg><span class="font-medium">认证协议检查 (SPF/DKIM/DMARC/PTR)</span></button><div data-state="open" id="radix-_r_4_" data-slot="collapsible-content" class="mt-4 space-y-4" style="transition-duration: 0s; animation-name: none; --radix-collapsible-content-height: 757px; --radix-collapsible-content-width: 974px;"><div class="ml-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-blue-200 dark:border-blue-800 space-y-4" data-role="template-bar"><div class="flex items-center justify-between flex-wrap gap-4"><div class="flex items-center gap-3"><span class="text-sm font-medium">策略模板:</span><div class="flex gap-1 p-1 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700"><button class="px-3 py-1.5 rounded text-sm transition-all hover:bg-gray-100 dark:hover:bg-gray-700" data-role="template" data-template="loose">宽松</button><button class="px-3 py-1.5 rounded text-sm transition-all text-blue-600 bg-blue-50 dark:bg-blue-900/30 font-medium shadow-sm" data-role="template" data-template="standard">标准</button><button class="px-3 py-1.5 rounded text-sm transition-all hover:bg-gray-100 dark:hover:bg-gray-700" data-role="template" data-template="strict">严格</button><button class="px-3 py-1.5 rounded text-sm transition-all hover:bg-gray-100 dark:hover:bg-gray-700" data-role="template" data-template="custom">自定义</button></div></div><div class="flex items-center gap-3"><div class="flex items-center gap-2"><button type="button" role="switch" aria-checked="false" data-state="unchecked" value="on" data-slot="switch" class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50" data-role="observe-global"><span data-state="unchecked" data-slot="switch-thumb" class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"></span></button><span class="text-sm font-medium">观察模式</span></div></div></div><div class="flex items-center gap-2 p-2 bg-blue-100/50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span class="text-xs text-blue-700 dark:text-blue-300">例外规则（白名单）请在【策略流水线】模块配置，本模块仅设置协议检查规则</span><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive underline-offset-4 hover:underline rounded-md gap-1.5 has-[&gt;svg]:px-2.5 h-auto p-0 text-xs text-blue-600 dark:text-blue-400 ml-auto">前往策略流水线</button></div></div><div class="ml-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800"><div class="text-xs text-muted-foreground mb-3">邮件身份验证流程</div><div class="flex items-center gap-2 overflow-x-auto pb-2" data-role="flow"><div class="flex items-center gap-2"><button class="px-3 py-2 rounded-lg text-center min-w-[70px] transition-all bg-gray-200 dark:bg-gray-700" data-role="flow-node" data-node="pipeline"><div class="text-xs font-medium text-gray-600 dark:text-gray-300">策略流水线</div><div class="text-[10px] mt-0.5 text-gray-600 dark:text-gray-300 opacity-70">例外检查</div></button><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 text-gray-400 flex-shrink-0"><path d="m9 18 6-6-6-6"></path></svg></div><div class="flex items-center gap-2"><button class="px-3 py-2 rounded-lg text-center min-w-[70px] transition-all bg-blue-100 dark:bg-blue-900/50 ring-2 ring-blue-500 ring-offset-2" data-role="flow-node" data-node="spf"><div class="text-xs font-medium text-blue-700 dark:text-blue-300">SPF</div><div class="text-[10px] mt-0.5 text-blue-700 dark:text-blue-300 opacity-70">阻断</div></button><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 text-gray-400 flex-shrink-0"><path d="m9 18 6-6-6-6"></path></svg></div><div class="flex items-center gap-2"><button class="px-3 py-2 rounded-lg text-center min-w-[70px] transition-all bg-green-100 dark:bg-green-900/50" data-role="flow-node" data-node="dkim"><div class="text-xs font-medium text-green-700 dark:text-green-300">DKIM</div><div class="text-[10px] mt-0.5 text-green-700 dark:text-green-300 opacity-70">隔离</div></button><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 text-gray-400 flex-shrink-0"><path d="m9 18 6-6-6-6"></path></svg></div><div class="flex items-center gap-2"><button class="px-3 py-2 rounded-lg text-center min-w-[70px] transition-all bg-purple-100 dark:bg-purple-900/50" data-role="flow-node" data-node="dmarc"><div class="text-xs font-medium text-purple-700 dark:text-purple-300">DMARC</div><div class="text-[10px] mt-0.5 text-purple-700 dark:text-purple-300 opacity-70">阻断</div></button><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 text-gray-400 flex-shrink-0"><path d="m9 18 6-6-6-6"></path></svg></div><div class="flex items-center gap-2"><button class="px-3 py-2 rounded-lg text-center min-w-[70px] transition-all bg-orange-100 dark:bg-orange-900/50" data-role="flow-node" data-node="ptr"><div class="text-xs font-medium text-orange-700 dark:text-orange-300">PTR</div><div class="text-[10px] mt-0.5 text-orange-700 dark:text-orange-300 opacity-70">检查</div></button><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 text-gray-400 flex-shrink-0"><path d="m9 18 6-6-6-6"></path></svg></div><div class="flex items-center gap-2"><button class="px-3 py-2 rounded-lg text-center min-w-[70px] transition-all bg-gray-200 dark:bg-gray-700" data-role="flow-node" data-node="next"><div class="text-xs font-medium text-gray-600 dark:text-gray-300">下一模块</div></button></div></div></div><div class="ml-6"><div dir="ltr" data-orientation="horizontal" data-slot="tabs" class="flex flex-col gap-2"><div role="tablist" aria-orientation="horizontal" data-slot="tabs-list" class="bg-muted text-muted-foreground h-9 items-center justify-center rounded-lg p-[3px] grid grid-cols-4 w-full max-w-md" tabindex="0" data-orientation="horizontal" style="outline: none;"><button type="button" role="tab" aria-selected="true" aria-controls="radix-_r_5_-content-spf" data-state="active" id="radix-_r_5_-trigger-spf" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="0" data-orientation="horizontal" data-radix-collection-item="" data-role="tab" data-tab="spf">SPF</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_5_-content-dkim" data-state="inactive" id="radix-_r_5_-trigger-dkim" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="" data-role="tab" data-tab="dkim">DKIM</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_5_-content-dmarc" data-state="inactive" id="radix-_r_5_-trigger-dmarc" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="" data-role="tab" data-tab="dmarc">DMARC</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_5_-content-ptr" data-state="inactive" id="radix-_r_5_-trigger-ptr" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="" data-role="tab" data-tab="ptr">PTR</button></div><div data-state="active" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_5_-trigger-spf" id="radix-_r_5_-content-spf" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none mt-4" style="" data-role="tabpanel" data-panel="spf"><div class="p-4 bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-800 space-y-4"><div class="flex items-center justify-between"><h4 class="font-medium">SPF检查配置</h4><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-blue-100 text-blue-700" data-role="template-badge">标准模式</span></div><div class="space-y-3"><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">硬拒绝 (Fail)</div><div class="text-xs text-muted-foreground">发信IP不在SPF记录允许范围内</div></div><button type="button" role="combobox" aria-controls="radix-_r_3g_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="spf" data-value="block" data-row="0"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span>阻断（返回5xx）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">软拒绝 (SoftFail)</div><div class="text-xs text-muted-foreground">SPF记录使用~all（过渡配置）</div></div><button type="button" role="combobox" aria-controls="radix-_r_3h_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="spf" data-value="quarantine" data-row="1"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-500"></span>隔离（进垃圾箱）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">未维护 (None)</div><div class="text-xs text-muted-foreground">域名未配置SPF记录</div></div><button type="button" role="combobox" aria-controls="radix-_r_3i_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="spf" data-value="tag" data-row="2"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span>标记（加头投递）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">查询失败 (TempError)</div><div class="text-xs text-muted-foreground">DNS查询超时或失败</div></div><button type="button" role="combobox" aria-controls="radix-_r_3j_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="spf" data-value="tag" data-row="3"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span>标记（加头投递）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div></div></div><div data-state="inactive" hidden="" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_5_-trigger-dkim" id="radix-_r_5_-content-dkim" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none mt-4" data-role="tabpanel" data-panel="dkim"><div class="p-4 bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-800 space-y-4"><div class="flex items-center justify-between"><h4 class="font-medium">DKIM检查配置</h4><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-blue-100 text-blue-700" data-role="template-badge">标准模式</span></div><div class="space-y-3"><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">验证失败</div><div class="text-xs text-muted-foreground">DKIM签名验证不通过</div></div><button type="button" role="combobox" aria-controls="radix-_r_1h_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="dkim" data-value="quarantine" data-row="0"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-500"></span>隔离（进垃圾箱）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">中性 (Neutral)</div><div class="text-xs text-muted-foreground">签名存在但无法验证</div></div><button type="button" role="combobox" aria-controls="radix-_r_1i_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="dkim" data-value="quarantine" data-row="1"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-500"></span>隔离（进垃圾箱）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">部分通过</div><div class="text-xs text-muted-foreground">多个签名中部分验证通过</div></div><button type="button" role="combobox" aria-controls="radix-_r_1j_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="dkim" data-value="next" data-row="2"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-300"></span>进行下一步检测</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">无签名</div><div class="text-xs text-muted-foreground">邮件未包含DKIM签名</div></div><button type="button" role="combobox" aria-controls="radix-_r_1k_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="dkim" data-value="tag" data-row="3"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span>标记（加头投递）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div></div></div><div data-state="inactive" hidden="" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_5_-trigger-dmarc" id="radix-_r_5_-content-dmarc" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none mt-4" data-role="tabpanel" data-panel="dmarc"><div class="p-4 bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-800 space-y-4"><div class="flex items-center justify-between"><h4 class="font-medium">DMARC检查配置</h4><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-blue-100 text-blue-700" data-role="template-badge">标准模式</span></div><div class="space-y-3"><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">p=reject</div><div class="text-xs text-muted-foreground">发信域要求拒绝未通过验证的邮件</div></div><button type="button" role="combobox" aria-controls="radix-_r_29_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="dmarc" data-value="block" data-row="0"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span>阻断（返回5xx）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">p=quarantine</div><div class="text-xs text-muted-foreground">发信域要求隔离未通过验证的邮件</div></div><button type="button" role="combobox" aria-controls="radix-_r_2a_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="dmarc" data-value="quarantine" data-row="1"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-500"></span>隔离（进垃圾箱）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">p=none</div><div class="text-xs text-muted-foreground">发信域仅监控，不要求处置</div></div><button type="button" role="combobox" aria-controls="radix-_r_2b_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="dmarc" data-value="tag" data-row="2"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span>标记（加头投递）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div><div class="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/30 rounded border border-blue-200 dark:border-blue-800"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><p class="text-xs text-blue-700 dark:text-blue-300">DMARC验证依赖SPF或DKIM对齐结果。如果SPF和DKIM均被禁用，DMARC验证将始终失败。</p></div></div></div><div data-state="inactive" hidden="" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_5_-trigger-ptr" id="radix-_r_5_-content-ptr" tabindex="0" data-slot="tabs-content" class="flex-1 outline-none mt-4" data-role="tabpanel" data-panel="ptr"><div class="p-4 bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-800 space-y-4"><div class="flex items-center justify-between"><h4 class="font-medium">PTR反向解析配置</h4><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-blue-100 text-blue-700" data-role="template-badge">标准模式</span></div><div class="space-y-3"><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">记录不存在</div><div class="text-xs text-muted-foreground">发信IP无PTR反向解析记录</div></div><button type="button" role="combobox" aria-controls="radix-_r_2o_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="ptr" data-value="tag" data-row="0"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span>标记（加头投递）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">查询失败</div><div class="text-xs text-muted-foreground">PTR DNS查询超时或失败</div></div><button type="button" role="combobox" aria-controls="radix-_r_2p_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="ptr" data-value="tag" data-row="1"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span>标记（加头投递）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">与EHLO不匹配</div><div class="text-xs text-muted-foreground">PTR记录与SMTP EHLO/HELO不一致</div></div><button type="button" role="combobox" aria-controls="radix-_r_2q_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="ptr" data-value="quarantine" data-row="2"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-500"></span>隔离（进垃圾箱）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"><div><div class="text-sm font-medium">与A记录不匹配</div><div class="text-xs text-muted-foreground">PTR反查的A记录不指向原IP</div></div><button type="button" role="combobox" aria-controls="radix-_r_2r_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" disabled="" data-disabled="" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[160px]" data-role="action-select" data-opts="ptr" data-value="quarantine" data-row="3"><span data-slot="select-value" style="pointer-events: none;"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-500"></span>隔离（进垃圾箱）</span></span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div><div class="flex items-start gap-2 p-3 bg-gray-100 dark:bg-gray-800 rounded"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><p class="text-xs text-muted-foreground">PTR检查在连接层执行，但在此处统一配置策略。</p></div></div></div></div></div><div class="ml-6 p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800 space-y-3" data-role="health-panel"><div class="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-4 w-4"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>配置健康检查</div></div></div></div>
+</div>
+      <figure class="screenshot-figure"><img src="./screenshots/layer-0-auth-protocol-default.png" alt="交互层级 0：认证协议检查（默认展开，SPF Tab）"><figcaption>交互层级 0：认证协议检查（默认展开，SPF Tab）</figcaption></figure>
+      <h5>UI 元素清单</h5>
+      <table class="spec-table">
+<thead><tr><th>元素</th><th>类型</th><th>默认状态 / 文案</th><th>交互行为</th></tr></thead>
+<tbody>
+<tr><td>折叠触发</td><td>button</td><td>认证协议检查 (SPF/DKIM/DMARC/PTR)</td><td>点击展开/折叠</td></tr>
+<tr><td>策略模板</td><td>4 × button</td><td>宽松 / <strong>标准</strong>(高亮) / 严格 / 自定义</td><td>点击<strong>非当前</strong>模板 → 确认 Dialog；点击当前模板无响应</td></tr>
+<tr><td>观察模式（全局）</td><td>Switch</td><td>关</td><td>开启后右侧出现「预计丢弃: 23」脉冲徽标；影响健康检查面板可见性</td></tr>
+<tr><td>例外机制说明</td><td>Info + link Button</td><td>例外规则（白名单）请在【策略流水线】模块配置，本模块仅设置协议检查规则</td><td>「前往策略流水线」为 <code>variant="link"</code> 按钮，<strong>demo 未绑定 onClick</strong></td></tr>
+<tr><td>邮件身份验证流程图</td><td>6 × button + 5 × ChevronRight</td><td>策略流水线(例外检查) → SPF(阻断) → DKIM(隔离) → DMARC(阻断) → PTR(检查) → 下一模块</td><td>点击 SPF/DKIM/DMARC/PTR 节点切换 Tab；首尾节点不可点；激活节点带 <code>ring-2 ring-blue-500</code></td></tr>
+<tr><td>协议 Tab</td><td>TabsList grid-cols-4</td><td>SPF 激活</td><td>切换面板；与流程图节点双向同步</td></tr>
+<tr><td>协议配置面板</td><td>每行 (标题 + 说明 + Select)</td><td>SPF：4 行，全部 <code>disabled</code></td><td>标准模板下只读</td></tr>
+<tr><td>模板徽标</td><td>Badge</td><td>标准模式（bg-blue-100 text-blue-700）</td><td>随模板变化文案与配色</td></tr>
+<tr><td>配置健康检查</td><td>div.bg-amber-50 + AlertTriangle</td><td><strong>默认可见</strong>（因 <code>!observeMode</code> 成立），此时仅标题行、无建议行</td><td>出现 drop 动作时追加建议行 + 快捷修正按钮</td></tr>
+</tbody>
+</table>
+      <h5>流程图节点着色规则（浏览器实测）</h5>
+      <table class="spec-table">
+<thead><tr><th>节点</th><th>取值来源</th><th>drop 时</th><th>否则</th></tr></thead>
+<tbody>
+<tr><td>SPF</td><td><code>spfFailAction</code></td><td>bg-black text-white，副标题「丢弃」</td><td>bg-blue-100 text-blue-700；block→「阻断」，其它→「隔离」</td></tr>
+<tr><td>DKIM</td><td><code>dkimFailAction</code></td><td>同上</td><td>bg-green-100 text-green-700</td></tr>
+<tr><td>DMARC</td><td><code>dmarcRejectAction</code></td><td>同上</td><td>bg-purple-100 text-purple-700</td></tr>
+<tr><td>PTR</td><td><code>ptrEhloMismatchAction</code></td><td>同上</td><td>bg-orange-100 text-orange-700；副标题固定「检查」</td></tr>
+<tr><td>策略流水线 / 下一模块</td><td>静态</td><td>—</td><td>bg-gray-200，不可点击</td></tr>
+</tbody>
+</table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+<table class="spec-table">
+<thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>嵌入 spec 的 HTML</th><th>是否一致</th></tr></thead>
+<tbody>
+<tr><td>根节点</td><td>div[data-slot=collapsible][data-state=open]</td><td>同</td><td>✅</td></tr>
+<tr><td>节点总数</td><td>125</td><td>125 + 3 个内嵌面板</td><td><span class="bad">⚠ 有意差异</span></td></tr>
+<tr><td>content 直接子节点</td><td>4（模板栏 / 流程图 / Tabs / 配置健康检查）</td><td>4</td><td>✅</td></tr>
+<tr><td><strong>配置健康检查面板</strong></td><td><strong>已渲染</strong>（条件 <code>!observeMode</code> 默认成立），仅含标题行</td><td>已渲染</td><td>✅</td></tr>
+<tr><td>SPF 面板动作行</td><td>4 行，Select 均 <code>disabled=""</code> + <code>data-disabled=""</code></td><td>4 行，同属性</td><td>✅</td></tr>
+<tr><td>流程图</td><td>6 节点 + 5 箭头</td><td>6 + 5</td><td>✅</td></tr>
+<tr><td>DKIM/DMARC/PTR 面板</td><td>Radix 卸载非激活面板（<code>hidden</code> 且 0 子节点）</td><td>内嵌各自激活时抓取的真实 DOM 并置 <code>hidden</code>，以支撑 Tab 交互</td><td><span class="bad">⚠ 有意差异</span></td></tr>
+</tbody>
+</table></div>
+      <p><strong>⚠ 修正前一版规格的错误：</strong>旧版 html_spec 的 DOM 比对表称「配置健康检查面板 默认标准模板下未出现 / 未包含 ✅」。浏览器实测<strong>该面板默认就渲染</strong>——渲染条件为 <code>(spfFailAction === "drop" || spfSoftFailAction === "drop" || !observeMode)</code>，而 <code>observeMode</code> 默认为 <code>false</code>，故 <code>!observeMode</code> 恒成立。截图 <code>layer-0-auth-protocol-default.png</code> 底部即可见该 amber 面板。</p>
+    </div>
+
+    <h4>交互层级详情（拆分为独立文件）</h4>
+    <table class="spec-table">
+<thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>默认渲染（标准模板 / SPF Tab）</td><td>页面加载</td><td>上方内嵌</td></tr>
+<tr><td>1</td><td>协议 Tab 切换</td><td>点击 Tab 或流程图协议节点</td><td><a href="./layer-1-auth-protocol-tabs.html">查看详情 →</a></td></tr>
+<tr><td>1</td><td>策略模板变更确认 Dialog</td><td>点击非当前模板按钮</td><td><a href="./layer-1-template-dialog.html">查看详情 →</a></td></tr>
+<tr><td>2</td><td>自定义模板生效（下拉解禁 + 联动）</td><td>Dialog →「确认切换」（pending=custom）</td><td><a href="./layer-2-custom-template.html">查看详情 →</a></td></tr>
+</tbody>
+</table>
+  </article>
+
+  <article class="component-spec" id="component-2-3">
+    <h3>2.3 例外规则入口 ExceptionRulesEntry</h3>
+    <table class="spec-table">
+<thead><tr><th>元信息</th><th>值</th></tr></thead>
+<tbody>
+<tr><td>组件类型</td><td>底部信息条（div.pt-4.border-t）+ 2 个 Button</td></tr>
+<tr><td>交互层级数</td><td>1 层</td></tr>
+<tr><td>demo 源码</td><td>identity-strategy-page.tsx L1130-L1140</td></tr>
+<tr><td>归属</td><td>配置区根节点的第 3 个直接子节点 → 模块禁用时一并灰度</td></tr>
+</tbody>
+</table>
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：默认渲染</h4>
+      <p class="preview-hint">两个按钮在 demo 中均未绑定 onClick，此处保留其视觉与 hover 态</p>
+<div class="component-preview">
+<div class="pt-4 border-t border-gray-200 dark:border-gray-800"><div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg"><div class="flex items-center justify-between"><div><p class="text-sm font-medium">例外规则管理</p><p class="text-xs text-muted-foreground mt-1">本模块不配置例外规则，请在策略流水线统一管理</p></div><div class="flex gap-2"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5">前往策略流水线</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5">查看当前例外: 12条</button></div></div></div></div>
+</div>
+      <figure class="screenshot-figure"><img src="./screenshots/layer-0-exception-entry.png" alt="例外规则入口"><figcaption>例外规则入口</figcaption></figure>
+      <table class="spec-table">
+<thead><tr><th>元素</th><th>类型</th><th>文案</th><th>交互行为</th></tr></thead>
+<tbody>
+<tr><td>标题</td><td>p.text-sm.font-medium</td><td>例外规则管理</td><td>—</td></tr>
+<tr><td>说明</td><td>p.text-xs.text-muted-foreground</td><td>本模块不配置例外规则，请在策略流水线统一管理</td><td>—</td></tr>
+<tr><td>前往策略流水线</td><td>Button variant=outline size=sm</td><td>前往策略流水线</td><td><strong>demo 未绑定 onClick</strong>（点击无反应），预期跳转 <code>/filter-rules/pipeline</code></td></tr>
+<tr><td>查看当前例外</td><td>Button variant=ghost size=sm</td><td>查看当前例外: 12条</td><td><strong>demo 未绑定 onClick</strong>；「12」为硬编码 mock</td></tr>
+</tbody>
+</table>
+      <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+<table class="spec-table">
+<thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>嵌入 spec 的 HTML</th><th>是否一致</th></tr></thead>
+<tbody>
+<tr><td>根节点</td><td>div.pt-4.border-t.border-gray-200</td><td>同</td><td>✅</td></tr>
+<tr><td>节点总数</td><td>9</td><td>9</td><td>✅</td></tr>
+<tr><td>按钮数</td><td>2</td><td>2</td><td>✅</td></tr>
+<tr><td>按钮 onClick</td><td>无（demo 未绑定）</td><td>无</td><td>✅</td></tr>
+</tbody>
+</table></div>
+    </div>
+  </article>
+
+  <article class="component-spec" id="component-2-4">
+    <h3>2.4 模块启用开关 / 禁用态</h3>
+    <table class="spec-table">
+<thead><tr><th>元信息</th><th>值</th></tr></thead>
+<tbody>
+<tr><td>组件类型</td><td>卡片头部 Switch + 配置区根节点 class 切换</td></tr>
+<tr><td>交互层级数</td><td>2 层（层级 0 启用态；层级 1 禁用态拆分为子文件）</td></tr>
+<tr><td>demo 源码</td><td><code>authEnabled</code> 状态 + <code>cn("space-y-4", !authEnabled &amp;&amp; "opacity-50 pointer-events-none")</code>（L446）</td></tr>
+<tr><td>头部文案</td><td>「已启用」⇄「已禁用」</td></tr>
+</tbody>
+</table>
+    <h4>交互层级详情</h4>
+    <table class="spec-table">
+<thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>模块启用态</td><td>默认（<code>authEnabled=true</code>）</td><td>即本页 §2.1 / §2.2 的层级 0</td></tr>
+<tr><td>1</td><td>模块禁用态</td><td>卡片头部「启用」Switch → off</td><td><a href="./layer-1-module-disabled.html">查看详情 →</a></td></tr>
+</tbody>
+</table>
+    <p><strong>禁用范围（浏览器实测）：</strong>被灰度的根节点有 3 个直接子节点 —— 基础格式检查 Collapsible、认证协议检查 Collapsible、例外规则入口。策略模板变更 Dialog 由 Radix Portal 挂到 <code>document.body</code>，<strong>不在</strong>禁用根节点内。</p>
+  </article>
+
+  <article class="component-spec" id="component-2-5">
+    <h3>2.5 仿冒特征检测 SpoofFeatureDetection（当前形态不渲染）</h3>
+    <table class="spec-table">
+<thead><tr><th>元信息</th><th>值</th></tr></thead>
+<tbody>
+<tr><td>渲染条件</td><td><code>showSpoofFeature = !capabilities.ai</code> → 仅传统版可见</td></tr>
+<tr><td>浏览器实测</td><td>默认形态下匹配「相似域名检测 / 显示名仿冒」的节点数 = <strong>0</strong>，区块完全不渲染</td></tr>
+<tr><td>demo 源码</td><td>identity-strategy-page.tsx L1085：<code>{showSpoofFeature &amp;&amp; &lt;SpoofFeatureDetection /&gt;}</code></td></tr>
+<tr><td>spec 要求</td><td>spec §2 信息架构把「相似域名检测」「显示名仿冒检测」列为本模块的两个可折叠区块（功能点 5/6/9/10）</td></tr>
+<tr><td>结论</td><td>AI 形态下由「仿冒邮件检测智能体」（<code>spec/V2仿冒邮件检测智能体 需求文档（PRD.md</code>）承接，本模块不承载。属产品形态差异，详见 §9 差异 #1</td></tr>
+</tbody>
+</table>
+    <p>因当前验证形态下该组件不渲染，本规格<strong>不提供</strong>其 HTML 预览、截图与 DOM 比对；如需覆盖传统版形态，需切换 ProductProfile 后另行抓取。已列入 §10 需确认事项 Q4。</p>
+  </article>
+</section>
+
+<section id="api-mapping">
+  <h2>3. 数据模型与 API 映射</h2>
+  <h3>3.1 demo 前端状态模型（TypeScript，摘自 identity-strategy-page.tsx）</h3>
+<pre><code>// 基础格式检查：每项 4 个字段（启用 / 动作 / 观察 / 观察前缓存动作）
+mailFromEmptyCheck:  boolean = true;   mailFromEmptyAction:  Action = "pass"
+mailFromFormatCheck: boolean = true;   mailFromFormatAction: Action = "reject"
+envelopeHeaderCheck: boolean = true;   envelopeHeaderAction: Action = "quarantine"
+// 每项另有 xxxObserve: boolean = false 与 xxxPrevAction: Action
+
+type Action = "pass" | "quarantine" | "reject" | "drop"          // 基础格式检查
+type ProtoAction = "block" | "drop" | "quarantine" | "tag" | "next" // 认证协议（DMARC 无 next）
+
+// 认证协议检查
+authPolicyTemplate: "loose" | "standard" | "strict" | "custom" = "standard"
+observeMode: boolean = false
+observeStats: { wouldDrop: 23, wouldBlock: 8, wouldQuarantine: 45 }  // 硬编码 mock
+activeProtocolTab: "spf" | "dkim" | "dmarc" | "ptr" = "spf"
+
+spfFailAction   = "block"      spfSoftFailAction  = "quarantine"
+spfNoneAction   = "tag"        spfTempErrorAction = "tag"
+dkimFailAction  = "quarantine" dkimNeutralAction  = "quarantine"
+dkimPartialAction = "next"     dkimNoneAction     = "tag"
+dmarcRejectAction = "block"    dmarcQuarantineAction = "quarantine"  dmarcNoneAction = "tag"
+ptrNoRecordAction = "tag"      ptrTempErrorAction = "tag"
+ptrEhloMismatchAction = "quarantine"  ptrAMismatchAction = "quarantine"
+
+authEnabled: boolean = true    // 模块启用开关</code></pre>
+
+  <h3>3.2 spec 定义的 API（产品设计稿，非网关现状）</h3>
+  <table class="spec-table">
+<thead><tr><th>方法</th><th>路径</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td>GET</td><td>/api/auth-spoofing/config</td><td>获取认证与仿冒检测配置</td></tr>
+<tr><td>PUT</td><td>/api/auth-spoofing/config</td><td>更新配置（spec 要求乐观锁校验版本号）</td></tr>
+<tr><td>GET</td><td>/api/auth-spoofing/stats</td><td>获取检测统计数据</td></tr>
+<tr><td>GET</td><td>/api/auth-spoofing/observe-stats</td><td>获取观察模式统计（对应 observeStats）</td></tr>
+<tr><td>POST</td><td>/api/auth-spoofing/test</td><td>测试邮件认证结果</td></tr>
+</tbody>
+</table>
+  <p>按 <code>implement.md</code> 第 7 条，上述 API 是产品设计时定义的，<strong>不要求</strong>网关照实现；应尽量用现有 API 组合完成。</p>
+
+  <h3>3.3 spec 定义的数据表</h3>
+  <table class="spec-table">
+<thead><tr><th>表名</th><th>用途</th><th>落地建议</th></tr></thead>
+<tbody>
+<tr><td><code>t_auth_spoofing_config</code></td><td>认证与仿冒检测配置表</td><td>优先复用现有配置系统（ConfigManager / <code>config_overrides</code>），不新建表</td></tr>
+<tr><td><code>t_auth_results_cache</code></td><td>认证结果缓存表（spec 建议 Redis TTL 1h）</td><td>网关已有 Redis，可复用</td></tr>
+<tr><td><code>t_similar_domain_whitelist</code></td><td>相似域名白名单表</td><td>仅传统版需要；AI 形态由智能体承接</td></tr>
+<tr><td><code>t_protected_domains</code></td><td>保护域名表</td><td>同上</td></tr>
+</tbody>
+</table>
+  <p><strong>action 映射（遵循 implement.md 第 13 条：不新增 action）：</strong></p>
+  <table class="spec-table">
+<thead><tr><th>demo 值</th><th>demo 文案</th><th>统一规则系统 action</th></tr></thead>
+<tbody>
+<tr><td>pass / next</td><td>允许（进行下一步检测）/ 进行下一步检测</td><td><code>accept</code>（继续后续规则）</td></tr>
+<tr><td>tag</td><td>标记（加头投递）</td><td><code>accept</code> + 添加特定 header（<strong>不是</strong>新增 mark action）</td></tr>
+<tr><td>quarantine</td><td>隔离（进垃圾箱）/ 隔离/审核</td><td><code>quarantine</code></td></tr>
+<tr><td>block / reject</td><td>阻断（返回5xx）/ 阻断并退信</td><td><code>reject</code></td></tr>
+<tr><td>drop</td><td>丢弃（静默删除）/ 静默丢弃</td><td><code>discard</code></td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="business-logic">
+  <h2>4. 业务逻辑规格（以 spec 为准）</h2>
+  <h3>4.1 检查执行顺序</h3>
+  <p>spec §1：基础格式检查 → 认证协议检查（SPF → DKIM → DMARC → PTR，按序执行）。流程图起点「策略流水线（例外检查）」表示白名单例外在流水线层先行判定，命中即跳过本模块。</p>
+  <h3>4.2 观察模式机制（spec §1.27-29）</h3>
+  <p>开启后规则仅记录不执行阻断；可查看 7 天内观察统计；用于评估影响后再正式启用。demo 实现：开启时缓存当前动作到 <code>xxxPrevAction</code> 并把 UI 动作显示为只读「允许（仅记录）」，关闭时恢复缓存值。</p>
+  <h3>4.3 策略模板语义（spec §1.14-18）</h3>
+  <table class="spec-table">
+<thead><tr><th>模板</th><th>spec 语义</th><th>Dialog 内说明文案（demo）</th></tr></thead>
+<tbody>
+<tr><td>宽松</td><td>大部分检查项设为「允许」，适合新部署测试</td><td>仅拦截明确伪造，兼容老旧系统，丢弃动作使用极少</td></tr>
+<tr><td>标准</td><td>关键检查项设为「隔离」，平衡安全与可用性（推荐）</td><td>平衡安全与业务，明确伪造使用阻断/丢弃，疑似伪造使用隔离</td></tr>
+<tr><td>严格</td><td>大部分检查项设为「阻断」，最高安全级别</td><td>零信任策略，大量使用丢弃动作，适用于金融/政务等高安全场景</td></tr>
+<tr><td>自定义</td><td>用户自行配置各检查项动作</td><td>完全手动控制，脱离模板保护，需自行评估风险</td></tr>
+</tbody>
+</table>
+  <h3>4.4 配置健康检查面板规则（demo 实测）</h3>
+  <table class="spec-table">
+<thead><tr><th>规则</th><th>条件</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td>面板可见</td><td><code>spfFail==="drop" ∥ spfSoftFail==="drop" ∥ !observeMode</code></td><td>标题「配置健康检查」+ AlertTriangle</td></tr>
+<tr><td>建议行 A</td><td><code>spfSoftFail==="drop"</code></td><td>「高风险：SPF软拒绝设置为丢弃」+ 快捷按钮「改为隔离」「改为标记」</td></tr>
+<tr><td>建议行 B</td><td><code>!observeMode &amp;&amp; (spfFail==="drop" ∥ dmarcReject==="drop")</code></td><td>「当前配置包含"丢弃"动作，建议开启观察模式验证影响面」+ 按钮「开启观察模式」</td></tr>
+</tbody>
+</table>
+  <h3>4.5 权限矩阵（spec §1）</h3>
+  <table class="spec-table">
+<thead><tr><th>角色</th><th>权限</th></tr></thead>
+<tbody>
+<tr><td>系统管理员</td><td>完整读写，可配置所有检查项与策略模板</td></tr>
+<tr><td>安全管理员</td><td>可配置检查项参数，可查看观察统计</td></tr>
+<tr><td>审计员</td><td>只读，可查看配置</td></tr>
+<tr><td>普通用户</td><td>无权限访问本模块</td></tr>
+</tbody>
+</table>
+  <p>demo 未实现任何角色判断——所有控件对当前登录态一律可编辑。已列入 §10 Q7。</p>
+</section>
+
+<section id="interaction">
+  <h2>5. 交互规格</h2>
+  <h3>5.1 状态变化规则</h3>
+  <table class="spec-table">
+<thead><tr><th>状态</th><th>视觉表现（demo 实测）</th></tr></thead>
+<tbody>
+<tr><td>模块禁用</td><td>配置区根节点加 <code>opacity-50 pointer-events-none</code>；头部文案「已禁用」</td></tr>
+<tr><td>检查项禁用</td><td>卡片正文条件渲染卸载；观察模式 Switch 置 <code>disabled</code> 并强制 unchecked</td></tr>
+<tr><td>观察模式开启</td><td>脉冲「观察中」标签；动作显示为只读「允许（仅记录）」；高风险告警隐藏</td></tr>
+<tr><td>高风险动作</td><td>action ∈ {reject, drop} 且未开观察模式 → amber 告警框（AlertTriangle）</td></tr>
+<tr><td>SPF 硬拒绝 = drop</td><td>SPF 面板额外出现 <strong>红色</strong> 告警框；流程图 SPF 节点转为 <code>bg-black</code></td></tr>
+<tr><td>非自定义模板</td><td>15 个协议动作 Select 全部 <code>disabled</code></td></tr>
+<tr><td>保存成功</td><td><strong>spec 要求 Toast「保存成功」；demo 无保存按钮、无 Toast</strong>（见 §9 差异 #3）</td></tr>
+</tbody>
+</table>
+  <h3>5.2 Tooltip 规格（spec §3，demo 未实现 Tooltip）</h3>
+  <p>spec 列出 12 条关键字段悬浮提示。<strong>浏览器实测：demo 未给任何检查项名称绑定 Tooltip</strong>，说明文案是常驻的 Info 行而非 hover 提示。spec §7 TC017「悬浮检查项名称 → 显示详细说明 Tooltip」在 demo 上不可复现。见 §9 差异 #5。</p>
+  <h3>5.3 异常场景（spec §4）</h3>
+  <table class="spec-table">
+<thead><tr><th>场景</th><th>spec 处理方式</th><th>demo 现状</th></tr></thead>
+<tbody>
+<tr><td>保护域名格式错误</td><td>提示「请输入有效的域名格式，多个域名用分号分隔」</td><td>组件不渲染，无法验证</td></tr>
+<tr><td>所有协议都设为允许</td><td>允许保存，提示「当前配置不会阻断任何邮件」</td><td>未实现</td></tr>
+<tr><td>所有协议都设为阻断</td><td>保存时警告「严格模式可能影响正常邮件投递」</td><td>未实现</td></tr>
+<tr><td>保存配置超时（10s）</td><td>提示「保存超时，请检查网络后重试」，保留配置数据</td><td>无保存动作</td></tr>
+<tr><td>DNS 查询服务不可用</td><td>SPF/DKIM/DMARC/PTR 检测降级为「允许」</td><td>前端不涉及</td></tr>
+<tr><td>版本冲突</td><td>提示「配置已被他人修改，请刷新后重试」</td><td>未实现</td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="i18n">
+  <h2>6. 国际化规格</h2>
+  <p><code>implement.md</code> 第 12 条要求四种内置语言。demo 的 <code>language-context.tsx</code> 当前提供 <strong>中 / 英 / 泰</strong> 三语。</p>
+  <table class="spec-table">
+<thead><tr><th>i18n key</th><th>中文</th><th>英文</th></tr></thead>
+<tbody>
+<tr><td><code>identity.basicFormatCheck</code></td><td>基础格式检查</td><td>Basic Format Check</td></tr>
+<tr><td><code>identity.protocolBasicValidation</code></td><td>(协议层基础验证)</td><td>(Protocol Level Basic Validation)</td></tr>
+<tr><td><code>identity.authProtocolCheck</code></td><td>认证协议检查</td><td>Authentication Protocol Check</td></tr>
+<tr><td><code>identity.policyTemplate</code></td><td>策略模板</td><td>Policy Template</td></tr>
+<tr><td><code>identity.observeModeLabel</code></td><td>观察模式</td><td>Observe Mode</td></tr>
+<tr><td><code>identity.failureAction</code></td><td>失败动作</td><td>Failure Action</td></tr>
+<tr><td><code>identity.allowNextCheck</code></td><td>允许（进行下一步检测）</td><td>Allow (Proceed to Next Check)</td></tr>
+<tr><td><code>identity.quarantineReview</code></td><td>隔离/审核</td><td>Quarantine/Review</td></tr>
+<tr><td><code>identity.rejectWithBounce</code></td><td>阻断并退信</td><td>Block with Bounce</td></tr>
+<tr><td><code>identity.silentDrop</code></td><td>静默丢弃</td><td>Silent Drop</td></tr>
+<tr><td><code>identity.emptyEnvelopeWarning</code></td><td>注意：拒绝空信封将导致无法接收退信通知（Bounce）…</td><td>—</td></tr>
+<tr><td><code>identity.proxyServiceWarning</code></td><td>代发服务注意：如使用代发服务或企业有邮件列表转发…</td><td>Note: If using proxy services or mailing list forwarding…</td></tr>
+</tbody>
+</table>
+  <h4>硬编码文案（未走 i18n，落地时必须补 key）</h4>
+  <table class="spec-table">
+<thead><tr><th>文案</th><th>位置</th></tr></thead>
+<tbody>
+<tr><td>例外规则（白名单）请在【策略流水线】模块配置，本模块仅设置协议检查规则</td><td>认证协议检查 · 例外提示</td></tr>
+<tr><td>前往策略流水线 / 邮件身份验证流程 / 配置健康检查</td><td>认证协议检查</td></tr>
+<tr><td>SPF检查配置 / DKIM检查配置 / DMARC检查配置 / PTR反向解析配置</td><td>4 个协议面板标题</td></tr>
+<tr><td>硬拒绝 (Fail) / 软拒绝 (SoftFail) / 未维护 (None) / 查询失败 (TempError) …</td><td>全部检查结果行标题与说明</td></tr>
+<tr><td>阻断（返回5xx）/ 丢弃（静默删除）/ 隔离（进垃圾箱）/ 标记（加头投递）/ 进行下一步检测</td><td>协议动作下拉全部选项</td></tr>
+<tr><td>确认切换策略模板？ / 模板说明 / 取消 / 确认切换 / 四段模板说明文案</td><td>策略模板变更 Dialog（整体硬编码）</td></tr>
+<tr><td>例外规则管理 / 本模块不配置例外规则，请在策略流水线统一管理 / 查看当前例外: 12条</td><td>例外规则入口</td></tr>
+<tr><td>观察中 / 观察模式 / 允许（仅记录） / 高风险动作：建议先开启观察模式测试影响范围</td><td>用内联 <code>language === "zh" ? … : …</code> 三元判断，未走 <code>t()</code></td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="responsive">
+  <h2>7. 响应式规格</h2>
+  <p>spec §2 要求：最小宽度 800px；流程图水平排列、小屏横向滚动；配置表格固定列宽。</p>
+  <table class="spec-table">
+<thead><tr><th>断点</th><th>实测表现</th></tr></thead>
+<tbody>
+<tr><td>1920px</td><td>左侧导航展开，右侧卡片充分展开；流程图完整可见，无滚动条</td></tr>
+<tr><td>1366px</td><td>布局不变；流程图仍完整可见</td></tr>
+<tr><td>1024px</td><td>流程图容器 <code>overflow-x-auto</code> 生效，可横向滚动；Tabs <code>max-w-md</code> 保持 4 列不换行</td></tr>
+</tbody>
+</table>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1920px.png" alt="1920px 断点"><figcaption>1920px 断点</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1366px.png" alt="1366px 断点"><figcaption>1366px 断点</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/responsive-1024px.png" alt="1024px 断点"><figcaption>1024px 断点</figcaption></figure>
+</section>
+
+<section id="diffs" class="diff-section">
+  <h2>8. 与 spec 的差异标注</h2>
+  <p>三方交叉：<strong>浏览器实际渲染</strong>（第一事实源）vs demo 源码 vs spec 文档。冲突时以浏览器为准记录。</p>
+  <table class="spec-table">
+<thead><tr><th>#</th><th>spec 原文 / 预期</th><th>demo 实际渲染（浏览器实测）</th><th>差异性质</th><th>建议</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>§2 信息架构：「相似域名检测」「显示名仿冒检测」为本模块的两个可折叠区块（功能点 5/6/9/10）</td><td>默认形态（<code>capabilities.ai=true</code>）下 <strong>完全不渲染</strong>，匹配节点数 0</td><td>产品形态差异</td><td>AI 形态由仿冒检测智能体承接；传统版保留。按 implement.md 不新增规则系统。需确认落地范围（Q4）</td></tr>
+<tr><td>2</td><td>§7 TC006/TC007/TC008：选择策略模板「宽松/标准/严格」→ 所有协议动作被批量设置</td><td>「确认切换」<strong>只改模板标签与徽标</strong>，15 个协议动作值<strong>一个都没变</strong>。实测标准→自定义前后 SPF 四行仍为 block/quarantine/tag/tag。demo 源码中不存在 <code>applyPolicyTemplate</code> 之类函数</td><td><strong>功能缺失</strong></td><td>落地必须实现模板→动作的批量填充映射表；需产品给出三套模板的完整动作矩阵（Q1）</td></tr>
+<tr><td>3</td><td>§3 状态变化规则：「保存成功 → Toast 提示"保存成功"」；§7 TC018</td><td>demo 卡片<strong>没有保存按钮</strong>，配置改动即时生效于本地 state，无 Toast、无持久化</td><td>缺少保存入口</td><td>确认保存语义：卡片内保存 / 页面级保存 / 自动保存（Q2）</td></tr>
+<tr><td>4</td><td>§2「执行动作选项」只有 3 种：允许（绿）/ 隔离（橙）/ 阻断（红）</td><td>基础格式检查 4 种（pass/quarantine/reject/drop）；协议检查 5 种（block/drop/quarantine/tag/next），<strong>DMARC 只有 4 种</strong>（无 next）。颜色为 red/black/yellow/blue/gray 圆点</td><td>动作粒度更细且不一致</td><td>以 demo 为准；按 §3.3 映射到统一规则系统 action，<code>tag</code> = accept + header，不新增 action</td></tr>
+<tr><td>5</td><td>§3 列出 12 条「关键字段悬浮提示」；§7 TC017「悬浮检查项名称 → 显示 Tooltip」</td><td>demo <strong>未绑定任何 Tooltip</strong>；说明文案是常驻 Info 行</td><td>交互形式差异</td><td>确认是保留常驻说明行，还是补 Tooltip（Q5）</td></tr>
+<tr><td>6</td><td>§7 TC009「修改单个协议动作 → 模板自动切换为自定义」</td><td><strong>逻辑上不可达</strong>：非自定义模板下 15 个 Select 全为 <code>disabled</code>，根本改不动；只有先切到「自定义」才能编辑</td><td>交互路径相反</td><td>确认最终形态：(a) 保持只读+显式切自定义，或 (b) 允许直接改并自动切自定义（Q1）</td></tr>
+<tr><td>7</td><td>§2 流程图节点「SPF/DKIM/DMARC/PTR 绿色/红色，根据配置动作显示颜色」</td><td>实际每个协议有<strong>固定色系</strong>（SPF 蓝 / DKIM 绿 / DMARC 紫 / PTR 橙），只有 drop 时统一转黑底白字</td><td>配色规则不同</td><td>以 demo 为准</td></tr>
+<tr><td>8</td><td>§2 流程图节点顺序：策略流水线→例外检查→SPF→…</td><td>「策略流水线」与「例外检查」是<strong>同一个节点</strong>的主副标题，共 6 个节点</td><td>节点数差异</td><td>以 demo 为准</td></tr>
+<tr><td>9</td><td>§3 弹窗触发条件：「有未保存修改时切换策略 → 未保存确认 Dialog」</td><td>不存在未保存态概念；Dialog 的触发条件是<strong>点击非当前模板按钮</strong>（无论是否有改动）</td><td>触发条件不同</td><td>与差异 #3 一并确认保存语义</td></tr>
+<tr><td>10</td><td>§4 并发一致性：配置修改采用乐观锁，保存时校验版本号</td><td>demo 无保存、无版本号</td><td>未实现</td><td>确认网关现有配置接口是否支持 version/etag（Q3）</td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="questions" class="question-section">
+  <h2>9. 需确认事项</h2>
+  <p>以下问题涉及产品设计与网关底层的取舍，按 <code>implement.md</code> 第 4/5 条<strong>不自行决定</strong>。</p>
+  <table class="spec-table">
+<thead><tr><th>#</th><th>问题</th><th>背景</th><th>建议方案</th></tr></thead>
+<tbody>
+<tr><td>Q1</td><td>策略模板 → 协议动作的批量填充矩阵是什么？以及是否实现「改动作自动切自定义」？</td><td>demo 只切标签不填动作（差异 #2）；且非自定义模板下动作只读，TC009 不可达（差异 #6）</td><td>请产品给出 宽松/标准/严格 三套模板下 15 个动作的完整取值表；并二选一确定交互路径</td></tr>
+<tr><td>Q2</td><td>配置保存的触发方式与作用域？</td><td>demo 无保存按钮（差异 #3）；卡片底部为空占位栏</td><td>建议页面级「保存」按钮 + 离开未保存拦截；需确认是否按策略卡片独立保存</td></tr>
+<tr><td>Q3</td><td>网关现有配置接口是否支持乐观锁（version / etag）？</td><td>spec §4 要求版本冲突提示「配置已被他人修改，请刷新后重试」</td><td>若 ConfigManager 不支持，需确认是否接受"后写覆盖"或新增版本字段</td></tr>
+<tr><td>Q4</td><td>「相似域名检测 / 显示名仿冒检测」在传统版的保留范围与数据模型？</td><td>AI 形态由仿冒检测智能体替代，当前形态完全不渲染（差异 #1）</td><td>确认：(a) 传统版是否仍需这两个区块；(b) 与智能体是否共用保护域名表 / 白名单表</td></tr>
+<tr><td>Q5</td><td>Tooltip 是补齐还是保留常驻说明行？</td><td>spec §3 列 12 条 hover 提示，demo 全未实现（差异 #5）</td><td>建议保留常驻 Info 行（信息密度更高），Tooltip 仅用于超长文案</td></tr>
+<tr><td>Q6</td><td>模块禁用采用 <code>pointer-events-none</code>，键盘 Tab 仍可聚焦内部控件，是否需要补 <code>disabled</code> / <code>inert</code>？</td><td>无障碍缺陷：鼠标点不到但键盘能聚焦并操作</td><td>建议落地时对容器加 <code>inert</code> 属性，或给每个控件加 <code>disabled</code></td></tr>
+<tr><td>Q7</td><td>角色权限（系统管理员/安全管理员/审计员）如何映射到前端只读态？</td><td>spec §1 定义 4 类角色；demo 无任何权限判断</td><td>确认审计员只读时的视觉（复用模块禁用的灰度态，还是逐控件 disabled）</td></tr>
+<tr><td>Q8</td><td>「前往策略流水线」「查看当前例外: 12条」两个按钮的目标行为？</td><td>demo 均未绑定 onClick；「12」为硬编码</td><td>确认跳转路由与例外条数的数据来源（是否统一规则系统按 page 字段过滤）</td></tr>
+<tr><td>Q9</td><td><code>observeStats</code>（预计丢弃 23 / 阻断 8 / 隔离 45）的数据来源与刷新周期？</td><td>demo 为硬编码 mock；spec §1 要求「可查看 7 天内的观察统计数据」</td><td>确认统计口径、存储（spec 建议 ClickHouse 保留 7 天）与网关现状的落差</td></tr>
+<tr><td>Q10</td><td>国际化第四种语言是什么？</td><td>implement.md 要求四种内置语言，demo 目前仅 中/英/泰 三语</td><td>确认第四语言，并补齐 §6 列出的全部硬编码文案</td></tr>
+</tbody>
+</table>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>if(window.mermaid){mermaid.initialize({startOnLoad:true});}</script>
+<script src="../assets/spec-preview.js"></script>
+</body>
+</html>

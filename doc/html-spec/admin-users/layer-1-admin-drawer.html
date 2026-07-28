@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 1：新建/编辑管理员抽屉 - 管理员与权限 HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/spec-style.css">
+<link rel="stylesheet" href="./preview.css">
+<style>.component-preview{background:#fff;overflow-x:auto}.pass{color:#15803d;font-weight:600}.warn{color:#a16207;font-weight:600}</style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="./index.html#c-2">← 返回主文件（2.2 管理员账号）</a>
+  <span>层级 1 / 2</span>
+  <a href="./layer-2-admin-dialogs.html">层级 2：弹窗组 →</a>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 1：新建 / 编辑管理员抽屉（Sheet）</h1>
+  <table class="meta-table">
+    <thead><tr><th>属性</th><th>规格</th><th>形态/角色差异</th></tr></thead>
+    <tr><td>所属组件</td><td>2.2 管理员账号 Tab（AdminAccountTab）</td><td>[Base] 全形态共用</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">admin-users/index.html</a></td><td>[Base] —</td></tr>
+    <tr><td>触发路径</td><td>工具栏「＋新建」→ <code>openNew()</code>（emptyDraft）；行「编辑」→ <code>openEdit(a)</code>（账号不可改、密码留空=不改）</td><td>[Base] 一致</td></tr>
+    <tr><td>demo 组件</td><td><code>admin-account-tab.tsx</code> 的 <code>&lt;Sheet&gt;</code>（右侧抽屉 <code>sm:max-w-xl</code>）</td><td>[Base] 一致</td></tr>
+    <tr><td>标题</td><td>新建=「管理员配置」/「创建新的管理员账号并分配角色」；编辑=「编辑管理员」/「账号不可修改，密码留空表示不修改」</td><td>[Base] 一致</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">1</span> 交互层级 1：抽屉打开态（新建，含即时校验）</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：层0 工具栏「＋新建」→ 打开右侧抽屉。空 draft 下所有必填即时报错。<strong>可交互</strong>：「生成」按钮填入随机密码占位；角色/账号状态为下拉。</div>
+  <div class="preview-hint">点「生成」填入 16 位随机密码；点角色/账号状态下拉选择</div>
+
+  <div class="component-preview cp">
+    <div style="border:1px solid #e5e7eb;border-radius:.5rem;overflow:hidden">
+      <div class="dh" style="padding:1.25rem 1.5rem .75rem;border-bottom:1px solid #f3f4f6">
+        <h4 style="margin:0;font-size:1rem;font-weight:600">管理员配置</h4>
+        <p style="margin:.25rem 0 0;font-size:.8125rem;color:#6b7280">创建新的管理员账号并分配角色</p>
+      </div>
+      <div style="padding:1.25rem 1.5rem;background:#fbfdff">
+        <div class="cp-sec"><h5>基础信息</h5>
+          <div class="cp-field"><label>账号/用户名<span class="req">*</span></label><input class="cp-input" placeholder="如 operator02"><div class="cp-err">请输入账号</div></div>
+          <div class="cp-field"><label>姓名<span class="req">*</span></label><input class="cp-input" placeholder="如 王工"><div class="cp-err">请输入姓名</div></div>
+          <div class="cp-field"><label>手机号<span class="req">*</span></label><input class="cp-input" placeholder="如 13800138000"><div class="cp-err">请输入手机号</div></div>
+          <div class="cp-field"><label>邮箱<span class="req">*</span></label><input class="cp-input" placeholder="如 admin@example.com"><div class="cp-err">请输入邮箱</div></div>
+          <div class="cp-field"><label>初始密码<span class="req">*</span></label>
+            <div style="display:flex;gap:.5rem"><input class="cp-input" id="pwd-inp" placeholder="请输入初始密码"><button class="cp-btn" onclick="var g='ABCDEFGHJKLMNP2345678!@#$';var s='';for(var i=0;i&lt;16;i++)s+=g[Math.floor(Math.random()*g.length)];document.getElementById('pwd-inp').value=s;return false">↻ 生成</button></div>
+            <div class="cp-err">请输入初始密码</div>
+          </div>
+        </div>
+        <div class="cp-sec"><h5>角色与状态</h5>
+          <div class="cp-field"><label>角色<span class="req">*</span></label>
+            <span class="cp-sel" data-sel="role" style="min-width:12rem"><span data-selval>安全运营</span></span>
+            <div class="cp-selmenu" data-selmenu="role" hidden><span class="cp-selopt" data-selopt>系统管理员</span><span class="cp-selopt" data-selopt>平台审计员</span><span class="cp-selopt" data-selopt>安全运营</span><span class="cp-selopt" data-selopt>审计员</span></div>
+          </div>
+          <div class="cp-field"><label>账号状态</label>
+            <span class="cp-sel" data-sel="astat" style="min-width:12rem"><span data-selval>启用（正常）</span></span>
+            <div class="cp-selmenu" data-selmenu="astat" hidden><span class="cp-selopt" data-selopt>启用（正常）</span><span class="cp-selopt" data-selopt>禁用（异常）</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="df" style="display:flex;gap:.5rem;padding:.75rem 1.5rem;border-top:1px solid #f3f4f6"><button class="cp-btn pri">确定</button><button class="cp-btn">取消</button></div>
+    </div>
+  </div>
+
+  <figure class="screenshot-figure">
+    <img src="./screenshots/account-layer1-new-drawer.png" alt="新建管理员抽屉">
+    <figcaption>层级 1：新建管理员抽屉（浏览器实际渲染 · 空 draft 即时校验）</figcaption>
+  </figure>
+
+  <h4>UI 元素清单</h4>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>元素</th><th>标签</th><th>占位/默认</th><th>校验规则</th><th>禁用条件</th><th>形态/角色差异</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Input</td><td>账号/用户名*</td><td>如 operator02</td><td>非空 + 不重复（大小写不敏感）；"该账号已存在"</td><td>编辑时 <code>disabled</code></td><td>[Base] 一致</td></tr>
+      <tr><td>2</td><td>Input</td><td>姓名*</td><td>如 王工</td><td>非空</td><td>-</td><td>[Base] 一致</td></tr>
+      <tr><td>3</td><td>Input</td><td>手机号*</td><td>如 13800138000</td><td><code>/^1[3-9]\d{9}$/</code>；"请输入正确的手机号"</td><td>-</td><td>[Base] 一致</td></tr>
+      <tr><td>4</td><td>Input(email)</td><td>邮箱*</td><td>如 admin@example.com</td><td>邮箱正则；"请输入正确的邮箱"</td><td>-</td><td>[Base] 一致</td></tr>
+      <tr><td>5</td><td>Input(text) + 生成</td><td>初始密码* / 新密码</td><td>请输入初始密码 / 留空表示不修改</td><td>满足密码策略（8 位以上，含大小写/数字/特殊）；新建必填，编辑留空=不改；hint「需满足密码策略」</td><td>-</td><td>[Overlay] 校验应读取所在 scope 的密码策略</td></tr>
+      <tr><td>6</td><td>Select</td><td>角色*</td><td>安全运营（emptyDraft 默认 role_ops）</td><td>必选；租户视角剔除「系统管理员」</td><td>-</td><td>[租户管理员] 不含 role_sys</td></tr>
+      <tr><td>7</td><td>Select</td><td>账号状态</td><td>启用（正常）</td><td>启用/禁用</td><td>-</td><td>[Base] 一致</td></tr>
+      <tr><td>8</td><td>Button</td><td>确定 / 取消</td><td>-</td><td>hasError 时确定 → Toast「请修正表单中的校验错误」；成功 → 「管理员已创建/已更新」</td><td>-</td><td>[Base] 一致</td></tr>
+    </tbody>
+  </table>
+  <p class="cp-hint">保存逻辑：租户视角创建的均为租户管理员（不可成为平台系统管理员）；<code>isSystemAdmin = !isTenant &amp;&amp; roleId==="role_sys"</code>。</p>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>抽屉根</td><td><code>[role=dialog][data-slot=sheet-content]</code> 右侧全高（64 节点）</td><td>同结构（cp 抽屉映射）</td><td class="pass">一致</td></tr>
+        <tr><td>标题/描述</td><td>「管理员配置」/「创建新的管理员账号并分配角色」</td><td>同</td><td class="pass">一致</td></tr>
+        <tr><td>分组卡数</td><td>2（基础信息 / 角色与状态）</td><td>2</td><td class="pass">一致</td></tr>
+        <tr><td>字段数</td><td>7（账号/姓名/手机号/邮箱/密码/角色/状态）</td><td>7</td><td class="pass">一致</td></tr>
+        <tr><td>即时校验错误</td><td>空 draft 下 5 处必填红字（请输入账号/姓名/手机号/邮箱/初始密码）</td><td>同</td><td class="pass">一致</td></tr>
+        <tr><td>密码字段</td><td><code>type=text</code> + 「生成」按钮（明文显示，见主文件 D-006）</td><td>同</td><td class="pass">一致</td></tr>
+        <tr><td>底部按钮</td><td>确定(bg-blue-600) / 取消</td><td>同</td><td class="pass">一致</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<nav class="layer-nav">
+  <a href="./index.html#c-2">← 返回主文件</a>
+  <a href="./layer-2-admin-dialogs.html">层级 2：弹窗组 →</a>
+</nav>
+
+<script src="./preview.js"></script>
+</body>
+</html>

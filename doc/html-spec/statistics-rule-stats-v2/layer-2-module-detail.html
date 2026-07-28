@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级2：模块明细视图 - 规则统计</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground);
+      line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 2rem; }
+    .spec-header h1 { color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+    .meta-table td:first-child { font-weight: 600; width: 160px; color: var(--muted-foreground); white-space: nowrap; }
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 2rem; margin-bottom: 2rem; }
+    .component-toc > h2 { color: var(--primary); font-size: 1.05rem; margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .component-toc ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.5rem; }
+    .component-toc li { padding: 0.375rem 0.75rem; border-radius: calc(var(--radius) - 4px); background: var(--muted); font-size: 0.875rem; }
+    .component-toc li a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .component-toc li a:hover { text-decoration: underline; }
+    .component-toc .toc-layer-links { font-size: 0.75rem; color: var(--muted-foreground); margin-left: 1rem; }
+    .component-toc .toc-layer-links a { color: var(--muted-foreground); font-weight: 400; }
+    .component-toc .toc-badge { display: inline-block; font-size: 0.6875rem; font-weight: 600;
+      padding: 0.0625rem 0.375rem; border-radius: calc(var(--radius) - 4px); background: var(--primary); color: var(--primary-foreground); white-space: nowrap; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+    section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem; font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; margin: 1rem 0 0.75rem; color: var(--foreground); }
+    h4 { font-size: 0.95rem; margin: 0.75rem 0 0.5rem; color: var(--muted-foreground); }
+    table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.spec-table th { background: var(--muted); color: var(--foreground); font-weight: 600; text-align: left;
+      padding: 0.625rem 0.75rem; border: 1px solid var(--border); white-space: nowrap; }
+    table.spec-table td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.spec-table tr:nth-child(even) td { background: var(--muted); }
+    .table-scroll { overflow-x: auto; }
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .screenshot-figure figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .component-spec { border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px);
+      padding: 1rem 1.25rem; margin: 1rem 0; background: var(--card); }
+    .component-spec > h3 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 0.75rem; }
+    pre { background: var(--muted); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px);
+      padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; margin: 1rem 0; }
+    code { font-family: var(--font-mono); font-size: 0.85em; }
+    .mermaid { text-align: center; margin: 1rem 0; padding: 1rem; background: var(--muted); border-radius: calc(var(--radius) - 2px); }
+    .diff-section { border-left: 4px solid var(--diff-border); background: var(--diff-bg); }
+    .diff-section > h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+    .diff-badge { display: inline-block; background: var(--diff-border); color: var(--primary-foreground);
+      font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); margin-right: 0.5rem; }
+    .question-section { border-left: 4px solid var(--question-border); background: var(--question-bg); }
+    .question-section > h2 { color: var(--question-border); border-bottom-color: var(--question-border); }
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); }
+    .badge-high { background: oklch(0.65 0.2 25); color: white; }
+    .badge-medium { background: oklch(0.75 0.15 90); color: var(--foreground); }
+    .badge-low { background: oklch(0.85 0.05 150); color: var(--foreground); }
+    blockquote { border-left: 4px solid var(--destructive); background: var(--diff-bg); padding: 0.75rem 1rem;
+      margin: 1rem 0; font-size: 0.875rem; border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0; }
+    .component-preview { border: 2px dashed var(--primary); border-radius: var(--radius); padding: 1.5rem;
+      margin: 1rem 0; background: #f9fafb; position: relative; overflow: auto; }
+    .component-preview::before { content: "🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）"; position: absolute;
+      top: -0.625rem; left: 0.75rem; background: var(--primary); color: var(--primary-foreground); font-size: 0.6875rem;
+      font-weight: 600; padding: 0.125rem 0.5rem; border-radius: calc(var(--radius) - 4px); white-space: nowrap; z-index: 5; }
+    .component-preview * { box-sizing: border-box; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary);
+      border-radius: calc(var(--radius) - 2px); padding: 1rem 1.25rem; margin: 1.5rem 0; background: var(--card); }
+    .interaction-layer > h4 { color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem;
+      border-radius: 50%; background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .trigger-path { background: var(--muted); border-radius: calc(var(--radius) - 4px); padding: 0.5rem 0.75rem;
+      margin: 0.5rem 0 1rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .trigger-path strong { color: var(--foreground); }
+    .dom-comparison { margin: 1rem 0; border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px); overflow: hidden; }
+    .dom-comparison > h5 { background: var(--muted); padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600;
+      color: var(--foreground); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.375rem; }
+    .dom-comparison > h5::before { content: "🔍"; font-size: 0.875rem; }
+    .dom-comparison table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+    .dom-comparison th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .dom-comparison td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .dom-comparison tr:last-child td { border-bottom: none; }
+    .dom-pass { color: oklch(0.5 0.15 150); font-weight: 600; }
+    .dom-fail { color: var(--destructive); font-weight: 600; }
+    table.layer-index { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1rem 0; }
+    table.layer-index th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid var(--border); }
+    table.layer-index td { padding: 0.625rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    table.layer-index td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    table.layer-index td a:hover { text-decoration: underline; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem;
+      background: var(--muted); border-radius: var(--radius); margin-bottom: 1.5rem; font-size: 0.875rem; }
+    .layer-nav a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .layer-nav a:hover { text-decoration: underline; }
+    .version-history-section { margin: 1.5rem 0; }
+    .spec-version { font-weight: 600; color: oklch(0.52 0.226 262); }
+    /* 阶段色样例 */
+    .stage-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+    /* 预览区内自定义交互控件 */
+    .rs-tip { position: fixed; z-index: 9999; max-width: 280px; background: #111827; color: #fff; font-size: 12px;
+      padding: 6px 10px; border-radius: 6px; pointer-events: none; display: none; line-height: 1.5; }
+    .rs-menu { position: absolute; z-index: 60; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12); padding: 4px; min-width: 200px; max-height: 320px; overflow: auto; display: none; }
+    .rs-menu .rs-opt { padding: 6px 10px; font-size: 13px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .rs-menu .rs-opt:hover { background: #f3f4f6; }
+    .rs-menu .rs-opt.rs-checked { background: #eff6ff; font-weight: 600; }
+    .rs-menu .rs-group { padding: 6px 8px; font-size: 11px; font-weight: 600; color: #6b7280; background: #f3f4f6; border-radius: 4px; margin: 2px 0; }
+    .rs-menu .rs-foot { padding: 6px 8px; font-size: 11px; color: #9ca3af; border-top: 1px solid #e5e7eb; margin-top: 2px; }
+    /* ===== shadcn 语义色桥接（Tailwind CDN 不认识 demo 的自定义 token 类；取值来自 demo globals.css :root 亮色主题） ===== */
+    .component-preview .bg-primary { background-color: oklch(0.52 0.226 262); }
+    .component-preview .text-primary-foreground { color: oklch(0.985 0 0); }
+    .component-preview .text-primary { color: oklch(0.52 0.226 262); }
+    .component-preview .bg-secondary { background-color: oklch(0.97 0 0); }
+    .component-preview .text-secondary-foreground { color: oklch(0.205 0 0); }
+    .component-preview .bg-destructive { background-color: oklch(0.577 0.245 27.325); }
+    .component-preview .text-destructive { color: oklch(0.577 0.245 27.325); }
+    .component-preview .bg-muted { background-color: oklch(0.97 0 0); }
+    .component-preview .text-muted-foreground { color: oklch(0.556 0 0); }
+    .component-preview .bg-card { background-color: oklch(1 0 0); }
+    .component-preview .text-card-foreground { color: oklch(0.145 0 0); }
+    .component-preview .bg-popover { background-color: oklch(1 0 0); }
+    .component-preview .text-popover-foreground { color: oklch(0.145 0 0); }
+    .component-preview .bg-accent { background-color: oklch(0.52 0.226 262); }
+    .component-preview .text-accent-foreground { color: oklch(0.985 0 0); }
+    .component-preview .bg-background { background-color: oklch(0.98 0.01 205); }
+    .component-preview .text-foreground { color: oklch(0.145 0 0); }
+    .component-preview .border-border { border-color: oklch(0.922 0 0); }
+    .component-preview .border-input { border-color: oklch(0.922 0 0); }
+  /* 追加：半径/调色板对齐 demo Tailwind v4 实测计算色 */
+  .component-preview .rounded-xl { border-radius: 14px; }
+  .component-preview .rounded-lg { border-radius: 10px; }
+  .component-preview .rounded-md { border-radius: 8px; }
+  .component-preview .rounded-sm { border-radius: 6px; }
+  .component-preview .bg-blue-50 { background-color: lab(96.492 -1.14644 -5.11479); }
+  .component-preview .bg-gray-100 { background-color: lab(96.1596 -0.0823438 -1.13575); }
+  .component-preview .bg-gray-400 { background-color: lab(65.9269 -0.832707 -8.17473); }
+  .component-preview .bg-gray-50 { background-color: lab(98.2596 -0.247031 -0.706708); }
+  .component-preview .bg-gray-700 { background-color: lab(27.1134 -0.956401 -12.3224); }
+  .component-preview .bg-green-50 { background-color: lab(98.1563 -5.60117 2.75915); }
+  .component-preview .bg-green-500 { background-color: lab(70.5521 -66.5147 45.8073); }
+  .component-preview .bg-orange-50 { background-color: lab(97.7008 1.53735 5.90649); }
+  .component-preview .bg-orange-500 { background-color: lab(64.272 57.1788 90.3583); }
+  .component-preview .bg-red-50 { background-color: lab(96.5005 4.18508 1.52328); }
+  .component-preview .bg-yellow-50 { background-color: lab(98.6846 -1.79055 9.7766); }
+  .component-preview .border-blue-500 { border-color: lab(54.1736 13.3369 -74.6839); }
+  .component-preview .border-gray-200 { border-color: lab(91.6229 -0.159115 -2.26791); }
+  .component-preview .border-green-200 { border-color: lab(92.4222 -26.4702 12.9427); }
+  .component-preview .border-orange-200 { border-color: lab(88.4871 9.94918 28.8378); }
+  .component-preview .border-red-200 { border-color: lab(86.017 19.8815 7.75869); }
+  .component-preview .border-yellow-200 { border-color: lab(94.3433 -5.00429 52.9663); }
+  .component-preview .text-blue-600 { color: lab(44.0605 29.0279 -86.0352); }
+  .component-preview .text-gray-400 { color: lab(65.9269 -0.832707 -8.17473); }
+  .component-preview .text-gray-500 { color: lab(47.7841 -0.393182 -10.0268); }
+  .component-preview .text-gray-600 { color: lab(35.6337 -1.58697 -10.8425); }
+  .component-preview .text-gray-900 { color: lab(8.11897 0.811279 -12.254); }
+  .component-preview .text-green-500 { color: lab(70.5521 -66.5147 45.8073); }
+  .component-preview .text-green-600 { color: lab(59.0978 -58.6621 41.2579); }
+  .component-preview .text-green-700 { color: lab(47.0329 -47.0239 31.4788); }
+  .component-preview .text-orange-500 { color: lab(64.272 57.1788 90.3583); }
+  .component-preview .text-orange-600 { color: lab(57.1026 64.2584 89.8886); }
+  .component-preview .text-orange-700 { color: lab(46.4615 57.7275 70.8507); }
+  .component-preview .text-red-500 { color: lab(55.4814 75.0732 48.8528); }
+  .component-preview .text-red-600 { color: lab(48.4493 77.4328 61.5452); }
+  .component-preview .text-red-700 { color: lab(40.4273 67.2623 53.7441); }
+  .component-preview .text-yellow-600 { color: lab(62.7799 22.4197 86.1544); }
+  .component-preview .text-yellow-700 { color: lab(47.8202 25.2426 66.5015); }
+    .crash-overlay { border: 2px solid #ef4444; background: #fef2f2; border-radius: 8px; padding: 1rem 1.25rem; margin: 0.75rem 0; font-size: 0.85rem; }
+    .crash-overlay .crash-title { color: #b91c1c; font-weight: 700; font-family: var(--font-mono); margin-bottom: 0.4rem; }
+    .note-inline { font-size: 0.8125rem; color: var(--muted-foreground); background: var(--muted);
+      border-radius: 6px; padding: 0.4rem 0.6rem; margin: 0.5rem 0; }
+</style>
+</head>
+<body>
+
+<nav class="layer-nav">
+  <a href="./index.html#component-2-6">← 返回主文件（组件 2.6）</a>
+  <span>交互层级 2 / 4</span>
+  <span><a href="./layer-1-filter-cascade.html">← 层级1</a> · <a href="./layer-3-detail-table.html">层级 3：明细表格交互 →</a></span>
+</nav>
+
+<header class="spec-header">
+  <h1>交互层级 2：模块明细视图（ModuleDetailView，以 IP黑白名单 为样例）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.6 策略模块效能卡片墙</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">statistics-rule-stats-v2/index.html</a></td></tr>
+    <tr><td>触发路径</td><td>层级0 任一模块卡片「查看详情」→ <code>viewMode="detail"</code> → 明细视图追加渲染在卡片墙下方（同页，非弹窗/路由）→ 100ms 后平滑滚动定位</td></tr>
+    <tr><td>demo 源</td><td><code>module-detail-view.tsx</code>（Props: module{id,nameKey,stage} / onBack / timeRange）</td></tr>
+    <tr><td>布局</td><td>返回导航栏 + 模块概览卡（52% KPI×5 + 48% 趋势图）+ 下方 flex（左：规则明细表 flex-1；右：辅助面板 w-72 sticky top-5）</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">2</span> 明细视图整体（预览为浏览器提取的实际 DOM）</h4>
+  <div class="trigger-path"><strong>预览可操作</strong>：「返回全部模块」→ 回到主文件卡片墙；hover ❔ 图标与「较上周期」区域查看口径 Tooltip；<b>规则明细表的筛选/排序/搜索在 <a href="./layer-3-detail-table.html">层级 3</a> 中可完整操作</b>。导出CSV / PDF 按钮在 demo 中无绑定行为（hover 查看说明）。</div>
+
+  <h4>2.a 返回导航栏</h4>
+  <div class="component-preview" id="pv-backbar"><div class="flex items-center justify-between py-3 px-4 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 shadow-sm"><div class="flex items-center gap-4"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md px-3 has-[&gt;svg]:px-2.5 gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left w-4 h-4"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>返回全部模块</button><div class="flex items-center gap-3"><div class="w-1 h-10 rounded-full" style="background-color: rgb(255, 77, 79);"></div><div><h2 class="text-xl font-bold text-gray-900 dark:text-white">IP黑白名单 — 规则效能分析</h2><p class="text-sm text-gray-500 dark:text-gray-400">19条规则 · 16启用 · 0条老化 · 3条禁用</p></div></div></div><div class="flex items-center gap-2"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md px-3 has-[&gt;svg]:px-2.5 gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>导出CSV</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md px-3 has-[&gt;svg]:px-2.5 gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>PDF</button></div></div></div>
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>规格</th></tr></thead>
+    <tbody>
+      <tr><td>返回按钮</td><td>Button(outline sm)「← 返回全部模块」→ onBack()：viewMode="cards"，明细 DOM 移除（浏览器实测 detail_gone=true）</td></tr>
+      <tr><td>模块色条</td><td>w-1 h-10 圆角竖条，颜色=所属阶段主色（IP黑白名单→#FF4D4F）</td></tr>
+      <tr><td>标题</td><td>「IP黑白名单 — 规则效能分析」(text-xl font-bold)；副标题「19条规则 · 16启用 · 0条老化 · 3条禁用」</td></tr>
+      <tr><td>右侧按钮</td><td>「导出CSV」「PDF」两个 outline 按钮，<b>demo 无绑定行为</b>（§9-D11）</td></tr>
+    </tbody>
+  </table>
+
+  <h4>2.b 模块概览卡（KPI×5 + 近30天命中趋势）</h4>
+  <div class="component-preview" id="pv-overview"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 bg-white dark:bg-gray-800 shadow-sm"><div data-slot="card-content" class="p-5"><div class="flex gap-6"><div class="flex-none grid grid-cols-5 gap-3" style="width: 52%;"><div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"><div class="text-xs text-gray-500 dark:text-gray-400 mb-1">策略命中总量</div><div class="text-xl font-bold text-gray-900 dark:text-white">2,400</div><div class="flex items-center gap-1 mt-1 text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-3 h-3 text-green-500"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span class="text-green-500">+12%</span></div></div><div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"><div class="text-xs text-gray-500 dark:text-gray-400 mb-1">拦截率</div><div class="text-xl font-bold text-gray-900 dark:text-white">54%</div><div class="flex items-center gap-1 mt-1 text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-3 h-3 text-green-500"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span class="text-green-500">+5%</span></div></div><div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"><div class="text-xs text-gray-500 dark:text-gray-400 mb-1">观察模式命中</div><div class="text-xl font-bold text-yellow-600 dark:text-yellow-400">60</div><div class="flex items-center gap-1 mt-1 text-xs text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus w-3 h-3"><path d="M5 12h14"></path></svg><span>-</span></div></div><div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"><div data-state="closed" data-slot="tooltip-trigger"><div class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-1">规则总数<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help w-3 h-3"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></div><div class="text-xl font-bold text-gray-900 dark:text-white">19</div><div class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span>16启用</span><span class="text-orange-500 ml-1">0老化</span></div></div></div><div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg relative"><div data-state="closed" data-slot="tooltip-trigger"><div class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-1">准确率<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help w-3 h-3"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></div><div class="text-xl font-bold text-orange-600 dark:text-orange-400">88.5%</div><div class="flex items-center gap-1 mt-1 text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up w-3 h-3 text-green-500"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span class="text-green-500">+2.2%</span></div><div class="absolute top-2 right-2 w-2 h-2 rounded-full bg-green-500"></div></div></div></div><div class="flex-1"><div class="text-sm text-gray-500 dark:text-gray-400 mb-2">近30天命中趋势</div><div class="recharts-responsive-container" style="width: 100%; height: 140px; min-width: 0px;"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 140px; max-width: 540px;"><svg class="recharts-surface" width="540" height="140" viewBox="0 0 540 140" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts162-clip"><rect x="65" y="5" height="100" width="470"></rect></clipPath></defs><g class="recharts-cartesian-grid"><g class="recharts-cartesian-grid-horizontal"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="65" y1="80" x2="535" y2="80"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="65" y1="55" x2="535" y2="55"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="65" y1="30" x2="535" y2="30"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="65" y1="5" x2="535" y2="5"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="65" y1="105" x2="535" y2="105"></line></g><g class="recharts-cartesian-grid-vertical"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="65" y1="5" x2="65" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="143.33333333333331" y1="5" x2="143.33333333333331" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="221.66666666666666" y1="5" x2="221.66666666666666" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="300" y1="5" x2="300" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="378.3333333333333" y1="5" x2="378.3333333333333" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="456.66666666666663" y1="5" x2="456.66666666666663" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="470" height="100" x1="535" y1="5" x2="535" y2="105"></line></g></g><g class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"><line orientation="bottom" width="470" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="105" x2="535" y2="105"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="470" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="65" y1="111" x2="65" y2="105"></line><text orientation="bottom" width="470" height="30" stroke="none" font-size="11" x="65" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="65" dy="0.71em">05-21</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="470" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="143.33333333333331" y1="111" x2="143.33333333333331" y2="105"></line><text orientation="bottom" width="470" height="30" stroke="none" font-size="11" x="143.33333333333331" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="143.33333333333331" dy="0.71em">05-22</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="470" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="221.66666666666666" y1="111" x2="221.66666666666666" y2="105"></line><text orientation="bottom" width="470" height="30" stroke="none" font-size="11" x="221.66666666666666" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="221.66666666666666" dy="0.71em">05-23</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="470" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="300" y1="111" x2="300" y2="105"></line><text orientation="bottom" width="470" height="30" stroke="none" font-size="11" x="300" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="300" dy="0.71em">05-24</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="470" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="378.3333333333333" y1="111" x2="378.3333333333333" y2="105"></line><text orientation="bottom" width="470" height="30" stroke="none" font-size="11" x="378.3333333333333" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="378.3333333333333" dy="0.71em">05-25</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="470" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="456.66666666666663" y1="111" x2="456.66666666666663" y2="105"></line><text orientation="bottom" width="470" height="30" stroke="none" font-size="11" x="456.66666666666663" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="456.66666666666663" dy="0.71em">05-26</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="470" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="535" y1="111" x2="535" y2="105"></line><text orientation="bottom" width="470" height="30" stroke="none" font-size="11" x="524.484375" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="524.484375" dy="0.71em">05-27</tspan></text></g></g></g><g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis"><line orientation="left" width="60" height="100" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="5" x2="65" y2="105"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="100" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="105" x2="65" y2="105"></line><text orientation="left" width="60" height="100" stroke="none" font-size="11" x="57" y="105" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">0</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="100" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="80" x2="65" y2="80"></line><text orientation="left" width="60" height="100" stroke="none" font-size="11" x="57" y="80" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">85</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="100" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="55" x2="65" y2="55"></line><text orientation="left" width="60" height="100" stroke="none" font-size="11" x="57" y="55" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">170</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="100" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="30" x2="65" y2="30"></line><text orientation="left" width="60" height="100" stroke="none" font-size="11" x="57" y="30" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">255</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="100" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="5" x2="65" y2="5"></line><text orientation="left" width="60" height="100" stroke="none" font-size="11" x="57" y="8.25" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">340</tspan></text></g></g></g><g class="recharts-layer recharts-line"><path stroke="#FF4D4F" stroke-width="2" name="命中" width="470" height="100" fill="none" class="recharts-curve recharts-line-curve" d="M65,43.235C91.111,41.275,117.222,39.314,143.333,37.353C169.444,35.392,195.556,33.431,221.667,31.471C247.778,29.51,273.889,27.549,300,25.588C326.111,23.627,352.222,21.667,378.333,19.706C404.444,17.745,430.556,15.784,456.667,13.824C482.778,11.863,508.889,9.902,535,7.941"></path><g class="recharts-layer"></g></g><g class="recharts-layer recharts-line"><path stroke="#F5222D" stroke-width="2" name="阻断" width="470" height="100" fill="none" class="recharts-curve recharts-line-curve" d="M65,74.412C91.111,73.431,117.222,72.451,143.333,71.471C169.444,70.49,195.556,69.51,221.667,68.529C247.778,67.549,273.889,66.569,300,65.588C326.111,64.608,352.222,63.627,378.333,62.647C404.444,61.667,430.556,60.686,456.667,59.706C482.778,58.725,508.889,57.745,535,56.765"></path><g class="recharts-layer"></g></g></svg><div tabindex="-1" class="recharts-tooltip-wrapper recharts-tooltip-wrapper-right recharts-tooltip-wrapper-bottom" style="visibility: hidden; pointer-events: none; position: absolute; top: 0px; left: 0px; transform: translate(75px, 10px);"><div class="recharts-default-tooltip" style="margin: 0px; padding: 10px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); white-space: nowrap;"><p class="recharts-tooltip-label" style="margin: 0px;">05-21</p></div></div></div></div></div></div></div></div></div>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/detail-overview-area.png" alt="明细概览区">
+    <figcaption>概览区浏览器渲染：策略命中总量 2,400(+12%) / 拦截率 54%(+5%) / 观察模式命中 60(-) / 规则总数 19(16启用 0老化)❔ / 准确率 88.5%(+2.2%·右上高置信绿点)❔ + 双线趋势图（命中=阶段色、阻断=红）</figcaption>
+  </figure>
+  <table class="spec-table">
+    <thead><tr><th>KPI 迷你卡</th><th>值（ip-blacklist）</th><th>规则</th></tr></thead>
+    <tbody>
+      <tr><td>策略命中总量</td><td>2,400 · ↗+12%</td><td>变化率硬编码（§9-D10）</td></tr>
+      <tr><td>拦截率</td><td>54% · ↗+5%</td><td>同上</td></tr>
+      <tr><td>观察模式命中</td><td>60 · 「-」</td><td>黄色数值；无变化率（Minus 图标）</td></tr>
+      <tr><td>规则总数 ❔</td><td>19（16启用 <span style="color:#f97316">0老化</span>）</td><td>Tooltip：启用: 当前生效的规则数 | 老化: 近90天零命中的启用规则 | 禁用: 已关闭的规则</td></tr>
+      <tr><td>准确率 ❔</td><td>88.5% · ↗+2.2% · 右上角置信度圆点</td><td>数值色：≥90 绿 / ≥70 橙 / &lt;70 红 / 无样本灰「-」；圆点：高置信(样本≥100)绿 / 中(≥30)橙 / 低灰。Tooltip：反馈闭环口径 + 「基于270条反馈」</td></tr>
+      <tr><td>近30天命中趋势</td><td>7 个数据点（05-21~05-27）</td><td>双 Line：hits=阶段主色、blocked=#F5222D；<b>标题写「近30天」但 mock 仅 7 天数据</b></td></tr>
+    </tbody>
+  </table>
+
+  <h4>2.c 右侧辅助面板（w-72 sticky，6 张卡）</h4>
+  <div class="component-preview" id="pv-right" style="max-width:340px"><div class="w-72 flex-none space-y-4 sticky top-5 self-start"><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 bg-white dark:bg-gray-800 shadow-sm"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-sm">处置分布</div></div><div data-slot="card-content" class="px-6"><div class="recharts-responsive-container" style="width: 100%; height: 180px; min-width: 0px;"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 180px; max-width: 238px;"><svg cx="50%" cy="50%" class="recharts-surface" width="238" height="180" viewBox="0 0 238 180" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts172-clip"><rect x="5" y="5" height="134" width="228"></rect></clipPath></defs><g class="recharts-layer recharts-pie" tabindex="0"><g class="recharts-layer"><g class="recharts-layer recharts-pie-sector" tabindex="-1"><path cx="119" cy="72" name="block" stroke="#fff" fill="#F5222D" color="#F5222D" tabindex="-1" class="recharts-sector" d="M 189,72
+    A 70,70,0,
+    0,0,
+    51.7787670884298,52.472945796960765
+  L 75.78635027113344,59.44689372661763
+            A 45,45,0,
+            0,1,
+            164,72 Z" role="img"></path></g><g class="recharts-layer recharts-pie-sector" tabindex="-1"><path cx="119" cy="72" name="isolate" stroke="#fff" fill="#FA8C16" color="#FA8C16" tabindex="-1" class="recharts-sector" d="M 51.13823208349409,54.83082834711331
+    A 70,70,0,
+    0,0,
+    115.17945551066644,141.89566109426983
+  L 116.54393568542844,116.93292498917344
+            A 45,45,0,
+            0,1,
+            75.37457776796049,60.96267536600141 Z" role="img"></path></g><g class="recharts-layer recharts-pie-sector" tabindex="-1"><path cx="119" cy="72" name="audit" stroke="#fff" fill="#722ED1" color="#722ED1" tabindex="-1" class="recharts-sector" d="M 117.62110627702026,141.986417625856
+    A 70,70,0,
+    0,0,
+    178.44016005455939,108.97116947958723
+  L 157.21153146364531,95.76718037973465
+            A 45,45,0,
+            0,1,
+            118.1135683209416,116.99126847376456 Z" role="img"></path></g><g class="recharts-layer recharts-pie-sector" tabindex="-1"><path cx="119" cy="72" name="mark" stroke="#fff" fill="#1890FF" color="#1890FF" tabindex="-1" class="recharts-sector" d="M 179.694225922414,106.87421597224758
+    A 70,70,0,
+    0,0,
+    188.9573578913367,74.44296476917499
+  L 163.9725872158593,73.5704773516125
+            A 45,45,0,
+            0,1,
+            158.017716664409,94.41913883930202 Z" role="img"></path></g></g></g></svg><div class="recharts-legend-wrapper" style="position: absolute; width: 228px; height: 36px; left: 5px; bottom: 5px;"><ul class="recharts-default-legend" style="padding: 0px; margin: 0px; text-align: center;"><li class="recharts-legend-item legend-item-0" style="display: inline-block; margin-right: 10px;"><svg class="recharts-surface" width="14" height="14" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 4px;"><title></title><desc></desc><path fill="#F5222D" cx="16" cy="16" class="recharts-symbols" transform="translate(16, 16)" d="M16,0A16,16,0,1,1,-16,0A16,16,0,1,1,16,0"></path></svg><span class="recharts-legend-item-text" style="color: rgb(245, 34, 45);">阻断</span></li><li class="recharts-legend-item legend-item-1" style="display: inline-block; margin-right: 10px;"><svg class="recharts-surface" width="14" height="14" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 4px;"><title></title><desc></desc><path fill="#FA8C16" cx="16" cy="16" class="recharts-symbols" transform="translate(16, 16)" d="M16,0A16,16,0,1,1,-16,0A16,16,0,1,1,16,0"></path></svg><span class="recharts-legend-item-text" style="color: rgb(250, 140, 22);">隔离</span></li><li class="recharts-legend-item legend-item-2" style="display: inline-block; margin-right: 10px;"><svg class="recharts-surface" width="14" height="14" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 4px;"><title></title><desc></desc><path fill="#722ED1" cx="16" cy="16" class="recharts-symbols" transform="translate(16, 16)" d="M16,0A16,16,0,1,1,-16,0A16,16,0,1,1,16,0"></path></svg><span class="recharts-legend-item-text" style="color: rgb(114, 46, 209);">审核</span></li><li class="recharts-legend-item legend-item-3" style="display: inline-block; margin-right: 10px;"><svg class="recharts-surface" width="14" height="14" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 4px;"><title></title><desc></desc><path fill="#1890FF" cx="16" cy="16" class="recharts-symbols" transform="translate(16, 16)" d="M16,0A16,16,0,1,1,-16,0A16,16,0,1,1,16,0"></path></svg><span class="recharts-legend-item-text" style="color: rgb(24, 144, 255);">标记</span></li></ul></div><div tabindex="-1" class="recharts-tooltip-wrapper recharts-tooltip-wrapper-right recharts-tooltip-wrapper-bottom" style="visibility: hidden; pointer-events: none; position: absolute; top: 0px; left: 0px; transform: translate(10px, 10px);"><div class="recharts-default-tooltip" style="margin: 0px; padding: 10px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); white-space: nowrap;"><p class="recharts-tooltip-label" style="margin: 0px;"></p></div></div></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 bg-white dark:bg-gray-800 shadow-sm"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-sm">命中TOP5规则</div></div><div data-slot="card-content" class="px-6 space-y-2"><div class="flex items-center justify-between py-2 px-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded cursor-pointer"><div class="flex items-center gap-2 min-w-0"><span class="text-sm font-medium text-gray-500 w-5">1.</span><span class="text-sm truncate">Rule 1</span></div><span class="text-sm font-bold text-gray-900 dark:text-white flex-none ml-2">410</span></div><div class="flex items-center justify-between py-2 px-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded cursor-pointer"><div class="flex items-center gap-2 min-w-0"><span class="text-sm font-medium text-gray-500 w-5">2.</span><span class="text-sm truncate">Rule 2</span></div><span class="text-sm font-bold text-gray-900 dark:text-white flex-none ml-2">360</span></div><div class="flex items-center justify-between py-2 px-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded cursor-pointer"><div class="flex items-center gap-2 min-w-0"><span class="text-sm font-medium text-gray-500 w-5">3.</span><span class="text-sm truncate">Rule 3</span></div><span class="text-sm font-bold text-gray-900 dark:text-white flex-none ml-2">310</span></div><div class="flex items-center justify-between py-2 px-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded cursor-pointer"><div class="flex items-center gap-2 min-w-0"><span class="text-sm font-medium text-gray-500 w-5">4.</span><span class="text-sm truncate">Rule 4</span></div><span class="text-sm font-bold text-gray-900 dark:text-white flex-none ml-2">260</span></div><div class="flex items-center justify-between py-2 px-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded cursor-pointer"><div class="flex items-center gap-2 min-w-0"><span class="text-sm font-medium text-gray-500 w-5">5.</span><span class="text-sm truncate">Rule 5</span></div><span class="text-sm font-bold text-gray-900 dark:text-white flex-none ml-2">210</span></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 bg-white dark:bg-gray-800 shadow-sm"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="tooltip-trigger" class="font-semibold text-sm flex items-center gap-1 cursor-help" data-state="closed">模块健康度评分<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help w-3.5 h-3.5 text-gray-400"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></div></div><div data-slot="card-content" class="px-6"><div class="space-y-3"><div class="h-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full rounded-full bg-orange-500" style="width: 87%;"></div></div><div class="flex items-center justify-between"><span class="text-2xl font-bold text-orange-700 dark:text-orange-400">87</span><span class="text-sm text-gray-500">/ 100分</span></div><div class="text-sm text-orange-700 dark:text-orange-400">需关注</div><div class="text-xs text-gray-500 dark:text-gray-400 space-y-1"><div>老化率: 0% (-5分)</div><div>超时率: 0% (+0分)</div><div>命中率: 高 (+0分)</div></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 bg-white dark:bg-gray-800 shadow-sm"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-sm">准确率趋势（近30天）</div></div><div data-slot="card-content" class="px-6"><div class="recharts-responsive-container" style="width: 100%; height: 140px; min-width: 0px;"><div class="recharts-wrapper" style="position: relative; cursor: default; width: 100%; height: 100%; max-height: 140px; max-width: 238px;"><svg class="recharts-surface" width="238" height="140" viewBox="0 0 238 140" style="width: 100%; height: 100%;"><title></title><desc></desc><defs><clipPath id="recharts176-clip"><rect x="65" y="5" height="100" width="108"></rect></clipPath></defs><g class="recharts-cartesian-grid"><g class="recharts-cartesian-grid-horizontal"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="108" height="100" x1="65" y1="105" x2="173" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="108" height="100" x1="65" y1="78.33333333333333" x2="173" y2="78.33333333333333"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="108" height="100" x1="65" y1="51.666666666666664" x2="173" y2="51.666666666666664"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="108" height="100" x1="65" y1="5" x2="173" y2="5"></line></g><g class="recharts-cartesian-grid-vertical"><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="108" height="100" x1="83" y1="5" x2="83" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="108" height="100" x1="101" y1="5" x2="101" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="108" height="100" x1="119" y1="5" x2="119" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="108" height="100" x1="155" y1="5" x2="155" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="108" height="100" x1="173" y1="5" x2="173" y2="105"></line><line stroke-dasharray="3 3" stroke="#E5E7EB" fill="none" x="65" y="5" width="108" height="100" x1="65" y1="5" x2="65" y2="105"></line></g></g><g class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"><line orientation="bottom" width="108" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="105" x2="173" y2="105"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="108" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="65" y1="111" x2="65" y2="105"></line><text orientation="bottom" width="108" height="30" stroke="none" font-size="10" x="65" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="65" dy="0.71em">25</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="108" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="83" y1="111" x2="83" y2="105"></line><text orientation="bottom" width="108" height="30" stroke="none" font-size="10" x="83" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="83" dy="0.71em">26</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="108" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="101" y1="111" x2="101" y2="105"></line><text orientation="bottom" width="108" height="30" stroke="none" font-size="10" x="101" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="101" dy="0.71em">27</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="108" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="119" y1="111" x2="119" y2="105"></line><text orientation="bottom" width="108" height="30" stroke="none" font-size="10" x="119" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="119" dy="0.71em">28</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="108" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="137" y1="111" x2="137" y2="105"></line><text orientation="bottom" width="108" height="30" stroke="none" font-size="10" x="137" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="137" dy="0.71em">29</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="108" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="155" y1="111" x2="155" y2="105"></line><text orientation="bottom" width="108" height="30" stroke="none" font-size="10" x="155" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="155" dy="0.71em">30</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="bottom" width="108" height="30" stroke="#9CA3AF" x="65" y="105" class="recharts-cartesian-axis-tick-line" fill="none" x1="173" y1="111" x2="173" y2="105"></line><text orientation="bottom" width="108" height="30" stroke="none" font-size="10" x="173" y="113" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="middle" fill="#9CA3AF"><tspan x="173" dy="0.71em">31</tspan></text></g></g></g><g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis"><line orientation="left" width="60" height="100" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-line" fill="none" x1="65" y1="5" x2="65" y2="105"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="100" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="105" x2="65" y2="105"></line><text orientation="left" width="60" height="100" stroke="none" font-size="10" x="57" y="105" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">70%</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="100" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="78.33333333333333" x2="65" y2="78.33333333333333"></line><text orientation="left" width="60" height="100" stroke="none" font-size="10" x="57" y="78.33333333333333" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">78%</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="100" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="51.666666666666664" x2="65" y2="51.666666666666664"></line><text orientation="left" width="60" height="100" stroke="none" font-size="10" x="57" y="51.666666666666664" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">86%</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="left" width="60" height="100" stroke="#9CA3AF" x="5" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="59" y1="5" x2="65" y2="5"></line><text orientation="left" width="60" height="100" stroke="none" font-size="10" x="57" y="7.5" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="end" fill="#9CA3AF"><tspan x="57" dy="0.355em">100%</tspan></text></g></g></g><g class="recharts-layer recharts-cartesian-axis recharts-yAxis yAxis"><line orientation="right" width="60" height="100" stroke="#9CA3AF" x="173" y="5" class="recharts-cartesian-axis-line" fill="none" x1="173" y1="5" x2="173" y2="105"></line><g class="recharts-cartesian-axis-ticks"><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="right" width="60" height="100" stroke="#9CA3AF" x="173" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="179" y1="105" x2="173" y2="105"></line><text orientation="right" width="60" height="100" stroke="none" font-size="10" x="181" y="105" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="start" fill="#9CA3AF"><tspan x="181" dy="0.355em">0</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="right" width="60" height="100" stroke="#9CA3AF" x="173" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="179" y1="80" x2="173" y2="80"></line><text orientation="right" width="60" height="100" stroke="none" font-size="10" x="181" y="80" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="start" fill="#9CA3AF"><tspan x="181" dy="0.355em">4</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="right" width="60" height="100" stroke="#9CA3AF" x="173" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="179" y1="55" x2="173" y2="55"></line><text orientation="right" width="60" height="100" stroke="none" font-size="10" x="181" y="55" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="start" fill="#9CA3AF"><tspan x="181" dy="0.355em">8</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="right" width="60" height="100" stroke="#9CA3AF" x="173" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="179" y1="30" x2="173" y2="30"></line><text orientation="right" width="60" height="100" stroke="none" font-size="10" x="181" y="30" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="start" fill="#9CA3AF"><tspan x="181" dy="0.355em">12</tspan></text></g><g class="recharts-layer recharts-cartesian-axis-tick"><line orientation="right" width="60" height="100" stroke="#9CA3AF" x="173" y="5" class="recharts-cartesian-axis-tick-line" fill="none" x1="179" y1="5" x2="173" y2="5"></line><text orientation="right" width="60" height="100" stroke="none" font-size="10" x="181" y="7.5" class="recharts-text recharts-cartesian-axis-tick-value" text-anchor="start" fill="#9CA3AF"><tspan x="181" dy="0.355em">16</tspan></text></g></g></g><g class="recharts-layer recharts-line"><path stroke="#1890FF" stroke-width="2" width="108" height="100" fill="none" class="recharts-curve recharts-line-curve" stroke-dasharray="133.49746704101562px 0px" d="M65,21.667C71,40,77,58.333,83,58.333C89,58.333,95,56.111,101,55C107,53.889,113,52.778,119,51.667C125,50.556,131,49.444,137,48.333C143,47.222,149,46.111,155,45C161,43.889,167,42.778,173,41.667"></path><g class="recharts-layer"></g></g><g class="recharts-layer recharts-line"><path stroke="#E8E8E8" stroke-width="1" stroke-dasharray="3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 3px, 2.800689697265625px, 0px, 0px" width="108" height="100" fill="none" class="recharts-curve recharts-line-curve" d="M65,5C71,26.875,77,48.75,83,48.75C89,48.75,95,44.583,101,42.5C107,40.417,113,38.333,119,36.25C125,34.167,131,32.083,137,30C143,27.917,149,25.833,155,23.75C161,21.667,167,19.583,173,17.5"></path><g class="recharts-layer"></g></g></svg><div tabindex="-1" class="recharts-tooltip-wrapper recharts-tooltip-wrapper-right recharts-tooltip-wrapper-bottom" style="visibility: hidden; pointer-events: none; position: absolute; top: 0px; left: 0px; transform: translate(65px, 10px);"><div class="recharts-default-tooltip" style="margin: 0px; padding: 10px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); white-space: nowrap;"><p class="recharts-tooltip-label" style="margin: 0px;"></p></div></div></div></div><div class="mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-1"><div>平均准确率: 88.5%</div><div>波动范围: 82% - 94%</div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 bg-white dark:bg-gray-800 shadow-sm"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="card-title" class="font-semibold text-sm">误判来源分布</div></div><div data-slot="card-content" class="px-6 space-y-2"><div class="space-y-1"><div class="flex items-center justify-between text-xs"><span class="text-gray-600 dark:text-gray-400">管理员隔离区放行</span><span class="font-medium text-gray-900 dark:text-white">44%</span></div><div class="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: 44%; background-color: rgb(245, 34, 45);"></div></div></div><div class="space-y-1"><div class="flex items-center justify-between text-xs"><span class="text-gray-600 dark:text-gray-400">管理员审核队列放行</span><span class="font-medium text-gray-900 dark:text-white">22%</span></div><div class="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: 22%; background-color: rgb(250, 140, 22);"></div></div></div><div class="space-y-1"><div class="flex items-center justify-between text-xs"><span class="text-gray-600 dark:text-gray-400">用户隔离区取回</span><span class="font-medium text-gray-900 dark:text-white">28%</span></div><div class="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: 28%; background-color: rgb(250, 173, 20);"></div></div></div><div class="space-y-1"><div class="flex items-center justify-between text-xs"><span class="text-gray-600 dark:text-gray-400">用户通知信取回</span><span class="font-medium text-gray-900 dark:text-white">6%</span></div><div class="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: 6%; background-color: rgb(255, 192, 105);"></div></div></div></div></div><div data-slot="card" class="text-card-foreground flex flex-col gap-6 rounded-xl border py-6 bg-white dark:bg-gray-800 shadow-sm"><div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2"><div data-slot="tooltip-trigger" class="font-semibold text-sm flex items-center gap-1 cursor-help" data-state="closed">反馈闭环健康度<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help w-3.5 h-3.5 text-gray-400"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></div></div><div data-slot="card-content" class="px-6"><div class="space-y-3"><div class="h-3 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full rounded-full bg-green-500" style="width: 71%;"></div></div><div class="flex items-center justify-between"><span class="text-sm text-gray-600 dark:text-gray-400">反馈覆盖率</span><span class="text-lg font-bold text-green-600 dark:text-green-400">71%</span></div><div class="text-xs text-gray-500 dark:text-gray-400">已反馈 270 / 总处置 380</div></div></div></div></div></div>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/detail-right-panel.png" alt="右侧面板">
+    <figcaption>右侧面板浏览器渲染（自上而下 6 卡）</figcaption>
+  </figure>
+  <table class="spec-table">
+    <thead><tr><th>卡片</th><th>内容（ip-blacklist 实测值）</th></tr></thead>
+    <tbody>
+      <tr><td>处置分布</td><td>recharts 环图（innerR45/outerR70）：阻断57%/隔离29%/审核8%/标记6%（value 归一化前 45+12%10 等 mock 公式）+ 底部图例；hover 显示「n%·动作名」</td></tr>
+      <tr><td>命中TOP5规则</td><td>1. Rule 1 410 / 2. Rule 2 360 / 3. Rule 3 310 / 4. Rule 4 260 / 5. Rule 5 220；行 hover 灰底（无点击行为）</td></tr>
+      <tr><td>模块健康度评分 ❔</td><td>进度条 + 87/100分「需关注」（≥90绿健康 70-89橙需关注 &lt;70红需优化）+ 扣分明细（老化率 0% (-5分)/超时率/命中率——<b>文案数值硬编码，0% 却 -5 分</b> §9-D10）；Tooltip：100-(老化占比×50)-(超时率×30)-(零命中占比×20)</td></tr>
+      <tr><td>准确率趋势（近30天）</td><td>双 Y 轴折线（左：准确率% 70-100 蓝实线；右：样本数 灰虚线），仅取末 7 点渲染；底部「平均准确率: 88.5%」「波动范围: 82% - 94%（硬编码）」</td></tr>
+      <tr><td>误判来源分布</td><td>黑名单类模块：管理员隔离区放行 44% / 管理员审核队列放行 22% / 用户隔离区取回 28% / 用户通知信取回 6%（横向条，红→橙渐次）；白名单类改为「漏判来源分布」（见层级4）</td></tr>
+      <tr><td>反馈闭环健康度 ❔</td><td>覆盖率进度条 71%（≥70绿 ≥50橙 &lt;50红+警示行）+「已反馈 270 / 总处置 380」；Tooltip：反馈覆盖率越高准确率越可信。覆盖率&lt;50%时准确率可能存在偏差。</td></tr>
+    </tbody>
+  </table>
+
+  <figure class="screenshot-figure">
+    <img src="./screenshots/detail-view-full.png" alt="明细视图整页">
+    <figcaption>明细视图整体（浏览器整页渲染，含左表右栏布局与表格横向滚动条）</figcaption>
+  </figure>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果（层级 2 · 明细视图）</h5>
+    <table>
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>视图根节点</td><td><code>div#module-detail-view.space-y-6</code>（902 节点）</td><td>按区块拆分嵌入（返回栏 24 + 概览 140 + 右栏 253 + 表格卡 483 节点）</td><td class="dom-pass">✅</td></tr>
+        <tr><td>返回栏文本</td><td>返回全部模块 / IP黑白名单 — 规则效能分析 / 19条规则 · 16启用 · 0条老化 · 3条禁用 / 导出CSV / PDF</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        <tr><td>概览 KPI 值</td><td>2,400 · 54% · 60 · 19 · 88.5%</td><td>同左</td><td class="dom-pass">✅</td></tr>
+        <tr><td>右栏卡片数</td><td>6（处置分布/TOP5/健康度/准确率趋势/误判来源/反馈闭环）</td><td>6</td><td class="dom-pass">✅</td></tr>
+        <tr><td>sticky 定位</td><td>右栏 class 含 <code>sticky top-5 self-start</code></td><td>同左（预览容器内不生效，如实保留 class）</td><td class="dom-pass">✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+
+// 简易 tooltip：绑定 [data-rs-tip] 元素，hover 显示与 demo 一致的提示文案
+(function(){
+  var tip = document.createElement('div'); tip.className = 'rs-tip'; document.body.appendChild(tip);
+  document.addEventListener('mouseover', function(e){
+    var t = e.target.closest('[data-rs-tip]');
+    if (!t) { tip.style.display = 'none'; return; }
+    tip.textContent = t.getAttribute('data-rs-tip');
+    tip.style.display = 'block';
+    var r = t.getBoundingClientRect();
+    tip.style.left = Math.min(r.left, window.innerWidth - 300) + 'px';
+    tip.style.top = (r.bottom + 6) + 'px';
+  });
+})();
+
+(function(){
+  var bb = document.getElementById('pv-backbar');
+  if (bb) {
+    var back = Array.prototype.find.call(bb.querySelectorAll('button'), function(b){ return (b.innerText||'').indexOf('返回全部模块') >= 0; });
+    if (back) back.addEventListener('click', function(){ location.href = './index.html#component-2-6'; });
+    bb.querySelectorAll('button').forEach(function(b){
+      var t = (b.innerText || '').trim();
+      if (t.indexOf('导出') >= 0 || t === 'PDF') b.setAttribute('data-rs-tip', 'demo 中此按钮无绑定行为（§9-D11）');
+    });
+  }
+  var TIPS = [
+    ['规则总数', '启用: 当前生效的规则数 | 老化: 近90天零命中的启用规则 | 禁用: 已关闭的规则'],
+    ['准确率', '准确率基于管理员放行/取回/召回的反馈闭环计算。仅统计有明确反馈的处置记录，30天无反馈自动归档为正确。（基于270条反馈）'],
+    ['模块健康度评分', '计算公式: 100 - (老化规则占比×50) - (超时率×30) - (零命中规则占比×20)'],
+    ['反馈闭环健康度', '反馈覆盖率越高准确率越可信。覆盖率<50%时准确率可能存在偏差。']
+  ];
+  ['pv-overview', 'pv-right'].forEach(function(id){
+    var pv = document.getElementById(id);
+    if (!pv) return;
+    pv.querySelectorAll('div').forEach(function(d){
+      var t = (d.innerText || '').trim().split('\n')[0];
+      TIPS.forEach(function(p){ if (t === p[0] && d.querySelector('svg')) d.setAttribute('data-rs-tip', p[1]); });
+    });
+  });
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>if (window.mermaid) mermaid.initialize({startOnLoad:true});</script>
+</body>
+</html>

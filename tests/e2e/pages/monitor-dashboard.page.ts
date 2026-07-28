@@ -1,6 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 
-// 监控总览页 Page Object（对齐 design/origin/demo/docs/html_spec/monitor-dashboard/）
+// 监控总览页 Page Object（对齐 webapp/doc/html-spec/monitor-dashboard/）
 export class MonitorDashboardPage {
   readonly page: Page;
   readonly heading: Locator;

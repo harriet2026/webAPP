@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 2：合并模式（外发+域内合并控制） - 收信人检测</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --text:#111827; --sub:#6b7280; --blue:#1677ff; --red:#f5222d; --radius:.625rem; font-family:"Geist", system-ui, sans-serif; }
+    *{box-sizing:border-box} body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:var(--text);line-height:1.6;font-family:"Geist","Inter",system-ui,sans-serif} a{color:var(--blue);text-decoration:none}
+    nav.layer-nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+    h1{margin:0 0 16px;color:var(--primary);font-size:26px} h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px}
+    .meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+    .meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}
+    .meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}
+    .meta-table td:first-child{width:180px;color:var(--sub)}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}
+    .component-preview{margin:12px 0;padding:16px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}
+    .radio-row{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+    .direction-card{padding:14px 16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;display:flex;flex-direction:column;gap:10px;margin-top:14px}
+    .dir-badge{display:inline-flex;padding:2px 8px;border-radius:6px;border:1px solid;font-size:12px;font-weight:600}
+    .dir-badge.in{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+    .dir-badge.merged{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+    .dir-badge.out{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}
+    .dir-badge.internal{background:#faf5ff;color:#7e22ce;border-color:#e9d5ff}
+    .dir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .dir-grid.cols-2{grid-template-columns:repeat(2,1fr)}
+    .field label{display:block;margin-bottom:6px;font-size:12px;font-weight:600;color:#374151}
+    .num-input{width:80px;padding:7px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}
+    .unit{margin-left:6px;color:#6b7280;font-size:13px}
+    .action-select{min-width:140px;padding:7px 10px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:14px}
+    .action-desc{margin:0;color:#6b7280;font-size:12px}
+    .note{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:8px;font-size:12px}
+    .note.amber{background:#fffbeb;border:1px solid #fde68a;color:#b45309}
+    .is-hidden{display:none!important}
+    .screenshot-figure{margin:14px 0;text-align:center}
+    .screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}
+    .screenshot-figure figcaption{margin-top:8px;color:var(--sub);font-size:13px}
+  </style>
+</head>
+<body>
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a> · 层级 2 / 3 · <a href="layer-2-disabled-and-dropdown.html">下一层：禁用态与动作下拉 →</a></nav>
+
+  <header class="spec-header">
+    <h1>交互层级 2：合并模式（外发+域内合并控制）</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.2 收信人检测配置面板 renderRecipientCheckConfig</td></tr>
+      <tr><td>主文件</td><td><a href="index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级1 抽屉默认态 → 数量限制策略区块 → 配置模式 RadioGroup 选中“外发+域内合并控制”（<code>recipientLimitMode="merged"</code>）</td></tr>
+      <tr><td>demo 源码</td><td><code>identity-strategy-page.tsx</code> 行 1959-2062（merged 分支）</td></tr>
+      <tr><td>截图</td><td><code>screenshots/drawer-limit-merged-mode.png</code></td></tr>
+      <tr><td>DOM 提取</td><td>radio merged=checked；scope radio id 变为 <code>scope-local-m/scope-all-m</code>；combobox 3 个 [阻断, 审核, 阻断]；number input 2 个 [30, 50]；“内部发信”卡节点数 23。</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">2</span>HTML 预览（可交互：radio 切换模式、下拉联动说明）</h2>
+    <div class="component-preview" data-demo-extracted="recipient-limit-merged">
+      <div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px;">配置模式</div>
+        <label class="radio-row"><input type="radio" name="mode" value="detailed" data-mode-radio> 精细化分方向配置</label>
+        <label class="radio-row"><input type="radio" name="mode" value="merged" checked data-mode-radio> 外发+域内合并控制</label>
+      </div>
+      <div data-mode-body="merged">
+        <div class="direction-card">
+          <div><span class="dir-badge in">接收方向</span> <small style="color:#6b7280;">（外部→内部）</small></div>
+          <div class="dir-grid">
+            <div class="field"><label>最大收信人</label><input class="num-input" type="number" min="1" max="1000" value="30"><span class="unit">个</span></div>
+            <div class="field"><label>计数范围</label>
+              <label class="radio-row" style="display:inline-flex;"><input type="radio" name="scope-m" checked> 仅本域</label>
+              <label class="radio-row" style="display:inline-flex;"><input type="radio" name="scope-m"> 所有</label>
+            </div>
+            <div class="field"><label>执行动作</label>
+              <select class="action-select" data-action-select data-desc-target="in-m">
+                <option value="quarantine">隔离</option><option value="review">审核</option><option value="block" selected>阻断</option><option value="drop">丢弃</option>
+              </select>
+            </div>
+          </div>
+          <p class="action-desc" data-desc="in-m">拒绝接收，发送方收到退信通知（452/550）</p>
+        </div>
+        <div class="direction-card">
+          <div><span class="dir-badge merged">内部发信</span> <small style="color:#6b7280;">（外发+域内合并控制）</small></div>
+          <div class="dir-grid cols-2">
+            <div class="field"><label>最大收信人</label><input class="num-input" type="number" min="1" max="1000" value="50"><span class="unit">个</span></div>
+            <div class="field"><label>执行动作</label>
+              <select class="action-select" data-action-select data-desc-target="merged-m">
+                <option value="quarantine">隔离</option><option value="review" selected>审核</option><option value="block">阻断</option><option value="drop">丢弃</option>
+              </select>
+            </div>
+          </div>
+          <p class="action-desc" data-desc="merged-m">邮件进入待审核队列，人工确认后投递或退回</p>
+          <div class="note amber">ⓘ 合并模式下外发和域内方向使用统一配置，防止通过切换方向绕过限制</div>
+        </div>
+      </div>
+      <div data-mode-body="detailed" class="is-hidden">
+        <div class="direction-card">
+          <div><span class="dir-badge in">接收方向</span> <small style="color:#6b7280;">（外部→内部）</small></div>
+          <p class="action-desc">30 个 · 仅本域 · 阻断（详细模式完整规格见主文件层级1）</p>
+        </div>
+        <div class="direction-card">
+          <div><span class="dir-badge out">外发方向</span> <small style="color:#6b7280;">（内部→外部）</small></div>
+          <p class="action-desc">50 个 · 审核</p>
+        </div>
+        <div class="direction-card">
+          <div><span class="dir-badge internal">域内方向</span> <small style="color:#6b7280;">（内部→内部）</small></div>
+          <p class="action-desc">20 个 · 隔离</p>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/drawer-limit-merged-mode.png" alt="合并模式">
+      <figcaption>合并模式：接收方向卡保持独立；外发+域内合并为橙色“内部发信”卡，卡内含 amber 提示。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>元素清单</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>元素</th><th>默认值/文案</th><th>交互行为</th></tr></thead>
+      <tbody>
+        <tr><td>配置模式</td><td>RadioGroup</td><td>“外发+域内合并控制”选中</td><td>切回“精细化分方向配置”即返回层级1；两模式共享接收方向已填值。</td></tr>
+        <tr><td>接收方向卡</td><td>数量/计数范围/动作</td><td>30 个 · 仅本域 · 阻断（与 detailed 模式同一状态，radio id 换为 <code>scope-local-m/scope-all-m</code>）</td><td>动作切换联动说明文案。</td></tr>
+        <tr><td>内部发信卡</td><td>橙色 Badge“内部发信（外发+域内合并控制）”</td><td>最大收信人 50 个（<code>mergedRecipientLimit</code>，独立 state，恰与外发方向默认值同为 50）；动作 审核（<code>mergedRecipientAction</code>）</td><td>动作切换联动说明；替代 detailed 模式的外发+域内两张卡。</td></tr>
+        <tr><td>内部发信卡</td><td>amber 提示条</td><td>合并模式下外发和域内方向使用统一配置，防止通过切换方向绕过限制</td><td>纯展示（Info 图标）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>radio 状态</td><td>detailed=unchecked，merged=checked；scope radio id <code>scope-local-m</code>=checked</td><td>merged 选中、仅本域选中</td><td>一致</td></tr>
+        <tr><td>方向卡数量</td><td>2（接收方向 + 内部发信），外发/域内卡未渲染</td><td>merged 体 2 卡；detailed 体默认 is-hidden</td><td>一致</td></tr>
+        <tr><td>内部发信卡节点数</td><td>23（Badge、数量输入、动作下拉、说明、amber 提示）</td><td>预览保留全部叶子控件与文案</td><td>一致（关键节点）</td></tr>
+        <tr><td>Badge 清单</td><td>接收方向 / 内部发信（+ 存在性验证区 3 个 pill 不在本层范围）</td><td>接收方向 / 内部发信</td><td>一致</td></tr>
+        <tr><td>下拉/输入</td><td>数量限制区 combobox [阻断, 审核]，input [30, 50]</td><td>同值</td><td>一致</td></tr>
+        <tr><td>amber 提示文案</td><td>合并模式下外发和域内方向使用统一配置，防止通过切换方向绕过限制</td><td>同文案</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a> · <a href="layer-2-disabled-and-dropdown.html">下一层：禁用态与动作下拉 →</a></nav>
+
+  <script>
+    const ACTION_DESC = {
+      quarantine: "邮件进入隔离区，管理员审核后可放行或删除",
+      review: "邮件进入待审核队列，人工确认后投递或退回",
+      block: "拒绝接收，发送方收到退信通知（452/550）",
+      drop: "静默丢弃，发送方无感知，无退信"
+    };
+    document.querySelectorAll("[data-action-select]").forEach((sel) => {
+      sel.addEventListener("change", () => {
+        const t = document.querySelector('[data-desc="' + sel.dataset.descTarget + '"]');
+        if (t) t.textContent = ACTION_DESC[sel.value];
+      });
+    });
+    document.querySelectorAll("[data-mode-radio]").forEach((radio) => {
+      radio.addEventListener("change", () => {
+        document.querySelectorAll("[data-mode-body]").forEach((body) => {
+          body.classList.toggle("is-hidden", body.dataset.modeBody !== radio.value);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

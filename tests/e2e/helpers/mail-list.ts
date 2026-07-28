@@ -39,3 +39,12 @@ export async function findRowBySubject(
     return null;
   }
 }
+
+// GT-12423 起高级筛选默认展开；本 helper 兼容两种初始态：仅在筛选区
+// 未展开时点击「高级筛选」开关，幂等地保证展开。
+export async function ensureFiltersExpanded(page: Page): Promise<void> {
+  const quick = page.getByTestId('disposal-quick-filters');
+  if (await quick.isVisible().catch(() => false)) return;
+  await page.getByTestId('disposal-filters-toggle').click();
+  await quick.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+}

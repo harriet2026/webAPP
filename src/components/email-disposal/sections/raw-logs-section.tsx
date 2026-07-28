@@ -39,7 +39,7 @@ const ROW_HEIGHT_PX = 28; // matches the px-3 py-1.5 text-sm font-mono row sizin
 const OVERSCAN_ROWS = 20;
 const MAX_LOG_LINES = 10_000;
 
-// v2 html_spec `logLevelColors` (design/origin/demo/docs/html_spec/
+// v2 html_spec `logLevelColors` (webapp/doc/html-spec/
 // email-handling-disposal-center/layer-13-detail-raw-logs.html §日志级别配色):
 // CONNECT/SCAN=emerald, INFO/ENGINE/DELIVER=blue, ANALYZE/AUTH=purple,
 // WARN=amber, THREAT/ALERT/ERROR=red, DECISION/POLICY=cyan, ACTION=orange.

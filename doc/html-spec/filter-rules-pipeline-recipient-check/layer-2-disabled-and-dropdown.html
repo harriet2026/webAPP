@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 3：禁用态与执行动作下拉 - 收信人检测</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --text:#111827; --sub:#6b7280; --blue:#1677ff; --radius:.625rem; }
+    *{box-sizing:border-box} body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:var(--text);line-height:1.6;font-family:"Geist","Inter",system-ui,sans-serif} a{color:var(--blue);text-decoration:none}
+    nav.layer-nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+    h1{margin:0 0 16px;color:var(--primary);font-size:26px} h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px} h3{margin:16px 0 8px;font-size:16px}
+    .meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+    .meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}
+    .meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}
+    .meta-table td:first-child{width:180px;color:var(--sub)}
+    .layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}
+    .component-preview{margin:12px 0;padding:16px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}
+    .sw{position:relative;width:32px;height:18.4px;border:0;border-radius:999px;background:#2563eb;cursor:pointer;transition:background .15s;flex-shrink:0;vertical-align:middle}
+    .sw::after{content:"";position:absolute;top:2px;left:15px;width:14px;height:14px;border-radius:999px;background:#fff;transition:left .15s}
+    .sw[aria-checked="false"]{background:#e5e7eb} .sw[aria-checked="false"]::after{left:3px}
+    .policy-block{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:12px}
+    .policy-block-head{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#f9fafb}
+    .policy-block-head.with-body{border-bottom:1px solid var(--border)}
+    .policy-block-head b{display:block;font-size:14px} .policy-block-head small{color:#6b7280;font-size:12px}
+    .policy-block-body{padding:16px;display:flex;flex-direction:column;gap:12px}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border:1px solid var(--border);border-radius:8px;background:#fff}
+    .panel-head h4{margin:0;font-size:16px}
+    .panel-status{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#2563eb}
+    .panel-status.off{color:#6b7280}
+    .module-content{margin-top:12px;transition:opacity .15s}
+    .module-content.off{opacity:.5;pointer-events:none}
+    .note{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:8px;font-size:12px}
+    .note.blue{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:13px}
+    .note.gray{background:#f9fafb;border:1px solid #e5e7eb;color:#6b7280}
+    .pill{display:inline-flex;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600;background:#f3f4f6;color:#374151}
+    .nav-dot-demo{display:inline-block;width:10px;height:10px;border-radius:999px;background:#3b82f6;vertical-align:middle}
+    .nav-dot-demo.off{background:transparent;border:2px solid #d1d5db}
+    .is-hidden{display:none!important}
+    .screenshot-figure{margin:14px 0;text-align:center}
+    .screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}
+    .screenshot-figure figcaption{margin-top:8px;color:var(--sub);font-size:13px}
+    /* 模拟 Radix Select 下拉 */
+    .fake-select{position:relative;display:inline-block}
+    .fake-trigger{min-width:160px;padding:7px 28px 7px 10px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:14px;text-align:left;cursor:pointer;position:relative}
+    .fake-trigger::after{content:"⌄";position:absolute;right:10px;top:50%;transform:translateY(-60%);color:#9ca3af}
+    .fake-menu{position:absolute;top:calc(100% + 4px);left:0;z-index:10;min-width:160px;padding:4px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.16)}
+    .fake-option{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:6px;font-size:14px;cursor:pointer}
+    .fake-option:hover{background:#f3f4f6}
+    .fake-option.checked{background:#2563eb;color:#fff}
+    .fake-option.checked::after{content:"✓";margin-left:12px}
+    .action-desc{margin:6px 0 0;color:#6b7280;font-size:12px}
+  </style>
+</head>
+<body>
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a> · 层级 3 / 3 · <a href="layer-1-merged-mode.html">上一层：合并模式 ←</a></nav>
+
+  <header class="spec-header">
+    <h1>交互层级 3：禁用态（子策略/模块）与执行动作下拉</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.2 收信人检测配置面板 renderRecipientCheckConfig</td></tr>
+      <tr><td>主文件</td><td><a href="index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级1 抽屉默认态 → ①关闭“数量限制策略”开关；②关闭“存在性验证策略”开关；③关闭面板头模块开关；④点击任一“执行动作”下拉</td></tr>
+      <tr><td>截图</td><td><code>drawer-limit-disabled.png</code> / <code>drawer-existence-disabled.png</code> / <code>drawer-module-disabled.png</code> / <code>drawer-action-select-open.png</code></td></tr>
+      <tr><td>DOM 提取</td><td>三态开关矩阵、区块 body 卸载证据（radio/combobox/input 数量变化）、灰化 wrapper class、下拉 option 清单均取自浏览器实测。</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">3</span>A. 数量限制策略关闭</h2>
+    <div class="component-preview">
+      <div class="policy-block">
+        <div class="policy-block-head">
+          <button class="sw" type="button" role="switch" aria-checked="false" data-sw-a aria-label="数量限制策略开关"></button>
+          <span><b>数量限制策略</b><small>限制单封邮件最大收件人数量</small></span>
+        </div>
+        <div class="policy-block-body is-hidden" data-body-a>
+          <span style="font-size:13px;color:#6b7280;">（重新开启后此处恢复：配置模式 + 方向卡，见主文件层级1）</span>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/drawer-limit-disabled.png" alt="数量限制策略关闭">
+      <figcaption>数量限制策略关闭：区块只剩头部开关行，配置模式与方向卡整体卸载；存在性验证区块不受影响。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>开关矩阵</td><td>[模块 checked, 数量限制 unchecked, 存在性验证 checked]</td><td>预览开关 aria-checked=false</td><td>一致</td></tr>
+        <tr><td>body 卸载证据</td><td>radio 0 个、number input 0 个、combobox 仅剩 1 个（存在性验证的“阻断”）；“配置模式”文本消失</td><td>body 加 is-hidden（卸载等价展示）</td><td>一致</td></tr>
+        <tr><td>头部保留</td><td>标题/副标题/开关仍渲染，无灰化</td><td>同结构</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">3</span>B. 存在性验证策略关闭</h2>
+    <div class="component-preview">
+      <div class="policy-block">
+        <div class="policy-block-head">
+          <button class="sw" type="button" role="switch" aria-checked="false" data-sw-b aria-label="存在性验证策略开关"></button>
+          <span><b>存在性验证策略</b><small>验证收件人在目录服务的真实存在性</small></span>
+        </div>
+        <div class="policy-block-body is-hidden" data-body-b>
+          <div class="note blue">ⓘ 仅接收方向（外部→内部）生效，内部发信自动跳过验证</div>
+          <div><b style="font-size:13px;">严格模式</b><br><span class="pill">LDAP/AD验证</span> <span class="pill">API实时校验</span> <span class="pill">别名递归解析</span></div>
+        </div>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/drawer-existence-disabled.png" alt="存在性验证策略关闭">
+      <figcaption>存在性验证关闭（滚动到底）：区块只剩头部开关行；上方数量限制区块完整；底部说明保留。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>开关矩阵</td><td>[模块 checked, 数量限制 checked, 存在性验证 unchecked]</td><td>预览开关 aria-checked=false</td><td>一致</td></tr>
+        <tr><td>body 卸载证据</td><td>“严格模式”文本消失；combobox 由 4 减为 3；数量限制区 radio/input 不受影响（4 radio / 3 input）</td><td>body 加 is-hidden</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">3</span>C. 模块整体禁用（面板头开关）</h2>
+    <div class="component-preview">
+      <div class="panel-head">
+        <h4>收信人检测</h4>
+        <span class="panel-status" data-status-c>已启用 <button class="sw" type="button" role="switch" aria-checked="true" data-sw-c aria-label="模块启用开关"></button></span>
+      </div>
+      <div class="module-content" data-content-c>
+        <div class="note blue" style="margin-bottom:10px;">ⓘ 在 RCPT TO 阶段检测收件人地址，防范目录收割攻击（DHA）、邮件轰炸及域内横向钓鱼</div>
+        <div class="note gray">数量限制策略 / 存在性验证策略 区块（内容不卸载，仅灰化且不可点；开关视觉保持原状态）</div>
+        <p style="font-size:13px;color:#6b7280;margin:10px 0 0;">左侧导航状态圆点联动：启用 <span class="nav-dot-demo" data-dot-c></span> → 禁用 变空心灰。</p>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/drawer-module-disabled.png" alt="模块整体禁用">
+      <figcaption>模块禁用：状态字“已禁用”，整个配置区 opacity-50 且 pointer-events-none；左导航收信人检测行圆点变空心。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>开关矩阵</td><td>[模块 unchecked, 数量限制 checked, 存在性验证 checked]（内部开关状态保留）</td><td>预览仅模块开关切换，正文说明内部开关不变</td><td>一致</td></tr>
+        <tr><td>灰化 wrapper</td><td><code>div.space-y-6.opacity-50.pointer-events-none</code>（内容不卸载：radio 4 / input 3 / combobox 4 仍在）</td><td><code>.module-content.off</code> opacity .5 + pointer-events none</td><td>一致</td></tr>
+        <tr><td>状态字</td><td>“已禁用”（灰色），启用时“已启用”（蓝色）</td><td>同文案同配色逻辑</td><td>一致</td></tr>
+        <tr><td>导航圆点</td><td>由 <code>bg-blue-500</code> 变 <code>border-2 border-gray-300</code> 空心</td><td><code>.nav-dot-demo.off</code></td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">3</span>D. 执行动作下拉展开与切换</h2>
+    <div class="component-preview" style="min-height:220px;">
+      <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">执行动作</div>
+      <div class="fake-select">
+        <button class="fake-trigger" type="button" data-dd-trigger>阻断</button>
+        <div class="fake-menu is-hidden" data-dd-menu>
+          <div class="fake-option" data-value="quarantine">隔离</div>
+          <div class="fake-option" data-value="review">审核</div>
+          <div class="fake-option checked" data-value="block">阻断</div>
+          <div class="fake-option" data-value="drop">丢弃</div>
+        </div>
+      </div>
+      <p class="action-desc" data-dd-desc>拒绝接收，发送方收到退信通知（452/550）</p>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/drawer-action-select-open.png" alt="执行动作下拉展开">
+      <figcaption>接收方向执行动作下拉展开：4 个选项，当前值“阻断”高亮并带勾选标记。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>选项清单（顺序）</td><td><code>[role=option]</code>：隔离 / 审核 / 阻断(checked) / 丢弃</td><td>同顺序同选中态</td><td>一致</td></tr>
+        <tr><td>选中标识</td><td><code>data-state=checked</code>，蓝底白字+勾</td><td><code>.fake-option.checked</code> 蓝底白字+✓</td><td>一致</td></tr>
+        <tr><td>切换联动</td><td>选“丢弃”后 combobox 值变“丢弃”，说明变“静默丢弃，发送方无感知，无退信”</td><td>预览点选后触发同文案联动</td><td>一致</td></tr>
+        <tr><td>动作说明全集</td><td>隔离=进隔离区待审 / 审核=待审核队列 / 阻断=退信452/550 / 丢弃=静默丢弃无退信</td><td>同映射（getActionDescription）</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>元素清单（本层汇总）</h2>
+    <table class="spec-table">
+      <thead><tr><th>序号</th><th>元素</th><th>状态变化</th><th>恢复方式</th><th>跳转层级</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>数量限制策略 Switch</td><td>关闭 → 区块 body 卸载（值保留于 state）</td><td>再次开启原样恢复</td><td>→ 层级1</td></tr>
+        <tr><td>2</td><td>存在性验证策略 Switch</td><td>关闭 → 区块 body 卸载</td><td>再次开启原样恢复</td><td>→ 层级1</td></tr>
+        <tr><td>3</td><td>模块启用 Switch（面板头）</td><td>关闭 → 已禁用 + 全区灰化不可点 + 导航圆点空心；内部开关状态不变</td><td>再次开启恢复交互</td><td>→ 层级1</td></tr>
+        <tr><td>4</td><td>执行动作 Select（×4 处）</td><td>展开 4 项菜单；选中项高亮打勾；切换后说明文案联动</td><td>Escape/点外部关闭</td><td>本层内</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="layer-nav"><a href="index.html#component-2-3">← 返回主文件</a> · <a href="layer-1-merged-mode.html">上一层：合并模式 ←</a></nav>
+
+  <script>
+    // A/B：区块开关 ↔ body 卸载
+    function bindBlock(swSel, bodySel) {
+      const sw = document.querySelector(swSel), body = document.querySelector(bodySel);
+      sw.addEventListener("click", () => {
+        const on = sw.getAttribute("aria-checked") === "true";
+        sw.setAttribute("aria-checked", String(!on));
+        body.classList.toggle("is-hidden", on);
+      });
+    }
+    bindBlock("[data-sw-a]", "[data-body-a]");
+    bindBlock("[data-sw-b]", "[data-body-b]");
+
+    // C：模块开关 → 灰化 + 状态字 + 圆点
+    const swC = document.querySelector("[data-sw-c]");
+    swC.addEventListener("click", () => {
+      const on = swC.getAttribute("aria-checked") === "true";
+      swC.setAttribute("aria-checked", String(!on));
+      const status = document.querySelector("[data-status-c]");
+      status.classList.toggle("off", on);
+      status.childNodes[0].textContent = on ? "已禁用 " : "已启用 ";
+      document.querySelector("[data-content-c]").classList.toggle("off", on);
+      document.querySelector("[data-dot-c]").classList.toggle("off", on);
+    });
+
+    // D：模拟 Radix Select
+    const ACTION_DESC = {
+      quarantine: "邮件进入隔离区，管理员审核后可放行或删除",
+      review: "邮件进入待审核队列，人工确认后投递或退回",
+      block: "拒绝接收，发送方收到退信通知（452/550）",
+      drop: "静默丢弃，发送方无感知，无退信"
+    };
+    const trigger = document.querySelector("[data-dd-trigger]");
+    const menu = document.querySelector("[data-dd-menu]");
+    trigger.addEventListener("click", (e) => { e.stopPropagation(); menu.classList.toggle("is-hidden"); });
+    menu.querySelectorAll(".fake-option").forEach((opt) => {
+      opt.addEventListener("click", () => {
+        menu.querySelectorAll(".fake-option").forEach((o) => o.classList.toggle("checked", o === opt));
+        trigger.textContent = opt.textContent.trim();
+        document.querySelector("[data-dd-desc]").textContent = ACTION_DESC[opt.dataset.value];
+        menu.classList.add("is-hidden");
+      });
+    });
+    document.addEventListener("click", () => menu.classList.add("is-hidden"));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") menu.classList.add("is-hidden"); });
+  </script>
+</body>
+</html>

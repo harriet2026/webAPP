@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级14：详情抽屉内的弹窗组 - 邮件处置中心 HTML 规格说明</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .pass { color:#15803d; font-weight:600; }
+  .bad { color:#b91c1c; font-weight:600; }
+  .warn { color:#a16207; font-weight:600; }
+  table.spec-table.compact th, table.spec-table.compact td{ padding:.4rem .55rem; font-size:.82rem; }
+  .preview-note{ font-size:.75rem; color:#64748b; margin:.25rem 0 .75rem; }
+
+  /* 实测 dialog DOM 用 fixed 定位（相对视口），预览内需改为静态内联居中，与 layer-7/8/9 同款 */
+  .component-preview [role="dialog"][data-slot="dialog-content"]{
+    position:static!important; transform:none!important; translate:none!important;
+    left:auto!important; top:auto!important; margin:1rem auto; max-width:32rem; width:100%;
+    box-shadow:0 8px 24px rgba(0,0,0,.14);
+  }
+  .component-preview [data-radix-menu-content]{
+    position:static!important; transform:none!important; margin:.25rem 0 0 auto;
+  }
+  .component-preview{ max-height:none; background:#fff; }
+
+  /* 关闭后出现的「重新打开」按钮 + 确认后 toast（演示交互态） */
+  .dlg-reopen{ display:inline-flex; align-items:center; gap:.375rem; margin:1rem auto; padding:.5rem 1rem;
+    border:1px dashed #1890FF; color:#1890FF; background:#F0F8FF; border-radius:.375rem; font-size:.8125rem;
+    cursor:pointer; }
+  .dlg-reopen:hover{ background:#E6F4FF; }
+  .dlg-toast{ margin:.75rem auto; padding:.5rem .875rem; background:#F6FFED; color:#389E0D; border:1px solid #B7EB8F;
+    border-radius:.375rem; font-size:.8125rem; text-align:center; width:max-content; }
+  .dlg-more-trigger{ display:inline-flex; align-items:center; gap:.375rem; padding:.4rem .75rem; border:1px solid #D9D9D9;
+    color:#595959; background:#fff; border-radius:.375rem; font-size:.8125rem; cursor:pointer; }
+  .dlg-more-trigger:hover{ background:#FAFAFA; }
+</style>
+</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-4">← 返回主文件</a>
+  <a href="./layer-13-detail-raw-logs.html">上一层：原始日志</a>
+</nav>
+<header class="spec-header">
+  <h1>交互层级 14（详情层级5）：抽屉内弹窗组</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.4 详情抽屉 → <code>OverviewActionSection</code> 的 6 个 Dialog + 1 个 DropdownMenu</td></tr>
+    <tr><td>源码</td><td><code>components/mail-investigation/overview-action-section.tsx</code>（弹窗 JSX 第 1315–1487 行；moreActions 第 550–558 行）</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html#component-2-4">index.html#component-2-4</a></td></tr>
+    <tr><td>触发路径</td><td>概览区处置按钮：发信人加黑 / 发信人加白 / 投递 / 丢弃 / 召回 / 更多；收件人矩阵批量处置 → 批量结果</td></tr>
+    <tr><td>实测样本</td><td>发信人弹窗取「单投·紧急员工名单确认」行（发件人 <code>ceo@company-corp.com</code>，收件人 <code>hr@company.com</code>）；批量结果取「多投·Q2财务报表」行（5 收件人）</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <p class="preview-hint">下方每个弹窗为运行中 demo（:3111）实测 dialog/menu 的 1:1 DOM。点「取消 / ✕ / 遮罩外」关闭，点「确认」按钮演示提交（不落库）。</p>
+
+  <!-- ① 发信人加黑 -->
+  <h2>① 发信人加黑确认（<code>showBlacklistDialog</code>）</h2>
+  <p class="preview-note">radio「本租户/全系统」可切换；checkbox「同时拦截该域名下所有地址」可勾选；确认按钮红 <code>#FF4D4F</code>。</p>
+  <div class="component-preview" data-preview="none" data-dlg style="min-height:320px"><button type="button" class="dlg-reopen" hidden>重新打开弹窗</button><div class="dlg-toast" hidden>✓ 已加入黑名单（演示模拟，不落库）</div><div role="dialog" id="radix-_r_6a_" aria-describedby="radix-_r_6c_" aria-labelledby="radix-_r_6b_" data-state="open" data-slot="dialog-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg" tabindex="-1" style="pointer-events: auto;"><div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left"><h2 id="radix-_r_6b_" data-slot="dialog-title" class="font-semibold text-base">确认将发信人 "ceo@company-corp.com" 加入黑名单？</h2><p id="radix-_r_6c_" data-slot="dialog-description" class="text-sm text-[#8C8C8C]">后续来自该发信人的邮件将被自动拦截。</p></div><div class="space-y-4 py-4"><div><label class="block text-sm font-medium text-[#595959] dark:text-gray-300 mb-2">生效范围</label><div class="flex gap-4"><label class="flex items-center gap-2 cursor-pointer"><input class="w-4 h-4 text-[#1890FF]" type="radio" checked="" name="scope"><span class="text-sm text-[#595959]">本租户</span></label><label class="flex items-center gap-2 cursor-pointer"><input class="w-4 h-4 text-[#1890FF]" type="radio" name="scope"><span class="text-sm text-[#595959]">全系统</span></label></div></div><div class="flex items-center gap-2"><button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" data-slot="checkbox" class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50" id="include-subdomains"></button><label for="include-subdomains" class="text-sm text-[#595959] dark:text-gray-300">同时拦截该域名下所有地址</label></div></div><div data-slot="dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3 border-[#D9D9D9] text-[#595959]">取消</button><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[>svg]:px-3 bg-[#FF4D4F] hover:bg-[#FF7875] text-white">确认</button></div><button type="button" data-slot="dialog-close" class="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="sr-only">Close</span></button></div></div>
+  <figure class="screenshot-figure"><img src="./screenshots/detail-layer-2-blacklist-dialog.png" alt="发信人加黑确认对话框"><figcaption>发信人加黑确认（浏览器实测 · demo :3111）</figcaption></figure>
+  <h5>UI 元素清单</h5>
+  <table class="spec-table compact">
+    <thead><tr><th>元素</th><th>文案 / 取值</th><th>默认 / 交互</th><th>i18n / 源码</th></tr></thead>
+    <tbody>
+      <tr><td>标题 <code>DialogTitle</code></td><td>确认将发信人 "{log.sender}" 加入黑名单？</td><td><code>text-base</code></td><td>模板字符串（第 1318 行）</td></tr>
+      <tr><td>描述 <code>DialogDescription</code></td><td>后续来自该发信人的邮件将被自动拦截。</td><td><code>text-[#8C8C8C]</code></td><td>第 1319 行</td></tr>
+      <tr><td>生效范围 label</td><td>生效范围</td><td>—</td><td>Scope</td></tr>
+      <tr><td>radio 本租户</td><td>本租户</td><td><strong>默认选中</strong>；native <code>input[name=scope]</code></td><td>blacklistScope="tenant"</td></tr>
+      <tr><td>radio 全系统</td><td>全系统</td><td>native radio</td><td>blacklistScope="global"</td></tr>
+      <tr><td>Checkbox</td><td>同时拦截该域名下所有地址</td><td><strong>默认不勾选</strong>；radix <code>#include-subdomains</code></td><td>includeSubdomains</td></tr>
+      <tr><td>Footer 取消</td><td>取消</td><td>border <code>#D9D9D9</code> → 关闭</td><td>Cancel</td></tr>
+      <tr><td>Footer 确认</td><td>确认</td><td>红填充 <code>#FF4D4F</code> / hover <code>#FF7875</code> → handleAction("blacklist")</td><td>Confirm</td></tr>
+    </tbody>
+  </table>
+  <p class="warn">落地映射：写入<strong>统一规则系统</strong>的发件人黑白名单（implement.md 第 5/12 条：不新增规则系统、不新增 action）。「生效范围」→ 租户维度；「含子域」→ 规则匹配模式（域名 vs 精确地址）。→ 主文件 §10 Q3</p>
+
+  <!-- ② 发信人加白 -->
+  <h2>② 发信人加白确认（<code>showWhitelistDialog</code>）</h2>
+  <p class="preview-note">结构同加黑，<strong>无「含子域」勾选</strong>；描述「跳过部分安全检测」；确认按钮绿 <code>#52C41A</code>。</p>
+  <div class="component-preview" data-preview="none" data-dlg style="min-height:280px"><button type="button" class="dlg-reopen" hidden>重新打开弹窗</button><div class="dlg-toast" hidden>✓ 已加入白名单（演示模拟，不落库）</div><div role="dialog" id="radix-_r_6d_" aria-describedby="radix-_r_6f_" aria-labelledby="radix-_r_6e_" data-state="open" data-slot="dialog-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg" tabindex="-1" style="pointer-events: auto;"><div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left"><h2 id="radix-_r_6e_" data-slot="dialog-title" class="font-semibold text-base">确认将发信人 "ceo@company-corp.com" 加入白名单？</h2><p id="radix-_r_6f_" data-slot="dialog-description" class="text-sm text-[#8C8C8C]">后续来自该发信人的邮件将跳过部分安全检测。</p></div><div class="space-y-4 py-4"><div><label class="block text-sm font-medium text-[#595959] dark:text-gray-300 mb-2">生效范围</label><div class="flex gap-4"><label class="flex items-center gap-2 cursor-pointer"><input class="w-4 h-4 text-[#1890FF]" type="radio" checked="" name="whitelist-scope"><span class="text-sm text-[#595959]">本租户</span></label><label class="flex items-center gap-2 cursor-pointer"><input class="w-4 h-4 text-[#1890FF]" type="radio" name="whitelist-scope"><span class="text-sm text-[#595959]">全系统</span></label></div></div></div><div data-slot="dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3 border-[#D9D9D9] text-[#595959]">取消</button><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[>svg]:px-3 bg-[#52C41A] hover:bg-[#389E0D] text-white">确认</button></div><button type="button" data-slot="dialog-close" class="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="sr-only">Close</span></button></div></div>
+  <figure class="screenshot-figure"><img src="./screenshots/detail-layer-2c-whitelist-dialog.png" alt="发信人加白确认对话框"><figcaption>发信人加白确认（浏览器实测 · demo :3111，触发「发信人加白」新捕获）</figcaption></figure>
+  <h5>UI 元素清单</h5>
+  <table class="spec-table compact">
+    <thead><tr><th>元素</th><th>文案 / 取值</th><th>默认 / 交互</th><th>i18n / 源码</th></tr></thead>
+    <tbody>
+      <tr><td>标题</td><td>确认将发信人 "{log.sender}" 加入白名单？</td><td><code>text-base</code></td><td>第 1345 行</td></tr>
+      <tr><td>描述</td><td>后续来自该发信人的邮件将跳过部分安全检测。</td><td><code>text-[#8C8C8C]</code></td><td>第 1346 行</td></tr>
+      <tr><td>radio 本租户 / 全系统</td><td>本租户（默认）/ 全系统</td><td>native <code>input[name=whitelist-scope]</code>（复用同一 <code>blacklistScope</code> state）</td><td>第 1352–1353 行</td></tr>
+      <tr><td>Footer 确认</td><td>确认</td><td>绿填充 <code>#52C41A</code> / hover <code>#389E0D</code> → handleAction("whitelist")</td><td>Confirm</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ③ 投递确认 -->
+  <h2>③ 投递确认 · 单收件人（<code>showDeliverConfirm</code>）</h2>
+  <p class="preview-note">仅单投场景、且收件人处于「隔离中 / 待审核」时，顶部出现「投递」按钮触发；绿底信息条显示收件人。</p>
+  <div class="component-preview" data-preview="none" data-dlg style="min-height:260px"><button type="button" class="dlg-reopen" hidden>重新打开弹窗</button><div class="dlg-toast" hidden>✓ 已投递给 hr@company.com（演示模拟，不落库）</div><div role="dialog" id="radix-_r_6g_" aria-describedby="radix-_r_6i_" aria-labelledby="radix-_r_6h_" data-state="open" data-slot="dialog-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg" tabindex="-1" style="pointer-events: auto;"><div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left"><h2 id="radix-_r_6h_" data-slot="dialog-title" class="font-semibold text-base">确认投递邮件</h2><p id="radix-_r_6i_" data-slot="dialog-description" class="text-sm text-[#8C8C8C]">确认将该邮件投递给 hr@company.com？</p></div><div class="py-2"><div class="p-3 bg-[#F6FFED] rounded-lg text-sm text-[#52C41A] flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail w-4 h-4"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>hr@company.com</div></div><div data-slot="dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3 border-[#D9D9D9] text-[#595959]">取消</button><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[>svg]:px-3 bg-[#52C41A] hover:bg-[#389E0D] text-white">确认投递</button></div><button type="button" data-slot="dialog-close" class="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="sr-only">Close</span></button></div></div>
+  <figure class="screenshot-figure"><img src="./screenshots/detail-layer-2b-deliver-dialog.png" alt="投递确认对话框"><figcaption>投递确认（浏览器实测 · demo :3111）</figcaption></figure>
+  <h5>UI 元素清单</h5>
+  <table class="spec-table compact">
+    <thead><tr><th>元素</th><th>文案 / 取值</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>标题</td><td>确认投递邮件</td><td>第 1368 行</td></tr>
+      <tr><td>描述</td><td>确认将该邮件投递给 {收件人}？</td><td>无 selectedRecipientData 时退化为「确认将该邮件从隔离区释放并投递到收件人邮箱？」（第 1370–1376 行）</td></tr>
+      <tr><td>信息条</td><td>✉ {收件人}</td><td>绿底 <code>bg-[#F6FFED]</code> + <code>text-[#52C41A]</code> + <code>Mail</code> 图标</td></tr>
+      <tr><td>Footer</td><td>取消 / 确认投递</td><td>确认投递 = 绿 <code>#52C41A</code> → handleRecipientAction("deliver", email)</td></tr>
+    </tbody>
+  </table>
+  <p class="preview-note"><strong>同族变体（未单列预览，结构一致）：</strong>丢弃确认 <code>showDeleteConfirm</code>（标题红 <code>#F5222D</code>「确认丢弃邮件」，描述含「该操作不可恢复」，红底信息条 <code>#FFF1F0</code>，确认按钮红「确认丢弃」）；召回确认 <code>showRecallConfirm</code>（标题「确认召回邮件」，蓝底信息条 <code>#E6F7FF</code>/<code>#1890FF</code>，额外说明段「召回操作将尝试从收件人邮箱中删除该邮件。召回成功率取决于邮件客户端和服务器配置。」，确认按钮蓝 <code>#1890FF</code>「确认召回」）。</p>
+
+  <!-- ④ 批量操作结果 -->
+  <h2>④ 批量处置结果「操作完成」（<code>showBatchResultDialog</code>）</h2>
+  <p class="preview-note">仅多投场景：收件人矩阵勾选后点「批量投递/隔离/丢弃」，1.5s 后弹出逐收件人成败汇总（<code>max-w-md</code>）。</p>
+  <div class="component-preview" data-preview="none" data-dlg style="min-height:340px"><button type="button" class="dlg-reopen" hidden>重新打开弹窗</button><div role="dialog" id="radix-_r_8h_" aria-describedby="radix-_r_8j_" aria-labelledby="radix-_r_8i_" data-state="open" data-slot="dialog-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg max-w-md" tabindex="-1" style="pointer-events: auto;"><div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left"><h2 id="radix-_r_8i_" data-slot="dialog-title" class="font-semibold text-base">操作完成</h2></div><div class="py-4 space-y-2 max-h-64 overflow-auto"><div class="p-2 rounded text-sm flex items-center justify-between bg-[#FFF1F0]"><span>finance@company.com</span><div class="flex items-center gap-2 text-xs"><span class="text-gray-500">已投递</span><span>→</span><span class="text-[#F5222D]">当前状态不支持该操作</span></div></div><div class="p-2 rounded text-sm flex items-center justify-between bg-[#F6FFED]"><span>hr@company.com</span><div class="flex items-center gap-2 text-xs"><span class="text-gray-500">隔离中</span><span>→</span><span class="text-[#52C41A]">已投递</span></div></div><div class="p-2 rounded text-sm flex items-center justify-between bg-[#F6FFED]"><span>admin@company.com</span><div class="flex items-center gap-2 text-xs"><span class="text-gray-500">待审核</span><span>→</span><span class="text-[#52C41A]">已投递</span></div></div><div class="p-2 rounded text-sm flex items-center justify-between bg-[#FFF1F0]"><span>user1@company.com</span><div class="flex items-center gap-2 text-xs"><span class="text-gray-500">已阻断</span><span>→</span><span class="text-[#F5222D]">邮件已阻断，无原文，不可操作</span></div></div><div class="p-2 rounded text-sm flex items-center justify-between bg-[#FFF1F0]"><span>user2@company.com</span><div class="flex items-center gap-2 text-xs"><span class="text-gray-500">已丢弃</span><span>→</span><span class="text-[#F5222D]">邮件已丢弃，无原文，不可操作</span></div></div></div><div data-slot="dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3">确定</button></div><button type="button" data-slot="dialog-close" class="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="sr-only">Close</span></button></div></div>
+  <figure class="screenshot-figure"><img src="./screenshots/detail-layer-7-batch-result-dialog.png" alt="批量处置结果对话框（5 收件人）"><figcaption>批量投递结果 · 5 收件人（浏览器实测 · demo :3111）</figcaption></figure>
+  <h5>UI 元素清单（以「批量投递」为例）</h5>
+  <table class="spec-table compact">
+    <thead><tr><th>收件人</th><th>前状态</th><th>结果</th><th>底色</th></tr></thead>
+    <tbody>
+      <tr><td>finance@company.com</td><td>已投递</td><td class="bad">当前状态不支持该操作</td><td>红 <code>#FFF1F0</code></td></tr>
+      <tr><td>hr@company.com</td><td>隔离中</td><td class="pass">已投递</td><td>绿 <code>#F6FFED</code></td></tr>
+      <tr><td>admin@company.com</td><td>待审核</td><td class="pass">已投递</td><td>绿 <code>#F6FFED</code></td></tr>
+      <tr><td>user1@company.com</td><td>已阻断</td><td class="bad">邮件已阻断，无原文，不可操作</td><td>红 <code>#FFF1F0</code></td></tr>
+      <tr><td>user2@company.com</td><td>已丢弃</td><td class="bad">邮件已丢弃，无原文，不可操作</td><td>红 <code>#FFF1F0</code></td></tr>
+    </tbody>
+  </table>
+  <p>逐收件人一行：成功 → 绿底「前状态 → 后状态」；失败 → 红底「前状态 → 失败原因」（第 1464–1481 行 <code>batchResults.map</code>）。这是 demo 中<strong>唯一实现「部分成功」结果汇总</strong>的地方（列表页批量处置没有）。失败判定：<code>已投递</code>（canOperate 但无 deliver 动作）→「当前状态不支持」；<code>已阻断/已丢弃</code>（canOperate=false，无原文）→「无原文，不可操作」。Footer 仅「确定」（primary）。</p>
+
+  <!-- ⑤ 更多菜单 -->
+  <h2>⑤ 「更多」下拉菜单（<code>DropdownMenu</code> / moreActions）</h2>
+  <p class="preview-note">点「⋯ 更多」触发；6 项 + 2 分隔线，<code>w-48</code> 右对齐。</p>
+  <div class="component-preview" data-preview="none" data-moremenu style="position:relative;min-height:280px"><div style="display:flex;justify-content:flex-end;padding:12px 16px 0;"><button type="button" class="dlg-more-trigger"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-more-horizontal w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>更多</button></div><div style="display:flex;justify-content:flex-end;padding:0 16px;"><div data-side="bottom" data-align="end" role="menu" aria-orientation="vertical" data-state="open" data-radix-menu-content="" dir="ltr" id="radix-_r_62_" aria-labelledby="radix-_r_61_" data-slot="dropdown-menu-content" class="bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md w-48" tabindex="-1" data-orientation="vertical" data-spec-moremenu=""><div role="menuitem" data-slot="dropdown-menu-item" data-variant="default" class="focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center rounded-sm px-2 py-1.5 outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 gap-2 text-sm" tabindex="-1" data-orientation="vertical" data-radix-collection-item=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4 text-gray-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>导出EML</div><div role="menuitem" data-slot="dropdown-menu-item" data-variant="default" class="focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center rounded-sm px-2 py-1.5 outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 gap-2 text-sm" tabindex="-1" data-orientation="vertical" data-radix-collection-item=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4 text-gray-400"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>导出PDF报告</div><div role="separator" aria-orientation="horizontal" data-slot="dropdown-menu-separator" class="bg-border -mx-1 my-1 h-px"></div><div role="menuitem" data-slot="dropdown-menu-item" data-variant="default" class="focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center rounded-sm px-2 py-1.5 outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 gap-2 text-sm" tabindex="-1" data-orientation="vertical" data-radix-collection-item=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flag w-4 h-4 text-gray-400"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg>标记误报</div><div role="menuitem" data-slot="dropdown-menu-item" data-variant="default" class="focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center rounded-sm px-2 py-1.5 outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 gap-2 text-sm" tabindex="-1" data-orientation="vertical" data-radix-collection-item=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flag w-4 h-4 text-gray-400"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg>标记漏报</div><div role="separator" aria-orientation="horizontal" data-slot="dropdown-menu-separator" class="bg-border -mx-1 my-1 h-px"></div><div role="menuitem" data-slot="dropdown-menu-item" data-variant="default" class="focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center rounded-sm px-2 py-1.5 outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 gap-2 text-sm" tabindex="-1" data-orientation="vertical" data-radix-collection-item=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-plus w-4 h-4 text-gray-400"><path d="M12 10v6"></path><path d="M9 13h6"></path><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>加入调查任务</div></div></div></div>
+  <figure class="screenshot-figure"><img src="./screenshots/detail-layer-1b-more-menu.png" alt="更多操作下拉菜单"><figcaption>更多操作下拉（浏览器实测 · demo :3111）</figcaption></figure>
+  <h5>UI 元素清单</h5>
+  <table class="spec-table compact">
+    <thead><tr><th>菜单项</th><th>图标</th><th>onClick</th></tr></thead>
+    <tbody>
+      <tr><td>导出EML</td><td><code>Download</code></td><td class="bad">console.log（未实现）</td></tr>
+      <tr><td>导出PDF报告</td><td><code>FileText</code></td><td class="bad">console.log（未实现）</td></tr>
+      <tr><td colspan="3"><em>── 分隔线 ──</em></td></tr>
+      <tr><td>标记误报</td><td><code>Flag</code></td><td class="bad">console.log（未实现）</td></tr>
+      <tr><td>标记漏报</td><td><code>Flag</code></td><td class="bad">console.log（未实现）</td></tr>
+      <tr><td colspan="3"><em>── 分隔线 ──</em></td></tr>
+      <tr><td>加入调查任务</td><td><code>FolderPlus</code></td><td class="bad">console.log（未实现）</td></tr>
+    </tbody>
+  </table>
+
+  <!-- DOM 比对 -->
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果（嵌入的预览 HTML ↔ demo 实测渲染）</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>嵌入的 HTML</th><th>一致</th></tr></thead>
+      <tbody>
+        <tr><td>① 加黑根节点</td><td><code>[role=dialog][data-slot=dialog-content] sm:max-w-lg</code></td><td>一致</td><td class="pass">✅</td></tr>
+        <tr><td>① 加黑 radio</td><td>2 个 native <code>input[type=radio][name=scope]</code>，首个 checked</td><td>2 个</td><td class="pass">✅</td></tr>
+        <tr><td>① 加黑 checkbox</td><td>1 个 radix <code>#include-subdomains</code>（默认 unchecked）</td><td>1 个</td><td class="pass">✅</td></tr>
+        <tr><td>② 加白结构</td><td>无 checkbox；2 个 native <code>input[name=whitelist-scope]</code>；描述「跳过部分安全检测」</td><td>一致（新捕获核对）</td><td class="pass">✅</td></tr>
+        <tr><td>② 加白确认色</td><td><code>bg-[#52C41A] hover:bg-[#389E0D]</code></td><td>一致</td><td class="pass">✅</td></tr>
+        <tr><td>③ 投递信息条</td><td><code>Mail</code> 图标 + <code>bg-[#F6FFED] text-[#52C41A]</code></td><td>一致</td><td class="pass">✅</td></tr>
+        <tr><td>④ 批量结果行数</td><td><strong>5 行</strong>（Q2财务报表 5 收件人；2 绿 3 红）</td><td>5 行</td><td class="pass">✅ 修正（旧稿误写 3 行）</td></tr>
+        <tr><td>④ 批量结果宽度</td><td><code>max-w-md</code>（覆盖 sm:max-w-lg）</td><td>一致</td><td class="pass">✅</td></tr>
+        <tr><td>⑤ 更多菜单</td><td>6 项 <code>menuitem</code> + 2 <code>separator</code>，<code>w-48</code></td><td>6+2</td><td class="pass">✅</td></tr>
+        <tr><td>⑤ 菜单包裹</td><td>demo 中 radix 通过 <code>[data-radix-popper-content-wrapper]</code> portal 到 body</td><td>预览内改为紧贴触发按钮的静态菜单（无 radix runtime）</td><td class="warn">△ 预览简化（定位方式，非内容差异）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="diff-section">
+  <h2>差异标注：源码 vs 实测渲染</h2>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>项</th><th>源码</th><th>实测 / 落地含义</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>加黑「生效范围」与加白共用 state</td><td>加白 radio 的 <code>checked</code> 也绑定 <code>blacklistScope</code>（第 1352–1353 行），并非独立 <code>whitelistScope</code></td><td class="warn">两弹窗范围选择互相串值；落地时应拆为独立字段</td></tr>
+      <tr><td>2</td><td>加黑 checkbox 状态未参与提交</td><td><code>includeSubdomains</code> 有 state，但确认仅 <code>handleAction("blacklist")</code>（sleep 1s），未读取该值</td><td class="warn">demo 桩实现；落地需把「含子域」→ 规则匹配模式</td></tr>
+      <tr><td>3</td><td>「更多」6 项全部未实现</td><td>moreActions 每项 onClick 均为 <code>console.log(...)</code>（第 551–557 行）</td><td class="bad">导出EML/PDF、标记误报/漏报、加入调查任务均为占位</td></tr>
+      <tr><td>4</td><td>投递/丢弃描述有双分支</td><td>有 <code>selectedRecipientData</code> → 「投递给 {email}」；否则退化为隔离区通用文案（第 1370–1376 / 1400–1406 行）</td><td>抽屉内恒有选中收件人，实测总走前一分支</td></tr>
+      <tr><td>5</td><td>批量结果仅详情抽屉有</td><td><code>handleBatchAction</code> 产出 <code>batchResults</code> 部分成功汇总（第 439–485 行）</td><td>列表页批量处置无此「操作完成」汇总弹窗</td></tr>
+    </tbody>
+  </table>
+  <p class="preview-note">注：预览为无 radix runtime 的静态 DOM 重建；弹窗定位由 <code>fixed</code> 改为静态内联居中以适配规格页（内容/class 未改）。交互（开关/勾选/关闭/确认 toast/菜单展开）由本页内联脚本复刻，均非空 onclick。</p>
+</section>
+
+<script>
+(function () {
+  var CHECK = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check size-3.5"><path d="M20 6 9 17l-5-5"></path></svg>';
+  function qa(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+  function txt(el) { return (el && el.textContent || '').trim(); }
+  var CONFIRM = ['确认', '确认投递', '确认丢弃', '确认召回', '确定'];
+
+  qa('.component-preview[data-dlg]').forEach(function (prev) {
+    var dlg = prev.querySelector('[role="dialog"]');
+    var reopen = prev.querySelector('.dlg-reopen');
+    var toast = prev.querySelector('.dlg-toast');
+    if (!dlg) return;
+    function open() { dlg.style.display = ''; if (reopen) reopen.hidden = true; if (toast) toast.hidden = true; }
+    function close() { dlg.style.display = 'none'; if (reopen) reopen.hidden = false; }
+    if (reopen) reopen.addEventListener('click', open);
+    qa('button', dlg).forEach(function (b) {
+      var t = txt(b);
+      if (t === '取消' || b.getAttribute('data-slot') === 'dialog-close') {
+        b.addEventListener('click', close);
+      } else if (CONFIRM.indexOf(t) >= 0) {
+        b.addEventListener('click', function () { if (toast) toast.hidden = false; close(); });
+      }
+    });
+    // radix checkbox 勾选态
+    qa('[data-slot="checkbox"]', dlg).forEach(function (cb) {
+      cb.addEventListener('click', function () {
+        var on = cb.getAttribute('data-state') === 'checked';
+        cb.setAttribute('data-state', on ? 'unchecked' : 'checked');
+        cb.setAttribute('aria-checked', String(!on));
+        var ind = cb.querySelector('[data-slot="checkbox-indicator"]');
+        if (on) { if (ind) ind.remove(); return; }
+        if (!ind) {
+          ind = document.createElement('span');
+          ind.setAttribute('data-slot', 'checkbox-indicator');
+          ind.className = 'flex items-center justify-center text-current';
+          cb.appendChild(ind);
+        }
+        ind.innerHTML = CHECK;
+      });
+    });
+  });
+
+  // 更多菜单：触发按钮开关
+  qa('.component-preview[data-moremenu]').forEach(function (prev) {
+    var trg = prev.querySelector('.dlg-more-trigger');
+    var menu = prev.querySelector('[data-spec-moremenu]');
+    if (!trg || !menu) return;
+    menu.style.display = 'none';
+    trg.addEventListener('click', function (e) {
+      e.stopPropagation();
+      menu.style.display = menu.style.display === 'none' ? '' : 'none';
+    });
+    qa('[role="menuitem"]', menu).forEach(function (mi) {
+      mi.addEventListener('click', function () { menu.style.display = 'none'; });
+    });
+    document.addEventListener('click', function (e) {
+      if (!prev.contains(e.target)) menu.style.display = 'none';
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "module": "monitor-alerts",
+  "current_version": 3,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": null,
+      "summary": "初版：3 Tab（实时告警/告警规则/通知设置）+ 搜索过滤/全选批量/行操作菜单全交互实测；规则编辑器（80vw 5 段）与邮件服务配置双抽屉 portal 提取；形态×角色 5×2 矩阵（多租户 tenant 隐藏入口）；3 断点截图；9 项差异（全部操作空 onClick、渠道无新增、?id 参数未消费等）+ 4 项需确认"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": null,
+      "summary": "用户决定落地 1 项目标行为：实时告警行操作「查看详情」→ 打开告警详情抽屉（D-02 部分解决，新增 §3.3 目标行为规格：抽屉形态/内容/建议扩展信息/底部操作；?id=N 下钻直接开详情抽屉，Q-04 已解决）；§9/§10 全部条目逐项标注复核状态"
+    },
+    {
+      "version": 3,
+      "generated_at": "2026-07-22",
+      "demo_commit": "804efb9",
+      "spec_commit": null,
+      "summary": "预览交互修复：layer-5 规则编辑器抽屉补齐步骤导航滚动（scrollToSection 复刻：展开+smooth 滚动+高亮）与段头展开/收起（toggleSection 复刻：内容显隐+chevron 互换），补提取④高级降噪收起段内容，初始展开态与 demo 一致（①②③⑤展开、④收起）；8/8 浏览器回放验证通过"
+    }
+  ]
+}

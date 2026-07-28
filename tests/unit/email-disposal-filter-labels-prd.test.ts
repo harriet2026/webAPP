@@ -28,7 +28,7 @@ describe('GT-12237 emailDisposal.filters.statuses 对齐 V2 状态机字典', ()
 });
 
 // GT-12238: 邮件类型筛选标签必须使用原型全称
-// （design/origin/demo/docs/html_spec/email-handling-disposal-center/
+// （webapp/doc/html-spec/email-handling-disposal-center/
 // layer-1-search-mailtype-popover.html），不能使用缩写。
 describe('GT-12238 emailDisposal.filters.mailTypes 使用原型全称', () => {
   const mailTypes = zh.emailDisposal.filters.mailTypes as Record<string, string>;

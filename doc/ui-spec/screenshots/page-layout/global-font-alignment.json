@@ -1,0 +1,77 @@
+{
+  "captured_at": "2026-07-25",
+  "environment": {
+    "demo_url": "http://127.0.0.1:3000/security-ops-dashboard",
+    "webapp_url": "http://127.0.0.1:3001/zh/dashboard",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "zoom": 1,
+    "device_scale_factor": 1,
+    "font_ready": true
+  },
+  "before": {
+    "root_import": "geist/font",
+    "sans_faces": [
+      "400",
+      "500",
+      "600",
+      "700"
+    ],
+    "problem": "The webapp loaded separate static GeistSans faces while the demo loaded one 100-900 variable Geist face."
+  },
+  "after": {
+    "root_imports": [
+      "geist/font/sans",
+      "geist/font/mono"
+    ],
+    "loaded_faces": [
+      {
+        "family": "GeistSans",
+        "weight": "100 900",
+        "status": "loaded"
+      },
+      {
+        "family": "GeistMono",
+        "weight": "100 900",
+        "status": "loaded"
+      }
+    ],
+    "component_font_overrides": false
+  },
+  "detection_text_range": {
+    "text": "检测到",
+    "demo": {
+      "x": 361,
+      "y": 207,
+      "width": 42,
+      "height": 18,
+      "font_size": "14px",
+      "line_height": "20px",
+      "font_weight": "500"
+    },
+    "webapp": {
+      "x": 361,
+      "y": 207,
+      "width": 42,
+      "height": 18,
+      "font_size": "14px",
+      "line_height": "20px",
+      "font_weight": "500"
+    },
+    "equal": true
+  },
+  "same_text_pixel_comparison": {
+    "normalization": "The demo danger count was temporarily changed from 2 to 3 so both banners rendered identical text.",
+    "clip": {
+      "x": 312,
+      "y": 193,
+      "width": 1072,
+      "height": 46
+    },
+    "demo_sha256": "450edf0b73a08f923fa5f33b40e66a04ee3595d3ad2ea8470b2d49927a0fed9b",
+    "webapp_sha256": "450edf0b73a08f923fa5f33b40e66a04ee3595d3ad2ea8470b2d49927a0fed9b",
+    "identical": true
+  }
+}

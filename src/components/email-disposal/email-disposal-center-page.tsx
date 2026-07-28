@@ -117,7 +117,9 @@ export function EmailDisposalCenterPage({
   const [quickFilter, setQuickFilter] = useState<DisposalQuickFilter>(
     getDefaultQuickFilter,
   );
-  const [quickFilterCollapsed, setQuickFilterCollapsed] = useState(true);
+  // GT-12423: html_spec（index「按 demo（默认展开）落地」）要求高级筛选默认
+  // 展开；「更多筛选条件」(AdvancedFilters) 仍默认折叠（PRD 口径）。
+  const [quickFilterCollapsed, setQuickFilterCollapsed] = useState(false);
   const [advancedFilter, setAdvancedFilter] =
     useState<AdvancedFilter>(DEFAULT_ADVANCED);
   const [aiConditions, setAiConditions] = useState<AICondition[]>([]);
@@ -683,7 +685,11 @@ export function EmailDisposalCenterPage({
       />
 
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <AlertDialogContent data-testid="disposal-delete-dialog">
+        {/* html_spec layer-7: 弹窗 sm:max-w-md(448px)，写法说明见 reclassify-dialog.tsx */}
+        <AlertDialogContent
+          className="data-[size=default]:sm:max-w-md"
+          data-testid="disposal-delete-dialog"
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="text-destructive">{t("batch.delete")}</AlertDialogTitle>
             <AlertDialogDescription>
@@ -693,6 +699,8 @@ export function EmailDisposalCenterPage({
           <AlertDialogFooter>
             <AlertDialogCancel>{t("detail.overview.cancel")}</AlertDialogCancel>
             <AlertDialogAction
+              // html_spec layer-7: 删除确认按钮 bg-red-500 hover 600 白字
+              className="border-red-500/20 bg-red-500 text-white data-[hovered=true]:bg-red-600 active:bg-red-600"
               onClick={(event) => {
                 event.preventDefault();
                 void executeDelete();

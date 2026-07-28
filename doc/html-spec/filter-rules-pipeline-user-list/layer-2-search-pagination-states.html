@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级2：搜索/分页/禁用态 - 用户黑白名单 HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --muted: #f5f7fa; --muted-foreground: #6b7280; --border: #e5e7eb; --blue: #1677ff; --radius: 0.625rem; --font-sans: "Geist", "Inter", system-ui, sans-serif; --font-mono: "Geist Mono", ui-monospace, monospace; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: #111827; font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .layer-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: var(--muted); border-radius: var(--radius); margin-bottom: 20px; font-size: 14px; }
+    .layer-nav a { font-weight: 650; }
+    .spec-header, section { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .trigger-path { padding: 8px 12px; margin: 8px 0 12px; border-radius: 8px; background: var(--muted); color: var(--muted-foreground); font-size: 13px; }
+    .trigger-path strong { color: #111827; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .preview-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; color: #374151; background: #fff; }
+    .button-icon { padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; cursor: pointer; position: relative; }
+    .button-icon .tip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); padding: 3px 8px; border-radius: 6px; background: #111827; color: #fff; font-size: 12px; white-space: nowrap; }
+    .button-icon:hover .tip, .button-icon:focus .tip { display: block; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mini-table th, .mini-table td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; }
+    .mini-table th { background: #f8fafc; color: #374151; }
+    .mono { font-family: var(--font-mono); font-size: 12px; }
+    .pill { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #f3f4f6; }
+    .pill.orange { background: #ffedd5; color: #c2410c; }
+    .pill.green { background: #dcfce7; color: #15803d; }
+    .preview-pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 13px; color: #4b5563; flex-wrap: wrap; gap: 8px; }
+    .page-btn { min-width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; background: #fff; cursor: pointer; }
+    .page-btn.active { background: #155eef; color: #fff; border-color: #155eef; }
+    .preview-switch { display: inline-flex; align-items: center; gap: 8px; color: #155eef; font-size: 13px; cursor: pointer; user-select: none; }
+    .disabled-panel { opacity: .5; pointer-events: none; }
+    .is-hidden { display: none !important; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .shot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 900px) { .shot-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./layer-1-selection-delete-dialogs.html">← 层级1：选中与删除弹窗</a>
+    <span>层级 2 / 共 3 层</span>
+    <a href="./index.html#component-2-3">返回主文件 →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 2：搜索过滤 / 空态 / 分页 / 每页条数 / 跳页 / 模块禁用 / Tooltip</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.3 列表操作交互（用户黑白名单）</td></tr>
+      <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>层级1 列表态 → 搜索框输入 / 分页控件点击 / 每页条数下拉 / 卡头启用开关</td></tr>
+      <tr><td>demo 组件</td><td><code>identity-strategy-page.tsx renderUserListConfig()</code>（Input / Select / Button / Switch）</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">2</span>综合可交互预览（搜索 + 分页 + 跳页 + 每页条数 + 禁用开关）</h4>
+    <div class="trigger-path"><strong>说明</strong>：以下预览用 20 条黑名单 mock 数据（与 demo 生成器同源前缀 UB-）完整复刻列表数据流：搜索即时过滤并回第1页、空态隐藏分页、页码/跳页/每页条数联动、卡头开关整体禁用。</div>
+    <div class="component-preview">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <strong>用户黑白名单</strong>
+        <label class="preview-switch"><span data-switch-label>已启用</span><input type="checkbox" checked data-module-switch></label>
+      </div>
+      <div data-panel>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+          <input class="preview-input" style="min-width:300px;" type="search" data-search placeholder="搜索规则ID、发信人或收信人...">
+          <button class="button-icon" type="button" data-reset>⟳<span class="tip">重置</span></button>
+        </div>
+        <table class="mini-table">
+          <thead><tr><th>规则ID</th><th>发信人</th><th>收信人</th><th>执行动作</th><th>状态</th></tr></thead>
+          <tbody data-body></tbody>
+        </table>
+        <div data-empty class="is-hidden" style="text-align:center;padding:20px;color:#9ca3af;">暂无数据</div>
+        <div class="preview-pagination" data-pagination>
+          <span data-total>共 20 条</span>
+          <span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <span data-pages></span>
+            前往 <input class="preview-input" style="width:52px;padding:4px 6px;" type="number" min="1" data-jump> 页
+            <select class="preview-input" style="padding:6px 8px;" data-pagesize>
+              <option value="10" selected>10条/页</option>
+              <option value="20">20条/页</option>
+              <option value="50">50条/页</option>
+              <option value="100">100条/页</option>
+            </select>
+          </span>
+        </div>
+      </div>
+    </div>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>demo 实际行为（浏览器验证事实）</th><th>预览复刻</th></tr></thead>
+      <tbody>
+        <tr><td>搜索“alice”</td><td>过滤出 1 行 UB-20260320-001；分页变“共 1 条 | 1”</td><td>同</td></tr>
+        <tr><td>搜索无结果</td><td>单行“暂无数据”居中；整个分页控件隐藏</td><td>同</td></tr>
+        <tr><td>重置按钮</td><td>清空搜索、恢复 10 行、回第1页；hover/focus Tooltip“重置”</td><td>同（hover/focus 显示 tip）</td></tr>
+        <tr><td>页码点击 2</td><td>首行变 UB-20260309-011（第2页第1行）</td><td>同</td></tr>
+        <tr><td>跳页输入 2 + Enter</td><td>同页码点击；非数字/越界（如 99）忽略，停留当前页</td><td>同（含忽略逻辑）</td></tr>
+        <tr><td>每页条数选 20</td><td>单页 20 行、页码回1、分页文本“共 20 条 | 1 | 20条/页”</td><td>同</td></tr>
+        <tr><td>卡头开关关闭</td><td>内容区加 <code>opacity-50 pointer-events-none</code>，标签变“已禁用”</td><td>同</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="interaction-layer">
+    <h4><span class="layer-badge">2</span>浏览器验证截图</h4>
+    <div class="shot-grid">
+      <figure class="screenshot-figure">
+        <img src="./screenshots/search-filter-alice.png" alt="搜索 alice 过滤态">
+        <figcaption>搜索“alice”：仅 1 行命中，分页“共 1 条”。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/search-empty-state.png" alt="搜索无结果空态">
+        <figcaption>搜索无结果：表格显示“暂无数据”，分页控件整体隐藏。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/pagination-page-2.png" alt="第2页">
+        <figcaption>点击页码2：首行 UB-20260309-011，页码2高亮（default variant）。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/pagesize-select-open.png" alt="每页条数下拉展开">
+        <figcaption>每页条数 Select 展开：10/20/50/100条/页 四个选项（Radix Portal 渲染）。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/pagesize-20-applied.png" alt="每页20条生效">
+        <figcaption>选择 20条/页：单页渲染 20 行、页码回1。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/module-disabled-state.png" alt="模块禁用态">
+        <figcaption>卡头开关关闭：标签“已禁用”，内容区半透明不可点，左导航圆点变空心。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/tooltip-reset.png" alt="重置按钮 Tooltip">
+        <figcaption>重置按钮 focus/hover 显示 Tooltip“重置”。</figcaption>
+      </figure>
+    </div>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果（各状态）</h4>
+      <table class="spec-table">
+        <thead><tr><th>状态/比对项</th><th>demo 实际 DOM</th><th>提取的 HTML / 预览</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>搜索“alice”行数</td><td>tbody 1 行，首行 [UB-20260320-001, spam@bad-actor.com, alice@company.com, 隔离, 启用]；input.value="alice"</td><td>预览同数据同行为</td><td>一致</td></tr>
+          <tr><td>空态节点</td><td>tbody 单行 <code>td[colspan=9].text-center</code>“暂无数据”；分页容器不在 DOM（<code>filtered.length&gt;0</code> 条件渲染）</td><td>“暂无数据”块显示 + 分页 <code>.is-hidden</code></td><td>一致</td></tr>
+          <tr><td>第2页首行</td><td>UB-20260309-011 / sender11@spam-domain1.com / user11@company.com；页码按钮 [1=outline, 2=default]</td><td>同数据；页码2 active</td><td>一致</td></tr>
+          <tr><td>每页条数选项</td><td><code>[role=option]</code> ×4：10条/页 / 20条/页 / 50条/页 / 100条/页</td><td>native select 同 4 项（Radix 下拉以原生 select 代替）</td><td>一致（控件形态简化）</td></tr>
+          <tr><td>20条/页生效</td><td>tbody 20 行；分页“共 20 条 | 1 | 20条/页”</td><td>同</td><td>一致</td></tr>
+          <tr><td>禁用态</td><td>配置根 class=<code>space-y-4 opacity-50 pointer-events-none</code>；switch <code>data-state=unchecked</code>；卡头文案“已禁用”</td><td><code>[data-panel].disabled-panel</code> + 标签切换</td><td>一致</td></tr>
+          <tr><td>Tooltip</td><td><code>[data-radix-popper-content-wrapper]</code> 文本“重置”</td><td>CSS tip 元素“重置”</td><td>一致（实现方式简化）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="./layer-1-selection-delete-dialogs.html">← 层级1：选中与删除弹窗</a>
+    <a href="./index.html#component-2-3">返回主文件 →</a>
+  </nav>
+
+  <script>
+    (function () {
+      // 与 demo generateUserBlacklistRules 同构的 20 条数据（前5条逐字一致，6-20 按同一生成公式）
+      const seed = [
+        ["UB-20260320-001","spam@bad-actor.com","alice@company.com",true],
+        ["UB-20260319-002","*@promo-blast.net","bob@company.com",true],
+        ["UB-20260318-003","ads@newsletter.io","*@sales.company.com",false],
+        ["UB-20260317-004","marketing@spam.org","charlie@company.com",true],
+        ["UB-20260316-005","*@junk-mail.com","*@company.com",true],
+      ];
+      for (let i = 6; i <= 20; i++) {
+        seed.push([
+          "UB-202603" + String(20 - (i % 20)).padStart(2, "0") + "-" + String(i).padStart(3, "0"),
+          "sender" + i + "@spam-domain" + (i % 5) + ".com",
+          i % 3 === 0 ? "*@dept" + (i % 5) + ".company.com" : "user" + i + "@company.com",
+          i % 4 !== 0,
+        ]);
+      }
+      const body = document.querySelector("[data-body]");
+      const search = document.querySelector("[data-search]");
+      const resetBtn = document.querySelector("[data-reset]");
+      const empty = document.querySelector("[data-empty]");
+      const pagination = document.querySelector("[data-pagination]");
+      const totalEl = document.querySelector("[data-total]");
+      const pagesEl = document.querySelector("[data-pages]");
+      const jump = document.querySelector("[data-jump]");
+      const sizeSel = document.querySelector("[data-pagesize]");
+      const moduleSwitch = document.querySelector("[data-module-switch]");
+      const switchLabel = document.querySelector("[data-switch-label]");
+      const panel = document.querySelector("[data-panel]");
+      let page = 1, size = 10;
+
+      function filtered() {
+        const t = (search.value || "").trim().toLowerCase();
+        return seed.filter((r) => !t || r[0].toLowerCase().includes(t) || r[1].toLowerCase().includes(t) || r[2].toLowerCase().includes(t));
+      }
+      function render() {
+        const list = filtered();
+        const totalPages = Math.max(1, Math.ceil(list.length / size));
+        if (page > totalPages) page = totalPages;
+        const rows = list.slice((page - 1) * size, page * size);
+        body.innerHTML = rows.map((r) =>
+          "<tr><td class='mono'>" + r[0] + "</td><td class='mono'>✉ " + r[1] + "</td><td class='mono'>👤 " + r[2] +
+          "</td><td><span class='pill orange'>隔离</span></td><td><span class='pill " + (r[3] ? "green'>启用" : "'>禁用") + "</span></td></tr>").join("");
+        empty.classList.toggle("is-hidden", list.length > 0);
+        pagination.classList.toggle("is-hidden", list.length === 0);  // demo: filtered.length>0 才渲染分页
+        totalEl.textContent = "共 " + list.length + " 条";
+        const shown = Math.min(totalPages, 5);
+        let html = "";
+        for (let p = 1; p <= shown; p++) html += "<button class='page-btn" + (p === page ? " active" : "") + "' data-page='" + p + "'>" + p + "</button>";
+        if (totalPages > 5) html += " ...";
+        pagesEl.innerHTML = html;
+        pagesEl.querySelectorAll("[data-page]").forEach((b) => b.addEventListener("click", () => { page = parseInt(b.dataset.page); render(); }));
+      }
+      search.addEventListener("input", () => { page = 1; render(); });   // demo: 输入即过滤并回第1页
+      resetBtn.addEventListener("click", () => { search.value = ""; page = 1; render(); });
+      jump.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        const v = parseInt(jump.value);
+        const totalPages = Math.max(1, Math.ceil(filtered().length / size));
+        if (v >= 1 && v <= totalPages) { page = v; render(); }           // demo: 越界/非数字忽略（D-007）
+      });
+      sizeSel.addEventListener("change", () => { size = parseInt(sizeSel.value); page = 1; render(); });
+      moduleSwitch.addEventListener("change", () => {
+        const on = moduleSwitch.checked;
+        switchLabel.textContent = on ? "已启用" : "已禁用";
+        switchLabel.parentElement.style.color = on ? "#155eef" : "#6b7280";
+        panel.classList.toggle("disabled-panel", !on);
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>

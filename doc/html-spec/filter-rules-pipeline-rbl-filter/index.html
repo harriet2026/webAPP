@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>策略流水线 · RBL过滤 - HTML 规格说明</title>
+<style>
+:root{
+  --primary:oklch(0.52 0.226 262);--background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);
+  --card:#fff;--muted:#f6f7f9;--border:#e5e7eb;--subtle:#64748b;
+  --danger:#d92d20;--warn:#b7791f;--ok:#14804a;
+  --font:"Geist","Inter",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  /* ==== demo-preview tokens: 逐值取自运行中 demo 的 getComputedStyle ==== */
+  --dp-fg:lab(2.75381 0 0);--dp-border:lab(90.952 0 -0.0000119209);
+  --dp-muted-bg:lab(96.52 0 0);--dp-muted-fg:lab(48.496 0 0);
+  --dp-input-bg:lab(97.7711 -3.04654 -1.63313);
+  --dp-primary:lab(41.4441 24.5539 -79.1878);--dp-primary-fg:lab(98.26 0 0);
+  --dp-blue50:lab(96.492 -1.14644 -5.11479);--dp-blue200:lab(86.15 -4.04379 -21.0797);
+  --dp-blue300:lab(77.5052 -6.4629 -36.42);--dp-blue500:lab(54.1736 13.3369 -74.6839);
+  --dp-blue600:lab(44.0605 29.0279 -86.0352);--dp-blue700:lab(36.9089 35.0961 -85.6872);
+  --dp-card-border:#E8E8E8;--dp-link:#1890FF;--dp-link-hover:#40A9FF;--dp-title:#262626;--dp-red:#f5222d;
+  --dp-font:Geist,"Geist Fallback","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:28px;color:var(--foreground);background:var(--background);font-family:var(--font);line-height:1.62}
+.wrap{max-width:1380px;margin:0 auto}
+header,nav,section,article{background:var(--card);border:1px solid var(--border);border-radius:10px}
+header{padding:24px 28px;margin-bottom:18px}
+h1{margin:0 0 14px;color:var(--primary);font-size:26px}
+h2{margin:0 0 16px;padding-bottom:8px;border-bottom:2px solid var(--primary);color:var(--primary);font-size:20px}
+h3{margin:18px 0 10px;font-size:17px}
+h4{margin:14px 0 8px;color:#334155;font-size:15px}
+h5{margin:12px 0 6px;color:#475569;font-size:13.5px}
+code,pre{font-family:var(--mono)}
+code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12.5px}
+pre{overflow:auto;padding:14px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;font-size:12.5px}
+pre code{background:none;padding:0}
+a{color:#1677ff;text-decoration:none}
+a:hover{text-decoration:underline}
+section{padding:22px 26px;margin-bottom:18px}
+article{padding:16px 18px;margin:16px 0}
+.meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+.meta-table td,.spec-table th,.spec-table td{border:1px solid var(--border);padding:9px 11px;vertical-align:top}
+.meta-table td:first-child{width:180px;color:var(--subtle);font-weight:650;background:#f8fafc}
+.spec-table th{background:#f1f5f9;text-align:left;white-space:nowrap}
+.spec-table tr:nth-child(even) td{background:#fbfdff}
+.component-toc{padding:18px 22px;margin-bottom:18px}
+.component-toc ul{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}
+.component-toc li{padding:10px 12px;background:#f8fafc;border:1px solid var(--border);border-radius:8px}
+.toc-badge{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#e6f4ff;color:#0958d9;font-size:11.5px;font-weight:700}
+.toc-layer-links{display:block;margin-top:5px;font-size:12.5px;color:var(--subtle)}
+.toc-layer-links a{margin-right:9px}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.badge-blue{background:#e6f4ff;color:#0958d9}.badge-green{background:#eaf8ef;color:var(--ok)}
+.badge-red{background:#fff1f0;color:var(--danger)}.badge-amber{background:#fff7e6;color:var(--warn)}
+.figure{margin:14px 0}
+.figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 18px rgba(15,23,42,.08)}
+.figure figcaption{margin-top:7px;color:var(--subtle);font-size:13px}
+.screenshot-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.screenshot-grid figure{margin:0}.screenshot-grid img,.full-screenshot{width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 18px rgba(15,23,42,.08)}
+.screenshot-grid figcaption,figure>figcaption{margin-top:7px;color:var(--subtle);font-size:13px}
+.interaction-layer{margin:18px 0;padding:16px;border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:8px}
+.layer-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;margin-right:6px;border-radius:50%;background:#1677ff;color:#fff;font-size:13px;font-weight:800}
+.trigger-path{margin:8px 0 12px;padding:9px 11px;background:#f8fafc;border-radius:8px;color:#475569;font-size:13px}
+.component-preview{margin:14px 0;padding:20px;border:2px dashed #91caff;border-radius:10px;background:#f8fbff;overflow:auto}
+.preview-note{margin:0 0 12px;color:#0958d9;font-size:12.5px;font-weight:650}
+.dom-comparison{margin:14px 0;padding:12px 14px;background:#f8fafc;border:1px solid var(--border);border-radius:8px}
+.dom-comparison h5{margin-top:0}
+.diff-section{border-left:5px solid var(--danger);background:#fff8f8}
+.diff-section h2{color:var(--danger);border-bottom-color:var(--danger)}
+.question-section{border-left:5px solid var(--warn);background:#fffdf5}
+.question-section h2{color:var(--warn);border-bottom-color:var(--warn)}
+.mermaid{margin:14px 0;padding:14px;background:#fbfdff;border:1px solid var(--border);border-radius:8px;text-align:center}
+.overflow{overflow-x:auto}
+.mojibake{color:var(--danger);font-weight:700}
+@media(max-width:760px){body{padding:12px}.screenshot-grid{grid-template-columns:1fr}section{padding:16px}}
+/* ===================== demo preview 1:1 组件样式 ===================== */
+.dp{font-family:var(--dp-font);color:var(--dp-fg);font-size:16px;line-height:1.5}
+.dp-card{width:220px;height:60px;display:flex;overflow:visible;background:#fff;border:1px solid var(--dp-card-border);border-radius:10px;cursor:pointer;transition:all .2s;position:relative}
+.dp-card:hover{border-color:var(--dp-link);background:#E6F7FF}
+.dp-card .bar{width:4px;flex-shrink:0;background:var(--dp-red);border-radius:9px 0 0 9px}
+.dp-card .body{flex:1;padding:8px 12px;display:flex;flex-direction:column;justify-content:space-between}
+.dp-card .row{display:flex;align-items:center;justify-content:space-between}
+.dp-card .title{font-size:14px;font-weight:500;color:var(--dp-title);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dp-card .cfg{display:flex;align-items:center;gap:2px;flex-shrink:0;font-size:13px;color:var(--dp-link);background:none;border:0;cursor:pointer;font-family:inherit;padding:0}
+.dp-card .cfg:hover{color:var(--dp-link-hover)}
+.dp-tip{position:absolute;z-index:20;left:50%;transform:translateX(-50%);bottom:calc(100% + 8px);min-width:220px;padding:8px 12px;
+  background:#0f172a;color:#fff;border-radius:8px;font-size:13px;line-height:1.7;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.22);display:none}
+.dp-tip.on{display:block}
+.dp-tip b{font-weight:500}
+.dp-tip .dim{color:#cbd5e1}
+.dp-hint{margin-top:16px;padding:10px 12px;border-radius:8px;background:#e6f4ff;border:1px solid #91caff;color:#0958d9;font-size:13px;display:none}
+.dp-hint.on{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ 0. 元信息 ============ -->
+<header class="spec-header">
+  <h1>策略流水线 · RBL过滤 — HTML 可视化规格说明</h1>
+  <table class="meta-table">
+    <tr><td>模块</td><td>安全策略 → 策略流水线 → 阶段1 IP策略 → <strong>RBL过滤</strong></td></tr>
+    <tr><td>demo 路由</td><td><code>http://localhost:3111/filter-rules/pipeline</code></td></tr>
+    <tr><td>demo 源</td><td>
+      <code>design/origin/demo/app/filter-rules/pipeline/page.tsx</code><br>
+      → <code>components/filter-rules-new/strategy-pipeline-page.tsx</code>（策略卡片 + 全页面嵌入式抽屉）<br>
+      → <code>components/filter-rules-new/connection-layer-page.tsx</code>（<code>renderRblConfig()</code> L1019–1112，灰名单 Dialog L2297–2427）
+    </td></tr>
+    <tr><td>spec 源</td><td>
+      <code>design/origin/spec/RBL检测需求文档.md</code>（主）<br>
+      <code>design/origin/spec/策略流水线需求文档.md</code>（关联：卡片与流水线编排）
+    </td></tr>
+    <tr><td>遵循约束</td><td><code>design/origin/implement.md</code> — 四语国际化、复用统一规则系统 action（<code>mark</code> = <code>accept</code> + 加 header）、不新增规则系统、与底层冲突先确认</td></tr>
+    <tr><td>浏览器验证</td><td>Chromium（Playwright 1223）· 视口 1440×1000 / 1920 / 1024 · 全部截图、DOM 树、computed style 均取自运行中的 demo</td></tr>
+    <tr><td>交互层级</td><td>共 <strong>5 层</strong>（L0 内嵌本文件，L1–L4 拆分为独立子文件）</td></tr>
+    <tr><td>生成日期</td><td>2026-07-10</td></tr>
+  </table>
+</header>
+
+<section id="v2-update">
+  <h2>v2 更新说明（2026-07-21）</h2>
+  <table class="meta-table">
+    <tr><td>需求依据</td><td><strong>用户当前描述 + 当前会话历史 + demo</strong>；原始 spec 仅作非权威差异对照。</td></tr>
+    <tr><td>demo commit</td><td><code>6f34f80</code></td></tr>
+    <tr><td>本次变化</td><td>默认配置单一可信源；DNSBL 域名必填/格式/去重校验；删除二次确认；超时 1–30 秒钳制；灰名单动作联动入口。</td></tr>
+    <tr><td>新增层级</td><td><a href="./layer-5-rbl-validation.html">L5 服务器与超时校验</a> · <a href="./layer-6-rbl-delete-confirm.html">L6 删除确认</a></td></tr>
+    <tr><td>浏览器复验状态</td><td><strong>已完成。</strong>2026-07-21 使用 agent-browser 连接运行中的 <code>http://localhost:3001</code>，真实操作并采集服务器空值/格式/重复校验、合法域名 Enter 添加、超时 99→30 与 0→1 钳制、删除取消/确认、灰名单入口/Dialog，以及 5 形态 × 2 请求视角共 10 组 DOM。</td></tr>
+  </table>
+  <div class="screenshot-grid">
+    <figure><img src="./screenshots/20-rbl-greylist-entry.png" alt="RBL 动作切换为灰名单后的配置入口"><figcaption>动作切换为灰名单后条件渲染“点击配置”入口</figcaption></figure>
+    <figure><img src="./screenshots/21-rbl-greylist-dialog.png" alt="RBL 灰名单配置弹窗"><figcaption>灰名单 Dialog：延迟/限流模式、最大请求数、有效期与豁免项</figcaption></figure>
+  </div>
+</section>
+
+<section id="form-role-matrix">
+  <h2>0.1 产品形态 × 管理员视角矩阵</h2>
+  <div class="overflow"><table class="spec-table">
+    <thead><tr><th>角色</th><th>AI版-单租户</th><th>传统版-单租户</th><th>云网关-多租户</th><th>AI版-多租户</th><th>传统版-多租户</th></tr></thead>
+    <tbody>
+      <tr><td>平台/唯一管理员视角</td><td>✅ 显示且可编辑</td><td>✅ 显示且可编辑</td><td>✅ 显示且可编辑</td><td>✅ 显示且可编辑</td><td>✅ 显示且可编辑</td></tr>
+      <tr><td>租户管理员请求视角</td><td>— 无独立租户角色；自动归一为唯一管理员并显示</td><td>— 无独立租户角色；自动归一为唯一管理员并显示</td><td>❌ RBL 不渲染；阶段1显示平台统一管控</td><td>❌ RBL 不渲染；阶段1显示平台统一管控</td><td>❌ RBL 不渲染；阶段1显示平台统一管控</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>运行逻辑：</strong><code>effectiveViewer = isMultiTenant ? viewer : "platform"</code>；<code>lockStage1 = isMultiTenant &amp;&amp; viewer === "tenant"</code>。锁定时阶段1的四张策略卡全部替换为“平台统一管控”占位，RBL 卡片、配置抽屉及其所有校验/删除/灰名单交互均不渲染。直接访问 <code>/filter-rules/connection</code> 只是组件调试入口，不作为权限放行证据。</p>
+  <div class="overflow"><table class="spec-table"><thead><tr><th>实测组合</th><th>RBL 文本</th><th>平台锁定占位</th><th>结论</th></tr></thead><tbody>
+    <tr><td>cloud / ai-multi / legacy-multi × platform</td><td>存在</td><td>不存在</td><td><span class="badge badge-green">可见可编辑</span></td></tr>
+    <tr><td>cloud / ai-multi / legacy-multi × tenant</td><td>不存在</td><td>存在，含“租户不可调整”</td><td><span class="badge badge-green">隐藏已验证</span></td></tr>
+    <tr><td>ai-single / legacy-single × platform</td><td>存在</td><td>不存在</td><td><span class="badge badge-green">唯一管理员可编辑</span></td></tr>
+    <tr><td>ai-single / legacy-single × tenant 请求参数</td><td>存在</td><td>不存在</td><td><span class="badge badge-green">自动归一已验证</span></td></tr>
+  </tbody></table></div>
+  <figure><img class="full-screenshot" src="./screenshots/23-rbl-cloud-tenant-locked.png" alt="云网关租户管理员阶段1平台统一管控"><figcaption>agent-browser 实测：云网关租户管理员视角，阶段1由锁定占位替代，DOM 中无 RBL 文本。</figcaption></figure>
+  <p><strong>图例：</strong>✅ 显示且可编辑；🔒 显示但只读；❌ 隐藏；— 该形态无此角色。当前实现没有 RBL 只读态。</p>
+  <div class="overflow"><table class="spec-table">
+    <thead><tr><th>组件/元素</th><th>有效形态与角色</th><th>多租户租户管理员</th><th>标记</th></tr></thead><tbody>
+      <tr><td>RBL 策略卡片</td><td>✅ 单租户租户管理员；✅ 多租户平台管理员</td><td>❌ 不渲染，显示阶段锁定占位</td><td>[Overlay] 阶段1权限差异</td></tr>
+      <tr><td>服务器列表、添加、删除</td><td>✅ 随 RBL 抽屉显示且可编辑</td><td>❌ 无入口</td><td>[Base] 对有效角色一致</td></tr>
+      <tr><td>超时与动作</td><td>✅ 随 RBL 抽屉显示且可编辑</td><td>❌ 无入口</td><td>[Base] 对有效角色一致</td></tr>
+      <tr><td>灰名单入口与 Dialog</td><td>✅ 仅当动作为 <code>greylist</code> 条件渲染</td><td>❌ 无入口</td><td>[Base] 条件渲染 + [Overlay] 权限差异</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ============ 0.1 组件列表 ============ -->
+<nav class="component-toc">
+  <h2>📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 流水线 RBL 策略卡片</a><span class="toc-badge">1 层</span>
+      <span class="toc-layer-links">层级 0 内嵌本文件（含 hover Tooltip）</span></li>
+    <li><a href="#component-2-2">2.2 RBL 配置面板 <code>renderRblConfig()</code></a><span class="toc-badge">2 层</span>
+      <span class="toc-layer-links">
+        <a href="./layer-1-rbl-drawer.html">层级 1 · 抽屉 + 面板（阻断）</a>
+        <a href="./layer-2-greylist-entry.html">层级 2 · 灰名单入口</a>
+        <a href="./layer-5-rbl-validation.html">层级 5 · 服务器/超时校验</a>
+        <a href="./layer-6-rbl-delete-confirm.html">层级 6 · 删除确认</a>
+      </span></li>
+    <li><a href="#dialog-3-1">3.1 灰名单配置 Dialog</a><span class="toc-badge">2 层</span>
+      <span class="toc-layer-links">
+        <a href="./layer-3-greylist-dialog.html">层级 3 · 延迟接收模式</a>
+        <a href="./layer-4-greylist-ratelimit.html">层级 4 · 频率限制模式</a>
+      </span></li>
+  </ul>
+</nav>
+
+<!-- ============ 1. 页面布局结构 ============ -->
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <p>RBL过滤在 demo 中<strong>没有独立路由</strong>。它是策略流水线页（<code>/filter-rules/pipeline</code>）阶段1 IP策略泳道内的一张策略卡片；点击卡片上的「配置」按钮，会在同一页面打开一个<strong>全页面嵌入式抽屉</strong>（<code>Dialog</code>），抽屉里挂载 <code>ConnectionLayerPage</code> 的 <code>embedded</code> 模式并把 <code>initialPolicy</code> 定位到 <code>rbl</code>。</p>
+
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>DOM 根</th><th>尺寸（1440px 视口实测）</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>阶段泳道</td><td><code>div.flex.flex-col.min-w-[240px]</code></td><td>253 × 415 px</td><td>「阶段1: IP策略」，含 4 张策略卡片</td></tr>
+      <tr><td>策略卡片列表</td><td><code>div.flex.flex-col.gap-3</code></td><td>220 × 276 px</td><td>IP频率限制 / IP黑白名单 / <strong>RBL过滤</strong> / 海外邮件检测</td></tr>
+      <tr><td>RBL 策略卡片</td><td><code>div.w-[220px].rounded-lg…flex</code></td><td>220 × 60 px</td><td>左侧 4px 红色状态条 + 标题 + 「配置」链接按钮；整卡是 Tooltip 触发器</td></tr>
+      <tr><td>全页面抽屉</td><td><code>div[role=dialog]</code></td><td>整屏覆盖（103 节点）</td><td>头部面包屑「IP策略 / RBL过滤」+ 左侧策略导航（4 项）+ 右侧配置区</td></tr>
+      <tr><td>RBL 配置面板</td><td><code>div.grid.grid-cols-2.gap-6</code></td><td>双栏，每栏 602.5px @1920 / 244px @1024</td><td>左栏 RBL 服务器列表，右栏 超时 + 操作（+ 灰名单入口）</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>视觉规范（实测 computed style）</h4>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>令牌</th><th>实测值</th><th>用于</th></tr></thead>
+    <tbody>
+      <tr><td>卡片圆角 / 边框</td><td><code>10px</code> / <code>1px solid rgb(232,232,232)</code></td><td>策略卡片</td></tr>
+      <tr><td>卡片 hover</td><td>背景 <code>rgb(230,247,255)</code>，边框 <code>rgb(24,144,255)</code></td><td>策略卡片悬浮态</td></tr>
+      <tr><td>阻断类状态条</td><td><code>#f5222d</code>，宽 4px</td><td><code>type:"blocking"</code> 的策略</td></tr>
+      <tr><td>「配置」链接色</td><td><code>#1890FF</code> → hover <code>#40A9FF</code>，13px</td><td>卡片操作入口</td></tr>
+      <tr><td>主按钮（确认）</td><td>背景 <code>lab(41.4441 24.5539 -79.1878)</code>，前景 <code>lab(98.26 0 0)</code>，圆角 8px，高 36px</td><td>Dialog 主操作</td></tr>
+      <tr><td>字体</td><td><code>Geist, "Geist Fallback"</code></td><td>全局</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <figure class="figure">
+    <img src="./screenshots/00-pipeline-page-default.png" alt="策略流水线整页默认态">
+    <figcaption>整页默认态（1440×1000，full page）— RBL过滤位于阶段1泳道第 3 张卡片</figcaption>
+  </figure>
+  <figure class="figure">
+    <img src="./screenshots/02-rbl-drawer-full.png" alt="RBL 全页面抽屉">
+    <figcaption>点击 RBL 卡片「配置」后打开的全页面嵌入式抽屉（层级 1）</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 2. 逐组件规格 ============ -->
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <!-- ---------- 2.1 ---------- -->
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 流水线 RBL 策略卡片</h3>
+    <table class="meta-table">
+      <tr><td>demo 源</td><td><code>strategy-pipeline-page.tsx</code> <code>renderPolicyCard()</code>；数据定义见 L255</td></tr>
+      <tr><td>数据定义</td><td><code>{ priority: 1002, key: "rbl", stage: 1, type: "blocking", href: "/filter-rules/connection", todayHits: 45, todayBlocked: 45, todayExempted: 0, action: "pipeline.actionBlock" }</code></td></tr>
+      <tr><td>交互层级数</td><td>1（初始态 + hover Tooltip；点击「配置」进入层级 1）</td></tr>
+    </table>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：策略卡片初始态</h4>
+      <div class="trigger-path"><strong>触发路径：</strong>访问 <code>/filter-rules/pipeline</code> → 页面加载即渲染（无需交互）</div>
+
+      <div class="component-preview">
+        <p class="preview-note">↓ 可交互预览：悬浮卡片查看 Tooltip；点击「配置」查看跳转提示（行为与 demo 一致）</p>
+        <div class="dp">
+          <div class="dp-card" id="rblCard">
+            <div class="bar"></div>
+            <div class="body">
+              <div class="row">
+                <span class="title">RBL过滤</span>
+                <button class="cfg" id="rblCfgBtn" type="button">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right" style="width:12px;height:12px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button>
+              </div>
+            </div>
+            <div class="dp-tip" id="rblTip">
+              <div><b>策略：</b><span>RBL过滤</span></div>
+              <div><b>动作：</b><span>阻断</span></div>
+              <div><b>影响：</b><span class="dim">黑名单命中则阻断并终止流程</span></div>
+            </div>
+          </div>
+          <div class="dp-hint" id="rblHint">点击「配置」→ demo 打开全页面嵌入式抽屉（<code>setFullPageDrawerPolicy("rbl")</code>）。
+            请查看 <a href="./layer-1-rbl-drawer.html">层级 1 · RBL 抽屉 + 配置面板 →</a></div>
+        </div>
+      </div>
+
+      <figure class="figure">
+        <img src="./screenshots/01-rbl-policy-card.png" alt="RBL 策略卡片" style="max-width:300px">
+        <figcaption>层级 0：RBL 策略卡片（元素截图，220×60）</figcaption>
+      </figure>
+      <figure class="figure">
+        <img src="./screenshots/01b-rbl-card-tooltip.png" alt="卡片 hover Tooltip">
+        <figcaption>hover 态：Radix Tooltip 显示 策略 / 动作 / 影响 三行</figcaption>
+      </figure>
+
+      <h5>UI 元素清单</h5>
+      <div class="overflow">
+      <table class="spec-table">
+        <thead><tr><th>#</th><th>元素</th><th>类型</th><th>文案 / 图标</th><th>样式（实测）</th><th>交互</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>卡片根</td><td>div（Tooltip 触发器）</td><td>—</td><td>220×60，白底，1px <code>#E8E8E8</code>，radius 10px，<code>cursor:pointer</code></td><td>hover → 边框 <code>#1890FF</code> + 背景 <code>#E6F7FF</code>，弹出 Tooltip</td><td>—</td></tr>
+          <tr><td>2</td><td>状态条</td><td>div</td><td>—</td><td>宽 4px，<code>bg-[#f5222d]</code>（blocking 类）</td><td>无</td><td>—</td></tr>
+          <tr><td>3</td><td>策略名</td><td>span</td><td>「RBL过滤」</td><td>14px / 500 / <code>#262626</code> / <code>truncate</code></td><td>无</td><td><code>pipeline.rblFilter</code></td></tr>
+          <tr><td>4</td><td>配置入口</td><td>button + <code>lucide-arrow-right</code>（12×12）</td><td>「配置」+ →</td><td>13px / <code>#1890FF</code></td><td>click → 打开全页面抽屉</td><td><code>common.configure</code></td></tr>
+          <tr><td>5</td><td>Tooltip</td><td>Radix Tooltip（Portal 渲染）</td><td>策略：RBL过滤 / 动作：阻断 / 影响：黑名单命中则阻断并终止流程</td><td>深色浮层，13px</td><td>hover 触发</td><td><code>pipeline.actionBlock</code>、<code>pipeline.rblFilterDesc</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果（预览 HTML vs demo 实际 DOM）</h5>
+        <div class="overflow">
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>预览 HTML</th><th>一致</th></tr></thead>
+          <tbody>
+            <tr><td>根节点</td><td><code>div.w-[220px].rounded-lg…flex</code>（<code>data-slot="tooltip-trigger"</code>）</td><td><code>div.dp-card</code>（同尺寸 / 边框 / 圆角，同为 Tooltip 触发器）</td><td>✅</td></tr>
+            <tr><td>节点总数</td><td>9</td><td>9（div, div.bar, div.body, div.row, span, button, svg, path×2）</td><td>✅</td></tr>
+            <tr><td>直接子节点数</td><td>2（状态条 + 内容区）</td><td>2（Tooltip 浮层在 demo 中由 Portal 渲染到 body，不计入卡片子树）</td><td>✅</td></tr>
+            <tr><td>状态条</td><td><code>div.w-1.flex-shrink-0.bg-[#f5222d]</code>，实测 4×58px</td><td>宽 4px，<code>#f5222d</code></td><td>✅</td></tr>
+            <tr><td>标题文案</td><td>"RBL过滤"</td><td>"RBL过滤"</td><td>✅</td></tr>
+            <tr><td>按钮文案 + 图标</td><td>"配置" + <code>svg.lucide-arrow-right</code>（2 个 <code>path</code>）</td><td>"配置" + 同一 <code>lucide-arrow-right</code> path 数据</td><td>✅</td></tr>
+            <tr><td>Tooltip 文案</td><td>3 行：策略 / 动作 / 影响</td><td>3 行，逐字一致</td><td>✅</td></tr>
+            <tr><td>统计数字（<code>todayHits=45</code>）</td><td><strong>未渲染</strong>——卡片只显示名称 + 入口</td><td>未包含</td><td>✅</td></tr>
+            <tr><td>启用开关</td><td><strong>未渲染</strong>——卡片上无 Switch</td><td>未包含</td><td>✅</td></tr>
+            <tr><td>hover 计算样式</td><td><code>bg rgb(230,247,255)</code> / <code>border rgb(24,144,255)</code></td><td>同（<code>.dp-card:hover</code>）</td><td>✅</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p style="margin:8px 0 0;font-size:13px;color:var(--subtle)"><strong>修正记录：</strong>首次提取时祖先 climb 停在内层 <code>div.flex.items-center.justify-between</code>（6 节点，仅标题行，截图宽度仅 190px）。已按 demo 实际卡片根 <code>w-[220px]</code>（9 节点，220×60）重新提取并重截图。</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ---------- 2.2 ---------- -->
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 RBL 配置面板 <code>renderRblConfig()</code>（多层交互）</h3>
+    <table class="meta-table">
+      <tr><td>demo 源</td><td><code>connection-layer-page.tsx</code> L1019–1112</td></tr>
+      <tr><td>默认值来源</td><td><code>createDefaultRblConfig()</code>（L200–206，注释标明「单一可信源」）：<code>servers = ["zen.spamhaus.org","bl.spamcop.net","b.barracudacentral.org"]</code>、<code>timeout = "5"</code>、<code>action = "block"</code></td></tr>
+      <tr><td>交互层级数</td><td>6（L1 阻断态 / L2 灰名单态 / L3-L4 灰名单 Dialog / L5 校验 / L6 删除确认）</td></tr>
+      <tr><td>形态/角色差异</td><td>[Base] 有效角色下控件一致；[Overlay] 多租户租户管理员阶段1整体隐藏，无法进入本组件</td></tr>
+    </table>
+
+    <h4>交互层级关系图</h4>
+    <div class="mermaid">
+flowchart TD
+  L0["层级 0<br/>流水线 RBL 策略卡片"] -->|点击「配置」| L1["层级 1<br/>全页面抽屉 + RBL 配置面板<br/>action = 阻断"]
+  L1 -->|操作下拉选「灰名单」| L2["层级 2<br/>灰名单入口卡片出现"]
+  L2 -->|选回 阻断 / 隔离 / 标记| L1
+  L2 -->|点击入口卡按钮| L3["层级 3<br/>灰名单配置 Dialog<br/>延迟接收模式"]
+  L3 -->|选中「频率限制」单选| L4["层级 4<br/>Dialog · 频率限制模式"]
+  L4 -->|选回「延迟接收」| L3
+  L3 -->|取消 / 确认| L2
+  L4 -->|确认 → 摘要更新| L2
+  L1 -->|添加空值/非法/重复；超时失焦越界| L5["层级 5<br/>输入错误态 + Toast / 超时钳制"]
+  L1 -->|点击服务器 ×| L6["层级 6<br/>删除确认 AlertDialog"]
+  L6 -->|取消| L1
+  L6 -->|确认移除 + Toast| L1
+    </div>
+
+    <h4>交互层级详情（拆分为独立文件）</h4>
+    <div class="overflow">
+    <table class="spec-table layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>DOM 节点数（实测）</th><th>详情</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>策略卡片初始态</td><td>页面加载</td><td>9</td><td>↑ 上方内嵌（§2.1）</td></tr>
+        <tr><td>1</td><td>抽屉 + RBL 配置面板（action = 阻断）</td><td>卡片「配置」按钮 → <code>setFullPageDrawerPolicy("rbl")</code></td><td>抽屉 103 / 面板 38</td><td><a href="./layer-1-rbl-drawer.html">查看详情 →</a></td></tr>
+        <tr><td>2</td><td>灰名单入口卡片出现</td><td>「操作」下拉 → 选「灰名单」→ <code>rblAction === "greylist"</code> 条件渲染</td><td>面板 44 / 入口卡 5</td><td><a href="./layer-2-greylist-entry.html">查看详情 →</a></td></tr>
+        <tr><td>3</td><td>灰名单配置 Dialog（延迟接收）</td><td>入口卡按钮 → <code>setShowGreylistDialog(true)</code></td><td>47</td><td><a href="./layer-3-greylist-dialog.html">查看详情 →</a></td></tr>
+        <tr><td>4</td><td>Dialog · 频率限制模式</td><td>Dialog 内选中第 2 个 <code>RadioGroupItem</code></td><td>47</td><td><a href="./layer-4-greylist-ratelimit.html">查看详情 →</a></td></tr>
+        <tr><td>5</td><td>服务器/超时校验</td><td>添加空值、非法域名、重复域名；或超时输入失焦</td><td>基线 38 + Toast Portal</td><td><a href="./layer-5-rbl-validation.html">查看详情 →</a></td></tr>
+        <tr><td>6</td><td>服务器删除确认</td><td>点击服务器行 ×</td><td>面板 + AlertDialog Portal</td><td><a href="./layer-6-rbl-delete-confirm.html">查看详情 →</a></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </article>
+</section>
+
+<!-- ============ 3. 弹窗规格 ============ -->
+<section id="dialogs">
+  <h2>3. 弹窗 / 抽屉 / 对话框规格</h2>
+  <article id="dialog-3-1">
+    <h3>3.1 灰名单配置 Dialog</h3>
+    <table class="meta-table">
+      <tr><td>demo 源</td><td><code>connection-layer-page.tsx</code> L2297–2427</td></tr>
+      <tr><td>触发条件</td><td>「操作」= <code>greylist</code> 时条件渲染入口卡片 → 点击其配置按钮</td></tr>
+      <tr><td>实测尺寸</td><td>512 × 597 px（<code>max-w-lg</code>），padding 24px，radius 10px</td></tr>
+      <tr><td>草稿态</td><td>打开时把 8 个已生效状态拷贝进 <code>greylistDraft</code>；「取消」直接关闭丢弃草稿，「确认」才回写并置 <code>hasUnsavedChanges = true</code></td></tr>
+      <tr><td>嵌套关系</td><td>Dialog 叠加在全页面抽屉之上——两者<strong>都是</strong> <code>[role=dialog]</code>（提取时须取后出现的那个）</td></tr>
+      <tr><td>详情</td><td><a href="./layer-3-greylist-dialog.html">层级 3 · 延迟接收模式 →</a> ｜ <a href="./layer-4-greylist-ratelimit.html">层级 4 · 频率限制模式 →</a></td></tr>
+    </table>
+    <figure class="figure">
+      <img src="./screenshots/08-greylist-dialog-delay-page.png" alt="灰名单 Dialog 叠加在抽屉之上">
+      <figcaption>灰名单 Dialog 叠加在全页面抽屉之上（整页截图）</figcaption>
+    </figure>
+  </article>
+</section>
+
+<!-- ============ 4. 数据模型与 API 映射 ============ -->
+<section id="api-mapping">
+  <h2>4. 数据模型与 API 映射</h2>
+
+  <h4>4.1 demo 前端数据模型</h4>
+<pre><code>// connection-layer-page.tsx L195-206 —— RBL 全局默认配置（单一可信源）
+export interface RblConfig {
+  servers: string[]   // 默认 ["zen.spamhaus.org","bl.spamcop.net","b.barracudacentral.org"]
+  timeout: string     // 默认 "5"（秒）；受控 &lt;input type=number&gt;，state 为字符串
+  action: string      // "block" | "quarantine" | "mark" | "greylist"，默认 "block"
+}
+
+// 灰名单草稿 greylistDraft（L290-299）
+{
+  mode: "delay" | "rateLimit",   // 默认 delay
+  delaySeconds: "600",           // delay 模式：秒数
+  windowSeconds: "600",          // rateLimit 模式：窗口秒数
+  maxRequests:  "5",             // ⚠ 有 state、被摘要文案引用，但 Dialog 内无任何输入控件
+  whitelistTTL: "24",            // 小时
+  exemptAuthenticated: true,
+  exemptWhitelisted:   true,
+  exemptInternal:      false
+}</code></pre>
+
+  <h4>4.2 spec 定义的 API（产品视角，非落地约束）</h4>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>spec API / 表</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET/PUT /api/rbl/config</code></td><td>获取 / 更新 RBL 配置</td></tr>
+      <tr><td><code>GET /api/rbl/servers/health</code></td><td>服务器健康状态</td></tr>
+      <tr><td><code>GET /api/rbl/stats</code></td><td>查询统计</td></tr>
+      <tr><td><code>POST /api/rbl/query</code></td><td>手动查询 IP（调试）</td></tr>
+      <tr><td><code>GET/PUT /api/greylist/config</code></td><td>灰名单配置</td></tr>
+      <tr><td><code>t_rbl_config</code>、<code>t_rbl_servers</code>、<code>t_rbl_cache</code>、<code>t_greylist_config</code>、<code>t_greylist_whitelist</code></td><td>产品设计的数据表</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="font-size:13px;color:var(--subtle)">按 <code>implement.md</code>：「接口与数据表关联」里的 API 是产品设计时定义的，不必照搬，当前网关尽量用现有 API 完成对应功能。</p>
+
+  <h4>4.3 网关现有 API 映射（<code>internal/api/rbl_filter.go</code>、<code>detection_profiles.go</code>、<code>internal/models/rbl_filter.go</code>）</h4>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>UI 元素</th><th>网关现有 API / 存储</th><th>映射说明</th></tr></thead>
+    <tbody>
+      <tr><td>RBL 服务器列表</td><td><code>GET/POST/PUT/DELETE /detection-profiles</code>（<code>config_type = 'rbl'</code>）</td><td>服务器以 detection_profile 行存于 <code>detection_profiles</code> 表，而非独立的 <code>t_rbl_servers</code></td></tr>
+      <tr><td>查询超时（秒）</td><td>profile <code>value</code> JSON：<code>{"timeout_seconds":5,"retry_count":1}</code></td><td><code>ValidateRBLProfileValue()</code> 校验 <code>1 ≤ timeout_seconds ≤ 30</code>、<code>0 ≤ retry_count ≤ 3</code>；与 spec 的 1–30 秒一致。<strong>demo 未暴露 <code>retry_count</code></strong></td></tr>
+      <tr><td>命中动作 = 阻断</td><td><code>product_action:"block"</code> → 规则 action <code>reject</code></td><td><code>productActionToRuleAction()</code></td></tr>
+      <tr><td>命中动作 = 隔离</td><td><code>product_action:"quarantine"</code> → <code>quarantine</code></td><td>同上</td></tr>
+      <tr><td>命中动作 = 标记</td><td><code>product_action:"mark"</code> → <code>accept</code> + <code>add_headers</code></td><td>✅ 符合 <code>implement.md</code>「mark 对应 accept + 添加特定 header，而不是新加 action」</td></tr>
+      <tr><td>命中动作 = 灰名单</td><td colspan="2"><span class="badge badge-red">网关不支持</span> <code>ValidateRBLFilterRequest()</code> 显式 <code>return fmt.Errorf("greylist action is not supported")</code>；<code>rblFilterValidProductActions</code> 只含 <code>block / quarantine / mark</code></td></tr>
+      <tr><td>规则 CRUD</td><td><code>/rbl-filter/rules</code> GET/POST/PUT/DELETE、<code>/rules/bulk</code>、<code>/rules/:id/status</code>、<code>/rules/test</code></td><td>统一规则系统。含 <code>match_mode ∈ {"any","specific"}</code>——demo 无此概念</td></tr>
+      <tr><td>手动查询 / 探测</td><td><code>POST /rbl-filter/probe</code></td><td>对应 spec 的 <code>POST /api/rbl/query</code>，<strong>无需新增</strong></td></tr>
+      <tr><td>统计</td><td><code>GET /rbl-filter/stats</code></td><td>对应 spec 的 <code>GET /api/rbl/stats</code>，<strong>无需新增</strong></td></tr>
+      <tr><td>服务器健康检测</td><td><span class="badge badge-amber">无直接 API</span></td><td>spec 的 <code>/api/rbl/servers/health</code> 无等价实现；demo 也未渲染健康状态</td></tr>
+      <tr><td>灰名单配置</td><td><span class="badge badge-red">无 API / 无表</span></td><td>网关无 <code>t_greylist_config</code> / <code>t_greylist_whitelist</code> 的等价物</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ============ 5. 业务逻辑规格 ============ -->
+<section id="business-logic">
+  <h2>5. 业务逻辑规格（依据 spec 文档）</h2>
+
+  <h4>5.1 RBL 查询机制（spec §1 / §6）</h4>
+  <ul>
+    <li>连接建立时提取发信 IP，对配置的<strong>所有</strong> RBL 服务器<strong>并行</strong>发起 DNS 查询。</li>
+    <li>IP 反转拼接服务器域名（<code>1.2.3.4</code> → <code>4.3.2.1.zen.spamhaus.org</code>），查 A 记录；返回 <code>127.0.0.x</code> 判为命中，<code>NXDOMAIN</code> 为未命中。</li>
+    <li><strong>任一</strong>服务器命中即判定黑名单 IP；<strong>全部</strong>超时或未命中才放行（超时视为未命中）。</li>
+    <li>结果缓存（Redis，TTL 默认 1 小时），目标缓存命中率 &gt; 80%。</li>
+    <li>性能目标：单服务器查询 &lt; 100ms（P95），并行多服务器 &lt; 200ms（P95），支持 20+ 服务器、10000 QPS。</li>
+  </ul>
+
+  <h4>5.2 命中动作语义</h4>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>动作</th><th>spec 语义</th><th>网关落地</th></tr></thead>
+    <tbody>
+      <tr><td><code>block</code> 阻断</td><td>返回 5xx 拒绝，邮件不会重试</td><td><code>reject</code></td></tr>
+      <tr><td><code>quarantine</code> 隔离</td><td>放入隔离队列待审核</td><td><code>quarantine</code></td></tr>
+      <tr><td><code>mark</code> 标记</td><td>加 <code>X-RBL-Hit</code> 邮件头，继续后续检测</td><td><code>accept</code> + <code>add_headers</code></td></tr>
+      <tr><td><code>greylist</code> 灰名单</td><td>首次连接临时拒绝，重试后放行</td><td><span class="badge badge-red">不支持</span>（见 §9 D1 / §10 Q1）</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>5.3 灰名单模式（spec §1.4 / §6）</h4>
+  <ul>
+    <li><code>delay</code>：首次连接返回临时拒绝，延迟 N 秒后允许重试。</li>
+    <li><code>rateLimit</code>：在时间窗口内限制连接次数。</li>
+    <li>通过灰名单后自动加入白名单，TTL 内不再检测；key 为三元组 <code>(IP, 发信人域名, 收信人)</code>，存首次连接时间。</li>
+  </ul>
+
+  <h4>5.4 权限矩阵（spec §1）</h4>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>角色</th><th>spec 权限</th><th>demo 是否体现</th></tr></thead>
+    <tbody>
+      <tr><td>系统管理员</td><td>完整读写，可配置全部参数</td><td>是（当前登录态即完整读写）</td></tr>
+      <tr><td>安全管理员</td><td>可配置参数、查看统计</td><td><span class="badge badge-amber">否</span> demo 未做角色分支</td></tr>
+      <tr><td>审计员</td><td>只读</td><td><span class="badge badge-amber">否</span> demo 无只读态</td></tr>
+      <tr><td>普通用户</td><td>无权限访问</td><td><span class="badge badge-amber">否</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>5.5 配置联动（spec §5）</h4>
+  <ul>
+    <li>禁用 RBL 模块 → 跳过 RBL 检测环节。</li>
+    <li>删除所有服务器 → 等同于禁用模块。</li>
+    <li>选择灰名单动作 → 启用灰名单子模块配置（demo 已实现条件渲染）。</li>
+    <li>群组策略：<code>strategy-pipeline-page.tsx</code> L98 声明 <code>{ key:"rbl", defaultEnabled:true, canExempt:true }</code>，L128 示例 <code>policyConfig:{ rblFilter:"exempt" }</code> —— 即 RBL 支持按群组豁免。</li>
+  </ul>
+</section>
+
+<!-- ============ 6. 交互规格 ============ -->
+<section id="interaction">
+  <h2>6. 交互规格</h2>
+
+  <h4>6.1 状态变化规则（spec §3 vs demo 浏览器实测）</h4>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>状态</th><th>spec 要求的视觉表现</th><th>demo 浏览器实测</th></tr></thead>
+    <tbody>
+      <tr><td>模块禁用</td><td>整体灰度（<code>opacity:.5</code>），表单不可编辑</td><td>抽屉内有「已启用」Switch（<code>aria-checked="true"</code>、<code>data-state="checked"</code>）</td></tr>
+      <tr><td>有未保存修改</td><td>保存按钮高亮 + 未保存提示</td><td>改超时 / 改动作会置 <code>hasUnsavedChanges = true</code>；<strong>但增删服务器不置位</strong>（见 §9 D3）</td></tr>
+      <tr><td>服务器列表为空</td><td>提示「请至少添加一个RBL服务器」</td><td><span class="badge badge-red">未实现</span> 可删至 0 条，无任何提示</td></tr>
+      <tr><td>灰名单动作选中</td><td>显示灰名单配置入口卡片</td><td>✅ 一致（<code>rblAction === "greylist" &amp;&amp; (…)</code>）</td></tr>
+      <tr><td>保存成功</td><td>Toast「保存成功」</td><td>面板内无保存按钮，未观察到 Toast</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>6.2 Tooltip 规格</h4>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>触发元素</th><th>spec 要求文案</th><th>demo 实测</th></tr></thead>
+    <tbody>
+      <tr><td>流水线 RBL 卡片</td><td>（spec 未定义）</td><td>✅「策略：RBL过滤 / 动作：阻断 / 影响：黑名单命中则阻断并终止流程」</td></tr>
+      <tr><td>白名单有效期 <code>HelpCircle</code></td><td>（spec 未定义）</td><td>✅「通过灰名单验证的发件人将被<span class="mojibake">��</span>住该时长，有效期内再次发信无需重新验证。」</td></tr>
+      <tr><td>各 RBL 服务器 Badge</td><td>逐个说明（Spamhaus / SpamCop / Barracuda）</td><td><span class="badge badge-red">未实现</span> Badge 无 Tooltip</td></tr>
+      <tr><td>查询超时 / 4 个动作项</td><td>逐项说明（spec §3 共 9 条）</td><td><span class="badge badge-red">未实现</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>6.3 异常场景（spec §4 vs demo 实测）</h4>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>场景</th><th>spec 期望</th><th>demo 实测行为</th></tr></thead>
+    <tbody>
+      <tr><td>服务器地址为空</td><td>添加按钮置灰，不响应</td><td>按钮始终可点；<code>addRblServer()</code> 因 <code>if (newRblServer &amp;&amp; …)</code> 静默不作为</td></tr>
+      <tr><td>服务器地址格式错误</td><td>提示「请输入有效的域名格式」</td><td><span class="badge badge-red">无校验</span> 任意字符串（如 <code>abc</code>）都会被加入列表</td></tr>
+      <tr><td>服务器地址重复</td><td>提示「该服务器已存在」</td><td>静默忽略（<code>!rblServers.includes(server)</code>），无提示</td></tr>
+      <tr><td>超时为空 / 非数字</td><td>恢复默认值 5 秒</td><td>无恢复逻辑，state 可为空串</td></tr>
+      <tr><td>超时超出 1–30</td><td>提示「超时时间必须在1-30秒之间」</td><td><span class="badge badge-red">无校验</span>（<code>&lt;input type=number&gt;</code> 未设 min/max）。网关侧 <code>ValidateRBLProfileValue()</code> 会拒绝</td></tr>
+      <tr><td>灰名单延迟 &lt;60s / &gt;3600s</td><td>警告文案</td><td><span class="badge badge-red">无警告</span>，仅 <code>min="10"</code>（HTML 原生属性，不阻止手工输入）</td></tr>
+      <tr><td>删除最后一个服务器</td><td>确认弹窗「移除后将无法进行RBL检测」</td><td><span class="badge badge-red">无确认弹窗</span>，直接删除</td></tr>
+      <tr><td>保存超时 / API 500</td><td>提示并保留表单数据</td><td>demo 无后端调用，不可验证</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ============ 7. 国际化 ============ -->
+<section id="i18n">
+  <h2>7. 国际化规格</h2>
+  <p>翻译表在 <code>contexts/language-context.tsx</code>，<code>export type Language = "zh" | "en" | "th"</code> —— <strong>仅 3 种语言</strong>，与 <code>implement.md</code>「初始需要支持四种内置语言」不符（见 §9 D6）。</p>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>i18n key</th><th>zh（浏览器实际渲染）</th><th>en</th><th>用于</th></tr></thead>
+    <tbody>
+      <tr><td><code>pipeline.rblFilter</code> / <code>connection.rblFilter</code></td><td>RBL过滤</td><td>RBL Filter</td><td>卡片标题 / 抽屉标题</td></tr>
+      <tr><td><code>connection.rblServers</code></td><td>RBL服务器</td><td>RBL Servers</td><td>左栏 Label</td></tr>
+      <tr><td><code>connection.timeout</code></td><td>超时</td><td>Timeout</td><td>右栏 Label（渲染为 <code>超时 (s)</code>）</td></tr>
+      <tr><td><code>connection.serversCount</code></td><td>个服务器</td><td>" servers"</td><td>抽屉左侧导航摘要「3个服务器 / 超时5s」</td></tr>
+      <tr><td><code>common.action</code></td><td>操作</td><td>Action</td><td>动作 Label</td></tr>
+      <tr><td><code>common.block</code> / <code>quarantine</code> / <code>mark</code> / <code>greylist</code></td><td>阻断 / 隔离 / 标记 / 灰名单</td><td>Block / Quarantine / Mark / Greylist</td><td>动作下拉 4 项</td></tr>
+      <tr><td><code>common.add</code></td><td>添加</td><td>Add</td><td>添加服务器按钮</td></tr>
+      <tr><td><code>connection.greylistConfig</code></td><td>灰名单配置</td><td>Greylist Configuration</td><td>入口卡标题 + Dialog 标题</td></tr>
+      <tr><td><code>connection.greylistConfigDesc</code></td><td>配置灰名单策略，有效过滤<span class="mojibake">���</span>圾邮件同时减少误判。</td><td>Configure greylist policy to effectively filter spam while reducing false positives.</td><td>Dialog 描述</td></tr>
+      <tr><td><code>connection.greylistConfigure</code></td><td>点<span class="mojibake">���</span>配置</td><td>Configure</td><td>入口卡按钮</td></tr>
+      <tr><td><code>connection.greylistModeSummaryDelay</code></td><td>延迟接收：{seconds}秒内阻断首次请求</td><td>Delay mode: block first request within {seconds}s</td><td>入口卡摘要（delay）</td></tr>
+      <tr><td><code>connection.greylistModeSummaryRate</code></td><td>频率限制：{seconds}秒内最多{max}次</td><td>Rate limit: max {max} requests per {seconds}s</td><td>入口卡摘要（rateLimit）</td></tr>
+      <tr><td><code>connection.greylistDelayDesc</code></td><td>秒内，阻断第一封邮件请求，发信重投则正常收<span class="mojibake">���</span></td><td>seconds - block first mail request, allow on retry</td><td>delay 单选行</td></tr>
+      <tr><td><code>connection.greylistRateDesc</code></td><td>秒内，正常接收第<span class="mojibake">���</span>封邮<span class="mojibake">���</span>请求<span class="mojibake">���</span>阻断超过请<span class="mojibake">���</span>限制的请求</td><td>seconds - accept first mail request, block requests exceeding limit</td><td>rateLimit 单选行</td></tr>
+      <tr><td><code>connection.greylistWhitelistTTL</code></td><td>白<span class="mojibake">���</span>单有效期</td><td>Whitelist TTL</td><td>TTL Label</td></tr>
+      <tr><td><code>connection.greylistHours</code></td><td>小时</td><td>hours</td><td>TTL 单位</td></tr>
+      <tr><td><code>connection.greylistWhitelistTTLTip</code></td><td>通过灰名单验证的发件人将被<span class="mojibake">��</span>住该时长，有效期内再次发信无需重新验证。</td><td>Senders that pass greylist verification will be remembered for this duration…</td><td>TTL Tooltip</td></tr>
+      <tr><td><code>connection.greylistExemptions</code></td><td>豁免设置</td><td>Exemptions</td><td>豁免分组标题</td></tr>
+      <tr><td><code>connection.greylistExemptAuth</code></td><td>已认证发件人（SPF/DKIM通过）自动豁免</td><td>Auto-exempt authenticated senders (SPF/DKIM passed)</td><td>豁免项 1</td></tr>
+      <tr><td><code>connection.greylistExemptWhitelist</code></td><td>白名单IP / <span class="mojibake">�����</span>自动豁免</td><td>Auto-exempt whitelisted IPs / domains</td><td>豁免项 2</td></tr>
+      <tr><td><code>connection.greylistExemptInternal</code></td><td>内部域名互发豁免</td><td>Exempt internal domain mail</td><td>豁免项 3</td></tr>
+      <tr><td><code>common.cancel</code> / <code>common.confirm</code></td><td>取消 / 确认</td><td>Cancel / Confirm</td><td>Dialog 页脚</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="font-size:13px;color:var(--subtle)">表中标红的 <span class="mojibake">�</span> 是 demo <strong>实际渲染出的</strong> U+FFFD 替换字符（乱码），本文档原样保留、未擅自「修好」。详见 §9 D5。</p>
+
+  <h4 id="i18n-repair">7.1 乱码文案推断修正表（落地时以本表为准，<span class="badge badge-amber">待产品确认</span>）</h4>
+  <p style="font-size:13.5px">损坏机制是<strong>逐字符的字节级损坏</strong>，而非整串重编码：未损坏的邻字完好无损（如「白<span class="mojibake">���</span>单有效期」只丢了「名」）。
+  由于 UTF-8 解码器按 <em>maximal subpart</em> 规则合并非法字节，<strong><span class="mojibake">�</span> 的个数不等于丢失的汉字数</strong>
+  （「名」<code>E5 90 8D</code> → 3 个 <span class="mojibake">�</span>，而「记」<code>E8 AE B0</code> → 仅 2 个），因此<strong>不能靠数 <span class="mojibake">�</span> 还原</strong>。本表依据 en / th 译文 + 上下文语义推断。</p>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>i18n key</th><th>demo 实际渲染（zh）</th><th>推断修正</th><th>推断依据</th><th>置信度</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>connection.greylistConfigDesc</code></td><td>配置灰名单策略，有效过滤<span class="mojibake">���</span>圾邮件同时减少误判。</td><td>配置灰名单策略，有效过滤<strong>垃</strong>圾邮件同时减少误判。</td><td>en「filter <strong>spam</strong>」；同文件另有 20 处未损坏的「垃圾邮件」</td><td><span class="badge badge-green">高</span></td></tr>
+      <tr><td>2</td><td><code>connection.greylistConfigure</code></td><td>点<span class="mojibake">���</span>配置</td><td>点<strong>击</strong>配置</td><td>en「Configure」；同文件另有 22 处未损坏的「点击」；按钮语境</td><td><span class="badge badge-green">高</span></td></tr>
+      <tr><td>3</td><td><code>connection.greylistRateDesc</code></td><td>秒内，正常接收第<span class="mojibake">���</span>封邮<span class="mojibake">���</span>请求<span class="mojibake">���</span>阻断超过请<span class="mojibake">���</span>限制的请求</td><td>秒内，正常接收第<strong>一</strong>封邮<strong>件</strong>请求<strong>，</strong>阻断超过请<strong>求</strong>限制的请求</td><td>en「accept <strong>first</strong> mail request<strong>,</strong> block <strong>requests</strong> exceeding limit」。第 3 处缺失是<strong>全角逗号 <code>，</code></strong>（U+FF0C，同为 3 字节），不是汉字</td><td><span class="badge badge-green">高</span></td></tr>
+      <tr><td>4</td><td><code>connection.greylistWhitelistTTL</code></td><td>白<span class="mojibake">���</span>单有效期</td><td>白<strong>名</strong>单有效期</td><td>en「<strong>Whitelist</strong> TTL」；与同串未损坏的「白名单IP」呼应</td><td><span class="badge badge-green">高</span></td></tr>
+      <tr><td>5</td><td><code>connection.greylistWhitelistTTLTip</code></td><td>通过灰名单验证的发件人将被<span class="mojibake">��</span>住该时长，有效期内再次发信无需重新验证。</td><td>…将被<strong>记</strong>住该时长，…</td><td>en「will be <strong>remembered</strong> for this duration」。此处仅 2 个 <span class="mojibake">�</span>——正是「<span class="mojibake">�</span> 数 ≠ 字数」的实例</td><td><span class="badge badge-green">高</span></td></tr>
+      <tr><td>6</td><td><code>connection.greylistExemptWhitelist</code></td><td>白名单IP / <span class="mojibake">�����</span>自动豁免</td><td>白名单IP / <strong>域名</strong>自动豁免</td><td>en「whitelisted IPs / <strong>domains</strong>」；th「IP / <strong>โดเมน</strong>」。5 个 <span class="mojibake">�</span> 对应 2 个汉字（6 字节）</td><td><span class="badge badge-green">高</span></td></tr>
+      <tr><td>7</td><td><code>connection.greylistDelayDesc</code></td><td>秒内，阻断第一封邮件请求，发信重投则正常收<span class="mojibake">���</span></td><td>…发信重投则正常收<strong>信</strong><br><span style="color:var(--subtle)">（已拍板；曾备选「正常收<strong>取</strong>」）</span></td><td>en「allow on retry」/ th「รับหากส่งซ้ำ（重发则接收）」均未点明动词，「信」「取」皆为 3 字节、字节数无法区分。<strong>2026-07-10 由项目负责人拍板取「收信」</strong>（与前半句「发信」对仗）</td><td><span class="badge badge-green">已确认</span></td></tr>
+      <tr><td>8</td><td><code>connection.ipFrequencyLimit</code><br>（抽屉左侧导航，非本模块）</td><td>IP频率限<span class="mojibake">��</span></td><td>IP频率限<strong>制</strong></td><td>出现在本模块截图 02 / 04 中；流水线卡片处同名策略未损坏</td><td><span class="badge badge-green">高</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="font-size:13px;color:var(--subtle)"><strong>全局损坏规模（实测统计）：</strong><code>language-context.tsx</code> 共 <strong>8560</strong> 个 U+FFFD，分布在
+  <strong>zh 494 / 4519</strong>、<strong>en 2 / 4511</strong>、<strong>th 1611 / 3857</strong> 条翻译值中（合计 2107 条）。
+  本表只覆盖 RBL 模块用到的 8 条；其余（尤其 th 占 42%）需产品 / 翻译方提供权威文案，不宜逐条猜测。<br><strong>处置决定（2026-07-10）：</strong>推断修正<strong>只记录于本表</strong>，<strong>不回写 demo</strong>——demo 位于独立 submodule（<code>osgateway-demo</code>），且本文档的预览与截图须恪守「浏览器实际渲染为准」。<strong>落地实现时以本表的「推断修正」列为准</strong>。</p>
+</section>
+
+<!-- ============ 8. 响应式 ============ -->
+<section id="responsive">
+  <h2>8. 响应式规格</h2>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>视口宽度</th><th><code>grid-template-columns</code> 实测</th><th>行为</th></tr></thead>
+    <tbody>
+      <tr><td>1920px</td><td><code>602.5px 602.5px</code></td><td>双栏等宽</td></tr>
+      <tr><td>1440px</td><td>双栏等宽（基准视口）</td><td>所有元素截图取自该视口</td></tr>
+      <tr><td>1024px</td><td><code>244.094px 244.094px</code></td><td><strong>仍为双栏</strong>——<code>grid-cols-2</code> 未加断点前缀，左栏 Badge 与输入框被压窄</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>spec §2「响应式/自适应规则」要求「双栏各 50% 宽度，最小宽度 600px」。demo 的面板<strong>没有任何断点降级</strong>：1024px 下两栏各仅 244px，服务器输入框 +「添加」按钮已明显拥挤。</p>
+  <figure class="figure">
+    <img src="./screenshots/12-responsive-1920.png" alt="1920px 视口">
+    <figcaption>1920px：双栏各 602.5px</figcaption>
+  </figure>
+  <figure class="figure">
+    <img src="./screenshots/12-responsive-1024.png" alt="1024px 视口">
+    <figcaption>1024px：仍是双栏，各 244.094px（未降级为单栏）</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 9. 差异标注 ============ -->
+<section id="diff-review-v2" class="diff-section">
+  <h2>9. 历史差异逐项复核（v2）</h2>
+  <p>复核日期：2026-07-21。状态依据用户当前描述、当前会话历史、demo 源码和既有 agent-browser 证据；下表优先于其后的 v1 历史描述。</p>
+  <div class="overflow"><table class="spec-table"><thead><tr><th>编号 / 原问题</th><th>状态</th><th>验证依据</th><th>处理说明 / 解决版本</th></tr></thead><tbody>
+    <tr><td>D1 灰名单动作网关不支持</td><td><span class="badge badge-amber">未解决</span></td><td>前端灰名单入口与 Dialog 已实现；当前上下文无网关新增 action 证据</td><td>继续关联 Q1</td></tr>
+    <tr><td>D2 频率模式缺最大请求数输入</td><td><span class="badge badge-green">已解决</span></td><td><code>greylistDraft.maxRequests</code> 已绑定 number Input；agent-browser 在灰名单 Dialog 实测到第三个数值输入 <code>value=5</code></td><td>v2 / 截图 21</td></tr>
+    <tr><td>D3 增删服务器不标记未保存</td><td><span class="badge badge-green">已解决</span></td><td>添加合法域名后页面出现“有未保存的更改”；确认删除后同样保持未保存状态</td><td>v2 / agent-browser 已验证</td></tr>
+    <tr><td>D4 输入校验与提示全部缺失</td><td><span class="badge badge-amber">部分解决</span></td><td>服务器空值/格式/重复、超时 1–30、删除确认与三语 Toast 均已由 agent-browser 验证；灰名单 delay/window/max/TTL 的完整边界仍未在本次描述中闭环</td><td>已解决本次范围；截图 14–19；继续跟踪其余边界</td></tr>
+    <tr><td>D5 本模块 zh 文案乱码</td><td><span class="badge badge-green">已解决</span></td><td>当前 <code>connection.greylist*</code> 中文键已为完整可读文案</td><td>v2；泰语及模块外乱码不在本条解决范围</td></tr>
+    <tr><td>D6 只有 3 种语言</td><td><span class="badge badge-amber">未解决</span></td><td>当前仍为 zh/en/th；第四语言未定义</td><td>需语言规划确认</td></tr>
+    <tr><td>D7 无响应式单栏降级</td><td><span class="badge badge-amber">未解决</span></td><td><code>grid grid-cols-2 gap-6</code> 无断点 class；既有 1024px 截图仍为双栏</td><td>无解决版本</td></tr>
+    <tr><td>D8 缺预置选项、统计、健康检测</td><td><span class="badge badge-amber">未解决</span></td><td>默认服务器已统一为工厂单一源，但仍不是可选预置控件；统计/健康节点仍不存在</td><td>继续关联 Q3/Q5</td></tr>
+    <tr><td>D9 Tooltip 覆盖率不足</td><td><span class="badge badge-amber">未解决</span></td><td>本次修改未新增服务器、超时、动作 Tooltip</td><td>无解决版本</td></tr>
+    <tr><td>D10 UI 无 match_mode</td><td><span class="badge badge-amber">未解决</span></td><td>RBL 面板仍只有扁平服务器列表</td><td>继续关联 Q4</td></tr>
+    <tr><td>D11 UI 无 retry_count</td><td><span class="badge badge-amber">未解决</span></td><td>当前 RBL state 与面板均无该字段</td><td>继续关联 Q8</td></tr>
+    <tr><td>D12 无角色只读态</td><td><span class="badge badge-amber">部分解决</span></td><td>10 组 agent-browser DOM 已确认：多租户 tenant 隐藏整个阶段1并显示平台锁定占位；但不存在 RBL 只读态</td><td>v2 已明确当前可见性；是否需只读继续关联 Q9</td></tr>
+    <tr><td>D13 默认配置散落</td><td><span class="badge badge-green">已解决</span></td><td>导出 <code>RblConfig</code> 与 <code>createDefaultRblConfig()</code>；相关 state 统一取 <code>rblDefaults</code></td><td>v2 / <code>6f34f80</code></td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="diffs" class="diff-section">
+  <h3>9.1 原始差异记录（历史基线，当前状态以 9 节 v2 复核表为准）</h3>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>差异点</th><th>spec 原文 / 约束</th><th>demo 浏览器实测</th><th>严重度</th></tr></thead>
+    <tbody>
+      <tr><td>D1</td><td><strong>灰名单动作网关不支持</strong></td><td>spec §1「命中动作配置（阻断/隔离/标记/<strong>灰名单</strong>）」+ 完整灰名单子模块</td><td>demo 完整实现了灰名单下拉项、入口卡与配置 Dialog；但网关 <code>ValidateRBLFilterRequest()</code> 显式 <code>return fmt.Errorf("greylist action is not supported")</code>，<code>rblFilterValidProductActions</code> 仅含 block/quarantine/mark</td><td><span class="badge badge-red">阻断级</span></td></tr>
+      <tr><td>D2</td><td><strong>频率限制模式缺「最大请求数」输入</strong></td><td>spec §2 灰名单对话框字段表列出「最大请求数 / 数字输入 / 频率模式：窗口内最大请求数」</td><td>Dialog 内<strong>只有 3 个 number input</strong>（<code>delaySeconds=600</code> / <code>windowSeconds=600</code> / <code>whitelistTTL=24</code>）。<code>maxRequests</code> 有 state、且被摘要文案「频率限制：600秒内最多<strong>5</strong>次」引用，但<strong>无任何 UI 可修改</strong>，恒为 <code>"5"</code></td><td><span class="badge badge-red">高</span></td></tr>
+      <tr><td>D3</td><td>增删服务器不标记未保存</td><td>spec §3「修改超时时间 / 选择命中动作 → 实时生效（标记未保存状态）」，服务器管理同属配置变更</td><td><code>addRblServer()</code> / <code>removeRblServer()</code> 都<strong>没有</strong>调用 <code>setHasUnsavedChanges(true)</code>；只有超时与动作的 onChange 调用了</td><td><span class="badge badge-amber">中</span></td></tr>
+      <tr><td>D4</td><td>输入校验与提示全部缺失</td><td>spec §4 列出 8 类边界处理（空 / 格式错 / 重复 / 超时越界 / 延迟过短过长 / 删空确认）</td><td>demo 一条都未实现：无格式校验、无重复提示、无越界提示、无删空确认、无 Toast</td><td><span class="badge badge-amber">中</span></td></tr>
+      <tr><td>D5</td><td><strong>zh 文案存在 UTF-8 乱码</strong></td><td>—</td><td><code>language-context.tsx</code> 共 <strong>2166 行</strong>含 U+FFFD 替换字符。本模块受影响：<code>greylistConfigure</code>「点���配置」、<code>greylistWhitelistTTL</code>「白���单有效期」、<code>greylistConfigDesc</code>、<code>greylistDelayDesc</code>、<code>greylistRateDesc</code>、<code>greylistExemptWhitelist</code>、<code>greylistWhitelistTTLTip</code>。浏览器如实渲染乱码（见截图 07 / 10）。<strong>逐条推断修正见 <a href="#i18n-repair">§7.1</a></strong></td><td><span class="badge badge-red">高</span></td></tr>
+      <tr><td>D6</td><td>只有 3 种语言</td><td><code>implement.md</code>「页面应该支持国际化，初始需要支持四种内置语言」</td><td><code>export type Language = "zh" | "en" | "th"</code></td><td><span class="badge badge-amber">中</span></td></tr>
+      <tr><td>D7</td><td>无响应式降级</td><td>spec §2「双栏各 50%；最小宽度 600px」</td><td><code>grid-cols-2</code> 无断点前缀，1024px 下仍双栏（各 244.094px）</td><td><span class="badge badge-blue">低</span></td></tr>
+      <tr><td>D8</td><td>缺失 3 个 spec 功能点</td><td>spec §1 功能点清单第 5 / 7 / 8 项：预置服务器选项、查询统计、服务器健康检测</td><td>面板内既无统计（今日查询 / 命中 / 命中率），也无健康检测徽标，也无「预置服务器」下拉（3 个默认值是硬编码初始 state，不是可选项）</td><td><span class="badge badge-amber">中</span></td></tr>
+      <tr><td>D9</td><td>Tooltip 覆盖率</td><td>spec §3 要求 9 处悬浮提示（3 个服务器逐个说明 + 超时 + 4 个动作）</td><td>实测仅 2 处 Tooltip：流水线卡片、白名单有效期 <code>HelpCircle</code></td><td><span class="badge badge-blue">低</span></td></tr>
+      <tr><td>D10</td><td>网关有 <code>match_mode</code>，demo 无</td><td>—</td><td>网关 <code>RBLFilterRuleRequest.MatchMode ∈ {"any","specific"}</code>（specific 时必须给 <code>match_servers</code>，any 时必须为空）。demo UI 无「任一命中 / 指定服务器命中」概念，只有一个扁平服务器列表</td><td><span class="badge badge-amber">中</span></td></tr>
+      <tr><td>D11</td><td>网关有 <code>retry_count</code>，demo 无</td><td>spec §1「支持配置失败重试次数」</td><td><code>ValidateRBLProfileValue()</code> 支持 <code>retry_count</code>（0–3，默认 1），demo 面板未暴露该字段</td><td><span class="badge badge-blue">低</span></td></tr>
+      <tr><td>D12</td><td>无角色只读态</td><td>spec §1 权限边界 + §4「无编辑权限 → 表单只读，隐藏添加/删除按钮」</td><td>demo 无任何角色分支，所有控件恒可编辑</td><td><span class="badge badge-blue">低</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ============ 10. 需确认事项 ============ -->
+<section id="question-review-v2" class="question-section">
+  <h2>10. 历史需确认事项逐项复核（v2）</h2>
+  <p>复核日期：2026-07-21。已解决项保留编号和证据，未解决项继续跟踪。</p>
+  <div class="overflow"><table class="spec-table"><thead><tr><th>编号 / 问题</th><th>状态</th><th>验证依据</th><th>后续处理</th></tr></thead><tbody>
+    <tr><td>Q1 灰名单是否落地到网关</td><td><span class="badge badge-amber">未解决</span></td><td>前端已完整联动，缺后端支持证据</td><td>产品与后端确认 action/存储/临时拒绝路径</td></tr>
+    <tr><td>Q2 maxRequests 控件位置</td><td><span class="badge badge-green">已解决</span></td><td>当前位于 rateLimit 单选行内，形成“窗口秒数 + 最大请求数”组合；agent-browser 已采集该 Dialog DOM</td><td>v2 采纳原建议 (a)；截图 21</td></tr>
+    <tr><td>Q3 预置选项 + 自定义</td><td><span class="badge badge-amber">未解决</span></td><td>工厂只提供初始默认值，UI 仍是自由输入</td><td>确认是否新增预置下拉</td></tr>
+    <tr><td>Q4 match_mode 是否暴露</td><td><span class="badge badge-amber">未解决</span></td><td>UI 未出现 any/specific</td><td>确认固定 any 或新增控件</td></tr>
+    <tr><td>Q5 统计与健康检测</td><td><span class="badge badge-amber">未解决</span></td><td>当前 UI 与本次修改均未覆盖</td><td>确认 API 与本期范围</td></tr>
+    <tr><td>Q6 zh 乱码修正是否采纳</td><td><span class="badge badge-green">已解决</span></td><td>本模块当前中文键已采用完整文案</td><td>v2；模块外/泰语问题另行治理</td></tr>
+    <tr><td>Q7 超时 min/max</td><td><span class="badge badge-green">已解决</span></td><td><code>min=1 max=30</code> + onBlur 钳制 + destructive Toast；实测 99→30、0→1</td><td>v2 / 截图 17</td></tr>
+    <tr><td>Q8 retry_count 是否暴露</td><td><span class="badge badge-amber">未解决</span></td><td>当前仍无 UI 字段</td><td>确认固定默认 1 或新增输入</td></tr>
+    <tr><td>Q9 多租户租户管理员应隐藏还是只读</td><td><span class="badge badge-amber">未解决</span></td><td>当前实现为隐藏 RBL 卡片并显示“平台统一管控”占位；旧权限描述期待只读</td><td>确认目标权限语义；本规格如实记录当前为隐藏</td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="questions" class="question-section">
+  <h3>10.1 原始需确认事项（历史基线，当前状态以 10 节 v2 复核表为准）</h3>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>问题</th><th>背景</th><th>候选方案</th></tr></thead>
+    <tbody>
+      <tr><td>Q1</td><td><strong>灰名单（greylist）到底做不做？</strong></td><td>产品 spec 把灰名单列为 4 个命中动作之一并配了完整子模块（模式 / TTL / 豁免）；网关统一规则系统当前<strong>显式拒绝</strong>该 action，且无 <code>t_greylist_*</code> 等价存储。按 <code>implement.md</code>：「与网关底层实现冲突的，说明清楚后找我确认，不要自行下决定」「不要因为产品设计的一些定义而新加 action」</td><td>(a) 前端隐藏灰名单选项，本期不做；(b) 新增 <code>greylist</code> action + 灰名单存储（需评估 milter 4xx 临时拒绝路径与 Redis 三元组表）；(c) 用现有 <code>defer</code> / sideline 语义近似实现。<strong>需产品 + 后端共同拍板</strong></td></tr>
+      <tr><td>Q2</td><td><code>maxRequests</code> 应放在哪个控件？</td><td>D2：state 与摘要文案都引用它，Dialog 里却没有输入框。落地时不能照抄 demo，否则用户永远只能是「5 次 / 窗口」</td><td>(a) 在 rateLimit 单选行内补第 2 个 number input（渲染成「{window} 秒内最多 {max} 次」）；(b) 摘要文案改为不含 max。<strong>建议 (a)</strong>，与 spec §2 字段表一致</td></tr>
+      <tr><td>Q3</td><td>RBL 服务器是否需要「预置选项 + 自定义」双模式？</td><td>spec 功能点 5 要求提供 Spamhaus / SpamCop / Barracuda / SORBS 预置选项；demo 只把前 3 个作为初始 state 硬编码，UI 上只有自由输入框</td><td>(a) 增加「从预置列表添加」下拉；(b) 保持纯自由输入。涉及是否新增 UI，需产品确认</td></tr>
+      <tr><td>Q4</td><td>是否向 UI 暴露网关的 <code>match_mode</code>（any / specific）？</td><td>D10：网关规则模型支持「任一服务器命中」与「指定服务器命中」两种匹配模式，demo UI 无此概念。若不暴露，落地时需固定为 <code>any</code>（此时 <code>match_servers</code> 必须为空）</td><td>(a) 固定 <code>match_mode="any"</code>，UI 不暴露；(b) 在面板加匹配模式单选。<strong>建议 (a)</strong>，与 demo 保持一致</td></tr>
+      <tr><td>Q5</td><td>服务器健康检测 / 查询统计本期是否实现？</td><td>D8：spec 功能点 7、8 要求展示今日查询次数 / 命中 / 命中率与服务器可用性徽标。网关有 <code>GET /rbl-filter/stats</code> 可复用，但<strong>没有</strong> <code>servers/health</code> 等价 API</td><td>(a) 统计复用现有 <code>/rbl-filter/stats</code>，健康检测本期不做；(b) 新增健康探测（可复用 <code>POST /rbl-filter/probe</code> 定时打点，无需全新 API）。<strong>需确认是否新增 API</strong></td></tr>
+      <tr><td>Q6</td><td>zh 文案乱码：<strong>推断修正是否采纳？</strong></td><td>D5：<code>language-context.tsx</code> 共 8560 个 U+FFFD（zh 494 条 / en 2 条 / th 1611 条值受损）。本 html_spec 的预览与截图按「浏览器实际渲染为准」<strong>如实保留乱码</strong>，同时在 <a href="#i18n-repair">§7.1</a> 给出逐条推断修正</td><td><span class="badge badge-green">已定</span> 采纳 <a href="#i18n-repair">§7.1</a> 修正表，落地按修正后文案实现（<code>greylistDelayDesc</code> 取「正常收<strong>信</strong>」）；<strong>不回写 demo submodule</strong>，html_spec 继续如实呈现乱码。<br><span class="badge badge-amber">仍待办</span> th 的 1611 条 / zh 其余 486 条损坏值超出本模块范围，建议交翻译方 + 产品统一出权威文案表</td></tr>
+      <tr><td>Q7</td><td>超时输入是否补前端 min/max？</td><td>D4：demo 的 <code>&lt;input type=number&gt;</code> 无 min/max；网关 <code>ValidateRBLProfileValue()</code> 强制 <code>1 ≤ timeout_seconds ≤ 30</code></td><td>建议前端补 <code>min=1 max=30</code> + 越界提示，与后端校验对齐。属实现细节，确认即可</td></tr>
+      <tr><td>Q8</td><td>是否暴露 <code>retry_count</code>？</td><td>D11：spec 功能点提到「支持配置失败重试次数」，网关已支持（0–3，默认 1），demo 未暴露</td><td>(a) 面板右栏补一个 number input；(b) 固定用默认值 1。需产品确认</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  if (window.mermaid) mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+
+  /* ===== 层级 0 预览交互：复刻 demo（hover → Tooltip；click 配置 → 打开抽屉） ===== */
+  (function () {
+    var card = document.getElementById('rblCard');
+    var tip  = document.getElementById('rblTip');
+    var btn  = document.getElementById('rblCfgBtn');
+    var hint = document.getElementById('rblHint');
+    if (!card) { return; }
+    card.addEventListener('mouseenter', function () { tip.classList.add('on'); });
+    card.addEventListener('mouseleave', function () { tip.classList.remove('on'); });
+    btn.addEventListener('click', function (e) { e.stopPropagation(); hint.classList.add('on'); });
+  })();
+</script>
+</body>
+</html>

@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronRight, Plus, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { cn } from '@/lib/utils';
 import { CONDITIONS, computeCatalogueItem, type ConditionCategory, type ConditionDef } from './catalogue';
 import { MATCH_MODE_TO_OPERATOR, defaultModeForField, type ConditionGroups, type ConditionLeaf } from './serde';
@@ -177,16 +178,12 @@ export function ConditionTree({
           const open = isFiltering || openCategories.has(cat);
           return (
             <Collapsible key={cat} open={open} onOpenChange={() => toggleCategory(cat)}>
-              <CollapsibleTrigger
-                className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-xs font-semibold hover:bg-muted"
-                data-testid={`condition-category-${cat}`}
-              >
-                <ChevronRight className={cn('h-3.5 w-3.5 shrink-0 transition-transform', open && 'rotate-90')} />
+              <ConditionCategoryTrigger open={open} testid={`condition-category-${cat}`}>
                 <span>{t(`v3Conditions.category_${cat}` as never)}</span>
                 <Badge variant="outline" className="ml-auto text-[10px]" data-testid={`condition-category-badge-${cat}`}>
                   {defs.length}
                 </Badge>
-              </CollapsibleTrigger>
+              </ConditionCategoryTrigger>
               <CollapsibleContent className="pl-4">
                 {filtered.map((def) => (
                   <ConditionButton key={def.key} def={def} fieldDefs={fieldDefs} onAdd={onAddCondition} />
@@ -223,19 +220,24 @@ function GroupButton({
   countLabel: string;
 }) {
   const isOr = kind === 'any';
+  // 可选卡片（柔和交互反馈规格 §6.4/§7.2）：hover 为 pointer 驱动，选中态（demo 语义色）不受 hover 覆盖。
+  const { pointerHoverProps } = usePointerHover<HTMLButtonElement>({ disabled: active });
   return (
     <button
       type="button"
       onClick={onClick}
       data-testid={`group-button-${kind}`}
       className={cn(
-        'w-full rounded-lg border p-2.5 text-left transition-colors',
+        'w-full rounded-lg border p-2.5 text-left outline-none',
+        'transition-[background-color,border-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+        'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset',
         active
           ? isOr
             ? 'border-2 border-blue-500 bg-blue-50 dark:bg-blue-950/30'
             : 'border-2 border-green-500 bg-green-50 dark:bg-green-950/30'
-          : 'border-border hover:bg-muted',
+          : 'border-border data-[hovered=true]:bg-muted/50 active:bg-muted/65',
       )}
+      {...pointerHoverProps}
     >
       <div className="flex items-center gap-1.5">
         <span
@@ -275,32 +277,16 @@ function SelectedLeavesList({
         const def = CONDITIONS.find((d) => d.key === leaf.conditionKey);
         const label = def ? t(`v3Conditions.conditions.${def.key}` as never) : leaf.conditionKey;
         return (
-          <div
+          <SelectedLeafRow
             key={leaf.id}
-            className={cn(
-              'flex items-center gap-1 rounded px-1.5 py-1 text-xs cursor-pointer',
-              selectedLeafId === leaf.id ? 'bg-accent font-medium' : 'hover:bg-muted',
-            )}
-            onClick={() => onSelectLeaf(leaf.id)}
-            data-testid={`selected-leaf-${leaf.id}`}
-          >
-            <span className="truncate">{label}</span>
-            <span className="truncate text-muted-foreground">
-              {leaf.value ? leaf.value.split('\n')[0] : ''}
-            </span>
-            <button
-              type="button"
-              className="ml-auto shrink-0 rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemoveLeaf(leaf.id, group);
-              }}
-              aria-label={t('removeCondition')}
-              data-testid={`remove-leaf-${leaf.id}`}
-            >
-              <X className="h-3 w-3" />
-            </button>
-          </div>
+            leafId={leaf.id}
+            selected={selectedLeafId === leaf.id}
+            label={label}
+            valuePreview={leaf.value ? leaf.value.split('\n')[0] : ''}
+            removeLabel={t('removeCondition')}
+            onSelect={() => onSelectLeaf(leaf.id)}
+            onRemove={() => onRemoveLeaf(leaf.id, group)}
+          />
         );
       })}
     </div>
@@ -321,6 +307,8 @@ function ConditionButton({
   const item = computeCatalogueItem(def, fieldDefs);
   const disabled = !item.selectable;
 
+  // 菜单项（柔和交互反馈规格 §6.5/§7.2）：pointer 驱动 hover，disabled 不响应。
+  const { pointerHoverProps } = usePointerHover<HTMLButtonElement>({ disabled });
   return (
     <button
       type="button"
@@ -329,10 +317,13 @@ function ConditionButton({
       onClick={() => onAdd(def)}
       data-testid={`condition-button-${def.key}`}
       className={cn(
-        'flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left text-[12.5px]',
+        'flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left text-[12.5px] outline-none',
+        'transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+        'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset',
         def.envelope ? 'bg-muted font-semibold' : '',
-        disabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-muted cursor-pointer',
+        disabled ? 'cursor-not-allowed opacity-50' : 'data-[hovered=true]:bg-accent/70 cursor-pointer',
       )}
+      {...pointerHoverProps}
     >
       <Plus className="h-3 w-3 shrink-0 text-muted-foreground" />
       <span className="truncate">{label}</span>
@@ -342,5 +333,96 @@ function ConditionButton({
         </Badge>
       )}
     </button>
+  );
+}
+
+// 分类折叠触发器：pointer 驱动 hover + focus-visible；chevron 单节点旋转（规格 §6.5/§7.2）。
+function ConditionCategoryTrigger({
+  open,
+  testid,
+  children,
+}: {
+  open: boolean;
+  testid: string;
+  children: ReactNode;
+}) {
+  const { pointerHoverProps } = usePointerHover<HTMLButtonElement>();
+  return (
+    <CollapsibleTrigger
+      className={cn(
+        'flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-xs font-semibold outline-none',
+        'transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+        'data-[hovered=true]:bg-muted/50 active:bg-muted/65',
+        'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset',
+      )}
+      data-testid={testid}
+      {...pointerHoverProps}
+    >
+      <ChevronRight
+        className={cn(
+          'h-3.5 w-3.5 shrink-0 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+          open && 'rotate-90',
+        )}
+      />
+      {children}
+    </CollapsibleTrigger>
+  );
+}
+
+// 已选条件行：整行可点（选中该条件进入右侧配置）→ 补 role/tabIndex/键盘激活（规格 §8），
+// hover 为 pointer 驱动；删除按钮危险色在 rest 态即可识别，hover 只加表面（规格 §6.2）。
+function SelectedLeafRow({
+  leafId,
+  selected,
+  label,
+  valuePreview,
+  removeLabel,
+  onSelect,
+  onRemove,
+}: {
+  leafId: string;
+  selected: boolean;
+  label: string;
+  valuePreview: string;
+  removeLabel: string;
+  onSelect: () => void;
+  onRemove: () => void;
+}) {
+  const { pointerHoverProps } = usePointerHover<HTMLDivElement>();
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={cn(
+        'flex items-center gap-1 rounded px-1.5 py-1 text-xs cursor-pointer outline-none',
+        'transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+        'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset',
+        selected ? 'bg-accent font-medium' : 'data-[hovered=true]:bg-muted/50',
+      )}
+      onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
+      data-testid={`selected-leaf-${leafId}`}
+      {...pointerHoverProps}
+    >
+      <span className="truncate">{label}</span>
+      <span className="truncate text-muted-foreground">{valuePreview}</span>
+      <button
+        type="button"
+        className="ml-auto shrink-0 rounded p-0.5 text-destructive/70 outline-none transition-[background-color,color] duration-[120ms] ease-out motion-reduce:transition-none hover:bg-destructive/10 hover:text-destructive focus-visible:ring-2 focus-visible:ring-ring/60"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        aria-label={removeLabel}
+        data-testid={`remove-leaf-${leafId}`}
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </div>
   );
 }

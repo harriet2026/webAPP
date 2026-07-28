@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 4：处置策略 Tab - 高级过滤规则</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --border: oklch(0.922 0 0); --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0); --radius: 0.625rem; --font-sans: "Geist", system-ui, sans-serif; --font-mono: "Geist Mono", monospace; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { margin: 0 auto; max-width: 1320px; padding: 2rem; font-family: var(--font-sans); background: var(--background); color: #1f2937; line-height: 1.6; }
+    .layer-nav, header, section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+    .layer-nav { display: flex; justify-content: space-between; }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1 { color: var(--primary); font-size: 1.3rem; margin-bottom: 0.75rem; }
+    h2 { font-size: 1.1rem; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.4rem; margin-bottom: 1rem; }
+    h4 { margin: 0.9rem 0 0.5rem; }
+    table.spec-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.84rem; }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 0.5rem 0.65rem; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); white-space: nowrap; }
+    img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    figure { margin: 1rem 0; text-align: center; }
+    figcaption { font-size: 0.8rem; color: var(--muted-foreground); margin-top: 0.4rem; }
+    code { font-family: var(--font-mono); font-size: 0.85em; background: var(--muted); padding: 0.1em 0.35em; border-radius: 4px; }
+    .pass { color: #15803d; font-weight: 700; }
+    .component-preview { border: 2px dashed oklch(0.75 0.1 262); border-radius: var(--radius); padding: 1.25rem; margin: 1rem 0; background: #f5f7fa; overflow-x: auto; }
+    .component-preview::before { content: "▶ 可交互组件预览（执行动作切换 / 附加策略勾选 / 冲突矩阵置灰 / 确定按钮校验均可操作）"; display: block; font-size: 0.75rem; color: var(--primary); margin-bottom: 0.9rem; font-weight: 600; }
+    .dom-comparison { background: oklch(0.97 0.02 150); border: 1px solid oklch(0.8 0.08 150); border-radius: var(--radius); padding: 0.75rem 1rem; margin: 0.75rem 0; }
+
+    /* ===== 三栏处置策略预览 ===== */
+    .ax { display: grid; grid-template-columns: 280px 1fr 320px; gap: 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; min-height: 460px; }
+    .ax h5 { font-size: 13.5px; margin-bottom: 8px; }
+    .ax select, .ax input[type=text], .ax input[type=number] { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 7px 9px; font-size: 12.5px; font-family: inherit; }
+    .lhint { font-size: 12px; color: #6b7280; margin: 6px 0; }
+    .lreq { font-size: 12px; color: #dc2626; margin: 4px 0; display: none; }
+    .cfgbtn { display: none; width: 100%; text-align: left; border: 0; border-left: 3px solid #1d4ed8; background: #eff6ff; color: #1d4ed8; border-radius: 6px; padding: 7px 10px; font-size: 12.5px; margin-top: 8px; cursor: pointer; }
+    .addonhead { font-weight: 600; font-size: 13.5px; margin: 16px 0 8px; border-top: 1px solid #f3f4f6; padding-top: 14px; }
+    .arow { display: flex; align-items: center; gap: 8px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; font-size: 13px; cursor: pointer; background: #fff; }
+    .arow.sel { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
+    .arow.on { background: #eff6ff; color: #1d4ed8; }
+    .arow.dis { opacity: 0.5; cursor: not-allowed; }
+    .mid2 { border-left: 1px solid #f3f4f6; border-right: 1px solid #f3f4f6; padding: 0 14px; }
+    .mid2 .ptitle { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .mid2 .tbadge { border: 1px solid #d1d5db; border-radius: 6px; font-size: 11px; padding: 1px 7px; font-family: var(--font-mono); color: #374151; font-weight: 400; }
+    .desc-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 9px 12px; font-size: 12px; color: #166534; margin-bottom: 12px; }
+    .mid2 label.fl { display: block; font-size: 12.5px; margin: 10px 0 4px; color: #374151; }
+    .mid2 .chk { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12.5px; cursor: pointer; }
+    .mid2 .req { color: #dc2626; }
+    .rt3 { font-size: 12.5px; }
+    .rt3 .ph { font-weight: 600; font-size: 13px; margin-bottom: 10px; }
+    .pcard { border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+    .pcard .gh { margin-bottom: 6px; }
+    .pcard .gh .tag { background: #1d4ed8; color: #fff; border-radius: 6px; font-size: 10.5px; font-weight: 700; padding: 1px 8px; }
+    .pcard li { list-style: none; padding: 2px 0; }
+    .pcard .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 6px; background: #3b82f6; }
+    .pcard .dot.g { background: #22c55e; }
+    .pcard .sub { color: #6b7280; font-size: 11.5px; padding-left: 13px; }
+    .amber { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 12px; color: #92400e; font-size: 12px; margin-bottom: 10px; }
+    .amber ol { margin-left: 1.2rem; }
+    .sumt { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+    .sumt th, .sumt td { border: 1px solid #f3f4f6; padding: 4px 7px; text-align: left; }
+    .sumt th { background: #fafafa; }
+    .foot { border-top: 1px solid #f3f4f6; margin-top: 14px; padding: 12px 16px 2px; }
+    .foot .freq { color: #dc2626; font-size: 12px; margin-bottom: 8px; display: none; }
+    .foot button { display: block; width: 100%; border-radius: 8px; padding: 9px; font-size: 14px; cursor: pointer; }
+    .foot .cancel { background: #fff; border: 1px solid #e5e7eb; margin-bottom: 8px; }
+    .foot .ok { background: #1d4ed8; border: 1px solid #1d4ed8; color: #fff; }
+    .foot .ok:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./index.html#component-2-2">← 返回主文件</a>
+    <span><a href="./layer-3-conditions.html">← 层级 3</a>　<a href="./layer-5-test-analysis.html">层级 5：测试与分析 →</a></span>
+  </nav>
+
+  <header>
+    <h1>交互层级 4：处置策略 Tab</h1>
+    <table class="spec-table">
+      <tr><td style="width:120px"><b>所属组件</b></td><td>3.2 规则编辑抽屉 → 处置策略 Tab</td></tr>
+      <tr><td><b>主文件</b></td><td><a href="./index.html">filter-rules-pipeline-advanced-rules/index.html</a></td></tr>
+      <tr><td><b>触发路径</b></td><td>层级2 抽屉内点击「处置策略」Tab</td></tr>
+      <tr><td><b>demo 源</b></td><td>L3471-4721（三栏 grid <code>[280px_1fr_320px]</code>）；冲突矩阵 <code>getAddonConflictRules</code> L1143-1160；校验 <code>canSaveActions</code> L3006；默认值 <code>getDefaultActionsSettings</code> L1119-1140</td></tr>
+    </table>
+  </header>
+
+  <section class="interaction-layer">
+    <h2>可交互组件预览</h2>
+    <div class="component-preview">
+      <div class="ax">
+        <div class="left3">
+          <h5>执行动作</h5>
+          <select id="act">
+            <option value="none">不设置执行动作</option>
+            <option value="deliver">投递</option>
+            <option value="tagDeliver">标记投递</option>
+            <option value="quarantine">邮件隔离</option>
+            <option value="review">邮件审核</option>
+            <option value="discard">丢弃</option>
+            <option value="block">阻断</option>
+          </select>
+          <div class="lhint" id="noneHint">未设置执行动作，邮件将仅执行下方已启用的附加策略。</div>
+          <div class="lreq" id="leftReq">* 执行动作与附加策略至少配置一项</div>
+          <button class="cfgbtn" id="cfgBtn"></button>
+          <div class="addonhead">附加策略</div>
+          <div id="addons"></div>
+        </div>
+        <div class="mid2" id="mid2"></div>
+        <div class="rt3">
+          <div class="ph">逻辑表达式预览</div>
+          <div id="rt3"></div>
+        </div>
+      </div>
+      <div class="foot">
+        <div class="freq" id="footReq">* 执行动作与附加策略至少配置一项</div>
+        <button class="cancel">取消</button>
+        <button class="ok" id="okBtn">确定</button>
+      </div>
+    </div>
+
+    <figure><img src="./screenshots/layer4-actions-default.png" alt="处置策略默认态"><figcaption>默认态：执行动作=不设置；附加策略默认勾选「添加免责声明」「删除附件」（demo <code>getDefaultActionsSettings</code>）；右栏 OR 策略组 + 完整表达式（琥珀卡）+ 配置摘要。</figcaption></figure>
+    <figure><img src="./screenshots/layer4-action-select-open.png" alt="执行动作下拉"><figcaption>执行动作下拉 7 项：不设置执行动作 / 投递 / 标记投递 / 邮件隔离 / 邮件审核 / 丢弃 / 阻断。</figcaption></figure>
+    <figure><img src="./screenshots/layer4-tagdeliver-params.png" alt="标记投递参数"><figcaption>选「标记投递」→ 中栏参数：标记内容* / 标记位置 / 标记样式（+信头字段时的附加输入）。</figcaption></figure>
+    <figure><img src="./screenshots/layer4-block-params-conflict.png" alt="阻断参数与冲突"><figcaption>选「阻断」→ 中栏：SMTP响应码*（默认550，附注 常用: 550/554/571）+ 自定义响应文本* + 启用Tarpit；左栏附加策略仅「发送管理员通知」可用，其余 6 项置灰（冲突矩阵）。</figcaption></figure>
+    <figure><img src="./screenshots/layer4-block-tarpit-on.png" alt="Tarpit 展开"><figcaption>勾选「启用Tarpit延迟响应（防暴力探测）」→ 展开延迟秒数输入（1-60s，默认5）。</figcaption></figure>
+    <figure><img src="./screenshots/layer4-quarantine-conflict.png" alt="隔离冲突"><figcaption>选「邮件隔离」→「转发至目的服务器」「更改信头」两项置灰，其余可用；中栏提示隔离无需配置参数。</figcaption></figure>
+    <figure><img src="./screenshots/layer4-none-validation.png" alt="保存校验"><figcaption>不设置动作 + 取消全部附加策略 → 确定按钮禁用，左栏与 Footer 双处红字「* 执行动作与附加策略至少配置一项」。</figcaption></figure>
+    <figure><img src="./screenshots/layer4-adminnotify-checked.png" alt="勾选管理员通知恢复"><figcaption>勾选「发送管理员通知」→ 确定按钮立即恢复可用；中栏渲染通知参数（含条件说明卡，注意「删除附件」说明卡中文乱码 D-6）。</figcaption></figure>
+    <figure><img src="./screenshots/layer4-config-summary.png" alt="配置摘要"><figcaption>右栏底部「配置摘要」两列表格（策略/配置），遍历已启用项参数拼接展示。</figcaption></figure>
+  </section>
+
+  <section>
+    <h2>UI 元素清单</h2>
+    <h4>执行动作（6 种互斥 + 不设置，demo Select 单选）</h4>
+    <table class="spec-table">
+      <thead><tr><th>动作</th><th>值</th><th>中栏参数字段</th></tr></thead>
+      <tbody>
+        <tr><td>不设置执行动作</td><td><code>none</code></td><td>无表单；左栏提示「未设置执行动作，邮件将仅执行下方已启用的附加策略。」</td></tr>
+        <tr><td>投递</td><td><code>deliver</code></td><td>跳过后续规则 Checkbox（<code>skipSubsequentRules</code>）</td></tr>
+        <tr><td>标记投递</td><td><code>tagDeliver</code></td><td>标记内容* Input；标记位置 Select（主题前缀/主题后缀/正文开头/正文结尾/信头字段）；标记样式 Select（纯文本/HTML红/HTML橙/HTML黄，选信头时禁用）；信头字段时附加「标头字段名/字段内容」两 Input</td></tr>
+        <tr><td>邮件隔离</td><td><code>quarantine</code></td><td>无参数（提示无需配置；被隔离邮件在邮件隔离模块查看）</td></tr>
+        <tr><td>邮件审核</td><td><code>review</code></td><td>审核人 Select（系统管理员/安全团队）；审核期限 Input number 1-168 小时</td></tr>
+        <tr><td>丢弃</td><td><code>discard</code></td><td>静默丢弃 Checkbox；通知管理员 Checkbox（记录日志默认开）</td></tr>
+        <tr><td>阻断</td><td><code>block</code></td><td>SMTP响应码* Input（默认550，附注常用550/554/571）；自定义响应文本* Input（默认 5.7.1 Message rejected…）；启用Tarpit Checkbox → 展开延迟秒数 1-60（默认5）</td></tr>
+      </tbody>
+    </table>
+    <h4>附加策略（数据模型 8 项；左栏勾选列表实渲 7 项——「记录详细日志」无 UI 入口，D-7）</h4>
+    <table class="spec-table">
+      <thead><tr><th>左栏顺序</th><th>策略</th><th>key</th><th>默认</th><th>中栏参数字段</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>添加免责声明</td><td><code>disclaimer</code></td><td><b>勾选</b></td><td>声明模板* Select（标准/法务/自定义）；插入位置* Select（正文顶部/正文底部/信头）</td></tr>
+        <tr><td>2</td><td>外部邮件提醒</td><td><code>externalReminder</code></td><td>—</td><td>提醒模板* Select（标准/安全/自定义）；插入位置* Select（正文顶部/正文底部）；琥珀提示</td></tr>
+        <tr><td>3</td><td>发送管理员通知</td><td><code>adminNotify</code></td><td>—</td><td>接收人类型* Select（手动/管理员列表/群组/组织）；合并窗口 Input 1-60 分钟（默认5）；通知模板 Select</td></tr>
+        <tr><td>4</td><td>删除附件</td><td><code>deleteAttachment</code></td><td><b>勾选</b></td><td>删除范围* Select（全部/检出病毒/指定类型/超大小/加密/嵌套压缩/含二维码 7 值）；替换文案 Input；替换方式 3 Checkbox（正文提示/同名文本文件/信头标记 X-Attachment-Removed）；正文插入位置 Select；启用例外保护 Checkbox（正则/域名组/MD5白名单）</td></tr>
+        <tr><td>5</td><td>自定义标记</td><td><code>emailTag</code></td><td>—</td><td>标记内容* Input；位置 Select（5 值同标记投递）；样式 Select（5 值，多 HTML蓝）</td></tr>
+        <tr><td>6</td><td>转发至目的服务器</td><td><code>forwardServer</code></td><td>—</td><td>目标地址* Input；端口* Input（默认25）；转发方式* Select（抄送 copy/重定向 redirect）；认证方式 Select（无/SMTP认证→用户名密码）；保留原始信封 Checkbox</td></tr>
+        <tr><td>7</td><td>更改信头</td><td><code>modifyHeader</code></td><td>—</td><td>目标字段* Select（From/To/Subject/Reply-To/自定义）；操作类型* Select（替换/加前缀/加后缀/正则替换/删除）；新值* Input；变量提示 + SPF/DKIM 破坏警告</td></tr>
+        <tr><td>—</td><td>记录详细日志</td><td><code>detailedLog</code></td><td>模型默认 false</td><td>仅存在于数据模型（level: detailed/simple）；不计入「至少一项」校验；无 UI 入口</td></tr>
+      </tbody>
+    </table>
+    <h4>交互规则</h4>
+    <table class="spec-table">
+      <thead><tr><th>规则</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>冲突矩阵</td><td>隔离→禁转发/改信头；丢弃、阻断→仅管理员通知可用。被禁项 opacity-50 + 不可点 + title 提示冲突原因；切回兼容动作后恢复（勾选状态保留）</td></tr>
+        <tr><td>勾选自动展开</td><td>勾选附加策略自动展开参数并 focus 首个输入（100ms）；取消勾选不收起（保留已填配置）</td></tr>
+        <tr><td>选中联动</td><td>点击附加策略行（不点 checkbox）也会把中栏切到该策略的参数表单；动作 Select 变化同理</td></tr>
+        <tr><td>保存校验</td><td><code>canSave = primaryAction!=="none" || 存在(已启用 ∧ 未被冲突禁用 ∧ 非detailedLog)的附加策略</code>；不满足→确定禁用+双处红字</td></tr>
+        <tr><td>右栏三区</td><td>① OR 策略组卡：动作名+参数摘要+已启用附加策略摘要（过滤冲突项与 detailedLog）；② 完整表达式琥珀卡：动作详述+有序附加策略列表（丢弃/阻断等终结动作不列附加策略）；③ 配置摘要表：策略/配置两列</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="dom-comparison">
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM（Playwright 提取，Tab 面板总节点 109）</th><th>预览还原 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td>tabpanel &gt; 三栏 grid <code>[280px_1fr_320px]</code></td><td><code>.ax</code> 同 grid 模板</td><td class="pass">一致</td></tr>
+        <tr><td>动作下拉</td><td>listbox 7 options（文案逐字核对：不设置执行动作/投递/标记投递/邮件隔离/邮件审核/丢弃/阻断）</td><td>同 7 项同顺序</td><td class="pass">一致</td></tr>
+        <tr><td>附加策略行</td><td>7 行（添加免责声明/外部邮件提醒/发送管理员通知/删除附件/自定义标记/转发至目的服务器/更改信头），默认 checked=disclaimer+deleteAttachment</td><td>同 7 行同默认态</td><td class="pass">一致</td></tr>
+        <tr><td>block 冲突态</td><td>role=checkbox 8 个（7 addon + Tarpit）：仅 index2(管理员通知) 与 Tarpit 可用，其余 disabled（Playwright 断言）</td><td>同禁用集合</td><td class="pass">一致</td></tr>
+        <tr><td>校验态</td><td>none+全不勾：确定 button disabled=true；红字「* 执行动作与附加策略至少配置一项」出现于左栏与 Footer；勾选管理员通知后 disabled=false（Playwright 断言）</td><td>同逻辑复现</td><td class="pass">一致</td></tr>
+        <tr><td>右栏</td><td>OR 策略组卡 + 完整表达式琥珀卡 + 配置摘要表（截图核对）；默认摘要含「添加免责声明（标准模板，正文底部）」「删除附件（范围：全部附件）」</td><td>同三区同默认摘要</td><td class="pass">一致</td></tr>
+        <tr><td>条件渲染</td><td>none 时中栏无参数表单仅说明卡；cfg 参数按钮仅非 none 显示；Tarpit 秒数仅勾选后出现</td><td>同条件逻辑</td><td class="pass">一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+<script>
+(function () {
+  var ACTIONS = {
+    none: { n: "不设置执行动作", desc: ["无", "不对邮件执行任何主动作", "未设置执行动作，邮件将仅执行下方已启用的附加策略。"], form: [] },
+    deliver: { n: "投递", desc: ["投递引擎", "正常投递到收件箱", "可选择跳过后续规则"], form: [["chk", "跳过后续规则"]] },
+    tagDeliver: { n: "标记投递", desc: ["投递引擎", "投递并添加可疑标记", "标记位置为信头时样式不生效"], form: [["text", "标记内容 *", "[可疑邮件]"], ["sel", "标记位置", "主题前缀|主题后缀|正文开头|正文结尾|信头字段"], ["sel", "标记样式", "纯文本|HTML红色|HTML橙色|HTML黄色"]] },
+    quarantine: { n: "邮件隔离", desc: ["隔离区", "移至隔离区待审", "被隔离邮件可在邮件隔离模块查看"], form: [["hint", "邮件隔离无需配置参数。"]] },
+    review: { n: "邮件审核", desc: ["人工审核队列", "进入人工审核队列", "超时未审按默认策略处理"], form: [["sel", "审核人", "系统管理员|安全团队"], ["num", "审核期限（1-168小时）", 24]] },
+    discard: { n: "丢弃", desc: ["投递引擎", "直接删除不通知", "丢弃后不可恢复"], form: [["chk", "静默丢弃"], ["chk", "通知管理员"]] },
+    block: { n: "阻断", desc: ["MTA代理层", "在SMTP会话阶段直接拒绝接收", "阻断后邮件不会进入内容处理引擎（demo 原文含乱码「注�」，D-6）"], form: [["text", "SMTP响应码 *（常用: 550/554/571）", "550"], ["text", "自定义响应文本 *", "5.7.1 Message rejected due to content policy"], ["tarpit", "启用Tarpit延迟响应（防暴力探测）"]] }
+  };
+  var ADDONS = [
+    { k: "disclaimer", n: "添加免责声明", on: true, form: [["sel", "声明模板 *", "标准模板|法务模板|自定义"], ["sel", "插入位置 *", "正文顶部|正文底部|信头"]], sum: "标准模板，正文底部" },
+    { k: "externalReminder", n: "外部邮件提醒", on: false, form: [["sel", "提醒模板 *", "标准模板|安全提醒|自定义"], ["sel", "插入位置 *", "正文顶部|正文底部"]], sum: "标准模板" },
+    { k: "adminNotify", n: "发送管理员通知", on: false, form: [["sel", "接收人类型 *", "手动输入|管理员列表|群组|组织"], ["num", "合并窗口（1-60分钟）", 5], ["sel", "通知模板", "默认告警模板"]], sum: "管理员列表，合并5分钟" },
+    { k: "deleteAttachment", n: "删除附件", on: true, form: [["sel", "删除范围 *", "全部附件|检出病毒|指定类型|超过大小|加密附件|嵌套压缩|含二维码"], ["text", "替换文案", "附件因安全策略已移除，如有疑问请联系IT部门。"], ["chk", "在正文插入替换提示（demo 原文含乱码，D-6）"], ["chk", "在附件原位置插入同名文本文件"], ["chk", "在信头添加删除标记（X-Attachment-Removed）"]], sum: "范围：全部附件" },
+    { k: "emailTag", n: "自定义标记", on: false, form: [["text", "标记内容 *", ""], ["sel", "标记位置", "主题前缀|主题后缀|正文开头|正文结尾|信头字段"], ["sel", "标记样式", "纯文本|HTML红色|HTML橙色|HTML黄色|HTML蓝色"]], sum: "主题前缀" },
+    { k: "forwardServer", n: "转发至目的服务器", on: false, form: [["text", "目标地址 *", ""], ["num", "端口 *", 25], ["sel", "转发方式 *", "抄送 (copy)|重定向 (redirect)"], ["sel", "认证方式", "无|SMTP认证"], ["chk", "保留原始信封"]], sum: "copy:25" },
+    { k: "modifyHeader", n: "更改信头", on: false, form: [["sel", "目标字段 *", "From|To|Subject|Reply-To|自定义"], ["sel", "操作类型 *", "替换|添加前缀|添加后缀|正则替换|删除"], ["text", "新值 *", ""]], sum: "Subject 替换" }
+  ];
+  var CONFLICTS = { none: [], deliver: [], tagDeliver: [], review: [], quarantine: ["forwardServer", "modifyHeader"], discard: ["disclaimer", "externalReminder", "deleteAttachment", "emailTag", "forwardServer", "modifyHeader"], block: ["disclaimer", "externalReminder", "deleteAttachment", "emailTag", "forwardServer", "modifyHeader"] };
+  var state = { act: "none", sel: { type: "action", key: "none" }, tarpit: false };
+
+  var actSel = document.getElementById('act');
+  function conflicted(k) { return CONFLICTS[state.act].includes(k); }
+  function canSave() { return state.act !== 'none' || ADDONS.some(function (a) { return a.on && !conflicted(a.k); }); }
+
+  function renderAddons() {
+    document.getElementById('addons').innerHTML = ADDONS.map(function (a) {
+      var dis = conflicted(a.k);
+      return '<div class="arow' + (a.on && !dis ? ' on' : '') + (dis ? ' dis' : '') + (state.sel.type === 'addon' && state.sel.key === a.k ? ' sel' : '') + '" data-k="' + a.k + '"' + (dis ? ' title="与当前执行动作「' + ACTIONS[state.act].n + '」冲突，不可用"' : '') + '>' +
+        '<input type="checkbox"' + (a.on ? ' checked' : '') + (dis ? ' disabled' : '') + ' data-k="' + a.k + '"> ' + a.n + '</div>';
+    }).join('');
+  }
+  document.getElementById('addons').addEventListener('click', function (e) {
+    var k = (e.target.closest('[data-k]') || {}).dataset && e.target.closest('[data-k]').dataset.k;
+    if (!k || conflicted(k)) return;
+    var a = ADDONS.find(function (x) { return x.k === k; });
+    if (e.target.type === 'checkbox') a.on = e.target.checked;
+    state.sel = { type: 'addon', key: k };
+    renderAll();
+  });
+  actSel.addEventListener('change', function () { state.act = actSel.value; state.sel = { type: 'action', key: state.act }; renderAll(); });
+
+  function fieldHtml(f) {
+    if (f[0] === 'hint') return '<div class="lhint">' + f[1] + '</div>';
+    if (f[0] === 'chk') return '<label class="chk"><input type="checkbox"> ' + f[1] + '</label>';
+    if (f[0] === 'tarpit') return '<label class="chk"><input type="checkbox" id="tarpitChk"' + (state.tarpit ? ' checked' : '') + '> ' + f[1] + '</label><div id="tarpitS" style="display:' + (state.tarpit ? 'block' : 'none') + '"><label class="fl">延迟秒数（1-60）</label><input type="number" value="5" min="1" max="60"></div>';
+    if (f[0] === 'text') return '<label class="fl">' + f[1].replace('*', '<span class="req">*</span>') + '</label><input type="text" value="' + (f[2] || '') + '">';
+    if (f[0] === 'num') return '<label class="fl">' + f[1].replace('*', '<span class="req">*</span>') + '</label><input type="number" value="' + f[2] + '">';
+    if (f[0] === 'sel') return '<label class="fl">' + f[1].replace('*', '<span class="req">*</span>') + '</label><select>' + f[2].split('|').map(function (o) { return '<option>' + o + '</option>'; }).join('') + '</select>';
+    return '';
+  }
+  function renderMid() {
+    var mid = document.getElementById('mid2'), h;
+    if (state.sel.type === 'action') {
+      var a = ACTIONS[state.act];
+      h = '<div class="ptitle">' + a.n + ' <span class="tbadge">action</span></div>' +
+        '<div class="desc-card"><b>条件说明</b><br>数据来源: ' + a.desc[0] + '<br>用途: ' + a.desc[1] + '<br>注意: ' + a.desc[2] + '</div>' +
+        (a.form.length ? '<div style="font-weight:600;font-size:13px;margin:8px 0 2px">' + a.n + '参数</div>' : '') + a.form.map(fieldHtml).join('');
+    } else {
+      var ad = ADDONS.find(function (x) { return x.k === state.sel.key; });
+      h = '<div class="ptitle">' + ad.n + ' <span class="tbadge">addon_policy</span></div>' +
+        '<div class="desc-card"><b>条件说明</b><br>用途: 在执行动作之上叠加「' + ad.n + '」处理（说明文案见 demo L3599-3675）</div>' +
+        '<fieldset style="border:0"' + (ad.on ? '' : ' disabled') + '>' + ad.form.map(fieldHtml).join('') + '</fieldset>' +
+        (ad.on ? '' : '<div class="lhint">（未勾选：表单禁用；勾选后自动展开并聚焦首个输入项）</div>');
+    }
+    mid.innerHTML = h;
+    var tc = document.getElementById('tarpitChk');
+    if (tc) tc.onchange = function () { state.tarpit = tc.checked; document.getElementById('tarpitS').style.display = tc.checked ? 'block' : 'none'; };
+  }
+  function renderRight() {
+    var enabled = ADDONS.filter(function (a) { return a.on && !conflicted(a.k); });
+    var a = ACTIONS[state.act];
+    var h = '<div class="pcard"><div class="gh"><span class="tag">OR 策略组</span></div><ul>' +
+      '<li><span class="dot"></span>' + a.n + (state.act === 'block' ? '<div class="sub">响应码: 550</div>' : '') + '</li>' +
+      enabled.map(function (x) { return '<li><span class="dot g"></span>' + x.n + '<div class="sub">' + x.sum + '</div></li>'; }).join('') + '</ul></div>';
+    var terminal = state.act === 'discard' || state.act === 'block';
+    h += '<div class="amber"><b>完整表达式</b><br>' +
+      (state.act === 'none' ? '未设置执行动作，邮件将仅执行下方附加策略' : '邮件将被' + a.n + (state.act === 'block' ? '（SMTP响应码：550）' : '')) +
+      (enabled.length && !terminal ? '<br>并执行以下附加策略：<ol>' + enabled.map(function (x) { return '<li>' + x.n + '（' + x.sum + '）</li>'; }).join('') + '</ol>' : '') + '</div>';
+    h += '<div style="font-weight:600;margin:8px 0 4px">配置摘要</div><table class="sumt"><tr><th>策略</th><th>配置</th></tr>' +
+      (state.act !== 'none' ? '<tr><td>' + a.n + '</td><td>' + (state.act === 'block' ? 'smtpCode: 550, tarpit: ' + state.tarpit : '默认参数') + '</td></tr>' : '') +
+      enabled.map(function (x) { return '<tr><td>' + x.n + '</td><td>' + x.sum + '</td></tr>'; }).join('') + '</table>';
+    document.getElementById('rt3').innerHTML = h;
+  }
+  function renderAll() {
+    document.getElementById('noneHint').style.display = state.act === 'none' ? 'block' : 'none';
+    var cfg = document.getElementById('cfgBtn');
+    cfg.style.display = state.act === 'none' ? 'none' : 'block';
+    cfg.textContent = '配置「' + ACTIONS[state.act].n + '」参数';
+    cfg.onclick = function () { state.sel = { type: 'action', key: state.act }; renderAll(); };
+    var ok = canSave();
+    document.getElementById('okBtn').disabled = !ok;
+    document.getElementById('leftReq').style.display = ok ? 'none' : 'block';
+    document.getElementById('footReq').style.display = ok ? 'none' : 'block';
+    renderAddons(); renderMid(); renderRight();
+  }
+  renderAll();
+})();
+</script>
+</body>
+</html>

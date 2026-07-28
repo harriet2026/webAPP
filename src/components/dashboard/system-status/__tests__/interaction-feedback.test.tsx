@@ -32,6 +32,7 @@ const DATA: SystemStatusData = {
   pendingReport: 1,
   nodesOnline: 2,
   nodesTotal: 2,
+  nodesDegraded: false,
   threatTrend: [],
   top5: [],
   alerts: [],
@@ -65,5 +66,29 @@ describe('system-status interaction feedback', () => {
 
     fireEvent.pointerLeave(cardLink);
     expect(cardLink).not.toHaveAttribute('data-hovered');
+  });
+});
+
+// GT-12549: 节点数据源降级时 KPI 必须如实展示"数据源不可用"，
+// 绝不渲染看似有效的 0/0。
+describe('nodes KPI degrade rendering (GT-12549)', () => {
+  it('renders -- and nodesUnavailable when the node source is degraded', () => {
+    render(
+      <KpiCards
+        data={{ ...DATA, nodesOnline: 0, nodesTotal: 0, nodesDegraded: true }}
+        showInfra
+      />,
+    );
+    const nodesCard = screen.getByTestId('system-status-kpi-card-nodes');
+    expect(nodesCard.textContent).toContain('--');
+    expect(nodesCard.textContent).toContain('nodesUnavailable');
+    expect(nodesCard.textContent).not.toContain('0/0');
+  });
+
+  it('renders real counts when the source is healthy', () => {
+    render(<KpiCards data={DATA} showInfra />);
+    const nodesCard = screen.getByTestId('system-status-kpi-card-nodes');
+    expect(nodesCard.textContent).toContain('2/2');
+    expect(nodesCard.textContent).not.toContain('nodesUnavailable');
   });
 });

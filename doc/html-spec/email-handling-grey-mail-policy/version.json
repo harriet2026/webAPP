@@ -1,0 +1,9 @@
+{
+  "module": "email-handling-grey-mail-policy",
+  "current_version": 1,
+  "history": [
+    { "version": 1, "generated_at": "2026-07-18",
+      "demo_commit": "2cdad33", "spec_commit": "804efb9",
+      "summary": "初版：策略矩阵（新建/编辑/启停/删除）、用户组三态（全员/组织部门树多选/群组下拉）、置信度区间滑块、处置动作、全局参数配置、保存" }
+  ]
+}

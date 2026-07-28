@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 3：行操作菜单 - 告警中心</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== 设计变量（参考 demo globals.css） ===== */
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --destructive: oklch(0.577 0.245 27.325);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground); line-height: 1.55; font-size: 14px; padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem; max-width: 1280px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1.2rem; margin: 2.2rem 0 .8rem; padding-bottom: .35rem; border-bottom: 2px solid var(--primary); }
+    h3 { font-size: 1.05rem; margin: 1.6rem 0 .6rem; }
+    h4 { font-size: .95rem; margin: 1.2rem 0 .5rem; }
+    h5 { font-size: .85rem; margin: .8rem 0 .4rem; }
+    p { margin: .45rem 0; }
+    code { font-family: var(--font-mono); font-size: .85em; background: var(--muted); padding: .1em .35em; border-radius: 4px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    a { color: oklch(0.52 0.226 262); }
+
+    .spec-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .spec-header .subtitle { color: var(--muted-foreground); font-size: .9rem; }
+    .meta-table { border-collapse: collapse; width: 100%; margin-top: .8rem; font-size: 13px; }
+    .meta-table td { border: 1px solid var(--border); padding: 5px 10px; vertical-align: top; }
+    .meta-table td:first-child { background: var(--muted); font-weight: 600; white-space: nowrap; width: 11em; }
+
+    .component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem; margin-top: 1.2rem; }
+    .component-toc ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .component-toc li { margin: .3rem 0; }
+    .toc-badge { display: inline-block; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 999px; padding: 0 .5em; margin-left: .4em; vertical-align: middle; }
+    .toc-layer-links { margin-left: .6em; font-size: 12px; }
+    .toc-layer-links a { margin-right: .5em; }
+
+    .spec-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0 1rem; background: var(--card); }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+    .spec-table th { background: var(--muted); font-weight: 600; white-space: nowrap; }
+    .spec-table td.num { text-align: right; font-family: var(--font-mono); }
+    .spec-table .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    .matrix-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: .6rem 0; background: var(--card); }
+    .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: center; }
+    .matrix-table th { background: var(--muted); font-weight: 600; }
+    .matrix-table td:first-child { text-align: left; font-weight: 600; background: var(--muted); }
+    .legend { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .5rem .8rem; }
+
+    .screenshot-figure { margin: .8rem 0 1.2rem; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .screenshot-figure figcaption { font-size: 12px; color: var(--muted-foreground); margin-top: .35rem; }
+
+    .component-spec { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.4rem 1.4rem; margin: 1.2rem 0; }
+    .interaction-layer { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: .9rem 1.1rem; margin: 1rem 0; background: oklch(0.99 0 0); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; background: var(--primary); color: #fff; border-radius: 999px; font-size: .8em; font-weight: 700; margin-right: .4em; }
+    .trigger-path { font-size: 12.5px; color: var(--muted-foreground); background: var(--muted); border-radius: 6px; padding: .45rem .7rem; margin: .5rem 0; }
+    .layer-nav { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 13px; }
+    .layer-index a { font-weight: 600; }
+
+    .component-preview { border: 2px dashed oklch(0.7 0.12 262); border-radius: 10px; padding: 18px; background: #f4f5f7; overflow-x: auto; margin: .7rem 0; position: relative; }
+    .component-preview::before { content: "可交互预览（提取自运行中的 demo）"; position: absolute; top: -9px; left: 14px; background: oklch(0.52 0.226 262); color: #fff; font-size: 10.5px; padding: 0 8px; border-radius: 999px; line-height: 16px; z-index: 5; }
+    .preview-note { font-size: 12px; color: var(--muted-foreground); background: oklch(0.975 0.02 95); border: 1px solid oklch(0.9 0.06 95); border-radius: 6px; padding: .4rem .7rem; margin: .4rem 0 .8rem; }
+    .component-preview .bg-card { background: #fff; }
+    .component-preview .text-card-foreground { color: #0a0a0a; }
+    .component-preview .bg-popover { background: #fff; }
+    .component-preview .text-popover-foreground { color: #0a0a0a; }
+    .component-preview .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .component-preview .border-input { border-color: #e5e7eb; }
+    .component-preview svg { flex-shrink: 0; }
+    .component-preview [data-slot="card"] { border-color: #e5e7eb; background: #fff; }
+    .component-preview button { cursor: pointer; }
+    .component-preview button:disabled { cursor: default; }
+    .component-preview .text-gray-900 { color: #111827; }
+    .component-preview .text-gray-500 { color: #6b7280; }
+    .component-preview .text-gray-400 { color: #9ca3af; }
+    .component-preview .bg-gray-50 { background: #f9fafb; }
+    @keyframes spec-spin { to { transform: rotate(360deg); } }
+    .component-preview .animate-spin { animation: spec-spin 1s linear infinite; }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .component-preview .animate-marquee { animation: marquee 30s linear infinite; }
+    .component-preview .animate-marquee:hover { animation-play-state: paused; }
+
+    .route-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; font-size: 13px; padding: 8px 16px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 99; opacity: 0; transition: opacity .2s; pointer-events: none; font-family: var(--font-mono); }
+    .route-toast.show { opacity: 1; }
+
+    .dom-comparison { background: oklch(0.975 0.008 262); border: 1px solid oklch(0.85 0.03 262); border-radius: 8px; padding: .6rem .9rem; margin-top: .8rem; }
+    .dom-comparison h5 { margin: .2rem 0 .4rem; }
+
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .diff-section h2 { border-bottom-color: var(--diff-border); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.5rem 0; }
+    .question-section h2 { border-bottom-color: var(--question-border); }
+    .diff-table td:first-child, .question-table td:first-child { font-weight: 700; white-space: nowrap; }
+
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 .55em; line-height: 1.6; vertical-align: middle; }
+    .tag-green { background: #dcfce7; color: #15803d; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-gray { background: #f3f4f6; color: #4b5563; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+    .mermaid { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .6rem; margin: .8rem 0; overflow-x: auto; }
+
+    .component-preview [data-radix-popper-content-wrapper] { position: static !important; transform: none !important; }
+  </style>
+</head>
+<body>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-2">&larr; 返回主文件</a>
+  <span>层级 3 / 3（实时告警）</span>
+  <a href="./layer-2-batch-select.html">&larr; 层级 2：全选批量</a>
+</nav>
+<header class="spec-header">
+  <h1>交互层级 3：行操作菜单展开</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.2 实时告警 Tab</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">monitor-alerts/index.html</a></td></tr>
+    <tr><td>触发路径</td><td>层级0 → 点击首行行尾 MoreHorizontal（ghost icon 按钮）→ Radix DropdownMenu 展开（align=end）</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">3</span> 行操作菜单打开态（浏览器实测截图）</h4>
+  <figure class="screenshot-figure"><img src="./screenshots/layer-3-row-actions.png"><figcaption>首行操作菜单：确认 / 解决 / 查看详情（3 个 menuitem）；「查看详情」目标行为已定：打开告警详情抽屉（主文件 §3.3，2026-07-22 用户决定）</figcaption></figure>
+
+  <h4>菜单 DOM（提取自 demo 打开态）</h4>
+  <div class="component-preview" id="preview-row-actions" style="overflow:visible; max-width:280px;">
+<button id="pv-row-trigger" data-slot="dropdown-menu-trigger" aria-haspopup="menu" aria-expanded="false" data-state="closed" type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground size-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+<div id="pv-row-menu" style="display:none;margin-top:4px;">
+<div data-radix-popper-content-wrapper="" dir="ltr" style="position: fixed; left: 0px; top: 0px; transform: translate(1699px, 722px); min-width: max-content; --radix-popper-transform-origin: 100% 0px; z-index: 50; --radix-popper-available-width: 1920px; --radix-popper-available-height: 358.5px; --radix-popper-anchor-width: 36px; --radix-popper-anchor-height: 36px;"><div data-side="bottom" data-align="end" role="menu" aria-orientation="vertical" data-state="open" data-radix-menu-content="" dir="ltr" id="radix-_r_c_" aria-labelledby="radix-_r_b_" data-slot="dropdown-menu-content" class="bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md" tabindex="-1" data-orientation="vertical" style="outline: none; --radix-dropdown-menu-content-transform-origin: var(--radix-popper-transform-origin); --radix-dropdown-menu-content-available-width: var(--radix-popper-available-width); --radix-dropdown-menu-content-available-height: var(--radix-popper-available-height); --radix-dropdown-menu-trigger-width: var(--radix-popper-anchor-width); --radix-dropdown-menu-trigger-height: var(--radix-popper-anchor-height); pointer-events: auto;"><div role="menuitem" data-slot="dropdown-menu-item" data-variant="default" class="focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&amp;_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="-1" data-orientation="vertical" data-radix-collection-item="">确认</div><div role="menuitem" data-slot="dropdown-menu-item" data-variant="default" class="focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&amp;_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="-1" data-orientation="vertical" data-radix-collection-item="">解决</div><div role="menuitem" data-slot="dropdown-menu-item" data-variant="default" class="focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&amp;_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4" tabindex="-1" data-orientation="vertical" data-radix-collection-item="">查看详情</div></div></div>
+</div>
+  </div>
+  <div class="preview-note">点击 ⋯ 触发按钮展开菜单（确认 / 解决 / 查看详情）；3 个菜单项在 demo 中<b>均无 onClick</b>（差异 D-02），点击仅提示未绑定。</div>
+
+  <h4>菜单项清单（实测）</h4>
+  <table class="spec-table">
+    <thead><tr><th>菜单项</th><th>i18n key</th><th>onClick</th><th>预期行为（未实现）</th></tr></thead>
+    <tbody>
+      <tr><td>确认</td><td class="mono">monitor.action.confirm</td><td>无（差异 D-02）</td><td>未确认 → 已确认</td></tr>
+      <tr><td>解决</td><td class="mono">monitor.action.resolve</td><td>无</td><td>任意状态 → 已解决</td></tr>
+      <tr><td>查看详情</td><td class="mono">monitor.action.viewDetail</td><td>demo 无（v2 已定目标行为）</td><td>【目标行为·2026-07-22 用户决定】<b>打开告警详情抽屉</b>（Sheet 右侧，展示该条告警完整信息，详见主文件 §3.3）</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>菜单项数（role=menuitem）</td><td>3</td><td>3</td><td class="dom-pass">✅</td></tr>
+        <tr><td>菜单项文案</td><td>确认 / 解决 / 查看详情</td><td>同</td><td class="dom-pass">✅</td></tr>
+        <tr><td>触发器</td><td>ghost icon 按钮（MoreHorizontal w-4 h-4）</td><td>同</td><td class="dom-pass">✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<nav class="layer-nav">
+  <a href="./index.html#component-2-2">&larr; 返回主文件</a>
+  <a href="./layer-2-batch-select.html">&larr; 层级 2：全选批量</a>
+</nav>
+<script>
+  function showRouteToast(msg) {
+    let el = document.querySelector('.route-toast');
+    if (!el) { el = document.createElement('div'); el.className = 'route-toast'; document.body.appendChild(el); }
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+  (function(){
+    const trigger = document.getElementById('pv-row-trigger');
+    const menu = document.getElementById('pv-row-menu');
+    if (!trigger || !menu) return;
+    function close() { menu.style.display = 'none'; trigger.setAttribute('data-state','closed'); trigger.setAttribute('aria-expanded','false'); }
+    function open() { menu.style.display = 'block'; trigger.setAttribute('data-state','open'); trigger.setAttribute('aria-expanded','true'); }
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (menu.style.display === 'none') open(); else close();
+    });
+    menu.querySelectorAll('[role="menuitem"]').forEach(it => {
+      it.style.cursor = 'pointer';
+      it.onmouseenter = () => { it.style.background = '#f3f4f6'; };
+      it.onmouseleave = () => { it.style.background = ''; };
+      it.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        showRouteToast('demo 未绑定 onClick（点击无响应）');
+        close();
+      });
+    });
+    document.addEventListener('click', () => { if (menu.style.display !== 'none') close(); });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - 高级过滤规则 - HTML 规格说明</title>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --radius: 0.625rem;
+      --diff-bg: oklch(0.97 0.013 25);
+      --diff-border: oklch(0.65 0.2 25);
+      --question-bg: oklch(0.97 0.05 95);
+      --question-border: oklch(0.75 0.15 90);
+      --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+      --font-mono: "Geist Mono", monospace;
+      --color-block: #f5222d;
+      --color-quarantine: #fa8c16;
+      --color-review: #722ed1;
+      --color-deliver: #52c41a;
+      --color-tag-deliver: #13c2c2;
+      --color-primary-blue: #1890ff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--background); color: var(--foreground); line-height: 1.6; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .spec-header, section, nav.component-toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+    .spec-header h1 { color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .meta-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+    .meta-table td:first-child { font-weight: 600; width: 170px; color: var(--muted-foreground); white-space: nowrap; }
+    section > h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; margin-bottom: 1.25rem; font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; margin: 1.25rem 0 0.75rem; }
+    h4 { font-size: 0.95rem; margin: 1rem 0 0.5rem; color: var(--muted-foreground); }
+    a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    a:hover { text-decoration: underline; }
+    p { margin: 0.5rem 0; }
+    ul { margin: 0.5rem 0 0.5rem 1.5rem; }
+    code { font-family: var(--font-mono); font-size: 0.85em; background: var(--muted); padding: 0.1em 0.35em; border-radius: 4px; }
+    pre { background: #1e293b; color: #e2e8f0; padding: 1rem 1.25rem; border-radius: var(--radius); overflow-x: auto; font-size: 0.8rem; margin: 0.75rem 0; }
+    pre code { background: none; color: inherit; padding: 0; }
+    table.spec-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 0.75rem 0 1.25rem; }
+    table.spec-table th { background: var(--muted); font-weight: 600; text-align: left; padding: 0.6rem 0.75rem; border: 1px solid var(--border); white-space: nowrap; }
+    table.spec-table td { padding: 0.55rem 0.75rem; border: 1px solid var(--border); vertical-align: top; }
+    .screenshot-figure { margin: 1rem 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .screenshot-figure figcaption { font-size: 0.8rem; color: var(--muted-foreground); margin-top: 0.4rem; }
+    .component-toc ul { list-style: none; margin-left: 0; }
+    .component-toc li { padding: 0.45rem 0; border-bottom: 1px dashed var(--border); }
+    .toc-badge { display: inline-block; background: var(--primary); color: white; border-radius: 999px; font-size: 0.7rem; padding: 0.1rem 0.55rem; margin-left: 0.5rem; }
+    .toc-layer-links { margin-left: 0.75rem; font-size: 0.8rem; }
+    .toc-layer-links a { margin-right: 0.6rem; font-weight: 400; }
+    .interaction-layer { border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin: 1rem 0; background: oklch(0.995 0.003 240); }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--primary); color: white; font-size: 0.8rem; margin-right: 0.5rem; }
+    .component-preview { border: 2px dashed oklch(0.75 0.1 262); border-radius: var(--radius); padding: 1.5rem; margin: 1rem 0; background: #f5f7fa; overflow-x: auto; }
+    .component-preview::before { content: "▶ 可交互组件预览（还原自 demo 实际渲染，可 hover / 点击）"; display: block; font-size: 0.75rem; color: var(--primary); margin-bottom: 0.9rem; font-weight: 600; }
+    .dom-comparison { background: oklch(0.97 0.02 150); border: 1px solid oklch(0.8 0.08 150); border-radius: var(--radius); padding: 0.75rem 1rem; margin: 0.75rem 0; }
+    .dom-comparison h5 { font-size: 0.85rem; margin-bottom: 0.4rem; }
+    .pass { color: #15803d; font-weight: 700; }
+    .diff-section { border-left: 5px solid var(--diff-border); background: var(--diff-bg); }
+    .question-section { border-left: 5px solid var(--question-border); background: var(--question-bg); }
+    .badge { display: inline-block; border-radius: 999px; padding: 0.05rem 0.6rem; font-size: 0.72rem; font-weight: 600; border: 1px solid transparent; }
+    .badge-high { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+    .badge-mid { background: #ffedd5; color: #c2410c; border-color: #fdba74; }
+    .badge-low { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
+    .badge-ok { background: #dcfce7; color: #15803d; border-color: #86efac; }
+    .mermaid { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin: 0.75rem 0; text-align: center; }
+    /* ===== 组件预览：流水线节点卡片（还原 demo Tailwind 效果） ===== */
+    .np-wrap { position: relative; display: inline-block; padding: 3rem 18rem 3rem 1rem; }
+    .np-card { width: 220px; height: 60px; border-radius: 8px; background: #fff; display: flex; overflow: hidden; cursor: pointer;
+      border: 2px dashed #FA8C16; transition: all .2s; }
+    .np-card:hover { border-color: #1890FF; background: #E6F7FF; }
+    .np-bar { width: 4px; flex-shrink: 0; background: #d9d9d9; }
+    .np-body { flex: 1; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
+    .np-name { font-size: 14px; font-weight: 500; color: #262626; }
+    .np-cfg { border: 0; background: none; color: #1890FF; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; }
+    .np-cfg:hover { color: #40A9FF; }
+    .np-tooltip { display: none; position: absolute; left: 245px; top: 0.5rem; width: 280px; background: #1f2937; color: #f9fafb; border-radius: 6px; padding: 12px; font-size: 0.82rem; z-index: 10; text-align: left; }
+    .np-wrap:hover .np-tooltip { display: block; }
+    .np-tooltip b { color: #fff; }
+    .np-tooltip .tip-note { color: #9ca3af; font-size: 0.72rem; border-top: 1px solid #374151; padding-top: 8px; margin-top: 8px; }
+    .np-hint { margin-top: 0.75rem; font-size: 0.82rem; color: #0369a1; background: #e0f2fe; border-radius: 6px; padding: 0.5rem 0.75rem; display: none; }
+  </style>
+</head>
+<body>
+
+<!-- ========== 0. 元信息头 ========== -->
+<header class="spec-header">
+  <h1>策略流水线 - 高级过滤规则 详细产品规格说明</h1>
+  <table class="meta-table">
+    <tr><td>模块定位</td><td>策略流水线（<code>/filter-rules/pipeline</code>）阶段5「综合策略」中的「高级过滤规则」节点 → 综合策略抽屉内嵌 <code>AdvancedFilterRulesModule</code>（多维度条件组合过滤引擎）</td></tr>
+    <tr><td>spec 源</td><td><code>design/origin/spec/V3高级过滤规则.md</code>（主）；<code>design/origin/spec/策略流水线需求文档.md</code>（阶段5节点与抽屉宿主）</td></tr>
+    <tr><td>demo 源</td><td><code>demo/components/filter-rules-new/modules/advanced-filter-rules-module.tsx</code>（5250行，模块本体）；<code>strategy-pipeline-page.tsx</code>（节点卡片 L860-1000 + 综合策略抽屉 L2151-2196）；<code>comprehensive-strategy-page.tsx</code>（嵌入宿主，<code>initialPolicy="advancedRules"</code> → <code>direction="receive"</code>）；<code>shared/feature-groups.ts</code>（特征组共享数据）</td></tr>
+    <tr><td>浏览器验证</td><td>Playwright Chromium，<code>http://localhost:3111/filter-rules/pipeline</code>，视口 1440×900（响应式另验 1024×900 / 1920×1080），语言 zh（默认）。共 44 张截图存于 <code>./screenshots/</code></td></tr>
+    <tr><td>覆盖章节</td><td>V3高级过滤规则.md 全部章节（§1 概述～§11 验收标准）</td></tr>
+    <tr><td>遵循约束</td><td><code>design/origin/implement.md</code>：复用统一规则系统（page 字段区分来源页面，不新增规则系统、不新增 action）；四语国际化；与网关底层冲突处列入 §10 需确认</td></tr>
+    <tr><td>产品形态</td><td>demo 顶栏形态「云网关」下验证；模块自身无形态差异逻辑（源码未引用 <code>useProductProfile</code>）</td></tr>
+  </table>
+</header>
+
+<!-- ========== 0.1 组件列表 ========== -->
+<nav class="component-toc">
+  <h2>📋 组件列表（点击跳转）</h2>
+  <ul>
+    <li><a href="#component-2-1">2.1 流水线节点卡片「高级过滤规则」（阶段5 · 未配置态）</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#component-2-2">2.2 高级过滤规则模块 AdvancedFilterRulesModule（综合策略抽屉内嵌）</a> <span class="toc-badge">6层</span>
+      <span class="toc-layer-links">
+        <a href="./layer-1-list-view.html">层级1 规则列表</a>
+        <a href="./layer-2-edit-basic.html">层级2 基础设置</a>
+        <a href="./layer-3-conditions.html">层级3 条件配置</a>
+        <a href="./layer-4-actions.html">层级4 处置策略</a>
+        <a href="./layer-5-test-analysis.html">层级5 测试与分析</a>
+      </span>
+    </li>
+    <li><a href="#dialog-3-1">3.1 综合策略抽屉（80vw Sheet，宿主容器）</a> <span class="toc-badge">1层</span></li>
+    <li><a href="#dialog-3-2">3.2 规则编辑抽屉 RuleEditorDrawer（75vw Sheet，4 Tab）</a> <span class="toc-badge">4层</span></li>
+  </ul>
+</nav>
+
+<!-- ========== 1. 页面布局结构 ========== -->
+<section id="layout">
+  <h2>1. 页面布局结构</h2>
+  <p>「高级过滤规则」不是独立路由页面，而是策略流水线页阶段5「综合策略」列中的一个<b>可配置节点</b>。点击节点卡片（或卡片右侧「去配置/配置」按钮）打开 80vw 宽的<b>综合策略抽屉</b>，抽屉左侧为 3 个综合策略的导航（相似邮件与主题检测 / 高级过滤规则 / 邮件标记与声明），右侧为选中策略的配置区——本模块即在此渲染。</p>
+  <table class="spec-table">
+    <thead><tr><th>区域</th><th>内容</th><th>来源组件</th></tr></thead>
+    <tbody>
+      <tr><td>流水线阶段5列</td><td>相似检测 / <b>高级过滤规则</b> / 邮件标记与声明 三张 220×60px 节点卡片</td><td><code>strategy-pipeline-page.tsx</code>（policy key <code>advancedRules</code>，优先级 5001）</td></tr>
+      <tr><td>综合策略抽屉头部</td><td>Settings 图标 + 「阶段5: 综合策略 / 高级过滤规则」面包屑 + 关闭按钮（XCircle）</td><td><code>strategy-pipeline-page.tsx</code> L2158-2182</td></tr>
+      <tr><td>抽屉左栏</td><td>3 策略导航（含启用圆点 + 摘要文案），支持折叠（ChevronLeft 圆钮）</td><td><code>comprehensive-strategy-page.tsx</code></td></tr>
+      <tr><td>抽屉右栏（本模块）</td><td>模块头部（标题+页级开关）→ 过滤卡片（模块头/工具栏/规则表格/分页/条件类型提示）</td><td><code>advanced-filter-rules-module.tsx</code> 主组件 L4896-5248</td></tr>
+    </tbody>
+  </table>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/page-full-default.png" alt="策略流水线整页默认态">
+    <figcaption>策略流水线整页默认态（1440×900 全页截图）。阶段5「综合策略」列含「高级过滤规则」节点。</figcaption>
+  </figure>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/layer1-drawer-default.png" alt="综合策略抽屉-高级过滤规则默认态">
+    <figcaption>点击节点后打开的综合策略抽屉（80vw），定位到「高级过滤规则」规则列表视图。</figcaption>
+  </figure>
+  <h4>视觉规范（浏览器 computed 实测）</h4>
+  <table class="spec-table">
+    <thead><tr><th>项</th><th>值</th></tr></thead>
+    <tbody>
+      <tr><td>节点卡片</td><td>220×60px，圆角 8px（rounded-lg），未配置态 2px 橙色虚线边框 <code>#FA8C16</code>，左色条 4px 灰 <code>#d9d9d9</code>；hover 边框 <code>#1890FF</code> + 背景 <code>#E6F7FF</code></td></tr>
+      <tr><td>综合策略抽屉</td><td><code>w-[80vw] max-w-[80vw]</code> 右侧滑出、全高、<code>p-0 flex flex-col</code>、隐藏默认关闭钮（自绘 XCircle）</td></tr>
+      <tr><td>规则编辑抽屉</td><td><code>w-[75vw] max-w-[75vw]</code>（叠加在综合策略抽屉之上）</td></tr>
+      <tr><td>动作 Badge 色板</td><td>投递绿 / 标记投递青 / 隔离琥珀 / 审核紫蓝 / 丢弃灰 / 阻断红（Ant Design 色板，见 demo <code>getActionBadge</code> L4997-5008）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 2. 逐组件规格 ========== -->
+<section id="components">
+  <h2>2. 逐组件规格</h2>
+
+  <!-- ===== 2.1 节点卡片 ===== -->
+  <article class="component-spec" id="component-2-1">
+    <h3>2.1 流水线节点卡片「高级过滤规则」（层级 0）</h3>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>demo 源</td><td><code>strategy-pipeline-page.tsx</code> 节点渲染 L923-1000（policy key <code>advancedRules</code>, nameKey <code>pipeline.advancedRules</code>, stage 5, type configurable, 优先级 5001）</td></tr>
+        <tr><td>交互层级数</td><td>1（本层级 0 内嵌；点击进入层级 1 综合策略抽屉）</td></tr>
+        <tr><td>浏览器实测状态</td><td><b>未配置态</b>：橙色虚线边框 + 灰色左色条 + 按钮文案「去配置」。注意：源码 mock 节点数据带 todayHits:12 / action 隔离，但页面按「未配置具体规则」渲染未配置样式（见 §9 差异 D-8）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="interaction-layer">
+      <h4><span class="layer-badge">0</span> 交互层级 0：节点卡片默认态（hover 出 Tooltip，点击打开抽屉）</h4>
+      <p><b>触发路径</b>：打开 <code>/filter-rules/pipeline</code> → 阶段5「综合策略」列第二张卡片。</p>
+
+      <div class="component-preview">
+        <div class="np-wrap" id="np-wrap">
+          <div class="np-card" id="np-card" title="">
+            <div class="np-bar"></div>
+            <div class="np-body">
+              <span class="np-name">高级过滤规则</span>
+              <button class="np-cfg" id="np-cfg">去配置 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+            </div>
+          </div>
+          <div class="np-tooltip">
+            <div><b>策略：</b>高级过滤规则</div>
+            <div><b>动作：</b>-</div>
+            <div><b>影响：</b><span style="color:#9ca3af">已启用，未配置具体规则，默认投递继续</span></div>
+            <div class="tip-note">被隔离邮件可在邮件隔离模块查看</div>
+          </div>
+        </div>
+        <div class="np-hint" id="np-hint">✔ demo 行为：点击卡片任意处或「去配置」→ 打开综合策略抽屉并定位到高级过滤规则 → 见 <a href="./layer-1-list-view.html">层级 1：规则列表视图</a></div>
+      </div>
+
+      <figure class="screenshot-figure">
+        <img src="./screenshots/node-card-tooltip.png" alt="节点卡片 hover Tooltip">
+        <figcaption>hover 节点卡片时右侧出现 Tooltip（策略 / 动作 / 影响 + 隔离模块提示）。卡片为橙色虚线「未配置」样式。</figcaption>
+      </figure>
+
+      <table class="spec-table">
+        <thead><tr><th>元素</th><th>类型</th><th>文案/图标</th><th>交互行为</th><th>视觉</th></tr></thead>
+        <tbody>
+          <tr><td>卡片容器</td><td>div（TooltipTrigger）</td><td>—</td><td>整卡可点击 → <code>setComprehensiveDrawerPolicy("advancedRules")</code> + 打开抽屉；hover 300ms 出 Tooltip</td><td>220×60，未配置=2px 橙虚线 <code>#FA8C16</code>；hover 蓝框浅蓝底</td></tr>
+          <tr><td>左色条</td><td>div</td><td>—</td><td>—</td><td>4px 宽，未配置灰 <code>#d9d9d9</code></td></tr>
+          <tr><td>节点名称</td><td>span</td><td>「高级过滤规则」（i18n key <code>pipeline.advancedRules</code>）</td><td>—</td><td>14px / 500 / <code>#262626</code> / truncate</td></tr>
+          <tr><td>配置按钮</td><td>button</td><td>未配置=「去配置」，已配置=「配置」+ ArrowRight 图标</td><td>点击（stopPropagation）同卡片点击</td><td>13px 蓝 <code>#1890FF</code>，hover <code>#40A9FF</code></td></tr>
+          <tr><td>Tooltip</td><td>TooltipContent</td><td>策略：高级过滤规则 / 动作：- / 影响：已启用，未配置具体规则，默认投递继续 / 底注：被隔离邮件可在邮件隔离模块查看</td><td>hover 显示，side=right（实测因空间不足翻转为 left），max-w-[280px]</td><td>深底白字，p-3</td></tr>
+        </tbody>
+      </table>
+
+      <div class="dom-comparison">
+        <h5>DOM 树比对结果（demo 实际 DOM vs 预览还原 HTML）</h5>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM（Playwright 提取）</th><th>预览 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>根节点</td><td><code>div.w-[220px].rounded-lg…border-dashed</code>（data-slot=tooltip-trigger，总节点数 9）</td><td><code>div.np-card</code>（等效样式内联化）</td><td class="pass">一致</td></tr>
+            <tr><td>子结构</td><td>色条 div + 内容 div &gt; (name span + button &gt; svg.lucide-arrow-right)</td><td>同三段结构，svg 同 path</td><td class="pass">一致</td></tr>
+            <tr><td>按钮文案</td><td>「去配置」（未配置态分支）</td><td>「去配置」</td><td class="pass">一致</td></tr>
+            <tr><td>条件渲染</td><td>阶段4 AI 标签未渲染（本节点 stage 5）；已配置态色条/实线分支未渲染</td><td>未包含</td><td class="pass">一致</td></tr>
+            <tr><td>Tooltip 内容</td><td>4 行（策略/动作/影响/configurable 类型附加的隔离提示行）</td><td>同 4 行文案</td><td class="pass">一致</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===== 2.2 模块本体 ===== -->
+  <article class="component-spec" id="component-2-2">
+    <h3>2.2 高级过滤规则模块 AdvancedFilterRulesModule（多层交互）</h3>
+    <table class="spec-table">
+      <thead><tr><th>项</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>demo 源</td><td><code>advanced-filter-rules-module.tsx</code> L4896-5248（主组件）＋ 规则编辑抽屉 L2939-4888 ＋ 条件编辑器 L1429-2928</td></tr>
+        <tr><td>Props</td><td><code>direction: "receive" | "send" | "internal"</code>——综合策略页固定传 <code>"receive"</code>（三方向独立规则集的需求见 spec §1.3，demo 宿主未实现方向切换，见 §9 差异 D-9）</td></tr>
+        <tr><td>交互层级数</td><td>6（层级0 节点卡片见 2.1；层级1-5 拆分为独立子文件）</td></tr>
+        <tr><td>导出复用</td><td><code>ConditionsEditor / ConditionSelector / ConditionConfigPanel / ExpressionPreview</code> 及全部类型定义均 export，供群组策略「特征组」编辑器复用（满足 spec §10 一致性要求）</td></tr>
+      </tbody>
+    </table>
+
+    <h4>交互层级关系图</h4>
+    <div class="mermaid">
+graph LR
+  L0["层级0<br/>流水线节点卡片<br/>(未配置态)"] -- "点击卡片/去配置" --> L1["层级1<br/>综合策略抽屉<br/>规则列表视图"]
+  L1 -- "新建规则 / 行编辑✎" --> L2["层级2<br/>规则编辑抽屉<br/>基础设置 Tab"]
+  L2 -- "Tab: 条件配置" --> L3["层级3<br/>条件配置 Tab<br/>(三栏编辑器)"]
+  L2 -- "Tab: 处置策略" --> L4["层级4<br/>处置策略 Tab<br/>(动作+附加策略)"]
+  L2 -- "Tab: 测试与分析" --> L5["层级5<br/>测试与分析 Tab"]
+  L3 -- "Tab 切换" --> L4
+  L4 -- "确定(校验通过)" --> L1
+  L2 -- "取消/Esc" --> L1
+  L1 -- "关闭 ⊗ / Esc" --> L0
+    </div>
+
+    <h4>交互层级详情（层级 1+ 拆分为独立文件）</h4>
+    <table class="spec-table layer-index">
+      <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>流水线节点卡片（未配置态 + Tooltip）</td><td>页面加载</td><td>上方 <a href="#component-2-1">2.1 内嵌</a></td></tr>
+        <tr><td>1</td><td>综合策略抽屉 - 规则列表视图（搜索/筛选/表格/分页/双开关）</td><td>层级0 点击节点卡片</td><td><a href="./layer-1-list-view.html">查看详情 -&gt;</a></td></tr>
+        <tr><td>2</td><td>规则编辑抽屉 - 基础设置 Tab（含必填校验、编辑回填缺陷实证）</td><td>层级1 点击「新建规则」或行内 ✎ 编辑</td><td><a href="./layer-2-edit-basic.html">查看详情 -&gt;</a></td></tr>
+        <tr><td>3</td><td>条件配置 Tab（OR/AND 双组 + 54 条件树 + 配置面板 + 表达式预览）</td><td>层级2 点击「条件配置」Tab</td><td><a href="./layer-3-conditions.html">查看详情 -&gt;</a></td></tr>
+        <tr><td>4</td><td>处置策略 Tab（6 执行动作 + 7 项附加策略 + 冲突矩阵 + 保存校验）</td><td>层级2 点击「处置策略」Tab</td><td><a href="./layer-4-actions.html">查看详情 -&gt;</a></td></tr>
+        <tr><td>5</td><td>测试与分析 Tab（EML 测试 + 效果分析 + 历史版本）</td><td>层级2 点击「测试与分析」Tab</td><td><a href="./layer-5-test-analysis.html">查看详情 -&gt;</a></td></tr>
+      </tbody>
+    </table>
+  </article>
+</section>
+
+<!-- ========== 3. 弹窗/抽屉规格 ========== -->
+<section id="dialogs">
+  <h2>3. 弹窗 / 抽屉规格</h2>
+
+  <article id="dialog-3-1">
+    <h3>3.1 综合策略抽屉（宿主容器）</h3>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>规格</th></tr></thead>
+      <tbody>
+        <tr><td>容器</td><td>Radix Sheet，<code>w-[80vw]</code>，右侧滑出全高；<code>onOpenChange</code> 关闭（Esc / 点遮罩 / XCircle 按钮）</td></tr>
+        <tr><td>头部</td><td>Settings 图标（蓝 #1890FF）+ 标题「阶段5: 综合策略」+「/」+ 当前策略名「高级过滤规则」+ 右侧 ghost 关闭按钮</td></tr>
+        <tr><td>左侧策略导航</td><td>3 项：相似邮件与主题检测（摘要「窗口30分钟 / 阈值80%」）/ <b>高级过滤规则</b>（摘要「多维度条件组合规则」）/ 邮件标记与声明；选中项浅蓝底；启用状态圆点（蓝=启用 灰=禁用）；中缝 ChevronLeft 圆钮可折叠导航</td></tr>
+        <tr><td>页级策略开关</td><td>右栏顶部白条「高级过滤规则 已启用 [Switch]」——控制整个策略（关闭后内容半透明、左导航摘要变「已禁用」、底部出现橙点「有未保存的更改」条），见截图 <code>layer1-module-disabled.png</code></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <article id="dialog-3-2">
+    <h3>3.2 规则编辑抽屉 RuleEditorDrawer</h3>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>规格</th></tr></thead>
+      <tbody>
+        <tr><td>容器</td><td>Radix Sheet，<code>w-[75vw]</code>，叠加于综合策略抽屉之上（双层 Sheet）</td></tr>
+        <tr><td>标题</td><td>新建=「新建规则」；编辑=「编辑规则: {规则名}」；副标题「配置过滤规则的基础信息、条件和处置策略」</td></tr>
+        <tr><td>Tab 栏</td><td>4 Tab：基础设置（默认）/ 条件配置 / 处置策略 / 测试与分析；内容区 ScrollArea 滚动</td></tr>
+        <tr><td>底部 Footer</td><td>校验不通过时左侧红字「* 执行动作与附加策略至少配置一项」；「取消」（outline，关闭不保存）+「确定」（primary，<code>disabled=!canSaveActions</code>）。1440px 实测两钮为上下堆叠通栏布局</td></tr>
+        <tr><td>关闭途径</td><td>取消 / Esc / 右上 × / 保存成功后自动关闭</td></tr>
+      </tbody>
+    </table>
+    <p>各 Tab 详细规格见 <a href="./layer-2-edit-basic.html">层级2</a> / <a href="./layer-3-conditions.html">层级3</a> / <a href="./layer-4-actions.html">层级4</a> / <a href="./layer-5-test-analysis.html">层级5</a>。</p>
+  </article>
+</section>
+
+<!-- ========== 4. 数据模型与 API 映射 ========== -->
+<section id="api-mapping">
+  <h2>4. 数据模型与 API 映射</h2>
+  <h3>4.1 前端数据模型（demo TypeScript，全部 export）</h3>
+  <pre><code>FilterRule {                                  // L261-274
+  id, name, status: "enabled"|"disabled", priority: number,
+  expiryTime, createTime, updateTime, keywords?: string[],
+  basicSettings: BasicSettings {              // L88-95
+    name; priority(1-100,默认50); status; scope: ("incoming"|"outgoing"|"internal")[];
+    validityEndDate?; description?(≤500字)
+  },
+  conditionsSettings: {                       // L98-101
+    anyConditions: ConditionConfig[];         // OR 组
+    allConditions: ConditionConfig[];         // AND 组 —— 合并语义 (OR组) AND (AND组)
+  },
+  actionsSettings: ActionsSettings {          // L232-249
+    primaryAction: "none"|"deliver"|"tagDeliver"|"quarantine"|"review"|"discard"|"block",
+    deliverParams|tagDeliverParams|reviewParams|discardParams|blockParams,
+    addonPolicies: { detailedLog, adminNotify, emailTag, disclaimer,
+      externalReminder, deleteAttachment, forwardServer, modifyHeader
+      : { enabled: boolean; params } }        // 8 项
+  },
+  statistics?: { hitCount; processedCount; falsePositiveRate; effectivenessScore; lastHitTime? }
+}
+ConditionConfig {                             // L75-85
+  id; type: ConditionType(54 种);
+  config: { matchMode; values[]; caseSensitive; exclude; threshold? }
+  // 注意：运行时还动态写入 selectedResult/selectedValue/compareMode/
+  // customMimeTypes/startTime/endTime 等接口未声明字段（松散类型）
+}</code></pre>
+
+  <h3>4.2 spec 定义的 API</h3>
+  <p>V3高级过滤规则.md 为纯 UI/交互规格，<b>未定义 REST API 与数据表</b>；demo 全部数据为组件内 mock（<code>mockFilterRules</code> 4 条 + <code>MOCK_FEATURE_GROUPS</code> 3 组），无网络请求。</p>
+
+  <h3>4.3 网关现有能力映射（遵循 implement.md：复用统一规则系统）</h3>
+  <table class="spec-table">
+    <thead><tr><th>demo 功能</th><th>建议映射</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>规则 CRUD / 启停 / 优先级</td><td>统一规则系统 API（新增 <code>page</code> 字段值如 <code>advanced-filter</code>）</td><td>数值越大优先级越高，与网关规则优先级定义一致（1-100）</td></tr>
+      <tr><td>执行动作 6 种</td><td>统一规则系统现有 action：deliver→accept、tagDeliver→accept+加信头/改主题、quarantine→quarantine、review→audit(旁路审核)、discard→drop、block→reject(SMTP码+文本)</td><td>不新增 action；tagDeliver 按 implement.md「mark = accept + 特定 header」组合实现</td></tr>
+      <tr><td>附加策略 8 种</td><td>accept 类 action 的附加参数（加信头/免责声明/改写/转发/删附件/通知）</td><td>与网关底层能力差距逐项列入 §10 需确认</td></tr>
+      <tr><td>条件 54 种</td><td>milter 各阶段检测项（信封/信头/正文/附件/SPF/DKIM/DMARC/RBL/GeoIP/频率统计等）</td><td>部分条件（URL 沙箱、短链展开、意图引擎置信度、二维码深度检测）依赖 attachd/textsim/LLM 侧能力，见 §10</td></tr>
+      <tr><td>特征组引用</td><td>群组管理（特征组）共享条件结构</td><td>demo 中经 <code>useFeatureGroups</code> context 即时联动</td></tr>
+      <tr><td>效果分析统计</td><td>规则命中统计（现有 rejection log / 规则统计报表）</td><td>demo 为静态 mock</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 5. 业务逻辑规格 ========== -->
+<section id="business-logic">
+  <h2>5. 业务逻辑规格</h2>
+  <h3>5.1 条件合并语义</h3>
+  <p>最终命中条件 = <code>(OR组内条件任一命中) AND (AND组内条件全部命中)</code>；任一组为空时仅取另一组。表达式预览实时输出等价表达式（见层级3）。</p>
+  <h3>5.2 主附策略冲突矩阵（demo <code>getAddonConflictRules</code> L1143-1160，浏览器逐项实测一致）</h3>
+  <table class="spec-table">
+    <thead><tr><th>执行动作</th><th>被禁用的附加策略</th><th>浏览器实测</th></tr></thead>
+    <tbody>
+      <tr><td>不设置 / 投递 / 标记投递 / 邮件审核</td><td>无限制（7 项全可勾选）</td><td class="pass">✓</td></tr>
+      <tr><td>邮件隔离</td><td>转发至目的服务器、更改信头（2 项置灰）</td><td class="pass">✓ <code>layer4-quarantine-conflict.png</code></td></tr>
+      <tr><td>丢弃 / 阻断</td><td>仅「发送管理员通知」可用，其余 6 项置灰</td><td class="pass">✓ <code>layer4-block-params-conflict.png</code></td></tr>
+    </tbody>
+  </table>
+  <h3>5.3 保存校验</h3>
+  <ul>
+    <li><b>确定按钮禁用条件</b>：<code>primaryAction==="none"</code> 且无任何「已启用、未被冲突禁用、非 detailedLog」的附加策略（<code>canSaveActions</code> L3006）。实测：none + 全不勾 → 确定禁用 + 红字提示；勾选「发送管理员通知」→ 确定立即恢复。</li>
+    <li><b>点击确定后校验</b>：规则名称为空 →「规则名称不能为空」；作用范围全不选 →「请至少选择一个生效范围」——两者置红并强制跳回「基础设置」Tab（不禁用按钮）。</li>
+    <li>保存成功：新建 push / 编辑按 id 替换 <code>rules</code> 数组，关闭抽屉，列表即时刷新。</li>
+  </ul>
+  <h3>5.4 状态机（规则）</h3>
+  <table class="spec-table">
+    <thead><tr><th>当前态</th><th>操作</th><th>目标态</th><th>UI 反馈</th></tr></thead>
+    <tbody>
+      <tr><td>enabled</td><td>行内「禁用」按钮</td><td>disabled</td><td>状态 Badge 绿→灰、按钮文案变「启用」（即时，无确认框）</td></tr>
+      <tr><td>disabled</td><td>行内「启用」按钮</td><td>enabled</td><td>反向同上</td></tr>
+      <tr><td>任意</td><td>行内 🗑 删除</td><td>（移除）</td><td>直接从列表移除，<b>无确认对话框</b>（见 §10 Q-6）</td></tr>
+      <tr><td>—</td><td>模块级 Switch 关闭</td><td>模块禁用</td><td>模块内容区 opacity-50 + pointer-events-none</td></tr>
+      <tr><td>—</td><td>页级策略 Switch 关闭</td><td>策略禁用</td><td>右栏整体半透明 + 左导航摘要「已禁用」+ 底部「有未保存的更改」</td></tr>
+    </tbody>
+  </table>
+  <h3>5.5 权限与可见性</h3>
+  <p>demo 未对本模块做角色/形态差异控制（无 <code>useProductProfile</code> 引用）；spec 亦未定义权限矩阵。多租户视角下的可见性遵循策略流水线页整体规则。</p>
+</section>
+
+<!-- ========== 6. 交互规格 ========== -->
+<section id="interaction">
+  <h2>6. 交互规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>触发</th><th>状态变化</th><th>浏览器实证</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>搜索框输入「钓鱼」</td><td>按名称/关键字不区分大小写模糊过滤 → 仅剩 1 行，「共 1 条记录」</td><td><code>layer1-search-filtered.png</code></td></tr>
+      <tr><td>2</td><td>状态筛选=已启用/已禁用</td><td>按 status 过滤</td><td><code>layer1-status-filter-open.png</code></td></tr>
+      <tr><td>3</td><td>范围筛选=收件</td><td><b>缺陷</b>：所有行消失（数组===字符串恒 false）</td><td><code>layer1-scope-filter-incoming.png</code>，§9 D-4</td></tr>
+      <tr><td>4</td><td>重置按钮</td><td>三筛选器清空恢复全量</td><td>✓</td></tr>
+      <tr><td>5</td><td>Tab 切换</td><td>4 Tab 独立内容；校验失败自动跳回基础设置</td><td>✓</td></tr>
+      <tr><td>6</td><td>条件树点击条件</td><td>条件加入当前激活组（OR/AND）并自动选中，中栏渲染配置面板，右栏表达式实时更新</td><td><code>layer3-*.png</code></td></tr>
+      <tr><td>7</td><td>匹配方式选「正则表达式」</td><td>出现「AI 生成正则」按钮（Sparkles 图标）</td><td><code>layer3-regex-ai-button.png</code></td></tr>
+      <tr><td>8</td><td>勾选附加策略</td><td>自动展开参数区并 focus 首个输入项（100ms 延迟）；取消勾选不收起（保留配置）</td><td>✓</td></tr>
+      <tr><td>9</td><td>执行动作切换</td><td>中栏参数表单切换 + 冲突项置灰（title 提示冲突原因）+ 右栏摘要重算</td><td><code>layer4-*.png</code></td></tr>
+      <tr><td>10</td><td>效果分析时间范围</td><td>Select 24h/最近7天(默认)/30d——demo 仅切换选中值，指标为静态 mock</td><td><code>layer5-analysis-cards.png</code></td></tr>
+    </tbody>
+  </table>
+  <h4>异常场景</h4>
+  <table class="spec-table">
+    <thead><tr><th>场景</th><th>demo 行为</th></tr></thead>
+    <tbody>
+      <tr><td>筛选无结果</td><td>表格单行 colSpan=8「暂无数据」，分页区隐藏</td></tr>
+      <tr><td>条件配置不完整</td><td>表达式预览对应条件后缀橙色「[配置不完整]」标记，不阻断保存</td></tr>
+      <tr><td>名称/范围校验失败</td><td>红框+红字，跳回基础设置 Tab</td></tr>
+      <tr><td>处置策略全空</td><td>确定按钮禁用 + 左栏与 Footer 双处红字「* 执行动作与附加策略至少配置一项」</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 7. 国际化规格 ========== -->
+<section id="i18n">
+  <h2>7. 国际化规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>项</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>demo 支持语言</td><td>中 / 英 / 泰 三语。<b>本模块几乎全部文案为组件内联三元对象</b>（<code>language==="zh" ? … : language==="th" ? … : en</code>），集中于各组件顶部 L/D/M 字典与 <code>getConditionCategories</code> 等函数；唯一例外：模块头开关文案用 <code>t("common.enabled"/"common.disabled")</code>（L5045）</td></tr>
+      <tr><td>条件三语</td><td>54 条件的名称/说明/Tooltip 均有三语（L293-1082）；信封类条件在表达式预览中带 <code>[SMTP]</code> 原始类型标识</td></tr>
+      <tr><td>乱码缺陷</td><td>泰语多处含 <code>���</code> 乱码（spec §9 待办已知）；<b>中文也有</b>：删除附件面板「注�」「在正文��插入替换提示段��」、效果分析「刷新��据」（浏览器截图实证，§9 D-6）</td></tr>
+      <tr><td>落地要求</td><td>implement.md 要求<b>四语内置</b>；demo 仅三语，且内联三元写法不利于抽取 —— 落地需迁移为 i18n key 表（见 §10 Q-7）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 8. 响应式规格 ========== -->
+<section id="responsive">
+  <h2>8. 响应式规格</h2>
+  <table class="spec-table">
+    <thead><tr><th>断点</th><th>行为（浏览器实测）</th><th>截图</th></tr></thead>
+    <tbody>
+      <tr><td>1920×1080</td><td>流水线五阶段横向完整展开；抽屉 80vw/75vw 随视口等比放大</td><td><code>responsive-1920-pipeline.png</code></td></tr>
+      <tr><td>1440×900（基准）</td><td>本文档全部截图基准；编辑抽屉 Footer 取消/确定为上下通栏堆叠</td><td>—</td></tr>
+      <tr><td>1024×900</td><td>综合策略抽屉仍 80vw；条件配置三栏 grid（280px+400px+1fr）中<b>右栏表达式预览被压缩成窄条</b>（文字竖排溢出），左中栏保持固定宽 —— 可用性缺陷记入 §9 D-10</td><td><code>responsive-1024-drawer.png</code> / <code>responsive-1024-conditions.png</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 9. 与 spec 的差异标注 ========== -->
+<section id="diffs" class="diff-section">
+  <h2>9. 与 spec 的差异标注（以浏览器实际渲染为准记录）</h2>
+  <table class="spec-table diff-table">
+    <thead><tr><th>#</th><th>严重度</th><th>差异点</th><th>spec 原文</th><th>demo 实际（浏览器验证）</th></tr></thead>
+    <tbody>
+      <tr><td>D-1</td><td><span class="badge badge-mid">已知待办</span></td><td>条件数量文案不一致</td><td>§4.4 待办：「出现 54 / 52 / 21 等，需统一为 54」</td><td>实测四处矛盾：模块描述「支持52种」、底部提示卡「支持21种条件类型」、分类标签「(18)/(13)/(21)」、分类 Badge 实算 19/13/22（=54）。<code>ConditionType</code> 联合实为 54 个</td></tr>
+      <tr><td>D-2</td><td><span class="badge badge-mid">功能差异</span></td><td>文本匹配方式仅 4 种</td><td>§5.2.4/§7：文本类 6 种（包含/不包含/等于/不等于/正则/通配符）</td><td>下拉实测仅 4 项：包含/等于/正则表达式/通配符；「不包含/不等于」由独立「排除匹配 (NOT)」复选框实现</td></tr>
+      <tr><td>D-3</td><td><span class="badge badge-high">功能缺陷</span></td><td>编辑不回填表单</td><td>§4.4「编辑：打开规则编辑抽屉并回填数据」</td><td>标题正确显示「编辑规则: 拦截可疑附件邮件」但表单为默认值（名称空、优先级50）。根因：L2991 误用 <code>useState(()=&gt;{…})</code> 做一次性初始化，首挂载时 rule 恒为 null，且 Drawer 无 key 不重挂载</td></tr>
+      <tr><td>D-4</td><td><span class="badge badge-high">功能缺陷</span></td><td>范围筛选失效</td><td>§4.2 范围筛选：全部/收件/发件/内部</td><td>选「收件」→「暂无数据」（3 条含 incoming 的规则全被滤掉）。根因：L4961 <code>rule.basicSettings.scope === scopeFilter</code>，数组与字符串严格相等恒 false</td></tr>
+      <tr><td>D-5</td><td><span class="badge badge-mid">渲染缺陷</span></td><td>多值范围列显示原始值拼接</td><td>§4.3 范围列</td><td>规则「二维码恶意检测」（scope 三选）范围列显示 <code>incomingoutgoinginternal</code>（<code>getScopeBadge</code> 以数组整体查 labels 失败后回退原值）；单值行正常显示「收件/发件」</td></tr>
+      <tr><td>D-6</td><td><span class="badge badge-mid">已知待办+扩大</span></td><td>乱码不止泰语</td><td>§9 待办仅提泰语乱码</td><td>中文亦有乱码：删除附件面板「注�」「在正文��插入替换提示段��」、效果分析「刷新��据」、阻断说明「注��」</td></tr>
+      <tr><td>D-7</td><td><span class="badge badge-low">UI 差异</span></td><td>附加策略左栏仅 7 项</td><td>§5.3.2 附加策略 8 种可叠加（含记录详细日志）</td><td>左栏勾选列表仅 7 项（免责声明/外部提醒/管理员通知/删除附件/自定义标记/转发/更改信头）；「记录详细日志」无 UI 入口，仅存在于数据模型与校验排除逻辑（与 §5.3.4「不计入至少一项」呼应）</td></tr>
+      <tr><td>D-8</td><td><span class="badge badge-low">数据不一致</span></td><td>节点卡片按未配置态渲染</td><td>策略流水线 spec：节点显示今日命中等摘要</td><td>流水线 mock 给了 todayHits:12/action 隔离，但卡片按「未配置」渲染（橙虚线+去配置+Tooltip「未配置具体规则，默认投递继续」）——流水线页对 advancedRules 的已配置判定与 mock 数据脱节</td></tr>
+      <tr><td>D-9</td><td><span class="badge badge-mid">功能差距</span></td><td>三方向独立规则集未实现</td><td>§1.3「收件/发件/域内三个方向各自维护独立的规则集」</td><td>综合策略宿主固定 <code>direction="receive"</code>，模块内也未消费 direction 区分数据；mock 规则靠 scope 字段表达方向</td></tr>
+      <tr><td>D-10</td><td><span class="badge badge-low">响应式缺陷</span></td><td>1024px 表达式预览被压缩</td><td>spec 无断点定义</td><td>三栏 grid 左中栏固定 280+400px，1024px 视口下右栏预览列宽不足、文字竖排（见 responsive-1024-conditions.png）</td></tr>
+      <tr><td>D-11</td><td><span class="badge badge-low">遗留代码</span></td><td>mock 使用了类型清单外的条件</td><td>§6 条件清单 54 种</td><td>mock 规则含 <code>senderAuth / mailSize / qrCodeDeepDetection</code> 3 个不在 <code>ConditionType</code> 联合内的遗留类型（叠加 D-3 编辑不回填，用户无法在编辑器中看到/修改这些条件）</td></tr>
+      <tr><td>D-12</td><td><span class="badge badge-low">交互占位</span></td><td>分页/EML测试/趋势图/历史回滚为占位</td><td>§4.5/§5.4（spec 已注明「当前为占位」）</td><td>与 spec 一致：上一页/下一页恒禁用；开始测试无逻辑；趋势图为占位框；回滚/查看/PDF/CSV 无逻辑——记录备落地排期</td></tr>
+      <tr><td>D-13</td><td><span class="badge badge-high">功能缺陷</span></td><td>已选条件无法选中/删除</td><td>§5.2.3「可在已选列表中点击选中、删除」</td><td>条件加入后无任何选中/删除入口：<code>ConditionSelector</code> 的 <code>onRemoveCondition / onSelectCondition</code> 为传入但从未调用的死 props（L1423/1425 声明、L2907/2909 传入、全文件无调用点）；重复点击同一条件会加入重复条件。选中仅在“新增时自动选中”发生</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== 10. 需确认事项 ========== -->
+<section id="questions" class="question-section">
+  <h2>10. 需确认事项（不自行决定）</h2>
+  <table class="spec-table question-table">
+    <thead><tr><th>#</th><th>类型</th><th>事项</th></tr></thead>
+    <tbody>
+      <tr><td>Q-1</td><td><span class="badge badge-low">底层映射</span></td><td>统一规则系统 page 字段取值（建议 <code>advanced-filter</code>）；一条「OR组+AND组+多附加策略」的复合规则如何映射到统一规则系统的单条/多条规则（是否需要规则分组/复合条件表达能力）？</td></tr>
+      <tr><td>Q-2</td><td><span class="badge badge-low">底层映射</span></td><td>54 种条件与网关现有检测项的映射清单：URL 沙箱结果 / 短链接展开 / 意图引擎置信度 / 图片二维码 / 压缩炸弹 / 15分钟频率类条件分别依赖 attachd / textsim / LLM / 频率统计，哪些第一期不落地？</td></tr>
+      <tr><td>Q-3</td><td><span class="badge badge-low">底层映射</span></td><td>附加策略中「转发至目的服务器（copy/redirect+SMTP认证）」「更改信头（正则替换）」「删除附件（7种范围+例外保护）」当前网关底层支持程度？不支持项是否裁剪 UI？</td></tr>
+      <tr><td>Q-4</td><td><span class="badge badge-mid">缺陷修复</span></td><td>D-3（编辑不回填）与 D-4（范围筛选失效）按 spec 语义修复确认——是否本迭代实现？</td></tr>
+      <tr><td>Q-5</td><td><span class="badge badge-low">交互设计</span></td><td>匹配方式保持 demo 的「4 种 + 排除匹配开关」还是补齐 spec 的 6 种独立选项？</td></tr>
+      <tr><td>Q-6</td><td><span class="badge badge-low">交互设计</span></td><td>删除规则无确认对话框（demo 直接移除）——是否需要加二次确认？</td></tr>
+      <tr><td>Q-7</td><td><span class="badge badge-low">国际化</span></td><td>implement.md 要求四语内置，demo 仅中/英/泰——第四语种确认；内联三元文案是否统一迁移到 i18n key 表？</td></tr>
+      <tr><td>Q-8</td><td><span class="badge badge-low">交互设计</span></td><td>「AI 生成正则」按钮的落地形态（调用 OSG_LLM？离线不可用时降级？）</td></tr>
+      <tr><td>Q-9</td><td><span class="badge badge-low">数据展示</span></td><td>到期时间列格式实测为 <code>1/1/2027</code>（en-US toLocaleDateString）——中文界面是否应为 <code>2027-01-01</code>？</td></tr>
+      <tr><td>Q-10</td><td><span class="badge badge-low">范围</span></td><td>测试与分析 Tab（EML 实测 / 命中趋势 / 历史版本+回滚）第一期落地范围？</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<script>
+(function () {
+  // 层级0 节点卡片：点击 → 显示跳转提示（demo 行为为打开综合策略抽屉，此处以提示+链接代替并指向层级1）
+  var card = document.getElementById('np-card');
+  var hint = document.getElementById('np-hint');
+  card.addEventListener('click', function () {
+    hint.style.display = 'block';
+    card.style.borderColor = '#1890FF';
+    card.style.borderStyle = 'solid';
+  });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>if (window.mermaid) mermaid.initialize({ startOnLoad: true });</script>
+</body>
+</html>

@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Spec 索引</title>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --primary-foreground: oklch(0.985 0 0);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --border: oklch(0.922 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --radius: 0.625rem;
+      --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 { color: var(--primary); margin-bottom: 1.5rem; }
+
+    /* -- chevron 通用 -- */
+    .chevron {
+      display: inline-block;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-right: 2px solid var(--muted-foreground);
+      border-bottom: 2px solid var(--muted-foreground);
+      transform: rotate(-45deg);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    details[open] > summary .chevron { transform: rotate(45deg); }
+
+    /* -- 通用 summary -- */
+    summary { list-style: none; cursor: pointer; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+
+    /* -- badge -- */
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.125rem 0.5rem;
+      border-radius: calc(var(--radius) - 4px);
+      flex-shrink: 0;
+    }
+    .badge-done { background: oklch(0.85 0.05 150); color: var(--foreground); }
+    .badge-todo { background: var(--muted); color: var(--muted-foreground); }
+
+    /* -- 页面概览栏 -- */
+    .card-version-badge { display:inline-block; font-size:0.6875rem; font-weight:700; padding:0.0625rem 0.375rem; border-radius:0.25rem; background:oklch(0.52 0.226 262); color:#fff; margin-left:0.375rem; }
+    .card-generated-at { font-size:0.6875rem; color:var(--muted-foreground); margin-left:0.375rem; }
+    .overview {
+      display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
+    }
+    .overview-item {
+      flex: 1; min-width: 140px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1rem 1.25rem; text-align: center;
+    }
+    .overview-item .num {
+      font-size: 1.75rem; font-weight: 700; color: var(--primary); line-height: 1.2;
+    }
+    .overview-item .label { font-size: 0.8125rem; color: var(--muted-foreground); }
+
+    /* -- 一级功能区 (可折叠) -- */
+    details.l1-section {
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      overflow: hidden;
+    }
+    .l1-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 1rem 1.25rem; transition: background 0.15s;
+    }
+    details.l1-section > summary:hover .l1-header { background: oklch(0.97 0.01 262); }
+    details.l1-section[open] > summary .l1-header { border-bottom: 2px solid var(--primary); }
+    .l1-header h2 { color: var(--primary); font-size: 1.25rem; }
+    .l1-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 2rem; height: 2rem; border-radius: var(--radius);
+      background: var(--primary); color: var(--primary-foreground);
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .l1-stats { margin-left: auto; font-size: 0.8125rem; color: var(--muted-foreground); }
+    .l1-stats .done-count { color: oklch(0.45 0.12 150); font-weight: 600; }
+    .l1-body { padding: 1.25rem; }
+
+    /* -- 二级功能区 (可折叠) -- */
+    details.l2-group {
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 2px);
+      overflow: hidden;
+    }
+    .l2-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.625rem 1rem; background: var(--muted); transition: background 0.15s;
+    }
+    details.l2-group > summary:hover .l2-header { background: oklch(0.94 0.01 262); }
+    .l2-header h3 { color: var(--foreground); font-size: 1rem; font-weight: 600; }
+    .l2-tag {
+      display: inline-block; font-size: 0.6875rem; font-weight: 500;
+      padding: 0.0625rem 0.4rem; border-radius: calc(var(--radius) - 4px);
+      background: oklch(0.95 0.02 262); color: var(--primary);
+    }
+    .l2-count { font-size: 0.75rem; color: var(--muted-foreground); }
+    .l2-content { padding: 1rem; }
+
+    /* -- 卡片网格 -- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem;
+    }
+
+    /* -- 卡片 (可折叠) -- */
+    details.spec-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    details.spec-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    details.spec-card.status-done { border-left: 4px solid oklch(0.6 0.1 150); }
+    details.spec-card.status-todo { border-left: 4px solid var(--border); }
+    .card-summary {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1rem; transition: background 0.15s;
+    }
+    details.spec-card > summary:hover .card-summary { background: oklch(0.98 0.005 262); }
+    .card-title {
+      color: var(--primary); font-size: 0.9375rem; font-weight: 600;
+      text-decoration: none; flex: 1;
+    }
+    .card-title:hover { text-decoration: underline; }
+    .card-detail {
+      padding: 0.625rem 1rem 0.875rem 1.75rem;
+      border-top: 1px solid var(--border);
+    }
+    .card-detail p { font-size: 0.8125rem; color: var(--muted-foreground); margin: 0.2rem 0; }
+    .card-detail a { color: var(--primary); text-decoration: none; }
+    .card-detail a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>HTML Spec 索引</h1>
+
+  <div class="overview">
+    <div class="overview-item"><div class="num">46</div><div class="label">功能模块总数</div></div>
+    <div class="overview-item"><div class="num">38</div><div class="label">已生成</div></div>
+    <div class="overview-item"><div class="num">8</div><div class="label">待生成</div></div>
+    <div class="overview-item"><div class="num">83%</div><div class="label">完成率</div></div>
+  </div>
+
+  <!-- ==================== 一级：系统状态（首页） ==================== -->
+  <details class="l1-section" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">📊</span>
+        <h2>系统状态（首页）</h2>
+        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="system-status/index.html">系统状态（安全运营总览首页）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-21</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /（首页根路由）与 /security-ops-dashboard 同组件（全站安全态势聚合入口）</p>
+            <p>spec: 0703系统状态.md</p>
+            <p>组件: security-ops/security-ops-dashboard.tsx（628 行，recharts 堆叠面积图）</p>
+            <p>子文件: <a href="system-status/layer-1-range-select.html">时间范围下拉</a> / <a href="system-status/layer-2-legend-toggle.html">图例显隐</a> / <a href="system-status/layer-3-viewer-tenant.html">租户视角</a> / <a href="system-status/layer-4-form-legacy.html">传统版</a></p>
+            <p>预览可交互 · 8 组件 · 4 裁剪/交互态子文件 · 11 截图 · 三时间范围/三形态/三断点实测 · 8 项差异 / 7 项需确认</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== 一级：全局外壳 / 导航 ==================== -->
+  <details class="l1-section" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🧭</span>
+        <h2>全局外壳 / 导航</h2>
+        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="component-sidebar-nav/index.html">侧边菜单栏 SidebarNav（后台外壳全局导航）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-25</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>组件级: components/sidebar-nav.tsx（在 app-shell.tsx 中挂载，/login 等全屏路由不渲染）</p>
+            <p>可见性数据源: lib/product-profiles.ts（FEATURE_MAP / resolveAccess）+ contexts/product-profile-context.tsx</p>
+            <p>子文件: <a href="component-sidebar-nav/layer-1-expand-collapse.html">展开收起</a> / <a href="component-sidebar-nav/layer-2-nested-subgroup.html">三级嵌套</a> / <a href="component-sidebar-nav/layer-3-active-state.html">激活高亮</a> / <a href="component-sidebar-nav/layer-4-profile-visibility.html">形态×视角可见性矩阵</a> / <a href="component-sidebar-nav/layer-5-theme-color.html">主题色</a></p>
+            <p>预览可交互（本地复刻 navItems + FEATURE_MAP 逻辑）· 4 组件 · 6 交互层级 · 5×2 形态×视角实测 · zh/en/th 国际化 · 5 项差异 / 5 项需确认</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== 一级：过滤规则 ==================== -->
+  <details class="l1-section" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🛡</span>
+        <h2>过滤规则</h2>
+        <span class="l1-stats"><span class="done-count">18</span> 已完成 / 18 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+
+    <!-- 二级：策略流水线首页 -->
+    <details class="l2-group" open>
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>策略流水线首页</h3>
+          <span class="l2-tag">入口</span>
+          <span class="l2-count">1 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-execution-flow/index.html">策略流水线首页（执行流程 + 统一阶段抽屉框架★）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v2</span>
+              <span class="card-generated-at">2026-07-13</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline</p>
+            <p>spec: 策略流水线需求文档.md</p>
+            <p>组件: strategy-pipeline-page.tsx（执行流程卡 + 图例 + v2 统一阶段抽屉框架：4 抽屉共享 80vw Sheet 外壳，嵌入各阶段策略页）</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+
+    <!-- 二级：阶段1 - 连接层 -->
+    <details class="l2-group" open>
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>阶段1 · 连接层</h3>
+          <span class="l2-tag">priority 1xxx</span>
+          <span class="l2-count">4 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-ip-filter/index.html">IP黑白名单</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v2</span>
+              <span class="card-generated-at">2026-07-21</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独立页）</p>
+            <p>spec: IP黑白名单需求文档.md</p>
+            <p>组件: connection-layer-page.tsx (renderIpFilterConfig)</p>
+            <p>v2: 黑/白名单独立选中、跨页全选、行高亮、删除选中（N）与批量删除确认；<a href="filter-rules-pipeline-ip-filter/layer-7-batch-delete.html">查看可交互层级 7</a></p>
+            <p>第 9 节 D-001～D-017、第 10 节 Q-001～Q-008 已逐项复核并记录状态与证据。</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-ip-frequency-limit/index.html">IP频率限制</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v3</span>
+              <span class="card-generated-at">2026-07-20</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独立页）</p>
+            <p>spec: IP频率限制的需求文档.done.md</p>
+            <p>组件: ip-frequency-limit/ip-frequency-limit-module.tsx</p>
+            <p><span class="badge badge-done">v3</span> 8 个交互层级（L0 内嵌 + L1–L7 子文件）· 运行态 outerHTML · 逐层 DOM 比对 · 2026-07-20 复核</p>
+            <p>v2 新增：批量删除（全选三态/删除选中N/确认弹窗）、批量导入/导出（实时校验预览/范围格式）、优先级 Tooltip「数值越大越优先」 · agent-browser 逐项交互验证（截图 11~18）</p>
+            <p>v3 新增：5 种产品形态 × 2 种角色差异矩阵，并补齐无独立 PRD 与门控语义的差异/确认项。</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-rbl-filter/index.html">RBL过滤</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v2</span>
+              <span class="card-generated-at">2026-07-21</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独立页）</p>
+            <p>spec: RBL检测需求文档.md</p>
+            <p>组件: connection-layer-page.tsx (renderRblConfig + greylistDialog)</p>
+            <p>7 个交互层级（L0 内嵌 + L1–L6 子文件）· <a href="filter-rules-pipeline-rbl-filter/layer-5-rbl-validation.html">服务器/超时校验</a> · <a href="filter-rules-pipeline-rbl-filter/layer-6-rbl-delete-confirm.html">删除确认</a></p>
+            <p>5 产品形态 × 2 管理员视角矩阵 · D1–D13 / Q1–Q9 已逐项复核</p>
+            <p>agent-browser 实测：校验/钳制/删除/灰名单链路 + 10 组形态角色 DOM；新增截图 13–23</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-overseas/index.html">海外邮件检测</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v3</span>
+              <span class="card-generated-at">2026-07-21</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（Pipeline 卡片） / /filter-rules/connection（独立页，海外邮件检测 Tab）</p>
+            <p>组件: connection-layer-page.tsx (renderOverseasConfig + GeoIP Sheet)，commit 6f34f80</p>
+            <p>交互子文件: <a href="filter-rules-pipeline-overseas/layer-1-geoip-create-dialog.html">新增/编辑</a> · <a href="filter-rules-pipeline-overseas/layer-2-direction-states.html">方向联动</a> · <a href="filter-rules-pipeline-overseas/layer-3-geoip-import.html">导入</a> · <a href="filter-rules-pipeline-overseas/layer-4-geoip-export.html">导出</a> · <a href="filter-rules-pipeline-overseas/layer-5-geoip-delete.html">删除确认</a></p>
+            <p>2 个组件 · 18 张 v3 浏览器截图 · 5×2 形态/角色 DOM 实测 · D-01/D-02/D-04、Q-01/Q-02/Q-03 已解决 · D-03/Q-04 未解决 · v3 2026-07-21</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+
+    <!-- 二级：阶段2 - 收发信人策略 -->
+    <details class="l2-group" open>
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>阶段2 · 收发信人策略</h3>
+          <span class="l2-tag">priority 2xxx</span>
+          <span class="l2-count">5 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-identity-auth-spoofing/index.html">身份认证与仿冒检测</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-10</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/identity（收发信人策略阶段2，priority 2001）</p>
+            <p>spec: 身份认证与仿冒检测模块需求文档.md</p>
+            <p>组件: identity-strategy-page.tsx（renderAuthSpoofingConfig）</p>
+            <p>子文件: <a href="filter-rules-identity-auth-spoofing/layer-1-observe-mode.html">观察模式</a> / <a href="filter-rules-identity-auth-spoofing/layer-2-check-disabled.html">检查项禁用</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-auth-protocol-tabs.html">协议Tab</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-template-dialog.html">模板Dialog</a> / <a href="filter-rules-identity-auth-spoofing/layer-2-custom-template.html">自定义模板</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-module-disabled.html">模块禁用态</a></p>
+            <p>预览可交互 · 5 组件 / 6 交互层级 · 10 项差异 / 10 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-behavior-control/index.html">发信行为管控</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-14</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（阶段2收发信人策略抽屉，priority 2002）</p>
+            <p>spec: 发信行为管控模块需求文档.md / 策略流水线需求文档.md</p>
+            <p>组件: strategy-pipeline-page.tsx + identity-strategy-page.tsx + sender-behavior-control/</p>
+            <p>子文件: <a href="filter-rules-pipeline-behavior-control/layer-1-new-rule-drawer.html">规则编辑抽屉</a> / <a href="filter-rules-pipeline-behavior-control/layer-2-validation-examples-simulator.html">校验与模拟</a> / <a href="filter-rules-pipeline-behavior-control/layer-3-confirm-dialogs.html">确认对话框</a></p>
+            <p>预览可交互 · 4 交互层级 · 20 截图 · 23 项差异 / 8 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-recipient-check/index.html">收信人检测</a>
+              <span class="badge badge-done">✅</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（阶段2收发信人策略抽屉，priority 2003）</p>
+            <p>spec: 收信人检测需求文档.md / 策略流水线需求文档.md</p>
+            <p>组件: strategy-pipeline-page.tsx + identity-strategy-page.tsx（recipientCheck）</p>
+            <p>子文件: <a href="filter-rules-pipeline-recipient-check/layer-1-merged-mode.html">合并模式</a> / <a href="filter-rules-pipeline-recipient-check/layer-2-disabled-and-dropdown.html">禁用态与动作下拉</a></p>
+            <p>预览可交互 · 4 交互层级 · 10 截图 · 11 项差异 / 7 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-user-list/index.html">用户黑白名单</a>
+              <span class="badge badge-done">✅</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（阶段2收发信人策略抽屉，priority 2004）</p>
+            <p>spec: 用户黑白名单.md / 策略流水线需求文档.md</p>
+            <p>组件: strategy-pipeline-page.tsx + identity-strategy-page.tsx（userList）</p>
+            <p>子文件: <a href="filter-rules-pipeline-user-list/layer-1-selection-delete-dialogs.html">选中与删除弹窗</a> / <a href="filter-rules-pipeline-user-list/layer-2-search-pagination-states.html">搜索与分页态</a></p>
+            <p>预览可交互 · 4 交互层级 · 16 截图 · 11 项差异 / 6 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-sender-filter/index.html">发信人黑白名单</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-14</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（阶段2收发信人策略抽屉）</p>
+            <p>spec: 策略流水线需求文档.md / 发信人黑白名单模块需求文档.md</p>
+            <p>组件: strategy-pipeline-page.tsx + identity-strategy-page.tsx + sender-filter-module.tsx</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+
+    <!-- 二级：阶段3 - 内容层 -->
+    <details class="l2-group" open>
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>阶段3 · 内容层</h3>
+          <span class="l2-tag">priority 3xxx</span>
+          <span class="l2-count">4 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-attachment-security/index.html">附件安全检测</a>
+              <span class="badge badge-done">✅</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（阶段3内容层抽屉，priority 3000）</p>
+            <p>spec: 附件安全检测模块 - 需求文档.md / 链接与附件安全 功能需求文档.md</p>
+            <p>组件: strategy-pipeline-page.tsx + content-strategy-page.tsx + attachment-security-module.tsx</p>
+            <p>子文件: <a href="filter-rules-pipeline-attachment-security/layer-1-antivirus-tab.html">反病毒引擎</a> / <a href="filter-rules-pipeline-attachment-security/layer-2-image-detect-tab.html">图片识别</a> / <a href="filter-rules-pipeline-attachment-security/layer-3-encrypted-tab.html">加密附件</a> / <a href="filter-rules-pipeline-attachment-security/layer-4-disabled-tenant-states.html">禁用/租户态</a></p>
+            <p>预览可交互 · 6 交互层级 · 22 截图 · 14 项差异 / 8 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-url-protection/index.html">URL检测与防护</a>
+              <span class="badge badge-done">✅</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（阶段3内容层抽屉，priority 3001）</p>
+            <p>spec: URL检测与防护模块 - 需求文档.md / 0704链接保护.md / 0709链接保护-点击时复检.md</p>
+            <p>组件: strategy-pipeline-page.tsx + content-strategy-page.tsx + url-protection-module.tsx</p>
+            <p>子文件: <a href="filter-rules-pipeline-url-protection/layer-1-sandbox-tab.html">URL沙箱</a> / <a href="filter-rules-pipeline-url-protection/layer-2-sandbox-interactions.html">沙箱校验交互</a> / <a href="filter-rules-pipeline-url-protection/layer-3-link-protection.html">链接保护</a></p>
+            <p>预览可交互 · 4 交互层级 · 15 截图 · 10 项差异 / 7 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-content-rules/index.html">内容规则</a>
+              <span class="badge badge-done">✅</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（阶段3内容层抽屉，priority 3002）</p>
+            <p>spec: 策略流水线需求文档.md / 0708（多租户视角）安全策略体系 PRD.md</p>
+            <p>组件: strategy-pipeline-page.tsx + content-strategy-page.tsx + content-rules-module.tsx</p>
+            <p>子文件: <a href="filter-rules-pipeline-content-rules/layer-1-rule-edit-drawer.html">规则编辑抽屉</a> / <a href="filter-rules-pipeline-content-rules/layer-2-validation-examples-simulator.html">校验与模拟</a> / <a href="filter-rules-pipeline-content-rules/layer-3-dialogs.html">确认对话框</a></p>
+            <p>预览可交互 · 5 交互层级 · 22 截图 · 12 项差异 / 8 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-intent-engine/index.html">意图引擎</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v3</span>
+              <span class="card-generated-at">2026-07-17</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（阶段3内容层抽屉，priority 3003，强制检测）</p>
+            <p>spec: 意图引擎功能模块需求文档.md / 策略流水线需求文档.md</p>
+            <p>组件: strategy-pipeline-page.tsx + content-strategy-page.tsx + intent-engine-module.tsx</p>
+            <p>子文件: <a href="filter-rules-pipeline-intent-engine/layer-1-intent-card-classification.html">意图卡分类</a> / <a href="filter-rules-pipeline-intent-engine/layer-2-threshold-config.html">分段阈值</a> / <a href="filter-rules-pipeline-intent-engine/layer-3-dialogs.html">复制/重置对话框</a> / <a href="filter-rules-pipeline-intent-engine/layer-4-direction-disable.html">方向切换/禁用</a> / <a href="filter-rules-pipeline-intent-engine/layer-5-copy-save-state.html">复制未保存状态修复</a> / <a href="filter-rules-pipeline-intent-engine/layer-6-mark-label-fallback.html">标记文案与 Tooltip 修复</a></p>
+            <p>预览可交互 · 6 交互层级 · 39 截图 · 12 项差异（D-07/D-08/D-11 已修复）/ 5 项需确认</p>
+            <p>v3 更新: 标记文案空值 onBlur 回填（D-11）+ Pipeline Tooltip effectKey 解耦方案C（D-08）</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+
+    <!-- 二级：阶段5 - 综合策略 -->
+    <details class="l2-group" open>
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>阶段5 · 综合策略</h3>
+          <span class="l2-tag">priority 5xxx</span>
+          <span class="l2-count">3 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-similar-detection/index.html">相似邮件检测</a>
+              <span class="badge badge-done">✅</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（阶段5综合策略抽屉，priority 5000）</p>
+            <p>spec: 相似检测模块需求文档.md / 策略流水线需求文档.md（textsim TLSH+FAISS 关联）</p>
+            <p>组件: strategy-pipeline-page.tsx + comprehensive-strategy-page.tsx + similar-detection-module.tsx</p>
+            <p>子文件: <a href="filter-rules-pipeline-similar-detection/layer-1-same-subject-tab.html">相同主题</a> / <a href="filter-rules-pipeline-similar-detection/layer-2-aggregate-mode.html">聚合模式</a> / <a href="filter-rules-pipeline-similar-detection/layer-3-card-interactions.html">卡片交互</a></p>
+            <p>预览可交互 · 4 交互层级 · 14 截图 · 11 项差异 / 8 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-advanced-rules/index.html">高级过滤规则</a>
+              <span class="badge badge-done">✅</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（阶段5综合策略抽屉，initialPolicy=advancedRules）</p>
+            <p>spec: V3高级过滤规则.md / 策略流水线需求文档.md</p>
+            <p>组件: modules/advanced-filter-rules-module.tsx + comprehensive-strategy-page.tsx</p>
+            <p>子文件: <a href="filter-rules-pipeline-advanced-rules/layer-1-list-view.html">规则列表</a> / <a href="filter-rules-pipeline-advanced-rules/layer-2-edit-basic.html">基础设置</a> / <a href="filter-rules-pipeline-advanced-rules/layer-3-conditions.html">条件配置</a> / <a href="filter-rules-pipeline-advanced-rules/layer-4-actions.html">处置策略</a> / <a href="filter-rules-pipeline-advanced-rules/layer-5-test-analysis.html">测试与分析</a></p>
+            <p>预览可交互 · 6 交互层级 · 54 条件类型总表 · 13 项差异 / 10 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-pipeline-mail-marking/index.html">邮件标记</a>
+              <span class="badge badge-done">✅</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/pipeline（阶段5综合策略抽屉，priority 5002，标记投递）</p>
+            <p>spec: 邮件标记与声明功能模块需求文档.md / 策略流水线需求文档.md</p>
+            <p>组件: strategy-pipeline-page.tsx + comprehensive-strategy-page.tsx + mail-marking-module.tsx</p>
+            <p>子文件: <a href="filter-rules-pipeline-mail-marking/layer-1-receive-rule-drawer.html">接收标记规则</a> / <a href="filter-rules-pipeline-mail-marking/layer-2-send-rule-drawer.html">外发声明规则</a> / <a href="filter-rules-pipeline-mail-marking/layer-3-preview-test-delete.html">预览/测试/删除</a></p>
+            <p>预览可交互 · 4 交互层级 · 15 截图 · 12 项差异 / 9 项需确认</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+
+    <!-- 二级：其他过滤规则 -->
+    <details class="l2-group">
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>其他</h3>
+          <span class="l2-count">1 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="filter-rules-group-policy/index.html">群组策略</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-18</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /filter-rules/group-policy</p>
+            <p>spec: 0703群组管理模块.md / 0703群组策略规则.md / 0708（多租户视角）安全策略体系 PRD</p>
+            <p>组件: group-policy-page.tsx（群组管理 + 群组策略规则）</p>
+            <p>子文件覆盖特征组、策略抽屉、配置详情、有效路径与 14 个策略卡配置面板；8 个交互层级。</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+
+    </div>
+  </details>
+
+  <!-- ==================== 一级：统计报表 ==================== -->
+  <details class="l1-section" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">📊</span>
+        <h2>统计报表</h2>
+        <span class="l1-stats"><span class="done-count">4</span> 已完成 / 5 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+    <details class="l2-group" open>
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>统计看板</h3>
+          <span class="l2-count">5 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary><div class="card-summary"><span class="chevron"></span>
+            <a class="card-title" href="statistics-security-overview/index.html">邮件安全总览</a>
+            <span class="badge badge-done">✅</span><span class="card-version-badge">v3</span><span class="card-generated-at">2026-07-22</span>
+          </div></summary>
+          <div class="card-detail">
+            <p>路由: /statistics/security-overview（威胁态势感知与安全运营核心观测台）</p>
+            <p>spec: 邮件安全总览 功能需求文档（PRD）.md + 邮件安全总览 - 需求文档.md（<b>两篇冲突 9 处</b>）</p>
+            <p>组件: security-overview-page.tsx（1494 行，recharts）</p>
+            <p>子文件: <a href="statistics-security-overview/layer-1-viewby-tabs.html">视角切换</a> / <a href="statistics-security-overview/layer-2-time-heatmap.html">周内热力图</a> / <a href="statistics-security-overview/layer-3-geo-drilldown.html">地理下钻</a> / <a href="statistics-security-overview/layer-4-datapoint-drilldown.html">数据点下钻</a> / <a href="statistics-security-overview/layer-5-table-row-expand.html">明细行展开</a></p>
+            <p><b>v3</b>：产品目标恢复四视角（邮件类型/处置动作/威胁等级/投递结果）· demo 当前两视角改列为原型缺口 · Q4 已确认关闭 · 邮件类型维持统一 11 类 · 5 交互层级 · 15 项差异 / 5 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary><div class="card-summary"><span class="chevron"></span>
+            <a class="card-title" href="statistics-delivery-traffic-analysis/index.html">投递与流量分析</a>
+            <span class="badge badge-done">✅</span><span class="card-version-badge">v2</span><span class="card-generated-at">2026-07-22</span>
+          </div></summary>
+          <div class="card-detail">
+            <p>路由: /statistics/delivery-traffic-analysis（方向驱动的整页重建：全部/接收/外发/域内）</p>
+            <p>spec: 投递与流量分析 功能需求文档.md（含 TC-001~TC-019）</p>
+            <p>组件: delivery-traffic-analysis-page.tsx（811 行）</p>
+            <p>子文件: <a href="statistics-delivery-traffic-analysis/layer-1-direction-inbound.html">接收</a> / <a href="statistics-delivery-traffic-analysis/layer-2-direction-outbound.html">外发</a> / <a href="statistics-delivery-traffic-analysis/layer-3-direction-internal.html">域内</a> / <a href="statistics-delivery-traffic-analysis/layer-4-queue-health.html">队列健康卡</a></p>
+            <p>预览可交互 · 4 交互层级 · 34 截图 · <b>修复 12 条损坏中文</b> · 10 项差异 / 6 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary><div class="card-summary"><span class="chevron"></span>
+            <a class="card-title" href="statistics-link-attachment-security/index.html">链接与附件安全</a>
+            <span class="badge badge-done">✅</span><span class="card-version-badge">v1</span><span class="card-generated-at">2026-07-14</span>
+          </div></summary>
+          <div class="card-detail">
+            <p>路由: /statistics/link-attachment-security（链接/附件双视图 + 沙箱异步召回）</p>
+            <p>spec: 链接与附件安全 功能需求文档.md + 链接保护日志.md + 附件安全检测模块.md</p>
+            <p>组件: link-attachment-security-page.tsx（938 行）</p>
+            <p>子文件: <a href="statistics-link-attachment-security/layer-1-attachment-view.html">附件视图</a> / <a href="statistics-link-attachment-security/layer-2-chart-type.html">图表类型</a> / <a href="statistics-link-attachment-security/layer-3-async-alert.html">异步告警条</a> / <a href="statistics-link-attachment-security/layer-4-table-row-expand.html">明细行展开</a></p>
+            <p>预览可交互 · 4 交互层级 · 17 截图 · <b>修复 6 条损坏中文</b> · 10 项差异（含封禁/一键召回<b>无二次确认</b>）/ 6 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary><div class="card-summary"><span class="chevron"></span>
+            <a class="card-title" href="statistics-ops-top-trend/index.html">运营TOP与趋势</a>
+            <span class="badge badge-done">✅</span><span class="card-version-badge">v1</span><span class="card-generated-at">2026-07-14</span>
+          </div></summary>
+          <div class="card-detail">
+            <p>路由: /statistics/ops-top-trend（六维度 TOP 富列表 + 行展开下钻）</p>
+            <p>spec: (多租户视角)运营 TOP 与趋势 PRD.md + 连接成功和连接失败的定义.md</p>
+            <p>组件: ops-top-trend-page.tsx（1138 行）</p>
+            <p>子文件: <a href="statistics-ops-top-trend/layer-1-dimensions.html">六维度列集</a> / <a href="statistics-ops-top-trend/layer-2-row-drilldown.html">行展开下钻</a> / <a href="statistics-ops-top-trend/layer-3-top-count.html">TOP 数量</a> / <a href="statistics-ops-top-trend/layer-4-narrow-screen.html">小屏</a></p>
+            <p>预览可交互 · 4 交互层级 · 20 截图 · <b>修复 14 条损坏中文</b> · 10 项差异（含连接失败未按子类归因）/ 6 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary><div class="card-summary"><span class="chevron"></span>
+            <a class="card-title" href="statistics-rule-stats-v2/index.html">规则统计</a>
+            <span class="badge badge-done">✅</span><span class="card-version-badge">v1</span><span class="card-generated-at">2026-07-22</span>
+          </div></summary>
+          <div class="card-detail">
+            <p>路由: /statistics/rule-stats-v2（rule-stats-v2-page.tsx 1451 行 + module-detail-view.tsx 1770 行）</p>
+            <p>spec: <b>无独立 PRD</b>（口径关联 策略流水线需求文档.md，全部列入需确认）</p>
+            <p>子文件: <a href="statistics-rule-stats-v2/layer-1-filter-cascade.html">筛选级联仿真</a> / <a href="statistics-rule-stats-v2/layer-2-module-detail.html">模块明细视图</a> / <a href="statistics-rule-stats-v2/layer-3-detail-table.html">明细表格交互</a> / <a href="statistics-rule-stats-v2/layer-4-module-columns.html">14套专属列集+崩溃缺陷</a></p>
+            <p>预览可交互 · 4 交互层级 · 29 截图 · <b>发现 2 个崩溃级缺陷</b>（RBL/身份认证明细白屏）+ 2 处原始 i18n key 渲染 · 14 项差异 / 8 项需确认</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+    </div>
+  </details>
+
+  <!-- ==================== 一级：日志审计 ==================== -->
+  <details class="l1-section" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">📋</span>
+        <h2>日志审计</h2>
+        <span class="l1-stats"><span class="done-count">4</span> 已完成 / 6 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+    <details class="l2-group" open>
+      <summary>
+        <div class="l2-header"><span class="chevron"></span><h3>日志查询</h3><span class="l2-count">6 个模块</span></div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary><div class="card-summary"><span class="chevron"></span>
+            <a class="card-title" href="logs-link-logs/index.html">链接保护日志</a>
+            <span class="badge badge-done">✅</span><span class="card-version-badge">v1</span><span class="card-generated-at">2026-07-14</span>
+          </div></summary>
+          <div class="card-detail">
+            <p>路由: /logs/link-logs（点击时复检的顺序检测日志）</p>
+            <p>spec: 链接保护日志（含多租户视角）.md + 0704链接保护.md + 0709点击时复检策略.md</p>
+            <p>组件: link-logs-page.tsx + search-filters + table + detail-modal（814 行）</p>
+            <p>子文件: <a href="logs-link-logs/layer-1-detail-modal.html">详情弹窗</a> / <a href="logs-link-logs/layer-2-filters.html">筛选面板</a></p>
+            <p>预览可交互 · 2 交互层级 · 10 项差异（重点：<b>0709 要求的 skipped_deep_inspect 完全缺失</b>、9 个筛选项不参与过滤、形态矩阵冲突）/ 6 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary><div class="card-summary"><span class="chevron"></span>
+            <a class="card-title" href="logs-auth-logs/index.html">认证日志</a>
+            <span class="badge badge-done">✅</span><span class="card-version-badge">v1</span><span class="card-generated-at">2026-07-14</span>
+          </div></summary>
+          <div class="card-detail">
+            <p>路由: /logs/auth-logs（发信认证 SMTP/LDAP/POP3/IMAP 的每次尝试）</p>
+            <p>spec: 认证日志（含多租户）.md</p>
+            <p>组件: auth-logs-page.tsx + stats-overview + search-filters + table + detail-modal + <b>brute-force-panel（未挂载）</b></p>
+            <p>子文件: <a href="logs-auth-logs/layer-1-detail-drawer.html">详情抽屉</a></p>
+            <p>预览可交互 · 1 交互层级 · 9 项差异（重点：<b>暴力破解面板组件已写但页面未挂载</b>、租户视角未裁剪数据）/ 5 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary><div class="card-summary"><span class="chevron"></span>
+            <a class="card-title" href="logs-admin-logs/index.html">管理员操作日志</a>
+            <span class="badge badge-done">✅</span><span class="card-version-badge">v2</span><span class="card-generated-at">2026-07-25</span>
+          </div></summary>
+          <div class="card-detail">
+            <p>路由: /logs/admin-logs（分层视图：平台管理员操作 / 租户管理员操作）</p>
+            <p>spec: 管理员操作日志需求文档.md（F1–F9）</p>
+            <p>组件: admin-logs-page.tsx + search-filters + table + detail-modal（593 行）</p>
+            <p>子文件: <a href="logs-admin-logs/layer-1-tenant-layer.html">租户层</a> / <a href="logs-admin-logs/layer-2-detail-drawer.html">详情抽屉（变更对比）</a></p>
+            <p>预览可交互 · 2 交互层级 · 8 项差异（3 处 hover 提示未实现、failReason 自由文本非枚举、无导出）/ 6 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-todo">
+          <summary><div class="card-summary"><span class="chevron"></span><span class="card-title">邮件调查中心</span><span class="badge badge-todo">⬜</span></div></summary>
+          <div class="card-detail">
+            <p>路由: /logs/mail-investigation</p>
+            <p>⚠ 与「邮件处置中心」<b>共用同一套组件</b>（MailInvestigationPage，仅标题不同）→ 见 <a href="email-handling-disposal-center/index.html">email-handling-disposal-center</a></p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary><div class="card-summary"><span class="chevron"></span>
+            <a class="card-title" href="logs-ai-url-logs/index.html">沙箱日志</a>
+            <span class="badge badge-done">✅</span><span class="card-version-badge">v1</span><span class="card-generated-at">2026-07-18</span>
+          </div></summary>
+          <div class="card-detail">
+            <p>路由: /logs/ai-url-logs（仅传统版形态可见）</p>
+            <p>spec: 无独立 PRD；关联钓鱼邮件智能体与 URL 检测需求</p>
+            <p>组件: ai-url-logs-page.tsx + search-filters + table + detail-modal/detail-content</p>
+            <p>子文件: <a href="logs-ai-url-logs/layer-1-detail-modal.html">5-Tab 沙箱研判详情弹窗（6 态可交互）</a></p>
+          </div>
+        </details>
+        <details class="spec-card status-todo">
+          <summary><div class="card-summary"><span class="chevron"></span><span class="card-title">通知日志</span><span class="badge badge-todo">⬜</span></div></summary>
+          <div class="card-detail">
+            <p>路由: /logs/system-logs</p>
+            <p class="bad">⚠ <b>demo 缺陷：侧边栏有入口，但页面目录不存在（404 死链）</b></p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+    </div>
+  </details>
+
+  <!-- ==================== 一级：邮件处置 ==================== -->
+  <details class="l1-section">
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">📮</span>
+        <h2>邮件处置</h2>
+        <span class="l1-stats"><span class="done-count">4</span> 已完成 / 4 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+
+    <details class="l2-group" open>
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>处置中心</h3>
+          <span class="l2-count">2 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="email-handling-disposal-center/index.html">邮件处置中心</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v2</span>
+              <span class="card-generated-at">2026-07-23</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（与「邮件调查中心」共享同一套组件，仅标题不同）</p>
+            <p>spec: 0702邮件处置中心.md / 邮件处置中心.md / 邮件处置中心（多租户视角）.md / 邮件处置中心—详情查看页面.md / 0702…「查看」页面.md / 0703处置依据.md / V1·V2邮件状态机 / 0702邮件调查中心.md</p>
+            <p>组件: mail-investigation-page.tsx + compact-search-filters.tsx + investigation-logs-table.tsx + overview-action-section.tsx + security-analysis-section.tsx + raw-logs-section.tsx</p>
+            <p>子文件: <a href="email-handling-disposal-center/layer-1-search-mailtype.html">邮件类型多选</a> / <a href="email-handling-disposal-center/layer-2-search-more-filters.html">更多筛选(27字段)</a> / <a href="email-handling-disposal-center/layer-3-search-sample-mode.html">样本检索态</a> / <a href="email-handling-disposal-center/layer-4-table-header-filter.html">表头筛选</a> / <a href="email-handling-disposal-center/layer-5-table-batch-selected.html">批量选中</a> / <a href="email-handling-disposal-center/layer-6-release-dialog.html">放行</a> / <a href="email-handling-disposal-center/layer-7-delete-dialog.html">删除</a> / <a href="email-handling-disposal-center/layer-8-recall-dialog.html">召回</a> / <a href="email-handling-disposal-center/layer-9-similar-mode.html">找相似</a> / <a href="email-handling-disposal-center/layer-10-detail-overview-single.html">详情·概览与处置</a> / <a href="email-handling-disposal-center/layer-11-detail-recipient-matrix.html">详情·收件人矩阵</a> / <a href="email-handling-disposal-center/layer-12-detail-security-analysis.html">详情·安全分析</a> / <a href="email-handling-disposal-center/layer-13-detail-raw-logs.html">详情·原始日志</a> / <a href="email-handling-disposal-center/layer-14-detail-dialogs.html">详情·弹窗组</a></p>
+            <p>预览可交互 · 14 交互层级 · 30 截图 · 15 项差异 / 8 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="email-handling-disposal-settings/index.html">处置设置</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-14</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-settings（隔离区设置 / 审核设置 / 召回策略设置 三 Tab）</p>
+            <p>spec: 处置设置 需求文档.md / 邮件处置中心（多租户视角）.md F6–F8</p>
+            <p>组件: disposal-settings-page.tsx + notification-scope-selector.tsx + lib/mail-types.ts</p>
+            <p>子文件: <a href="email-handling-disposal-settings/layer-1-classification-notify.html">分类通知联动</a> / <a href="email-handling-disposal-settings/layer-2-notification-scope.html">通知范围选择器</a> / <a href="email-handling-disposal-settings/layer-3-review-tab.html">审核设置</a> / <a href="email-handling-disposal-settings/layer-4-recall-tab.html">召回策略</a></p>
+            <p>预览可交互 · 4 交互层级 · 16 截图 · 10 项差异 / 6 项需确认（网关已有 GET/PUT /api/v1/disposal-settings，可直接复用）</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+
+    <details class="l2-group">
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>灰邮治理</h3>
+          <span class="l2-count">2 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="email-handling-grey-mail-policy/index.html">灰邮策略配置</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-18</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/grey-mail/policy</p>
+            <p>spec: 无独立 PRD（散见于邮件处置中心各篇）</p>
+            <p>子文件: <a href="email-handling-grey-mail-policy/layer-1-add-form.html">新建/编辑策略</a> / <a href="email-handling-grey-mail-policy/layer-2-dept-tree.html">组织部门树</a> / <a href="email-handling-grey-mail-policy/layer-3-group-select.html">群组选择</a></p>
+            <p>策略矩阵 + 用户组三态 + 置信度区间 + 全局参数配置，共 4 个交互层级。</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="email-handling-grey-mail-queue/index.html">灰邮队列</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-18</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/grey-mail/queue</p>
+            <p>spec: 无独立 PRD</p>
+            <p>子文件: <a href="email-handling-grey-mail-queue/layer-1-advanced-search.html">高级搜索</a> / <a href="email-handling-grey-mail-queue/layer-2-batch-selected.html">批量选中</a> / <a href="email-handling-grey-mail-queue/layer-3-detail-modal.html">灰邮详情与快速处置</a></p>
+            <p>普通/高级查询、5 个批量动作、9 列表格、分页与共享详情弹窗。</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+
+    </div>
+  </details>
+
+  <details class="l1-section" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">⚙️</span>
+        <h2>系统管理</h2>
+        <span class="l1-stats"><span class="done-count">3</span> 已完成 / 8 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+
+    <details class="l2-group" open>
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>用户与权限</h3>
+          <span class="l2-count">1 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="admin-users/index.html">管理员与权限</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v3</span>
+              <span class="card-generated-at">2026-07-21</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /admin/users（三 Tab：管理员账号 / 角色权限 / 登录安全；平台/租户双视角）</p>
+            <p>业务源: demo/docs/prd-admin-user-permission.md（专属 PRD）+ 对话记录（租户首管理员生命周期三处修复）；UI 事实以浏览器渲染为准</p>
+            <p>组件: user-permission-page.tsx + admin-account-tab.tsx + role-permission-tab.tsx + login-security-tab.tsx + types.ts；跨模块: tenant-list-tab.tsx + credential-result-dialog.tsx + tenant-center-page.tsx + product-profile-context.tsx</p>
+            <p>子文件: <a href="admin-users/layer-1-admin-drawer.html">管理员抽屉</a> / <a href="admin-users/layer-2-admin-dialogs.html">弹窗组(重置/下线/删除/筛选)</a> / <a href="admin-users/layer-3-role-drawer.html">角色抽屉·权限矩阵</a> / <a href="admin-users/layer-4-login-ip-reset.html">IP控制/重置</a> / <a href="admin-users/layer-5-tenant-view.html">租户视角</a> / <a href="admin-users/layer-6-tenant-primary-admin-lifecycle.html">租户首管理员生命周期(凭据/改密/再建)</a></p>
+            <p>预览可交互 · 6 交互层级 · 新增 §0.5 产品形态×视角「新建管理员」语义 + 首管理员改密/再建路径 · 5 形态×2角色矩阵 · 9 项差异(D-006 已解决/新增 D-008/D-009) / 9 项需确认 · agent-browser 实测截图 + DOM 比对</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+
+    <details class="l2-group">
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>其他系统管理模块</h3>
+          <span class="l2-count">12 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="monitor-dashboard/index.html">监控中心·监控总览</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v2</span>
+              <span class="card-generated-at">2026-07-22</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /monitor/dashboard（「监控中心」分组首页）· spec: 未提供（demo/docs 下无监控中心需求文档，以浏览器运行态为准）</p>
+            <p>组件: monitor-dashboard-page.tsx（6 KPI 卡 + 四模块健康看板 + 双趋势图 + 告警跑马灯 + 时间范围/刷新间隔双选择器）</p>
+            <p>子文件: <a href="monitor-dashboard/layer-1-range-select.html">时间范围下拉</a> / <a href="monitor-dashboard/layer-2-refresh-select.html">刷新间隔下拉</a></p>
+            <p>预览可交互（Select/卡片下钻 toast/跑马灯动画）· 形态×角色 5×2 矩阵浏览器实测 · v2 纠正 v1「切范围数据刷新」错误结论（实测静态 mock 不变）· 8 项差异（导出PDF无响应、刷新间隔不生效、Thai 缺 key、URL 直连未拦截等）/ 4 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="monitor-infrastructure/index.html">监控中心·基础设施</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v2</span>
+              <span class="card-generated-at">2026-07-22</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /monitor/infrastructure · spec: 未提供 · 多租户租户视角导航隐藏（v2 用户决定：URL 直连也应 403/404 拦截）</p>
+            <p>组件: monitor-infrastructure-page.tsx（4 Tab：硬件资源/服务进程/数据库与缓存/存储与备份；Kingbase/Redis × 指标切换）</p>
+            <p>子文件: <a href="monitor-infrastructure/layer-1-tab-container.html">服务进程</a> / <a href="monitor-infrastructure/layer-2-tab-database.html">数据库与缓存(双态)</a> / <a href="monitor-infrastructure/layer-3-tab-storage.html">存储与备份</a></p>
+            <p>预览可交互（Tab/库切换）· 形态×角色 5×2 矩阵实测 · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="monitor-mailflow/index.html">监控中心·邮件流</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v2</span>
+              <span class="card-generated-at">2026-07-22</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /monitor/mailflow · spec: 未提供（connection-session-definition.md 可参考连接四阶段定义）</p>
+            <p>组件: monitor-mailflow-page.tsx（方向 Select 全页联动×乘数 1.8/1.0/0.7/0.4 + 3 Tab：队列监控/投递质量/连接会话）</p>
+            <p>子文件: <a href="monitor-mailflow/layer-1-direction.html">方向切换联动</a> / <a href="monitor-mailflow/layer-2-tab-delivery.html">投递质量</a> / <a href="monitor-mailflow/layer-3-tab-connection.html">连接会话(单链路/全部四线)</a></p>
+            <p>预览可交互（方向/时间 Select）· 四方向联动对照表 · 形态×角色 5×2 矩阵 · v2：2 项用户决定落地（时间范围切换数据跟着更新 / ?tab= 参数按 URL 落 Tab）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="monitor-security/index.html">监控中心·检测引擎状态</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v2</span>
+              <span class="card-generated-at">2026-07-22</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /monitor/security · spec: 未提供 · 多租户租户视角导航隐藏（v2 用户决定：URL 直连也应拦截）</p>
+            <p>组件: monitor-security-page.tsx（4 引擎卡选中联动 + 双 Y 轴趋势 + 4 种详情表结构 + 3 时间范围数据集）</p>
+            <p>子文件: <a href="monitor-security/layer-1-engine-switch.html">引擎切换(沙箱/RBL/反病毒)</a> / <a href="monitor-security/layer-2-timerange.html">时间范围切换</a></p>
+            <p>预览可交互 · 形态×角色 5×2 矩阵 · v2：3 项用户决定落地（详情表随时间范围变化 / URL 拦截 / 主指标单位自适应&lt;1s用毫秒）· 6 项差异 + 3 项需确认均逐项标注复核状态</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="monitor-alerts/index.html">监控中心·告警中心</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v3</span>
+              <span class="card-generated-at">2026-07-22</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /monitor/alerts · spec: 未提供 · 多租户租户视角导航隐藏</p>
+            <p>组件: monitor-alerts-page.tsx + alert-rule-editor.tsx(1847行,80vw抽屉) + email-config-drawer.tsx（3 Tab + 搜索/双筛选/全选批量/行菜单）</p>
+            <p>子文件: <a href="monitor-alerts/layer-1-search-filter.html">搜索过滤</a> / <a href="monitor-alerts/layer-2-batch-select.html">全选批量</a> / <a href="monitor-alerts/layer-3-row-actions.html">行操作菜单</a> / <a href="monitor-alerts/layer-4-tab-rules.html">规则Tab</a> / <a href="monitor-alerts/layer-5-rule-editor.html">规则编辑器抽屉</a> / <a href="monitor-alerts/layer-6-tab-notification.html">通知设置</a> / <a href="monitor-alerts/layer-7-email-config.html">邮件配置抽屉</a></p>
+            <p>预览可交互（搜索/筛选/全选 JS 复刻）· 形态×角色 5×2 矩阵 · v2：「查看详情」→ 告警详情抽屉（§3.3，?id=N 直接开抽屉）· v3：修复规则编辑器预览——步骤导航滚动 + 段头展开/收起完整复刻 demo 行为（8/8 回放通过）· 9 项差异 + 4 项需确认逐项标注状态</p>
+          </div>
+        </details>
+        <details class="spec-card status-todo"><summary><div class="card-summary"><span class="chevron"></span><span class="card-title">租户中心</span><span class="badge badge-todo">⬜</span></div></summary><div class="card-detail"><p>路由: /admin/tenants · spec: 租户中心.md</p></div></details>
+        <details class="spec-card status-done">
+          <summary><div class="card-summary"><span class="chevron"></span>
+            <a class="card-title" href="admin-platform-security/index.html">平台安全策略</a>
+            <span class="badge badge-done">✅</span><span class="card-version-badge">v1</span><span class="card-generated-at">2026-07-19</span>
+          </div></summary>
+          <div class="card-detail">
+            <p>路由: /admin/platform-security · spec: 0708（多租户视角）安全策略体系 PRD</p>
+            <p>组件: platform-security-page.tsx + 内嵌 ConnectionLayerPage + BasicLimitTab</p>
+            <p>子文件: <a href="admin-platform-security/layer-1-attachment-tab.html">附件基础限制</a> / <a href="admin-platform-security/layer-2-direction-send.html">方向切换</a> / <a href="admin-platform-security/layer-3-exceed-action-open.html">处置下拉</a> / <a href="admin-platform-security/layer-4-unlimited-warning.html">无限制警告</a> / <a href="admin-platform-security/layer-5-ip-nav-ipfilter.html">IP 策略导航</a> / <a href="admin-platform-security/layer-6-policy-disabled.html">策略禁用态</a></p>
+          </div>
+        </details>
+        <details class="spec-card status-todo"><summary><div class="card-summary"><span class="chevron"></span><span class="card-title">网络设置</span><span class="badge badge-todo">⬜</span></div></summary><div class="card-detail"><p>路由: /admin/network · spec: 网络设置.md</p></div></details>
+        <details class="spec-card status-todo"><summary><div class="card-summary"><span class="chevron"></span><span class="card-title">邮件路由</span><span class="badge badge-todo">⬜</span></div></summary><div class="card-detail"><p>路由: /admin/forwarding · spec: 邮件路由模块 PRD</p></div></details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="admin-contacts/index.html">组织通讯录</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-19</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /admin/contacts · spec: 组织通讯录.md</p>
+            <p>组件: contacts-page.tsx（三 Tab：数据源管理 / 通讯录查询 / 同步日志）+ contact-book-tab.tsx</p>
+            <p>子文件: <a href="admin-contacts/layer-1-source-filter.html">数据源筛选</a> / <a href="admin-contacts/layer-2-source-drawer.html">数据源抽屉·4种同步方式联动</a> / <a href="admin-contacts/layer-3-test-connection.html">测试连接</a> / <a href="admin-contacts/layer-4-source-edit.html">编辑</a> / <a href="admin-contacts/layer-5-source-delete.html">删除确认</a> / <a href="admin-contacts/layer-6-source-sync.html">立即同步</a> / <a href="admin-contacts/layer-7-book-mark.html">通讯录标记下拉</a> / <a href="admin-contacts/layer-8-book-batch.html">批量标记</a> / <a href="admin-contacts/layer-9-book-detail.html">人员详情</a> / <a href="admin-contacts/layer-10-log-detail.html">同步日志详情</a></p>
+            <p>预览可交互 · 10 交互层级子文件 · 全量组件实测（4 种同步方式表单联动 / 测试连接双结果 / 批量标记全流程）· 15 处 demo↔spec 差异（自动同步无 Cron 抽屉 · CSV 无列映射 · 无刷新按钮等）</p>
+          </div>
+        </details>
+        <details class="spec-card status-todo"><summary><div class="card-summary"><span class="chevron"></span><span class="card-title">数据管理</span><span class="badge badge-todo">⬜</span></div></summary><div class="card-detail"><p>路由: /admin/data-management</p></div></details>
+        <details class="spec-card status-todo"><summary><div class="card-summary"><span class="chevron"></span><span class="card-title">授权与升级</span><span class="badge badge-todo">⬜</span></div></summary><div class="card-detail"><p>路由: /admin/authorization-upgrade</p></div></details>
+      </div>
+      </div>
+    </details>
+
+    </div>
+  </details>
+
+  <!-- ==================== 一级：智能体管理中心 ==================== -->
+  <details class="l1-section" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🤖</span>
+        <h2>智能体管理中心</h2>
+        <span class="l1-stats"><span class="done-count">3</span> 已完成 / 3 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+    <details class="l2-group" open>
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>Stage 4 · AI 检测层智能体</h3>
+          <span class="l2-tag">agent-center</span>
+          <span class="l2-count">3 个模块</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="component-threat-retrospect-agent/index.html">威胁回溯智能体（AI 异步 · Stage 4.8）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-22</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /agent-center/overview?agent=retrospectV1 · spec: V2威胁回溯邮件智能体1 — 模块需求文档（PRD）.md</p>
+            <p>组件: threat-retrospect-agent-v1.tsx（检测总览 KPI 下钻 + 任务表/漏报明细 + 回溯策略实时/深度联动抽屉）</p>
+            <p>子文件: <a href="component-threat-retrospect-agent/layer-1-scan-dialog.html">紧急手动扫描</a> / <a href="component-threat-retrospect-agent/layer-2-recall-confirm.html">召回二次确认</a> / <a href="component-threat-retrospect-agent/layer-3-false-positive-confirm.html">标记误报</a> / <a href="component-threat-retrospect-agent/layer-4-kpi-filter.html">KPI 下钻+漏报明细</a> / <a href="component-threat-retrospect-agent/layer-5-strategy-tab.html">回溯策略列表+编辑抽屉</a></p>
+            <p>预览可交互 · 5 交互层级子文件 · 7 项差异（组件未国际化 · 无角色分权 · 缺模型更新入口 · 壳开关无二次确认等）/ 5 项需确认（回溯调度引擎 · 策略持久化 · 第4语言等）</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="component-phishing-detection-agent/index.html">钓鱼邮件检测智能体（AI 同步 · Stage 4.0）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-22</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /agent-center/overview?agent=phishingV1 · spec: V2-钓鱼邮件检测智能体模块 · 需求文档（PRD）.md</p>
+            <p>组件: phishing-detection-agent-v1.tsx（两 Tab：检测总览/检测引擎配置）+ phishing-url-evidence-drawer.tsx + 外套启用开关与关闭二次确认</p>
+            <p>子文件: <a href="component-phishing-detection-agent/layer-1-detail-drawer.html">检测详情抽屉(680px)</a> / <a href="component-phishing-detection-agent/layer-2-rule-drawer.html">准入规则抽屉+收件人树</a> / <a href="component-phishing-detection-agent/layer-3-mode-drawer.html">运行模式+分级策略表</a> / <a href="component-phishing-detection-agent/layer-4-band-edit.html">区间编辑弹窗(80vw)</a> / <a href="component-phishing-detection-agent/layer-5-url-evidence.html">URL透视证据(5Tab)</a> / <a href="component-phishing-detection-agent/layer-6-action-dialogs.html">处置确认对话框</a> / <a href="component-phishing-detection-agent/layer-7-disable-confirm.html">关闭确认</a></p>
+            <p>预览可交互 · 7 交互层级子文件 · 6 项差异（主组件未国际化 · enabled 兼表仅审计只读 · traceback 无UI · 异步模式入口缺失 · mark 动作等）/ 7 项需确认（召回状态机 · 误报样本回流 · 准入规则映射统一规则系统 · 配置快照落库等）</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="component-impersonation-detection-agent/index.html">仿冒邮件检测智能体（AI 同步 · Stage 4.1）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-22</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /agent-center/overview?agent=impersonation · spec: V2仿冒邮件检测智能体 需求文档（PRD.md</p>
+            <p>组件: impersonation-detection-agent.tsx（三页签：检测总览/发信人名称仿冒/品牌保护）+ 包裹层启用开关与关闭二次确认</p>
+            <p>子文件: <a href="component-impersonation-detection-agent/layer-1-brand-sheet.html">品牌抽屉(80vw)</a> / <a href="component-impersonation-detection-agent/layer-2-logs-tab.html">检测总览</a> / <a href="component-impersonation-detection-agent/layer-3-disable-confirm.html">关闭确认</a> / <a href="component-impersonation-detection-agent/layer-4-log-detail-drawer.html">详情抽屉(680px)</a> / <a href="component-impersonation-detection-agent/layer-5-displayname-tab.html">发信人名称仿冒</a> / <a href="component-impersonation-detection-agent/layer-6-delete-brand.html">删除确认</a></p>
+            <p>预览可交互 · 6 交互层级子文件 · 6 项差异（详情抽屉处置徽章仅二分 · 仅3语 · 硬编码文案 · 检测方向死代码等）/ 6 项需确认（仿冒信号存储 · 审核加急超时 · 品牌所有权TXT · 发信人名称仿冒深层向导等）</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </details>
+    </div>
+  </details>
+</body>
+</html>

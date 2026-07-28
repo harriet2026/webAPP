@@ -158,7 +158,8 @@ export const sidebarNavItems: NavItem[] = [
     // toggle. Per-item permission does the gating; the group renders whenever
     // a child is visible.
     children: [
-      { id: 'mail-investigation', titleKey: 'sidebar.mailInvestigation', href: '/logs/mail-investigation' },
+      // GT-12501: 「邮件调查中心」入口按验收要求从导航隐藏（页面
+      // /logs/mail-investigation 保留，同 /logs/email、/investigations 先例）。
       { id: 'auth-attempts', titleKey: 'sidebar.authAttempts', href: '/logs/auth-attempts', permission: 'view_auth_attempts' },
       { id: 'link-clicks', titleKey: 'sidebar.linkClicks', href: '/logs/link-clicks', permission: 'view_link_logs' },
       { id: 'admin-audit-logs', titleKey: 'sidebar.adminAuditLogs', href: '/logs/admin-audit', permission: 'view_admin_audit_logs' },
@@ -204,9 +205,9 @@ export const offNavRouteTitles: Array<{ href: string; titleKey: string }> = [
   { href: '/investigations', titleKey: 'sidebar.investigations' },
 ];
 
+// GT-12501: 泰语/俄语按验收要求从语言切换器隐藏（i18n 词典与 /th /ru
+// 路由保留，恢复展示只需把条目加回来）。
 export const languages = [
   { code: 'zh', name: '中文', flag: '🇨🇳' },
   { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'th', name: 'ไทย', flag: '🇹🇭' },
-  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
 ];

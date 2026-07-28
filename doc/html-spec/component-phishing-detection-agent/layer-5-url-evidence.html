@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 5：URL 透视证据抽屉 - 钓鱼邮件检测智能体 HTML 规格说明</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: ['class', '[data-theme="dark"]'],
+    corePlugins: { preflight: false },
+    theme: {
+      extend: {
+        colors: {
+          background: 'var(--background)', foreground: 'var(--foreground)',
+          card: 'var(--card)', 'card-foreground': 'var(--card-foreground)',
+          popover: 'var(--popover)', 'popover-foreground': 'var(--popover-foreground)',
+          primary: 'var(--primary)', 'primary-foreground': 'var(--primary-foreground)',
+          secondary: 'var(--secondary)', 'secondary-foreground': 'var(--secondary-foreground)',
+          muted: 'var(--muted)', 'muted-foreground': 'var(--muted-foreground)',
+          accent: 'var(--accent)', 'accent-foreground': 'var(--accent-foreground)',
+          destructive: 'var(--destructive)', 'destructive-foreground': 'var(--destructive-foreground)',
+          border: 'var(--border)', input: 'var(--input)', ring: 'var(--ring)',
+          'chart-1': 'var(--chart-1)', 'chart-2': 'var(--chart-2)', 'chart-3': 'var(--chart-3)',
+          'chart-4': 'var(--chart-4)', 'chart-5': 'var(--chart-5)',
+          sidebar: 'var(--sidebar)', 'sidebar-foreground': 'var(--sidebar-foreground)',
+          'sidebar-primary': 'var(--sidebar-primary)', 'sidebar-accent': 'var(--sidebar-accent)',
+          'sidebar-border': 'var(--sidebar-border)',
+        },
+        borderRadius: {
+          lg: 'var(--radius)', md: 'calc(var(--radius) - 2px)',
+          sm: 'calc(var(--radius) - 4px)', xl: 'calc(var(--radius) + 4px)',
+        },
+        fontFamily: {
+          sans: ['Geist', 'Geist Fallback', 'system-ui', 'sans-serif'],
+          mono: ['Geist Mono', 'Geist Mono Fallback', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style id="shadcn-tokens">
+  /* demo globals.css tokens injected so semantic classes (bg-card / text-muted-foreground /
+     border-border / bg-primary / bg-destructive ...) resolve identically to the running demo */
+  :root {
+    --background: oklch(0.98 0.01 205); --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0); --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0); --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.52 0.226 262); --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0); --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.52 0.226 262); --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.577 0.245 27.325); --destructive-foreground: oklch(0.577 0.245 27.325);
+    --border: oklch(0.922 0 0); --input: oklch(0.922 0 0); --ring: oklch(0.52 0.226 262);
+    --chart-1: oklch(0.52 0.226 262); --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.398 0.07 227.392); --chart-4: oklch(0.828 0.189 84.429);
+    --chart-5: oklch(0.769 0.188 70.08);
+    --sidebar: oklch(0.175 0.02 260); --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.52 0.226 262); --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-border: oklch(0.269 0 0);
+    --radius: 0.625rem;
+    --font-sans: "Geist","Geist Fallback", system-ui, sans-serif;
+    --font-mono: "Geist Mono","Geist Mono Fallback", monospace;
+  }
+  .dark, [data-theme="dark"] {
+    --background: oklch(0.145 0 0); --foreground: oklch(0.985 0 0);
+    --card: oklch(0.145 0 0); --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.145 0 0); --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.52 0.226 262); --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.269 0 0); --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0); --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.52 0.226 262); --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.396 0.141 25.723); --destructive-foreground: oklch(0.637 0.237 25.331);
+    --border: oklch(0.269 0 0); --input: oklch(0.269 0 0); --ring: oklch(0.52 0.226 262);
+  }
+</style>
+<style>
+:root{--primary:oklch(0.52 0.226 262);--primary-foreground:oklch(0.985 0 0);--background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);--card:oklch(1 0 0);--muted:oklch(0.97 0 0);--muted-foreground:oklch(0.556 0 0);--border:oklch(0.922 0 0);--destructive:oklch(0.577 0.245 27.325);--radius:0.625rem;--font-sans:"Geist","Geist Fallback",system-ui,sans-serif;--font-mono:"Geist Mono",monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);line-height:1.6;padding:2rem;max-width:1400px;margin:0 auto;}
+.spec-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem;}
+.spec-header h1{color:var(--primary);margin-bottom:1rem;font-size:1.4rem;}
+.meta-table{width:100%;border-collapse:collapse;font-size:0.875rem;}
+.meta-table td{padding:0.5rem 1rem;border-bottom:1px solid var(--border);}
+.meta-table td:first-child{font-weight:600;width:120px;color:var(--muted-foreground);white-space:nowrap;}
+.meta-table a{color:var(--primary);}
+section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem;}
+h4{font-size:0.95rem;margin:0.75rem 0 0.5rem;color:var(--muted-foreground);}
+table.spec-table{width:100%;border-collapse:collapse;font-size:0.85rem;margin:1rem 0;}
+table.spec-table th{background:var(--muted);font-weight:600;text-align:left;padding:0.55rem 0.7rem;border:1px solid var(--border);white-space:nowrap;}
+table.spec-table td{padding:0.55rem 0.7rem;border:1px solid var(--border);vertical-align:top;}
+table.spec-table tr:nth-child(even) td{background:var(--muted);}
+.table-scroll{overflow-x:auto;}
+.screenshot-figure{margin:1rem 0;text-align:center;}
+.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+.screenshot-figure figcaption{margin-top:0.5rem;font-size:0.8125rem;color:var(--muted-foreground);}
+pre{background:var(--muted);border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);padding:1rem;overflow-x:auto;font-family:var(--font-mono);font-size:0.8125rem;margin:1rem 0;}
+code{font-family:var(--font-mono);font-size:0.85em;}
+blockquote{border-left:4px solid var(--destructive);background:oklch(0.97 0.013 25);padding:0.75rem 1rem;margin:1rem 0;font-size:0.875rem;border-radius:0 6px 6px 0;}
+.component-preview{border:2px dashed var(--primary);border-radius:var(--radius);padding:1.5rem;margin:1rem 0;background:#f8fafc;position:relative;overflow:auto;}
+.component-preview::before{content:"🖥 可交互组件预览（从 demo 提取的实际 HTML+CSS）";position:absolute;top:-0.625rem;left:0.75rem;background:var(--primary);color:var(--primary-foreground);font-size:0.6875rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:6px;white-space:nowrap;}
+.component-preview *{box-sizing:border-box;}
+.interaction-layer{border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:calc(var(--radius) - 2px);padding:1rem 1.25rem;margin:1rem 0;background:var(--card);}
+.interaction-layer>h4{color:var(--primary);font-size:0.95rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;}
+.layer-badge{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--primary);color:var(--primary-foreground);font-size:0.75rem;font-weight:700;flex-shrink:0;}
+.trigger-path{background:var(--muted);border-radius:6px;padding:0.5rem 0.75rem;margin:0.5rem 0 1rem;font-size:0.8125rem;color:var(--muted-foreground);}
+.trigger-path strong{color:var(--foreground);}
+.dom-comparison{margin:1rem 0;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.dom-comparison>h5{background:var(--muted);padding:0.5rem 0.75rem;font-size:0.8125rem;font-weight:600;border-bottom:1px solid var(--border);}
+.dom-comparison>h5::before{content:"🔍 ";}
+.dom-comparison table{width:100%;border-collapse:collapse;font-size:0.8125rem;}
+.dom-comparison th{background:var(--muted);font-weight:600;text-align:left;padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);}
+.dom-comparison td{padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);vertical-align:top;}
+.dom-comparison tr:last-child td{border-bottom:none;}
+.dom-pass{color:oklch(0.5 0.15 150);font-weight:600;}
+.dom-fail{color:var(--destructive);font-weight:600;}
+.layer-nav{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.25rem;background:var(--muted);border-radius:var(--radius);margin-bottom:1.5rem;font-size:0.875rem;}
+.layer-nav a{color:var(--primary);text-decoration:none;font-weight:600;}
+.layer-nav a:hover{text-decoration:underline;}
+.tabbar button{padding:0.5rem 0.75rem;border-bottom:2px solid transparent;font-size:0.875rem;color:#6b7280;background:none;cursor:pointer;}
+.tabbar button.active{border-color:#2563eb;color:#2563eb;font-weight:500;}
+
+    /* 让被提取的 radix 抽屉/弹窗在预览区以常规流呈现（去掉 fixed 定位与全屏遮罩） */
+    .component-preview [role="dialog"], .component-preview [role="alertdialog"], .component-preview [data-slot="sheet-content"]{
+      position: static !important; inset: auto !important; transform: none !important; translate: none !important;
+      width: 100% !important; max-width: 100% !important; height: auto !important; max-height: none !important;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin: 0 auto; }
+  </style>
+/* === TW-STATIC-BEGIN (offline Tailwind, auto-generated) === */
+<style id="tw-static">
+*, ::before, ::after {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}::backdrop {--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x:  ;--tw-pan-y:  ;--tw-pinch-zoom:  ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position:  ;--tw-gradient-via-position:  ;--tw-gradient-to-position:  ;--tw-ordinal:  ;--tw-slashed-zero:  ;--tw-numeric-figure:  ;--tw-numeric-spacing:  ;--tw-numeric-fraction:  ;--tw-ring-inset:  ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / 0.5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur:  ;--tw-brightness:  ;--tw-contrast:  ;--tw-grayscale:  ;--tw-hue-rotate:  ;--tw-invert:  ;--tw-saturate:  ;--tw-sepia:  ;--tw-drop-shadow:  ;--tw-backdrop-blur:  ;--tw-backdrop-brightness:  ;--tw-backdrop-contrast:  ;--tw-backdrop-grayscale:  ;--tw-backdrop-hue-rotate:  ;--tw-backdrop-invert:  ;--tw-backdrop-opacity:  ;--tw-backdrop-saturate:  ;--tw-backdrop-sepia:  ;--tw-contain-size:  ;--tw-contain-layout:  ;--tw-contain-paint:  ;--tw-contain-style:  
+}.sr-only {position: absolute;width: 1px;height: 1px;padding: 0;margin: -1px;overflow: hidden;clip: rect(0, 0, 0, 0);white-space: nowrap;border-width: 0
+}.fixed {position: fixed
+}.absolute {position: absolute
+}.relative {position: relative
+}.sticky {position: sticky
+}.inset-y-0 {top: 0px;bottom: 0px
+}.left-3 {left: 0.75rem
+}.right-0 {right: 0px
+}.top-0 {top: 0px
+}.top-1\/2 {top: 50%
+}.z-10 {z-index: 10
+}.z-50 {z-index: 50
+}.-mb-px {margin-bottom: -1px
+}.mt-0\.5 {margin-top: 0.125rem
+}.flex {display: flex
+}.inline-flex {display: inline-flex
+}.grid {display: grid
+}.aspect-video {aspect-ratio: 16 / 9
+}.size-9 {width: 2.25rem;height: 2.25rem
+}.h-2 {height: 0.5rem
+}.h-3 {height: 0.75rem
+}.h-3\.5 {height: 0.875rem
+}.h-4 {height: 1rem
+}.h-5 {height: 1.25rem
+}.h-6 {height: 1.5rem
+}.h-8 {height: 2rem
+}.h-full {height: 100%
+}.min-h-full {min-height: 100%
+}.\!w-\[55vw\] {width: 55vw !important
+}.w-16 {width: 4rem
+}.w-28 {width: 7rem
+}.w-3 {width: 0.75rem
+}.w-3\.5 {width: 0.875rem
+}.w-3\/4 {width: 75%
+}.w-4 {width: 1rem
+}.w-5 {width: 1.25rem
+}.w-6 {width: 1.5rem
+}.w-8 {width: 2rem
+}.w-fit {width: -moz-fit-content;width: fit-content
+}.w-full {width: 100%
+}.min-w-0 {min-width: 0px
+}.min-w-\[120px\] {min-width: 120px
+}.min-w-\[180px\] {min-width: 180px
+}.\!max-w-\[900px\] {max-width: 900px !important
+}.max-w-\[140px\] {max-width: 140px
+}.flex-1 {flex: 1 1 0%
+}.shrink-0 {flex-shrink: 0
+}.-translate-y-1\/2 {--tw-translate-y: -50%;transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}.cursor-default {cursor: default
+}.grid-cols-1 {grid-template-columns: repeat(1, minmax(0, 1fr))
+}.grid-cols-\[160px_1fr\] {grid-template-columns: 160px 1fr
+}.flex-col {flex-direction: column
+}.flex-wrap {flex-wrap: wrap
+}.items-start {align-items: flex-start
+}.items-center {align-items: center
+}.justify-center {justify-content: center
+}.justify-between {justify-content: space-between
+}.gap-1 {gap: 0.25rem
+}.gap-1\.5 {gap: 0.375rem
+}.gap-2 {gap: 0.5rem
+}.gap-3 {gap: 0.75rem
+}.gap-4 {gap: 1rem
+}.space-y-0\.5 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.125rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.125rem * var(--tw-space-y-reverse))
+}.space-y-1 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.25rem * var(--tw-space-y-reverse))
+}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.375rem * var(--tw-space-y-reverse))
+}.space-y-2 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.5rem * var(--tw-space-y-reverse))
+}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.625rem * var(--tw-space-y-reverse))
+}.space-y-3 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(0.75rem * var(--tw-space-y-reverse))
+}.space-y-4 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(1rem * var(--tw-space-y-reverse))
+}.space-y-5 > :not([hidden]) ~ :not([hidden]) {--tw-space-y-reverse: 0;margin-top: calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom: calc(1.25rem * var(--tw-space-y-reverse))
+}.divide-y > :not([hidden]) ~ :not([hidden]) {--tw-divide-y-reverse: 0;border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width: calc(1px * var(--tw-divide-y-reverse))
+}.divide-gray-100 > :not([hidden]) ~ :not([hidden]) {--tw-divide-opacity: 1;border-color: rgb(243 244 246 / var(--tw-divide-opacity, 1))
+}.overflow-auto {overflow: auto
+}.overflow-hidden {overflow: hidden
+}.overflow-x-auto {overflow-x: auto
+}.overflow-y-auto {overflow-y: auto
+}.truncate {overflow: hidden;text-overflow: ellipsis;white-space: nowrap
+}.whitespace-nowrap {white-space: nowrap
+}.break-all {word-break: break-all
+}.rounded {border-radius: 0.25rem
+}.rounded-full {border-radius: 9999px
+}.rounded-lg {border-radius: var(--radius)
+}.rounded-md {border-radius: calc(var(--radius) - 2px)
+}.border {border-width: 1px
+}.border-0 {border-width: 0px
+}.border-2 {border-width: 2px
+}.border-b {border-bottom-width: 1px
+}.border-b-2 {border-bottom-width: 2px
+}.border-l {border-left-width: 1px
+}.border-r {border-right-width: 1px
+}.border-dashed {border-style: dashed
+}.border-amber-200 {--tw-border-opacity: 1;border-color: rgb(253 230 138 / var(--tw-border-opacity, 1))
+}.border-blue-600 {--tw-border-opacity: 1;border-color: rgb(37 99 235 / var(--tw-border-opacity, 1))
+}.border-gray-100 {--tw-border-opacity: 1;border-color: rgb(243 244 246 / var(--tw-border-opacity, 1))
+}.border-gray-200 {--tw-border-opacity: 1;border-color: rgb(229 231 235 / var(--tw-border-opacity, 1))
+}.border-gray-300 {--tw-border-opacity: 1;border-color: rgb(209 213 219 / var(--tw-border-opacity, 1))
+}.border-gray-800 {--tw-border-opacity: 1;border-color: rgb(31 41 55 / var(--tw-border-opacity, 1))
+}.border-green-200 {--tw-border-opacity: 1;border-color: rgb(187 247 208 / var(--tw-border-opacity, 1))
+}.border-input {border-color: var(--input)
+}.border-red-200 {--tw-border-opacity: 1;border-color: rgb(254 202 202 / var(--tw-border-opacity, 1))
+}.border-red-300 {--tw-border-opacity: 1;border-color: rgb(252 165 165 / var(--tw-border-opacity, 1))
+}.border-transparent {border-color: transparent
+}.bg-amber-100 {--tw-bg-opacity: 1;background-color: rgb(254 243 199 / var(--tw-bg-opacity, 1))
+}.bg-amber-500 {--tw-bg-opacity: 1;background-color: rgb(245 158 11 / var(--tw-bg-opacity, 1))
+}.bg-background {background-color: var(--background)
+}.bg-blue-50 {--tw-bg-opacity: 1;background-color: rgb(239 246 255 / var(--tw-bg-opacity, 1))
+}.bg-gray-200 {--tw-bg-opacity: 1;background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1))
+}.bg-gray-50 {--tw-bg-opacity: 1;background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}.bg-gray-800 {--tw-bg-opacity: 1;background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1))
+}.bg-primary {background-color: var(--primary)
+}.bg-red-100 {--tw-bg-opacity: 1;background-color: rgb(254 226 226 / var(--tw-bg-opacity, 1))
+}.bg-red-50 {--tw-bg-opacity: 1;background-color: rgb(254 242 242 / var(--tw-bg-opacity, 1))
+}.bg-red-600 {--tw-bg-opacity: 1;background-color: rgb(220 38 38 / var(--tw-bg-opacity, 1))
+}.bg-transparent {background-color: transparent
+}.bg-white {--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
+}.p-0 {padding: 0px
+}.p-3 {padding: 0.75rem
+}.p-4 {padding: 1rem
+}.p-5 {padding: 1.25rem
+}.px-2 {padding-left: 0.5rem;padding-right: 0.5rem
+}.px-3 {padding-left: 0.75rem;padding-right: 0.75rem
+}.py-0\.5 {padding-top: 0.125rem;padding-bottom: 0.125rem
+}.py-1 {padding-top: 0.25rem;padding-bottom: 0.25rem
+}.py-1\.5 {padding-top: 0.375rem;padding-bottom: 0.375rem
+}.py-2 {padding-top: 0.5rem;padding-bottom: 0.5rem
+}.pb-2 {padding-bottom: 0.5rem
+}.pl-9 {padding-left: 2.25rem
+}.pr-3 {padding-right: 0.75rem
+}.pt-1 {padding-top: 0.25rem
+}.text-left {text-align: left
+}.text-center {text-align: center
+}.font-mono {font-family: Geist Mono, Geist Mono Fallback, monospace
+}.text-\[10px\] {font-size: 10px
+}.text-\[11px\] {font-size: 11px
+}.text-base {font-size: 1rem;line-height: 1.5rem
+}.text-sm {font-size: 0.875rem;line-height: 1.25rem
+}.text-xs {font-size: 0.75rem;line-height: 1rem
+}.font-bold {font-weight: 700
+}.font-medium {font-weight: 500
+}.font-semibold {font-weight: 600
+}.text-amber-600 {--tw-text-opacity: 1;color: rgb(217 119 6 / var(--tw-text-opacity, 1))
+}.text-amber-700 {--tw-text-opacity: 1;color: rgb(180 83 9 / var(--tw-text-opacity, 1))
+}.text-blue-600 {--tw-text-opacity: 1;color: rgb(37 99 235 / var(--tw-text-opacity, 1))
+}.text-foreground {color: var(--foreground)
+}.text-gray-400 {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.text-gray-500 {--tw-text-opacity: 1;color: rgb(107 114 128 / var(--tw-text-opacity, 1))
+}.text-gray-600 {--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity, 1))
+}.text-gray-700 {--tw-text-opacity: 1;color: rgb(55 65 81 / var(--tw-text-opacity, 1))
+}.text-gray-800 {--tw-text-opacity: 1;color: rgb(31 41 55 / var(--tw-text-opacity, 1))
+}.text-gray-900 {--tw-text-opacity: 1;color: rgb(17 24 39 / var(--tw-text-opacity, 1))
+}.text-green-600 {--tw-text-opacity: 1;color: rgb(22 163 74 / var(--tw-text-opacity, 1))
+}.text-muted-foreground {color: var(--muted-foreground)
+}.text-red-600 {--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}.text-red-700 {--tw-text-opacity: 1;color: rgb(185 28 28 / var(--tw-text-opacity, 1))
+}.text-white {--tw-text-opacity: 1;color: rgb(255 255 255 / var(--tw-text-opacity, 1))
+}.shadow-lg {--tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}.outline-none {outline: 2px solid transparent;outline-offset: 2px
+}.transition {transition-property: color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-\[color\2c box-shadow\] {transition-property: color,box-shadow;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-all {transition-property: all;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-colors {transition-property: color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.transition-transform {transition-property: transform;transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);transition-duration: 150ms
+}.ease-in-out {transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1)
+}.selection\:bg-primary *::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground *::selection {color: var(--primary-foreground)
+}.selection\:bg-primary::selection {background-color: var(--primary)
+}.selection\:text-primary-foreground::selection {color: var(--primary-foreground)
+}.file\:inline-flex::file-selector-button {display: inline-flex
+}.file\:h-7::file-selector-button {height: 1.75rem
+}.file\:border-0::file-selector-button {border-width: 0px
+}.file\:bg-transparent::file-selector-button {background-color: transparent
+}.file\:text-sm::file-selector-button {font-size: 0.875rem;line-height: 1.25rem
+}.file\:font-medium::file-selector-button {font-weight: 500
+}.file\:text-foreground::file-selector-button {color: var(--foreground)
+}.placeholder\:text-muted-foreground::placeholder {color: var(--muted-foreground)
+}.hover\:bg-accent:hover {background-color: var(--accent)
+}.hover\:bg-gray-100:hover {--tw-bg-opacity: 1;background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1))
+}.hover\:bg-gray-50:hover {--tw-bg-opacity: 1;background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}.hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}.hover\:text-blue-700:hover {--tw-text-opacity: 1;color: rgb(29 78 216 / var(--tw-text-opacity, 1))
+}.hover\:text-gray-600:hover {--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity, 1))
+}.hover\:text-gray-700:hover {--tw-text-opacity: 1;color: rgb(55 65 81 / var(--tw-text-opacity, 1))
+}.focus-visible\:border-ring:focus-visible {border-color: var(--ring)
+}.focus-visible\:ring-\[3px\]:focus-visible {--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
+}.disabled\:pointer-events-none:disabled {pointer-events: none
+}.disabled\:cursor-not-allowed:disabled {cursor: not-allowed
+}.disabled\:opacity-50:disabled {opacity: 0.5
+}.has-\[\>svg\]\:px-2\.5:has(>svg) {padding-left: 0.625rem;padding-right: 0.625rem
+}.data-\[state\=closed\]\:duration-300[data-state="closed"] {transition-duration: 300ms
+}.data-\[state\=open\]\:duration-500[data-state="open"] {transition-duration: 500ms
+}.dark\:divide-gray-800:is([data-theme="dark"] *) > :not([hidden]) ~ :not([hidden]) {--tw-divide-opacity: 1;border-color: rgb(31 41 55 / var(--tw-divide-opacity, 1))
+}.dark\:border-gray-700:is([data-theme="dark"] *) {--tw-border-opacity: 1;border-color: rgb(55 65 81 / var(--tw-border-opacity, 1))
+}.dark\:border-gray-800:is([data-theme="dark"] *) {--tw-border-opacity: 1;border-color: rgb(31 41 55 / var(--tw-border-opacity, 1))
+}.dark\:border-input:is([data-theme="dark"] *) {border-color: var(--input)
+}.dark\:bg-blue-950\/20:is([data-theme="dark"] *) {background-color: rgb(23 37 84 / 0.2)
+}.dark\:bg-gray-700:is([data-theme="dark"] *) {--tw-bg-opacity: 1;background-color: rgb(55 65 81 / var(--tw-bg-opacity, 1))
+}.dark\:bg-gray-800:is([data-theme="dark"] *) {--tw-bg-opacity: 1;background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1))
+}.dark\:bg-gray-900:is([data-theme="dark"] *) {--tw-bg-opacity: 1;background-color: rgb(17 24 39 / var(--tw-bg-opacity, 1))
+}.dark\:bg-gray-950:is([data-theme="dark"] *) {--tw-bg-opacity: 1;background-color: rgb(3 7 18 / var(--tw-bg-opacity, 1))
+}.dark\:bg-red-950\/20:is([data-theme="dark"] *) {background-color: rgb(69 10 10 / 0.2)
+}.dark\:text-gray-100:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(243 244 246 / var(--tw-text-opacity, 1))
+}.dark\:text-gray-200:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(229 231 235 / var(--tw-text-opacity, 1))
+}.dark\:text-gray-300:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(209 213 219 / var(--tw-text-opacity, 1))
+}.dark\:text-gray-400:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}.dark\:text-red-300:is([data-theme="dark"] *) {--tw-text-opacity: 1;color: rgb(252 165 165 / var(--tw-text-opacity, 1))
+}.dark\:hover\:bg-gray-800\/50:hover:is([data-theme="dark"] *) {background-color: rgb(31 41 55 / 0.5)
+}@media (min-width: 640px) {.sm\:max-w-sm {max-width: 24rem
+    }
+}@media (min-width: 768px) {.md\:grid-cols-3 {grid-template-columns: repeat(3, minmax(0, 1fr))
+    }.md\:text-sm {font-size: 0.875rem;line-height: 1.25rem
+    }
+}@media (min-width: 1024px) {.lg\:grid-cols-2 {grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+}.\[\&\>div\]\:bg-red-500>div {--tw-bg-opacity: 1;background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1))
+}.\[\&\>svg\]\:pointer-events-none>svg {pointer-events: none
+}.\[\&\>svg\]\:size-3>svg {width: 0.75rem;height: 0.75rem
+}.\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-4 svg:not([class*='size-']) {width: 1rem;height: 1rem
+}.\[\&_svg\]\:pointer-events-none svg {pointer-events: none
+}.\[\&_svg\]\:shrink-0 svg {flex-shrink: 0
+}a.\[a\&\]\:hover\:bg-accent:hover {background-color: var(--accent)
+}a.\[a\&\]\:hover\:text-accent-foreground:hover {color: var(--accent-foreground)
+}
+</style>
+/* === TW-STATIC-END === */</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#dialog-3-5">← 返回主文件</a><span>层级 5 / URL 透视证据抽屉（5 Tab）</span><a href="./layer-1-detail-drawer.html">← 层级 1：检测详情</a></nav>
+<header class="spec-header">
+  <h1>交互层级 5：URL 透视证据抽屉（5 Tab）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.5 → 检测详情抽屉（layer-1）→ 查看透视证据</td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+    <tr><td>触发路径</td><td>详情抽屉正文高亮 URL / URL 摘要「查看透视证据 →」→ <code>setEvidenceUrl(u)</code> → <code>&lt;PhishingUrlEvidenceDrawer&gt;</code>（!w-[55vw] max 900px）</td></tr>
+    <tr><td>demo 组件</td><td><code>phishing-url-evidence-drawer.tsx</code>（Tab：总览/页面透视/网络调查/智能体推理/原始日志）</td></tr>
+    <tr><td>spec 章节</td><td>§1.2 A5、§3.4 触发、§5.1 上游 AI-URL 沙箱</td></tr>
+  </table>
+</header>
+<section class="interaction-layer">
+  <h4><span class="layer-badge">5</span> URL 证据 5 Tab（可点击切换）+ 返回检测详情 + 落地页截图放大</h4>
+  <div class="trigger-path"><strong>触发路径</strong>：detail 抽屉「查看透视证据」。顶部固定 URL 条 + 复制；5 个 Tab 切换内容；「返回检测详情」回退（onBack）；总览 Tab 落地页占位点击放大遮罩。</div>
+  <div class="component-preview" style="font-family:var(--font-sans)">
+<div role="dialog" id="radix-_r_1e_" aria-describedby="radix-_r_1g_" aria-labelledby="radix-_r_1f_" data-state="open" data-slot="sheet-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm !w-[55vw] !max-w-[900px] p-0 overflow-y-auto" tabindex="-1" style="pointer-events: auto;"><h2 id="radix-_r_1f_" data-slot="sheet-title" class="text-foreground font-semibold sr-only">URL 透视证据详情</h2><p id="radix-_r_1g_" data-slot="sheet-description" class="text-muted-foreground text-sm sr-only">查看该链接的沙箱透视、网络调查、智能体推理与原始日志证据</p><div class="flex flex-col min-h-full"><div class="border-b border-gray-200 dark:border-gray-800 p-5 space-y-3 sticky top-0 bg-white dark:bg-gray-950 z-10"><div class="flex items-center justify-between"><button class="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left h-4 w-4"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>返回检测详情</button><button class="text-gray-400 hover:text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-4 w-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div><div><h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">URL 透视证据详情</h2><p class="text-xs text-gray-500 mt-0.5">钓鱼邮件智能体 · 沙箱透视层 + 智能体调查层</p></div><div class="flex items-center gap-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3 py-2"><span class="text-xs text-gray-700 dark:text-gray-300 break-all flex-1">https://cacter-fake.com/account/verify?id=88213</span><button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 h-6 w-6 shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy h-3.5 w-3.5 text-gray-400"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button></div><div class="flex gap-1 border-b border-gray-200 dark:border-gray-800 -mb-px"><button class="px-3 py-2 text-sm border-b-2 transition-colors border-blue-600 text-blue-600 font-medium" data-l5tab="总览">总览</button><button class="px-3 py-2 text-sm border-b-2 transition-colors border-transparent text-gray-500 hover:text-gray-700" data-l5tab="页面透视">页面透视</button><button class="px-3 py-2 text-sm border-b-2 transition-colors border-transparent text-gray-500 hover:text-gray-700" data-l5tab="网络调查">网络调查</button><button class="px-3 py-2 text-sm border-b-2 transition-colors border-transparent text-gray-500 hover:text-gray-700" data-l5tab="智能体推理">智能体推理</button><button class="px-3 py-2 text-sm border-b-2 transition-colors border-transparent text-gray-500 hover:text-gray-700" data-l5tab="原始日志">原始日志</button></div></div><div data-l5wrap><div data-l5panel="总览"><div class="p-5"><div class="space-y-5"><div class="grid grid-cols-1 lg:grid-cols-2 gap-4"><div class="rounded-lg border-2 p-4 space-y-2.5 border-red-200 bg-red-50 dark:bg-red-950/20"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-alert h-5 w-5 text-red-600"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="font-semibold text-gray-900 dark:text-gray-100">核心结论</span></div><div class="flex items-center justify-between text-sm"><span class="text-gray-500">风险等级</span><span class="font-medium flex items-center gap-1 text-red-600">高危<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-3 w-3"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span></div><div class="flex items-center justify-between text-sm"><span class="text-gray-500">沙箱结论</span><span class="font-medium flex items-center gap-1 text-red-600">钓鱼<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-3 w-3"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span></div><div class="flex items-center justify-between text-sm"><span class="text-gray-500">域名年龄</span><span class="font-medium flex items-center gap-1 text-red-600">3 天<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-3 w-3"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span></div><div class="flex items-center justify-between text-sm"><span class="text-gray-500">证书状态</span><span class="font-medium flex items-center gap-1 text-red-600">自签名<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-3 w-3"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span></div><div class="flex items-center justify-between text-sm"><span class="text-gray-500">视觉相似</span><span class="font-medium flex items-center gap-1 text-red-600">与招商银行官网 87%<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-3 w-3"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span></div><div class="flex flex-wrap gap-1.5 pt-1"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-red-600 text-white border-0 text-[11px]">仿冒登录页</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-red-600 text-white border-0 text-[11px]">紧急诱导语言</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-red-600 text-white border-0 text-[11px]">输入框捕获</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&amp;]:hover:bg-primary/90 bg-red-600 text-white border-0 text-[11px]">自签名</span></div></div><div class="space-y-1.5"><button class="w-full aspect-video rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image h-8 w-8"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg><span class="text-xs">点击放大查看落地页截图</span></button><p class="text-[11px] text-gray-400 text-center">沙箱透视截图 · 2026-06-08 14:23:16</p></div></div><div class="space-y-2"><h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">重定向链</h4><div class="flex items-center gap-2 overflow-x-auto pb-2"><div class="flex items-center gap-2 shrink-0"><div class="rounded-lg border px-3 py-2 text-center min-w-[120px] border-red-300 bg-red-50 dark:bg-red-950/20" data-state="closed" data-slot="tooltip-trigger"><p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate max-w-[140px]">原始 URL</p><p class="text-[10px] text-gray-400">邮件正文</p></div><div class="flex flex-col items-center text-gray-400"><span class="text-[10px]">302</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></div></div><div class="flex items-center gap-2 shrink-0"><div class="rounded-lg border px-3 py-2 text-center min-w-[120px] border-red-300 bg-red-50 dark:bg-red-950/20" data-state="closed" data-slot="tooltip-trigger"><p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate max-w-[140px]">bit.ly/xxx</p><p class="text-[10px] text-gray-400">短链接解包</p></div><div class="flex flex-col items-center text-gray-400"><span class="text-[10px]">302</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></div></div><div class="flex items-center gap-2 shrink-0"><div class="rounded-lg border px-3 py-2 text-center min-w-[120px] border-red-300 bg-red-50 dark:bg-red-950/20" data-state="closed" data-slot="tooltip-trigger"><p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate max-w-[140px]">redirect-fake-site.com</p><p class="text-[10px] text-gray-400">中间跳转</p></div><div class="flex flex-col items-center text-gray-400"><span class="text-[10px]">302</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg></div></div><div class="flex items-center gap-2 shrink-0"><div class="rounded-lg border px-3 py-2 text-center min-w-[120px] border-red-300 bg-red-50 dark:bg-red-950/20" data-state="closed" data-slot="tooltip-trigger"><p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate max-w-[140px]">final-phishing-page.com</p><p class="text-[10px] text-gray-400">仿冒登录页</p></div></div></div></div><div class="space-y-2"><h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">邮件关联证据</h4><div class="rounded-lg border border-gray-200 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800"><div class="flex gap-3 px-3 py-2 text-sm"><span class="text-gray-500 w-28 shrink-0">邮件诱导话术</span><span class="text-gray-700 dark:text-gray-300">您的账户存在异常登录，请立即验证</span></div><div class="flex gap-3 px-3 py-2 text-sm"><span class="text-gray-500 w-28 shrink-0">URL 锚文本</span><span class="text-gray-700 dark:text-gray-300">点击立即验证</span></div><div class="flex gap-3 px-3 py-2 text-sm"><span class="text-gray-500 w-28 shrink-0">落地页标题</span><span class="text-gray-700 dark:text-gray-300">Account Security Verification - Bank System</span></div><div class="flex gap-3 px-3 py-2 text-sm"><span class="text-gray-500 w-28 shrink-0">智能体判定</span><span class="text-gray-700 dark:text-gray-300">话术与落地页内容高度一致，构成完整钓鱼链</span></div><div class="flex gap-3 px-3 py-2 text-sm"><span class="text-gray-500 w-28 shrink-0">关联得分贡献</span><span class="text-red-600 font-medium">+15 分（邮件上下文语义分析）</span></div></div></div></div></div></div><div data-l5panel="页面透视" style="display:none"><div class="p-5"><div class="space-y-4"><div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden"><div class="bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800">基础信息</div><div class="p-3 space-y-1.5"><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">原始 URL</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">https://cacter-fake.com/account/verify?id=88213</span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">落地页 URL</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">https://cacter-fake.com/account/verify?id=88213</span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">协议</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">HTTPS</span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">域名</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">cacter-fake.com</span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">顶级域名</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">.com</span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">路径</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">/account/verify</span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">查询参数</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">?id=88213&amp;session=abc123</span></div></div></div><div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden"><div class="bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800">页面特征</div><div class="p-3 space-y-1.5"><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">页面标题</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">Account Security Verification - Bank System</span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">页面语言</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">English (en-US)</span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">页面类型</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">登录表单</span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">HTTP 状态码</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">200 OK</span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">服务器信息</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">nginx/1.18.0</span></div></div></div><div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden"><div class="bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800">安全检测</div><div class="p-3 space-y-1.5"><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">SSL 证书</span><span class="break-all flex items-center gap-1 text-red-600 font-medium">自签名 · 域名不匹配<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-3 w-3 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">域名年龄</span><span class="break-all flex items-center gap-1 text-red-600 font-medium">3 天<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-3 w-3 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">表单检测</span><span class="break-all flex items-center gap-1 text-red-600 font-medium">检测到密码输入框<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-3 w-3 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">视觉相似度</span><span class="break-all flex items-center gap-1 text-red-600 font-medium">与招商银行登录页 87%<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-3 w-3 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span></div></div></div><div class="rounded-lg border border-gray-200 dark:border-gray-800"><button class="w-full flex items-center justify-between p-3 text-sm font-medium text-gray-700 dark:text-gray-300">技术栈<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right h-4 w-4 transition-transform"><path d="m9 18 6-6-6-6"></path></svg></button></div></div></div></div><div data-l5panel="网络调查" style="display:none"><div class="p-5"><div class="space-y-5"><div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden"><div class="bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800">IP 与信誉</div><div class="p-3 space-y-1.5"><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">IP 地址</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">203.0.113.100</span></div><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">地理位置</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">United States, California</span></div><div class="flex items-center gap-3 text-sm py-1"><span class="text-gray-500 w-28 shrink-0">信誉评分</span><div aria-valuemax="100" aria-valuemin="0" role="progressbar" data-state="indeterminate" data-max="100" data-slot="progress" class="bg-primary/20 relative w-full overflow-hidden rounded-full h-2 flex-1 [&amp;&gt;div]:bg-red-500"><div data-state="indeterminate" data-max="100" data-slot="progress-indicator" class="bg-primary h-full w-full flex-1 transition-all" style="transform: translateX(-85%);"></div></div><span class="text-red-600 font-medium text-xs">15/100 Low</span></div></div></div><div class="space-y-2"><h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">重定向链</h4><div class="overflow-auto border border-gray-200 dark:border-gray-800 rounded-lg"><table class="w-full text-xs"><thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"><tr><th class="px-3 py-2 text-left font-medium text-gray-900 dark:text-gray-100">#</th><th class="px-3 py-2 text-left font-medium text-gray-900 dark:text-gray-100">URL</th><th class="px-3 py-2 text-left font-medium text-gray-900 dark:text-gray-100">HTTP</th><th class="px-3 py-2 text-left font-medium text-gray-900 dark:text-gray-100">跳转类型</th><th class="px-3 py-2 text-left font-medium text-gray-900 dark:text-gray-100">耗时</th><th class="px-3 py-2 text-left font-medium text-gray-900 dark:text-gray-100">备注</th></tr></thead><tbody><tr class="border-b border-gray-100 dark:border-gray-800"><td class="px-3 py-2 text-gray-500">0</td><td class="px-3 py-2 text-gray-700 dark:text-gray-300 font-mono">cacter-fake.com/verify?id=...</td><td class="px-3 py-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-[10px] text-amber-600 border-amber-200">302</span></td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">原始 URL</td><td class="px-3 py-2 text-gray-500">120ms</td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">邮件正文</td></tr><tr class="border-b border-gray-100 dark:border-gray-800"><td class="px-3 py-2 text-gray-500">1</td><td class="px-3 py-2 text-gray-700 dark:text-gray-300 font-mono">bit.ly/xxx</td><td class="px-3 py-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-[10px] text-amber-600 border-amber-200">302</span></td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">短链接解包</td><td class="px-3 py-2 text-gray-500">80ms</td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">跳转层 1</td></tr><tr class="border-b border-gray-100 dark:border-gray-800"><td class="px-3 py-2 text-gray-500">2</td><td class="px-3 py-2 text-gray-700 dark:text-gray-300 font-mono">redirect-fake-site.com/verify</td><td class="px-3 py-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-[10px] text-amber-600 border-amber-200">302</span></td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">中间跳转</td><td class="px-3 py-2 text-gray-500">150ms</td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">跳转层 2</td></tr><tr class="border-b border-gray-100 dark:border-gray-800"><td class="px-3 py-2 text-gray-500">3</td><td class="px-3 py-2 text-gray-700 dark:text-gray-300 font-mono">final-phishing-page.com/login</td><td class="px-3 py-2"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground text-[10px] text-green-600 border-green-200">200</span></td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">落地页</td><td class="px-3 py-2 text-gray-500">200ms</td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">仿冒登录页</td></tr></tbody></table></div></div><div class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden"><div class="bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800">资源加载</div><div class="p-3 space-y-1.5"><div class="flex items-start gap-3 text-sm py-0.5"><span class="text-gray-500 w-28 shrink-0">加载资源</span><span class="break-all flex items-center gap-1 text-gray-700 dark:text-gray-300">script.js, style.css, logo.png（3 项）</span></div><div class="flex items-start gap-3 text-sm py-1"><span class="text-gray-500 w-28 shrink-0">外部域名</span><div class="flex flex-wrap gap-1.5"><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-red-100 text-red-700 border-red-200 text-[11px]">cdn.malicious.com</span><span data-slot="badge" class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden [a&amp;]:hover:bg-primary/90 bg-amber-100 text-amber-700 border-amber-200 text-[11px]">analytics.fake.net</span></div></div></div></div></div></div></div><div data-l5panel="智能体推理" style="display:none"><div class="p-5"><div class="space-y-5"><div class="rounded-lg border-2 border-red-200 bg-red-50 dark:bg-red-950/20 p-4 flex items-center gap-3"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert h-5 w-5 text-red-600 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><p class="text-sm text-red-700 dark:text-red-300">该 URL 构成高危钓鱼网站，智能体调查层得分 <span class="font-bold">47/100</span></p></div><div class="space-y-2"><h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">证据链</h4><div class="overflow-auto border border-gray-200 dark:border-gray-800 rounded-lg"><table class="w-full text-xs"><thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"><tr><th class="px-3 py-2 text-left font-medium text-gray-900 dark:text-gray-100">调查维度</th><th class="px-3 py-2 text-left font-medium text-gray-900 dark:text-gray-100">关键发现</th><th class="px-3 py-2 text-left font-medium text-gray-900 dark:text-gray-100">风险贡献</th></tr></thead><tbody><tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2 text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">域名特征</td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">仿冒金融机构域名（编辑距离 2）</td><td class="px-3 py-2 text-red-600 font-medium whitespace-nowrap">+15</td></tr><tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2 text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">页面特征</td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">与真实官网视觉相似度 87%</td><td class="px-3 py-2 text-red-600 font-medium whitespace-nowrap">+20</td></tr><tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2 text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">证书特征</td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">自签名证书，域名不匹配</td><td class="px-3 py-2 text-red-600 font-medium whitespace-nowrap">+10</td></tr><tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2 text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">邮件上下文关联</td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">紧急诱导话术与登录页内容一致</td><td class="px-3 py-2 text-red-600 font-medium whitespace-nowrap">+15</td></tr><tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2 text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">动态行为</td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">检测到输入框捕获、表单提交到第三方</td><td class="px-3 py-2 text-red-600 font-medium whitespace-nowrap">+12</td></tr><tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-3 py-2 text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">黑名单关键词</td><td class="px-3 py-2 text-gray-600 dark:text-gray-400">命中「立即验证」「账户冻结」</td><td class="px-3 py-2 text-red-600 font-medium whitespace-nowrap">+8</td></tr></tbody></table></div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-3"><div class="rounded-lg border border-gray-200 dark:border-gray-800 p-3 space-y-2"><h5 class="text-xs font-medium text-gray-700 dark:text-gray-300">高风险特征匹配</h5><div class="flex flex-wrap gap-1.5"><span class="px-2 py-0.5 rounded text-[11px] bg-red-600 text-white">钓鱼域名仿冒</span><span class="px-2 py-0.5 rounded text-[11px] bg-red-600 text-white">紧急诱导语言</span><span class="px-2 py-0.5 rounded text-[11px] bg-red-600 text-white">输入框捕获</span><span class="px-2 py-0.5 rounded text-[11px] bg-red-600 text-white">表单提交到第三方</span></div></div><div class="rounded-lg border border-gray-200 dark:border-gray-800 p-3 space-y-2"><h5 class="text-xs font-medium text-gray-700 dark:text-gray-300">排查特征</h5><div class="flex flex-wrap gap-1.5"><span class="px-2 py-0.5 rounded text-[11px] bg-amber-500 text-white">域名年龄：3 天</span><span class="px-2 py-0.5 rounded text-[11px] bg-amber-500 text-white">SSL 证书：自签名</span></div></div><div class="rounded-lg border border-gray-200 dark:border-gray-800 p-3 space-y-2"><h5 class="text-xs font-medium text-gray-700 dark:text-gray-300">黑名单关键词</h5><div class="flex flex-wrap gap-1.5"><span class="px-2 py-0.5 rounded text-[11px] bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">立即验证</span><span class="px-2 py-0.5 rounded text-[11px] bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">账户冻结</span><span class="px-2 py-0.5 rounded text-[11px] bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">点击链接</span></div></div></div></div></div></div><div data-l5panel="原始日志" style="display:none"><div class="p-5"><div class="space-y-3"><div class="flex items-center gap-2 flex-wrap"><div class="relative flex-1 min-w-[180px]"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-8 pl-9" placeholder="搜索日志内容..." value=""></div><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md px-3 has-[&gt;svg]:px-2.5 h-8 gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-3.5 w-3.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>下载</button></div><div class="flex items-center gap-1.5 flex-wrap"><button class="px-2 py-0.5 rounded text-[11px] border transition-colors bg-gray-800 text-white border-gray-800">全部</button><button class="px-2 py-0.5 rounded text-[11px] border transition-colors bg-white dark:bg-gray-900 text-gray-500 border-gray-200 dark:border-gray-700">INFO</button><button class="px-2 py-0.5 rounded text-[11px] border transition-colors bg-white dark:bg-gray-900 text-gray-500 border-gray-200 dark:border-gray-700">SCAN</button><button class="px-2 py-0.5 rounded text-[11px] border transition-colors bg-white dark:bg-gray-900 text-gray-500 border-gray-200 dark:border-gray-700">ALERT</button><button class="px-2 py-0.5 rounded text-[11px] border transition-colors bg-white dark:bg-gray-900 text-gray-500 border-gray-200 dark:border-gray-700">THREAT</button><button class="px-2 py-0.5 rounded text-[11px] border transition-colors bg-white dark:bg-gray-900 text-gray-500 border-gray-200 dark:border-gray-700">DECISION</button></div><div class="grid grid-cols-[160px_1fr] gap-3"><div class="border-r border-gray-200 dark:border-gray-800 pr-3 space-y-1"><div class="text-xs px-2 py-1.5 rounded cursor-default text-gray-600 dark:text-gray-400">引擎初始化</div><div class="text-xs px-2 py-1.5 rounded cursor-default text-gray-600 dark:text-gray-400">URL 分析</div><div class="text-xs px-2 py-1.5 rounded cursor-default text-red-600 bg-red-50 dark:bg-red-950/20">威胁检测</div><div class="text-xs px-2 py-1.5 rounded cursor-default text-blue-600 bg-blue-50 dark:bg-blue-950/20">决策分析</div><div class="text-xs px-2 py-1.5 rounded cursor-default text-gray-600 dark:text-gray-400">处置执行</div></div><div class="font-mono text-[11px] space-y-0.5"><div class="flex gap-2 px-2 py-1 rounded"><span class="text-gray-400 shrink-0">10:30:45.123</span><span class="shrink-0 font-semibold w-16 text-gray-500">[INFO]</span><span class="text-gray-700 dark:text-gray-300">引擎初始化完成，加载检测策略 v8-AI</span></div><div class="flex gap-2 px-2 py-1 rounded"><span class="text-gray-400 shrink-0">10:30:46.234</span><span class="shrink-0 font-semibold w-16 text-gray-500">[SCAN]</span><span class="text-gray-700 dark:text-gray-300">开始分析 URL：https://cacter-fake.com/account/verify?id=88213</span></div><div class="flex gap-2 px-2 py-1 rounded"><span class="text-gray-400 shrink-0">10:30:46.512</span><span class="shrink-0 font-semibold w-16 text-gray-500">[SCAN]</span><span class="text-gray-700 dark:text-gray-300">短链接解包：bit.ly/xxx → redirect-fake-site.com</span></div><div class="flex gap-2 px-2 py-1 rounded"><span class="text-gray-400 shrink-0">10:30:46.890</span><span class="shrink-0 font-semibold w-16 text-gray-500">[SCAN]</span><span class="text-gray-700 dark:text-gray-300">落地页爬取完成，HTTP 200，提取 DOM 节点 1284 个</span></div><div class="flex gap-2 px-2 py-1 rounded bg-red-50 dark:bg-red-950/20"><span class="text-gray-400 shrink-0">10:30:47.456</span><span class="shrink-0 font-semibold w-16 text-red-600">[ALERT]</span><span class="text-gray-700 dark:text-gray-300">检测到密码输入框，疑似凭据捕获页面</span></div><div class="flex gap-2 px-2 py-1 rounded bg-red-50 dark:bg-red-950/20"><span class="text-gray-400 shrink-0">10:30:47.612</span><span class="shrink-0 font-semibold w-16 text-red-600">[THREAT]</span><span class="text-gray-700 dark:text-gray-300">视觉相似度比对：与招商银行登录页相似度 87%</span></div><div class="flex gap-2 px-2 py-1 rounded bg-red-50 dark:bg-red-950/20"><span class="text-gray-400 shrink-0">10:30:47.880</span><span class="shrink-0 font-semibold w-16 text-red-600">[THREAT]</span><span class="text-gray-700 dark:text-gray-300">SSL 证书为自签名且域名不匹配</span></div><div class="flex gap-2 px-2 py-1 rounded bg-blue-50 dark:bg-blue-950/20"><span class="text-gray-400 shrink-0">10:30:48.112</span><span class="shrink-0 font-semibold w-16 text-blue-600">[DECISION]</span><span class="text-gray-700 dark:text-gray-300">智能体推理：综合证据判定为高危钓鱼网站</span></div><div class="flex gap-2 px-2 py-1 rounded bg-blue-50 dark:bg-blue-950/20"><span class="text-gray-400 shrink-0">10:30:48.340</span><span class="shrink-0 font-semibold w-16 text-blue-600">[DECISION]</span><span class="text-gray-700 dark:text-gray-300">智能体调查层得分：47/100</span></div><div class="flex gap-2 px-2 py-1 rounded"><span class="text-gray-400 shrink-0">10:30:49.223</span><span class="shrink-0 font-semibold w-16 text-gray-500">[INFO]</span><span class="text-gray-700 dark:text-gray-300">处置执行：URL 标记钓鱼，邮件转入隔离区</span></div></div></div></div></div></div></div></div></div>
+
+<script>
+(function(){
+  var scope=document.currentScript.closest('.component-preview'); if(!scope) return;
+  var ACT='border-blue-600 text-blue-600 font-medium', INA='border-transparent text-gray-500 hover:text-gray-700';
+  scope.addEventListener('click', function(e){
+    var t=e.target.closest('[data-l5tab]'); if(!t) return;
+    var k=t.getAttribute('data-l5tab');
+    scope.querySelectorAll('[data-l5tab]').forEach(function(bn){
+      var on=bn===t;
+      bn.className=bn.className.replace(ACT,'').replace(INA,'').trim()+' '+(on?ACT:INA);
+    });
+    scope.querySelectorAll('[data-l5panel]').forEach(function(p){ p.style.display = p.getAttribute('data-l5panel')===k?'':'none'; });
+  });
+})();
+</script>
+</div>
+  <script>function e5tab(k){['overview','page','network','reasoning','rawlog'].forEach(function(t){document.getElementById('e5-'+t).style.display=t===k?'block':'none';document.getElementById('e5-t-'+t).className=t===k?'active':'';});}</script>
+  <figure class="screenshot-figure"><img src="./screenshots/evidence-overview.png" alt="总览 Tab"><figcaption>Tab 1「总览」：核心结论 + 落地页截图 + 重定向链 + 邮件关联证据 · 浏览器实际渲染</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/evidence-network.png" alt="网络调查 Tab"><figcaption>Tab 3「网络调查」：IP 与信誉 + 重定向链表 + 资源加载</figcaption></figure>
+  <figure class="screenshot-figure"><img src="./screenshots/evidence-rawlog.png" alt="原始日志 Tab"><figcaption>Tab 5「原始日志」：搜索 + 级别筛选 + 时间线导航 + 日志详情（ALERT/THREAT 红、DECISION 蓝）</figcaption></figure>
+  <h4>Tab 与内容清单</h4>
+  <table class="spec-table">
+    <thead><tr><th>Tab</th><th>key</th><th>主要内容</th></tr></thead>
+    <tbody>
+      <tr><td>总览</td><td>overview</td><td>核心结论卡（风险等级/沙箱结论/域名年龄/证书/视觉相似 + 风险标签）、落地页截图（点击放大遮罩）、重定向链、邮件关联证据</td></tr>
+      <tr><td>页面透视</td><td>page</td><td>基础信息 / 页面特征 / 安全检测（SSL/域名年龄/表单/视觉相似）/ 技术栈（Collapsible）</td></tr>
+      <tr><td>网络调查</td><td>network</td><td>IP 与信誉（Progress 条）/ 重定向链表（4 跳）/ 资源加载外部域名</td></tr>
+      <tr><td>智能体推理</td><td>reasoning</td><td>结论横幅 + 证据链表（维度/发现/风险贡献）+ 3 张特征卡（高风险/排查/黑名单关键词）</td></tr>
+      <tr><td>原始日志</td><td>rawlog</td><td>搜索 + 下载 + 级别筛选（全部/INFO/SCAN/ALERT/THREAT/DECISION）+ 时间线分组导航 + 日志行着色</td></tr>
+    </tbody>
+  </table>
+  <h4>顶部固定元素</h4>
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>元素</th><th>行为</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>返回检测详情</td><td><code>onBack</code>（回 detail 抽屉）或 <code>onClose</code></td></tr>
+      <tr><td>2</td><td>关闭 ✕</td><td><code>onClose</code></td></tr>
+      <tr><td>3</td><td>URL 条 + 复制</td><td><code>navigator.clipboard.writeText(url)</code></td></tr>
+      <tr><td>4</td><td>Tab 导航</td><td>5 Tab 切换 <code>tab</code> state</td></tr>
+    </tbody>
+  </table>
+  <div class="dom-comparison"><h5>DOM 树比对结果</h5>
+  <table><thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead><tbody>
+    <tr><td>抽屉根</td><td>div.bg-background（!w-[55vw] max-900px）childCount=3 nodeCount=136（总览 Tab）</td><td>真实提取 DOM（5 Tab 内容全量内嵌，可切换）</td><td class="dom-pass">✅</td></tr>
+    <tr><td>Tab 数</td><td>5（总览/页面透视/网络调查/智能体推理/原始日志）</td><td>5</td><td class="dom-pass">✅</td></tr>
+    <tr><td>默认 Tab</td><td>总览（border-blue-600 active）</td><td>总览 active</td><td class="dom-pass">✅</td></tr>
+    <tr><td>核心结论行</td><td>5 行 + 4 风险标签（红底白字）</td><td>一致</td><td class="dom-pass">✅</td></tr>
+    <tr><td>重定向链节点</td><td>4（原始URL/bit.ly/redirect/final，全红）</td><td>4</td><td class="dom-pass">✅</td></tr>
+    <tr><td>原始日志级别</td><td>6（全部/INFO/SCAN/ALERT/THREAT/DECISION）</td><td>6</td><td class="dom-pass">✅</td></tr>
+  </tbody></table></div>
+</section>
+<nav class="layer-nav"><a href="./index.html#dialog-3-5">← 返回主文件</a><a href="./layer-1-detail-drawer.html">← 层级 1：检测详情</a></nav>
+<script>
+// 统一交互：让内嵌 demo 预览与 demo 行为一致（页签/单选/开关/手风琴/弹窗关闭）
+(function(){
+  function within(el, role){ return el.closest('[role="'+role+'"]'); }
+  document.querySelectorAll('.component-preview').forEach(function(scope){
+    scope.addEventListener('click', function(e){
+      var tab = e.target.closest('[role="tab"]');
+      if (tab){
+        var list = tab.closest('[role="tablist"]') || scope;
+        list.querySelectorAll('[role="tab"]').forEach(function(t){
+          t.setAttribute('aria-selected', t===tab?'true':'false');
+          t.setAttribute('data-state', t===tab?'active':'inactive');
+        });
+      }
+      var radio = e.target.closest('[role="radio"]');
+      if (radio){
+        var g = radio.closest('[role="radiogroup"]') || scope;
+        g.querySelectorAll('[role="radio"]').forEach(function(r){
+          r.setAttribute('data-state', r===radio?'checked':'unchecked');
+          r.setAttribute('aria-checked', r===radio?'true':'false');
+        });
+      }
+      var sw = e.target.closest('[role="switch"]');
+      if (sw){
+        var on = sw.getAttribute('data-state')==='checked' || sw.getAttribute('aria-checked')==='true';
+        sw.setAttribute('data-state', on?'unchecked':'checked');
+        sw.setAttribute('aria-checked', on?'false':'true');
+      }
+      var acc = e.target.closest('[aria-expanded]');
+      if (acc && !tab){
+        var exp = acc.getAttribute('aria-expanded')==='true';
+        acc.setAttribute('aria-expanded', exp?'false':'true');
+        var sub = acc.getAttribute('data-target') && scope.querySelector(acc.getAttribute('data-target'));
+        if (sub) sub.style.display = exp?'none':'';
+      }
+      var btn = e.target.closest('button');
+      if (btn){
+        var label=(btn.innerText||btn.textContent||'').trim();
+        if (['取消','关闭','返回修改','确认关闭','确认拦截','提交豁免','仍要保存','放弃'].indexOf(label)>=0){
+          var dlg = within(btn,'dialog') || within(btn,'alertdialog');
+          if (dlg && !scope.querySelector('.d6-switcher')) dlg.style.display='none';
+        }
+      }
+    });
+  });
+})();
+</script>
+</body></html>

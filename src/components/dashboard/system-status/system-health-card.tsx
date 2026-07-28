@@ -39,6 +39,7 @@ interface SystemHealthSummary {
 interface SystemHealthCardProps {
   nodesOnline: number;
   nodesTotal: number;
+  nodesDegraded?: boolean;
   isLoading: boolean;
 }
 
@@ -72,7 +73,7 @@ function licenseDot(days: number | null | undefined): string {
   return 'bg-rose-500';
 }
 
-export function SystemHealthCard({ nodesOnline, nodesTotal, isLoading }: SystemHealthCardProps) {
+export function SystemHealthCard({ nodesOnline, nodesTotal, nodesDegraded, isLoading }: SystemHealthCardProps) {
   const t = useTranslations('systemStatus.systemHealth');
   const { scopedRequest } = useSecurityScope(null);
 
@@ -156,11 +157,12 @@ export function SystemHealthCard({ nodesOnline, nodesTotal, isLoading }: SystemH
           </div>
         ) : (
           <div className="divide-y divide-border/60">
+            {/* GT-12549: 数据源降级时如实展示不可用，不渲染伪 0/0 */}
             <Row
               testId="system-status-health-node"
               label={t('node')}
-              value={`${nodesOnline}/${nodesTotal}`}
-              dotClass={allOnline ? 'bg-emerald-500' : 'bg-rose-500'}
+              value={nodesDegraded ? t('na') : `${nodesOnline}/${nodesTotal}`}
+              dotClass={nodesDegraded ? 'bg-amber-500' : allOnline ? 'bg-emerald-500' : 'bg-rose-500'}
             />
             <Row
               testId="system-status-health-core"

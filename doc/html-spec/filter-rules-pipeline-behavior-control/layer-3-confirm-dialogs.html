@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级3：删除确认 / 未保存确认对话框 - 发信行为管控 HTML 规格说明</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --background: oklch(0.98 0.01 205); --card: #fff; --muted: #f5f7fa; --muted-foreground: #6b7280; --border: #e5e7eb; --blue: #1677ff; --radius: 0.625rem; --font-sans: "Geist", "Inter", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: #111827; font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 24px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 19px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .layer-nav { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 12px 18px; background: var(--muted); border-radius: 8px; font-size: 14px; }
+    .spec-header, section { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 160px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .button-blue { padding: 7px 14px; border: 0; border-radius: 8px; background: #155eef; color: #fff; font-weight: 650; font-size: 13px; cursor: pointer; }
+    .button-icon { padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; font-size: 13px; cursor: pointer; }
+    .button-red { padding: 7px 12px; border: 0; border-radius: 8px; background: #dc2626; color: #fff; font-weight: 650; font-size: 13px; cursor: pointer; }
+    .stage { position: relative; min-height: 260px; padding: 20px; border-radius: 8px; background: #eef2f7; }
+    .mini-dialog-mask { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,.45); border-radius: 8px; z-index: 5; }
+    .mini-dialog { width: 400px; padding: 20px; border-radius: 10px; background: #fff; box-shadow: 0 12px 30px rgba(0,0,0,.25); font-size: 14px; }
+    .mini-dialog h5 { margin: 0 0 8px; font-size: 16px; }
+    .mini-dialog p { margin: 0; color: #6b7280; }
+    .mini-dialog .btn-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    .is-hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <nav class="layer-nav">
+    <a href="./layer-2-validation-examples-simulator.html">← 层级 2：校验/示例/模拟测试</a>
+    <span>层级 3 / 3</span>
+    <a href="./index.html#component-2-3">返回主文件 →</a>
+  </nav>
+
+  <header class="spec-header">
+    <h1>交互层级 3：删除确认 AlertDialog / 未保存确认 Dialog</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.2 规则列表（删除确认）/ 2.3 规则编辑抽屉（未保存确认）</td></tr>
+      <tr><td>主文件</td><td><a href="./index.html">index.html</a></td></tr>
+      <tr><td>触发路径</td><td>① 层级0 列表行内 Trash2 图标 → AlertDialog；② 层级1 抽屉 isDirty=true 时点击"取消"/关闭/点遮罩 → Dialog</td></tr>
+      <tr><td>demo 组件</td><td><code>sender-behavior-control-module.tsx</code>（AlertDialog）/ <code>behavior-rule-drawer.tsx</code>（Dialog sm:max-w-[400px]）</td></tr>
+    </table>
+  </header>
+
+  <section>
+    <h2><span class="layer-badge">3</span>3A 删除确认 AlertDialog（可交互复刻）</h2>
+    <div class="component-preview">
+      <div class="stage" id="del-stage">
+        <p style="margin:0;font-size:13px;color:#6b7280;">规则行：<code>rule-1 全局入站IP数量限制</code>
+          <button class="button-icon" type="button" style="color:#ef4444;" data-open-del>🗑 删除</button></p>
+        <div class="mini-dialog-mask is-hidden" data-del-mask>
+          <div class="mini-dialog">
+            <h5>确认删除</h5>
+            <p>确定要删除规则吗？此操作无法撤销。</p>
+            <div class="btn-row">
+              <button class="button-icon" type="button" data-del-cancel>取消</button>
+              <button class="button-red" type="button" data-del-ok>删除</button>
+            </div>
+          </div>
+        </div>
+        <p class="is-hidden" style="color:#15803d;font-size:13px;" data-del-done>✓ 已删除（demo 中该行立即从列表移除，无 Toast）</p>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/behavior-delete-confirm-dialog.png" alt="删除确认对话框">
+      <figcaption>浏览器实际渲染：居中 AlertDialog + 全屏遮罩。注意红色"删除"按钮文字渲染不可见（视觉缺陷，差异 D-12）；另可见弹窗弹出时背景表格自动横向滚动到操作列。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th></tr></thead>
+      <tbody>
+        <tr><td>标题</td><td>确认删除</td><td>—</td></tr>
+        <tr><td>描述</td><td>确定要删除规则吗？此操作无法撤销。</td><td>不显示被删规则名称（可考虑增强）</td></tr>
+        <tr><td>取消按钮</td><td>outline"取消"</td><td>关闭对话框，不删除</td></tr>
+        <tr><td>删除按钮</td><td><code>bg-destructive text-destructive-foreground</code>，文字实际不可见（D-12）</td><td>确认删除：规则从列表移除；无成功 Toast（D-17）</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>对话框文本</td><td>"确认删除 | 确定要删除规则吗？此操作无法撤销。| 取消 | 删除"（浏览器提取）</td><td>同文案</td><td>一致</td></tr>
+          <tr><td>按钮数</td><td>2（取消 / 删除）</td><td>2</td><td>一致</td></tr>
+          <tr><td>删除按钮可见性</td><td>红底、文字不可见（截图证实）</td><td>预览按规格意图渲染白字"删除"，缺陷已在差异表记录</td><td>一致（缺陷单独标注）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="layer-badge">3</span>3B 未保存确认 Dialog（可交互复刻）</h2>
+    <div class="component-preview">
+      <div class="stage" id="unsaved-stage">
+        <p style="margin:0;font-size:13px;color:#6b7280;">抽屉内已修改字段（isDirty=true），此时点击：
+          <button class="button-icon" type="button" data-open-unsaved>取消 / 关闭抽屉</button></p>
+        <div class="mini-dialog-mask is-hidden" data-unsaved-mask>
+          <div class="mini-dialog">
+            <h5>确认离开</h5>
+            <p>当前配置未保存，是否放弃修改？</p>
+            <div class="btn-row">
+              <button class="button-icon" type="button" data-unsaved-stay>继续编辑</button>
+              <button class="button-red" type="button" data-unsaved-discard>放弃并关闭</button>
+            </div>
+          </div>
+        </div>
+        <p class="is-hidden" style="color:#b45309;font-size:13px;" data-unsaved-done>已放弃修改并关闭抽屉（demo 中回到规则列表，表单丢弃）</p>
+      </div>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/behavior-rule-drawer-unsaved-dialog.png" alt="未保存确认对话框">
+      <figcaption>浏览器实际渲染：表单已填值时点击"取消"，弹出"确认离开"对话框（400px），选项为 继续编辑 / 放弃并关闭（destructive 红色）。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th></tr></thead>
+      <tbody>
+        <tr><td>标题</td><td>确认离开</td><td>—</td></tr>
+        <tr><td>描述</td><td>当前配置未保存，是否放弃修改？</td><td>—</td></tr>
+        <tr><td>继续编辑</td><td>outline</td><td>关闭对话框，留在抽屉</td></tr>
+        <tr><td>放弃并关闭</td><td>destructive 红色（文字可见）</td><td>关闭对话框 + 关闭抽屉，丢弃表单；无"保存"选项（差异 D-11）</td></tr>
+        <tr><td>触发条件</td><td>isDirty（任意 updateField 后为 true）时 Sheet onOpenChange(false)</td><td>未修改时直接关闭、不弹框（浏览器验证）</td></tr>
+      </tbody>
+    </table>
+    <div class="dom-comparison">
+      <h4>DOM 树比对结果</h4>
+      <table class="spec-table">
+        <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>预览 HTML</th><th>是否一致</th></tr></thead>
+        <tbody>
+          <tr><td>对话框文本</td><td>"确认离开 | 当前配置未保存，是否放弃修改？ | 继续编辑 | 放弃并关闭"（浏览器提取）</td><td>同文案</td><td>一致</td></tr>
+          <tr><td>按钮数</td><td>2 + 右上 Close</td><td>2（Close 省略）</td><td>一致（结构裁剪）</td></tr>
+          <tr><td>宽度</td><td>sm:max-w-[400px]</td><td>400px</td><td>一致</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="layer-nav">
+    <a href="./layer-2-validation-examples-simulator.html">← 层级 2：校验/示例/模拟测试</a>
+    <a href="./index.html#component-2-3">返回主文件 →</a>
+  </nav>
+
+  <script>
+    const q = (s) => document.querySelector(s);
+    q("[data-open-del]").addEventListener("click", () => { q("[data-del-mask]").classList.remove("is-hidden"); q("[data-del-done]").classList.add("is-hidden"); });
+    q("[data-del-cancel]").addEventListener("click", () => q("[data-del-mask]").classList.add("is-hidden"));
+    q("[data-del-ok]").addEventListener("click", () => { q("[data-del-mask]").classList.add("is-hidden"); q("[data-del-done]").classList.remove("is-hidden"); });
+    q("[data-open-unsaved]").addEventListener("click", () => { q("[data-unsaved-mask]").classList.remove("is-hidden"); q("[data-unsaved-done]").classList.add("is-hidden"); });
+    q("[data-unsaved-stay]").addEventListener("click", () => q("[data-unsaved-mask]").classList.add("is-hidden"));
+    q("[data-unsaved-discard]").addEventListener("click", () => { q("[data-unsaved-mask]").classList.add("is-hidden"); q("[data-unsaved-done]").classList.remove("is-hidden"); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>层级 4：确认对话框与行内菜单 - 内容规则</title>
+  <style>
+    :root { --primary: oklch(0.52 0.226 262); --card:#fff; --bg:oklch(0.98 0.01 205); --border:#e5e7eb; --muted:#f5f7fa; --text:#111827; --sub:#6b7280; --blue:#1677ff; --red:#f5222d; --radius:.625rem; font-family:"Geist", system-ui, sans-serif; }
+    *{box-sizing:border-box} body{margin:0;padding:32px;max-width:1280px;margin-inline:auto;background:var(--bg);color:var(--text);line-height:1.6} a{color:var(--blue);text-decoration:none} nav,.spec-header,section{margin-bottom:24px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)} h1{margin:0 0 16px;color:var(--primary);font-size:26px} h2{margin:0 0 16px;color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:8px;font-size:20px} h3{font-size:16px}.meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}.meta-table td,.spec-table th,.spec-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top}.meta-table td:first-child,.spec-table th{background:var(--muted);font-weight:650;text-align:left}.component-preview{margin:12px 0;padding:18px;border:1px solid #dbeafe;border-radius:8px;background:#f8fbff;overflow:auto}.button-blue{padding:8px 14px;border:0;border-radius:8px;background:#155eef;color:#fff;font-weight:650;cursor:pointer}.button-red{padding:8px 14px;border:0;border-radius:8px;background:#dc2626;color:#fff;font-weight:650;cursor:pointer}.button-outline{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer}.overlay{position:fixed;inset:0;z-index:40;display:none;background:rgba(0,0,0,.5)}.dialog{position:fixed;left:50%;top:50%;z-index:50;display:none;width:440px;max-width:92vw;padding:22px;border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:0 20px 50px rgba(15,23,42,.3);transform:translate(-50%,-50%)}.dialog h3{margin:0 0 8px;font-size:17px}.dialog p{margin:0 0 18px;color:var(--sub);font-size:14px}.dialog .actions{display:flex;justify-content:flex-end;gap:10px}.menu-demo{position:relative;display:inline-block}.menu-pop{position:absolute;right:0;top:34px;z-index:6;display:none;min-width:130px;padding:4px;border:1px solid var(--border);border-radius:8px;background:#fff;box-shadow:0 8px 20px rgba(15,23,42,.16)}.menu-pop button{display:block;width:100%;padding:7px 10px;border:0;border-radius:6px;background:none;text-align:left;font-size:13px;cursor:pointer}.menu-pop button:hover{background:#f3f4f6}.menu-pop .danger{color:#dc2626}.menu-pop hr{margin:4px 0;border:0;border-top:1px solid #eee}.screenshot-figure{text-align:center;margin:14px 0}.screenshot-figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 10px rgba(15,23,42,.12)}.screenshot-figure figcaption{margin-top:8px;color:var(--sub);font-size:13px}.layer-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-right:8px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:700}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <nav><a href="index.html#dialogs">← 返回主文件</a> · <a href="layer-2-validation-examples-simulator.html">← 层级3：校验/示例/模拟测试</a> · 层级 4 / 4</nav>
+  <header class="spec-header">
+    <h1>交互层级 4：确认对话框（删除 / 批量删除 / 取消确认）与行内更多菜单</h1>
+    <table class="meta-table">
+      <tr><td>所属组件</td><td>2.2 内容规则列表（删除/批量删除/更多菜单） + 2.3 规则编辑抽屉（取消确认）</td></tr>
+      <tr><td>触发路径</td><td>① 行操作列 ⋯ → DropdownMenu → 删除 → 删除确认；② 勾选行 → 「删除选中(N)」→ 批量删除确认；③ 编辑抽屉有未保存更改时点「取消」或关闭 Sheet → 取消确认</td></tr>
+      <tr><td>组件形态</td><td>三个均为 Radix AlertDialog（<code>[role=alertdialog]</code>，居中弹窗 + 半透明遮罩），节点数实测均为 7（标题 h2 + 描述 p + 两按钮）；更多菜单为 <code>[role=menu]</code> DropdownMenu（节点数 14）</td></tr>
+      <tr><td>截图</td><td><code>row-more-menu.png / delete-confirm-dialog.png / batch-delete-dialog.png / cancel-confirm-dialog.png</code></td></tr>
+    </table>
+  </header>
+
+  <section id="more-menu">
+    <h2><span class="layer-badge">4</span>A. 行内更多菜单 DropdownMenu（可交互）</h2>
+    <div class="component-preview">
+      <span class="menu-demo">
+        <button class="button-outline" type="button" data-menu-btn>⋯ 更多</button>
+        <span class="menu-pop" data-menu-pop>
+          <button type="button">禁用</button>
+          <button type="button">⧉ 复制规则</button>
+          <hr>
+          <button type="button" class="danger" data-open="delete">🗑 删除</button>
+        </span>
+      </span>
+      <span style="margin-left:14px;color:#6b7280;font-size:13px;">点击展开菜单；菜单内「删除」打开下方删除确认。</span>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/row-more-menu.png" alt="行内更多菜单">
+      <figcaption>更多菜单实测：禁用 / 复制规则 / 分隔线 / 删除（红色 destructive 变体）。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>菜单项</th><th>实际行为</th><th>备注</th></tr></thead>
+      <tbody>
+        <tr><td>禁用 / 启用</td><td>即时切换 rule.enabled 并刷新 updatedAt，无二次确认；文案按当前状态切换</td><td>文案硬编码中文（主文件 D11）</td></tr>
+        <tr><td>复制规则</td><td>生成新规则：新 id（CR-当日-序号）、名称「{原名} (副本)」，追加到列表</td><td>Copy 图标；文案硬编码中文</td></tr>
+        <tr><td>删除</td><td>打开删除确认 AlertDialog（B）</td><td>destructive 红色文字，上方有分隔线</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="dialogs-demo">
+    <h2><span class="layer-badge">4</span>B. 三个 AlertDialog（可交互，点击按钮打开）</h2>
+    <div class="component-preview">
+      <button class="button-outline" type="button" data-open="delete">打开：删除确认</button>
+      <button class="button-red" type="button" data-open="batch" id="batch-delete">打开：批量删除确认</button>
+      <button class="button-outline" type="button" data-open="cancel" id="cancel-confirm">打开：取消确认（编辑抽屉）</button>
+      <span data-dialog-result style="margin-left:12px;color:#6b7280;font-size:13px;"></span>
+    </div>
+
+    <div class="grid2">
+      <figure class="screenshot-figure">
+        <img src="./screenshots/delete-confirm-dialog.png" alt="删除确认对话框">
+        <figcaption>删除确认：「确认删除规则 / 确定要删除规则「银行卡号检测」吗？此操作不可撤销。」取消 + 删除(红)。</figcaption>
+      </figure>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/batch-delete-dialog.png" alt="批量删除确认对话框">
+        <figcaption>批量删除确认：「批量删除规则 / 确定要删除选中的 1 条规则吗？此操作不可撤销。」取消 + 确认删除(红)。</figcaption>
+      </figure>
+    </div>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/cancel-confirm-dialog.png" alt="取消确认对话框" style="max-width:640px;">
+      <figcaption>取消确认（编辑抽屉有未保存更改时）：「确认取消 / 当前有未保存的更改，确定要放弃吗？」继续编辑 + 放弃更改。</figcaption>
+    </figure>
+
+    <table class="spec-table">
+      <thead><tr><th>对话框</th><th>标题</th><th>描述（实测）</th><th>按钮</th><th>确认后行为</th></tr></thead>
+      <tbody>
+        <tr><td>删除确认</td><td>确认删除规则</td><td>确定要删除规则「{规则名}」吗？此操作不可撤销。</td><td>取消（outline）/ 删除（destructive 红）</td><td>从列表移除该规则并同步清除选中集合</td></tr>
+        <tr><td>批量删除确认</td><td>批量删除规则</td><td>确定要删除选中的 {N} 条规则吗？此操作不可撤销。</td><td>取消 / 确认删除（destructive 红）</td><td>移除所有选中规则并清空选中集合</td></tr>
+        <tr><td>取消确认</td><td>确认取消</td><td>当前有未保存的更改，确定要放弃吗？</td><td>继续编辑（AlertDialogCancel）/ 放弃更改（AlertDialogAction）</td><td>放弃更改关闭编辑抽屉回到列表（实测关闭）；继续编辑留在抽屉。Sheet 遮罩/ESC 关闭同样被 hasChanges 拦截进入本对话框</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>DOM 树比对结果</h2>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>对话框根节点</td><td><code>[role=alertdialog] data-state=open</code>，居中 fixed，nodeCount 7：header(h2+p) + footer(两 button)</td><td>.dialog 居中弹窗，h3+p+actions 两按钮</td><td>一致（结构等价）</td></tr>
+        <tr><td>删除确认文案</td><td>h2「确认删除规则」，p「确定要删除规则「银行卡号检测」吗？此操作不可撤销。」</td><td>同文案（规则名示例相同）</td><td>一致</td></tr>
+        <tr><td>批量删除文案</td><td>h2「批量删除规则」，p「确定要删除选中的 1 条规则吗？此操作不可撤销。」</td><td>同文案（N 联动演示）</td><td>一致</td></tr>
+        <tr><td>取消确认文案</td><td>h2「确认取消」，p「当前有未保存的更改，确定要放弃吗？」，按钮「继续编辑 / 放弃更改」</td><td>同文案同按钮</td><td>一致</td></tr>
+        <tr><td>危险按钮样式</td><td>删除/确认删除 class 含 <code>bg-destructive</code></td><td>button-red 红底</td><td>一致</td></tr>
+        <tr><td>更多菜单</td><td><code>[role=menu]</code> nodeCount 14：menuitem 禁用 / menuitem(Copy图标)复制规则 / separator / menuitem(红)删除</td><td>menu-pop 同三项 + 分隔线 + 红色删除</td><td>一致</td></tr>
+        <tr><td>遮罩</td><td>Radix Overlay <code>bg-black/50</code></td><td>.overlay rgba(0,0,0,.5)</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav><a href="index.html#dialogs">← 返回主文件</a> · <a href="layer-2-validation-examples-simulator.html">← 层级3：校验/示例/模拟测试</a></nav>
+
+  <!-- 对话框实体 -->
+  <div class="overlay" data-overlay></div>
+  <div class="dialog" data-dialog="delete" role="alertdialog">
+    <h3>确认删除规则</h3>
+    <p>确定要删除规则「银行卡号检测」吗？此操作不可撤销。</p>
+    <div class="actions"><button class="button-outline" type="button" data-close>取消</button><button class="button-red" type="button" data-confirm="已删除（demo 中该行从列表移除）">删除</button></div>
+  </div>
+  <div class="dialog" data-dialog="batch" role="alertdialog">
+    <h3>批量删除规则</h3>
+    <p>确定要删除选中的 1 条规则吗？此操作不可撤销。</p>
+    <div class="actions"><button class="button-outline" type="button" data-close>取消</button><button class="button-red" type="button" data-confirm="已批量删除并清空选中">确认删除</button></div>
+  </div>
+  <div class="dialog" data-dialog="cancel" role="alertdialog">
+    <h3>确认取消</h3>
+    <p>当前有未保存的更改，确定要放弃吗？</p>
+    <div class="actions"><button class="button-outline" type="button" data-close>继续编辑</button><button class="button-blue" type="button" data-confirm="已放弃更改，编辑抽屉关闭回到列表">放弃更改</button></div>
+  </div>
+
+  <script>
+    const overlay = document.querySelector("[data-overlay]");
+    const result = document.querySelector("[data-dialog-result]");
+    function openDialog(name) {
+      overlay.style.display = "block";
+      document.querySelector(`[data-dialog="${name}"]`).style.display = "block";
+    }
+    function closeDialogs() {
+      overlay.style.display = "none";
+      document.querySelectorAll("[data-dialog]").forEach((d) => d.style.display = "none");
+    }
+    document.querySelectorAll("[data-open]").forEach((btn) => btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.querySelector("[data-menu-pop]").style.display = "none";
+      openDialog(btn.dataset.open);
+    }));
+    document.querySelectorAll("[data-close]").forEach((btn) => btn.addEventListener("click", () => { result.textContent = "已取消，对话框关闭。"; closeDialogs(); }));
+    document.querySelectorAll("[data-confirm]").forEach((btn) => btn.addEventListener("click", () => { result.textContent = btn.dataset.confirm; closeDialogs(); }));
+    overlay.addEventListener("click", closeDialogs);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDialogs(); });
+
+    // 更多菜单
+    const menuBtn = document.querySelector("[data-menu-btn]");
+    const menuPop = document.querySelector("[data-menu-pop]");
+    menuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menuPop.style.display = menuPop.style.display === "block" ? "none" : "block";
+    });
+    document.addEventListener("click", () => { menuPop.style.display = "none"; });
+    // 打开时根据 hash 直达对应对话框（供主文件跳转）
+    if (location.hash === "#batch-delete") openDialog("batch");
+    if (location.hash === "#cancel-confirm") openDialog("cancel");
+  </script>
+</body>
+</html>

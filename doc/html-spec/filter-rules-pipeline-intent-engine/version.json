@@ -1,0 +1,27 @@
+{
+  "module": "filter-rules-pipeline-intent-engine",
+  "current_version": 3,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-11",
+      "demo_commit": "unknown",
+      "spec_commit": "unknown",
+      "summary": "初版：策略卡入口、内容策略抽屉意图引擎默认态、意图分类卡片多层交互（层级1分类优先/标记投递、层级2分段阈值、层级3复制/重置对话框、层级4方向切换/禁用态）、API/业务/交互/差异/需确认。"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-17",
+      "demo_commit": "887ac48",
+      "spec_commit": "887ac48",
+      "summary": "修复「复制到其他方向」未保存状态异常（差异 D-07）：isDirty 由单一布尔改为按方向追踪 dirtyDirections，复制仅对实际变化的目标方向标脏并在其 Tab 打点、操作栏给出蓝色点名反馈，目标与源一致时不标脏；外层保存自增 saveSignal 通知模块清除。新增 layer-5-copy-save-state.html 与 3 张截图，D-07 标记为已修复。"
+    },
+    {
+      "version": 3,
+      "generated_at": "2026-07-17",
+      "demo_commit": "5d17c2e",
+      "spec_commit": "b75c3cc",
+      "summary": "新增 layer-6-mark-label-fallback.html，覆盖两项修复：(1) 差异 D-11 标记文案空值 onBlur 回填 — MarkDeliverSubConfig 新增 defaultText prop，主题标记与正文标记输入框均在失焦且值为空时回调 onChange 写入默认文案 [意图类型名]，placeholder 同步改为 defaultText，浏览器验证 [订阅] 回填；(2) 差异 D-08 Pipeline Tooltip effectKey 解耦方案C — PipelinePolicy 新增 actionKeys/effectKey，getPolicyTooltipContent() 改为直接读字段，意图引擎 Tooltip 影响文案由「黑名单命中则阻断」改为专属 pipeline.effect.intentEngine 文案，浏览器验证无误用文案。新增 5 张截图。D-08/D-11 标记为已修复，TOC 层级数更新为 6 层。"
+    }
+  ]
+}

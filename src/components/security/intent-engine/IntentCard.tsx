@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { ChevronDown, ChevronRight, AlertTriangle, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { MarkDeliverConfig } from './MarkDeliverConfig';
 import { ThresholdSegmentConfig } from './ThresholdSegmentConfig';
 
@@ -107,15 +108,18 @@ export function IntentCard({
     onChange({ ...value, threshold_segments: segments });
   };
 
+  // 卡片头是唯一可点区域（展开/收起）——pointer 驱动 hover（柔和交互反馈规格 §6.4/§7.2）。
+  const { pointerHoverProps: headerHoverProps } = usePointerHover<HTMLDivElement>();
+
   return (
     <TooltipProvider>
       {/* GT-11743: 对齐 demo 原型 — 外层只控制边框/阴影/裁剪，padding 由内部 header/body 各自控制 */}
       <div
         data-testid={`ie-card-${direction}-${intent}`}
         className={cn(
-          'rounded-lg border border-l-4 overflow-hidden transition-shadow',
+          'rounded-lg border border-l-4 overflow-hidden transition-shadow duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
           riskStyles.border,
-          expanded ? 'shadow-md' : 'shadow-sm hover:shadow-md',
+          expanded ? 'shadow-md' : 'shadow-sm',
         )}
       >
         {/* 卡片头部（可点击展开）— GT-11743: 左右分组、背景色随 expanded 切换 */}
@@ -124,9 +128,12 @@ export function IntentCard({
           tabIndex={0}
           data-testid={`ie-toggle-${direction}-${intent}`}
           className={cn(
-            'flex items-center justify-between p-4 cursor-pointer transition-colors',
-            expanded ? riskStyles.bg : 'bg-card hover:bg-muted/50',
+            'flex items-center justify-between p-4 cursor-pointer outline-none',
+            'transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+            'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset',
+            expanded ? riskStyles.bg : 'bg-card data-[hovered=true]:bg-muted/50',
           )}
+          {...headerHoverProps}
           onClick={onToggleExpand}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - 意图引擎 HTML 规格说明</title>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: #fff;
+      --muted: #f5f7fa;
+      --muted-foreground: #6b7280;
+      --border: #e5e7eb;
+      --blue: #1677ff;
+      --red: #f5222d;
+      --orange: #fa8c16;
+      --green: #52c41a;
+      --purple: #722ed1;
+      --radius: 0.625rem;
+      --font-sans: "Geist", "Inter", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1, h2, h3 { line-height: 1.3; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 28px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 20px; }
+    h3 { margin: 18px 0 10px; color: #111827; font-size: 17px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .spec-header, section, .component-toc { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .toc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+    .toc-list li { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa; }
+    .toc-badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #eef4ff; color: #155eef; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-spec, .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .diff-section { border-left: 4px solid var(--red); background: #fff7f7; }
+    .question-section { border-left: 4px solid #d97706; background: #fffbeb; }
+    .mermaid { padding: 16px; border-radius: 8px; background: #f8fafc; text-align: center; }
+    pre { padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; overflow: auto; font-family: var(--font-mono); font-size: 13px; }
+    .is-hidden { display: none !important; }
+
+    /* ===== 预览控件（复刻 demo 视觉） ===== */
+    .preview-card { position: relative; width: 220px; height: 60px; display: flex; overflow: hidden; border: 1px solid #e8e8e8; border-radius: 8px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); cursor: pointer; }
+    .preview-card:hover { border-color: #1890ff; background: #e6f7ff; }
+    .preview-bar { width: 4px; background: var(--red); }
+    .preview-card-body { flex: 1; padding: 8px 12px; display: flex; align-items: flex-start; justify-content: space-between; }
+    .preview-title { font-size: 14px; font-weight: 650; color: #262626; }
+    .preview-config { color: #1890ff; font-size: 13px; }
+    .card-tooltip { position: absolute; left: 236px; top: 0; width: 260px; padding: 10px 12px; border-radius: 8px; background: #fff; border: 1px solid var(--border); box-shadow: 0 6px 20px rgba(15,23,42,.18); font-size: 13px; z-index: 5; }
+    .card-tooltip b { color: #262626; }
+    .drawer-shell { display: grid; grid-template-columns: 180px 1fr; gap: 0; min-width: 900px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #fff; }
+    .drawer-nav { padding: 12px 8px; background: #f9fafb; border-right: 1px solid var(--border); }
+    .drawer-nav-row { display: flex; gap: 8px; align-items: flex-start; margin: 4px 0; padding: 8px 10px; border-radius: 8px; color: #374151; font-size: 13px; cursor: default; }
+    .drawer-nav-row.active { background: #eff6ff; color: #1d4ed8; }
+    .drawer-nav-row .dot { margin-top: 6px; width: 9px; height: 9px; border-radius: 999px; background: #3b82f6; flex-shrink: 0; }
+    .drawer-nav-row small { display: block; color: #9ca3af; font-size: 11px; }
+    .drawer-main { padding: 16px 20px; background: #f3f4f6; }
+    .panel-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 2px 8px rgba(15,23,42,.06); overflow: hidden; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .panel-head h3 { margin: 0; font-size: 17px; }
+    .switch { position: relative; display: inline-block; width: 36px; height: 20px; border-radius: 999px; background: #2563eb; cursor: pointer; transition: background .15s; vertical-align: middle; }
+    .switch::after { content: ""; position: absolute; top: 2px; left: 18px; width: 16px; height: 16px; border-radius: 999px; background: #fff; transition: left .15s; }
+    .switch.off { background: #d1d5db; }
+    .switch.off::after { left: 2px; }
+    .panel-body { padding: 16px 20px; transition: opacity .2s; }
+    .panel-body.dimmed { opacity: .5; pointer-events: none; }
+    .dir-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; border-radius: 10px; background: #f3f4f6; margin-bottom: 14px; }
+    .dir-tab { padding: 6px 0; border: 0; border-radius: 8px; background: transparent; font-size: 14px; font-weight: 600; color: #6b7280; cursor: pointer; }
+    .dir-tab.active { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    .ops-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border-radius: 10px; background: #f9fafb; margin-bottom: 14px; }
+    .btn-outline { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .btn-outline:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-outline.danger { color: #dc2626; }
+    .dirty-hint { margin-left: auto; color: #d97706; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+    .dir-banner { display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin-bottom: 14px; border: 1px solid #bfdbfe; border-radius: 10px; background: #eff6ff; color: #1d4ed8; font-size: 13px; }
+    .risk-panel-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; margin-top: 12px; border: 1px solid var(--border); border-radius: 10px; background: #fff; cursor: pointer; font-size: 14px; }
+    .risk-panel-head .chev { display: inline-block; width: 14px; transition: transform .15s; }
+    .risk-panel-head.open .chev { transform: rotate(90deg); }
+    .risk-panel-head.high { color: #b91c1c; } .risk-panel-head.high.open { background: #fef2f2; }
+    .risk-panel-head.medium { color: #c2410c; } .risk-panel-head.medium.open { background: #fff7ed; }
+    .risk-panel-head.low { color: #1d4ed8; } .risk-panel-head.low.open { background: #eff6ff; }
+    .risk-panel-head .count { color: #6b7280; font-weight: 400; margin-left: 6px; }
+    .risk-panel-head .desc { color: #6b7280; font-size: 12px; font-weight: 400; }
+    .risk-body { padding-top: 10px; }
+    .intent-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; margin: 8px 0 0; border: 1px solid var(--border); border-left-width: 4px; border-radius: 10px; background: #fff; cursor: pointer; font-size: 14px; }
+    .intent-head.high { border-left-color: #ef4444; }
+    .intent-head.medium { border-left-color: #f97316; }
+    .intent-head.low { border-left-color: #3b82f6; }
+    .intent-head .left, .intent-head .right { display: inline-flex; align-items: center; gap: 8px; }
+    .pill { display: inline-flex; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #f3f4f6; }
+    .pill.risk-high { background: #fee2e2; color: #991b1b; }
+    .pill.risk-medium { background: #ffedd5; color: #9a3412; }
+    .pill.risk-low { background: #dbeafe; color: #1e40af; }
+    .pill.mode { background: #fff; border: 1px solid var(--border); color: #374151; font-weight: 500; }
+    .pill.act-mark { background: #dbeafe; color: #1d4ed8; }
+    .pill.act-quarantine { background: #ffedd5; color: #c2410c; }
+    .pill.act-review { background: #f3e8ff; color: #7e22ce; }
+    .pill.act-block { background: #fee2e2; color: #b91c1c; }
+    .pill.act-drop { background: #fecaca; color: #7f1d1d; }
+    .intent-expand-note { margin: 0; padding: 12px 16px; border: 1px solid var(--border); border-top: 0; border-radius: 0 0 10px 10px; background: #fafafa; font-size: 13px; color: #4b5563; }
+    .help { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 999px; border: 1.5px solid #9ca3af; color: #9ca3af; font-size: 11px; cursor: help; position: relative; }
+    @media (max-width: 900px) { body { padding: 16px; } .drawer-shell { min-width: 720px; } }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>策略流水线 - 意图引擎 HTML 规格说明</h1>
+    <table class="meta-table">
+      <tr><td>目标模块</td><td>策略流水线 / 阶段3：内容层 / 意图引擎（policy key: <code>intentEngine</code>，priority 3003，type=<code>forced</code>，canExempt=<code>false</code>）</td></tr>
+      <tr><td>demo 地址</td><td><a href="http://localhost:3000/filter-rules/pipeline">http://localhost:3000/filter-rules/pipeline</a>（阶段3卡片「意图引擎」→ 80vw 内容策略抽屉）</td></tr>
+      <tr><td>demo 源码</td><td><code>design/origin/demo/app/filter-rules/pipeline/page.tsx</code><br><code>design/origin/demo/components/filter-rules-new/strategy-pipeline-page.tsx</code>（抽屉宿主）<br><code>design/origin/demo/components/filter-rules-new/content-strategy-page.tsx</code>（抽屉页宿主，initialPolicy=intentEngine）<br><code>design/origin/demo/components/filter-rules-new/intent-engine-module.tsx</code>（模块 UI 主体）</td></tr>
+      <tr><td>关联 PRD</td><td><code>design/origin/spec/意图引擎功能模块需求文档.md</code>（第一来源）<br><code>design/origin/spec/策略流水线需求文档.md</code>（流水线上下文）</td></tr>
+      <tr><td>落地约束</td><td><code>design/origin/implement.md</code>：管理员可见可改配置优先走配置系统；复用统一规则系统 action，不新增 action（标记投递 = accept + 添加特定 header）；PRD API 不等于必须新增后端 API；四语国际化。</td></tr>
+      <tr><td>规格版本</td><td><b>v3</b>（2026-07-17）· demo 源 commit <code>5d17c2e</code>（intent-engine-module.tsx）/ <code>b75c3cc</code>（language-context.tsx）；变更：标记文案空值 onBlur 回填（差异 D-11 已修复）、Pipeline Tooltip effectKey 解耦方案C（差异 D-08 已修复），新增层级6 子文件与 5 张截图。v2（2026-07-17）修复 D-07。v1（2026-07-11）为初版。</td></tr>
+      <tr><td>浏览器验证</td><td>2026-07-11（v1），headless Chromium CDP 访问运行态 demo（viewport 1440×1000 与 1024×900），完成：流水线卡片与 hover Tooltip、抽屉默认态、卡片展开、动作下拉、标记投递子配置、高危警告、分段阈值、复制与重置对话框、方向切换、禁用半透明、1024px 响应式，共 31 张截图。<br>2026-07-17（v2 增量），viewport 1405×936 访问 <code>/filter-rules/content</code> 意图引擎，回归验证「复制到其他方向 → 保存」修复：复制后目标方向 Tab 琥珀点 + 蓝色点名反馈、保存后清除、目标一致时「无需修改」，新增 3 张截图。<br>2026-07-17（v3 增量），viewport 1405×936 访问 <code>/filter-rules/content</code> 意图引擎（标记文案 onBlur 回填验证）与 <code>/filter-rules/pipeline</code>（Pipeline Tooltip 文案验证）：展开订阅卡片 → 清空主题标记 → Tab 失焦 → 确认回填 [订阅]；hover 意图引擎 Pipeline 卡片 → 确认 Tooltip 动作与影响文案已使用专属 effectKey 无「黑名单」误用。新增截图：v3-mark-label-subconfig.png、v3-mark-label-cleared.png、v3-mark-label-fallback.png、v3-outbound-direction.png、v3-pipeline-tooltip-intent.png，共 5 张。</td></tr>
+    </table>
+  </header>
+
+  <nav class="component-toc">
+    <h2>组件列表</h2>
+    <ul class="toc-list">
+      <li><a href="#component-2-1">2.1 策略流水线入口卡片（意图引擎）</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-2">2.2 内容策略抽屉 + 意图引擎默认态</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-3">2.3 意图分类卡片（多层交互）</a><span class="toc-badge">6层</span><br>
+        <a href="layer-1-intent-card-classification.html">层级1：卡片展开/分类优先/标记投递</a> ·
+        <a href="layer-2-threshold-config.html">层级2：分段阈值配置</a> ·
+        <a href="layer-3-dialogs.html">层级3：复制/重置对话框</a> ·
+        <a href="layer-4-direction-disable.html">层级4：方向切换与禁用态</a> ·
+        <a href="layer-5-copy-save-state.html">层级5：复制未保存状态与保存清除（已修复 D-07）</a> ·
+        <a href="layer-6-mark-label-fallback.html">层级6：标记文案空值 onBlur 默认回填（已修复 D-11）+ Pipeline Tooltip 解耦（已修复 D-08）</a></li>
+      <li><a href="#api-mapping">4. 数据模型与 API 映射</a><span class="toc-badge">配置系统映射</span></li>
+    </ul>
+  </nav>
+
+  <section id="layout">
+    <h2>1. 页面布局结构</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>实际渲染</th><th>规格含义</th></tr></thead>
+      <tbody>
+        <tr><td>左侧产品导航</td><td>深色侧边栏，当前位于「平台安全策略」功能域</td><td>全局导航容器，不属于本模块配置表单。</td></tr>
+        <tr><td>策略流水线主内容</td><td>五个阶段的策略卡片区，意图引擎位于阶段3「内容层」，红色左色条（forced 强制阻断类）</td><td>意图引擎以阶段3策略卡进入，不是独立页面首屏。</td></tr>
+        <tr><td>内容策略抽屉</td><td>右侧 80vw Sheet，头部「阶段3: 内容层 / 意图引擎」，内嵌 <code>ContentStrategyPage embedded initialPolicy=intentEngine</code></td><td>抽屉左侧为内容层4个子策略导航（附件/URL/内容规则/意图引擎），右侧为白色配置卡片（头部策略开关 + 内容区 + sticky 保存栏）。</td></tr>
+        <tr><td>意图引擎配置内容</td><td>方向 Tab（接收/外发/域内）→ 全局操作栏 → 高/中/低危三个折叠面板 → 5 张意图分类卡片</td><td>核心配置界面，多层交互详见 2.3 及各子文件。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/page-full-default.png" alt="策略流水线整页默认态">
+      <figcaption>整页默认态：意图引擎入口卡片位于阶段3内容层（右上区域），红色左色条。</figcaption>
+    </figure>
+    <h3>1.1 视觉规范（浏览器验证值）</h3>
+    <table class="spec-table">
+      <thead><tr><th>属性</th><th>demo 实际值</th><th>PRD 要求</th><th>一致性</th></tr></thead>
+      <tbody>
+        <tr><td>高危色</td><td><code>border-l-red-500</code>（#EF4444 系）、Badge <code>bg-red-100 text-red-800</code></td><td>红色系 #EF4444</td><td>一致</td></tr>
+        <tr><td>中危色</td><td><code>border-l-orange-500</code>、Badge <code>bg-orange-100 text-orange-800</code></td><td>橙色系 #F97316</td><td>一致</td></tr>
+        <tr><td>低危色</td><td><code>border-l-blue-500</code>、Badge <code>bg-blue-100 text-blue-800</code></td><td>蓝色系 #3B82F6</td><td>一致</td></tr>
+        <tr><td>动作色</td><td>标记投递 blue-100/700，隔离 orange-100/700，审核 purple-100/700，阻断 red-100/700，丢弃 red-200/900</td><td>同左</td><td>一致</td></tr>
+        <tr><td>卡片左边框</td><td><code>border-l-4</code>（4px，风险等级色）</td><td>4px 风险等级色</td><td>一致</td></tr>
+        <tr><td>可视化条</td><td><code>h-8</code>（32px）<code>rounded-lg overflow-hidden flex</code></td><td>32px 圆角</td><td>一致</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="components">
+    <h2>2. 逐组件规格</h2>
+
+    <article class="component-spec" id="component-2-1">
+      <h3>2.1 策略流水线入口卡片 IntentEngine Policy Card</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级0：页面默认态中的策略入口卡片</td></tr>
+          <tr><th>触发路径</th><td>打开 <code>/filter-rules/pipeline</code>，在阶段3内容层定位「意图引擎」卡片。</td></tr>
+          <tr><th>浏览器验证</th><td>卡片根节点 <code>div.w-[220px].cursor-pointer</code>（实测 220×60px，节点数 9），左色条 <code>bg-[#f5222d]</code>（type=forced → 红色）。hover 300ms 出现 Tooltip：「策略：意图引擎 / 动作：阻断 / 影响：黑名单命中则阻断并终止流程」。点击卡片整体或「配置」按钮均打开内容���略抽屉。</td></tr>
+        </tbody>
+      </table>
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：策略卡默认态（hover 可看 Tooltip，点击跳 2.2）</h4>
+        <div class="component-preview">
+          <a class="preview-card" data-demo-extracted="intent-policy-card" href="#component-2-2" aria-label="打开意图引擎抽屉规格"
+             onmouseenter="document.getElementById('card-tip').classList.remove('is-hidden')"
+             onmouseleave="document.getElementById('card-tip').classList.add('is-hidden')" style="overflow:visible;">
+            <div class="preview-bar" style="border-radius:8px 0 0 8px;"></div>
+            <div class="preview-card-body">
+              <span class="preview-title">意图引擎</span>
+              <span class="preview-config">配置 →</span>
+            </div>
+            <div id="card-tip" class="card-tooltip is-hidden">
+              <div><b>策略：</b>意图引擎</div>
+              <div><b>动作：</b>阻断</div>
+              <div><b>影响：</b><span style="color:#595959;">黑名单命中则阻断并终止流程</span></div>
+            </div>
+          </a>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/card-layer-0-tooltip.png" alt="意图引擎策略卡 hover Tooltip">
+          <figcaption>策略卡 hover 态：右侧 Radix Tooltip 显示策略/动作/影响三行。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>卡片标题</td><td>意图引擎（i18n key <code>pipeline.intentEngine</code>）</td><td>点击卡片整体打开阶段3内容策略抽屉并选中意图引擎</td><td><code>policy.key = intentEngine</code>，priority 3003</td></tr>
+            <tr><td>配置入口</td><td>配置 + ArrowRight 图标（<code>pipeline.configBtn</code>）</td><td><code>e.stopPropagation()</code> 后同样打开抽屉</td><td>卡片与按钮共用打开逻辑</td></tr>
+            <tr><td>左侧色条</td><td>红色 <code>#f5222d</code>，宽 4px（w-1）</td><td>无独立交互</td><td>由 <code>type=forced</code> 推导（强制检测命中即阻断）</td></tr>
+            <tr><td>hover Tooltip</td><td>策略：意图引擎 / 动作：阻断 / 影响：黑名单命中则阻断并终止流程</td><td>hover 300ms 出现</td><td>「影响」文案复用 <code>pipeline.policyEffectBlock</code>，措辞含「黑名单」与意图引擎语义不完全贴合，见差异 D-08</td></tr>
+            <tr><td>统计数据</td><td>卡片上不显示（极简卡）；源码数据 todayHits 156 / blocked 156 / exempted 0</td><td>-</td><td>PRD 未要求卡片统计</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>根节点</td><td><code>div.w-[220px].rounded-lg.cursor-pointer</code>（data-slot=tooltip-trigger），220×60px，节点数 9</td><td><code>.preview-card[data-demo-extracted]</code>，220×60px</td><td>一致</td></tr>
+              <tr><td>子结构</td><td>色条 div.w-1.bg-[#f5222d] + 内容列（标题 span + 配置 button + arrow-right svg）</td><td>色条 + 标题/配置行</td><td>一致</td></tr>
+              <tr><td>关键文案</td><td>意图引擎 / 配置</td><td>意图引擎 / 配置 →</td><td>一致</td></tr>
+              <tr><td>hover Tooltip</td><td><code>[role=tooltip]</code> 三行：策略/动作/影响</td><td>预览 hover 显示同文案浮层</td><td>一致</td></tr>
+              <tr><td>阶段4 AI 标签</td><td>未渲染（意图引擎为阶段3，非 AI 卡）</td><td>未包含</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-2">
+      <h3>2.2 内容策略抽屉 + 意图引擎默认态 ContentStrategyPage(initialPolicy=intentEngine)</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级0：点击策略卡后打开 80vw Sheet（1440px 视口实测宽 1152px；1024px 视口实测 819px）。</td></tr>
+          <tr><th>渲染组件</th><td><code>Sheet(hideCloseButton) → SheetHeader(阶段3: 内容层 / 意图引擎 + XCircle 关闭) → ContentStrategyPage embedded initialPolicy=intentEngine → IntentEngineModule direction=receive embedded</code></td></tr>
+          <tr><th>实际状态</th><td>抽屉根 <code>[role=dialog]</code> 节点数 137；意图引擎内容根 <code>.space-y-6</code> 节点数 80。左导航「意图引擎」高亮（bg-blue-50），摘要「涉黄赌/涉政/钓鱼/垃圾/订阅」。卡片头开关「已启用」。接收方向 Tab active。「应用同风险等级」默认 disabled（未展开任何意图卡）。高危面板默认折叠，中危/低危默认展开；默认可见卡片：垃圾［中危｜分类优先｜隔离］、订阅［低危｜分类优先｜标记投递］。</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：抽屉默认态（预览可操作：总开关/方向Tab/面板折叠/卡片头）</h4>
+        <div class="component-preview">
+          <div class="drawer-shell" data-demo-extracted="content-drawer-intent-engine">
+            <div class="drawer-nav">
+              <div class="drawer-nav-row"><span class="dot"></span><span>附件安全检测<small>病毒扫描/沙箱分析/类型检测</small></span></div>
+              <div class="drawer-nav-row"><span class="dot"></span><span>URL检测与防护<small>信誉评估/沙箱分析/仿冒检测</small></span></div>
+              <div class="drawer-nav-row"><span class="dot"></span><span>内容规则<small>关键词/正则/DLP检测</small></span></div>
+              <div class="drawer-nav-row active"><span class="dot"></span><span>意图引擎<small>涉黄赌/涉政/钓鱼/垃圾/订阅</small></span></div>
+            </div>
+            <div class="drawer-main">
+              <div class="panel-card">
+                <div class="panel-head">
+                  <h3>意图引擎</h3>
+                  <span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;">
+                    <span id="p-enable-label" style="color:#2563eb;">已启用</span>
+                    <span id="p-enable-switch" class="switch" role="switch" aria-checked="true" title="意图引擎策略总开关"></span>
+                  </span>
+                </div>
+                <div class="panel-body" id="p-body">
+                  <div class="dir-tabs" role="tablist">
+                    <button class="dir-tab active" type="button" data-dir="receive">接收方向</button>
+                    <button class="dir-tab" type="button" data-dir="send">外发方向</button>
+                    <button class="dir-tab" type="button" data-dir="internal">域内方向</button>
+                  </div>
+                  <div class="ops-bar">
+                    <button class="btn-outline" id="p-apply-risk" disabled title="展开某个意图卡后可用">✓ 应用同风险等级</button>
+                    <a class="btn-outline" href="layer-3-dialogs.html">⧉ 复制到其他方向</a>
+                    <a class="btn-outline danger" href="layer-3-dialogs.html">↺ 重置为缺省值</a>
+                    <span class="dirty-hint is-hidden" id="p-dirty">⚠ 当前方向配置已修改未保存</span>
+                  </div>
+                  <div class="dir-banner is-hidden" id="p-banner">ⓘ <span id="p-banner-text">外发方向不支持"标记投递"动作，相关配置将自动降级为"隔离"</span></div>
+
+                  <div class="risk-panel-head high" data-panel="high"><span><span class="chev">▶</span> <b>高危意图</b><span class="count">(3 个分类)</span></span><span class="desc">包含 3 个分类，默认处置较为严格，请谨慎调整</span></div>
+                  <div class="risk-body is-hidden" data-panel-body="high">
+                    <div class="intent-head high" data-intent="porn_gambling"><span class="left"><span class="switch" data-sw></span> 涉黄/赌 <span class="pill risk-high">高危</span> <span class="help">?</span></span><span class="right"><span class="pill mode">分类优先</span><span class="pill act-quarantine" data-act>隔离</span> ›</span></div>
+                    <div class="intent-expand-note is-hidden" data-note="porn_gambling">展开态详细配置见 <a href="layer-1-intent-card-classification.html">层级1：意图卡片展开</a>（检测模式 / 处置动作 / 标记投递子配置 / 高危警告）。</div>
+                    <div class="intent-head high" data-intent="political"><span class="left"><span class="switch" data-sw></span> 涉政/反动 <span class="pill risk-high">高危</span> <span class="help">?</span></span><span class="right"><span class="pill mode">分类优先</span><span class="pill act-quarantine" data-act>隔离</span> ›</span></div>
+                    <div class="intent-expand-note is-hidden" data-note="political">展开态详细配置见 <a href="layer-1-intent-card-classification.html">层级1：意图卡片展开</a>。</div>
+                    <div class="intent-head high" data-intent="phishing"><span class="left"><span class="switch" data-sw></span> 钓鱼 <span class="pill risk-high">高危</span> <span class="help">?</span></span><span class="right"><span class="pill mode">分类优先</span><span class="pill act-quarantine" data-act>隔离</span> ›</span></div>
+                    <div class="intent-expand-note is-hidden" data-note="phishing">展开态详细配置见 <a href="layer-1-intent-card-classification.html">层级1：意图卡片展开</a>。</div>
+                  </div>
+
+                  <div class="risk-panel-head medium open" data-panel="medium"><span><span class="chev">▶</span> <b>中危意图</b><span class="count">(1 个分类)</span></span><span class="desc">包含 1 个分类，建议使用标准处置策略</span></div>
+                  <div class="risk-body" data-panel-body="medium">
+                    <div class="intent-head medium" data-intent="spam"><span class="left"><span class="switch" data-sw></span> 垃圾 <span class="pill risk-medium">中危</span> <span class="help">?</span></span><span class="right"><span class="pill mode">分类优先</span><span class="pill act-quarantine" data-act data-send-act="审核">隔离</span> ›</span></div>
+                    <div class="intent-expand-note is-hidden" data-note="spam">展开态详细配置见 <a href="layer-1-intent-card-classification.html">层级1：意图卡片展开</a>；分段阈值模式见 <a href="layer-2-threshold-config.html">层级2</a>。</div>
+                  </div>
+
+                  <div class="risk-panel-head low open" data-panel="low"><span><span class="chev">▶</span> <b>低危意图</b><span class="count">(1 个分类)</span></span><span class="desc">包含 1 个分类，可根据业务需要灵活调整</span></div>
+                  <div class="risk-body" data-panel-body="low">
+                    <div class="intent-head low" data-intent="subscription"><span class="left"><span class="switch" data-sw></span> 订阅 <span class="pill risk-low">低危</span> <span class="help">?</span></span><span class="right"><span class="pill mode">分类优先</span><span class="pill act-mark" data-act data-send-act="审核" data-send-cls="act-review">标记投递</span> ›</span></div>
+                    <div class="intent-expand-note is-hidden" data-note="subscription">展开态详细配置（含标记投递子配置）见 <a href="layer-1-intent-card-classification.html">层级1：意图卡片展开</a>。</div>
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-top:1px solid var(--border);background:rgba(255,255,255,.95);">
+                  <span class="dirty-hint is-hidden" id="p-dirty2" style="margin-left:0;">● 有未保存的更改</span>
+                  <button class="btn-outline" style="background:#2563eb;color:#fff;border:0;height:36px;font-size:14px;" type="button" onclick="document.getElementById('p-dirty').classList.add('is-hidden');document.getElementById('p-dirty2').classList.add('is-hidden')">保存配置</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-layer-0-default.png" alt="内容策略抽屉意图引擎默认态">
+          <figcaption>抽屉默认态：左导航意图引擎高亮，高危面板折叠，中危/低危展开，垃圾=隔离、订阅=标记投递。</figcaption>
+        </figure>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/risk-panel-high-open.png" alt="高危面板展开">
+          <figcaption>点击高危面板头后展开：涉黄/赌、涉政/反动、钓鱼三张卡（接收方向默认动作均为隔离），头部背景变浅红。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>抽屉头部</td><td>Settings 图标 + 「阶段3: 内容层」/「意图引擎」+ 右上 XCircle</td><td>XCircle 关闭抽屉；无遮罩点击关闭限制（Sheet 默认可 ESC）</td><td>标题 key <code>pipeline.phase3Content</code> + <code>pipeline.intentEngine</code></td></tr>
+            <tr><td>左侧子策略导航</td><td>附件安全检测 / URL检测与防护 / 内容规则 / 意图引擎（active）；每项状态圆点（蓝=启用）+ 摘要</td><td>点击切换右侧配置模块；导航可折叠（浮动圆形按钮，收起后宽 w-14 悬浮 Tooltip 显示名称+摘要）</td><td>摘要「涉黄赌/涉政/钓鱼/垃圾/订阅」；禁用时摘要变「未���用」</td></tr>
+            <tr><td>策略总开关</td><td>「已启用」蓝色文字 + Switch(checked)</td><td>切换后文字变「已禁用」灰色，内容区 <code>opacity-50 pointer-events-none</code>；详见层级4</td><td>浏览器实测 dim 容器 class 一致</td></tr>
+            <tr><td>方向 Tab</td><td>接收方向(active) / 外发方向 / 域内方向，grid-cols-3 等宽</td><td>切换后收起所有展开的意图卡片（expandedIntent=null）；外发/域内显示蓝色提示条</td><td>面板开合状态不随方向重置（浏览器验证）</td></tr>
+            <tr><td>应用同风险等级</td><td>outline 按钮，默认 <code>disabled</code></td><td>展开某意图卡后可用；点击将该卡配置深拷贝到同风险等级其他意图（高危3选2），无确认弹窗</td><td>中危/低危各只有 1 个分类，应用无实际效果</td></tr>
+            <tr><td>复制到其他方向</td><td>outline 按钮 + Copy 图标</td><td>打开复制对话框（层级3）</td><td>-</td></tr>
+            <tr><td>重置为缺省值</td><td>outline 按钮红色文字 + RotateCcw 图标</td><td>打开重置确认对话框（层级3）</td><td>-</td></tr>
+            <tr><td>未保存提示（按方向）</td><td>「⚠ 当前方向配置已修改未保存」琥珀色 / 复制后蓝色「已复制到 X / Y 方向，请保存后生效」，操作栏右侧；被改动方向 Tab 右侧显示琥珀点</td><td>仅当前方向被改时出现琥珀提示；复制到其他方向时给出蓝色点名反馈（4 秒消失）并在目标方向 Tab 标点；保存后全部清除（saveSignal）</td><td>已修复：按方向追踪 <code>dirtyDirections</code>，保存清除，见差异 D-07（已修复）与 <a href="layer-5-copy-save-state.html">层级5</a></td></tr>
+            <tr><td>风险面板 ×3</td><td>高危(3 个分类，默认折叠) / 中危(1 个分类，默认展开) / 低危(1 个分类，默认展开)；右侧描述文案</td><td>点击面板头展开/收起；展开后头部变对应浅色背景，箭头 ▶→▼</td><td>与 PRD §2.1「高危折叠、中/低危展开」一致</td></tr>
+            <tr><td>意图卡片头 ×5</td><td>启用 Switch + 名称 + 风险 Badge + ?帮助图标 ｜ 检测模式 Badge + 动作 Badge + 箭头</td><td>点击头部（非 Switch）展开该卡且其他卡收起；Switch 点击 <code>stopPropagation</code> 只切换启用</td><td>接收方向默认动作：高危×3=隔离，垃圾=隔离，订阅=标记投递</td></tr>
+            <tr><td>保存栏</td><td>sticky 底部「保存配置」蓝色按钮 + 左侧页面级未保存提示（琥珀呼吸圆点）</td><td>点击仅清除未保存标记（demo 无 API）；总开关禁用时保存栏仍可点击（在 dim 容器外）</td><td>无阈值覆盖完整性校验，见差异 D-05</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>抽屉根节点</td><td><code>[role=dialog]</code> 1152×857（80vw），节点数 137</td><td>预览保留左导航 + 配置卡核心结构（结构裁剪展示）</td><td>一致（裁剪）</td></tr>
+              <tr><td>方向 Tab</td><td><code>[role=tablist].grid-cols-3</code>，接收 data-state=active，外发/域内 inactive</td><td>3 个 tab，接收 active</td><td>一致</td></tr>
+              <tr><td>应用同风险等级 disabled</td><td>默认 <code>disabled=true</code>（未展开意图卡）</td><td>预览按钮 disabled</td><td>一致</td></tr>
+              <tr><td>面板默认开合</td><td>高危折叠（涉黄/赌、涉政/反动、钓鱼不可见），中危/低危展开（垃圾、订阅可见）</td><td>高危 body 隐藏，中/低危 body 显示</td><td>一致</td></tr>
+              <tr><td>默认卡片头文案</td><td>垃圾 | 中危 | 分类优先 | 隔离；订阅 | 低危 | 分类优先 | 标记投递</td><td>同文案同 Badge 色</td><td>一致</td></tr>
+              <tr><td>方向提示条</td><td>接收方向不渲染（条件渲染 direction !== "receive"）</td><td>默认隐藏，切外发/域内显示</td><td>一致</td></tr>
+              <tr><td>左导航 active</td><td>意图引擎 button 含 bg-blue-50 text-blue-700</td><td>active 行浅蓝底</td><td>一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-3">
+      <h3>2.3 意图分类卡片 IntentCard（多层交互）</h3>
+      <p>意图卡片展开后的配置（分类优先/分段阈值/标记投递/对话框/方向差异）超过单文件可读范围，层级1及以后拆分为独立文件。主文件保留关系图与索引。</p>
+      <div class="mermaid">
+        graph LR
+          A[层级0 策略卡] --> B[层级0 抽屉默认态]
+          B -->|点击卡片头| C[层级1 卡片展开·分类优先]
+          C -->|动作=标记投递| C2[层级1 标记投递子配置+高危警告]
+          C -->|检测模式=分段阈值| D[层级2 分段阈值配置]
+          D -->|区间有间隙| D2[层级2 间隙警告/智能填充/预设模板]
+          B -->|复制到其他方向| E[层级3 复制对话框]
+          B -->|重置为缺省值| E2[层级3 重置确认对话框]
+          B -->|切换方向Tab| F[层级4 外发/域内方向]
+          B -->|总开关/单卡开关| F2[层级4 禁用半透明态]
+          E -->|确认复制| G[层级5 目标方向标脏+反馈]
+          G -->|保存配置| G2[层级5 标记清除]
+      </div>
+      <table class="spec-table layer-index">
+        <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>策略卡 + 抽屉默认态</td><td>页面加载 / 点击策略卡</td><td>上方内嵌（2.1、2.2）</td></tr>
+          <tr><td>1</td><td>意图卡片展开：分类优先 + 标记投递子配置 + 高危警告 + 帮助 Tooltip + 单卡禁用</td><td>点击卡片头部（非 Switch 区域）</td><td><a href="layer-1-intent-card-classification.html">查看详情</a></td></tr>
+          <tr><td>2</td><td>分段阈值配置：可视化条 / 区间编辑 / 间隙警告 / 智能填充 / 预设模板</td><td>展开卡内检测模式选「分段阈值」</td><td><a href="layer-2-threshold-config.html">查看详情</a></td></tr>
+          <tr><td>3</td><td>复制到其他方向 / 重置为缺省值对话框</td><td>全局操作栏按钮</td><td><a href="layer-3-dialogs.html">查看详情</a></td></tr>
+          <tr><td>4</td><td>方向切换（外发/域内）与总开关/单卡禁用态、响应式</td><td>方向 Tab / 头部 Switch</td><td><a href="layer-4-direction-disable.html">查看详情</a></td></tr>
+          <tr><td>5</td><td>复制到其他方向的未保存状态（按方向标脏 + 点名反馈 + 保存清除）<span style="display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:700;">已修复 D-07</span></td><td>操作栏「复制到其他方向」→ 确认复制 → 保存配置</td><td><a href="layer-5-copy-save-state.html">查看详情</a></td></tr>
+          <tr><td>6</td><td>标记文案空值 onBlur 默认回填 <span style="display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:700;">已修复 D-11</span> + Pipeline Tooltip effectKey 解耦 <span style="display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:700;">已修复 D-08</span></td><td>标记投递配置区 → 清空主题/正文标记输入框 → 失焦触发回填；Pipeline hover Tooltip 文案验证</td><td><a href="layer-6-mark-label-fallback.html">查看详情</a></td></tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+  <section id="dialogs">
+    <h2>3. 弹窗/抽屉/对话框规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>名称</th><th>触发条件</th><th>实际渲染</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>阶段3内容策略抽屉</td><td>点击「意图引擎」策略卡或配置入口</td><td>80vw Sheet，hideCloseButton，头部标题 + XCircle 自定义关闭；左侧子策略导航 + 右侧配置卡</td><td>嵌入式配置页面承载容器</td></tr>
+        <tr><td>复制配置到其他方向 Dialog</td><td>全局操作栏「复制到其他方向」</td><td>居中 Dialog：目标方向复选框（排除当前方向）+ 降级提示（仅接收→其他且已勾选时）+ 取消/确认复制（无勾选时 disabled）</td><td>与 PRD §3.5 一致；详见 <a href="layer-3-dialogs.html">层级3</a></td></tr>
+        <tr><td>确认重置配置 Dialog</td><td>全局操作栏「重置为缺省值」</td><td>居中 Dialog：确认文案（含当前方向名 + 此操作不可撤销）+ 取消/确认重置（destructive 红色）</td><td>与 PRD §3.5 一致；详见 <a href="layer-3-dialogs.html">层级3</a></td></tr>
+        <tr><td>检测模式 Tooltip</td><td>hover 检测模式 ? 图标</td><td>「分类优先：评分为0，只要识别为该意图即执行处置，忽略置信度分数。分段阈值：根据置信度分数落入的区间执行不同处置动作。」</td><td>浏览器实测捕获；「评分为0」措辞存疑，见差异 D-09</td></tr>
+        <tr><td>意图分类 Tooltip</td><td>hover 意图名称旁 ? 图标</td><td>该意图描述，如订阅：「检测新闻订阅、通知邮件、营销推送」</td><td>与 PRD §3.5 一致</td></tr>
+        <tr><td>高危标记投递警告 Tooltip</td><td>hover 动作选择器旁琥珀色 ⚠ 图标（高危 + 标记投递时）</td><td>「高危意图采用标记投递，邮件将投递至用户邮箱，请确认风险」</td><td>与卡内红色警告条文案相同</td></tr>
+        <tr><td>可视化条区间 Tooltip</td><td>hover 阈值条区间块</td><td>「0.00 - 0.30: 隔离」（min.toFixed(2) - max.toFixed(2): 动作）</td><td>浏览器实测捕获</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="api-mapping">
+    <h2>4. 数据模型与 API 映射</h2>
+    <pre><code>// demo 前端数据模型（intent-engine-module.tsx 原样提取）
+type Direction = "receive" | "send" | "internal"
+type ActionType = "mark_deliver" | "quarantine" | "review" | "block" | "drop"
+type IntentType = "porn_gambling" | "political" | "phishing" | "spam" | "subscription"
+type DetectionMode = "classification" | "threshold"
+
+interface ThresholdSegment { id: string; min: number; max: number; action: ActionType }
+interface MarkDeliverConfig {
+  deliveryTarget: "inbox" | "spam_folder"
+  subjectMark: { enabled: boolean; text: string; position: "prefix" | "suffix" }
+  bodyMark:    { enabled: boolean; text: string; position: "prefix" | "suffix" }
+}
+interface IntentConfig {
+  enabled: boolean
+  mode: DetectionMode
+  classificationAction: ActionType
+  thresholdSegments: ThresholdSegment[]
+  markDeliverConfig: MarkDeliverConfig
+}
+type DirectionIntentConfig = Record&lt;IntentType, IntentConfig&gt;
+interface IntentEngineConfig { receive: DirectionIntentConfig; send: DirectionIntentConfig; internal: DirectionIntentConfig }</code></pre>
+    <table class="spec-table">
+      <thead><tr><th>PRD API / 数据</th><th>用途</th><th>落地映射建议</th><th>需确认</th></tr></thead>
+      <tbody>
+        <tr><td>PRD §5.4 仅定义数据模型，未给出 API 路径</td><td>意图引擎配置读写</td><td>配置为管理员可见可改参数 → 按 implement.md/CLAUDE.md 走配置系统（ConfigManager，<code>/apiserver.cf/intent_engine/*</code> 或 DB <code>config_overrides</code> JSON 覆盖）；嵌套 3方向×5意图 结构建议整体 JSON 存储</td><td>Q3：配置系统 vs 统一规则系统 page 字段，需确认承载方式</td></tr>
+        <tr><td>处置动作 mark_deliver</td><td>标记投递（加标记后投递）</td><td>复用统一规则系统 <code>accept</code> + 添加特定 header（implement.md 明确 mark = accept + header），主题/正文标记由投递链路改写</td><td>Q7：投递目标「垃圾邮件文件夹」需下游邮件系统按 header 分拣，网关侧只能加 header</td></tr>
+        <tr><td>处置动作 quarantine / review / block / drop</td><td>隔离/审核/阻断/丢弃</td><td>映射统一规则系统现有 action：quarantine、审核映射审核队列（同发信人黑白名单 Q1 的 review 结论）、block=reject、drop=discard；不新增 action</td><td>Q2：审核动作的统一映射需与其他模块结论保持一致</td></tr>
+        <tr><td>AI/ML 意图识别服务（PRD §5.1/§6.1）</td><td>五分类 + 置信度(0-1)</td><td>当前网关无意图五分类服务；反垃圾链路已有 LLM 深度复检（OSG_LLM_*）与 textsim 相似聚类，均非五分类意图模型</td><td>Q2：意图识别引擎对接为新增底层能力，需确认服务形态与 API</td></tr>
+        <tr><td>命中统计（PRD §5.2 统计报表）</td><td>各意图命中/处置统计</td><td>复用拦截日志（InterceptEvent）+ 规则统计，标注意图类型字段</td><td>需确认统计维度是否新增意图分类字段</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="business-logic">
+    <h2>5. 业务逻辑规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>逻辑</th><th>PRD 要求</th><th>demo 实际</th><th>落地说明</th></tr></thead>
+      <tbody>
+        <tr><td>流水线位置</td><td>PRD §1.3/§2.1：阶段5意图引擎（连接/信封/内容/附件层之后）</td><td>demo：阶段3「内容层」第4张卡，priority 3003，forced 不可豁免</td><td>结构性差异 D-01，以 demo 流水线分阶段为准并需确认</td></tr>
+        <tr><td>检测模式</td><td>分类优先：识别为该意图即处置；分段阈值：按置信度区间处置</td><td>RadioGroup 二选一，默认分类优先；切换即时改变下方配置区</td><td>置信度来源依赖 AI 服务（Q2）</td></tr>
+        <tr><td>方向差异</td><td>接收：5动作；外发/域内：4动作（无标记投递）</td><td>浏览器实测接收下拉 5 项、外发下拉 4 项（隔离/审核/阻断/丢弃）</td><td>一致</td></tr>
+        <tr><td>默认动作（分类优先）</td><td>PRD 未逐项定义</td><td>接收：高危=隔离、垃圾=隔离、订阅=标记投递；外发/域内：高危=阻断、垃圾=审核、订阅=审核</td><td>以 demo 缺省值为落地默认</td></tr>
+        <tr><td>默认阈值区间</td><td>PRD 未逐项定义</td><td>高危 0-0.3审核/0.3-0.6隔离/0.6-1阻断；中危 0-0.2标记投递/0.2-0.6隔离/0.6-1阻断；低危 0-0.5标记投递/0.5-0.8隔离/0.8-1审核</td><td>外发/域内的区间默认值仍含标记投递（源码 createDefaultThresholdSegments 不区分方向），仅在复制时降级，见差异 D-06</td></tr>
+        <tr><td>预设模板</td><td>严格 0-0.3隔离/0.3-0.6阻断/0.6-1丢弃；标准 0-0.3标记或审核/0.3-0.7隔离/0.7-1阻断；宽松 0-0.5标记或审核/0.5-0.8审核/0.8-1隔离</td><td>浏览器实测应用「严格」后区间与 PRD 完全一致；标准/宽松源码与 PRD 一致（接收=标记投递，外发/域内=审核）</td><td>一致</td></tr>
+        <tr><td>复制降级</td><td>接收→外发/域内：标记投递（分类动作与区间动作）降级为隔离</td><td>handleCopyToDirections 深拷贝后逐意图替换 mark_deliver→quarantine</td><td>一致</td></tr>
+        <tr><td>应用同风险等级</td><td>将当前展开意图配置应用到同风险等级其他意图</td><td>disabled 直到展开某卡；深拷贝覆盖同组其他意图；无确认弹窗、无成功提示</td><td>建议落地补操作反馈</td></tr>
+        <tr><td>多意图命中优先级</td><td>按风险等级 高&gt;中&gt;低 排序（PRD §6.1）</td><td>纯前端 demo 无引擎行为</td><td>后端检测顺序需实现该优先级</td></tr>
+        <tr><td>权限</td><td>超管/安全管理员可编辑；审计员只读；普通用户无权限</td><td>demo 无权限控制</td><td>差异 D-10，落地按统一权限体系实现只读态</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interaction">
+    <h2>6. 交互规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>实际行为（浏览器验证）</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>切换方向 Tab</td><td>接收→外发：所有展开意图卡收起（expandedIntent=null）；出现蓝色提示条；风险面板开合状态保留</td><td>PRD §3.1 一致；面板开合保留为 demo 附加行为</td></tr>
+        <tr><td>展开意图卡</td><td>点击卡片头（非 Switch）展开，其他卡收起（单展开）；头部背景变风险浅色（涉黄/赌实测 bg-red-50）</td><td>PRD §3.1/§3.2 一致</td></tr>
+        <tr><td>单意图禁用</td><td>Switch off 后展开内容 <code>opacity-50 pointer-events-none</code>（实测 class）；卡片头仍可点击展开/收起</td><td>PRD §3.2/§4.2 一致</td></tr>
+        <tr><td>总开关禁用</td><td>「已禁用」+ 整个内容区半透明不可点；保存栏在 dim 容器外仍可点击</td><td>PRD §3.2 一致</td></tr>
+        <tr><td>修改当前方向配置</td><td>操作栏右侧出现「⚠ 当前方向配置已修改未保存」（仅当前方向）+ 底部保存栏出现「有未保存的更改」（页面级）</td><td>PRD §3.2 一处提示，已按方向拆分，见 D-07（已修复）</td></tr>
+        <tr><td>复制到其他方向</td><td>确认复制后：被改动方向 Tab 出现琥珀点，操作栏显示蓝色「已复制到 X / Y 方向，请保存后生效」（4 秒消失）；当前方向不标脏；目标与源一致时提示「无需修改」不标脏</td><td>已修复，详见 <a href="layer-5-copy-save-state.html">层级5</a></td></tr>
+        <tr><td>保存配置</td><td>点击「保存配置」后各方向未保存标记与复制反馈全部清除（saveSignal 通知模块）</td><td>已修复 D-07：模块级提示保存后可清除</td></tr>
+        <tr><td>阈值区间编辑</td><td>min/max 输入（number step 0.01 min 0 max 1）与动作下拉即时更新可视化条；间隙时琥珀警告 + 智能填充按钮出现</td><td>详见 <a href="layer-2-threshold-config.html">层级2</a></td></tr>
+        <tr><td>加载/保存异常</td><td>demo 无实现（无 API）</td><td>PRD §4.3：加载失败点击重试、保存超时 Toast、AI 不可用降级跳过并告警 —— 落地需实现</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="i18n">
+    <h2>7. 国际化规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>层面</th><th>demo 覆盖</th><th>缺口</th></tr></thead>
+      <tbody>
+        <tr><td>流水线外层</td><td><code>t()</code> 全局字典 zh/en/th 三语：<code>pipeline.intentEngine</code>（意图引擎/Intent Engine/เอนจินเจตนา）、<code>pipeline.intentEngineDesc</code>（强制检测所有邮件意图，不可豁免）、<code>pipeline.phase3Content</code>（阶段3: 内容层）、<code>pipeline.configBtn</code>（配置）、<code>pipeline.actionForced</code>（强制检测，不可豁免）、<code>pipeline.policyEffectBlock</code>、<code>content.title</code>（内容策略）</td><td>demo 仅 zh/en/th，implement.md 要求四种内置语言（Q5）</td></tr>
+        <tr><td>意图引擎模块内部</td><td><strong>全部硬编码中文</strong>：INTENT_METADATA 定义了 labelZh/labelEn 与 descriptionZh/descriptionEn，但渲染只使用 labelZh/descriptionZh；「分类优先/分段阈值/处置动作/标记投递配置/投递目标/主题标记/正文标记/前缀/后缀/添加区间/智能填充/应用模板/应用同风险等级/复制到其他方向/重置为缺省值/配置已修改未保存」及对话框全部文案均为中文字面量</td><td>差异 D-04：落地需将模块内约 40 条文案全部接入 i18n key（建议命名空间 <code>intentEngine.*</code>）</td></tr>
+      </tbody>
+    </table>
+    <h3>7.1 需新建的 i18n key 清单（模块内硬编码文案）</h3>
+    <table class="spec-table">
+      <thead><tr><th>建议 key</th><th>中文文案（demo 实际渲染）</th><th>使用位置</th></tr></thead>
+      <tbody>
+        <tr><td>intentEngine.intent.pornGambling / political / phishing / spam / subscription</td><td>涉黄/赌、涉政/反动、钓鱼、垃圾、订阅</td><td>卡片名称（labelEn 已备好英文）</td></tr>
+        <tr><td>intentEngine.intent.*Desc</td><td>检测色情、赌博等违规内容邮件 …（5 条）</td><td>? 图标 Tooltip</td></tr>
+        <tr><td>intentEngine.risk.high / medium / low</td><td>高危意图 / 中危意图 / 低危意图（Badge：高危/中危/低危）</td><td>面板标题与 Badge</td></tr>
+        <tr><td>intentEngine.risk.*Desc</td><td>包含 3 个分类，默认处置较为严格，请谨慎调整 …（3 条）</td><td>面板头右侧描述</td></tr>
+        <tr><td>intentEngine.action.markDeliver / quarantine / review / block / drop</td><td>标记投递 / 隔离 / 审核 / 阻断 / 丢弃</td><td>动作下拉与 Badge</td></tr>
+        <tr><td>intentEngine.mode.classification / threshold / help</td><td>分类优先 / 分段阈值 / Tooltip 全文</td><td>检测模式区</td></tr>
+        <tr><td>intentEngine.markDeliver.*</td><td>标记投递配置、投递目标、收件箱（仅标记）、垃圾邮件文件夹、主题标记、正文标记、前缀、后缀、标记文案</td><td>标记投递子配置</td></tr>
+        <tr><td>intentEngine.threshold.*</td><td>区间{n}:、添加区间、智能填充、应用模板、严格、标准（推荐）、宽松、存在未覆盖区间提示</td><td>分段阈值配置</td></tr>
+        <tr><td>intentEngine.ops.*</td><td>应用同风险等级、复制到其他方向、重置为缺省值、配置已修改未保存</td><td>全局操作栏</td></tr>
+        <tr><td>intentEngine.direction.* / dialog.*</td><td>接收方向、外发方向、域内方向、方向提示条、复制/重置对话框全文</td><td>Tab 与对话框</td></tr>
+        <tr><td>intentEngine.warning.highRiskMark</td><td>高危意图采用标记投递，邮件将投递至用户邮箱，请确认风险</td><td>红色警告条 + ⚠ Tooltip</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="responsive">
+    <h2>8. 响应式规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>断点</th><th>浏览器验证</th><th>表现</th></tr></thead>
+      <tbody>
+        <tr><td>1440px</td><td>默认全流程截图</td><td>抽屉宽 1152px（80vw）；左导航 208px（可折叠至 56px）；卡片内容区自适应，可视化条 100% 填充。</td></tr>
+        <tr><td>1024px</td><td>已截图</td><td>抽屉实测宽 819px（80vw 比例保持）；方向 Tab、操作栏、意图卡片单列布局不变；操作栏按钮 flex-wrap 可折行。</td></tr>
+        <tr><td>&lt;1024px / 移动端</td><td>未验证</td><td>PRD §2.3：移动端暂不支持，建议桌面端操作。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/responsive-1024-drawer.png" alt="1024px 抽屉截图">
+      <figcaption>1024px 断点：抽屉保持 80vw（819px），意图引擎配置区域完整可用。</figcaption>
+    </figure>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>9. 与 PRD / 源码 / 浏览器渲染的差异标注</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>位置</th><th>PRD 描述</th><th>demo 实际</th><th>建议处理</th></tr></thead>
+      <tbody>
+        <tr><td>D-01</td><td>流水线阶段</td><td>意图引擎为「阶段5」（§1.3/§2.1 信息架构）</td><td>阶段3「内容层」第4项，priority 3003，抽屉标题「阶段3: 内容层」</td><td>以 demo 流水线结构为准记录；阶段编号归属需确认（Q1）</td></tr>
+        <tr><td>D-02</td><td>总开关位置</td><td>§2.1 总开关位于意图引擎模块顶部</td><td>总开关在抽屉配置卡头部（ContentStrategyPage 级，四个内容策略共用同一模式）</td><td>以 demo 为准，行为等价</td></tr>
+        <tr><td>D-03</td><td>卡片头动作 Badge</td><td>§2.2.3「当前动作Badge：显示配置的处置动作」</td><td>Badge 恒显示 <code>classificationAction</code>；切到分段阈值模式后仍显示分类优先动作（实测「分段阈值 + 标记投递」并列），不反映区间动作</td><td>落���建议阈值模式下显示区间摘要或最高严重度动作</td></tr>
+        <tr><td>D-04</td><td>国际化</td><td>§6.4 支持中英双语（implement.md 要求四语）</td><td>模块内全部文案硬编码中文，labelEn 定义未使用；全局字典仅 zh/en/th</td><td>落地必须接入 i18n（见 §7.1 key 清单），并确认第4语言（Q5）</td></tr>
+        <tr><td>D-05</td><td>保存校验</td><td>§4.4 阈值区间未覆盖完整时保存应提示「存在未覆盖区间，请修复后保存」</td><td>「保存配置」仅清除未保存标记，无任何校验（间隙警告只在阈值配置区内联显示）</td><td>落地需补保存前校验（Q6）</td></tr>
+        <tr><td>D-06</td><td>阈值边界与非法输入</td><td>§4.1 非数字修正为0、超出0-1修正为边界值、重叠按后输入覆盖</td><td>非数字 <code>parseFloat||0</code> 修正为0（一致）；但手工输入 &gt;1 或 &lt;0 不会被钳制（input 的 min/max 只约束步进按钮）；重叠区间仅按 min 排序显示，无覆盖处理。另外发/域内方向的默认阈值区间仍含「标记投递」动作（源码不区分方向），仅复制时降级</td><td>落地需实现钳制与重叠归一，非接收方向默认区间应替换标记投递</td></tr>
+        <tr style="background:#f0fdf4;"><td>D-07 <span style="display:inline-block;padding:1px 8px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:700;">已修复</span></td><td>未保存提示</td><td>§2.2.1 全局操作栏右侧一处「配置已修改未保存」，保存后清除</td><td><b>修复前</b>：模块级 <code>isDirty</code> 为单一布尔且无外部重置入口，「复制到其他方向」无条件标脏并显示在当前方向操作栏，保存后提示一直残留。<b>修复后（2026-07-17，commit 887ac48）</b>：改为按方向追踪 <code>dirtyDirections</code>，复制仅对真正变化的目标方向标脏并在其 Tab 打点、操作栏给出蓝色点名反馈；目标与源一致时不标脏（提示「无需修改」）；外层保存自增 <code>saveSignal</code>，模块清空各方向脏标记与反馈。浏览器已回归验证。</td><td>已落地修复，详见 <a href="layer-5-copy-save-state.html">层级5</a></td></tr>
+        <tr style="background:#f0fdf4;"><td>D-08 <span style="display:inline-block;padding:1px 8px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:700;">已修复</span></td><td>策略卡 Tooltip 文案</td><td>-</td><td><b>修复前</b>：hover 卡片 Tooltip「影响：黑名单命中则阻断并终止流程」复用通用 forced 文案 <code>policyEffectBlock</code>，与意图引擎语义不符。<b>修复后（2026-07-17，commit 5d17c2e）</b>：方案C — <code>PipelinePolicy</code> 新增 <code>actionKeys</code>/<code>effectKey</code> 字段，每条策略独立填写专属 i18n key，<code>getPolicyTooltipContent()</code> 直接读字段而非按 type 分支。意图引擎专属 key <code>pipeline.effect.intentEngine</code> 文案「按意图分类得分与分段阈值区间执行对应动作；命中高危区间默认阻断并终止流程」。浏览器已验证截图：v3-pipeline-tooltip-intent.png。</td><td>已落地修复，详见 <a href="layer-6-mark-label-fallback.html">层级6</a></td></tr>
+        <tr><td>D-09</td><td>检测模式 Tooltip</td><td>§1.2「分类优先：只要识别为该意图即执行处置，忽略置信度分数」</td><td>实测 Tooltip 为「分类优先：<b>评分为0</b>，只要识别为该意图即执行处置，忽略置信度分数。」——「评分为0」疑为笔误/冗余</td><td>落地修正文案</td></tr>
+        <tr><td>D-10</td><td>权限</td><td>§1.4 审计员只读、普通用户无权限</td><td>demo 无任何权限态（无只读渲染分支）</td><td>落地按统一权限体系实现只读禁用态（Q4）</td></tr>
+        <tr style="background:#f0fdf4;"><td>D-11 <span style="display:inline-block;padding:1px 8px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:700;">已修复</span></td><td>标记文案空值</td><td>§4.1 标记文案为空使用默认「[意图类型]」</td><td><b>修复前</b>：输入框可清空，无回填/默认逻辑（仅初始默认值为 [意图名]）；保存时写入空字符串。<b>修复后（2026-07-17，commit 5d17c2e）</b>：<code>MarkDeliverSubConfig</code> 新增 <code>defaultText</code> prop 与 <code>onBlur</code> 回填逻辑；主题标记与正文标记输入框均在失焦时检测 <code>value.trim() === ""</code>，若为空则回调 <code>onChange</code> 写入 <code>defaultText</code>（<code>[意图类型名]</code>）；placeholder 同步改为 <code>defaultText</code>。浏览器已验证：清空 → Tab → 回填 [订阅]，截图：v3-mark-label-cleared.png / v3-mark-label-fallback.png。</td><td>已落地修复，详见 <a href="layer-6-mark-label-fallback.html">层级6</a></td></tr>
+        <tr><td>D-12</td><td>异常场景</td><td>§4.3 加载重试 / 保存超时 Toast / AI 降级告警</td><td>demo 纯前端 mock，无任何加载/保存/降级路径</td><td>落地需实现</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>10. 需确认事项</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>问题</th><th>影响</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td>意图引擎的流水线阶段归属：PRD 写「阶段5」，demo 放在阶段3内容层（priority 3003）。以哪个为准？（影响优先级区间与执行顺序）</td><td>影响后端检测链路插入点与优先级编号。</td></tr>
+        <tr><td>Q2</td><td>AI 意图五分类识别服务的形态：当前网关无该服务（现有 LLM 深度复检 / textsim 均非五分类意图模型）。是新增独立 AI 服务、复用 OSG_LLM_* 链路，还是对接外部引擎？置信度分数（0-1）由谁产出？「审核」动作映射是否沿用其他模块的结论？</td><td>决定模块能否落地，为最大的底层依赖。</td></tr>
+        <tr><td>Q3</td><td>配置承载方式：3方向×5意图 的嵌套 JSON 配置走配置系统（ConfigManager/config_overrides 整体 JSON），还是拆为统一规则系统规则（page=intent-engine）？PRD 未定义 API 路径。</td><td>影响 API 设计、审计与多租户隔离实现。</td></tr>
+        <tr><td>Q4</td><td>审计员只读视图的实现方式：整页禁用（半透明）还是隐藏操作按钮？demo 无权限态可参考。</td><td>影响前端权限渲染方案。</td></tr>
+        <tr><td>Q5</td><td>四语国际化的第4种语言是哪一种（demo 全局字典仅 zh/en/th）？</td><td>影响 i18n key 清单与验收范围。</td></tr>
+        <tr><td>Q6</td><td>阈值区间存在间隙时是否阻止保存（PRD §4.4 要求提示后修复才能保存，demo 未实现）？间隙区间内的邮件按「未命中」处理还是默认放行？</td><td>影响保存校验与引擎兜底行为。</td></tr>
+        <tr><td>Q7</td><td>标记投递「投递目标=垃圾邮件文件夹」的实现机制：网关只能添加 header（implement.md：mark = accept + header），实际入文件夹依赖下游邮件系统按 header 分拣。header 约定是什么？「收件箱（仅标记）」与「垃圾邮件文件夹」如何区分？</td><td>影响标记投递动作的端到端联动。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    if (window.mermaid) { mermaid.initialize({ startOnLoad: true }); }
+
+    // ===== 层级0 抽屉预览交互（复刻 demo 状态机） =====
+    const pBody = document.getElementById("p-body");
+    const pSwitch = document.getElementById("p-enable-switch");
+    const pLabel = document.getElementById("p-enable-label");
+    const pDirty = document.getElementById("p-dirty");
+    const pDirty2 = document.getElementById("p-dirty2");
+    const pBanner = document.getElementById("p-banner");
+    const pBannerText = document.getElementById("p-banner-text");
+    const applyRisk = document.getElementById("p-apply-risk");
+
+    function markDirty() { pDirty.classList.remove("is-hidden"); pDirty2.classList.remove("is-hidden"); }
+
+    // 总开关：已启用/已禁用 + 内容半透明（demo: opacity-50 pointer-events-none）
+    pSwitch.addEventListener("click", () => {
+      const off = pSwitch.classList.toggle("off");
+      pSwitch.setAttribute("aria-checked", String(!off));
+      pLabel.textContent = off ? "已禁用" : "已启用";
+      pLabel.style.color = off ? "#6b7280" : "#2563eb";
+      pBody.classList.toggle("dimmed", off);
+      markDirty();
+    });
+
+    // 方向 Tab：切换后收起展开卡片；外发/域内显示提示条；动作 Badge 按方向默认值变化
+    document.querySelectorAll(".dir-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".dir-tab").forEach(t => t.classList.toggle("active", t === tab));
+        const dir = tab.dataset.dir;
+        pBanner.classList.toggle("is-hidden", dir === "receive");
+        pBannerText.textContent = (dir === "send" ? "外发" : "域内") + '方向不支持"标记投递"动作，相关配置将自动降级为"隔离"';
+        // 收起所有展开的意图说明（对应 demo setExpandedIntent(null)）
+        document.querySelectorAll("[data-note]").forEach(n => n.classList.add("is-hidden"));
+        applyRisk.disabled = true;
+        // 动作 Badge 按方向默认值（demo createIntentDefaults）
+        document.querySelectorAll(".intent-head").forEach(head => {
+          const act = head.querySelector("[data-act]");
+          const risk = head.classList.contains("high") ? "high" : head.classList.contains("medium") ? "medium" : "low";
+          let label, cls;
+          if (dir === "receive") { label = risk === "low" ? "标记投递" : "隔离"; cls = risk === "low" ? "act-mark" : "act-quarantine"; }
+          else { label = risk === "high" ? "阻断" : "审核"; cls = risk === "high" ? "act-block" : "act-review"; }
+          act.textContent = label;
+          act.className = "pill " + cls;
+          act.setAttribute("data-act", "");
+        });
+      });
+    });
+
+    // 风险面板折叠/展开（高危默认折叠）
+    document.querySelectorAll("[data-panel]").forEach(head => {
+      head.addEventListener("click", () => {
+        const body = document.querySelector(`[data-panel-body="${head.dataset.panel}"]`);
+        const open = head.classList.toggle("open");
+        body.classList.toggle("is-hidden", !open);
+      });
+    });
+
+    // 意图卡片头：点击展开（其他收起），Switch 点击不冒泡
+    document.querySelectorAll(".intent-head").forEach(head => {
+      head.addEventListener("click", (e) => {
+        if (e.target.closest("[data-sw]")) return;
+        const note = document.querySelector(`[data-note="${head.dataset.intent}"]`);
+        const wasOpen = !note.classList.contains("is-hidden");
+        document.querySelectorAll("[data-note]").forEach(n => n.classList.add("is-hidden"));
+        note.classList.toggle("is-hidden", wasOpen);
+        applyRisk.disabled = wasOpen; // 有展开卡时可用
+      });
+      const sw = head.querySelector("[data-sw]");
+      sw.addEventListener("click", (e) => { e.stopPropagation(); sw.classList.toggle("off"); markDirty(); });
+    });
+  </script>
+</body>
+</html>

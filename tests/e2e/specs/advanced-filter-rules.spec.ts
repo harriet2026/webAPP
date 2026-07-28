@@ -2,7 +2,7 @@
  * E2E spec: Advanced Filter Rules — list module + comprehensive-strategy
  * drawer host + editor drawer tab navigation + basic validation + i18n.
  *
- * Rewritten for the html_spec F1-F12 rewrite (see design/origin/html_spec/
+ * Rewritten for the html_spec F1-F12 rewrite (see webapp/doc/html-spec/
  * filter-rules-pipeline-advanced-rules and the components under
  * src/components/security/advanced-filter-rules/). The pre-rewrite UI's
  * superset features (stage selector, hit-stats column, advanced-settings

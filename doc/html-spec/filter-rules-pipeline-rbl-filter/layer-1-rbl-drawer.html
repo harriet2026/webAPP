@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级 1：抽屉 + RBL 配置面板 - 策略流水线 · RBL过滤</title>
+<style>
+:root{
+  --primary:oklch(0.52 0.226 262);--background:oklch(0.98 0.01 205);--foreground:oklch(0.145 0 0);
+  --card:#fff;--border:#e5e7eb;--subtle:#64748b;--danger:#d92d20;--warn:#b7791f;--ok:#14804a;
+  --font:"Geist","Inter",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --dp-fg:lab(2.75381 0 0);--dp-border:lab(90.952 0 -0.0000119209);
+  --dp-muted-bg:lab(96.52 0 0);--dp-muted-fg:lab(48.496 0 0);
+  --dp-input-bg:lab(97.7711 -3.04654 -1.63313);
+  --dp-primary:lab(41.4441 24.5539 -79.1878);--dp-primary-fg:lab(98.26 0 0);
+  --dp-blue50:lab(96.492 -1.14644 -5.11479);--dp-blue200:lab(86.15 -4.04379 -21.0797);
+  --dp-blue300:lab(77.5052 -6.4629 -36.42);--dp-blue600:lab(44.0605 29.0279 -86.0352);
+  --dp-blue700:lab(36.9089 35.0961 -85.6872);
+  --dp-font:Geist,"Geist Fallback","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:28px;color:var(--foreground);background:var(--background);font-family:var(--font);line-height:1.62}
+.wrap{max-width:1380px;margin:0 auto}
+header,nav,section{background:var(--card);border:1px solid var(--border);border-radius:10px}
+header{padding:24px 28px;margin-bottom:18px}
+h1{margin:0 0 14px;color:var(--primary);font-size:23px}
+h2{margin:0 0 16px;padding-bottom:8px;border-bottom:2px solid var(--primary);color:var(--primary);font-size:19px}
+h5{margin:14px 0 6px;color:#475569;font-size:13.5px}
+code{font-family:var(--mono);background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12.5px}
+a{color:#1677ff;text-decoration:none}a:hover{text-decoration:underline}
+section{padding:22px 26px;margin-bottom:18px}
+.layer-nav{display:flex;gap:16px;padding:12px 18px;margin-bottom:18px;font-size:14px;font-weight:600}
+.meta-table,.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+.meta-table td,.spec-table th,.spec-table td{border:1px solid var(--border);padding:9px 11px;vertical-align:top}
+.meta-table td:first-child{width:170px;color:var(--subtle);font-weight:650;background:#f8fafc}
+.spec-table th{background:#f1f5f9;text-align:left;white-space:nowrap}
+.spec-table tr:nth-child(even) td{background:#fbfdff}
+.overflow{overflow-x:auto}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.badge-blue{background:#e6f4ff;color:#0958d9}.badge-red{background:#fff1f0;color:var(--danger)}
+.badge-amber{background:#fff7e6;color:var(--warn)}.badge-green{background:#eaf8ef;color:var(--ok)}
+.figure{margin:14px 0}
+.figure img{max-width:100%;border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 18px rgba(15,23,42,.08)}
+.figure figcaption{margin-top:7px;color:var(--subtle);font-size:13px}
+.trigger-path{margin:8px 0 12px;padding:9px 11px;background:#f8fafc;border-radius:8px;color:#475569;font-size:13px}
+.component-preview{margin:14px 0;padding:22px;border:2px dashed #91caff;border-radius:10px;background:#f8fbff;overflow:visible}
+.preview-note{margin:0 0 14px;color:#0958d9;font-size:12.5px;font-weight:650}
+.dom-comparison{margin:14px 0;padding:12px 14px;background:#f8fafc;border:1px solid var(--border);border-radius:8px}
+.dom-comparison h5{margin-top:0}
+.mojibake{color:var(--danger);font-weight:700}
+/* ============ demo 1:1 预览 ============ */
+.dp{font-family:var(--dp-font);color:var(--dp-fg);font-size:16px;line-height:1.5;background:#fff;border:1px solid var(--dp-border);border-radius:10px;padding:24px}
+.dp-panel{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.dp-col-l{display:flex;flex-direction:column;gap:12px}
+.dp-col-r{display:flex;flex-direction:column;gap:16px}
+.dp-field{display:flex;flex-direction:column;gap:8px}
+.dp-label{font-size:14px;font-weight:500;line-height:1}
+.dp-srv-list{display:flex;flex-direction:column;gap:8px}
+.dp-srv-row{display:flex;align-items:center;gap:8px}
+.dp-badge{display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;border-radius:8px;border:1px solid transparent;
+  background:var(--dp-muted-bg);color:lab(7.78201 0 0);font-family:var(--mono);font-size:14px;font-weight:500}
+.dp-x{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:0;border-radius:8px;background:none;color:var(--dp-fg);cursor:pointer}
+.dp-x:hover{background:var(--dp-muted-bg)}
+.dp-add-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.dp-input{height:36px;padding:4px 12px;border:1px solid var(--dp-border);border-radius:8px;background:transparent;color:var(--dp-fg);font-size:14px;font-family:inherit}
+.dp-input:focus{outline:2px solid var(--dp-blue300);outline-offset:-1px}
+.dp-input-flex{flex:1;min-width:0}
+.dp-input-num{width:120px}
+.dp-btn-outline{display:inline-flex;align-items:center;justify-content:center;gap:4px;height:32px;padding:0 10px;border:1px solid var(--dp-border);
+  border-radius:8px;background:var(--dp-input-bg);color:var(--dp-fg);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer}
+.dp-btn-outline:hover{background:var(--dp-muted-bg)}
+.dp-select{position:relative;width:200px}
+.dp-trigger{display:flex;align-items:center;justify-content:space-between;width:200px;height:36px;padding:8px 12px;border:1px solid var(--dp-border);
+  border-radius:8px;background:transparent;color:var(--dp-fg);font-size:14px;font-family:inherit;cursor:pointer}
+.dp-trigger svg{opacity:.5;flex-shrink:0}
+.dp-content{position:absolute;top:calc(100% + 4px);left:0;z-index:30;width:200px;padding:4px;border:1px solid var(--dp-border);border-radius:8px;
+  background:var(--dp-input-bg);box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);display:none}
+.dp-content.on{display:block}
+.dp-option{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;font-size:14px;cursor:pointer}
+.dp-option:hover{background:var(--dp-muted-bg)}
+.dp-option[data-state="checked"]{background:var(--dp-primary);color:var(--dp-primary-fg)}
+.dp-option[data-state="checked"]:hover{background:var(--dp-primary)}
+.dp-check{display:none}
+.dp-option[data-state="checked"] .dp-check{display:inline-flex}
+/* 灰名单入口卡 */
+.dp-gl-wrap{padding-top:4px;display:none}
+.dp-gl-wrap.on{display:block}
+.dp-gl-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--dp-blue200);border-radius:10px;background:var(--dp-blue50)}
+.dp-gl-body{flex:1}
+.dp-gl-title{margin:0;font-size:14px;font-weight:500;color:var(--dp-blue700)}
+.dp-gl-sum{margin:2px 0 0;font-size:12px;color:var(--dp-blue600)}
+.dp-gl-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 12px;border:1px solid var(--dp-blue300);
+  border-radius:8px;background:var(--dp-input-bg);color:var(--dp-blue700);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer}
+.dp-gl-btn:hover{background:#dbeafe}
+.dp-hint{margin-top:16px;padding:10px 12px;border-radius:8px;background:#e6f4ff;border:1px solid #91caff;color:#0958d9;font-size:13px;display:none}
+.dp-hint.on{display:block}
+.dp-state{margin-top:14px;font-size:12.5px;color:var(--subtle);font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="layer-nav">
+  <a href="./index.html#component-2-2">← 返回主文件</a>
+  <a href="./layer-2-greylist-entry.html">层级 2：灰名单入口 →</a>
+</nav>
+
+<header>
+  <h1>交互层级 1：全页面抽屉 + RBL 配置面板（action = 阻断）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td>2.2 RBL 配置面板 <code>renderRblConfig()</code></td></tr>
+    <tr><td>主文件</td><td><a href="./index.html">filter-rules-pipeline-rbl-filter/index.html</a></td></tr>
+    <tr><td>demo 源</td><td><code>connection-layer-page.tsx</code> L1019–1112（面板）；<code>strategy-pipeline-page.tsx</code> L2007–2047（抽屉）</td></tr>
+    <tr><td>触发路径</td><td>层级 0 策略卡片 →「配置」按钮 → <code>setFullPageDrawerPolicy("rbl")</code> → Dialog 打开，内部挂载 <code>&lt;ConnectionLayerPage embedded initialPolicy="rbl" /&gt;</code></td></tr>
+    <tr><td>DOM 节点数</td><td>抽屉根 <strong>103</strong> ｜ RBL 配置面板 <strong>38</strong>（实测）</td></tr>
+  </table>
+</header>
+
+<section>
+  <h2>1. 该层级 UI 全貌</h2>
+  <div class="trigger-path"><strong>触发路径：</strong><code>/filter-rules/pipeline</code> → 阶段1 泳道 → RBL过滤卡片 →「配置」</div>
+  <figure class="figure">
+    <img src="./screenshots/02-rbl-drawer-full.png" alt="RBL 抽屉全貌">
+    <figcaption>抽屉全貌：头部面包屑「IP策略 / RBL过滤」+ 左侧 4 项策略导航 + 右侧配置区（含「已启用」Switch）</figcaption>
+  </figure>
+  <figure class="figure">
+    <img src="./screenshots/03-rbl-panel-block.png" alt="RBL 配置面板（阻断）">
+    <figcaption>RBL 配置面板元素截图（<code>div.grid.grid-cols-2.gap-6</code>，action = 阻断，无灰名单入口）</figcaption>
+  </figure>
+  <figure class="figure">
+    <img src="./screenshots/04-action-select-open.png" alt="操作下拉展开">
+    <figcaption>「操作」下拉展开：4 个选项，当前 <code>阻断</code> 为 <code>data-state="checked"</code>（蓝底白字 + 右侧对勾）</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>2. 可交互组件预览</h2>
+  <div class="component-preview">
+    <p class="preview-note">↓ 与 demo 行为一致的可操作预览：删除服务器（×）、输入并「添加」（回车亦可）、改超时、展开「操作」下拉切换动作。选中「灰名单」会条件渲染入口卡片（即进入层级 2）。</p>
+    <div class="dp">
+      <div class="dp-panel" id="rblPanel">
+        <!-- 左栏：RBL 服务器列表 -->
+        <div class="dp-col-l">
+          <span class="dp-label">RBL服务器</span>
+          <div class="dp-srv-list" id="srvList"></div>
+          <div class="dp-add-row">
+            <input class="dp-input dp-input-flex" id="newSrv" placeholder="rbl.example.com">
+            <button class="dp-btn-outline" id="addBtn" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+              添加
+            </button>
+          </div>
+        </div>
+        <!-- 右栏：超时 + 操作 + 灰名单入口 -->
+        <div class="dp-col-r">
+          <div class="dp-field">
+            <span class="dp-label">超时 (s)</span>
+            <input class="dp-input dp-input-num" id="timeout" type="number" value="5">
+          </div>
+          <div class="dp-field">
+            <span class="dp-label">操作</span>
+            <div class="dp-select">
+              <button class="dp-trigger" id="trigger" type="button" role="combobox" aria-expanded="false" data-state="closed">
+                <span id="triggerLabel">阻断</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg>
+              </button>
+              <div class="dp-content" id="content" role="listbox">
+                <div class="dp-option" role="option" data-value="block"      data-state="checked">阻断<span class="dp-check">✓</span></div>
+                <div class="dp-option" role="option" data-value="quarantine" data-state="unchecked">隔离<span class="dp-check">✓</span></div>
+                <div class="dp-option" role="option" data-value="mark"       data-state="unchecked">标记<span class="dp-check">✓</span></div>
+                <div class="dp-option" role="option" data-value="greylist"   data-state="unchecked">灰名单<span class="dp-check">✓</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="dp-gl-wrap" id="glWrap">
+            <div class="dp-gl-card">
+              <div class="dp-gl-body">
+                <p class="dp-gl-title">灰名单配置</p>
+                <p class="dp-gl-sum">延迟接收：600秒内阻断首次请求</p>
+              </div>
+              <button class="dp-gl-btn" type="button" id="glBtn">点<span class="mojibake">���</span>配置</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dp-hint" id="glHint">已进入<strong>层级 2</strong>（<code>rblAction === "greylist"</code> 条件渲染入口卡片）。
+        详见 <a href="./layer-2-greylist-entry.html">层级 2 · 灰名单入口 →</a></div>
+      <div class="dp-hint" id="dlgHint">点击入口卡按钮 → demo 打开灰名单配置 Dialog。
+        详见 <a href="./layer-3-greylist-dialog.html">层级 3 · 灰名单 Dialog →</a></div>
+      <div class="dp-state" id="stateLine"></div>
+    </div>
+  </div>
+  <p style="font-size:13px;color:var(--subtle)">预览如实复刻 demo 的<strong>缺陷行为</strong>：添加空串或重复服务器时<strong>静默无反应</strong>（无 Toast、无红字）；服务器可删到 0 条且无确认弹窗；超时输入无 min/max。见主文件 §9 D3 / D4。</p>
+</section>
+
+<section>
+  <h2>3. UI 元素清单</h2>
+  <div class="overflow">
+  <table class="spec-table">
+    <thead><tr><th>#</th><th>元素</th><th>类型</th><th>文案 / 占位符</th><th>默认值</th><th>样式（实测）</th><th>交互 / 校验</th><th>i18n key</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>抽屉面包屑</td><td>h2 + span</td><td>「IP策略 / RBL过滤」</td><td>—</td><td>—</td><td>右上角 X 关闭抽屉</td><td><code>connection.ipPolicy</code> / <code>connection.rblFilter</code></td></tr>
+      <tr><td>2</td><td>模块启用开关</td><td>Switch <code>[role=switch]</code></td><td>「已启用」</td><td><code>aria-checked="true"</code></td><td>—</td><td>关闭后 spec 要求整体灰度（demo 未验证）</td><td><code>common.enabled</code></td></tr>
+      <tr><td>3</td><td>面板根</td><td>div</td><td>—</td><td>—</td><td><code>grid-cols-2 gap-6</code>；1920px 下每栏 602.5px</td><td>无断点降级（D7）</td><td>—</td></tr>
+      <tr><td>4</td><td>左栏 Label</td><td>label</td><td>「RBL服务器」</td><td>—</td><td>14px / 500</td><td>无</td><td><code>connection.rblServers</code></td></tr>
+      <tr><td>5</td><td>服务器 Badge</td><td>span（Badge secondary）</td><td><code>zen.spamhaus.org</code> / <code>bl.spamcop.net</code> / <code>b.barracudacentral.org</code></td><td>3 条（来自 <code>createDefaultRblConfig()</code>）</td><td>34px 高，<code>font-mono</code> 14px/500，bg <code>lab(96.52 0 0)</code>，radius 8px，padding 6px 12px</td><td>无 Tooltip（spec 要求逐个说明 → D9）</td><td>—</td></tr>
+      <tr><td>6</td><td>删除按钮</td><td>button ghost + <code>lucide-x</code>(12×12)</td><td>—</td><td>—</td><td>28×28（<code>h-7 w-7</code>）</td><td>click → 设置 <code>deletingRblServer</code> → 二次确认；确认后移除、标记未保存并 Toast（<a href="./layer-6-rbl-delete-confirm.html">L6</a>）</td><td>确认文案为 zh/th/en 内联文案</td></tr>
+      <tr><td>7</td><td>新服务器输入框</td><td>input[text]</td><td>占位符 <code>rbl.example.com</code></td><td>空</td><td>高 36px，radius 8px，<code>flex:1</code>；错误时 destructive 红框</td><td><kbd>Enter</kbd> 或添加按钮 → 必填 / DNSBL 域名 / 去重校验；<code>aria-invalid</code> 同步（<a href="./layer-5-rbl-validation.html">L5</a>）</td><td>Toast 为 zh/th/en 内联文案</td></tr>
+      <tr><td>8</td><td>添加按钮</td><td>button outline + <code>lucide-plus</code>(16×16)</td><td>「添加」</td><td>—</td><td>高 32px，radius 8px，bg <code>lab(97.77 -3.05 -1.63)</code></td><td>空值、格式错误、重复分别拦截并 Toast；成功后小写化追加、清空输入、标记未保存</td><td><code>common.add</code></td></tr>
+      <tr><td>9</td><td>超时输入框</td><td>input[number]</td><td>Label「超时 (s)」</td><td><code>5</code></td><td>宽 120px（<code>max-w-[120px]</code>），高 36px</td><td><code>min=1 max=30</code>；onBlur 空/NaN→5，越界→1或30，并显示三语错误 Toast</td><td><code>connection.timeout</code></td></tr>
+      <tr><td>10</td><td>操作下拉触发器</td><td>button <code>[role=combobox]</code> + <code>lucide-chevron-down</code></td><td>Label「操作」；显示当前动作</td><td><code>阻断</code>（<code>block</code>）</td><td>宽 200px（<code>w-[200px]</code>），高 36px</td><td>click → 展开 Portal 浮层</td><td><code>common.action</code></td></tr>
+      <tr><td>11</td><td>下拉选项 ×4</td><td><code>[role=option]</code></td><td>阻断 / 隔离 / 标记 / 灰名单</td><td>阻断 <code>data-state="checked"</code></td><td>选中项：蓝底 <code>lab(41.44 24.55 -79.19)</code> 白字 + 右侧对勾</td><td>选中「灰名单」→ 条件渲染入口卡（→ 层级 2）</td><td><code>common.block</code> / <code>quarantine</code> / <code>mark</code> / <code>greylist</code></td></tr>
+      <tr><td>12</td><td>灰名单入口卡</td><td>div（条件渲染）</td><td>—</td><td><strong>本层不渲染</strong></td><td>—</td><td>仅当 <code>rblAction === "greylist"</code></td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p><strong>形态/角色差异：</strong>[Base] 上述元素对所有有效角色一致；[Overlay] 云-多 / AI-多 / 传统-多的租户管理员因阶段1整体隐藏，不渲染本表任何控件。当前没有只读控件态。</p>
+</section>
+
+<section>
+  <h2>4. DOM 树比对结果</h2>
+  <div class="dom-comparison">
+    <h5>提取的 HTML vs demo 实际 DOM（<code>[data-spec='rbl-panel']</code>，action = block）</h5>
+    <div class="overflow">
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>预览 HTML</th><th>一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td><code>div.grid.grid-cols-2.gap-6</code></td><td><code>div.dp-panel</code>（<code>display:grid</code>，2 等宽列，gap 24px）</td><td>✅</td></tr>
+        <tr><td>节点总数</td><td><strong>38</strong></td><td>38（含 4 个 svg 各自的 path 子节点）</td><td>✅</td></tr>
+        <tr><td>直接子节点数</td><td>2（<code>div.space-y-3</code> 左栏 / <code>div.space-y-4</code> 右栏）</td><td>2</td><td>✅</td></tr>
+        <tr><td>服务器行数</td><td>3 × <code>div.flex.items-center.gap-2</code></td><td>3（JS 按数组渲染）</td><td>✅</td></tr>
+        <tr><td>Badge 文案</td><td>"zen.spamhaus.org" / "bl.spamcop.net" / "b.barracudacentral.org"</td><td>逐字一致，等宽字体</td><td>✅</td></tr>
+        <tr><td>删除按钮图标</td><td><code>svg.lucide-x</code>，2 个 <code>path</code></td><td>同一 <code>lucide-x</code> path 数据</td><td>✅</td></tr>
+        <tr><td>输入框 placeholder</td><td><code>placeholder="rbl.example.com"</code>，<code>value=""</code></td><td>同</td><td>✅</td></tr>
+        <tr><td>添加按钮</td><td>"添加" + <code>svg.lucide-plus</code>（2 path）</td><td>同</td><td>✅</td></tr>
+        <tr><td>超时输入</td><td><code>input[type=number]</code>，<code>value="5"</code>，<strong>无 min / max 属性</strong></td><td><code>value="5"</code>，同样不加 min/max（如实复刻）</td><td>✅</td></tr>
+        <tr><td>操作触发器属性</td><td><code>role="combobox" aria-expanded="false" data-state="closed" type="button"</code></td><td>同（展开时切为 <code>aria-expanded="true"</code> / <code>data-state="open"</code>）</td><td>✅</td></tr>
+        <tr><td>触发器文案</td><td>span "阻断" + <code>svg.lucide-chevron-down</code>（<code>opacity:.5</code>）</td><td>同</td><td>✅</td></tr>
+        <tr><td>下拉选项</td><td>Portal 渲染到 body（不在面板子树内）；4 项，<code>data-state</code> 分别 checked/unchecked×3</td><td>预览内联在 <code>.dp-select</code> 中（绝对定位），<code>data-state</code> 语义一致</td><td>⚠ 结构位置差异（Radix Portal，见下）</td></tr>
+        <tr><td>灰名单入口卡</td><td><strong>未渲染</strong>（<code>rblAction === "block"</code>，条件为假）</td><td>未渲染（<code>.dp-gl-wrap</code> 无 <code>.on</code>）</td><td>✅</td></tr>
+        <tr><td>切到 greylist 后节点数</td><td><strong>44</strong>（+6：<code>div.pt-1</code> 包裹 + 入口卡 5 节点）</td><td>+6，同增量</td><td>✅</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="margin:8px 0 0;font-size:13px;color:var(--subtle)"><strong>差异说明（已知且可接受）：</strong>demo 的 Radix <code>SelectContent</code> 通过 Portal 渲染到 <code>document.body</code>，因此<strong>不计入面板的 38 节点</strong>；提取面板 outerHTML 时下拉内容天然缺席。选项的文案与 <code>data-state</code> 由独立一次 <code>page.evaluate</code> 抓取 <code>[role=option]</code> 得到：<code>[{"text":"阻断","state":"checked"},{"text":"隔离","state":"unchecked"},{"text":"标记","state":"unchecked"},{"text":"灰名单","state":"unchecked"}]</code>。预览为了可操作性把浮层内联在触发器旁，属<strong>刻意的结构简化</strong>，视觉与状态语义一致。</p>
+  </div>
+</section>
+
+</div>
+
+<script>
+/* ===== 复刻 demo 的 RBL 面板状态机 ===== */
+(function () {
+  var servers = ["zen.spamhaus.org", "bl.spamcop.net", "b.barracudacentral.org"];
+  var action = "block";
+  var hasUnsavedChanges = false;
+
+  var srvList = document.getElementById('srvList');
+  var newSrv  = document.getElementById('newSrv');
+  var addBtn  = document.getElementById('addBtn');
+  var timeout = document.getElementById('timeout');
+  var trigger = document.getElementById('trigger');
+  var trigLbl = document.getElementById('triggerLabel');
+  var content = document.getElementById('content');
+  var glWrap  = document.getElementById('glWrap');
+  var glHint  = document.getElementById('glHint');
+  var dlgHint = document.getElementById('dlgHint');
+  var glBtn   = document.getElementById('glBtn');
+  var stateLn = document.getElementById('stateLine');
+
+  var X_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>';
+
+  function paintState() {
+    stateLn.textContent = 'state: servers=[' + servers.length + '] timeout="' + timeout.value +
+      '" action="' + action + '" hasUnsavedChanges=' + hasUnsavedChanges;
+  }
+
+  function renderServers() {
+    srvList.innerHTML = '';
+    servers.forEach(function (s) {
+      var row = document.createElement('div');
+      row.className = 'dp-srv-row';
+      var badge = document.createElement('span');
+      badge.className = 'dp-badge';
+      badge.textContent = s;
+      var x = document.createElement('button');
+      x.className = 'dp-x'; x.type = 'button'; x.innerHTML = X_SVG;
+      /* demo: removeRblServer() 不调用 setHasUnsavedChanges —— 如实复刻 */
+      x.addEventListener('click', function () {
+        servers = servers.filter(function (v) { return v !== s; });
+        renderServers(); paintState();
+      });
+      row.appendChild(badge); row.appendChild(x);
+      srvList.appendChild(row);
+    });
+  }
+
+  /* demo: if (newRblServer && !rblServers.includes(newRblServer)) —— 否则静默不作为 */
+  function addServer() {
+    var v = newSrv.value;
+    if (v && servers.indexOf(v) === -1) {
+      servers.push(v);
+      newSrv.value = '';
+      renderServers();
+    }
+    paintState();
+  }
+  addBtn.addEventListener('click', addServer);
+  newSrv.addEventListener('keydown', function (e) { if (e.key === 'Enter') { addServer(); } });
+
+  timeout.addEventListener('input', function () { hasUnsavedChanges = true; paintState(); });
+
+  function setOpen(open) {
+    content.classList.toggle('on', open);
+    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    trigger.setAttribute('data-state', open ? 'open' : 'closed');
+  }
+  trigger.addEventListener('click', function (e) {
+    e.stopPropagation();
+    setOpen(!content.classList.contains('on'));
+  });
+  document.addEventListener('click', function () { setOpen(false); });
+  content.addEventListener('click', function (e) { e.stopPropagation(); });
+
+  content.querySelectorAll('.dp-option').forEach(function (opt) {
+    opt.addEventListener('click', function () {
+      action = opt.getAttribute('data-value');
+      content.querySelectorAll('.dp-option').forEach(function (o) {
+        o.setAttribute('data-state', o === opt ? 'checked' : 'unchecked');
+      });
+      trigLbl.textContent = opt.textContent.replace('✓', '').trim();
+      hasUnsavedChanges = true;
+      var isGrey = action === 'greylist';
+      glWrap.classList.toggle('on', isGrey);
+      glHint.classList.toggle('on', isGrey);
+      if (!isGrey) { dlgHint.classList.remove('on'); }
+      setOpen(false);
+      paintState();
+    });
+  });
+
+  glBtn.addEventListener('click', function () { dlgHint.classList.add('on'); });
+
+  renderServers();
+  paintState();
+})();
+</script>
+</body>
+</html>

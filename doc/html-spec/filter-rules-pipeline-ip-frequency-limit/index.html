@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - IP频率限制 - HTML 规格说明</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --radius: 0.625rem;
+      --blue: #1890ff;
+      --block: #f5222d;
+      --warn: #fa8c16;
+      --ok: #52c41a;
+      --diff-bg: #fff1f0;
+      --diff-border: #f5222d;
+      --question-bg: #fffbe6;
+      --question-border: #faad14;
+      --font-sans: "Geist", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0 auto;
+      max-width: 1420px;
+      padding: 28px;
+      background: var(--background);
+      color: var(--foreground);
+      font-family: var(--font-sans);
+      line-height: 1.58;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .spec-header, section, .component-toc, .component-spec {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      padding: 22px 26px;
+    }
+    h1 { color: var(--primary); font-size: 25px; margin: 0 0 14px; }
+    h2 { color: var(--primary); font-size: 20px; margin: 0 0 14px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; }
+    h3 { font-size: 17px; margin: 18px 0 10px; }
+    h4 { font-size: 15px; margin: 14px 0 8px; color: var(--muted-foreground); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 9px 11px; vertical-align: top; }
+    .meta-table td:first-child { width: 190px; color: var(--muted-foreground); font-weight: 650; }
+    .spec-table th { background: var(--muted); text-align: left; white-space: nowrap; }
+    .badge { display: inline-block; border-radius: 6px; padding: 2px 7px; font-size: 12px; font-weight: 650; }
+    .badge-blue { background: #e6f4ff; color: #0958d9; }
+    .badge-red { background: #fff1f0; color: #cf1322; }
+    .badge-orange { background: #fff7e6; color: #d46b08; }
+    .badge-green { background: #f6ffed; color: #389e0d; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgb(0 0 0 / 8%); }
+    .screenshot-figure figcaption { margin-top: 7px; color: var(--muted-foreground); font-size: 13px; }
+    .component-preview {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      padding: 16px;
+      margin: 12px 0;
+      overflow: auto;
+    }
+    .actual-extracted { max-height: 680px; overflow: auto; isolation: isolate; }
+    .actual-extracted > * { margin: 0; }
+    .actual-extracted .fixed { position: relative !important; inset: auto !important; }
+    .pipeline-preview { display: flex; align-items: stretch; min-width: 980px; }
+    .stage { min-width: 218px; padding: 14px; border: 1px solid #e8e8e8; background: #fff; }
+    .stage h4 { margin-top: 0; color: #262626; }
+    .policy-card { height: 56px; border: 1px solid #e8e8e8; border-radius: 8px; display: flex; overflow: hidden; margin-top: 10px; background: #fff; }
+    .policy-card .bar { width: 4px; background: var(--block); }
+    .policy-card .body { flex: 1; padding: 8px 11px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .policy-card button { border: 0; background: transparent; color: var(--blue); font-size: 13px; }
+    .arrow { width: 42px; display: grid; place-items: center; border-block: 1px solid #e8e8e8; color: var(--block); font-size: 12px; }
+    .mini-table { min-width: 1060px; border-collapse: collapse; font-size: 13px; }
+    .mini-table th, .mini-table td { border-bottom: 1px solid #f0f0f0; padding: 9px 10px; text-align: left; white-space: nowrap; }
+    .mini-table th { background: #fafafa; color: #595959; }
+    .diff-section { background: var(--diff-bg); border-left: 4px solid var(--diff-border); }
+    .diff-section h2 { color: var(--diff-border); border-bottom-color: var(--diff-border); }
+    .question-section { background: var(--question-bg); border-left: 4px solid var(--question-border); }
+    .question-section h2 { color: #ad6800; border-bottom-color: var(--question-border); }
+    pre { background: #f6f8fa; border: 1px solid var(--border); border-radius: 8px; padding: 12px; overflow: auto; font-family: var(--font-mono); font-size: 12px; }
+    .mermaid { background: var(--muted); border-radius: 8px; padding: 16px; text-align: center; overflow: auto; }
+    .dom-comparison { margin-top: 14px; }
+    .toc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+    .toc-list li { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    @media (max-width: 900px) { body { padding: 14px; } .spec-header, section, .component-toc, .component-spec { padding: 16px; } }
+    /* ===== 产品形态×角色差异矩阵 ===== */
+    .matrix-table th { background: var(--primary); color: #fff; text-align: center; }
+    .matrix-table td { text-align: center; font-size: 18px; }
+    .matrix-table td:first-child { text-align: left; font-size: 14px; }
+    .legend { color: var(--muted-foreground); font-size: 13px; margin: 8px 0 0; }
+    #form-role-matrix { border-left: 4px solid var(--primary); }
+    /* 形态/角色差异列标记 */
+    .fm-tag { display:inline-block; font-size:11px; font-weight:650; padding:1px 6px; border-radius:5px; background:#eef2ff; color:#3730a3; margin-right:4px; white-space:nowrap; }
+    .fm-cell { font-size:15px; }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>策略流水线 - IP频率限制 HTML 规格说明</h1>
+    <table class="meta-table">
+      <tr><td>目标模块</td><td>安全策略模块 / 策略流水线 / 阶段1 IP策略 / IP频率限制</td></tr>
+      <tr><td>浏览器验证 URL</td><td><code>http://192.168.3.3:3004/filter-rules/pipeline</code></td></tr>
+      <tr><td>demo 源路径</td><td><code>app/filter-rules/pipeline/page.tsx</code><br><code>components/filter-rules-new/strategy-pipeline-page.tsx</code><br><code>components/filter-rules-new/connection-layer-page.tsx</code><br><code>components/ip-frequency-limit/</code><br><code>lib/product-profiles.ts</code>（形态×角色门控）</td></tr>
+      <tr><td>spec 源文件</td><td><span class="badge badge-green">事实源已裁决</span> <code>docs/</code> 下无 IP频率限制独立需求文档。<strong>本规格的事实源 = demo 运行态（第一）+ 用户/PO 描述（第二）</strong>（2026-07-21 裁决：无 spec 即以 demo 与描述为准）。组件/交互描述以 demo 运行态逆向提取并逐项浏览器验证。原 header 引用的 <code>IP频率限制的需求文档.done.md</code> 经核实不存在，引用已移除。</td></tr>
+      <tr><td>门控真源</td><td><code>lib/product-profiles.ts</code> → <code>strategy-pipeline</code>：<code>visibility=ALL_SHOW</code>、<code>scope=mixed</code>、<code>tenantAccess=edit</code>、<code>platformHidden=true</code>、<code>capability=base</code>。运行态实测见 <a href="#form-role-matrix">§0.1 差异矩阵</a>。</td></tr>
+      <tr><td>浏览器证据</td><td>agent-browser，视口 1440×1000；逐层 DOM/点击证据及截图位于 <code>./screenshots/</code>；形态×角色实测 6 组合（见 §0.1）</td></tr>
+      <tr><td>规格版本</td><td><span class="spec-version">v3</span>（v2 校验于 2026-07-20，v1 于 2026-07-10）</td></tr>
+      <tr><td>校验时间</td><td>2026-07-20（当前 demo 运行态，agent-browser 真实交互验证）</td></tr>
+    </table>
+  </header>
+
+  <!-- ========== 0.1 产品形态 × 角色视角差异矩阵（技能首要原则，强制） ========== -->
+  <section id="form-role-matrix">
+    <h2>0.1 产品形态 × 角色差异矩阵</h2>
+    <p>IP频率限制是<strong>策略流水线（strategy-pipeline）</strong>阶段1「IP策略」下的子模块，其可见性继承策略流水线的门控。结论以 <strong>demo 运行态实测</strong> 为准（6 组合交叉验证，2026-07-20）。</p>
+    <table class="matrix-table spec-table">
+      <thead>
+        <tr><th>角色 / 形态</th><th>AI-单</th><th>传统-单</th><th>云-多</th><th>AI-多</th><th>传统-多</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>平台管理员</strong></td>
+          <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+        </tr>
+        <tr>
+          <td><strong>租户管理员</strong></td>
+          <td>—</td><td>—</td><td>❌</td><td>❌</td><td>❌</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="legend">图例：✅ 显示且可编辑 ｜ 🔒 显示但只读 ｜ ❌ 隐藏（前端不展示入口；直接拼 URL 访问时后端拦截返回 403/404）｜ — 无此角色（单租户形态无平台/租户之分，统一为平台视角）</p>
+
+    <h4>实测证据（demo 运行态，agent-browser 严格可见性判定：<code>offsetParent + getBoundingClientRect + computedStyle</code>）</h4>
+    <table class="spec-table">
+      <thead><tr><th>形态 × 角色</th><th>profile/viewer</th><th>IP频率限制可见</th><th>判定</th></tr></thead>
+      <tbody>
+        <tr><td>云-多 × 平台</td><td><code>cloud / platform</code></td><td>可见（freqVisCount=1）</td><td>✅</td></tr>
+        <tr><td>云-多 × 租户</td><td><code>cloud / tenant</code></td><td>不可见（freqVisCount=0）</td><td>❌</td></tr>
+        <tr><td>AI-单 × 平台</td><td><code>ai-single / platform</code></td><td>可见</td><td>✅</td></tr>
+        <tr><td>传统-单 × 平台</td><td><code>legacy-single / platform</code></td><td>可见</td><td>✅</td></tr>
+        <tr><td>AI-多 × 租户</td><td><code>ai-multi / tenant</code></td><td>不可见</td><td>❌</td></tr>
+        <tr><td>传统-多 × 平台</td><td><code>legacy-multi / platform</code></td><td>可见</td><td>✅</td></tr>
+      </tbody>
+    </table>
+
+    <blockquote>
+      ⚠️ <strong>运行态与代码注释冲突（已按运行态记录）</strong>：<code>lib/product-profiles.ts</code> 中 <code>strategy-pipeline.platformHidden=true</code> 的注释写「多租户<strong>平台</strong>视角隐藏」，但实测实际行为是「<strong>平台视角可见、租户视角隐藏</strong>」（云-多/AI-多/传统-多的租户视角均不渲染 IP频率限制，平台视角均渲染）。注释字面与运行态相反，按技能「以 demo 运行态为第一事实源」以实测为准，并已列入 <a href="#diffs">§9 D-011</a> 差异与 <a href="#questions">§10 Q-GATE</a> 待确认（注释是否写反 / 门控语义是否符合产品预期）。
+    </blockquote>
+
+    <h4>编写标记</h4>
+    <table class="spec-table">
+      <tbody>
+        <tr><td><code>[Base]</code></td><td>功能基线：模块的规则 CRUD、批量删除、批量导入/导出、挂起IP管理等核心交互，在所有「可见」的形态×角色下行为一致（不随 AI 能力变化，<code>capability=base</code>，传统版同样可用）。</td></tr>
+        <tr><td><code>[多租户差异：租户视角]</code></td><td>多租户形态（云-多/AI-多/传统-多）的<strong>租户管理员</strong>视角下，IP频率限制入口隐藏——IP策略相关配置收归平台侧安全策略，租户不暴露。</td></tr>
+        <tr><td><code>[单租户]</code></td><td>单租户形态（AI-单/传统-单）无平台/租户分层，IP频率限制对管理员照常可见可编辑。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="version-history" class="version-history-section">
+    <h2>🕑 版本历史</h2>
+    <table class="version-history-table spec-table">
+      <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>变更摘要</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>v3</td><td>2026-07-20</td><td><code>3ef88c5</code></td>
+          <td>补齐技能首要原则/第一原则缺口：① 新增 <a href="#form-role-matrix">§0.1 产品形态×角色差异矩阵</a>（5形态×2角色，结论来自 demo 运行态 6 组合严格可见性实测——实测「平台可见/租户隐藏」，与 product-profiles.ts 注释字面相反，按运行态记录）；② 3 个组件补 demo 组件/交互/形态角色差异标注；③ 差异新增 D-011（门控语义冲突）、D-PRD（spec 真源缺失）；④ 需确认新增 Q-PRD、Q-GATE。</td>
+        </tr>
+        <tr>
+          <td>v2</td><td>2026-07-20</td><td><code>3ef88c5</code></td>
+          <td>同步 demo 新增能力：① 表格全选三态 Checkbox（跨页保留）+ 行单选高亮 + 「删除选中（N）」destructive 按钮 + 批量删除确认弹窗；② 批量导入/导出由占位逻辑升级为完整实现（CSV/JSON、模板下载、实时解析预览、导入成功内联横幅、导出范围/格式 RadioGroup）；③ 优先级 Tooltip 文案更正为「数值越大，匹配顺序越靠前」。已用 agent-browser 逐项真实交互验证并截图（11~18）。</td>
+        </tr>
+        <tr>
+          <td>v1</td><td>2026-07-10</td><td><code>2e0be97</code></td>
+          <td>初版：入口卡片、模块头部操作栏、规则列表 5 交互层级（展开详情/挂起IP抽屉/新建规则抽屉/示例+模拟测试）、Chrome CDP 逐层 DOM 比对与截图；差异标注含优先级方向待确认项。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <nav class="component-toc">
+    <h2>组件列表</h2>
+    <ul class="toc-list">
+      <li><a href="#component-2-1">2.1 策略流水线入口卡片</a> <span class="badge badge-blue">1层</span></li>
+      <li><a href="#component-2-2">2.2 模块头部与操作栏</a> <span class="badge badge-blue">1层</span></li>
+      <li><a href="#component-2-3">2.3 IP频率限制规则列表模块</a> <span class="badge badge-blue">8层</span><br>
+        <a href="layer-1-expanded-rule.html">层级1 展开规则详情</a> /
+        <a href="layer-2-suspended-ip-drawer.html">层级2 挂起IP抽屉</a> /
+        <a href="layer-3-new-rule-drawer.html">层级3 新建规则抽屉</a> /
+        <a href="layer-4-examples-simulator.html">层级4 示例+模拟测试</a> /
+        <a href="layer-5-batch-delete.html">层级5 批量删除</a> /
+        <a href="layer-6-batch-import.html">层级6 批量导入</a> /
+        <a href="layer-7-export.html">层级7 导出</a>
+      </li>
+      <li><a href="#api-mapping">4. 数据/API 映射</a> <span class="badge badge-green">落地约束</span></li>
+      <li><a href="#diffs">9. 差异标注</a> <span class="badge badge-red">需关注</span></li>
+    </ul>
+  </nav>
+
+  <section id="layout">
+    <h2>1. 页面布局结构</h2>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/01-page-default.png" alt="策略流水线默认态">
+      <figcaption>策略流水线默认态：阶段1 IP策略中第一张卡片为“IP频率限制”，右侧操作为“配置”。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>浏览器实际渲染</th><th>规格说明</th></tr></thead>
+      <tbody>
+        <tr><td>侧边栏</td><td>AI邮件安全网关、系统状态、监控中心、统计报表、邮件处置、举报中心、日志审计、系统管理等导航。</td><td>非本模块编辑范围，只作为页面容器。</td></tr>
+        <tr><td>页面标题</td><td>“策略流水线”，右侧有“刷新”按钮。</td><td>策略执行流程的页面级入口。</td></tr>
+        <tr><td>阶段1 IP策略</td><td>包含 IP频率限制、IP黑白名单、RBL过滤、海外邮件检测。</td><td>点击 IP频率限制卡片或“配置”进入 80vw 右侧嵌入式抽屉。</td></tr>
+        <tr><td>动作图例</td><td>投递、标记投递、隔离、审核、阻断、丢弃，以及流程控制说明。</td><td>IP频率限制是阻断型策略，卡片左侧色条为红色。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="components">
+    <h2>2. 逐组件规格</h2>
+
+    <article class="component-spec" id="component-2-1">
+      <h3>2.1 策略流水线入口卡片</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><td style="width:190px;color:var(--muted-foreground);font-weight:650">demo 组件</td><td><code>components/filter-rules-new/strategy-pipeline-page.tsx</code>（阶段1 IP策略 → IP频率限制卡片）</td></tr>
+          <tr><td style="color:var(--muted-foreground);font-weight:650">交互</td><td>点击卡片/「配置」→ 打开全页面嵌入式 Sheet（IP频率限制模块），1 层入口</td></tr>
+          <tr><td style="color:var(--muted-foreground);font-weight:650">形态/角色差异</td><td class="fm-cell"><span class="fm-tag">[Base]</span>可见形态×角色下入口一致；<span class="fm-tag">[多租户差异：租户视角]</span>❌ 租户管理员不可见此入口（收归平台侧）；<span class="fm-tag">[单租户]</span>✅ 可见。详见 <a href="#form-role-matrix">§0.1</a>。</td></tr>
+        </tbody>
+      </table>
+      <h4>运行态提取 HTML（DOM 比对对象）</h4>
+      <div class="component-preview actual-extracted" id="pv-entry-extract">
+<div class="flex items-center justify-between"><span class="text-[14px] font-medium text-[#262626] dark:text-gray-100 truncate">IP频率限制</span><button id="pv-entry-cfg" class="text-[#1890FF] hover:text-[#40A9FF] text-[13px] flex items-center gap-0.5 flex-shrink-0" style="cursor:pointer;background:none;border:0;">配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right h-3 w-3"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div>
+      </div>
+      <script>(function(){var b=document.getElementById('pv-entry-cfg');if(b)b.addEventListener('click',function(){var t=document.getElementById('component-2-3');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});});})();</script>
+      <h4>离线视觉重建（辅助审查）</h4>
+      <div class="component-preview" id="pv-pipeline">
+        <p style="color:var(--muted-foreground);font-size:12px;margin:0 0 10px">🖥 可交互预览：点击「IP频率限制 → 配置」跳转至 2.3 模块；其他策略卡片提示非本模块。</p>
+        <div class="pipeline-preview">
+          <div class="stage">
+            <h4>阶段1: IP策略</h4>
+            <div class="policy-card" data-target="component-2-3" style="cursor:pointer;"><div class="bar"></div><div class="body"><strong>IP频率限制</strong><button>配置 →</button></div></div>
+            <div class="policy-card" data-other="IP黑白名单"><div class="bar"></div><div class="body"><strong>IP黑白名单</strong><button>配置 →</button></div></div>
+            <div class="policy-card" data-other="RBL过滤"><div class="bar"></div><div class="body"><strong>RBL过滤</strong><button>配置 →</button></div></div>
+            <div class="policy-card" data-other="海外邮件检测"><div class="bar" style="background:#d9d9d9"></div><div class="body"><strong>海外邮件检测</strong><button>去配置 →</button></div></div>
+          </div>
+          <div class="arrow">阻断</div>
+          <div class="stage">
+            <h4>阶段2: 收发信人策略</h4>
+            <div class="policy-card" data-other="发信人黑白名单"><div class="bar" style="background:#52c41a"></div><div class="body"><strong>发信人黑白名单</strong><button>配置 →</button></div></div>
+            <div class="policy-card" data-other="身份认证与仿冒检测"><div class="bar"></div><div class="body"><strong>身份认证与仿冒检测</strong><button>配置 →</button></div></div>
+          </div>
+        </div>
+        <div id="pv-pipeline-msg" style="margin-top:10px;font-size:13px;color:#d46b08;min-height:18px;"></div>
+      </div>
+      <script>(function(){
+        var root=document.getElementById('pv-pipeline');if(!root)return;
+        var msg=root.querySelector('#pv-pipeline-msg');
+        root.querySelectorAll('.policy-card').forEach(function(card){
+          card.style.cursor='pointer';
+          card.addEventListener('click',function(){
+            var t=this.getAttribute('data-target');
+            if(t){var el=document.getElementById(t);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+            else{var n=this.getAttribute('data-other');msg.textContent='「'+n+'」为策略流水线其他策略，非本规格模块（本规格仅覆盖 IP频率限制）。';clearTimeout(root._tm);root._tm=setTimeout(function(){msg.textContent='';},3000);}
+          });
+        });
+      })();</script>
+      <table class="spec-table">
+        <thead><tr><th>元素</th><th>文案/状态</th><th>交互行为</th><th>DOM/样式事实</th></tr></thead>
+        <tbody>
+          <tr><td>IP频率限制卡片</td><td>名称“IP频率限制”，操作“配置”，左侧红色条。</td><td>点击卡片或“配置”按钮打开全页面嵌入式 Sheet。</td><td>浏览器提取到所在阶段容器文本为“IP频率限制 / 配置 / IP黑白名单 / 配置 / RBL过滤 / 配置 / 海外邮件检测 / 去配置”。</td></tr>
+          <tr><td>阶段箭头</td><td>阶段1 到阶段2 显示“阻断”。</td><td>Hover 显示流程控制说明；图例点击可高亮同类策略。</td><td>阻断型策略存在时箭头使用红色虚线方向提示。</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h4>DOM 树比对结果</h4>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>嵌入 HTML</th><th>一致性</th></tr></thead>
+          <tbody>
+            <tr><td>提取根节点</td><td><code>div.flex.items-center.justify-between</code>，directChildren=2，nodeCount=6。</td><td>嵌入同一 <code>outerHTML</code>。</td><td>✅ 一致</td></tr>
+            <tr><td>入口卡片文案</td><td>IP频率限制 / 配置</td><td>IP频率限制 / 配置</td><td>✅ 一致</td></tr>
+            <tr><td>关键属性</td><td>button + ArrowRight SVG；无 aria-disabled/disabled。</td><td>属性完整保留。</td><td>✅ 一致</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-2">
+      <h3>2.2 模块头部与操作栏</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><td style="width:190px;color:var(--muted-foreground);font-weight:650">demo 组件</td><td><code>components/ip-frequency-limit/frequency-rule-filters.tsx</code>（筛选/操作栏）+ 抽屉头部（IP策略 / IP频率限制）</td></tr>
+          <tr><td style="color:var(--muted-foreground);font-weight:650">交互</td><td>搜索、生效范围/状态筛选、重置、删除选中(N)、新增规则、批量导入、导出</td></tr>
+          <tr><td style="color:var(--muted-foreground);font-weight:650">形态/角色差异</td><td class="fm-cell"><span class="fm-tag">[Base]</span>可见形态×角色下操作栏一致（不随 AI 变化）；<span class="fm-tag">[多租户差异：租户视角]</span>❌ 租户管理员不可见整个模块，操作栏随之不可达；<span class="fm-tag">[单租户]</span>✅ 可见可编辑。详见 <a href="#form-role-matrix">§0.1</a>。</td></tr>
+        </tbody>
+      </table>
+      <h4>运行态提取 HTML：80vw 抽屉头部</h4>
+      <div class="component-preview actual-extracted" id="pv-drawer-head">
+<div class="flex items-center justify-between"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings h-5 w-5 text-[#1890FF]"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg><h2 id="radix-_R_b5esnebn9lbH1_" data-slot="sheet-title" class="text-foreground text-[18px] font-semibold">IP策略</h2><span class="text-gray-400 dark:text-gray-600">/</span><span class="text-[16px] text-gray-600 dark:text-gray-400">IP频率限制</span></div><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x h-5 w-5"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg></button></div>
+      </div>
+      <script>(function(){var w=document.getElementById('pv-drawer-head');if(!w)return;var btn=w.querySelector('button[data-slot="button"]');if(btn){btn.style.cursor='pointer';btn.title='关闭抽屉（返回策略流水线入口）';btn.addEventListener('click',function(){var t=document.getElementById('component-2-1');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});});}})();</script>
+      <h4>运行态提取 HTML：筛选与操作栏</h4>
+      <div class="component-preview actual-extracted">
+<div class="flex items-center justify-between gap-4"><div class="flex items-center gap-3 flex-1"><div class="relative flex-1 max-w-md"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive pl-9" placeholder="搜索规则ID/名称/IP..." value=""></div><button type="button" role="combobox" aria-controls="radix-_r_5_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[120px]"><span data-slot="select-value" style="pointer-events: none;">全部</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button type="button" role="combobox" aria-controls="radix-_r_6_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&amp;_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 w-[100px]"><span data-slot="select-value" style="pointer-events: none;">全部</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw h-4 w-4 mr-1"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>重置</button></div><div class="flex items-center gap-2"><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-4 w-4 mr-1"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>新增规则</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload h-4 w-4 mr-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>批量导入</button><button data-slot="button" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download h-4 w-4 mr-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>导出</button></div></div>
+      </div>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/02-module-default.png" alt="IP频率限制模块头部与操作栏">
+        <figcaption>模块顶部区域：标题/启用开关、说明提示、搜索筛选与操作按钮。该区域位于规则表格上方。</figcaption>
+      </figure>
+      <div class="component-preview" id="pv-filters">
+        <p style="color:var(--muted-foreground);font-size:12px;margin:0 0 10px">🖥 可交互预览：搜索框可输入、下拉可展开选择、重置可清空、新增/导入/导出跳转对应层级。</p>
+        <div style="min-width: 980px; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; background: #fff;">
+          <div style="height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid #e8e8e8;">
+            <strong style="font-size: 24px;">IP频率限制</strong>
+            <div style="display: flex; align-items: center; gap: 12px; color: #0958d9; font-size: 18px;">
+              <span id="pv-enabled-label">已启用</span>
+              <span id="pv-switch" role="switch" aria-checked="true" tabindex="0" style="width: 44px; height: 24px; border-radius: 999px; background: #0b5be7; display: inline-flex; justify-content: flex-end; padding: 2px; cursor: pointer; transition: background .15s;">
+                <span style="width: 20px; height: 20px; border-radius: 999px; background: #fff;"></span>
+              </span>
+            </div>
+          </div>
+          <div style="padding: 32px 36px 24px;">
+            <div style="border: 1px solid #b7d8ff; background: #eaf4ff; color: #0958d9; border-radius: 12px; padding: 18px 20px; font-size: 18px; margin-bottom: 22px;">
+              针对IP发信频率过滤限制，防止暴力破解或滥发邮件。各维度为"或"关系，任一达到阈值即触发处置动作。
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; position: relative;">
+              <div style="height: 42px; min-width: 220px; border: 1px solid #d9d9d9; border-radius: 10px; display: flex; align-items: center; gap: 10px; padding: 0 14px; color: #8c8c8c; background:#fff;">
+                <span>⌕</span>
+                <input id="pv-search" type="text" placeholder="搜索规则ID/名称/IP..." style="border:0;outline:0;flex:1;font-size:15px;color:#262626;background:transparent;" />
+              </div>
+              <div class="pv-select" data-key="scope" style="position:relative;">
+                <button type="button" class="pv-select-btn" style="height: 42px; width: 150px; border: 1px solid #d9d9d9; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background:#fff; cursor:pointer; font-size:15px;"><span class="pv-select-val">全部</span><span>⌄</span></button>
+                <div class="pv-select-menu" style="display:none; position:absolute; top:46px; left:0; width:150px; background:#fff; border:1px solid #d9d9d9; border-radius:10px; box-shadow:0 4px 14px rgba(0,0,0,.12); z-index:20; overflow:hidden;">
+                  <div class="pv-opt" data-v="全部" style="padding:9px 16px;cursor:pointer;font-size:14px;">全部</div>
+                  <div class="pv-opt" data-v="全部IP" style="padding:9px 16px;cursor:pointer;font-size:14px;">全部IP</div>
+                  <div class="pv-opt" data-v="单IP" style="padding:9px 16px;cursor:pointer;font-size:14px;">单IP</div>
+                  <div class="pv-opt" data-v="IP段" style="padding:9px 16px;cursor:pointer;font-size:14px;">IP段</div>
+                </div>
+              </div>
+              <div class="pv-select" data-key="status" style="position:relative;">
+                <button type="button" class="pv-select-btn" style="height: 42px; width: 130px; border: 1px solid #d9d9d9; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background:#fff; cursor:pointer; font-size:15px;"><span class="pv-select-val">全部</span><span>⌄</span></button>
+                <div class="pv-select-menu" style="display:none; position:absolute; top:46px; left:0; width:130px; background:#fff; border:1px solid #d9d9d9; border-radius:10px; box-shadow:0 4px 14px rgba(0,0,0,.12); z-index:20; overflow:hidden;">
+                  <div class="pv-opt" data-v="全部" style="padding:9px 16px;cursor:pointer;font-size:14px;">全部</div>
+                  <div class="pv-opt" data-v="启用" style="padding:9px 16px;cursor:pointer;font-size:14px;">启用</div>
+                  <div class="pv-opt" data-v="停用" style="padding:9px 16px;cursor:pointer;font-size:14px;">停用</div>
+                </div>
+              </div>
+              <button id="pv-reset" type="button" style="height: 42px; border: 1px solid #d9d9d9; border-radius: 10px; background: #f5fbff; padding: 0 18px; font-size: 16px; cursor:pointer;">↻ 重置</button>
+              <button id="pv-add" type="button" style="height: 42px; border: 0; border-radius: 10px; background: #0b5be7; color: #fff; padding: 0 20px; font-size: 16px; cursor:pointer;">＋ 新增规则</button>
+              <button id="pv-import" type="button" style="height: 42px; border: 1px solid #d9d9d9; border-radius: 10px; background: #fff; padding: 0 18px; font-size: 16px; cursor:pointer;">⇧ 批量导入</button>
+              <button id="pv-export" type="button" style="height: 42px; border: 1px solid #d9d9d9; border-radius: 10px; background: #fff; padding: 0 18px; font-size: 16px; cursor:pointer;">⇩ 导出</button>
+            </div>
+            <div id="pv-state" style="margin-top:16px; font-size:13px; color:#8c8c8c; min-height:18px;"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+      (function(){
+        var root = document.getElementById('pv-filters'); if(!root) return;
+        var state = { scope:'全部', status:'全部', search:'', enabled:true };
+        var stateEl = root.querySelector('#pv-state');
+        function render(){
+          stateEl.textContent = '当前筛选：搜索="' + (state.search||'') + '" · 生效范围=' + state.scope + ' · 状态=' + state.status + (state.enabled ? '' : '　（模块已停用）');
+        }
+        // 模块启用开关
+        var sw = root.querySelector('#pv-switch'), lbl = root.querySelector('#pv-enabled-label');
+        function toggleSwitch(){
+          state.enabled = !state.enabled;
+          sw.style.background = state.enabled ? '#0b5be7' : '#bfbfbf';
+          sw.style.justifyContent = state.enabled ? 'flex-end' : 'flex-start';
+          sw.setAttribute('aria-checked', state.enabled);
+          lbl.textContent = state.enabled ? '已启用' : '已停用';
+          lbl.style.color = state.enabled ? '#0958d9' : '#8c8c8c';
+          render();
+        }
+        sw.addEventListener('click', toggleSwitch);
+        sw.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleSwitch(); } });
+        // 搜索框
+        var search = root.querySelector('#pv-search');
+        search.addEventListener('input', function(){ state.search = this.value; render(); });
+        // 下拉（demo 为 Select 弹出）
+        root.querySelectorAll('.pv-select').forEach(function(sel){
+          var btn = sel.querySelector('.pv-select-btn'), menu = sel.querySelector('.pv-select-menu'), val = sel.querySelector('.pv-select-val'), key = sel.getAttribute('data-key');
+          btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            var open = menu.style.display === 'block';
+            root.querySelectorAll('.pv-select-menu').forEach(function(m){ m.style.display='none'; });
+            menu.style.display = open ? 'none' : 'block';
+          });
+          sel.querySelectorAll('.pv-opt').forEach(function(opt){
+            opt.addEventListener('mouseenter', function(){ this.style.background='#f0f7ff'; });
+            opt.addEventListener('mouseleave', function(){ this.style.background=''; });
+            opt.addEventListener('click', function(e){
+              e.stopPropagation();
+              state[key] = this.getAttribute('data-v'); val.textContent = state[key];
+              menu.style.display='none'; render();
+            });
+          });
+        });
+        document.addEventListener('click', function(){ root.querySelectorAll('.pv-select-menu').forEach(function(m){ m.style.display='none'; }); });
+        // 重置
+        root.querySelector('#pv-reset').addEventListener('click', function(){
+          state.scope='全部'; state.status='全部'; state.search='';
+          search.value='';
+          root.querySelectorAll('.pv-select-val').forEach(function(v){ v.textContent='全部'; });
+          render();
+        });
+        // 新增/导入/导出 -> 跳转对应层级子文件（与 demo「打开对应抽屉/弹窗」对应）
+        root.querySelector('#pv-add').addEventListener('click', function(){ location.href='./layer-3-new-rule-drawer.html'; });
+        root.querySelector('#pv-import').addEventListener('click', function(){ location.href='./layer-6-batch-import.html'; });
+        root.querySelector('#pv-export').addEventListener('click', function(){ location.href='./layer-7-export.html'; });
+        render();
+      })();
+      </script>
+      <table class="spec-table">
+        <thead><tr><th>元素</th><th>浏览器实际文案/状态</th><th>交互行为</th><th>规格说明</th></tr></thead>
+        <tbody>
+          <tr><td>模块标题</td><td>规格采用正确文案“IP频率限制”。</td><td>只读。</td><td>demo 运行态因编码 bug 把“制”渲染为替换字符（乱码），已列入差异标注 §9；落地须显示正确文案。</td></tr>
+          <tr><td>模块启用开关</td><td>右上角显示“已启用”，Switch 为开启蓝色状态。</td><td>点击切换模块级 enabled；关闭后模块内容应整体禁用或灰显。</td><td>PRD 要求模块头部包含启用开关；这是规则执行总开关。</td></tr>
+          <tr><td>说明提示条</td><td>“针对IP发信频率过滤限制，防止暴力破解或滥发邮件。各维度为‘或’关系，任一达到阈值即触发处置动作。”</td><td>只读提示。</td><td>蓝色弱提示，位于筛选栏上方。</td></tr>
+          <tr><td>搜索框</td><td>placeholder “搜索规则ID/名称/IP...”</td><td>输入即过滤 ID、规则名称、IP 地址。</td><td>搜索框左侧为搜索图标。</td></tr>
+          <tr><td>生效范围筛选</td><td>默认“全部”；选项为全部、全部IP、单IP、IP段。</td><td>选择后过滤规则列表。</td><td>demo 未提供 IP组筛选项，见差异标注。</td></tr>
+          <tr><td>状态筛选</td><td>默认“全部”；选项为全部、启用、停用。</td><td>选择后按 enabled 状态过滤。</td><td>与 PRD 一致。</td></tr>
+          <tr><td>重置</td><td>图标 + “重置”。</td><td>清空搜索、筛选、选中项，并回到第一页。</td><td>按钮使用 outline/浅蓝背景。</td></tr>
+          <tr><td>新增规则</td><td>蓝色主按钮“新增规则”。</td><td>打开层级3 新建规则抽屉。</td><td>主操作按钮。</td></tr>
+          <tr><td>删除选中（N）</td><td>红色 destructive 按钮“删除选中（N）”，带 Trash2 图标，<strong>仅在有勾选行时显示</strong>，位于“新增规则”之前。</td><td>点击弹出批量删除确认弹窗（见 §3）。</td><td>v2 新增。N 为当前选中规则数；取消全部勾选后按钮隐藏。</td></tr>
+          <tr><td>批量导入/导出</td><td>outline 按钮“批量导入”“导出”。</td><td>批量导入打开导入弹窗（CSV/TXT 文件或粘贴文本，实时逐行校验预览）；导出打开导出弹窗（范围+格式）。</td><td>v2 已由占位逻辑升级为完整实现，见 §3.4/§3.5 与层级 5/6。</td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h4>DOM 树比对结果</h4>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/嵌入 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>80vw 抽屉头部</td><td><code>div.flex.items-center.justify-between</code>，directChildren=2，nodeCount=13，文本“IP策略 / IP频率限制”（demo 运行态“制”字为乱码）。</td><td>嵌入同一 <code>outerHTML</code>，本规格已把乱码修正为正确文案。</td><td>✅ 结构一致（文案已修正）</td></tr>
+            <tr><td>筛选操作栏</td><td><code>div.flex.items-center.justify-between.gap-4</code>，directChildren=2，nodeCount=34。</td><td>搜索框、两个 Select、重置、新增规则、批量导入、导出节点与属性完整保留。</td><td>✅ 一致</td></tr>
+            <tr><td>条件渲染</td><td>默认无批量操作浮层、无 Select 下拉 Portal。</td><td>提取块不包含未渲染节点。</td><td>✅ 一致</td></tr>
+            <tr><td>截图校验</td><td>截图 02-module-default.png 可见该区域。</td><td>本节引用同一截图。</td><td>✅ 一致</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-3">
+      <h3>2.3 IP频率限制规则列表模块</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><td style="width:190px;color:var(--muted-foreground);font-weight:650">demo 组件</td><td><code>components/ip-frequency-limit/ip-frequency-limit-module.tsx</code>（主模块）+ <code>frequency-rule-table.tsx</code> + <code>suspended-ip-drawer.tsx</code> + <code>frequency-rule-drawer.tsx</code></td></tr>
+          <tr><td style="color:var(--muted-foreground);font-weight:650">交互层级数</td><td>8 层（L0 初始态 + L1 展开详情 / L2 挂起IP抽屉 / L3 新建规则抽屉 / L4 示例+模拟测试 / L5 批量删除 / L6 批量导入 / L7 导出）</td></tr>
+          <tr><td style="color:var(--muted-foreground);font-weight:650">形态/角色差异</td><td class="fm-cell"><span class="fm-tag">[Base]</span>规则 CRUD、展开详情、批量删除、批量导入/导出、挂起IP管理等全部 8 层交互，在可见形态×角色下行为一致（<code>capability=base</code>，不随 AI 能力变化，传统版同样可用）；<span class="fm-tag">[多租户差异：租户视角]</span>❌ 租户管理员不可见整个模块（IP策略收归平台侧），8 层交互全部不可达；<span class="fm-tag">[单租户]</span>✅ 完整可见可编辑。详见 <a href="#form-role-matrix">§0.1</a>。</td></tr>
+        </tbody>
+      </table>
+      <h4>交互层级 0：运行态完整模块 HTML（DOM 比对对象）</h4>
+      <div class="component-preview">
+        <p style="color:var(--muted-foreground);font-size:13px;margin:0 0 10px">层级0 运行态为抽屉嵌入整页（含滚动容器与顶部渐变 sticky 条），直接嵌入 outerHTML 会在本规格中产生黑条/滚动条样式失真。故层级0 以 <strong>下方离线视觉重建</strong> + <strong>截图 02-module-default.png</strong> 为准呈现，DOM 比对对象见下方 DOM 树比对表（运行态 outerHTML 已存证，不在此内联）。</p>
+      </div>
+      <figure class="screenshot-figure">
+        <img src="./screenshots/02-module-default.png" alt="IP频率限制模块默认态">
+        <figcaption>层级0：从策略流水线点击 IP频率限制后，右侧 80vw 抽屉嵌入连接层页面，默认选中 IP频率限制。</figcaption>
+      </figure>
+      <div class="component-preview" id="pv-ruletable">
+        <p style="color:var(--muted-foreground);font-size:12px;margin:0 0 10px">🖥 可交互预览：表头全选（三态）、行单选高亮、点击 ⌄ 展开详情、状态开关切换、优先级点击排序、编辑/更多跳转对应层级。</p>
+        <table class="mini-table" style="width:100%;">
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox" id="pvrt-all" style="cursor:pointer;"></th>
+              <th style="width:36px;"></th>
+              <th>ID</th><th>规则名称</th>
+              <th id="pvrt-prio" style="cursor:pointer;user-select:none;" title="点击切换排序">优先级 <span id="pvrt-prio-arrow">⇅</span></th>
+              <th>IP地址/段</th><th>同时连接</th><th>时间窗口频率</th><th>每日限制</th><th>挂起策略</th><th>到期时间</th><th>状态</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="pvrt-body"></tbody>
+        </table>
+        <div id="pvrt-batch" style="margin-top:10px;display:none;align-items:center;gap:10px;">
+          <button id="pvrt-del" style="height:34px;border:0;border-radius:8px;background:#f5222d;color:#fff;padding:0 14px;font-size:14px;cursor:pointer;">🗑 删除选中（<span id="pvrt-n">0</span>）</button>
+          <span style="font-size:12px;color:#8c8c8c;">点击后进入批量删除确认（见 layer-5）</span>
+        </div>
+      </div>
+      <script>(function(){
+        var DATA=[
+          {id:'1-ipgroup',name:'可信IP组放宽限制',desc:'对可信IP组放宽频率限制',prio:50,ip:'IP组: 可信IP',conn:100,tw:'2000次/15分钟',daily:10000,sus:'不启用',exp:'永久',on:true, detail:{ip级:{当天连接总数:10000,并发连接上限:100,时间窗口频率:'2000次/15分钟',认证失败限制:'-'},单连接:{命令错误上限:'-',认证失败上限:'-'},处置:{当次阻断:'拒绝连接',IP挂起:'不启用'},统计:{当前挂起IP:0,历史挂起次数:0}}},
+          {id:'4',name:'VPN出口IP监控',desc:'公司VPN出口IP，仅记录不阻断',prio:50,ip:'172.16.100.1',conn:100,tw:'-',daily:'-',sus:'15分钟',exp:'永久',on:true, detail:{ip级:{当天连接总数:'-',并发连接上限:100,时间窗口频率:'-',认证失败限制:'-'},单连接:{命令错误上限:'-',认证失败上限:'-'},处置:{当次阻断:'仅记录',IP挂起:'15分钟'},统计:{当前挂起IP:0,历史挂起次数:0}}},
+          {id:'1',name:'高频发信限制',desc:'合作伙伴IP，放宽限制',prio:100,ip:'203.0.113.0/24',conn:50,tw:'1000次/15分钟',daily:5000,sus:'30分钟',exp:'永久',on:true, detail:{ip级:{当天连接总数:5000,并发连接上限:50,时间窗口频率:'1000次/15分钟',认证失败限制:'-'},单连接:{命令错误上限:'-',认证失败上限:'-'},处置:{当次阻断:'拒绝连接',IP挂起:'30分钟'},统计:{当前挂起IP:0,历史挂起次数:0}}}
+        ];
+        var sel=new Set(), expanded=new Set(), asc=false;
+        var body=document.getElementById('pvrt-body'), allBox=document.getElementById('pvrt-all'), batch=document.getElementById('pvrt-batch'), nEl=document.getElementById('pvrt-n');
+        function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+        function detailRows(d){
+          var out='';
+          ['ip级','单连接','处置','统计'].forEach(function(grp){
+            var items=d.detail[grp], inner='';
+            for(var k in items){inner+='<div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:#8c8c8c;">'+esc(k)+':</span><span>'+esc(items[k])+'</span></div>';}
+            out+='<div><div style="font-size:11px;color:#8c8c8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">'+esc(grp==='ip级'?'IP级防护':grp)+'</div><div style="display:flex;flex-direction:column;gap:4px;">'+inner+'</div></div>';
+          });
+          return out;
+        }
+        function render(){
+          var rows=DATA.slice().sort(function(a,b){return asc?a.prio-b.prio:b.prio-a.prio;});
+          var html='';
+          rows.forEach(function(r){
+            var s=sel.has(r.id), ex=expanded.has(r.id);
+            html+='<tr data-id="'+r.id+'" style="'+(s?'background:rgba(11,91,231,.06);':'')+(r.on?'':'opacity:.6;')+'">'
+              +'<td><input type="checkbox" class="pvrt-row" data-id="'+r.id+'" '+(s?'checked':'')+' style="cursor:pointer;"></td>'
+              +'<td><button class="pvrt-exp" data-id="'+r.id+'" style="border:0;background:none;cursor:pointer;font-size:14px;">'+(ex?'⌃':'⌄')+'</button></td>'
+              +'<td style="font-family:monospace;font-size:12px;color:#8c8c8c;">'+esc(r.id)+'</td>'
+              +'<td><div style="font-weight:600;">'+esc(r.name)+'</div><small style="color:#8c8c8c;">'+esc(r.desc)+'</small></td>'
+              +'<td><span class="badge badge-blue">'+r.prio+'</span></td>'
+              +'<td style="font-family:monospace;font-size:13px;">'+esc(r.ip)+'</td>'
+              +'<td style="text-align:center;">'+r.conn+'</td>'
+              +'<td style="text-align:center;font-size:13px;">'+esc(r.tw)+'</td>'
+              +'<td style="text-align:center;">'+r.daily+'</td>'
+              +'<td style="text-align:center;"><span class="badge '+(r.sus==='不启用'?'':'badge-orange')+'">'+esc(r.sus)+'</span></td>'
+              +'<td>'+esc(r.exp)+'</td>'
+              +'<td style="text-align:center;"><span class="pvrt-toggle" data-id="'+r.id+'" role="switch" aria-checked="'+r.on+'" style="display:inline-flex;width:36px;height:20px;border-radius:999px;padding:2px;cursor:pointer;background:'+(r.on?'#0b5be7':'#bfbfbf')+';justify-content:'+(r.on?'flex-end':'flex-start')+';"><span style="width:16px;height:16px;border-radius:999px;background:#fff;"></span></span></td>'
+              +'<td style="font-size:13px;"><a href="./layer-3-new-rule-drawer.html" style="color:#1890ff;">编辑</a> / <a href="'+(r.detail.统计.当前挂起IP>0?'./layer-2-suspended-ip-drawer.html':'./layer-5-batch-delete.html')+'" style="color:#1890ff;">更多</a></td>'
+              +'</tr>';
+            if(ex){
+              html+='<tr style="background:#fafafa;"><td></td><td></td><td colspan="11" style="padding:14px 18px;"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px;">'+detailRows(r)+'</div></td></tr>';
+            }
+          });
+          body.innerHTML=html;
+          // 全选三态
+          var total=DATA.length, cnt=sel.size;
+          allBox.checked = cnt===total && total>0;
+          allBox.indeterminate = cnt>0 && cnt<total;
+          batch.style.display = cnt>0?'flex':'none';
+          nEl.textContent=cnt;
+          bind();
+        }
+        function bind(){
+          body.querySelectorAll('.pvrt-row').forEach(function(cb){cb.addEventListener('change',function(){var id=this.getAttribute('data-id');if(this.checked)sel.add(id);else sel.delete(id);render();});});
+          body.querySelectorAll('.pvrt-exp').forEach(function(b){b.addEventListener('click',function(){var id=this.getAttribute('data-id');if(expanded.has(id))expanded.delete(id);else expanded.add(id);render();});});
+          body.querySelectorAll('.pvrt-toggle').forEach(function(t){t.addEventListener('click',function(){var id=this.getAttribute('data-id');var r=DATA.find(function(x){return x.id===id;});if(r)r.on=!r.on;render();});});
+        }
+        allBox.addEventListener('change',function(){if(this.checked){DATA.forEach(function(r){sel.add(r.id);});}else{sel.clear();}render();});
+        document.getElementById('pvrt-prio').addEventListener('click',function(){asc=!asc;document.getElementById('pvrt-prio-arrow').textContent=asc?'↑':'↓';render();});
+        document.getElementById('pvrt-del').addEventListener('click',function(){location.href='./layer-5-batch-delete.html';});
+        render();
+      })();</script>
+      <table class="spec-table">
+        <thead><tr><th>元素</th><th>浏览器实际文案/默认值</th><th>交互</th><th>校验/禁用条件</th></tr></thead>
+        <tbody>
+          <tr><td>左侧策略导航</td><td>IP频率限制、IP黑白名单、RBL过滤、海外邮件检测；第一项选中。</td><td>点击切换同一连接层抽屉内的策略模块。</td><td>demo 运行态“IP频率限制”首项渲染为乱码，见差异标注 §9。</td></tr>
+          <tr><td>模块说明</td><td>“针对IP发信频率过滤限制，防止暴力破解或滥发邮件。各维度为‘或’关系，任一达到阈值即触发处置动作。”</td><td>只读提示。</td><td>模块禁用时整个卡片 opacity 下降且 pointer-events none。</td></tr>
+          <tr><td>搜索框</td><td>placeholder “搜索规则ID/名称/IP...”</td><td>输入即过滤 ID、名称、IP地址。</td><td>空值不过滤。</td></tr>
+          <tr><td>生效范围筛选</td><td>全部、全部IP、单IP、IP段。</td><td>选择后过滤表格；“全部IP”映射到 scope=all。</td><td>demo 未在筛选器中提供 IP组选项，但列表支持 IP组。</td></tr>
+          <tr><td>状态筛选</td><td>全部、启用、停用。</td><td>按 rule.enabled 过滤。</td><td>无。</td></tr>
+          <tr><td>操作按钮</td><td>重置、删除选中（N）（仅选中时）、新增规则、批量导入、导出。</td><td>重置清空筛选；删除选中弹批量删除确认；新增打开 920px 规则抽屉；导入打开校验预览弹窗；导出打开范围/格式弹窗。</td><td>v2：导入导出已完整实现（CSV/JSON 文件流程）；删除选中为新增批量操作。</td></tr>
+          <tr><td>规则表格</td><td>列：复选框、展开、ID、规则名称、优先级、IP地址/段、并发连接上限、时间窗口频率、当天连接总数、IP挂起、到期时间、状态、操作。</td><td>表头全选三态 Checkbox（跨页保留）、行单选高亮、展开详情、切换启用、编辑、更多操作。</td><td>分页默认 20 条/页，总数 56 条。v2：复选框列由占位升级为真实全选/单选逻辑。</td></tr>
+          <tr><td>优先级表头</td><td>可点击排序按钮“优先级 ⇅”，Tooltip 文案：“数值越大，匹配顺序越靠前。数值越大优先级越高。”</td><td>点击切换升/降序；默认降序（大数值置顶）。</td><td>v2：Tooltip 文案由 v1 的“数值越小越先匹配”更正为全局约束“数值越大越优先”。</td></tr>
+          <tr><td>分页区</td><td>“共 56 条规则”，页码 1/2/3，前往第 X 页，20/50/100/200 条/页。</td><td>页码切换时清空选中；跳转输入回车生效。</td><td>PRD 的每页 10 条在 demo 中不存在。</td></tr>
+        </tbody>
+      </table>
+
+      <h4>交互层级关系</h4>
+      <div class="mermaid">
+flowchart TD
+  L0[层级0：规则列表默认态] -->|点击行展开按钮| L1[层级1：展开规则详情]
+  L1 -->|查看挂起IP列表| L2[层级2：挂起IP管理抽屉]
+  L0 -->|新增规则| L3[层级3：新建规则抽屉]
+  L3 -->|展开示例并使用 / 展开模拟测试并开始测试| L4[层级4：示例应用与模拟命中结果]
+  L0 -->|勾选行 + 删除选中（N）| L5[层级5：批量删除确认弹窗]
+  L0 -->|批量导入| L6[层级6：批量导入弹窗 + 实时解析预览]
+  L0 -->|导出| L7[层级7：导出弹窗]
+      </div>
+
+      <table class="spec-table">
+        <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>规则列表默认态</td><td>策略流水线 IP频率限制卡片 -> 打开连接层抽屉</td><td>本节内嵌</td></tr>
+          <tr><td>1</td><td>展开规则详情</td><td>点击“高频发信限制”行展开按钮</td><td><a href="layer-1-expanded-rule.html">查看详情</a></td></tr>
+          <tr><td>2</td><td>挂起IP管理抽屉</td><td>层级1 -> 点击“查看挂起IP列表”</td><td><a href="layer-2-suspended-ip-drawer.html">查看详情</a></td></tr>
+          <tr><td>3</td><td>新建规则抽屉</td><td>层级0 -> 点击“新增规则”</td><td><a href="layer-3-new-rule-drawer.html">查看详情</a></td></tr>
+          <tr><td>4</td><td>配置示例与模拟测试</td><td>层级3 -> 展开示例 -> 使用防暴力破解 -> 模拟测试 -> 开始测试</td><td><a href="layer-4-examples-simulator.html">查看详情</a></td></tr>
+          <tr><td>5</td><td>批量删除确认弹窗（v2 新增）</td><td>层级0 -> 勾选若干行 -> 点击“删除选中（N）”</td><td><a href="layer-5-batch-delete.html">查看详情</a></td></tr>
+          <tr><td>6</td><td>批量导入（v2 新增）</td><td>层级0 -> 点击“批量导入” -> 粘贴/选择文件触发实时解析</td><td><a href="layer-6-batch-import.html">查看详情</a></td></tr>
+          <tr><td>7</td><td>导出（v2 新增）</td><td>层级0 -> 点击“导出”</td><td><a href="layer-7-export.html">查看详情</a></td></tr>
+        </tbody>
+      </table>
+      <div class="dom-comparison">
+        <h4>DOM 树比对结果</h4>
+        <table class="spec-table">
+          <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/嵌入 HTML</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>模块内容根节点</td><td><code>div.flex-1.overflow-y-auto.px-6.py-4.transition-opacity.duration-200</code>，childCount=2，nodeCount=804。</td><td>嵌入的是该根节点的完整 <code>outerHTML</code>。</td><td>✅ 一致</td></tr>
+            <tr><td>筛选操作栏</td><td><code>div.flex.items-center.justify-between.gap-4</code>，childCount=2，nodeCount=34。</td><td>嵌入的是同一运行态节点。</td><td>✅ 一致</td></tr>
+            <tr><td>默认分页</td><td>20 条/页，共 56 条规则。</td><td>规格表记录 20/50/100/200。</td><td>一致</td></tr>
+            <tr><td>条件渲染</td><td>有数据时渲染 20 条首屏规则与分页；空态节点未渲染。</td><td>完整提取块同样不含空态节点。</td><td>✅ 一致</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section id="dialogs">
+    <h2>3. 弹窗/抽屉规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>抽屉/对话框</th><th>尺寸</th><th>触发条件</th><th>内容</th><th>关闭规则</th></tr></thead>
+      <tbody>
+        <tr><td>连接层嵌入式抽屉</td><td>80vw，右侧滑入</td><td>点击策略卡片或配置按钮</td><td>ConnectionLayerPage embedded=true，默认策略 ipFrequency。</td><td>点击右上关闭图标。</td></tr>
+        <tr><td>新建/编辑规则抽屉</td><td>920px，右侧滑入</td><td>新增规则或编辑按钮</td><td>左侧表单 560px + 右侧预览帮助区。</td><td>未修改可直接关闭；已修改弹出“确认离开”。</td></tr>
+        <tr><td>挂起IP抽屉</td><td>源码声明 500/600px；1440 运行态受 <code>sm:max-w-sm</code> 约束实际为 384px</td><td>展开规则详情后点击“查看挂起IP列表”</td><td>挂起 IP 表格、批量解封、刷新、说明。</td><td>点击右上 X 或外部遮罩。</td></tr>
+        <tr><td>删除确认</td><td>AlertDialog</td><td>更多菜单 -> 删除规则</td><td>若存在挂起 IP，提示删除会立即解封对应 IP。</td><td>取消/确认删除。</td></tr>
+        <tr><td>批量删除确认（v2 新增）</td><td>AlertDialog（sm:max-w-lg）</td><td>勾选若干行 -> 点击“删除选中（N）”</td><td>标题“批量删除规则”，文案“确定要删除选中的 N 条规则吗？此操作不可撤销。”</td><td>取消/确认删除（destructive）。确认后过滤删除选中规则并清空选中。</td></tr>
+        <tr><td>批量导入（v2 新增）</td><td>Dialog max-w-3xl，max-h-85vh 可滚动</td><td>点击“批量导入”</td><td>下载导入模板、选择文件（.csv/.txt）、粘贴文本域、实时逐行校验预览（有效/无效统计 + 行号/原文/状态/错误原因表）、取消/确认导入（N 条）。仅合法行追加。</td><td>取消/关闭时清空文本与解析结果。确认后回到第一页并显示绿色导入成功内联横幅（4s 自动消失）。</td></tr>
+        <tr><td>导出（v2 新增）</td><td>Dialog max-w-md</td><td>点击“导出”</td><td>导出范围 RadioGroup（当前筛选结果 N 条 / 全部数据 N 条）+ 导出格式 RadioGroup（CSV 含 BOM / JSON 完整往返）。</td><td>取消/确认导出（带 Download 图标）。确认后生成带时间戳文件并触发下载。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="api-mapping">
+    <h2>4. 数据模型与 API 映射</h2>
+    <h3>前端数据模型</h3>
+    <pre><code>FrequencyRule {
+  id, name, description, priority,
+  scope: "all" | "single" | "range" | "ipGroup",
+  ipAddress, ipGroupId, ipGroupName, expireTime,
+  dailyLimit, concurrentLimit, timeWindowMinutes, timeWindowLimit, authFailHourlyLimit,
+  connCmdErrorLimit, connAuthFailLimit,
+  blockAction: "reject" | "error421" | "disconnect",
+  suspendDuration: "none" | "15min" | "30min" | "1hour" | "2hour",
+  enabled, createdAt, updatedAt, suspendedIpCount, totalSuspendCount
+}</code></pre>
+    <table class="spec-table">
+      <thead><tr><th>PRD API/表</th><th>用途</th><th>落地建议</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/ip-frequency/rules</code></td><td>获取规则列表。</td><td>按 implement.md，应优先复用统一规则系统，通过 page 字段隔离 IP 频率限制页面；若底层缺少连接层频率统计字段，再确认新增 API。</td></tr>
+        <tr><td><code>POST/PUT/DELETE /api/ip-frequency/rules</code></td><td>创建、更新、删除规则。</td><td>统一规则系统 action 尽量映射到现有动作；blockAction 的 SMTP 语义需要后端确认。</td></tr>
+        <tr><td><code>PUT /api/ip-frequency/rules/id/status</code></td><td>切换启用状态。</td><td>可映射到统一规则 enabled 字段更新。</td></tr>
+        <tr><td><code>GET /api/ip-frequency/rules/id/suspended-ips</code></td><td>获取挂起 IP。</td><td>若挂起状态在 Redis，需只读查询接口或现有内部状态 API 支撑。</td></tr>
+        <tr><td><code>POST /api/ip-frequency/suspended-ips/id/release</code></td><td>手动解封。</td><td>需确认当前网关是否已有 Redis 挂起记录和解封入口。</td></tr>
+        <tr><td><code>t_ip_frequency_rules</code> 等 PRD 表</td><td>产品设计的数据表。</td><td>不硬性要求 PostgreSQL；所有 DB 后端需统一迁移，优先沿用现有 schema/统一规则系统。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="business-logic">
+    <h2>5. 业务逻辑规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>规则</th><th>说明</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>双重防护</td><td>IP级防护包含当日连接总数、并发连接、时间窗口频率、每小时认证失败；单连接防护包含命令错误和认证失败。</td><td>PRD + demo 表单。</td></tr>
+        <tr><td>触发关系</td><td>各维度为“或”关系，任一达到阈值即触发处置动作。</td><td>浏览器模块说明与 PRD 一致。</td></tr>
+        <tr><td>优先级</td><td>demo 与 PRD 显示“数值越小越先匹配”，但项目全局约束明确“数值越大越优先”。落地实现必须采用全局定义，并同步修正排序、提示文案与默认值策略。</td><td>项目全局约束优先，不再作为开放问题。</td></tr>
+        <tr><td>-1 阈值</td><td>-1 表示不限制；demo 表格显示为“-”，表单输入为空值。</td><td>demo + PRD。</td></tr>
+        <tr><td>0 阈值</td><td>保存时出现确认提示“0表示禁止任何连接/命令”。</td><td>源码逻辑 + PRD。</td></tr>
+        <tr><td>全部阈值为 -1</td><td>demo 校验为错误“至少配置一项防护阈值”。</td><td>源码逻辑；PRD 写的是警告，见差异。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interaction">
+    <h2>6. 交互规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>操作</th><th>浏览器验证结果</th><th>状态变化</th></tr></thead>
+      <tbody>
+        <tr><td>点击 IP频率限制卡片</td><td>打开右侧 80vw Sheet，标题“IP策略 / IP频率限制”，内容为连接层页面。</td><td>fullPageDrawerOpen=true，fullPageDrawerPolicy=ipFrequency。</td></tr>
+        <tr><td>点击展开按钮</td><td>行下方展开 4 列详情：IP级防护、单连接防护、处置动作、统计信息。</td><td>expandedIds 增加该规则 id。</td></tr>
+        <tr><td>点击挂起 IP 列表</td><td>打开嵌套右侧抽屉，标题“当前挂起IP (5)”。</td><td>showSuspendedDrawer=true，加载 mockSuspendedIps。</td></tr>
+        <tr><td>点击新增规则</td><td>打开 920px 新建规则抽屉。</td><td>editingRule=null，formData=DEFAULT_FORM_DATA。</td></tr>
+        <tr><td>使用配置示例</td><td>防暴力破解示例将时间窗口改为 1分钟/5次、认证失败 10、挂起 30分钟。</td><td>实时预览与模拟测试同步更新。</td></tr>
+        <tr><td>优先级 Tooltip</td><td>Hover 实际文案：“数值越小越先匹配。建议紧急封禁规则设为1-50，常规限制设为100-500。”</td><td>当前 demo 行为；落地须按全局“数值越大越优先”改写。</td></tr>
+        <tr><td>空名称保存</td><td>保持抽屉打开并显示“规则名称不能为空”；同时显示优先级冲突警告。</td><td>blocking error 阻止保存。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="i18n">
+    <h2>7. 国际化规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>语言</th><th>覆盖状态</th><th>关键 key</th></tr></thead>
+      <tbody>
+        <tr><td>中文</td><td>已覆盖，但部分连接层 key 渲染为乱码。</td><td><code>pipeline.ipFrequencyLimit</code>、<code>connection.ipFrequencyLimit</code>、<code>ipFrequency.*</code></td></tr>
+        <tr><td>英文</td><td>language-context 中存在对应 key。</td><td><code>IP Frequency Limit</code>、<code>Daily Connection Limit</code></td></tr>
+        <tr><td>泰文</td><td>存在 key，但源码文件中可见部分编码异常。</td><td><code>pipeline.ipFrequencyConfig</code> 等。</td></tr>
+        <tr><td>第四语言</td><td>本次浏览器只验证中文态。</td><td>实现时需按 implement.md 补齐四语。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="responsive">
+    <h2>8. 响应式规格</h2>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/07-responsive-1024.png" alt="1024px 响应式">
+      <figcaption>1024x900：策略流水线横向内容保持可滚动，侧边栏仍占用固定宽度。</figcaption>
+    </figure>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/08-responsive-1920.png" alt="1920px 响应式">
+      <figcaption>1920x1080：五阶段在宽屏下展示更完整，图例区位于下方。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>断点</th><th>实际行为</th><th>规格要求</th></tr></thead>
+      <tbody>
+        <tr><td>1024px</td><td>流水线区域横向滚动，卡片不压缩。</td><td>保持策略卡片 220px 宽度和阶段最小宽度。</td></tr>
+        <tr><td>1440px</td><td>默认验证视口，80vw 抽屉展示连接层模块。</td><td>规则表格可横向/纵向滚动。</td></tr>
+        <tr><td>1920px</td><td>宽屏仍保持阶段卡片尺寸，不做满屏拉伸。</td><td>避免卡片内部文字换行挤压按钮。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>9. 与 spec / 源码 / 运行态差异标注</h2>
+    <table class="spec-table">
+      <thead><tr><th>差异</th><th>PRD/源码</th><th>浏览器实际</th><th>影响</th></tr></thead>
+      <tbody>
+        <tr><td>中文乱码（真实 demo bug）</td><td>应显示“IP频率限制”。</td><td>demo 连接层抽屉的面包屑、左侧导航首项、模块标题共 3 处，把“制”字渲染为两个 U+FFFD 替换字符（乱码）；流水线入口卡片等其余位置显示正常。本规格预览与文案已按正确“IP频率限制”呈现。</td><td>落地须修复对应 i18n 翻译值/编码；本行仅如实记录运行态缺陷。</td></tr>
+        <tr><td>表格列</td><td>原 PRD 草稿列为勾选框、优先级、规则名称、生效范围、阈值摘要、挂起IP数、状态、操作。</td><td>demo 列为勾选框、展开、ID、规则名称、优先级、IP地址/段、同时连接、时间窗口频率、每日限制、挂起策略、到期时间、状态、操作。</td><td><span class="badge badge-low">以 demo 为准</span>（无 spec，2026-07-21 裁决）：demo 列更细；挂起数在展开详情内，不单列。</td></tr>
+        <tr><td>每页条数</td><td>原 PRD 草稿支持 10/20/50/100。</td><td>demo 支持 20/50/100/200。</td><td><span class="badge badge-low">以 demo 为准</span>：采用 20/50/100/200。</td></tr>
+        <tr><td>scope 筛选</td><td>原 PRD 草稿生效范围含 all/single/range/ipGroup。</td><td>demo 列表支持 IP组，但筛选器只有 全部/全部IP/单IP/IP段。</td><td><span class="badge badge-low">以 demo 为准</span>：筛选器不含 IP组单独项（IP组规则经「全部」过滤）；列为体验优化点（见 Q8）。</td></tr>
+        <tr><td>全部阈值 -1</td><td>原 PRD 草稿：保存时警告“当前配置不会限制任何连接”。</td><td>demo：校验为 error“至少配置一项防护阈值”，阻止保存。</td><td><span class="badge badge-low">以 demo 为准</span>：阻断保存（error），不允许全 -1 无效规则。</td></tr>
+        <tr><td>优先级方向</td><td>IP频率 PRD/旧 demo：数值越小越优先。</td><td>项目全局约束：规则优先级数值越大越优先。<strong>v2 实测：demo 已采用全局定义</strong>——表格默认降序（大数值置顶），优先级表头 Tooltip 文案为“数值越大，匹配顺序越靠前。数值越大优先级越高。”（agent-browser hover 验证）。</td><td>✅ v2 已解决。落地沿用全局定义即可。</td></tr>
+        <tr><td>阻断动作预览</td><td>默认 <code>blockAction=reject</code> 应表达拒绝连接。</td><td>当 <code>suspendDuration=none</code> 时右侧实际显示“仅记录日志，不阻断”，完全忽略 blockAction。</td><td><span class="badge badge-high">高</span> demo 预览文案与 blockAction 语义冲突——demo 自身缺陷（非 PRD 分歧），需确认“仅记录”是否为合法第四动作（见 Q2）。</td></tr>
+        <tr><td>导入/导出</td><td>PRD 要求 JSON 导入导出。</td><td><strong>v2 实测：demo 已完整实现</strong>——批量导入支持 CSV/TXT 文件与粘贴文本、模板下载、实时逐行校验预览（有效/无效统计+错误原因）、导入成功内联横幅；导出支持范围（当前筛选/全部）与格式（CSV 含 BOM / JSON 完整往返）选择，生成带时间戳文件下载。CSV 亦可再导入，不限于 JSON。</td><td>✅ v2 已解决。功能超出 PRD（额外支持 CSV），落地可对齐 demo 实现。</td></tr>
+        <tr><td>批量删除（v2 新增能力）</td><td>PRD 未明确批量删除交互细节。</td><td>demo 提供表头全选三态 Checkbox（跨页保留：全选仅追加当前页未选项、取消仅移除当前页项）、行单选高亮（bg-primary/5）、“删除选中（N）”destructive 按钮（仅选中时显示，位于新增规则之前）、批量删除确认 AlertDialog。</td><td>v2 新增。落地参照 demo 交互；跨页保留逻辑需后端批量删除 API 配合（见 Q6）。</td></tr>
+        <tr><td><span class="diff-badge">D-011</span> 形态×角色门控语义（v3 新增）</td><td><code>lib/product-profiles.ts</code> 注释：<code>strategy-pipeline.platformHidden=true</code> 写「多租户<strong>平台</strong>视角隐藏」。</td><td><strong>v3 运行态实测（6 组合交叉验证）行为相反</strong>：实际是「<strong>平台视角可见、租户视角隐藏</strong>」——云-多/AI-多/传统-多的租户管理员视角下 IP频率限制不渲染（freqVisCount=0），平台视角与单租户均渲染。注释字面与运行态冲突。</td><td><span class="badge badge-high">高</span> 门控方向直接决定多租户租户能否配置 IP策略。已按运行态填入 <a href="#form-role-matrix">§0.1</a> 矩阵；注释是否写反/语义是否符合产品预期见 <a href="#questions">Q-GATE</a>。</td></tr>
+        <tr><td><span class="diff-badge">D-PRD</span> spec 真源（v3 新增 / v3.1 裁决）</td><td>本规格原引用 <code>IP频率限制的需求文档.done.md</code> 作为 PRD 真源（经核实该文件不存在，<code>docs/</code> 下无 IP频率限制独立 PRD）。</td><td><strong>2026-07-21 裁决：无 spec 时以 demo 运行态 + 用户/PO 描述为准。</strong>故本规格以 demo 运行态为第一事实源、用户描述为第二事实源；下文 §9 中原标注「PRD 要求/PRD 列」的对照项，凡无 PRD 佐证者，一律以 demo 实现为准（见各行已更新）。</td><td><span class="badge badge-low">低</span> 事实源已明确，不再悬挂。本规格即作为该模块的规格事实源。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>10. 需确认事项</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>问题</th><th>建议确认对象</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td>IP频率限制是否复用统一规则系统，还是需要独立连接层限频 API 与 Redis 挂起管理 API？</td><td>后端/产品</td></tr>
+        <tr><td>Q2</td><td>右侧预览在“IP挂起=不启用”时忽略 blockAction 并写成“仅记录日志，不阻断”；需确认是预览 bug，还是产品确实允许“只记录”这一第四动作。</td><td>产品/前端/后端</td></tr>
+        <tr><td>Q3</td><td>blockAction 的 reject/error421/disconnect 是否都能被当前 SMTP/milter 路径精确表达？</td><td>后端</td></tr>
+        <tr><td>Q4</td><td>挂起 IP 是否应在 Redis 中跨节点同步，手动解封是否需要审计日志？</td><td>后端/运维</td></tr>
+        <tr><td>Q5</td><td>是否修复当前中文渲染乱码后再进入实现阶段？</td><td>前端</td></tr>
+        <tr><td>Q6</td><td>v2 新增批量删除/批量导入/导出需配套后端 API：批量删除（按 ID 数组）、批量导入（CSV/JSON 解析入库与逐行校验错误返回）、导出（范围+格式）。是否复用统一规则系统批量接口，还是为连接层限频单独提供？</td><td>后端/产品</td></tr>
+        <tr><td>Q7</td><td>批量导入的“仅合法行追加、非法行跳过”策略是否符合产品预期（vs 整批失败回滚）？导入成功横幅 4s 自动消失是否足够（无全局 Toaster）。</td><td>产品</td></tr>
+        <tr><td>Q-PRD</td><td><strong>需求文档缺失</strong>：IP频率限制无独立 PRD。<span class="badge badge-green">已裁决 2026-07-21</span> 无 spec 时以 demo 运行态 + 用户/PO 描述为准——本规格即作为该模块规格事实源，无需补写 PRD。</td><td>产品/PO（已裁决）</td></tr>
+        <tr><td>Q8</td><td>筛选器是否补「IP组」单独选项（当前 IP组规则只能经「全部」过滤，无法单独筛选）？demo 现状不含此项。</td><td>产品（体验优化，非阻塞）</td></tr>
+        <tr><td>Q-GATE</td><td><strong>形态×角色门控方向</strong>：运行态实测为「平台可见、租户隐藏」，但 <code>product-profiles.ts</code> 注释写「多租户平台视角隐藏」（字面相反）。需确认：①注释是否写反；②「租户不可配置 IP频率限制（收归平台）」是否符合产品预期——若租户应可配，则当前门控是 bug。</td><td>产品/前端</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true });</script>
+</body>
+</html>

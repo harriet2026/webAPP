@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略流水线 - 发信人黑白名单 HTML 规格说明</title>
+  <style>
+    :root {
+      --primary: oklch(0.52 0.226 262);
+      --background: oklch(0.98 0.01 205);
+      --foreground: oklch(0.145 0 0);
+      --card: #fff;
+      --muted: #f5f7fa;
+      --muted-foreground: #6b7280;
+      --border: #e5e7eb;
+      --blue: #1677ff;
+      --red: #f5222d;
+      --orange: #fa8c16;
+      --green: #52c41a;
+      --yellow: #d4b106;
+      --purple: #722ed1;
+      --radius: 0.625rem;
+      --font-sans: "Geist", "Inter", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; max-width: 1400px; margin-inline: auto; background: var(--background); color: var(--foreground); font-family: var(--font-sans); line-height: 1.6; }
+    a { color: var(--blue); text-decoration: none; }
+    h1, h2, h3 { line-height: 1.3; }
+    h1 { margin: 0 0 16px; color: var(--primary); font-size: 28px; }
+    h2 { margin: 0 0 18px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary); font-size: 20px; }
+    h3 { margin: 18px 0 10px; color: #111827; font-size: 17px; }
+    h4 { margin: 16px 0 8px; color: #374151; font-size: 15px; }
+    .spec-header, section, .component-toc { margin-bottom: 24px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .meta-table, .spec-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .meta-table td, .spec-table th, .spec-table td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+    .meta-table td:first-child { width: 180px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); }
+    .spec-table th { text-align: left; background: var(--muted); font-weight: 650; white-space: nowrap; }
+    .toc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+    .toc-list li { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa; }
+    .toc-badge, .badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #eef4ff; color: #155eef; }
+    .toc-layer-links { display: block; margin-top: 6px; font-size: 13px; }
+    .layer-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: 8px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+    .component-spec, .interaction-layer { margin: 16px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .component-preview { margin: 12px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; overflow: auto; }
+    .preview-card { width: 220px; min-height: 58px; display: flex; overflow: hidden; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); color: inherit; cursor: pointer; }
+    .preview-card:hover { border-color: #93c5fd; box-shadow: 0 4px 12px rgba(21,94,239,.14); }
+    .preview-bar { width: 4px; background: var(--green); }
+    .preview-card-body { flex: 1; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
+    .preview-title { font-size: 15px; font-weight: 600; }
+    .preview-config { color: #155eef; font-size: 13px; }
+    .preview-shell { display: grid; grid-template-columns: 200px 1fr; gap: 20px; min-width: 900px; }
+    .preview-nav { padding: 10px; border-right: 1px solid var(--border); background: #f9fafb; }
+    .preview-nav-row { margin: 4px 0; padding: 9px 10px; border-radius: 8px; color: #4b5563; font-size: 13px; }
+    .preview-nav-row.active { background: #eaf3ff; color: #155eef; font-weight: 600; }
+    .preview-nav-row small { color: #9ca3af; font-size: 11px; }
+    .preview-panel { padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    .preview-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .switch-on { display: inline-flex; align-items: center; gap: 6px; color: #155eef; font-size: 13px; font-weight: 600; }
+    .switch-on::after { content: ""; width: 34px; height: 18px; border-radius: 999px; background: #155eef; position: relative; }
+    .preview-toolbar { display: flex; justify-content: space-between; gap: 12px; margin: 14px 0; flex-wrap: wrap; }
+    .preview-input { min-width: 280px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; color: #374151; background: #fff; }
+    .button-blue { padding: 8px 12px; border: 0; border-radius: 8px; background: #155eef; color: #fff; font-weight: 650; cursor: pointer; }
+    .button-icon { padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; cursor: pointer; }
+    .tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 8px; background: #f3f4f6; }
+    .tab { padding: 5px 12px; border: 0; border-radius: 7px; font-size: 14px; font-weight: 650; background: transparent; cursor: pointer; color: #6b7280; }
+    .tab.active { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mini-table th, .mini-table td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; }
+    .mini-table th { background: #f8fafc; color: #374151; }
+    .pill { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: #f3f4f6; color: #4b5563; }
+    .pill.red { background: #ffe2e2; color: #d92d20; }
+    .pill.orange { background: #ffedd5; color: #c2410c; }
+    .pill.yellow { background: #fef3c7; color: #92400e; }
+    .pill.green { background: #dcfce7; color: #15803d; }
+    .pill.blue { background: #155eef; color: #fff; }
+    .pill.gray { background: #e5e7eb; color: #6b7280; }
+    .icon-btn { color: #6b7280; cursor: pointer; }
+    .icon-btn.del { color: #ef4444; }
+    .is-hidden { display: none !important; }
+    .screenshot-figure { margin: 14px 0; text-align: center; }
+    .screenshot-figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 10px rgba(15,23,42,.12); }
+    .screenshot-figure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; }
+    .dom-comparison { margin-top: 14px; padding: 14px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; }
+    .dom-comparison h4 { margin-top: 0; }
+    .diff-section { border-left: 4px solid var(--red); background: #fff7f7; }
+    .question-section { border-left: 4px solid #d97706; background: #fffbeb; }
+    .mermaid { padding: 16px; border-radius: 8px; background: #f8fafc; text-align: center; }
+    pre { padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; overflow: auto; font-family: var(--font-mono); font-size: 13px; }
+    code { font-family: var(--font-mono); font-size: 0.92em; }
+    @media (max-width: 900px) { body { padding: 16px; } .preview-shell { grid-template-columns: 1fr; } .preview-nav { border-right: 0; border-bottom: 1px solid var(--border); } }
+  </style>
+</head>
+<body>
+  <header class="spec-header">
+    <h1>策略流水线 - 发信人黑白名单 HTML 规格说明</h1>
+    <table class="meta-table">
+      <tr><td>目标模块</td><td>策略流水线 / 阶段2：收发信人策略 / 发信人黑白名单（<code>SenderFilterModule</code>）</td></tr>
+      <tr><td>规格版本</td><td><strong>v1</strong>（初版规格快照）</td></tr>
+      <tr><td>生成日期</td><td>2026-07-14</td></tr>
+      <tr><td>demo 源 commit</td><td><code>3c2bb69</code>（<code>sender-filter-module.tsx</code>）· 页面/流水线 <code>804efb9</code></td></tr>
+      <tr><td>spec 源 commit</td><td><code>804efb9</code>（<code>发信人黑白名单模块需求文档.md</code>）</td></tr>
+      <tr><td>demo 地址</td><td><a href="http://localhost:3000/filter-rules/pipeline">http://localhost:3000/filter-rules/pipeline</a></td></tr>
+      <tr><td>demo 源码</td><td><code>design/origin/demo/app/filter-rules/pipeline/page.tsx</code><br><code>design/origin/demo/components/filter-rules-new/strategy-pipeline-page.tsx</code><br><code>design/origin/demo/components/filter-rules-new/sender-filter-module.tsx</code></td></tr>
+      <tr><td>关联 PRD</td><td><code>design/origin/spec/发信人黑白名单模块需求文档.md</code><br><code>design/origin/spec/策略流水线需求文档.md</code></td></tr>
+      <tr><td>落地约束</td><td><code>design/origin/implement.md</code>：管理员可见可改配置优先走配置系统；涉及规则系统复用统一规则系统 action，不新增独立规则系统；产品 PRD API 不等于必须新增后端 API；四语国际化。</td></tr>
+      <tr><td>浏览器验证</td><td>2026-07-14 使用 headless Chrome (CDP) 访问运行态 demo，完成：策略卡默认态、阶段2抽屉黑/白名单列表、920px 新建规则抽屉、空表单校验、发信人类型联动、配置示例、模拟测试、“使用该示例”运行时报错、1024px 响应式 —— 均为真实点击/DOM 提取结果。</td></tr>
+    </table>
+  </header>
+
+  <nav class="component-toc">
+    <h2>组件列表（点击跳转）</h2>
+    <ul class="toc-list">
+      <li><a href="#component-2-1">2.1 策略流水线入口卡片</a><span class="toc-badge">1层</span></li>
+      <li><a href="#component-2-2">2.2 阶段2抽屉 + 发信人列表 SenderFilterModule</a><span class="toc-badge">2层</span></li>
+      <li><a href="#component-2-3">2.3 发信人规则编辑抽屉 SenderFilterDrawer</a><span class="toc-badge">3层</span>
+        <span class="toc-layer-links"><a href="layer-1-new-rule-drawer.html">层级2：新建规则抽屉 →</a> · <a href="layer-2-validation-examples-simulator.html">层级3：校验/示例/模拟测试/联动 →</a></span></li>
+      <li><a href="#dialogs">3. 弹窗/抽屉规格</a></li>
+      <li><a href="#api-mapping">4. 数据模型与 API 映射</a><span class="toc-badge">规则系统映射</span></li>
+    </ul>
+  </nav>
+
+  <section id="version-history">
+    <h2>0.2 版本历史</h2>
+    <table class="spec-table">
+      <thead><tr><th>版本</th><th>生成日期</th><th>demo commit</th><th>spec commit</th><th>变更摘要</th></tr></thead>
+      <tbody>
+        <tr><td>v1</td><td>2026-07-14</td><td><code>3c2bb69</code></td><td><code>804efb9</code></td><td>初版：策略卡入口、阶段2抽屉黑/白名单列表（7列，无 IP 范围列）、920px 新建规则抽屉（基础设置/执行动作两色条 + 右栏预览）、校验/配置示例/模拟测试/发信人联动，并记录列表状态用 Badge 非开关、删除/导入导出未接线、白名单全局策略缺 UI、“使用该示例”触发 <code>setSkipSpf</code> 运行时报错等差异。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="layout">
+    <h2>1. 页面布局结构</h2>
+    <table class="spec-table">
+      <thead><tr><th>区域</th><th>实际渲染</th><th>规格含义</th></tr></thead>
+      <tbody>
+        <tr><td>左侧产品导航</td><td>深色侧边栏，当前功能域“系统管理 / 平台安全策略”上下文</td><td>全局导航容器，不属于本模块表单，但占用首屏固定宽度。</td></tr>
+        <tr><td>策略流水线主内容</td><td>“策略执行流程”卡片，横向排列阶段1~4，底部为图例说明</td><td>发信人黑白名单以阶段2的策略卡进入，不是独立页面首屏。</td></tr>
+        <tr><td>阶段2收发信人策略抽屉</td><td>右侧 80vw（1440 视口下 1152px）Sheet，顶部“阶段2: 收发信人策略 / 发信人黑白名单”，左侧子策略导航，右侧承载 <code>SenderFilterModule</code></td><td>阶段2子模块的容器，右上角 × 关闭。</td></tr>
+        <tr><td>规则编辑抽屉</td><td>在阶段2抽屉上叠加 920px Sheet，左 560px 表单 + 右侧预览帮助区</td><td>规则新建/编辑主交互层，详见子文件。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/page-full-default.png" alt="策略流水线整页默认态">
+      <figcaption>整页默认态（1440×1000）：阶段2“收发信人策略”首个卡片即“发信人黑白名单”，绿色左色条=例外/放行类。</figcaption>
+    </figure>
+  </section>
+
+  <section id="components">
+    <h2>2. 逐组件规格</h2>
+
+    <article class="component-spec" id="component-2-1">
+      <h3>2.1 策略流水线入口卡片（SenderFilter Policy Card）</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级0：页面默认态中的策略入口卡片</td></tr>
+          <tr><th>触发路径</th><td>打开 <code>/filter-rules/pipeline</code>，在“阶段2: 收发信人策略”列首行定位“发信人黑白名单”卡片</td></tr>
+          <tr><th>渲染依据</th><td><code>policy.key = "senderFilter"</code>，<code>stage=2</code>，<code>type="exception"</code>，<code>priority=2000</code></td></tr>
+          <tr><th>可点击目标</th><td>浏览器验证：卡片整体（214×58px）与右侧“配置 →”共用打开逻辑，点击后打开阶段2抽屉并选中发信人黑白名单</td></tr>
+        </tbody>
+      </table>
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">0</span>交互层级 0：策略卡默认态</h4>
+        <div class="component-preview">
+          <a class="preview-card" data-demo-extracted="strategy-card" href="#component-2-2" aria-label="打开发信人黑白名单列表规格">
+            <div class="preview-bar"></div>
+            <div class="preview-card-body">
+              <span class="preview-title">发信人黑白名单</span>
+              <span class="preview-config">配置 →</span>
+            </div>
+          </a>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/sender-card-layer-0.png" alt="发信人黑白名单策略卡">
+          <figcaption>策略卡局部截图（CDP clip，2x）：绿色左色条表示例外/放行类策略。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/属性</th><th>交互行为</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>卡片标题</td><td>发信人黑白名单</td><td>点击卡片整体打开阶段2抽屉</td><td><code>handleCardClick</code> → <code>identityDrawerPolicy="senderFilter"</code></td></tr>
+            <tr><td>配置入口</td><td>配置 →</td><td>点击同样打开阶段2抽屉并选中发信人黑白名单</td><td><code>handleConfigClick</code>，与卡片共用打开逻辑</td></tr>
+            <tr><td>左侧色条</td><td>绿色 <code>#52c41a</code></td><td>无独立交互</td><td>由 <code>type="exception"</code> 推导（图例：白名单=投递/标记投递）</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取/预览 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>定位方式</td><td><code>div.cursor-pointer</code>，文本含“发信人黑白名单”+“配置”</td><td><code>.preview-card[data-demo-extracted]</code></td><td>✅ 一致</td></tr>
+              <tr><td>尺寸</td><td>214 × 58px（CDP <code>getBoundingClientRect</code>）</td><td>220px，min-height 58px</td><td>✅ 一致（预览取整）</td></tr>
+              <tr><td>关键文案</td><td>发信人黑白名单 / 配置 →</td><td>发信人黑白名单 / 配置 →</td><td>✅ 一致</td></tr>
+              <tr><td>触发结果</td><td>点击后 <code>body.innerText</code> 出现“黑名单规则”（阶段2抽屉已开）</td><td>规格中描述同一触发路径</td><td>✅ 一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-2">
+      <h3>2.2 阶段2抽屉 + 发信人列表（SenderFilterModule）</h3>
+      <table class="spec-table">
+        <tbody>
+          <tr><th>交互层级</th><td>层级1：点击策略卡后打开 80vw 阶段2抽屉，右侧渲染发信人黑白名单模块</td></tr>
+          <tr><th>渲染组件</th><td>阶段2抽屉 → <code>SenderFilterModule direction="receive" showHeader=false</code></td></tr>
+          <tr><th>左侧子策略导航</th><td>发信人黑白名单（当前，黑3/白2）· 身份认证与仿冒检测 · 发信行为管控 · 收信人检测 · 用户黑白名单（黑20/白15）</td></tr>
+          <tr><th>实际状态</th><td>模块头显示“已启用”开关；默认黑名单 Tab，首屏 10 行、底部“共 35 条规则”；白名单 Tab 切换后为 WL-* 规则（共 20 条）</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">1</span>交互层级 1A：黑名单规则列表默认态</h4>
+        <div class="component-preview">
+          <div class="preview-shell" data-demo-extracted="sender-filter-blacklist">
+            <div class="preview-nav">
+              <div class="preview-nav-row active">发信人黑白名单<br><small>黑名单规则: 3 / 白名单规则: 2</small></div>
+              <div class="preview-nav-row">身份认证与仿冒检测<br><small>SPF/DKIM/DMARC/PTR</small></div>
+              <div class="preview-nav-row">发信行为管控<br><small>频率限制/异常检测</small></div>
+              <div class="preview-nav-row">收信人检测<br><small>数量限制/存在性验证</small></div>
+              <div class="preview-nav-row">用户黑白名单<br><small>黑名单规则: 20 / 白名单规则: 15</small></div>
+            </div>
+            <div class="preview-panel">
+              <div class="preview-panel-head"><h3 style="margin:0;">发信人黑白名单</h3><span class="switch-on">已启用</span></div>
+              <div class="tabs" data-rule-tabs>
+                <button class="tab active" type="button" data-rule-tab="blacklist">黑名单规则</button>
+                <button class="tab" type="button" data-rule-tab="whitelist">白名单规则</button>
+              </div>
+              <div class="preview-toolbar">
+                <input class="preview-input" type="search" data-preview-search placeholder="搜索规则名称或发信人...">
+                <span><button class="button-icon" type="button" data-preview-reset title="重置">↻</button> <a class="button-blue" href="layer-1-new-rule-drawer.html">+ 新建规则</a> <span class="button-icon" title="导入">⬆</span> <span class="button-icon" title="导出">⬇</span></span>
+              </div>
+              <table class="mini-table">
+                <thead><tr><th>规则ID</th><th>规则名称</th><th>发信人</th><th>执行动作</th><th>状态</th><th>修改时间</th><th>操作</th></tr></thead>
+                <tbody data-rule-body="blacklist">
+                  <tr data-search-text="BL-20260320-001 垃圾邮件发送者 spam@bad.com 个人 阻断"><td>BL-20260320-001</td><td>垃圾邮件发送者</td><td>👤 spam@bad.com <span class="pill">个人</span></td><td><span class="pill red">阻断</span></td><td><span class="pill blue">启用</span></td><td>2026-03-20 10:30</td><td><span class="icon-btn">✎</span> <span class="icon-btn del">🗑</span></td></tr>
+                  <tr data-search-text="BL-20260319-002 钓鱼域名 phish.com 组织域名 隔离"><td>BL-20260319-002</td><td>钓鱼域名</td><td>🏢 phish.com <span class="pill">组织域名</span></td><td><span class="pill orange">隔离</span></td><td><span class="pill blue">启用</span></td><td>2026-03-19 14:15</td><td><span class="icon-btn">✎</span> <span class="icon-btn del">🗑</span></td></tr>
+                  <tr data-search-text="BL-20260318-003 可疑群组 可疑来源组 群组 审核"><td>BL-20260318-003</td><td>可疑群组</td><td>👥 可疑来源组 <span class="pill">群组</span></td><td><span class="pill yellow">审核</span></td><td><span class="pill gray">禁用</span></td><td>2026-03-18 09:00</td><td><span class="icon-btn">✎</span> <span class="icon-btn del">🗑</span></td></tr>
+                </tbody>
+                <tbody data-rule-body="whitelist" class="is-hidden">
+                  <tr data-search-text="WL-20260320-001 可信合作伙伴 partner@trusted.com 个人 放行"><td>WL-20260320-001</td><td>可信合作伙伴</td><td>👤 partner@trusted.com <span class="pill">个人</span></td><td><span class="pill green">放行</span></td><td><span class="pill blue">启用</span></td><td>2026-03-18 09:00</td><td><span class="icon-btn">✎</span> <span class="icon-btn del">🗑</span></td></tr>
+                  <tr data-search-text="WL-20260319-002 内部财务组 财务部门 群组 放行"><td>WL-20260319-002</td><td>内部财务组</td><td>👥 财务部门 <span class="pill">群组</span></td><td><span class="pill green">放行</span></td><td><span class="pill blue">启用</span></td><td>2026-03-17 15:30</td><td><span class="icon-btn">✎</span> <span class="icon-btn del">🗑</span></td></tr>
+                </tbody>
+              </table>
+              <div style="margin-top:12px;color:#6b7280;font-size:13px;">共 <span data-total-count>35</span> 条规则 &nbsp;|&nbsp; &lt; 1 2 3 4 &gt; &nbsp; 前往第 [ ] 页 &nbsp; 10 条/页</div>
+            </div>
+          </div>
+        </div>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/drawer-stage2-open.png" alt="发信人黑名单列表默认态">
+          <figcaption>阶段2抽屉 + 黑名单列表默认态：模块头“已启用”开关、Tab、搜索/重置/新建/导入/导出、7 列表格、分页均为浏览器实测。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为</th><th>差异/备注</th></tr></thead>
+          <tbody>
+            <tr><td>模块启用开关</td><td>“已启用” + 蓝色 Switch（模块头右上）</td><td>切换整个发信人黑白名单策略的启用状态</td><td>这是<strong>模块级</strong>开关（阶段2策略），非单条规则开关。</td></tr>
+            <tr><td>Tab</td><td>黑名单规则 / 白名单规则</td><td>点击切换列表，<code>setSearchTerm("")</code> + <code>setCurrentPage(1)</code></td><td>PRD 一致。</td></tr>
+            <tr><td>搜索框</td><td>placeholder：搜索规则名称或发信人...</td><td>实时过滤 <code>ruleName</code>、<code>senderValue</code>、<code>ruleId</code></td><td>无独立提交按钮；未匹配群组名/组织名（见差异）。</td></tr>
+            <tr><td>重置按钮</td><td>仅 <code>RotateCcw</code> 图标，无文字</td><td>清空搜索关键词</td><td>需补 aria-label / i18n。</td></tr>
+            <tr><td>新建规则</td><td>+ 新建规则（primary）</td><td>打开 920px 规则编辑抽屉（空表单）</td><td>详见子文件层级2。</td></tr>
+            <tr><td>导入 / 导出</td><td>Upload / Download 图标按钮（outline）</td><td>demo 中<strong>无 onClick</strong>，点击无响应</td><td>PRD 要求导入 Dialog + 导出，需接线，见差异。</td></tr>
+            <tr><td>表格列（7列）</td><td>规则ID、规则名称、发信人、执行动作、状态、修改时间、操作</td><td>操作列含编辑（✎）、删除（🗑）图标</td><td>PRD 还要求“发信IP范围”列，demo 列表<strong>未渲染该列</strong>（IP 仅在抽屉配置）。</td></tr>
+            <tr><td>发信人单元格</td><td>类型图标 + 值 + 类型 Badge</td><td>—</td><td>图标色：个人=灰、群组=蓝、组织=紫（<em>与 PRD 蓝/紫/橙不同</em>，见差异）。</td></tr>
+            <tr><td>执行动作 Badge</td><td>阻断=红 / 隔离=橙 / 审核=黄 / 放行=绿</td><td>—</td><td>PRD 写审核=紫，demo 实际=<strong>黄</strong>，见差异。</td></tr>
+            <tr><td>状态列</td><td>启用=蓝 Badge / 禁用=灰 Badge</td><td>列表中<strong>不可点击切换</strong></td><td>PRD 要求“状态开关”，demo 为只读 Badge，见差异。</td></tr>
+            <tr><td>分页</td><td>共 35 条；页码 1-4；前往第 [ ] 页；10/20/50/100 条/页</td><td>页码、跳页、每页条数可交互</td><td>符合 PRD。</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML 预览</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>抽屉根节点</td><td><code>[role=dialog]</code>，CDP 统计 <code>nodeCount=432</code></td><td>预览保留左导航、模块头、Tab、工具栏、7列表格核心结构</td><td>✅ 一致（结构裁剪展示）</td></tr>
+              <tr><td>表头列数</td><td>7：规则ID/规则名称/发信人/执行动作/状态/修改时间/操作（<strong>无发信IP范围</strong>）</td><td>7 列，同顺序</td><td>✅ 一致</td></tr>
+              <tr><td>首行数据</td><td>BL-20260320-001 / 垃圾邮件发送者 / spam@bad.com 个人 / 阻断 / 启用 / 2026-03-20 10:30</td><td>同文案</td><td>✅ 一致</td></tr>
+              <tr><td>Tab 状态</td><td>黑名单 <code>data-state=active</code>，白名单 inactive</td><td>黑名单 active</td><td>✅ 一致</td></tr>
+              <tr><td>隐藏条件节点</td><td>白名单 tbody 未在黑名单层级渲染</td><td>白名单行 <code>.is-hidden</code></td><td>✅ 一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="interaction-layer">
+        <h4><span class="layer-badge">1</span>交互层级 1B：白名单规则 Tab</h4>
+        <p style="color:#6b7280;font-size:13px;">触发：层级1A 点击“白名单规则” Tab（<code>role=tab</code>）。上方预览可直接点击 Tab 复现。</p>
+        <figure class="screenshot-figure">
+          <img src="./screenshots/sender-whitelist-tab.png" alt="白名单规则 Tab">
+          <figcaption>白名单 Tab：WL-* 规则，执行动作统一“放行”（绿色）。通过 <code>button[role=tab]</code> 精确点击验证。</figcaption>
+        </figure>
+        <table class="spec-table">
+          <thead><tr><th>元素</th><th>实际文案/默认值</th><th>交互行为</th></tr></thead>
+          <tbody>
+            <tr><td>白名单动作</td><td>统一“放行”绿色 Badge</td><td>列表态不可改；编辑抽屉内白名单动作 Select 仅 <code>allow</code></td></tr>
+            <tr><td>白名单数据</td><td>WL-20260320-001 可信合作伙伴；WL-20260319-002 内部财务组</td><td>与黑名单共享搜索、分页、编辑、删除入口</td></tr>
+            <tr><td>总数</td><td>共 20 条白名单规则</td><td>分页组件同黑名单</td></tr>
+          </tbody>
+        </table>
+        <div class="dom-comparison">
+          <h4>DOM 树比对结果</h4>
+          <table class="spec-table">
+            <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>提取的 HTML</th><th>是否一致</th></tr></thead>
+            <tbody>
+              <tr><td>Tab 属性</td><td>白名单 <code>data-state=active</code>，黑名单 inactive</td><td>白名单 active class</td><td>✅ 一致</td></tr>
+              <tr><td>规则ID 前缀</td><td><code>WL-</code></td><td><code>WL-</code></td><td>✅ 一致</td></tr>
+              <tr><td>动作 Badge</td><td>放行，绿色</td><td>放行，绿色</td><td>✅ 一致</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="component-spec" id="component-2-3">
+      <h3>2.3 发信人规则编辑抽屉 SenderFilterDrawer（多层交互）</h3>
+      <p>规则编辑抽屉超过单文件可读范围，层级2及以后拆分为独立文件。主文件保留关系图与索引。</p>
+      <div class="mermaid">
+        graph LR
+          A[层级0 策略卡] --> B[层级1 发信人黑/白名单列表]
+          B --> C[层级2 新建规则抽屉 920px]
+          C --> D[层级3 保存空表单校验错误]
+          C --> E[层级3 配置示例展开 / 使用该示例]
+          C --> F[层级3 模拟测试展开并执行]
+          C --> G[层级3 发信人类型联动]
+          B --> H[编辑已有规则 抽屉预填]
+      </div>
+      <table class="spec-table layer-index">
+        <thead><tr><th>层级</th><th>名称</th><th>触发路径</th><th>详情链接</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>策略卡默认态</td><td>页面加载</td><td>上方内嵌</td></tr>
+          <tr><td>1</td><td>发信人黑/白名单列表</td><td>点击策略卡</td><td>上方内嵌</td></tr>
+          <tr><td>2</td><td>新建规则抽屉（920px）</td><td>列表态点击“新建规则”</td><td><a href="layer-1-new-rule-drawer.html">查看详情 →</a></td></tr>
+          <tr><td>3</td><td>校验错误 / 配置示例 / 模拟测试 / 发信人联动</td><td>抽屉内点击“保存 / 查看配置示例 / 模拟测试 / 切换发信人类型”</td><td><a href="layer-2-validation-examples-simulator.html">查看详情 →</a></td></tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+  <section id="dialogs">
+    <h2>3. 弹窗/抽屉/对话框规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>名称</th><th>触发条件</th><th>实际渲染</th><th>规格要求 / 备注</th></tr></thead>
+      <tbody>
+        <tr><td>阶段2收发信人策略抽屉</td><td>点击“发信人黑白名单”策略卡或“配置”</td><td>80vw（1152px），顶部标题 + 子策略名，左侧子策略导航，右侧配置内容，右上角 × 关闭</td><td>嵌入式配置容器。</td></tr>
+        <tr><td>规则编辑抽屉（Sheet）</td><td>点击“新建规则”或行内编辑图标</td><td>920px，左 560px 表单 + 右侧预览帮助区；标题“新建规则/编辑规则”</td><td>新建、编辑共用；编辑态预填已有规则。</td></tr>
+        <tr><td>未保存确认 Dialog</td><td>抽屉内字段变更（<code>isDirty</code>）后点关闭/取消</td><td>源码实现 <code>showUnsavedDialog</code>，标题“确认离开”，含“不保存 / 保存”</td><td>浏览器验证：脏数据时关闭确会弹出。</td></tr>
+        <tr><td>删除确认 AlertDialog</td><td>点击行内删除（🗑）</td><td>PRD 要求；demo 删除按钮<strong>无 onClick</strong>，点击无弹窗</td><td>需接线，见差异。</td></tr>
+        <tr><td>导入 Dialog</td><td>点击导入图标</td><td>PRD 要求；demo 未接线</td><td>需确认导入格式与 API。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="api-mapping">
+    <h2>4. 数据模型与 API 映射</h2>
+    <pre><code>interface SenderFilterRule {
+  id: string
+  ruleId: string                 // 如 BL-20260320-001 / WL-20260320-001
+  priority: number               // 黑名单默认 2000 起，白名单 2025 起，范围 2000-2049
+  ruleName: string
+  senderConfigType: "individual" | "group" | "organization"
+  senderValue: string            // 个人邮箱（支持 *@domain.com）
+  senderGroupId?: string
+  senderGroupName?: string
+  ipRangeType: "all" | "ipGroup" | "single" | "range"
+  ipRangeValue?: string          // 单IP 或 CIDR
+  ipGroupId?: string
+  ipGroupName?: string
+  action: "block" | "quarantine" | "review" | "allow"
+  expireAt?: string              // 留空=永久
+  remark?: string                // 最多 200 字
+  enabled: boolean
+  modifyTime: string
+}</code></pre>
+    <table class="spec-table">
+      <thead><tr><th>PRD API / 数据表</th><th>用途</th><th>落地映射建议</th><th>需确认</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/sender-filter/rules</code></td><td>分页、搜索、类型筛选</td><td>优先映射统一规则系统列表接口，用 <code>type=blacklist/whitelist</code> 区分页签。</td><td>统一规则系统现有筛选字段是否覆盖 sender/ipRange。</td></tr>
+        <tr><td><code>POST/PUT/DELETE /api/sender-filter/rules</code></td><td>规则增删改</td><td>复用统一规则 CRUD；<strong>action 不新增</strong>，阻断/隔离/审核/放行映射现有动作。</td><td>“审核 review”是否已有统一 action，或映射为隔离+人工队列标签。</td></tr>
+        <tr><td><code>PUT /api/sender-filter/rules/{id}/status</code></td><td>切换启用/禁用</td><td>复用统一规则启停接口。</td><td>列表状态列需从只读 Badge 改为可操作开关（见差异）。</td></tr>
+        <tr><td><code>POST /api/sender-filter/simulate</code></td><td>模拟测试</td><td>可先前端本地模拟；如需真实匹配链路，提供统一规则 dry-run 接口。</td><td>是否新增 dry-run API。</td></tr>
+        <tr><td><code>GET /api/sender-groups</code>、<code>/api/organizations</code>、<code>/api/ip-groups</code></td><td>群组 / 组织 / IP 组下拉</td><td>关联群组策略模块数据源。</td><td>组织域名来源需与租户/组织通讯录统一。</td></tr>
+        <tr><td><code>t_sender_filter_rules</code> / <code>t_sender_filter_config</code></td><td>规则表 / 全局配置表</td><td>若统一规则系统已有表结构，避免新建独立规则表；<code>ipRangeType</code> 仍需存储。</td><td>白名单全局策略（bypass_content/direct_deliver）落库位置。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="business-logic">
+    <h2>5. 业务逻辑规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>逻辑</th><th>PRD 要求</th><th>demo 实际</th><th>落地说明</th></tr></thead>
+      <tbody>
+        <tr><td>匹配顺序</td><td>白名单优先于黑名单；同类型 priority 升序；首个匹配生效；发信人+IP 组合都匹配才命中</td><td>mock 数据分黑白名单，优先级区间黑名单 2000 起、白名单 2025 起</td><td>后端规则引擎需明确白名单先行，不能仅依赖数值区间。</td></tr>
+        <tr><td>发信人类型</td><td>个人邮箱、发信人群组、发信域名/组织</td><td>抽屉 Select 三类，切换动态显示输入/下拉；列表用 User/Users/Building2 图标区分</td><td>个人邮箱支持通配符 <code>*@domain.com</code>。</td></tr>
+        <tr><td>发信 IP 范围</td><td>全部IP、IP组、单IP、IP段（CIDR）</td><td>抽屉实现四类联动，列表未展示该列</td><td>落地需补列表列或确认隐藏。</td></tr>
+        <tr><td>黑名单动作</td><td>阻断、隔离、审核</td><td>黑名单抽屉动作 Select 含三项</td><td>阻断→reject/block；隔离→quarantine；审核需确认 action。</td></tr>
+        <tr><td>白名单动作</td><td>允许；全局策略决定跳过内容检测(bypass_content)或直接投递(direct_deliver)</td><td>白名单列表显示“放行”；源码有 <code>globalExceptionMode</code> 状态但<strong>无对应 UI</strong></td><td>需补白名单全局执行策略 UI，或确认移至流水线例外规则，见差异。</td></tr>
+        <tr><td>角色权限</td><td>系统管理员全权；安全管理员不可删预置；审计员只读；普通用户无权限</td><td>demo 未做权限态区分</td><td>落地按统一权限矩阵控制按钮可见性。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interaction">
+    <h2>6. 交互规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>交互</th><th>实际行为（浏览器验证）</th><th>规格要求 / 备注</th></tr></thead>
+      <tbody>
+        <tr><td>切换 Tab</td><td>黑/白名单 <code>role=tab</code>，点击后 <code>data-state</code> 更新</td><td>重置搜索词和页码。</td></tr>
+        <tr><td>搜索</td><td>输入即过滤 <code>ruleName</code>、<code>senderValue</code>、<code>ruleId</code></td><td>应同时覆盖群组名/组织名；源码当前未搜索 <code>senderGroupName</code>。</td></tr>
+        <tr><td>新建规则</td><td>打开 920px 抽屉，默认个人发信人、全部IP、阻断动作、优先级 2000</td><td>保存前校验必填。</td></tr>
+        <tr><td>保存空表单</td><td>显示“规则名称不能为空”“请输入发信人邮箱”，字段红框，抽屉保持打开</td><td>见子文件层级3。</td></tr>
+        <tr><td>发信人类型联动</td><td>选“群组”→ 出现“选择群组...”下拉；配置效果“当发信人为 未选择”</td><td>切换类型清空当前值。</td></tr>
+        <tr><td>配置示例</td><td>展开显示两张示例卡；点击“使用该示例”<strong>抛出 <code>Uncaught ReferenceError: setSkipSpf is not defined</code></strong>，示例未被应用</td><td>demo 缺陷，需修正为本模块字段填充，见差异。</td></tr>
+        <tr><td>模拟测试</td><td>默认 <code>test@example.com</code>，点击“开始测试”显示绿色“✓ 未命中 / 未命中当前规则”</td><td>命中逻辑支持精确邮箱与 <code>*@domain.com</code>。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="i18n">
+    <h2>7. 国际化规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>语言</th><th>demo 覆盖</th><th>缺口</th></tr></thead>
+      <tbody>
+        <tr><td>中文 zh</td><td><code>LABELS.zh</code> 完整覆盖模块文案</td><td>重置/导入/导出图标按钮缺可见文字和 aria-label。</td></tr>
+        <tr><td>英文 en</td><td><code>LABELS.en</code> 覆盖 SenderFilterModule 文案</td><td>策略流水线外层由全局 <code>t()</code> 维护。</td></tr>
+        <tr><td>泰语 th</td><td><code>LABELS.th</code> 覆盖 SenderFilterModule 文案</td><td>—</td></tr>
+        <tr><td>第4语言</td><td><code>LABELS</code> 仅内置 zh/en/th 三套</td><td>implement.md 要求四语内置，缺第4语言需确认（见需确认事项）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="responsive">
+    <h2>8. 响应式规格</h2>
+    <table class="spec-table">
+      <thead><tr><th>断点</th><th>浏览器验证</th><th>表现</th></tr></thead>
+      <tbody>
+        <tr><td>1440px</td><td>默认截图</td><td>左侧导航 + 主内容；80vw 抽屉足够展示左导航与表格；920px 规则抽屉左右双栏正常。</td></tr>
+        <tr><td>1024px</td><td>已截图</td><td>主页面仍横向布局，内容区压缩；PRD 声明最小宽度 900px，1200px 以下表格出现水平滚动。</td></tr>
+      </tbody>
+    </table>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/responsive-1024-default.png" alt="1024px 响应式截图">
+      <figcaption>1024px 默认态：左侧导航固定宽度，主内容区域压缩。</figcaption>
+    </figure>
+  </section>
+
+  <section id="diffs" class="diff-section">
+    <h2>9. 与 PRD / 源码 / 浏览器渲染的差异标注</h2>
+    <table class="spec-table">
+      <thead><tr><th>差异点</th><th>PRD 描述</th><th>demo 实际（浏览器渲染）</th><th>建议处理</th></tr></thead>
+      <tbody>
+        <tr><td>列表缺“发信IP范围”列</td><td>表格列含“发信IP范围”</td><td>表格仅 7 列：规则ID、规则名称、发信人、执行动作、状态、修改时间、操作</td><td>需确认是否补列；抽屉已支持 IP 范围配置。</td></tr>
+        <tr><td>抽屉区块数少于 PRD</td><td>抽屉分 5 个色条区块：基本信息(蓝)/发信人配置(紫)/发信IP范围(青)/执行动作(红或绿)/其他配置(灰)</td><td>实际只有 <strong>2 个色条区块</strong>：基础设置(蓝) + 执行动作(红)；备注在区块外，无紫/青/灰色条</td><td>按 PRD 补齐分区色条，或确认合并布局。</td></tr>
+        <tr><td>发信人类型图标配色</td><td>个人=蓝、群组=紫、组织=橙</td><td>个人=灰(<code>gray-500</code>)、群组=蓝(<code>blue-500</code>)、组织=紫(<code>purple-500</code>)</td><td>统一图标配色规范。</td></tr>
+        <tr><td>审核动作 Badge 颜色</td><td>审核=紫（<code>bg-purple-100</code>）</td><td>审核=<strong>黄</strong>（<code>bg-yellow-100 text-yellow-700</code>）</td><td>确认最终配色。</td></tr>
+        <tr><td>状态呈现不是开关</td><td>启用/禁用通过开关切换</td><td>列表行内是只读 Badge（启用蓝/禁用灰），无开关控件；开关只在模块头（模块级启用）</td><td>按 PRD 补行内 Switch；或只读视图需权限态说明。</td></tr>
+        <tr><td>删除确认未实现</td><td>点击删除弹确认 AlertDialog</td><td>删除图标存在但<strong>无 onClick</strong>，点击无反应</td><td>落地需接线确认弹窗。</td></tr>
+        <tr><td>导入导出未接线</td><td>支持导入 Dialog 与导出下载</td><td>仅图标按钮，无 onClick，浏览器验证无弹窗/下载</td><td>确认导入格式(CSV/JSON)和下载 API。</td></tr>
+        <tr><td>白名单全局配置缺 UI</td><td>配置 <code>bypass_content</code> / <code>direct_deliver</code></td><td>源码有 <code>globalExceptionMode</code> 状态但页面未渲染任何配置区域</td><td>确认放本模块还是统一例外规则。</td></tr>
+        <tr><td>“使用该示例”运行时报错</td><td>点击“使用该示例”一键填充配置</td><td>浏览器实测点击抛 <code>Uncaught ReferenceError: setSkipSpf is not defined</code>（<code>example.config</code> 也无 <code>skipSpf</code>/<code>action</code> 之外字段），示例未应用，抽屉保持打开</td><td>修正为填充本模块字段（action/ipRangeType 等），移除 <code>setSkipSpf</code>。</td></tr>
+        <tr><td>国际化语言数</td><td>implement.md 要求四种内置语言</td><td><code>LABELS</code> 仅 zh/en/th 三套</td><td>补第4语言或确认全局语言范围。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="questions" class="question-section">
+    <h2>10. 需确认事项</h2>
+    <table class="spec-table">
+      <thead><tr><th>编号</th><th>问题</th><th>影响</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td>“审核 review”是否已有统一规则系统 action？若无，是否映射为隔离队列 + 人工审核标签？其 Badge 颜色最终用黄还是紫？</td><td>影响规则动作落地和邮件处理链路、配色规范。</td></tr>
+        <tr><td>Q2</td><td>列表是否必须补“发信IP范围”列？状态列是否改为可操作开关？</td><td>影响表格宽度、响应式、后端返回字段与启停接口。</td></tr>
+        <tr><td>Q3</td><td>白名单全局策略（bypass_content/direct_deliver）由本模块配置，还是统一由策略流水线例外规则管理？</td><td>影响是否新增配置区域和 API。</td></tr>
+        <tr><td>Q4</td><td>导入导出的文件格式是 CSV、JSON，还是两者都支持？</td><td>影响导入校验和导出字段定义。</td></tr>
+        <tr><td>Q5</td><td>四语国际化的第4种语言是哪一种？</td><td>影响 i18n key 清单和验收范围。</td></tr>
+        <tr><td>Q6</td><td>抽屉是否按 PRD 拆成 5 个色条分区，还是保留 demo 的 2 分区合并布局？</td><td>影响表单信息架构与落地工作量。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    if (window.mermaid) { mermaid.initialize({ startOnLoad: true }); }
+
+    const previewSearch = document.querySelector("[data-preview-search]");
+    const previewReset = document.querySelector("[data-preview-reset]");
+    const ruleTabs = [...document.querySelectorAll("[data-rule-tab]")];
+    const ruleBodies = [...document.querySelectorAll("[data-rule-body]")];
+    const totalCount = document.querySelector("[data-total-count]");
+    const COUNTS = { blacklist: 35, whitelist: 20 };
+
+    function activePreviewBody() {
+      return document.querySelector("[data-rule-body]:not(.is-hidden)");
+    }
+    function filterPreviewRows() {
+      const term = (previewSearch?.value || "").trim().toLowerCase();
+      activePreviewBody()?.querySelectorAll("tr").forEach((row) => {
+        row.classList.toggle("is-hidden", term !== "" && !row.dataset.searchText.toLowerCase().includes(term));
+      });
+    }
+    ruleTabs.forEach((button) => {
+      button.addEventListener("click", () => {
+        ruleTabs.forEach((tab) => tab.classList.toggle("active", tab === button));
+        ruleBodies.forEach((body) => body.classList.toggle("is-hidden", body.dataset.ruleBody !== button.dataset.ruleTab));
+        if (previewSearch) previewSearch.value = "";
+        if (totalCount) totalCount.textContent = COUNTS[button.dataset.ruleTab];
+        filterPreviewRows();
+      });
+    });
+    previewSearch?.addEventListener("input", filterPreviewRows);
+    previewReset?.addEventListener("click", () => { previewSearch.value = ""; filterPreviewRows(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "module": "email-handling-disposal-settings",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-14",
+      "demo_commit": "804efb9",
+      "spec_commit": "8db3a98",
+      "summary": "初版：三 Tab（隔离区/审核/召回）全量设置项、9 类分类通知（PRD 仅 4 类）、通知范围树形选择器、与网关 GET/PUT /api/v1/disposal-settings 的字段级映射与 5 处缺口"
+    }
+  ]
+}
