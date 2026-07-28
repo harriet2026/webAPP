@@ -452,7 +452,7 @@
           <tr><td>D-001</td><td>在认证协议检查下管理本租户 DKIM 外发签名</td><td>已实现独立可折叠子卡 + 复用 DkimManageDrawer</td><td class="status-done">已解决</td><td>2026-07-28</td><td>源码 + 单测（子卡3 + mock7 + 既有9 全绿）</td><td>本会话新增，v1</td></tr>
           <tr><td>D-002</td><td>平台管理员与租户管理员均可管理</td><td><code>canQuery = (isSystemAdmin||isTenantAdmin)&amp;&amp;tenant!=null</code>；平台未选租户显示引导</td><td class="status-done">已解决</td><td>2026-07-28</td><td>源码门控 + 单测覆盖</td><td>形态/角色矩阵见 §1</td></tr>
           <tr><td>D-003</td><td>与入站 DKIM 校验语义解耦</td><td>走 DKIM 独立接口/内存态，不入 AuthSpoofingConfig 保存流</td><td class="status-done">已解决</td><td>2026-07-28</td><td>源码实现与注释</td><td>正交设计</td></tr>
-          <tr><td>D-004</td><td>规格应含真实运行截图</td><td>后端 18080 离线，业务数据态无法真实呈现</td><td class="status-open">未解决</td><td>2026-07-28</td><td>服务端日志 ECONNREFUSED；4.0 实拍加载态</td><td>待后端可用后补拍，见 Q-001</td></tr>
+          <tr><td>D-004</td><td>规格应含真实运行截图</td><td>已在内置 Mock 数据模式下实拍子卡表、管理抽屉、生成表单</td><td class="status-done">已解决</td><td>2026-07-28</td><td>浏览器实拍（§4.1 / §4.4）</td><td>后端 18080 离线时改用 Mock 数据模式取得真实 UI 渲染</td></tr>
         </tbody>
       </table>
     </div>
@@ -464,8 +464,8 @@
       <table class="spec-table">
         <thead><tr><th>编号</th><th>事项</th><th>原因</th><th>状态</th><th>复核日期</th><th>验证依据</th><th>处理说明</th></tr></thead>
         <tbody>
-          <tr><td>Q-001</td><td>业务数据态（默认/空/抽屉/校验/激活/删除）的真实截图</td><td>预览环境后端 <code>127.0.0.1:18080</code> 未启动，数据请求 ECONNREFUSED</td><td class="status-na">无法验证</td><td>2026-07-28</td><td>服务端日志；<code>/system/dkim</code>、<code>/tenants</code> 实拍均为加载/空态</td><td>后端恢复后按 §4 逐状态补拍</td></tr>
-          <tr><td>Q-002</td><td>平台管理员进入阶段2 抽屉的完整路径（选定租户后是否解除重定向）</td><td>租户列表为空，无法在 UI 选定租户复现</td><td class="status-na">无法验证</td><td>2026-07-28</td><td><code>PolicyPipelinePage</code> 329–334 源码 + 实拍重定向</td><td>需后端返回租户后确认</td></tr>
+          <tr><td>Q-001</td><td>Mock 样例数据与真实后端返回是否一致（域名/selector/DNS 记录为演示值）</td><td>截图在 Mock 数据模式下取得，非真实后端契约</td><td class="status-open">待确认</td><td>2026-07-28</td><td>浏览器实拍（Mock）；后端 18080 离线</td><td>后端可用后以真实数据复核一遍即可</td></tr>
+          <tr><td>Q-002</td><td>平台管理员（非租户绑定）进入阶段2 抽屉的完整路径（选定租户后是否解除重定向）</td><td>本次以租户管理员作用域实拍，未复现平台管理员选租户路径</td><td class="status-na">未实拍</td><td>2026-07-28</td><td><code>PolicyPipelinePage</code> 329–334 与 <code>security-scope</code> 源码</td><td>门控逻辑据源码；平台视角路径待补验</td></tr>
           <tr><td>Q-003</td><td>dev mock 与生产后端对 <code>/dkim/keys</code> 响应结构是否完全一致</td><td>当前仅前端 mock 可用，后端契约未在本环境联调</td><td class="status-open">待确认</td><td>2026-07-28</td><td>mock 依据 <code>DkimKey</code> 类型；后端未联通</td><td>联调时以后端为准</td></tr>
         </tbody>
       </table>
@@ -478,7 +478,7 @@
       <table class="spec-table">
         <thead><tr><th>版本</th><th>日期</th><th>webapp commit</th><th>对照 spec commit</th><th>摘要</th></tr></thead>
         <tbody>
-          <tr><td>v1</td><td>2026-07-28</td><td><code>9791661</code></td><td><code>not-used</code></td><td>初版：DKIM 外发签名子卡（域名×签名状态表、管理抽屉生成/导入/发布DNS/校验/激活/删除、作用域门控、形态×角色矩阵）。业务数据态受后端离线限制标注为无法验证，附环境实拍证据。</td></tr>
+          <tr><td>v1</td><td>2026-07-28</td><td><code>9791661</code></td><td><code>not-used</code></td><td>初版：DKIM 外发签名子卡（域名×签名状态表、管理抽屉生成/导入/发布DNS/校验/激活/删除、作用域门控、形态×角色矩阵）。截图在内置 Mock 数据模式下以租户管理员作用域实拍（子卡表、管理抽屉、生成表单）。</td></tr>
         </tbody>
       </table>
     </div>
