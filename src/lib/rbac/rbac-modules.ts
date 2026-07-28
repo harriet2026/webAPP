@@ -16,12 +16,23 @@
  *
  * Pure data/logic — no React, framework-agnostic, unit-testable in isolation.
  *
- * `labelKey` values are i18n keys. Where an existing `sidebar.*` / `users.*`
- * key already carries the right zh/en copy, it's reused directly. Submodules
- * with no existing sidebar counterpart (mostly demo-only concepts not yet
- * surfaced in the webapp nav, e.g. 举报中心/高管保护/灰邮治理) use a new
- * `rbac.module.*` key placeholder — those keys are added to
- * messages/{zh,en}.json in Task 8, not here.
+ * `labelKey` values are i18n keys reused from existing `sidebar.*` / `users.*`
+ * copy wherever possible.
+ *
+ * INVARIANT (matrix ↔ real pages): every submodule in `PERM_MODULES` MUST map
+ * to a webapp page — i.e. `SUBMODULE_ROUTE_MAP[id].href` is a non-empty string.
+ * The matrix used to be a loose superset of the nav, carrying demo-only
+ * concepts (举报中心/高管保护/灰邮治理/规则统计 …) that had no page anywhere, so a
+ * role could be granted view/edit on a permission it could never exercise.
+ * Those "dangling" submodules were removed; the assignable scope now equals
+ * the set of features that actually exist in each viewer's product. This is
+ * the same principle as the §7.5 advance-page exclusion below — permissions
+ * for pages a viewer can't reach don't belong in the matrix. Note we align to
+ * "real pages", NOT to live nav visibility: nav visibility is partly derived
+ * from RBAC itself (circular) and partly from product-form capabilities, so
+ * pages that exist but are currently hidden from the nav (链接与附件安全/邮件调查)
+ * are also excluded here. The `rbac-modules.test.ts` invariant test enforces
+ * this so a future edit can't reintroduce a pageless submodule.
  */
 
 import { sidebarNavItems, type NavItem } from '@/lib/constants';
@@ -69,9 +80,7 @@ export const PERM_MODULES: ModuleMeta[] = [
     children: [
       sub('security-overview', 'sidebar.securityOverview', false, false),
       sub('delivery-traffic-analysis', 'sidebar.deliveryTraffic', false, false),
-      sub('link-attachment-security', 'sidebar.linkAttachmentSecurity', false, false),
       sub('ops-top-trend', 'sidebar.opsTopTrend', false, false),
-      sub('rule-stats-v2', 'rbac.module.ruleStatsV2', false, false),
     ],
   },
   {
@@ -79,15 +88,6 @@ export const PERM_MODULES: ModuleMeta[] = [
     children: [
       sub('disposal-center', 'sidebar.disposalCenter', true, true),
       sub('disposal-settings', 'sidebar.disposalSettings', true, true),
-      sub('grey-mail-policy', 'rbac.module.greyMailPolicy', true, true),
-      sub('grey-mail-queue', 'rbac.module.greyMailQueue', true, true),
-    ],
-  },
-  {
-    key: 'report', labelKey: 'rbac.module.report', supportApprove: true, supportDelete: false,
-    children: [
-      sub('report-management', 'rbac.module.reportManagement', true, false),
-      sub('report-strategy', 'rbac.module.reportStrategy', true, false),
     ],
   },
   {
@@ -95,7 +95,6 @@ export const PERM_MODULES: ModuleMeta[] = [
     children: [
       sub('strategy-pipeline', 'sidebar.policyPipeline', false, false),
       sub('group-policy', 'sidebar.groupManagement', false, false),
-      sub('policy-test', 'rbac.module.policyTest', false, false),
     ],
   },
   {
@@ -107,20 +106,9 @@ export const PERM_MODULES: ModuleMeta[] = [
   {
     key: 'audit', labelKey: 'sidebar.logs', supportApprove: false, supportDelete: false,
     children: [
-      sub('mail-investigation', 'sidebar.mailInvestigation', false, false),
-      sub('ai-url-logs', 'rbac.module.aiUrlLogs', false, false),
       sub('link-logs', 'sidebar.linkClicks', false, false),
       sub('auth-logs', 'sidebar.authAttempts', false, false),
-      sub('system-logs', 'rbac.module.systemLogs', false, false),
       sub('admin-logs', 'sidebar.adminAuditLogs', false, false),
-    ],
-  },
-  {
-    key: 'executive', labelKey: 'rbac.module.executive', supportApprove: false, supportDelete: false,
-    children: [
-      sub('executive-dashboard', 'rbac.module.executiveDashboard', false, false),
-      sub('executive-policy', 'rbac.module.executivePolicy', false, false),
-      sub('executive-monitoring', 'rbac.module.executiveMonitoring', false, false),
     ],
   },
   {
@@ -128,11 +116,8 @@ export const PERM_MODULES: ModuleMeta[] = [
     children: [
       sub('tenant-management', 'sidebar.tenants', false, false),
       sub('platform-security-policy', 'sidebar.platformSecurityPolicy', false, false),
-      sub('network', 'rbac.module.network', false, false),
       sub('forwarding', 'sidebar.mailRouting', false, false),
       sub('contacts', 'sidebar.organizationContacts', false, false),
-      sub('data-management', 'rbac.module.dataManagement', false, false),
-      sub('authorization-upgrade', 'rbac.module.authorizationUpgrade', false, false),
     ],
   },
   {
@@ -162,8 +147,10 @@ export function findSubModule(id: string): SubModuleMeta | undefined {
 export const PLATFORM_ONLY_MODULE_KEYS = ['system'];
 
 // Tenant-exclusive business modules: assignable only to tenant admins; hidden from the platform scope
-// (mirrors the product's platformHidden business capabilities — 安全策略/智能体中心/高管保护).
-export const TENANT_ONLY_MODULE_KEYS = ['security', 'agent', 'executive'];
+// (mirrors the product's platformHidden business capabilities — 安全策略/智能体中心).
+// 高管保护(executive) used to live here but was removed with the rest of the
+// pageless demo modules; keep this list in sync with actual tenant-only pages.
+export const TENANT_ONLY_MODULE_KEYS = ['security', 'agent'];
 
 /**
  * Modules assignable within the given scope:
@@ -254,24 +241,15 @@ export const SUBMODULE_ROUTE_MAP: Record<string, RouteEntry> = {
   // ---- statistics ----
   'security-overview': route('/statistics/security-overview', 'security-overview'),
   'delivery-traffic-analysis': route('/statistics/delivery-traffic', 'delivery-traffic-analysis'),
-  'link-attachment-security': route('/statistics/link-attachment-security', 'link-attachment-security'),
   'ops-top-trend': route('/statistics/ops-top-trend', 'ops-top-trend'),
-  'rule-stats-v2': route(), // 规则统计: no dedicated webapp page yet
 
   // ---- mailHandling ----
   'disposal-center': route('/email-disposal/center', 'disposal-center'),
   'disposal-settings': route('/email-disposal/disposal-settings', 'disposal-settings'),
-  'grey-mail-policy': route(), // 灰邮治理-策略配置: not yet built in webapp
-  'grey-mail-queue': route(), // 灰邮治理-灰邮队列: not yet built in webapp
-
-  // ---- report ----
-  'report-management': route(), // 举报管理: not yet built in webapp
-  'report-strategy': route(), // 举报策略设置: not yet built in webapp
 
   // ---- security (tenant-only) ----
   'strategy-pipeline': route('/security/pipeline', 'strategy-pipeline'),
   'group-policy': route('/security/groups', 'group-policy'),
-  'policy-test': route(), // 策略测试: not yet built in webapp
 
   // ---- agent (tenant-only) ----
   // demo models a single "智能体管理" submodule; the webapp/product-form
@@ -282,26 +260,15 @@ export const SUBMODULE_ROUTE_MAP: Record<string, RouteEntry> = {
   'agent-management': route('/agent-center/overview'),
 
   // ---- audit ----
-  'mail-investigation': route('/logs/mail-investigation'),
-  'ai-url-logs': route(undefined, 'ai-url-logs'), // 沙箱日志: registry feature exists but has no route yet
   'link-logs': route('/logs/link-clicks', 'link-clicks'),
   'auth-logs': route('/logs/auth-attempts', 'auth-logs'),
-  'system-logs': route(), // 通知日志: not yet built in webapp
   'admin-logs': route('/logs/admin-audit', 'admin-logs'),
-
-  // ---- executive (tenant-only) ----
-  'executive-dashboard': route(), // not yet built in webapp
-  'executive-policy': route(),
-  'executive-monitoring': route(),
 
   // ---- system (platform-only) ----
   'tenant-management': route('/tenants', 'tenant-management'),
   'platform-security-policy': route('/system/platform-security', 'platform-security-policy'),
-  network: route(), // 网络设置: not yet built in webapp
   forwarding: route('/mail-routing', 'forwarding'),
   contacts: route('/organization-contacts', 'contacts'),
-  'data-management': route(), // 数据管理: not yet built in webapp
-  'authorization-upgrade': route(), // 升级更新: not yet built in webapp
 
   // ---- userPermission ----
   // all three submodules manage tabs of the single /users page.

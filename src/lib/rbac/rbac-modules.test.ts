@@ -53,6 +53,35 @@ describe('rbac module mapping (spec §7.4)', () => {
     }
   });
 
+  it('INVARIANT: every matrix submodule maps to a real webapp page (non-empty href)', () => {
+    // The matrix must not carry pageless demo concepts — a role can only be
+    // granted permissions it can actually exercise. This guards against a
+    // future edit reintroducing a submodule with an empty route() entry.
+    for (const m of PERM_MODULES) {
+      for (const s of m.children) {
+        const entry = SUBMODULE_ROUTE_MAP[s.id];
+        expect(entry, `submodule "${s.id}" missing route entry`).toBeDefined();
+        expect(
+          typeof entry.href === 'string' && entry.href.length > 0,
+          `submodule "${s.id}" has no page href — it must be removed from the matrix`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it('pageless demo modules 举报中心/高管保护 are removed from the matrix entirely', () => {
+    const keys = PERM_MODULES.map((m) => m.key);
+    expect(keys).not.toContain('report');
+    expect(keys).not.toContain('executive');
+    // executive is no longer a tenant-only module key either
+    expect(TENANT_ONLY_MODULE_KEYS).not.toContain('executive');
+    // and their submodule ids resolve to nothing
+    for (const id of ['report-management', 'executive-dashboard', 'grey-mail-policy', 'network']) {
+      expect(findSubModule(id)).toBeUndefined();
+      expect(SUBMODULE_ROUTE_MAP).not.toHaveProperty(id);
+    }
+  });
+
   it('reverse lookup resolves a known route back to its submodule id', () => {
     // disposal-center → /email-disposal/center (see sidebar constants)
     expect(submoduleForHref('/email-disposal/center')).toBe('disposal-center');
