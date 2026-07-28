@@ -3,13 +3,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { ColumnDef } from '@tanstack/react-table';
-import { Plus, Pencil, Trash2, Loader2, Search, AlertCircle, LockOpen, Power, LogOut, FileText, KeyRound } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Search, AlertCircle, LockOpen, Power, LogOut, FileText, KeyRound, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTable } from '@/components/shared/data-table';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { StatusBadge } from '@/components/shared/status-badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -765,15 +765,16 @@ export default function UsersPage() {
         </PageSurface>
       ) : (
         <PageSurface>
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <div className="relative max-w-sm flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          {/* GT: 对齐原型工具条——左侧搜索框，右侧（ml-auto）为「筛选 / 新建」按钮组。 */}
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <div className="relative w-64">
+              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 data-testid="user-search"
                 placeholder={t('users.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
+                className="h-9 pl-8"
               />
             </div>
             {tenantFilter !== null && !Number.isNaN(tenantFilter) && (
@@ -784,6 +785,26 @@ export default function UsersPage() {
                 </Link>
               </Badge>
             )}
+            <div className="ml-auto flex items-center gap-2">
+              {/* 原型的「筛选」按钮 aria-label 为「重置筛选」——这里落地为清空搜索
+                  与租户深链过滤的重置动作（无破坏性）。 */}
+              <Button
+                variant="outline"
+                aria-label={t('users.filterButton')}
+                data-testid="user-filter-reset"
+                onClick={() => {
+                  setSearch('');
+                  if (tenantFilter !== null && !Number.isNaN(tenantFilter)) router.push('/users');
+                }}
+              >
+                <Filter className="h-4 w-4" />
+                {t('users.filterButton')}
+              </Button>
+              <Button data-testid="user-new" onClick={() => handleOpenDialog()}>
+                <Plus className="h-4 w-4" />
+                {t('users.newButton')}
+              </Button>
+            </div>
           </div>
 
           {/* Task 9: batch bar, shown once any row is selected. */}
@@ -821,95 +842,142 @@ export default function UsersPage() {
         </PageSurface>
       )}
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent data-testid="create-user-dialog" className="max-w-md rounded-[28px] border-border/70 shadow-2xl">
-          <DialogHeader>
-            <DialogTitle>{editingUser ? t('users.editUser') : t('users.createUser')}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={form.handleSubmit(handleSubmit, onInvalidSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t('users.accountUsername')} *</Label>
-                {/* GT-12313：用户名是账号唯一标识，编辑时一律不可改（原型
-                    "账号不可修改，密码留空表示不修改"），不再区分平台/租户视角。 */}
-                <Input {...form.register('username')} disabled={!!editingUser} />
-                {fieldError('username')}
-              </div>
-              <div className="space-y-2">
-                <Label>{t('users.name')}{!editingUser && ' *'}</Label>
-                <Input {...form.register('name')} />
-                {fieldError('name')}
-              </div>
-              <div className="space-y-2">
-                <Label>{t('users.phone')}{!editingUser && ' *'}</Label>
-                <Input data-testid="new-admin-phone" {...form.register('phone')} />
-                {fieldError('phone')}
-              </div>
-              <div className="space-y-2">
-                <Label>{t('users.email')}{!editingUser && ' *'}</Label>
-                <Input type="email" {...form.register('email')} />
-                {fieldError('email')}
-              </div>
-              <div className="space-y-2">
-                <Label>{t('users.role')} *</Label>
-                <Select
-                  value={form.watch('role_id') !== undefined ? String(form.watch('role_id')) : ''}
-                  onValueChange={(v) => form.setValue('role_id', Number(v))}
-                >
-                  <SelectTrigger data-testid="new-admin-role-select">
-                    <SelectValue>{selectedRole?.name ?? t('users.selectRolePlaceholder')}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roleOptions.map((r) => (
-                      <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {fieldError('role_id')}
-              </div>
-              {!isTenantView && selectedRole?.scope === 'tenant' && (
-                <div className="space-y-2">
-                  <Label>{t('users.tenant')}</Label>
-                  <Input type="number" {...form.register('tenant_id', { valueAsNumber: true })} />
+      {/* GT: 对齐原型 layer-1——新建/编辑账号改用右侧抽屉（Sheet），表单分为
+          「基础信息」与「角色与状态」两张分组卡片；抽屉标题固定为「管理员配置」。
+          data-testid 沿用 create-user-dialog（既有防回归单测按此定位）。 */}
+      <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
+        <SheetContent
+          data-testid="create-user-dialog"
+          className="flex w-full flex-col p-0 sm:max-w-xl"
+        >
+          <SheetHeader className="gap-1.5 border-b border-border px-6 pt-6 pb-3">
+            <SheetTitle>{t('users.drawerTitle')}</SheetTitle>
+            <SheetDescription>
+              {editingUser ? t('users.drawerDescriptionEdit') : t('users.drawerDescriptionCreate')}
+            </SheetDescription>
+          </SheetHeader>
+
+          <form
+            onSubmit={form.handleSubmit(handleSubmit, onInvalidSubmit)}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4">
+              {/* 分组卡片一：基础信息 */}
+              <div className="space-y-3 rounded-lg border border-border p-4">
+                <h4 className="text-sm font-medium text-foreground">{t('users.basicInfo')}</h4>
+                <div className="space-y-1.5">
+                  <Label>{t('users.accountUsername')}<span className="ml-0.5 text-destructive">*</span></Label>
+                  {/* GT-12313：用户名是账号唯一标识，编辑时一律不可改（原型
+                      "账号不可修改，密码留空表示不修改"），不再区分平台/租户视角。 */}
+                  <Input {...form.register('username')} disabled={!!editingUser} />
+                  {fieldError('username')}
                 </div>
-              )}
-              <div className="space-y-2">
-                <Label>{editingUser ? t('common.password') : `${t('users.initialPassword')} *`}</Label>
-                <div className="flex items-center gap-2">
-                  <Input type="password" {...form.register('password')} placeholder={editingUser ? t('users.leaveBlank') : ''} className="flex-1" />
-                  {!editingUser && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      data-testid="user-password-generate"
-                      onClick={() => form.setValue('password', generatePassword(), { shouldValidate: true })}
-                    >
-                      {t('users.resetPassword.generate')}
-                    </Button>
-                  )}
+                <div className="space-y-1.5">
+                  <Label>{t('users.name')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
+                  <Input {...form.register('name')} />
+                  {fieldError('name')}
                 </div>
-                {fieldError('password')}
+                <div className="space-y-1.5">
+                  <Label>{t('users.phone')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
+                  <Input data-testid="new-admin-phone" {...form.register('phone')} />
+                  {fieldError('phone')}
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{t('users.email')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
+                  <Input type="email" {...form.register('email')} />
+                  {fieldError('email')}
+                </div>
+                <div className="space-y-1.5">
+                  <Label>
+                    {editingUser ? t('common.password') : t('users.initialPassword')}
+                    {!editingUser && <span className="ml-0.5 text-destructive">*</span>}
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Input type="password" {...form.register('password')} placeholder={editingUser ? t('users.leaveBlank') : ''} className="flex-1" />
+                    {!editingUser && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        data-testid="user-password-generate"
+                        onClick={() => form.setValue('password', generatePassword(), { shouldValidate: true })}
+                      >
+                        {t('users.resetPassword.generate')}
+                      </Button>
+                    )}
+                  </div>
+                  {fieldError('password')}
+                </div>
               </div>
+
+              {/* 分组卡片二：角色与状态 */}
+              <div className="space-y-3 rounded-lg border border-border p-4">
+                <h4 className="text-sm font-medium text-foreground">{t('users.roleAndStatus')}</h4>
+                <div className="space-y-1.5">
+                  <Label>{t('users.role')}<span className="ml-0.5 text-destructive">*</span></Label>
+                  <Select
+                    value={form.watch('role_id') !== undefined ? String(form.watch('role_id')) : ''}
+                    onValueChange={(v) => form.setValue('role_id', Number(v))}
+                  >
+                    <SelectTrigger data-testid="new-admin-role-select">
+                      <SelectValue>{selectedRole?.name ?? t('users.selectRolePlaceholder')}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roleOptions.map((r) => (
+                        <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {fieldError('role_id')}
+                </div>
+                {!isTenantView && selectedRole?.scope === 'tenant' && (
+                  <div className="space-y-1.5">
+                    <Label>{t('users.tenant')}</Label>
+                    <Input type="number" {...form.register('tenant_id', { valueAsNumber: true })} />
+                  </div>
+                )}
+                {/* 账号状态：对齐原型（原型固定展示「启用（正常）」）。状态的启用/停用
+                    由行操作走「确认并终止会话」的专用流程处理，这里只做只读展示，
+                    不在编辑表单里旁路那条带确认的停用流程。 */}
+                <div className="space-y-1.5">
+                  <Label>{t('users.accountStatus')}</Label>
+                  <Select value={editingUser?.status === 'disabled' ? 'disabled' : 'normal'} disabled>
+                    <SelectTrigger data-testid="new-admin-status-select">
+                      <SelectValue>
+                        {editingUser?.status === 'disabled'
+                          ? t('users.statusDisabledOption')
+                          : t('users.statusEnabledOption')}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">{t('users.statusEnabledOption')}</SelectItem>
+                      <SelectItem value="disabled">{t('users.statusDisabledOption')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* GT-12318：所有账号首次登录一律强制改密（临时密码安全契约），
+                  不再提供"是否强制首登改密"开关——平台与租户视角统一显示固定
+                  提示。新账号 must_change_password 由服务端默认 true 保证，前端
+                  不再下发该字段（testid 沿用 tenant-must-change-notice）。 */}
+              <p className="pt-1 text-xs text-muted-foreground" data-testid="tenant-must-change-notice">
+                {t('users.tenantMustChangeNotice')}
+              </p>
             </div>
-            {/* GT-12318：所有账号首次登录一律强制改密（临时密码安全契约），
-                不再提供"是否强制首登改密"开关——平台与租户视角统一显示固定
-                提示。新账号 must_change_password 由服务端默认 true 保证，前端
-                不再下发该字段（testid 沿用 tenant-must-change-notice）。 */}
-            <p className="pt-1 text-xs text-muted-foreground" data-testid="tenant-must-change-notice">
-              {t('users.tenantMustChangeNotice')}
-            </p>
-            <DialogFooter>
+
+            {/* 页脚：对齐原型「确定 / 取消」顺序（确定在前）。 */}
+            <div className="flex items-center gap-2 border-t border-border px-6 py-3">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t('common.save')}
+              </Button>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                {t('common.save')}
-              </Button>
-            </DialogFooter>
+            </div>
           </form>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       <ConfirmDialog
         open={!!deleteId}
@@ -995,18 +1063,11 @@ export default function UsersPage() {
 
   return (
     <PageShell>
+      {/* GT: 对齐原型页面框架——页头只保留标题 + 副标题（无 eyebrow），
+          「新建」按钮下沉到账号页签的工具条右侧（见 accountsTab）。 */}
       <PageHeader
-        eyebrow={t('users.eyebrow')}
         title={t('users.title')}
         description={t('users.subtitle')}
-        actions={
-          canManageAccounts ? (
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t('users.newButton')}
-            </Button>
-          ) : undefined
-        }
       />
 
       <Tabs defaultValue={tabs[0]?.value} className="w-full space-y-4">

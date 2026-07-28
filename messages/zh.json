@@ -699,7 +699,7 @@
       "masterSwitchOff": "免认证中继总开关当前关闭，授权暂不生效。",
       "masterSwitch": "总开关",
       "masterSwitchOffActionable": "免认证中继总开关当前关闭，下方授权均不生效——打开右上角「总开关」后生效。",
-      "masterSwitchEnabled": "免认证中继总开关已开启",
+      "masterSwitchEnabled": "免认证中继总��关已开启",
       "masterSwitchDisabled": "免认证中继总开关已关闭",
       "add": "新增授权",
       "empty": "暂无授权",
@@ -1015,7 +1015,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置：灰色为「继承全局」，彩色为「另行配置」。",
+    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置：灰���为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
     "targetGroups": "适用对象",
@@ -1829,7 +1829,7 @@
     "filteredByTenant": "仅显示租户 #{id} 的用户",
     "clearTenantFilter": "清除筛选",
     "eyebrow": "用户访问",
-    "subtitle": "在管理工作区中管理控制台用户、角色分配、租户关联和密码轮换。",
+    "subtitle": "统一管理平台管理员账号、角色权限与登录安全策略",
     "mustChangePassword": "首次登录强制修改密码",
     "mustChangePasswordHint": "新用户初始密码为临时密码，登录后需自行修改。",
     "initialPassword": "初始密码",
@@ -1861,6 +1861,15 @@
     "confirmDisable": "确定停用该账号？停用后将立即终止其所有登录会话。",
     "confirmForceOffline": "确定强制下线该账号？将立即终止其所有登录会话。",
     "selectRolePlaceholder": "请选择角色",
+    "drawerTitle": "管理员配置",
+    "drawerDescriptionCreate": "创建新的管理员账号并分配角色",
+    "drawerDescriptionEdit": "编辑管理员账号信息与角色分配",
+    "basicInfo": "基础信息",
+    "roleAndStatus": "角色与状态",
+    "accountStatus": "账号状态",
+    "statusEnabledOption": "启用（正常）",
+    "statusDisabledOption": "停用",
+    "filterButton": "筛选",
     "roleRequired": "请选择角色",
     "selectAll": "全选",
     "selectRow": "选择该行",
@@ -2132,9 +2141,9 @@
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
-      "connectionRefused": "连接被拒绝，请检查认证服务器端口可达性与防火墙策略。",
+      "connectionRefused": "连接被拒绝，请检查认证服务器端���可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
-      "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
+      "protocolMismatch": "协议不��配，请确认客户端使用的协议与该域名认证配置一致。",
       "unknown": "未能识别的失败原因，请查看原始失败信息并联系支持。"
     },
     "detail": {
@@ -2385,7 +2394,7 @@
     },
     "trustedDevices": {
       "count": "授信终端（{n}）",
-      "empty": "暂无授信终端。登录时勾选「信任此设备」后，下次在此设备可跳过二次认证。",
+      "empty": "暂无授信终端。登录时勾选「信任此设备」后���下次在此设备可跳过二次认证。",
       "createdAt": "授信时间",
       "lastUsed": "最近使用",
       "expires": "到期时间",
@@ -3214,7 +3223,7 @@
     "examples": {
       "title": "查看配置示例",
       "antiBruteforce": "防暴力破解",
-      "antiBruteforceDesc": "防止密码爆破攻击，短时间内多次认证失败将被封禁",
+      "antiBruteforceDesc": "防止密码爆破攻击，短时��内多次认证失败将被封禁",
       "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1小时。",
       "antiSpam": "防滥发邮件",
       "antiSpamDesc": "限制高频发信行为，防止垃圾邮件泛滥",
@@ -3235,7 +3244,7 @@
       "noThresholds": "当前配置未设置有效阈值，连接将被放行"
     },
     "tips": {
-      "title": "配置提示",
+      "title": "配置提���",
       "negOne": "-1 表示不限制",
       "priorityLower": "优先级越大越先匹配",
       "permanent": "留空 = 永久有效",
@@ -4509,7 +4518,7 @@
       "normalEffect": "正常用户日发50封邮件，使用2个IP，未触发规则",
       "stolenName": "账号被盗场景",
       "stolenDesc": "异常高频发信，触发隔离",
-      "stolenEffect": "盗号者15分钟用10个IP发信200封，触发隔离",
+      "stolenEffect": "盗号者15分钟用10个IP发信200封，触发��离",
       "salesName": "销售部群发场景",
       "salesDesc": "正常业务群发，阈值宽松",
       "salesEffect": "销售部正常日报群发500人，域内方向阈值宽松，不触发外发规则"
@@ -5151,7 +5160,7 @@
     "save": "保存",
     "createReceiveRule": "新建接收标记规则",
     "editReceiveRule": "编辑接收标记规则",
-    "createSendRule": "新建外发声明规则",
+    "createSendRule": "新建���发声明规则",
     "editSendRule": "编辑外发声明规则",
     "basicConfig": "基础配置",
     "ruleNamePlaceholder": "如：高管外站警示",
@@ -5252,7 +5261,7 @@
   "configManagement": {
     "eyebrow": "高级规则设置",
     "title": "配置管理",
-    "description": "查看各服务的配置文件内容，并通过数据库覆盖配置项",
+    "description": "查看各服务的配���文件内容，并通过数据库覆盖配置项",
     "noFiles": "未找到配置文件",
     "key": "配置键",
     "fileValue": "文件值",
@@ -5862,7 +5871,7 @@
         "contentDetails": "内容详情",
         "detectionPipeline": "检测流程",
         "totalElapsed": "总耗时: {ms}ms",
-        "elapsed": "耗时: {ms}ms",
+        "elapsed": "���时: {ms}ms",
         "policyCount": "{n} 项策略",
         "hitPolicyLabel": "命中策略",
         "agentJudgementLabel": "智能体研判",
@@ -6218,7 +6227,7 @@
       "noneTagsCleared": "该规则的主操作为“无”（仅附加 addon），设置的标签不会生效，保存时将被清除，可删除对应标签规则。"
     },
     "observe": {
-      "title": "观察模式",
+      "title": "��察模式",
       "desc": "启用后规则匹配但不执行动作，仅记录日志"
     },
     "hitStats": {
@@ -6503,7 +6512,7 @@
       "desc_keywordMatch": {
         "source": "内容规则模块-关键词库",
         "usage": "从预定义关键词库匹配邮件内容",
-        "note": "关键词库支持分组管理"
+        "note": "关��词库支持分组管理"
       },
       "desc_sendTime": {
         "source": "邮件头 Date 字段",
@@ -6592,7 +6601,7 @@
       },
       "desc_rblResult": {
         "source": "RBL实时黑名单服务",
-        "usage": "根据RBL查询结果过滤邮件",
+        "usage": "根据RBL查询结果过��邮件",
         "note": "支持多个RBL源联合查询"
       },
       "desc_urlSandboxResult": {
@@ -6943,7 +6952,7 @@
     "weekday_6": "周六",
     "timePoints": "通知时间点",
     "addTimePoint": "添加时间点",
-    "tzComputedIn": "通知时间按 {tz} 计算",
+    "tzComputedIn": "通知时间��� {tz} 计算",
     "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间：",
     "tzUseBrowser": "使用浏览器时区（{tz}）",
     "tzKeepCurrent": "保持当前时区（{tz}）",

@@ -2250,7 +2250,7 @@
     "filteredByTenant": "Showing users for tenant #{id}",
     "clearTenantFilter": "Clear filter",
     "eyebrow": "User Access",
-    "subtitle": "Manage console users, role assignments, tenant linkage, and password rotation from the admin workspace.",
+    "subtitle": "Centrally manage platform admin accounts, role permissions, and login security policies",
     "mustChangePassword": "First-login must change password",
     "mustChangePasswordHint": "New user's initial password is temporary; user must change it on first login.",
     "initialPassword": "Initial Password",
@@ -2282,6 +2282,15 @@
     "confirmDisable": "Disable this account? All of its active sessions will be terminated immediately.",
     "confirmForceOffline": "Force this account offline? All of its active sessions will be terminated immediately.",
     "selectRolePlaceholder": "Select a role",
+    "drawerTitle": "Admin Configuration",
+    "drawerDescriptionCreate": "Create a new admin account and assign a role",
+    "drawerDescriptionEdit": "Edit admin account details and role assignment",
+    "basicInfo": "Basic Information",
+    "roleAndStatus": "Role & Status",
+    "accountStatus": "Account Status",
+    "statusEnabledOption": "Enabled (Normal)",
+    "statusDisabledOption": "Disabled",
+    "filterButton": "Filter",
     "roleRequired": "Please select a role",
     "selectAll": "Select all",
     "selectRow": "Select row",
@@ -2446,7 +2455,7 @@
       "proceeded": "Proceeded",
       "abandoned": "Abandoned",
       "skippedDeepInspect": "Skipped deep inspect",
-      "none": "—"
+      "none": "��"
     },
     "deepInspect": {
       "skipped": "Not run",
