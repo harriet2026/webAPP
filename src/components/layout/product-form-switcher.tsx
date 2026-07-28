@@ -74,7 +74,7 @@ export function ProductFormSwitcher() {
         >
           {/* 产品形态始终显示（主标识） */}
           <span className="text-muted-foreground/70">{t('label')}:</span>
-          <span className="text-foreground">{t(i18nKey)}</span>
+          <span className="text-foreground" suppressHydrationWarning>{t(i18nKey)}</span>
           {/* 登录视角徽标：仅 system_admin 且切到 tenant（非默认 platform）时显示 */}
           {isSystemAdmin && viewer === 'tenant' && (
             <span className="ml-0.5 inline-flex items-center rounded bg-amber-500/15 px-1.5 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
