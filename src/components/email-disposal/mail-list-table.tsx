@@ -85,7 +85,7 @@ const STATUS_VARIANTS: Record<DisplayStatus, 'default' | 'secondary' | 'destruct
 // The leading select checkbox and the trailing operations column are
 // structural and always rendered.
 const TOGGLEABLE_COLUMNS = [
-  'time', 'direction', 'senderIp', 'sender', 'recipient', 'subject',
+  'time', 'direction', 'subject', 'senderIp', 'sender', 'recipient',
   'disposalBasis', 'mailType', 'similarity', 'action', 'status',
 ] as const;
 type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
@@ -376,10 +376,10 @@ export function MailListTable({
                 </TableHead>
                 {colHead('time')}
                 {colHead('direction')}
+                {colHead('subject')}
                 {colHead('senderIp')}
                 {colHead('sender')}
                 {colHead('recipient')}
-                {colHead('subject')}
                 {colHead('disposalBasis')}
                 {colHead('mailType')}
                 {aiEnabled && similarMode && colHead('similarity')}
@@ -415,10 +415,10 @@ export function MailListTable({
                 </TableHead>
                 {colHead('time')}
                 {colHead('direction')}
+                {colHead('subject')}
                 {colHead('senderIp')}
                 {colHead('sender')}
                 {colHead('recipient')}
-                {colHead('subject')}
                 {colHead('disposalBasis')}
                 {colHead('mailType')}
                 {aiEnabled && similarMode && colHead('similarity')}
@@ -570,6 +570,11 @@ export function MailListTable({
                   <Badge variant="outline">{localizeEnum(`filters.${item.direction}` as const, item.direction)}</Badge>
                 </TableCell>
                 )}
+                {isColVisible('subject') && (
+                <TableCell className="text-xs max-w-[300px] truncate">
+                  {item.subject}
+                </TableCell>
+                )}
                 {isColVisible('senderIp') && (
                 <TableCell className="text-xs max-w-[160px] truncate font-mono">
                   <Tooltip>
@@ -592,11 +597,6 @@ export function MailListTable({
                     <TooltipTrigger render={<span className="cursor-default" />}>{(item.recipientList ?? (item.recipient ? [item.recipient] : [])) .join(', ') || '—'}</TooltipTrigger>
                     <TooltipContent className="max-w-md text-xs">{(item.recipientList ?? (item.recipient ? [item.recipient] : [])).join(', ') || '—'}</TooltipContent>
                   </Tooltip>
-                </TableCell>
-                )}
-                {isColVisible('subject') && (
-                <TableCell className="text-xs max-w-[300px] truncate">
-                  {item.subject}
                 </TableCell>
                 )}
                 {isColVisible('disposalBasis') && (
