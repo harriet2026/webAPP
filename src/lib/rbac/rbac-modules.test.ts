@@ -191,6 +191,21 @@ describe('rbac module mapping (spec §7.4)', () => {
       const all = visibleModulesForScope('platform', () => true);
       expect(all.map((m) => m.key)).toEqual(getScopedModules('platform').map((m) => m.key));
     });
+
+    it('REGRESSION: platform-role matrix uses the platform viewer, never the logged-in tenant viewer', () => {
+      // A platform admin impersonating a tenant still edits PLATFORM roles; the
+      // form gate must resolve with the 'platform' viewer. Using the caller's
+      // 'tenant' viewer would mark every platform-only page (proxysvr, DKIM,
+      // tenant-management …) invisible and collapse the whole 系统管理 group.
+      const withPlatformViewer = visibleModulesForScope('platform', formGate('ai-multi', 'platform'));
+      const system = withPlatformViewer.find((m) => m.key === 'system');
+      expect(system, '系统管理 must survive under platform viewer').toBeDefined();
+      expect(system!.children.map((c) => c.id)).toContain('proxysvr');
+
+      // Prove the bug the fix prevents: the WRONG viewer collapses 系统管理.
+      const withTenantViewer = visibleModulesForScope('platform', formGate('ai-multi', 'tenant'));
+      expect(withTenantViewer.some((m) => m.key === 'system')).toBe(false);
+    });
   });
 
   it('reverse lookup resolves a known route back to its submodule id', () => {

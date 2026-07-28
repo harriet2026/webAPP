@@ -85,17 +85,24 @@ export function RoleDrawer({ open, onOpenChange, scope, role, existingNames, onS
   const readonly = !!role?.isSystemDefault;
   const roleIdToken = role?.id ?? 'new';
 
-  // Product-form gate — the SAME one the sidebar uses (sidebar-visibility.ts),
-  // so the assignable matrix matches the nav of the current form/viewer instead
-  // of over-granting form-specific pages (e.g. forwarding is hidden in every
-  // multi-tenant form; platform-security-policy/tenant-management in single).
-  // Fail closed against the canonical registry mirror until /bootstrap answers
-  // (GT-12013), mirroring sidebar-nav.tsx exactly.
-  const { capabilities, registry, registryReady, viewer, grants } = useProductForm();
+  // Product-form gate — the SAME registry resolver the sidebar uses
+  // (sidebar-visibility.ts), so the assignable matrix matches the real nav of
+  // the current product form instead of over-granting form-specific pages
+  // (e.g. forwarding is hidden in every multi-tenant form; MULTI_ONLY
+  // platform-security-policy/tenant-management in single-tenant).
+  //
+  // IMPORTANT: the product-form viewer used for this gate is derived from the
+  // ROLE's `scope` being edited (platform-role matrix → 'platform' viewer),
+  // NOT from the logged-in admin's own viewer. A platform admin impersonating a
+  // tenant still edits platform roles against the platform nav; using their
+  // 'tenant' viewer here would wrongly hide every platform-only page (proxysvr,
+  // DKIM, tenant-management …) and collapse the whole 系统管理 group.
+  const { capabilities, registry, registryReady, grants } = useProductForm();
+  const gateViewer: 'platform' | 'tenant' = scope === 'tenant' ? 'tenant' : 'platform';
   const gateRegistry = registryReady ? registry : FALLBACK_FEATURE_REGISTRY;
   const formVisible = useMemo(
-    () => (capabilities ? new Set(visibleNavIds(gateRegistry, capabilities, viewer, grants)) : null),
-    [gateRegistry, capabilities, viewer, grants],
+    () => (capabilities ? new Set(visibleNavIds(gateRegistry, capabilities, gateViewer, grants)) : null),
+    [gateRegistry, capabilities, gateViewer, grants],
   );
   const isSubmoduleVisible = useMemo(
     () => (subId: string) => {
