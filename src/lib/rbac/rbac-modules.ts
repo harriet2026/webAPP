@@ -79,6 +79,9 @@ export const PERM_MODULES: ModuleMeta[] = [
     // 平台专属(见 PLATFORM_ONLY_MODULE_KEYS)，租户视角矩阵不再出现监控中心。
     key: 'monitor', labelKey: 'sidebar.monitoringCenter', supportApprove: false, supportDelete: false,
     children: [
+      // 监控总览(/monitoring/dashboard) 是监控中心的首个子页，此前遗漏。它与
+      // 「系统状态」(/dashboard) 是两个不同的页面，不要混淆。
+      sub('monitor-dashboard', 'sidebar.monitorDashboard', false, false),
       sub('monitor-infrastructure', 'sidebar.infrastructure', false, false),
       sub('monitor-mailflow', 'sidebar.mailflow', false, false),
       sub('monitor-security', 'rbac.module.monitorSecurity', false, false),
@@ -127,6 +130,13 @@ export const PERM_MODULES: ModuleMeta[] = [
       sub('tenant-management', 'sidebar.tenants', false, false),
       sub('platform-security-policy', 'sidebar.platformSecurityPolicy', false, false),
       sub('forwarding', 'sidebar.mailRouting', false, false),
+      // 以下四页在平台导航「系统管理」组中真实存在(manage_tenants/manage_users 门)，
+      // 此前矩阵遗漏、无法通过角色授权。均为平台专属(scope=platform / tenantAccess=hidden)，
+      // 随 system 模块一起只在平台视角出现。
+      sub('proxysvr', 'sidebar.proxysvr', false, false),
+      sub('system-dkim', 'sidebar.dkimOverview', false, false),
+      sub('password-policy', 'sidebar.passwordPolicy', false, false),
+      sub('smtp-credentials', 'sidebar.smtpCredentials', false, false),
     ],
   },
   {
@@ -187,6 +197,32 @@ export function getScopedModules(scope: RbacScope): ModuleMeta[] {
 /** Flattened submodules assignable within the given scope — the matrix's row set for that scope. */
 export function rbacSubmodulesForScope(scope: RbacScope): SubModuleMeta[] {
   return getScopedModules(scope).flatMap((m) => m.children);
+}
+
+/**
+ * Product-form-aware view of the scoped module tree (spec §7.4 alignment).
+ *
+ * `getScopedModules` splits platform/tenant, but that is NOT enough to match
+ * the nav: the sidebar also hides items whose product-form registry
+ * `visibility` resolves to hidden for the current capabilities/viewer — e.g.
+ * `forwarding` (SINGLE_ONLY) is absent from every multi-tenant nav, while
+ * `platform-security-policy`/`tenant-management` (MULTI_ONLY) are absent from
+ * single-tenant. A static matrix over-grants those form-specific pages.
+ *
+ * This keeps the module tree framework-agnostic: the caller supplies
+ * `isSubmoduleVisible` (built in RoleDrawer from `useProductForm` +
+ * `isItemVisibleByForm`, the SAME gate the sidebar uses, keyed by the
+ * submodule's `SUBMODULE_ROUTE_MAP` href). Submodules the predicate rejects
+ * are dropped, and any module left with no children collapses — mirroring
+ * `isGroupVisible`'s empty-group contract in the sidebar.
+ */
+export function visibleModulesForScope(
+  scope: RbacScope,
+  isSubmoduleVisible: (subId: string) => boolean,
+): ModuleMeta[] {
+  return getScopedModules(scope)
+    .map((m) => ({ ...m, children: m.children.filter((s) => isSubmoduleVisible(s.id)) }))
+    .filter((m) => m.children.length > 0);
 }
 
 // ==================== §7.5 advance-page hard exclusion ====================
@@ -257,6 +293,8 @@ export const SUBMODULE_ROUTE_MAP: Record<string, RouteEntry> = {
   'system-status': route('/dashboard', 'system-status'),
 
   // ---- monitor (platform-only) ----
+  // 监控总览未登记于 product-form registry → featureId 省略(未登记=放行)。
+  'monitor-dashboard': route('/monitoring/dashboard'),
   'monitor-infrastructure': route('/monitoring/infrastructure', 'monitor-infrastructure'),
   'monitor-mailflow': route('/monitoring/mailflow'),
   'monitor-security': route('/monitoring/security'),
@@ -292,6 +330,10 @@ export const SUBMODULE_ROUTE_MAP: Record<string, RouteEntry> = {
   'tenant-management': route('/tenants', 'tenant-management'),
   'platform-security-policy': route('/system/platform-security', 'platform-security-policy'),
   forwarding: route('/mail-routing', 'forwarding'),
+  proxysvr: route('/system/proxysvr', 'proxysvr'),
+  'system-dkim': route('/system/dkim', 'system-dkim'),
+  'password-policy': route('/system/password-policy', 'password-policy'),
+  'smtp-credentials': route('/smtp-credentials', 'smtp-credentials'),
 
   // ---- organization (both scopes) ----
   contacts: route('/organization-contacts', 'contacts'),

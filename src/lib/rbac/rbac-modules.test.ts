@@ -5,6 +5,7 @@ import {
   ALL_SUB_MODULES,
   getScopedModules,
   rbacSubmodulesForScope,
+  visibleModulesForScope,
   findSubModule,
   subIdsOfModules,
   SUBMODULE_ROUTE_MAP,
@@ -15,6 +16,17 @@ import {
   PLATFORM_ONLY_MODULE_KEYS,
   TENANT_ONLY_MODULE_KEYS,
 } from './rbac-modules';
+import { FALLBACK_FEATURE_REGISTRY } from '@/lib/product-form/fallback-registry';
+import { capabilitiesForForm } from '@/lib/product-form/resolve';
+import { visibleNavIds, isItemVisibleByForm } from '@/components/layout/sidebar-visibility';
+
+/** Build the SAME product-form submodule gate RoleDrawer uses, for a given form/viewer. */
+function formGate(form: string, viewer: 'platform' | 'tenant') {
+  const caps = capabilitiesForForm(form);
+  const visible = new Set(visibleNavIds(FALLBACK_FEATURE_REGISTRY, caps, viewer, []));
+  return (subId: string) =>
+    isItemVisibleByForm({ id: subId, href: SUBMODULE_ROUTE_MAP[subId]?.href }, FALLBACK_FEATURE_REGISTRY, visible);
+}
 
 describe('rbac module mapping (spec §7.4)', () => {
   it('platform scope excludes tenant-only modules; tenant excludes platform-only', () => {
@@ -90,10 +102,12 @@ describe('rbac module mapping (spec §7.4)', () => {
     // visible to BOTH scopes
     expect(getScopedModules('platform').map((m) => m.key)).toContain('systemStatus');
     expect(getScopedModules('tenant').map((m) => m.key)).toContain('systemStatus');
-    // the old misplaced id is gone; 监控中心 no longer carries /dashboard
-    expect(findSubModule('monitor-dashboard')).toBeUndefined();
+    // 监控中心 no longer carries the SYSTEM STATUS page (/dashboard): its own
+    // first child `monitor-dashboard` is 监控总览 (/monitoring/dashboard), a
+    // different page. No monitor child may point at /dashboard.
     const monitor = PERM_MODULES.find((m) => m.key === 'monitor')!;
     expect(monitor.children.some((c) => SUBMODULE_ROUTE_MAP[c.id].href === '/dashboard')).toBe(false);
+    expect(SUBMODULE_ROUTE_MAP['monitor-dashboard'].href).toBe('/monitoring/dashboard');
   });
 
   it('监控中心 is platform-only (its /monitoring/* pages are gated from tenants)', () => {
@@ -113,6 +127,70 @@ describe('rbac module mapping (spec §7.4)', () => {
     // contacts is no longer a child of the platform-only system module
     const system = PERM_MODULES.find((m) => m.key === 'system')!;
     expect(system.children.map((c) => c.id)).not.toContain('contacts');
+  });
+
+  it('platform matrix now includes the 5 previously-missing platform pages', () => {
+    // A-class fix: pages that exist in the platform nav but had no matrix entry.
+    const platformSubIds = getScopedModules('platform').flatMap((m) => m.children.map((c) => c.id));
+    for (const id of ['monitor-dashboard', 'proxysvr', 'system-dkim', 'password-policy', 'smtp-credentials']) {
+      expect(platformSubIds).toContain(id);
+    }
+    // each maps to its real platform page
+    expect(SUBMODULE_ROUTE_MAP['proxysvr'].href).toBe('/system/proxysvr');
+    expect(SUBMODULE_ROUTE_MAP['system-dkim'].href).toBe('/system/dkim');
+    expect(SUBMODULE_ROUTE_MAP['password-policy'].href).toBe('/system/password-policy');
+    expect(SUBMODULE_ROUTE_MAP['smtp-credentials'].href).toBe('/smtp-credentials');
+  });
+
+  describe('visibleModulesForScope aligns the matrix to the current product form', () => {
+    it('drops SINGLE_ONLY forwarding in multi-tenant, keeps it in single-tenant (platform view)', () => {
+      const subIds = (form: string) =>
+        visibleModulesForScope('platform', formGate(form, 'platform')).flatMap((m) => m.children.map((c) => c.id));
+      // multi-tenant forms: 邮件路由 not in nav → not assignable
+      for (const form of ['cloud', 'ai-multi', 'legacy-multi']) {
+        expect(subIds(form)).not.toContain('forwarding');
+      }
+      // single-tenant: 邮件路由 exists → assignable
+      expect(subIds('ai-single')).toContain('forwarding');
+    });
+
+    it('drops MULTI_ONLY platform-security-policy/tenant-management in single-tenant', () => {
+      const single = visibleModulesForScope('platform', formGate('ai-single', 'platform')).flatMap((m) =>
+        m.children.map((c) => c.id),
+      );
+      expect(single).not.toContain('platform-security-policy');
+      expect(single).not.toContain('tenant-management');
+      const multi = visibleModulesForScope('platform', formGate('ai-multi', 'platform')).flatMap((m) =>
+        m.children.map((c) => c.id),
+      );
+      expect(multi).toContain('platform-security-policy');
+      expect(multi).toContain('tenant-management');
+    });
+
+    it('keeps the 4 ALWAYS platform system pages across all forms (platform view)', () => {
+      for (const form of ['cloud', 'ai-multi', 'legacy-multi', 'ai-single', 'legacy-single']) {
+        const subIds = visibleModulesForScope('platform', formGate(form, 'platform')).flatMap((m) =>
+          m.children.map((c) => c.id),
+        );
+        for (const id of ['proxysvr', 'system-dkim', 'password-policy', 'smtp-credentials']) {
+          expect(subIds).toContain(id);
+        }
+      }
+    });
+
+    it('collapses a module whose children are all form-hidden', () => {
+      // predicate that hides every system child → system module disappears
+      const gate = (subId: string) => !subIdsOfModules(['system']).includes(subId);
+      const keys = visibleModulesForScope('platform', gate).map((m) => m.key);
+      expect(keys).not.toContain('system');
+      // other modules survive
+      expect(keys).toContain('statistics');
+    });
+
+    it('is a no-op when the predicate allows everything (equals getScopedModules)', () => {
+      const all = visibleModulesForScope('platform', () => true);
+      expect(all.map((m) => m.key)).toEqual(getScopedModules('platform').map((m) => m.key));
+    });
   });
 
   it('reverse lookup resolves a known route back to its submodule id', () => {

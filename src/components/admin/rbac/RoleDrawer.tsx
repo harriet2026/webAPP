@@ -23,9 +23,10 @@ import {
   type RolePermission,
 } from '@/lib/api/roles';
 import {
-  getScopedModules,
+  visibleModulesForScope,
   rbacSubmodulesForScope,
   findSubModule,
+  SUBMODULE_ROUTE_MAP,
   type RbacScope,
   type SubModuleMeta,
 } from '@/lib/rbac/rbac-modules';
@@ -35,6 +36,9 @@ import {
   emptyPermissionRow,
   type PermAction,
 } from '@/lib/rbac/role-permissions';
+import { useProductForm } from '@/contexts/product-form-context';
+import { FALLBACK_FEATURE_REGISTRY } from '@/lib/product-form/fallback-registry';
+import { visibleNavIds, isItemVisibleByForm } from '@/components/layout/sidebar-visibility';
 
 const ACTION_COLS: PermAction[] = ['view', 'edit', 'approve', 'delete'];
 const ACTION_FIELD: Record<PermAction, keyof RolePermission> = {
@@ -80,7 +84,31 @@ export function RoleDrawer({ open, onOpenChange, scope, role, existingNames, onS
 
   const readonly = !!role?.isSystemDefault;
   const roleIdToken = role?.id ?? 'new';
-  const scopedModules = useMemo(() => getScopedModules(scope), [scope]);
+
+  // Product-form gate — the SAME one the sidebar uses (sidebar-visibility.ts),
+  // so the assignable matrix matches the nav of the current form/viewer instead
+  // of over-granting form-specific pages (e.g. forwarding is hidden in every
+  // multi-tenant form; platform-security-policy/tenant-management in single).
+  // Fail closed against the canonical registry mirror until /bootstrap answers
+  // (GT-12013), mirroring sidebar-nav.tsx exactly.
+  const { capabilities, registry, registryReady, viewer, grants } = useProductForm();
+  const gateRegistry = registryReady ? registry : FALLBACK_FEATURE_REGISTRY;
+  const formVisible = useMemo(
+    () => (capabilities ? new Set(visibleNavIds(gateRegistry, capabilities, viewer, grants)) : null),
+    [gateRegistry, capabilities, viewer, grants],
+  );
+  const isSubmoduleVisible = useMemo(
+    () => (subId: string) => {
+      if (!formVisible) return true;
+      const href = SUBMODULE_ROUTE_MAP[subId]?.href;
+      return isItemVisibleByForm({ id: subId, href }, gateRegistry, formVisible);
+    },
+    [formVisible, gateRegistry],
+  );
+  const scopedModules = useMemo(
+    () => visibleModulesForScope(scope, isSubmoduleVisible),
+    [scope, isSubmoduleVisible],
+  );
 
   const [name, setName] = useState('');
   const [remark, setRemark] = useState('');
