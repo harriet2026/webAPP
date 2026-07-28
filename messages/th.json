@@ -5378,12 +5378,12 @@
       "actions": {
         "accept": "นำส่ง",
         "reject": "ปฏิเสธ",
-        "bounce": "ตีกลับ",
         "discard": "ทิ้ง",
         "audit": "ตรวจสอบ",
         "quarantine": "กักกัน",
         "sideline": "เกรย์ลิสต์",
-        "mixed": "ผสม"
+        "mixed": "ผสม",
+        "recall": "เรียกคืน"
       },
       "statuses": {
         "processing": "กำลังดำเนินการ",

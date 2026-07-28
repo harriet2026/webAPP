@@ -92,7 +92,7 @@ export function QuickFilters({
   const actions = [
     "accept",
     "reject",
-    "bounce",
+    "recall",
     "discard",
     "audit",
     "quarantine",

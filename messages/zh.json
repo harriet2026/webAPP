@@ -5354,12 +5354,12 @@
       "actions": {
         "accept": "投递",
         "reject": "拒收",
-        "bounce": "退信",
         "discard": "丢弃",
         "audit": "审核",
         "quarantine": "隔离",
         "sideline": "灰名单",
-        "mixed": "混合"
+        "mixed": "混合",
+        "recall": "召回"
       },
       "statuses": {
         "processing": "处理中",

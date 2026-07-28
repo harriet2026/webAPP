@@ -5195,12 +5195,12 @@
       "actions": {
         "accept": "Доставить",
         "reject": "Отклонить",
-        "bounce": "Отказ",
         "discard": "Отбросить",
         "audit": "Проверка",
         "quarantine": "Карантин",
         "sideline": "Серый список",
-        "mixed": "Смешанные"
+        "mixed": "Смешанные",
+        "recall": "Отозвать"
       },
       "statuses": {
         "processing": "Обработка",

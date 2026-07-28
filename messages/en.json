@@ -5349,12 +5349,12 @@
       "actions": {
         "accept": "Deliver",
         "reject": "Reject",
-        "bounce": "Bounce",
         "discard": "Discard",
         "audit": "Audit",
         "quarantine": "Quarantine",
         "sideline": "Greylist",
-        "mixed": "Mixed"
+        "mixed": "Mixed",
+        "recall": "Recall"
       },
       "statuses": {
         "processing": "Processing",
