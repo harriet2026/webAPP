@@ -201,7 +201,6 @@ export function SenderActions({
               {tOverview('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
-              variant="destructive"
               disabled={busy}
               data-testid="email-disposal-overview-blacklist-confirm"
               onClick={(e) => {
@@ -222,14 +221,12 @@ export function SenderActions({
             <AlertDialogTitle>{t('whitelistDialog.title', { sender })}</AlertDialogTitle>
             <AlertDialogDescription>{t('whitelistDialog.desc')}</AlertDialogDescription>
           </AlertDialogHeader>
-
           <AlertDialogFooter>
             <AlertDialogCancel disabled={busy} data-testid="email-disposal-overview-whitelist-cancel">
               {tOverview('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               disabled={busy}
-              className="border-emerald-600/20 bg-emerald-600 text-white data-[hovered=true]:bg-emerald-600/90"
               data-testid="email-disposal-overview-whitelist-confirm"
               onClick={(e) => {
                 e.preventDefault();
