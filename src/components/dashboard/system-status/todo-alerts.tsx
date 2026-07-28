@@ -11,6 +11,7 @@
 // points at `/monitoring/alerts` (adminOnly, 403s tenant_admin). Per the
 // pattern Task 4/5 established, that comes from `useSecurityScope(null)`
 // directly — not a hand-rolled `viewer === 'tenant'` check.
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { PartyPopper, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -88,6 +89,8 @@ function itemDescription(item: SystemStatusAlertItem, t: TFn): string {
 export function TodoAlerts({ alerts, isLoading }: TodoAlertsProps) {
   const t = useTranslations('systemStatus.todo');
   const tSidebar = useTranslations('sidebar');
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const { effectiveViewer } = useSecurityScope(null);
   const isPlatform = effectiveViewer === 'platform';
   const agentRowVisibility = useAgentRowVisibility();
@@ -152,7 +155,7 @@ export function TodoAlerts({ alerts, isLoading }: TodoAlertsProps) {
           </ul>
         )}
       </CardContent>
-      {isPlatform && (
+      {mounted && isPlatform && (
         <CardFooter>
           <DashboardCardFooterLink
             href="/monitoring/alerts"
