@@ -3,6 +3,7 @@ import {
   fetchDeliveryTraffic,
   type DeliveryTrafficResponse,
 } from './delivery-traffic';
+import type { ApiRequestFn } from './client';
 
 describe('delivery traffic API', () => {
   it('passes hourly granularity for a today trend request (GT-12594)', async () => {
@@ -13,7 +14,7 @@ describe('delivery traffic API', () => {
       latency: { buckets: [] },
       detail_table: [],
     };
-    const request = vi.fn(async () => response);
+    const request = vi.fn(async <T,>() => response as T) as ApiRequestFn;
 
     await fetchDeliveryTraffic({
       startDate: '2026-07-28',

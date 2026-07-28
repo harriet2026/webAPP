@@ -2,12 +2,14 @@ import { apiRequest, type ApiRequestFn } from './client';
 
 export type Direction = 'all' | 'receive' | 'send' | 'internal';
 export type TimeRange = 'today' | '7d' | '30d' | 'this_month' | 'last_month' | 'custom';
+export type DeliveryTrafficInterval = 'hour' | 'day';
 
 export interface DeliveryTrafficParams {
   direction?: Direction;
   startDate?: string;
   endDate?: string;
   tenantId?: number | null;
+  interval?: DeliveryTrafficInterval;
 }
 
 export interface KpiData {
@@ -99,6 +101,7 @@ export async function fetchDeliveryTraffic(
     end_date: params.endDate,
     direction: params.direction,
     tenant_id: params.tenantId,
+    interval: params.interval,
   });
   return requestFn<DeliveryTrafficResponse>(`/statistics/delivery-traffic?${query}`);
 }

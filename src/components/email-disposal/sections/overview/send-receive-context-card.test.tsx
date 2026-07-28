@@ -125,6 +125,19 @@ describe('SendReceiveContextCard', () => {
     expect(screen.getByTestId('email-disposal-overview-context-view-policy')).toHaveTextContent('查看策略命中详情');
   });
 
+  // GT-12596 防回归：B4「查看策略命中详情」注入 onViewPolicyDetail 后必须走
+  // 跳转回调（滚到安全分析处置依据卡），不能再落「暂未实现」toast。
+  it('GT-12596: B4 查看策略命中详情 invokes onViewPolicyDetail when provided', () => {
+    const onViewPolicyDetail = vi.fn();
+    renderCard(baseDetail({
+      recipient_dispositions: [
+        { recipient: 'victim@company.com', final_action: 'reject', status: 'blocked', object_id: '' },
+      ],
+    }), { onViewPolicyDetail });
+    fireEvent.click(screen.getByTestId('email-disposal-overview-context-view-policy'));
+    expect(onViewPolicyDetail).toHaveBeenCalledTimes(1);
+  });
+
   it('does NOT show the 单投不可操作 warning for an operable single recipient', () => {
     renderCard(baseDetail());
     expect(screen.queryByTestId('email-disposal-overview-context-not-operable')).not.toBeInTheDocument();

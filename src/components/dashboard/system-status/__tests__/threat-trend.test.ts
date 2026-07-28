@@ -115,4 +115,17 @@ describe('buildThreatTrendOption', () => {
     });
     expect(option?.series.find((series) => series.name === 'phishing')).toHaveProperty('areaStyle');
   });
+
+  // GT-12570 防回归：boundaryGap=false 时最后一个类目标签以最右数据点为中心
+  // 渲染，grid.right=0 会把标签右半截裁出画布（"横坐标最后时刻显示不全"）。
+  // containLabel 不处理这种越界，必须显式保留 ≥ 标签半宽的右侧内边距。
+  it('GT-12570: 趋势图 grid 右侧保留内边距，末尾时间标签不被画布裁切', () => {
+    const points: TrendSeriesPoint[] = [
+      { date: '2026-07-27T22:00:00Z', total: 3, block_rate: 100, change: null, phishing: 1, spam: 2 },
+      { date: '2026-07-27T23:00:00Z', total: 7, block_rate: 100, change: 4, phishing: 3, spam: 4 },
+    ];
+    const option = buildThreatTrendOption(points, new Set(), label);
+    const grid = option?.grid as { right: number };
+    expect(grid.right).toBeGreaterThanOrEqual(20);
+  });
 });

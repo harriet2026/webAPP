@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Search, X, Inbox as InboxIcon } from "lucide-react";
@@ -23,15 +23,30 @@ import {
   mergeAiQuickFilter,
   shouldAddDefaultSubject,
 } from "./lib/ai-search-state";
+import {
+  countDisposalFilterConditions,
+  getApplicableAdvancedFilter,
+  getApplicableAiConditions,
+  getDisposalFilterSignature,
+  hasSavableDisposalFilters,
+} from "./lib/filter-state";
 import { SearchBar } from "./search-bar";
 import { QuickFilters } from "./quick-filters";
 import { AdvancedFilters } from "./advanced-filters";
 import { SelectedConditions } from "./selected-conditions";
-import { MailListTable, type TableHeaderFilters, type TimeSortOrder } from "./mail-list-table";
+import {
+  MailListTable,
+  type TableHeaderFilters,
+  type TimeSortOrder,
+} from "./mail-list-table";
 import { DetailModal } from "./detail-modal";
 import { ReclassifyDialog } from "./components/reclassify-dialog";
 import { ServerPagination } from "@/components/shared/server-pagination";
-import { PageShell, PageHeader, PageSurface } from "@/components/shared/page-shell";
+import {
+  PageShell,
+  PageHeader,
+  PageSurface,
+} from "@/components/shared/page-shell";
 import { PageFilters } from "@/components/shared/page-filters";
 import {
   AlertDialog,
@@ -101,11 +116,15 @@ export function EmailDisposalCenterPage({
   // tenant filter. Keep that filter local to this page: reusing the global
   // selectedTenantId would turn a platform admin into a tenant-scoped
   // impersonation context and ProductFormProvider correctly clears it.
-  const [platformScopeTenantId, setPlatformScopeTenantId] = useState<number | null>(null);
+  const [platformScopeTenantId, setPlatformScopeTenantId] = useState<
+    number | null
+  >(null);
+  const [appliedPlatformScopeTenantId, setAppliedPlatformScopeTenantId] =
+    useState<number | null>(null);
   const disposalScopeTenantId =
     isSystemAdmin && effectiveViewer === "platform"
-      ? platformScopeTenantId
-      : effectiveTenantId ?? null;
+      ? appliedPlatformScopeTenantId
+      : (effectiveTenantId ?? null);
   const { apiRequest } = useScopedApiRequest(disposalScopeTenantId);
   // AI 维度（相似搜索/相似度列/找相似/AI 解析/钓鱼智能体研判）的唯一事实源是产品形态
   // 能力 capabilities.ai（spec §3.2）。仅「AI 解读」（log-interpret SSE）这一项额外依赖
@@ -117,12 +136,22 @@ export function EmailDisposalCenterPage({
   const [quickFilter, setQuickFilter] = useState<DisposalQuickFilter>(
     getDefaultQuickFilter,
   );
-  // GT-12423: html_spec（index「按 demo（默认展开）落地」）要求高级筛选默认
-  // 展开；「更多筛选条件」(AdvancedFilters) 仍默认折叠（PRD 口径）。
-  const [quickFilterCollapsed, setQuickFilterCollapsed] = useState(false);
+  // Progressive disclosure: keep the result list visible on first entry and
+  // let users opt into the large structured-filter grid. Active conditions
+  // remain visible as removable chips even while this panel is collapsed.
+  const [quickFilterCollapsed, setQuickFilterCollapsed] = useState(true);
   const [advancedFilter, setAdvancedFilter] =
     useState<AdvancedFilter>(DEFAULT_ADVANCED);
   const [aiConditions, setAiConditions] = useState<AICondition[]>([]);
+  // Structured controls edit a local draft. Only an explicit Search action
+  // copies that draft into these applied states and changes the list query.
+  const [appliedQuickFilter, setAppliedQuickFilter] =
+    useState<DisposalQuickFilter>(getDefaultQuickFilter);
+  const [appliedAdvancedFilter, setAppliedAdvancedFilter] =
+    useState<AdvancedFilter>(DEFAULT_ADVANCED);
+  const [appliedAiConditions, setAppliedAiConditions] = useState<AICondition[]>(
+    [],
+  );
   const [aiParsedQuery, setAiParsedQuery] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
@@ -145,10 +174,73 @@ export function EmailDisposalCenterPage({
     emailTypes: [],
     statuses: [],
   });
-  const [timeSort, setTimeSort] = useState<TimeSortOrder>('none');
+  const [timeSort, setTimeSort] = useState<TimeSortOrder>("none");
+
+  const activeFilterCount = useMemo(
+    () =>
+      countDisposalFilterConditions(quickFilter, advancedFilter, aiConditions) +
+      (platformScopeTenantId !== null ? 1 : 0),
+    [quickFilter, advancedFilter, aiConditions, platformScopeTenantId],
+  );
+  const canSaveTemplate = useMemo(
+    () => hasSavableDisposalFilters(quickFilter, advancedFilter),
+    [quickFilter, advancedFilter],
+  );
+  const appliedFilterCount = useMemo(
+    () =>
+      countDisposalFilterConditions(
+        appliedQuickFilter,
+        appliedAdvancedFilter,
+        appliedAiConditions,
+      ) + (appliedPlatformScopeTenantId !== null ? 1 : 0),
+    [
+      appliedQuickFilter,
+      appliedAdvancedFilter,
+      appliedAiConditions,
+      appliedPlatformScopeTenantId,
+    ],
+  );
+  const hasPendingFilters = useMemo(
+    () =>
+      getDisposalFilterSignature(
+        quickFilter,
+        advancedFilter,
+        aiConditions,
+        platformScopeTenantId,
+      ) !==
+      getDisposalFilterSignature(
+        appliedQuickFilter,
+        appliedAdvancedFilter,
+        appliedAiConditions,
+        appliedPlatformScopeTenantId,
+      ),
+    [
+      quickFilter,
+      advancedFilter,
+      aiConditions,
+      platformScopeTenantId,
+      appliedQuickFilter,
+      appliedAdvancedFilter,
+      appliedAiConditions,
+      appliedPlatformScopeTenantId,
+    ],
+  );
+  const hasActiveFilters =
+    activeFilterCount > 0 ||
+    appliedFilterCount > 0 ||
+    headerFilters.directions.length > 0 ||
+    headerFilters.emailTypes.length > 0 ||
+    headerFilters.statuses.length > 0 ||
+    timeSort !== "none" ||
+    similarMode ||
+    platformScopeTenantId !== null;
 
   const mergedFilter = useMemo(() => {
-    const base = merge(quickFilter, advancedFilter, aiConditions);
+    const base = merge(
+      appliedQuickFilter,
+      appliedAdvancedFilter,
+      appliedAiConditions,
+    );
     const groups = [...base.groups];
     if (headerFilters.directions.length > 0) {
       const directionMap: Record<string, string> = {
@@ -176,30 +268,44 @@ export function EmailDisposalCenterPage({
       });
     }
     return { ...base, groups };
-  }, [quickFilter, advancedFilter, aiConditions, headerFilters, merge]);
+  }, [
+    appliedQuickFilter,
+    appliedAdvancedFilter,
+    appliedAiConditions,
+    headerFilters,
+    merge,
+  ]);
 
   const searchParams = useMemo(
     () => ({
       advanced: mergedFilter,
       page,
       pageSize,
-      startDate: quickFilter.sendReceiveTime?.start,
-      endDate: quickFilter.sendReceiveTime?.end,
-      recipient: quickFilter.recipient,
+      startDate: appliedQuickFilter.sendReceiveTime?.start,
+      endDate: appliedQuickFilter.sendReceiveTime?.end,
+      recipient: appliedQuickFilter.recipient,
       // GT-11614: pass sendReceiveType to backend as direction param
-      direction: quickFilter.sendReceiveType,
+      direction: appliedQuickFilter.sendReceiveType,
       // GT-11618: pass display_status through so the backend maps the canonical 17-value
       // UI concept to action / delivery / workflow predicates. The previous
       // frontend-side mapping only handled a small legacy subset.
       displayStatus:
         headerFilters.statuses.length > 0
           ? headerFilters.statuses.join(",")
-          : (quickFilter.emailStatuses?.join(',') ?? quickFilter.emailStatus),
-      emailTypes: quickFilter.emailTypes,
-      disposalPolicyKeys: quickFilter.disposalPolicyKeys,
-      sortOrder: timeSort === 'none' ? undefined : timeSort,
+          : (appliedQuickFilter.emailStatuses?.join(",") ??
+            appliedQuickFilter.emailStatus),
+      emailTypes: appliedQuickFilter.emailTypes,
+      disposalPolicyKeys: appliedQuickFilter.disposalPolicyKeys,
+      sortOrder: timeSort === "none" ? undefined : timeSort,
     }),
-    [quickFilter, mergedFilter, headerFilters.statuses, timeSort, page, pageSize],
+    [
+      appliedQuickFilter,
+      mergedFilter,
+      headerFilters.statuses,
+      timeSort,
+      page,
+      pageSize,
+    ],
   );
 
   const { data, isLoading } = useQuery({
@@ -224,39 +330,85 @@ export function EmailDisposalCenterPage({
       const result = backfillAiFilter(filter, advancedFilter.groups.length);
       const hasAiConditions =
         filter?.groups.some((group) => group.conditions.length > 0) ?? false;
+      const nextQuickFilter =
+        hasAiConditions || Object.keys(result.quick).length > 0
+          ? mergeAiQuickFilter(
+              quickFilter,
+              result.quick,
+              query,
+              hasAiConditions,
+            )
+          : quickFilter;
+      const nextAdvancedFilter =
+        result.advanced.length > 0
+          ? {
+              ...advancedFilter,
+              groups: [...advancedFilter.groups, ...result.advanced],
+            }
+          : advancedFilter;
+      const nextAiConditions = result.residual;
+      const applicableAdvancedFilter =
+        getApplicableAdvancedFilter(nextAdvancedFilter);
+      const applicableAiConditions =
+        getApplicableAiConditions(nextAiConditions);
+
       setAiParsedQuery(hasAiConditions ? query.trim() : null);
-      if (hasAiConditions || Object.keys(result.quick).length > 0) {
-        setQuickFilter((prev) =>
-          mergeAiQuickFilter(prev, result.quick, query, hasAiConditions),
-        );
-      }
-      if (result.advanced.length > 0) {
-        setAdvancedFilter((prev) => ({ ...prev, groups: [...prev.groups, ...result.advanced] }));
-      }
-      setAiConditions(result.residual);
+      setQuickFilter(nextQuickFilter);
+      setAdvancedFilter(nextAdvancedFilter);
+      setAiConditions(nextAiConditions);
+      setAppliedQuickFilter(nextQuickFilter);
+      setAppliedAdvancedFilter(applicableAdvancedFilter);
+      setAppliedAiConditions(applicableAiConditions);
+      setAppliedPlatformScopeTenantId(platformScopeTenantId);
+      setSelectedIds(new Set());
+      setSimilarMode(false);
+      setSimilarSeedCount(0);
       setPage(1);
     },
-    [advancedFilter.groups.length],
+    [advancedFilter, platformScopeTenantId, quickFilter],
   );
 
-  const handleSearch = useCallback((query: string) => {
-    if (shouldAddDefaultSubject(query, aiParsedQuery)) {
-      setQuickFilter((prev) => ({ ...prev, subject: query.trim() || undefined }));
-    }
-    setSimilarMode(false);
-    setSimilarSeedCount(0);
-    setPage(1);
-  }, [aiParsedQuery]);
+  const handleSearch = useCallback(
+    (query: string) => {
+      const nextQuickFilter = shouldAddDefaultSubject(query, aiParsedQuery)
+        ? {
+            ...quickFilter,
+            subject: query.trim() || undefined,
+          }
+        : quickFilter;
+      setQuickFilter(nextQuickFilter);
+      setAppliedQuickFilter(nextQuickFilter);
+      setAppliedAdvancedFilter(getApplicableAdvancedFilter(advancedFilter));
+      setAppliedAiConditions(getApplicableAiConditions(aiConditions));
+      setAppliedPlatformScopeTenantId(platformScopeTenantId);
+      setSelectedIds(new Set());
+      setSimilarMode(false);
+      setSimilarSeedCount(0);
+      setPage(1);
+    },
+    [
+      advancedFilter,
+      aiConditions,
+      aiParsedQuery,
+      platformScopeTenantId,
+      quickFilter,
+    ],
+  );
 
   const handleClearAll = useCallback(() => {
     setQuickFilter(getDefaultQuickFilter());
     setAdvancedFilter(DEFAULT_ADVANCED);
     setAiConditions([]);
+    setAppliedQuickFilter(getDefaultQuickFilter());
+    setAppliedAdvancedFilter(DEFAULT_ADVANCED);
+    setAppliedAiConditions([]);
     setAiParsedQuery(null);
+    setPlatformScopeTenantId(null);
+    setAppliedPlatformScopeTenantId(null);
     setSelectedIds(new Set());
     setSimilarMode(false);
     setHeaderFilters({ directions: [], emailTypes: [], statuses: [] });
-    setTimeSort('none');
+    setTimeSort("none");
     setPage(1);
   }, []);
 
@@ -286,21 +438,10 @@ export function EmailDisposalCenterPage({
     [apiRequest, t],
   );
 
-  useEffect(() => {
-    setSelectedIds(new Set());
-    setQuickFilter(getDefaultQuickFilter());
-    setAdvancedFilter(DEFAULT_ADVANCED);
-    setAiConditions([]);
-    setAiParsedQuery(null);
-    setSimilarMode(false);
-    setSimilarSeedCount(0);
-    setHeaderFilters({ directions: [], emailTypes: [], statuses: [] });
-    setTimeSort('none');
-    setPage(1);
-  }, [disposalScopeTenantId]);
-
   const handleRemoveChip = useCallback((key: string) => {
-    if (key.startsWith("ai-")) {
+    if (key === "scope-tenant") {
+      setPlatformScopeTenantId(null);
+    } else if (key.startsWith("ai-")) {
       const idx = parseInt(key.slice(3), 10);
       setAiConditions((prev) => prev.filter((_, i) => i !== idx));
     } else if (key.startsWith("q-")) {
@@ -338,7 +479,6 @@ export function EmailDisposalCenterPage({
         return { ...prev, groups };
       });
     }
-    setPage(1);
   }, []);
 
   const handleItemClick = useCallback((id: number) => {
@@ -547,9 +687,8 @@ export function EmailDisposalCenterPage({
             if (!template) return;
             setQuickFilter(template.quickFilter);
             setAdvancedFilter(template.advancedFilter);
+            setAiConditions([]);
             setAiParsedQuery(null);
-            setSimilarMode(false);
-            setPage(1);
           }}
           onDeleteTemplate={deleteTemplate}
           sampleCount={similarMode ? similarSeedCount : 0}
@@ -560,15 +699,19 @@ export function EmailDisposalCenterPage({
           }}
           filtersExpanded={!quickFilterCollapsed}
           onToggleFilters={() => setQuickFilterCollapsed((value) => !value)}
+          activeFilterCount={activeFilterCount}
+          hasActiveFilters={hasActiveFilters}
+          canSaveTemplate={canSaveTemplate}
+          hasPendingFilters={hasPendingFilters}
         />
         {!quickFilterCollapsed && (
-          <div data-testid="disposal-structured-filters" className="mt-4 border-t pt-4">
+          <div
+            data-testid="disposal-structured-filters"
+            className="mt-4 border-t pt-4"
+          >
             <QuickFilters
               value={quickFilter}
-              onChange={(v) => {
-                setQuickFilter(v);
-                setPage(1);
-              }}
+              onChange={setQuickFilter}
               disposalRuleOptions={disposalRuleOptions}
               tenantSelector={
                 showTenant ? (
@@ -583,24 +726,29 @@ export function EmailDisposalCenterPage({
             <div className="mt-4 border-t pt-4">
               <AdvancedFilters
                 value={advancedFilter}
-                onChange={(v) => {
-                  setAdvancedFilter(v);
-                  setPage(1);
-                }}
+                onChange={setAdvancedFilter}
               />
             </div>
           </div>
         )}
-        {quickFilterCollapsed && (
-          <SelectedConditions
-            compact
-            quick={quickFilter}
-            advanced={advancedFilter}
-            aiConditions={aiConditions}
-            onClearAll={handleClearAll}
-            onRemoveChip={handleRemoveChip}
-          />
-        )}
+        <SelectedConditions
+          compact
+          quick={quickFilter}
+          advanced={advancedFilter}
+          aiConditions={aiConditions}
+          extraConditions={
+            platformScopeTenantId === null
+              ? []
+              : [
+                  {
+                    key: "scope-tenant",
+                    label: `${t("filters.tenantScope")}: #${platformScopeTenantId}`,
+                  },
+                ]
+          }
+          onClearAll={handleClearAll}
+          onRemoveChip={handleRemoveChip}
+        />
       </PageFilters>
 
       <PageSurface className="space-y-4">
@@ -646,7 +794,10 @@ export function EmailDisposalCenterPage({
             setPage(1);
           }}
           timeSort={timeSort}
-          onTimeSortChange={(sort) => { setTimeSort(sort); setPage(1); }}
+          onTimeSortChange={(sort) => {
+            setTimeSort(sort);
+            setPage(1);
+          }}
         />
         {!similarMode && (
           <ServerPagination
@@ -691,7 +842,9 @@ export function EmailDisposalCenterPage({
           data-testid="disposal-delete-dialog"
         >
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-destructive">{t("batch.delete")}</AlertDialogTitle>
+            <AlertDialogTitle className="text-destructive">
+              {t("batch.delete")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               {t("batch.confirmDelete")}
             </AlertDialogDescription>

@@ -7,11 +7,13 @@ import type { DisposalQuickFilter, AICondition } from "@/types/email-disposal";
 import type { AdvancedFilter } from "@/types/log";
 import { getModuleName, type DisposalLang } from "./lib/disposal-basis-config";
 import { intentLabelI18nKey } from "./intent-label-options";
+import { isCompleteFilterCondition } from "./lib/filter-state";
 
 interface SelectedConditionsProps {
   quick: DisposalQuickFilter;
   advanced: AdvancedFilter;
   aiConditions: AICondition[];
+  extraConditions?: { key: string; label: string }[];
   onClearAll: () => void;
   onRemoveChip?: (key: string) => void;
   compact?: boolean;
@@ -24,12 +26,23 @@ const FIELD_LABEL_KEYS: Record<string, string> = {
   action: "executionAction",
   direction: "sendReceiveType",
   status: "emailStatus",
-  sender: "headerSender",
+  sender: "envelopeSender",
+  header_sender: "headerSender",
+  header_recipient: "headerRecipient",
+  envelope_recipient: "envelopeRecipient",
   sender_name: "displayName",
+  send_hour: "sendHour",
   client_ip: "senderIp",
+  recipient_domain: "recipientDomain",
   subject: "subject",
   storage_size: "emailSize",
   tid: "tid",
+  similar_cluster: "cluster",
+  attachment_count: "attachmentCount",
+  attachment_total_size: "attachmentTotalSize",
+  attachment_type: "attachmentType",
+  attachment_name: "attachmentName",
+  attachment_md5: "attachmentMd5",
   spf_valid: "spfResult",
   spf_result: "spfResult",
   dkim_valid: "dkimResult",
@@ -39,11 +52,15 @@ const FIELD_LABEL_KEYS: Record<string, string> = {
   ptr_valid: "ptrResult",
   similar_domain: "similarDomain",
   display_name: "displayNameDetect",
+  display_name_detect: "displayNameDetect",
   mail_from_empty: "mailFromEmpty",
   virus_scan_result: "virusScanResult",
   threat_level: "threatLevel",
   qr_code_result: "qrCodeResult",
-  intent_label: "intentLabel",
+  url_result: "urlResult",
+  keyword_hit: "keywordHit",
+  rbl_result: "rblResult",
+  intent_label: "intentEngineResult",
   is_zip_bomb: "isZipBomb",
   is_encrypted_attachment: "isEncryptedAttachment",
   recipient: "recipient",
@@ -51,6 +68,8 @@ const FIELD_LABEL_KEYS: Record<string, string> = {
   // 目前不暴露编辑入口，但 AI chips 需要与其它字段一致的本地化标签）。
   received_at: "sendReceiveTime",
   display_status: "emailStatus",
+  email_type: "mailType",
+  geo_region_name: "ipLocation",
   disposal_policy_key: "disposalPolicyKeys",
 };
 
@@ -59,6 +78,7 @@ const FIELD_LABEL_KEYS: Record<string, string> = {
 // value, so a size chip reads "邮件大小 > 111 KB" instead of "邮件大小 > 111".
 const FIELD_UNIT_KEYS: Record<string, string> = {
   storage_size: "sizeUnit",
+  attachment_total_size: "sizeUnit",
 };
 
 const OP_LABELS: Record<string, string> = {
@@ -67,8 +87,6 @@ const OP_LABELS: Record<string, string> = {
   neq: "≠",
   contains: "∼",
   not_contains: "≁",
-  is_null: "is null",
-  is_not_null: "is not null",
   gt: ">",
   lt: "<",
   gte: "≥",
@@ -92,9 +110,12 @@ const ENUM_VALUE_MAP: Record<string, (v: string) => string | undefined> = {
   dmarc_result: (v) => `enumValue.${v}`,
   similar_domain: (v) => `enumValue.${v}`,
   display_name: (v) => `enumValue.${v}`,
+  display_name_detect: (v) => `enumValue.${v}`,
   virus_scan_result: (v) => `enumValue.${v}`,
   threat_level: (v) => `enumValue.${v}`,
   qr_code_result: (v) => `enumValue.${v}`,
+  url_result: (v) => `enumValue.${v}`,
+  rbl_result: (v) => `enumValue.${v}`,
   intent_label: intentLabelI18nKey,
   // GT-12368 AI 搜索 filter 全覆盖：display_status 复用 quick-filter 的
   // statuses.* 字典（17 值枚举，与 emailStatus 多选一致）。
@@ -115,6 +136,7 @@ export function SelectedConditions({
   quick,
   advanced,
   aiConditions,
+  extraConditions = [],
   onClearAll,
   onRemoveChip,
   compact = false,
@@ -140,7 +162,9 @@ export function SelectedConditions({
   }): string => {
     const fieldKey = FIELD_LABEL_KEYS[cond.field];
     const fieldLabel = fieldKey ? ft(fieldKey) : cond.field;
-    const opLabel = OP_LABELS[cond.op] ?? cond.op;
+    const opLabel =
+      OP_LABELS[cond.op] ??
+      (ft.has(`operators.${cond.op}`) ? ft(`operators.${cond.op}`) : cond.op);
     const valueMapper = ENUM_VALUE_MAP[cond.field];
     // GT-12368 fix round 1: AI 条件的多值结果（如 display_status in
     // [delivered, rejected]）在 search-bar.tsx 里已被 String() 展平成逗号拼接
@@ -181,7 +205,12 @@ export function SelectedConditions({
     // GT-11610: append unit suffix for unit-bearing fields (e.g. email size in
     // KB). Skip for null operators, which have no value.
     const unitKey = FIELD_UNIT_KEYS[cond.field];
-    if (unitKey && valueLabel && cond.op !== "is_null" && cond.op !== "is_not_null") {
+    if (
+      unitKey &&
+      valueLabel &&
+      cond.op !== "is_null" &&
+      cond.op !== "is_not_null"
+    ) {
       valueLabel = `${valueLabel} ${ft(unitKey)}`;
     }
     return `${fieldLabel} ${opLabel} ${valueLabel}`;
@@ -284,6 +313,7 @@ export function SelectedConditions({
 
   for (const [gi, group] of advanced.groups.entries()) {
     for (const [ci, cond] of group.conditions.entries()) {
+      if (!isCompleteFilterCondition(cond)) continue;
       // GT-11579 A3: render localized "field op value" instead of raw SQL-like form.
       chips.push({
         key: `a-${gi}-${ci}`,
@@ -293,12 +323,24 @@ export function SelectedConditions({
     }
   }
 
+  for (const condition of extraConditions) {
+    chips.push({ ...condition, isAi: false });
+  }
+
   if (chips.length === 0) return null;
 
   return (
-    <div className={compact ? "mt-3 border-t pt-3" : "rounded-lg border border-border bg-card p-4"}>
+    <div
+      className={
+        compact
+          ? "mt-3 border-t pt-3"
+          : "rounded-lg border border-border bg-card p-4"
+      }
+    >
       {/* 标题行：左侧标题 + 右侧清空全部按钮 */}
-      <div className={`${compact ? "mb-2" : "mb-3"} flex items-center justify-between`}>
+      <div
+        className={`${compact ? "mb-2" : "mb-3"} flex items-center justify-between`}
+      >
         <h3 className="text-sm font-medium text-foreground">
           {t("selectedConditions")} ({chips.length} {t("items")})
         </h3>

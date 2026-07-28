@@ -64,6 +64,56 @@ export async function downloadEml(
   }
 }
 
+// downloadAttachment -- GT-12584：详情页附件卡片「下载」按钮的真实实现，
+// 打后端 GET /mail-logs/{id}/attachments/{md5}（按内容 MD5 从原始 EML 提取
+// 单个附件）。错误展示逻辑与 downloadEml 同款：优先透出后端 error 文案
+// （404 未存原文 / 403 越权 / 500 存储节点故障），否则回退通用失败文案。
+// `t` 与 downloadEml 一致，是 `emailDisposal.detail.overview` 作用域的
+// translator（需要 downloadFailed/downloadNotFound）。
+export async function downloadAttachment(
+  mailLogId: number,
+  attachment: { md5sum?: string; filename?: string },
+  t: (key: string) => string,
+): Promise<void> {
+  if (!attachment.md5sum) {
+    toast.error(t('downloadFailed'));
+    return;
+  }
+  try {
+    const resp = await fetch(
+      `${API_BASE}/mail-logs/${mailLogId}/attachments/${encodeURIComponent(attachment.md5sum)}`,
+      { credentials: 'include', headers: { ...getTenantHeader() } },
+    );
+    if (!resp.ok) {
+      let reason = t('downloadFailed');
+      try {
+        const errBody = await resp.json();
+        const apiErr = errBody?.error;
+        if (typeof apiErr === 'string') {
+          reason = apiErr;
+        } else if (apiErr?.message) {
+          reason = apiErr.message;
+        } else if (apiErr?.code === 'not_found') {
+          reason = t('downloadNotFound');
+        }
+      } catch {
+        /* response body wasn't JSON — fall back to generic message */
+      }
+      toast.error(reason);
+      return;
+    }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = attachment.filename || `attachment-${attachment.md5sum}`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch {
+    toast.error(t('downloadFailed'));
+  }
+}
+
 export async function getMailLogPreview(
   id: number,
   requestFn: ApiRequestFn,
@@ -242,10 +292,22 @@ export async function addSenderFilterRule(
 // `Pages:["advanced_rules"]` 只在 page=='advanced_rules' 时由
 // validateAdvancedRulesAllowedFields 强制，对 page='attachment_security' 不
 // 生效——如果未来把这条限制收紧到覆盖所有 page，这里也需要同步跟进。
+// disposalRulePriority -- GT-12601：后端 validatePriority（internal/api/
+// unified_rules.go）对 tenant_admin 强制 100-1000 区间，此前这里硬编码 5000
+// 导致租户管理员从详情页做域名/URL/哈希加黑一律 400（"tenant admin priority
+// must be between 100 and 1000"），前端只显示一句「加黑失败」。取值随角色：
+// 租户管理员用区间顶格 1000（数值越大越优先，保住"应急加黑优先生效"的语义），
+// 平台管理员维持既有 5000 不变。与 GT-12181（advanced-filter-rules 的
+// priority-range.ts）同一后端约束、同一处理思路。
+export function disposalRulePriority(isSystemAdmin: boolean): number {
+  return isSystemAdmin ? 5000 : 1000;
+}
+
 export async function addUrlRule(
   value: string,
   field: 'domain' | 'url',
   requestFn: ApiRequestFn,
+  priority: number,
 ): Promise<void> {
   await createUnifiedRule(
     {
@@ -254,7 +316,7 @@ export async function addUrlRule(
       rule_class: 'action',
       stage: 'data',
       action: 'reject',
-      priority: 5000,
+      priority,
       condition_tree: { type: 'condition', field: 'urls', operator: 'contain', value },
       metadata: { feature: 'url_protection', target: field },
       is_active: true,
@@ -266,6 +328,7 @@ export async function addUrlRule(
 export async function addAttachmentHashRule(
   md5: string,
   requestFn: ApiRequestFn,
+  priority: number,
 ): Promise<void> {
   await createUnifiedRule(
     {
@@ -274,7 +337,7 @@ export async function addAttachmentHashRule(
       rule_class: 'action',
       stage: 'sideline',
       action: 'reject',
-      priority: 5000,
+      priority,
       condition_tree: { type: 'condition', field: 'attachment_md5', operator: 'eq', value: md5 },
       metadata: { feature: 'attachment_security' },
       is_active: true,

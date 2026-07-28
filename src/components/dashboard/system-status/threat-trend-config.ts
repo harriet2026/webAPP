@@ -105,7 +105,11 @@ export function buildThreatTrendOption(
     // containLabel calculation, a 35px left inset produces the same plot
     // origin. The 24px top inset keeps the highest Y-axis label fully inside
     // the chart canvas instead of letting it protrude into the legend row.
-    grid: { left: 35, right: 0, top: 24, bottom: 0, containLabel: true },
+    // GT-12570：right 不能为 0——折线/面积模式 boundaryGap=false 时最后一个
+    // 类目标签以最右侧数据点为中心渲染，右半截会被画布裁掉（"横坐标最后
+    // 时刻显示不全"）；containLabel 只扩展轴自身占位，不给越界的边缘标签
+    // 留白。26px ≈ "HH:mm" 标签宽度的一半 + 2px 余量。
+    grid: { left: 35, right: 26, top: 24, bottom: 0, containLabel: true },
     xAxis: {
       type: 'category',
       boundaryGap: singleBucket,

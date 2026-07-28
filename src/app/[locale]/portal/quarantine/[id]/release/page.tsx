@@ -99,7 +99,9 @@ export default function ReleasePage() {
   return (
     <div>
       <h1 className="text-lg font-semibold mb-4">{t('confirmTitle')}</h1>
-      <p className="mb-4 text-slate-600 text-sm">{t('mailIdLabel')}: <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">{id}</span></p>
+      {/* GT-12566 问题6：不再展示内部 quarantine UUID（对用户是无效信息），
+          改为 V7 风格的取回警示文案。 */}
+      <p className="mb-4 text-slate-600 text-sm">{t('confirmWarning')}</p>
       <button
         className="w-full bg-blue-600 text-white px-4 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium"
         onClick={handleConfirm}

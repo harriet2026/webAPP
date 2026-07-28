@@ -207,7 +207,13 @@ export const offNavRouteTitles: Array<{ href: string; titleKey: string }> = [
 
 // GT-12501: 泰语/俄语按验收要求从语言切换器隐藏（i18n 词典与 /th /ru
 // 路由保留，恢复展示只需把条目加回来）。
-export const languages = [
+export const languageMetadata = [
   { code: 'zh', name: '中文', flag: '🇨🇳' },
   { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'th', name: 'ไทย', flag: '🇹🇭' },
+  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
 ];
+
+export const languages = languageMetadata.filter(({ code }) =>
+  code === 'zh' || code === 'en',
+);

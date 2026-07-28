@@ -55,7 +55,11 @@ export function TrendChart({ trend, direction, isLoading }: TrendChartProps) {
     if (!trend || !trend.points || trend.points.length === 0) return null;
 
     const isHourly = trend.granularity === 'hour';
-    const xLabels = trend.points.map((p) => p.date);
+    const xLabels = trend.points.map((p) => {
+      if (!isHourly) return p.date;
+      const timeSeparator = Math.max(p.date.lastIndexOf('T'), p.date.lastIndexOf(' '));
+      return timeSeparator >= 0 ? p.date.slice(timeSeparator + 1, timeSeparator + 6) : p.date;
+    });
 
     const axisColor = isDark ? '#9ca3af' : '#4b5563';
     const splitColor = isDark ? '#374151' : '#e5e7eb';

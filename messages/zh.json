@@ -33,7 +33,8 @@
   },
   "mock": {
     "label": "开发模式",
-    "enabled": "Mock 数据（无需后端）"
+    "enabled": "Mock 数据（无需后端）",
+    "htmlSpec": "查看 HTML Spec"
   },
   "common": {
     "save": "保存",
@@ -2234,8 +2235,11 @@
   "header": {
     "currentTenant": "当前租户",
     "language": "语言",
+    "accountMenu": "账户菜单",
     "profile": "个人信息",
     "logout": "退出登录",
+    "logoutConfirmDescription": "确定要退出当前账号登录吗？",
+    "logoutConfirm": "确认退出",
     "brandName": "OSGateway",
     "tenantLabel": "租户",
     "allTenants": "所有租户",
@@ -5290,6 +5294,7 @@
       "reset": "重置",
       "resetDone": "已重置全部筛选",
       "saveTemplate": "保存为模板",
+      "templates": "模板",
       "advancedFilter": "高级筛选",
       "collapse": "收起",
       "saveCurrent": "保存当前条件",
@@ -5405,6 +5410,11 @@
       "addCondition": "添加条件",
       "addGroup": "添加条件组",
       "groupRelation": "条件组关系",
+      "conditionRelation": "组内条件关系",
+      "groupLabel": "条件组 {n}",
+      "deleteGroup": "删除条件组 {n}",
+      "groupLimit": "最多可添加 {n} 个条件组",
+      "operator": "运算符",
       "operators": {
         "eq": "等于",
         "neq": "不等于",
@@ -5493,7 +5503,9 @@
         "from": "从",
         "to": "到",
         "inList": "a,b,c",
-        "select": "请选择..."
+        "select": "请选择...",
+        "selectFieldFirst": "请先选择字段",
+        "value": "输入值"
       }
     },
     "table": {
@@ -9629,16 +9641,16 @@
   },
   "portalRelease": {
     "loading": "加载中...",
-    "confirmTitle": "确认释放隔离邮件",
-    "mailIdLabel": "邮件 ID",
-    "confirmButton": "确认释放",
-    "releasedTitle": "释放成功",
-    "releasedDesc": "邮件已成功释放到您的收件箱。",
+    "confirmTitle": "确认取回隔离邮件",
+    "confirmButton": "确认取回",
+    "releasedTitle": "取回成功",
+    "releasedDesc": "邮件已成功重新投递到您的收件箱。",
     "expiredTitle": "链接已过期或无效",
-    "expiredDesc": "请联系管理员获取新的释放链接。",
+    "expiredDesc": "请联系管理员获取新的取回链接。",
     "errorTitle": "操作失败",
     "errorDesc": "请稍后重试或联系管理员。",
-    "alreadyReleased": "该邮件已被释放，或已超出保留期被清理"
+    "alreadyReleased": "该邮件已被取回，或已超出保留期被清理",
+    "confirmWarning": "您正在取回被网关隔离的邮件，成功后该邮件将重新投递到您的收件箱，请谨慎操作！"
   },
   "portalPreview": {
     "loading": "加载中...",

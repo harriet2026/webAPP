@@ -55,6 +55,19 @@ test.describe('Product-form switcher (OSGATEWAY_PRODUCT_FORM_SWITCHER)', () => {
     await expect(cloudItem.locator('svg')).toBeVisible();
   });
 
+  test('HTML Spec entry opens the maintained index in a new tab', async ({ authenticatedPage }) => {
+    await switcherTrigger(authenticatedPage).click();
+
+    const specPagePromise = authenticatedPage.context().waitForEvent('page');
+    await authenticatedPage.getByRole('menuitem', { name: '查看 HTML Spec' }).click();
+    const specPage = await specPagePromise;
+
+    await specPage.waitForLoadState('domcontentloaded');
+    await expect(specPage).toHaveURL(/\/html-spec\/index\.html$/);
+    await expect(specPage).toHaveTitle('HTML Spec 索引');
+    await specPage.close();
+  });
+
   test('selecting legacy-single updates sidebar brand text', async ({ authenticatedPage }) => {
     await switchTo(authenticatedPage, FORM_LABELS.legacySingle);
 

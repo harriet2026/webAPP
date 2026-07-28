@@ -249,6 +249,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                     events={eventsQ.data ?? []}
                     readOnly={readOnly}
                     onViewBasis={() => scrollToSection('analysis')}
+                    onViewRawLogs={() => scrollToSection('rawlogs')}
                   />
                 </section>
                 <section

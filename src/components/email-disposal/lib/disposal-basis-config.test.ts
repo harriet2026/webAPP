@@ -1,9 +1,12 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import {
   formatListReason,
   formatHitDetail,
   getModuleName,
   getActionLabel,
+  getPolicyRoute,
   DISPOSAL_POLICY_MAP,
 } from './disposal-basis-config';
 import type { DisposalBasis } from '@/types/email-disposal';
@@ -215,5 +218,23 @@ describe('IPBL / UBL allow-block list rendering (GT-12214 复开)', () => {
     expect(formatListReason(mkIP('whitelist'), 'en')).toContain('allowlist');
     expect(formatListReason(mkIP('blacklist'), 'en')).toContain('blocklist');
     expect(formatListReason(mkUser('whitelist'), 'en')).toContain('allowlist');
+  });
+
+  // GT-12583 防回归：处置依据规则名的跳转目标必须是 app router 里真实存在的
+  // 页面。此前 STAGE_ROUTE 指向 demo 原型的 /filter-rules/*（webapp 从未有过
+  // 这些路由），点击即 404——断言"路由对应的 page.tsx 文件存在"能直接拦住
+  // 这类"跳转目标失联"的漂移。
+  it('GT-12583: 每个 policy 的跳转路由都对应真实存在的 dashboard 页面', () => {
+    const dashboardDir = join(__dirname, '../../../app/[locale]/(dashboard)');
+    const routes = new Set(
+      Object.keys(DISPOSAL_POLICY_MAP)
+        .map((k) => getPolicyRoute(k))
+        .filter((r): r is string => !!r),
+    );
+    expect(routes.size).toBeGreaterThan(0);
+    for (const route of routes) {
+      const pagePath = join(dashboardDir, route, 'page.tsx');
+      expect(existsSync(pagePath), `route ${route} -> ${pagePath} 不存在`).toBe(true);
+    }
   });
 });

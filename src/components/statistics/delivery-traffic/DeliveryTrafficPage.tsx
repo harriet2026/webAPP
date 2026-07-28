@@ -52,6 +52,7 @@ export function DeliveryTrafficPage() {
     () => timeRangeToDates(timeRange, customRange),
     [timeRange, customRange],
   );
+  const interval = timeRange === 'today' ? 'hour' as const : undefined;
   const dateError = useMemo(() => {
     if (!startDate || !endDate) return t('timeRange.required');
     const start = new Date(`${startDate}T00:00:00`);
@@ -69,6 +70,7 @@ export function DeliveryTrafficPage() {
     endDate,
     direction: queryDirection,
     tenantId: queryTenantId,
+    interval,
     enabled: scopeResolved && !dateError,
   });
   const transitioning = direction !== queryDirection;
