@@ -524,10 +524,10 @@ export function MailListTable({
               </TableHead>
               {colHead('time')}
               {colHead('direction')}
+              {colHead('subject')}
               {colHead('senderIp')}
               {colHead('sender')}
               {colHead('recipient')}
-              {colHead('subject')}
               {colHead('disposalBasis')}
               {colHead('mailType')}
               {aiEnabled && similarMode && colHead('similarity')}
