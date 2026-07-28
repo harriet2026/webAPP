@@ -164,6 +164,16 @@ import {
   mockLinkClickLogsList,
   mockLinkClickLogById,
 } from './fixtures';
+import {
+  mockTenantDomainsFor,
+  mockListDkimKeys,
+  mockGenerateDkimKey,
+  mockImportDkimKey,
+  mockVerifyDkimDns,
+  mockSetDkimKeyStatus,
+  mockDeleteDkimKey,
+} from './dkim';
+import type { DkimAlgorithm } from '@/lib/api/dkim';
 import type { IPFrequencyRulePayload } from '@/types/ip-frequency';
 import type { OverseasMailConfigResponse } from '@/types/overseas-mail';
 import type { DisposalSettings } from '@/types/disposal-settings';
@@ -1823,6 +1833,83 @@ const routes: Route[] = [
     method: 'GET',
     pattern: '/system/health-summary',
     handler: () => ({ status: 200, data: mockSystemHealthSummary() }),
+  },
+
+  // ─── 租户发信域名（DKIM 外发签名子卡 / 组织域名下拉 / 域名管理页共用）──────
+  // 真实后端在预览不可达；此前该 GET 未 mock，导致依赖域名列表的模块在 demo
+  // 里查询失败。这里补齐，返回按 :id 分组的 demo 域名（见 mock/dkim.ts）。
+  {
+    method: 'GET',
+    pattern: /^\/tenants\/\d+\/domains$/,
+    handler: (req) => {
+      const tenantId = Number(pathname(req.path).split('/')[2]);
+      return { status: 200, data: mockTenantDomainsFor(tenantId) };
+    },
+  },
+
+  // ─── DKIM 外发签名密钥（认证协议检查 → DKIM 外发签名子卡）──────────────────
+  // 生成/导入/校验/激活/删除全套，内存态可变（mock/dkim.ts），支持完整 demo 流。
+  // 注意路由顺序：generate/import 为非数字子路径，放在 /^\/dkim\/keys\/\d+/ 正则
+  // 之前，避免被数字 id 正则误伤（两者其实不冲突，仍显式前置以求稳）。
+  {
+    method: 'GET',
+    pattern: '/dkim/keys',
+    handler: (req) => ({ status: 200, data: mockListDkimKeys(req.path) }),
+  },
+  {
+    method: 'POST',
+    pattern: '/dkim/keys/generate',
+    handler: (req) => {
+      const b = (req.body ?? {}) as {
+        tenant_id: number;
+        domain: string;
+        selector: string;
+        algorithm: DkimAlgorithm;
+        key_size?: number;
+        note?: string;
+      };
+      return { status: 200, data: mockGenerateDkimKey(b) };
+    },
+  },
+  {
+    method: 'POST',
+    pattern: '/dkim/keys/import',
+    handler: (req) => {
+      const b = (req.body ?? {}) as {
+        tenant_id: number;
+        domain: string;
+        selector: string;
+        note?: string;
+      };
+      return { status: 200, data: mockImportDkimKey(b) };
+    },
+  },
+  {
+    method: 'POST',
+    pattern: /^\/dkim\/keys\/\d+\/verify-dns$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[3]);
+      return { status: 200, data: mockVerifyDkimDns(id) };
+    },
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/dkim\/keys\/\d+\/status$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[3]);
+      const b = (req.body ?? {}) as { is_active?: boolean };
+      mockSetDkimKeyStatus(id, b.is_active ?? false);
+      return { status: 204, data: {} };
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/dkim\/keys\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[3]);
+      mockDeleteDkimKey(id);
+      return { status: 204, data: {} };
+    },
   },
 ];
 

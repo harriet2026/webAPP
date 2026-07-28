@@ -1059,7 +1059,7 @@
       "inherit": "跟随全局设置，全局启用则启用、禁用则禁用；全局日后调整时本群组自动同步。",
       "enable": "本群组固定启用，不随全局变化；即使全局关闭该模块，本群组仍保持启用。",
       "disable": "本群组固定禁用，不随全局变化；即使全局开启该模块，本群组仍不检测。",
-      "custom": "在全局默认基础上，为本群组单独调整参数，仅对本群组生效。"
+      "custom": "在全局默认基础上，为本群组单独调整参数，仅��本群组生效。"
     },
     "stages": {
       "stage1": "阶段1：IP 策略",
@@ -2913,7 +2913,7 @@
     "executionPipeline": "策略执行流程",
     "phase1IP": "IP策略",
     "phase2Sender": "收发信人策略",
-    "phase3Content": "内容层",
+    "phase3Content": "内���层",
     "phase4AI": "智能分析层",
     "phase4Comprehensive": "综合策略",
     "phase5Comprehensive": "综合策略",
@@ -3228,7 +3228,7 @@
     "batchRelease": "批量解封 ({count})",
     "refresh": "刷新",
     "releaseHint1": "解封后IP可立即发起新连接",
-    "releaseHint2": "剩余时长到期后自动解封",
+    "releaseHint2": "剩余时��到期后自动解封",
     "scopeIpGroup": "IP组",
     "scopeIpGroupRequired": "请选择一个IP组",
     "ipGroupPlaceholder": "选择IP组",
@@ -4132,6 +4132,20 @@
       "templateApply": "应用",
       "ptrReadonlyNotice": "PTR 设置由系统管理员管理"
     },
+    "dkimOutbound": {
+      "title": "DKIM 外发签名",
+      "description": "为本租户的发信域名生成并管理 DKIM 私钥、发布 DNS 公钥，对经本网关外发的邮件进行 DKIM 签名。",
+      "domainCol": "发信域名",
+      "statusCol": "签名状态",
+      "actionsCol": "操作",
+      "activeSelector": "已启用 selector：{selector}",
+      "notSigned": "未签名",
+      "pendingVerify": "待验证",
+      "manage": "管理",
+      "loading": "加载中…",
+      "selectTenant": "请先在页面顶部选择一个租户，再管理其 DKIM 外发签名。",
+      "noDomains": "该租户暂无发信域名，请先在「租户域名管理」中添加域名后再配置签名。"
+    },
     "flow": {
       "start": "策略流水线",
       "end": "下一模块"
@@ -4670,7 +4684,7 @@
       "qrMaxCount": "二维码最大数量",
       "qrBarcodeExempt": "条形码豁免",
       "qrDeepRoutesSection": "二维码深度路由配置",
-      "urlCheck": "URL 检查",
+      "urlCheck": "URL 检���",
       "urlUnshorten": "URL 短链展开",
       "keywordScope": "关键词范围",
       "advancedRules": "高级规则",
@@ -6595,7 +6609,7 @@
       "desc_similarDomain": {
         "source": "相似域名检测引擎",
         "usage": "检测是否存在仿冒相似域名",
-        "note": "输入0-100的置信度阈值，越高越严格"
+        "note": "输入0-100的置信度阈���，越高越严格"
       },
       "desc_displayNameSpoof": {
         "source": "仿冒检测模块",
@@ -8498,7 +8512,7 @@
       "importCheckingExisting": "检查中",
       "importExistingCheckFailed": "检查失败",
       "importDisabledExisting": "已存在",
-      "importDisabledLimit": "已达上限"
+      "importDisabledLimit": "已���上限"
     },
     "batch": {
       "title": "批量操作",
@@ -9648,7 +9662,7 @@
     "selectTenantFirst": "请先选择租户，再修改此模块",
     "adminOnly": "仅系统管理员或租户管理员可修改此模块",
     "disableWarning": "关闭本模块后，其全部规则停止生效，该模块的拦截能力将不再起作用。",
-    "whitelistWarning": "注意：本模块的白名单 / 放行规则也会一并停用，原本被放行的邮件将继续走后续检测。",
+    "whitelistWarning": "注意：本模块的白名单 / 放行规则也会一并停用，原本被放行的邮���将继续走后续检测。",
     "saveFailed": "保存失败，请重试",
     "unsavedChanges": "模块开关有未保存的更改"
   },

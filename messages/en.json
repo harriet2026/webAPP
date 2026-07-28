@@ -4127,6 +4127,20 @@
       "templateApply": "Apply",
       "ptrReadonlyNotice": "PTR settings are managed by system administrator"
     },
+    "dkimOutbound": {
+      "title": "DKIM Outbound Signing",
+      "description": "Generate and manage DKIM private keys for this tenant's sending domains, publish the DNS public key, and DKIM-sign mail sent out through this gateway.",
+      "domainCol": "Sending Domain",
+      "statusCol": "Signing Status",
+      "actionsCol": "Actions",
+      "activeSelector": "Active selector: {selector}",
+      "notSigned": "Not signed",
+      "pendingVerify": "Pending verification",
+      "manage": "Manage",
+      "loading": "Loading…",
+      "selectTenant": "Select a tenant at the top of the page before managing its DKIM outbound signing.",
+      "noDomains": "This tenant has no sending domains yet. Add domains in Tenant Domain Management before configuring signing."
+    },
     "flow": {
       "start": "Pipeline",
       "end": "Next Module"
