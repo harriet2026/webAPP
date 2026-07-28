@@ -142,7 +142,14 @@ export function MailListTable({
     const timer = window.setTimeout(() => {
       try {
         const raw = localStorage.getItem(COLUMN_PREF_KEY);
-        if (raw) setHiddenColumns(new Set(JSON.parse(raw) as string[]));
+        if (raw) {
+          setHiddenColumns(new Set(JSON.parse(raw) as string[]));
+        } else {
+          // 默认隐藏"处置依据"列，首次访问时生效
+          const defaults = new Set(['disposalBasis']);
+          setHiddenColumns(defaults);
+          localStorage.setItem(COLUMN_PREF_KEY, JSON.stringify([...defaults]));
+        }
       } catch {
         /* ignore malformed preference */
       }
