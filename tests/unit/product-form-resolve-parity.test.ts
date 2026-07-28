@@ -21,6 +21,7 @@ describe('resolve parity with Go', () => {
     // 这个数字是「生成的向量被截断」的哨兵，所以刻意写死而不是从 registry 推导 ——
     // 若从 registry.length 推导，向量文件整体缺失时它会跟着变小、断言恒真。
     // registry 增删条目时同步改这里（并重新生成向量）。
+    expect(registry).toHaveLength(41);
     expect(rows.length).toBe(41 * 5 * 2 * 2);
     for (const row of rows) {
       const f = byId.get(row.feature);

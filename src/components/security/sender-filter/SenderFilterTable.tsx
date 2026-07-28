@@ -11,17 +11,14 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { SenderFilterRuleView, SenderFilterAction, SenderConfigType, SenderFilterGroups } from '@/types/sender-filter';
 
-/**
- * Render an ISO timestamp as `yyyy-MM-dd HH:mm` in UTC (no local-tz shift), so a
- * `2026-03-20T10:30:00Z` row shows `10:30` — consistent with the UTC date baked
- * into the rule id (BL-20260320-xxx). Using date-fns `format(new Date(...))`
- * would apply the browser's local offset and drift the displayed minute.
- */
-function formatUtcMinute(iso: string): string {
+// GT-12500：修改时间按本地时区展示（分钟精度）。此前刻意用 UTC（理由是与
+// 规则 ID 里的 UTC 日期一致），但管理员看到的是与本地钟表对不上的时间——
+// 展示一律本地化，规则 ID 只是标识不承担时刻语义。
+function formatLocalMinute(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
   const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
 interface SenderFilterTableProps {
@@ -158,7 +155,7 @@ export function SenderFilterTable({
       header: t('senderFilter.modifyTime'),
       cell: ({ row }) => (
         <span className="text-xs text-muted-foreground">
-          {formatUtcMinute(row.original.rule.updated_at)}
+          {formatLocalMinute(row.original.rule.updated_at)}
         </span>
       ),
     },

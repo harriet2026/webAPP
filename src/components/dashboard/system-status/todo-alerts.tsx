@@ -47,10 +47,12 @@ function itemTitle(item: SystemStatusAlertItem, t: TFn, tSidebar: TFn): string {
       return item.alert?.rule_name ?? '';
     case 'node_offline':
       return t('itemNodeOffline', { node: item.node?.id ?? '' });
+    // GT-12551：按 html_spec 两行结构——第一行事项名（待处置队列/举报待审），
+    // 第二行数量说明（见 itemDescription；举报的单位是"条"不是"封"）。
     case 'pending_disposal':
-      return t('itemPendingDisposal', { n: item.count ?? 0 });
+      return t('itemPendingDisposal');
     case 'pending_report':
-      return t('itemPendingReport', { n: item.count ?? 0 });
+      return t('itemPendingReport');
     case 'agent_pending':
       return t('itemAgentPending', {
         agent: item.agent ? tSidebar(AGENT_SIDEBAR_KEY[item.agent]) : '',
@@ -76,6 +78,8 @@ function itemDescription(item: SystemStatusAlertItem, t: TFn): string {
     if (!unix || !Number.isFinite(unix)) return '';
     return t('lastSeen', { time: new Date(unix * 1000).toLocaleString() });
   }
+  if (item.kind === 'pending_disposal') return t('itemPendingDisposalDesc', { n: item.count ?? 0 });
+  if (item.kind === 'pending_report') return t('itemPendingReportDesc', { n: item.count ?? 0 });
   if (item.kind === 'license_expiry') return t('licenseRenewHint');
   if (item.kind === 'rule_lib') return item.ruleVersion ?? '';
   return '';

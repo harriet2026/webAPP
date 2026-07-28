@@ -13,10 +13,10 @@ export class EmailLogsPage {
     this.page = page;
     this.heading = page.locator('main h1');
     this.table = page.locator('.rounded-md.border table, table').first();
-    this.searchButton = page.locator('form button[type="submit"]');
-    this.resetButton = page.locator('form button[type="button"]').filter({ hasText: /重置/ });
+    this.searchButton = page.getByTestId('email-logs-filter-search');
+    this.resetButton = page.getByTestId('email-logs-filter-reset');
     this.exportButton = page.locator('main button').filter({ hasText: /导出/ });
-    this.advancedFilterToggle = page.locator('button, [role="button"]').filter({ hasText: /高级搜索/ });
+    this.advancedFilterToggle = page.getByTestId('email-logs-advanced-toggle');
   }
 
   async goto() {
@@ -191,17 +191,17 @@ export class EmailLogsPage {
   }
 
   getAdvancedFilterPanel() {
-    return this.page.locator('form').locator('div.border.rounded-md');
+    return this.page.getByTestId('email-logs-search-panel').locator('div.border.rounded-md');
   }
 
   async addAdvancedConditionGroup() {
-    const addGroupBtn = this.page.locator('form button').filter({ hasText: /添加搜索条件组/ });
+    const addGroupBtn = this.page.getByTestId('email-logs-search-panel').locator('button').filter({ hasText: /添加搜索条件组/ });
     await addGroupBtn.click();
     await this.page.waitForTimeout(300);
   }
 
   async addAdvancedCondition() {
-    const addCondBtn = this.page.locator('form button').filter({ hasText: /添加搜索条件/ });
+    const addCondBtn = this.page.getByTestId('email-logs-search-panel').locator('button').filter({ hasText: /添加搜索条件/ });
     await addCondBtn.click();
     await this.page.waitForTimeout(300);
   }
@@ -211,7 +211,7 @@ export class EmailLogsPage {
       return;
     }
 
-    const fieldSelect = this.page.locator('form .border.rounded-md [data-slot="select-trigger"]').nth(rowIndex * 2 + 1);
+    const fieldSelect = this.page.getByTestId('email-logs-search-panel').locator('.border.rounded-md [data-slot="select-trigger"]').nth(rowIndex * 2 + 1);
     const currentValue = (await fieldSelect.textContent())?.trim() ?? '';
     if (fieldKey === 'Client IP' && /Client IP|客户端 IP|client_ip/i.test(currentValue)) {
       return;
@@ -229,7 +229,7 @@ export class EmailLogsPage {
   }
 
   async selectAdvancedOperator(rowIndex: number, operator: string) {
-    const opSelect = this.page.locator('form .border.rounded-md [data-slot="select-trigger"]').nth(rowIndex * 2 + 2);
+    const opSelect = this.page.getByTestId('email-logs-search-panel').locator('.border.rounded-md [data-slot="select-trigger"]').nth(rowIndex * 2 + 2);
     await opSelect.click();
     await this.page.waitForTimeout(300);
     const normalizedOperator = operator === '包含' ? 'contains' : operator;
@@ -242,13 +242,13 @@ export class EmailLogsPage {
   }
 
   async fillAdvancedValue(rowIndex: number, value: string) {
-    const input = this.page.locator('form .border.rounded-md input[type="text"], form .border.rounded-md input[type="number"]').nth(rowIndex);
+    const input = this.page.getByTestId('email-logs-search-panel').locator('.border.rounded-md input[type="text"], .border.rounded-md input[type="number"]').nth(rowIndex);
     await input.fill(value);
     await this.page.waitForTimeout(200);
   }
 
   async selectAdvancedEnumValue(rowIndex: number, value: string) {
-    const valueSelect = this.page.locator('form .border.rounded-md [data-slot="select-trigger"]').nth(rowIndex * 2 + 2);
+    const valueSelect = this.page.getByTestId('email-logs-search-panel').locator('.border.rounded-md [data-slot="select-trigger"]').nth(rowIndex * 2 + 2);
     await valueSelect.click();
     await this.page.waitForTimeout(300);
     const option = this.page.locator('[data-slot="select-item"]').filter({ hasText: value });
@@ -262,7 +262,7 @@ export class EmailLogsPage {
   }
 
   async clearAdvancedFilters() {
-    const clearBtn = this.page.locator('form button').filter({ hasText: /清除全部/ });
+    const clearBtn = this.page.getByTestId('email-logs-search-panel').locator('button').filter({ hasText: /清除全部/ });
     if (await clearBtn.count() > 0) {
       await clearBtn.click();
       await this.page.waitForTimeout(300);

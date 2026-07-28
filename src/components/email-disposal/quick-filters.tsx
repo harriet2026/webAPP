@@ -93,9 +93,10 @@ export function QuickFilters({
     "accept",
     "reject",
     "bounce",
+    "discard",
+    "audit",
     "quarantine",
     "sideline",
-    "mixed",
   ] as const;
   const directions = ["incoming", "outgoing", "internal"] as const;
   const mailTypes = [

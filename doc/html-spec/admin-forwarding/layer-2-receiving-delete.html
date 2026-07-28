@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级2：收信域 删除确认 + 行内探测 - 邮件路由</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .component-preview { background:#fff; overflow-x:auto; }
+  .pass { color:#15803d; font-weight:600; } .bad { color:#b91c1c; font-weight:600; } .warn { color:#a16207; font-weight:600; }
+  .component-preview [role="alertdialog"] { position:relative !important; top:auto !important; left:auto !important; transform:none !important; margin:0; max-width:32rem; }
+  .component-preview [role="status"] { position:relative !important; inset:auto !important; transform:none !important; opacity:1 !important; pointer-events:auto !important; display:inline-flex; left:auto !important; bottom:auto !important; margin:.5rem 0; }
+  .layer-nav { display:flex; gap:1rem; margin-bottom:1rem; font-size:.875rem; }
+</style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#c-3">← 返回主文件 §2.3</a><a href="./layer-1-receiving-drawer.html">← 层级1 抽屉</a><a href="./layer-3-relay-drawer.html">层级3 转发规则抽屉 →</a></nav>
+<header class="spec-header">
+  <h1>交互层级 2：收信域 删除确认（AlertDialog）+ 行内探测 / Toast</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td><a href="./index.html#c-3">2.3 收信域管理 Tab</a></td></tr>
+    <tr><td>触发路径</td><td>层级0 行内「删除」（实测第 4 行 legacy.example.net）→ 居中 AlertDialog + 遮罩；行内「探测」→ 状态列 1s「探测中…」→ 随机结果 + Toast</td></tr>
+  </table>
+</header>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">2a</span> 删除确认弹窗</h4>
+  <p class="preview-hint">预览可操作：「取消」/「强制删除」→ Toast「收信域已删除」（demo 同时移除该行）。注意按钮文案是<strong>「强制删除」</strong>而非「确认删除」——正文声明被引用规则将失效，但删除不做引用拦截。</p>
+  <div class="component-preview" data-preview="alert-dialog" data-confirm-toast="收信域已删除"><div role="alertdialog" id="radix-_R_hd5esnebn9lb_" aria-describedby="radix-_R_hd5esnebn9lbH2_" aria-labelledby="radix-_R_hd5esnebn9lbH1_" data-state="open" data-slot="alert-dialog-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg" tabindex="-1" style="pointer-events: auto;"><div data-slot="alert-dialog-header" class="flex flex-col gap-2 text-center sm:text-left"><h2 id="radix-_R_hd5esnebn9lbH1_" data-slot="alert-dialog-title" class="text-lg font-semibold">删除收信域「legacy.example.net」？</h2><p id="radix-_R_hd5esnebn9lbH2_" data-slot="alert-dialog-description" class="text-muted-foreground text-sm">该域名可能正在被转发设置、发信认证引用，删除后相关规则的对应条件将失效。是否强制删除？</p></div><div data-slot="alert-dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3">取消</button><button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground h-9 px-4 py-2 has-[&gt;svg]:px-3 bg-red-600 hover:bg-red-700">强制删除</button></div></div></div>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/receiving-delete-dialog.png" alt="删除收信域确认">
+    <figcaption>实测：标题「删除收信域「legacy.example.net」？」；正文「该域名可能正在被转发设置、发信认证引用，删除后相关规则的对应条件将失效。是否强制删除？」；「强制删除」红底 bg-red-600</figcaption>
+  </figure>
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>规格（浏览器实测）</th></tr></thead>
+    <tbody>
+      <tr><td>标题</td><td>「删除收信域「<em>域名</em>」？」（动态插入）</td></tr>
+      <tr><td>正文</td><td>提示被转发设置/发信认证引用的连带失效风险；<strong>无引用计数/清单</strong>（落地建议列出实际引用数）</td></tr>
+      <tr><td>按钮</td><td>「取消」outline / 「强制删除」红底 <code>bg-red-600 hover:bg-red-700</code>；确认后行移除 + Toast，无撤销</td></tr>
+      <tr><td>关闭方式</td><td>取消 / 强制删除 / Esc；遮罩点击关闭</td></tr>
+    </tbody>
+  </table>
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>嵌入的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td><code>[role=alertdialog][data-state=open]</code>（居中 max-w-lg）</td><td>同（规格侧中和 fixed 居中）</td><td class="pass">一致</td></tr>
+        <tr><td>标题动态名</td><td>「legacy.example.net」</td><td>同</td><td class="pass">一致</td></tr>
+        <tr><td>确认按钮</td><td>「强制删除」红底</td><td>同</td><td class="pass">一致</td></tr>
+        <tr><td>节点数</td><td>7</td><td>7</td><td class="pass">一致</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="interaction-layer">
+  <h4><span class="layer-badge">2b</span> 行内探测中 → 探测完成 Toast</h4>
+  <p>探测为行级互斥（probingId 单值）：探测中该行「探测」按钮禁用，状态列替换为 Loader2 旋转 + 「探测中…」；1s 后随机落定 正常(40%)/部分异常(30%)/异常(30%)，部分异常时 abnormalCount=⌈主机数/2⌉，刷新最后探测时间为当前时刻，Toast「探测完成」。</p>
+  <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:.75rem">
+    <figure class="screenshot-figure"><img src="./screenshots/receiving-probing.png" alt="探测中"><figcaption>探测中实测：第 1 行状态列「探测中…」，探测按钮禁用</figcaption></figure>
+    <figure class="screenshot-figure"><img src="./screenshots/receiving-toast.png" alt="探测完成 Toast"><figcaption>探测完成实测：底部 Toast「探测完成」，状态与时间已刷新</figcaption></figure>
+  </div>
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果（Toast）</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>嵌入的 HTML（主文件 §2.7）</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td><code>div[role=status][aria-live=polite]</code>，class 含 <code>bg-gray-900 text-white</code> + <code>opacity-100</code>（显示态）</td><td>同</td><td class="pass">一致</td></tr>
+        <tr><td>图标 + 文案</td><td>CheckCircle2（<code>text-green-400</code>）+「探测完成」</td><td>同</td><td class="pass">一致</td></tr>
+        <tr><td>节点数</td><td>4</td><td>4</td><td class="pass">一致</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<script src="../assets/forwarding-preview.js"></script>
+</body>
+</html>

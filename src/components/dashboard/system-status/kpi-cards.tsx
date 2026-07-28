@@ -90,7 +90,8 @@ export function KpiCards({ data, showInfra }: KpiCardsProps) {
     {
       key: 'pending',
       icon: ClipboardList,
-      href: '/email-disposal/center',
+      // GT-12608：带 view=pending 深链，落地页应用与本卡同口径的待处置筛选。
+      href: '/email-disposal/center?view=pending',
       ctaKey: 'pending',
       value: data.pending.toLocaleString(),
       sub: (

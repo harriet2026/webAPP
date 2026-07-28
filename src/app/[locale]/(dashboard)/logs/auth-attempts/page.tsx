@@ -18,14 +18,23 @@ import { useAuth } from '@/contexts/auth-context';
 import { listTenants } from '@/lib/api/tenants';
 import { useApiRequest } from '@/lib/api/client';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
-import { PageFilters } from '@/components/shared/page-filters';
 import { AuthStatsCards } from '@/components/auth-logs/auth-stats-cards';
 import { AuthFilters, type AuthFilterValues } from '@/components/auth-logs/auth-filters';
 import { AuthDetailDrawer } from '@/components/auth-logs/auth-detail-drawer';
 import { failReasonLabelKey, formatIPLocation, protocolLabelKey, sceneLabelKey } from '@/components/auth-logs/constants';
+import { useAppliedFilterState } from '@/hooks/use-applied-filter-state';
 
 const DEFAULT_PAGE_SIZE = 50;
 const PAGE_SIZE_OPTIONS = [20, 50, 100];
+const EMPTY_AUTH_FILTERS: AuthFilterValues = {
+  keyword: '',
+  domain: '',
+  result: '',
+  authProtocol: '',
+  scene: '',
+  failReason: '',
+  tenantId: '',
+};
 
 export default function AuthAttemptsPage() {
   const t = useTranslations();
@@ -53,14 +62,17 @@ export default function AuthAttemptsPage() {
   const pathname = usePathname();
   const router = useRouter();
   const initialResult = searchParams.get('result');
-  const [filters, setFilters] = useState<AuthFilterValues>({
-    keyword: '',
-    domain: '',
-    result: initialResult === 'failed' ? 'false' : initialResult === 'success' ? 'true' : '',
-    authProtocol: '',
-    scene: '',
-    failReason: '',
-    tenantId: '',
+  const {
+    draft: filters,
+    applied: appliedFilters,
+    setDraft: setFilters,
+    apply: applyFilters,
+    reset: resetFilters,
+  } = useAppliedFilterState<AuthFilterValues>({
+    initialValue: {
+      ...EMPTY_AUTH_FILTERS,
+      result: initialResult === 'failed' ? 'false' : initialResult === 'success' ? 'true' : '',
+    },
   });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -76,20 +88,17 @@ export default function AuthAttemptsPage() {
     const nextQuery = nextParams.toString();
     router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname);
   }, [searchParams, pathname, router]);
-  // Bumped on Reset to remount AuthFilters so its local text drafts clear.
-  const [filterKey, setFilterKey] = useState(0);
-
   const params = useMemo(() => ({
-    keyword: filters.keyword || undefined,
-    domain: filters.domain || undefined,
-    auth_protocol: filters.authProtocol || undefined,
-    scene: filters.scene || undefined,
-    fail_reason: (filters.result === 'true' ? undefined : filters.failReason) || undefined,
-    tenant_id: filters.tenantId ? Number(filters.tenantId) : undefined,
-    success: filters.result === 'true' ? true : filters.result === 'false' ? false : undefined,
+    keyword: appliedFilters.keyword || undefined,
+    domain: appliedFilters.domain || undefined,
+    auth_protocol: appliedFilters.authProtocol || undefined,
+    scene: appliedFilters.scene || undefined,
+    fail_reason: (appliedFilters.result === 'true' ? undefined : appliedFilters.failReason) || undefined,
+    tenant_id: appliedFilters.tenantId ? Number(appliedFilters.tenantId) : undefined,
+    success: appliedFilters.result === 'true' ? true : appliedFilters.result === 'false' ? false : undefined,
     page,
     page_size: pageSize,
-  }), [filters, page, pageSize]);
+  }), [appliedFilters, page, pageSize]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['auth-attempts', params, effectiveTenantId],
@@ -104,11 +113,12 @@ export default function AuthAttemptsPage() {
       }
       return next;
     });
-  }, []);
+  }, [setFilters]);
 
   const handleSearch = useCallback(() => {
+    applyFilters();
     setPage(1);
-  }, []);
+  }, [applyFilters]);
 
   // Changing page size must return to page 1, otherwise a stale high page index
   // (e.g. page 5 at size 20) requests an offset past the (now larger-page) total
@@ -119,18 +129,9 @@ export default function AuthAttemptsPage() {
   }, []);
 
   const handleReset = useCallback(() => {
-    setFilters({
-      keyword: '',
-      domain: '',
-      result: '',
-      authProtocol: '',
-      scene: '',
-      failReason: '',
-      tenantId: '',
-    });
+    resetFilters(EMPTY_AUTH_FILTERS);
     setPage(1);
-    setFilterKey((k) => k + 1);
-  }, []);
+  }, [resetFilters]);
 
   const columns: ColumnDef<AuthAttempt>[] = [
     {
@@ -254,16 +255,13 @@ export default function AuthAttemptsPage() {
 
       <AuthStatsCards />
 
-      <PageFilters>
-        <AuthFilters
-          key={filterKey}
-          values={filters}
-          onChange={handleFilterChange}
-          onSearch={handleSearch}
-          onReset={handleReset}
-          tenantOptions={tenantOptions}
-        />
-      </PageFilters>
+      <AuthFilters
+        values={filters}
+        onChange={handleFilterChange}
+        onSearch={handleSearch}
+        onReset={handleReset}
+        tenantOptions={tenantOptions}
+      />
 
       {isLoading ? (
         <PageSurface>

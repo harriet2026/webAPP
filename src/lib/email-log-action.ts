@@ -12,6 +12,17 @@ export type KnownAction =
   | 'bounce'
   | 'mixed';
 
+// Severity order: higher index = more severe. Used to sort multi-action badges.
+const ACTION_SEVERITY: Record<string, number> = {
+  accept: 0,
+  sideline: 1,
+  audit: 2,
+  quarantine: 3,
+  discard: 4,
+  bounce: 5,
+  reject: 6,
+};
+
 export function actionToVariant(action: string | undefined | null): ActionBadgeVariant {
   switch ((action || '').toLowerCase()) {
     case 'accept':
@@ -23,7 +34,6 @@ export function actionToVariant(action: string | undefined | null): ActionBadgeV
     case 'quarantine':
     case 'sideline':
     case 'audit':
-      return 'outline';
     case 'mixed':
       return 'outline';
     default:
@@ -31,7 +41,8 @@ export function actionToVariant(action: string | undefined | null): ActionBadgeV
   }
 }
 
-// Extra class for the mixed badge — amber so it stands out from neutral outline ones.
+// A mixed badge is only rendered when per-recipient details are unavailable.
+// Keep it visually distinct from the neutral outline actions.
 export function actionExtraClass(action: string | undefined | null): string {
   if ((action || '').toLowerCase() === 'mixed') {
     return 'border-amber-500 bg-amber-50 text-amber-900 dark:border-amber-400 dark:bg-amber-950/40 dark:text-amber-200';
@@ -49,6 +60,55 @@ export function actionLabel(action: string | undefined | null, t: ActionTranslat
   // next-intl returns the key when missing; fall back to the raw action so
   // unknown values (e.g. from older logs) still render.
   return translated === key ? raw : translated;
+}
+
+/** Maximum number of per-action badges shown inline before collapsing with "+N". */
+const MAX_INLINE_BADGES = 2;
+
+export interface ActionBadgeEntry {
+  action: string;
+  /** Number of recipients that received this action (for tooltip). */
+  count: number;
+}
+
+/**
+ * Resolves the list of per-action badges to display for a mail row.
+ *
+ * - For non-mixed actions, returns a single entry.
+ * - For `mixed` actions, de-duplicates by action across all recipients,
+ *   sorts by severity (most severe first), and caps at MAX_INLINE_BADGES
+ *   with a remainder count for "+N" display.
+ */
+export function resolveActionBadges(
+  action: string,
+  finalActionRule?: Record<string, FinalActionRuleDetail>,
+): { badges: ActionBadgeEntry[]; remainder: number } {
+  const raw = (action || '').toLowerCase();
+
+  if (raw !== 'mixed' || !finalActionRule) {
+    return { badges: raw ? [{ action: raw, count: 1 }] : [], remainder: 0 };
+  }
+
+  // Aggregate counts per action across all recipients.
+  const counts = new Map<string, number>();
+  for (const detail of Object.values(finalActionRule)) {
+    const a = (detail?.action || '').toLowerCase();
+    if (!a) continue;
+    counts.set(a, (counts.get(a) || 0) + 1);
+  }
+
+  const sorted = Array.from(counts.entries())
+    .map(([a, count]) => ({ action: a, count }))
+    .sort((a, b) => {
+      const sa = ACTION_SEVERITY[a.action] ?? -1;
+      const sb = ACTION_SEVERITY[b.action] ?? -1;
+      // Most severe first; tie-break alphabetically.
+      return sb - sa || a.action.localeCompare(b.action);
+    });
+
+  const badges = sorted.slice(0, MAX_INLINE_BADGES);
+  const remainder = sorted.length - badges.length;
+  return { badges, remainder };
 }
 
 export interface FinalActionSummaryEntry {

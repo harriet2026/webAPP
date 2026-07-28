@@ -411,21 +411,35 @@ export function GroupPolicyDrawer({
                       data-readonly={readOnly ? 'true' : undefined}
                       data-testid={`group-policy-stage-body-${stage.key}`}
                     >
-                      {readOnly && (
-                        <p
-                          className="text-[11px] text-muted-foreground/80 leading-relaxed px-0.5"
+                      {/* GT-12275（重开轮）：租户视角的阶段一不再暴露任何策略
+                          卡（此前只读展示 RBL/海外等 4 张卡，越出"租户只配置
+                          非阶段一"的角色边界），收敛为一张"平台统一管控"占位
+                          说明卡。 */}
+                      {readOnly ? (
+                        <div
+                          className="p-2.5 rounded-lg border border-dashed border-muted-foreground/30 bg-muted/40"
                           data-testid={`group-policy-stage-readonly-${stage.key}`}
                         >
-                          {tGp('stageReadOnlyForTenant')}
-                        </p>
-                      )}
+                          <div className="flex items-center gap-1.5">
+                            <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            <span className="text-xs font-medium text-muted-foreground">{tGp('globalManagedTitle')}</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground/80 mt-1 leading-relaxed">
+                            {tGp('stageReadOnlyForTenant')}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground/80 mt-1 leading-relaxed">
+                            {stage.policies.map((p) => t(p.nameKey)).join('、')}
+                          </p>
+                        </div>
+                      ) : (
+                      <>
                       {configurable.map((def) => (
                         <StagePolicyCard
                           key={def.key}
                           def={def}
                           status={statusOf(def.key)}
-                          selected={!readOnly && selectedPolicy === def.key && panelOpen}
-                          onClick={readOnly ? () => {} : () => handleCardClick(def.key)}
+                          selected={selectedPolicy === def.key && panelOpen}
+                          onClick={() => handleCardClick(def.key)}
                         />
                       ))}
                       {/* 名单/基础设施类全局管控项：折叠为只读摘要（demo 全局统一管控卡） */}
@@ -440,6 +454,8 @@ export function GroupPolicyDrawer({
                           </p>
                           <p className="text-[11px] text-muted-foreground/80 mt-0.5">{tGp('globalManagedNote')}</p>
                         </div>
+                      )}
+                      </>
                       )}
                     </div>
                   </div>

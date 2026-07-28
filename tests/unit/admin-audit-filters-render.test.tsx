@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { AdminAuditFilters, EMPTY_ADMIN_FILTERS } from '@/components/admin-audit/admin-audit-filters';
 
@@ -33,9 +33,20 @@ vi.mock('@/components/layout/sidebar-visibility', () => ({
 
 const noop = () => {};
 
-function renderFilters() {
+function renderFilters({
+  onChange = noop,
+  onSearch = noop,
+}: {
+  onChange?: (value: typeof EMPTY_ADMIN_FILTERS) => void;
+  onSearch?: () => void;
+} = {}) {
   return render(
-    <AdminAuditFilters value={EMPTY_ADMIN_FILTERS} onChange={noop} onReset={noop} />,
+    <AdminAuditFilters
+      value={EMPTY_ADMIN_FILTERS}
+      onChange={onChange}
+      onSearch={onSearch}
+      onReset={noop}
+    />,
   );
 }
 
@@ -75,5 +86,22 @@ describe('AdminAuditFilters — html_spec §2.3 alignment', () => {
     expect(resetBtn).toBeTruthy();
     // A lucide RotateCcw would render an <svg> child; the prototype button has none.
     expect(resetBtn?.querySelector('svg')).toBeNull();
+  });
+
+  it('keeps keyword edits as a draft and only searches on button or Enter', () => {
+    const onChange = vi.fn();
+    const onSearch = vi.fn();
+    renderFilters({ onChange, onSearch });
+
+    const keyword = screen.getByTestId('admin-audit-filter-keyword');
+    fireEvent.change(keyword, { target: { value: 'admin' } });
+    expect(onChange).toHaveBeenCalledWith({ ...EMPTY_ADMIN_FILTERS, keyword: 'admin' });
+    expect(onSearch).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(keyword, { key: 'Enter' });
+    expect(onSearch).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('admin-audit-filter-search'));
+    expect(onSearch).toHaveBeenCalledTimes(2);
   });
 });

@@ -26,7 +26,6 @@ describe('delivery traffic frontend fixes', () => {
       'direction.label', 'direction.all', 'direction.receive', 'direction.send', 'direction.internal',
       'timeRange.label', 'timeRange.7d',
       'kpi.inboundTotal', 'kpi.outboundTotal', 'kpi.internalTotal', 'kpi.totalSuccessRate', 'kpi.queueBacklog',
-      'queueHealth.title',
       'table.title', 'table.date', 'table.total', 'table.success', 'table.failure', 'table.deferred',
       'table.cancelled', 'table.successRate', 'table.change',
       'bottomActions.exportCsv',

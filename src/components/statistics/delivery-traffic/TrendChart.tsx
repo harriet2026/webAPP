@@ -54,10 +54,20 @@ export function TrendChart({ trend, direction, isLoading }: TrendChartProps) {
   const option = useMemo(() => {
     if (!trend || !trend.points || trend.points.length === 0) return null;
 
-    const dates = trend.points.map((p) => p.date);
+    const isHourly = trend.granularity === 'hour';
+    const xLabels = trend.points.map((p) => {
+      if (!isHourly) return p.date;
+      const timeSeparator = Math.max(p.date.lastIndexOf('T'), p.date.lastIndexOf(' '));
+      return timeSeparator >= 0 ? p.date.slice(timeSeparator + 1, timeSeparator + 6) : p.date;
+    });
 
     const axisColor = isDark ? '#9ca3af' : '#4b5563';
     const splitColor = isDark ? '#374151' : '#e5e7eb';
+
+    // Show every 3rd label for hourly (0,3,6,…,21) to avoid crowding.
+    const xAxisLabel = isHourly
+      ? { color: axisColor, fontSize: 11, interval: 2, rotate: 0 }
+      : { color: axisColor, fontSize: 12 };
 
     if (direction === 'all') {
       const receiveData = trend.points.map((p) => (p.receive as number) ?? 0);
@@ -72,8 +82,13 @@ export function TrendChart({ trend, direction, isLoading }: TrendChartProps) {
           textStyle: { color: axisColor },
         },
         grid: { left: 48, right: 16, top: 16, bottom: 48 },
-        xAxis: { type: 'category' as const, data: dates, axisLabel: { color: axisColor, fontSize: 12 }, axisLine: { lineStyle: { color: axisColor } } },
-        yAxis: { type: 'value' as const, min: 0, max: 14_000, interval: 3_500, axisLabel: { color: axisColor, fontSize: 12 }, splitLine: { lineStyle: { type: 'dashed', color: splitColor } } },
+        xAxis: { type: 'category' as const, data: xLabels, axisLabel: xAxisLabel, axisLine: { lineStyle: { color: axisColor } } },
+        yAxis: {
+          type: 'value' as const,
+          ...(isHourly ? {} : { min: 0, max: 14_000, interval: 3_500 }),
+          axisLabel: { color: axisColor, fontSize: 12 },
+          splitLine: { lineStyle: { type: 'dashed', color: splitColor } },
+        },
         series: [
           { name: t('direction.receive'), type: 'line', data: receiveData, smooth: true, lineStyle: { width: 2 }, itemStyle: { color: COLORS.receive } },
           { name: t('direction.send'), type: 'line', data: sendData, smooth: true, lineStyle: { width: 2 }, itemStyle: { color: COLORS.send } },
@@ -88,10 +103,10 @@ export function TrendChart({ trend, direction, isLoading }: TrendChartProps) {
     return {
       tooltip: { trigger: 'axis' as const },
       grid: { left: 48, right: 16, top: 16, bottom: 32 },
-      xAxis: { type: 'category' as const, data: dates, axisLabel: { color: axisColor, fontSize: 12 }, axisLine: { lineStyle: { color: axisColor } } },
+      xAxis: { type: 'category' as const, data: xLabels, axisLabel: xAxisLabel, axisLine: { lineStyle: { color: axisColor } } },
       yAxis: {
         type: 'value' as const,
-        ...(direction === 'receive' ? { min: 0, max: 14_000, interval: 3_500 } : {}),
+        ...(direction === 'receive' && !isHourly ? { min: 0, max: 14_000, interval: 3_500 } : {}),
         axisLabel: { color: axisColor, fontSize: 12 },
         splitLine: { lineStyle: { type: 'dashed', color: splitColor } },
       },

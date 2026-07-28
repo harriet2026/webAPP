@@ -23,6 +23,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
 import { useApiRequest } from '@/lib/api/client';
 import { Badge } from '@/components/ui/badge';
+import { deliveryStatusLabel, workflowOutcomeLabel } from '@/components/logs/status-labels';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { actionToVariant, actionExtraClass, actionLabel, summarizeFinalActions } from '@/lib/email-log-action';
@@ -30,7 +31,6 @@ import { getColumnLabel } from '@/lib/email-log-columns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
-import { PageFilters } from '@/components/shared/page-filters';
 
 const TRUNCATE_LEN = 40;
 const SUBJECT_TRUNCATE_LEN = 80;
@@ -797,7 +797,7 @@ export default function EmailLogsPage() {
           if (!v || v === 'unknown') {
             if (row.original.action === 'quarantine') return <Badge variant="outline">{t('logs.deliveryStatusQuarantined')}</Badge>;
             if (row.original.action === 'sideline') return <Badge variant="secondary">{t('logs.deliveryStatusProcessing')}</Badge>;
-            return <Badge variant="outline">unknown</Badge>;
+            return <Badge variant="outline">{t('logs.deliveryStatusValue.unknown')}</Badge>;
           }
           const variantMap: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
             delivered: 'default',
@@ -806,7 +806,8 @@ export default function EmailLogsPage() {
             cancelled: 'outline',
             partial_delivered: 'secondary',
           };
-          return <Badge variant={variantMap[v] || 'outline'}>{v}</Badge>;
+          {/* GT-12610：枚举值本地化，未知值原文透出 */}
+          return <Badge variant={variantMap[v] || 'outline'}>{deliveryStatusLabel(v, t)}</Badge>;
         },
       },
       workflow_outcome_summary: {
@@ -822,7 +823,7 @@ export default function EmailLogsPage() {
             expired: 'secondary',
             bounced: 'destructive',
           };
-          return <Badge variant={variantMap[v] || 'outline'}>{v}</Badge>;
+          return <Badge variant={variantMap[v] || 'outline'}>{workflowOutcomeLabel(v, t)}</Badge>;
         },
       },
       delivery_attempts: {
@@ -1006,13 +1007,12 @@ export default function EmailLogsPage() {
         </div>}
       />
 
-      <PageFilters>
-        <SearchFilters
-          onSearch={handleSearch}
-          onReset={handleReset}
-          initialAdvancedFilters={initialAdvancedFilter}
-        />
-      </PageFilters>
+      <SearchFilters
+        key={initialAdvancedFilter ? JSON.stringify(initialAdvancedFilter) : 'default'}
+        onSearch={handleSearch}
+        onReset={handleReset}
+        initialAdvancedFilters={initialAdvancedFilter}
+      />
 
       <PageSurface className="py-3">
         <div className="flex flex-wrap items-center justify-between gap-3">

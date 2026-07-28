@@ -4,6 +4,7 @@ export class AuthAttemptsPage {
   readonly page: Page;
   readonly heading: Locator;
   readonly table: Locator;
+  readonly searchButton: Locator;
   readonly resetButton: Locator;
   readonly filterSection: Locator;
 
@@ -11,6 +12,7 @@ export class AuthAttemptsPage {
     this.page = page;
     this.heading = page.locator('main h1');
     this.table = page.locator('main table').first();
+    this.searchButton = page.getByTestId('auth-filter-search');
     this.resetButton = page.getByTestId('auth-filter-reset');
     this.filterSection = page.locator('main section').filter({
       has: page.getByTestId('auth-filter-keyword'),
@@ -89,7 +91,7 @@ export class AuthAttemptsPage {
       .first();
     await option.waitFor({ state: 'visible', timeout: 10000 });
     await option.click();
-    await this.page.waitForTimeout(300);
+    await this.page.waitForTimeout(100);
   }
 
   async selectResult(label: string) {
@@ -120,13 +122,23 @@ export class AuthAttemptsPage {
     await this.openSelectAndPick(trigger, optionText);
   }
 
-  // 对齐 demo 后筛选区没有「搜索」按钮（下拉即时生效、文本防抖提交）；
-  // 这里在关键字输入框按 Enter 立即提交文本草稿，保留原有的响应等待语义。
   async clickSearch() {
     const responsePromise = this.page
       .waitForResponse(
         (resp) => resp.url().includes('/auth-attempts') && resp.status() === 200,
         { timeout: 10000 }
+      )
+      .catch(() => null);
+    await this.searchButton.click();
+    await responsePromise;
+    await this.page.waitForTimeout(800);
+  }
+
+  async pressEnterToSearch() {
+    const responsePromise = this.page
+      .waitForResponse(
+        (resp) => resp.url().includes('/auth-attempts') && resp.status() === 200,
+        { timeout: 10000 },
       )
       .catch(() => null);
     await this.getKeywordInput().press('Enter');

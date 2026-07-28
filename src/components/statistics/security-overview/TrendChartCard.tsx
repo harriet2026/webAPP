@@ -75,17 +75,35 @@ export function TrendChartCard({
     // Single data point: render as bar so the chart isn't just a dot.
     const isSinglePoint = seriesData.length === 1;
 
-    const series: Record<string, unknown>[] = visibleKeys.map((key) => ({
-      name: seriesLabel(key),
-      type: isSinglePoint ? 'bar' : 'line',
-      stack: 'total',
-      smooth: true,
-      areaStyle: { opacity: 0.5, color: seriesColor(key) },
-      lineStyle: { width: 1, color: seriesColor(key) },
-      symbol: 'none',
-      itemStyle: { color: seriesColor(key) },
-      data: seriesData.map((p) => (typeof p[key] === 'number' ? p[key] : 0)),
-    }));
+    // "威胁态势趋势" (email_type) and "执行动作" (action) use plain line style (no stacking, no fill).
+    const isLineView = viewBy === 'email_type' || viewBy === 'action';
+
+    const series: Record<string, unknown>[] = visibleKeys.map((key) => {
+      if (isLineView && !isSinglePoint) {
+        return {
+          name: seriesLabel(key),
+          type: 'line',
+          smooth: true,
+          lineStyle: { width: 2, color: seriesColor(key) },
+          symbol: 'circle',
+          symbolSize: 5,
+          showSymbol: seriesData.length <= 14,
+          itemStyle: { color: seriesColor(key) },
+          data: seriesData.map((p) => (typeof p[key] === 'number' ? p[key] : 0)),
+        };
+      }
+      return {
+        name: seriesLabel(key),
+        type: isSinglePoint ? 'bar' : 'line',
+        stack: 'total',
+        smooth: true,
+        areaStyle: { opacity: 0.5, color: seriesColor(key) },
+        lineStyle: { width: 1, color: seriesColor(key) },
+        symbol: 'none',
+        itemStyle: { color: seriesColor(key) },
+        data: seriesData.map((p) => (typeof p[key] === 'number' ? p[key] : 0)),
+      };
+    });
 
     return {
       tooltip: {

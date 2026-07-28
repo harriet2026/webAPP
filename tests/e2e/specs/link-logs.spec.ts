@@ -33,13 +33,14 @@ test.describe('Link Protection Logs (platform admin / cloud)', () => {
     await expect(sel).toBeVisible();
     await sel.click();
     await lp.page.waitForTimeout(300);
-    // picking a specific tenant re-queries the list
+    // Picking a tenant only edits the draft; Search applies it.
     const opt = lp.page.locator('[data-slot="select-item"]').nth(1);
     if ((await opt.count()) > 0) {
       const respPromise = lp.page
         .waitForResponse((r) => r.url().includes('/link-click-logs') && r.status() === 200, { timeout: 10000 })
         .catch(() => null);
       await opt.click();
+      await lp.getSearchButton().click();
       await respPromise;
     }
   });
@@ -139,7 +140,7 @@ test.describe('Link Protection Logs (platform admin / cloud)', () => {
       await userActionSelect.click();
       await lp.page.waitForTimeout(200);
       await lp.page.locator('[data-slot="select-item"]').filter({ hasText: /跳过深度|Skip/ }).first().click();
-      await lp.page.waitForTimeout(800);
+      await lp.clickSearch();
 
       // The table must render without an "invalid combo" error toast/banner...
       await expect(lp.table).toBeVisible({ timeout: 5000 });

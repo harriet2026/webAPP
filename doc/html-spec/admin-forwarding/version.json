@@ -1,0 +1,9 @@
+{
+  "module": "admin-forwarding",
+  "current_version": 1,
+  "history": [
+    { "version": 1, "generated_at": "2026-07-28",
+      "demo_commit": "470732d", "spec_commit": "804efb9",
+      "summary": "初版：四 Tab（收信域管理/转发设置/出站路由三步向导/发信认证）全量组件 + 8 个交互层级子文件；6 抽屉、6 删除确认、4 筛选弹层、域名多选弹层、两处规则模拟器、连通性测试三态浏览器实测；12 处 demo↔PRD 差异 + 8 项需网关确认（优先级语义相反、authd fail-closed 与 TLS 关闭档冲突、通道删除拦截 vs 降级）" }
+  ]
+}

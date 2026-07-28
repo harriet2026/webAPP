@@ -1,10 +1,12 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useApiRequest } from '@/lib/api/client';
 import type { MailLogDetail, MailChildEvent } from '@/types/email-disposal-detail';
 import { ThreatSummaryCard } from './overview/threat-summary-card';
 import { SendReceiveContextCard } from './overview/send-receive-context-card';
 import { InvestigationWorkbench } from './overview/investigation-workbench';
+import { downloadAttachment } from '../lib/disposal-detail-api';
 
 interface OverviewSectionProps {
   detail: MailLogDetail;
@@ -29,10 +31,16 @@ interface OverviewSectionProps {
   // summary here can jump to the full basis box (mirrors the demo's overview →
   // security-analysis "查看依据详情" link). Provided by detail-modal.tsx.
   onViewBasis?: () => void;
+  // GT-12600：滚动到「原始日志」区（SMTP 会话/命中时间线所在处）。阻断/丢弃
+  // 遮罩上的「查看SMTP会话」按钮用它兜底——此前是 onClick={() => {}} 死按钮。
+  onViewRawLogs?: () => void;
 }
 
-export function OverviewSection({ detail, onRefetch, aiInterpretEnabled = true, events, readOnly = false, onViewBasis }: OverviewSectionProps) {
+export function OverviewSection({ detail, onRefetch, aiInterpretEnabled = true, events, readOnly = false, onViewBasis, onViewRawLogs }: OverviewSectionProps) {
   const { apiRequest } = useApiRequest();
+  // GT-12584：附件「下载」的真实实现（此前无人注入 onDownload，点击只弹
+  // 「暂未实现」toast）。translator 作用域与 downloadEml 的约定一致。
+  const tOverview = useTranslations('emailDisposal.detail.overview');
 
   // A6's multi-recipient hint / A5's single-recipient dispose-button gating
   // (SenderActions, threaded through ThreatSummaryCard) key off exactly one
@@ -56,6 +64,7 @@ export function OverviewSection({ detail, onRefetch, aiInterpretEnabled = true, 
         onDisposed={onRefetch}
         readOnly={readOnly}
         events={events}
+        onViewPolicyDetail={onViewBasis}
       />
 
       {/* 研判工作台（C1-C7）：左=邮件原文三视图，右=内容实体检测（Task 9 的
@@ -65,6 +74,9 @@ export function OverviewSection({ detail, onRefetch, aiInterpretEnabled = true, 
         requestFn={apiRequest}
         readOnly={readOnly}
         onDisposed={onRefetch}
+        onDownload={(a) => void downloadAttachment(detail.id, a, tOverview)}
+        onViewSmtpSession={onViewRawLogs}
+        onViewPolicyDetail={onViewBasis}
       />
     </div>
   );

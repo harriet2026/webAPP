@@ -7,7 +7,6 @@ import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
-import { PageFilters } from '@/components/shared/page-filters';
 import { listTenants } from '@/lib/api/tenants';
 import {
   getAdminAuditLogs,
@@ -26,6 +25,7 @@ import {
 import { AdminAuditTable } from '@/components/admin-audit/admin-audit-table';
 import { AdminAuditDetailDrawer } from '@/components/admin-audit/admin-audit-detail-drawer';
 import { useAuditViewMode } from '@/components/admin-audit/use-audit-view-mode';
+import { useAppliedFilterState } from '@/hooks/use-applied-filter-state';
 
 type LayerTab = 'platform' | 'tenant';
 
@@ -41,16 +41,20 @@ export default function AdminAuditLogsPage() {
   // 用它作为关键字过滤的初始值（仅初始化时读取，后续由过滤卡片接管）。
   const searchParams = useSearchParams();
   const initialKeyword = searchParams.get('keyword') ?? '';
-  const [filters, setFilters] = useState<AdminFilterState>(
-    initialKeyword ? { ...EMPTY_ADMIN_FILTERS, keyword: initialKeyword } : EMPTY_ADMIN_FILTERS,
-  );
+  const {
+    draft: filters,
+    applied: appliedFilters,
+    setDraft: setFilters,
+    apply: applyFilters,
+    reset: resetFilters,
+  } = useAppliedFilterState<AdminFilterState>({
+    initialValue: initialKeyword
+      ? { ...EMPTY_ADMIN_FILTERS, keyword: initialKeyword }
+      : EMPTY_ADMIN_FILTERS,
+  });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [selectedLog, setSelectedLog] = useState<AdminAuditLog | null>(null);
-  // Bumped on reset / tab-switch to remount AdminAuditFilters, clearing its
-  // internal keyword input and cancelling any pending debounce so an
-  // un-committed keyword can't re-apply itself ~300ms after the reset.
-  const [filtersEpoch, setFiltersEpoch] = useState(0);
 
   const drillTenant = viewMode === 'platform' && layerTab === 'tenant';
   const showTenantColumn = viewMode === 'platform' && layerTab === 'tenant';
@@ -84,19 +88,19 @@ export default function AdminAuditLogsPage() {
 
   const tenantIdParam = useMemo<number | undefined>(() => {
     if (!drillTenant) return undefined;
-    const v = filters.tenant.trim();
+    const v = appliedFilters.tenant.trim();
     if (!v) return undefined;
     const n = Number(v);
     return Number.isFinite(n) && n > 0 ? n : undefined;
-  }, [drillTenant, filters.tenant]);
+  }, [appliedFilters.tenant, drillTenant]);
 
   const params = useMemo<AdminAuditLogParams>(() => ({
     page,
     page_size: pageSize,
-    ...filtersToParams(filters),
+    ...filtersToParams(appliedFilters),
     layer: layerForParams,
     tenant_id: tenantIdParam,
-  }), [page, pageSize, filters, layerForParams, tenantIdParam]);
+  }), [page, pageSize, appliedFilters, layerForParams, tenantIdParam]);
 
   const statsParams = useMemo<Omit<AdminAuditLogParams, 'page' | 'page_size'>>(() => {
     const { page: _p, page_size: _ps, ...rest } = params;
@@ -116,23 +120,25 @@ export default function AdminAuditLogsPage() {
 
   const handleFiltersChange = useCallback((next: AdminFilterState) => {
     setFilters(next);
+  }, [setFilters]);
+
+  const handleSearch = useCallback(() => {
+    applyFilters();
     setPage(1);
-  }, []);
+  }, [applyFilters]);
 
   const handleReset = useCallback(() => {
-    setFilters(EMPTY_ADMIN_FILTERS);
+    resetFilters(EMPTY_ADMIN_FILTERS);
     setPage(1);
-    setFiltersEpoch((e) => e + 1);
-  }, []);
+  }, [resetFilters]);
 
   const handleLayerTabChange = useCallback((value: string | null) => {
     if (value === 'platform' || value === 'tenant') {
       setLayerTab(value);
-      setFilters(EMPTY_ADMIN_FILTERS);
+      resetFilters(EMPTY_ADMIN_FILTERS);
       setPage(1);
-      setFiltersEpoch((e) => e + 1);
     }
-  }, []);
+  }, [resetFilters]);
 
   const handlePageSizeChange = useCallback((size: number) => {
     setPageSize(size);
@@ -164,16 +170,14 @@ export default function AdminAuditLogsPage() {
 
       <AdminAuditStats stats={stats} />
 
-      <PageFilters>
-        <AdminAuditFilters
-          key={filtersEpoch}
-          value={filters}
-          onChange={handleFiltersChange}
-          onReset={handleReset}
-          showTenant={drillTenant}
-          tenants={tenants}
-        />
-      </PageFilters>
+      <AdminAuditFilters
+        value={filters}
+        onChange={handleFiltersChange}
+        onSearch={handleSearch}
+        onReset={handleReset}
+        showTenant={drillTenant}
+        tenants={tenants}
+      />
 
       {isLoading ? (
         <PageSurface>

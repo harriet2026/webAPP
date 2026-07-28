@@ -1,7 +1,6 @@
 import { test, expect } from '../fixtures/auth.fixture';
 import { AdminAuditPage } from '../pages/admin-audit.page';
-import { createTenant, deleteTenant, getAdminToken } from '../helpers/seed-data';
-import { uniqueSuffix } from '../helpers/test-data';
+import { getAdminToken } from '../helpers/seed-data';
 
 // Chinese labels (from webapp/messages/zh.json → adminAudit block). The harness
 // runs in the zh locale.
@@ -115,7 +114,7 @@ test.describe('Admin Audit (rebuilt UI)', () => {
 
   // ── TC6: keyword filter ───────────────────────────────────────────────────
   test('TC6: keyword filter sends the keyword param and narrows the table', async () => {
-    // Assert the frontend forwards the keyword to the API (debounced 300ms).
+    // Assert the frontend forwards the keyword only after explicit Search.
     // CONCERN: the backend's keyword LIKE filter is currently a no-op on
     // opengauss (every keyword returns the full row set), so we cannot assert
     // the table actually narrows. We verify the wire-level behavior instead:
@@ -129,6 +128,7 @@ test.describe('Admin Audit (rebuilt UI)', () => {
       )
       .catch(() => null);
     await adminAuditPage.fillKeyword('zzz-no-such-row-99999');
+    await adminAuditPage.clickSearch();
     const req = await reqPromise;
     expect(req, 'keyword filter request was not emitted').not.toBeNull();
     expect(req!.url()).toContain('keyword=zzz-no-such-row-99999');
@@ -147,6 +147,7 @@ test.describe('Admin Audit (rebuilt UI)', () => {
   test('TC7: opType filter narrows the table', async () => {
     const baseline = await adminAuditPage.rowCount();
     await adminAuditPage.selectOption(adminAuditPage.opTypeSelect(), L.opTypeCreate);
+    await adminAuditPage.clickSearch();
     const filtered = await adminAuditPage.rowCount();
     // Filter is applied (either narrowed or empty — both are valid outcomes;
     // we only assert it doesn't crash and the count is <= baseline).
@@ -157,6 +158,7 @@ test.describe('Admin Audit (rebuilt UI)', () => {
   // ── TC8: result filter ────────────────────────────────────────────────────
   test('TC8: result filter (failed) shows only failed rows', async () => {
     await adminAuditPage.selectOption(adminAuditPage.resultSelect(), L.resultFailed);
+    await adminAuditPage.clickSearch();
     const rows = adminAuditPage.tableRows();
     const count = await rows.count();
     for (let i = 0; i < count; i++) {
@@ -198,6 +200,7 @@ test.describe('Admin Audit (rebuilt UI)', () => {
     }
     // Filter to failed only; every visible row is failed and tinted.
     await adminAuditPage.selectOption(adminAuditPage.resultSelect(), L.resultFailed);
+    await adminAuditPage.clickSearch();
     const firstRow = adminAuditPage.tableRows().first();
     await firstRow.waitFor({ state: 'visible', timeout: 10000 });
     // The table.tsx applies bg-red-50/40 to failed rows.
@@ -229,6 +232,7 @@ test.describe('Admin Audit (rebuilt UI)', () => {
     }
     // Filter the table to failed, then open the first row's drawer.
     await adminAuditPage.selectOption(adminAuditPage.resultSelect(), L.resultFailed);
+    await adminAuditPage.clickSearch();
     const firstRow = adminAuditPage.tableRows().first();
     await firstRow.waitFor({ state: 'visible', timeout: 10000 });
     await adminAuditPage.viewButtonInRow(firstRow).click();

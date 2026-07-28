@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Building2, Check, User, FlaskConical } from 'lucide-react';
+import { Building2, Check, ExternalLink, FileText, User, FlaskConical } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
   DropdownMenu,
@@ -159,6 +159,20 @@ export function ProductFormSwitcher() {
               {tMock('enabled')}
             </span>
             {mockEnabled && <Check className="ml-2 h-4 w-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.open('/html-spec/index.html', '_blank', 'noopener,noreferrer');
+              }
+            }}
+            className="flex items-center justify-between"
+          >
+            <span className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              {tMock('htmlSpec')}
+            </span>
+            <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

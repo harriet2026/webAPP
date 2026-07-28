@@ -64,9 +64,16 @@ export function EmailAIInterpretDrawer({ open, onOpenChange, emailId }: EmailAII
 
     const url = buildAIInterpretURL(emailId, locale, showThinking);
 
-    const handleError = (serverMsg: string) => {
+    // GT-12610：错误一律按后端下发的稳定 code 映射到本地化文案，不再透出
+    // 英文 message（"interpretation timed out" 等曾直接显示给中文用户）。
+    const handleError = (code: string) => {
       if (phaseRef.current === 'done') return;
-      setErrorMsg(serverMsg || t('logs.email.aiInterpret.errors.llmUnavailable'));
+      const keyByCode: Record<string, string> = {
+        timeout: 'timeout',
+        llm_unavailable: 'llmUnavailable',
+        rate_limited: 'rateLimited',
+      };
+      setErrorMsg(t(`logs.email.aiInterpret.errors.${keyByCode[code] ?? 'generic'}`));
       setPhase('error');
       phaseRef.current = 'error';
       cleanup();
@@ -126,12 +133,12 @@ export function EmailAIInterpretDrawer({ open, onOpenChange, emailId }: EmailAII
               cleanup();
               break;
             case 'error': {
-              let serverMsg = '';
+              let code = '';
               try {
                 const parsed = JSON.parse(ev.data);
-                serverMsg = parsed?.message || '';
+                code = parsed?.code || '';
               } catch {}
-              handleError(serverMsg);
+              handleError(code);
               return;
             }
           }
@@ -246,7 +253,9 @@ export function EmailAIInterpretDrawer({ open, onOpenChange, emailId }: EmailAII
                           ? t('logs.email.aiInterpret.ruleQuery', { id: tc.ruleId ?? '?', page: tc.ruleName })
                           : tc.ruleId
                             ? t('logs.email.aiInterpret.ruleQuery', { id: tc.ruleId, page: tc.page || tc.name })
-                            : `${tc.name}`}
+                            : tc.name === 'get_rule_detail'
+                              ? t('logs.email.aiInterpret.ruleQueryGeneric')
+                              : t('logs.email.aiInterpret.toolGeneric')}
                       </span>
                     </div>
                   ))}

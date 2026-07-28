@@ -11,11 +11,13 @@ import {
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { useMyRole } from '@/lib/api/roles';
+import { setDemoSessionEnabled, setMockEnabled } from '@/lib/mock/storage';
 import { canOnSubmodule, deriveVisibleRoutes, hasConfiguredMatrix, type PermAction } from '@/lib/rbac/role-permissions';
 import { submoduleForHref } from '@/lib/rbac/rbac-modules';
 
 interface AuthContextType extends AuthState {
   isLoading: boolean;
+  demoAuthBypassEnabled: boolean;
   showAdvancedRules: boolean;
   features: { aiInterpret: boolean };
   login: (credentials: LoginRequest, options?: { showAdvancedRules?: boolean }) => Promise<void>;
@@ -25,6 +27,7 @@ interface AuthContextType extends AuthState {
     options?: { showAdvancedRules?: boolean },
   ) => void;
   logout: () => Promise<void>;
+  startDemoSession: () => void;
   setSelectedTenant: (tenantId: number | null) => void;
   /** Legacy coarse permission check — kept for existing call sites, now backed by the role-matrix derivation below (see `LEGACY_PERMISSION_SUBMODULE`). */
   hasPermission: (permission: Permission) => boolean;
@@ -235,6 +238,10 @@ export function AuthProvider({
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- Authentication and feature state are hydrated from browser-only localStorage after the client mounts. */
+    if (!demoAuthBypassEnabled) {
+      setDemoSessionEnabled(false);
+      setMockEnabled(false);
+    }
     const userStr = localStorage.getItem('osgateway_user');
     let restoredStoredUser = false;
     if (userStr) {
@@ -275,6 +282,8 @@ export function AuthProvider({
 
   const login = useCallback(async (credentials: LoginRequest, options?: { showAdvancedRules?: boolean }) => {
     const response = await apiLogin(credentials);
+    setDemoSessionEnabled(false);
+    setMockEnabled(false);
     // Drop anything the previous identity left behind on this tab before any
     // component can read it under the new one.
     resetQueryCache();
@@ -317,6 +326,8 @@ export function AuthProvider({
       options?: { showAdvancedRules?: boolean },
     ) => {
       completeLoginFromResponse(response, username);
+      setDemoSessionEnabled(false);
+      setMockEnabled(false);
       resetQueryCache();
       cachedTenantRef.current = response.tenant_id ?? null;
       const user: User = {
@@ -356,6 +367,8 @@ export function AuthProvider({
     // apiLogout() runs clearStoredUser() in its finally — that already clears
     // osgateway_user + the osgateway_auth/osg_viewer/osg_selected_tenant cookies.
     await apiLogout();
+    setDemoSessionEnabled(false);
+    setMockEnabled(false);
     localStorage.removeItem('osgateway_selected_tenant');
     localStorage.removeItem('osgateway_show_advanced_rules');
     localStorage.removeItem('osgateway_features');
@@ -376,6 +389,27 @@ export function AuthProvider({
     resetQueryCache();
     cachedTenantRef.current = null;
   }, [router, locale, resetQueryCache]);
+
+  const startDemoSession = useCallback(() => {
+    if (!demoAuthBypassEnabled) return;
+
+    resetQueryCache();
+    localStorage.removeItem('osgateway_user');
+    localStorage.removeItem('osgateway_selected_tenant');
+    document.cookie = 'osgateway_auth=; path=/; max-age=0';
+    document.cookie = 'osg_viewer=; path=/; max-age=0';
+    document.cookie = 'osg_selected_tenant=; path=/; max-age=0';
+    setDemoSessionEnabled(true);
+    setMockEnabled(true);
+
+    cachedTenantRef.current = null;
+    setState({
+      user: DEMO_SUPER_ADMIN,
+      token: null,
+      expiresAt: null,
+      selectedTenantId: null,
+    });
+  }, [demoAuthBypassEnabled, resetQueryCache]);
 
   const setSelectedTenant = useCallback((tenantId: number | null) => {
     if (tenantId !== null) {
@@ -414,11 +448,13 @@ export function AuthProvider({
   const baseValue: AuthContextType = {
     ...state,
     isLoading,
+    demoAuthBypassEnabled,
     showAdvancedRules,
     features,
     login,
     completeLogin,
     logout,
+    startDemoSession,
     setSelectedTenant,
     isSystemAdmin,
     isTenantAdmin,

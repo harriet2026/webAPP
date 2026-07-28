@@ -13,10 +13,17 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const switcherEnabled = SWITCHER_TRUTHY.has(process.env.OSGATEWAY_PRODUCT_FORM_SWITCHER ?? '');
+  // The explicit demo session may run without an apiserver, so pass the
+  // deployment form from this Server Component into the client provider.
+  // No NEXT_PUBLIC_ exposure is needed.
+  const configuredForm = process.env.OSG_PRODUCT_FORM ?? 'ai-multi';
 
   return (
     <ProtectedRoute>
-      <ProductFormProvider switcherEnabled={switcherEnabled}>
+      <ProductFormProvider
+        switcherEnabled={switcherEnabled}
+        configuredForm={configuredForm}
+      >
         <AppShell>{children}</AppShell>
       </ProductFormProvider>
     </ProtectedRoute>

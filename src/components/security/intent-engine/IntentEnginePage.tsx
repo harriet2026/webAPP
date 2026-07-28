@@ -9,10 +9,10 @@ import type {
   IntentSingleConfig,
   IntentEngineConfig,
   IntentRiskLevel,
-  ThresholdSegment,
 } from '@/types/intent-engine';
 import {
   INTENT_TYPES,
+  segmentCoverageIssue,
   RISK_LEVEL_OF,
   HIGH_RISK_INTENTS,
   MEDIUM_RISK_INTENTS,
@@ -55,16 +55,6 @@ function intentsOfRisk(level: IntentRiskLevel): IntentType[] {
   return LOW_RISK_INTENTS;
 }
 
-// 分段阈值缺口校验（Q6/D-05）：区间必须完整覆盖 [0,1] 且相邻无空隙。
-function hasGap(segs: ThresholdSegment[]): boolean {
-  if (!segs.length) return true;
-  const s = [...segs].sort((a, b) => a.min - b.min);
-  if (s[0].min > 0.001 || s[s.length - 1].max < 0.999) return true;
-  for (let i = 0; i < s.length - 1; i++) {
-    if (Math.abs(s[i].max - s[i + 1].min) > 0.001) return true;
-  }
-  return false;
-}
 
 export function IntentEnginePage({
   embedded,
@@ -200,14 +190,21 @@ export function IntentEnginePage({
   }, [direction, setDirty]);
 
   const handleSave = useCallback(async () => {
-    // 保存校验（Q6/D-05）：与后端 validateThresholdCoverage 保持同一范围——
-    // 后端对所有配置无条件校验分段阈值区间覆盖（不受总开关/单意图 enabled 门控），
-    // 前端也恒校验三方向所有 detection_mode==='threshold' 的意图，避免「禁用意图
-    // 带间隙时前端放行、后端 400（用户看到英文原始错误）」的不一致。
+    // 保存校验（Q6/D-05，重叠语义为 D-06 裁决）：与后端 validateThresholdCoverage
+    // 保持同一范围——后端对所有配置无条件校验分段阈值区间覆盖（不受总开关/单意图
+    // enabled 门控），前端也恒校验三方向所有 detection_mode==='threshold' 的意图，
+    // 避免「禁用意图带间隙时前端放行、后端 400（用户看到英文原始错误）」的不一致。
+    // 报错按问题种类区分：重叠时提示"未覆盖"会把排查方向引反。
     for (const d of ['receive', 'send', 'internal'] as IntentDirection[]) {
       for (const it of INTENT_TYPES) {
         const c = config.directions[d][it];
-        if (c.detection_mode === 'threshold' && hasGap(c.threshold_segments || [])) {
+        if (c.detection_mode !== 'threshold') continue;
+        const issue = segmentCoverageIssue(c.threshold_segments || []);
+        if (issue === 'overlap') {
+          toast.error(t('saveOverlapBlocked'));
+          return;
+        }
+        if (issue === 'gap') {
           toast.error(t('saveGapBlocked'));
           return;
         }

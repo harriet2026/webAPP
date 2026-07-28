@@ -22,10 +22,11 @@ import { Ban, Download, Info, Link as LinkIcon, Paperclip } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth-context';
 import type { ApiRequestFn } from '@/lib/api/client';
 import type { AttachmentInfo, MailLogDetail, URLEntity } from '@/types/email-disposal-detail';
 import { formatBytes } from '../../lib/detail-helpers';
-import { addAttachmentHashRule, addUrlRule } from '../../lib/disposal-detail-api';
+import { addAttachmentHashRule, addUrlRule, disposalRulePriority } from '../../lib/disposal-detail-api';
 
 interface EntityDetectionProps {
   detail: MailLogDetail;
@@ -74,17 +75,21 @@ function vtScoreIsPositive(vtScore: string): boolean {
 export function EntityDetection({ detail, requestFn, readOnly = false, onDownload, onDisposed }: EntityDetectionProps) {
   const t = useTranslations('emailDisposal.detail.overview.entityDetection');
   const tOverview = useTranslations('emailDisposal.detail.overview');
+  const { isSystemAdmin } = useAuth();
   const [tab, setTab] = useState<EntityTab>('links');
   const [busyKey, setBusyKey] = useState<string | null>(null);
 
   const urls = detail.entity_urls ?? [];
   const attachments = detail.attachments ?? [];
   const scans = detail.scan_results ?? [];
+  // GT-12601：priority 必须落在当前角色的合法区间内（tenant_admin 只接受
+  // 100-1000），否则后端 400、加黑永远失败。
+  const rulePriority = disposalRulePriority(isSystemAdmin);
 
   async function handleUrlRule(key: string, value: string, field: 'domain' | 'url') {
     setBusyKey(key);
     try {
-      await addUrlRule(value, field, requestFn);
+      await addUrlRule(value, field, requestFn, rulePriority);
       toast.success(t('ruleSuccess'));
       onDisposed?.();
     } catch {
@@ -97,7 +102,7 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
   async function handleAttachmentRule(key: string, md5: string) {
     setBusyKey(key);
     try {
-      await addAttachmentHashRule(md5, requestFn);
+      await addAttachmentHashRule(md5, requestFn, rulePriority);
       toast.success(t('ruleSuccess'));
       onDisposed?.();
     } catch {

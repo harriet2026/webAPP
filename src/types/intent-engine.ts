@@ -100,6 +100,54 @@ export function thresholdActionSummary(segments: ThresholdSegment[] | undefined)
   return out;
 }
 
+/**
+ * GT-12171 D-06 裁决（2026-07-28）：阈值区间必须无间隙、无重叠地完整覆盖 [0,1]；
+ * 重叠不做"后输入覆盖"自动归一，由前端校验报错并阻止保存，与后端
+ * validateThresholdCoverage 的 gap/overlap 双拒绝契约一致。
+ * 返回值区分问题种类，报错文案必须与实际问题对应（重叠时提示"未覆盖"会误导排查）。
+ * 判定顺序：空集/起点缺口 → gap；相邻段按 min 升序扫描，遇到的第一个越界
+ * （差值 > 容差为 gap、< -容差为 overlap）即返回；最后检查终点缺口。
+ */
+export type SegmentCoverageIssue = 'gap' | 'overlap';
+
+const SEGMENT_EPS = 0.001;
+
+export function segmentCoverageIssue(segments: ThresholdSegment[] | undefined): SegmentCoverageIssue | null {
+  const segs = segments ?? [];
+  if (segs.length === 0) return 'gap';
+  const s = [...segs].sort((a, b) => a.min - b.min);
+  if (s[0].min > SEGMENT_EPS) return 'gap';
+  for (let i = 0; i < s.length - 1; i++) {
+    const d = s[i + 1].min - s[i].max;
+    if (d > SEGMENT_EPS) return 'gap';
+    if (d < -SEGMENT_EPS) return 'overlap';
+  }
+  if (s[s.length - 1].max < 1 - SEGMENT_EPS) return 'gap';
+  return null;
+}
+
+/**
+ * "智能填充"的统一修复：按 min 升序把每段起点接到上一段终点（间隙向下补齐、
+ * 重叠向上钳掉），被上一段完全吞没的段丢弃，最后一段终点延伸到 1。
+ * 旧实现只补间隙、对重叠原样保留，导致重叠时按钮点击无效且警告不消失。
+ */
+export function fixSegmentCoverage(segments: ThresholdSegment[]): ThresholdSegment[] {
+  const s = [...segments].sort((a, b) => a.min - b.min);
+  if (s.length === 0) return [{ min: 0, max: 1, action: 'quarantine' }];
+  const fixed: ThresholdSegment[] = [];
+  let lastMax = 0;
+  for (const seg of s) {
+    if (seg.max <= lastMax + SEGMENT_EPS) continue;
+    fixed.push(seg.min === lastMax ? seg : { ...seg, min: lastMax });
+    lastMax = seg.max;
+  }
+  if (fixed.length === 0) return [{ min: 0, max: 1, action: s[s.length - 1].action }];
+  if (lastMax < 1 - SEGMENT_EPS) {
+    fixed[fixed.length - 1] = { ...fixed[fixed.length - 1], max: 1 };
+  }
+  return fixed;
+}
+
 export const DEFAULT_MARK_TEXT: Record<IntentType, string> = {
   porn_gambling: '[涉黄/赌]',
   political: '[涉政/反动]',

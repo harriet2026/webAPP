@@ -94,6 +94,7 @@ async function loginUI(page: Page, username: string) {
 async function logoutUI(page: Page) {
   await page.locator('[data-slot="dropdown-menu-trigger"]').last().click();
   await page.getByRole('menuitem', { name: /退出登录|Logout/ }).click();
+  await page.getByRole('button', { name: /确认退出|Confirm logout/ }).click();
   await expect(page).toHaveURL(/login/, { timeout: 15000 });
 }
 

@@ -1,7 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InvestigationWorkbench } from './investigation-workbench';
 import type { MailLogDetail } from '@/types/email-disposal-detail';
+
+// 右列子组件 EntityDetection 自 GT-12601 起用 useAuth 决定加黑规则 priority；
+// 这里不在 AuthProvider 下渲染，按普通角色 mock（本套件不断言 priority 分支，
+// 那在 entity-detection.test.tsx 里测）。
+vi.mock('@/contexts/auth-context', () => ({
+  useAuth: () => ({ isSystemAdmin: false }),
+}));
 
 // Identity translator (mirrors entity-detection.test.tsx): keeps namespace +
 // key + interpolation params visible instead of resolving to real zh/en/th/ru
@@ -133,6 +141,31 @@ describe('InvestigationWorkbench', () => {
       }),
     })} />);
     expect(screen.getByTestId('email-disposal-workbench-blocked-overlay')).toBeInTheDocument();
+  });
+
+  // GT-12600 防回归：阻断/丢弃遮罩上的两个入口不再是死按钮——分别调用
+  // onViewSmtpSession（跳原始日志区）与 onViewPolicyDetail（跳安全分析区）。
+  it('GT-12600: blocked overlay buttons invoke onViewSmtpSession / onViewPolicyDetail', async () => {
+    const user = userEvent.setup();
+    const onViewSmtpSession = vi.fn();
+    const onViewPolicyDetail = vi.fn();
+    render(<InvestigationWorkbench {...baseProps({
+      onViewSmtpSession,
+      onViewPolicyDetail,
+      detail: baseDetail({
+        recipients: ['b@corp.com'],
+        content: undefined,
+        html_content: undefined,
+        recipient_dispositions: [
+          { recipient: 'b@corp.com', final_action: 'reject', status: 'discarded' },
+        ],
+      }),
+    })} />);
+
+    await user.click(screen.getByTestId('email-disposal-workbench-view-smtp-session'));
+    expect(onViewSmtpSession).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByTestId('email-disposal-workbench-view-policy-detail'));
+    expect(onViewPolicyDetail).toHaveBeenCalledTimes(1);
   });
 
   it('does not show the C5 overlay when the single recipient content is retained', () => {

@@ -67,6 +67,7 @@ const REQUIRED = [
   'verify',
   'password',
   'loginButton',
+  'demoEntry',
   'twoFactorRequiredHint',
   'setupSubmit',
 ] as const;

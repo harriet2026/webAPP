@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils';
+import { resolveActionBadges, actionToVariant } from '@/lib/email-log-action';
 import type { DisposalMailItem, DisplayStatus } from '@/types/email-disposal';
 import { formatListReason, type DisposalLang } from './lib/disposal-basis-config';
 import { mailTypeLabelKey, correctionSourceLabelKey } from './lib/detail-helpers';
@@ -77,14 +78,8 @@ const STATUS_VARIANTS: Record<DisplayStatus, 'default' | 'secondary' | 'destruct
   reviewed_rejected: 'destructive',
 };
 
-const ACTION_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  accept: 'default',
-  reject: 'destructive',
-  bounce: 'destructive',
-  quarantine: 'destructive',
-  sideline: 'secondary',
-  mixed: 'outline',
-};
+// ACTION_VARIANTS is no longer used for rendering; actionToVariant() from
+// email-log-action.ts is used directly so mixed actions expand to per-action badges.
 
 // GT-11580: columns the operator can show/hide via the toolbar 设置 button.
 // The leading select checkbox and the trailing operations column are
@@ -641,9 +636,23 @@ export function MailListTable({
                 )}
                 {isColVisible('action') && (
                 <TableCell className="text-xs">
-                  <Badge variant={ACTION_VARIANTS[item.action] || 'outline'}>
-                    {localizeEnum(`filters.actions.${item.action}` as const, item.action)}
-                  </Badge>
+                  <div className="flex flex-wrap items-center gap-1">
+                    {(() => {
+                      const { badges, remainder } = resolveActionBadges(item.action, item.finalActionRule);
+                      return (
+                        <>
+                          {badges.map(({ action }) => (
+                            <Badge key={action} variant={actionToVariant(action)}>
+                              {localizeEnum(`filters.actions.${action}` as const, action)}
+                            </Badge>
+                          ))}
+                          {remainder > 0 && (
+                            <span className="text-[10px] text-muted-foreground">+{remainder}</span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
                 </TableCell>
                 )}
                 {isColVisible('status') && (

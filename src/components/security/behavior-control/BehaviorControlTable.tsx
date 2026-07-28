@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { formatTimestamp } from '@/lib/format-time';
 import Link from 'next/link';
 import { Globe, User, Server, Mail, Edit, Trash2, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -112,7 +113,8 @@ export function BehaviorControlTable({ views, onEdit, onDelete }: Props) {
                     {t(v.rule.is_active ? 'behaviorControl.filter.enabled' : 'behaviorControl.filter.disabled')}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground">{v.rule.updated_at}</TableCell>
+                {/* GT-12500：本地时区分钟精度，不再裸渲染 UTC ISO 串 */}
+                <TableCell className="text-sm text-muted-foreground">{formatTimestamp(v.rule.updated_at)}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     {v.is_complex ? (

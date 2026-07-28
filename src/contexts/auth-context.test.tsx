@@ -94,8 +94,17 @@ function Harness() {
 }
 
 function IdentityHarness() {
-  const { user, isLoading, isTrueSuperAdmin } = useAuth();
+  const { user, isLoading, isTrueSuperAdmin, startDemoSession } = useAuth();
   return createElement('div', null, [
+    createElement(
+      'button',
+      {
+        key: 'start-demo',
+        'data-testid': 'start-demo',
+        onClick: startDemoSession,
+      },
+      'start demo',
+    ),
     createElement('span', { key: 'loading', 'data-testid': 'identity-loading' }, String(isLoading)),
     createElement('span', { key: 'username', 'data-testid': 'identity-username' }, user?.username ?? ''),
     createElement('span', { key: 'super', 'data-testid': 'identity-super' }, String(isTrueSuperAdmin)),
@@ -216,6 +225,35 @@ describe('demo authentication bypass', () => {
     });
     expect(screen.getByTestId('identity-username').textContent).toBe('stored-admin');
     expect(screen.getByTestId('identity-super').textContent).toBe('false');
+  });
+
+  it('explicit demo entry replaces stale browser identity and enables mock data', async () => {
+    localStorage.setItem('osgateway_user', JSON.stringify({
+      id: 7,
+      username: 'stored-admin',
+      role: 'system_admin',
+      tenant_id: null,
+      role_id: null,
+      is_super_admin: false,
+      created_at: '',
+      updated_at: '',
+    }));
+    localStorage.setItem('osgateway_selected_tenant', '42');
+    renderIdentity(true);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('identity-username').textContent).toBe('stored-admin');
+    });
+    act(() => {
+      screen.getByTestId('start-demo').click();
+    });
+
+    expect(screen.getByTestId('identity-username').textContent).toBe('demo-admin');
+    expect(screen.getByTestId('identity-super').textContent).toBe('true');
+    expect(localStorage.getItem('osgateway_user')).toBeNull();
+    expect(localStorage.getItem('osgateway_selected_tenant')).toBeNull();
+    expect(localStorage.getItem('osgateway_demo_session')).toBe('1');
+    expect(localStorage.getItem('osgateway_mock_enabled')).toBe('1');
   });
 });
 

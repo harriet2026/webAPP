@@ -50,7 +50,7 @@ test.describe('Auth Attempts', () => {
     const searchIp = ip.trim().split(/\s+/)[0];
 
     await authAttemptsPage.fillClientIp(searchIp);
-    await authAttemptsPage.clickSearch();
+    await authAttemptsPage.pressEnterToSearch();
 
     const filteredCount = await authAttemptsPage.getDataRowCount();
     expect(filteredCount).toBeGreaterThanOrEqual(1);

@@ -31,6 +31,7 @@ import { ForcedChangeStep } from '@/components/login/forced-change-step';
 import { TwoFactorStep } from '@/components/login/two-factor-step';
 import { SetupStep } from '@/components/login/setup-step';
 import { ForgotStep } from '@/components/login/forgot-step';
+import { DemoLoginEntry } from '@/components/login/demo-login-entry';
 
 // The login state machine. Each step is a distinct screen; transitions are
 // driven by the backend response shape (Plans 2/3/4).
@@ -506,39 +507,42 @@ export default function LoginPage() {
           )}
 
           {step.kind === 'credentials' && (
-            <CredentialsStep
-              username={username}
-              password={password}
-              remember={remember}
-              captchaRequired={captchaRequired}
-              captchaSvg={captchaSvg}
-              captchaAnswer={captchaAnswer}
-              remainingAttempts={remainingAttempts}
-              lockRemainingSec={lockRemainingSec}
-              submitting={submitting}
-              errorMessage={errorMessage}
-              successMessage={successMessage}
-              onUsernameChange={setUsername}
-              onPasswordChange={setPassword}
-              onRememberChange={(v) => {
-                setRemember(v);
-                try {
-                  if (!v) localStorage.removeItem(REMEMBER_KEY);
-                } catch {
-                  /* ignore */
-                }
-              }}
-              onCaptchaAnswerChange={setCaptchaAnswer}
-              onRefreshCaptcha={refreshCaptcha}
-              onForgot={() => {
-                setErrorMessage(null);
-                setSuccessMessage(null);
-                captchaWasRequiredRef.current = captchaRequired;
-                resetCaptchaState();
-                setStep({ kind: 'forgot' });
-              }}
-              onSubmit={submitCredentials}
-            />
+            <>
+              <CredentialsStep
+                username={username}
+                password={password}
+                remember={remember}
+                captchaRequired={captchaRequired}
+                captchaSvg={captchaSvg}
+                captchaAnswer={captchaAnswer}
+                remainingAttempts={remainingAttempts}
+                lockRemainingSec={lockRemainingSec}
+                submitting={submitting}
+                errorMessage={errorMessage}
+                successMessage={successMessage}
+                onUsernameChange={setUsername}
+                onPasswordChange={setPassword}
+                onRememberChange={(v) => {
+                  setRemember(v);
+                  try {
+                    if (!v) localStorage.removeItem(REMEMBER_KEY);
+                  } catch {
+                    /* ignore */
+                  }
+                }}
+                onCaptchaAnswerChange={setCaptchaAnswer}
+                onRefreshCaptcha={refreshCaptcha}
+                onForgot={() => {
+                  setErrorMessage(null);
+                  setSuccessMessage(null);
+                  captchaWasRequiredRef.current = captchaRequired;
+                  resetCaptchaState();
+                  setStep({ kind: 'forgot' });
+                }}
+                onSubmit={submitCredentials}
+              />
+              <DemoLoginEntry />
+            </>
           )}
 
           {step.kind === 'forcedChange' && (

@@ -35,12 +35,16 @@ export type HitValues = Record<string, string | number>;
 export type DisposalLang = 'zh' | 'en' | 'th' | 'ru';
 
 // 阶段 -> 规则配置页路由（详情页点击规则名/ID 跳转）。
+// GT-12583：阶段 1/2/3/5 的策略配置统一落在「策略流水线」页（/security/
+// pipeline，页内以抽屉承载各阶段策略）；此前写的 /filter-rules/* 是 demo
+// 原型的路由，webapp 从未存在过这些页面，点击处置依据规则名直接 404。
+// 阶段 4（AI 检测）走智能体中心总览。
 const STAGE_ROUTE: Record<number, string> = {
-  1: '/filter-rules/connection',
-  2: '/filter-rules/identity',
-  3: '/filter-rules/content',
+  1: '/security/pipeline',
+  2: '/security/pipeline',
+  3: '/security/pipeline',
   4: '/agent-center/overview',
-  5: '/filter-rules/comprehensive',
+  5: '/security/pipeline',
 };
 
 // 阶段配色（列表页阶段色点 / 详情页强调）。

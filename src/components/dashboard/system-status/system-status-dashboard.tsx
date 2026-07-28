@@ -31,8 +31,9 @@ import {
   PageHeaderActionButton,
   PageHeaderSelectTrigger,
 } from '@/components/shared/page-header-controls';
-import { FramedPage } from '@/components/shared/page-shell';
+import { PageShell, PageHeader } from '@/components/shared/page-shell';
 import { Select, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { Activity } from 'lucide-react';
 import { useSystemStatusData, type SystemStatusRange } from './hooks';
 import { useSystemStatusVisibility, overviewGridClass } from './visibility';
 import { HealthBanner } from './health-banner';
@@ -67,39 +68,44 @@ export function SystemStatusDashboard() {
   const overviewGrid = overviewGridClass(overviewCols);
 
   return (
-    <FramedPage
-      title={t('title')}
-      description={t('subtitle')}
+    <PageShell
+      className="min-h-full bg-[#F8F9FB] shadow-[0_0_0_32px_#F8F9FB] dark:bg-background dark:shadow-[0_0_0_32px_var(--background)]"
       data-testid="system-status-page"
-      actions={
-        <>
-          <Select value={range} onValueChange={(v) => v && setRange(v as SystemStatusRange)}>
-            <PageHeaderSelectTrigger data-testid="system-status-range-trigger">
-              <SelectValue />
-            </PageHeaderSelectTrigger>
-            <SelectContent>
-              {RANGES.map((r) => (
-                <SelectItem key={r} value={r}>
-                  {tRange(r)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <PageHeaderActionButton
-            className="w-20"
-            onClick={handleRefresh}
-            disabled={spinning}
-            aria-busy={spinning}
-            data-testid="system-status-refresh"
-          >
-            <RefreshCw
-              className={`mr-2 size-4 motion-reduce:animate-none ${spinning ? 'animate-spin' : ''}`}
-            />
-            {t('refresh')}
-          </PageHeaderActionButton>
-        </>
-      }
     >
+      <PageHeader
+        title={t('title')}
+        description={t('subtitle')}
+        icon={Activity}
+        actions={
+          <>
+            <Select value={range} onValueChange={(v) => v && setRange(v as SystemStatusRange)}>
+              <PageHeaderSelectTrigger data-testid="system-status-range-trigger">
+                <SelectValue />
+              </PageHeaderSelectTrigger>
+              <SelectContent>
+                {RANGES.map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {tRange(r)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <PageHeaderActionButton
+              className="w-20"
+              onClick={handleRefresh}
+              disabled={spinning}
+              aria-busy={spinning}
+              data-testid="system-status-refresh"
+            >
+              <RefreshCw
+                className={`mr-2 size-4 motion-reduce:animate-none ${spinning ? 'animate-spin' : ''}`}
+              />
+              {t('refresh')}
+            </PageHeaderActionButton>
+          </>
+        }
+      />
+
       <HealthBanner
         alerts={data.alerts}
         threats={data.threats}
@@ -129,6 +135,6 @@ export function SystemStatusDashboard() {
           />
         )}
       </div>
-    </FramedPage>
+    </PageShell>
   );
 }

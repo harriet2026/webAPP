@@ -603,6 +603,49 @@ test.describe('Intent Engine', () => {
     // 本用例未保存，DB 不变，无需恢复
   });
 
+  test('save blocked on threshold overlap with overlap-specific message (GT-12171 D-06)', async ({ authenticatedPage, request }) => {
+    await openIntentEngineDrawer(authenticatedPage, request);
+    await expandHighRiskPanel(authenticatedPage);
+
+    // 展开钓鱼卡 → 切分段阈值 → 制造区间重叠（区间1 max 0.3 → 0.5，压过区间2 起点）
+    await ensureIntentEnabled(authenticatedPage, 'receive', 'phishing');
+    await expandIntentCard(authenticatedPage, 'receive', 'phishing');
+    const card = authenticatedPage.locator('[data-testid="ie-card-receive-phishing"]');
+    const thresholdRadio = authenticatedPage.locator('label[for="mode-threshold-phishing-receive"]');
+    await thresholdRadio.scrollIntoViewIfNeeded();
+    await thresholdRadio.click();
+    await authenticatedPage.waitForTimeout(500);
+
+    const maxInput = card.locator('input[type="number"]').nth(1);
+    await maxInput.scrollIntoViewIfNeeded();
+    await maxInput.fill('0.5');
+    await authenticatedPage.waitForTimeout(300);
+
+    // 内联警告用重叠文案，不是误导性的"未覆盖"
+    const warning = card.locator('[data-testid="ie-coverage-warning"]');
+    await expect(warning).toContainText('存在重叠区间', { timeout: 3000 });
+
+    let putFired = false;
+    authenticatedPage.on('request', (r) => {
+      if (r.method() === 'PUT' && r.url().includes('/security/intent-engine')) putFired = true;
+    });
+
+    const saveBtn = authenticatedPage.locator('[data-testid="intent-engine-save"]');
+    await saveBtn.scrollIntoViewIfNeeded();
+    await saveBtn.click();
+
+    // 校验拦截：toast 用重叠专属文案
+    await expect(authenticatedPage.getByText('存在重叠区间，请修复后保存')).toBeVisible({ timeout: 3000 });
+    expect(putFired).toBe(false);
+
+    // 智能填充也能修复重叠：点击后警告消失（旧实现对重叠点击无效）
+    const fillBtn = card.getByRole('button', { name: '智能填充' });
+    await fillBtn.scrollIntoViewIfNeeded();
+    await fillBtn.click();
+    await expect(warning).toHaveCount(0, { timeout: 3000 });
+    // 本用例未保存，DB 不变，无需恢复
+  });
+
   test('mark deliver full config round trip', async ({ authenticatedPage, request }) => {
     const { tenantHeader } = await selectTenant(authenticatedPage, request);
     const current = await (await request.get(`${API}/security/intent-engine`, { headers: tenantHeader })).json();

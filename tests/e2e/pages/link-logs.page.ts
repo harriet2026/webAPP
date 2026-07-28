@@ -39,6 +39,22 @@ export class LinkLogsPage {
     return this.page.locator('[data-testid="link-logs-total"]');
   }
 
+  getSearchButton(): Locator {
+    return this.page.getByTestId('link-logs-search');
+  }
+
+  async clickSearch() {
+    const responsePromise = this.page
+      .waitForResponse(
+        (resp) => resp.url().includes('/link-click-logs') && resp.status() === 200,
+        { timeout: 10000 },
+      )
+      .catch(() => null);
+    await this.getSearchButton().click();
+    await responsePromise;
+    await this.page.waitForTimeout(400);
+  }
+
   async getDataRows(): Promise<Locator[]> {
     const rows = this.table.locator('tbody tr');
     const count = await rows.count();

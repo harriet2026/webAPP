@@ -32,11 +32,11 @@ import { fetchNodes, fetchAlerts } from '@/lib/api/monitoring';
 import type { NodeInfo } from '@/types/monitoring';
 import type { AlertEvent, AlertSeverity } from '@/types/alerts';
 import { getDisposalList } from '@/components/email-disposal/lib/disposal-api';
+import { PENDING_DISPOSAL_FILTER } from '@/components/email-disposal/lib/pending-filter';
 import { getInboundAuditItems } from '@/lib/api/inbound-audit';
 import { getDetectionStats } from '@/lib/api/phishing-detection';
 import { getSpoofingStats } from '@/lib/api/spoofing-detection';
 import { getThreatRetroStats } from '@/lib/api/threat-retro';
-import type { AdvancedFilter } from '@/types/log';
 
 export type SystemStatusRange = 'today' | '7d' | '30d';
 
@@ -93,18 +93,6 @@ export function resolveRangeDates(range: SystemStatusRange, now: Date = new Date
 // "待处置邮件" default filter mirrors the disposal center's default quick
 // view (action IN quarantine, sideline) — spec §4.3. This is a live backlog
 // count, not scoped to the selected time range.
-const PENDING_DISPOSAL_FILTER: AdvancedFilter = {
-  operator: 'AND',
-  groups: [
-    {
-      operator: 'OR',
-      conditions: [
-        { field: 'action', op: 'eq', value: 'quarantine' },
-        { field: 'action', op: 'eq', value: 'sideline' },
-      ],
-    },
-  ],
-};
 
 export type SystemStatusAlertLevel = 'danger' | 'warning' | 'info';
 export type SystemStatusAlertScope = 'platform' | 'tenant';

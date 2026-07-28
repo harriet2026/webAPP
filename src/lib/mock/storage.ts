@@ -4,6 +4,7 @@
 // 实际的数据拦截发生在 src/lib/api/client.ts 的 apiRequest 入口。
 
 const STORAGE_KEY = 'osgateway_mock_enabled';
+const DEMO_SESSION_KEY = 'osgateway_demo_session';
 
 type Listener = (enabled: boolean) => void;
 const listeners = new Set<Listener>();
@@ -28,6 +29,20 @@ export function setMockEnabled(enabled: boolean): void {
       // listener 抛错不应影响其他订阅者
     }
   });
+}
+
+export function isDemoSessionEnabled(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(DEMO_SESSION_KEY) === '1';
+}
+
+export function setDemoSessionEnabled(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  if (enabled) {
+    localStorage.setItem(DEMO_SESSION_KEY, '1');
+  } else {
+    localStorage.removeItem(DEMO_SESSION_KEY);
+  }
 }
 
 export function toggleMock(): boolean {

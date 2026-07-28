@@ -62,4 +62,18 @@ describe('ProductFormSwitcher', () => {
     expect(mocks.setSelectedTenant).toHaveBeenCalledWith(null);
     expect(mocks.setViewer).toHaveBeenCalledWith('platform');
   });
+
+  it('opens the HTML Spec index in a new tab', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    render(<ProductFormSwitcher />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'htmlSpec' }));
+
+    expect(openSpy).toHaveBeenCalledWith(
+      '/html-spec/index.html',
+      '_blank',
+      'noopener,noreferrer',
+    );
+    openSpy.mockRestore();
+  });
 });

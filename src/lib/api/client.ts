@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import type { User } from '@/types/user';
-import { isMockEnabled } from '@/lib/mock/storage';
+import { isDemoSessionEnabled, isMockEnabled } from '@/lib/mock/storage';
 import { dispatch as mockDispatch, isMockable } from '@/lib/mock/dispatcher';
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
@@ -108,9 +108,14 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   // 菜单项控制（localStorage: osgateway_mock_enabled）。
   // 注意：只在浏览器端生效（SSR 时 isMockEnabled() 恒为 false），避免
   // 影响 Next.js 服务端渲染时的 bootstrap 预取。
-  if (typeof window !== 'undefined' && isMockEnabled() && isMockable(options.method || 'GET', path)) {
+  const method = options.method || 'GET';
+  if (
+    typeof window !== 'undefined' &&
+    isMockEnabled() &&
+    isMockable(method, path)
+  ) {
     const { status, data } = mockDispatch({
-      method: options.method || 'GET',
+      method,
       path,
       body: options.body,
       headers: options.headers,
@@ -125,7 +130,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   let response: Response;
   try {
     response = await fetch(`${API_BASE}${path}`, {
-      method: options.method || 'GET',
+      method,
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
@@ -158,7 +163,17 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   if (!response.ok) {
     if (response.status === 401) {
       clearStoredUser();
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+      // A deliberately entered demo session has no backend JWT. Mock coverage
+      // is intentionally incremental, so an unregistered endpoint may still
+      // reach the real API and return 401. Surface that request as an ordinary
+      // page-level error without ejecting the user from the demo. The server-
+      // provided login entry is the only normal path that sets this marker;
+      // AuthProvider clears stale markers whenever the server flag is off.
+      if (
+        typeof window !== 'undefined' &&
+        !isDemoSessionEnabled() &&
+        !window.location.pathname.includes('/login')
+      ) {
         const locale = window.location.pathname.split('/')[1] || 'zh';
         window.location.href = `/${locale}/login`;
       }

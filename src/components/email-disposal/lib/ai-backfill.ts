@@ -21,11 +21,13 @@ import type {
   FilterConditionGroup,
 } from "@/types/log";
 import type { AICondition, DisposalQuickFilter } from "@/types/email-disposal";
-import { ADVANCED_FILTER_FIELD_KEYS } from "../advanced-filters";
+import {
+  ADVANCED_FILTER_FIELD_KEYS,
+  MAX_ADVANCED_GROUPS,
+} from "../advanced-filters";
 
 // 高级筛选构建器一次最多展示 5 个组（advanced-filters.tsx 的既有产品约束）；
 // 回填时若「已有组数 + 本次待回填组数」超过该上限，超出部分整组降级到 residual。
-const MAX_ADVANCED_GROUPS = 5;
 
 export interface AiBackfillResult {
   quick: Partial<DisposalQuickFilter>;
@@ -41,7 +43,9 @@ function normalizeDate(value: unknown): string {
   return match ? match[1] : raw;
 }
 
-function isScalar(value: FilterCondition["value"]): value is string | number | boolean {
+function isScalar(
+  value: FilterCondition["value"],
+): value is string | number | boolean {
   return value !== undefined && value !== "" && !Array.isArray(value);
 }
 
@@ -52,19 +56,28 @@ function mapReceivedAt(
   if (cond.op === "between") {
     if (!Array.isArray(cond.value) || cond.value.length !== 2) return false;
     const [start, end] = cond.value;
-    draft.sendReceiveTime = { start: normalizeDate(start), end: normalizeDate(end) };
+    draft.sendReceiveTime = {
+      start: normalizeDate(start),
+      end: normalizeDate(end),
+    };
     return true;
   }
   if (cond.op === "gte" || cond.op === "gt") {
     if (!isScalar(cond.value)) return false;
     // gte/gt 单值只圈定下界；若同组内还有一个圈定上界的条件（见下方 lte/lt 分
     // 支）先/后处理过，保留其 end，避免互相覆盖成单点。
-    draft.sendReceiveTime = { start: normalizeDate(cond.value), end: draft.sendReceiveTime?.end ?? "" };
+    draft.sendReceiveTime = {
+      start: normalizeDate(cond.value),
+      end: draft.sendReceiveTime?.end ?? "",
+    };
     return true;
   }
   if (cond.op === "lte" || cond.op === "lt") {
     if (!isScalar(cond.value)) return false;
-    draft.sendReceiveTime = { start: draft.sendReceiveTime?.start ?? "", end: normalizeDate(cond.value) };
+    draft.sendReceiveTime = {
+      start: draft.sendReceiveTime?.start ?? "",
+      end: normalizeDate(cond.value),
+    };
     return true;
   }
   if (cond.op === "eq") {
@@ -114,14 +127,20 @@ const DIRECTION_TO_QUICK: Record<string, string> = {
   internal: "internal",
 };
 
-function mapDirection(cond: FilterCondition, draft: Partial<DisposalQuickFilter>): boolean {
+function mapDirection(
+  cond: FilterCondition,
+  draft: Partial<DisposalQuickFilter>,
+): boolean {
   if (cond.op !== "eq" || !isScalar(cond.value)) return false;
   const raw = String(cond.value);
   draft.sendReceiveType = DIRECTION_TO_QUICK[raw] ?? raw;
   return true;
 }
 
-function mapAction(cond: FilterCondition, draft: Partial<DisposalQuickFilter>): boolean {
+function mapAction(
+  cond: FilterCondition,
+  draft: Partial<DisposalQuickFilter>,
+): boolean {
   if (cond.op !== "eq" || !isScalar(cond.value)) return false;
   draft.executionAction = String(cond.value);
   return true;
@@ -150,7 +169,9 @@ const LEVEL1_HANDLERS: Record<
 
 // 尝试把一个 AND 组的全部条件独立映射进 quick 草稿；只要有一个条件命中不了就
 // 整组失败（返回 null），不做部分回填。
-function tryMapGroupToQuick(group: FilterConditionGroup): Partial<DisposalQuickFilter> | null {
+function tryMapGroupToQuick(
+  group: FilterConditionGroup,
+): Partial<DisposalQuickFilter> | null {
   if (group.conditions.length === 0) return null;
   const draft: Partial<DisposalQuickFilter> = {};
   for (const cond of group.conditions) {
@@ -182,7 +203,10 @@ export function backfillAiFilter(
   }
 
   const topLevelAnd = filter.operator === "AND";
-  let advancedRoom = Math.max(0, MAX_ADVANCED_GROUPS - existingAdvancedGroupCount);
+  let advancedRoom = Math.max(
+    0,
+    MAX_ADVANCED_GROUPS - existingAdvancedGroupCount,
+  );
 
   for (const group of filter.groups) {
     if (group.conditions.length === 0) continue;
@@ -208,7 +232,12 @@ export function backfillAiFilter(
     }
 
     for (const cond of group.conditions) {
-      residual.push({ field: cond.field, op: cond.op, value: cond.value, source: "ai" });
+      residual.push({
+        field: cond.field,
+        op: cond.op,
+        value: cond.value,
+        source: "ai",
+      });
     }
   }
 

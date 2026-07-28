@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>层级4：转发规则 删除确认 - 邮件路由</title>
+<link rel="stylesheet" href="../assets/demo-app.css">
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  .component-preview { background:#fff; overflow-x:auto; }
+  .pass { color:#15803d; font-weight:600; } .bad { color:#b91c1c; font-weight:600; } .warn { color:#a16207; font-weight:600; }
+  .component-preview [role="alertdialog"] { position:relative !important; top:auto !important; left:auto !important; transform:none !important; margin:0; max-width:32rem; }
+  .layer-nav { display:flex; gap:1rem; margin-bottom:1rem; font-size:.875rem; }
+</style>
+</head>
+<body>
+<nav class="layer-nav"><a href="./index.html#c-4">← 返回主文件 §2.4</a><a href="./layer-3-relay-drawer.html">← 层级3 规则抽屉</a><a href="./layer-5-outbound-proxy-drawer.html">层级5 代理IP抽屉 →</a></nav>
+<header class="spec-header">
+  <h1>交互层级 4：转发规则 删除确认（AlertDialog）</h1>
+  <table class="meta-table">
+    <tr><td>所属组件</td><td><a href="./index.html#c-4">2.4 转发设置 Tab</a></td></tr>
+    <tr><td>触发路径</td><td>层级0 行内「删除」（实测第 1 行 优先级10「内网放行」）→ 居中 AlertDialog</td></tr>
+  </table>
+</header>
+<section class="interaction-layer">
+  <p class="preview-hint">预览可操作：「取消」/「确认删除」→ Toast「转发规则已删除」（demo 同时从列表移除）。</p>
+  <div class="component-preview" data-preview="alert-dialog" data-confirm-toast="转发规则已删除"><div role="alertdialog" id="radix-_r_m_" aria-describedby="radix-_r_o_" aria-labelledby="radix-_r_n_" data-state="open" data-slot="alert-dialog-content" class="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg" tabindex="-1" style="pointer-events: auto;"><div data-slot="alert-dialog-header" class="flex flex-col gap-2 text-center sm:text-left"><h2 id="radix-_r_n_" data-slot="alert-dialog-title" class="text-lg font-semibold">删除转发规则「内网放行」？</h2><p id="radix-_r_o_" data-slot="alert-dialog-description" class="text-muted-foreground text-sm">删除后该连接层过滤规则立即失效。</p></div><div data-slot="alert-dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3">取消</button><button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-primary-foreground h-9 px-4 py-2 has-[&gt;svg]:px-3 bg-red-600 hover:bg-red-700">确认删除</button></div></div></div>
+  <figure class="screenshot-figure">
+    <img src="./screenshots/relay-delete-dialog.png" alt="删除转发规则确认">
+    <figcaption>实测：标题「删除转发规则「内网放行」？」；正文「删除后该连接层过滤规则立即失效。」；按钮「取消」/「确认删除」（红底）</figcaption>
+  </figure>
+  <table class="spec-table">
+    <thead><tr><th>元素</th><th>规格（浏览器实测）</th></tr></thead>
+    <tbody>
+      <tr><td>标题</td><td>「删除转发规则「<em>规则名</em>」？」（动态插入 ruleName——列表虽不显示规则名列，删除确认可见）</td></tr>
+      <tr><td>正文</td><td>「删除后该连接层过滤规则立即失效。」（无引用/连带提示）</td></tr>
+      <tr><td>按钮</td><td>「取消」/「确认删除」<code>bg-red-600</code>；确认后行移除 + Toast，无撤销</td></tr>
+    </tbody>
+  </table>
+  <div class="dom-comparison">
+    <h5>DOM 树比对结果</h5>
+    <table class="spec-table">
+      <thead><tr><th>比对项</th><th>demo 实际 DOM</th><th>嵌入的 HTML</th><th>是否一致</th></tr></thead>
+      <tbody>
+        <tr><td>根节点</td><td><code>[role=alertdialog][data-state=open]</code></td><td>同（中和居中定位）</td><td class="pass">一致</td></tr>
+        <tr><td>标题动态名</td><td>「内网放行」</td><td>同</td><td class="pass">一致</td></tr>
+        <tr><td>节点数</td><td>7</td><td>7</td><td class="pass">一致</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<script src="../assets/forwarding-preview.js"></script>
+</body>
+</html>

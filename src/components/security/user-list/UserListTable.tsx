@@ -9,13 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { UserListView, UserListAction } from '@/lib/api/user-list';
 
-// 修改时间显示：UTC + 分钟精度（与 sender-filter 列表同款，且对齐 demo 的
-// "YYYY-MM-DD HH:MM" 展示，如 2026-03-20T10:30:00Z → "2026-03-20 10:30"）。
-function formatUtcMinute(iso: string): string {
+// GT-12500：修改时间按本地时区展示（分钟精度，与 sender-filter 列表同款）。
+function formatLocalMinute(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
   const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
 // D-003: admin can only read + delete user-list rules — no edit affordance.
@@ -99,7 +98,7 @@ export function UserListTable(props: {
                   </TableCell>
                   <TableCell className="font-mono text-xs">{r.createdBy}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">
-                    {formatUtcMinute(r.modifyTime)}
+                    {formatLocalMinute(r.modifyTime)}
                   </TableCell>
                   <TableCell className="text-right">
                     <Tooltip>

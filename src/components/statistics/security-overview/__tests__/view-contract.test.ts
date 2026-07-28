@@ -11,12 +11,10 @@ import {
 import { blockRateTier, geoBlockRateTier } from '../constants';
 
 describe('security overview view contract', () => {
-  it('exposes exactly the four html_spec v3 trend perspectives', () => {
+  it('exposes exactly the two user-facing trend perspectives', () => {
     expect(SECURITY_OVERVIEW_VIEW_OPTIONS).toEqual([
       'email_type',
       'action',
-      'threat_level',
-      'delivery_result',
     ]);
   });
 
@@ -28,6 +26,11 @@ describe('security overview view contract', () => {
       'sensitive', 'spoofing', 'phishing', 'virus', 'account_compromised',
     ]));
     expect(overview.trend.action).toHaveLength(7);
+    expect(Object.keys(overview.trend.action?.[0] ?? {})).toEqual(expect.arrayContaining([
+      'deliver', 'mark_deliver', 'greylist', 'quarantine', 'review', 'block', 'drop', 'recall',
+    ]));
+    expect(Object.keys(overview.trend.action?.[0] ?? {})).not.toContain('advanced_review');
+    expect(Object.keys(overview.trend.action?.[0] ?? {})).not.toContain('cancelled');
     expect(overview.trend.threat_level).toHaveLength(7);
     expect(overview.trend.delivery_result).toHaveLength(7);
     expect(overview.trend_previous_period?.email_type).toHaveLength(7);

@@ -68,7 +68,8 @@ export const sidebarNavItems: NavItem[] = [
       { id: 'security-overview', titleKey: 'sidebar.securityOverview', href: '/statistics/security-overview' },
       { id: 'delivery-traffic', titleKey: 'sidebar.deliveryTraffic', href: '/statistics/delivery-traffic' },
       { id: 'ops-top-trend', titleKey: 'sidebar.opsTopTrend', href: '/statistics/ops-top-trend' },
-      { id: 'link-attachment-security', titleKey: 'sidebar.linkAttachmentSecurity', href: '/statistics/link-attachment-security' },
+      // 「链接与附件安全」暂时从导航隐藏，页面与直达路由保留。
+      // { id: 'link-attachment-security', titleKey: 'sidebar.linkAttachmentSecurity', href: '/statistics/link-attachment-security' },
     ],
   },
   {
@@ -203,11 +204,18 @@ export const sidebarNavItems: NavItem[] = [
 export const offNavRouteTitles: Array<{ href: string; titleKey: string }> = [
   { href: '/logs/email', titleKey: 'sidebar.emailLogs' },
   { href: '/investigations', titleKey: 'sidebar.investigations' },
+  { href: '/statistics/link-attachment-security', titleKey: 'sidebar.linkAttachmentSecurity' },
 ];
 
 // GT-12501: 泰语/俄语按验收要求从语言切换器隐藏（i18n 词典与 /th /ru
 // 路由保留，恢复展示只需把条目加回来）。
-export const languages = [
+export const languageMetadata = [
   { code: 'zh', name: '中文', flag: '🇨🇳' },
   { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'th', name: 'ไทย', flag: '🇹🇭' },
+  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
 ];
+
+export const languages = languageMetadata.filter(({ code }) =>
+  code === 'zh' || code === 'en',
+);

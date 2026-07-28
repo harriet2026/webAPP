@@ -1,5 +1,9 @@
 {
-  "theme": {"label": "Theme", "blue": "Blue Theme", "green": "Green Theme"},
+  "theme": {
+    "label": "Theme",
+    "blue": "Blue Theme",
+    "green": "Green Theme"
+  },
   "branding": {
     "saasName": "Cloud Email Security Gateway",
     "selfHostedName": "Email Security Gateway",
@@ -29,7 +33,8 @@
   },
   "mock": {
     "label": "Dev Mode",
-    "enabled": "Mock Data (No Backend)"
+    "enabled": "Mock Data (No Backend)",
+    "htmlSpec": "View HTML Spec"
   },
   "accessDenied": "Access Denied",
   "id": "ID",
@@ -209,6 +214,7 @@
     "password": "Password",
     "loginTitle": "OSGateway Admin",
     "loginButton": "Login",
+    "demoEntry": "Enter demo",
     "loginError": "Invalid username or password",
     "sessionExpired": "Session expired, please login again",
     "showAdvancedRules": "Show advanced rules",
@@ -315,7 +321,7 @@
     "routeRules": "Delivery Routes",
     "security": "Security Policy",
     "policyPipeline": "Policy Pipeline",
-    "groupManagement": "Group Management",
+    "groupManagement": "Group Policy",
     "ipFrequency": "IP Frequency",
     "inboundAudit": "Inbound Audit",
     "configManagement": "Config Management",
@@ -1770,7 +1776,9 @@
           "timeout": "Interpretation timed out. Click regenerate to try again",
           "rateLimited": "Too many requests. Please try again later",
           "generic": "Interpretation failed. Please try again"
-        }
+        },
+        "ruleQueryGeneric": "Querying rule details",
+        "toolGeneric": "Tool call"
       },
       "eyebrow": "Mail Logs",
       "subtitle": "Inspect message metadata, authentication outcomes, rule hits, and message relationships with flexible column selection and advanced search."
@@ -1894,6 +1902,21 @@
       "notSigned": "Not signed",
       "selector": "Selector",
       "skipReason": "Skip reason"
+    },
+    "deliveryStatusValue": {
+      "unknown": "Unknown",
+      "delivered": "Delivered",
+      "in_delivery": "In delivery",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "partial_delivered": "Partially delivered"
+    },
+    "workflowOutcomeValue": {
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "released": "Released",
+      "expired": "Expired",
+      "bounced": "Bounced"
     }
   },
   "adminAudit": {
@@ -2452,6 +2475,11 @@
       "clientIp": "Client IP",
       "rewrittenUrl": "Rewritten URL",
       "clickSource": "Link source"
+    },
+    "downloadErrors": {
+      "invalidId": "Download failed: invalid record id",
+      "notFound": "Download failed: record not found or already purged",
+      "generic": "Download failed: server error, please retry later"
     }
   },
   "authAttempts": {
@@ -2579,8 +2607,11 @@
   "header": {
     "currentTenant": "Current Tenant",
     "language": "Language",
+    "accountMenu": "Account menu",
     "profile": "Profile",
     "logout": "Logout",
+    "logoutConfirmDescription": "Are you sure you want to log out of the current account?",
+    "logoutConfirm": "Confirm logout",
     "brandName": "OSGateway",
     "tenantLabel": "Tenant",
     "allTenants": "All Tenants",
@@ -4990,6 +5021,7 @@
     "threshold": {
       "segment": "Segment",
       "gapWarning": "There are uncovered intervals. Please fix or click \"Auto-fill\".",
+      "overlapWarning": "There are overlapping intervals. Please fix or click \"Auto-fill\".",
       "addSegment": "Add segment",
       "fillGaps": "Auto-fill",
       "applyPreset": "Apply Template",
@@ -5008,6 +5040,7 @@
     "dirty": "Unsaved changes",
     "unsavedChanges": "Unsaved changes",
     "saveGapBlocked": "There are uncovered ranges; fix them before saving",
+    "saveOverlapBlocked": "There are overlapping ranges; fix them before saving",
     "copyDialog": {
       "title": "Copy configuration to other directions",
       "description": "Select target directions to copy the current [{src}] direction configuration to.",
@@ -5267,6 +5300,7 @@
       "reset": "Reset",
       "resetDone": "All filters reset",
       "saveTemplate": "Save as template",
+      "templates": "Templates",
       "advancedFilter": "Advanced Filters",
       "collapse": "Collapse",
       "saveCurrent": "Save current filters",
@@ -5289,6 +5323,7 @@
       "aiError": "Semantic parsing service busy, please retry later or use structured filters",
       "truncatedTo500": "Truncated to 500 characters",
       "selectedConditions": "Selected conditions",
+      "pendingConditions": "Pending conditions",
       "clearAll": "Clear all",
       "items": "items"
     },
@@ -5312,13 +5347,13 @@
       "outgoing": "Outbound",
       "internal": "Internal",
       "actions": {
-        "accept": "Accept",
+        "accept": "Deliver",
         "reject": "Reject",
         "bounce": "Bounce",
         "discard": "Discard",
         "audit": "Audit",
         "quarantine": "Quarantine",
-        "sideline": "Sideline",
+        "sideline": "Greylist",
         "mixed": "Mixed"
       },
       "statuses": {
@@ -5382,6 +5417,11 @@
       "addCondition": "Add condition",
       "addGroup": "Add group",
       "groupRelation": "Group relation",
+      "conditionRelation": "Conditions in group",
+      "groupLabel": "Condition group {n}",
+      "deleteGroup": "Delete condition group {n}",
+      "groupLimit": "You can add up to {n} condition groups",
+      "operator": "Operator",
       "operators": {
         "eq": "equals",
         "neq": "not equals",
@@ -5470,7 +5510,9 @@
         "from": "From",
         "to": "To",
         "inList": "a,b,c",
-        "select": "Select..."
+        "select": "Select...",
+        "selectFieldFirst": "Select a field first",
+        "value": "Enter a value"
       }
     },
     "table": {
@@ -5518,10 +5560,10 @@
     "batch": {
       "findSimilar": "Find Similar",
       "release": "Release",
-      "delete": "Delete",
+      "delete": "Discard",
       "export": "Export",
       "confirmRelease": "Confirm release selected emails?",
-      "confirmDelete": "Delete the selected emails? This action cannot be undone.",
+      "confirmDelete": "Discard the selected emails? This action cannot be undone.",
       "releaseDescription": "Resume delivery for the selected emails and optionally correct their mail type.",
       "releaseAuditHint": "The release and type correction are both recorded in the audit trail.",
       "recallDescription": "Try to remove the selected emails from recipient mailboxes and optionally correct their mail type.",
@@ -7086,10 +7128,10 @@
     },
     "viewBy": {
       "threat_type": "Threat Type",
-      "action": "Action",
+      "action": "Execute Action",
+      "email_type": "Threat Posture Trend",
       "threat_level": "Threat Level",
-      "delivery_result": "Delivery Result",
-      "email_type": "Threat Posture Trend"
+      "delivery_result": "Delivery Result"
     },
     "threatTypes": {
       "normal": "Normal",
@@ -7104,28 +7146,12 @@
     "actions": {
       "deliver": "Deliver",
       "mark_deliver": "Mark Deliver",
-      "advanced_review": "Advanced Review",
+      "greylist": "Greylist",
       "quarantine": "Quarantine",
       "review": "Review",
-      "block": "Block",
+      "block": "Reject",
       "drop": "Drop",
       "recall": "Recall"
-    },
-    "deliveryResults": {
-      "delivered": "Delivered",
-      "success_rate": "Delivery Success Rate",
-      "failed": "Failed",
-      "cancelled": "Cancelled",
-      "in_delivery": "In Delivery",
-      "partial_delivered": "Partial Delivered",
-      "unknown": "Unknown"
-    },
-    "threatLevels": {
-      "normal": "Normal",
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High",
-      "critical": "Critical"
     },
     "emailTypes": {
       "normal": "Normal",
@@ -7237,11 +7263,27 @@
       "noData": "No data available",
       "loading": "Loading…"
     },
-    "normalHiddenHint": "Normal mail is hidden by default so its volume does not flatten the threat curves — click its legend entry to show it"
+    "normalHiddenHint": "Normal mail is hidden by default so its volume does not flatten the threat curves — click its legend entry to show it",
+    "deliveryResults": {
+      "delivered": "Delivered",
+      "success_rate": "Delivery Success Rate",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "in_delivery": "In Delivery",
+      "partial_delivered": "Partial Delivered",
+      "unknown": "Unknown"
+    },
+    "threatLevels": {
+      "normal": "Normal",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    }
   },
   "deliveryTraffic": {
     "title": "Delivery & Traffic Analysis",
-    "subtitle": "Analyze email delivery status, queue health, and three-way traffic distribution",
+    "subtitle": "Analyze email delivery status and three-way traffic distribution",
     "direction": {
       "label": "Direction",
       "all": "All",
@@ -7331,24 +7373,6 @@
       "internal_spam": "Internal Spam",
       "internal_phishing": "Internal Phishing",
       "internal_virus": "Internal Virus"
-    },
-    "queueHealth": {
-      "title": "Queue Health",
-      "currentLength": "Current Queue Length",
-      "receiveQueue": "Inbound Queue",
-      "sendQueue": "Outbound Queue",
-      "internalQueue": "Internal Queue",
-      "internalHealthy": "Internal Queue Healthy",
-      "oldestAge": "Oldest Message Age",
-      "processingRate": "Processing Rate",
-      "healthy": "Healthy",
-      "warning": "Warning",
-      "busy": "Processing backlog",
-      "offline": "Queue monitoring service unavailable",
-      "expand": "Expand queue details",
-      "collapse": "Collapse queue details",
-      "topDomain": "Top backlogged domain",
-      "currentTooltip": "{count} messages currently queued"
     },
     "table": {
       "title": "Detail Data",
@@ -9493,14 +9517,16 @@
       "empty": "No pending items or alerts — system is running well",
       "viewAll": "View All Alerts",
       "itemNodeOffline": "Node {node} is offline",
-      "itemPendingDisposal": "{n} email(s) pending disposal",
-      "itemPendingReport": "{n} report(s) awaiting review",
+      "itemPendingDisposal": "Pending disposal queue",
+      "itemPendingReport": "Reports pending review",
       "itemAgentPending": "{agent}: {n} pending review",
       "itemLicenseExpiry": "License expires in {n} days",
       "licenseRenewHint": "Please renew in time",
       "itemRuleLibLatest": "Rule library is up to date",
       "itemRuleLibOutdated": "Rule library update available",
-      "lastSeen": "Last seen: {time}"
+      "lastSeen": "Last seen: {time}",
+      "itemPendingDisposalDesc": "{n} emails pending",
+      "itemPendingReportDesc": "{n} items"
     },
     "agents": {
       "title": "Agent Overview",
@@ -9573,16 +9599,16 @@
   },
   "portalRelease": {
     "loading": "Loading...",
-    "confirmTitle": "Confirm release of quarantined email",
-    "mailIdLabel": "Email ID",
-    "confirmButton": "Confirm release",
-    "releasedTitle": "Released",
-    "releasedDesc": "The email has been released to your inbox.",
+    "confirmTitle": "Confirm retrieval of quarantined email",
+    "confirmButton": "Confirm retrieve",
+    "releasedTitle": "Retrieved successfully",
+    "releasedDesc": "The email has been redelivered to your inbox.",
     "expiredTitle": "Link expired or invalid",
-    "expiredDesc": "Please contact your administrator for a new release link.",
+    "expiredDesc": "Please contact your administrator for a new retrieval link.",
     "errorTitle": "Operation failed",
     "errorDesc": "Please try again later or contact your administrator.",
-    "alreadyReleased": "This email has already been released, or it has passed the retention period and been purged"
+    "alreadyReleased": "This email has already been retrieved, or was cleaned up after the retention period",
+    "confirmWarning": "You are retrieving an email quarantined by the gateway. Once completed, it will be redelivered to your inbox. Please proceed with caution."
   },
   "portalPreview": {
     "loading": "Loading...",

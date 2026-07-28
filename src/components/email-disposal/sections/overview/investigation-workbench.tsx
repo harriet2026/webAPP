@@ -114,10 +114,16 @@ interface InvestigationWorkbenchProps {
   onDisposed?: () => void;
   // 下载附件的真实实现由调用方注入，透传给 EntityDetection（C7）。
   onDownload?: (attachment: AttachmentInfo) => void;
+  // GT-12600：阻断/丢弃遮罩上的两个入口。「查看SMTP会话」跳原始日志区（SMTP
+  // 会话/命中时间线），「查看策略命中详情」跳安全分析区的处置依据卡——此前两个
+  // 按钮是空 onClick 死按钮，点击无任何反馈。
+  onViewSmtpSession?: () => void;
+  onViewPolicyDetail?: () => void;
 }
 
 export function InvestigationWorkbench({
   detail, requestFn, readOnly = false, onDisposed, onDownload,
+  onViewSmtpSession, onViewPolicyDetail,
 }: InvestigationWorkbenchProps) {
   const t = useTranslations('emailDisposal.detail.overview');
   const [view, setView] = useState<ContentView>('text');
@@ -202,11 +208,23 @@ export function InvestigationWorkbench({
               <p className="text-sm text-muted-foreground">{t('workbench.blockedOverlay')}</p>
               <p className="text-xs text-muted-foreground">{t('workbench.blockedOverlaySubtext')}</p>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => {}}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onViewSmtpSession?.()}
+                  data-testid="email-disposal-workbench-view-smtp-session"
+                >
                   <Shield className="mr-1 h-3.5 w-3.5" />
                   {t('workbench.viewSmtpSession')}
                 </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => {}}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onViewPolicyDetail?.()}
+                  data-testid="email-disposal-workbench-view-policy-detail"
+                >
                   <Shield className="mr-1 h-3.5 w-3.5" />
                   {t('context.viewPolicyDetail')}
                 </Button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,11 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 import { OP_TYPE_META, AUDIT_MODULE_GROUPS, filterVisibleModuleGroups } from './admin-audit-taxonomy';
 import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
 import { visibleNavIds, isNavItemAllowed } from '@/components/layout/sidebar-visibility';
+import {
+  SearchFilterPanel,
+  type SearchFilterCondition,
+} from '@/components/shared/search-filter-panel';
 
 const OP_TYPE_KEYS = Object.keys(OP_TYPE_META).sort();
 
@@ -66,6 +69,7 @@ interface TenantOption {
 interface AdminAuditFiltersProps {
   value: AdminFilterState;
   onChange: (next: AdminFilterState) => void;
+  onSearch: () => void;
   onReset: () => void;
   showTenant?: boolean;
   tenants?: TenantOption[];
@@ -74,6 +78,7 @@ interface AdminAuditFiltersProps {
 export function AdminAuditFilters({
   value,
   onChange,
+  onSearch,
   onReset,
   showTenant,
   tenants,
@@ -102,26 +107,6 @@ export function AdminAuditFilters({
       (featureId) => !!formVisible?.has(featureId),
     );
   }, [hasPermission, isSystemAdmin, showAdvancedRules, canSeeRoute, capabilities, registry, viewer, grants]);
-  const [keywordInput, setKeywordInput] = useState(value.keyword);
-  const lastEmitted = useRef(value.keyword);
-
-  useEffect(() => {
-    if (value.keyword !== lastEmitted.current && value.keyword !== keywordInput) {
-      lastEmitted.current = value.keyword;
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- parent reset/override: resync the local input box with the canonical filter value.
-      setKeywordInput(value.keyword);
-    }
-  }, [value.keyword, keywordInput]);
-
-  useEffect(() => {
-    if (keywordInput === lastEmitted.current) return;
-    const handle = setTimeout(() => {
-      lastEmitted.current = keywordInput;
-      onChange({ ...value, keyword: keywordInput });
-    }, 300);
-    return () => clearTimeout(handle);
-  }, [keywordInput, value, onChange]);
-
   // Base UI's <Select.Value> shows the raw value unless the Root gets `items`,
   // so every Select here rendered its raw code (tenant id, module key,
   // "success", ...) in the trigger instead of the label (GT-12021).
@@ -157,47 +142,52 @@ export function AdminAuditFilters({
   // GT-12439: html_spec 原型每个筛选控件都带字段标签在上方，且三个下拉的默认
   // 选中值显示「全部」（而非空占位符）。这里给每个控件补 <label>，并把三个类目
   // 下拉的占位符改为「全部」，与原型 §2.3 对齐、同时保留字段语境。
-  return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="admin-audit-filters">
-      {showTenant ? (
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm leading-none text-muted-foreground">{t('adminAudit.filter.tenant')}</label>
-          <Select
-            items={tenantItems}
-            value={value.tenant}
-            onValueChange={(v) => onChange({ ...value, tenant: v ?? '' })}
-          >
-            <SelectTrigger className="w-full" data-testid="admin-audit-filter-tenant">
-              <SelectValue placeholder={t('common.all')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">{t('common.all')}</SelectItem>
-              {(tenants ?? []).map((tenant) => (
-                <SelectItem key={tenant.id} value={String(tenant.id)}>
-                  {tenant.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      ) : null}
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-sm leading-none text-muted-foreground">{t('adminAudit.filter.keyword')}</label>
+  const conditions: SearchFilterCondition[] = [
+    ...(showTenant
+      ? [{
+          key: 'tenant',
+          label: t('adminAudit.filter.tenant'),
+          control: (
+            <Select
+              items={tenantItems}
+              value={value.tenant}
+              onValueChange={(next) => onChange({ ...value, tenant: next ?? '' })}
+            >
+              <SelectTrigger className="w-full" data-testid="admin-audit-filter-tenant">
+                <SelectValue placeholder={t('common.all')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">{t('common.all')}</SelectItem>
+                {(tenants ?? []).map((tenant) => (
+                  <SelectItem key={tenant.id} value={String(tenant.id)}>
+                    {tenant.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ),
+        }]
+      : []),
+    {
+      key: 'keyword',
+      label: t('adminAudit.filter.keyword'),
+      control: (
         <Input
           data-testid="admin-audit-filter-keyword"
           placeholder={t('adminAudit.filter.keyword')}
-          value={keywordInput}
-          onChange={(e) => setKeywordInput(e.target.value)}
+          value={value.keyword}
+          onChange={(event) => onChange({ ...value, keyword: event.target.value })}
         />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-sm leading-none text-muted-foreground">{t('adminAudit.filter.module')}</label>
+      ),
+    },
+    {
+      key: 'module',
+      label: t('adminAudit.filter.module'),
+      control: (
         <Select
           items={moduleItems}
           value={value.module}
-          onValueChange={(v) => onChange({ ...value, module: v ?? '' })}
+          onValueChange={(next) => onChange({ ...value, module: next ?? '' })}
         >
           <SelectTrigger className="w-full" data-testid="admin-audit-filter-module">
             <SelectValue placeholder={t('common.all')} />
@@ -216,14 +206,16 @@ export function AdminAuditFilters({
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-sm leading-none text-muted-foreground">{t('adminAudit.filter.opType')}</label>
+      ),
+    },
+    {
+      key: 'op-type',
+      label: t('adminAudit.filter.opType'),
+      control: (
         <Select
           items={opTypeItems}
           value={value.opType}
-          onValueChange={(v) => onChange({ ...value, opType: v ?? '' })}
+          onValueChange={(next) => onChange({ ...value, opType: next ?? '' })}
         >
           <SelectTrigger className="w-full" data-testid="admin-audit-filter-optype">
             <SelectValue placeholder={t('common.all')} />
@@ -237,14 +229,16 @@ export function AdminAuditFilters({
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-sm leading-none text-muted-foreground">{t('adminAudit.filter.result')}</label>
+      ),
+    },
+    {
+      key: 'result',
+      label: t('adminAudit.filter.result'),
+      control: (
         <Select
           items={resultItems}
           value={value.result}
-          onValueChange={(v) => onChange({ ...value, result: v ?? '' })}
+          onValueChange={(next) => onChange({ ...value, result: next ?? '' })}
         >
           <SelectTrigger className="w-full" data-testid="admin-audit-filter-result">
             <SelectValue placeholder={t('common.all')} />
@@ -255,14 +249,24 @@ export function AdminAuditFilters({
             <SelectItem value="failed">{t('adminAudit.stats.failed')}</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      ),
+    },
+  ];
 
-      <div className="flex items-end">
-        {/* GT-12440: html_spec 原型的重置按钮为纯文字（无 RotateCcw 图标）。 */}
-        <Button variant="outline" data-testid="admin-audit-filter-reset" onClick={onReset}>
-          {t('adminAudit.filter.reset')}
-        </Button>
-      </div>
-    </div>
+  return (
+    <SearchFilterPanel
+      testId="admin-audit-filters"
+      conditions={conditions}
+      conditionGridClassName="gap-3 sm:grid-cols-2 lg:grid-cols-3"
+      conditionClassName="flex flex-col gap-1.5 space-y-0"
+      labelClassName="text-sm leading-none"
+      actionsPlacement="grid"
+      onSearch={onSearch}
+      onReset={onReset}
+      searchLabel={t('common.search')}
+      resetLabel={t('adminAudit.filter.reset')}
+      searchTestId="admin-audit-filter-search"
+      resetTestId="admin-audit-filter-reset"
+    />
   );
 }

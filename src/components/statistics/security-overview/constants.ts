@@ -32,26 +32,25 @@ export const SERIES_COLORS: Record<string, string> = {
   // action view
   deliver: '#10B981',
   mark_deliver: '#06B6D4',
-  advanced_review: '#F59E0B',
   quarantine: '#F59E0B',
   review: '#8B5CF6',
   block: '#EF4444',
   drop: '#DC2626',
   recall: '#0ea5e9',
-  cancelled: '#9CA3AF',
   greylist: '#64748B',
   // delivery_result view
   delivered: '#10B981',
   failed: '#EF4444',
+  cancelled: '#9CA3AF',
   in_delivery: '#3B82F6',
   partial_delivered: '#F59E0B',
   unknown: '#6B7280',
 };
 
-// html_spec v3: the interactive and printed report expose the same four
-// business perspectives. `threat_type` remains in the wire contract for
-// compatibility, but is not a user-facing tab.
-export const TREND_VIEW_BY_OPTIONS: ViewBy[] = ['email_type', 'action', 'threat_level', 'delivery_result'];
+// Only these two perspectives are user-facing. `threat_type`,
+// `threat_level`, and `delivery_result` remain in the wire contract for
+// compatibility, but are not rendered as tabs.
+export const TREND_VIEW_BY_OPTIONS: ViewBy[] = ['email_type', 'action'];
 export const PRINT_VIEW_BY_OPTIONS: ViewBy[] = TREND_VIEW_BY_OPTIONS;
 
 export function seriesColor(key: string): string {

@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 
 // Chinese labels pulled from webapp/messages/zh.json (adminAudit block).
 // The harness runs in the zh locale, so all selectors target Chinese text.
@@ -34,7 +34,7 @@ const L = {
  * Page object for /zh/logs/admin-audit (rebuilt admin-audit UI).
  *
  * The rebuilt UI uses:
- *  - live filters (debounced keyword Input + immediate Selects), no 搜索 button
+ *  - draft filters applied by 搜索 or Enter; Reset applies an empty draft
  *  - a shadcn Sheet (right drawer) for details, NOT a Dialog
  *  - layer Tabs (平台级操作 / 租户级操作) only when viewMode === 'platform'
  *  - three stat cards (总数 / 成功 / 失败)
@@ -57,7 +57,7 @@ export class AdminAuditPage {
     await this.page.goto('/zh/logs/admin-audit');
     await this.page.waitForLoadState('networkidle');
     await this.expectLoaded();
-    // Give react-query + the debounced keyword filter a moment to settle.
+    // Give react-query a moment to settle.
     await this.page.waitForTimeout(800);
   }
 
@@ -107,12 +107,15 @@ export class AdminAuditPage {
     return this.page.locator('main button').filter({ hasText: L.resetText }).first();
   }
 
+  searchButton(): Locator {
+    return this.page.getByTestId('admin-audit-filter-search');
+  }
+
   /**
-   * Open a select and pick the option matching `optionText`. Waits for the
-   * admin-audit list response so the caller doesn't need its own wait.
+   * Open a select and pick the option matching `optionText`.
+   * The selection only edits the filter draft; callers explicitly search.
    */
   async selectOption(trigger: Locator, optionText: string) {
-    const responsePromise = this.waitForListResponse();
     await trigger.click();
     const option = this.page
       .locator('[data-slot="select-item"]')
@@ -120,15 +123,25 @@ export class AdminAuditPage {
       .first();
     await option.waitFor({ state: 'visible', timeout: 10000 });
     await option.click();
-    await responsePromise;
-    await this.page.waitForTimeout(400);
+    await this.page.waitForTimeout(100);
   }
 
   async fillKeyword(value: string) {
     const input = this.keywordInput();
     await input.fill(value);
-    // The keyword filter is debounced 300ms; wait for the resulting fetch.
-    await this.waitForListResponse({ timeout: 5000 }).catch(() => {});
+  }
+
+  async clickSearch() {
+    const responsePromise = this.waitForListResponse().catch(() => {});
+    await this.searchButton().click();
+    await responsePromise;
+    await this.page.waitForTimeout(400);
+  }
+
+  async pressEnterToSearch() {
+    const responsePromise = this.waitForListResponse().catch(() => {});
+    await this.keywordInput().press('Enter');
+    await responsePromise;
     await this.page.waitForTimeout(400);
   }
 

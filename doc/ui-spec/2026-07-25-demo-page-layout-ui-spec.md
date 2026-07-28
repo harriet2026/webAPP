@@ -8,6 +8,7 @@
 - UI 事实源：运行中的 demo `/security-ops-dashboard`
 - 上位设计语言：[`DESIGN.md`](../../../DESIGN.md)
 - 配套交互规范：[跨页面柔和交互反馈 UI 规格](./2026-07-25-cross-page-gentle-interaction-feedback-ui-spec.md)
+- 配套国际化规范：[跨页面国际化与文本完整性 UI 规格](./2026-07-28-cross-page-i18n-text-integrity-ui-spec.md)
 
 ## 0. v5 修订说明
 
@@ -306,7 +307,8 @@ PageHeader 的 81px 高度来自 `16 + 48 + 16 + 1px bottom border`；
 - 不使用 `tracking-tight` 或自定义字距；
 - 不得把标题降为 600 字重，也不得把副标题降为 12px；
 - 副标题是可选项；无副标题时 PageHeader 高度随内容自然收敛；
-- 文案来自 i18n，不在共享组件中硬编码。
+- 文案来自 i18n，不在共享组件中硬编码；四语覆盖、长文案布局和
+  `U+FFFD` 零容忍遵循配套国际化与文本完整性规格。
 
 #### 7.3.3 页面级操作区
 

@@ -290,6 +290,24 @@ const routes: Route[] = [
       data: { rev: 'mockrev0000000', built: '2026-01-01T00:00:00Z', modified: false, build_tag: 'mock' },
     }),
   },
+  // 顶栏用户菜单与个人中心共用当前账号信息。纯 mock 模式必须覆盖该请求，
+  // 否则顶栏新增的显示名查询会落到真实后端并因无登录 cookie 返回 401。
+  {
+    method: 'GET',
+    pattern: '/profile/account',
+    handler: () => ({
+      status: 200,
+      data: {
+        username: 'admin',
+        role: 'system_admin',
+        name: '张运维',
+        phone: '138****8000',
+        email: 'zhangyunwei@example.com',
+        lastLoginTime: '2026-07-28T08:30:00+08:00',
+        lastLoginIp: '192.168.1.100',
+      },
+    }),
+  },
 
   // ─── 邮件处置中心 ──────────────────────────────────────────────────────
   {
@@ -544,12 +562,21 @@ const routes: Route[] = [
       const rawDirection = p.get('direction');
       const direction = rawDirection === 'receive' || rawDirection === 'send' || rawDirection === 'internal' ? rawDirection : 'all';
       const tenant = Number(p.get('tenant_id'));
-      return { status: 200, data: mockDeliveryTrafficFor(direction, Number.isFinite(tenant) && tenant > 0 ? tenant : null) };
+      const startDate = p.get('start_date') ?? '';
+      const endDate = p.get('end_date') ?? '';
+      return { status: 200, data: mockDeliveryTrafficFor(direction, Number.isFinite(tenant) && tenant > 0 ? tenant : null, startDate, endDate) };
     },
   },
   {
     method: 'GET', pattern: '/statistics/delivery-traffic/export.csv',
-    handler: () => ({ status: 200, data: mockDeliveryTrafficCsv() }),
+    handler: (req) => {
+      const p = new URLSearchParams(rawQuery(req.path));
+      const rawDirection = p.get('direction');
+      const direction = rawDirection === 'receive' || rawDirection === 'send' || rawDirection === 'internal' ? rawDirection : 'all';
+      const startDate = p.get('start_date') ?? '';
+      const endDate = p.get('end_date') ?? '';
+      return { status: 200, data: mockDeliveryTrafficCsv(direction, startDate, endDate) };
+    },
   },
   {
     method: 'POST', pattern: '/statistics/delivery-traffic/ai-analysis',

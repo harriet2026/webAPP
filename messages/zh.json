@@ -1,5 +1,9 @@
 {
-  "theme": {"label": "主题", "blue": "蓝色主题", "green": "绿色主题"},
+  "theme": {
+    "label": "主题",
+    "blue": "蓝色主题",
+    "green": "绿色主题"
+  },
   "branding": {
     "saasName": "云邮件安全网关",
     "selfHostedName": "邮件安全网关",
@@ -29,7 +33,8 @@
   },
   "mock": {
     "label": "开发模式",
-    "enabled": "Mock 数据（无需后端）"
+    "enabled": "Mock 数据（无需后端）",
+    "htmlSpec": "查看 HTML Spec"
   },
   "common": {
     "save": "保存",
@@ -203,6 +208,7 @@
     "password": "密码",
     "loginTitle": "OSGateway 管理系统",
     "loginButton": "登录",
+    "demoEntry": "进入演示环境",
     "loginError": "用户名或密码错误",
     "sessionExpired": "会话已过期，请重新登录",
     "showAdvancedRules": "显示高级规则设置",
@@ -325,7 +331,7 @@
     },
     "security": "安全策略",
     "policyPipeline": "策略流水线",
-    "groupManagement": "群组管理",
+    "groupManagement": "群组策略",
     "ipFrequency": "IP 频率限制",
     "inboundAudit": "入站审核",
     "configManagement": "配置管理",
@@ -1381,10 +1387,10 @@
     "finalActionRule": "最终生效规则",
     "actionLabels": {
       "accept": "接受",
-      "reject": "拒绝",
+      "reject": "拒收",
       "quarantine": "隔离",
-      "sideline": "旁路审查",
-      "audit": "送审",
+      "sideline": "灰名单",
+      "audit": "审核",
       "discard": "丢弃",
       "bounce": "退信",
       "mixed": "多个处理结果"
@@ -1428,7 +1434,9 @@
           "timeout": "解读超时，可点击重新生成",
           "rateLimited": "请求过于频繁，请稍后再试",
           "generic": "解读失败，请重试"
-        }
+        },
+        "ruleQueryGeneric": "查询规则详情",
+        "toolGeneric": "工具调用"
       },
       "eyebrow": "邮件日志",
       "subtitle": "通过灵活的列选择和高级搜索，检查邮件元数据、认证结果、规则命中和邮件关联关系。"
@@ -1552,6 +1560,21 @@
       "notSigned": "未签名",
       "selector": "Selector",
       "skipReason": "跳过原因"
+    },
+    "deliveryStatusValue": {
+      "unknown": "未知",
+      "delivered": "已投递",
+      "in_delivery": "投递中",
+      "failed": "投递失败",
+      "cancelled": "已取消",
+      "partial_delivered": "部分投递"
+    },
+    "workflowOutcomeValue": {
+      "approved": "已批准",
+      "rejected": "已拒绝",
+      "released": "已放行",
+      "expired": "已过期",
+      "bounced": "已退信"
     }
   },
   "tenants": {
@@ -2045,6 +2068,11 @@
       "clientIp": "客户端 IP",
       "rewrittenUrl": "改写后链接",
       "clickSource": "链接来源"
+    },
+    "downloadErrors": {
+      "invalidId": "下载失败：记录标识无效",
+      "notFound": "下载失败：记录不存在或已被清理",
+      "generic": "下载失败：服务端读取失败，请稍后重试"
     }
   },
   "authAttempts": {
@@ -2230,8 +2258,11 @@
   "header": {
     "currentTenant": "当前租户",
     "language": "语言",
+    "accountMenu": "账户菜单",
     "profile": "个人信息",
     "logout": "退出登录",
+    "logoutConfirmDescription": "确定要退出当前账号登录吗？",
+    "logoutConfirm": "确认退出",
     "brandName": "OSGateway",
     "tenantLabel": "租户",
     "allTenants": "所有租户",
@@ -4995,6 +5026,7 @@
     "threshold": {
       "segment": "区间",
       "gapWarning": "存在未覆盖区间，请修复或点击\"智能填充\"",
+      "overlapWarning": "存在重叠区间，请修复或点击\"智能填充\"",
       "addSegment": "添加区间",
       "fillGaps": "智能填充",
       "applyPreset": "应用模板",
@@ -5013,6 +5045,7 @@
     "dirty": "配置已修改未保存",
     "unsavedChanges": "有未保存的更改",
     "saveGapBlocked": "存在未覆盖区间，请修复后保存",
+    "saveOverlapBlocked": "存在重叠区间，请修复后保存",
     "copyDialog": {
       "title": "复制配置到其他方向",
       "description": "选择目标方向，将当前【{src}】方向的配置复制过去。",
@@ -5272,6 +5305,7 @@
       "reset": "重置",
       "resetDone": "已重置全部筛选",
       "saveTemplate": "保存为模板",
+      "templates": "模板",
       "advancedFilter": "高级筛选",
       "collapse": "收起",
       "saveCurrent": "保存当前条件",
@@ -5294,6 +5328,7 @@
       "aiTimeout": "语义解析超时，请重试或直接使用结构化筛选",
       "aiError": "语义解析服务繁忙，请稍后重试或直接使用结构化筛选",
       "selectedConditions": "已选条件",
+      "pendingConditions": "待应用条件",
       "clearAll": "清空全部",
       "items": "条"
     },
@@ -5317,13 +5352,13 @@
       "outgoing": "外发",
       "internal": "域内",
       "actions": {
-        "accept": "接受",
-        "reject": "拒绝",
+        "accept": "投递",
+        "reject": "拒收",
         "bounce": "退信",
         "discard": "丢弃",
-        "audit": "送审",
+        "audit": "审核",
         "quarantine": "隔离",
-        "sideline": "旁路",
+        "sideline": "灰名单",
         "mixed": "混合"
       },
       "statuses": {
@@ -5387,6 +5422,11 @@
       "addCondition": "添加条件",
       "addGroup": "添加条件组",
       "groupRelation": "条件组关系",
+      "conditionRelation": "组内条件关系",
+      "groupLabel": "条件组 {n}",
+      "deleteGroup": "删除条件组 {n}",
+      "groupLimit": "最多可添加 {n} 个条件组",
+      "operator": "运算符",
       "operators": {
         "eq": "等于",
         "neq": "不等于",
@@ -5475,7 +5515,9 @@
         "from": "从",
         "to": "到",
         "inList": "a,b,c",
-        "select": "请选择..."
+        "select": "请选择...",
+        "selectFieldFirst": "请先选择字段",
+        "value": "输入值"
       }
     },
     "table": {
@@ -5513,10 +5555,10 @@
     "batch": {
       "findSimilar": "查找相似",
       "release": "放行",
-      "delete": "删除",
+      "delete": "丢弃",
       "export": "导出",
       "confirmRelease": "确认放行选中邮件？",
-      "confirmDelete": "确认删除选中邮件？删除后无法恢复。",
+      "confirmDelete": "确认丢弃选中邮件？丢弃后无法恢复。",
       "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
       "releaseAuditHint": "放行与类型改判都会写入审计记录。",
       "recallDescription": "尝试从收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
@@ -7143,10 +7185,10 @@
     },
     "viewBy": {
       "threat_type": "威胁类型",
-      "action": "处置动作",
+      "action": "执行动作",
+      "email_type": "威胁态势趋势",
       "threat_level": "威胁等级",
-      "delivery_result": "投递结果",
-      "email_type": "威胁态势趋势"
+      "delivery_result": "投递结果"
     },
     "threatTypes": {
       "normal": "正常邮件",
@@ -7161,28 +7203,12 @@
     "actions": {
       "deliver": "投递",
       "mark_deliver": "标记投递",
-      "advanced_review": "高级审核",
+      "greylist": "灰名单",
       "quarantine": "隔离",
       "review": "审核",
-      "block": "拦截",
+      "block": "拒收",
       "drop": "丢弃",
       "recall": "召回"
-    },
-    "deliveryResults": {
-      "delivered": "已投递",
-      "success_rate": "投递成功率",
-      "failed": "失败",
-      "cancelled": "已取消",
-      "in_delivery": "投递中",
-      "partial_delivered": "部分投递",
-      "unknown": "未知"
-    },
-    "threatLevels": {
-      "normal": "正常",
-      "low": "低危",
-      "medium": "中危",
-      "high": "高危",
-      "critical": "严重"
     },
     "emailTypes": {
       "normal": "正常",
@@ -7294,11 +7320,27 @@
       "noData": "暂无数据",
       "loading": "加载中…"
     },
-    "normalHiddenHint": "正常邮件默认隐藏，避免其量级压制威胁曲线，可点击图例展开"
+    "normalHiddenHint": "正常邮件默认隐藏，避免其量级压制威胁曲线，可点击图例展开",
+    "deliveryResults": {
+      "delivered": "已投递",
+      "success_rate": "投递成功率",
+      "failed": "失败",
+      "cancelled": "已取消",
+      "in_delivery": "投递中",
+      "partial_delivered": "部分投递",
+      "unknown": "未知"
+    },
+    "threatLevels": {
+      "normal": "正常",
+      "low": "低危",
+      "medium": "中危",
+      "high": "高危",
+      "critical": "严重"
+    }
   },
   "deliveryTraffic": {
     "title": "投递与流量分析",
-    "subtitle": "分析邮件投递状态、队列健康度和三向流量分布",
+    "subtitle": "分析邮件投递状态和三向流量分布",
     "direction": {
       "label": "方向",
       "all": "全部",
@@ -7388,24 +7430,6 @@
       "internal_spam": "内部垃圾",
       "internal_phishing": "内部钓鱼",
       "internal_virus": "内部病毒"
-    },
-    "queueHealth": {
-      "title": "队列健康状态",
-      "currentLength": "当前队列长度",
-      "receiveQueue": "接收队列",
-      "sendQueue": "外发队列",
-      "internalQueue": "域内队列",
-      "internalHealthy": "域内队列健康",
-      "oldestAge": "最老邮件年龄",
-      "processingRate": "处理速率",
-      "healthy": "队列健康",
-      "warning": "队列告警",
-      "busy": "队列处理中",
-      "offline": "队列监控服务不可用",
-      "expand": "展开队列详情",
-      "collapse": "收起队列详情",
-      "topDomain": "积压最多域名",
-      "currentTooltip": "当前积压 {count} 封"
     },
     "table": {
       "title": "明细数据",
@@ -9549,14 +9573,16 @@
       "empty": "当前无待办事项和告警，系统运行良好",
       "viewAll": "查看全部告警",
       "itemNodeOffline": "节点 {node} 离线",
-      "itemPendingDisposal": "待处置邮件 {n} 封",
-      "itemPendingReport": "举报待审 {n} 封",
+      "itemPendingDisposal": "待处置队列",
+      "itemPendingReport": "举报待审",
       "itemAgentPending": "{agent} 待审 {n} 封",
       "itemLicenseExpiry": "许可证将在 {n} 天后到期",
       "licenseRenewHint": "请及时续期",
       "itemRuleLibLatest": "规则库已是最新版",
       "itemRuleLibOutdated": "规则库有可用更新",
-      "lastSeen": "最近心跳：{time}"
+      "lastSeen": "最近心跳：{time}",
+      "itemPendingDisposalDesc": "{n} 封待处理",
+      "itemPendingReportDesc": "{n} 条"
     },
     "agents": {
       "title": "智能体运行概况",
@@ -9629,16 +9655,16 @@
   },
   "portalRelease": {
     "loading": "加载中...",
-    "confirmTitle": "确认释放隔离邮件",
-    "mailIdLabel": "邮件 ID",
-    "confirmButton": "确认释放",
-    "releasedTitle": "释放成功",
-    "releasedDesc": "邮件已成功释放到您的收件箱。",
+    "confirmTitle": "确认取回隔离邮件",
+    "confirmButton": "确认取回",
+    "releasedTitle": "取回成功",
+    "releasedDesc": "邮件已成功重新投递到您的收件箱。",
     "expiredTitle": "链接已过期或无效",
-    "expiredDesc": "请联系管理员获取新的释放链接。",
+    "expiredDesc": "请联系管理员获取新的取回链接。",
     "errorTitle": "操作失败",
     "errorDesc": "请稍后重试或联系管理员。",
-    "alreadyReleased": "该邮件已被释放，或已超出保留期被清理"
+    "alreadyReleased": "该邮件已被取回，或已超出保留期被清理",
+    "confirmWarning": "您正在取回被网关隔离的邮件，成功后该邮件将重新投递到您的收件箱，请谨慎操作！"
   },
   "portalPreview": {
     "loading": "加载中...",

@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { fetchBootstrap, type Bootstrap } from '@/lib/api/bootstrap';
 import { clearStoredUser } from '@/lib/api/client';
+import { isDemoSessionEnabled } from '@/lib/mock/storage';
+import { createOfflineDemoBootstrap } from '@/lib/product-form/offline-bootstrap';
 import { useAuth } from './auth-context';
 import {
   capabilitiesForForm,
@@ -63,7 +65,13 @@ const ProductFormContext = createContext<Ctx | null>(null);
 export function ProductFormProvider({
   children,
   switcherEnabled = false,
-}: { children: React.ReactNode; switcherEnabled?: boolean }) {
+  configuredForm = 'ai-multi',
+}: {
+  children: React.ReactNode;
+  switcherEnabled?: boolean;
+  configuredForm?: string;
+}) {
+  const offlineDemo = isDemoSessionEnabled();
   const [bs, setBs] = useState<Bootstrap | null>(null);
   const { user, selectedTenantId, setSelectedTenant } = useAuth();
   const isTenantAdmin = user?.role === 'tenant_admin';
@@ -84,6 +92,15 @@ export function ProductFormProvider({
   }, [user?.role, viewer, selectedTenantId, setSelectedTenant]);
 
   useEffect(() => {
+    // An explicit demo session must remain fully usable with no apiserver.
+    // Its product form comes from the server layout and its feature registry
+    // from the local Go-parity-checked mirror. Initialize after hydration so
+    // server rendering never depends on browser localStorage.
+    if (offlineDemo) {
+      setBs(createOfflineDemoBootstrap(configuredForm));
+      return;
+    }
+
     // GT-11771 P3: out-of-order response guard. When a system_admin switches
     // tenant A→B quickly, the slower A response can resolve after B and
     // apply A's grants while the UI shows B. Track the latest request and
@@ -129,7 +146,7 @@ export function ProductFormProvider({
     };
     // Re-fetch when the impersonated tenant changes so grants reflect
     // the selected tenant's capability_flags, not the platform-admin state.
-  }, [selectedTenantId]);
+  }, [selectedTenantId, offlineDemo, configuredForm]);
 
   // Clamp: tenant_admin must always be 'tenant'. Derive on read; sync the
   // cookie (external state) in an effect so a stale 'platform' cookie is fixed.

@@ -5,8 +5,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import type { TrendData } from '@/lib/api/security-overview';
 
-// GT-12482 / html_spec v3 supersedes the older removal: the page and print
-// report expose 邮件类型 / 处置动作 / 威胁等级 / 投递结果 as one shared contract.
+// The page and print report expose only 威胁态势趋势 / 执行动作. The other
+// dimensions remain wire-compatible but are not user-facing tabs.
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
@@ -41,8 +41,8 @@ function loadMessages(locale: string): Record<string, unknown> {
   return JSON.parse(readFileSync(file, 'utf-8'));
 }
 
-describe('security-overview: four perspective contract restored (GT-12482)', () => {
-  it('trend card renders the four v3 view-by tabs', () => {
+describe('security-overview: two user-facing perspectives', () => {
+  it('trend card renders only the two source view-by tabs', () => {
     const { container } = render(createElement(TrendChartCard, {
       trend, isLoading: false, viewBy: 'threat_type' as const,
       onViewByChange: vi.fn(), hiddenSeries: new Set<string>(), onToggleSeries: vi.fn(),
@@ -51,13 +51,11 @@ describe('security-overview: four perspective contract restored (GT-12482)', () 
     expect(tabs).toEqual([
       'viewBy.email_type',
       'viewBy.action',
-      'viewBy.threat_level',
-      'viewBy.delivery_result',
     ]);
   });
 
-  it('keeps the interactive page and print report on the same four views', () => {
-    const expected = ['email_type', 'action', 'threat_level', 'delivery_result'];
+  it('keeps the interactive page and print report on the same two views', () => {
+    const expected = ['email_type', 'action'];
     expect(TREND_VIEW_BY_OPTIONS).toEqual(expected);
     expect(PRINT_VIEW_BY_OPTIONS).toEqual(expected);
   });

@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { deliveryStatusLabel, workflowOutcomeLabel } from './status-labels';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { InvestigationCreateDialog, InvestigationDetailDialog } from '@/components/investigations/investigation-dialogs';
@@ -456,7 +457,7 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
                       <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
                         <label className="text-sm text-muted-foreground">{t('logs.workflowOutcomeSummary')}</label>
                         <div className="mt-2">
-                          <WorkflowOutcomeBadge outcome={email.workflow_outcome_summary} />
+                          <WorkflowOutcomeBadge outcome={email.workflow_outcome_summary} t={t} />
                         </div>
                       </div>
                       <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
@@ -489,7 +490,7 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
                             {summary.map((r: DeliveryRecipientSummary, i: number) => (
                             <div key={i} className="flex flex-wrap items-center gap-2 rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
                               <Badge variant="secondary" className="text-xs font-mono">{r.recipient}</Badge>
-                              <DeliveryStatusBadge status={r.status} />
+                              <DeliveryStatusBadge status={r.status} t={t} />
                               <Badge variant="outline" className="text-xs">{t('logs.attemptCount', { count: r.attempts ?? r.count ?? 0 })}</Badge>
                               {r.last_event_at && (
                                 <span className="text-xs text-muted-foreground">{formatDate(r.last_event_at)}</span>
@@ -613,11 +614,13 @@ function riskBadgeVariant(risk: InvestigationTask['risk_level']) {
   }
 }
 
+// GT-12610：中文环境不得裸渲染英文枚举——标签走 status-labels 的本地化映射，
+// 未知枚举值原文透出。t 缺省时退回原文（防御，不臆造译文）。
 function DeliveryStatusBadge({ status, action, t }: { status?: string; action?: string; t?: (key: string) => string }) {
   if (!status || status === 'unknown') {
     if (action === 'quarantine' && t) return <Badge variant="outline">{t('logs.deliveryStatusQuarantined')}</Badge>;
     if (action === 'sideline' && t) return <Badge variant="secondary">{t('logs.deliveryStatusProcessing')}</Badge>;
-    return <Badge variant="outline">unknown</Badge>;
+    return <Badge variant="outline">{t ? t('logs.deliveryStatusValue.unknown') : 'unknown'}</Badge>;
   }
   const config: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon?: React.ReactNode }> = {
     delivered: { variant: 'default' },
@@ -627,10 +630,10 @@ function DeliveryStatusBadge({ status, action, t }: { status?: string; action?: 
     partial_delivered: { variant: 'secondary' },
   };
   const c = config[status] || { variant: 'outline' as const };
-  return <Badge variant={c.variant}>{c.icon}{status}</Badge>;
+  return <Badge variant={c.variant}>{c.icon}{t ? deliveryStatusLabel(status, t) : status}</Badge>;
 }
 
-function WorkflowOutcomeBadge({ outcome }: { outcome?: string }) {
+function WorkflowOutcomeBadge({ outcome, t }: { outcome?: string; t?: (key: string) => string }) {
   if (!outcome || outcome === 'none') return <span className="text-sm text-muted-foreground">-</span>;
   const config: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
     approved: { variant: 'default' },
@@ -640,5 +643,5 @@ function WorkflowOutcomeBadge({ outcome }: { outcome?: string }) {
     bounced: { variant: 'destructive' },
   };
   const c = config[outcome] || { variant: 'outline' as const };
-  return <Badge variant={c.variant}>{outcome}</Badge>;
+  return <Badge variant={c.variant}>{t ? workflowOutcomeLabel(outcome, t) : outcome}</Badge>;
 }

@@ -7,7 +7,7 @@ import type {
   ThresholdSegment,
   IntentAction,
 } from '@/types/intent-engine';
-import { thresholdActionsForDirection } from '@/types/intent-engine';
+import { thresholdActionsForDirection, segmentCoverageIssue, fixSegmentCoverage } from '@/types/intent-engine';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -37,15 +37,8 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
   const sorted = useMemo(() => [...segments].sort((a, b) => a.min - b.min), [segments]);
   const actions = thresholdActionsForDirection(direction);
 
-  const hasGap = useMemo(() => {
-    if (sorted.length === 0) return true;
-    if (sorted[0].min > 0.001) return true;
-    if (sorted[sorted.length - 1].max < 0.999) return true;
-    for (let i = 0; i < sorted.length - 1; i++) {
-      if (Math.abs(sorted[i].max - sorted[i + 1].min) > 0.001) return true;
-    }
-    return false;
-  }, [sorted]);
+  // D-06 裁决：区分间隙/重叠两种覆盖问题，警告文案与修复动作都按种类给。
+  const coverageIssue = useMemo(() => segmentCoverageIssue(sorted), [sorted]);
 
   const handleSegmentChange = (idx: number, updates: Partial<ThresholdSegment>) => {
     const updated = segments.map((s, i) => (i === idx ? { ...s, ...updates } : s));
@@ -68,28 +61,9 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
     onChange(segments.filter((_, i) => i !== idx));
   };
 
+  // 智能填充：间隙补齐 + 重叠钳掉（旧实现只补间隙，重叠时点击无效）。
   const handleFillGaps = () => {
-    if (sorted.length === 0) {
-      onChange([{ min: 0, max: 1, action: 'quarantine' }]);
-      return;
-    }
-    const filled: ThresholdSegment[] = [];
-    let lastMax = 0;
-    sorted.forEach((segment) => {
-      if (segment.min > lastMax + 0.001) {
-        filled.push({ ...segment, min: lastMax });
-      } else {
-        filled.push(segment);
-      }
-      lastMax = segment.max;
-    });
-    if (lastMax < 0.999) {
-      filled[filled.length - 1] = { ...filled[filled.length - 1], max: 1 };
-    }
-    if (filled.length > 0 && filled[0].min > 0.001) {
-      filled[0] = { ...filled[0], min: 0 };
-    }
-    onChange(filled);
+    onChange(fixSegmentCoverage(segments));
   };
 
   const actionLabel = (a: IntentAction) => {
@@ -211,11 +185,14 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
         ))}
       </div>
 
-      {/* 间隙警告 */}
-      {hasGap && (
-        <div className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-700 dark:text-amber-300">
+      {/* 覆盖问题警告（间隙/重叠分开报，避免重叠时提示"未覆盖"误导） */}
+      {coverageIssue && (
+        <div
+          className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-700 dark:text-amber-300"
+          data-testid="ie-coverage-warning"
+        >
           <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{t('gapWarning')}</span>
+          <span>{coverageIssue === 'overlap' ? t('overlapWarning') : t('gapWarning')}</span>
         </div>
       )}
 
@@ -225,7 +202,7 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
           <Plus className="h-3.5 w-3.5 mr-1" />
           {t('addSegment')}
         </Button>
-        {hasGap && (
+        {coverageIssue && (
           <Button variant="outline" size="sm" onClick={handleFillGaps} className="h-8 text-xs" disabled={disabled}>
             <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
             {t('fillGaps')}

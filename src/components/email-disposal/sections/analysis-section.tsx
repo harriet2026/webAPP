@@ -2,7 +2,9 @@
 
 import React, { useMemo, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
+// GT-12583：必须用 next-intl 的 locale-aware router——本项目 localePrefix 为
+// 默认 always，next/navigation 的裸 push 会丢 /zh 前缀导致 404。
+import { useRouter } from '@/i18n/navigation';
 import {
   CheckCircle2, AlertTriangle, XCircle, MinusCircle, ChevronDown,
   Clock, ShieldQuestion, ShieldAlert, ExternalLink, ArrowRight, User,

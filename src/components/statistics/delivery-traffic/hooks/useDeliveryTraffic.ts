@@ -1,5 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchDeliveryTraffic, type Direction } from '@/lib/api/delivery-traffic';
+import {
+  fetchDeliveryTraffic,
+  type DeliveryTrafficInterval,
+  type Direction,
+} from '@/lib/api/delivery-traffic';
 import { useApiRequest } from '@/lib/api/client';
 import { useTenant } from '@/hooks/use-tenant';
 
@@ -8,6 +12,7 @@ export function useDeliveryTraffic(params: {
   endDate: string;
   direction: Direction;
   tenantId?: number | null;
+  interval?: DeliveryTrafficInterval;
   enabled?: boolean;
 }) {
   const { apiRequest } = useApiRequest();
@@ -15,7 +20,7 @@ export function useDeliveryTraffic(params: {
   const tenantId = params.tenantId === undefined ? effectiveTenantId : params.tenantId;
 
   return useQuery({
-    queryKey: ['delivery-traffic', tenantId, params.direction, params.startDate, params.endDate],
+    queryKey: ['delivery-traffic', tenantId, params.direction, params.startDate, params.endDate, params.interval],
     queryFn: () => fetchDeliveryTraffic({ ...params, tenantId }, apiRequest),
     enabled: params.enabled !== false,
     // Statistics failures (notably 503) are actionable page state. Automatic

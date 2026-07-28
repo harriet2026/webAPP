@@ -16,8 +16,11 @@ const wrap = (ui: React.ReactNode) => (
 );
 
 const routerPush = vi.fn();
-vi.mock('next/navigation', () => ({
+// GT-12583：组件改用 next-intl 的 locale-aware router（@/i18n/navigation），
+// mock 对应模块（真实实现会向 push 的路径自动补 /zh 前缀，这里按透传断言）。
+vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({ push: routerPush, replace: vi.fn(), prefetch: vi.fn() }),
+  Link: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 function baseDetail(overrides: Partial<MailLogDetail> = {}): MailLogDetail {

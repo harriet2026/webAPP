@@ -2,12 +2,14 @@ import { apiRequest, type ApiRequestFn } from './client';
 
 export type Direction = 'all' | 'receive' | 'send' | 'internal';
 export type TimeRange = 'today' | '7d' | '30d' | 'this_month' | 'last_month' | 'custom';
+export type DeliveryTrafficInterval = 'hour' | 'day';
 
 export interface DeliveryTrafficParams {
   direction?: Direction;
   startDate?: string;
   endDate?: string;
   tenantId?: number | null;
+  interval?: DeliveryTrafficInterval;
 }
 
 export interface KpiData {
@@ -35,6 +37,8 @@ export interface TrendPoint {
 
 export interface TrendData {
   points: TrendPoint[];
+  /** 'hour' when the range is a single day (today), 'day' otherwise. */
+  granularity?: 'hour' | 'day';
 }
 
 export interface DistributionItem {
@@ -57,26 +61,6 @@ export interface LatencyData {
   buckets?: LatencyBucket[];
 }
 
-export interface QueueHealthSingle {
-  current: number;
-  oldest_age_ms: number;
-  processing_rate: number;
-  top_domain?: string;
-  top_domain_count?: number;
-}
-
-export interface QueueHealthAll {
-  receive: number;
-  send: number;
-  internal: number;
-}
-
-export type QueueHealth = QueueHealthSingle | QueueHealthAll;
-
-export function isQueueHealthAll(q: QueueHealth): q is QueueHealthAll {
-  return 'receive' in q;
-}
-
 export interface DetailTableRow {
   date: string;
   total: number;
@@ -92,7 +76,6 @@ export interface DeliveryTrafficResponse {
   trend: TrendData;
   distribution: DistributionItem[];
   latency: LatencyData;
-  queue_health: QueueHealth;
   queue_trend?: TrendPoint[];
   detail_table: DetailTableRow[];
   generated_at?: string;
@@ -118,6 +101,7 @@ export async function fetchDeliveryTraffic(
     end_date: params.endDate,
     direction: params.direction,
     tenant_id: params.tenantId,
+    interval: params.interval,
   });
   return requestFn<DeliveryTrafficResponse>(`/statistics/delivery-traffic?${query}`);
 }

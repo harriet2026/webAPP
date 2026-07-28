@@ -36,6 +36,9 @@ interface SendReceiveContextCardProps {
   // Per-recipient delivery events, threaded straight through to
   // RecipientStatus (delivered-status detail line, DD-11 part 2).
   events?: MailChildEvent[];
+  // GT-12596：B4「查看策略命中详情」跳转安全分析区的处置依据卡（detail-modal
+  // 的 scrollToSection('analysis')）。未注入时回退「暂未实现」toast。
+  onViewPolicyDetail?: () => void;
 }
 
 // STATUS_STYLES intentionally duplicates recipient-status.tsx's own
@@ -56,16 +59,16 @@ const STATUS_STYLES: Record<string, string> = {
 };
 const DEFAULT_STATUS_STYLE = 'bg-gray-50 text-gray-700 border-gray-200';
 
-export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnly, events }: SendReceiveContextCardProps) {
+export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnly, events, onViewPolicyDetail }: SendReceiveContextCardProps) {
   const t = useTranslations('emailDisposal.detail.overview');
   const [expanded, setExpanded] = useState(false);
 
   const dispositions = detail.recipient_dispositions ?? [];
   const isSingle = dispositions.length === 1;
   const single = isSingle ? dispositions[0] : undefined;
-  // §9-A: 「查看策略命中详情」/「查看IP信誉」都是 no-op 链接（spec 明确没有
-  // 落地页面），一律用统一的「暂未实现」toast 反馈，复用 SenderActions 已有
-  // 的同一句译文而不是新造一句意思重复的文案。
+  // 「查看IP信誉」仍是 no-op 链接（spec §9-A 有意偏离清单，已用户确认
+  // 2026-07-23：无后端字段），保持「暂未实现」toast；「查看策略命中详情」
+  // 不在 §9-A 清单里，GT-12596 起跳安全分析区的处置依据卡（onViewPolicyDetail）。
   const singleNotOperable = !!single
     && recipientActionsForStatus(single.status, !!single.object_id).length === 0;
 
@@ -159,7 +162,7 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
               size="sm"
               className="h-auto p-0 text-xs"
               data-testid="email-disposal-overview-context-view-policy"
-              onClick={notImplemented}
+              onClick={onViewPolicyDetail ?? notImplemented}
             >
               <Shield className="mr-1 h-3 w-3" />
               {t('context.viewPolicyDetail')}

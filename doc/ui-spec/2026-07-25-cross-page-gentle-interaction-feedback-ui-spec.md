@@ -6,6 +6,7 @@
 - 范围：`webapp/` 管理控制台
 - 上位设计语言：[`DESIGN.md`](../../../DESIGN.md)
 - 首个参考实现：`webapp/src/components/layout/sidebar-nav.tsx`
+- 配套国际化规范：[跨页面国际化与文本完整性 UI 规格](./2026-07-28-cross-page-i18n-text-integrity-ui-spec.md)
 
 ## 1. 目的
 
