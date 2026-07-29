@@ -401,7 +401,7 @@ export function MailListTable({
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">
+                <TableHead className="sticky left-0 z-30 w-10 bg-card border-r">
                   <Checkbox checked={false} disabled aria-label="Select all" />
                 </TableHead>
                 {colHead('time')}
@@ -440,7 +440,7 @@ export function MailListTable({
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">
+                <TableHead className="sticky left-0 z-30 w-10 bg-card border-r">
                   <Checkbox checked={false} disabled aria-label="Select all" />
                 </TableHead>
                 {colHead('time')}
@@ -549,7 +549,7 @@ export function MailListTable({
         <Table className="min-w-[800px]">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-10">
+              <TableHead className="sticky left-0 z-30 w-10 bg-card border-r">
                 <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
               </TableHead>
               {colHead('time')}
@@ -583,7 +583,13 @@ export function MailListTable({
                   onItemClick(item.id);
                 }}
               >
-                <TableCell onClick={(e) => e.stopPropagation()}>
+                <TableCell
+                  className={cn(
+                    'sticky left-0 z-10 w-10 border-r bg-card transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
+                    selectedIds.has(item.id) && 'bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]',
+                  )}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Checkbox
                     checked={selectedIds.has(item.id)}
                     onCheckedChange={() => toggleOne(item.id)}
