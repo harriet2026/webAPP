@@ -140,7 +140,12 @@
     "id": "ID",
     "password": "Пароль",
     "close": "Закрыть",
-    "previous": "Назад"
+    "previous": "Назад",
+    "unsavedChangesLeaveTitle": "Есть несохранённые изменения",
+    "unsavedChangesLeaveDesc": "На этой странице есть несохранённые изменения. При уходе они будут потеряны. Выберите действие.",
+    "keepEditing": "Продолжить редактирование",
+    "discardAndLeave": "Отменить и уйти",
+    "saveAndLeave": "Сохранить и уйти"
   },
   "ruleImportExport": {
     "trigger": "Единый импорт / экспорт",

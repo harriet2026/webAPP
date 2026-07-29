@@ -12,6 +12,7 @@ import { useProductForm } from '@/contexts/product-form-context';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { visibleNavIds, isNavItemAllowed } from './sidebar-visibility';
 import { VersionFooter } from './version-footer';
+import { useUnsavedGuard } from '@/contexts/unsaved-guard-context';
 
 interface SidebarNavItemProps {
   item: NavItem;
@@ -26,6 +27,7 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
+  const { requestNavigate } = useUnsavedGuard();
   const { isHovered, pointerHoverProps } = usePointerHover<HTMLButtonElement>();
 
   if (!isItemAllowed(item)) {
@@ -50,7 +52,7 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
     if (hasChildren) {
       toggleExpand(item.id);
     } else if (item.href) {
-      router.push(item.href);
+      requestNavigate(item.href, (href) => router.push(href));
     }
   };
 

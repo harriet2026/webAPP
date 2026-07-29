@@ -140,7 +140,12 @@
     "id": "ID",
     "password": "รหัสผ่าน",
     "close": "ปิด",
-    "previous": "ก่อนหน้า"
+    "previous": "ก่อนหน้า",
+    "unsavedChangesLeaveTitle": "มีการแก้ไขที่ยังไม่บันทึก",
+    "unsavedChangesLeaveDesc": "คุณมีการแก้ไขที่ยังไม่บันทึกในหน้านี้ การออกจากหน้าจะทำให้การแก้ไขสูญหาย กรุณาเลือกการดำเนินการ",
+    "keepEditing": "แก้ไขต่อ",
+    "discardAndLeave": "ยกเลิกและออก",
+    "saveAndLeave": "บันทึกแล้วออก"
   },
   "ruleImportExport": {
     "trigger": "นำเข้า / ส่งออกแบบรวม",

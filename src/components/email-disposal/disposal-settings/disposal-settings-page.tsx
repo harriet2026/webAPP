@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
@@ -21,6 +21,7 @@ import { getBrowserTz } from '@/lib/timezone';
 import { useTenant } from '@/hooks/use-tenant';
 import { useProductForm } from '@/contexts/product-form-context';
 import { useAuth } from '@/contexts/auth-context';
+import { useUnsavedGuard } from '@/contexts/unsaved-guard-context';
 
 function normalizeTime(v: string): string {
   if (/^\d{2}:\d{2}$/.test(v)) return `${v}:00`;
@@ -34,6 +35,7 @@ export function DisposalSettingsPage() {
   const { effectiveTenantId } = useTenant();
   const { capabilities } = useProductForm();
   const { isSystemAdmin, demoAuthBypassEnabled } = useAuth();
+  const { registerGuard, unregisterGuard } = useUnsavedGuard();
   // GT-12427: 多租户下「处置设置」是租户自有配置(registry platformHidden=true 已隐藏平台
   // 视角侧栏入口)。平台管理员未下钻到具体租户(effectiveTenantId===null)时,即便手贴 URL
   // 也拒绝渲染/取数,与同区兄弟模块 group-policy 一致;下钻进入某租户后按该租户身份正常配置。
@@ -117,6 +119,47 @@ export function DisposalSettingsPage() {
   // GT-12251：校验失败时 handleSubmit 默认什么都不做，保存按钮看上去"没反应"。
   // 至少给一个明确的失败提示，具体字段错误由各 tab 就地渲染。
   const onInvalid = () => toast.error(t('saveValidationFailed'));
+
+  // 供 UnsavedGuardDialog「保存后离开」选项调用：触发完整的 RHF 校验+提交流程。
+  const saveForGuard = useCallback(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        form.handleSubmit(
+          async (values) => {
+            await onSubmit(values);
+            resolve();
+          },
+          () => {
+            // 校验失败：让 Promise reject，保持弹窗关闭但停留在页面
+            toast.error(t('saveValidationFailed'));
+            reject(new Error('validation'));
+          },
+        )();
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [form],
+  );
+
+  // 注册 / 更新 guard（随 isDirty 变化实时同步）
+  const isDirty = form.formState.isDirty;
+  useEffect(() => {
+    registerGuard({ isDirty, onSave: isDirty ? saveForGuard : undefined });
+    return () => {
+      unregisterGuard();
+    };
+    // saveForGuard 依赖 form（稳定引用），isDirty 是基础类型，不会引起无限循环。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDirty, saveForGuard]);
+
+  // 浏览器关闭/刷新时的原生拦截
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!form.formState.isDirty) return;
+      e.preventDefault();
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [form]);
 
   const onReset = () => form.reset(defaultDisposalSettings());
 

@@ -140,7 +140,12 @@
     "id": "ID",
     "password": "Password",
     "close": "Close",
-    "previous": "Previous"
+    "previous": "Previous",
+    "unsavedChangesLeaveTitle": "You have unsaved changes",
+    "unsavedChangesLeaveDesc": "You have unsaved changes on this page. Leaving will discard them. Please choose an action.",
+    "keepEditing": "Keep editing",
+    "discardAndLeave": "Discard and leave",
+    "saveAndLeave": "Save and leave"
   },
   "ruleImportExport": {
     "trigger": "Unified import / export",
