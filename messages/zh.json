@@ -5663,7 +5663,6 @@
         "recipient": "收信人",
         "context": {
           "title": "收发信上下文",
-          "ipReputation": "查看IP信誉",
           "recipientsCount": "{n} 个收件人",
           "notOperableWarning": "该邮件已被阻断/丢弃，系统未保留原文，不可执行后续操作。",
           "viewPolicyDetail": "查看策略命中详情",

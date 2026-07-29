@@ -5668,7 +5668,6 @@
         "recipient": "Recipient",
         "context": {
           "title": "Send/Receive Context",
-          "ipReputation": "View IP Reputation",
           "recipientsCount": "{n} recipients",
           "notOperableWarning": "This email was blocked/discarded; no content is stored and no further action is possible.",
           "viewPolicyDetail": "View Policy Match Details",

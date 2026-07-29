@@ -6,7 +6,7 @@ import type { MailLogDetail } from '@/types/email-disposal-detail';
 import { SendReceiveContextCard } from './send-receive-context-card';
 
 // Real zh messages (not an identity mock) -- assertions read actual rendered
-// copy (查看IP信誉/展开完整信息/etc), which is the point of this suite.
+// copy (展开完整信息/etc), which is the point of this suite.
 const wrap = (ui: React.ReactNode) => (
   <NextIntlClientProvider locale="zh" messages={zh as never}>
     {ui}
@@ -87,11 +87,6 @@ describe('SendReceiveContextCard', () => {
     expect(senderRow.textContent).toContain('上海');
   });
 
-  it('renders the 查看IP信誉 no-op link (B1 / §9-A)', () => {
-    renderCard(baseDetail());
-    expect(screen.getByTestId('email-disposal-overview-context-ip-reputation')).toHaveTextContent('查看IP信誉');
-  });
-
   it('renders single-recipient pill with status (B2)', () => {
     renderCard(baseDetail());
     const row = screen.getByTestId('email-disposal-overview-context-recipient');
@@ -154,7 +149,7 @@ describe('SendReceiveContextCard', () => {
     expect(row.textContent).toContain('20.0 KB');
   });
 
-  it('expands to show full info (Message-ID/Return-Path/PTR/ASN) and NOT TLS/IP信誉评分 (B6/B7, §9-A)', () => {
+  it('expands to show full info (Message-ID/Return-Path/PTR/ASN) and NOT TLS (B6/B7, §9-A)', () => {
     renderCard(baseDetail());
     expect(screen.queryByTestId('email-disposal-overview-context-fullinfo')).not.toBeInTheDocument();
 
@@ -168,7 +163,6 @@ describe('SendReceiveContextCard', () => {
     expect(full.textContent).toContain('PTR: mail.company-security.com');
     expect(full.textContent).toContain('ASN: AS12345');
     expect(full.textContent).not.toContain('TLS');
-    expect(full.textContent).not.toContain('IP信誉评分');
 
     fireEvent.click(screen.getByTestId('email-disposal-overview-context-expand-fullinfo'));
     expect(screen.queryByTestId('email-disposal-overview-context-fullinfo')).not.toBeInTheDocument();
