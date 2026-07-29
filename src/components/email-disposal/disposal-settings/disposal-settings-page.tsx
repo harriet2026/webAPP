@@ -149,32 +149,6 @@ export function DisposalSettingsPage() {
       title={t('pageTitle')}
       description={t('pageDescription')}
       data-testid="disposal-settings-page"
-      actions={
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            data-testid="disposal-settings-reset"
-            onClick={onReset}
-          >
-            <RotateCcw className="mr-2 h-4 w-4" />
-            {t('reset')}
-          </Button>
-          <Button
-            type="button"
-            data-testid="disposal-settings-save"
-            onClick={form.handleSubmit(onSubmit, onInvalid)}
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="mr-2 h-4 w-4" />
-            )}
-            {t('save')}
-          </Button>
-        </div>
-      }
     >
       <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
         <Tabs defaultValue="quarantine" data-testid="disposal-settings-tabs">
@@ -208,6 +182,29 @@ export function DisposalSettingsPage() {
             <RecallSettingsTab control={control} watch={watch} setValue={setValue} />
           </TabsContent>
         </Tabs>
+        <div className="mt-6 flex justify-end gap-2 border-t pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            data-testid="disposal-settings-reset"
+            onClick={onReset}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            {t('reset')}
+          </Button>
+          <Button
+            type="submit"
+            data-testid="disposal-settings-save"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            {t('save')}
+          </Button>
+        </div>
       </form>
     </FramedPage>
   );
