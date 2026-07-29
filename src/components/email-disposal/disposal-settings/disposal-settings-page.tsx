@@ -152,7 +152,7 @@ export function DisposalSettingsPage() {
     >
       <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
         <Tabs defaultValue="quarantine" data-testid="disposal-settings-tabs">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 [&>[data-state=active]]:bg-background [&>[data-state=active]]:text-foreground [&>[data-state=active]]:shadow-sm">
             <TabsTrigger value="quarantine" data-testid="disposal-settings-tab-quarantine">
               <Shield className="mr-2 h-4 w-4" />
               {t('tabQuarantine')}
