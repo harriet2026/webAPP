@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>变更记录 · 处置设置体验优化与安全校验 · 2026-07-29</title>
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  /* ── 基础重置 ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #1a1a2e; background: #f4f6fb; }
+
+  /* ── 顶部 Header ── */
+  .cl-header { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); color: #fff; padding: 32px 48px 28px; }
+  .cl-header h1 { font-size: 22px; font-weight: 700; letter-spacing: .01em; margin-bottom: 6px; }
+  .cl-header .subtitle { font-size: 13px; opacity: .75; margin-bottom: 20px; }
+  .cl-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 24px; }
+  .cl-meta-grid dt { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; opacity: .6; margin-bottom: 2px; }
+  .cl-meta-grid dd { font-size: 13px; font-weight: 500; font-family: "SF Mono", "Cascadia Code", monospace; }
+
+  /* ── 主容器 ── */
+  .cl-wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  /* ── 章节标题 ── */
+  .cl-section-title { font-size: 16px; font-weight: 700; color: #1e3a5f; border-left: 4px solid #2563eb; padding-left: 12px; margin: 40px 0 16px; }
+
+  /* ── 变更类型标签 ── */
+  .tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; margin: 1px 2px; white-space: nowrap; }
+  .tag-layout   { background: #dbeafe; color: #1d4ed8; }
+  .tag-ux       { background: #f3e8ff; color: #7c3aed; }
+  .tag-validate { background: #fef9c3; color: #a16207; }
+  .tag-error    { background: #fee2e2; color: #b91c1c; }
+  .tag-perm     { background: #fce7f3; color: #be185d; }
+  .tag-i18n     { background: #dcfce7; color: #15803d; }
+  .tag-arch     { background: #e0f2fe; color: #0369a1; }
+
+  /* ── 概览表 ── */
+  .overview-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .overview-table thead tr { background: #1e3a5f; color: #fff; }
+  .overview-table thead th { padding: 11px 14px; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+  .overview-table tbody tr { border-bottom: 1px solid #f0f0f5; }
+  .overview-table tbody tr:last-child { border-bottom: none; }
+  .overview-table tbody tr:hover { background: #f8faff; }
+  .overview-table td { padding: 10px 14px; vertical-align: top; font-size: 13px; }
+  .overview-table td:first-child { color: #6b7280; font-weight: 600; width: 36px; }
+  .path-cell { font-weight: 600; color: #1e3a5f; }
+  .path-route { display: block; font-size: 11px; font-family: monospace; color: #6b7280; margin-top: 2px; font-weight: 400; }
+  .count-badge { display: inline-block; background: #e0f2fe; color: #0369a1; border-radius: 9999px; padding: 1px 8px; font-size: 11px; font-weight: 700; }
+
+  /* ── 详情卡片 ── */
+  .cl-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 28px; overflow: hidden; }
+  .cl-card-header { background: #f8faff; border-bottom: 1px solid #e5e7f0; padding: 16px 24px; display: flex; align-items: flex-start; gap: 14px; }
+  .cl-card-index { width: 30px; height: 30px; border-radius: 50%; background: #2563eb; color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .cl-card-title { flex: 1; }
+  .cl-card-title h3 { font-size: 16px; font-weight: 700; color: #1e3a5f; margin-bottom: 4px; }
+  .cl-card-title .cl-route { font-size: 12px; font-family: monospace; color: #6b7280; }
+  .cl-card-body { padding: 20px 24px; }
+  .cl-card-body h4 { font-size: 13px; font-weight: 700; color: #374151; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: .04em; }
+  .cl-card-body h4:first-child { margin-top: 0; }
+  .cl-card-body ul { padding-left: 18px; }
+  .cl-card-body ul li { margin-bottom: 5px; font-size: 13px; color: #374151; }
+  .cl-card-body ul li strong { color: #1e3a5f; }
+  .cl-card-body p { font-size: 13px; color: #4b5563; line-height: 1.7; }
+  .cl-card-body blockquote { border-left: 3px solid #2563eb; padding: 8px 14px; background: #f0f6ff; border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 13px; color: #1e3a5f; }
+
+  /* ── 影响模块表 ── */
+  .impact-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .impact-table thead tr { background: #f1f5f9; }
+  .impact-table thead th { padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b7280; letter-spacing: .04em; border-bottom: 1px solid #e5e7eb; }
+  .impact-table tbody tr { border-bottom: 1px solid #f3f4f6; }
+  .impact-table tbody tr:last-child { border-bottom: none; }
+  .impact-table td { padding: 8px 12px; font-size: 12px; vertical-align: top; }
+  .impact-table td:first-child { font-family: monospace; color: #1e3a5f; font-size: 11.5px; }
+  .impact-new  { background: #dcfce7; color: #15803d; border-radius: 4px; padding: 1px 6px; font-size: 11px; font-weight: 600; }
+  .impact-mod  { background: #dbeafe; color: #1d4ed8; border-radius: 4px; padding: 1px 6px; font-size: 11px; font-weight: 600; }
+  .impact-i18n { background: #dcfce7; color: #15803d; border-radius: 4px; padding: 1px 6px; font-size: 11px; font-weight: 600; }
+
+  /* ── 未解决事项 ── */
+  .pending-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .pending-table thead tr { background: #fef3c7; }
+  .pending-table thead th { padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 600; color: #92400e; }
+  .pending-table tbody tr { border-bottom: 1px solid #fef9c3; }
+  .pending-table td { padding: 10px 14px; font-size: 13px; }
+  .status-pending { background: #fef3c7; color: #92400e; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600; }
+  .status-done    { background: #dcfce7; color: #15803d; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600; }
+
+  /* ── 版本历史 ── */
+  .history-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .history-table thead tr { background: #1e3a5f; color: #fff; }
+  .history-table thead th { padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 600; }
+  .history-table tbody tr { border-bottom: 1px solid #f0f0f5; }
+  .history-table td { padding: 10px 14px; font-size: 13px; }
+  .history-table td:first-child { font-family: monospace; color: #6b7280; font-size: 12px; }
+  .current-row td { background: #eff6ff; font-weight: 600; }
+
+  /* ── 页脚 ── */
+  footer { text-align: center; padding: 24px; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ████ HEADER ████ -->
+<header class="cl-header">
+  <h1>变更记录 · 邮件处置 / 处置设置 · 体验优化与安全校验</h1>
+  <p class="subtitle">本文档记录本次对话中对「处置设置」模块所有功能优化的变更详情，供 PM 迭代归档与复盘使用。</p>
+  <dl class="cl-meta-grid">
+    <div><dt>对话日期</dt><dd>2026-07-29</dd></div>
+    <div><dt>生成时间</dt><dd>2026-07-29</dd></div>
+    <div><dt>Git 分支</dt><dd>v0/0665430749-7903-dcc979a5</dd></div>
+    <div><dt>涉及模块</dt><dd>5 个</dd></div>
+    <div><dt>变更条目</dt><dd>5 条</dd></div>
+    <div><dt>涉及文件</dt><dd>11 个</dd></div>
+  </dl>
+</header>
+
+<div class="cl-wrap">
+
+  <!-- ████ 对话主题 ████ -->
+  <p style="margin: 24px 0 8px; font-size: 14px; color: #4b5563; background: #fff; padding: 14px 20px; border-radius: 8px; border-left: 4px solid #2563eb; box-shadow: 0 1px 3px rgba(0,0,0,.06);">
+    <strong>对话主题：</strong>处置设置页面的 UX 改进（布局紧凑化、操作栏固定、未保存提醒）与安全性增强（外部访问地址前端校验、后端错误消息本地化），以及 PM 版变更记录技能的建立。
+  </p>
+
+  <!-- ████ 变更概览表 ████ -->
+  <h2 class="cl-section-title">变更概览</h2>
+  <table class="overview-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>功能路径</th>
+        <th>变更类型</th>
+        <th>优化点摘要</th>
+        <th>影响模块数</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td class="path-cell">
+          邮件处置 / 处置设置 / 隔离区设置 · 分类通知控制
+          <span class="path-route">/zh/email-disposal/disposal-settings</span>
+        </td>
+        <td>
+          <span class="tag tag-layout">布局优化</span>
+          <span class="tag tag-i18n">i18n</span>
+        </td>
+        <td>分类通知卡片列表改为紧凑五列表格，页面高度减少约 60%</td>
+        <td><span class="count-badge">2</span></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td class="path-cell">
+          邮件处置 / 处置设置 · 操作栏
+          <span class="path-route">/zh/email-disposal/disposal-settings</span>
+        </td>
+        <td>
+          <span class="tag tag-ux">可用性</span>
+          <span class="tag tag-layout">布局优化</span>
+        </td>
+        <td>重置/保存按钮改为 sticky 底部吸附栏，滚动时持续可见</td>
+        <td><span class="count-badge">1</span></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td class="path-cell">
+          邮件处置 / 处置设置 / 用户权限设置 · 外部访问地址校验
+          <span class="path-route">/zh/email-disposal/disposal-settings</span>
+        </td>
+        <td>
+          <span class="tag tag-validate">校验增强</span>
+          <span class="tag tag-perm">权限控制</span>
+          <span class="tag tag-i18n">i18n</span>
+        </td>
+        <td>外部访问地址为空时，禁用四项权限 Switch 并展示 inline 警告横幅；schema 层阻断提交</td>
+        <td><span class="count-badge">4</span></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td class="path-cell">
+          邮件处置 / 处置设置 · 后端错误消息本地化
+          <span class="path-route">/zh/email-disposal/disposal-settings</span>
+        </td>
+        <td>
+          <span class="tag tag-error">错误处理</span>
+          <span class="tag tag-i18n">i18n</span>
+        </td>
+        <td>catch 块将后端英文错误 message 映射为 i18n 键再 toast，不再裸露字段名</td>
+        <td><span class="count-badge">2</span></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td class="path-cell">
+          全局 · 未保存离开拦截
+          <span class="path-route">全局 SPA 导航（侧栏跳转）</span>
+        </td>
+        <td>
+          <span class="tag tag-ux">可用性</span>
+          <span class="tag tag-arch">架构</span>
+          <span class="tag tag-i18n">i18n</span>
+        </td>
+        <td>新增 UnsavedGuardContext，处置设置表单有未保存改动时跳转侧栏弹出三选项确认弹窗</td>
+        <td><span class="count-badge">5</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ████ 逐条变更详情 ████ -->
+  <h2 class="cl-section-title">逐条变更详情</h2>
+
+  <!-- ── 条目 1 ── -->
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-index">1</div>
+      <div class="cl-card-title">
+        <h3>邮件处置 / 处置设置 / 隔离区设置 · 分类通知控制</h3>
+        <span class="cl-route">/zh/email-disposal/disposal-settings → Tab: 隔离区设置 → 分类通知控制模块</span>
+        <div style="margin-top:6px;">
+          <span class="tag tag-layout">布局优化</span>
+          <span class="tag tag-i18n">i18n</span>
+        </div>
+      </div>
+    </div>
+    <div class="cl-card-body">
+      <h4>本次优化点</h4>
+      <ul>
+        <li><strong>结构重构：</strong>将原来每个邮件分类各占一个 <code>rounded-lg border p-4</code> 展开卡片（约 80–140px/行）改为单一紧凑五列 <code>&lt;table&gt;</code>（约 44px/行），页面高度节省约 60%。</li>
+        <li><strong>列设计：</strong>五列分别为：勾选框 / 分类标签 / 最低置信度输入 / 最高置信度输入 / 状态文字。置信度输入始终可见，未勾选行整体 <code>opacity-60</code> 灰化表示禁用，省去 expand/collapse 交互。</li>
+        <li><strong>表头容器：</strong>原 <code>div.space-y-3</code> 改为带 <code>rounded-lg border overflow-hidden</code> 的表格容器，首行 <code>bg-muted/50</code> 表头区域分离。</li>
+        <li><strong>新增 i18n 键：</strong><code>category</code>（分类）、<code>notifyStatus</code>（状态）两个表头键，补充到 zh / en / th / ru 四个语言文件。</li>
+        <li><strong>错误提示：</strong>置信度范围错误从展开区域移至「最低置信度」列内联显示，避免行高突变。</li>
+      </ul>
+
+      <h4>影响的关联模块</h4>
+      <table class="impact-table">
+        <thead><tr><th>文件</th><th>类型</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>src/components/email-disposal/disposal-settings/quarantine-settings-tab.tsx</td>
+            <td><span class="impact-mod">直接修改</span></td>
+            <td>分类通知列表 JSX 从卡片列表重构为 table，删除约 65 行，新增约 63 行</td>
+          </tr>
+          <tr>
+            <td>messages/zh.json · messages/en.json · messages/th.json · messages/ru.json</td>
+            <td><span class="impact-i18n">i18n 新增键</span></td>
+            <td>新增 <code>disposalSettings.category</code>、<code>disposalSettings.notifyStatus</code> 共 2 键 × 4 语言</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>设计决策与背景</h4>
+      <blockquote>分类数量多（广告、垃圾、钓鱼、病毒等），每条卡片展开后页面需大量滚动，管理员容易忽略下方配置。紧凑表格模式参考企业后台标准做法（如 Google Admin Console），在信息密度与可读性间取得平衡。</blockquote>
+    </div>
+  </div>
+
+  <!-- ── 条目 2 ── -->
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-index">2</div>
+      <div class="cl-card-title">
+        <h3>邮件处置 / 处置设置 · 操作按钮 sticky 吸附</h3>
+        <span class="cl-route">/zh/email-disposal/disposal-settings → 底部操作栏（重置 / 保存设置）</span>
+        <div style="margin-top:6px;">
+          <span class="tag tag-ux">可用性</span>
+          <span class="tag tag-layout">布局优化</span>
+        </div>
+      </div>
+    </div>
+    <div class="cl-card-body">
+      <h4>本次优化点</h4>
+      <ul>
+        <li><strong>问题：</strong>保存/重置按钮位于页面底部，页面内容较长时滚动后按钮完全离开视口，管理员容易误以为修改已生效。</li>
+        <li><strong>方案：</strong>将操作按钮容器 <code>div</code> 的 className 增加 <code>sticky bottom-0 z-10 bg-background/95 backdrop-blur-sm</code>，使其在页面滚动时始终固定在视口底部右侧。</li>
+        <li><strong>视觉分隔：</strong>保留原有 <code>border-t</code>，并通过 <code>bg-background/95 backdrop-blur-sm</code> 使滚动时下方内容透过半透明背景隐约可见，与内容区形成自然层次。</li>
+        <li><strong>兼容性：</strong>三个 Tab（隔离区/审核/召回）切换后按钮保持在底部，行为一致；不影响任何输入控件的焦点管理。</li>
+      </ul>
+
+      <h4>影响的关联模块</h4>
+      <table class="impact-table">
+        <thead><tr><th>文件</th><th>类型</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>src/components/email-disposal/disposal-settings/disposal-settings-page.tsx</td>
+            <td><span class="impact-mod">直接修改</span></td>
+            <td>底部操作区 <code>div</code> className 从 <code>mt-6 flex justify-end gap-2 border-t pt-4</code> 改为 sticky 版本</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>设计决策与背景</h4>
+      <blockquote>业界企业后台普遍采用 sticky 底部操作栏（飞书管理后台、Google Admin、AWS Console 均如此），改动极小（仅改一个 <code>div</code> 的 className），风险极低。不选择顶部右上角双份按钮方案，因为离表单内容太远，视觉关联弱。</blockquote>
+    </div>
+  </div>
+
+  <!-- ── 条目 3 ── -->
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-index">3</div>
+      <div class="cl-card-title">
+        <h3>邮件处置 / 处置设置 / 用户权限设置 · 外部访问地址校验</h3>
+        <span class="cl-route">/zh/email-disposal/disposal-settings → Tab: 隔离区设置 → 用户权限设置卡片</span>
+        <div style="margin-top:6px;">
+          <span class="tag tag-validate">校验增强</span>
+          <span class="tag tag-perm">权限控制</span>
+          <span class="tag tag-i18n">i18n</span>
+        </div>
+      </div>
+    </div>
+    <div class="cl-card-body">
+      <h4>本次优化点</h4>
+      <ul>
+        <li><strong>问题：</strong>外部访问地址（<code>portal_base_url</code>）为空时，前端仍允许开启取回、预览、加白、加黑权限并保存；四项权限依赖该地址生成通知链接，地址缺失时权限实际无效但无任何提示。</li>
+        <li><strong>schema 层校验：</strong>在 <code>disposalSettingsSchema</code> 的 <code>superRefine</code> 中新增规则：若任意权限 <code>enabled=true</code> 且 <code>portal_base_url</code> 为空或非合法 http/https URL，则向该字段注入 ZodIssue，zodResolver 阻断 <code>handleSubmit</code>。</li>
+        <li><strong>UI 禁用：</strong>实时派生 <code>portalMissing</code>（从 <code>watch('quarantine.portal_base_url')</code> 校验），地址缺失时四个 Switch 全部 <code>disabled</code>，整行 <code>opacity-60</code> 灰化，地址填写合法后自动恢复。</li>
+        <li><strong>inline 警告横幅：</strong>地址缺失时在权限表上方渲染琥珀色 <code>AlertTriangle</code> 横幅，文案说明四项权限的依赖关系，引导管理员先填写地址再开启权限。</li>
+        <li><strong>字段级错误：</strong>保存校验失败时 <code>portal_base_url</code> 输入框高亮 <code>border-destructive</code>，下方显示中文错误提示。</li>
+        <li><strong>新增 i18n 键：</strong><code>portalBaseUrlRequired</code>（字段级错误文案）、<code>portalBaseUrlMissingHint</code>（横幅提示文案）各 4 语言。</li>
+      </ul>
+
+      <h4>影响的关联模块</h4>
+      <table class="impact-table">
+        <thead><tr><th>文件</th><th>类型</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>src/components/email-disposal/disposal-settings/schema.ts</td>
+            <td><span class="impact-mod">直接修改</span></td>
+            <td><code>superRefine</code> 末尾新增 portal_base_url 依赖校验规则（约 23 行）</td>
+          </tr>
+          <tr>
+            <td>src/components/email-disposal/disposal-settings/quarantine-settings-tab.tsx</td>
+            <td><span class="impact-mod">直接修改</span></td>
+            <td>用户权限设置卡片：<code>portal_base_url</code> 字段渲染增加错误高亮；权限表新增横幅 + Switch disabled 逻辑（IIFE 派生 portalMissing）</td>
+          </tr>
+          <tr>
+            <td>messages/zh.json · messages/en.json · messages/th.json · messages/ru.json</td>
+            <td><span class="impact-i18n">i18n 新增键</span></td>
+            <td>新增 <code>portalBaseUrlRequired</code>、<code>portalBaseUrlMissingHint</code> 共 2 键 × 4 语言</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>设计决策与背景</h4>
+      <blockquote>采用「禁用 Switch + 横幅提示」而非「允许开启但提交时报错」，原因是：禁用模式让管理员在编辑阶段即感知约束，避免填完所有配置后才在保存时看到报错，减少操作反复。schema 层校验保留作为兜底，即使 UI 被绕过也能拦截。</blockquote>
+    </div>
+  </div>
+
+  <!-- ── 条目 4 ── -->
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-index">4</div>
+      <div class="cl-card-title">
+        <h3>邮件处置 / 处置设置 · 后端错误消息本地化</h3>
+        <span class="cl-route">/zh/email-disposal/disposal-settings → 保存操作 → 错误 Toast</span>
+        <div style="margin-top:6px;">
+          <span class="tag tag-error">错误处理</span>
+          <span class="tag tag-i18n">i18n</span>
+        </div>
+      </div>
+    </div>
+    <div class="cl-card-body">
+      <h4>本次优化点</h4>
+      <ul>
+        <li><strong>问题：</strong>外部访问地址为空时开启权限并保存，页面 Toast 展示后端原始英文错误：<em>"quarantine.portal_base_url is required when the retrieve or preview permission is enabled…"</em>，裸露字段名，不可理解。</li>
+        <li><strong>根因：</strong><code>disposal-settings-page.tsx</code> 的 <code>catch</code> 块直接将 <code>e.message</code>（后端英文原文）传入 <code>toast.error()</code>，无任何翻译处理。</li>
+        <li><strong>修复：</strong>重构 <code>catch</code> 块，引入三级映射逻辑：① 含 <code>portal_base_url</code> 的 400 错误 → <code>t('portalBaseUrlRequired')</code>；② 含分类键名的 400 错误 → <code>t('saveFailed')</code>（并将错误标注到对应分类字段）；③ 其他错误 → 透传原始 message 或 <code>t('saveFailed')</code>。</li>
+        <li><strong>setError 规范化：</strong><code>form.setError</code> 的 <code>message</code> 统一改为键名字符串（如 <code>'portalBaseUrlRequired'</code>），与字段渲染层已有的 <code>t(key)</code> 模式保持一致，避免字段级提示和 Toast 文案不一致。</li>
+      </ul>
+
+      <h4>影响的关联模块</h4>
+      <table class="impact-table">
+        <thead><tr><th>文件</th><th>类型</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>src/components/email-disposal/disposal-settings/disposal-settings-page.tsx</td>
+            <td><span class="impact-mod">直接修改</span></td>
+            <td><code>onSubmit</code> 的 <code>catch</code> 块：变量从 <code>message</code> 拆分为 <code>rawMessage</code> + <code>toastMessage</code>，新增三级映射逻辑</td>
+          </tr>
+          <tr>
+            <td>messages/zh.json 等（已有键）</td>
+            <td><span class="impact-mod">间接引用</span></td>
+            <td>复用上一条目已新增的 <code>portalBaseUrlRequired</code>、<code>saveFailed</code> 等键</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>设计决策与背景</h4>
+      <blockquote>前端校验（条目 3）理论上能拦截此场景，但后端校验是独立防线，不能假设前端总是成功拦截（如直接 API 调用、前端 bug 等）。因此后端错误消息的本地化是必要的第二道兜底，两者互补。</blockquote>
+    </div>
+  </div>
+
+  <!-- ── 条目 5 ── -->
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-index">5</div>
+      <div class="cl-card-title">
+        <h3>全局 · 处置设置未保存离开拦截</h3>
+        <span class="cl-route">/zh/email-disposal/disposal-settings → 侧栏 SPA 跳转 / 浏览器关闭/刷新</span>
+        <div style="margin-top:6px;">
+          <span class="tag tag-ux">可用性</span>
+          <span class="tag tag-arch">架构</span>
+          <span class="tag tag-i18n">i18n</span>
+        </div>
+      </div>
+    </div>
+    <div class="cl-card-body">
+      <h4>本次优化点</h4>
+      <ul>
+        <li><strong>问题：</strong>处置设置字段多且需滚动，管理员修改后未保存即点击侧栏跳转，所有改动丢失且无任何提示。</li>
+        <li><strong>新增 UnsavedGuardContext：</strong>新建 <code>src/contexts/unsaved-guard-context.tsx</code>，提供 <code>registerGuard</code>（注册 dirty 状态及保存回调）、<code>unregisterGuard</code>（卸载时清理）、<code>requestNavigate</code>（拦截跳转请求，有 dirty 时弹窗，无 dirty 时直接跳转）三个 API。</li>
+        <li><strong>UnsavedGuardDialog：</strong>新建 <code>src/components/layout/unsaved-guard-dialog.tsx</code>，消费 Context，渲染 AlertDialog 弹窗，三个选项：「继续编辑」（关闭弹窗保持页面）、「放弃修改并离开」（直接跳转）、「保存后离开」（触发 <code>form.handleSubmit</code> 成功后跳转）。</li>
+        <li><strong>AppShell 挂载：</strong>在 <code>app-shell.tsx</code> 中用 <code>UnsavedGuardProvider</code> 包裹整个布局，并在根层渲染 <code>UnsavedGuardDialog</code>，确保弹窗在所有页面路由切换时均可挂载。</li>
+        <li><strong>处置设置注册：</strong><code>disposal-settings-page.tsx</code> 通过 <code>useEffect</code> 监听 <code>form.formState.isDirty</code>，变化时调用 <code>registerGuard</code> 同步最新状态；同时挂载 <code>beforeunload</code> 事件拦截浏览器关闭/刷新。</li>
+        <li><strong>侧栏拦截：</strong><code>sidebar-nav.tsx</code> 中 <code>SidebarNavItem</code> 的 <code>handleClick</code> 将原 <code>router.push(href)</code> 替换为 <code>requestNavigate(href, (href) => router.push(href))</code>，所有侧栏跳转经 guard 过滤。</li>
+        <li><strong>自动清除 dirty：</strong>保存成功后 <code>form.reset(saved)</code> 重置 RHF 状态，<code>isDirty</code> 变为 <code>false</code>，guard 自动解除，不再误报。</li>
+        <li><strong>新增 i18n 键：</strong><code>unsavedChangesLeaveTitle</code>、<code>unsavedChangesLeaveDesc</code>、<code>keepEditing</code>、<code>discardAndLeave</code>、<code>saveAndLeave</code> 共 5 键 × 4 语言，写入 <code>common</code> 命名空间。</li>
+      </ul>
+
+      <h4>影响的关联模块</h4>
+      <table class="impact-table">
+        <thead><tr><th>文件</th><th>类型</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>src/contexts/unsaved-guard-context.tsx</td>
+            <td><span class="impact-new">新增文件</span></td>
+            <td>UnsavedGuardContext / Provider / useUnsavedGuard Hook，包含弹窗状态机和导航回调管理</td>
+          </tr>
+          <tr>
+            <td>src/components/layout/unsaved-guard-dialog.tsx</td>
+            <td><span class="impact-new">新增文件</span></td>
+            <td>AlertDialog 弹窗组件，消费 UnsavedGuardContext，渲染三选项弹窗</td>
+          </tr>
+          <tr>
+            <td>src/components/layout/app-shell.tsx</td>
+            <td><span class="impact-mod">直接修改</span></td>
+            <td>引入 UnsavedGuardProvider 包裹布局 + 渲染 UnsavedGuardDialog</td>
+          </tr>
+          <tr>
+            <td>src/components/layout/sidebar-nav.tsx</td>
+            <td><span class="impact-mod">直接修改</span></td>
+            <td>SidebarNavItem.handleClick 中 router.push 替换为 requestNavigate</td>
+          </tr>
+          <tr>
+            <td>src/components/email-disposal/disposal-settings/disposal-settings-page.tsx</td>
+            <td><span class="impact-mod">直接修改</span></td>
+            <td>引入 useUnsavedGuard，注册 guard useEffect，挂载 beforeunload，暴露 saveForGuard 回调</td>
+          </tr>
+          <tr>
+            <td>messages/zh.json · messages/en.json · messages/th.json · messages/ru.json</td>
+            <td><span class="impact-i18n">i18n 新增键</span></td>
+            <td>common 命名空间新增 5 个键 × 4 语言</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>设计决策与背景</h4>
+      <blockquote>Next.js 16 App Router 无 <code>router.events</code>，无法用框架内置机制拦截 SPA 导航。选择在 Context 层劫持 <code>requestNavigate</code>、在侧栏 <code>handleClick</code> 处拦截（而非全局 <code>Link</code> 或 <code>pushState</code> 劫持），原因是侧栏是本项目唯一的跨模块导航入口，改动范围最小、副作用最可控。UnsavedGuardContext 设计为通用架构，未来其他带表单的页面可通过相同的 <code>registerGuard</code> API 接入，无需修改 Context 或侧栏。</blockquote>
+    </div>
+  </div>
+
+  <!-- ████ 未解决事项 ████ -->
+  <h2 class="cl-section-title">本次对话未解决事项</h2>
+  <table class="pending-table">
+    <thead>
+      <tr><th>#</th><th>问题描述</th><th>状态</th><th>备注</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>处置设置 Header 右上角路由级导航（如面包屑中的链接）尚未接入 UnsavedGuard，绕过侧栏跳转时不触发弹窗</td>
+        <td><span class="status-pending">待处理</span></td>
+        <td>当前侧栏是主要跳转路径，Header 链接跳转较少见，可在下一迭代补充</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>「保存后离开」选项中若 handleSubmit 校验失败，弹窗消失但停留页面，无法区分「用户取消」和「校验阻断」两种状态，体验有轻微割裂</td>
+        <td><span class="status-pending">待处理</span></td>
+        <td>可通过在 Promise reject 时不关闭弹窗、展示校验失败提示来改善</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ████ 版本历史 ████ -->
+  <h2 class="cl-section-title">变更日志版本历史</h2>
+  <table class="history-table">
+    <thead>
+      <tr><th>日期</th><th>文件</th><th>对话主题摘要</th><th>条目数</th></tr>
+    </thead>
+    <tbody>
+      <tr class="current-row">
+        <td>2026-07-29</td>
+        <td>2026-07-29-disposal-settings-guard-validation-ux.html</td>
+        <td>处置设置 · 布局紧凑化、操作栏固定、外部地址校验、后端错误本地化、未保存离开拦截</td>
+        <td>5</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<footer>
+  由 html-spec-PM-version 技能自动生成 · 2026-07-29 · 分支 v0/0665430749-7903-dcc979a5 · 仅供 PM 迭代归档使用，不作为开发实现依据
+</footer>
+</body>
+</html>
