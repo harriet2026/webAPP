@@ -7066,7 +7066,9 @@
     "notifyMode": "通知模式",
     "notifyModeAll": "全员通知（默认）",
     "notifyModeSpecified": "指定范围",
-    "notifyModeAllHint": "通知信将发送给所有用户"
+    "notifyModeAllHint": "通知信将发送给所有用户",
+    "category": "分类",
+    "notifyStatus": "状态"
   },
   "dkim": {
     "column": "DKIM",

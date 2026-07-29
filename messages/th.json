@@ -7100,7 +7100,9 @@
     "notifyMode": "โหมดการแจ้งเตือน",
     "notifyModeAll": "ผู้ใช้ทั้งหมด (ค่าเริ่มต้น)",
     "notifyModeSpecified": "ระบุขอบเขต",
-    "notifyModeAllHint": "การแจ้งเตือนจะถูกส่งถึงผู้ใช้ทุกคน"
+    "notifyModeAllHint": "การแจ้งเตือนจะถูกส่งถึงผู้ใช้ทุกคน",
+    "category": "ประเภท",
+    "notifyStatus": "สถานะ"
   },
   "securityOverview": {
     "trendPeakHint": "คลิกที่คำอธิบายเพื่อสลับซีรีส์ ดับเบิลคลิกเพื่อแสดงเฉพาะรายการเดียว",

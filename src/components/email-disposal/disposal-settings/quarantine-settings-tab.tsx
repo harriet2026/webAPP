@@ -218,71 +218,75 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{t('scoreHint')}</span>
           </div>
-          <div className="space-y-3" data-testid="disposal-settings-category-list">
-            {CATEGORY_DISPLAY_ORDER.map((key) => (
-              <Controller
-                key={key}
-                control={control}
-                name={`quarantine.category_notify.${key}` as const}
-                render={({ field, fieldState }) => {
-                  const entry: CategoryNotifyEntry = field.value;
-
-                  return (
-                    <div
-                      className="space-y-3 rounded-lg border p-4"
-                      data-testid={`disposal-settings-category-row-${key}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Checkbox
-                            checked={entry.enabled}
-                            onCheckedChange={(c) => field.onChange({ ...entry, enabled: !!c })}
-                            data-testid={`disposal-settings-category-checkbox-${key}`}
-                          />
-                          <span
-                            className={`inline-flex items-center rounded border px-2 py-0.5 text-sm font-medium ${categoryBadgeCls(key)}`}
-                          >
-                            {t(`category_${key}` as const)}
-                          </span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">
-                          {entry.enabled ? t('notify') : t('noNotify')}
-                        </span>
-                      </div>
-                      {entry.enabled && (
-                        <>
-                          <div className="ml-6 grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="text-sm text-muted-foreground">
-                                {t('minConfidenceScore')}
-                              </Label>
+          <div className="overflow-hidden rounded-lg border" data-testid="disposal-settings-category-list">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="px-3 py-2.5 text-left font-medium text-muted-foreground w-8"></th>
+                  <th className="px-3 py-2.5 text-left font-medium text-muted-foreground">{t('category')}</th>
+                  <th className="px-3 py-2.5 text-left font-medium text-muted-foreground w-36">{t('minConfidenceScore')}</th>
+                  <th className="px-3 py-2.5 text-left font-medium text-muted-foreground w-36">{t('maxConfidenceScore')}</th>
+                  <th className="px-3 py-2.5 text-right font-medium text-muted-foreground w-20">{t('notifyStatus')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {CATEGORY_DISPLAY_ORDER.map((key) => (
+                  <Controller
+                    key={key}
+                    control={control}
+                    name={`quarantine.category_notify.${key}` as const}
+                    render={({ field, fieldState }) => {
+                      const entry: CategoryNotifyEntry = field.value;
+                      return (
+                        <tr
+                          data-testid={`disposal-settings-category-row-${key}`}
+                          className={entry.enabled ? '' : 'opacity-60'}
+                        >
+                          <td className="px-3 py-2.5">
+                            <Checkbox
+                              checked={entry.enabled}
+                              onCheckedChange={(c) => field.onChange({ ...entry, enabled: !!c })}
+                              data-testid={`disposal-settings-category-checkbox-${key}`}
+                            />
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <span
+                              className={`inline-flex items-center rounded border px-2 py-0.5 text-xs font-medium ${categoryBadgeCls(key)}`}
+                            >
+                              {t(`category_${key}` as const)}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="space-y-1">
                               <ScoreField
                                 testId={`disposal-settings-category-min-${key}`}
                                 value={entry.min_score}
                                 onCommit={(v) => field.onChange({ ...entry, min_score: v })}
                               />
+                              {fieldState.error && (
+                                <p className="text-xs text-destructive">{t('scoreRangeError')}</p>
+                              )}
                             </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm text-muted-foreground">
-                                {t('maxConfidenceScore')}
-                              </Label>
-                              <ScoreField
-                                testId={`disposal-settings-category-max-${key}`}
-                                value={entry.max_score}
-                                onCommit={(v) => field.onChange({ ...entry, max_score: v })}
-                              />
-                            </div>
-                          </div>
-                          {fieldState.error && (
-                            <p className="ml-6 text-sm text-destructive">{t('scoreRangeError')}</p>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  );
-                }}
-              />
-            ))}
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <ScoreField
+                              testId={`disposal-settings-category-max-${key}`}
+                              value={entry.max_score}
+                              onCommit={(v) => field.onChange({ ...entry, max_score: v })}
+                            />
+                          </td>
+                          <td className="px-3 py-2.5 text-right">
+                            <span className={entry.enabled ? 'text-foreground' : 'text-muted-foreground'}>
+                              {entry.enabled ? t('notify') : t('noNotify')}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    }}
+                  />
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 

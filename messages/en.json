@@ -7009,7 +7009,9 @@
     "notifyMode": "Notification Mode",
     "notifyModeAll": "All Users (Default)",
     "notifyModeSpecified": "Specified Range",
-    "notifyModeAllHint": "Notifications will be sent to all users"
+    "notifyModeAllHint": "Notifications will be sent to all users",
+    "category": "Category",
+    "notifyStatus": "Status"
   },
   "dkim": {
     "column": "DKIM",
