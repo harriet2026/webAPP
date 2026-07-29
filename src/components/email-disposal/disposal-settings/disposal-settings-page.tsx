@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Save, RotateCcw, Loader2, Shield, AlertTriangle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PageShell, PageHeader } from '@/components/shared/page-shell';
+import { FramedPage } from '@/components/shared/page-shell';
 import { useApiRequest, ApiError } from '@/lib/api/client';
 import { getDisposalSettings, putDisposalSettings } from '@/lib/api/disposal-settings';
 import { DISPOSAL_CATEGORY_KEYS, type DisposalSettings } from '@/types/disposal-settings';
@@ -108,8 +108,11 @@ export function DisposalSettingsPage() {
 
   if (platformWithoutTenant) {
     return (
-      <PageShell data-testid="disposal-settings-page">
-        <PageHeader title={t('pageTitle')} description={t('pageDescription')} />
+      <FramedPage
+        title={t('pageTitle')}
+        description={t('pageDescription')}
+        data-testid="disposal-settings-page"
+      >
         <div
           className="flex items-center justify-center min-h-[400px]"
           data-testid="disposal-settings-tenant-required"
@@ -119,56 +122,58 @@ export function DisposalSettingsPage() {
             <p className="text-muted-foreground">{tCommon('accessDenied')}</p>
           </div>
         </div>
-      </PageShell>
+      </FramedPage>
     );
   }
 
   if (isLoading) {
     return (
-      <PageShell data-testid="disposal-settings-page">
-        <PageHeader title={t('pageTitle')} description={t('pageDescription')} />
+      <FramedPage
+        title={t('pageTitle')}
+        description={t('pageDescription')}
+        data-testid="disposal-settings-page"
+      >
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      </PageShell>
+      </FramedPage>
     );
   }
 
   const { control, watch, setValue } = form;
 
   return (
-    <PageShell data-testid="disposal-settings-page">
-      <PageHeader
-        title={t('pageTitle')}
-        description={t('pageDescription')}
-        actions={
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              data-testid="disposal-settings-reset"
-              onClick={onReset}
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              {t('reset')}
-            </Button>
-            <Button
-              type="button"
-              data-testid="disposal-settings-save"
-              onClick={form.handleSubmit(onSubmit, onInvalid)}
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              {t('save')}
-            </Button>
-          </div>
-        }
-      />
-
+    <FramedPage
+      title={t('pageTitle')}
+      description={t('pageDescription')}
+      data-testid="disposal-settings-page"
+      actions={
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            data-testid="disposal-settings-reset"
+            onClick={onReset}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            {t('reset')}
+          </Button>
+          <Button
+            type="button"
+            data-testid="disposal-settings-save"
+            onClick={form.handleSubmit(onSubmit, onInvalid)}
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            {t('save')}
+          </Button>
+        </div>
+      }
+    >
       <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
         <Tabs defaultValue="quarantine" data-testid="disposal-settings-tabs">
           <TabsList className="grid w-full grid-cols-3">
@@ -202,6 +207,6 @@ export function DisposalSettingsPage() {
           </TabsContent>
         </Tabs>
       </form>
-    </PageShell>
+    </FramedPage>
   );
 }
