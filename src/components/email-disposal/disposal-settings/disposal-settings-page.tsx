@@ -182,7 +182,7 @@ export function DisposalSettingsPage() {
             <RecallSettingsTab control={control} watch={watch} setValue={setValue} />
           </TabsContent>
         </Tabs>
-        <div className="mt-6 flex justify-end gap-2 border-t pt-4">
+        <div className="sticky bottom-0 z-10 mt-6 flex justify-end gap-2 border-t bg-background/95 px-1 py-3 backdrop-blur-sm">
           <Button
             type="button"
             variant="outline"
