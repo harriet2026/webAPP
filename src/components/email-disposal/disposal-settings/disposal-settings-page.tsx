@@ -152,16 +152,16 @@ export function DisposalSettingsPage() {
     >
       <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
         <Tabs defaultValue="quarantine" data-testid="disposal-settings-tabs">
-          <TabsList className="grid w-full grid-cols-3 [&>[data-state=active]]:bg-background [&>[data-state=active]]:text-foreground [&>[data-state=active]]:shadow-sm">
-            <TabsTrigger value="quarantine" data-testid="disposal-settings-tab-quarantine">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="quarantine" data-testid="disposal-settings-tab-quarantine" className="data-active:bg-background dark:data-active:bg-background data-active:text-foreground dark:data-active:text-foreground">
               <Shield className="mr-2 h-4 w-4" />
               {t('tabQuarantine')}
             </TabsTrigger>
-            <TabsTrigger value="review" data-testid="disposal-settings-tab-review">
+            <TabsTrigger value="review" data-testid="disposal-settings-tab-review" className="data-active:bg-background dark:data-active:bg-background data-active:text-foreground dark:data-active:text-foreground">
               <AlertTriangle className="mr-2 h-4 w-4" />
               {t('tabReview')}
             </TabsTrigger>
-            <TabsTrigger value="recall" data-testid="disposal-settings-tab-recall">
+            <TabsTrigger value="recall" data-testid="disposal-settings-tab-recall" className="data-active:bg-background dark:data-active:bg-background data-active:text-foreground dark:data-active:text-foreground">
               <Clock className="mr-2 h-4 w-4" />
               {t('tabRecall')}
             </TabsTrigger>
