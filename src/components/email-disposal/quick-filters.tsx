@@ -154,12 +154,14 @@ export function QuickFilters({
   // 收发时间/收发类型/发信人/收信人同一行（QC UI04）。
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="disposal-quick-filters">
-          {tenantSelector ? (
-            <div className="order-1 space-y-1">
-              <label className="text-xs text-muted-foreground">{t("tenantScope")}</label>
-              {tenantSelector}
-            </div>
-          ) : null}
+          <div className="order-1 space-y-1" suppressHydrationWarning>
+            {tenantSelector ? (
+              <>
+                <label className="text-xs text-muted-foreground">{t("tenantScope")}</label>
+                {tenantSelector}
+              </>
+            ) : null}
+          </div>
           <div className="order-2 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
               {t("sendReceiveTime")}
