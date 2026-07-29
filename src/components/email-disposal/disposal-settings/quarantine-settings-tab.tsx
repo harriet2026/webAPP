@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Controller, type Control, type UseFormWatch, type UseFormSetValue } from 'react-hook-form';
-import { AlertTriangle, Plus, X } from 'lucide-react';
+import { AlertTriangle, Plus, Users, X } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -102,6 +102,30 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
   const [newMinute, setNewMinute] = useState('00');
 
   const [tzAcked, setTzAcked] = useState(false);
+
+  // 通知模式：'all'=全员（默认），'specified'=指定范围
+  // 初始值派生自当前表单数据：若已有选中组/部门则默认为 specified，否则为 all。
+  // 使用 useMemo 仅在组件首次挂载时计算初始值，后续由用户交互控制。
+  const recipientGroupIdsInit = watch('quarantine.recipient_group_ids');
+  const departmentPathsInit = watch('quarantine.department_paths');
+  const initialMode = useMemo(
+    () =>
+      recipientGroupIdsInit.length > 0 || departmentPathsInit.length > 0
+        ? 'specified'
+        : 'all',
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+  const [notifyMode, setNotifyMode] = useState<'all' | 'specified'>(initialMode);
+
+  const handleNotifyModeChange = (mode: 'all' | 'specified') => {
+    setNotifyMode(mode);
+    if (mode === 'all') {
+      // 切换为全员时清空已选范围
+      setValue('quarantine.recipient_group_ids', [], { shouldDirty: true });
+      setValue('quarantine.department_paths', [], { shouldDirty: true });
+    }
+  };
   const browserTz = getBrowserTz();
   const savedTz = watch('tz') || '';
   const effectiveTz = savedTz || serverTz;
@@ -344,19 +368,66 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
             </div>
           )}
 
-          {/* 通知范围：紧跟通知策略配置，与 demo 同一层级嵌套（非并列 sibling） */}
+          {/* 通知范围：方案C — 通知模式单选控制 */}
           <div className="space-y-4">
             <Label>{t('range')}</Label>
-            <NotificationScopeSelector
-              selectedGroupIds={recipientGroupIds}
-              selectedDeptPaths={departmentPaths}
-              onGroupsChange={(ids) =>
-                setValue('quarantine.recipient_group_ids', ids, { shouldDirty: true })
-              }
-              onDeptsChange={(paths) =>
-                setValue('quarantine.department_paths', paths, { shouldDirty: true })
-              }
-            />
+
+            {/* 通知模式单选 */}
+            <div className="flex flex-col gap-2" role="radiogroup" aria-label={t('notifyMode')}>
+              {/* 全员通知 */}
+              <label
+                className="flex items-start gap-3 cursor-pointer"
+                data-testid="disposal-settings-notify-mode-all"
+              >
+                <input
+                  type="radio"
+                  name="notifyMode"
+                  value="all"
+                  checked={notifyMode === 'all'}
+                  onChange={() => handleNotifyModeChange('all')}
+                  className="mt-0.5 accent-primary"
+                />
+                <div className="space-y-0.5">
+                  <span className="text-sm font-medium">{t('notifyModeAll')}</span>
+                  {notifyMode === 'all' && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Users className="w-3 h-3 shrink-0" />
+                      {t('notifyModeAllHint')}
+                    </p>
+                  )}
+                </div>
+              </label>
+
+              {/* 指定范围 */}
+              <label
+                className="flex items-start gap-3 cursor-pointer"
+                data-testid="disposal-settings-notify-mode-specified"
+              >
+                <input
+                  type="radio"
+                  name="notifyMode"
+                  value="specified"
+                  checked={notifyMode === 'specified'}
+                  onChange={() => handleNotifyModeChange('specified')}
+                  className="mt-0.5 accent-primary"
+                />
+                <span className="text-sm font-medium">{t('notifyModeSpecified')}</span>
+              </label>
+            </div>
+
+            {/* 指定范围时展示选择器 */}
+            {notifyMode === 'specified' && (
+              <NotificationScopeSelector
+                selectedGroupIds={recipientGroupIds}
+                selectedDeptPaths={departmentPaths}
+                onGroupsChange={(ids) =>
+                  setValue('quarantine.recipient_group_ids', ids, { shouldDirty: true })
+                }
+                onDeptsChange={(paths) =>
+                  setValue('quarantine.department_paths', paths, { shouldDirty: true })
+                }
+              />
+            )}
           </div>
         </div>
       </Card>

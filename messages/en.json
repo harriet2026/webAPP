@@ -6999,7 +6999,11 @@
     "emailInvalid": "Invalid email format. Use an address like user@example.com",
     "emailDuplicate": "This email is already in the list",
     "customMinutesRange": "Review duration must be between 1 and 300 minutes",
-    "saveValidationFailed": "Some settings are invalid. Fix them and save again"
+    "saveValidationFailed": "Some settings are invalid. Fix them and save again",
+    "notifyMode": "Notification Mode",
+    "notifyModeAll": "All Users (Default)",
+    "notifyModeSpecified": "Specified Range",
+    "notifyModeAllHint": "Notifications will be sent to all users"
   },
   "dkim": {
     "column": "DKIM",
