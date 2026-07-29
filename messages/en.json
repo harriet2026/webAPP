@@ -5802,7 +5802,8 @@
           "download": "Download",
           "ruleSuccess": "Added to blacklist rule",
           "ruleFailed": "Failed to add blacklist rule",
-          "vtScore": "VirusTotal: {score}"
+          "vtScore": "VirusTotal: {score}",
+          "title": "Content Entity Detection & Disposal"
         },
         "reclassify": {
           "title": "Reclassify Email Type",

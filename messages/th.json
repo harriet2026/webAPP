@@ -5831,7 +5831,8 @@
           "download": "ดาวน์โหลด",
           "ruleSuccess": "เพิ่มกฎบัญชีดำแล้ว",
           "ruleFailed": "เพิ่มกฎบัญชีดำไม่สำเร็จ",
-          "vtScore": "ตรวจสอบ VirusTotal: {score}"
+          "vtScore": "ตรวจสอบ VirusTotal: {score}",
+          "title": "การตรวจจับและจัดการเอนทิตีเนื้อหา"
         },
         "reclassify": {
           "title": "เปลี่ยนประเภทอีเมล",

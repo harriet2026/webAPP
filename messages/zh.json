@@ -5797,7 +5797,8 @@
           "download": "下载",
           "ruleSuccess": "已加入黑名单规则",
           "ruleFailed": "加入黑名单规则失败",
-          "vtScore": "VirusTotal检测：{score}"
+          "vtScore": "VirusTotal检测：{score}",
+          "title": "内容实体检测与处置"
         },
         "reclassify": {
           "title": "改判邮件类型",

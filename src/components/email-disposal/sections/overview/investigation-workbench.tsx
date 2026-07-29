@@ -313,6 +313,9 @@ export function InvestigationWorkbench({
 
         {/* 右列：内容实体检测（C6/C7，Task 9） */}
         <div className="p-4">
+          <div className="mb-3 flex items-center">
+            <h3 className="text-sm font-semibold">{t('entityDetection.title')}</h3>
+          </div>
           <EntityDetection
             detail={detail}
             requestFn={requestFn}

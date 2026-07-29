@@ -5648,7 +5648,8 @@
           "download": "Скачать",
           "ruleSuccess": "Правило чёрного списка добавлено",
           "ruleFailed": "Не удалось добавить правило чёрного списка",
-          "vtScore": "VirusTotal: {score}"
+          "vtScore": "VirusTotal: {score}",
+          "title": "Обнаружение и обработка сущностей контента"
         },
         "reclassify": {
           "title": "Reclassify Email Type",
