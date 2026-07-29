@@ -18,6 +18,8 @@ import { DashboardCardFooterLink } from './dashboard-card-footer-link';
 interface ThreatTop5Props {
   top5: OpsTopRow[];
   isLoading: boolean;
+  // GT-12613：查看完整榜单深链需携带与本卡取数一致的时间范围。
+  range: string;
 }
 
 const RANK_CLASS = ['bg-rose-500 text-white', 'bg-amber-500 text-white', 'bg-muted text-muted-foreground', 'bg-muted text-muted-foreground', 'bg-muted text-muted-foreground'];
@@ -27,7 +29,7 @@ function hitsOf(row: OpsTopRow): number {
   return typeof v === 'number' ? v : Number(v ?? 0) || 0;
 }
 
-export function ThreatTop5({ top5, isLoading }: ThreatTop5Props) {
+export function ThreatTop5({ top5, isLoading, range }: ThreatTop5Props) {
   const t = useTranslations('systemStatus.top5');
   // Reuses the trend card's generic "no data" copy rather than adding a
   // near-duplicate `top5.empty` key — both cards need the same "empty
@@ -82,7 +84,10 @@ export function ThreatTop5({ top5, isLoading }: ThreatTop5Props) {
       </CardContent>
       <CardFooter>
         <DashboardCardFooterLink
-          href="/statistics/ops-top-trend"
+          // GT-12613：携带与本卡取数(fetchOpsTop dimension=sender&direction=all
+          // &sort=threat)一致的维度上下文，落地页保持"威胁来源/发信人"语义，
+          // 不再落回默认 connection（租户视角还会被降级为 subject 高危主题）。
+          href={`/statistics/ops-top-trend?dimension=sender&direction=all&time_range=${range}`}
           testId="system-status-top5-view-full"
         >
           {t('viewFull')}

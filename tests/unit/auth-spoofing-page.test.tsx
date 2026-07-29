@@ -4,6 +4,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement } from 'react';
 
 const mockApiRequest = vi.fn();
+const { StubAuthContext } = vi.hoisted(() => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { createContext } = require('react');
+  return { StubAuthContext: createContext({ ready: true }) };
+});
 
 vi.mock('@/lib/api/client', () => ({
   useApiRequest: () => ({ apiRequest: mockApiRequest }),
@@ -32,6 +37,7 @@ vi.mock('@/i18n/navigation', () => ({
 }));
 
 vi.mock('@/contexts/auth-context', () => ({
+  AuthContext: StubAuthContext,
   useAuth: () => ({ isSystemAdmin: true, hasPermission: () => true, showAdvancedRules: false, user: { role: 'system_admin' } }),
 }));
 

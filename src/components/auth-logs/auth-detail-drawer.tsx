@@ -17,6 +17,17 @@ import type { AuthAttempt } from '@/lib/api/auth-attempts';
 import { formatDate } from '@/lib/utils';
 import { FAIL_ADVICE_KEY, failReasonLabelKey, formatIPLocation, protocolLabelKey, sceneLabelKey } from './constants';
 
+// matchedConfigHref —— GT-12437（重开轮指示）：命中配置跳转 租户中心 >
+// 域名与路由 下钻该租户的发信认证页签（?view= 顶层页签、?tenant_id= 下钻、
+// ?tab=auth&config= 由 MailRoutingShell 消费：选中子页签并高亮该配置行）。
+// 无租户上下文时回退 /mail-routing（单租户形态无租户中心）。
+export function matchedConfigHref(a: { tenant_id?: number; matched_config_id?: number }): string {
+  if (a.tenant_id) {
+    return `/tenants?view=routing&tenant_id=${a.tenant_id}&tab=auth&config=${a.matched_config_id}`;
+  }
+  return `/mail-routing?tab=auth&config=${a.matched_config_id}`;
+}
+
 interface AuthDetailDrawerProps {
   attempt: AuthAttempt | null;
   open: boolean;
@@ -149,7 +160,7 @@ export function AuthDetailDrawer({ attempt, open, onOpenChange }: AuthDetailDraw
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push(`/mail-routing?tab=auth&config=${attempt.matched_config_id}`)}
+                    onClick={() => router.push(matchedConfigHref(attempt))}
                     data-testid="auth-detail-jump-config"
                   >
                     <ExternalLink className="mr-1 h-4 w-4" />

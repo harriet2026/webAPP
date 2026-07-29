@@ -70,6 +70,19 @@ test.describe.serial('DKIM Key Management', () => {
     expect(getData.private_key_pem).toBeFalsy();
   });
 
+  test('list signing domains through the minimal DKIM projection', async ({ authenticatedPage }) => {
+    const resp = await authenticatedPage.request.get(
+      `${API_BASE}/dkim/signing-domains?tenant_id=${tenantId}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    expect(resp.ok()).toBeTruthy();
+    const data = await resp.json();
+    const item = data.items.find((candidate: { domain: string }) => candidate.domain === domain);
+    expect(item).toEqual({ id: expect.any(Number), tenant_id: tenantId, domain });
+    expect(item).not.toHaveProperty('mail_system_config');
+    expect(item).not.toHaveProperty('next_hop_host');
+  });
+
   test('list DKIM keys', async ({ authenticatedPage }) => {
     const resp = await authenticatedPage.request.get(`${API_BASE}/dkim/keys?tenant_id=${tenantId}`, {
       headers: { Authorization: `Bearer ${token}` },

@@ -157,12 +157,15 @@ describe('GT-12312 页签顺序 / 表头 / 当前在线提示', () => {
     expect(screen.getByText('账号/用户名')).toBeTruthy();
   });
 
-  it('在线账号的最后登录时间列渲染绿点（Tooltip 当前在线）', async () => {
+  it('系统派生列（在线/最后登录时间）已随列表-表单字段对齐移除（GT-12629）', async () => {
+    // GT-12629（原型 fb4b6a2）：账号列表仅保留与新建/编辑弹窗一致的业务字段，
+    // ID/在线/最后登录时间等系统派生只读列整体移除。此前 GT-12312 的绿点
+    // （user-lastlogin-online-dot-*）随最后登录列一并下线，这里守住不回流。
     wrap();
     await screen.findByTestId('user-status-badge-2');
-    // alice online=true → 绿点存在；bob online=false → 无绿点
-    expect(screen.getByTestId('user-lastlogin-online-dot-1')).toBeTruthy();
-    expect(screen.queryByTestId('user-lastlogin-online-dot-2')).toBeNull();
+    expect(screen.queryByTestId('user-lastlogin-online-dot-1')).toBeNull();
+    expect(screen.queryByTestId('user-lastlogin-1')).toBeNull();
+    expect(screen.queryByTestId('user-online-1')).toBeNull();
   });
 });
 

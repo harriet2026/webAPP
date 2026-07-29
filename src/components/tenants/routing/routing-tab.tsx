@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { ColumnDef } from '@tanstack/react-table';
@@ -19,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { routingOverview } from '@/lib/api/tenant-routing';
+import { getTenant } from '@/lib/api/tenants';
 import type { Tenant } from '@/types/tenant';
 import {
   progressCount,
@@ -39,6 +41,21 @@ export function RoutingTab() {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Tenant | null>(null);
+
+  // GT-12437：?tenant_id= 深链直达指定租户的路由详情（认证日志「命中配置」
+  // 跳转带上归属租户；MailRoutingShell 自己读 ?tab=auth&config= 选中子页签
+  // 与高亮行）。仅首载生效，之后由页内状态接管。
+  const deepLinkTenantID = useSearchParams().get('tenant_id');
+  useEffect(() => {
+    const id = Number(deepLinkTenantID);
+    if (!deepLinkTenantID || !Number.isInteger(id) || id <= 0) return;
+    let cancelled = false;
+    getTenant(id)
+      .then((t) => { if (!cancelled) setSelected(t); })
+      .catch(() => { /* 租户不存在/无权限 → 停留在路由总览列表 */ });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLinkTenantID]);
 
   // GT-12330: the drill-down scopes to the target tenant page-locally. It does
   // NOT touch the global selected tenant — RoutingDetail + MailRoutingShell now

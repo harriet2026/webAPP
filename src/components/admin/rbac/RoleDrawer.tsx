@@ -23,9 +23,10 @@ import {
   type RolePermission,
 } from '@/lib/api/roles';
 import {
-  getScopedModules,
+  visibleModulesForScope,
   rbacSubmodulesForScope,
   findSubModule,
+  SUBMODULE_ROUTE_MAP,
   type RbacScope,
   type SubModuleMeta,
 } from '@/lib/rbac/rbac-modules';
@@ -35,6 +36,9 @@ import {
   emptyPermissionRow,
   type PermAction,
 } from '@/lib/rbac/role-permissions';
+import { useProductForm } from '@/contexts/product-form-context';
+import { FALLBACK_FEATURE_REGISTRY } from '@/lib/product-form/fallback-registry';
+import { visibleNavIds, isItemVisibleByForm } from '@/components/layout/sidebar-visibility';
 
 const ACTION_COLS: PermAction[] = ['view', 'edit', 'approve', 'delete'];
 const ACTION_FIELD: Record<PermAction, keyof RolePermission> = {
@@ -80,7 +84,38 @@ export function RoleDrawer({ open, onOpenChange, scope, role, existingNames, onS
 
   const readonly = !!role?.isSystemDefault;
   const roleIdToken = role?.id ?? 'new';
-  const scopedModules = useMemo(() => getScopedModules(scope), [scope]);
+
+  // Product-form gate — the SAME registry resolver the sidebar uses
+  // (sidebar-visibility.ts), so the assignable matrix matches the real nav of
+  // the current product form instead of over-granting form-specific pages
+  // (e.g. forwarding is hidden in every multi-tenant form; MULTI_ONLY
+  // platform-security-policy/tenant-management in single-tenant).
+  //
+  // IMPORTANT: the product-form viewer used for this gate is derived from the
+  // ROLE's `scope` being edited (platform-role matrix → 'platform' viewer),
+  // NOT from the logged-in admin's own viewer. A platform admin impersonating a
+  // tenant still edits platform roles against the platform nav; using their
+  // 'tenant' viewer here would wrongly hide every platform-only page (proxysvr,
+  // DKIM, tenant-management …) and collapse the whole 系统管理 group.
+  const { capabilities, registry, registryReady, grants } = useProductForm();
+  const gateViewer: 'platform' | 'tenant' = scope === 'tenant' ? 'tenant' : 'platform';
+  const gateRegistry = registryReady ? registry : FALLBACK_FEATURE_REGISTRY;
+  const formVisible = useMemo(
+    () => (capabilities ? new Set(visibleNavIds(gateRegistry, capabilities, gateViewer, grants)) : null),
+    [gateRegistry, capabilities, gateViewer, grants],
+  );
+  const isSubmoduleVisible = useMemo(
+    () => (subId: string) => {
+      if (!formVisible) return true;
+      const href = SUBMODULE_ROUTE_MAP[subId]?.href;
+      return isItemVisibleByForm({ id: subId, href }, gateRegistry, formVisible);
+    },
+    [formVisible, gateRegistry],
+  );
+  const scopedModules = useMemo(
+    () => visibleModulesForScope(scope, isSubmoduleVisible),
+    [scope, isSubmoduleVisible],
+  );
 
   const [name, setName] = useState('');
   const [remark, setRemark] = useState('');

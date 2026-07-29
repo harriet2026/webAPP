@@ -8,6 +8,8 @@ export interface CreateUserRequest {
   // Task 8: role_id is now the authoritative field server-side (internal/api
   // resolveRoleID); role is accepted only for back-compat / conflict-checking.
   role_id?: number;
+  // Initial account status chosen at creation time (defaults to 'normal').
+  status?: UserStatus;
   tenant_id?: number;
   must_change_password?: boolean;
   name?: string;

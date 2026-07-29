@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { useCallback, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
@@ -32,12 +33,27 @@ export default function OpsTopTrendPage() {
   const isPlatformScope = effectiveViewer === 'platform'
     && computeIsPlatformScope(isSystemAdmin, selectedTenantId);
 
-  const [requestedDimension, setRequestedDimension] = useState<DimensionType>('connection');
+  // GT-12613：支持深链初始上下文（系统状态"威胁来源 TOP5 → 查看完整榜单"
+  // 带 dimension=sender&direction=all&time_range=<range>），非法/缺失值落回
+  // 各自默认；租户视角的维度降级仍由 effectiveDimension 兜底。
+  const sp = useSearchParams();
+  const dimParam = sp.get('dimension');
+  const dirParam = sp.get('direction');
+  const rangeParam = sp.get('time_range');
+  const [requestedDimension, setRequestedDimension] = useState<DimensionType>(
+    () => (dimParam && dimParam in DIMENSION_CONFIG ? (dimParam as DimensionType) : 'connection'),
+  );
   // Derived, not effect-corrected: a tenant-scoped viewer must never get as far
   // as issuing the 403-bound `dimension=connection` request (spec §5.2).
   const dimension = effectiveDimension(requestedDimension, isPlatformScope);
-  const [direction, setDirection] = useState<OpsDirection>('all');
-  const [timeRange, setTimeRange] = useState<OpsTimeRange>('7d');
+  const [direction, setDirection] = useState<OpsDirection>(
+    () => (dirParam === 'all' || dirParam === 'receive' || dirParam === 'send' || dirParam === 'internal' ? dirParam : 'all'),
+  );
+  const [timeRange, setTimeRange] = useState<OpsTimeRange>(
+    () => (['today', '7d', '30d', 'thisMonth', 'lastMonth'].includes(rangeParam ?? '')
+      ? (rangeParam as OpsTimeRange)
+      : '7d'),
+  );
   const [topCount, setTopCount] = useState<OpsTopCount>('10');
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [subDim, setSubDim] = useState<DrillSubDimType>(

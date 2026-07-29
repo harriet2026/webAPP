@@ -16,12 +16,23 @@
  *
  * Pure data/logic — no React, framework-agnostic, unit-testable in isolation.
  *
- * `labelKey` values are i18n keys. Where an existing `sidebar.*` / `users.*`
- * key already carries the right zh/en copy, it's reused directly. Submodules
- * with no existing sidebar counterpart (mostly demo-only concepts not yet
- * surfaced in the webapp nav, e.g. 举报中心/高管保护/灰邮治理) use a new
- * `rbac.module.*` key placeholder — those keys are added to
- * messages/{zh,en}.json in Task 8, not here.
+ * `labelKey` values are i18n keys reused from existing `sidebar.*` / `users.*`
+ * copy wherever possible.
+ *
+ * INVARIANT (matrix ↔ real pages): every submodule in `PERM_MODULES` MUST map
+ * to a webapp page — i.e. `SUBMODULE_ROUTE_MAP[id].href` is a non-empty string.
+ * The matrix used to be a loose superset of the nav, carrying demo-only
+ * concepts (举报中心/高管保护/灰邮治理/规则统计 …) that had no page anywhere, so a
+ * role could be granted view/edit on a permission it could never exercise.
+ * Those "dangling" submodules were removed; the assignable scope now equals
+ * the set of features that actually exist in each viewer's product. This is
+ * the same principle as the §7.5 advance-page exclusion below — permissions
+ * for pages a viewer can't reach don't belong in the matrix. Note we align to
+ * "real pages", NOT to live nav visibility: nav visibility is partly derived
+ * from RBAC itself (circular) and partly from product-form capabilities, so
+ * pages that exist but are currently hidden from the nav (链接与附件安全/邮件调查)
+ * are also excluded here. The `rbac-modules.test.ts` invariant test enforces
+ * this so a future edit can't reintroduce a pageless submodule.
  */
 
 import { sidebarNavItems, type NavItem } from '@/lib/constants';
@@ -55,9 +66,22 @@ const sub = (
 
 export const PERM_MODULES: ModuleMeta[] = [
   {
+    // 系统状态是一个独立的顶层导航项(/dashboard)，两视角均可见 → 独立可授模块。
+    // 之前它被错误地作为 monitor 模块的 monitor-dashboard 子项(标签「系统状态」
+    // 却挂在监控中心下)，导致租户视角矩阵里能授监控中心、却看不到系统状态。
+    key: 'systemStatus', labelKey: 'sidebar.systemStatus', supportApprove: false, supportDelete: false,
+    children: [
+      sub('system-status', 'sidebar.systemStatus', false, false),
+    ],
+  },
+  {
+    // 监控中心的全部子页均在 /monitoring/*，导航侧由 manage_tenants 门控 →
+    // 平台专属(见 PLATFORM_ONLY_MODULE_KEYS)，租户视角矩阵不再出现监控中心。
     key: 'monitor', labelKey: 'sidebar.monitoringCenter', supportApprove: false, supportDelete: false,
     children: [
-      sub('monitor-dashboard', 'sidebar.systemStatus', false, false),
+      // 监控总览(/monitoring/dashboard) 是监控中心的首个子页，此前遗漏。它与
+      // 「系统状态」(/dashboard) 是两个不同的页面，不要混淆。
+      sub('monitor-dashboard', 'sidebar.monitorDashboard', false, false),
       sub('monitor-infrastructure', 'sidebar.infrastructure', false, false),
       sub('monitor-mailflow', 'sidebar.mailflow', false, false),
       sub('monitor-security', 'rbac.module.monitorSecurity', false, false),
@@ -69,9 +93,7 @@ export const PERM_MODULES: ModuleMeta[] = [
     children: [
       sub('security-overview', 'sidebar.securityOverview', false, false),
       sub('delivery-traffic-analysis', 'sidebar.deliveryTraffic', false, false),
-      sub('link-attachment-security', 'sidebar.linkAttachmentSecurity', false, false),
       sub('ops-top-trend', 'sidebar.opsTopTrend', false, false),
-      sub('rule-stats-v2', 'rbac.module.ruleStatsV2', false, false),
     ],
   },
   {
@@ -79,15 +101,6 @@ export const PERM_MODULES: ModuleMeta[] = [
     children: [
       sub('disposal-center', 'sidebar.disposalCenter', true, true),
       sub('disposal-settings', 'sidebar.disposalSettings', true, true),
-      sub('grey-mail-policy', 'rbac.module.greyMailPolicy', true, true),
-      sub('grey-mail-queue', 'rbac.module.greyMailQueue', true, true),
-    ],
-  },
-  {
-    key: 'report', labelKey: 'rbac.module.report', supportApprove: true, supportDelete: false,
-    children: [
-      sub('report-management', 'rbac.module.reportManagement', true, false),
-      sub('report-strategy', 'rbac.module.reportStrategy', true, false),
     ],
   },
   {
@@ -95,7 +108,6 @@ export const PERM_MODULES: ModuleMeta[] = [
     children: [
       sub('strategy-pipeline', 'sidebar.policyPipeline', false, false),
       sub('group-policy', 'sidebar.groupManagement', false, false),
-      sub('policy-test', 'rbac.module.policyTest', false, false),
     ],
   },
   {
@@ -107,20 +119,9 @@ export const PERM_MODULES: ModuleMeta[] = [
   {
     key: 'audit', labelKey: 'sidebar.logs', supportApprove: false, supportDelete: false,
     children: [
-      sub('mail-investigation', 'sidebar.mailInvestigation', false, false),
-      sub('ai-url-logs', 'rbac.module.aiUrlLogs', false, false),
       sub('link-logs', 'sidebar.linkClicks', false, false),
       sub('auth-logs', 'sidebar.authAttempts', false, false),
-      sub('system-logs', 'rbac.module.systemLogs', false, false),
       sub('admin-logs', 'sidebar.adminAuditLogs', false, false),
-    ],
-  },
-  {
-    key: 'executive', labelKey: 'rbac.module.executive', supportApprove: false, supportDelete: false,
-    children: [
-      sub('executive-dashboard', 'rbac.module.executiveDashboard', false, false),
-      sub('executive-policy', 'rbac.module.executivePolicy', false, false),
-      sub('executive-monitoring', 'rbac.module.executiveMonitoring', false, false),
     ],
   },
   {
@@ -128,11 +129,23 @@ export const PERM_MODULES: ModuleMeta[] = [
     children: [
       sub('tenant-management', 'sidebar.tenants', false, false),
       sub('platform-security-policy', 'sidebar.platformSecurityPolicy', false, false),
-      sub('network', 'rbac.module.network', false, false),
       sub('forwarding', 'sidebar.mailRouting', false, false),
+      // 以下四页在平台导航「系统管理」组中真实存在(manage_tenants/manage_users 门)，
+      // 此前矩阵遗漏、无法通过角色授权。均为平台专属(scope=platform / tenantAccess=hidden)，
+      // 随 system 模块一起只在平台视角出现。
+      sub('proxysvr', 'sidebar.proxysvr', false, false),
+      sub('system-dkim', 'sidebar.dkimOverview', false, false),
+      sub('password-policy', 'sidebar.passwordPolicy', false, false),
+      sub('smtp-credentials', 'sidebar.smtpCredentials', false, false),
+    ],
+  },
+  {
+    // 组织与成员(/organization-contacts)对租户管理员本就可访问(页面无平台门)，
+    // 之前被错误地并入平台专属的 system 模块，导致租户视角看不到。抽为独立模块，
+    // 不进 PLATFORM_ONLY / TENANT_ONLY → 两视角均可授。
+    key: 'organization', labelKey: 'rbac.module.organization', supportApprove: false, supportDelete: false,
+    children: [
       sub('contacts', 'sidebar.organizationContacts', false, false),
-      sub('data-management', 'rbac.module.dataManagement', false, false),
-      sub('authorization-upgrade', 'rbac.module.authorizationUpgrade', false, false),
     ],
   },
   {
@@ -158,12 +171,18 @@ export function findSubModule(id: string): SubModuleMeta | undefined {
   return ALL_SUB_MODULES.find((s) => s.id === id);
 }
 
-// Platform-exclusive module: only a platform admin may assign it; hidden from the tenant scope.
-export const PLATFORM_ONLY_MODULE_KEYS = ['system'];
+// Platform-exclusive modules: only a platform admin may assign them; hidden from the tenant scope.
+// - system: 系统管理(租户管理/平台安全策略/邮件路由)
+// - monitor: 监控中心(/monitoring/* 全部由导航的 manage_tenants 门控，租户不可达)
+// 注意「系统状态」(/dashboard) 与「组织与成员」(/organization-contacts) 是两视角共享，
+// 不在此列表内。
+export const PLATFORM_ONLY_MODULE_KEYS = ['system', 'monitor'];
 
 // Tenant-exclusive business modules: assignable only to tenant admins; hidden from the platform scope
-// (mirrors the product's platformHidden business capabilities — 安全策略/智能体中心/高管保护).
-export const TENANT_ONLY_MODULE_KEYS = ['security', 'agent', 'executive'];
+// (mirrors the product's platformHidden business capabilities — 安全策略/智能体中心).
+// 高管保护(executive) used to live here but was removed with the rest of the
+// pageless demo modules; keep this list in sync with actual tenant-only pages.
+export const TENANT_ONLY_MODULE_KEYS = ['security', 'agent'];
 
 /**
  * Modules assignable within the given scope:
@@ -178,6 +197,32 @@ export function getScopedModules(scope: RbacScope): ModuleMeta[] {
 /** Flattened submodules assignable within the given scope — the matrix's row set for that scope. */
 export function rbacSubmodulesForScope(scope: RbacScope): SubModuleMeta[] {
   return getScopedModules(scope).flatMap((m) => m.children);
+}
+
+/**
+ * Product-form-aware view of the scoped module tree (spec §7.4 alignment).
+ *
+ * `getScopedModules` splits platform/tenant, but that is NOT enough to match
+ * the nav: the sidebar also hides items whose product-form registry
+ * `visibility` resolves to hidden for the current capabilities/viewer — e.g.
+ * `forwarding` (SINGLE_ONLY) is absent from every multi-tenant nav, while
+ * `platform-security-policy`/`tenant-management` (MULTI_ONLY) are absent from
+ * single-tenant. A static matrix over-grants those form-specific pages.
+ *
+ * This keeps the module tree framework-agnostic: the caller supplies
+ * `isSubmoduleVisible` (built in RoleDrawer from `useProductForm` +
+ * `isItemVisibleByForm`, the SAME gate the sidebar uses, keyed by the
+ * submodule's `SUBMODULE_ROUTE_MAP` href). Submodules the predicate rejects
+ * are dropped, and any module left with no children collapses — mirroring
+ * `isGroupVisible`'s empty-group contract in the sidebar.
+ */
+export function visibleModulesForScope(
+  scope: RbacScope,
+  isSubmoduleVisible: (subId: string) => boolean,
+): ModuleMeta[] {
+  return getScopedModules(scope)
+    .map((m) => ({ ...m, children: m.children.filter((s) => isSubmoduleVisible(s.id)) }))
+    .filter((m) => m.children.length > 0);
 }
 
 // ==================== §7.5 advance-page hard exclusion ====================
@@ -244,8 +289,12 @@ function route(href?: string, featureId?: string): RouteEntry {
 }
 
 export const SUBMODULE_ROUTE_MAP: Record<string, RouteEntry> = {
-  // ---- monitor ----
-  'monitor-dashboard': route('/dashboard', 'system-status'),
+  // ---- systemStatus (both scopes) ----
+  'system-status': route('/dashboard', 'system-status'),
+
+  // ---- monitor (platform-only) ----
+  // 监控总览未登记于 product-form registry → featureId 省略(未登记=放行)。
+  'monitor-dashboard': route('/monitoring/dashboard'),
   'monitor-infrastructure': route('/monitoring/infrastructure', 'monitor-infrastructure'),
   'monitor-mailflow': route('/monitoring/mailflow'),
   'monitor-security': route('/monitoring/security'),
@@ -254,24 +303,15 @@ export const SUBMODULE_ROUTE_MAP: Record<string, RouteEntry> = {
   // ---- statistics ----
   'security-overview': route('/statistics/security-overview', 'security-overview'),
   'delivery-traffic-analysis': route('/statistics/delivery-traffic', 'delivery-traffic-analysis'),
-  'link-attachment-security': route('/statistics/link-attachment-security', 'link-attachment-security'),
   'ops-top-trend': route('/statistics/ops-top-trend', 'ops-top-trend'),
-  'rule-stats-v2': route(), // 规则统计: no dedicated webapp page yet
 
   // ---- mailHandling ----
   'disposal-center': route('/email-disposal/center', 'disposal-center'),
   'disposal-settings': route('/email-disposal/disposal-settings', 'disposal-settings'),
-  'grey-mail-policy': route(), // 灰邮治理-策略配置: not yet built in webapp
-  'grey-mail-queue': route(), // 灰邮治理-灰邮队列: not yet built in webapp
-
-  // ---- report ----
-  'report-management': route(), // 举报管理: not yet built in webapp
-  'report-strategy': route(), // 举报策略设置: not yet built in webapp
 
   // ---- security (tenant-only) ----
   'strategy-pipeline': route('/security/pipeline', 'strategy-pipeline'),
   'group-policy': route('/security/groups', 'group-policy'),
-  'policy-test': route(), // 策略测试: not yet built in webapp
 
   // ---- agent (tenant-only) ----
   // demo models a single "智能体管理" submodule; the webapp/product-form
@@ -282,26 +322,21 @@ export const SUBMODULE_ROUTE_MAP: Record<string, RouteEntry> = {
   'agent-management': route('/agent-center/overview'),
 
   // ---- audit ----
-  'mail-investigation': route('/logs/mail-investigation'),
-  'ai-url-logs': route(undefined, 'ai-url-logs'), // 沙箱日志: registry feature exists but has no route yet
   'link-logs': route('/logs/link-clicks', 'link-clicks'),
   'auth-logs': route('/logs/auth-attempts', 'auth-logs'),
-  'system-logs': route(), // 通知日志: not yet built in webapp
   'admin-logs': route('/logs/admin-audit', 'admin-logs'),
-
-  // ---- executive (tenant-only) ----
-  'executive-dashboard': route(), // not yet built in webapp
-  'executive-policy': route(),
-  'executive-monitoring': route(),
 
   // ---- system (platform-only) ----
   'tenant-management': route('/tenants', 'tenant-management'),
   'platform-security-policy': route('/system/platform-security', 'platform-security-policy'),
-  network: route(), // 网络设置: not yet built in webapp
   forwarding: route('/mail-routing', 'forwarding'),
+  proxysvr: route('/system/proxysvr', 'proxysvr'),
+  'system-dkim': route('/system/dkim', 'system-dkim'),
+  'password-policy': route('/system/password-policy', 'password-policy'),
+  'smtp-credentials': route('/smtp-credentials', 'smtp-credentials'),
+
+  // ---- organization (both scopes) ----
   contacts: route('/organization-contacts', 'contacts'),
-  'data-management': route(), // 数据管理: not yet built in webapp
-  'authorization-upgrade': route(), // 升级更新: not yet built in webapp
 
   // ---- userPermission ----
   // all three submodules manage tabs of the single /users page.

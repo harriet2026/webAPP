@@ -164,12 +164,24 @@ import {
   mockLinkClickLogsList,
   mockLinkClickLogById,
 } from './fixtures';
+import {
+  mockTenantDomainsFor,
+  mockDkimSigningDomainsFor,
+  mockListDkimKeys,
+  mockGenerateDkimKey,
+  mockImportDkimKey,
+  mockVerifyDkimDns,
+  mockSetDkimKeyStatus,
+  mockDeleteDkimKey,
+} from './dkim';
+import type { DkimAlgorithm } from '@/lib/api/dkim';
 import type { IPFrequencyRulePayload } from '@/types/ip-frequency';
 import type { OverseasMailConfigResponse } from '@/types/overseas-mail';
 import type { DisposalSettings } from '@/types/disposal-settings';
 import { GROUPS_PAGE_KEY } from '@/types/groups';
 import { GROUP_POLICY_PAGE_KEY } from '@/types/group-policy';
 import type { OpsDimension, OpsTopCount } from '@/lib/api/ops-top';
+import { rbacSubmodulesForScope, type RbacScope } from '@/lib/rbac/rbac-modules';
 
 export interface MockRequest {
   method: string;
@@ -266,6 +278,69 @@ const mockSecurityModules: Record<string, boolean> = {
   url_protection: true,
 };
 
+// ─── 角色（RBAC）mock 数据 ──────────────────────────────────────────────
+// 平台/租户两套内置角色。`_level` 仅用于本地生成权限矩阵，不属于 Role 线上
+// 字段，列表响应里会被剥离。真实后端按 GetEffectiveTenantID 裁剪作用域，这里
+// 返回全集、由页面按视角（platform/tenant）过滤。
+type RoleLevel = 'admin' | 'operator' | 'viewer';
+interface MockRoleSeed {
+  id: number;
+  code: string;
+  name: string;
+  scope: RbacScope;
+  tenantId?: number;
+  isSuperAdmin?: boolean;
+  isSystemDefault: boolean;
+  status: string;
+  remark: string;
+  _level: RoleLevel;
+}
+
+const MOCK_ROLES: MockRoleSeed[] = [
+  { id: 1, code: 'platform_super_admin', name: '超级管理员', scope: 'platform', isSuperAdmin: true, isSystemDefault: true, status: 'normal', remark: '平台内置超级管理员', _level: 'admin' },
+  { id: 2, code: 'platform_ops', name: '平台运维管理员', scope: 'platform', isSystemDefault: false, status: 'normal', remark: '负责平台运维', _level: 'operator' },
+  { id: 3, code: 'platform_auditor', name: '平台审计员', scope: 'platform', isSystemDefault: false, status: 'normal', remark: '只读审计', _level: 'viewer' },
+  { id: 101, code: 'tenant_admin', name: '租户管理员', scope: 'tenant', tenantId: 1, isSystemDefault: true, status: 'normal', remark: '租户内置管理员', _level: 'admin' },
+  { id: 102, code: 'tenant_operator', name: '租户操作员', scope: 'tenant', tenantId: 1, isSystemDefault: false, status: 'normal', remark: '日常运营', _level: 'operator' },
+  { id: 103, code: 'tenant_viewer', name: '租户观察员', scope: 'tenant', tenantId: 1, isSystemDefault: false, status: 'normal', remark: '只读', _level: 'viewer' },
+];
+
+/** 列表响应：剥离内部的 `_level`，保持与 Role 线上结构一致。 */
+function roleListItem({ _level, ...rest }: MockRoleSeed) {
+  return rest;
+}
+
+/**
+ * 按角色作用域生成权限矩阵——这是让"平台视角 / 租户视角内置角色反映各自可用
+ * 授权范围"的关键：矩阵覆盖的子模块集合来自 `rbacSubmodulesForScope(scope)`，
+ * 平台角色得到平台专属模块（系统管理/监控等），租户角色得到租户专属模块
+ * （安全策略/智能体等）。行内 can* 的粒度按角色层级区分：
+ *   - admin  ：可见 + 查看/编辑/审批/删除（受子模块能力约束）
+ *   - operator：可见 + 查看/编辑（审批/删除留空）
+ *   - viewer ：可见 + 仅查看（只读）
+ * canApprove/canDelete 对不支持该操作的子模块回落为 null（"不适用"）。
+ */
+function buildRoleMatrix(scope: RbacScope, level: RoleLevel) {
+  return rbacSubmodulesForScope(scope).map((meta) => {
+    const approveBase = meta.supportApprove ? false : null;
+    const deleteBase = meta.supportDelete ? false : null;
+    if (level === 'admin') {
+      return {
+        submoduleId: meta.id,
+        visible: true,
+        canView: true,
+        canEdit: true,
+        canApprove: meta.supportApprove ? true : null,
+        canDelete: meta.supportDelete ? true : null,
+      };
+    }
+    if (level === 'operator') {
+      return { submoduleId: meta.id, visible: true, canView: true, canEdit: true, canApprove: approveBase, canDelete: deleteBase };
+    }
+    return { submoduleId: meta.id, visible: true, canView: true, canEdit: false, canApprove: approveBase, canDelete: deleteBase };
+  });
+}
+
 // 用并表替代大 switch，便于扩展。按注册顺序遍历，第一个匹配即返回。
 const routes: Route[] = [
   // 认证接口（/auth/**）刻意不 mock：登录必须走真实后端，确保拿到有效的
@@ -307,6 +382,34 @@ const routes: Route[] = [
         lastLoginIp: '192.168.1.100',
       },
     }),
+  },
+
+  // ─── 角色列表（管理员账号 role_id 下拉 + 角色权限页）───────────────────
+  // 真实后端 GET /roles 由 GetEffectiveTenantID 做作用域裁剪；纯 mock 模式下
+  // 该接口原本未覆盖，dispatcher 兜底返回 { items: [] }，导致「新建管理员」
+  // 抽屉里的角色下拉无可选项、点开为空（表现为“锁定/无法展开”）。这里回填
+  // 平台与租户两种作用域的角色，页面再按视角（isTenantView）过滤。
+  // 列表不含 permissions（与真实后端 ListRoles 一致），矩阵在详情端点返回。
+  {
+    method: 'GET', pattern: '/roles',
+    handler: () => ({ status: 200, data: { items: MOCK_ROLES.map(roleListItem) } }),
+  },
+  // ─── 角色详情（点击「查看/编辑」时 useRole 拉取权限矩阵）─────────────────
+  // 该端点原本未被 mock：GET /roles/:id 落到 dispatcher 兜底返回 {}（无 id），
+  // RolePermissionTab 的 `roleDetail.id === editingId` 判定失败 → drawerReady
+  // 恒为 false → 抽屉打不开（表现为「内置角色不可查看/编辑」）。这里按角色
+  // 作用域返回对应的权限矩阵，使平台/租户内置角色分别展示各自的授权范围。
+  {
+    method: 'GET', pattern: /^\/roles\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const seed = MOCK_ROLES.find((r) => r.id === id);
+      if (!seed) return { status: 404, data: {} };
+      return {
+        status: 200,
+        data: { ...roleListItem(seed), permissions: buildRoleMatrix(seed.scope, seed._level) },
+      };
+    },
   },
 
   // ─── 邮件处置中心 ──────────────────────────────────────────────────────
@@ -1841,6 +1944,108 @@ const routes: Route[] = [
     method: 'GET',
     pattern: '/system/health-summary',
     handler: () => ({ status: 200, data: mockSystemHealthSummary() }),
+  },
+
+  // ─── 租户发信域名（DKIM 外发签名子卡 / 组织域名下拉 / 域名管理页共用）──────
+  // 真实后端在预览不可达；此前该 GET 未 mock，导致依赖域名列表的模块在 demo
+  // 里查询失败。这里补齐，返回按 :id 分组的 demo 域名（见 mock/dkim.ts）。
+  {
+    method: 'GET',
+    pattern: /^\/tenants\/\d+\/domains$/,
+    handler: (req) => {
+      const tenantId = Number(pathname(req.path).split('/')[2]);
+      return { status: 200, data: mockTenantDomainsFor(tenantId) };
+    },
+  },
+
+  {
+    method: 'GET',
+    pattern: '/dkim/signing-domains',
+    handler: (req) => {
+      const query = new URLSearchParams(req.path.split('?')[1] ?? '');
+      const rawTenantId = query.get('tenant_id');
+      const tenantId = Number(rawTenantId);
+      if (!rawTenantId || !Number.isInteger(tenantId) || tenantId <= 0) {
+        return {
+          status: 400,
+          data: {
+            error: {
+              code: 'invalid_request',
+              message: 'tenant_id query param must be a positive integer',
+            },
+          },
+        };
+      }
+      return {
+        status: 200,
+        data: mockDkimSigningDomainsFor(tenantId),
+      };
+    },
+  },
+
+  // ─── DKIM 外发签名密钥（认证协议检查 → DKIM 外发签名子卡）──────────────────
+  // 生成/导入/校验/激活/删除全套，内存态可变（mock/dkim.ts），支持完整 demo 流。
+  // 注意路由顺序：generate/import 为非数字子路径，放在 /^\/dkim\/keys\/\d+/ 正则
+  // 之前，避免被数字 id 正则误伤（两者其实不冲突，仍显式前置以求稳）。
+  {
+    method: 'GET',
+    pattern: '/dkim/keys',
+    handler: (req) => ({ status: 200, data: mockListDkimKeys(req.path) }),
+  },
+  {
+    method: 'POST',
+    pattern: '/dkim/keys/generate',
+    handler: (req) => {
+      const b = (req.body ?? {}) as {
+        tenant_id: number;
+        domain: string;
+        selector: string;
+        algorithm: DkimAlgorithm;
+        key_size?: number;
+        note?: string;
+      };
+      return { status: 201, data: mockGenerateDkimKey(b) };
+    },
+  },
+  {
+    method: 'POST',
+    pattern: '/dkim/keys/import',
+    handler: (req) => {
+      const b = (req.body ?? {}) as {
+        tenant_id: number;
+        domain: string;
+        selector: string;
+        note?: string;
+      };
+      return { status: 201, data: mockImportDkimKey(b) };
+    },
+  },
+  {
+    method: 'POST',
+    pattern: /^\/dkim\/keys\/\d+\/verify-dns$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[3]);
+      return { status: 200, data: mockVerifyDkimDns(id) };
+    },
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/dkim\/keys\/\d+\/status$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[3]);
+      const b = (req.body ?? {}) as { is_active?: boolean };
+      mockSetDkimKeyStatus(id, b.is_active ?? false);
+      return { status: 204, data: {} };
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/dkim\/keys\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[3]);
+      mockDeleteDkimKey(id);
+      return { status: 204, data: {} };
+    },
   },
 ];
 

@@ -5,7 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.98 0.01 205);
+  /* 画布底色：中性冷灰，去除原先 hue 205（青绿）色偏，避免页面留白泛浅绿。
+     极低 chroma + 蓝向 hue 256（与 --body 同色相），保持干净的管理台冷灰观感。 */
+  --background: oklch(0.98 0.004 256);
   --foreground: oklch(0.145 0 0);
   --body: oklch(0.446 0.03 256);
   --card: oklch(1 0 0);

@@ -90,6 +90,34 @@ export interface GatedNavItem {
   requiresAdvancedRules?: boolean;
 }
 
+/**
+ * A parent group's own visibility contract.
+ *
+ * A group (an item with children) is visible iff at least one of its direct
+ * children passes the full nav gate. This used to live only as an implicit
+ * side-effect in sidebar-nav.tsx (`filteredChildren.length === 0 → return
+ * null`); extracting it makes the contract explicit and unit-testable, so it
+ * can no longer silently regress.
+ *
+ * This is precisely the mechanism that hides the「安全策略」(security) group
+ * from the platform admin under every multi-tenant form: both of its children
+ * (strategy-pipeline / group-policy) are `platformHidden`, so in the
+ * multi-tenant platform view every child is filtered out and the group
+ * collapses. The moment a NON-platformHidden child is added to that group,
+ * this function will (correctly, and visibly in tests) start showing the group
+ * to the platform admin — turning a hidden regression into a caught one.
+ *
+ * A leaf item (no children) is never hidden by THIS rule — its visibility is
+ * decided solely by `isNavItemAllowed`.
+ */
+export function isGroupVisible(
+  item: { children?: GatedNavItem[] },
+  isAllowed: (child: GatedNavItem) => boolean,
+): boolean {
+  if (!item.children || item.children.length === 0) return true;
+  return item.children.some(isAllowed);
+}
+
 /** The gate inputs a caller assembles once from useAuth() + useProductForm(). */
 export interface NavGateContext {
   hasPermission: (permission: Permission) => boolean;

@@ -5,7 +5,7 @@ import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { ColumnDef } from '@tanstack/react-table';
-import { Loader2, Eye } from 'lucide-react';
+import { Loader2, Eye, KeyRound } from 'lucide-react';
 import { DataTable } from '@/components/shared/data-table';
 import { ServerPagination } from '@/components/shared/server-pagination';
 import { Badge } from '@/components/ui/badge';
@@ -246,11 +246,14 @@ export default function AuthAttemptsPage() {
   ];
 
   return (
-    <PageShell data-testid="auth-attempts-page">
+    <PageShell
+      className="min-h-full bg-[#F8F9FB] shadow-[0_0_0_32px_#F8F9FB] dark:bg-background dark:shadow-[0_0_0_32px_var(--background)]"
+      data-testid="auth-attempts-page"
+    >
       <PageHeader
-        eyebrow={t('authAttempts.eyebrow')}
         title={t('authAttempts.title')}
         description={t('authAttempts.subtitle')}
+        icon={KeyRound}
       />
 
       <AuthStatsCards />

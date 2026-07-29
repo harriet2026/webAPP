@@ -31,7 +31,6 @@ import {
 } from '@/components/ui/select';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { DkimStatusBadge } from '@/components/dkim/dkim-status-badge';
-import { DkimPrivateKeyModal } from '@/components/dkim/dkim-private-key-modal';
 import {
   listDkimKeys,
   generateDkimKey,
@@ -95,9 +94,6 @@ export function DkimManageDrawer({ open, onOpenChange, tenantId, domain }: DkimM
   const [impPem, setImpPem] = useState('');
   const [impNote, setImpNote] = useState('');
 
-  // one-time private key modal
-  const [privateKey, setPrivateKey] = useState<{ pem: string; selector: string } | null>(null);
-
   // activate confirm
   const [activateTarget, setActivateTarget] = useState<DkimKey | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DkimKey | null>(null);
@@ -115,9 +111,8 @@ export function DkimManageDrawer({ open, onOpenChange, tenantId, domain }: DkimM
 
   const generateMutation = useMutation({
     mutationFn: (req: GenerateDkimKeyRequest) => generateDkimKey(req),
-    onSuccess: (res) => {
+    onSuccess: () => {
       toast.success(t('generateSuccess'));
-      setPrivateKey({ pem: res.private_key_pem, selector: res.selector });
       setGenOpen(false);
       setGenSelector('');
       setGenNote('');
@@ -335,16 +330,6 @@ export function DkimManageDrawer({ open, onOpenChange, tenantId, domain }: DkimM
           </ScrollArea>
         </SheetContent>
       </Sheet>
-
-      {privateKey && (
-        <DkimPrivateKeyModal
-          open={!!privateKey}
-          onOpenChange={(o) => !o && setPrivateKey(null)}
-          privateKeyPem={privateKey.pem}
-          domain={domain}
-          selector={privateKey.selector}
-        />
-      )}
 
       <ConfirmDialog
         open={!!activateTarget}

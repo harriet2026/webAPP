@@ -27,7 +27,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { PageSurface } from '@/components/shared/page-shell';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
-import { useContactSources, useContactSourceMutations } from './api';
+import { useApiRequest } from '@/lib/api/client';
+import { useContactSources, useContactSourceMutations, getContactSourceImpact } from './api';
 import { DataSourceFormSheet } from './DataSourceFormSheet';
 import {
   SyncStatusBadge,
@@ -37,7 +38,7 @@ import {
   EmptyState,
   Pager,
 } from './shared';
-import type { ContactSource, SourceType } from './types';
+import type { ContactSource, ContactSourceImpact, SourceType } from './types';
 
 // demo data-source-tab.tsx 的 webapp 实现：工具栏/表格/分页逐字段对齐 demo，
 // 筛选与分页走后端参数（GT-12038）。
@@ -79,6 +80,19 @@ export function DataSourceTab() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<ContactSource | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ContactSource | null>(null);
+  // GT-12341（重开轮）：删除确认框动态展示影响面（联系人数量 + 受影响策略）。
+  // 打开时拉取 /impact；失败/加载中回退固定说明文案，不阻塞删除操作。
+  const [deleteImpact, setDeleteImpact] = useState<ContactSourceImpact | null>(null);
+  useEffect(() => {
+    setDeleteImpact(null);
+    if (!deleteTarget) return;
+    let cancelled = false;
+    getContactSourceImpact(deleteTarget.id, scopedRequest)
+      .then((im) => { if (!cancelled) setDeleteImpact(im); })
+      .catch(() => { /* 影响面拉取失败 → 保留固定文案 */ });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deleteTarget]);
 
   // GT-12038：搜索/类型/状态筛选与分页全部走后端参数（后端 ListContactSources
   // 已支持 search + source_type + sync_status + auto_sync）。
@@ -95,6 +109,7 @@ export function DataSourceTab() {
   const filterCount = (filters.syncType !== 'all' ? 1 : 0) + (filters.status !== 'all' ? 1 : 0);
 
   const { sync, remove, setAutoSync } = useContactSourceMutations();
+  const { apiRequest: scopedRequest } = useApiRequest();
   const anyRunning = allItems.some((s) => s.sync_status === 'running');
 
   // 同步终态 toast：跟踪 running → 终态 的迁移（demo syncRow 1.5s 出结果 + toast；
@@ -358,7 +373,17 @@ export function DataSourceTab() {
         <AlertDialogContent data-testid="contacts-source-delete-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('deleteTitle', { name: deleteTarget?.name ?? '' })}</AlertDialogTitle>
-            <AlertDialogDescription>{t('deleteDesc')}</AlertDialogDescription>
+            <AlertDialogDescription data-testid="contacts-source-delete-impact">
+              {deleteImpact
+                ? t('deleteImpactDesc', {
+                    count: deleteImpact.contact_count,
+                    // 后端无受影响策略时返回 null（Go nil slice），必须判空。
+                    profiles: (deleteImpact.affected_profiles ?? []).length > 0
+                      ? (deleteImpact.affected_profiles ?? []).join('、')
+                      : t('deleteImpactNoProfiles'),
+                  })
+                : t('deleteDesc')}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel data-testid="contacts-source-delete-dialog-cancel">{tc('cancel')}</AlertDialogCancel>

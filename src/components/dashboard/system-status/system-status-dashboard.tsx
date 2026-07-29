@@ -125,7 +125,7 @@ export function SystemStatusDashboard() {
 
       <div className={`grid grid-cols-1 gap-6 ${overviewGrid}`}>
         {showAgents && <AgentOverview agents={data.agents} isLoading={data.isLoading} />}
-        <ThreatTop5 top5={data.top5} isLoading={data.isLoading} />
+        <ThreatTop5 top5={data.top5} isLoading={data.isLoading} range={range} />
         {showInfra && (
           <SystemHealthCard
             nodesOnline={data.nodesOnline}

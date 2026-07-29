@@ -23,9 +23,10 @@ export interface DkimKey {
   created_at: string;
 }
 
-// generate returns the one-time plaintext private key in addition to the key object.
-export interface DkimKeyWithPrivate extends DkimKey {
-  private_key_pem: string;
+export interface DkimSigningDomain {
+  id: number;
+  tenant_id: number;
+  domain: string;
 }
 
 export interface DkimKeyListResponse {
@@ -65,6 +66,16 @@ export interface VerifyDnsResult {
   dns_record_observed?: string | null;
 }
 
+export async function listDkimSigningDomains(
+  tenantId: number,
+  requestFn: ApiRequestFn = apiRequest
+): Promise<DkimSigningDomain[]> {
+  const query = new URLSearchParams({ tenant_id: String(tenantId) });
+  return requestFn<{ items: DkimSigningDomain[] }>(
+    `/dkim/signing-domains?${query.toString()}`
+  ).then((res) => res.items);
+}
+
 export async function listDkimKeys(
   params: ListDkimKeysParams = {},
   requestFn: ApiRequestFn = apiRequest
@@ -86,8 +97,8 @@ export async function getDkimKey(id: number, requestFn: ApiRequestFn = apiReques
 export async function generateDkimKey(
   data: GenerateDkimKeyRequest,
   requestFn: ApiRequestFn = apiRequest
-): Promise<DkimKeyWithPrivate> {
-  return requestFn<DkimKeyWithPrivate>('/dkim/keys/generate', {
+): Promise<DkimKey> {
+  return requestFn<DkimKey>('/dkim/keys/generate', {
     method: 'POST',
     body: data,
   });

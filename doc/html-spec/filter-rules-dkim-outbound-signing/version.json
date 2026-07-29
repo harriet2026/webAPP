@@ -1,0 +1,13 @@
+{
+  "module": "filter-rules-dkim-outbound-signing",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-28",
+      "webapp_commit": "9791661",
+      "comparison_spec_commit": "not-used",
+      "summary": "初版：DKIM 外发签名子卡规格（隶属 认证协议检查）。含域名×签名状态表、DkimManageDrawer 生成/导入/发布DNS/校验/激活/删除字段与校验、平台/租户作用域门控、产品形态×角色矩阵、数据/API 映射。因预览后端 127.0.0.1:18080 离线，业务数据态标注为无法验证并附环境实拍证据（Q-001/Q-002/D-004）。"
+    }
+  ]
+}

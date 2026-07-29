@@ -2082,6 +2082,15 @@
     "confirmDisable": "ยืนยันการปิดใช้งานบัญชีนี้หรือไม่? หลังจากปิดใช้งานจะยุติเซสชันการเข้าสู่ระบบทั้งหมดทันที",
     "confirmForceOffline": "ยืนยันการบังคับให้บัญชีนี้ออกจากระบบหรือไม่? จะยุติเซสชันการเข้าสู่ระบบทั้งหมดทันที",
     "selectRolePlaceholder": "กรุณาเลือกบทบาท",
+    "drawerTitle": "การตั้งค่าผู้ดูแลระบบ",
+    "drawerDescriptionCreate": "สร้างบัญชีผู้ดูแลระบบใหม่และกำหนดบทบาท",
+    "drawerDescriptionEdit": "แก้ไขข้อมูลบัญชีผู้ดูแลระบบและการกำหนดบทบาท",
+    "basicInfo": "ข้อมูลพื้นฐาน",
+    "roleAndStatus": "บทบาทและสถานะ",
+    "accountStatus": "สถานะบัญชี",
+    "statusEnabledOption": "เปิดใช้งาน (ปกติ)",
+    "statusDisabledOption": "ปิดใช้งาน",
+    "filterButton": "ตัวกรอง",
     "roleRequired": "กรุณาเลือกบทบาท",
     "selectAll": "เลือกทั้งหมด",
     "selectRow": "เลือกแถวนี้",
@@ -4199,6 +4208,20 @@
       "templateCancel": "ยกเลิก",
       "templateApply": "นำไปใช้",
       "ptrReadonlyNotice": "การตั้งค่า PTR จัดการโดยผู้ดูแลระบบ"
+    },
+    "dkimOutbound": {
+      "title": "การลงลายเซ็น DKIM ขาออก",
+      "description": "สร้างและจัดการคีย์ส่วนตัว DKIM สำหรับโดเมนที่ใช้ส่งของผู้เช่านี้ เผยแพร่คีย์สาธารณะใน DNS และลงลายเซ็น DKIM ให้กับอีเมลที่ส่งออกผ่านเกตเวย์นี้",
+      "domainCol": "โดเมนที่ใช้ส่ง",
+      "statusCol": "สถานะลายเซ็น",
+      "actionsCol": "การดำเนินการ",
+      "activeSelector": "ตัวเลือกที่ใช้งานอยู่: {selector}",
+      "notSigned": "ยังไม่ลงลายเซ็น",
+      "pendingVerify": "รอการยืนยัน",
+      "manage": "จัดการ",
+      "loading": "กำลังโหลด…",
+      "selectTenant": "เลือกผู้เช่าที่ด้านบนของหน้าก่อนจัดการการลงลายเซ็น DKIM ขาออก",
+      "noDomains": "ผู้เช่านี้ยังไม่มีโดเมนที่ใช้ส่ง โปรดเพิ่มโดเมนในการจัดการโดเมนผู้เช่าก่อนกำหนดค่าการลงลายเซ็น"
     },
     "flow": {
       "start": "ไปป์ไลน์นโยบาย",
@@ -9249,7 +9272,9 @@
     "typeNeteml": "Netease Mail API",
     "typeShortCoremail": "Coremail",
     "typeShortNeteml": "Netease API",
-    "uploadHint": "รองรับไฟล์ CSV แผนกและผู้ใช้ ไฟล์ละไม่เกิน 50MB ต้องทำการแมปคอลัมน์"
+    "uploadHint": "รองรับไฟล์ CSV แผนกและผู้ใช้ ไฟล์ละไม่เกิน 50MB ต้องทำการแมปคอลัมน์",
+    "deleteImpactDesc": "แหล่งข้อมูลนี้มีผู้ติดต่อ {count} ราย นโยบายที่ได้รับผลกระทบ: {profiles} หลังลบ ผู้ติดต่อจะถูกนำออกในการล้างข้อมูลครั้งถัดไปและนโยบายที่เกี่ยวข้องอาจใช้ไม่ได้ การดำเนินการนี้ย้อนกลับไม่ได้",
+    "deleteImpactNoProfiles": "ไม่มี"
   },
   "dkim": {
     "eyebrow": "DKIM",
@@ -9282,8 +9307,6 @@
     "copy": "คัดลอก",
     "copied": "คัดลอกไปคลิปบอร์ดแล้ว",
     "copyFailed": "คัดลอกล้มเหลว",
-    "downloadPem": "ดาวน์โหลด .pem",
-    "savedClose": "บันทึกแล้ว ปิด",
     "switchBeforeDelete": "สลับไปยัง selector อื่นก่อน",
     "generateSuccess": "สร้างคีย์แล้ว",
     "importSuccess": "นำเข้าคีย์แล้ว",
@@ -9293,8 +9316,6 @@
     "activateConfirmDesc": "ตั้ง selector {selector} เป็นคีย์ DKIM ที่ใช้งานสำหรับโดเมนนี้?",
     "deleteConfirmTitle": "ลบคีย์",
     "deleteConfirmDesc": "ลบ selector {selector}? การกระทำนี้ย้อนกลับไม่ได้",
-    "privateKeyOnceTitle": "แสดงคีย์ส่วนตัวเพียงครั้งเดียว",
-    "privateKeyOnceWarning": "บันทึกไว้ตอนนี้ หลังปิดหน้าต่างนี้จะไม่สามารถดึงคีย์ส่วนตัวแบบข้อความธรรมดาได้อีก",
     "overviewTitle": "ภาพรวม DKIM",
     "overviewDescription": "ดูสถานะคีย์ลงลายเซ็น DKIM ของทุกผู้เช่าและโดเมนผู้ส่ง",
     "tenant": "ผู้เช่า",
@@ -9954,8 +9975,9 @@
       "network": "การตั้งค่าเครือข่าย",
       "dataManagement": "การจัดการข้อมูล",
       "authorizationUpgrade": "การอนุญาตและอัปเกรด",
-      "userPermission": "ผู้ใช้และสิทธิ์",
+      "userPermission": "ผู้ดูแลระบบและสิทธิ์",
       "rolePermission": "สิทธิ์ของบทบาท",
+      "organization": "องค์กรและสมาชิก",
       "systemLogs": "ล็อกระบบ"
     }
   },

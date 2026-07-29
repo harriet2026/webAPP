@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AuthFlowDiagram } from './AuthFlowDiagram';
 import { ConfigHealthPanel } from './ConfigHealthPanel';
+import { DkimOutboundSigningSection } from './DkimOutboundSigningSection';
 import { applyTemplate } from '@/lib/auth-spoofing-templates';
 import { protocolActionKey } from '@/lib/auth-spoofing-labels';
 import { AlertTriangle, ChevronDown, Info } from 'lucide-react';
@@ -220,6 +221,11 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
             </Tabs>
 
             <ConfigHealthPanel config={config} onChange={onChange} />
+
+            {/* DKIM 外发签名子卡：与上方 SPF/DKIM/DMARC/PTR「入站校验」正交，管理本
+                租户外发邮件的 DKIM 签名密钥（生成/导入/发布 DNS/校验/激活）。自带
+                租户作用域与权限门控，不接入 AuthSpoofingConfig 的统一保存流。 */}
+            <DkimOutboundSigningSection />
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

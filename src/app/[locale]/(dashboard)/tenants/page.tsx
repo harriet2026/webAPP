@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Plus, Settings } from 'lucide-react';
 
@@ -22,6 +23,9 @@ export default function TenantsPage() {
   const { canManageTenants } = usePermission();
   const { capabilities } = useProductForm();
 
+  // GT-12437：认证日志详情「命中配置」深链 ?view=routing 直达「域名与路由」
+  // 页签（顶层 Tabs 的参数名刻意与 MailRoutingShell 的 ?tab= 区分开）。
+  const initialView = useSearchParams().get('view') === 'routing' ? 'routing' : 'manage';
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
 
@@ -59,7 +63,7 @@ export default function TenantsPage() {
         }
       />
 
-      <Tabs defaultValue="manage">
+      <Tabs defaultValue={initialView}>
         <TabsList>
           <TabsTrigger value="manage">{t('title')}</TabsTrigger>
           <TabsTrigger value="routing">

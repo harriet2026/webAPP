@@ -3,13 +3,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { ColumnDef } from '@tanstack/react-table';
-import { Plus, Pencil, Trash2, Loader2, Search, AlertCircle, LockOpen, Power, LogOut, FileText, KeyRound } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Search, LockOpen, Power, LogOut, FileText, KeyRound, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTable } from '@/components/shared/data-table';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { StatusBadge } from '@/components/shared/status-badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -46,10 +46,10 @@ import {
 import { listTenants } from '@/lib/api/tenants';
 import { getRoles, roleQueryKeys } from '@/lib/api/roles';
 import { useApiRequest } from '@/lib/api/client';
-import { formatDate, cn } from '@/lib/utils';
+
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
 import { LoginSecurityTab } from '@/components/admin/login-security/LoginSecurityTab';
 import { RolePermissionTab } from '@/components/admin/rbac/RolePermissionTab';
 import { ResetPasswordDialog, generatePassword } from '@/components/admin/reset-password-dialog';
@@ -61,6 +61,8 @@ import { ResetPasswordDialog, generatePassword } from '@/components/admin/reset-
 const userSchema = z.object({
   username: z.string().min(1, 'usernameRequired'),
   role_id: z.number().optional(),
+  // 账号状态：新建与编辑均可自由选择（原为只读展示）。取值对齐 UserStatus。
+  status: z.enum(['normal', 'disabled']).optional(),
   tenant_id: z.number().nullable().optional(),
   password: z.string().min(6, 'passwordMinLength').optional().or(z.literal('')),
   must_change_password: z.boolean().optional(),
@@ -295,7 +297,7 @@ export default function UsersPage() {
 
   const form = useForm<UserForm>({
     resolver: zodResolver(userSchema),
-    defaultValues: { username: '', password: '', must_change_password: true },
+    defaultValues: { username: '', password: '', must_change_password: true, status: 'normal' },
   });
 
   // GT-12307：schema/setError 里存的是 users.validation.* 的键名，这里集中
@@ -336,6 +338,7 @@ export default function UsersPage() {
       form.reset({
         username: user.username,
         role_id: user.roleId ?? undefined,
+        status: user.status === 'disabled' ? 'disabled' : 'normal',
         tenant_id: user.tenant_id,
         password: '',
         name: user.name ?? '',
@@ -348,6 +351,7 @@ export default function UsersPage() {
       form.reset({
         username: '',
         role_id: undefined,
+        status: 'normal',
         password: '',
         tenant_id: null,
         name: '',
@@ -407,6 +411,16 @@ export default function UsersPage() {
         } else {
           await updateUser(editingUser.id, updateData, apiRequest);
         }
+        // 账号状态改动走与行操作一致的专用接口（停用时同时终止在线会话）。
+        const nextStatus: UserStatus = data.status ?? 'normal';
+        const prevStatus: UserStatus = editingUser.status === 'disabled' ? 'disabled' : 'normal';
+        if (nextStatus !== prevStatus) {
+          if (isTenantView) {
+            await setTenantUserStatus(editingUser.id, nextStatus, apiRequest);
+          } else {
+            await setUserStatus(editingUser.id, nextStatus, apiRequest);
+          }
+        }
         toast.success(t('common.updateSuccess'));
       } else {
         // GT-12307：原型要求创建时账号/姓名/手机号/邮箱/初始密码均必填、角色必选，
@@ -423,6 +437,7 @@ export default function UsersPage() {
           // hasError 标志无法让 TS 收窄类型，故显式断言以满足 CreateUserRequest。
           password: data.password!,
           role_id: data.role_id,
+          status: data.status ?? 'normal',
           name: data.name || undefined,
           phone: data.phone || undefined,
           email: data.email || undefined,
@@ -482,9 +497,10 @@ export default function UsersPage() {
         />
       ),
     },
-    { accessorKey: 'id', header: 'ID', size: 60 },
+    // 列表仅保留与新建/编辑弹窗一致的业务字段；ID/在线/最后登录时间/创建时间等
+    // 系统派生的只读列已移除，以与表单字段严格对齐。
     // GT-12312：表头对齐原型「账号/用户名」（抽屉标签同步）。
-  { accessorKey: 'username', header: t('users.accountUsername') },
+    { accessorKey: 'username', header: t('users.accountUsername') },
     // GT-11960: name / email / last_login_at were already on the wire (see
     // storage.ListUsers) but were never rendered.
     {
@@ -536,7 +552,8 @@ export default function UsersPage() {
     // wire — absent means normal (the pre-Plan-B default).
     {
       id: 'status',
-      header: t('users.status'),
+      // 与新建/编辑弹窗共用同一文案 key（账号状态），避免两处命名漂移。
+      header: t('users.accountStatus'),
       size: 90,
       cell: ({ row }) =>
         row.original.status === 'disabled' ? (
@@ -553,73 +570,6 @@ export default function UsersPage() {
           />
         ),
     },
-    // Task 9: derived per-request online indicator (admin_sessions-backed).
-    {
-      id: 'online',
-      header: t('users.online'),
-      size: 90,
-      cell: ({ row }) => (
-        <span
-          data-testid={`user-online-${row.original.id}`}
-          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
-        >
-          <span
-            className={cn('h-2 w-2 rounded-full', row.original.online ? 'bg-emerald-500' : 'bg-muted-foreground/30')}
-          />
-          {row.original.online ? t('users.online') : t('users.offline')}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'must_change_password',
-      header: t('users.mustChangeColumnHeader'),
-      size: 100,
-      cell: ({ row }) => (
-        row.original.must_change_password ? (
-          <Badge variant="secondary" className="gap-1" data-testid={`user-must-change-badge-${row.original.id}`}>
-            <AlertCircle className="h-3 w-3" />
-            {t('users.mustChangeBadge')}
-          </Badge>
-        ) : (
-          <span className="text-muted-foreground">-</span>
-        )
-      ),
-    },
-    {
-      accessorKey: 'last_login_at',
-      header: t('users.lastLoginAt'),
-      // GT-12312：原型在最后登录时间列以绿点标注在线账号，悬浮提示
-      // 「当前在线」（独立的在线列保留——实现已多做的能力不回退）。
-      // Tooltip 触发器必须包住日期文本本身（而非仅绿点），否则悬浮日期看不到提示；
-      // 且对离线账号也常驻渲染 tooltip（内容回落为列名），保证任意一行日期悬浮都有提示。
-      cell: ({ row }) =>
-        row.original.last_login_at ? (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <span
-                  data-testid={`user-lastlogin-${row.original.id}`}
-                  className="inline-flex items-center gap-1.5"
-                >
-                  {row.original.online && (
-                    <span
-                      data-testid={`user-lastlogin-online-dot-${row.original.id}`}
-                      className="h-2 w-2 rounded-full bg-emerald-500"
-                    />
-                  )}
-                  {formatDate(row.original.last_login_at)}
-                </span>
-              }
-            />
-            <TooltipContent>
-              {row.original.online ? t('users.currentlyOnline') : t('users.lastLoginAt')}
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <span className="text-muted-foreground">{t('users.neverLoggedIn')}</span>
-        ),
-    },
-    { accessorKey: 'created_at', header: t('logs.timestamp'), cell: ({ row }) => formatDate(row.original.created_at) },
     {
       id: 'actions',
       header: t('common.actions'),
@@ -765,15 +715,16 @@ export default function UsersPage() {
         </PageSurface>
       ) : (
         <PageSurface>
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <div className="relative max-w-sm flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          {/* GT: 对齐原型工具条——左侧搜索框，右侧（ml-auto）为「筛选 / 新建」按钮组。 */}
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <div className="relative w-64">
+              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 data-testid="user-search"
                 placeholder={t('users.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
+                className="h-9 pl-8"
               />
             </div>
             {tenantFilter !== null && !Number.isNaN(tenantFilter) && (
@@ -784,6 +735,26 @@ export default function UsersPage() {
                 </Link>
               </Badge>
             )}
+            <div className="ml-auto flex items-center gap-2">
+              {/* 原型的「筛选」按钮 aria-label 为「重置筛选」——这里落地为清空搜索
+                  与租户深链过滤的重置动作（无破坏性）。 */}
+              <Button
+                variant="outline"
+                aria-label={t('users.filterButton')}
+                data-testid="user-filter-reset"
+                onClick={() => {
+                  setSearch('');
+                  if (tenantFilter !== null && !Number.isNaN(tenantFilter)) router.push('/users');
+                }}
+              >
+                <Filter className="h-4 w-4" />
+                {t('users.filterButton')}
+              </Button>
+              <Button data-testid="user-new" onClick={() => handleOpenDialog()}>
+                <Plus className="h-4 w-4" />
+                {t('users.newButton')}
+              </Button>
+            </div>
           </div>
 
           {/* Task 9: batch bar, shown once any row is selected. */}
@@ -821,95 +792,150 @@ export default function UsersPage() {
         </PageSurface>
       )}
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent data-testid="create-user-dialog" className="max-w-md rounded-[28px] border-border/70 shadow-2xl">
-          <DialogHeader>
-            <DialogTitle>{editingUser ? t('users.editUser') : t('users.createUser')}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={form.handleSubmit(handleSubmit, onInvalidSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t('users.accountUsername')} *</Label>
-                {/* GT-12313：用户名是账号唯一标识，编辑时一律不可改（原型
-                    "账号不可修改，密码留空表示不修改"），不再区分平台/租户视角。 */}
-                <Input {...form.register('username')} disabled={!!editingUser} />
-                {fieldError('username')}
-              </div>
-              <div className="space-y-2">
-                <Label>{t('users.name')}{!editingUser && ' *'}</Label>
-                <Input {...form.register('name')} />
-                {fieldError('name')}
-              </div>
-              <div className="space-y-2">
-                <Label>{t('users.phone')}{!editingUser && ' *'}</Label>
-                <Input data-testid="new-admin-phone" {...form.register('phone')} />
-                {fieldError('phone')}
-              </div>
-              <div className="space-y-2">
-                <Label>{t('users.email')}{!editingUser && ' *'}</Label>
-                <Input type="email" {...form.register('email')} />
-                {fieldError('email')}
-              </div>
-              <div className="space-y-2">
-                <Label>{t('users.role')} *</Label>
-                <Select
-                  value={form.watch('role_id') !== undefined ? String(form.watch('role_id')) : ''}
-                  onValueChange={(v) => form.setValue('role_id', Number(v))}
-                >
-                  <SelectTrigger data-testid="new-admin-role-select">
-                    <SelectValue>{selectedRole?.name ?? t('users.selectRolePlaceholder')}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roleOptions.map((r) => (
-                      <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {fieldError('role_id')}
-              </div>
-              {!isTenantView && selectedRole?.scope === 'tenant' && (
+      {/* GT: 对齐原型 layer-1——新建/编辑账号改用右侧抽屉（Sheet），表单分为
+          「基础信息」与「角色与状态」两张分组卡片；抽屉标题固定为「管理员配置」。
+          data-testid 沿用 create-user-dialog（既有防回归单测按此定位）。 */}
+      <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
+        <SheetContent
+          data-testid="create-user-dialog"
+          className="flex w-full flex-col p-0 sm:max-w-xl"
+        >
+          <SheetHeader className="border-b border-border px-6 pt-6 pb-3">
+            <SheetTitle>{t('users.drawerTitle')}</SheetTitle>
+            <SheetDescription>
+              {editingUser ? t('users.drawerDescriptionEdit') : t('users.drawerDescriptionCreate')}
+            </SheetDescription>
+          </SheetHeader>
+
+          <form
+            onSubmit={form.handleSubmit(handleSubmit, onInvalidSubmit)}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-4">
+              {/* 分区一：基础信息（对齐角色权限抽屉的「下划线分区标题」规范） */}
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2 border-b border-border pb-1.5">
+                  <span className="text-sm font-medium text-foreground">{t('users.basicInfo')}</span>
+                </div>
                 <div className="space-y-2">
-                  <Label>{t('users.tenant')}</Label>
-                  <Input type="number" {...form.register('tenant_id', { valueAsNumber: true })} />
+                  <Label>{t('users.accountUsername')}<span className="ml-0.5 text-destructive">*</span></Label>
+                  {/* GT-12313：用户名是账号唯一标识，编辑时一律不可改（原型
+                      "账号不可修改，密码留空表示不修改"），不再区分平台/租户视角。 */}
+                  <Input {...form.register('username')} disabled={!!editingUser} />
+                  {fieldError('username')}
                 </div>
-              )}
-              <div className="space-y-2">
-                <Label>{editingUser ? t('common.password') : `${t('users.initialPassword')} *`}</Label>
-                <div className="flex items-center gap-2">
-                  <Input type="password" {...form.register('password')} placeholder={editingUser ? t('users.leaveBlank') : ''} className="flex-1" />
-                  {!editingUser && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      data-testid="user-password-generate"
-                      onClick={() => form.setValue('password', generatePassword(), { shouldValidate: true })}
-                    >
-                      {t('users.resetPassword.generate')}
-                    </Button>
-                  )}
+                <div className="space-y-2">
+                  <Label>{t('users.name')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
+                  <Input {...form.register('name')} />
+                  {fieldError('name')}
                 </div>
-                {fieldError('password')}
+                {/* 字段顺序与列表列序保持一致：姓名 → 邮箱 → 手机号 */}
+                <div className="space-y-2">
+                  <Label>{t('users.email')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
+                  <Input type="email" {...form.register('email')} />
+                  {fieldError('email')}
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('users.phone')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
+                  <Input data-testid="new-admin-phone" {...form.register('phone')} />
+                  {fieldError('phone')}
+                </div>
+                <div className="space-y-2">
+                  <Label>
+                    {editingUser ? t('common.password') : t('users.initialPassword')}
+                    {!editingUser && <span className="ml-0.5 text-destructive">*</span>}
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Input type="password" {...form.register('password')} placeholder={editingUser ? t('users.leaveBlank') : ''} className="flex-1" />
+                    {!editingUser && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        data-testid="user-password-generate"
+                        onClick={() => form.setValue('password', generatePassword(), { shouldValidate: true })}
+                      >
+                        {t('users.resetPassword.generate')}
+                      </Button>
+                    )}
+                  </div>
+                  {fieldError('password')}
+                </div>
               </div>
+
+              {/* 分区二：角色与状态（同样使用下划线分区标题规范） */}
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2 border-b border-border pb-1.5">
+                  <span className="text-sm font-medium text-foreground">{t('users.roleAndStatus')}</span>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('users.role')}<span className="ml-0.5 text-destructive">*</span></Label>
+                  <Select
+                    value={form.watch('role_id') !== undefined ? String(form.watch('role_id')) : ''}
+                    onValueChange={(v) => form.setValue('role_id', Number(v))}
+                  >
+                    <SelectTrigger data-testid="new-admin-role-select">
+                      <SelectValue>{selectedRole?.name ?? t('users.selectRolePlaceholder')}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roleOptions.map((r) => (
+                        <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {fieldError('role_id')}
+                </div>
+                {!isTenantView && selectedRole?.scope === 'tenant' && (
+                  <div className="space-y-2">
+                    <Label>{t('users.tenant')}</Label>
+                    <Input type="number" {...form.register('tenant_id', { valueAsNumber: true })} />
+                  </div>
+                )}
+                {/* 账号状态：新建与编辑均可自由选择。编辑时若改为「停用」，提交会走
+                    与行操作相同的 setUserStatus/setTenantUserStatus 接口——该接口在
+                    停用时仍会终止该账号的在线会话，安全语义不变。 */}
+                <div className="space-y-2">
+                  <Label>{t('users.accountStatus')}</Label>
+                  <Select
+                    value={form.watch('status') ?? 'normal'}
+                    onValueChange={(v) => form.setValue('status', v as UserStatus)}
+                  >
+                    <SelectTrigger data-testid="new-admin-status-select">
+                      <SelectValue>
+                        {form.watch('status') === 'disabled'
+                          ? t('users.statusDisabledOption')
+                          : t('users.statusEnabledOption')}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">{t('users.statusEnabledOption')}</SelectItem>
+                      <SelectItem value="disabled">{t('users.statusDisabledOption')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* GT-12318：所有账号首次登录一律强制改密（临时密码安全契约），
+                  不再提供"是否强制首登改密"开关——平台与租户视角统一显示固定
+                  提示。新账号 must_change_password 由服务端默认 true 保证，前端
+                  不再下发该字段（testid 沿用 tenant-must-change-notice）。 */}
+              <p className="pt-1 text-xs text-muted-foreground" data-testid="tenant-must-change-notice">
+                {t('users.tenantMustChangeNotice')}
+              </p>
             </div>
-            {/* GT-12318：所有账号首次登录一律强制改密（临时密码安全契约），
-                不再提供"是否强制首登改密"开关——平台与租户视角统一显示固定
-                提示。新账号 must_change_password 由服务端默认 true 保证，前端
-                不再下发该字段（testid 沿用 tenant-must-change-notice）。 */}
-            <p className="pt-1 text-xs text-muted-foreground" data-testid="tenant-must-change-notice">
-              {t('users.tenantMustChangeNotice')}
-            </p>
-            <DialogFooter>
+
+            {/* 页脚：对齐原型「确定 / 取消」顺序（确定在前）。 */}
+            <div className="flex items-center gap-2 border-t border-border px-6 py-3">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t('common.save')}
+              </Button>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                {t('common.save')}
-              </Button>
-            </DialogFooter>
+            </div>
           </form>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       <ConfirmDialog
         open={!!deleteId}
@@ -994,19 +1020,15 @@ export default function UsersPage() {
   }
 
   return (
-    <PageShell>
+    // GT: 页面底色与「邮件安全总览」页对齐——沿用其 PageShell 的底色处理
+    // （浅灰 #F8F9FB + 32px 外扩阴影抵消父容器 padding，让灰底铺满内容区；
+    // 深色模式回落到 --background）。避免各页底色逐页漂移。
+    <PageShell className="min-h-full bg-[#F8F9FB] shadow-[0_0_0_32px_#F8F9FB] dark:bg-background dark:shadow-[0_0_0_32px_var(--background)]">
+      {/* GT: 对齐原型页面框架——页头只保留标题 + 副标题（无 eyebrow），
+          「新建」按钮下沉到账号页签的工具条右侧（见 accountsTab）。 */}
       <PageHeader
-        eyebrow={t('users.eyebrow')}
         title={t('users.title')}
         description={t('users.subtitle')}
-        actions={
-          canManageAccounts ? (
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t('users.newButton')}
-            </Button>
-          ) : undefined
-        }
       />
 
       <Tabs defaultValue={tabs[0]?.value} className="w-full space-y-4">
