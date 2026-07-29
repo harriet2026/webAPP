@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import {
@@ -63,6 +63,10 @@ export function QuickFilters({
     : "zh";
   const [policyMode, setPolicyMode] = useState<"module" | "rule">("module");
   const [ruleSearch, setRuleSearch] = useState("");
+  // SSR/hydration 安全：tenantSelector 依赖客户端 capabilities（异步加载），
+  // SSR 时始终为 null，客户端水合后才显示，避免 DOM 结构不一致。
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   // GT-12236: 原型要求处置依据按模块语义展示（附件安全检测为单一模块），
   // 而后端 policy_key 把它拆成 ATT-BASIC/ATT-QR/ATT-ENC 三个 key。
   // groupDisposalModulesByStage 按模块名分组合并：同名 key 只出现一次，
@@ -154,8 +158,8 @@ export function QuickFilters({
   // 收发时间/收发类型/发信人/收信人同一行（QC UI04）。
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="disposal-quick-filters">
-          <div className="order-1 space-y-1" suppressHydrationWarning>
-            {tenantSelector ? (
+          <div className="order-1 space-y-1">
+            {mounted && tenantSelector ? (
               <>
                 <label className="text-xs text-muted-foreground">{t("tenantScope")}</label>
                 {tenantSelector}
