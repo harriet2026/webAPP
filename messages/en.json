@@ -5577,7 +5577,13 @@
       "failed": "Bulk operation failed, please retry later",
       "recall": "Recall",
       "recallLimit": "Max 10 emails per recall",
-      "reclassifyPartial": "{n} email(s) disposed, but reclassification failed"
+      "reclassifyPartial": "{n} email(s) disposed, but reclassification failed",
+      "exportSelected": "Export {n} Selected",
+      "exportAll": "Export All Filtered ({n})",
+      "exportAllLimit": "Export All Filtered ({n} total, only first {limit} will be exported)",
+      "exportLimitWarning": "Large result set ({n} records). Only first {limit} will be exported. Consider narrowing your filters.",
+      "exportAllFiltered": "Export All Filtered",
+      "crossPageSelected": "{n} items selected across pages"
     },
     "recall": {
       "title": "Mail Recall",

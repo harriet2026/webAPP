@@ -48,6 +48,8 @@ interface MailListTableProps {
   onHeaderFiltersChange: (filters: TableHeaderFilters) => void;
   timeSort: TimeSortOrder;
   onTimeSortChange: (sort: TimeSortOrder) => void;
+  /** 全量筛选导出时的 loading 状态 */
+  exportLoading?: boolean;
 }
 
 export type TimeSortOrder = 'none' | 'asc' | 'desc';
@@ -106,6 +108,7 @@ export function MailListTable({
   onHeaderFiltersChange,
   timeSort,
   onTimeSortChange,
+  exportLoading = false,
 }: MailListTableProps) {
   const t = useTranslations('emailDisposal');
   const rawLocale = useLocale();
@@ -269,7 +272,9 @@ export function MailListTable({
     <div data-testid="disposal-batch-toolbar" className="flex items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2">
       <span className="text-sm text-muted-foreground">{t('table.total', { n: total })}</span>
       {hasSelection && (
-        <span className="text-sm font-medium">{t('table.selected', { n: selectedIds.size })}</span>
+        <span className="text-sm font-medium text-primary">
+          {t('batch.crossPageSelected', { n: selectedIds.size })}
+        </span>
       )}
       <div className="flex gap-2 ml-auto items-center">
         {aiEnabled && (
@@ -304,10 +309,28 @@ export function MailListTable({
           <Trash2 className="mr-1 h-3 w-3" />
           {t('batch.delete')}
         </Button>
-        <Button data-testid="disposal-batch-export" variant="outline" size="sm" className="h-7 text-xs" onClick={() => onBatchAction('export')} disabled={!hasSelection}>
-          <Download className="mr-1 h-3 w-3" />
-          {t('batch.export')}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger render={<span />}>
+            <Button
+              data-testid="disposal-batch-export"
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => onBatchAction('export')}
+              disabled={exportLoading}
+            >
+              {exportLoading
+                ? <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                : <Download className="mr-1 h-3 w-3" />}
+              {hasSelection
+                ? t('batch.exportSelected', { n: selectedIds.size })
+                : t('batch.exportAll', { n: total })}
+            </Button>
+          </TooltipTrigger>
+          {!hasSelection && (
+            <TooltipContent>{t('batch.exportAllFiltered')}</TooltipContent>
+          )}
+        </Tooltip>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={

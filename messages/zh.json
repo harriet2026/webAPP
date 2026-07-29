@@ -5572,7 +5572,13 @@
       "failed": "批量处置失败，请稍后重试",
       "recall": "召回",
       "recallLimit": "单次召回最多 10 封",
-      "reclassifyPartial": "{n} 封邮件已处置，但改判失败"
+      "reclassifyPartial": "{n} 封邮件已处置，但改判失败",
+      "exportSelected": "导出已选 {n} 条",
+      "exportAll": "导出全部筛选（{n} 条）",
+      "exportAllLimit": "导出全部筛选（共 {n} 条，超出上限将只导出前 {limit} 条）",
+      "exportLimitWarning": "筛选结果较多（{n} 条），将导出前 {limit} 条，建议缩小筛选范围",
+      "exportAllFiltered": "导出全部筛选",
+      "crossPageSelected": "已跨页选中 {n} 条"
     },
     "recall": {
       "title": "邮件召回",
