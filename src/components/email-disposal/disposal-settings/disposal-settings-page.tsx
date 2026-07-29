@@ -80,25 +80,37 @@ export function DisposalSettingsPage() {
       form.reset(saved);
       toast.success(t('saveSuccess'));
     } catch (e) {
-      const message = e instanceof Error ? e.message : t('saveFailed');
-      // portal_base_url is conditionally required (backend 400s when
-      // recall/preview is enabled and it's empty); surface that message next
-      // to the field IN ADDITION to the toast (GT-12077). The toast is not
-      // optional: the field lives on the quarantine tab, so a save triggered
-      // from the review/recall tab would otherwise fail with nothing visible
-      // at all — the button would just appear to do nothing.
-      if (e instanceof ApiError && e.status === 400 && message.includes('portal_base_url')) {
-        form.setError('quarantine.portal_base_url', { type: 'server', message });
+      const rawMessage = e instanceof Error ? e.message : '';
+
+      // 将已知的后端英文错误映射为 i18n 键，避免裸露字段名和英文原文给终端用户。
+      // 匹配优先级：portal_base_url > 分类置信度 > 通用 saveFailed。
+      let toastMessage: string;
+
+      if (e instanceof ApiError && e.status === 400 && rawMessage.includes('portal_base_url')) {
+        // 把错误同时标注到字段旁（字段渲染层已通过 t('portalBaseUrlRequired') 翻译，
+        // setError 的 message 只用作 fieldState.error 存在性判断，不直接渲染）。
+        form.setError('quarantine.portal_base_url', {
+          type: 'server',
+          message: 'portalBaseUrlRequired',
+        });
+        toastMessage = t('portalBaseUrlRequired');
       } else if (e instanceof ApiError && e.status === 400) {
         // 分类置信度区间的服务端校验错误信息带分类键名（如
         // "min_score must be <= max_score for phishing"），据此把错误挂到
-        // 对应分类行；无法定位键时保持 toast-only。
-        const key = DISPOSAL_CATEGORY_KEYS.find((k) => message.includes(k));
+        // 对应分类行；字段错误文案统一走 t('scoreRangeError')，toast 走通用失败文案。
+        const key = DISPOSAL_CATEGORY_KEYS.find((k) => rawMessage.includes(k));
         if (key) {
-          form.setError(`quarantine.category_notify.${key}`, { type: 'server', message });
+          form.setError(`quarantine.category_notify.${key}`, {
+            type: 'server',
+            message: 'scoreRangeError',
+          });
         }
+        toastMessage = t('saveFailed');
+      } else {
+        toastMessage = rawMessage || t('saveFailed');
       }
-      toast.error(message);
+
+      toast.error(toastMessage);
     }
   };
 
