@@ -7011,7 +7011,9 @@
     "notifyModeSpecified": "Specified Range",
     "notifyModeAllHint": "Notifications will be sent to all users",
     "category": "Category",
-    "notifyStatus": "Status"
+    "notifyStatus": "Status",
+    "portalBaseUrlRequired": "Please enter a valid external access URL (http/https). This address is used to generate notification links when permissions are enabled.",
+    "portalBaseUrlMissingHint": "External access URL is not set — recall, preview, whitelist, and blacklist permissions require this URL to generate notification links. Please fill it in before enabling these permissions."
   },
   "dkim": {
     "column": "DKIM",

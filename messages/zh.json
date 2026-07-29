@@ -7068,7 +7068,9 @@
     "notifyModeSpecified": "指定范围",
     "notifyModeAllHint": "通知信将发送给所有用户",
     "category": "分类",
-    "notifyStatus": "状态"
+    "notifyStatus": "状态",
+    "portalBaseUrlRequired": "请先填写合法的外部访问地址（http/https），开启权限后该地址用于生成通知链接。",
+    "portalBaseUrlMissingHint": "外部访问地址未填写——取回、预览、加白、加黑权限依赖该地址生成通知链接，请先填写后再开启对应权限。"
   },
   "dkim": {
     "column": "DKIM",

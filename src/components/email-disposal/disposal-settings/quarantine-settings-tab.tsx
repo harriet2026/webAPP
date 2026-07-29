@@ -444,84 +444,115 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
         <Controller
           control={control}
           name="quarantine.portal_base_url"
-          render={({ field, fieldState }) => (
-            <div className="space-y-1.5">
-              <Label htmlFor="portal-base-url">{t('portalBaseUrlLabel')}</Label>
-              <Input
-                id="portal-base-url"
-                value={field.value ?? ''}
-                onChange={field.onChange}
-                placeholder={t('portalBaseUrlPlaceholder')}
-                aria-invalid={!!fieldState.error}
-              />
-              {fieldState.error ? (
-                <p className="text-sm text-destructive">{fieldState.error.message}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground">{t('portalBaseUrlHelp')}</p>
-              )}
-            </div>
-          )}
+          render={({ field, fieldState }) => {
+            const portalUrl = (field.value ?? '').trim();
+            return (
+              <div className="space-y-1.5">
+                <Label htmlFor="portal-base-url">{t('portalBaseUrlLabel')}</Label>
+                <Input
+                  id="portal-base-url"
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  placeholder={t('portalBaseUrlPlaceholder')}
+                  aria-invalid={!!fieldState.error}
+                  className={fieldState.error ? 'border-destructive focus-visible:ring-destructive' : ''}
+                />
+                {fieldState.error ? (
+                  <p className="text-sm text-destructive">{t('portalBaseUrlRequired')}</p>
+                ) : portalUrl ? null : (
+                  <p className="text-sm text-muted-foreground">{t('portalBaseUrlHelp')}</p>
+                )}
+              </div>
+            );
+          }}
         />
-        <div className="overflow-hidden rounded-lg border">
-          <table className="w-full">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium">{t('permissionItem')}</th>
-                <th className="px-4 py-3 text-center text-sm font-medium">{t('status')}</th>
-                <th className="px-4 py-3 text-center text-sm font-medium">{t('validDays')}</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">{t('description')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {DISPOSAL_PERMISSION_KEYS.map((key) => {
-                const enabled = watch(`quarantine.permissions.${key}.enabled` as const);
-                return (
-                  <tr key={key}>
-                    <td className="px-4 py-4 text-sm font-medium">
-                      {t(`perm_${key}`)}
-                      {(key === 'whitelist' || key === 'blacklist') && (
-                        <span className="ml-2 rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-                          {t('selfServicePending')}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex justify-center">
-                        <Controller
-                          control={control}
-                          name={`quarantine.permissions.${key}.enabled` as const}
-                          render={({ field }) => (
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <Controller
-                        control={control}
-                        name={`quarantine.permissions.${key}.valid_days` as const}
-                        render={({ field }) => (
-                          <Input
-                            type="number"
-                            min={1}
-                            max={365}
-                            className="mx-auto w-24"
-                            disabled={!enabled}
-                            value={field.value}
-                            onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
-                          />
-                        )}
-                      />
-                    </td>
-                    <td className="px-4 py-4 text-sm text-muted-foreground">
-                      {t(`perm_${key}_desc`)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        {(() => {
+          const portalUrl = (watch('quarantine.portal_base_url') ?? '').trim();
+          let urlValid = false;
+          if (portalUrl) {
+            try {
+              const parsed = new URL(portalUrl);
+              urlValid = parsed.protocol === 'https:' || parsed.protocol === 'http:';
+            } catch {
+              urlValid = false;
+            }
+          }
+          const portalMissing = !urlValid;
+          return (
+            <>
+              {portalMissing && (
+                <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{t('portalBaseUrlMissingHint')}</span>
+                </div>
+              )}
+              <div className="overflow-hidden rounded-lg border">
+                <table className="w-full">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-sm font-medium">{t('permissionItem')}</th>
+                      <th className="px-4 py-3 text-center text-sm font-medium">{t('status')}</th>
+                      <th className="px-4 py-3 text-center text-sm font-medium">{t('validDays')}</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium">{t('description')}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {DISPOSAL_PERMISSION_KEYS.map((key) => {
+                      const enabled = watch(`quarantine.permissions.${key}.enabled` as const);
+                      return (
+                        <tr key={key} className={portalMissing ? 'opacity-60' : ''}>
+                          <td className="px-4 py-4 text-sm font-medium">
+                            {t(`perm_${key}`)}
+                            {(key === 'whitelist' || key === 'blacklist') && (
+                              <span className="ml-2 rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                                {t('selfServicePending')}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex justify-center">
+                              <Controller
+                                control={control}
+                                name={`quarantine.permissions.${key}.enabled` as const}
+                                render={({ field }) => (
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    disabled={portalMissing}
+                                  />
+                                )}
+                              />
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <Controller
+                              control={control}
+                              name={`quarantine.permissions.${key}.valid_days` as const}
+                              render={({ field }) => (
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={365}
+                                  className="mx-auto w-24"
+                                  disabled={!enabled || portalMissing}
+                                  value={field.value}
+                                  onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                                />
+                              )}
+                            />
+                          </td>
+                          <td className="px-4 py-4 text-sm text-muted-foreground">
+                            {t(`perm_${key}_desc`)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          );
+        })()}
       </Card>
     </div>
   );

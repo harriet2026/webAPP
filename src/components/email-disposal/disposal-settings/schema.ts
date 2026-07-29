@@ -107,6 +107,29 @@ export const disposalSettingsSchema = z.object({
       });
     }
   }
+
+  // 任意依赖终端入口的权限开启时，必须填写合法的外部访问地址。
+  const PORTAL_DEPENDENT_PERMS = ['recall', 'preview', 'whitelist', 'blacklist'] as const;
+  const anyPortalPermEnabled = PORTAL_DEPENDENT_PERMS.some(
+    (k) => data.quarantine.permissions[k]?.enabled,
+  );
+  const baseUrl = (data.quarantine.portal_base_url ?? '').trim();
+  let urlValid = false;
+  if (baseUrl) {
+    try {
+      const parsed = new URL(baseUrl);
+      urlValid = parsed.protocol === 'https:' || parsed.protocol === 'http:';
+    } catch {
+      urlValid = false;
+    }
+  }
+  if (anyPortalPermEnabled && !urlValid) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'portalBaseUrlRequired',
+      path: ['quarantine', 'portal_base_url'],
+    });
+  }
 });
 
 export function defaultDisposalSettings(): DisposalSettings {
