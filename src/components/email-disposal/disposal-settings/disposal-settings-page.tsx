@@ -33,12 +33,14 @@ export function DisposalSettingsPage() {
   const { apiRequest } = useApiRequest();
   const { effectiveTenantId } = useTenant();
   const { capabilities } = useProductForm();
-  const { isSystemAdmin } = useAuth();
+  const { isSystemAdmin, demoAuthBypassEnabled } = useAuth();
   // GT-12427: 多租户下「处置设置」是租户自有配置(registry platformHidden=true 已隐藏平台
   // 视角侧栏入口)。平台管理员未下钻到具体租户(effectiveTenantId===null)时,即便手贴 URL
   // 也拒绝渲染/取数,与同区兄弟模块 group-policy 一致;下钻进入某租户后按该租户身份正常配置。
+  // Demo bypass 模式下底层账号仍是超管(isSystemAdmin=true)，但实际操作身份是租户管理员，
+  // 不应触发平台视角 403，与 detailReadOnly 的修复逻辑保持一致。
   const platformWithoutTenant =
-    !!capabilities?.multiTenant && isSystemAdmin && effectiveTenantId === null;
+    !demoAuthBypassEnabled && !!capabilities?.multiTenant && isSystemAdmin && effectiveTenantId === null;
 
   const { data, isLoading } = useQuery({
     queryKey: ['disposal-settings', effectiveTenantId],
