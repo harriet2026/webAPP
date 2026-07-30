@@ -33,8 +33,9 @@ import {
 } from '../../lib/detail-helpers';
 import { downloadEml } from '../../lib/disposal-detail-api';
 import {
-  getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor, formatHitDetail, type DisposalLang,
+  getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor, formatHitDetail, isStage1Policy, type DisposalLang,
 } from '../../lib/disposal-basis-config';
+import { useProductForm } from '@/contexts/product-form-context';
 import { SenderActions } from './sender-actions';
 import { SingleRecipientActions } from './single-recipient-actions';
 
@@ -200,6 +201,11 @@ export function ThreatSummaryCard({
   const tDetail = useTranslations('emailDisposal.detail'); // mailTypeConfig / correctionSourceLabelKey keys
   const tFeatures = useTranslations('emailDisposal.detail.features'); // shared disposal-basis strings (same source as analysis-section)
   const locale = useLocale();
+  const { viewer, capabilities } = useProductForm();
+  const isPlatformPolicyContext =
+    viewer === 'tenant' &&
+    capabilities?.multiTenant === true &&
+    isStage1Policy(detail.disposal_basis?.policy_key);
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(locale as DisposalLang)
     ? (locale as DisposalLang)
     : 'zh';
@@ -349,12 +355,18 @@ export function ThreatSummaryCard({
           <ShieldAlert className="h-4 w-4 shrink-0 text-orange-600" />
           <span className="shrink-0 text-muted-foreground">{tFeatures('disposalBasis')}：</span>
           <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', getStageColor(stagePolicyMeta?.stage ?? 0))} />
-          <span className="font-medium text-foreground">
-            {getModuleName(detail.disposal_basis.policy_key, disposalLang) || detail.disposal_basis.policy_key}
-            {detail.disposal_basis.rule_name && detail.disposal_basis.rule_name !== '—' && (
-              <span className="font-normal text-muted-foreground">「{detail.disposal_basis.rule_name}」</span>
-            )}
-          </span>
+          {isPlatformPolicyContext ? (
+            <span className="font-medium text-foreground">
+              {tFeatures('platformPolicyModule')}
+            </span>
+          ) : (
+            <span className="font-medium text-foreground">
+              {getModuleName(detail.disposal_basis.policy_key, disposalLang) || detail.disposal_basis.policy_key}
+              {detail.disposal_basis.rule_name && detail.disposal_basis.rule_name !== '—' && (
+                <span className="font-normal text-muted-foreground">「{detail.disposal_basis.rule_name}」</span>
+              )}
+            </span>
+          )}
           {detail.disposal_basis.action && (
             <span className={cn('rounded px-2 py-0.5 text-xs font-medium', getActionColor(detail.disposal_basis.action))}>
               {getActionLabel(detail.disposal_basis.action, disposalLang)}
