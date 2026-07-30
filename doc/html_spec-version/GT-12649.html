@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12649 · 增量功能规格 · v2</title>
+  <title>GT-12649 · 增量功能规格 · v3</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; }
@@ -225,7 +225,7 @@
   <!-- ══════════════ HEADER ══════════════ -->
   <header class="spec-header">
     <span class="ticket-badge">GT-12649</span>
-    <h1>增量功能规格 · v2</h1>
+    <h1>增量功能规格 · v3</h1>
     <p class="subtitle">
       关联模块：侧边菜单栏 · 邮件处置中心 · 邮件安全总览&nbsp;·&nbsp;
       变更类型：功能移除 / 功能变更&nbsp;·&nbsp;
@@ -236,7 +236,7 @@
 
   <!-- ══════════════ 本版变更总览 ══════════════ -->
   <div class="change-summary">
-    <h2>本版变更点（v2 新增 2 项）— 点击卡片跳转至对应需求描述</h2>
+    <h2>本版变更点（v2 新增 3 项）— 点击卡片跳转至对应需求描述</h2>
     <a class="change-item" href="#change-1">
       <span class="ci-num">1</span>
       <div class="ci-body">
@@ -256,6 +256,13 @@
       <div class="ci-body">
         <div class="ci-title">GT-12660 安全总览执行动作图表移除"标记投递"</div>
         <div class="ci-sub">邮件安全总览 · 功能变更</div>
+      </div>
+    </a>
+    <a class="change-item" href="#change-4">
+      <span class="ci-num">4</span>
+      <div class="ci-body">
+        <div class="ci-title">GT-12655 多租户租户管理员视角处置依据"平台管控策略"显示方案</div>
+        <div class="ci-sub">邮件处置中心 · 功能变更</div>
       </div>
     </a>
   </div>
@@ -281,6 +288,11 @@
       <li class="toc-indent"><a href="#c3-states">截图式交互预览</a></li>
       <li class="toc-indent"><a href="#c3-elements">逐元素说明</a></li>
 
+      <li class="toc-change"><span class="toc-num">4</span><a href="#change-4">GT-12655 多租户租户管理员视角处置依据"平台管控策略"显示方案</a></li>
+      <li class="toc-indent"><a href="#c4-overview">方案概述</a></li>
+      <li class="toc-indent"><a href="#c4-states">截图式交互预览</a></li>
+      <li class="toc-indent"><a href="#c4-elements">逐元素说明</a></li>
+
       <li><a href="#diff">差异标注（D-*）</a></li>
       <li><a href="#questions">待确认事项（Q-*）</a></li>
       <li><a href="#version-history">版本历史</a></li>
@@ -294,7 +306,7 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 多变更点格式</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v2</span></span></td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v3</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-07-30</td></tr>
         <tr><td>webapp commit</td><td><code>c481bf6</code>（基线）</td></tr>
         <tr><td>对照 spec commit</td><td>not-used</td></tr>
@@ -304,7 +316,7 @@
       </tbody>
     </table>
     <div class="callout callout-info">
-      本规格为增量文档，共记录 3 个变更点。每个变更点独立成区，互不干扰；矩阵、差异、待确认按增量编号接续，不重置。
+      本规格为增量文档，共记录 4 个变更点。每个变更点独立成区，互不干扰；矩阵、差异、待确认按增量编号接续，不重置。
     </div>
   </section>
 
@@ -328,24 +340,51 @@
           <th>云-多<br/>平台管理员</th>
           <th>云-多<br/>租户管理员</th>
           <th>AI-多<br/>平台管理员</th>
+          <th>AI-多<br/>租户管理员</th>
           <th>传统-多<br/>平台管理员</th>
+          <th>传统-多<br/>租户管理员</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><del>SidebarNav · VersionFooter</del></td>
           <td>#1</td>
-          <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
         </tr>
         <tr>
           <td><del>GT-12659 处置中心执行动作筛选 · "标记投递"选项</del></td>
           <td>#2</td>
-          <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
         </tr>
         <tr>
           <td><del>GT-12660 安全总览执行动作图表 · mark_deliver 折线</del></td>
           <td>#3</td>
-          <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+        </tr>
+        <tr>
+          <td>GT-12655 处置依据显示 · 列表列"处置依据"文案</td>
+          <td>#4</td>
+          <td>✅ 原文</td><td>✅ 原文</td><td>✅ 原文</td><td>🔒 平台管控策略</td><td>✅ 原文</td><td>🔒 平台管控策略</td><td>✅ 原文</td><td>🔒 平台管控策略</td>
+        </tr>
+        <tr>
+          <td>GT-12655 处置依据显示 · 详情弹窗概览与处置卡 · 策略模块名</td>
+          <td>#4</td>
+          <td>✅ 原文</td><td>✅ 原文</td><td>✅ 原文</td><td>🔒 平台管控策略</td><td>✅ 原文</td><td>🔒 平台管控策略</td><td>✅ 原文</td><td>🔒 平台管控策略</td>
+        </tr>
+        <tr>
+          <td>GT-12655 处置依据显示 · 详情弹窗安全分析 · 阶段1卡片标题</td>
+          <td>#4</td>
+          <td>✅ 连接层检测</td><td>✅ 连接层检测</td><td>✅ 连接层检测</td><td>🔒 平台管控</td><td>✅ 连接层检测</td><td>🔒 平台管控</td><td>✅ 连接层检测</td><td>🔒 平台管控</td>
+        </tr>
+        <tr>
+          <td>GT-12655 处置依据显示 · 详情弹窗安全分析 · 阶段1命中策略明细</td>
+          <td>#4</td>
+          <td>✅ 策略列表</td><td>✅ 策略列表</td><td>✅ 策略列表</td><td>🔒 平台统一管控说明文字</td><td>✅ 策略列表</td><td>🔒 平台统一管控说明文字</td><td>✅ 策略列表</td><td>🔒 平台统一管控说明文字</td>
+        </tr>
+        <tr>
+          <td>GT-12655 处置依据显示 · 筛选器"处置依据"下拉 · 连接层策略选项</td>
+          <td>#4</td>
+          <td>✅ 各策略可勾选</td><td>✅ 各策略可勾选</td><td>✅ 各策略可勾选</td><td>✅ 折叠为"平台管控策略"可勾选</td><td>✅ 各策略可勾选</td><td>✅ 折叠为"平台管控策略"可勾选</td><td>✅ 各策略可勾选</td><td>✅ 折叠为"平台管控策略"可勾选</td>
         </tr>
       </tbody>
     </table>
@@ -536,7 +575,7 @@
 
       <div class="callout callout-removed">
         <span class="tag tag-removed">已移除</span>
-        邮件安全总览 → 安全态势分析 → 执行动作 tab 图表中，不再显示 <code>mark_deliver</code>（标记投递）折线。其他视图（威胁类型、投递结果等）的折线系列不受影响。
+        邮件安全总览 → 安全态势分析 → 执��动作 tab 图表中，不再显示 <code>mark_deliver</code>（标记投递）折线。其他视图（威胁类型、投递结果等）的折线系列不受影响。
       </div>
 
       <h3 id="c3-states">截图式交互预览</h3>
@@ -591,6 +630,314 @@
     </div>
   </div>
 
+  <!-- ══════════════ 变更 4 ══════════════ -->
+  <div class="incremental-section" id="change-4">
+    <div class="incr-header">
+      <span class="incr-num">4</span>
+      <h2>GT-12655 多租户租户管理员视角处置依据"平台管控策略"显示方案</h2>
+      <span class="incr-meta">
+        组件：<code>mail-list-table.tsx</code> · <code>threat-summary-card.tsx</code> · <code>analysis-section.tsx</code> · <code>quick-filters.tsx</code> ·
+        变更类型：功能变更 · 2026-07-30
+      </span>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-info">
+        <strong>背景：</strong>在云网关 / AI 版多租户 / 传统版多租户产品形态下，登录视角切换为租户管理员时，阶段1（连接层）策略为平台级策略，租户无权查看或配置具体规则。因此所有涉及"处置依据"的展示点，若触发策略为阶段1，需将具体策略信息模糊化，统一展示为"平台管控策略"，引导用户联系平台管理员。
+      </div>
+
+      <h3 id="c4-overview">方案概述</h3>
+      <table>
+        <thead><tr><th>触发条件</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>产品形态</td>
+            <td>云网关-多租户 / AI版-多租户 / 传统版-多租户（<code>capabilities.multiTenant === true</code>）</td>
+          </tr>
+          <tr>
+            <td>登录视角</td>
+            <td>租户管理员（<code>viewer === 'tenant'</code>）</td>
+          </tr>
+          <tr>
+            <td>处置依据策略</td>
+            <td>阶段1（连接层）策略：<code>IPFREQ</code> / <code>IPBL</code> / <code>RBL</code> / <code>OVERSEAS</code>（<code>isStage1Policy(policy_key) === true</code>）</td>
+          </tr>
+          <tr>
+            <td>不触发条件</td>
+            <td>单租户形态；平台管理员视角；阶段2~5 策略</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="c4-states">截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-8：邮件列表"处置依据"列 — 多租户租户管理员视角 · 阶段1策略邮件</h4>
+        <p class="trigger-path">
+          触发路径：切换产品形态为"云网关" → 登录视角切换为"租户管理员" →
+          邮件处置中心列表页 → 定位处置依据为阶段1策略（如 IPBL / RBL）的行 → 观察"处置依据"列
+        </p>
+        <figure>
+          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="处置中心默认态（租户管理员视角，含平台管控策略拦截行）" style="max-width:900px;" />
+          <figcaption>
+            注：S-8 专项截图待归档。当前借用 S-4 展示处置中心页面整体结构。
+            阶段1策略邮件（MIC026 IPBL / MIC027 RBL）在"处置依据"列显示"平台管控策略拦截"，
+            Tooltip 悬停后展示完整引导文案"该邮件由平台连接层策略拦截，如需了解详情请联系平台管理员"。
+          </figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>平台管理员视角（原文）</th><th>多租户租户管理员视角（变更后）</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>处置依据列文案</td>
+              <td><code>RBL 过滤 · RBL黑名单命中</code>（策略模块 · 规则名）</td>
+              <td><code>平台管控策略拦截</code>（固定文案，i18n key：<code>emailDisposal.detail.features.platformPolicyListReason</code>）</td>
+            </tr>
+            <tr>
+              <td>Tooltip 内容</td>
+              <td>同列文案</td>
+              <td>该邮件由平台连接层策略拦截，如需了解详情请联系平台管理员（i18n key：<code>platformPolicyHitDetail</code>）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>状态 S-9：详情弹窗"概览与处置"卡片"处置依据"行 — 多租户租户管理员视角 · 阶段1策略邮件</h4>
+        <p class="trigger-path">
+          触发路径：邮件处置中心列表 → 点击阶段1策略邮件行（如 MIC027 RBL）→ 弹窗打开 → 切至"概览与处置"标签页 → 观察处置依据行
+        </p>
+        <figure>
+          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="详情弹窗概览与处置（租户管理员视角，处置依据显示平台管控策略）" style="max-width:900px;" />
+          <figcaption>
+            注：S-9 专项截图待归档（见 D-5）。处置依据行结构：
+            阶段色点（保留）·「平台管控策略」·「拒收」徽标（保留）。
+            策略模块名、规则名、命中详情、"前往策略配置页"链接均不显示。
+          </figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>平台管理员视角（原文）</th><th>多租户租户管理员视角（变更后）</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>策略模块名</td>
+              <td>RBL 过滤（含阶段色点）</td>
+              <td>平台管控策略（无色点；i18n key：<code>platformPolicyModule</code>）</td>
+            </tr>
+            <tr>
+              <td>规则名 / ID</td>
+              <td>RBL黑名单命中（RBL-023）</td>
+              <td>平台统一管控（i18n key：<code>platformPolicyRuleName</code>）</td>
+            </tr>
+            <tr>
+              <td>命中详情</td>
+              <td>具体命中信息</td>
+              <td>该邮件由平台连接层策略拦截，如需了解详情请联系平台管理员（i18n key：<code>platformPolicyHitDetail</code>）</td>
+            </tr>
+            <tr>
+              <td>检测标签</td>
+              <td>显示</td>
+              <td>隐藏（不渲染）</td>
+            </tr>
+            <tr>
+              <td>"前往策略配置页"链接</td>
+              <td>显示</td>
+              <td>隐藏（不渲染）</td>
+            </tr>
+            <tr>
+              <td>动作徽标（拒收 / 隔离等）</td>
+              <td>显示</td>
+              <td>保留（不变）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>状态 S-10：详情弹窗"安全分析"标签页"检测流程"阶段1卡片 — 多租户租户管理员视角</h4>
+        <p class="trigger-path">
+          触发路径：邮件处置中心 → 点击阶段1策略邮件行 → 弹窗打开 → 切至"安全分析"标签页 → 观察"检测流程"区阶段1卡片
+        </p>
+        <figure>
+          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="安全分析检测流程（租户管理员视角，阶段1显示平台管控）" style="max-width:900px;" />
+          <figcaption>
+            注：S-10 专项截图待归档（见 D-5）。阶段1卡片展示逻辑（展开态）：
+            标题：「阶段 1 · 平台管控」；
+            结果徽标（通过/拦截）保留；
+            策略项数和耗时保留；
+            命中策略明细列表替换为灰色斜体说明文字"该阶段由平台统一管控，详情请联系平台管理员"。
+            阶段2~5 卡片不受影响。
+          </figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>平台管理员视角（原文）</th><th>多租户租户管理员视角（变更后）</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>阶段1卡片标题</td>
+              <td>阶段 1 · 连接层检测</td>
+              <td>阶段 1 · 平台管控（i18n key：<code>emailDisposal.detail.analysis.stageName.connectionPlatform</code>）</td>
+            </tr>
+            <tr>
+              <td>结果徽标</td>
+              <td>通过 / 拦截</td>
+              <td>保留（不变）</td>
+            </tr>
+            <tr>
+              <td>策略项数 / 耗时</td>
+              <td>4 项策略 · 8ms</td>
+              <td>保留（不变）</td>
+            </tr>
+            <tr>
+              <td>命中策略明细列表</td>
+              <td>IP频率限制、IP过滤、RBL过滤、海外邮件检测（各含状态标记）</td>
+              <td>灰色斜体文字：「该阶段由平台统一管控，详情请联系平台管理员」（i18n key：<code>platformStageHint</code>）</td>
+            </tr>
+            <tr>
+              <td>阶段2~5 卡片</td>
+              <td>正常显示</td>
+              <td>不变</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>状态 S-11：搜索筛选"处置依据"下拉 · "连接层"分组 — 多租户租户管理员视角</h4>
+        <p class="trigger-path">
+          触发路径：邮件处置中心列表页 → 点击"处置依据"筛选下拉 → 展开弹层 → 观察"连接层"分组
+        </p>
+        <figure>
+          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="处置依据筛选下拉（租户管理员视角，连接层折叠为平台管控策略）" style="max-width:600px;" />
+          <figcaption>
+            注：S-11 专项截图待归档（见 D-5）。"连接层"分组标题保留，其下原有 4 条独立模块条目
+            （IP频率限制、IP黑白名单、RBL过滤、境外邮件）折叠为单条"平台管控策略"可勾选条目。
+            勾选后等同于将全部阶段1 policy_key（IPFREQ / IPBL / RBL / OVERSEAS）写入筛选条件。
+            其他分组（身份层、内容层等）不受影响。
+          </figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>平台管理员视角（原文）</th><th>多租户租户管理员视角（变更后）</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>连接层分组标题</td>
+              <td>连接层</td>
+              <td>保留（不变）</td>
+            </tr>
+            <tr>
+              <td>连接层各模块条目</td>
+              <td>IPFREQ·IP频率限制、IPBL·IP黑白名单、RBL·RBL过滤、OVERSEAS·境外邮件（各可独立勾选）</td>
+              <td>折叠为单条「平台管控策略」可勾选条目（Checkbox + 文案，i18n key：<code>emailDisposal.platformManagedPolicy</code>）</td>
+            </tr>
+            <tr>
+              <td>勾选"平台管控策略"的筛选效果</td>
+              <td>—</td>
+              <td>等同于勾选全部阶段1 policy_key（IPFREQ / IPBL / RBL / OVERSEAS）；取消勾选时全部移除</td>
+            </tr>
+            <tr>
+              <td>身份层 / 内容层等其他分组</td>
+              <td>正常可勾选</td>
+              <td>不变</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="c4-elements">逐元素说明</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>展示点</th>
+            <th>组件</th>
+            <th>触发条件</th>
+            <th>平台管理员 / 单租户</th>
+            <th>多租户租户管理员</th>
+            <th>i18n key</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>列表列文案</td>
+            <td><code>mail-list-table.tsx</code></td>
+            <td><code>isStage1Policy(policy_key)</code></td>
+            <td>原始策略模块 · 规则名</td>
+            <td>平台管控策略拦截</td>
+            <td><code>platformPolicyListReason</code></td>
+          </tr>
+          <tr>
+            <td>列表列 Tooltip</td>
+            <td><code>mail-list-table.tsx</code></td>
+            <td>同上</td>
+            <td>同列文案</td>
+            <td>完整引导说明</td>
+            <td><code>platformPolicyHitDetail</code></td>
+          </tr>
+          <tr>
+            <td>概览与处置卡 · 策略模块名</td>
+            <td><code>threat-summary-card.tsx</code></td>
+            <td>同上</td>
+            <td>RBL 过滤（含阶段色点）</td>
+            <td>平台管控策略（无色点）</td>
+            <td><code>platformPolicyModule</code></td>
+          </tr>
+          <tr>
+            <td>安全分析详情区 · 策略模块名</td>
+            <td><code>analysis-section.tsx</code></td>
+            <td>同上</td>
+            <td>原始模块名</td>
+            <td>平台管控策略</td>
+            <td><code>platformPolicyModule</code></td>
+          </tr>
+          <tr>
+            <td>安全分析详情区 · 规则名</td>
+            <td><code>analysis-section.tsx</code></td>
+            <td>同上</td>
+            <td>RBL黑名单命中（RBL-023）</td>
+            <td>平台统一管控</td>
+            <td><code>platformPolicyRuleName</code></td>
+          </tr>
+          <tr>
+            <td>安全分析详情区 · 命中详情</td>
+            <td><code>analysis-section.tsx</code></td>
+            <td>同上</td>
+            <td>具体命中信息</td>
+            <td>引导说明</td>
+            <td><code>platformPolicyHitDetail</code></td>
+          </tr>
+          <tr>
+            <td>检测流程 · 阶段1卡片标题</td>
+            <td><code>analysis-section.tsx</code></td>
+            <td><code>isPlatformPolicyContext &amp;&amp; st.stage === 1</code></td>
+            <td>连接层检测</td>
+            <td>平台管控</td>
+            <td><code>stageName.connectionPlatform</code></td>
+          </tr>
+          <tr>
+            <td>检测流程 · 阶段1命中策略明细</td>
+            <td><code>analysis-section.tsx</code></td>
+            <td>同上</td>
+            <td>策略列表（含状态标记）</td>
+            <td>灰色斜体说明文字</td>
+            <td><code>platformStageHint</code></td>
+          </tr>
+          <tr>
+            <td>筛选器处置依据 · 连接层条目</td>
+            <td><code>quick-filters.tsx</code></td>
+            <td><code>hidePlatformStage &amp;&amp; stage === 1</code></td>
+            <td>4 条独立可勾选项</td>
+            <td>折叠为单条"平台管控策略"可勾选项</td>
+            <td><code>platformManagedPolicy</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-info">
+        判断逻辑统一由 <code>isStage1Policy(policy_key)</code>（<code>disposal-basis-config.ts</code> 导出）和
+        <code>useProductForm()</code> 的 <code>viewer / capabilities.multiTenant</code> 共同决定，
+        无需在各组件中重复维护阶段1 key 列表。
+      </div>
+
+    </div>
+  </div>
+
   <!-- ══════════════ 差异标注 ══════════════ -->
   <section id="diff">
     <h2>差异标注（D-*）</h2>
@@ -641,7 +988,16 @@
           <td>已解决</td>
           <td>2026-07-30</td>
           <td>源码：<code>TrendChartCard.tsx</code> useMemo 在 <code>viewBy === 'action'</code> 时过滤 <code>mark_deliver</code>；浏览器截图 S-7 已验证。</td>
-          <td>���在 <code>TrendChartCard.tsx</code> 中修复，其他 viewBy 不受影响。</td>
+          <td>已在 <code>TrendChartCard.tsx</code> 中修复，其他 viewBy 不受影响。</td>
+        </tr>
+        <tr>
+          <td>D-5</td>
+          <td>#4</td>
+          <td>GT-12655 变更4涉及的 S-8（列表列）、S-9（概览与处置卡）、S-10（安全分析阶段1卡片）、S-11（筛选器下拉）四个专项状态截图尚未归档至 <code>screenshots/</code>；当前规格借用已有截图 S-4 作示意。</td>
+          <td>未解决</td>
+          <td>2026-07-30</td>
+          <td>—</td>
+          <td>需在多租户租户管理员视角下实拍上述四个状态，分别归档为 <code>S-8-list-platform-policy.png</code>、<code>S-9-detail-overview-platform-policy.png</code>、<code>S-10-analysis-stage1-platform.png</code>、<code>S-11-filter-platform-policy.png</code>，并替换规格中对应的 img src。</td>
         </tr>
       </tbody>
     </table>
@@ -682,6 +1038,13 @@
           <td>待确认</td>
           <td>当前实现为前端过滤，共享常量仍含该值；若永久下线，建议从常量中移除以避免误用。</td>
         </tr>
+        <tr>
+          <td>Q-4</td>
+          <td>#4</td>
+          <td>多租户租户管理员视角下，筛选器"处置依据"下拉勾选"平台管控策略"后，后端查询是否支持传入全部阶段1 policy_key（IPFREQ / IPBL / RBL / OVERSEAS）作为 OR 筛选条件？当前前端实现为将四个 key 全部写入 <code>disposalPolicyKeys</code>，需确认后端接口是否有单次传入 key 数量上限。</td>
+          <td>待确认</td>
+          <td>关联 S-11。若后端有限制，需改为新增"平台连接层"聚合筛选 key 或由后端新增接口参数。</td>
+        </tr>
       </tbody>
     </table>
   </section>
@@ -716,6 +1079,14 @@
           <td>GT-12649</td>
           <td><code>c481bf6</code></td>
           <td>新增变更 #2（DevMode 变更规格独立分区）、#3（处置中心执行动作移除"标记投递"）、#4（安全总览执行动作图表移除"标记投递"）；重构文档为多变更点格式，补充真实浏览器截图 S-3 ~ S-7；新增差异 D-3/D-4/D-5，新增待确认 Q-3。</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v3</span></span></td>
+          <td>2026-07-30</td>
+          <td>增量更新</td>
+          <td>GT-12655</td>
+          <td><code>c481bf6</code></td>
+          <td>GT-12655：新增变更 #4，记录多租户租户管理员视角下处置依据阶段1策略全链路"平台管控策略"显示方案；涵盖列表列、详情概览卡、安全分析阶段1卡片、筛选器下拉共4个展示点；矩阵表新增 AI-多/传统-多租户管理员列；新增差异 D-5（截图待归档）、待确认 Q-4（后端筛选接口兼容性）。</td>
         </tr>
       </tbody>
     </table>

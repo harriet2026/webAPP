@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 2,
+  "current_version": 3,
   "history": [
     {
       "version": 1,
@@ -19,6 +19,15 @@
       "ticket": "GT-12649",
       "incremental": true,
       "summary": "GT-12649 v2：新增变更 #2（DevMode 变更规格独立分区）、#3（处置中心执行动作移除"标记投递"）、#4（安全总览执行动作图表移除"标记投递"）；重构为多变更点格式，补充真实浏览器截图 S-3~S-7；新增 D-3/D-4/D-5、Q-3。"
+    },
+    {
+      "version": 3,
+      "generated_at": "2026-07-30",
+      "webapp_commit": "c481bf6",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12655",
+      "incremental": true,
+      "summary": "GT-12655：新增变更 #4，记录多租户租户管理员视角下处置依据阶段1策略全链路「平台管控策略」显示方案；涵盖列表列、详情概览卡、安全分析阶段1卡片、筛选器下拉共4个展示点；矩阵表新增 AI-多/传统-多租户管理员列；新增差异 D-5（截图待归档）、待确认 Q-4（后端筛选接口兼容性）。"
     }
   ]
 }
