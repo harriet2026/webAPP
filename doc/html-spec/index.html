@@ -161,8 +161,8 @@
   <h1>HTML Spec 索引</h1>
 
   <div class="overview">
-    <div class="overview-item"><div class="num">47</div><div class="label">功能模块总数</div></div>
-    <div class="overview-item"><div class="num">40</div><div class="label">已生成</div></div>
+    <div class="overview-item"><div class="num">48</div><div class="label">功能模块总数</div></div>
+    <div class="overview-item"><div class="num">41</div><div class="label">已生成</div></div>
     <div class="overview-item"><div class="num">7</div><div class="label">待生成</div></div>
     <div class="overview-item"><div class="num">85%</div><div class="label">完成率</div></div>
   </div>
@@ -208,7 +208,7 @@
         <span class="chevron"></span>
         <span class="l1-icon">🧭</span>
         <h2>全局外壳 / 导航</h2>
-        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
+        <span class="l1-stats"><span class="done-count">2</span> 已完成 / 2 总计</span>
       </div>
     </summary>
     <div class="l1-body">
@@ -228,6 +228,24 @@
             <p>可见性数据源: lib/product-profiles.ts（FEATURE_MAP / resolveAccess）+ contexts/product-profile-context.tsx</p>
             <p>子文件: <a href="component-sidebar-nav/layer-1-expand-collapse.html">展开收起</a> / <a href="component-sidebar-nav/layer-2-nested-subgroup.html">三级嵌套</a> / <a href="component-sidebar-nav/layer-3-active-state.html">激活高亮</a> / <a href="component-sidebar-nav/layer-4-profile-visibility.html">形态×视角可见性矩阵</a> / <a href="component-sidebar-nav/layer-5-theme-color.html">主题色</a></p>
             <p>预览可交互（本地复刻 navItems + FEATURE_MAP 逻辑）· 4 组件 · 6 交互层级 · 5×2 形态×视角实测 · zh/en/th 国际化 · 5 项差异 / 5 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12649.html" target="_blank" rel="noopener noreferrer">GT-12649 · SidebarNav 移除 VersionFooter（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-30</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /zh/dashboard 及所有挂载全局侧边栏的后台路由</p>
+            <p>组件: src/components/layout/sidebar-nav.tsx（移除 &lt;VersionFooter /&gt; 及其 import）</p>
+            <p>变更类型: 功能移除（增量规格）· commit c481bf6</p>
+            <p>内含: 变更前/后对比 · QC 2026-07-28 复查记录 · S-1 历史态（QC 截图占位）/ S-2 目标态（截图占位）· D-1~D-2 / Q-1~Q-2</p>
+            <p>关联: GT-11459（VersionFooter 组件保留，待产品确认合规入口）</p>
           </div>
         </details>
       </div>
@@ -339,7 +357,7 @@
           </summary>
           <div class="card-detail">
             <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独立页）</p>
-            <p>spec: RBL检测需求文档.md</p>
+            <p>spec: RBL���测需求文档.md</p>
             <p>组件: connection-layer-page.tsx (renderRblConfig + greylistDialog)</p>
             <p>7 个交互层级（L0 内嵌 + L1–L6 子文件）· <a href="filter-rules-pipeline-rbl-filter/layer-5-rbl-validation.html">服务器/超时校验</a> · <a href="filter-rules-pipeline-rbl-filter/layer-6-rbl-delete-confirm.html">删除确认</a></p>
             <p>5 产品形态 × 2 管理员视角矩阵 · D1–D13 / Q1–Q9 已逐项复核</p>
@@ -458,7 +476,7 @@
           </summary>
           <div class="card-detail">
             <p>路由: /filter-rules/pipeline（阶段2收发信人策略抽屉，priority 2004）</p>
-            <p>spec: 用户黑白名单.md / 策略流水线需求文档.md</p>
+            <p>spec: 用户黑白名单.md / 策略流水线需求��档.md</p>
             <p>组件: strategy-pipeline-page.tsx + identity-strategy-page.tsx（userList）</p>
             <p>子文件: <a href="filter-rules-pipeline-user-list/layer-1-selection-delete-dialogs.html">选中与删除弹窗</a> / <a href="filter-rules-pipeline-user-list/layer-2-search-pagination-states.html">搜索与分页态</a></p>
             <p>预览可交互 · 4 交互层级 · 16 截图 · 11 项差异 / 6 项需确认</p>
@@ -1076,7 +1094,7 @@
             <p>路由: /monitor/security · spec: 未提供 · 多租户租户视角导航隐藏（v2 用户决定：URL 直连也应拦截）</p>
             <p>组件: monitor-security-page.tsx（4 引擎卡选中联动 + 双 Y 轴趋势 + 4 种详情表结构 + 3 时间范围数据集）</p>
             <p>子文件: <a href="monitor-security/layer-1-engine-switch.html">引擎切换(沙箱/RBL/反病毒)</a> / <a href="monitor-security/layer-2-timerange.html">时间范围切换</a></p>
-            <p>预览可交互 · 形态×角色 5×2 矩阵 · v2：3 项用户决定落地（详情表随时间范围变化 / URL 拦截 / 主指标单位自适应&lt;1s用毫秒）· 6 项差异 + 3 项需确认均逐项标注复核状态</p>
+            <p>预览可交互 · 形态×角色 5×2 矩阵 · v2：3 项用户决定落地（详情表随时间范围变化 / URL 拦截 / 主指标单位自适应&lt;1s用毫秒）· 6 项差异 + 3 项��确认均逐项标注复核状态</p>
           </div>
         </details>
         <details class="spec-card status-done">

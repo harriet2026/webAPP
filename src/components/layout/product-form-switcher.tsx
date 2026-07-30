@@ -174,11 +174,25 @@ export function ProductFormSwitcher() {
             </span>
             <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
           </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.open('/html-spec/version/GT-12649.html', '_blank', 'noopener,noreferrer');
+              }
+            }}
+            className="flex items-center justify-between"
+          >
+            <span className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              {tMock('versionSpec')}
+            </span>
+            <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
       {/* 切到 tenant 视角但 selectedTenantId 为空时的租户选择 dialog。
-          受控渲染：open 状态由 dropdown menuitem 的 onClick 触发。 */}
+          受控渲染：open 状态由 dropdown menuitem �� onClick 触发。 */}
       {isSystemAdmin && (
         <ViewerSwitcherTenantDialog
           open={tenantDialogOpen}

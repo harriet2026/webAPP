@@ -34,7 +34,8 @@
   "mock": {
     "label": "Dev Mode",
     "enabled": "Mock Data (No Backend)",
-    "htmlSpec": "View HTML Spec"
+    "htmlSpec": "View HTML Spec",
+    "versionSpec": "Version Change Spec (GT-12649)"
   },
   "accessDenied": "Access Denied",
   "id": "ID",
