@@ -66,8 +66,8 @@ export function QuickFilters({
   const [policyMode, setPolicyMode] = useState<"module" | "rule">("module");
   const [ruleSearch, setRuleSearch] = useState("");
   const { viewer, capabilities } = useProductForm();
-  // 方案A：多租户产品形态 + 租户管理员视角下，阶段1（连接层）为平台级策略，
-  // 租户无权查看/配置，从处置依据筛选选项中隐藏整个阶段1分组。
+  // 多租户产品形态 + 租户管理员视角下，阶段1（连接层）为平台级策略，
+  // 租户无权配置，处置依据筛选中将整个阶段1折叠为"平台管控策略"只读标签展示。
   const hidePlatformStage = viewer === "tenant" && capabilities?.multiTenant === true;
 
   // GT-12236: 原型要求处置依据按模块语义展示（附件安全检测为单一模块），
@@ -77,16 +77,13 @@ export function QuickFilters({
   // 查询语义不变）。
   const modulesByStage = useMemo(() => {
     const groups = groupDisposalModulesByStage(disposalLang);
-    return [1, 2, 3, 4, 5]
-      // 多租户租户视角下隐藏阶段1（连接层/平台级策略）
-      .filter((stage) => !(hidePlatformStage && stage === 1))
-      .map((stage) => ({
-        stage,
-        modules: groups
-          .filter((g) => g.stage === stage)
-          .map((g) => ({ moduleName: g.moduleName, keys: g.keys })),
-      }));
-  }, [disposalLang, hidePlatformStage]);
+    return [1, 2, 3, 4, 5].map((stage) => ({
+      stage,
+      modules: groups
+        .filter((g) => g.stage === stage)
+        .map((g) => ({ moduleName: g.moduleName, keys: g.keys })),
+    }));
+  }, [disposalLang]);
   const visibleRuleOptions = useMemo(() => {
     const needle = ruleSearch.trim().toLowerCase();
     return disposalRuleOptions
@@ -426,7 +423,13 @@ export function QuickFilters({
                         <div className="px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
                           {t(`policyStages.${stage}`)}
                         </div>
-                        {modules.map(({ moduleName, keys }) => {
+                        {/* 阶段1 + 多租户租户视角：折叠为"平台管控策略"只读标签，不可勾选 */}
+                        {hidePlatformStage && stage === 1 ? (
+                          <div className="flex items-center gap-2 rounded px-2 py-1.5 text-xs text-muted-foreground">
+                            <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border border-border bg-muted opacity-50" />
+                            <span>{t("platformManagedPolicy")}</span>
+                          </div>
+                        ) : modules.map(({ moduleName, keys }) => {
                           const selected = value.disposalPolicyKeys ?? [];
                           const checked = keys.every((key) =>
                             selected.includes(key),

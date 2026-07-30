@@ -190,7 +190,7 @@
         "exportDownloaded": "导出已下载",
         "exportFailed": "导出失败",
         "parseFailed": "解析导入文件失败",
-        "chooseFileFirst": "请先选��导入文件",
+        "chooseFileFirst": "请先选���导入文件",
         "selectAtLeastOneType": "请至少选择一种导入类型",
         "chooseTargetTenant": "请选择目标租户",
         "previewNotWired": "{variant} 预览功能尚未接入",
@@ -436,7 +436,7 @@
       "description": "三类智能体共享策略流水线的智能分析层，但各自保留独立配置、日志和授权边界。",
       "phishing": {
         "title": "钓鱼检测",
-        "body": "实时旁路会话完成后输出钓鱼判定，并驱动隔离、标记、审核或放行。"
+        "body": "实时旁路会话���成后输出钓鱼判定，并驱动隔离、标记、审核或放行。"
       },
       "spoofing": {
         "title": "仿冒检测",
@@ -699,7 +699,7 @@
       "masterSwitch": "总开关",
       "masterSwitchOffActionable": "免认证中继总开关当前关闭，下方授权均不生效——打开右上角「总开关」后生效。",
       "masterSwitchEnabled": "免认证中继总��关已开启",
-      "masterSwitchDisabled": "免认证中继总开关已��闭",
+      "masterSwitchDisabled": "免认证中继总开关����闭",
       "add": "新增授权",
       "empty": "暂无授权",
       "created": "授权已创建",
@@ -1012,7 +1012,7 @@
     "selectGroupPlaceholder": "选择组",
     "executionOrderNote": "模块的执行顺序由阶段流水线（阶段1→阶段5）固定决定，与优先级无关；优先级仅在多条策略命中同一封邮件、且配置了同一模块时用于仲裁——数值越大越优先生效（可���范围见新建/编辑抽屉）。",
     "stagePrefix": "【阶段{stage}】",
-    "expandConfig": "查看完整配��",
+    "expandConfig": "查看��整配��",
     "collapseConfig": "收起��整配置",
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置：灰色为「继承全局」，彩色为「另行配���」。",
     "priorityHintAria": "优先级��明",
@@ -2888,7 +2888,7 @@
       "cac_tid": "CAC 簇"
     },
     "mailActions": {
-      "accept": "已放行",
+      "accept": "已放��",
       "reject": "已拒绝",
       "quarantine": "已隔���",
       "sideline": "���旁路",
@@ -3490,7 +3490,7 @@
     "subject": "主题",
     "rule": "触发规则",
     "triggeredAt": "触发时间",
-    "status": "状态",
+    "status": "状���",
     "approve": "放行",
     "reject": "拒绝",
     "bulkApprove": "批量放行",
@@ -3792,7 +3792,7 @@
     "effectSenderEmpty": "未填写",
     "effectExpirePermanent": "永久",
     "exampleBlockSpam": "阻断垃圾邮件发送者",
-    "exampleBlockSpamDesc": "直接阻断已知的垃圾邮件发送者",
+    "exampleBlockSpamDesc": "直接阻断已知的垃圾邮��发送者",
     "exampleQuarantineSuspicious": "隔离可疑���源",
     "exampleQuarantineSuspiciousDesc": "隔离 suspicious.test 从 192.168.1.0/24 发来的邮件",
     "simEmailLabel": "模拟发信人邮箱",
@@ -3957,7 +3957,7 @@
     "batchDelete": "批量删除",
     "scopesLabel": "范围 ({count})",
     "directionsLabel": "方向",
-    "preview": "配置预览",
+    "preview": "配置预��",
     "testResult": "测���结果",
     "atLeastOneScope": "请至少选择一个范围",
     "atLeastOneDirection": "请至少启用一个方向",
@@ -4106,7 +4106,7 @@
     "actionTooltip": {
       "accept": "允许：不对此规则触发的情况采取拦截动作，邮件继续进入下一阶段检测。",
       "quarantine": "隔离：将匹配的邮件放入隔离区，待管理员审核后再决定放行或删除。",
-      "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知。",
+      "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信��知。",
       "audit": "审核���将邮件放入审核队列，等待管理员人工��批后再投递。",
       "discard": "丢弃：静默丢弃该邮件，不通��发件方也不投递给收件方。"
     },
@@ -4262,7 +4262,7 @@
     "globalObserve": "观察模式",
     "wouldDropCount": "预计丢弃",
     "observingRecordOnly": "允许（仅记录）",
-    "highRiskWarning": "高风险动作：建议先开启观察模式测试影响范围",
+    "highRiskWarning": "高风险动作：建议先开启观察模式测试���响范围",
     "spfDropAlert": "SPF 硬拒绝设为静默丢弃，可能误删合法邮件",
     "exceptionBanner": "例外规则（白名单）请在【策略流水线】模块配置，本模块仅���置协议检查规则",
     "goToPipeline": "前往策略流水线",
@@ -4789,7 +4789,7 @@
       "attachmentCount": "单封邮件允许进入检测的附件数量，-1 表示不限制",
       "attachmentSize": "单个附件大小上限，-1 表示不限制",
       "nestedProtection": "限制压缩包数量、内部文件数量和解压层级，避免压缩炸弹耗尽资源",
-      "scanTimeout": "单封邮件附件扫描允许占用的最长时间",
+      "scanTimeout": "单封邮件附件扫描允许占用���最长时间",
       "exceedAction": "基础限制���一项超限时采取的处置",
       "antivirusHost": "attachd 连接的通��� AV 服务地址",
       "virusAction": "确认检出病毒后对邮件采取的动作",
@@ -4839,7 +4839,7 @@
       "hint": "请使用页面右上角的租户选择器选择一个租户"
     },
     "tabs": {
-      "sandbox": "URL沙箱检测",
+      "sandbox": "URL沙箱检��",
       "linkProtection": "链接保护",
       "receiveOnlyBadge": "仅接收"
     },
@@ -5417,6 +5417,7 @@
       "policyRulePlaceholder": "输入规则名称或 ID",
       "policyRuleEmpty": "没有匹配的规则",
       "policyClear": "清空处置依据",
+      "platformManagedPolicy": "平台管控策略",
       "policyStages": {
         "1": "连接层",
         "2": "身份层",
@@ -5970,7 +5971,7 @@
         "viewPolicyConfigTitle": "前往策略配置页",
         "platformPolicyModule": "平台策略",
         "platformPolicyRuleName": "平台统一管控",
-        "platformPolicyHitDetail": "该邮件由平台级连接层策略拦截，如需了解详情请联系平台管理员",
+        "platformPolicyHitDetail": "该邮件由平台��连接层策略拦截，如需了解详情请联系平台管理员",
         "platformPolicyListReason": "平台策略拦截"
       },
       "delivery": {
@@ -6574,7 +6575,7 @@
       },
       "desc_attachmentSizeTotal": {
         "source": "邮件附件解析",
-        "usage": "限制所有附件的总大小",
+        "usage": "��制所有附件的总大小",
         "note": "单位为MB，防止超大附件"
       },
       "desc_attachmentSizeSingle": {
@@ -6675,7 +6676,7 @@
       "desc_mailFromFromConsistency": {
         "source": "SMTP会话MAIL FROM + 邮件头From字段",
         "usage": "检测信封层与信头层发信人是否一致",
-        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
+        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但���封层MAIL FROM保持真实以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
       },
       "desc_virusScanResult": {
         "source": "防病毒引擎",
@@ -6844,7 +6845,7 @@
         "created": "创建",
         "basic": "基础设置",
         "conditions": "条件",
-        "disposition": "处置策略",
+        "disposition": "处��策略",
         "rollback": "回滚至 v{version}",
         "separator": "、"
       }
@@ -7306,7 +7307,7 @@
       "title": "明细数据",
       "date": "日期",
       "total": "过滤邮件总量",
-      "blockRate": "拦截率",
+      "blockRate": "拦���率",
       "change": "环比变化",
       "allZero": "全为 0"
     },
@@ -7416,7 +7417,7 @@
         "inboundTotal": "选定时段内接收方向的邮件总数。",
         "outboundTotal": "选定时段内外发方向的邮件总数。",
         "internalTotal": "选定时段内域内方向的邮件总数。",
-        "totalSuccessRate": "全部方向成功投递数 ÷ 投递总数。",
+        "totalSuccessRate": "全部方向成功投递数 ÷ 投递总数���",
         "queueBacklog": "基于邮件日志与旁路任务估算的当前积压。",
         "total": "当前方向在选定时段内的邮件总数。",
         "successRate": "当前方向成功投递数 ÷ 总数。",
@@ -7625,7 +7626,7 @@
       "domain": "域名",
       "count": "检出次数",
       "blockRate": "点击拦截率",
-      "blockRateHelp": "该域名点击后进入威胁拦截页面的比例",
+      "blockRateHelp": "该域名��击后进入威胁拦截页面的比例",
       "firstSeen": "首次出现",
       "status": "封禁状态",
       "block": "封禁",
@@ -7813,7 +7814,7 @@
     "updatedAt": "数据更新于",
     "refresh": "刷新",
     "noData": "暂无数据",
-    "loadTimeout": "数据加载超时，请稍后重试",
+    "loadTimeout": "数据加���超时，请稍后重试",
     "retry": "重试",
     "agentOffline": "数据采集异常",
     "degradeBackendUnavailable": "监控数据源（时序数据库）暂时不可达，数据可能缺失",
@@ -8135,7 +8136,7 @@
       "cancel": "取消",
       "errors": {
         "needDirection": "请至少选择一个邮件流方向",
-        "qrNoOutbound": "二维码风险信号暂不支持外发方向",
+        "qrNoOutbound": "二维码风险信号暂不支���外发方向",
         "needRiskSignal": "请至少启用一个风险信号",
         "needRecipientTarget": "开启收件人筛选时至少填写一个标签或邮箱",
         "maxSizeTooLarge": "邮件大小上限不能超过 100000 MB"
@@ -9229,7 +9230,7 @@
     "searchPlaceholder": "搜索数据源名称或地址…",
     "sectionBasic": "基础信息",
     "sectionConn": "连接参数",
-    "sectionPolicy": "同步策略",
+    "sectionPolicy": "同步��略",
     "selectAllPageAria": "全选本页",
     "selectRowAria": "选择 {name}",
     "selectTenantDesc": "请使用上方的租户选择器选择租户后，再管理组织通讯录。",

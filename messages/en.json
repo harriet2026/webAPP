@@ -5412,6 +5412,7 @@
       "policyRulePlaceholder": "Enter a rule name or ID",
       "policyRuleEmpty": "No matching rules",
       "policyClear": "Clear disposal basis",
+      "platformManagedPolicy": "Platform-managed Policy",
       "policyStages": {
         "1": "Connection",
         "2": "Identity",
