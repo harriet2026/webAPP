@@ -236,7 +236,7 @@
 
   <!-- ══════════════ 本版变更总览 ══════════════ -->
   <div class="change-summary">
-    <h2>本版变更点（v2 新增 3 项）— 点击卡片跳转至对应需求描述</h2>
+    <h2>本版变更点（v2 新增 2 项）— 点击卡片跳转至对应需求描述</h2>
     <a class="change-item" href="#change-1">
       <span class="ci-num">1</span>
       <div class="ci-body">
@@ -247,19 +247,12 @@
     <a class="change-item" href="#change-2">
       <span class="ci-num">2</span>
       <div class="ci-body">
-        <div class="ci-title">变更规格目录独立分区</div>
-        <div class="ci-sub">DevMode 下拉菜单 · 功能变更</div>
-      </div>
-    </a>
-    <a class="change-item" href="#change-3">
-      <span class="ci-num">3</span>
-      <div class="ci-body">
         <div class="ci-title">处置中心"执行动作"筛选移除"标记投递"</div>
         <div class="ci-sub">邮件处置中心 · 功能变更</div>
       </div>
     </a>
-    <a class="change-item" href="#change-4">
-      <span class="ci-num">4</span>
+    <a class="change-item" href="#change-3">
+      <span class="ci-num">3</span>
       <div class="ci-body">
         <div class="ci-title">安全总览执行动作图表移除"标记投递"</div>
         <div class="ci-sub">邮件安全总览 · 功能变更</div>
@@ -280,17 +273,13 @@
       <li class="toc-indent"><a href="#c1-elements">逐元素说明</a></li>
       <li class="toc-indent"><a href="#c1-api">API 映射</a></li>
 
-      <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">DevMode 下拉菜单 — 变更规格独立分区</a></li>
+      <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">处置中心"执行动作"筛选移除"标记投递"</a></li>
       <li class="toc-indent"><a href="#c2-states">截图式交互预览</a></li>
       <li class="toc-indent"><a href="#c2-elements">逐元素说明</a></li>
 
-      <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">处置中心"执行动作"筛选移除"标记投递"</a></li>
+      <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">安全总览执行动作图表移除"标记投递"</a></li>
       <li class="toc-indent"><a href="#c3-states">截图式交互预览</a></li>
       <li class="toc-indent"><a href="#c3-elements">逐元素说明</a></li>
-
-      <li class="toc-change"><span class="toc-num">4</span><a href="#change-4">安全总览执行动作图表移除"标记投递"</a></li>
-      <li class="toc-indent"><a href="#c4-states">截图式交互预览</a></li>
-      <li class="toc-indent"><a href="#c4-elements">逐元素说明</a></li>
 
       <li><a href="#diff">差异标注（D-*）</a></li>
       <li><a href="#questions">待确认事项（Q-*）</a></li>
@@ -315,7 +304,7 @@
       </tbody>
     </table>
     <div class="callout callout-info">
-      本规格为增量文档，共记录 4 个变更点。每个变更点独立成区，互不干扰；矩阵、差异、待确认按增量编号接续，不重置。
+      本规格为增量文档，共记录 3 个变更点。每个变更点独立成区，互不干扰；矩阵、差异、待确认按增量编号接续，不重置。
     </div>
   </section>
 
@@ -349,18 +338,13 @@
           <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
         </tr>
         <tr>
-          <td>DevMode 菜单 · "变更规格"分区（独立）</td>
-          <td>#2</td>
-          <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
-        </tr>
-        <tr>
           <td><del>处置中心执行动作筛选 · "标记投递"选项</del></td>
-          <td>#3</td>
+          <td>#2</td>
           <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
         </tr>
         <tr>
           <td><del>安全总览执行动作图表 · mark_deliver 折线</del></td>
-          <td>#4</td>
+          <td>#3</td>
           <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
         </tr>
       </tbody>
@@ -464,75 +448,6 @@
   <div class="incremental-section" id="change-2">
     <div class="incr-header">
       <span class="incr-num">2</span>
-      <h2>DevMode 下拉菜单 — 变更规格独立分区</h2>
-      <span class="incr-meta">组件：<code>product-form-switcher.tsx</code> · 变更类型：功能变更 · 2026-07-30</span>
-    </div>
-    <div class="incr-body">
-
-      <div class="callout callout-info">
-        原"开发模式"区块内混有"GT-12649"等 spec 链接条目。本次将变更规格条目独立为第四个分区"变更规格"，带独立 <code>DropdownMenuSeparator</code> 和分区标题，保留动态加载（扫描 <code>doc/html_spec-version/</code> 目录），无文件时整个分区不渲染。
-      </div>
-
-      <h3 id="c2-states">截图式交互预览</h3>
-
-      <div class="interaction-preview">
-        <h4>状态 S-3：DevMode 下拉菜单打开态 — "变更规格"独立分区（当前规格）</h4>
-        <p class="trigger-path">触发路径：任意后台页面 → 点击顶部导航栏"产品形态"切换器 → 展开 DevMode 下拉菜单 → 观察菜单底部区域</p>
-        <figure>
-          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="处置中心默认态含变更规格分区入口" style="max-width:480px;" />
-          <figcaption>
-            注：变更规格菜单入口截图依赖截屏时 DevMode 处于展开状态。以下用文字描述：菜单结构自上而下为：产品形态 → 登录视角 → 开发模式（含 Mock / 查看 HTML Spec）→ 分隔线 → <strong>变更规格</strong>（分区标题）→ GT-12649 · ↗ 图标。<br/>
-            当前截图展示的是处置中心页面，供验证导航侧边栏及 DevMode 按钮可正常访问。
-          </figcaption>
-        </figure>
-        <table>
-          <thead><tr><th>元素</th><th>内容</th><th>行为</th></tr></thead>
-          <tbody>
-            <tr><td>分区标题</td><td>"变更规格"（<code>tMock('changeSpecs')</code>，CN/EN 均已配置）</td><td>静态文字，不可点击</td></tr>
-            <tr><td>分区分隔线</td><td><code>DropdownMenuSeparator</code>，位于"开发模式"区块末尾与"变更规格"分区标题之间</td><td>视觉分隔</td></tr>
-            <tr><td>GT-12649 条目</td><td>文件图标 + ticket 标题 + 外链图标（↗）</td><td>点击在新标签打开对应 HTML spec</td></tr>
-            <tr><td>无文件时</td><td>整个"变更规格"分区（含分隔线和标题）不渲染</td><td>条件：<code>versionSpecs.length &gt; 0</code></td></tr>
-          </tbody>
-        </table>
-        <div class="callout callout-info">
-          动态加载逻辑：<code>GET /api/dev/version-specs</code> 扫描 <code>doc/html_spec-version/</code> 目录所有 <code>.html</code> 文件，返回 <code>[{ ticket, label, url }]</code> 数组；新增 spec 文件后无需修改前端即自动出现在此分区。
-        </div>
-      </div>
-
-      <h3 id="c2-elements">逐元素说明</h3>
-      <table>
-        <thead><tr><th>元素</th><th>类型</th><th>位置</th><th>变更前</th><th>变更后</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>变更规格分区标题</td>
-            <td>div 静态文字</td>
-            <td>第四分区顶部</td>
-            <td><span class="tag tag-removed">不存在</span>（原混在"开发模式"末尾）</td>
-            <td><span class="tag tag-added">新增</span>"变更规格"分区标题（<code>text-xs text-muted-foreground</code>）</td>
-          </tr>
-          <tr>
-            <td>分区分隔线</td>
-            <td><code>DropdownMenuSeparator</code></td>
-            <td>"开发模式"末尾 / "变更规格"顶部之间</td>
-            <td><span class="tag tag-removed">不存在</span></td>
-            <td><span class="tag tag-added">新增</span></td>
-          </tr>
-          <tr>
-            <td>spec 链接条目</td>
-            <td><code>DropdownMenuItem</code> + 外链图标</td>
-            <td>"变更规格"分区内</td>
-            <td>混在"开发模式"区块末尾，无分组标题</td>
-            <td><span class="tag tag-changed">移动</span>至独立分区，层级更清晰</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ══════════════ 变更 3 ══════════════ -->
-  <div class="incremental-section" id="change-3">
-    <div class="incr-header">
-      <span class="incr-num">3</span>
       <h2>处置中心"执行动作"筛选 — 移除"标记投递"选项</h2>
       <span class="incr-meta">组件：<code>quick-filters.tsx</code> · 变更类型：功能变更 · 2026-07-30</span>
     </div>
@@ -543,7 +458,7 @@
         "执行动作"下拉筛选框中不再显示"标记投递"（<code>mark_deliver</code>）选项。共享常量 <code>EXECUTION_ACTIONS</code> 本身不变，仅在 <code>quick-filters.tsx</code> 层面过滤。
       </div>
 
-      <h3 id="c3-states">截图式交互预览</h3>
+      <h3 id="c2-states">截图式交互预览</h3>
 
       <div class="interaction-preview">
         <h4>状态 S-4：处置中心默认态 — 筛选模块（含执行动作字段）</h4>
@@ -587,7 +502,7 @@
         <div class="callout callout-ok">验收标准：展开"执行动作"下拉后，选项列表中不存在"标记投递"文字。</div>
       </div>
 
-      <h3 id="c3-elements">逐元素说明</h3>
+      <h3 id="c2-elements">逐元素说明</h3>
       <table>
         <thead><tr><th>元素</th><th>字段 key</th><th>变更前</th><th>变更后</th><th>修改位置</th></tr></thead>
         <tbody>
@@ -610,10 +525,10 @@
     </div>
   </div>
 
-  <!-- ══════════════ 变更 4 ══════════════ -->
-  <div class="incremental-section" id="change-4">
+  <!-- ══════════════ 变更 3 ══════════════ -->
+  <div class="incremental-section" id="change-3">
     <div class="incr-header">
-      <span class="incr-num">4</span>
+      <span class="incr-num">3</span>
       <h2>安全总览执行动作图表 — 移除"标记投递"折线</h2>
       <span class="incr-meta">组件：<code>TrendChartCard.tsx</code> · 变更类型：功能变更 · 2026-07-30</span>
     </div>
@@ -624,7 +539,7 @@
         邮件安全总览 → 安全态势分析 → 执行动作 tab 图表中，不再显示 <code>mark_deliver</code>（标记投递）折线。其他视图（威胁类型、投递结果等）的折线系列不受影响。
       </div>
 
-      <h3 id="c4-states">截图式交互预览</h3>
+      <h3 id="c3-states">截图式交互预览</h3>
 
       <div class="interaction-preview">
         <h4>状态 S-6：安全总览默认态</h4>
@@ -655,7 +570,7 @@
         <div class="callout callout-ok">验收标准："执行动作"tab 激活后，图表图例及折线中不存在"标记投递"系列。</div>
       </div>
 
-      <h3 id="c4-elements">逐元素说明</h3>
+      <h3 id="c3-elements">逐元素说明</h3>
       <table>
         <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>修改位置</th></tr></thead>
         <tbody>
@@ -713,24 +628,15 @@
         <tr>
           <td>D-3</td>
           <td>#2</td>
-          <td>DevMode 菜单中变更规格条目原混在"开发模式"末尾，无独立分区，层级不清晰。</td>
-          <td>已解决</td>
-          <td>2026-07-30</td>
-          <td>源码：<code>product-form-switcher.tsx</code> 新增独立分区；messages zh/en 添加 <code>changeSpecs</code> 键。</td>
-          <td>已在本次迭代中拆出为独立"变更规格"分区。</td>
-        </tr>
-        <tr>
-          <td>D-4</td>
-          <td>#3</td>
           <td>处置中心"执行动作"筛选包含不应对用户开放的"标记投递"选项，与安全总览图表的 series 数据不对称。</td>
           <td>已解决</td>
           <td>2026-07-30</td>
           <td>源码：<code>quick-filters.tsx</code> 添加 <code>.filter(a !== 'mark_deliver')</code>；浏览器截图 S-5 已验证下拉无此项。</td>
-          <td>已在 <code>quick-filters.tsx</code> 层面过滤；共享常量不变，安全总览侧需同步处理（见 D-5）。</td>
+          <td>已在 <code>quick-filters.tsx</code> 层面过滤；共享常量不变，安全总览侧需同步处理（见 D-4）。</td>
         </tr>
         <tr>
-          <td>D-5</td>
-          <td>#4</td>
+          <td>D-4</td>
+          <td>#3</td>
           <td>安全总览执行动作图表包含 mark_deliver 折线，与处置中心筛选项不一致（均应不展示标记投递）。</td>
           <td>已解决</td>
           <td>2026-07-30</td>
@@ -771,7 +677,7 @@
         </tr>
         <tr>
           <td>Q-3</td>
-          <td>#3/#4</td>
+          <td>#2/#3</td>
           <td>"标记投递"（<code>mark_deliver</code>）在产品上是否为永久下线，还是仅在当前版本隐藏？若为阶段性隐藏，需在 <code>EXECUTION_ACTIONS</code> 层面添加条件或注释。</td>
           <td>待确认</td>
           <td>当前实现为前端过滤，共享常量仍含该值；若永久下线，建议从常量中移除以避免误用。</td>
