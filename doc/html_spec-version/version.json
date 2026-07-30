@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 1,
+  "current_version": 2,
   "history": [
     {
       "version": 1,
@@ -9,7 +9,16 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12649",
       "incremental": true,
-      "summary": "GT-12649：首次生成增量规格，记录从 SidebarNav 移除 VersionFooter 的变更；包含 QC 2026-07-28 复查记录（S-1 变更前）和 S-2 变更后目标状态（截图占位，待 commit c481bf6 部署后补拍）。"
+      "summary": "GT-12649 变更 #1：首次生成增量规格，记录从 SidebarNav 移除 VersionFooter；QC 2026-07-28 复查记录（S-1 变更前占位）和 S-2 变更后目标状态。"
+    },
+    {
+      "version": 2,
+      "generated_at": "2026-07-30",
+      "webapp_commit": "c481bf6",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12649",
+      "incremental": true,
+      "summary": "GT-12649 v2：新增变更 #2（DevMode 变更规格独立分区）、#3（处置中心执行动作移除"标记投递"）、#4（安全总览执行动作图表移除"标记投递"）；重构为多变更点格式，补充真实浏览器截图 S-3~S-7；新增 D-3/D-4/D-5、Q-3。"
     }
   ]
 }

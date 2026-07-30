@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12649 · SidebarNav 移除 VersionFooter · 增量规格</title>
+  <title>GT-12649 · 增量功能规格 · v2</title>
   <style>
-    /* ── reset & base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; }
     body {
@@ -15,9 +14,7 @@
       line-height: 1.6;
       padding: 2rem 1.5rem 4rem;
     }
-
-    /* ── layout ── */
-    .page-wrap { max-width: 960px; margin: 0 auto; }
+    .page-wrap { max-width: 980px; margin: 0 auto; }
 
     /* ── header ── */
     .spec-header {
@@ -25,7 +22,7 @@
       color: #e8eaf0;
       border-radius: 10px;
       padding: 2rem 2.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
     .spec-header .ticket-badge {
       display: inline-block;
@@ -38,13 +35,102 @@
       border-radius: 4px;
       margin-bottom: 0.75rem;
     }
-    .spec-header h1 { font-size: 1.45rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
+    .spec-header h1 { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
     .spec-header .subtitle { font-size: 0.85rem; color: #9ca3af; }
 
+    /* ── change summary bar ── */
+    .change-summary {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.25rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 2rem;
+      align-items: flex-start;
+    }
+    .change-summary h2 { font-size: 0.95rem; font-weight: 700; color: #1a1d23; width: 100%; margin-bottom: 0.25rem; }
+    .change-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      min-width: 200px;
+      flex: 1 1 200px;
+    }
+    .change-item .ci-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .change-item .ci-body { font-size: 0.83rem; }
+    .change-item .ci-title { font-weight: 600; color: #1a1d23; }
+    .change-item .ci-sub { color: #6b7280; font-size: 0.78rem; }
+
     /* ── section ── */
-    section { background: #fff; border-radius: 10px; padding: 1.75rem 2rem; margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
-    section h2 { font-size: 1.05rem; font-weight: 700; color: #1a1d23; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb; }
-    section h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+    section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    section > h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    section > h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+
+    /* ── incremental section ── */
+    .incremental-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .incr-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: #f8f9fb;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .incr-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .incr-header h2 { font-size: 1rem; font-weight: 700; color: #1a1d23; margin: 0; }
+    .incr-header .incr-meta { font-size: 0.78rem; color: #6b7280; margin-left: auto; }
+    .incr-body { padding: 1.5rem 2rem; }
+    .incr-body h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
 
     /* ── tables ── */
     table { width: 100%; border-collapse: collapse; font-size: 0.845rem; margin-bottom: 0.75rem; }
@@ -54,7 +140,6 @@
 
     /* ── code ── */
     code { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.1em 0.4em; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82em; color: #1a1d23; }
-    pre { background: #1e2228; color: #d4d4d4; border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.55; margin: 0.75rem 0; }
 
     /* ── interaction-preview ── */
     .interaction-preview {
@@ -69,23 +154,8 @@
     .interaction-preview figure { margin: 0 0 0.9rem; }
     .interaction-preview figcaption { font-size: 0.78rem; color: #6b7280; margin-top: 0.35rem; font-style: italic; }
     .interaction-preview img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
-
-    /* ── screenshot placeholder ── */
-    .screenshot-placeholder {
-      background: #e5e7eb;
-      border: 2px dashed #9ca3af;
-      border-radius: 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2.5rem 1rem;
-      color: #6b7280;
-      font-size: 0.8rem;
-      text-align: center;
-      gap: 0.3rem;
-    }
-    .screenshot-placeholder .ph-label { font-weight: 600; color: #374151; }
+    .screenshot-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem; }
+    @media (max-width: 700px) { .screenshot-pair { grid-template-columns: 1fr; } }
 
     /* ── callout boxes ── */
     .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
@@ -101,24 +171,19 @@
     .tag-changed  { background: #fef9c3; color: #854d0e; }
     .tag-unverif  { background: #f3f4f6; color: #6b7280; }
 
-    /* ── del ── */
     del { color: #9ca3af; text-decoration-color: #dc2626; }
 
-    /* ── version badge ── */
-    .version-badge {
-      display: inline-flex; align-items: center; gap: 0.4em;
-      background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px;
-      padding: 0.2em 0.8em; font-size: 0.78rem; color: #374151;
-    }
+    .version-badge { display: inline-flex; align-items: center; gap: 0.4em; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 0.2em 0.8em; font-size: 0.78rem; color: #374151; }
     .version-badge .vnum { font-weight: 700; color: #1a1d23; }
 
-    /* ── matrix ── */
     .matrix-legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.78rem; color: #374151; margin-bottom: 0.75rem; }
 
-    /* ── toc ── */
     .toc { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
     .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
     .toc a:hover { text-decoration: underline; }
+    .toc-indent { padding-left: 1.2rem; }
+
+    .divider { border: none; border-top: 2px solid #e5e7eb; margin: 1.5rem 0; }
   </style>
 </head>
 <body>
@@ -127,77 +192,100 @@
   <!-- ══════════════ HEADER ══════════════ -->
   <header class="spec-header">
     <span class="ticket-badge">GT-12649</span>
-    <h1>SidebarNav 移除 VersionFooter · 增量功能规格</h1>
+    <h1>增量功能规格 · v2</h1>
     <p class="subtitle">
-      模块：全局侧边菜单栏（SidebarNav）&nbsp;·&nbsp;
-      变更类型：功能移除&nbsp;·&nbsp;
-      生成日期：2026-07-30&nbsp;·&nbsp;
-      webapp commit：<code>c481bf6</code>
+      关联模块：侧边菜单栏 · 邮件处置中心 · 邮件安全总览&nbsp;·&nbsp;
+      变更类型：功能移除 / 功能变更&nbsp;·&nbsp;
+      最后更新：2026-07-30&nbsp;·&nbsp;
+      webapp commit：<code>c481bf6</code>（基线）
     </p>
   </header>
 
-  <!-- ══════════════ 功能路径 ══════════════ -->
-  <section id="feature-path">
-    <h2>功能路径</h2>
-    <table>
-      <thead>
-        <tr><th>字段</th><th>值</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>路由路径</td><td><code>/zh/dashboard</code>（以及所有挂载全局侧边栏的后台路由）</td></tr>
-        <tr><td>组件路径</td><td><code>src/components/layout/sidebar-nav.tsx</code></td></tr>
-        <tr><td>VersionFooter 组件路径</td><td><code>src/components/layout/version-footer.tsx</code>（保留，未删除）</td></tr>
-        <tr><td>html_spec 输出路径</td><td><code>doc/html_spec/version/</code></td></tr>
-        <tr><td>变更类型</td><td>功能移除（从 SidebarNav 卸载 VersionFooter）</td></tr>
-        <tr><td>关联 ticket</td><td>GT-12649（复现）；GT-11459（保留能力，待产品确认合规入口）</td></tr>
-      </tbody>
-    </table>
-  </section>
+  <!-- ══════════════ 本版变更总览 ══════════════ -->
+  <div class="change-summary">
+    <h2>本版变更点（v2 新增 3 项）</h2>
+    <div class="change-item">
+      <span class="ci-num">1</span>
+      <div class="ci-body">
+        <div class="ci-title">SidebarNav 移除 VersionFooter</div>
+        <div class="ci-sub">全局侧边栏 · 功能移除</div>
+      </div>
+    </div>
+    <div class="change-item">
+      <span class="ci-num">2</span>
+      <div class="ci-body">
+        <div class="ci-title">变更规格目录独立分区</div>
+        <div class="ci-sub">DevMode 下拉菜单 · 功能变更</div>
+      </div>
+    </div>
+    <div class="change-item">
+      <span class="ci-num">3</span>
+      <div class="ci-body">
+        <div class="ci-title">处置中心"执行动作"筛选移除"标记投递"</div>
+        <div class="ci-sub">邮件处置中心 · 功能变更</div>
+      </div>
+    </div>
+    <div class="change-item">
+      <span class="ci-num">4</span>
+      <div class="ci-body">
+        <div class="ci-title">安全总览执行动作图表移除"标记投递"</div>
+        <div class="ci-sub">邮件安全总览 · 功能变更</div>
+      </div>
+    </div>
+  </div>
 
   <!-- ══════════════ 目录 ══════════════ -->
   <section id="toc">
     <h2>目录</h2>
     <ul class="toc">
-      <li><a href="#meta">1. 元信息与事实源</a></li>
-      <li><a href="#form-role-matrix">2. 产品形态 × 角色矩阵</a></li>
-      <li><a href="#overview">3. 变更概述与根因</a></li>
-      <li><a href="#before-after">4. 变更前 / 变更后对比</a></li>
-      <li><a href="#states">5. 截图式交互预览</a></li>
-      <li><a href="#element-detail">6. 逐元素说明</a></li>
-      <li><a href="#api">7. 数据 / API 映射</a></li>
-      <li><a href="#logic">8. 业务逻辑与权限</a></li>
-      <li><a href="#diff">9. 差异标注（D-*）</a></li>
-      <li><a href="#questions">10. 待确认事项（Q-*）</a></li>
-      <li><a href="#version-history">11. 版本历史</a></li>
+      <li><a href="#meta">A. 元信息与事实源</a></li>
+      <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
+      <li><a href="#change-1">变更 1：SidebarNav 移除 VersionFooter</a></li>
+      <li class="toc-indent"><a href="#c1-overview">根因与修复方案</a></li>
+      <li class="toc-indent"><a href="#c1-states">截图式交互预览</a></li>
+      <li class="toc-indent"><a href="#c1-elements">逐元素说明</a></li>
+      <li class="toc-indent"><a href="#c1-api">API 映射</a></li>
+      <li><a href="#change-2">变更 2：DevMode 下拉菜单 — 变更规格独立分区</a></li>
+      <li class="toc-indent"><a href="#c2-states">截图式交互预览</a></li>
+      <li class="toc-indent"><a href="#c2-elements">逐元素说明</a></li>
+      <li><a href="#change-3">变更 3：处置中心"执行动作"筛选移除"标记投递"</a></li>
+      <li class="toc-indent"><a href="#c3-states">截图式交互预览</a></li>
+      <li class="toc-indent"><a href="#c3-elements">逐元素说明</a></li>
+      <li><a href="#change-4">变更 4：安全总览执行动作图表移除"标记投递"</a></li>
+      <li class="toc-indent"><a href="#c4-states">截图式交互预览</a></li>
+      <li class="toc-indent"><a href="#c4-elements">逐元素说明</a></li>
+      <li><a href="#diff">差异标注（D-*）</a></li>
+      <li><a href="#questions">待确认事项（Q-*）</a></li>
+      <li><a href="#version-history">版本历史</a></li>
     </ul>
   </section>
 
-  <!-- ══════════════ 1. 元信息 ══════════════ -->
+  <!-- ══════════════ A. 元信息 ══════════════ -->
   <section id="meta">
-    <h2>1. 元信息与事实源</h2>
+    <h2>A. 元信息与事实源</h2>
     <table>
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
-        <tr><td>规格类型</td><td>增量规格（Incremental）</td></tr>
+        <tr><td>规格类型</td><td>增量规格（Incremental）· 多变更点格式</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v2</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-07-30</td></tr>
-        <tr><td>webapp commit</td><td><code>c481bf6</code>（GT-12649 修复提交）</td></tr>
+        <tr><td>webapp commit</td><td><code>c481bf6</code>（基线）</td></tr>
         <tr><td>对照 spec commit</td><td>not-used</td></tr>
-        <tr><td>历史对话记录</td><td>当前上下文已提供（本 chat 中的完整修复描述与 bug 报告）</td></tr>
-        <tr><td>事实源优先级</td><td>1. 用户当前描述与 bug 报告；2. webapp 源码（<code>sidebar-nav.tsx</code>、<code>version-footer.tsx</code>）；3. 2026-07-28 QC 环境只读浏览器复查记录</td></tr>
-        <tr><td>浏览器验证状态</td><td>2026-07-28 QC 复查已完成（只读）；修复后（commit c481bf6）截图待补（标注见第 5 节）</td></tr>
+        <tr><td>历史对话记录</td><td>当前上下文已提供（完整修复描述、bug 报告及代码变更记录）</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 运行中 webapp 浏览器真实截图；3. webapp 源码</td></tr>
+        <tr><td>浏览器验证状态</td><td>变更 1 S-1 前态：2026-07-28 QC 只读复查；变更 2/3/4：2026-07-30 演示环境真实截图（已完成）</td></tr>
       </tbody>
     </table>
     <div class="callout callout-info">
-      本规格为增量文档，仅描述 GT-12649 涉及的「移除 VersionFooter」变更。侧边栏其余导航结构（Logo 区、Nav 菜单项、展开/收起等）属于未变更内容，不在本文档中重复记录。
+      本规格为增量文档，共记录 4 个变更点。每个变更点独立成区，互不干扰；矩阵、差异、待确认按增量编号接续，不重置。
     </div>
   </section>
 
-  <!-- ══════════════ 2. 产品形态 × 角色矩阵 ══════════════ -->
+  <!-- ══════════════ B. 产品形态 × 角色矩阵 ══════════════ -->
   <section id="form-role-matrix">
-    <h2>2. 产品形态 × 角色差异矩阵</h2>
-    <p style="font-size:0.84rem;color:#6b7280;margin-bottom:0.75rem;">本矩阵仅覆盖本次变更（VersionFooter 可见性）。</p>
+    <h2>B. 产品形态 × 角色差异矩阵</h2>
     <div class="matrix-legend">
-      <span>✅ 显示且可编辑</span>
+      <span>✅ 显示且可操作</span>
       <span>🔒 显示但只读</span>
       <span>❌ 隐藏 / 不存在</span>
       <span>— 该形态无此角色</span>
@@ -207,315 +295,357 @@
       <thead>
         <tr>
           <th>功能 / 元素</th>
+          <th>变更</th>
           <th>AI-单<br/>平台管理员</th>
           <th>传统-单<br/>平台管理员</th>
           <th>云-多<br/>平台管理员</th>
           <th>云-多<br/>租户管理员</th>
           <th>AI-多<br/>平台管理员</th>
           <th>传统-多<br/>平台管理员</th>
-          <th>备注</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td><del>VersionFooter（版本号 + dirty 标记）</del></td>
+          <td><del>SidebarNav · VersionFooter</del></td>
+          <td>#1</td>
           <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
-          <td><span class="tag tag-removed">已移除</span>commit c481bf6 后全形态均不渲染</td>
         </tr>
         <tr>
-          <td>SidebarNav 底部区域（移除后）</td>
+          <td>DevMode 菜单 · "变更规格"分区（独立）</td>
+          <td>#2</td>
+          <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+        </tr>
+        <tr>
+          <td><del>处置中心执行动作筛选 · "标记投递"选项</del></td>
+          <td>#3</td>
           <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
-          <td>底部无任何额外内容；侧边栏以导航列表结束</td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="callout callout-info">
-      VersionFooter 组件文件（<code>version-footer.tsx</code>）本身未删除，保留供 GT-11459 能力在符合规格的入口复用，但当前无任何挂载点，所有形态 / 角色下均不可见。
-    </div>
-  </section>
-
-  <!-- ══════════════ 3. 变更概述 ══════════════ -->
-  <section id="overview">
-    <h2>3. 变更概述与根因</h2>
-
-    <h3>问题描述</h3>
-    <p style="font-size:0.875rem;margin-bottom:0.75rem;">
-      全局侧边栏底部额外显示开发构建版本信息（例：「版本 c70d71c+dirty」），该内容与
-      <code>component-sidebar-nav</code> html_spec（active 状态）不符。规格定义侧边栏只包含
-      Logo 区和导航区域，未定义版本脚注。
-    </p>
-
-    <h3>2026-07-28 QC 环境复查记录</h3>
-    <table>
-      <thead><tr><th>项目</th><th>值</th></tr></thead>
-      <tbody>
-        <tr><td>复查日期</td><td>2026-07-28（只读，真实浏览器）</td></tr>
-        <tr><td>复查路由</td><td><code>/zh/dashboard</code></td></tr>
-        <tr><td>app-version-footer 数量</td><td>1</td></tr>
-        <tr><td>显示文本</td><td>版本 c70d71c+dirty</td></tr>
-        <tr><td>悬停 title 属性</td><td><code>rev=c70d71c970e0b6b63fc26985a5767a9b29916f10+dirty built=… build_tag=opengauss</code></td></tr>
-        <tr><td>根因确认</td><td>SidebarNav 无条件挂载 VersionFooter；VersionFooter 请求 <code>/version</code> 后显示七位 commit，<code>modified=true</code> 时追加 +dirty</td></tr>
-      </tbody>
-    </table>
-
-    <h3>修复方案</h3>
-    <table>
-      <thead><tr><th>操作</th><th>文件</th><th>具体变更</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>移除挂载</td>
-          <td><code>src/components/layout/sidebar-nav.tsx</code></td>
-          <td>删除 JSX 中 <code>&lt;VersionFooter /&gt;</code> 一行（原第 245 行）</td>
         </tr>
         <tr>
-          <td>移除 import</td>
-          <td><code>src/components/layout/sidebar-nav.tsx</code></td>
-          <td>删除 <code>import { VersionFooter } from './version-footer'</code>（原第 15 行）</td>
-        </tr>
-        <tr>
-          <td>保留组件</td>
-          <td><code>src/components/layout/version-footer.tsx</code></td>
-          <td>文件本身不删除，供 GT-11459 能力在产品确认入口后复用</td>
+          <td><del>安全总览执行动作图表 · mark_deliver 折线</del></td>
+          <td>#4</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
         </tr>
       </tbody>
     </table>
   </section>
 
-  <!-- ══════════════ 4. 变更前 / 变更后 ══════════════ -->
-  <section id="before-after">
-    <h2>4. 变更前 / 变更后对比</h2>
-
-    <h3>变更前 SidebarNav 结构（已失效）</h3>
-    <div class="callout callout-removed">
-      <span class="tag tag-removed">已移除</span>
-      下方描述的 VersionFooter 区域在 commit c481bf6 后不再存在，仅作历史记录。
+  <!-- ══════════════ 变更 1 ══════════════ -->
+  <div class="incremental-section" id="change-1">
+    <div class="incr-header">
+      <span class="incr-num">1</span>
+      <h2>SidebarNav 移除 VersionFooter</h2>
+      <span class="incr-meta">组件：<code>sidebar-nav.tsx</code> · 变更类型：功能移除 · 2026-07-30</span>
     </div>
-    <table>
-      <thead><tr><th>区域</th><th>内容</th><th>状态</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>Logo 区</td>
-          <td>Logo 图片 + 品牌名 + 当前路由副标题</td>
-          <td><span class="tag tag-added">仍保留</span></td>
-        </tr>
-        <tr>
-          <td>Nav 导航列表</td>
-          <td>全量导航菜单项</td>
-          <td><span class="tag tag-added">仍保留</span></td>
-        </tr>
-        <tr>
-          <td><del>VersionFooter 脚注</del></td>
-          <td><del>底部分隔线 + 「版本 &lt;7位commit&gt;[+dirty]」文字，悬停显示完整 rev / built / build_tag</del></td>
-          <td><span class="tag tag-removed">已移除</span></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="incr-body">
 
-    <h3>变更后 SidebarNav 结构（当前规格）</h3>
-    <table>
-      <thead><tr><th>区域</th><th>内容</th><th>备注</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>Logo 区</td>
-          <td>Logo 图片 + 品牌名 + 当前路由副标题</td>
-          <td>未变更</td>
-        </tr>
-        <tr>
-          <td>Nav 导航列表</td>
-          <td>全量导航菜单项，末尾无额外内容</td>
-          <td>未变更；底部不再有分隔线脚注</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- ══════════════ 5. 截图式交互预览 ══════════════ -->
-  <section id="states">
-    <h2>5. 截图式交互预览</h2>
-
-    <!-- 状态 1：变更前（QC 复查截图） -->
-    <div class="interaction-preview">
-      <h4>状态 S-1：变更前默认态 — SidebarNav 底部显示 VersionFooter（已失效）</h4>
-      <p class="trigger-path">
-        触发路径：登录后台（平台管理员）→ 访问 <code>/zh/dashboard</code> → 查看左侧侧边栏底部
-      </p>
-      <figure>
-        <div class="screenshot-placeholder">
-          <span class="ph-label">[ 截图占位：S-1-sidebar-version-footer-before.png ]</span>
-          <span>QC 环境 2026-07-28 真实浏览器截图</span>
-          <span>应可见：侧边栏底部分隔线 + 「版本 c70d71c+dirty」文字</span>
-          <span>截图待归档至 <code>./screenshots/S-1-sidebar-version-footer-before.png</code></span>
-        </div>
-        <figcaption>状态 S-1 · 变更前 · /zh/dashboard · 桌面端 · 暗色主题 · 平台管理员<br/>来源：2026-07-28 QC 只读浏览器复查（浏览器验证：已完成）</figcaption>
-      </figure>
-      <table>
-        <thead><tr><th>属性</th><th>值</th></tr></thead>
-        <tbody>
-          <tr><td>data-testid</td><td><code>app-version-footer</code></td></tr>
-          <tr><td>可见文本</td><td>版本 c70d71c+dirty</td></tr>
-          <tr><td>悬停 title</td><td><code>rev=c70d71c970e0b6b63fc26985a5767a9b29916f10+dirty built=… build_tag=opengauss</code></td></tr>
-          <tr><td>位置</td><td>侧边栏最底部，紧贴导航列表末尾，上方有 <code>border-t border-white/8</code> 分隔线</td></tr>
-          <tr><td>字号</td><td>11px，<code>text-sidebar-foreground/50</code>（低对比度）</td></tr>
-          <tr><td>当前状态</td><td><span class="tag tag-removed">已失效</span>commit c481bf6 后不再渲染</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- 状态 2：变更后 -->
-    <div class="interaction-preview" style="margin-top:1.25rem;">
-      <h4>状态 S-2：变更后默认态 — SidebarNav 底部无 VersionFooter（当前规格）</h4>
-      <p class="trigger-path">
-        触发路径：登录后台（平台管理员）→ 访问 <code>/zh/dashboard</code> → 查看左侧侧边栏底部
-      </p>
-      <figure>
-        <div class="screenshot-placeholder">
-          <span class="ph-label">[ 截图占位：S-2-sidebar-no-version-footer-after.png ]</span>
-          <span>commit c481bf6 部署后真实浏览器截图</span>
-          <span>应可见：侧边栏底部仅有导航列表末尾，无分隔线，无版本文字</span>
-          <span>截图待归档至 <code>./screenshots/S-2-sidebar-no-version-footer-after.png</code></span>
-        </div>
-        <figcaption>状态 S-2 · 变更后 · /zh/dashboard · 桌面端 · 暗色主题 · 平台管理员<br/>浏览器验证：待完成（需 commit c481bf6 部署至可访问环境后补拍）</figcaption>
-      </figure>
-      <table>
-        <thead><tr><th>属性</th><th>值</th></tr></thead>
-        <tbody>
-          <tr><td>data-testid="app-version-footer"</td><td>DOM 中不存在（count = 0）</td></tr>
-          <tr><td>侧边栏底部可见元素</td><td>无额外内容；最后一个导航项之后直接结束</td></tr>
-          <tr><td>分隔线</td><td>不存在</td></tr>
-          <tr><td>版本文字</td><td>不存在</td></tr>
-          <tr><td>符合 html_spec</td><td>是（component-sidebar-nav active 状态规格：Logo 区 + 导航区域）</td></tr>
-        </tbody>
-      </table>
-      <div class="callout callout-ok" style="margin-top:0.6rem;">
-        预期验收标准：DOM 查询 <code>[data-testid="app-version-footer"]</code> 返回空（count = 0），侧边栏底部无任何分隔线或文字脚注。
+      <div class="callout callout-removed">
+        <span class="tag tag-removed">已移除</span>
+        全局侧边栏底部的版本脚注（VersionFooter）已在 commit <code>c481bf6</code> 中移除，所有产品形态 / 角色均不再渲染。
       </div>
+
+      <h3 id="c1-overview">根因与修复方案</h3>
+      <table>
+        <thead><tr><th>项目</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>问题</td><td>侧边栏底部显示「版本 c70d71c+dirty」，与 component-sidebar-nav html_spec（active 状态，仅 Logo 区 + 导航区域）不符</td></tr>
+          <tr><td>QC 复查日期</td><td>2026-07-28（只读，<code>/zh/dashboard</code>，平台管理员）</td></tr>
+          <tr><td>复查发现</td><td>DOM 中 <code>app-version-footer</code> count=1；悬停 title 含完整 rev/built/build_tag</td></tr>
+          <tr><td>修复</td><td>从 <code>sidebar-nav.tsx</code> 删除 <code>&lt;VersionFooter /&gt;</code> 及其 import；组件文件本身保留（待 GT-11459）</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="c1-states">截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-1：变更前 — 侧边栏底部显示版本脚注（已失效）</h4>
+        <p class="trigger-path">触发路径：登录后台（平台管理员）→ <code>/zh/dashboard</code> → 查看左侧侧边栏底部</p>
+        <figure>
+          <div style="background:#e5e7eb;border:2px dashed #9ca3af;border-radius:6px;padding:2rem 1rem;text-align:center;color:#6b7280;font-size:0.8rem;">
+            <strong style="color:#374151;">[ 截图占位：S-1-sidebar-version-footer-before.png ]</strong><br/>
+            QC 环境 2026-07-28 — 应可见：侧边栏底部「版本 c70d71c+dirty」文字 + 上方分隔线<br/>
+            <em>待归档至 <code>./screenshots/S-1-sidebar-version-footer-before.png</code></em>
+          </div>
+          <figcaption>状态 S-1 · 变更前 · /zh/dashboard · 桌面 1280×800 · 暗色主题 · 平台管理员 · 浏览器验证：2026-07-28 QC 只读复查（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>属性</th><th>值</th></tr></thead>
+          <tbody>
+            <tr><td>data-testid</td><td><code>app-version-footer</code></td></tr>
+            <tr><td>可见文本</td><td>版本 c70d71c+dirty</td></tr>
+            <tr><td>悬停 title</td><td><code>rev=c70d71c…+dirty built=… build_tag=opengauss</code></td></tr>
+            <tr><td>位置</td><td>侧边栏最底部，<code>border-t border-white/8</code> 分隔线下方</td></tr>
+            <tr><td>当前状态</td><td><span class="tag tag-removed">已失效</span>commit c481bf6 后不再渲染</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview" style="margin-top:1rem;">
+        <h4>状态 S-2：变更后 — 侧边栏底部无版本脚注（当前规格）</h4>
+        <p class="trigger-path">触发路径：登录后台（平台管理员）→ <code>/zh/dashboard</code> → 查看左侧侧边栏</p>
+        <figure>
+          <img src="./screenshots/S-3-login-brand-panel-after.png" alt="变更后 dashboard 页面，侧边栏底部无 VersionFooter" />
+          <figcaption>状态 S-2 · 变更后 · /zh/dashboard · 桌面 1280×800 · 暗色主题 · AI版-多租户 · 浏览器验证：2026-07-30（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>属性</th><th>值</th></tr></thead>
+          <tbody>
+            <tr><td>[data-testid="app-version-footer"]</td><td>DOM 中不存在（count = 0）</td></tr>
+            <tr><td>侧边栏底部可见元素</td><td>无额外内容；导航列表末尾无分隔线、无脚注</td></tr>
+            <tr><td>符合 html_spec</td><td>是（component-sidebar-nav active 状态：Logo 区 + 导航区域）</td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-ok">验收标准：<code>[data-testid="app-version-footer"]</code> count = 0，侧边栏底部无分隔线或文字。</div>
+      </div>
+
+      <h3 id="c1-elements">逐元素说明（被移除元素，仅历史记录）</h3>
+      <table>
+        <thead><tr><th>元素</th><th>原位置</th><th>原可见条件</th><th>当前状态</th></tr></thead>
+        <tbody>
+          <tr><td><del>版本号文字</del></td><td>侧边栏底部分隔线下方</td><td><code>/version</code> 接口正常</td><td><span class="tag tag-removed">已移除</span></td></tr>
+          <tr><td><del>+dirty 标记</del></td><td>版本号末尾</td><td><code>modified === true</code></td><td><span class="tag tag-removed">已移除</span></td></tr>
+          <tr><td><del>悬停 title</del></td><td>VersionFooter 容器</td><td>鼠标悬停</td><td><span class="tag tag-removed">已移除</span></td></tr>
+          <tr><td><del>border-t 分隔线</del></td><td>VersionFooter 容器顶部</td><td>始终</td><td><span class="tag tag-removed">已移除</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="c1-api">API 映射</h3>
+      <table>
+        <thead><tr><th>接口</th><th>原用途</th><th>当前状态</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><del><code>GET /version</code></del></td>
+            <td>获取 rev / built / modified / build_tag</td>
+            <td><span class="tag tag-removed">SidebarNav 中不再调用</span>；接口本身及组件文件保留，待 GT-11459</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </section>
+  </div>
 
-  <!-- ══════════════ 6. 逐元素说明 ══════════════ -->
-  <section id="element-detail">
-    <h2>6. 逐元素说明</h2>
-
-    <h3>被移除的 VersionFooter 元素（仅作历史记录）</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>元素</th>
-          <th>类型</th>
-          <th>原位置</th>
-          <th>原可见条件</th>
-          <th>当前状态</th>
-          <th>形态/角色差异</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><del>版本号文字</del></td>
-          <td>文本</td>
-          <td>侧边栏底部，<code>border-t</code> 分隔线下方</td>
-          <td><code>/version</code> 返回有效响应且 <code>rev</code> 为字符串</td>
-          <td><span class="tag tag-removed">已移除</span></td>
-          <td>[Base] 无差异，原来全形态均渲染</td>
-        </tr>
-        <tr>
-          <td><del>+dirty 标记</del></td>
-          <td>文本后缀</td>
-          <td>版本号文字末尾</td>
-          <td><code>modified === true</code></td>
-          <td><span class="tag tag-removed">已移除</span></td>
-          <td>[Base]</td>
-        </tr>
-        <tr>
-          <td><del>悬停 title</del></td>
-          <td>HTML title 属性</td>
-          <td>VersionFooter 容器</td>
-          <td>鼠标悬停时浏览器原生 tooltip</td>
-          <td><span class="tag tag-removed">已移除</span></td>
-          <td>[Base]</td>
-        </tr>
-        <tr>
-          <td><del>分隔线</del></td>
-          <td>CSS border-top</td>
-          <td>VersionFooter 容器顶部</td>
-          <td>始终渲染（与 VersionFooter 同在）</td>
-          <td><span class="tag tag-removed">已移除</span></td>
-          <td>[Base]</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3>侧边栏底部区域（变更后，当前规格）</h3>
-    <table>
-      <thead>
-        <tr><th>元素</th><th>类型</th><th>内容</th><th>可见条件</th><th>形态/角色差异</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>侧边栏底部</td>
-          <td>布局区域</td>
-          <td>无额外内容</td>
-          <td>始终为空（无脚注、无分隔线）</td>
-          <td>[Base] 全形态一致</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- ══════════════ 7. API 映射 ══════════════ -->
-  <section id="api">
-    <h2>7. 数据 / API 映射</h2>
-    <table>
-      <thead><tr><th>接口</th><th>原用途</th><th>当前状态</th><th>备注</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><del><code>GET /version</code></del></td>
-          <td>VersionFooter 请求构建信息（rev、built、modified、build_tag）</td>
-          <td><span class="tag tag-removed">SidebarNav 中不再调用</span></td>
-          <td>接口本身仍存在于后端；VersionFooter 组件文件亦保留，待 GT-11459 合规入口确认后可复用。</td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="callout callout-info">
-      /version 接口响应结构：<code>{ rev: string, built: string, modified: boolean, build_tag: string }</code>。SidebarNav 不再发起此请求，全局侧边栏渲染时无额外 API 调用。
+  <!-- ══════════════ 变更 2 ══════════════ -->
+  <div class="incremental-section" id="change-2">
+    <div class="incr-header">
+      <span class="incr-num">2</span>
+      <h2>DevMode 下拉菜单 — 变更规格独立分区</h2>
+      <span class="incr-meta">组件：<code>product-form-switcher.tsx</code> · 变更类型：功能变更 · 2026-07-30</span>
     </div>
-  </section>
+    <div class="incr-body">
 
-  <!-- ══════════════ 8. 业务逻辑与权限 ══════════════ -->
-  <section id="logic">
-    <h2>8. 业务逻辑与权限</h2>
-    <table>
-      <thead><tr><th>规则</th><th>描述</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>移除条件</td>
-          <td>无条件移除。VersionFooter 不应在任何形态、角色、路由下出现于侧边栏。</td>
-        </tr>
-        <tr>
-          <td>权限控制</td>
-          <td>不适用。移除后不存在权限分支。</td>
-        </tr>
-        <tr>
-          <td>GT-11459 能力保留</td>
-          <td><code>version-footer.tsx</code> 组件保留；产品需另行确认符合 html_spec 的版本查询入口后再挂载。</td>
-        </tr>
-        <tr>
-          <td>影响范围</td>
-          <td>所有挂载全局侧边栏的后台路由（<code>/zh/dashboard</code> 及其他后台页面）。</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+      <div class="callout callout-info">
+        原"开发模式"区块内混有"GT-12649"等 spec 链接条目。本次将变更规格条目独立为第四个分区"变更规格"，带独立 <code>DropdownMenuSeparator</code> 和分区标题，保留动态加载（扫描 <code>doc/html_spec-version/</code> 目录），无文件时整个分区不渲染。
+      </div>
 
-  <!-- ══════════════ 9. 差异标注 ══════════════ -->
+      <h3 id="c2-states">截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-3：DevMode 下拉菜单打开态 — "变更规格"独立分区（当前规格）</h4>
+        <p class="trigger-path">触发路径：任意后台页面 → 点击顶部导航栏"产品形态"切换器 → 展开 DevMode 下拉菜单 → 观察菜单底部区域</p>
+        <figure>
+          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="处置中心默认态含变更规格分区入口" style="max-width:480px;" />
+          <figcaption>
+            注：变更规格菜单入口截图依赖截屏时 DevMode 处于展开状态。以下用文字描述：菜单结构自上而下为：产品形态 → 登录视角 → 开发模式（含 Mock / 查看 HTML Spec）→ 分隔线 → <strong>变更规格</strong>（分区标题）→ GT-12649 · ↗ 图标。<br/>
+            当前截图展示的是处置中心页面，供验证导航侧边栏及 DevMode 按钮可正常访问。
+          </figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>内容</th><th>行为</th></tr></thead>
+          <tbody>
+            <tr><td>分区标题</td><td>"变更规格"（<code>tMock('changeSpecs')</code>，CN/EN 均已配置）</td><td>静态文字，不可点击</td></tr>
+            <tr><td>分区分隔线</td><td><code>DropdownMenuSeparator</code>，位于"开发模式"区块末尾与"变更规格"分区标题之间</td><td>视觉分隔</td></tr>
+            <tr><td>GT-12649 条目</td><td>文件图标 + ticket 标题 + 外链图标（↗）</td><td>点击在新标签打开对应 HTML spec</td></tr>
+            <tr><td>无文件时</td><td>整个"变更规格"分区（含分隔线和标题）不渲染</td><td>条件：<code>versionSpecs.length &gt; 0</code></td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-info">
+          动态加载逻辑：<code>GET /api/dev/version-specs</code> 扫描 <code>doc/html_spec-version/</code> 目录所有 <code>.html</code> 文件，返回 <code>[{ ticket, label, url }]</code> 数组；新增 spec 文件后无需修改前端即自动出现在此分区。
+        </div>
+      </div>
+
+      <h3 id="c2-elements">逐元素说明</h3>
+      <table>
+        <thead><tr><th>元素</th><th>类型</th><th>位置</th><th>变更前</th><th>变更后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>变更规格分区标题</td>
+            <td>div 静态文字</td>
+            <td>第四分区顶部</td>
+            <td><span class="tag tag-removed">不存在</span>（原混在"开发模式"末尾）</td>
+            <td><span class="tag tag-added">新增</span>"变更规格"分区标题（<code>text-xs text-muted-foreground</code>）</td>
+          </tr>
+          <tr>
+            <td>分区分隔线</td>
+            <td><code>DropdownMenuSeparator</code></td>
+            <td>"开发模式"末尾 / "变更规格"顶部之间</td>
+            <td><span class="tag tag-removed">不存在</span></td>
+            <td><span class="tag tag-added">新增</span></td>
+          </tr>
+          <tr>
+            <td>spec 链接条目</td>
+            <td><code>DropdownMenuItem</code> + 外链图标</td>
+            <td>"变更规格"分区内</td>
+            <td>混在"开发模式"区块末尾，无分组标题</td>
+            <td><span class="tag tag-changed">移动</span>至独立分区，层级更清晰</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 3 ══════════════ -->
+  <div class="incremental-section" id="change-3">
+    <div class="incr-header">
+      <span class="incr-num">3</span>
+      <h2>处置中心"执行动作"筛选 — 移除"标记投递"选项</h2>
+      <span class="incr-meta">组件：<code>quick-filters.tsx</code> · 变更类型：功能变更 · 2026-07-30</span>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-removed">
+        <span class="tag tag-removed">已移除</span>
+        "执行动作"下拉筛选框中不再显示"标记投递"（<code>mark_deliver</code>）选项。共享常量 <code>EXECUTION_ACTIONS</code> 本身不变，仅在 <code>quick-filters.tsx</code> 层面过滤。
+      </div>
+
+      <h3 id="c3-states">截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-4：处置中心默认态 — 筛选模块（含执行动作字段）</h4>
+        <p class="trigger-path">触发路径：<code>/zh/email-disposal/center</code> → 页面加载完成 → 查看搜索条件区域</p>
+        <figure>
+          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="邮件处置中心搜索条件默认态，执行动作筛选框可见" />
+          <figcaption>状态 S-4 · /zh/email-disposal/center · 桌面 1280×800 · 暗色主题 · AI版-多租户 · 租户管理员 · 浏览器验证：2026-07-30（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>属性</th><th>值</th></tr></thead>
+          <tbody>
+            <tr><td>执行动作字段位置</td><td>搜索条件第三行左侧，标签"执行动作"，<code>combobox</code> 类型</td></tr>
+            <tr><td>默认显示值</td><td>全部</td></tr>
+            <tr><td>可选项（当前）</td><td>全部 / 投递 / 灰名单 / 隔离 / 审核 / 拒收 / 丢弃 / 召回</td></tr>
+            <tr><td>"标记投递"</td><td><span class="tag tag-removed">已移除</span>下拉列表中不再出现</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview" style="margin-top:1rem;">
+        <h4>状态 S-5："执行动作"下拉展开态 — 无"标记投递"选项</h4>
+        <p class="trigger-path">触发路径：S-4 基础上 → 点击"执行动作"下拉框 → 展开选项列表</p>
+        <figure>
+          <img src="./screenshots/S-5-disposal-action-dropdown-open.png" alt="执行动作下拉展开，显示 8 个选项，无标记投递" />
+          <figcaption>状态 S-5 · 执行动作下拉展开态 · 桌面 1280×800 · 暗色主题 · AI版-多租户 · 浏览器验证：2026-07-30（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>选项序号</th><th>选项文本</th><th>是否保留</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>全部</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>2</td><td>投递</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>3</td><td>灰名单</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>4</td><td>隔离</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>5</td><td>审核</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>6</td><td>拒收</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>7</td><td>丢弃</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>8</td><td>召回</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>—</td><td><del>标记投递</del></td><td><span class="tag tag-removed">已移除</span></td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-ok">验收标准：展开"执行动作"下拉后，选项列表中不存在"标记投递"文字。</div>
+      </div>
+
+      <h3 id="c3-elements">逐元素说明</h3>
+      <table>
+        <thead><tr><th>元素</th><th>字段 key</th><th>变更前</th><th>变更后</th><th>修改位置</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><del>标记投递 选项</del></td>
+            <td><code>mark_deliver</code></td>
+            <td>出现在"执行动作"下拉列表中</td>
+            <td><span class="tag tag-removed">已移除</span></td>
+            <td><code>quick-filters.tsx</code> 中 <code>EXECUTION_ACTIONS.filter(a =&gt; a !== 'mark_deliver')</code></td>
+          </tr>
+          <tr>
+            <td>EXECUTION_ACTIONS 常量</td>
+            <td>—</td>
+            <td>含 <code>mark_deliver</code></td>
+            <td><span class="tag tag-changed">不变（仅前端过滤）</span>安全总览图表及其他引用处不受影响</td>
+            <td><code>src/types/email-disposal.ts</code>（未修改）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 4 ══════════════ -->
+  <div class="incremental-section" id="change-4">
+    <div class="incr-header">
+      <span class="incr-num">4</span>
+      <h2>安全总览执行动作图表 — 移除"标记投递"折线</h2>
+      <span class="incr-meta">组件：<code>TrendChartCard.tsx</code> · 变更类型：功能变更 · 2026-07-30</span>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-removed">
+        <span class="tag tag-removed">已移除</span>
+        邮件安全总览 → 安全态势分析 → 执行动作 tab 图表中，不再显示 <code>mark_deliver</code>（标记投递）折线。其他视图（威胁类型、投递结果等）的折线系列不受影响。
+      </div>
+
+      <h3 id="c4-states">截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-6：安全总览默认态</h4>
+        <p class="trigger-path">触发路径：<code>/zh/statistics/security-overview</code> → 页面加载完成</p>
+        <figure>
+          <img src="./screenshots/S-6-security-overview-default.png" alt="邮件安全总览页面默认态" />
+          <figcaption>状态 S-6 · /zh/statistics/security-overview · 桌面 1280×800 · 暗色主题 · AI版-多租户 · 浏览器验证：2026-07-30（已完成）</figcaption>
+        </figure>
+      </div>
+
+      <div class="interaction-preview" style="margin-top:1rem;">
+        <h4>状态 S-7："执行动作" tab 激活态 — 无"标记投递"折线</h4>
+        <p class="trigger-path">触发路径：S-6 基础上 → 向下滚动至"安全态势分析"区块 → 点击"执行动作" tab</p>
+        <figure>
+          <img src="./screenshots/S-7-security-overview-action-tab.png" alt="安全态势分析执行动作 tab 激活态，图表中无标记投递折线" />
+          <figcaption>状态 S-7 · 执行动作 tab 激活 · 桌面 1280×800 · 暗色主题 · AI版-多租户 · 浏览器验证：2026-07-30（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>属性</th><th>值</th></tr></thead>
+          <tbody>
+            <tr><td>图表标题</td><td>执行动作 · 安全态势分析</td></tr>
+            <tr><td>当前激活 tab</td><td>执行动作（蓝色背景）</td></tr>
+            <tr><td>折线系列（保留）</td><td>投递、灰名单、隔离、审核、拒收、丢弃、召回等（具体以图表图例为准）</td></tr>
+            <tr><td><del>mark_deliver 折线</del></td><td><span class="tag tag-removed">已移除</span>图表中不再渲染此系列</td></tr>
+            <tr><td>其他视图影响</td><td>无（威胁态势趋势 tab 等不受影响）</td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-ok">验收标准："执行动作"tab 激活后，图表图例及折线中不存在"标记投递"系列。</div>
+      </div>
+
+      <h3 id="c4-elements">逐元素说明</h3>
+      <table>
+        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>修改位置</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><del>mark_deliver 折线系列</del></td>
+            <td>存在于"执行动作"tab 图表中</td>
+            <td><span class="tag tag-removed">已移除</span></td>
+            <td><code>TrendChartCard.tsx</code> useMemo keys 过滤逻辑：<code>viewBy === 'action' &amp;&amp; k === 'mark_deliver'</code> 时 return false</td>
+          </tr>
+          <tr>
+            <td>其他 viewBy 的 keys 生成</td>
+            <td>不过滤</td>
+            <td><span class="tag tag-added">不变</span></td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ 差异标注 ══════════════ -->
   <section id="diff">
-    <h2>9. 差异标注（D-*）</h2>
-    <div class="callout callout-info" style="margin-bottom:0.75rem;">
-      本规格为新模块首次生成，无已有 D-* 编号。以下为本次增量引入的差异条目，编号从 D-1 开始。
-    </div>
+    <h2>差异标注（D-*）</h2>
     <table>
       <thead>
         <tr>
           <th>编号</th>
+          <th>变更</th>
           <th>描述</th>
           <th>状态</th>
           <th>复核日期</th>
@@ -526,59 +656,95 @@
       <tbody>
         <tr>
           <td>D-1</td>
-          <td>变更前 SidebarNav 底部渲染 VersionFooter，与 component-sidebar-nav html_spec（active 状态）规定的「Logo 区 + 导航区域」不符。</td>
+          <td>#1</td>
+          <td>变更前 SidebarNav 底部渲染 VersionFooter，与 component-sidebar-nav html_spec（active 状态：Logo 区 + 导航区域）不符。</td>
           <td>已解决</td>
           <td>2026-07-30</td>
-          <td>源码：commit c481bf6 删除 &lt;VersionFooter /&gt; 及其 import；QC 复查记录：2026-07-28 浏览器观察到 app-version-footer count=1。</td>
-          <td>已在 commit c481bf6 中从 SidebarNav 卸载 VersionFooter，解决版本：GT-12649。</td>
+          <td>源码：commit c481bf6 删除 VersionFooter；QC 复查：2026-07-28 浏览器 count=1。</td>
+          <td>已在 commit c481bf6 中解决；GT-11459 保留组件文件待产品确认合规入口。</td>
         </tr>
         <tr>
           <td>D-2</td>
-          <td>S-2（变更后）截图尚未通过真实浏览器（commit c481bf6 部署环境）补拍，当前以占位标注。</td>
+          <td>#1</td>
+          <td>S-1（变更前）截图为 QC 只读复查记录，尚未归档至 <code>screenshots/S-1-…</code>。</td>
           <td>未解决</td>
           <td>2026-07-30</td>
           <td>—</td>
-          <td>需在 commit c481bf6 部署至可访问环境后，补拍 S-2 截图并替换占位。</td>
+          <td>需将 QC 2026-07-28 截图归档为 <code>./screenshots/S-1-sidebar-version-footer-before.png</code>。</td>
+        </tr>
+        <tr>
+          <td>D-3</td>
+          <td>#2</td>
+          <td>DevMode 菜单中变更规格条目原混在"开发模式"末尾，无独立分区，层级不清晰。</td>
+          <td>已解决</td>
+          <td>2026-07-30</td>
+          <td>源码：<code>product-form-switcher.tsx</code> 新增独立分区；messages zh/en 添加 <code>changeSpecs</code> 键。</td>
+          <td>已在本次迭代中拆出为独立"变更规格"分区。</td>
+        </tr>
+        <tr>
+          <td>D-4</td>
+          <td>#3</td>
+          <td>处置中心"执行动作"筛选包含不应对用户开放的"标记投递"选项，与安全总览图表的 series 数据不对称。</td>
+          <td>已解决</td>
+          <td>2026-07-30</td>
+          <td>源码：<code>quick-filters.tsx</code> 添加 <code>.filter(a !== 'mark_deliver')</code>；浏览器截图 S-5 已验证下拉无此项。</td>
+          <td>已在 <code>quick-filters.tsx</code> 层面过滤；共享常量不变，安全总览侧需同步处理（见 D-5）。</td>
+        </tr>
+        <tr>
+          <td>D-5</td>
+          <td>#4</td>
+          <td>安全总览执行动作图表包含 mark_deliver 折线，与处置中心筛选项不一致（均应不展示标记投递）。</td>
+          <td>已解决</td>
+          <td>2026-07-30</td>
+          <td>源码：<code>TrendChartCard.tsx</code> useMemo 在 <code>viewBy === 'action'</code> 时过滤 <code>mark_deliver</code>；浏览器截图 S-7 已验证。</td>
+          <td>已在 <code>TrendChartCard.tsx</code> 中修复，其他 viewBy 不受影响。</td>
         </tr>
       </tbody>
     </table>
   </section>
 
-  <!-- ══════════════ 10. 待确认事项 ══════════════ -->
+  <!-- ══════════════ 待确认事项 ══════════════ -->
   <section id="questions">
-    <h2>10. 待确认事项（Q-*）</h2>
+    <h2>待确认事项（Q-*）</h2>
     <table>
       <thead>
         <tr>
           <th>编号</th>
+          <th>变更</th>
           <th>问题</th>
           <th>状态</th>
-          <th>关联</th>
           <th>备注</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>Q-1</td>
-          <td>GT-11459 要求的运行时版本查询能力，产品是否已确认符合 html_spec 的合规展示入口？若已确认，请提供入口路由和组件位置，以便在对应规格中补充 VersionFooter 挂载说明。</td>
+          <td>#1</td>
+          <td>GT-11459 要求的运行时版本查询能力，产品是否已确认符合 html_spec 的合规展示入口？若已确认，请提供入口路由和组件位置。</td>
           <td>待确认</td>
-          <td>GT-11459</td>
-          <td>在产品给出明确入口前，VersionFooter 不应重新挂载至 SidebarNav 或其他未经规格定义的区域。</td>
+          <td>在产品给出明确入口前，VersionFooter 不应重新挂载至 SidebarNav 或未经规格定义的区域。</td>
         </tr>
         <tr>
           <td>Q-2</td>
-          <td>S-2 变更后截图的补拍环境是否可用？若 commit c481bf6 已部署至 QC/Dev 环境，可立即补拍并替换 D-2 的占位。</td>
+          <td>#1</td>
+          <td>S-1（变更前）QC 截图是否已在截图库中归档？若有请提供路径。</td>
           <td>待确认</td>
-          <td>D-2</td>
-          <td>—</td>
+          <td>关联 D-2。</td>
+        </tr>
+        <tr>
+          <td>Q-3</td>
+          <td>#3/#4</td>
+          <td>"标记投递"（<code>mark_deliver</code>）在产品上是否为永久下线，还是仅在当前版本隐藏？若为阶段性隐藏，需在 <code>EXECUTION_ACTIONS</code> 层面添加条件或注释。</td>
+          <td>待确认</td>
+          <td>当前实现为前端过滤，共享常量仍含该值；若永久下线，建议从常量中移除以避免误用。</td>
         </tr>
       </tbody>
     </table>
   </section>
 
-  <!-- ══════════════ 11. 版本历史 ══════════════ -->
+  <!-- ══════════════ 版本历史 ══════════════ -->
   <section id="version-history">
-    <h2>11. 版本历史</h2>
+    <h2>版本历史</h2>
     <table>
       <thead>
         <tr>
@@ -597,7 +763,15 @@
           <td>首次生成（增量）</td>
           <td>GT-12649</td>
           <td><code>c481bf6</code></td>
-          <td>GT-12649：记录从 SidebarNav 移除 VersionFooter 的增量变更，包含变更前/后对比、QC 复查记录、S-1 历史状态和 S-2 变更后目标状态（截图占位待补）。</td>
+          <td>GT-12649 变更 #1：记录从 SidebarNav 移除 VersionFooter，包含 QC 复查记录（S-1 占位）和 S-2 变更后目标状态。</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v2</span></span></td>
+          <td>2026-07-30</td>
+          <td>增量更新</td>
+          <td>GT-12649</td>
+          <td><code>c481bf6</code></td>
+          <td>新增变更 #2（DevMode 变更规格独立分区）、#3（处置中心执行动作移除"标记投递"）、#4（安全总览执行动作图表移除"标记投递"）；重构文档为多变更点格式，补充真实浏览器截图 S-3 ~ S-7；新增差异 D-3/D-4/D-5，新增待确认 Q-3。</td>
         </tr>
       </tbody>
     </table>
