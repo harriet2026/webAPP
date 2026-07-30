@@ -12,7 +12,6 @@ import { useProductForm } from '@/contexts/product-form-context';
 import { FALLBACK_FEATURE_REGISTRY } from '@/lib/product-form/fallback-registry';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { visibleNavIds, isNavItemAllowed, isGroupVisible } from './sidebar-visibility';
-import { VersionFooter } from './version-footer';
 
 interface SidebarNavItemProps {
   item: NavItem;
@@ -242,7 +241,6 @@ export function SidebarNav() {
         ))}
       </nav>
 
-      <VersionFooter />
     </div>
   );
 }
