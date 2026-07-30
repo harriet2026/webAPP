@@ -163,9 +163,45 @@ import {
   mockDeleteGroupPolicyRule,
   mockLinkClickLogsList,
   mockLinkClickLogById,
+  mockRoutingScope,
+  mockTenantDomainsList,
+  mockCreateTenantDomain,
+  mockUpdateTenantDomain,
+  mockDeleteTenantDomain,
+  mockNexthopsList,
+  mockCreateNexthop,
+  mockUpdateNexthop,
+  mockDeleteNexthop,
+  mockProbeDomain,
+  mockMailAdmissionRulesList,
+  mockCreateMailAdmissionRule,
+  mockUpdateMailAdmissionRule,
+  mockDeleteMailAdmissionRule,
+  mockMailAdmissionPolicy,
+  mockSetMailAdmissionPolicy,
+  mockOutboundRulesUnifiedList,
+  mockUpdateOutboundRule,
+  mockSetOutboundRuleStatus,
+  mockDeleteOutboundRule,
+  MR_OUTBOUND_RULE_ID_PATTERN,
+  mockActiveProxysvrGroups,
+  mockMailAuthConfigsList,
+  mockCreateMailAuthConfig,
+  mockUpdateMailAuthConfig,
+  mockDeleteMailAuthConfig,
+  mockMailAuthTest,
+  mockProxysvrEndpointsList,
+  mockCreateProxysvrEndpoint,
+  mockUpdateProxysvrEndpoint,
+  mockDeleteProxysvrEndpoint,
+  mockProbeProxysvrEndpoint,
+  mockProxysvrGroupsList,
+  mockCreateProxysvrGroup,
+  mockUpdateProxysvrGroup,
+  mockDeleteProxysvrGroup,
+  mockConnectivityTest,
 } from './fixtures';
 import {
-  mockTenantDomainsFor,
   mockDkimSigningDomainsFor,
   mockListDkimKeys,
   mockGenerateDkimKey,
@@ -1580,6 +1616,19 @@ const routes: Route[] = [
     matchQuery: (q) => new URLSearchParams(q).get('scope') === 'content_rules',
     handler: (req) => ({ status: 200, data: mockExecuteContentRulesImport(req.body) }),
   },
+  // 邮件路由出站规则（mock id 段 5000-5999）：必须排在下面通用的无 scope
+  // DELETE 兜底之前，否则会被那条更早注册、同样匹配 \d+ 的路由吞掉，
+  // 导致状态假装删除成功但 outboundRulesState 从未真正变化。
+  {
+    method: 'DELETE',
+    pattern: /^\/unified-rules\/(5\d{3})$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      return mockDeleteOutboundRule(id)
+        ? { status: 200, data: { status: 'deleted' } }
+        : { status: 404, data: { message: 'not found' } };
+    },
+  },
   {
     method: 'DELETE',
     pattern: /^\/unified-rules\/\d+$/,
@@ -1946,18 +1995,28 @@ const routes: Route[] = [
     handler: () => ({ status: 200, data: mockSystemHealthSummary() }),
   },
 
-  // ─── 租户发信域名（DKIM 外发签名子卡 / 组织域名下拉 / 域名管理页共用）──────
-  // 真实后端在预览不可达；此前该 GET 未 mock，导致依赖域名列表的模块在 demo
-  // 里查询失败。这里补齐，返回按 :id 分组的 demo 域名（见 mock/dkim.ts）。
+  // ─── 邮件路由 html_spec 对齐（design/implement/spec/2026-07-28-mail-routing-
+  // html-spec-alignment-design.md，实施 task-2-brief.md）────────────────────
+  // 收信域/转发放行/出站规则/发信认证都有真实后端路径，这里做同路径 mock；
+  // 代理 IP / 投递通道没有真实后端，属于 mock-only 的虚拟 endpoint
+  // （`/mail-routing/outbound-*`）。fixture 与 CRUD 状态见 mail-routing-fixtures.ts。
+  {
+    method: 'GET',
+    pattern: '/routing/_meta/scope',
+    handler: () => ({ status: 200, data: mockRoutingScope() }),
+  },
   {
     method: 'GET',
     pattern: /^\/tenants\/\d+\/domains$/,
+    // 该共享路由由 mail-routing fixture 承接（原 DKIM 租户域名 mock 并入，见
+    // mail-routing-fixtures）；租户表单在 Mock 模式下显示 mail-routing 域名数据。
     handler: (req) => {
       const tenantId = Number(pathname(req.path).split('/')[2]);
-      return { status: 200, data: mockTenantDomainsFor(tenantId) };
+      return { status: 200, data: mockTenantDomainsList(tenantId) };
     },
   },
 
+  // ─── DKIM 外发签名（域名下拉，认证协议检查 → DKIM 外发签名子卡）───────────
   {
     method: 'GET',
     pattern: '/dkim/signing-domains',
@@ -2046,6 +2105,290 @@ const routes: Route[] = [
       mockDeleteDkimKey(id);
       return { status: 204, data: {} };
     },
+  },
+
+  // ─── 邮件路由 - 收信域：新建域名 / nexthop CRUD / 探测（html_spec inbound-domains）──
+  {
+    method: 'POST',
+    pattern: /^\/tenants\/\d+\/domains$/,
+    handler: (req) => {
+      const tenantId = Number(pathname(req.path).split('/')[2]);
+      return { status: 201, data: mockCreateTenantDomain(tenantId, req.body) };
+    },
+  },
+  {
+    method: 'GET',
+    pattern: /^\/tenants\/\d+\/domains\/\d+\/nexthops$/,
+    handler: (req) => {
+      const domainId = Number(pathname(req.path).split('/')[4]);
+      return { status: 200, data: mockNexthopsList(domainId) };
+    },
+  },
+  {
+    method: 'POST',
+    pattern: /^\/tenants\/\d+\/domains\/\d+\/nexthops$/,
+    handler: (req) => {
+      const domainId = Number(pathname(req.path).split('/')[4]);
+      return { status: 201, data: mockCreateNexthop(domainId, req.body) };
+    },
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/tenants\/\d+\/domains\/\d+\/nexthops\/\d+$/,
+    handler: (req) => {
+      const nexthopId = Number(pathname(req.path).split('/')[6]);
+      const nh = mockUpdateNexthop(nexthopId, req.body);
+      return nh ? { status: 200, data: nh } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/tenants\/\d+\/domains\/\d+\/nexthops\/\d+$/,
+    handler: (req) => {
+      const nexthopId = Number(pathname(req.path).split('/')[6]);
+      return mockDeleteNexthop(nexthopId)
+        ? { status: 200, data: { status: 'deleted' } }
+        : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'POST',
+    pattern: /^\/tenants\/\d+\/domains\/\d+\/probe$/,
+    handler: (req) => {
+      const domainId = Number(pathname(req.path).split('/')[4]);
+      const result = mockProbeDomain(domainId);
+      return result ? { status: 200, data: result } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/tenant-domains\/\d+$/,
+    handler: (req) => {
+      const domainId = Number(pathname(req.path).split('/')[2]);
+      const d = mockUpdateTenantDomain(domainId, req.body);
+      return d ? { status: 200, data: d } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/tenant-domains\/\d+$/,
+    handler: (req) => {
+      const domainId = Number(pathname(req.path).split('/')[2]);
+      return mockDeleteTenantDomain(domainId)
+        ? { status: 200, data: { status: 'deleted' } }
+        : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  // 转发设置 / 未认证放行（mail-admission-rules，取代旧 relay-grants，Task 13）。
+  {
+    method: 'GET',
+    pattern: '/mail-admission-rules',
+    handler: () => ({ status: 200, data: mockMailAdmissionRulesList() }),
+  },
+  {
+    method: 'POST',
+    pattern: '/mail-admission-rules',
+    handler: (req) => ({ status: 201, data: mockCreateMailAdmissionRule(req.body) }),
+  },
+  {
+    method: 'GET',
+    pattern: '/mail-admission/_meta/policy',
+    handler: () => ({ status: 200, data: mockMailAdmissionPolicy() }),
+  },
+  {
+    method: 'PUT',
+    pattern: '/mail-admission/_meta/policy',
+    handler: (req) => ({ status: 200, data: mockSetMailAdmissionPolicy(req.body) }),
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/mail-admission-rules\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const r = mockUpdateMailAdmissionRule(id, req.body);
+      return r ? { status: 200, data: r } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/mail-admission-rules\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      return mockDeleteMailAdmissionRule(id)
+        ? { status: 200, data: { status: 'deleted' } }
+        : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  // 出站路由 - 路由规则：真实模式走 unified-rules（page=mail_routing_outbound）。
+  // 列表可靠 query 收窄；写操作（PUT/PUT status/DELETE）的真实调用方走
+  // src/lib/api/unified-rules.ts 的通用函数，不带 scope query，只能靠 mock id
+  // 段（5000-5999，呼应群组策略 90xx 的既有惯例）收窄，避免吞掉其它模块对
+  // /unified-rules/{id} 的无 scope 写操作（回归见 group-policy-mock.test.ts）。
+  {
+    method: 'GET',
+    pattern: '/unified-rules',
+    // task-2-brief 与设计文档字面要求的 query 键是 `page=mail_routing_outbound`；
+    // 但当前 OutboundRoutingTab.tsx（后续任务会重写）实际复用
+    // src/lib/api/unified-rules.ts 的通用 getUnifiedRules()，那个函数把
+    // `page` 参数编码成 `rule_page=`，不是 `page=`。两种键都收，兼容重写前后
+    // 两种可能的调用方式，不收窄就不匹配、不影响其它模块。
+    matchQuery: (q) => {
+      const params = new URLSearchParams(q);
+      return params.get('page') === 'mail_routing_outbound' || params.get('rule_page') === 'mail_routing_outbound';
+    },
+    handler: () => ({ status: 200, data: mockOutboundRulesUnifiedList() }),
+  },
+  {
+    method: 'PUT',
+    pattern: MR_OUTBOUND_RULE_ID_PATTERN,
+    handler: (req) => {
+      const p = pathname(req.path);
+      const id = Number(p.split('/')[2]);
+      const rule = p.endsWith('/status')
+        ? mockSetOutboundRuleStatus(id, Boolean((req.body as { is_active?: boolean } | undefined)?.is_active))
+        : mockUpdateOutboundRule(id, req.body);
+      return rule ? { status: 200, data: rule } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  // demo 语义里状态开关也常见 POST（内容规则/群组策略等用 PUT，这里额外兼容
+  // POST /status，见 task-2-brief 写操作方法列 "POST/PUT/DELETE"）。
+  {
+    method: 'POST',
+    pattern: /^\/unified-rules\/(5\d{3})\/status$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const rule = mockSetOutboundRuleStatus(id, Boolean((req.body as { is_active?: boolean } | undefined)?.is_active));
+      return rule ? { status: 200, data: rule } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  // 路由规则抽屉的通道下拉：列出 active 的 proxysvr 组（真实端点形状，Task 13）。
+  {
+    method: 'GET',
+    pattern: '/proxysvr-groups/_meta/active',
+    handler: () => ({ status: 200, data: mockActiveProxysvrGroups() }),
+  },
+  // 发信认证（mail-auth-configs，真实后端已支撑）。
+  {
+    method: 'GET',
+    pattern: '/mail-auth-configs',
+    handler: () => ({ status: 200, data: mockMailAuthConfigsList() }),
+  },
+  {
+    method: 'POST',
+    pattern: '/mail-auth-configs',
+    handler: (req) => ({ status: 201, data: mockCreateMailAuthConfig(req.body) }),
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/mail-auth-configs\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const c = mockUpdateMailAuthConfig(id, req.body);
+      return c ? { status: 200, data: c } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/mail-auth-configs\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      return mockDeleteMailAuthConfig(id)
+        ? { status: 200, data: { status: 'deleted' } }
+        : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'POST',
+    pattern: '/mail-auth-configs/test',
+    handler: () => ({ status: 200, data: mockMailAuthTest() }),
+  },
+  // 出站路由 - 代理 IP（proxysvr-endpoints，真实后端，Task 13 取代虚拟 endpoint）。
+  {
+    method: 'GET',
+    pattern: '/proxysvr-endpoints',
+    handler: () => ({ status: 200, data: mockProxysvrEndpointsList() }),
+  },
+  {
+    method: 'POST',
+    pattern: '/proxysvr-endpoints',
+    handler: (req) => ({ status: 201, data: mockCreateProxysvrEndpoint(req.body) }),
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/proxysvr-endpoints\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const p = mockUpdateProxysvrEndpoint(id, req.body);
+      return p ? { status: 200, data: p } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/proxysvr-endpoints\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      return mockDeleteProxysvrEndpoint(id)
+        ? { status: 200, data: { status: 'deleted' } }
+        : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'POST',
+    pattern: /^\/proxysvr-endpoints\/\d+\/probe$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const result = mockProbeProxysvrEndpoint(id);
+      return result ? { status: 200, data: result } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  // 出站路由 - 投递通道（proxysvr-groups，真实后端，Task 13 取代虚拟 endpoint）。
+  {
+    method: 'GET',
+    pattern: '/proxysvr-groups',
+    handler: () => ({ status: 200, data: mockProxysvrGroupsList() }),
+  },
+  {
+    method: 'POST',
+    pattern: '/proxysvr-groups',
+    handler: (req) => ({ status: 201, data: mockCreateProxysvrGroup(req.body) }),
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/proxysvr-groups\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const c = mockUpdateProxysvrGroup(id, req.body);
+      return c ? { status: 200, data: c } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/proxysvr-groups\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const result = mockDeleteProxysvrGroup(id);
+      if (!result.ok) {
+        return {
+          status: 409,
+          data: {
+            error: {
+              code: 'conflict',
+              message:
+                'proxysvr group is referenced by one or more outbound route rules and cannot be deleted; remove those rules first',
+            },
+          },
+        };
+      }
+      return { status: 200, data: { status: 'deleted' } };
+    },
+  },
+  // 收信域抽屉「测试连通性」按钮专用的 mock-only 虚拟 endpoint（receiving-tab.tsx，任意
+  // host/port 组合的一次性连通性测试，真实后端没有对应 API）；出站代理/通道已改用真实 TCP/TLS
+  // 探测（POST /proxysvr-endpoints/:id/probe），不再复用这个端点。
+  {
+    method: 'POST',
+    pattern: '/mail-routing/connectivity-test',
+    handler: () => ({ status: 200, data: mockConnectivityTest() }),
   },
 ];
 

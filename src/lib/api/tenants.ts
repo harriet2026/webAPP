@@ -101,9 +101,10 @@ export function createTenantDomain(
 export function updateTenantDomain(
   domainId: number,
   data: UpdateTenantDomainRequest,
-  tenantId?: number
+  tenantId?: number,
+  requestFn: ApiRequestFn = apiRequest
 ): Promise<TenantDomain> {
-  return apiRequest<TenantDomain>(`/tenant-domains/${domainId}`, {
+  return requestFn<TenantDomain>(`/tenant-domains/${domainId}`, {
     method: 'PUT',
     body: data,
     ...tenantHeader(tenantId),

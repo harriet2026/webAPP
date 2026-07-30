@@ -97,23 +97,26 @@ describe('QuarantineSettingsTab category notification section (task-10)', () => 
     });
   });
 
-  it('shows min/max score inputs only for enabled rows', () => {
+  it('renders min/max score inputs for every row; disabled rows are dimmed, not removed', () => {
     render(<Harness serverTz="Asia/Shanghai" />);
-    // spam defaults enabled=true → has min/max inputs
+    // 表格布局下所有行恒渲染分数输入框（demo 对齐）
     expect(screen.getByTestId('disposal-settings-category-min-spam')).toBeInTheDocument();
     expect(screen.getByTestId('disposal-settings-category-max-spam')).toBeInTheDocument();
-    // advertising defaults enabled=false → no min/max inputs
-    expect(screen.queryByTestId('disposal-settings-category-min-advertising')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('disposal-settings-category-max-advertising')).not.toBeInTheDocument();
+    expect(screen.getByTestId('disposal-settings-category-min-advertising')).toBeInTheDocument();
+    expect(screen.getByTestId('disposal-settings-category-max-advertising')).toBeInTheDocument();
+    // 禁用行整行弱化展示
+    expect(screen.getByTestId('disposal-settings-category-row-advertising')).toHaveClass('opacity-60');
+    expect(screen.getByTestId('disposal-settings-category-row-spam')).not.toHaveClass('opacity-60');
   });
 
-  it('unchecking a row removes its min/max inputs and only affects that row', async () => {
+  it('unchecking a row dims it and only affects that row', async () => {
     render(<Harness serverTz="Asia/Shanghai" />);
     const spamCheckbox = screen.getByTestId('disposal-settings-category-checkbox-spam');
     await userEvent.click(spamCheckbox);
-    expect(screen.queryByTestId('disposal-settings-category-min-spam')).not.toBeInTheDocument();
-    // other malicious rows unaffected
-    expect(screen.getByTestId('disposal-settings-category-min-virus')).toBeInTheDocument();
+    expect(screen.getByTestId('disposal-settings-category-row-spam')).toHaveClass('opacity-60');
+    // 输入框保留，其他行不受影响
+    expect(screen.getByTestId('disposal-settings-category-min-spam')).toBeInTheDocument();
+    expect(screen.getByTestId('disposal-settings-category-row-virus')).not.toHaveClass('opacity-60');
   });
 
   it('clamps min score onBlur into [0,1] and restores on invalid input', async () => {

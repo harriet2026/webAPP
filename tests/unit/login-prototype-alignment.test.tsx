@@ -62,14 +62,16 @@ describe('FormAlert', () => {
 });
 
 describe('BrandPanel prototype parity', () => {
-  it('renders product name, headline, four feature bullets and the copyright', () => {
+  it('renders product name, headline, three feature bullets and the copyright', () => {
     render(<BrandPanel />);
     expect(screen.getByText('auth.brandProductName')).toBeInTheDocument();
     expect(screen.getByText('auth.brandHeadline')).toBeInTheDocument();
-    for (const i of [1, 2, 3, 4]) {
+    // GT-12649: 品牌位收敛为 3 项特性（撤掉"多租户网关"）。
+    for (const i of [1, 2, 3]) {
       expect(screen.getByText(`auth.brandFeature${i}`)).toBeInTheDocument();
       expect(screen.getByText(`auth.brandFeature${i}Desc`)).toBeInTheDocument();
     }
+    expect(screen.queryByText('auth.brandFeature4')).not.toBeInTheDocument();
     expect(screen.getByText('auth.brandCopyright')).toBeInTheDocument();
   });
 

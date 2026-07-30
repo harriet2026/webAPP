@@ -83,7 +83,7 @@ describe("MailListTable toolbar (GT-11580)", () => {
     ).toBeInTheDocument();
   });
 
-  it("disables batch action buttons when nothing is selected", () => {
+  it("disables batch action buttons when nothing is selected (export stays enabled for export-all)", () => {
     renderTable({ selectedIds: new Set<number>() });
     expect(
       screen.getByRole("button", { name: /emailDisposal\.batch\.release/ }),
@@ -91,9 +91,10 @@ describe("MailListTable toolbar (GT-11580)", () => {
     expect(
       screen.getByRole("button", { name: /emailDisposal\.batch\.delete/ }),
     ).toBeDisabled();
+    // 未选中时导出按钮变为「导出全部筛选」，保持可用（仅 exportLoading 时禁用）
     expect(
       screen.getByRole("button", { name: /emailDisposal\.batch\.export/ }),
-    ).toBeDisabled();
+    ).toBeEnabled();
   });
 
   it("enables batch action buttons when at least one row is selected", () => {

@@ -93,7 +93,7 @@ export function EmailDisposalCenterPage({
   const { templates, saveTemplate, deleteTemplate } = useSearchTemplates();
   const queryClient = useQueryClient();
   const { capabilities, viewer } = useProductForm();
-  const { features, isSystemAdmin, isTenantAdmin, user } = useAuth();
+  const { features, isSystemAdmin, isTenantAdmin, user, demoAuthBypassEnabled } = useAuth();
   const { selectedTenantId } = useTenant();
   const { effectiveViewer } = resolveSecurityScope({
     scopeTenantId: null,
@@ -116,8 +116,12 @@ export function EmailDisposalCenterPage({
   // + no selected tenant" -> platform normalization, leaving detail-drawer
   // dispose actions enabled while the list page correctly showed
   // platform-wide/readonly).
+  // Demo bypass 模式下超管未选租户会被规范为 platform 视角（只读），
+  // 但 demo 需要展示完整操作功能，故跳过只读限制。
   const detailReadOnly =
-    !!capabilities?.multiTenant && effectiveViewer === "platform";
+    !demoAuthBypassEnabled &&
+    !!capabilities?.multiTenant &&
+    effectiveViewer === "platform";
   // Platform-wide mail investigation is read-only, but it still needs a
   // tenant filter. Keep that filter local to this page: reusing the global
   // selectedTenantId would turn a platform admin into a tenant-scoped
@@ -164,8 +168,12 @@ export function EmailDisposalCenterPage({
   );
   const [aiParsedQuery, setAiParsedQuery] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(100);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [pageSize, setPageSize] = useState(20);
+  // 跨页选中记忆：id → 完整 item 快照，翻页不清空。
+  // 筛选条件变更时通过 resetSelection() 清空，避免导出与当前筛选不相关的历史选中。
+  const [selectedItemMap, setSelectedItemMap] = useState<Map<number, DisposalMailItem>>(new Map());
+  const selectedIds = useMemo(() => new Set(selectedItemMap.keys()), [selectedItemMap]);
+  const [exportLoading, setExportLoading] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [similarMode, setSimilarMode] = useState(false);
@@ -370,7 +378,7 @@ export function EmailDisposalCenterPage({
       setAppliedAdvancedFilter(applicableAdvancedFilter);
       setAppliedAiConditions(applicableAiConditions);
       setAppliedPlatformScopeTenantId(platformScopeTenantId);
-      setSelectedIds(new Set());
+      setSelectedItemMap(new Map());
       setSimilarMode(false);
       setSimilarSeedCount(0);
       setPage(1);
@@ -391,7 +399,7 @@ export function EmailDisposalCenterPage({
       setAppliedAdvancedFilter(getApplicableAdvancedFilter(advancedFilter));
       setAppliedAiConditions(getApplicableAiConditions(aiConditions));
       setAppliedPlatformScopeTenantId(platformScopeTenantId);
-      setSelectedIds(new Set());
+      setSelectedItemMap(new Map());
       setSimilarMode(false);
       setSimilarSeedCount(0);
       setPage(1);
@@ -415,7 +423,7 @@ export function EmailDisposalCenterPage({
     setAiParsedQuery(null);
     setPlatformScopeTenantId(null);
     setAppliedPlatformScopeTenantId(null);
-    setSelectedIds(new Set());
+    setSelectedItemMap(new Map());
     setSimilarMode(false);
     setHeaderFilters({ directions: [], emailTypes: [], statuses: [] });
     setTimeSort("none");
@@ -496,57 +504,100 @@ export function EmailDisposalCenterPage({
     setDetailOpen(true);
   }, []);
 
+  // 将 DisposalMailItem 列表转 CSV Blob 并触发下载
+  const exportToCsv = useCallback((items: DisposalMailItem[]) => {
+    const escapeCsv = (value: unknown) =>
+      `"${String(value ?? "").replaceAll('"', '""')}"`;
+    const rows = [
+      [
+        "ID",
+        t("table.time"),
+        t("table.sender"),
+        t("table.recipient"),
+        t("table.subject"),
+        t("table.mailType"),
+        t("table.status"),
+      ],
+      ...items.map((item) => [
+        item.id,
+        item.timestamp,
+        item.sender,
+        item.recipientList?.join("; ") ?? item.recipient,
+        item.subject,
+        item.emailType ?? "",
+        item.displayStatus,
+      ]),
+    ];
+    const blob = new Blob(
+      [`\uFEFF${rows.map((row) => row.map(escapeCsv).join(",")).join("\n")}`],
+      { type: "text/csv;charset=utf-8" },
+    );
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `email-disposal-${new Date().toISOString().slice(0, 10)}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }, [t]);
+
+  // 导出全量筛选结果（无选中时）
+  const EXPORT_MAX = 5000;
+  const exportAllFiltered = useCallback(async () => {
+    const total = similarMode ? similarTotal : (data?.total ?? 0);
+    if (total === 0) return;
+    if (total > EXPORT_MAX) {
+      toast.warning(
+        t("batch.exportLimitWarning", { n: total, limit: EXPORT_MAX }),
+      );
+    }
+    setExportLoading(true);
+    try {
+      if (similarMode) {
+        exportToCsv(similarItems);
+      } else {
+        // 后端 QueryMailLogs 把 page_size 硬顶在 200——单次 pageSize=5000 的调用
+        // 只会静默返回前 200 条，因此按 200/页分页拉取到 EXPORT_MAX 为止。
+        const EXPORT_PAGE_SIZE = 200;
+        const target = Math.min(total, EXPORT_MAX);
+        const items: DisposalMailItem[] = [];
+        for (let page = 1; items.length < target; page++) {
+          const result = await getDisposalList(
+            { ...searchParams, page, pageSize: EXPORT_PAGE_SIZE },
+            apiRequest,
+          );
+          items.push(...result.items);
+          if (result.items.length < EXPORT_PAGE_SIZE) break;
+        }
+        exportToCsv(items.slice(0, target));
+      }
+    } catch {
+      toast.error(t("batch.failed"));
+    } finally {
+      setExportLoading(false);
+    }
+  }, [similarMode, similarTotal, similarItems, data?.total, searchParams, apiRequest, t, exportToCsv]);
+
   const handleBatchAction = useCallback(
     async (
       action: "find_similar" | "release" | "delete" | "export" | "recall",
     ) => {
+      if (action === "export") {
+        if (selectedIds.size === 0) {
+          // 未选中 → 导出当前筛选全部
+          void exportAllFiltered();
+          return;
+        }
+        // 有选中 → 从跨页缓存 Map 直接读取，不依赖当前页数据
+        exportToCsv(Array.from(selectedItemMap.values()));
+        return;
+      }
+
       if (selectedIds.size === 0) return;
       const ids = Array.from(selectedIds);
 
       if (action === "find_similar") {
         if (ids.length > 10) return;
         void runFindSimilar(ids);
-        return;
-      }
-
-      if (action === "export") {
-        const selected = (
-          similarMode ? similarItems : (data?.items ?? [])
-        ).filter((item) => selectedIds.has(item.id));
-        const escapeCsv = (value: unknown) =>
-          `"${String(value ?? "").replaceAll('"', '""')}"`;
-        const rows = [
-          [
-            "ID",
-            t("table.time"),
-            t("table.sender"),
-            t("table.recipient"),
-            t("table.subject"),
-            t("table.mailType"),
-            t("table.status"),
-          ],
-          ...selected.map((item) => [
-            item.id,
-            item.timestamp,
-            item.sender,
-            item.recipientList?.join(", ") ?? item.recipient,
-            item.subject,
-            item.emailType ?? "",
-            item.displayStatus,
-          ]),
-        ];
-        const blob = new Blob(
-          [
-            `\uFEFF${rows.map((row) => row.map(escapeCsv).join(",")).join("\n")}`,
-          ],
-          { type: "text/csv;charset=utf-8" },
-        );
-        const url = URL.createObjectURL(blob);
-        const anchor = document.createElement("a");
-        anchor.href = url;
-        anchor.download = `email-disposal-${new Date().toISOString().slice(0, 10)}.csv`;
-        anchor.click();
-        URL.revokeObjectURL(url);
         return;
       }
 
@@ -568,7 +619,7 @@ export function EmailDisposalCenterPage({
 
       setDeleteConfirmOpen(true);
     },
-    [selectedIds, t, runFindSimilar, similarMode, similarItems, data?.items],
+    [selectedIds, selectedItemMap, t, runFindSimilar, exportToCsv, exportAllFiltered],
   );
 
   const executeDelete = useCallback(async () => {
@@ -592,7 +643,7 @@ export function EmailDisposalCenterPage({
       } else {
         toast.success(t("batch.allSucceeded", { n: successCount }));
       }
-      setSelectedIds(new Set());
+      setSelectedItemMap(new Map());
       void queryClient.invalidateQueries({ queryKey: ["email-disposal"] });
     } catch {
       toast.error(t("batch.failed"));
@@ -645,7 +696,7 @@ export function EmailDisposalCenterPage({
             }),
           );
         }
-        setSelectedIds(new Set());
+        setSelectedItemMap(new Map());
         void queryClient.invalidateQueries({ queryKey: ["email-disposal"] });
         setReclassifyOpen(false);
         setPendingAction(null);
@@ -707,7 +758,7 @@ export function EmailDisposalCenterPage({
             onClearSamples={() => {
               setSimilarMode(false);
               setSimilarSeedCount(0);
-              setSelectedIds(new Set());
+              setSelectedItemMap(new Map());
             }}
             filtersExpanded={!quickFilterCollapsed}
             onToggleFilters={() => setQuickFilterCollapsed((value) => !value)}
@@ -789,7 +840,7 @@ export function EmailDisposalCenterPage({
               onClick={() => {
                 setSimilarMode(false);
                 setSimilarSeedCount(0);
-                setSelectedIds(new Set());
+                setSelectedItemMap(new Map());
               }}
             >
               <X className="mr-1 h-3.5 w-3.5" />
@@ -802,9 +853,27 @@ export function EmailDisposalCenterPage({
           total={similarMode ? similarTotal : (data?.total ?? 0)}
           loading={similarMode ? similarLoading : isLoading}
           selectedIds={selectedIds}
-          onSelectionChange={setSelectedIds}
+          onSelectionChange={(newPageIds) => {
+            // 跨页追加/移除：以当前页 items 的 id 集合作为"当前页范围"
+            // newPageIds 是当前页用户选中的 id Set（已包含全选/取消逻辑）
+            const currentPageItems = similarMode ? similarItems : (data?.items ?? []);
+            const currentPageIdSet = new Set(currentPageItems.map((i) => i.id));
+            setSelectedItemMap((prev) => {
+              const next = new Map(prev);
+              // 移除当前页所有 id 后再写入新选中的
+              for (const id of currentPageIdSet) {
+                next.delete(id);
+              }
+              for (const id of newPageIds) {
+                const item = currentPageItems.find((i) => i.id === id);
+                if (item) next.set(id, item);
+              }
+              return next;
+            });
+          }}
           onItemClick={handleItemClick}
           onBatchAction={handleBatchAction}
+          exportLoading={exportLoading}
           onFindSimilar={(id) => void runFindSimilar([id])}
           aiEnabled={aiEnabled}
           similarMode={similarMode}

@@ -64,6 +64,7 @@ vi.mock('@/components/layout/version-footer', () => ({
 }));
 
 import { SidebarNav } from '@/components/layout/sidebar-nav';
+import { UnsavedGuardProvider } from '@/contexts/unsaved-guard-context';
 
 function setupAuthMocks(isSystemAdmin: boolean, showAdvancedRules: boolean) {
   mockUseAuth.mockReturnValue({
@@ -94,38 +95,38 @@ describe('SidebarNav - advanced rules visibility', () => {
 
   it('hides advanced rules when not system admin and not checked', () => {
     setupAuthMocks(false, false);
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.queryByText('高级规则设置')).not.toBeInTheDocument();
   });
 
   it('hides advanced rules when system admin but not checked', () => {
     setupAuthMocks(true, false);
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.queryByText('高级规则设置')).not.toBeInTheDocument();
   });
 
   it('hides advanced rules when checked but not system admin', () => {
     setupAuthMocks(false, true);
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.queryByText('高级规则设置')).not.toBeInTheDocument();
   });
 
   it('shows advanced rules when system admin and checked', () => {
     setupAuthMocks(true, true);
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.getByText('高级规则设置')).toBeInTheDocument();
   });
 
   it('shows rules and detection children under advanced rules when visible', () => {
     setupAuthMocks(true, true);
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.getByText('规则管理')).toBeInTheDocument();
     expect(screen.getByText('检测设置')).toBeInTheDocument();
   });
 
   it('always shows non-advanced items', () => {
     setupAuthMocks(false, false);
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     // After the nav restructure (commit 77b02ab1) the `mail` group itself is
     // advanced-gated, so it must NOT be the "always visible" canary. Use a
     // genuinely non-advanced top-level group instead: 系统管理 (sidebar.system).
@@ -155,7 +156,7 @@ describe('SidebarNav - product form visibility gate', () => {
       viewer: 'platform',
       setViewer: vi.fn(),
     });
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.queryByText('租户管理')).not.toBeInTheDocument();
   });
 
@@ -167,7 +168,7 @@ describe('SidebarNav - product form visibility gate', () => {
       viewer: 'platform',
       setViewer: vi.fn(),
     });
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.queryByText('智能体总览')).not.toBeInTheDocument();
   });
 
@@ -179,7 +180,7 @@ describe('SidebarNav - product form visibility gate', () => {
       viewer: 'platform',
       setViewer: vi.fn(),
     });
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     // "租户管理" lives under the collapsible 系统管理 group; expand it first.
     fireEvent.click(screen.getByText('系统管理'));
     expect(screen.getByText('租户管理')).toBeInTheDocument();
@@ -217,12 +218,12 @@ describe('SidebarNav - security policy visible to tenant_admin (GT-11586)', () =
   });
 
   it('shows the 安全策略 parent header for tenant_admin', () => {
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.getByText('安全策略')).toBeInTheDocument();
   });
 
   it('shows the 策略流水线 child under 安全策略 for tenant_admin', () => {
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     // Parent group renders collapsed by default unless the current path
     // matches a child; expand it to assert the child is reachable.
     fireEvent.click(screen.getByText('安全策略'));

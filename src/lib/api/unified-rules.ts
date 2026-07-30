@@ -1,6 +1,6 @@
 import { apiRequest, type ApiRequestFn } from './client';
 import type { Rule, CreateRuleRequest, UpdateRuleRequest, FieldDefinitionsResponse, SystemTag, SidelineCheckMeta } from '@/types/unified-rules';
-import type { DetectionProfile, BounceDSNSetting } from '@/types/unified-rules';
+import type { DetectionProfile } from '@/types/unified-rules';
 
 export const API_BASE = '';
 
@@ -13,7 +13,6 @@ export interface RuleExportTenantContext {
 export interface RuleExportData {
   rules?: Rule[];
   detection_profiles?: DetectionProfile[];
-  bounce_dsn_settings?: BounceDSNSetting[];
 }
 
 export interface RuleExportEnvelope {
@@ -27,7 +26,6 @@ export interface RuleExportEnvelope {
 export interface RuleImportSelection {
   include_rules: boolean;
   include_detection_profiles: boolean;
-  include_bounce_dsn_settings: boolean;
 }
 
 export type RuleExportSelection = RuleImportSelection;
@@ -53,7 +51,6 @@ export interface ImportTypeSummary {
 export interface ImportPreviewSummaryResponse {
   rules: ImportTypeSummary;
   detection_profiles: ImportTypeSummary;
-  bounce_dsn_settings: ImportTypeSummary;
 }
 
 export interface ImportPreviewItem {
@@ -99,7 +96,6 @@ export interface RuleImportExecuteRequest {
 export interface ImportTypeCounters {
   rules: number;
   detection_profiles: number;
-  bounce_dsn_settings: number;
 }
 
 export interface RuleImportExecuteResponse extends RuleImportPreviewResponse {
@@ -179,7 +175,6 @@ export async function exportUnifiedRules(
   if (selection) {
     searchParams.set('include_rules', String(selection.include_rules));
     searchParams.set('include_detection_profiles', String(selection.include_detection_profiles));
-    searchParams.set('include_bounce_dsn_settings', String(selection.include_bounce_dsn_settings));
   }
   const qs = searchParams.toString();
   return requestFn<RuleExportEnvelope>(`${API_BASE}/unified-rules/export${qs ? `?${qs}` : ''}`);

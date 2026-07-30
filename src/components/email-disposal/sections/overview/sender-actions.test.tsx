@@ -56,25 +56,25 @@ describe('SenderActions', () => {
     expect(screen.queryByTestId('email-disposal-overview-recipient-hint')).not.toBeInTheDocument();
   });
 
-  it('opens the E1 blacklist dialog with scope radios + include-subdomains checkbox', async () => {
+  it('opens the E1 blacklist dialog with the include-subdomains checkbox (scope selection removed)', async () => {
     const user = userEvent.setup();
     render(<SenderActions {...baseProps()} />);
     await user.click(screen.getByTestId('email-disposal-overview-action-blacklist'));
 
     const dialog = await screen.findByTestId('email-disposal-overview-blacklist-dialog');
-    expect(within(dialog).getByTestId('email-disposal-overview-blacklist-scope-tenant')).toBeInTheDocument();
-    expect(within(dialog).getByTestId('email-disposal-overview-blacklist-scope-global')).toBeInTheDocument();
+    expect(within(dialog).queryByTestId('email-disposal-overview-blacklist-scope-tenant')).not.toBeInTheDocument();
+    expect(within(dialog).queryByTestId('email-disposal-overview-blacklist-scope-global')).not.toBeInTheDocument();
     expect(within(dialog).getByTestId('email-disposal-overview-blacklist-include-subdomains')).toBeInTheDocument();
   });
 
-  it('opens the E2 whitelist dialog with scope radios but NO include-subdomains checkbox', async () => {
+  it('opens the E2 whitelist dialog with NO scope radios and NO include-subdomains checkbox', async () => {
     const user = userEvent.setup();
     render(<SenderActions {...baseProps()} />);
     await user.click(screen.getByTestId('email-disposal-overview-action-whitelist'));
 
     const dialog = await screen.findByTestId('email-disposal-overview-whitelist-dialog');
-    expect(within(dialog).getByTestId('email-disposal-overview-whitelist-scope-tenant')).toBeInTheDocument();
-    expect(within(dialog).getByTestId('email-disposal-overview-whitelist-scope-global')).toBeInTheDocument();
+    expect(within(dialog).queryByTestId('email-disposal-overview-whitelist-scope-tenant')).not.toBeInTheDocument();
+    expect(within(dialog).queryByTestId('email-disposal-overview-whitelist-scope-global')).not.toBeInTheDocument();
     expect(within(dialog).queryByTestId('email-disposal-overview-whitelist-include-subdomains')).not.toBeInTheDocument();
   });
 
@@ -94,14 +94,13 @@ describe('SenderActions', () => {
     );
   });
 
-  it('confirms blacklist with global scope + includeSubdomains=true when selected', async () => {
+  it('confirms blacklist with includeSubdomains=true when selected (scope fixed to tenant)', async () => {
     const user = userEvent.setup();
     const apiRequest = vi.fn() as never;
     render(<SenderActions {...baseProps({ apiRequest })} />);
     await user.click(screen.getByTestId('email-disposal-overview-action-blacklist'));
 
     const dialog = await screen.findByTestId('email-disposal-overview-blacklist-dialog');
-    await user.click(within(dialog).getByTestId('email-disposal-overview-blacklist-scope-global'));
     await user.click(within(dialog).getByTestId('email-disposal-overview-blacklist-include-subdomains'));
     await user.click(within(dialog).getByTestId('email-disposal-overview-blacklist-confirm'));
 
@@ -110,18 +109,17 @@ describe('SenderActions', () => {
       'attacker@evil.com',
       'blacklist',
       apiRequest,
-      { scope: 'global', includeSubdomains: true },
+      { scope: 'tenant', includeSubdomains: true },
     );
   });
 
-  it('confirms whitelist with the chosen scope', async () => {
+  it('confirms whitelist with the fixed tenant scope', async () => {
     const user = userEvent.setup();
     const apiRequest = vi.fn() as never;
     render(<SenderActions {...baseProps({ apiRequest })} />);
     await user.click(screen.getByTestId('email-disposal-overview-action-whitelist'));
 
     const dialog = await screen.findByTestId('email-disposal-overview-whitelist-dialog');
-    await user.click(within(dialog).getByTestId('email-disposal-overview-whitelist-scope-global'));
     await user.click(within(dialog).getByTestId('email-disposal-overview-whitelist-confirm'));
 
     await waitFor(() => expect(mockAddSenderFilterRule).toHaveBeenCalledTimes(1));
@@ -129,30 +127,20 @@ describe('SenderActions', () => {
       'attacker@evil.com',
       'whitelist',
       apiRequest,
-      { scope: 'global' },
+      { scope: 'tenant' },
     );
   });
 
-  it('renders the E7 more menu with export/mark/investigation items', async () => {
+  it('renders the E7 more menu with only the mark-fp/mark-fn items (export/investigation removed)', async () => {
     const user = userEvent.setup();
     render(<SenderActions {...baseProps()} />);
     await user.click(screen.getByTestId('email-disposal-overview-action-more'));
 
-    expect(await screen.findByTestId('email-disposal-overview-action-more-export-eml')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-overview-action-more-export-pdf')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-overview-action-more-mark-fp')).toBeInTheDocument();
+    expect(await screen.findByTestId('email-disposal-overview-action-more-mark-fp')).toBeInTheDocument();
     expect(screen.getByTestId('email-disposal-overview-action-more-mark-fn')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-overview-action-more-investigate')).toBeInTheDocument();
-  });
-
-  it('wires the E7 export-EML item to onExportEml', async () => {
-    const user = userEvent.setup();
-    const onExportEml = vi.fn();
-    render(<SenderActions {...baseProps({ onExportEml })} />);
-    await user.click(screen.getByTestId('email-disposal-overview-action-more'));
-    await user.click(await screen.findByTestId('email-disposal-overview-action-more-export-eml'));
-
-    expect(onExportEml).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('email-disposal-overview-action-more-export-eml')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('email-disposal-overview-action-more-export-pdf')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('email-disposal-overview-action-more-investigate')).not.toBeInTheDocument();
   });
 
   it('disables the blacklist/whitelist/more buttons when readOnly', () => {

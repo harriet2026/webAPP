@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useHydrated } from '@/hooks/use-hydrated';
 import { Building2, Check, ExternalLink, FileText, User, FlaskConical } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
@@ -24,12 +25,31 @@ export function ProductFormSwitcher() {
   const tMock = useTranslations('mock');
   // 切到 tenant 视角但尚未选中租户时，弹租户选择 dialog。
   const [tenantDialogOpen, setTenantDialogOpen] = useState(false);
-  // Mock 数据开关状态。仅在 switcherEnabled（开发形态切换器）可见时才有意义：
-  // 这是给前端开发/演示用的无后端 mock 层入口。组件只在登录后的 dashboard
-  // 客户端场景下挂载，因此可以安全地在 lazy initializer 里读取 localStorage
-  // 作为初值；effect 只负责订阅跨标签页同步。
-  const [mockEnabled, setMockEnabled] = useState(() => isMockEnabled());
-  useEffect(() => subscribeMockEnabled(setMockEnabled), []);
+  const mounted = useHydrated();
+  // Mock 数据开关状态。SSR 快照恒为 false 确保与客户端首次渲染一致；
+  // 水合后从 localStorage 读真实值，并经 subscribeMockEnabled 订阅跨标签页变化。
+  const mockEnabled = useSyncExternalStore(subscribeMockEnabled, isMockEnabled, () => false);
+
+  // 变更规格索引：动态扫描 doc/html_spec-version/ 下的所有 HTML 文件，
+  // 无需手动维护列表，每次增加新 spec 文件后自动出现在此入口。
+  const [versionSpecs, setVersionSpecs] = useState<{ ticket: string; label: string; url: string }[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const fetchVersionSpecs = () => {
+    fetch('/api/dev/version-specs')
+      .then((r) => r.json())
+      .then((data) => setVersionSpecs(data.specs ?? []))
+      .catch(() => {/* 非开发环境下 API 不可用属正常 */});
+  };
+
+  // mount 时预热，保证首次打开 dropdown 时数据已就绪
+  useEffect(() => { fetchVersionSpecs(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleDropdownOpenChange = (open: boolean) => {
+    setDropdownOpen(open);
+    // 每次打开都重新 fetch，确保新增 spec 文件即时可见
+    if (open) fetchVersionSpecs();
+  };
 
   // 可见性门控：服务端 layout 仅在 OSGATEWAY_PRODUCT_FORM_SWITCHER=true
   // 时才给 provider 传 switcherEnabled=true。provider 会透传此 flag；
@@ -67,27 +87,31 @@ export function ProductFormSwitcher() {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={dropdownOpen} onOpenChange={handleDropdownOpenChange}>
         <DropdownMenuTrigger
           className="inline-flex h-8 items-center gap-1 rounded border border-border/80 bg-card px-2.5 text-xs font-medium text-muted-foreground shadow-none transition-colors hover:bg-accent/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
           aria-label={t('label')}
         >
           {/* 产品形态始终显示（主标识） */}
           <span className="text-muted-foreground/70">{t('label')}:</span>
-          <span className="text-foreground">{t(i18nKey)}</span>
-          {/* 登录视角徽标：仅 system_admin 且切到 tenant（非默认 platform）时显示 */}
-          {isSystemAdmin && viewer === 'tenant' && (
-            <span className="ml-0.5 inline-flex items-center rounded bg-amber-500/15 px-1.5 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
-              <User className="mr-1 h-3 w-3" />
-              {tViewer('tenant')}
-            </span>
-          )}
-          {/* Mock 数据徽标：开启时显示，紫色区分（开发态指示器） */}
-          {mockEnabled && (
-            <span className="ml-0.5 inline-flex items-center rounded bg-violet-500/15 px-1.5 py-0.5 text-xs font-medium text-violet-600 dark:text-violet-400">
-              <FlaskConical className="mr-1 h-3 w-3" />
-              Mock
-            </span>
+          {/* 产品形态名称 + 视角徽标 + Mock 徽标均依赖客户端 context，
+              用 mounted 守卫确保 SSR 和客户端初始渲染输出一致，避免 hydration mismatch。 */}
+          {mounted && (
+            <>
+              <span className="text-foreground">{t(i18nKey)}</span>
+              {isSystemAdmin && viewer === 'tenant' && (
+                <span className="ml-0.5 inline-flex items-center rounded bg-amber-500/15 px-1.5 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+                  <User className="mr-1 h-3 w-3" />
+                  {tViewer('tenant')}
+                </span>
+              )}
+              {mockEnabled && (
+                <span className="ml-0.5 inline-flex items-center rounded bg-violet-500/15 px-1.5 py-0.5 text-xs font-medium text-violet-600 dark:text-violet-400">
+                  <FlaskConical className="mr-1 h-3 w-3" />
+                  Mock
+                </span>
+              )}
+            </>
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
@@ -174,6 +198,33 @@ export function ProductFormSwitcher() {
             </span>
             <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
           </DropdownMenuItem>
+          {/* 变更规格索引：独立分区，动态读取 doc/html_spec-version/ 下所有 HTML，
+              每新增一个 spec 文件后无需修改前端代码即自动出现在此。 */}
+          {versionSpecs.length > 0 && (
+            <>
+              <DropdownMenuSeparator />
+              <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                {tMock('changeSpecs')}
+              </div>
+              {versionSpecs.map((spec) => (
+                <DropdownMenuItem
+                  key={spec.ticket}
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.open(spec.url, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                  className="flex items-center justify-between"
+                >
+                  <span className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    {spec.label}
+                  </span>
+                  <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
+                </DropdownMenuItem>
+              ))}
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

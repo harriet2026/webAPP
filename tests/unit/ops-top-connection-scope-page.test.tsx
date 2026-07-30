@@ -11,6 +11,15 @@ vi.mock('next-intl', () => ({
   useLocale: () => 'zh',
 }));
 
+// GT-12613 added a `useSearchParams()` read for deep-link params
+// (dimension/direction/time_range); without this mock, next/navigation's real
+// implementation has no app-router context in jsdom and returns null, so
+// `sp.get(...)` throws. Mirrors the sibling statistics-page specs
+// (security-overview-print-scope, users-page-alignment).
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 vi.mock('@/components/statistics/ops-top-trend/hooks/useOpsTop', () => ({
   useOpsTop: (params: { dimension: string }) => {
     opsTopCalls.push({ dimension: params.dimension });

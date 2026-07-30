@@ -42,6 +42,8 @@ export interface Rule {
     hit_count_7d: number;
     last_hit_at: string | null;
   };
+  /** page=mail_routing_outbound 列表附带的近 24h TLS 成功率聚合（%，null=近窗口无投递统计）。 */
+  tls_success_rate?: number | null;
 }
 
 export interface CreateRuleRequest {
@@ -116,6 +118,8 @@ export interface RuleMetadata {
   next_hop_port?: number;
   channel?: 'smtp' | 'proxysvr';
   proxysvr_group_id?: number;
+  /** 投递规则 TLS 四档：plain|prefer|force|force_verify（空值等价 prefer）。 */
+  tls_level?: string;
   [key: string]: unknown;
 }
 
@@ -154,21 +158,6 @@ export interface SystemTag {
   key: string;
   label: string;
   description: string;
-}
-
-// BounceDSNSetting describes rows carried in the rule export/import payload
-// (RuleExportData). Its admin page and CRUD API client were removed;
-// /rules/export and /rules/import read this table server-side, so this
-// shape is all the frontend still needs.
-export interface BounceDSNSetting {
-  id: number;
-  tenant_id: number;
-  domain: string;
-  enabled: boolean;
-  language: 'zh' | 'en' | 'th' | 'ru';
-  include_original_headers: boolean;
-  created_at: string;
-  updated_at: string;
 }
 
 export const ADVANCED_RULE_FIELDS: Record<string, FieldDef> = {};

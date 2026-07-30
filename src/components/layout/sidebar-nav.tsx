@@ -12,7 +12,7 @@ import { useProductForm } from '@/contexts/product-form-context';
 import { FALLBACK_FEATURE_REGISTRY } from '@/lib/product-form/fallback-registry';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { visibleNavIds, isNavItemAllowed, isGroupVisible } from './sidebar-visibility';
-import { VersionFooter } from './version-footer';
+import { useUnsavedGuard } from '@/contexts/unsaved-guard-context';
 
 interface SidebarNavItemProps {
   item: NavItem;
@@ -27,6 +27,7 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
+  const { requestNavigate } = useUnsavedGuard();
   const { isHovered, pointerHoverProps } = usePointerHover<HTMLButtonElement>();
 
   if (!isItemAllowed(item)) {
@@ -54,7 +55,7 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
     if (hasChildren) {
       toggleExpand(item.id);
     } else if (item.href) {
-      router.push(item.href);
+      requestNavigate(item.href, (href) => router.push(href));
     }
   };
 
@@ -221,7 +222,7 @@ export function SidebarNav() {
             className="h-10 w-10 shrink-0 object-contain"
           />
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold tracking-wide text-white">{brandName}</div>
+            <div className="truncate text-sm font-semibold tracking-wide text-white" suppressHydrationWarning>{brandName}</div>
             <div className="truncate text-xs text-sidebar-foreground/55">
               {activeTitleKey ? t(activeTitleKey) : t('sidebar.dashboard')}
             </div>
@@ -242,7 +243,6 @@ export function SidebarNav() {
         ))}
       </nav>
 
-      <VersionFooter />
     </div>
   );
 }

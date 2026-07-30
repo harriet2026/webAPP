@@ -44,15 +44,14 @@ import { AgentOverview } from './agent-overview';
 import { ThreatTop5 } from './threat-top5';
 import { SystemHealthCard } from './system-health-card';
 
-const RANGES: SystemStatusRange[] = ['today', '7d', '30d'];
+const RANGES: SystemStatusRange[] = ['24h', 'today', '7d', '30d'];
 
 export function SystemStatusDashboard() {
   const t = useTranslations('systemStatus');
   const tRange = useTranslations('systemStatus.range');
   const queryClient = useQueryClient();
 
-  // Default range aligned to the demo prototype's initial view (今日).
-  const [range, setRange] = useState<SystemStatusRange>('today');
+  const [range, setRange] = useState<SystemStatusRange>('24h');
   const [spinning, setSpinning] = useState(false);
 
   const data = useSystemStatusData(range);

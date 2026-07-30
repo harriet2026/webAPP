@@ -14,16 +14,29 @@ export class MailRoutingPage {
   readonly page: Page;
   /** Receiving nexthop editor uses a Sheet (side panel). */
   readonly sheet: Locator;
-  /** Generic dialog (relay / outbound / auth create+edit + auth test). */
+  /** Generic dialog (auth test connection uses this; auth create/edit now uses `authDrawer`
+   * — a Sheet, not a Dialog, since Task 8's html_spec redesign). */
   readonly dialog: Locator;
   /** Shared AlertDialog confirm (delete actions). */
   readonly confirmDialog: Locator;
+  /** Receiving domain drawer (new/edit), scoped by testid. */
+  readonly receivingDrawer: Locator;
+  /** Relay rule drawer (new/edit), scoped by testid (Task 4 single-table redesign). */
+  readonly relayDrawer: Locator;
+  /** Outbound step-3 rule drawer (new/edit), scoped by testid (Task 7 wizard redesign). */
+  readonly outboundRuleDrawer: Locator;
+  /** Auth config new/edit Sheet drawer, scoped by testid (Task 8 html_spec redesign). */
+  readonly authDrawer: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.sheet = page.locator('[data-slot="sheet-content"]');
     this.dialog = page.locator('[role="dialog"]');
     this.confirmDialog = page.locator('[role="alertdialog"]');
+    this.receivingDrawer = page.locator('[data-testid="mr-recv-drawer"]');
+    this.relayDrawer = page.locator('[data-testid="mr-relay-drawer"]');
+    this.outboundRuleDrawer = page.locator('[data-testid="mr-ob-rule-drawer"]');
+    this.authDrawer = page.locator('[data-testid="mr-auth-drawer"]');
   }
 
   async goto() {
@@ -79,258 +92,340 @@ export class MailRoutingPage {
     await this.page.getByRole('tab', { name: label }).click();
   }
 
-  // ─── Receiving: probe + nexthop Sheet CRUD ──────────────────────────────
+  // ─── Receiving: flat domain table (html_spec 对齐重构, Task 3) ───────────
+  // One row per domain (`mr-recv-row-<id>`); the drawer (`mr-recv-drawer`)
+  // holds domain name / TagInput target addresses / shared port.
 
-  /** The per-domain card (one <section> per domain) in the receiving tab. */
-  domainCard(domain: string): Locator {
-    return this.page.locator('section', { hasText: domain }).first();
+  /** The table row for a receiving domain, matched by its domain-name cell text. */
+  domainRow(domain: string): Locator {
+    return this.page.locator('[data-testid^="mr-recv-row-"]').filter({ hasText: domain }).first();
   }
 
-  /** Click the per-card 探测 button (triggers POST /domains/:id/probe). */
-  async probeDomain(domain: string) {
-    await this.domainCard(domain).getByRole('button', { name: /^探测/ }).click();
+  /** Number of rows currently rendering the domain (0 after delete). */
+  domainRowCount(domain: string): Promise<number> {
+    return this.page.locator('[data-testid^="mr-recv-row-"]').filter({ hasText: domain }).count();
   }
 
-  /** Open the "添加目标" Sheet for a domain. */
-  async openAddNexthop(domain: string) {
-    await this.domainCard(domain).getByRole('button', { name: '添加目标' }).click();
-    await this.sheet.waitFor({ state: 'visible' });
+  /** Click the row's 探测 button (triggers POST /domains/:id/probe). */
+  async probeDomainRow(domain: string) {
+    await this.domainRow(domain).getByTestId(/^mr-recv-probe-/).click();
   }
 
-  /** Open the edit Sheet for an existing nexthop row identified by its host. */
-  async openEditNexthop(host: string) {
-    await this.nexthopRow(host).locator('button:has(svg.lucide-pencil)').click();
-    await this.sheet.waitFor({ state: 'visible' });
+  /** Open the row's 编辑 drawer for an existing domain. */
+  async openEditDomain(domain: string) {
+    await this.domainRow(domain).getByTestId(/^mr-recv-edit-/).click();
+    await this.receivingDrawer.waitFor({ state: 'visible' });
   }
 
   /**
-   * Fill the nexthop Sheet. Host field has placeholder "mx.example.com"; the
-   * port is the 1st number input, priority the 2nd. Type select defaults to
-   * "domain" and is left unchanged.
+   * Fill the receiving-domain drawer: domain name input, TagInput target
+   * addresses (each committed with Enter), and the shared port.
    */
-  async fillNexthop(data: { host: string; port?: string; priority?: string }) {
-    const sheet = this.sheet;
-    await sheet.getByPlaceholder('mx.example.com').fill(data.host);
-    const numberInputs = sheet.locator('input[type="number"]');
+  async fillReceivingDrawer(data: { domainName?: string; hosts?: string[]; port?: string }) {
+    const drawer = this.receivingDrawer;
+    if (data.domainName !== undefined) {
+      await drawer.getByTestId('mr-recv-domain-input').fill(data.domainName);
+    }
+    for (const host of data.hosts ?? []) {
+      const tagInput = drawer.getByTestId('mr-recv-tag-input');
+      await tagInput.fill(host);
+      await tagInput.press('Enter');
+    }
     if (data.port !== undefined) {
-      await numberInputs.nth(0).fill(data.port);
-    }
-    if (data.priority !== undefined) {
-      await numberInputs.nth(1).fill(data.priority);
+      await drawer.getByTestId('mr-recv-port-input').fill(data.port);
     }
   }
 
-  async submitNexthop() {
-    await this.sheet.getByRole('button', { name: '保存' }).click();
-    await this.sheet.waitFor({ state: 'hidden' });
+  async saveReceivingDrawer() {
+    await this.receivingDrawer.getByTestId('mr-recv-save').click();
+    await this.receivingDrawer.waitFor({ state: 'hidden' });
   }
 
-  /** Submit any Dialog form (relay/outbound/auth) via its footer 保存 button. */
-  async submitDialog() {
-    await this.dialog.locator('button[type="submit"]').click();
-    await this.dialog.waitFor({ state: 'hidden' });
+  /** Click the row's 删除 button, then confirm the「强制删除」AlertDialog. */
+  async deleteDomainRow(domain: string) {
+    await this.domainRow(domain).getByTestId(/^mr-recv-delete-/).click();
+    await this.page.getByTestId('mr-recv-delete-dialog').waitFor({ state: 'visible' });
+    await this.page.getByTestId('mr-recv-delete-confirm').click();
+    await this.page.getByTestId('mr-recv-delete-dialog').waitFor({ state: 'hidden' });
   }
 
-  /** A nexthop row identified by its host cell text (any domain card table). */
-  nexthopRow(host: string): Locator {
-    return this.page.locator('table tbody tr').filter({ hasText: host }).first();
+  // ─── Relay: relay-grants single-table Sheet drawer CRUD (html_spec 对齐重构,
+  // Task 4) ─────────────────────────────────────────────────────────────────
+  // One row per relay grant (`mr-relay-row-<id>`). Rule name (note) is
+  // deliberately NOT a table column (html_spec §9-D2), so rows can't be
+  // located by name text like the old unified-rules table could — callers
+  // resolve the numeric id via the API (note round-trips reliably; unlike
+  // client_cidr, sender_domain does NOT for a grant with no matching verified
+  // tenant domain — see relay-mapping.ts's top-of-file comment) and pass it in.
+
+  relayRow(id: number): Locator {
+    return this.page.getByTestId(`mr-relay-row-${id}`);
   }
 
-  /** Count of nexthop rows currently rendering the host (0 after delete). */
-  nexthopRowCount(host: string): Promise<number> {
-    return this.page.locator('table tbody tr').filter({ hasText: host }).count();
+  relayRowCount(id: number): Promise<number> {
+    return this.page.getByTestId(`mr-relay-row-${id}`).count();
   }
 
-  /** Delete a nexthop via its trash action + the confirm AlertDialog. */
-  async deleteNexthop(host: string) {
-    await this.nexthopRow(host).locator('button:has(svg.lucide-trash-2)').click();
-    await this.confirmDialog.waitFor({ state: 'visible' });
-    await this.confirmDialog.locator('button').last().click();
-    await this.confirmDialog.waitFor({ state: 'hidden' });
+  async openCreateRelay() {
+    await this.page.getByTestId('mr-relay-create').click();
+    await this.relayDrawer.waitFor({ state: 'visible' });
   }
 
-  // ─── Relay: relay-rule Dialog CRUD ──────────────────────────────────────
-
-  async openAddRelay() {
-    await this.page.getByRole('button', { name: '添加反垃圾例外规则' }).click();
-    await this.dialog.waitFor({ state: 'visible' });
+  async openEditRelay(id: number) {
+    await this.relayRow(id).getByTestId(`mr-relay-edit-${id}`).click();
+    await this.relayDrawer.waitFor({ state: 'visible' });
   }
 
-  /**
-   * Fill the relay dialog. Name/priority have stable ids; the condition value
-   * input carries the builder's "值..." placeholder (default tree is
-   * client_ip + `cidr` operator — fill a valid CIDR so the server doesn't
-   * reject the condition). skip_antispam is toggled on when requested.
-   */
-  async fillRelay(data: {
-    name: string;
-    priority?: string;
-    conditionValue?: string;
-    skipAntispam?: boolean;
-  }) {
-    const d = this.dialog;
-    await d.locator('#relay-name').fill(data.name);
-    if (data.priority !== undefined) {
-      await d.locator('#relay-priority').fill(data.priority);
-    }
-    if (data.conditionValue !== undefined) {
-      await d.locator('input[placeholder="值..."]').first().fill(data.conditionValue);
-    }
-    if (data.skipAntispam) {
-      // Toggle via a dispatched click event rather than a pointer click: the
-      // base-ui Switch is an 18px button inside a Dialog whose overlay sibling
-      // makes Playwright's pointer hit-test land on the backdrop ("dialog-overlay
-      // intercepts pointer events"), and a keyboard Space does not reliably
-      // flip base-ui's Switch. A synthetic click dispatched straight on the
-      // switch root bypasses the overlay and fires the component's onClick.
-      await d.locator('#relay-skip').dispatchEvent('click');
-      // Give React a tick to commit the checked state before submit reads it.
+  /** Toggle a base-ui Checkbox/Switch (data-checked/data-unchecked) to a target state. */
+  private async setToggle(locator: Locator, target: boolean) {
+    const checked = await locator.evaluate((el) => el.hasAttribute('data-checked'));
+    if (checked !== target) {
+      // Dispatch a synthetic click rather than a pointer click: base-ui's
+      // Switch/Checkbox root is a small control inside a scrollable Sheet
+      // whose siblings can intercept Playwright's pointer hit-test.
+      await locator.dispatchEvent('click');
       await this.page.waitForTimeout(50);
     }
   }
 
-  relayRow(name: string): Locator {
-    return this.page.locator('table tbody tr').filter({ hasText: name }).first();
-  }
-
-  relayRowCount(name: string): Promise<number> {
-    return this.page.locator('table tbody tr').filter({ hasText: name }).count();
-  }
-
-  /** Toggle the row's active status via its Power/PowerOff icon button. */
-  async toggleRelayActive(name: string) {
-    await this.relayRow(name)
-      .locator('button:has(svg.lucide-power-off), button:has(svg.lucide-power)')
-      .click();
-  }
-
-  async deleteRelay(name: string) {
-    await this.relayRow(name).locator('button:has(svg.lucide-trash-2)').click();
-    await this.confirmDialog.waitFor({ state: 'visible' });
-    await this.confirmDialog.locator('button').last().click();
-    await this.confirmDialog.waitFor({ state: 'hidden' });
-  }
-
-  // ─── Outbound: route-rule Dialog CRUD ───────────────────────────────────
-
-  async openCreateOutbound() {
-    await this.page.getByRole('button', { name: '创建路由规则' }).click();
-    await this.dialog.waitFor({ state: 'visible' });
-  }
-
-  /**
-   * Fill the outbound dialog. The name input is react-hook-form-registered
-   * (name="name"); the SMTP channel is the default, with hop host carrying
-   * the "mail.example.com" placeholder. The condition builder's value input
-   * ("值...") is filled so the server doesn't reject the empty default
-   * senderdomain condition.
-   */
-  async fillOutbound(data: {
-    name: string;
-    nextHopHost: string;
-    nextHopPort?: string;
-    conditionValue?: string;
+  /** Fill the relay drawer (basic info + match conditions). */
+  async fillRelayDrawer(data: {
+    ruleName?: string;
+    sourceIp?: string;
+    fromDomain?: string;
+    useSpf?: boolean;
+    spamFilter?: boolean;
+    active?: boolean;
   }) {
-    const d = this.dialog;
-    await d.locator('input[name="name"]').fill(data.name);
-    if (data.conditionValue !== undefined) {
-      await d.locator('input[placeholder="值..."]').first().fill(data.conditionValue);
+    const d = this.relayDrawer;
+    if (data.ruleName !== undefined) {
+      await d.getByTestId('mr-relay-name-input').fill(data.ruleName);
     }
-    await d.getByPlaceholder('mail.example.com').fill(data.nextHopHost);
-    if (data.nextHopPort !== undefined) {
-      await d.locator('input[type="number"]').first().fill(data.nextHopPort);
+    if (data.sourceIp !== undefined) {
+      await d.getByTestId('mr-relay-source-ip-input').fill(data.sourceIp);
+    }
+    if (data.fromDomain !== undefined) {
+      await d.getByTestId('mr-relay-from-domain-input').fill(data.fromDomain);
+    }
+    if (data.useSpf !== undefined) {
+      await this.setToggle(d.getByTestId('mr-relay-spf-checkbox'), data.useSpf);
+    }
+    if (data.spamFilter !== undefined) {
+      await d.getByTestId('mr-relay-spam-filter-select').click();
+      await this.page
+        .locator('[data-slot="select-item"]')
+        .filter({ hasText: data.spamFilter ? '过滤' : '不过滤' })
+        .first()
+        .click();
+    }
+    if (data.active !== undefined) {
+      await this.setToggle(d.getByTestId('mr-relay-active-switch'), data.active);
+    }
+  }
+
+  async saveRelayDrawer() {
+    await this.relayDrawer.getByTestId('mr-relay-save').click();
+    await this.relayDrawer.waitFor({ state: 'hidden' });
+  }
+
+  async cancelRelayDrawer() {
+    await this.relayDrawer.getByTestId('mr-relay-cancel').click();
+    await this.relayDrawer.waitFor({ state: 'hidden' });
+  }
+
+  async deleteRelayRow(id: number) {
+    // dispatchEvent('click') — the preceding create/save's success toast
+    // (bottom-right, sonner) can sit directly over the 操作列 for a short
+    // single-row table. A regular `.click()` (and even `{force:true}`, which
+    // still delivers a real pointer event at the button's on-screen
+    // coordinates) lands on the toast instead, and Playwright's own
+    // hover-based actionability probing pauses/expands the sonner toast
+    // (mouseenter suspends its auto-dismiss timer), deadlocking retries
+    // forever rather than letting the toast time out. Dispatching a
+    // synthetic DOM click bypasses hit-testing entirely — same idiom as
+    // this file's setToggle() helper above for the identical class of
+    // "unrelated sibling intercepts the pointer" problem.
+    await this.relayRow(id).getByTestId(`mr-relay-delete-${id}`).dispatchEvent('click');
+    await this.page.getByTestId('mr-relay-delete-dialog').waitFor({ state: 'visible' });
+    await this.page.getByTestId('mr-relay-delete-confirm').click();
+    await this.page.getByTestId('mr-relay-delete-dialog').waitFor({ state: 'hidden' });
+  }
+
+  // ─── Outbound: three-step wizard (StepBar + ProxyStep/ChannelStep/RuleStep,
+  // html_spec 对齐重构, Task 7) ────────────────────────────────────────────
+  // All three steps now hit the real backend (Task 13: proxysvr-endpoints /
+  // proxysvr-groups / unified-rules — the old A9 mock-only BackendPendingPanel
+  // placeholder for steps 1/2 is retired). This page object only drives step 3
+  // (路由规则) directly, since that is what the spec's CRUD tests exercise:
+  // regular unified-rules CRUD via a Sheet drawer (`mr-ob-rule-drawer`),
+  // scoped by testid like the relay drawer above.
+
+  /** Switch to step 3 (路由规则设置) of the outbound wizard. */
+  async openOutboundRuleStep() {
+    await this.page.getByTestId('mr-ob-step-3').click();
+    await this.page.getByTestId('mr-ob-rule-root').waitFor({ state: 'visible' });
+  }
+
+  async openCreateOutboundRule() {
+    await this.page.getByTestId('mr-ob-rule-create').click();
+    await this.outboundRuleDrawer.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Fill the rule drawer's discrete condition/routing fields. `fromDomain` is
+   * filled by default callers so the server doesn't reject a genuinely
+   * condition-less tree — real-mode `mail_routing_outbound` (rule_class=route)
+   * is NOT on the backend's empty-catch-all-tree allowlist
+   * (internal/api/field_registry.go::isAdvancedRulesCatchAllTree /
+   * isGroupPolicySentinelTree only cover advanced_rules/group_policy), so an
+   * all-empty condition tree 400s on create (see rule-step.tsx's top-of-file
+   * comment on this exact limitation, found via browser verification).
+   * `targetHost` is likewise effectively required for any non-proxysvr channel
+   * (real backend requires next_hop_host when channel=smtp; rule-step.tsx's
+   * client-side validation mirrors this).
+   */
+  async fillOutboundRule(data: {
+    name: string;
+    fromDomain?: string;
+    targetHost?: string;
+    targetPort?: string;
+  }) {
+    const d = this.outboundRuleDrawer;
+    await d.getByTestId('mr-ob-rule-name-input').fill(data.name);
+    if (data.fromDomain !== undefined) {
+      await d.getByTestId('mr-ob-rule-from-domain-input').fill(data.fromDomain);
+    }
+    if (data.targetHost !== undefined) {
+      await d.getByTestId('mr-ob-rule-target-host-input').fill(data.targetHost);
+    }
+    if (data.targetPort !== undefined) {
+      await d.getByTestId('mr-ob-rule-target-port-input').fill(data.targetPort);
     }
   }
 
   /**
-   * Fill the outbound dialog for the proxysvr channel (TC-B03): switch the
-   * channel select from the default SMTP next-hop to "代理服务器分组" and pick the
-   * named active group. Exercises the channel=proxysvr metadata path
-   * (proxysvr_group_id) rather than the SMTP next-hop path.
+   * Switch the rule drawer's 投递通道 select from "默认通道" to a named
+   * proxysvr group (TC-B03 / DEV-8: real mode's channel dropdown lists active
+   * proxysvr groups, not the mock-only demo channels). Exercises the
+   * channel=proxysvr metadata path (proxysvr_group_id) rather than the SMTP
+   * next-hop path — targetHost is not required on this path (see rule-mapping.ts).
    */
-  async fillOutboundProxysvr(data: { name: string; proxysvrGroup: string; conditionValue?: string }) {
-    const d = this.dialog;
-    await d.locator('input[name="name"]').fill(data.name);
-    if (data.conditionValue !== undefined) {
-      await d.locator('input[placeholder="值..."]').first().fill(data.conditionValue);
-    }
-    // The channel select shows the SMTP label ("SMTP 下一跳") by default; switch
-    // it to "代理服务器分组" (i18n routeRules.channelProxysvr). Radix Select items
-    // render in a page-level portal.
-    await d.locator('[data-slot="select-trigger"]').filter({ hasText: 'SMTP 下一跳' }).first().click();
-    await this.page.locator('[data-slot="select-item"]').filter({ hasText: '代理服务器分组' }).first().click();
-    // The group select then appears (placeholder "选择一个活跃的代理服务器分组").
-    await d.locator('[data-slot="select-trigger"]').filter({ hasText: '选择一个活跃的代理服务器分组' }).first().click();
-    await this.page.locator('[data-slot="select-item"]').filter({ hasText: data.proxysvrGroup }).first().click();
+  async selectOutboundRuleProxysvrChannel(groupName: string) {
+    const d = this.outboundRuleDrawer;
+    await d.getByTestId('mr-ob-rule-channel-select').click();
+    await this.page.locator('[data-slot="select-item"]').filter({ hasText: groupName }).first().click();
   }
 
-  outboundRow(name: string): Locator {
-    return this.page.locator('table tbody tr').filter({ hasText: name }).first();
+  async saveOutboundRuleDrawer() {
+    await this.outboundRuleDrawer.getByTestId('mr-ob-rule-save').click();
+    await this.outboundRuleDrawer.waitFor({ state: 'hidden' });
   }
 
-  outboundRowCount(name: string): Promise<number> {
-    return this.page.locator('table tbody tr').filter({ hasText: name }).count();
+  async cancelOutboundRuleDrawer() {
+    await this.outboundRuleDrawer.getByTestId('mr-ob-rule-cancel').click();
+    await this.outboundRuleDrawer.waitFor({ state: 'hidden' });
   }
 
-  async deleteOutbound(name: string) {
-    await this.outboundRow(name).locator('button:has(svg.lucide-trash-2)').click();
-    await this.confirmDialog.waitFor({ state: 'visible' });
-    await this.confirmDialog.locator('button').last().click();
-    await this.confirmDialog.waitFor({ state: 'hidden' });
+  /** The rule-list row matched by its rule-name cell text (testid-scoped, like domainRow). */
+  outboundRuleRow(name: string): Locator {
+    return this.page.locator('[data-testid^="mr-ob-rule-row-"]').filter({ hasText: name }).first();
   }
 
-  // ─── Auth: mail_auth_config Dialog CRUD + Test Connection ───────────────
+  outboundRuleRowCount(name: string): Promise<number> {
+    return this.page.locator('[data-testid^="mr-ob-rule-row-"]').filter({ hasText: name }).count();
+  }
+
+  async openEditOutboundRule(name: string) {
+    await this.outboundRuleRow(name).locator('[data-testid^="mr-ob-rule-edit-"]').click();
+    await this.outboundRuleDrawer.waitFor({ state: 'visible' });
+  }
+
+  async deleteOutboundRule(name: string) {
+    await this.outboundRuleRow(name).locator('[data-testid^="mr-ob-rule-delete-"]').click();
+    await this.page.getByTestId('mr-ob-rule-delete-dialog').waitFor({ state: 'visible' });
+    await this.page.getByTestId('mr-ob-rule-delete-confirm').click();
+    await this.page.getByTestId('mr-ob-rule-delete-dialog').waitFor({ state: 'hidden' });
+  }
+
+  // ─── Auth: mail_auth_config Sheet CRUD + Test Connection Dialog (Task 8
+  // html_spec redesign — TLS 三档 + 域名多选 Popover) ────────────────────────
 
   async openAddAuth() {
-    await this.page.getByRole('button', { name: '添加配置' }).click();
-    await this.dialog.waitFor({ state: 'visible' });
+    await this.page.getByTestId('mr-auth-create').click();
+    await this.authDrawer.waitFor({ state: 'visible' });
   }
 
   /**
-   * Fill the auth dialog. protocol defaults to smtp (left unchanged) and the
-   * default scene smtpsend stays checked. To make the row uniquely
-   * identifiable we switch domain scope to "指定域名" and supply a unique
-   * domain; the server host is a loopback address so the optional Test
-   * Connection fails fast (connection refused) rather than hanging on DNS.
-   * authTimeout is lowered so any dial is bounded.
+   * Select a domain in the drawer's 适用域名 multi-select Popover. Domain scope
+   * is no longer free text (Task 8 redesign) — the option text must exactly
+   * match an existing *verified* tenant domain, sourced from
+   * `GET /tenants/:id/domains`. Opens the popover, checks the option, then
+   * closes it (Escape) so it doesn't cover the rest of the form.
    */
-  async fillAuth(data: { serverHost: string; specificDomain: string; authTimeout?: string }) {
-    const d = this.dialog;
-    // Domain scope = specific (the first select-trigger in the form).
-    await d.locator('[data-slot="select-trigger"]').first().click();
-    await this.page
-      .locator('[data-slot="select-item"]')
-      .filter({ hasText: '指定域名' })
-      .first()
-      .click();
-    await d.getByPlaceholder(/域名/).fill(data.specificDomain);
+  async selectAuthDomain(domainText: string) {
+    await this.authDrawer.getByTestId('mr-auth-domain-trigger').click();
+    const popover = this.page.getByTestId('mr-auth-domain-popover');
+    await popover.waitFor({ state: 'visible' });
+    await popover.getByText(domainText, { exact: true }).click();
+    await this.page.keyboard.press('Escape');
+    await popover.waitFor({ state: 'hidden' });
+  }
 
-    await d.getByPlaceholder('mail.example.com').fill(data.serverHost);
-
+  /**
+   * Fill the auth drawer. `domain` must be an existing verified tenant domain
+   * (selected via the Popover, see `selectAuthDomain`). protocol defaults to
+   * LDAP + TLS=prefer (drawer defaults) unless changed via `selectAuthProtocol`
+   * / `selectAuthTlsMode`. The server host is a loopback address in most
+   * callers so the optional Test Connection fails fast (connection refused)
+   * rather than hanging on DNS; authTimeout is lowered so any dial is bounded.
+   */
+  async fillAuth(data: { serverHost: string; domain: string; authTimeout?: string }) {
+    const d = this.authDrawer;
+    await this.selectAuthDomain(data.domain);
+    await d.getByTestId('mr-auth-host-input').fill(data.serverHost);
     if (data.authTimeout !== undefined) {
-      // number inputs in DOM order: priority(0), serverPort(1), authTimeout(2).
-      await d.locator('input[type="number"]').nth(2).fill(data.authTimeout);
+      await d.getByTestId('mr-auth-timeout-input').fill(data.authTimeout);
     }
+  }
+
+  /** Check a 生效场景 checkbox in the auth drawer (`scene` is one of
+   * userspace/smtpsend/mailsync). Uses the same synthetic-click helper as the
+   * relay drawer's checkboxes/switch (`setToggle`) — base-ui's control is a
+   * small root inside a scrollable Sheet whose siblings can intercept
+   * Playwright's pointer hit-test. */
+  async checkAuthScene(scene: 'userspace' | 'smtpsend' | 'mailsync') {
+    await this.setToggle(this.authDrawer.getByTestId(`mr-auth-scene-${scene}`), true);
   }
 
   /** Auth row identified by its unique domain-scope cell text. */
   authRow(scope: string): Locator {
-    return this.page.locator('table tbody tr').filter({ hasText: scope }).first();
+    return this.page.locator('[data-testid^="mr-auth-row-"]').filter({ hasText: scope }).first();
   }
 
   authRowCount(scope: string): Promise<number> {
-    return this.page.locator('table tbody tr').filter({ hasText: scope }).count();
+    return this.page.locator('[data-testid^="mr-auth-row-"]').filter({ hasText: scope }).count();
   }
 
-  /** Open the Test Connection dialog for a config row (Zap icon). */
+  async saveAuthDrawer() {
+    await this.authDrawer.getByTestId('mr-auth-save').click();
+    await this.authDrawer.waitFor({ state: 'hidden' });
+  }
+
+  async cancelAuthDrawer() {
+    await this.authDrawer.getByTestId('mr-auth-cancel').click();
+    await this.authDrawer.waitFor({ state: 'hidden' });
+  }
+
+  /** Open the Test Connection dialog for a config row (still a Dialog, not the
+   * drawer — brief keeps this form as-is). */
   async openTestConnection(scope: string) {
-    await this.authRow(scope).locator('button:has(svg.lucide-zap)').click();
+    await this.authRow(scope).getByTestId(/^mr-auth-test-/).click();
     await this.dialog.waitFor({ state: 'visible' });
   }
 
   /** Click the Test Connection dialog's action button (fires POST /test). */
   async runTest() {
-    await this.dialog.getByRole('button', { name: '测试连接' }).click();
+    await this.page.getByTestId('mr-auth-test-run').click();
   }
 
   /** Close whatever dialog is currently open via its 取消 footer button. */
@@ -340,20 +435,17 @@ export class MailRoutingPage {
   }
 
   async deleteAuth(scope: string) {
-    await this.authRow(scope).locator('button:has(svg.lucide-trash-2)').click();
-    await this.confirmDialog.waitFor({ state: 'visible' });
-    await this.confirmDialog.locator('button').last().click();
-    await this.confirmDialog.waitFor({ state: 'hidden' });
+    await this.authRow(scope).getByTestId(/^mr-auth-delete-/).click();
+    await this.page.getByTestId('mr-auth-delete-dialog').waitFor({ state: 'visible' });
+    await this.page.getByTestId('mr-auth-delete-confirm').click();
+    await this.page.getByTestId('mr-auth-delete-dialog').waitFor({ state: 'hidden' });
   }
 
-  // ─── Auth dialog: protocol/port introspection (TC-B05) ──────────────────
+  // ─── Auth drawer: protocol/TLS-mode/port introspection (TC-B05) ─────────
 
-  /**
-   * The server-port number input. In DOM order the auth dialog's number inputs
-   * are: priority(0), serverPort(1), authTimeout(2).
-   */
+  /** The server-port number input inside the auth drawer. */
   authServerPortInput(): Locator {
-    return this.dialog.locator('input[type="number"]').nth(1);
+    return this.authDrawer.getByTestId('mr-auth-port-input');
   }
 
   /** Current value of the server-port input. */
@@ -362,13 +454,11 @@ export class MailRoutingPage {
   }
 
   /**
-   * Switch the protocol select (the 2nd select-trigger in the dialog, after the
-   * domain-scope select) and wait for handleProtocolChange to recompute the
-   * default port. `protoLabel` is the visible zh label (SMTP/LDAP/POP3/IMAP).
+   * Switch the 认证协议 select and wait for handleProtocolChange to recompute
+   * the default port. `protoLabel` is the visible zh label (SMTP/LDAP/POP3/IMAP).
    */
   async selectAuthProtocol(protoLabel: string) {
-    // The protocol select is the 2nd select-trigger (domain scope is the 1st).
-    await this.dialog.locator('[data-slot="select-trigger"]').nth(1).click();
+    await this.authDrawer.getByTestId('mr-auth-protocol-select').click();
     await this.page
       .locator('[data-slot="select-item"]')
       .filter({ hasText: protoLabel })
@@ -377,14 +467,29 @@ export class MailRoutingPage {
     // Give React a tick to recompute the port from PROTOCOL_PORTS.
     await this.page.waitForTimeout(50);
   }
+
+  /**
+   * Switch the 传输加密（TLS） select and wait for handleTlsModeChange to
+   * recompute the default port. `modeLabel` is the visible zh label
+   * (关闭/优先 TLS/强制 TLS).
+   */
+  async selectAuthTlsMode(modeLabel: string) {
+    await this.authDrawer.getByTestId('mr-auth-tls-mode-select').click();
+    await this.page
+      .locator('[data-slot="select-item"]')
+      .filter({ hasText: modeLabel })
+      .first()
+      .click();
+    await this.page.waitForTimeout(50);
+  }
 }
 
 /** Visible zh tab labels (mailRouting.tabs.*). */
 export const TABS = {
-  receiving: '收件域',
+  receiving: '收信域管理',
   // mailRouting.tabs.relay renders 转发设置; this said 中继, which no longer
   // matches any tab and made every TABS.relay lookup resolve to nothing.
   relay: '转发设置',
   outbound: '出站路由',
-  auth: '发件认证',
+  auth: '发信认证',
 } as const;

@@ -155,14 +155,34 @@
     .card-detail p { font-size: 0.8125rem; color: var(--muted-foreground); margin: 0.2rem 0; }
     .card-detail a { color: var(--primary); text-decoration: none; }
     .card-detail a:hover { text-decoration: underline; }
+
+    /* -- 变更记录标签 -- */
+    .badge-changelog { background: oklch(0.88 0.06 262); color: oklch(0.32 0.18 262); }
+    .cl-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.375rem; }
+    .cl-tag {
+      display: inline-block; font-size: 0.6875rem; font-weight: 500;
+      padding: 0.0625rem 0.4rem; border-radius: calc(var(--radius) - 4px);
+    }
+    .cl-tag-layout  { background: oklch(0.93 0.03 220); color: oklch(0.35 0.12 220); }
+    .cl-tag-ux      { background: oklch(0.93 0.03 150); color: oklch(0.35 0.12 150); }
+    .cl-tag-validate{ background: oklch(0.93 0.04 30);  color: oklch(0.38 0.14 30);  }
+    .cl-tag-error   { background: oklch(0.93 0.04 15);  color: oklch(0.4 0.18 15);   }
+    .cl-tag-arch    { background: oklch(0.93 0.03 262); color: oklch(0.35 0.14 262); }
+    .cl-tag-i18n    { background: oklch(0.93 0.03 80);  color: oklch(0.38 0.12 80);  }
+    .cl-tag-bugfix  { background: oklch(0.93 0.04 0);   color: oklch(0.4 0.18 0);    }
+    .cl-tag-perm    { background: oklch(0.93 0.04 300); color: oklch(0.38 0.14 300); }
+    .cl-modules { margin-top: 0.5rem; }
+    .cl-modules ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+    .cl-modules li { font-size: 0.8125rem; color: var(--muted-foreground); }
+    .cl-modules li::before { content: "·"; margin-right: 0.375rem; color: var(--primary); font-weight: 700; }
   </style>
 </head>
 <body>
   <h1>HTML Spec 索引</h1>
 
   <div class="overview">
-    <div class="overview-item"><div class="num">47</div><div class="label">功能模块总数</div></div>
-    <div class="overview-item"><div class="num">40</div><div class="label">已生成</div></div>
+    <div class="overview-item"><div class="num">48</div><div class="label">功能模块总数</div></div>
+    <div class="overview-item"><div class="num">41</div><div class="label">已生成</div></div>
     <div class="overview-item"><div class="num">7</div><div class="label">待生成</div></div>
     <div class="overview-item"><div class="num">85%</div><div class="label">完成率</div></div>
   </div>
@@ -208,7 +228,7 @@
         <span class="chevron"></span>
         <span class="l1-icon">🧭</span>
         <h2>全局外壳 / 导航</h2>
-        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
+        <span class="l1-stats"><span class="done-count">2</span> 已完成 / 2 总计</span>
       </div>
     </summary>
     <div class="l1-body">
@@ -228,6 +248,24 @@
             <p>可见性数据源: lib/product-profiles.ts（FEATURE_MAP / resolveAccess）+ contexts/product-profile-context.tsx</p>
             <p>子文件: <a href="component-sidebar-nav/layer-1-expand-collapse.html">展开收起</a> / <a href="component-sidebar-nav/layer-2-nested-subgroup.html">三级嵌套</a> / <a href="component-sidebar-nav/layer-3-active-state.html">激活高亮</a> / <a href="component-sidebar-nav/layer-4-profile-visibility.html">形态×视角可见性矩阵</a> / <a href="component-sidebar-nav/layer-5-theme-color.html">主题色</a></p>
             <p>预览可交互（本地复刻 navItems + FEATURE_MAP 逻辑）· 4 组件 · 6 交互层级 · 5×2 形态×视角实测 · zh/en/th 国际化 · 5 项差异 / 5 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12649.html" target="_blank" rel="noopener noreferrer">GT-12649 · SidebarNav 移除 VersionFooter（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-07-30</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /zh/dashboard 及所有挂载全局侧边栏的后台路由</p>
+            <p>组件: src/components/layout/sidebar-nav.tsx（移除 &lt;VersionFooter /&gt; 及其 import）</p>
+            <p>变更类型: 功能移除（增量规格）· commit c481bf6</p>
+            <p>内含: 变更前/后对比 · QC 2026-07-28 复查记录 · S-1 历史态（QC 截图占位）/ S-2 目标态（截图占位）· D-1~D-2 / Q-1~Q-2</p>
+            <p>关联: GT-11459（VersionFooter 组件保留，待产品确认合规入口）</p>
           </div>
         </details>
       </div>
@@ -1230,5 +1268,189 @@
     </details>
     </div>
   </details>
+
+  <!-- ==================== 一级：版本变更记录 ==================== -->
+  <details class="l1-section" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">📋</span>
+        <h2>版本变更记录</h2>
+        <span class="l1-stats"><span class="done-count">1</span> 份记录 / 16 条优化项</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+
+    <details class="l2-group" open>
+      <summary>
+        <div class="l2-header">
+          <span class="chevron"></span>
+          <h3>2026-07-29</h3>
+          <span class="l2-tag">处置设置 · 邮件处置中心 · 系统首页</span>
+          <span class="l2-count">16 条优化项</span>
+        </div>
+      </summary>
+      <div class="l2-content">
+      <div class="grid">
+
+        <!-- A：系统首页 -->
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="changelogs/2026-07-29-disposal-settings-guard-validation-ux.html#A">系统首页 · 状态统计时间范围默认值</a>
+              <span class="badge badge-changelog">v-feat</span>
+              <span class="card-generated-at">2026-07-29</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /（安全运营总览首页）</p>
+            <div class="cl-tags">
+              <span class="cl-tag cl-tag-ux">可用性</span>
+            </div>
+            <div class="cl-modules">
+              <ul>
+                <li>默认时间范围由「今日」改为「最近 24h」，确保统计数据在跨午夜时始终有意义</li>
+              </ul>
+            </div>
+            <p><a href="changelogs/2026-07-29-disposal-settings-guard-validation-ux.html#A">查看完整变更详情 →</a></p>
+          </div>
+        </details>
+
+        <!-- B：邮件处置中心 · 邮件列表 -->
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="changelogs/2026-07-29-disposal-settings-guard-validation-ux.html#B">邮件处置中心 · 邮件列表增强（7 项）</a>
+              <span class="badge badge-changelog">v-feat</span>
+              <span class="card-generated-at">2026-07-29</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center</p>
+            <div class="cl-tags">
+              <span class="cl-tag cl-tag-layout">布局优化</span>
+              <span class="cl-tag cl-tag-ux">可用性</span>
+              <span class="cl-tag cl-tag-bugfix">缺陷修复</span>
+            </div>
+            <div class="cl-modules">
+              <ul>
+                <li>Subject 列新增，显示邮件主题摘要</li>
+                <li>调整列顺序 + 设置默认隐藏列</li>
+                <li>全选表头样式与行为增强（三态 checkbox）</li>
+                <li>导出功能新增（选中导出 / 当页导出）</li>
+                <li>快速筛选 SSR 水合安全修复（避免 hydration mismatch）</li>
+                <li>租户选择器显示优化</li>
+                <li>召回动作新增到操作列</li>
+              </ul>
+            </div>
+            <p>关联文件: investigation-logs-table.tsx / compact-search-filters.tsx / mail-investigation-page.tsx</p>
+            <p><a href="changelogs/2026-07-29-disposal-settings-guard-validation-ux.html#B">查看完整变更详情 →</a></p>
+          </div>
+        </details>
+
+        <!-- C：邮件处置中心 · 详情弹窗 -->
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="changelogs/2026-07-29-disposal-settings-guard-validation-ux.html#C">邮件处置中心 · 详情弹窗重构（5 项）</a>
+              <span class="badge badge-changelog">v-feat</span>
+              <span class="card-generated-at">2026-07-29</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（详情弹窗层）</p>
+            <div class="cl-tags">
+              <span class="cl-tag cl-tag-ux">可用性</span>
+              <span class="cl-tag cl-tag-bugfix">缺陷修复</span>
+              <span class="cl-tag cl-tag-layout">布局优化</span>
+            </div>
+            <div class="cl-modules">
+              <ul>
+                <li>发件人动作弹窗去除「作用域」选择，简化操作路径</li>
+                <li>AlertDialog z-index / Portal 层级修复（被 Sheet 遮挡问题）</li>
+                <li>黑名单动作移除 Destructive 危险样式，与加白保持一致</li>
+                <li>IP 声誉外部链接移除（避免跳转至未维护的外部页面）</li>
+                <li>调查工作台「实体检测」标题层级新增</li>
+              </ul>
+            </div>
+            <p>关联文件: detail-dialogs.tsx / sender-action-dialog.tsx / overview-action-section.tsx</p>
+            <p><a href="changelogs/2026-07-29-disposal-settings-guard-validation-ux.html#C">查看完整变更详情 →</a></p>
+          </div>
+        </details>
+
+        <!-- D：处置设置 -->
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="changelogs/2026-07-29-disposal-settings-guard-validation-ux.html#D">处置设置 · UX 全面优化（8 项）</a>
+              <span class="badge badge-changelog">v-feat</span>
+              <span class="card-generated-at">2026-07-29</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-settings</p>
+            <div class="cl-tags">
+              <span class="cl-tag cl-tag-layout">布局优化</span>
+              <span class="cl-tag cl-tag-ux">可用性</span>
+              <span class="cl-tag cl-tag-validate">校验增强</span>
+              <span class="cl-tag cl-tag-error">错误处理</span>
+              <span class="cl-tag cl-tag-arch">架构</span>
+              <span class="cl-tag cl-tag-i18n">i18n</span>
+              <span class="cl-tag cl-tag-bugfix">缺陷修复</span>
+            </div>
+            <div class="cl-modules">
+              <ul>
+                <li>Tab 激活态样式修复（下划线高亮丢失问题）</li>
+                <li>i18n 乱码批量修复（zh/en/th/ru 共 202 处 ）</li>
+                <li>FramedPage 结构重构（统一页面容器框架）</li>
+                <li>分类通知控制改为紧凑表格布局，节省约 60% 页面高度</li>
+                <li>操作栏改为 sticky bottom-0 吸附，保存/重置始终可见</li>
+                <li>外部访问地址为空时禁用权限开关 + inline 警告横幅</li>
+                <li>后端英文错误消息本地化（portal_base_url 映射为 i18n 键）</li>
+                <li>未保存离开拦截（UnsavedGuardContext + AlertDialog 三选项）</li>
+              </ul>
+            </div>
+            <p>关联文件: disposal-settings-page.tsx / quarantine-settings-tab.tsx / schema.ts / unsaved-guard-context.tsx / sidebar-nav.tsx / app-shell.tsx</p>
+            <p><a href="changelogs/2026-07-29-disposal-settings-guard-validation-ux.html#D">查看完整变更详情 →</a></p>
+          </div>
+        </details>
+
+        <!-- E：全局 -->
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="changelogs/2026-07-29-disposal-settings-guard-validation-ux.html#E">全局 · 侧栏品牌名 SSR 水合修复</a>
+              <span class="badge badge-changelog">v-feat</span>
+              <span class="card-generated-at">2026-07-29</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>范围: 全局（app-shell / sidebar-nav）</p>
+            <div class="cl-tags">
+              <span class="cl-tag cl-tag-bugfix">缺陷修复</span>
+              <span class="cl-tag cl-tag-arch">架构</span>
+            </div>
+            <div class="cl-modules">
+              <ul>
+                <li>侧栏品牌名在 SSR 渲染时与客户端不一致导致 hydration mismatch，修复后服务端/客户端结果一致</li>
+              </ul>
+            </div>
+            <p>关联文件: sidebar-nav.tsx / app-shell.tsx</p>
+            <p><a href="changelogs/2026-07-29-disposal-settings-guard-validation-ux.html#E">查看完整变更详情 →</a></p>
+          </div>
+        </details>
+
+      </div>
+      </div>
+    </details>
+
+    </div>
+  </details>
+
 </body>
 </html>

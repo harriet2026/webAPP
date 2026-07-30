@@ -7,8 +7,7 @@ import type {
 
 export type ImportGroupKey =
   | 'rules'
-  | 'detection_profiles'
-  | 'bounce_dsn_settings';
+  | 'detection_profiles';
 
 export type ImportSelectionState = Record<ImportGroupKey, boolean>;
 
@@ -47,7 +46,6 @@ function isRuleExportEnvelope(value: unknown): value is RuleExportEnvelope {
   return (
     isOptionalRecordArray(value.data.rules)
     && isOptionalRecordArray(value.data.detection_profiles)
-    && isOptionalRecordArray(value.data.bounce_dsn_settings)
   );
 }
 
@@ -55,7 +53,6 @@ function toSelectionPayload(selection: ImportSelectionState): RuleExportSelectio
   return {
     include_rules: selection.rules,
     include_detection_profiles: selection.detection_profiles,
-    include_bounce_dsn_settings: selection.bounce_dsn_settings,
   };
 }
 
@@ -84,7 +81,6 @@ export function getAvailableImportGroups(file: RuleExportEnvelope): Record<Impor
   return {
     rules: Array.isArray(data.rules) && data.rules.length > 0,
     detection_profiles: Array.isArray(data.detection_profiles) && data.detection_profiles.length > 0,
-    bounce_dsn_settings: Array.isArray(data.bounce_dsn_settings) && data.bounce_dsn_settings.length > 0,
   };
 }
 

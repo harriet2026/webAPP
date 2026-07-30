@@ -4,10 +4,10 @@
 // design/implement/spec/email-disposal-overview-html-spec-alignment.md §2 B
 // 节）。取代 overview-section.tsx 原先的极简「基本信息」四行块（执行动作/
 // 主题/发信人/收信人），改为 demo 的完整收发信上下文卡：发件人（B1，含 IP/
-// geo/查看IP信誉 no-op 链接）、收件人（B2 单投 pill / 多投状态分布 +
+// geo）、收件人（B2 单投 pill / 多投状态分布 +
 // B3 复用既有 RecipientStatus 渲染多投矩阵）、单投不可操作提示（B4）、
 // 时间/大小（B5）、展开完整信息开关与详情（B6/B7：身份验证详情 +
-// 网络特征，spec §9-A 刻意不渲染 TLS 版本 / IP 信誉评分 -- 后端无这两个字段）。
+// 网络特征）。
 //
 // B2/B3 的边界：single-recipient（recipient_dispositions.length===1）只渲染
 // 一个状态 pill，不再渲染 RecipientStatus 的可操作按钮行 -- 单投的投递/丢弃/
@@ -66,9 +66,7 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
   const dispositions = detail.recipient_dispositions ?? [];
   const isSingle = dispositions.length === 1;
   const single = isSingle ? dispositions[0] : undefined;
-  // 「查看IP信誉」仍是 no-op 链接（spec §9-A 有意偏离清单，已用户确认
-  // 2026-07-23：无后端字段），保持「暂未实现」toast；「查看策略命中详情」
-  // 不在 §9-A 清单里，GT-12596 起跳安全分析区的处置依据卡（onViewPolicyDetail）。
+  // 「查看策略命中详情」GT-12596 起跳安全分析区的处置依据卡（onViewPolicyDetail）。
   const singleNotOperable = !!single
     && recipientActionsForStatus(single.status, !!single.object_id).length === 0;
 
@@ -78,6 +76,7 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
   function notImplemented() {
     toast.info(t('senderActions.notImplementedToast'));
   }
+  // notImplemented 仍保留供 B4「查看策略命中详情」fallback 使用
 
   return (
     <div className="rounded-lg border bg-muted/30 p-4 space-y-3" data-testid="email-disposal-overview-context-card">
@@ -98,15 +97,6 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
             <MapPin className="h-3 w-3" />
             {detail.geo_region_name || detail.geo_city || detail.geo_isp || '—'}
           </Badge>
-          <Button
-            variant="link"
-            size="sm"
-            className="h-auto p-0 text-xs"
-            data-testid="email-disposal-overview-context-ip-reputation"
-            onClick={notImplemented}
-          >
-            [{t('context.ipReputation')}]
-          </Button>
         </div>
 
         {/* B2 收件人（单投 pill / 多投状态分布） */}

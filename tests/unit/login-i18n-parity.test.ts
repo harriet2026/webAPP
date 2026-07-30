@@ -42,14 +42,14 @@ const REQUIRED = [
   'resetSuccess',
   'loginSuccess',
   'brandTagline',
+  // GT-12649: 登录页品牌位从 4 项特性收敛为 3 项（撤掉"多租户网关"），
+  // brandFeature4/brandFeature4Desc 已从全部 locale 移除，不要再加回。
   'brandFeature1',
   'brandFeature2',
   'brandFeature3',
-  'brandFeature4',
   'brandFeature1Desc',
   'brandFeature2Desc',
   'brandFeature3Desc',
-  'brandFeature4Desc',
   'brandProductName',
   'brandHeadline',
   'brandCopyright',

@@ -7,6 +7,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const HTML_SPEC_ROOT = resolve(process.cwd(), 'doc', 'html-spec');
+// 增量功能变更规格目录：/html-spec/version/* → doc/html_spec-version/*
+const HTML_SPEC_VERSION_ROOT = resolve(process.cwd(), 'doc', 'html_spec-version');
 const CONTENT_TYPES: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
@@ -25,6 +27,14 @@ function resolveSpecFile(pathSegments: string[]): string | null {
     pathSegments.some((segment) => !segment || segment === '.' || segment === '..')
   ) {
     return null;
+  }
+
+  // /html-spec/version/* → doc/html_spec-version/*（增量功能变更规格目录）
+  if (pathSegments[0] === 'version') {
+    const rest = pathSegments.slice(1);
+    if (rest.length === 0) return null;
+    const filePath = resolve(HTML_SPEC_VERSION_ROOT, ...rest);
+    return filePath.startsWith(`${HTML_SPEC_VERSION_ROOT}${sep}`) ? filePath : null;
   }
 
   const filePath = resolve(HTML_SPEC_ROOT, ...pathSegments);

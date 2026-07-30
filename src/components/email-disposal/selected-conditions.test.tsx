@@ -417,7 +417,9 @@ describe("SelectedConditions - advanced chip multi-value enum mapping (GT-12368)
             {
               field: "action",
               op: "in" as never,
-              value: ["quarantine", "discard"] as never,
+              // GT-12649: action 字段枚举已切换为展示级执行动作
+              // （backend AllActions），discard → drop。
+              value: ["quarantine", "drop"] as never,
             },
           ],
         },
@@ -433,7 +435,7 @@ describe("SelectedConditions - advanced chip multi-value enum mapping (GT-12368)
     );
     expect(
       screen.getByText(
-        /emailDisposal\.filters\.actions\.quarantine,emailDisposal\.filters\.actions\.discard/,
+        /emailDisposal\.filters\.actions\.quarantine,emailDisposal\.filters\.actions\.drop/,
       ),
     ).toBeInTheDocument();
   });

@@ -69,17 +69,19 @@ vi.mock('@/components/email-disposal/disposal-settings/RecallSettingsTab', () =>
 vi.mock('@/components/shared/page-shell', () => ({
   PageShell: ({ children }: { children: React.ReactNode }) => createElement('div', null, children),
   PageHeader: () => null,
+  FramedPage: ({ children }: { children: React.ReactNode }) => createElement('div', null, children),
 }));
 vi.mock('@/components/layout/tenant-selector', () => ({
   TenantSelector: () => null,
 }));
 
 import { DisposalSettingsPage } from '@/components/email-disposal/disposal-settings/disposal-settings-page';
+import { UnsavedGuardProvider } from '@/contexts/unsaved-guard-context';
 
 function renderPage() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    createElement(QueryClientProvider, { client: qc }, createElement(DisposalSettingsPage)),
+    createElement(QueryClientProvider, { client: qc }, createElement(UnsavedGuardProvider, null, createElement(DisposalSettingsPage))),
   );
 }
 

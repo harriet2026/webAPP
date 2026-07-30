@@ -3,7 +3,7 @@ import { apiRequest, type ApiRequestFn, API_BASE } from './client';
 export type OpsDimension =
   | 'connection' | 'auth' | 'sendIp' | 'subject' | 'sender' | 'recipient';
 export type OpsDirection = 'all' | 'receive' | 'send' | 'internal';
-export type OpsTimeRange = 'today' | '7d' | '30d' | 'thisMonth' | 'lastMonth';
+export type OpsTimeRange = '24h' | 'today' | '7d' | '30d' | 'thisMonth' | 'lastMonth';
 export type OpsTopCount = '10' | '50' | '100';
 
 export interface OpsTopRow {

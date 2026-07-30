@@ -9,10 +9,12 @@ import {
 } from './fixtures';
 
 describe('email disposal center mock contract', () => {
-  it('provides the exact 25-row demo dataset and 30 advanced fields', () => {
+  it('provides the exact 52-row demo dataset and 30 advanced fields', () => {
+    // GT-12649: +2 阶段1（IPBL/RBL 平台策略）示例行 MIC026/MIC027；
+    // demo 合入: +25 跨页选中/全量导出验证行（顺延编号 MIC028-MIC052）。
     const result = mockEmailDisposalList('/mail-logs?page=1&page_size=100');
-    expect(result.total).toBe(25);
-    expect(result.items).toHaveLength(25);
+    expect(result.total).toBe(52);
+    expect(result.items).toHaveLength(52);
     expect(result.items[0]).toMatchObject({ tid: 'MIC001', subject: 'Q2财务报表 - 紧急审批（多投信）' });
     expect(mockEmailDisposalFields()).toHaveLength(30);
   });

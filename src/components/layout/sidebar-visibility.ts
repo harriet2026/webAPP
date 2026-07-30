@@ -110,9 +110,9 @@ export interface GatedNavItem {
  * A leaf item (no children) is never hidden by THIS rule — its visibility is
  * decided solely by `isNavItemAllowed`.
  */
-export function isGroupVisible(
-  item: { children?: GatedNavItem[] },
-  isAllowed: (child: GatedNavItem) => boolean,
+export function isGroupVisible<T extends GatedNavItem>(
+  item: { children?: T[] },
+  isAllowed: (child: T) => boolean,
 ): boolean {
   if (!item.children || item.children.length === 0) return true;
   return item.children.some(isAllowed);

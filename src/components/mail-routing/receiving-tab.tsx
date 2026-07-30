@@ -1,16 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+// 收信域管理 Tab —— html_spec 对齐重构（design/implement/spec/2026-07-28-mail-routing-
+// html-spec-alignment-design.md §4.1，doc/html-spec/admin-forwarding/index.html §2.3 +
+// layer-1-receiving-drawer.html + layer-2-receiving-delete.html）。
+//
+// 从「卡片 + nexthop 子表」重构为 demo 的扁平表格形态：一域一行，目的地址/端口/状态聚合展示；
+// 抽屉内以 TagInput 承载多目的地址 + 共享端口，不再单独暴露每个 nexthop 的
+// type/priority/per-hop is_active（DEV-4，创建走默认值：type 按 isIPv4 推断、
+// priority=数组序、is_active 恒 true）。
+
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Plus, Pencil, Trash2, Loader2, Wifi } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import {
   Sheet,
   SheetContent,
@@ -34,9 +41,25 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { EmptyState } from '@/components/shared/empty-state';
-import { useScopedApiRequest } from '@/lib/api/client';
+import { ListToolbar } from '@/components/mail-routing/shared/list-toolbar';
+import { ProbeBadge } from '@/components/mail-routing/shared/probe-badge';
+import { TagInput } from '@/components/mail-routing/shared/tag-input';
+import { TestResultTag } from '@/components/mail-routing/shared/test-result-tag';
+import { isDomain, isHostOrIp, isIPv4, type ProbeStatus, type TestState } from '@/components/mail-routing/mr-types';
+import { useScopedApiRequest, type ApiRequestFn } from '@/lib/api/client';
+import { isMockEnabled } from '@/lib/mock/storage';
 import { listTenantDomains, probeDomain } from '@/lib/api/mail-routing';
 import {
   listNexthops,
@@ -44,37 +67,44 @@ import {
   updateNexthop,
   deleteNexthop,
 } from '@/lib/api/tenant-routing';
-import { createTenantDomain, deleteTenantDomain } from '@/lib/api/tenants';
-import type {
-  TenantDomain,
-  TenantDomainNexthop,
-  NextHopType,
-} from '@/types/tenant';
+import { createTenantDomain, deleteTenantDomain, updateTenantDomain } from '@/lib/api/tenants';
+import type { TenantDomain, TenantDomainNexthop } from '@/types/tenant';
 import { formatDate } from '@/lib/utils';
 
 interface ReceivingTabProps {
   tenantId: number;
 }
 
-interface NexthopFormState {
-  host: string;
-  port: string;
-  next_hop_type: NextHopType;
-  priority: string;
-  is_active: boolean;
+interface ReceivingDomainRow {
+  id: number;
+  domainName: string;
+  targetHosts: string[];
+  targetPort: number;
+  status: ProbeStatus;
+  abnormalCount: number;
+  total: number;
+  lastProbeTime: string | null;
 }
 
-const EMPTY_FORM: NexthopFormState = {
-  host: '',
-  port: '25',
-  next_hop_type: 'domain',
-  priority: '0',
-  is_active: true,
-};
+interface DraftState {
+  domainName: string;
+  targetHosts: string[];
+  targetPort: number;
+}
 
-type ProbeStatus = 'normal' | 'abnormal' | 'partial' | 'unchecked';
+const EMPTY_DRAFT: DraftState = { domainName: '', targetHosts: [], targetPort: 25 };
 
-/** Compute per-domain aggregate probe status from a list of nexthops. */
+interface Filters {
+  target: string;
+  port: string;
+  status: 'all' | ProbeStatus;
+}
+
+const EMPTY_FILTERS: Filters = { target: '', port: '', status: 'all' };
+
+const PAGE_SIZE = 20;
+
+/** Compute per-domain aggregate probe status from its active nexthops. */
 function aggregateProbeStatus(nexthops: TenantDomainNexthop[]): ProbeStatus {
   const active = nexthops.filter((nh) => nh.is_active);
   if (active.length === 0) return 'unchecked';
@@ -86,571 +116,651 @@ function aggregateProbeStatus(nexthops: TenantDomainNexthop[]): ProbeStatus {
   return 'partial';
 }
 
-function lastProbeTime(nexthops: TenantDomainNexthop[]): string | null {
-  const times = nexthops
-    .filter((nh) => nh.is_active && nh.last_probe_time)
+function latestProbeTime(active: TenantDomainNexthop[]): string | null {
+  const times = active
+    .filter((nh) => nh.last_probe_time)
     .map((nh) => new Date(nh.last_probe_time!).getTime());
   if (times.length === 0) return null;
   return new Date(Math.max(...times)).toISOString();
 }
 
-const STATUS_CLASSES: Record<ProbeStatus, string> = {
-  normal: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-  abnormal: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-  partial: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
-  unchecked: 'bg-muted text-muted-foreground',
-};
+/** Target port shown in the row = the mode (most common port) among the
+ * domain's active nexthops (spec §4.1: 所有 nexthop 共享同一端口, 众数兜底异常数据). */
+function modePort(active: TenantDomainNexthop[]): number {
+  if (active.length === 0) return 25;
+  const counts = new Map<number, number>();
+  active.forEach((nh) => counts.set(nh.port, (counts.get(nh.port) ?? 0) + 1));
+  let best = active[0].port;
+  let bestCount = 0;
+  counts.forEach((count, port) => {
+    if (count > bestCount) {
+      bestCount = count;
+      best = port;
+    }
+  });
+  return best;
+}
+
+function toRow(domain: TenantDomain, nexthops: TenantDomainNexthop[], statusOverride?: ProbeStatus): ReceivingDomainRow {
+  const active = [...nexthops]
+    .filter((nh) => nh.is_active)
+    .sort((a, b) => a.priority - b.priority || a.id - b.id);
+  return {
+    id: domain.id,
+    domainName: domain.domain,
+    targetHosts: active.map((nh) => nh.host),
+    targetPort: modePort(active),
+    status: statusOverride ?? aggregateProbeStatus(nexthops),
+    abnormalCount: active.filter((nh) => nh.probe_status === 'abnormal').length,
+    total: active.length,
+    lastProbeTime: latestProbeTime(active),
+  };
+}
+
+interface ConnectivityTestResult {
+  success: boolean;
+  message: string;
+  latency_ms: number;
+}
+
+/** `/mail-routing/connectivity-test` is a mock-only virtual endpoint (spec A9 /
+ * DEV-7) — no real backend route exists, so this is only ever called while
+ * mock mode is on (the drawer button is disabled otherwise). */
+function testConnectivity(request: ApiRequestFn): Promise<ConnectivityTestResult> {
+  return request<ConnectivityTestResult>('/mail-routing/connectivity-test', { method: 'POST' });
+}
 
 export function ReceivingTab({ tenantId }: ReceivingTabProps) {
   const t = useTranslations('mailRouting');
+  const ts = useTranslations('mailRouting.shared');
   const tc = useTranslations('common');
   const { apiRequest } = useScopedApiRequest(tenantId);
   const queryClient = useQueryClient();
+  const mockOn = isMockEnabled();
 
-  const { data: domains = [], isLoading } = useQuery({
+  const { data: domains = [], isLoading: domainsLoading } = useQuery({
     queryKey: ['mail-routing-domains', tenantId],
     queryFn: () => listTenantDomains(tenantId, apiRequest),
   });
 
-  const [sheet, setSheet] = useState<{
-    open: boolean;
-    domain: TenantDomain | null;
-    editing: TenantDomainNexthop | null;
-  }>({ open: false, domain: null, editing: null });
-  const [form, setForm] = useState<NexthopFormState>({ ...EMPTY_FORM });
-  const [deleteTarget, setDeleteTarget] = useState<{
-    domain: TenantDomain;
-    nh: TenantDomainNexthop;
-  } | null>(null);
+  const domainIdsKey = domains.map((d) => d.id).join(',');
+  const { data: nexthopsByDomain = {}, isLoading: nexthopsLoading } = useQuery({
+    queryKey: ['mail-routing-domains-nexthops', tenantId, domainIdsKey],
+    queryFn: async () => {
+      const entries = await Promise.all(
+        domains.map(async (d) => [d.id, await listNexthops(tenantId, d.id, apiRequest)] as const)
+      );
+      return Object.fromEntries(entries) as Record<number, TenantDomainNexthop[]>;
+    },
+    enabled: domains.length > 0,
+  });
 
-  const [domainSheet, setDomainSheet] = useState(false);
-  const [domainName, setDomainName] = useState('');
-  const [domainDeleteTarget, setDomainDeleteTarget] = useState<TenantDomain | null>(null);
-  const [probingDomainId, setProbingDomainId] = useState<number | null>(null);
-  // Authoritative server-computed aggregate probe status per domain, captured
-  // from the probe response (DomainProbeResult.probe_status). Preferred over the
-  // client recomputation so the badge always reflects the server's verdict and
-  // cannot drift if the server-side aggregation logic changes (review M17).
+  // Server-computed aggregate probe status per domain, captured from the
+  // probe response — authoritative until the next background refetch lands.
   const [serverStatusByDomain, setServerStatusByDomain] = useState<Record<number, ProbeStatus>>({});
+  const [probingId, setProbingId] = useState<number | null>(null);
+
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState<Filters>({ ...EMPTY_FILTERS });
+  const [page, setPage] = useState(1);
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [draft, setDraft] = useState<DraftState>({ ...EMPTY_DRAFT });
+  const [testState, setTestState] = useState<TestState>('idle');
+  const [deleteTarget, setDeleteTarget] = useState<TenantDomain | null>(null);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['mail-routing-domains', tenantId] });
-    queryClient.invalidateQueries({ queryKey: ['mail-routing-nexthops', tenantId] });
+    queryClient.invalidateQueries({ queryKey: ['mail-routing-domains-nexthops', tenantId] });
   };
 
+  const rows: ReceivingDomainRow[] = useMemo(
+    () => domains.map((d) => toRow(d, nexthopsByDomain[d.id] ?? [], serverStatusByDomain[d.id])),
+    [domains, nexthopsByDomain, serverStatusByDomain]
+  );
+
+  const filteredRows = useMemo(() => {
+    const kw = search.trim().toLowerCase();
+    return rows.filter((r) => {
+      if (
+        kw &&
+        !r.domainName.toLowerCase().includes(kw) &&
+        !r.targetHosts.some((h) => h.toLowerCase().includes(kw))
+      ) {
+        return false;
+      }
+      if (filters.target && !r.targetHosts.some((h) => h.includes(filters.target))) return false;
+      if (filters.port && String(r.targetPort) !== filters.port.trim()) return false;
+      if (filters.status !== 'all' && r.status !== filters.status) return false;
+      return true;
+    });
+  }, [rows, search, filters]);
+
+  const filterCount =
+    (filters.target ? 1 : 0) + (filters.port ? 1 : 0) + (filters.status !== 'all' ? 1 : 0);
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedRows = filteredRows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const resetFilters = () => {
+    setSearch('');
+    setFilters({ ...EMPTY_FILTERS });
+    setPage(1);
+  };
+
+  const closeDrawer = () => {
+    setDrawerOpen(false);
+    setEditingId(null);
+    setDraft({ ...EMPTY_DRAFT });
+    setTestState('idle');
+  };
+
+  const openCreate = () => {
+    setDraft({ ...EMPTY_DRAFT });
+    setEditingId(null);
+    setTestState('idle');
+    setDrawerOpen(true);
+  };
+
+  const openEdit = (row: ReceivingDomainRow) => {
+    setDraft({ domainName: row.domainName, targetHosts: [...row.targetHosts], targetPort: row.targetPort });
+    setEditingId(row.id);
+    setTestState('idle');
+    setDrawerOpen(true);
+  };
+
+  const probeMutation = useMutation({
+    mutationFn: (domainId: number) => probeDomain(tenantId, domainId, apiRequest),
+    onMutate: (domainId) => setProbingId(domainId),
+    onSettled: () => setProbingId(null),
+    onSuccess: (data, domainId) => {
+      setServerStatusByDomain((prev) => ({ ...prev, [domainId]: data.probe_status }));
+      toast.success(t('receiving.probeCompleteToast'));
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(t('receiving.probeFailed') + ': ' + e.message),
+  });
+
   const createMutation = useMutation({
-    mutationFn: ({ domain, payload }: { domain: TenantDomain; payload: NexthopFormState }) =>
-      createNexthop(tenantId, domain.id, {
-        host: payload.host.trim(),
-        port: Number(payload.port),
-        next_hop_type: payload.next_hop_type,
-        priority: Number(payload.priority) || 0,
-        is_active: payload.is_active,
-      }, apiRequest),
+    mutationFn: async (payload: DraftState) => {
+      const domain = await createTenantDomain(
+        tenantId,
+        { domain: payload.domainName, next_hop_type: 'domain', next_hop_host: '', next_hop_port: 0 },
+        apiRequest
+      );
+      await Promise.all(
+        payload.targetHosts.map((host, idx) =>
+          createNexthop(
+            tenantId,
+            domain.id,
+            {
+              host,
+              port: payload.targetPort,
+              next_hop_type: isIPv4(host) ? 'ip' : 'domain',
+              priority: idx,
+              is_active: true,
+            },
+            apiRequest
+          )
+        )
+      );
+      return domain;
+    },
     onSuccess: () => {
-      toast.success(tc('createSuccess'));
-      setSheet({ open: false, domain: null, editing: null });
+      toast.success(t('receiving.createdToast'));
+      closeDrawer();
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       domain,
-      editing,
+      existingNexthops,
       payload,
     }: {
       domain: TenantDomain;
-      editing: TenantDomainNexthop;
-      payload: NexthopFormState;
-    }) =>
-      updateNexthop(tenantId, domain.id, editing.id, {
-        host: payload.host.trim(),
-        port: Number(payload.port),
-        next_hop_type: payload.next_hop_type,
-        priority: Number(payload.priority) || 0,
-        is_active: payload.is_active,
-      }, apiRequest),
+      existingNexthops: TenantDomainNexthop[];
+      payload: DraftState;
+    }) => {
+      if (payload.domainName !== domain.domain) {
+        // Task 9 修复：updateTenantDomain 此前没有 requestFn 形参，硬编码走 @/lib/api/client
+        // 的模块级 apiRequest，而不是本组件从 useScopedApiRequest() 拿到的作用域版本——与同文件
+        // 的 createTenantDomain/deleteTenantDomain（均可注入 requestFn）不一致。功能上因为
+        // tenantHeader(tenantId) 本身会补上 X-Tenant-ID，生产环境两者表现一致，但破坏了可测试性
+        // （测试里 mock 的是 useScopedApiRequest 返回的 apiRequest，模块级 apiRequest 不受其影响，
+        // 补覆盖率单测时才发现）。已给 updateTenantDomain 加 requestFn 形参并在此处显式传入。
+        await updateTenantDomain(domain.id, { domain: payload.domainName }, tenantId, apiRequest);
+      }
+
+      // Nexthop delta (DEV-4): the drawer only manages active nexthops as a
+      // flat host list — per-hop type/priority/active are never surfaced, so
+      // they're recomputed here (type by isIPv4, priority by array order,
+      // active always true). Existing hosts are updated in place (keeps their
+      // id / probe history); new hosts are created; hosts no longer present
+      // are deleted. Inactive nexthops (outside this UI's reach) are left
+      // untouched.
+      const activeExisting = existingNexthops.filter((nh) => nh.is_active);
+      const existingByHost = new Map(activeExisting.map((nh) => [nh.host, nh]));
+      const keepHosts = new Set(payload.targetHosts);
+
+      await Promise.all(
+        payload.targetHosts.map((host, idx) => {
+          const nextHopType = isIPv4(host) ? 'ip' : 'domain';
+          const existing = existingByHost.get(host);
+          if (existing) {
+            return updateNexthop(
+              tenantId,
+              domain.id,
+              existing.id,
+              { host, port: payload.targetPort, next_hop_type: nextHopType, priority: idx, is_active: true },
+              apiRequest
+            );
+          }
+          return createNexthop(
+            tenantId,
+            domain.id,
+            { host, port: payload.targetPort, next_hop_type: nextHopType, priority: idx, is_active: true },
+            apiRequest
+          );
+        })
+      );
+
+      await Promise.all(
+        activeExisting
+          .filter((nh) => !keepHosts.has(nh.host))
+          .map((nh) => deleteNexthop(tenantId, domain.id, nh.id, apiRequest))
+      );
+    },
     onSuccess: () => {
-      toast.success(tc('updateSuccess'));
-      setSheet({ open: false, domain: null, editing: null });
+      toast.success(t('receiving.updatedToast'));
+      closeDrawer();
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: ({ domain, nh }: { domain: TenantDomain; nh: TenantDomainNexthop }) =>
-      deleteNexthop(tenantId, domain.id, nh.id, apiRequest),
+    mutationFn: (domain: TenantDomain) => deleteTenantDomain(domain.id, tenantId, apiRequest),
     onSuccess: () => {
-      toast.success(tc('deleteSuccess'));
+      toast.success(t('receiving.deletedToast'));
       setDeleteTarget(null);
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const probeMutation = useMutation({
-    mutationFn: (domainId: number) => probeDomain(tenantId, domainId, apiRequest),
-    onMutate: (domainId) => setProbingDomainId(domainId),
-    onSettled: () => setProbingDomainId(null),
-    onSuccess: (data, domainId) => {
-      // Persist the server's aggregate verdict as authoritative for display.
-      setServerStatusByDomain((prev) => ({ ...prev, [domainId]: data.probe_status }));
-      toast.success(t('receiving.probeSuccess'));
-      invalidate();
-    },
-    onError: (e: Error) => toast.error(t('receiving.probeFailed') + ': ' + e.message),
-  });
-
-  const createDomainMutation = useMutation({
-    mutationFn: (name: string) =>
-      createTenantDomain(tenantId, { domain: name, next_hop_type: 'domain', next_hop_host: '', next_hop_port: 0 }, apiRequest),
-    onSuccess: () => {
-      toast.success(tc('createSuccess'));
-      setDomainSheet(false);
-      setDomainName('');
-      invalidate();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const deleteDomainMutation = useMutation({
-    // apiRequest is scoped to this tenant (useScopedApiRequest(tenantId)), so it
-    // injects X-Tenant-ID; the explicit tenantId arg is left undefined here.
-    mutationFn: (domain: TenantDomain) => deleteTenantDomain(domain.id, undefined, apiRequest),
-    onSuccess: () => {
-      toast.success(tc('deleteSuccess'));
-      setDomainDeleteTarget(null);
-      invalidate();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const openCreate = (domain: TenantDomain, existingPort?: number | string) => {
-    // Spec §4.2 wants port entered once per domain and applied to every nexthop
-    // (M15). Pre-fill from the domain's existing active nexthop port so new
-    // nexthops stay consistent with the domain's canonical port.
-    const port = existingPort ? String(existingPort) : EMPTY_FORM.port;
-    setForm({ ...EMPTY_FORM, port });
-    setSheet({ open: true, domain, editing: null });
-  };
-
-  const openEdit = (domain: TenantDomain, nh: TenantDomainNexthop) => {
-    setForm({
-      host: nh.host,
-      port: String(nh.port),
-      next_hop_type: (nh.next_hop_type === 'ip' ? 'ip' : 'domain') as NextHopType,
-      priority: String(nh.priority),
-      is_active: nh.is_active,
-    });
-    setSheet({ open: true, domain, editing: nh });
-  };
-
-  const submit = () => {
-    if (!sheet.domain) return;
-    const port = Number(form.port);
-    if (!form.host.trim()) {
-      toast.error(t('receiving.hostRequired'));
-      return;
-    }
-    if (!Number.isInteger(port) || port < 1 || port > 65535) {
-      toast.error(t('receiving.portInvalid'));
-      return;
-    }
-    if (sheet.editing) {
-      updateMutation.mutate({ domain: sheet.domain, editing: sheet.editing, payload: form });
-    } else {
-      createMutation.mutate({ domain: sheet.domain, payload: form });
-    }
-  };
-
+  const domainNameTrimmed = draft.domainName.trim();
+  const nameErr = !domainNameTrimmed
+    ? t('receiving.domainNameRequired')
+    : !isDomain(domainNameTrimmed)
+      ? t('receiving.domainNameInvalid')
+      : rows.some((r) => r.id !== editingId && r.domainName.toLowerCase() === domainNameTrimmed.toLowerCase())
+        ? t('receiving.domainNameDuplicate')
+        : '';
+  const hostErr = draft.targetHosts.length === 0 ? t('receiving.targetHostsRequired') : '';
+  const portErr = draft.targetPort < 1 || draft.targetPort > 65535 ? t('receiving.targetPortRequired') : '';
+  const hasError = !!(nameErr || hostErr || portErr);
   const saving = createMutation.isPending || updateMutation.isPending;
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  const submitDomain = () => {
-    const name = domainName.trim();
-    if (!name) return;
-    createDomainMutation.mutate(name);
+  const handleSave = () => {
+    if (hasError) {
+      toast.error(t('receiving.saveErrorToast'));
+      return;
+    }
+    const payload: DraftState = {
+      domainName: domainNameTrimmed,
+      targetHosts: draft.targetHosts,
+      targetPort: draft.targetPort,
+    };
+    if (editingId != null) {
+      const domain = domains.find((d) => d.id === editingId);
+      if (!domain) return;
+      updateMutation.mutate({ domain, existingNexthops: nexthopsByDomain[editingId] ?? [], payload });
+    } else {
+      createMutation.mutate(payload);
+    }
   };
 
-  if (domains.length === 0) {
-    return (
-      <>
-        <div className="flex justify-end mb-2">
-          <Button size="sm" onClick={() => setDomainSheet(true)}>
-            <Plus className="mr-1 h-4 w-4" />
-            {t('receiving.addDomain')}
-          </Button>
-        </div>
-        <EmptyState title={t('receiving.noDomains')} />
-        <Sheet open={domainSheet} onOpenChange={(open) => !open && setDomainSheet(false)}>
-          <SheetContent side="right" className="w-full sm:max-w-md">
-            <SheetHeader>
-              <SheetTitle>{t('receiving.addDomain')}</SheetTitle>
-            </SheetHeader>
-            <div className="space-y-4 px-4 py-4">
-              <div className="space-y-1.5">
-                <Label>{t('receiving.domainColumn')}</Label>
-                <Input
-                  value={domainName}
-                  onChange={(e) => setDomainName(e.target.value)}
-                  placeholder="example.com"
-                  onKeyDown={(e) => e.key === 'Enter' && submitDomain()}
-                />
-              </div>
+  const runConnectivityTest = async () => {
+    if (!mockOn) return;
+    setTestState('loading');
+    try {
+      const [result] = await Promise.all([
+        testConnectivity(apiRequest),
+        new Promise((resolve) => setTimeout(resolve, 900)),
+      ]);
+      setTestState(result.success ? 'ok' : 'fail');
+    } catch {
+      setTestState('fail');
+    }
+  };
+
+  const loading = domainsLoading || (domains.length > 0 && nexthopsLoading);
+
+  return (
+    <div className="space-y-4 rounded-xl border border-border bg-card p-5" data-testid="mr-recv-root">
+      <ListToolbar
+        search={search}
+        onSearchChange={(v) => {
+          setSearch(v);
+          setPage(1);
+        }}
+        searchPlaceholder={t('receiving.searchPlaceholder')}
+        onReset={resetFilters}
+        filterCount={filterCount}
+        filterContent={
+          <>
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground">{t('receiving.hostsColumn')}</span>
+              <Input
+                value={filters.target}
+                onChange={(e) => {
+                  setFilters((f) => ({ ...f, target: e.target.value }));
+                  setPage(1);
+                }}
+                placeholder={t('receiving.filterTargetPlaceholder')}
+                className="h-9"
+                data-testid="mr-recv-filter-target"
+              />
             </div>
-            <SheetFooter>
-              <Button variant="outline" onClick={() => setDomainSheet(false)}>{tc('cancel')}</Button>
-              <Button onClick={submitDomain} disabled={createDomainMutation.isPending}>
-                {createDomainMutation.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-                {tc('save')}
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground">{t('receiving.portColumn')}</span>
+              <Input
+                value={filters.port}
+                onChange={(e) => {
+                  setFilters((f) => ({ ...f, port: e.target.value }));
+                  setPage(1);
+                }}
+                placeholder={t('receiving.filterPortPlaceholder')}
+                className="h-9"
+                data-testid="mr-recv-filter-port"
+              />
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground">{t('receiving.statusColumn')}</span>
+              <Select
+                value={filters.status}
+                onValueChange={(v) => {
+                  setFilters((f) => ({ ...f, status: v as Filters['status'] }));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-9" data-testid="mr-recv-filter-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('receiving.filterStatusAll')}</SelectItem>
+                  <SelectItem value="normal">{ts('probe.normal')}</SelectItem>
+                  <SelectItem value="abnormal">{ts('probe.abnormal')}</SelectItem>
+                  <SelectItem value="partial">{ts('probe.partial')}</SelectItem>
+                  <SelectItem value="unchecked">{ts('probe.unchecked')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        }
+        actions={
+          <Button size="sm" className="h-9 gap-1.5" onClick={openCreate} data-testid="mr-recv-create">
+            <Plus className="h-4 w-4" />
+            {ts('create')}
+          </Button>
+        }
+        testIdPrefix="mr-recv"
+      />
+
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : filteredRows.length === 0 ? (
+        <div data-testid="mr-recv-empty">
+          <EmptyState
+            title={ts('emptyText')}
+            action={
+              <Button variant="outline" size="sm" onClick={openCreate}>
+                {ts('addNow')}
               </Button>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
-      </>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button size="sm" onClick={() => setDomainSheet(true)}>
-          <Plus className="mr-1 h-4 w-4" />
-          {t('receiving.addDomain')}
-        </Button>
-      </div>
-      {domains.map((domain) => (
-        <DomainCard
-          key={domain.id}
-          tenantId={tenantId}
-          domain={domain}
-          probing={probingDomainId === domain.id}
-          serverStatus={serverStatusByDomain[domain.id]}
-          onProbe={() => probeMutation.mutate(domain.id)}
-          onAddNexthop={(existingPort) => openCreate(domain, existingPort)}
-          onEditNexthop={(nh) => openEdit(domain, nh)}
-          onDeleteNexthop={(nh) => setDeleteTarget({ domain, nh })}
-          onDeleteDomain={() => setDomainDeleteTarget(domain)}
-        />
-      ))}
-
-      <Sheet
-        open={sheet.open}
-        onOpenChange={(open) => !open && setSheet({ open: false, domain: null, editing: null })}
-      >
-        <SheetContent side="right" className="w-full sm:max-w-md">
-          <SheetHeader>
-            <SheetTitle>
-              {sheet.editing ? t('receiving.editNexthop') : t('receiving.addNexthop')}
-            </SheetTitle>
-            <SheetDescription>
-              {sheet.domain?.domain ? `${sheet.domain.domain} · ` : ''}
-              {t('receiving.priorityLabel')}
-            </SheetDescription>
-          </SheetHeader>
-          <div className="space-y-4 px-4 py-4">
-            <div className="space-y-1.5">
-              <Label>{t('receiving.hostLabel')} *</Label>
-              <Input
-                value={form.host}
-                onChange={(e) => setForm((f) => ({ ...f, host: e.target.value }))}
-                placeholder="mx.example.com"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>{t('receiving.portLabel')} *</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={65535}
-                  value={form.port}
-                  onChange={(e) => setForm((f) => ({ ...f, port: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>{t('receiving.typeLabel')}</Label>
-                <Select
-                  value={form.next_hop_type}
-                  onValueChange={(v) => setForm((f) => ({ ...f, next_hop_type: v as NextHopType }))}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="domain">domain</SelectItem>
-                    <SelectItem value="ip">ip</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>{t('receiving.priorityLabel')}</Label>
-              <Input
-                type="number"
-                value={form.priority}
-                onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value }))}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={form.is_active}
-                onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: !!v }))}
-              />
-              <Label>{t('receiving.activeLabel')}</Label>
-            </div>
-          </div>
-          <SheetFooter>
-            <Button variant="outline" onClick={() => setSheet({ open: false, domain: null, editing: null })}>
-              {tc('cancel')}
-            </Button>
-            <Button onClick={submit} disabled={saving}>
-              {saving && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-              {tc('save')}
-            </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={tc('confirmDelete')}
-        variant="destructive"
-        onConfirm={() => {
-          if (deleteTarget) {
-            deleteMutation.mutate({ domain: deleteTarget.domain, nh: deleteTarget.nh });
-          }
-        }}
-      />
-
-      <Sheet open={domainSheet} onOpenChange={(open) => !open && setDomainSheet(false)}>
-        <SheetContent side="right" className="w-full sm:max-w-md">
-          <SheetHeader>
-            <SheetTitle>{t('receiving.addDomain')}</SheetTitle>
-          </SheetHeader>
-          <div className="space-y-4 px-4 py-4">
-            <div className="space-y-1.5">
-              <Label>{t('receiving.domainColumn')}</Label>
-              <Input
-                value={domainName}
-                onChange={(e) => setDomainName(e.target.value)}
-                placeholder="example.com"
-                onKeyDown={(e) => e.key === 'Enter' && submitDomain()}
-              />
-            </div>
-          </div>
-          <SheetFooter>
-            <Button variant="outline" onClick={() => setDomainSheet(false)}>{tc('cancel')}</Button>
-            <Button onClick={submitDomain} disabled={createDomainMutation.isPending}>
-              {createDomainMutation.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-              {tc('save')}
-            </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-
-      <ConfirmDialog
-        open={!!domainDeleteTarget}
-        onOpenChange={(open) => !open && setDomainDeleteTarget(null)}
-        title={tc('confirmDelete')}
-        variant="destructive"
-        onConfirm={() => {
-          if (domainDeleteTarget) {
-            deleteDomainMutation.mutate(domainDeleteTarget);
-          }
-        }}
-      />
-    </div>
-  );
-}
-
-interface DomainCardProps {
-  tenantId: number;
-  domain: TenantDomain;
-  probing: boolean;
-  serverStatus?: ProbeStatus;
-  onProbe: () => void;
-  onAddNexthop: (existingPort?: number | string) => void;
-  onEditNexthop: (nh: TenantDomainNexthop) => void;
-  onDeleteNexthop: (nh: TenantDomainNexthop) => void;
-  onDeleteDomain: () => void;
-}
-
-function DomainCard({
-  tenantId,
-  domain,
-  probing,
-  serverStatus,
-  onProbe,
-  onAddNexthop,
-  onEditNexthop,
-  onDeleteNexthop,
-  onDeleteDomain,
-}: DomainCardProps) {
-  const t = useTranslations('mailRouting');
-  const tc = useTranslations('common');
-  const { apiRequest } = useScopedApiRequest(tenantId);
-
-  const { data: nexthops = [] } = useQuery({
-    queryKey: ['mail-routing-nexthops', tenantId, domain.id],
-    queryFn: () => listNexthops(tenantId, domain.id, apiRequest),
-  });
-
-  // The nexthops list endpoint returns {"items": null} when empty (not []),
-  // so listNexthops resolves to null and the `= []` default above does NOT
-  // apply (defaults only catch undefined). Normalize here so the spreads/filters
-  // below never hit "null is not iterable".
-  const nexthopList = nexthops ?? [];
-  const sorted = [...nexthopList].sort((a, b) => b.priority - a.priority || a.id - b.id);
-  // Prefer the server-computed aggregate (authoritative, from the probe
-  // response); fall back to the client recomputation only before the first
-  // probe (review M17).
-  const clientStatus = aggregateProbeStatus(nexthopList);
-  const status: ProbeStatus = serverStatus ?? clientStatus;
-  const probeTime = lastProbeTime(nexthopList);
-
-  const hostsSummary = sorted
-    .filter((nh) => nh.is_active)
-    .map((nh) => nh.host)
-    .join(', ') || '—';
-
-  const activePort = sorted.find((nh) => nh.is_active)?.port ?? '—';
-
-  // For the partial badge, show normal/total so ops sees the split (spec §4.2,
-  // review M14).
-  const activeNexthops = sorted.filter((nh) => nh.is_active);
-  const normalCount = activeNexthops.filter((nh) => nh.probe_status === 'normal').length;
-  const statusLabel =
-    status === 'partial' && activeNexthops.length > 0
-      ? `${t('receiving.status.partial')} (${normalCount}/${activeNexthops.length})`
-      : t(`receiving.status.${status}`);
-
-  return (
-    <section className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="font-mono text-sm font-semibold">{domain.domain}</span>
-          <span className="text-sm text-muted-foreground">{hostsSummary}</span>
-          <span className="text-sm text-muted-foreground">:{activePort}</span>
-          <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_CLASSES[status]}`}
-          >
-            {/* During a probe, show the spinner in the status badge itself (spec
-                §4.2 / review M16), not only on the button. */}
-            {probing ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : null}
-            {statusLabel}
-          </span>
-          {probeTime && (
-            <span className="text-xs text-muted-foreground">
-              {t('receiving.lastProbeColumn')}: {formatDate(probeTime)}
-            </span>
-          )}
+            }
+          />
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onProbe}
-            disabled={probing}
-            title={t('receiving.statusHint')}
-          >
-            {probing ? (
-              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-            ) : (
-              <Wifi className="mr-1 h-4 w-4" />
-            )}
-            {probing ? t('receiving.probing') : t('receiving.probeButton')}
-          </Button>
-          <Button size="sm" onClick={() => onAddNexthop(activePort === '—' ? undefined : activePort)}>
-            <Plus className="mr-1 h-4 w-4" />
-            {t('receiving.addNexthop')}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-destructive"
-            title={t('receiving.deleteDomain')}
-            onClick={onDeleteDomain}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </header>
-
-      {sorted.length === 0 ? (
-        <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-          {t('receiving.noNexthops')}
-        </p>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('receiving.hostLabel')}</TableHead>
-              <TableHead>{t('receiving.portLabel')}</TableHead>
-              <TableHead>{t('receiving.typeLabel')}</TableHead>
-              <TableHead>{t('receiving.priorityLabel')}</TableHead>
-              <TableHead>{t('receiving.activeLabel')}</TableHead>
-              <TableHead>{t('receiving.statusColumn')}</TableHead>
-              <TableHead className="text-right">{t('receiving.actionsColumn')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sorted.map((nh) => {
-              const nhStatus = (nh.probe_status as ProbeStatus) ?? 'unchecked';
-              return (
-                <TableRow key={nh.id}>
-                  <TableCell className="font-mono text-sm">{nh.host}</TableCell>
-                  <TableCell className="tabular-nums">{nh.port}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{nh.next_hop_type}</Badge>
+        <>
+          <Table data-testid="mr-recv-table">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('receiving.domainColumn')}</TableHead>
+                <TableHead>{t('receiving.hostsColumn')}</TableHead>
+                <TableHead>{t('receiving.portColumn')}</TableHead>
+                <TableHead>{t('receiving.statusColumn')}</TableHead>
+                <TableHead>{t('receiving.lastProbeColumn')}</TableHead>
+                <TableHead className="w-[180px]">{t('receiving.actionsColumn')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pagedRows.map((row) => (
+                <TableRow key={row.id} data-testid={`mr-recv-row-${row.id}`}>
+                  <TableCell className="font-medium">{row.domainName}</TableCell>
+                  <TableCell className="max-w-[280px]">
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <span className="block truncate text-muted-foreground">
+                            {row.targetHosts.join('、')}
+                          </span>
+                        }
+                      />
+                      <TooltipContent>{row.targetHosts.join('、')}</TooltipContent>
+                    </Tooltip>
                   </TableCell>
-                  <TableCell className="tabular-nums">{nh.priority}</TableCell>
+                  <TableCell>{row.targetPort}</TableCell>
                   <TableCell>
-                    <span
-                      className={nh.is_active ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}
-                    >
-                      {nh.is_active ? tc('active') : tc('inactive')}
-                    </span>
+                    {probingId === row.id ? (
+                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        {t('receiving.probing')}
+                      </span>
+                    ) : (
+                      <ProbeBadge
+                        status={row.status}
+                        abnormalCount={row.abnormalCount}
+                        total={row.total}
+                        testId={`mr-recv-status-${row.id}`}
+                      />
+                    )}
                   </TableCell>
+                  <TableCell className="text-muted-foreground">{formatDate(row.lastProbeTime)}</TableCell>
                   <TableCell>
-                    <span className={`text-sm ${STATUS_CLASSES[nhStatus]}`}>
-                      {t(`receiving.status.${nhStatus}`)}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => onEditNexthop(nh)}>
-                        <Pencil className="h-4 w-4" />
+                    <div className="flex items-center gap-0.5">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 gap-1 text-muted-foreground"
+                        disabled={probingId === row.id}
+                        onClick={() => probeMutation.mutate(row.id)}
+                        data-testid={`mr-recv-probe-${row.id}`}
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        {t('receiving.probeButton')}
                       </Button>
                       <Button
                         variant="ghost"
-                        size="icon"
-                        className="text-destructive"
-                        onClick={() => onDeleteNexthop(nh)}
+                        size="sm"
+                        className="h-7 gap-1 text-blue-600"
+                        onClick={() => openEdit(row)}
+                        data-testid={`mr-recv-edit-${row.id}`}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Pencil className="h-3.5 w-3.5" />
+                        {t('receiving.editButton')}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 gap-1 text-destructive"
+                        onClick={() => {
+                          const domain = domains.find((d) => d.id === row.id);
+                          if (domain) setDeleteTarget(domain);
+                        }}
+                        data-testid={`mr-recv-delete-${row.id}`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        {t('receiving.deleteButton')}
                       </Button>
                     </div>
                   </TableCell>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+              ))}
+            </TableBody>
+          </Table>
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 text-sm text-muted-foreground">
+            <span>{tc('total', { count: filteredRows.length })}</span>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={currentPage <= 1}
+                  onClick={() => setPage(currentPage - 1)}
+                  aria-label={tc('previous')}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="px-2 text-xs">
+                  {currentPage} / {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setPage(currentPage + 1)}
+                  aria-label={tc('next')}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </>
       )}
-    </section>
+
+      <Sheet open={drawerOpen} onOpenChange={(open) => !open && closeDrawer()}>
+        <SheetContent side="right" className="w-full sm:max-w-xl" data-testid="mr-recv-drawer">
+          <SheetHeader>
+            <SheetTitle>{editingId != null ? t('receiving.drawerTitleEdit') : t('receiving.drawerTitleNew')}</SheetTitle>
+            <SheetDescription>{t('receiving.drawerDescription')}</SheetDescription>
+          </SheetHeader>
+          <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
+            <div className="space-y-3 rounded-lg border border-border p-4">
+              <h4 className="text-sm font-medium">{t('receiving.sectionBasic')}</h4>
+              <div className="space-y-1.5">
+                <Label>
+                  {t('receiving.domainNameLabel')}
+                  <span className="ml-0.5 text-destructive">*</span>
+                </Label>
+                <Input
+                  value={draft.domainName}
+                  onChange={(e) => setDraft((d) => ({ ...d, domainName: e.target.value }))}
+                  placeholder={t('receiving.domainNamePlaceholder')}
+                  data-testid="mr-recv-domain-input"
+                />
+                {nameErr && (
+                  <p className="text-xs text-destructive" data-testid="mr-recv-domain-error">
+                    {nameErr}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label>
+                  {t('receiving.hostsColumn')}
+                  <span className="ml-0.5 text-destructive">*</span>
+                </Label>
+                <TagInput
+                  value={draft.targetHosts}
+                  onChange={(v) => setDraft((d) => ({ ...d, targetHosts: v }))}
+                  placeholder={t('receiving.targetHostsPlaceholder')}
+                  validate={isHostOrIp}
+                  invalidHint={ts('invalidHostOrIp')}
+                  testIdPrefix="mr-recv-tag"
+                />
+                {!hostErr && <p className="text-xs text-muted-foreground">{t('receiving.targetHostsHint')}</p>}
+                {hostErr && (
+                  <p className="text-xs text-destructive" data-testid="mr-recv-hosts-error">
+                    {hostErr}
+                  </p>
+                )}
+              </div>
+              <div className="grid grid-cols-2 items-end gap-4">
+                <div className="space-y-1.5">
+                  <Label>
+                    {t('receiving.portColumn')}
+                    <span className="ml-0.5 text-destructive">*</span>
+                  </Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={65535}
+                    value={draft.targetPort}
+                    onChange={(e) => setDraft((d) => ({ ...d, targetPort: Number(e.target.value) }))}
+                    data-testid="mr-recv-port-input"
+                  />
+                  {portErr && (
+                    <p className="text-xs text-destructive" data-testid="mr-recv-port-error">
+                      {portErr}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 pb-0.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={draft.targetHosts.length === 0 || testState === 'loading' || !mockOn}
+                    title={!mockOn ? t('receiving.testRealModeHint') : undefined}
+                    onClick={runConnectivityTest}
+                    data-testid="mr-recv-test-btn"
+                  >
+                    {t('receiving.testConnectivity')}
+                  </Button>
+                  <TestResultTag state={testState} testId="mr-recv-test-result" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <SheetFooter>
+            <Button onClick={handleSave} disabled={saving} data-testid="mr-recv-save">
+              {saving && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
+              {tc('save')}
+            </Button>
+            <Button variant="outline" onClick={closeDrawer} data-testid="mr-recv-cancel">
+              {tc('cancel')}
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent data-testid="mr-recv-delete-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t('receiving.deleteDialogTitle', { domain: deleteTarget?.domain ?? '' })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>{t('receiving.deleteDialogDescription')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget)}
+              data-testid="mr-recv-delete-confirm"
+            >
+              {t('receiving.deleteConfirmButton')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Save, RotateCcw, Loader2, Shield, AlertTriangle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PageShell, PageHeader } from '@/components/shared/page-shell';
+import { FramedPage } from '@/components/shared/page-shell';
 import { useApiRequest, ApiError } from '@/lib/api/client';
 import { getDisposalSettings, putDisposalSettings } from '@/lib/api/disposal-settings';
 import { DISPOSAL_CATEGORY_KEYS, type DisposalSettings } from '@/types/disposal-settings';
@@ -21,6 +21,7 @@ import { getBrowserTz } from '@/lib/timezone';
 import { useTenant } from '@/hooks/use-tenant';
 import { useProductForm } from '@/contexts/product-form-context';
 import { useAuth } from '@/contexts/auth-context';
+import { useUnsavedGuard } from '@/contexts/unsaved-guard-context';
 
 function normalizeTime(v: string): string {
   if (/^\d{2}:\d{2}$/.test(v)) return `${v}:00`;
@@ -33,12 +34,15 @@ export function DisposalSettingsPage() {
   const { apiRequest } = useApiRequest();
   const { effectiveTenantId } = useTenant();
   const { capabilities } = useProductForm();
-  const { isSystemAdmin } = useAuth();
+  const { isSystemAdmin, demoAuthBypassEnabled } = useAuth();
+  const { registerGuard, unregisterGuard } = useUnsavedGuard();
   // GT-12427: 多租户下「处置设置」是租户自有配置(registry platformHidden=true 已隐藏平台
   // 视角侧栏入口)。平台管理员未下钻到具体租户(effectiveTenantId===null)时,即便手贴 URL
   // 也拒绝渲染/取数,与同区兄弟模块 group-policy 一致;下钻进入某租户后按该租户身份正常配置。
+  // Demo bypass 模式下底层账号仍是超管(isSystemAdmin=true)，但实际操作身份是租户管理员，
+  // 不应触发平台视角 403，与 detailReadOnly 的修复逻辑保持一致。
   const platformWithoutTenant =
-    !!capabilities?.multiTenant && isSystemAdmin && effectiveTenantId === null;
+    !demoAuthBypassEnabled && !!capabilities?.multiTenant && isSystemAdmin && effectiveTenantId === null;
 
   const { data, isLoading } = useQuery({
     queryKey: ['disposal-settings', effectiveTenantId],
@@ -78,25 +82,37 @@ export function DisposalSettingsPage() {
       form.reset(saved);
       toast.success(t('saveSuccess'));
     } catch (e) {
-      const message = e instanceof Error ? e.message : t('saveFailed');
-      // portal_base_url is conditionally required (backend 400s when
-      // recall/preview is enabled and it's empty); surface that message next
-      // to the field IN ADDITION to the toast (GT-12077). The toast is not
-      // optional: the field lives on the quarantine tab, so a save triggered
-      // from the review/recall tab would otherwise fail with nothing visible
-      // at all — the button would just appear to do nothing.
-      if (e instanceof ApiError && e.status === 400 && message.includes('portal_base_url')) {
-        form.setError('quarantine.portal_base_url', { type: 'server', message });
+      const rawMessage = e instanceof Error ? e.message : '';
+
+      // 将已知的后端英文错误映射为 i18n 键，避免裸露字段名和英文原文给终端用户。
+      // 匹配优先级：portal_base_url > 分类置信度 > 通用 saveFailed。
+      let toastMessage: string;
+
+      if (e instanceof ApiError && e.status === 400 && rawMessage.includes('portal_base_url')) {
+        // 把错误同时标注到字段旁（字段渲染层已通过 t('portalBaseUrlRequired') 翻译，
+        // setError 的 message 只用作 fieldState.error 存在性判断，不直接渲染）。
+        form.setError('quarantine.portal_base_url', {
+          type: 'server',
+          message: 'portalBaseUrlRequired',
+        });
+        toastMessage = t('portalBaseUrlRequired');
       } else if (e instanceof ApiError && e.status === 400) {
         // 分类置信度区间的服务端校验错误信息带分类键名（如
         // "min_score must be <= max_score for phishing"），据此把错误挂到
-        // 对应分类行；无法定位键时保持 toast-only。
-        const key = DISPOSAL_CATEGORY_KEYS.find((k) => message.includes(k));
+        // 对应分类行；字段错误文案统一走 t('scoreRangeError')，toast 走通用失败文案。
+        const key = DISPOSAL_CATEGORY_KEYS.find((k) => rawMessage.includes(k));
         if (key) {
-          form.setError(`quarantine.category_notify.${key}`, { type: 'server', message });
+          form.setError(`quarantine.category_notify.${key}`, {
+            type: 'server',
+            message: 'scoreRangeError',
+          });
         }
+        toastMessage = t('saveFailed');
+      } else {
+        toastMessage = rawMessage || t('saveFailed');
       }
-      toast.error(message);
+
+      toast.error(toastMessage);
     }
   };
 
@@ -104,12 +120,56 @@ export function DisposalSettingsPage() {
   // 至少给一个明确的失败提示，具体字段错误由各 tab 就地渲染。
   const onInvalid = () => toast.error(t('saveValidationFailed'));
 
+  // 供 UnsavedGuardDialog「保存后离开」选项调用：触发完整的 RHF 校验+提交流程。
+  const saveForGuard = useCallback(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        form.handleSubmit(
+          async (values) => {
+            await onSubmit(values);
+            resolve();
+          },
+          () => {
+            // 校验失败：让 Promise reject，保持弹窗关闭但停留在页面
+            toast.error(t('saveValidationFailed'));
+            reject(new Error('validation'));
+          },
+        )();
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [form],
+  );
+
+  // 注册 / 更新 guard（随 isDirty 变化实时同步）
+  const isDirty = form.formState.isDirty;
+  useEffect(() => {
+    registerGuard({ isDirty, onSave: isDirty ? saveForGuard : undefined });
+    return () => {
+      unregisterGuard();
+    };
+    // saveForGuard 依赖 form（稳定引用），isDirty 是基础类型，不会引起无限循环。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDirty, saveForGuard]);
+
+  // 浏览器关闭/刷新时的原生拦截
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!form.formState.isDirty) return;
+      e.preventDefault();
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [form]);
+
   const onReset = () => form.reset(defaultDisposalSettings());
 
   if (platformWithoutTenant) {
     return (
-      <PageShell data-testid="disposal-settings-page">
-        <PageHeader title={t('pageTitle')} description={t('pageDescription')} />
+      <FramedPage
+        title={t('pageTitle')}
+        description={t('pageDescription')}
+        data-testid="disposal-settings-page"
+      >
         <div
           className="flex items-center justify-center min-h-[400px]"
           data-testid="disposal-settings-tenant-required"
@@ -119,68 +179,44 @@ export function DisposalSettingsPage() {
             <p className="text-muted-foreground">{tCommon('accessDenied')}</p>
           </div>
         </div>
-      </PageShell>
+      </FramedPage>
     );
   }
 
   if (isLoading) {
     return (
-      <PageShell data-testid="disposal-settings-page">
-        <PageHeader title={t('pageTitle')} description={t('pageDescription')} />
+      <FramedPage
+        title={t('pageTitle')}
+        description={t('pageDescription')}
+        data-testid="disposal-settings-page"
+      >
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      </PageShell>
+      </FramedPage>
     );
   }
 
   const { control, watch, setValue } = form;
 
   return (
-    <PageShell data-testid="disposal-settings-page">
-      <PageHeader
-        title={t('pageTitle')}
-        description={t('pageDescription')}
-        actions={
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              data-testid="disposal-settings-reset"
-              onClick={onReset}
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              {t('reset')}
-            </Button>
-            <Button
-              type="button"
-              data-testid="disposal-settings-save"
-              onClick={form.handleSubmit(onSubmit, onInvalid)}
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              {t('save')}
-            </Button>
-          </div>
-        }
-      />
-
+    <FramedPage
+      title={t('pageTitle')}
+      description={t('pageDescription')}
+      data-testid="disposal-settings-page"
+    >
       <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
         <Tabs defaultValue="quarantine" data-testid="disposal-settings-tabs">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="quarantine" data-testid="disposal-settings-tab-quarantine">
+            <TabsTrigger value="quarantine" data-testid="disposal-settings-tab-quarantine" className="data-active:!bg-white data-active:!text-gray-900">
               <Shield className="mr-2 h-4 w-4" />
               {t('tabQuarantine')}
             </TabsTrigger>
-            <TabsTrigger value="review" data-testid="disposal-settings-tab-review">
+            <TabsTrigger value="review" data-testid="disposal-settings-tab-review" className="data-active:!bg-white data-active:!text-gray-900">
               <AlertTriangle className="mr-2 h-4 w-4" />
               {t('tabReview')}
             </TabsTrigger>
-            <TabsTrigger value="recall" data-testid="disposal-settings-tab-recall">
+            <TabsTrigger value="recall" data-testid="disposal-settings-tab-recall" className="data-active:!bg-white data-active:!text-gray-900">
               <Clock className="mr-2 h-4 w-4" />
               {t('tabRecall')}
             </TabsTrigger>
@@ -201,7 +237,30 @@ export function DisposalSettingsPage() {
             <RecallSettingsTab control={control} watch={watch} setValue={setValue} />
           </TabsContent>
         </Tabs>
+        <div className="sticky bottom-0 z-10 mt-6 flex justify-end gap-2 border-t bg-background/95 px-1 py-3 backdrop-blur-sm">
+          <Button
+            type="button"
+            variant="outline"
+            data-testid="disposal-settings-reset"
+            onClick={onReset}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            {t('reset')}
+          </Button>
+          <Button
+            type="submit"
+            data-testid="disposal-settings-save"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            {t('save')}
+          </Button>
+        </div>
       </form>
-    </PageShell>
+    </FramedPage>
   );
 }

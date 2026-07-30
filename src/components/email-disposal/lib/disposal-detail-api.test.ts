@@ -25,7 +25,7 @@ describe('disposeByObject', () => {
 describe('addUrlRule', () => {
   test('domain field: page=url_protection, field=urls, operator=contain, value=domain', async () => {
     const requestFn = vi.fn().mockResolvedValue({}) as unknown as ApiRequestFn;
-    await addUrlRule('evil.com', 'domain', requestFn);
+    await addUrlRule('evil.com', 'domain', requestFn, 5000);
 
     expect(requestFn).toHaveBeenCalledTimes(1);
     const [url, opts] = (requestFn as ReturnType<typeof vi.fn>).mock.calls[0];
@@ -36,15 +36,17 @@ describe('addUrlRule', () => {
       rule_class: 'action',
       stage: 'data',
       action: 'reject',
+      priority: 5000,
       condition_tree: { type: 'condition', field: 'urls', operator: 'contain', value: 'evil.com' },
     });
   });
 
   test('url field: same field/operator, full URL as value', async () => {
     const requestFn = vi.fn().mockResolvedValue({}) as unknown as ApiRequestFn;
-    await addUrlRule('https://evil.com/phish', 'url', requestFn);
+    await addUrlRule('https://evil.com/phish', 'url', requestFn, 1000);
 
     const [, opts] = (requestFn as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(opts.body.priority).toBe(1000);
     expect(opts.body.condition_tree).toEqual({
       type: 'condition', field: 'urls', operator: 'contain', value: 'https://evil.com/phish',
     });
@@ -54,7 +56,7 @@ describe('addUrlRule', () => {
 describe('addAttachmentHashRule', () => {
   test('page=attachment_security, stage=sideline, field=attachment_md5, operator=eq', async () => {
     const requestFn = vi.fn().mockResolvedValue({}) as unknown as ApiRequestFn;
-    await addAttachmentHashRule('deadbeef', requestFn);
+    await addAttachmentHashRule('deadbeef', requestFn, 1000);
 
     expect(requestFn).toHaveBeenCalledTimes(1);
     const [url, opts] = (requestFn as ReturnType<typeof vi.fn>).mock.calls[0];
@@ -65,6 +67,7 @@ describe('addAttachmentHashRule', () => {
       rule_class: 'action',
       stage: 'sideline',
       action: 'reject',
+      priority: 1000,
       condition_tree: { type: 'condition', field: 'attachment_md5', operator: 'eq', value: 'deadbeef' },
     });
   });

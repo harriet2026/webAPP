@@ -293,7 +293,6 @@ test.describe('GT-11765 Storage Audit Fixes', () => {
           selection: {
             include_rules: true,
             include_detection_profiles: true,
-            include_bounce_dsn_settings: true,
           },
           import_mode: { mode: 'restore_original_tenants' },
         },

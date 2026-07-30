@@ -12,6 +12,7 @@
 // pattern Task 4/5 established, that comes from `useSecurityScope(null)`
 // directly — not a hand-rolled `viewer === 'tenant'` check.
 import { useTranslations } from 'next-intl';
+import { useHydrated } from '@/hooks/use-hydrated';
 import { PartyPopper, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
@@ -88,6 +89,7 @@ function itemDescription(item: SystemStatusAlertItem, t: TFn): string {
 export function TodoAlerts({ alerts, isLoading }: TodoAlertsProps) {
   const t = useTranslations('systemStatus.todo');
   const tSidebar = useTranslations('sidebar');
+  const mounted = useHydrated();
   const { effectiveViewer } = useSecurityScope(null);
   const isPlatform = effectiveViewer === 'platform';
   const agentRowVisibility = useAgentRowVisibility();
@@ -152,7 +154,7 @@ export function TodoAlerts({ alerts, isLoading }: TodoAlertsProps) {
           </ul>
         )}
       </CardContent>
-      {isPlatform && (
+      {mounted && isPlatform && (
         <CardFooter>
           <DashboardCardFooterLink
             href="/monitoring/alerts"

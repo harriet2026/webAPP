@@ -6,6 +6,7 @@ import type {
   ProxysvrGroup,
   ProxysvrGroupRequest,
   ProxysvrGroupListResponse,
+  ProxysvrProbeResult,
 } from '@/types/proxysvr';
 
 // fetchAll fetches all pages of a paginated list endpoint (page_size=100 per request).
@@ -69,6 +70,18 @@ export async function deleteProxysvrEndpoint(
   requestFn: ApiRequestFn = apiRequest
 ): Promise<void> {
   return requestFn<void>(`/proxysvr-endpoints/${id}`, { method: 'DELETE' });
+}
+
+/**
+ * 对单个端点做一次连通性探测（TCP dial，use_tls 时改走 TLS 握手），单次 ≤5s，
+ * 服务端回写 probe_status/last_probe_time 并原样返回。诊断快照，不影响投递路由决策
+ * （doc/mail-routing.md §4）。
+ */
+export async function probeProxysvrEndpoint(
+  id: number,
+  requestFn: ApiRequestFn = apiRequest
+): Promise<ProxysvrProbeResult> {
+  return requestFn<ProxysvrProbeResult>(`/proxysvr-endpoints/${id}/probe`, { method: 'POST' });
 }
 
 // ---- groups ----

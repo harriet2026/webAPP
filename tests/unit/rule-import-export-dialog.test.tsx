@@ -33,7 +33,6 @@ const sampleEnvelope: RuleExportEnvelope = {
       },
     ],
     detection_profiles: [],
-    bounce_dsn_settings: [],
   },
 };
 
@@ -71,7 +70,7 @@ describe('rule-import-export-helpers', () => {
           ...sampleEnvelope,
           data: {
             ...sampleEnvelope.data,
-            bounce_dsn_settings: ['bad-item'],
+            detection_profiles: ['bad-item'],
           },
         }))
       ).rejects.toThrow('Invalid import file');
@@ -92,7 +91,6 @@ describe('rule-import-export-helpers', () => {
       const groups = getAvailableImportGroups(sampleEnvelope);
       expect(groups.rules).toBe(true);
       expect(groups.detection_profiles).toBe(false);
-      expect(groups.bounce_dsn_settings).toBe(false);
     });
 
     it('returns all true when all groups have data', () => {
@@ -101,13 +99,11 @@ describe('rule-import-export-helpers', () => {
         data: {
           rules: sampleEnvelope.data.rules,
           detection_profiles: [{ id: 1, config_type: 'rbl' as const, name: 'test', is_active: true, created_at: '', updated_at: '' }],
-          bounce_dsn_settings: [{ id: 1, tenant_id: 1, domain: 'a.com', enabled: true, language: 'zh', include_original_headers: true, created_at: '', updated_at: '' }],
         },
       };
       const groups = getAvailableImportGroups(full);
       expect(groups.rules).toBe(true);
       expect(groups.detection_profiles).toBe(true);
-      expect(groups.bounce_dsn_settings).toBe(true);
     });
   });
 
@@ -118,7 +114,6 @@ describe('rule-import-export-helpers', () => {
         selection: {
           rules: true,
           detection_profiles: false,
-          bounce_dsn_settings: false,
         },
         importMode: {
           mode: 'restore_original_tenants',
@@ -129,7 +124,6 @@ describe('rule-import-export-helpers', () => {
       expect(payload.selection).toEqual({
         include_rules: true,
         include_detection_profiles: false,
-        include_bounce_dsn_settings: false,
       });
       expect(payload.import_mode).toEqual({
         mode: 'restore_original_tenants',
@@ -139,7 +133,7 @@ describe('rule-import-export-helpers', () => {
     it('includes target_tenant_id for import_to_selected_tenant mode', () => {
       const payload = buildPreviewPayload({
         file: sampleEnvelope,
-        selection: { rules: true, detection_profiles: false, bounce_dsn_settings: false },
+        selection: { rules: true, detection_profiles: false },
         importMode: { mode: 'import_to_selected_tenant', targetTenantId: 9 },
       });
       expect(payload.import_mode).toEqual({
@@ -156,7 +150,6 @@ describe('rule-import-export-helpers', () => {
         selection: {
           rules: true,
           detection_profiles: false,
-          bounce_dsn_settings: false,
         },
         importMode: {
           mode: 'import_to_selected_tenant',
@@ -178,7 +171,6 @@ describe('rule-import-export-helpers', () => {
         selection: {
           rules: true,
           detection_profiles: true,
-          bounce_dsn_settings: false,
         },
         importMode: {
           mode: 'restore_original_tenants',

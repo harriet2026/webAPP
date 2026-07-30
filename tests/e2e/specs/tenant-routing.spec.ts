@@ -58,7 +58,7 @@ async function deleteTenant(token: string, tenantId: number) {
 // in messages/zh.json). The drill-down now renders MailRoutingShell (unified
 // with the standalone /mail-routing page), so the tab labels are the
 // mailRouting.* ones, not the legacy tenants.routing.tabs.* labels.
-const RECEIVING_TAB = '收件域';
+const RECEIVING_TAB = '收信域管理';
 
 /**
  * Spec 2B — Tenant Routing UI (Task 8). Serial; covers the routing overview
@@ -142,7 +142,7 @@ test.describe.serial('Tenant Routing UI (Spec 2B)', () => {
     await expect(authenticatedPage.getByText(tenantName, { exact: true }).first()).toBeVisible();
     await expect(authenticatedPage.getByText(tenantCode)).toBeVisible();
 
-    // The drill-down now renders MailRoutingShell; its first tab (收件域) is
+    // The drill-down now renders MailRoutingShell; its first tab (收信域管理) is
     // present. Full per-tab CRUD is covered by specs/mail-routing.spec.ts.
     await expect(authenticatedPage.getByRole('tab', { name: RECEIVING_TAB })).toBeVisible();
   });

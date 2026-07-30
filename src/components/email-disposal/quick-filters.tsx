@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { useHydrated } from "@/hooks/use-hydrated";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -29,6 +30,7 @@ import {
 import { format, differenceInDays, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { EXECUTION_ACTIONS } from "@/types/email-disposal";
 import type { DisposalQuickFilter } from "@/types/email-disposal";
 import { MultiSelectFilter } from "./lib/multi-select-filter";
 import {
@@ -36,6 +38,7 @@ import {
   type DisposalLang,
 } from "./lib/disposal-basis-config";
 import { useLocale } from "next-intl";
+import { useProductForm } from "@/contexts/product-form-context";
 
 interface QuickFiltersProps {
   value: DisposalQuickFilter;
@@ -63,6 +66,14 @@ export function QuickFilters({
     : "zh";
   const [policyMode, setPolicyMode] = useState<"module" | "rule">("module");
   const [ruleSearch, setRuleSearch] = useState("");
+  const { viewer, capabilities } = useProductForm();
+  // 多租户产品形态 + 租户管理员视角下，阶段1（连接层）为平台级策略，
+  // 租户无权配置，处置依据筛选中将整个阶段1折叠为"平台管控策略"只读标签展示。
+  const hidePlatformStage = viewer === "tenant" && capabilities?.multiTenant === true;
+
+  // SSR/hydration 安全：tenantSelector 依赖客户端 capabilities（异步加载），
+  // SSR 时始终为 null，客户端水合后才显示，避免 DOM 结构不一致。
+  const mounted = useHydrated();
   // GT-12236: 原型要求处置依据按模块语义展示（附件安全检测为单一模块），
   // 而后端 policy_key 把它拆成 ATT-BASIC/ATT-QR/ATT-ENC 三个 key。
   // groupDisposalModulesByStage 按模块名分组合并：同名 key 只出现一次，
@@ -89,15 +100,10 @@ export function QuickFilters({
       .slice(0, 12);
   }, [disposalRuleOptions, ruleSearch]);
 
-  const actions = [
-    "accept",
-    "reject",
-    "bounce",
-    "discard",
-    "audit",
-    "quarantine",
-    "sideline",
-  ] as const;
+  // Single source of truth — defined in src/types/email-disposal.ts,
+  // shared with the 安全总览 › 安全态势分析 action series.
+  // mark_deliver 仅在安全总览图表中展示，处置中心搜索条件不开放此过滤项。
+  const actions = EXECUTION_ACTIONS.filter((a) => a !== 'mark_deliver');
   const directions = ["incoming", "outgoing", "internal"] as const;
   const mailTypes = [
     "normal",
@@ -154,12 +160,14 @@ export function QuickFilters({
   // 收发时间/收发类型/发信人/收信人同一行（QC UI04）。
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="disposal-quick-filters">
-          {tenantSelector ? (
-            <div className="order-1 space-y-1">
-              <label className="text-xs text-muted-foreground">{t("tenantScope")}</label>
-              {tenantSelector}
-            </div>
-          ) : null}
+          <div className="order-1 space-y-1">
+            {mounted && tenantSelector ? (
+              <>
+                <label className="text-xs text-muted-foreground">{t("tenantScope")}</label>
+                {tenantSelector}
+              </>
+            ) : null}
+          </div>
           <div className="order-2 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
               {t("sendReceiveTime")}
@@ -246,6 +254,20 @@ export function QuickFilters({
 
           <div className="order-4 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
+              {t("senderIp")}
+            </label>
+            <Input
+              data-testid="disposal-sender-ip-filter"
+              className="h-9 text-xs"
+              value={value.senderIp || ""}
+              onChange={(e) =>
+                onChange({ ...value, senderIp: e.target.value || undefined })
+              }
+            />
+          </div>
+
+          <div className="order-5 space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">
               {t("sender")}
             </label>
             <Input
@@ -258,7 +280,7 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-5 space-y-1">
+          <div className="order-6 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
               {t("recipient")}
             </label>
@@ -272,7 +294,7 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-6 space-y-1">
+          <div className="order-7 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
               {t("subject")}
             </label>
@@ -286,7 +308,7 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-10 space-y-1">
+          <div className="order-11 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
               {t("executionAction")}
             </label>
@@ -313,7 +335,7 @@ export function QuickFilters({
             </Select>
           </div>
 
-          <div className="order-8 space-y-1" data-testid="disposal-status-filter">
+          <div className="order-9 space-y-1" data-testid="disposal-status-filter">
             <label className="text-xs font-medium text-muted-foreground">
               {t("emailStatus")}
             </label>
@@ -335,7 +357,7 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-9 space-y-1" data-testid="disposal-mail-type-filter">
+          <div className="order-10 space-y-1" data-testid="disposal-mail-type-filter">
             <label className="text-xs font-medium text-muted-foreground">
               {t("mailType")}
             </label>
@@ -358,7 +380,7 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-7 space-y-1" data-testid="disposal-policy-filter">
+          <div className="order-8 space-y-1" data-testid="disposal-policy-filter">
             <label className="text-xs font-medium text-muted-foreground">
               {t("disposalPolicyKeys")}
             </label>
@@ -421,7 +443,39 @@ export function QuickFilters({
                         <div className="px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
                           {t(`policyStages.${stage}`)}
                         </div>
-                        {modules.map(({ moduleName, keys }) => {
+                        {/* 阶段1 + 多租户租户视角：合并为单条"平台管控策略"可勾选条目，
+                            勾选时将阶段1全部 policy_key 作为筛选条件传入 */}
+                        {hidePlatformStage && stage === 1 ? (() => {
+                          const allStage1Keys = modules.flatMap((m) => m.keys);
+                          const selected = value.disposalPolicyKeys ?? [];
+                          const checked = allStage1Keys.length > 0 && allStage1Keys.every((k) => selected.includes(k));
+                          return (
+                            <InteractiveSurface
+                              asChild
+                              variant="control"
+                              className="flex items-center gap-2 rounded px-2 py-1.5 text-xs data-[hovered=true]:bg-accent/70 focus-within:ring-2 focus-within:ring-ring/60"
+                            >
+                              <label>
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={() => {
+                                    const next = checked
+                                      ? selected.filter((item) => !allStage1Keys.includes(item))
+                                      : Array.from(new Set([...selected, ...allStage1Keys]));
+                                    onChange({
+                                      ...value,
+                                      disposalPolicyKeys: next.length > 0 ? next : undefined,
+                                    });
+                                  }}
+                                />
+                                <span className="min-w-0 flex-1 truncate">
+                                  {t("platformManagedPolicy")}
+                                </span>
+                                {checked ? <Check className="h-3 w-3 opacity-50" /> : null}
+                              </label>
+                            </InteractiveSurface>
+                          );
+                        })() : modules.map(({ moduleName, keys }) => {
                           const selected = value.disposalPolicyKeys ?? [];
                           const checked = keys.every((key) =>
                             selected.includes(key),

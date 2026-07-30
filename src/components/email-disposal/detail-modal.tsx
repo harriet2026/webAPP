@@ -220,7 +220,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                       'w-full rounded-none border-l-2 px-4 py-2 text-left text-sm',
                       'max-lg:w-auto max-lg:shrink-0 max-lg:whitespace-nowrap max-lg:border-l-0 max-lg:border-b-2',
                       activeSection === key
-                        ? 'border-primary bg-primary/10 font-medium text-foreground data-[hovered=true]:bg-primary/15'
+                        ? 'border-foreground/40 bg-muted font-medium text-foreground data-[hovered=true]:bg-muted/80'
                         : 'border-transparent text-muted-foreground data-[hovered=true]:bg-muted/50 data-[hovered=true]:text-foreground',
                     )}
                   >

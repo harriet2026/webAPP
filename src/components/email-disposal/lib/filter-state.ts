@@ -34,6 +34,7 @@ export function countQuickFilterConditions(quick: DisposalQuickFilter): number {
   if (quick.sendReceiveTime?.start || quick.sendReceiveTime?.end) count += 1;
   for (const key of [
     "sendReceiveType",
+    "senderIp",
     "sender",
     "recipient",
     "subject",

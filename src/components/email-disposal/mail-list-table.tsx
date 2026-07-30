@@ -30,8 +30,9 @@ import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils';
 import { resolveActionBadges, actionToVariant } from '@/lib/email-log-action';
 import type { DisposalMailItem, DisplayStatus } from '@/types/email-disposal';
-import { formatListReason, type DisposalLang } from './lib/disposal-basis-config';
+import { formatListReason, isStage1Policy, type DisposalLang } from './lib/disposal-basis-config';
 import { mailTypeLabelKey, correctionSourceLabelKey } from './lib/detail-helpers';
+import { useProductForm } from '@/contexts/product-form-context';
 
 interface MailListTableProps {
   items: DisposalMailItem[];
@@ -48,6 +49,8 @@ interface MailListTableProps {
   onHeaderFiltersChange: (filters: TableHeaderFilters) => void;
   timeSort: TimeSortOrder;
   onTimeSortChange: (sort: TimeSortOrder) => void;
+  /** 全量筛选导出时的 loading 状态 */
+  exportLoading?: boolean;
 }
 
 export type TimeSortOrder = 'none' | 'asc' | 'desc';
@@ -85,7 +88,7 @@ const STATUS_VARIANTS: Record<DisplayStatus, 'default' | 'secondary' | 'destruct
 // The leading select checkbox and the trailing operations column are
 // structural and always rendered.
 const TOGGLEABLE_COLUMNS = [
-  'time', 'direction', 'sender', 'recipient', 'subject',
+  'time', 'direction', 'subject', 'senderIp', 'sender', 'recipient',
   'disposalBasis', 'mailType', 'similarity', 'action', 'status',
 ] as const;
 type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
@@ -106,14 +109,17 @@ export function MailListTable({
   onHeaderFiltersChange,
   timeSort,
   onTimeSortChange,
+  exportLoading = false,
 }: MailListTableProps) {
   const t = useTranslations('emailDisposal');
+  const tFeatures = useTranslations('emailDisposal.detail.features');
   const rawLocale = useLocale();
   // Map next-intl locale to one of the disposal-basis dictionary's supported
   // langs; unknown locales fall back to zh (the dictionary's primary language).
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(rawLocale as DisposalLang)
     ? (rawLocale as DisposalLang)
     : 'zh';
+  const { viewer, capabilities } = useProductForm();
 
   // GT-11579: localize enum badges (direction / action) with safe fallback to
   // the raw value when the i18n key is missing.
@@ -142,7 +148,14 @@ export function MailListTable({
     const timer = window.setTimeout(() => {
       try {
         const raw = localStorage.getItem(COLUMN_PREF_KEY);
-        if (raw) setHiddenColumns(new Set(JSON.parse(raw) as string[]));
+        if (raw) {
+          setHiddenColumns(new Set(JSON.parse(raw) as string[]));
+        } else {
+          // 默认隐藏"处置依据"列，首次访问时生效
+          const defaults = new Set(['disposalBasis']);
+          setHiddenColumns(defaults);
+          localStorage.setItem(COLUMN_PREF_KEY, JSON.stringify([...defaults]));
+        }
       } catch {
         /* ignore malformed preference */
       }
@@ -262,7 +275,9 @@ export function MailListTable({
     <div data-testid="disposal-batch-toolbar" className="flex items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2">
       <span className="text-sm text-muted-foreground">{t('table.total', { n: total })}</span>
       {hasSelection && (
-        <span className="text-sm font-medium">{t('table.selected', { n: selectedIds.size })}</span>
+        <span className="text-sm font-medium text-primary">
+          {t('batch.crossPageSelected', { n: selectedIds.size })}
+        </span>
       )}
       <div className="flex gap-2 ml-auto items-center">
         {aiEnabled && (
@@ -297,10 +312,28 @@ export function MailListTable({
           <Trash2 className="mr-1 h-3 w-3" />
           {t('batch.delete')}
         </Button>
-        <Button data-testid="disposal-batch-export" variant="outline" size="sm" className="h-7 text-xs" onClick={() => onBatchAction('export')} disabled={!hasSelection}>
-          <Download className="mr-1 h-3 w-3" />
-          {t('batch.export')}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger render={<span />}>
+            <Button
+              data-testid="disposal-batch-export"
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => onBatchAction('export')}
+              disabled={exportLoading}
+            >
+              {exportLoading
+                ? <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                : <Download className="mr-1 h-3 w-3" />}
+              {hasSelection
+                ? t('batch.exportSelected', { n: selectedIds.size })
+                : t('batch.exportAll', { n: total })}
+            </Button>
+          </TooltipTrigger>
+          {!hasSelection && (
+            <TooltipContent>{t('batch.exportAllFiltered')}</TooltipContent>
+          )}
+        </Tooltip>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
@@ -371,14 +404,15 @@ export function MailListTable({
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">
+                <TableHead className="sticky left-0 z-30 w-10 bg-card border-r">
                   <Checkbox checked={false} disabled aria-label="Select all" />
                 </TableHead>
                 {colHead('time')}
                 {colHead('direction')}
+                {colHead('subject')}
+                {colHead('senderIp')}
                 {colHead('sender')}
                 {colHead('recipient')}
-                {colHead('subject')}
                 {colHead('disposalBasis')}
                 {colHead('mailType')}
                 {aiEnabled && similarMode && colHead('similarity')}
@@ -409,14 +443,15 @@ export function MailListTable({
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">
+                <TableHead className="sticky left-0 z-30 w-10 bg-card border-r">
                   <Checkbox checked={false} disabled aria-label="Select all" />
                 </TableHead>
                 {colHead('time')}
                 {colHead('direction')}
+                {colHead('subject')}
+                {colHead('senderIp')}
                 {colHead('sender')}
                 {colHead('recipient')}
-                {colHead('subject')}
                 {colHead('disposalBasis')}
                 {colHead('mailType')}
                 {aiEnabled && similarMode && colHead('similarity')}
@@ -517,14 +552,15 @@ export function MailListTable({
         <Table className="min-w-[800px]">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-10">
+              <TableHead className="sticky left-0 z-30 w-10 bg-card border-r">
                 <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
               </TableHead>
               {colHead('time')}
               {colHead('direction')}
+              {colHead('subject')}
+              {colHead('senderIp')}
               {colHead('sender')}
               {colHead('recipient')}
-              {colHead('subject')}
               {colHead('disposalBasis')}
               {colHead('mailType')}
               {aiEnabled && similarMode && colHead('similarity')}
@@ -550,7 +586,13 @@ export function MailListTable({
                   onItemClick(item.id);
                 }}
               >
-                <TableCell onClick={(e) => e.stopPropagation()}>
+                <TableCell
+                  className={cn(
+                    'sticky left-0 z-10 w-10 border-r bg-card transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
+                    selectedIds.has(item.id) && 'bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]',
+                  )}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Checkbox
                     checked={selectedIds.has(item.id)}
                     onCheckedChange={() => toggleOne(item.id)}
@@ -565,6 +607,19 @@ export function MailListTable({
                 {isColVisible('direction') && (
                 <TableCell className="text-xs">
                   <Badge variant="outline">{localizeEnum(`filters.${item.direction}` as const, item.direction)}</Badge>
+                </TableCell>
+                )}
+                {isColVisible('subject') && (
+                <TableCell className="text-xs max-w-[300px] truncate">
+                  {item.subject}
+                </TableCell>
+                )}
+                {isColVisible('senderIp') && (
+                <TableCell className="text-xs max-w-[160px] truncate font-mono">
+                  <Tooltip>
+                    <TooltipTrigger render={<span className="cursor-default" />}>{item.clientIp || '—'}</TooltipTrigger>
+                    <TooltipContent className="max-w-md text-xs">{item.clientIp || '—'}</TooltipContent>
+                  </Tooltip>
                 </TableCell>
                 )}
                 {isColVisible('sender') && (
@@ -583,23 +638,29 @@ export function MailListTable({
                   </Tooltip>
                 </TableCell>
                 )}
-                {isColVisible('subject') && (
-                <TableCell className="text-xs max-w-[300px] truncate">
-                  {item.subject}
-                </TableCell>
-                )}
                 {isColVisible('disposalBasis') && (
                 <TableCell className="text-xs max-w-[280px] truncate">
-                  {item.disposalBasis ? (
-                    <Tooltip>
-                      <TooltipTrigger render={<span className="cursor-default truncate block" />}>
-                        {formatListReason(item.disposalBasis, disposalLang)}
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-md text-xs">
-                        {formatListReason(item.disposalBasis, disposalLang)}
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : '—'}
+                  {item.disposalBasis ? (() => {
+                    const isPlatformPolicy =
+                      viewer === 'tenant' &&
+                      capabilities?.multiTenant === true &&
+                      isStage1Policy(item.disposalBasis.policy_key);
+                    const label = isPlatformPolicy
+                      ? tFeatures('platformPolicyListReason')
+                      : formatListReason(item.disposalBasis, disposalLang);
+                    return (
+                      <Tooltip>
+                        <TooltipTrigger render={<span className="cursor-default truncate block" />}>
+                          {label}
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-md text-xs">
+                          {isPlatformPolicy
+                            ? tFeatures('platformPolicyHitDetail')
+                            : label}
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })() : '—'}
                 </TableCell>
                 )}
                 {isColVisible('mailType') && (

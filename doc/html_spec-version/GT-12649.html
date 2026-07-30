@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GT-12649 · 增量功能规格 · v4</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f6f8;
+      color: #1a1d23;
+      line-height: 1.6;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .page-wrap { max-width: 980px; margin: 0 auto; }
+
+    /* ── header ── */
+    .spec-header {
+      background: #1a1d23;
+      color: #e8eaf0;
+      border-radius: 10px;
+      padding: 2rem 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .spec-header .ticket-badge {
+      display: inline-block;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.2em 0.65em;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+    .spec-header h1 { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
+    .spec-header .subtitle { font-size: 0.85rem; color: #9ca3af; }
+
+    /* ── change summary bar ── */
+    .change-summary {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.25rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 2rem;
+      align-items: flex-start;
+    }
+    .change-summary h2 { font-size: 0.95rem; font-weight: 700; color: #1a1d23; width: 100%; margin-bottom: 0.25rem; }
+    .change-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      min-width: 200px;
+      flex: 1 1 200px;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .change-item:hover {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    }
+    .change-item .ci-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .change-item .ci-body { font-size: 0.83rem; }
+    .change-item .ci-title { font-weight: 600; color: #1a1d23; }
+    .change-item .ci-sub { color: #6b7280; font-size: 0.78rem; }
+
+    /* ── section ── */
+    section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    section > h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    section > h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+
+    /* ── incremental section ── */
+    .incremental-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .incr-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: #f8f9fb;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .incr-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .incr-header h2 { font-size: 1rem; font-weight: 700; color: #1a1d23; margin: 0; }
+    .incr-header .incr-meta { font-size: 0.78rem; color: #6b7280; margin-left: auto; }
+    .incr-body { padding: 1.5rem 2rem; }
+    .incr-body h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+
+    /* ── tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.845rem; margin-bottom: 0.75rem; }
+    th { background: #f3f4f6; color: #374151; font-weight: 600; text-align: left; padding: 0.55rem 0.8rem; border: 1px solid #e5e7eb; }
+    td { padding: 0.5rem 0.8rem; border: 1px solid #e5e7eb; vertical-align: top; color: #374151; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    /* ── code ── */
+    code { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.1em 0.4em; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82em; color: #1a1d23; }
+
+    /* ── interaction-preview ── */
+    .interaction-preview {
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+    .interaction-preview h4 { font-size: 0.88rem; font-weight: 700; color: #1a1d23; margin-bottom: 0.35rem; }
+    .interaction-preview .trigger-path { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.9rem; }
+    .interaction-preview figure { margin: 0 0 0.9rem; }
+    .interaction-preview figcaption { font-size: 0.78rem; color: #6b7280; margin-top: 0.35rem; font-style: italic; }
+    .interaction-preview img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
+    .screenshot-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem; }
+    @media (max-width: 700px) { .screenshot-pair { grid-template-columns: 1fr; } }
+
+    /* ── callout boxes ── */
+    .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
+    .callout-info    { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; }
+    .callout-warn    { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .callout-removed { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; }
+    .callout-ok      { background: #f0fdf4; border-left: 4px solid #16a34a; color: #15532e; }
+
+    /* ── tag badges ── */
+    .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.15em 0.5em; border-radius: 4px; margin-right: 0.3em; }
+    .tag-removed  { background: #fee2e2; color: #991b1b; }
+    .tag-added    { background: #dcfce7; color: #15532e; }
+    .tag-changed  { background: #fef9c3; color: #854d0e; }
+    .tag-unverif  { background: #f3f4f6; color: #6b7280; }
+
+    del { color: #9ca3af; text-decoration-color: #dc2626; }
+
+    .version-badge { display: inline-flex; align-items: center; gap: 0.4em; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 0.2em 0.8em; font-size: 0.78rem; color: #374151; }
+    .version-badge .vnum { font-weight: 700; color: #1a1d23; }
+
+    .matrix-legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.78rem; color: #374151; margin-bottom: 0.75rem; }
+
+    .toc { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
+    .toc a:hover { text-decoration: underline; }
+    .toc-indent { padding-left: 1.2rem; }
+    .toc-change {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 6px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      margin-top: 0.35rem;
+      margin-bottom: 0.1rem;
+    }
+    .toc-change a { font-weight: 600; font-size: 0.88rem; color: #1d4ed8; }
+    .toc-change .toc-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .divider { border: none; border-top: 2px solid #e5e7eb; margin: 1.5rem 0; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ══════════════ HEADER ══════════════ -->
+  <header class="spec-header">
+    <span class="ticket-badge">GT-12649</span>
+    <h1>增量功能规格 · v4</h1>
+    <p class="subtitle">
+      关联模块：侧边菜单栏 · 邮件处置中心 · 邮件安全总览&nbsp;·&nbsp;
+      变更类型：功能移除 / 功能变更&nbsp;·&nbsp;
+      最后更新：2026-07-30&nbsp;·&nbsp;
+      webapp commit：<code>c481bf6</code>（基线）
+    </p>
+  </header>
+
+  <!-- ══════════════ 本版变更总览 ══════════════ -->
+  <div class="change-summary">
+    <h2>本版变更点（共 4 项需求）— 点击卡片跳转至对应需求描述</h2>
+    <a class="change-item" href="#change-1">
+      <span class="ci-num">1</span>
+      <div class="ci-body">
+        <div class="ci-title">SidebarNav 移除 VersionFooter</div>
+        <div class="ci-sub">全局侧边栏 · 功能移除</div>
+      </div>
+    </a>
+    <a class="change-item" href="#change-2">
+      <span class="ci-num">2</span>
+      <div class="ci-body">
+        <div class="ci-title">GT-12659 处置中心"执行动作"筛选移除"标记投递"</div>
+        <div class="ci-sub">邮件处置中心 · 功能变更</div>
+      </div>
+    </a>
+    <a class="change-item" href="#change-3">
+      <span class="ci-num">3</span>
+      <div class="ci-body">
+        <div class="ci-title">GT-12660 安全总览执行动作图表移除"标记投递"</div>
+        <div class="ci-sub">邮件安全总览 · 功能变更</div>
+      </div>
+    </a>
+    <a class="change-item" href="#change-4">
+      <span class="ci-num">4</span>
+      <div class="ci-body">
+        <div class="ci-title">GT-12655 多租户租户管理员视角处置依据"平台管控策略"显示方案</div>
+        <div class="ci-sub">邮件处置中心 · 功能变更</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- ══════════════ 目录 ══════════════ -->
+  <section id="toc">
+    <h2>目录</h2>
+    <ul class="toc">
+      <li><a href="#meta">A. 元信息与事实源</a></li>
+      <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
+
+      <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">SidebarNav 移除 VersionFooter — 全局侧边栏底部版本脚注移除</a></li>
+      <li class="toc-indent"><a href="#c1-overview">1.1 根因与修复方案</a></li>
+      <li class="toc-indent"><a href="#c1-states">1.2 截图式交互预览（S-1 变更前 · S-2 变更后）</a></li>
+      <li class="toc-indent"><a href="#c1-elements">1.3 逐元素说明（被移除元素历史记录）</a></li>
+      <li class="toc-indent"><a href="#c1-api">1.4 API 映射</a></li>
+
+      <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">GT-12659 邮件处置中心 — 执行动作筛选移除"标记投递"选项</a></li>
+      <li class="toc-indent"><a href="#c2-states">2.1 截图式交互预览（S-4 默认态 · S-5 下拉展开态）</a></li>
+      <li class="toc-indent"><a href="#c2-elements">2.2 逐元素说明</a></li>
+
+      <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">GT-12660 邮件安全总览 — 执行动作图表移除"标记投递"折线</a></li>
+      <li class="toc-indent"><a href="#c3-states">3.1 截图式交互预览（S-6 总览默认态 · S-7 执行动作 tab 激活态）</a></li>
+      <li class="toc-indent"><a href="#c3-elements">3.2 逐元素说明</a></li>
+
+      <li class="toc-change"><span class="toc-num">4</span><a href="#change-4">GT-12655 邮件处置中心 — 多租户租户管理员视角处置依据"平台管控策略"显示方案</a></li>
+      <li class="toc-indent"><a href="#c4-overview">4.1 方案概述与触发条件</a></li>
+      <li class="toc-indent"><a href="#c4-states">4.2 截图式交互预览（S-8 列表列 · S-9 详情概览卡 · S-10 安全分析阶段1 · S-11 筛选器下拉）</a></li>
+      <li class="toc-indent"><a href="#c4-elements">4.3 逐元素说明（9 个展示点全覆盖）</a></li>
+
+      <li><a href="#diff">C. 差异标注（D-1 ~ D-5）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-1 ~ Q-4）</a></li>
+      <li><a href="#version-history">E. 版本历史（v1 ~ v3）</a></li>
+    </ul>
+  </section>
+
+  <!-- ══════════════ A. 元信息 ══════════════ -->
+  <section id="meta">
+    <h2>A. 元信息与事实源</h2>
+    <table>
+      <thead><tr><th>字段</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>规格类型</td><td>增量规格（Incremental）· 多变更点格式</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v4</span></span></td></tr>
+        <tr><td>生成日期</td><td>2026-07-30</td></tr>
+        <tr><td>webapp commit</td><td><code>c481bf6</code>（基线）</td></tr>
+        <tr><td>对照 spec commit</td><td>not-used</td></tr>
+        <tr><td>历史对话记录</td><td>当前上下文已提供（完整修复描述、bug 报告及代码变更记录）</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 运行中 webapp 浏览器真实截图；3. webapp 源码</td></tr>
+        <tr><td>浏览器验证状态</td><td>变更 1 S-1 前态：2026-07-28 QC 只读复查；变更 2/3/4：2026-07-30 演示环境真实截图（已完成）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本规格为增量文档，共记录 4 个变更点。每个变更点独立成区，互不干扰；矩阵、差异、待确认按增量编号接续，不重置。
+    </div>
+  </section>
+
+  <!-- ══════════════ B. 产品形态 × 角色矩阵 ══════════════ -->
+  <section id="form-role-matrix">
+    <h2>B. 产品形态 × 角色差异矩阵</h2>
+    <div class="matrix-legend">
+      <span>✅ 显示且可操作</span>
+      <span>🔒 显示但只读</span>
+      <span>❌ 隐藏 / 不存在</span>
+      <span>— 该形态无此角色</span>
+      <span>? 无法验证</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>功能 / 元素</th>
+          <th>变更</th>
+          <th>AI-单<br/>平台管理员</th>
+          <th>传统-单<br/>平台管理员</th>
+          <th>云-多<br/>平台管理员</th>
+          <th>云-多<br/>租户管理员</th>
+          <th>AI-多<br/>平台管理员</th>
+          <th>AI-多<br/>租户管理员</th>
+          <th>传统-多<br/>平台管理员</th>
+          <th>传统-多<br/>租户管理员</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><del>SidebarNav · VersionFooter</del></td>
+          <td>#1</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+        </tr>
+        <tr>
+          <td><del>GT-12659 处置中心执行动作筛选 · "标记投递"选项</del></td>
+          <td>#2</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+        </tr>
+        <tr>
+          <td><del>GT-12660 安全总览执行动作图表 · mark_deliver 折线</del></td>
+          <td>#3</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+        </tr>
+        <tr>
+          <td>GT-12655 处置依据显示 · 列表列"处置依据"文案</td>
+          <td>#4</td>
+          <td>✅ 原文</td><td>✅ 原文</td><td>✅ 原文</td><td>🔒 平台管控策略</td><td>✅ 原文</td><td>🔒 平台管控策略</td><td>✅ 原文</td><td>🔒 平台管控策略</td>
+        </tr>
+        <tr>
+          <td>GT-12655 处置依据显示 · 详情弹窗概览与处置卡 · 策略模块名</td>
+          <td>#4</td>
+          <td>✅ 原文</td><td>✅ 原文</td><td>✅ 原文</td><td>🔒 平台管控策略</td><td>✅ 原文</td><td>🔒 平台管控策略</td><td>✅ 原文</td><td>🔒 平台管控策略</td>
+        </tr>
+        <tr>
+          <td>GT-12655 处置依据显示 · 详情弹窗安全分析 · 阶段1卡片标题</td>
+          <td>#4</td>
+          <td>✅ 连接层检测</td><td>✅ 连接层检测</td><td>✅ 连接层检测</td><td>🔒 平台管控</td><td>✅ 连接层检测</td><td>🔒 平台管控</td><td>✅ 连接层检测</td><td>🔒 平台管控</td>
+        </tr>
+        <tr>
+          <td>GT-12655 处置依据显示 · 详情弹窗安全分析 · 阶段1命中策略明细</td>
+          <td>#4</td>
+          <td>✅ 策略列表</td><td>✅ 策略列表</td><td>✅ 策略列表</td><td>🔒 平台统一管控说明文字</td><td>✅ 策略列表</td><td>🔒 平台统一管控说明文字</td><td>✅ 策略列表</td><td>🔒 平台统一管控说明文字</td>
+        </tr>
+        <tr>
+          <td>GT-12655 处置依据显示 · 筛选器"处置依据"下拉 · 连接层策略选项</td>
+          <td>#4</td>
+          <td>✅ 各策略可勾选</td><td>✅ 各策略可勾选</td><td>✅ 各策略可勾选</td><td>✅ 折叠为"平台管控策略"可勾选</td><td>✅ 各策略可勾选</td><td>✅ 折叠为"平台管控策略"可勾选</td><td>✅ 各策略可勾选</td><td>✅ 折叠为"平台管控策略"可勾选</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ 变更 1 ══════════════ -->
+  <div class="incremental-section" id="change-1">
+    <div class="incr-header">
+      <span class="incr-num">1</span>
+      <h2>SidebarNav 移除 VersionFooter</h2>
+      <span class="incr-meta">组件：<code>sidebar-nav.tsx</code> · 变更类型：功能移除 · 2026-07-30</span>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-removed">
+        <span class="tag tag-removed">已移除</span>
+        全局侧边栏底部的版本脚注（VersionFooter）已在 commit <code>c481bf6</code> 中移除，所有产品形态 / 角色均不再渲染。
+      </div>
+
+      <h3 id="c1-overview">根因与修复方案</h3>
+      <table>
+        <thead><tr><th>项目</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>问题</td><td>侧边栏底部显示「版本 c70d71c+dirty」，与 component-sidebar-nav html_spec（active 状态，仅 Logo 区 + 导航区域）不符</td></tr>
+          <tr><td>QC 复查日期</td><td>2026-07-28（只读，<code>/zh/dashboard</code>，平台管理员）</td></tr>
+          <tr><td>复查发现</td><td>DOM 中 <code>app-version-footer</code> count=1；悬停 title 含完整 rev/built/build_tag</td></tr>
+          <tr><td>修复</td><td>从 <code>sidebar-nav.tsx</code> 删除 <code>&lt;VersionFooter /&gt;</code> 及其 import；组件文件本身保留（待 GT-11459）</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="c1-states">截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-1：变更前 — 侧边栏底部显示版本脚注（已失效）</h4>
+        <p class="trigger-path">触发路径：登录后台（平台管理员）→ <code>/zh/dashboard</code> → 查看左侧侧边栏底部</p>
+        <figure>
+          <div style="background:#e5e7eb;border:2px dashed #9ca3af;border-radius:6px;padding:2rem 1rem;text-align:center;color:#6b7280;font-size:0.8rem;">
+            <strong style="color:#374151;">[ 截图占位：S-1-sidebar-version-footer-before.png ]</strong><br/>
+            QC 环境 2026-07-28 — 应可见：侧边栏底部「版本 c70d71c+dirty」文字 + 上方分隔线<br/>
+            <em>待归档至 <code>./screenshots/S-1-sidebar-version-footer-before.png</code></em>
+          </div>
+          <figcaption>状态 S-1 · 变更前 · /zh/dashboard · 桌面 1280×800 · 暗色主题 · 平台管理员 · 浏览器验证：2026-07-28 QC 只读复查（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>属性</th><th>值</th></tr></thead>
+          <tbody>
+            <tr><td>data-testid</td><td><code>app-version-footer</code></td></tr>
+            <tr><td>可见文本</td><td>版本 c70d71c+dirty</td></tr>
+            <tr><td>悬停 title</td><td><code>rev=c70d71c…+dirty built=… build_tag=opengauss</code></td></tr>
+            <tr><td>位置</td><td>侧边栏最底部，<code>border-t border-white/8</code> 分隔线下方</td></tr>
+            <tr><td>当前状态</td><td><span class="tag tag-removed">已失效</span>commit c481bf6 后不再渲染</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview" style="margin-top:1rem;">
+        <h4>状态 S-2：变更后 — 侧边栏底部无版本脚注（当前规格）</h4>
+        <p class="trigger-path">触发路径：登录后台（平台管理员）→ <code>/zh/dashboard</code> → 查看左侧侧边栏</p>
+        <figure>
+          <img src="./screenshots/S-3-login-brand-panel-after.png" alt="变更后 dashboard 页面，侧边栏底部无 VersionFooter" />
+          <figcaption>状态 S-2 · 变更后 · /zh/dashboard · 桌面 1280×800 · 暗色主题 · AI版-多租户 · 浏览器验证：2026-07-30（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>属性</th><th>值</th></tr></thead>
+          <tbody>
+            <tr><td>[data-testid="app-version-footer"]</td><td>DOM 中不存在（count = 0）</td></tr>
+            <tr><td>侧边栏底部可见元素</td><td>无额外内容；导航列表末尾无分隔线、无脚注</td></tr>
+            <tr><td>符合 html_spec</td><td>是（component-sidebar-nav active 状态：Logo 区 + 导航区域）</td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-ok">验收标准：<code>[data-testid="app-version-footer"]</code> count = 0，侧边栏底部无分隔线或文字。</div>
+      </div>
+
+      <h3 id="c1-elements">逐元素说明（被移除元素，仅历史记录）</h3>
+      <table>
+        <thead><tr><th>元素</th><th>原位置</th><th>原可见条件</th><th>当前状态</th></tr></thead>
+        <tbody>
+          <tr><td><del>版本号文字</del></td><td>侧边栏底部分隔线下方</td><td><code>/version</code> 接口正常</td><td><span class="tag tag-removed">已移除</span></td></tr>
+          <tr><td><del>+dirty 标记</del></td><td>版本号末尾</td><td><code>modified === true</code></td><td><span class="tag tag-removed">已移除</span></td></tr>
+          <tr><td><del>悬停 title</del></td><td>VersionFooter 容器</td><td>鼠标悬停</td><td><span class="tag tag-removed">已移除</span></td></tr>
+          <tr><td><del>border-t 分隔线</del></td><td>VersionFooter 容器顶部</td><td>始终</td><td><span class="tag tag-removed">已移除</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="c1-api">API 映射</h3>
+      <table>
+        <thead><tr><th>接口</th><th>原用途</th><th>当前状态</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><del><code>GET /version</code></del></td>
+            <td>获取 rev / built / modified / build_tag</td>
+            <td><span class="tag tag-removed">SidebarNav 中不再调用</span>；接口本身及组件文件保留，待 GT-11459</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 2 ══════════════ -->
+  <div class="incremental-section" id="change-2">
+    <div class="incr-header">
+      <span class="incr-num">2</span>
+      <h2>GT-12659 邮件处置中心 — 执行动作筛选移除"标记投递"选项</h2>
+      <span class="incr-meta">组件：<code>quick-filters.tsx</code> · 路由：<code>/zh/email-disposal/center</code> · 变更类型：功能变更 · 2026-07-30</span>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-removed">
+        <span class="tag tag-removed">已移除</span>
+        "执行动作"下拉筛选框中不再显示"标记投递"（<code>mark_deliver</code>）选项。共享常量 <code>EXECUTION_ACTIONS</code> 本身不变，仅在 <code>quick-filters.tsx</code> 层面过滤。
+      </div>
+
+      <h3 id="c2-states">截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-4：处置中心默认态 — 筛选模块（含执行动作字段）</h4>
+        <p class="trigger-path">触发路径：<code>/zh/email-disposal/center</code> → 页面加载完成 → 查看搜索条件区域</p>
+        <figure>
+          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="邮件处置中心搜索条件默认态，执行动作筛选框可见" />
+          <figcaption>状态 S-4 · /zh/email-disposal/center · 桌面 1280×800 · 暗色主题 · AI版-多租户 · 租户管理员 · 浏览器验证：2026-07-30（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>属性</th><th>值</th></tr></thead>
+          <tbody>
+            <tr><td>执行动作字段位置</td><td>搜索条件第三行左侧，标签"执行动作"，<code>combobox</code> 类型</td></tr>
+            <tr><td>默认显示值</td><td>全部</td></tr>
+            <tr><td>可选项（当前）</td><td>全部 / 投递 / 灰名单 / 隔离 / 审核 / 拒收 / 丢弃 / 召回</td></tr>
+            <tr><td>"标记投递"</td><td><span class="tag tag-removed">已移除</span>下拉列表中不再出现</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview" style="margin-top:1rem;">
+        <h4>状态 S-5："执行动作"下拉展开态 — 无"标记投递"选项</h4>
+        <p class="trigger-path">触发路径：S-4 基础上 → 点击"执行动作"下拉框 → 展开选项列表</p>
+        <figure>
+          <img src="./screenshots/S-5-disposal-action-dropdown-open.png" alt="执行动作下拉展开，显示 8 个选项，无标记投递" />
+          <figcaption>状态 S-5 · 执行动作下拉展开态 · 桌面 1280×800 · 暗色主题 · AI版-多租户 · 浏览器验证：2026-07-30（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>选项序号</th><th>选项文本</th><th>是否保留</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>全部</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>2</td><td>投递</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>3</td><td>灰名单</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>4</td><td>隔离</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>5</td><td>审核</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>6</td><td>拒收</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>7</td><td>丢弃</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>8</td><td>召回</td><td><span class="tag tag-added">保留</span></td></tr>
+            <tr><td>—</td><td><del>标记投递</del></td><td><span class="tag tag-removed">已移除</span></td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-ok">验收标准：展开"执行动作"下拉后，选项列表中不存在"标记投递"文字。</div>
+      </div>
+
+      <h3 id="c2-elements">逐元素说明</h3>
+      <table>
+        <thead><tr><th>元素</th><th>字段 key</th><th>变更前</th><th>变更后</th><th>修改位置</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><del>标记投递 选项</del></td>
+            <td><code>mark_deliver</code></td>
+            <td>出现在"执行动作"下拉列表中</td>
+            <td><span class="tag tag-removed">已移除</span></td>
+            <td><code>quick-filters.tsx</code> 中 <code>EXECUTION_ACTIONS.filter(a =&gt; a !== 'mark_deliver')</code></td>
+          </tr>
+          <tr>
+            <td>EXECUTION_ACTIONS 常量</td>
+            <td>—</td>
+            <td>含 <code>mark_deliver</code></td>
+            <td><span class="tag tag-changed">不变（仅前端过滤）</span>安全总览图表及其他引用处不受影响</td>
+            <td><code>src/types/email-disposal.ts</code>（未修改）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 3 ══════════════ -->
+  <div class="incremental-section" id="change-3">
+    <div class="incr-header">
+      <span class="incr-num">3</span>
+      <h2>GT-12660 邮件安全总览 — 执行动作图表移除"标记投递"折线</h2>
+      <span class="incr-meta">组件：<code>TrendChartCard.tsx</code> · 路由：<code>/zh/statistics/security-overview</code> · 变更类型：功能变更 · 2026-07-30</span>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-removed">
+        <span class="tag tag-removed">已移除</span>
+        邮件安全总览 → 安全态势分析 → 执行动作 tab 图表中，不再显示 <code>mark_deliver</code>（标记投递）折线。其他视图（威胁类型、投递结果等）的折线系列不受影响。
+      </div>
+
+      <h3 id="c3-states">截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-6：安全总览默认态</h4>
+        <p class="trigger-path">触发路径：<code>/zh/statistics/security-overview</code> → 页面加载完成</p>
+        <figure>
+          <img src="./screenshots/S-6-security-overview-default.png" alt="邮件安全总览页面默认态" />
+          <figcaption>状态 S-6 · /zh/statistics/security-overview · 桌面 1280×800 · 暗色主题 · AI版-多租户 · 浏览器验证：2026-07-30（已完成）</figcaption>
+        </figure>
+      </div>
+
+      <div class="interaction-preview" style="margin-top:1rem;">
+        <h4>状态 S-7："执行动作" tab 激活态 — 无"标记投递"折线</h4>
+        <p class="trigger-path">触发路径：S-6 基础上 → 向下滚动至"安全态势分析"区块 → 点击"执行动作" tab</p>
+        <figure>
+          <img src="./screenshots/S-7-security-overview-action-tab.png" alt="安全态势分析执行动作 tab 激活态，图表中无标记投递折线" />
+          <figcaption>状态 S-7 · 执行动作 tab 激活 · 桌面 1280×800 · 暗色主题 · AI版-多租户 · 浏览器验证：2026-07-30（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>属性</th><th>值</th></tr></thead>
+          <tbody>
+            <tr><td>图表标题</td><td>执行动作 · 安全态势分析</td></tr>
+            <tr><td>当前激活 tab</td><td>执行动作（蓝色背景）</td></tr>
+            <tr><td>折线系列（保留）</td><td>投递、灰名单、隔离、审核、拒收、丢弃、召回等（具体以图表图例为准）</td></tr>
+            <tr><td><del>mark_deliver 折线</del></td><td><span class="tag tag-removed">已移除</span>图表中不再渲染此系列</td></tr>
+            <tr><td>其他视图影响</td><td>无（威胁态势趋势 tab 等不受影响）</td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-ok">验收标准："执行动作"tab 激活后，图表图例及折线中不存在"标记投递"系列。</div>
+      </div>
+
+      <h3 id="c3-elements">逐元素说明</h3>
+      <table>
+        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>修改位置</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><del>mark_deliver 折线系列</del></td>
+            <td>存在于"执行动作"tab 图表中</td>
+            <td><span class="tag tag-removed">已移除</span></td>
+            <td><code>TrendChartCard.tsx</code> useMemo keys 过滤逻辑：<code>viewBy === 'action' &amp;&amp; k === 'mark_deliver'</code> 时 return false</td>
+          </tr>
+          <tr>
+            <td>其他 viewBy 的 keys 生成</td>
+            <td>不过滤</td>
+            <td><span class="tag tag-added">不变</span></td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 4 ══════════════ -->
+  <div class="incremental-section" id="change-4">
+    <div class="incr-header">
+      <span class="incr-num">4</span>
+      <h2>GT-12655 多租户租户管理员视角处置依据"平台管控策略"显示方案</h2>
+      <span class="incr-meta">
+        组件：<code>mail-list-table.tsx</code> · <code>threat-summary-card.tsx</code> · <code>analysis-section.tsx</code> · <code>quick-filters.tsx</code> ·
+        路由：<code>/zh/email-disposal/center</code> · 变更类型：功能变更 · 2026-07-30
+      </span>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-info">
+        <strong>背景：</strong>在云网关 / AI 版多租户 / 传统版多租户产品形态下，登录视角切换为租户管理员时，阶段1（连接层）策略为平台级策略，租户无权查看或配置具体规则。因此所有涉及"处置依据"的展示点，若触发策略为阶段1，需将具体策略信息模糊化，统一展示为"平台管控策略"，引导用户联系平台管理员。
+      </div>
+
+      <h3 id="c4-overview">方案概述</h3>
+      <table>
+        <thead><tr><th>触发条件</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>产品形态</td>
+            <td>云网关-多租户 / AI版-多租户 / 传统版-多租户（<code>capabilities.multiTenant === true</code>）</td>
+          </tr>
+          <tr>
+            <td>登录视角</td>
+            <td>租户管理员（<code>viewer === 'tenant'</code>）</td>
+          </tr>
+          <tr>
+            <td>处置依据策略</td>
+            <td>阶段1（连接层）策略：<code>IPFREQ</code> / <code>IPBL</code> / <code>RBL</code> / <code>OVERSEAS</code>（<code>isStage1Policy(policy_key) === true</code>）</td>
+          </tr>
+          <tr>
+            <td>不触发条件</td>
+            <td>单租户形态；平台管理员视角；阶段2~5 策略</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="c4-states">截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-8：邮件列表"处置依据"列 — 多租户租户管理员视角 · 阶段1策略邮件</h4>
+        <p class="trigger-path">
+          触发路径：切换产品形态为"AI版·多租户" → 登录视角切换为"租户管理员"（示例租户 B）→
+          邮件处置中心列表页 → 滚动至列表末尾 → 横向滚动至"处置依据"列 → 观察 MIC026（您的账户存在异常）和 MIC027（专属折扣，仅限今日）行
+        </p>
+        <figure>
+          <img src="./screenshots/S-8-list-platform-policy.png" alt="处置中心列表（租户管理员视角）：MIC026/MIC027 两行处置依据列显示「平台管控策略拦截」" style="max-width:900px;" />
+          <figcaption>
+            AI版·多租户 · 租户管理员视角（示例租户 B）· 2026-07-30 浏览器实拍。
+            列表末尾 MIC026（您的账户存在异常，请立即验证）和 MIC027（专属折扣，仅限今日）
+            在"处置依据"列均显示"平台管控策略拦截"，其余行正常展示具体策略信息。
+          </figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>平台管理员视角（原文）</th><th>多租户租户管理员视角（变更后）</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>处置依据列文案</td>
+              <td><code>RBL 过滤 · RBL黑名单命中</code>（策略模块 · 规则名）</td>
+              <td><code>平台管控策略拦截</code>（固定文案，i18n key：<code>emailDisposal.detail.features.platformPolicyListReason</code>）</td>
+            </tr>
+            <tr>
+              <td>Tooltip 内容</td>
+              <td>同列文案</td>
+              <td>该邮件由平台连接层策略拦截，如需了解详情请联系平台管理员（i18n key：<code>platformPolicyHitDetail</code>）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>状态 S-9：详情弹窗"概览与处置"卡片"处置依据"行 — 多租户租户管理员视角 · 阶段1策略邮件</h4>
+        <p class="trigger-path">
+          触发路径：邮件处置中心列表 → 点击 MIC027（专属折扣，仅限今日）行 → 弹窗打开 → 默认显示"概览与处置"标签页 → 观察"处置依据"行
+        </p>
+        <figure>
+          <img src="./screenshots/S-9-detail-overview-platform-policy.png" alt="详情弹窗概览与处置（租户管理员视角）：处置依据行显示「平台管控策略 · 拒收」" style="max-width:900px;" />
+          <figcaption>
+            AI版·多租户 · 租户管理员视角（示例租户 B）· MIC027 RBL · 2026-07-30 浏览器实拍。
+            处置依据行显示「平台管控策略 · 拒收」；策略模块名、规则名、命中详情、"前往策略配置页"链接均不显示。
+          </figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>平台管理员视角（原文）</th><th>多租户租户管理员视角（变更后）</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>策略模块名</td>
+              <td>RBL 过滤（含阶段色点）</td>
+              <td>平台管控策略（无色点；i18n key：<code>platformPolicyModule</code>）</td>
+            </tr>
+            <tr>
+              <td>规则名 / ID</td>
+              <td>RBL黑名单命中（RBL-023）</td>
+              <td>平台统一管控（i18n key：<code>platformPolicyRuleName</code>）</td>
+            </tr>
+            <tr>
+              <td>命中详情</td>
+              <td>具体命中信息</td>
+              <td>该邮件由平台连接层策略拦截，如需了解详情请联系平台管理员（i18n key：<code>platformPolicyHitDetail</code>）</td>
+            </tr>
+            <tr>
+              <td>检测标签</td>
+              <td>显示</td>
+              <td>隐藏（不渲染）</td>
+            </tr>
+            <tr>
+              <td>"前往策略配置页"链接</td>
+              <td>显示</td>
+              <td>隐藏（不渲染）</td>
+            </tr>
+            <tr>
+              <td>动作徽标（拒收 / 隔离等）</td>
+              <td>显示</td>
+              <td>保留（不变）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>状态 S-10：详情弹窗"安全分析"标签页"检测流程"阶段1卡片 — 多租户租户管理员视角</h4>
+        <p class="trigger-path">
+          触发路径：邮件处置中心 → 点击 MIC027（专属折扣，仅限今日）行 → 弹窗打开 → 切至"安全分析"标签页 → 观察"检测流程"区阶段1卡片
+        </p>
+        <figure>
+          <img src="./screenshots/S-10-analysis-stage1-platform.png" alt="安全分析检测流程（租户管理员视角）：阶段1卡片标题显示「平台管控」，命中策略明细替换为说明文字" style="max-width:900px;" />
+          <figcaption>
+            AI版·多租户 · 租户管理员视角（示例租户 B）· MIC027 RBL · 2026-07-30 浏览器实拍。
+            阶段1卡片标题：「阶段 1 · 平台管控」；结果徽标（通过）保留；策略项数（4项）和耗时（8ms）保留；
+            命中策略明细列表替换为灰色斜体说明文字"该阶段由平台统一管控，详情请联系平台管理员"。阶段2~5 卡片正常展示。
+          </figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>平台管理员视角（原文）</th><th>多租户租户管理员视角（变更后）</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>阶段1卡片标题</td>
+              <td>阶段 1 · 连接层检测</td>
+              <td>阶段 1 · 平台管控（i18n key：<code>emailDisposal.detail.analysis.stageName.connectionPlatform</code>）</td>
+            </tr>
+            <tr>
+              <td>结果徽标</td>
+              <td>通过 / 拦截</td>
+              <td>保留（不变）</td>
+            </tr>
+            <tr>
+              <td>策略项数 / 耗时</td>
+              <td>4 项策略 · 8ms</td>
+              <td>保留（不变）</td>
+            </tr>
+            <tr>
+              <td>命中策略明细列表</td>
+              <td>IP频率限制、IP过滤、RBL过滤、海外邮件检测（各含状态标记）</td>
+              <td>灰色斜体文字：「该阶段由平台统一管控，详情请联系平台管理员」（i18n key：<code>platformStageHint</code>）</td>
+            </tr>
+            <tr>
+              <td>阶段2~5 卡片</td>
+              <td>正常显示</td>
+              <td>不变</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>状态 S-11：搜索筛选"处置依据"下拉 · "连接层"分组 — 多租户租户管理员视角</h4>
+        <p class="trigger-path">
+          触发路径：邮件处置中心列表页 → 点击"处置依据"筛选下拉 → 展开弹层 → 观察"连接层"分组
+        </p>
+        <figure>
+          <img src="./screenshots/S-11-filter-platform-policy.png" alt="处置依据筛选下拉（租户管理员视角）：连接层分组下显示「平台管控策略」单条可勾选条目" style="max-width:600px;" />
+          <figcaption>
+            AI版·多租户 · 租户管理员视角（示例租户 B）· 2026-07-30 浏览器实拍。
+            "连接层"分组标题保留，其下原有 4 条独立模块条目折叠为单条"平台管控策略"可勾选条目。
+            身份层、内容层等其他分组正常展示，不受影响。
+          </figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>平台管理员视角（原文）</th><th>多租户租户管理员视角（变更后）</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>连接层分组标题</td>
+              <td>连接层</td>
+              <td>保留（不变）</td>
+            </tr>
+            <tr>
+              <td>连接层各模块条目</td>
+              <td>IPFREQ·IP频率限制、IPBL·IP黑白名单、RBL·RBL过滤、OVERSEAS·境外邮件（各可独立勾选）</td>
+              <td>折叠为单条「平台管控策略」可勾选条目（Checkbox + 文案，i18n key：<code>emailDisposal.platformManagedPolicy</code>）</td>
+            </tr>
+            <tr>
+              <td>勾选"平台管控策略"的筛选效果</td>
+              <td>—</td>
+              <td>等同于勾选全部阶段1 policy_key（IPFREQ / IPBL / RBL / OVERSEAS）；取消勾选时全部移除</td>
+            </tr>
+            <tr>
+              <td>身份层 / 内容层等其他分组</td>
+              <td>正常可勾选</td>
+              <td>不变</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="c4-elements">逐元素说明</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>展示点</th>
+            <th>组件</th>
+            <th>触发条件</th>
+            <th>平台管理员 / 单租户</th>
+            <th>多租户租户管理员</th>
+            <th>i18n key</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>列表列文案</td>
+            <td><code>mail-list-table.tsx</code></td>
+            <td><code>isStage1Policy(policy_key)</code></td>
+            <td>原始策略模块 · 规则名</td>
+            <td>平台管控策略拦截</td>
+            <td><code>platformPolicyListReason</code></td>
+          </tr>
+          <tr>
+            <td>列表列 Tooltip</td>
+            <td><code>mail-list-table.tsx</code></td>
+            <td>同上</td>
+            <td>同列文案</td>
+            <td>完整引导说明</td>
+            <td><code>platformPolicyHitDetail</code></td>
+          </tr>
+          <tr>
+            <td>概览与处置卡 · 策略模块名</td>
+            <td><code>threat-summary-card.tsx</code></td>
+            <td>同上</td>
+            <td>RBL 过滤（含阶段色点）</td>
+            <td>平台管控策略（无色点）</td>
+            <td><code>platformPolicyModule</code></td>
+          </tr>
+          <tr>
+            <td>安全分析详情区 · 策略模块名</td>
+            <td><code>analysis-section.tsx</code></td>
+            <td>同上</td>
+            <td>原始模块名</td>
+            <td>平台管控策略</td>
+            <td><code>platformPolicyModule</code></td>
+          </tr>
+          <tr>
+            <td>安全分析详情区 · 规则名</td>
+            <td><code>analysis-section.tsx</code></td>
+            <td>同上</td>
+            <td>RBL黑名单命中（RBL-023）</td>
+            <td>平台统一管控</td>
+            <td><code>platformPolicyRuleName</code></td>
+          </tr>
+          <tr>
+            <td>安全分析详情区 · 命中详情</td>
+            <td><code>analysis-section.tsx</code></td>
+            <td>同上</td>
+            <td>具体命中信息</td>
+            <td>引导说明</td>
+            <td><code>platformPolicyHitDetail</code></td>
+          </tr>
+          <tr>
+            <td>检测流程 · 阶段1卡片标题</td>
+            <td><code>analysis-section.tsx</code></td>
+            <td><code>isPlatformPolicyContext &amp;&amp; st.stage === 1</code></td>
+            <td>连接层检测</td>
+            <td>平台管控</td>
+            <td><code>stageName.connectionPlatform</code></td>
+          </tr>
+          <tr>
+            <td>检测流程 · 阶段1命中策略明细</td>
+            <td><code>analysis-section.tsx</code></td>
+            <td>同上</td>
+            <td>策略列表（含状态标记）</td>
+            <td>灰色斜体说明文字</td>
+            <td><code>platformStageHint</code></td>
+          </tr>
+          <tr>
+            <td>筛选器处置依据 · 连接层条目</td>
+            <td><code>quick-filters.tsx</code></td>
+            <td><code>hidePlatformStage &amp;&amp; stage === 1</code></td>
+            <td>4 条独立可勾选项</td>
+            <td>折叠为单条"平台管控策略"可勾选项</td>
+            <td><code>platformManagedPolicy</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-info">
+        判断逻辑统一由 <code>isStage1Policy(policy_key)</code>（<code>disposal-basis-config.ts</code> 导出）和
+        <code>useProductForm()</code> 的 <code>viewer / capabilities.multiTenant</code> 共同决定，
+        无需在各组件中重复维护阶段1 key 列表。
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ 差异标注 ══════════════ -->
+  <section id="diff">
+    <h2>差异标注（D-*）</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>编号</th>
+          <th>变更</th>
+          <th>描述</th>
+          <th>状态</th>
+          <th>复核日期</th>
+          <th>验证依据</th>
+          <th>处理说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>D-1</td>
+          <td>#1</td>
+          <td>变更前 SidebarNav 底部渲染 VersionFooter，与 component-sidebar-nav html_spec（active 状态：Logo 区 + 导航区域）不符。</td>
+          <td>已解决</td>
+          <td>2026-07-30</td>
+          <td>源码：commit c481bf6 删除 VersionFooter；QC 复查：2026-07-28 浏览器 count=1。</td>
+          <td>已在 commit c481bf6 中解决；GT-11459 保留组件文件待产品确认合规入口。</td>
+        </tr>
+        <tr>
+          <td>D-2</td>
+          <td>#1</td>
+          <td>S-1（变更前）截图为 QC 只读复查记录，尚未归档至 <code>screenshots/S-1-…</code>。</td>
+          <td>未解决</td>
+          <td>2026-07-30</td>
+          <td>—</td>
+          <td>需将 QC 2026-07-28 截图归档为 <code>./screenshots/S-1-sidebar-version-footer-before.png</code>。</td>
+        </tr>
+        <tr>
+          <td>D-3</td>
+          <td>#2</td>
+          <td>处置中心"执行动作"筛选包含不应对用户开放的"标记投递"选项，与安全总览图表的 series 数据不对称。</td>
+          <td>已解决</td>
+          <td>2026-07-30</td>
+          <td>源码：<code>quick-filters.tsx</code> 添加 <code>.filter(a !== 'mark_deliver')</code>；浏览器截图 S-5 已验证下拉无此项。</td>
+          <td>已在 <code>quick-filters.tsx</code> 层面过滤；共享常量不变，安全总览侧需同步处理（见 D-4）。</td>
+        </tr>
+        <tr>
+          <td>D-4</td>
+          <td>#3</td>
+          <td>安全总览执行动作图表包含 mark_deliver 折线，与处置中心筛选项不一致（均应不展示标记投递）。</td>
+          <td>已解决</td>
+          <td>2026-07-30</td>
+          <td>源码：<code>TrendChartCard.tsx</code> useMemo 在 <code>viewBy === 'action'</code> 时过滤 <code>mark_deliver</code>；浏览器截图 S-7 已验证。</td>
+          <td>已在 <code>TrendChartCard.tsx</code> 中修复，其他 viewBy 不受影响。</td>
+        </tr>
+        <tr>
+          <td>D-5</td>
+          <td>#4</td>
+          <td>GT-12655 变更4涉及的 S-8（列表列）、S-9（概览与处置卡）、S-10（安全分析阶段1卡片）、S-11（筛选器下拉）四个专项状态截图已通过浏览器自动化实拍并归档。</td>
+          <td>已解决</td>
+          <td>2026-07-30</td>
+          <td>源码：<code>agent-browser</code> 在 AI版·多租户 · 租户管理员（示例租户 B）视角下实拍，截图已归档至 <code>screenshots/S-8~S-11</code>，规格中 img src 已同步替换。</td>
+          <td>无需后续操作。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ 待确认事项 ══════════════ -->
+  <section id="questions">
+    <h2>待确认事项（Q-*）</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>编号</th>
+          <th>变更</th>
+          <th>问题</th>
+          <th>状态</th>
+          <th>备注</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Q-1</td>
+          <td>#1</td>
+          <td>GT-11459 要求的运行时版本查询能力，产品是否已确认符合 html_spec 的合规展示入口？若已确认，请提供入口路由和组件位置。</td>
+          <td>待确认</td>
+          <td>在产品给出明确入口前，VersionFooter 不应重新挂载至 SidebarNav 或未经规格定义的区域。</td>
+        </tr>
+        <tr>
+          <td>Q-2</td>
+          <td>#1</td>
+          <td>S-1（变更前）QC 截图是否已在截图库中归档？若有请提供路径。</td>
+          <td>待确认</td>
+          <td>关联 D-2。</td>
+        </tr>
+        <tr>
+          <td>Q-3</td>
+          <td>#2/#3</td>
+          <td>"标记投递"（<code>mark_deliver</code>）在产品上是否为永久下线，还是仅在当前版本隐藏？若为阶段性隐藏，需在 <code>EXECUTION_ACTIONS</code> 层面添加条件或注释。</td>
+          <td>待确认</td>
+          <td>当前实现为前端过滤，共享常量仍含该值；若永久下线，建议从常量中移除以避免误用。</td>
+        </tr>
+        <tr>
+          <td>Q-4</td>
+          <td>#4</td>
+          <td>多租户租户管理员视角下，筛选器"处置依据"下拉勾选"平台管控策略"后，后端查询是否支持传入全部阶段1 policy_key（IPFREQ / IPBL / RBL / OVERSEAS）作为 OR 筛选条件？当前前端实现为将四个 key 全部写入 <code>disposalPolicyKeys</code>，需确认后端接口是否有单次传入 key 数量上限。</td>
+          <td>待确认</td>
+          <td>关联 S-11。若后端有限制，需改为新增"平台连接层"聚合筛选 key 或由后端新增接口参数。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ 版本历史 ══════════════ -->
+  <section id="version-history">
+    <h2>版本历史</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>版本</th>
+          <th>日期</th>
+          <th>类型</th>
+          <th>Ticket</th>
+          <th>Webapp commit</th>
+          <th>摘要</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v1</span></span></td>
+          <td>2026-07-30</td>
+          <td>首次生成（增量）</td>
+          <td>GT-12649</td>
+          <td><code>c481bf6</code></td>
+          <td>GT-12649 变更 #1：记录从 SidebarNav 移除 VersionFooter，包含 QC 复查记录（S-1 占位）和 S-2 变更后目标状态。</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v2</span></span></td>
+          <td>2026-07-30</td>
+          <td>增量更新</td>
+          <td>GT-12649</td>
+          <td><code>c481bf6</code></td>
+          <td>新增变更 #2（DevMode 变更规格独立分区）、#3（处置中心执行动作移除"标记投递"）、#4（安全总览执行动作图表移除"标记投递"）；重构文档为多变更点格式，补充真实浏览器截图 S-3 ~ S-7；新增差异 D-3/D-4/D-5，新增待确认 Q-3。</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v3</span></span></td>
+          <td>2026-07-30</td>
+          <td>增量更新</td>
+          <td>GT-12655</td>
+          <td><code>c481bf6</code></td>
+          <td>GT-12655：新增变更 #4，记录多租户租户管理员视角下处置依据阶段1策略全链路"平台管控策略"显示方案；涵盖列表列、详情概览卡、安全分析阶段1卡片、筛选器下拉共4个展示点；矩阵表新增 AI-多/传统-多租户管理员列；新增差异 D-5（截图待归档）、待确认 Q-4（后端筛选接口兼容性）。</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v4</span></span></td>
+          <td>2026-07-30</td>
+          <td>规范修复</td>
+          <td>GT-12649</td>
+          <td><code>c481bf6</code></td>
+          <td>按技能规范重写目录（每个需求点使用完整名称作为主入口，子章节使用编号层级 1.1/1.2/…/4.3，尾部三项以 C/D/E 字母编号）；变更总览标题修正为"共 4 项需求"；各变更区块 incr-header 补充路由路径；批量修复全部 UTF-8 replacement character 乱码（共 6 处）。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
+</body>
+</html>

@@ -107,6 +107,30 @@ export const disposalSettingsSchema = z.object({
       });
     }
   }
+
+  // 任意依赖终端入口的权限开启时，必须填写合法的外部访问地址。
+  const PORTAL_DEPENDENT_PERMS = ['recall', 'preview', 'whitelist', 'blacklist'] as const;
+  const anyPortalPermEnabled = PORTAL_DEPENDENT_PERMS.some(
+    (k) => data.quarantine.permissions[k]?.enabled,
+  );
+  const baseUrl = (data.quarantine.portal_base_url ?? '').trim();
+  let urlValid = false;
+  if (baseUrl) {
+    try {
+      // 后端（GT-12077）强制 https-only：portal token 是 bearer 凭据，不允许明文
+      // 传输，这里与后端口径一致，避免 http 地址通过前端校验后被后端 400。
+      urlValid = new URL(baseUrl).protocol === 'https:';
+    } catch {
+      urlValid = false;
+    }
+  }
+  if (anyPortalPermEnabled && !urlValid) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'portalBaseUrlRequired',
+      path: ['quarantine', 'portal_base_url'],
+    });
+  }
 });
 
 export function defaultDisposalSettings(): DisposalSettings {

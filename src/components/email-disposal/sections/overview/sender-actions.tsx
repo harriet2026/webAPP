@@ -9,13 +9,13 @@
 // 多投提示，自身从不渲染投递/召回/丢弃/通知按钮）。
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Info, Loader2, MoreHorizontal, UserMinus, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,13 +30,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { ApiRequestFn } from '@/lib/api/client';
 import { addSenderFilterRule } from '../../lib/disposal-detail-api';
-
-type ScopeValue = 'tenant' | 'global';
 
 interface SenderActionsProps {
   sender: string;
@@ -49,10 +46,6 @@ interface SenderActionsProps {
   // Called after a successful blacklist/whitelist rule creation so the
   // caller can refresh anything derived from it (e.g. a rule-hit list).
   onDisposed?: () => void;
-  // E7's "导出EML" item (spec §9-A: the only non-placeholder item). Reuses
-  // whatever download-EML implementation the caller's overview 下载原文
-  // button already has, rather than duplicating fetch/blob logic here.
-  onExportEml?: () => void;
 }
 
 export function SenderActions({
@@ -61,7 +54,6 @@ export function SenderActions({
   isSingleRecipient,
   readOnly = false,
   onDisposed,
-  onExportEml,
 }: SenderActionsProps) {
   const t = useTranslations('emailDisposal.detail.overview.senderActions');
   // cancel / confirmBtn already exist (four languages) at the parent
@@ -72,19 +64,15 @@ export function SenderActions({
 
   const [blacklistOpen, setBlacklistOpen] = useState(false);
   const [whitelistOpen, setWhitelistOpen] = useState(false);
-  const [blacklistScope, setBlacklistScope] = useState<ScopeValue>('tenant');
-  const [whitelistScope, setWhitelistScope] = useState<ScopeValue>('tenant');
   const [includeSubdomains, setIncludeSubdomains] = useState(false);
   const [busy, setBusy] = useState(false);
 
   function openBlacklist() {
-    setBlacklistScope('tenant');
     setIncludeSubdomains(false);
     setBlacklistOpen(true);
   }
 
   function openWhitelist() {
-    setWhitelistScope('tenant');
     setWhitelistOpen(true);
   }
 
@@ -92,7 +80,7 @@ export function SenderActions({
     setBusy(true);
     try {
       await addSenderFilterRule(sender, 'blacklist', apiRequest, {
-        scope: blacklistScope,
+        scope: 'tenant',
         includeSubdomains,
       });
       toast.success(t('blacklistDialog.success'));
@@ -109,7 +97,7 @@ export function SenderActions({
     setBusy(true);
     try {
       await addSenderFilterRule(sender, 'whitelist', apiRequest, {
-        scope: whitelistScope,
+        scope: 'tenant',
       });
       toast.success(t('whitelistDialog.success'));
       setWhitelistOpen(false);
@@ -125,15 +113,14 @@ export function SenderActions({
     toast.info(t('notImplementedToast'));
   }
 
-  function exportEml() {
-    if (onExportEml) {
-      onExportEml();
-    } else {
-      notImplemented();
-    }
-  }
+  const showOverlay = blacklistOpen || whitelistOpen;
 
   return (
+    <>
+    {showOverlay && typeof document !== 'undefined' && createPortal(
+      <div className="fixed inset-0 z-[199] bg-black/60 transition-opacity duration-150" aria-hidden="true" />,
+      document.body
+    )}
     <div className="flex flex-wrap items-center gap-2">
       <Button
         size="sm"
@@ -171,22 +158,11 @@ export function SenderActions({
           {t('more')}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={exportEml} data-testid="email-disposal-overview-action-more-export-eml">
-            {t('menu.exportEml')}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={notImplemented} data-testid="email-disposal-overview-action-more-export-pdf">
-            {t('menu.exportPdf')}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={notImplemented} data-testid="email-disposal-overview-action-more-mark-fp">
             {t('menu.markFalsePositive')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={notImplemented} data-testid="email-disposal-overview-action-more-mark-fn">
             {t('menu.markFalseNegative')}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={notImplemented} data-testid="email-disposal-overview-action-more-investigate">
-            {t('menu.addToInvestigation')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -203,33 +179,12 @@ export function SenderActions({
 
       {/* E1 -- 发信人加黑 */}
       <AlertDialog open={blacklistOpen} onOpenChange={(o) => !busy && setBlacklistOpen(o)}>
-        <AlertDialogContent data-testid="email-disposal-overview-blacklist-dialog">
+        <AlertDialogContent data-testid="email-disposal-overview-blacklist-dialog" overlayClassName="bg-black/60">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('blacklistDialog.title', { sender })}</AlertDialogTitle>
             <AlertDialogDescription>{t('blacklistDialog.desc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-3 py-1">
-            <div className="space-y-1.5">
-              <p className="text-sm font-medium">{t('blacklistDialog.scopeLabel')}</p>
-              <RadioGroup
-                value={blacklistScope}
-                onValueChange={(v) => setBlacklistScope(v as ScopeValue)}
-                className="flex gap-4"
-              >
-                <InteractiveSurface asChild variant="control" className="flex items-center gap-2 text-sm focus-within:ring-2 focus-within:ring-ring/60">
-                  <label>
-                    <RadioGroupItem value="tenant" data-testid="email-disposal-overview-blacklist-scope-tenant" />
-                    {t('blacklistDialog.scopeTenant')}
-                  </label>
-                </InteractiveSurface>
-                <InteractiveSurface asChild variant="control" className="flex items-center gap-2 text-sm focus-within:ring-2 focus-within:ring-ring/60">
-                  <label>
-                    <RadioGroupItem value="global" data-testid="email-disposal-overview-blacklist-scope-global" />
-                    {t('blacklistDialog.scopeGlobal')}
-                  </label>
-                </InteractiveSurface>
-              </RadioGroup>
-            </div>
             <InteractiveSurface asChild variant="control" className="flex items-center gap-2 text-sm focus-within:ring-2 focus-within:ring-ring/60">
               <label>
                 <Checkbox
@@ -246,7 +201,6 @@ export function SenderActions({
               {tOverview('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
-              variant="destructive"
               disabled={busy}
               data-testid="email-disposal-overview-blacklist-confirm"
               onClick={(e) => {
@@ -262,39 +216,17 @@ export function SenderActions({
 
       {/* E2 -- 发信人加白 */}
       <AlertDialog open={whitelistOpen} onOpenChange={(o) => !busy && setWhitelistOpen(o)}>
-        <AlertDialogContent data-testid="email-disposal-overview-whitelist-dialog">
+        <AlertDialogContent data-testid="email-disposal-overview-whitelist-dialog" overlayClassName="bg-black/60">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('whitelistDialog.title', { sender })}</AlertDialogTitle>
             <AlertDialogDescription>{t('whitelistDialog.desc')}</AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="space-y-1.5 py-1">
-            <p className="text-sm font-medium">{t('whitelistDialog.scopeLabel')}</p>
-            <RadioGroup
-              value={whitelistScope}
-              onValueChange={(v) => setWhitelistScope(v as ScopeValue)}
-              className="flex gap-4"
-            >
-              <InteractiveSurface asChild variant="control" className="flex items-center gap-2 text-sm focus-within:ring-2 focus-within:ring-ring/60">
-                <label>
-                  <RadioGroupItem value="tenant" data-testid="email-disposal-overview-whitelist-scope-tenant" />
-                  {t('whitelistDialog.scopeTenant')}
-                </label>
-              </InteractiveSurface>
-              <InteractiveSurface asChild variant="control" className="flex items-center gap-2 text-sm focus-within:ring-2 focus-within:ring-ring/60">
-                <label>
-                  <RadioGroupItem value="global" data-testid="email-disposal-overview-whitelist-scope-global" />
-                  {t('whitelistDialog.scopeGlobal')}
-                </label>
-              </InteractiveSurface>
-            </RadioGroup>
-          </div>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={busy} data-testid="email-disposal-overview-whitelist-cancel">
               {tOverview('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               disabled={busy}
-              className="border-emerald-600/20 bg-emerald-600 text-white data-[hovered=true]:bg-emerald-600/90"
               data-testid="email-disposal-overview-whitelist-confirm"
               onClick={(e) => {
                 e.preventDefault();
@@ -307,5 +239,6 @@ export function SenderActions({
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </>
   );
 }

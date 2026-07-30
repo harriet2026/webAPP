@@ -88,9 +88,10 @@ export const sidebarNavItems: NavItem[] = [
     requiresAdvancedRules: true,
     // /logs/email 与 /investigations 已从导航移除（页面保留）：两者仍是 mailflow
     // 投递页、附件安全统计卡片与 StageRulesPage 建规则后的跳转目标，只能经这些
-    // 深链进入。bounce-dsn-settings / assistant 两个页面已整体下线，其后端 API
-    // 一并注释待清理；quarantine-notify-settings 功能已改为租户设置驱动，表与
-    // API 已于 GT-12142 删除。
+    // 深链进入。bounce-dsn-settings 页面已整体下线，该模块与其后端 API 均已删除
+    // （GT-12449）；assistant 页面已整体下线，其后端 API 一并注释待清理；
+    // quarantine-notify-settings 功能已改为租户设置驱动，表与 API 已于 GT-12142
+    // 删除。
     children: [
       { id: 'audit-queue', titleKey: 'sidebar.auditQueue', href: '/audit-queue' },
       { id: 'inbound-audit', titleKey: 'sidebar.inboundAudit', href: '/audit/inbound', icon: MailCheck },
@@ -171,7 +172,7 @@ export const sidebarNavItems: NavItem[] = [
     titleKey: 'sidebar.system',
     icon: Settings,
     children: [
-      // GT-12329: 邮件路由（收件域/中继/出站路由/发件认证）是平台管理员功能。
+      // GT-12329: 邮件路由（收信域管理/中继/出站路由/发信认证）是平台管理员功能。
       // 页面本身早已拒绝 tenant_admin，但侧栏项此前无 permission 门 —— 产品形态
       // registry 里 forwarding 的 tenantAccess='hidden' 在**单租户形态**下是失效的
       // （resolve() 的 `viewer === 'platform' || !c.multiTenant` 短路走平台分支），

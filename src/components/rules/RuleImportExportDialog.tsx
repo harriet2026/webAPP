@@ -79,7 +79,6 @@ export interface RuleImportExportDialogProps {
 const EMPTY_SELECTION: ImportSelectionState = {
   rules: false,
   detection_profiles: false,
-  bounce_dsn_settings: false,
 };
 
 function downloadEnvelope(file: RuleExportEnvelope, scopeLabel: string) {
@@ -116,7 +115,6 @@ export function RuleImportExportDialog({
   const [exportSelection, setExportSelection] = useState<ImportSelectionState>({
     rules: true,
     detection_profiles: true,
-    bounce_dsn_settings: true,
   });
   const [importFile, setImportFile] = useState<RuleExportEnvelope | null>(null);
   const [selection, setSelection] = useState<ImportSelectionState>(EMPTY_SELECTION);
@@ -136,7 +134,6 @@ export function RuleImportExportDialog({
   const groupLabels: Record<ImportGroupKey, string> = {
     rules: t('ruleImportExport.dialog.group.rules'),
     detection_profiles: t('ruleImportExport.dialog.group.detectionProfiles'),
-    bounce_dsn_settings: t('ruleImportExport.dialog.group.bounceDsnSettings'),
   };
 
   function clearPreviewState() {
@@ -159,7 +156,6 @@ export function RuleImportExportDialog({
       setExportSelection({
         rules: true,
         detection_profiles: true,
-        bounce_dsn_settings: true,
       });
       setImportFile(null);
       setSelection(EMPTY_SELECTION);
@@ -226,7 +222,6 @@ export function RuleImportExportDialog({
 			const file = await onExport({
 				include_rules: exportSelection.rules,
 				include_detection_profiles: exportSelection.detection_profiles,
-				include_bounce_dsn_settings: exportSelection.bounce_dsn_settings,
 			});
 			downloadEnvelope(file, scopeLabel);
       toast.success(t('ruleImportExport.dialog.toast.exportDownloaded'));

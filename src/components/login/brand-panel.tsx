@@ -1,9 +1,9 @@
 'use client';
 
-import { ShieldCheck, Bot, Network, FileSearch, type LucideIcon } from 'lucide-react';
+import { ShieldCheck, Bot, FileSearch, type LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-const FEATURE_ICONS: LucideIcon[] = [ShieldCheck, Bot, Network, FileSearch];
+const FEATURE_ICONS: LucideIcon[] = [ShieldCheck, Bot, FileSearch];
 
 /**
  * BrandPanel — the dark left rail of the login screen (spec

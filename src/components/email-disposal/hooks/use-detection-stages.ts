@@ -22,17 +22,17 @@ const STAGE_DEFS: { stage: number; key: string; checks: { key: string; pages: st
     { key: 'urlProtection',      pages: ['url_protection'] },
     { key: 'contentRules',       pages: ['content_rules'] },
   ]},
-  { stage: 4, key: 'comprehensive', checks: [
-    { key: 'intentEngine',        pages: ['intent_engine'] },
-    { key: 'similarityDetection', pages: ['similar_detection'] },
-    { key: 'advancedRules',       pages: ['advanced_rules'] },
-  ]},
-  { stage: 5, key: 'ai', checks: [
+  { stage: 4, key: 'ai', checks: [
     { key: 'senderBehaviorAgent',     pages: [] },
     { key: 'intentRecognitionAgent',  pages: [] },
     { key: 'marketingEmailAgent',     pages: [] },
     { key: 'phishingDetectionAgent',  pages: [] },
     { key: 'retrospectiveAgent',      pages: [] },
+  ]},
+  { stage: 5, key: 'comprehensive', checks: [
+    { key: 'intentEngine',        pages: ['intent_engine'] },
+    { key: 'similarityDetection', pages: ['similar_detection'] },
+    { key: 'advancedRules',       pages: ['advanced_rules'] },
   ]},
 ];
 

@@ -36,6 +36,10 @@ export function TrendChartCard({
   onPointClick,
 }: TrendChartCardProps) {
   const t = useTranslations('securityOverview');
+  // action view labels share the same enum as the email-disposal search filter.
+  // Reading from emailDisposal.filters.actions keeps a single i18n source of
+  // truth instead of duplicating entries under securityOverview.actions.
+  const tDisposal = useTranslations('emailDisposal');
 
   const seriesData = useMemo(() => trend?.[viewBy] ?? [], [trend, viewBy]);
   const keys = useMemo(() => {
@@ -44,13 +48,24 @@ export function TrendChartCard({
     // `success_rate` percentage that is NOT a stackable count and is not a valid
     // drill-down series (backend validates series ∈ AllDeliveryResults). Stacking
     // it distorts the area chart and clicking it would 400 the drill-down.
-    return Object.keys(seriesData[0]).filter((k) => k !== 'date' && !NON_SERIES_KEYS.has(k));
+    return Object.keys(seriesData[0]).filter((k) => {
+      if (k === 'date' || NON_SERIES_KEYS.has(k)) return false;
+      // mark_deliver 不在处置中心筛选枚举中，安全总览执行动作视图同步去掉。
+      if (viewBy === 'action' && k === 'mark_deliver') return false;
+      return true;
+    });
   }, [seriesData]);
 
   function seriesLabel(key: string): string {
+    // action view: delegate to emailDisposal.filters.actions — single source of
+    // truth shared with the email-disposal search filter enum (EXECUTION_ACTIONS).
+    if (viewBy === 'action') {
+      const result = tDisposal(`filters.actions.${key}` as Parameters<typeof tDisposal>[0]);
+      return result.includes('.') ? key : result;
+    }
     const nsMap: Record<ViewBy, string> = {
       threat_type: 'threatTypes',
-      action: 'actions',
+      action: 'actions', // fallback — should not be reached with the guard above
       threat_level: 'threatLevels',
       delivery_result: 'deliveryResults',
       email_type: 'emailTypes',

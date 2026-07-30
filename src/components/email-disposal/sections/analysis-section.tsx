@@ -22,8 +22,9 @@ import {
 } from '../lib/detail-helpers';
 import {
   formatHitDetail, getModuleName, getActionLabel, getActionColor, getPolicyRoute, getPolicyMeta,
-  getStageColor, type DisposalLang,
+  getStageColor, isStage1Policy, type DisposalLang,
 } from '../lib/disposal-basis-config';
+import { useProductForm } from '@/contexts/product-form-context';
 
 interface AnalysisSectionProps {
   detail: MailLogDetail;
@@ -125,6 +126,7 @@ const ALL_STAGE_NUMBERS = [1, 2, 3, 4, 5];
 export function AnalysisSection({ detail, aiEnabled = false, events = [] }: AnalysisSectionProps) {
   const t = useTranslations('emailDisposal.detail.analysis');
   const tFeatures = useTranslations('emailDisposal.detail.features');
+  const { viewer, capabilities } = useProductForm();
   // Reuses §9-A's existing "暂未实现" copy (send-receive-context-card.tsx)
   // rather than adding a fourth duplicate translation of the same string.
   const tSenderActions = useTranslations('emailDisposal.detail.overview.senderActions');
@@ -218,6 +220,13 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
     ? (basis?.rule_id ? `${basis.rule_name}（${basis.rule_id}）` : basis!.rule_name)
     : (basis?.rule_id || '—');
 
+  // 方案A：多租户产品形态 + 租户管理员视角 + 阶段1（连接层/IP策略）→ 显示"平台策略"，
+  // 不暴露策略模块细节、规则名、命中详情，也不提供"前往策略配置页"跳转。
+  const isPlatformPolicyContext =
+    viewer === 'tenant' &&
+    capabilities?.multiTenant === true &&
+    isStage1Policy(basis?.policy_key);
+
   return (
     <div className="space-y-5">
       {/* 检测流程：5 个阶段卡片，默认全部展开，命中策略明细内联在卡片内 */}
@@ -250,7 +259,12 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                   >
                     <div className="text-center">
                       <div className="text-xs text-muted-foreground mb-1">{t('stage')} {st.stage}</div>
-                      <div className="font-medium text-sm mb-2">{t(`stageName.${st.key}`)}</div>
+                      {/* 阶段1 + 多租户租户视角：标题改为"平台管控" */}
+                      <div className="font-medium text-sm mb-2">
+                        {isPlatformPolicyContext && st.stage === 1
+                          ? t('stageName.connectionPlatform')
+                          : t(`stageName.${st.key}`)}
+                      </div>
                       <div className="flex justify-center mb-2">{STATUS_ICON_LG[st.status]}</div>
                       <Badge variant="outline" className={cn('text-xs mb-1', STAGE_BADGE_STYLE[st.status])}>
                         {t(`status.${st.status}`)}
@@ -265,25 +279,34 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                         className="mt-3 pt-3 border-t border-border/70 text-left"
                         data-testid={`analysis-stage-${st.stage}-detail`}
                       >
-                        <div className="text-xs font-medium text-muted-foreground mb-2">
-                          {st.stage === 5 ? t('agentJudgementLabel') : t('hitPolicyLabel')}
-                        </div>
-                        <div className="space-y-1.5">
-                          {st.checks.map((c) => (
-                            <div key={c.key} className="flex items-center justify-between gap-2 text-xs">
-                              <div className="flex items-center gap-1 min-w-0">
-                                {STATUS_ICON[c.status]}
-                                <span className="truncate">{t(`check.${c.key}`)}</span>
-                              </div>
-                              <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[c.status])}>
-                                {c.status === 'skipped' ? t('notIntegrated') : t(`status.${c.status}`)}
-                                {c.ruleIds.length > 0 && (
-                                  <span className="ml-1 text-muted-foreground">#{c.ruleIds.join(', #')}</span>
-                                )}
-                              </span>
+                        {isPlatformPolicyContext && st.stage === 1 ? (
+                          /* 阶段1 + 多租户租户视角：命中策略明细替换为说明文字 */
+                          <p className="text-xs text-muted-foreground italic">
+                            {t('platformStageHint')}
+                          </p>
+                        ) : (
+                          <>
+                            <div className="text-xs font-medium text-muted-foreground mb-2">
+                              {st.stage === 5 ? t('agentJudgementLabel') : t('hitPolicyLabel')}
                             </div>
-                          ))}
-                        </div>
+                            <div className="space-y-1.5">
+                              {st.checks.map((c) => (
+                                <div key={c.key} className="flex items-center justify-between gap-2 text-xs">
+                                  <div className="flex items-center gap-1 min-w-0">
+                                    {STATUS_ICON[c.status]}
+                                    <span className="truncate">{t(`check.${c.key}`)}</span>
+                                  </div>
+                                  <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[c.status])}>
+                                    {c.status === 'skipped' ? t('notIntegrated') : t(`status.${c.status}`)}
+                                    {c.ruleIds.length > 0 && (
+                                      <span className="ml-1 text-muted-foreground">#{c.ruleIds.join(', #')}</span>
+                                    )}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </button>
@@ -347,12 +370,22 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
           </div>
           <div className="grid grid-cols-[72px_1fr] gap-x-3 gap-y-2.5 text-sm">
             <span className="text-muted-foreground">{tFeatures('module')}</span>
-            <div className="flex items-center gap-2 min-w-0">
-              <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', getStageColor(policyMeta?.stage ?? 0))} />
-              <span className="font-medium">{getModuleName(basis.policy_key, disposalLang) || '—'}</span>
-            </div>
+            {isPlatformPolicyContext ? (
+              // 平台策略模糊化：不展示阶段色点和具体模块名，仅显示"平台策略"
+              <span className="font-medium text-muted-foreground">
+                {tFeatures('platformPolicyModule')}
+              </span>
+            ) : (
+              <div className="flex items-center gap-2 min-w-0">
+                <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', getStageColor(policyMeta?.stage ?? 0))} />
+                <span className="font-medium">{getModuleName(basis.policy_key, disposalLang) || '—'}</span>
+              </div>
+            )}
             <span className="text-muted-foreground">{tFeatures('ruleName')}</span>
-            {basisRoute && hasRuleName ? (
+            {isPlatformPolicyContext ? (
+              // 租户不可见规则名，展示固定文案
+              <span className="text-muted-foreground">{tFeatures('platformPolicyRuleName')}</span>
+            ) : basisRoute && hasRuleName ? (
               <InteractiveSurface asChild variant="text" className="min-w-0 text-primary data-[hovered=true]:text-primary/80">
                 <button
                   type="button"
@@ -370,9 +403,11 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             )}
             <span className="text-muted-foreground">{tFeatures('hitDetail')}</span>
             <span className="text-muted-foreground leading-relaxed">
-              {formatHitDetail(basis, disposalLang) || '—'}
+              {isPlatformPolicyContext
+                ? tFeatures('platformPolicyHitDetail')
+                : (formatHitDetail(basis, disposalLang) || '—')}
             </span>
-            {basis.detection_tags && basis.detection_tags.length > 0 && (
+            {!isPlatformPolicyContext && basis.detection_tags && basis.detection_tags.length > 0 && (
               <>
                 <span className="text-muted-foreground">{tFeatures('detectionTags')}</span>
                 <span className="flex flex-wrap gap-1">

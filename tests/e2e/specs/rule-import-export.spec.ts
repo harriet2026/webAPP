@@ -19,7 +19,6 @@ type RuleExportEnvelope = {
   data: {
     rules?: Array<Record<string, unknown>>;
     detection_profiles?: Array<Record<string, unknown>>;
-    bounce_dsn_settings?: Array<Record<string, unknown>>;
   };
 };
 
@@ -43,54 +42,6 @@ async function apiGet(request: APIRequestContext, token: string, path: string) {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  });
-}
-
-// The bounce-DSN list endpoint was retired along with its admin page, so
-// reading that group back now goes through the export endpoint — which is
-// also what the dialog under test drives.
-async function exportSettings(request: APIRequestContext, token: string, tenantId: number) {
-  const qs = new URLSearchParams({
-    include_rules: 'false',
-    include_detection_profiles: 'false',
-    include_bounce_dsn_settings: 'true',
-  });
-  const resp = await request.get(`${API_BASE}/unified-rules/export?${qs}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'X-Tenant-ID': String(tenantId),
-    },
-  });
-  return resp;
-}
-
-// The bounce-DSN admin page and its CRUD endpoints were retired, so this
-// suite seeds that group through the import endpoint — the same path the
-// dialog under test drives, and now the only way to create it. `data`
-// carries only the groups being seeded; `selection` must enable exactly
-// those, since the importer ignores groups that are not selected.
-async function seedSettingsViaImport(
-  request: APIRequestContext,
-  token: string,
-  tenantId: number,
-  tenantName: string,
-  data: RuleExportEnvelope['data'],
-) {
-  return apiPost(request, token, '/unified-rules/import', {
-    file: {
-      version: 'rule-settings/v1',
-      exported_at: new Date().toISOString(),
-      scope: 'tenant',
-      tenant_context: { mode: 'selected', tenant_id: tenantId, tenant_name: tenantName },
-      data,
-    },
-    selection: {
-      include_rules: false,
-      include_detection_profiles: false,
-      include_bounce_dsn_settings: Array.isArray(data.bounce_dsn_settings),
-    },
-    import_mode: { mode: 'import_to_selected_tenant', target_tenant_id: tenantId },
-    duplicate_resolutions: {},
   });
 }
 
@@ -125,11 +76,9 @@ test.describe.serial('Rule settings import/export', () => {
   const tenantDomain = `rule-ie-${ds}.local`;
   const existingRuleName = `rule-export-existing-${suffix}`;
   const existingProfileName = `rbl-export-${ds}.test`;
-  const existingBounceDomain = `bounce-existing-${ds}.local`;
   const duplicateProfileName = `profile-import-duplicate-${suffix}`;
   const importedProfileName = `profile-import-new-${suffix}`;
   const unselectedRuleName = `rule-import-unselected-${suffix}`;
-  const unselectedBounceDomain = `bounce-import-unselected-${ds}.local`;
 
   let token = '';
   let tenantId = 0;
@@ -145,14 +94,6 @@ test.describe.serial('Rule settings import/export', () => {
       next_hop_port: 25,
     });
     expect([200, 201]).toContain(domainResp.status());
-
-    const bounceDomainResp = await apiPost(request, token, `/tenants/${tenantId}/domains`, {
-      domain: existingBounceDomain,
-      next_hop_type: 'domain',
-      next_hop_host: 'smtpsink',
-      next_hop_port: 25,
-    });
-    expect([200, 201]).toContain(bounceDomainResp.status());
 
     const existingRuleResp = await apiPost(request, token, '/unified-rules', {
       tenant_id: tenantId,
@@ -188,19 +129,6 @@ test.describe.serial('Rule settings import/export', () => {
       is_active: true,
     });
     expect(duplicateProfileResp.status()).toBe(201);
-
-    const settingsResp = await seedSettingsViaImport(request, token, tenantId, tenantName, {
-      bounce_dsn_settings: [
-        {
-          tenant_id: tenantId,
-          domain: existingBounceDomain,
-          enabled: true,
-          language: 'en',
-          include_original_headers: true,
-        },
-      ],
-    });
-    expect(settingsResp.status()).toBe(200);
   });
 
   test.afterAll(async ({ request }) => {
@@ -234,7 +162,6 @@ test.describe.serial('Rule settings import/export', () => {
     expect(exported.tenant_context.tenant_id).toBe(tenantId);
     expect(exported.data.rules?.some((rule) => rule.name === existingRuleName)).toBe(true);
     expect(exported.data.detection_profiles?.some((profile) => profile.name === existingProfileName)).toBe(true);
-    expect(exported.data.bounce_dsn_settings?.some((setting) => setting.domain === existingBounceDomain)).toBe(true);
   });
 
   test('previews duplicates, expands details, and imports only selected groups', async ({ authenticatedPage, request }) => {
@@ -288,15 +215,6 @@ test.describe.serial('Rule settings import/export', () => {
             is_active: true,
           },
         ],
-        bounce_dsn_settings: [
-          {
-            tenant_id: tenantId,
-            domain: unselectedBounceDomain,
-            enabled: true,
-            language: 'en',
-            include_original_headers: true,
-          },
-        ],
       },
     };
 
@@ -317,12 +235,11 @@ test.describe.serial('Rule settings import/export', () => {
     await expect(dialog.getByText(/已加载：rule-import-export\.json|Loaded: rule-import-export\.json/)).toBeVisible();
     const importPanel = dialog.getByRole('tabpanel', { name: /导入|Import/ });
     await importPanel.getByRole('checkbox', { name: /规则|Rules/ }).click();
-    await importPanel.getByRole('checkbox', { name: /退信 DSN 设置|Bounce DSN settings/ }).click();
     await dialog.getByRole('button', { name: /预览导入|Preview import/ }).click();
 
     await expect(dialog.getByText(/预览摘要|Preview summary/)).toBeVisible();
     await expect(dialog.getByText(/已解析 2，可导入 1，重复 1，无效 0|Parsed 2, importable 1, duplicates 1, invalid 0/)).toHaveCount(1);
-    await expect(dialog.getByText(/已解析 0，可导入 0，重复 0，无效 0|Parsed 0, importable 0, duplicates 0, invalid 0/)).toHaveCount(2);
+    await expect(dialog.getByText(/已解析 0，可导入 0，重复 0，无效 0|Parsed 0, importable 0, duplicates 0, invalid 0/)).toHaveCount(1);
     await expect(dialog.getByText(/重复项处理|Duplicate handling/)).toBeVisible();
 
     await scrollDialog(authenticatedPage, dialog, 700);
@@ -348,16 +265,9 @@ test.describe.serial('Rule settings import/export', () => {
     expect(profilesBody.items.some((profile) => profile.name === importedProfileName && profile.tenant_id === tenantId)).toBe(true);
     expect(profilesBody.items.filter((profile) => profile.name === duplicateProfileName && profile.tenant_id === tenantId)).toHaveLength(1);
 
-    const settingsResp = await exportSettings(request, token, tenantId);
-    expect(settingsResp.status()).toBe(200);
-    const exportedSettings = await settingsResp.json() as RuleExportEnvelope;
-
     const rulesResp = await apiGet(request, token, '/unified-rules?rule_class=action&stage=data');
     expect(rulesResp.status()).toBe(200);
     const rulesBody = await rulesResp.json() as { items: Array<{ name: string; tenant_id?: number | null }> };
     expect(rulesBody.items.some((rule) => rule.name === unselectedRuleName && rule.tenant_id === tenantId)).toBe(false);
-
-    const bounceSettings = (exportedSettings.data.bounce_dsn_settings ?? []) as Array<{ domain: string; tenant_id: number }>;
-    expect(bounceSettings.some((setting) => setting.domain === unselectedBounceDomain && setting.tenant_id === tenantId)).toBe(false);
   });
 });

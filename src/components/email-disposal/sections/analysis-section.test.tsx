@@ -77,8 +77,8 @@ describe('AnalysisSection (v2 spec alignment)', () => {
       // Inline hit-strategy detail is present without any click (default expanded).
       expect(screen.getByTestId(`analysis-stage-${n}-detail`)).toBeInTheDocument();
     }
-    // Stage 5 (智能分析层) is the hit stage -- 威胁 badge; others 通过.
-    expect(screen.getByTestId('analysis-stage-5').textContent).toContain('威胁');
+    // 阶段 4/5 已交换：智能体研判(ai)为阶段 4，是命中阶段 -- 威胁 badge; others 通过.
+    expect(screen.getByTestId('analysis-stage-4').textContent).toContain('威胁');
     expect(screen.getByTestId('analysis-stage-1').textContent).toContain('通过');
 
     // Clicking a card collapses only that card's own detail.

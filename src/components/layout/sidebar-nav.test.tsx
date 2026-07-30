@@ -43,6 +43,7 @@ vi.mock('./version-footer', () => ({
 }));
 
 import { SidebarNav } from './sidebar-nav';
+import { UnsavedGuardProvider } from '../../contexts/unsaved-guard-context';
 
 describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
   beforeEach(() => {
@@ -52,7 +53,7 @@ describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
   });
 
   it('true super admin sees every group, including advance-gated and system/users', async () => {
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.getByText('sidebar.systemStatus')).toBeInTheDocument(); // dashboard
     expect(screen.getByText('sidebar.advancedRules')).toBeInTheDocument();
     expect(screen.getByText('sidebar.system')).toBeInTheDocument();
@@ -63,14 +64,14 @@ describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
   });
 
   it('keeps the browser tab title aligned with the sidebar brand name', () => {
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     const brandName = screen.getByText('branding.selfHostedName');
 
     expect(document.title).toBe(brandName.textContent);
   });
 
   it('provides pointer-driven hover feedback without relying on CSS hover media support', () => {
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     const dashboardItem = screen.getByText('sidebar.systemStatus').closest('button');
     const dashboardIcon = dashboardItem?.querySelector('svg');
     const submenuItem = Array.from(document.querySelectorAll('button'))
@@ -110,7 +111,7 @@ describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
     mockShowAdvancedRules = false;
     mockCanSeeRoute = (href) => href === '/dashboard';
 
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.getByText('sidebar.systemStatus')).toBeInTheDocument(); // dashboard visible
     // system group's every child href is denied -> the whole group collapses (empty-parent hide).
     expect(screen.queryByText('sidebar.system')).not.toBeInTheDocument();
@@ -121,7 +122,7 @@ describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
     mockShowAdvancedRules = false;
     mockCanSeeRoute = () => true; // RBAC grants everything
 
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.queryByText('sidebar.advancedRules')).not.toBeInTheDocument();
     expect(screen.queryByText('sidebar.mail')).not.toBeInTheDocument(); // also requiresAdvancedRules
   });
@@ -131,7 +132,7 @@ describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
     mockShowAdvancedRules = true;
     mockCanSeeRoute = (href) => href === '/dashboard';
 
-    render(<SidebarNav />);
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     expect(screen.queryByText('sidebar.monitoringCenter')).not.toBeInTheDocument();
     expect(screen.queryByText('sidebar.statistics')).not.toBeInTheDocument();
   });

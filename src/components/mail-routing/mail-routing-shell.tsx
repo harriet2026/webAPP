@@ -43,7 +43,7 @@ export function MailRoutingShell({ tenantId }: MailRoutingShellProps) {
   // and the jump only switched tabs).
   const highlightConfigId = parseConfigParam(searchParams);
   return (
-    <Tabs defaultValue={initialTab} className="w-full">
+    <Tabs defaultValue={initialTab} className="w-full" data-testid="mr-root">
       <TabsList>
         <TabsTrigger value="receiving">{t('tabs.receiving')}</TabsTrigger>
         <TabsTrigger value="relay">{t('tabs.relay')}</TabsTrigger>

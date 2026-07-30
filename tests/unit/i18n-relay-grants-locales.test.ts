@@ -12,34 +12,43 @@ import th from "../../messages/th.json";
 // keeps every ENABLED locale complete for this namespace. It is deliberately
 // scoped to the relay area (ru/th trail zh elsewhere; a full-tree parity test
 // would fail on pre-existing, unrelated gaps).
+//
+// Task 9 (mail-routing html_spec 对齐收尾): mailRouting.relayGrants.* was the
+// old grants-card i18n namespace. Task 4's single-table rewrite (A7: grants
+// advanced-capability UI moved out of this page, "另行安置，本次不做") already
+// removed every renderer of it — grep across src/ turned up zero references
+// (the only remaining consumer was this test file's own parity check on
+// itself). Deleted the dead namespace from all four locale files; the
+// relayGrants-specific sub-tests below go with it. The still-live SPF-key
+// coverage (GT-12235's actual concern — SPF copy must exist in every enabled
+// locale) now lives entirely in mailRouting.relay.fields.* and stays covered.
 
 const messagesByLocale: Record<string, unknown> = { zh, en, ru, th };
 
 type Tree = Record<string, unknown>;
 const mailRouting = (m: unknown) => (m as { mailRouting: Tree }).mailRouting;
 
-describe("relayGrants i18n coverage across enabled locales", () => {
-  const reference = mailRouting(zh).relayGrants as Tree;
-  const referenceKeys = Object.keys(reference);
-
-  it("the reference namespace itself is non-trivial", () => {
-    expect(referenceKeys.length).toBeGreaterThan(30);
-  });
-
+describe("relay SPF i18n coverage across enabled locales", () => {
   for (const locale of routing.locales) {
-    it(`${locale}: mailRouting.relayGrants has every key zh has`, () => {
-      const messages = messagesByLocale[locale];
-      expect(messages, `messages/${locale}.json must be imported here`).toBeDefined();
-      const grants = mailRouting(messages).relayGrants as Tree | undefined;
-      expect(grants, `mailRouting.relayGrants missing in ${locale}`).toBeDefined();
-      const missing = referenceKeys.filter((k) => !(k in grants!));
-      expect(missing, `keys missing in ${locale}`).toEqual([]);
-    });
-
-    it(`${locale}: relay scope-notice keys exist`, () => {
+    // Task 4 (mail-routing html_spec 对齐): mailRouting.relay.* was rewritten
+    // wholesale for the single-table redesign — "add"/"rulesScopeNotice"/
+    // "rulesCardSubtitle" (the old grants-card + unified-rules regulation
+    // split, A7) no longer exist. The SPF-parity concern this sub-test guards
+    // (GT-12235: SPF-related copy must exist in every enabled locale, not just
+    // zh/en) now lives in the new single-table drawer's SPF fields.
+    it(`${locale}: relay SPF-related keys exist (post Task-4 single-table redesign)`, () => {
       const relay = mailRouting(messagesByLocale[locale]).relay as Tree;
-      for (const key of ["add", "rulesScopeNotice", "rulesCardSubtitle"]) {
-        expect(relay[key], `mailRouting.relay.${key} missing in ${locale}`).toBeTruthy();
+      const fields = relay.fields as Tree;
+      expect(relay.deleteDialogTitle, `mailRouting.relay.deleteDialogTitle missing in ${locale}`).toBeTruthy();
+      for (const key of [
+        "useSpf",
+        "useSpfLabel",
+        "useSpfHint",
+        "fromDomainRequiredWithSpf",
+        "fromDomainMustBeVerified",
+        "sourceIpSpfHint",
+      ]) {
+        expect(fields[key], `mailRouting.relay.fields.${key} missing in ${locale}`).toBeTruthy();
       }
     });
   }

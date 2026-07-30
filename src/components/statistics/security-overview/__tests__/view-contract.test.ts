@@ -26,10 +26,12 @@ describe('security overview view contract', () => {
       'sensitive', 'spoofing', 'phishing', 'virus', 'account_compromised',
     ]));
     expect(overview.trend.action).toHaveLength(7);
+    // 与真实后端 internal/models/security_overview.go AllActions 对齐：
+    // 第 3 个动作是 advanced_review（sideline_pending），不存在 greylist。
     expect(Object.keys(overview.trend.action?.[0] ?? {})).toEqual(expect.arrayContaining([
-      'deliver', 'mark_deliver', 'greylist', 'quarantine', 'review', 'block', 'drop', 'recall',
+      'deliver', 'mark_deliver', 'advanced_review', 'quarantine', 'review', 'block', 'drop', 'recall',
     ]));
-    expect(Object.keys(overview.trend.action?.[0] ?? {})).not.toContain('advanced_review');
+    expect(Object.keys(overview.trend.action?.[0] ?? {})).not.toContain('greylist');
     expect(Object.keys(overview.trend.action?.[0] ?? {})).not.toContain('cancelled');
     expect(overview.trend.threat_level).toHaveLength(7);
     expect(overview.trend.delivery_result).toHaveLength(7);

@@ -37,6 +37,7 @@ vi.mock('@/components/layout/version-footer', () => ({
 }));
 
 import { SidebarNav } from '@/components/layout/sidebar-nav';
+import { UnsavedGuardProvider } from '@/contexts/unsaved-guard-context';
 
 // GT-12329. Deliberately NOT reusing sidebar-nav.test.tsx's `setupAuthMocks`:
 // that fixture stubs `hasPermission: () => true`, which bypasses the permission
@@ -97,7 +98,7 @@ function mockSystemAdmin() {
 // "邮件路由 is hidden" assertion would pass trivially — it would be asserting
 // that a collapsed group is collapsed.
 function renderWithSystemGroupExpanded() {
-  render(<SidebarNav />);
+  render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
   fireEvent.click(screen.getByText('系统管理'));
 }
 

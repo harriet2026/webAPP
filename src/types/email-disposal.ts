@@ -8,6 +8,7 @@ import type {
 export interface DisposalQuickFilter {
   sendReceiveTime?: { start: string; end: string };
   sendReceiveType?: string;
+  senderIp?: string;
   sender?: string;
   recipient?: string;
   subject?: string;
@@ -45,6 +46,29 @@ export interface AICondition {
   value?: FilterCondition["value"];
   source: "ai";
 }
+
+/**
+ * Unified execution-action enum — single source of truth shared by:
+ *   - 邮件处置中心 › 搜索条件 › 执行动作 (quick-filters.tsx)
+ *   - 邮件安全总览 › 安全态势分析 › 执行动作图表 (TrendChartCard action series)
+ *
+ * Keys MUST mirror the backend's display-action enum
+ * (internal/models/security_overview.go `AllActions`): it feeds both the
+ * search filter's `action` virtual field (validated server-side) and the
+ * `trend.action` series keys.
+ */
+export const EXECUTION_ACTIONS = [
+  'deliver',
+  'mark_deliver',
+  'advanced_review',
+  'quarantine',
+  'review',
+  'block',
+  'drop',
+  'recall',
+] as const;
+
+export type ExecutionAction = (typeof EXECUTION_ACTIONS)[number];
 
 export type DisplayStatus =
   | "rejected"

@@ -829,6 +829,15 @@ export function getPolicyMeta(policyKey: string): PolicyMeta | undefined {
   return DISPOSAL_POLICY_MAP[policyKey];
 }
 
+// 判断 policy_key 是否属于阶段1（连接层/IP策略）。
+// 用于多租户产品形态下租户管理员视角的处置依据模糊化展示：
+// 阶段1策略为平台级，租户无权查看/配置，展示"平台策略"而非内部模块细节。
+export function isStage1Policy(policyKey?: string): boolean {
+  if (!policyKey) return false;
+  const meta = DISPOSAL_POLICY_MAP[policyKey];
+  return meta?.stage === 1;
+}
+
 export function getActionLabel(action: string, lang: DisposalLang = 'zh'): string {
   return ACTION_LABEL[action as DisposalAction]?.[lang] ?? action;
 }

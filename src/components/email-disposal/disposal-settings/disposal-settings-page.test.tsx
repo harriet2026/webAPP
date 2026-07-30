@@ -63,12 +63,15 @@ vi.mock('./recall-settings-tab', () => ({
 }));
 
 import { DisposalSettingsPage } from './disposal-settings-page';
+import { UnsavedGuardProvider } from '@/contexts/unsaved-guard-context';
 
 function renderPage() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <DisposalSettingsPage />
+      <UnsavedGuardProvider>
+        <DisposalSettingsPage />
+      </UnsavedGuardProvider>
     </QueryClientProvider>,
   );
 }

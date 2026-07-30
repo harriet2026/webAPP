@@ -231,6 +231,7 @@ export function SelectedConditions({
   // Only string-valued quick-filter keys; sendReceiveTime (object) is handled separately below.
   type StringQuickKey = Exclude<keyof DisposalQuickFilter, "sendReceiveTime">;
   const quickFields: [StringQuickKey, string][] = [
+    ["senderIp", ft("senderIp")],
     ["sender", ft("sender")],
     ["recipient", ft("recipient")],
     ["subject", ft("subject")],
