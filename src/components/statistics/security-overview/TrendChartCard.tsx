@@ -36,6 +36,10 @@ export function TrendChartCard({
   onPointClick,
 }: TrendChartCardProps) {
   const t = useTranslations('securityOverview');
+  // action view labels share the same enum as the email-disposal search filter.
+  // Reading from emailDisposal.filters.actions keeps a single i18n source of
+  // truth instead of duplicating entries under securityOverview.actions.
+  const tDisposal = useTranslations('emailDisposal');
 
   const seriesData = useMemo(() => trend?.[viewBy] ?? [], [trend, viewBy]);
   const keys = useMemo(() => {
@@ -48,9 +52,15 @@ export function TrendChartCard({
   }, [seriesData]);
 
   function seriesLabel(key: string): string {
+    // action view: delegate to emailDisposal.filters.actions — single source of
+    // truth shared with the email-disposal search filter enum (EXECUTION_ACTIONS).
+    if (viewBy === 'action') {
+      const result = tDisposal(`filters.actions.${key}` as Parameters<typeof tDisposal>[0]);
+      return result.includes('.') ? key : result;
+    }
     const nsMap: Record<ViewBy, string> = {
       threat_type: 'threatTypes',
-      action: 'actions',
+      action: 'actions', // fallback — should not be reached with the guard above
       threat_level: 'threatLevels',
       delivery_result: 'deliveryResults',
       email_type: 'emailTypes',

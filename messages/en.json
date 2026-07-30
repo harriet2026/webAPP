@@ -7162,16 +7162,6 @@
       "malicious": "Malicious",
       "invalid": "Invalid"
     },
-    "actions": {
-      "deliver": "Deliver",
-      "mark_deliver": "Mark Deliver",
-      "greylist": "Greylist",
-      "quarantine": "Quarantine",
-      "review": "Review",
-      "block": "Reject",
-      "drop": "Drop",
-      "recall": "Recall"
-    },
     "emailTypes": {
       "normal": "Normal",
       "subscription": "Subscription",

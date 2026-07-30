@@ -1014,7 +1014,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置：灰色为「继承全局」，彩色为「另行配置」。",
+    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置：灰色为「继承全局」，彩色为「另行配��」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
     "targetGroups": "适用对象",
@@ -1160,7 +1160,7 @@
     "stageReadOnlyForTenant": "阶段1 由平台统一管控，租户侧不可配置差异化策略"
   },
   "detectionProfiles": {
-    "rbl": "RBL 过滤",
+    "rbl": "RBL 过���",
     "execImpersonation": "高管冒充检测",
     "domainLookalike": "仿冒域名检测",
     "name": "名称",
@@ -1748,7 +1748,7 @@
         "name": "出口 IP",
         "nameRequired": "请选择出口 IP",
         "empty": "请先在网络设置配置出口 IP",
-        "domainNotVerified": "发信域须���完成归属校验"
+        "domainNotVerified": "发信域须����完成归属校验"
       },
       "outbound": {
         "title": "出站规则",
@@ -2137,7 +2137,7 @@
     },
     "failAdvice": {
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号���否泄露并启用登录限速。",
-      "userNotExist": "账号不存在，常见于扫描探������建议关注来源 IP 是否存在批量尝试。",
+      "userNotExist": "账号不存在，常见���扫描探������建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务器端口可达性与防火墙策略。",
@@ -2890,7 +2890,7 @@
     "mailActions": {
       "accept": "已放行",
       "reject": "已拒绝",
-      "quarantine": "已隔离",
+      "quarantine": "已隔���",
       "sideline": "���旁路",
       "audit": "已审计",
       "deliver": "已投递"
@@ -3211,7 +3211,7 @@
       "conditionAuthFail": "每小时认证失败超过 {count} 次",
       "conditionCmdError": "单连接命令错误超过 {count} 次",
       "conditionConnAuthFail": "单连接认证失败超过 {count} 次",
-      "suspend15minText": "15分钟",
+      "suspend15minText": "15��钟",
       "suspend30minText": "30分钟",
       "suspend1hourText": "1小时",
       "suspend2hourText": "2小时",
@@ -4269,7 +4269,7 @@
     "exceptionEntry": {
       "title": "例外规则管理",
       "desc": "本模块不配置例外规则，请在策略流水线统一管理",
-      "viewCurrent": "查看当前例外"
+      "viewCurrent": "查看当��例外"
     },
     "health": {
       "title": "配置健康��查",
@@ -4495,7 +4495,7 @@
       "title": "确认离开",
       "body": "当前配置未保存，是否放弃修改？",
       "stay": "继续编辑",
-      "discard": "放弃并关闭"
+      "discard": "放弃并关��"
     },
     "drawerSubtitle": "配置发信人行为管控规则",
     "filter": {
@@ -4930,7 +4930,7 @@
       "costHint": "复检耗时预期：回扫黑名单（即时）→ 查询情报（秒级）→ 深度复检（约 30-60 秒）。开启深度复检会让用户点击后产生等待。",
       "m1": {
         "title": "回扫黑名单",
-        "desc": "比对「高级过滤规则」与「内容规则」中动作为 审核·隔离·丢弃·阻断 的 URL 黑名单规则，命中即按其动作处置"
+        "desc": "比对「高级过滤规则」与「内容规则」中动作为 审核·隔离·丢弃·阻断 的 URL 黑名单规则，命���即按其动作处置"
       },
       "m2": {
         "title": "查询情报",
@@ -4953,7 +4953,7 @@
         "riskBanner": "已允许用户跳过深度复检：用户可在等待期间点击“跳过并访问”，经二次风险确认后直接访问未完成检测的链接，存在放行恶意链接的风险。该操作将记录到链接日志以供审计。"
       },
       "timeoutFixedNotice": "深度复检超时的链接将被视为未知风险链接，展示提示页。",
-      "desc": "终端用户点击改写后的链接时，网关按下列已启用项对该 URL 做实时复检",
+      "desc": "终端用户点击改写后的链��时，网关按下列已启用项对该 URL 做实时复检",
       "engineAi": "钓鱼邮件智能体",
       "engineLegacy": "URL 沙箱",
       "timeoutPolicy": {
@@ -6681,7 +6681,7 @@
       "desc_comprehensiveEngineResult": {
         "source": "AI意图分类引擎",
         "usage": "根据AI意图分类结果过滤",
-        "note": "支持置信度阈值，可识别钓鱼、垃圾、涉政等"
+        "note": "支持置信度阈值���可识别钓鱼、垃圾、涉政等"
       },
       "desc_senderIpCount15Min": {
         "source": "发信行为统计",
@@ -7219,16 +7219,6 @@
       "malicious": "恶意邮件",
       "invalid": "无效邮件"
     },
-    "actions": {
-      "deliver": "投递",
-      "mark_deliver": "标记投递",
-      "greylist": "灰名单",
-      "quarantine": "隔离",
-      "review": "审核",
-      "block": "拒收",
-      "drop": "丢弃",
-      "recall": "召回"
-    },
     "emailTypes": {
       "normal": "正常",
       "subscription": "订阅资讯",
@@ -7732,7 +7722,7 @@
     "loadTimeout": "加载超时，请稍后重试",
     "retry": "重试",
     "agentOffline": "数据采集异常",
-    "degradeBackendUnavailable": "监控数据源（时序数据库）暂时不可达，数据可能缺失",
+    "degradeBackendUnavailable": "监控数据源（时序数据库）��时不可达，数据可能缺失",
     "degradeNotInitialized": "监控库尚未初始化",
     "degradeDbUnavailable": "数据库监控数据源暂时不可用",
     "backendUnsupported": "该后端暂不支持",
@@ -8420,7 +8410,7 @@
       "edit": "编辑",
       "delete": "删除",
       "deleteConfirmTitle": "删除保护对象",
-      "deleteConfirmDesc": "删除后将停止对该对象的仿冒检测，历史检测日志保留。",
+      "deleteConfirmDesc": "删除后将停止对该对象的仿冒检测，历史检��日志保留。",
       "emptyTitle": "暂无保护对象",
       "emptyDescription": "添加保护对��后开启防护，引擎需至少 1 个对象才能启用",
       "emptyFiltered": "未找到匹配的保护对象",
@@ -8971,7 +8961,7 @@
         "everyHour": "每小时",
         "every2Hours": "每 2 小时"
       },
-      "overlapWarn": "与策略「{name}」存在时间点重叠，仍可保存。",
+      "overlapWarn": "与策略「{name}」存在时间点��叠，仍可保存。",
       "lookbackWindow": "单次回溯窗",
       "lookbackRange": "回溯窗范围 30–1440 分钟",
       "weekdays": "按周几执行（可选）",
@@ -9240,7 +9230,7 @@
     "selectRowAria": "选择 {name}",
     "selectTenantDesc": "请使用上方的租户选择器选择租户后，再管理组织通讯录。",
     "selectTenantPlaceholder": "选择租户",
-    "selectTenantTitle": "请先选择租户",
+    "selectTenantTitle": "请先选���租户",
     "selected": "已选 {count} 条",
     "serverPlaceholder": "如 ldap.corp.com",
     "sheetDesc": "配���通��录数据来源，保存前需完成连接测试",
@@ -9714,7 +9704,7 @@
     "unsavedChanges": "模块开关有未保存的更改"
   },
   "loginSecurity": {
-    "unsavedChanges": "有未保存的修改",
+    "unsavedChanges": "有未保��的修改",
     "cancel": "取消",
     "resetToDefault": "重置为默认",
     "resetToBaseline": "重置为平台基线",
@@ -9900,7 +9890,7 @@
     "expiredTitle": "链接已过期或无效",
     "expiredDesc": "请联系管理员获取新的链接。",
     "errorTitle": "操作失败",
-    "errorDesc": "请稍后重试或联系管理员。",
+    "errorDesc": "请稍���重试或联系管理员。",
     "confirmTitle": "确认将发件人加入白名单",
     "confirmHint": "加入后，该发件人发给您的邮件将不再被隔离。",
     "confirmButton": "确��加白",
