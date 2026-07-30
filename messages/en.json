@@ -5371,11 +5371,11 @@
       "actions": {
         "accept": "Deliver",
         "reject": "Reject",
-        "bounce": "Bounce",
         "discard": "Discard",
         "audit": "Audit",
         "quarantine": "Quarantine",
         "sideline": "Greylist",
+        "recall": "Recall",
         "mixed": "Mixed"
       },
       "statuses": {

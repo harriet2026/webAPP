@@ -1748,7 +1748,7 @@
         "name": "出口 IP",
         "nameRequired": "请选择出口 IP",
         "empty": "请先在网络设置配置出口 IP",
-        "domainNotVerified": "发信域须先完成归属校验"
+        "domainNotVerified": "发信域须��完成归属校验"
       },
       "outbound": {
         "title": "出站规则",
@@ -2137,7 +2137,7 @@
     },
     "failAdvice": {
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号���否泄露并启用登录限速。",
-      "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
+      "userNotExist": "账号不存在，常见于扫描探测���建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务器端口可达性与防火墙策略。",
@@ -2503,7 +2503,7 @@
     "title": "高级搜索",
     "conditionGroup": "搜索条件组",
     "match": "满足条件",
-    "all": "所有条件",
+    "all": "所有条��",
     "any": "任一条件",
     "exclude": "排除",
     "addCondition": "添加搜索条件",
@@ -2891,7 +2891,7 @@
       "accept": "已放行",
       "reject": "已拒绝",
       "quarantine": "已隔离",
-      "sideline": "已旁路",
+      "sideline": "���旁路",
       "audit": "已审计",
       "deliver": "已投递"
     },
@@ -2914,7 +2914,7 @@
       "rule_analysis": "规则分析"
     },
     "typeDescriptions": {
-      "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼风险。",
+      "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结��，判断是否存在钓鱼风险。",
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
       "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
@@ -3855,7 +3855,7 @@
     "sender": "发信人",
     "currentEffect": "当前规则效果预览",
     "effectBlacklist": "发信人 [{sender}] 发往 [{recipient}] 的邮件将被{action}",
-    "effectWhitelist": "发信人 [{sender}] 发往 [{recipient}] 的邮件将被放行",
+    "effectWhitelist": "发信人 [{sender}] 发往 [{recipient}] 的邮件将被���行",
     "configExamples": "配置示例",
     "exampleBlockSender": "拦截特定发信人",
     "exampleBlockSenderDesc": "拒绝 spam@bad.com 发给 user@example.com 的邮件",
@@ -4115,7 +4115,7 @@
       "mailFromEmpty": "空MAIL FROM",
       "mailFromInvalid": "无效MAIL FROM",
       "envelopeHeaderMismatch": "信封与头部不匹配",
-      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。",
+      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封���用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。",
       "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，建议阻断。",
       "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
     },
@@ -4128,7 +4128,7 @@
       "spf_fail": "硬拒绝 (Fail)",
       "spf_failDesc": "发信IP不在SPF记录允许范围内",
       "spf_softfail": "软拒绝 (SoftFail)",
-      "spf_softfailDesc": "SPF记录使���~all（过渡配置）",
+      "spf_softfailDesc": "SPF记录使���~all（过���配置）",
       "spf_none": "未维护 (None)",
       "spf_noneDesc": "域名未配置SPF记录",
       "spf_temperror": "查询失败 (TempError)",
@@ -4272,7 +4272,7 @@
       "viewCurrent": "查看当前例外"
     },
     "health": {
-      "title": "配置健康检查",
+      "title": "配置健康��查",
       "softfailDropRisk": "高风险：SPF软拒绝设置为丢弃",
       "changeToQuarantine": "改为隔离",
       "changeToTag": "改为标记",
@@ -4846,7 +4846,7 @@
     "sandbox": {
       "placeholder": {
         "title": "URL 沙箱检测",
-        "desc": "本功能将在后续版本提供。当前版本仅支持链接保护。"
+        "desc": "本功能将在后续版本提供���当前版本仅支持链接保护。"
       },
       "toggle": "沙箱检测",
       "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁",
@@ -5145,7 +5145,7 @@
     "observeNote": "观察模式下命中仅记录日志，不执行拦截动作",
     "goToGroupPolicy": "前往群组策略配置",
     "atLeastOneDirection": "至少选择一个检测方向",
-    "navSummary": "窗口{window}分钟 / 阈值{threshold}%",
+    "navSummary": "窗口{window}分�� / 阈值{threshold}%",
     "tooltipObserve": "开启后仅记录日志，不执行实际拦截动作",
     "errorTagRequired": "标记投递需至少启用一种标记方式"
   },
@@ -5376,11 +5376,11 @@
       "actions": {
         "accept": "投递",
         "reject": "拒收",
-        "bounce": "退信",
         "discard": "丢弃",
         "audit": "审核",
         "quarantine": "隔离",
         "sideline": "灰名单",
+        "recall": "召回",
         "mixed": "混合"
       },
       "statuses": {
@@ -8577,7 +8577,7 @@
       "keywordsCount": "品牌关键词：{count}个",
       "confidenceThreshold": "置信度阈值",
       "todaySpoofs": "今日仿冒",
-      "emptyFiltered": "未找到匹配的品牌",
+      "emptyFiltered": "未找到匹��的品牌",
       "edit": "编辑",
       "delete": "删除",
       "deleteConfirmTitle": "删除品牌",
@@ -9521,7 +9521,7 @@
       "testFailed": "测试失败",
       "unsavedTitle": "未保存的更改",
       "unsavedDesc": "您有未保存的更��，离开后将丢失。",
-      "leave": "离开（不保存）",
+      "leave": "离���（不保存）",
       "continueEdit": "继续编辑",
       "err": {
         "server": "SMTP 服务器不能为空",
@@ -9530,7 +9530,7 @@
         "username": "用户名不能为空",
         "password": "密码不能为空",
         "noEncKey": "缺少加密密钥；无法保存外部 SMTP 密码",
-        "testEmail": "请输入有效的测试收件人"
+        "testEmail": "���输入有效的测试收件人"
       }
     }
   },
@@ -9902,7 +9902,7 @@
     "errorDesc": "请稍后重试或联系管理员。",
     "confirmTitle": "确认将发件人加入白名单",
     "confirmHint": "加入后，该发件人发给您的邮件将不再被隔离。",
-    "confirmButton": "确认加白",
+    "confirmButton": "确��加白",
     "addedTitle": "已加入白名单",
     "addedDesc": "该发件人已加入您的白名单。"
   },

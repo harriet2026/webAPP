@@ -92,11 +92,11 @@ export function QuickFilters({
   const actions = [
     "accept",
     "reject",
-    "bounce",
     "discard",
     "audit",
     "quarantine",
     "sideline",
+    "recall",
   ] as const;
   const directions = ["incoming", "outgoing", "internal"] as const;
   const mailTypes = [
