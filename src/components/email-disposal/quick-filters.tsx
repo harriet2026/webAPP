@@ -92,7 +92,8 @@ export function QuickFilters({
 
   // Single source of truth — defined in src/types/email-disposal.ts,
   // shared with the 安全总览 › 安全态势分析 action series.
-  const actions = EXECUTION_ACTIONS;
+  // mark_deliver 仅在安全总览图表中展示，处置中心搜索条件不开放此过滤项。
+  const actions = EXECUTION_ACTIONS.filter((a) => a !== 'mark_deliver');
   const directions = ["incoming", "outgoing", "internal"] as const;
   const mailTypes = [
     "normal",
