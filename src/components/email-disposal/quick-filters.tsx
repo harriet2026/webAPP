@@ -425,8 +425,11 @@ export function QuickFilters({
                         </div>
                         {/* 阶段1 + 多租户租户视角：折叠为"平台管控策略"只读标签，不可勾选 */}
                         {hidePlatformStage && stage === 1 ? (
-                          <div className="flex items-center gap-2 rounded px-2 py-1.5 text-xs text-muted-foreground">
-                            <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border border-border bg-muted opacity-50" />
+                          <div
+                            aria-disabled="true"
+                            className="flex cursor-not-allowed items-center gap-2 rounded px-2 py-1.5 text-xs text-muted-foreground/50 pointer-events-none select-none"
+                          >
+                            <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border border-border/40 bg-muted/40" />
                             <span>{t("platformManagedPolicy")}</span>
                           </div>
                         ) : modules.map(({ moduleName, keys }) => {
