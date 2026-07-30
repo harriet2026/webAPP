@@ -30,8 +30,9 @@ import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils';
 import { resolveActionBadges, actionToVariant } from '@/lib/email-log-action';
 import type { DisposalMailItem, DisplayStatus } from '@/types/email-disposal';
-import { formatListReason, type DisposalLang } from './lib/disposal-basis-config';
+import { formatListReason, isStage1Policy, type DisposalLang } from './lib/disposal-basis-config';
 import { mailTypeLabelKey, correctionSourceLabelKey } from './lib/detail-helpers';
+import { useProductForm } from '@/contexts/product-form-context';
 
 interface MailListTableProps {
   items: DisposalMailItem[];
@@ -108,12 +109,14 @@ export function MailListTable({
   onTimeSortChange,
 }: MailListTableProps) {
   const t = useTranslations('emailDisposal');
+  const tFeatures = useTranslations('emailDisposal.detail.features');
   const rawLocale = useLocale();
   // Map next-intl locale to one of the disposal-basis dictionary's supported
   // langs; unknown locales fall back to zh (the dictionary's primary language).
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(rawLocale as DisposalLang)
     ? (rawLocale as DisposalLang)
     : 'zh';
+  const { viewer, capabilities } = useProductForm();
 
   // GT-11579: localize enum badges (direction / action) with safe fallback to
   // the raw value when the i18n key is missing.
@@ -590,16 +593,27 @@ export function MailListTable({
                 )}
                 {isColVisible('disposalBasis') && (
                 <TableCell className="text-xs max-w-[280px] truncate">
-                  {item.disposalBasis ? (
-                    <Tooltip>
-                      <TooltipTrigger render={<span className="cursor-default truncate block" />}>
-                        {formatListReason(item.disposalBasis, disposalLang)}
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-md text-xs">
-                        {formatListReason(item.disposalBasis, disposalLang)}
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : '—'}
+                  {item.disposalBasis ? (() => {
+                    const isPlatformPolicy =
+                      viewer === 'tenant' &&
+                      capabilities?.multiTenant === true &&
+                      isStage1Policy(item.disposalBasis.policy_key);
+                    const label = isPlatformPolicy
+                      ? tFeatures('platformPolicyListReason')
+                      : formatListReason(item.disposalBasis, disposalLang);
+                    return (
+                      <Tooltip>
+                        <TooltipTrigger render={<span className="cursor-default truncate block" />}>
+                          {label}
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-md text-xs">
+                          {isPlatformPolicy
+                            ? tFeatures('platformPolicyHitDetail')
+                            : label}
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })() : '—'}
                 </TableCell>
                 )}
                 {isColVisible('mailType') && (

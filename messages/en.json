@@ -5972,7 +5972,11 @@
         "hitDetail": "Hit Detail",
         "detectionTags": "Detection Tags",
         "viewBasisDetail": "View details",
-        "viewPolicyConfigTitle": "Go to policy configuration"
+        "viewPolicyConfigTitle": "Go to policy configuration",
+        "platformPolicyModule": "Platform Policy",
+        "platformPolicyRuleName": "Platform-managed",
+        "platformPolicyHitDetail": "This email was intercepted by a platform-level connection policy. Contact your platform administrator for details.",
+        "platformPolicyListReason": "Intercepted by platform policy"
       },
       "delivery": {
         "noData": "No delivery records",

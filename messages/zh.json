@@ -190,7 +190,7 @@
         "exportDownloaded": "导出已下载",
         "exportFailed": "导出失败",
         "parseFailed": "解析导入文件失败",
-        "chooseFileFirst": "请先选择导入文件",
+        "chooseFileFirst": "请先选��导入文件",
         "selectAtLeastOneType": "请至少选择一种导入类型",
         "chooseTargetTenant": "请选择目标租户",
         "previewNotWired": "{variant} 预览功能尚未接入",
@@ -699,7 +699,7 @@
       "masterSwitch": "总开关",
       "masterSwitchOffActionable": "免认证中继总开关当前关闭，下方授权均不生效——打开右上角「总开关」后生效。",
       "masterSwitchEnabled": "免认证中继总��关已开启",
-      "masterSwitchDisabled": "免认证中继总开关已关闭",
+      "masterSwitchDisabled": "免认证中继总开关已��闭",
       "add": "新增授权",
       "empty": "暂无授权",
       "created": "授权已创建",
@@ -861,7 +861,7 @@
   },
   "rules": {
     "createRule": "创建规则",
-    "editRule": "编辑规则",
+    "editRule": "��辑规则",
     "deleteRule": "删除规则",
     "action": "动作",
     "priority": "优先级",
@@ -1012,7 +1012,7 @@
     "selectGroupPlaceholder": "选择组",
     "executionOrderNote": "模块的执行顺序由阶段流水线（阶段1→阶段5）固定决定，与优先级无关；优先级仅在多条策略命中同一封邮件、且配置了同一模块时用于仲裁——数值越大越优先生效（可���范围见新建/编辑抽屉）。",
     "stagePrefix": "【阶段{stage}】",
-    "expandConfig": "查看完整配置",
+    "expandConfig": "查看完整配��",
     "collapseConfig": "收起��整配置",
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置：灰色为「继承全局」，彩色为「另行配���」。",
     "priorityHintAria": "优先级��明",
@@ -1520,7 +1520,7 @@
       "delivery_attempts": "投递次数",
       "last_delivery_event_at": "最后投递事件",
       "delivery_error_summary": "投递错误",
-      "delivery_recipients_summary": "收件人投递详情",
+      "delivery_recipients_summary": "收件人��递详情",
       "tenant_id": "租户 ID",
       "tenant_name": "租户",
       "processing_time_ms": "处理耗时",
@@ -1748,7 +1748,7 @@
         "name": "出口 IP",
         "nameRequired": "请选择出口 IP",
         "empty": "请先在网络设置配置出口 IP",
-        "domainNotVerified": "发��域须����完成归属校验"
+        "domainNotVerified": "发����域须����完成归属校验"
       },
       "outbound": {
         "title": "出站规则",
@@ -1905,7 +1905,7 @@
         "created": "角色已创建",
         "updated": "角色已更新",
         "deleted": "角色已删除",
-        "statusUpdated": "角色状态已更���",
+        "statusUpdated": "角色状态已������",
         "saveFailed": "保存失败，请重试",
         "deleteFailed": "删除失败，请重试"
       },
@@ -2683,7 +2683,7 @@
       "warnings": "警告",
       "request": "请求",
       "result": "结果",
-      "ruleClass": "规则类别",
+      "ruleClass": "规则类��",
       "isActive": "启用",
       "mailLogId": "邮件日志 ID",
       "sender": "发件人",
@@ -3958,7 +3958,7 @@
     "scopesLabel": "范围 ({count})",
     "directionsLabel": "方向",
     "preview": "配置预览",
-    "testResult": "测试结果",
+    "testResult": "测���结果",
     "atLeastOneScope": "请至少选择一个范围",
     "atLeastOneDirection": "请至少启用一个方向",
     "totalRules": "{count} 条规则",
@@ -4107,7 +4107,7 @@
       "accept": "允许：不对此规则触发的情况采取拦截动作，邮件继续进入下一阶段检测。",
       "quarantine": "隔离：将匹配的邮件放入隔离区，待管理员审核后再决定放行或删除。",
       "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知。",
-      "audit": "审核：将邮件放入审核队列，等待管理员人工��批后再投递。",
+      "audit": "审核���将邮件放入审核队列，等待管理员人工��批后再投递。",
       "discard": "丢弃：静默丢弃该邮件，不通��发件方也不投递给收件方。"
     },
     "formatChecks": {
@@ -4126,7 +4126,7 @@
       "dmarc": "DMARC",
       "ptr": "PTR",
       "spf_fail": "硬拒绝 (Fail)",
-      "spf_failDesc": "发信IP不在SPF记录允许范围内",
+      "spf_failDesc": "��信IP不在SPF记录允许范围内",
       "spf_softfail": "软拒绝 (SoftFail)",
       "spf_softfailDesc": "SPF记录使���~all（过���配置）",
       "spf_none": "未维护 (None)",
@@ -4493,7 +4493,7 @@
     },
     "closeConfirm": {
       "title": "确认离开",
-      "body": "当前配置未保存，是否放弃修改？",
+      "body": "当前配置未保存，是否��弃修改？",
       "stay": "继续编辑",
       "discard": "��弃并关��"
     },
@@ -4623,7 +4623,7 @@
       "save": "保存配置"
     },
     "common": {
-      "save": "保存",
+      "save": "��存",
       "cancel": "取消"
     },
     "toast": {
@@ -4790,7 +4790,7 @@
       "attachmentSize": "单个附件大小上限，-1 表示不限制",
       "nestedProtection": "限制压缩包数量、内部文件数量和解压层级，避免压缩炸弹耗尽资源",
       "scanTimeout": "单封邮件附件扫描允许占用的最长时间",
-      "exceedAction": "基础限制任一项超限时采取的处置",
+      "exceedAction": "基础限制���一项超限时采取的处置",
       "antivirusHost": "attachd 连接的通��� AV 服务地址",
       "virusAction": "确认检出病毒后对邮件采取的动作",
       "antivirusTimeout": "AV 服务超过扫描时限或不可用时采取的动作",
@@ -4930,7 +4930,7 @@
       "costHint": "复检耗时预期：回扫黑名单（即时）→ 查询情报（秒级）→ 深度复检（约 30-60 秒）。开启深度复检会让用户点击后产生等待。",
       "m1": {
         "title": "回扫黑名单",
-        "desc": "比对「高级过滤规则」与「内容规则」中动作为 审核·隔离·丢弃·阻断 的 URL 黑名单规则，命���即按其动作处置"
+        "desc": "比对���高级过滤规则」与「内容规则」中动作为 审核·隔离·丢弃·阻断 的 URL 黑名单规则，命���即按其动作处置"
       },
       "m2": {
         "title": "查询情报",
@@ -5095,7 +5095,7 @@
     "observeWarningTitle": "当前处于观察模式",
     "observeWarningDesc": "命中后仅记录不拦截。确认策略效果后请及时切换为正式模式。",
     "observingDirections": "正在观察中",
-    "viewObserveLogs": "查看观察日志",
+    "viewObserveLogs": "���看观察日志",
     "modeAggregate": "全方向聚合（合并统计）",
     "modeSeparate": "按方向独立检测（可勾选多个）",
     "directionConfig": "检测方向配置",
@@ -5142,7 +5142,7 @@
     "ignoreNumbers": "忽略数字",
     "similarSubject": "相似度>90%视为相同",
     "realtimeNote": "此检测在邮件进入时实时计算，命中后立即拦截或标记",
-    "observeNote": "观察模式下命中仅记录日志，不执行拦截动作",
+    "observeNote": "观察模式��命中仅记录日志，不执行拦截动作",
     "goToGroupPolicy": "前往群���策略配置",
     "atLeastOneDirection": "至少选择一个检测方���",
     "navSummary": "窗口{window}分�� / 阈值{threshold}%",
@@ -5489,7 +5489,7 @@
       "dkimResult": "DKIM 结果",
       "dmarcResult": "DMARC 结果",
       "ptrResult": "PTR 结果",
-      "similarDomain": "相似域名检测",
+      "similarDomain": "相似域名检��",
       "displayNameDetect": "显示名检测",
       "mailFromEmpty": "Mail From 为空",
       "virusScanResult": "病毒扫描结果",
@@ -5967,7 +5967,11 @@
         "hitDetail": "命中详情",
         "detectionTags": "检测标签",
         "viewBasisDetail": "查看依据详情",
-        "viewPolicyConfigTitle": "前往策略配置页"
+        "viewPolicyConfigTitle": "前往策略配置页",
+        "platformPolicyModule": "平台策略",
+        "platformPolicyRuleName": "平台统一管控",
+        "platformPolicyHitDetail": "该邮件由平台级连接层策略拦截，如需了解详情请联系平台管理员",
+        "platformPolicyListReason": "平台策略拦截"
       },
       "delivery": {
         "noData": "暂无投递记录",
@@ -6206,7 +6210,7 @@
       "modifyHeaderVariableHint": "支持变量：{sender}、{recipient}、{subject}",
       "tagPositionBodyEnd": "正文结尾",
       "tagPositionBodyStart": "正文开头",
-      "tagPositionSuffix": "主题后缀",
+      "tagPositionSuffix": "主题后��",
       "tagStyleHtmlBlue": "HTML蓝色",
       "tagStyleHtmlOrange": "HTML橙���",
       "tagStyleHtmlRed": "HTML红色",
@@ -7724,7 +7728,7 @@
     "agentOffline": "数据采集异常",
     "degradeBackendUnavailable": "监控数据源（时序数据库）��时不可达，数据可能缺失",
     "degradeNotInitialized": "监控库尚未初始化",
-    "degradeDbUnavailable": "数据库监控数据源暂时不可用",
+    "degradeDbUnavailable": "数���库监控数据源暂时不可用",
     "backendUnsupported": "该后端暂不支持",
     "hardware": {
       "cpuMem": "CPU/内存趋势",
@@ -7815,7 +7819,7 @@
     "degradeBackendUnavailable": "监控数据源（时序数据库）暂时不可达，数据可能缺失",
     "degradeNotInitialized": "监控库尚未初始化",
     "degradeDbUnavailable": "数据库监控数据源暂时不可用",
-    "queueDirectionDisabled": "队列为全局共享，不区分方向",
+    "queueDirectionDisabled": "队列为���局共享，不区分方向",
     "approximate": "近似",
     "calibrating": "数据校准中",
     "clusterAggregate": "该指��为集群汇总，不区分节点",
@@ -8962,7 +8966,7 @@
         "every2Hours": "每 2 小时"
       },
       "overlapWarn": "与策略「{name}」存在时间点��叠，仍可保存。",
-      "lookbackWindow": "单次回溯窗",
+      "lookbackWindow": "单次��溯窗",
       "lookbackRange": "回溯窗范围 30–1440 分钟",
       "weekdays": "按周几执行（可选）",
       "weekdaysHint": "不选=每天执行",
@@ -9698,7 +9702,7 @@
     "platformManaged": "阶段 1 IP 策略由平台管理员全局管控",
     "selectTenantFirst": "请先选择租户，再修改此模块",
     "adminOnly": "仅系统管理员或租户管理员可修改此模块",
-    "disableWarning": "关闭本模块后，其全部规则停止生效，该模块的拦截能力将不再起作用。",
+    "disableWarning": "关闭��模块后，其全部规则停止生效，该模块的拦截能力将不再起作用。",
     "whitelistWarning": "注意：本模块的白名单 / ���行规则也会一并停用，原本被放行的邮件将继续走后续检测。",
     "saveFailed": "保存失败，请重试",
     "unsavedChanges": "模块开关有未保存的更改"
