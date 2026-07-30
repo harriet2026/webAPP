@@ -48,7 +48,12 @@ export function TrendChartCard({
     // `success_rate` percentage that is NOT a stackable count and is not a valid
     // drill-down series (backend validates series ∈ AllDeliveryResults). Stacking
     // it distorts the area chart and clicking it would 400 the drill-down.
-    return Object.keys(seriesData[0]).filter((k) => k !== 'date' && !NON_SERIES_KEYS.has(k));
+    return Object.keys(seriesData[0]).filter((k) => {
+      if (k === 'date' || NON_SERIES_KEYS.has(k)) return false;
+      // mark_deliver 不在处置中心筛选枚举中，安全总览执行动作视图同步去掉。
+      if (viewBy === 'action' && k === 'mark_deliver') return false;
+      return true;
+    });
   }, [seriesData]);
 
   function seriesLabel(key: string): string {
