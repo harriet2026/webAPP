@@ -34,12 +34,23 @@ export function ProductFormSwitcher() {
   // 变更规格索引：动态扫描 doc/html_spec-version/ 下的所有 HTML 文件，
   // 无需手动维护列表，每次增加新 spec 文件后自动出现在此入口。
   const [versionSpecs, setVersionSpecs] = useState<{ ticket: string; label: string; url: string }[]>([]);
-  useEffect(() => {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const fetchVersionSpecs = () => {
     fetch('/api/dev/version-specs')
       .then((r) => r.json())
       .then((data) => setVersionSpecs(data.specs ?? []))
-      .catch(() => {/* 忽略：非开发环境下 API 不可用属正常 */});
-  }, []);
+      .catch(() => {/* 非开发环境下 API 不可用属正常 */});
+  };
+
+  // mount 时预热，保证首次打开 dropdown 时数据已就绪
+  useEffect(() => { fetchVersionSpecs(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleDropdownOpenChange = (open: boolean) => {
+    setDropdownOpen(open);
+    // 每次打开都重新 fetch，确保新增 spec 文件即时可见
+    if (open) fetchVersionSpecs();
+  };
 
   // 可见性门控：服务端 layout 仅在 OSGATEWAY_PRODUCT_FORM_SWITCHER=true
   // 时才给 provider 传 switcherEnabled=true。provider 会透传此 flag；
@@ -77,7 +88,7 @@ export function ProductFormSwitcher() {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={dropdownOpen} onOpenChange={handleDropdownOpenChange}>
         <DropdownMenuTrigger
           className="inline-flex h-8 items-center gap-1 rounded border border-border/80 bg-card px-2.5 text-xs font-medium text-muted-foreground shadow-none transition-colors hover:bg-accent/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
           aria-label={t('label')}
