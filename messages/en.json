@@ -5849,11 +5849,13 @@
         "notIntegrated": "Not Integrated",
         "stageName": {
           "connection": "Connection",
+          "connectionPlatform": "Platform-managed",
           "identity": "Identity",
           "content": "Content",
           "comprehensive": "Comprehensive",
           "ai": "AI Analysis"
         },
+        "platformStageHint": "This stage is managed by the platform. Contact your platform administrator for details.",
         "verdict": {
           "malicious": "Malicious",
           "suspicious": "Suspicious",

@@ -259,7 +259,12 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                   >
                     <div className="text-center">
                       <div className="text-xs text-muted-foreground mb-1">{t('stage')} {st.stage}</div>
-                      <div className="font-medium text-sm mb-2">{t(`stageName.${st.key}`)}</div>
+                      {/* 阶段1 + 多租户租户视角：标题改为"平台管控" */}
+                      <div className="font-medium text-sm mb-2">
+                        {isPlatformPolicyContext && st.stage === 1
+                          ? t('stageName.connectionPlatform')
+                          : t(`stageName.${st.key}`)}
+                      </div>
                       <div className="flex justify-center mb-2">{STATUS_ICON_LG[st.status]}</div>
                       <Badge variant="outline" className={cn('text-xs mb-1', STAGE_BADGE_STYLE[st.status])}>
                         {t(`status.${st.status}`)}
@@ -274,25 +279,34 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                         className="mt-3 pt-3 border-t border-border/70 text-left"
                         data-testid={`analysis-stage-${st.stage}-detail`}
                       >
-                        <div className="text-xs font-medium text-muted-foreground mb-2">
-                          {st.stage === 5 ? t('agentJudgementLabel') : t('hitPolicyLabel')}
-                        </div>
-                        <div className="space-y-1.5">
-                          {st.checks.map((c) => (
-                            <div key={c.key} className="flex items-center justify-between gap-2 text-xs">
-                              <div className="flex items-center gap-1 min-w-0">
-                                {STATUS_ICON[c.status]}
-                                <span className="truncate">{t(`check.${c.key}`)}</span>
-                              </div>
-                              <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[c.status])}>
-                                {c.status === 'skipped' ? t('notIntegrated') : t(`status.${c.status}`)}
-                                {c.ruleIds.length > 0 && (
-                                  <span className="ml-1 text-muted-foreground">#{c.ruleIds.join(', #')}</span>
-                                )}
-                              </span>
+                        {isPlatformPolicyContext && st.stage === 1 ? (
+                          /* 阶段1 + 多租户租户视角：命中策略明细替换为说明文字 */
+                          <p className="text-xs text-muted-foreground italic">
+                            {t('platformStageHint')}
+                          </p>
+                        ) : (
+                          <>
+                            <div className="text-xs font-medium text-muted-foreground mb-2">
+                              {st.stage === 5 ? t('agentJudgementLabel') : t('hitPolicyLabel')}
                             </div>
-                          ))}
-                        </div>
+                            <div className="space-y-1.5">
+                              {st.checks.map((c) => (
+                                <div key={c.key} className="flex items-center justify-between gap-2 text-xs">
+                                  <div className="flex items-center gap-1 min-w-0">
+                                    {STATUS_ICON[c.status]}
+                                    <span className="truncate">{t(`check.${c.key}`)}</span>
+                                  </div>
+                                  <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[c.status])}>
+                                    {c.status === 'skipped' ? t('notIntegrated') : t(`status.${c.status}`)}
+                                    {c.ruleIds.length > 0 && (
+                                      <span className="ml-1 text-muted-foreground">#{c.ruleIds.join(', #')}</span>
+                                    )}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </button>

@@ -190,7 +190,7 @@
         "exportDownloaded": "导出已下载",
         "exportFailed": "导出失败",
         "parseFailed": "解析导入文件失败",
-        "chooseFileFirst": "请先选����导入文件",
+        "chooseFileFirst": "请先选�����导入文件",
         "selectAtLeastOneType": "请至少选择一种导入类型",
         "chooseTargetTenant": "请选择目标租户",
         "previewNotWired": "{variant} 预览功能尚未接入",
@@ -542,7 +542,7 @@
       "firstSeen": "��次出现",
       "senderEmail": "发信地址",
       "senderDomain": "发信域名",
-      "bounceRate": "退��率",
+      "bounceRate": "����率",
       "topSendIps": "TOP发信IP",
       "recipientEmail": "收件地址",
       "recipientDomain": "收件域名",
@@ -699,7 +699,7 @@
       "masterSwitch": "总开关",
       "masterSwitchOffActionable": "免认证中继总开关当前关闭，下方授权均不生效——打开右上角「总开关」后生效。",
       "masterSwitchEnabled": "免认证中继总��关已开启",
-      "masterSwitchDisabled": "免认证中继��开关����闭",
+      "masterSwitchDisabled": "免认证��继��开关����闭",
       "add": "新增授权",
       "empty": "暂无授权",
       "created": "授权已创建",
@@ -1014,7 +1014,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看��整配��",
     "collapseConfig": "收起��整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置：灰色为「继承全局」，彩色为���另行配���」。",
+    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置：灰色为「继承全局」，���色为���另行配���」。",
     "priorityHintAria": "优先级��明",
     "name": "名称",
     "targetGroups": "适用对象",
@@ -1904,7 +1904,7 @@
       "toast": {
         "created": "角色已创建",
         "updated": "角色已更新",
-        "deleted": "角色已删除",
+        "deleted": "角���已删除",
         "statusUpdated": "角色状态已������",
         "saveFailed": "保存失败，请重试",
         "deleteFailed": "删除失败，请重试"
@@ -2136,7 +2136,7 @@
       "unknown": "未知错误"
     },
     "failAdvice": {
-      "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号���否泄露并启用登录限���。",
+      "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号���否���露并启用登录限���。",
       "userNotExist": "账号不存���，常见���扫描探��������建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
@@ -2314,7 +2314,7 @@
       "boundEmail": "邮箱绑定成功",
       "bindFailed": "绑定失败",
       "saved": "保存成功",
-      "saveFailed": "保存失败",
+      "saveFailed": "保存���败",
       "lastLoginTime": "��近登录时间",
       "lastLoginIp": "最近登录IP"
     },
@@ -2523,7 +2523,7 @@
       "regex": "正则匹配",
       "gt": "大于",
       "lt": "小于",
-      "gte": "大于等于",
+      "gte": "大��等于",
       "lte": "小������于",
       "isNull": "为空",
       "isNotNull": "不��空",
@@ -2787,7 +2787,7 @@
       "route": "路由规则"
     },
     "evidenceTypes": {
-      "eml_parsed": "已解析 EML",
+      "eml_parsed": "已解�� EML",
       "embedded_urls": "包含 URL",
       "attachments_present": "包含附件",
       "obfuscated_content": "内容存在混淆特征",
@@ -3209,7 +3209,7 @@
       "conditionConcurrent": "并发连接超过 {count} 个",
       "conditionWindow": "每 {minutes} 分钟超过 {count} 次",
       "conditionAuthFail": "每小时认证失败超过 {count} 次",
-      "conditionCmdError": "单连接命令错误超过 {count} 次",
+      "conditionCmdError": "单��接命令错误超过 {count} 次",
       "conditionConnAuthFail": "单连接认证失败超过 {count} 次",
       "suspend15minText": "15��钟",
       "suspend30minText": "30分钟",
@@ -4261,7 +4261,7 @@
     "policyTemplate": "策略模板",
     "globalObserve": "观察模式",
     "wouldDropCount": "预计丢弃",
-    "observingRecordOnly": "允许（仅记录）",
+    "observingRecordOnly": "允许（���记录）",
     "highRiskWarning": "高风险动作：建议先开启观察模式测试���响范围",
     "spfDropAlert": "SPF 硬拒绝设为静默丢弃，可能误删合法邮件",
     "exceptionBanner": "例外规则（白名单）请在【策略流水线】模块配置，本模块仅���置协议检查规则",
@@ -4617,7 +4617,7 @@
       "mimeMismatchAction": "MIME不一致处理动作",
       "action_quarantine": "隔离",
       "action_sideline": "搁置",
-      "action_reject": "拒绝",
+      "action_reject": "���绝",
       "action_accept": "放行",
       "action_discard": "丢弃",
       "save": "保存配置"
@@ -4836,7 +4836,7 @@
     "tenantRequired": {
       "title": "需要选择租户",
       "description": "URL 检测与防护是租户级别的配置，请先选择要管理的租户。",
-      "hint": "请使用页面右上角的租户选择器选择一个租户"
+      "hint": "请使用页���右上角的租户选择器选择一个租户"
     },
     "tabs": {
       "sandbox": "URL沙箱检��",
@@ -5484,7 +5484,7 @@
       "attachmentCount": "附件数量",
       "attachmentTotalSize": "附件总大小",
       "attachmentType": "附件类型",
-      "attachmentName": "附件名称",
+      "attachmentName": "附件名��",
       "attachmentMd5": "附件 MD5",
       "spfResult": "SPF 结果",
       "dkimResult": "DKIM 结果",
@@ -5844,11 +5844,13 @@
         "notIntegrated": "未接入",
         "stageName": {
           "connection": "连接层检测",
+          "connectionPlatform": "平台管控",
           "identity": "身份层检测",
           "content": "内容层检测",
           "comprehensive": "综合分析",
           "ai": "AI 智能分析"
         },
+        "platformStageHint": "该阶段由平台统一管控，详情请联系平台管理员",
         "verdict": {
           "malicious": "恶意邮件",
           "suspicious": "可疑邮件",
@@ -6570,7 +6572,7 @@
       },
       "desc_attachmentMd5": {
         "source": "附件哈希计算",
-        "usage": "精确匹配已知恶意文件的MD5值",
+        "usage": "精确匹配已知恶���文件的MD5值",
         "note": "适用于已知威胁情报匹配"
       },
       "desc_attachmentSizeTotal": {
@@ -6924,7 +6926,7 @@
       "columnPolicy": "策略",
       "columnConfig": "配置",
       "terminalNoAddons": "终结动作 —— 不执行附加策略。",
-      "emptySummary": "尚未配置任何内容。"
+      "emptySummary": "尚未配��任何内容。"
     }
   },
   "disposalSettings": {
@@ -7300,7 +7302,7 @@
         "client_ip": "IP TOP",
         "matched_rule": "策略"
       },
-      "close": "关闭",
+      "close": "���闭",
       "empty": "无下钻数据"
     },
     "table": {
@@ -8131,7 +8133,7 @@
       "created": "准入规则已创建",
       "updated": "准入规则已更新",
       "saveFailed": "保存失败",
-      "saving": "保存中...",
+      "saving": "���存中...",
       "save": "保存",
       "cancel": "取消",
       "errors": {
@@ -8753,7 +8755,7 @@
       "mode": "检测模式",
       "agentRounds": "复检轮数",
       "confidence": "置信度",
-      "status": "任务状态",
+      "status": "任务状���",
       "disposition": "最终处置",
       "basis": "判定依据",
       "dispositionValue": {
@@ -8953,7 +8955,7 @@
       "offlineSourceHint": "离线来源将在恢复后自动生效。",
       "confidenceThreshold": "置信度阈值（1–100）",
       "confidenceRange": "置信度阈值范围 1–100",
-      "cooldown": "冷却时间（分钟）",
+      "cooldown": "冷却时间（分钟���",
       "cooldownRange": "冷却时间范围 5–1440 分钟",
       "fixedLookbackHint": "实时模式固定回溯 24 小时。",
       "runTimes": "巡检时间点",
@@ -9297,7 +9299,7 @@
     "typeShortCoremail": "Coremail",
     "typeShortNeteml": "网易 API",
     "uploadHint": "支持部门与用户两个 CSV 文件，单文件不超过 50MB，需完成列映射",
-    "deleteImpactDesc": "该数据源当前关联 {count} 名联系人；受影响策略：{profiles}。删除后这些联系人将随下次清理移除，相关策略可能失效，此操作不可撤销。",
+    "deleteImpactDesc": "该数据源当前关联 {count} 名联系人；受影响策略：{profiles}。删除��这些联系人将随下次清理移除，相关策略可能失效，此操作不可撤销。",
     "deleteImpactNoProfiles": "无"
   },
   "alertCenter": {
