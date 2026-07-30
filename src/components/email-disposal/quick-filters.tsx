@@ -37,6 +37,7 @@ import {
   type DisposalLang,
 } from "./lib/disposal-basis-config";
 import { useLocale } from "next-intl";
+import { useProductForm } from "@/contexts/product-form-context";
 
 interface QuickFiltersProps {
   value: DisposalQuickFilter;
@@ -64,6 +65,11 @@ export function QuickFilters({
     : "zh";
   const [policyMode, setPolicyMode] = useState<"module" | "rule">("module");
   const [ruleSearch, setRuleSearch] = useState("");
+  const { viewer, capabilities } = useProductForm();
+  // 方案A：多租户产品形态 + 租户管理员视角下，阶段1（连接层）为平台级策略，
+  // 租户无权查看/配置，从处置依据筛选选项中隐藏整个阶段1分组。
+  const hidePlatformStage = viewer === "tenant" && capabilities?.multiTenant === true;
+
   // GT-12236: 原型要求处置依据按模块语义展示（附件安全检测为单一模块），
   // 而后端 policy_key 把它拆成 ATT-BASIC/ATT-QR/ATT-ENC 三个 key。
   // groupDisposalModulesByStage 按模块名分组合并：同名 key 只出现一次，
@@ -71,13 +77,16 @@ export function QuickFilters({
   // 查询语义不变）。
   const modulesByStage = useMemo(() => {
     const groups = groupDisposalModulesByStage(disposalLang);
-    return [1, 2, 3, 4, 5].map((stage) => ({
-      stage,
-      modules: groups
-        .filter((g) => g.stage === stage)
-        .map((g) => ({ moduleName: g.moduleName, keys: g.keys })),
-    }));
-  }, [disposalLang]);
+    return [1, 2, 3, 4, 5]
+      // 多租户租户视角下隐藏阶段1（连接层/平台级策略）
+      .filter((stage) => !(hidePlatformStage && stage === 1))
+      .map((stage) => ({
+        stage,
+        modules: groups
+          .filter((g) => g.stage === stage)
+          .map((g) => ({ moduleName: g.moduleName, keys: g.keys })),
+      }));
+  }, [disposalLang, hidePlatformStage]);
   const visibleRuleOptions = useMemo(() => {
     const needle = ruleSearch.trim().toLowerCase();
     return disposalRuleOptions
