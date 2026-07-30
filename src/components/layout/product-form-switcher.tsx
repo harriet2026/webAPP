@@ -31,6 +31,16 @@ export function ProductFormSwitcher() {
   const [mockEnabled, setMockEnabled] = useState(() => isMockEnabled());
   useEffect(() => subscribeMockEnabled(setMockEnabled), []);
 
+  // 变更规格索引：动态扫描 doc/html_spec-version/ 下的所有 HTML 文件，
+  // 无需手动维护列表，每次增加新 spec 文件后自动出现在此入口。
+  const [versionSpecs, setVersionSpecs] = useState<{ ticket: string; label: string; url: string }[]>([]);
+  useEffect(() => {
+    fetch('/api/dev/version-specs')
+      .then((r) => r.json())
+      .then((data) => setVersionSpecs(data.specs ?? []))
+      .catch(() => {/* 忽略：非开发环境下 API 不可用属正常 */});
+  }, []);
+
   // 可见性门控：服务端 layout 仅在 OSGATEWAY_PRODUCT_FORM_SWITCHER=true
   // 时才给 provider 传 switcherEnabled=true。provider 会透传此 flag；
   // 开关关闭时本组件直接返回 null 不渲染。
@@ -174,20 +184,23 @@ export function ProductFormSwitcher() {
             </span>
             <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.open('/html-spec/version/GT-12649.html', '_blank', 'noopener,noreferrer');
-              }
-            }}
-            className="flex items-center justify-between"
-          >
-            <span className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              {tMock('versionSpec')}
-            </span>
-            <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
-          </DropdownMenuItem>
+          {versionSpecs.map((spec) => (
+            <DropdownMenuItem
+              key={spec.ticket}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.open(spec.url, '_blank', 'noopener,noreferrer');
+                }
+              }}
+              className="flex items-center justify-between"
+            >
+              <span className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                {spec.label}
+              </span>
+              <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
 

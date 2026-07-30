@@ -34,8 +34,7 @@
   "mock": {
     "label": "开发模式",
     "enabled": "Mock 数据（无需后端）",
-    "htmlSpec": "查看 HTML Spec",
-    "versionSpec": "版本变更规格 (GT-12649)"
+    "htmlSpec": "查看 HTML Spec"
   },
   "common": {
     "save": "保存",
@@ -1014,7 +1013,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置：灰色为「继承全局」，彩色为「另行配��」。",
+    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置：灰色为「继承全局」，彩色为「另行配���」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
     "targetGroups": "适用对象",
@@ -1160,7 +1159,7 @@
     "stageReadOnlyForTenant": "阶段1 由平台统一管控，租户侧不可配置差异化策略"
   },
   "detectionProfiles": {
-    "rbl": "RBL 过���",
+    "rbl": "RBL ������",
     "execImpersonation": "高管冒充检测",
     "domainLookalike": "仿冒域名检测",
     "name": "名称",
@@ -1748,7 +1747,7 @@
         "name": "出口 IP",
         "nameRequired": "请选择出口 IP",
         "empty": "请先在网络设置配置出口 IP",
-        "domainNotVerified": "发信域须����完成归属校验"
+        "domainNotVerified": "发��域须����完成归属校验"
       },
       "outbound": {
         "title": "出站规则",
@@ -1905,7 +1904,7 @@
         "created": "角色已创建",
         "updated": "角色已更新",
         "deleted": "角色已删除",
-        "statusUpdated": "角色状态已更新",
+        "statusUpdated": "角色状态已更���",
         "saveFailed": "保存失败，请重试",
         "deleteFailed": "删除失败，请重试"
       },
@@ -2137,7 +2136,7 @@
     },
     "failAdvice": {
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号���否泄露并启用登录限速。",
-      "userNotExist": "账号不存在，常见���扫描探������建议关注来源 IP 是否存在批量尝试。",
+      "userNotExist": "账号不存���，常见���扫描探������建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务器端口可达性与防火墙策略。",
@@ -3236,7 +3235,7 @@
       "start": "开始测试",
       "hit": "命中规则",
       "notHit": "未命中",
-      "diffLeft": "距离触发阈值还差 {diff} 次",
+      "diffLeft": "距���触发阈值还差 {diff} 次",
       "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次，超过限制 {limit} 次",
       "dailyHit": "触发\"每日连接数\"阈值，当日已连接 {count} 次，超过限制 {limit} 次",
       "notHitReason": "未触发阈值",
@@ -3527,7 +3526,7 @@
     "presetBarracuda": "Barracuda",
     "presetBarracudaTip": "Barracuda Central IP 黑名单",
     "presetSorbs": "SORBS",
-    "presetSorbsTip": "垃圾邮件和开放中继阻止系统",
+    "presetSorbsTip": "垃圾邮件和开放中��阻止系统",
     "manualQuery": "手动查询",
     "queryIP": "IP 地址",
     "queryButton": "查询",
@@ -3793,7 +3792,7 @@
     "effectExpirePermanent": "永久",
     "exampleBlockSpam": "阻断垃圾邮件发送者",
     "exampleBlockSpamDesc": "直接阻断已知的垃圾邮件发送者",
-    "exampleQuarantineSuspicious": "隔离可疑来源",
+    "exampleQuarantineSuspicious": "隔离可疑���源",
     "exampleQuarantineSuspiciousDesc": "隔离 suspicious.test 从 192.168.1.0/24 发来的邮件",
     "simEmailLabel": "模拟发信人邮箱",
     "simEmailPlaceholder": "test@example.com",
@@ -4107,7 +4106,7 @@
       "accept": "允许：不对此规则触发的情况采取拦截动作，邮件继续进入下一阶段检测。",
       "quarantine": "隔离：将匹配的邮件放入隔离区，待管理员审核后再决定放行或删除。",
       "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知。",
-      "audit": "审核：将邮件放入审核队列，等待管理员人工审批后再投递。",
+      "audit": "审核：将邮件放入审核队列，等待管理员人工��批后再投递。",
       "discard": "丢弃：静默丢弃该邮件，不通��发件方也不投递给收件方。"
     },
     "formatChecks": {
@@ -6208,7 +6207,7 @@
       "tagPositionBodyStart": "正文开头",
       "tagPositionSuffix": "主题后缀",
       "tagStyleHtmlBlue": "HTML蓝色",
-      "tagStyleHtmlOrange": "HTML橙色",
+      "tagStyleHtmlOrange": "HTML橙���",
       "tagStyleHtmlRed": "HTML红色",
       "tagStyleHtmlYellow": "HTML黄色",
       "tagStylePlainText": "纯文本"
@@ -6935,7 +6934,7 @@
     "tabRecall": "召回策略设置",
     "notificationSettings": "通知设置",
     "classificationControl": "分类通知控制",
-    "categoryHint": "选择哪些类别的隔离邮件会触发用户通知",
+    "categoryHint": "选择哪些��别的隔离邮件会触发用户通知",
     "category_spam": "垃圾邮件",
     "category_advertising": "广告���件",
     "category_suspicious": "可疑邮件",
@@ -8144,7 +8143,7 @@
     },
     "runtime": {
       "title": "运行模式与超时",
-      "description": "实时/观察模式、超���时间线与超时临时处置（对所有旁路检测生效）。",
+      "description": "���时/观察模式、超���时间线与超时临时处置（对所有旁路检测生效）。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败，运行模式仍按真实引擎配置展示。",
@@ -8214,7 +8213,7 @@
       "colRange": "置信度区间",
       "colMin": "区间下限",
       "colMax": "区间上限",
-      "colDisposition": "处置动作",
+      "colDisposition": "处���动作",
       "colMarkSettings": "标记设置",
       "colActions": "操作",
       "advancedEdit": "高级编辑",
@@ -8881,7 +8880,7 @@
       "cancelSuccess": "任务已取消",
       "cancelError": "取消任务���败",
       "exportError": "导出报告失败",
-      "bulkCancelResult": "请求 {requested} 个，已取消 {cancelled}，跳过 {skipped}，失败 {failed}"
+      "bulkCancelResult": "请求 {requested} 个，已���消 {cancelled}，跳过 {skipped}，失败 {failed}"
     },
     "runStatus": {
       "pending": "等待中",
@@ -9234,7 +9233,7 @@
     "selected": "已选 {count} 条",
     "serverPlaceholder": "如 ldap.corp.com",
     "sheetDesc": "配���通��录数据来源，保存前需完成连接测试",
-    "sheetTitleAdd": "新增数据源",
+    "sheetTitleAdd": "新增���据源",
     "sheetTitleEdit": "编��数据源",
     "srcStatusAbnormal": "异常",
     "srcStatusNormal": "正常",
@@ -9699,7 +9698,7 @@
     "selectTenantFirst": "请先选择租户，再修改此模块",
     "adminOnly": "仅系统管理员或租户管理员可修改此模块",
     "disableWarning": "关闭本模块后，其全部规则停止生效，该模块的拦截能力将不再起作用。",
-    "whitelistWarning": "注意：本模块的白名单 / 放行规则也会一并停用，原本被放行的邮件将继续走后续检测。",
+    "whitelistWarning": "注意：本模块的白名单 / ���行规则也会一并停用，原本被放行的邮件将继续走后续检测。",
     "saveFailed": "保存失败，请重试",
     "unsavedChanges": "模块开关有未保存的更改"
   },
