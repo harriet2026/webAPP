@@ -423,16 +423,39 @@ export function QuickFilters({
                         <div className="px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
                           {t(`policyStages.${stage}`)}
                         </div>
-                        {/* 阶段1 + 多租户租户视角：折叠为"平台管控策略"只读标签，不可勾选 */}
-                        {hidePlatformStage && stage === 1 ? (
-                          <div
-                            aria-disabled="true"
-                            className="flex cursor-not-allowed items-center gap-2 rounded px-2 py-1.5 text-xs text-muted-foreground/50 pointer-events-none select-none"
-                          >
-                            <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border border-border/40 bg-muted/40" />
-                            <span>{t("platformManagedPolicy")}</span>
-                          </div>
-                        ) : modules.map(({ moduleName, keys }) => {
+                        {/* 阶段1 + 多租户租户视角：合并为单条"平台管控策略"可勾选条目，
+                            勾选时将阶段1全部 policy_key 作为筛选条件传入 */}
+                        {hidePlatformStage && stage === 1 ? (() => {
+                          const allStage1Keys = modules.flatMap((m) => m.keys);
+                          const selected = value.disposalPolicyKeys ?? [];
+                          const checked = allStage1Keys.length > 0 && allStage1Keys.every((k) => selected.includes(k));
+                          return (
+                            <InteractiveSurface
+                              asChild
+                              variant="control"
+                              className="flex items-center gap-2 rounded px-2 py-1.5 text-xs data-[hovered=true]:bg-accent/70 focus-within:ring-2 focus-within:ring-ring/60"
+                            >
+                              <label>
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={() => {
+                                    const next = checked
+                                      ? selected.filter((item) => !allStage1Keys.includes(item))
+                                      : Array.from(new Set([...selected, ...allStage1Keys]));
+                                    onChange({
+                                      ...value,
+                                      disposalPolicyKeys: next.length > 0 ? next : undefined,
+                                    });
+                                  }}
+                                />
+                                <span className="min-w-0 flex-1 truncate">
+                                  {t("platformManagedPolicy")}
+                                </span>
+                                {checked ? <Check className="h-3 w-3 opacity-50" /> : null}
+                              </label>
+                            </InteractiveSurface>
+                          );
+                        })() : modules.map(({ moduleName, keys }) => {
                           const selected = value.disposalPolicyKeys ?? [];
                           const checked = keys.every((key) =>
                             selected.includes(key),
