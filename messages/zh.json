@@ -34,7 +34,8 @@
   "mock": {
     "label": "开发模式",
     "enabled": "Mock 数据（无需后端）",
-    "htmlSpec": "查看 HTML Spec"
+    "htmlSpec": "查看 HTML Spec",
+    "changeSpecs": "变更规格"
   },
   "common": {
     "save": "保存",
@@ -1012,9 +1013,9 @@
     "executionOrderNote": "模块的执行顺序由阶段流水线（阶段1→阶段5）固定决定，与优先级无关；优先级仅在多条策略命中同一封邮件、且配置了同一模块时用于仲裁——数值越大越优先生效（可���范围见新建/编辑抽屉）。",
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
-    "collapseConfig": "收起完整配置",
+    "collapseConfig": "收起��整配置",
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置：灰色为「继承全局」，彩色为「另行配���」。",
-    "priorityHintAria": "优先级说明",
+    "priorityHintAria": "优先级��明",
     "name": "名称",
     "targetGroups": "适用对象",
     "policyConfig": "策略配置",
@@ -2136,7 +2137,7 @@
     },
     "failAdvice": {
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号���否泄露并启用登录限速。",
-      "userNotExist": "账号不存���，常见���扫描探������建议关注来源 IP 是否存在批量尝试。",
+      "userNotExist": "账号不存���，常见���扫描探��������建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务器端口可达性与防火墙策略。",
@@ -2770,7 +2771,7 @@
       "same_subject": "同主题",
       "subject_match": "主题匹配",
       "same_content": "同内容",
-      "content_match": "内容匹配",
+      "content_match": "内��匹配",
       "same_sender_domain": "同发件域",
       "shared_url_host": "共享 URL 主机",
       "shared_cac_suspicious_url": "共享可疑 URL"
@@ -2913,7 +2914,7 @@
       "rule_analysis": "规则分析"
     },
     "typeDescriptions": {
-      "phish_analysis": "结合邮件内容、URL、相似样本��� LLM 分析结��，判断是否存在钓鱼风险。",
+      "phish_analysis": "结合邮件内容、URL、相���样本��� LLM 分析结��，判断是否存在钓鱼风险。",
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
       "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
@@ -3053,7 +3054,7 @@
     "flowContinueShort": "继续",
     "listTypeLegend": "名单类型",
     "blacklistType": "黑名单",
-    "blacklistTypeDesc": "阻断/隔离/丢弃",
+    "blacklistTypeDesc": "��断/隔离/丢弃",
     "whitelistType": "白名单",
     "whitelistTypeDesc": "投递/标记投递",
     "flowTerminateDesc": "阻断/丢弃/隔离 → 终止并退出流水线",
@@ -3815,7 +3816,7 @@
   "personalFilter": {
     "title": "用户黑白名单",
     "blacklist": "黑名单",
-    "whitelist": "白名单",
+    "whitelist": "白名���",
     "createRule": "新���规则",
     "editRule": "编辑规则",
     "deleteRule": "删除规则",
@@ -4268,7 +4269,7 @@
     "exceptionEntry": {
       "title": "例外规则管理",
       "desc": "本模块不配置例外规则，请在策略流水线统一管理",
-      "viewCurrent": "查看当��例外"
+      "viewCurrent": "��看当��例外"
     },
     "health": {
       "title": "配置健康��查",
@@ -4494,7 +4495,7 @@
       "title": "确认离开",
       "body": "当前配置未保存，是否放弃修改？",
       "stay": "继续编辑",
-      "discard": "放弃并关��"
+      "discard": "��弃并关��"
     },
     "drawerSubtitle": "配置发信人行为管控规则",
     "filter": {
@@ -4790,7 +4791,7 @@
       "nestedProtection": "限制压缩包数量、内部文件数量和解压层级，避免压缩炸弹耗尽资源",
       "scanTimeout": "单封邮件附件扫描允许占用的最长时间",
       "exceedAction": "基础限制任一项超限时采取的处置",
-      "antivirusHost": "attachd 连接的通用 AV 服务地址",
+      "antivirusHost": "attachd 连接的通��� AV 服务地址",
       "virusAction": "确认检出病毒后对邮件采取的动作",
       "antivirusTimeout": "AV 服务超过扫描时限或不可用时采取的动作",
       "ocrMode": "轻度模式仅识别印刷体，深度模式同时识别手写与印刷内容",
@@ -5142,7 +5143,7 @@
     "similarSubject": "相似度>90%视为相同",
     "realtimeNote": "此检测在邮件进入时实时计算，命中后立即拦截或标记",
     "observeNote": "观察模式下命中仅记录日志，不执行拦截动作",
-    "goToGroupPolicy": "前往群组策略配置",
+    "goToGroupPolicy": "前往群���策略配置",
     "atLeastOneDirection": "至少选择一个检测方���",
     "navSummary": "窗口{window}分�� / 阈值{threshold}%",
     "tooltipObserve": "开启后仅记录日志，不执行实际拦截动作",
@@ -5304,7 +5305,7 @@
       "confirmText": "确认切换为 replica",
       "cancelText": "取消"
     },
-    "siteIdHint": "此项可能被环境变量 OSG_RULESYNC_SITE_ID 覆盖——集群形态下由 clustermgr 统一下发，环境变量始终优先于此处的值，修改后可能不会生效，请到 clustermgr 控制台的「跨部署点规则同步」面板确认实际生效值。"
+    "siteIdHint": "此项可能被环境变量 OSG_RULESYNC_SITE_ID ���盖——集群形态下由 clustermgr 统一下发，环境变量始终优先于此处的值，修改后可能不会生效，请到 clustermgr 控制台的「跨部署点规则同步」面板确认实际生效值。"
   },
   "rulePipeline": {
     "terminate": "终止",
@@ -5794,7 +5795,7 @@
           "whitelistDialog": {
             "title": "确认将发信人 \"{sender}\" 加入白名单？",
             "desc": "后续来自该发信人的邮件将跳过部分安全检测。",
-            "scopeLabel": "生效范围",
+            "scopeLabel": "���效范围",
             "scopeTenant": "本租户",
             "scopeGlobal": "全系统",
             "success": "已加入白名单",
@@ -6934,7 +6935,7 @@
     "tabRecall": "召回策略设置",
     "notificationSettings": "通知设置",
     "classificationControl": "分类通知控制",
-    "categoryHint": "选择哪些��别的隔离邮件会触发用户通知",
+    "categoryHint": "选择哪些��别��隔离邮件会触发用户通知",
     "category_spam": "垃圾邮件",
     "category_advertising": "广告���件",
     "category_suspicious": "可疑邮件",
@@ -7017,7 +7018,7 @@
     "timeoutDisposal_deliver": "直接投递",
     "timeoutDisposal_mark": "添加标记后投递",
     "timeoutMarkPositions": "标记位置",
-    "markPosition_subject_prefix": "主题前缀",
+    "markPosition_subject_prefix": "主题���缀",
     "markPosition_header": "邮件头",
     "timeoutMarkText": "标记文本",
     "senderNotification": "发件人通知管理",
@@ -8143,7 +8144,7 @@
     },
     "runtime": {
       "title": "运行模式与超时",
-      "description": "���时/观察模式、超���时间线与超时临时处置（对所有旁路检测生效）。",
+      "description": "�����时/观察模式、超���时间线与超时临时处置（对所有旁路检测生效）。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败，运行模式仍按真实引擎配置展示。",
@@ -8880,7 +8881,7 @@
       "cancelSuccess": "任务已取消",
       "cancelError": "取消任务���败",
       "exportError": "导出报告失败",
-      "bulkCancelResult": "请求 {requested} 个，已���消 {cancelled}，跳过 {skipped}，失败 {failed}"
+      "bulkCancelResult": "请求 {requested} 个���已���消 {cancelled}，跳过 {skipped}，失败 {failed}"
     },
     "runStatus": {
       "pending": "等待中",
@@ -9510,7 +9511,7 @@
       "saveFailed": "保存失败",
       "testFailed": "测试失败",
       "unsavedTitle": "未保存的更改",
-      "unsavedDesc": "您有未保存的����，离开后将丢失。",
+      "unsavedDesc": "您有未保存的����，离开��将丢失。",
       "leave": "离���（不保存）",
       "continueEdit": "继续编辑",
       "err": {
@@ -9891,7 +9892,7 @@
     "errorTitle": "操作失败",
     "errorDesc": "请稍���重试或联系管理员。",
     "confirmTitle": "确认将发件人加入白名单",
-    "confirmHint": "加入后，该发件人发给您的邮件将不再被隔离。",
+    "confirmHint": "加入后，该发件人发给您的邮件将��再被隔离。",
     "confirmButton": "确��加白",
     "addedTitle": "已加入白名单",
     "addedDesc": "该发件人已加入您的白名单。"

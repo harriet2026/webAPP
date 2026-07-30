@@ -195,23 +195,33 @@ export function ProductFormSwitcher() {
             </span>
             <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
           </DropdownMenuItem>
-          {versionSpecs.map((spec) => (
-            <DropdownMenuItem
-              key={spec.ticket}
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  window.open(spec.url, '_blank', 'noopener,noreferrer');
-                }
-              }}
-              className="flex items-center justify-between"
-            >
-              <span className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                {spec.label}
-              </span>
-              <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
-            </DropdownMenuItem>
-          ))}
+          {/* 变更规格索引：独立分区，动态读取 doc/html_spec-version/ 下所有 HTML，
+              每新增一个 spec 文件后无需修改前端代码即自动出现在此。 */}
+          {versionSpecs.length > 0 && (
+            <>
+              <DropdownMenuSeparator />
+              <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                {tMock('changeSpecs')}
+              </div>
+              {versionSpecs.map((spec) => (
+                <DropdownMenuItem
+                  key={spec.ticket}
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.open(spec.url, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                  className="flex items-center justify-between"
+                >
+                  <span className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    {spec.label}
+                  </span>
+                  <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
+                </DropdownMenuItem>
+              ))}
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
