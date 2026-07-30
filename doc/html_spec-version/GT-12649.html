@@ -369,7 +369,7 @@
         <tr>
           <td>GT-12655 处置依据显示 · 详情弹窗概览与处置卡 · 策略模块名</td>
           <td>#4</td>
-          <td>✅ 原文</td><td>✅ 原文</td><td>✅ 原文</td><td>🔒 平台管控策略</td><td>✅ 原文</td><td>🔒 平台管控策略</td><td>✅ 原文</td><td>🔒 平台管控策略</td>
+          <td>✅ 原文</td><td>✅ 原文</td><td>✅ 原文</td><td>🔒 平台管控策略</td><td>✅ 原文</td><td>🔒 平台管���策略</td><td>✅ 原文</td><td>🔒 平台管控策略</td>
         </tr>
         <tr>
           <td>GT-12655 处置依据显示 · 详情弹窗安全分析 · 阶段1卡片标题</td>
@@ -494,7 +494,7 @@
 
       <div class="callout callout-removed">
         <span class="tag tag-removed">已移除</span>
-        "执行动作"下拉筛选框中不再显示"标记投递"（<code>mark_deliver</code>）选项。共享常量 <code>EXECUTION_ACTIONS</code> 本身不变，仅在 <code>quick-filters.tsx</code> 层面过滤。
+        "执行��作"下拉筛选框中不再显示"标记投递"（<code>mark_deliver</code>）选项。共享常量 <code>EXECUTION_ACTIONS</code> 本身不变，仅在 <code>quick-filters.tsx</code> 层面过滤。
       </div>
 
       <h3 id="c2-states">截图式交互预览</h3>
@@ -674,15 +674,15 @@
       <div class="interaction-preview">
         <h4>状态 S-8：邮件列表"处置依据"列 — 多租户租户管理员视角 · 阶段1策略邮件</h4>
         <p class="trigger-path">
-          触发路径：切换产品形态为"云网关" → 登录视角切换为"租户管理员" →
-          邮件处置中心列表页 → 定位处置依据为阶段1策略（如 IPBL / RBL）的行 → 观察"处置依据"列
+          触发路径：切换产品形态为"AI版·多租户" → 登录视角切换为"租户管理员"（示例租户 B）→
+          邮件处置中心列表页 → 滚动至列表末尾 → 横向滚动至"处置依据"列 → 观察 MIC026（您的账户存在异常）和 MIC027（专属折扣，仅限今日）行
         </p>
         <figure>
-          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="处置中心默认态（租户管理员视角，含平台管控策略拦截行）" style="max-width:900px;" />
+          <img src="./screenshots/S-8-list-platform-policy.png" alt="处置中心列表（租户管理员视角）：MIC026/MIC027 两行处置依据列显示「平台管控策略拦截」" style="max-width:900px;" />
           <figcaption>
-            注：S-8 专项截图待归档。当前借用 S-4 展示处置中心页面整体结构。
-            阶段1策略邮件（MIC026 IPBL / MIC027 RBL）在"处置依据"列显示"平台管控策略拦截"，
-            Tooltip 悬停后展示完整引导文案"该邮件由平台连接层策略拦截，如需了解详情请联系平台管理员"。
+            AI版·多租户 · 租户管理员视角（示例租户 B）· 2026-07-30 浏览器实拍。
+            列表末尾 MIC026（您的账户存在异常，请立即验证）和 MIC027（专属折扣，仅限今日）
+            在"处置依据"列均显示"平台管控策略拦截"，其余行正常展示具体策略信息。
           </figcaption>
         </figure>
         <table>
@@ -705,14 +705,13 @@
       <div class="interaction-preview">
         <h4>状态 S-9：详情弹窗"概览与处置"卡片"处置依据"行 — 多租户租户管理员视角 · 阶段1策略邮件</h4>
         <p class="trigger-path">
-          触发路径：邮件处置中心列表 → 点击阶段1策略邮件行（如 MIC027 RBL）→ 弹窗打开 → 切至"概览与处置"标签页 → 观察处置依据行
+          触发路径：邮件处置中心列表 → 点击 MIC027（专属折扣，仅限今日）行 → 弹窗打开 → 默认显示"概览与处置"标签页 → 观察"处置依据"行
         </p>
         <figure>
-          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="详情弹窗概览与处置（租户管理员视角，处置依据显示平台管控策略）" style="max-width:900px;" />
+          <img src="./screenshots/S-9-detail-overview-platform-policy.png" alt="详情弹窗概览与处置（租户管理员视角）：处置依据行显示「平台管控策略 · 拒收」" style="max-width:900px;" />
           <figcaption>
-            注：S-9 专项截图待归档（见 D-5）。处置依据行结构：
-            阶段色点（保留）·「平台管控策略」·「拒收」徽标（保留）。
-            策略模块名、规则名、命中详情、"前往策略配置页"链接均不显示。
+            AI版·多租户 · 租户管理员视角（示例租户 B）· MIC027 RBL · 2026-07-30 浏览器实拍。
+            处置依据行显示「平台管控策略 · 拒收」；策略模块名、规则名、命中详情、"前往策略配置页"链接均不显示。
           </figcaption>
         </figure>
         <table>
@@ -755,17 +754,14 @@
       <div class="interaction-preview">
         <h4>状态 S-10：详情弹窗"安全分析"标签页"检测流程"阶段1卡片 — 多租户租户管理员视角</h4>
         <p class="trigger-path">
-          触发路径：邮件处置中心 → 点击阶段1策略邮件行 → 弹窗打开 → 切至"安全分析"标签页 → 观察"检测流程"区阶段1卡片
+          触发路径：邮件处置中心 → 点击 MIC027（专属折扣，仅限今日）行 → 弹窗打开 → 切至"安全分析"标签页 → 观察"检测流程"区阶段1卡片
         </p>
         <figure>
-          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="安全分析检测流程（租户管理员视角，阶段1显示平台管控）" style="max-width:900px;" />
+          <img src="./screenshots/S-10-analysis-stage1-platform.png" alt="安全分析检测流程（租户管理员视角）：阶段1卡片标题显示「平台管控」，命中策略明细替换为说明文字" style="max-width:900px;" />
           <figcaption>
-            注：S-10 专项截图待归档（见 D-5）。阶段1卡片展示逻辑（展开态）：
-            标题：「阶段 1 · 平台管控」；
-            结果徽标（通过/拦截）保留；
-            策略项数和耗时保留；
-            命中策略明细列表替换为灰色斜体说明文字"该阶段由平台统一管控，详情请联系平台管理员"。
-            阶段2~5 卡片不受影响。
+            AI版·多租户 · 租户管理员视角（示例租户 B）· MIC027 RBL · 2026-07-30 浏览器实拍。
+            阶段1卡片标题：「阶段 1 · 平台管控」；结果徽标（通过）保留；策略项数（4项）和耗时（8ms）保留；
+            命中策略明细列表替换为灰色斜体说明文字"该阶段由平台统一管控，详情请联系平台管理员"。阶段2~5 卡片正常展示。
           </figcaption>
         </figure>
         <table>
@@ -806,12 +802,11 @@
           触发路径：邮件处置中心列表页 → 点击"处置依据"筛选下拉 → 展开弹层 → 观察"连接层"分组
         </p>
         <figure>
-          <img src="./screenshots/S-4-disposal-center-search-default.png" alt="处置依据筛选下拉（租户管理员视角，连接层折叠为平台管控策略）" style="max-width:600px;" />
+          <img src="./screenshots/S-11-filter-platform-policy.png" alt="处置依据筛选下拉（租户管理员视角）：连接层分组下显示「平台管控策略」单条可勾选条目" style="max-width:600px;" />
           <figcaption>
-            注：S-11 专项截图待归档（见 D-5）。"连接层"分组标题保留，其下原有 4 条独立模块条目
-            （IP频率限制、IP黑白名单、RBL过滤、境外邮件）折叠为单条"平台管控策略"可勾选条目。
-            勾选后等同于将全部阶段1 policy_key（IPFREQ / IPBL / RBL / OVERSEAS）写入筛选条件。
-            其他分组（身份层、内容层等）不受影响。
+            AI版·多租户 · 租户管理员视角（示例租户 B）· 2026-07-30 浏览器实拍。
+            "连接层"分组标题保留，其下原有 4 条独立模块条目折叠为单条"平台管控策略"可勾选条目。
+            身份层、内容层等其他分组正常展示，不受影响。
           </figcaption>
         </figure>
         <table>
@@ -957,7 +952,7 @@
         <tr>
           <td>D-1</td>
           <td>#1</td>
-          <td>变更前 SidebarNav 底部渲染 VersionFooter，与 component-sidebar-nav html_spec（active 状态：Logo 区 + 导航区域）不符。</td>
+          <td>变更前 SidebarNav 底部渲染 VersionFooter，与 component-sidebar-nav html_spec（active 状态：Logo 区 + 导航���域）不符。</td>
           <td>已解决</td>
           <td>2026-07-30</td>
           <td>源码：commit c481bf6 删除 VersionFooter；QC 复查：2026-07-28 浏览器 count=1。</td>
@@ -993,11 +988,11 @@
         <tr>
           <td>D-5</td>
           <td>#4</td>
-          <td>GT-12655 变更4涉及的 S-8（列表列）、S-9（概览与处置卡）、S-10（安全分析阶段1卡片）、S-11（筛选器下拉）四个专项状态截图尚未归档至 <code>screenshots/</code>；当前规格借用已有截图 S-4 作示意。</td>
-          <td>未解决</td>
+          <td>GT-12655 变更4涉及的 S-8（列表列）、S-9（概览与处置卡）、S-10（安全分析阶段1卡片）、S-11（筛选器下拉）四个专项状态截图已通过浏览器自动化实拍并归档。</td>
+          <td>已解决</td>
           <td>2026-07-30</td>
-          <td>—</td>
-          <td>需在多租户租户管理员视角下实拍上述四个状态，分别归档为 <code>S-8-list-platform-policy.png</code>、<code>S-9-detail-overview-platform-policy.png</code>、<code>S-10-analysis-stage1-platform.png</code>、<code>S-11-filter-platform-policy.png</code>，并替换规格中对应的 img src。</td>
+          <td>源码：<code>agent-browser</code> 在 AI版·多租户 · 租户管理员（示例租户 B）视角下实拍，截图已归档至 <code>screenshots/S-8~S-11</code>，规格中 img src 已同步替换。</td>
+          <td>无需后续操作。</td>
         </tr>
       </tbody>
     </table>
