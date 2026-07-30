@@ -1,0 +1,15 @@
+{
+  "module": "sidebar-nav-version-footer",
+  "current_version": 1,
+  "history": [
+    {
+      "version": 1,
+      "generated_at": "2026-07-30",
+      "webapp_commit": "c481bf6",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12649",
+      "incremental": true,
+      "summary": "GT-12649：首次生成增量规格，记录从 SidebarNav 移除 VersionFooter 的变更；包含 QC 2026-07-28 复查记录（S-1 变更前）和 S-2 变更后目标状态（截图占位，待 commit c481bf6 部署后补拍）。"
+    }
+  ]
+}
