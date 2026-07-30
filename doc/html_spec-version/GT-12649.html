@@ -61,6 +61,14 @@
       padding: 0.6rem 1rem;
       min-width: 200px;
       flex: 1 1 200px;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .change-item:hover {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
     }
     .change-item .ci-num {
       display: inline-flex;
@@ -182,6 +190,31 @@
     .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
     .toc a:hover { text-decoration: underline; }
     .toc-indent { padding-left: 1.2rem; }
+    .toc-change {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 6px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      margin-top: 0.35rem;
+      margin-bottom: 0.1rem;
+    }
+    .toc-change a { font-weight: 600; font-size: 0.88rem; color: #1d4ed8; }
+    .toc-change .toc-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
 
     .divider { border: none; border-top: 2px solid #e5e7eb; margin: 1.5rem 0; }
   </style>
@@ -203,35 +236,35 @@
 
   <!-- ══════════════ 本版变更总览 ══════════════ -->
   <div class="change-summary">
-    <h2>本版变更点（v2 新增 3 项）</h2>
-    <div class="change-item">
+    <h2>本版变更点（v2 新增 3 项）— 点击卡片跳转至对应需求描述</h2>
+    <a class="change-item" href="#change-1">
       <span class="ci-num">1</span>
       <div class="ci-body">
         <div class="ci-title">SidebarNav 移除 VersionFooter</div>
         <div class="ci-sub">全局侧边栏 · 功能移除</div>
       </div>
-    </div>
-    <div class="change-item">
+    </a>
+    <a class="change-item" href="#change-2">
       <span class="ci-num">2</span>
       <div class="ci-body">
         <div class="ci-title">变更规格目录独立分区</div>
         <div class="ci-sub">DevMode 下拉菜单 · 功能变更</div>
       </div>
-    </div>
-    <div class="change-item">
+    </a>
+    <a class="change-item" href="#change-3">
       <span class="ci-num">3</span>
       <div class="ci-body">
         <div class="ci-title">处置中心"执行动作"筛选移除"标记投递"</div>
         <div class="ci-sub">邮件处置中心 · 功能变更</div>
       </div>
-    </div>
-    <div class="change-item">
+    </a>
+    <a class="change-item" href="#change-4">
       <span class="ci-num">4</span>
       <div class="ci-body">
         <div class="ci-title">安全总览执行动作图表移除"标记投递"</div>
         <div class="ci-sub">邮件安全总览 · 功能变更</div>
       </div>
-    </div>
+    </a>
   </div>
 
   <!-- ══════════════ 目录 ══════════════ -->
@@ -240,20 +273,25 @@
     <ul class="toc">
       <li><a href="#meta">A. 元信息与事实源</a></li>
       <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
-      <li><a href="#change-1">变更 1：SidebarNav 移除 VersionFooter</a></li>
+
+      <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">SidebarNav 移除 VersionFooter</a></li>
       <li class="toc-indent"><a href="#c1-overview">根因与修复方案</a></li>
       <li class="toc-indent"><a href="#c1-states">截图式交互预览</a></li>
       <li class="toc-indent"><a href="#c1-elements">逐元素说明</a></li>
       <li class="toc-indent"><a href="#c1-api">API 映射</a></li>
-      <li><a href="#change-2">变更 2：DevMode 下拉菜单 — 变更规格独立分区</a></li>
+
+      <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">DevMode 下拉菜单 — 变更规格独立分区</a></li>
       <li class="toc-indent"><a href="#c2-states">截图式交互预览</a></li>
       <li class="toc-indent"><a href="#c2-elements">逐元素说明</a></li>
-      <li><a href="#change-3">变更 3：处置中心"执行动作"筛选移除"标记投递"</a></li>
+
+      <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">处置中心"执行动作"筛选移除"标记投递"</a></li>
       <li class="toc-indent"><a href="#c3-states">截图式交互预览</a></li>
       <li class="toc-indent"><a href="#c3-elements">逐元素说明</a></li>
-      <li><a href="#change-4">变更 4：安全总览执行动作图表移除"标记投递"</a></li>
+
+      <li class="toc-change"><span class="toc-num">4</span><a href="#change-4">安全总览执行动作图表移除"标记投递"</a></li>
       <li class="toc-indent"><a href="#c4-states">截图式交互预览</a></li>
       <li class="toc-indent"><a href="#c4-elements">逐元素说明</a></li>
+
       <li><a href="#diff">差异标注（D-*）</a></li>
       <li><a href="#questions">待确认事项（Q-*）</a></li>
       <li><a href="#version-history">版本历史</a></li>
@@ -357,7 +395,7 @@
       <h3 id="c1-states">截图式交互预览</h3>
 
       <div class="interaction-preview">
-        <h4>状态 S-1：变更前 — 侧边栏底部显示版本脚注（已失效）</h4>
+        <h4>状态 S-1：变更前 — 侧边栏���部显示版本脚注（已失效）</h4>
         <p class="trigger-path">触发路径：登录后台（平台管理员）→ <code>/zh/dashboard</code> → 查看左侧侧边栏底部</p>
         <figure>
           <div style="background:#e5e7eb;border:2px dashed #9ca3af;border-radius:6px;padding:2rem 1rem;text-align:center;color:#6b7280;font-size:0.8rem;">
@@ -609,7 +647,7 @@
           <tbody>
             <tr><td>图表标题</td><td>执行动作 · 安全态势分析</td></tr>
             <tr><td>当前激活 tab</td><td>执行动作（蓝色背景）</td></tr>
-            <tr><td>折线系列（保留）</td><td>投递、灰名单、隔离、审核、拒收、丢弃、召回等（具体以图表图例为准）</td></tr>
+            <tr><td>折线系列（保留）</td><td>投递、灰名单、隔离、���核、拒收、丢弃、召回等（具体以图表图例为准）</td></tr>
             <tr><td><del>mark_deliver 折线</del></td><td><span class="tag tag-removed">已移除</span>图表中不再渲染此系列</td></tr>
             <tr><td>其他视图影响</td><td>无（威胁态势趋势 tab 等不受影响）</td></tr>
           </tbody>
