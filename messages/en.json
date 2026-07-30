@@ -5369,12 +5369,13 @@
       "outgoing": "Outbound",
       "internal": "Internal",
       "actions": {
-        "accept": "Deliver",
-        "reject": "Reject",
-        "discard": "Discard",
-        "audit": "Audit",
+        "deliver": "Deliver",
+        "mark_deliver": "Marked Deliver",
+        "greylist": "Greylist",
         "quarantine": "Quarantine",
-        "sideline": "Greylist",
+        "review": "Review",
+        "block": "Reject",
+        "drop": "Discard",
         "recall": "Recall",
         "mixed": "Mixed"
       },

@@ -29,6 +29,7 @@ import {
 import { format, differenceInDays, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { EXECUTION_ACTIONS } from "@/types/email-disposal";
 import type { DisposalQuickFilter } from "@/types/email-disposal";
 import { MultiSelectFilter } from "./lib/multi-select-filter";
 import {
@@ -89,15 +90,9 @@ export function QuickFilters({
       .slice(0, 12);
   }, [disposalRuleOptions, ruleSearch]);
 
-  const actions = [
-    "accept",
-    "reject",
-    "discard",
-    "audit",
-    "quarantine",
-    "sideline",
-    "recall",
-  ] as const;
+  // Single source of truth — defined in src/types/email-disposal.ts,
+  // shared with the 安全总览 › 安全态势分析 action series.
+  const actions = EXECUTION_ACTIONS;
   const directions = ["incoming", "outgoing", "internal"] as const;
   const mailTypes = [
     "normal",

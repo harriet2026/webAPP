@@ -1748,12 +1748,12 @@
         "name": "出口 IP",
         "nameRequired": "请选择出口 IP",
         "empty": "请先在网络设置配置出口 IP",
-        "domainNotVerified": "发信域须��完成归属校验"
+        "domainNotVerified": "发信域须���完成归属校验"
       },
       "outbound": {
         "title": "出站规则",
         "description": "出站邮件的内容审核与放行策略",
-        "ruleCount": "出站规则数",
+        "ruleCount": "出站���则数",
         "smtpCount": "SMTP 凭证数",
         "manageTitle": "管理出站策略",
         "manageDesc": "出站内容规则与审核队列在独立页面管理",
@@ -2097,7 +2097,7 @@
     "occurredAt": "发生时间",
     "logId": "日志编号",
     "eyebrow": "日志审计",
-    "subtitle": "记录发信认证模块每一次认证尝试的结果，用于安全审计与异常排查",
+    "subtitle": "记录发信认证模块每一次认证尝试的结果，用于安全审计与异常��查",
     "protocol": "协议",
     "scene": "场景",
     "domain": "域名",
@@ -2137,7 +2137,7 @@
     },
     "failAdvice": {
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号���否泄露并启用登录限速。",
-      "userNotExist": "账号不存在，常见于扫描探测���建议关注来源 IP 是否存在批量尝试。",
+      "userNotExist": "账号不存在，常见于扫描探������建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务器端口可达性与防火墙策略。",
@@ -2914,7 +2914,7 @@
       "rule_analysis": "规则分析"
     },
     "typeDescriptions": {
-      "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结��，判断是否存在钓鱼风险。",
+      "phish_analysis": "结合邮件内容、URL、相似样本��� LLM 分析结��，判断是否存在钓鱼风险。",
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
       "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
@@ -3817,7 +3817,7 @@
     "title": "用户黑白名单",
     "blacklist": "黑名单",
     "whitelist": "白名单",
-    "createRule": "新建规则",
+    "createRule": "新���规则",
     "editRule": "编辑规则",
     "deleteRule": "删除规则",
     "deleteConfirm": "确定要删除规则「{name}」吗？此操作不可恢复。",
@@ -3987,7 +3987,7 @@
     "tips": "配置提示",
     "tipPriority": "优先级数值越大越优先",
     "tipScopes": "内容规则仅检查选定的作用域，选择多个作用域可扩大匹配范围",
-    "tipRegex": "正则表达式使用标准Go regexp语法，无效正则保存时会被拒绝",
+    "tipRegex": "正则表达式使用标���Go regexp语法，无效正则保存时会被拒绝",
     "tipDirections": "规则可同时启用多个方向，每个方向有独立的执行动作",
     "tipContentGroup": "内容组通过收件人标签匹配邮件，标签在分组页面管理",
     "tipKeyword": "关键词用竖线分隔，支持多个关键词",
@@ -4501,7 +4501,7 @@
     "filter": {
       "allDirections": "全部方向",
       "allTypes": "全部类型",
-      "allStatus": "全部状态",
+      "allStatus": "全部��态",
       "enabled": "启用",
       "disabled": "禁用",
       "reset": "重置",
@@ -4682,7 +4682,7 @@
       "qrMode_deep": "深度检测 - 解码内容并送入后续模块检测",
       "lightConfig": "轻度检测配置",
       "deepConfig": "深度检测配置",
-      "routeModules": "解码后送入以下模块进行检测（勾选启用）：",
+      "routeModules": "解码后���入以下模块进行检测（勾选启用）：",
       "execAction": "执行动作",
       "actionQuarantine": "隔离",
       "actionSideline": "审核",
@@ -4934,7 +4934,7 @@
       },
       "m2": {
         "title": "查询情报",
-        "desc": "查询本地与云端威胁情报库，命中已知恶意情报即拦截"
+        "desc": "查询本地与云端威胁情报库，命中���知恶意情报即拦截"
       },
       "m3": {
         "title": "深度复检",
@@ -5144,7 +5144,7 @@
     "realtimeNote": "此检测在邮件进入时实时计算，命中后立即拦截或标记",
     "observeNote": "观察模式下命中仅记录日志，不执行拦截动作",
     "goToGroupPolicy": "前往群组策略配置",
-    "atLeastOneDirection": "至少选择一个检测方向",
+    "atLeastOneDirection": "至少选择一个检测方���",
     "navSummary": "窗口{window}分�� / 阈值{threshold}%",
     "tooltipObserve": "开启后仅记录日志，不执行实际拦截动作",
     "errorTagRequired": "标记投递需至少启用一种标记方式"
@@ -5374,12 +5374,13 @@
       "outgoing": "外发",
       "internal": "域内",
       "actions": {
-        "accept": "投递",
-        "reject": "拒收",
-        "discard": "丢弃",
-        "audit": "审核",
+        "deliver": "投递",
+        "mark_deliver": "标记投递",
+        "greylist": "灰名单",
         "quarantine": "隔离",
-        "sideline": "灰名单",
+        "review": "审核",
+        "block": "拒收",
+        "drop": "丢弃",
         "recall": "召回",
         "mixed": "混合"
       },
@@ -6215,7 +6216,7 @@
     "block": {
       "paramsTitle": "��断参数",
       "smtpCode": "SMTP 错误码",
-      "responseText": "回应文本",
+      "responseText": "回应��本",
       "tarpitEnabled": "启用延迟响应",
       "tarpitSeconds": "延迟时间（秒）"
     },
@@ -6584,11 +6585,11 @@
       },
       "desc_nestedFileCount": {
         "source": "压缩包解析引擎",
-        "usage": "检测压缩包内文件总数",
+        "usage": "检测压缩包内文���总数",
         "note": "防止解压后文件数量��多"
       },
       "desc_imageQrCodeResult": {
-        "source": "图片二维码识别引擎",
+        "source": "图���二维码识别引擎",
         "usage": "检测图片附件中的二维码内容",
         "note": "可识别钓鱼链接、恶意URL等"
       },
@@ -6765,7 +6766,7 @@
       "resultFalse": "假",
       "invalidJson": "JSON 无效，请输入有效的 JSON 对象。",
       "emlTitle": "EML 上传",
-      "emlComingSoon": "EML 上传即将上线，请暂时使用 JSON 属性测试。",
+      "emlComingSoon": "EML 上传即将上线���请暂时使用 JSON 属性测试。",
       "analysisTitle": "分析",
       "hitCount": "命中数 (7 天)",
       "lastHit": "最近命中",
@@ -7325,7 +7326,7 @@
       "loading": "正���分析...",
       "aiFailed": "AI 分析失败，请稍后重试",
       "empty": "AI 未返回任何分���内容，请稍后重试",
-      "retry": "重试",
+      "retry": "重���",
       "truncated": "分析被中断，以下为已生成的部分内容，并非完整分析"
     },
     "print": {
@@ -8148,12 +8149,12 @@
       "direction": {
         "inbound": "入站",
         "outbound": "出站",
-        "internal": "内部"
+        "internal": "内��"
       }
     },
     "runtime": {
       "title": "运行模式与超时",
-      "description": "实时/观察模式、超时时间线与超时临时处置（对所有旁路检测生效）。",
+      "description": "实时/观察模式、超���时间线与超时临时处置（对所有旁路检测生效）。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败，运行模式仍按真实引擎配置展示。",
@@ -9077,7 +9078,7 @@
     },
     "toast": {
       "created": "策略已创建",
-      "updated": "策略已更新",
+      "updated": "���略已更新",
       "saveError": "保存策略失败",
       "testStarted": "测试扫描已启动",
       "invalid": "请修正表单错误后再保存",
@@ -9242,9 +9243,9 @@
     "selectTenantTitle": "请先选择租户",
     "selected": "已选 {count} 条",
     "serverPlaceholder": "如 ldap.corp.com",
-    "sheetDesc": "配���通讯录数据来源，保存前需完成连接测试",
+    "sheetDesc": "配���通��录数据来源，保存前需完成连接测试",
     "sheetTitleAdd": "新增数据源",
-    "sheetTitleEdit": "编辑数据源",
+    "sheetTitleEdit": "编��数据源",
     "srcStatusAbnormal": "异常",
     "srcStatusNormal": "正常",
     "statAdded": "新增",
@@ -9520,7 +9521,7 @@
       "saveFailed": "保存失败",
       "testFailed": "测试失败",
       "unsavedTitle": "未保存的更改",
-      "unsavedDesc": "您有未保存的更��，离开后将丢失。",
+      "unsavedDesc": "您有未保存的����，离开后将丢失。",
       "leave": "离���（不保存）",
       "continueEdit": "继续编辑",
       "err": {
@@ -9649,7 +9650,7 @@
   },
   "platformSecurity": {
     "title": "平台安全策略",
-    "subtitle": "平台级安全基线，作用于所有租户。以下策略仅平台管理员可配置，���户管理员不可见、不可修改。",
+    "subtitle": "平台级安全基线，作用于所有租户。以下策略仅平台管理员可��置，���户管理员不可见、不可修改。",
     "accessDenied": "仅平台管理员可访问。",
     "tabs": {
       "ipStrategy": "IP 策略",
@@ -10016,7 +10017,7 @@
     "allNormal": "全部正常",
     "normal": "正常",
     "viewAll": "查看全部",
-    "exportPdf": "导出PDF",
+    "exportPdf": "���出PDF",
     "pdfUnavailable": "暂未开放",
     "mailflowVolume": "邮件量",
     "latencyP95": "投递延时 P95",

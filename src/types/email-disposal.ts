@@ -46,6 +46,27 @@ export interface AICondition {
   source: "ai";
 }
 
+/**
+ * Unified execution-action enum — single source of truth shared by:
+ *   - 邮件处置中心 › 搜索条件 › 执行动作 (quick-filters.tsx)
+ *   - 邮件安全总览 › 安全态势分析 › 执行动作图表 (TrendChartCard action series)
+ *
+ * Keys MUST match the raw values the backend uses in both the
+ * `execution_action` filter param and the `trend.action` series keys.
+ */
+export const EXECUTION_ACTIONS = [
+  'deliver',
+  'mark_deliver',
+  'greylist',
+  'quarantine',
+  'review',
+  'block',
+  'drop',
+  'recall',
+] as const;
+
+export type ExecutionAction = (typeof EXECUTION_ACTIONS)[number];
+
 export type DisplayStatus =
   | "rejected"
   | "bounced"
