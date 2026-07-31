@@ -24,7 +24,6 @@ import { IntentEnginePage } from '@/components/security/intent-engine/IntentEngi
 import { SimilarDetectionPage } from '@/components/security/similar-detection/SimilarDetectionPage';
 import { MailMarkingPage } from '@/components/security/mail-marking/MailMarkingPage';
 import { AdvancedFilterRulesModule } from '@/components/security/advanced-filter-rules/AdvancedFilterRulesModule';
-import { ComprehensiveStrategyHeader } from '@/components/security/ComprehensiveStrategyHeader';
 import { PipelinePolicyCard, PipelineDrawerNavButton, type PipelinePolicy } from '@/components/security/pipeline-policy-card';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { useAuth } from '@/contexts/auth-context';
@@ -1034,15 +1033,7 @@ export function PolicyPipelinePage() {
                     drawerContentOwnsScrolling ? 'h-full min-h-0' : 'p-6 space-y-4',
                   )}
                 >
-                  {stage5Active && (
-                    <ComprehensiveStrategyHeader
-                      policyName={t('pipeline.phase5Comprehensive')}
-                      enabled={comprehensiveStrategyEnabled}
-                      loading={comprehensiveStrategyMutation.isPending}
-                      disabled={!comprehensiveStrategyEditable}
-                      onToggle={(enabled) => comprehensiveStrategyMutation.mutate(enabled)}
-                    />
-                  )}
+
                   <div className={cn(
                     // GT-12356: when the drawer content owns its own scrolling
                     // (authSpoofing embeds a flex-col with an inner overflow-y-auto
