@@ -171,19 +171,32 @@
     .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
     .toc a:hover { text-decoration: underline; }
     .toc-indent { padding-left: 1.2rem; }
+
+    /* 一级需求入口：GT-12682-RBL优化 */
+    .toc-l1 {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; border-radius: 6px;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      margin-top: 0.4rem; margin-bottom: 0.15rem;
+    }
+    .toc-l1 > a { font-weight: 700; font-size: 0.9rem; color: #1d4ed8; }
+
+    /* 二级变更点子列表 */
+    .toc-l2-group { list-style: none; display: flex; flex-direction: column; gap: 0.2rem; padding-left: 1.5rem; margin-bottom: 0.4rem; }
     .toc-change {
       display: flex; align-items: center; gap: 0.5rem;
-      padding: 0.45rem 0.75rem; border-radius: 6px;
-      background: #eff6ff; border: 1px solid #bfdbfe;
-      margin-top: 0.35rem; margin-bottom: 0.1rem;
+      padding: 0.35rem 0.65rem; border-radius: 6px;
+      background: #f8f9ff; border: 1px solid #dbeafe;
     }
-    .toc-change a { font-weight: 600; font-size: 0.88rem; color: #1d4ed8; }
+    .toc-change a { font-weight: 600; font-size: 0.85rem; color: #1d4ed8; }
     .toc-change .toc-num {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 20px; height: 20px; border-radius: 50%;
-      background: #2563eb; color: #fff;
-      font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #3b82f6; color: #fff;
+      font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
     }
+    /* 二级变更点下的三级子章节 */
+    .toc-l3 { padding-left: 2.8rem; }
     .divider { border: none; border-top: 2px solid #e5e7eb; margin: 1.5rem 0; }
     .back-link { display: inline-block; margin-top: 1.5rem; font-size: 0.82rem; color: #2563eb; text-decoration: none; }
     .back-link:hover { text-decoration: underline; }
@@ -237,26 +250,37 @@
       <li><a href="#meta">A. 元信息与事实源</a></li>
       <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
 
-      <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">灰名单从执行动作中分离 — serde 层 greylistEnabled 字段 + 旧数据兼容映射</a></li>
-      <li class="toc-indent"><a href="#c1-overview">1.1 方案概述与架构说明</a></li>
-      <li class="toc-indent"><a href="#c1-states">1.2 截图式交互预览</a></li>
-      <li class="toc-indent"><a href="#c1-elements">1.3 数据模型变更</a></li>
-
-      <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">处置策略互斥卡片选择器 — RadioGroup 并排二选一，选中态展开子配置</a></li>
-      <li class="toc-indent"><a href="#c2-overview">2.1 方案概述</a></li>
-      <li class="toc-indent"><a href="#c2-states">2.2 截图式交互预览（S-1 执行动作选中态 · S-2 灰名单策略选中态）</a></li>
-      <li class="toc-indent"><a href="#c2-elements">2.3 逐元素说明</a></li>
-
-      <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">执行动作集合调整 — reject/quarantine/review/discard，移除 block 和 mark</a></li>
-      <li class="toc-indent"><a href="#c3-states">3.1 截图式交互预览（S-3 下拉展开态）</a></li>
-      <li class="toc-indent"><a href="#c3-elements">3.2 逐元素说明</a></li>
-      <li class="toc-indent"><a href="#c3-i18n">3.3 国际化 key 变更</a></li>
+      <!-- 一级需求：GT-12682-RBL优化 -->
+      <li class="toc-l1"><a href="#gt-12682">GT-12682-RBL优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">灰名单从执行动作中分离</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c1-overview">1.1 方案概述与架构说明</a></li>
+          <li class="toc-l3"><a href="#c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c1-elements">1.3 数据模型变更</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">处置策略互斥卡片选择器</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">执行动作集合调整</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c3-states">3.1 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c3-elements">3.2 逐元素说明</a></li>
+          <li class="toc-l3"><a href="#c3-i18n">3.3 国际化 key 变更</a></li>
+        </ul>
+      </ul>
 
       <li><a href="#diff">C. 差异标注（D-001 ~ D-003）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-002）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
   </section>
+
+  <!-- 需求入口锚点（供目录一级链接跳转）-->
+  <div id="gt-12682" style="scroll-margin-top: 1rem;"></div>
 
   <!-- ══════════════ A. 元信息 ══════════════ -->
   <section id="meta">
