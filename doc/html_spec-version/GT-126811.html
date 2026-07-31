@@ -246,7 +246,18 @@
         </ul>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-004）</a></li>
+      <!-- 一级需求：GT-12659 邮件处置中心：执行动作统一修正 -->
+      <li class="toc-l1"><a href="#gt-12659">GT-12659 邮件处置中心：执行动作统一修正</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12659-change-1">搜索模块执行动作筛选移除"灰名单"</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12659-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12659-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12659-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-005）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-002）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
@@ -272,7 +283,7 @@
         <tr><td>对照 spec commit</td><td>not-used</td></tr>
         <tr><td>历史对话记录</td><td>当前上下文已提供（完整需求讨论、设计方案确认、代码变更记录）</td></tr>
         <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 运行中 webapp 浏览器真实截图；3. webapp 源码</td></tr>
-        <tr><td>浏览器验证状态</td><td>2026-07-31 演示环境真实截图（暗色主题 / 1305×832 / AI版·多租户 / 平台管理员）</td></tr>
+        <tr><td>浏览器验证状态</td><td>2026-07-31 演示环境真实截图（暗色题 / 1305×832 / AI版·多租户 / 平台管理员）</td></tr>
         <tr><td>变更类型</td><td>功能变更（架构调整 + 交互优化 + 选项集合调整）</td></tr>
       </tbody>
     </table>
@@ -715,6 +726,92 @@
     </div>
   </section>
 
+  <!-- ══════════════ GT-12659 需求入口锚点 ══════════════ -->
+  <div id="gt-12659" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12659 增量内容 ══════════════ -->
+  <section id="incremental-gt-12659-disposal-action">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12659</span>
+      <span class="incr-title">邮件处置中心：执行动作统一修正</span>
+      <span class="incr-meta">2026-07-31 &nbsp;·&nbsp; commit <code>640e96f</code> &nbsp;·&nbsp; 路由 <code>/zh/email-disposal/center</code></span>
+    </div>
+
+    <div id="c12659-change-1">
+      <h3>变更 1 · 搜索模块执行动作筛选移除"灰名单"</h3>
+
+      <div id="c12659-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          邮件处置中心搜索筛选区域的"执行动作"下拉 Select 原本包含"灰名单"（<code>advanced_review</code>）选项。
+          由于灰名单已从执行动作枚举中独立出来，搜索筛选的执行动作选项需要同步移除"灰名单"，使筛选口径与实际执行动作枚举保持一致。
+        </p>
+        <div class="callout callout-info">
+          修改位置：<code>src/types/email-disposal.ts</code> 的 <code>EXECUTION_ACTIONS</code> 常量数组（单一事实来源，同时驱动搜索筛选 Select 和安全总览图表）——移除 <code>'advanced_review'</code> 一项。
+        </div>
+      </div>
+
+      <div id="c12659-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="trigger-path">
+            触发路径：导航至 <code>/zh/email-disposal/center</code> → 页面加载完成 → 点击"执行动作"筛选下拉 → 展开选项列表
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12659-disposal-center-default-dark-1305x832.png"
+                 alt="S-1 邮件处置中心默认态 — 搜索筛选区执行动作 Select 显示全部"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 邮件处置中心默认态（搜索筛选区）</strong><br>
+              路由：<code>/zh/email-disposal/center</code> &nbsp;·&nbsp;
+              主题：暗色 &nbsp;·&nbsp; 视口：1305×832 &nbsp;·&nbsp;
+              形态：AI版·多租户 &nbsp;·&nbsp; 角色：平台管理员（Mock 演示数据）<br>
+              执行动作筛选 Select 初始值为"全部"，下拉折叠态
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12659-disposal-action-dropdown-open-dark-1305x832.png"
+                 alt="S-2 执行动作下拉展开态 — 选项：全部 / 投递 / 隔离 / 审核 / 拒收 / 丢弃 / 召回，无灰名单"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 执行动作下拉展开态</strong><br>
+              选项列表：<strong>全部、投递、隔离、审核、拒收、丢弃、召回</strong>，共 7 项（含"全部"）；
+              "灰名单"已从选项中完全移除
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12659-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>执行动作筛选 Select 选项列表</td>
+              <td>全部、投递、<del>灰名单</del>、隔离、审核、拒收、丢弃、召回（8 项）</td>
+              <td>全部、投递、隔离、审核、拒收、丢弃、召回（7 项）</td>
+              <td><code>src/types/email-disposal.ts</code> — <code>EXECUTION_ACTIONS</code> 常量数组，移除 <code>'advanced_review'</code></td>
+              <td>[Base] 所有形态/角色一致</td>
+            </tr>
+            <tr>
+              <td>执行动作 i18n 标签 <code>advanced_review</code></td>
+              <td><code>emailDisposal.filters.actions.advanced_review</code> = "灰名单"（可见）</td>
+              <td>该 key 不再被 Select 选项引用（key 保留在 zh.json 中，未删除）</td>
+              <td><code>messages/zh.json</code> 第 5691 行</td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+        <a class="back-link" href="#toc">&#8593; 返回目录</a>
+      </div>
+    </div>
+  </section>
+
   <!-- ══════════════ C. 差异标注 ══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -756,6 +853,16 @@
         <tr><td>描述</td><td>最初过滤尝试了 <code>greylist</code> 和 <code>sideline</code>，均未命中。通过 console.log 确认数据 key 后，发现实际是 <code>advanced_review</code>（在 <code>emailDisposal.filters.actions.advanced_review</code> 中翻译为"灰名单"）。</td></tr>
         <tr><td>解决版本</td><td>GT-12660 · 2026-07-31</td></tr>
         <tr><td>验证依据</td><td>图 S-1/S-2 截图图例不含"灰名单"；<code>messages/zh.json</code> 第 5691 行确认 key 映射</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-005 · EXECUTION_ACTIONS 是安全总览与邮件处置中心的共享事实源，移除 advanced_review 对两处同时生效</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-added">已解决</span></td></tr>
+        <tr><td>描述</td><td><code>EXECUTION_ACTIONS</code>（<code>src/types/email-disposal.ts</code>）作为单一来源同时驱动邮件处置中心搜索筛选 Select 和安全总览图表过滤。GT-12659 从该数组移除 <code>'advanced_review'</code>，GT-12660 在图表渲染层独立过滤（<code>TrendChartCard</code> 和 <code>DetailTable</code>）。两处修改均已验证截图。</td></tr>
+        <tr><td>解决版本</td><td>GT-12659 · 2026-07-31</td></tr>
+        <tr><td>验证依据</td><td>GT-12659 S-2 截图下拉无"灰名单"；GT-12660 S-1/S-2 截图图例无"灰名单"</td></tr>
       </tbody>
     </table>
   </section>
@@ -808,6 +915,12 @@
           <td>2026-07-31</td>
           <td><code>6f7749d</code></td>
           <td>增量追加 GT-12660 需求：邮件安全总览执行动作图表移除"灰名单"系列（后端 key <code>advanced_review</code>）；新增一级目录条目 GT-12660、变更 1 区块、截图式交互预览 S-1/S-2（暗色 1305×832）、逐元素变更表；追加差异 D-004（key 排查过程记录）；目录 C 项编号更新为 D-001~D-004。</td>
+        </tr>
+        <tr>
+          <td>v4</td>
+          <td>2026-07-31</td>
+          <td><code>640e96f</code></td>
+          <td>增量追加 GT-12659 需求：邮件处置中心搜索模块执行动作筛选移除"灰名单"（从 <code>EXECUTION_ACTIONS</code> 移除 <code>'advanced_review'</code>）；新增一级目录条目 GT-12659、变更 1 区块、截图式交互预览 S-1（默认态）/ S-2（下拉展开，7 项无灰名单）、逐元素变更表；追加差异 D-005（共享事实源说明）；目录 C 项编号更新为 D-001~D-005。</td>
         </tr>
       </tbody>
     </table>
