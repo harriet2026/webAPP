@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useMemo,
+  useRef,
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
@@ -36,6 +37,7 @@ import {
   hasSavableDisposalFilters,
 } from "./lib/filter-state";
 import { SearchBar } from "./search-bar";
+import { SaveTemplateDialog } from "./save-template-dialog";
 import { QuickFilters } from "./quick-filters";
 import { AdvancedFilters } from "./advanced-filters";
 import { SelectedConditions } from "./selected-conditions";
@@ -90,7 +92,7 @@ export function EmailDisposalCenterPage({
   const t = useTranslations("emailDisposal");
   const { effectiveTenantId } = useTenant();
   const { merge } = useFilterMerger();
-  const { templates, saveTemplate, deleteTemplate } = useSearchTemplates();
+  const { templates, saveTemplate, deleteTemplate, renameTemplate, hasTemplateName } = useSearchTemplates();
   const queryClient = useQueryClient();
   const { capabilities, viewer } = useProductForm();
   const { features, isSystemAdmin, isTenantAdmin, user, demoAuthBypassEnabled } = useAuth();
@@ -167,6 +169,18 @@ export function EmailDisposalCenterPage({
     [],
   );
   const [aiParsedQuery, setAiParsedQuery] = useState<string | null>(null);
+  // --- Template dialog state ---
+  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
+  const [renameTemplateId, setRenameTemplateId] = useState<string | null>(null);
+  // When applying a template while current filters are non-empty, we first
+  // show a confirmation AlertDialog. pendingTemplateId holds the id until
+  // the user confirms or cancels.
+  const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
+  // Ref so the apply-template callback can always read the latest aiParsedQuery
+  // without being a stale closure.
+  const aiParsedQueryRef = useRef(aiParsedQuery);
+  aiParsedQueryRef.current = aiParsedQuery;
+  // --- end template dialog state ---
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   // 跨页选中记忆：id → 完整 item 快照，翻页不清空。
@@ -429,6 +443,30 @@ export function EmailDisposalCenterPage({
     setTimeSort("none");
     setPage(1);
   }, []);
+
+  /** Apply a template's saved conditions and immediately trigger a search. */
+  const applyTemplate = useCallback(
+    (id: string) => {
+      const template = templates.find((item) => item.id === id);
+      if (!template) return;
+      setQuickFilter(template.quickFilter);
+      setAdvancedFilter(template.advancedFilter);
+      // Restore the raw AI text so the user can re-trigger AI parsing if needed,
+      // but do NOT auto-parse — clear any previously parsed AI conditions.
+      setAiConditions([]);
+      setAiParsedQuery(template.aiQuery ?? null);
+      // Immediately commit and trigger search (mirrors handleSearch("")).
+      setAppliedQuickFilter(template.quickFilter);
+      setAppliedAdvancedFilter(getApplicableAdvancedFilter(template.advancedFilter));
+      setAppliedAiConditions([]);
+      setAppliedPlatformScopeTenantId(platformScopeTenantId);
+      setSelectedItemMap(new Map());
+      setSimilarMode(false);
+      setSimilarSeedCount(0);
+      setPage(1);
+    },
+    [templates, platformScopeTenantId],
+  );
 
   const runFindSimilar = useCallback(
     async (ids: number[]) => {
@@ -737,23 +775,17 @@ export function EmailDisposalCenterPage({
             onReset={handleClearAll}
             aiEnabled={aiEnabled}
             templates={templates.map(({ id, name }) => ({ id, name }))}
-            onSaveTemplate={() => {
-              const template = saveTemplate(
-                `${t("search.templateDefaultName")} ${templates.length + 1}`,
-                quickFilter,
-                advancedFilter,
-              );
-              toast.success(t("search.templateSaved", { name: template.name }));
-            }}
+            onSaveTemplate={() => setSaveTemplateOpen(true)}
             onLoadTemplate={(id) => {
-              const template = templates.find((item) => item.id === id);
-              if (!template) return;
-              setQuickFilter(template.quickFilter);
-              setAdvancedFilter(template.advancedFilter);
-              setAiConditions([]);
-              setAiParsedQuery(null);
+              // If there are active filters, confirm before overwriting.
+              if (hasActiveFilters) {
+                setPendingTemplateId(id);
+              } else {
+                applyTemplate(id);
+              }
             }}
             onDeleteTemplate={deleteTemplate}
+            onRenameTemplate={(id) => setRenameTemplateId(id)}
             sampleCount={similarMode ? similarSeedCount : 0}
             onClearSamples={() => {
               setSimilarMode(false);
@@ -953,6 +985,68 @@ export function EmailDisposalCenterPage({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* ── Save-as-template dialog ── */}
+      <SaveTemplateDialog
+        open={saveTemplateOpen}
+        onOpenChange={setSaveTemplateOpen}
+        templateCount={templates.length}
+        existingNames={templates.map((tmpl) => tmpl.name)}
+        onConfirm={(name) => {
+          const template = saveTemplate(name, quickFilter, advancedFilter, aiParsedQuery ?? undefined);
+          setSaveTemplateOpen(false);
+          toast.success(t("search.templateSaved", { name: template.name }));
+        }}
+      />
+
+      {/* ── Rename-template dialog ── */}
+      <SaveTemplateDialog
+        open={renameTemplateId !== null}
+        onOpenChange={(open) => { if (!open) setRenameTemplateId(null); }}
+        templateCount={templates.length}
+        existingNames={templates.map((tmpl) => tmpl.name)}
+        initialName={templates.find((tmpl) => tmpl.id === renameTemplateId)?.name}
+        mode="rename"
+        onConfirm={(name) => {
+          if (renameTemplateId) {
+            const ok = renameTemplate(renameTemplateId, name);
+            if (!ok) {
+              toast.error(t("search.templateNameConflict"));
+            }
+          }
+          setRenameTemplateId(null);
+        }}
+      />
+
+      {/* ── Apply-template confirmation (only shown when active filters exist) ── */}
+      <AlertDialog
+        open={pendingTemplateId !== null}
+        onOpenChange={(open) => { if (!open) setPendingTemplateId(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("search.templateApplyConfirmTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("search.templateApplyConfirmDesc", {
+                name: templates.find((tmpl) => tmpl.id === pendingTemplateId)?.name ?? "",
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingTemplateId(null)}>
+              {t("detail.overview.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingTemplateId) applyTemplate(pendingTemplateId);
+                setPendingTemplateId(null);
+              }}
+            >
+              {t("search.templateApplyConfirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </PageShell>
   );
 }
