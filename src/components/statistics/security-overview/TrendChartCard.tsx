@@ -48,13 +48,15 @@ export function TrendChartCard({
     // `success_rate` percentage that is NOT a stackable count and is not a valid
     // drill-down series (backend validates series ∈ AllDeliveryResults). Stacking
     // it distorts the area chart and clicking it would 400 the drill-down.
-    return Object.keys(seriesData[0]).filter((k) => {
+    const filtered = Object.keys(seriesData[0]).filter((k) => {
       if (k === 'date' || NON_SERIES_KEYS.has(k)) return false;
-      // mark_deliver / greylist 不在执行动作枚举中，安全总览执行动作视图同步去掉。
-      if (viewBy === 'action' && (k === 'mark_deliver' || k === 'greylist')) return false;
+      // mark_deliver / greylist / sideline（灰名单）不在执行动作枚举中，安全总览执行动作视图同步去掉。
+      if (viewBy === 'action' && (k === 'mark_deliver' || k === 'greylist' || k === 'sideline')) return false;
       return true;
     });
-  }, [seriesData]);
+    console.log('[v0] TrendChartCard keys viewBy=' + viewBy + ' raw=' + Object.keys(seriesData[0]).join(',') + ' filtered=' + filtered.join(','));
+    return filtered;
+  }, [seriesData, viewBy]);
 
   function seriesLabel(key: string): string {
     // action view: delegate to emailDisposal.filters.actions — single source of
