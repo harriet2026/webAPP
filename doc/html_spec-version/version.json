@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 8,
+  "current_version": 9,
   "history": [
     {
       "version": 1,
@@ -73,6 +73,15 @@
       "ticket": "GT-12659",
       "incremental": true,
       "summary": "GT-12659 增量：邮件处置中心搜索模块执行动作筛选移除"灰名单"（从 EXECUTION_ACTIONS 移除 advanced_review）；追加一级目录条目 GT-12659、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 下拉展开 7 项无灰名单，暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-005（EXECUTION_ACTIONS 共享事实源说明）；目录 C 项编号更新为 D-001~D-005；version.json current_version 7→8。"
+    },
+    {
+      "version": 9,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "bbe5bee",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12665",
+      "incremental": true,
+      "summary": "GT-12665 增量：发信人黑白名单域名类型输入控件由 Select（仅限租户接收域名）改为 DomainCombobox（可自由输入任意域名，focus 时展示租户接收域名建议列表）；追加一级目录条目 GT-12665、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-5 暗色 1253×832 / 1.3 逐元素变更表）；追加差异 D-006（noTenantDomains key 保留但不再渲染）；目录 C 项编号更新为 D-001~D-006；version.json current_version 8→9。"
     }
   ]
 }
