@@ -119,19 +119,20 @@ describe('buildProfileValue', () => {
 describe('diffRblConfig', () => {
   const base = [profile(1, 'keep.rbl'), profile(2, 'drop.rbl')];
   it('computes add/delete/retime sets', () => {
-    const draft = { enabled: true, servers: ['keep.rbl', 'new.rbl'], timeout: '9', action: 'mark' as const };
+    const draft = { enabled: true, servers: ['keep.rbl', 'new.rbl'], timeout: '9', action: 'mark' as const, greylistEnabled: false };
     expect(diffRblConfig(base, draft, true)).toEqual({
       serversToAdd: ['new.rbl'],
       profileIdsToDelete: [2],
       profilesToRetime: [1],
       action: 'mark',
+      greylist: undefined,
       enabled: true,
     });
   });
   it('skips retime when timeout unchanged', () => {
-    const draft = { enabled: false, servers: ['keep.rbl', 'drop.rbl'], timeout: '5', action: 'block' as const };
+    const draft = { enabled: false, servers: ['keep.rbl', 'drop.rbl'], timeout: '5', action: 'block' as const, greylistEnabled: false };
     expect(diffRblConfig(base, draft, false)).toEqual({
-      serversToAdd: [], profileIdsToDelete: [], profilesToRetime: [], action: 'block', enabled: false,
+      serversToAdd: [], profileIdsToDelete: [], profilesToRetime: [], action: 'block', greylist: undefined, enabled: false,
     });
   });
 });

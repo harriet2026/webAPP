@@ -3883,6 +3883,8 @@
     "serverExists": "This server already exists",
     "serverReferenced": "This server is used by {count} hit rule(s) and cannot be deleted",
     "loadError": "Failed to load RBL configuration",
+    "actionSectionTitle": "Execution Action",
+    "actionSectionDesc": "The immediate disposition applied to mail when a RBL hit occurs.",
     "greylistSectionTitle": "Greylist Policy",
     "greylistSectionDesc": "Temporarily defer unknown senders and require a retry to verify identity. Effective against botnets.",
     "greylistEnabled": "Enable greylist policy",

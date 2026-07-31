@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { useAuth } from '@/contexts/auth-context';
@@ -481,85 +482,102 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
               {timeoutError ? <p className="text-xs text-destructive">{timeoutError}</p> : null}
             </div>
 
-            {/* Section 1：即时处置动作（三选一 RadioGroup） */}
-            <div className="space-y-2">
-              <Label className="font-medium">{t('rblFilter.productAction')}</Label>
-              <RadioGroup
-                value={action}
-                onValueChange={(value) => {
-                  setAction(value as RblImmediateAction);
-                  markDirty();
-                }}
-                className="space-y-1"
-              >
-                {RBL_IMMEDIATE_ACTIONS.map((value) => (
-                  <div key={value} className="flex items-center gap-2">
-                    <RadioGroupItem value={value} id={`rbl-action-${value}`} />
-                    <Label htmlFor={`rbl-action-${value}`} className="cursor-pointer font-normal">
-                      {actionLabel[value]}
-                    </Label>
-                    <Tooltip>
-                      <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
-                      <TooltipContent className="max-w-[300px]">{t(ACTION_TIP_KEY[value])}</TooltipContent>
-                    </Tooltip>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
           </div>
         </div>
 
-        {/* Section 2：灰名单策略（独立开关，与即时动作并列） */}
-        <div className="border-t border-border px-6 py-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 space-y-0.5">
+        {/* 并列区：执行动作（左）与灰名单策略（右），border-t 与上方服务器/超时区分隔 */}
+        <div className="grid grid-cols-2 divide-x divide-border border-t border-border">
+
+          {/* 左列：执行动作（Select 下拉） */}
+          <div className="px-6 py-5 space-y-3">
+            <div className="space-y-0.5">
               <div className="flex items-center gap-1.5">
-                <p className="text-sm font-medium">{t('rblFilter.greylistSectionTitle')}</p>
+                <p className="text-sm font-medium">{t('rblFilter.actionSectionTitle')}</p>
                 <Tooltip>
                   <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
-                  <TooltipContent className="max-w-[320px]">{t('rblFilter.actionGreylistTip')}</TooltipContent>
+                  <TooltipContent className="max-w-[300px]">{t('rblFilter.actionSectionDesc')}</TooltipContent>
                 </Tooltip>
               </div>
-              <p className="text-xs text-muted-foreground">{t('rblFilter.greylistSectionDesc')}</p>
-              {greylistEnabled ? (
-                <div className="mt-3 flex items-center gap-3 rounded-lg border border-info/35 bg-info/10 p-3">
-                  <div className="flex-1">
-                    <p className="text-xs text-info">{greylistSummary}</p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="shrink-0 border-primary/35 text-primary hover:bg-primary/10"
-                    onClick={openGreylistDialog}
-                  >
-                    {t('rblFilter.greylistConfigure')}
-                  </Button>
-                </div>
-              ) : null}
+              <p className="text-xs text-muted-foreground">{t('rblFilter.actionSectionDesc')}</p>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={greylistEnabled}
-              aria-label={t('rblFilter.greylistEnabled')}
-              onClick={() => {
-                setGreylistEnabled((v) => !v);
+            <Select
+              value={action}
+              onValueChange={(value) => {
+                setAction(value as RblImmediateAction);
                 markDirty();
               }}
-              className={cn(
-                'relative mt-0.5 inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                greylistEnabled ? 'bg-primary' : 'bg-input',
-              )}
             >
-              <span
-                className={cn(
-                  'pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform duration-200',
-                  greylistEnabled ? 'translate-x-4' : 'translate-x-0',
-                )}
-              />
-            </button>
+              <SelectTrigger className="w-full max-w-[200px]">
+                <SelectValue>{actionLabel[action]}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {RBL_IMMEDIATE_ACTIONS.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    <div className="flex flex-col gap-0.5">
+                      <span>{actionLabel[value]}</span>
+                      <span className="text-xs text-muted-foreground">{t(ACTION_TIP_KEY[value])}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* 右列：灰名单策略（独立开关） */}
+          <div className="px-6 py-5 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-medium">{t('rblFilter.greylistSectionTitle')}</p>
+                  <Tooltip>
+                    <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
+                    <TooltipContent className="max-w-[320px]">{t('rblFilter.actionGreylistTip')}</TooltipContent>
+                  </Tooltip>
+                </div>
+                <p className="text-xs text-muted-foreground">{t('rblFilter.greylistSectionDesc')}</p>
+              </div>
+              {/* Toggle 开关 */}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={greylistEnabled}
+                aria-label={t('rblFilter.greylistEnabled')}
+                onClick={() => {
+                  setGreylistEnabled((v) => !v);
+                  markDirty();
+                }}
+                className={cn(
+                  'relative mt-0.5 inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  greylistEnabled ? 'bg-primary' : 'bg-input',
+                )}
+              >
+                <span
+                  className={cn(
+                    'pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform duration-200',
+                    greylistEnabled ? 'translate-x-4' : 'translate-x-0',
+                  )}
+                />
+              </button>
+            </div>
+            {/* 开启后显示摘要与配置入口 */}
+            {greylistEnabled ? (
+              <div className="flex items-center gap-3 rounded-lg border border-info/35 bg-info/10 p-3">
+                <div className="flex-1">
+                  <p className="text-xs text-info">{greylistSummary}</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 border-primary/35 text-primary hover:bg-primary/10"
+                  onClick={openGreylistDialog}
+                >
+                  {t('rblFilter.greylistConfigure')}
+                </Button>
+              </div>
+            ) : null}
+          </div>
+
         </div>
 
         <div className="sticky bottom-0 z-10 flex items-center justify-between gap-3 border-t border-border bg-card/95 px-6 py-4 backdrop-blur-sm shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">
