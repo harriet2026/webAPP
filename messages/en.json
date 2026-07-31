@@ -3883,6 +3883,8 @@
     "serverExists": "This server already exists",
     "serverReferenced": "This server is used by {count} hit rule(s) and cannot be deleted",
     "loadError": "Failed to load RBL configuration",
+    "disposalStrategyTitle": "Disposal Strategy",
+    "disposalStrategyDesc": "Choose how to handle mail when an RBL hit occurs. The two strategies are mutually exclusive.",
     "actionSectionTitle": "Execution Action",
     "actionSectionDesc": "The immediate disposition applied to mail when a RBL hit occurs.",
     "greylistSectionTitle": "Greylist Policy",

@@ -485,99 +485,116 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
           </div>
         </div>
 
-        {/* 并列区：执行动作（左）与灰名单策略（右），border-t 与上方服务器/超时区分隔 */}
-        <div className="grid grid-cols-2 divide-x divide-border border-t border-border">
+        {/* 处置策略选择区：执行动作 vs 灰名单策略，border-t 与上方服务器/超时区分隔 */}
+        <div className="border-t border-border px-6 py-5 space-y-3">
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm font-medium">{t('rblFilter.disposalStrategyTitle')}</p>
+            <Tooltip>
+              <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
+              <TooltipContent className="max-w-[300px]">{t('rblFilter.disposalStrategyDesc')}</TooltipContent>
+            </Tooltip>
+          </div>
 
-          {/* 左列：执行动作（Select 下拉） */}
-          <div className="px-6 py-5 space-y-3">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-1.5">
-                <p className="text-sm font-medium">{t('rblFilter.actionSectionTitle')}</p>
-                <Tooltip>
-                  <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
-                  <TooltipContent className="max-w-[300px]">{t('rblFilter.actionSectionDesc')}</TooltipContent>
-                </Tooltip>
-              </div>
-              <p className="text-xs text-muted-foreground">{t('rblFilter.actionSectionDesc')}</p>
-            </div>
-            <Select
-              value={action}
-              onValueChange={(value) => {
-                setAction(value as RblImmediateAction);
-                markDirty();
-              }}
+          {/* 两张并排可选卡片，RadioGroup 保证互斥 */}
+          <RadioGroup
+            value={greylistEnabled ? 'greylist' : 'action'}
+            onValueChange={(val) => {
+              setGreylistEnabled(val === 'greylist');
+              markDirty();
+            }}
+            className="grid grid-cols-2 gap-3"
+          >
+            {/* 卡片 A：执行动作 */}
+            <label
+              htmlFor="strategy-action"
+              className={cn(
+                'flex cursor-pointer flex-col gap-3 rounded-lg border p-4 transition-colors',
+                !greylistEnabled
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border bg-card opacity-60 hover:opacity-80 hover:border-border/80',
+              )}
             >
-              <SelectTrigger className="w-full max-w-[200px]">
-                <SelectValue>{actionLabel[action]}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {RBL_IMMEDIATE_ACTIONS.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    <div className="flex flex-col gap-0.5">
-                      <span>{actionLabel[value]}</span>
-                      <span className="text-xs text-muted-foreground">{t(ACTION_TIP_KEY[value])}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* 右列：灰名单策略（独立开关） */}
-          <div className="px-6 py-5 space-y-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5">
-                  <p className="text-sm font-medium">{t('rblFilter.greylistSectionTitle')}</p>
-                  <Tooltip>
-                    <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
-                    <TooltipContent className="max-w-[320px]">{t('rblFilter.actionGreylistTip')}</TooltipContent>
-                  </Tooltip>
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium leading-none">{t('rblFilter.actionSectionTitle')}</p>
+                    <Tooltip>
+                      <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
+                      <TooltipContent className="max-w-[280px]">{t('rblFilter.actionSectionDesc')}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('rblFilter.actionSectionDesc')}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">{t('rblFilter.greylistSectionDesc')}</p>
+                <RadioGroupItem value="action" id="strategy-action" className="mt-0.5 shrink-0" />
               </div>
-              {/* Toggle 开关 */}
-              <button
-                type="button"
-                role="switch"
-                aria-checked={greylistEnabled}
-                aria-label={t('rblFilter.greylistEnabled')}
-                onClick={() => {
-                  setGreylistEnabled((v) => !v);
-                  markDirty();
-                }}
-                className={cn(
-                  'relative mt-0.5 inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                  greylistEnabled ? 'bg-primary' : 'bg-input',
-                )}
-              >
-                <span
-                  className={cn(
-                    'pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform duration-200',
-                    greylistEnabled ? 'translate-x-4' : 'translate-x-0',
-                  )}
-                />
-              </button>
-            </div>
-            {/* 开启后显示摘要与配置入口 */}
-            {greylistEnabled ? (
-              <div className="flex items-center gap-3 rounded-lg border border-info/35 bg-info/10 p-3">
-                <div className="flex-1">
-                  <p className="text-xs text-info">{greylistSummary}</p>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0 border-primary/35 text-primary hover:bg-primary/10"
-                  onClick={openGreylistDialog}
+              {/* 选中时展开 Select */}
+              {!greylistEnabled ? (
+                <Select
+                  value={action}
+                  onValueChange={(value) => {
+                    setAction(value as RblImmediateAction);
+                    markDirty();
+                  }}
                 >
-                  {t('rblFilter.greylistConfigure')}
-                </Button>
-              </div>
-            ) : null}
-          </div>
+                  <SelectTrigger className="w-full" onClick={(e) => e.stopPropagation()}>
+                    <SelectValue>{actionLabel[action]}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RBL_IMMEDIATE_ACTIONS.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        <div className="flex flex-col gap-0.5">
+                          <span>{actionLabel[value]}</span>
+                          <span className="text-xs text-muted-foreground">{t(ACTION_TIP_KEY[value])}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : null}
+            </label>
 
+            {/* 卡片 B：灰名单策略 */}
+            <label
+              htmlFor="strategy-greylist"
+              className={cn(
+                'flex cursor-pointer flex-col gap-3 rounded-lg border p-4 transition-colors',
+                greylistEnabled
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border bg-card opacity-60 hover:opacity-80 hover:border-border/80',
+              )}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium leading-none">{t('rblFilter.greylistSectionTitle')}</p>
+                    <Tooltip>
+                      <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
+                      <TooltipContent className="max-w-[320px]">{t('rblFilter.actionGreylistTip')}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('rblFilter.greylistSectionDesc')}</p>
+                </div>
+                <RadioGroupItem value="greylist" id="strategy-greylist" className="mt-0.5 shrink-0" />
+              </div>
+              {/* 选中时展开摘要与配置入口 */}
+              {greylistEnabled ? (
+                <div className="flex items-center gap-3 rounded-lg border border-info/35 bg-info/10 p-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-info truncate">{greylistSummary}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 border-primary/35 text-primary hover:bg-primary/10"
+                    onClick={(e) => { e.preventDefault(); openGreylistDialog(); }}
+                  >
+                    {t('rblFilter.greylistConfigure')}
+                  </Button>
+                </div>
+              ) : null}
+            </label>
+          </RadioGroup>
         </div>
 
         <div className="sticky bottom-0 z-10 flex items-center justify-between gap-3 border-t border-border bg-card/95 px-6 py-4 backdrop-blur-sm shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">
