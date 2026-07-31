@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 5,
+  "current_version": 6,
   "history": [
     {
       "version": 1,
@@ -45,7 +45,16 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12682",
       "incremental": true,
-      "summary": "GT-12682-RBL优化：新建 GT-126811.html，记录三个需求点——(1) 灰名单从执行动作分离（两段式布局 + serde 层 greylistEnabled 字段 + 旧数据兼容映射）；(2) 处置策略互斥卡片选择器（RadioGroup 并排二选一，选中态展开子配置）；(3) 执行动作集合调整（reject/quarantine/review/discard，移除 block 和 mark，4 语言 i18n 同步）；含目录导航、差异 D-001~D-003、待确认 Q-001~Q-003。"
+      "summary": "GT-12682-RBL优化 v1 初稿：新建 GT-126811.html，记录三个需求点目录结构（占位版，无真实截图）。"
+    },
+    {
+      "version": 6,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "ebec245",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12682",
+      "incremental": true,
+      "summary": "GT-12682-RBL优化 v2 完整重写：按 html-spec-PM-version 技能规范补充真实浏览器截图（S-1 默认态 / S-2 执行动作选中 / S-3 灰名单策略选中 / S-4 执行动作下拉展开，均为暗色主题 1305×832）；仅呈现最终实现方案；完善变更 #1 数据模型表（greylistEnabled + legacyMap）、变更 #2 RadioGroup 逐元素表、变更 #3 i18n key 变更全表；新增差异 D-001~D-003、待确认 Q-001~Q-002；乱码自检 CLEAN。"
     }
   ]
 }
