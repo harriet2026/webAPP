@@ -143,15 +143,15 @@ function CellContent({
               <TooltipTrigger
                 render={
                   <span
-                    className="max-w-[120px] cursor-help truncate font-mono text-foreground"
+                    className="max-w-[160px] cursor-help truncate font-mono text-foreground"
                     title={textVal}
                   />
                 }
               >
-                {textVal.length > 20 ? `${textVal.slice(0, 20)}...` : textVal}
+                {textVal}
               </TooltipTrigger>
-              <TooltipContent>
-                <p>{textVal}</p>
+              <TooltipContent className="max-w-sm break-all">
+                <p className="font-mono text-xs">{textVal}</p>
                 {col.key === 'sourceIp' && row.metrics.geoLocation ? (
                   <p className="mt-1 text-xs text-muted-foreground">
                     {row.metrics.geoLocation === 'internal'
@@ -179,14 +179,14 @@ function CellContent({
             <TooltipTrigger
               render={
                 <span
-                  className="block max-w-[180px] cursor-help truncate text-foreground"
+                  className="block max-w-[196px] cursor-help truncate text-foreground"
                   title={textVal}
                 />
               }
             >
-              {textVal.length > 25 ? `${textVal.slice(0, 25)}...` : textVal}
+              {textVal}
             </TooltipTrigger>
-            <TooltipContent className="max-w-md">
+            <TooltipContent className="max-w-md break-all">
               <p>{textVal}</p>
             </TooltipContent>
           </Tooltip>
@@ -199,24 +199,37 @@ function CellContent({
             <TooltipTrigger
               render={
                 <span
-                  className="block max-w-[110px] cursor-help truncate font-mono text-xs text-muted-foreground"
+                  className="block max-w-[106px] cursor-help truncate font-mono text-xs text-muted-foreground"
                   title={ipsVal}
                 />
               }
             >
-              {ipsVal.length > 15 ? `${ipsVal.slice(0, 15)}...` : ipsVal}
+              {ipsVal}
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="max-w-xs break-all">
               <p className="font-mono text-xs">{ipsVal}</p>
             </TooltipContent>
           </Tooltip>
         );
       }
       if (col.key === 'senderDomain' || col.key === 'recipientDomain') {
+        const domainVal = String(value ?? '');
         return (
-          <span className="text-xs text-muted-foreground">
-            {String(value ?? '')}
-          </span>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <span
+                  className="block max-w-[126px] cursor-help truncate text-xs text-muted-foreground"
+                  title={domainVal}
+                />
+              }
+            >
+              {domainVal}
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs break-all">
+              <p className="text-xs">{domainVal}</p>
+            </TooltipContent>
+          </Tooltip>
         );
       }
       if (

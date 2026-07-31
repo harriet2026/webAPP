@@ -59,7 +59,7 @@ export function ExpandedPanel({
   const color = config.color;
   const yAxisLabel = t(config.yAxisLabel as Parameters<typeof t>[0]);
   const itemName = String(row.name ?? '');
-  const displayName = itemName.length > 30 ? `${itemName.slice(0, 30)}...` : itemName;
+  const displayName = itemName;
 
   const dayLabels = trendLabels ?? FALLBACK_LABELS;
 
@@ -126,19 +126,26 @@ export function ExpandedPanel({
 
   const drillOption = useMemo(() => {
     if (drillItems.length === 0) return null;
+    // Keep y-axis labels short for space; tooltip shows the full value.
+    const drillFullNames = drillItems.map((d) => drillLabel(d.name));
     return {
       tooltip: {
         trigger: 'axis' as const,
         axisPointer: { type: 'shadow' as const },
+        formatter: (params: Array<{ dataIndex: number; value: number }>) => {
+          const idx = params[0]?.dataIndex ?? 0;
+          const fullName = drillFullNames[idx] ?? '';
+          const val = params[0]?.value ?? 0;
+          return `${fullName}<br/><strong>${val.toLocaleString()}</strong>`;
+        },
       },
       grid: { left: 100, right: 24, top: 8, bottom: 32 },
       xAxis: { type: 'value' as const, axisLabel: { fontSize: 10 } },
       yAxis: {
         type: 'category' as const,
-        data: drillItems.map((d) => {
-          const label = drillLabel(d.name);
-          return label.length > 15 ? `${label.slice(0, 15)}...` : label;
-        }),
+        data: drillFullNames.map((label) =>
+          label.length > 15 ? `${label.slice(0, 15)}\u2026` : label,
+        ),
         axisLabel: { fontSize: 10 },
       },
       series: [
