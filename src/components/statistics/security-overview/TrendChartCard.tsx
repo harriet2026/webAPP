@@ -50,8 +50,8 @@ export function TrendChartCard({
     // it distorts the area chart and clicking it would 400 the drill-down.
     return Object.keys(seriesData[0]).filter((k) => {
       if (k === 'date' || NON_SERIES_KEYS.has(k)) return false;
-      // mark_deliver 不在处置中心筛选枚举中，安全总览执行动作视图同步去掉。
-      if (viewBy === 'action' && k === 'mark_deliver') return false;
+      // mark_deliver / greylist 不在执行动作枚举中，安全总览执行动作视图同步去掉。
+      if (viewBy === 'action' && (k === 'mark_deliver' || k === 'greylist')) return false;
       return true;
     });
   }, [seriesData]);
