@@ -131,6 +131,7 @@ export function AttachmentSecurityPage({
   const [baseline, setBaseline] = useState<AttachmentDraft>(defaultDraft);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [togglingEnabled, setTogglingEnabled] = useState(false);
 
   // GT-12196: attachment_security 是租户级安全模块。不能只按
   // isSystemAdmin 判断，否则 tenant_admin 虽能调用后端租户级开关接口，
@@ -260,13 +261,26 @@ export function AttachmentSecurityPage({
     setDraft((current) => ({ ...current, [key]: value }));
   }, []);
 
+  // 总开关立即持久化，与其他模块保持一致，不走 draft/save 流程。
+  const handleToggleEnabled = useCallback(async (next: boolean) => {
+    const prev = draft.enabled;
+    setDraft((current) => ({ ...current, enabled: next }));
+    setTogglingEnabled(true);
+    try {
+      await setSecurityModuleEnabled('attachment_security', next, apiRequest);
+      setBaseline((current) => ({ ...current, enabled: next }));
+    } catch {
+      setDraft((current) => ({ ...current, enabled: prev }));
+      toast.error(moduleT('saveFailed'));
+    } finally {
+      setTogglingEnabled(false);
+    }
+  }, [draft.enabled, apiRequest, moduleT]);
+
   const save = async () => {
     setSaving(true);
     try {
       const tasks: Promise<void>[] = [];
-      if (draft.enabled !== baseline.enabled) {
-        tasks.push(setSecurityModuleEnabled('attachment_security', draft.enabled, apiRequest));
-      }
       if (!same(draft.basic, baseline.basic)) tasks.push(saveBasicLimitConfig(direction, draft.basic, apiRequest));
       if (!same(draft.antivirus, baseline.antivirus)) tasks.push(saveAntivirusConfig(draft.antivirus, apiRequest));
       // GT-12196：归租户的三节（反病毒处置 / 图片识别 / 加密附件）改走租户级端点，
@@ -341,8 +355,8 @@ export function AttachmentSecurityPage({
       <PipelinePanelHeader
         title={t('title')}
         enabled={draft.enabled}
-        onToggle={(enabled) => updateDraft('enabled', enabled)}
-        disabled={!moduleEditable || saving}
+        onToggle={handleToggleEnabled}
+        disabled={!moduleEditable || saving || togglingEnabled}
         enabledLabel={moduleT('enabled')}
         disabledLabel={moduleT('disabled')}
         rootTestId="module-master-switch-attachment_security"
