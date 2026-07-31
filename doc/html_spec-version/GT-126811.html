@@ -279,7 +279,18 @@
         </ul>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-007）</a></li>
+      <!-- 一级需求：GT-12657 附件安全检测-模块总开关需额外保存才生效，与其他模块即时生效行为不一致 -->
+      <li class="toc-l1"><a href="#gt-12657">GT-12657 附件安全检测-模块总开关需额外保存才生效，与其他模块即时生效行为不一致</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12657-change-1">总开关改为立即持久化：点击后直接生效，切换期间禁用，失败时回滚并 toast</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12657-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12657-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12657-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-008）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-002）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
@@ -998,6 +1009,139 @@
     </div>
   </section>
 
+  <!-- ══════════════ GT-12657 需求入口锚点 ══════════════ -->
+  <div id="gt-12657" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12657 增量内容 ══════════════ -->
+  <section id="incremental-gt-12657-attachment-security-toggle-immediate">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12657</span>
+      <span class="incr-title">附件安全检测-模块总开关需额外保存才生效，与其他模块即时生效行为不一致</span>
+      <span class="incr-meta">2026-07-31 &nbsp;·&nbsp; commit <code>ede9867</code> &nbsp;·&nbsp; 路由 <code>/zh/security/pipeline</code> → 阶段3: 内容层 / 附件安全检测抽屉</span>
+    </div>
+
+    <div id="c12657-change-1">
+      <h3>变更 1 · 总开关改为立即持久化：点击后直接生效，切换期间禁用，失败时回滚并 toast</h3>
+
+      <div id="c12657-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          原实现中，附件安全检测抽屉顶部的"启用/禁用"开关点击后仅更新 draft 状态，
+          底部会出现"模块开关有未保存的更改"提示，用户必须额外点击"保存配置"才能真正持久化。
+          其他模块（发信行为管控、收信人检测等）的开关均在点击后立即调用 API 持久化，
+          两者交互语义不一致，存在用户误以为生效而实际未生效的安全风险。
+        </p>
+        <p>
+          本次变更在 <code>AttachmentSecurityPage.tsx</code> 中新增 <code>handleToggleEnabled</code> 异步函数：
+          点击开关时乐观更新 UI（立即翻转显示），同时调用 <code>setSecurityModuleEnabled('attachment_security', next, apiRequest)</code> 持久化；
+          成功后同步 <code>baseline.enabled</code>，使"保存配置"按钮对开关状态不再产生差异提交；
+          失败时回滚 <code>draft.enabled</code> 并弹出错误 toast（<code>moduleT('saveFailed')</code>）。
+          切换进行中 <code>togglingEnabled=true</code>，开关和"保存配置"按钮均禁用，防止重复操作。
+        </p>
+        <div class="callout callout-info">
+          修改位置：<code>src/components/security/AttachmentSecurityPage.tsx</code> — 新增 <code>handleToggleEnabled</code> 函数和 <code>togglingEnabled</code> 状态，
+          <code>PipelinePanelHeader onToggle</code> 从 <code>updateDraft('enabled', enabled)</code> 改为 <code>handleToggleEnabled</code>；
+          <code>save()</code> 中移除 <code>draft.enabled !== baseline.enabled</code> 的冗余提交分支。
+        </div>
+      </div>
+
+      <div id="c12657-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="trigger-path">
+            触发路径：安全策略 → 策略流水线 → 阶段3：内容层 → 附件安全检测「配置」→ 点击顶部启用/禁用开关
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12657-S1-attachment-security-drawer-default-enabled-dark-1253x832.png"
+                 alt="S-1 附件安全检测抽屉默认态 — 总开关已启用（蓝色），底部保存配置按钮 disabled"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 附件安全检测抽屉 — 默认态（总开关：已启用）</strong><br>
+              路由：<code>/zh/security/pipeline</code> → 阶段3: 内容层 / 附件安全检测抽屉 &nbsp;·&nbsp;
+              主题：暗色 &nbsp;·&nbsp; 视口：1253×832 &nbsp;·&nbsp;
+              形态：AI版·多租户 &nbsp;·&nbsp; 角色：租户管理员（示例租户 A，Mock 演示数据）<br>
+              抽屉标题"阶段3: 内容层 / 附件安全检测"，右上角总开关蓝色（已启用）；
+              底部"保存配置"按钮为 <code>disabled</code> 状态（无未保存更改）
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12657-S2-toggle-off-immediate-no-unsaved-prompt-dark-1253x832.png"
+                 alt="S-2 点击总开关切换为禁用后立即生效 — 顶部显示已禁用，保存配置按钮仍为 disabled，无未保存提示"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 点击总开关切换为禁用后 — 立即持久化（无未保存提示）</strong><br>
+              点击开关后 UI 立即切换为"已禁用"（灰色）；
+              面板显示警告横幅"关闭本模块后，其全部规则停止生效，该模块的拦截能力将不再起作用。"；
+              底部"保存配置"按钮仍为 <code>disabled</code>（API 已即时调用，baseline 已同步，无 draft 差异）；
+              <strong>无"模块开关有未保存的更改"提示</strong>（修复前的旧行为已消除）
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12657-S3-toggle-on-immediate-no-unsaved-prompt-dark-1253x832.png"
+                 alt="S-3 再次点击总开关切换回启用 — 顶部显示已启用，保存配置按钮仍为 disabled，无未保存提示"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-3 · 再次点击总开关切换回启用 — 立即持久化（无未保存提示）</strong><br>
+              再次点击后 UI 立即恢复为"已启用"（蓝色），警告横幅消失；
+              底部"保存配置"按钮仍为 <code>disabled</code>；
+              连续切换两次后状态与初始值一致，无累积 draft，行为与 S-1 默认态完全相同
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12657-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径 / 相关 key</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>总开关（<code>Switch</code> / <code>PipelinePanelHeader</code> <code>onToggle</code>）</td>
+              <td>点击后调用 <code>updateDraft('enabled', enabled)</code>，将状态写入 draft；底部出现"模块开关有未保存的更改"提示，需用户手动点击"保存配置"持久化</td>
+              <td>点击后调用 <code>handleToggleEnabled(next)</code>：乐观更新 UI，立即调用 <code>setSecurityModuleEnabled('attachment_security', next, apiRequest)</code> 持久化，成功后同步 <code>baseline.enabled</code>，底部无未保存提示</td>
+              <td><code>src/components/security/AttachmentSecurityPage.tsx</code> — <code>handleToggleEnabled</code> 函数（新增）</td>
+              <td>[Base] 所有形态/角色一致</td>
+            </tr>
+            <tr>
+              <td>总开关切换期间禁用</td>
+              <td>无禁用逻辑，可多次快速点击</td>
+              <td><code>togglingEnabled=true</code> 时开关 <code>disabled</code>，防止并发重复请求</td>
+              <td><code>AttachmentSecurityPage.tsx</code> — <code>togglingEnabled</code> state（新增）；<code>PipelinePanelHeader disabled</code> prop 条件加入 <code>|| togglingEnabled</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>切换失败回滚与 toast</td>
+              <td>不适用（旧逻辑通过 <code>save()</code> 统一处理错误）</td>
+              <td>API 调用失败时回滚 <code>draft.enabled</code> 为切换前值，弹出错误 toast（<code>moduleT('saveFailed')</code>）</td>
+              <td><code>AttachmentSecurityPage.tsx</code> — <code>handleToggleEnabled</code> catch 分支；i18n key <code>module.saveFailed</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>"保存配置"按钮 <code>disabled</code> 条件</td>
+              <td>开关切换后 draft 与 baseline 不同，按钮变为 enabled（可点击）</td>
+              <td>开关切换后 <code>baseline.enabled</code> 立即同步，draft 与 baseline 始终一致，按钮保持 <code>disabled</code>（仅其他字段变更时才 enabled）</td>
+              <td><code>AttachmentSecurityPage.tsx</code> — <code>save()</code> 中已移除 <code>draft.enabled !== baseline.enabled</code> 的提交分支</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>底部"模块开关有未保存的更改"提示</td>
+              <td>每次点击开关后必然出现</td>
+              <td>不再出现（开关已立即持久化，不产生 draft 差异）</td>
+              <td><code>AttachmentSecurityPage.tsx</code> — <code>PipelinePanelFooter</code> 的 dirty 判断中 <code>enabled</code> 差异已消除</td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+        <a class="back-link" href="#toc">&#8593; 返回目录</a>
+      </div>
+    </div>
+  </section>
+
   <!-- ══════════════ GT-12661 需求入口锚点 ══════════════ -->
   <div id="gt-12661" style="scroll-margin-top: 1rem;"></div>
 
@@ -1141,7 +1285,7 @@
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-added">已解决</span></td></tr>
-        <tr><td>描述</td><td>最初过滤尝试了 <code>greylist</code> 和 <code>sideline</code>，均未命中。通过 console.log 确认数据 key 后，发现实际是 <code>advanced_review</code>（在 <code>emailDisposal.filters.actions.advanced_review</code> 中翻译为"灰名单"）。</td></tr>
+        <tr><td>描述</td><td>最初过滤尝试了 <code>greylist</code> 和 <code>sideline</code>，均未命中。通过 console.log 确认数据 key 后，发实际是 <code>advanced_review</code>（在 <code>emailDisposal.filters.actions.advanced_review</code> 中翻译为"灰名单"）。</td></tr>
         <tr><td>解决版本</td><td>GT-12660 · 2026-07-31</td></tr>
         <tr><td>验证依据</td><td>图 S-1/S-2 截图图例不含"灰名单"；<code>messages/zh.json</code> 第 5691 确认 key 映射</td></tr>
       </tbody>
@@ -1165,6 +1309,16 @@
         <tr><td>描述</td><td>旧实现在租户无接收域名时展示提示文案（i18n key <code>senderFilter.noTenantDomains</code>）；新 <code>DomainCombobox</code> 不再渲染该逻辑。key 仍保留在 <code>messages/zh.json</code> 和 <code>messages/en.json</code> 中（未删除），属于死字符串。不影响运行时，可在下一次国际化清理中移除。</td></tr>
         <tr><td>解决版本</td><td>GT-12665 · 2026-07-31</td></tr>
         <tr><td>验证依据</td><td>S-3/S-4/S-5 截图均为自由输入模式，浏览器快照无 noTenantDomains 提示；<code>SenderFilterDrawer.tsx</code> 源码 domain 分支已替换为 <code>DomainCombobox</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-008 · GT-12657 附件安全检测总开关切换失败的 toast 依赖 moduleT('saveFailed') key，需确认多语言覆盖</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·复用已有 key</span></td></tr>
+        <tr><td>描述</td><td><code>handleToggleEnabled</code> 的 catch 分支调用 <code>toast.error(moduleT('saveFailed'))</code>，复用了 <code>ModuleMasterSwitch</code> 原有 i18n key <code>module.saveFailed</code>，zh/en 均已有翻译。无需新增 key，但需确认其他 locale（如 ja、ko）的翻译是否已覆盖。</td></tr>
+        <tr><td>解决版本</td><td>GT-12657 · 2026-07-31（i18n key 复用确认）</td></tr>
+        <tr><td>验证依据</td><td>S-2/S-3 截图无错误 toast（正常操作路径），错误态无法在 Mock 环境安全触发，记录为"无法验证错误 toast 显示效果"</td></tr>
       </tbody>
     </table>
 
@@ -1245,6 +1399,12 @@
           <td>2026-07-31</td>
           <td><code>54cb647</code></td>
           <td>增量追加 GT-12661 需求：从认证仿冒检测配置面板移除底部"例外规则管理"横幅（含"前往策略流水线"和"查看当前例外"两个无效按钮）；新增一级目录条目 GT-12661、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 底部无横幅，暗色 1253×832 / 1.3 逐元素变更表）；追加差异 D-007（<code>ExceptionRulesEntry</code> 组件文件保留为死代码）；目录 C 项编号更新为 D-001~D-007；version.json current_version 9→10。</td>
+        </tr>
+        <tr>
+          <td>v11</td>
+          <td>2026-07-31</td>
+          <td><code>ede9867</code></td>
+          <td>增量追加 GT-12657 需求：附件安全检测总开关从 draft 模式改为立即持久化（新增 <code>handleToggleEnabled</code>，调用 <code>setSecurityModuleEnabled</code>，失败回滚 + toast，切换期间禁用）；新增一级目录条目 GT-12657、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 切换禁用即时生效 + S-3 切换启用即时生效，暗色 1253×832 / 1.3 逐元素变更表 5 项）；追加差异 D-008（<code>moduleT('saveFailed')</code> i18n key 复用确认）；目录 C 项编号更新为 D-001~D-008；version.json current_version 10→11。</td>
         </tr>
       </tbody>
     </table>

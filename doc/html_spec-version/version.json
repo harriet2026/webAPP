@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 10,
+  "current_version": 11,
   "history": [
     {
       "version": 1,
@@ -91,6 +91,15 @@
       "ticket": "GT-12661",
       "incremental": true,
       "summary": "GT-12661 增量：从认证仿冒检测配置面板移除底部例外规则管理横幅（含前往策略流水线和查看当前例外两个无效按钮）；追加一级目录条目 GT-12661、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 底部无横幅，暗色 1253×832 / 1.3 逐元素变更表）；追加差异 D-007（ExceptionRulesEntry 组件文件保留为死代码）；目录 C 项编号更新为 D-001~D-007；version.json current_version 9→10。"
+    },
+    {
+      "version": 11,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "ede9867",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12657",
+      "incremental": true,
+      "summary": "GT-12657 增量：附件安全检测总开关从 draft 模式改为立即持久化（新增 handleToggleEnabled，调用 setSecurityModuleEnabled，失败回滚 + toast，切换期间 togglingEnabled 禁用开关）；追加一级目录条目 GT-12657、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 切换禁用即时生效无未保存提示 + S-3 切换启用即时生效无未保存提示，暗色 1253×832 / 1.3 逐元素变更表 5 项）；追加差异 D-008（moduleT saveFailed i18n key 复用确认）；目录 C 项编号更新为 D-001~D-008；version.json current_version 10→11。"
     }
   ]
 }
