@@ -60,7 +60,6 @@ export interface AICondition {
 export const EXECUTION_ACTIONS = [
   'deliver',
   'mark_deliver',
-  'advanced_review',
   'quarantine',
   'review',
   'block',
