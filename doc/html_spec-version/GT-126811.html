@@ -205,44 +205,6 @@
 <body>
 <div class="page-wrap">
 
-  <!-- ══════════════ HEADER ══════════════ -->
-  <header class="spec-header">
-    <span class="ticket-badge">GT-126811</span>
-    <h1>GT-12682-RBL优化 · 增量功能规格 · v2</h1>
-    <p class="subtitle">
-      关联模块：规则配置 &gt; RBL 过滤 &nbsp;&middot;&nbsp;
-      变更类型：功能变更 &nbsp;&middot;&nbsp;
-      最后更新：2026-07-31 &nbsp;&middot;&nbsp;
-      webapp commit：<code>ebec245</code>
-    </p>
-  </header>
-
-  <!-- ══════════════ 本版变更总览 ══════════════ -->
-  <div class="change-summary">
-    <h2>本版变更点（共 3 项需求）— 点击卡片跳转至对应需求描述</h2>
-    <a class="change-item" href="#change-1">
-      <span class="ci-num">1</span>
-      <div class="ci-body">
-        <div class="ci-title">灰名单从执行动作中分离</div>
-        <div class="ci-sub">RBL 过滤 · 架构变更</div>
-      </div>
-    </a>
-    <a class="change-item" href="#change-2">
-      <span class="ci-num">2</span>
-      <div class="ci-body">
-        <div class="ci-title">处置策略互斥卡片选择器</div>
-        <div class="ci-sub">RBL 过滤 · 交互优化</div>
-      </div>
-    </a>
-    <a class="change-item" href="#change-3">
-      <span class="ci-num">3</span>
-      <div class="ci-body">
-        <div class="ci-title">执行动作集合调整</div>
-        <div class="ci-sub">RBL 过滤 · 功能变更</div>
-      </div>
-    </a>
-  </div>
-
   <!-- ══════════════ 目录 ══════════════ -->
   <section id="toc">
     <h2>目录</h2>
@@ -471,7 +433,7 @@
         <h4>S-2 · 执行动作卡片选中态</h4>
         <p class="trigger-path">触发路径：页面加载默认态（<code>greylistEnabled=false</code>）· 暗色主题 / 1305×832 / AI版·多租户 / 平台管理员</p>
         <figure>
-          <img src="./screenshots/GT-12682-rbl-default-action-selected-dark-1305x832.png" alt="执行动作卡片选中态：左卡高亮蓝色边框，内部展开 Select 下拉；右卡灰色 dimmed" />
+          <img src="./screenshots/GT-12682-rbl-default-action-selected-dark-1305x832.png" alt="执行动作卡片选中态：左卡高��蓝色边框，内部展开 Select 下拉；右卡灰色 dimmed" />
           <figcaption>图 S-2：执行动作卡片选中态。左卡蓝色边框高亮，右侧单选圆点在左卡处于选中状态，左卡内部展开执行动作 Select（当前值：拒收）。右卡"灰名单策略"opacity 降低，内部无子配置展开。底部显示"暂无未保存更改"，保存按钮 disabled。</figcaption>
         </figure>
       </div>
