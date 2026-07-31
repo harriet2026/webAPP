@@ -2081,7 +2081,7 @@
     "adminAccountTaken": "该账号已存在（不区分大小写），请换一个"
   },
   "users": {
-    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全���������约）",
+    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全�����������约）",
     "resetPassword": {
       "title": "重置密码",
       "description": "为管理员「{username}」设置新密码，重置后需用新密码登录。",
@@ -2442,7 +2442,7 @@
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号是否泄露并启用登录限速。",
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
-      "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路���或���当���大认证超时时间。",
+      "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络���路���或���当���大认证超时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
@@ -2838,7 +2838,7 @@
       "client_ip": "客户端 IP",
       "sender": "发件人",
       "sender_name": "发件人名称",
-      "sender_domain": "发件人域名",
+      "sender_domain": "发���人域名",
       "message_id": "消�� ID",
       "message_uuid": "消息 UUID",
       "smtp_user": "SMTP 用户",
@@ -3248,7 +3248,7 @@
   },
   "pipeline": {
     "title": "策略流水线",
-    "executionPipeline": "策略执行流程",
+    "executionPipeline": "��略执行流程",
     "phase1IP": "IP策略",
     "phase2Sender": "收发信人策略",
     "phase3Content": "内容层",
@@ -3374,7 +3374,7 @@
   },
   "ipFrequency": {
     "title": "IP 频率限制",
-    "description": "限制每个 IP 地址的连���数、认证���败次数和命令错误次数",
+    "description": "限制每�� IP 地址的连���数、认证���败次数和命令错误次数",
     "basicSettings": "基础设置",
     "ruleName": "规则名称",
     "ruleNamePlaceholder": "如：合作伙伴IP限制",
@@ -3540,7 +3540,7 @@
       "hit": "命中规则",
       "notHit": "未命中",
       "diffLeft": "距离触发阈值还差 {diff} 次",
-      "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次，超过限制 {limit} 次",
+      "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次，超过限制 {limit} ���",
       "dailyHit": "触发\"每日连接数\"阈值，当日已连接 {count} 次，超过限制 {limit} 次",
       "notHitReason": "未触发阈值",
       "noThresholds": "当前配置未设置有效阈值，连接将被放行"
@@ -4047,7 +4047,7 @@
     "senderConfig": "发信人",
     "complexCondition": "复杂条件",
     "senderType_individual": "个人",
-    "senderType_domain": "组织域名",
+    "senderType_domain": "发信域名",
     "senderType_group": "群组",
     "ipRange": "发信IP范围",
     "ipType_all": "全部IP",
@@ -4075,8 +4075,9 @@
     "drawerSubtitleBlacklist": "配置发信人黑名单规则，阻断或处置指定发信人",
     "drawerSubtitleWhitelist": "配置发信人白名单规则，信任的发信人直接放行",
     "senderPlaceholder_individual": "如: user@example.com 或 *@domain.com",
-    "senderPlaceholder_domain": "请输入域名，如 example.com",
+    "senderPlaceholder_domain": "如 example.com 或 evil.com",
     "noTenantDomains": "该租户暂无接收域名，请先在『接收域名』中配置",
+    "domainSuggestions": "本租户接收域名（快捷选择）",
     "senderPlaceholder_group": "请选择发件人组",
     "validUntil": "生效结束",
     "currentEffect": "当前配置效果",
@@ -4143,7 +4144,7 @@
     "recipientSection": "收信人配置",
     "recipientType": "收信人类型",
     "recipientType_individual": "个人邮箱",
-    "recipientValue": "收信人邮箱",
+    "recipientValue": "收信人邮���",
     "recipientPlaceholder": "请输入邮箱地址，如 user@example.com",
     "senderSection": "发信人配置",
     "senderType": "发信人类型",
@@ -4428,7 +4429,7 @@
       "mailFromInvalid": "无效MAIL FROM",
       "envelopeHeaderMismatch": "信封与头部不匹配",
       "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。",
-      "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，建议阻断。",
+      "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错��通常是垃圾邮件或恶意软件生成的特征，建议阻断。",
       "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法��发服务或恶意身份仿冒。"
     },
     "protocolChecks": {
@@ -4549,7 +4550,7 @@
       "accept": "允许（进行下一步检测）",
       "quarantine": "隔离/审核",
       "reject": "阻断并退信",
-      "discard": "静默丢弃"
+      "discard": "静默���弃"
     },
     "protocolActionLabel": {
       "accept": "进行下一步检测",
@@ -5157,7 +5158,7 @@
     },
     "sandbox": {
       "placeholder": {
-        "title": "URL 沙箱检测",
+        "title": "URL ��箱检测",
         "desc": "本功能将在后续版本提供。当前版本仅支持链接保护。"
       },
       "toggle": "沙箱检测",
@@ -5469,7 +5470,7 @@
     "totalRules": "共 {count} 条规则",
     "createRule": "新建规则",
     "priority": "优先级",
-    "priorityHint": "数值越大优先级越高，命中多条规则时优先执行数值大的规则",
+    "priorityHint": "数值越大优先级越高��命中多条规则时优先执行数值大的规则",
     "ruleName": "规则名称",
     "applyTo": "适用对象",
     "applyToAllUsers": "全部用户",
@@ -5747,7 +5748,7 @@
         "subscription": "订阅资讯",
         "advertising": "广告邮件",
         "spam": "垃圾邮件",
-        "harmful": "有害内容邮件",
+        "harmful": "有害���容邮件",
         "suspicious": "可疑邮件",
         "sensitive": "敏感内容邮件",
         "spoofing": "仿冒邮件",
@@ -6176,7 +6177,7 @@
         },
         "platformStageHint": "该阶段由平台统一管控，详情请联系平台管理员",
         "verdict": {
-          "malicious": "恶意邮件",
+          "malicious": "恶意邮���",
           "suspicious": "可疑邮件",
           "safe": "安全邮件"
         },
@@ -7000,7 +7001,7 @@
         "note": "空MAIL FROM常见于退信或系统邮件"
       },
       "desc_mailFromFromConsistency": {
-        "source": "SMTP会话MAIL FROM + 邮件头From字段",
+        "source": "SMTP会话MAIL FROM + 邮件头From��段",
         "usage": "检测信封层与信头层发信人是否一致",
         "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证；两者不一��是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
       },
@@ -8156,7 +8157,7 @@
     "degradeDbUnavailable": "数据库监控数据源暂时不可用",
     "queueDirectionDisabled": "队列为全局共享，不区分方向",
     "approximate": "近似",
-    "calibrating": "数据校准中",
+    "calibrating": "数据校准���",
     "clusterAggregate": "该指标为集群汇总，不区分节点",
     "reasonOther": "其他",
     "direction": {
@@ -8351,7 +8352,7 @@
       "recall": "召回",
       "configSnapshot": "配置快照",
       "configPlaceholder": "配置模块上线后提供",
-      "configSnapshotStaleNotice": "当前配置已变更，此为历史快照",
+      "configSnapshotStaleNotice": "当��配置已变更，此为历史快照",
       "runLog": "运行日志",
       "searchSteps": "搜索步骤...",
       "exportJson": "导出 JSON",
@@ -8459,7 +8460,7 @@
       "senderFirstSeen": "收发信人之前没有邮件往来",
       "senderFirstSeenHint": "仅对无历史收发记录的发信人启用——常见钓鱼/社工高风险来源。",
       "qrcode": "邮件包含二维码",
-      "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
+      "qrcodeDesc": "附件/图片中解码��二维码时命中（需附件深度检查）",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
       "validationFailed": "请检查必填字段。",
       "created": "��入规则已创建",
@@ -8825,7 +8826,7 @@
       "cancelConfirmDescription": "当前抽屉中有未保存的修改，关闭后将无法恢复。",
       "continueEditing": "继续编辑",
       "discardChanges": "放弃修改",
-      "warnSensThreshold": "检测灵敏度极高时，建议置信度阈值 ≥ 80 以避免误报",
+      "warnSensThreshold": "检测灵敏度极高时，建议置信度阈值 ≥ 80 以避免���报",
       "errDiscardNeedsAlert": "丢弃动作必须开启告警通知",
       "errEmailDup": "该邮箱已作为保护对象存在",
       "errEmailInvalid": "请输入合法的邮箱地址",
@@ -9192,7 +9193,7 @@
       "origConfidence": "原始置信度",
       "recheckConfidence": "复检置信度",
       "downloadEml": "下载 EML",
-      "loading": "正在加载原文…",
+      "loading": "正在加载��文…",
       "contentUnavailable": "邮件原文暂不可用",
       "threatType": {
         "phishing": "钓鱼",
@@ -9201,7 +9202,7 @@
         "unknown": "未知"
       },
       "disposition": {
-        "pending_recall": "待召回",
+        "pending_recall": "待召��",
         "recalled": "已召回",
         "alert_only": "仅告警",
         "false_positive": "误报"
@@ -9441,7 +9442,7 @@
     "colActions": "操作",
     "colAddress": "服务器地址 / URL",
     "colAutoSync": "自动同步",
-    "colDept": "部门路径",
+    "colDept": "��门路径",
     "colDisplayName": "用户名",
     "colDuration": "耗时",
     "colEmail": "邮箱",
@@ -9553,7 +9554,7 @@
     "policyExecProtect": "高管邮件保护：{state}",
     "policyImpersonation": "显示名仿冒检测：{state}",
     "policyRecipientCheck": "收件人合法性校验：内部白名单",
-    "priorityHint": "数值越大优先级越高，冲突时高优先级覆盖低优先级",
+    "priorityHint": "数值越大优先级越高，���突时高优先级覆盖低优先级",
     "refresh": "刷新",
     "relatedPolicies": "关联策略",
     "resetFilters": "重置筛选",
@@ -9610,7 +9611,7 @@
     "testing": "测试中…",
     "title": "组织通讯录",
     "toastBatchTagged": "成功标记 {count} 条记录",
-    "toastBatchUntagged": "已取消 {count} 条记录的标记",
+    "toastBatchUntagged": "已取消 {count} 条记��的标记",
     "toastCreated": "数据源已新增",
     "toastDeleted": "数据源已删除",
     "toastFailuresExported": "已导出失败明细 CSV",
@@ -9818,7 +9819,7 @@
       "recoveryNotify": "恢复通知",
       "err": {
         "nameRequired": "规则名称不能为空",
-        "reservedPrefix": "名称不能以 __deleted__ 开头",
+        "reservedPrefix": "��称不能以 __deleted__ 开头",
         "thresholdRequired": "阈值为必填",
         "thresholdPositive": "阈值必须为正数",
         "durationPositive": "持续时间必须大于 0",
@@ -9950,7 +9951,7 @@
     },
     "systemHealth": {
       "title": "系统与服务健康",
-      "node": "节点状态",
+      "node": "���点状态",
       "coreService": "核心服务",
       "normal": "正常",
       "license": "License",

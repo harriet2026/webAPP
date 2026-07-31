@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type {
   SenderFilterRuleView,
   SenderFilterFormData,
@@ -37,6 +37,107 @@ import type {
   SenderFilterAction,
 } from '@/types/sender-filter';
 import { normalizeDomain } from '@/lib/api/sender-filter';
+
+/** 域名输入框：自由输入 + 租户接收域名快捷建议 */
+interface DomainComboboxProps {
+  value: string;
+  suggestions: string[];
+  placeholder: string;
+  suggestionsLabel: string;
+  hasError: boolean;
+  onChange: (value: string) => void;
+}
+
+function DomainCombobox({ value, suggestions, placeholder, suggestionsLabel, hasError, onChange }: DomainComboboxProps) {
+  const [open, setOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 同步外部 value → 内部 inputValue（切换类型时重置）
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  // 点击外部关闭建议
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  // 过滤建议：只展示包含输入词的项
+  const filtered = useMemo(() => {
+    if (!inputValue.trim()) return suggestions;
+    const lower = inputValue.toLowerCase();
+    return suggestions.filter((d) => d.toLowerCase().includes(lower));
+  }, [suggestions, inputValue]);
+
+  function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.value.toLowerCase().replace(/\s/g, '');
+    setInputValue(raw);
+    onChange(raw);
+    setOpen(suggestions.length > 0);
+  }
+
+  function handleSelectSuggestion(domain: string) {
+    setInputValue(domain);
+    onChange(domain);
+    setOpen(false);
+    inputRef.current?.focus();
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Escape') setOpen(false);
+    if (e.key === 'Enter') { e.preventDefault(); setOpen(false); }
+  }
+
+  return (
+    <div ref={containerRef} className="relative flex-1">
+      <Input
+        ref={inputRef}
+        className="w-full"
+        value={inputValue}
+        placeholder={placeholder}
+        aria-invalid={hasError}
+        aria-autocomplete="list"
+        aria-expanded={open}
+        data-testid="sender-filter-domain-input"
+        onChange={handleInput}
+        onFocus={() => suggestions.length > 0 && setOpen(true)}
+        onKeyDown={handleKeyDown}
+      />
+      {open && filtered.length > 0 && (
+        <div className="absolute z-50 left-0 right-0 top-full mt-1 rounded-md border bg-popover shadow-md overflow-hidden">
+          {suggestionsLabel && (
+            <div className="px-3 py-1.5 text-xs text-muted-foreground border-b">{suggestionsLabel}</div>
+          )}
+          <ul role="listbox" className="max-h-48 overflow-y-auto py-1">
+            {filtered.map((domain) => (
+              <li
+                key={domain}
+                role="option"
+                aria-selected={domain === inputValue}
+                className={cn(
+                  'px-3 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground',
+                  domain === inputValue && 'bg-accent/50',
+                )}
+                onMouseDown={(e) => { e.preventDefault(); handleSelectSuggestion(domain); }}
+              >
+                {domain}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function getDefaultPriority(listType: ListType, whitelistMode?: WhitelistMode): number {
   if (listType === 'blacklist') return 500;
@@ -463,26 +564,15 @@ export function SenderFilterDrawer({
                                 </SelectContent>
                               </Select>
                             ) : watchSenderType === 'domain' ? (
-                              /* GT-12117: 组织域名从当前租户的接收域名列表下拉选择（不再手输自由文本）。 */
-                              tenantDomains.length > 0 ? (
-                                <Select
-                                  value={watchSenderValue}
-                                  onValueChange={(value) => form.setValue('sender_config.value', value ?? '', { shouldDirty: true, shouldValidate: true })}
-                                >
-                                  <SelectTrigger className="flex-1" aria-invalid={!!form.formState.errors.sender_config?.value} data-testid="sender-filter-domain-select">
-                                    <SelectValue placeholder={t('senderFilter.senderPlaceholder_domain')} />
-                                  </SelectTrigger>
-                                  <SelectContent alignItemWithTrigger={false}>
-                                    {tenantDomains.map((d) => (
-                                      <SelectItem key={d} value={d}>{d}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              ) : (
-                                <div className="flex-1 flex items-center text-xs text-muted-foreground" data-testid="sender-filter-no-domains">
-                                  {t('senderFilter.noTenantDomains')}
-                                </div>
-                              )
+                              /* 支持自由输入任意合法外部域名，同时将租户接收域名作为快捷建议。 */
+                              <DomainCombobox
+                                value={watchSenderValue}
+                                suggestions={tenantDomains}
+                                placeholder={t('senderFilter.senderPlaceholder_domain')}
+                                suggestionsLabel={t('senderFilter.domainSuggestions')}
+                                hasError={!!form.formState.errors.sender_config?.value}
+                                onChange={(v) => form.setValue('sender_config.value', v, { shouldDirty: true, shouldValidate: true })}
+                              />
                             ) : (
                               <Input
                                 className="flex-1"
