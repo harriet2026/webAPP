@@ -37,7 +37,6 @@ export const SERIES_COLORS: Record<string, string> = {
   block: '#EF4444',
   drop: '#DC2626',
   recall: '#0ea5e9',
-  greylist: '#64748B',
   // delivery_result view
   delivered: '#10B981',
   failed: '#EF4444',
