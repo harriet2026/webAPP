@@ -50,11 +50,10 @@ export function TrendChartCard({
     // it distorts the area chart and clicking it would 400 the drill-down.
     const filtered = Object.keys(seriesData[0]).filter((k) => {
       if (k === 'date' || NON_SERIES_KEYS.has(k)) return false;
-      // mark_deliver / greylist / sideline（灰名单）不在执行动作枚举中，安全总览执行动作视图同步去掉。
-      if (viewBy === 'action' && (k === 'mark_deliver' || k === 'greylist' || k === 'sideline')) return false;
+      // mark_deliver / greylist / sideline / advanced_review（灰名单）不在执行动作枚举中，安全总览执行动作视图同步去掉。
+      if (viewBy === 'action' && (k === 'mark_deliver' || k === 'greylist' || k === 'sideline' || k === 'advanced_review')) return false;
       return true;
     });
-    console.log('[v0] TrendChartCard keys viewBy=' + viewBy + ' raw=' + Object.keys(seriesData[0]).join(',') + ' filtered=' + filtered.join(','));
     return filtered;
   }, [seriesData, viewBy]);
 

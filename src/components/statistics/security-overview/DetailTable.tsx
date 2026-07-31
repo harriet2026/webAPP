@@ -50,8 +50,8 @@ export const DETAIL_SERIES_ORDER: Partial<Record<ViewBy, readonly string[]>> = {
   delivery_result: ['delivered', 'failed', 'cancelled', 'in_delivery', 'partial_delivered', 'unknown'],
 };
 
-// sideline（后端灰名单动作）和 greylist 已从执行动作枚举中移除，安全总览同步过滤。
-const EXCLUDED_ACTION_KEYS = new Set(['sideline', 'greylist', 'mark_deliver']);
+// advanced_review（灰名单）/ sideline / greylist / mark_deliver 已从执行动作枚举中移除，安全总览同步过滤。
+const EXCLUDED_ACTION_KEYS = new Set(['advanced_review', 'sideline', 'greylist', 'mark_deliver']);
 
 function orderedSeriesKeys(row: Record<string, unknown>, viewBy: ViewBy): string[] {
   const available = Object.keys(row).filter((key) => {
