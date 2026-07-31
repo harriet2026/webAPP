@@ -126,27 +126,28 @@ export function ExpandedPanel({
 
   const drillOption = useMemo(() => {
     if (drillItems.length === 0) return null;
-    // Keep y-axis labels short for space; tooltip shows the full value.
+    // Store full names in y-axis data; axisLabel.formatter truncates for display only.
+    // ECharts tooltip then receives the full name via {b} (category name).
     const drillFullNames = drillItems.map((d) => drillLabel(d.name));
     return {
       tooltip: {
         trigger: 'axis' as const,
         axisPointer: { type: 'shadow' as const },
-        formatter: (params: Array<{ dataIndex: number; value: number }>) => {
-          const idx = params[0]?.dataIndex ?? 0;
-          const fullName = drillFullNames[idx] ?? '';
-          const val = params[0]?.value ?? 0;
-          return `${fullName}<br/><strong>${val.toLocaleString()}</strong>`;
-        },
+        // {b} = category name (full y-axis value), {c} = data value
+        formatter: '{b}<br/><strong>{c}</strong>',
       },
       grid: { left: 100, right: 24, top: 8, bottom: 32 },
       xAxis: { type: 'value' as const, axisLabel: { fontSize: 10 } },
       yAxis: {
         type: 'category' as const,
-        data: drillFullNames.map((label) =>
-          label.length > 15 ? `${label.slice(0, 15)}\u2026` : label,
-        ),
-        axisLabel: { fontSize: 10 },
+        // Use full names as data so tooltip {b} shows the full string.
+        data: drillFullNames,
+        axisLabel: {
+          fontSize: 10,
+          // Visually truncate labels to 14 chars + ellipsis for axis readability.
+          formatter: (val: string) =>
+            val.length > 14 ? `${val.slice(0, 14)}\u2026` : val,
+        },
       },
       series: [
         {
@@ -187,9 +188,14 @@ export function ExpandedPanel({
       </div>
       <div className="flex h-[380px] flex-col gap-4 px-4 pb-4 xl:flex-row">
         <div className="flex h-full min-h-0 w-full flex-col xl:w-[60%]">
-          <h3 className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
-            <TrendingUp className="h-4 w-4" style={{ color }} />
-            {t('trendAnalysisTitle', { item: displayName })}
+          <h3 className="mb-2 flex min-w-0 items-center gap-2 text-sm font-medium text-foreground">
+            <TrendingUp className="h-4 w-4 shrink-0" style={{ color }} />
+            <span
+              className="truncate"
+              title={t('trendAnalysisTitle', { item: displayName })}
+            >
+              {t('trendAnalysisTitle', { item: displayName })}
+            </span>
           </h3>
           <div className="min-h-0 flex-1 rounded-lg bg-background p-3 shadow-sm">
             {trendOption ? (
@@ -204,18 +210,26 @@ export function ExpandedPanel({
         </div>
 
         <div className="flex h-full min-h-0 w-full flex-col xl:w-[40%]">
-          <h3 className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
-            <FileText className="h-4 w-4 text-purple-600" />
-            {t('drillTitleGeneric', {
-              item: displayName,
-              dim: t(config.labelKey as Parameters<typeof t>[0]),
-            })}
+          <h3 className="mb-2 flex min-w-0 items-center gap-2 text-sm font-medium text-foreground">
+            <FileText className="h-4 w-4 shrink-0 text-purple-600" />
+            <span
+              className="truncate"
+              title={t('drillTitleGeneric', {
+                item: displayName,
+                dim: t(config.labelKey as Parameters<typeof t>[0]),
+              })}
+            >
+              {t('drillTitleGeneric', {
+                item: displayName,
+                dim: t(config.labelKey as Parameters<typeof t>[0]),
+              })}
+            </span>
             {/* Parent row counts sessions; sub-dims count messages (spec §8.3).
                 Calling this out at the drilldown title avoids the silent
                 unit-mismatch surprise. */}
             {dimension === 'connection' ? (
               <span
-                className="text-xs font-normal text-muted-foreground"
+                className="shrink-0 text-xs font-normal text-muted-foreground"
                 title={t('connDrilldownUnitTip')}
               >
                 <AlertCircle className="inline h-3 w-3 align-text-bottom" />
