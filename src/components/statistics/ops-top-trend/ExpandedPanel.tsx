@@ -131,20 +131,22 @@ export function ExpandedPanel({
     const drillFullNames = drillItems.map((d) => drillLabel(d.name));
     return {
       tooltip: {
-        trigger: 'axis' as const,
-        axisPointer: { type: 'shadow' as const },
-        // {b} = category name (full y-axis value), {c} = data value
-        formatter: '{b}<br/><strong>{c}</strong>',
+        // 'item' trigger: {b} is the y-axis category value (full name),
+        // {c} is the data value. This is more reliable than 'axis' where
+        // {b} is the series name instead of the category.
+        trigger: 'item' as const,
+        formatter: (params: { name: string; value: number }) =>
+          `${params.name}<br/><strong>${params.value.toLocaleString()}</strong>`,
       },
       grid: { left: 100, right: 24, top: 8, bottom: 32 },
       xAxis: { type: 'value' as const, axisLabel: { fontSize: 10 } },
       yAxis: {
         type: 'category' as const,
-        // Use full names as data so tooltip {b} shows the full string.
+        // Full names in data so tooltip params.name gets the untruncated string.
         data: drillFullNames,
         axisLabel: {
           fontSize: 10,
-          // Visually truncate labels to 14 chars + ellipsis for axis readability.
+          // Visually truncate axis labels for readability; tooltip shows full value.
           formatter: (val: string) =>
             val.length > 14 ? `${val.slice(0, 14)}\u2026` : val,
         },
