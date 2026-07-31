@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 11,
+  "current_version": 12,
   "history": [
     {
       "version": 1,
@@ -100,6 +100,15 @@
       "ticket": "GT-12657",
       "incremental": true,
       "summary": "GT-12657 增量：附件安全检测总开关从 draft 模式改为立即持久化（新增 handleToggleEnabled，调用 setSecurityModuleEnabled，失败回滚 + toast，切换期间 togglingEnabled 禁用开关）；追加一级目录条目 GT-12657、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 切换禁用即时生效无未保存提示 + S-3 切换启用即时生效无未保存提示，暗色 1253×832 / 1.3 逐元素变更表 5 项）；追加差异 D-008（moduleT saveFailed i18n key 复用确认）；目录 C 项编号更新为 D-001~D-008；version.json current_version 10→11。"
+    },
+    {
+      "version": 12,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "d706c3d",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12587",
+      "incremental": true,
+      "summary": "GT-12587 增量：邮件安全总览攻击时段分布周内热力图修复（xAxis.data 由数字数组改为零填充字符串 ['00'~'23']，series data hour 同步转换，消除 ECharts category 类型不匹配导致的 24 列只渲染 7 列问题）；同步更新 yAxis.inverse、axisLabel.interval、图表高度（周内 280px）、tooltip formatter（显示小时区间）、visualMap 色阶（暗色对比度优化）；追加一级目录条目 GT-12587、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 日内分布默认态 + S-2 周内切换后 7×24 矩阵完整渲染 + S-3 完整视图，暗色 1253×832 / 1.3 逐元素变更表 7 项）；追加差异 D-009（weekdays 数组与后端 day 索引对应关系待确认）；目录 C 项编号更新为 D-001~D-009；version.json current_version 11→12。"
     }
   ]
 }

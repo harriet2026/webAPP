@@ -290,7 +290,18 @@
         </ul>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-008）</a></li>
+      <!-- 一级需求：GT-12587 邮件安全总览-攻击时段分布切换周内后只显示7列导致时间图不完整 -->
+      <li class="toc-l1"><a href="#gt-12587">GT-12587 邮件安全总览-攻击时段分布切换周内后只显示7列导致时间图不完整</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12587-change-1">周内热力图修复：xAxis category 类型统一为零填充字符串，series data 同步，24 列完整渲染</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12587-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12587-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12587-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-009）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-002）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
@@ -486,7 +497,7 @@
       <h3 id="c2-states">2.2 截图式交互预览</h3>
       <div class="interaction-preview">
         <h4>S-2 · 执行动作卡片选中态</h4>
-        <p class="trigger-path">触发路径：页面加载默认态（<code>greylistEnabled=false</code>）· 暗色主题 / 1305×832 / AI版·多租户 / 平台管理员</p>
+        <p class="trigger-path">触发路径：页面加载默认态（<code>greylistEnabled=false</code>）· 暗色主题 / 1305×832 / AI版·多租户 / 台管理员</p>
         <figure>
           <img src="./screenshots/GT-12682-rbl-default-action-selected-dark-1305x832.png" alt="执行动作卡片选中态：左卡高蓝色边框，内部展开 Select 下拉；右卡灰色 dimmed" />
           <figcaption>图 S-2：执行动作卡片选中态。左卡蓝色边框高亮，右单选圆点在左卡处于选中状态，左卡内部展开执行动作 Select（当前值：拒收）。右卡"灰名单策略"opacity 降低，内部无子配置展开。底部显示"暂无未保存更改"，保存按钮 disabled。</figcaption>
@@ -702,7 +713,7 @@
               路由：<code>/zh/statistics/security-overview</code> &nbsp;·&nbsp;
               主题：暗色 &nbsp;·&nbsp; 视口：1305×832 &nbsp;·&nbsp;
               形态：AI版·多租户 &nbsp;·&nbsp; 角色：平台管理员（Mock 演示数据）<br>
-              图表底部图例可见系列：<strong>投递、隔离、审核、拒收、丢弃、召回</strong>，不含"灰名单"
+              图表底部图例可见系列：<strong>递、隔离、审核、拒收、丢弃、召回</strong>，不含"灰名单"
             </figcaption>
           </figure>
 
@@ -1097,7 +1108,7 @@
         <h4>1.3 逐元素说明</h4>
         <table>
           <thead>
-            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径 / 相关 key</th><th>形态/角色差异</th></tr>
+            <tr><th>元素</th><th>更前</th><th>变更后</th><th>源码路径 / 相关 key</th><th>形态/角色差异</th></tr>
           </thead>
           <tbody>
             <tr>
@@ -1133,6 +1144,155 @@
               <td>每次点击开关后必然出现</td>
               <td>不再出现（开关已立即持久化，不产生 draft 差异）</td>
               <td><code>AttachmentSecurityPage.tsx</code> — <code>PipelinePanelFooter</code> 的 dirty 判断中 <code>enabled</code> 差异已消除</td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+        <a class="back-link" href="#toc">&#8593; 返回目录</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ GT-12587 需求入口锚点 ══════════════ -->
+  <div id="gt-12587" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12587 增量内容 ══════════════ -->
+  <section id="incremental-gt-12587-weekly-heatmap">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12587</span>
+      <span class="incr-title">邮件安全总览-攻击时段分布切换周内后只显示7列导致时间图不完整</span>
+      <span class="incr-meta">2026-07-31 &nbsp;·&nbsp; commit <code>d706c3d</code> &nbsp;·&nbsp; 路由 <code>/zh/statistics/security-overview</code> → 攻击时段分布卡片 · 周内分布模式</span>
+    </div>
+
+    <div id="c12587-change-1">
+      <h3>变更 1 · 周内热力图修复：xAxis category 类型统一为零填充字符串，series data 同步，24 列完整渲染</h3>
+
+      <div id="c12587-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          原实现中 <code>TimeDistributionCard.tsx</code> 的 ECharts 周内热力图 <code>xAxis.data</code> 传入数字数组
+          <code>[0, 1, …, 23]</code>，而 series <code>data</code> 中的 hour 值也是数字（<code>cell.hour</code>）。
+          ECharts category axis 内部将 data 项转为字符串 key 做映射，数字 <code>0</code> 转为 <code>"0"</code>，
+          但 heatmap series 传入的数字 <code>0</code> 在严格字符串比较下无法命中 category，
+          导致只有恰好与 day 索引（0~6）重合的前 7 个 hour 格子被正确渲染，其余 17 个小时列全部丢失。
+        </p>
+        <p>
+          修复方案：将 <code>xAxis.data</code> 改为零填充字符串数组 <code>['00','01',…,'23']</code>；
+          series <code>data</code> 中的 hour 也统一用 <code>String(cell.hour).padStart(2,'0')</code> 转换，
+          确保两侧类型一致。同时 <code>axisLabel.interval</code> 改为 <code>1</code>（每格显示一个标签）、
+          <code>inverse: false</code>（周日在下）、图表高度在周内模式下扩展至 280px 以容纳 7 行。
+          tooltip <code>formatter</code> 更新为显示小时区间（如 <code>12:00–13:00</code>）。
+        </p>
+        <div class="callout callout-info">
+          修改位置：<code>src/components/statistics/security-overview/TimeDistributionCard.tsx</code> —
+          <code>weeklyOption</code> 中 <code>xAxis.data</code>、<code>series.data</code> 的 hour 映射、
+          <code>tooltip.formatter</code>、<code>yAxis.inverse</code>、图表高度条件表达式。
+        </div>
+      </div>
+
+      <div id="c12587-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="trigger-path">
+            触发路径：统计报表 → 邮件安全总览 → 攻击时段分布卡片右上角 → 点击「周内分布」
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12587-S1-attack-time-dist-default-hourly-dark-1253x832.png"
+                 alt="S-1 攻击时段分布卡片默认态 — 日内分布模式，右上角可见日内分布/周内分布切换按钮"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 攻击时段分布卡片默认态（日内分布）</strong><br>
+              路由：<code>/zh/statistics/security-overview</code> &nbsp;·&nbsp;
+              主题：暗色 &nbsp;·&nbsp; 视口：1253×832 &nbsp;·&nbsp;
+              形态：AI版·多租户 &nbsp;·&nbsp; 角色：租户管理员（Mock 演示数据）<br>
+              卡片右上角显示「日内分布」（选中，蓝色）和「周内分布」（未选中）两个切换按钮；
+              图表为 24 小时柱状图（堆叠），x 轴标签 00～22，峰值信息横幅显示 13:00–14:00 攻击高峰
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12587-S2-weekly-heatmap-7row-24col-fixed-dark-1253x832.png"
+                 alt="S-2 点击周内分布后热力图显示 7 行 × 24 列完整矩阵，不再只显示 7 列"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 点击「周内分布」后 — 7×24 热力图矩阵完整渲染（修复后）</strong><br>
+              「周内分布」按钮切换为选中态（蓝色）；图表切换为热力图，纵轴 7 行（周六→周日），
+              横轴标签从 00 延伸至 22 共 24 列全部可见；
+              峰值横幅更新为「峰值时段: 周六 13:00 · 299」；
+              <strong>修复前只显示 7 列（hour 0~6），修复后 24 列全部正确渲染</strong>
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12587-S3-weekly-heatmap-full-view-dark-1253x832.png"
+                 alt="S-3 滚动至攻击时段分布热力图完整视图，展示 7 行 × 24 列矩阵与 x 轴完整标签"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-3 · 周内热力图完整视图（页面滚动后居中显示）</strong><br>
+              纵轴完整显示 7 天（周六、周五、周四、周三、周二、周一、周日）；
+              横轴完整显示 24 小时（00 02 04 06 08 10 12 14 16 18 20 22，每 2 小时一个刻度标签）；
+              底部 visualMap 图例显示低→高色阶（深蓝→蓝→橙→红）；
+              热力色块在 12:00–16:00 周四～周六区间呈橙红色，与日内分布峰值趋势一致
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12587-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径 / 相关 key</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ECharts <code>xAxis.data</code>（周内模式）</td>
+              <td>数字数组 <code>[0, 1, …, 23]</code>；ECharts 内部转字符串时与 series data 的数字 hour 不一致，导致只有前 7 个 category 命中</td>
+              <td>零填充字符串数组 <code>['00','01',…,'23']</code>；与 series data 类型完全一致，24 个 category 全部命中</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>weeklyOption xAxis.data</code></td>
+              <td>[Base] 所有形态/角色一致</td>
+            </tr>
+            <tr>
+              <td>ECharts series <code>data</code> 中 hour 值（周内模式）</td>
+              <td><code>cell.hour</code>（数字）</td>
+              <td><code>String(cell.hour).padStart(2,'0')</code>（零填充字符串，与 xAxis.data 匹配）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>series[0].data</code> map 函数</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td><code>xAxis.axisLabel.interval</code></td>
+              <td><code>2</code>（每隔 2 个显示一个标签，以为 24 列展示）</td>
+              <td><code>1</code>（每 2 小时显示一个刻度标签，与当前 data 长度 24 匹配，避免标签重叠）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>xAxis.axisLabel.interval</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td><code>yAxis.inverse</code></td>
+              <td><code>true</code>（周一在上）</td>
+              <td><code>false</code>（周日在下，与自然星期阅读顺序一致）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>yAxis.inverse</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>热力图图表高度</td>
+              <td>固定 230px（日内/周内共用）</td>
+              <td>周内模式 280px，日内模式 230px（条件表达式 <code>mode === 'weekly' ? 280 : 230</code>）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>ReactECharts style.height</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>tooltip <code>formatter</code></td>
+              <td><code>[value[1]] [value[0].padStart(2,'0')]:00</code>（仅显示开始小时）</td>
+              <td><code>[weekdays[value[1]]] HH:00–HH+1:00 / 数值加粗</code>（显示完整时段区间）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>tooltip.formatter</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>visualMap 色阶</td>
+              <td><code>['#f3f4f6','#fef3c7','#fed7aa','#fdba74','#f87171']</code>（浅灰→橙→红）</td>
+              <td><code>['#1e293b','#1e3a5f','#1d4ed8','#f97316','#ef4444']</code>（深蓝→蓝→橙→红，暗色背景下对比度更高）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>visualMap.inRange.color</code></td>
               <td>[Base]</td>
             </tr>
           </tbody>
@@ -1312,6 +1472,22 @@
       </tbody>
     </table>
 
+    <h3>D-009 · GT-12587 周内热力图 yAxis weekdays 数组顺序与 mock 数据 day 索引的对应关系需确认</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认·低优先级</span></td></tr>
+        <tr><td>描述</td><td>
+          修复后 <code>yAxis.data</code> 为 <code>weekdays</code> 数组（来自 i18n，顺序为周日→周六），
+          series data 中 <code>cell.day</code> 的取值范围为 <code>0~6</code>（mock 生成逻辑 <code>day = Math.floor(index / 24)</code>）。
+          ECharts category y 轴按数组索引映射：<code>day=0</code> → <code>weekdays[0]</code>。
+          需确认后端真实接口中 <code>day</code> 字段是否也以 0=周日 或 0=周一 的方式定义，
+          以保证标签与实际时段对应。
+        </td></tr>
+        <tr><td>解决版本</td><td>待后端接口联调时确认</td></tr>
+        <tr><td>验证依据</td><td>Mock 演示数据截图（S-2/S-3）中热力色块分布符合预期，但 day 索引语义依赖后端约定</td></tr>
+      </tbody>
+    </table>
+
     <h3>D-008 · GT-12657 附件安全检测总开关切换失败的 toast 依赖 moduleT('saveFailed') key，需确认多语言覆盖</h3>
     <table>
       <tbody>
@@ -1405,6 +1581,12 @@
           <td>2026-07-31</td>
           <td><code>ede9867</code></td>
           <td>增量追加 GT-12657 需求：附件安全检测总开关从 draft 模式改为立即持久化（新增 <code>handleToggleEnabled</code>，调用 <code>setSecurityModuleEnabled</code>，失败回滚 + toast，切换期间禁用）；新增一级目录条目 GT-12657、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 切换禁用即时生效 + S-3 切换启用即时生效，暗色 1253×832 / 1.3 逐元素变更表 5 项）；追加差异 D-008（<code>moduleT('saveFailed')</code> i18n key 复用确认）；目录 C 项编号更新为 D-001~D-008；version.json current_version 10→11。</td>
+        </tr>
+        <tr>
+          <td>v12</td>
+          <td>2026-07-31</td>
+          <td><code>d706c3d</code></td>
+          <td>增量追加 GT-12587 需求：邮件安全总览攻击时段分布周内热力图修复（<code>xAxis.data</code> 由数字数组改为零填充字符串 <code>['00'~'23']</code>，series data hour 同步转换，消除 ECharts category 类型不匹配导致的 24 列只渲染 7 列问题）；同步更新 <code>yAxis.inverse</code>、<code>axisLabel.interval</code>、图表高度（周内 280px）、tooltip formatter（显示小时区间）、visualMap 色阶（暗色对比度优化）；新增一级目录条目 GT-12587、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 日内分布默认态 + S-2 周内切换后 7×24 矩阵完整渲染 + S-3 完整视图，暗色 1253×832 / 1.3 逐元素变更表 7 项）；追加差异 D-009（weekdays 数组与后端 day 索引对应关系待确认）；目录 C 项编号更新为 D-001~D-009；version.json current_version 11→12。</td>
         </tr>
       </tbody>
     </table>
