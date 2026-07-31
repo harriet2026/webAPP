@@ -20,7 +20,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { useAuth } from '@/contexts/auth-context';
@@ -46,6 +45,7 @@ import {
   validateGreylistForm,
   RBL_CANONICAL_RULE_NAME,
   type GreylistFormConfig,
+  type RblImmediateAction,
 } from './rbl-config-serde';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
 
@@ -54,10 +54,8 @@ const DOMAIN_REGEX = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0
 const DEFAULT_RBL_CONFIG = {
   servers: ['zen.spamhaus.org', 'bl.spamcop.net', 'b.barracudacentral.org'],
   timeout: '5',
-  action: 'block' as RblAction,
+  action: 'block' as RblImmediateAction,
 };
-
-type RblAction = 'block' | 'quarantine' | 'mark' | 'greylist';
 
 // GT-12263: PRD §3「关键字段悬浮提示」— 预置 RBL 服务器 Badge 的来源说明文案；
 // 非预置（管理员自行添加）的服务器回退到通用 RBL 服务器说明。
@@ -67,15 +65,14 @@ const SERVER_TIP_KEY: Record<string, string> = {
   'b.barracudacentral.org': 'rblFilter.serverTipBarracuda',
 };
 
-// GT-12263: 四个命中动作各自的帮助说明（PRD §3 阻断/隔离/标记/灰名单动作行）。
-const ACTION_TIP_KEY: Record<RblAction, string> = {
+// GT-12263: 即时处置动作各自的帮助说明（PRD §3 阻断/隔离/标记动作行）。
+const ACTION_TIP_KEY: Record<RblImmediateAction, string> = {
   block: 'rblFilter.actionBlockTip',
   quarantine: 'rblFilter.actionQuarantineTip',
   mark: 'rblFilter.actionMarkTip',
-  greylist: 'rblFilter.actionGreylistTip',
 };
 
-const RBL_ACTIONS: RblAction[] = ['block', 'quarantine', 'mark', 'greylist'];
+const RBL_IMMEDIATE_ACTIONS: RblImmediateAction[] = ['block', 'quarantine', 'mark'];
 
 const DEFAULT_GREYLIST_CONFIG: GreylistFormConfig = {
   mode: 'delay',
@@ -116,7 +113,8 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const [serverError, setServerError] = useState('');
   const [timeout, setTimeoutValue] = useState(DEFAULT_RBL_CONFIG.timeout);
   const [timeoutError, setTimeoutError] = useState('');
-  const [action, setAction] = useState<RblAction>(DEFAULT_RBL_CONFIG.action);
+  const [action, setAction] = useState<RblImmediateAction>(DEFAULT_RBL_CONFIG.action);
+  const [greylistEnabled, setGreylistEnabled] = useState(false);
   const [greylistConfig, setGreylistConfig] = useState<GreylistFormConfig>(DEFAULT_GREYLIST_CONFIG);
   const [greylistDraft, setGreylistDraft] = useState<GreylistFormConfig>(DEFAULT_GREYLIST_CONFIG);
   const [greylistDialogOpen, setGreylistDialogOpen] = useState(false);
@@ -127,6 +125,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
     servers: DEFAULT_RBL_CONFIG.servers,
     timeout: DEFAULT_RBL_CONFIG.timeout,
     action: DEFAULT_RBL_CONFIG.action,
+    greylistEnabled: false,
     greylist: DEFAULT_GREYLIST_CONFIG,
   });
 
@@ -146,6 +145,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
     setServers(usePresets ? DEFAULT_RBL_CONFIG.servers : cfg.servers);
     setTimeoutValue(cfg.timeout);
     setAction(cfg.action);
+    setGreylistEnabled(cfg.greylistEnabled);
     const loadedGreylist = cfg.greylist ? unmapGreylistConfig(cfg.greylist) : DEFAULT_GREYLIST_CONFIG;
     setGreylistConfig(loadedGreylist);
     setGreylistDraft(cloneGreylistConfig(loadedGreylist));
@@ -156,6 +156,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
       servers: cfg.servers,
       timeout: cfg.timeout,
       action: cfg.action,
+      greylistEnabled: cfg.greylistEnabled,
       greylist: loadedGreylist,
     });
     setHasUnsavedChanges(usePresets);
@@ -163,12 +164,11 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
   }, [isLoading, loadedOnce, rblProfiles, rblRulesData]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  const actionLabel = useMemo<Record<RblAction, string>>(
+  const actionLabel = useMemo<Record<RblImmediateAction, string>>(
     () => ({
       block: t('rblFilter.actionBlock'),
       quarantine: t('rblFilter.actionQuarantine'),
       mark: t('rblFilter.actionMark'),
-      greylist: t('rblFilter.actionGreylist'),
     }),
     [t],
   );
@@ -178,7 +178,18 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const timeoutChanged = timeout.trim() !== savedConfig.timeout;
-      const diff = diffRblConfig(baselineProfiles, { enabled, servers, timeout: timeout.trim(), action, greylist: action === 'greylist' ? mapGreylistConfig(greylistConfig) : undefined }, timeoutChanged);
+      const diff = diffRblConfig(
+        baselineProfiles,
+        {
+          enabled,
+          servers,
+          timeout: timeout.trim(),
+          action,
+          greylistEnabled,
+          greylist: greylistEnabled ? mapGreylistConfig(greylistConfig) : undefined,
+        },
+        timeoutChanged,
+      );
       const value = buildProfileValue(timeout.trim());
       // servers
       for (const name of diff.serversToAdd) {
@@ -215,7 +226,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
       const payload: RBLFilterRulePayload = {
         name: RBL_CANONICAL_RULE_NAME, match_mode: 'any', product_action: diff.action, priority: canonical?.priority ?? 100, is_active: diff.enabled,
       };
-      if (diff.action === 'greylist' && diff.greylist) {
+      if (diff.greylist) {
         payload.greylist = diff.greylist;
       }
       if (canonical) {
@@ -370,6 +381,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
     setServers([...savedConfig.servers]);
     setTimeoutValue(savedConfig.timeout);
     setAction(savedConfig.action);
+    setGreylistEnabled(savedConfig.greylistEnabled);
     setGreylistConfig(cloneGreylistConfig(savedConfig.greylist));
     setServerError('');
     setTimeoutError('');
@@ -469,55 +481,50 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
               {timeoutError ? <p className="text-xs text-destructive">{timeoutError}</p> : null}
             </div>
 
+            {/* Section 1：即时处置动作（三选一 RadioGroup） */}
             <div className="space-y-2">
-              <Label>{t('rblFilter.productAction')}</Label>
-              <Select
+              <Label className="font-medium">{t('rblFilter.productAction')}</Label>
+              <RadioGroup
                 value={action}
                 onValueChange={(value) => {
-                  setAction(value as RblAction);
+                  setAction(value as RblImmediateAction);
                   markDirty();
                 }}
+                className="space-y-1"
               >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue>{actionLabel[action]}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="block">{t('rblFilter.actionBlock')}</SelectItem>
-                  <SelectItem value="quarantine">{t('rblFilter.actionQuarantine')}</SelectItem>
-                  <SelectItem value="mark">{t('rblFilter.actionMark')}</SelectItem>
-                  <SelectItem value="greylist">
-                    {t('rblFilter.actionGreylist')}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {/* GT-12263: 命中动作区四个动作的帮助说明（PRD §3 阻断/隔离/标记/灰名单动作行）。
-                  动作项本身位于 Select 下拉内，收起时不在 DOM 中，故在此常驻渲染四个帮助入口。 */}
-              <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-1">
-                {RBL_ACTIONS.map((value) => (
-                  <Tooltip key={value}>
-                    <TooltipTrigger
-                      render={
-                        <span
-                          className="inline-flex cursor-help items-center gap-1 text-xs text-muted-foreground"
-                          tabIndex={0}
-                        />
-                      }
-                    >
+                {RBL_IMMEDIATE_ACTIONS.map((value) => (
+                  <div key={value} className="flex items-center gap-2">
+                    <RadioGroupItem value={value} id={`rbl-action-${value}`} />
+                    <Label htmlFor={`rbl-action-${value}`} className="cursor-pointer font-normal">
                       {actionLabel[value]}
-                      <HelpCircle className="h-3 w-3" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-[300px]">{t(ACTION_TIP_KEY[value])}</TooltipContent>
-                  </Tooltip>
+                    </Label>
+                    <Tooltip>
+                      <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
+                      <TooltipContent className="max-w-[300px]">{t(ACTION_TIP_KEY[value])}</TooltipContent>
+                    </Tooltip>
+                  </div>
                 ))}
-              </div>
+              </RadioGroup>
             </div>
+          </div>
+        </div>
 
-            {action === 'greylist' ? (
-              <div className="pt-1">
-                <div className="flex items-center gap-3 rounded-lg border border-info/35 bg-info/10 p-3">
+        {/* Section 2：灰名单策略（独立开关，与即时动作并列） */}
+        <div className="border-t border-border px-6 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 space-y-0.5">
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-medium">{t('rblFilter.greylistSectionTitle')}</p>
+                <Tooltip>
+                  <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
+                  <TooltipContent className="max-w-[320px]">{t('rblFilter.actionGreylistTip')}</TooltipContent>
+                </Tooltip>
+              </div>
+              <p className="text-xs text-muted-foreground">{t('rblFilter.greylistSectionDesc')}</p>
+              {greylistEnabled ? (
+                <div className="mt-3 flex items-center gap-3 rounded-lg border border-info/35 bg-info/10 p-3">
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-primary">{t('rblFilter.greylistConfig')}</p>
-                    <p className="mt-0.5 text-xs text-info">{greylistSummary}</p>
+                    <p className="text-xs text-info">{greylistSummary}</p>
                   </div>
                   <Button
                     type="button"
@@ -529,8 +536,29 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                     {t('rblFilter.greylistConfigure')}
                   </Button>
                 </div>
-              </div>
-            ) : null}
+              ) : null}
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={greylistEnabled}
+              aria-label={t('rblFilter.greylistEnabled')}
+              onClick={() => {
+                setGreylistEnabled((v) => !v);
+                markDirty();
+              }}
+              className={cn(
+                'relative mt-0.5 inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                greylistEnabled ? 'bg-primary' : 'bg-input',
+              )}
+            >
+              <span
+                className={cn(
+                  'pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform duration-200',
+                  greylistEnabled ? 'translate-x-4' : 'translate-x-0',
+                )}
+              />
+            </button>
           </div>
         </div>
 

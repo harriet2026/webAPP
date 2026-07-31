@@ -2081,7 +2081,7 @@
     "adminAccountTaken": "该账号已存在（不区分大小写），请换一个"
   },
   "users": {
-    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全契约）",
+    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全���约）",
     "resetPassword": {
       "title": "重置密码",
       "description": "为管理员「{username}」设置新密码，重置后需用新密码登录。",
@@ -2268,7 +2268,7 @@
     "subtitle": "管理 SMTP 认证凭据、后端路由、锁定状态以及租户邮件提交的密码重置。"
   },
   "auditQueue": {
-    "title": "出站审核",
+    "title": "出站���核",
     "sender": "发件人",
     "recipient": "收件人",
     "subject": "主题",
@@ -2678,7 +2678,7 @@
       "online": "在线",
       "device": "设备",
       "browser": "浏览器",
-      "ip": "IP 地址",
+      "ip": "IP 地��",
       "location": "地点",
       "loginTime": "登录时间",
       "status": "状态",
@@ -3888,6 +3888,9 @@
     "serverExists": "该服务器已存在",
     "serverReferenced": "该服务器被 {count} 条命中规则使用，无法删除",
     "loadError": "加载 RBL 配置失败",
+    "greylistSectionTitle": "灰名单策略",
+    "greylistSectionDesc": "对未知发件方临时挂起，等待重试验证身份，可有效过滤僵尸网络。",
+    "greylistEnabled": "启用灰名单策略",
     "greylistConfig": "灰名单配置",
     "greylistConfigDesc": "配置灰名单策略，有效过滤垃圾邮件同时减少误判。",
     "greylistConfigure": "点击配置",
@@ -4565,7 +4568,7 @@
     "globalObserve": "观察模式",
     "wouldDropCount": "预计丢弃",
     "observingRecordOnly": "允许（仅记录）",
-    "highRiskWarning": "高风险动作：建议先开启观察模式测试影响范围",
+    "highRiskWarning": "高风险动作：建议先开启观察���式测试影响范围",
     "spfDropAlert": "SPF 硬拒绝设为静默丢弃，可能误删合法邮件",
     "exceptionBanner": "例外规则（白名单）请在【策略流水线】模块配置，本模块仅设置协议检查规则",
     "goToPipeline": "前往策略流水线",
@@ -4765,7 +4768,7 @@
       "thresholdRequired": "阈值必须大于0",
       "orRequiresB": "启用OR组合时，阈值B必须大于0",
       "dimsMustDiffer": "维度A和维度B不能相同",
-      "validUntilBeforeFrom": "有效期结束不能早于开始",
+      "validUntilBeforeFrom": "有效期结��不能早于开始",
       "thresholdAttachmentMax": "附件大小阈值不能超过102,400 MB",
       "nameRequired": "请输入规则名称",
       "nameMaxLength": "规则名称过长",
@@ -5169,7 +5172,7 @@
       "timeoutLabel": "沙箱分析超时（超过30秒）",
       "timeoutContinue": "进行下一步检测（放行，依赖链接保护兜底）",
       "timeoutContinueTip": "超时后放行邮件，依赖链接保护在用户点击时进行实时检测",
-      "timeoutTreatMalicious": "按恶意处置（使用上述处置动作）",
+      "timeoutTreatMalicious": "按恶意处置��使用上述处置动作）",
       "timeoutTreatMaliciousTip": "超时后按照恶意URL的处置策略执行",
       "timeoutPass": "放行（仅记录日志）",
       "intelGroup": "情报库设置",
@@ -6103,7 +6106,7 @@
             "scopeLabel": "生效范围",
             "scopeTenant": "本租户",
             "scopeGlobal": "全系统",
-            "includeSubdomains": "同时拦截该域名下所有地址",
+            "includeSubdomains": "同时拦截该域���下所有地址",
             "success": "已加入黑名单",
             "failed": "加入黑名单失败"
           },
@@ -6643,7 +6646,7 @@
       "expiresAtHint": "留空=永久有效"
     },
     "cannotSave": {
-      "name": "请填写规则名称",
+      "name": "请填���规则名称",
       "scope": "请至少选择一个范围",
       "priority": "优先级需在 1–100 之间",
       "actionOrAddon": "请选择一个主动作或至少启用一个附加项",
@@ -7008,7 +7011,7 @@
       "desc_senderIpCount15Min": {
         "source": "发信行为统计",
         "usage": "统计15分钟内发信人使用的不同IP数量",
-        "note": "异常IP切换可能为攻击行为"
+        "note": "异常IP切换可能为攻击��为"
       },
       "desc_senderRecipientCount15Min": {
         "source": "发信行为统计",
@@ -7528,7 +7531,7 @@
         "error": {
           "invalid": "请选择起止日期",
           "order": "结束日期不能早于开始日期",
-          "tooLong": "时间跨度不能超过 {max} 天"
+          "tooLong": "时���跨度不能超过 {max} 天"
         }
       }
     },
@@ -8053,7 +8056,7 @@
     "retry": "重试",
     "agentOffline": "数据采集异常",
     "degradeBackendUnavailable": "监控数据源（时序数据库）暂时不可达，数据可能缺失",
-    "degradeNotInitialized": "监控库尚未初始化",
+    "degradeNotInitialized": "监控库尚未��始化",
     "degradeDbUnavailable": "数据库监控数据源暂时不可用",
     "backendUnsupported": "该后端暂不支持",
     "hardware": {
@@ -8890,7 +8893,7 @@
       "title": "保护品牌列表",
       "subtitle": "针对重点品牌资产的精细化专项防护",
       "add": "添加品牌",
-      "searchPlaceholder": "按品牌名称、保护域名搜索",
+      "searchPlaceholder": "��品牌名称、保护域名搜索",
       "modeFilter": "处置模式",
       "allModes": "全部模式",
       "protectedDomains": "保护域名",
@@ -9971,7 +9974,7 @@
   },
   "platformSecurity": {
     "title": "平台安全策略",
-    "subtitle": "平台级安全基线，作用于所有租户。以下策略仅平台管理员可配置，租户管理员不可见、不可修改。",
+    "subtitle": "平台级安全基线，作用于所有租户。以下策略仅平台管理员���配置，租户管理员不可见、不可修改。",
     "accessDenied": "仅平台管理员可访问。",
     "tabs": {
       "ipStrategy": "IP 策略",

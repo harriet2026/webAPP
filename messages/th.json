@@ -221,8 +221,8 @@
     "demoEntry": "เข้าสู่โหมดสาธิต",
     "loginError": "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
     "sessionExpired": "เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง",
-    "showAdvancedRules": "แสดงกฎขั้นสูง",
-    "showAdvancedRulesHint": "มองเห็นได้เฉพราะเมื่อผู้ดูแลระบบเลือก",
+    "showAdvancedRules": "���สดงกฎขั้นสูง",
+    "showAdvancedRulesHint": "มองเห็นได้เฉพราะเม��่อผู้ดูแลระบบเลือก",
     "twoFactorRequired": "ต้องยืนยันตัวตนสองปัจจัย",
     "twoFactorRequiredHint": "กรอกรหัสที่ส่งไปยัง {target}",
     "twoFactorCode": "รหัส",
@@ -644,7 +644,7 @@
       "firstConn": "เวลาเชื่อมต่อครั้งแรก",
       "lastConn": "เวลาเชื่อมต่อล่าสุด",
       "firstAuth": "เวลายืนยันตัวตนครั้งแรก",
-      "firstSend": "เวลาส่งครั้งแรก",
+      "firstSend": "เวลาส่งครั้งแร���",
       "firstSeen": "เวลาที่พบครั้งแรก",
       "firstSendSender": "เวลาส่งครั้งแรกของผู้ส่งนี้",
       "trend": "แนวโน้มรายวันในช่วง 7 วันที่ผ่านมา",
@@ -1016,7 +1016,7 @@
           "add": "เพิ่ม",
           "empty": "ไม่มีเงื่อนไขเพิ่มเติม",
           "loading": "กำลังโหลดฟิลด์ที่ใช้ได้…",
-          "loadError": "โหลดฟิลด์เงื่อนไขที่ใช้ได้ไม่สำเร็จ",
+          "loadError": "โหลดฟิลด์เงื���อนไขที่ใช้ได้ไม่สำเร็จ",
           "field": "เลือกฟิลด์",
           "currentField": "ฟิลด์เดิมปัจจุบัน",
           "operator": "ตัวดำเนินการ",
@@ -1133,7 +1133,7 @@
       "sectionBasic": "การกำหนดค่าพื้นฐาน",
       "sectionServer": "เซิร์ฟเวอร์ยืนยันตัวตน",
       "sectionScenes": "สถานการณ์ที่มีผล",
-      "scenesDesc": "เลือกสถานการณ์ทางธุรกิจที่การกำหนดค่านี้มีผล",
+      "scenesDesc": "เลือกสถานการณ์ทางธุรกิจที่การกำหนดค่า��ี้มีผล",
       "fields": {
         "priority": "ลำดับความสำคัญ",
         "priorityHint": "ค่ามากกว่ามีความสำคัญกว่า",
@@ -1195,7 +1195,7 @@
       "passwordOptional": "รหัสผ่าน (ไม่บังคับ)"
     },
     "receiving": {
-      "domainColumn": "โดเมนรับ",
+      "domainColumn": "โดเมนร��บ",
       "hostsColumn": "ที่อยู่เป้าหมาย",
       "portColumn": "พอร์ตเป้าหมาย",
       "statusColumn": "สถานะ",
@@ -1404,7 +1404,7 @@
   },
   "logs": {
     "emailLogs": "บันทึกอีเมล",
-    "authAttempts": "ความพยายามยืนยันตัวตน",
+    "authAttempts": "ความพยายามยืนยันตั���ตน",
     "adminAuditLogs": "บันทึกการตรวจสอบ",
     "timestamp": "เวลา",
     "sender": "ผู้ส่ง",
@@ -2271,7 +2271,7 @@
         "senderDomain": "โดเมนผู้ส่ง",
         "name": "IP ออก",
         "nameRequired": "เลือก IP ออก",
-        "empty": "กรุณากำหนดค่า IP ออกในการตั้งค่าเครือข่ายก่อน",
+        "empty": "กรุณากำหนดค่า IP ออก��นการตั้งค่าเครือข่ายก่อน",
         "domainNotVerified": "โดเมนผู้ส่งต้องยืนยันก่อน"
       },
       "outbound": {
@@ -2456,7 +2456,7 @@
       "matrix": {
         "moduleColumn": "เมนู",
         "view": "ดู",
-        "edit": "แก้ไข",
+        "edit": "แก���ไข",
         "approve": "อนุมัติ",
         "delete": "ลบ",
         "unsupportedHint": "«-» หมายถึงเมนูนี้ไม่รองรับการดำเนินการนี้"
@@ -3317,7 +3317,7 @@
     "userListDesc": "กฎบัญชีดำ/ขาวระดับผู้ใช้ที่กำหนดโดยผู้ดูแลระบบ",
     "userListTip": "กฎระดับผู้ใช้ที่กำหนดโดยผู้ดูแลระบบ สามารถตั้งค่าบัญชีดำ/ขาวผู้ส่งสำหรับผู้รับหรือกลุ่มผู้รับเฉพาะ มีความสำคัญสูงกว่าบัญชีดำ/ขาวส่วนบุคคล",
     "attachment": "ความปลอดภัยไฟล์แนบ",
-    "attachmentDesc": "ตรวจสอบประเภทและขนาดไฟล์แนบ",
+    "attachmentDesc": "ต��วจสอบประเภทและขนาดไฟล์แนบ",
     "url": "การป้องกัน URL",
     "urlDesc": "ตรวจจับและกรอง URL ที่เป็นอันตราย",
     "content": "กฎเนื้อหา",
@@ -3692,7 +3692,7 @@
     "ipGroupRequired": "กรุณาเลือกกลุ่ม IP",
     "ipGroupMembersUnit": "IP",
     "ruleNameTip": "เพิ่มชื่อที่อธิบายกฎเพื่อการจัดการที่ง่าย",
-    "ruleNamePlaceholder": "เช่น แหล่งโจมตีที่เป็นอันตราย, IP พันธมิตร ฯลฯ",
+    "ruleNamePlaceholder": "เช่น แหล่งโจมตีที่เป็นอันตราย, IP พันธมิตร ฯล��",
     "ipAddressTip": "รองรับที่อยู่ IP เดียว, ช่วง CIDR หรือกลุ่ม IP",
     "ipAddressRequired": "กรุณากรอกที่อยู่/ช่วง IP",
     "invalidIp": "กรุณาใส่ IP ที่ถูกต้อง",
@@ -3928,6 +3928,9 @@
     "serverExists": "เซิร์ฟเวอร์นี้มีอยู่แล้ว",
     "serverReferenced": "เซิร์ฟเวอร์นี้ถูกใช้โดยกฎ {count} รายการ ไม่สามารถลบได้",
     "loadError": "โหลดการตั้งค่า RBL ล้มเหลว",
+    "greylistSectionTitle": "นโยบาย Greylist",
+    "greylistSectionDesc": "หน่วงการส่งจากผู้ส่งที่ไม่รู้จักชั่วคราวและต้องการการลองใหม่เพื่อยืนยันตัวตน มีประสิทธิภาพต่อบ็อตเน็ต",
+    "greylistEnabled": "เปิดใช้นโยบาย Greylist",
     "greylistConfig": "การตั้งค่า Greylist",
     "greylistConfigDesc": "ตั้งค่านโยบาย Greylist เพื่อกรองสแปมและลดผลบวกลวง",
     "greylistConfigure": "ตั้งค่า",
@@ -4000,7 +4003,7 @@
     "actionLabel": "การกระทำ",
     "toggleLabel": "เปิด/ปิด",
     "directionsInfo": "ขาเข้า: ตรวจจับอีเมลจากแหล่งต่างประเทศ ขาออก: ตรวจจับอีเมลที่ส่งไปยังผู้รับต่างประเทศ ภายใน: ตรวจจับอีเมลระหว่างโดเมนภายในที่ส่งผ่านเกตเวย์",
-    "effectWhenHit": "ดำเนินการ \"{action}\" เมื่อตรงเงื่อนไข",
+    "effectWhenHit": "ดำเนิน���าร \"{action}\" เมื่อตรงเงื่อนไข",
     "unsavedChangesBanner": "มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก",
     "blockAllTitle": "ไม่สามารถบันทึกการตั้งค่า",
     "blockAllMessage": "การตั้งค่านี้จะบล็อกอีเมลต่างประเทศทั้งหมด กรุณาเปิดไว้อย่างน้อยหนึ่งทิศทาง",
@@ -4384,7 +4387,7 @@
     "keywordPlaceholder": "เช่น ลับ|ลับมาก|ภายใน",
     "keywordDividerHint": "คั่นคำสำคัญหลายคำด้วย |",
     "regexPlaceholder": "ป้อนนิพจน์ทั่วไปที่เข้ากันได้กับ Go",
-    "invalidRegex": "นิพจน์ทั่วไปไม่ถูกต้อง",
+    "invalidRegex": "นิพจน์ทั่วไปไม่ถูก���้อง",
     "runTest": "เรียกใช้การทดสอบ",
     "simulateTest": "ทดสอบจำลอง",
     "ruleNameTooLong": "ชื่อกฎต้องไม่เกิน 50 อักขระ",
@@ -4616,7 +4619,7 @@
     },
     "health": {
       "title": "การตรวจสอบสถานะการกำหนดค่า",
-      "softfailDropRisk": "ความเสี่ยงสูง: ตั้งค่า SPF SoftFail เป็นทิ้ง",
+      "softfailDropRisk": "ความเสี่ยงสูง: ต��้งค่า SPF SoftFail เป็นทิ้ง",
       "changeToQuarantine": "เปลี่ยนเป็นกักกัน",
       "changeToTag": "เปลี่ยนเป็นทำเครื่องหมาย",
       "dropSuggest": "การกำหนดค่าปัจจุบันมีการดำเนินการ \"ทิ้ง\" แนะนำให้เปิดโหมดสังเกตเพื่อตรวจสอบผลกระทบ",
@@ -5437,7 +5440,7 @@
     "directionReceive": "ขาเข้า",
     "directionSend": "ขาออก",
     "directionInternal": "ภายในโดเมน",
-    "similarityThreshold": "เกณฑ์ความคล้ายคลึง",
+    "similarityThreshold": "เกณฑ์���วามคล้ายคลึง",
     "actionQuarantine": "กักกัน",
     "syncToOthers": "ซิงค์ไปยังทิศทางอื่น",
     "tooltipWindow": "ช่วงเวลาสำหรับนับอีเมลที่คล้ายคลึง (นาที)",
@@ -5900,7 +5903,7 @@
         "no_need": "ไม่ต้องจัดการ",
         "pending_recall": "รอยืนยันเรียกคืน",
         "recalled": "เริ่มเรียกคืนแล้ว",
-        "alert_only": "แจ้งเตือนเท่านั้น",
+        "alert_only": "แจ้งเตือนเท่านั��น",
         "false_positive": "ทำเครื่องหมายผลบวกลวง",
         "multiple": "หลายการจัดการ"
       },
@@ -6322,7 +6325,7 @@
         "viewPolicyConfigTitle": "ไปที่หน้าตั้งค่านโยบาย",
         "platformPolicyModule": "นโยบายที่แพลตฟอร์มควบคุม",
         "platformPolicyRuleName": "ควบคุมโดยแพลตฟอร์ม",
-        "platformPolicyHitDetail": "อีเมลนี้ถูกสกัดกั้นโดยนโยบายชั้นการเชื่อมต่อระดับแพลตฟอร์ม หากต้องการรายละเอียดโปรดติดต่อผู้ดูแลแพลตฟอร์ม",
+        "platformPolicyHitDetail": "อีเมลนี้ถูกสกัดกั้นโดยนโยบายชั้นการเชื่อมต่อระดับแพลตฟอร์ม หากต้องการรายละเอี���ดโปรดติดต่อผู้ดูแลแพลตฟอร์ม",
         "platformPolicyListReason": "ถูกสกัดกั้นโดยนโยบายที่แพลตฟอร์มควบคุม"
       },
       "delivery": {
@@ -6497,7 +6500,7 @@
       "deleteAttachmentScopeVirus": "ตรวจพบไวรัส",
       "deleteAttachmentScopeType": "ประเภทที่ระบุ",
       "deleteAttachmentScopeOverSize": "เกินขนาด",
-      "deleteAttachmentScopeEncrypted": "เข้ารหัส",
+      "deleteAttachmentScopeEncrypted": "เข้��รหัส",
       "deleteAttachmentScopeNestedZip": "ZIP ซ้อน",
       "deleteAttachmentScopeQrCode": "มีรหัส QR",
       "deleteAttachmentReplacementText": "ข้อความทดแทน",
@@ -6517,7 +6520,7 @@
       "forwardServerMode": "โหมดส่งต่อ",
       "forwardServerModeCopy": "โหมดคัดลอก",
       "forwardServerAuthType": "ประเภทการยืนยันตัวตน",
-      "forwardServerAuthNone": "ไม่มีการยืนยัน",
+      "forwardServerAuthNone": "ไม่มี��ารยืนยัน",
       "forwardServerAuthSmtp": "การยืนยัน SMTP",
       "forwardServerUsername": "ชื่อผู้ใช้",
       "forwardServerPassword": "รหัสผ่าน",
@@ -7644,7 +7647,7 @@
       "failed": "ล้มเหลว",
       "cancelled": "ยกเลิกแล้ว",
       "in_delivery": "กำลังนำส่ง",
-      "partial_delivered": "นำส่งบางส่วน",
+      "partial_delivered": "���ำส่งบางส่วน",
       "unknown": "ไม่ทราบ"
     },
     "threatLevels": {
@@ -8213,7 +8216,7 @@
     "tabs": {
       "overview": "ภาพรวมการตรวจจับ",
       "config": "การตั้งค่าเอนจิน",
-      "configPlaceholder": "การตั้งค่าเอนจิน — จะพร้อมใช้งานเมื่อโมดูลการตั้งค่าออนไลน์"
+      "configPlaceholder": "การตั้งค่าเอนจิน — จะพร้อมใช้งานเมื่อโมดูลก��รตั้งค่าออนไลน์"
     },
     "kpi": {
       "todayDetected": "ตรวจพบวันนี้",
@@ -8526,7 +8529,7 @@
       "colMin": "ต่ำสุด",
       "colMax": "สูงสุด",
       "colDisposition": "การจัดการ",
-      "colMarkSettings": "ตั้งค่าเครื่องหมาย",
+      "colMarkSettings": "ตั้งค่า���ครื่องหมาย",
       "colActions": "การดำเนินการ",
       "advancedEdit": "ขั้นสูง",
       "dialogTitle": "แก้ไขแถบ #{index}",
@@ -8667,7 +8670,7 @@
       "confidence": "ความมั่นใจ",
       "finalDisposition": "การจัดการขั้นสุดท้าย",
       "block": "บล็อก",
-      "exempt": "ยกเว้น",
+      "exempt": "ยกเ��้น",
       "fallbackHint": "รายการนี้เป็นการสำรองแบบอินไลน์ (ส่งมอบและทำเครื่องหมายแล้ว) ไม่มีรายการ sideline ที่ดำเนินการได้",
       "signals": "สัญญาณปลอมแปลง",
       "gateDetail": "รายละเอียดการจับคู่เกต",
@@ -8848,7 +8851,7 @@
       "importLimitHint": "เลือกได้สูงสุด 20 คนต่อครั้ง",
       "importEmpty": "ไม่มีผู้ติดต่อ",
       "importHint": "บันทึกเฉพาะชื่อ อีเมล หมวดหมู่ ความไว และการตั้งค่าตรวจจับ/จัดการ; แผนก ตำแหน่ง และ ID ภายนอกใช้ตรวจทานการนำเข้าเท่านั้น",
-      "importBatchIdentity": "เลือก {n} คนสำหรับสร้างแบบกลุ่ม ข้อมูลอัตลักษณ์มาจากโครงสร้างองค์กร และระดับการปกป้องกับการตั้งค่าด้านล่างจะใช้กับทุกคน",
+      "importBatchIdentity": "เลือก {n} คนสำหรับสร้างแบบกลุ่ม ข้อมูล��ัตลักษณ์มาจากโครงสร้างองค์กร และระดับการปกป้องกับการตั้งค่าด้านล่างจะใช้กับทุกคน",
       "importIdentityHint": "ชื่อ อีเมล และตำแหน่งมาจากโครงสร้างองค์กรเพื่อยืนยันการนำเข้า โดยแก้ไขชื่อและอีเมลที่นี่ไม่ได้",
       "importSensitivityHint": "อัตลักษณ์ที่นำเข้าจะแนะนำหมวดหมู่และความไวจากตำแหน่งงาน; แผนกและตำแหน่งจะไม่ถูกบันทึก",
       "importDisabledInvalidEmail": "อีเมลไม่ถูกต้อง",
@@ -8951,7 +8954,7 @@
       "delete": "ลบ",
       "empty": "ไม่มีรายการอนุญาต",
       "errDup": "รายการนี้มีอยู่แล้ว",
-      "errMatchType": "ประเภทต้องเป็นอีเมลหรือโดเมน"
+      "errMatchType": "ประเภทต้องเป���นอีเมลหรือโดเมน"
     }
   },
   "threatRetro": {
@@ -9070,7 +9073,7 @@
         "false_positive": "ทำเครื่องหมายผลบวกลวง",
         "multiple": "หลายการจัดการ",
         "proposed_pending_recall": "เสนอให้ยืนยันการเรียกคืน",
-        "proposed_recalled": "เสนอให้เรียกคืนอัตโนมัติ",
+        "proposed_recalled": "เสนอให้เรียกคืนอ��ตโนมัติ",
         "proposed_alert_only": "เสนอให้แจ้งเตือนเท่านั้น",
         "proposed_multiple": "เสนอหลายการจัดการ"
       },
@@ -9320,7 +9323,7 @@
       "decisionModeHint": "อนุรักษ์ไว้: เข้าคิวรอเท่านั้น; อัตโนมัติ: recall เมื่อเกินขีด",
       "autoConfidenceThreshold": "ขีด recall อัตโนมัติ (1–100)",
       "decisionTimeoutHours": "หมดเวลาตัดสินใจ (ชั่วโมง)",
-      "numberInvalid": "ป้อนจำนวนเต็มบวกภายในช่วงที่อนุญาต",
+      "numberInvalid": "ป้อน��ำนวนเต็มบวกภายในช่วงที่อนุญาต",
       "recallActionSoftDelete": "การกระทำ recall: ลบแบบปลอดภัย (อย่างเดียว)",
       "unreadPolicy": "นโยบายอีเมลที่ยังไม่อ่าน",
       "readPolicy": "นโยบายอีเมลที่อ่านแล้ว",
@@ -9761,7 +9764,7 @@
       "cancel": "ยกเลิก"
     },
     "batch": {
-      "done": "ดำเนินการแล้ว {ok} รายการ",
+      "done": "ดำเนินก��รแล้ว {ok} รายการ",
       "partial": "สำเร็จ {ok} ล้มเหลว {fail} (อาจถูกดำเนินการแล้ว)"
     },
     "notify": {
@@ -10156,7 +10159,7 @@
     "module": {
       "enabled": "เปิดใช้งาน",
       "disabled": "ปิดใช้งาน",
-      "switchLabel": "สวิตช์เปิดใช้งานโมดูล"
+      "switchLabel": "สวิตช์เ���ิดใช้งานโมดูล"
     },
     "limit": {
       "title": "นโยบายจำกัดจำนวน",
