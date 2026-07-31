@@ -1,5 +1,5 @@
 export type RBLFilterMatchMode = 'any' | 'specific';
-export type RBLFilterProductAction = 'block' | 'quarantine' | 'mark' | 'greylist';
+export type RBLFilterProductAction = 'reject' | 'quarantine' | 'review' | 'discard' | 'greylist';
 
 export interface RBLGreylistConfig {
   mode: 'delay' | 'rateLimit';
@@ -71,8 +71,9 @@ export interface RBLFilterRuleTestResponse {
 }
 
 export const RBLProductActionLabels: Record<RBLFilterProductAction, string> = {
-  block: 'rblFilter.actionBlock',
+  reject: 'rblFilter.actionReject',
   quarantine: 'rblFilter.actionQuarantine',
-  mark: 'rblFilter.actionMark',
+  review: 'rblFilter.actionReview',
+  discard: 'rblFilter.actionDiscard',
   greylist: 'rblFilter.actionGreylist',
 };

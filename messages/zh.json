@@ -2081,7 +2081,7 @@
     "adminAccountTaken": "该账号已存在（不区分大小写），请换一个"
   },
   "users": {
-    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全�������约）",
+    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全���������约）",
     "resetPassword": {
       "title": "重置密码",
       "description": "为管理员「{username}」设置新密码，重置后需用新密码登录。",
@@ -2442,7 +2442,7 @@
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号是否泄露并启用登录限速。",
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
-      "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或���当���大认证超时时间。",
+      "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路���或���当���大认证超时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
@@ -3013,7 +3013,7 @@
       "statusCounts": "状态分布",
       "searchMethods": "搜索方法",
       "fetchBudget": "抓取预算",
-      "ruleReplayWindowDays": "回放窗��",
+      "ruleReplayWindowDays": "回放�����",
       "similarMatchCount": "相似命中",
       "clusterMatchCount": "簇命中",
       "recallCandidateCount": "召回候选",
@@ -3374,7 +3374,7 @@
   },
   "ipFrequency": {
     "title": "IP 频率限制",
-    "description": "限制每个 IP 地址的连接数、认证���败次数和命令错误次数",
+    "description": "限制每个 IP 地址的连���数、认证���败次数和命令错误次数",
     "basicSettings": "基础设置",
     "ruleName": "规则名称",
     "ruleNamePlaceholder": "如：合作伙伴IP限制",
@@ -3684,7 +3684,7 @@
     "executeActionWhitelistTip": "选择当IP命中白名单规则时的处理方式。投递会直接放行，标记投递会添加标记后放行。",
     "basicSettings": "基础设置",
     "remarkTitle": "备注说明",
-    "remarkPlaceholder": "可选，规则说明或备注信息...",
+    "remarkPlaceholder": "可选，规则��明或备注信息...",
     "saveAndEnable": "保存并启用",
     "blacklistRuleDesc": "配置IP黑名单规则，阻断或处置指定IP地址/段",
     "whitelistRuleDesc": "配置IP白名单规则，信任的IP直接放行或标记",
@@ -3846,9 +3846,10 @@
     "matchModeSpecific": "指定服务器",
     "matchServers": "匹配服务器",
     "productAction": "操作",
-    "actionBlock": "阻断",
+    "actionReject": "拒收",
     "actionQuarantine": "隔离",
-    "actionMark": "标记",
+    "actionReview": "审核",
+    "actionDiscard": "丢弃",
     "actionGreylist": "灰名单",
     "comingSoon": "敬请期待",
     "priority": "优先级",
@@ -3878,9 +3879,10 @@
     "serverTipZenSpamhaus": "Spamhaus综合黑名单，包含SBL、XBL、PBL等多个子列表，覆盖范围广",
     "serverTipBlSpamcop": "SpamCop用户举报黑名单，基于用户举报的垃圾邮件来源IP",
     "serverTipBarracuda": "Barracuda实时黑名单，由Barracuda安全网络维护",
-    "actionBlockTip": "立即拒绝连接，返回5xx错误。适用于高风险场景，可能误拦合法邮件",
+    "actionRejectTip": "立即拒绝连接，返回5xx错误。适用于高风险场景，可能误拦合法邮件",
     "actionQuarantineTip": "将邮件放入隔离队列，等待管理员审核。平衡安全与可用性",
-    "actionMarkTip": "添加X-RBL-Hit邮件头标记，继续后续检测。最宽松，便于统计分析",
+    "actionReviewTip": "邮件进入人工审核队列，等待管理员决策。适用于需要人工判断的场景",
+    "actionDiscardTip": "静默丢弃邮件，不通知发件方。适用于确认为垃圾邮件的高风险场景",
     "actionGreylistTip": "首次连接临时拒绝，要求发信方重试。可有效过滤僵尸网络，但会延迟正常邮件",
     "timeoutRangeError": "超时时间必须在 1-30 秒之间",
     "serverRequired": "请至少添加一个 RBL 服务器",
@@ -4287,7 +4289,7 @@
     "exampleKeywordReject": "身份证号外发管控",
     "exampleKeywordRejectDesc": "检测正文中的 18 位身份证号并阻断",
     "exampleRegexQuarantine": "银行卡号检测",
-    "exampleRegexQuarantineDesc": "检测正文中的 16–19 位银行账号并进入审核",
+    "exampleRegexQuarantineDesc": "检测正文��的 16–19 位银行账号并进入审核",
     "exampleContentGroupAudit": "敏感词过滤",
     "exampleContentGroupAuditDesc": "主题或正文包含敏感词时阻断邮件",
     "addHeaders": "添加头部",
@@ -4427,7 +4429,7 @@
       "envelopeHeaderMismatch": "信封与头部不匹配",
       "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。",
       "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，建议阻断。",
-      "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
+      "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法��发服务或恶意身份仿冒。"
     },
     "protocolChecks": {
       "title": "认证协议检查",
@@ -4454,7 +4456,7 @@
       "dmarc_reject": "p=reject",
       "dmarc_rejectDesc": "发信域要求拒绝未通过验证的邮件",
       "dmarc_quarantine": "p=quarantine",
-      "dmarc_quarantineDesc": "发信域要求隔离未通过验证的邮件",
+      "dmarc_quarantineDesc": "发信��要求隔离未通过验证的邮件",
       "dmarc_none": "p=none",
       "dmarc_noneDesc": "发信域仅监控，不要求处置",
       "ptr_norecord": "记录不存在",
@@ -4553,7 +4555,7 @@
       "accept": "进行下一步检测",
       "quarantine": "隔离（进垃圾箱）",
       "reject": "阻断（返回5xx）",
-      "audit": "标记（加头投递）",
+      "audit": "标记（��头投递）",
       "discard": "丢弃（静默删除）"
     },
     "flowSub": {
@@ -4758,7 +4760,7 @@
       "expirePrefix": "有效期至：",
       "priorityPrefix": "优先级：",
       "objAny": "任意对象",
-      "permanent": "永久"
+      "permanent": "永���"
     },
     "delete": {
       "title": "确认删除",
@@ -4835,7 +4837,7 @@
       "attachment_size": "MB"
     },
     "examples": {
-      "toggle": "查看配置示例",
+      "toggle": "��看配置示例",
       "normalName": "正常用户场景",
       "normalDesc": "日常办公发信，不触发规则",
       "normalEffect": "正常用户日发50封邮件，使用2个IP，未触发规则",
@@ -5159,7 +5161,7 @@
         "desc": "本功能将在后续版本提供。当前版本仅支持链接保护。"
       },
       "toggle": "沙箱检测",
-      "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁",
+      "toggleDesc": "启用后，对邮件中的未知URL进行动态行为��析，识别钓鱼、恶意下载等威胁",
       "toggleTip": "对未知URL进行动态行为分析，模拟用户访问以检测恶意行为",
       "detectGroup": "检测结果处置（当前方向）",
       "maliciousLabel": "发现恶意URL",
@@ -5472,7 +5474,7 @@
     "applyTo": "适用对象",
     "applyToAllUsers": "全部用户",
     "position": "位置",
-    "status": "状态",
+    "status": "状��",
     "operation": "操作",
     "enabled": "启用",
     "disabled": "禁用",
@@ -6096,7 +6098,7 @@
           "whitelist": "发信人加白",
           "more": "更多",
           "recipientHint": "投递/隔离等操作请在下方收件人矩阵中执行",
-          "notImplementedToast": "暂未实现",
+          "notImplementedToast": "暂未实���",
           "menu": {
             "exportEml": "导出EML",
             "exportPdf": "导出PDF报告",
@@ -6464,7 +6466,7 @@
       "headerName": "信头名称",
       "headerValue": "信头值",
       "mergeWindow": "合并窗口（分钟）",
-      "mergeWindowDesc": "同一规则在此时间内多次触发将合并为一封通知邮件",
+      "mergeWindowDesc": "同一规则在此时间内��次触发将合并为一封通知邮件",
       "deleteAttachmentScope": "删除范围",
       "deleteAttachmentScopeAll": "全部",
       "deleteAttachmentScopeVirus": "含病毒",
@@ -7000,7 +7002,7 @@
       "desc_mailFromFromConsistency": {
         "source": "SMTP会话MAIL FROM + 邮件头From字段",
         "usage": "检测信封层与信头层发信人是否一致",
-        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
+        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证；两者不一��是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
       },
       "desc_virusScanResult": {
         "source": "防病毒引擎",
@@ -7337,7 +7339,7 @@
     "currentSetting": "当前设置：{minutes}分钟",
     "maxRecheckMinutes": "复检窗口（分钟）",
     "timeoutAutoDeliver": "超时自动投递",
-    "autoDeliverDesc": "审核超时后自动投递邮件",
+    "autoDeliverDesc": "审核超时后自动投���邮件",
     "enabled": "已启用",
     "disabled": "已禁用",
     "currentStatus": "当前状态：",
@@ -7516,7 +7518,7 @@
         "label": "时间范围",
         "today": "今天",
         "7d": "近7天",
-        "30d": "近30天",
+        "30d": "近30��",
         "this_month": "本月",
         "last_month": "上月",
         "custom": "自定义"
@@ -7918,7 +7920,7 @@
       "exe": "可执行文件",
       "doc": "办公文档",
       "pdf": "PDF",
-      "zip": "压缩包",
+      "zip": "压��包",
       "xls": "表格",
       "other": "其他"
     },
@@ -8041,7 +8043,7 @@
   "infrastructure": {
     "title": "基础设施",
     "description": "系统基础设施监控",
-    "selectNode": "选择节点",
+    "selectNode": "��择节点",
     "tabs": {
       "hardware": "硬件资源",
       "processes": "服务进程",
@@ -8354,7 +8356,7 @@
       "searchSteps": "搜索步骤...",
       "exportJson": "导出 JSON",
       "noSteps": "暂无步骤记录",
-      "noVerdictContent": "智能体已完成检测，详细研判内容暂未生成",
+      "noVerdictContent": "智能体已完成检测，详细研判内容���未生成",
       "resultTruncatedHint": "调查明细可能因体量被截断，部分内容不完整"
     },
     "block": {
@@ -8412,7 +8414,7 @@
     "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
     "admission": {
       "title": "准入规则",
-      "description": "决定哪些邮件进入钓鱼邮件检测智能体。命中后使用当前部署级运行限制。",
+      "description": "决定哪些邮件进入钓鱼邮件检测智能体。命���后使用当前部署级运行限制。",
       "loading": "加载中...",
       "empty": "暂无准入规则，点击「新建」添加。",
       "create": "新建",
@@ -8460,7 +8462,7 @@
       "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
       "validationFailed": "请检查必填字段。",
-      "created": "准入规则已创建",
+      "created": "��入规则已创建",
       "updated": "准入规则已更新",
       "saveFailed": "保存失败",
       "saving": "保存中...",
@@ -9821,7 +9823,7 @@
         "thresholdPositive": "阈值必须为正数",
         "durationPositive": "持续时间必须大于 0",
         "samplesPositive": "采样数必须大于 0",
-        "email": "收件人邮箱格式不正确",
+        "email": "收件人���箱格式不正确",
         "recipientsRequired": "已开启通知时必须填写至少一个收件人"
       }
     },
@@ -10059,7 +10061,7 @@
       "minLength": "最小密码长度",
       "minCharClasses": "密码复杂度要求",
       "historyLimit": "历史密码限制",
-      "passwordMaxAgeDays": "密码有效期",
+      "passwordMaxAgeDays": "密码有效���",
       "maxLoginAttempts": "连续密码错误次数",
       "lockoutMinutes": "锁定时长",
       "sessionTimeoutSecs": "会话超时时间",

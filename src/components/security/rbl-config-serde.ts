@@ -5,16 +5,16 @@ import type { RBLFilterRuleView, RBLFilterProductAction, RBLGreylistConfig } fro
 export const RBL_CANONICAL_RULE_NAME = '__rbl_default__';
 
 /**
- * 即时处置动作：block / quarantine / mark。
+ * 即时处置动作：reject / quarantine / review / discard。
  * greylist 已从即时动作中分离，作为独立策略通过 greylistEnabled 控制。
  */
-export type RblImmediateAction = 'block' | 'quarantine' | 'mark';
+export type RblImmediateAction = 'reject' | 'quarantine' | 'review' | 'discard';
 
 export interface RblConfig {
   enabled: boolean;
   servers: string[];
   timeout: string; // 秒，字符串形式以适配输入控件
-  action: RblImmediateAction; // 即时处置动作：block | quarantine | mark
+  action: RblImmediateAction; // 即时处置动作：reject | quarantine | review | discard
   greylistEnabled: boolean;   // 灰名单策略开关（独立于即时动作）
   greylist?: RBLGreylistConfig; // 仅当 greylistEnabled 为 true 时有意义
 }
@@ -112,10 +112,13 @@ export function parseRblConfig(
     }
   }
   const canonical = findCanonicalRule(rules);
-  // 若后端 action 为 greylist（旧数据兼容），转换为：action=block + greylistEnabled=true
+  // 若后端 action 为 greylist（旧数据兼容），转换为：action=reject + greylistEnabled=true
+  // 若后端 action 为旧的 block/mark（旧数据兼容），映射到新值
   const rawAction = canonical?.product_action ?? fallback.action;
   const isLegacyGreylist = (rawAction as string) === 'greylist';
-  const action: RblImmediateAction = isLegacyGreylist ? 'block' : (rawAction as RblImmediateAction);
+  const legacyMap: Record<string, RblImmediateAction> = { block: 'reject', mark: 'reject' };
+  const mappedAction = legacyMap[rawAction as string] ?? rawAction;
+  const action: RblImmediateAction = isLegacyGreylist ? 'reject' : (mappedAction as RblImmediateAction);
   return {
     // The global rbl_filter module is enabled independently by
     // ModuleMasterSwitch.  A missing canonical rule means this is the first

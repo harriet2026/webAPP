@@ -55,7 +55,7 @@ const DOMAIN_REGEX = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0
 const DEFAULT_RBL_CONFIG = {
   servers: ['zen.spamhaus.org', 'bl.spamcop.net', 'b.barracudacentral.org'],
   timeout: '5',
-  action: 'block' as RblImmediateAction,
+  action: 'reject' as RblImmediateAction,
 };
 
 // GT-12263: PRD §3「关键字段悬浮提示」— 预置 RBL 服务器 Badge 的来源说明文案；
@@ -66,14 +66,15 @@ const SERVER_TIP_KEY: Record<string, string> = {
   'b.barracudacentral.org': 'rblFilter.serverTipBarracuda',
 };
 
-// GT-12263: 即时处置动作各自的帮助说明（PRD §3 阻断/隔离/标记动作行）。
+// 即时处置动作各自的帮助说明（拒收/隔离/审核/丢弃）。
 const ACTION_TIP_KEY: Record<RblImmediateAction, string> = {
-  block: 'rblFilter.actionBlockTip',
+  reject: 'rblFilter.actionRejectTip',
   quarantine: 'rblFilter.actionQuarantineTip',
-  mark: 'rblFilter.actionMarkTip',
+  review: 'rblFilter.actionReviewTip',
+  discard: 'rblFilter.actionDiscardTip',
 };
 
-const RBL_IMMEDIATE_ACTIONS: RblImmediateAction[] = ['block', 'quarantine', 'mark'];
+const RBL_IMMEDIATE_ACTIONS: RblImmediateAction[] = ['reject', 'quarantine', 'review', 'discard'];
 
 const DEFAULT_GREYLIST_CONFIG: GreylistFormConfig = {
   mode: 'delay',
@@ -167,9 +168,10 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
 
   const actionLabel = useMemo<Record<RblImmediateAction, string>>(
     () => ({
-      block: t('rblFilter.actionBlock'),
+      reject: t('rblFilter.actionReject'),
       quarantine: t('rblFilter.actionQuarantine'),
-      mark: t('rblFilter.actionMark'),
+      review: t('rblFilter.actionReview'),
+      discard: t('rblFilter.actionDiscard'),
     }),
     [t],
   );

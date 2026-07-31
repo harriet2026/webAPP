@@ -38,7 +38,7 @@ describe('parseProfileValue', () => {
 describe('findCanonicalRule', () => {
   it('finds the canonical any-match rule by name', () => {
     const other: RBLFilterRuleView = { ...canonRule('block', true), id: 2, name: 'user-made', match_mode: 'specific' };
-    expect(findCanonicalRule([other, canonRule('mark', true)])?.product_action).toBe('mark');
+    expect(findCanonicalRule([other, canonRule('reject', true)])?.product_action).toBe('reject');
   });
   it('ignores same-name rule that is not match_mode any', () => {
     const weird = { ...canonRule('block', true), match_mode: 'specific' as const };
@@ -119,20 +119,20 @@ describe('buildProfileValue', () => {
 describe('diffRblConfig', () => {
   const base = [profile(1, 'keep.rbl'), profile(2, 'drop.rbl')];
   it('computes add/delete/retime sets', () => {
-    const draft = { enabled: true, servers: ['keep.rbl', 'new.rbl'], timeout: '9', action: 'mark' as const, greylistEnabled: false };
+    const draft = { enabled: true, servers: ['keep.rbl', 'new.rbl'], timeout: '9', action: 'review' as const, greylistEnabled: false };
     expect(diffRblConfig(base, draft, true)).toEqual({
       serversToAdd: ['new.rbl'],
       profileIdsToDelete: [2],
       profilesToRetime: [1],
-      action: 'mark',
+      action: 'review',
       greylist: undefined,
       enabled: true,
     });
   });
   it('skips retime when timeout unchanged', () => {
-    const draft = { enabled: false, servers: ['keep.rbl', 'drop.rbl'], timeout: '5', action: 'block' as const, greylistEnabled: false };
+    const draft = { enabled: false, servers: ['keep.rbl', 'drop.rbl'], timeout: '5', action: 'reject' as const, greylistEnabled: false };
     expect(diffRblConfig(base, draft, false)).toEqual({
-      serversToAdd: [], profileIdsToDelete: [], profilesToRetime: [], action: 'block', greylist: undefined, enabled: false,
+      serversToAdd: [], profileIdsToDelete: [], profilesToRetime: [], action: 'reject', greylist: undefined, enabled: false,
     });
   });
 });
