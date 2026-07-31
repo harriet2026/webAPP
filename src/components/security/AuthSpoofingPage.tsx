@@ -16,7 +16,6 @@ import { FormatChecksSection } from './auth-spoofing/FormatChecksSection';
 import { ProtocolChecksSection } from './auth-spoofing/ProtocolChecksSection';
 import { SimilarDomainSection } from './auth-spoofing/SimilarDomainSection';
 import { DisplayNameSpoofSection } from './auth-spoofing/DisplayNameSpoofSection';
-import { ExceptionRulesEntry } from './auth-spoofing/ExceptionRulesEntry';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
 
 const DEFAULT_CONFIG: AuthSpoofingConfig = {
@@ -223,7 +222,6 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
             </>
           )}
 
-          <ExceptionRulesEntry />
         </div>
       )}
     </div>
