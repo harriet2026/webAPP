@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 4,
+  "current_version": 5,
   "history": [
     {
       "version": 1,
@@ -37,6 +37,15 @@
       "ticket": "GT-12649",
       "incremental": true,
       "summary": "文档规范修复：按技能规范重写目录（每个需求点使用完整名称作为主入口，子章节使用编号层级 1.1/1.2/…/4.3，尾部三项以 C/D/E 字母编号）；变更总览标题由"v2 新增 3 项"修正为"共 4 项需求"；各变更区块 incr-header 补充路由路径；批量修复文档中全部 UTF-8 replacement character 乱码（共 6 处：侧边栏底部、执行动作 ×2、审核、导航区域、平台管控策略）。"
+    },
+    {
+      "version": 5,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "ebec245",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12682",
+      "incremental": true,
+      "summary": "GT-12682-RBL优化：新建 GT-126811.html，记录三个需求点——(1) 灰名单从执行动作分离（两段式布局 + serde 层 greylistEnabled 字段 + 旧数据兼容映射）；(2) 处置策略互斥卡片选择器（RadioGroup 并排二选一，选中态展开子配置）；(3) 执行动作集合调整（reject/quarantine/review/discard，移除 block 和 mark，4 语言 i18n 同步）；含目录导航、差异 D-001~D-003、待确认 Q-001~Q-003。"
     }
   ]
 }

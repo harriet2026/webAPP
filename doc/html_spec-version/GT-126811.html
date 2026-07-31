@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GT-126811 · GT-12682-RBL优化 · 需求文档</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f6f8;
+      color: #1a1d23;
+      line-height: 1.6;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .page-wrap { max-width: 980px; margin: 0 auto; }
+
+    /* ── header ── */
+    .spec-header {
+      background: #1a1d23;
+      color: #e8eaf0;
+      border-radius: 10px;
+      padding: 2rem 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .spec-header .ticket-badge {
+      display: inline-block;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.2em 0.65em;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+    .spec-header h1 { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
+    .spec-header .subtitle { font-size: 0.85rem; color: #9ca3af; }
+    .spec-header .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 2rem;
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      color: #9ca3af;
+    }
+    .spec-header .meta-row span strong { color: #e8eaf0; }
+
+    /* ── toc / 目录导航 ── */
+    .toc-section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    .toc-section h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .toc-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .toc-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .toc-list a {
+      font-size: 0.9rem;
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.45rem 0.9rem;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      flex: 1;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .toc-list a:hover {
+      background: #dbeafe;
+      border-color: #93c5fd;
+    }
+    .toc-list .toc-meta {
+      font-size: 0.77rem;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+
+    /* ── incremental section ── */
+    .incremental-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .incr-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: #f8f9fb;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .incr-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .incr-header h2 { font-size: 1rem; font-weight: 700; color: #1a1d23; margin: 0; }
+    .incr-header .incr-meta { font-size: 0.78rem; color: #6b7280; margin-left: auto; }
+    .incr-body { padding: 1.5rem 2rem; }
+    .incr-body h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+    .incr-body h4 { font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-top: 1rem; margin-bottom: 0.5rem; }
+
+    /* ── tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.845rem; margin-bottom: 0.75rem; }
+    th { background: #f3f4f6; color: #374151; font-weight: 600; text-align: left; padding: 0.55rem 0.8rem; border: 1px solid #e5e7eb; }
+    td { padding: 0.5rem 0.8rem; border: 1px solid #e5e7eb; vertical-align: top; color: #374151; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    /* ── code ── */
+    code { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.1em 0.4em; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82em; color: #1a1d23; }
+
+    /* ── interaction-preview ── */
+    .interaction-preview {
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+    .interaction-preview h4 { font-size: 0.88rem; font-weight: 700; color: #1a1d23; margin-bottom: 0.35rem; }
+    .interaction-preview .trigger-path { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.9rem; }
+    .interaction-preview figure { margin: 0 0 0.9rem; }
+    .interaction-preview figcaption { font-size: 0.78rem; color: #6b7280; margin-top: 0.35rem; font-style: italic; }
+    .interaction-preview img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
+
+    /* ── callout boxes ── */
+    .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
+    .callout-info    { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; }
+    .callout-warn    { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .callout-removed { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; }
+    .callout-ok      { background: #f0fdf4; border-left: 4px solid #16a34a; color: #15532e; }
+
+    /* ── tag badges ── */
+    .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.15em 0.5em; border-radius: 4px; margin-right: 0.3em; }
+    .tag-removed  { background: #fee2e2; color: #991b1b; }
+    .tag-added    { background: #dcfce7; color: #15532e; }
+    .tag-changed  { background: #fef9c3; color: #854d0e; }
+    .tag-new      { background: #e0e7ff; color: #3730a3; }
+
+    /* ── diff section ── */
+    .diff-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      border-left: 4px solid #dc2626;
+    }
+    .question-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      border-left: 4px solid #f59e0b;
+    }
+    .section-plain {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      padding: 1.5rem 2rem;
+    }
+    .section-plain h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .status-open   { color: #dc2626; font-weight: 600; }
+    .status-done   { color: #16a34a; font-weight: 600; }
+    .status-note   { color: #d97706; font-weight: 600; }
+
+    /* ── back to top ── */
+    .back-top {
+      display: inline-block;
+      margin-top: 1.5rem;
+      font-size: 0.82rem;
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .back-top:hover { text-decoration: underline; }
+
+    @media (max-width: 700px) {
+      body { padding: 1rem 0.75rem 3rem; }
+      .spec-header { padding: 1.25rem 1.25rem; }
+      .incr-body { padding: 1rem 1.25rem; }
+      .toc-list a { font-size: 0.83rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ── 文档头 ── -->
+  <header class="spec-header" id="top">
+    <div class="ticket-badge">GT-126811</div>
+    <h1>GT-12682-RBL优化</h1>
+    <p class="subtitle">RBL 过滤模块交互与语义优化 · 增量需求文档</p>
+    <div class="meta-row">
+      <span><strong>路由路径</strong>：<code>/zh/rules/rbl</code></span>
+      <span><strong>组件路径</strong>：<code>src/components/security/RBLFilterPage.tsx</code></span>
+      <span><strong>关联类型文件</strong>：<code>src/types/rbl-filter.ts</code></span>
+      <span><strong>关联 serde 文件</strong>：<code>src/components/security/rbl-config-serde.ts</code></span>
+      <span><strong>生成日期</strong>：2026-07-31</span>
+      <span><strong>webapp commit</strong>：<code>ebec245</code></span>
+      <span><strong>需求依据</strong>：用户当前描述 + 本对话历史决定 + webapp 当前运行态</span>
+    </div>
+  </header>
+
+  <!-- ── 目录导航 ── -->
+  <nav class="toc-section" id="toc" aria-label="需求点目录">
+    <h2>目录 · 需求点导航</h2>
+    <ul class="toc-list">
+      <li>
+        <span class="toc-num">1</span>
+        <a href="#req-1">灰名单从执行动作中分离 — 两段式布局（处置策略独立区块）</a>
+        <span class="toc-meta"><span class="tag tag-changed">变更</span> UI 重构 + Serde 层</span>
+      </li>
+      <li>
+        <span class="toc-num">2</span>
+        <a href="#req-2">处置策略改为互斥卡片选择器 — 执行动作与灰名单策略并排二选一</a>
+        <span class="toc-meta"><span class="tag tag-changed">变更</span> 交互语义</span>
+      </li>
+      <li>
+        <span class="toc-num">3</span>
+        <a href="#req-3">执行动作集合调整 — 拒收/隔离/审核/丢弃，移除阻断和标记</a>
+        <span class="toc-meta"><span class="tag tag-added">新增</span><span class="tag tag-removed">移除</span> 类型层 + i18n</span>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- ══════════════════════════════════════════
+       需求点 1：灰名单从执行动作中分离
+  ═══════════════════════════════════════════ -->
+  <section class="incremental-section" id="req-1">
+    <div class="incr-header">
+      <span class="incr-num">1</span>
+      <h2>灰名单从执行动作中分离 — 两段式布局</h2>
+      <span class="incr-meta">GT-12682 · 2026-07-31 · <span class="tag tag-changed">变更</span></span>
+    </div>
+    <div class="incr-body">
+
+      <h3>1.1 背景与目标</h3>
+      <p>原设计中，<code>greylist</code> 作为 <code>product_action</code> 的一个枚举值与 <code>block / quarantine / mark</code> 并列放在同一个 Select 下拉框中。用户反馈此设计存在语义混淆：灰名单是"临时挂起策略"（SMTP 451 DEFER），与即时处置动作（5xx REJECT / 隔离 / 标记）属于不同维度的概念，不应并列。</p>
+      <p style="margin-top:0.5rem">本需求目标：将灰名单策略从执行动作 Select 中抽离，作为独立区块，拥有自己的开关和配置入口。</p>
+
+      <h3>1.2 变更范围</h3>
+      <div class="callout callout-info">
+        仅修改 RBL 过滤模块的处置配置区，不涉及其他功能模块（服务器列表、超时设置、灰名单配置弹窗等保持不变）。
+      </div>
+
+      <h3>1.3 Serde 层变更</h3>
+      <table>
+        <thead>
+          <tr><th>文件</th><th>变更内容</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>rbl-config-serde.ts</code></td>
+            <td>新增 <code>RblImmediateAction</code> 类型（<code>'block' | 'quarantine' | 'mark'</code>）；<code>RblConfig</code> 新增 <code>greylistEnabled: boolean</code> 字段</td>
+            <td><code>greylist</code> 从 <code>action</code> 枚举中移出，改为独立布尔字段</td>
+          </tr>
+          <tr>
+            <td><code>rbl-config-serde.ts</code></td>
+            <td><code>parseRblConfig</code> 增加旧数据兼容逻辑：后端 <code>action=greylist</code> 转换为 <code>action=block + greylistEnabled=true</code></td>
+            <td>保证历史存量配置正确读取，不影响 API 约定</td>
+          </tr>
+          <tr>
+            <td><code>rbl-config-serde.ts</code></td>
+            <td><code>diffRblConfig</code> 在 <code>greylistEnabled=true</code> 时向 API 写入 <code>action='greylist'</code>，保持后端兼容</td>
+            <td>API 层 payload 结构不变，前端 state 语义与后端协议解耦</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>1.4 UI 变更：两段式布局</h3>
+      <table>
+        <thead>
+          <tr><th>区域</th><th>变更前</th><th>变更后</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>处置配置区</td>
+            <td>单个 Select 下拉，四个选项：阻断 / 隔离 / 标记 / 灰名单（混合并列）</td>
+            <td>上半区右列保留超时设置；下方 <code>border-t</code> 分隔后新增独立"灰名单策略"Section（含开关 Toggle 和配置摘要行）</td>
+          </tr>
+          <tr>
+            <td>执行动作区</td>
+            <td>包含 <code>greylist</code> 的 4 选 Select</td>
+            <td>3 选 RadioGroup（<code>block / quarantine / mark</code>），帮助 Tooltip 内联</td>
+          </tr>
+          <tr>
+            <td>灰名单策略区</td>
+            <td>不存在（灰名单作为动作选项隐藏于 Select 内）</td>
+            <td>独立 Section，含标题"灰名单策略"、副文案、Toggle 开关；开启后展示摘要信息与"点击配置"按钮</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>1.5 交互预览说明</h3>
+      <div class="callout callout-warn">
+        按技能规范，交互预览需要浏览器实拍截图。本文档记录需求点描述、元素清单和字段映射，截图待浏览器验证后归档至
+        <code>doc/html-spec/filter-rules-pipeline-rbl-filter/screenshots/</code>。
+      </div>
+
+      <h4>元素清单</h4>
+      <table>
+        <thead>
+          <tr><th>#</th><th>元素</th><th>文案 (zh)</th><th>状态/交互</th><th>i18n key</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Section 标题</td><td>灰名单策略</td><td>只读标签</td><td><code>rblFilter.greylistSectionTitle</code></td></tr>
+          <tr><td>2</td><td>副文案</td><td>对未知发件方临时挂起，等待重试验证身份，可有效过滤僵尸网络。</td><td>只读文本</td><td><code>rblFilter.greylistSectionDesc</code></td></tr>
+          <tr><td>3</td><td>Toggle 开关</td><td>（aria-label）启用灰名单策略</td><td>点击切换 <code>greylistEnabled</code> state；高亮态 <code>bg-primary</code>，关闭态 <code>bg-input</code></td><td><code>rblFilter.greylistEnabled</code></td></tr>
+          <tr><td>4</td><td>摘要行（开启后可见）</td><td>灰名单配置摘要文本</td><td>仅展示，不可直接编辑</td><td>动态计算自 <code>greylistConfig</code></td></tr>
+          <tr><td>5</td><td>"点击配置"按钮（开启后可见）</td><td>点击配置</td><td>点击打开灰名单配置 Dialog</td><td><code>rblFilter.greylistConfigure</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3>1.6 API 字段映射</h3>
+      <table>
+        <thead>
+          <tr><th>前端 state 字段</th><th>API payload 字段</th><th>转换逻辑</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>greylistEnabled = true</code></td>
+            <td><code>product_action: 'greylist'</code></td>
+            <td><code>diffRblConfig</code> 在 <code>greylistEnabled=true</code> 时覆盖 <code>action</code></td>
+          </tr>
+          <tr>
+            <td><code>greylistEnabled = false</code></td>
+            <td><code>product_action: &lt;即时动作值&gt;</code></td>
+            <td>使用 <code>draft.action</code> 直接写入</td>
+          </tr>
+          <tr>
+            <td><code>greylist: RBLGreylistConfig</code></td>
+            <td><code>greylist: { ... }</code></td>
+            <td>仅当 <code>greylistEnabled=true</code> 时写入；否则 <code>undefined</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <a href="#toc" class="back-top">返回目录</a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       需求点 2：互斥卡片选择器
+  ═══════════════════════════════════════════ -->
+  <section class="incremental-section" id="req-2">
+    <div class="incr-header">
+      <span class="incr-num">2</span>
+      <h2>处置策略改为互斥卡片选择器 — 执行动作与灰名单策略并排二选一</h2>
+      <span class="incr-meta">GT-12682 · 2026-07-31 · <span class="tag tag-changed">变更</span></span>
+    </div>
+    <div class="incr-body">
+
+      <h3>2.1 背景与目标</h3>
+      <p>需求点 1 完成后，执行动作与灰名单策略被拆为两个独立 Section，但并排双列的视觉样式暗示"可以同时启用"，而实际上两者在 API 层互斥（<code>product_action</code> 只能有一个值）。用户反馈：选择了执行动作后就无法配置灰名单策略，交互体验令人困惑。</p>
+      <p style="margin-top:0.5rem">本需求目标：通过 UI 明确表达互斥关系，同时保留两者各自的深度配置能力。</p>
+
+      <h3>2.2 设计决策</h3>
+      <div class="callout callout-info">
+        采用"处置策略选择器"方案（RadioGroup + 可选卡片）：两张并排等宽卡片，选中态高亮边框，未选中态 dimmed（opacity-60），切换时自动展开该卡片内的配置控件。
+      </div>
+      <table>
+        <thead>
+          <tr><th>方案</th><th>描述</th><th>决策结果</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>方案 A（已实现，需求点 1）</td>
+            <td>两段式：上方执行动作 RadioGroup，下方灰名单 Section+Toggle</td>
+            <td><span class="tag tag-removed">已替换</span> 未体现互斥关系</td>
+          </tr>
+          <tr>
+            <td>方案 B（平铺双列）</td>
+            <td>两列并排，左列执行动作 Select，右列灰名单 Toggle</td>
+            <td><span class="tag tag-removed">已替换</span> 视觉暗示可同时启用，与 API 约束矛盾</td>
+          </tr>
+          <tr>
+            <td>方案 C（本次采纳）</td>
+            <td>处置策略 RadioGroup + 互斥可选卡片，选中卡片高亮展开子配置</td>
+            <td><span class="tag tag-added">已采纳</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>2.3 UI 结构</h3>
+      <table>
+        <thead>
+          <tr><th>区域</th><th>内容</th><th>交互行为</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>区域标题行</td>
+            <td>文本"处置策略" + HelpCircle Tooltip（说明互斥含义）</td>
+            <td>Tooltip 悬停显示：<code>rblFilter.disposalStrategyDesc</code></td>
+          </tr>
+          <tr>
+            <td>左卡片：执行动作</td>
+            <td>标题 + 副文案 + RadioGroupItem + 选中时展开 Select 下拉</td>
+            <td>点击卡片任意区域 → 选中执行动作策略；Select 阻止冒泡，避免切换策略时干扰动作值</td>
+          </tr>
+          <tr>
+            <td>右卡片：灰名单策略</td>
+            <td>标题 + 副文案 + RadioGroupItem + 选中时展开摘要行和配置按钮</td>
+            <td>点击卡片任意区域 → 选中灰名单策略；配置按钮点击需 <code>e.preventDefault()</code> 避免卡片 label 重触发</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>2.4 状态映射</h3>
+      <table>
+        <thead>
+          <tr><th>RadioGroup value</th><th><code>greylistEnabled</code> state</th><th>左卡片</th><th>右卡片</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>'action'</code></td>
+            <td><code>false</code></td>
+            <td>高亮（<code>border-primary bg-primary/5</code>）；Select 可见</td>
+            <td>dimmed（<code>opacity-60</code>）；摘要行隐藏</td>
+          </tr>
+          <tr>
+            <td><code>'greylist'</code></td>
+            <td><code>true</code></td>
+            <td>dimmed（<code>opacity-60</code>）；Select 隐藏</td>
+            <td>高亮（<code>border-primary bg-primary/5</code>）；摘要行可见</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>2.5 元素清单</h3>
+      <table>
+        <thead>
+          <tr><th>#</th><th>元素</th><th>文案 (zh)</th><th>位置</th><th>i18n key</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>区域标题</td><td>处置策略</td><td>RadioGroup 容器上方</td><td><code>rblFilter.disposalStrategyTitle</code></td></tr>
+          <tr><td>2</td><td>区域 Tooltip</td><td>选择命中 RBL 后的处置方式，两种策略互斥，仅能启用其一。</td><td>标题旁 HelpCircle 图标</td><td><code>rblFilter.disposalStrategyDesc</code></td></tr>
+          <tr><td>3</td><td>左卡片标题</td><td>执行动作</td><td>左卡片内顶部</td><td><code>rblFilter.actionSectionTitle</code></td></tr>
+          <tr><td>4</td><td>左卡片副文案</td><td>当命中 RBL 时，对邮件立即执行的处置方式。</td><td>左卡片标题下</td><td><code>rblFilter.actionSectionDesc</code></td></tr>
+          <tr><td>5</td><td>左卡片 RadioGroupItem</td><td>（无文案，圆形单选）</td><td>左卡片右上角</td><td>—</td></tr>
+          <tr><td>6</td><td>执行动作 Select（选中左卡片后展开）</td><td>当前选中动作名称</td><td>左卡片底部</td><td>见需求点 3</td></tr>
+          <tr><td>7</td><td>右卡片标题</td><td>灰名单策略</td><td>右卡片内顶部</td><td><code>rblFilter.greylistSectionTitle</code></td></tr>
+          <tr><td>8</td><td>右卡片副文案</td><td>对未知发件方临时挂起，等待重试验证身份，可有效过滤僵尸网络。</td><td>右卡片标题下</td><td><code>rblFilter.greylistSectionDesc</code></td></tr>
+          <tr><td>9</td><td>右卡片 RadioGroupItem</td><td>（无文案，圆形单选）</td><td>右卡片右上角</td><td>—</td></tr>
+          <tr><td>10</td><td>摘要行（选中右卡片后展开）</td><td>灰名单配置摘要</td><td>右卡片底部蓝色区域</td><td>动态计算</td></tr>
+          <tr><td>11</td><td>"点击配置"按钮（选中右卡片后展开）</td><td>点击配置</td><td>摘要行右侧</td><td><code>rblFilter.greylistConfigure</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3>2.6 新增 i18n key（4 语言）</h3>
+      <table>
+        <thead>
+          <tr><th>key</th><th>zh</th><th>en</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>rblFilter.disposalStrategyTitle</code></td>
+            <td>处置策略</td>
+            <td>Disposal Strategy</td>
+          </tr>
+          <tr>
+            <td><code>rblFilter.disposalStrategyDesc</code></td>
+            <td>选择命中 RBL 后的处置方式，两种策略互斥，仅能启用其一。</td>
+            <td>Choose how to handle mail when an RBL hit occurs. The two strategies are mutually exclusive.</td>
+          </tr>
+          <tr>
+            <td><code>rblFilter.actionSectionTitle</code></td>
+            <td>执行动作</td>
+            <td>Execution Action</td>
+          </tr>
+          <tr>
+            <td><code>rblFilter.actionSectionDesc</code></td>
+            <td>当命中 RBL 时，对邮件立即执行的处置方式。</td>
+            <td>The immediate disposition applied to mail when a RBL hit occurs.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <a href="#toc" class="back-top">返回目录</a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       需求点 3：执行动作集合调整
+  ═══════════════════════════════════════════ -->
+  <section class="incremental-section" id="req-3">
+    <div class="incr-header">
+      <span class="incr-num">3</span>
+      <h2>执行动作集合调整 — 拒收/隔离/审核/丢弃，移除阻断和标记</h2>
+      <span class="incr-meta">GT-12682 · 2026-07-31 · <span class="tag tag-added">新增</span><span class="tag tag-removed">移除</span></span>
+    </div>
+    <div class="incr-body">
+
+      <h3>3.1 背景与目标</h3>
+      <p>在需求点 2 的基础上，用户对执行动作的枚举值提出以下调整要求：</p>
+      <ul style="margin: 0.5rem 0 0.5rem 1.25rem; font-size: 0.87rem; line-height: 1.8;">
+        <li><span class="tag tag-removed">移除</span> <code>block</code>（阻断）→ 改名为 <code>reject</code>（拒收）</li>
+        <li><span class="tag tag-removed">移除</span> <code>mark</code>（标记）</li>
+        <li><span class="tag tag-added">新增</span> <code>review</code>（审核）</li>
+        <li><span class="tag tag-added">新增</span> <code>discard</code>（丢弃）</li>
+      </ul>
+
+      <h3>3.2 执行动作集合对比</h3>
+      <table>
+        <thead>
+          <tr><th>动作值</th><th>变更前显示名称</th><th>变更后显示名称</th><th>变更类型</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>block</code> → <code>reject</code></td>
+            <td>阻断</td>
+            <td>拒收</td>
+            <td><span class="tag tag-changed">改名</span> 值和文案同时变更</td>
+          </tr>
+          <tr>
+            <td><code>quarantine</code></td>
+            <td>隔离</td>
+            <td>隔离</td>
+            <td>不变</td>
+          </tr>
+          <tr>
+            <td><code>mark</code></td>
+            <td>标记</td>
+            <td>—</td>
+            <td><span class="tag tag-removed">移除</span></td>
+          </tr>
+          <tr>
+            <td><code>review</code></td>
+            <td>—</td>
+            <td>审核</td>
+            <td><span class="tag tag-added">新增</span></td>
+          </tr>
+          <tr>
+            <td><code>discard</code></td>
+            <td>—</td>
+            <td>丢弃</td>
+            <td><span class="tag tag-added">新增</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>3.3 变更范围（类型层 + Serde + UI + i18n）</h3>
+      <table>
+        <thead>
+          <tr><th>文件</th><th>变更内容</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>src/types/rbl-filter.ts</code></td>
+            <td><code>RBLFilterProductAction</code> 类型：<code>'block' | 'quarantine' | 'mark' | 'greylist'</code> → <code>'reject' | 'quarantine' | 'review' | 'discard' | 'greylist'</code>；<code>RBLProductActionLabels</code> 映射同步更新</td>
+          </tr>
+          <tr>
+            <td><code>src/components/security/rbl-config-serde.ts</code></td>
+            <td><code>RblImmediateAction</code>：<code>'block' | 'quarantine' | 'mark'</code> → <code>'reject' | 'quarantine' | 'review' | 'discard'</code>；<code>parseRblConfig</code> 增加旧数据兼容映射（<code>block</code>→<code>reject</code>，<code>mark</code>→<code>reject</code>）；<code>DEFAULT_RBL_CONFIG.action</code> 从 <code>'block'</code> 改为 <code>'reject'</code></td>
+          </tr>
+          <tr>
+            <td><code>src/components/security/RBLFilterPage.tsx</code></td>
+            <td><code>ACTION_TIP_KEY</code>、<code>RBL_IMMEDIATE_ACTIONS</code>、<code>actionLabel useMemo</code>、<code>DEFAULT_RBL_CONFIG.action</code> 全部对齐新动作集合</td>
+          </tr>
+          <tr>
+            <td><code>messages/zh.json</code></td>
+            <td><code>actionBlock</code>→<code>actionReject</code>（"拒收"），移除 <code>actionMark</code>/<code>actionMarkTip</code>，新增 <code>actionReview</code>/<code>actionReviewTip</code>、<code>actionDiscard</code>/<code>actionDiscardTip</code></td>
+          </tr>
+          <tr>
+            <td><code>messages/en.json</code></td>
+            <td>同上（英文）</td>
+          </tr>
+          <tr>
+            <td><code>messages/ru.json</code></td>
+            <td>同上（俄文）</td>
+          </tr>
+          <tr>
+            <td><code>messages/th.json</code></td>
+            <td>同上（泰文）</td>
+          </tr>
+          <tr>
+            <td><code>src/components/security/rbl-config-serde.test.ts</code></td>
+            <td>测试 fixture 中 <code>'mark'</code>→<code>'reject'</code>，<code>'block'</code>→<code>'reject'</code>；期望值同步更新</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>3.4 执行动作 i18n key 完整清单（zh）</h3>
+      <table>
+        <thead>
+          <tr><th>key</th><th>中文文案</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>rblFilter.actionReject</code></td><td>拒收</td><td>立即 5xx REJECT，替代原 <code>actionBlock</code></td></tr>
+          <tr><td><code>rblFilter.actionRejectTip</code></td><td>立即拒绝连接，返回5xx错误。适用于高风险场景，可能误拦合法邮件</td><td>Select 选项内联说明</td></tr>
+          <tr><td><code>rblFilter.actionQuarantine</code></td><td>隔离</td><td>不变</td></tr>
+          <tr><td><code>rblFilter.actionQuarantineTip</code></td><td>将邮件放入隔离队列，等待管理员审核。平衡安全与可用性</td><td>不变</td></tr>
+          <tr><td><code>rblFilter.actionReview</code></td><td>审核</td><td>新增</td></tr>
+          <tr><td><code>rblFilter.actionReviewTip</code></td><td>邮件进入人工审核队列，等待管理员决策。适用于需要人工判断的场景</td><td>新增</td></tr>
+          <tr><td><code>rblFilter.actionDiscard</code></td><td>丢弃</td><td>新增</td></tr>
+          <tr><td><code>rblFilter.actionDiscardTip</code></td><td>静默丢弃邮件，不通知发件方。适用于确认为垃圾邮件的高风险场景</td><td>新增</td></tr>
+        </tbody>
+      </table>
+
+      <h3>3.5 旧数据兼容逻辑</h3>
+      <div class="callout callout-warn">
+        后端存量配置可能包含 <code>product_action: 'block'</code> 或 <code>product_action: 'mark'</code>。<code>parseRblConfig</code> 中通过 <code>legacyMap</code> 将两者均映射为 <code>'reject'</code>，前端读取时自动升级，不影响用户体验。保存时写入新值 <code>'reject'</code>，与后端协商一致。
+      </div>
+
+      <a href="#toc" class="back-top">返回目录</a>
+    </div>
+  </section>
+
+  <!-- ── 差异与待确认 ── -->
+  <section class="diff-section section-plain" id="diffs">
+    <h2>差异标注</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>编号</th><th>目标要求</th><th>webapp 当前实现</th>
+          <th>状态</th><th>复核日期</th><th>处理说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>D-001</td>
+          <td>灰名单与执行动作在语义上并行，UI 体现互斥关系</td>
+          <td>已实现：RadioGroup 互斥卡片选择器，选中态高亮，未选中态 dimmed</td>
+          <td class="status-done">已解决</td>
+          <td>2026-07-31</td>
+          <td>需求点 2 完成</td>
+        </tr>
+        <tr>
+          <td>D-002</td>
+          <td>阻断改名为拒收，移除标记，新增审核/丢弃</td>
+          <td>已实现：类型层、serde、UI、i18n 全部对齐</td>
+          <td class="status-done">已解决</td>
+          <td>2026-07-31</td>
+          <td>需求点 3 完成</td>
+        </tr>
+        <tr>
+          <td>D-003</td>
+          <td>后端是否已支持 <code>review</code> / <code>discard</code> 两个新 action 值</td>
+          <td>前端类型已定义；后端接口兼容性未经浏览器联调验证</td>
+          <td class="status-open">待验证</td>
+          <td>2026-07-31</td>
+          <td>需与后端确认 API 枚举是否已扩展，见 Q-001</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="question-section section-plain" id="questions">
+    <h2>待确认事项</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>编号</th><th>事项</th><th>原因</th>
+          <th>状态</th><th>复核日期</th><th>需要谁确认</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Q-001</td>
+          <td>后端 <code>product_action</code> 枚举是否已扩展支持 <code>review</code> 和 <code>discard</code></td>
+          <td>前端仅变更了类型定义和 UI，未联调后端；若后端枚举未更新，保存时将返回参数错误</td>
+          <td class="status-open">无法验证</td>
+          <td>2026-07-31</td>
+          <td>后端 RBL 过滤模块负责人</td>
+        </tr>
+        <tr>
+          <td>Q-002</td>
+          <td><code>review</code>（审核）动作触发后，邮件进入哪个队列；与"隔离"队列是否相同</td>
+          <td>前端 Tip 文案描述为"人工审核队列"，与隔离队列是否共用尚不确定</td>
+          <td class="status-open">无法验证</td>
+          <td>2026-07-31</td>
+          <td>产品经理 + 后端负责人</td>
+        </tr>
+        <tr>
+          <td>Q-003</td>
+          <td><code>discard</code>（丢弃）在多租户场景下是否需要权限限制</td>
+          <td>静默丢弃邮件风险较高，租户管理员是否应有此操作权限需确认</td>
+          <td class="status-open">无法验证</td>
+          <td>2026-07-31</td>
+          <td>产品经理</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── 版本历史 ── -->
+  <section class="section-plain" id="history">
+    <h2>版本历史</h2>
+    <table>
+      <thead>
+        <tr><th>版本</th><th>日期</th><th>webapp commit</th><th>对照 spec</th><th>摘要</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>v1</td>
+          <td>2026-07-31</td>
+          <td><code>ebec245</code></td>
+          <td><code>not-used</code></td>
+          <td>GT-12682-RBL优化初版：记录三个需求点——灰名单从执行动作分离（两段式布局 + serde 层 greylistEnabled 字段）、处置策略互斥卡片选择器（RadioGroup + 选中态展开子配置）、执行动作集合调整（reject/quarantine/review/discard，移除 block 和 mark）；含目录导航、差异 D-001~D-003、待确认 Q-001~Q-003。</td>
+        </tr>
+      </tbody>
+    </table>
+    <a href="#toc" class="back-top">返回目录</a>
+  </section>
+
+</div>
+</body>
+</html>
