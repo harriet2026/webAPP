@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 6,
+  "current_version": 7,
   "history": [
     {
       "version": 1,
@@ -55,6 +55,15 @@
       "ticket": "GT-12682",
       "incremental": true,
       "summary": "GT-12682-RBL优化 v2 完整重写：按 html-spec-PM-version 技能规范补充真实浏览器截图（S-1 默认态 / S-2 执行动作选中 / S-3 灰名单策略选中 / S-4 执行动作下拉展开，均为暗色主题 1305×832）；仅呈现最终实现方案；完善变更 #1 数据模型表（greylistEnabled + legacyMap）、变更 #2 RadioGroup 逐元素表、变更 #3 i18n key 变更全表；新增差异 D-001~D-003、待确认 Q-001~Q-002；乱码自检 CLEAN。"
+    },
+    {
+      "version": 7,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "6f7749d",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12660",
+      "incremental": true,
+      "summary": "GT-12660 增量：邮件安全总览执行动作图表移除"灰名单"系列（后端 key advanced_review）；追加一级目录条目 GT-12660、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-2 暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-004（key 排查过程记录）；目录 C 项编号更新为 D-001~D-004；version.json current_version 6→7。"
     }
   ]
 }
