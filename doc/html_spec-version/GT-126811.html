@@ -268,7 +268,18 @@
         </ul>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-006）</a></li>
+      <!-- 一级需求：GT-12661 身份认证与仿冒检测-去掉多出原型未定义且点击无效的例外规则按钮 -->
+      <li class="toc-l1"><a href="#gt-12661">GT-12661 身份认证与仿冒检测-去掉多出原型未定义且点击无效的例外规则按钮</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12661-change-1">移除"例外规则管理"横幅及其两个无效跳转按钮</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12661-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12661-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12661-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-007）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-002）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
@@ -321,7 +332,7 @@
           <th>AI-单<br/>平台管理员</th>
           <th>传统-单<br/>平台管理员</th>
           <th>云-多<br/>平台管理员</th>
-          <th>云-多<br/>租户管理员</th>
+          <th>云-多<br/>租户理员</th>
           <th>AI-多<br/>平台管理员</th>
           <th>AI-多<br/>租户管理员</th>
           <th>传统-多<br/>平台管理员</th>
@@ -467,7 +478,7 @@
         <p class="trigger-path">触发路径：页面加载默认态（<code>greylistEnabled=false</code>）· 暗色主题 / 1305×832 / AI版·多租户 / 平台管理员</p>
         <figure>
           <img src="./screenshots/GT-12682-rbl-default-action-selected-dark-1305x832.png" alt="执行动作卡片选中态：左卡高蓝色边框，内部展开 Select 下拉；右卡灰色 dimmed" />
-          <figcaption>图 S-2：执行动作卡片选中态。左卡蓝色边框高亮，右���单选圆点在左卡处于选中状态，左卡内部展开执行动作 Select（当前值：拒收）。右卡"灰名单策略"opacity 降低，内部无子配置展开。底部显示"暂无未保存更改"，保存按钮 disabled。</figcaption>
+          <figcaption>图 S-2：执行动作卡片选中态。左卡蓝色边框高亮，右单选圆点在左卡处于选中状态，左卡内部展开执行动作 Select（当前值：拒收）。右卡"灰名单策略"opacity 降低，内部无子配置展开。底部显示"暂无未保存更改"，保存按钮 disabled。</figcaption>
         </figure>
       </div>
       <div class="interaction-preview">
@@ -596,7 +607,7 @@
             <td>审核</td>
             <td><code>review</code></td>
             <td>审核</td>
-            <td>邮件进入人工审核队列，等待管理员决策。适用于需要人工判断的场景</td>
+            <td>邮件进入人工审核队列，等待管理员决策。适用于要人工判断的场景</td>
             <td><span class="tag tag-added">新增</span></td>
           </tr>
           <tr>
@@ -849,7 +860,7 @@
         </p>
         <div class="callout callout-info">
           修改位置：<code>src/components/security/sender-filter/SenderFilterDrawer.tsx</code> — 新增内联 <code>DomainCombobox</code> 子组件，替换 domain 分支下的 Select/空态提示；
-          <code>messages/zh.json</code> 和 <code>messages/en.json</code> — 更新 <code>senderType_domain</code>、<code>senderPlaceholder_domain</code>，新增 <code>domainSuggestions</code>。
+          <code>messages/zh.json</code> 和 <code>messages/en.json</code>  更新 <code>senderType_domain</code>、<code>senderPlaceholder_domain</code>，新增 <code>domainSuggestions</code>。
         </div>
       </div>
 
@@ -987,6 +998,111 @@
     </div>
   </section>
 
+  <!-- ══════════════ GT-12661 需求入口锚点 ══════════════ -->
+  <div id="gt-12661" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12661 增量内容 ══════════════ -->
+  <section id="incremental-gt-12661-auth-spoofing-remove-exception-banner">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12661</span>
+      <span class="incr-title">身份认证与仿冒检测-去掉多出原型未定义且点击无效的例外规则按钮</span>
+      <span class="incr-meta">2026-07-31 &nbsp;·&nbsp; commit <code>54cb647</code> &nbsp;·&nbsp; 路由 <code>/zh/security/pipeline</code> → 认证仿冒检测配置面板</span>
+    </div>
+
+    <div id="c12661-change-1">
+      <h3>变更 1 · 移除"例外规则管理"横幅及其两个无效跳转按钮</h3>
+
+      <div id="c12661-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          "认证仿冒检测配置"面板底部原存在一个"例外规则管理"横幅（<code>ExceptionRulesEntry</code> 组件），
+          内含"前往策略流水线"和"查看当前例外"两个按钮。该横幅在产品原型中无对应定义，两个按钮点击后无任何实际功能响应，
+          属于误植入的冗余 UI，对用户造成困惑。
+        </p>
+        <p>
+          本次变更从 <code>AuthSpoofingPage.tsx</code> 中移除 <code>&lt;ExceptionRulesEntry /&gt;</code> 的渲染调用及对应 import，
+          <code>ExceptionRulesEntry</code> 组件文件本身保留未删除。面板底部直接以"保存"按钮结束，布局更简洁。
+        </p>
+        <div class="callout callout-info">
+          修改位置：<code>src/components/security/AuthSpoofingPage.tsx</code> — 移除第 226 行 <code>&lt;ExceptionRulesEntry /&gt;</code> 使用及第 19 行对应 import。
+        </div>
+      </div>
+
+      <div id="c12661-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="trigger-path">
+            触发路径：安全策略 → 策略流水线 → 身份认证与仿冒检测「配置」→ 等待面板加载完成
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12661-S1-auth-spoofing-config-default-dark-1253x832.png"
+                 alt="S-1 认证仿冒检测配置面板默认态 — 顶部基础格式检查区域"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 认证仿冒检测配置面板 — 默认态（顶部）</strong><br>
+              路由：<code>/zh/security/pipeline</code> → 认证仿冒检测配置面板 &nbsp;·&nbsp;
+              主题：暗色 &nbsp;·&nbsp; 视口：1253×832 &nbsp;·&nbsp;
+              形态：AI版·多租户 &nbsp;·&nbsp; 角色：租户管理员（示例租户 A，Mock 演示数据）<br>
+              面板标题"认证仿冒检测配置"，左侧导航高亮"身份认证与仿冒检测"，顶部显示"基础格式检查"折叠区
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12661-S2-auth-spoofing-config-bottom-no-exception-banner-dark-1253x832.png"
+                 alt="S-2 认证仿冒检测配置面板底部 — 例外规则管理横幅已移除，保存按钮直接位于底部右侧"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 认证仿冒检测配置面板 — 底部（例外规则管理横幅已移除）</strong><br>
+              原有"例外规则管理"横幅（含"前往策略流水线"/"查看当前例外"两按钮）已消失；
+              面板内容区域直接以配置项结束，"保存"按钮位于右下角；页面布局更简洁，无冗余跳转入口
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12661-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>"例外规则管理"横幅容器</td>
+              <td>面板底部渲染 <code>ExceptionRulesEntry</code> 组件，包含标题"例外规则管理"和描述文案"本模块不配置例外规则，请在策略流水线统一管理"</td>
+              <td>完全移除，不再渲染</td>
+              <td><code>src/components/security/AuthSpoofingPage.tsx</code> 第 226 行（已移除）</td>
+              <td>[Base] 所有形态/角色一致</td>
+            </tr>
+            <tr>
+              <td>"前往策略流水线"按钮</td>
+              <td>横幅右侧按钮，点击无实际响应（原型未定义跳转行为）</td>
+              <td>随横幅一并移除</td>
+              <td><code>src/components/security/auth-spoofing/ExceptionRulesEntry.tsx</code>（组件文件保留，渲染调用移除）</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>"查看当前例外"按钮</td>
+              <td>横幅右侧按钮，点击无实际响应（原型未定义跳转行为）</td>
+              <td>随横幅一并移除</td>
+              <td><code>src/components/security/auth-spoofing/ExceptionRulesEntry.tsx</code>（组件文件保留，渲染调用移除）</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>面板底部布局</td>
+              <td>底部：配置项 → 例外规则横幅 → 保存按钮</td>
+              <td>底部：配置项 → 保存按钮（布局更紧凑）</td>
+              <td><code>src/components/security/AuthSpoofingPage.tsx</code></td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+        <a class="back-link" href="#toc">&#8593; 返回目录</a>
+      </div>
+    </div>
+  </section>
+
   <!-- ══════════════ C. 差异标注 ══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -1027,7 +1143,7 @@
         <tr><td width="140">状态</td><td><span class="tag tag-added">已解决</span></td></tr>
         <tr><td>描述</td><td>最初过滤尝试了 <code>greylist</code> 和 <code>sideline</code>，均未命中。通过 console.log 确认数据 key 后，发现实际是 <code>advanced_review</code>（在 <code>emailDisposal.filters.actions.advanced_review</code> 中翻译为"灰名单"）。</td></tr>
         <tr><td>解决版本</td><td>GT-12660 · 2026-07-31</td></tr>
-        <tr><td>验证依据</td><td>图 S-1/S-2 截图图例不含"灰名单"；<code>messages/zh.json</code> 第 5691 ��确认 key 映射</td></tr>
+        <tr><td>验证依据</td><td>图 S-1/S-2 截图图例不含"灰名单"；<code>messages/zh.json</code> 第 5691 确认 key 映射</td></tr>
       </tbody>
     </table>
 
@@ -1049,6 +1165,16 @@
         <tr><td>描述</td><td>旧实现在租户无接收域名时展示提示文案（i18n key <code>senderFilter.noTenantDomains</code>）；新 <code>DomainCombobox</code> 不再渲染该逻辑。key 仍保留在 <code>messages/zh.json</code> 和 <code>messages/en.json</code> 中（未删除），属于死字符串。不影响运行时，可在下一次国际化清理中移除。</td></tr>
         <tr><td>解决版本</td><td>GT-12665 · 2026-07-31</td></tr>
         <tr><td>验证依据</td><td>S-3/S-4/S-5 截图均为自由输入模式，浏览器快照无 noTenantDomains 提示；<code>SenderFilterDrawer.tsx</code> 源码 domain 分支已替换为 <code>DomainCombobox</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-007 · ExceptionRulesEntry 组件文件保留但渲染调用已移除，可在后续清理中删除</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·暂保留</span></td></tr>
+        <tr><td>描述</td><td><code>src/components/security/auth-spoofing/ExceptionRulesEntry.tsx</code> 组件文件本身未被删除，但 <code>AuthSpoofingPage.tsx</code> 已移除其渲染调用和 import，属于死代码。不影响运行时，可在后续组件清理时一并删除。</td></tr>
+        <tr><td>解决版本</td><td>GT-12661 · 2026-07-31</td></tr>
+        <tr><td>验证依据</td><td>S-2 截图底部无"例外规则管理"横幅；<code>AuthSpoofingPage.tsx</code> 源码确认无 <code>ExceptionRulesEntry</code> import 和渲染</td></tr>
       </tbody>
     </table>
   </section>
@@ -1113,6 +1239,12 @@
           <td>2026-07-31</td>
           <td><code>bbe5bee</code></td>
           <td>增量追加 GT-12665 需求：发信人黑白名单域名类型输入控件由 Select（仅限租户接收域名）改为 <code>DomainCombobox</code>（可自由输入任意域名，focus 时展示租户接收域名建议列表）；新增一级目录条目 GT-12665、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-5 暗色 1253×832 / 1.3 逐元素变更表）；追加差异 D-006（<code>noTenantDomains</code> key 保留但不再渲染）；目录 C 项编号更新为 D-001~D-006；version.json current_version 8→9。</td>
+        </tr>
+        <tr>
+          <td>v10</td>
+          <td>2026-07-31</td>
+          <td><code>54cb647</code></td>
+          <td>增量追加 GT-12661 需求：从认证仿冒检测配置面板移除底部"例外规则管理"横幅（含"前往策略流水线"和"查看当前例外"两个无效按钮）；新增一级目录条目 GT-12661、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 底部无横幅，暗色 1253×832 / 1.3 逐元素变更表）；追加差异 D-007（<code>ExceptionRulesEntry</code> 组件文件保留为死代码）；目录 C 项编号更新为 D-001~D-007；version.json current_version 9→10。</td>
         </tr>
       </tbody>
     </table>
