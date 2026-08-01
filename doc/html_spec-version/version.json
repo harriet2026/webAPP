@@ -1,6 +1,6 @@
 {
   "module": "sender-filter-optimization",
-  "current_version": 5,
+  "current_version": 8,
   "history": [
     {
       "version": 1,
@@ -64,6 +64,15 @@
       "ticket": "GT-12701",
       "incremental": true,
       "summary": "GT-12695 v4（GT-12701 认证仿冒检测配置页面优化项：认证协议组件修复）：在 GT-12695.html 中追加 GT-12701 需求节（1个变更点）：邮件身份验证流程节点选中态上边缘裁切 Bug 修复（pb-2→py-1，顶部 4px 留白）；目录追加 GT-12701 卡片块；补充真实截图 S-24~S-26（SPF/DMARC/PTR 三节点选中态修复后验证）；差异标注新增 D-5（已解决）；版本历史追加 v4。"
+    },
+    {
+      "version": 8,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12705",
+      "incremental": true,
+      "summary": "GT-12695 v5（GT-12705 身份认证与仿冒检测——认证协议检查：去掉例外配置说明文案）：追加 GT-12705 需求节（1个变更点）：移除认证协议检查区块顶部蓝色例外配置说明条（exceptionBanner + 前往策略流水线 Link，ProtocolChecksSection.tsx 7行JSX+Info导入移除，i18n key保留）；目录追加 GT-12705 卡片块；补充真实截图 S-27（移除后默认态验证）；差异标注新增 D-6（已移除）；版本历史追加 v5。"
     }
   ]
 }

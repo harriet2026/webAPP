@@ -371,13 +371,32 @@
       </div>
     </div>
 
+    <!-- 需求：GT-12705 身份认证与仿冒检测——认证协议检查：去掉例外配置说明文案 -->
+    <div class="toc-req">
+      <div class="toc-req-header">
+        <a href="#req-gt12705">GT-12705 身份认证与仿冒检测——认证协议检查：去掉例外配置说明文案</a>
+      </div>
+      <div class="toc-req-body">
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">1</span>
+            <a href="#gt12705-c1">移除认证协议检查区块顶部蓝色例外配置说明条</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#gt12705-c1-states">1.1 截图式交互预览（移除前 vs 移除后）</a></li>
+            <li><a href="#gt12705-c1-elements">1.2 逐元素说明</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- 附录 -->
     <ul class="toc-misc">
       <li><a href="#meta">A. 元信息与事实源</a></li>
       <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
-      <li><a href="#diff">C. 差异标注（D-1 ~ D-5）</a></li>
+      <li><a href="#diff">C. 差异标注（D-1 ~ D-6）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-1 ~ Q-3）</a></li>
-      <li><a href="#version-history">E. 版本历史（v1 ~ v4）</a></li>
+      <li><a href="#version-history">E. 版本历史（v1 ~ v5）</a></li>
     </ul>
   </section>
 
@@ -413,7 +432,7 @@
   <section id="form-role-matrix">
     <h2>B. 产品形态 × 角色差异矩阵</h2>
     <div class="matrix-legend">
-      <span>✅ 显示且可操作</span>
+      <span>显示且可操作</span>
       <span>🔒 显示但只读</span>
       <span>❌ 隐藏 / 不存在</span>
       <span>— 该形态无此角色</span>
@@ -1187,6 +1206,84 @@
     </div>
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════
+       GT-12705 身份认证与仿冒检测——认证协议检查：去掉例外配置说明文案
+  ══════════════════════════════════════════════════════════ -->
+  <div id="req-gt12705" style="scroll-margin-top:1.5rem;"></div>
+
+  <div class="incr-header" id="gt12705-header">
+    <div>
+      <span class="incr-badge">GT-12705</span>
+      <span class="incr-title">身份认证与仿冒检测——认证协议检查：去掉例外配置说明文案</span>
+    </div>
+    <div class="incr-meta">
+      关联模块：身份认证与仿冒检测 &gt; 认证协议检查（策略流水线 阶段2）·
+      变更类型：功能移除 ·
+      最后更新：2026-08-01
+    </div>
+  </div>
+
+  <div class="incremental-section" id="gt12705-c1">
+    <div class="incr-section-header">
+      <span class="incr-num">1</span>
+      <span>移除认证协议检查区块顶部蓝色例外配置说明条</span>
+      <span class="tag tag-removed">功能移除</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12705-c1-states">1.1 截图式交互预览</h3>
+
+      <p class="state-label">移除前（用户提交的 Bug 报告截图）</p>
+      <div class="callout callout-warn">
+        移除前在认证协议检查区块策略模板行上方展示蓝色信息条：「例外规则（白名单）请在【策略流水线】模块配置，本模块仅设置协议检查规则」及「前往策略流水线」跳转链接。该条文案对用户操作造成干扰且信息已通过其他途径传达，需移除（见 D-6）。
+      </div>
+
+      <p class="state-label">状态 A — 移除后：认证协议检查区块默认态</p>
+      <div class="screenshot-wrap">
+        <img src="../screenshots/S-27-gt12705-protocol-checks-no-banner.png"
+             alt="认证协议检查区块移除蓝色说明条后：直接展示策略模板选择器、观察模式开关、邮件身份验证流程图和 Tab 栏" />
+        <p class="screenshot-caption">S-27 · 认证协议检查默认态（移除后，AI版·单租户，zh，dark，1528×832）。区块顶部蓝色例外配置说明条已消失；内容直接从策略模板选择器（宽松 / 标准 / 严格 / 自定义，当前选中「标准」）和观察模式开关开始；邮件身份验证流程图（SPF 阻断 → DKIM 隔离 → DMARC 阻断 → PTR 检查）完整可见；当前激活 Tab 为「SPF」，下方展示「硬拒绝 (Fail)」规则。</p>
+      </div>
+
+      <h3 id="gt12705-c1-elements">1.2 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>蓝色例外配置说明条</td>
+            <td>
+              显示于认证协议检查区块顶部：<br>
+              <code>Info</code> 图标（blue-600）+ 文案「例外规则（白名单）请在【策略流水线】模块配置，本模块仅设置协议检查规则」<br>
+              + 右对齐「前往策略流水线」Link 按钮<br>
+              i18n key：<code>authSpoofing.exceptionBanner</code>
+            </td>
+            <td>已完全移除，不再渲染</td>
+            <td>整块 <code>div.flex.items-center.gap-2.rounded.border.border-blue-200</code> 从 JSX 中删除；<code>Info</code> 图标导入同步移除；i18n key <code>exceptionBanner</code> 保留（避免影响其他潜在引用）</td>
+          </tr>
+          <tr>
+            <td>「前往策略流水线」Link 按钮</td>
+            <td>显示于蓝色条右侧，i18n key：<code>authSpoofing.goToPipeline</code></td>
+            <td>随父容器一并移除</td>
+            <td><code>goToPipeline</code> key 在 <code>ExceptionRulesEntry.tsx</code> 中仍有引用，i18n key 保留不删</td>
+          </tr>
+          <tr>
+            <td>认证协议检查区块内容顺序</td>
+            <td>蓝色说明条 → 策略模板行 → 邮件身份验证流程 → Tab 栏 + 规则列表</td>
+            <td>策略模板行 → 邮件身份验证流程 → Tab 栏 + 规则列表</td>
+            <td>视觉减少一行高度，内容区更紧凑</td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="3"><code>src/components/security/auth-spoofing/ProtocolChecksSection.tsx</code>：移除 7 行 JSX（div 容器、Info 图标、span 文案、Button）及 <code>Info</code> 图标导入</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
   <!-- ══════════════ C. 差异标注 ═══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -1235,6 +1332,13 @@
           <td>GT-12701：邮件身份验证流程节点选中态（<code>ring-2 ring-primary ring-offset-2</code>）上边缘被 <code>overflow-x-auto</code> 容器裁切，选中框仅显示三边</td>
           <td>2026-08-01</td>
           <td>已修复：节点行容器 class <code>pb-2</code> → <code>py-1</code>，顶部留白 4px 恰好容纳 ring 溢出；浏览器截图 S-24~S-26 验证四节点选中态均完整显示</td>
+        </tr>
+        <tr>
+          <td>D-6</td>
+          <td><span class="tag tag-removed">已移除</span></td>
+          <td>GT-12705：认证协议检查区块顶部蓝色例外配置说明条（<code>exceptionBanner</code>）已移除；「前往策略流水线」Link 按钮随之消失</td>
+          <td>2026-08-01</td>
+          <td>已移除：<code>ProtocolChecksSection.tsx</code> 删除整块 div（7 行 JSX）及 <code>Info</code> 导入；i18n key <code>exceptionBanner</code> 和 <code>goToPipeline</code> 保留（后者在 ExceptionRulesEntry.tsx 仍有引用）；截图 S-27 验证移除后状态</td>
         </tr>
       </tbody>
     </table>
@@ -1312,6 +1416,13 @@
           <td><code>GT-12695</code></td>
           <td>GT-12701</td>
           <td>追加 GT-12701 需求节（1 个变更点）：邮件身份验证流程节点选中态上边缘裁切 Bug 修复（<code>pb-2</code> → <code>py-1</code>）。补充真实截图 S-24~S-26（SPF/DMARC/PTR 三节点选中态修复后验证）；更新目录（新增 GT-12701 卡片块）、差异标注（新增 D-5 已解决）；版本历史追加 v4。</td>
+        </tr>
+        <tr>
+          <td>v5</td>
+          <td>2026-08-01</td>
+          <td><code>GT-12695</code></td>
+          <td>GT-12705</td>
+          <td>追加 GT-12705 需求节（1 个变更点）：移除认证协议检查区块顶部蓝色例外配置说明条（exceptionBanner + 前往策略流水线 Link）；i18n key 保留；补充真实截图 S-27（移除后默认态验证）；目录追加 GT-12705 卡片块；差异标注新增 D-6（已移除）；版本历史追加 v5。</td>
         </tr>
       </tbody>
     </table>
