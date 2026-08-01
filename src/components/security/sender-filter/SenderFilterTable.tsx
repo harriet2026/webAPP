@@ -142,6 +142,14 @@ export function SenderFilterTable({
       },
     },
     {
+      accessorKey: 'rule.priority',
+      header: t('senderFilter.priority'),
+      cell: ({ row }) => (
+        <span className="text-sm tabular-nums">{row.original.rule.priority}</span>
+      ),
+      size: 80,
+    },
+    {
       id: 'status',
       header: t('senderFilter.status'),
       cell: ({ row }) => (
