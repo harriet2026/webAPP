@@ -220,7 +220,7 @@
 <body>
 <div class="page-wrap">
 
-  <!-- ══════════════ HEADER ══════════════ -->
+  <!-- ══════════════ HEADER ═══════════════ -->
   <header class="spec-header">
     <span class="ticket-badge">GT-12695</span>
     <h1>增量功能规格 · v2</h1>
@@ -233,8 +233,8 @@
     </p>
   </header>
 
-  <!-- ══════════════ 本版变更总览 ══════════════ -->
-  <!-- ══════════════ 目录 ══════════════ -->
+  <!-- ══════════════ 本版变更总览 ═══════════════ -->
+  <!-- ══════════════ 目录 ═══════════════ -->
   <section id="toc">
     <h2>目录</h2>
 
@@ -349,17 +349,39 @@
       </div>
     </div>
 
+    <!-- 需求：GT-12701 认证仿冒检测配置页面优化项：认证协议组件修复 -->
+    <div class="toc-req">
+      <div class="toc-req-header">
+        <a href="#req-gt12701">GT-12701 认证仿冒检测配置页面优化项：认证协议组件修复</a>
+      </div>
+      <div class="toc-req-body">
+
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">1</span>
+            <a href="#gt12701-c1">邮件身份验证流程节点选中态上边缘裁切修复</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#gt12701-c1-states">1.1 截图式交互预览（修复前 vs 修复后）</a></li>
+            <li><a href="#gt12701-c1-elements">1.2 逐元素说明</a></li>
+            <li><a href="#gt12701-c1-root">1.3 根因与修复方案</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
     <!-- 附录 -->
     <ul class="toc-misc">
       <li><a href="#meta">A. 元信息与事实源</a></li>
       <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
-      <li><a href="#diff">C. 差异标注（D-1 ~ D-4）</a></li>
+      <li><a href="#diff">C. 差异标注（D-1 ~ D-5）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-1 ~ Q-3）</a></li>
-      <li><a href="#version-history">E. 版本历史（v1 ~ v3）</a></li>
+      <li><a href="#version-history">E. 版本历史（v1 ~ v4）</a></li>
     </ul>
   </section>
 
-  <!-- ══════════════ A. 元信息 ══════════════ -->
+  <!-- ══════════════ A. 元信息 ═══════════════ -->
   <section id="meta">
     <h2>A. 元信息与事实源</h2>
     <table>
@@ -387,7 +409,7 @@
     </div>
   </section>
 
-  <!-- ══════════════ B. 产品形态 × 角色矩阵 ══════════════ -->
+  <!-- ══════════════ B. 产品形态 × 角色矩阵 ═══════════════ -->
   <section id="form-role-matrix">
     <h2>B. 产品形态 × 角色差异矩阵</h2>
     <div class="matrix-legend">
@@ -455,7 +477,7 @@
     </div>
   </section>
 
-  <!-- ══════════════ 变更 1 ══════════════ -->
+  <!-- ══════════════ 变更 1 ═══════════════ -->
   <!-- 需求锚点：供目录第一层跳转 -->
   <div id="req-gt12696" style="scroll-margin-top: 1.5rem;"></div>
   <div class="incremental-section" id="change-1">
@@ -514,7 +536,7 @@
     </div>
   </div>
 
-  <!-- ══════════════ 变更 2 ══════════════ -->
+  <!-- ══════════════ 变更 2 ═══════════════ -->
   <div class="incremental-section" id="change-2">
     <div class="incr-header">
       <span class="incr-num">2</span>
@@ -578,7 +600,7 @@
     </div>
   </div>
 
-  <!-- ══════════════ 变更 3 ══════════════════ -->
+  <!-- ══════════════ 变更 3 ═══════════════════ -->
   <div class="incremental-section" id="change-3">
     <div class="incr-header">
       <span class="incr-num">3</span>
@@ -712,7 +734,7 @@
     </div>
   </div>
 
-  <!-- ══════════════ 变更 5 ══════════════ -->
+  <!-- ══════════════ 变更 5 ═══════════════ -->
   <div class="incremental-section" id="change-5">
     <div class="incr-header">
       <span class="incr-num">5</span>
@@ -792,7 +814,7 @@
     </div>
   </div>
 
-  <!-- ══════════════ 变更 6 ══════════════ -->
+  <!-- ══════════════ 变更 6 ═══════════════ -->
   <div class="incremental-section" id="change-6">
     <div class="incr-header">
       <span class="incr-num">6</span>
@@ -879,7 +901,7 @@
 
   <!-- ══════════════════════════════════════════════════════════
        GT-12700 身份认证与仿冒检测—基础格式检查
-  ══════════════════════════════════════════════════════════ -->
+  ═══════════════════════════════════════════════════════════ -->
   <div id="req-gt12700" style="scroll-margin-top:1.5rem;"></div>
 
   <div class="incr-header" id="gt12700-header">
@@ -1052,7 +1074,120 @@
     </div>
   </div>
 
-  <!-- ══════════════ C. 差异标注 ══════════════ -->
+  <!-- ══════════════════════════════════════════════════════════
+       GT-12701 认证仿冒检测配置页面优化项：认证协议组件修复
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="req-gt12701" style="scroll-margin-top:1.5rem;"></div>
+
+  <div class="incr-header" id="gt12701-header">
+    <div>
+      <span class="incr-badge">GT-12701</span>
+      <span class="incr-title">认证仿冒检测配置页面优化项：认证协议组件修复</span>
+    </div>
+    <div class="incr-meta">
+      关联模块：身份认证与仿冒检测 &gt; 认证协议检查 &gt; 邮件身份验证流程（策略流水线 阶段2）·
+      变更类型：Bug 修复 ·
+      最后更新：2026-08-01
+    </div>
+  </div>
+
+  <div class="incremental-section" id="gt12701-c1">
+    <div class="incr-section-header">
+      <span class="incr-num">1</span>
+      <span>邮件身份验证流程节点选中态上边缘裁切修复</span>
+      <span class="tag tag-changed">Bug 修复</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12701-c1-root">1.3 根因与修复方案</h3>
+      <table>
+        <thead><tr><th>项目</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>根因</td>
+            <td>
+              <code>AuthFlowDiagram.tsx</code> 节点行容器原 class 为 <code>flex items-center gap-2 overflow-x-auto pb-2</code>，仅有底部 8px 留白，顶部无留白。<br>
+              节点选中态使用 <code>ring-2 ring-primary ring-offset-2</code>（ring 2px + offset 2px = 向外扩展 4px），顶部溢出 4px 被 <code>overflow-x-auto</code> 的裁切边界截断，导致选中框上边缘不可见。
+            </td>
+          </tr>
+          <tr>
+            <td>修复方案</td>
+            <td>将节点行容器 class 由 <code>pb-2</code> 改为 <code>py-1</code>（上下各 4px），为 ring-offset(2px) + ring(2px) 共 4px 的向外溢出提供精确顶部留白，同时底部也保持视觉留白。</td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td><code>src/components/security/auth-spoofing/AuthFlowDiagram.tsx</code> 第 73 行，仅 1 处 class 变更</td>
+          </tr>
+          <tr>
+            <td>影响范围</td>
+            <td>仅 <code>AuthFlowDiagram</code> 节点行容器顶部留白；交互逻辑、节点颜色、点击回调、其他模块均不受影响</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="gt12701-c1-states">1.1 截图式交互预览</h3>
+
+      <p class="state-label">修复前（Bug 复现）</p>
+      <div class="callout callout-warn">
+        修复前截图来自用户提交的 Bug 报告截图（已记录于 D-5）。DMARC 节点选中时，<code>ring-2 ring-primary ring-offset-2</code> 的上边缘 4px 被容器裁切，紫色选中框仅显示左/右/下三边，顶边不可见。
+      </div>
+
+      <p class="state-label">状态 A — 修复后：SPF 节点选中态（默认激活）</p>
+      <div class="screenshot-wrap">
+        <img src="../screenshots/S-24-gt12701-protocol-flow-spf-selected.png"
+             alt="邮件身份验证流程：SPF 节点选中，蓝色 ring 边框四边完整显示，上边缘不再被裁切" />
+        <p class="screenshot-caption">S-24 · SPF 节点选中态（修复后）。蓝色 <code>ring-2 ring-primary ring-offset-2</code> 边框四边完整可见，顶部 4px 留白（<code>py-1</code>）恰好容纳溢出的 ring。Tab 栏联动切换至「SPF」，下方显示 SPF 协议规则（硬拒绝/软拒绝/未维护）。</p>
+      </div>
+
+      <p class="state-label">状态 B — 修复后：DMARC 节点选中态</p>
+      <div class="screenshot-wrap">
+        <img src="../screenshots/S-25-gt12701-protocol-flow-dmarc-selected.png"
+             alt="邮件身份验证流程：DMARC 节点选中，紫色 ring 边框四边完整显示" />
+        <p class="screenshot-caption">S-25 · DMARC 节点选中态（修复后）。紫色边框四边完整，上边缘不再被裁切（Bug 复现时此边缘缺失）。下方 Tab 联动切换至「DMARC」，显示 p=reject / p=quarantine / p=none 三条规则。</p>
+      </div>
+
+      <p class="state-label">状态 C — 修复后：PTR 节点选中态</p>
+      <div class="screenshot-wrap">
+        <img src="../screenshots/S-26-gt12701-protocol-flow-ptr-selected.png"
+             alt="邮件身份验证流程：PTR 节点选中，橙色 ring 边框四边完整显示" />
+        <p class="screenshot-caption">S-26 · PTR 节点选中态（修复后）。橙色边框四边完整。下方 Tab 联动切换至「PTR」，显示记录不存在 / 查询失败 / 与EHLO不匹配三条规则。</p>
+      </div>
+
+      <h3 id="gt12701-c1-elements">1.2 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>节点行容器（<code>AuthFlowDiagram</code> 第 73 行）</td>
+            <td><code>flex items-center gap-2 overflow-x-auto pb-2</code></td>
+            <td><code>flex items-center gap-2 overflow-x-auto py-1</code></td>
+            <td>将单侧 <code>pb-2</code>（8px）改为双侧 <code>py-1</code>（上下各 4px）；顶部新增 4px 留白，使 <code>ring-offset-2 + ring-2</code> 的 4px 向外扩展不再被裁切</td>
+          </tr>
+          <tr>
+            <td>节点选中态样式（<code>FlowNodeButton</code>）</td>
+            <td colspan="2"><code>ring-2 ring-primary ring-offset-2</code>（未变更）</td>
+            <td>选中态样式本身无误；问题在于容器没有为其预留顶部空间</td>
+          </tr>
+          <tr>
+            <td>可点击节点（SPF / DKIM / DMARC / PTR）</td>
+            <td>选中时上边缘 ring 被裁切</td>
+            <td>选中时四边 ring 完整显示</td>
+            <td>全部 4 个协议节点均受益于此修复</td>
+          </tr>
+          <tr>
+            <td>不可点击节点（策略流水线·例外检查 / 下一模块）</td>
+            <td colspan="2">无变化（<code>cursor-default</code>，无 ring 样式）</td>
+            <td>视觉与行为均不受影响</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ C. 差异标注 ═══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
     <table>
@@ -1094,11 +1229,18 @@
           <td>2026-08-01</td>
           <td>前端 fallback 已实现；后端兼容待确认（Q-3）</td>
         </tr>
+        <tr>
+          <td>D-5</td>
+          <td><span class="tag tag-changed">已解决</span></td>
+          <td>GT-12701：邮件身份验证流程节点选中态（<code>ring-2 ring-primary ring-offset-2</code>）上边缘被 <code>overflow-x-auto</code> 容器裁切，选中框仅显示三边</td>
+          <td>2026-08-01</td>
+          <td>已修复：节点行容器 class <code>pb-2</code> → <code>py-1</code>，顶部留白 4px 恰好容纳 ring 溢出；浏览器截图 S-24~S-26 验证四节点选中态均完整显示</td>
+        </tr>
       </tbody>
     </table>
   </section>
 
-  <!-- ══════════════ D. 待确认事项 ══════════════ -->
+  <!-- ══════════════ D. 待确认事项 ═══════════════ -->
   <section id="questions">
     <h2>D. 待确认事项</h2>
     <table>
@@ -1137,7 +1279,7 @@
     </table>
   </section>
 
-  <!-- ══════════════ E. 版本历史 ══════════════ -->
+  <!-- ══════════════ E. 版本历史 ═══════════════ -->
   <section id="version-history">
     <h2>E. 版本历史</h2>
     <table>
@@ -1163,6 +1305,13 @@
           <td><code>GT-12695</code></td>
           <td>GT-12700</td>
           <td>追加 GT-12700 需求节（2 个变更点）：① 执行动作统一为隔离/审核/拒收/丢弃（移除 accept，新增 audit，文案精简）；② 下拉新增各选项说明文字（288px 宽，i18n formatActionDesc）。补充真实截图 S-19~S-23（共 5 张）；更新目录、差异标注（新增 D-4）、待确认事项（新增 Q-3）。</td>
+        </tr>
+        <tr>
+          <td>v4</td>
+          <td>2026-08-01</td>
+          <td><code>GT-12695</code></td>
+          <td>GT-12701</td>
+          <td>追加 GT-12701 需求节（1 个变更点）：邮件身份验证流程节点选中态上边缘裁切 Bug 修复（<code>pb-2</code> → <code>py-1</code>）。补充真实截图 S-24~S-26（SPF/DMARC/PTR 三节点选中态修复后验证）；更新目录（新增 GT-12701 卡片块）、差异标注（新增 D-5 已解决）；版本历史追加 v4。</td>
         </tr>
       </tbody>
     </table>

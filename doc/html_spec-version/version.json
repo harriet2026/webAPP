@@ -56,5 +56,14 @@
       "incremental": true,
       "summary": "GT-12695 v3（GT-12700 身份认证与仿冒检测—基础格式检查）：在 GT-12695.html 中追加 GT-12700 需求节（2 个变更点）：①执行动作统一为隔离/审核/拒收/丢弃（移除 accept/新增 audit/文案精简/前端 normalizeFormatItem fallback）；②下拉新增说明文字（288px，i18n formatActionDesc 四语言）；目录追加 GT-12700 卡片块；补充真实截图 S-19~S-23（共 5 张）；新增差异 D-4、待确认 Q-3；版本历史追加 v3。"
     }
+    ,{
+      "version": 7,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12701",
+      "incremental": true,
+      "summary": "GT-12695 v4（GT-12701 认证仿冒检测配置页面优化项：认证协议组件修复）：在 GT-12695.html 中追加 GT-12701 需求节（1个变更点）：邮件身份验证流程节点选中态上边缘裁切 Bug 修复（pb-2→py-1，顶部 4px 留白）；目录追加 GT-12701 卡片块；补充真实截图 S-24~S-26（SPF/DMARC/PTR 三节点选中态修复后验证）；差异标注新增 D-5（已解决）；版本历史追加 v4。"
+    }
   ]
 }
