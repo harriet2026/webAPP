@@ -2081,7 +2081,7 @@
     "adminAccountTaken": "该账号已存在（不区分大小写），请换一个"
   },
   "users": {
-    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安��������约）",
+    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安����������约）",
     "resetPassword": {
       "title": "重置密码",
       "description": "为管理员「{username}」设置新密码，重置后需用新密码登录。",
@@ -2442,7 +2442,7 @@
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号是否泄露并启用登录限速。",
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
-      "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证���时时间。",
+      "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，���适当调大认证���时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
@@ -3374,7 +3374,7 @@
   },
   "ipFrequency": {
     "title": "IP 频率限制",
-    "description": "限制每个 IP 地址的连接数、认���失败次数和命���错误次数",
+    "description": "限制每个 IP 地址的连接数���认���失败次数和命���错误次数",
     "basicSettings": "基础设置",
     "ruleName": "规则名称",
     "ruleNamePlaceholder": "如：合作伙伴IP限制",
@@ -3684,7 +3684,7 @@
     "executeActionWhitelistTip": "选择当IP命中白名单规则时的处理方式。投递会直接放行，标记投递会添加标记后放行。",
     "basicSettings": "基础设置",
     "remarkTitle": "备注说明",
-    "remarkPlaceholder": "可选，规则说明或备��信息...",
+    "remarkPlaceholder": "可选，规��说明或备��信息...",
     "saveAndEnable": "保��并启用",
     "blacklistRuleDesc": "配置IP黑名单规则，阻断或处置指定IP地址/段",
     "whitelistRuleDesc": "配置IP白名单规则，信任的IP直接放行或标记",
@@ -3964,7 +3964,7 @@
     "unsavedChangesBanner": "有未保存的更改",
     "blockAllTitle": "无法保存配置",
     "blockAllMessage": "当前配置将阻断所有海外邮件流，请至少保留一个收发方向。",
-    "versionConflict": "配置已被他人修改，请刷��后重试"
+    "versionConflict": "配置已被他��修改，请刷��后重试"
   },
   "geoipLibrary": {
     "title": "自定义IP定位库",
@@ -4141,7 +4141,7 @@
     "priorityHelp": "数值越大优先级越高，优先级高的规则先匹配",
     "status": "状态",
     "complexCondition": "复杂条件",
-    "recipientSection": "收信人配置",
+    "recipientSection": "收信人配���",
     "recipientType": "收信人类型",
     "recipientType_individual": "个人邮箱",
     "recipientValue": "收信人邮箱",
@@ -4428,7 +4428,7 @@
       "mailFromEmpty": "空MAIL FROM",
       "mailFromInvalid": "无效MAIL FROM",
       "envelopeHeaderMismatch": "信封与头部不匹配",
-      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿���邮件。",
+      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统��件，但也可能被滥用发送匿���邮件。",
       "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，建议阻断。",
       "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
     },
@@ -4547,10 +4547,16 @@
       "cancel": "取消"
     },
     "formatActionLabel": {
-      "accept": "允许（进行下一步检测）",
-      "quarantine": "隔离/审核",
-      "reject": "阻断并退信",
-      "discard": "静默丢弃"
+      "quarantine": "隔离",
+      "audit": "审核",
+      "reject": "拒收",
+      "discard": "丢弃"
+    },
+    "formatActionDesc": {
+      "quarantine": "邮件进入隔离区，管理员可审阅后决定是否放行",
+      "audit": "邮件正常投递，同时写入审核日志供管理员事后审查",
+      "reject": "向发信方返回 SMTP 拒绝响应，邮件不进入系统",
+      "discard": "静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃"
     },
     "protocolActionLabel": {
       "accept": "进行下一步检测",
@@ -5107,7 +5113,7 @@
       "antivirusHost": "attachd 连接的通用 AV 服务地址",
       "virusAction": "确认检出病毒后对邮件采取的动作",
       "antivirusTimeout": "AV 服务超过扫描时限或不可用时采取的动作",
-      "ocrMode": "轻度模式仅识别印刷体，深度模式同时识别手写与印刷内容",
+      "ocrMode": "轻度模式仅识别印刷体，深度模式同时识别手写与印��内容",
       "qrMode": "轻度模式识别到二维码后直接处置；深度模式解码并路由至后续模块",
       "arbitration": "二维码内容命中多个后续模块时如何选择最终动作",
       "qrLimit": "单封邮件最多深度解码 1–50 个二维码",
@@ -5166,7 +5172,7 @@
       "toggleTip": "对未知URL进行动态行为分析，模拟用户访问以检测恶意行为",
       "detectGroup": "检测结果处置（当前方向）",
       "maliciousLabel": "发现恶意URL",
-      "maliciousTip": "当沙箱分析判定URL为恶意时执行的动作",
+      "maliciousTip": "当沙箱分��判定URL为恶意时执行的动作",
       "actionIsolate": "隔离（邮件存入隔离区）",
       "actionIsolateTip": "邮件存入隔离区，管理员可审核后释放或删除",
       "actionBlock": "阻断（拒绝接收该邮件）",
@@ -5250,7 +5256,7 @@
         "desc": "查询本地与云端威胁情报库，命中已知恶意情报即拦截"
       },
       "m3": {
-        "title": "深度复检",
+        "title": "深度复��",
         "desc": "点击时将链接送【{engine}】做深度分析，检出钓鱼、恶意跳转等高级威胁"
       },
       "timeout": {
@@ -5818,7 +5824,7 @@
       "urlResult": "URL 检测",
       "keywordHit": "关键词命中",
       "rblResult": "RBL 结果",
-      "intentLabel": "意图标签",
+      "intentLabel": "意��标签",
       "isZipBomb": "压缩炸弹",
       "isEncryptedAttachment": "加密附件",
       "enumValue": {
@@ -6090,7 +6096,7 @@
           },
           "confirmNotify": {
             "title": "确认发送安全提醒",
-            "body": "向该收件人发送一封安全提醒邮件，告知其近期收到的邮件存在风险？"
+            "body": "向该收件人发送一封安全提醒邮件，告知其近期收到的邮件存在风险��"
           },
           "whitelistCheckbox": "同时将发信人加入白名单"
         },
@@ -6808,7 +6814,7 @@
       "desc_header": {
         "source": "完整邮件头部",
         "usage": "高级规则匹配，检测自定义邮件头",
-        "note": "可用于检测X-开头的自定义头部字段"
+        "note": "可用于检测X-开头的自定���头部字段"
       },
       "desc_envelopeSender": {
         "source": "SMTP协议层 MAIL FROM 地址",
@@ -6898,7 +6904,7 @@
       "desc_attachmentMd5": {
         "source": "附件哈希计算",
         "usage": "精确匹配已知恶意文件的MD5值",
-        "note": "适用于已知威胁情报匹配"
+        "note": "适用于已知威胁情报��配"
       },
       "desc_attachmentSizeTotal": {
         "source": "邮件附件解析",
@@ -7333,7 +7339,7 @@
     "portalBaseUrlPlaceholder": "https://gw.example.com",
     "portalBaseUrlHelp": "收件人浏览器可访问的控制台地址（https）；启用取回、预览、加白或加黑权限时必填。",
     "periodAndTimeout": "审核时长与超时配置",
-    "durationControl": "审核时长控制",
+    "durationControl": "审��时长控制",
     "duration_unlimited": "不限时长",
     "duration_custom": "自定义等待时长",
     "minutes": "分钟",
@@ -8033,7 +8039,7 @@
       "generateReport": "生成报告",
       "aiAnalysis": "AI 分析"
     },
-    "sandboxAsyncAlert": "有 {count} 封已投递邮件，沙箱异步检测后报恶意。建议立即查看详情。",
+    "sandboxAsyncAlert": "有 {count} 封已投递邮件，沙箱异步检测后报恶意。建议立即查看详情��",
     "viewDetails": "查看详情",
     "ai": {
       "drawerTitle": "AI 分析结果",
@@ -10012,7 +10018,7 @@
     "releasedTitle": "取回成功",
     "releasedDesc": "邮件已成功重新投递到您的收件箱。",
     "expiredTitle": "链接已过期或无效",
-    "expiredDesc": "请联系管理员获取新的取回链接。",
+    "expiredDesc": "请联��管理员获取新的取回链接。",
     "errorTitle": "操作失败",
     "errorDesc": "请稍后重试或联系管理员。",
     "alreadyReleased": "该邮件已被取回，或已超出保留期被清理",

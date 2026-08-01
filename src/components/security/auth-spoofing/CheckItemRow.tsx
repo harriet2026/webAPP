@@ -40,8 +40,8 @@ const ACTIONS: AuthSpoofingAction[] = [
 ];
 
 export const FORMAT_ACTIONS: AuthSpoofingAction[] = [
-  "accept",
   "quarantine",
+  "audit",
   "reject",
   "discard",
 ];

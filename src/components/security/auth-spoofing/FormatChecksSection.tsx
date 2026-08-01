@@ -114,10 +114,15 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
                 <SelectTrigger className="w-[220px]">
                   <SelectValue>{t(formatActionKey(item.action) as any)}</SelectValue>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-72">
                   {FORMAT_ACTIONS.map((a) => (
                     <SelectItem key={a} value={a}>
-                      {t(formatActionKey(a) as any)}
+                      <div className="flex flex-col gap-0.5 py-0.5">
+                        <span>{t(formatActionKey(a) as any)}</span>
+                        <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
+                          {t(`formatActionDesc.${a}` as any)}
+                        </span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>

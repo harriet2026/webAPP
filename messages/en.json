@@ -4542,10 +4542,16 @@
       "cancel": "Cancel"
     },
     "formatActionLabel": {
-      "accept": "Allow (Proceed to Next Check)",
-      "quarantine": "Quarantine/Review",
-      "reject": "Block with Bounce",
-      "discard": "Silent Drop"
+      "quarantine": "Quarantine",
+      "audit": "Audit",
+      "reject": "Reject",
+      "discard": "Discard"
+    },
+    "formatActionDesc": {
+      "quarantine": "Move the email to the quarantine queue for administrator review before release or deletion",
+      "audit": "Deliver the email normally and write an audit log entry for later administrator review",
+      "reject": "Return an SMTP rejection response to the sender; the email never enters the system",
+      "discard": "Silently drop the email; the sender receives a delivery-success response but the email is discarded"
     },
     "protocolActionLabel": {
       "accept": "Proceed to Next Check",
