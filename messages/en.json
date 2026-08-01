@@ -4568,7 +4568,9 @@
       "drop": "Drop",
       "block": "Block",
       "quarantine": "Quarantine",
-      "check": "Check"
+      "check": "Check",
+      "tag": "Tag",
+      "pass": "Pass"
     },
     "flowTitle": "Email Authentication Flow",
     "flowNode": {

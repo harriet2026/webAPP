@@ -4573,7 +4573,9 @@
       "drop": "丢弃",
       "block": "阻断",
       "quarantine": "隔离",
-      "check": "检查"
+      "check": "检查",
+      "tag": "标记",
+      "pass": "进行下一步检测"
     },
     "flowTitle": "邮件身份验证流程",
     "flowNode": {

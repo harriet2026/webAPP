@@ -20,7 +20,7 @@ import { AuthFlowDiagram } from './AuthFlowDiagram';
 import { ConfigHealthPanel } from './ConfigHealthPanel';
 import { DkimOutboundSigningSection } from './DkimOutboundSigningSection';
 import { applyTemplate } from '@/lib/auth-spoofing-templates';
-import { protocolActionKey } from '@/lib/auth-spoofing-labels';
+import { protocolActionKey, dominantAction } from '@/lib/auth-spoofing-labels';
 import { AlertTriangle, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -84,10 +84,10 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
   };
 
   const flowFailActions: Record<'spf' | 'dkim' | 'dmarc' | 'ptr', AuthSpoofingAction> = {
-    spf: config.spf?.fail?.action ?? 'accept',
-    dkim: config.dkim?.fail?.action ?? 'accept',
-    dmarc: config.dmarc?.reject?.action ?? 'accept',
-    ptr: config.ptr?.ehlomismatch?.action ?? 'accept',
+    spf: dominantAction(config.spf),
+    dkim: dominantAction(config.dkim),
+    dmarc: dominantAction(config.dmarc),
+    ptr: dominantAction(config.ptr),
   };
 
   return (
