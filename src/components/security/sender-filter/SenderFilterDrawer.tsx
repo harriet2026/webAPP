@@ -59,7 +59,6 @@ export const senderFilterErrorKeys = [
   'descriptionMaxLength',
   'priorityMin',
   'priorityMax',
-  'whitelistModeRequired',
   'invalidEmail',
   'invalidDomain',
   'selectGroup',
@@ -92,9 +91,6 @@ const ruleSchema = z.object({
   }),
 }).superRefine((data, ctx) => {
   if (data.is_complex) return;
-  if (data.list_type === 'whitelist' && !data.whitelist_mode) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['whitelist_mode'], message: 'whitelistModeRequired' });
-  }
   if (data.sender_config.type === 'individual' && data.sender_config.value) {
     if (!emailRegex.test(data.sender_config.value)) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['sender_config', 'value'], message: 'invalidEmail' });
@@ -243,16 +239,15 @@ export function SenderFilterDrawer({
           is_complex: true,
         });
       } else {
-        const whitelistMode = listTypeTab === 'whitelist' ? 'bypass_content' : undefined;
         form.reset({
           name: '',
           description: '',
-          priority: getDefaultPriority(listTypeTab, whitelistMode),
+          priority: listTypeTab === 'whitelist' ? 800 : 500,
           is_active: true,
           valid_until: '',
           list_type: listTypeTab,
           action: listTypeTab === 'whitelist' ? 'accept' : 'reject',
-          whitelist_mode: whitelistMode,
+          whitelist_mode: undefined,
           sender_config: { type: 'individual', value: '' },
           ip_range: { type: 'all', value: undefined },
           is_complex: false,
@@ -288,7 +283,7 @@ export function SenderFilterDrawer({
     try {
       const formData: SenderFilterFormData = {
         ...data,
-        whitelist_mode: data.list_type === 'whitelist' ? data.whitelist_mode : undefined,
+        whitelist_mode: undefined,
       };
       await onSubmit(formData);
       onOpenChange(false);
