@@ -4335,7 +4335,11 @@
       "templateConfirmDesc": "Переключение на шаблон \"{template}\" перезапишет все текущие настройки проверки протокола. Продолжить?",
       "templateCancel": "Отмена",
       "templateApply": "Применить",
-      "ptrReadonlyNotice": "Настройки PTR управляются системным администратором"
+      "ptrReadonlyNotice": "Настройки PTR управляются системным администратором",
+      "dmarc_no_record": "Нет записи DMARC",
+      "dmarc_no_recordDesc": "Домен отправителя не опубликовал запись DMARC",
+      "dmarc_query_fail": "Сбой запроса DMARC",
+      "dmarc_query_failDesc": "Ошибка при запросе DNS-записи DMARC (таймаут / SERVFAIL)"
     },
     "dkimOutbound": {
       "title": "Исходящая DKIM-подпись",
@@ -5546,8 +5550,7 @@
         "audit": "Проверка",
         "quarantine": "Карантин",
         "sideline": "Серый список",
-        "mixed": "Смешанные",
-        "recall": "Отозвать"
+        "mixed": "Смешанные"
       },
       "statuses": {
         "processing": "Обработка",

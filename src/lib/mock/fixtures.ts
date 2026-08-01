@@ -685,7 +685,7 @@ function threatSeriesValue(
 }
 
 // 5 条 series 对齐 demo THREAT_SERIES：phishing / spoofing / spam / virus /
-// malicious（demo「���意链接」→ malicious）。点数：today 24（1h，00:00..23:00）、
+// malicious（demo「�����意链接」→ malicious）。点数：today 24（1h，00:00..23:00）、
 // 7d 7 日、30d 30 日；7d/30d 数值按 demo scale（6 / 5）放大。值域对齐 demo：
 // phishing 20-60、spoofing 10-40、spam 40-120、virus 3-18、malicious 8-33。
 const SECURITY_DATES = ["11/1", "11/2", "11/3", "11/4", "11/5", "11/6", "11/7"];
@@ -864,7 +864,7 @@ const DRILL_NAMES: Record<DrillDimension, string[]> = {
   action: ["block", "quarantine", "review", "drop", "recall"],
   sender_domain: ["notice-secure.example", "billing-alert.example", "mail-update.example", "promo.example", "unknown.example"],
   client_ip: ["203.0.113.42", "198.51.100.18", "192.0.2.77", "203.0.113.90", "198.51.100.31"],
-  matched_rule: ["仿冒登录��", "恶意附件", "高危垃圾邮件", "异常发件域", "批量外发"],
+  matched_rule: ["仿冒登录����", "恶意附件", "高危垃圾邮件", "异常发件域", "批量外发"],
 };
 
 export function mockSecurityDrill(dimension: DrillDimension): DrillDownResponse {
@@ -3101,7 +3101,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）──────────────────────────────────
+// ─── 自定义 IP 定位库（GeoIP rules，mock）────────────────���─────────────────
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -3569,7 +3569,7 @@ function groupPolicyRulesSeed(): Rule[] {
       description: "优先级更高，但配置位于阶段3",
       priority: 1,
       is_active: true,
-      target_groups: { senderIpGroup: ["IP群组1"] },
+      target_groups: { senderIpGroup: ["IP��组1"] },
       stage_policies: {
         attachment: { status: "disable", summary: "禁用附件检测" },
       },
@@ -4118,6 +4118,8 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
           observe_mode: false,
         },
         none: { enabled: true, action: "audit", observe_mode: false },
+        no_record: { enabled: true, action: "quarantine", observe_mode: false },
+        query_fail: { enabled: true, action: "audit", observe_mode: false },
       },
       ptr: {
         norecord: { enabled: true, action: "audit", observe_mode: false },
@@ -4147,7 +4149,7 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
 }
 
 export function mockAuthSpoofingConfig(): AuthSpoofingConfig {
-  // 深拷贝：避免调用方就地修改返回值污染后续 GET。
+  // 深拷贝：避免调用方就地修改返回值污染��续 GET。
   return JSON.parse(JSON.stringify(defaultAuthSpoofingConfig()));
 }
 
@@ -6419,7 +6421,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     // A10 紧急/敏感词徽章（isSensitiveUrgent）——钓鱼/敏感数据外发行命中。
     sensitive_keyword_hit:
       seed.mailType === "phishing" || seed.mailType === "sensitive",
-    // 内容实体链接 tab：照抄 demo mockEntities.links（同上文件 279-282 行），
+    // 内容实体链接 tab：照抄 demo mockEntities.links（同上��件 279-282 行），
     // vt_score 照抄 demo html_spec §④「VirusTotal检测: 47/90」/「0/90」。
     entity_urls:
       seed.mailType === "phishing"

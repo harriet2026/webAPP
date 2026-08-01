@@ -4473,7 +4473,11 @@
       "templateConfirmDesc": "Switching to \"{template}\" template will override all current protocol check settings. Continue?",
       "templateCancel": "Cancel",
       "templateApply": "Apply",
-      "ptrReadonlyNotice": "PTR settings are managed by system administrator"
+      "ptrReadonlyNotice": "PTR settings are managed by system administrator",
+      "dmarc_no_record": "No DMARC Record",
+      "dmarc_no_recordDesc": "The sending domain has not published a DMARC record",
+      "dmarc_query_fail": "DMARC Query Failed",
+      "dmarc_query_failDesc": "An error occurred when querying the DMARC DNS record (timeout / SERVFAIL)"
     },
     "dkimOutbound": {
       "title": "DKIM Outbound Signing",

@@ -11,19 +11,19 @@ export const TEMPLATES: Record<'loose'|'standard'|'strict', TemplateActions> = {
   loose: {
     spf:  { fail:'quarantine', softfail:'audit', none:'accept', temperror:'accept' },
     dkim: { fail:'quarantine', neutral:'audit', partial:'accept', none:'accept' },
-    dmarc:{ reject:'quarantine', quarantine:'audit', none:'audit' },
+    dmarc:{ reject:'quarantine', quarantine:'audit', none:'audit', no_record:'audit', query_fail:'audit' },
     ptr:  { norecord:'accept', temperror:'accept', ehlomismatch:'audit', amismatch:'audit' },
   },
   standard: {
     spf:  { fail:'reject', softfail:'quarantine', none:'audit', temperror:'audit' },
     dkim: { fail:'quarantine', neutral:'quarantine', partial:'accept', none:'audit' },
-    dmarc:{ reject:'reject', quarantine:'quarantine', none:'audit' },
+    dmarc:{ reject:'reject', quarantine:'quarantine', none:'audit', no_record:'quarantine', query_fail:'audit' },
     ptr:  { norecord:'audit', temperror:'audit', ehlomismatch:'quarantine', amismatch:'quarantine' },
   },
   strict: {
     spf:  { fail:'reject', softfail:'quarantine', none:'quarantine', temperror:'quarantine' },
     dkim: { fail:'reject', neutral:'quarantine', partial:'quarantine', none:'quarantine' },
-    dmarc:{ reject:'reject', quarantine:'quarantine', none:'quarantine' },
+    dmarc:{ reject:'reject', quarantine:'quarantine', none:'quarantine', no_record:'quarantine', query_fail:'quarantine' },
     ptr:  { norecord:'quarantine', temperror:'quarantine', ehlomismatch:'reject', amismatch:'reject' },
   },
 };
@@ -33,9 +33,17 @@ function applyGroup(
   actions: Record<string, AuthSpoofingAction>,
 ): Record<string, CheckItem> {
   const out: Record<string, CheckItem> = {};
+  // Process keys that exist in current config, applying template action if defined
   for (const k of Object.keys(current)) {
     const action = actions[k] ?? current[k].action;
     out[k] = { ...current[k], action, enabled: action !== 'accept' };
+  }
+  // Also add keys that exist in the template but not yet in current config (e.g. newly added scenarios)
+  for (const k of Object.keys(actions)) {
+    if (!(k in out)) {
+      const action = actions[k];
+      out[k] = { enabled: action !== 'accept', action, observe_mode: false };
+    }
   }
   return out;
 }

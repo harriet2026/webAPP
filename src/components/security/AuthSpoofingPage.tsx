@@ -44,6 +44,8 @@ const DEFAULT_CONFIG: AuthSpoofingConfig = {
       reject: { enabled: true, action: 'reject', observe_mode: false },
       quarantine: { enabled: true, action: 'quarantine', observe_mode: false },
       none: { enabled: true, action: 'audit', observe_mode: false },
+      no_record: { enabled: true, action: 'quarantine', observe_mode: false },
+      query_fail: { enabled: true, action: 'audit', observe_mode: false },
     },
     ptr: {
       norecord: { enabled: true, action: 'audit', observe_mode: false },

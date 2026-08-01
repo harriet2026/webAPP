@@ -4518,7 +4518,11 @@
       "templateConfirmDesc": "การเปลี่ยนเป็นเทมเพลต \"{template}\" จะเขียนทับการตั้งค่าการตรวจสอบโปรโตคอลปัจจุบันทั้งหมด ดำเนินการต่อ?",
       "templateCancel": "ยกเลิก",
       "templateApply": "นำไปใช้",
-      "ptrReadonlyNotice": "การตั้งค่า PTR จัดการโดยผู้ดูแลระบบ"
+      "ptrReadonlyNotice": "การตั้งค่า PTR จัดการโดยผู้ดูแลระบบ",
+      "dmarc_no_record": "ไม่มีระเบียน DMARC",
+      "dmarc_no_recordDesc": "โดเมนผู้ส่งยังไม่ได้เผยแพร่ระเบียน DMARC",
+      "dmarc_query_fail": "การสืบค้น DMARC ล้มเหลว",
+      "dmarc_query_failDesc": "เกิดข้อผิดพลาดขณะสืบค้นระเบียน DNS ของ DMARC (หมดเวลา / SERVFAIL)"
     },
     "dkimOutbound": {
       "title": "การลงลายเซ็น DKIM ขาออก",
@@ -5729,8 +5733,7 @@
         "audit": "ตรวจสอบ",
         "quarantine": "กักกัน",
         "sideline": "เกรย์ลิสต์",
-        "mixed": "ผสม",
-        "recall": "เรียกคืน"
+        "mixed": "ผสม"
       },
       "statuses": {
         "processing": "กำลังดำเนินการ",

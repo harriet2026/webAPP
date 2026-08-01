@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils';
 const PROTOCOL_GROUPS: { key: 'spf' | 'dkim' | 'dmarc' | 'ptr'; labelKey: string; keys: string[] }[] = [
   { key: 'spf', labelKey: 'protocolChecks.spf', keys: ['fail', 'softfail', 'none', 'temperror'] },
   { key: 'dkim', labelKey: 'protocolChecks.dkim', keys: ['fail', 'neutral', 'partial', 'none'] },
-  { key: 'dmarc', labelKey: 'protocolChecks.dmarc', keys: ['reject', 'quarantine', 'none'] },
+  { key: 'dmarc', labelKey: 'protocolChecks.dmarc', keys: ['reject', 'quarantine', 'none', 'no_record', 'query_fail'] },
   { key: 'ptr', labelKey: 'protocolChecks.ptr', keys: ['norecord', 'temperror', 'ehlomismatch', 'amismatch'] },
 ];
 
