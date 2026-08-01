@@ -21,7 +21,7 @@ import { ConfigHealthPanel } from './ConfigHealthPanel';
 import { DkimOutboundSigningSection } from './DkimOutboundSigningSection';
 import { applyTemplate } from '@/lib/auth-spoofing-templates';
 import { protocolActionKey } from '@/lib/auth-spoofing-labels';
-import { AlertTriangle, ChevronDown, Info } from 'lucide-react';
+import { AlertTriangle, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const PROTOCOL_GROUPS: { key: 'spf' | 'dkim' | 'dmarc' | 'ptr'; labelKey: string; keys: string[] }[] = [
@@ -138,13 +138,7 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 rounded border border-blue-200 bg-blue-100/50 p-2 dark:border-blue-700 dark:bg-blue-900/20">
-                <Info className="h-4 w-4 flex-shrink-0 text-blue-600 dark:text-blue-400" />
-                <span className="text-xs text-blue-700 dark:text-blue-300">{t('exceptionBanner')}</span>
-                <Button variant="link" size="sm" className="ml-auto h-auto p-0 text-xs text-blue-600 dark:text-blue-400">
-                  {t('goToPipeline')}
-                </Button>
-              </div>
+
             </div>
 
             <AuthFlowDiagram failActions={flowFailActions} activeTab={activeTab} onNodeClick={setActiveTab} />
