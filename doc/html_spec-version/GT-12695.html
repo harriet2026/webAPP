@@ -38,50 +38,6 @@
     .spec-header h1 { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
     .spec-header .subtitle { font-size: 0.85rem; color: #9ca3af; }
 
-    /* ── change summary bar ── */
-    .change-summary {
-      background: #fff;
-      border-radius: 10px;
-      padding: 1.25rem 2rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem 2rem;
-      align-items: flex-start;
-    }
-    .change-summary h2 { font-size: 0.95rem; font-weight: 700; color: #1a1d23; width: 100%; margin-bottom: 0.25rem; }
-    .change-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-      background: #f8f9fb;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 0.6rem 1rem;
-      min-width: 200px;
-      flex: 1 1 200px;
-      text-decoration: none;
-      color: inherit;
-    }
-    .change-item .ci-num {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: #2563eb;
-      color: #fff;
-      font-size: 0.72rem;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-    .change-item .ci-body { font-size: 0.83rem; }
-    .change-item .ci-title { font-weight: 600; color: #1a1d23; }
-    .change-item .ci-sub { color: #6b7280; font-size: 0.78rem; }
-
     /* ── section ── */
     section {
       background: #fff;
@@ -278,52 +234,6 @@
   </header>
 
   <!-- ══════════════ 本版变更总览 ══════════════ -->
-  <div class="change-summary">
-    <h2>本版变更点（共 6 项）— GT-12696 发信人黑白名单优化</h2>
-    <a class="change-item" href="#change-1">
-      <span class="ci-num">1</span>
-      <div class="ci-body">
-        <div class="ci-title">黑名单执行动作「阻断」→「拒收」</div>
-        <div class="ci-sub">新建规则抽屉 · 文案变更</div>
-      </div>
-    </a>
-    <a class="change-item" href="#change-2">
-      <span class="ci-num">2</span>
-      <div class="ci-body">
-        <div class="ci-title">黑名单新增「丢弃」执行动作</div>
-        <div class="ci-sub">新建规则抽屉 · 新增功能</div>
-      </div>
-    </a>
-    <a class="change-item" href="#change-3">
-      <span class="ci-num">3</span>
-      <div class="ci-body">
-        <div class="ci-title">执行动作下拉选项新增说明文字</div>
-        <div class="ci-sub">黑/白名单抽屉 · 功能变更</div>
-      </div>
-    </a>
-    <a class="change-item" href="#change-4">
-      <span class="ci-num">4</span>
-      <div class="ci-body">
-        <div class="ci-title">修复白名单「查看配置示例」展示黑名单内容的 Bug</div>
-        <div class="ci-sub">白名单抽屉 · Bug 修复</div>
-      </div>
-    </a>
-    <a class="change-item" href="#change-5">
-      <span class="ci-num">5</span>
-      <div class="ci-body">
-        <div class="ci-title">白名单执行动作「放行」→「投递」· 移除「白名单模式」字段</div>
-        <div class="ci-sub">白名单抽屉 · 文案变更 + 功能移除</div>
-      </div>
-    </a>
-    <a class="change-item" href="#change-6">
-      <span class="ci-num">6</span>
-      <div class="ci-body">
-        <div class="ci-title">规则列表新增「优先级」列</div>
-        <div class="ci-sub">黑/白名单规则列表 · 新增功能</div>
-      </div>
-    </a>
-  </div>
-
   <!-- ══════════════ 目录 ══════════════ -->
   <section id="toc">
     <h2>目录</h2>
@@ -331,7 +241,7 @@
     <!-- 需求：GT-12696 发信人黑白名单优化 -->
     <div class="toc-req">
       <div class="toc-req-header">
-        <a href="#change-1">GT-12696 发信人黑白名单优化</a>
+        <a href="#req-gt12696">GT-12696 发信人黑白名单优化</a>
       </div>
       <div class="toc-req-body">
 
@@ -513,6 +423,8 @@
   </section>
 
   <!-- ══════════════ 变更 1 ══════════════ -->
+  <!-- 需求锚点：供目录第一层跳转 -->
+  <div id="req-gt12696" style="scroll-margin-top: 1.5rem;"></div>
   <div class="incremental-section" id="change-1">
     <div class="incr-header">
       <span class="incr-num">1</span>
@@ -956,7 +868,7 @@
         <tr>
           <td>D-2</td>
           <td><span class="tag tag-unverif">待验证</span></td>
-          <td>白名单「查看配置示例」展开后的展示内容未截图（修复后应展示白名单示例而非黑名单示例）</td>
+          <td>白名单「查看配置示例」展开后的展示内容未截图（修复后应展示白名单示��而非黑名单示例）</td>
           <td>2026-08-01</td>
           <td>下次迭代补充截图；源码已确认修复逻辑，见 <code>SenderFilterDrawer.tsx</code></td>
         </tr>
