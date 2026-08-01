@@ -192,7 +192,9 @@ export function SearchBar({
   }, [onAiParsed, onReset]);
 
   const resetDisabled = !value.trim() && !hasActiveFilters && sampleCount === 0;
-  const templateMenuDisabled = !canSaveTemplate && templates.length === 0;
+  // The template menu is always accessible so users can browse and manage
+  // existing templates. Only the "Save current" item inside is gated by canSaveTemplate.
+  const templateMenuDisabled = false;
 
   return (
     <div className="space-y-3">
