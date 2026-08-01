@@ -2081,7 +2081,7 @@
     "adminAccountTaken": "该账号已存在（不区分大小写），请换一个"
   },
   "users": {
-    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全�����约）",
+    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安��������约）",
     "resetPassword": {
       "title": "重置密码",
       "description": "为管理员「{username}」设置新密码，重置后需用新密码登录。",
@@ -3374,7 +3374,7 @@
   },
   "ipFrequency": {
     "title": "IP 频率限制",
-    "description": "限制每个 IP 地址的连接数、认证失败次数和命���错误次数",
+    "description": "限制每个 IP 地址的连接数、认���失败次数和命���错误次数",
     "basicSettings": "基础设置",
     "ruleName": "规则名称",
     "ruleNamePlaceholder": "如：合作伙伴IP限制",
@@ -3660,7 +3660,7 @@
     "cidrPrefixMax": "CIDR前缀长度必须在0-32之间",
     "ipConfigTypeExpression": "表达式",
     "expressionPlaceholder": "192.0.2.1;10.0.0.0/8;192.0.2.10-192.0.2.50;!192.0.2.33",
-    "expressionHelp": "多项用 ; 或 , 分隔；支持单个IP、CIDR网段、起-止区间；! 前缀表示排除；最多100项",
+    "expressionHelp": "多项用 ; 或 , 分隔；支持单个IP、CIDR网段、起-��区间；! 前缀表示排除；最多100项",
     "expressionRequired": "请输入表达式或至少选择一个IP组",
     "expressionOnlyExclusions": "表达式不能只包含排除项（!），请添加正向IP/网段/区间或选择IP组",
     "expressionItemInvalid": "表达式包含无效项，请检查IP/CIDR格式",
@@ -3684,7 +3684,7 @@
     "executeActionWhitelistTip": "选择当IP命中白名单规则时的处理方式。投递会直接放行，标记投递会添加标记后放行。",
     "basicSettings": "基础设置",
     "remarkTitle": "备注说明",
-    "remarkPlaceholder": "可选，规则说明或备注信息...",
+    "remarkPlaceholder": "可选，规则说明或备��信息...",
     "saveAndEnable": "保��并启用",
     "blacklistRuleDesc": "配置IP黑名单规则，阻断或处置指定IP地址/段",
     "whitelistRuleDesc": "配置IP白名单规则，信任的IP直接放行或标记",
@@ -3964,7 +3964,7 @@
     "unsavedChangesBanner": "有未保存的更改",
     "blockAllTitle": "无法保存配置",
     "blockAllMessage": "当前配置将阻断所有海外邮件流，请至少保留一个收发方向。",
-    "versionConflict": "配置已被他人修改，请刷新后重试"
+    "versionConflict": "配置已被他人修改，请刷��后重试"
   },
   "geoipLibrary": {
     "title": "自定义IP定位库",
@@ -4054,8 +4054,8 @@
   "action_quarantine_desc": "邮件进入隔离区，管理员可审阅后决定是否放行",
   "action_audit": "审核",
   "action_audit_desc": "邮件正常投递，同时写入审核日志供管理员事后审查",
-  "action_accept": "放行",
-  "action_accept_desc": "允许邮件通过，跳过后续检测或直接投递",
+  "action_accept": "投递",
+  "action_accept_desc": "允许邮件通过，跳过后续检测直接投递至收件箱",
     "whitelistMode": "白名单模式",
     "whitelistMode_bypass_content": "跳过内容检测",
     "whitelistMode_direct_deliver": "直接投递",
@@ -4428,7 +4428,7 @@
       "mailFromEmpty": "空MAIL FROM",
       "mailFromInvalid": "无效MAIL FROM",
       "envelopeHeaderMismatch": "信封与头部不匹配",
-      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。",
+      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿���邮件。",
       "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，建议阻断。",
       "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
     },
@@ -4451,7 +4451,7 @@
       "dkim_neutral": "中性 (Neutral)",
       "dkim_neutralDesc": "签名存在但无法验证",
       "dkim_partial": "部分通过",
-      "dkim_partialDesc": "多个签名中部分验证通过",
+      "dkim_partialDesc": "多个签名中部分验���通过",
       "dkim_none": "无签名",
       "dkim_noneDesc": "邮件未包含DKIM签名",
       "dmarc_reject": "p=reject",
@@ -4586,7 +4586,7 @@
     },
     "health": {
       "title": "配置健康检查",
-      "softfailDropRisk": "高风险：SPF软拒绝设置为丢弃",
+      "softfailDropRisk": "高风险：SPF软拒绝设���为丢弃",
       "changeToQuarantine": "改为隔离",
       "changeToTag": "改为标记",
       "dropSuggest": "当前配置包含\"丢弃\"动作，建议开启观察模式验证影响面",
@@ -5274,7 +5274,7 @@
         "block": "拦截并提示（安全优先，推荐）",
         "allow": "放行并标记（可用性优先）",
         "hold": "继续等待（保持等待页轮询结果）",
-        "hint": "到达超时上限仍无检测结果时的处理方式"
+        "hint": "到达超���上限仍无检测结果时的处理方式"
       }
     },
     "statusEnabled": "已启用",
@@ -5789,7 +5789,7 @@
       },
       "headerSender": "信头发信人",
       "envelopeSender": "信封发信人",
-      "headerRecipient": "信头收信人",
+      "headerRecipient": "信头收���人",
       "envelopeRecipient": "信封收信人",
       "displayName": "发信人显示名",
       "sendHour": "发信小时",
@@ -7509,7 +7509,7 @@
     },
     "filter": {
       "direction": {
-        "label": "邮件方向",
+        "label": "��件方向",
         "all": "全部",
         "receive": "接收",
         "send": "外发",
@@ -7713,7 +7713,7 @@
       "noFuture": "不能选择未来日期"
     },
     "customRange": {
-      "start": "开始",
+      "start": "开��",
       "end": "结束",
       "error": {
         "invalid": "日期格式无效",
@@ -8122,7 +8122,7 @@
     "storage": {
       "partitions": "磁盘分区使用率",
       "backupTasks": "备份任务列表",
-      "execTime": "执行时间",
+      "execTime": "��行时间",
       "duration": "耗时",
       "size": "大小",
       "viewLog": "查看日志",
@@ -8520,7 +8520,7 @@
       "asyncTimeout": "超时异步",
       "asyncTimeoutHint": "超时投递后，系统继续等待最终检测结论的最长时长。在此窗口内若得出高风险结论，邮件将被自动召回。范围：1–60 分钟。",
       "autoDeliver": "超时自动投递",
-      "autoDeliverHint": "开启：超时邮件自动投递，无需人工干预；关闭：超时邮件不自动投递，需人工处置。",
+      "autoDeliverHint": "开启：超时邮件自动投递，无��人工干预；关闭：超时邮件不自动投递，需人工处置。",
       "autoDeliverOn": "已开启",
       "autoDeliverOff": "已关闭",
       "timeoutCloseConfirmTitle": "确认关闭超时自动投递？",
@@ -8719,7 +8719,7 @@
     "exempt": {
       "title": "放行此邮件",
       "description": "将该仿冒判定标记为误报并放行",
-      "reasonPlaceholder": "请输入放行原因",
+      "reasonPlaceholder": "请输���放行原因",
       "reasonRequired": "请填写放行原因",
       "submit": "确认放行",
       "success": "已放行",
@@ -8826,7 +8826,7 @@
       "cancelConfirmDescription": "当前抽屉中有未保存的修改，关闭后将无法恢复。",
       "continueEditing": "继续编辑",
       "discardChanges": "放弃修改",
-      "warnSensThreshold": "检测灵敏度极高时，建议置信度阈值 ≥ 80 以避免误报",
+      "warnSensThreshold": "检测灵敏度极高时，建议置信度阈值 �� 80 以避免误报",
       "errDiscardNeedsAlert": "丢弃动作必须开启告警通知",
       "errEmailDup": "该邮箱已作为保护对象存在",
       "errEmailInvalid": "请输入合法的邮箱地址",
@@ -9554,7 +9554,7 @@
     "policyExecProtect": "高管邮件保护：{state}",
     "policyImpersonation": "显示名仿冒检测：{state}",
     "policyRecipientCheck": "收件人合法性校验：内部白名单",
-    "priorityHint": "数值越大优先级越高，冲突时高优先级覆盖低优先级",
+    "priorityHint": "数值越大优先级越高，冲���时高优先级覆盖低优先级",
     "refresh": "刷新",
     "relatedPolicies": "关联策略",
     "resetFilters": "重置筛选",
@@ -9619,7 +9619,7 @@
     "toastMarkedExec": "已标记为高管",
     "toastMarkedKey": "已标记为关键岗位",
     "toastSyncFailed": "同步失败：连接异常",
-    "toastSyncPartial": "同步完成，存在 {count} 条失败记录",
+    "toastSyncPartial": "同步完成，存在 {count} 条失��记录",
     "toastSyncSuccess": "同步成功",
     "toastTestFirst": "请先完成连接测试并通过",
     "toastUnmarked": "已取消标记",
@@ -10194,7 +10194,7 @@
     "recipient": "收信人",
     "action": "执行动作",
     "status": "状态",
-    "createdBy": "创建者",
+    "createdBy": "创建���",
     "modifyTime": "修改时间",
     "operation": "操作",
     "block": "阻断",
