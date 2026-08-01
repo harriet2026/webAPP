@@ -180,35 +180,83 @@
 
     .matrix-legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.78rem; color: #374151; margin-bottom: 0.75rem; }
 
-    .toc { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
-    .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
-    .toc a:hover { text-decoration: underline; }
-    .toc-indent { padding-left: 1.2rem; }
-    .toc-change {
+    /* ── toc (new nested card style) ── */
+    .toc-req {
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+    .toc-req-header {
+      background: #dbeafe;
+      border: 1px solid #bfdbfe;
+      border-bottom: none;
+      padding: 0.55rem 1rem;
+      border-radius: 8px 8px 0 0;
+    }
+    .toc-req-header a {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #1d4ed8;
+      text-decoration: none;
+    }
+    .toc-req-header a:hover { text-decoration: underline; }
+    .toc-req-body {
+      border: 1px solid #bfdbfe;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+    }
+    .toc-feature {
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .toc-feature:last-child { border-bottom: none; }
+    .toc-feature-row {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.45rem 0.75rem;
-      border-radius: 6px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      margin-top: 0.35rem;
-      margin-bottom: 0.1rem;
+      gap: 0.6rem;
+      padding: 0.5rem 1rem;
+      background: #f0f7ff;
+      border-bottom: 1px solid #e5e7eb;
     }
-    .toc-change a { font-weight: 600; font-size: 0.88rem; color: #1d4ed8; }
-    .toc-change .toc-num {
+    .toc-feature-row .tf-num {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       background: #2563eb;
       color: #fff;
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-weight: 700;
       flex-shrink: 0;
     }
+    .toc-feature-row a {
+      font-weight: 600;
+      font-size: 0.86rem;
+      color: #1d4ed8;
+      text-decoration: none;
+    }
+    .toc-feature-row a:hover { text-decoration: underline; }
+    .toc-sub-links {
+      list-style: none;
+      padding: 0.35rem 1rem 0.4rem 3.2rem;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .toc-sub-links li a {
+      color: #2563eb;
+      text-decoration: none;
+      font-size: 0.83rem;
+    }
+    .toc-sub-links li a:hover { text-decoration: underline; }
+    /* misc toc links */
+    .toc-misc { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.5rem; }
+    .toc-misc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
+    .toc-misc a:hover { text-decoration: underline; }
 
     .divider { border: none; border-top: 2px solid #e5e7eb; margin: 1.5rem 0; }
   </style>
@@ -279,34 +327,89 @@
   <!-- ══════════════ 目录 ══════════════ -->
   <section id="toc">
     <h2>目录</h2>
-    <ul class="toc">
+
+    <!-- 需求：GT-12696 发信人黑白名单优化 -->
+    <div class="toc-req">
+      <div class="toc-req-header">
+        <a href="#change-1">GT-12696 发信人黑白名单优化</a>
+      </div>
+      <div class="toc-req-body">
+
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">1</span>
+            <a href="#change-1">黑名单执行动作文案「阻断」→「拒收」</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#c1-states">1.1 截图式交互预览</a></li>
+            <li><a href="#c1-elements">1.2 逐元素说明</a></li>
+          </ul>
+        </div>
+
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">2</span>
+            <a href="#change-2">黑名单新增「丢弃」执行动作</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#c2-states">2.1 截图式交互预览</a></li>
+            <li><a href="#c2-elements">2.2 逐元素说明</a></li>
+          </ul>
+        </div>
+
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">3</span>
+            <a href="#change-3">执行动作下拉选项新增说明文字</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#c3-states">3.1 截图式交互预览</a></li>
+            <li><a href="#c3-elements">3.2 逐元素说明</a></li>
+            <li><a href="#c3-i18n">3.3 国际化 key 变更</a></li>
+          </ul>
+        </div>
+
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">4</span>
+            <a href="#change-4">修复白名单「查看配置示例」展示黑名单内容 Bug</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#c4-overview">4.1 方案概述</a></li>
+            <li><a href="#c4-states">4.2 截图式交互预览</a></li>
+            <li><a href="#c4-elements">4.3 逐元素说明</a></li>
+          </ul>
+        </div>
+
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">5</span>
+            <a href="#change-5">白名单执行动作「放行」→「投递」· 移除「白名单模式」UI</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#c5-states">5.1 截图式交互预览</a></li>
+            <li><a href="#c5-elements">5.2 逐元素说明</a></li>
+          </ul>
+        </div>
+
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">6</span>
+            <a href="#change-6">规则列表新增「优先级」列</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#c6-states">6.1 截图式交互预览</a></li>
+            <li><a href="#c6-elements">6.2 逐元素说明</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 附录 -->
+    <ul class="toc-misc">
       <li><a href="#meta">A. 元信息与事实源</a></li>
       <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
-
-      <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">黑名单执行动作文案「阻断」→「拒收」</a></li>
-      <li class="toc-indent"><a href="#c1-states">1.1 截图式交互预览（S-15 黑名单抽屉默认态）</a></li>
-      <li class="toc-indent"><a href="#c1-elements">1.2 逐元素说明</a></li>
-
-      <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">黑名单新增「丢弃」执行动作选项</a></li>
-      <li class="toc-indent"><a href="#c2-states">2.1 截图式交互预览（S-16 执行动作下拉展开态）</a></li>
-      <li class="toc-indent"><a href="#c2-elements">2.2 逐元素说明</a></li>
-
-      <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">执行动作下拉选项新增说明文字（黑/白名单）</a></li>
-      <li class="toc-indent"><a href="#c3-states">3.1 截图式交互预览（S-16 下拉展开态 · S-18 白名单抽屉）</a></li>
-      <li class="toc-indent"><a href="#c3-elements">3.2 逐元素说明（4个选项说明文字全覆盖）</a></li>
-
-      <li class="toc-change"><span class="toc-num">4</span><a href="#change-4">修复白名单「查看配置示例」展示黑名单内容并跳转黑名单 Bug</a></li>
-      <li class="toc-indent"><a href="#c4-states">4.1 截图式交互预览（S-18 白名单抽屉右侧面板）</a></li>
-      <li class="toc-indent"><a href="#c4-elements">4.2 逐元素说明</a></li>
-
-      <li class="toc-change"><span class="toc-num">5</span><a href="#change-5">白名单执行动作「放行」→「投递」· 移除「白名单模式」UI 字段</a></li>
-      <li class="toc-indent"><a href="#c5-states">5.1 截图式交互预览（S-17 白名单列表 · S-18 白名单抽屉）</a></li>
-      <li class="toc-indent"><a href="#c5-elements">5.2 逐元素说明</a></li>
-
-      <li class="toc-change"><span class="toc-num">6</span><a href="#change-6">规则列表新增「优先级」列（黑/白名单均生效）</a></li>
-      <li class="toc-indent"><a href="#c6-states">6.1 截图式交互预览（S-14 黑名单列表 8 列 · S-17 白名单列表 8 列）</a></li>
-      <li class="toc-indent"><a href="#c6-elements">6.2 逐元素说明（列定义全覆盖）</a></li>
-
       <li><a href="#diff">C. 差异标注（D-1 ~ D-3）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-1 ~ Q-2）</a></li>
       <li><a href="#version-history">E. 版本历史（v1 ~ v2）</a></li>
@@ -327,7 +430,7 @@
         <tr><td>对照 spec commit</td><td>not-used</td></tr>
         <tr><td>历史对话记录</td><td>当前上下文已提供（完整代码变更记录、对话历史）</td></tr>
         <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 运行中 webapp 浏览器真实截图；3. webapp 源码</td></tr>
-        <tr><td>浏览器验证状态</td><td>2026-08-01 实际运行截图（S-12 ~ S-18 全部完成）</td></tr>
+        <tr><td>浏览器验证状态</td><td>2026-08-01 实���运行截图（S-12 ~ S-18 全部完成）</td></tr>
         <tr><td>路由路径</td><td><code>/zh/security/pipeline</code> → 发信人黑白名单「配置」→ 黑名单规则 / 白名单规则 Tab → 新建规则抽屉</td></tr>
         <tr><td>组件路径</td><td>
           <code>src/components/security/sender-filter/SenderFilterTable.tsx</code><br/>
@@ -574,6 +677,22 @@
         <div class="callout callout-info">白名单执行动作下拉的说明文字与变更 #3 一致，同步在白名单抽屉中生效（同一组件）。</div>
       </div>
 
+      <h3 id="c3-i18n">3.3 国际化 key 变更</h3>
+      <table>
+        <thead><tr><th>key</th><th>zh</th><th>en</th><th>变更类型</th></tr></thead>
+        <tbody>
+          <tr><td><code>senderFilter.action_reject</code></td><td>拒收</td><td>Reject</td><td><span class="tag tag-changed">已变更</span>（原：阻断 / Block）</td></tr>
+          <tr><td><code>senderFilter.action_reject_desc</code></td><td>向发信方返回 SMTP 拒绝响应，邮件不进入系统</td><td>Return an SMTP rejection response; the email never enters the system</td><td><span class="tag tag-added">新增</span></td></tr>
+          <tr><td><code>senderFilter.action_discard</code></td><td>丢弃</td><td>Discard</td><td><span class="tag tag-added">新增</span></td></tr>
+          <tr><td><code>senderFilter.action_discard_desc</code></td><td>静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃</td><td>Silently drop the email; the sender receives a delivery-success response but the email is discarded</td><td><span class="tag tag-added">新增</span></td></tr>
+          <tr><td><code>senderFilter.action_quarantine_desc</code></td><td>邮件进入隔离区，管理员可审阅后决定是否放行</td><td>Move the email to the quarantine queue for administrator review</td><td><span class="tag tag-added">新增</span></td></tr>
+          <tr><td><code>senderFilter.action_audit_desc</code></td><td>邮件正常投递，同时写入审核日志供管理员事后审查</td><td>Deliver the email normally and write an audit log entry for later review</td><td><span class="tag tag-added">新增</span></td></tr>
+          <tr><td><code>senderFilter.action_accept</code></td><td>投递</td><td>Deliver</td><td><span class="tag tag-changed">已变更</span>（原：放行 / Allow）</td></tr>
+          <tr><td><code>senderFilter.action_accept_desc</code></td><td>允许邮件通过，跳过后续检测直接投递至收件箱</td><td>Deliver the email directly to the inbox, bypassing further checks</td><td><span class="tag tag-added">新增</span></td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">以上 key 同步更新至 zh / en / ru / th 四个语言文件，ru / th 使用对应语言翻译，不使用中文直译。</div>
+
       <h3 id="c3-elements">3.2 逐元素说明（下拉选项说明文字）</h3>
       <table>
         <thead><tr><th>选项</th><th>说明文字</th><th>适用列表类型</th><th>形态/角色差异</th></tr></thead>
@@ -603,7 +722,18 @@
         原实现中，白名单抽屉的「查看配置示例」展开后展示黑名单配置内容（拒收/隔离示例），且点击「使用该示例」会触发 <code>setSkipSpf</code> 运行时报错并跳转至黑名单 Tab。修复后改为按列表类型（黑名单/白名单）分类展示对应示例。
       </div>
 
-      <h3 id="c4-states">4.1 截图式交互预览</h3>
+      <h3 id="c4-overview">4.1 方案概述</h3>
+      <table>
+        <thead><tr><th>项目</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>根因</td><td>原实现两个示例卡片的回调均硬编码 <code>form.setValue('list_type', 'blacklist')</code>，无论当前在哪个 Tab 均强制切换至黑名单</td></tr>
+          <tr><td>修复方案</td><td>示例区块改为按 <code>watchListType</code> 分支渲染：黑名单 Tab 显示「拒收垃圾邮件发送者」和「隔离可疑来源」；白名单 Tab 显示「放行可信发信人」和「放行可信域名」</td></tr>
+          <tr><td>移除</td><td>所有「使用该示例」回调中的 <code>list_type</code> 硬编码赋值全部移除，填充字段仅含 <code>sender_config / ip_range / action / priority</code></td></tr>
+          <tr><td>影响文件</td><td><code>SenderFilterDrawer.tsx</code>（CollapsibleContent 示例区块）</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="c4-states">4.2 截图式交互预览</h3>
 
       <div class="interaction-preview">
         <h4>状态 S-18（复用）：白名单新建规则抽屉右侧 — 「查看配置示例」折叠控件</h4>
@@ -622,7 +752,7 @@
         <div class="callout callout-warn">「查看配置示例」展开后状态未单独截图；修复后的展开态示例内容未能在本次验证中截取，标注为 D-2。</div>
       </div>
 
-      <h3 id="c4-elements">4.2 逐元素说明</h3>
+      <h3 id="c4-elements">4.3 逐元素说明</h3>
       <table>
         <thead><tr><th>元素</th><th>组件路径</th><th>修复内容</th><th>形态/角色差异</th></tr></thead>
         <tbody>
