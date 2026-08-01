@@ -949,21 +949,21 @@
 
       <p class="state-label">状态 A — 基础格式检查默认态（三项均启用）</p>
       <div class="screenshot-wrap">
-        <img src="../screenshots/S-20-gt12700-format-checks-default.png"
+        <img src="./screenshots/S-20-gt12700-format-checks-default.png"
              alt="基础格式检查默认态：空MAIL FROM 隔离、无效MAIL FROM 拒收（高风险警告）、信封与头部不匹配 隔离" />
         <p class="screenshot-caption">S-20 · 基础格式检查默认态。空MAIL FROM 执行动作=隔离；无效MAIL FROM 执行动作=拒收（高风险警告条）；信封与头部不匹配 执行动作=隔离。</p>
       </div>
 
       <p class="state-label">状态 B — 观察模式开启（空MAIL FROM）</p>
       <div class="screenshot-wrap">
-        <img src="../screenshots/S-22-gt12700-format-observe-mode.png"
+        <img src="./screenshots/S-22-gt12700-format-observe-mode.png"
              alt="空MAIL FROM 观察模式开启态：观察中 badge 显示，执行动作 Select 禁用" />
         <p class="screenshot-caption">S-22 · 空MAIL FROM 观察模式已开启（观察模式开关=ON）。行右侧标注「观察」badge；执行动作下拉保持可见但功能受限。</p>
       </div>
 
       <p class="state-label">状态 C — 检查项关闭态（空MAIL FROM enabled=false）</p>
       <div class="screenshot-wrap">
-        <img src="../screenshots/S-23-gt12700-format-disabled.png"
+        <img src="./screenshots/S-23-gt12700-format-disabled.png"
              alt="空MAIL FROM 检查项关闭态：行折叠、Select 和观察模式开关均禁用" />
         <p class="screenshot-caption">S-23 · 空MAIL FROM 检查项关闭（enabled=false）。行折叠为不可交互状态，执行动作 Select 及观察模式开关均 disabled。</p>
       </div>
@@ -1040,7 +1040,7 @@
 
       <p class="state-label">状态 D — 执行动作下拉展开态（含说明文字）</p>
       <div class="screenshot-wrap">
-        <img src="../screenshots/S-21-gt12700-format-action-dropdown.png"
+        <img src="./screenshots/S-21-gt12700-format-action-dropdown.png"
              alt="执行动作下拉展开：隔离（已选）、审核、拒收、丢弃，每项下方有一行灰色说明文字" />
         <p class="screenshot-caption">S-21 · 执行动作下拉展开态。四个选项各带一行灰色说明文字（muted-foreground），下拉宽度扩至 288px（<code>w-72</code>）与发信人黑白名单保持一致。</p>
       </div>
@@ -1153,21 +1153,21 @@
 
       <p class="state-label">状态 A — 修复后：SPF 节点选中态（默认激活）</p>
       <div class="screenshot-wrap">
-        <img src="../screenshots/S-24-gt12701-protocol-flow-spf-selected.png"
+        <img src="./screenshots/S-24-gt12701-protocol-flow-spf-selected.png"
              alt="邮件身份验证流程：SPF 节点选中，蓝色 ring 边框四边完整显示，上边缘不再被裁切" />
         <p class="screenshot-caption">S-24 · SPF 节点选中态（修复后）。蓝色 <code>ring-2 ring-primary ring-offset-2</code> 边框四边完整可见，顶部 4px 留白（<code>py-1</code>）恰好容纳溢出的 ring。Tab 栏联动切换至「SPF」，下方显示 SPF 协议规则（硬拒绝/软拒绝/未维护）。</p>
       </div>
 
       <p class="state-label">状态 B — 修复后：DMARC 节点选中态</p>
       <div class="screenshot-wrap">
-        <img src="../screenshots/S-25-gt12701-protocol-flow-dmarc-selected.png"
+        <img src="./screenshots/S-25-gt12701-protocol-flow-dmarc-selected.png"
              alt="邮件身份验证流程：DMARC 节点选中，紫色 ring 边框四边完整显示" />
         <p class="screenshot-caption">S-25 · DMARC 节点选中态（修复后）。紫色边框四边完整，上边缘不再被裁切（Bug 复现时此边缘缺失）。下方 Tab 联动切换至「DMARC」，显示 p=reject / p=quarantine / p=none 三条规则。</p>
       </div>
 
       <p class="state-label">状态 C — 修复后：PTR 节点选中态</p>
       <div class="screenshot-wrap">
-        <img src="../screenshots/S-26-gt12701-protocol-flow-ptr-selected.png"
+        <img src="./screenshots/S-26-gt12701-protocol-flow-ptr-selected.png"
              alt="邮件身份验证流程：PTR 节点选中，橙色 ring 边框四边完整显示" />
         <p class="screenshot-caption">S-26 · PTR 节点选中态（修复后）。橙色边框四边完整。下方 Tab 联动切换至「PTR」，显示记录不存在 / 查询失败 / 与EHLO不匹配三条规则。</p>
       </div>
@@ -1240,7 +1240,7 @@
 
       <p class="state-label">状态 A — 移除后：认证协议检查区块默认态</p>
       <div class="screenshot-wrap">
-        <img src="../screenshots/S-27-gt12705-protocol-checks-no-banner.png"
+        <img src="./screenshots/S-27-gt12705-protocol-checks-no-banner.png"
              alt="认证协议检查区块移除蓝色说明条后：直接展示策略模板选择器、观察模式开关、邮件身份验证流程图和 Tab 栏" />
         <p class="screenshot-caption">S-27 · 认证协议检查默认态（移除后，AI版·单租户，zh，dark，1528×832）。区块顶部蓝色例外配置说明条已消失；内容直接从策略模板选择器（宽松 / 标准 / 严格 / 自定义，当前选中「标准」）和观察模式开关开始；邮件身份验证流程图（SPF 阻断 → DKIM 隔离 → DMARC 阻断 → PTR 检查）完整可见；当前激活 Tab 为「SPF」，下方展示「硬拒绝 (Fail)」规则。</p>
       </div>
