@@ -768,54 +768,107 @@ export function SenderFilterDrawer({
                   }
                 />
                 <CollapsibleContent className="mt-3 space-y-3">
-                  <div className="rounded-lg border bg-card p-4">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <h4 className="text-sm font-medium">{t('senderFilter.exampleBlockSpam')}</h4>
-                        <p className="text-xs text-muted-foreground">{t('senderFilter.exampleBlockSpamDesc')}</p>
+                  {watchListType === 'blacklist' ? (
+                    <>
+                      <div className="rounded-lg border bg-card p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <h4 className="text-sm font-medium">{t('senderFilter.exampleBlockSpam')}</h4>
+                            <p className="text-xs text-muted-foreground">{t('senderFilter.exampleBlockSpamDesc')}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs shrink-0"
+                            type="button"
+                            onClick={() => {
+                              form.setValue('sender_config', { type: 'individual', value: 'spam@bad.com' }, { shouldDirty: true });
+                              form.setValue('ip_range', { type: 'all' }, { shouldDirty: true });
+                              form.setValue('action', 'reject', { shouldDirty: true });
+                              form.setValue('priority', 500, { shouldDirty: true });
+                              setShowExamples(false);
+                            }}
+                          >
+                            {t('senderFilter.useExample')}
+                          </Button>
+                        </div>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs shrink-0"
-                        type="button"
-                        onClick={() => {
-                          form.setValue('sender_config', { type: 'individual', value: 'spam@bad.com' }, { shouldDirty: true });
-                          form.setValue('ip_range', { type: 'all' }, { shouldDirty: true });
-                          form.setValue('list_type', 'blacklist', { shouldDirty: true });
-                          form.setValue('action', 'reject', { shouldDirty: true });
-                          form.setValue('priority', 500, { shouldDirty: true });
-                          setShowExamples(false);
-                        }}
-                      >
-                        {t('senderFilter.useExample')}
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="rounded-lg border bg-card p-4">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <h4 className="text-sm font-medium">{t('senderFilter.exampleQuarantineSuspicious')}</h4>
-                        <p className="text-xs text-muted-foreground">{t('senderFilter.exampleQuarantineSuspiciousDesc')}</p>
+                      <div className="rounded-lg border bg-card p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <h4 className="text-sm font-medium">{t('senderFilter.exampleQuarantineSuspicious')}</h4>
+                            <p className="text-xs text-muted-foreground">{t('senderFilter.exampleQuarantineSuspiciousDesc')}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs shrink-0"
+                            type="button"
+                            onClick={() => {
+                              form.setValue('sender_config', { type: 'domain', value: 'suspicious.test' }, { shouldDirty: true });
+                              form.setValue('ip_range', { type: 'range', value: '192.168.1.0/24' }, { shouldDirty: true });
+                              form.setValue('action', 'quarantine', { shouldDirty: true });
+                              form.setValue('priority', 500, { shouldDirty: true });
+                              setShowExamples(false);
+                            }}
+                          >
+                            {t('senderFilter.useExample')}
+                          </Button>
+                        </div>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs shrink-0"
-                        type="button"
-                        onClick={() => {
-                          form.setValue('sender_config', { type: 'domain', value: 'suspicious.test' }, { shouldDirty: true });
-                          form.setValue('ip_range', { type: 'range', value: '192.168.1.0/24' }, { shouldDirty: true });
-                          form.setValue('list_type', 'blacklist', { shouldDirty: true });
-                          form.setValue('action', 'quarantine', { shouldDirty: true });
-                          form.setValue('priority', 500, { shouldDirty: true });
-                          setShowExamples(false);
-                        }}
-                      >
-                        {t('senderFilter.useExample')}
-                      </Button>
-                    </div>
-                  </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="rounded-lg border bg-card p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <h4 className="text-sm font-medium">{t('senderFilter.exampleAllowTrustedSender')}</h4>
+                            <p className="text-xs text-muted-foreground">{t('senderFilter.exampleAllowTrustedSenderDesc')}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs shrink-0"
+                            type="button"
+                            onClick={() => {
+                              form.setValue('sender_config', { type: 'individual', value: 'partner@trusted.com' }, { shouldDirty: true });
+                              form.setValue('ip_range', { type: 'all' }, { shouldDirty: true });
+                              form.setValue('action', 'accept', { shouldDirty: true });
+                              form.setValue('whitelist_mode', 'bypass_content', { shouldDirty: true });
+                              form.setValue('priority', 800, { shouldDirty: true });
+                              setShowExamples(false);
+                            }}
+                          >
+                            {t('senderFilter.useExample')}
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="rounded-lg border bg-card p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <h4 className="text-sm font-medium">{t('senderFilter.exampleAllowTrustedDomain')}</h4>
+                            <p className="text-xs text-muted-foreground">{t('senderFilter.exampleAllowTrustedDomainDesc')}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs shrink-0"
+                            type="button"
+                            onClick={() => {
+                              form.setValue('sender_config', { type: 'domain', value: 'trusted-partner.com' }, { shouldDirty: true });
+                              form.setValue('ip_range', { type: 'all' }, { shouldDirty: true });
+                              form.setValue('action', 'accept', { shouldDirty: true });
+                              form.setValue('whitelist_mode', 'bypass_content', { shouldDirty: true });
+                              form.setValue('priority', 800, { shouldDirty: true });
+                              setShowExamples(false);
+                            }}
+                          >
+                            {t('senderFilter.useExample')}
+                          </Button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </CollapsibleContent>
               </Collapsible>
 

@@ -1491,7 +1491,7 @@
   "detectionItems": {
     "rbl": "RBL 过滤",
     "rblDesc": "配置 RBL（实时黑名单）服务器，用于检测垃圾邮件发送者 IP",
-    "execImpersonation": "高管仿冒检测",
+    "execImpersonation": "��管仿冒检测",
     "execImpersonationDesc": "配置需要保护的高管名单，检测仿冒高管身份的邮件",
     "domainLookalike": "域名相似检测",
     "domainLookalikeDesc": "配置需要监控的域名列表，检测仿冒域名的钓鱼邮件",
@@ -2081,7 +2081,7 @@
     "adminAccountTaken": "该账号已存在（不区分大小写），请换一个"
   },
   "users": {
-    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全���约）",
+    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全�����约）",
     "resetPassword": {
       "title": "重置密码",
       "description": "为管理员「{username}」设置新密码，重置后需用新密码登录。",
@@ -2463,7 +2463,7 @@
     "ssl": "SSL/TLS",
     "rawFailureReason": "原始失败信息",
     "ipLocation": {
-      "internal": "内网",
+      "internal": "��网",
       "domestic": "境内",
       "overseas": "境外"
     },
@@ -2754,7 +2754,7 @@
     "parseError": "部分解析错误"
   },
   "routeRules": {
-    "routeConfig": "路由配置",
+    "routeConfig": "路���配置",
     "hopType": "下一跳类型",
     "nextHopHost": "下一跳地址",
     "nextHopPort": "下一跳端口",
@@ -3212,7 +3212,7 @@
     "types": {
       "phish_analysis": "钓鱼分析",
       "similarity_search": "相似邮件聚类",
-      "account_anomaly_analysis": "账号异常分析",
+      "account_anomaly_analysis": "账��异常分析",
       "threat_traceback": "威胁回溯",
       "rule_analysis": "规则分析"
     },
@@ -3374,7 +3374,7 @@
   },
   "ipFrequency": {
     "title": "IP 频率限制",
-    "description": "限制每个 IP 地址的连接数、认证失败次数和命令错误次数",
+    "description": "限制每个 IP 地址的连接数、认证失败次数和命���错误次数",
     "basicSettings": "基础设置",
     "ruleName": "规则名称",
     "ruleNamePlaceholder": "如：合作伙伴IP限制",
@@ -3541,7 +3541,7 @@
       "notHit": "未命中",
       "diffLeft": "距离触发阈值还差 {diff} 次",
       "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次，超过限制 {limit} 次",
-      "dailyHit": "触发\"每日连接数\"阈值，当日已连接 {count} 次，超过限制 {limit} 次",
+      "dailyHit": "触发\"每日连接数\"阈��，当日已连接 {count} 次，超过限制 {limit} 次",
       "notHitReason": "未触发阈值",
       "noThresholds": "当前配置未设置有效阈值，连接将被放行"
     },
@@ -4100,10 +4100,14 @@
     "effectPriorityLabel": "优先级",
     "effectSenderEmpty": "未填写",
     "effectExpirePermanent": "永久",
-    "exampleBlockSpam": "阻断垃圾邮件发送者",
-    "exampleBlockSpamDesc": "直接阻断已知的垃圾邮件发送者",
+    "exampleBlockSpam": "拒收垃圾邮件发送者",
+    "exampleBlockSpamDesc": "直接拒收已知的垃圾邮件发送者",
     "exampleQuarantineSuspicious": "隔离可疑来源",
     "exampleQuarantineSuspiciousDesc": "隔离 suspicious.test 从 192.168.1.0/24 发来的邮件",
+    "exampleAllowTrustedSender": "放行可信发信人",
+    "exampleAllowTrustedSenderDesc": "将 partner@trusted.com 加入白名单，跳过内容检测直接投递",
+    "exampleAllowTrustedDomain": "放行可信域名",
+    "exampleAllowTrustedDomainDesc": "放行来自 trusted-partner.com 的所有邮件，绕过内容安全检测",
     "simEmailLabel": "模拟发信人邮箱",
     "simEmailPlaceholder": "test@example.com",
     "startTest": "开始测试",
@@ -4116,7 +4120,7 @@
     "configHint4": "群组和组织来自群组策略配置",
     "scheduleSection": "生效时间",
     "complexEditTitle": "复杂条件",
-    "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑。可修改规则名称、备注、优先级与有效期；保存不会改动原有条件与执行动作。",
+    "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑。可修改规则名称、备注、优先级与有效期；保存不会改动原有条件与执��动作。",
     "statusFilter": "状态筛选",
     "statusAll": "全部状态",
     "statusEnabled": "已启用",
@@ -4287,7 +4291,7 @@
     "exampleKeywordRejectDesc": "检测正文中的 18 位身份证号并阻断",
     "exampleRegexQuarantine": "银行卡号检测",
     "exampleRegexQuarantineDesc": "检测正文中的 16–19 位银行账号并进入审核",
-    "exampleContentGroupAudit": "敏感词过滤",
+    "exampleContentGroupAudit": "��感词过滤",
     "exampleContentGroupAuditDesc": "主题或正文包含敏感词时阻断邮件",
     "addHeaders": "添加头部",
     "headerName": "头部名称",
@@ -4951,7 +4955,7 @@
       "engineQianxin": "奇安信（国内病毒库覆盖好）",
       "engineKaspersky": "卡巴斯基（国际病毒库覆盖好）",
       "engineQianxinShort": "奇安信",
-      "engineKasperskyShort": "卡巴斯基",
+      "engineKasperskyShort": "���巴斯基",
       "engineNone": "无",
       "autoSwitch": "主引擎故障/超时时自动启用备引擎",
       "dualEngine": "双引擎同时扫描（提升检出率）",
@@ -4980,7 +4984,7 @@
       "ocrDetection": "图片OCR检测",
       "ocrSendHint": "（外发方向建议启用深度检测，防截图泄密）",
       "detectionMode": "检测模式",
-      "ocrLimit": "检测数量上限（防止性能耗尽）",
+      "ocrLimit": "检测数量上限（防止性能��尽）",
       "attachments": "个附件",
       "ocrMode_none": "不检测",
       "ocrMode_light": "轻度检测（仅印刷体）",
@@ -5168,7 +5172,7 @@
       "actionBlock": "阻断（拒绝接收该邮件）",
       "actionBlockTip": "拒绝接收该邮件，发件人收到退信通知",
       "actionMark": "标记（投递但添加风险标签）",
-      "actionMarkTip": "邮件正常投递，但添加风险标签提醒用户",
+      "actionMarkTip": "邮件正��投递，但添加风险标签提醒用户",
       "actionDiscard": "丢弃（静默删除）",
       "actionDiscardTip": "静默删除邮件，不通知发件人",
       "anomalyGroup": "扫描异常处置",
@@ -5255,7 +5259,7 @@
         "unit": "秒",
         "hint": "{engine}分析通常需 30-60 秒（有效范围：10-120 秒）"
       },
-      "costBanner": "深度复检由【{engine}】执行，通常需 30-60 秒。用户点击链接后需等待，请结合下方超时策略配置。",
+      "costBanner": "深度复检由【{engine}】执行，通常需 30-60 秒。用户点击链��后需等待，请结合下方超时策略配置。",
       "skip": {
         "title": "允许用户跳过深度检测",
         "desc": "允许终端用户在等待期间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风险。开启会降低防护强度，请谨慎使用。",
@@ -6907,7 +6911,7 @@
         "note": "单位为MB"
       },
       "desc_nestedZipLevel": {
-        "source": "压缩包解析引擎",
+        "source": "压缩包解���引擎",
         "usage": "检测压缩包嵌套层级",
         "note": "用于检测压缩炸弹，建议阈值3-5层"
       },
@@ -7629,7 +7633,7 @@
         "action": "动作",
         "sender_domain": "发件人 TOP",
         "client_ip": "IP TOP",
-        "matched_rule": "策略"
+        "matched_rule": "策��"
       },
       "close": "关闭",
       "empty": "无下钻数据"
@@ -7722,7 +7726,7 @@
       "inboundTotal": "接收总量",
       "outboundTotal": "外发总量",
       "internalTotal": "域内总量",
-      "totalSuccessRate": "总投递成功率",
+      "totalSuccessRate": "总投递成功���",
       "queueBacklog": "总队列积压",
       "total": "总量",
       "successRate": "成功率",
@@ -8044,7 +8048,7 @@
     "tabs": {
       "hardware": "硬件资源",
       "processes": "服务进程",
-      "database": "数据库与缓存",
+      "database": "数���库与缓存",
       "storage": "存储与备份"
     },
     "range": {
@@ -8129,7 +8133,7 @@
       "logTitle": "备份日志 - {name}",
       "logDescription": "{time} · 节点 {node}",
       "logEmpty": "该任务未上报日志内容",
-      "logLoadError": "备份任务数据加载失败"
+      "logLoadError": "备份任务数据加载失���"
     },
     "nodesUnavailable": "监控节点列表不可用，请检查数据采集 Agent 或 TSDB 状态"
   },
@@ -9077,7 +9081,7 @@
       "title": "检测日志",
       "time": "时间",
       "runId": "任务 ID",
-      "testRun": "测试",
+      "testRun": "测���",
       "selectRuns": "选择任务",
       "triggerType": "触发来源",
       "window": "扫描范围",
