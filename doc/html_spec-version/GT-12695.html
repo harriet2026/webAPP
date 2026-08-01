@@ -473,13 +473,33 @@
       </div>
     </div>
 
+    <!-- 需求：GT-12711 管控方向双向改为外发+域内 -->
+    <div class="toc-req">
+      <div class="toc-req-header">
+        <a href="#req-gt12711">GT-12711 发信行为管控——新建规则：【管控方向】选择框中的"双向"字段修改为"接收+外发"</a>
+      </div>
+      <div class="toc-req-body">
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">1</span>
+            <a href="#gt12711-c1">将 bidirectional 文案从"双向"改为"外发 + 域内"（四语言 i18n 同步更新）</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#gt12711-c1-states">1.1 截图式交互预览（Select 关闭态 S-35 / 展开四选项 S-36）</a></li>
+            <li><a href="#gt12711-c1-elements">1.2 语义根因分析与四语言文案对照</a></li>
+            <li><a href="#gt12711-c1-impl">1.3 实现说明</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- 附录 -->
     <ul class="toc-misc">
       <li><a href="#meta">A. 元信息与事实源</a></li>
       <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
-      <li><a href="#diff">C. 差异标注（D-1 ~ D-10）</a></li>
+      <li><a href="#diff">C. 差异标注（D-1 ~ D-11）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-1 ~ Q-3）</a></li>
-      <li><a href="#version-history">E. 版本历史（v1 ~ v9）</a></li>
+      <li><a href="#version-history">E. 版本历史（v1 ~ v10）</a></li>
     </ul>
   </section>
 
@@ -1860,6 +1880,130 @@
     </div>
   </div>
 
+  <!-- ══════════════ GT-12711 增量节 ═══════════════ -->
+  <div id="req-gt12711" style="scroll-margin-top:1.5rem;"></div>
+
+  <div class="incr-header" id="gt12711-header">
+    <div>
+      <span class="incr-badge">GT-12711</span>
+      <span class="incr-title">发信行为管控——新建规则：【管控方向】选择框中的"双向"字段修改为"接收+外发"</span>
+    </div>
+    <div class="incr-meta">
+      关联模块：发信行为管控（策略流水线 阶段2）·
+      组件：<code>BehaviorControlDrawer.tsx</code>·
+      i18n：<code>messages/{zh,en,ru,th}.json</code> → <code>behaviorControl.direction.bidirectional</code>·
+      变更类型：文案优化（i18n）·
+      最后更新：2026-08-01
+    </div>
+  </div>
+
+  <div class="incremental-section" id="gt12711-c1">
+    <div class="incr-section-header">
+      <span class="incr-num">1</span>
+      <span>将 bidirectional 文案从"双向"改为"外发 + 域内"（四语言 i18n 同步更新）</span>
+      <span class="tag tag-changed">文案优化</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12711-c1-states">1.1 截图式交互预览</h3>
+
+      <p><strong>触发路径：</strong>策略流水线（租户管理员视角）→ 发信行为管控「配置」→ 弹窗打开 → 「+ 新建规则」→ 基础设置区「管控方向」Select</p>
+
+      <p class="state-label">状态 A — 新建规则抽屉 · 管控方向 Select 关闭态（默认值"外发"）</p>
+      <div class="screenshot-wrap">
+        <img src="./screenshots/S-35-gt12711-drawer-direction-closed.png"
+             alt="新建规则抽屉，管控方向 Select 关闭态，Trigger 显示默认值「外发」" />
+        <p class="screenshot-caption">S-35 · 管控方向 Select 关闭态（AI版·单租户，租户管理员，zh，dark，1528×832，2026-08-01）。基础设置区「管控方向」字段 Select Trigger 显示默认值「外发」；底部 footer「取消」「保存」按钮可见（GT-12710 修复效果）。</p>
+      </div>
+
+      <p class="state-label">状态 B — 新建规则抽屉 · 管控方向 Select 展开态（四选项，含修改后的"外发 + 域内"）</p>
+      <div class="screenshot-wrap">
+        <img src="./screenshots/S-36-gt12711-direction-dropdown.png"
+             alt="管控方向 Select 展开，显示接收、外发（选中）、域内、外发 + 域内四个选项，原「双向」已不存在" />
+        <p class="screenshot-caption">S-36 · 管控方向 Select 展开态（AI版·单租户，租户管理员，zh，dark，1528×832，2026-08-01）。下拉面板显示四个选项：「接收」「外发」（当前选中，蓝色高亮）「域内」「外发 + 域内」；<strong>原「双向」选项已不存在</strong>，替换为「外发 + 域内」，消除语义歧义。</p>
+      </div>
+
+      <h3 id="gt12711-c1-elements">1.2 语义根因分析与四语言文案对照</h3>
+
+      <p><strong>问题根因：</strong>「双向」字面含义为「两个方向来回」，用户最直观的联想是「接收 ↔ 外发」（入站 + 出站）。但 <code>bidirectional</code> 的实际覆盖范围是「外发 + 域内」（outbound + internal）——一个出站、一个域内转发，两者并不构成对称的来回关系，与「双向」的语义直觉完全相反，导致理解成本高且存在误选风险。</p>
+
+      <table>
+        <thead>
+          <tr><th>locale</th><th>修改前</th><th>修改后</th><th>i18n key</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>zh</td>
+            <td>双向</td>
+            <td><strong>外发 + 域内</strong></td>
+            <td><code>behaviorControl.direction.bidirectional</code></td>
+          </tr>
+          <tr>
+            <td>en</td>
+            <td>Bidirectional</td>
+            <td><strong>Outbound + Internal</strong></td>
+            <td><code>behaviorControl.direction.bidirectional</code></td>
+          </tr>
+          <tr>
+            <td>ru</td>
+            <td>Двусторонние</td>
+            <td><strong>Исходящие + Внутренние</strong></td>
+            <td><code>behaviorControl.direction.bidirectional</code></td>
+          </tr>
+          <tr>
+            <td>th</td>
+            <td>สองทิศทาง</td>
+            <td><strong>ขาออก + ภายใน</strong></td>
+            <td><code>behaviorControl.direction.bidirectional</code></td>
+          </tr>
+          <tr>
+            <td colspan="4">
+              <strong>覆盖面：</strong>Select Trigger 显示值、SelectItem 列表项文案、规则列表「方向」列 Badge 均读取同一 i18n key，无需修改组件代码，自动跟随更新。<br/>
+              <strong>其他三项：</strong>接收（inbound）/ 外发（outbound）/ 域内（internal）文案不变。
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="gt12711-c1-impl">1.3 实现说明</h3>
+
+      <table>
+        <thead><tr><th>修改文件</th><th>变更内容</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>messages/zh.json</code></td>
+            <td><code>behaviorControl.direction.bidirectional</code>：<code>"双向"</code> → <code>"外发 + 域内"</code></td>
+          </tr>
+          <tr>
+            <td><code>messages/en.json</code></td>
+            <td><code>behaviorControl.direction.bidirectional</code>：<code>"Bidirectional"</code> → <code>"Outbound + Internal"</code></td>
+          </tr>
+          <tr>
+            <td><code>messages/ru.json</code></td>
+            <td><code>behaviorControl.direction.bidirectional</code>：<code>"Двусторонние"</code> → <code>"Исходящие + Внутренние"</code></td>
+          </tr>
+          <tr>
+            <td><code>messages/th.json</code></td>
+            <td><code>behaviorControl.direction.bidirectional</code>：<code>"สองทิศทาง"</code> → <code>"ขาออก + ภายใน"</code></td>
+          </tr>
+          <tr>
+            <td colspan="2">不修改任何组件代码；不新增 i18n key；不影响其他三个方向选项。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table>
+        <thead><tr><th>元素</th><th>形态/角色差异</th></tr></thead>
+        <tbody>
+          <tr><td>管控方向 Select Trigger 文案（bidirectional）</td><td>[Base] — 所有形态/角色一致</td></tr>
+          <tr><td>管控方向 SelectItem 文案（bidirectional）</td><td>[Base] — 所有形态/角色一致</td></tr>
+          <tr><td>规则列表「方向」列 Badge（bidirectional）</td><td>[Base] — 所有形态/角色一致</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
   <!-- ══════════════ C. 差异标注 ═══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -1943,6 +2087,13 @@
           <td>GT-12710：<code>BehaviorControlDrawer</code> 新建/编辑规则抽屉的「保存」「取消」按钮嵌在 header 右侧（顶部），与参照格式（<code>SenderFilterDrawer</code>）的底部独立 footer 位置不一致</td>
           <td>2026-08-01</td>
           <td>已修复：仅修改 <code>BehaviorControlDrawer.tsx</code>——① header 外层 div 移除 <code>flex items-center justify-between</code>，删除 header 内的按钮组；② 在 <code>&lt;/form&gt;</code> 前追加 <code>flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0</code> 独立 footer，按钮文案沿用 <code>common.cancel</code>/<code>common.save</code> i18n key；截图 S-33（header 无按钮）/ S-34（底部 footer 按钮）验证</td>
+        </tr>
+        <tr>
+          <td>D-11</td>
+          <td><span class="tag tag-changed">已优化</span></td>
+          <td>GT-12711：管控方向 Select 选项「双向」与实际语义（外发 + 域内）不符——「双向」字面联想为接收 ↔ 外发（入站 + 出站），实际覆盖外发 + 域内（outbound + internal），语义相反，理解成本高且存在误选风险</td>
+          <td>2026-08-01</td>
+          <td>已优化：四语言 messages JSON 各修改 <code>behaviorControl.direction.bidirectional</code> 一个 key（共 4 处）；zh: 双向 → 外发 + 域内，en: Bidirectional → Outbound + Internal，ru: Двусторонние → Исходящие + Внутренние，th: สองทิศทาง → ขาออก + ภายใน；不修改任何组件代码；Select Trigger / SelectItem / 列表 Badge 自动跟随更新；截图 S-36 验证展开态四选项</td>
         </tr>
       </tbody>
     </table>
@@ -2051,6 +2202,12 @@
           <td>2026-08-01</td>
           <td>GT-12710</td>
           <td>GT-12710 v9（发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1 个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（移除 header 内按钮组 + 追加 footer div），沿用 common.cancel/common.save i18n key，不新增 key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/ S-33（抽屉顶部 header 无按钮）/ S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史追加 v9。</td>
+        </tr>
+        <tr>
+          <td>v10</td>
+          <td>2026-08-01</td>
+          <td>GT-12711</td>
+          <td>GT-12711 v10（发信行为管控管控方向双向文案修改）：追加 GT-12711 需求节（1 个变更点）：四语言 messages JSON 各修改 behaviorControl.direction.bidirectional 一个 key（共 4 处），zh: 双向→外发+域内，en: Bidirectional→Outbound+Internal，ru: Двусторонние→Исходящие+Внутренние，th: สองทิศทาง→ขาออก+ภายใน；不修改任何组件代码；目录追加 GT-12711 卡片块；补充截图 S-35（Select 关闭态默认「外发」）/ S-36（展开态四选项，「外发+域内」取代原「双向」）；差异标注新增 D-11（已优化）；版本历史追加 v10。</td>
         </tr>
       </tbody>
     </table>

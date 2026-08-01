@@ -1,6 +1,6 @@
 {
   "module": "sender-filter-optimization",
-  "current_version": 12,
+  "current_version": 13,
   "history": [
     {
       "version": 1,
@@ -109,6 +109,15 @@
       "ticket": "GT-12710",
       "incremental": true,
       "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史追加 v9。"
+    },
+    {
+      "version": 13,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12711",
+      "incremental": true,
+      "summary": "GT-12695 v10（GT-12711 发信行为管控管控方向双向文案修改）：追加 GT-12711 需求节（1个变更点）：四语言 messages JSON 各修改 behaviorControl.direction.bidirectional 一个 key（共4处），zh:双向→外发+域内，en:Bidirectional→Outbound+Internal，ru:Двусторонние→Исходящие+Внутренние，th:สองทิศทาง→ขาออก+ภายใน；不修改任何组件代码；目录追加 GT-12711 卡片块；补充截图 S-35（Select关闭态）/S-36（展开态四选项）；差异标注新增 D-11（已优化）；版本历史追加 v10。"
     }
   ]
 }
