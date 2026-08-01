@@ -413,13 +413,33 @@
       </div>
     </div>
 
+    <!-- 需求：GT-12708 SPF/DKIM/DMARC策略显示的执行配置与实际设置的配置不符问题解决 -->
+    <div class="toc-req">
+      <div class="toc-req-header">
+        <a href="#req-gt12708">GT-12708 SPF/DKIM/DMARC策略显示的执行配置与实际设置的配置不符问题解决</a>
+      </div>
+      <div class="toc-req-body">
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">1</span>
+            <a href="#gt12708-c1">流程图节点 badge 改用 dominantAction 实时计算</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#gt12708-c1-states">1.1 截图式交互预览（标准模板流程图节点修复后状态）</a></li>
+            <li><a href="#gt12708-c1-elements">1.2 Bug 根因与修复说明</a></li>
+            <li><a href="#gt12708-c1-impl">1.3 实现说明</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- 附录 -->
     <ul class="toc-misc">
       <li><a href="#meta">A. 元信息与事实源</a></li>
       <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
-      <li><a href="#diff">C. 差异标注（D-1 ~ D-7）</a></li>
+      <li><a href="#diff">C. 差异标注（D-1 ~ D-8）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-1 ~ Q-3）</a></li>
-      <li><a href="#version-history">E. 版本历史（v1 ~ v6）</a></li>
+      <li><a href="#version-history">E. 版本历史（v1 ~ v7）</a></li>
     </ul>
   </section>
 
@@ -797,7 +817,7 @@
         <h4>状态 S-17：白名单规则列表 — 8 列（含优先级）</h4>
         <p class="trigger-path">触发路径：发信人黑白名单配置弹窗 → 白名单规则 Tab</p>
         <figure>
-          <img src="./screenshots/S-17-whitelist-table-cols.png" alt="白名单规则列表，8列：规则ID、规则名称、发信人、执行动作、优先级、状态、修改时间、操作" />
+          <img src="./screenshots/S-17-whitelist-table-cols.png" alt="白名单规则���表，8列：规则ID、规则名称、发信人、执行动作、优先级、状态、修改时间、操作" />
           <figcaption>状态 S-17 · 白名单规则列表 · 桌面 1528×832 · 蓝色主题（亮色）· AI版·单租户 · 平台管理员 · 浏览器验证：2026-08-01（已完成）</figcaption>
         </figure>
         <table>
@@ -931,7 +951,7 @@
           </tr>
           <tr>
             <td>优先级列位置</td>
-            <td>第 5 列，「执行动作」列之后、「状态」列之前</td>
+            <td>第 5 列，「执行动作」列之后、「状���」列之前</td>
             <td><code>SenderFilterTable.tsx</code></td>
             <td>—</td>
             <td>[Base]</td>
@@ -941,7 +961,7 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════
+  <!-- ═══════��══════════════════════════════════════════════════
        GT-12700 身份认证与仿冒检测—基础格式检查
   ═══════════════════════════════════════════════════════════ -->
   <div id="req-gt12700" style="scroll-margin-top:1.5rem;"></div>
@@ -1254,7 +1274,7 @@
     </div>
     <div class="incr-body">
 
-      <h3 id="gt12705-c1-states">1.1 截图式交互预览</h3>
+      <h3 id="gt12705-c1-states">1.1 截图式交互���览</h3>
 
       <p class="state-label">移除前（用户提交的 Bug 报告截图）</p>
       <div class="callout callout-warn">
@@ -1407,6 +1427,134 @@
     </div>
   </div>
 
+  <!-- ══════════════ GT-12708 增量节 ═══════════════ -->
+  <section id="incremental-gt12708-flow-badge-dominant-action">
+    <div class="incr-header" id="req-gt12708">
+      <span class="incr-badge">GT-12708</span>
+      <h2>GT-12708 SPF/DKIM/DMARC策略显示的执行配置与实际设置的配置不符问题解决</h2>
+      <p class="incr-meta">路由：<code>/zh/security/pipeline</code>（身份认证与仿冒检测 &gt; 认证协议检查）｜变更类型：Bug 修复｜日期：2026-08-01</p>
+    </div>
+
+    <!-- 变更点 1 -->
+    <div class="change-block" id="gt12708-c1">
+      <h3>变更点 1：流程图节点 badge 改用 dominantAction 实时计算</h3>
+
+      <!-- 1.1 截图式交互预览 -->
+      <section id="gt12708-c1-states" class="interaction-preview">
+        <h4>1.1 截图式交互预览</h4>
+
+        <p><strong>触发路径：</strong>策略流水线 → 身份认证与仿冒检测「配置」→ 弹窗打开 → 认证协议检查区域</p>
+
+        <figure>
+          <img src="./screenshots/S-29-gt12708-flow-diagram-standard.png" alt="标准模板下邮件身份验证流程图节点修复后状态：SPF阻断、DKIM隔离、DMARC隔离、PTR检查" />
+          <figcaption>
+            <strong>S-29：标准模板 — 流程图节点（修复后）</strong><br/>
+            路由：<code>/zh/security/pipeline</code>｜视口：1528×1200｜主题：深色｜形态：AI版-单租户｜角色：租户管理员
+          </figcaption>
+        </figure>
+
+        <table>
+          <thead>
+            <tr><th>节点</th><th>修复前 badge（硬编码单 key）</th><th>修复后 badge（dominantAction）</th><th>依据（标准模板最严重 action）</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>SPF</td><td>隔离（读取 <code>config.spf.fail.action</code>，值为 <code>quarantine</code>）</td><td>阻断</td><td>标准模板 <code>spf.fail=reject</code>，severity 最高</td></tr>
+            <tr><td>DKIM</td><td>隔离（读取 <code>config.dkim.fail.action</code>）</td><td>隔离</td><td>标准模板 DKIM 所有 key 中最严为 <code>quarantine</code></td></tr>
+            <tr><td>DMARC</td><td>隔离（读取 <code>config.dmarc.reject.action</code>）</td><td>隔离</td><td>标准模板 DMARC 所有 key 中最严为 <code>quarantine</code></td></tr>
+            <tr><td>PTR</td><td>检查（读取 <code>config.ptr.ehlomismatch.action</code>）</td><td>检查</td><td>PTR 节点固定显示「检查」（isPtr=true）</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>修复验证：</strong>截图 S-29 可见标准模板下 SPF 节点正确显示「阻断」（修复前该节点错误显示「隔离」，因为硬编码只读了 <code>config.spf.fail.action=quarantine</code> 这一个 key）。</p>
+      </section>
+
+      <!-- 1.2 Bug 根因 -->
+      <section id="gt12708-c1-elements">
+        <h4>1.2 Bug 根因与修复说明</h4>
+        <table>
+          <thead>
+            <tr><th>维度</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>根因</td>
+              <td>
+                <code>ProtocolChecksSection.tsx</code> 中 <code>flowFailActions</code> 硬编码读取单一 sub-key（如 <code>config.spf.fail.action</code>、<code>config.dmarc.reject.action</code>），导致当用户将所有规则改为低严重度 action（如 <code>audit</code>/<code>accept</code>）后，流程图节点 badge 仍显示被硬编码 key 的旧值（如隔离）。
+              </td>
+            </tr>
+            <tr>
+              <td>修复方案</td>
+              <td>
+                新增 <code>dominantAction(group)</code> 函数，遍历协议组内所有 CheckItem，按 <code>discard(5)&gt;reject(4)&gt;quarantine(3)&gt;audit(2)&gt;accept(1)</code> 严重度排序，返回最严重的 action；<code>flowFailActions</code> 改为 <code>dominantAction(config.spf/dkim/dmarc/ptr)</code>。
+              </td>
+            </tr>
+            <tr>
+              <td>附带修复</td>
+              <td>
+                <code>flowSubKey()</code> 补充了 <code>audit→flowSub.tag</code>（标记）、<code>accept→flowSub.pass</code>（进行下一步检测）两个分支——原来二者均 fallback 到 <code>flowSub.quarantine</code>（隔离），导致「标记」和「进行下一步检测」在流程图中均错误显示为「隔离」。
+              </td>
+            </tr>
+            <tr>
+              <td>i18n</td>
+              <td>四语言（zh/en/ru/th）各追加 <code>flowSub.tag</code> 和 <code>flowSub.pass</code> 两个 key。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 1.3 实现说明 -->
+      <section id="gt12708-c1-impl">
+        <h4>1.3 实现说明</h4>
+        <table>
+          <thead>
+            <tr><th>文件</th><th>变更</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>src/lib/auth-spoofing-labels.ts</code></td>
+              <td>
+                1. <code>flowSubKey()</code> 新增 <code>audit→'flowSub.tag'</code>、<code>accept→'flowSub.pass'</code> 分支（原 fallback 为 <code>flowSub.quarantine</code>）；<br/>
+                2. 新增 <code>ACTION_SEVERITY</code> 常量（5 个等级）；<br/>
+                3. 新增 <code>dominantAction(group, fallback)</code> 函数，返回组内最严重 action。
+              </td>
+            </tr>
+            <tr>
+              <td><code>src/components/security/auth-spoofing/ProtocolChecksSection.tsx</code></td>
+              <td>
+                1. 导入 <code>dominantAction</code>；<br/>
+                2. <code>flowFailActions</code> 从硬编码单 key（<code>config.spf.fail.action</code> 等）改为 <code>dominantAction(config.spf/dkim/dmarc/ptr)</code>。
+              </td>
+            </tr>
+            <tr>
+              <td><code>messages/zh.json</code>、<code>en.json</code>、<code>ru.json</code>、<code>th.json</code></td>
+              <td>各追加 <code>authSpoofing.flowSub.tag</code>（标记 / Tag / Пометить / แท็ก）和 <code>authSpoofing.flowSub.pass</code>（进行下一步检测 / Pass / Передать дальше / ผ่านไปยังขั้นตอนถัดไป）。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <tr><th>元素 / 可见性</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>流程图 SPF/DKIM/DMARC/PTR 节点 badge</td>
+              <td>[Base] — 所有形态/角色一致，badge 文案取自 <code>flowSubKey(dominantAction(group))</code></td>
+            </tr>
+            <tr>
+              <td>「标记（加头投递）」选项对应的流程图 badge</td>
+              <td>[Base] — 修复后正确显示「标记」，不再显示「隔离」</td>
+            </tr>
+            <tr>
+              <td>「进行下一步检测」选项对应的流程图 badge</td>
+              <td>[Base] — 修复后正确显示「进行下一步检测」，不再显示「隔离」</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </section>
+
   <!-- ══════════════ C. 差异标注 ═══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -1470,6 +1618,13 @@
           <td>2026-08-01</td>
           <td>已新增：<code>PROTOCOL_GROUPS</code> dmarc keys 追加两项；三模板补充默认 action；<code>applyGroup</code> 修复新增 key 的 fallback 逻辑；<code>DEFAULT_CONFIG</code>/<code>fixtures</code> 同步补全；四语言各追加 4 个 i18n key；snapshot 可访问性树验证五行均正确渲染（截图 S-28）</td>
         </tr>
+        <tr>
+          <td>D-8</td>
+          <td><span class="tag tag-added">已解决</span></td>
+          <td>GT-12708：流程图节点 badge 硬编码读取单一 sub-key，导致将所有规则改为「标记」/「进行下一步检测」后节点仍显示「隔离」；且 <code>flowSubKey()</code> 缺少 <code>audit</code>/<code>accept</code> → <code>flowSub.tag</code>/<code>flowSub.pass</code> 的映射，二者均 fallback 为 <code>flowSub.quarantine</code></td>
+          <td>2026-08-01</td>
+          <td>已修复：新增 <code>dominantAction()</code> 函数遍历协议组所有 CheckItem 按 5 级 severity 返回最严重 action；<code>flowFailActions</code> 改用 <code>dominantAction(config.spf/dkim/dmarc/ptr)</code>；<code>flowSubKey()</code> 补充 audit/accept 两个分支；四语言各追加 <code>flowSub.tag</code>/<code>flowSub.pass</code>；截图 S-29 验证标准模板 SPF 节点正确显示「阻断」</td>
+        </tr>
       </tbody>
     </table>
   </section>
@@ -1491,7 +1646,7 @@
         <tr>
           <td>Q-1</td>
           <td><span class="tag tag-unverif">待确认</span></td>
-          <td>云-多 / AI-多 / 传统-多 · 租户管理员视角下，发信人黑白名单配置弹窗是否与单租户平台管理员视角一致？（源码未见形态/角色分支，推断一致，未实测）</td>
+          <td>云-多 / AI-多 / 传统-多 · 租户管理员视角下，发信人黑白名单配���弹窗是否与单租户平台管理员视角一致？（源码未见形态/角色分支，推断一致，未实测）</td>
           <td>产品形态 × 角色矩阵</td>
           <td>低</td>
         </tr>
@@ -1557,9 +1712,14 @@
         <tr>
           <td>v6</td>
           <td>2026-08-01</td>
-          <td><code>GT-12695</code></td>
           <td>GT-12707</td>
           <td>追加 GT-12707 需求节（1 个变更点）：DMARC检查新增「DMARC无记录」（no_record）和「DMARC查询失败」（query_fail）两个技术异常场景；修改 5 处文件（ProtocolChecksSection.tsx、auth-spoofing-templates.ts、AuthSpoofingPage.tsx、fixtures.ts、四语言 JSON 共 16 个 i18n key）；applyGroup 修复新增 key 的 fallback 逻辑；目录追加 GT-12707 卡片块；补充截图 S-28（DMARC Tab 五行，标准模板）；差异标注新增 D-7（已解决）；版本历史追加 v6。</td>
+        </tr>
+        <tr>
+          <td>v7</td>
+          <td>2026-08-01</td>
+          <td>GT-12708</td>
+          <td>GT-12708 v7（SPF/DKIM/DMARC策略显示的执行配置与实际设置的配置不符问题解决）：追加 GT-12708 需求节（1 个变更点）：修复流程图节点 badge 硬编码单 key 读取 bug；新增 dominantAction() 函数按 5 级 severity 计算协议组最严重 action；flowSubKey() 补充 audit→flowSub.tag、accept→flowSub.pass 两个分支；四语言各追加 2 个 i18n key（共 8 个）；目录追加 GT-12708 卡片块；补充截图 S-29（标准模板流程图节点修复后：SPF阻断、DKIM隔离、DMARC隔离、PTR检查）；差异标注新增 D-8（已解决）；版本历史追加 v7。</td>
         </tr>
       </tbody>
     </table>

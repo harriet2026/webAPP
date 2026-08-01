@@ -1,6 +1,6 @@
 {
   "module": "sender-filter-optimization",
-  "current_version": 9,
+  "current_version": 10,
   "history": [
     {
       "version": 1,
@@ -82,6 +82,15 @@
       "ticket": "GT-12707",
       "incremental": true,
       "summary": "GT-12695 v6（GT-12707 DMARC补充两个场景）：追加 GT-12707 需求节（1个变更点）：DMARC检查新增 no_record（DMARC无记录）和 query_fail（DMARC查询失败）两个技术异常场景；修改5处文件（ProtocolChecksSection.tsx keys数组、auth-spoofing-templates.ts三模板+applyGroup修复、AuthSpoofingPage.tsx DEFAULT_CONFIG、fixtures.ts mock、四语言JSON各4个i18n key共16个）；目录追加GT-12707卡片块；补充截图S-28（DMARC Tab五行标准模板）；差异标注新增D-7（已解决）；版本历史追加v6。"
+    },
+    {
+      "version": 10,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12708",
+      "incremental": true,
+      "summary": "GT-12695 v7（GT-12708 SPF/DKIM/DMARC策略显示的执行配置与实际设置的配置不符问题解决）：追加 GT-12708 需求节（1个变更点）：修复流程图节点 badge 硬编码单 key 读取 bug；新增 dominantAction() 函数按 5 级 severity 计算协议组最严重 action；flowSubKey() 补充 audit→flowSub.tag、accept→flowSub.pass 两个缺失分支；四语言各追加 flowSub.tag/flowSub.pass 共 8 个 i18n key；目录追加 GT-12708 卡片块；补充截图 S-29（标准模板流程图节点修复后：SPF阻断、DKIM隔离、DMARC隔离、PTR检查）；差异标注新增 D-8（已解决）；版本历史追加 v7。"
     }
   ]
 }
