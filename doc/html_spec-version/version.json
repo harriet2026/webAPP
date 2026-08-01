@@ -1,6 +1,6 @@
 {
   "module": "sender-filter-optimization",
-  "current_version": 8,
+  "current_version": 9,
   "history": [
     {
       "version": 1,
@@ -73,6 +73,15 @@
       "ticket": "GT-12705",
       "incremental": true,
       "summary": "GT-12695 v5（GT-12705 身份认证与仿冒检测——认证协议检查：去掉例外配置说明文案）：追加 GT-12705 需求节（1个变更点）：移除认证协议检查区块顶部蓝色例外配置说明条（exceptionBanner + 前往策略流水线 Link，ProtocolChecksSection.tsx 7行JSX+Info导入移除，i18n key保留）；目录追加 GT-12705 卡片块；补充真实截图 S-27（移除后默认态验证）；差异标注新增 D-6（已移除）；版本历史追加 v5。"
+    },
+    {
+      "version": 9,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12707",
+      "incremental": true,
+      "summary": "GT-12695 v6（GT-12707 DMARC补充两个场景）：追加 GT-12707 需求节（1个变更点）：DMARC检查新增 no_record（DMARC无记录）和 query_fail（DMARC查询失败）两个技术异常场景；修改5处文件（ProtocolChecksSection.tsx keys数组、auth-spoofing-templates.ts三模板+applyGroup修复、AuthSpoofingPage.tsx DEFAULT_CONFIG、fixtures.ts mock、四语言JSON各4个i18n key共16个）；目录追加GT-12707卡片块；补充截图S-28（DMARC Tab五行标准模板）；差异标注新增D-7（已解决）；版本历史追加v6。"
     }
   ]
 }

@@ -393,17 +393,37 @@
       </div>
     </div>
 
+    <!-- 需求：GT-12707 DMARC补充两个场景 -->
+    <div class="toc-req">
+      <div class="toc-req-header">
+        <a href="#req-gt12707">GT-12707 DMARC补充两个场景</a>
+      </div>
+      <div class="toc-req-body">
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">1</span>
+            <a href="#gt12707-c1">DMARC检查新增「DMARC无记录」与「DMARC查询失败」场景</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#gt12707-c1-states">1.1 截图式交互预览（标准模板 DMARC Tab 五行）</a></li>
+            <li><a href="#gt12707-c1-elements">1.2 逐元素说明</a></li>
+            <li><a href="#gt12707-c1-impl">1.3 实现说明</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- 附录 -->
     <ul class="toc-misc">
       <li><a href="#meta">A. 元信息与事实源</a></li>
       <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
-      <li><a href="#diff">C. 差异标注（D-1 ~ D-6）</a></li>
+      <li><a href="#diff">C. 差异标注（D-1 ~ D-7）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-1 ~ Q-3）</a></li>
-      <li><a href="#version-history">E. 版本历史（v1 ~ v5）</a></li>
+      <li><a href="#version-history">E. 版本历史（v1 ~ v6）</a></li>
     </ul>
   </section>
 
-  <!-- ══════════════ A. 元信息 ═══════════════ -->
+  <!-- ══════════════ A. 元信息 ══════════════ -->
   <section id="meta">
     <h2>A. 元信息与事实源</h2>
     <table>
@@ -999,7 +1019,7 @@
             <td>「隔离/审核」拆分为「隔离」+「审核」</td>
             <td>隔离/审核 (<code>quarantine</code>)</td>
             <td>隔离 (<code>quarantine</code>) + 审核 (<code>audit</code>)</td>
-            <td>原 <code>quarantine</code> 文案「隔离/审核」混淆两种语义；现拆分为独立选项��隔离=进隔离队列、审核=正常投递+写日志</td>
+            <td>原 <code>quarantine</code> 文案「隔离/审核」混淆两种语义；现拆分为独立选项：隔离=进隔离队列、审核=正常投递+写日志</td>
           </tr>
           <tr>
             <td>遗留数据 fallback</td>
@@ -1211,7 +1231,7 @@
 
   <!-- ══════════════════════════════════════════════════════════
        GT-12705 身份认证与仿冒检测——认证协议检查：去掉例外配置说明文案
-  ═══════════��══════════════════════════════════════════════ -->
+  ═════════════════════════════════════════════════════════ -->
   <div id="req-gt12705" style="scroll-margin-top:1.5rem;"></div>
 
   <div class="incr-header" id="gt12705-header">
@@ -1287,6 +1307,106 @@
     </div>
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════
+       GT-12707 DMARC补充两个场景
+  ══════════════════════════════════════════════════════════ -->
+  <div id="req-gt12707" style="scroll-margin-top:1.5rem;"></div>
+
+  <div class="incr-header" id="gt12707-header">
+    <div>
+      <span class="incr-badge">GT-12707</span>
+      <span class="incr-title">DMARC补充两个场景</span>
+    </div>
+    <div class="incr-meta">
+      关联模块：身份认证与仿冒检测 &gt; 认证协议检查 &gt; DMARC Tab（策略流水线 阶段2）·
+      变更类型：新增功能 ·
+      最后更新：2026-08-01
+    </div>
+  </div>
+
+  <div class="incremental-section" id="gt12707-c1">
+    <div class="incr-section-header">
+      <span class="incr-num">1</span>
+      <span>DMARC检查新增「DMARC无记录」与「DMARC查询失败」场景</span>
+      <span class="tag tag-added">新增功能</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12707-c1-states">1.1 截图式交互预览</h3>
+
+      <p class="state-label">状态 A — 标准模板 · DMARC Tab（新增两行后完整五行）</p>
+      <div class="screenshot-wrap">
+        <img src="./screenshots/S-28-gt12707-dmarc-5rows-standard.png"
+             alt="认证协议检查 DMARC Tab，标准模板下五行：p=reject 阻断、p=quarantine 隔离、p=none 标记、DMARC无记录 隔离、DMARC查询失败（内容区截断）" />
+        <p class="screenshot-caption">S-28 · DMARC Tab 五行（标准模板，AI版·单租户，zh，dark，1528×832，2026-08-01）。可见前四行：p=reject→阻断（返回5xx）、p=quarantine→隔离（进垃圾箱）、p=none→标记（加头投递）、DMARC无记录「发信域未发布DMARC记录」→隔离（进垃圾箱）；第五行「DMARC查询失败」因内容区容器固定高度被裁切在视口外，已通过 snapshot 可访问性树确认渲染正确（见1.3）。</p>
+      </div>
+
+      <h3 id="gt12707-c1-elements">1.2 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>场景 key</th><th>显示标题（zh）</th><th>显示描述（zh）</th><th>标准模板默认 action</th><th>宽松模板默认 action</th><th>严格模板默认 action</th><th>i18n key（标题/描述）</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>no_record</code></td>
+            <td>DMARC无记录</td>
+            <td>发信域未发布DMARC记录</td>
+            <td>隔离（进垃圾箱）</td>
+            <td>标记（加头投递）</td>
+            <td>隔离（进垃圾箱）</td>
+            <td><code>authSpoofing.protocolChecks.dmarc_no_record</code><br/><code>authSpoofing.protocolChecks.dmarc_no_recordDesc</code></td>
+          </tr>
+          <tr>
+            <td><code>query_fail</code></td>
+            <td>DMARC查询失败</td>
+            <td>DNS查询DMARC记录时发生错误（超时/SERVFAIL）</td>
+            <td>标记（加头投递）</td>
+            <td>标记（加头投递）</td>
+            <td>隔离（进垃圾箱）</td>
+            <td><code>authSpoofing.protocolChecks.dmarc_query_fail</code><br/><code>authSpoofing.protocolChecks.dmarc_query_failDesc</code></td>
+          </tr>
+          <tr>
+            <td colspan="7">
+              <strong>UI 行为：</strong>标准/严格模板下 Select 禁用（<code>lockNonCustom=true</code>），切换「自定义」后可编辑，可用动作集合与其他 DMARC 行一致（隔离/审核/拒收/丢弃/标记）。两行在 DMARC Tab 中位于 p=none 行之后，顺序固定。
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="gt12707-c1-impl">1.3 实现说明</h3>
+      <table>
+        <thead><tr><th>修改文件</th><th>变更内容</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>ProtocolChecksSection.tsx</code></td>
+            <td><code>PROTOCOL_GROUPS</code> dmarc <code>keys</code> 数组追加 <code>'no_record'</code>、<code>'query_fail'</code></td>
+          </tr>
+          <tr>
+            <td><code>auth-spoofing-templates.ts</code></td>
+            <td>三个模板（loose/standard/strict）dmarc 对象各追加两个 key 的默认 action；<code>applyGroup</code> 函数新增「补全模板中有但 config 中缺失的 key」逻辑，防止新增 key 在非 custom 模板下 fallback 为 <code>accept</code></td>
+          </tr>
+          <tr>
+            <td><code>AuthSpoofingPage.tsx</code></td>
+            <td><code>DEFAULT_CONFIG.protocol_checks.dmarc</code> 追加 <code>no_record</code>/<code>query_fail</code> 两项（与 standard 模板默认值一致），确保初始 state 与 mock 合并后包含完整五个 key</td>
+          </tr>
+          <tr>
+            <td><code>fixtures.ts</code></td>
+            <td>mock <code>dmarc</code> 对象追加 <code>no_record: { enabled: true, action: 'quarantine' }</code>、<code>query_fail: { enabled: true, action: 'audit' }</code></td>
+          </tr>
+          <tr>
+            <td><code>messages/zh.json</code>、<code>en.json</code>、<code>ru.json</code>、<code>th.json</code></td>
+            <td>各追加 4 个 i18n key：<code>dmarc_no_record</code>、<code>dmarc_no_recordDesc</code>、<code>dmarc_query_fail</code>、<code>dmarc_query_failDesc</code>（四语言，共 16 个 key）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-info">
+        snapshot 可访问性树确认第五行「DMARC查询失败」完整渲染（<code>StaticText "DMARC查询失败"</code>、<code>StaticText "DNS查询DMARC记录时发生错误（超时/SERVFAIL）"</code>、<code>combobox: 标记（加头投递）</code>），因弹窗内容区容器固定高度导致视口截图未能完整展示第五行，非渲染异常。
+      </div>
+
+    </div>
+  </div>
+
   <!-- ══════════════ C. 差异标注 ═══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -1342,6 +1462,13 @@
           <td>GT-12705：认证协议检查区块顶部蓝色例外配置说明条（<code>exceptionBanner</code>）已移除；「前往策略流水线」Link 按钮随之消失</td>
           <td>2026-08-01</td>
           <td>已移除：<code>ProtocolChecksSection.tsx</code> 删除整块 div（7 行 JSX）及 <code>Info</code> 导入；i18n key <code>exceptionBanner</code> 和 <code>goToPipeline</code> 保留（后者在 ExceptionRulesEntry.tsx 仍有引用）；截图 S-27 验证移除后状态</td>
+        </tr>
+        <tr>
+          <td>D-7</td>
+          <td><span class="tag tag-added">已解决</span></td>
+          <td>GT-12707：DMARC检查缺少「DMARC无记录」（<code>no_record</code>）和「DMARC查询失败」（<code>query_fail</code>）两个技术异常场景，与 SPF <code>temperror</code>/<code>permerror</code>、PTR <code>norecord</code>/<code>temperror</code> 不对齐</td>
+          <td>2026-08-01</td>
+          <td>已新增：<code>PROTOCOL_GROUPS</code> dmarc keys 追加两项；三模板补充默认 action；<code>applyGroup</code> 修复新增 key 的 fallback 逻辑；<code>DEFAULT_CONFIG</code>/<code>fixtures</code> 同步补全；四语言各追加 4 个 i18n key；snapshot 可访问性树验证五行均正确渲染（截图 S-28）</td>
         </tr>
       </tbody>
     </table>
@@ -1426,6 +1553,13 @@
           <td><code>GT-12695</code></td>
           <td>GT-12705</td>
           <td>追加 GT-12705 需求节（1 个变更点）：移除认证协议检查区块顶部蓝色例外配置说明条（exceptionBanner + 前往策略流水线 Link）；i18n key 保留；补充真实截图 S-27（移除后默认态验证）；目录追加 GT-12705 卡片块；差异标注新增 D-6（已移除）；版本历史追加 v5。</td>
+        </tr>
+        <tr>
+          <td>v6</td>
+          <td>2026-08-01</td>
+          <td><code>GT-12695</code></td>
+          <td>GT-12707</td>
+          <td>追加 GT-12707 需求节（1 个变更点）：DMARC检查新增「DMARC无记录」（no_record）和「DMARC查询失败」（query_fail）两个技术异常场景；修改 5 处文件（ProtocolChecksSection.tsx、auth-spoofing-templates.ts、AuthSpoofingPage.tsx、fixtures.ts、四语言 JSON 共 16 个 i18n key）；applyGroup 修复新增 key 的 fallback 逻辑；目录追加 GT-12707 卡片块；补充截图 S-28（DMARC Tab 五行，标准模板）；差异标注新增 D-7（已解决）；版本历史追加 v6。</td>
         </tr>
       </tbody>
     </table>
