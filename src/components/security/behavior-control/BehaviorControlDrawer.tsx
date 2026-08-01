@@ -270,21 +270,11 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
         >
           <FormProvider {...methods}>
             <form onSubmit={handleSubmit((v) => saveMutation.mutate(v))} className="flex flex-col flex-1 overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0">
-                <div>
-                  <SheetTitle className="text-[18px] font-semibold">
-                    {editing ? t('behaviorControl.editTitle') : t('behaviorControl.createTitle')}
-                  </SheetTitle>
-                  <p className="text-sm text-muted-foreground mt-1">{t('behaviorControl.drawerSubtitle')}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => handleClose(false)}>
-                    {t('common.cancel')}
-                  </Button>
-                  <Button type="submit" size="sm" disabled={saveMutation.isPending}>
-                    {t('common.save')}
-                  </Button>
-                </div>
+              <div className="px-6 py-4 border-b flex-shrink-0">
+                <SheetTitle className="text-[18px] font-semibold">
+                  {editing ? t('behaviorControl.editTitle') : t('behaviorControl.createTitle')}
+                </SheetTitle>
+                <p className="text-sm text-muted-foreground mt-1">{t('behaviorControl.drawerSubtitle')}</p>
               </div>
 
               <div className="flex flex-1 overflow-hidden">
@@ -978,6 +968,14 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                     </div>
                   </div>
                 </TooltipProvider>
+              </div>
+              <div className="flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0">
+                <Button type="button" variant="outline" size="sm" onClick={() => handleClose(false)}>
+                  {t('common.cancel')}
+                </Button>
+                <Button type="submit" size="sm" disabled={saveMutation.isPending}>
+                  {t('common.save')}
+                </Button>
               </div>
             </form>
           </FormProvider>
