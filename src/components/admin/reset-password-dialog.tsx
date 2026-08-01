@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 // 生成 16 位随机密码：大写/小写/数字/特殊各至少 1 个（满足后端
 // N-of-4 复杂度的最严配置），剔除易混淆字符（I/l/O/0/1）。
@@ -47,6 +48,7 @@ interface ResetPasswordDialogProps {
 
 export function ResetPasswordDialog({ open, onOpenChange, username, onSubmit }: ResetPasswordDialogProps) {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -75,7 +77,10 @@ export function ResetPasswordDialog({ open, onOpenChange, username, onSubmit }: 
       toast.success(t('users.resetPassword.success'));
       close(false);
     } catch (e) {
-      // 服务端按目标作用域的密码策略校验，失败消息（长度/复杂度）直接透传
+      // 服务端按目标作用域的密码策略校验，失败消息（长度/复杂度）直接透传。
+      // GT-12614 刻意保留这条透传：密码策略按租户可配，服务端返回的就是当前生效
+      // 策略的权威描述，前端没有等价文案可替代（同 tenant-form-drawer 的
+      // admin_password_weak 分支）。守卫见 reset-password-dialog.test.tsx。
       toast.error(e instanceof Error ? e.message : t('common.error'));
     } finally {
       setSubmitting(false);

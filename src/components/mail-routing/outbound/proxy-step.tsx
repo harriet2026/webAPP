@@ -70,6 +70,7 @@ import {
 } from '@/lib/api/proxysvr';
 import { proxysvrEndpointToRow, emptyProxyDraft, proxyDraftToRequest, type OutboundProxyDraft } from './proxy-mapping';
 import type { OutboundProxyRow, TlsMinVersion, CipherProfile } from './outbound-types';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 // mock PTR 固定值——rDNS 一致性检查用的假反解结果（真实后端也没有 PTR 查询 API，demo 语义
 // 沿用：出口 IP 的反向解析恒为该值）。
@@ -91,6 +92,7 @@ const TLS_MIN_VERSIONS: TlsMinVersion[] = ['1.0', '1.1', '1.2', '1.3'];
 
 export function ProxyStep({ tenantId }: ProxyStepProps) {
   const t = useTranslations('mailRouting.outbound.proxy');
+  const apiErrorMessage = useApiErrorMessage();
   const ts = useTranslations('mailRouting.shared');
   const tc = useTranslations('common');
   const { apiRequest } = useScopedApiRequest(tenantId);
@@ -212,7 +214,7 @@ export function ProxyStep({ tenantId }: ProxyStepProps) {
       closeDrawer();
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const handleSave = () => {
@@ -230,7 +232,7 @@ export function ProxyStep({ tenantId }: ProxyStepProps) {
       setDeleteTarget(null);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   // 行内「探测」：真实 TCP/TLS 探测（≤5s），服务端回写 probe_status/last_probe_time。
@@ -241,7 +243,7 @@ export function ProxyStep({ tenantId }: ProxyStepProps) {
       toast.success(t('toasts.probeComplete'));
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
     onSettled: () => setProbingId(null),
   });
 

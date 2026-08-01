@@ -47,6 +47,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
 import { simulateBehaviorControl } from '@/lib/behavior-control-simulator';
 import { createBehaviorControlSchema, getBehaviorControlPriorityRange } from './schema';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const BEHAVIOR_DIMENSIONS: BehaviorDimension[] = [
   'ip_count',
@@ -101,6 +102,7 @@ interface GroupOption { name: string; memberCount?: number }
 
 export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }: Props) {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const qc = useQueryClient();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin } = useAuth();
@@ -197,7 +199,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
       toast.success(t('behaviorControl.toast.saveOk'));
       onOpenChange(false);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const handleClose = useCallback((next: boolean) => {

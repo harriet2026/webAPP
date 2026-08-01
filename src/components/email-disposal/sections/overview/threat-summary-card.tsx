@@ -238,10 +238,20 @@ export function ThreatSummaryCard({
   const phishAgentInline = detail.phish_agent_check?.checked
     ? (detail.phish_agent_check.summary || '')
     : '';
-  const aiInlineText = (detail.disposal_basis?.policy_key && formatHitDetail(detail.disposal_basis, disposalLang))
-    || detail.cac_result?.description
-    || phishAgentInline
-    || '';
+  // GT-12578：这一行的**标签必须跟着来源走**。此前它固定写「AI判定依据」，
+  // 而 fallback 链里的 cac_result.description 来自外部 CAC 反垃圾云查服务
+  // （internal/cac/client.go 的 CAC_PROT_DESC，典型值 "Check by predict
+  // engine"），与我们的 AI 智能体（phish_agent_check）无关——给云查的话贴 AI
+  // 标签是误标。同时把真实的智能体结论排到云查之前：两者都存在时应该显示
+  // 智能体自己的结论，而不是云查文案。
+  const inlineVerdict: { text: string; labelKey: 'aiJudgmentBasis' | 'cloudCheckBasis' } | null =
+    (detail.disposal_basis?.policy_key && formatHitDetail(detail.disposal_basis, disposalLang))
+      ? { text: formatHitDetail(detail.disposal_basis, disposalLang), labelKey: 'aiJudgmentBasis' }
+      : phishAgentInline
+        ? { text: phishAgentInline, labelKey: 'aiJudgmentBasis' }
+        : detail.cac_result?.description
+          ? { text: detail.cac_result.description, labelKey: 'cloudCheckBasis' }
+          : null;
 
   return (
     <div
@@ -332,11 +342,11 @@ export function ThreatSummaryCard({
       {/* Row 3: AI判定依据（A11 restructure）-- 短判定文本内联展示，来源见
           上方 aiInlineText 注释。demo 无独立的 SSE 深度推理小节，此处与 demo
           对齐：仅此一行，不再有可展开的「AI 深度推理」区块。 */}
-      {aiInlineText && (
+      {inlineVerdict && (
         <div className="flex items-start gap-2 border-t pt-3 text-sm">
           <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-purple-600" />
-          <span className="shrink-0 font-semibold text-muted-foreground">{t('aiJudgmentBasis')}：</span>
-          <p className="flex-1 text-muted-foreground">{aiInlineText}</p>
+          <span className="shrink-0 font-semibold text-muted-foreground">{t(inlineVerdict.labelKey)}：</span>
+          <p className="flex-1 text-muted-foreground">{inlineVerdict.text}</p>
         </div>
       )}
 
@@ -345,6 +355,24 @@ export function ThreatSummaryCard({
           （getStageColor）+ 模块名 +「规则名」+ 动作徽标（getActionLabel/
           getActionColor，修复 G4：此前对 disposal_basis.action==="audit" 等
           值无映射，直接落回原始英文字符串渲染）+ 查看依据详情 链接。 */}
+      {/* GT-12578 / GT-12686：落地 spec
+          design/implement/spec/2026-07-07-mail-disposal-investigation-center-design.md:168
+          规定「合成失败/无命中时 disposal_basis 存 null，前端回退现有
+          MailLog.Reason 自由文本」。此前这里是硬门控直接隐藏整块，于是
+          mail_marking（接收标记）这类不参与 disposal_basis 合成的规则，
+          命中后处置依据处什么都看不到——尽管规则名早已由 decision.go 写进
+          mail_log.reason。html-spec 对该卡片的规定也是「常显」。 */}
+      {!detail.disposal_basis?.policy_key && detail.reason && (
+        <div
+          className="flex flex-wrap items-start gap-2 border-t pt-3 text-sm"
+          data-testid="email-disposal-overview-disposal-basis"
+        >
+          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-orange-600" />
+          <span className="shrink-0 text-muted-foreground">{tFeatures('disposalBasis')}：</span>
+          <span className="min-w-0 flex-1 break-all text-foreground">{detail.reason}</span>
+        </div>
+      )}
+
       {detail.disposal_basis?.policy_key && (
         <div
           className="flex flex-wrap items-center gap-2 border-t pt-3 text-sm"

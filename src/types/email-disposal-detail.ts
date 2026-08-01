@@ -1,5 +1,5 @@
 import type { DisplayStatus, DisposalBasis } from './email-disposal';
-import type { MailChildEvent } from './log';
+import type { MailChildEvent, MailLifecycleLog, MailLifecycleLogsResponse } from './log';
 
 export interface CACResult {
   result_code?: string;
@@ -145,6 +145,8 @@ export interface MailLogDetail {
   entity_urls?: URLEntity[];
 
   queue_id?: string;
+  // milter 会话 ID（后端运行日志的 sid 字段），用于对应查询后端服务器日志。
+  session_id?: string;
   delivery_status_summary?: string;
   workflow_outcome_summary?: string;
   delivery_error_summary?: string;
@@ -226,6 +228,7 @@ export interface PhishAgentRecommendedAction {
 }
 
 export type { MailChildEvent };
+export type { MailLifecycleLog, MailLifecycleLogsResponse };
 
 export type CheckStatus = 'pass' | 'suspicious' | 'threat' | 'processing' | 'skipped';
 

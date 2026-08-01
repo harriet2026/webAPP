@@ -133,7 +133,7 @@ vi.mock("@/components/email-disposal/search-bar", () => ({
         "button",
         {
           "data-testid": "disposal-search-submit",
-          disabled: !hasPendingFilters,
+          "data-has-pending-filters": hasPendingFilters ? "true" : "false",
           onClick: () => onSearch?.(""),
         },
         "apply filters",
@@ -274,6 +274,27 @@ describe("EmailDisposalCenterPage tenant-switch reset (review TEST-3)", () => {
       key: "Enter",
       code: "Enter",
     });
+    await waitFor(() =>
+      expect(getDisposalListMock.mock.calls.length).toBeGreaterThan(firstCall),
+    );
+  });
+
+  it("keeps Search enabled and refreshes an unchanged effective query", async () => {
+    useTenantMock.mockReturnValue({
+      effectiveTenantId: null,
+      selectedTenantId: null,
+    });
+    const { getByTestId } = renderPage();
+
+    await waitFor(() => expect(getDisposalListMock).toHaveBeenCalled());
+    const firstCall = getDisposalListMock.mock.calls.length;
+    const search = getByTestId("disposal-search-submit");
+
+    expect(search).toBeEnabled();
+    expect(search).toHaveAttribute("data-has-pending-filters", "false");
+
+    fireEvent.click(search);
+
     await waitFor(() =>
       expect(getDisposalListMock.mock.calls.length).toBeGreaterThan(firstCall),
     );

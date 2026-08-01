@@ -678,6 +678,9 @@
     },
     "relay": {
       "searchPlaceholder": "搜索规则名称…",
+      "masterSwitch": "规则总开关",
+      "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
+      "masterSwitchOffActionable": "规则总开关已关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -752,6 +755,8 @@
         "created": "转发规则已添加",
         "updated": "转发规则已更新",
         "deleted": "转发规则已删除",
+        "masterSwitchEnabled": "转发规则总开关已开启",
+        "masterSwitchDisabled": "转发规则总开关已关闭",
         "saveError": "请修正表单中的校验错误"
       },
       "deleteDialogTitle": "删除转发规则「{name}」？",
@@ -3846,9 +3851,10 @@
     "matchModeSpecific": "指定服务器",
     "matchServers": "匹配服务器",
     "productAction": "操作",
-    "actionBlock": "阻断",
+    "actionReject": "拒收",
     "actionQuarantine": "隔离",
-    "actionMark": "标记",
+    "actionReview": "审核",
+    "actionDiscard": "丢弃",
     "actionGreylist": "灰名单",
     "comingSoon": "敬请期待",
     "priority": "优先级",
@@ -3878,9 +3884,10 @@
     "serverTipZenSpamhaus": "Spamhaus综合黑名单，包含SBL、XBL、PBL等多个子列表，覆盖范围广",
     "serverTipBlSpamcop": "SpamCop用户举报黑名单，基于用户举报的垃圾邮件来源IP",
     "serverTipBarracuda": "Barracuda实时黑名单，由Barracuda安全网络维护",
-    "actionBlockTip": "立即拒绝连接，返回5xx错误。适用于高风险场景，可能误拦合法邮件",
+    "actionRejectTip": "立即拒绝连接，返回5xx错误。适用于高风险场景，可能误拦合法邮件",
     "actionQuarantineTip": "将邮件放入隔离队列，等待管理员审核。平衡安全与可用性",
-    "actionMarkTip": "添加X-RBL-Hit邮件头标记，继续后续检测。最宽松，便于统计分析",
+    "actionReviewTip": "邮件进入人工审核队列，等待管理员决策。适用于需要人工判断的场景",
+    "actionDiscardTip": "静默丢弃邮件，不通知发件方。适用于确认为垃圾邮件的高风险场景",
     "actionGreylistTip": "首次连接临时拒绝，要求发信方重试。可有效过滤僵尸网络，但会延迟正常邮件",
     "timeoutRangeError": "超时时间必须在 1-30 秒之间",
     "serverRequired": "请至少添加一个 RBL 服务器",
@@ -3888,6 +3895,13 @@
     "serverExists": "该服务器已存在",
     "serverReferenced": "该服务器被 {count} 条命中规则使用，无法删除",
     "loadError": "加载 RBL 配置失败",
+    "disposalStrategyTitle": "处置策略",
+    "disposalStrategyDesc": "选择命中 RBL 后的处置方式，两种策略互斥，仅能启用其一。",
+    "actionSectionTitle": "执行动作",
+    "actionSectionDesc": "当命中 RBL 时，对邮件立即执行的处置方式。",
+    "greylistSectionTitle": "灰名单策略",
+    "greylistSectionDesc": "对未知发件方临时挂起，等待重试验证身份，可有效过滤僵尸网络。",
+    "greylistEnabled": "启用灰名单策略",
     "greylistConfig": "灰名单配置",
     "greylistConfigDesc": "配置灰名单策略，有效过滤垃圾邮件同时减少误判。",
     "greylistConfigure": "点击配置",
@@ -4013,8 +4027,7 @@
       "nameRequired": "规则名称不能为空",
       "nameMaxLength": "名称最多50个字符",
       "descriptionMaxLength": "备注最多200个字符",
-      "priorityMin": "优先级最小为1",
-      "priorityMax": "优先级最大为9999",
+      "priorityRange": "优先级须在 {min}-{max} 之间",
       "whitelistModeRequired": "请选择白名单模式",
       "invalidEmail": "请输入有效的邮箱地址",
       "invalidDomain": "请输入有效的域名",
@@ -4038,7 +4051,7 @@
     "senderConfig": "发信人",
     "complexCondition": "复杂条件",
     "senderType_individual": "个人",
-    "senderType_domain": "组织域名",
+    "senderType_domain": "发信域名",
     "senderType_group": "群组",
     "ipRange": "发信IP范围",
     "ipType_all": "全部IP",
@@ -4066,8 +4079,9 @@
     "drawerSubtitleBlacklist": "配置发信人黑名单规则，阻断或处置指定发信人",
     "drawerSubtitleWhitelist": "配置发信人白名单规则，信任的发信人直接放行",
     "senderPlaceholder_individual": "如: user@example.com 或 *@domain.com",
-    "senderPlaceholder_domain": "请输入域名，如 example.com",
+    "senderPlaceholder_domain": "如 example.com 或 evil.com",
     "noTenantDomains": "该租户暂无接收域名，请先在『接收域名』中配置",
+    "domainSuggestions": "本租户接收域名（快捷选择）",
     "senderPlaceholder_group": "请选择发件人组",
     "validUntil": "生效结束",
     "currentEffect": "当前配置效果",
@@ -4450,14 +4464,6 @@
       "dmarc_quarantineDesc": "发信域要求隔离未通过验证的邮件",
       "dmarc_none": "p=none",
       "dmarc_noneDesc": "发信域仅监控，不要求处置",
-      "ptr_norecord": "记录不存在",
-      "ptr_norecordDesc": "发信IP无PTR反向解析记录",
-      "ptr_temperror": "查询失败",
-      "ptr_temperrorDesc": "PTR DNS查询超时或失败",
-      "ptr_ehlomismatch": "与EHLO不匹配",
-      "ptr_ehlomismatchDesc": "PTR记录与SMTP EHLO/HELO不一致",
-      "ptr_amismatch": "与A记录不匹配",
-      "ptr_amismatchDesc": "PTR反查的A记录不指向原IP",
       "template": {
         "loose": "宽松",
         "standard": "标准",
@@ -4468,7 +4474,13 @@
       "templateConfirmDesc": "切换到「{template}」模板将覆盖当前所有协议检查的配置，是否继续？",
       "templateCancel": "取消",
       "templateApply": "应用",
-      "ptrReadonlyNotice": "PTR 设置由系统管理员管理"
+      "ptrReadonlyNotice": "PTR 设置由系统管理员管理",
+      "ptr_noptr": "记录不存在",
+      "ptr_noptrDesc": "发信IP无PTR反向解析记录",
+      "ptr_nomatch": "与A记录不匹配",
+      "ptr_nomatchDesc": "PTR反查的A记录不指向原IP",
+      "ptr_ehlo_mismatch": "与EHLO不匹配",
+      "ptr_ehlo_mismatchDesc": "PTR记录与SMTP EHLO/HELO不一致"
     },
     "dkimOutbound": {
       "title": "DKIM 外发签名",
@@ -4546,7 +4558,7 @@
       "accept": "进行下一步检测",
       "quarantine": "隔离（进垃圾箱）",
       "reject": "阻断（返回5xx）",
-      "audit": "标记（加头投递）",
+      "audit": "审核（待审批）",
       "discard": "丢弃（静默删除）"
     },
     "flowSub": {
@@ -5622,6 +5634,15 @@
     "pageTitle": "邮件处置中心",
     "investigationTitle": "邮件调查中心",
     "investigationSubtitle": "查看和分析邮件安全事件，进行威胁调查和处置",
+    "recipientStatusBar": {
+      "delivered": "投递",
+      "sideline": "旁路",
+      "quarantine": "隔离",
+      "rejected": "拒收",
+      "discarded": "丢弃",
+      "audit": "审核",
+      "other": "其他"
+    },
     "search": {
       "placeholder": "描述邮件特征，例如：上周伪装成微软的钓鱼邮件",
       "aiParse": "AI 解析",
@@ -5636,8 +5657,27 @@
       "saveCurrent": "保存当前条件",
       "savedTemplates": "已保存模板",
       "deleteTemplate": "删除模板",
+      "renameTemplate": "重命名",
       "templateDefaultName": "搜索模板",
       "templateSaved": "已保存“{name}”",
+      "templateSaveError": "保存失败，请检查浏览器存储空间",
+      "templateNameConflict": "重命名失败，已存在同名模板",
+      "saveTemplateTitle": "保存搜索模板",
+      "saveTemplateDesc": "当前已有 {count} 个模板（上限 {max} 个）",
+      "renameTemplateTitle": "重命名模板",
+      "renameTemplateDesc": "修改后将立即生效",
+      "templateNameLabel": "模板名称",
+      "templateNamePlaceholder": "为这组搜索条件起个名字",
+      "templateNameRequired": "请输入模板名称",
+      "templateOverwriteWarning": "已存在同名模板，保存将覆盖原有条件",
+      "templateOverwriteConfirm": "覆盖保存",
+      "templateLimitWarning": "已达上限（{max} 个），保存将删除最旧的一条模板",
+      "templateApplyConfirmTitle": "应用搜索模板",
+      "templateApplyConfirmDesc": "应用「{name}」将替换当前所有搜索条件，是否继续？",
+      "templateApplyConfirm": "确认应用",
+      "cancel": "取消",
+      "save": "保存",
+      "confirm": "确认",
       "sampleSingle": "已选择 1 封样本邮件，正在查找相似邮件",
       "sampleMultiple": "已选择 {n} 封样本邮件，正在查找相似邮件",
       "parsing": "解析中...",
@@ -6031,6 +6071,7 @@
         "domainAge": "域名年龄{n}天",
         "domainAgeTooltip": "发件人域名注册仅 {n} 天，新注册域名是钓鱼/仿冒的常见信号",
         "aiJudgmentBasis": "AI判定依据",
+        "cloudCheckBasis": "云查依据",
         "recipientStatus": {
           "title": "收件人状态",
           "header": "收件人状态 ({n} 人)",
@@ -6039,15 +6080,15 @@
           "colStatus": "状态",
           "colActions": "操作",
           "status": {
-            "delivered": "已投递",
+            "delivered": "投递成功",
             "marked_delivered": "已标记投递",
-            "quarantined": "已隔离",
+            "quarantined": "隔离中",
             "pending_review": "待审核",
-            "sidelined": "已旁路",
+            "sidelined": "检测中",
             "blocked": "已阻断",
-            "rejected": "已拒绝",
+            "rejected": "拒收",
             "discarded": "已丢弃",
-            "audited": "审核中"
+            "audited": "待审核"
           },
           "notOperable": "不可操作",
           "noContent": "(无原文)",
@@ -6241,6 +6282,9 @@
         "basicInfo": "邮件基本信息",
         "tid": "TID",
         "emailId": "邮件 ID",
+        "messageUuid": "邮件唯一ID",
+        "sessionId": "会话ID",
+        "queueId": "队列ID",
         "receiveTime": "接收时间",
         "direction": "收发类型",
         "emailSize": "邮件大小",
@@ -6326,12 +6370,21 @@
       "rawLogs": {
         "title": "原始日志",
         "entriesBadge": "{count} 条",
+        "groupsBadge": "{count} 个组件分组",
+        "notLoaded": "未加载",
+        "loadingBadge": "加载中",
+        "loadFailedBadge": "加载失败",
         "foundCount": "找到 {matched} / {total} 条记录",
         "truncated": "已截断至 10,000 行",
+        "partial": "部分网关节点未能查询，当前生命周期日志不完整。失败节点：{nodes}",
         "searchPlaceholder": "搜索日志内容...",
         "copyAll": "复制全部",
         "downloadLog": "下载",
         "copied": "已复制",
+        "copyFailed": "复制失败，请手动选择并复制",
+        "loading": "正在加载原始日志...",
+        "loadFailed": "原始日志加载失败，请稍后重试",
+        "empty": "暂无原始日志",
         "noMatch": "没有匹配的日志记录"
       }
     },
@@ -6978,7 +7031,7 @@
       "desc_similarDomain": {
         "source": "相似域名检测引擎",
         "usage": "检测是否存在仿冒相似域名",
-        "note": "输入0-100的置信度阈值，越高越严格"
+        "note": "先选择受保护域名档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
       },
       "desc_displayNameSpoof": {
         "source": "仿冒检测模块",
@@ -7381,22 +7434,22 @@
     "errEmailInvalid": "邮箱格式不正确",
     "errEmailDuplicate": "邮箱已存在",
     "recallKeys": "召回密钥",
-    "newRecallKey": "新建 Recall Key",
+    "newRecallKey": "新建召回密钥",
     "agentType": "所属 Agent 类型",
-    "noRecallKeys": "暂无 Recall Key",
+    "noRecallKeys": "暂无召回密钥",
     "actions": "操作",
     "cancel": "取消",
     "create": "创建",
-    "keyDeleted": "Key 已删除",
+    "keyDeleted": "密钥已删除",
     "keyDeleteFailed": "删除失败",
-    "keyCreated": "Key 创建成功",
+    "keyCreated": "密钥创建成功",
     "keyCreateFailed": "创建失败",
-    "keyId": "Key ID",
-    "keySecret": "Key Secret",
+    "keyId": "密钥 ID",
+    "keySecret": "密钥",
     "coremailAgent": "Coremail 代理",
     "exchangeAgent": "Exchange 代理",
-    "keyIdPlaceholder": "输入 Key ID",
-    "keySecretPlaceholder": "输入 Key Secret",
+    "keyIdPlaceholder": "输入密钥 ID",
+    "keySecretPlaceholder": "输入密钥",
     "emailInvalid": "邮箱格式不正确，请输入如 user@example.com 的地址",
     "emailDuplicate": "该邮箱已在列表中",
     "customMinutesRange": "审核时长需为 1-300 分钟",
@@ -10005,7 +10058,7 @@
     "expiredDesc": "请联系管理员获取新的取回链接。",
     "errorTitle": "操作失败",
     "errorDesc": "请稍后重试或联系管理员。",
-    "alreadyReleased": "该邮件已被取回，或已超出保留期被清理",
+    "alreadyReleased": "该邮件已被管理员删除，无法取回",
     "confirmWarning": "您正在取回被网关隔离的邮件，成功后该邮件将重新投递到您的收件箱，请谨慎操作！"
   },
   "portalPreview": {
@@ -10393,6 +10446,807 @@
       "antivirus": "反病毒",
       "sandbox": "沙箱",
       "rbl": "RBL"
+    }
+  },
+  "apiErrors": {
+    "account": {
+      "cannot_delete_self": "不能删除自己的账号",
+      "last_super_admin": "不能停用最后一个启用中的超级管理员，否则将无人可管理系统",
+      "last_system_admin": "不能删除或降级最后一个系统管理员，否则将无人可管理系统",
+      "not_found": "账号不存在，可能已被删除",
+      "password_recently_used": "新密码不能与近期使用过的密码相同",
+      "role_id_required": "请选择角色",
+      "tenant_id_required": "选择「{role}」角色时必须指定所属租户",
+      "tenant_scope_required": "该操作需要先选择租户",
+      "unknown_id_in_batch": "批量操作中包含不存在的账号",
+      "username_exists": "用户名已存在（不区分大小写）",
+      "username_immutable": "用户名创建后不可修改"
+    },
+    "advanced_rule": {
+      "addon_type_invalid": "附加动作类型无效",
+      "delete_attachment_scope_invalid": "删除附件的适用范围无效，只能是：{allowed}",
+      "primary_action_invalid": "规则的主处置动作取值无效",
+      "scope_invalid": "规则的生效范围取值无效"
+    },
+    "alert": {
+      "action_invalid": "操作无效，只能是：{allowed}",
+      "already_handled": "该告警已被其他人处理，请刷新后查看最新状态",
+      "ids_required": "请至少选择一条告警",
+      "not_found": "告警不存在，可能已被处理或清理",
+      "range_invalid": "时间范围取值无效",
+      "severity_invalid": "告警级别取值无效",
+      "status_invalid": "告警状态取值无效"
+    },
+    "auth_attempt": {
+      "data_format_invalid": "认证记录数据格式不正确",
+      "data_required": "未提供认证记录数据",
+      "request_body_read_failed": "读取请求内容失败，请重试",
+      "success_value_invalid": "认证结果取值无效，只能是：{allowed}"
+    },
+    "contact_source": {
+      "auto_sync_invalid": "自动同步开关取值无效",
+      "config_empty": "数据源配置不能为空",
+      "config_invalid": "数据源配置无效，请检查各项填写是否完整",
+      "config_parse_failed": "数据源配置解析失败，请检查填写的内容格式是否正确",
+      "cron_expr_required": "启用自动同步时必须填写同步周期",
+      "csv_auto_sync_unsupported": "CSV 数据源不支持自动同步，请改用手动导入",
+      "csv_preview_failed": "读取 CSV 预览失败，请确认文件格式正确后重试",
+      "department_id_unmapped": "部门必填字段「部门ID」尚未映射，请在字段映射中指定它对应的列",
+      "email_field_unmapped": "必填字段「邮箱」尚未映射，请在字段映射中指定它对应的列",
+      "encryption_key_missing": "服务端未配置通讯录加密密钥（至少 32 字节），无法保存或测试含密码等敏感字段的配置，请联系管理员配置后重试",
+      "file_store_uninitialized": "服务端未启用 CSV 文件存储，请联系管理员配置后重试",
+      "multipart_parse_failed": "上传表单解析失败，请重新提交",
+      "no_running_sync": "当前没有正在运行的同步任务",
+      "no_sync_log": "该数据源还没有同步记录",
+      "not_found": "通讯录数据源不存在，可能已被删除",
+      "source_type_empty": "请选择数据源类型",
+      "stale_write": "该数据源已被他人修改，请刷新后重试",
+      "sync_already_running": "该数据源已有同步任务在运行，请等待完成后再试",
+      "sync_mode_invalid": "同步方式无效，只能是：{allowed}",
+      "test_connection_required": "请先测试连接成功后再保存",
+      "updated_at_required": "缺少数据版本信息，请刷新页面后重试",
+      "upload_token_empty": "请先上传 CSV 文件",
+      "upload_token_invalid": "上传凭证无效或已过期，请重新上传 CSV 文件",
+      "user_file_empty": "上传的 CSV 文件为空",
+      "user_file_missing": "请选择要上传的用户通讯录 CSV 文件",
+      "user_file_read_failed": "读取上传的 CSV 文件失败，请确认文件未损坏后重试",
+      "user_file_ref_empty": "缺少已上传文件的引用，请重新上传"
+    },
+    "detection_profile": {
+      "access_denied": "没有权限访问该检测档案",
+      "global_rbl_requires_system_admin": "管理全局 RBL 检测档案需要平台管理员权限",
+      "id_invalid": "检测档案 ID 无效",
+      "name_exists": "已存在同名的检测档案",
+      "not_found": "检测档案不存在，可能已被删除",
+      "tenant_context_required": "该操作需要先选择租户",
+      "test_supported_for_rbl_only": "仅 RBL 类型的检测档案支持测试"
+    },
+    "disposal": {
+      "access_denied": "没有权限执行该处置操作",
+      "action_invalid": "处置动作无效，只能是：{allowed}",
+      "description_required": "请填写说明",
+      "eml_not_on_storage_node": "在存储节点上找不到原始邮件，可能已被清理",
+      "eml_unavailable": "原始邮件不可用，可能已过保留期或被清理",
+      "final_type_invalid": "最终邮件类型取值无效",
+      "final_type_requires_release": "仅在执行「放行」时才能指定最终邮件类型",
+      "mail_log_ids_required": "请至少选择一封邮件",
+      "mail_log_not_found": "邮件记录不存在，可能已被清理",
+      "object_id_requires_single_mail": "按对象处置时只能选择一封邮件",
+      "quarantine": {
+        "category_score_order_invalid": "「{category}」的最小置信度不能大于最大置信度",
+        "category_score_out_of_range": "「{category}」的置信度需在 {min}–{max} 之间",
+        "category_unknown": "无法识别的邮件分类「{value}」",
+        "custom_weekday_out_of_range": "星期取值「{value}」超出范围，应在 {min}–{max} 之间",
+        "custom_weekdays_empty": "自定义频率下至少要选择一天",
+        "notify_frequency_invalid": "通知频率取值无效，只能是：{allowed}",
+        "notify_time_format_invalid": "通知时间「{value}」格式不正确，应为 HH:MM（00:00–23:59）",
+        "notify_times_empty": "通知频率不为「从不」时，至少要设置一个通知时间",
+        "permission_unknown": "无法识别的权限项「{value}」",
+        "portal_base_url_host_missing": "外部访问地址缺少主机名",
+        "portal_base_url_invalid": "外部访问地址不是合法的网址",
+        "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到，请填写网关对外可达的地址",
+        "portal_base_url_path_not_allowed": "外部访问地址不能带路径、查询参数或锚点，只填到域名和端口即可",
+        "portal_base_url_required": "启用取回、预览、加白或加黑权限时，必须填写外部访问地址——通知信里的操作链接需要它才能生成",
+        "portal_base_url_scheme_invalid": "外部访问地址必须使用 {scheme}：取回和预览的令牌不能明文传输",
+        "valid_days_out_of_range": "「{permission}」的链接有效期需在 {min}–{max} 天之间"
+      },
+      "recall": {
+        "notify_email_invalid": "召回通知邮箱「{value}」格式不正确",
+        "notify_frequency_invalid": "召回通知频率取值无效，只能是：{allowed}",
+        "policy_invalid": "召回策略「{value}」无效，只能是：{allowed}",
+        "task_timeout_out_of_range": "召回任务超时需在 {min}–{max} 秒之间"
+      },
+      "recipient_not_in_mail": "该收件人不属于这封邮件",
+      "recipient_required": "请指定收件人",
+      "review": {
+        "custom_minutes_out_of_range": "自定义审核时长需在 {min}–{max} 分钟之间",
+        "duration_mode_invalid": "审核时长模式取值无效，只能是：{allowed}",
+        "max_recheck_minutes_out_of_range": "最长复检时间需在 {min}–{max} 分钟之间",
+        "reviewer_active_end_format_invalid": "审核人值班结束时间格式不正确，应为 HH:MM:SS",
+        "reviewer_active_start_format_invalid": "审核人值班开始时间格式不正确，应为 HH:MM:SS",
+        "reviewer_email_invalid": "审核人邮箱「{value}」格式不正确",
+        "reviewer_notify_interval_out_of_range": "审核人提醒间隔需在 {min}–{max} 分钟之间",
+        "timeout_mark_position_invalid": "不支持的标记位置「{value}」，只能是：{allowed}",
+        "timeout_mark_positions_empty": "选择「打标记」时，至少要指定一个标记位置",
+        "timeout_mark_text_empty": "标记文本不能为空",
+        "timeout_mark_text_too_long": "标记文本不能超过 {max} 个字符",
+        "timeout_temp_disposal_invalid": "超时临时处置「{value}」无效，只能是：{allowed}"
+      },
+      "timezone_invalid": "时区「{value}」无效，请填写标准的 IANA 时区名（如 Asia/Shanghai）",
+      "too_many_items": "一次最多处理 {max} 项，请减少选择后重试"
+    },
+    "dkim": {
+      "activate_failed": "启用签名密钥失败，请稍后重试",
+      "active_key_cannot_delete": "正在使用的签名密钥不能删除，请先启用另一个密钥或停用当前密钥",
+      "algorithm_unsupported": "不支持的签名算法「{value}」，只能是：{allowed}",
+      "cross_tenant_manage_denied": "无权管理其他租户的签名密钥",
+      "cross_tenant_read_denied": "无权查看其他租户的签名域名",
+      "dns_not_verified": "该密钥的 DNS 记录尚未验证通过，请先在域名服务商处添加 TXT 记录并完成验证，再启用它",
+      "forbidden": "没有权限执行此操作",
+      "key_not_found": "签名密钥不存在，可能已被删除",
+      "key_size_too_large": "密钥长度不能超过 {max} 位",
+      "selector_invalid": "选择器「{value}」格式不正确",
+      "tenant_id_invalid": "租户参数无效，必须是正整数"
+    },
+    "link_blacklist": {
+      "access_denied": "没有权限执行该操作",
+      "match_type_invalid": "匹配方式取值无效",
+      "name_and_pattern_required": "名称和匹配内容都必须填写",
+      "not_found": "链接黑名单规则不存在，可能已被删除",
+      "tenant_access_denied": "没有权限访问该租户的数据",
+      "tenant_id_required": "必须指定租户（平台管理员需通过 X-Tenant-ID 指定）",
+      "verdict_invalid": "判定结果取值无效"
+    },
+    "mail_admission": {
+      "enabled_required": "请指定是否启用",
+      "expires_at_format_invalid": "过期时间格式不正确，应为 RFC3339（如 2026-08-01T12:00:00+08:00）",
+      "helo_match_invalid": "HELO 匹配方式无效，只能是：{allowed}",
+      "helo_pattern_regex_invalid": "HELO 匹配的正则表达式不合法，请检查语法",
+      "is_active_required": "请指定是否生效",
+      "not_found": "准入规则不存在，可能已被删除",
+      "null_sender_requires_cidr": "允许空发件人的规则只按来源 IP 匹配，因此必须填写来源 IP 段",
+      "privileged_requires_system_admin": "创建特权准入规则需要平台管理员权限",
+      "rate_limit_must_be_positive": "每小时限额必须大于 0",
+      "rcpt_domain_not_owned": "收件域必须是本租户已验证的域名或其子域",
+      "rcpt_domain_regex_invalid": "收件域匹配的正则表达式不合法，请检查语法",
+      "rcpt_match_invalid": "收件人匹配方式无效，只能是：{allowed}",
+      "source_auth_required": "至少要指定一种来源认证方式：来源 IP 段或 SPF 校验",
+      "tenant_domain_cross_tenant": "所选域名属于其他租户",
+      "tenant_domain_not_found": "所选域名不存在，可能已被删除",
+      "use_spf_requires_privileged": "启用 SPF 校验的规则必须同时设为特权规则——SPF 规则不受可信中继 IP 池的约束",
+      "use_spf_requires_sender_domain": "启用 SPF 校验必须指定具体的发件域，否则没有 SPF 记录可查",
+      "tenant_domain_id_belongs_different_tenant": "所选域名属于其他租户"
+    },
+    "ops_top": {
+      "account_required": "下钻认证明细时必须指定账号",
+      "ai_interpretation_disabled": "AI 智能解读未启用，请联系管理员开启",
+      "ai_too_many_concurrent": "AI 解读请求过多，请稍后重试",
+      "connection_requires_platform": "连接维度只在平台视角下可用，请切换到平台视角",
+      "dimension_invalid": "统计维度无效",
+      "filter_enum_invalid": "筛选条件取值无效",
+      "key_required": "请指定要下钻的对象",
+      "sort_invalid": "排序方式无效",
+      "sub_dimension_invalid": "当前维度不支持该子维度",
+      "tenant_id_invalid": "租户标识必须是正整数",
+      "tenant_id_must_be_single": "一次只能指定一个租户",
+      "tenant_not_found": "租户不存在，可能已被删除"
+    },
+    "outbound_audit": {
+      "access_denied": "没有权限访问该审核条目",
+      "action_invalid": "审核动作无效，只能是：{allowed}",
+      "id_invalid": "审核条目 ID 无效",
+      "not_found": "审核条目不存在，可能已被处理",
+      "not_pending": "该条目已不在待审核状态，或正在被其他人处理",
+      "operation_in_progress": "该邮件正有另一个处置操作在进行，请稍后重试"
+    },
+    "proxysvr": {
+      "cipher_profile_invalid": "加密套件档位无效，只能是：{allowed}",
+      "egress_ip_invalid": "出口 IP 必须是合法的 IPv4 地址，或留空",
+      "endpoint_name_exists": "已存在同名的代理节点",
+      "endpoint_not_found": "代理节点不存在，可能已被删除",
+      "group_name_exists": "已存在同名的代理分组",
+      "group_not_found": "代理分组不存在，可能已被删除",
+      "group_referenced_by_routes": "该分组正被外发路由规则引用，不能删除，请先移除相关路由规则",
+      "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP 地址），或留空",
+      "license_key_missing": "服务端未配置授权加密密钥，无法保存授权信息，请联系管理员",
+      "member_endpoint_duplicate": "同一个节点不能在分组里重复出现",
+      "member_endpoint_id_invalid": "分组成员的节点必须是有效选择",
+      "member_ord_duplicate": "分组成员的排序值不能重复",
+      "port_out_of_range": "端口需在 {min}–{max} 之间",
+      "tls_min_version_invalid": "TLS 最低版本无效，只能是：{allowed}"
+    },
+    "role": {
+      "cross_tenant_denied": "无权修改其他租户的角色",
+      "name_conflicts_template": "角色名称与已有的租户角色或全局模板重名",
+      "name_exists": "该范围内已存在同名角色",
+      "name_required": "请填写角色名称",
+      "not_found": "角色不存在，可能已被删除",
+      "scope_invalid": "角色范围无效，只能是：{allowed}",
+      "status_invalid": "角色状态无效，只能是：{allowed}",
+      "super_admin_required": "管理平台级角色需要超级管理员权限",
+      "system_default_cannot_delete": "系统内置角色不能删除",
+      "system_default_cannot_disable": "系统内置角色与超级管理员角色不能停用",
+      "system_default_cannot_edit": "系统内置角色不能编辑"
+    },
+    "rule_analytics": {
+      "range_invalid": "时间范围无效，只能是：{allowed}",
+      "version_not_found": "规则版本不存在，可能已被清理"
+    },
+    "sideline": {
+      "access_denied": "没有权限访问该旁路邮件",
+      "id_required": "请指定要操作的条目",
+      "not_found": "旁路邮件不存在，或没有权限访问"
+    },
+    "smtp_credential": {
+      "access_denied": "没有权限访问该发信凭证",
+      "cross_tenant_denied": "无权为其他租户创建发信凭证",
+      "local_auth_disabled": "本地账号库认证已停用，请改用：{allowed}",
+      "not_found": "发信凭证不存在，可能已被删除",
+      "password_required": "使用本地账号库认证时必须设置密码"
+    },
+    "statistics": {
+      "date_range_required": "请指定统计的起止日期",
+      "interval_invalid": "统计粒度无效，只能是：{allowed}",
+      "limit_out_of_range": "返回条数需在 {min}–{max} 之间",
+      "params_invalid": "查询参数不正确，请检查筛选条件后重试"
+    },
+    "unified_rule": {
+      "access_denied": "没有权限访问该规则",
+      "action_required": "动作类规则必须指定一个执行动作",
+      "advanced_rules_need_tenant": "高级过滤规则不在平台视角下提供，请先选择租户",
+      "bulk_action_invalid": "批量操作无效，只能是：{allowed}",
+      "condition_tree_invalid": "规则条件配置不正确，请检查各条件是否填写完整",
+      "content_rules_need_tenant": "内容规则只能在租户视角下管理，请先选择租户",
+      "copy_denied": "没有权限复制该规则",
+      "feature_group_condition_required": "特征组必须配置条件",
+      "group_policy_name_required": "请填写群组策略名称",
+      "id_invalid": "规则 ID 无效",
+      "ids_required": "请至少选择一条规则",
+      "metadata_invalid": "规则元数据格式不正确",
+      "name_exists": "规则名称已存在，请换一个",
+      "not_found": "规则不存在，可能已被删除",
+      "role_not_permitted": "当前角色没有创建规则的权限",
+      "route_metadata_required": "路由类规则必须填写下一跳信息：{required}",
+      "stage_not_allowed_for_role": "租户管理员只能管理以下阶段的规则：{allowed}",
+      "system_baseline_no_convert": "普通规则不能转换为系统基线规则",
+      "system_baseline_no_create": "系统基线规则不能通过接口创建",
+      "system_baseline_no_edit": "系统基线规则不能由租户管理员编辑",
+      "tag_required": "标记类规则至少要指定一个标记",
+      "tenant_context_required": "该操作需要先选择租户",
+      "valid_range_invalid": "生效结束时间不能早于开始时间"
+    },
+    "investigation": {
+      "not_found": "调查任务不存在",
+      "access_denied": "无权访问该调查任务",
+      "id_required": "请填写调查任务 ID",
+      "confirm_required": "该操作需要确认后才能执行",
+      "not_ready_for_actions": "调查任务尚未完成，暂时无法执行处置动作",
+      "type_unsupported": "不支持的调查类型",
+      "target_type_unsupported": "不支持的调查对象类型",
+      "traceback_created_elsewhere": "威胁回溯任务由威胁回溯扫描创建，不能从此处新建",
+      "traceback_cancelled_elsewhere": "威胁回溯任务请在威胁回溯运行记录中取消"
+    },
+    "profile": {
+      "user_not_found": "用户不存在",
+      "session_not_found": "登录会话不存在或已失效",
+      "session_id_missing": "缺少会话标识",
+      "name_required": "姓名不能为空",
+      "password_incorrect": "密码错误",
+      "verification_code_incorrect": "验证码错误",
+      "method_invalid": "无效的验证方式",
+      "purpose_invalid": "无效的验证用途",
+      "type_invalid": "无效的类型",
+      "method_purpose_mismatch": "验证方式与验证用途不匹配",
+      "target_invalid": "无效的接收目标",
+      "action_unsupported": "不支持的操作",
+      "start_time_invalid": "开始时间格式不正确，请使用 RFC3339 或 YYYY-MM-DD",
+      "end_time_invalid": "结束时间格式不正确，请使用 RFC3339 或 YYYY-MM-DD",
+      "two_factor_required_by_policy": "系统策略要求必须开启二次认证，无法关闭",
+      "two_factor_enable_via_endpoint": "请在二次认证设置中开启二次认证"
+    },
+    "threat_retro": {
+      "run_not_found": "回溯运行记录不存在",
+      "strategy_not_found": "处置策略不存在",
+      "strategy_id_required": "请选择处置策略",
+      "mail_log_id_required": "请选择邮件",
+      "mail_log_ids_required": "请至少选择一封邮件",
+      "leak_mail_not_in_run": "该邮件不属于本次回溯运行",
+      "window_start_invalid": "开始时间格式不正确",
+      "window_end_invalid": "结束时间格式不正确",
+      "window_order_invalid": "开始时间必须早于结束时间",
+      "indicator_tag_format_invalid": "威胁标签格式应为 indicator:「标签代码」，且代码不能为空"
+    },
+    "tenant": {
+      "not_found": "租户不存在",
+      "access_denied": "无权访问该租户",
+      "admin_account_password_pair_required": "管理员账号与密码必须同时填写",
+      "admin_account_too_long": "管理员账号长度不能超过 {max} 个字符",
+      "code_immutable": "租户编码创建后不可修改",
+      "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请先放行或清除后再删除租户",
+      "next_hop_pair_required": "下一跳主机与端口必须同时填写",
+      "next_hop_triad_required": "下一跳类型、主机与端口必须同时填写",
+      "next_hop_host_empty": "下一跳主机不能为空"
+    },
+    "tenant_routing": {
+      "nexthop_not_found": "下一跳配置不存在",
+      "domain_not_found": "域名不存在",
+      "domain_not_verified": "该域名尚未通过验证",
+      "egress_not_in_pool": "所选出口不在出口池中",
+      "egress_binding_exists": "该域名已绑定出口，请勿重复绑定",
+      "egress_binding_not_found": "出口绑定不存在"
+    },
+    "mail_log": {
+      "direction_invalid": "邮件方向参数无效，只能是 all、receive、send 或 internal",
+      "id_required": "请填写邮件日志 ID",
+      "id_format_invalid": "邮件日志 ID 格式不正确",
+      "not_found": "邮件日志不存在",
+      "access_denied": "无权访问该邮件日志",
+      "export_format_unsupported": "不支持的导出格式，请使用 json 或 csv",
+      "import_data_format_invalid": "邮件日志数据格式不正确",
+      "import_data_missing": "未提供邮件日志数据",
+      "interpret_rate_limited": "请求过于频繁，请稍后重试",
+      "interpret_too_many_concurrent": "当前 AI 解读任务过多，请稍后重试",
+      "interpret_disabled": "AI 日志解读功能未启用"
+    },
+    "spoofing_log": {
+      "page_too_large": "页码不能超过 {max}",
+      "category_must_be_single": "只能指定一个 KPI 下钻类别",
+      "category_invalid": "无效的下钻类别",
+      "time_range_too_long": "查询时间范围不能超过 {max_days} 天",
+      "not_found": "仿冒检测记录不存在"
+    },
+    "inbound_audit": {
+      "item_id_invalid": "审核条目 ID 无效",
+      "item_not_found": "收信审核条目不存在",
+      "mail_content_unavailable": "邮件正文已从存储节点清除，无法查看",
+      "item_not_pending": "该审核条目已被处理，无法重复操作",
+      "ids_required": "请至少选择一个审核条目",
+      "action_invalid": "无效的操作，只能是通过或拒绝"
+    },
+    "assistant": {
+      "not_authenticated": "请先登录",
+      "session_not_found": "会话不存在",
+      "access_denied": "无权访问该会话",
+      "no_rule_drafts_in_session": "该会话中没有可用的规则草稿"
+    },
+    "security_overview": {
+      "date_range_required": "请选择开始日期与结束日期",
+      "date_required": "请选择日期",
+      "date_format_invalid": "日期格式不正确，请使用 YYYY-MM-DD",
+      "view_by_required": "请选择统计视角",
+      "series_required": "请选择数据系列",
+      "dimension_invalid": "无效的统计维度，可选：{allowed}",
+      "interpret_disabled": "AI 解读功能未启用",
+      "interpret_too_many_concurrent": "当前 AI 请求过多，请稍后重试"
+    },
+    "quarantine": {
+      "id_required": "请填写隔离邮件 ID",
+      "item_not_found": "隔离邮件不存在",
+      "access_denied": "无权访问该隔离邮件"
+    },
+    "antispam_notify": {
+      "tenant_id_invalid": "租户 ID 无效",
+      "limit_invalid": "条数限制无效",
+      "recipient_required": "请填写收件人",
+      "since_invalid": "起始时间格式不正确，请使用 RFC3339",
+      "no_pending_sideline_item": "没有待处理的旁路邮件"
+    },
+    "attachment_security": {
+      "password_blank": "解压密码不能为空",
+      "password_too_long": "解压密码不能超过 {max} 个字符",
+      "id_invalid": "ID 无效",
+      "id_required": "请填写 ID",
+      "sideline_item_not_found": "旁路邮件不存在",
+      "access_denied": "无权访问该附件记录",
+      "request_body_unreadable": "请求内容读取失败",
+      "scan_result_format_invalid": "附件扫描结果数据格式不正确",
+      "scan_result_missing": "未提供附件扫描结果数据",
+      "scan_result_all_invalid": "校验后没有任何有效的扫描结果"
+    },
+    "url_protection": {
+      "deep_inspect_timeout_out_of_range": "深度检测超时时间必须在 {min}-{max} 秒之间",
+      "deep_inspect_timeout_policy_invalid": "深度检测超时处置无效，可选：{allowed}",
+      "domain_format_invalid": "域名格式不正确",
+      "domain_limit_exceeded": "每个租户最多 {max} 个域名",
+      "domain_already_exists": "该域名已存在",
+      "cidr_invalid": "CIDR 格式不正确",
+      "cidr_limit_exceeded": "每个租户最多 {max} 个 IP 段",
+      "cidr_already_exists": "该 IP 段已存在",
+      "tenant_id_required": "请指定租户",
+      "tenant_id_invalid": "租户 ID 无效"
+    },
+    "login_policy": {
+      "two_factor_platform_admin_only": "二次认证强制策略仅平台管理员可设置",
+      "two_factor_locked_by_platform": "平台已强制启用二次认证，租户不可关闭",
+      "two_factor_self_service_tenant_only": "二次认证自助开关是租户级设置，全局基线不支持",
+      "baseline_platform_admin_only": "仅平台管理员可修改平台基线",
+      "rule_platform_admin_only": "仅平台管理员可修改平台规则",
+      "ip_or_cidr_format_invalid": "请输入正确的 IP 地址或 CIDR 格式（如 192.168.1.0/24）",
+      "rule_already_exists": "该 IP/CIDR 规则已存在",
+      "delete_would_lock_out_self": "删除后白名单将不再包含你当前的 IP 地址，你将无法登录",
+      "rule_not_found": "规则不存在"
+    },
+    "group_members_io": {
+      "group_not_found": "分组不存在",
+      "access_denied": "无权访问该分组",
+      "export_unsupported_for_feature_group": "功能分组不支持导出成员",
+      "import_unsupported_for_feature_group": "功能分组不支持导入成员",
+      "file_missing": "请选择要上传的文件",
+      "file_too_large": "文件过大",
+      "file_unreadable": "文件无法打开",
+      "condition_tree_not_member_format": "该分组的条件不是可导入的成员列表格式"
+    },
+    "rule_test_eml": {
+      "file_missing": "请选择要上传的 EML 文件",
+      "file_too_large": "文件过大，最多 {max_mb} MB",
+      "file_unreadable": "文件无法读取",
+      "condition_tree_invalid": "条件树 JSON 格式不正确",
+      "condition_tree_or_rule_id_required": "请提供条件树或规则 ID",
+      "rule_id_invalid": "规则 ID 必须是整数"
+    },
+    "threat_retro_mail": {
+      "mail_log_id_invalid": "邮件日志 ID 无效",
+      "mail_not_found": "邮件不存在",
+      "email_content_not_found": "邮件正文不存在或已被清除"
+    },
+    "tenant_user": {
+      "tenant_scope_required": "该操作需要在租户视角下进行",
+      "cannot_delete_own_account": "不能删除自己的账号"
+    },
+    "phishing_admission": {
+      "profile_id_invalid_for_tenant": "所选检测档案不存在或不属于当前租户",
+      "rule_not_found": "准入规则不存在"
+    },
+    "mail_auth_config": {
+      "overlaps_existing_active": "与已启用的邮件认证配置在相同域范围和场景下重叠",
+      "not_found": "邮件认证配置不存在",
+      "server_fields_required": "请填写协议、服务器地址和端口",
+      "auth_timeout_out_of_range": "认证超时时间必须在 {min}-{max} 秒之间",
+      "protocol_unsupported": "不支持的协议"
+    },
+    "admin_audit": {
+      "tenant_admin_has_no_tenant_bound": "该租户管理员未绑定任何租户",
+      "audit_log_not_found": "审计日志不存在"
+    },
+    "advanced_rules_config": {
+      "review_timeout_action_accept_reject_keep": "审核超时处置只能是放行、拒绝或继续等待",
+      "forward_rate_limit_per_minute_non": "每分钟转发速率上限不能为负数",
+      "tarpit_max_concurrent_non_negative": "延时限流并发上限不能为负数",
+      "admin_notify_max_recipients_non_negative": "管理员通知收件人上限不能为负数"
+    },
+    "alert_rules": {
+      "rule_name_exists": "规则名称已存在",
+      "rule_not_found": "规则不存在",
+      "rule_has_open_alerts": "该规则有未处理告警，无法删除，请先处理"
+    },
+    "alert_smtp": {
+      "alert_smtp_enc_key_missing": "未配置告警 SMTP 加密密钥，无法保存外部 SMTP 凭据",
+      "recipient_required": "收件人不能为空"
+    },
+    "antispam_dkim": {
+      "dkim_key_not_found": "DKIM 密钥不存在"
+    },
+    "antispam_queue": {
+      "notification_message_uuid_accepted_by_atomic": "通知邮件 UUID 仅原子通知跟踪接口接受",
+      "invalid_quarantine_notification_tracking_request": "隔离通知跟踪请求无效"
+    },
+    "auth_spoofing": {
+      "no_tenant_context": "请先选择租户",
+      "tenant_admins_delete_tenant_overrides": "仅租户管理员可删除租户级配置覆盖"
+    },
+    "config_overrides": {
+      "config_value_not_empty": "配置值不能为空",
+      "config_override_not_found": "配置覆盖项不存在",
+      "config_file_section_name_config_key": "请填写配置文件、配置节和配置项"
+    },
+    "config_overrides_handler": {
+      "config_file_query_parameter_required": "请指定配置文件"
+    },
+    "contact_sync_logs": {
+      "sync_log_not_found": "同步日志不存在"
+    },
+    "contacts": {
+      "contact_not_found": "联系人不存在",
+      "tag_invalid": "标签只能是高管或关键岗位"
+    },
+    "delivery_stats": {
+      "too_many_items_one_batch": "单次批量处理的条目过多"
+    },
+    "delivery_traffic": {
+      "end_date_in_future": "结束日期不能晚于今天",
+      "ai_interpretation_disabled": "AI 解读功能未启用",
+      "too_many_concurrent_ai_requests_please": "当前 AI 请求过多，请稍后重试"
+    },
+    "link_attachment_security": {
+      "ai_interpretation_disabled": "AI 解读功能未启用",
+      "too_many_concurrent_ai_requests_please": "当前 AI 请求过多，请稍后重试",
+      "limit_integer_between_1_50": "条数必须是 1-50 之间的整数",
+      "domain_required": "请填写域名",
+      "invalid_domain_format": "域名格式不正确",
+      "direction_one_all_receive_send_internal": "邮件方向只能是 all/receive/send/internal",
+      "domain_already_blacklisted": "该域名已在黑名单中"
+    },
+    "disposal_settings": {
+      "tenant_id_required_select_tenant_x": "请先选择租户，再管理其设置"
+    },
+    "security_modules": {
+      "tenant_id_required_select_tenant_x": "请先选择租户，再管理其设置",
+      "valid_tenant_scope_required": "该操作需要有效的租户范围",
+      "admin_access_required": "该操作需要管理员权限",
+      "stage_1_ip_policy_managed_globally": "一阶段 IP 策略由平台管理员全局管理",
+      "stage_1_ip_policy_changed_from": "一阶段 IP 策略需在平台视角下修改",
+      "unknown_page": "未知的安全模块页面：{page}"
+    },
+    "domain_verify": {
+      "path_tenant_id_does_not_match": "路径中的租户与当前所选租户不一致",
+      "domain_not_found": "域名不存在"
+    },
+    "email_logs": {
+      "id_required": "请填写 ID",
+      "date_query_parameter_required_yyyy_mm": "请指定日期（YYYY-MM-DD）",
+      "invalid_date_format_expected_yyyy_mm": "日期格式不正确，应为 YYYY-MM-DD",
+      "invalid_date": "日期无效",
+      "no_log_files_found_specified_date": "指定日期没有日志文件",
+      "access_denied": "无权执行该操作",
+      "email_log_entry_not_found": "邮件日志不存在"
+    },
+    "link_click_logs": {
+      "access_denied": "无权执行该操作",
+      "invalid_id": "ID 无效",
+      "link_click_not_found": "链接点击记录不存在"
+    },
+    "mail_lifecycle_logs": {
+      "access_denied": "无权执行该操作",
+      "mail_log_entry_not_found": "邮件日志不存在",
+      "raw_log_search_busy_all_gateway": "所有网关节点的原始日志检索都在忙，请稍后重试",
+      "message_uuid_required": "请提供邮件 UUID",
+      "from_define_valid_time_range": "开始时间必须早于结束时间",
+      "raw_log_search_busy_retry_shortly": "原始日志检索正忙，请稍后重试"
+    },
+    "mail_log_attachment": {
+      "access_denied": "无权执行该操作",
+      "invalid_attachment_md5": "附件 MD5 无效",
+      "mail_log_not_found": "邮件日志不存在",
+      "eml_not_available": "邮件原文不可用",
+      "eml_not_found_storage_node": "存储节点上找不到邮件原文",
+      "attachment_not_found": "附件不存在"
+    },
+    "mail_log_preview": {
+      "access_denied": "无权执行该操作",
+      "mail_log_entry_not_found": "邮件日志不存在",
+      "original_email_content_not_available": "邮件原文不可用"
+    },
+    "email_preview": {
+      "email_content_not_found": "邮件正文不存在"
+    },
+    "portal_quarantine_preview": {
+      "email_content_not_found": "邮件正文不存在"
+    },
+    "export_import": {
+      "content_rules_managed_by_system_administrators": "内容规则仅平台管理员可管理"
+    },
+    "feature_group": {
+      "type_query_param_one_ip_sender": "类型只能是 ip/sender/recipient/content/feature"
+    },
+    "forward_queue_admin": {
+      "invalid_id": "ID 无效"
+    },
+    "geoip_rules": {
+      "ip_range_already_exists": "该 IP 段已存在",
+      "geoip_rule_not_found": "IP 归属地规则不存在",
+      "format_json_csv": "导出格式只能是 json 或 csv"
+    },
+    "group_management_access": {
+      "group_management_requires_tenant_administrator_a": "分组管理需要租户管理员权限",
+      "group_management_accessed_within_tenant_context": "多租户模式下，分组管理需要先选择租户",
+      "access_denied_group_management_rule": "无权访问该分组管理规则",
+      "group_management_rules_imported_with_scope": "分组管理规则必须以 scope=groups 导入"
+    },
+    "group_policy": {
+      "group_policy_requires_tenant_administrator_acces": "分组策略需要租户管理员权限",
+      "group_policy_accessed_within_tenant_context": "多租户模式下，分组策略需要先选择租户",
+      "group_policy_rules_stay_within_active": "分组策略规则必须属于当前所选租户"
+    },
+    "intent_engine": {
+      "engine_enabled_receive_engine_enabled_send": "请分别设置收信、发信和内部信的引擎开关"
+    },
+    "ip_filter": {
+      "rule_not_found": "规则不存在"
+    },
+    "ip_frequency": {
+      "rule_not_found": "规则不存在",
+      "active_required_toggle_action": "启停操作必须指定目标状态",
+      "rules_required": "请提供规则"
+    },
+    "rbl_filter": {
+      "rule_not_found": "规则不存在",
+      "invalid_client_ip": "客户端 IP 无效"
+    },
+    "mail_routing_helper": {
+      "mail_routing_rules_managed_by_system": "邮件路由规则仅平台管理员可管理",
+      "mail_routing_rules_imported_with_scope": "邮件路由规则必须以 scope=mail_routing_relay 或 scope=mail_routing_outbound 导入",
+      "tenant_id_required_select_tenant_x": "请先选择租户，再管理邮件路由规则"
+    },
+    "monitor_handlers": {
+      "backup_task_not_found": "备份任务不存在"
+    },
+    "overseas_mail": {
+      "directions_required": "请选择邮件方向",
+      "config_modified_by_another": "配置已被他人修改，请刷新后重试",
+      "invalid_ip_address": "IP 地址格式不正确"
+    },
+    "password_policy_settings": {
+      "mincharclasses_between_1_4": "密码字符种类数必须在 1-4 之间"
+    },
+    "phishing_actions": {
+      "reason_required": "请填写原因",
+      "not_found": "记录不存在"
+    },
+    "spoofing_actions": {
+      "reason_required": "请填写原因",
+      "not_found": "记录不存在"
+    },
+    "phishing_detection_log": {
+      "not_found": "记录不存在"
+    },
+    "spoofing_brands": {
+      "not_found": "记录不存在",
+      "disposition_mode_invalid": "处置模式只能是 observe/standard/strict/custom"
+    },
+    "spoofing_persons": {
+      "not_found": "记录不存在",
+      "protection_level_invalid": "防护级别只能是高/中/低",
+      "observe_mode_invalid": "观察模式只能是开或关",
+      "email_already_protected": "邮箱 {email} 已作为保护对象存在"
+    },
+    "spoofing_whitelist": {
+      "not_found": "记录不存在",
+      "match_type_invalid": "匹配类型只能是邮箱或域名",
+      "value_required": "值不能为空",
+      "whitelist_entry_exists": "该白名单条目已存在"
+    },
+    "phishing_screenshot": {
+      "invalid_storage_node_key": "存储节点或键无效",
+      "invalid_key_missing_task_id": "键无效：缺少任务 ID",
+      "screenshot_not_found": "截图不存在"
+    },
+    "portal_quarantine_listadd": {
+      "quarantine_item_has_no_tenant_cannot": "该隔离邮件没有归属租户，无法加入用户名单",
+      "quarantined_mail_has_no_usable_sender": "该隔离邮件没有可用于添加的发件人"
+    },
+    "portal_quarantine_release": {
+      "quarantine_item_not_found": "隔离邮件不存在",
+      "quarantine_item_already_released_deleted": "该隔离邮件已放行或已删除"
+    },
+    "proxysvr_probe": {
+      "proxysvr_endpoint_not_found": "代理发信端点不存在"
+    },
+    "recall_admin": {
+      "backend_coremail_exchange": "后端类型只能是 coremail 或 exchange",
+      "mail_log_does_not_belong_your": "该邮件日志不属于当前租户",
+      "recall_request_not_found": "召回请求不存在",
+      "recall_request_does_not_belong_your": "该召回请求不属于当前租户"
+    },
+    "recipient_check": {
+      "invalid_existence_action": "收件人存在性处置动作无效"
+    },
+    "recipient_config_access": {
+      "recipient_configuration_requires_tenant_context": "多租户模式下，收件人配置需要先选择租户",
+      "recipient_configuration_requires_tenant_administ": "收件人配置需要租户管理员权限"
+    },
+    "recipient_limit": {
+      "mode_detailed_merged": "模式只能是明细或合并",
+      "merged_limit_limit_1_unlimited_between": "合并限额必须是 -1（不限）或 1-1000 之间",
+      "invalid_action_merged_limit": "合并限额不支持该操作",
+      "action_invalid": "{name} 的处置动作无效",
+      "scope_invalid": "{name} 的生效范围无效，只能是本域或全部"
+    },
+    "roles": {
+      "system_default_role_cannot_edited": "系统内置角色不可修改",
+      "system_default_super_admin_role_cannot": "系统内置角色和超级管理员角色不可停用",
+      "system_default_role_cannot_deleted": "系统内置角色不可删除"
+    },
+    "smtp_auth_ip_lockout": {
+      "invalid_ip": "IP 地址无效"
+    },
+    "spoofing_notification_preview": {
+      "admin_emails_invalid": "管理员邮箱列表中含有无效邮箱",
+      "sample_sender_invalid": "样本发件人必须是合法邮箱地址",
+      "sample_subject_too_long": "样本主题最多 500 个字符",
+      "sample_confidence_out_of_range": "样本置信度必须在 0-100 之间"
+    },
+    "spoofing_persons_bulk": {
+      "confidence_threshold_out_of_range": "置信度阈值必须在 0-100 之间",
+      "unsupported_bulk_action": "不支持的批量操作",
+      "bulk_add_limit_exceeded": "批量添加单次最多 20 人",
+      "duplicate_email_in_group": "组内存在重复邮箱 {email}"
+    },
+    "spoofing_routes": {
+      "spoofing_detection_capability_required": "需要开通仿冒检测能力"
+    },
+    "tenant_llm": {
+      "invalid_tenant_id": "租户 ID 无效",
+      "base_url_model_api_key_required": "请填写服务地址、模型和 API Key"
+    },
+    "threat_retro_agent_state": {
+      "limits_non_negative": "限额不能为负数"
+    },
+    "threat_retro_bulk_export": {
+      "action_cancel": "action 只能是 cancel"
+    },
+    "threat_retro_notification": {
+      "kind_immediate_digest": "通知类型只能是即时或汇总"
+    },
+    "threat_retro_routes": {
+      "tenant_id_required_select_tenant_x": "请先选择租户",
+      "threat_retro_capability_required": "需要开通威胁回溯能力"
+    },
+    "threat_retro_runs": {
+      "runid_required": "请提供运行 ID",
+      "run_not_found": "运行记录不存在"
+    },
+    "threat_retro_strategies": {
+      "strategy_not_found": "处置策略不存在"
+    },
+    "unified_rules_pagespec": {
+      "behavior_control_rule_have_metadata_feature": "发信行为管控规则的 metadata.feature 必须是 behavior_control",
+      "content_rules_rule_have_metadata_feature": "内容规则的 metadata.feature 必须是 content_rules",
+      "sender_filter_rule_priority_between_1": "发件人过滤规则优先级必须在 1-9999 之间",
+      "invalid_metadata": "元数据格式不正确"
+    },
+    "user_list_access": {
+      "user_list_rules_require_tenant_administrator": "用户名单规则需要租户管理员权限",
+      "user_list_rules_available_owning_tenant": "多租户模式下，用户名单规则仅归属租户可见",
+      "user_list_rules_require_tenant_context": "用户名单规则需要先选择租户",
+      "user_list_rules_created_managed_by": "用户名单规则由用户自行创建和管理，不通过通用管理接口",
+      "access_denied_user_list_rule": "无权访问该用户名单规则",
+      "user_generated_user_list_rules_deleted": "此处只能删除用户自建的名单规则"
+    },
+    "user_unlock": {
+      "user_not_found": "用户不存在"
+    },
+    "users": {
+      "cannot_demote_last_system_administrator": "不能降级最后一个平台管理员",
+      "cannot_delete_your_own_account": "不能删除自己的账号",
+      "cannot_delete_last_system_administrator": "不能删除最后一个平台管理员",
+      "cannot_disable_last_enabled_super_administrator": "不能停用最后一个启用的超级管理员",
+      "bulk_action_would_leave_zero_enabled": "该批量操作会导致没有任何启用的超级管理员"
+    },
+    "auth": {
+      "authorization_header_required": "请先登录",
+      "authorization_header_malformed": "登录凭证格式不正确，请重新登录",
+      "token_invalid_or_expired": "登录已失效，请重新登录",
+      "session_invalid": "会话无效，请重新登录",
+      "session_revoked": "会话已被注销，请重新登录",
+      "system_admin_required": "该操作需要平台管理员权限",
+      "super_admin_required": "该操作需要超级管理员权限",
+      "admin_required": "该操作需要管理员权限",
+      "tenant_header_cross_tenant": "请求的租户与当前所选租户不一致，已拒绝跨租户操作",
+      "tenant_id_not_integer": "租户 ID 必须是整数",
+      "tenant_id_required": "请先选择租户，再管理其设置",
+      "tenant_id_invalid": "租户 ID 无效",
+      "tenant_access_denied": "无权访问该租户"
+    },
+    "login": {
+      "rate_limited": "请求过于频繁，请稍后再试",
+      "code_already_sent": "验证码已发送，请稍后再试",
+      "channel_disabled": "该接收方式未启用",
+      "ticket_invalid_or_expired": "登录校验已失效，请重新登录",
+      "verification_code_incorrect": "验证码错误",
+      "target_invalid": "接收目标无效",
+      "user_gone": "该账号已不存在"
+    },
+    "password": {
+      "user_not_found": "用户不存在",
+      "current_incorrect": "当前密码不正确",
+      "recently_used": "新密码不能与近期使用过的密码相同",
+      "credential_invalid_or_expired": "凭证无效或已过期，请重新发起"
+    },
+    "password_reset": {
+      "feature_disabled": "密码重置功能未启用",
+      "code_invalid_or_expired": "验证码错误或已过期",
+      "ticket_invalid_or_expired": "凭证无效或已过期",
+      "rate_limited": "请求过于频繁，请稍后再试"
     }
   }
 }

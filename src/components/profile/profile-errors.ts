@@ -1,4 +1,5 @@
 import { ApiError } from '@/lib/api/client';
+import { localizeApiError } from '@/lib/api/error-message';
 
 /**
  * Map a profile-area API error to a localized, user-facing message.
@@ -16,13 +17,23 @@ import { ApiError } from '@/lib/api/client';
  *
  * `t` is a next-intl translator scoped to the `profile` namespace, so both
  * `t('errors.internal')` and `t('account.saveFailed')` resolve under `profile.*`.
+ *
+ * GT-12614: `tRoot` 是**根命名空间**的 translator，用来按后端错误码
+ * (`apiErrors.<code>`) 取本地化文案。它必须排在 CJK 透传之前 —— profile 侧的
+ * 校验错误已经改成"错误码 + 英文 message"，若先走 CJK 判断就永远不命中，
+ * 具体提示会退化成笼统的兜底文案。未命中错误码时行为与改造前完全一致。
  */
 export function profileApiErrorMessage(
   err: unknown,
   fallbackKey: string,
   t: (key: string) => string,
+  tRoot?: (key: string, values?: Record<string, string | number | Date>) => string,
 ): string {
   if (err instanceof ApiError) {
+    if (tRoot) {
+      const coded = localizeApiError(err, tRoot);
+      if (coded) return coded;
+    }
     if (err.status >= 500) return t("errors.internal");
     if (err.status === 0) return err.message;
     if (err.message && /[\u4e00-\u9fff]/.test(err.message)) return err.message;

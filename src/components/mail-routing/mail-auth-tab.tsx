@@ -91,6 +91,7 @@ import type {
   MailAuthDomainScope,
 } from '@/lib/api/mail-auth';
 import { cn, formatDate } from '@/lib/utils';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -214,6 +215,7 @@ export interface MailAuthTabProps {
 
 export function MailAuthTab({ tenantId, highlightConfigId }: MailAuthTabProps) {
   const t = useTranslations('mailRouting.auth');
+  const apiErrorMessage = useApiErrorMessage();
   const ts = useTranslations('mailRouting.shared');
   const tc = useTranslations('common');
   const { apiRequest } = useScopedApiRequest(tenantId);
@@ -380,9 +382,9 @@ export function MailAuthTab({ tenantId, highlightConfigId }: MailAuthTabProps) {
     onError: (e: Error) => {
       // 409 冲突 → 透传后端 message（域名+场景冲突的权威判定）。
       if (e instanceof ApiError && e.status === 409) {
-        toast.error(e.message);
+        toast.error(apiErrorMessage(e));
       } else {
-        toast.error(e.message);
+        toast.error(apiErrorMessage(e));
       }
     },
   });
@@ -402,7 +404,7 @@ export function MailAuthTab({ tenantId, highlightConfigId }: MailAuthTabProps) {
       setDeleteTarget(null);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   // ─── Test connection (独立 Dialog 形态维持不变) ───────────────────────────

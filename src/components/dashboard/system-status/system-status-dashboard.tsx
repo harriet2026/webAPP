@@ -117,7 +117,7 @@ export function SystemStatusDashboard() {
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <ThreatTrend trend={data.threatTrend} isLoading={data.isLoading} />
+          <ThreatTrend trend={data.threatTrend} isLoading={data.isLoading} isError={data.isError} />
         </div>
         <TodoAlerts alerts={data.alerts} isLoading={data.isLoading} />
       </div>

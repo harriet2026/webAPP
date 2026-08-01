@@ -29,6 +29,7 @@ import { EmailPreviewDialog } from '@/components/email/email-preview-dialog';
 import type { EmailPreviewResponse } from '@/types/email-preview';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { PageFilters } from '@/components/shared/page-filters';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const statusVariantMap: Record<SidelineItem['status'], 'default' | 'secondary' | 'destructive' | 'outline'> = {
   pending: 'secondary',
@@ -49,6 +50,7 @@ const statusClassNameMap: Partial<Record<SidelineItem['status'], string>> = {
 
 export default function SidelinePage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { effectiveTenantId, isSystemAdmin, isViewingAllTenants } = useTenant();
   const { apiRequest } = useApiRequest();
@@ -86,7 +88,7 @@ export default function SidelinePage() {
       queryClient.invalidateQueries({ queryKey: ['sideline'] });
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     },
   });
 
@@ -98,7 +100,7 @@ export default function SidelinePage() {
       setDeleteTarget(null);
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     },
   });
 
@@ -122,7 +124,7 @@ export default function SidelinePage() {
       const data = await getSidelinePreview(item.id, apiRequest);
       setPreviewData(data);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     } finally {
       setPreviewLoading(false);
     }

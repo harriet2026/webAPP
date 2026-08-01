@@ -26,9 +26,11 @@ import { useApiRequest } from '@/lib/api/client';
 import { OverflowCell } from '@/components/shared/overflow-cell';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { useAuth } from '@/contexts/auth-context';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export function InboundAuditPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin } = useAuth();
@@ -89,7 +91,7 @@ export function InboundAuditPage() {
       setCommentDialog(null);
       setComment('');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     } finally {
       setIsSubmitting(false);
     }
@@ -106,9 +108,9 @@ export function InboundAuditPage() {
       URL.revokeObjectURL(url);
       toast.success(t('common.success'));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     }
-  }, [apiRequest, t]);
+  }, [apiRequest, t, apiErrorMessage]);
 
   const columns: ColumnDef<InboundAuditItem>[] = useMemo(() => [
     {

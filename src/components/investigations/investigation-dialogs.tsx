@@ -49,6 +49,7 @@ import type {
 } from '@/types/investigation';
 import type { CreateRuleRequest, Rule, RuleNode } from '@/types/unified-rules';
 import { genericAgentTypes } from './investigation-types';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const STRUCTURED_DETAIL_KEYS = [
   'mail_log_id',
@@ -160,6 +161,7 @@ export function InvestigationDetailDialog({
   taskId: string | null;
 }) {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const locale = useLocale();
   const router = useRouter();
   const { apiRequest } = useApiRequest();
@@ -188,7 +190,7 @@ export function InvestigationDetailDialog({
   const cancelMutation = useMutation({
     mutationFn: (id: string) => cancelInvestigation(id, apiRequest),
     onSuccess: () => toast.success(t('investigations.cancelSuccess')),
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('investigations.cancelError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('investigations.cancelError'))),
   });
 
   const { data: actionRules = [] } = useQuery({
@@ -640,6 +642,7 @@ export function InvestigationCreateDialog({
   onCreated: (taskId: string) => void;
 }) {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
   const [type, setType] = useState<InvestigationType>('phish_analysis');
   const [targetType, setTargetType] = useState<InvestigationTargetType>('mail');
@@ -655,7 +658,7 @@ export function InvestigationCreateDialog({
       onCreated(result.id);
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     },
   });
 

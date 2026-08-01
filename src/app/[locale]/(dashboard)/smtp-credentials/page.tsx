@@ -33,6 +33,7 @@ import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-she
 import { PageFilters } from '@/components/shared/page-filters';
 import { Search, X } from 'lucide-react';
 import { useProductForm } from '@/contexts/product-form-context';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 // GT-12368: 本地账号库禁用时（OSG_LOCAL_AUTH_ENABLED=false），创建/编辑凭证的
 // auth_backend 下拉不提供 local，避免用户选中一个后端会 400 拒绝的选项。
@@ -54,6 +55,7 @@ type CredentialForm = z.infer<typeof credentialSchema>;
 
 export default function SMTPCredentialsPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
   const { localAuthEnabled } = useProductForm();
@@ -90,7 +92,7 @@ export default function SMTPCredentialsPage() {
       toast.success(t('common.deleteSuccess'));
       setDeleteId(null);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(apiErrorMessage(error)),
   });
 
   const unlockMutation = useMutation({
@@ -99,7 +101,7 @@ export default function SMTPCredentialsPage() {
       queryClient.invalidateQueries({ queryKey: ['smtp-credentials'] });
       toast.success(t('smtpCredentials.unlocked'));
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(apiErrorMessage(error)),
   });
 
   const resetPasswordMutation = useMutation({
@@ -111,7 +113,7 @@ export default function SMTPCredentialsPage() {
       setResetPasswordId(null);
       setNewPassword('');
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(apiErrorMessage(error)),
   });
 
   const form = useForm<CredentialForm>({
@@ -181,7 +183,7 @@ export default function SMTPCredentialsPage() {
       queryClient.invalidateQueries({ queryKey: ['smtp-credentials'] });
       setDialogOpen(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     } finally {
       setIsSubmitting(false);
     }

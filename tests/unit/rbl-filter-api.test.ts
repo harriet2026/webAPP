@@ -26,13 +26,13 @@ describe('RBL Filter API Client', () => {
     const payload = {
       match_mode: 'specific' as const,
       match_servers: ['zen.spamhaus.org'],
-      product_action: 'block' as const,
+      product_action: 'reject' as const,
       hit_servers: ['bl.spamcop.net'],
     };
     mockApiRequest.mockResolvedValueOnce({
       matched: false,
       condition_tree: '{"type":"condition"}',
-      action: 'block',
+      action: 'reject',
     });
 
     const result = await testRBLFilterRule(payload);

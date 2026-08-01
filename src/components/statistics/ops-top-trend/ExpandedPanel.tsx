@@ -59,7 +59,7 @@ export function ExpandedPanel({
   const color = config.color;
   const yAxisLabel = t(config.yAxisLabel as Parameters<typeof t>[0]);
   const itemName = String(row.name ?? '');
-  const displayName = itemName.length > 30 ? `${itemName.slice(0, 30)}...` : itemName;
+  const displayName = itemName;
 
   const dayLabels = trendLabels ?? FALLBACK_LABELS;
 
@@ -126,20 +126,30 @@ export function ExpandedPanel({
 
   const drillOption = useMemo(() => {
     if (drillItems.length === 0) return null;
+    // Store full names in y-axis data; axisLabel.formatter truncates for display only.
+    // ECharts tooltip then receives the full name via {b} (category name).
+    const drillFullNames = drillItems.map((d) => drillLabel(d.name));
     return {
       tooltip: {
-        trigger: 'axis' as const,
-        axisPointer: { type: 'shadow' as const },
+        // 'item' trigger: {b} is the y-axis category value (full name),
+        // {c} is the data value. This is more reliable than 'axis' where
+        // {b} is the series name instead of the category.
+        trigger: 'item' as const,
+        formatter: (params: { name: string; value: number }) =>
+          `${params.name}<br/><strong>${params.value.toLocaleString()}</strong>`,
       },
       grid: { left: 100, right: 24, top: 8, bottom: 32 },
       xAxis: { type: 'value' as const, axisLabel: { fontSize: 10 } },
       yAxis: {
         type: 'category' as const,
-        data: drillItems.map((d) => {
-          const label = drillLabel(d.name);
-          return label.length > 15 ? `${label.slice(0, 15)}...` : label;
-        }),
-        axisLabel: { fontSize: 10 },
+        // Full names in data so tooltip params.name gets the untruncated string.
+        data: drillFullNames,
+        axisLabel: {
+          fontSize: 10,
+          // Visually truncate axis labels for readability; tooltip shows full value.
+          formatter: (val: string) =>
+            val.length > 14 ? `${val.slice(0, 14)}\u2026` : val,
+        },
       },
       series: [
         {
@@ -180,9 +190,14 @@ export function ExpandedPanel({
       </div>
       <div className="flex h-[380px] flex-col gap-4 px-4 pb-4 xl:flex-row">
         <div className="flex h-full min-h-0 w-full flex-col xl:w-[60%]">
-          <h3 className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
-            <TrendingUp className="h-4 w-4" style={{ color }} />
-            {t('trendAnalysisTitle', { item: displayName })}
+          <h3 className="mb-2 flex min-w-0 items-center gap-2 text-sm font-medium text-foreground">
+            <TrendingUp className="h-4 w-4 shrink-0" style={{ color }} />
+            <span
+              className="truncate"
+              title={t('trendAnalysisTitle', { item: displayName })}
+            >
+              {t('trendAnalysisTitle', { item: displayName })}
+            </span>
           </h3>
           <div className="min-h-0 flex-1 rounded-lg bg-background p-3 shadow-sm">
             {trendOption ? (
@@ -197,18 +212,26 @@ export function ExpandedPanel({
         </div>
 
         <div className="flex h-full min-h-0 w-full flex-col xl:w-[40%]">
-          <h3 className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
-            <FileText className="h-4 w-4 text-purple-600" />
-            {t('drillTitleGeneric', {
-              item: displayName,
-              dim: t(config.labelKey as Parameters<typeof t>[0]),
-            })}
+          <h3 className="mb-2 flex min-w-0 items-center gap-2 text-sm font-medium text-foreground">
+            <FileText className="h-4 w-4 shrink-0 text-purple-600" />
+            <span
+              className="truncate"
+              title={t('drillTitleGeneric', {
+                item: displayName,
+                dim: t(config.labelKey as Parameters<typeof t>[0]),
+              })}
+            >
+              {t('drillTitleGeneric', {
+                item: displayName,
+                dim: t(config.labelKey as Parameters<typeof t>[0]),
+              })}
+            </span>
             {/* Parent row counts sessions; sub-dims count messages (spec §8.3).
                 Calling this out at the drilldown title avoids the silent
                 unit-mismatch surprise. */}
             {dimension === 'connection' ? (
               <span
-                className="text-xs font-normal text-muted-foreground"
+                className="shrink-0 text-xs font-normal text-muted-foreground"
                 title={t('connDrilldownUnitTip')}
               >
                 <AlertCircle className="inline h-3 w-3 align-text-bottom" />

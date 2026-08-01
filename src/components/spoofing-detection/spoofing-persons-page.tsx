@@ -25,11 +25,13 @@ import { SpoofingPersonCard } from './spoofing-person-card';
 import { SpoofingBatchDialog } from './spoofing-batch-dialog';
 import { SpoofingPersonForm } from './spoofing-person-form';
 import { spoofingQueryKeys } from './spoofing-query-keys';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const PAGE_SIZE = 100;
 
 export function SpoofingPersonsPage({ auditOnly }: { auditOnly?: boolean }) {
   const tsd = useTranslations('spoofingDetection');
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest, effectiveTenantId } = useApiRequest();
   const { canEdit } = useSpoofingAccess();
   const qc = useQueryClient();
@@ -68,7 +70,7 @@ export function SpoofingPersonsPage({ auditOnly }: { auditOnly?: boolean }) {
   const bulkMutation = useMutation({
     mutationFn: (body: Parameters<typeof bulkSpoofPersons>[0]) => bulkSpoofPersons(body, apiRequest),
     onSuccess: () => { invalidate(); setSelectedIds([]); setBatchOpen(false); },
-    onError: (e) => toast.error(e instanceof Error ? e.message : 'error'),
+    onError: (e) => toast.error(apiErrorMessage(e, 'error')),
   });
 
   const items = listQuery.data?.items ?? [];

@@ -28,6 +28,7 @@ import { DetectionDetailSheet } from '@/components/phishing-detection/detection-
 import { BlockDialog } from '@/components/phishing-detection/block-dialog';
 import { ExemptDialog } from '@/components/phishing-detection/exempt-dialog';
 import type { DetectionLogItem, Disposition, DetectionMode, RecallStatus, RiskLevel } from '@/types/phishing-detection';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const PAGE_SIZE = 20;
 const LIVE_DISPOSITIONS = ['pending', 'processing', 'manual_hold'];
@@ -82,6 +83,7 @@ function isLiveStateError(err: unknown): boolean {
 
 export function PhishingOverviewPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const tpd = useTranslations('phishingDetection');
   const { apiRequest } = useApiRequest();
   const { isAdmin } = useTenant();
@@ -141,7 +143,7 @@ export function PhishingOverviewPage() {
         toast.error(tpd('block.liveStateError'));
         return;
       }
-      toast.error(error instanceof Error ? error.message : tpd('block.error'));
+      toast.error(apiErrorMessage(error, tpd('block.error')));
     },
   });
 
@@ -157,7 +159,7 @@ export function PhishingOverviewPage() {
         toast.error(tpd('block.liveStateError'));
         return;
       }
-      toast.error(error instanceof Error ? error.message : tpd('exempt.error'));
+      toast.error(apiErrorMessage(error, tpd('exempt.error')));
     },
   });
 

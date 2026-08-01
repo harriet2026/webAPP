@@ -27,9 +27,12 @@ import { buildThreatTrendOption, THREAT_TREND_SERIES } from './threat-trend-conf
 interface ThreatTrendProps {
   trend: TrendSeriesPoint[];
   isLoading: boolean;
+  // GT-12397: 只有真实错误才显示占位（诚实报错）；成功但无数据时渲染空
+  // 坐标系画布（见 buildThreatTrendOption 的空态分支）。
+  isError?: boolean;
 }
 
-export function ThreatTrend({ trend, isLoading }: ThreatTrendProps) {
+export function ThreatTrend({ trend, isLoading, isError = false }: ThreatTrendProps) {
   const t = useTranslations('systemStatus.trend');
   const tSeries = useTranslations('systemStatus.trend.series');
   // All five series shown by default (demo shows the full stack initially).
@@ -51,6 +54,7 @@ export function ThreatTrend({ trend, isLoading }: ThreatTrendProps) {
       points,
       hidden,
       (key) => tSeries(key as Parameters<typeof tSeries>[0]),
+      t('empty'),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [points, hidden]);
@@ -98,21 +102,21 @@ export function ThreatTrend({ trend, isLoading }: ThreatTrendProps) {
 
         {isLoading ? (
           <Skeleton className="h-[320px] w-full rounded-lg" />
-        ) : option ? (
-          <ReactECharts
-            option={option}
-            style={{ height: 320, width: '100%' }}
-            notMerge
-            data-render-mode={points.length === 1 ? 'single-bucket-bar' : 'trend-area'}
-            data-testid="system-status-trend-chart"
-          />
-        ) : (
+        ) : isError ? (
           <div
             className="flex h-[320px] items-center justify-center text-muted-foreground"
             data-testid="system-status-trend-empty"
           >
             {t('empty')}
           </div>
+        ) : (
+          <ReactECharts
+            option={option}
+            style={{ height: 320, width: '100%' }}
+            notMerge
+            data-render-mode={points.length === 0 ? 'empty-canvas' : points.length === 1 ? 'single-bucket-bar' : 'trend-area'}
+            data-testid="system-status-trend-chart"
+          />
         )}
       </CardContent>
     </Card>

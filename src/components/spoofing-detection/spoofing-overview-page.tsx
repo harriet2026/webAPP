@@ -20,6 +20,7 @@ import { SpoofingDetailSheet } from './spoofing-detail-sheet';
 import { SpoofingExemptDialog } from './spoofing-exempt-dialog';
 import type { SpoofingLogItem } from '@/types/spoofing-detection';
 import { spoofingQueryKeys } from './spoofing-query-keys';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const PAGE_SIZE = 20;
 const MAX_RANGE_MS = 90 * 24 * 60 * 60 * 1000;
@@ -51,6 +52,7 @@ const DEFAULT_FILTERS: SpoofFilterState = {
 
 export function SpoofingOverviewPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const tsd = useTranslations('spoofingDetection');
   const { apiRequest, effectiveTenantId } = useApiRequest();
   const { canEdit } = useSpoofingAccess();
@@ -96,7 +98,7 @@ export function SpoofingOverviewPage() {
         toast.error(tsd('block.notActionable'));
         return;
       }
-      toast.error(error instanceof Error ? error.message : tsd('block.error'));
+      toast.error(apiErrorMessage(error, tsd('block.error')));
     },
   });
 
@@ -112,7 +114,7 @@ export function SpoofingOverviewPage() {
         toast.error(tsd('block.notActionable'));
         return;
       }
-      toast.error(error instanceof Error ? error.message : tsd('exempt.error'));
+      toast.error(apiErrorMessage(error, tsd('exempt.error')));
     },
   });
 

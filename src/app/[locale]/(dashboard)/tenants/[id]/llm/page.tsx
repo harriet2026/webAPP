@@ -23,6 +23,7 @@ import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-she
 import { AccessDeniedPanel, LoadingPanel } from '@/components/shared/state-panel';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { usePermission } from '@/hooks/use-permission';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const llmSchema = z.object({
   base_url: z.string().min(1, 'valueRequired'),
@@ -36,6 +37,7 @@ type LLMForm = z.infer<typeof llmSchema>;
 
 export default function TenantLLMPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -113,7 +115,7 @@ export default function TenantLLMPage() {
       setShowDelete(false);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 

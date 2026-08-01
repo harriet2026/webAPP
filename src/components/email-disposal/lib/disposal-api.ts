@@ -1,6 +1,7 @@
 import type { ApiRequestFn } from '@/lib/api/client';
 import type { DisposalBasis, DisposalListResponse, DisposalMailItem, DisplayStatus, BulkDisposeRequest, BulkDisposeResponse, ParseQueryRequest, ParseQueryResponse, SimilarSearchRequest } from '@/types/email-disposal';
 import type { AdvancedFilter, FinalActionRuleDetail } from '@/types/log';
+import type { RecipientDisposition } from '@/types/phishing-detection';
 
 export function mapToDisplayStatus(action: string, deliveryStatus?: string, workflowOutcome?: string, recallStatusSummary?: string): DisplayStatus {
   // Recall status takes priority: if the message has any recall record
@@ -10,7 +11,11 @@ export function mapToDisplayStatus(action: string, deliveryStatus?: string, work
     return recallStatusSummary as DisplayStatus;
   }
 
-  if (workflowOutcome === 'released' || workflowOutcome === 'approved') {
+  // GT-12353 F5：超时自动放行（timeout_released）与管理员主动批准
+  // （approved）在"邮件已经投递出去"这件事上等价，展示态同样按投递状态推导。
+  // 此前缺这一支，超时放行的邮件会落到下面 action==='audit' 的分支，
+  // 继续显示成「待审核」。
+  if (workflowOutcome === 'released' || workflowOutcome === 'approved' || workflowOutcome === 'timeout_released') {
     if (deliveryStatus === 'delivered') return 'delivered';
     if (deliveryStatus === 'in_delivery') return 'delivering';
     if (deliveryStatus === 'failed') return 'delivery_failed';
@@ -42,6 +47,17 @@ export function mapToDisplayStatus(action: string, deliveryStatus?: string, work
     return 'delivering';
   }
 
+  // mixed: 收件人被拆分成不同处置（部分投递/部分隔离/部分旁路…）。
+  // 执行动作列已用 mini 堆叠色条展示明细，状态列表示整体投递结果。
+  // 如果有 delivery_status_summary，优先采用后端值；否则用 partial_delivered。
+  if (action === 'mixed') {
+    if (deliveryStatus === 'delivered') return 'delivered';
+    if (deliveryStatus === 'in_delivery') return 'delivering';
+    if (deliveryStatus === 'partial_delivered') return 'partial_delivered';
+    if (deliveryStatus === 'failed') return 'delivery_failed';
+    return 'partial_delivered';
+  }
+
   return 'delivering';
 }
 
@@ -63,6 +79,7 @@ export interface MailLogAPIItem {
   delivery_status_summary?: string;
   workflow_outcome_summary?: string;
   recall_status_summary?: string;
+  reason?: string;
   received_at?: string;
   timestamp?: string;
   email_type?: string;
@@ -75,6 +92,10 @@ export interface MailLogAPIItem {
   disposal_policy_keys?: string;
   /** Per-recipient action details; present when action === 'mixed'. */
   final_action_rule?: Record<string, FinalActionRuleDetail>;
+  /** Per-recipient final dispositions; drives the mixed-status stacked bar (方案 C). */
+  recipient_dispositions?: RecipientDisposition[];
+  /** Distinct actions across all recipients (e.g. ['accept','quarantine']). */
+  disposition_actions?: string[];
 }
 
 export function mapMailLogToDisposalItem(item: MailLogAPIItem): DisposalMailItem {
@@ -118,8 +139,11 @@ export function mapMailLogToDisposalItem(item: MailLogAPIItem): DisposalMailItem
     emailTypeOriginal: item.email_type_original,
     correctionSource: item.correction_source,
     disposalBasis: item.disposal_basis,
+    reason: item.reason,
     disposalPolicyKeys: item.disposal_policy_keys,
     finalActionRule: item.final_action_rule,
+    recipientDispositions: item.recipient_dispositions,
+    dispositionActions: item.disposition_actions,
   };
 }
 
@@ -129,6 +153,17 @@ interface MailLogListResponse {
   page: number;
   page_size: number;
   total_pages?: number;
+}
+
+// localDayBound 把 yyyy-MM-dd 的"某一天"换算成用户本地时区的日界时刻
+// （RFC3339，start=当天 00:00:00.000、end=当天 23:59:59.999），供后端按
+// 精确时刻过滤（GT-12633）。非纯日期输入原样透传（后端已接受 RFC3339）。
+export function localDayBound(dateOnly: string, endOfDay: boolean): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) return dateOnly;
+  // 不带时区后缀的字符串会被 Date 按本地时区解析——这正是这里要的语义。
+  const dt = new Date(`${dateOnly}T${endOfDay ? '23:59:59.999' : '00:00:00.000'}`);
+  if (Number.isNaN(dt.getTime())) return dateOnly;
+  return dt.toISOString();
 }
 
 export async function getDisposalList(
@@ -153,8 +188,11 @@ export async function getDisposalList(
   const query = new URLSearchParams();
   query.set('page', String(params.page));
   query.set('page_size', String(params.pageSize));
-  if (params.startDate) query.set('start_date', params.startDate);
-  if (params.endDate) query.set('end_date', params.endDate);
+  // GT-12633: 日期筛选按"用户本地时区的当天"换算成带偏移的时刻再发给后端。
+  // 后端存储层把纯日期 yyyy-MM-dd 按 UTC 零点解析，UTC+8 用户选的"当天"会
+  // 错位 8 小时（当天 00:00-08:00 漏掉、次日 00:00-08:00 混入）。
+  if (params.startDate) query.set('start_date', localDayBound(params.startDate, false));
+  if (params.endDate) query.set('end_date', localDayBound(params.endDate, true));
   if (params.recipient) query.set('recipient', params.recipient);
   // GT-11614: map quick-filter sendReceiveType to backend direction param.
   // Quick filter values are incoming/outgoing/internal; backend expects

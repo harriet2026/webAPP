@@ -25,6 +25,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useTenant } from '@/hooks/use-tenant';
 import { useApiRequest } from '@/lib/api/client';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 type ConfigType = 'rbl' | 'exec_impersonation' | 'domain_lookalike';
 
@@ -34,6 +35,7 @@ interface DetectionProfilesPageProps {
 
 export function DetectionProfilesPage({ configType }: DetectionProfilesPageProps) {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { effectiveTenantId, isViewingAllTenants } = useTenant();
   const { apiRequest } = useApiRequest();
@@ -61,7 +63,7 @@ export function DetectionProfilesPage({ configType }: DetectionProfilesPageProps
       setDeleteId(null);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 

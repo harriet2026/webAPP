@@ -1,6 +1,7 @@
 // GT-12263: RBL 过滤配置页缺少服务器/动作 Tooltip（PRD §3 交互设计-关键字段悬浮提示、TC015）。
-// 需求要求配置页（module-content-rbl_filter 容器内，不含灰名单 Dialog）共 8 处
-// data-slot=tooltip-trigger：3 个预置 RBL 服务器 Badge + 查询超时 + 4 个命中动作说明。
+// GT-12682 改版后处置区变成「执行动作 / 灰名单策略」两张互斥卡片，四个动作的说明文案
+// 移进了 Select 选项内部（收起时不在 DOM），配置页常驻的 tooltip-trigger 变为 7 处：
+// 3 个预置 RBL 服务器 Badge + 查询超时 + 处置策略标题 + 执行动作标题 + 灰名单策略标题。
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -94,12 +95,12 @@ describe('GT-12263 RBL config-page tooltips', () => {
     mockApiRequest.mockReset();
   });
 
-  it('renders >= 8 tooltip triggers inside module-content-rbl_filter (3 servers + timeout + 4 actions)', async () => {
+  it('renders >= 7 tooltip triggers inside module-content-rbl_filter (3 servers + timeout + 3 section titles)', async () => {
     const { container } = await renderLoaded();
     const scope = container.querySelector('[data-testid="module-content-rbl_filter"]');
     expect(scope).not.toBeNull();
     const triggers = scope!.querySelectorAll('[data-slot="tooltip-trigger"]');
-    expect(triggers.length).toBeGreaterThanOrEqual(8);
+    expect(triggers.length).toBeGreaterThanOrEqual(7);
   });
 
   it('server badge tooltip opens with the PRD source description (zen.spamhaus.org)', async () => {
@@ -116,31 +117,50 @@ describe('GT-12263 RBL config-page tooltips', () => {
     });
   });
 
-  it('action tooltip opens with the PRD block-action description', async () => {
-    const { container, baseElement } = await renderLoaded();
+  it('hangs a tooltip trigger off each disposal-strategy section title', async () => {
+    const { container } = await renderLoaded();
     const scope = container.querySelector('[data-testid="module-content-rbl_filter"]')!;
-    // 命中动作区的「阻断」帮助触发器（排除服务器 Badge 与超时 HelpCircle）
-    const blockTrigger = Array.from(scope.querySelectorAll('[data-slot="tooltip-trigger"]')).find(
-      (el) => el.textContent?.includes(zh.rblFilter.actionBlock) && !el.textContent?.includes('.'),
-    ) as HTMLElement | undefined;
-    expect(blockTrigger).toBeTruthy();
-    fireEvent.focus(blockTrigger!);
-    await waitFor(() => {
-      const contents = Array.from(baseElement.querySelectorAll('[data-slot="tooltip-content"]'));
-      expect(contents.some((el) => el.textContent?.includes('立即拒绝连接'))).toBe(true);
-    });
+    // 三个标题（处置策略 / 执行动作 / 灰名单策略）各自紧挨着一个 HelpCircle 触发器。
+    // 触发器是 <svg>（不可聚焦），故只断言结构；tooltip 的实际展开行为由上面的
+    // 服务器 Badge 用例覆盖。
+    for (const title of [
+      zh.rblFilter.disposalStrategyTitle,
+      zh.rblFilter.actionSectionTitle,
+      zh.rblFilter.greylistSectionTitle,
+    ]) {
+      const titleEl = Array.from(scope.querySelectorAll('p')).find((el) => el.textContent === title);
+      expect(titleEl, `title not rendered: ${title}`).toBeTruthy();
+      expect(
+        titleEl!.parentElement?.querySelector('[data-slot="tooltip-trigger"]'),
+        `no tooltip trigger next to: ${title}`,
+      ).toBeTruthy();
+    }
   });
 
-  it('all four locales carry the 7 new tooltip keys (next-intl silently renders missing keys)', () => {
+  it('renders the two mutually-exclusive strategy cards with the action Select selected by default', async () => {
+    const { container } = await renderLoaded();
+    const scope = container.querySelector('[data-testid="module-content-rbl_filter"]')!;
+    const text = scope.textContent ?? '';
+    expect(text).toContain(zh.rblFilter.actionSectionTitle);
+    expect(text).toContain(zh.rblFilter.greylistSectionTitle);
+    // 默认走执行动作卡片（greylistEnabled=false），Select 显示默认动作「拒收」
+    expect(text).toContain(zh.rblFilter.actionReject);
+  });
+
+  it('all four locales carry the tooltip keys (next-intl silently renders missing keys)', () => {
     const keys = [
       'rblFilter.serverTipGeneric',
       'rblFilter.serverTipZenSpamhaus',
       'rblFilter.serverTipBlSpamcop',
       'rblFilter.serverTipBarracuda',
-      'rblFilter.actionBlockTip',
+      'rblFilter.actionRejectTip',
       'rblFilter.actionQuarantineTip',
-      'rblFilter.actionMarkTip',
+      'rblFilter.actionReviewTip',
+      'rblFilter.actionDiscardTip',
       'rblFilter.actionGreylistTip',
+      'rblFilter.disposalStrategyDesc',
+      'rblFilter.actionSectionDesc',
+      'rblFilter.greylistSectionDesc',
     ];
     for (const locale of [zh, en, ru, th]) {
       for (const key of keys) {
@@ -153,9 +173,10 @@ describe('GT-12263 RBL config-page tooltips', () => {
     expect(zh.rblFilter.serverTipZenSpamhaus).toContain('Spamhaus综合黑名单');
     expect(zh.rblFilter.serverTipBlSpamcop).toContain('SpamCop');
     expect(zh.rblFilter.serverTipBarracuda).toContain('Barracuda');
-    expect(zh.rblFilter.actionBlockTip).toContain('立即拒绝连接');
+    expect(zh.rblFilter.actionRejectTip).toContain('立即拒绝连接');
     expect(zh.rblFilter.actionQuarantineTip).toContain('隔离队列');
-    expect(zh.rblFilter.actionMarkTip).toContain('X-RBL-Hit');
+    expect(zh.rblFilter.actionReviewTip).toContain('人工审核');
+    expect(zh.rblFilter.actionDiscardTip).toContain('静默丢弃');
     expect(zh.rblFilter.actionGreylistTip).toContain('临时拒绝');
   });
 });

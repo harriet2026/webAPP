@@ -52,7 +52,7 @@ describe('inferTemplate', () => {
       spf:   { ...baseStandard.spf,   fail: { ...baseStandard.spf.fail,   observe_mode: true } },
       dkim:  { ...baseStandard.dkim,  fail: { ...baseStandard.dkim.fail,  observe_mode: true } },
       dmarc: { ...baseStandard.dmarc, reject: { ...baseStandard.dmarc.reject, observe_mode: true } },
-      ptr:   { ...baseStandard.ptr,   norecord: { ...baseStandard.ptr.norecord, observe_mode: true } },
+      ptr:   { ...baseStandard.ptr,   noptr: { ...baseStandard.ptr.noptr, observe_mode: true } },
     };
     expect(inferTemplate(c)).toBe('standard');
   });
@@ -68,7 +68,7 @@ describe('inferTemplate', () => {
   it('detects action changes in ptr group', () => {
     const c = {
       ...baseStandard,
-      ptr: { ...baseStandard.ptr, norecord: { ...baseStandard.ptr.norecord, enabled: true, action: 'reject' as const } },
+      ptr: { ...baseStandard.ptr, noptr: { ...baseStandard.ptr.noptr, enabled: true, action: 'reject' as const } },
     };
     expect(inferTemplate(c)).toBe('custom');
   });
@@ -89,7 +89,7 @@ describe('applyTemplate', () => {
     expect(r.spf.fail.action).toBe('reject');
     expect(r.dkim.fail.action).toBe('reject');
     expect(r.dmarc.reject.action).toBe('reject');
-    expect(r.ptr.norecord.action).toBe('quarantine');
+    expect(r.ptr.noptr.action).toBe('quarantine');
   });
 
   it('transforms strict to loose', () => {
@@ -127,14 +127,18 @@ describe('applyTemplate', () => {
 });
 
 describe('TEMPLATES structure', () => {
-  it('PTR keys use norecord/temperror/ehlomismatch/amismatch not pass or match', () => {
+  // GT-12687：PTR 的 subkey 已对齐后端 asProtocolRuleDefs
+  // （noptr / nomatch / ehlo_mismatch），前端此前用的 norecord / amismatch /
+  // ehlomismatch 三个键后端根本不认识，配置会被静默丢弃；temperror 是幽灵项
+  // （引擎的 ptrResultAtStage 没有这个分支），已一并删除。
+  // 这条断言原本钉在旧键名上，属 GT-12687 的遗漏，本次一并纠正。
+  it('PTR keys 对齐后端 subkey：noptr / nomatch / ehlo_mismatch', () => {
     for (const t of Object.values(TEMPLATES)) {
       expect(Object.keys(t.ptr)).not.toContain('pass');
       expect(Object.keys(t.ptr)).not.toContain('match');
-      expect(Object.keys(t.ptr)).toContain('norecord');
-      expect(Object.keys(t.ptr)).toContain('temperror');
-      expect(Object.keys(t.ptr)).toContain('ehlomismatch');
-      expect(Object.keys(t.ptr)).toContain('amismatch');
+      expect(Object.keys(t.ptr)).toContain('noptr');
+      expect(Object.keys(t.ptr)).toContain('ehlo_mismatch');
+      expect(Object.keys(t.ptr)).toContain('nomatch');
     }
   });
 

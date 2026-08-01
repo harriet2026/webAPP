@@ -31,6 +31,7 @@ import { formatDate } from '@/lib/utils';
 import { resolveActionBadges, actionToVariant } from '@/lib/email-log-action';
 import type { DisposalMailItem, DisplayStatus } from '@/types/email-disposal';
 import { formatListReason, isStage1Policy, type DisposalLang } from './lib/disposal-basis-config';
+import { RecipientStatusBadges } from './components/recipient-status-badges';
 import { mailTypeLabelKey, correctionSourceLabelKey } from './lib/detail-helpers';
 import { useProductForm } from '@/contexts/product-form-context';
 
@@ -404,8 +405,10 @@ export function MailListTable({
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="sticky left-0 z-30 w-10 bg-card border-r">
-                  <Checkbox checked={false} disabled aria-label="Select all" />
+                <TableHead className="sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r">
+                  <div className="flex items-center justify-center h-full w-10">
+                    <Checkbox checked={false} disabled aria-label="Select all" />
+                  </div>
                 </TableHead>
                 {colHead('time')}
                 {colHead('direction')}
@@ -443,8 +446,10 @@ export function MailListTable({
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="sticky left-0 z-30 w-10 bg-card border-r">
-                  <Checkbox checked={false} disabled aria-label="Select all" />
+                <TableHead className="sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r">
+                  <div className="flex items-center justify-center h-full w-10">
+                    <Checkbox checked={false} disabled aria-label="Select all" />
+                  </div>
                 </TableHead>
                 {colHead('time')}
                 {colHead('direction')}
@@ -552,8 +557,13 @@ export function MailListTable({
         <Table className="min-w-[800px]">
           <TableHeader>
             <TableRow>
-              <TableHead className="sticky left-0 z-30 w-10 bg-card border-r">
-                <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
+              <TableHead
+                className="sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r"
+                data-testid="disposal-select-column"
+              >
+                <div className="flex items-center justify-center h-full w-10">
+                  <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
+                </div>
               </TableHead>
               {colHead('time')}
               {colHead('direction')}
@@ -588,16 +598,18 @@ export function MailListTable({
               >
                 <TableCell
                   className={cn(
-                    'sticky left-0 z-10 w-10 border-r bg-card transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
+                    'sticky left-0 z-10 w-10 min-w-[40px] max-w-[40px] p-0 border-r bg-card transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
                     selectedIds.has(item.id) && 'bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]',
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Checkbox
-                    checked={selectedIds.has(item.id)}
-                    onCheckedChange={() => toggleOne(item.id)}
-                    aria-label={`Select email ${item.id}`}
-                  />
+                  <div className="flex items-center justify-center h-full w-10">
+                    <Checkbox
+                      checked={selectedIds.has(item.id)}
+                      onCheckedChange={() => toggleOne(item.id)}
+                      aria-label={`Select email ${item.id}`}
+                    />
+                  </div>
                 </TableCell>
                 {isColVisible('time') && (
                 <TableCell className="text-xs whitespace-nowrap">
@@ -660,7 +672,18 @@ export function MailListTable({
                         </TooltipContent>
                       </Tooltip>
                     );
-                  })() : '—'}
+                  })() : item.reason ? (
+                    // GT-12578 / GT-12686：落地 spec §4.1「合成失败/无命中时
+                    // disposal_basis 存 null，前端回退现有 MailLog.Reason
+                    // 自由文本」。此前这里直接落 '—'，于是 mail_marking 这类
+                    // 不参与 disposal_basis 合成的规则命中后列表上什么都看不到。
+                    <Tooltip>
+                      <TooltipTrigger render={<span className="cursor-default truncate block" />}>
+                        {item.reason}
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-md text-xs">{item.reason}</TooltipContent>
+                    </Tooltip>
+                  ) : '—'}
                 </TableCell>
                 )}
                 {isColVisible('mailType') && (
@@ -697,30 +720,41 @@ export function MailListTable({
                 )}
                 {isColVisible('action') && (
                 <TableCell className="text-xs">
-                  <div className="flex flex-wrap items-center gap-1">
-                    {(() => {
-                      const { badges, remainder } = resolveActionBadges(item.action, item.finalActionRule);
-                      return (
-                        <>
-                          {badges.map(({ action }) => (
-                            <Badge key={action} variant={actionToVariant(action)}>
-                              {localizeEnum(`filters.actions.${action}` as const, action)}
-                            </Badge>
-                          ))}
-                          {remainder > 0 && (
-                            <span className="text-[10px] text-muted-foreground">+{remainder}</span>
-                          )}
+                  {/* 方案 C：mixed + 有逐收件人明细时用 mini 堆叠色条（按 final_action 聚类），
+                      否则走原 badge 路径（单一动作展开） */}
+                  {item.action === 'mixed' && item.recipientDispositions && item.recipientDispositions.length > 0 ? (
+                    <RecipientStatusBadges dispositions={item.recipientDispositions} />
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-1">
+                      {(() => {
+                        const { badges, remainder } = resolveActionBadges(item.action, item.finalActionRule);
+                        return (
+                          <>
+                            {badges.map(({ action }) => (
+                              <Badge key={action} variant={actionToVariant(action)}>
+                                {localizeEnum(`filters.actions.${action}` as const, action)}
+                              </Badge>
+                            ))}
+                            {remainder > 0 && (
+                              <span className="text-[10px] text-muted-foreground">+{remainder}</span>
+                            )}
                         </>
                       );
                     })()}
-                  </div>
+                    </div>
+                  )}
                 </TableCell>
                 )}
                 {isColVisible('status') && (
                 <TableCell className="text-xs">
-                  <Badge variant={STATUS_VARIANTS[item.displayStatus] || 'outline'}>
-                    {t(`filters.statuses.${item.displayStatus}`)}
-                  </Badge>
+                  {/* 方案 C：mixed + 有逐收件人明细时用 status 维度的堆叠条，否则走原 Badge */}
+                  {item.action === 'mixed' && item.recipientDispositions && item.recipientDispositions.length > 0 ? (
+                    <RecipientStatusBadges dispositions={item.recipientDispositions} dimension="status" />
+                  ) : (
+                    <Badge variant={STATUS_VARIANTS[item.displayStatus] || 'outline'}>
+                      {t(`filters.statuses.${item.displayStatus}`)}
+                    </Badge>
+                  )}
                 </TableCell>
                 )}
                 <TableCell

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { mapMailLogToDisposalItem, mapToDisplayStatus, getDisposalList, type MailLogAPIItem } from './disposal-api';
+import { mapMailLogToDisposalItem, mapToDisplayStatus, getDisposalList, localDayBound, type MailLogAPIItem } from './disposal-api';
 
 function baseItem(overrides: Partial<MailLogAPIItem> = {}): MailLogAPIItem {
   return {
@@ -171,5 +171,60 @@ describe('getDisposalList - multi-value quick filter serialization', () => {
     const requestFn = vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, page_size: 100 });
     await getDisposalList({ page: 1, pageSize: 100, sortOrder: 'asc' }, requestFn);
     expect(String(requestFn.mock.calls[0][0])).toContain('sort_order=asc');
+  });
+});
+
+describe('localDayBound / date range params (GT-12633)', () => {
+  it('converts yyyy-MM-dd to local-timezone day bounds in RFC3339', () => {
+    const start = localDayBound('2026-07-29', false);
+    const end = localDayBound('2026-07-29', true);
+    // 断言换算语义而非具体时区：本地 00:00 与 23:59:59.999 的精确时刻。
+    expect(new Date(start).getTime()).toBe(new Date('2026-07-29T00:00:00.000').getTime());
+    expect(new Date(end).getTime()).toBe(new Date('2026-07-29T23:59:59.999').getTime());
+    // RFC3339 instant（Z 结尾），不再是裸日期。
+    expect(start).toMatch(/^\d{4}-\d{2}-\d{2}T.*Z$/);
+    // 起止界覆盖恰好一整天（含毫秒末端）。
+    expect(new Date(end).getTime() - new Date(start).getTime()).toBe(24 * 3600 * 1000 - 1);
+  });
+
+  it('passes non-date inputs through unchanged', () => {
+    expect(localDayBound('2026-07-29T10:00:00Z', false)).toBe('2026-07-29T10:00:00Z');
+    expect(localDayBound('', true)).toBe('');
+  });
+
+  it('getDisposalList sends converted RFC3339 day bounds, not bare dates', async () => {
+    const requestFn = vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, page_size: 20 });
+    await getDisposalList({ page: 1, pageSize: 20, startDate: '2026-07-29', endDate: '2026-07-29' }, requestFn);
+    const url = String(requestFn.mock.calls[0][0]);
+    const params = new URLSearchParams(url.split('?')[1]);
+    expect(params.get('start_date')).toBe(localDayBound('2026-07-29', false));
+    expect(params.get('end_date')).toBe(localDayBound('2026-07-29', true));
+    expect(params.get('start_date')).not.toBe('2026-07-29');
+  });
+});
+
+// GT-12353：审核队列/超时 worker 把审核项翻成终态后，后端现在会回写
+// mail_log.workflow_outcome_summary（此前只有邮件处置中心自己写，于是这类
+// 邮件在处置中心永远显示「待审核」、放行点了返回 not_applicable、召回恒灰）。
+// 前端必须认得这三种终态取值，否则回写了也白写——会继续落到
+// action==='audit' 的分支。
+describe('审核终态的展示映射 (GT-12353)', () => {
+  it('timeout_released 按已投递渲染，而不是继续显示待审核', () => {
+    expect(mapToDisplayStatus('audit', 'delivered', 'timeout_released')).toBe('delivered');
+    // 未拿到终端投递状态时按「投递中」，与 released/approved 同语义。
+    expect(mapToDisplayStatus('audit', undefined, 'timeout_released')).toBe('delivering');
+  });
+
+  it('approved 按已投递渲染', () => {
+    expect(mapToDisplayStatus('audit', 'delivered', 'approved')).toBe('delivered');
+  });
+
+  it('rejected_after_review 渲染为已驳回', () => {
+    expect(mapToDisplayStatus('audit', undefined, 'rejected_after_review')).toBe('reviewed_rejected');
+  });
+
+  it('终态缺失时仍显示待审核（这正是修复前的现象，必须保持可区分）', () => {
+    expect(mapToDisplayStatus('audit', undefined, 'none')).toBe('audit_pending');
+    expect(mapToDisplayStatus('audit', undefined, undefined)).toBe('audit_pending');
   });
 });

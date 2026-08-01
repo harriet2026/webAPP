@@ -36,6 +36,7 @@ import { Badge } from '@/components/ui/badge';
 import { ConditionTreeBuilder } from './ConditionTreeBuilder';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { RuleImportExportDialog } from './RuleImportExportDialog';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const routeRuleSchema = z.object({
   name: z.string().min(1, 'nameRequired'),
@@ -53,6 +54,7 @@ const defaultTree: RuleNode = {
 
 export function RouteRulesPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { effectiveTenantId, isSystemAdmin, isViewingAllTenants } = useTenant();
   const { apiRequest } = useApiRequest();
@@ -98,7 +100,7 @@ export function RouteRulesPage() {
       setDeleteId(null);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -109,7 +111,7 @@ export function RouteRulesPage() {
       toast.success(t('common.updateSuccess'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 

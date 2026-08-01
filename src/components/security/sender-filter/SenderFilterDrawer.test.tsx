@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { SenderFilterDrawer } from './SenderFilterDrawer';
 import type { SenderFilterGroups, SenderFilterRuleView } from '@/types/sender-filter';
@@ -7,6 +7,14 @@ import type { SenderFilterGroups, SenderFilterRuleView } from '@/types/sender-fi
 // `useTranslations()` with NO namespace and passes fully-qualified keys like
 // 'senderFilter.ruleName', so the mock returns the key as-is (never prefixed
 // with "undefined.") and appends any interpolation params.
+// GT-12693：抽屉改为按登录角色决定优先级可填范围（后端 validatePriority 对
+// tenant_admin 收窄到 100-1000），因此需要 auth 上下文。默认给平台管理员，
+// 保持这批既有用例原有的"全量范围"前提不变——角色相关的断言在
+// sender-filter-priority.test.tsx 里单独覆盖。
+vi.mock('@/contexts/auth-context', () => ({
+  useAuth: () => ({ isSystemAdmin: true }),
+}));
+
 vi.mock('next-intl', () => ({
   useTranslations: (namespace?: string) => (key: string, params?: Record<string, unknown>) => {
     const full = namespace ? `${namespace}.${key}` : key;
@@ -46,19 +54,36 @@ const domainRule = {
   is_complex: false,
 } as unknown as SenderFilterRuleView;
 
-describe('SenderFilterDrawer 组织域名下拉 (GT-12117)', () => {
-  it('domain 类型渲染租户域名下拉（不再是自由文本框）', () => {
+// GT-12665 取代了 GT-12117 的"只能从租户域名里选"：域名改为可自由输入的 combobox，
+// 租户接收域名退化为快捷建议，因此没有"租户无域名"的空态了。
+describe('SenderFilterDrawer 组织域名输入 (GT-12665)', () => {
+  it('domain 类型渲染可输入的 combobox，并把租户域名作为建议', () => {
     renderDrawer({ editingRule: domainRule, tenantDomains: ['corp.example.com', 'mail.example.org'] });
-    expect(screen.getByTestId('sender-filter-domain-select')).toBeInTheDocument();
-    expect(screen.queryByTestId('sender-filter-no-domains')).toBeNull();
-    // 不再有 domain 的自由文本输入（individual 的 placeholder 也不应出现在 domain 态）
+    const input = screen.getByTestId('sender-filter-domain-input');
+    expect(input).toBeInTheDocument();
+    // 建议列表默认收起，聚焦后展开
+    expect(screen.queryByTestId('sender-filter-domain-suggestions')).toBeNull();
+    fireEvent.focus(input);
+    // 建议按当前输入过滤：编辑态里已填 corp.example.com，故只剩它一条
+    expect(within(screen.getByTestId('sender-filter-domain-suggestions')).getByText('corp.example.com'))
+      .toBeInTheDocument();
+    // 清空输入后两条建议都回来
+    fireEvent.change(input, { target: { value: '' } });
+    const listbox = screen.getByTestId('sender-filter-domain-suggestions');
+    expect(within(listbox).getByText('corp.example.com')).toBeInTheDocument();
+    expect(within(listbox).getByText('mail.example.org')).toBeInTheDocument();
+    // 不应出现 individual 态的 placeholder
     expect(screen.queryByPlaceholderText('senderFilter.senderPlaceholder_individual')).toBeNull();
   });
 
-  it('租户无域名时显示空态提示，不渲染下拉', () => {
+  it('租户无域名时仍可自由输入外部域名，只是没有建议', () => {
     renderDrawer({ editingRule: domainRule, tenantDomains: [] });
-    expect(screen.getByTestId('sender-filter-no-domains')).toBeInTheDocument();
-    expect(screen.queryByTestId('sender-filter-domain-select')).toBeNull();
+    const input = screen.getByTestId('sender-filter-domain-input');
+    expect(input).toBeInTheDocument();
+    fireEvent.focus(input);
+    expect(screen.queryByTestId('sender-filter-domain-suggestions')).toBeNull();
+    fireEvent.change(input, { target: { value: 'partner.example.net' } });
+    expect(input).toHaveValue('partner.example.net');
   });
 });
 

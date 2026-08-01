@@ -39,6 +39,7 @@ import {
 import { useProductForm } from '@/contexts/product-form-context';
 import { FALLBACK_FEATURE_REGISTRY } from '@/lib/product-form/fallback-registry';
 import { visibleNavIds, isItemVisibleByForm } from '@/components/layout/sidebar-visibility';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const ACTION_COLS: PermAction[] = ['view', 'edit', 'approve', 'delete'];
 const ACTION_FIELD: Record<PermAction, keyof RolePermission> = {
@@ -78,6 +79,7 @@ export interface RoleDrawerProps {
  */
 export function RoleDrawer({ open, onOpenChange, scope, role, existingNames, onSaved }: RoleDrawerProps) {
   const t = useTranslations('users');
+  const apiErrorMessage = useApiErrorMessage();
   const tRoot = useTranslations();
   const createRole = useCreateRole();
   const updateRole = useUpdateRole();
@@ -171,7 +173,7 @@ export function RoleDrawer({ open, onOpenChange, scope, role, existingNames, onS
             onOpenChange(false);
             onSaved?.();
           },
-          onError: (e) => toast.error(e instanceof Error ? e.message : t('rbac.toast.saveFailed')),
+          onError: (e) => toast.error(apiErrorMessage(e, t('rbac.toast.saveFailed'))),
         },
       );
     } else {
@@ -183,7 +185,7 @@ export function RoleDrawer({ open, onOpenChange, scope, role, existingNames, onS
             onOpenChange(false);
             onSaved?.();
           },
-          onError: (e) => toast.error(e instanceof Error ? e.message : t('rbac.toast.saveFailed')),
+          onError: (e) => toast.error(apiErrorMessage(e, t('rbac.toast.saveFailed'))),
         },
       );
     }

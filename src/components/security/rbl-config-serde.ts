@@ -4,12 +4,19 @@ import type { RBLFilterRuleView, RBLFilterProductAction, RBLGreylistConfig } fro
 /** 本配置面板拥有的唯一 rbl_filter 规则。绝不触碰其他（用户自建）规则。 */
 export const RBL_CANONICAL_RULE_NAME = '__rbl_default__';
 
+/**
+ * 即时处置动作：reject / quarantine / review / discard。
+ * greylist 已从即时动作中分离，作为独立策略通过 greylistEnabled 控制。
+ */
+export type RblImmediateAction = 'reject' | 'quarantine' | 'review' | 'discard';
+
 export interface RblConfig {
   enabled: boolean;
   servers: string[];
   timeout: string; // 秒，字符串形式以适配输入控件
-  action: RBLFilterProductAction; // block | quarantine | mark | greylist
-  greylist?: RBLGreylistConfig; // 仅当 action 为 greylist 时设置
+  action: RblImmediateAction; // 即时处置动作：reject | quarantine | review | discard
+  greylistEnabled: boolean;   // 灰名单策略开关（独立于即时动作）
+  greylist?: RBLGreylistConfig; // 仅当 greylistEnabled 为 true 时有意义
 }
 
 export interface GreylistFormConfig {
@@ -93,7 +100,7 @@ export function findCanonicalRule(rules: RBLFilterRuleView[]): RBLFilterRuleView
 export function parseRblConfig(
   profiles: DetectionProfile[],
   rules: RBLFilterRuleView[],
-  fallback: { timeout: string; action: RBLFilterProductAction },
+  fallback: { timeout: string; action: RblImmediateAction },
 ): RblConfig {
   const servers = profiles.map((p) => p.name);
   let timeout = fallback.timeout;
@@ -105,6 +112,13 @@ export function parseRblConfig(
     }
   }
   const canonical = findCanonicalRule(rules);
+  // 若后端 action 为 greylist（旧数据兼容），转换为：action=reject + greylistEnabled=true
+  // 若后端 action 为旧的 block/mark（旧数据兼容），映射到新值
+  const rawAction = canonical?.product_action ?? fallback.action;
+  const isLegacyGreylist = (rawAction as string) === 'greylist';
+  const legacyMap: Record<string, RblImmediateAction> = { block: 'reject', mark: 'reject' };
+  const mappedAction = legacyMap[rawAction as string] ?? rawAction;
+  const action: RblImmediateAction = isLegacyGreylist ? 'reject' : (mappedAction as RblImmediateAction);
   return {
     // The global rbl_filter module is enabled independently by
     // ModuleMasterSwitch.  A missing canonical rule means this is the first
@@ -112,7 +126,8 @@ export function parseRblConfig(
     enabled: canonical?.is_active ?? true,
     servers,
     timeout,
-    action: canonical?.product_action ?? fallback.action,
+    action,
+    greylistEnabled: isLegacyGreylist || !!(canonical?.greylist),
     greylist: canonical?.greylist,
   };
 }
@@ -126,6 +141,7 @@ export interface RblSaveDiff {
   serversToAdd: string[];
   profileIdsToDelete: number[];
   profilesToRetime: number[];
+  /** 写入 API 的 product_action：greylistEnabled=true 时固定写 'greylist'，否则写即时动作 */
   action: RBLFilterProductAction;
   greylist?: RBLGreylistConfig;
   enabled: boolean;
@@ -143,5 +159,14 @@ export function diffRblConfig(
   const profilesToRetime = timeoutChanged
     ? profiles.filter((p) => draftSet.has(p.name)).map((p) => p.id)
     : [];
-  return { serversToAdd, profileIdsToDelete, profilesToRetime, action: draft.action, greylist: draft.greylist, enabled: draft.enabled };
+  // 灰名单开启时 API action 保持 'greylist'，关闭时使用即时动作值
+  const apiAction: RBLFilterProductAction = draft.greylistEnabled ? 'greylist' : draft.action;
+  return {
+    serversToAdd,
+    profileIdsToDelete,
+    profilesToRetime,
+    action: apiAction,
+    greylist: draft.greylistEnabled ? draft.greylist : undefined,
+    enabled: draft.enabled,
+  };
 }

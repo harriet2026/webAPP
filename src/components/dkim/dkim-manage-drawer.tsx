@@ -44,6 +44,7 @@ import {
 } from '@/lib/api/dkim';
 import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const SELECTOR_RE = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
 const DKIM_SETUP_DOC = 'https://github.com/your-org/osgateway/blob/master/doc/dkim-setup.md';
@@ -79,6 +80,7 @@ interface DkimManageDrawerProps {
 
 export function DkimManageDrawer({ open, onOpenChange, tenantId, domain }: DkimManageDrawerProps) {
   const t = useTranslations('dkim');
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
 
   const [genOpen, setGenOpen] = useState(false);
@@ -118,7 +120,7 @@ export function DkimManageDrawer({ open, onOpenChange, tenantId, domain }: DkimM
       setGenNote('');
       refresh();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const importMutation = useMutation({
@@ -132,7 +134,7 @@ export function DkimManageDrawer({ open, onOpenChange, tenantId, domain }: DkimM
       setImpNote('');
       refresh();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const verifyMutation = useMutation({
@@ -141,7 +143,7 @@ export function DkimManageDrawer({ open, onOpenChange, tenantId, domain }: DkimM
       toast.success(t(`dnsStatus.${res.dns_status}`));
       refresh();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const activateMutation = useMutation({
@@ -151,7 +153,7 @@ export function DkimManageDrawer({ open, onOpenChange, tenantId, domain }: DkimM
       setActivateTarget(null);
       refresh();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const deleteMutation = useMutation({
@@ -161,7 +163,7 @@ export function DkimManageDrawer({ open, onOpenChange, tenantId, domain }: DkimM
       setDeleteTarget(null);
       refresh();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const handleGenerate = () => {

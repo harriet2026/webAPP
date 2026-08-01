@@ -116,3 +116,19 @@ describe('buildDetectionStages - tag rules show suspicious', () => {
     expect(advanced.ruleIds).toEqual([402]);
   });
 });
+
+// GT-12575: 检测流程阶段顺序必须与安全策略流水线一致——阶段4=智能分析(ai)、
+// 阶段5=综合(comprehensive)。此前两者互换，详情页与策略页说法矛盾。
+describe('stage ordering aligns with policy pipeline (GT-12575)', () => {
+  it('assigns ai to stage 4 and comprehensive to stage 5', () => {
+    const stages = buildDetectionStages({
+      id: 1, action: 'accept',
+    } as unknown as MailLogDetail);
+    const byKey = Object.fromEntries(stages.map((s) => [s.key, s.stage]));
+    expect(byKey.connection).toBe(1);
+    expect(byKey.identity).toBe(2);
+    expect(byKey.content).toBe(3);
+    expect(byKey.ai).toBe(4);
+    expect(byKey.comprehensive).toBe(5);
+  });
+});

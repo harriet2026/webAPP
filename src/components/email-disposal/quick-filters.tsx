@@ -102,8 +102,9 @@ export function QuickFilters({
 
   // Single source of truth — defined in src/types/email-disposal.ts,
   // shared with the 安全总览 › 安全态势分析 action series.
-  // mark_deliver 仅在安全总览图表中展示，处置中心搜索条件不开放此过滤项。
-  const actions = EXECUTION_ACTIONS.filter((a) => a !== 'mark_deliver');
+  // GT-12659：mark_deliver 已从枚举里整条移除（其邮件并入 deliver），
+  // 这里不再需要额外过滤。
+  const actions = EXECUTION_ACTIONS;
   const directions = ["incoming", "outgoing", "internal"] as const;
   const mailTypes = [
     "normal",
@@ -160,14 +161,14 @@ export function QuickFilters({
   // 收发时间/收发类型/发信人/收信人同一行（QC UI04）。
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="disposal-quick-filters">
-          <div className="order-1 space-y-1">
-            {mounted && tenantSelector ? (
-              <>
-                <label className="text-xs text-muted-foreground">{t("tenantScope")}</label>
-                {tenantSelector}
-              </>
-            ) : null}
-          </div>
+          {mounted && tenantSelector ? (
+            <div className="order-1 space-y-1">
+              <label className="text-xs text-muted-foreground">
+                {t("tenantScope")}
+              </label>
+              {tenantSelector}
+            </div>
+          ) : null}
           <div className="order-2 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
               {t("sendReceiveTime")}

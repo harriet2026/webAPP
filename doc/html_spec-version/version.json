@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 4,
+  "current_version": 13,
   "history": [
     {
       "version": 1,
@@ -37,6 +37,87 @@
       "ticket": "GT-12649",
       "incremental": true,
       "summary": "文档规范修复：按技能规范重写目录（每个需求点使用完整名称作为主入口，子章节使用编号层级 1.1/1.2/…/4.3，尾部三项以 C/D/E 字母编号）；变更总览标题由"v2 新增 3 项"修正为"共 4 项需求"；各变更区块 incr-header 补充路由路径；批量修复文档中全部 UTF-8 replacement character 乱码（共 6 处：侧边栏底部、执行动作 ×2、审核、导航区域、平台管控策略）。"
+    },
+    {
+      "version": 5,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "ebec245",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12682",
+      "incremental": true,
+      "summary": "GT-12682-RBL优化 v1 初稿：新建 GT-126811.html，记录三个需求点目录结构（占位版，无真实截图）。"
+    },
+    {
+      "version": 6,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "ebec245",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12682",
+      "incremental": true,
+      "summary": "GT-12682-RBL优化 v2 完整重写：按 html-spec-PM-version 技能规范补充真实浏览器截图（S-1 默认态 / S-2 执行动作选中 / S-3 灰名单策略选中 / S-4 执行动作下拉展开，均为暗色主题 1305×832）；仅呈现最终实现方案；完善变更 #1 数据模型表（greylistEnabled + legacyMap）、变更 #2 RadioGroup 逐元素表、变更 #3 i18n key 变更全表；新增差异 D-001~D-003、待确认 Q-001~Q-002；乱码自检 CLEAN。"
+    },
+    {
+      "version": 7,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "6f7749d",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12660",
+      "incremental": true,
+      "summary": "GT-12660 增量：邮件安全总览执行动作图表移除"灰名单"系列（后端 key advanced_review）；追加一级目录条目 GT-12660、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-2 暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-004（key 排查过程记录）；目录 C 项编号更新为 D-001~D-004；version.json current_version 6→7。"
+    },
+    {
+      "version": 8,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "640e96f",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12659",
+      "incremental": true,
+      "summary": "GT-12659 增量：邮件处置中心搜索模块执行动作筛选移除"灰名单"（从 EXECUTION_ACTIONS 移除 advanced_review）；追加一级目录条目 GT-12659、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 下拉展开 7 项无灰名单，暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-005（EXECUTION_ACTIONS 共享事实源说明）；目录 C 项编号更新为 D-001~D-005；version.json current_version 7→8。"
+    },
+    {
+      "version": 9,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "bbe5bee",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12665",
+      "incremental": true,
+      "summary": "GT-12665 增量：发信人黑白名单域名类型输入控件由 Select（仅限租户接收域名）改为 DomainCombobox（可自由输入任意域名，focus 时展示租户接收域名建议列表）；追加一级目录条目 GT-12665、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-5 暗色 1253×832 / 1.3 逐元素变更表）；追加差异 D-006（noTenantDomains key 保留但不再渲染）；目录 C 项编号更新为 D-001~D-006；version.json current_version 8→9。"
+    },
+    {
+      "version": 10,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "54cb647",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12661",
+      "incremental": true,
+      "summary": "GT-12661 增量：从认证仿冒检测配置面板移除底部例外规则管理横幅（含前往策略流水线和查看当前例外两个无效按钮）；追加一级目录条目 GT-12661、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 底部无横幅，暗色 1253×832 / 1.3 逐元素变更表）；追加差异 D-007（ExceptionRulesEntry 组件文件保留为死代码）；目录 C 项编号更新为 D-001~D-007；version.json current_version 9→10。"
+    },
+    {
+      "version": 11,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "ede9867",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12657",
+      "incremental": true,
+      "summary": "GT-12657 增量：附件安全检测总开关从 draft 模式改为立即持久化（新增 handleToggleEnabled，调用 setSecurityModuleEnabled，失败回滚 + toast，切换期间 togglingEnabled 禁用开关）；追加一级目录条目 GT-12657、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 切换禁用即时生效无未保存提示 + S-3 切换启用即时生效无未保存提示，暗色 1253×832 / 1.3 逐元素变更表 5 项）；追加差异 D-008（moduleT saveFailed i18n key 复用确认）；目录 C 项编号更新为 D-001~D-008；version.json current_version 10→11。"
+    },
+    {
+      "version": 12,
+      "generated_at": "2026-07-31",
+      "webapp_commit": "d706c3d",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12587",
+      "incremental": true,
+      "summary": "GT-12587 增量：邮件安全总览攻击时段分布周内热力图修复（xAxis.data 由数字数组改为零填充字符串 ['00'~'23']，series data hour 同步转换，消除 ECharts category 类型不匹配导致的 24 列只渲染 7 列问题）；同步更新 yAxis.inverse、axisLabel.interval、图表高度（周内 280px）、tooltip formatter（显示小时区间）、visualMap 色阶（暗色对比度优化）；追加一级目录条目 GT-12587、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 日内分布默认态 + S-2 周内切换后 7×24 矩阵完整渲染 + S-3 完整视图，暗色 1253×832 / 1.3 逐元素变更表 7 项）；追加差异 D-009（weekdays 数组与后端 day 索引对应关系待确认）；目录 C 项编号更新为 D-001~D-009；version.json current_version 11→12。"
+    },
+    {
+      "version": 13,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "99410b4",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12563",
+      "incremental": true,
+      "summary": "GT-12563 搜索模板实现增量：追加一级目录条目「GT-12563 搜索模板实现」及变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-9 暗色 1253×832 / 1.3 逐元素变更表 9 项）；涵盖模板按钮 disabled 修复（始终 false）、SaveTemplateDialog 新建组件（保存/重命名复用）、同名覆盖警告（amber Warning + 按钮改为覆盖保存）、铅笔重命名按钮、应用确认 AlertDialog（有活跃条件时弹出）、SearchTemplate 类型扩展（aiQuery/updatedAt）、19 个新增 i18n key；追加差异 D-010（localStorage 跨设备不同步）；目录 C 项编号更新为 D-001~D-010；version.json current_version 12→13。"
     }
   ]
 }

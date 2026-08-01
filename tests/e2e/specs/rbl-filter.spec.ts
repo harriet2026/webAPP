@@ -44,21 +44,18 @@ test.describe('RBL Filter', () => {
     }
   });
 
-  test('greylist action exposes config dialog with all exemption options', async ({ authenticatedPage }) => {
+  test('greylist strategy exposes config dialog with all exemption options', async ({ authenticatedPage }) => {
     rblFilterPage = new RBLFilterPage(authenticatedPage);
     await rblFilterPage.gotoDirect();
     await rblFilterPage.expectLoaded();
     await rblFilterPage.openRBLCard();
 
-    const actionSelect = authenticatedPage
-      .locator('button[role="combobox"]')
-      .filter({ hasText: /阻断|隔离|标记|灰名单|block|quarantine|mark|greylist/i })
-      .first();
-    // The embedded pipeline card currently has an outer section that can
-    // intercept pointer clicks; exercise the same accessible select via keyboard.
-    await actionSelect.focus();
-    await actionSelect.press('Enter');
-    await authenticatedPage.getByRole('option', { name: /灰名单|greylist/i }).click();
+    // GT-12682：处置策略改为「执行动作 / 灰名单策略」两张互斥卡片（RadioGroup），
+    // 灰名单不再是执行动作下拉里的一项。选中灰名单卡片后才展开配置入口。
+    const greylistRadio = authenticatedPage.locator('#strategy-greylist');
+    await expect(greylistRadio).toBeVisible();
+    await greylistRadio.focus();
+    await greylistRadio.press('Space');
 
     const configureButton = authenticatedPage.getByRole('button', { name: /点击配置|configure/i });
     await configureButton.focus();

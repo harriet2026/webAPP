@@ -127,11 +127,29 @@ describe('TimeDistributionCard peak-hours ranking (GT-11983 / GT-11932)', () => 
     const chart = screen.getByTestId('time-distribution-echarts');
     const option = JSON.parse(chart.getAttribute('data-option') ?? '{}');
     expect(option.series[0].type).toBe('heatmap');
-    expect(option.series[0].data).toEqual([[9, 0, 12], [10, 1, 24]]);
-    expect(option.yAxis.inverse).toBe(true);
+    // GT-12587: x 值是补零的小时字符串，与 xAxis.data 的字符串类目严格相等匹配。
+    //
+    // 这条断言此前写的是 `toEqual([['09',0,12], ['10',1,24]])`，即"series 恰好
+    // 等于后端返回的那两个稀疏格子"——它把缺陷行为编码成了期望值：后端 weekly
+    // 分支不补零，热力图就只画出有数据的那几列，正是工单报的"只显示 7 列"。
+    // 现在改为断言完整的 7×24 网格，并单独校验那两个格子的取值，比原断言更强。
+    expect(option.series[0].data).toHaveLength(7 * 24);
+    const cellAt = (hour: string, day: number) =>
+      (option.series[0].data as [string, number, number][])
+        .find(([h, d]) => h === hour && d === day)?.[2];
+    expect(cellAt('09', 0)).toBe(12);
+    expect(cellAt('10', 1)).toBe(24);
+    // 没有数据的格子必须存在且为 0，而不是缺席——缺席就画不出列。
+    expect(cellAt('00', 0)).toBe(0);
+    expect(cellAt('23', 6)).toBe(0);
+    expect(option.xAxis.data[9]).toBe('09');
+    // GT-12587: 周日在最上方 → 不再反转 y 轴
+    expect(option.yAxis.inverse).toBe(false);
     expect(option.yAxis.data).toEqual(['周日', '周一', '周二', '周三', '周四', '周五', '周六']);
     const formatter = (lastChartOption.tooltip as { formatter: (params: unknown) => string }).formatter;
-    expect(formatter({ value: [10, 1, 24] })).toContain('周一');
+    // tooltip 现在展示「周一 10:00–11:00」的整段区间
+    expect(formatter({ value: ['10', 1, 24] })).toContain('周一');
+    expect(formatter({ value: ['10', 1, 24] })).toContain('10:00–11:00');
   });
 
   it('localizes weekday labels without forcing Chinese in other locales', () => {

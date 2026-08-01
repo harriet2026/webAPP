@@ -31,6 +31,7 @@ import {
 } from '@/types/group-policy';
 import { STAGE_POLICIES, findPolicy } from './stage-policies';
 import { RuleConfigDetail, STATUS_BADGE_COLOR, stageNumberForPolicy } from './rule-config-detail';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const QUERY_KEY = ['group-policies'] as const;
 
@@ -44,6 +45,7 @@ const TARGET_BADGE_COLOR: Record<keyof TargetGroups, string> = {
 
 export function GroupPolicyPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const tGp = useTranslations('groupPolicy');
   const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
@@ -85,7 +87,7 @@ export function GroupPolicyPage() {
       toast.success(tCommon('deleteSuccess'));
       setDeletingPolicy(null);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const toggleMutation = useMutation({
@@ -94,7 +96,7 @@ export function GroupPolicyPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const targetGroupBadges = (rule: GroupPolicyRule) =>

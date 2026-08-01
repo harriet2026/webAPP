@@ -13,9 +13,11 @@ import { useApiRequest, ApiError } from '@/lib/api/client';
 import { spoofingQueryKeys } from './spoofing-query-keys';
 import { listSpoofWhitelist, createSpoofWhitelist, deleteSpoofWhitelist } from '@/lib/api/spoofing-detection';
 import { useSpoofingAccess } from './spoofing-access';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export function SpoofingWhitelistPanel({ auditOnly = false }: { auditOnly?: boolean }) {
   const tsd = useTranslations('spoofingDetection');
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest, effectiveTenantId } = useApiRequest();
   const { canEdit } = useSpoofingAccess();
   const qc = useQueryClient();
@@ -31,7 +33,7 @@ export function SpoofingWhitelistPanel({ auditOnly = false }: { auditOnly?: bool
     onSuccess: () => { setValue(''); invalidate(); toast.success(tsd('whitelist.add')); },
     onError: (e) => {
       if (e instanceof ApiError && e.status === 409) { toast.error(tsd('whitelist.errDup')); return; }
-      toast.error(e instanceof Error ? e.message : 'error');
+      toast.error(apiErrorMessage(e, 'error'));
     },
   });
   const delMutation = useMutation({

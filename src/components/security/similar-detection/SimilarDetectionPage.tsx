@@ -36,6 +36,7 @@ import { Loader2, Save, AlertTriangle, Info, ExternalLink, Mail, Send, Building2
 import { DirectionCard } from './DirectionCard';
 import { AggregateCard } from './AggregateCard';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 // 方向短名 i18n key（复选行用）
 const DIR_LABEL_KEY: Record<SimilarDetectionDirection, string> = {
@@ -68,6 +69,7 @@ const NORMALIZATION_FIELDS: ReadonlyArray<{ field: keyof SubjectNormalization; l
 
 export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: boolean; onDirtyChange?: (dirty: boolean) => void } = {}) {
   const t = useTranslations('similarDetection');
+  const apiErrorMessage = useApiErrorMessage();
   const tc = useTranslations('common');
   const { apiRequest } = useApiRequest();
 
@@ -85,7 +87,7 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
         if (!cancelled) setConfig(cfg);
       })
       .catch((err) => {
-        if (!cancelled) toast.error(err instanceof Error ? err.message : String(err));
+        if (!cancelled) toast.error(apiErrorMessage(err, String(err)));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -206,7 +208,7 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
           setDirty(false);
         } catch { /* ignore */ }
       } else {
-        toast.error(e instanceof Error ? e.message : String(e));
+        toast.error(apiErrorMessage(e, String(e)));
       }
     } finally {
       setSaving(false);
@@ -220,7 +222,7 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
         setConfig(cfg);
         setDirty(false);
       })
-      .catch((err) => toast.error(err instanceof Error ? err.message : String(err)))
+      .catch((err) => toast.error(apiErrorMessage(err, String(err))))
       .finally(() => setLoading(false));
   }, [apiRequest]);
 

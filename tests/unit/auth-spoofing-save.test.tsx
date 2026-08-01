@@ -65,9 +65,6 @@ vi.mock('@/components/security/auth-spoofing/DisplayNameSpoofSection', () => ({
   DisplayNameSpoofSection: () => null,
 }));
 
-vi.mock('@/components/security/auth-spoofing/ExceptionRulesEntry', () => ({
-  ExceptionRulesEntry: () => null,
-}));
 
 const mockConfig = {
   format_checks: {

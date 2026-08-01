@@ -29,10 +29,11 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import type { ApiRequestFn } from '@/lib/api/client';
+import { useAuth } from '@/contexts/auth-context';
 import type { EmailType, ObjectDisposeResult, RecipientDisposition } from '@/types/email-disposal-detail';
 import { recipientActionsForStatus } from '../lib/detail-helpers';
 import {
-  addSenderFilterRule, disposeByObject, disposeObjectAction, notifyRecipient,
+  addSenderFilterRule, disposalRulePriority, disposeByObject, disposeObjectAction, notifyRecipient,
 } from '../lib/disposal-detail-api';
 import { recallMails } from '../lib/disposal-api';
 import { ReclassifyDialog } from '../components/reclassify-dialog';
@@ -145,6 +146,7 @@ export function useRecipientDisposition({
   recipient_dispositions, mailLogId, sender, apiRequest, onDisposed, onSettled,
 }: UseRecipientDispositionArgs) {
   const t = useTranslations('emailDisposal.detail.overview');
+  const { isSystemAdmin } = useAuth();
 
   const groups = useMemo(
     () => groupRecipientDispositions(recipient_dispositions ?? []),
@@ -471,7 +473,7 @@ export function useRecipientDisposition({
         let ruleOk = true;
         if (action === 'deliver' && whitelistSender && succeeded > 0) {
           try {
-            await addSenderFilterRule(sender, 'whitelist', apiRequest);
+            await addSenderFilterRule(sender, 'whitelist', apiRequest, disposalRulePriority(isSystemAdmin));
           } catch {
             ruleOk = false;
             toast.warning(t('rulePartialFail'));

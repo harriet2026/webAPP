@@ -67,10 +67,10 @@ export function MapKeySelect({ mapSource, value, onChange, placeholder = 'Select
       </SelectTrigger>
       <SelectContent>
         {items.map((item) => {
-          const id = String(item.id ?? item.name ?? '')
-          const label = item.name ?? item.label ?? id
+          const key = mapKeyForItem(mapSource, item)
+          const label = item.name ?? item.label ?? key
           return (
-            <SelectItem key={id} value={id}>
+            <SelectItem key={key} value={key}>
               {label}
             </SelectItem>
           )
@@ -78,4 +78,20 @@ export function MapKeySelect({ mapSource, value, onChange, placeholder = 'Select
       </SelectContent>
     </Select>
   )
+}
+
+// GT-12685：不同 mapSource 的键形态不同，不能一律取 item.id。
+//
+// - /unified-rules/_meta/groups 与 _meta/feature-groups：后端刻意把 id 设成
+//   tag（grp:<名>），引擎也按该 tag 建键，直接用 id 即可。
+// - /detection-profiles：id 是**数据库主键**，而引擎历来按档案名建键 ——
+//   两边对不上会让规则保存成功却恒不命中（rule_eval 取不到值就落 isNull
+//   分支），且列表健康度看不出异常。引擎现同时写 profid:<id> 别名
+//   （precompute.go markProfileIDKey），这里就存这个无歧义形态。
+function mapKeyForItem(mapSource: string, item: MapKeyItem): string {
+  const rawID = item.id == null ? '' : String(item.id)
+  if (mapSource.includes('/detection-profiles') && rawID !== '') {
+    return `profid:${rawID}`
+  }
+  return rawID || String(item.name ?? '')
 }

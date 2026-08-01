@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Search, Loader2, AlertCircle } from 'lucide-react';
 import { useApiRequest } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
-import { getMailLogDetail, getMailLogEvents } from './lib/disposal-detail-api';
+import { getMailLifecycleLogs, getMailLogDetail, getMailLogEvents } from './lib/disposal-detail-api';
 import { OverviewSection } from './sections/overview-section';
 import { AnalysisSection } from './sections/analysis-section';
 import { RawLogsSection } from './sections/raw-logs-section';
@@ -36,6 +36,7 @@ type SectionKey = 'overview' | 'analysis' | 'rawlogs';
 // otherwise spin the loading state forever instead of switching to the
 // inline error+retry UI spec §6.1 requires after >5s.
 const DETAIL_FETCH_TIMEOUT_MS = 5000;
+const RAW_LOG_FETCH_TIMEOUT_MS = 15000;
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -45,6 +46,10 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
       (err) => { clearTimeout(timer); reject(err); },
     );
   });
+}
+
+function rawLogSearchSignal(signal: AbortSignal): AbortSignal {
+  return AbortSignal.any([signal, AbortSignal.timeout(RAW_LOG_FETCH_TIMEOUT_MS)]);
 }
 
 export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEnabled = true, aiInterpretEnabled = true, readOnly = false }: DetailModalProps) {
@@ -70,6 +75,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     rawlogs: null,
   });
   const [activeSection, setActiveSection] = useState<SectionKey>('overview');
+  const [rawLogsExpanded, setRawLogsExpanded] = useState(false);
 
   // Reset to the overview section whenever the drawer (re)opens for a mail log,
   // including reopening for the same id. Adjusting state during render (the
@@ -79,7 +85,10 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
   const [lastResetKey, setLastResetKey] = useState(resetKey);
   if (resetKey !== lastResetKey) {
     setLastResetKey(resetKey);
-    if (open) setActiveSection('overview');
+    if (open) {
+      setActiveSection('overview');
+      setRawLogsExpanded(false);
+    }
   }
 
   const detailQ = useQuery({
@@ -92,8 +101,24 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     queryFn: () => withTimeout(getMailLogEvents(mailLogId!, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
     enabled: open && mailLogId != null,
   });
+  const lifecycleLogsQ = useQuery({
+    queryKey: ['mail-lifecycle-logs', mailLogId],
+    queryFn: ({ signal }) => getMailLifecycleLogs(mailLogId!, apiRequest, rawLogSearchSignal(signal)),
+    // Disk-backed lifecycle collection can fan out to every gateway node.
+    // Keep it completely lazy: merely opening the detail drawer must not
+    // trigger that work.
+    enabled: open && mailLogId != null && rawLogsExpanded,
+  });
 
   const detail = detailQ.data ?? null;
+
+  // Collapse/close may happen while a multi-node grep is still in flight.
+  // Abort it promptly instead of letting an invisible search consume node
+  // I/O until the server deadline.
+  useEffect(() => {
+    if ((open && rawLogsExpanded) || mailLogId == null) return;
+    void queryClient.cancelQueries({ queryKey: ['mail-lifecycle-logs', mailLogId] });
+  }, [open, rawLogsExpanded, mailLogId, queryClient]);
 
   // A dispose action taken from inside the drawer (release/discard/recall via
   // RecipientStatus) must refresh BOTH the drawer's own detail/events queries
@@ -104,6 +129,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
   const handleDisposed = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ['mail-log-detail', mailLogId] });
     void queryClient.invalidateQueries({ queryKey: ['mail-log-events', mailLogId] });
+    void queryClient.invalidateQueries({ queryKey: ['mail-lifecycle-logs', mailLogId] });
     void queryClient.invalidateQueries({ queryKey: ['email-disposal'] });
   }, [queryClient, mailLogId]);
 
@@ -265,8 +291,19 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                   ref={(el) => { sectionRefs.current.rawlogs = el; }}
                   className="scroll-mt-4"
                 >
-                  <h3 className="text-base font-semibold mb-2">{t('originalLog')}</h3>
-                  <RawLogsSection detail={detail} />
+                  <RawLogsSection
+                    key={detail.id}
+                    detail={detail}
+                    expanded={rawLogsExpanded}
+                    onExpandedChange={setRawLogsExpanded}
+                    loaded={lifecycleLogsQ.isSuccess}
+                    logs={lifecycleLogsQ.data?.items ?? []}
+                    truncated={lifecycleLogsQ.data?.truncated ?? false}
+                    partial={lifecycleLogsQ.data?.partial ?? false}
+                    failedNodes={lifecycleLogsQ.data?.failed_nodes ?? []}
+                    loading={lifecycleLogsQ.isFetching}
+                    error={lifecycleLogsQ.isError}
+                  />
                 </section>
               </div>
             </div>

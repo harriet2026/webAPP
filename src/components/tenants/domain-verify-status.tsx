@@ -13,6 +13,7 @@ import { verifyDomainDNS, verifyDomainManual } from '@/lib/api/tenants';
 import { useProductForm } from '@/contexts/product-form-context';
 import type { TenantDomain } from '@/types/tenant';
 import { formatDate } from '@/lib/utils';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface DomainVerifyStatusProps {
   tenantId: number;
@@ -21,6 +22,7 @@ interface DomainVerifyStatusProps {
 
 export function DomainVerifyStatus({ tenantId, domain }: DomainVerifyStatusProps) {
   const t = useTranslations('tenants');
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { capabilities, viewer } = useProductForm();
   const [confirmManual, setConfirmManual] = useState(false);
@@ -43,7 +45,7 @@ export function DomainVerifyStatus({ tenantId, domain }: DomainVerifyStatusProps
         toast.info(t('verify.toastPending'));
       }
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(apiErrorMessage(error)),
   });
 
   const manualMutation = useMutation({
@@ -53,7 +55,7 @@ export function DomainVerifyStatus({ tenantId, domain }: DomainVerifyStatusProps
       toast.success(t('verify.toastManual'));
       setConfirmManual(false);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(apiErrorMessage(error)),
   });
 
   // Non-SaaS: domains are auto-verified server-side; render only a muted hint.

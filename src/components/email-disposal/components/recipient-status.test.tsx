@@ -12,6 +12,12 @@ import { RecipientStatus } from './recipient-status';
 // tenant-selector.test.tsx's simpler identity-mock, extended with param
 // interpolation since recipientStatus.bulkResult/selected use {n}/{success}/
 // {failed} placeholders).
+// GT-12628: SenderActions/useRecipientDisposition 现从 useAuth 取角色决定
+// 规则 priority（tenant_admin 上限 1000），测试按平台管理员形态 mock。
+vi.mock('@/contexts/auth-context', () => ({
+  useAuth: () => ({ isSystemAdmin: true }),
+}));
+
 vi.mock('next-intl', () => ({
   useTranslations: (namespace: string) => (key: string, params?: Record<string, unknown>) => (
     params ? `${namespace}.${key}:${JSON.stringify(params)}` : `${namespace}.${key}`
@@ -23,6 +29,8 @@ vi.mock('sonner', () => ({
 }));
 
 vi.mock('../lib/disposal-detail-api', () => ({
+  // 真实实现（GT-12601/GT-12628）：按角色给 5000/1000，mock 同语义。
+  disposalRulePriority: (isSystemAdmin: boolean) => (isSystemAdmin ? 5000 : 1000),
   addSenderFilterRule: vi.fn(),
   disposeByObject: vi.fn(),
   // RA-5: 隔离/阻断's own dispatch path (dispatchQuarantineOrBlock in

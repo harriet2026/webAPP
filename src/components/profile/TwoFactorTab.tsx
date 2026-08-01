@@ -22,9 +22,11 @@ import { toast } from 'sonner';
 import { use2FA, useEnable2FA, useDisable2FA, useSendCode } from './api';
 import type { TwoFactorMethod } from './types';
 import { isPhone, isEmail } from './password-rules';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export function TwoFactorTab() {
   const t = useTranslations('profile');
+  const apiErrorMessage = useApiErrorMessage();
   const tc = useTranslations('common');
   const { data: config, isLoading } = use2FA();
   const enable2FA = useEnable2FA();
@@ -84,7 +86,7 @@ export function TwoFactorTab() {
       startCountdown();
       toast.success(t('twoFactor.codeSent'));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : tc('error'));
+      toast.error(apiErrorMessage(e, tc('error')));
     }
   };
 

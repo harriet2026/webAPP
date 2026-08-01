@@ -33,6 +33,11 @@ export class ApiError extends Error {
   // "edit this on the primary" copy (see replicaReadOnlyMessage).
   isReplicaReadOnly?: boolean;
   primaryAddr?: string;
+  // GT-12606：后端的**稳定错误码 + 结构化参数**。前端据此按 locale 渲染文案，
+  // 不再拿英文 message 做子串匹配（后端润色一个字就静默失配，且没有任何测试会红）。
+  // 见 design/implement/spec/2026-08-01-api-error-code-params-design.md。
+  code?: string;
+  params?: Record<string, unknown>;
 
   constructor(public status: number, message: string, body: Record<string, unknown> = {}) {
     super(message);
@@ -47,6 +52,16 @@ export class ApiError extends Error {
       typeof errField === 'object' && errField !== null
         ? (errField as { code?: unknown }).code
         : undefined;
+    if (typeof code === 'string' && code !== '') {
+      this.code = code;
+    }
+    const rawParams =
+      typeof errField === 'object' && errField !== null
+        ? (errField as { params?: unknown }).params
+        : undefined;
+    if (typeof rawParams === 'object' && rawParams !== null) {
+      this.params = rawParams as Record<string, unknown>;
+    }
     if (status === 403 && code === 'replica_readonly') {
       this.isReplicaReadOnly = true;
       this.primaryAddr = typeof body.primary_addr === 'string' ? body.primary_addr : undefined;

@@ -79,6 +79,7 @@ import {
 } from './rule-mapping';
 import type { OutboundChannelRow, OutboundProxyRow } from './outbound-types';
 import { CompactConditionEditor } from './compact-condition-editor';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface RuleStepProps {
   tenantId: number;
@@ -317,6 +318,7 @@ function isPublicIPv4(host: string): boolean {
 
 export function RuleStep({ tenantId, channels, proxies }: RuleStepProps) {
   const t = useTranslations('mailRouting.outbound.rule');
+  const apiErrorMessage = useApiErrorMessage();
   const tRcpt = useTranslations('mailRouting.relay.fields');
   const tIntent = useTranslations('intentEngine');
   const ts = useTranslations('mailRouting.shared');
@@ -475,7 +477,7 @@ export function RuleStep({ tenantId, channels, proxies }: RuleStepProps) {
       closeDrawer();
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const handleSave = () => {
@@ -493,7 +495,7 @@ export function RuleStep({ tenantId, channels, proxies }: RuleStepProps) {
       setDeleteTarget(null);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const runSimulate = () => {

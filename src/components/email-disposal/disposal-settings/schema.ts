@@ -10,7 +10,7 @@ const timeRe = /^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/;
 
 const permissionSchema = z.object({
   enabled: z.boolean(),
-  valid_days: z.number().int().min(1).max(365),
+  valid_days: z.number().int().min(1).max(30),
 });
 
 const categoryNotifyEntrySchema = z.object({

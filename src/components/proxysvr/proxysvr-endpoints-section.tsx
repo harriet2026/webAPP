@@ -22,6 +22,7 @@ import {
   deleteProxysvrEndpoint,
 } from '@/lib/api/proxysvr';
 import type { ProxysvrEndpoint, ProxysvrEndpointRequest } from '@/types/proxysvr';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface EndpointForm {
   name: string;
@@ -45,6 +46,7 @@ const emptyForm: EndpointForm = {
 
 export function ProxysvrEndpointsSection() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
 
@@ -68,7 +70,7 @@ export function ProxysvrEndpointsSection() {
       toast.success(t('common.deleteSuccess'));
       setDeleteId(null);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(apiErrorMessage(error)),
   });
 
   const openDialog = (ep?: ProxysvrEndpoint) => {
@@ -118,7 +120,7 @@ export function ProxysvrEndpointsSection() {
       queryClient.invalidateQueries({ queryKey });
       setDialogOpen(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     } finally {
       setIsSubmitting(false);
     }

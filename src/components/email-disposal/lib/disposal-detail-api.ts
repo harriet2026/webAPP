@@ -4,7 +4,12 @@ import { API_BASE } from '@/lib/api/client';
 import { getTenantHeader } from '@/lib/api/logs';
 import { createUnifiedRule } from '@/lib/api/unified-rules';
 import { bulkDispose } from './disposal-api';
-import type { MailLogDetail, MailChildEvent, ObjectDisposeResult } from '@/types/email-disposal-detail';
+import type {
+  MailLogDetail,
+  MailChildEvent,
+  MailLifecycleLogsResponse,
+  ObjectDisposeResult,
+} from '@/types/email-disposal-detail';
 import type { BulkDisposeResponse } from '@/types/email-disposal';
 import type { EmailPreviewResponse } from '@/types/email-preview';
 
@@ -131,6 +136,25 @@ export async function getMailLogEvents(
   return resp.items ?? [];
 }
 
+export async function getMailLifecycleLogs(
+  id: number,
+  requestFn: ApiRequestFn,
+  signal?: AbortSignal,
+): Promise<MailLifecycleLogsResponse> {
+  const resp = await requestFn<MailLifecycleLogsResponse>(
+    `/mail-logs/${id}/lifecycle-logs`,
+    { signal },
+  );
+  return {
+    items: resp.items ?? [],
+    total: resp.total ?? 0,
+    truncated: resp.truncated ?? false,
+    partial: resp.partial ?? false,
+    searched_nodes: resp.searched_nodes ?? [],
+    failed_nodes: resp.failed_nodes ?? [],
+  };
+}
+
 export async function disposeOne(
   id: number,
   action: 'release' | 'delete',
@@ -233,10 +257,16 @@ export interface AddSenderFilterRuleOptions {
   includeSubdomains?: boolean;
 }
 
+// GT-12628 真实数据验证发现：此处硬编码 priority 5000 会让租户管理员创建
+// 一律 400（后端 validatePriority 对 tenant_admin 强制 100-1000，实测
+// "tenant admin priority must be between 100 and 1000"）——与 GT-12601 修过
+// 的 addUrlRule/addAttachmentHashRule 同族，发信人路径当时被漏掉。priority
+// 由调用方经 disposalRulePriority(isSystemAdmin) 按角色传入。
 export async function addSenderFilterRule(
   sender: string,
   kind: 'whitelist' | 'blacklist',
   requestFn: ApiRequestFn,
+  priority: number,
   opts?: AddSenderFilterRuleOptions,
 ): Promise<void> {
   const domain = sender.includes('@') ? sender.slice(sender.indexOf('@') + 1) : sender;
@@ -253,7 +283,7 @@ export async function addSenderFilterRule(
       rule_class: 'action',
       stage: 'rcpt',
       action: kind === 'whitelist' ? 'accept' : 'reject',
-      priority: 5000,
+      priority,
       condition_tree: conditionTree,
       metadata: opts?.scope ? { feature: 'sender_filter', scope: opts.scope } : { feature: 'sender_filter' },
       is_active: true,

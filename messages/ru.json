@@ -752,6 +752,9 @@
     },
     "relay": {
       "searchPlaceholder": "Поиск по названию правила…",
+      "masterSwitch": "Главный переключатель правил",
+      "masterSwitchOff": "Главный переключатель правил выключен. Ни одно правило ретрансляции сейчас не действует. Обратитесь к системному администратору.",
+      "masterSwitchOffActionable": "Главный переключатель правил выключен. Ни одно правило ретрансляции сейчас не действует. Включите его, чтобы применять правила при SMTP-допуске.",
       "columns": {
         "priority": "Приоритет",
         "sourceIp": "IP источника",
@@ -826,6 +829,8 @@
         "created": "Правило пересылки добавлено",
         "updated": "Правило пересылки обновлено",
         "deleted": "Правило пересылки удалено",
+        "masterSwitchEnabled": "Главный переключатель правил ретрансляции включён",
+        "masterSwitchDisabled": "Главный переключатель правил ретрансляции выключен",
         "saveError": "Исправьте ошибки проверки в форме"
       },
       "deleteDialogTitle": "Удалить правило пересылки «{name}»?",
@@ -2512,8 +2517,8 @@
       "create": "Create",
       "import": "Import",
       "update": "Update",
-      "delete": "Delete",
-      "deleteItem": "Delete item",
+      "delete": "Удаление",
+      "deleteItem": "Удаление записи",
       "reject": "Reject",
       "block": "Block",
       "approve": "Approve",
@@ -2529,8 +2534,8 @@
     },
     "stats": {
       "total": "Total",
-      "success": "Success",
-      "failed": "Failed"
+      "success": "Успешно",
+      "failed": "Неуспешно"
     },
     "layer": {
       "platform": "Операция уровня платформы",
@@ -2832,12 +2837,12 @@
     "addMember": "Add member proxy server",
     "noMoreEndpoints": "No more proxy servers to add",
     "membersEmptyHint": "Add at least one proxy server; order is the failover order (top first).",
-    "createEndpoint": "New proxy server",
+    "createEndpoint": "Новый прокси-сервер",
     "editEndpoint": "Edit proxy server",
-    "deleteEndpoint": "Delete proxy server",
-    "createGroup": "New group",
+    "deleteEndpoint": "Удалить прокси-сервер",
+    "createGroup": "Новая группа",
     "editGroup": "Edit group",
-    "deleteGroup": "Delete group",
+    "deleteGroup": "Удалить группу",
     "endpointRequiredFields": "Name, host and License ID are required",
     "groupNameRequired": "Group name is required",
     "groupMembersRequired": "Add at least one member proxy server",
@@ -2932,7 +2937,7 @@
   "investigations": {
     "title": "Investigations",
     "description": "Launch and monitor LLM-driven investigation tasks, then review verdicts, evidence, execution steps, and suggested follow-up actions.",
-    "createTitle": "New investigation",
+    "createTitle": "Новое расследование",
     "createDescription": "Start an investigation from a mail log. The UI currently exposes the agent types that are already implemented end-to-end.",
     "createSuccess": "Investigation created",
     "launch": "Launch investigation",
@@ -2949,7 +2954,7 @@
     "copyLink": "Copy link",
     "copiedLink": "Copied",
     "copyLinkSuccess": "Investigation link copied",
-    "copyLinkFailed": "Failed to copy investigation link",
+    "copyLinkFailed": "Не удалось скопировать ссылку на расследование",
     "prefillRuleInvalid": "Unable to load prefilled rule request",
     "prefillRuleBanner": "This rule draft was prefilled from an investigation candidate. Review the condition tree and action before saving.",
     "ruleCreatedReturnSuccess": "Rule created and linked back to this investigation",
@@ -2959,13 +2964,13 @@
     "autoRefreshing": "Auto refresh",
     "pendingSummary": "The task was created and is waiting for results.",
     "notAvailable": "N/A",
-    "targetIdRequired": "Enter at least one target identifier",
+    "targetIdRequired": "Укажите хотя бы один идентификатор цели",
     "targetMailLogPlaceholder": "For example: 1024",
     "targetMailBatchPlaceholder": "For example: 1024, 1025, 1031",
     "targetAccountPlaceholder": "For example: alice@corp.local",
     "targetClusterPlaceholder": "For example: cac_tid:abc123 or 1024,1025",
     "targetMailHelp": "Use a single mail log ID.",
-    "targetMailBatchHelp": "Enter multiple mail log IDs separated by commas, spaces, or new lines.",
+    "targetMailBatchHelp": "Укажите несколько идентификаторов записей почты через запятую, пробел или с новой строки",
     "targetAccountHelp": "Use one account identifier such as an SMTP username or sender address.",
     "targetClusterHelp": "Use a cluster key like cac_tid:abc123, or provide a group of mail log IDs.",
     "createdByPlaceholder": "Filter by creator",
@@ -3175,8 +3180,8 @@
       "pending": "Pending",
       "running": "Running",
       "completed": "Completed",
-      "failed": "Failed",
-      "cancelled": "Cancelled"
+      "failed": "Неуспешно",
+      "cancelled": "Отменено"
     },
     "severities": {
       "low": "Low",
@@ -3187,7 +3192,7 @@
       "pending": "Pending",
       "running": "Running",
       "completed": "Completed",
-      "failed": "Failed",
+      "failed": "Неуспешно",
       "skipped": "Skipped"
     },
     "stepNames": {
@@ -3248,7 +3253,7 @@
       "rejected": "Rejected",
       "quarantined": "Quarantined",
       "sidelined": "Sidelined",
-      "failed": "Failed"
+      "failed": "Неуспешно"
     },
     "types": {
       "phish_analysis": "Phishing analysis",
@@ -3268,9 +3273,9 @@
       "pending": "Pending",
       "running": "Running",
       "completed": "Completed",
-      "failed": "Failed",
+      "failed": "Неуспешно",
       "needs_approval": "Needs approval",
-      "cancelled": "Cancelled"
+      "cancelled": "Отменено"
     },
     "risks": {
       "low": "Low",
@@ -3887,9 +3892,10 @@
     "matchModeSpecific": "Конкретные серверы",
     "matchServers": "Серверы совпадения",
     "productAction": "Действие",
-    "actionBlock": "Блокировать",
+    "actionReject": "Отклонить",
     "actionQuarantine": "Карантин",
-    "actionMark": "Пометить (добавить заголовок)",
+    "actionReview": "Проверка",
+    "actionDiscard": "Удалить",
     "actionGreylist": "Серый список",
     "comingSoon": "Скоро",
     "priority": "Приоритет",
@@ -3919,9 +3925,10 @@
     "serverTipZenSpamhaus": "Комбинированный черный список Spamhaus: включает SBL, XBL, PBL и другие подсписки, широкий охват.",
     "serverTipBlSpamcop": "Черный список SpamCop на основе IP-адресов источников спама, о которых сообщили пользователи.",
     "serverTipBarracuda": "Черный список Barracuda в реальном времени, поддерживается сетью безопасности Barracuda.",
-    "actionBlockTip": "Немедленно отклонить соединение с ошибкой 5xx. Для сценариев высокого риска; возможны ложные блокировки.",
+    "actionRejectTip": "Немедленно отклонить соединение с ошибкой 5xx. Для сценариев высокого риска; возможны ложные блокировки.",
     "actionQuarantineTip": "Поместить письмо в карантин для проверки администратором. Баланс безопасности и доступности.",
-    "actionMarkTip": "Добавить заголовок X-RBL-Hit и продолжить последующие проверки. Самый мягкий вариант, удобен для статистики.",
+    "actionReviewTip": "Направить письмо в очередь ручной проверки для решения администратором. Подходит для пограничных случаев.",
+    "actionDiscardTip": "Молча удалить письмо без уведомления отправителя. Использовать только при полной уверенности в спаме.",
     "actionGreylistTip": "Временно отклонить первое соединение и потребовать повтор. Эффективно против ботнетов, но задерживает обычную почту.",
     "timeoutRangeError": "Тайм-аут должен быть от 1 до 30 секунд",
     "serverRequired": "Добавьте хотя бы один RBL-сервер",
@@ -3929,6 +3936,13 @@
     "serverExists": "Этот сервер уже существует",
     "serverReferenced": "Сервер используется в {count} правил(е/ах) и не может быть удалён",
     "loadError": "Не удалось загрузить конфигурацию RBL",
+    "disposalStrategyTitle": "Стратегия обработки",
+    "disposalStrategyDesc": "Выберите способ обработки писем при совпадении с RBL. Две стратегии являются взаимоисключающими.",
+    "actionSectionTitle": "Действие при срабатывании",
+    "actionSectionDesc": "Немедленное действие, применяемое к письму при совпадении с RBL.",
+    "greylistSectionTitle": "Политика серого списка",
+    "greylistSectionDesc": "Временно откладывать неизвестных отправителей и требовать повторной попытки для проверки личности. Эффективно против ботнетов.",
+    "greylistEnabled": "Включить политику серого списка",
     "greylistConfig": "Настройка серого списка",
     "greylistConfigDesc": "Настройте серый список, чтобы фильтровать спам и снижать ложные срабатывания.",
     "greylistConfigure": "Настроить",
@@ -4054,8 +4068,7 @@
       "nameRequired": "Название правила не может быть пустым",
       "nameMaxLength": "Название не более 50 символов",
       "descriptionMaxLength": "Описание не более 200 символов",
-      "priorityMin": "Приоритет не менее 1",
-      "priorityMax": "Приоритет не более 9999",
+      "priorityRange": "Приоритет должен быть от {min} до {max}",
       "whitelistModeRequired": "Выберите режим белого списка",
       "invalidEmail": "Введите действительный адрес эл. почты",
       "invalidDomain": "Введите действительный домен",
@@ -4307,14 +4320,6 @@
       "dmarc_quarantineDesc": "Домен отправителя требует помещать в карантин письма, не прошедшие проверку",
       "dmarc_none": "p=none",
       "dmarc_noneDesc": "Домен отправителя только отслеживает, без принудительных мер",
-      "ptr_norecord": "Запись отсутствует",
-      "ptr_norecordDesc": "У IP отправителя нет обратной PTR-записи",
-      "ptr_temperror": "Ошибка запроса",
-      "ptr_temperrorDesc": "Тайм-аут или ошибка DNS-запроса PTR",
-      "ptr_ehlomismatch": "Несоответствие EHLO",
-      "ptr_ehlomismatchDesc": "Запись PTR не соответствует SMTP EHLO/HELO",
-      "ptr_amismatch": "Несоответствие A-записи",
-      "ptr_amismatchDesc": "A-запись, найденная по PTR, не указывает обратно на исходный IP",
       "template": {
         "loose": "Свободный",
         "standard": "Стандартный",
@@ -4325,7 +4330,13 @@
       "templateConfirmDesc": "Переключение на шаблон \"{template}\" перезапишет все текущие настройки проверки протокола. Продолжить?",
       "templateCancel": "Отмена",
       "templateApply": "Применить",
-      "ptrReadonlyNotice": "Настройки PTR управляются системным администратором"
+      "ptrReadonlyNotice": "Настройки PTR управляются системным администратором",
+      "ptr_noptr": "Запись отсутствует",
+      "ptr_noptrDesc": "У IP отправителя нет обратной PTR-записи",
+      "ptr_nomatch": "Несоответствие A-записи",
+      "ptr_nomatchDesc": "A-запись, найденная по PTR, не указывает обратно на исходный IP",
+      "ptr_ehlo_mismatch": "Несоответствие EHLO",
+      "ptr_ehlo_mismatchDesc": "Запись PTR не соответствует SMTP EHLO/HELO"
     },
     "dkimOutbound": {
       "title": "Исходящая DKIM-подпись",
@@ -4403,7 +4414,7 @@
       "accept": "Перейти к следующей проверке",
       "quarantine": "Карантин (в папку \"Спам\")",
       "reject": "Блокировать (5xx)",
-      "audit": "Пометить (добавить заголовок)",
+      "audit": "Аудит (ожидает одобрения)",
       "discard": "Удалить (тихое удаление)"
     },
     "flowSub": {
@@ -5530,8 +5541,7 @@
         "audit": "Проверка",
         "quarantine": "Карантин",
         "sideline": "Серый список",
-        "mixed": "Смешанные",
-        "recall": "Отозвать"
+        "mixed": "Смешанные"
       },
       "statuses": {
         "processing": "Обработка",
@@ -5802,7 +5812,7 @@
       "findSimilarTooltip": "Find emails similar to this one",
       "close": "Close",
       "errors": {
-        "loadFailed": "Failed to load details, please retry",
+        "loadFailed": "Не удалось загрузить подробности, повторите попытку",
         "retry": "Retry"
       },
       "overview": {
@@ -5860,7 +5870,7 @@
         "collapse": "Collapse",
         "downloadFailed": "Download failed",
         "releaseWhitelist": "Release & Whitelist",
-        "cancel": "Cancel",
+        "cancel": "Отмена",
         "confirmBtn": "Confirm",
         "rulePartialFail": "Email disposed, but failed to update list",
         "reclassifyPartialFail": "Email disposed, but reclassification failed",
@@ -5882,6 +5892,7 @@
         "domainAge": "Возраст домена {n} дн.",
         "domainAgeTooltip": "Домен отправителя зарегистрирован всего {n} дн. назад -- недавно зарегистрированные домены часто являются признаком фишинга/подмены",
         "aiJudgmentBasis": "Основание вердикта ИИ",
+        "cloudCheckBasis": "Основание облачной проверки",
         "recipientStatus": {
           "title": "Recipient Status",
           "header": "Статус получателей ({n})",
@@ -6092,6 +6103,9 @@
         "basicInfo": "Basic Information",
         "tid": "TID",
         "emailId": "Email ID",
+        "messageUuid": "UUID письма",
+        "sessionId": "ID сессии",
+        "queueId": "ID очереди",
         "receiveTime": "Receive Time",
         "direction": "Direction",
         "emailSize": "Email Size",
@@ -6127,7 +6141,7 @@
         "virus": {
           "detected": "Virus Detected",
           "clean": "Clean",
-          "error": "Scan Failed"
+          "error": "Сканирование не удалось"
         },
         "disposalBasis": "Основание утилизации",
         "module": "Модуль",
@@ -6150,7 +6164,7 @@
         "errorMessage": "Error Message",
         "statusValue": {
           "success": "Delivered",
-          "failed": "Delivery Failed",
+          "failed": "Доставка не удалась",
           "delivering": "Delivering",
           "pending": "Pending"
         }
@@ -6177,12 +6191,21 @@
       "rawLogs": {
         "title": "Исходные журналы",
         "entriesBadge": "{count} записей",
+        "groupsBadge": "Групп компонентов: {count}",
+        "notLoaded": "Не загружено",
+        "loadingBadge": "Загрузка",
+        "loadFailedBadge": "Ошибка загрузки",
         "foundCount": "Найдено {matched} / {total} записей",
         "truncated": "Обрезано до 10 000 строк",
+        "partial": "Некоторые узлы шлюза недоступны, поэтому журнал жизненного цикла неполон. Недоступные узлы: {nodes}",
         "searchPlaceholder": "Поиск по журналу...",
         "copyAll": "Копировать всё",
         "downloadLog": "Скачать",
         "copied": "Скопировано",
+        "copyFailed": "Не удалось скопировать. Выберите и скопируйте текст вручную.",
+        "loading": "Загрузка исходных журналов...",
+        "loadFailed": "Не удалось загрузить исходные журналы. Повторите попытку.",
+        "empty": "Исходные журналы отсутствуют",
         "noMatch": "Совпадений не найдено"
       }
     },
@@ -6767,7 +6790,7 @@
       "desc_similarDomain": {
         "source": "Similar domain detection",
         "usage": "Detect lookalike domain spoofing",
-        "note": "Enter 0-100 confidence threshold"
+        "note": "Сначала выберите профиль защищаемого домена, затем задайте порог редакционного расстояния: число различающихся символов между доменом отправителя и защищаемым доменом (целое, обычно 1-5). Чем меньше, тем больше сходство. Встроенное правило использует «меньше или равно 2»."
       },
       "desc_displayNameSpoof": {
         "source": "Spoof detection module",
@@ -7099,10 +7122,10 @@
     "pageTitle": "Настройки обработки",
     "pageDescription": "Настройка карантина, рабочего процесса проверки и политики отзыва",
     "selectTenantEmpty": "Выберите арендатора, чтобы управлять его настройками обработки",
-    "save": "Save Settings",
+    "save": "Сохранить настройки",
     "reset": "Reset",
     "saveSuccess": "Settings saved",
-    "saveFailed": "Save failed",
+    "saveFailed": "Не удалось сохранить",
     "tabQuarantine": "Quarantine Settings",
     "tabReview": "Review Settings",
     "tabRecall": "Recall Policy Settings",
@@ -7201,7 +7224,7 @@
     "resultNotifyDesc": "Notify sender of review result",
     "reviewerNotification": "Reviewer Notification",
     "receiverEmail": "Receiver Email",
-    "enterEmailAddress": "Enter email address",
+    "enterEmailAddress": "Введите адрес эл. почты",
     "add": "Add",
     "notifyInterval": "Notification Interval (minutes)",
     "intervalHint": "Recommended 15-60 minutes to avoid notification spam",
@@ -7232,22 +7255,22 @@
     "errEmailInvalid": "Invalid email format",
     "errEmailDuplicate": "Email already exists",
     "recallKeys": "Ключи отзыва",
-    "newRecallKey": "Новый Recall Key",
+    "newRecallKey": "Новый ключ отзыва",
     "agentType": "Тип агента",
-    "noRecallKeys": "Нет Recall Key",
+    "noRecallKeys": "Ключей отзыва пока нет",
     "actions": "Действия",
     "cancel": "Отмена",
     "create": "Создать",
-    "keyDeleted": "Key удалён",
+    "keyDeleted": "Ключ удалён",
     "keyDeleteFailed": "Не удалось удалить",
-    "keyCreated": "Key создан",
+    "keyCreated": "Ключ создан",
     "keyCreateFailed": "Не удалось создать",
-    "keyId": "Key ID",
-    "keySecret": "Key Secret",
+    "keyId": "Идентификатор ключа",
+    "keySecret": "Секретный ключ",
     "coremailAgent": "Агент Coremail",
     "exchangeAgent": "Агент Exchange",
-    "keyIdPlaceholder": "Введите Key ID",
-    "keySecretPlaceholder": "Введите Key Secret",
+    "keyIdPlaceholder": "Введите идентификатор ключа",
+    "keySecretPlaceholder": "Введите секретный ключ",
     "emailInvalid": "Неверный формат адреса. Используйте адрес вида user@example.com",
     "emailDuplicate": "Этот адрес уже в списке",
     "customMinutesRange": "Длительность проверки должна быть от 1 до 300 минут",
@@ -7751,7 +7774,7 @@
       },
       "blockSuccess": "Domain \"{domain}\" has been blocked",
       "blockConflict": "This domain is already in the blocklist",
-      "blockFailed": "Failed to blacklist the domain. Please retry later."
+      "blockFailed": "Не удалось добавить домен в чёрный список. Повторите попытку позже"
     },
     "topAttachments": {
       "rank": "Rank",
@@ -9869,7 +9892,7 @@
     "expiredDesc": "Обратитесь к администратору за новой ссылкой для возврата.",
     "errorTitle": "Ошибка операции",
     "errorDesc": "Повторите попытку позже или обратитесь к администратору.",
-    "alreadyReleased": "Это письмо уже возвращено или удалено по истечении срока хранения",
+    "alreadyReleased": "Это письмо удалено администратором и больше не может быть возвращено",
     "confirmWarning": "Вы возвращаете письмо, помещённое шлюзом в карантин. После успешного возврата письмо будет повторно доставлено в ваш почтовый ящик. Действуйте осмотрительно."
   },
   "portalPreview": {
@@ -10511,5 +10534,806 @@
       "cancelText": "Отмена"
     },
     "siteIdHint": "Это значение может быть переопределено переменной окружения OSG_RULESYNC_SITE_ID — в кластерной установке оно задаётся централизованно clustermgr и всегда имеет приоритет над этой настройкой, поэтому ваше изменение здесь может незаметно не вступить в силу. Подтвердите действующее значение на панели clustermgr «Cross-Site Rule Sync»."
+  },
+  "apiErrors": {
+    "account": {
+      "cannot_delete_self": "Нельзя удалить собственную учётную запись",
+      "last_super_admin": "Нельзя отключить последнего активного суперадминистратора — управлять системой станет некому",
+      "last_system_admin": "Нельзя удалить или понизить последнего системного администратора — управлять системой станет некому",
+      "not_found": "Учётная запись не найдена — возможно, она была удалена",
+      "password_recently_used": "Новый пароль должен отличаться от недавно использованных",
+      "role_id_required": "Выберите роль",
+      "tenant_id_required": "Для роли «{role}» необходимо указать арендатора",
+      "tenant_scope_required": "Перед этим действием выберите арендатора",
+      "unknown_id_in_batch": "В пакете есть несуществующая учётная запись",
+      "username_exists": "Такое имя пользователя уже существует (без учёта регистра)",
+      "username_immutable": "Имя пользователя нельзя изменить после создания учётной записи"
+    },
+    "advanced_rule": {
+      "addon_type_invalid": "Некорректный тип дополнительного действия",
+      "delete_attachment_scope_invalid": "Некорректная область удаления вложений. Допустимо: {allowed}",
+      "primary_action_invalid": "Некорректное основное действие правила",
+      "scope_invalid": "Некорректная область действия правила"
+    },
+    "alert": {
+      "action_invalid": "Недопустимое действие. Допустимо: {allowed}",
+      "already_handled": "Это оповещение уже обработано другим пользователем; обновите страницу",
+      "ids_required": "Выберите хотя бы одно оповещение",
+      "not_found": "Оповещение не найдено — возможно, оно уже обработано или удалено",
+      "range_invalid": "Некорректный временной диапазон",
+      "severity_invalid": "Некорректный уровень важности оповещения",
+      "status_invalid": "Некорректный статус оповещения"
+    },
+    "auth_attempt": {
+      "data_format_invalid": "Некорректный формат данных записи аутентификации",
+      "data_required": "Данные записи аутентификации не предоставлены",
+      "request_body_read_failed": "Не удалось прочитать тело запроса; повторите попытку",
+      "success_value_invalid": "Недопустимый результат аутентификации. Допустимо: {allowed}"
+    },
+    "contact_source": {
+      "auto_sync_invalid": "Недопустимое значение переключателя автосинхронизации",
+      "config_empty": "Конфигурация источника не может быть пустой",
+      "config_invalid": "Конфигурация источника некорректна; проверьте, что все поля заполнены",
+      "config_parse_failed": "Не удалось разобрать конфигурацию источника; проверьте формат введённых значений",
+      "cron_expr_required": "При включённой автосинхронизации необходимо задать расписание",
+      "csv_auto_sync_unsupported": "Источники CSV не поддерживают автосинхронизацию; импортируйте вручную",
+      "csv_preview_failed": "Не удалось прочитать предпросмотр CSV; проверьте формат файла и повторите",
+      "department_id_unmapped": "Обязательное поле подразделения «ID подразделения» не сопоставлено; выберите его столбец в сопоставлении полей",
+      "email_field_unmapped": "Обязательное поле «эл. почта» не сопоставлено; выберите его столбец в сопоставлении полей",
+      "encryption_key_missing": "На сервере не настроен ключ шифрования контактов (не менее 32 байт), поэтому конфигурации с паролями и другими чувствительными полями нельзя сохранить или проверить. Обратитесь к администратору",
+      "file_store_uninitialized": "Хранилище CSV-файлов не включено на сервере. Обратитесь к администратору",
+      "multipart_parse_failed": "Не удалось разобрать форму загрузки; отправьте её снова",
+      "no_running_sync": "Сейчас нет выполняющихся задач синхронизации",
+      "no_sync_log": "У этого источника ещё нет истории синхронизации",
+      "not_found": "Источник контактов не найден — возможно, он был удалён",
+      "source_type_empty": "Выберите тип источника",
+      "stale_write": "Этот источник был изменён другим пользователем; обновите страницу и повторите",
+      "sync_already_running": "Для этого источника уже выполняется задача синхронизации; дождитесь её завершения",
+      "sync_mode_invalid": "Недопустимый режим синхронизации. Допустимо: {allowed}",
+      "test_connection_required": "Сначала успешно проверьте подключение, затем сохраняйте",
+      "updated_at_required": "Отсутствует версия записи; обновите страницу и повторите",
+      "upload_token_empty": "Сначала загрузите CSV-файл",
+      "upload_token_invalid": "Токен загрузки недействителен или истёк; загрузите CSV-файл снова",
+      "user_file_empty": "Загруженный CSV-файл пуст",
+      "user_file_missing": "Выберите CSV-файл контактов для загрузки",
+      "user_file_read_failed": "Не удалось прочитать загруженный CSV-файл; убедитесь, что он не повреждён, и повторите",
+      "user_file_ref_empty": "Отсутствует ссылка на загруженный файл; загрузите его снова"
+    },
+    "detection_profile": {
+      "access_denied": "У вас нет прав доступа к этому профилю обнаружения",
+      "global_rbl_requires_system_admin": "Для управления глобальными профилями RBL нужны права администратора платформы",
+      "id_invalid": "Некорректный идентификатор профиля обнаружения",
+      "name_exists": "Профиль обнаружения с таким именем уже существует",
+      "not_found": "Профиль обнаружения не найден — возможно, он был удалён",
+      "tenant_context_required": "Перед этим действием выберите арендатора",
+      "test_supported_for_rbl_only": "Тестирование поддерживается только для профилей типа RBL"
+    },
+    "disposal": {
+      "access_denied": "У вас нет прав на выполнение этого действия обработки",
+      "action_invalid": "Недопустимое действие обработки. Допустимо: {allowed}",
+      "description_required": "Введите описание",
+      "eml_not_on_storage_node": "Исходное письмо не найдено на узле хранения — возможно, оно удалено",
+      "eml_unavailable": "Исходное письмо недоступно — возможно, истёк срок хранения или оно удалено",
+      "final_type_invalid": "Недопустимый итоговый тип письма",
+      "final_type_requires_release": "Итоговый тип письма можно задать только при выпуске",
+      "mail_log_ids_required": "Выберите хотя бы одно письмо",
+      "mail_log_not_found": "Запись о письме не найдена — возможно, она удалена",
+      "object_id_requires_single_mail": "Обработка на уровне объекта принимает ровно одно письмо",
+      "quarantine": {
+        "category_score_order_invalid": "Минимальная уверенность для «{category}» не может превышать максимальную",
+        "category_score_out_of_range": "Уверенность для «{category}» должна быть от {min} до {max}",
+        "category_unknown": "Неизвестная категория письма «{value}»",
+        "custom_weekday_out_of_range": "День недели «{value}» вне диапазона: допустимо от {min} до {max}",
+        "custom_weekdays_empty": "Выберите хотя бы один день недели для пользовательской частоты",
+        "notify_frequency_invalid": "Недопустимая частота уведомлений. Допустимо: {allowed}",
+        "notify_time_format_invalid": "Время уведомления «{value}» должно быть в формате ЧЧ:ММ (00:00–23:59)",
+        "notify_times_empty": "Укажите хотя бы одно время уведомления, если частота не «никогда»",
+        "permission_unknown": "Неизвестное право «{value}»",
+        "portal_base_url_host_missing": "Во внешнем адресе доступа отсутствует имя хоста",
+        "portal_base_url_invalid": "Внешний адрес доступа не является корректным URL",
+        "portal_base_url_loopback": "Внешний адрес доступа не должен быть петлевым — получатели до него не доберутся; укажите внешне доступный адрес шлюза",
+        "portal_base_url_path_not_allowed": "Внешний адрес доступа не должен содержать путь, строку запроса или якорь — укажите только хост и порт",
+        "portal_base_url_required": "Внешний адрес доступа обязателен при включённых правах на извлечение, предпросмотр, белый или чёрный список — иначе ссылкам в сводном письме некуда вести",
+        "portal_base_url_scheme_invalid": "Внешний адрес доступа должен использовать {scheme}: токены извлечения и предпросмотра нельзя передавать в открытом виде",
+        "valid_days_out_of_range": "Срок действия ссылки для «{permission}» должен быть от {min} до {max} дней"
+      },
+      "recall": {
+        "notify_email_invalid": "Адрес уведомлений об отзыве «{value}» некорректен",
+        "notify_frequency_invalid": "Недопустимая частота уведомлений об отзыве. Допустимо: {allowed}",
+        "policy_invalid": "Недопустимая политика отзыва «{value}». Допустимо: {allowed}",
+        "task_timeout_out_of_range": "Таймаут задачи отзыва должен быть от {min} до {max} секунд"
+      },
+      "recipient_not_in_mail": "Этот получатель не относится к данному письму",
+      "recipient_required": "Укажите получателя",
+      "review": {
+        "custom_minutes_out_of_range": "Пользовательская длительность проверки должна быть от {min} до {max} минут",
+        "duration_mode_invalid": "Недопустимый режим длительности проверки. Допустимо: {allowed}",
+        "max_recheck_minutes_out_of_range": "Максимальное время повторной проверки должно быть от {min} до {max} минут",
+        "reviewer_active_end_format_invalid": "Время окончания дежурства проверяющего должно быть в формате ЧЧ:ММ:СС",
+        "reviewer_active_start_format_invalid": "Время начала дежурства проверяющего должно быть в формате ЧЧ:ММ:СС",
+        "reviewer_email_invalid": "Адрес проверяющего «{value}» некорректен",
+        "reviewer_notify_interval_out_of_range": "Интервал напоминаний проверяющему должен быть от {min} до {max} минут",
+        "timeout_mark_position_invalid": "Неподдерживаемая позиция метки «{value}». Допустимо: {allowed}",
+        "timeout_mark_positions_empty": "При выборе «пометить» укажите хотя бы одну позицию метки",
+        "timeout_mark_text_empty": "Текст метки не может быть пустым",
+        "timeout_mark_text_too_long": "Текст метки не должен превышать {max} символов",
+        "timeout_temp_disposal_invalid": "Недопустимая обработка по таймауту «{value}». Допустимо: {allowed}"
+      },
+      "timezone_invalid": "Часовой пояс «{value}» некорректен; используйте стандартное имя IANA, например Asia/Shanghai",
+      "too_many_items": "За один раз можно обработать не более {max} элементов; сократите выбор"
+    },
+    "dkim": {
+      "activate_failed": "Не удалось активировать подписывающий ключ. Повторите попытку",
+      "active_key_cannot_delete": "Нельзя удалить используемый ключ. Сначала активируйте другой ключ или деактивируйте этот",
+      "algorithm_unsupported": "Неподдерживаемый алгоритм подписи «{value}». Допустимо: {allowed}",
+      "cross_tenant_manage_denied": "Нельзя управлять подписывающими ключами другого арендатора",
+      "cross_tenant_read_denied": "Нельзя просматривать подписывающие домены другого арендатора",
+      "dns_not_verified": "DNS-запись этого ключа ещё не проверена. Добавьте TXT-запись у DNS-провайдера и завершите проверку перед активацией",
+      "forbidden": "У вас нет прав на выполнение этого действия",
+      "key_not_found": "Подписывающий ключ не найден — возможно, он был удалён",
+      "key_size_too_large": "Длина ключа не должна превышать {max} бит",
+      "selector_invalid": "Некорректный формат селектора «{value}»",
+      "tenant_id_invalid": "Некорректный параметр арендатора: требуется положительное целое число"
+    },
+    "link_blacklist": {
+      "access_denied": "У вас нет прав на выполнение этого действия",
+      "match_type_invalid": "Некорректный тип сопоставления",
+      "name_and_pattern_required": "Необходимо указать и название, и шаблон сопоставления",
+      "not_found": "Правило чёрного списка ссылок не найдено — возможно, оно было удалено",
+      "tenant_access_denied": "У вас нет прав доступа к данным этого арендатора",
+      "tenant_id_required": "Необходимо указать арендатора (администраторы платформы используют заголовок X-Tenant-ID)",
+      "verdict_invalid": "Некорректный вердикт"
+    },
+    "mail_admission": {
+      "enabled_required": "Укажите, включено ли правило",
+      "expires_at_format_invalid": "Время истечения должно быть в формате RFC3339, например 2026-08-01T12:00:00+03:00",
+      "helo_match_invalid": "Недопустимый режим сопоставления HELO. Допустимо: {allowed}",
+      "helo_pattern_regex_invalid": "Шаблон HELO не является корректным регулярным выражением; проверьте синтаксис",
+      "is_active_required": "Укажите, действует ли правило",
+      "not_found": "Правило допуска не найдено — возможно, оно было удалено",
+      "null_sender_requires_cidr": "Правило, разрешающее пустого отправителя, сопоставляется только по IP источника, поэтому требуется диапазон IP",
+      "privileged_requires_system_admin": "Для создания привилегированного правила допуска нужны права администратора платформы",
+      "rate_limit_must_be_positive": "Часовой лимит должен быть больше 0",
+      "rcpt_domain_not_owned": "Домен получателя должен быть подтверждённым доменом этого арендатора или его поддоменом",
+      "rcpt_domain_regex_invalid": "Шаблон домена получателя не является корректным регулярным выражением; проверьте синтаксис",
+      "rcpt_match_invalid": "Недопустимый режим сопоставления получателя. Допустимо: {allowed}",
+      "source_auth_required": "Требуется хотя бы один способ проверки источника: диапазон IP или проверка SPF",
+      "tenant_domain_cross_tenant": "Выбранный домен принадлежит другому арендатору",
+      "tenant_domain_not_found": "Выбранный домен не найден — возможно, он был удалён",
+      "use_spf_requires_privileged": "Правило с проверкой SPF также должно быть привилегированным — правило SPF не ограничено пулом доверенных IP ретрансляции",
+      "use_spf_requires_sender_domain": "Для проверки SPF нужен конкретный домен отправителя, иначе нечего искать в SPF-записи",
+      "tenant_domain_id_belongs_different_tenant": "Выбранный домен принадлежит другому арендатору"
+    },
+    "ops_top": {
+      "account_required": "Для детализации данных аутентификации нужно указать учётную запись",
+      "ai_interpretation_disabled": "Интерпретация с помощью AI не включена; обратитесь к администратору",
+      "ai_too_many_concurrent": "Слишком много запросов на AI-интерпретацию; повторите позже",
+      "connection_requires_platform": "Измерение соединений доступно только в режиме платформы; переключите режим",
+      "dimension_invalid": "Недопустимое измерение",
+      "filter_enum_invalid": "Недопустимое значение фильтра",
+      "key_required": "Укажите объект для детализации",
+      "sort_invalid": "Недопустимый порядок сортировки",
+      "sub_dimension_invalid": "Это подизмерение не поддерживается для выбранного измерения",
+      "tenant_id_invalid": "Идентификатор арендатора должен быть положительным целым числом",
+      "tenant_id_must_be_single": "Указывайте ровно одного арендатора за раз",
+      "tenant_not_found": "Арендатор не найден — возможно, он был удалён"
+    },
+    "outbound_audit": {
+      "access_denied": "У вас нет прав доступа к этому элементу проверки",
+      "action_invalid": "Недопустимое действие проверки. Допустимо: {allowed}",
+      "id_invalid": "Некорректный идентификатор элемента проверки",
+      "not_found": "Элемент проверки не найден — возможно, он уже обработан",
+      "not_pending": "Этот элемент больше не ожидает проверки или обрабатывается другим пользователем",
+      "operation_in_progress": "Для этого письма уже выполняется другая операция обработки; повторите позже"
+    },
+    "proxysvr": {
+      "cipher_profile_invalid": "Недопустимый профиль шифрования. Допустимо: {allowed}",
+      "egress_ip_invalid": "Исходящий IP должен быть корректным адресом IPv4 или пустым",
+      "endpoint_name_exists": "Конечная точка прокси с таким именем уже существует",
+      "endpoint_not_found": "Конечная точка прокси не найдена — возможно, она была удалена",
+      "group_name_exists": "Группа прокси с таким именем уже существует",
+      "group_not_found": "Группа прокси не найдена — возможно, она была удалена",
+      "group_referenced_by_routes": "На эту группу ссылаются правила исходящей маршрутизации, её нельзя удалить; сначала удалите эти правила",
+      "helo_hostname_invalid": "Имя хоста HELO должно быть корректным доменным именем (не IP-адресом) или пустым",
+      "license_key_missing": "На сервере не настроен ключ шифрования лицензии, поэтому лицензию нельзя сохранить. Обратитесь к администратору",
+      "member_endpoint_duplicate": "Одна и та же конечная точка не может встречаться в группе дважды",
+      "member_endpoint_id_invalid": "Каждый участник группы должен ссылаться на корректную конечную точку",
+      "member_ord_duplicate": "Значения порядка участников группы не должны повторяться",
+      "port_out_of_range": "Порт должен быть в диапазоне от {min} до {max}",
+      "tls_min_version_invalid": "Недопустимая минимальная версия TLS. Допустимо: {allowed}"
+    },
+    "role": {
+      "cross_tenant_denied": "Нельзя изменять роль, принадлежащую другому арендатору",
+      "name_conflicts_template": "Название роли конфликтует с существующей ролью арендатора или глобальным шаблоном",
+      "name_exists": "Роль с таким названием уже существует в этой области",
+      "name_required": "Введите название роли",
+      "not_found": "Роль не найдена — возможно, она была удалена",
+      "scope_invalid": "Недопустимая область роли. Допустимо: {allowed}",
+      "status_invalid": "Недопустимый статус роли. Допустимо: {allowed}",
+      "super_admin_required": "Для управления ролями платформы требуются права суперадминистратора",
+      "system_default_cannot_delete": "Встроенные системные роли нельзя удалить",
+      "system_default_cannot_disable": "Встроенные системные роли и роль суперадминистратора нельзя отключить",
+      "system_default_cannot_edit": "Встроенные системные роли нельзя редактировать"
+    },
+    "rule_analytics": {
+      "range_invalid": "Недопустимый временной диапазон. Допустимо: {allowed}",
+      "version_not_found": "Версия правила не найдена — возможно, она удалена"
+    },
+    "sideline": {
+      "access_denied": "У вас нет прав доступа к этому отложенному письму",
+      "id_required": "Укажите элемент для действия",
+      "not_found": "Отложенное письмо не существует или у вас нет к нему доступа"
+    },
+    "smtp_credential": {
+      "access_denied": "У вас нет прав доступа к этим учётным данным отправки",
+      "cross_tenant_denied": "Нельзя создавать учётные данные отправки для другого арендатора",
+      "local_auth_disabled": "Локальная база учётных записей отключена. Используйте: {allowed}",
+      "not_found": "Учётные данные отправки не найдены — возможно, они были удалены",
+      "password_required": "При использовании локальной базы учётных записей требуется пароль"
+    },
+    "statistics": {
+      "date_range_required": "Укажите начальную и конечную дату отчёта",
+      "interval_invalid": "Недопустимый интервал. Допустимо: {allowed}",
+      "limit_out_of_range": "Количество результатов должно быть от {min} до {max}",
+      "params_invalid": "Некорректные параметры запроса; проверьте фильтры и повторите"
+    },
+    "unified_rule": {
+      "access_denied": "У вас нет прав доступа к этому правилу",
+      "action_required": "Правила действия должны указывать действие",
+      "advanced_rules_need_tenant": "Расширенные правила фильтрации недоступны в режиме платформы; сначала выберите арендатора",
+      "bulk_action_invalid": "Недопустимое пакетное действие. Допустимо: {allowed}",
+      "condition_tree_invalid": "Условия правила некорректны; проверьте, что все условия заполнены",
+      "content_rules_need_tenant": "Правилами содержимого можно управлять только в режиме арендатора; сначала выберите арендатора",
+      "copy_denied": "У вас нет прав на копирование этого правила",
+      "feature_group_condition_required": "Для группы признаков должны быть заданы условия",
+      "group_policy_name_required": "Введите название групповой политики",
+      "id_invalid": "Некорректный идентификатор правила",
+      "ids_required": "Выберите хотя бы одно правило",
+      "metadata_invalid": "Некорректный формат метаданных правила",
+      "name_exists": "Правило с таким названием уже существует; выберите другое",
+      "not_found": "Правило не найдено — возможно, оно было удалено",
+      "role_not_permitted": "Ваша роль не имеет прав на создание правил",
+      "route_metadata_required": "Правила маршрутизации должны указывать следующий узел: {required}",
+      "stage_not_allowed_for_role": "Администраторы арендатора могут управлять правилами только на этих этапах: {allowed}",
+      "system_baseline_no_convert": "Обычное правило нельзя преобразовать в системное базовое",
+      "system_baseline_no_create": "Системные базовые правила нельзя создать через API",
+      "system_baseline_no_edit": "Системные базовые правила не могут редактироваться администраторами арендатора",
+      "tag_required": "Правила меток должны указывать хотя бы одну метку",
+      "tenant_context_required": "Перед этим действием выберите арендатора",
+      "valid_range_invalid": "Время окончания действия не может быть раньше времени начала"
+    },
+    "investigation": {
+      "not_found": "Задача расследования не найдена",
+      "access_denied": "Доступ к этой задаче расследования запрещён",
+      "id_required": "Укажите идентификатор задачи расследования",
+      "confirm_required": "Это действие требует подтверждения",
+      "not_ready_for_actions": "Задача расследования ещё не завершена, действия недоступны",
+      "type_unsupported": "Неподдерживаемый тип расследования",
+      "target_type_unsupported": "Неподдерживаемый тип объекта расследования",
+      "traceback_created_elsewhere": "Задачи ретроспективы угроз создаются сканированием ретроспективы, а не здесь",
+      "traceback_cancelled_elsewhere": "Отменяйте задачи ретроспективы угроз в записи запуска ретроспективы"
+    },
+    "profile": {
+      "user_not_found": "Пользователь не найден",
+      "session_not_found": "Сеанс входа не найден или истёк",
+      "session_id_missing": "Отсутствует идентификатор сеанса",
+      "name_required": "Имя не может быть пустым",
+      "password_incorrect": "Неверный пароль",
+      "verification_code_incorrect": "Неверный код подтверждения",
+      "method_invalid": "Неверный способ проверки",
+      "purpose_invalid": "Неверное назначение проверки",
+      "type_invalid": "Неверный тип",
+      "method_purpose_mismatch": "Способ проверки не соответствует назначению",
+      "target_invalid": "Неверный получатель",
+      "action_unsupported": "Неподдерживаемое действие",
+      "start_time_invalid": "Неверное время начала: используйте RFC3339 или YYYY-MM-DD",
+      "end_time_invalid": "Неверное время окончания: используйте RFC3339 или YYYY-MM-DD",
+      "two_factor_required_by_policy": "Политика системы требует двухфакторную аутентификацию, отключить нельзя",
+      "two_factor_enable_via_endpoint": "Включите двухфакторную аутентификацию в её настройках"
+    },
+    "threat_retro": {
+      "run_not_found": "Запуск ретроспективы не найден",
+      "strategy_not_found": "Стратегия не найдена",
+      "strategy_id_required": "Выберите стратегию",
+      "mail_log_id_required": "Выберите письмо",
+      "mail_log_ids_required": "Выберите хотя бы одно письмо",
+      "leak_mail_not_in_run": "Это письмо не относится к текущему запуску ретроспективы",
+      "window_start_invalid": "Неверное время начала окна",
+      "window_end_invalid": "Неверное время окончания окна",
+      "window_order_invalid": "Время начала должно быть раньше времени окончания",
+      "indicator_tag_format_invalid": "Теги индикаторов должны иметь вид indicator:「код」 с непустым кодом"
+    },
+    "tenant": {
+      "not_found": "Арендатор не найден",
+      "access_denied": "Доступ к этому арендатору запрещён",
+      "admin_account_password_pair_required": "Учётная запись и пароль администратора указываются вместе",
+      "admin_account_too_long": "Учётная запись администратора не длиннее {max} символов",
+      "code_immutable": "Код арендатора нельзя изменить после создания",
+      "has_withheld_mail": "У арендатора остались задержанные письма (карантин / боковая ветка / проверка исходящих); освободите или удалите их перед удалением арендатора",
+      "next_hop_pair_required": "Хост и порт следующего узла указываются вместе",
+      "next_hop_triad_required": "Тип, хост и порт следующего узла указываются вместе",
+      "next_hop_host_empty": "Хост следующего узла не может быть пустым"
+    },
+    "tenant_routing": {
+      "nexthop_not_found": "Следующий узел не найден",
+      "domain_not_found": "Домен не найден",
+      "domain_not_verified": "Домен ещё не подтверждён",
+      "egress_not_in_pool": "Выбранный шлюз отсутствует в пуле",
+      "egress_binding_exists": "Для этого домена привязка шлюза уже существует",
+      "egress_binding_not_found": "Привязка шлюза не найдена"
+    },
+    "mail_log": {
+      "direction_invalid": "Неверное направление: допустимо all, receive, send или internal",
+      "id_required": "Укажите идентификатор журнала письма",
+      "id_format_invalid": "Неверный формат идентификатора журнала письма",
+      "not_found": "Запись журнала письма не найдена",
+      "access_denied": "Доступ к этой записи журнала запрещён",
+      "export_format_unsupported": "Неподдерживаемый формат экспорта: используйте json или csv",
+      "import_data_format_invalid": "Неверный формат данных журнала писем",
+      "import_data_missing": "Данные журнала писем не переданы",
+      "interpret_rate_limited": "Слишком много запросов, повторите позже",
+      "interpret_too_many_concurrent": "Слишком много одновременных ИИ-разборов, повторите позже",
+      "interpret_disabled": "Функция ИИ-разбора журналов отключена"
+    },
+    "spoofing_log": {
+      "page_too_large": "Номер страницы не должен превышать {max}",
+      "category_must_be_single": "Можно указать только одну категорию детализации KPI",
+      "category_invalid": "Неверная категория детализации",
+      "time_range_too_long": "Диапазон запроса не должен превышать {max_days} дней",
+      "not_found": "Запись обнаружения подделки не найдена"
+    },
+    "inbound_audit": {
+      "item_id_invalid": "Неверный идентификатор элемента проверки",
+      "item_not_found": "Элемент проверки входящих не найден",
+      "mail_content_unavailable": "Содержимое письма больше недоступно на узле хранения",
+      "item_not_pending": "Этот элемент проверки уже обработан",
+      "ids_required": "Выберите хотя бы один элемент проверки",
+      "action_invalid": "Неверное действие: допустимо одобрить или отклонить"
+    },
+    "assistant": {
+      "not_authenticated": "Сначала войдите в систему",
+      "session_not_found": "Сеанс не найден",
+      "access_denied": "Доступ к этому сеансу запрещён",
+      "no_rule_drafts_in_session": "В этом сеансе нет черновиков правил"
+    },
+    "security_overview": {
+      "date_range_required": "Укажите начальную и конечную даты",
+      "date_required": "Укажите дату",
+      "date_format_invalid": "Дата должна быть в формате YYYY-MM-DD",
+      "view_by_required": "Укажите разрез просмотра",
+      "series_required": "Укажите ряд данных",
+      "dimension_invalid": "Неверное измерение; допустимо: {allowed}",
+      "interpret_disabled": "Функция ИИ-разбора отключена",
+      "interpret_too_many_concurrent": "Слишком много одновременных ИИ-запросов, повторите позже"
+    },
+    "quarantine": {
+      "id_required": "Укажите идентификатор элемента карантина",
+      "item_not_found": "Элемент карантина не найден",
+      "access_denied": "Доступ к этому элементу карантина запрещён"
+    },
+    "antispam_notify": {
+      "tenant_id_invalid": "Неверный идентификатор арендатора",
+      "limit_invalid": "Неверное ограничение количества",
+      "recipient_required": "Укажите получателя",
+      "since_invalid": "Неверное время начала: используйте RFC3339",
+      "no_pending_sideline_item": "Нет ожидающих элементов боковой ветки"
+    },
+    "attachment_security": {
+      "password_blank": "Пароль не может быть пустым",
+      "password_too_long": "Пароль не длиннее {max} символов",
+      "id_invalid": "Неверный идентификатор",
+      "id_required": "Укажите идентификатор",
+      "sideline_item_not_found": "Элемент боковой ветки не найден",
+      "access_denied": "Доступ к этой записи вложения запрещён",
+      "request_body_unreadable": "Не удалось прочитать тело запроса",
+      "scan_result_format_invalid": "Неверный формат данных результата сканирования вложения",
+      "scan_result_missing": "Данные результата сканирования вложения не переданы",
+      "scan_result_all_invalid": "После проверки не осталось корректных результатов сканирования"
+    },
+    "url_protection": {
+      "deep_inspect_timeout_out_of_range": "Тайм-аут глубокой проверки должен быть от {min} до {max} секунд",
+      "deep_inspect_timeout_policy_invalid": "Неверная политика тайм-аута глубокой проверки; допустимо: {allowed}",
+      "domain_format_invalid": "Неверный формат домена",
+      "domain_limit_exceeded": "Не более {max} доменов на арендатора",
+      "domain_already_exists": "Этот домен уже существует",
+      "cidr_invalid": "Неверная запись CIDR",
+      "cidr_limit_exceeded": "Не более {max} диапазонов IP на арендатора",
+      "cidr_already_exists": "Этот диапазон IP уже существует",
+      "tenant_id_required": "Укажите арендатора",
+      "tenant_id_invalid": "Неверный идентификатор арендатора"
+    },
+    "login_policy": {
+      "two_factor_platform_admin_only": "Только администраторы платформы могут задавать политику обязательной двухфакторной аутентификации",
+      "two_factor_locked_by_platform": "Двухфакторная аутентификация принудительно включена платформой; арендатор не может её отключить",
+      "two_factor_self_service_tenant_only": "Переключатель самостоятельной двухфакторной аутентификации задаётся на уровне арендатора и не поддерживается в глобальной базовой политике",
+      "baseline_platform_admin_only": "Только администраторы платформы могут менять базовую политику платформы",
+      "rule_platform_admin_only": "Только администраторы платформы могут менять правила платформы",
+      "ip_or_cidr_format_invalid": "Введите корректный IP-адрес или CIDR (например, 192.168.1.0/24)",
+      "rule_already_exists": "Такое правило IP/CIDR уже существует",
+      "delete_would_lock_out_self": "После удаления ваш текущий IP не останется в списке разрешённых, и вы не сможете войти",
+      "rule_not_found": "Правило не найдено"
+    },
+    "group_members_io": {
+      "group_not_found": "Группа не найдена",
+      "access_denied": "Доступ к этой группе запрещён",
+      "export_unsupported_for_feature_group": "Функциональные группы не поддерживают экспорт участников",
+      "import_unsupported_for_feature_group": "Функциональные группы не поддерживают импорт участников",
+      "file_missing": "Выберите файл для загрузки",
+      "file_too_large": "Файл слишком большой",
+      "file_unreadable": "Не удалось открыть файл",
+      "condition_tree_not_member_format": "Условия этой группы не в формате списка участников, пригодном для импорта"
+    },
+    "rule_test_eml": {
+      "file_missing": "Выберите файл EML для загрузки",
+      "file_too_large": "Файл слишком большой (максимум {max_mb} МБ)",
+      "file_unreadable": "Не удалось прочитать файл",
+      "condition_tree_invalid": "Неверный JSON дерева условий",
+      "condition_tree_or_rule_id_required": "Укажите дерево условий или идентификатор правила",
+      "rule_id_invalid": "Идентификатор правила должен быть целым числом"
+    },
+    "threat_retro_mail": {
+      "mail_log_id_invalid": "Неверный идентификатор журнала письма",
+      "mail_not_found": "Письмо не найдено",
+      "email_content_not_found": "Содержимое письма отсутствует или удалено"
+    },
+    "tenant_user": {
+      "tenant_scope_required": "Это действие требует контекста арендатора",
+      "cannot_delete_own_account": "Нельзя удалить собственную учётную запись"
+    },
+    "phishing_admission": {
+      "profile_id_invalid_for_tenant": "Выбранный профиль обнаружения не существует или не принадлежит текущему арендатору",
+      "rule_not_found": "Правило допуска не найдено"
+    },
+    "mail_auth_config": {
+      "overlaps_existing_active": "Эта конфигурация пересекается с уже активной конфигурацией почтовой аутентификации в той же области доменов и сценариях",
+      "not_found": "Конфигурация почтовой аутентификации не найдена",
+      "server_fields_required": "Укажите протокол, адрес сервера и порт",
+      "auth_timeout_out_of_range": "Тайм-аут аутентификации должен быть от {min} до {max} секунд",
+      "protocol_unsupported": "Неподдерживаемый протокол"
+    },
+    "admin_audit": {
+      "tenant_admin_has_no_tenant_bound": "Этот администратор арендатора не привязан ни к одному арендатору",
+      "audit_log_not_found": "Журнал аудита не найден"
+    },
+    "advanced_rules_config": {
+      "review_timeout_action_accept_reject_keep": "Действие при тайм-ауте проверки должно быть accept, reject или keep_pending",
+      "forward_rate_limit_per_minute_non": "Лимит пересылки в минуту не может быть отрицательным",
+      "tarpit_max_concurrent_non_negative": "Лимит одновременных соединений tarpit не может быть отрицательным",
+      "admin_notify_max_recipients_non_negative": "Лимит получателей уведомлений администратора не может быть отрицательным"
+    },
+    "alert_rules": {
+      "rule_name_exists": "Правило с таким именем уже существует",
+      "rule_not_found": "Правило не найдено",
+      "rule_has_open_alerts": "У правила есть необработанные оповещения; сначала обработайте их"
+    },
+    "alert_smtp": {
+      "alert_smtp_enc_key_missing": "Ключ шифрования SMTP для оповещений не настроен, внешние учётные данные SMTP сохранить нельзя",
+      "recipient_required": "Получатель не может быть пустым"
+    },
+    "antispam_dkim": {
+      "dkim_key_not_found": "Ключ DKIM не найден"
+    },
+    "antispam_queue": {
+      "notification_message_uuid_accepted_by_atomic": "UUID уведомления принимается только конечной точкой атомарного отслеживания уведомлений",
+      "invalid_quarantine_notification_tracking_request": "Неверный запрос отслеживания уведомления карантина"
+    },
+    "auth_spoofing": {
+      "no_tenant_context": "Сначала выберите арендатора",
+      "tenant_admins_delete_tenant_overrides": "Только администраторы арендатора могут удалять переопределения арендатора"
+    },
+    "config_overrides": {
+      "config_value_not_empty": "Значение настройки не может быть пустым",
+      "config_override_not_found": "Переопределение настройки не найдено",
+      "config_file_section_name_config_key": "Необходимо указать файл конфигурации, имя секции и ключ"
+    },
+    "config_overrides_handler": {
+      "config_file_query_parameter_required": "Укажите файл конфигурации"
+    },
+    "contact_sync_logs": {
+      "sync_log_not_found": "Журнал синхронизации не найден"
+    },
+    "contacts": {
+      "contact_not_found": "Контакт не найден",
+      "tag_invalid": "Метка должна быть executive или key_position"
+    },
+    "delivery_stats": {
+      "too_many_items_one_batch": "Слишком много элементов в одном пакете"
+    },
+    "delivery_traffic": {
+      "end_date_in_future": "Конечная дата не может быть позже сегодняшней",
+      "ai_interpretation_disabled": "Функция ИИ-разбора отключена",
+      "too_many_concurrent_ai_requests_please": "Слишком много одновременных ИИ-запросов, повторите позже"
+    },
+    "link_attachment_security": {
+      "ai_interpretation_disabled": "Функция ИИ-разбора отключена",
+      "too_many_concurrent_ai_requests_please": "Слишком много одновременных ИИ-запросов, повторите позже",
+      "limit_integer_between_1_50": "Лимит должен быть целым числом от 1 до 50",
+      "domain_required": "Укажите домен",
+      "invalid_domain_format": "Неверный формат домена",
+      "direction_one_all_receive_send_internal": "Направление должно быть одним из: all, receive, send, internal",
+      "domain_already_blacklisted": "Этот домен уже в чёрном списке"
+    },
+    "disposal_settings": {
+      "tenant_id_required_select_tenant_x": "Выберите арендатора, прежде чем управлять его настройками"
+    },
+    "security_modules": {
+      "tenant_id_required_select_tenant_x": "Выберите арендатора, прежде чем управлять его настройками",
+      "valid_tenant_scope_required": "Требуется корректная область арендатора",
+      "admin_access_required": "Требуются права администратора",
+      "stage_1_ip_policy_managed_globally": "Политика IP этапа 1 управляется глобально системным администратором",
+      "stage_1_ip_policy_changed_from": "Политику IP этапа 1 нужно менять в области платформы",
+      "unknown_page": "Неизвестная страница модуля безопасности: {page}"
+    },
+    "domain_verify": {
+      "path_tenant_id_does_not_match": "Арендатор в пути не совпадает с выбранным арендатором",
+      "domain_not_found": "Домен не найден"
+    },
+    "email_logs": {
+      "id_required": "Укажите идентификатор",
+      "date_query_parameter_required_yyyy_mm": "Укажите дату (YYYY-MM-DD)",
+      "invalid_date_format_expected_yyyy_mm": "Неверный формат даты, ожидается YYYY-MM-DD",
+      "invalid_date": "Неверная дата",
+      "no_log_files_found_specified_date": "Файлы журналов за указанную дату не найдены",
+      "access_denied": "Доступ запрещён",
+      "email_log_entry_not_found": "Запись журнала письма не найдена"
+    },
+    "link_click_logs": {
+      "access_denied": "Доступ запрещён",
+      "invalid_id": "Неверный идентификатор",
+      "link_click_not_found": "Запись клика по ссылке не найдена"
+    },
+    "mail_lifecycle_logs": {
+      "access_denied": "Доступ запрещён",
+      "mail_log_entry_not_found": "Запись журнала письма не найдена",
+      "raw_log_search_busy_all_gateway": "Поиск по сырым журналам занят на всех узлах шлюза; повторите позже",
+      "message_uuid_required": "Укажите UUID сообщения",
+      "from_define_valid_time_range": "Начальное время должно быть раньше конечного",
+      "raw_log_search_busy_retry_shortly": "Поиск по сырым журналам занят; повторите позже"
+    },
+    "mail_log_attachment": {
+      "access_denied": "Доступ запрещён",
+      "invalid_attachment_md5": "Неверный MD5 вложения",
+      "mail_log_not_found": "Запись журнала письма не найдена",
+      "eml_not_available": "Исходное письмо недоступно",
+      "eml_not_found_storage_node": "Исходное письмо не найдено на узле хранения",
+      "attachment_not_found": "Вложение не найдено"
+    },
+    "mail_log_preview": {
+      "access_denied": "Доступ запрещён",
+      "mail_log_entry_not_found": "Запись журнала письма не найдена",
+      "original_email_content_not_available": "Исходное содержимое письма недоступно"
+    },
+    "email_preview": {
+      "email_content_not_found": "Содержимое письма не найдено"
+    },
+    "portal_quarantine_preview": {
+      "email_content_not_found": "Содержимое письма не найдено"
+    },
+    "export_import": {
+      "content_rules_managed_by_system_administrators": "Правилами содержимого могут управлять только системные администраторы"
+    },
+    "feature_group": {
+      "type_query_param_one_ip_sender": "Тип должен быть одним из: ip, sender, recipient, content, feature"
+    },
+    "forward_queue_admin": {
+      "invalid_id": "Неверный идентификатор"
+    },
+    "geoip_rules": {
+      "ip_range_already_exists": "Этот диапазон IP уже существует",
+      "geoip_rule_not_found": "Правило GeoIP не найдено",
+      "format_json_csv": "Формат должен быть json или csv"
+    },
+    "group_management_access": {
+      "group_management_requires_tenant_administrator_a": "Управление группами требует прав администратора арендатора",
+      "group_management_accessed_within_tenant_context": "В мультиарендном режиме управление группами требует выбора арендатора",
+      "access_denied_group_management_rule": "Доступ к этому правилу управления группами запрещён",
+      "group_management_rules_imported_with_scope": "Правила управления группами импортируются с scope=groups"
+    },
+    "group_policy": {
+      "group_policy_requires_tenant_administrator_acces": "Групповая политика требует прав администратора арендатора",
+      "group_policy_accessed_within_tenant_context": "В мультиарендном режиме групповая политика требует выбора арендатора",
+      "group_policy_rules_stay_within_active": "Правила групповой политики должны относиться к выбранному арендатору"
+    },
+    "intent_engine": {
+      "engine_enabled_receive_engine_enabled_send": "Необходимо задать переключатели движка для входящих, исходящих и внутренних писем"
+    },
+    "ip_filter": {
+      "rule_not_found": "Правило не найдено"
+    },
+    "ip_frequency": {
+      "rule_not_found": "Правило не найдено",
+      "active_required_toggle_action": "Для переключения необходимо указать целевое состояние",
+      "rules_required": "Укажите правила"
+    },
+    "rbl_filter": {
+      "rule_not_found": "Правило не найдено",
+      "invalid_client_ip": "Неверный IP клиента"
+    },
+    "mail_routing_helper": {
+      "mail_routing_rules_managed_by_system": "Правилами маршрутизации почты могут управлять только системные администраторы",
+      "mail_routing_rules_imported_with_scope": "Правила маршрутизации почты импортируются с scope=mail_routing_relay или scope=mail_routing_outbound",
+      "tenant_id_required_select_tenant_x": "Выберите арендатора, прежде чем управлять правилами маршрутизации почты"
+    },
+    "monitor_handlers": {
+      "backup_task_not_found": "Задача резервного копирования не найдена"
+    },
+    "overseas_mail": {
+      "directions_required": "Укажите направления",
+      "config_modified_by_another": "Конфигурация изменена другим пользователем; обновите страницу и повторите",
+      "invalid_ip_address": "Неверный IP-адрес"
+    },
+    "password_policy_settings": {
+      "mincharclasses_between_1_4": "Минимальное число классов символов должно быть от 1 до 4"
+    },
+    "phishing_actions": {
+      "reason_required": "Укажите причину",
+      "not_found": "Не найдено"
+    },
+    "spoofing_actions": {
+      "reason_required": "Укажите причину",
+      "not_found": "Не найдено"
+    },
+    "phishing_detection_log": {
+      "not_found": "Не найдено"
+    },
+    "spoofing_brands": {
+      "not_found": "Не найдено",
+      "disposition_mode_invalid": "Режим обработки должен быть observe, standard, strict или custom"
+    },
+    "spoofing_persons": {
+      "not_found": "Не найдено",
+      "protection_level_invalid": "Уровень защиты должен быть high, medium или low",
+      "observe_mode_invalid": "Режим наблюдения должен быть true или false",
+      "email_already_protected": "Адрес {email} уже является защищаемым лицом"
+    },
+    "spoofing_whitelist": {
+      "not_found": "Не найдено",
+      "match_type_invalid": "Тип совпадения должен быть email или domain",
+      "value_required": "Значение не может быть пустым",
+      "whitelist_entry_exists": "Такая запись в списке разрешённых уже существует"
+    },
+    "phishing_screenshot": {
+      "invalid_storage_node_key": "Неверный узел хранения или ключ",
+      "invalid_key_missing_task_id": "Неверный ключ: отсутствует идентификатор задачи",
+      "screenshot_not_found": "Снимок экрана не найден"
+    },
+    "portal_quarantine_listadd": {
+      "quarantine_item_has_no_tenant_cannot": "У элемента карантина нет арендатора, его нельзя добавить в пользовательский список",
+      "quarantined_mail_has_no_usable_sender": "У письма в карантине нет пригодного отправителя для добавления"
+    },
+    "portal_quarantine_release": {
+      "quarantine_item_not_found": "Элемент карантина не найден",
+      "quarantine_item_already_released_deleted": "Этот элемент карантина уже освобождён или удалён"
+    },
+    "proxysvr_probe": {
+      "proxysvr_endpoint_not_found": "Конечная точка прокси-отправки не найдена"
+    },
+    "recall_admin": {
+      "backend_coremail_exchange": "Бэкенд должен быть coremail или exchange",
+      "mail_log_does_not_belong_your": "Эта запись журнала не принадлежит вашему арендатору",
+      "recall_request_not_found": "Запрос отзыва не найден",
+      "recall_request_does_not_belong_your": "Этот запрос отзыва не принадлежит вашему арендатору"
+    },
+    "recipient_check": {
+      "invalid_existence_action": "Неверное действие при проверке существования получателя"
+    },
+    "recipient_config_access": {
+      "recipient_configuration_requires_tenant_context": "В мультиарендном режиме настройка получателей требует выбора арендатора",
+      "recipient_configuration_requires_tenant_administ": "Настройка получателей требует прав администратора арендатора"
+    },
+    "recipient_limit": {
+      "mode_detailed_merged": "Режим должен быть detailed или merged",
+      "merged_limit_limit_1_unlimited_between": "Объединённый лимит должен быть -1 (без ограничений) или от 1 до 1000",
+      "invalid_action_merged_limit": "Это действие не поддерживается для объединённого лимита",
+      "action_invalid": "Неверное действие для {name}",
+      "scope_invalid": "Неверная область для {name}: допустимо local или all"
+    },
+    "roles": {
+      "system_default_role_cannot_edited": "Системную роль по умолчанию нельзя изменить",
+      "system_default_super_admin_role_cannot": "Системную роль по умолчанию и роль суперадминистратора нельзя отключить",
+      "system_default_role_cannot_deleted": "Системную роль по умолчанию нельзя удалить"
+    },
+    "smtp_auth_ip_lockout": {
+      "invalid_ip": "Неверный IP-адрес"
+    },
+    "spoofing_notification_preview": {
+      "admin_emails_invalid": "Список адресов администраторов содержит некорректный адрес",
+      "sample_sender_invalid": "Отправитель образца должен быть корректным адресом эл. почты",
+      "sample_subject_too_long": "Тема образца не длиннее 500 символов",
+      "sample_confidence_out_of_range": "Уверенность образца должна быть от 0 до 100"
+    },
+    "spoofing_persons_bulk": {
+      "confidence_threshold_out_of_range": "Порог уверенности должен быть от 0 до 100",
+      "unsupported_bulk_action": "Неподдерживаемое массовое действие",
+      "bulk_add_limit_exceeded": "За один раз можно добавить не более 20 человек",
+      "duplicate_email_in_group": "Дублирующийся адрес {email} внутри группы"
+    },
+    "spoofing_routes": {
+      "spoofing_detection_capability_required": "Требуется возможность обнаружения подделки"
+    },
+    "tenant_llm": {
+      "invalid_tenant_id": "Неверный идентификатор арендатора",
+      "base_url_model_api_key_required": "Необходимо указать базовый URL, модель и API-ключ"
+    },
+    "threat_retro_agent_state": {
+      "limits_non_negative": "Лимиты не могут быть отрицательными"
+    },
+    "threat_retro_bulk_export": {
+      "action_cancel": "Действие должно быть cancel"
+    },
+    "threat_retro_notification": {
+      "kind_immediate_digest": "Тип уведомления должен быть немедленным или сводным"
+    },
+    "threat_retro_routes": {
+      "tenant_id_required_select_tenant_x": "Сначала выберите арендатора",
+      "threat_retro_capability_required": "Требуется возможность ретроспективы угроз"
+    },
+    "threat_retro_runs": {
+      "runid_required": "Укажите идентификатор запуска",
+      "run_not_found": "Запуск не найден"
+    },
+    "threat_retro_strategies": {
+      "strategy_not_found": "Стратегия не найдена"
+    },
+    "unified_rules_pagespec": {
+      "behavior_control_rule_have_metadata_feature": "Правило контроля поведения должно иметь metadata.feature = behavior_control",
+      "content_rules_rule_have_metadata_feature": "Правило содержимого должно иметь metadata.feature = content_rules",
+      "sender_filter_rule_priority_between_1": "Приоритет правила фильтрации отправителя должен быть от 1 до 9999",
+      "invalid_metadata": "Неверные метаданные"
+    },
+    "user_list_access": {
+      "user_list_rules_require_tenant_administrator": "Правила пользовательских списков требуют прав администратора арендатора",
+      "user_list_rules_available_owning_tenant": "В мультиарендном режиме правила пользовательских списков доступны только владеющему арендатору",
+      "user_list_rules_require_tenant_context": "Правила пользовательских списков требуют выбора арендатора",
+      "user_list_rules_created_managed_by": "Правила пользовательских списков создаются и управляются пользователями, а не через общий административный API",
+      "access_denied_user_list_rule": "Доступ к этому правилу пользовательского списка запрещён",
+      "user_generated_user_list_rules_deleted": "Здесь можно удалять только созданные пользователем правила списков"
+    },
+    "user_unlock": {
+      "user_not_found": "Пользователь не найден"
+    },
+    "users": {
+      "cannot_demote_last_system_administrator": "Нельзя понизить роль последнего системного администратора",
+      "cannot_delete_your_own_account": "Нельзя удалить собственную учётную запись",
+      "cannot_delete_last_system_administrator": "Нельзя удалить последнего системного администратора",
+      "cannot_disable_last_enabled_super_administrator": "Нельзя отключить последнего включённого суперадминистратора",
+      "bulk_action_would_leave_zero_enabled": "Это массовое действие оставит систему без включённых суперадминистраторов"
+    },
+    "auth": {
+      "authorization_header_required": "Сначала войдите в систему",
+      "authorization_header_malformed": "Неверный формат учётных данных; войдите снова",
+      "token_invalid_or_expired": "Сеанс недействителен или истёк; войдите снова",
+      "session_invalid": "Недействительный сеанс; войдите снова",
+      "session_revoked": "Сеанс отозван; войдите снова",
+      "system_admin_required": "Требуются права системного администратора",
+      "super_admin_required": "Требуются права суперадминистратора",
+      "admin_required": "Требуются права администратора",
+      "tenant_header_cross_tenant": "Запрошенный арендатор не совпадает с выбранным; межарендная операция отклонена",
+      "tenant_id_not_integer": "Идентификатор арендатора должен быть целым числом",
+      "tenant_id_required": "Выберите арендатора, прежде чем управлять его настройками",
+      "tenant_id_invalid": "Неверный идентификатор арендатора",
+      "tenant_access_denied": "Доступ к этому арендатору запрещён"
+    },
+    "login": {
+      "rate_limited": "Слишком много запросов, повторите позже",
+      "code_already_sent": "Код подтверждения уже отправлен; повторите позже",
+      "channel_disabled": "Этот канал доставки не включён",
+      "ticket_invalid_or_expired": "Проверка входа истекла; войдите снова",
+      "verification_code_incorrect": "Неверный код подтверждения",
+      "target_invalid": "Неверный получатель",
+      "user_gone": "Эта учётная запись больше не существует"
+    },
+    "password": {
+      "user_not_found": "Пользователь не найден",
+      "current_incorrect": "Текущий пароль неверен",
+      "recently_used": "Новый пароль должен отличаться от недавно использованных",
+      "credential_invalid_or_expired": "Учётные данные недействительны или истекли; начните заново"
+    },
+    "password_reset": {
+      "feature_disabled": "Сброс пароля не включён",
+      "code_invalid_or_expired": "Код подтверждения неверен или истёк",
+      "ticket_invalid_or_expired": "Учётные данные недействительны или истекли",
+      "rate_limited": "Слишком много запросов, повторите позже"
+    }
   }
 }

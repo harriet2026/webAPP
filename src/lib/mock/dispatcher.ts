@@ -487,6 +487,34 @@ const routes: Route[] = [
     handler: (req) => ({ status: 200, data: mockEmailDisposalEvents(Number(pathname(req.path).split('/')[2])) }),
   },
   {
+    method: 'GET', pattern: /^\/mail-logs\/\d+\/lifecycle-logs$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const events = mockEmailDisposalEvents(id).items;
+      const items = events
+        .filter((event) => typeof event.raw_line === 'string' && event.raw_line.length > 0)
+        .map((event) => ({
+          event_uid: `mock-${event.id}`,
+          message_uuid: `00000000-0000-0000-0000-${String(id).padStart(12, '0')}`,
+          component: event.event_source,
+          level: event.event_result === 'failed' ? 'error' : 'info',
+          event_time: event.event_time,
+          raw_line: event.raw_line as string,
+        }));
+      return {
+        status: 200,
+        data: {
+          items,
+          total: items.length,
+          truncated: false,
+          partial: false,
+          searched_nodes: ['mock-node'],
+          failed_nodes: [],
+        },
+      };
+    },
+  },
+  {
     method: 'GET', pattern: /^\/mail-logs\/\d+\/eml$/,
     handler: (req) => ({ status: 200, data: { id: Number(pathname(req.path).split('/')[2]), content: 'Mock RFC822 message' } }),
   },
@@ -1287,7 +1315,7 @@ const routes: Route[] = [
         params.product_action === 'block' ||
         params.product_action === 'quarantine' ||
         params.product_action === 'mark'
-          ? (params.product_action as 'block' | 'quarantine' | 'mark')
+          ? (params.product_action as 'block' | 'quarantine' | 'mark')  // 旧枚举，与 mock 存量数据保持一致
           : undefined;
       return {
         status: 200,

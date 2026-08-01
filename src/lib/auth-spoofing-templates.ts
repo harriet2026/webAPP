@@ -12,19 +12,19 @@ export const TEMPLATES: Record<'loose'|'standard'|'strict', TemplateActions> = {
     spf:  { fail:'quarantine', softfail:'audit', none:'accept', temperror:'accept' },
     dkim: { fail:'quarantine', neutral:'audit', partial:'accept', none:'accept' },
     dmarc:{ reject:'quarantine', quarantine:'audit', none:'audit' },
-    ptr:  { norecord:'accept', temperror:'accept', ehlomismatch:'audit', amismatch:'audit' },
+    ptr:  { noptr:'accept', nomatch:'audit', ehlo_mismatch:'audit' },
   },
   standard: {
     spf:  { fail:'reject', softfail:'quarantine', none:'audit', temperror:'audit' },
     dkim: { fail:'quarantine', neutral:'quarantine', partial:'accept', none:'audit' },
     dmarc:{ reject:'reject', quarantine:'quarantine', none:'audit' },
-    ptr:  { norecord:'audit', temperror:'audit', ehlomismatch:'quarantine', amismatch:'quarantine' },
+    ptr:  { noptr:'audit', nomatch:'quarantine', ehlo_mismatch:'quarantine' },
   },
   strict: {
     spf:  { fail:'reject', softfail:'quarantine', none:'quarantine', temperror:'quarantine' },
     dkim: { fail:'reject', neutral:'quarantine', partial:'quarantine', none:'quarantine' },
     dmarc:{ reject:'reject', quarantine:'quarantine', none:'quarantine' },
-    ptr:  { norecord:'quarantine', temperror:'quarantine', ehlomismatch:'reject', amismatch:'reject' },
+    ptr:  { noptr:'quarantine', nomatch:'reject', ehlo_mismatch:'reject' },
   },
 };
 

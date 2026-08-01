@@ -64,6 +64,7 @@ function PwdInput({
 
 export function PasswordTab() {
   const t = useTranslations('profile');
+  const tRoot = useTranslations();
   const tc = useTranslations('common');
   const { data: policy } = useSecurityPolicy();
   const changePassword = useChangePassword();
@@ -121,7 +122,7 @@ export function PasswordTab() {
       if (isWrongCurrentPasswordError(e)) {
         setOldErr(t('pwd.incorrect'));
       } else {
-        toast.error(profileApiErrorMessage(e, 'pwd.changeFailed', t));
+        toast.error(profileApiErrorMessage(e, 'pwd.changeFailed', t, tRoot));
       }
     }
   };

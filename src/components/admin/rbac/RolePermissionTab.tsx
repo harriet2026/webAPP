@@ -22,6 +22,7 @@ import {
 } from '@/lib/api/roles';
 import type { RbacScope } from '@/lib/rbac/rbac-modules';
 import { RoleDrawer } from './RoleDrawer';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export interface RolePermissionTabProps {
   scope: RbacScope;
@@ -37,6 +38,7 @@ export interface RolePermissionTabProps {
  */
 export function RolePermissionTab({ scope }: RolePermissionTabProps) {
   const t = useTranslations('users');
+  const apiErrorMessage = useApiErrorMessage();
   const { data: roles, isLoading } = useRoles(scope);
   const deleteRole = useDeleteRole();
   const setRoleStatus = useSetRoleStatus();
@@ -85,7 +87,7 @@ export function RolePermissionTab({ scope }: RolePermissionTabProps) {
         // GT-... a role still holding admins 409s with a server-composed
         // "reassign them first" message (internal/api/roles.go DeleteRole) —
         // surface it verbatim rather than a generic failure.
-        toast.error(e instanceof Error ? e.message : t('rbac.toast.deleteFailed'));
+        toast.error(apiErrorMessage(e, t('rbac.toast.deleteFailed')));
         setDeleteTarget(null);
       },
     });
@@ -97,7 +99,7 @@ export function RolePermissionTab({ scope }: RolePermissionTabProps) {
       { id: role.id, status: next },
       {
         onSuccess: () => toast.success(t('rbac.toast.statusUpdated')),
-        onError: (e) => toast.error(e instanceof Error ? e.message : t('rbac.toast.saveFailed')),
+        onError: (e) => toast.error(apiErrorMessage(e, t('rbac.toast.saveFailed'))),
       },
     );
   };

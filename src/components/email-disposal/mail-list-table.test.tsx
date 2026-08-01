@@ -184,3 +184,58 @@ describe("MailListTable toolbar (GT-11580)", () => {
     expect(row).toHaveAttribute("data-hovered", "true");
   });
 });
+
+// GT-12585: 勾选列在横向滚动时固定在表格左侧（与右侧 sticky 操作列同款
+// 模式：sticky + 不透明背景遮挡滚过的内容 + border 分隔）。
+describe("MailListTable sticky select column (GT-12585)", () => {
+  it("pins the header select cell to the left with an opaque background", () => {
+    renderTable();
+    const head = screen.getByTestId("disposal-select-column");
+    expect(head).toHaveClass("sticky", "left-0", "z-30", "border-r", "bg-card");
+  });
+
+  it("pins each row's select cell with hover/selected backgrounds mirroring the operations column", () => {
+    renderTable({ selectedIds: new Set([1]) });
+    const cell = screen.getByLabelText("Select email 1").closest("td")!;
+    // 选中态下 tailwind-merge 用 primary 混色背景替换 bg-card（与操作列一致）。
+    expect(cell).toHaveClass("sticky", "left-0", "z-10", "border-r");
+    expect(cell).toHaveClass(
+      "bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))]",
+      "group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]",
+    );
+    const unselected = screen.getByLabelText("Select email 2").closest("td")!;
+    expect(unselected).toHaveClass("sticky", "left-0", "bg-card");
+    expect(unselected).not.toHaveClass("bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))]");
+  });
+});
+
+// GT-12578 / GT-12686：落地 spec
+// design/implement/spec/2026-07-07-mail-disposal-investigation-center-design.md:168
+// 规定「合成失败/无命中时 disposal_basis 存 null，前端回退现有 MailLog.Reason
+// 自由文本」。此前列表这一列在 disposalBasis 缺失时直接落 '—'，于是
+// mail_marking（接收标记）这类不参与 disposal_basis 合成的规则命中后，
+// 管理员在列表上看不到任何线索——尽管规则名早已由 decision.go 写进
+// mail_log.reason，并且后端列表接口一直在返回该字段。
+describe("处置依据列的 reason 回退 (GT-12578/GT-12686)", () => {
+  it("disposalBasis 缺失但有 reason 时显示 reason 而不是 —", () => {
+    const item: DisposalMailItem = {
+      ...makeItem(1),
+      disposalBasis: undefined,
+      reason: "rule f01-receive-mark-001 matched at data stage",
+    };
+    renderTable({ items: [item] });
+    expect(
+      screen.getAllByText("rule f01-receive-mark-001 matched at data stage").length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("disposalBasis 与 reason 都缺失时仍显示 —", () => {
+    const item: DisposalMailItem = {
+      ...makeItem(1),
+      disposalBasis: undefined,
+      reason: undefined,
+    };
+    const { container } = renderTable({ items: [item] });
+    expect(container.textContent).toContain("—");
+  });
+});

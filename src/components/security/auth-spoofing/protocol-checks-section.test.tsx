@@ -39,10 +39,9 @@ function makeConfig(overrides: Partial<ProtocolChecksConfig> = {}): ProtocolChec
       none: item('audit'),
     },
     ptr: {
-      norecord: item('audit'),
-      temperror: item('audit'),
-      ehlomismatch: item('quarantine'),
-      amismatch: item('quarantine'),
+      noptr: item('audit'),
+      nomatch: item('quarantine'),
+      ehlo_mismatch: item('quarantine'),
     },
     ...overrides,
   };

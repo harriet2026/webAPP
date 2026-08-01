@@ -1,21 +1,42 @@
 'use client';
 
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import { Check, ChevronDown, Copy, Download, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { useTranslations } from 'next-intl';
+import {
+  AlertTriangle,
+  Check,
+  ChevronRight,
+  Copy,
+  Download,
+  Search,
+  Server,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import type { MailLogDetail } from '@/types/email-disposal-detail';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { formatTimestamp } from '@/lib/format-time';
-import { deriveThreatLevel, mailTypeConfig } from '../lib/detail-helpers';
-import { formatHitDetail, getActionLabel, getModuleName, type DisposalLang } from '../lib/disposal-basis-config';
+import type { MailLifecycleLog, MailLogDetail } from '@/types/email-disposal-detail';
 
 interface RawLogsSectionProps {
   detail: MailLogDetail;
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+  // A successful request and an unrequested query both contain an empty
+  // array. Keep that distinction explicit so the collapsed header never
+  // claims "0 entries" before disk collection has run.
+  loaded?: boolean;
+  // Every item is a source line found in a real component's node-local file.
+  // No mail detail field is serialized or synthesized in this section.
+  logs?: MailLifecycleLog[];
+  truncated?: boolean;
+  // A node failure must remain visible even when other nodes returned useful
+  // lines; otherwise an incomplete lifecycle looks authoritative.
+  partial?: boolean;
+  failedNodes?: string[];
+  loading?: boolean;
+  error?: boolean;
 }
 
 function escapeRe(s: string): string {
@@ -26,185 +47,312 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// 单封上限 10,000 行超出虚拟滚动 (spec §3.9，KEEP): above this many rendered
-// rows we window the list instead of rendering every row. No virtualization
-// library exists yet in webapp/package.json (checked; none used elsewhere in
-// src/ either), so this is a minimal, dependency-free windowing approach
-// rather than a new dependency for one feature -- see the DD-11 report.
-// Bounded in practice by recipient/attachment/event counts on a single mail
-// (not by an arbitrary JSON dump anymore), but kept for the pathological
-// case of a very large distribution list.
+// Keep the existing 10,000-line guard and dependency-free virtualization.
+// Each expanded component owns a small scroll viewport, so a pathological
+// component cannot force all lifecycle rows into the DOM at once.
 const VIRTUALIZE_THRESHOLD = 5000;
-const ROW_HEIGHT_PX = 28; // matches the px-3 py-1.5 text-sm font-mono row sizing below
+const ROW_HEIGHT_PX = 28;
 const OVERSCAN_ROWS = 20;
 const MAX_LOG_LINES = 10_000;
 
-// v2 html_spec `logLevelColors` (webapp/doc/html-spec/
-// email-handling-disposal-center/layer-13-detail-raw-logs.html §日志级别配色):
-// CONNECT/SCAN=emerald, INFO/ENGINE/DELIVER=blue, ANALYZE/AUTH=purple,
-// WARN=amber, THREAT/ALERT/ERROR=red, DECISION/POLICY=cyan, ACTION=orange.
-// Our synthesized tags map 1:1 onto those 8 tiers rather than reusing v2's
-// exact literal tag names, since our lines are built from real detail
-// fields (see buildLogLines below) instead of v2's mocked strings.
-type LogLevel = 'CONNECT' | 'INFO' | 'AUTH' | 'SCAN' | 'WARN' | 'THREAT' | 'ERROR' | 'DECISION' | 'ACTION';
+type LogLevel = 'INFO' | 'WARN' | 'ERROR';
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
+
+interface ParsedJsonLine {
+  prefix: string;
+  value: JsonValue[] | { [key: string]: JsonValue };
+}
 
 const LEVEL_COLOR: Record<LogLevel, string> = {
-  CONNECT: 'text-emerald-400',
-  SCAN: 'text-emerald-400',
   INFO: 'text-blue-400',
-  AUTH: 'text-purple-400',
   WARN: 'text-amber-400',
-  THREAT: 'text-red-500',
   ERROR: 'text-red-400',
-  DECISION: 'text-cyan-400',
-  ACTION: 'text-orange-400',
 };
 
 interface LogLine {
   level: LogLevel;
-  // Full rendered line INCLUDING the leading timestamp, e.g.
-  // "2026-07-20 09:15:00 [CONNECT] client=203.0.113.45 geo=美国 ...".
+  node: string;
+  component: string;
+  // Full authoritative source line, including its original timestamp.
   text: string;
+  json: ParsedJsonLine | null;
+  source: MailLifecycleLog;
 }
 
-function formatGeo(d: MailLogDetail): string {
-  return [d.geo_region_name, d.geo_city].filter(Boolean).join(' ');
+interface RenderedLogLine extends LogLine {
+  no: number;
+  html: string;
 }
 
-// SPF/DKIM/DMARC 校验值不为 "pass"（大小写不敏感）都视为失败/可疑，触发 WARN 级别。
-function isAuthValue(v: string | undefined): boolean {
-  return !!v && v.trim() !== '';
+interface LogGroup {
+  key: string;
+  node: string;
+  component: string;
+  lines: RenderedLogLine[];
 }
-function authFailed(v: string | undefined): boolean {
-  return isAuthValue(v) && v!.toLowerCase() !== 'pass';
+
+function isJsonContainer(value: unknown): value is JsonValue[] | { [key: string]: JsonValue } {
+  return typeof value === 'object' && value !== null;
 }
 
-// 从邮件的真实字段合成人类可读、按级别着色的 syslog 风格日志行 (v2 spec KEY
-// DECISION: 后端没有真实的原始/syslog 字段，改由前端用真实 detail 字段合成，
-// 而非沿用旧实现的 JSON.stringify(detail) 整体转储)。缺失的字段直接跳过对应
-// 整行，不编造数据。
-function buildLogLines(detail: MailLogDetail, lang: DisposalLang): LogLine[] {
-  const lines: LogLine[] = [];
-  const tsEarly = formatTimestamp(detail.received_at) || detail.received_at || '';
-  const tsMid = formatTimestamp(detail.processed_at || detail.received_at) || detail.processed_at || tsEarly;
-  const tsLate = formatTimestamp(detail.delivered_at || detail.processed_at || detail.received_at)
-    || detail.delivered_at || tsMid;
+// Structured services usually emit a pure JSONL object. Some operational
+// loggers prepend a timestamp/level before that object, so also try a small
+// bounded set of JSON-looking suffixes that start after whitespace. Postfix
+// tokens such as smtpd[123] are intentionally not candidates.
+function parseJsonLogLine(text: string): ParsedJsonLine | null {
+  const firstNonWhitespace = text.search(/\S/);
+  if (firstNonWhitespace < 0) return null;
 
-  // [CONNECT]
-  if (detail.client_ip) {
-    const parts = [`client=${detail.client_ip}`];
-    const geo = formatGeo(detail);
-    if (geo) parts.push(`geo=${geo}`);
-    if (detail.ptr_domain) parts.push(`ptr=${detail.ptr_domain}`);
-    lines.push({ level: 'CONNECT', text: `${tsEarly} [CONNECT] ${parts.join(' ')}` });
+  const content = text.slice(firstNonWhitespace);
+  const candidateOffsets = [0];
+  const suffixPattern = /\s([\[{])/g;
+  let match: RegExpExecArray | null;
+  while ((match = suffixPattern.exec(content)) !== null && candidateOffsets.length < 8) {
+    candidateOffsets.push(match.index + match[0].length - 1);
   }
 
-  // [AUTH]
-  if (isAuthValue(detail.spf_valid) || isAuthValue(detail.dkim_valid) || isAuthValue(detail.dmarc_valid)) {
-    const parts: string[] = [];
-    if (isAuthValue(detail.spf_valid)) parts.push(`SPF=${detail.spf_valid}`);
-    if (isAuthValue(detail.dkim_valid)) parts.push(`DKIM=${detail.dkim_valid}`);
-    if (isAuthValue(detail.dmarc_valid)) parts.push(`DMARC=${detail.dmarc_valid}`);
-    const failed = authFailed(detail.spf_valid) || authFailed(detail.dkim_valid) || authFailed(detail.dmarc_valid);
-    lines.push({ level: failed ? 'WARN' : 'AUTH', text: `${tsEarly} [AUTH] ${parts.join(' ')}` });
+  for (const offset of candidateOffsets) {
+    const candidate = content.slice(offset);
+    try {
+      const value: unknown = JSON.parse(candidate);
+      if (!isJsonContainer(value)) continue;
+      return {
+        prefix: text.slice(0, firstNonWhitespace + offset).trimEnd(),
+        value,
+      };
+    } catch {
+      // Try the next bounded suffix candidate.
+    }
   }
+  return null;
+}
 
-  // [MAILFROM]/[RCPT]
-  if (detail.sender || (detail.recipients && detail.recipients.length > 0)) {
-    const parts: string[] = [];
-    if (detail.sender) parts.push(`sender=${detail.sender}`);
-    if (detail.recipients && detail.recipients.length > 0) parts.push(`recipients=${detail.recipients.join(', ')}`);
-    lines.push({ level: 'INFO', text: `${tsEarly} [RCPT] ${parts.join(' ')}` });
-  }
-
-  // [DATA] subject -- lets search-by-subject hit the raw log viewer. Omitted
-  // when empty per the no-fabrication rule (same convention as every other
-  // line in this function).
-  if (detail.subject) {
-    lines.push({ level: 'INFO', text: `${tsEarly} [DATA] subject="${detail.subject}"` });
-  }
-
-  // [SCAN]
-  const hasScanData = !!detail.cac_result || detail.urls != null || detail.attachments != null;
-  if (hasScanData) {
-    const parts: string[] = [];
-    if (detail.cac_result?.tag) parts.push(`cac_tag=${detail.cac_result.tag}`);
-    if (detail.cac_result?.int_tag != null) parts.push(`int_tag=${detail.cac_result.int_tag}`);
-    if (detail.urls != null) parts.push(`urls=${detail.urls.length}`);
-    if (detail.attachments != null) parts.push(`attachments=${detail.attachments.length}`);
-    const hasBadScan = (detail.scan_results ?? []).some(
-      (s) => s.final_disposition && !['clean', 'passed', 'pass'].includes(s.final_disposition.toLowerCase()),
-    );
-    lines.push({ level: hasBadScan ? 'WARN' : 'SCAN', text: `${tsEarly} [SCAN] ${parts.join(' ')}` });
-  }
-
-  // [THREAT]
-  const tone = detail.email_type ? mailTypeConfig[detail.email_type]?.tone : undefined;
-  const threatLevel = deriveThreatLevel(detail.cac_result);
-  const phishRisk = detail.phish_agent_check?.risk_level;
-  const isThreat = tone === 'malicious' || threatLevel === 'high' || phishRisk === 'high' || phishRisk === 'critical';
-  if (isThreat) {
-    const parts: string[] = [];
-    if (detail.cac_result?.tag) parts.push(`cac_tag=${detail.cac_result.tag}`);
-    if (detail.cac_result?.description) parts.push(`desc=${detail.cac_result.description}`);
-    if (phishRisk) parts.push(`ai_risk=${phishRisk}`);
-    lines.push({ level: 'THREAT', text: `${tsMid} [THREAT] ${parts.join(' ') || 'multiple threat indicators identified'}` });
-  }
-
-  // [RULE]
-  const basis = detail.disposal_basis;
-  if (basis?.policy_key) {
-    const moduleName = getModuleName(basis.policy_key, lang);
-    const ruleLabel = [basis.rule_name, basis.rule_id].filter(Boolean).join(' ');
-    const hit = formatHitDetail(basis, lang);
-    const parts = [`policy=${moduleName}`];
-    if (ruleLabel) parts.push(`rule=${ruleLabel}`);
-    if (basis.action) parts.push(`action=${getActionLabel(basis.action, lang)}`);
-    lines.push({ level: 'DECISION', text: `${tsMid} [RULE] ${parts.join(' ')}${hit ? ` — ${hit}` : ''}` });
-  }
-
-  // [ACTION]
-  if (detail.action) {
-    const destructive = ['reject', 'discard', 'bounce'].includes(detail.action);
-    lines.push({
-      level: destructive ? 'ERROR' : 'ACTION',
-      text: `${tsMid} [ACTION] action=${getActionLabel(detail.action, lang)} status=${detail.status ?? '-'}`,
+function buildRawLogLines(logs: MailLifecycleLog[]): LogLine[] {
+  return [...logs]
+    .filter((item) => item.raw_line.length > 0)
+    .sort((a, b) => {
+      const byTime = (a.event_time || '').localeCompare(b.event_time || '');
+      return byTime || a.event_uid.localeCompare(b.event_uid);
+    })
+    .map((item) => {
+      const level = item.level?.toLowerCase();
+      return {
+        level: level === 'error' || level === 'fatal' || level === 'panic'
+          ? 'ERROR'
+          : level === 'warn' || level === 'warning'
+            ? 'WARN'
+            : 'INFO',
+        node: item.node ?? '',
+        component: item.component,
+        text: item.raw_line,
+        json: parseJsonLogLine(item.raw_line),
+        source: item,
+      };
     });
-  }
-
-  // [DELIVERY] per recipient_disposition
-  for (const rd of detail.recipient_dispositions ?? []) {
-    const failed = /fail/i.test(rd.status ?? '');
-    const parts = [`recipient=${rd.recipient}`, `status=${rd.status}`];
-    if (rd.final_action) parts.push(`action=${rd.final_action}`);
-    if (rd.dsn_status) parts.push(`dsn=${rd.dsn_status}`);
-    if (rd.reason) parts.push(`reason=${rd.reason}`);
-    lines.push({ level: failed ? 'ERROR' : 'INFO', text: `${tsLate} [DELIVERY] ${parts.join(' ')}` });
-  }
-
-  // Trailing [INFO] summary line, mirroring v2's "Processing completed" line.
-  if (detail.processing_time_ms != null) {
-    lines.push({ level: 'INFO', text: `${tsLate} [INFO] processing completed total_time=${detail.processing_time_ms}ms` });
-  }
-
-  return lines;
 }
 
-export function RawLogsSection({ detail }: RawLogsSectionProps) {
-  const t = useTranslations('emailDisposal.detail.rawLogs');
-  const rawLocale = useLocale();
-  const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(rawLocale as DisposalLang)
-    ? (rawLocale as DisposalLang)
-    : 'zh';
+function serializeLogsByComponent(lines: LogLine[]): string {
+  const grouped = new Map<string, Omit<MailLifecycleLog, 'component'>[]>();
+  for (const line of lines) {
+    const { component, ...entry } = line.source;
+    const entries = grouped.get(component);
+    if (entries) entries.push(entry);
+    else grouped.set(component, [entry]);
+  }
+  return `${JSON.stringify(Object.fromEntries(grouped), null, 2)}\n`;
+}
 
-  const [query, setQuery] = useState('');
-  const [copied, setCopied] = useState(false);
+async function writeTextToClipboard(text: string): Promise<void> {
+  if (typeof navigator !== 'undefined') {
+    try {
+      const clipboard = navigator.clipboard;
+      if (typeof clipboard?.writeText === 'function') {
+        await clipboard.writeText(text);
+        return;
+      }
+    } catch {
+      // Clipboard API may be blocked outside a secure context or denied by policy.
+    }
+  }
+
+  if (typeof document === 'undefined' || typeof document.execCommand !== 'function') {
+    throw new Error('Clipboard is unavailable');
+  }
+
+  const activeElement = document.activeElement instanceof HTMLElement
+    ? document.activeElement
+    : null;
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.setAttribute('aria-hidden', 'true');
+  textarea.style.position = 'fixed';
+  textarea.style.top = '0';
+  textarea.style.left = '-9999px';
+  textarea.style.width = '1px';
+  textarea.style.height = '1px';
+  textarea.style.opacity = '0';
+  textarea.style.pointerEvents = 'none';
+  document.body.appendChild(textarea);
+
+  let copied = false;
+  try {
+    textarea.focus();
+    textarea.select();
+    textarea.setSelectionRange(0, text.length);
+    copied = document.execCommand('copy');
+  } finally {
+    textarea.remove();
+    activeElement?.focus();
+  }
+
+  if (!copied) {
+    throw new Error('Clipboard is unavailable');
+  }
+}
+
+function HighlightedJsonText({ text, query }: { text: string; query: string }) {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) return text;
+  const parts = text.split(new RegExp(`(${escapeRe(normalizedQuery)})`, 'gi'));
+  return parts.map((part, index) =>
+    part.toLowerCase() === normalizedQuery.toLowerCase() ? (
+      <mark key={`${part}-${index}`} className="rounded bg-yellow-300 px-0.5 text-gray-900">
+        {part}
+      </mark>
+    ) : (
+      part
+    ));
+}
+
+function JsonPrimitiveValue({ value, query }: { value: JsonPrimitive; query: string }) {
+  const serialized = value === null ? 'null' : JSON.stringify(value);
+  const color = value === null
+    ? 'text-slate-400'
+    : typeof value === 'string'
+      ? 'text-emerald-300'
+      : typeof value === 'number'
+        ? 'text-amber-300'
+        : 'text-violet-300';
+  return (
+    <span className={color}>
+      <HighlightedJsonText text={serialized} query={query} />
+    </span>
+  );
+}
+
+function JsonTreeNode({
+  value,
+  propertyName,
+  depth,
+  trailingComma,
+  query,
+}: {
+  value: JsonValue;
+  propertyName?: string;
+  depth: number;
+  trailingComma: boolean;
+  query: string;
+}) {
+  const property = propertyName === undefined ? null : (
+    <>
+      <span className="text-sky-300">
+        <HighlightedJsonText text={JSON.stringify(propertyName)} query={query} />
+      </span>
+      <span className="text-slate-400">: </span>
+    </>
+  );
+
+  if (!isJsonContainer(value)) {
+    return (
+      <div className="min-w-0 break-all leading-5">
+        {property}
+        <JsonPrimitiveValue value={value} query={query} />
+        {trailingComma && <span className="text-slate-400">,</span>}
+      </div>
+    );
+  }
+
+  const entries = Array.isArray(value)
+    ? value.map((item, index) => [String(index), item] as const)
+    : Object.entries(value);
+  const opening = Array.isArray(value) ? '[' : '{';
+  const closing = Array.isArray(value) ? ']' : '}';
+
+  if (entries.length === 0) {
+    return (
+      <div className="min-w-0 break-all leading-5">
+        {property}
+        <span className="text-slate-300">{opening}{closing}</span>
+        {trailingComma && <span className="text-slate-400">,</span>}
+      </div>
+    );
+  }
+
+  return (
+    <details
+      open={depth === 0}
+      className="min-w-0 text-slate-300 [&[open]>summary_.json-collapsed]:hidden"
+      data-json-depth={depth}
+    >
+      <summary className="cursor-pointer select-none break-all leading-5 marker:text-slate-500">
+        {property}
+        <span>{opening}</span>
+        <span className="json-collapsed ml-1 text-slate-500">
+          … {closing}{trailingComma ? ',' : ''}
+        </span>
+      </summary>
+      <div className="ml-2 space-y-0.5 border-l border-slate-600/70 pl-3">
+        {entries.map(([key, item], index) => (
+          <JsonTreeNode
+            key={key}
+            value={item}
+            propertyName={key}
+            depth={depth + 1}
+            trailingComma={index < entries.length - 1}
+            query={query}
+          />
+        ))}
+      </div>
+      <div className="leading-5 text-slate-300">
+        {closing}{trailingComma ? ',' : ''}
+      </div>
+    </details>
+  );
+}
+
+function JsonLogViewer({
+  line,
+  query,
+}: {
+  line: RenderedLogLine;
+  query: string;
+}) {
+  if (!line.json) return null;
+  return (
+    <div
+      data-testid={`raw-log-json-viewer-${line.no}`}
+      className="min-w-0 flex-1 px-3 py-1.5 font-mono text-xs"
+    >
+      {line.json.prefix && (
+        <div className={cn('mb-1 break-all leading-5', LEVEL_COLOR[line.level])}>
+          <HighlightedJsonText text={line.json.prefix} query={query} />
+        </div>
+      )}
+      <JsonTreeNode
+        value={line.json.value}
+        depth={0}
+        trailingComma={false}
+        query={query}
+      />
+    </div>
+  );
+}
+
+function RawLogRows({ lines, query }: { lines: RenderedLogLine[]; query: string }) {
   const [scrollTop, setScrollTop] = useState(0);
-  const [open, setOpen] = useState(true);
-  // Fallback height before the container has been measured; kept in state
-  // (rather than read from the ref during render, which react-hooks/refs
-  // flags) and refreshed on mount/resize via the layout effect below.
-  const [viewportHeight, setViewportHeight] = useState(40 * ROW_HEIGHT_PX);
+  const [viewportHeight, setViewportHeight] = useState(320);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -213,170 +361,388 @@ export function RawLogsSection({ detail }: RawLogsSectionProps) {
     setViewportHeight(el.clientHeight);
     if (typeof ResizeObserver === 'undefined') return;
     const ro = new ResizeObserver((entries) => {
-      const h = entries[0]?.contentRect.height;
-      if (h) setViewportHeight(h);
+      const height = entries[0]?.contentRect.height;
+      if (height) setViewportHeight(height);
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
-  const allLogLines = useMemo(() => buildLogLines(detail, disposalLang), [detail, disposalLang]);
-  const logLines = useMemo(() => allLogLines.slice(0, MAX_LOG_LINES), [allLogLines]);
-  const totalCount = logLines.length;
-
-  // Search filter -- always applied directly (no separate "match only"
-  // toggle, matching v2's filteredLogs behavior: only matching lines render).
-  const filteredLines = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return logLines;
-    return logLines.filter((l) => l.text.toLowerCase().includes(q));
-  }, [logLines, query]);
-
-  // Gap 3.3: line numbers renumbered per VISIBLE FILTERED row (contiguous
-  // 1..N of matches), not the original pre-filter index.
-  const rendered = useMemo(() => {
-    const q = query.trim();
-    if (!q) {
-      return filteredLines.map((l, i) => ({ no: i + 1, level: l.level, html: escapeHtml(l.text) }));
-    }
-    const escapedQuery = escapeHtml(q);
-    const re = new RegExp(`(${escapeRe(escapedQuery)})`, 'gi');
-    return filteredLines.map((l, i) => ({
-      no: i + 1,
-      level: l.level,
-      html: escapeHtml(l.text).replace(re, '<mark class="bg-yellow-300 text-gray-900 px-0.5 rounded">$1</mark>'),
-    }));
-  }, [filteredLines, query]);
-
-  const virtualized = rendered.length > VIRTUALIZE_THRESHOLD;
-
+  const virtualized = lines.length > VIRTUALIZE_THRESHOLD;
   const { startIndex, endIndex, topPad, bottomPad } = useMemo(() => {
     if (!virtualized) {
-      return { startIndex: 0, endIndex: rendered.length, topPad: 0, bottomPad: 0 };
+      return { startIndex: 0, endIndex: lines.length, topPad: 0, bottomPad: 0 };
     }
     const visibleCount = Math.ceil(viewportHeight / ROW_HEIGHT_PX) + OVERSCAN_ROWS * 2;
     const first = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT_PX) - OVERSCAN_ROWS);
-    const last = Math.min(rendered.length, first + visibleCount);
+    const last = Math.min(lines.length, first + visibleCount);
     return {
       startIndex: first,
       endIndex: last,
       topPad: first * ROW_HEIGHT_PX,
-      bottomPad: (rendered.length - last) * ROW_HEIGHT_PX,
+      bottomPad: (lines.length - last) * ROW_HEIGHT_PX,
     };
-  }, [virtualized, rendered.length, scrollTop, viewportHeight]);
+  }, [lines.length, scrollTop, viewportHeight, virtualized]);
 
-  const visibleRows = virtualized ? rendered.slice(startIndex, endIndex) : rendered;
-
-  // Gap 3.6: copies the FILTERED (search-scoped) lines; button toggles to a
-  // Check icon + "已复制" and reverts after 2s. A toast in addition to the
-  // in-button state is fine per the brief.
-  function copyAll() {
-    const text = filteredLines.map((l) => l.text).join('\n');
-    navigator.clipboard.writeText(text).then(() => {
-      toast.success(t('copied'));
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }
-
-  // Gap 3.7: filename `email-log-{detail.id}-{date}.log`, text/plain,
-  // contents = ALL synthesized lines (unaffected by search filter).
-  function download() {
-    const text = logLines.map((l) => l.text).join('\n');
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const date = new Date().toISOString().slice(0, 10);
-    a.download = `email-log-${detail.id}-${date}.log`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  const visibleRows = virtualized ? lines.slice(startIndex, endIndex) : lines;
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen} data-testid="disposal-raw-logs">
+    <div
+      ref={scrollRef}
+      onScroll={virtualized ? (event) => setScrollTop(event.currentTarget.scrollTop) : undefined}
+      className="max-h-[320px] overflow-y-auto bg-slate-800 font-mono text-sm"
+    >
+      {virtualized && topPad > 0 && <div style={{ height: topPad }} aria-hidden="true" />}
+      {visibleRows.map((line) => (
+        <div key={line.no} data-testid={`raw-log-line-${line.no}`} className="flex items-stretch">
+          <span className="w-12 shrink-0 select-none border-r border-slate-600 py-1.5 pr-3 text-right text-slate-500">
+            {line.no}
+          </span>
+          {line.json && !virtualized ? (
+            <JsonLogViewer line={line} query={query} />
+          ) : (
+            <pre
+              className={cn('min-w-0 flex-1 whitespace-pre-wrap break-all px-3 py-1.5', LEVEL_COLOR[line.level])}
+              dangerouslySetInnerHTML={{ __html: line.html }}
+            />
+          )}
+        </div>
+      ))}
+      {virtualized && bottomPad > 0 && <div style={{ height: bottomPad }} aria-hidden="true" />}
+    </div>
+  );
+}
+
+function RawLogGroup({
+  group,
+  index,
+  open,
+  onOpenChange,
+  countLabel,
+  query,
+}: {
+  group: LogGroup;
+  index: number;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  countLabel: string;
+  query: string;
+}) {
+  const worstLevel = group.lines.some((line) => line.level === 'ERROR')
+    ? 'ERROR'
+    : group.lines.some((line) => line.level === 'WARN')
+      ? 'WARN'
+      : 'INFO';
+
+  return (
+    <Collapsible
+      open={open}
+      onOpenChange={onOpenChange}
+      className="overflow-hidden rounded-lg border bg-card"
+      data-testid={`raw-log-group-${index}`}
+      data-component={group.component}
+      data-node={group.node}
+    >
       <CollapsibleTrigger
-        data-testid="disposal-raw-logs-trigger"
+        data-testid={`raw-log-group-trigger-${index}`}
         render={
-          <Button
+          <button
             type="button"
-            variant="outline"
-            className="mb-3 h-auto w-full justify-start gap-2 bg-muted/30 px-3 py-2 text-left text-sm font-medium"
+            className="group flex min-h-11 w-full min-w-0 items-center gap-3 px-3 py-2 text-left text-sm transition-colors duration-150 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none"
           />
         }
       >
-        <ChevronDown className={cn('h-4 w-4 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', !open && '-rotate-90')} />
-        {t('title')}
-        {/* Gap 3.4: outline badge shows the TOTAL line count, unaffected by search. */}
-        <Badge variant="outline" className="text-xs" data-testid="raw-logs-count-badge">
-          {t('entriesBadge', { count: totalCount })}
+        <ChevronRight
+          className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out group-data-[panel-open]:rotate-90 motion-reduce:transition-none"
+          aria-hidden="true"
+        />
+        <span
+          className={cn(
+            'h-2 w-2 shrink-0 rounded-full',
+            worstLevel === 'ERROR'
+              ? 'bg-red-500'
+              : worstLevel === 'WARN'
+                ? 'bg-amber-500'
+                : 'bg-blue-500',
+          )}
+          aria-hidden="true"
+        />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-medium">{group.component}</span>
+          {group.node && (
+            <span className="mt-0.5 flex items-center gap-1 truncate text-xs text-muted-foreground">
+              <Server className="h-3 w-3 shrink-0" aria-hidden="true" />
+              {group.node}
+            </span>
+          )}
+        </span>
+        <Badge variant="secondary" className="shrink-0 text-xs">
+          {countLabel}
         </Badge>
-        {allLogLines.length > MAX_LOG_LINES && <span className="ml-auto text-xs text-amber-600">{t('truncated')}</span>}
       </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-3">
-      <div className="flex items-center gap-3">
-        <div className="flex flex-1 items-center gap-2 rounded-md border px-3">
-          <Search className="h-4 w-4 text-muted-foreground" />
-          <Input
-            value={query}
-            data-testid="disposal-raw-logs-search"
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t('searchPlaceholder')}
-            className="border-0 shadow-none focus-visible:ring-0"
+      <CollapsibleContent className="h-[var(--collapsible-panel-height)] overflow-hidden border-t opacity-100 transition-[height,opacity] duration-200 ease-out data-[ending-style]:h-0 data-[ending-style]:opacity-0 data-[starting-style]:h-0 data-[starting-style]:opacity-0 motion-reduce:transition-none">
+        <RawLogRows lines={group.lines} query={query} />
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+export function RawLogsSection({
+  detail,
+  expanded,
+  onExpandedChange,
+  loaded = false,
+  logs = [],
+  truncated = false,
+  partial = false,
+  failedNodes = [],
+  loading = false,
+  error = false,
+}: RawLogsSectionProps) {
+  const t = useTranslations('emailDisposal.detail.rawLogs');
+  const [query, setQuery] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Set<string>>(() => new Set());
+
+  const allLogLines = useMemo(() => buildRawLogLines(logs), [logs]);
+  const logLines = useMemo(() => allLogLines.slice(0, MAX_LOG_LINES), [allLogLines]);
+  const totalCount = logLines.length;
+
+  const filteredLines = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return logLines;
+    return logLines.filter((line) =>
+      line.text.toLowerCase().includes(normalizedQuery)
+      || line.component.toLowerCase().includes(normalizedQuery)
+      || line.node.toLowerCase().includes(normalizedQuery));
+  }, [logLines, query]);
+
+  const renderedLines = useMemo(() => {
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery) {
+      return filteredLines.map((line, index) => ({
+        ...line,
+        no: index + 1,
+        html: escapeHtml(line.text),
+      }));
+    }
+    const re = new RegExp(`(${escapeRe(escapeHtml(normalizedQuery))})`, 'gi');
+    return filteredLines.map((line, index) => ({
+      ...line,
+      no: index + 1,
+      html: escapeHtml(line.text).replace(
+        re,
+        '<mark class="rounded bg-yellow-300 px-0.5 text-gray-900">$1</mark>',
+      ),
+    }));
+  }, [filteredLines, query]);
+
+  const groups = useMemo(() => {
+    const grouped = new Map<string, LogGroup>();
+    for (const line of renderedLines) {
+      const key = `${line.node}\u0000${line.component}`;
+      const current = grouped.get(key);
+      if (current) {
+        current.lines.push(line);
+      } else {
+        grouped.set(key, {
+          key,
+          node: line.node,
+          component: line.component,
+          lines: [line],
+        });
+      }
+    }
+    return [...grouped.values()];
+  }, [renderedLines]);
+
+  const totalGroups = useMemo(() => {
+    const keys = new Set(logLines.map((line) => `${line.node}\u0000${line.component}`));
+    return keys.size;
+  }, [logLines]);
+
+  function setGroupOpen(key: string, open: boolean) {
+    setOpenGroups((current) => {
+      const next = new Set(current);
+      if (open) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  }
+
+  async function copyAll() {
+    const text = serializeLogsByComponent(filteredLines);
+    try {
+      await writeTextToClipboard(text);
+      toast.success(t('copied'));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error(t('copyFailed'));
+    }
+  }
+
+  function download() {
+    const text = serializeLogsByComponent(logLines);
+    const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    const date = new Date().toISOString().slice(0, 10);
+    anchor.download = `email-log-${detail.id}-${date}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const statusLabel = loading
+    ? t('loadingBadge')
+    : error
+      ? t('loadFailedBadge')
+      : loaded
+        ? t('entriesBadge', { count: totalCount })
+        : t('notLoaded');
+  const showInitialLoading = loading && !loaded;
+  const controlsDisabled = !loaded || loading || error || totalCount === 0;
+  const hasSearch = query.trim().length > 0;
+
+  return (
+    <Collapsible
+      open={expanded}
+      onOpenChange={onExpandedChange}
+      data-testid="disposal-raw-logs"
+      className="overflow-hidden rounded-xl border bg-card shadow-sm"
+    >
+      <CollapsibleTrigger
+        data-testid="disposal-raw-logs-trigger"
+        render={
+          <button
+            type="button"
+            className="group flex min-h-14 w-full min-w-0 items-center gap-3 px-4 py-3 text-left transition-colors duration-150 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none"
           />
-        </div>
-        <Button data-testid="disposal-raw-logs-download" variant="outline" size="sm" onClick={download}>
-          <Download className="mr-1 h-3.5 w-3.5" />{t('downloadLog')}
-        </Button>
-      </div>
-
-      <div className="rounded-lg overflow-hidden border">
-        <div
-          data-testid="raw-logs-viewer"
-          ref={scrollRef}
-          onScroll={virtualized ? (e) => setScrollTop(e.currentTarget.scrollTop) : undefined}
-          // Gap 3.8: fixed dark "terminal" look in both app themes. Individual
-          // log lines are static information, so the feedback spec deliberately
-          // keeps them free of hover affordances.
-          className="bg-slate-800 text-sm font-mono max-h-[400px] overflow-y-auto"
-        >
-          {rendered.length === 0 ? (
-            <div className="p-4 text-center text-gray-400">{t('noMatch')}</div>
-          ) : (
-            <>
-              {virtualized && topPad > 0 && <div style={{ height: topPad }} aria-hidden="true" />}
-              {visibleRows.map((r) => (
-                <div key={r.no} data-testid={`raw-log-line-${r.no}`} className="flex">
-                  <span className="w-10 flex-shrink-0 text-right pr-3 py-1.5 text-slate-500 select-none border-r border-slate-600">
-                    {r.no}
-                  </span>
-                  <pre
-                    className={cn('flex-1 py-1.5 px-3 whitespace-pre-wrap break-all', LEVEL_COLOR[r.level])}
-                    dangerouslySetInnerHTML={{ __html: r.html }}
-                  />
-                </div>
-              ))}
-              {virtualized && bottomPad > 0 && <div style={{ height: bottomPad }} aria-hidden="true" />}
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <Button data-testid="disposal-raw-logs-copy" variant="ghost" size="sm" className="h-8 text-xs" onClick={copyAll}>
-          {copied ? (
-            <><Check className="mr-1 h-3.5 w-3.5 text-green-500" />{t('copied')}</>
-          ) : (
-            <><Copy className="mr-1 h-3.5 w-3.5" />{t('copyAll')}</>
-          )}
-        </Button>
-        {/* Gap 3.5: found-count shown ONLY when the search box is non-empty. */}
-        {query && (
-          <span className="text-xs text-muted-foreground" data-testid="disposal-raw-logs-found-count">
-            {t('foundCount', { matched: filteredLines.length, total: totalCount })}
+        }
+      >
+        <ChevronRight
+          className="h-5 w-5 shrink-0 text-primary transition-transform duration-200 ease-out group-data-[panel-open]:rotate-90 motion-reduce:transition-none"
+          aria-hidden="true"
+        />
+        <span className="min-w-0 flex-1 text-base font-semibold">{t('title')}</span>
+        {loaded && totalGroups > 0 && (
+          <span className="hidden text-xs text-muted-foreground sm:inline">
+            {t('groupsBadge', { count: totalGroups })}
           </span>
         )}
-      </div>
+        <Badge
+          variant={error ? 'destructive' : 'secondary'}
+          className="shrink-0 text-xs"
+          data-testid="raw-logs-count-badge"
+          aria-live="polite"
+        >
+          {statusLabel}
+        </Badge>
+        {(truncated || allLogLines.length > MAX_LOG_LINES) && (
+          <span className="shrink-0 text-xs text-amber-600">{t('truncated')}</span>
+        )}
+      </CollapsibleTrigger>
+
+      <CollapsibleContent className="h-[var(--collapsible-panel-height)] overflow-hidden border-t opacity-100 transition-[height,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] data-[ending-style]:h-0 data-[ending-style]:opacity-0 data-[starting-style]:h-0 data-[starting-style]:opacity-0 motion-reduce:transition-none">
+        {partial && (
+          <div
+            data-testid="raw-logs-partial-warning"
+            className="flex items-start gap-2 border-b border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+          >
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>{t('partial', { nodes: failedNodes.join(', ') || '-' })}</span>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-3 border-b bg-muted/20 p-3 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-md border bg-background px-3">
+            <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <Input
+              value={query}
+              data-testid="disposal-raw-logs-search"
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={t('searchPlaceholder')}
+              disabled={controlsDisabled}
+              className="w-full border-0 shadow-none focus-visible:ring-0"
+            />
+          </div>
+          <Button
+            type="button"
+            data-testid="disposal-raw-logs-download"
+            variant="outline"
+            size="sm"
+            disabled={controlsDisabled}
+            onClick={download}
+            className="shrink-0"
+          >
+            <Download className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+            {t('downloadLog')}
+          </Button>
+        </div>
+
+        <div data-testid="raw-logs-viewer" className="min-h-20 p-3">
+          {showInitialLoading ? (
+            <div className="flex min-h-20 items-center justify-center rounded-lg bg-muted/30 px-4 text-sm text-muted-foreground">
+              {t('loading')}
+            </div>
+          ) : error ? (
+            <div className="flex min-h-20 items-center justify-center rounded-lg bg-destructive/5 px-4 text-sm text-destructive">
+              {t('loadFailed')}
+            </div>
+          ) : !loaded ? (
+            <div className="flex min-h-20 items-center justify-center rounded-lg bg-muted/30 px-4 text-sm text-muted-foreground">
+              {t('loading')}
+            </div>
+          ) : renderedLines.length === 0 ? (
+            <div className="flex min-h-20 items-center justify-center rounded-lg bg-muted/30 px-4 text-sm text-muted-foreground">
+              {query ? t('noMatch') : t('empty')}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {groups.map((group, index) => (
+                <RawLogGroup
+                  key={group.key}
+                  group={group}
+                  index={index}
+                  open={hasSearch || openGroups.has(group.key)}
+                  onOpenChange={(open) => setGroupOpen(group.key, open)}
+                  countLabel={t('entriesBadge', { count: group.lines.length })}
+                  query={query}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex min-h-12 items-center justify-between gap-3 border-t px-3 py-2">
+          <Button
+            type="button"
+            data-testid="disposal-raw-logs-copy"
+            variant="ghost"
+            size="sm"
+            disabled={controlsDisabled}
+            className="h-8 text-xs"
+            onClick={copyAll}
+          >
+            {copied ? (
+              <>
+                <Check className="mr-1 h-3.5 w-3.5 text-green-500" aria-hidden="true" />
+                {t('copied')}
+              </>
+            ) : (
+              <>
+                <Copy className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                {t('copyAll')}
+              </>
+            )}
+          </Button>
+          {query && (
+            <span className="text-xs text-muted-foreground" data-testid="disposal-raw-logs-found-count">
+              {t('foundCount', { matched: filteredLines.length, total: totalCount })}
+            </span>
+          )}
+        </div>
       </CollapsibleContent>
     </Collapsible>
   );

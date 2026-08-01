@@ -30,9 +30,11 @@ import { OverflowCell } from '@/components/shared/overflow-cell';
 import { EmailPreviewDialog } from '@/components/email/email-preview-dialog';
 import type { EmailPreviewResponse } from '@/types/email-preview';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export default function AuditQueuePage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
   const { effectiveTenantId, isViewingAllTenants } = useTenant();
@@ -100,7 +102,7 @@ export default function AuditQueuePage() {
       setNotesDialog(null);
       setNotes('');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     } finally {
       setIsSubmitting(false);
     }
@@ -115,7 +117,7 @@ export default function AuditQueuePage() {
       const data = await getOutboundAuditPreview(item.id, apiRequest);
       setPreviewData(data);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
       setPreviewOpen(false);
     } finally {
       setPreviewLoading(false);

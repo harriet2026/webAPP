@@ -24,7 +24,8 @@ import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useAuth } from '@/contexts/auth-context';
 import type {
   SenderFilterRuleView,
   SenderFilterFormData,
@@ -37,10 +38,112 @@ import type {
   SenderFilterAction,
 } from '@/types/sender-filter';
 import { normalizeDomain } from '@/lib/api/sender-filter';
+import { getSenderFilterDefaultPriority } from './priority-defaults';
+import { getRulePriorityRange } from '../advanced-filter-rules/priority-range';
 
-function getDefaultPriority(listType: ListType, whitelistMode?: WhitelistMode): number {
-  if (listType === 'blacklist') return 500;
-  return whitelistMode === 'direct_deliver' ? 999 : 800;
+// GT-12693：默认值实现已提取到 priority-defaults.ts，便于与后端
+// validatePriority 的角色范围一起被单测锁住。
+const getDefaultPriority = getSenderFilterDefaultPriority;
+
+/** 域名输入框：自由输入 + 租户接收域名快捷建议 */
+interface DomainComboboxProps {
+  value: string;
+  suggestions: string[];
+  placeholder: string;
+  suggestionsLabel: string;
+  hasError: boolean;
+  onChange: (value: string) => void;
+}
+
+function DomainCombobox({ value, suggestions, placeholder, suggestionsLabel, hasError, onChange }: DomainComboboxProps) {
+  const [open, setOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 同步外部 value → 内部 inputValue（切换类型时重置）
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  // 点击外部关闭建议
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  // 过滤建议：只展示包含输入词的项
+  const filtered = useMemo(() => {
+    if (!inputValue.trim()) return suggestions;
+    const lower = inputValue.toLowerCase();
+    return suggestions.filter((d) => d.toLowerCase().includes(lower));
+  }, [suggestions, inputValue]);
+
+  function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.value.toLowerCase().replace(/\s/g, '');
+    setInputValue(raw);
+    onChange(raw);
+    setOpen(suggestions.length > 0);
+  }
+
+  function handleSelectSuggestion(domain: string) {
+    setInputValue(domain);
+    onChange(domain);
+    setOpen(false);
+    inputRef.current?.focus();
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Escape') setOpen(false);
+    if (e.key === 'Enter') { e.preventDefault(); setOpen(false); }
+  }
+
+  return (
+    <div ref={containerRef} className="relative flex-1">
+      <Input
+        ref={inputRef}
+        className="w-full"
+        value={inputValue}
+        placeholder={placeholder}
+        aria-invalid={hasError}
+        aria-autocomplete="list"
+        aria-expanded={open}
+        data-testid="sender-filter-domain-input"
+        onChange={handleInput}
+        onFocus={() => suggestions.length > 0 && setOpen(true)}
+        onKeyDown={handleKeyDown}
+      />
+      {open && filtered.length > 0 && (
+        <div className="absolute z-50 left-0 right-0 top-full mt-1 rounded-md border bg-popover shadow-md overflow-hidden">
+          {suggestionsLabel && (
+            <div className="px-3 py-1.5 text-xs text-muted-foreground border-b">{suggestionsLabel}</div>
+          )}
+          <ul role="listbox" data-testid="sender-filter-domain-suggestions" className="max-h-48 overflow-y-auto py-1">
+            {filtered.map((domain) => (
+              <li
+                key={domain}
+                role="option"
+                aria-selected={domain === inputValue}
+                className={cn(
+                  'px-3 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground',
+                  domain === inputValue && 'bg-accent/50',
+                )}
+                onMouseDown={(e) => { e.preventDefault(); handleSelectSuggestion(domain); }}
+              >
+                {domain}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 }
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -62,8 +165,10 @@ export const senderFilterErrorKeys = [
   'nameMaxLength',
   'nameDuplicate',
   'descriptionMaxLength',
-  'priorityMin',
-  'priorityMax',
+  // GT-12693：优先级校验改为按角色范围构造，统一发 priorityRange 一个键（带
+  // {min}/{max} 参数），旧的 priorityMin/priorityMax 已不再被 schema 发出，
+  // 四语文案也随之替换 —— 声明必须跟着改，否则 i18n 守卫会一直红。
+  'priorityRange',
   'whitelistModeRequired',
   'invalidEmail',
   'invalidDomain',
@@ -78,7 +183,9 @@ export const senderFilterErrorKeys = [
 const ruleSchema = z.object({
   name: z.string().min(1, 'nameRequired').max(50, 'nameMaxLength'),
   description: z.string().max(200, 'descriptionMaxLength').optional(),
-  priority: z.number().int().min(1, 'priorityMin').max(9999, 'priorityMax'),
+  // GT-12693：占位。真实上下界依赖登录角色（后端 validatePriority 对
+  // tenant_admin 收窄到 100-1000），由下面的 makeRuleSchema 覆盖。
+  priority: z.number().int(),
   is_active: z.boolean(),
   valid_until: z.string().optional(),
   list_type: z.enum(['blacklist', 'whitelist']),
@@ -152,6 +259,20 @@ const ruleSchema = z.object({
 
 type RuleForm = z.infer<typeof ruleSchema>;
 
+// GT-12693：优先级范围随登录角色变化，而 zod schema 是模块级常量拿不到角色，
+// 故按范围构造。错误信息用统一的 priorityRange 键 + 参数，避免把 1/9999 之类
+// 的数字写死在四语文案里（写死的话，角色一变文案就撒谎）。
+function makeRuleSchema(range: { min: number; max: number }) {
+  // ruleSchema 带 superRefine，zod v4 要求用 safeExtend 覆盖字段。
+  return ruleSchema.safeExtend({
+    priority: z
+      .number()
+      .int()
+      .min(range.min, 'priorityRange')
+      .max(range.max, 'priorityRange'),
+  });
+}
+
 /**
  * Local, API-free simulation (replaces the old `testSenderFilterRule` round
  * trip). Matches the demo's `runSimulation`: an individual rule hits on exact
@@ -192,6 +313,11 @@ export function SenderFilterDrawer({
   onSubmit,
 }: SenderFilterDrawerProps) {
   const t = useTranslations();
+  // GT-12693：优先级的可填范围随登录角色变化——后端 validatePriority 把
+  // tenant_admin 收窄到 100-1000，平台管理员保留 0-9999。此前这里写死
+  // 1-9999，租户管理员手改优先级必然 400。
+  const { isSystemAdmin } = useAuth();
+  const priorityRange = useMemo(() => getRulePriorityRange(isSystemAdmin), [isSystemAdmin]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
   const [showSimulation, setShowSimulation] = useState(false);
@@ -199,7 +325,7 @@ export function SenderFilterDrawer({
   const [simMatch, setSimMatch] = useState<boolean | 'group_notice' | null>(null);
 
   const form = useForm<RuleForm>({
-    resolver: zodResolver(ruleSchema),
+    resolver: zodResolver(makeRuleSchema(priorityRange)),
     defaultValues: {
       name: '',
       description: '',
@@ -463,26 +589,15 @@ export function SenderFilterDrawer({
                                 </SelectContent>
                               </Select>
                             ) : watchSenderType === 'domain' ? (
-                              /* GT-12117: 组织域名从当前租户的接收域名列表下拉选择（不再手输自由文本）。 */
-                              tenantDomains.length > 0 ? (
-                                <Select
-                                  value={watchSenderValue}
-                                  onValueChange={(value) => form.setValue('sender_config.value', value ?? '', { shouldDirty: true, shouldValidate: true })}
-                                >
-                                  <SelectTrigger className="flex-1" aria-invalid={!!form.formState.errors.sender_config?.value} data-testid="sender-filter-domain-select">
-                                    <SelectValue placeholder={t('senderFilter.senderPlaceholder_domain')} />
-                                  </SelectTrigger>
-                                  <SelectContent alignItemWithTrigger={false}>
-                                    {tenantDomains.map((d) => (
-                                      <SelectItem key={d} value={d}>{d}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              ) : (
-                                <div className="flex-1 flex items-center text-xs text-muted-foreground" data-testid="sender-filter-no-domains">
-                                  {t('senderFilter.noTenantDomains')}
-                                </div>
-                              )
+                              /* 支持自由输入任意合法外部域名，同时将租户接收域名作为快捷建议。 */
+                              <DomainCombobox
+                                value={watchSenderValue}
+                                suggestions={tenantDomains}
+                                placeholder={t('senderFilter.senderPlaceholder_domain')}
+                                suggestionsLabel={t('senderFilter.domainSuggestions')}
+                                hasError={!!form.formState.errors.sender_config?.value}
+                                onChange={(v) => form.setValue('sender_config.value', v, { shouldDirty: true, shouldValidate: true })}
+                              />
                             ) : (
                               <Input
                                 className="flex-1"
@@ -584,12 +699,19 @@ export function SenderFilterDrawer({
                             type="number"
                             {...form.register('priority', { valueAsNumber: true })}
                             className="w-24"
-                            min={1}
-                            max={9999}
+                            min={priorityRange.min}
+                            max={priorityRange.max}
                           />
-                          <span className="text-xs text-muted-foreground">1-9999</span>
+                          <span className="text-xs text-muted-foreground">
+                            {priorityRange.min}-{priorityRange.max}
+                          </span>
                           {form.formState.errors.priority && (
-                            <p className="text-xs text-destructive">{t(`senderFilter.errors.${form.formState.errors.priority.message}`)}</p>
+                            <p className="text-xs text-destructive">
+                              {t(`senderFilter.errors.${form.formState.errors.priority.message}`, {
+                                min: priorityRange.min,
+                                max: priorityRange.max,
+                              })}
+                            </p>
                           )}
                         </div>
                       </div>

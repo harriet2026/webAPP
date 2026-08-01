@@ -55,6 +55,7 @@ import { useScopedApiRequest } from '@/lib/api/client';
 import { listProxysvrGroups, createProxysvrGroup, updateProxysvrGroup, deleteProxysvrGroup } from '@/lib/api/proxysvr';
 import { proxysvrGroupToRow, channelRowToRequest } from './channel-mapping';
 import type { OutboundProxyRow, OutboundChannelRow } from './outbound-types';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface ChannelStepProps {
   tenantId: number;
@@ -68,6 +69,7 @@ function emptyDraft(): OutboundChannelRow {
 
 export function ChannelStep({ tenantId, proxies }: ChannelStepProps) {
   const t = useTranslations('mailRouting.outbound.channel');
+  const apiErrorMessage = useApiErrorMessage();
   const ts = useTranslations('mailRouting.shared');
   const tc = useTranslations('common');
   const { apiRequest } = useScopedApiRequest(tenantId);
@@ -169,7 +171,7 @@ export function ChannelStep({ tenantId, proxies }: ChannelStepProps) {
       closeDrawer();
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const handleSave = () => {
@@ -189,7 +191,8 @@ export function ChannelStep({ tenantId, proxies }: ChannelStepProps) {
     },
     // 409（被引用）与其它错误都走同一条 toast——ApiError.message 已经是后端透传的可读文案
     // （"proxysvr group is referenced by one or more outbound route rules ..."），不需要
-    // 额外分支特判状态码。
+    // 额外分支特判状态码。GT-12614 刻意保留透传：这条 message 里带**具体引用者列表**，
+    // 换成固定文案会丢掉"被谁引用"这个唯一可操作信息。守卫见 channel-step.test.tsx。
     onError: (e: Error) => toast.error(e.message),
   });
 

@@ -14,6 +14,7 @@ import { RunFilters, DEFAULT_FILTERS, type RunFilterState, type TimeRangeKey } f
 import { RunsTable } from './runs-table';
 import { ManualScanDialog } from './manual-scan-dialog';
 import type { RecallStatus, RiskLevel, RunStatus } from '@/types/threat-retro';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const PAGE_SIZE = 20;
 
@@ -68,6 +69,7 @@ interface OverviewTabProps {
 
 export function OverviewTab({ manualScanOpen, onManualScanOpenChange }: OverviewTabProps) {
   const t = useTranslations('threatRetro');
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
   const { isAdmin } = useTenant();
   const qc = useQueryClient();
@@ -151,7 +153,7 @@ export function OverviewTab({ manualScanOpen, onManualScanOpenChange }: Overview
       setSelected([]);
       invalidate();
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.recallError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.recallError'))),
   });
 
   const toggleKpi = (k: string) => {

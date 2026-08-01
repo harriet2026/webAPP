@@ -56,6 +56,7 @@ import {
 } from "@/lib/api/unified-rules";
 import { ApiError } from "@/lib/api/client";
 import { ModuleMasterSwitch } from "@/components/security/ModuleMasterSwitch";
+import { useApiErrorMessage } from "@/lib/api/use-api-error-message";
 
 function toRFC3339(value?: string): string | null {
   if (!value) return null;
@@ -66,6 +67,7 @@ function toRFC3339(value?: string): string | null {
 
 export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin, isTenantAdmin, user, selectedTenantId } = useAuth();
@@ -184,7 +186,7 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
       setDeleteTarget(null);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -199,7 +201,7 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
       toast.success(t("common.updateSuccess"));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -215,7 +217,7 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
       toast.success(t("common.updateSuccess"));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -228,7 +230,7 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
       toast.success(t("common.copySuccess"));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -330,9 +332,9 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
         toast.success(t("common.deleteSuccess"));
       })
       .catch((error: Error) => {
-        toast.error(error.message);
+        toast.error(apiErrorMessage(error));
       });
-  }, [selectedIds, apiRequest, queryClient, queryKey, t]);
+  }, [selectedIds, apiRequest, queryClient, queryKey, t, apiErrorMessage]);
 
   if (!embedded && !isSystemAdmin && user?.role !== "tenant_admin") {
     return (

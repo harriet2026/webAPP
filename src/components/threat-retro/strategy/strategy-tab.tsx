@@ -16,9 +16,11 @@ import { StrategyListTable } from './strategy-list-table';
 import { StrategySheet } from './strategy-sheet';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import type { ThreatRetroStrategy } from '@/types/threat-retro';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export function StrategyTab() {
   const t = useTranslations('threatRetroStrategy');
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
   const { isAdmin } = useTenant();
   const qc = useQueryClient();
@@ -41,7 +43,7 @@ export function StrategyTab() {
       invalidate();
       setSheetOpen(false);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.saveError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.saveError'))),
   });
 
   const cloneMutation = useMutation({
@@ -50,7 +52,7 @@ export function StrategyTab() {
       toast.success(t('toast.cloned'));
       invalidate();
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.saveError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.saveError'))),
   });
 
   const deleteMutation = useMutation({
@@ -60,7 +62,7 @@ export function StrategyTab() {
       setDeleteTarget(null);
       invalidate();
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.saveError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.saveError'))),
   });
 
   // Hook into the sheet's save flow via a side-channel: when the sheet calls

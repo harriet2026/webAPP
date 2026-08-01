@@ -17,11 +17,14 @@ const SOURCE = readFileSync(
 );
 
 describe('RBL filter html-spec text alignment', () => {
-  it('GT-12045: action label is 操作', () => {
-    expect(zh.rblFilter.productAction).toBe('操作');
-    expect(zh.rblFilter.productAction).not.toBe('动作');
-    // key is actually rendered as the action field label
-    expect(SOURCE).toContain("t('rblFilter.productAction')");
+  // GT-12682 取代了 GT-12045：处置区改版后不再有「操作」这个字段标签，
+  // 执行动作变成一张标题为「执行动作」的策略卡片（与灰名单策略互斥）。
+  // productAction 这个 key 仍保留在词表里供其他处复用，但配置页不再渲染它。
+  it('GT-12682: the action field label became the 执行动作 strategy card title', () => {
+    expect(zh.rblFilter.actionSectionTitle).toBe('执行动作');
+    expect(SOURCE).toContain("t('rblFilter.actionSectionTitle')");
+    expect(SOURCE).toContain("t('rblFilter.greylistSectionTitle')");
+    expect(SOURCE).not.toContain("t('rblFilter.productAction')");
   });
 
   it('GT-12048: greylist entry button is 点击配置', () => {

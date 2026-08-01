@@ -59,8 +59,6 @@ export interface AICondition {
  */
 export const EXECUTION_ACTIONS = [
   'deliver',
-  'mark_deliver',
-  'advanced_review',
   'quarantine',
   'review',
   'block',
@@ -123,9 +121,15 @@ export interface DisposalMailItem {
   emailTypeOriginal?: string;
   correctionSource?: string;
   disposalBasis?: DisposalBasis;
+  /** mail_log.reason 自由文本。disposalBasis 缺失时按落地 spec §4.1 回退显示（GT-12578/GT-12686）。 */
+  reason?: string;
   disposalPolicyKeys?: string;
   /** Per-recipient action details; present when action === 'mixed'. */
   finalActionRule?: Record<string, FinalActionRuleDetail>;
+  /** Per-recipient final dispositions; drives the mixed-status stacked bar (方案 C). */
+  recipientDispositions?: import('@/types/phishing-detection').RecipientDisposition[];
+  /** Distinct actions across all recipients (e.g. ['accept','quarantine']). */
+  dispositionActions?: string[];
 }
 
 export interface DisposalListResponse {

@@ -668,6 +668,9 @@
     },
     "relay": {
       "searchPlaceholder": "Search rule name…",
+      "masterSwitch": "Rules master switch",
+      "masterSwitchOff": "The rules master switch is off. No relay rules are currently effective. Contact a system administrator to enable it.",
+      "masterSwitchOffActionable": "The rules master switch is off. No relay rules are currently effective. Enable it to apply the rules during SMTP admission.",
       "columns": {
         "priority": "Priority",
         "sourceIp": "Source IP",
@@ -742,6 +745,8 @@
         "created": "Relay rule added",
         "updated": "Relay rule updated",
         "deleted": "Relay rule deleted",
+        "masterSwitchEnabled": "Relay rules master switch enabled",
+        "masterSwitchDisabled": "Relay rules master switch disabled",
         "saveError": "Please fix the validation errors in the form"
       },
       "deleteDialogTitle": "Delete relay rule “{name}”?",
@@ -3841,9 +3846,10 @@
     "matchModeSpecific": "Specific Servers",
     "matchServers": "Match Servers",
     "productAction": "Action",
-    "actionBlock": "Block",
+    "actionReject": "Reject",
     "actionQuarantine": "Quarantine",
-    "actionMark": "Mark (Add Header)",
+    "actionReview": "Review",
+    "actionDiscard": "Discard",
     "actionGreylist": "Greylist",
     "comingSoon": "Coming Soon",
     "priority": "Priority",
@@ -3873,9 +3879,10 @@
     "serverTipZenSpamhaus": "Spamhaus combined blacklist covering SBL, XBL, PBL and other sub-lists; broad coverage.",
     "serverTipBlSpamcop": "SpamCop user-report blacklist based on spam source IPs reported by users.",
     "serverTipBarracuda": "Barracuda realtime blacklist maintained by the Barracuda security network.",
-    "actionBlockTip": "Reject the connection immediately with a 5xx error. Suited to high-risk scenarios; may block some legitimate mail.",
+    "actionRejectTip": "Reject the connection immediately with a 5xx error. Suited to high-risk scenarios; may block some legitimate mail.",
     "actionQuarantineTip": "Put the mail into the quarantine queue for administrator review. Balances security and availability.",
-    "actionMarkTip": "Add an X-RBL-Hit header and continue subsequent checks. The most lenient option, useful for statistics.",
+    "actionReviewTip": "Route the mail to the manual review queue for administrator decision. Suited to borderline cases.",
+    "actionDiscardTip": "Silently discard the mail without notifying the sender. Use only when confident the mail is spam.",
     "actionGreylistTip": "Temporarily reject the first connection and require the sender to retry. Effective against botnets but delays normal mail.",
     "timeoutRangeError": "Timeout must be between 1 and 30 seconds",
     "serverRequired": "Add at least one RBL server",
@@ -3883,6 +3890,13 @@
     "serverExists": "This server already exists",
     "serverReferenced": "This server is used by {count} hit rule(s) and cannot be deleted",
     "loadError": "Failed to load RBL configuration",
+    "disposalStrategyTitle": "Disposal Strategy",
+    "disposalStrategyDesc": "Choose how to handle mail when an RBL hit occurs. The two strategies are mutually exclusive.",
+    "actionSectionTitle": "Execution Action",
+    "actionSectionDesc": "The immediate disposition applied to mail when a RBL hit occurs.",
+    "greylistSectionTitle": "Greylist Policy",
+    "greylistSectionDesc": "Temporarily defer unknown senders and require a retry to verify identity. Effective against botnets.",
+    "greylistEnabled": "Enable greylist policy",
     "greylistConfig": "Greylist Configuration",
     "greylistConfigDesc": "Configure greylist policy to filter spam while reducing false positives.",
     "greylistConfigure": "Configure",
@@ -4008,8 +4022,7 @@
       "nameRequired": "Rule name is required",
       "nameMaxLength": "Name must be at most 50 characters",
       "descriptionMaxLength": "Description must be at most 200 characters",
-      "priorityMin": "Priority must be at least 1",
-      "priorityMax": "Priority must be at most 9999",
+      "priorityRange": "Priority must be between {min} and {max}",
       "whitelistModeRequired": "Please select a whitelist mode",
       "invalidEmail": "Please enter a valid email address",
       "invalidDomain": "Please enter a valid domain",
@@ -4033,7 +4046,7 @@
     "senderConfig": "Sender",
     "complexCondition": "Complex condition",
     "senderType_individual": "Individual",
-    "senderType_domain": "Organization",
+    "senderType_domain": "Sender Domain",
     "senderType_group": "Group",
     "ipRange": "Sender IP Range",
     "ipType_all": "All IPs",
@@ -4061,8 +4074,9 @@
     "drawerSubtitleBlacklist": "Configure sender blacklist rules to block or handle specified senders",
     "drawerSubtitleWhitelist": "Configure sender whitelist rules, trusted senders are allowed directly",
     "senderPlaceholder_individual": "e.g. user@example.com or *@domain.com",
-    "senderPlaceholder_domain": "Enter domain, e.g. example.com",
+    "senderPlaceholder_domain": "e.g. example.com or evil.com",
     "noTenantDomains": "This tenant has no receiving domains yet — configure them under Receiving Domains first",
+    "domainSuggestions": "Tenant receiving domains (quick select)",
     "senderPlaceholder_group": "Select a sender group",
     "validUntil": "Valid Until",
     "currentEffect": "Current Configuration Effect",
@@ -4445,14 +4459,6 @@
       "dmarc_quarantineDesc": "Sending domain requires quarantining emails that fail verification",
       "dmarc_none": "p=none",
       "dmarc_noneDesc": "Sending domain only monitors, no enforcement required",
-      "ptr_norecord": "Record Not Found",
-      "ptr_norecordDesc": "Sending IP has no PTR reverse resolution record",
-      "ptr_temperror": "Query Failed",
-      "ptr_temperrorDesc": "PTR DNS query timed out or failed",
-      "ptr_ehlomismatch": "EHLO Mismatch",
-      "ptr_ehlomismatchDesc": "PTR record does not match SMTP EHLO/HELO",
-      "ptr_amismatch": "A Record Mismatch",
-      "ptr_amismatchDesc": "The A record resolved from PTR does not point back to the original IP",
       "template": {
         "loose": "Loose",
         "standard": "Standard",
@@ -4463,7 +4469,13 @@
       "templateConfirmDesc": "Switching to \"{template}\" template will override all current protocol check settings. Continue?",
       "templateCancel": "Cancel",
       "templateApply": "Apply",
-      "ptrReadonlyNotice": "PTR settings are managed by system administrator"
+      "ptrReadonlyNotice": "PTR settings are managed by system administrator",
+      "ptr_noptr": "Record Not Found",
+      "ptr_noptrDesc": "Sending IP has no PTR reverse resolution record",
+      "ptr_nomatch": "A Record Mismatch",
+      "ptr_nomatchDesc": "The A record resolved from PTR does not point back to the original IP",
+      "ptr_ehlo_mismatch": "EHLO Mismatch",
+      "ptr_ehlo_mismatchDesc": "PTR record does not match SMTP EHLO/HELO"
     },
     "dkimOutbound": {
       "title": "DKIM Outbound Signing",
@@ -4541,7 +4553,7 @@
       "accept": "Proceed to Next Check",
       "quarantine": "Quarantine (to Junk)",
       "reject": "Block (5xx)",
-      "audit": "Tag (Add Header)",
+      "audit": "Audit (Pending Approval)",
       "discard": "Discard (Silent Delete)"
     },
     "flowSub": {
@@ -5617,6 +5629,15 @@
     "pageTitle": "Email Disposal Center",
     "investigationTitle": "Mail Investigation Center",
     "investigationSubtitle": "View and analyze mail security incidents for threat investigation and disposal",
+    "recipientStatusBar": {
+      "delivered": "Delivered",
+      "sideline": "Sidelined",
+      "quarantine": "Quarantined",
+      "rejected": "Rejected",
+      "discarded": "Discarded",
+      "audit": "Review",
+      "other": "Other"
+    },
     "search": {
       "placeholder": "Describe email traits, e.g.: phishing emails disguised as Microsoft from last week",
       "aiParse": "AI Parse",
@@ -5631,8 +5652,27 @@
       "saveCurrent": "Save current filters",
       "savedTemplates": "Saved templates",
       "deleteTemplate": "Delete template",
+      "renameTemplate": "Rename",
       "templateDefaultName": "Search template",
       "templateSaved": "Saved “{name}”",
+      "templateSaveError": "Save failed, please check browser storage",
+      "templateNameConflict": "Rename failed: a template with that name already exists",
+      "saveTemplateTitle": "Save search template",
+      "saveTemplateDesc": "You have {count} of {max} templates saved",
+      "renameTemplateTitle": "Rename template",
+      "renameTemplateDesc": "The new name takes effect immediately",
+      "templateNameLabel": "Template name",
+      "templateNamePlaceholder": "Name this set of search conditions",
+      "templateNameRequired": "Please enter a template name",
+      "templateOverwriteWarning": "A template with this name already exists. Saving will overwrite its conditions.",
+      "templateOverwriteConfirm": "Overwrite & save",
+      "templateLimitWarning": "Limit reached ({max}). Saving will remove the oldest template.",
+      "templateApplyConfirmTitle": "Apply search template",
+      "templateApplyConfirmDesc": "Applying “{name}” will replace all current search conditions. Continue?",
+      "templateApplyConfirm": "Apply",
+      "cancel": "Cancel",
+      "save": "Save",
+      "confirm": "Confirm",
       "sampleSingle": "1 sample selected; finding similar mail",
       "sampleMultiple": "{n} samples selected; finding similar mail",
       "parsing": "Parsing...",
@@ -6036,6 +6076,7 @@
         "domainAge": "Domain age {n}d",
         "domainAgeTooltip": "The sender domain was registered only {n} days ago -- newly-registered domains are a common phishing/spoofing signal",
         "aiJudgmentBasis": "AI Judgment Basis",
+        "cloudCheckBasis": "Cloud check basis",
         "recipientStatus": {
           "title": "Recipient Status",
           "header": "Recipient Status ({n})",
@@ -6046,13 +6087,13 @@
           "status": {
             "delivered": "Delivered",
             "marked_delivered": "Marked Delivered",
-            "quarantined": "Quarantined",
+            "quarantined": "Quarantining",
             "pending_review": "Pending Review",
-            "sidelined": "Sidelined",
+            "sidelined": "Scanning",
             "blocked": "Blocked",
             "rejected": "Rejected",
             "discarded": "Discarded",
-            "audited": "Under Audit"
+            "audited": "Pending Audit"
           },
           "notOperable": "Not Operable",
           "noContent": "(No original content)",
@@ -6246,6 +6287,9 @@
         "basicInfo": "Basic Information",
         "tid": "TID",
         "emailId": "Email ID",
+        "messageUuid": "Message UUID",
+        "sessionId": "Session ID",
+        "queueId": "Queue ID",
         "receiveTime": "Receive Time",
         "direction": "Direction",
         "emailSize": "Email Size",
@@ -6331,12 +6375,21 @@
       "rawLogs": {
         "title": "Raw logs",
         "entriesBadge": "{count} entries",
+        "groupsBadge": "{count} component groups",
+        "notLoaded": "Not loaded",
+        "loadingBadge": "Loading",
+        "loadFailedBadge": "Load failed",
         "foundCount": "Found {matched} / {total} entries",
         "truncated": "Truncated to 10,000 lines",
+        "partial": "Some gateway nodes could not be searched, so this lifecycle is incomplete. Failed nodes: {nodes}",
         "searchPlaceholder": "Search logs...",
         "copyAll": "Copy All",
         "downloadLog": "Download",
         "copied": "Copied",
+        "copyFailed": "Copy failed. Please select and copy manually.",
+        "loading": "Loading raw logs...",
+        "loadFailed": "Failed to load raw logs. Please try again.",
+        "empty": "No raw logs available",
         "noMatch": "No matching log entries"
       }
     },
@@ -6921,7 +6974,7 @@
       "desc_similarDomain": {
         "source": "Similar domain detection",
         "usage": "Detect lookalike domain spoofing",
-        "note": "Enter 0-100 confidence threshold"
+        "note": "Pick a protected-domain profile first, then set the edit-distance threshold: the number of character edits between the sender domain and the protected domain (integer, typically 1-5). Smaller means more similar. The built-in lookalike rule uses \"less than or equal to 2\"."
       },
       "desc_displayNameSpoof": {
         "source": "Spoof detection module",
@@ -9949,7 +10002,7 @@
     "expiredDesc": "Please contact your administrator for a new retrieval link.",
     "errorTitle": "Operation failed",
     "errorDesc": "Please try again later or contact your administrator.",
-    "alreadyReleased": "This email has already been retrieved, or was cleaned up after the retention period",
+    "alreadyReleased": "This email has been deleted by an administrator and can no longer be retrieved",
     "confirmWarning": "You are retrieving an email quarantined by the gateway. Once completed, it will be redelivered to your inbox. Please proceed with caution."
   },
   "portalPreview": {
@@ -10337,6 +10390,807 @@
       "antivirus": "Antivirus",
       "sandbox": "Sandbox",
       "rbl": "RBL"
+    }
+  },
+  "apiErrors": {
+    "account": {
+      "cannot_delete_self": "You cannot delete your own account",
+      "last_super_admin": "The last enabled super administrator cannot be disabled — no one would be left to manage the system",
+      "last_system_admin": "The last system administrator cannot be deleted or demoted — no one would be left to manage the system",
+      "not_found": "The account no longer exists; it may have been deleted",
+      "password_recently_used": "The new password must differ from your recently used passwords",
+      "role_id_required": "Select a role",
+      "tenant_id_required": "A tenant must be specified for the “{role}” role",
+      "tenant_scope_required": "Select a tenant before performing this action",
+      "unknown_id_in_batch": "The batch contains an account that does not exist",
+      "username_exists": "That username already exists (comparison is case-insensitive)",
+      "username_immutable": "The username cannot be changed after the account is created"
+    },
+    "advanced_rule": {
+      "addon_type_invalid": "Invalid add-on action type",
+      "delete_attachment_scope_invalid": "Invalid scope for deleting attachments. Allowed: {allowed}",
+      "primary_action_invalid": "The rule's primary action has an invalid value",
+      "scope_invalid": "The rule scope has an invalid value"
+    },
+    "alert": {
+      "action_invalid": "Invalid action. Allowed: {allowed}",
+      "already_handled": "This alert was already handled by someone else; refresh to see its current state",
+      "ids_required": "Select at least one alert",
+      "not_found": "The alert no longer exists; it may have been handled or purged",
+      "range_invalid": "Invalid time range",
+      "severity_invalid": "Invalid alert severity",
+      "status_invalid": "Invalid alert status"
+    },
+    "auth_attempt": {
+      "data_format_invalid": "The authentication record data has an invalid format",
+      "data_required": "No authentication record data was provided",
+      "request_body_read_failed": "Could not read the request body; try again",
+      "success_value_invalid": "Invalid authentication result. Allowed: {allowed}"
+    },
+    "contact_source": {
+      "auto_sync_invalid": "The automatic-sync toggle has an invalid value",
+      "config_empty": "The source configuration must not be empty",
+      "config_invalid": "The source configuration is invalid; check that every field is complete",
+      "config_parse_failed": "Could not parse the source configuration; check the format of the values you entered",
+      "cron_expr_required": "A sync schedule is required when automatic sync is enabled",
+      "csv_auto_sync_unsupported": "CSV sources do not support automatic sync; import manually instead",
+      "csv_preview_failed": "Could not read the CSV preview; make sure the file format is correct and try again",
+      "department_id_unmapped": "The required department field “department ID” is not mapped; pick its column in the field mapping",
+      "email_field_unmapped": "The required “email” field is not mapped; pick its column in the field mapping",
+      "encryption_key_missing": "The contact encryption key (at least 32 bytes) is not configured on the server, so configurations containing passwords or other sensitive fields cannot be saved or tested. Ask an administrator to configure it",
+      "file_store_uninitialized": "CSV file storage is not enabled on the server. Ask an administrator to configure it",
+      "multipart_parse_failed": "Could not parse the upload form; submit it again",
+      "no_running_sync": "No sync task is currently running",
+      "no_sync_log": "This source has no sync history yet",
+      "not_found": "The contact source no longer exists; it may have been deleted",
+      "source_type_empty": "Select a source type",
+      "stale_write": "This source was modified by someone else; refresh and try again",
+      "sync_already_running": "A sync task is already running for this source; wait for it to finish",
+      "sync_mode_invalid": "Invalid sync mode. Allowed: {allowed}",
+      "test_connection_required": "Test the connection successfully before saving",
+      "updated_at_required": "The record version is missing; refresh the page and try again",
+      "upload_token_empty": "Upload the CSV file first",
+      "upload_token_invalid": "The upload token is invalid or has expired; upload the CSV file again",
+      "user_file_empty": "The uploaded CSV file is empty",
+      "user_file_missing": "Choose the contact CSV file to upload",
+      "user_file_read_failed": "Could not read the uploaded CSV file; make sure it is not corrupted and try again",
+      "user_file_ref_empty": "The uploaded-file reference is missing; upload the file again"
+    },
+    "detection_profile": {
+      "access_denied": "You do not have permission to access this detection profile",
+      "global_rbl_requires_system_admin": "Platform administrator access is required to manage global RBL detection profiles",
+      "id_invalid": "Invalid detection profile ID",
+      "name_exists": "A detection profile with this name already exists",
+      "not_found": "The detection profile no longer exists; it may have been deleted",
+      "tenant_context_required": "Select a tenant before performing this action",
+      "test_supported_for_rbl_only": "Only RBL detection profiles support testing"
+    },
+    "disposal": {
+      "access_denied": "You do not have permission to perform this disposal action",
+      "action_invalid": "Invalid disposal action. Allowed: {allowed}",
+      "description_required": "Enter a description",
+      "eml_not_on_storage_node": "The original message was not found on the storage node; it may have been purged",
+      "eml_unavailable": "The original message is unavailable; it may have passed its retention period or been purged",
+      "final_type_invalid": "Invalid final mail type",
+      "final_type_requires_release": "A final mail type can only be set when releasing",
+      "mail_log_ids_required": "Select at least one message",
+      "mail_log_not_found": "The mail record no longer exists; it may have been purged",
+      "object_id_requires_single_mail": "Object-level disposal accepts exactly one message",
+      "quarantine": {
+        "category_score_order_invalid": "The minimum confidence for “{category}” cannot exceed the maximum",
+        "category_score_out_of_range": "The confidence for “{category}” must be between {min} and {max}",
+        "category_unknown": "Unknown mail category “{value}”",
+        "custom_weekday_out_of_range": "Weekday “{value}” is out of range; it must be between {min} and {max}",
+        "custom_weekdays_empty": "Select at least one weekday for the custom frequency",
+        "notify_frequency_invalid": "Invalid notification frequency. Allowed: {allowed}",
+        "notify_time_format_invalid": "Notification time “{value}” must be in HH:MM format (00:00–23:59)",
+        "notify_times_empty": "At least one notification time is required unless the frequency is “never”",
+        "permission_unknown": "Unknown permission “{value}”",
+        "portal_base_url_host_missing": "The external access address is missing a host name",
+        "portal_base_url_invalid": "The external access address is not a valid URL",
+        "portal_base_url_loopback": "The external access address must not be a loopback address — recipients cannot reach it; use the gateway’s externally reachable address",
+        "portal_base_url_path_not_allowed": "The external access address must not contain a path, query string or fragment — enter only the host and port",
+        "portal_base_url_required": "An external access address is required when the retrieve, preview, allowlist or blocklist permission is enabled — the links in the digest email have nowhere to point without it",
+        "portal_base_url_scheme_invalid": "The external access address must use {scheme}: retrieve and preview tokens must not travel in cleartext",
+        "valid_days_out_of_range": "The link validity for “{permission}” must be between {min} and {max} days"
+      },
+      "recall": {
+        "notify_email_invalid": "Recall notification email “{value}” is not a valid address",
+        "notify_frequency_invalid": "Invalid recall notification frequency. Allowed: {allowed}",
+        "policy_invalid": "Invalid recall policy “{value}”. Allowed: {allowed}",
+        "task_timeout_out_of_range": "The recall task timeout must be between {min} and {max} seconds"
+      },
+      "recipient_not_in_mail": "That recipient does not belong to this message",
+      "recipient_required": "Specify a recipient",
+      "review": {
+        "custom_minutes_out_of_range": "The custom review duration must be between {min} and {max} minutes",
+        "duration_mode_invalid": "Invalid review duration mode. Allowed: {allowed}",
+        "max_recheck_minutes_out_of_range": "The maximum recheck time must be between {min} and {max} minutes",
+        "reviewer_active_end_format_invalid": "The reviewer on-duty end time must be in HH:MM:SS format",
+        "reviewer_active_start_format_invalid": "The reviewer on-duty start time must be in HH:MM:SS format",
+        "reviewer_email_invalid": "Reviewer email “{value}” is not a valid address",
+        "reviewer_notify_interval_out_of_range": "The reviewer reminder interval must be between {min} and {max} minutes",
+        "timeout_mark_position_invalid": "Unsupported mark position “{value}”. Allowed: {allowed}",
+        "timeout_mark_positions_empty": "Select at least one mark position when using “mark”",
+        "timeout_mark_text_empty": "The mark text must not be empty",
+        "timeout_mark_text_too_long": "The mark text must not exceed {max} characters",
+        "timeout_temp_disposal_invalid": "Invalid timeout disposition “{value}”. Allowed: {allowed}"
+      },
+      "timezone_invalid": "Time zone “{value}” is invalid; use a standard IANA name such as Asia/Shanghai",
+      "too_many_items": "At most {max} items can be processed at once; reduce your selection and try again"
+    },
+    "dkim": {
+      "activate_failed": "Could not activate the signing key. Please try again",
+      "active_key_cannot_delete": "The key currently in use cannot be deleted. Activate another key or deactivate this one first",
+      "algorithm_unsupported": "Unsupported signing algorithm “{value}”. Allowed: {allowed}",
+      "cross_tenant_manage_denied": "You cannot manage signing keys that belong to another tenant",
+      "cross_tenant_read_denied": "You cannot view signing domains that belong to another tenant",
+      "dns_not_verified": "This key’s DNS record has not been verified yet. Add the TXT record at your DNS provider and complete verification before activating it",
+      "forbidden": "You do not have permission to perform this action",
+      "key_not_found": "The signing key no longer exists; it may have been deleted",
+      "key_size_too_large": "The key size must not exceed {max} bits",
+      "selector_invalid": "The selector “{value}” has an invalid format",
+      "tenant_id_invalid": "The tenant parameter is invalid; it must be a positive integer"
+    },
+    "link_blacklist": {
+      "access_denied": "You do not have permission to perform this action",
+      "match_type_invalid": "Invalid match type",
+      "name_and_pattern_required": "Both the name and the match pattern are required",
+      "not_found": "The link blacklist rule no longer exists; it may have been deleted",
+      "tenant_access_denied": "You do not have permission to access this tenant's data",
+      "tenant_id_required": "A tenant must be specified (platform administrators use the X-Tenant-ID header)",
+      "verdict_invalid": "Invalid verdict"
+    },
+    "mail_admission": {
+      "enabled_required": "Specify whether the rule is enabled",
+      "expires_at_format_invalid": "The expiry time must be RFC3339, e.g. 2026-08-01T12:00:00+08:00",
+      "helo_match_invalid": "Invalid HELO match mode. Allowed: {allowed}",
+      "helo_pattern_regex_invalid": "The HELO match pattern is not a valid regular expression; check its syntax",
+      "is_active_required": "Specify whether the rule is active",
+      "not_found": "The admission rule no longer exists; it may have been deleted",
+      "null_sender_requires_cidr": "A rule that allows a null sender matches by source IP alone, so a source IP range is required",
+      "privileged_requires_system_admin": "Platform administrator access is required to create a privileged admission rule",
+      "rate_limit_must_be_positive": "The hourly limit must be greater than 0",
+      "rcpt_domain_not_owned": "The recipient domain must be a verified domain owned by this tenant, or a subdomain of one",
+      "rcpt_domain_regex_invalid": "The recipient-domain pattern is not a valid regular expression; check its syntax",
+      "rcpt_match_invalid": "Invalid recipient match mode. Allowed: {allowed}",
+      "source_auth_required": "At least one source authentication is required: a source IP range or SPF verification",
+      "tenant_domain_cross_tenant": "The selected domain belongs to another tenant",
+      "tenant_domain_not_found": "The selected domain no longer exists; it may have been deleted",
+      "use_spf_requires_privileged": "A rule using SPF verification must also be marked privileged — an SPF rule is not bounded by the trusted relay IP pool",
+      "use_spf_requires_sender_domain": "SPF verification requires a concrete sender domain; otherwise there is no SPF record to look up",
+      "tenant_domain_id_belongs_different_tenant": "The selected domain belongs to a different tenant"
+    },
+    "ops_top": {
+      "account_required": "An account is required to drill into authentication details",
+      "ai_interpretation_disabled": "AI interpretation is not enabled; ask an administrator to turn it on",
+      "ai_too_many_concurrent": "Too many AI interpretation requests; try again shortly",
+      "connection_requires_platform": "The connection dimension is only available in the platform view; switch to the platform view",
+      "dimension_invalid": "Invalid dimension",
+      "filter_enum_invalid": "Invalid filter value",
+      "key_required": "Specify the item to drill into",
+      "sort_invalid": "Invalid sort order",
+      "sub_dimension_invalid": "That sub-dimension is not supported for the selected dimension",
+      "tenant_id_invalid": "The tenant identifier must be a positive integer",
+      "tenant_id_must_be_single": "Specify exactly one tenant at a time",
+      "tenant_not_found": "The tenant no longer exists; it may have been deleted"
+    },
+    "outbound_audit": {
+      "access_denied": "You do not have permission to access this audit item",
+      "action_invalid": "Invalid review action. Allowed: {allowed}",
+      "id_invalid": "Invalid audit item ID",
+      "not_found": "The audit item no longer exists; it may have been handled",
+      "not_pending": "This item is no longer pending, or someone else is processing it",
+      "operation_in_progress": "Another disposal operation is running for this message; try again shortly"
+    },
+    "proxysvr": {
+      "cipher_profile_invalid": "Invalid cipher profile. Allowed: {allowed}",
+      "egress_ip_invalid": "The egress IP must be a valid IPv4 address, or left empty",
+      "endpoint_name_exists": "A proxy endpoint with this name already exists",
+      "endpoint_not_found": "The proxy endpoint no longer exists; it may have been deleted",
+      "group_name_exists": "A proxy group with this name already exists",
+      "group_not_found": "The proxy group no longer exists; it may have been deleted",
+      "group_referenced_by_routes": "This group is referenced by outbound route rules and cannot be deleted; remove those rules first",
+      "helo_hostname_invalid": "The HELO hostname must be a valid domain name (not an IP address), or left empty",
+      "license_key_missing": "The license encryption key is not configured on the server, so the license cannot be stored. Ask an administrator",
+      "member_endpoint_duplicate": "The same endpoint cannot appear twice in a group",
+      "member_endpoint_id_invalid": "Each group member must reference a valid endpoint",
+      "member_ord_duplicate": "Group members must have unique order values",
+      "port_out_of_range": "The port must be between {min} and {max}",
+      "tls_min_version_invalid": "Invalid minimum TLS version. Allowed: {allowed}"
+    },
+    "role": {
+      "cross_tenant_denied": "You cannot modify a role that belongs to another tenant",
+      "name_conflicts_template": "The role name conflicts with an existing tenant role or global template",
+      "name_exists": "A role with this name already exists in this scope",
+      "name_required": "Enter a role name",
+      "not_found": "The role no longer exists; it may have been deleted",
+      "scope_invalid": "Invalid role scope. Allowed: {allowed}",
+      "status_invalid": "Invalid role status. Allowed: {allowed}",
+      "super_admin_required": "Super administrator access is required to manage platform roles",
+      "system_default_cannot_delete": "Built-in system roles cannot be deleted",
+      "system_default_cannot_disable": "Built-in system roles and the super administrator role cannot be disabled",
+      "system_default_cannot_edit": "Built-in system roles cannot be edited"
+    },
+    "rule_analytics": {
+      "range_invalid": "Invalid time range. Allowed: {allowed}",
+      "version_not_found": "The rule version no longer exists; it may have been purged"
+    },
+    "sideline": {
+      "access_denied": "You do not have permission to access this sidelined message",
+      "id_required": "Specify the item to act on",
+      "not_found": "The sidelined message does not exist, or you do not have access to it"
+    },
+    "smtp_credential": {
+      "access_denied": "You do not have permission to access this SMTP credential",
+      "cross_tenant_denied": "You cannot create credentials for another tenant",
+      "local_auth_disabled": "The local account backend is disabled. Use one of: {allowed}",
+      "not_found": "The SMTP credential no longer exists; it may have been deleted",
+      "password_required": "A password is required when using the local account backend"
+    },
+    "statistics": {
+      "date_range_required": "Specify the start and end dates for the report",
+      "interval_invalid": "Invalid interval. Allowed: {allowed}",
+      "limit_out_of_range": "The result limit must be between {min} and {max}",
+      "params_invalid": "The query parameters are invalid; check your filters and try again"
+    },
+    "unified_rule": {
+      "access_denied": "You do not have permission to access this rule",
+      "action_required": "Action rules must specify an action",
+      "advanced_rules_need_tenant": "Advanced filter rules are not available from the platform view; select a tenant first",
+      "bulk_action_invalid": "Invalid bulk action. Allowed: {allowed}",
+      "condition_tree_invalid": "The rule conditions are invalid; check that every condition is complete",
+      "content_rules_need_tenant": "Content rules can only be managed from a tenant view; select a tenant first",
+      "copy_denied": "You do not have permission to copy this rule",
+      "feature_group_condition_required": "A feature group must have conditions configured",
+      "group_policy_name_required": "Enter a group policy name",
+      "id_invalid": "Invalid rule ID",
+      "ids_required": "Select at least one rule",
+      "metadata_invalid": "The rule metadata has an invalid format",
+      "name_exists": "A rule with this name already exists; choose another",
+      "not_found": "The rule no longer exists; it may have been deleted",
+      "role_not_permitted": "Your role is not permitted to create rules",
+      "route_metadata_required": "Route rules must specify the next hop: {required}",
+      "stage_not_allowed_for_role": "Tenant administrators may only manage rules at these stages: {allowed}",
+      "system_baseline_no_convert": "A regular rule cannot be converted into a system baseline rule",
+      "system_baseline_no_create": "System baseline rules cannot be created through the API",
+      "system_baseline_no_edit": "System baseline rules cannot be edited by tenant administrators",
+      "tag_required": "Tag rules must specify at least one tag",
+      "tenant_context_required": "Select a tenant before performing this action",
+      "valid_range_invalid": "The validity end time cannot be earlier than the start time"
+    },
+    "investigation": {
+      "not_found": "Investigation task not found",
+      "access_denied": "Access to this investigation task is denied",
+      "id_required": "Investigation task ID is required",
+      "confirm_required": "This action requires explicit confirmation",
+      "not_ready_for_actions": "The investigation task is not finished yet, so actions cannot be taken",
+      "type_unsupported": "Unsupported investigation type",
+      "target_type_unsupported": "Unsupported investigation target type",
+      "traceback_created_elsewhere": "Threat-traceback tasks are created by the threat-retro scan, not here",
+      "traceback_cancelled_elsewhere": "Cancel threat-traceback tasks from the threat-retro run instead"
+    },
+    "profile": {
+      "user_not_found": "User not found",
+      "session_not_found": "The sign-in session does not exist or has expired",
+      "session_id_missing": "The session identifier is missing",
+      "name_required": "Name must not be empty",
+      "password_incorrect": "Incorrect password",
+      "verification_code_incorrect": "Incorrect verification code",
+      "method_invalid": "Invalid verification method",
+      "purpose_invalid": "Invalid verification purpose",
+      "type_invalid": "Invalid type",
+      "method_purpose_mismatch": "The verification method does not match the purpose",
+      "target_invalid": "Invalid target",
+      "action_unsupported": "Unsupported action",
+      "start_time_invalid": "Invalid start time: use RFC3339 or YYYY-MM-DD",
+      "end_time_invalid": "Invalid end time: use RFC3339 or YYYY-MM-DD",
+      "two_factor_required_by_policy": "The system policy requires two-factor authentication, so it cannot be disabled",
+      "two_factor_enable_via_endpoint": "Enable two-factor authentication from the two-factor settings"
+    },
+    "threat_retro": {
+      "run_not_found": "Retro run not found",
+      "strategy_not_found": "Strategy not found",
+      "strategy_id_required": "Please select a strategy",
+      "mail_log_id_required": "Please select a mail",
+      "mail_log_ids_required": "Please select at least one mail",
+      "leak_mail_not_in_run": "This mail does not belong to the current retro run",
+      "window_start_invalid": "Invalid window start time",
+      "window_end_invalid": "Invalid window end time",
+      "window_order_invalid": "The window start time must be earlier than the end time",
+      "indicator_tag_format_invalid": "Indicator tags must use the form indicator:「code」 with a non-empty code"
+    },
+    "tenant": {
+      "not_found": "Tenant not found",
+      "access_denied": "Access to this tenant is denied",
+      "admin_account_password_pair_required": "The admin account and password must be provided together",
+      "admin_account_too_long": "The admin account must not exceed {max} characters",
+      "code_immutable": "The tenant code cannot be changed after creation",
+      "has_withheld_mail": "This tenant still has withheld mail (quarantine / sideline / outbound audit); release or purge those items before deleting it",
+      "next_hop_pair_required": "The next-hop host and port must be provided together",
+      "next_hop_triad_required": "The next-hop type, host and port must be provided together",
+      "next_hop_host_empty": "The next-hop host must not be empty"
+    },
+    "tenant_routing": {
+      "nexthop_not_found": "Next hop not found",
+      "domain_not_found": "Domain not found",
+      "domain_not_verified": "The domain is not verified yet",
+      "egress_not_in_pool": "The selected egress is not in the pool",
+      "egress_binding_exists": "An egress binding already exists for this domain",
+      "egress_binding_not_found": "Egress binding not found"
+    },
+    "mail_log": {
+      "direction_invalid": "Invalid direction: must be all, receive, send, or internal",
+      "id_required": "Mail log ID is required",
+      "id_format_invalid": "Invalid mail log ID format",
+      "not_found": "Mail log entry not found",
+      "access_denied": "Access to this mail log entry is denied",
+      "export_format_unsupported": "Unsupported export format: use json or csv",
+      "import_data_format_invalid": "Invalid mail log data format",
+      "import_data_missing": "No mail log data provided",
+      "interpret_rate_limited": "Too many requests, please try again later",
+      "interpret_too_many_concurrent": "Too many concurrent AI interpretations, please try again later",
+      "interpret_disabled": "AI log interpretation is disabled"
+    },
+    "spoofing_log": {
+      "page_too_large": "The page number must not exceed {max}",
+      "category_must_be_single": "Only a single KPI drill-down category may be specified",
+      "category_invalid": "Invalid drill-down category",
+      "time_range_too_long": "The query time range must not exceed {max_days} days",
+      "not_found": "Spoofing detection log not found"
+    },
+    "inbound_audit": {
+      "item_id_invalid": "Invalid audit item ID",
+      "item_not_found": "Inbound audit item not found",
+      "mail_content_unavailable": "The email content is no longer available on the storage node",
+      "item_not_pending": "This audit item is no longer pending",
+      "ids_required": "Please select at least one audit item",
+      "action_invalid": "Invalid action: must be approve or reject"
+    },
+    "assistant": {
+      "not_authenticated": "Please sign in first",
+      "session_not_found": "Session not found",
+      "access_denied": "Access to this session is denied",
+      "no_rule_drafts_in_session": "No rule drafts were found in this session"
+    },
+    "security_overview": {
+      "date_range_required": "Start date and end date are required",
+      "date_required": "A date is required",
+      "date_format_invalid": "The date must be in YYYY-MM-DD format",
+      "view_by_required": "A view dimension is required",
+      "series_required": "A data series is required",
+      "dimension_invalid": "Invalid dimension; allowed values: {allowed}",
+      "interpret_disabled": "AI interpretation is disabled",
+      "interpret_too_many_concurrent": "Too many concurrent AI requests, please try again later"
+    },
+    "quarantine": {
+      "id_required": "The quarantine item ID is required",
+      "item_not_found": "Quarantine item not found",
+      "access_denied": "Access to this quarantine item is denied"
+    },
+    "antispam_notify": {
+      "tenant_id_invalid": "Invalid tenant ID",
+      "limit_invalid": "Invalid limit",
+      "recipient_required": "A recipient is required",
+      "since_invalid": "Invalid since time: use RFC3339",
+      "no_pending_sideline_item": "There is no pending sideline item"
+    },
+    "attachment_security": {
+      "password_blank": "The password must not be blank",
+      "password_too_long": "The password must not exceed {max} characters",
+      "id_invalid": "Invalid ID",
+      "id_required": "An ID is required",
+      "sideline_item_not_found": "Sideline item not found",
+      "access_denied": "Access to this attachment record is denied",
+      "request_body_unreadable": "Failed to read the request body",
+      "scan_result_format_invalid": "Invalid attachment scan result data format",
+      "scan_result_missing": "No attachment scan result data provided",
+      "scan_result_all_invalid": "No valid scan results remained after validation"
+    },
+    "url_protection": {
+      "deep_inspect_timeout_out_of_range": "The deep-inspection timeout must be between {min} and {max} seconds",
+      "deep_inspect_timeout_policy_invalid": "Invalid deep-inspection timeout policy; allowed values: {allowed}",
+      "domain_format_invalid": "Invalid domain format",
+      "domain_limit_exceeded": "At most {max} domains per tenant",
+      "domain_already_exists": "This domain already exists",
+      "cidr_invalid": "Invalid CIDR notation",
+      "cidr_limit_exceeded": "At most {max} IP ranges per tenant",
+      "cidr_already_exists": "This CIDR already exists",
+      "tenant_id_required": "A tenant must be specified",
+      "tenant_id_invalid": "Invalid tenant ID"
+    },
+    "login_policy": {
+      "two_factor_platform_admin_only": "Only platform admins may set the two-factor enforcement policy",
+      "two_factor_locked_by_platform": "Two-factor authentication is enforced by the platform and cannot be disabled by a tenant",
+      "two_factor_self_service_tenant_only": "The two-factor self-service switch is tenant-scoped and not supported on the global baseline",
+      "baseline_platform_admin_only": "Only platform admins may change the platform baseline",
+      "rule_platform_admin_only": "Only platform admins may change platform rules",
+      "ip_or_cidr_format_invalid": "Enter a valid IP address or CIDR (e.g. 192.168.1.0/24)",
+      "rule_already_exists": "This IP/CIDR rule already exists",
+      "delete_would_lock_out_self": "Deleting this rule would remove your current IP from the allowlist and lock you out",
+      "rule_not_found": "Rule not found"
+    },
+    "group_members_io": {
+      "group_not_found": "Group not found",
+      "access_denied": "Access to this group is denied",
+      "export_unsupported_for_feature_group": "Feature groups do not support member export",
+      "import_unsupported_for_feature_group": "Feature groups do not support member import",
+      "file_missing": "Please choose a file to upload",
+      "file_too_large": "The file is too large",
+      "file_unreadable": "The file cannot be opened",
+      "condition_tree_not_member_format": "This group's condition tree is not in an importable member format"
+    },
+    "rule_test_eml": {
+      "file_missing": "Please choose an EML file to upload",
+      "file_too_large": "The file is too large (max {max_mb} MB)",
+      "file_unreadable": "The file cannot be read",
+      "condition_tree_invalid": "Invalid condition tree JSON",
+      "condition_tree_or_rule_id_required": "A condition tree or rule ID is required",
+      "rule_id_invalid": "The rule ID must be an integer"
+    },
+    "threat_retro_mail": {
+      "mail_log_id_invalid": "Invalid mail log ID",
+      "mail_not_found": "Mail not found",
+      "email_content_not_found": "The email content is missing or has been purged"
+    },
+    "tenant_user": {
+      "tenant_scope_required": "This action requires a tenant scope",
+      "cannot_delete_own_account": "You cannot delete your own account"
+    },
+    "phishing_admission": {
+      "profile_id_invalid_for_tenant": "The selected detection profile does not exist or does not belong to the current tenant",
+      "rule_not_found": "Admission rule not found"
+    },
+    "mail_auth_config": {
+      "overlaps_existing_active": "This config overlaps an existing active mail-auth config with the same domain scope and scenes",
+      "not_found": "Mail auth config not found",
+      "server_fields_required": "Protocol, server host and server port are required",
+      "auth_timeout_out_of_range": "The auth timeout must be between {min} and {max} seconds",
+      "protocol_unsupported": "Unsupported protocol"
+    },
+    "admin_audit": {
+      "tenant_admin_has_no_tenant_bound": "This tenant administrator is not bound to any tenant",
+      "audit_log_not_found": "Audit log not found"
+    },
+    "advanced_rules_config": {
+      "review_timeout_action_accept_reject_keep": "The review timeout action must be accept, reject or keep_pending",
+      "forward_rate_limit_per_minute_non": "The per-minute forward rate limit must not be negative",
+      "tarpit_max_concurrent_non_negative": "The tarpit concurrency limit must not be negative",
+      "admin_notify_max_recipients_non_negative": "The admin notification recipient limit must not be negative"
+    },
+    "alert_rules": {
+      "rule_name_exists": "This rule name already exists",
+      "rule_not_found": "Rule not found",
+      "rule_has_open_alerts": "This rule has open alerts and cannot be deleted; handle them first"
+    },
+    "alert_smtp": {
+      "alert_smtp_enc_key_missing": "The alert SMTP encryption key is not configured, so external SMTP credentials cannot be saved",
+      "recipient_required": "The recipient must not be empty"
+    },
+    "antispam_dkim": {
+      "dkim_key_not_found": "DKIM key not found"
+    },
+    "antispam_queue": {
+      "notification_message_uuid_accepted_by_atomic": "The notification message UUID is only accepted by the atomic notification tracking endpoint",
+      "invalid_quarantine_notification_tracking_request": "Invalid quarantine notification tracking request"
+    },
+    "auth_spoofing": {
+      "no_tenant_context": "Please select a tenant first",
+      "tenant_admins_delete_tenant_overrides": "Only tenant admins can delete tenant overrides"
+    },
+    "config_overrides": {
+      "config_value_not_empty": "The config value must not be empty",
+      "config_override_not_found": "Config override not found",
+      "config_file_section_name_config_key": "The config file, section name and config key are required"
+    },
+    "config_overrides_handler": {
+      "config_file_query_parameter_required": "The config file must be specified"
+    },
+    "contact_sync_logs": {
+      "sync_log_not_found": "Sync log not found"
+    },
+    "contacts": {
+      "contact_not_found": "Contact not found",
+      "tag_invalid": "The tag must be executive or key_position"
+    },
+    "delivery_stats": {
+      "too_many_items_one_batch": "Too many items in one batch"
+    },
+    "delivery_traffic": {
+      "end_date_in_future": "The end date must not be later than today",
+      "ai_interpretation_disabled": "AI interpretation is disabled",
+      "too_many_concurrent_ai_requests_please": "Too many concurrent AI requests, please try again later"
+    },
+    "link_attachment_security": {
+      "ai_interpretation_disabled": "AI interpretation is disabled",
+      "too_many_concurrent_ai_requests_please": "Too many concurrent AI requests, please try again later",
+      "limit_integer_between_1_50": "The limit must be an integer between 1 and 50",
+      "domain_required": "A domain is required",
+      "invalid_domain_format": "Invalid domain format",
+      "direction_one_all_receive_send_internal": "The direction must be one of all, receive, send or internal",
+      "domain_already_blacklisted": "This domain is already blacklisted"
+    },
+    "disposal_settings": {
+      "tenant_id_required_select_tenant_x": "Please select a tenant before managing its settings"
+    },
+    "security_modules": {
+      "tenant_id_required_select_tenant_x": "Please select a tenant before managing its settings",
+      "valid_tenant_scope_required": "A valid tenant scope is required",
+      "admin_access_required": "Administrator access is required",
+      "stage_1_ip_policy_managed_globally": "The stage-1 IP policy is managed globally by a system administrator",
+      "stage_1_ip_policy_changed_from": "The stage-1 IP policy must be changed from the platform scope",
+      "unknown_page": "Unknown security module page: {page}"
+    },
+    "domain_verify": {
+      "path_tenant_id_does_not_match": "The tenant in the path does not match the selected tenant",
+      "domain_not_found": "Domain not found"
+    },
+    "email_logs": {
+      "id_required": "An ID is required",
+      "date_query_parameter_required_yyyy_mm": "A date is required (YYYY-MM-DD)",
+      "invalid_date_format_expected_yyyy_mm": "Invalid date format, expected YYYY-MM-DD",
+      "invalid_date": "Invalid date",
+      "no_log_files_found_specified_date": "No log files were found for the specified date",
+      "access_denied": "Access denied",
+      "email_log_entry_not_found": "Email log entry not found"
+    },
+    "link_click_logs": {
+      "access_denied": "Access denied",
+      "invalid_id": "Invalid ID",
+      "link_click_not_found": "Link click record not found"
+    },
+    "mail_lifecycle_logs": {
+      "access_denied": "Access denied",
+      "mail_log_entry_not_found": "Mail log entry not found",
+      "raw_log_search_busy_all_gateway": "Raw log search is busy on all gateway nodes; please retry shortly",
+      "message_uuid_required": "The message UUID is required",
+      "from_define_valid_time_range": "The start time must be earlier than the end time",
+      "raw_log_search_busy_retry_shortly": "Raw log search is busy; please retry shortly"
+    },
+    "mail_log_attachment": {
+      "access_denied": "Access denied",
+      "invalid_attachment_md5": "Invalid attachment MD5",
+      "mail_log_not_found": "Mail log not found",
+      "eml_not_available": "The raw email is not available",
+      "eml_not_found_storage_node": "The raw email was not found on the storage node",
+      "attachment_not_found": "Attachment not found"
+    },
+    "mail_log_preview": {
+      "access_denied": "Access denied",
+      "mail_log_entry_not_found": "Mail log entry not found",
+      "original_email_content_not_available": "The original email content is not available"
+    },
+    "email_preview": {
+      "email_content_not_found": "Email content not found"
+    },
+    "portal_quarantine_preview": {
+      "email_content_not_found": "Email content not found"
+    },
+    "export_import": {
+      "content_rules_managed_by_system_administrators": "Content rules can only be managed by system administrators"
+    },
+    "feature_group": {
+      "type_query_param_one_ip_sender": "The type must be one of ip, sender, recipient, content or feature"
+    },
+    "forward_queue_admin": {
+      "invalid_id": "Invalid ID"
+    },
+    "geoip_rules": {
+      "ip_range_already_exists": "This IP range already exists",
+      "geoip_rule_not_found": "GeoIP rule not found",
+      "format_json_csv": "The format must be json or csv"
+    },
+    "group_management_access": {
+      "group_management_requires_tenant_administrator_a": "Group management requires tenant administrator access",
+      "group_management_accessed_within_tenant_context": "In multi-tenant mode, group management requires a tenant context",
+      "access_denied_group_management_rule": "Access to this group management rule is denied",
+      "group_management_rules_imported_with_scope": "Group management rules must be imported with scope=groups"
+    },
+    "group_policy": {
+      "group_policy_requires_tenant_administrator_acces": "Group policy requires tenant administrator access",
+      "group_policy_accessed_within_tenant_context": "In multi-tenant mode, group policy requires a tenant context",
+      "group_policy_rules_stay_within_active": "Group policy rules must stay within the active tenant"
+    },
+    "intent_engine": {
+      "engine_enabled_receive_engine_enabled_send": "The receive, send and internal engine switches are all required"
+    },
+    "ip_filter": {
+      "rule_not_found": "Rule not found"
+    },
+    "ip_frequency": {
+      "rule_not_found": "Rule not found",
+      "active_required_toggle_action": "The toggle action requires a target state",
+      "rules_required": "Rules are required"
+    },
+    "rbl_filter": {
+      "rule_not_found": "Rule not found",
+      "invalid_client_ip": "Invalid client IP"
+    },
+    "mail_routing_helper": {
+      "mail_routing_rules_managed_by_system": "Mail routing rules can only be managed by system administrators",
+      "mail_routing_rules_imported_with_scope": "Mail routing rules must be imported with scope=mail_routing_relay or scope=mail_routing_outbound",
+      "tenant_id_required_select_tenant_x": "Please select a tenant before managing mail routing rules"
+    },
+    "monitor_handlers": {
+      "backup_task_not_found": "Backup task not found"
+    },
+    "overseas_mail": {
+      "directions_required": "The direction list is required",
+      "config_modified_by_another": "The configuration was changed by someone else; refresh and try again",
+      "invalid_ip_address": "Invalid IP address"
+    },
+    "password_policy_settings": {
+      "mincharclasses_between_1_4": "The minimum character-class count must be between 1 and 4"
+    },
+    "phishing_actions": {
+      "reason_required": "A reason is required",
+      "not_found": "Not found"
+    },
+    "spoofing_actions": {
+      "reason_required": "A reason is required",
+      "not_found": "Not found"
+    },
+    "phishing_detection_log": {
+      "not_found": "Not found"
+    },
+    "spoofing_brands": {
+      "not_found": "Not found",
+      "disposition_mode_invalid": "The disposition mode must be observe, standard, strict or custom"
+    },
+    "spoofing_persons": {
+      "not_found": "Not found",
+      "protection_level_invalid": "The protection level must be high, medium or low",
+      "observe_mode_invalid": "The observe mode must be true or false",
+      "email_already_protected": "The email {email} is already a protected person"
+    },
+    "spoofing_whitelist": {
+      "not_found": "Not found",
+      "match_type_invalid": "The match type must be email or domain",
+      "value_required": "The value must not be empty",
+      "whitelist_entry_exists": "This allowlist entry already exists"
+    },
+    "phishing_screenshot": {
+      "invalid_storage_node_key": "Invalid storage node or key",
+      "invalid_key_missing_task_id": "Invalid key: the task ID is missing",
+      "screenshot_not_found": "Screenshot not found"
+    },
+    "portal_quarantine_listadd": {
+      "quarantine_item_has_no_tenant_cannot": "This quarantine item has no tenant, so it cannot be added to a user list",
+      "quarantined_mail_has_no_usable_sender": "This quarantined mail has no usable sender to add"
+    },
+    "portal_quarantine_release": {
+      "quarantine_item_not_found": "Quarantine item not found",
+      "quarantine_item_already_released_deleted": "This quarantine item has already been released or deleted"
+    },
+    "proxysvr_probe": {
+      "proxysvr_endpoint_not_found": "The proxy-send endpoint was not found"
+    },
+    "recall_admin": {
+      "backend_coremail_exchange": "The backend must be coremail or exchange",
+      "mail_log_does_not_belong_your": "This mail log does not belong to your tenant",
+      "recall_request_not_found": "Recall request not found",
+      "recall_request_does_not_belong_your": "This recall request does not belong to your tenant"
+    },
+    "recipient_check": {
+      "invalid_existence_action": "Invalid recipient-existence action"
+    },
+    "recipient_config_access": {
+      "recipient_configuration_requires_tenant_context": "In multi-tenant mode, recipient configuration requires a tenant context",
+      "recipient_configuration_requires_tenant_administ": "Recipient configuration requires tenant administrator access"
+    },
+    "recipient_limit": {
+      "mode_detailed_merged": "The mode must be detailed or merged",
+      "merged_limit_limit_1_unlimited_between": "The merged limit must be -1 (unlimited) or between 1 and 1000",
+      "invalid_action_merged_limit": "This action is not supported for a merged limit",
+      "action_invalid": "Invalid action for {name}",
+      "scope_invalid": "Invalid scope for {name}: must be local or all"
+    },
+    "roles": {
+      "system_default_role_cannot_edited": "The system default role cannot be edited",
+      "system_default_super_admin_role_cannot": "The system default and super administrator roles cannot be disabled",
+      "system_default_role_cannot_deleted": "The system default role cannot be deleted"
+    },
+    "smtp_auth_ip_lockout": {
+      "invalid_ip": "Invalid IP address"
+    },
+    "spoofing_notification_preview": {
+      "admin_emails_invalid": "The admin email list contains an invalid address",
+      "sample_sender_invalid": "The sample sender must be a valid email address",
+      "sample_subject_too_long": "The sample subject must not exceed 500 characters",
+      "sample_confidence_out_of_range": "The sample confidence must be between 0 and 100"
+    },
+    "spoofing_persons_bulk": {
+      "confidence_threshold_out_of_range": "The confidence threshold must be between 0 and 100",
+      "unsupported_bulk_action": "Unsupported bulk action",
+      "bulk_add_limit_exceeded": "At most 20 people can be added at once",
+      "duplicate_email_in_group": "Duplicate email {email} within the group"
+    },
+    "spoofing_routes": {
+      "spoofing_detection_capability_required": "The spoofing detection capability is required"
+    },
+    "tenant_llm": {
+      "invalid_tenant_id": "Invalid tenant ID",
+      "base_url_model_api_key_required": "The base URL, model and API key are required"
+    },
+    "threat_retro_agent_state": {
+      "limits_non_negative": "Limits must not be negative"
+    },
+    "threat_retro_bulk_export": {
+      "action_cancel": "The action must be cancel"
+    },
+    "threat_retro_notification": {
+      "kind_immediate_digest": "The notification kind must be immediate or digest"
+    },
+    "threat_retro_routes": {
+      "tenant_id_required_select_tenant_x": "Please select a tenant first",
+      "threat_retro_capability_required": "The threat retro capability is required"
+    },
+    "threat_retro_runs": {
+      "runid_required": "The run ID is required",
+      "run_not_found": "Run not found"
+    },
+    "threat_retro_strategies": {
+      "strategy_not_found": "Strategy not found"
+    },
+    "unified_rules_pagespec": {
+      "behavior_control_rule_have_metadata_feature": "A behavior-control rule must set metadata.feature to behavior_control",
+      "content_rules_rule_have_metadata_feature": "A content rule must set metadata.feature to content_rules",
+      "sender_filter_rule_priority_between_1": "The sender filter rule priority must be between 1 and 9999",
+      "invalid_metadata": "Invalid metadata"
+    },
+    "user_list_access": {
+      "user_list_rules_require_tenant_administrator": "User-list rules require tenant administrator access",
+      "user_list_rules_available_owning_tenant": "In multi-tenant mode, user-list rules are only available to the owning tenant",
+      "user_list_rules_require_tenant_context": "User-list rules require a tenant context",
+      "user_list_rules_created_managed_by": "User-list rules are created and managed by users, not through the generic administrator API",
+      "access_denied_user_list_rule": "Access to this user-list rule is denied",
+      "user_generated_user_list_rules_deleted": "Only user-generated user-list rules can be deleted here"
+    },
+    "user_unlock": {
+      "user_not_found": "User not found"
+    },
+    "users": {
+      "cannot_demote_last_system_administrator": "The last system administrator cannot be demoted",
+      "cannot_delete_your_own_account": "You cannot delete your own account",
+      "cannot_delete_last_system_administrator": "The last system administrator cannot be deleted",
+      "cannot_disable_last_enabled_super_administrator": "The last enabled super administrator cannot be disabled",
+      "bulk_action_would_leave_zero_enabled": "This bulk action would leave no enabled super administrator"
+    },
+    "auth": {
+      "authorization_header_required": "Please sign in first",
+      "authorization_header_malformed": "The sign-in credential is malformed; please sign in again",
+      "token_invalid_or_expired": "Your session is invalid or has expired; please sign in again",
+      "session_invalid": "Invalid session; please sign in again",
+      "session_revoked": "This session has been revoked; please sign in again",
+      "system_admin_required": "This action requires system administrator access",
+      "super_admin_required": "This action requires super administrator access",
+      "admin_required": "This action requires administrator access",
+      "tenant_header_cross_tenant": "The requested tenant does not match the selected tenant; the cross-tenant operation was rejected",
+      "tenant_id_not_integer": "The tenant ID must be an integer",
+      "tenant_id_required": "Please select a tenant before managing its settings",
+      "tenant_id_invalid": "Invalid tenant ID",
+      "tenant_access_denied": "Access to this tenant is denied"
+    },
+    "login": {
+      "rate_limited": "Too many requests, please try again later",
+      "code_already_sent": "A verification code has already been sent; please try again later",
+      "channel_disabled": "This delivery channel is not enabled",
+      "ticket_invalid_or_expired": "The sign-in verification has expired; please sign in again",
+      "verification_code_incorrect": "Incorrect verification code",
+      "target_invalid": "Invalid delivery target",
+      "user_gone": "This account no longer exists"
+    },
+    "password": {
+      "user_not_found": "User not found",
+      "current_incorrect": "The current password is incorrect",
+      "recently_used": "The new password must differ from recently used passwords",
+      "credential_invalid_or_expired": "The credential is invalid or has expired; please start over"
+    },
+    "password_reset": {
+      "feature_disabled": "Password reset is not enabled",
+      "code_invalid_or_expired": "The verification code is incorrect or has expired",
+      "ticket_invalid_or_expired": "The credential is invalid or has expired",
+      "rate_limited": "Too many requests, please try again later"
     }
   }
 }

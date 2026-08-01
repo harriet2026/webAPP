@@ -32,9 +32,11 @@ import { useAuth } from '@/contexts/auth-context';
 import { useDevices, useLogoutDevice, useLogoutOthers } from './api';
 import { formatTimestamp } from '@/lib/format-time';
 import type { Session } from './types';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export function SessionsTab() {
   const t = useTranslations('profile');
+  const apiErrorMessage = useApiErrorMessage();
   const tc = useTranslations('common');
   const { data, isLoading } = useDevices();
   const logoutDevice = useLogoutDevice();
@@ -66,7 +68,7 @@ export function SessionsTab() {
         toast.success(t('devices.loggedOutDevice', { name: d.device }));
       }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : tc('error'));
+      toast.error(apiErrorMessage(e, tc('error')));
     }
   };
 
@@ -76,7 +78,7 @@ export function SessionsTab() {
       setBatchOpen(false);
       toast.success(t('devices.loggedOutOthers', { n: res.count }));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : tc('error'));
+      toast.error(apiErrorMessage(e, tc('error')));
     }
   };
 

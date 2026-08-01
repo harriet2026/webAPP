@@ -27,6 +27,25 @@ describe('profileApiErrorMessage (GT-11969)', () => {
     expect(profileApiErrorMessage(err, 'pwd.changeFailed', t)).toBe('新密码不能与近期使用过的密码相同');
   });
 
+  // GT-12614: profile 侧校验错误已改成"稳定错误码 + 英文 message"。若不先按
+  // 错误码取词条，这些错误会落到 CJK 判断之外、退化成笼统的兜底文案 ——
+  // 用户从"密码错误"变成"保存失败"，页面不报错但信息量丢了。
+  it('coded 4xx -> apiErrors.<code> 文案，优先于英文 message 的兜底', () => {
+    const err = new ApiError(400, 'incorrect password', {
+      error: { code: 'profile.password_incorrect', message: 'incorrect password', params: { field: 'password' } },
+    });
+    const tRoot = (key: string) => (key === 'apiErrors.profile.password_incorrect' ? '密码错误' : key);
+    expect(profileApiErrorMessage(err, 'pwd.changeFailed', t, tRoot)).toBe('密码错误');
+  });
+
+  it('未命中错误码时回到原有行为（兜底 key），不显示后端英文', () => {
+    const err = new ApiError(400, 'something else', {
+      error: { code: 'profile.brand_new_code', message: 'something else' },
+    });
+    const tRoot = (key: string) => key; // next-intl 缺 key 时原样返回
+    expect(profileApiErrorMessage(err, 'pwd.changeFailed', t, tRoot)).toBe('profile.pwd.changeFailed');
+  });
+
   it('non-ApiError -> caller fallback key', () => {
     expect(profileApiErrorMessage(new Error('boom'), 'account.saveFailed', t)).toBe('profile.account.saveFailed');
     expect(profileApiErrorMessage('weird', 'account.saveFailed', t)).toBe('profile.account.saveFailed');

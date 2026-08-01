@@ -27,8 +27,17 @@ const systemAdminPriorityRange: PriorityRange = {
   defaultValue: 600,
 };
 
-export function getAdvancedRulesPriorityRange(isSystemAdmin: boolean): PriorityRange {
+// validatePriority 的角色收窄是**全局**的（对 rules 表的所有 page 一视同仁），
+// 不是高级过滤规则专有。GT-12693 发现发信人黑白名单抽屉写死 1-9999、完全没有
+// 角色判断，租户管理员手改优先级必然 400。所以这里给出一个不带模块名的入口，
+// 供其它规则表单共用；getAdvancedRulesPriorityRange 保留为其别名，避免改动
+// 既有调用点与它的单测。
+export function getRulePriorityRange(isSystemAdmin: boolean): PriorityRange {
   return isSystemAdmin ? systemAdminPriorityRange : tenantAdminPriorityRange;
+}
+
+export function getAdvancedRulesPriorityRange(isSystemAdmin: boolean): PriorityRange {
+  return getRulePriorityRange(isSystemAdmin);
 }
 
 export function isPriorityInRange(priority: number, range: Pick<PriorityRange, 'min' | 'max'>): boolean {

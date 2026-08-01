@@ -103,6 +103,14 @@ const VERIFIED_DOMAINS = [
   { id: 502, domain: 'partner.com', verify_status: 'verified', is_active: true },
 ];
 
+const ENABLED_POLICY = {
+  enabled: true,
+  trusted_cidrs: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'],
+  min_prefix_len_v4: 24,
+  min_prefix_len_v6: 64,
+  can_privilege: true,
+};
+
 function ruleBody(f: RuleFixture) {
   return {
     id: f.id,
@@ -128,11 +136,21 @@ function ruleBody(f: RuleFixture) {
   };
 }
 
-function routeApi(fixtures: RuleFixture[] = FIXTURES, domains: typeof VERIFIED_DOMAINS = VERIFIED_DOMAINS) {
+function routeApi(
+  fixtures: RuleFixture[] = FIXTURES,
+  domains: typeof VERIFIED_DOMAINS = VERIFIED_DOMAINS,
+  policy = ENABLED_POLICY,
+) {
   mockApiRequest.mockImplementation((url: string, opts?: { method?: string; body?: unknown }) => {
     const method = (opts?.method ?? 'GET').toUpperCase();
     if (method === 'GET' && url === '/mail-admission-rules') {
       return Promise.resolve({ items: fixtures.map(ruleBody) });
+    }
+    if (method === 'GET' && url === '/mail-admission/_meta/policy') {
+      return Promise.resolve(policy);
+    }
+    if (method === 'PUT' && url === '/mail-admission/_meta/policy') {
+      return Promise.resolve({ ...policy, ...(opts?.body as { enabled?: boolean }) });
     }
     if (method === 'GET' && url === `/tenants/${TENANT_ID}/domains`) {
       return Promise.resolve({ items: domains });
@@ -165,6 +183,28 @@ describe('RelayTab', () => {
   beforeEach(() => {
     mockApiRequest.mockReset();
     routeApi();
+  });
+
+  it('shows the default-off gate and lets a system admin enable it from the rules page', async () => {
+    const user = userEvent.setup();
+    routeApi(FIXTURES, VERIFIED_DOMAINS, { ...ENABLED_POLICY, enabled: false });
+    render(wrap(<RelayTab tenantId={TENANT_ID} />));
+
+    expect(await screen.findByTestId('mr-relay-master-switch-off')).toHaveTextContent(
+      '规则总开关已关闭，当前所有转发规则均不会生效'
+    );
+    const masterSwitch = screen.getByTestId('mr-relay-master-switch');
+    expect(masterSwitch).not.toBeChecked();
+
+    await user.click(masterSwitch);
+
+    await waitFor(() => {
+      expect(mockApiRequest).toHaveBeenCalledWith('/mail-admission/_meta/policy', {
+        method: 'PUT',
+        body: { enabled: true },
+      });
+      expect(screen.queryByTestId('mr-relay-master-switch-off')).not.toBeInTheDocument();
+    });
   });
 
   it('renders 3 rows sorted by priority descending (990 -> 950 -> 1)', async () => {

@@ -49,6 +49,7 @@ import { EmlSheet } from './eml-sheet';
 import { AffectedUsersDialog } from './affected-users-dialog';
 import { RecallDialog } from './recall-dialog';
 import { FalsePositiveDialog } from './false-positive-dialog';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface RowSelection {
   runId: string;
@@ -108,6 +109,7 @@ function ExpandedRunDetail({
   onShowAffected: (leak: ThreatRetroLeakMail) => void;
 }) {
   const t = useTranslations('threatRetro');
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
   const { data, isLoading } = useQuery({
     queryKey: ['tr-run-detail', runId],
@@ -267,6 +269,7 @@ export function RunsTable({
   onMutated,
 }: RunsTableProps) {
   const t = useTranslations('threatRetro');
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [emlLeak, setEmlLeak] = useState<ThreatRetroLeakMail | null>(null);
@@ -288,7 +291,7 @@ export function RunsTable({
       link.click();
       URL.revokeObjectURL(url);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.exportError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.exportError'))),
   });
   const bulkCancelMutation = useMutation({
     mutationFn: () => bulkCancelRuns(selectedRunIds, apiRequest),
@@ -298,7 +301,7 @@ export function RunsTable({
       setBulkCancelOpen(false);
       onMutated();
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.cancelError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.cancelError'))),
   });
 
   const cancelMutation = useMutation({
@@ -308,7 +311,7 @@ export function RunsTable({
       setCancelRunId(null);
       onMutated();
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.cancelError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.cancelError'))),
   });
 
   const recallMutation = useMutation({
@@ -326,7 +329,7 @@ export function RunsTable({
       setRecallCtx(null);
       onMutated();
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.recallError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.recallError'))),
   });
 
   const fpMutation = useMutation({
@@ -341,7 +344,7 @@ export function RunsTable({
       setFpCtx(null);
       onMutated();
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.recallError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.recallError'))),
   });
 
   const columns = useMemo<ColumnDef<ThreatRetroRun>[]>(

@@ -46,25 +46,19 @@ describe("SearchBar actions", () => {
     vi.clearAllMocks();
   });
 
-  it("disables empty search and applies a non-empty plain query", () => {
+  it("keeps empty search available for refresh and applies a non-empty plain query", () => {
     const { props } = renderSearchBar();
     const submit = screen.getByTestId("disposal-search-submit");
 
-    expect(submit).toBeDisabled();
-    expect(submit).toHaveClass(
-      "h-9",
-      "gap-1.5",
-      "px-4",
-      "disabled:bg-muted",
-      "disabled:opacity-100",
-    );
+    expect(submit).toBeEnabled();
+    fireEvent.click(submit);
+    expect(props.onSearch).toHaveBeenLastCalledWith("");
+
     fireEvent.change(screen.getByTestId("disposal-natural-language-input"), {
       target: { value: "Q2 report" },
     });
-    expect(submit).toBeEnabled();
-
     fireEvent.click(submit);
-    expect(props.onSearch).toHaveBeenCalledWith("Q2 report");
+    expect(props.onSearch).toHaveBeenLastCalledWith("Q2 report");
   });
 
   it("enables the primary action for a pending structured-filter draft", () => {
@@ -179,11 +173,13 @@ describe("SearchBar actions", () => {
     );
   });
 
-  it("disables reset and templates when there is no useful action", () => {
+  // GT-12563：模板菜单改为恒可用（用户随时可浏览/重命名/删除已存模板），
+  // 只有菜单里的「保存当前条件」条目受 canSaveTemplate 门控。重置按钮仍按无可重置内容禁用。
+  it("disables reset but keeps the template menu reachable when there is no useful action", () => {
     renderSearchBar();
 
     expect(screen.getByTestId("disposal-search-reset")).toBeDisabled();
-    expect(screen.getByTestId("disposal-template-menu")).toBeDisabled();
+    expect(screen.getByTestId("disposal-template-menu")).toBeEnabled();
   });
 
   it("shows the active filter count on the structured-filter toggle", () => {

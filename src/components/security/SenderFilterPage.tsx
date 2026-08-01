@@ -24,9 +24,11 @@ import { RuleImportExportDialog } from '@/components/rules/RuleImportExportDialo
 import { exportUnifiedRules, previewUnifiedRulesImport, executeUnifiedRulesImport } from '@/lib/api/unified-rules';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
 import { toRFC3339 } from '@/lib/format-time';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest, effectiveTenantId } = useApiRequest();
   const { isSystemAdmin, user } = useAuth();
@@ -107,7 +109,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
       setDeleteTarget(null);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -122,7 +124,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
       toast.success(t('common.updateSuccess'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 

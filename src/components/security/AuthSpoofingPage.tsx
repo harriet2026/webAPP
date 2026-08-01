@@ -16,7 +16,6 @@ import { FormatChecksSection } from './auth-spoofing/FormatChecksSection';
 import { ProtocolChecksSection } from './auth-spoofing/ProtocolChecksSection';
 import { SimilarDomainSection } from './auth-spoofing/SimilarDomainSection';
 import { DisplayNameSpoofSection } from './auth-spoofing/DisplayNameSpoofSection';
-import { ExceptionRulesEntry } from './auth-spoofing/ExceptionRulesEntry';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
 
 const DEFAULT_CONFIG: AuthSpoofingConfig = {
@@ -46,10 +45,9 @@ const DEFAULT_CONFIG: AuthSpoofingConfig = {
       none: { enabled: true, action: 'audit', observe_mode: false },
     },
     ptr: {
-      norecord: { enabled: true, action: 'audit', observe_mode: false },
-      temperror: { enabled: true, action: 'audit', observe_mode: false },
-      ehlomismatch: { enabled: true, action: 'quarantine', observe_mode: false },
-      amismatch: { enabled: true, action: 'quarantine', observe_mode: false },
+      noptr: { enabled: true, action: 'audit', observe_mode: false },
+      nomatch: { enabled: true, action: 'quarantine', observe_mode: false },
+      ehlo_mismatch: { enabled: true, action: 'quarantine', observe_mode: false },
     },
   },
   similar_domain: {
@@ -223,7 +221,6 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
             </>
           )}
 
-          <ExceptionRulesEntry />
         </div>
       )}
     </div>

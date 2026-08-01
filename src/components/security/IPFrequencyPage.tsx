@@ -112,6 +112,7 @@ import { format } from 'date-fns';
 import { toRFC3339 } from '@/lib/format-time';
 import { useAuth } from '@/contexts/auth-context';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const ruleSchema = z.object({
   name: z.string().min(1, 'ipFrequency.nameRequired').max(50, 'ipFrequency.nameTooLong'),
@@ -181,6 +182,7 @@ export function IPFrequencyPage({
   showPlatformScopeBadge?: boolean;
 } = {}) {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin } = useAuth();
@@ -368,7 +370,7 @@ export function IPFrequencyPage({
       setReleaseOnDelete(false);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -380,7 +382,7 @@ export function IPFrequencyPage({
       toast.success(t('common.updateSuccess'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -393,7 +395,7 @@ export function IPFrequencyPage({
       toast.success(t('common.updateSuccess'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -404,7 +406,7 @@ export function IPFrequencyPage({
       toast.success(t('common.updateSuccess'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -415,7 +417,7 @@ export function IPFrequencyPage({
       toast.success(t('common.updateSuccess'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 

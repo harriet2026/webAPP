@@ -45,7 +45,10 @@ describe('SenderFilterDrawer validation messages', () => {
     // then any surviving `.message` in JSX is one that reaches the user raw.
     // (Matching the wrapped form directly is fragile: its `${...}` interpolation
     // nests braces inside the outer JSX expression.)
-    const withoutTranslated = SOURCE.replace(/t\(`senderFilter\.errors\.\$\{[^`]*}`\)/g, 'TRANSLATED');
+    // GT-12693 起 priority 用带插值参数的形式 t(`...`, { min, max })，剥离正则
+    // 不能锁死右括号，否则带参调用会被误判成"裸露的 .message"。只匹配到模板串
+    // 结束即可：替换后剩下的 `, { min: … })` 里已不含 errors…message。
+    const withoutTranslated = SOURCE.replace(/t\(`senderFilter\.errors\.\$\{[^`]*}`/g, 'TRANSLATED');
     const survivors = [...withoutTranslated.matchAll(/\{[^{}]*errors[^{}]*\.message[^{}]*\}/g)].map((m) => m[0]);
     expect(survivors).toEqual([]);
   });

@@ -33,7 +33,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { ApiRequestFn } from '@/lib/api/client';
-import { addSenderFilterRule } from '../../lib/disposal-detail-api';
+import { addSenderFilterRule, disposalRulePriority } from '../../lib/disposal-detail-api';
+import { useAuth } from '@/contexts/auth-context';
 
 interface SenderActionsProps {
   sender: string;
@@ -56,6 +57,7 @@ export function SenderActions({
   onDisposed,
 }: SenderActionsProps) {
   const t = useTranslations('emailDisposal.detail.overview.senderActions');
+  const { isSystemAdmin } = useAuth();
   // cancel / confirmBtn already exist (four languages) at the parent
   // overview namespace and are reused by reclassify-dialog.tsx /
   // recipient-status.tsx's own confirm dialogs -- pull from there instead of
@@ -79,7 +81,7 @@ export function SenderActions({
   async function confirmBlacklist() {
     setBusy(true);
     try {
-      await addSenderFilterRule(sender, 'blacklist', apiRequest, {
+      await addSenderFilterRule(sender, 'blacklist', apiRequest, disposalRulePriority(isSystemAdmin), {
         scope: 'tenant',
         includeSubdomains,
       });
@@ -96,7 +98,7 @@ export function SenderActions({
   async function confirmWhitelist() {
     setBusy(true);
     try {
-      await addSenderFilterRule(sender, 'whitelist', apiRequest, {
+      await addSenderFilterRule(sender, 'whitelist', apiRequest, disposalRulePriority(isSystemAdmin), {
         scope: 'tenant',
       });
       toast.success(t('whitelistDialog.success'));

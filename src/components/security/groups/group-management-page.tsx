@@ -31,6 +31,7 @@ import { ruleToGroup, buildRulePayload, importMembers, exportMembers } from '@/l
 import { GroupEditDialog } from './group-edit-dialog';
 import { FeatureGroupDrawer } from './feature-group-drawer';
 import { summarizeConditionTree, summarizeFeaturePreview } from './feature-group-preview';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const ALL_TYPES: GroupType[] = ['ip', 'sender', 'recipient', 'content', 'feature'];
 
@@ -54,6 +55,7 @@ interface GroupManagementPageProps {
 
 export function GroupManagementPage({ platformScope = false }: GroupManagementPageProps = {}) {
   const t = useTranslations('groups');
+  const apiErrorMessage = useApiErrorMessage();
   const tCommon = useTranslations('common');
   const tRules = useTranslations('rules');
   // 条件预览用条件目录标签（与高级过滤规则条件编辑器同一 i18n 源）
@@ -141,7 +143,7 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
       queryClient.invalidateQueries({ queryKey: ['groups', effectiveTenantId] });
       toast.success(tCommon('saveSuccess'));
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const deleteMutation = useMutation({
@@ -151,7 +153,7 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
       toast.success(tCommon('deleteSuccess'));
       setDeletingGroup(null);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   // GT-12260：接口早就按行返回 {line, value, reason}，此前只取了 .length 塞进
@@ -175,7 +177,7 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
       }
       await refetch();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
+      toast.error(apiErrorMessage(e, String(e)));
     } finally {
       setImportingRuleId(null);
       pendingImportGroupRef.current = null;
@@ -197,7 +199,7 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
       link.remove();
       URL.revokeObjectURL(url);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
+      toast.error(apiErrorMessage(e, String(e)));
     } finally {
       setExportingRuleId(null);
     }
@@ -229,7 +231,7 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
       link.remove();
       URL.revokeObjectURL(url);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
+      toast.error(apiErrorMessage(e, String(e)));
     } finally {
       setExportingAll(false);
     }

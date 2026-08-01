@@ -154,7 +154,7 @@
       <thead><tr><th>面板类型</th><th>适用条件</th><th>字段</th></tr></thead>
       <tbody>
         <tr><td>文本类</td><td>发信人/收信人/主题/抄送/密送/正文/信头/信封发信人/信封收信人/关键词匹配/附件内容/附件名/附件MD5/URL/URL域名</td><td>匹配方式 Select（包含/等于/正则表达式/通配符——仅4项，D-2）；匹配值 Textarea（多值换行分隔）；区分大小写 Checkbox；排除匹配 Checkbox；正则时出现「AI 生成正则」按钮（Sparkles）</td></tr>
-        <tr><td>数值类</td><td>邮件附件数量上限/附件总大小/单个附件大小/嵌套压缩层级/嵌套文件数量/二维码数量上限/URL数量上限/相似域名检测(0-100)/15分钟内来源IP数/15分钟内收信人数/15分钟内发信数/当日发信数/15分钟内发信上限/收信人数量上限</td><td>比较方式 Select：大于/大于等于/小于/小于等于/<b>等于</b>（demo 无 spec 所写「介于」，见本页差异注）；阈值 Input number</td></tr>
+        <tr><td>数值类</td><td>邮件附件数量上限/附件总大小/单个附件大小/嵌套压缩层级/嵌套文件数量/二维码数量上限/URL数量上限/相似域名检测(编辑距离，整数，通常 1-5)/15分钟内来源IP数/15分钟内收信人数/15分钟内发信数/当日发信数/15分钟内发信上限/收信人数量上限</td><td>比较方式 Select：大于/大于等于/小于/小于等于/<b>等于</b>（demo 无 spec 所写「介于」，见本页差异注）；阈值 Input number</td></tr>
         <tr><td>选择/单选类</td><td>SPF结果(pass/fail/softfail/none)、DKIM结果(pass/fail)、DMARC结果(pass/fail/none)、PTR结果(match/mismatch/none)、RBL查询结果、URL沙箱结果(safe/suspicious/malicious)、短链接展开(+URL输入)、显示名仿冒、MAIL FROM为空、信封与信头一致性(富卡片UI)、病毒扫描结果、加密附件(存在/不存在)、图片二维码检测、压缩炸弹检测、意图引擎检测(分类+置信度阈值)</td><td>对应枚举 Select 或 RadioGroup（写入运行时字段 <code>selectedResult</code> 等）</td></tr>
         <tr><td>群组/组织/特征组引用</td><td>发信人群组/发信人组织/发信IP组/发信国家/发信地区/属于特征组</td><td>对象下拉 + 排除 Checkbox；特征组选项动态来自群组管理（<code>useFeatureGroups</code>），变更即时生效</td></tr>
         <tr><td>IP 类</td><td>发信IP地址</td><td>Textarea，支持 CIDR 格式，多值换行 + 排除</td></tr>

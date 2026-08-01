@@ -53,6 +53,7 @@ import { DkimManageDrawer } from '@/components/dkim/dkim-manage-drawer';
 import { DkimStatusBadge } from '@/components/dkim/dkim-status-badge';
 import { DomainVerifyStatus } from '@/components/tenants/domain-verify-status';
 import { useProductForm } from '@/contexts/product-form-context';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const domainSchema = z.object({
   domain: z.string().min(1, 'domainRequired'),
@@ -88,6 +89,7 @@ const KEEP_PASSWORD_SENTINEL = '__OSG_KEEP_PASSWORD__';
 
 export default function TenantDomainsPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -161,7 +163,7 @@ export default function TenantDomainsPage() {
       setDeleteId(null);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 

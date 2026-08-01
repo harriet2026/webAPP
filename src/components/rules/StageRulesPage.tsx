@@ -37,6 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { ConditionTreeBuilder } from './ConditionTreeBuilder';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { RuleImportExportDialog } from './RuleImportExportDialog';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const advancedRuleSchema = z.object({
   name: z.string().min(1, 'nameRequired'),
@@ -59,6 +60,7 @@ interface StageRulesPageProps {
 
 export function StageRulesPage({ stage }: StageRulesPageProps) {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const locale = useLocale();
   const { effectiveTenantId, isSystemAdmin, isViewingAllTenants } = useTenant();
@@ -105,7 +107,7 @@ export function StageRulesPage({ stage }: StageRulesPageProps) {
       setDeleteId(null);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -116,7 +118,7 @@ export function StageRulesPage({ stage }: StageRulesPageProps) {
       toast.success(t('common.updateSuccess'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 

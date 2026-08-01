@@ -32,6 +32,7 @@ import { TwoFactorStep } from '@/components/login/two-factor-step';
 import { SetupStep } from '@/components/login/setup-step';
 import { ForgotStep } from '@/components/login/forgot-step';
 import { DemoLoginEntry } from '@/components/login/demo-login-entry';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 // The login state machine. Each step is a distinct screen; transitions are
 // driven by the backend response shape (Plans 2/3/4).
@@ -58,6 +59,7 @@ function advancedRulesFromUrl(): boolean {
 
 export default function LoginPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const { completeLogin } = useAuth();
   const router = useRouter();
   const locale = useLocale();
@@ -298,10 +300,10 @@ export default function LoginPage() {
           const ms = Date.parse(err.lockedUntil) - Date.now();
           if (ms > 0) startLockCountdown(Math.ceil(ms / 1000));
         }
-        setErrorMessage(err.message || t('auth.loginError'));
+        setErrorMessage(apiErrorMessage(err, t('auth.loginError')));
       } else {
         setRemainingAttempts(undefined);
-        setErrorMessage(err instanceof Error ? err.message : t('auth.loginError'));
+        setErrorMessage(apiErrorMessage(err, t('auth.loginError')));
       }
     },
     [refreshCaptcha, startLockCountdown, t],
@@ -359,7 +361,7 @@ export default function LoginPage() {
         const resp = await loginForcedChange(step.ticket, newPassword);
         dispatchStep1(resp, username, advancedRulesFromUrl());
       } catch (err) {
-        setErrorMessage(err instanceof Error ? err.message : t('auth.pwdWeak'));
+        setErrorMessage(apiErrorMessage(err, t('auth.pwdWeak')));
       } finally {
         setSubmitting(false);
       }
@@ -379,7 +381,7 @@ export default function LoginPage() {
       const resp = await loginVerify2FA(step.ticket, twoFactorCode, trustDevice);
       finishLogin(resp, username, advancedRulesFromUrl());
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : t('auth.twoFactorInvalid'));
+      setErrorMessage(apiErrorMessage(err, t('auth.twoFactorInvalid')));
     } finally {
       setSubmitting(false);
     }
@@ -395,9 +397,9 @@ export default function LoginPage() {
       // Do NOT start the countdown if the send failed — the user should be
       // able to retry immediately after a rate-limit / service-unavailable.
       if (err instanceof ApiError) {
-        setErrorMessage(err.message || t('auth.twoFactorInvalid'));
+        setErrorMessage(apiErrorMessage(err, t('auth.twoFactorInvalid')));
       } else {
-        setErrorMessage(err instanceof Error ? err.message : t('auth.twoFactorInvalid'));
+        setErrorMessage(apiErrorMessage(err, t('auth.twoFactorInvalid')));
       }
     }
   }, [startResendCountdown, step, t]);
@@ -420,7 +422,7 @@ export default function LoginPage() {
         const resp = await loginSetupVerify(step.ticket, method, target, code);
         finishLogin(resp, username, advancedRulesFromUrl());
       } catch (err) {
-        setErrorMessage(err instanceof Error ? err.message : t('auth.twoFactorSetupInvalid'));
+        setErrorMessage(apiErrorMessage(err, t('auth.twoFactorSetupInvalid')));
       } finally {
         setSubmitting(false);
       }
@@ -477,7 +479,7 @@ export default function LoginPage() {
         setSuccessMessage(t('auth.resetSuccess'));
         setPassword('');
       } catch (err) {
-        setErrorMessage(err instanceof Error ? err.message : t('auth.pwdWeak'));
+        setErrorMessage(apiErrorMessage(err, t('auth.pwdWeak')));
       } finally {
         setSubmitting(false);
       }

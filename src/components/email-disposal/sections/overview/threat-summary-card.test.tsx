@@ -15,6 +15,12 @@ const wrap = (ui: React.ReactNode) => (
   </NextIntlClientProvider>
 );
 
+// GT-12628: SenderActions/useRecipientDisposition 现从 useAuth 取角色决定
+// 规则 priority（tenant_admin 上限 1000），测试按平台管理员形态 mock。
+vi.mock('@/contexts/auth-context', () => ({
+  useAuth: () => ({ isSystemAdmin: true }),
+}));
+
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
@@ -200,13 +206,48 @@ describe('ThreatSummaryCard', () => {
     expect(label.parentElement?.textContent).toContain('AI 判定为 高管 仿冒（置信度：94%）');
   });
 
-  it('falls back to cac_result.description for AI判定依据 when there is no disposal_basis', () => {
+  // GT-12578：这条用例此前断言「cac_result.description 显示为 AI判定依据」，
+  // 把缺陷行为编码成了期望值。cac_result 来自外部 CAC 反垃圾云查服务
+  // （internal/cac/client.go 的 CAC_PROT_DESC），不是我们的 AI 智能体
+  // （phish_agent_check），贴 AI 标签属于误标。现改为断言正确的来源标签。
+  it('云查描述用「云查依据」标签而不是 AI判定依据 (GT-12578)', () => {
+    renderCard(baseDetail({
+      disposal_basis: undefined,
+      phish_agent_check: undefined,
+      cac_result: { description: '命中已知钓鱼特征库' },
+    }));
+    expect(screen.queryByText('AI判定依据：')).not.toBeInTheDocument();
+    const label = screen.getByText('云查依据：');
+    expect(label.parentElement?.textContent).toContain('命中已知钓鱼特征库');
+  });
+
+  // GT-12578：真实的 AI 智能体结论必须压过云查文案——此前的 fallback 链把
+  // cac_result.description 排在 phish_agent_check.summary 之前，两者都存在时
+  // 显示的是云查的话，却挂着 AI 的标签。
+  it('AI 智能体结论优先于云查描述 (GT-12578)', () => {
     renderCard(baseDetail({
       disposal_basis: undefined,
       cac_result: { description: '命中已知钓鱼特征库' },
+      phish_agent_check: { status: 'completed', checked: true, summary: 'credential harvesting page detected' },
     }));
     const label = screen.getByText('AI判定依据：');
-    expect(label.parentElement?.textContent).toContain('命中已知钓鱼特征库');
+    expect(label.parentElement?.textContent).toContain('credential harvesting page detected');
+    expect(screen.queryByText('云查依据：')).not.toBeInTheDocument();
+  });
+
+  // GT-12578 / GT-12686：落地 spec
+  // design/implement/spec/2026-07-07-mail-disposal-investigation-center-design.md:168
+  // 明确规定「合成失败/无命中时 disposal_basis 存 null，前端回退现有
+  // MailLog.Reason 自由文本」。此前三处消费点全是硬门控直接隐藏整块，
+  // 于是接收标记规则（mail_marking）命中的邮件在处置依据处只显示 '—'，
+  // 尽管规则名早已由 decision.go 写进了 mail_log.reason。
+  it('无 disposal_basis 时处置依据回退显示 reason 自由文本 (GT-12578/GT-12686)', () => {
+    renderCard(baseDetail({
+      disposal_basis: undefined,
+      reason: 'rule f01-receive-mark-001 matched at data stage',
+    }));
+    const basis = screen.getByTestId('email-disposal-overview-disposal-basis');
+    expect(basis.textContent).toContain('rule f01-receive-mark-001 matched at data stage');
   });
 
   it('falls back to phish_agent_check.summary for AI判定依据 (real sidelined mail has no disposal_basis/cac)', () => {

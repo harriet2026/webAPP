@@ -751,6 +751,9 @@
     },
     "relay": {
       "searchPlaceholder": "ค้นหาชื่อกฎ…",
+      "masterSwitch": "สวิตช์หลักของกฎ",
+      "masterSwitchOff": "สวิตช์หลักของกฎปิดอยู่ ขณะนี้กฎรีเลย์ทั้งหมดจะไม่ทำงาน โปรดติดต่อผู้ดูแลระบบเพื่อเปิดใช้งาน",
+      "masterSwitchOffActionable": "สวิตช์หลักของกฎปิดอยู่ ขณะนี้กฎรีเลย์ทั้งหมดจะไม่ทำงาน เปิดสวิตช์เพื่อใช้กฎในการอนุญาต SMTP",
       "columns": {
         "priority": "ลำดับความสำคัญ",
         "sourceIp": "IP ต้นทาง",
@@ -825,6 +828,8 @@
         "created": "เพิ่มกฎการส่งต่อแล้ว",
         "updated": "อัปเดตกฎการส่งต่อแล้ว",
         "deleted": "ลบกฎการส่งต่อแล้ว",
+        "masterSwitchEnabled": "เปิดสวิตช์หลักของกฎรีเลย์แล้ว",
+        "masterSwitchDisabled": "ปิดสวิตช์หลักของกฎรีเลย์แล้ว",
         "saveError": "กรุณาแก้ไขข้อผิดพลาดในแบบฟอร์ม"
       },
       "deleteDialogTitle": "ลบกฎการส่งต่อ “{name}” หรือไม่?",
@@ -2734,8 +2739,8 @@
       "create": "Create",
       "import": "Import",
       "update": "Update",
-      "delete": "Delete",
-      "deleteItem": "Delete item",
+      "delete": "ลบ",
+      "deleteItem": "ลบรายการ",
       "reject": "Reject",
       "block": "Block",
       "approve": "Approve",
@@ -2751,8 +2756,8 @@
     },
     "stats": {
       "total": "Total",
-      "success": "Success",
-      "failed": "Failed"
+      "success": "สำเร็จ",
+      "failed": "ล้มเหลว"
     },
     "layer": {
       "platform": "การดำเนินการระดับแพลตฟอร์ม",
@@ -2831,12 +2836,12 @@
     "addMember": "Add member proxy server",
     "noMoreEndpoints": "No more proxy servers to add",
     "membersEmptyHint": "Add at least one proxy server; order is the failover order (top first).",
-    "createEndpoint": "New proxy server",
+    "createEndpoint": "สร้างเซิร์ฟเวอร์พร็อกซี",
     "editEndpoint": "Edit proxy server",
-    "deleteEndpoint": "Delete proxy server",
-    "createGroup": "New group",
+    "deleteEndpoint": "ลบเซิร์ฟเวอร์พร็อกซี",
+    "createGroup": "สร้างกลุ่ม",
     "editGroup": "Edit group",
-    "deleteGroup": "Delete group",
+    "deleteGroup": "ลบกลุ่ม",
     "endpointRequiredFields": "Name, host and License ID are required",
     "groupNameRequired": "Group name is required",
     "groupMembersRequired": "Add at least one member proxy server",
@@ -2931,7 +2936,7 @@
   "investigations": {
     "title": "Investigations",
     "description": "Launch and monitor LLM-driven investigation tasks, then review verdicts, evidence, execution steps, and suggested follow-up actions.",
-    "createTitle": "New investigation",
+    "createTitle": "สร้างการสอบสวนใหม่",
     "createDescription": "Start an investigation from a mail log. The UI currently exposes the agent types that are already implemented end-to-end.",
     "createSuccess": "Investigation created",
     "launch": "Launch investigation",
@@ -2948,7 +2953,7 @@
     "copyLink": "Copy link",
     "copiedLink": "Copied",
     "copyLinkSuccess": "Investigation link copied",
-    "copyLinkFailed": "Failed to copy investigation link",
+    "copyLinkFailed": "คัดลอกลิงก์การสอบสวนไม่สำเร็จ",
     "prefillRuleInvalid": "Unable to load prefilled rule request",
     "prefillRuleBanner": "This rule draft was prefilled from an investigation candidate. Review the condition tree and action before saving.",
     "ruleCreatedReturnSuccess": "Rule created and linked back to this investigation",
@@ -2958,13 +2963,13 @@
     "autoRefreshing": "Auto refresh",
     "pendingSummary": "The task was created and is waiting for results.",
     "notAvailable": "N/A",
-    "targetIdRequired": "Enter at least one target identifier",
+    "targetIdRequired": "กรุณาระบุตัวระบุเป้าหมายอย่างน้อยหนึ่งรายการ",
     "targetMailLogPlaceholder": "For example: 1024",
     "targetMailBatchPlaceholder": "For example: 1024, 1025, 1031",
     "targetAccountPlaceholder": "For example: alice@corp.local",
     "targetClusterPlaceholder": "For example: cac_tid:abc123 or 1024,1025",
     "targetMailHelp": "Use a single mail log ID.",
-    "targetMailBatchHelp": "Enter multiple mail log IDs separated by commas, spaces, or new lines.",
+    "targetMailBatchHelp": "ระบุรหัสบันทึกอีเมลหลายรายการ คั่นด้วยเครื่องหมายจุลภาค ช่องว่าง หรือขึ้นบรรทัดใหม่",
     "targetAccountHelp": "Use one account identifier such as an SMTP username or sender address.",
     "targetClusterHelp": "Use a cluster key like cac_tid:abc123, or provide a group of mail log IDs.",
     "createdByPlaceholder": "Filter by creator",
@@ -3174,8 +3179,8 @@
       "pending": "Pending",
       "running": "Running",
       "completed": "Completed",
-      "failed": "Failed",
-      "cancelled": "Cancelled"
+      "failed": "ล้มเหลว",
+      "cancelled": "ยกเลิกแล้ว"
     },
     "severities": {
       "low": "Low",
@@ -3186,7 +3191,7 @@
       "pending": "Pending",
       "running": "Running",
       "completed": "Completed",
-      "failed": "Failed",
+      "failed": "ล้มเหลว",
       "skipped": "Skipped"
     },
     "stepNames": {
@@ -3247,7 +3252,7 @@
       "rejected": "Rejected",
       "quarantined": "Quarantined",
       "sidelined": "Sidelined",
-      "failed": "Failed"
+      "failed": "ล้มเหลว"
     },
     "types": {
       "phish_analysis": "Phishing analysis",
@@ -3267,9 +3272,9 @@
       "pending": "Pending",
       "running": "Running",
       "completed": "Completed",
-      "failed": "Failed",
+      "failed": "ล้มเหลว",
       "needs_approval": "Needs approval",
-      "cancelled": "Cancelled"
+      "cancelled": "ยกเลิกแล้ว"
     },
     "risks": {
       "low": "Low",
@@ -3886,9 +3891,10 @@
     "matchModeSpecific": "เซิร์ฟเวอร์เฉพาะ",
     "matchServers": "เซิร์ฟเวอร์ที่จับคู่",
     "productAction": "การกระทำ",
-    "actionBlock": "บล็อก",
+    "actionReject": "ปฏิเสธ",
     "actionQuarantine": "กักกัน",
-    "actionMark": "ทำเครื่องหมาย (เพิ่มส่วนหัว)",
+    "actionReview": "ตรวจสอบ",
+    "actionDiscard": "ทิ้ง",
     "actionGreylist": "Greylist",
     "comingSoon": "เร็วๆ นี้",
     "priority": "ลำดับความสำคัญ",
@@ -3918,9 +3924,10 @@
     "serverTipZenSpamhaus": "บัญชีดำรวมของ Spamhaus ครอบคลุม SBL, XBL, PBL และรายการย่อยอื่น ๆ ครอบคลุมกว้าง",
     "serverTipBlSpamcop": "บัญชีดำจากรายงานผู้ใช้ของ SpamCop อิงจาก IP ต้นทางสแปมที่ผู้ใช้รายงาน",
     "serverTipBarracuda": "บัญชีดำเรียลไทม์ของ Barracuda ดูแลโดยเครือข่ายความปลอดภัย Barracuda",
-    "actionBlockTip": "ปฏิเสธการเชื่อมต่อทันทีด้วยรหัส 5xx เหมาะกับสถานการณ์ความเสี่ยงสูง อาจบล็อกอีเมลปกติได้",
+    "actionRejectTip": "ปฏิเสธการเชื่อมต่อทันทีด้วยรหัส 5xx เหมาะกับสถานการณ์ความเสี่ยงสูง อาจบล็อกอีเมลปกติได้",
     "actionQuarantineTip": "นำอีเมลเข้าคิวกักกันเพื่อรอผู้ดูแลตรวจสอบ สมดุลระหว่างความปลอดภัยและความพร้อมใช้งาน",
-    "actionMarkTip": "เพิ่มส่วนหัว X-RBL-Hit แล้วตรวจสอบขั้นต่อไปตามปกติ ผ่อนปรนที่สุด เหมาะสำหรับสถิติ",
+    "actionReviewTip": "ส่งอีเมลเข้าคิวตรวจสอบด้วยตนเองเพื่อให้ผู้ดูแลตัดสินใจ เหมาะสำหรับกรณีที่ต้องพิจารณาเพิ่มเติม",
+    "actionDiscardTip": "ทิ้งอีเมลโดยไม่แจ้งผู้ส่ง ใช้เมื่อมั่นใจว่าเป็นสแปมเท่านั้น",
     "actionGreylistTip": "ปฏิเสธการเชื่อมต่อครั้งแรกชั่วคราวให้ผู้ส่งลองใหม่ กรองบ็อตเน็ตได้ดี แต่อีเมลปกติจะล่าช้า",
     "timeoutRangeError": "เวลาหมดอายุต้องอยู่ระหว่าง 1-30 วินาที",
     "serverRequired": "เพิ่มเซิร์ฟเวอร์ RBL อย่างน้อยหนึ่งรายการ",
@@ -3928,6 +3935,13 @@
     "serverExists": "เซิร์ฟเวอร์นี้มีอยู่แล้ว",
     "serverReferenced": "เซิร์ฟเวอร์นี้ถูกใช้โดยกฎ {count} รายการ ไม่สามารถลบได้",
     "loadError": "โหลดการตั้งค่า RBL ล้มเหลว",
+    "disposalStrategyTitle": "กลยุทธ์การจัดการ",
+    "disposalStrategyDesc": "เลือกวิธีจัดการอีเมลเมื่อพบการตรงกับ RBL ทั้งสองกลยุทธ์ไม่สามารถใช้ร่วมกันได้",
+    "actionSectionTitle": "การดำเนินการ",
+    "actionSectionDesc": "การจัดการทันทีที่ใช้กับอีเมลเมื่อพบการตรงกับ RBL",
+    "greylistSectionTitle": "นโยบาย Greylist",
+    "greylistSectionDesc": "หน่วงการส่งจากผู้ส่งที่ไม่รู้จักชั่วคราวและต้องการการลองใหม่เพื่อยืนยันตัวตน มีประสิทธิภาพต่อบ็อตเน็ต",
+    "greylistEnabled": "เปิดใช้นโยบาย Greylist",
     "greylistConfig": "การตั้งค่า Greylist",
     "greylistConfigDesc": "ตั้งค่านโยบาย Greylist เพื่อกรองสแปมและลดผลบวกลวง",
     "greylistConfigure": "ตั้งค่า",
@@ -4053,8 +4067,7 @@
       "nameRequired": "ชื่อกฎห้ามว่าง",
       "nameMaxLength": "ชื่อต้องไม่เกิน 50 ตัวอักษร",
       "descriptionMaxLength": "คำอธิบายต้องไม่เกิน 200 ตัวอักษร",
-      "priorityMin": "ลำดับความสำคัญขั้นต่ำ 1",
-      "priorityMax": "ลำดับความสำคัญสูงสุด 9999",
+      "priorityRange": "ลำดับความสำคัญต้องอยู่ระหว่าง {min} ถึง {max}",
       "whitelistModeRequired": "กรุณาเลือกโหมดบัญชีขาว",
       "invalidEmail": "กรุณาใส่อีเมลที่ถูกต้อง",
       "invalidDomain": "กรุณาใส่โดเมนที่ถูกต้อง",
@@ -4490,14 +4503,6 @@
       "dmarc_quarantineDesc": "โดเมนผู้ส่งกำหนดให้กักกันอีเมลที่ไม่ผ่านการยืนยัน",
       "dmarc_none": "p=none",
       "dmarc_noneDesc": "โดเมนผู้ส่งเฝ้าติดตามเท่านั้น ไม่บังคับดำเนินการ",
-      "ptr_norecord": "ไม่มีระเบียน",
-      "ptr_norecordDesc": "IP ผู้ส่งไม่มีระเบียน PTR แบบย้อนกลับ",
-      "ptr_temperror": "การสอบถามล้มเหลว",
-      "ptr_temperrorDesc": "การสอบถาม DNS ของ PTR หมดเวลาหรือล้มเหลว",
-      "ptr_ehlomismatch": "ไม่ตรงกับ EHLO",
-      "ptr_ehlomismatchDesc": "ระเบียน PTR ไม่ตรงกับ SMTP EHLO/HELO",
-      "ptr_amismatch": "ไม่ตรงกับระเบียน A",
-      "ptr_amismatchDesc": "ระเบียน A ที่ค้นจาก PTR ไม่ชี้กลับไปยัง IP เดิม",
       "template": {
         "loose": "หละหลวม",
         "standard": "มาตรฐาน",
@@ -4508,7 +4513,13 @@
       "templateConfirmDesc": "การเปลี่ยนเป็นเทมเพลต \"{template}\" จะเขียนทับการตั้งค่าการตรวจสอบโปรโตคอลปัจจุบันทั้งหมด ดำเนินการต่อ?",
       "templateCancel": "ยกเลิก",
       "templateApply": "นำไปใช้",
-      "ptrReadonlyNotice": "การตั้งค่า PTR จัดการโดยผู้ดูแลระบบ"
+      "ptrReadonlyNotice": "การตั้งค่า PTR จัดการโดยผู้ดูแลระบบ",
+      "ptr_noptr": "ไม่มีระเบียน",
+      "ptr_noptrDesc": "IP ผู้ส่งไม่มีระเบียน PTR แบบย้อนกลับ",
+      "ptr_nomatch": "ไม่ตรงกับระเบียน A",
+      "ptr_nomatchDesc": "ระเบียน A ที่ค้นจาก PTR ไม่ชี้กลับไปยัง IP เดิม",
+      "ptr_ehlo_mismatch": "ไม่ตรงกับ EHLO",
+      "ptr_ehlo_mismatchDesc": "ระเบียน PTR ไม่ตรงกับ SMTP EHLO/HELO"
     },
     "dkimOutbound": {
       "title": "การลงลายเซ็น DKIM ขาออก",
@@ -4586,7 +4597,7 @@
       "accept": "ดำเนินการตรวจสอบขั้นต่อไป",
       "quarantine": "กักกัน (เข้าถังขยะ)",
       "reject": "บล็อก (ส่งคืน 5xx)",
-      "audit": "ทำเครื่องหมาย (เพิ่มส่วนหัว)",
+      "audit": "ตรวจสอบ (รอการอนุมัติ)",
       "discard": "ทิ้ง (ลบแบบเงียบ)"
     },
     "flowSub": {
@@ -5713,8 +5724,7 @@
         "audit": "ตรวจสอบ",
         "quarantine": "กักกัน",
         "sideline": "เกรย์ลิสต์",
-        "mixed": "ผสม",
-        "recall": "เรียกคืน"
+        "mixed": "ผสม"
       },
       "statuses": {
         "processing": "กำลังดำเนินการ",
@@ -6065,6 +6075,7 @@
         "domainAge": "อายุโดเมน {n} วัน",
         "domainAgeTooltip": "โดเมนของผู้ส่งเพิ่งลงทะเบียนเมื่อ {n} วันก่อน -- โดเมนที่เพิ่งลงทะเบียนใหม่มักเป็นสัญญาณของฟิชชิง/การปลอมแปลง",
         "aiJudgmentBasis": "พื้นฐานการตัดสินของ AI",
+        "cloudCheckBasis": "เกณฑ์การตรวจสอบบนคลาวด์",
         "recipientStatus": {
           "title": "สถานะผู้รับ",
           "header": "สถานะผู้รับ ({n} คน)",
@@ -6275,6 +6286,9 @@
         "basicInfo": "ข้อมูลพื้นฐาน",
         "tid": "TID",
         "emailId": "รหัสอีเมล",
+        "messageUuid": "UUID ของอีเมล",
+        "sessionId": "ID เซสชัน",
+        "queueId": "ID คิว",
         "receiveTime": "เวลารับ",
         "direction": "ทิศทาง",
         "emailSize": "ขนาดอีเมล",
@@ -6360,12 +6374,21 @@
       "rawLogs": {
         "title": "บันทึกดิบ",
         "entriesBadge": "{count} รายการ",
+        "groupsBadge": "{count} กลุ่มคอมโพเนนต์",
+        "notLoaded": "ยังไม่ได้โหลด",
+        "loadingBadge": "กำลังโหลด",
+        "loadFailedBadge": "โหลดล้มเหลว",
         "foundCount": "พบ {matched} / {total} รายการ",
         "truncated": "ตัดเหลือ 10,000 บรรทัด",
+        "partial": "ไม่สามารถค้นหาเกตเวย์บางโหนดได้ บันทึกวงจรชีวิตนี้จึงไม่สมบูรณ์ โหนดที่ล้มเหลว: {nodes}",
         "searchPlaceholder": "ค้นหาบันทึก...",
         "copyAll": "คัดลอกทั้งหมด",
         "downloadLog": "ดาวน์โหลด",
         "copied": "คัดลอกแล้ว",
+        "copyFailed": "คัดลอกไม่สำเร็จ โปรดเลือกและคัดลอกด้วยตนเอง",
+        "loading": "กำลังโหลดบันทึกดิบ...",
+        "loadFailed": "โหลดบันทึกดิบไม่สำเร็จ โปรดลองอีกครั้ง",
+        "empty": "ไม่มีบันทึกดิบ",
         "noMatch": "ไม่พบรายการที่ตรงกัน"
       }
     },
@@ -7012,7 +7035,7 @@
       "desc_similarDomain": {
         "source": "การตรวจจับโดเมนคล้าย",
         "usage": "ตรวจจับการปลอมแปลงโดเมนคล้าย",
-        "note": "ใส่ค่าความเชื่อมั่น 0-100"
+        "note": "เลือกโปรไฟล์โดเมนที่ได้รับการป้องกันก่อน จากนั้นกำหนดค่าระยะการแก้ไข (edit distance): จำนวนอักขระที่ต่างกันระหว่างโดเมนผู้ส่งกับโดเมนที่ได้รับการป้องกัน (จำนวนเต็ม โดยทั่วไป 1-5) ยิ่งน้อยยิ่งคล้ายกัน กฎในตัวใช้ \"น้อยกว่าหรือเท่ากับ 2\""
       },
       "desc_displayNameSpoof": {
         "source": "โมดูลตรวจจับการปลอม",
@@ -7415,22 +7438,22 @@
     "errEmailInvalid": "รูปแบบอีเมลไม่ถูกต้อง",
     "errEmailDuplicate": "อีเมลมีอยู่แล้ว",
     "recallKeys": "คีย์เรียกคืน",
-    "newRecallKey": "สร้าง Recall Key ใหม่",
+    "newRecallKey": "สร้างคีย์เรียกคืนใหม่",
     "agentType": "ประเภทเอเจนต์",
-    "noRecallKeys": "ยังไม่มี Recall Key",
+    "noRecallKeys": "ยังไม่มีคีย์เรียกคืน",
     "actions": "การดำเนินการ",
     "cancel": "ยกเลิก",
     "create": "สร้าง",
-    "keyDeleted": "ลบ Key แล้ว",
+    "keyDeleted": "ลบคีย์แล้ว",
     "keyDeleteFailed": "ลบล้มเหลว",
-    "keyCreated": "สร้าง Key สำเร็จ",
+    "keyCreated": "สร้างคีย์สำเร็จ",
     "keyCreateFailed": "สร้างล้มเหลว",
-    "keyId": "Key ID",
-    "keySecret": "Key Secret",
+    "keyId": "รหัสคีย์",
+    "keySecret": "คีย์ลับ",
     "coremailAgent": "เอเจนต์ Coremail",
     "exchangeAgent": "เอเจนต์ Exchange",
-    "keyIdPlaceholder": "ป้อน Key ID",
-    "keySecretPlaceholder": "ป้อน Key Secret",
+    "keyIdPlaceholder": "ป้อนรหัสคีย์",
+    "keySecretPlaceholder": "ป้อนคีย์ลับ",
     "emailInvalid": "รูปแบบอีเมลไม่ถูกต้อง ใช้ที่อยู่เช่น user@example.com",
     "emailDuplicate": "อีเมลนี้อยู่ในรายการแล้ว",
     "customMinutesRange": "ระยะเวลาตรวจสอบต้องอยู่ระหว่าง 1 ถึง 300 นาที",
@@ -7934,7 +7957,7 @@
       },
       "blockSuccess": "Domain \"{domain}\" has been blocked",
       "blockConflict": "This domain is already in the blocklist",
-      "blockFailed": "Failed to blacklist the domain. Please retry later."
+      "blockFailed": "เพิ่มโดเมนเข้าบัญชีดำไม่สำเร็จ กรุณาลองใหม่ภายหลัง"
     },
     "topAttachments": {
       "rank": "Rank",
@@ -10052,7 +10075,7 @@
     "expiredDesc": "โปรดติดต่อผู้ดูแลระบบเพื่อขอลิงก์ดึงกลับใหม่",
     "errorTitle": "การดำเนินการล้มเหลว",
     "errorDesc": "โปรดลองอีกครั้งภายหลังหรือติดต่อผู้ดูแลระบบ",
-    "alreadyReleased": "อีเมลนี้ถูกดึงกลับไปแล้ว หรือถูกลบหลังพ้นระยะเก็บรักษา",
+    "alreadyReleased": "อีเมลนี้ถูกลบโดยผู้ดูแลระบบแล้ว จึงไม่สามารถดึงกลับได้",
     "confirmWarning": "คุณกำลังดึงอีเมลที่ถูกเกตเวย์กักกันกลับ เมื่อสำเร็จ อีเมลจะถูกส่งไปยังกล่องจดหมายของคุณอีกครั้ง โปรดดำเนินการด้วยความระมัดระวัง"
   },
   "portalPreview": {
@@ -10510,5 +10533,806 @@
       "cancelText": "ยกเลิก"
     },
     "siteIdHint": "ค่านี้อาจถูกแทนที่ด้วยตัวแปรสภาพแวดล้อม OSG_RULESYNC_SITE_ID — ในการติดตั้งแบบคลัสเตอร์ค่าจะถูกกำหนดจากส่วนกลางโดย clustermgr และมีความสำคัญเหนือการตั้งค่านี้เสมอ ดังนั้นการแก้ไขที่นี่อาจไม่มีผลอย่างเงียบ ๆ ให้ยืนยันค่าที่มีผลจริงในแผง \"Cross-Site Rule Sync\" ของ clustermgr"
+  },
+  "apiErrors": {
+    "account": {
+      "cannot_delete_self": "คุณไม่สามารถลบบัญชีของตนเองได้",
+      "last_super_admin": "ไม่สามารถปิดใช้งานผู้ดูแลระบบสูงสุดที่เปิดใช้งานคนสุดท้ายได้ มิฉะนั้นจะไม่มีใครจัดการระบบ",
+      "last_system_admin": "ไม่สามารถลบหรือลดสิทธิ์ผู้ดูแลระบบคนสุดท้ายได้ มิฉะนั้นจะไม่มีใครจัดการระบบ",
+      "not_found": "ไม่พบบัญชี อาจถูกลบไปแล้ว",
+      "password_recently_used": "รหัสผ่านใหม่ต้องไม่ซ้ำกับรหัสผ่านที่ใช้ล่าสุด",
+      "role_id_required": "กรุณาเลือกบทบาท",
+      "tenant_id_required": "ต้องระบุผู้เช่าเมื่อเลือกบทบาท “{role}”",
+      "tenant_scope_required": "กรุณาเลือกผู้เช่าก่อนดำเนินการนี้",
+      "unknown_id_in_batch": "รายการแบบกลุ่มมีบัญชีที่ไม่มีอยู่",
+      "username_exists": "ชื่อผู้ใช้นี้มีอยู่แล้ว (ไม่คำนึงถึงตัวพิมพ์เล็กใหญ่)",
+      "username_immutable": "ไม่สามารถเปลี่ยนชื่อผู้ใช้หลังจากสร้างบัญชีแล้ว"
+    },
+    "advanced_rule": {
+      "addon_type_invalid": "ประเภทการดำเนินการเสริมไม่ถูกต้อง",
+      "delete_attachment_scope_invalid": "ขอบเขตการลบไฟล์แนบไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "primary_action_invalid": "การดำเนินการหลักของกฎไม่ถูกต้อง",
+      "scope_invalid": "ขอบเขตการบังคับใช้ของกฎไม่ถูกต้อง"
+    },
+    "alert": {
+      "action_invalid": "การดำเนินการไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "already_handled": "การแจ้งเตือนนี้ถูกจัดการโดยผู้อื่นแล้ว กรุณารีเฟรชเพื่อดูสถานะล่าสุด",
+      "ids_required": "กรุณาเลือกการแจ้งเตือนอย่างน้อยหนึ่งรายการ",
+      "not_found": "ไม่พบการแจ้งเตือน อาจถูกจัดการหรือล้างไปแล้ว",
+      "range_invalid": "ช่วงเวลาไม่ถูกต้อง",
+      "severity_invalid": "ระดับการแจ้งเตือนไม่ถูกต้อง",
+      "status_invalid": "สถานะการแจ้งเตือนไม่ถูกต้อง"
+    },
+    "auth_attempt": {
+      "data_format_invalid": "รูปแบบข้อมูลบันทึกการยืนยันตัวตนไม่ถูกต้อง",
+      "data_required": "ไม่ได้ระบุข้อมูลบันทึกการยืนยันตัวตน",
+      "request_body_read_failed": "อ่านเนื้อหาคำขอไม่สำเร็จ กรุณาลองใหม่",
+      "success_value_invalid": "ผลการยืนยันตัวตนไม่ถูกต้อง ต้องเป็น: {allowed}"
+    },
+    "contact_source": {
+      "auto_sync_invalid": "ค่าสวิตช์ซิงค์อัตโนมัติไม่ถูกต้อง",
+      "config_empty": "การตั้งค่าแหล่งข้อมูลต้องไม่ว่าง",
+      "config_invalid": "การตั้งค่าแหล่งข้อมูลไม่ถูกต้อง กรุณาตรวจสอบว่ากรอกครบทุกช่อง",
+      "config_parse_failed": "ไม่สามารถแยกวิเคราะห์การตั้งค่าแหล่งข้อมูล กรุณาตรวจสอบรูปแบบค่าที่กรอก",
+      "cron_expr_required": "ต้องกำหนดรอบการซิงค์เมื่อเปิดใช้งานการซิงค์อัตโนมัติ",
+      "csv_auto_sync_unsupported": "แหล่งข้อมูล CSV ไม่รองรับการซิงค์อัตโนมัติ กรุณานำเข้าด้วยตนเอง",
+      "csv_preview_failed": "อ่านตัวอย่าง CSV ไม่สำเร็จ กรุณาตรวจสอบรูปแบบไฟล์แล้วลองใหม่",
+      "department_id_unmapped": "ฟิลด์บังคับของแผนก “รหัสแผนก” ยังไม่ได้จับคู่ กรุณาเลือกคอลัมน์ในการจับคู่ฟิลด์",
+      "email_field_unmapped": "ฟิลด์บังคับ “อีเมล” ยังไม่ได้จับคู่ กรุณาเลือกคอลัมน์ในการจับคู่ฟิลด์",
+      "encryption_key_missing": "เซิร์ฟเวอร์ยังไม่ได้ตั้งค่าคีย์เข้ารหัสรายชื่อ (อย่างน้อย 32 ไบต์) จึงไม่สามารถบันทึกหรือทดสอบการตั้งค่าที่มีรหัสผ่านหรือข้อมูลอ่อนไหวได้ กรุณาแจ้งผู้ดูแลระบบ",
+      "file_store_uninitialized": "เซิร์ฟเวอร์ยังไม่ได้เปิดใช้งานที่จัดเก็บไฟล์ CSV กรุณาแจ้งผู้ดูแลระบบ",
+      "multipart_parse_failed": "ไม่สามารถแยกวิเคราะห์ฟอร์มอัปโหลด กรุณาส่งใหม่",
+      "no_running_sync": "ขณะนี้ไม่มีงานซิงค์ที่กำลังทำงาน",
+      "no_sync_log": "แหล่งข้อมูลนี้ยังไม่มีประวัติการซิงค์",
+      "not_found": "ไม่พบแหล่งข้อมูลรายชื่อ อาจถูกลบไปแล้ว",
+      "source_type_empty": "กรุณาเลือกประเภทแหล่งข้อมูล",
+      "stale_write": "แหล่งข้อมูลนี้ถูกแก้ไขโดยผู้อื่น กรุณารีเฟรชแล้วลองใหม่",
+      "sync_already_running": "มีงานซิงค์กำลังทำงานอยู่สำหรับแหล่งข้อมูลนี้ กรุณารอให้เสร็จสิ้น",
+      "sync_mode_invalid": "โหมดการซิงค์ไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "test_connection_required": "กรุณาทดสอบการเชื่อมต่อให้สำเร็จก่อนบันทึก",
+      "updated_at_required": "ไม่มีข้อมูลเวอร์ชันของเรกคอร์ด กรุณารีเฟรชหน้าแล้วลองใหม่",
+      "upload_token_empty": "กรุณาอัปโหลดไฟล์ CSV ก่อน",
+      "upload_token_invalid": "โทเค็นอัปโหลดไม่ถูกต้องหรือหมดอายุ กรุณาอัปโหลดไฟล์ CSV ใหม่",
+      "user_file_empty": "ไฟล์ CSV ที่อัปโหลดว่างเปล่า",
+      "user_file_missing": "กรุณาเลือกไฟล์ CSV รายชื่อที่จะอัปโหลด",
+      "user_file_read_failed": "อ่านไฟล์ CSV ที่อัปโหลดไม่สำเร็จ กรุณาตรวจสอบว่าไฟล์ไม่เสียหายแล้วลองใหม่",
+      "user_file_ref_empty": "ไม่มีการอ้างอิงไฟล์ที่อัปโหลด กรุณาอัปโหลดใหม่"
+    },
+    "detection_profile": {
+      "access_denied": "คุณไม่มีสิทธิ์เข้าถึงโปรไฟล์การตรวจจับนี้",
+      "global_rbl_requires_system_admin": "ต้องมีสิทธิ์ผู้ดูแลแพลตฟอร์มจึงจะจัดการโปรไฟล์ RBL ส่วนกลางได้",
+      "id_invalid": "รหัสโปรไฟล์การตรวจจับไม่ถูกต้อง",
+      "name_exists": "มีโปรไฟล์การตรวจจับชื่อนี้อยู่แล้ว",
+      "not_found": "ไม่พบโปรไฟล์การตรวจจับ อาจถูกลบไปแล้ว",
+      "tenant_context_required": "กรุณาเลือกผู้เช่าก่อนดำเนินการนี้",
+      "test_supported_for_rbl_only": "รองรับการทดสอบเฉพาะโปรไฟล์ประเภท RBL เท่านั้น"
+    },
+    "disposal": {
+      "access_denied": "คุณไม่มีสิทธิ์ดำเนินการจัดการนี้",
+      "action_invalid": "การจัดการไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "description_required": "กรุณากรอกคำอธิบาย",
+      "eml_not_on_storage_node": "ไม่พบอีเมลต้นฉบับบนโหนดจัดเก็บ อาจถูกล้างไปแล้ว",
+      "eml_unavailable": "ไม่มีอีเมลต้นฉบับ อาจพ้นระยะเก็บรักษาหรือถูกล้างไปแล้ว",
+      "final_type_invalid": "ประเภทอีเมลสุดท้ายไม่ถูกต้อง",
+      "final_type_requires_release": "กำหนดประเภทอีเมลสุดท้ายได้เฉพาะเมื่อปล่อยผ่านเท่านั้น",
+      "mail_log_ids_required": "กรุณาเลือกอีเมลอย่างน้อยหนึ่งฉบับ",
+      "mail_log_not_found": "ไม่พบบันทึกอีเมล อาจถูกล้างไปแล้ว",
+      "object_id_requires_single_mail": "การจัดการระดับวัตถุรับได้ครั้งละหนึ่งอีเมลเท่านั้น",
+      "quarantine": {
+        "category_score_order_invalid": "ค่าความเชื่อมั่นต่ำสุดของ “{category}” ต้องไม่เกินค่าสูงสุด",
+        "category_score_out_of_range": "ค่าความเชื่อมั่นของ “{category}” ต้องอยู่ระหว่าง {min} ถึง {max}",
+        "category_unknown": "ไม่รู้จักประเภทอีเมล “{value}”",
+        "custom_weekday_out_of_range": "วันในสัปดาห์ “{value}” อยู่นอกช่วง ต้องอยู่ระหว่าง {min} ถึง {max}",
+        "custom_weekdays_empty": "เลือกอย่างน้อยหนึ่งวันสำหรับความถี่แบบกำหนดเอง",
+        "notify_frequency_invalid": "ความถี่การแจ้งเตือนไม่ถูกต้อง ต้องเป็น: {allowed}",
+        "notify_time_format_invalid": "เวลาแจ้งเตือน “{value}” ต้องอยู่ในรูปแบบ HH:MM (00:00–23:59)",
+        "notify_times_empty": "ต้องกำหนดเวลาแจ้งเตือนอย่างน้อยหนึ่งรายการ เว้นแต่ความถี่เป็น “ไม่แจ้งเลย”",
+        "permission_unknown": "ไม่รู้จักสิทธิ์ “{value}”",
+        "portal_base_url_host_missing": "ที่อยู่สำหรับเข้าถึงจากภายนอกไม่มีชื่อโฮสต์",
+        "portal_base_url_invalid": "ที่อยู่สำหรับเข้าถึงจากภายนอกไม่ใช่ URL ที่ถูกต้อง",
+        "portal_base_url_loopback": "ที่อยู่สำหรับเข้าถึงจากภายนอกต้องไม่ใช่ที่อยู่ loopback เพราะผู้รับเข้าถึงไม่ได้ ให้ใช้ที่อยู่ที่เข้าถึงเกตเวย์ได้จากภายนอก",
+        "portal_base_url_path_not_allowed": "ที่อยู่สำหรับเข้าถึงจากภายนอกต้องไม่มีพาธ คิวรี หรือแฟรกเมนต์ ให้ระบุเฉพาะโฮสต์และพอร์ต",
+        "portal_base_url_required": "ต้องระบุที่อยู่สำหรับเข้าถึงจากภายนอกเมื่อเปิดสิทธิ์ดึงคืน ดูตัวอย่าง เพิ่มรายการอนุญาต หรือเพิ่มรายการบล็อก มิฉะนั้นลิงก์ในอีเมลสรุปจะไม่มีปลายทาง",
+        "portal_base_url_scheme_invalid": "ที่อยู่สำหรับเข้าถึงจากภายนอกต้องใช้ {scheme} เพราะโทเค็นสำหรับดึงคืนและดูตัวอย่างต้องไม่ถูกส่งแบบไม่เข้ารหัส",
+        "valid_days_out_of_range": "อายุลิงก์ของ “{permission}” ต้องอยู่ระหว่าง {min} ถึง {max} วัน"
+      },
+      "recall": {
+        "notify_email_invalid": "อีเมลแจ้งเตือนการเรียกคืน “{value}” ไม่ถูกต้อง",
+        "notify_frequency_invalid": "ความถี่การแจ้งเตือนการเรียกคืนไม่ถูกต้อง ต้องเป็น: {allowed}",
+        "policy_invalid": "นโยบายเรียกคืน “{value}” ไม่ถูกต้อง ต้องเป็น: {allowed}",
+        "task_timeout_out_of_range": "เวลาหมดอายุของงานเรียกคืนต้องอยู่ระหว่าง {min} ถึง {max} วินาที"
+      },
+      "recipient_not_in_mail": "ผู้รับรายนี้ไม่ได้อยู่ในอีเมลฉบับนี้",
+      "recipient_required": "กรุณาระบุผู้รับ",
+      "review": {
+        "custom_minutes_out_of_range": "ระยะเวลาตรวจสอบแบบกำหนดเองต้องอยู่ระหว่าง {min} ถึง {max} นาที",
+        "duration_mode_invalid": "โหมดระยะเวลาตรวจสอบไม่ถูกต้อง ต้องเป็น: {allowed}",
+        "max_recheck_minutes_out_of_range": "เวลาตรวจซ้ำสูงสุดต้องอยู่ระหว่าง {min} ถึง {max} นาที",
+        "reviewer_active_end_format_invalid": "เวลาสิ้นสุดปฏิบัติงานของผู้ตรวจสอบต้องอยู่ในรูปแบบ HH:MM:SS",
+        "reviewer_active_start_format_invalid": "เวลาเริ่มปฏิบัติงานของผู้ตรวจสอบต้องอยู่ในรูปแบบ HH:MM:SS",
+        "reviewer_email_invalid": "อีเมลผู้ตรวจสอบ “{value}” ไม่ถูกต้อง",
+        "reviewer_notify_interval_out_of_range": "ช่วงเวลาเตือนผู้ตรวจสอบต้องอยู่ระหว่าง {min} ถึง {max} นาที",
+        "timeout_mark_position_invalid": "ไม่รองรับตำแหน่งเครื่องหมาย “{value}” ต้องเป็น: {allowed}",
+        "timeout_mark_positions_empty": "เมื่อเลือก “ใส่เครื่องหมาย” ต้องระบุตำแหน่งอย่างน้อยหนึ่งจุด",
+        "timeout_mark_text_empty": "ข้อความเครื่องหมายต้องไม่ว่าง",
+        "timeout_mark_text_too_long": "ข้อความเครื่องหมายต้องไม่เกิน {max} ตัวอักษร",
+        "timeout_temp_disposal_invalid": "การจัดการเมื่อหมดเวลา “{value}” ไม่ถูกต้อง ต้องเป็น: {allowed}"
+      },
+      "timezone_invalid": "เขตเวลา “{value}” ไม่ถูกต้อง กรุณาใช้ชื่อมาตรฐาน IANA เช่น Asia/Shanghai",
+      "too_many_items": "ประมวลผลได้ครั้งละไม่เกิน {max} รายการ กรุณาลดจำนวนที่เลือก"
+    },
+    "dkim": {
+      "activate_failed": "เปิดใช้งานคีย์ลงนามไม่สำเร็จ กรุณาลองใหม่",
+      "active_key_cannot_delete": "ไม่สามารถลบคีย์ที่กำลังใช้งานอยู่ กรุณาเปิดใช้งานคีย์อื่นหรือปิดใช้งานคีย์นี้ก่อน",
+      "algorithm_unsupported": "ไม่รองรับอัลกอริทึมลงนาม “{value}” ต้องเป็น: {allowed}",
+      "cross_tenant_manage_denied": "คุณไม่มีสิทธิ์จัดการคีย์ลงนามของผู้เช่ารายอื่น",
+      "cross_tenant_read_denied": "คุณไม่มีสิทธิ์ดูโดเมนลงนามของผู้เช่ารายอื่น",
+      "dns_not_verified": "ระเบียน DNS ของคีย์นี้ยังไม่ผ่านการยืนยัน กรุณาเพิ่มระเบียน TXT ที่ผู้ให้บริการโดเมนและยืนยันให้เสร็จก่อนเปิดใช้งาน",
+      "forbidden": "คุณไม่มีสิทธิ์ดำเนินการนี้",
+      "key_not_found": "ไม่พบคีย์ลงนาม อาจถูกลบไปแล้ว",
+      "key_size_too_large": "ความยาวคีย์ต้องไม่เกิน {max} บิต",
+      "selector_invalid": "รูปแบบตัวเลือก “{value}” ไม่ถูกต้อง",
+      "tenant_id_invalid": "พารามิเตอร์ผู้เช่าไม่ถูกต้อง ต้องเป็นจำนวนเต็มบวก"
+    },
+    "link_blacklist": {
+      "access_denied": "คุณไม่มีสิทธิ์ดำเนินการนี้",
+      "match_type_invalid": "ประเภทการจับคู่ไม่ถูกต้อง",
+      "name_and_pattern_required": "ต้องกรอกทั้งชื่อและรูปแบบการจับคู่",
+      "not_found": "ไม่พบกฎบัญชีดำลิงก์ อาจถูกลบไปแล้ว",
+      "tenant_access_denied": "คุณไม่มีสิทธิ์เข้าถึงข้อมูลของผู้เช่ารายนี้",
+      "tenant_id_required": "ต้องระบุผู้เช่า (ผู้ดูแลแพลตฟอร์มใช้ส่วนหัว X-Tenant-ID)",
+      "verdict_invalid": "ผลการตัดสินไม่ถูกต้อง"
+    },
+    "mail_admission": {
+      "enabled_required": "กรุณาระบุว่าเปิดใช้งานหรือไม่",
+      "expires_at_format_invalid": "รูปแบบเวลาหมดอายุไม่ถูกต้อง ต้องเป็น RFC3339 เช่น 2026-08-01T12:00:00+07:00",
+      "helo_match_invalid": "โหมดจับคู่ HELO ไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "helo_pattern_regex_invalid": "รูปแบบจับคู่ HELO ไม่ใช่นิพจน์ทั่วไปที่ถูกต้อง กรุณาตรวจสอบไวยากรณ์",
+      "is_active_required": "กรุณาระบุว่ามีผลบังคับใช้หรือไม่",
+      "not_found": "ไม่พบกฎการอนุญาต อาจถูกลบไปแล้ว",
+      "null_sender_requires_cidr": "กฎที่อนุญาตผู้ส่งว่างจะจับคู่ด้วย IP ต้นทางเท่านั้น จึงต้องระบุช่วง IP ต้นทาง",
+      "privileged_requires_system_admin": "ต้องมีสิทธิ์ผู้ดูแลแพลตฟอร์มจึงจะสร้างกฎการอนุญาตแบบพิเศษได้",
+      "rate_limit_must_be_positive": "ขีดจำกัดต่อชั่วโมงต้องมากกว่า 0",
+      "rcpt_domain_not_owned": "โดเมนผู้รับต้องเป็นโดเมนที่ผู้เช่านี้ยืนยันแล้ว หรือโดเมนย่อยของโดเมนนั้น",
+      "rcpt_domain_regex_invalid": "รูปแบบโดเมนผู้รับไม่ใช่นิพจน์ทั่วไปที่ถูกต้อง กรุณาตรวจสอบไวยากรณ์",
+      "rcpt_match_invalid": "โหมดจับคู่ผู้รับไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "source_auth_required": "ต้องระบุการยืนยันแหล่งที่มาอย่างน้อยหนึ่งอย่าง: ช่วง IP ต้นทาง หรือการตรวจสอบ SPF",
+      "tenant_domain_cross_tenant": "โดเมนที่เลือกเป็นของผู้เช่ารายอื่น",
+      "tenant_domain_not_found": "ไม่พบโดเมนที่เลือก อาจถูกลบไปแล้ว",
+      "use_spf_requires_privileged": "กฎที่ใช้การตรวจสอบ SPF ต้องตั้งเป็นกฎพิเศษด้วย เนื่องจากกฎ SPF ไม่ถูกจำกัดด้วยพูล IP รีเลย์ที่เชื่อถือได้",
+      "use_spf_requires_sender_domain": "การตรวจสอบ SPF ต้องระบุโดเมนผู้ส่งที่ชัดเจน มิฉะนั้นจะไม่มีระเบียน SPF ให้ตรวจสอบ",
+      "tenant_domain_id_belongs_different_tenant": "โดเมนที่เลือกเป็นของผู้เช่ารายอื่น"
+    },
+    "ops_top": {
+      "account_required": "ต้องระบุบัญชีเมื่อเจาะลึกรายละเอียดการยืนยันตัวตน",
+      "ai_interpretation_disabled": "ยังไม่ได้เปิดใช้งานการตีความด้วย AI กรุณาแจ้งผู้ดูแลระบบ",
+      "ai_too_many_concurrent": "คำขอตีความด้วย AI มากเกินไป กรุณาลองใหม่ในภายหลัง",
+      "connection_requires_platform": "มิติการเชื่อมต่อใช้ได้เฉพาะในมุมมองแพลตฟอร์ม กรุณาสลับมุมมอง",
+      "dimension_invalid": "มิติสถิติไม่ถูกต้อง",
+      "filter_enum_invalid": "ค่าตัวกรองไม่ถูกต้อง",
+      "key_required": "กรุณาระบุรายการที่ต้องการเจาะลึก",
+      "sort_invalid": "ลำดับการเรียงไม่ถูกต้อง",
+      "sub_dimension_invalid": "มิติย่อยนี้ไม่รองรับสำหรับมิติที่เลือก",
+      "tenant_id_invalid": "ตัวระบุผู้เช่าต้องเป็นจำนวนเต็มบวก",
+      "tenant_id_must_be_single": "ระบุผู้เช่าได้ครั้งละหนึ่งรายเท่านั้น",
+      "tenant_not_found": "ไม่พบผู้เช่า อาจถูกลบไปแล้ว"
+    },
+    "outbound_audit": {
+      "access_denied": "คุณไม่มีสิทธิ์เข้าถึงรายการตรวจสอบนี้",
+      "action_invalid": "การตรวจสอบไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "id_invalid": "รหัสรายการตรวจสอบไม่ถูกต้อง",
+      "not_found": "ไม่พบรายการตรวจสอบ อาจถูกจัดการไปแล้ว",
+      "not_pending": "รายการนี้ไม่อยู่ในสถานะรอตรวจสอบแล้ว หรือกำลังถูกผู้อื่นดำเนินการ",
+      "operation_in_progress": "มีการจัดการอื่นกำลังทำงานกับอีเมลฉบับนี้ กรุณาลองใหม่ในภายหลัง"
+    },
+    "proxysvr": {
+      "cipher_profile_invalid": "โปรไฟล์การเข้ารหัสไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "egress_ip_invalid": "IP ขาออกต้องเป็นที่อยู่ IPv4 ที่ถูกต้อง หรือเว้นว่าง",
+      "endpoint_name_exists": "มีปลายทางพร็อกซีชื่อนี้อยู่แล้ว",
+      "endpoint_not_found": "ไม่พบปลายทางพร็อกซี อาจถูกลบไปแล้ว",
+      "group_name_exists": "มีกลุ่มพร็อกซีชื่อนี้อยู่แล้ว",
+      "group_not_found": "ไม่พบกลุ่มพร็อกซี อาจถูกลบไปแล้ว",
+      "group_referenced_by_routes": "กลุ่มนี้ถูกอ้างอิงโดยกฎเส้นทางขาออก จึงลบไม่ได้ กรุณาลบกฎเหล่านั้นก่อน",
+      "helo_hostname_invalid": "ชื่อโฮสต์ HELO ต้องเป็นชื่อโดเมนที่ถูกต้อง (ไม่ใช่ที่อยู่ IP) หรือเว้นว่าง",
+      "license_key_missing": "เซิร์ฟเวอร์ยังไม่ได้ตั้งค่าคีย์เข้ารหัสไลเซนส์ จึงไม่สามารถบันทึกไลเซนส์ได้ กรุณาแจ้งผู้ดูแลระบบ",
+      "member_endpoint_duplicate": "ปลายทางเดียวกันปรากฏซ้ำในกลุ่มไม่ได้",
+      "member_endpoint_id_invalid": "สมาชิกกลุ่มต้องอ้างอิงปลายทางที่ถูกต้อง",
+      "member_ord_duplicate": "ค่าลำดับของสมาชิกกลุ่มต้องไม่ซ้ำกัน",
+      "port_out_of_range": "พอร์ตต้องอยู่ระหว่าง {min} ถึง {max}",
+      "tls_min_version_invalid": "เวอร์ชัน TLS ขั้นต่ำไม่ถูกต้อง ต้องเป็น: {allowed}"
+    },
+    "role": {
+      "cross_tenant_denied": "คุณไม่มีสิทธิ์แก้ไขบทบาทของผู้เช่ารายอื่น",
+      "name_conflicts_template": "ชื่อบทบาทซ้ำกับบทบาทของผู้เช่าหรือเทมเพลตส่วนกลางที่มีอยู่",
+      "name_exists": "มีบทบาทชื่อนี้อยู่แล้วในขอบเขตนี้",
+      "name_required": "กรุณากรอกชื่อบทบาท",
+      "not_found": "ไม่พบบทบาท อาจถูกลบไปแล้ว",
+      "scope_invalid": "ขอบเขตบทบาทไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "status_invalid": "สถานะบทบาทไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "super_admin_required": "ต้องมีสิทธิ์ผู้ดูแลระบบสูงสุดจึงจะจัดการบทบาทระดับแพลตฟอร์มได้",
+      "system_default_cannot_delete": "ไม่สามารถลบบทบาทที่ระบบสร้างไว้",
+      "system_default_cannot_disable": "ไม่สามารถปิดใช้งานบทบาทที่ระบบสร้างไว้และบทบาทผู้ดูแลระบบสูงสุด",
+      "system_default_cannot_edit": "ไม่สามารถแก้ไขบทบาทที่ระบบสร้างไว้"
+    },
+    "rule_analytics": {
+      "range_invalid": "ช่วงเวลาไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "version_not_found": "ไม่พบเวอร์ชันของกฎ อาจถูกล้างไปแล้ว"
+    },
+    "sideline": {
+      "access_denied": "คุณไม่มีสิทธิ์เข้าถึงอีเมลที่พักไว้นี้",
+      "id_required": "กรุณาระบุรายการที่ต้องการดำเนินการ",
+      "not_found": "ไม่พบอีเมลที่พักไว้ หรือคุณไม่มีสิทธิ์เข้าถึง"
+    },
+    "smtp_credential": {
+      "access_denied": "คุณไม่มีสิทธิ์เข้าถึงข้อมูลรับรองการส่งนี้",
+      "cross_tenant_denied": "คุณไม่มีสิทธิ์สร้างข้อมูลรับรองการส่งให้ผู้เช่ารายอื่น",
+      "local_auth_disabled": "การยืนยันตัวตนด้วยฐานบัญชีภายในถูกปิดใช้งาน กรุณาใช้: {allowed}",
+      "not_found": "ไม่พบข้อมูลรับรองการส่ง อาจถูกลบไปแล้ว",
+      "password_required": "ต้องกำหนดรหัสผ่านเมื่อใช้ฐานบัญชีภายใน"
+    },
+    "statistics": {
+      "date_range_required": "กรุณาระบุวันที่เริ่มต้นและสิ้นสุดของรายงาน",
+      "interval_invalid": "ช่วงเวลาสรุปไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "limit_out_of_range": "จำนวนผลลัพธ์ต้องอยู่ระหว่าง {min} ถึง {max}",
+      "params_invalid": "พารามิเตอร์การค้นหาไม่ถูกต้อง กรุณาตรวจสอบตัวกรองแล้วลองใหม่"
+    },
+    "unified_rule": {
+      "access_denied": "คุณไม่มีสิทธิ์เข้าถึงกฎนี้",
+      "action_required": "กฎประเภทดำเนินการต้องระบุการดำเนินการหนึ่งอย่าง",
+      "advanced_rules_need_tenant": "กฎกรองขั้นสูงไม่มีให้ใช้ในมุมมองแพลตฟอร์ม กรุณาเลือกผู้เช่าก่อน",
+      "bulk_action_invalid": "การดำเนินการแบบกลุ่มไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "condition_tree_invalid": "เงื่อนไขของกฎไม่ถูกต้อง กรุณาตรวจสอบว่ากรอกครบทุกเงื่อนไข",
+      "content_rules_need_tenant": "กฎเนื้อหาจัดการได้เฉพาะในมุมมองผู้เช่า กรุณาเลือกผู้เช่าก่อน",
+      "copy_denied": "คุณไม่มีสิทธิ์คัดลอกกฎนี้",
+      "feature_group_condition_required": "กลุ่มคุณลักษณะต้องกำหนดเงื่อนไข",
+      "group_policy_name_required": "กรุณากรอกชื่อนโยบายกลุ่ม",
+      "id_invalid": "รหัสกฎไม่ถูกต้อง",
+      "ids_required": "กรุณาเลือกกฎอย่างน้อยหนึ่งรายการ",
+      "metadata_invalid": "รูปแบบข้อมูลเมทาของกฎไม่ถูกต้อง",
+      "name_exists": "มีกฎชื่อนี้อยู่แล้ว กรุณาใช้ชื่ออื่น",
+      "not_found": "ไม่พบกฎ อาจถูกลบไปแล้ว",
+      "role_not_permitted": "บทบาทของคุณไม่มีสิทธิ์สร้างกฎ",
+      "route_metadata_required": "กฎประเภทเส้นทางต้องระบุปลายทางถัดไป: {required}",
+      "stage_not_allowed_for_role": "ผู้ดูแลผู้เช่าจัดการกฎได้เฉพาะขั้นตอนเหล่านี้: {allowed}",
+      "system_baseline_no_convert": "ไม่สามารถแปลงกฎทั่วไปเป็นกฎพื้นฐานของระบบ",
+      "system_baseline_no_create": "ไม่สามารถสร้างกฎพื้นฐานของระบบผ่าน API",
+      "system_baseline_no_edit": "ผู้ดูแลผู้เช่าไม่สามารถแก้ไขกฎพื้นฐานของระบบ",
+      "tag_required": "กฎประเภทติดป้ายต้องระบุป้ายอย่างน้อยหนึ่งรายการ",
+      "tenant_context_required": "กรุณาเลือกผู้เช่าก่อนดำเนินการนี้",
+      "valid_range_invalid": "เวลาสิ้นสุดการมีผลต้องไม่เร็วกว่าเวลาเริ่มต้น"
+    },
+    "investigation": {
+      "not_found": "ไม่พบงานตรวจสอบ",
+      "access_denied": "ไม่มีสิทธิ์เข้าถึงงานตรวจสอบนี้",
+      "id_required": "กรุณาระบุรหัสงานตรวจสอบ",
+      "confirm_required": "การดำเนินการนี้ต้องยืนยันก่อน",
+      "not_ready_for_actions": "งานตรวจสอบยังไม่เสร็จ จึงยังดำเนินการไม่ได้",
+      "type_unsupported": "ประเภทการตรวจสอบไม่รองรับ",
+      "target_type_unsupported": "ประเภทเป้าหมายการตรวจสอบไม่รองรับ",
+      "traceback_created_elsewhere": "งานย้อนรอยภัยคุกคามถูกสร้างจากการสแกนย้อนรอย ไม่ใช่จากที่นี่",
+      "traceback_cancelled_elsewhere": "ยกเลิกงานย้อนรอยภัยคุกคามได้จากรายการรันย้อนรอย"
+    },
+    "profile": {
+      "user_not_found": "ไม่พบผู้ใช้",
+      "session_not_found": "ไม่พบเซสชันการเข้าสู่ระบบหรือหมดอายุแล้ว",
+      "session_id_missing": "ไม่มีรหัสเซสชัน",
+      "name_required": "ชื่อต้องไม่ว่าง",
+      "password_incorrect": "รหัสผ่านไม่ถูกต้อง",
+      "verification_code_incorrect": "รหัสยืนยันไม่ถูกต้อง",
+      "method_invalid": "วิธียืนยันไม่ถูกต้อง",
+      "purpose_invalid": "วัตถุประสงค์การยืนยันไม่ถูกต้อง",
+      "type_invalid": "ประเภทไม่ถูกต้อง",
+      "method_purpose_mismatch": "วิธียืนยันไม่ตรงกับวัตถุประสงค์",
+      "target_invalid": "เป้าหมายไม่ถูกต้อง",
+      "action_unsupported": "การดำเนินการไม่รองรับ",
+      "start_time_invalid": "รูปแบบเวลาเริ่มต้นไม่ถูกต้อง ใช้ RFC3339 หรือ YYYY-MM-DD",
+      "end_time_invalid": "รูปแบบเวลาสิ้นสุดไม่ถูกต้อง ใช้ RFC3339 หรือ YYYY-MM-DD",
+      "two_factor_required_by_policy": "นโยบายระบบกำหนดให้เปิดการยืนยันสองขั้นตอน จึงปิดไม่ได้",
+      "two_factor_enable_via_endpoint": "เปิดการยืนยันสองขั้นตอนได้ที่การตั้งค่าการยืนยันสองขั้นตอน"
+    },
+    "threat_retro": {
+      "run_not_found": "ไม่พบรายการรันย้อนรอย",
+      "strategy_not_found": "ไม่พบกลยุทธ์",
+      "strategy_id_required": "กรุณาเลือกกลยุทธ์",
+      "mail_log_id_required": "กรุณาเลือกอีเมล",
+      "mail_log_ids_required": "กรุณาเลือกอีเมลอย่างน้อยหนึ่งฉบับ",
+      "leak_mail_not_in_run": "อีเมลนี้ไม่ได้อยู่ในรายการรันย้อนรอยนี้",
+      "window_start_invalid": "รูปแบบเวลาเริ่มต้นช่วงไม่ถูกต้อง",
+      "window_end_invalid": "รูปแบบเวลาสิ้นสุดช่วงไม่ถูกต้อง",
+      "window_order_invalid": "เวลาเริ่มต้นต้องอยู่ก่อนเวลาสิ้นสุด",
+      "indicator_tag_format_invalid": "แท็กตัวบ่งชี้ต้องอยู่ในรูป indicator:「รหัส」 และรหัสต้องไม่ว่าง"
+    },
+    "tenant": {
+      "not_found": "ไม่พบผู้เช่า",
+      "access_denied": "ไม่มีสิทธิ์เข้าถึงผู้เช่านี้",
+      "admin_account_password_pair_required": "ต้องระบุบัญชีผู้ดูแลและรหัสผ่านพร้อมกัน",
+      "admin_account_too_long": "บัญชีผู้ดูแลต้องยาวไม่เกิน {max} อักขระ",
+      "code_immutable": "รหัสผู้เช่าแก้ไขไม่ได้หลังสร้างแล้ว",
+      "has_withheld_mail": "ผู้เช่านี้ยังมีอีเมลที่ถูกกักไว้ (กักกัน / ทางข้าง / ตรวจสอบขาออก) กรุณาปล่อยหรือล้างก่อนลบผู้เช่า",
+      "next_hop_pair_required": "ต้องระบุโฮสต์และพอร์ตของฮอปถัดไปพร้อมกัน",
+      "next_hop_triad_required": "ต้องระบุประเภท โฮสต์ และพอร์ตของฮอปถัดไปพร้อมกัน",
+      "next_hop_host_empty": "โฮสต์ของฮอปถัดไปต้องไม่ว่าง"
+    },
+    "tenant_routing": {
+      "nexthop_not_found": "ไม่พบฮอปถัดไป",
+      "domain_not_found": "ไม่พบโดเมน",
+      "domain_not_verified": "โดเมนนี้ยังไม่ผ่านการยืนยัน",
+      "egress_not_in_pool": "ทางออกที่เลือกไม่อยู่ในพูล",
+      "egress_binding_exists": "โดเมนนี้ผูกทางออกไว้แล้ว",
+      "egress_binding_not_found": "ไม่พบการผูกทางออก"
+    },
+    "mail_log": {
+      "direction_invalid": "ทิศทางไม่ถูกต้อง ต้องเป็น all, receive, send หรือ internal",
+      "id_required": "กรุณาระบุรหัสบันทึกอีเมล",
+      "id_format_invalid": "รูปแบบรหัสบันทึกอีเมลไม่ถูกต้อง",
+      "not_found": "ไม่พบบันทึกอีเมล",
+      "access_denied": "ไม่มีสิทธิ์เข้าถึงบันทึกอีเมลนี้",
+      "export_format_unsupported": "รูปแบบการส่งออกไม่รองรับ ใช้ json หรือ csv",
+      "import_data_format_invalid": "รูปแบบข้อมูลบันทึกอีเมลไม่ถูกต้อง",
+      "import_data_missing": "ไม่ได้ระบุข้อมูลบันทึกอีเมล",
+      "interpret_rate_limited": "มีคำขอมากเกินไป กรุณาลองใหม่ภายหลัง",
+      "interpret_too_many_concurrent": "งานตีความด้วย AI พร้อมกันมากเกินไป กรุณาลองใหม่ภายหลัง",
+      "interpret_disabled": "ฟีเจอร์ตีความบันทึกด้วย AI ถูกปิดอยู่"
+    },
+    "spoofing_log": {
+      "page_too_large": "หมายเลขหน้าต้องไม่เกิน {max}",
+      "category_must_be_single": "ระบุหมวดเจาะลึก KPI ได้เพียงหมวดเดียว",
+      "category_invalid": "หมวดเจาะลึกไม่ถูกต้อง",
+      "time_range_too_long": "ช่วงเวลาที่ค้นหาต้องไม่เกิน {max_days} วัน",
+      "not_found": "ไม่พบบันทึกการตรวจจับการปลอมแปลง"
+    },
+    "inbound_audit": {
+      "item_id_invalid": "รหัสรายการตรวจสอบไม่ถูกต้อง",
+      "item_not_found": "ไม่พบรายการตรวจสอบขาเข้า",
+      "mail_content_unavailable": "เนื้อหาอีเมลไม่มีอยู่บนโหนดจัดเก็บแล้ว",
+      "item_not_pending": "รายการตรวจสอบนี้ถูกดำเนินการไปแล้ว",
+      "ids_required": "กรุณาเลือกรายการตรวจสอบอย่างน้อยหนึ่งรายการ",
+      "action_invalid": "การดำเนินการไม่ถูกต้อง ต้องเป็นอนุมัติหรือปฏิเสธ"
+    },
+    "assistant": {
+      "not_authenticated": "กรุณาเข้าสู่ระบบก่อน",
+      "session_not_found": "ไม่พบเซสชัน",
+      "access_denied": "ไม่มีสิทธิ์เข้าถึงเซสชันนี้",
+      "no_rule_drafts_in_session": "ไม่พบร่างกฎในเซสชันนี้"
+    },
+    "security_overview": {
+      "date_range_required": "กรุณาระบุวันที่เริ่มต้นและวันที่สิ้นสุด",
+      "date_required": "กรุณาระบุวันที่",
+      "date_format_invalid": "รูปแบบวันที่ต้องเป็น YYYY-MM-DD",
+      "view_by_required": "กรุณาเลือกมุมมองสถิติ",
+      "series_required": "กรุณาเลือกชุดข้อมูล",
+      "dimension_invalid": "มิติไม่ถูกต้อง ค่าที่ใช้ได้: {allowed}",
+      "interpret_disabled": "ฟีเจอร์ตีความด้วย AI ถูกปิดอยู่",
+      "interpret_too_many_concurrent": "คำขอ AI พร้อมกันมากเกินไป กรุณาลองใหม่ภายหลัง"
+    },
+    "quarantine": {
+      "id_required": "กรุณาระบุรหัสรายการกักกัน",
+      "item_not_found": "ไม่พบรายการกักกัน",
+      "access_denied": "ไม่มีสิทธิ์เข้าถึงรายการกักกันนี้"
+    },
+    "antispam_notify": {
+      "tenant_id_invalid": "รหัสผู้เช่าไม่ถูกต้อง",
+      "limit_invalid": "ค่าจำกัดจำนวนไม่ถูกต้อง",
+      "recipient_required": "กรุณาระบุผู้รับ",
+      "since_invalid": "รูปแบบเวลาเริ่มต้นไม่ถูกต้อง ใช้ RFC3339",
+      "no_pending_sideline_item": "ไม่มีรายการทางข้างที่รอดำเนินการ"
+    },
+    "attachment_security": {
+      "password_blank": "รหัสผ่านต้องไม่ว่าง",
+      "password_too_long": "รหัสผ่านต้องยาวไม่เกิน {max} อักขระ",
+      "id_invalid": "รหัสไม่ถูกต้อง",
+      "id_required": "กรุณาระบุรหัส",
+      "sideline_item_not_found": "ไม่พบรายการทางข้าง",
+      "access_denied": "ไม่มีสิทธิ์เข้าถึงบันทึกไฟล์แนบนี้",
+      "request_body_unreadable": "อ่านเนื้อหาคำขอไม่สำเร็จ",
+      "scan_result_format_invalid": "รูปแบบข้อมูลผลสแกนไฟล์แนบไม่ถูกต้อง",
+      "scan_result_missing": "ไม่ได้ระบุข้อมูลผลสแกนไฟล์แนบ",
+      "scan_result_all_invalid": "หลังตรวจสอบแล้วไม่มีผลสแกนที่ใช้ได้"
+    },
+    "url_protection": {
+      "deep_inspect_timeout_out_of_range": "เวลาหมดเวลาการตรวจเชิงลึกต้องอยู่ระหว่าง {min}-{max} วินาที",
+      "deep_inspect_timeout_policy_invalid": "นโยบายเมื่อหมดเวลาตรวจเชิงลึกไม่ถูกต้อง ค่าที่ใช้ได้: {allowed}",
+      "domain_format_invalid": "รูปแบบโดเมนไม่ถูกต้อง",
+      "domain_limit_exceeded": "แต่ละผู้เช่ามีโดเมนได้ไม่เกิน {max} รายการ",
+      "domain_already_exists": "โดเมนนี้มีอยู่แล้ว",
+      "cidr_invalid": "รูปแบบ CIDR ไม่ถูกต้อง",
+      "cidr_limit_exceeded": "แต่ละผู้เช่ามีช่วง IP ได้ไม่เกิน {max} รายการ",
+      "cidr_already_exists": "ช่วง IP นี้มีอยู่แล้ว",
+      "tenant_id_required": "กรุณาระบุผู้เช่า",
+      "tenant_id_invalid": "รหัสผู้เช่าไม่ถูกต้อง"
+    },
+    "login_policy": {
+      "two_factor_platform_admin_only": "เฉพาะผู้ดูแลแพลตฟอร์มเท่านั้นที่ตั้งนโยบายบังคับยืนยันสองขั้นตอนได้",
+      "two_factor_locked_by_platform": "แพลตฟอร์มบังคับเปิดการยืนยันสองขั้นตอน ผู้เช่าปิดไม่ได้",
+      "two_factor_self_service_tenant_only": "สวิตช์ยืนยันสองขั้นตอนแบบบริการตนเองเป็นระดับผู้เช่า ไม่รองรับในค่าพื้นฐานรวม",
+      "baseline_platform_admin_only": "เฉพาะผู้ดูแลแพลตฟอร์มเท่านั้นที่แก้ค่าพื้นฐานของแพลตฟอร์มได้",
+      "rule_platform_admin_only": "เฉพาะผู้ดูแลแพลตฟอร์มเท่านั้นที่แก้กฎของแพลตฟอร์มได้",
+      "ip_or_cidr_format_invalid": "กรุณากรอก IP หรือ CIDR ที่ถูกต้อง (เช่น 192.168.1.0/24)",
+      "rule_already_exists": "กฎ IP/CIDR นี้มีอยู่แล้ว",
+      "delete_would_lock_out_self": "หากลบแล้ว รายการอนุญาตจะไม่มี IP ปัจจุบันของคุณ และคุณจะเข้าสู่ระบบไม่ได้",
+      "rule_not_found": "ไม่พบกฎ"
+    },
+    "group_members_io": {
+      "group_not_found": "ไม่พบกลุ่ม",
+      "access_denied": "ไม่มีสิทธิ์เข้าถึงกลุ่มนี้",
+      "export_unsupported_for_feature_group": "กลุ่มฟีเจอร์ไม่รองรับการส่งออกสมาชิก",
+      "import_unsupported_for_feature_group": "กลุ่มฟีเจอร์ไม่รองรับการนำเข้าสมาชิก",
+      "file_missing": "กรุณาเลือกไฟล์ที่จะอัปโหลด",
+      "file_too_large": "ไฟล์ใหญ่เกินไป",
+      "file_unreadable": "เปิดไฟล์ไม่ได้",
+      "condition_tree_not_member_format": "เงื่อนไขของกลุ่มนี้ไม่ได้อยู่ในรูปแบบรายชื่อสมาชิกที่นำเข้าได้"
+    },
+    "rule_test_eml": {
+      "file_missing": "กรุณาเลือกไฟล์ EML ที่จะอัปโหลด",
+      "file_too_large": "ไฟล์ใหญ่เกินไป สูงสุด {max_mb} MB",
+      "file_unreadable": "อ่านไฟล์ไม่ได้",
+      "condition_tree_invalid": "JSON ของต้นไม้เงื่อนไขไม่ถูกต้อง",
+      "condition_tree_or_rule_id_required": "กรุณาระบุต้นไม้เงื่อนไขหรือรหัสกฎ",
+      "rule_id_invalid": "รหัสกฎต้องเป็นจำนวนเต็ม"
+    },
+    "threat_retro_mail": {
+      "mail_log_id_invalid": "รหัสบันทึกอีเมลไม่ถูกต้อง",
+      "mail_not_found": "ไม่พบอีเมล",
+      "email_content_not_found": "ไม่พบเนื้อหาอีเมลหรือถูกล้างไปแล้ว"
+    },
+    "tenant_user": {
+      "tenant_scope_required": "การดำเนินการนี้ต้องอยู่ในมุมมองผู้เช่า",
+      "cannot_delete_own_account": "คุณลบบัญชีของตัวเองไม่ได้"
+    },
+    "phishing_admission": {
+      "profile_id_invalid_for_tenant": "โปรไฟล์ตรวจจับที่เลือกไม่มีอยู่หรือไม่ได้เป็นของผู้เช่าปัจจุบัน",
+      "rule_not_found": "ไม่พบกฎการรับเข้า"
+    },
+    "mail_auth_config": {
+      "overlaps_existing_active": "การตั้งค่านี้ทับซ้อนกับการตั้งค่ายืนยันตัวตนอีเมลที่เปิดใช้อยู่ในขอบเขตโดเมนและสถานการณ์เดียวกัน",
+      "not_found": "ไม่พบการตั้งค่ายืนยันตัวตนอีเมล",
+      "server_fields_required": "กรุณาระบุโปรโตคอล โฮสต์เซิร์ฟเวอร์ และพอร์ต",
+      "auth_timeout_out_of_range": "เวลาหมดเวลายืนยันตัวตนต้องอยู่ระหว่าง {min}-{max} วินาที",
+      "protocol_unsupported": "โปรโตคอลไม่รองรับ"
+    },
+    "admin_audit": {
+      "tenant_admin_has_no_tenant_bound": "ผู้ดูแลผู้เช่ารายนี้ยังไม่ผูกกับผู้เช่าใด",
+      "audit_log_not_found": "ไม่พบบันทึกการตรวจสอบ"
+    },
+    "advanced_rules_config": {
+      "review_timeout_action_accept_reject_keep": "การจัดการเมื่อหมดเวลาตรวจสอบต้องเป็น accept, reject หรือ keep_pending",
+      "forward_rate_limit_per_minute_non": "ขีดจำกัดอัตราการส่งต่อต่อนาทีต้องไม่เป็นค่าลบ",
+      "tarpit_max_concurrent_non_negative": "ขีดจำกัดการทำงานพร้อมกันของ tarpit ต้องไม่เป็นค่าลบ",
+      "admin_notify_max_recipients_non_negative": "จำนวนผู้รับการแจ้งเตือนผู้ดูแลต้องไม่เป็นค่าลบ"
+    },
+    "alert_rules": {
+      "rule_name_exists": "ชื่อกฎนี้มีอยู่แล้ว",
+      "rule_not_found": "ไม่พบกฎ",
+      "rule_has_open_alerts": "กฎนี้มีการแจ้งเตือนที่ยังไม่จัดการ ลบไม่ได้ กรุณาจัดการก่อน"
+    },
+    "alert_smtp": {
+      "alert_smtp_enc_key_missing": "ยังไม่ได้ตั้งค่าคีย์เข้ารหัส SMTP สำหรับการแจ้งเตือน จึงบันทึกข้อมูลรับรอง SMTP ภายนอกไม่ได้",
+      "recipient_required": "ผู้รับต้องไม่ว่าง"
+    },
+    "antispam_dkim": {
+      "dkim_key_not_found": "ไม่พบคีย์ DKIM"
+    },
+    "antispam_queue": {
+      "notification_message_uuid_accepted_by_atomic": "UUID ข้อความแจ้งเตือนรับได้เฉพาะที่ปลายทางติดตามการแจ้งเตือนแบบอะตอมมิก",
+      "invalid_quarantine_notification_tracking_request": "คำขอติดตามการแจ้งเตือนการกักกันไม่ถูกต้อง"
+    },
+    "auth_spoofing": {
+      "no_tenant_context": "กรุณาเลือกผู้เช่าก่อน",
+      "tenant_admins_delete_tenant_overrides": "เฉพาะผู้ดูแลผู้เช่าเท่านั้นที่ลบค่าแทนที่ระดับผู้เช่าได้"
+    },
+    "config_overrides": {
+      "config_value_not_empty": "ค่าการตั้งค่าต้องไม่ว่าง",
+      "config_override_not_found": "ไม่พบค่าแทนที่การตั้งค่า",
+      "config_file_section_name_config_key": "ต้องระบุไฟล์การตั้งค่า ชื่อส่วน และคีย์การตั้งค่า"
+    },
+    "config_overrides_handler": {
+      "config_file_query_parameter_required": "กรุณาระบุไฟล์การตั้งค่า"
+    },
+    "contact_sync_logs": {
+      "sync_log_not_found": "ไม่พบบันทึกการซิงค์"
+    },
+    "contacts": {
+      "contact_not_found": "ไม่พบผู้ติดต่อ",
+      "tag_invalid": "แท็กต้องเป็น executive หรือ key_position"
+    },
+    "delivery_stats": {
+      "too_many_items_one_batch": "รายการในชุดเดียวมากเกินไป"
+    },
+    "delivery_traffic": {
+      "end_date_in_future": "วันที่สิ้นสุดต้องไม่เกินวันนี้",
+      "ai_interpretation_disabled": "ฟีเจอร์ตีความด้วย AI ถูกปิดอยู่",
+      "too_many_concurrent_ai_requests_please": "คำขอ AI พร้อมกันมากเกินไป กรุณาลองใหม่ภายหลัง"
+    },
+    "link_attachment_security": {
+      "ai_interpretation_disabled": "ฟีเจอร์ตีความด้วย AI ถูกปิดอยู่",
+      "too_many_concurrent_ai_requests_please": "คำขอ AI พร้อมกันมากเกินไป กรุณาลองใหม่ภายหลัง",
+      "limit_integer_between_1_50": "จำนวนต้องเป็นจำนวนเต็มระหว่าง 1 ถึง 50",
+      "domain_required": "กรุณาระบุโดเมน",
+      "invalid_domain_format": "รูปแบบโดเมนไม่ถูกต้อง",
+      "direction_one_all_receive_send_internal": "ทิศทางต้องเป็น all, receive, send หรือ internal",
+      "domain_already_blacklisted": "โดเมนนี้อยู่ในบัญชีดำแล้ว"
+    },
+    "disposal_settings": {
+      "tenant_id_required_select_tenant_x": "กรุณาเลือกผู้เช่าก่อนจัดการการตั้งค่า"
+    },
+    "security_modules": {
+      "tenant_id_required_select_tenant_x": "กรุณาเลือกผู้เช่าก่อนจัดการการตั้งค่า",
+      "valid_tenant_scope_required": "ต้องมีขอบเขตผู้เช่าที่ถูกต้อง",
+      "admin_access_required": "การดำเนินการนี้ต้องใช้สิทธิ์ผู้ดูแลระบบ",
+      "stage_1_ip_policy_managed_globally": "นโยบาย IP ระยะที่ 1 จัดการแบบรวมโดยผู้ดูแลระบบ",
+      "stage_1_ip_policy_changed_from": "ต้องแก้นโยบาย IP ระยะที่ 1 จากมุมมองแพลตฟอร์ม",
+      "unknown_page": "หน้าโมดูลความปลอดภัยไม่รู้จัก: {page}"
+    },
+    "domain_verify": {
+      "path_tenant_id_does_not_match": "ผู้เช่าใน path ไม่ตรงกับผู้เช่าที่เลือกอยู่",
+      "domain_not_found": "ไม่พบโดเมน"
+    },
+    "email_logs": {
+      "id_required": "กรุณาระบุรหัส",
+      "date_query_parameter_required_yyyy_mm": "กรุณาระบุวันที่ (YYYY-MM-DD)",
+      "invalid_date_format_expected_yyyy_mm": "รูปแบบวันที่ไม่ถูกต้อง ต้องเป็น YYYY-MM-DD",
+      "invalid_date": "วันที่ไม่ถูกต้อง",
+      "no_log_files_found_specified_date": "ไม่พบไฟล์บันทึกสำหรับวันที่ที่ระบุ",
+      "access_denied": "ไม่มีสิทธิ์ดำเนินการ",
+      "email_log_entry_not_found": "ไม่พบบันทึกอีเมล"
+    },
+    "link_click_logs": {
+      "access_denied": "ไม่มีสิทธิ์ดำเนินการ",
+      "invalid_id": "รหัสไม่ถูกต้อง",
+      "link_click_not_found": "ไม่พบบันทึกการคลิกลิงก์"
+    },
+    "mail_lifecycle_logs": {
+      "access_denied": "ไม่มีสิทธิ์ดำเนินการ",
+      "mail_log_entry_not_found": "ไม่พบบันทึกอีเมล",
+      "raw_log_search_busy_all_gateway": "การค้นหาบันทึกดิบไม่ว่างบนทุกโหนดเกตเวย์ กรุณาลองใหม่ในไม่ช้า",
+      "message_uuid_required": "กรุณาระบุ UUID ของข้อความ",
+      "from_define_valid_time_range": "เวลาเริ่มต้นต้องอยู่ก่อนเวลาสิ้นสุด",
+      "raw_log_search_busy_retry_shortly": "การค้นหาบันทึกดิบไม่ว่าง กรุณาลองใหม่ในไม่ช้า"
+    },
+    "mail_log_attachment": {
+      "access_denied": "ไม่มีสิทธิ์ดำเนินการ",
+      "invalid_attachment_md5": "MD5 ของไฟล์แนบไม่ถูกต้อง",
+      "mail_log_not_found": "ไม่พบบันทึกอีเมล",
+      "eml_not_available": "ไม่มีไฟล์อีเมลต้นฉบับ",
+      "eml_not_found_storage_node": "ไม่พบไฟล์อีเมลต้นฉบับบนโหนดจัดเก็บ",
+      "attachment_not_found": "ไม่พบไฟล์แนบ"
+    },
+    "mail_log_preview": {
+      "access_denied": "ไม่มีสิทธิ์ดำเนินการ",
+      "mail_log_entry_not_found": "ไม่พบบันทึกอีเมล",
+      "original_email_content_not_available": "ไม่มีเนื้อหาอีเมลต้นฉบับ"
+    },
+    "email_preview": {
+      "email_content_not_found": "ไม่พบเนื้อหาอีเมล"
+    },
+    "portal_quarantine_preview": {
+      "email_content_not_found": "ไม่พบเนื้อหาอีเมล"
+    },
+    "export_import": {
+      "content_rules_managed_by_system_administrators": "กฎเนื้อหาจัดการได้เฉพาะผู้ดูแลระบบ"
+    },
+    "feature_group": {
+      "type_query_param_one_ip_sender": "ประเภทต้องเป็น ip, sender, recipient, content หรือ feature"
+    },
+    "forward_queue_admin": {
+      "invalid_id": "รหัสไม่ถูกต้อง"
+    },
+    "geoip_rules": {
+      "ip_range_already_exists": "ช่วง IP นี้มีอยู่แล้ว",
+      "geoip_rule_not_found": "ไม่พบกฎ GeoIP",
+      "format_json_csv": "รูปแบบต้องเป็น json หรือ csv"
+    },
+    "group_management_access": {
+      "group_management_requires_tenant_administrator_a": "การจัดการกลุ่มต้องใช้สิทธิ์ผู้ดูแลผู้เช่า",
+      "group_management_accessed_within_tenant_context": "ในโหมดหลายผู้เช่า การจัดการกลุ่มต้องเลือกผู้เช่าก่อน",
+      "access_denied_group_management_rule": "ไม่มีสิทธิ์เข้าถึงกฎการจัดการกลุ่มนี้",
+      "group_management_rules_imported_with_scope": "กฎการจัดการกลุ่มต้องนำเข้าด้วย scope=groups"
+    },
+    "group_policy": {
+      "group_policy_requires_tenant_administrator_acces": "นโยบายกลุ่มต้องใช้สิทธิ์ผู้ดูแลผู้เช่า",
+      "group_policy_accessed_within_tenant_context": "ในโหมดหลายผู้เช่า นโยบายกลุ่มต้องเลือกผู้เช่าก่อน",
+      "group_policy_rules_stay_within_active": "กฎนโยบายกลุ่มต้องอยู่ในผู้เช่าที่เลือกอยู่"
+    },
+    "intent_engine": {
+      "engine_enabled_receive_engine_enabled_send": "ต้องระบุสวิตช์เอนจินสำหรับรับ ส่ง และภายในทั้งหมด"
+    },
+    "ip_filter": {
+      "rule_not_found": "ไม่พบกฎ"
+    },
+    "ip_frequency": {
+      "rule_not_found": "ไม่พบกฎ",
+      "active_required_toggle_action": "การสลับสถานะต้องระบุสถานะเป้าหมาย",
+      "rules_required": "กรุณาระบุกฎ"
+    },
+    "rbl_filter": {
+      "rule_not_found": "ไม่พบกฎ",
+      "invalid_client_ip": "IP ของไคลเอนต์ไม่ถูกต้อง"
+    },
+    "mail_routing_helper": {
+      "mail_routing_rules_managed_by_system": "กฎการกำหนดเส้นทางอีเมลจัดการได้เฉพาะผู้ดูแลระบบ",
+      "mail_routing_rules_imported_with_scope": "กฎการกำหนดเส้นทางอีเมลต้องนำเข้าด้วย scope=mail_routing_relay หรือ scope=mail_routing_outbound",
+      "tenant_id_required_select_tenant_x": "กรุณาเลือกผู้เช่าก่อนจัดการกฎการกำหนดเส้นทางอีเมล"
+    },
+    "monitor_handlers": {
+      "backup_task_not_found": "ไม่พบงานสำรองข้อมูล"
+    },
+    "overseas_mail": {
+      "directions_required": "กรุณาเลือกทิศทางอีเมล",
+      "config_modified_by_another": "การตั้งค่าถูกแก้ไขโดยผู้อื่น กรุณารีเฟรชแล้วลองใหม่",
+      "invalid_ip_address": "รูปแบบที่อยู่ IP ไม่ถูกต้อง"
+    },
+    "password_policy_settings": {
+      "mincharclasses_between_1_4": "จำนวนประเภทอักขระขั้นต่ำต้องอยู่ระหว่าง 1 ถึง 4"
+    },
+    "phishing_actions": {
+      "reason_required": "กรุณาระบุเหตุผล",
+      "not_found": "ไม่พบรายการ"
+    },
+    "spoofing_actions": {
+      "reason_required": "กรุณาระบุเหตุผล",
+      "not_found": "ไม่พบรายการ"
+    },
+    "phishing_detection_log": {
+      "not_found": "ไม่พบรายการ"
+    },
+    "spoofing_brands": {
+      "not_found": "ไม่พบรายการ",
+      "disposition_mode_invalid": "โหมดการจัดการต้องเป็น observe, standard, strict หรือ custom"
+    },
+    "spoofing_persons": {
+      "not_found": "ไม่พบรายการ",
+      "protection_level_invalid": "ระดับการป้องกันต้องเป็นสูง กลาง หรือต่ำ",
+      "observe_mode_invalid": "โหมดสังเกตการณ์ต้องเป็น true หรือ false",
+      "email_already_protected": "อีเมล {email} เป็นบุคคลที่ได้รับการปกป้องอยู่แล้ว"
+    },
+    "spoofing_whitelist": {
+      "not_found": "ไม่พบรายการ",
+      "match_type_invalid": "ประเภทการจับคู่ต้องเป็นอีเมลหรือโดเมน",
+      "value_required": "ค่าต้องไม่ว่าง",
+      "whitelist_entry_exists": "รายการอนุญาตนี้มีอยู่แล้ว"
+    },
+    "phishing_screenshot": {
+      "invalid_storage_node_key": "โหนดจัดเก็บหรือคีย์ไม่ถูกต้อง",
+      "invalid_key_missing_task_id": "คีย์ไม่ถูกต้อง: ไม่มีรหัสงาน",
+      "screenshot_not_found": "ไม่พบภาพหน้าจอ"
+    },
+    "portal_quarantine_listadd": {
+      "quarantine_item_has_no_tenant_cannot": "รายการกักกันนี้ไม่มีผู้เช่า จึงเพิ่มเข้ารายชื่อผู้ใช้ไม่ได้",
+      "quarantined_mail_has_no_usable_sender": "อีเมลที่กักกันนี้ไม่มีผู้ส่งที่ใช้เพิ่มได้"
+    },
+    "portal_quarantine_release": {
+      "quarantine_item_not_found": "ไม่พบรายการกักกัน",
+      "quarantine_item_already_released_deleted": "รายการกักกันนี้ถูกปล่อยหรือลบไปแล้ว"
+    },
+    "proxysvr_probe": {
+      "proxysvr_endpoint_not_found": "ไม่พบปลายทางส่งผ่านพร็อกซี"
+    },
+    "recall_admin": {
+      "backend_coremail_exchange": "แบ็กเอนด์ต้องเป็น coremail หรือ exchange",
+      "mail_log_does_not_belong_your": "บันทึกอีเมลนี้ไม่ได้เป็นของผู้เช่าของคุณ",
+      "recall_request_not_found": "ไม่พบคำขอเรียกคืน",
+      "recall_request_does_not_belong_your": "คำขอเรียกคืนนี้ไม่ได้เป็นของผู้เช่าของคุณ"
+    },
+    "recipient_check": {
+      "invalid_existence_action": "การดำเนินการเมื่อตรวจสอบการมีอยู่ของผู้รับไม่ถูกต้อง"
+    },
+    "recipient_config_access": {
+      "recipient_configuration_requires_tenant_context": "ในโหมดหลายผู้เช่า การตั้งค่าผู้รับต้องเลือกผู้เช่าก่อน",
+      "recipient_configuration_requires_tenant_administ": "การตั้งค่าผู้รับต้องใช้สิทธิ์ผู้ดูแลผู้เช่า"
+    },
+    "recipient_limit": {
+      "mode_detailed_merged": "โหมดต้องเป็นแบบละเอียดหรือแบบรวม",
+      "merged_limit_limit_1_unlimited_between": "ขีดจำกัดแบบรวมต้องเป็น -1 (ไม่จำกัด) หรืออยู่ระหว่าง 1 ถึง 1000",
+      "invalid_action_merged_limit": "การดำเนินการนี้ไม่รองรับสำหรับขีดจำกัดแบบรวม",
+      "action_invalid": "การดำเนินการของ {name} ไม่ถูกต้อง",
+      "scope_invalid": "ขอบเขตของ {name} ไม่ถูกต้อง ต้องเป็น local หรือ all"
+    },
+    "roles": {
+      "system_default_role_cannot_edited": "บทบาทค่าเริ่มต้นของระบบแก้ไขไม่ได้",
+      "system_default_super_admin_role_cannot": "บทบาทค่าเริ่มต้นของระบบและผู้ดูแลสูงสุดปิดใช้งานไม่ได้",
+      "system_default_role_cannot_deleted": "บทบาทค่าเริ่มต้นของระบบลบไม่ได้"
+    },
+    "smtp_auth_ip_lockout": {
+      "invalid_ip": "ที่อยู่ IP ไม่ถูกต้อง"
+    },
+    "spoofing_notification_preview": {
+      "admin_emails_invalid": "รายชื่ออีเมลผู้ดูแลมีที่อยู่ที่ไม่ถูกต้อง",
+      "sample_sender_invalid": "ผู้ส่งตัวอย่างต้องเป็นอีเมลที่ถูกต้อง",
+      "sample_subject_too_long": "หัวเรื่องตัวอย่างต้องยาวไม่เกิน 500 อักขระ",
+      "sample_confidence_out_of_range": "ค่าความเชื่อมั่นของตัวอย่างต้องอยู่ระหว่าง 0-100"
+    },
+    "spoofing_persons_bulk": {
+      "confidence_threshold_out_of_range": "ค่าความเชื่อมั่นต้องอยู่ระหว่าง 0-100",
+      "unsupported_bulk_action": "การดำเนินการเป็นชุดไม่รองรับ",
+      "bulk_add_limit_exceeded": "เพิ่มได้ครั้งละไม่เกิน 20 คน",
+      "duplicate_email_in_group": "มีอีเมลซ้ำ {email} ภายในกลุ่ม"
+    },
+    "spoofing_routes": {
+      "spoofing_detection_capability_required": "ต้องเปิดใช้ความสามารถตรวจจับการปลอมแปลง"
+    },
+    "tenant_llm": {
+      "invalid_tenant_id": "รหัสผู้เช่าไม่ถูกต้อง",
+      "base_url_model_api_key_required": "ต้องระบุ base URL, โมเดล และ API key"
+    },
+    "threat_retro_agent_state": {
+      "limits_non_negative": "ขีดจำกัดต้องไม่เป็นค่าลบ"
+    },
+    "threat_retro_bulk_export": {
+      "action_cancel": "action ต้องเป็น cancel เท่านั้น"
+    },
+    "threat_retro_notification": {
+      "kind_immediate_digest": "ประเภทการแจ้งเตือนต้องเป็นทันทีหรือสรุปรวม"
+    },
+    "threat_retro_routes": {
+      "tenant_id_required_select_tenant_x": "กรุณาเลือกผู้เช่าก่อน",
+      "threat_retro_capability_required": "ต้องเปิดใช้ความสามารถย้อนรอยภัยคุกคาม"
+    },
+    "threat_retro_runs": {
+      "runid_required": "กรุณาระบุรหัสรัน",
+      "run_not_found": "ไม่พบรายการรัน"
+    },
+    "threat_retro_strategies": {
+      "strategy_not_found": "ไม่พบกลยุทธ์"
+    },
+    "unified_rules_pagespec": {
+      "behavior_control_rule_have_metadata_feature": "กฎควบคุมพฤติกรรมต้องตั้ง metadata.feature เป็น behavior_control",
+      "content_rules_rule_have_metadata_feature": "กฎเนื้อหาต้องตั้ง metadata.feature เป็น content_rules",
+      "sender_filter_rule_priority_between_1": "ลำดับความสำคัญของกฎกรองผู้ส่งต้องอยู่ระหว่าง 1 ถึง 9999",
+      "invalid_metadata": "ข้อมูลเมตาไม่ถูกต้อง"
+    },
+    "user_list_access": {
+      "user_list_rules_require_tenant_administrator": "กฎรายชื่อผู้ใช้ต้องใช้สิทธิ์ผู้ดูแลผู้เช่า",
+      "user_list_rules_available_owning_tenant": "ในโหมดหลายผู้เช่า กฎรายชื่อผู้ใช้มีให้เฉพาะผู้เช่าเจ้าของ",
+      "user_list_rules_require_tenant_context": "กฎรายชื่อผู้ใช้ต้องเลือกผู้เช่าก่อน",
+      "user_list_rules_created_managed_by": "กฎรายชื่อผู้ใช้สร้างและจัดการโดยผู้ใช้ ไม่ใช่ผ่าน API ผู้ดูแลทั่วไป",
+      "access_denied_user_list_rule": "ไม่มีสิทธิ์เข้าถึงกฎรายชื่อผู้ใช้นี้",
+      "user_generated_user_list_rules_deleted": "ที่นี่ลบได้เฉพาะกฎรายชื่อที่ผู้ใช้สร้างเอง"
+    },
+    "user_unlock": {
+      "user_not_found": "ไม่พบผู้ใช้"
+    },
+    "users": {
+      "cannot_demote_last_system_administrator": "ลดสิทธิ์ผู้ดูแลระบบคนสุดท้ายไม่ได้",
+      "cannot_delete_your_own_account": "คุณลบบัญชีของตัวเองไม่ได้",
+      "cannot_delete_last_system_administrator": "ลบผู้ดูแลระบบคนสุดท้ายไม่ได้",
+      "cannot_disable_last_enabled_super_administrator": "ปิดใช้งานผู้ดูแลสูงสุดคนสุดท้ายไม่ได้",
+      "bulk_action_would_leave_zero_enabled": "การดำเนินการเป็นชุดนี้จะทำให้ไม่เหลือผู้ดูแลสูงสุดที่เปิดใช้งาน"
+    },
+    "auth": {
+      "authorization_header_required": "กรุณาเข้าสู่ระบบก่อน",
+      "authorization_header_malformed": "รูปแบบข้อมูลรับรองไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่",
+      "token_invalid_or_expired": "การเข้าสู่ระบบหมดอายุ กรุณาเข้าสู่ระบบใหม่",
+      "session_invalid": "เซสชันไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่",
+      "session_revoked": "เซสชันถูกเพิกถอน กรุณาเข้าสู่ระบบใหม่",
+      "system_admin_required": "การดำเนินการนี้ต้องใช้สิทธิ์ผู้ดูแลระบบ",
+      "super_admin_required": "การดำเนินการนี้ต้องใช้สิทธิ์ผู้ดูแลสูงสุด",
+      "admin_required": "การดำเนินการนี้ต้องใช้สิทธิ์ผู้ดูแล",
+      "tenant_header_cross_tenant": "ผู้เช่าที่ร้องขอไม่ตรงกับผู้เช่าที่เลือก การดำเนินการข้ามผู้เช่าถูกปฏิเสธ",
+      "tenant_id_not_integer": "รหัสผู้เช่าต้องเป็นจำนวนเต็ม",
+      "tenant_id_required": "กรุณาเลือกผู้เช่าก่อนจัดการการตั้งค่า",
+      "tenant_id_invalid": "รหัสผู้เช่าไม่ถูกต้อง",
+      "tenant_access_denied": "ไม่มีสิทธิ์เข้าถึงผู้เช่านี้"
+    },
+    "login": {
+      "rate_limited": "มีคำขอมากเกินไป กรุณาลองใหม่ภายหลัง",
+      "code_already_sent": "ส่งรหัสยืนยันแล้ว กรุณาลองใหม่ภายหลัง",
+      "channel_disabled": "ช่องทางรับนี้ยังไม่เปิดใช้งาน",
+      "ticket_invalid_or_expired": "การยืนยันการเข้าสู่ระบบหมดอายุ กรุณาเข้าสู่ระบบใหม่",
+      "verification_code_incorrect": "รหัสยืนยันไม่ถูกต้อง",
+      "target_invalid": "เป้าหมายการรับไม่ถูกต้อง",
+      "user_gone": "บัญชีนี้ไม่มีอยู่แล้ว"
+    },
+    "password": {
+      "user_not_found": "ไม่พบผู้ใช้",
+      "current_incorrect": "รหัสผ่านปัจจุบันไม่ถูกต้อง",
+      "recently_used": "รหัสผ่านใหม่ต้องไม่ซ้ำกับรหัสผ่านที่ใช้ล่าสุด",
+      "credential_invalid_or_expired": "ข้อมูลรับรองไม่ถูกต้องหรือหมดอายุ กรุณาเริ่มใหม่"
+    },
+    "password_reset": {
+      "feature_disabled": "ฟีเจอร์รีเซ็ตรหัสผ่านยังไม่เปิดใช้งาน",
+      "code_invalid_or_expired": "รหัสยืนยันไม่ถูกต้องหรือหมดอายุ",
+      "ticket_invalid_or_expired": "ข้อมูลรับรองไม่ถูกต้องหรือหมดอายุ",
+      "rate_limited": "มีคำขอมากเกินไป กรุณาลองใหม่ภายหลัง"
+    }
   }
 }

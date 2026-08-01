@@ -76,6 +76,8 @@ import type { RcptMatchType } from '@/components/mail-routing/mr-types';
 import { useScopedApiRequest } from '@/lib/api/client';
 import {
   getMailAdmissionRules,
+  getMailAdmissionPolicy,
+  setMailAdmissionPolicyEnabled,
   createMailAdmissionRule,
   updateMailAdmissionRule,
   deleteMailAdmissionRule,
@@ -91,6 +93,7 @@ import {
   type RelayRuleRow,
 } from './relay-mapping';
 import { simulateRelay } from './relay-simulator';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface RelayTabProps {
   tenantId: number;
@@ -117,6 +120,7 @@ const RCPT_MATCH_LABEL_KEY: Record<RcptMatchType, string> = {
 
 export function RelayTab({ tenantId }: RelayTabProps) {
   const t = useTranslations('mailRouting.relay');
+  const apiErrorMessage = useApiErrorMessage();
   const ts = useTranslations('mailRouting.shared');
   const tc = useTranslations('common');
   const { apiRequest } = useScopedApiRequest(tenantId);
@@ -126,6 +130,16 @@ export function RelayTab({ tenantId }: RelayTabProps) {
   const { data: rules = [], isLoading } = useQuery({
     queryKey,
     queryFn: () => getMailAdmissionRules(apiRequest),
+  });
+
+  // The admission gate ships disabled by default so an upgrade cannot silently
+  // open unauthenticated relay. Keep its control next to the rules it governs:
+  // without this switch the UI can persist perfectly valid rows while both the
+  // Postfix policy pre-check and the milter short-circuit every match.
+  const policyQueryKey = ['mail-admission-policy'];
+  const { data: policy } = useQuery({
+    queryKey: policyQueryKey,
+    queryFn: () => getMailAdmissionPolicy(apiRequest),
   });
 
   // 用于保存时把「发信域名」自由文本换算成 tenant_domain_id（见文件顶部注释）。
@@ -175,6 +189,15 @@ export function RelayTab({ tenantId }: RelayTabProps) {
   const [simResult, setSimResult] = useState<RelayRuleRow | null | undefined>(undefined);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey });
+
+  const policyMutation = useMutation({
+    mutationFn: (enabled: boolean) => setMailAdmissionPolicyEnabled(enabled, apiRequest),
+    onSuccess: (nextPolicy) => {
+      queryClient.setQueryData(policyQueryKey, nextPolicy);
+      toast.success(nextPolicy.enabled ? t('toasts.masterSwitchEnabled') : t('toasts.masterSwitchDisabled'));
+    },
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
+  });
 
   const openCreate = () => {
     setDraft(emptyRelayRow());
@@ -327,7 +350,7 @@ export function RelayTab({ tenantId }: RelayTabProps) {
       closeDrawer();
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const handleSave = () => {
@@ -345,7 +368,7 @@ export function RelayTab({ tenantId }: RelayTabProps) {
       setDeleteTarget(null);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const runSimulate = () => {
@@ -420,13 +443,38 @@ export function RelayTab({ tenantId }: RelayTabProps) {
           </>
         }
         actions={
-          <Button size="sm" className="h-9 gap-1.5" onClick={openCreate} data-testid="mr-relay-create">
-            <Plus className="h-4 w-4" />
-            {ts('create')}
-          </Button>
+          <div className="flex items-center gap-3">
+            {policy?.can_privilege && (
+              <div className="flex items-center gap-2">
+                <Label htmlFor="mr-relay-master-switch" className="text-xs font-medium">
+                  {t('masterSwitch')}
+                </Label>
+                <Switch
+                  id="mr-relay-master-switch"
+                  data-testid="mr-relay-master-switch"
+                  checked={policy.enabled}
+                  disabled={policyMutation.isPending}
+                  onCheckedChange={(enabled) => policyMutation.mutate(enabled)}
+                />
+              </div>
+            )}
+            <Button size="sm" className="h-9 gap-1.5" onClick={openCreate} data-testid="mr-relay-create">
+              <Plus className="h-4 w-4" />
+              {ts('create')}
+            </Button>
+          </div>
         }
         testIdPrefix="mr-relay"
       />
+
+      {policy && !policy.enabled && (
+        <div
+          className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
+          data-testid="mr-relay-master-switch-off"
+        >
+          {policy.can_privilege ? t('masterSwitchOffActionable') : t('masterSwitchOff')}
+        </div>
+      )}
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">

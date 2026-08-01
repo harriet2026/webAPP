@@ -89,6 +89,7 @@ import { format } from 'date-fns';
 import { useAuth } from '@/contexts/auth-context';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
 import { IPFilterImportDialog } from '@/components/security/IPFilterImportDialog';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const BLACKLIST_ACTION_SET = new Set<DemoAction>(BLACKLIST_DEMO_ACTIONS);
 const WHITELIST_ACTION_SET = new Set<DemoAction>(WHITELIST_DEMO_ACTIONS);
@@ -193,6 +194,7 @@ const ACTION_EFFECT_TEXT_CLASS: Record<DemoAction, string> = {
 
 export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin } = useAuth();
@@ -256,7 +258,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
       toast.success(t('common.deleteSuccess'));
       setDeleteTarget(null);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(apiErrorMessage(error)),
   });
 
   const toggleMutation = useMutation({
@@ -265,7 +267,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
       queryClient.invalidateQueries({ queryKey: ['ip-filter-rules'] });
       toast.success(t('common.updateSuccess'));
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(apiErrorMessage(error)),
   });
 
   const resetPreview = useCallback(() => {

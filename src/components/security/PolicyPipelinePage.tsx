@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
@@ -24,7 +24,6 @@ import { IntentEnginePage } from '@/components/security/intent-engine/IntentEngi
 import { SimilarDetectionPage } from '@/components/security/similar-detection/SimilarDetectionPage';
 import { MailMarkingPage } from '@/components/security/mail-marking/MailMarkingPage';
 import { AdvancedFilterRulesModule } from '@/components/security/advanced-filter-rules/AdvancedFilterRulesModule';
-import { ComprehensiveStrategyHeader } from '@/components/security/ComprehensiveStrategyHeader';
 import { PipelinePolicyCard, PipelineDrawerNavButton, type PipelinePolicy } from '@/components/security/pipeline-policy-card';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { useAuth } from '@/contexts/auth-context';
@@ -39,7 +38,7 @@ import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useApiRequest } from '@/lib/api/client';
 import { getModuleEnabled, listAdvancedRules } from '@/lib/api/advanced-rules';
-import { canEditSecurityModule, getSecurityModules, setSecurityModuleEnabled } from '@/lib/api/security-modules';
+import { getSecurityModules } from '@/lib/api/security-modules';
 import { getSimilarDetection } from '@/lib/api/similar-detection';
 import { useAgentCenterOverview } from '@/hooks/use-agent-center-overview';
 import { resolveAgentPresentation } from '@/lib/agent-center/presentation';
@@ -164,7 +163,7 @@ export function canAccessPolicyPipeline({
 export function PolicyPipelinePage() {
   const t = useTranslations();
   const router = useRouter();
-  const { isSystemAdmin, user, selectedTenantId } = useAuth();
+  const { isSystemAdmin, user } = useAuth();
   const isTenantAdmin = user?.role === 'tenant_admin';
   const { capabilities } = useProductForm();
   const { effectiveViewer } = useSecurityScope(null);
@@ -210,10 +209,10 @@ export function PolicyPipelinePage() {
   const { pointerHoverProps: collapseHoverProps } = usePointerHover<HTMLButtonElement>();
 
   const { apiRequest } = useApiRequest();
-  const queryClient = useQueryClient();
 
   // F10: stage5 综合策略抽屉宿主对齐 — 左导航启用圆点 + 页级
-  // ComprehensiveStrategyHeader 开关的数据源。仅在抽屉处于阶段5时取数
+  // 综合策略开关状态（阶段5 各子模块是否被总开关关停）的数据源。仅在抽屉处于阶段5时取数;
+  // 开关本身的 UI 入口（ComprehensiveStrategyHeader）已随原型改版移除，这里只读不写。
   // (`enabled` gate)，不影响阶段1/2/3；其余阶段完全不读取这些 query。
   const stage5Active = drawerOpen && activeDrawerPolicy.stage === 5;
 
@@ -247,23 +246,6 @@ export function PolicyPipelinePage() {
   });
   const similarDetectionEnabled = securityModulesMap?.similar_detection ?? true;
   const comprehensiveStrategyEnabled = securityModulesMap?.comprehensive_strategy ?? true;
-  const comprehensiveStrategyEditable = canEditSecurityModule({
-    page: 'comprehensive_strategy',
-    role: user?.role,
-    viewer: effectiveViewer,
-    multiTenant: caps.multiTenant,
-    selectedTenantId,
-  });
-  const comprehensiveStrategyMutation = useMutation({
-    mutationFn: (enabled: boolean) => setSecurityModuleEnabled('comprehensive_strategy', enabled, apiRequest),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['security-modules'] });
-      queryClient.invalidateQueries({ queryKey: ['advanced-rules', 'enabled'] });
-      toast.success(t('common.updateSuccess'));
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
   // html_spec §2.3-13 对齐：左导航「相似邮件与主题检测」摘要=「窗口{N}分钟 / 阈值{M}%」，
   // 取自当前生效方向组（mode==='separate' 取 similar_email.receive，'aggregate' 取 aggregate）。
   // 同 advancedRulesEnabledResp/securityModulesMap，仅在抽屉处于阶段5时取数。
@@ -1034,15 +1016,7 @@ export function PolicyPipelinePage() {
                     drawerContentOwnsScrolling ? 'h-full min-h-0' : 'p-6 space-y-4',
                   )}
                 >
-                  {stage5Active && (
-                    <ComprehensiveStrategyHeader
-                      policyName={t('pipeline.phase5Comprehensive')}
-                      enabled={comprehensiveStrategyEnabled}
-                      loading={comprehensiveStrategyMutation.isPending}
-                      disabled={!comprehensiveStrategyEditable}
-                      onToggle={(enabled) => comprehensiveStrategyMutation.mutate(enabled)}
-                    />
-                  )}
+
                   <div className={cn(
                     // GT-12356: when the drawer content owns its own scrolling
                     // (authSpoofing embeds a flex-col with an inner overflow-y-auto

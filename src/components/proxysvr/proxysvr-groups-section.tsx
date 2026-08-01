@@ -24,9 +24,11 @@ import {
   listProxysvrEndpoints,
 } from '@/lib/api/proxysvr';
 import type { ProxysvrGroup, ProxysvrGroupRequest } from '@/types/proxysvr';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export function ProxysvrGroupsSection() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
 
@@ -61,7 +63,7 @@ export function ProxysvrGroupsSection() {
       toast.success(t('common.deleteSuccess'));
       setDeleteId(null);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(apiErrorMessage(error)),
   });
 
   const openDialog = (g?: ProxysvrGroup) => {
@@ -126,7 +128,7 @@ export function ProxysvrGroupsSection() {
       queryClient.invalidateQueries({ queryKey: groupsKey });
       setDialogOpen(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     } finally {
       setIsSubmitting(false);
     }

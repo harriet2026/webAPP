@@ -38,6 +38,7 @@ import { TriggerBlock } from './blocks/trigger-block';
 import { ResourceLimitsBlock } from './blocks/resource-limits-block';
 import { DispositionBlock } from './blocks/disposition-block';
 import type { ThreatRetroStrategy } from '@/types/threat-retro';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface Props {
   open: boolean;
@@ -54,6 +55,7 @@ function isDeepDraftEqualMode(a: ThreatRetroStrategy, b: ThreatRetroStrategy): b
 
 export function StrategySheet({ open, onOpenChange, initial, list, onSaved }: Props) {
   const t = useTranslations('threatRetroStrategy');
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
   const { isAdmin } = useTenant();
 
@@ -99,7 +101,7 @@ export function StrategySheet({ open, onOpenChange, initial, list, onSaved }: Pr
       onSaved();
       onOpenChange(false);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.saveError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.saveError'))),
   });
 
   const saveAndTestMutation = useMutation({
@@ -126,7 +128,7 @@ export function StrategySheet({ open, onOpenChange, initial, list, onSaved }: Pr
       onSaved();
       onOpenChange(false);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.saveError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.saveError'))),
   });
 
   const handleSave = () => {

@@ -22,6 +22,10 @@ const STAGE_DEFS: { stage: number; key: string; checks: { key: string; pages: st
     { key: 'urlProtection',      pages: ['url_protection'] },
     { key: 'contentRules',       pages: ['content_rules'] },
   ]},
+  // GT-12575: 阶段4/5 顺序与安全策略流水线对齐（阶段4=智能分析、阶段5=综合，
+  // 见 policyPipeline.stages 与 disposal-basis-config 的 stage 赋值）。非 AI
+  // 形态过滤掉 ai 阶段后由消费方重编号（综合显示为阶段4），与策略页 F10 的
+  // 「综合是阶段4还是阶段5取决于智能分析层是否展示」语义一致。
   { stage: 4, key: 'ai', checks: [
     { key: 'senderBehaviorAgent',     pages: [] },
     { key: 'intentRecognitionAgent',  pages: [] },

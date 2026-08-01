@@ -33,6 +33,7 @@ import {
 } from '@/components/security/advanced-filter-rules/AddonsPanel';
 import type { AddonsState } from '@/components/security/advanced-filter-rules/validation';
 import { isInternalIP } from '@/components/security/advanced-filter-rules/rule-form';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const STAGES: { value: StageType; label: string }[] = [
   { value: 'onconnect', label: 'On Connect' },
@@ -82,6 +83,7 @@ function buildTagMetadata(
 
 export default function RulesPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const tAdv = useTranslations('advancedRulesFeature');
   const queryClient = useQueryClient();
   const { effectiveTenantId, isViewingAllTenants } = useTenant();
@@ -127,7 +129,7 @@ export default function RulesPage() {
       setDeleteId(null);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 

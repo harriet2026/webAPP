@@ -267,17 +267,18 @@ describe('AuthSpoofingPage AI-form gating (task 9)', () => {
     expect(screen.getByText('displayNameSpoof.title')).toBeInTheDocument();
   });
 
-  it('always renders ExceptionRulesEntry regardless of AI capability', async () => {
+  // GT-12661：认证仿冒检测配置面板底部的「例外规则管理」横幅已移除
+  //（两个按钮都是无效入口）。ProtocolChecksSection 自己的 goToPipeline 链接保留。
+  it('no longer renders the ExceptionRulesEntry banner', async () => {
     useProductFormMock.mockReturnValue({ capabilities: { ai: true } });
     mockApiRequest.mockResolvedValue(mockConfig);
     renderPage(createElement(AuthSpoofingPage));
 
     await waitFor(() => {
-      expect(screen.getByText('exceptionEntry.title')).toBeInTheDocument();
+      expect(screen.getByText('formatChecks.title')).toBeInTheDocument();
     });
-    // ProtocolChecksSection also renders its own "goToPipeline" link, so assert
-    // at least one instance (the ExceptionRulesEntry's) rather than a unique match.
+    expect(screen.queryByText('exceptionEntry.title')).not.toBeInTheDocument();
+    expect(screen.queryByText('exceptionEntry.viewCurrent')).not.toBeInTheDocument();
     expect(screen.getAllByText('goToPipeline').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('exceptionEntry.viewCurrent')).toBeInTheDocument();
   });
 });

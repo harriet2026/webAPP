@@ -19,6 +19,7 @@ import type {
   SpoofNotificationPreviewResponse,
 } from '@/types/spoofing-detection';
 import { SpoofingNotificationPreviewDialog } from './spoofing-notification-preview-dialog';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const ACTIONS: SpoofDispositionAction[] = ['mark', 'quarantine', 'reject', 'discard'];
 const MARK_POSITIONS: SpoofMarkPosition[] = ['subject', 'header', 'banner'];
@@ -77,6 +78,7 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
   onSaved: () => void;
 }) {
   const tsd = useTranslations('spoofingDetection');
+  const apiErrorMessage = useApiErrorMessage();
   const locale = useLocale();
   const { apiRequest } = useApiRequest();
 
@@ -166,7 +168,7 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
       ? updateSpoofBrand(editing.id, buildConfig(), apiRequest)
       : createSpoofBrand(buildConfig(), apiRequest),
     onSuccess: onSaved,
-    onError: (e) => toast.error(e instanceof Error ? e.message : 'error'),
+    onError: (e) => toast.error(apiErrorMessage(e, 'error')),
   });
 
   const previewMutation = useMutation({
@@ -178,7 +180,7 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
       setNotificationPreview(preview);
       setPreviewOpen(true);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : tsd('notificationPreview.error')),
+    onError: (e) => toast.error(apiErrorMessage(e, tsd('notificationPreview.error'))),
   });
 
   return (

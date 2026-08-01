@@ -51,6 +51,7 @@ import type {
   ImportSelectionState,
   DialogImportModeState,
 } from '@/lib/rule-import-export-helpers';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import {
   parseImportFile,
   getAvailableImportGroups,
@@ -107,6 +108,7 @@ export function RuleImportExportDialog({
   onExecuteImport,
 }: RuleImportExportDialogProps) {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const [activeTab, setActiveTab] = useState<'export' | 'import'>('export');
   const [isExporting, setIsExporting] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
@@ -226,7 +228,7 @@ export function RuleImportExportDialog({
 			downloadEnvelope(file, scopeLabel);
       toast.success(t('ruleImportExport.dialog.toast.exportDownloaded'));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('ruleImportExport.dialog.toast.exportFailed'));
+      toast.error(apiErrorMessage(error, t('ruleImportExport.dialog.toast.exportFailed')));
     } finally {
       setIsExporting(false);
     }
@@ -247,7 +249,7 @@ export function RuleImportExportDialog({
       setImportFile(null);
       setSelection(EMPTY_SELECTION);
       clearPreviewState();
-      toast.error(error instanceof Error ? error.message : t('ruleImportExport.dialog.toast.parseFailed'));
+      toast.error(apiErrorMessage(error, t('ruleImportExport.dialog.toast.parseFailed')));
     }
   }
 
@@ -277,7 +279,7 @@ export function RuleImportExportDialog({
       setSkipAllRemainingDuplicates(false);
       toast.success(t('ruleImportExport.dialog.toast.previewLoaded'));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('ruleImportExport.dialog.toast.previewFailed'));
+      toast.error(apiErrorMessage(error, t('ruleImportExport.dialog.toast.previewFailed')));
     } finally {
       setIsPreviewing(false);
     }
@@ -306,7 +308,7 @@ export function RuleImportExportDialog({
       toast.success(t('ruleImportExport.dialog.toast.importFinished'));
       onOpenChange(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('ruleImportExport.dialog.toast.importFailed'));
+      toast.error(apiErrorMessage(error, t('ruleImportExport.dialog.toast.importFailed')));
     } finally {
       setIsImporting(false);
     }

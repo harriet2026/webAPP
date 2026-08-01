@@ -46,6 +46,7 @@ import {
   validateGreylistForm,
   RBL_CANONICAL_RULE_NAME,
   type GreylistFormConfig,
+  type RblImmediateAction,
 } from './rbl-config-serde';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
 
@@ -54,10 +55,8 @@ const DOMAIN_REGEX = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0
 const DEFAULT_RBL_CONFIG = {
   servers: ['zen.spamhaus.org', 'bl.spamcop.net', 'b.barracudacentral.org'],
   timeout: '5',
-  action: 'block' as RblAction,
+  action: 'reject' as RblImmediateAction,
 };
-
-type RblAction = 'block' | 'quarantine' | 'mark' | 'greylist';
 
 // GT-12263: PRD §3「关键字段悬浮提示」— 预置 RBL 服务器 Badge 的来源说明文案；
 // 非预置（管理员自行添加）的服务器回退到通用 RBL 服务器说明。
@@ -67,15 +66,15 @@ const SERVER_TIP_KEY: Record<string, string> = {
   'b.barracudacentral.org': 'rblFilter.serverTipBarracuda',
 };
 
-// GT-12263: 四个命中动作各自的帮助说明（PRD §3 阻断/隔离/标记/灰名单动作行）。
-const ACTION_TIP_KEY: Record<RblAction, string> = {
-  block: 'rblFilter.actionBlockTip',
+// 即时处置动作各自的帮助说明（拒收/隔离/审核/丢弃）。
+const ACTION_TIP_KEY: Record<RblImmediateAction, string> = {
+  reject: 'rblFilter.actionRejectTip',
   quarantine: 'rblFilter.actionQuarantineTip',
-  mark: 'rblFilter.actionMarkTip',
-  greylist: 'rblFilter.actionGreylistTip',
+  review: 'rblFilter.actionReviewTip',
+  discard: 'rblFilter.actionDiscardTip',
 };
 
-const RBL_ACTIONS: RblAction[] = ['block', 'quarantine', 'mark', 'greylist'];
+const RBL_IMMEDIATE_ACTIONS: RblImmediateAction[] = ['reject', 'quarantine', 'review', 'discard'];
 
 const DEFAULT_GREYLIST_CONFIG: GreylistFormConfig = {
   mode: 'delay',
@@ -116,7 +115,8 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const [serverError, setServerError] = useState('');
   const [timeout, setTimeoutValue] = useState(DEFAULT_RBL_CONFIG.timeout);
   const [timeoutError, setTimeoutError] = useState('');
-  const [action, setAction] = useState<RblAction>(DEFAULT_RBL_CONFIG.action);
+  const [action, setAction] = useState<RblImmediateAction>(DEFAULT_RBL_CONFIG.action);
+  const [greylistEnabled, setGreylistEnabled] = useState(false);
   const [greylistConfig, setGreylistConfig] = useState<GreylistFormConfig>(DEFAULT_GREYLIST_CONFIG);
   const [greylistDraft, setGreylistDraft] = useState<GreylistFormConfig>(DEFAULT_GREYLIST_CONFIG);
   const [greylistDialogOpen, setGreylistDialogOpen] = useState(false);
@@ -127,6 +127,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
     servers: DEFAULT_RBL_CONFIG.servers,
     timeout: DEFAULT_RBL_CONFIG.timeout,
     action: DEFAULT_RBL_CONFIG.action,
+    greylistEnabled: false,
     greylist: DEFAULT_GREYLIST_CONFIG,
   });
 
@@ -138,7 +139,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
     if (isLoading || loadedOnce || !rblProfiles || !rblRulesData) return;
     const cfg = parseRblConfig(rblProfiles, rblRulesData.items ?? [], {
       timeout: DEFAULT_RBL_CONFIG.timeout,
-      action: 'block',
+      action: DEFAULT_RBL_CONFIG.action,
     });
     // GT-11866 R2: 后端无 RBL 服务器时，预置常用服务器（zen.spamhaus.org 等）作为
     // 起始草稿并置 unsaved，提示管理员保存以落库；有则用后端实际值。
@@ -146,6 +147,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
     setServers(usePresets ? DEFAULT_RBL_CONFIG.servers : cfg.servers);
     setTimeoutValue(cfg.timeout);
     setAction(cfg.action);
+    setGreylistEnabled(cfg.greylistEnabled);
     const loadedGreylist = cfg.greylist ? unmapGreylistConfig(cfg.greylist) : DEFAULT_GREYLIST_CONFIG;
     setGreylistConfig(loadedGreylist);
     setGreylistDraft(cloneGreylistConfig(loadedGreylist));
@@ -156,6 +158,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
       servers: cfg.servers,
       timeout: cfg.timeout,
       action: cfg.action,
+      greylistEnabled: cfg.greylistEnabled,
       greylist: loadedGreylist,
     });
     setHasUnsavedChanges(usePresets);
@@ -163,12 +166,12 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
   }, [isLoading, loadedOnce, rblProfiles, rblRulesData]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  const actionLabel = useMemo<Record<RblAction, string>>(
+  const actionLabel = useMemo<Record<RblImmediateAction, string>>(
     () => ({
-      block: t('rblFilter.actionBlock'),
+      reject: t('rblFilter.actionReject'),
       quarantine: t('rblFilter.actionQuarantine'),
-      mark: t('rblFilter.actionMark'),
-      greylist: t('rblFilter.actionGreylist'),
+      review: t('rblFilter.actionReview'),
+      discard: t('rblFilter.actionDiscard'),
     }),
     [t],
   );
@@ -178,7 +181,18 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const timeoutChanged = timeout.trim() !== savedConfig.timeout;
-      const diff = diffRblConfig(baselineProfiles, { enabled, servers, timeout: timeout.trim(), action, greylist: action === 'greylist' ? mapGreylistConfig(greylistConfig) : undefined }, timeoutChanged);
+      const diff = diffRblConfig(
+        baselineProfiles,
+        {
+          enabled,
+          servers,
+          timeout: timeout.trim(),
+          action,
+          greylistEnabled,
+          greylist: greylistEnabled ? mapGreylistConfig(greylistConfig) : undefined,
+        },
+        timeoutChanged,
+      );
       const value = buildProfileValue(timeout.trim());
       // servers
       for (const name of diff.serversToAdd) {
@@ -215,7 +229,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
       const payload: RBLFilterRulePayload = {
         name: RBL_CANONICAL_RULE_NAME, match_mode: 'any', product_action: diff.action, priority: canonical?.priority ?? 100, is_active: diff.enabled,
       };
-      if (diff.action === 'greylist' && diff.greylist) {
+      if (diff.greylist) {
         payload.greylist = diff.greylist;
       }
       if (canonical) {
@@ -370,6 +384,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
     setServers([...savedConfig.servers]);
     setTimeoutValue(savedConfig.timeout);
     setAction(savedConfig.action);
+    setGreylistEnabled(savedConfig.greylistEnabled);
     setGreylistConfig(cloneGreylistConfig(savedConfig.greylist));
     setServerError('');
     setTimeoutError('');
@@ -469,69 +484,119 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
               {timeoutError ? <p className="text-xs text-destructive">{timeoutError}</p> : null}
             </div>
 
-            <div className="space-y-2">
-              <Label>{t('rblFilter.productAction')}</Label>
-              <Select
-                value={action}
-                onValueChange={(value) => {
-                  setAction(value as RblAction);
-                  markDirty();
-                }}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue>{actionLabel[action]}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="block">{t('rblFilter.actionBlock')}</SelectItem>
-                  <SelectItem value="quarantine">{t('rblFilter.actionQuarantine')}</SelectItem>
-                  <SelectItem value="mark">{t('rblFilter.actionMark')}</SelectItem>
-                  <SelectItem value="greylist">
-                    {t('rblFilter.actionGreylist')}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {/* GT-12263: 命中动作区四个动作的帮助说明（PRD §3 阻断/隔离/标记/灰名单动作行）。
-                  动作项本身位于 Select 下拉内，收起时不在 DOM 中，故在此常驻渲染四个帮助入口。 */}
-              <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-1">
-                {RBL_ACTIONS.map((value) => (
-                  <Tooltip key={value}>
-                    <TooltipTrigger
-                      render={
-                        <span
-                          className="inline-flex cursor-help items-center gap-1 text-xs text-muted-foreground"
-                          tabIndex={0}
-                        />
-                      }
-                    >
-                      {actionLabel[value]}
-                      <HelpCircle className="h-3 w-3" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-[300px]">{t(ACTION_TIP_KEY[value])}</TooltipContent>
-                  </Tooltip>
-                ))}
-              </div>
-            </div>
+          </div>
+        </div>
 
-            {action === 'greylist' ? (
-              <div className="pt-1">
+        {/* 处置策略选择区：执行动作 vs 灰名单策略，border-t 与上方服务器/超时区分隔 */}
+        <div className="border-t border-border px-6 py-5 space-y-3">
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm font-medium">{t('rblFilter.disposalStrategyTitle')}</p>
+            <Tooltip>
+              <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
+              <TooltipContent className="max-w-[300px]">{t('rblFilter.disposalStrategyDesc')}</TooltipContent>
+            </Tooltip>
+          </div>
+
+          {/* 两张并排可选卡片，RadioGroup 保证互斥 */}
+          <RadioGroup
+            value={greylistEnabled ? 'greylist' : 'action'}
+            onValueChange={(val) => {
+              setGreylistEnabled(val === 'greylist');
+              markDirty();
+            }}
+            className="grid grid-cols-2 gap-3"
+          >
+            {/* 卡片 A：执行动作 */}
+            <label
+              htmlFor="strategy-action"
+              className={cn(
+                'flex cursor-pointer flex-col gap-3 rounded-lg border p-4 transition-colors',
+                !greylistEnabled
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border bg-card opacity-60 hover:opacity-80 hover:border-border/80',
+              )}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium leading-none">{t('rblFilter.actionSectionTitle')}</p>
+                    <Tooltip>
+                      <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
+                      <TooltipContent className="max-w-[280px]">{t('rblFilter.actionSectionDesc')}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('rblFilter.actionSectionDesc')}</p>
+                </div>
+                <RadioGroupItem value="action" id="strategy-action" className="mt-0.5 shrink-0" />
+              </div>
+              {/* 选中时展开 Select */}
+              {!greylistEnabled ? (
+                <Select
+                  value={action}
+                  onValueChange={(value) => {
+                    setAction(value as RblImmediateAction);
+                    markDirty();
+                  }}
+                >
+                  <SelectTrigger className="w-full" onClick={(e) => e.stopPropagation()}>
+                    <SelectValue>{actionLabel[action]}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RBL_IMMEDIATE_ACTIONS.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        <div className="flex flex-col gap-0.5">
+                          <span>{actionLabel[value]}</span>
+                          <span className="text-xs text-muted-foreground">{t(ACTION_TIP_KEY[value])}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : null}
+            </label>
+
+            {/* 卡片 B：灰名单策略 */}
+            <label
+              htmlFor="strategy-greylist"
+              className={cn(
+                'flex cursor-pointer flex-col gap-3 rounded-lg border p-4 transition-colors',
+                greylistEnabled
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border bg-card opacity-60 hover:opacity-80 hover:border-border/80',
+              )}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium leading-none">{t('rblFilter.greylistSectionTitle')}</p>
+                    <Tooltip>
+                      <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 cursor-help text-muted-foreground" />} />
+                      <TooltipContent className="max-w-[320px]">{t('rblFilter.actionGreylistTip')}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('rblFilter.greylistSectionDesc')}</p>
+                </div>
+                <RadioGroupItem value="greylist" id="strategy-greylist" className="mt-0.5 shrink-0" />
+              </div>
+              {/* 选中时展开摘要与配置入口 */}
+              {greylistEnabled ? (
                 <div className="flex items-center gap-3 rounded-lg border border-info/35 bg-info/10 p-3">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-primary">{t('rblFilter.greylistConfig')}</p>
-                    <p className="mt-0.5 text-xs text-info">{greylistSummary}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-info truncate">{greylistSummary}</p>
                   </div>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     className="shrink-0 border-primary/35 text-primary hover:bg-primary/10"
-                    onClick={openGreylistDialog}
+                    onClick={(e) => { e.preventDefault(); openGreylistDialog(); }}
                   >
                     {t('rblFilter.greylistConfigure')}
                   </Button>
                 </div>
-              </div>
-            ) : null}
-          </div>
+              ) : null}
+            </label>
+          </RadioGroup>
         </div>
 
         <div className="sticky bottom-0 z-10 flex items-center justify-between gap-3 border-t border-border bg-card/95 px-6 py-4 backdrop-blur-sm shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">

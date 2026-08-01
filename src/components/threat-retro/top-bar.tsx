@@ -10,9 +10,11 @@ import { cn } from '@/lib/utils';
 import { useApiRequest } from '@/lib/api/client';
 import { useTenant } from '@/hooks/use-tenant';
 import { getAgentState, putAgentState, getModelInfo } from '@/lib/api/threat-retro';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export function TopBar() {
   const t = useTranslations('threatRetro');
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
   const { isAdmin } = useTenant();
   const qc = useQueryClient();
@@ -39,7 +41,7 @@ export function TopBar() {
       qc.invalidateQueries({ queryKey: ['tr-agent-state'] });
       toast.success(t('toast.stateSaved'));
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toast.stateError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toast.stateError'))),
   });
 
   const enabled = stateQuery.data?.enabled ?? false;

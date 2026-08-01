@@ -45,6 +45,7 @@ function AccountForm({
   onNameChange?: (n: string) => void;
 }) {
   const t = useTranslations('profile');
+  const tRoot = useTranslations();
   const tc = useTranslations('common');
   // GT-11970: role labels live under the `users` namespace (single source of
   // truth shared with 用户管理); resolve the Chinese label instead of showing
@@ -104,7 +105,7 @@ function AccountForm({
       startCountdown('p');
       toast.success(t('account.codeSent'));
     } catch (e) {
-      toast.error(profileApiErrorMessage(e, 'account.codeSendFailed', t));
+      toast.error(profileApiErrorMessage(e, 'account.codeSendFailed', t, tRoot));
     }
   };
 
@@ -119,7 +120,7 @@ function AccountForm({
       startCountdown('e');
       toast.success(t('account.codeSent'));
     } catch (e) {
-      toast.error(profileApiErrorMessage(e, 'account.codeSendFailed', t));
+      toast.error(profileApiErrorMessage(e, 'account.codeSendFailed', t, tRoot));
     }
   };
 
@@ -134,7 +135,7 @@ function AccountForm({
       setPhoneCode('');
       toast.success(t('account.boundPhone'));
     } catch (e) {
-      setPhoneErr(profileApiErrorMessage(e, 'account.bindFailed', t));
+      setPhoneErr(profileApiErrorMessage(e, 'account.bindFailed', t, tRoot));
     }
   };
 
@@ -149,7 +150,7 @@ function AccountForm({
       setEmailCode('');
       toast.success(t('account.boundEmail'));
     } catch (e) {
-      setEmailErr(profileApiErrorMessage(e, 'account.bindFailed', t));
+      setEmailErr(profileApiErrorMessage(e, 'account.bindFailed', t, tRoot));
     }
   };
 
@@ -164,7 +165,7 @@ function AccountForm({
       onNameChange?.(name.trim());
       toast.success(t('account.saved'));
     } catch (e) {
-      setNameErr(profileApiErrorMessage(e, 'account.saveFailed', t));
+      setNameErr(profileApiErrorMessage(e, 'account.saveFailed', t, tRoot));
     }
   };
 

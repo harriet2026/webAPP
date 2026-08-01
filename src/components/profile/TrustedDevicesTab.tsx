@@ -27,6 +27,7 @@ import { useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { useTrustedDevices, useRevokeTrustedDevice } from './api';
 import type { AdminTrustedDevice } from './types';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 function formatTime(iso: string | undefined, locale: string): string {
   if (!iso) return '—';
@@ -47,6 +48,7 @@ function formatTime(iso: string | undefined, locale: string): string {
  */
 export function TrustedDevicesTab() {
   const t = useTranslations('profile');
+  const apiErrorMessage = useApiErrorMessage();
   const tc = useTranslations('common');
   const { data, isLoading } = useTrustedDevices();
   const revoke = useRevokeTrustedDevice();
@@ -62,7 +64,7 @@ export function TrustedDevicesTab() {
       setTarget(null);
       toast.success(t('trustedDevices.revoked'));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : tc('error'));
+      toast.error(apiErrorMessage(e, tc('error')));
     }
   };
 

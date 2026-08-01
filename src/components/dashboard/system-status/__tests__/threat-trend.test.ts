@@ -129,3 +129,18 @@ describe('buildThreatTrendOption', () => {
     expect(grid.right).toBeGreaterThanOrEqual(20);
   });
 });
+
+// GT-12397: 无数据（成功响应、零点位）时也要产出完整坐标系 option——
+// 画布始终渲染，空态文案经 graphic 居中呈现，而不是返回 null 让组件换成
+// 占位 div。
+describe('empty-data canvas option (GT-12397)', () => {
+  it('returns a full axes option with centered empty-text graphic for zero points', () => {
+    const option = buildThreatTrendOption([], new Set(), (k) => k, '暂无数据');
+    expect(option).not.toBeNull();
+    expect(option?.xAxis).toMatchObject({ type: 'category', data: [] });
+    expect(option?.yAxis).toMatchObject({ type: 'value', splitNumber: 4 });
+    expect(option?.series).toEqual([]);
+    const graphics = (option as { graphic?: Array<{ style?: { text?: string } }> }).graphic ?? [];
+    expect(graphics.some((g) => g.style?.text === '暂无数据')).toBe(true);
+  });
+});

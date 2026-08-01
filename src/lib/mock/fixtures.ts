@@ -31,6 +31,7 @@ import type {
   RBLFilterRuleView,
   RBLFilterMatchMode,
   RBLFilterProductAction,
+  RBLFilterLegacyProductAction,
 } from "@/types/rbl-filter";
 import type { DetectionProfile } from "@/lib/api/detection-profiles";
 import type {
@@ -2907,7 +2908,8 @@ function makeRBLRule(input: {
   description?: string;
   match_mode: RBLFilterMatchMode;
   match_servers: string[];
-  product_action: RBLFilterProductAction;
+  // 允许旧枚举值：下面的 mock 规则刻意保留 block/mark 存量数据
+  product_action: RBLFilterProductAction | RBLFilterLegacyProductAction;
   action: string;
   priority: number;
   is_active: boolean;
@@ -3001,7 +3003,8 @@ export function mockRBLFilterRulesList(query: {
   page_size?: number;
   q?: string;
   match_mode?: RBLFilterMatchMode;
-  product_action?: RBLFilterProductAction;
+  // 允许旧枚举值：mock 规则里保留 block/mark 存量数据，用于覆盖 parseRblConfig 的兼容读路径
+  product_action?: RBLFilterProductAction | RBLFilterLegacyProductAction;
   is_active?: boolean;
 }) {
   let items = [...mockRBLFilterRules];
@@ -4120,14 +4123,13 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
         none: { enabled: true, action: "audit", observe_mode: false },
       },
       ptr: {
-        norecord: { enabled: true, action: "audit", observe_mode: false },
-        temperror: { enabled: true, action: "audit", observe_mode: false },
-        ehlomismatch: {
+        noptr: { enabled: true, action: "audit", observe_mode: false },
+        nomatch: { enabled: true, action: "quarantine", observe_mode: false },
+        ehlo_mismatch: {
           enabled: true,
           action: "quarantine",
           observe_mode: false,
         },
-        amismatch: { enabled: true, action: "quarantine", observe_mode: false },
       },
     },
     similar_domain: {
@@ -5181,6 +5183,9 @@ interface MockDisposalSeed {
   // recipient_dispositions 等派发状态（those stay driven by action+
   // deliveryStatus as before -- 本任务明确不touch dispatch逻辑）。
   disposalBasisActionOverride?: string;
+  // isMixed -- 标记这封邮件是多收件人混合处置（action='mixed'），mockMailLog
+  // 据此生成 disposition_actions + 逐收件人 final_action 各异的 dispositions。
+  isMixed?: boolean;
 }
 
 const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
@@ -5203,6 +5208,27 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     hasQrCode: false,
     score: 94,
     basis: ["AI-SPOOF", "高管仿冒识别", "AI-SPOOF-012"],
+  },
+  {
+    tid: "MIC053",
+    time: "2026-06-15 09:30:00",
+    direction: "incoming",
+    sender: "bulk-sender@marketing-external.com",
+    recipients:
+      "alice@company.com, bob@company.com, carol@company.com, dave@company.com, eve@company.com, frank@company.com, grace@company.com, henry@company.com",
+    subject: "季度营销报告 - 部分收件人白名单（混合处置演示）",
+    action: "mixed",
+    reason: "混合处置：白名单收件人投递 + 规则命中隔离",
+    mailType: "normal",
+    deliveryStatus: "partial_delivered",
+    sourceIp: "45.137.21.88",
+    ipLocation: "新加坡",
+    cluster: "Node 2",
+    attachmentCount: 0,
+    hasQrCode: false,
+    score: 35,
+    basis: ["CONTENT", "内容关键字匹配", "CT-007"],
+    isMixed: true,
   },
   {
     tid: "MIC002",
@@ -6369,8 +6395,9 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     sender_domain: seed.sender.split("@")[1],
     recipients,
     subject: seed.subject,
-    action: disposalAction(seed),
-    status: seed.deliveryStatus,
+    action: seed.isMixed ? "mixed" : disposalAction(seed),
+    status: seed.isMixed ? "mixed" : seed.deliveryStatus,
+    disposition_actions: seed.isMixed ? ["accept", "quarantine", "sideline"] : undefined,
     reason: seed.reason,
     authenticated: seed.direction === "outgoing",
     smtp_user: seed.direction === "outgoing" ? seed.sender : undefined,
@@ -6378,8 +6405,8 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     queue_id: `MOCK${String(index + 1).padStart(5, "0")}`,
     storage_node: seed.cluster,
     storage_size: seed.storageSizeBytes ?? 18_000 + index * 1371,
-    delivery_status_summary: disposalDelivery(seed),
-    workflow_outcome_summary: disposalWorkflow(seed),
+    delivery_status_summary: seed.isMixed ? "partial_delivered" : disposalDelivery(seed),
+    workflow_outcome_summary: seed.isMixed ? "released" : disposalWorkflow(seed),
     recall_status_summary: "none",
     received_at: seed.time.replace(" ", "T") + "+08:00",
     processed_at: seed.time.replace(" ", "T") + "+08:00",
@@ -6488,14 +6515,22 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     },
     recipient_dispositions: recipients.map((recipient, i) => {
       const status = recipientStatusFor(seed, recipients.length, i);
+      // mixed seed: 前半投递、后半隔离/旁路，模拟真实 mixed 场景
+      const mixedActions = ["accept", "accept", "accept", "quarantine", "sideline"];
+      const mixedStatuses = ["delivered", "delivered", "delivered", "quarantined", "delivered"];
+      const mixedReasons = [
+        "rule 投递白名单 matched at data stage",
+        "rule 投递白名单 matched at data stage",
+        "rule 投递白名单 matched at data stage",
+        "rule 隔离扣留 matched at data stage",
+        "default_sideline",
+      ];
+      const isMixedRcpt = seed.isMixed && i < mixedActions.length;
       return {
         recipient,
-        final_action: disposalAction(seed),
-        status,
-        reason: seed.reason,
-        // 只有落在「可操作」集合里的状态才配 object_id（§Task 12 item 1）——
-        // blocked/discarded 保持缺失，让单/多收件人处置按钮按 demo canOperate
-        // 语义禁用。
+        final_action: isMixedRcpt ? mixedActions[i] : disposalAction(seed),
+        status: isMixedRcpt ? mixedStatuses[i] : status,
+        reason: isMixedRcpt ? mixedReasons[i] : seed.reason,
         object_id: OPERABLE_RECIPIENT_STATUSES.has(status)
           ? `obj-${index + 1}-${i}`
           : undefined,
@@ -6550,6 +6585,7 @@ function displayStatusOf(item: (typeof mockDisposalMailLogs)[number]): string {
   if (item.action === "audit") return "audit_pending";
   if (item.action === "reject") return "rejected";
   if (item.action === "discard") return "discarded";
+  if (item.action === "mixed") return "partial_delivered";
   return (
     (
       {

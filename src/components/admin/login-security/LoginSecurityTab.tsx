@@ -25,6 +25,7 @@ import {
   type LoginPolicyWrite,
 } from '@/lib/api/login-policy';
 import { isBelowBaseline, type StrictnessField } from '@/lib/api/strictness';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 // GT-11959. Layout follows the product design (section cards, label left / control
 // right), with ONE deliberate departure: password complexity is an "at least N of
@@ -79,6 +80,7 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
 
 export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
   const t = useTranslations('loginSecurity');
+  const apiErrorMessage = useApiErrorMessage();
   const { data, isLoading } = useLoginPolicy(tenantId);
   const update = useUpdateLoginPolicy(tenantId);
   const addRule = useAddLoginIPRule(tenantId);
@@ -233,7 +235,7 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
         setTouched(new Set());
         toast.success(t('saved'));
       },
-      onError: (e) => toast.error(e instanceof Error ? e.message : t('saveFailed')),
+      onError: (e) => toast.error(apiErrorMessage(e, t('saveFailed'))),
     });
   };
 
@@ -442,7 +444,7 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
                     className="text-danger"
                     onClick={() =>
                       delRule.mutate(r.id, {
-                        onError: (e) => toast.error(e instanceof Error ? e.message : t('saveFailed')),
+                        onError: (e) => toast.error(apiErrorMessage(e, t('saveFailed'))),
                       })
                     }
                   >
@@ -481,7 +483,7 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
                       // The lock-out guard lives on the server: saving a whitelist
                       // that omits your own address shuts you out of the console
                       // with no way back in. Surface its message verbatim.
-                      onError: (e) => toast.error(e instanceof Error ? e.message : t('saveFailed')),
+                      onError: (e) => toast.error(apiErrorMessage(e, t('saveFailed'))),
                     },
                   )
                 }

@@ -1,5 +1,7 @@
 'use client';
 
+import { padWeeklyMatrix } from './weekly-matrix';
+
 import { useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import ReactECharts from 'echarts-for-react';
@@ -63,7 +65,11 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
 
   const buckets = useMemo(() => data?.buckets ?? [], [data?.buckets]);
   const hourly = useMemo(() => data?.hourly ?? [], [data?.hourly]);
-  const weeklyMatrix = useMemo(() => data?.weekly_matrix ?? [], [data?.weekly_matrix]);
+  // GT-12587：稀疏矩阵会让前端少画列，见 weekly-matrix.ts 的说明。
+  const weeklyMatrix = useMemo(
+    () => padWeeklyMatrix(data?.weekly_matrix ?? []),
+    [data?.weekly_matrix],
+  );
 
   const hasData = mode === 'weekly' ? weeklyMatrix.length > 0 : buckets.length > 0;
   const maxTotal = mode === 'weekly'
@@ -130,28 +136,36 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
           borderWidth: 0,
           textStyle: { color: '#f9fafb', fontSize: 12 },
           formatter: (params: unknown) => {
-            const value = (params as { value?: [number, number, number] }).value;
+            const value = (params as { value?: [string, number, number] }).value;
             if (!value) return '';
-            return `${weekdays[value[1]]} ${String(value[0]).padStart(2, '0')}:00<br/>${value[2].toLocaleString()}`;
+            const hourStr = typeof value[0] === 'string' ? value[0] : String(value[0]).padStart(2, '0');
+            const nextHour = String((Number(hourStr) + 1) % 24).padStart(2, '0');
+            return `${weekdays[value[1]]}  ${hourStr}:00–${nextHour}:00<br/><strong>${value[2].toLocaleString()}</strong>`;
           },
         },
         grid: { left: 42, right: 12, top: 8, bottom: 46 },
         xAxis: {
           type: 'category',
-          data: Array.from({ length: 24 }, (_, hour) => hour),
-          axisLabel: { ...axisLabel, interval: 2 },
+          // Use zero-padded strings so they match the string keys used in
+          // series data below — ECharts category axis matches by string equality.
+          data: Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0')),
+          axisLabel: {
+            ...axisLabel,
+            interval: 1,
+            formatter: (val: string) => `${val}`,
+          },
           axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.35)' } },
           axisTick: { show: false },
-          splitArea: { show: true, areaStyle: { color: ['transparent'] } },
+          splitArea: { show: true, areaStyle: { color: ['rgba(148,163,184,0.04)', 'transparent'] } },
         },
         yAxis: {
           type: 'category',
           data: weekdays,
-          inverse: true,
+          inverse: false,
           axisLabel,
           axisLine: { show: false },
           axisTick: { show: false },
-          splitArea: { show: true, areaStyle: { color: ['transparent'] } },
+          splitArea: { show: true, areaStyle: { color: ['rgba(148,163,184,0.04)', 'transparent'] } },
         },
         visualMap: {
           min: 0,
@@ -161,18 +175,23 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
           left: 'center',
           bottom: 0,
           itemWidth: 10,
-          itemHeight: 90,
+          itemHeight: 120,
           text: [t('high'), t('low')],
           textGap: 6,
           textStyle: axisLabel,
-          inRange: { color: ['#f3f4f6', '#fef3c7', '#fed7aa', '#fdba74', '#f87171'] },
+          inRange: { color: ['#1e293b', '#1e3a5f', '#1d4ed8', '#f97316', '#ef4444'] },
         },
         series: [{
           name: t('title'),
           type: 'heatmap',
-          data: weeklyMatrix.map((cell) => [cell.hour, cell.day, cell.value]),
-          itemStyle: { borderColor: '#ffffff', borderWidth: 2, borderRadius: 2 },
-          emphasis: { itemStyle: { borderColor: '#2563eb', borderWidth: 1 } },
+          // x = zero-padded hour string (matches xAxis.data), y = weekday index (matches yAxis.data position)
+          data: weeklyMatrix.map((cell) => [
+            String(cell.hour).padStart(2, '0'),
+            cell.day,
+            cell.value,
+          ]),
+          itemStyle: { borderColor: 'rgba(15,23,42,0.6)', borderWidth: 1, borderRadius: 1 },
+          emphasis: { itemStyle: { borderColor: '#60a5fa', borderWidth: 1.5 } },
         }],
       };
     }
@@ -187,12 +206,21 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
       animationDurationUpdate: 200,
       tooltip,
       legend: {
+        // 'scroll' keeps all legend items on a single row with prev/next arrows
+        // when they exceed the container width, avoiding multi-row overlap.
+        type: 'scroll',
         bottom: 0,
+        left: 0,
+        right: 0,
         itemWidth: 10,
         itemHeight: 10,
-        textStyle: axisLabel,
+        itemGap: 12,
+        pageIconSize: 10,
+        pageTextStyle: axisLabel,
+        textStyle: { ...axisLabel, padding: [0, 4, 0, 2] },
       },
-      grid: { left: 42, right: 12, top: 8, bottom: 48 },
+      // Fixed bottom clearance for the single-row scroll legend (≈28 px).
+      grid: { left: 42, right: 12, top: 8, bottom: 36 },
       xAxis: {
         type: 'category',
         data: buckets.map((bucket) => bucket.label.slice(0, 2)),
@@ -268,7 +296,7 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
               <ReactECharts
                 option={chartOption}
                 notMerge
-                style={{ height: 230, width: '100%' }}
+                style={{ height: mode === 'weekly' ? 280 : 230, width: '100%' }}
                 data-testid="time-distribution-echarts"
               />
             )}

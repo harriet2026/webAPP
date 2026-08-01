@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils';
 import { useApiRequest } from '@/lib/api/client';
 import { useTenant } from '@/hooks/use-tenant';
 import { listStrategies, startScan } from '@/lib/api/threat-retro';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface Props {
   open: boolean;
@@ -45,6 +46,7 @@ function toLocalInput(d: Date): string {
 
 export function ManualScanDialog({ open, onOpenChange, onScanned }: Props) {
   const t = useTranslations('threatRetro.manualScan');
+  const apiErrorMessage = useApiErrorMessage();
   const tc = useTranslations('common');
   const { apiRequest } = useApiRequest();
   const { isAdmin } = useTenant();
@@ -105,7 +107,7 @@ export function ManualScanDialog({ open, onOpenChange, onScanned }: Props) {
       onOpenChange(false);
       onScanned();
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('toastError')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('toastError'))),
   });
 
   const submit = () => {

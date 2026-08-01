@@ -30,9 +30,11 @@ import type { EmailPreviewResponse } from '@/types/email-preview';
 import { OverflowCell } from '@/components/shared/overflow-cell';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { PageFilters } from '@/components/shared/page-filters';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export default function QuarantinePage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { effectiveTenantId, isSystemAdmin, isViewingAllTenants } = useTenant();
   const { apiRequest } = useApiRequest();
@@ -106,7 +108,7 @@ export default function QuarantinePage() {
       setReleaseTarget('');
       setReleaseNotes('');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     } finally {
       setIsSubmitting(false);
     }
@@ -133,7 +135,7 @@ export default function QuarantinePage() {
       const data = await getQuarantinePreview(item.quarantine_id, apiRequest);
       setPreviewData(data);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
       setPreviewOpen(false);
     } finally {
       setPreviewLoading(false);

@@ -28,6 +28,7 @@ import {
   type ConfigSection,
 } from '@/lib/api/config-files';
 import { getRuleSyncStatus } from '@/lib/api/rule-sync';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 // Task 9b: [rule_sync] lives in apiserver.cf, and switching its `role` to
 // `replica` is destructive (spec §2: first sync overwrites this node's local
@@ -77,6 +78,7 @@ function inferValueType(raw: string): ValueType {
 
 export default function ConfigManagementPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
 
@@ -124,7 +126,7 @@ export default function ConfigManagementPage() {
       toast.success(t('common.deleteSuccess'));
       setDeleteTarget(null);
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: Error) => toast.error(apiErrorMessage(err)),
   });
 
   const openEdit = (sectionName: string, entry: ConfigEntry, existing?: ConfigOverride) => {
@@ -177,7 +179,7 @@ export default function ConfigManagementPage() {
       queryClient.invalidateQueries({ queryKey: ['config-overrides', activeFile] });
       setEditState(null);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('common.error'));
+      toast.error(apiErrorMessage(err, t('common.error')));
     } finally {
       setSaving(false);
     }
@@ -194,7 +196,7 @@ export default function ConfigManagementPage() {
         const status = await getRuleSyncStatus(apiRequest);
         setReplicaSwitchConfirm({ globalRuleCount: status.global_rule_count });
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : t('common.error'));
+        toast.error(apiErrorMessage(err, t('common.error')));
       } finally {
         setSaving(false);
       }

@@ -19,6 +19,7 @@ import { SpoofingBrandsPage } from './spoofing-brands-page';
 import { SpoofingWhitelistPanel } from './spoofing-whitelist-panel';
 import { cn } from '@/lib/utils';
 import { spoofingQueryKeys } from './spoofing-query-keys';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export type SpoofingAgentTab = 'overview' | 'protected-objects' | 'brand';
 
@@ -30,6 +31,7 @@ interface SpoofingAgentPageProps {
 
 function useSpoofingEngineToggle() {
   const t = useTranslations('spoofingDetection');
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest, effectiveTenantId } = useApiRequest();
   const { canEdit } = useSpoofingAccess();
   const qc = useQueryClient();
@@ -49,7 +51,7 @@ function useSpoofingEngineToggle() {
       qc.invalidateQueries({ queryKey: spoofingQueryKeys.engine(effectiveTenantId) });
       toast.success(t('enableSwitch'));
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : 'error'),
+    onError: (e) => toast.error(apiErrorMessage(e, 'error')),
   });
 
   return {

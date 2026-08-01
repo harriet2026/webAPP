@@ -57,8 +57,52 @@ export function buildThreatTrendOption(
   points: TrendSeriesPoint[],
   hidden: ReadonlySet<string>,
   seriesLabel: (key: string) => string,
+  emptyText?: string,
 ) {
-  if (points.length === 0) return null;
+  // GT-12397: 无数据时仍渲染完整坐标系画布（与原型一致、布局稳定），空态
+  // 文案用 ECharts graphic 居中呈现，而不是整块换成占位 div。cast 到非空
+  // 分支的返回类型，让消费方（组件与既有测试）的类型推断保持不变。
+  if (points.length === 0) {
+    const empty = {
+      grid: { left: 35, right: 26, top: 24, bottom: 0, containLabel: true },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: [] as string[],
+        axisLine: { show: true, lineStyle: { color: '#666666' } },
+        axisTick: { show: false },
+      },
+      yAxis: {
+        type: 'value',
+        splitNumber: 4,
+        min: 0,
+        max: 4,
+        splitLine: { show: true, lineStyle: { color: '#F0F0F0', type: 'dashed' } },
+        axisLabel: { fontSize: 12, color: '#666666' },
+        axisLine: { show: true, lineStyle: { color: '#666666' } },
+        axisTick: { show: true, lineStyle: { color: '#666666' } },
+      },
+      series: [],
+      graphic: emptyText
+        ? [{
+            type: 'text',
+            left: 'center',
+            top: 'middle',
+            silent: true,
+            style: { text: emptyText, fill: '#9ca3af', fontSize: 14 },
+          }]
+        : [],
+    };
+    return empty as unknown as ReturnType<typeof buildNonEmptyThreatTrendOption>;
+  }
+  return buildNonEmptyThreatTrendOption(points, hidden, seriesLabel);
+}
+
+function buildNonEmptyThreatTrendOption(
+  points: TrendSeriesPoint[],
+  hidden: ReadonlySet<string>,
+  seriesLabel: (key: string) => string,
+) {
 
   const singleBucket = points.length === 1;
   const axisLabelInterval = points.length > 12 ? Math.ceil(points.length / 12) - 1 : 0;

@@ -10,7 +10,8 @@ import { Save, RotateCcw, Loader2, Shield, AlertTriangle, Clock } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FramedPage } from '@/components/shared/page-shell';
-import { useApiRequest, ApiError } from '@/lib/api/client';
+import { useApiRequest } from '@/lib/api/client';
+import { localizeApiError, apiErrorFieldPath } from '@/lib/api/error-message';
 import { getDisposalSettings, putDisposalSettings } from '@/lib/api/disposal-settings';
 import { DISPOSAL_CATEGORY_KEYS, type DisposalSettings } from '@/types/disposal-settings';
 import { disposalSettingsSchema, defaultDisposalSettings } from './schema';
@@ -30,6 +31,8 @@ function normalizeTime(v: string): string {
 
 export function DisposalSettingsPage() {
   const t = useTranslations('disposalSettings');
+  // 根命名空间实例：localizeApiError 需要用完整 key（apiErrors.<code>）查文案。
+  const tRoot = useTranslations();
   const tCommon = useTranslations('common');
   const { apiRequest } = useApiRequest();
   const { effectiveTenantId } = useTenant();
@@ -82,37 +85,25 @@ export function DisposalSettingsPage() {
       form.reset(saved);
       toast.success(t('saveSuccess'));
     } catch (e) {
-      const rawMessage = e instanceof Error ? e.message : '';
-
-      // 将已知的后端英文错误映射为 i18n 键，避免裸露字段名和英文原文给终端用户。
-      // 匹配优先级：portal_base_url > 分类置信度 > 通用 saveFailed。
-      let toastMessage: string;
-
-      if (e instanceof ApiError && e.status === 400 && rawMessage.includes('portal_base_url')) {
-        // 把错误同时标注到字段旁（字段渲染层已通过 t('portalBaseUrlRequired') 翻译，
-        // setError 的 message 只用作 fieldState.error 存在性判断，不直接渲染）。
-        form.setError('quarantine.portal_base_url', {
+      // GT-12606：后端现在返回**稳定错误码 + 结构化参数**，前端按 locale 渲染。
+      // 此前这里是按英文 message 做子串匹配（portal_base_url / 分类键名两条），
+      // 其余 27 条校验全部落到无差别的 t('saveFailed') —— 用户从"看不懂的英文"
+      // 变成"看得懂但不知道错在哪"。子串匹配还有个致命问题：后端润色一个字就
+      // 静默失配，且没有任何测试会红。
+      //
+      // 未命中错误码时才回退 t('saveFailed')，**绝不显示后端英文 message**
+      // （上位规格 2026-07-28-cross-page-i18n-text-integrity-ui-spec.md §3 的
+      // 发布门禁）。
+      const localized = localizeApiError(e, tRoot);
+      const fieldPath = apiErrorFieldPath(e);
+      if (fieldPath) {
+        // 把错误标注到具体输入框旁。message 存本地化后的文案，字段渲染层直接用。
+        form.setError(fieldPath as Parameters<typeof form.setError>[0], {
           type: 'server',
-          message: 'portalBaseUrlRequired',
+          message: localized ?? undefined,
         });
-        toastMessage = t('portalBaseUrlRequired');
-      } else if (e instanceof ApiError && e.status === 400) {
-        // 分类置信度区间的服务端校验错误信息带分类键名（如
-        // "min_score must be <= max_score for phishing"），据此把错误挂到
-        // 对应分类行；字段错误文案统一走 t('scoreRangeError')，toast 走通用失败文案。
-        const key = DISPOSAL_CATEGORY_KEYS.find((k) => rawMessage.includes(k));
-        if (key) {
-          form.setError(`quarantine.category_notify.${key}`, {
-            type: 'server',
-            message: 'scoreRangeError',
-          });
-        }
-        toastMessage = t('saveFailed');
-      } else {
-        toastMessage = rawMessage || t('saveFailed');
       }
-
-      toast.error(toastMessage);
+      toast.error(localized ?? t('saveFailed'));
     }
   };
 

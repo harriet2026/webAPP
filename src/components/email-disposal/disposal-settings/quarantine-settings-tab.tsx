@@ -532,7 +532,7 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
                                 <Input
                                   type="number"
                                   min={1}
-                                  max={365}
+                                  max={30}
                                   className="mx-auto w-24"
                                   disabled={!enabled || portalMissing}
                                   value={field.value}

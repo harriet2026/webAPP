@@ -21,6 +21,7 @@ import { PageHeader, PageShell } from '@/components/shared/page-shell';
 import { cn } from '@/lib/utils';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { toast } from 'sonner';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -119,6 +120,7 @@ function parseMetadata(raw: string | null | undefined): RuleMetadata {
 
 function useRuleSummaryText(rule: Rule, maxLength = 90): { display: string; full: string } {
   const t = useTranslations('advancedRules');
+  const apiErrorMessage = useApiErrorMessage();
   const tree = parseConditionTree(rule.condition_tree);
 
   let prefix = '';
@@ -865,6 +867,7 @@ function RuleDetailSheet({ rule, onClose, onToggle }: {
 
 export function RulePipelinePage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { effectiveTenantId } = useTenant();
   const { apiRequest } = useApiRequest();
@@ -910,7 +913,7 @@ export function RulePipelinePage() {
       toast.success(t('common.updateSuccess'));
       setSelectedRule(prev => (prev?.id === updated.id ? updated : prev));
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: Error) => toast.error(apiErrorMessage(err)),
   });
 
   if (isLoading) {

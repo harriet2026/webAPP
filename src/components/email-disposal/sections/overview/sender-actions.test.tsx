@@ -6,6 +6,12 @@ import { SenderActions } from './sender-actions';
 // Identity translator (mirrors recipient-status.test.tsx): keeps namespace +
 // key + interpolation params visible instead of resolving to real zh/en/th/ru
 // copy, so this test stays decoupled from messages/*.json content.
+// GT-12628: SenderActions/useRecipientDisposition 现从 useAuth 取角色决定
+// 规则 priority（tenant_admin 上限 1000），测试按平台管理员形态 mock。
+vi.mock('@/contexts/auth-context', () => ({
+  useAuth: () => ({ isSystemAdmin: true }),
+}));
+
 vi.mock('next-intl', () => ({
   useTranslations: (namespace: string) => (key: string, params?: Record<string, unknown>) => (
     params ? `${namespace}.${key}:${JSON.stringify(params)}` : `${namespace}.${key}`
@@ -18,6 +24,8 @@ vi.mock('sonner', () => ({
 
 vi.mock('../../lib/disposal-detail-api', () => ({
   addSenderFilterRule: vi.fn(),
+  // 真实实现（GT-12601/GT-12628）：按角色 5000/1000，mock 同语义。
+  disposalRulePriority: (isSystemAdmin: boolean) => (isSystemAdmin ? 5000 : 1000),
 }));
 
 import { addSenderFilterRule } from '../../lib/disposal-detail-api';
@@ -90,6 +98,7 @@ describe('SenderActions', () => {
       'attacker@evil.com',
       'blacklist',
       apiRequest,
+      5000, // isSystemAdmin mock → disposalRulePriority(true)（GT-12628）
       { scope: 'tenant', includeSubdomains: false },
     );
   });
@@ -109,6 +118,7 @@ describe('SenderActions', () => {
       'attacker@evil.com',
       'blacklist',
       apiRequest,
+      5000,
       { scope: 'tenant', includeSubdomains: true },
     );
   });
@@ -127,6 +137,7 @@ describe('SenderActions', () => {
       'attacker@evil.com',
       'whitelist',
       apiRequest,
+      5000,
       { scope: 'tenant' },
     );
   });

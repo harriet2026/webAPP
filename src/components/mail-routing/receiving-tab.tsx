@@ -70,6 +70,7 @@ import {
 import { createTenantDomain, deleteTenantDomain, updateTenantDomain } from '@/lib/api/tenants';
 import type { TenantDomain, TenantDomainNexthop } from '@/types/tenant';
 import { formatDate } from '@/lib/utils';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface ReceivingTabProps {
   tenantId: number;
@@ -172,6 +173,7 @@ function testConnectivity(request: ApiRequestFn): Promise<ConnectivityTestResult
 
 export function ReceivingTab({ tenantId }: ReceivingTabProps) {
   const t = useTranslations('mailRouting');
+  const apiErrorMessage = useApiErrorMessage();
   const ts = useTranslations('mailRouting.shared');
   const tc = useTranslations('common');
   const { apiRequest } = useScopedApiRequest(tenantId);
@@ -312,7 +314,7 @@ export function ReceivingTab({ tenantId }: ReceivingTabProps) {
       closeDrawer();
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const updateMutation = useMutation({
@@ -379,7 +381,7 @@ export function ReceivingTab({ tenantId }: ReceivingTabProps) {
       closeDrawer();
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const deleteMutation = useMutation({
@@ -389,7 +391,7 @@ export function ReceivingTab({ tenantId }: ReceivingTabProps) {
       setDeleteTarget(null);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
   const domainNameTrimmed = draft.domainName.trim();

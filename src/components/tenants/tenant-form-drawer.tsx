@@ -51,6 +51,7 @@ import type {
 import { normalizeTenantLanguage, TENANT_LANGUAGE_LABELS } from '@/types/tenant';
 import { useProductForm } from '@/contexts/product-form-context';
 import { cn } from '@/lib/utils';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import {
   makeTenantFormSchema,
   tenantConflictToastKey,
@@ -67,6 +68,7 @@ interface TenantFormDrawerProps {
 
 export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFormDrawerProps) {
   const t = useTranslations('tenants');
+  const apiErrorMessage = useApiErrorMessage();
   const tc = useTranslations('common');
   // 复用「管理员与权限」重置密码弹窗的「生成」按钮文案，避免再造一条同义 key。
   const tu = useTranslations('users');
@@ -311,9 +313,9 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
         // （见 ApiError 构造函数），是权威、随策略变化的文案，不在前端重新
         // 翻译/改写。
         form.setError('admin_password', { message: err.message });
-        toast.error(err.message);
+        toast.error(apiErrorMessage(err));
       } else {
-        toast.error(err instanceof Error ? err.message : tc('error'));
+        toast.error(apiErrorMessage(err, tc('error')));
       }
     } finally {
       setIsSubmitting(false);

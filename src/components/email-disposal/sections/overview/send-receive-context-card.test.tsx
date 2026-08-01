@@ -13,6 +13,12 @@ const wrap = (ui: React.ReactNode) => (
   </NextIntlClientProvider>
 );
 
+// GT-12628: SenderActions/useRecipientDisposition 现从 useAuth 取角色决定
+// 规则 priority（tenant_admin 上限 1000），测试按平台管理员形态 mock。
+vi.mock('@/contexts/auth-context', () => ({
+  useAuth: () => ({ isSystemAdmin: true }),
+}));
+
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));

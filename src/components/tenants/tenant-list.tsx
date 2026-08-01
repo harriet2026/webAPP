@@ -26,6 +26,7 @@ import { formatDate } from '@/lib/utils';
 
 import { displayStatus, type DisplayStatus } from './tenant-status';
 import { useImpersonate } from './use-impersonate';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const STATUS_VARIANT: Record<DisplayStatus, 'success' | 'warning' | 'default' | 'error'> = {
   active: 'success',
@@ -42,6 +43,7 @@ interface TenantListProps {
 
 export function TenantList({ onEdit }: TenantListProps) {
   const t = useTranslations('tenants');
+  const apiErrorMessage = useApiErrorMessage();
   const tc = useTranslations('common');
   const queryClient = useQueryClient();
   const impersonate = useImpersonate();
@@ -77,7 +79,7 @@ export function TenantList({ onEdit }: TenantListProps) {
       setConfirmStatus(null);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 

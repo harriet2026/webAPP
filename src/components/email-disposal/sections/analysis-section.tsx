@@ -140,10 +140,12 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
 
   // --- Step 1: 5-stage detection pipeline (ported from tabs/analysis-tab.tsx) ---
   const { stages: allStages, verdict } = useDetectionStages(detail);
-  const stages = useMemo(
-    () => (aiEnabled ? allStages : allStages.filter((s) => s.key !== 'ai')),
-    [allStages, aiEnabled],
-  );
+  // GT-12575: 非 AI 形态滤掉 ai 阶段后重编号（综合显示为阶段4），与策略
+  // 流水线的动态阶段号语义一致。
+  const stages = useMemo(() => {
+    const base = aiEnabled ? allStages : allStages.filter((s) => s.key !== 'ai');
+    return base.map((s, i) => ({ ...s, stage: i + 1 }));
+  }, [allStages, aiEnabled]);
   // v2 spec gap 2.1: all 5 stage cards default EXPANDED (inline hit-strategy
   // detail rendered inside each card); clicking a card toggles its own
   // detail only. Initialize with every possible stage number -- harmless for
@@ -287,7 +289,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                         ) : (
                           <>
                             <div className="text-xs font-medium text-muted-foreground mb-2">
-                              {st.stage === 5 ? t('agentJudgementLabel') : t('hitPolicyLabel')}
+                              {st.key === 'ai' ? t('agentJudgementLabel') : t('hitPolicyLabel')}
                             </div>
                             <div className="space-y-1.5">
                               {st.checks.map((c) => (
@@ -348,6 +350,24 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
           </Button>
         </div>
       </div>
+
+      {/* GT-12578 / GT-12686：落地 spec
+          design/implement/spec/2026-07-07-mail-disposal-investigation-center-design.md:168
+          规定 disposal_basis 为 null 时回退 MailLog.Reason 自由文本；
+          html-spec 对本卡片的规定也是「常显」。此前是硬门控整张卡片消失。 */}
+      {!basis?.policy_key && detail.reason && (
+        <div
+          id="disposal-basis"
+          data-testid="analysis-disposal-basis"
+          className="rounded-lg border bg-card p-4 scroll-mt-4"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldAlert className="h-4 w-4 text-orange-600" />
+            <h4 className="text-sm font-semibold">{tFeatures('disposalBasis')}</h4>
+          </div>
+          <p className="break-all text-sm text-muted-foreground">{detail.reason}</p>
+        </div>
+      )}
 
       {/* 处置依据（gap 2.7） */}
       {basis?.policy_key && (
@@ -565,6 +585,12 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             <Section title={tFeatures('basicInfo')}>
               <KV label={tFeatures('tid')} value={tidOf(detail.message_uuid)} mono />
               <KV label={tFeatures('emailId')} value={detail.message_id || '—'} mono />
+              {/* 完整关联键：用于在后端服务器日志中对应检索（GT-12651）。
+                  message_uuid 贯穿组件 JSONL，session_id 是 milter 运行日志的
+                  sid，queue_id 对应 Postfix mail.log。 */}
+              <KV label={tFeatures('messageUuid')} value={detail.message_uuid || '—'} mono />
+              <KV label={tFeatures('sessionId')} value={detail.session_id || '—'} mono />
+              <KV label={tFeatures('queueId')} value={detail.queue_id || '—'} mono />
               <KV label={tFeatures('receiveTime')} value={detail.received_at} />
               <KV label={tFeatures('direction')} value={tFeatures(`directionValue.${direction}`)} />
               <KV label={tFeatures('emailSize')} value={formatBytes(detail.storage_size)} />

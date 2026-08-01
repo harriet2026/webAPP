@@ -28,7 +28,7 @@ const PROTOCOL_GROUPS: { key: 'spf' | 'dkim' | 'dmarc' | 'ptr'; labelKey: string
   { key: 'spf', labelKey: 'protocolChecks.spf', keys: ['fail', 'softfail', 'none', 'temperror'] },
   { key: 'dkim', labelKey: 'protocolChecks.dkim', keys: ['fail', 'neutral', 'partial', 'none'] },
   { key: 'dmarc', labelKey: 'protocolChecks.dmarc', keys: ['reject', 'quarantine', 'none'] },
-  { key: 'ptr', labelKey: 'protocolChecks.ptr', keys: ['norecord', 'temperror', 'ehlomismatch', 'amismatch'] },
+  { key: 'ptr', labelKey: 'protocolChecks.ptr', keys: ['noptr', 'nomatch', 'ehlo_mismatch'] },
 ];
 
 /** DMARC has no "accept" option (demo: block/drop/quarantine/tag only); the rest offer all 5 unified actions. */

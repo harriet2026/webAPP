@@ -17,6 +17,7 @@ import {
   ChevronDown,
   Filter,
   Trash2,
+  Pencil,
 } from "lucide-react";
 import { useApiRequest } from "@/lib/api/client";
 import { parseQuery } from "./lib/disposal-api";
@@ -52,6 +53,7 @@ interface SearchBarProps {
   onSaveTemplate?: () => void;
   onLoadTemplate?: (id: string) => void;
   onDeleteTemplate?: (id: string) => void;
+  onRenameTemplate?: (id: string) => void;
   sampleCount?: number;
   onClearSamples?: () => void;
   filtersExpanded?: boolean;
@@ -71,6 +73,7 @@ export function SearchBar({
   onSaveTemplate,
   onLoadTemplate,
   onDeleteTemplate,
+  onRenameTemplate,
   sampleCount = 0,
   onClearSamples,
   filtersExpanded = false,
@@ -114,7 +117,9 @@ export function SearchBar({
     async (rawQuery: string) => {
       const query = rawQuery.trim();
       if (!query) {
-        if (hasPendingFilters) onSearch("");
+        // Empty natural-language input is still a useful action: apply any
+        // structured draft or refresh the list with the current conditions.
+        onSearch("");
         return;
       }
       if (hasPendingFilters && query === lastSuccessfulQueryRef.current) {
@@ -189,7 +194,9 @@ export function SearchBar({
   }, [onAiParsed, onReset]);
 
   const resetDisabled = !value.trim() && !hasActiveFilters && sampleCount === 0;
-  const templateMenuDisabled = !canSaveTemplate && templates.length === 0;
+  // The template menu is always accessible so users can browse and manage
+  // existing templates. Only the "Save current" item inside is gated by canSaveTemplate.
+  const templateMenuDisabled = false;
 
   return (
     <div className="space-y-3">
@@ -252,11 +259,7 @@ export function SearchBar({
             data-testid="disposal-search-submit"
             className="h-9 min-w-[5.25rem] gap-1.5 px-4 disabled:border-border disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100 disabled:shadow-none"
             onClick={() => void executeSearch(value)}
-            disabled={
-              parsing ||
-              sampleCount > 0 ||
-              (!value.trim() && !hasPendingFilters)
-            }
+            disabled={parsing || sampleCount > 0}
             aria-busy={parsing}
           >
             {parsing ? (
@@ -312,20 +315,35 @@ export function SearchBar({
                         data-testid={`disposal-template-load-${template.id}`}
                         onClick={() => onLoadTemplate?.(template.id)}
                       >
-                        <span className="flex-1">{template.name}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-xs"
-                          aria-label={`${t("deleteTemplate")}: ${template.name}`}
-                          className="text-muted-foreground data-[hovered=true]:bg-destructive/10 data-[hovered=true]:text-destructive"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onDeleteTemplate?.(template.id);
-                          }}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                        <span className="min-w-0 flex-1 truncate">{template.name}</span>
+                        <span className="ml-1 flex shrink-0 items-center gap-0.5">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label={`${t("renameTemplate")}: ${template.name}`}
+                            className="text-muted-foreground data-[hovered=true]:bg-muted data-[hovered=true]:text-foreground"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onRenameTemplate?.(template.id);
+                            }}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label={`${t("deleteTemplate")}: ${template.name}`}
+                            className="text-muted-foreground data-[hovered=true]:bg-destructive/10 data-[hovered=true]:text-destructive"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onDeleteTemplate?.(template.id);
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </span>
                       </DropdownMenuItem>
                     ))}
                   </>

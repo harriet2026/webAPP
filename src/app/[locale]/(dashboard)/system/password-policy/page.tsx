@@ -10,9 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { AccessDeniedPanel, LoadingPanel } from '@/components/shared/state-panel';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export default function PasswordPolicyPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const { isSystemAdmin } = usePermission();
   const { data, isLoading } = usePasswordPolicySettings();
   const update = useUpdatePasswordPolicySettings();
@@ -36,7 +38,7 @@ export default function PasswordPolicyPage() {
       { minLength, minCharClasses },
       {
         onSuccess: () => toast.success(t('common.save')),
-        onError: (e) => toast.error(e instanceof Error ? e.message : t('common.save')),
+        onError: (e) => toast.error(apiErrorMessage(e, t('common.save'))),
       }
     );
   };

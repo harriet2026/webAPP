@@ -165,6 +165,28 @@ export interface MailLogEventsResponse {
   total_pages?: number;
 }
 
+export interface MailLifecycleLog {
+  event_uid: string;
+  message_uuid: string;
+  queue_id?: string;
+  component: string;
+  node?: string;
+  level?: string;
+  event_time: string;
+  raw_line: string;
+  source_file?: string;
+  source_offset?: number;
+}
+
+export interface MailLifecycleLogsResponse {
+  items: MailLifecycleLog[];
+  total: number;
+  truncated: boolean;
+  partial: boolean;
+  searched_nodes: string[];
+  failed_nodes: string[];
+}
+
 export interface EmailLogSearchParams {
   start_date?: string;
   end_date?: string;

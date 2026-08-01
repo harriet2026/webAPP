@@ -53,6 +53,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LoginSecurityTab } from '@/components/admin/login-security/LoginSecurityTab';
 import { RolePermissionTab } from '@/components/admin/rbac/RolePermissionTab';
 import { ResetPasswordDialog, generatePassword } from '@/components/admin/reset-password-dialog';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 // GT-12307：对齐原型 layer-1 的字段校验（手机号 /^1[3-9]\d{9}$/、邮箱格式、
 // 姓名 ≤64 字符）。格式仅在非空时校验；创建模式的必填约束在 handleSubmit
@@ -75,6 +76,7 @@ type UserForm = z.infer<typeof userSchema>;
 
 export default function UsersPage() {
   const t = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { canManageUsers, canManageLoginSecurity, canManageRoles, isTenantAdmin, isSystemAdmin } = usePermission();
   const { apiRequest, effectiveTenantId } = useApiRequest();
@@ -132,7 +134,7 @@ export default function UsersPage() {
   const unlockMutation = useMutation({
     mutationFn: (id: number) => unlockUser(id, apiRequest),
     onSuccess: () => toast.success(t('users.unlockSuccess')),
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('users.unlockFailed')),
+    onError: (e) => toast.error(apiErrorMessage(e, t('users.unlockFailed'))),
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [search, setSearch] = useState('');
@@ -232,7 +234,7 @@ export default function UsersPage() {
       });
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
     },
   });
 
@@ -248,7 +250,7 @@ export default function UsersPage() {
       setDisableId(null);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
       setDisableId(null);
     },
   });
@@ -264,7 +266,7 @@ export default function UsersPage() {
       queryClient.invalidateQueries({ queryKey: [usersQueryKey] });
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
       setForceOfflineId(null);
     },
   });
@@ -290,7 +292,7 @@ export default function UsersPage() {
       setBatchAction(null);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(apiErrorMessage(error));
       setBatchAction(null);
     },
   });
@@ -455,7 +457,7 @@ export default function UsersPage() {
       queryClient.invalidateQueries({ queryKey: [usersQueryKey] });
       setDialogOpen(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.error'));
+      toast.error(apiErrorMessage(error, t('common.error')));
     } finally {
       setIsSubmitting(false);
     }

@@ -77,7 +77,8 @@ describe('AnalysisSection (v2 spec alignment)', () => {
       // Inline hit-strategy detail is present without any click (default expanded).
       expect(screen.getByTestId(`analysis-stage-${n}-detail`)).toBeInTheDocument();
     }
-    // 阶段 4/5 已交换：智能体研判(ai)为阶段 4，是命中阶段 -- 威胁 badge; others 通过.
+    // 阶段 4/5 已交换（GT-12575 与策略流水线对齐）：智能体研判(ai)为阶段 4，
+    // 是命中阶段 -- 威胁 badge; others 通过.
     expect(screen.getByTestId('analysis-stage-4').textContent).toContain('威胁');
     expect(screen.getByTestId('analysis-stage-1').textContent).toContain('通过');
 
@@ -135,6 +136,29 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     expect(detail.textContent).toContain('召回动作');
     expect(detail.textContent).toContain('执行结果');
     expect(screen.getByTestId('analysis-timeline-event-501-view-log')).toHaveTextContent('查看召回日志');
+  });
+
+  it('内容详情展开后展示可供后端日志检索的完整关联ID (GT-12651)', () => {
+    render(wrap(
+      <AnalysisSection
+        detail={baseDetail({
+          message_uuid: '0d9c2f4e-8a31-4b6b-9f0e-1234567890ab',
+          session_id: 'a1b2c3d4-e5f',
+          queue_id: '4XyZ12AbCd',
+        })}
+        aiEnabled
+        events={[]}
+      />,
+    ));
+    fireEvent.click(screen.getByText('内容详情'));
+    // TID 是 message_uuid 截断（8 位），完整 UUID/会话ID/队列ID 必须原样可见，
+    // 否则无法拿去 grep 后端服务器日志。
+    expect(screen.getByText('邮件唯一ID')).toBeInTheDocument();
+    expect(screen.getByText('0d9c2f4e-8a31-4b6b-9f0e-1234567890ab')).toBeInTheDocument();
+    expect(screen.getByText('会话ID')).toBeInTheDocument();
+    expect(screen.getByText('a1b2c3d4-e5f')).toBeInTheDocument();
+    expect(screen.getByText('队列ID')).toBeInTheDocument();
+    expect(screen.getByText('4XyZ12AbCd')).toBeInTheDocument();
   });
 
   it('shows 暂无事件 when there are no events', () => {

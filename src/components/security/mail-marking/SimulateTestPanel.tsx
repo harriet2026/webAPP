@@ -6,10 +6,12 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { testMailMarkingRule, type SaveMailMarkingPayload } from '@/lib/api/mail-marking'
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { useApiRequest } from '@/lib/api/client'
 
 export function SimulateTestPanel({ payload }: { payload: SaveMailMarkingPayload }) {
   const t = useTranslations('mailMarking')
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest()
   const [email, setEmail] = useState('')
   const [result, setResult] = useState<null | { matched: boolean; ruleName?: string }>(null)
@@ -21,7 +23,7 @@ export function SimulateTestPanel({ payload }: { payload: SaveMailMarkingPayload
     try {
       setResult(await testMailMarkingRule(payload, email.trim(), apiRequest))
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error))
+      toast.error(apiErrorMessage(error, String(error)))
     } finally {
       setRunning(false)
     }

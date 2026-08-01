@@ -48,6 +48,7 @@ import { getRulePrimaryAction, getRuleScope } from './list-row';
 import { CONDITIONS } from './catalogue';
 import type { PrimaryAction } from './conflict-matrix';
 import { RuleEditorDrawer } from './RuleEditorDrawer';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 type StatusFilter = 'all' | 'enabled' | 'disabled';
 type ScopeFilter = 'all' | 'incoming' | 'outgoing' | 'internal';
@@ -97,6 +98,7 @@ export function AdvancedFilterRulesModule({
   aggregateDisabled?: boolean;
 }) {
   const t = useTranslations('advancedRulesFeature');
+  const apiErrorMessage = useApiErrorMessage();
   const tc = useTranslations('common');
   const locale = useLocale();
   const queryClient = useQueryClient();
@@ -153,7 +155,7 @@ export function AdvancedFilterRulesModule({
       queryClient.invalidateQueries({ queryKey: rulesQueryKey });
       toast.success(tc('deleteSuccess'));
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(apiErrorMessage(error)),
   });
 
   const toggleMutation = useMutation({
@@ -162,7 +164,7 @@ export function AdvancedFilterRulesModule({
       queryClient.invalidateQueries({ queryKey: rulesQueryKey });
       toast.success(tc('updateSuccess'));
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(apiErrorMessage(error)),
   });
 
   const handleReset = () => {

@@ -35,6 +35,7 @@ import { ConditionsTab } from "./ConditionsTab";
 import { ActionsTab } from "./ActionsTab";
 import { TestAnalysisTab } from "./TestAnalysisTab";
 import type { Rule, FieldDef } from "@/types/unified-rules";
+import { useApiErrorMessage } from "@/lib/api/use-api-error-message";
 
 type TabKey = "basic" | "conditions" | "disposition" | "test";
 
@@ -84,6 +85,7 @@ export function RuleEditorDrawer({
 }: Props) {
   const t = useTranslations("advancedRulesFeature");
   const tc = useTranslations("common");
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin } = useAuth();
   // GT-12181: priority range/default follow the logged-in role and match the
@@ -194,8 +196,12 @@ export function RuleEditorDrawer({
       onOpenChange(false);
     } catch (e) {
       if (e instanceof ApiError) {
-        const mapped = mapApiErrorMessage(t, e.message, priorityRange);
-        toast.error(mapped ?? e.message ?? tc("saveFailed"));
+        // GT-12614：优先按稳定错误码取四语文案；其次是下面这张历史的 message
+        // 子串映射表（后端改一个字就静默失配，只作过渡）；都不命中时用兜底文案，
+        // *不再回退到 e.message* —— 那是后端英文，规格 §3 明令禁止直接当 UI。
+        const mapped =
+          apiErrorMessage(e, "") || mapApiErrorMessage(t, e.message, priorityRange);
+        toast.error(mapped || tc("saveFailed"));
       } else {
         toast.error(tc("saveFailed"));
       }

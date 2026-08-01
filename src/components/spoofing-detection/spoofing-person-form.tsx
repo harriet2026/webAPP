@@ -44,6 +44,7 @@ import {
 } from './spoofing-person-import';
 import { SpoofingNotificationPreviewDialog } from './spoofing-notification-preview-dialog';
 import { spoofingQueryKeys } from './spoofing-query-keys';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -120,6 +121,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
   onSaved: () => void;
 }) {
   const tsd = useTranslations('spoofingDetection');
+  const apiErrorMessage = useApiErrorMessage();
   const tc = useTranslations('common');
   const locale = useLocale();
   const { apiRequest, effectiveTenantId } = useApiRequest();
@@ -327,7 +329,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
       setSelectedContacts({});
       setPasteText('');
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : 'error'),
+    onError: (e) => toast.error(apiErrorMessage(e, 'error')),
   });
 
   function currentPreviewPerson(): SpoofPersonConfig {
@@ -368,7 +370,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
       setNotificationPreview(preview);
       setPreviewOpen(true);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : tsd('notificationPreview.error')),
+    onError: (e) => toast.error(apiErrorMessage(e, tsd('notificationPreview.error'))),
   });
 
   return (
