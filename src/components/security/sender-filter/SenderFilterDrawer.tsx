@@ -616,31 +616,31 @@ export function SenderFilterDrawer({
                           <SelectTrigger className="w-40">
                             <SelectValue>{actionLabel[watchAction]}</SelectValue>
                           </SelectTrigger>
-                          <SelectContent alignItemWithTrigger={false}>
+                          <SelectContent alignItemWithTrigger={false} className="w-72">
                             {watchListType === 'blacklist' ? (
                               <>
                                 <SelectItem value="reject">
                                   <div className="flex flex-col gap-0.5 py-0.5">
                                     <span>{actionLabel.reject}</span>
-                                    <span className="text-xs text-muted-foreground">{t('senderFilter.action_reject_desc')}</span>
+                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_reject_desc')}</span>
                                   </div>
                                 </SelectItem>
                                 <SelectItem value="discard">
                                   <div className="flex flex-col gap-0.5 py-0.5">
                                     <span>{actionLabel.discard}</span>
-                                    <span className="text-xs text-muted-foreground">{t('senderFilter.action_discard_desc')}</span>
+                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_discard_desc')}</span>
                                   </div>
                                 </SelectItem>
                                 <SelectItem value="quarantine">
                                   <div className="flex flex-col gap-0.5 py-0.5">
                                     <span>{actionLabel.quarantine}</span>
-                                    <span className="text-xs text-muted-foreground">{t('senderFilter.action_quarantine_desc')}</span>
+                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_quarantine_desc')}</span>
                                   </div>
                                 </SelectItem>
                                 <SelectItem value="audit">
                                   <div className="flex flex-col gap-0.5 py-0.5">
                                     <span>{actionLabel.audit}</span>
-                                    <span className="text-xs text-muted-foreground">{t('senderFilter.action_audit_desc')}</span>
+                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_audit_desc')}</span>
                                   </div>
                                 </SelectItem>
                               </>
@@ -648,7 +648,7 @@ export function SenderFilterDrawer({
                               <SelectItem value="accept">
                                 <div className="flex flex-col gap-0.5 py-0.5">
                                   <span>{actionLabel.accept}</span>
-                                  <span className="text-xs text-muted-foreground">{t('senderFilter.action_accept_desc')}</span>
+                                  <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_accept_desc')}</span>
                                 </div>
                               </SelectItem>
                             )}
