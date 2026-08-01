@@ -4647,7 +4647,7 @@
       "inbound": "Inbound",
       "outbound": "Outbound",
       "internal": "Internal",
-      "bidirectional": "Bidirectional"
+      "bidirectional": "Outbound + Internal"
     },
     "object": {
       "global": "Global",

@@ -1460,7 +1460,7 @@
     "previewSkipped": "未执行（前序已短路）",
     "previewNoOverride": "无群组覆盖（按全局执行）",
     "previewExecuted": "执行",
-    "stageReadOnlyForTenant": "阶段1 由平台统一管控，租户侧不可配置差异化策略"
+    "stageReadOnlyForTenant": "阶段1 由平台统一管控���租户侧不可配置差异化策略"
   },
   "detectionProfiles": {
     "rbl": "RBL 过滤",
@@ -2081,7 +2081,7 @@
     "adminAccountTaken": "该账号已存在（不区分大小写），请换一个"
   },
   "users": {
-    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安����������约）",
+    "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安������������约）",
     "resetPassword": {
       "title": "重置密码",
       "description": "为管理员「{username}」设置新密码，重置后需用新密码登录。",
@@ -2442,7 +2442,7 @@
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号是否泄露并启用登录限速。",
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
-      "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，���适当调大认证���时时间。",
+      "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链���，���适当调大认证���时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
@@ -2838,7 +2838,7 @@
       "client_ip": "客户端 IP",
       "sender": "发件人",
       "sender_name": "发件人名称",
-      "sender_domain": "发件人域名",
+      "sender_domain": "发件人域���",
       "message_id": "消息 ID",
       "message_uuid": "消息 UUID",
       "smtp_user": "SMTP 用户",
@@ -3013,7 +3013,7 @@
       "statusCounts": "状态分布",
       "searchMethods": "搜索方法",
       "fetchBudget": "抓取预算",
-      "ruleReplayWindowDays": "回放窗口",
+      "ruleReplayWindowDays": "回放���口",
       "similarMatchCount": "相似命���",
       "clusterMatchCount": "簇命中",
       "recallCandidateCount": "召回候选",
@@ -3248,7 +3248,7 @@
   },
   "pipeline": {
     "title": "策略流水线",
-    "executionPipeline": "策略执行流程",
+    "executionPipeline": "策略执行��程",
     "phase1IP": "IP策略",
     "phase2Sender": "收发信人策略",
     "phase3Content": "内容层",
@@ -3564,7 +3564,7 @@
     "currentSuspendedIPs": "当前挂起IP ({count})",
     "suspendedRuleLabel": "规则",
     "batchRelease": "批量解封 ({count})",
-    "refresh": "刷新",
+    "refresh": "���新",
     "releaseHint1": "解封后IP可立即发起新连接",
     "releaseHint2": "剩余时长到期后自动解封",
     "scopeIpGroup": "IP组",
@@ -4428,7 +4428,7 @@
       "mailFromEmpty": "空MAIL FROM",
       "mailFromInvalid": "无效MAIL FROM",
       "envelopeHeaderMismatch": "信封与头部不匹配",
-      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统��件，但也可能被滥用发送匿���邮件。",
+      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、���动回复、邮件列表等系统��件，但也可能被滥用发送匿���邮件。",
       "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，建议阻断。",
       "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
     },
@@ -4546,7 +4546,7 @@
     },
     "protocolWarning": {
       "title": "启用此条件可能引发误判",
-      "desc": "此条件（如 SPF None、DKIM None、PTR 无记录等）表示认证信息「缺失」，而非邮件「造假」。正常邮件也常见此情况，启用规则后可能误判合法邮件。\n\n请在充分评估误判风险后再决定是否启用。",
+      "desc": "此条件（如 SPF None、DKIM None、PTR 无记录等）表示认证信息��缺失」，而非邮件「造假」。正常邮件也常见此情况，启用规则后可能误判合法邮件。\n\n请在充分评估误判风险后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
     },
@@ -4652,7 +4652,7 @@
       "inbound": "接收",
       "outbound": "外发",
       "internal": "域内",
-      "bidirectional": "双向"
+      "bidirectional": "外发 + 域内"
     },
     "object": {
       "global": "全局",
@@ -4811,7 +4811,7 @@
       "thresholdMax": "阈值过大",
       "valueRequired": "请填写该字段",
       "priorityRange": "优先级范围应为 {min}-{max}",
-      "validUntilPast": "有效期不能早于当前日期",
+      "validUntilPast": "有效期不能早于��前日期",
       "emailRequired": "请输入邮箱地址",
       "groupRequired": "请选择发信人群组",
       "orgRequired": "请选择组织部门",
@@ -5108,7 +5108,7 @@
         "empty": "密码本为空",
         "cancel": "取消",
         "confirm": "添加",
-        "confirmDelete": "确认删除",
+        "confirmDelete": "确认删��",
         "addSuccess": "密码已添加",
         "addFailed": "添加密码失败",
         "deleteSuccess": "密码已删除",
@@ -7246,7 +7246,7 @@
           "note": "可选择跳过后续规则"
         },
         "tagDeliver": {
-          "source": "投递引擎",
+          "source": "投递��擎",
           "usage": "投递并添加可疑标记",
           "note": "标记位置为信头时样式不生效"
         },
@@ -7609,7 +7609,7 @@
       "summary": "本周攻击主要来源于：{sources}",
       "topRegions": "TOP 攻击来源地区",
       "threatEmails": "威胁邮件数量",
-      "blockRate": "拦截率",
+      "blockRate": "拦截��",
       "less": "少",
       "more": "多",
       "noThreatData": "暂无威胁记录",
@@ -8029,7 +8029,7 @@
       "safeAttachmentMail": "安全附件邮件",
       "maliciousAttachmentMail": "恶意附件邮件",
       "virusAttachment": "病毒附件",
-      "macroDocument": "宏文档",
+      "macroDocument": "宏���档",
       "zipBomb": "压缩包炸弹",
       "exploit": "漏洞利用",
       "blockRate": "拦截率",
@@ -8710,7 +8710,7 @@
       "fallbackHint": "内联回退记录（已投递并标记），无可处置旁路件"
     },
     "detail": {
-      "title": "检测详情",
+      "title": "检测详��",
       "noSubject": "（无主题）",
       "basicInfo": "基础信息",
       "sender": "发信人",
@@ -9050,7 +9050,7 @@
       "recallFailed": "召回失败",
       "leakRate": "漏报检出率",
       "hint": {
-        "snapshot": "当前快照，不受时间范围筛选影响。",
+        "snapshot": "当前快照，不受时间范围筛���影响。",
         "range": "按当前时间范围统计。",
         "recallSuccess": "按当前时间范围内的召回最终结果统计；所有目标成功才计为成功。",
         "recallFailure": "按当前时间范围内的召回最终结果统计；部分成功归入召回失败。",
@@ -10054,7 +10054,7 @@
     "expiredDesc": "请联系管理员获取新的预览链接。",
     "purgedTitle": "邮件已超出保留期",
     "purgedDesc": "该邮件已超出隔离区保留期限并被清理，无法再预览。",
-    "errorTitle": "加载失败",
+    "errorTitle": "加载失��",
     "errorDesc": "请稍后重试或联系管理员。",
     "emptyBody": "该邮件没有可显示的正文内容。"
   },
@@ -10307,7 +10307,7 @@
     "normal": "正常",
     "abnormal": "异常",
     "loading": "正在加载检测引擎数据…",
-    "loadFailed": "检测引擎数据加载失败，请重试",
+    "loadFailed": "检测引擎数据加载��败，请重试",
     "degraded": "监控数据库暂不可用，当前仅显示可用数据",
     "noData": "所选范围内暂无数据",
     "approximate": "RBL 响应耗时根据邮件端到端处理耗时近似计算",
