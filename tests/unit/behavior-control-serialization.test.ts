@@ -15,9 +15,10 @@ const baseForm: BehaviorControlFormData = {
   direction: 'outbound',
   object_config: { type: 'sender', sub_type: 'individual', value: 'a@b.com' },
   time_window: '15min',
+  conditions: [{ dim: 'mail_count', threshold: 50 }],
+  or_enabled: false,
   dim_a: 'mail_count',
   threshold_a: 50,
-  or_enabled: false,
   action: 'review',
 };
 

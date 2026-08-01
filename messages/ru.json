@@ -4635,7 +4635,8 @@
       "conditionRelation": "Связь условий",
       "relationAnd": "AND (все совпадают)",
       "relationOr": "OR (любое совпадает)",
-      "conditionCount": "Добавлено {count}/4"
+      "conditionCount": "Добавлено {count}/4",
+      "threshold": "Порог"
     },
     "preview": {
       "title": "Текущий эффект конфигурации",

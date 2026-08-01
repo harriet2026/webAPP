@@ -4818,7 +4818,8 @@
       "conditionRelation": "ความสัมพันธ์ของเงื่อนไข",
       "relationAnd": "AND (ทุกเงื่อนไขต้องตรง)",
       "relationOr": "OR (ตรงเงื่อนไขใดก็ได้)",
-      "conditionCount": "เพิ่มแล้ว {count}/4"
+      "conditionCount": "เพิ่มแล้ว {count}/4",
+      "threshold": "เกณฑ์"
     },
     "preview": {
       "title": "ผลการกำหนดค่าปัจจุบัน",

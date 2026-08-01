@@ -4778,7 +4778,8 @@
       "conditionRelation": "条件关系",
       "relationAnd": "AND（同时满足）",
       "relationOr": "OR（任一满足）",
-      "conditionCount": "已添加 {count}/4"
+      "conditionCount": "已添加 {count}/4",
+      "threshold": "阈值"
     },
     "preview": {
       "title": "当前配置效果",

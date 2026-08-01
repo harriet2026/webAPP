@@ -4773,7 +4773,8 @@
       "conditionRelation": "Condition Relation",
       "relationAnd": "AND (all must match)",
       "relationOr": "OR (any one matches)",
-      "conditionCount": "{count}/4 added"
+      "conditionCount": "{count}/4 added",
+      "threshold": "Threshold"
     },
     "preview": {
       "title": "Current Configuration Effect",

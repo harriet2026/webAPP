@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useForm, useWatch, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { Resolver } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -181,7 +182,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   }, [editing, defaults, priorityRange]);
 
   const methods = useForm<BehaviorControlFormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as unknown as Resolver<BehaviorControlFormData>,
     defaultValues: initial,
     // Validate on submit (RHF default), not onBlur. The drawer auto-focuses the
     // required-but-empty name field, so onBlur made the *first* click on any of the
@@ -278,7 +279,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
           side="right"
         >
           <FormProvider {...methods}>
-            <form onSubmit={handleSubmit((v) => saveMutation.mutate(v))} className="flex flex-col flex-1 overflow-hidden">
+            <form onSubmit={handleSubmit((v) => saveMutation.mutate(v as BehaviorControlFormData))} className="flex flex-col flex-1 overflow-hidden">
               <div className="px-6 py-4 border-b flex-shrink-0">
                 <SheetTitle className="text-[18px] font-semibold">
                   {editing ? t('behaviorControl.editTitle') : t('behaviorControl.createTitle')}
@@ -669,7 +670,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                 {/* 阈值 */}
                                 <div className="flex items-center gap-3">
                                   <Label className="min-w-[80px] text-right text-sm">
-                                    <span className="text-red-500">*</span> {t('behaviorControl.form.thresholdA').replace(/\s*A$/, '')}
+                                    <span className="text-red-500">*</span> {t('behaviorControl.form.threshold')}
                                   </Label>
                                   <div className="flex items-center gap-2">
                                     <Input
