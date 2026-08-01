@@ -33,15 +33,10 @@ import type {
   SenderConfigType,
   IPRangeType,
   ListType,
-  WhitelistMode,
   SenderFilterAction,
 } from '@/types/sender-filter';
 import { normalizeDomain } from '@/lib/api/sender-filter';
 
-function getDefaultPriority(listType: ListType, whitelistMode?: WhitelistMode): number {
-  if (listType === 'blacklist') return 500;
-  return whitelistMode === 'direct_deliver' ? 999 : 800;
-}
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z]{2,}$/;
@@ -323,7 +318,6 @@ export function SenderFilterDrawer({
   const watchSenderType = form.watch('sender_config.type');
   const watchIpType = form.watch('ip_range.type');
   const watchAction = form.watch('action');
-  const watchWhitelistMode = form.watch('whitelist_mode');
   const watchSenderValue = form.watch('sender_config.value');
   const watchPriority = form.watch('priority');
   const watchValidUntil = form.watch('valid_until');
@@ -656,40 +650,7 @@ export function SenderFilterDrawer({
                         </Select>
                       </div>
 
-                      {watchListType === 'whitelist' && (
-                        <div className="flex items-center gap-3">
-                          <Label htmlFor="sender-filter-whitelist-mode" className={labelCls}>
-                            {t('senderFilter.whitelistMode')}
-                          </Label>
-                          <div className="flex-1">
-                            <Select
-                              value={watchWhitelistMode ?? ''}
-                              onValueChange={(value) => {
-                                const mode = value as WhitelistMode;
-                                form.setValue('whitelist_mode', mode, { shouldDirty: true, shouldValidate: true });
-                                form.setValue('priority', getDefaultPriority('whitelist', mode), { shouldDirty: true });
-                              }}
-                            >
-                              <SelectTrigger id="sender-filter-whitelist-mode" className="w-48" aria-invalid={!!form.formState.errors.whitelist_mode}>
-                                <SelectValue>
-                                  {watchWhitelistMode
-                                    ? t(`senderFilter.whitelistMode_${watchWhitelistMode}`)
-                                    : undefined}
-                                </SelectValue>
-                              </SelectTrigger>
-                              <SelectContent alignItemWithTrigger={false}>
-                                <SelectItem value="bypass_content">{t('senderFilter.whitelistMode_bypass_content')}</SelectItem>
-                                <SelectItem value="direct_deliver">{t('senderFilter.whitelistMode_direct_deliver')}</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            {form.formState.errors.whitelist_mode && (
-                              <p className="text-xs text-destructive mt-1">
-                                {t(`senderFilter.errors.${form.formState.errors.whitelist_mode.message}`)}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
+
                     </div>
                   </div>
 
