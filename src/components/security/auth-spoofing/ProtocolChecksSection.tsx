@@ -20,7 +20,7 @@ import { AuthFlowDiagram } from './AuthFlowDiagram';
 import { ConfigHealthPanel } from './ConfigHealthPanel';
 import { DkimOutboundSigningSection } from './DkimOutboundSigningSection';
 import { applyTemplate } from '@/lib/auth-spoofing-templates';
-import { protocolActionKey, dominantAction } from '@/lib/auth-spoofing-labels';
+import { protocolActionShortKey, protocolActionDescKey, dominantAction } from '@/lib/auth-spoofing-labels';
 import { AlertTriangle, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -195,13 +195,18 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                             }
                             disabled={isDisabled}
                           >
-                            <SelectTrigger className="w-[160px]">
-                              <SelectValue>{t(protocolActionKey(item.action) as any)}</SelectValue>
+                            <SelectTrigger className="w-[140px]">
+                              <SelectValue>{t(protocolActionShortKey(item.action) as any)}</SelectValue>
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent alignItemWithTrigger={false} className="w-72">
                               {actions.map((a) => (
                                 <SelectItem key={a} value={a}>
-                                  {t(protocolActionKey(a) as any)}
+                                  <div className="flex flex-col gap-0.5 py-0.5">
+                                    <span>{t(protocolActionShortKey(a) as any)}</span>
+                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
+                                      {t(protocolActionDescKey(a) as any)}
+                                    </span>
+                                  </div>
                                 </SelectItem>
                               ))}
                             </SelectContent>

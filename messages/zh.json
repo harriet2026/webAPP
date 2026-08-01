@@ -4610,7 +4610,21 @@
       "strict": "零信任策略，大量使用丢弃动作，适用于金融/政务等高安全场景",
       "custom": "完全手动控制，脱离模板保护，需自行评估风险"
     },
-    "strictObserveNotice": "切换后将强制开启观察模式"
+    "strictObserveNotice": "切换后将强制开启观察模式",
+    "protocolActionShort": {
+      "accept": "进行下一步",
+      "reject": "阻断",
+      "quarantine": "隔离",
+      "audit": "标记",
+      "discard": "丢弃"
+    },
+    "protocolActionDesc": {
+      "accept": "不做处理，传递给下一个协议检查",
+      "reject": "向发信方返回 SMTP 5xx 拒绝响应",
+      "quarantine": "移入隔离区，等待管理员审阅",
+      "audit": "添加标记头后正常投递",
+      "discard": "静默丢弃，发信方收到投递成功响应"
+    }
   },
   "behaviorControl": {
     "title": "发信行为管控",

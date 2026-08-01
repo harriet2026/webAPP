@@ -4605,7 +4605,21 @@
       "strict": "Zero-trust; heavy discard use; for finance/government high-security scenarios",
       "custom": "Full manual control; no template protection; assess risk yourself"
     },
-    "strictObserveNotice": "Switching will force-enable observe mode"
+    "strictObserveNotice": "Switching will force-enable observe mode",
+    "protocolActionShort": {
+      "accept": "Pass",
+      "reject": "Reject",
+      "quarantine": "Quarantine",
+      "audit": "Tag",
+      "discard": "Discard"
+    },
+    "protocolActionDesc": {
+      "accept": "No action taken; pass to next protocol check",
+      "reject": "Return an SMTP 5xx rejection to the sender",
+      "quarantine": "Move to quarantine for administrator review",
+      "audit": "Deliver with an added tag header",
+      "discard": "Silently drop; sender receives delivery-success response"
+    }
   },
   "behaviorControl": {
     "title": "Behavior Control",

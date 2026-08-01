@@ -5,6 +5,8 @@ import type { AuthSpoofingAction } from '@/types/auth-spoofing';
 // which would double-prefix to `authSpoofing.authSpoofing.*`).
 export const formatActionKey = (a: AuthSpoofingAction) => `formatActionLabel.${a}`;
 export const protocolActionKey = (a: AuthSpoofingAction) => `protocolActionLabel.${a}`;
+export const protocolActionShortKey = (a: AuthSpoofingAction) => `protocolActionShort.${a}`;
+export const protocolActionDescKey = (a: AuthSpoofingAction) => `protocolActionDesc.${a}`;
 
 export function flowSubKey(a: AuthSpoofingAction, isPtr: boolean): string {
   if (a === 'discard') return 'flowSub.drop';
