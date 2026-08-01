@@ -46,6 +46,15 @@
       "ticket": "GT-12695",
       "incremental": true,
       "summary": "GT-12695 v2（GT-12696 发信人黑白名单优化）：新增 GT-12695.html，完整重生成 6 个变更点规格；补充全部 7 张真实浏览器截图（S-12~S-18），覆盖：开发菜单 GT-12695 入口、策略流水线、黑名单列表8列（含优先级）、黑名单抽屉默认态（拒收）、执行动作下拉展开（含丢弃及说明文字）、白名单列表8列、白名单抽屉默认态（投递，无白名单模式）；D-1~D-3，Q-1~Q-2。"
+    },
+    {
+      "version": 6,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12700",
+      "incremental": true,
+      "summary": "GT-12695 v3（GT-12700 身份认证与仿冒检测—基础格式检查）：在 GT-12695.html 中追加 GT-12700 需求节（2 个变更点）：①执行动作统一为隔离/审核/拒收/丢弃（移除 accept/新增 audit/文案精简/前端 normalizeFormatItem fallback）；②下拉新增说明文字（288px，i18n formatActionDesc 四语言）；目录追加 GT-12700 卡片块；补充真实截图 S-19~S-23（共 5 张）；新增差异 D-4、待确认 Q-3；版本历史追加 v3。"
     }
   ]
 }
