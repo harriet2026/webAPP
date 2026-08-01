@@ -1,6 +1,6 @@
 {
   "module": "sender-filter-optimization",
-  "current_version": 13,
+  "current_version": 14,
   "history": [
     {
       "version": 1,
@@ -118,6 +118,15 @@
       "ticket": "GT-12711",
       "incremental": true,
       "summary": "GT-12695 v10（GT-12711 发信行为管控管控方向双向文案修改）：追加 GT-12711 需求节（1个变更点）：四语言 messages JSON 各修改 behaviorControl.direction.bidirectional 一个 key（共4处），zh:双向→外发+域内，en:Bidirectional→Outbound+Internal，ru:Двусторонние→Исходящие+Внутренние，th:สองทิศทาง→ขาออก+ภายใน；不修改任何组件代码；目录追加 GT-12711 卡片块；补充截图 S-35（Select关闭态）/S-36（展开态四选项）；差异标注新增 D-11（已优化）；版本历史追加 v10。"
+    },
+    {
+      "version": 14,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12707",
+      "incremental": true,
+      "summary": "GT-12695 v11（GT-12707 发信行为管控检测条件最多可添加4项）：追加 GT-12707 需求节（1个变更点）：检测条件从固定双字段重构为动态 conditions[] 数组（min 1/max 4），每条含维度 Select+阈值 Input+删除按钮，添加条件按钮+计数，满4条 disabled，条件数>1时 AND/OR 单选替代旧 OR 复选框；共修改7处文件（types/schema/API/simulator/Drawer/两个单测）；四语言各新增11个 i18n key（共44个）；目录追加 GT-12707 卡片块；补充截图 S-37（单条）/S-38（双条+AND/OR）/S-39（四条满额 disabled）；差异标注新增 D-12（已优化）；版本历史追加 v11。"
     }
   ]
 }
