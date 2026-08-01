@@ -82,7 +82,7 @@ const ruleSchema = z.object({
   is_active: z.boolean(),
   valid_until: z.string().optional(),
   list_type: z.enum(['blacklist', 'whitelist']),
-  action: z.enum(['accept', 'reject', 'quarantine', 'audit']),
+  action: z.enum(['accept', 'reject', 'quarantine', 'audit', 'discard']),
   whitelist_mode: z.enum(['bypass_content', 'direct_deliver']).optional(),
   // GT-11486: 复杂规则编辑态——条件/动作字段隐藏且不参与提交，
   // superRefine 的条件类校验对其全部跳过（只校验基础字段）。
@@ -357,6 +357,7 @@ export function SenderFilterDrawer({
     quarantine: t('senderFilter.action_quarantine'),
     audit: t('senderFilter.action_audit'),
     accept: t('senderFilter.action_accept'),
+    discard: t('senderFilter.action_discard'),
   };
 
   const labelCls = 'min-w-[100px] w-[100px] shrink-0 whitespace-nowrap text-right';
@@ -618,12 +619,38 @@ export function SenderFilterDrawer({
                           <SelectContent alignItemWithTrigger={false}>
                             {watchListType === 'blacklist' ? (
                               <>
-                                <SelectItem value="reject">{actionLabel.reject}</SelectItem>
-                                <SelectItem value="quarantine">{actionLabel.quarantine}</SelectItem>
-                                <SelectItem value="audit">{actionLabel.audit}</SelectItem>
+                                <SelectItem value="reject">
+                                  <div className="flex flex-col gap-0.5 py-0.5">
+                                    <span>{actionLabel.reject}</span>
+                                    <span className="text-xs text-muted-foreground">{t('senderFilter.action_reject_desc')}</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="discard">
+                                  <div className="flex flex-col gap-0.5 py-0.5">
+                                    <span>{actionLabel.discard}</span>
+                                    <span className="text-xs text-muted-foreground">{t('senderFilter.action_discard_desc')}</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="quarantine">
+                                  <div className="flex flex-col gap-0.5 py-0.5">
+                                    <span>{actionLabel.quarantine}</span>
+                                    <span className="text-xs text-muted-foreground">{t('senderFilter.action_quarantine_desc')}</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="audit">
+                                  <div className="flex flex-col gap-0.5 py-0.5">
+                                    <span>{actionLabel.audit}</span>
+                                    <span className="text-xs text-muted-foreground">{t('senderFilter.action_audit_desc')}</span>
+                                  </div>
+                                </SelectItem>
                               </>
                             ) : (
-                              <SelectItem value="accept">{actionLabel.accept}</SelectItem>
+                              <SelectItem value="accept">
+                                <div className="flex flex-col gap-0.5 py-0.5">
+                                  <span>{actionLabel.accept}</span>
+                                  <span className="text-xs text-muted-foreground">{t('senderFilter.action_accept_desc')}</span>
+                                </div>
+                              </SelectItem>
                             )}
                           </SelectContent>
                         </Select>

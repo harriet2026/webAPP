@@ -5,7 +5,7 @@ export type IPRangeType = 'all' | 'single' | 'range' | 'ipGroup';
 export type ListType = 'blacklist' | 'whitelist';
 export type WhitelistMode = 'bypass_content' | 'direct_deliver';
 
-export type BlacklistAction = 'reject' | 'quarantine' | 'audit';
+export type BlacklistAction = 'reject' | 'quarantine' | 'audit' | 'discard';
 export type WhitelistAction = 'accept';
 export type SenderFilterAction = BlacklistAction | WhitelistAction;
 

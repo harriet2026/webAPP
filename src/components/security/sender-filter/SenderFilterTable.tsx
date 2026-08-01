@@ -47,6 +47,8 @@ function actionVariant(action: string): 'success' | 'error' | 'warning' | 'defau
       return 'success';
     case 'reject':
       return 'error';
+    case 'discard':
+      return 'error';
     case 'quarantine':
       return 'warning';
     case 'audit':
