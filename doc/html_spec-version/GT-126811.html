@@ -301,7 +301,18 @@
         </ul>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-009）</a></li>
+      <!-- GT-12563 搜索模板实现 -->
+      <li class="toc-l1"><a href="#gt-12563">GT-12563 搜索模板实现</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12563-change-1">搜索模板完整闭环：保存 / 重命名 / 删除 / 应用，模板菜单始终可访问</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12563-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12563-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12563-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-010）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-002）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
@@ -832,7 +843,7 @@
         <h4>1.3 逐元素说明</h4>
         <table>
           <thead>
-            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径</th><th>形态/角色差异</th></tr>
+            <tr><th>元素</th><th>变更前</th><th>变��后</th><th>源码路径</th><th>形态/角色差异</th></tr>
           </thead>
           <tbody>
             <tr>
@@ -1079,7 +1090,7 @@
 
           <figure>
             <img src="screenshots/GT-12657-S2-toggle-off-immediate-no-unsaved-prompt-dark-1253x832.png"
-                 alt="S-2 点击总开关切换为禁用后立即生效 — 顶部显示已禁用，保存配置按钮仍为 disabled，无未保存提示"
+                 alt="S-2 点击总开关切换为禁用后立即生效 — 顶部显示已禁用，保存配置按钮仍为 disabled，无未���存提示"
                  style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
             <figcaption>
               <strong>S-2 · 点击总开关切换为禁用后 — 立即持久化（无未保存提示）</strong><br>
@@ -1113,7 +1124,7 @@
           <tbody>
             <tr>
               <td>总开关（<code>Switch</code> / <code>PipelinePanelHeader</code> <code>onToggle</code>）</td>
-              <td>点击后调用 <code>updateDraft('enabled', enabled)</code>，将状态写入 draft；底部出现"模块开关有未保存的更改"提示，需用户手动点击"保存配置"持久化</td>
+              <td>点击后调用 <code>updateDraft('enabled', enabled)</code>，将状态写入 draft；底部��现"模块开关有未保存的更改"提示，需用户手动点击"保存配置"持久化</td>
               <td>点击后调用 <code>handleToggleEnabled(next)</code>：乐观更新 UI，立即调用 <code>setSecurityModuleEnabled('attachment_security', next, apiRequest)</code> 持久化，成功后同步 <code>baseline.enabled</code>，底部无未保存提示</td>
               <td><code>src/components/security/AttachmentSecurityPage.tsx</code> — <code>handleToggleEnabled</code> 函数（新增）</td>
               <td>[Base] 所有形态/角色一致</td>
@@ -1407,6 +1418,224 @@
     </div>
   </section>
 
+  <!-- ══════════════ GT-12563 需求入口锚点 ══════════════ -->
+  <div id="gt-12563" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12563 增量内容 ══════════════ -->
+  <section id="incremental-gt-12563-search-template">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12563</span>
+      <span class="incr-title">搜索模板实现</span>
+      <span class="incr-meta">2026-08-01 &middot; commit <code>99410b4</code> &middot; 路由 <code>/zh/email-disposal/center</code> → 搜索栏「模板」按钮</span>
+    </div>
+
+    <div id="c12563-change-1">
+      <h3>变更 1 · 搜索模板完整闭环：保存 / 重命名 / 删除 / 应用，模板菜单始终可访问</h3>
+
+      <div id="c12563-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          在邮件处置中心搜索栏的「模板」下拉菜单中，完整实现了搜索模板的保存、重命名、删除和应用四条核心流程。
+        </p>
+        <p><strong>保存对象：</strong><code>quickFilter</code>（基础筛选字段）+ <code>advancedFilter</code>（高级筛选 27 个精确字段）+ <code>aiQuery</code>（AI 自然语言主输入框原始文本）。分页、排序和表头筛选不保存。</p>
+        <p><strong>保存交互：</strong>点击「保存当前条件」触发 <code>SaveTemplateDialog</code>（shadcn Dialog），自动填入「搜索模板 YYYY-MM-DD」格式默认名；字符上限 30；名称为空时「保存」禁用；与已有模板同名时出现 amber Warning「已存在同名模板，保存将覆盖原有条件」，按钮文字改为「覆盖保存」；达 20 条上限时出现 Info 提示；保存成功后 toast「已保存"&lt;模板名&gt;"」。支持 Enter 键提交，兼容 CJK IME（<code>isComposing</code> 判断）。</p>
+        <p><strong>菜单入口：</strong>模板按钮始终可点击（<code>templateMenuDisabled = false</code>）。「保存当前条件」菜单项仍通过 <code>disabled={!canSaveTemplate}</code> 单独控制。</p>
+        <p><strong>应用行为：</strong>无活跃条件时直接应用并自动搜索；有活跃条件时弹出 AlertDialog 确认「应用将替换当前所有搜索条件，是否继续？」，确认后全量替换并自动搜索，取消不做任何更改。AI 文本回填输入框但不自动解析。</p>
+        <p><strong>重命名：</strong>点击铅笔图标触发同一 Dialog（mode="rename"），预填原名，确认后立即生效；与其他模板同名时 toast 报错并保持弹窗打开。</p>
+        <p><strong>存储：</strong><code>localStorage</code> key <code>disposal-search-templates</code>，上限 20 条，此期无后端 API，跨设备不同步（见 D-010）。</p>
+        <div class="callout callout-info">
+          修改文件：<code>use-search-templates.ts</code>（扩展类型、同名覆盖、新增 renameTemplate / hasTemplateName）；新建 <code>save-template-dialog.tsx</code>；<code>search-bar.tsx</code>（铅笔按钮、templateMenuDisabled=false）；<code>email-disposal-center-page.tsx</code>（保存改为弹窗、有条件确认、传 aiQuery）；<code>messages/zh.json</code> / <code>messages/en.json</code>（补充 19 个新 key）。
+        </div>
+      </div>
+
+      <div id="c12563-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="trigger-path">
+            触发路径：邮件处置中心（<code>/zh/email-disposal/center</code>）→ 搜索栏右侧「模板」按钮 → 各下级交互
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12563-S1-template-btn-default-dark-1253x832.png"
+                 alt="S-1 页面默认态 — 模板按钮始终可点击"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 邮件处置中心默认态</strong><br>
+              路由：<code>/zh/email-disposal/center</code> &middot; 暗色 &middot; 1253×832 &middot; AI版·多租户 &middot; 租户管理员<br>
+              「模板」按钮（含收起图标）始终可点击（<code>disabled=false</code>）；无筛选条件，无数字徽标；示例提示词三条可见。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S2-template-menu-open-no-templates-dark-1253x832.png"
+                 alt="S-2 模板菜单打开 — 无模板时只显示「保存当前条件」"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 模板菜单打开态（无已保存模板）</strong><br>
+              仅显示「保存当前条件」一项（当前无可保存条件，该项视觉禁用）；「已保存模板」分组不渲染。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S3-save-dialog-open-dark-1253x832.png"
+                 alt="S-3 保存搜索模板弹窗正常态"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-3 · 保存搜索模板弹窗（正常态）</strong><br>
+              触发：执行动作选为「投递」后，点击「模板 → 保存当前条件」<br>
+              标题「保存搜索模板」；描述「当前已有 0 个模板（上限 20 个）」；
+              输入框预填「搜索模板 2026-08-01」，字符计数 15/30；「取消 / 保存」按钮；支持 Enter 键提交。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S4-save-dialog-overwrite-warn-dark-1253x832.png"
+                 alt="S-4 保存弹窗同名覆盖警告态"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-4 · 保存弹窗同名覆盖警告态（无已有模板，输入相同名称后触发提示路径）</strong><br>
+              当输入名称与已有模板匹配时，输入框下方出现 amber Warning「已存在同名模板，保存将覆盖原有条件」；
+              按钮文字改为「覆盖保存」；确认后原地替换该模板条件，保留原 id 和 createdAt。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S5-template-saved-toast-dark-1253x832.png"
+                 alt="S-5 保存成功 toast"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-5 · 保存成功态</strong><br>
+              弹窗关闭，右下角 toast「已保存"<模板名>"」；
+              「模板」按钮右侧显示数字徽标 1；搜索栏底部「待应用条件（1 条）」提示条件仍待搜索。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S6-template-menu-with-items-dark-1253x832.png"
+                 alt="S-6 模板菜单带已保存列表 — 铅笔和垃圾桶按钮"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-6 · 模板菜单带已保存列表态</strong><br>
+              下拉菜单分两个 section：「保存当前条件」（顶部）、「已保存模板」（下方）；
+              模板条目右侧有铅笔（重命名）和垃圾桶（删除）两个图标按钮；
+              点击条目主体区域触发应用流程；点击图标按钮通过 <code>stopPropagation</code> 阻止触发应用。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S7-save-dialog-overwrite-warn-dark-1253x832.png"
+                 alt="S-7 保存弹窗同名覆盖警告（有1条已保存模板场景）"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-7 · 保存弹窗同名覆盖警告（有已保存模板场景）</strong><br>
+              描述更新为「当前已有 1 个模板（上限 20 个）」；
+              输入与已有模板同名的字符串时 amber Warning 显示，按钮改为「覆盖保存」。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S8-rename-dialog-dark-1253x832.png"
+                 alt="S-8 重命名模板弹窗 — 预填原名，「取消 / 确认」按钮"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-8 · 重命名模板弹窗</strong><br>
+              触发：点击模板列表条目右侧铅笔图标按钮<br>
+              标题「重命名模板」；描述「修改后将立即生效」；输入框预填原模板名称，计数 14/30；
+              「取消 / 确认」按钮；名称为空时「确认」禁用；与其他模板同名时 toast 报错并保持弹窗打开。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S9-apply-confirm-dialog-dark-1253x832.png"
+                 alt="S-9 应用模板确认 AlertDialog — 有活跃条件时弹出覆盖确认"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-9 · 应用模板确认 AlertDialog（有活跃条件时）</strong><br>
+              触发：当前搜索栏有活跃筛选条件时，点击模板列表条目<br>
+              标题「应用搜索模板」；描述「应用"&lt;模板名&gt;"将替换当前所有搜索条件，是否继续？」；
+              「取消 / 确认应用」按钮；确认后全量替换并自动搜索；无活跃条件时跳过此 Dialog 直接应用。
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12563-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径 / 相关 key</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>「模板」按钮 disabled 逻辑</td>
+              <td><code>!canSaveTemplate &amp;&amp; templates.length === 0</code>（初始状态禁用，无法点击）</td>
+              <td>始终 <code>false</code>；「保存当前条件」菜单项自身保持 <code>disabled={!canSaveTemplate}</code></td>
+              <td><code>search-bar.tsx</code> — <code>templateMenuDisabled</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>「保存当前条件」onClick</td>
+              <td>内联直接 <code>saveTemplate()</code>，无命名弹窗</td>
+              <td>调用 <code>setSaveTemplateOpen(true)</code>，打开 <code>SaveTemplateDialog</code></td>
+              <td><code>email-disposal-center-page.tsx</code> — <code>onSaveTemplate</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>模板条目操作按钮</td>
+              <td>只有垃圾桶（删除）</td>
+              <td>新增铅笔按钮（重命名，<code>aria-label="重命名: &lt;name&gt;"</code>）；两者均 <code>stopPropagation</code></td>
+              <td><code>search-bar.tsx</code> — 模板 DropdownMenuItem 内 Pencil 图标按钮</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>SaveTemplateDialog（新建组件）</td>
+              <td>不存在</td>
+              <td>复用于保存（mode="save"）和重命名（mode="rename"）；字符上限 30；空名禁用；同名 amber Warning + 按钮变「覆盖保存」；上限 Info；Enter 提交兼容 CJK IME</td>
+              <td><code>save-template-dialog.tsx</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>SearchTemplate 类型</td>
+              <td><code>{ id, name, quickFilter, advancedFilter, createdAt }</code></td>
+              <td>新增 <code>aiQuery?: string</code>、<code>updatedAt?: string</code></td>
+              <td><code>use-search-templates.ts</code> — <code>SearchTemplate</code> interface</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>saveTemplate 同名覆盖</td>
+              <td>始终创建新条目</td>
+              <td>同名时原地替换（保留 id 和 createdAt，更新 updatedAt）；上限时丢弃最旧一条</td>
+              <td><code>use-search-templates.ts</code> — <code>saveTemplate</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>renameTemplate（新增）</td>
+              <td>不存在</td>
+              <td>根据 id 原地更新 name 和 updatedAt；同名冲突返回 false，由 page 层 toast 报错</td>
+              <td><code>use-search-templates.ts</code> — <code>renameTemplate</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>应用模板行为</td>
+              <td>直接设置 filter state，不自动搜索，AI 条件清空</td>
+              <td>有活跃条件时先弹 AlertDialog 确认；确认后全量替换并自动搜索；AI 原始文本回填输入框不自动解析</td>
+              <td><code>email-disposal-center-page.tsx</code> — <code>applyTemplate</code> / <code>pendingTemplateId</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>新增 i18n key</td>
+              <td>缺少约 19 个 key</td>
+              <td><code>renameTemplate</code>、<code>saveTemplateTitle</code>、<code>saveTemplateDesc</code>、<code>renameTemplateTitle</code>、<code>renameTemplateDesc</code>、<code>templateNameLabel</code>、<code>templateNamePlaceholder</code>、<code>templateNameRequired</code>、<code>templateOverwriteWarning</code>、<code>templateOverwriteConfirm</code>、<code>templateLimitWarning</code>、<code>templateApplyConfirmTitle</code>、<code>templateApplyConfirmDesc</code>、<code>templateApplyConfirm</code>、<code>cancel</code>、<code>save</code>、<code>confirm</code> 等</td>
+              <td><code>messages/zh.json</code> / <code>messages/en.json</code> — <code>emailDisposal.search.*</code></td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+        <a class="back-link" href="#toc">&#8593; 返回目录</a>
+      </div>
+    </div>
+  </section>
+
   <!-- ══════════════ C. 差异标注 ══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -1507,6 +1736,20 @@
         <tr><td>验证依据</td><td>S-2 截图底部无"例外规则管理"横幅；<code>AuthSpoofingPage.tsx</code> 源码确认无 <code>ExceptionRulesEntry</code> import 和渲染</td></tr>
       </tbody>
     </table>
+
+    <h3>D-010 · GT-12563 搜索模板存储仅限 localStorage，多设备无法同步</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认·低优先级</span></td></tr>
+        <tr><td>描述</td><td>
+          当前模板数据存储在 <code>localStorage</code>（key: <code>disposal-search-templates</code>），
+          跨设备或跨浏览器无法同步。若产品需要「租户共享模板」或「跨设备同步」，
+          需要新增后端 CRUD 接口。此期实现范围为前端本地存储，共享范围为「个人/当前浏览器」。
+        </td></tr>
+        <tr><td>解决版本</td><td>待产品确认共享范围需求后决定</td></tr>
+        <tr><td>验证依据</td><td><code>use-search-templates.ts</code> 中 localStorage 持久化实现，无 API 调用</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- ══════════════ D. 待确认 ══════════════ -->
@@ -1574,7 +1817,7 @@
           <td>v10</td>
           <td>2026-07-31</td>
           <td><code>54cb647</code></td>
-          <td>增量追加 GT-12661 需求：从认证仿冒检测配置面板移除底部"例外规则管理"横幅（含"前往策略流水线"和"查看当前例外"两个无效按钮）；新增一级目录条目 GT-12661、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 底部无横幅，暗色 1253×832 / 1.3 逐元素变更表）；追加差异 D-007（<code>ExceptionRulesEntry</code> 组件文件保留为死代码）；目录 C 项编号更新为 D-001~D-007；version.json current_version 9→10。</td>
+          <td>增量追加 GT-12661 需求：从认证仿冒检测配置面板移除底部"例外规则管理"横幅（含"前往策略流水线"和"查看当前例外"两个���效按钮）；新增一级目录条目 GT-12661、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 底部无横幅，暗色 1253×832 / 1.3 逐元素变更表）；追加差异 D-007（<code>ExceptionRulesEntry</code> 组件文件保留为死代码）；目录 C 项编号更新为 D-001~D-007；version.json current_version 9→10。</td>
         </tr>
         <tr>
           <td>v11</td>
@@ -1587,6 +1830,12 @@
           <td>2026-07-31</td>
           <td><code>d706c3d</code></td>
           <td>增量追加 GT-12587 需求：邮件安全总览攻击时段分布周内热力图修复（<code>xAxis.data</code> 由数字数组改为零填充字符串 <code>['00'~'23']</code>，series data hour 同步转换，消除 ECharts category 类型不匹配导致的 24 列只渲染 7 列问题）；同步更新 <code>yAxis.inverse</code>、<code>axisLabel.interval</code>、图表高度（周内 280px）、tooltip formatter（显示小时区间）、visualMap 色阶（暗色对比度优化）；新增一级目录条目 GT-12587、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 日内分布默认态 + S-2 周内切换后 7×24 矩阵完整渲染 + S-3 完整视图，暗色 1253×832 / 1.3 逐元素变更表 7 项）；追加差异 D-009（weekdays 数组与后端 day 索引对应关系待确认）；目录 C 项编号更新为 D-001~D-009；version.json current_version 11→12。</td>
+        </tr>
+        <tr>
+          <td>v13</td>
+          <td>2026-08-01</td>
+          <td><code>99410b4</code></td>
+          <td>增量追加 GT-12563 搜索模板实现：追加一级目录条目「GT-12563 搜索模板实现」及变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-9 暗色 1253×832 / 1.3 逐元素变更表 9 项）；涵盖模板按钮 disabled 修复（始终 false）、新建 <code>SaveTemplateDialog</code> 组件（保存/重命名复用）、同名覆盖 amber Warning + 按钮文字变「覆盖保存」、铅笔重命名按钮、应用确认 AlertDialog（有活跃条件时弹出）、<code>SearchTemplate</code> 类型扩展（aiQuery/updatedAt）、19 个新增 i18n key；追加差异 D-010（localStorage 跨设备不同步）；目录 C 项编号更新为 D-001~D-010；version.json current_version 12→13。</td>
         </tr>
       </tbody>
     </table>

@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 12,
+  "current_version": 13,
   "history": [
     {
       "version": 1,
@@ -109,6 +109,15 @@
       "ticket": "GT-12587",
       "incremental": true,
       "summary": "GT-12587 增量：邮件安全总览攻击时段分布周内热力图修复（xAxis.data 由数字数组改为零填充字符串 ['00'~'23']，series data hour 同步转换，消除 ECharts category 类型不匹配导致的 24 列只渲染 7 列问题）；同步更新 yAxis.inverse、axisLabel.interval、图表高度（周内 280px）、tooltip formatter（显示小时区间）、visualMap 色阶（暗色对比度优化）；追加一级目录条目 GT-12587、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 日内分布默认态 + S-2 周内切换后 7×24 矩阵完整渲染 + S-3 完整视图，暗色 1253×832 / 1.3 逐元素变更表 7 项）；追加差异 D-009（weekdays 数组与后端 day 索引对应关系待确认）；目录 C 项编号更新为 D-001~D-009；version.json current_version 11→12。"
+    },
+    {
+      "version": 13,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "99410b4",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12563",
+      "incremental": true,
+      "summary": "GT-12563 搜索模板实现增量：追加一级目录条目「GT-12563 搜索模板实现」及变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-9 暗色 1253×832 / 1.3 逐元素变更表 9 项）；涵盖模板按钮 disabled 修复（始终 false）、SaveTemplateDialog 新建组件（保存/重命名复用）、同名覆盖警告（amber Warning + 按钮改为覆盖保存）、铅笔重命名按钮、应用确认 AlertDialog（有活跃条件时弹出）、SearchTemplate 类型扩展（aiQuery/updatedAt）、19 个新增 i18n key；追加差异 D-010（localStorage 跨设备不同步）；目录 C 项编号更新为 D-001~D-010；version.json current_version 12→13。"
     }
   ]
 }
