@@ -1,0 +1,107 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NextIntlClientProvider } from 'next-intl';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import zh from '@/../messages/zh.json';
+import type { MailLogDetail } from '@/types/email-disposal-detail';
+import { DetailModal } from './detail-modal';
+
+const { apiRequestMock } = vi.hoisted(() => ({
+  apiRequestMock: vi.fn(),
+}));
+
+vi.mock('@/lib/api/client', () => ({
+  API_BASE: '/api/v1',
+  useApiRequest: () => ({ apiRequest: apiRequestMock }),
+}));
+
+vi.mock('./sections/overview-section', () => ({
+  OverviewSection: () => <div data-testid="overview-section-stub" />,
+}));
+
+vi.mock('./sections/analysis-section', () => ({
+  AnalysisSection: () => <div data-testid="analysis-section-stub" />,
+}));
+
+vi.mock('sonner', () => ({
+  toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
+}));
+
+function detail(): MailLogDetail {
+  return {
+    id: 1,
+    message_id: '<lazy-raw-log@example.test>',
+    message_uuid: 'uuid-lazy-raw-log',
+    client_ip: '203.0.113.10',
+    sender: 'sender@example.test',
+    recipients: ['recipient@example.test'],
+    authenticated: false,
+    subject: 'Lazy raw lifecycle log',
+    action: 'accept',
+    status: 'delivered',
+    received_at: '2026-07-31T07:00:00.000Z',
+    processed_at: '2026-07-31T07:00:01.000Z',
+    delivered_at: '2026-07-31T07:00:02.000Z',
+    processing_time_ms: 1000,
+  };
+}
+
+function rawLogRequestCount(): number {
+  return apiRequestMock.mock.calls.filter(
+    ([path]) => path === '/mail-logs/1/lifecycle-logs',
+  ).length;
+}
+
+describe('DetailModal raw lifecycle logs', () => {
+  beforeEach(() => {
+    apiRequestMock.mockReset();
+    apiRequestMock.mockImplementation(async (path: string) => {
+      if (path === '/mail-logs/1') return detail();
+      if (path === '/mail-logs/1/events?page=1&page_size=100') return { items: [] };
+      if (path === '/mail-logs/1/lifecycle-logs') {
+        return {
+          items: [],
+          total: 0,
+          truncated: false,
+          partial: false,
+          searched_nodes: ['node-a'],
+          failed_nodes: [],
+        };
+      }
+      throw new Error(`unexpected request: ${path}`);
+    });
+  });
+
+  it('does not request lifecycle logs until the collapsed section is expanded', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="zh" messages={zh as never}>
+          <DetailModal
+            open
+            mailLogId={1}
+            onOpenChange={vi.fn()}
+          />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    );
+
+    const trigger = await screen.findByTestId('disposal-raw-logs-trigger');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('raw-logs-count-badge')).toHaveTextContent('未加载');
+    expect(rawLogRequestCount()).toBe(0);
+
+    fireEvent.click(trigger);
+
+    await waitFor(() => {
+      expect(rawLogRequestCount()).toBe(1);
+    });
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await waitFor(() => {
+      expect(screen.getByTestId('raw-logs-count-badge')).toHaveTextContent('0 条');
+    });
+  });
+});

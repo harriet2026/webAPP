@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GT-126811 · GT-12682-RBL优化 · 增量功能规格 · v2</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f6f8;
+      color: #1a1d23;
+      line-height: 1.6;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .page-wrap { max-width: 980px; margin: 0 auto; }
+
+    /* ── header ── */
+    .spec-header {
+      background: #1a1d23;
+      color: #e8eaf0;
+      border-radius: 10px;
+      padding: 2rem 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .spec-header .ticket-badge {
+      display: inline-block;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.2em 0.65em;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+    .spec-header h1 { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
+    .spec-header .subtitle { font-size: 0.85rem; color: #9ca3af; }
+
+    /* ── change summary bar ── */
+    .change-summary {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.25rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 2rem;
+      align-items: flex-start;
+    }
+    .change-summary h2 { font-size: 0.95rem; font-weight: 700; color: #1a1d23; width: 100%; margin-bottom: 0.25rem; }
+    .change-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      min-width: 200px;
+      flex: 1 1 200px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .change-item:hover { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .change-item .ci-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #2563eb; color: #fff;
+      font-size: 0.72rem; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+    }
+    .change-item .ci-body { font-size: 0.83rem; }
+    .change-item .ci-title { font-weight: 600; color: #1a1d23; }
+    .change-item .ci-sub { color: #6b7280; font-size: 0.78rem; }
+
+    /* ── section ── */
+    section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    section > h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    section > h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+
+    /* ── incremental section ── */
+    .incremental-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .incr-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: #f8f9fb;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .incr-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #2563eb; color: #fff;
+      font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+    }
+    .incr-header h2 { font-size: 1rem; font-weight: 700; color: #1a1d23; margin: 0; }
+    .incr-header .incr-meta { font-size: 0.78rem; color: #6b7280; margin-left: auto; }
+    .incr-body { padding: 1.5rem 2rem; }
+    .incr-body h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+    .incr-body h4 { font-size: 0.87rem; font-weight: 600; color: #1a1d23; margin-top: 1rem; margin-bottom: 0.5rem; }
+
+    /* ── tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.845rem; margin-bottom: 0.75rem; }
+    th { background: #f3f4f6; color: #374151; font-weight: 600; text-align: left; padding: 0.55rem 0.8rem; border: 1px solid #e5e7eb; }
+    td { padding: 0.5rem 0.8rem; border: 1px solid #e5e7eb; vertical-align: top; color: #374151; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    /* ── code ── */
+    code { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.1em 0.4em; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82em; color: #1a1d23; }
+
+    /* ── interaction-preview ── */
+    .interaction-preview {
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+    .interaction-preview h4 { font-size: 0.88rem; font-weight: 700; color: #1a1d23; margin-bottom: 0.35rem; }
+    .interaction-preview .trigger-path { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.9rem; }
+    .interaction-preview figure { margin: 0 0 0.9rem; }
+    .interaction-preview figcaption { font-size: 0.78rem; color: #6b7280; margin-top: 0.35rem; font-style: italic; }
+    .interaction-preview img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
+    .screenshot-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem; }
+    @media (max-width: 700px) { .screenshot-pair { grid-template-columns: 1fr; } }
+
+    /* ── callout boxes ── */
+    .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
+    .callout-info    { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; }
+    .callout-warn    { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .callout-removed { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; }
+    .callout-ok      { background: #f0fdf4; border-left: 4px solid #16a34a; color: #15532e; }
+
+    /* ── tag badges ── */
+    .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.15em 0.5em; border-radius: 4px; margin-right: 0.3em; }
+    .tag-removed  { background: #fee2e2; color: #991b1b; }
+    .tag-added    { background: #dcfce7; color: #15532e; }
+    .tag-changed  { background: #fef9c3; color: #854d0e; }
+    .tag-unverif  { background: #f3f4f6; color: #6b7280; }
+
+    del { color: #9ca3af; text-decoration-color: #dc2626; }
+
+    .version-badge { display: inline-flex; align-items: center; gap: 0.4em; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 0.2em 0.8em; font-size: 0.78rem; color: #374151; }
+    .version-badge .vnum { font-weight: 700; color: #1a1d23; }
+
+    .matrix-legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.78rem; color: #374151; margin-bottom: 0.75rem; }
+
+    .toc { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
+    .toc a:hover { text-decoration: underline; }
+    .toc-indent { padding-left: 1.2rem; }
+
+    /* 一级需求入口：GT-12682-RBL优化 */
+    .toc-l1 {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; border-radius: 6px;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      margin-top: 0.4rem; margin-bottom: 0.15rem;
+    }
+    .toc-l1 > a { font-weight: 700; font-size: 0.9rem; color: #1d4ed8; }
+
+    /* 二级变更点子列表 */
+    .toc-l2-group { list-style: none; display: flex; flex-direction: column; gap: 0.2rem; padding-left: 1.5rem; margin-bottom: 0.4rem; }
+    .toc-change {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.65rem; border-radius: 6px;
+      background: #f8f9ff; border: 1px solid #dbeafe;
+    }
+    .toc-change a { font-weight: 600; font-size: 0.85rem; color: #1d4ed8; }
+    .toc-change .toc-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #3b82f6; color: #fff;
+      font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+    }
+    /* 二级变更点下的三级子章节 */
+    .toc-l3 { padding-left: 2.8rem; }
+    .divider { border: none; border-top: 2px solid #e5e7eb; margin: 1.5rem 0; }
+    .back-link { display: inline-block; margin-top: 1.5rem; font-size: 0.82rem; color: #2563eb; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ══════════════ 目录 ══════════════ -->
+  <section id="toc">
+    <h2>目录</h2>
+    <ul class="toc">
+      <li><a href="#meta">A. 元信息与事实源</a></li>
+      <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
+
+      <!-- 一级需求：GT-12682-RBL优化 -->
+      <li class="toc-l1"><a href="#gt-12682">GT-12682-RBL优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">灰名单从执行动作中分离</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c1-overview">1.1 方案概述与架构说明</a></li>
+          <li class="toc-l3"><a href="#c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c1-elements">1.3 数据模型变更</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">处置策略互斥卡片选择器</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">执行动作集合调整</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c3-states">3.1 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c3-elements">3.2 逐元素说明</a></li>
+          <li class="toc-l3"><a href="#c3-i18n">3.3 国际化 key 变更</a></li>
+        </ul>
+      </ul>
+
+      <!-- 一级需求：GT-12660 邮件安全总览：执行动作模块进行统一 -->
+      <li class="toc-l1"><a href="#gt-12660">GT-12660 邮件安全总览：执行动作模块进行统一</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12660-change-1">安全态势分析图表移除"灰名单"系列</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12660-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12660-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12660-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <!-- 一级需求：GT-12659 邮件处置中心：执行动作统一修正 -->
+      <li class="toc-l1"><a href="#gt-12659">GT-12659 邮件处置中心：执行动作统一修正</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12659-change-1">搜索模块执行动作筛选移除"灰名单"</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12659-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12659-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12659-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <!-- 一级需求：GT-12665 发信人黑白名单-域名类型仅可选择组织内域名，建议支持填写发信域名 -->
+      <li class="toc-l1"><a href="#gt-12665">GT-12665 发信人黑白名单-域名类型仅可选择组织内域名，建议支持填写发信域名</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12665-change-1">域名类型输入控件：下拉 Select 改为可自由输入 Combobox + 租户接收域名建议列表</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12665-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12665-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12665-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <!-- 一级需求：GT-12661 身份认证与仿冒检测-去掉多出原型未定义且点击无效的例外规则按钮 -->
+      <li class="toc-l1"><a href="#gt-12661">GT-12661 身份认证与仿冒检测-去掉多出原型未定义且点击无效的例外规则按钮</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12661-change-1">移除"例外规则管理"横幅及其两个无效跳转按钮</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12661-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12661-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12661-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <!-- 一级需求：GT-12657 附件安全检测-模块总开关需额外保存才生效，与其他模块即时生效行为不一致 -->
+      <li class="toc-l1"><a href="#gt-12657">GT-12657 附件安全检测-模块总开关需额外保存才生效，与其他模块即时生效行为不一致</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12657-change-1">总开关改为立即持久化：点击后直接生效，切换期间禁用，失败时回滚并 toast</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12657-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12657-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12657-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <!-- 一级需求：GT-12587 邮件安全总览-攻击时段分布切换周内后只显示7列导致时间图不完整 -->
+      <li class="toc-l1"><a href="#gt-12587">GT-12587 邮件安全总览-攻击时段分布切换周内后只显示7列导致时间图不完整</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12587-change-1">周内热力图修复：xAxis category 类型统一为零填充字符串，series data 同步，24 列完整渲染</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12587-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12587-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12587-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <!-- GT-12563 搜索模板实现 -->
+      <li class="toc-l1"><a href="#gt-12563">GT-12563 搜索模板实现</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#c12563-change-1">搜索模板完整闭环：保存 / 重命名 / 删除 / 应用，模板菜单始终可访问</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c12563-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c12563-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c12563-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-010）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-002）</a></li>
+      <li><a href="#version-history">E. 版本历史</a></li>
+    </ul>
+  </section>
+
+  <!-- 需求入口锚点（供目录一级链接跳转）-->
+  <div id="gt-12682" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ A. 元信息 ══════════════ -->
+  <section id="meta">
+    <h2>A. 元信息与事实源</h2>
+    <table>
+      <thead><tr><th>字段</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>文档编号</td><td>GT-126811</td></tr>
+        <tr><td>需求名称</td><td>GT-12682-RBL优化</td></tr>
+        <tr><td>规格类型</td><td>增量规格（Incremental）· 多变更点格式</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v2</span></span></td></tr>
+        <tr><td>生成日期</td><td>2026-07-31</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/rules/rbl</code></td></tr>
+        <tr><td>组件路径</td><td><code>src/components/security/RBLFilterPage.tsx</code>、<code>src/components/security/rbl-config-serde.ts</code>、<code>src/types/rbl-filter.ts</code></td></tr>
+        <tr><td>webapp commit</td><td><code>ebec245</code></td></tr>
+        <tr><td>对照 spec commit</td><td>not-used</td></tr>
+        <tr><td>历史对话记录</td><td>当前上下文已提供（完整需求讨论、设计方案确认、代码变更记录）</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 运行中 webapp 浏览器真实截图；3. webapp 源码</td></tr>
+        <tr><td>浏览器验证状态</td><td>2026-07-31 演示环境真实截图（暗色题 / 1305×832 / AI版·多租户 / 平台管理员）</td></tr>
+        <tr><td>变更类型</td><td>功能变更（架构调整 + 交互优化 + 选项集合调整）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本规格为增量文档，记录 GT-12682-RBL优化 的 3 个变更点。三个变更点均作用于同一页面（RBL 过滤），按实现顺序记录最终选定方案，不记录被否决的中间方案。
+    </div>
+  </section>
+
+  <!-- ══════════════ B. 产品形态 × 角色矩阵 ══════════════ -->
+  <section id="form-role-matrix">
+    <h2>B. 产品形态 × 角色差异矩阵</h2>
+    <div class="matrix-legend">
+      <span>&#x2705; 显示且可操作</span>
+      <span>&#x1F512; 显示但只读</span>
+      <span>&#x274C; 隐藏 / 不存在</span>
+      <span>— 该形态无此角色</span>
+      <span>? 无法验证</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>功能 / 元素</th>
+          <th>变更</th>
+          <th>AI-单<br/>平台管理员</th>
+          <th>传统-单<br/>平台管理员</th>
+          <th>云-多<br/>平台管理员</th>
+          <th>云-多<br/>租户理员</th>
+          <th>AI-多<br/>平台管理员</th>
+          <th>AI-多<br/>租户管理员</th>
+          <th>传统-多<br/>平台管理员</th>
+          <th>传统-多<br/>租户管理员</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>处置策略 · 执行动作卡片（RadioGroup 左卡）</td>
+          <td>#2</td>
+          <td>&#x2705;</td><td>&#x2705;</td><td>&#x2705;</td><td>?</td><td>&#x2705;</td><td>?</td><td>&#x2705;</td><td>?</td>
+        </tr>
+        <tr>
+          <td>处置策略 · 灰名单策略卡片（RadioGroup 右卡）</td>
+          <td>#1 #2</td>
+          <td>&#x2705;</td><td>&#x2705;</td><td>&#x2705;</td><td>?</td><td>&#x2705;</td><td>?</td><td>&#x2705;</td><td>?</td>
+        </tr>
+        <tr>
+          <td>执行动作下拉 · 拒收选项</td>
+          <td>#3</td>
+          <td>&#x2705;</td><td>&#x2705;</td><td>&#x2705;</td><td>?</td><td>&#x2705;</td><td>?</td><td>&#x2705;</td><td>?</td>
+        </tr>
+        <tr>
+          <td>执行动作下拉 · 审核选项（新增）</td>
+          <td>#3</td>
+          <td>&#x2705;</td><td>&#x2705;</td><td>&#x2705;</td><td>?</td><td>&#x2705;</td><td>?</td><td>&#x2705;</td><td>?</td>
+        </tr>
+        <tr>
+          <td>执行动作下拉 · 丢弃选项（新增）</td>
+          <td>#3</td>
+          <td>&#x2705;</td><td>&#x2705;</td><td>&#x2705;</td><td>?</td><td>&#x2705;</td><td>?</td><td>&#x2705;</td><td>?</td>
+        </tr>
+        <tr>
+          <td><del>执行动作下拉 · 阻断选项（已移除）</del></td>
+          <td>#3</td>
+          <td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td>
+        </tr>
+        <tr>
+          <td><del>执行动作下拉 · 标记选项（已移除）</del></td>
+          <td>#3</td>
+          <td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.8rem;color:#6b7280;margin-top:0.5rem;">? 标记项：租户管理员角色是否可见 RBL 过滤配置页面，当前版本未在租户管理员账号下验证，列入待确认 Q-001。</p>
+  </section>
+
+  <!-- ═════════════ 变更 1 ══════════════ -->
+  <div class="incremental-section" id="change-1">
+    <div class="incr-header">
+      <span class="incr-num">1</span>
+      <h2>灰名单从执行动作中分离</h2>
+      <span class="incr-meta">路由：<code>/zh/rules/rbl</code> &nbsp;·&nbsp; 组件：<code>rbl-config-serde.ts</code>、<code>RBLFilterPage.tsx</code> &nbsp;·&nbsp; 变更类型：架构变更 &nbsp;·&nbsp; 2026-07-31</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c1-overview">1.1 方案概述与架构说明</h3>
+      <p style="font-size:0.875rem;color:#374151;margin-bottom:0.75rem;">
+        原设计中 <code>greylist</code> 是 <code>product_action</code> 的一个枚举值，与 <code>block / quarantine / mark</code> 并列在同一个 Select 下拉中。用户反馈：灰名单是"临时挂起等待重试"的处置策略，而其他选项是"即时处置动作"，两者语义层不同，不应混放。
+      </p>
+      <div class="callout callout-ok">
+        <strong>最终实现方案：</strong>在 <code>RblConfig</code> 中新增独立的 <code>greylistEnabled: boolean</code> 字段，与 <code>action: RblImmediateAction</code> 并列。<code>RblImmediateAction</code> 类型不再包含 <code>'greylist'</code>。保存时 <code>diffRblConfig</code> 根据 <code>greylistEnabled</code> 决定写入 API 的 <code>product_action</code> 值（<code>greylistEnabled=true</code> 时写 <code>'greylist'</code>），保持后端接口兼容。
+      </div>
+
+      <h3 id="c1-states">1.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-1 · 页面默认态（执行动作卡片选中，展示 Select 下拉）</h4>
+        <p class="trigger-path">触发路径：导航至 <code>/zh/rules/rbl</code> → 页面加载完成后的默认呈现态 · 暗色主题 / 1305×832 / AI版·多租户 / 平台管理员</p>
+        <figure>
+          <img src="./screenshots/GT-12682-rbl-default-action-selected-dark-1305x832.png" alt="RBL 过滤页面默认态：执行动作卡片选中，灰名单策略卡片 dimmed" />
+          <figcaption>图 S-1：页面完整加载态。处置策略区域显示两张并排卡片，左卡"执行动作"处于选中状态（蓝色高亮边框），右卡"灰名单策略"dimmed（opacity 降低）。两者在 UI 上明确分离，灰名单不再出现在执行动作 Select 下拉中。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c1-elements">1.3 数据模型变更</h3>
+      <table>
+        <thead>
+          <tr><th>字段</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>RBLFilterProductAction</code></td>
+            <td><code>'block' | 'quarantine' | 'mark' | 'greylist'</code></td>
+            <td><code>'reject' | 'quarantine' | 'review' | 'discard' | 'greylist'</code></td>
+            <td>API 层类型，<code>greylist</code> 保留（兼容后端），即时动作枚举调整见变更 #3</td>
+          </tr>
+          <tr>
+            <td><code>RblImmediateAction</code></td>
+            <td>（不存在）</td>
+            <td><code>'reject' | 'quarantine' | 'review' | 'discard'</code></td>
+            <td>新增前端独立类型，不含 <code>greylist</code></td>
+          </tr>
+          <tr>
+            <td><code>RblConfig.action</code></td>
+            <td><code>RBLFilterProductAction</code>（含 greylist）</td>
+            <td><code>RblImmediateAction</code>（不含 greylist）</td>
+            <td>即时动作字段，灰名单由独立字段控制</td>
+          </tr>
+          <tr>
+            <td><code>RblConfig.greylistEnabled</code></td>
+            <td>（不存在）</td>
+            <td><code>boolean</code></td>
+            <td>新增字段，独立控制灰名单策略开关</td>
+          </tr>
+          <tr>
+            <td>旧数据兼容</td>
+            <td>—</td>
+            <td>后端 <code>action='greylist'</code> → 前端映射为 <code>action='reject' + greylistEnabled=true</code></td>
+            <td><code>parseRblConfig</code> 中处理</td>
+          </tr>
+          <tr>
+            <td>旧数据兼容</td>
+            <td>—</td>
+            <td>后端 <code>action='block'</code> 或 <code>'mark'</code> → 映射为 <code>action='reject'</code></td>
+            <td><code>legacyMap</code> 处理</td>
+          </tr>
+        </tbody>
+      </table>
+      <a class="back-link" href="#toc">&#8593; 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 2 ══════════════ -->
+  <div class="incremental-section" id="change-2">
+    <div class="incr-header">
+      <span class="incr-num">2</span>
+      <h2>处置策略互斥卡片选择器</h2>
+      <span class="incr-meta">路由：<code>/zh/rules/rbl</code> &nbsp;·&nbsp; 组件：<code>RBLFilterPage.tsx</code> &nbsp;·&nbsp; 变更类型：交互优化 &nbsp;·&nbsp; 2026-07-31</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c2-overview">2.1 方案概述</h3>
+      <p style="font-size:0.875rem;color:#374151;margin-bottom:0.75rem;">
+        原双列并排布局（<code>grid grid-cols-2 divide-x</code>）视觉上暗示两列可同时启用，但 API 层两者互斥。用户指出此设计会造成歧义。
+      </p>
+      <div class="callout callout-ok">
+        <strong>最终实现方案：</strong>用统一的"处置策略"<code>RadioGroup</code> 包裹两张并排可选卡片。左卡"执行动作"、右卡"灰名单策略"，两者互斥（RadioGroup 保证单选）。选中卡片高亮（<code>border-primary bg-primary/5</code>），未选中卡片 dimmed（<code>opacity-60</code>），直观表达互斥关系。选中卡片内部展开对应的子配置（执行动作 Select / 灰名单摘要+配置按钮）。
+      </div>
+
+      <h3 id="c2-states">2.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-2 · 执行动作卡片选中态</h4>
+        <p class="trigger-path">触发路径：页面加载默认态（<code>greylistEnabled=false</code>）· 暗色主题 / 1305×832 / AI版·多租户 / 台管理员</p>
+        <figure>
+          <img src="./screenshots/GT-12682-rbl-default-action-selected-dark-1305x832.png" alt="执行动作卡片选中态：左卡高蓝色边框，内部展开 Select 下拉；右卡灰色 dimmed" />
+          <figcaption>图 S-2：执行动作卡片选中态。左卡蓝色边框高亮，右单选圆点在左卡处于选中状态，左卡内部展开执行动作 Select（当前值：拒收）。右卡"灰名单策略"opacity 降低，内部无子配置展开。底部显示"暂无未保存更改"，保存按钮 disabled。</figcaption>
+        </figure>
+      </div>
+      <div class="interaction-preview">
+        <h4>S-3 · 灰名单策略卡片选中态</h4>
+        <p class="trigger-path">触发路径：点击右卡"灰名单策略"卡片或其 RadioItem → 选中状态切换 · 暗色主题 / 1305×832</p>
+        <figure>
+          <img src="./screenshots/GT-12682-rbl-greylist-selected-dark-1305x832.png" alt="灰名单策略卡片选中态：右卡高亮蓝色边框，内部展开摘要行和配置按钮；左卡 dimmed" />
+          <figcaption>图 S-3：灰名单策略卡片选中态。右卡蓝色边框高亮，内部展开灰名单摘要行（"延迟接收：600秒内阻断首次请求"）及"点击配置"按钮。左卡"执行动作"opacity 降低，无 Select 展开。底部状态条显示"有未保存的更改"（橙色指示点），保存和取消按钮均激活。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c2-elements">2.3 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>文案 / 默认值</th><th>交互行为</th><th>i18n key</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>处置策略 · 区域标题</td>
+            <td>Label + Tooltip 图标</td>
+            <td>"处置策略"</td>
+            <td>Hover Tooltip 提示互斥说明</td>
+            <td><code>rblFilter.disposalStrategyTitle</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>处置策略 · RadioGroup 容器</td>
+            <td>RadioGroup (<code>grid grid-cols-2 gap-3</code>)</td>
+            <td>—</td>
+            <td>保证两张卡片互斥单选</td>
+            <td>—</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>左卡 · 执行动作</td>
+            <td>label[for] 卡片，RadioGroupItem value="action"</td>
+            <td>选中：<code>border-primary bg-primary/5</code>；未选中：<code>opacity-60</code></td>
+            <td>点击整张卡片切换为执行动作模式</td>
+            <td><code>rblFilter.actionSectionTitle</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>左卡 · 执行动作 Select</td>
+            <td>Select 下拉（仅在左卡选中时渲染）</td>
+            <td>默认值：拒收（reject）</td>
+            <td>展开后选择 reject/quarantine/review/discard；onChange 触发 markDirty</td>
+            <td>见变更 #3</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>右卡 · 灰名单策略</td>
+            <td>label[for] 卡片，RadioGroupItem value="greylist"</td>
+            <td>选中：<code>border-primary bg-primary/5</code>；未选中：<code>opacity-60</code></td>
+            <td>点击整张卡片切换为灰名单模式，<code>greylistEnabled=true</code></td>
+            <td><code>rblFilter.greylistSectionTitle</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>右卡 · 灰名单摘要行</td>
+            <td>摘要文本 + 按钮（仅在右卡选中时渲染）</td>
+            <td>"延迟接收：600秒内阻断首次请求"（来自 greylistSummary）</td>
+            <td>点击"点击配置"按钮打开灰名单配置 Dialog</td>
+            <td><code>rblFilter.greylistConfigure</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+      <a class="back-link" href="#toc">&#8593; 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 3 ══════════════ -->
+  <div class="incremental-section" id="change-3">
+    <div class="incr-header">
+      <span class="incr-num">3</span>
+      <h2>执行动作集合调整</h2>
+      <span class="incr-meta">路由：<code>/zh/rules/rbl</code> &nbsp;·&nbsp; 组件：<code>RBLFilterPage.tsx</code>、<code>rbl-filter.ts</code> &nbsp;·&nbsp; 变更类型：功能变更 &nbsp;·&nbsp; 2026-07-31</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c3-states">3.1 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-4 · 执行动作下拉展开态（四个动作全部可见）</h4>
+        <p class="trigger-path">触发路径：执行动作卡片选中 → 点击 Select 触发器展开下拉 · 暗色主题 / 1305×832 / AI版·多租户 / 平台管理员</p>
+        <figure>
+          <img src="./screenshots/GT-12682-rbl-action-dropdown-open-dark-1305x832.png" alt="执行动作下拉展开态：依次显示拒收（选中）、隔离、审核、丢弃四个选项，每个选项附说明文字" />
+          <figcaption>图 S-4：执行动作 Select 下拉展开态。四个选项依次排列：拒收（当前选中，蓝色高亮带勾选图标）、隔离、审核、丢弃。每个选项下方展示一行灰色辅助说明文字。原"阻断"和"标记"选项已不存在。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c3-elements">3.2 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>选项</th><th>API value</th><th>中文文案</th><th>说明文字（Select 内展示）</th><th>变更标记</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><del>阻断</del></td>
+            <td><del><code>block</code></del></td>
+            <td><del>阻断</del></td>
+            <td><del>—</del></td>
+            <td><span class="tag tag-removed">已移除</span> 旧数据兼容映射至 reject</td>
+          </tr>
+          <tr>
+            <td>拒收</td>
+            <td><code>reject</code></td>
+            <td>拒收</td>
+            <td>立即拒绝连接，返回5xx错误。适用于高风险场景，可能误拦合法邮件</td>
+            <td><span class="tag tag-changed">改名</span> 原 block → reject</td>
+          </tr>
+          <tr>
+            <td>隔离</td>
+            <td><code>quarantine</code></td>
+            <td>隔离</td>
+            <td>将邮件放入隔离队列，等待管理员审核。平衡安全与可用性</td>
+            <td>无变更</td>
+          </tr>
+          <tr>
+            <td><del>标记</del></td>
+            <td><del><code>mark</code></del></td>
+            <td><del>标记</del></td>
+            <td><del>—</del></td>
+            <td><span class="tag tag-removed">已移除</span> 旧数据兼容映射至 reject</td>
+          </tr>
+          <tr>
+            <td>审核</td>
+            <td><code>review</code></td>
+            <td>审核</td>
+            <td>邮件进入人工审核队列，等待管理员决策。适用于要人工判断的场景</td>
+            <td><span class="tag tag-added">新增</span></td>
+          </tr>
+          <tr>
+            <td>丢弃</td>
+            <td><code>discard</code></td>
+            <td>丢弃</td>
+            <td>静默丢弃邮件，不通知发件方。适用于确认为垃圾邮件的高风险场景</td>
+            <td><span class="tag tag-added">新增</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="c3-i18n">3.3 国际化 key 变更（4 语言同步）</h3>
+      <table>
+        <thead>
+          <tr><th>i18n key</th><th>变更类型</th><th>zh 值</th><th>en 值</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><del><code>rblFilter.actionBlock</code></del></td><td><span class="tag tag-removed">已移除</span></td><td><del>阻断</del></td><td><del>Block</del></td></tr>
+          <tr><td><del><code>rblFilter.actionBlockTip</code></del></td><td><span class="tag tag-removed">已移除</span></td><td colspan="2"><del>原阻断说明</del></td></tr>
+          <tr><td><del><code>rblFilter.actionMark</code></del></td><td><span class="tag tag-removed">已移除</span></td><td><del>标记</del></td><td><del>Mark (Add Header)</del></td></tr>
+          <tr><td><del><code>rblFilter.actionMarkTip</code></del></td><td><span class="tag tag-removed">已移除</span></td><td colspan="2"><del>原标记说明</del></td></tr>
+          <tr><td><code>rblFilter.actionReject</code></td><td><span class="tag tag-added">新增</span></td><td>拒收</td><td>Reject</td></tr>
+          <tr><td><code>rblFilter.actionRejectTip</code></td><td><span class="tag tag-added">新增</span></td><td>立即拒绝连接，返回5xx错误…</td><td>Reject the connection immediately…</td></tr>
+          <tr><td><code>rblFilter.actionReview</code></td><td><span class="tag tag-added">新增</span></td><td>审核</td><td>Review</td></tr>
+          <tr><td><code>rblFilter.actionReviewTip</code></td><td><span class="tag tag-added">新增</span></td><td>邮件进入人工审核队列…</td><td>Route the mail to the manual review queue…</td></tr>
+          <tr><td><code>rblFilter.actionDiscard</code></td><td><span class="tag tag-added">新增</span></td><td>丢弃</td><td>Discard</td></tr>
+          <tr><td><code>rblFilter.actionDiscardTip</code></td><td><span class="tag tag-added">新增</span></td><td>静默丢弃邮件，不通知发件方…</td><td>Silently discard the mail…</td></tr>
+          <tr><td><code>rblFilter.disposalStrategyTitle</code></td><td><span class="tag tag-added">新增</span></td><td>处置策略</td><td>Disposal Strategy</td></tr>
+          <tr><td><code>rblFilter.disposalStrategyDesc</code></td><td><span class="tag tag-added">新增</span></td><td>选择命中 RBL 后的处置方式，两种策略互斥…</td><td>Choose how to handle mail when an RBL hit occurs…</td></tr>
+          <tr><td><code>rblFilter.actionSectionTitle</code></td><td><span class="tag tag-added">新增</span></td><td>执行动作</td><td>Execution Action</td></tr>
+          <tr><td><code>rblFilter.greylistSectionTitle</code></td><td><span class="tag tag-added">新增</span></td><td>灰名单策略</td><td>Greylist Policy</td></tr>
+          <tr><td><code>rblFilter.greylistSectionDesc</code></td><td><span class="tag tag-added">新增</span></td><td>对未知发件方临时挂起…</td><td>Temporarily defer unknown senders…</td></tr>
+          <tr><td><code>rblFilter.greylistEnabled</code></td><td><span class="tag tag-added">新增</span></td><td>启用灰名单策略</td><td>Enable greylist policy</td></tr>
+        </tbody>
+      </table>
+      <a class="back-link" href="#toc">&#8593; 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12660 需求入口锚点 ══════════════ -->
+  <div id="gt-12660" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12660 增量内容 ══════════════ -->
+  <section id="incremental-gt-12660-security-overview-action">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12660</span>
+      <span class="incr-title">邮件安全总览：执行动作模块进行统一</span>
+      <span class="incr-meta">2026-07-31 &nbsp;·&nbsp; commit <code>6f7749d</code> &nbsp;·&nbsp; 路由 <code>/zh/statistics/security-overview</code></span>
+    </div>
+
+    <div id="c12660-change-1">
+      <h3>变更 1 · 安全态势分析图表移除"灰名单"系列</h3>
+
+      <div id="c12660-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          邮件安全总览"安全态势分析"卡片的<strong>执行动作</strong>视图中，图表系列和底部图例原本包含"灰名单"（后端 key：<code>advanced_review</code>）。
+          由于灰名单已从 RBL 过滤执行动作枚举中独立出来（GT-12682），其不再是一个独立的执行动作类型，因此在安全总览执行动作图表中同步移除，
+          使统计口径与执行动作枚举保持一致。
+        </p>
+        <div class="callout callout-info">
+          过滤位置：<code>TrendChartCard.tsx</code> 的 <code>keys</code> useMemo（过滤条件追加 <code>advanced_review</code>）；
+          <code>DetailTable.tsx</code> 的 <code>EXCLUDED_ACTION_KEYS</code> 集合同步追加 <code>advanced_review</code>。
+        </div>
+      </div>
+
+      <div id="c12660-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="preview-trigger">
+            触发路径：导航至 <code>/zh/statistics/security-overview</code> → 向下滚动至"安全态势分析"卡片 → 点击切换按钮"执行动作" → 等待图表渲染完成
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12660-security-overview-action-tab-active-dark-1305x832.png"
+                 alt="S-1 执行动作 tab 激活态 — 图表渲染，底部图例不含灰名单"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 执行动作 tab 激活态（图表 + 图例区）</strong><br>
+              路由：<code>/zh/statistics/security-overview</code> &nbsp;·&nbsp;
+              主题：暗色 &nbsp;·&nbsp; 视口：1305×832 &nbsp;·&nbsp;
+              形态：AI版·多租户 &nbsp;·&nbsp; 角色：平台管理员（Mock 演示数据）<br>
+              图表底部图例可见系列：<strong>递、隔离、审核、拒收、丢弃、召回</strong>，不含"灰名单"
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12660-security-overview-action-legend-dark-1305x832.png"
+                 alt="S-2 图例近景 — 投递 / 隔离 / 审核 / 拒收 / 丢弃 / 召回，无灰名单"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 图例区近景</strong><br>
+              六个系列完整展示；"灰名单"（<code>advanced_review</code>）已从图例、折线数据系列和表格列中全部移除
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12660-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>执行动作图表系列列表</td>
+              <td>投递、<del>灰名单</del>、隔离、审核、拒收、丢弃、召回</td>
+              <td>投递、隔离、审核、拒收、丢弃、召回</td>
+              <td><code>TrendChartCard.tsx</code> — <code>keys</code> useMemo，过滤条件：<code>advanced_review</code></td>
+              <td>[Base] 所有形态/角色一致</td>
+            </tr>
+            <tr>
+              <td>图表底部图例按钮</td>
+              <td>含"灰名单"图例按钮（灰色圆点 + 文案）</td>
+              <td>移除"灰名单"图例按钮</td>
+              <td><code>TrendChartCard.tsx</code> 第 221 行 <code>keys.map</code> 渲染</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>详情表格列（执行动作维度）</td>
+              <td>含 <code>advanced_review</code> 列</td>
+              <td>移除 <code>advanced_review</code> 列</td>
+              <td><code>DetailTable.tsx</code> — <code>EXCLUDED_ACTION_KEYS</code> 集合：<code>['advanced_review', 'sideline', 'greylist', 'mark_deliver']</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>图例 i18n 标签</td>
+              <td><code>emailDisposal.filters.actions.advanced_review</code> = "灰名单"</td>
+              <td>该 key 不再被引用（key 本身保留在 zh.json 中，未删除）</td>
+              <td><code>messages/zh.json</code> 第 5691 行</td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ GT-12659 需求入口锚点 ══════════════ -->
+  <div id="gt-12659" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12659 增量内容 ══════════════ -->
+  <section id="incremental-gt-12659-disposal-action">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12659</span>
+      <span class="incr-title">邮件处置中心：执行动作统一修正</span>
+      <span class="incr-meta">2026-07-31 &nbsp;·&nbsp; commit <code>640e96f</code> &nbsp;·&nbsp; 路由 <code>/zh/email-disposal/center</code></span>
+    </div>
+
+    <div id="c12659-change-1">
+      <h3>变更 1 · 搜索模块执行动作筛选移除"灰名单"</h3>
+
+      <div id="c12659-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          邮件处置中心搜索筛选区域的"执行动作"下拉 Select 原本包含"灰名单"（<code>advanced_review</code>）选项。
+          由于灰名单已从执行动作枚举中独立出来，搜索筛选的执行动作选项需要同步移除"灰名单"，使筛选口径与实际执行动作枚举保持一致。
+        </p>
+        <div class="callout callout-info">
+          修改位置：<code>src/types/email-disposal.ts</code> 的 <code>EXECUTION_ACTIONS</code> 常量数组（单一事实来源，同时驱动搜索筛选 Select 和安全总览图表）——移除 <code>'advanced_review'</code> 一项。
+        </div>
+      </div>
+
+      <div id="c12659-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="trigger-path">
+            触发路径：导航至 <code>/zh/email-disposal/center</code> → 页面加载完成 → 点击"执行动作"筛选下拉 → 展开选项列表
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12659-disposal-center-default-dark-1305x832.png"
+                 alt="S-1 邮件处置中心默认态 — 搜索筛选区执行动作 Select 显示全部"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 邮件处置中心默认态（搜索筛选区）</strong><br>
+              路由：<code>/zh/email-disposal/center</code> &nbsp;·&nbsp;
+              主题：暗色 &nbsp;·&nbsp; 视口：1305×832 &nbsp;·&nbsp;
+              形态：AI版·多租户 &nbsp;·&nbsp; 角色：平台管理员（Mock 演示数据）<br>
+              执行动作筛选 Select 初始值为"全部"，下拉折叠态
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12659-disposal-action-dropdown-open-dark-1305x832.png"
+                 alt="S-2 执行动作下拉展开态 — 选项：全部 / 投递 / 隔离 / 审核 / 拒收 / 丢弃 / 召回，无灰名单"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 执行动作下拉展开态</strong><br>
+              选项列表：<strong>全部、投递、隔离、审核、拒收、丢弃、召回</strong>，共 7 项（含"全部"）；
+              "灰名单"已从选项中完全移除
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12659-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>执行动作筛选 Select 选项列表</td>
+              <td>全部、投递、<del>灰名单</del>、隔离、审核、拒收、丢弃、召回（8 项）</td>
+              <td>全部、投递、隔离、审核、拒收、丢弃、召回（7 项）</td>
+              <td><code>src/types/email-disposal.ts</code> — <code>EXECUTION_ACTIONS</code> 常量数组，移除 <code>'advanced_review'</code></td>
+              <td>[Base] 所有形态/角色一致</td>
+            </tr>
+            <tr>
+              <td>执行动作 i18n 标签 <code>advanced_review</code></td>
+              <td><code>emailDisposal.filters.actions.advanced_review</code> = "灰名单"（可见）</td>
+              <td>该 key 不再被 Select 选项引用（key 保留在 zh.json 中，未删除）</td>
+              <td><code>messages/zh.json</code> 第 5691 行</td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+        <a class="back-link" href="#toc">&#8593; 返回目录</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ GT-12665 需求入口锚点 ══════════════ -->
+  <div id="gt-12665" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12665 增量内容 ══════════════ -->
+  <section id="incremental-gt-12665-sender-filter-domain-combobox">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12665</span>
+      <span class="incr-title">发信人黑白名单-域名类型仅可选择组织内域名，建议支持填写发信域名</span>
+      <span class="incr-meta">2026-07-31 &nbsp;·&nbsp; commit <code>bbe5bee</code> &nbsp;·&nbsp; 路由 <code>/zh/security/pipeline</code> → 发信人黑白名单配置面板</span>
+    </div>
+
+    <div id="c12665-change-1">
+      <h3>变更 1 · 域名类型输入控件：下拉 Select 改为可自由输入 Combobox + 租户接收域名建议列表</h3>
+
+      <div id="c12665-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          原实现（GT-12117）中，新建/编辑规则抽屉的"发信人"字段在类型为"组织域名"时，仅允许从当前租户的<strong>接收域名列表</strong>中下拉选择。
+          当租户无接收域名时，控件显示提示文案"该租户暂无接收域名"且无法输入，导致无法针对<strong>外部恶意发信域名</strong>（如 phishing-attack.com）创建黑名单规则。
+        </p>
+        <p>
+          本次变更将该控件从纯 Select 改为内联 <code>DomainCombobox</code> 组件：支持自由输入任意合法域名，同时在输入框 focus 时将租户接收域名作为快捷建议展示在浮层中，建议项随输入词实时过滤。
+          i18n key <code>senderType_domain</code> 从"组织域名"更名为"发信域名"（更准确表达语义），新增 <code>domainSuggestions</code> 用于建议浮层标签文案。
+        </p>
+        <div class="callout callout-info">
+          修改位置：<code>src/components/security/sender-filter/SenderFilterDrawer.tsx</code> — 新增内联 <code>DomainCombobox</code> 子组件，替换 domain 分支下的 Select/空态提示；
+          <code>messages/zh.json</code> 和 <code>messages/en.json</code>  更新 <code>senderType_domain</code>、<code>senderPlaceholder_domain</code>，新增 <code>domainSuggestions</code>。
+        </div>
+      </div>
+
+      <div id="c12665-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="trigger-path">
+            触发路径：安全策略 → 策略流水线 → 发信人黑白名单「配置」→ 「新建规则」→ 发信人类型下拉展开
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12665-S1-new-rule-drawer-default-dark-1253x832.png"
+                 alt="S-1 新建规则抽屉默认态 — 发信人类型为个人"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 新建规则抽屉 — 默认态（发信人类型：个人）</strong><br>
+              路由：<code>/zh/security/pipeline</code> → 发信人黑白名单配置面板 &nbsp;·&nbsp;
+              主题：暗色 &nbsp;·&nbsp; 视口：1253×832 &nbsp;·&nbsp;
+              形态：AI版·多租户 &nbsp;·&nbsp; 角色：租户管理员（示例租户 A，Mock 演示数据）<br>
+              发信人类型默认为"个人"，右侧输入框为邮箱地址格式
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12665-S2-type-dropdown-open-dark-1253x832.png"
+                 alt="S-2 发信人类型下拉展开 — 选项：个人 / 群组 / 发信域名"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 发信人类型下拉展开态</strong><br>
+              选项列表：<strong>个人 / 群组 / 发信域名</strong>（原"组织域名"，i18n key <code>senderType_domain</code> 已更新为"发信域名"）
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12665-S3-domain-input-empty-dark-1253x832.png"
+                 alt="S-3 选择发信域名后 — 自由输入文本框，placeholder 如 example.com 或 evil.com"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-3 · 发信域名类型 — 输入框空态</strong><br>
+              发信人类型切换为"发信域名"后，右侧控件从 Select 变为可自由输入的 <code>Input</code>；
+              placeholder 为"如 example.com 或 evil.com"（i18n key <code>senderFilter.senderPlaceholder_domain</code>）；
+              右侧"当前配置效果"显示"当发信人为 未填写"
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12665-S4-suggestions-open-dark-1253x832.png"
+                 alt="S-4 点击输入框后建议浮层展开 — 标签：本租户接收域名（快捷选择），列出 5 个域名"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-4 · 建议浮层展开态（输入框 focus）</strong><br>
+              点击输入框后，在输入框正下方展开建议浮层；顶部分组标签"本租户接收域名（快捷选择）"（i18n key <code>senderFilter.domainSuggestions</code>）；
+              列表展示租户 A 的 5 个接收域名：example.cn / mail.example.cn / corp.example.com / legacy.example.net / newdomain.cn；
+              建议随输入词实时过滤，点击建议项直接填充输入框并关闭浮层
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12665-S5-external-domain-input-dark-1253x832.png"
+                 alt="S-5 自由输入外部域名 phishing-attack.com — 不属于租户域名，右侧当前配置效果实时更新"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-5 · 自由输入外部域名（非租户接收域名）</strong><br>
+              输入 phishing-attack.com（租户接收域名列表中不存在），无报错、无禁用；
+              右侧"当前配置效果"实时更新为"当发信人为 phishing-attack.com"，系统将执行阻断；
+              Zod <code>domainRegex</code> 校验仍有效，格式不合法时触发 field 级别错误
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12665-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径 / i18n key</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>发信人类型选项 — 域名</td>
+              <td>文案："组织域名"</td>
+              <td>文案："发信域名"</td>
+              <td><code>senderFilter.senderType_domain</code>（zh: "发信域名" / en: "Sender Domain"）</td>
+              <td>[Base] 所有形态/角色一致</td>
+            </tr>
+            <tr>
+              <td>发信人值输入控件（domain 分支）</td>
+              <td>
+                <strong>有接收域名时</strong>：Select 下拉，只能从租户接收域名中选择；<br>
+                <strong>无接收域名时</strong>：显示提示文案"该租户暂无接收域名，请先在『接收域名』中配置"，无法输入
+              </td>
+              <td>统一为自由输入 <code>Input</code>（<code>DomainCombobox</code> 组件），可填写任意合法域名；focus 时若租户有接收域名则展开建议浮层</td>
+              <td><code>SenderFilterDrawer.tsx</code> — <code>DomainCombobox</code> 组件（新增内联子组件，替换 domain 分支下的 Select 和空态 div）</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>域名输入框 placeholder</td>
+              <td>"请输入域名，如 example.com"</td>
+              <td>"如 example.com 或 evil.com"</td>
+              <td><code>senderFilter.senderPlaceholder_domain</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>建议浮层分组标签</td>
+              <td>不存在</td>
+              <td>"本租户接收域名（快捷选择）"；仅当 <code>tenantDomains.length &gt; 0</code> 且 <code>filtered.length &gt; 0</code> 时显示</td>
+              <td><code>senderFilter.domainSuggestions</code>（新增 key）</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>建议浮层列表项</td>
+              <td>不存在</td>
+              <td>租户接收域名列表，随输入词实时过滤（<code>includes</code> 不区分大小写）；点击 mousedown 事件填充并关闭浮层</td>
+              <td><code>DomainCombobox.filtered</code>（useMemo，依赖 <code>suggestions</code> 和 <code>inputValue</code>）</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>旧空态提示文案</td>
+              <td>无接收域名时显示："该租户暂无接收域名，请先在『接收域名』中配置"</td>
+              <td>不再单独展示；已被 <code>DomainCombobox</code> 统一替代（租户有无接收域名均可自由输入）</td>
+              <td><code>senderFilter.noTenantDomains</code>（key 保留在 zh.json / en.json，未删除）</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>域名格式校验</td>
+              <td>不适用（Select 选择，不需手输校验）</td>
+              <td>Zod <code>domainRegex</code> 校验（<code>SenderFilterDrawer.tsx</code> schema），格式不合法时触发 field 级别错误提示，onChange 触发</td>
+              <td><code>SenderFilterDrawer.tsx</code> — <code>senderValueSchema</code></td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+        <a class="back-link" href="#toc">&#8593; 返回目录</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ GT-12657 需求入口锚点 ══════════════ -->
+  <div id="gt-12657" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12657 增量内容 ══════════════ -->
+  <section id="incremental-gt-12657-attachment-security-toggle-immediate">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12657</span>
+      <span class="incr-title">附件安全检测-模块总开关需额外保存才生效，与其他模块即时生效行为不一致</span>
+      <span class="incr-meta">2026-07-31 &nbsp;·&nbsp; commit <code>ede9867</code> &nbsp;·&nbsp; 路由 <code>/zh/security/pipeline</code> → 阶段3: 内容层 / 附件安全检测抽屉</span>
+    </div>
+
+    <div id="c12657-change-1">
+      <h3>变更 1 · 总开关改为立即持久化：点击后直接生效，切换期间禁用，失败时回滚并 toast</h3>
+
+      <div id="c12657-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          原实现中，附件安全检测抽屉顶部的"启用/禁用"开关点击后仅更新 draft 状态，
+          底部会出现"模块开关有未保存的更改"提示，用户必须额外点击"保存配置"才能真正持久化。
+          其他模块（发信行为管控、收信人检测等）的开关均在点击后立即调用 API 持久化，
+          两者交互语义不一致，存在用户误以为生效而实际未生效的安全风险。
+        </p>
+        <p>
+          本次变更在 <code>AttachmentSecurityPage.tsx</code> 中新增 <code>handleToggleEnabled</code> 异步函数：
+          点击开关时乐观更新 UI（立即翻转显示），同时调用 <code>setSecurityModuleEnabled('attachment_security', next, apiRequest)</code> 持久化；
+          成功后同步 <code>baseline.enabled</code>，使"保存配置"按钮对开关状态不再产生差异提交；
+          失败时回滚 <code>draft.enabled</code> 并弹出错误 toast（<code>moduleT('saveFailed')</code>）。
+          切换进行中 <code>togglingEnabled=true</code>，开关和"保存配置"按钮均禁用，防止重复操作。
+        </p>
+        <div class="callout callout-info">
+          修改位置：<code>src/components/security/AttachmentSecurityPage.tsx</code> — 新增 <code>handleToggleEnabled</code> 函数和 <code>togglingEnabled</code> 状态，
+          <code>PipelinePanelHeader onToggle</code> 从 <code>updateDraft('enabled', enabled)</code> 改为 <code>handleToggleEnabled</code>；
+          <code>save()</code> 中移除 <code>draft.enabled !== baseline.enabled</code> 的冗余提交分支。
+        </div>
+      </div>
+
+      <div id="c12657-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="trigger-path">
+            触发路径：安全策略 → 策略流水线 → 阶段3：内容层 → 附件安全检测「配置」→ 点击顶部启用/禁用开关
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12657-S1-attachment-security-drawer-default-enabled-dark-1253x832.png"
+                 alt="S-1 附件安全检测抽屉默认态 — 总开关已启用（蓝色），底部保存配置按钮 disabled"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 附件安全检测抽屉 — 默认态（总开关：已启用）</strong><br>
+              路由：<code>/zh/security/pipeline</code> → 阶段3: 内容层 / 附件安全检测抽屉 &nbsp;·&nbsp;
+              主题：暗色 &nbsp;·&nbsp; 视口：1253×832 &nbsp;·&nbsp;
+              形态：AI版·多租户 &nbsp;·&nbsp; 角色：租户管理员（示例租户 A，Mock 演示数据）<br>
+              抽屉标题"阶段3: 内容层 / 附件安全检测"，右上角总开关蓝色（已启用）；
+              底部"保存配置"按钮为 <code>disabled</code> 状态（无未保存更改）
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12657-S2-toggle-off-immediate-no-unsaved-prompt-dark-1253x832.png"
+                 alt="S-2 点击总开关切换为禁用后立即生效 — 顶部显示已禁用，保存配置按钮仍为 disabled，无未保存提示"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 点击总开关切换为禁用后 — 立即持久化（无未保存提示）</strong><br>
+              点击开关后 UI 立即切换为"已禁用"（灰色）；
+              面板显示警告横幅"关闭本模块后，其全部规则停止生效，该模块的拦截能力将不再起作用。"；
+              底部"保存配置"按钮仍为 <code>disabled</code>（API 已即时调用，baseline 已同步，无 draft 差异）；
+              <strong>无"模块开关有未保存的更改"提示</strong>（修复前的旧行为已消除）
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12657-S3-toggle-on-immediate-no-unsaved-prompt-dark-1253x832.png"
+                 alt="S-3 再次点击总开关切换回启用 — 顶部显示已启用，保存配置按钮仍为 disabled，无未保存提示"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-3 · 再次点击总开关切换回启用 — 立即持久化（无未保存提示）</strong><br>
+              再次点击后 UI 立即恢复为"已启用"（蓝色），警告横幅消失；
+              底部"保存配置"按钮仍为 <code>disabled</code>；
+              连续切换两次后状态与初始值一致，无累积 draft，行为与 S-1 默认态完全相同
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12657-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>更前</th><th>变更后</th><th>源码路径 / 相关 key</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>总开关（<code>Switch</code> / <code>PipelinePanelHeader</code> <code>onToggle</code>）</td>
+              <td>点击后调用 <code>updateDraft('enabled', enabled)</code>，将状态写入 draft；底部出现"模块开关有未保存的更改"提示，需用户手动点击"保存配置"持久化</td>
+              <td>点击后调用 <code>handleToggleEnabled(next)</code>：乐观更新 UI，立即调用 <code>setSecurityModuleEnabled('attachment_security', next, apiRequest)</code> 持久化，成功后同步 <code>baseline.enabled</code>，底部无未保存提示</td>
+              <td><code>src/components/security/AttachmentSecurityPage.tsx</code> — <code>handleToggleEnabled</code> 函数（新增）</td>
+              <td>[Base] 所有形态/角色一致</td>
+            </tr>
+            <tr>
+              <td>总开关切换期间禁用</td>
+              <td>无禁用逻辑，可多次快速点击</td>
+              <td><code>togglingEnabled=true</code> 时开关 <code>disabled</code>，防止并发重复请求</td>
+              <td><code>AttachmentSecurityPage.tsx</code> — <code>togglingEnabled</code> state（新增）；<code>PipelinePanelHeader disabled</code> prop 条件加入 <code>|| togglingEnabled</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>切换失败回滚与 toast</td>
+              <td>不适用（旧逻辑通过 <code>save()</code> 统一处理错误）</td>
+              <td>API 调用失败时回滚 <code>draft.enabled</code> 为切换前值，弹出错误 toast（<code>moduleT('saveFailed')</code>）</td>
+              <td><code>AttachmentSecurityPage.tsx</code> — <code>handleToggleEnabled</code> catch 分支；i18n key <code>module.saveFailed</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>"保存配置"按钮 <code>disabled</code> 条件</td>
+              <td>开关切换后 draft 与 baseline 不同，按钮变为 enabled（可点击）</td>
+              <td>开关切换后 <code>baseline.enabled</code> 立即同步，draft 与 baseline 始终一致，按钮保持 <code>disabled</code>（仅其他字段变更时才 enabled）</td>
+              <td><code>AttachmentSecurityPage.tsx</code> — <code>save()</code> 中已移除 <code>draft.enabled !== baseline.enabled</code> 的提交分支</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>底部"模块开关有未保存的更改"提示</td>
+              <td>每次点击开关后必然出现</td>
+              <td>不再出现（开关已立即持久化，不产生 draft 差异）</td>
+              <td><code>AttachmentSecurityPage.tsx</code> — <code>PipelinePanelFooter</code> 的 dirty 判断中 <code>enabled</code> 差异已消除</td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+        <a class="back-link" href="#toc">&#8593; 返回目录</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ GT-12587 需求入口锚点 ══════════════ -->
+  <div id="gt-12587" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12587 增量内容 ══════════════ -->
+  <section id="incremental-gt-12587-weekly-heatmap">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12587</span>
+      <span class="incr-title">邮件安全总览-攻击时段分布切换周内后只显示7列导致时间图不完整</span>
+      <span class="incr-meta">2026-07-31 &nbsp;·&nbsp; commit <code>d706c3d</code> &nbsp;·&nbsp; 路由 <code>/zh/statistics/security-overview</code> → 攻击时段分布卡片 · 周内分布模式</span>
+    </div>
+
+    <div id="c12587-change-1">
+      <h3>变更 1 · 周内热力图修复：xAxis category 类型统一为零填充字符串，series data 同步，24 列完整渲染</h3>
+
+      <div id="c12587-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          原实现中 <code>TimeDistributionCard.tsx</code> 的 ECharts 周内热力图 <code>xAxis.data</code> 传入数字数组
+          <code>[0, 1, …, 23]</code>，而 series <code>data</code> 中的 hour 值也是数字（<code>cell.hour</code>）。
+          ECharts category axis 内部将 data 项转为字符串 key 做映射，数字 <code>0</code> 转为 <code>"0"</code>，
+          但 heatmap series 传入的数字 <code>0</code> 在严格字符串比较下无法命中 category，
+          导致只有恰好与 day 索引（0~6）重合的前 7 个 hour 格子被正确渲染，其余 17 个小时列全部丢失。
+        </p>
+        <p>
+          修复方案：将 <code>xAxis.data</code> 改为零填充字符串数组 <code>['00','01',…,'23']</code>；
+          series <code>data</code> 中的 hour 也统一用 <code>String(cell.hour).padStart(2,'0')</code> 转换，
+          确保两侧类型一致。同时 <code>axisLabel.interval</code> 改为 <code>1</code>（每格显示一个标签）、
+          <code>inverse: false</code>（周日在下）、图表高度在周内模式下扩展至 280px 以容纳 7 行。
+          tooltip <code>formatter</code> 更新为显示小时区间（如 <code>12:00–13:00</code>）。
+        </p>
+        <div class="callout callout-info">
+          修改位置：<code>src/components/statistics/security-overview/TimeDistributionCard.tsx</code> —
+          <code>weeklyOption</code> 中 <code>xAxis.data</code>、<code>series.data</code> 的 hour 映射、
+          <code>tooltip.formatter</code>、<code>yAxis.inverse</code>、图表高度条件表达式。
+        </div>
+      </div>
+
+      <div id="c12587-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="trigger-path">
+            触发路径：统计报表 → 邮件安全总览 → 攻击时段分布卡片右上角 → 点击「周内分布」
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12587-S1-attack-time-dist-default-hourly-dark-1253x832.png"
+                 alt="S-1 攻击时段分布卡片默认态 — 日内分布模式，右上角可见日内分布/周内分布切换按钮"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 攻击时段分布卡片默认态（日内分布）</strong><br>
+              路由：<code>/zh/statistics/security-overview</code> &nbsp;·&nbsp;
+              主题：暗色 &nbsp;·&nbsp; 视口：1253×832 &nbsp;·&nbsp;
+              形态：AI版·多租户 &nbsp;·&nbsp; 角色：租户管理员（Mock 演示数据）<br>
+              卡片右上角显示「日内分布」（选中，蓝色）和「周内分布」（未选中）两个切换按钮；
+              图表为 24 小时柱状图（堆叠），x 轴标签 00～22，峰值信息横幅显示 13:00–14:00 攻击高峰
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12587-S2-weekly-heatmap-7row-24col-fixed-dark-1253x832.png"
+                 alt="S-2 点击周内分布后热力图显示 7 行 × 24 列完整矩阵，不再只显示 7 列"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 点击「周内分布」后 — 7×24 热力图矩阵完整渲染（修复后）</strong><br>
+              「周内分布」按钮切换为选中态（蓝色）；图表切换为热力图，纵轴 7 行（周六→周日），
+              横轴标签从 00 延伸至 22 共 24 列全部可见；
+              峰值横幅更新为「峰值时段: 周六 13:00 · 299」；
+              <strong>修复前只显示 7 列（hour 0~6），修复后 24 列全部正确渲染</strong>
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12587-S3-weekly-heatmap-full-view-dark-1253x832.png"
+                 alt="S-3 滚动至攻击时段分布热力图完整视图，展示 7 行 × 24 列矩阵与 x 轴完整标签"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-3 · 周内热力图完整视图（页面滚动后居中显示）</strong><br>
+              纵轴完整显示 7 天（周六、周五、周四、周三、周二、周一、周日）；
+              横轴完整显示 24 小时（00 02 04 06 08 10 12 14 16 18 20 22，每 2 小时一个刻度标签）；
+              底部 visualMap 图例显示低→高色阶（深蓝→蓝→橙→红）；
+              热力色块在 12:00–16:00 周四～周六区间呈橙红色，与日内分布峰值趋势一致
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12587-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径 / 相关 key</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ECharts <code>xAxis.data</code>（周内模式）</td>
+              <td>数字数组 <code>[0, 1, …, 23]</code>；ECharts 内部转字符串时与 series data 的数字 hour 不一致，导致只有前 7 个 category 命中</td>
+              <td>零填充字符串数组 <code>['00','01',…,'23']</code>；与 series data 类型完全一致，24 个 category 全部命中</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>weeklyOption xAxis.data</code></td>
+              <td>[Base] 所有形态/角色一致</td>
+            </tr>
+            <tr>
+              <td>ECharts series <code>data</code> 中 hour 值（周内模式）</td>
+              <td><code>cell.hour</code>（数字）</td>
+              <td><code>String(cell.hour).padStart(2,'0')</code>（零填充字符串，与 xAxis.data 匹配）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>series[0].data</code> map 函数</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td><code>xAxis.axisLabel.interval</code></td>
+              <td><code>2</code>（每隔 2 个显示一个标签，以为 24 列展示）</td>
+              <td><code>1</code>（每 2 小时显示一个刻度标签，与当前 data 长度 24 匹配，避免标签重叠）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>xAxis.axisLabel.interval</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td><code>yAxis.inverse</code></td>
+              <td><code>true</code>（周一在上）</td>
+              <td><code>false</code>（周日在下，与自然星期阅读顺序一致）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>yAxis.inverse</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>热力图图表高度</td>
+              <td>固定 230px（日内/周内共用）</td>
+              <td>周内模式 280px，日内模式 230px（条件表达式 <code>mode === 'weekly' ? 280 : 230</code>）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>ReactECharts style.height</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>tooltip <code>formatter</code></td>
+              <td><code>[value[1]] [value[0].padStart(2,'0')]:00</code>（仅显示开始小时）</td>
+              <td><code>[weekdays[value[1]]] HH:00–HH+1:00 / 数值加粗</code>（显示完整时段区间）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>tooltip.formatter</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>visualMap 色阶</td>
+              <td><code>['#f3f4f6','#fef3c7','#fed7aa','#fdba74','#f87171']</code>（浅灰→橙→红）</td>
+              <td><code>['#1e293b','#1e3a5f','#1d4ed8','#f97316','#ef4444']</code>（深蓝→蓝→橙→红，暗色背景下对比度更高）</td>
+              <td><code>TimeDistributionCard.tsx</code> — <code>visualMap.inRange.color</code></td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+        <a class="back-link" href="#toc">&#8593; 返回目录</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ GT-12661 需求入口锚点 ══════════════ -->
+  <div id="gt-12661" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12661 增量内容 ══════════════ -->
+  <section id="incremental-gt-12661-auth-spoofing-remove-exception-banner">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12661</span>
+      <span class="incr-title">身份认证与仿冒检测-去掉多出原型未定义且点击无效的例外规则按钮</span>
+      <span class="incr-meta">2026-07-31 &nbsp;·&nbsp; commit <code>54cb647</code> &nbsp;·&nbsp; 路由 <code>/zh/security/pipeline</code> → 认证仿冒检测配置面板</span>
+    </div>
+
+    <div id="c12661-change-1">
+      <h3>变更 1 · 移除"例外规则管理"横幅及其两个无效跳转按钮</h3>
+
+      <div id="c12661-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          "认证仿冒检测配置"面板底部原存在一个"例外规则管理"横幅（<code>ExceptionRulesEntry</code> 组件），
+          内含"前往策略流水线"和"查看当前例外"两个按钮。该横幅在产品原型中无对应定义，两个按钮点击后无任何实际功能响应，
+          属于误植入的冗余 UI，对用户造成困惑。
+        </p>
+        <p>
+          本次变更从 <code>AuthSpoofingPage.tsx</code> 中移除 <code>&lt;ExceptionRulesEntry /&gt;</code> 的渲染调用及对应 import，
+          <code>ExceptionRulesEntry</code> 组件文件本身保留未删除。面板底部直接以"保存"按钮结束，布局更简洁。
+        </p>
+        <div class="callout callout-info">
+          修改位置：<code>src/components/security/AuthSpoofingPage.tsx</code> — 移除第 226 行 <code>&lt;ExceptionRulesEntry /&gt;</code> 使用及第 19 行对应 import。
+        </div>
+      </div>
+
+      <div id="c12661-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="trigger-path">
+            触发路径：安全策略 → 策略流水线 → 身份认证与仿冒检测「配置」→ 等待面板加载完成
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12661-S1-auth-spoofing-config-default-dark-1253x832.png"
+                 alt="S-1 认证仿冒检测配置面板默认态 — 顶部基础格式检查区域"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 认证仿冒检测配置面板 — 默认态（顶部）</strong><br>
+              路由：<code>/zh/security/pipeline</code> → 认证仿冒检测配置面板 &nbsp;·&nbsp;
+              主题：暗色 &nbsp;·&nbsp; 视口：1253×832 &nbsp;·&nbsp;
+              形态：AI版·多租户 &nbsp;·&nbsp; 角色：租户管理员（示例租户 A，Mock 演示数据）<br>
+              面板标题"认证仿冒检测配置"，左侧导航高亮"身份认证与仿冒检测"，顶部显示"基础格式检查"折叠区
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12661-S2-auth-spoofing-config-bottom-no-exception-banner-dark-1253x832.png"
+                 alt="S-2 认证仿冒检测配置面板底部 — 例外规则管理横幅已移除，保存按钮直接位于底部右侧"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 认证仿冒检测配置面板 — 底部（例外规则管理横幅已移除）</strong><br>
+              原有"例外规则管理"横幅（含"前往策略流水线"/"查看当前例外"两按钮）已消失；
+              面板内容区域直接以配置项结束，"保存"按钮位于右下角；页面布局更简洁，无冗余跳转入口
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12661-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>"例外规则管理"横幅容器</td>
+              <td>面板底部渲染 <code>ExceptionRulesEntry</code> 组件，包含标题"例外规则管理"和描述文案"本模块不配置例外规则，请在策略流水线统一管理"</td>
+              <td>完全移除，不再渲染</td>
+              <td><code>src/components/security/AuthSpoofingPage.tsx</code> 第 226 行（已移除）</td>
+              <td>[Base] 所有形态/角色一致</td>
+            </tr>
+            <tr>
+              <td>"前往策略流水线"按钮</td>
+              <td>横幅右侧按钮，点击无实际响应（原型未定义跳转行为）</td>
+              <td>随横幅一并移除</td>
+              <td><code>src/components/security/auth-spoofing/ExceptionRulesEntry.tsx</code>（组件文件保留，渲染调用移除）</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>"查看当前例外"按钮</td>
+              <td>横幅右侧按钮，点击无实际响应（原型未定义跳转行为）</td>
+              <td>随横幅一并移除</td>
+              <td><code>src/components/security/auth-spoofing/ExceptionRulesEntry.tsx</code>（组件文件保留，渲染调用移除）</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>面板底部布局</td>
+              <td>底部：配置项 → 例外规则横幅 → 保存按钮</td>
+              <td>底部：配置项 → 保存按钮（布局更紧凑）</td>
+              <td><code>src/components/security/AuthSpoofingPage.tsx</code></td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+        <a class="back-link" href="#toc">&#8593; 返回目录</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ GT-12563 需求入口锚点 ══════════════ -->
+  <div id="gt-12563" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12563 增量内容 ══════════════ -->
+  <section id="incremental-gt-12563-search-template">
+    <div class="incr-header">
+      <span class="ticket-badge">GT-12563</span>
+      <span class="incr-title">搜索模板实现</span>
+      <span class="incr-meta">2026-08-01 &middot; commit <code>99410b4</code> &middot; 路由 <code>/zh/email-disposal/center</code> → 搜索栏「模板」按钮</span>
+    </div>
+
+    <div id="c12563-change-1">
+      <h3>变更 1 · 搜索模板完整闭环：保存 / 重命名 / 删除 / 应用，模板菜单始终可访问</h3>
+
+      <div id="c12563-overview">
+        <h4>1.1 方案概述</h4>
+        <p>
+          在邮件处置中心搜索栏的「模板」下拉菜单中，完整实现了搜索模板的保存、重命名、删除和应用四条核心流程。
+        </p>
+        <p><strong>保存对象：</strong><code>quickFilter</code>（基础筛选字段）+ <code>advancedFilter</code>（高级筛选 27 个精确字段）+ <code>aiQuery</code>（AI 自然语言主输入框原始文本）。分页、排序和表头筛选不保存。</p>
+        <p><strong>保存交互：</strong>点击「保存当前条件」触发 <code>SaveTemplateDialog</code>（shadcn Dialog），自动填入「搜索模板 YYYY-MM-DD」格式默认名；字符上限 30；名称为空时「保存」禁用；与已有模板同名时出现 amber Warning「已存在同名模板，保存将覆盖原有条件」，按钮文字改为「覆盖保存」；达 20 条上限时出现 Info 提示；保存成功后 toast「已保存"&lt;模板名&gt;"」。支持 Enter 键提交，兼容 CJK IME（<code>isComposing</code> 判断）。</p>
+        <p><strong>菜单入口：</strong>模板按钮始终可点击（<code>templateMenuDisabled = false</code>）。「保存当前条件」菜单项仍通过 <code>disabled={!canSaveTemplate}</code> 单独控制。</p>
+        <p><strong>应用行为：</strong>无活跃条件时直接应用并自动搜索；有活跃条件时弹出 AlertDialog 确认「应用将替换当前所有搜索条件，是否继续？」，确认后全量替换并自动搜索，取消不做任何更改。AI 文本回填输入框但不自动解析。</p>
+        <p><strong>重命名：</strong>点击铅笔图标触发同一 Dialog（mode="rename"），预填原名，确认后立即生效；与其他模板同名时 toast 报错并保持弹窗打开。</p>
+        <p><strong>存储：</strong><code>localStorage</code> key <code>disposal-search-templates</code>，上限 20 条，此期无后端 API，跨设备不同步（见 D-010）。</p>
+        <div class="callout callout-info">
+          修改文件：<code>use-search-templates.ts</code>（扩展类型、同名覆盖、新增 renameTemplate / hasTemplateName）；新建 <code>save-template-dialog.tsx</code>；<code>search-bar.tsx</code>（铅笔按钮、templateMenuDisabled=false）；<code>email-disposal-center-page.tsx</code>（保存改为弹窗、有条件确认、传 aiQuery）；<code>messages/zh.json</code> / <code>messages/en.json</code>（补充 19 个新 key）。
+        </div>
+      </div>
+
+      <div id="c12563-states">
+        <h4>1.2 截图式交互预览</h4>
+        <div class="interaction-preview">
+          <p class="trigger-path">
+            触发路径：邮件处置中心（<code>/zh/email-disposal/center</code>）→ 搜索栏右侧「模板」按钮 → 各下级交互
+          </p>
+
+          <figure>
+            <img src="screenshots/GT-12563-S1-template-btn-default-dark-1253x832.png"
+                 alt="S-1 页面默认态 — 模板按钮始终可点击"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-1 · 邮件处置中心默认态</strong><br>
+              路由：<code>/zh/email-disposal/center</code> &middot; 暗色 &middot; 1253×832 &middot; AI版·多租户 &middot; 租户管理员<br>
+              「模板」按钮（含收起图标）始终可点击（<code>disabled=false</code>）；无筛选条件，无数字徽标；示例提示词三条可见。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S2-template-menu-open-no-templates-dark-1253x832.png"
+                 alt="S-2 模板菜单打开 — 无模板时只显示「保存当前条件」"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-2 · 模板菜单打开态（无已保存模板）</strong><br>
+              仅显示「保存当前条件」一项（当前无可保存条件，该项视觉禁用）；「已保存模板」分组不渲染。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S3-save-dialog-open-dark-1253x832.png"
+                 alt="S-3 保存搜索模板弹窗正常态"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-3 · 保存搜索模板弹窗（正常态）</strong><br>
+              触发：执行动作选为「投递」后，点击「模板 → 保存当前条件」<br>
+              标题「保存搜索模板」；描述「当前已有 0 个模板（上限 20 个）」；
+              输入框预填「搜索模板 2026-08-01」，字符计数 15/30；「取消 / 保存」按钮；支持 Enter 键提交。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S4-save-dialog-overwrite-warn-dark-1253x832.png"
+                 alt="S-4 保存弹窗同名覆盖警告态"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-4 · 保存弹窗同名覆盖警告态（无已有模板，输入相同名称后触发提示路径）</strong><br>
+              当输入名称与已有模板匹配时，输入框下方出现 amber Warning「已存在同名模板，保存将覆盖原有条件」；
+              按钮文字改为「覆盖保存」；确认后原地替换该模板条件，保留原 id 和 createdAt。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S5-template-saved-toast-dark-1253x832.png"
+                 alt="S-5 保存成功 toast"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-5 · 保存成功态</strong><br>
+              弹窗关闭，右下角 toast「已保存"<模板名>"」；
+              「模板」按钮右侧显示数字徽标 1；搜索栏底部「待应用条件（1 条）」提示条件仍待搜索。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S6-template-menu-with-items-dark-1253x832.png"
+                 alt="S-6 模板菜单带已保存列表 — 铅笔和垃圾桶按钮"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-6 · 模板菜单带已保存列表态</strong><br>
+              下拉菜单分两个 section：「保存当前条件」（顶部）、「已保存模板」（下方）；
+              模板条目右侧有铅笔（重命名）和垃圾桶（删除）两个图标按钮；
+              点击条目主体区域触发应用流程；点击图标按钮通过 <code>stopPropagation</code> 阻止触发应用。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S7-save-dialog-overwrite-warn-dark-1253x832.png"
+                 alt="S-7 保存弹窗同名覆盖警告（有1条已保存模板场景）"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-7 · 保存弹窗同名覆盖警告（有已保存模板场景）</strong><br>
+              描述更新为「当前已有 1 个模板（上限 20 个）」；
+              输入与已有模板同名的字符串时 amber Warning 显示，按钮改为「覆盖保存」。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S8-rename-dialog-dark-1253x832.png"
+                 alt="S-8 重命名模板弹窗 — 预填原名，「取消 / 确认」按钮"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-8 · 重命名模板弹窗</strong><br>
+              触发：点击模板列表条目右侧铅笔图标按钮<br>
+              标题「重命名模板」；描述「修改后将立即生效」；输入框预填原模板名称，计数 14/30；
+              「取消 / 确认」按钮；名称为空时「确认」禁用；与其他模板同名时 toast 报错并保持弹窗打开。
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="screenshots/GT-12563-S9-apply-confirm-dialog-dark-1253x832.png"
+                 alt="S-9 应用模板确认 AlertDialog — 有活跃条件时弹出覆盖确认"
+                 style="max-width:100%;border-radius:6px;border:1px solid #2d2d2d;">
+            <figcaption>
+              <strong>S-9 · 应用模板确认 AlertDialog（有活跃条件时）</strong><br>
+              触发：当前搜索栏有活跃筛选条件时，点击模板列表条目<br>
+              标题「应用搜索模板」；描述「应用"&lt;模板名&gt;"将替换当前所有搜索条件，是否继续？」；
+              「取消 / 确认应用」按钮；确认后全量替换并自动搜索；无活跃条件时跳过此 Dialog 直接应用。
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div id="c12563-elements">
+        <h4>1.3 逐元素说明</h4>
+        <table>
+          <thead>
+            <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码路径 / 相关 key</th><th>形态/角色差异</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>「模板」按钮 disabled 逻辑</td>
+              <td><code>!canSaveTemplate &amp;&amp; templates.length === 0</code>（初始状态禁用，无法点击）</td>
+              <td>始终 <code>false</code>；「保存当前条件」菜单项自身保持 <code>disabled={!canSaveTemplate}</code></td>
+              <td><code>search-bar.tsx</code> — <code>templateMenuDisabled</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>「保存当前条件」onClick</td>
+              <td>内联直接 <code>saveTemplate()</code>，无命名弹窗</td>
+              <td>调用 <code>setSaveTemplateOpen(true)</code>，打开 <code>SaveTemplateDialog</code></td>
+              <td><code>email-disposal-center-page.tsx</code> — <code>onSaveTemplate</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>模板条目操作按钮</td>
+              <td>只有垃圾桶（删除）</td>
+              <td>新增铅笔按钮（重命名，<code>aria-label="重命名: &lt;name&gt;"</code>）；两者均 <code>stopPropagation</code></td>
+              <td><code>search-bar.tsx</code> — 模板 DropdownMenuItem 内 Pencil 图标按钮</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>SaveTemplateDialog（新建组件）</td>
+              <td>不存在</td>
+              <td>复用于保存（mode="save"）和重命名（mode="rename"）；字符上限 30；空名禁用；同名 amber Warning + 按钮变「覆盖保存」；上限 Info；Enter 提交兼容 CJK IME</td>
+              <td><code>save-template-dialog.tsx</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>SearchTemplate 类型</td>
+              <td><code>{ id, name, quickFilter, advancedFilter, createdAt }</code></td>
+              <td>新增 <code>aiQuery?: string</code>、<code>updatedAt?: string</code></td>
+              <td><code>use-search-templates.ts</code> — <code>SearchTemplate</code> interface</td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>saveTemplate 同名覆盖</td>
+              <td>始终创建新条目</td>
+              <td>同名时原地替换（保留 id 和 createdAt，更新 updatedAt）；上限时丢弃最旧一条</td>
+              <td><code>use-search-templates.ts</code> — <code>saveTemplate</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>renameTemplate（新增）</td>
+              <td>不存在</td>
+              <td>根据 id 原地更新 name 和 updatedAt；同名冲突返回 false，由 page 层 toast 报错</td>
+              <td><code>use-search-templates.ts</code> — <code>renameTemplate</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>应用模板行为</td>
+              <td>直接设置 filter state，不自动搜索，AI 条件清空</td>
+              <td>有活跃条件时先弹 AlertDialog 确认；确认后全量替换并自动搜索；AI 原始文本回填输入框不自动解析</td>
+              <td><code>email-disposal-center-page.tsx</code> — <code>applyTemplate</code> / <code>pendingTemplateId</code></td>
+              <td>[Base]</td>
+            </tr>
+            <tr>
+              <td>新增 i18n key</td>
+              <td>缺少约 19 个 key</td>
+              <td><code>renameTemplate</code>、<code>saveTemplateTitle</code>、<code>saveTemplateDesc</code>、<code>renameTemplateTitle</code>、<code>renameTemplateDesc</code>、<code>templateNameLabel</code>、<code>templateNamePlaceholder</code>、<code>templateNameRequired</code>、<code>templateOverwriteWarning</code>、<code>templateOverwriteConfirm</code>、<code>templateLimitWarning</code>、<code>templateApplyConfirmTitle</code>、<code>templateApplyConfirmDesc</code>、<code>templateApplyConfirm</code>、<code>cancel</code>、<code>save</code>、<code>confirm</code> 等</td>
+              <td><code>messages/zh.json</code> / <code>messages/en.json</code> — <code>emailDisposal.search.*</code></td>
+              <td>[Base]</td>
+            </tr>
+          </tbody>
+        </table>
+        <a class="back-link" href="#toc">&#8593; 返回目录</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ C. 差异标注 ══════════════ -->
+  <section id="diff">
+    <h2>C. 差异标注</h2>
+
+    <h3>D-001 · 旧数据兼容映射行为未在浏览器中验证</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">无法验证</span></td></tr>
+        <tr><td>描述</td><td>后端存储了旧 <code>product_action='block'</code> 或 <code>'mark'</code> 的规则时，<code>parseRblConfig</code> 中的 <code>legacyMap</code> 会将其映射到 <code>'reject'</code>。该分支在演示环境下无法构造旧数据触发，未通过浏览器实际验证。</td></tr>
+        <tr><td>验证依据</td><td>源码 <code>rbl-config-serde.ts</code> 第 115-120 行</td></tr>
+        <tr><td>处理说明</td><td>列入 Q-002 待确认；需在测试环境写入旧格式数据后验证映射行为</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-002 · 灰名单配置 Dialog 在变更后未重新截图</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">未覆盖</span></td></tr>
+        <tr><td>描述</td><td>灰名单策略卡片选中后点击"点击配置"可打开灰名单配置 Dialog（<code>greylistDialogOpen</code>）。该 Dialog 的内部结构、字段、交互行为在本次增量中未重新截图记录，因为 Dialog 内容未发生变更。</td></tr>
+        <tr><td>验证依据</td><td>本次变更不涉及 Dialog 内部逻辑，仅触发入口从"action=greylist"变为"greylistEnabled=true"</td></tr>
+        <tr><td>处理说明</td><td>已有规格（如有）保持有效；如需补充 Dialog 规格可在后续增量中追加</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-003 · 用户描述"阻断"改为"拒收"</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-added">已解决</span></td></tr>
+        <tr><td>描述</td><td>用户明确要求将"阻断"（block）改名为"拒收"（reject），同时 API value 从 <code>block</code> 改为 <code>reject</code>。</td></tr>
+        <tr><td>解决版本</td><td>GT-12682 · 2026-07-31</td></tr>
+        <tr><td>验证依据</td><td>图 S-4 截图中下拉第一项文案为"拒收"；源码 <code>rbl-filter.ts</code> 类型定义已更新</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-004 · 安全总览图表"灰名单"系列的后端 key 经多轮排查才确认为 advanced_review</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-added">已解决</span></td></tr>
+        <tr><td>描述</td><td>最初过滤尝试了 <code>greylist</code> 和 <code>sideline</code>，均未命中。通过 console.log 确认数据 key 后，发实际是 <code>advanced_review</code>（在 <code>emailDisposal.filters.actions.advanced_review</code> 中翻译为"灰名单"）。</td></tr>
+        <tr><td>解决版本</td><td>GT-12660 · 2026-07-31</td></tr>
+        <tr><td>验证依据</td><td>图 S-1/S-2 截图图例不含"灰名单"；<code>messages/zh.json</code> 第 5691 确认 key 映射</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-005 · EXECUTION_ACTIONS 是安全总览与邮件处置中心的共享事实源，移除 advanced_review 对两处同时生效</h3>
+
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-added">已解决</span></td></tr>
+        <tr><td>描述</td><td><code>EXECUTION_ACTIONS</code>（<code>src/types/email-disposal.ts</code>）作为单一来源同时驱动邮件处置中心搜索筛选 Select 和安全总览图表过滤。GT-12659 从该数组移除 <code>'advanced_review'</code>，GT-12660 在图表渲染层独立过滤（<code>TrendChartCard</code> 和 <code>DetailTable</code>）。两处修改均已验证截图。</td></tr>
+        <tr><td>解决版本</td><td>GT-12659 · 2026-07-31</td></tr>
+        <tr><td>验证依据</td><td>GT-12659 S-2 截图下拉无"灰名单"；GT-12660 S-1/S-2 截图图例无"灰名单"</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-006 · GT-12665 域名 Combobox 旧空态提示 key noTenantDomains 保留但界面不再渲染</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·不删除</span></td></tr>
+        <tr><td>描述</td><td>旧实现在租户无接收域名时展示提示文案（i18n key <code>senderFilter.noTenantDomains</code>）；新 <code>DomainCombobox</code> 不再渲染该逻辑。key 仍保留在 <code>messages/zh.json</code> 和 <code>messages/en.json</code> 中（未删除），属于死字符串。不影响运行时，可在下一次国际化清理中移除。</td></tr>
+        <tr><td>解决版本</td><td>GT-12665 · 2026-07-31</td></tr>
+        <tr><td>验证依据</td><td>S-3/S-4/S-5 截图均为自由输入模式，浏览器快照无 noTenantDomains 提示；<code>SenderFilterDrawer.tsx</code> 源码 domain 分支已替换为 <code>DomainCombobox</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-009 · GT-12587 周内热力图 yAxis weekdays 数组顺序与 mock 数据 day 索引的对应关系需确认</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认·低优先级</span></td></tr>
+        <tr><td>描述</td><td>
+          修复后 <code>yAxis.data</code> 为 <code>weekdays</code> 数组（来自 i18n，顺序为周日→周六），
+          series data 中 <code>cell.day</code> 的取值范围为 <code>0~6</code>（mock 生成逻辑 <code>day = Math.floor(index / 24)</code>）。
+          ECharts category y 轴按数组索引映射：<code>day=0</code> → <code>weekdays[0]</code>。
+          需确认后端真实接口中 <code>day</code> 字段是否也以 0=周日 或 0=周一 的方式定义，
+          以保证标签与实际时段对应。
+        </td></tr>
+        <tr><td>解决版本</td><td>待后端接口联调时确认</td></tr>
+        <tr><td>验证依据</td><td>Mock 演示数据截图（S-2/S-3）中热力色块分布符合预期，但 day 索引语义依赖后端约定</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-008 · GT-12657 附件安全检测总开关切换失败的 toast 依赖 moduleT('saveFailed') key，需确认多语言覆盖</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·复用已有 key</span></td></tr>
+        <tr><td>描述</td><td><code>handleToggleEnabled</code> 的 catch 分支调用 <code>toast.error(moduleT('saveFailed'))</code>，复用了 <code>ModuleMasterSwitch</code> 原有 i18n key <code>module.saveFailed</code>，zh/en 均已有翻译。无需新增 key，但需确认其他 locale（如 ja、ko）的翻译是否已覆盖。</td></tr>
+        <tr><td>解决版本</td><td>GT-12657 · 2026-07-31（i18n key 复用确认）</td></tr>
+        <tr><td>验证依据</td><td>S-2/S-3 截图无错误 toast（正常操作路径），错误态无法在 Mock 环境安全触发，记录为"无法验证错误 toast 显示效果"</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-007 · ExceptionRulesEntry 组件文件保留但渲染调用已移除，可在后续清理中删除</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·暂保留</span></td></tr>
+        <tr><td>描述</td><td><code>src/components/security/auth-spoofing/ExceptionRulesEntry.tsx</code> 组件文件本身未被删除，但 <code>AuthSpoofingPage.tsx</code> 已移除其渲染调用和 import，属于死代码。不影响运行时，可在后续组件清理时一并删除。</td></tr>
+        <tr><td>解决版本</td><td>GT-12661 · 2026-07-31</td></tr>
+        <tr><td>验证依据</td><td>S-2 截图底部无"例外规则管理"横幅；<code>AuthSpoofingPage.tsx</code> 源码确认无 <code>ExceptionRulesEntry</code> import 和渲染</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-010 · GT-12563 搜索模板存储仅限 localStorage，多设备无法同步</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认·低优先级</span></td></tr>
+        <tr><td>描述</td><td>
+          当前模板数据存储在 <code>localStorage</code>（key: <code>disposal-search-templates</code>），
+          跨设备或跨浏览器无法同步。若产品需要「租户共享模板」或「跨设备同步」，
+          需要新增后端 CRUD 接口。此期实现范围为前端本地存储，共享范围为「个人/当前浏览器」。
+        </td></tr>
+        <tr><td>解决版本</td><td>待产品确认共享范围需求后决定</td></tr>
+        <tr><td>验证依据</td><td><code>use-search-templates.ts</code> 中 localStorage 持久化实现，无 API 调用</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ D. 待确认 ══════════════ -->
+  <section id="questions">
+    <h2>D. 待确认事项</h2>
+
+    <h3>Q-001 · 租户管理员角色下 RBL 过滤配置页可见性</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>多租户形态下，租户管理员是否有权限访问 <code>/zh/rules/rbl</code> 配置页？矩阵中相关单元格标记为 ?。</td></tr>
+        <tr><td>影响</td><td>产品形态 × 角色矩阵中"云-多租户管理员"、"AI-多租户管理员"、"传统-多租户管理员"列的所有行</td></tr>
+        <tr><td>建议</td><td>在测试环境切换为租户管理员账号，访问该路由，确认可见/只读/隐藏状态后补充矩阵</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Q-002 · 旧数据兼容映射需测试环境验证</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>数据库中存有 <code>product_action='block'</code> 或 <code>'mark'</code> 的旧规则时，前端 <code>legacyMap</code> 是否正确映射并正确回显为"拒收"？保存后是否正确写入 <code>reject</code>？</td></tr>
+        <tr><td>影响</td><td>升级前已配置了阻断/标记的租户，其规则在升级后的前端展示是否符合预期</td></tr>
+        <tr><td>建议</td><td>测试环境构造旧格式数据，验证读取映射和保存回写两个方向的行为</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ E. 版本历史 ══════════════ -->
+  <section id="version-history">
+    <h2>E. 版本历史</h2>
+    <table>
+      <thead><tr><th>版本</th><th>日期</th><th>commit</th><th>摘要</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>v1</td>
+          <td>2026-07-31</td>
+          <td><code>ebec245</code></td>
+          <td>初始创建 GT-126811.html，记录三个变更点目录结构（无真实截图，使用文字描述占位）</td>
+        </tr>
+        <tr>
+          <td>v2</td>
+          <td>2026-07-31</td>
+          <td><code>ebec245</code></td>
+          <td>按 html-spec-PM-version 技能规范完整重写：新增三张真实浏览器截图（S-1 默认态 / S-2 执行动作选中 / S-3 灰名单选中 / S-4 下拉展开）；仅记录最终实现方案；完善 interaction-preview、逐元素表、i18n key 变更表、差异 D-001~D-003、待确认 Q-001~Q-002；乱码自检 CLEAN。</td>
+        </tr>
+        <tr>
+          <td>v3</td>
+          <td>2026-07-31</td>
+          <td><code>6f7749d</code></td>
+          <td>增量追加 GT-12660 需求：邮件安全总览执行动作图表移除"灰名单"系列（后端 key <code>advanced_review</code>）；新增一级目录条目 GT-12660、变更 1 区块、截图式交互预览 S-1/S-2（暗色 1305×832）、逐元素变更表；追加差异 D-004（key 排查过程记录）；目录 C 项编号更新为 D-001~D-004。</td>
+        </tr>
+        <tr>
+          <td>v4</td>
+          <td>2026-07-31</td>
+          <td><code>640e96f</code></td>
+          <td>增量追加 GT-12659 需求：邮件处置中心搜索模块执行动作筛选移除"灰名单"（从 <code>EXECUTION_ACTIONS</code> 移除 <code>'advanced_review'</code>）；新增一级目录条目 GT-12659、变更 1 区块、截图式交互预览 S-1（默认态）/ S-2（下拉展开，7 项无灰名单）、逐元素变更表；追加差异 D-005（共享事实源说明）；目录 C 项编号更新为 D-001~D-005。</td>
+        </tr>
+        <tr>
+          <td>v5</td>
+          <td>2026-07-31</td>
+          <td><code>bbe5bee</code></td>
+          <td>增量追加 GT-12665 需求：发信人黑白名单域名类型输入控件由 Select（仅限租户接收域名）改为 <code>DomainCombobox</code>（可自由输入任意域名，focus 时展示租户接收域名建议列表）；新增一级目录条目 GT-12665、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-5 暗色 1253×832 / 1.3 逐元素变更表）；追加差异 D-006（<code>noTenantDomains</code> key 保留但不再渲染）；目录 C 项编号更新为 D-001~D-006；version.json current_version 8→9。</td>
+        </tr>
+        <tr>
+          <td>v10</td>
+          <td>2026-07-31</td>
+          <td><code>54cb647</code></td>
+          <td>增量追加 GT-12661 需求：从认证仿冒检测配置面板移除底部"例外规则管理"横幅（含"前往策略流水线"和"查看当前例外"两个无效按钮）；新增一级目录条目 GT-12661、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 底部无横幅，暗色 1253×832 / 1.3 逐元素变更表）；追加差异 D-007（<code>ExceptionRulesEntry</code> 组件文件保留为死代码）；目录 C 项编号更新为 D-001~D-007；version.json current_version 9→10。</td>
+        </tr>
+        <tr>
+          <td>v11</td>
+          <td>2026-07-31</td>
+          <td><code>ede9867</code></td>
+          <td>增量追加 GT-12657 需求：附件安全检测总开关从 draft 模式改为立即持久化（新增 <code>handleToggleEnabled</code>，调用 <code>setSecurityModuleEnabled</code>，失败回滚 + toast，切换期间禁用）；新增一级目录条目 GT-12657、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 切换禁用即时生效 + S-3 切换启用即时生效，暗色 1253×832 / 1.3 逐元素变更表 5 项）；追加差异 D-008（<code>moduleT('saveFailed')</code> i18n key 复用确认）；目录 C 项编号更新为 D-001~D-008；version.json current_version 10→11。</td>
+        </tr>
+        <tr>
+          <td>v12</td>
+          <td>2026-07-31</td>
+          <td><code>d706c3d</code></td>
+          <td>增量追加 GT-12587 需求：邮件安全总览攻击时段分布周内热力图修复（<code>xAxis.data</code> 由数字数组改为零填充字符串 <code>['00'~'23']</code>，series data hour 同步转换，消除 ECharts category 类型不匹配导致的 24 列只渲染 7 列问题）；同步更新 <code>yAxis.inverse</code>、<code>axisLabel.interval</code>、图表高度（周内 280px）、tooltip formatter（显示小时区间）、visualMap 色阶（暗色对比度优化）；新增一级目录条目 GT-12587、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 日内分布默认态 + S-2 周内切换后 7×24 矩阵完整渲染 + S-3 完整视图，暗色 1253×832 / 1.3 逐元素变更表 7 项）；追加差异 D-009（weekdays 数组与后端 day 索引对应关系待确认）；目录 C 项编号更新为 D-001~D-009；version.json current_version 11→12。</td>
+        </tr>
+        <tr>
+          <td>v13</td>
+          <td>2026-08-01</td>
+          <td><code>99410b4</code></td>
+          <td>增量追加 GT-12563 搜索模板实现：追加一级目录条目「GT-12563 搜索模板实现」及变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-9 暗色 1253×832 / 1.3 逐元素变更表 9 项）；涵盖模板按钮 disabled 修复（始终 false）、新建 <code>SaveTemplateDialog</code> 组件（保存/重命名复用）、同名覆盖 amber Warning + 按钮文字变「覆盖保存」、铅笔重命名按钮、应用确认 AlertDialog（有活跃条件时弹出）、<code>SearchTemplate</code> 类型扩展（aiQuery/updatedAt）、19 个新增 i18n key；追加差异 D-010（localStorage 跨设备不同步）；目录 C 项编号更新为 D-001~D-010；version.json current_version 12→13。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
+</body>
+</html>
