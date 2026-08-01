@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12695 · 增量功能规格 · v1</title>
+  <title>GT-12695 · 增量功能规格 · v2</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; }
@@ -63,10 +63,7 @@
       flex: 1 1 200px;
       text-decoration: none;
       color: inherit;
-      cursor: pointer;
-      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .change-item:hover { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
     .change-item .ci-num {
       display: inline-flex;
       align-items: center;
@@ -146,6 +143,22 @@
     /* ── code ── */
     code { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.1em 0.4em; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82em; color: #1a1d23; }
 
+    /* ── interaction-preview ── */
+    .interaction-preview {
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+    .interaction-preview h4 { font-size: 0.88rem; font-weight: 700; color: #1a1d23; margin-bottom: 0.35rem; }
+    .interaction-preview .trigger-path { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.9rem; }
+    .interaction-preview figure { margin: 0 0 0.9rem; }
+    .interaction-preview figcaption { font-size: 0.78rem; color: #6b7280; margin-top: 0.35rem; font-style: italic; }
+    .interaction-preview img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
+    .screenshot-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem; }
+    @media (max-width: 700px) { .screenshot-pair { grid-template-columns: 1fr; } }
+
     /* ── callout boxes ── */
     .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
     .callout-info    { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; }
@@ -206,58 +219,59 @@
   <!-- ══════════════ HEADER ══════════════ -->
   <header class="spec-header">
     <span class="ticket-badge">GT-12695</span>
-    <h1>GT-12696 发信人黑白名单优化 · 增量功能规格 · v1</h1>
+    <h1>增量功能规格 · v2</h1>
     <p class="subtitle">
-      关联模块：发信人黑白名单（黑名单规则 / 白名单规则）&nbsp;·&nbsp;
-      变更类型：文案变更 / 功能新增 / Bug 修复 / UI 移除 / 展示列新增&nbsp;·&nbsp;
-      生成日期：2026-08-01&nbsp;·&nbsp;
-      webapp branch：<code>gt-12695</code>
+      关联需求：GT-12696 发信人黑白名单优化&nbsp;·&nbsp;
+      关联模块：发信人黑白名单（策略流水线 阶段2）&nbsp;·&nbsp;
+      变更类型：文案变更 / 功能变更 / 功能移除 / 新增功能&nbsp;·&nbsp;
+      最后更新：2026-08-01&nbsp;·&nbsp;
+      webapp commit：<code>9531e5b</code>（基线）
     </p>
   </header>
 
   <!-- ══════════════ 本版变更总览 ══════════════ -->
   <div class="change-summary">
-    <h2>本版变更点（共 6 项）— 点击卡片跳转至对应需求描述</h2>
+    <h2>本版变更点（共 6 项）— GT-12696 发信人黑白名单优化</h2>
     <a class="change-item" href="#change-1">
       <span class="ci-num">1</span>
       <div class="ci-body">
-        <div class="ci-title">黑名单「阻断」→「拒收」</div>
-        <div class="ci-sub">黑名单规则 · 文案变更</div>
+        <div class="ci-title">黑名单执行动作「阻断」→「拒收」</div>
+        <div class="ci-sub">新建规则抽屉 · 文案变更</div>
       </div>
     </a>
     <a class="change-item" href="#change-2">
       <span class="ci-num">2</span>
       <div class="ci-body">
-        <div class="ci-title">新增「丢弃」执行动作</div>
-        <div class="ci-sub">黑名单规则 · 功能新增</div>
+        <div class="ci-title">黑名单新增「丢弃」执行动作</div>
+        <div class="ci-sub">新建规则抽屉 · 新增功能</div>
       </div>
     </a>
     <a class="change-item" href="#change-3">
       <span class="ci-num">3</span>
       <div class="ci-body">
-        <div class="ci-title">执行动作下拉新增说明文字</div>
-        <div class="ci-sub">黑名单 / 白名单规则 · UX 优化</div>
+        <div class="ci-title">执行动作下拉选项新增说明文字</div>
+        <div class="ci-sub">黑/白名单抽屉 · 功能变更</div>
       </div>
     </a>
     <a class="change-item" href="#change-4">
       <span class="ci-num">4</span>
       <div class="ci-body">
-        <div class="ci-title">修复白名单配置示例跳转黑名单 Bug</div>
-        <div class="ci-sub">白名单规则 · Bug 修复</div>
+        <div class="ci-title">修复白名单「查看配置示例」展示黑名单内容的 Bug</div>
+        <div class="ci-sub">白名单抽屉 · Bug 修复</div>
       </div>
     </a>
     <a class="change-item" href="#change-5">
       <span class="ci-num">5</span>
       <div class="ci-body">
-        <div class="ci-title">白名单「放行」→「投递」· 移除白名单模式 UI</div>
-        <div class="ci-sub">白名单规则 · 文案变更 / UI 移除</div>
+        <div class="ci-title">白名单执行动作「放行」→「投递」· 移除「白名单模式」字段</div>
+        <div class="ci-sub">白名单抽屉 · 文案变更 + 功能移除</div>
       </div>
     </a>
     <a class="change-item" href="#change-6">
       <span class="ci-num">6</span>
       <div class="ci-body">
         <div class="ci-title">规则列表新增「优先级」列</div>
-        <div class="ci-sub">黑名单 / 白名单规则列表 · 展示列新增</div>
+        <div class="ci-sub">黑/白名单规则列表 · 新增功能</div>
       </div>
     </a>
   </div>
@@ -269,33 +283,33 @@
       <li><a href="#meta">A. 元信息与事实源</a></li>
       <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
 
-      <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">黑名单执行动作「阻断」→「拒收」</a></li>
-      <li class="toc-indent"><a href="#c1-elements">1.1 逐元素说明</a></li>
-      <li class="toc-indent"><a href="#c1-files">1.2 影响文件</a></li>
+      <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">黑名单执行动作文案「阻断」→「拒收」</a></li>
+      <li class="toc-indent"><a href="#c1-states">1.1 截图式交互预览（S-15 黑名单抽屉默认态）</a></li>
+      <li class="toc-indent"><a href="#c1-elements">1.2 逐元素说明</a></li>
 
-      <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">黑名单新增「丢弃」执行动作</a></li>
-      <li class="toc-indent"><a href="#c2-elements">2.1 逐元素说明</a></li>
-      <li class="toc-indent"><a href="#c2-files">2.2 影响文件</a></li>
+      <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">黑名单新增「丢弃」执行动作选项</a></li>
+      <li class="toc-indent"><a href="#c2-states">2.1 截图式交互预览（S-16 执行动作下拉展开态）</a></li>
+      <li class="toc-indent"><a href="#c2-elements">2.2 逐元素说明</a></li>
 
-      <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">执行动作下拉新增说明文字</a></li>
-      <li class="toc-indent"><a href="#c3-elements">3.1 逐元素说明</a></li>
-      <li class="toc-indent"><a href="#c3-files">3.2 影响文件</a></li>
+      <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">执行动作下拉选项新增说明文字（黑/白名单）</a></li>
+      <li class="toc-indent"><a href="#c3-states">3.1 截图式交互预览（S-16 下拉展开态 · S-18 白名单抽屉）</a></li>
+      <li class="toc-indent"><a href="#c3-elements">3.2 逐元素说明（4个选项说明文字全覆盖）</a></li>
 
-      <li class="toc-change"><span class="toc-num">4</span><a href="#change-4">修复白名单配置示例展示黑名单内容并跳转黑名单的 Bug</a></li>
-      <li class="toc-indent"><a href="#c4-root-cause">4.1 根因分析</a></li>
+      <li class="toc-change"><span class="toc-num">4</span><a href="#change-4">修复白名单「查看配置示例」展示黑名单内容并跳转黑名单 Bug</a></li>
+      <li class="toc-indent"><a href="#c4-states">4.1 截图式交互预览（S-18 白名单抽屉右侧面板）</a></li>
       <li class="toc-indent"><a href="#c4-elements">4.2 逐元素说明</a></li>
-      <li class="toc-indent"><a href="#c4-files">4.3 影响文件</a></li>
 
-      <li class="toc-change"><span class="toc-num">5</span><a href="#change-5">白名单「放行」→「投递」· 移除白名单模式 UI 字段</a></li>
-      <li class="toc-indent"><a href="#c5-elements">5.1 逐元素说明</a></li>
-      <li class="toc-indent"><a href="#c5-files">5.2 影响文件</a></li>
+      <li class="toc-change"><span class="toc-num">5</span><a href="#change-5">白名单执行动作「放行」→「投递」· 移除「白名单模式」UI 字段</a></li>
+      <li class="toc-indent"><a href="#c5-states">5.1 截图式交互预览（S-17 白名单列表 · S-18 白名单抽屉）</a></li>
+      <li class="toc-indent"><a href="#c5-elements">5.2 逐元素说明</a></li>
 
-      <li class="toc-change"><span class="toc-num">6</span><a href="#change-6">规则列表新增「优先级」展示列</a></li>
-      <li class="toc-indent"><a href="#c6-elements">6.1 逐元素说明</a></li>
-      <li class="toc-indent"><a href="#c6-files">6.2 影响文件</a></li>
+      <li class="toc-change"><span class="toc-num">6</span><a href="#change-6">规则列表新增「优先级」列（黑/白名单均生效）</a></li>
+      <li class="toc-indent"><a href="#c6-states">6.1 截图式交互预览（S-14 黑名单列表 8 列 · S-17 白名单列表 8 列）</a></li>
+      <li class="toc-indent"><a href="#c6-elements">6.2 逐元素说明（列定义全覆盖）</a></li>
 
-      <li><a href="#diff">C. 差异标注</a></li>
-      <li><a href="#version-history">D. 版本历史</a></li>
+      <li><a href="#diff">C. 差异标注（D-1 ~ D-3）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-1 ~ Q-2）</a></li>
+      <li><a href="#version-history">E. 版本历史（v1 ~ v2）</a></li>
     </ul>
   </section>
 
@@ -306,16 +320,24 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 多变更点格式</td></tr>
-        <tr><td>需求编号</td><td>GT-12695（commit）/ GT-12696（需求名称）</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v1</span></span></td></tr>
+        <tr><td>需求名称</td><td>GT-12696 发信人黑白名单优化</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v2</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-08-01</td></tr>
-        <tr><td>webapp branch</td><td><code>gt-12695</code></td></tr>
-        <tr><td>关联模块</td><td>发信人黑白名单（<code>SenderFilterDrawer</code> · <code>SenderFilterTable</code> · i18n messages）</td></tr>
+        <tr><td>webapp commit</td><td><code>9531e5b</code>（基线）</td></tr>
+        <tr><td>对照 spec commit</td><td>not-used</td></tr>
+        <tr><td>历史对话记录</td><td>当前上下文已提供（完整代码变更记录、对话历史）</td></tr>
         <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 运行中 webapp 浏览器真实截图；3. webapp 源码</td></tr>
+        <tr><td>浏览器验证状态</td><td>2026-08-01 实际运行截图（S-12 ~ S-18 全部完成）</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/security/pipeline</code> → 发信人黑白名单「配置」→ 黑名单规则 / 白名单规则 Tab → 新建规则抽屉</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/security/sender-filter/SenderFilterTable.tsx</code><br/>
+          <code>src/components/security/sender-filter/SenderFilterDrawer.tsx</code>
+        </td></tr>
+        <tr><td>产品形态验证</td><td>AI版·单租户 · 平台管理员（2026-08-01 截图）</td></tr>
       </tbody>
     </table>
     <div class="callout callout-info">
-      本规格为增量文档，共记录 6 个变更点，均属于同一需求 GT-12696「发信人黑白名单优化」。每个变更点独立成区，互不干扰。
+      本规格为增量文档，共记录 6 个变更点（GT-12696 发信人黑白名单优化）。v1 为旧版草稿（无真实截图），v2 为基于浏览器真实截图的完整重生成版。
     </div>
   </section>
 
@@ -327,6 +349,7 @@
       <span>🔒 显示但只读</span>
       <span>❌ 隐藏 / 不存在</span>
       <span>— 该形态无此角色</span>
+      <span>? 无法验证</span>
     </div>
     <table>
       <thead>
@@ -335,93 +358,109 @@
           <th>变更</th>
           <th>AI-单<br/>平台管理员</th>
           <th>传统-单<br/>平台管理员</th>
+          <th>云-多<br/>平台管理员</th>
+          <th>云-多<br/>租户管理员</th>
           <th>AI-多<br/>平台管理员</th>
           <th>AI-多<br/>租户管理员</th>
+          <th>传统-多<br/>平台管理员</th>
+          <th>传统-多<br/>租户管理员</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>黑名单「拒收」动作（原「阻断」）</td>
-          <td><span class="tag tag-changed">文案变更</span></td>
-          <td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+          <td>黑名单执行动作「拒收」（原「阻断」）</td>
+          <td>#1</td>
+          <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
         </tr>
         <tr>
-          <td>黑名单「丢弃」动作（新增）</td>
-          <td><span class="tag tag-added">新增</span></td>
-          <td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+          <td>黑名单执行动作「丢弃」（新增）</td>
+          <td>#2</td>
+          <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
         </tr>
         <tr>
-          <td>执行动作下拉说明文字</td>
-          <td><span class="tag tag-added">新增</span></td>
-          <td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+          <td>执行动作下拉选项说明文字</td>
+          <td>#3</td>
+          <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
         </tr>
         <tr>
-          <td>白名单配置示例（按 Tab 分类）</td>
-          <td><span class="tag tag-changed">Bug 修复</span></td>
-          <td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+          <td>白名单「查看配置示例」按 Tab 分类展示</td>
+          <td>#4</td>
+          <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
         </tr>
         <tr>
-          <td>白名单「投递」动作（原「放行」）</td>
-          <td><span class="tag tag-changed">文案变更</span></td>
-          <td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+          <td>白名单执行动作「投递」（原「放行」）</td>
+          <td>#5</td>
+          <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
         </tr>
         <tr>
-          <td>白名单模式 UI 字段</td>
-          <td><span class="tag tag-removed">UI 移除</span></td>
-          <td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+          <td><del>白名单「白名单模式」字段 UI</del></td>
+          <td>#5</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
         </tr>
         <tr>
-          <td>规则列表「优先级」列</td>
-          <td><span class="tag tag-added">新增</span></td>
-          <td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+          <td>规则列表「优先级」列（黑/白名单）</td>
+          <td>#6</td>
+          <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
         </tr>
       </tbody>
     </table>
+    <div class="callout callout-warn">
+      云-多 / AI-多 / 传统-多 租户管理员视角下的差异暂未完成浏览器验证，标注为 ✅ 是基于源码推断（无形态/角色分支，所有形态统一渲染）。详见 Q-1。
+    </div>
   </section>
 
   <!-- ══════════════ 变更 1 ══════════════ -->
   <div class="incremental-section" id="change-1">
     <div class="incr-header">
       <span class="incr-num">1</span>
-      <h2>黑名单执行动作「阻断」→「拒收」</h2>
-      <span class="incr-meta">文案变更 · 黑名单规则</span>
+      <h2>黑名单执行动作文案「阻断」→「拒收」</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code> → 黑名单规则 → 新建规则 · 文案变更 · 2026-08-01</span>
     </div>
     <div class="incr-body">
-      <p>黑名单规则的执行动作 <code>reject</code> 原显示为「阻断」，更改为「拒收」，语义更准确（向发信方返回 SMTP 拒绝响应，邮件不进入系统）。</p>
 
-      <h3 id="c1-elements">1.1 逐元素说明</h3>
+      <div class="callout callout-info">
+        <span class="tag tag-changed">文案变更</span>
+        黑名单「执行动作」下拉的「阻断」选项已重命名为「拒收」，含义一致（向发信方返回 SMTP 拒绝响应），仅文案调整。
+      </div>
+
+      <h3 id="c1-states">1.1 截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-15：黑名单新建规则抽屉默认态 — 执行动作默认值「拒收」</h4>
+        <p class="trigger-path">触发路径：AI版·单租户 · 平台管理员 → <code>/zh/security/pipeline</code> → 发信人黑白名单「配置」→ 黑名单规则 Tab → 点击「+ 新建规则」</p>
+        <figure>
+          <img src="./screenshots/S-15-blacklist-drawer-default.png" alt="黑名单新建规则抽屉，执行动作默认值为「拒收」" />
+          <figcaption>状态 S-15 · 黑名单新建规则抽屉 · /zh/security/pipeline · 桌面 1528×832 · 蓝色主题（亮色）· AI版·单租户 · 平台管理员 · 浏览器验证：2026-08-01（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>内容 / 属性</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>执行动作下拉默认值</td><td>拒收</td><td><span class="tag tag-changed">原值「阻断」</span></td></tr>
+            <tr><td>当前配置效果 · 系统将执行</td><td>「拒收」</td><td>右侧预览区同步显示「拒收」</td></tr>
+            <tr><td>抽屉标题</td><td>新建规则</td><td>无变更</td></tr>
+            <tr><td>副标题</td><td>配置发信人黑名单规则，阻断或处置指定发信人</td><td>无变更</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="c1-elements">1.2 逐元素说明</h3>
       <table>
-        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>覆盖语言</th></tr></thead>
+        <thead><tr><th>元素位置</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>形态/角色差异</th></tr></thead>
         <tbody>
           <tr>
-            <td>执行动作下拉选项 <code>reject</code> 标签</td>
-            <td>阻断 / Block</td>
-            <td>拒收 / Reject</td>
-            <td>zh / en / ru / th</td>
+            <td>执行动作下拉 · 拒收选项文案</td>
+            <td>阻断</td>
+            <td>拒收</td>
+            <td><code>senderFilter.actionReject</code>（推断）</td>
+            <td>[Base] 所有形态/角色一致</td>
           </tr>
           <tr>
-            <td>规则列表 Badge 文字（<code>action</code> 列）</td>
-            <td>阻断 / Block</td>
-            <td>拒收 / Reject</td>
-            <td>同上</td>
+            <td>当前配置效果 · 执行文案</td>
+            <td>系统将执行：阻断</td>
+            <td>系统将执行：拒收</td>
+            <td>联动更新</td>
+            <td>[Base]</td>
           </tr>
-          <tr>
-            <td>配置示例卡片标题</td>
-            <td>阻断垃圾邮件发送者</td>
-            <td>拒收垃圾邮件发送者</td>
-            <td>zh / en / ru / th</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3 id="c1-files">1.2 影响文件</h3>
-      <table>
-        <thead><tr><th>文件</th><th>改动摘要</th></tr></thead>
-        <tbody>
-          <tr><td><code>messages/zh.json</code></td><td><code>senderFilter.action_reject</code>：「阻断」→「拒收」；<code>exampleBlockSpam</code> 标题同步更新</td></tr>
-          <tr><td><code>messages/en.json</code></td><td><code>action_reject</code>：「Block」→「Reject」；<code>exampleBlockSpam</code> 同步</td></tr>
-          <tr><td><code>messages/ru.json</code></td><td><code>action_reject</code>：「Блокировать」→「Отклонить」</td></tr>
-          <tr><td><code>messages/th.json</code></td><td><code>action_reject</code>：「บล็อก」→「ปฏิเสธ」</td></tr>
         </tbody>
       </table>
     </div>
@@ -431,30 +470,61 @@
   <div class="incremental-section" id="change-2">
     <div class="incr-header">
       <span class="incr-num">2</span>
-      <h2>黑名单新增「丢弃」执行动作</h2>
-      <span class="incr-meta">功能新增 · 黑名单规则</span>
+      <h2>黑名单新增「丢弃」执行动作选项</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code> → 黑名单规则 → 新建规则 · 新增功能 · 2026-08-01</span>
     </div>
     <div class="incr-body">
-      <p>黑名单执行动作新增 <code>discard</code>（丢弃）选项：静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃（蜜罐场景）。在下拉中排在「拒收」之后，规则列表 Badge 使用 <code>error</code> 样式（与「拒收」一致）。</p>
 
-      <h3 id="c2-elements">2.1 逐元素说明</h3>
-      <table>
-        <thead><tr><th>元素</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td>下拉选项「丢弃」</td><td>新增于「拒收」之后，value=<code>discard</code></td></tr>
-          <tr><td>选项说明文字</td><td>「静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃」</td></tr>
-          <tr><td>规则列表 Badge 样式</td><td><code>error</code> 变体（红色），与「拒收」保持一致</td></tr>
-        </tbody>
-      </table>
+      <div class="callout callout-info">
+        <span class="tag tag-added">新增</span>
+        黑名单执行动作下拉新增「丢弃」选项，位于「拒收」与「隔离」之间，静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃。
+      </div>
 
-      <h3 id="c2-files">2.2 影响文件</h3>
+      <h3 id="c2-states">2.1 截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-16：黑名单执行动作下拉展开态 — 显示「拒收」「丢弃」「隔离」「审核」四个选项</h4>
+        <p class="trigger-path">触发路径：S-15 基础上 → 点击「执行动作」下拉框</p>
+        <figure>
+          <img src="./screenshots/S-16-action-dropdown-expanded.png" alt="黑名单执行动作下拉展开，含丢弃选项及所有选项说明文字" />
+          <figcaption>状态 S-16 · 黑名单执行动作下拉展开态 · /zh/security/pipeline · 桌面 1528×832 · 蓝色主题（亮色）· AI版·单租户 · 平台管理员 · 浏览器验证：2026-08-01（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>选项</th><th>说明文字（下拉内显示）</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>拒收（高亮选中）</td><td>向发信方返回 SMTP 拒绝响应，邮件不进入系统</td><td><span class="tag tag-changed">原「阻断」</span></td></tr>
+            <tr><td>丢弃</td><td>静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃</td><td><span class="tag tag-added">新增</span></td></tr>
+            <tr><td>隔离</td><td>邮件进入隔离区，管理员可审阅后决定是否放行</td><td>无变更</td></tr>
+            <tr><td>审核</td><td>邮件正常投递，同时写入审核日志供管理员事后审查</td><td>无变更</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="c2-elements">2.2 逐元素说明</h3>
       <table>
-        <thead><tr><th>文件</th><th>改动摘要</th></tr></thead>
+        <thead><tr><th>元素</th><th>内容</th><th>位置</th><th>数据字段</th><th>形态/角色差异</th></tr></thead>
         <tbody>
-          <tr><td><code>src/types/sender-filter.ts</code></td><td><code>BlacklistAction</code> 联合类型新增 <code>'discard'</code></td></tr>
-          <tr><td><code>src/components/security/sender-filter/SenderFilterDrawer.tsx</code></td><td>Zod schema、<code>actionLabel</code> 映射、下拉 JSX 新增 <code>discard</code></td></tr>
-          <tr><td><code>src/components/security/sender-filter/SenderFilterTable.tsx</code></td><td><code>actionVariant</code> 新增 <code>discard → 'error'</code></td></tr>
-          <tr><td><code>messages/zh.json</code> 等 4 个语言文件</td><td>新增 <code>action_discard</code> 及 <code>action_discard_desc</code></td></tr>
+          <tr>
+            <td>执行动作下拉 · 丢弃选项</td>
+            <td>丢弃（含说明文字）</td>
+            <td>拒收与隔离之间，第 2 个选项</td>
+            <td><code>action: "discard"</code>（推断）</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>当前配置效果 · 执行文案（选择丢弃后）</td>
+            <td>系统将执行：丢弃</td>
+            <td>右侧预览区</td>
+            <td>联动更新</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>策略流水线图例（底部说明区）</td>
+            <td>丢弃 · 直接删除不通知</td>
+            <td><code>/zh/security/pipeline</code> 页面底部「执行动作」图例</td>
+            <td>—</td>
+            <td>[Base]</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -464,30 +534,56 @@
   <div class="incremental-section" id="change-3">
     <div class="incr-header">
       <span class="incr-num">3</span>
-      <h2>执行动作下拉新增说明文字</h2>
-      <span class="incr-meta">UX 优化 · 黑名单 / 白名单规则</span>
+      <h2>执行动作下拉选项新增说明文字（黑/白名单抽屉）</h2>
+      <span class="incr-meta">路由：黑名单规则 + 白名单规则 → 新建/编辑规则抽屉 · 功能变更 · 2026-08-01</span>
     </div>
     <div class="incr-body">
-      <p>配置执行动作时，下拉每个选项增加一行灰色说明文字，帮助用户理解各动作语义。同时将 <code>SelectContent</code> 宽度固定为 <code>w-72</code>（288 px），避免说明文字被截断；说明文字加 <code>whitespace-normal</code> 可自动换行。</p>
 
-      <h3 id="c3-elements">3.1 逐元素说明</h3>
-      <table>
-        <thead><tr><th>动作</th><th>说明文字（zh）</th></tr></thead>
-        <tbody>
-          <tr><td>拒收</td><td>向发信方返回 SMTP 拒绝响应，邮件不进入系统</td></tr>
-          <tr><td>丢弃</td><td>静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃</td></tr>
-          <tr><td>隔离</td><td>邮件进入隔离区，管理员可审阅后决定是否放行</td></tr>
-          <tr><td>审核</td><td>邮件正常投递，同时写入审核日志供管理员事后审查</td></tr>
-          <tr><td>投递</td><td>允许邮件通过，跳过后续检测直接投递至收件箱</td></tr>
-        </tbody>
-      </table>
+      <div class="callout callout-info">
+        <span class="tag tag-changed">功能变更</span>
+        执行动作下拉的每个选项在选项文字下方新增一行灰色说明文字，帮助用户理解各动作的实际含义。下拉宽度因此扩大。
+      </div>
 
-      <h3 id="c3-files">3.2 影响文件</h3>
+      <h3 id="c3-states">3.1 截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-16（复用）：黑名单执行动作下拉展开 — 4 个选项均含说明文字</h4>
+        <p class="trigger-path">触发路径：黑名单新建规则抽屉 → 点击「执行动作」下拉</p>
+        <figure>
+          <img src="./screenshots/S-16-action-dropdown-expanded.png" alt="黑名单执行动作下拉展开，每个选项均显示说明文字" />
+          <figcaption>状态 S-16 · 黑名单执行动作下拉展开态 · 浏览器验证：2026-08-01（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>选项</th><th>说明文字内容</th><th>文字颜色</th></tr></thead>
+          <tbody>
+            <tr><td>拒收</td><td>向发信方返回 SMTP 拒绝响应，邮件不进入系统</td><td>灰色（次级文本）</td></tr>
+            <tr><td>丢弃</td><td>静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃</td><td>灰色（次级文本）</td></tr>
+            <tr><td>隔离</td><td>邮件进入隔离区，管理员可审阅后决定是否放行</td><td>灰色（次级文本）</td></tr>
+            <tr><td>审核</td><td>邮件正常投递，同时写入审核日志供管理员事后审查</td><td>灰色（次级文本）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview" style="margin-top:1rem;">
+        <h4>状态 S-18（预览）：白名单新建规则抽屉 — 执行动作默认「投递」</h4>
+        <p class="trigger-path">触发路径：白名单规则 Tab → 点击「+ 新建规则」</p>
+        <figure>
+          <img src="./screenshots/S-18-whitelist-drawer-default.png" alt="白名单新建规则抽屉，执行动作默认值为投递，无白名单模式字段" />
+          <figcaption>状态 S-18 · 白名单新建规则抽屉 · 桌面 1528×832 · 蓝色主题（亮色）· AI版·单租户 · 平台管理员 · 浏览器验证：2026-08-01（已完成）</figcaption>
+        </figure>
+        <div class="callout callout-info">白名单执行动作下拉的说明文字与变更 #3 一致，同步在白名单抽屉中生效（同一组件）。</div>
+      </div>
+
+      <h3 id="c3-elements">3.2 逐元素说明（下拉选项说明文字）</h3>
       <table>
-        <thead><tr><th>文件</th><th>改动摘要</th></tr></thead>
+        <thead><tr><th>选项</th><th>说明文字</th><th>适用列表类型</th><th>形态/角色差异</th></tr></thead>
         <tbody>
-          <tr><td><code>SenderFilterDrawer.tsx</code></td><td><code>SelectContent</code> 加 <code>className="w-72"</code>；各 <code>SelectItem</code> 内含说明 <code>span</code> + <code>whitespace-normal leading-snug</code></td></tr>
-          <tr><td><code>messages/{zh,en,ru,th}.json</code></td><td>新增全部 5 个 <code>action_*_desc</code> key</td></tr>
+          <tr><td>拒收</td><td>向发信方返回 SMTP 拒绝响应，邮件不进入系统</td><td>黑名单</td><td>[Base]</td></tr>
+          <tr><td>丢弃</td><td>静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃</td><td>黑名单</td><td>[Base]</td></tr>
+          <tr><td>隔离</td><td>邮件进入隔离区，管理员可审阅后决定是否放行</td><td>黑名单</td><td>[Base]</td></tr>
+          <tr><td>审核</td><td>邮件正常投递，同时写入审核日志供管理员事后审查</td><td>黑名单</td><td>[Base]</td></tr>
+          <tr><td>投递</td><td>待确认（白名单下拉展开态未单独截图，见 Q-2）</td><td>白名单</td><td>[Base]</td></tr>
+          <tr><td>标记投递</td><td>待确认（同上，见 Q-2）</td><td>白名单</td><td>[Base]</td></tr>
         </tbody>
       </table>
     </div>
@@ -497,51 +593,45 @@
   <div class="incremental-section" id="change-4">
     <div class="incr-header">
       <span class="incr-num">4</span>
-      <h2>修复白名单配置示例展示黑名单内容并跳转黑名单的 Bug</h2>
-      <span class="incr-meta">Bug 修复 · 白名单规则</span>
+      <h2>修复白名单「查看配置示例」展示黑名单内容并跳转黑名单的 Bug</h2>
+      <span class="incr-meta">路由：白名单规则 → 新建规则抽屉 → 查看配置示例 · Bug 修复 · 2026-08-01</span>
     </div>
     <div class="incr-body">
-      <h3 id="c4-root-cause">4.1 根因分析</h3>
-      <p>「查看配置示例」展开后，两个示例卡片的「使用该示例」回调中硬编码了 <code>form.setValue('list_type', 'blacklist', ...)</code>，无论当前处于白名单 Tab，均会将表单强制切换为黑名单，导致后续逻辑跳转至黑名单页面。</p>
+
+      <div class="callout callout-removed">
+        <span class="tag tag-removed">Bug 修复</span>
+        原实现中，白名单抽屉的「查看配置示例」展开后展示黑名单配置内容（拒收/隔离示例），且点击「使用该示例」会触发 <code>setSkipSpf</code> 运行时报错并跳转至黑名单 Tab。修复后改为按列表类型（黑名单/白名单）分类展示对应示例。
+      </div>
+
+      <h3 id="c4-states">4.1 截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-18（复用）：白名单新建规则抽屉右侧 — 「查看配置示例」折叠控件</h4>
+        <p class="trigger-path">触发路径：白名单规则 Tab → 点击「+ 新建规则」→ 观察右侧面板</p>
+        <figure>
+          <img src="./screenshots/S-18-whitelist-drawer-default.png" alt="白名单新建规则抽屉右侧面板，显示查看配置示例和模拟测试折叠控件" />
+          <figcaption>状态 S-18 · 白名单新建规则抽屉（右侧面板可见「查看配置示例」折叠项） · 浏览器验证：2026-08-01（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>当前状态</th><th>修复前</th><th>修复后</th></tr></thead>
+          <tbody>
+            <tr><td>「查看配置示例」折叠控件</td><td>默认折叠，可展开</td><td>展开后展示黑名单示例（拒收/隔离）</td><td>展开后展示白名单示例（投递/标记投递）</td></tr>
+            <tr><td>「使用该示例」动作</td><td>点击后将示例值填入表单</td><td>触发 <code>setSkipSpf</code> 运行时报错；跳转黑名单 Tab</td><td>正确填入白名单字段；留在白名单 Tab</td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-warn">「查看配置示例」展开后状态未单独截图；修复后的展开态示例内容未能在本次验证中截取，标注为 D-2。</div>
+      </div>
 
       <h3 id="c4-elements">4.2 逐元素说明</h3>
       <table>
-        <thead><tr><th>变更点</th><th>变更前</th><th>变更后</th></tr></thead>
+        <thead><tr><th>元素</th><th>组件路径</th><th>修复内容</th><th>形态/角色差异</th></tr></thead>
         <tbody>
           <tr>
-            <td>配置示例区块渲染逻辑</td>
-            <td>始终展示两个黑名单示例卡片</td>
-            <td>按 <code>watchListType</code> 分支：黑名单 Tab 展示黑名单示例，白名单 Tab 展示白名单示例</td>
+            <td>「查看配置示例」按 Tab 分类展示</td>
+            <td><code>SenderFilterDrawer.tsx</code></td>
+            <td>按 <code>list_type</code>（blacklist/whitelist）区分示例集合；移除 <code>setSkipSpf</code> 调用</td>
+            <td>[Base]</td>
           </tr>
-          <tr>
-            <td>黑名单示例 1</td>
-            <td>「阻断垃圾邮件发送者」· <code>list_type: 'blacklist'</code></td>
-            <td>「拒收垃圾邮件发送者」· 移除 <code>list_type</code> 赋值</td>
-          </tr>
-          <tr>
-            <td>黑名单示例 2</td>
-            <td>「隔离可疑来源」· <code>list_type: 'blacklist'</code></td>
-            <td>「隔离可疑来源」· 移除 <code>list_type</code> 赋值</td>
-          </tr>
-          <tr>
-            <td>白名单示例 1（新增）</td>
-            <td>—</td>
-            <td>「放行可信发信人」· <code>sender_config.type: 'individual'</code>，<code>action: 'accept'</code></td>
-          </tr>
-          <tr>
-            <td>白名单示例 2（新增）</td>
-            <td>—</td>
-            <td>「放行可信域名」· <code>sender_config.type: 'domain'</code>，<code>action: 'accept'</code></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3 id="c4-files">4.3 影响文件</h3>
-      <table>
-        <thead><tr><th>文件</th><th>改动摘要</th></tr></thead>
-        <tbody>
-          <tr><td><code>SenderFilterDrawer.tsx</code></td><td>配置示例 <code>CollapsibleContent</code> 改为 <code>watchListType === 'blacklist' ? ... : ...</code> 分支渲染；移除所有 <code>form.setValue('list_type', 'blacklist')</code> 调用</td></tr>
-          <tr><td><code>messages/{zh,en,ru,th}.json</code></td><td>新增 <code>exampleAllowTrustedSender</code>、<code>exampleAllowTrustedSenderDesc</code>、<code>exampleAllowTrustedDomain</code>、<code>exampleAllowTrustedDomainDesc</code></td></tr>
         </tbody>
       </table>
     </div>
@@ -551,48 +641,77 @@
   <div class="incremental-section" id="change-5">
     <div class="incr-header">
       <span class="incr-num">5</span>
-      <h2>白名单「放行」→「投递」· 移除白名单模式 UI 字段</h2>
-      <span class="incr-meta">文案变更 / UI 移除 · 白名单规则</span>
+      <h2>白名单执行动作「放行」→「投递」· 移除「白名单模式」UI 字段</h2>
+      <span class="incr-meta">路由：白名单规则 → 新建/编辑规则抽屉 · 文案变更 + 功能移除 · 2026-08-01</span>
     </div>
     <div class="incr-body">
-      <p>白名单执行动作 <code>accept</code> 的显示文案由「放行」改为「投递」，语义更贴合实际行为（直接投递至收件箱）。同时将新建/编辑抽屉中「白名单模式」下拉字段从 UI 层移除（类型定义与 API 层保留，不影响已有数据）。</p>
 
-      <h3 id="c5-elements">5.1 逐元素说明</h3>
-      <table>
-        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>执行动作下拉 <code>accept</code> 标签</td>
-            <td>放行 / Allow</td>
-            <td>投递 / Deliver</td>
-          </tr>
-          <tr>
-            <td>「白名单模式」字段（执行动作下方）</td>
-            <td>显示（跳过内容检测 / 直接投递）</td>
-            <td>移除（不渲染）</td>
-          </tr>
-          <tr>
-            <td>表单 <code>whitelist_mode</code> 默认值</td>
-            <td><code>'bypass_content'</code></td>
-            <td><code>undefined</code></td>
-          </tr>
-          <tr>
-            <td><code>superRefine</code> 白名单必填校验</td>
-            <td>白名单下 <code>whitelist_mode</code> 为必填，否则报错</td>
-            <td>移除该校验</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="callout callout-warn">
-        <strong>注意：</strong><code>whitelist_mode</code> 字段仍保留在 <code>src/types/sender-filter.ts</code> 和 <code>src/lib/api/sender-filter.ts</code> 中，数据层向后兼容，仅 UI 层不再展示。
+      <div class="callout callout-info">
+        <span class="tag tag-changed">文案变更</span>
+        <span class="tag tag-removed">功能移除（UI）</span>
+        白名单执行动作默认值由「放行」改为「投递」；「白名单模式」字段从抽屉 UI 中移除（类型定义与 API 层字段 <code>whitelist_mode</code> 保留，仅 UI 不再暴露）。
       </div>
 
-      <h3 id="c5-files">5.2 影响文件</h3>
+      <h3 id="c5-states">5.1 截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-17：白名单规则列表 — 8 列（含优先级）</h4>
+        <p class="trigger-path">触发路径：发信人黑白名单配置弹窗 → 白名单规则 Tab</p>
+        <figure>
+          <img src="./screenshots/S-17-whitelist-table-cols.png" alt="白名单规则列表，8列：规则ID、规则名称、发信人、执行动作、优先级、状态、修改时间、操作" />
+          <figcaption>状态 S-17 · 白名单规则列表 · 桌面 1528×832 · 蓝色主题（亮色）· AI版·单租户 · 平台管理员 · 浏览器验证：2026-08-01（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>列</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td>执行动作列</td><td>白名单规则列中会显示「投递」或「标记投递」（数据态；暂无数据行展示）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview" style="margin-top:1rem;">
+        <h4>状态 S-18（复用）：白名单新建规则抽屉 — 执行动作默认「投递」，无「白名单模式」字段</h4>
+        <p class="trigger-path">触发路径：白名单规则 Tab → 点击「+ 新建规则」</p>
+        <figure>
+          <img src="./screenshots/S-18-whitelist-drawer-default.png" alt="白名单新建规则抽屉，执行动作默认投递，无白名单模式字段" />
+          <figcaption>状态 S-18 · 白名单新建规则抽屉 · 浏览器验证：2026-08-01（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>元素</th><th>当前状态</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>执行动作下拉默认值</td><td>投递</td><td><span class="tag tag-changed">原「放行」</span></td></tr>
+            <tr><td>当前配置效果 · 系统将执行</td><td>投递</td><td>右侧预览区同步</td></tr>
+            <tr><td><del>白名单模式字段</del></td><td>不存在（DOM 中无此字段）</td><td><span class="tag tag-removed">已移除</span>类型/API 层保留 <code>whitelist_mode</code></td></tr>
+            <tr><td>优先级默认值</td><td>800</td><td>白名单默认优先级 800（黑名单默认 500）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="c5-elements">5.2 逐元素说明</h3>
       <table>
-        <thead><tr><th>文件</th><th>改动摘要</th></tr></thead>
+        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>组件路径</th><th>形态/角色差异</th></tr></thead>
         <tbody>
-          <tr><td><code>messages/{zh,en,ru,th}.json</code></td><td><code>action_accept</code>：「放行」→「投递」；<code>action_accept_desc</code> 同步更新</td></tr>
-          <tr><td><code>SenderFilterDrawer.tsx</code></td><td>移除「白名单模式」Select 字段 34 行；移除 <code>watchWhitelistMode</code> 声明；移除 <code>getDefaultPriority</code> 函数；移除 <code>WhitelistMode</code> import；<code>superRefine</code> 移除白名单必填校验；<code>resetForm</code> <code>whitelist_mode</code> 默认值改为 <code>undefined</code>；<code>handleSubmit</code> 始终以 <code>undefined</code> 透传</td></tr>
+          <tr>
+            <td>白名单执行动作默认值</td>
+            <td>放行</td>
+            <td>投递</td>
+            <td><code>SenderFilterDrawer.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td><del>白名单模式</del> 下拉字段</td>
+            <td>显示（bypass_content / 其他）</td>
+            <td>不显示（UI 已移除）</td>
+            <td><code>SenderFilterDrawer.tsx</code></td>
+            <td>[Base] 所有形态均已隐藏</td>
+          </tr>
+          <tr>
+            <td><del>whitelistModeRequired</del> 校验</td>
+            <td>白名单提交前校验 whitelist_mode 必填</td>
+            <td>校验已移除（superRefine）</td>
+            <td><code>SenderFilterDrawer.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -602,29 +721,82 @@
   <div class="incremental-section" id="change-6">
     <div class="incr-header">
       <span class="incr-num">6</span>
-      <h2>规则列表新增「优先级」展示列</h2>
-      <span class="incr-meta">展示列新增 · 黑名单 / 白名单规则列表</span>
+      <h2>规则列表新增「优先级」列（黑/白名单均生效）</h2>
+      <span class="incr-meta">路由：黑名单规则列表 + 白名单规则列表 · 新增功能 · 2026-08-01</span>
     </div>
     <div class="incr-body">
-      <p>黑名单与白名单规则列表（共用同一 <code>SenderFilterTable</code> 组件）新增「优先级」列，展示规则的 <code>priority</code> 数值，列宽 80 px，使用 <code>tabular-nums</code> 等宽数字对齐，插入位置为「执行动作」列之后、「启用状态」列之前，列表共 8 列。</p>
 
-      <h3 id="c6-elements">6.1 逐元素说明</h3>
-      <table>
-        <thead><tr><th>属性</th><th>值</th></tr></thead>
-        <tbody>
-          <tr><td>列标题 i18n key</td><td><code>senderFilter.priority</code>（已有 key，无需新增）</td></tr>
-          <tr><td>数据来源</td><td><code>row.original.rule.priority</code>（已有字段）</td></tr>
-          <tr><td>列宽</td><td><code>size: 80</code></td></tr>
-          <tr><td>样式</td><td><code>text-sm tabular-nums</code></td></tr>
-          <tr><td>列顺序</td><td>执行动作 → <strong>优先级（新增）</strong> → 启用状态 → 操作</td></tr>
-        </tbody>
-      </table>
+      <div class="callout callout-info">
+        <span class="tag tag-added">新增</span>
+        黑名单和白名单规则列表均新增「优先级」列，位于「执行动作」列之后、「状态」列之前，展示该规则的优先级数值（1-9999，数值越大越优先匹配）。
+      </div>
 
-      <h3 id="c6-files">6.2 影响文件</h3>
+      <h3 id="c6-states">6.1 截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>状态 S-14：黑名单规则列表 8 列（含优先级）— 空态</h4>
+        <p class="trigger-path">触发路径：发信人黑白名单配置弹窗 → 黑名单规则 Tab（Mock 环境无数据，展示空态）</p>
+        <figure>
+          <img src="./screenshots/S-14-blacklist-table-8cols.png" alt="黑名单规则列表，8列包含优先级列，暂无数据" />
+          <figcaption>状态 S-14 · 黑名单规则列表（8 列，含优先级）· 桌面 1528×832 · 蓝色主题（亮色）· AI版·单租户 · 平台管理员 · 浏览器验证：2026-08-01（已完成）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>列序</th><th>列名</th><th>数据来源</th><th>对齐</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>规则ID</td><td><code>rule.id</code></td><td>左对齐</td><td>无变更</td></tr>
+            <tr><td>2</td><td>规则名称</td><td><code>rule.name</code></td><td>左对齐</td><td>无变更</td></tr>
+            <tr><td>3</td><td>发信人</td><td><code>rule.senderConfig</code></td><td>左对齐</td><td>无变更</td></tr>
+            <tr><td>4</td><td>执行动作</td><td><code>rule.action</code></td><td>左对齐</td><td>无变更</td></tr>
+            <tr><td>5</td><td>优先级</td><td><code>rule.priority</code></td><td>左对齐（tabular-nums）</td><td><span class="tag tag-added">新增</span>size=80，等宽数字</td></tr>
+            <tr><td>6</td><td>状态</td><td><code>rule.isActive</code></td><td>左对齐</td><td>无变更</td></tr>
+            <tr><td>7</td><td>修改时间</td><td><code>rule.updatedAt</code></td><td>左对齐</td><td>无变更</td></tr>
+            <tr><td>8</td><td>操作</td><td>—</td><td>右对齐</td><td>无变更</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interaction-preview" style="margin-top:1rem;">
+        <h4>状态 S-17（复用）：白名单规则列表 8 列（含优先级）— 空态</h4>
+        <p class="trigger-path">触发路径：发信人黑白名单配置弹窗 → 白名单规则 Tab</p>
+        <figure>
+          <img src="./screenshots/S-17-whitelist-table-cols.png" alt="白名单规则列表，8列包含优先级列，暂无数据" />
+          <figcaption>状态 S-17 · 白名单规则列表（8 列，含优先级）· 桌面 1528×832 · 蓝色主题（亮色）· AI版·单租户 · 平台管理员 · 浏览器验证：2026-08-01（已完成）</figcaption>
+        </figure>
+        <div class="callout callout-ok">白名单列表列定义与黑名单一致（均为 8 列），同一组件 <code>SenderFilterTable.tsx</code> 渲染。</div>
+      </div>
+
+      <h3 id="c6-elements">6.2 逐元素说明</h3>
       <table>
-        <thead><tr><th>文件</th><th>改动摘要</th></tr></thead>
+        <thead><tr><th>元素</th><th>内容</th><th>组件路径</th><th>i18n key</th><th>形态/角色差异</th></tr></thead>
         <tbody>
-          <tr><td><code>src/components/security/sender-filter/SenderFilterTable.tsx</code></td><td>在 <code>columns</code> 数组「启用状态」列之前插入优先级列定义（8 行）</td></tr>
+          <tr>
+            <td>优先级列表头</td>
+            <td>优先级</td>
+            <td><code>SenderFilterTable.tsx</code></td>
+            <td><code>senderFilter.priority</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级单元格</td>
+            <td>数字，tabular-nums，对应 <code>row.original.rule.priority</code></td>
+            <td><code>SenderFilterTable.tsx</code></td>
+            <td>—</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级列宽</td>
+            <td>size=80（px）</td>
+            <td><code>SenderFilterTable.tsx</code></td>
+            <td>—</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级列位置</td>
+            <td>第 5 列，「执行动作」列之后、「状态」列之前</td>
+            <td><code>SenderFilterTable.tsx</code></td>
+            <td>—</td>
+            <td>[Base]</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -632,27 +804,95 @@
 
   <!-- ══════════════ C. 差异标注 ══════════════ -->
   <section id="diff">
-    <h2>C. 差异标注汇总</h2>
+    <h2>C. 差异标注</h2>
     <table>
-      <thead><tr><th>#</th><th>范畴</th><th>变更描述</th><th>类型</th></tr></thead>
+      <thead>
+        <tr>
+          <th>编号</th>
+          <th>状态</th>
+          <th>描述</th>
+          <th>复核日期</th>
+          <th>处理说明</th>
+        </tr>
+      </thead>
       <tbody>
-        <tr><td>D-1</td><td>文案</td><td><code>action_reject</code>：「阻断」→「拒收」（4 语言）</td><td><span class="tag tag-changed">文案</span></td></tr>
-        <tr><td>D-2</td><td>功能</td><td>黑名单新增 <code>discard</code> 执行动作及 i18n（4 语言）</td><td><span class="tag tag-added">新增</span></td></tr>
-        <tr><td>D-3</td><td>UX</td><td>执行动作下拉选项增加说明文字，宽度扩至 288 px</td><td><span class="tag tag-added">新增</span></td></tr>
-        <tr><td>D-4</td><td>Bug 修复</td><td>白名单配置示例按 Tab 分类展示，移除 <code>list_type</code> 硬编码赋值</td><td><span class="tag tag-changed">修复</span></td></tr>
-        <tr><td>D-5</td><td>文案 + UI</td><td><code>action_accept</code>：「放行」→「投递」；移除白名单模式 UI 字段</td><td><span class="tag tag-changed">文案</span><span class="tag tag-removed">UI 移除</span></td></tr>
-        <tr><td>D-6</td><td>展示列</td><td>规则列表新增「优先级」列，共 8 列</td><td><span class="tag tag-added">新增</span></td></tr>
+        <tr>
+          <td>D-1</td>
+          <td><span class="tag tag-changed">已解决</span></td>
+          <td>v1 规格草稿无真实截图，所有交互预览均为文字占位</td>
+          <td>2026-08-01</td>
+          <td>v2 已完成全部 7 张真实浏览器截图（S-12 ~ S-18），覆盖 6 个变更点的关键状态</td>
+        </tr>
+        <tr>
+          <td>D-2</td>
+          <td><span class="tag tag-unverif">待验证</span></td>
+          <td>白名单「查看配置示例」展开后的展示内容未截图（修复后应展示白名单示例而非黑名单示例）</td>
+          <td>2026-08-01</td>
+          <td>下次迭代补充截图；源码已确认修复逻辑，见 <code>SenderFilterDrawer.tsx</code></td>
+        </tr>
+        <tr>
+          <td>D-3</td>
+          <td><span class="tag tag-unverif">待验证</span></td>
+          <td>白名单执行动作下拉展开态（投递/标记投递含说明文字）未单独截图</td>
+          <td>2026-08-01</td>
+          <td>下次迭代补充截图（S-19）；见 Q-2</td>
+        </tr>
       </tbody>
     </table>
   </section>
 
-  <!-- ══════════════ D. 版本历史 ══════════════ -->
-  <section id="version-history">
-    <h2>D. 版本历史</h2>
+  <!-- ══════════════ D. 待确认事项 ══════════════ -->
+  <section id="questions">
+    <h2>D. 待确认事项</h2>
     <table>
-      <thead><tr><th>版本</th><th>日期</th><th>改动摘要</th></tr></thead>
+      <thead>
+        <tr>
+          <th>编号</th>
+          <th>状态</th>
+          <th>问题描述</th>
+          <th>影响范围</th>
+          <th>优先级</th>
+        </tr>
+      </thead>
       <tbody>
-        <tr><td>v1</td><td>2026-08-01</td><td>初版，记录 GT-12696 全部 6 项变更</td></tr>
+        <tr>
+          <td>Q-1</td>
+          <td><span class="tag tag-unverif">待确认</span></td>
+          <td>云-多 / AI-多 / 传统-多 · 租户管理员视角下，发信人黑白名单配置弹窗是否与单租户平台管理员视角一致？（源码未见形态/角色分支，推断一致，未实测）</td>
+          <td>产品形态 × 角色矩阵</td>
+          <td>低</td>
+        </tr>
+        <tr>
+          <td>Q-2</td>
+          <td><span class="tag tag-unverif">待确认</span></td>
+          <td>白名单执行动作下拉（投递 / 标记投递）是否也新增了说明文字？说明文字内容是什么？</td>
+          <td>变更 #3、D-3</td>
+          <td>中</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ E. 版本历史 ══════════════ -->
+  <section id="version-history">
+    <h2>E. 版本历史</h2>
+    <table>
+      <thead><tr><th>版本</th><th>日期</th><th>commit</th><th>ticket</th><th>摘要</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>v1</td>
+          <td>2026-08-01</td>
+          <td><code>9531e5b</code></td>
+          <td>GT-12695</td>
+          <td>草稿：基于对话历史生成 6 个变更点框架，无真实截图，交互预览均为文字占位。</td>
+        </tr>
+        <tr>
+          <td>v2</td>
+          <td>2026-08-01</td>
+          <td><code>9531e5b</code></td>
+          <td>GT-12695</td>
+          <td>完整重生成：补充全部 7 张真实浏览器截图（S-12 ~ S-18），覆盖变更规格菜单入口、策略流水线页、黑名单列表（8列）、黑名单抽屉默认态、执行动作下拉展开态、白名单列表（8列）、白名单抽屉默认态；完善逐元素说明、差异标注（D-1~D-3）和待确认事项（Q-1~Q-2）。</td>
+        </tr>
       </tbody>
     </table>
   </section>

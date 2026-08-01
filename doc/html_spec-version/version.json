@@ -1,6 +1,6 @@
 {
-  "module": "sidebar-nav-version-footer",
-  "current_version": 4,
+  "module": "sender-filter-optimization",
+  "current_version": 5,
   "history": [
     {
       "version": 1,
@@ -18,7 +18,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12649",
       "incremental": true,
-      "summary": "GT-12649 v2：新增变更 #2（DevMode 变更规格独立分区）、#3（处置中心执行动作移除"标记投递"）、#4（安全总览执行动作图表移除"标记投递"）；重构为多变更点格式，补充真实浏览器截图 S-3~S-7；新增 D-3/D-4/D-5、Q-3。"
+      "summary": "GT-12649 v2：新增变更 #2（DevMode 变更规格独立分区）、#3（处置中心执行动作移除「标记投递」）、#4（安全总览执行动作图表移除「标记投递」）；重构为多变更点格式，补充真实浏览器截图 S-3~S-7；新增 D-3/D-4/D-5、Q-3。"
     },
     {
       "version": 3,
@@ -37,6 +37,15 @@
       "ticket": "GT-12649",
       "incremental": true,
       "summary": "文档规范修复：按技能规范重写目录（每个需求点使用完整名称作为主入口，子章节使用编号层级 1.1/1.2/…/4.3，尾部三项以 C/D/E 字母编号）；变更总览标题由"v2 新增 3 项"修正为"共 4 项需求"；各变更区块 incr-header 补充路由路径；批量修复文档中全部 UTF-8 replacement character 乱码（共 6 处：侧边栏底部、执行动作 ×2、审核、导航区域、平台管控策略）。"
+    },
+    {
+      "version": 5,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12695",
+      "incremental": true,
+      "summary": "GT-12695 v2（GT-12696 发信人黑白名单优化）：新增 GT-12695.html，完整重生成 6 个变更点规格；补充全部 7 张真实浏览器截图（S-12~S-18），覆盖：开发菜单 GT-12695 入口、策略流水线、黑名单列表8列（含优先级）、黑名单抽屉默认态（拒收）、执行动作下拉展开（含丢弃及说明文字）、白名单列表8列、白名单抽屉默认态（投递，无白名单模式）；D-1~D-3，Q-1~Q-2。"
     }
   ]
 }
