@@ -21,7 +21,7 @@ import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
 
 const DEFAULT_CONFIG: AuthSpoofingConfig = {
   format_checks: {
-    mailfrom_empty: { enabled: true, action: 'accept', observe_mode: false },
+    mailfrom_empty: { enabled: true, action: 'quarantine', observe_mode: false },
     mailfrom_invalid: { enabled: true, action: 'reject', observe_mode: false },
     envelope_header_mismatch: { enabled: true, action: 'quarantine', observe_mode: false },
   },
@@ -77,12 +77,22 @@ function mergeGroup(
   return { ...def, ...(got ?? {}) };
 }
 
+/** FORMAT_ACTIONS の有効 action セット。accept は廃止 → quarantine へ fallback */
+const FORMAT_ACTION_SET = new Set(['quarantine', 'audit', 'reject', 'discard']);
+function normalizeFormatItem(item: CheckItem): CheckItem {
+  return FORMAT_ACTION_SET.has(item.action) ? item : { ...item, action: 'quarantine' };
+}
+
 function mergeWithDefaults(cfg: AuthSpoofingConfig): AuthSpoofingConfig {
   const p = cfg.protocol_checks;
+  const rawFmt = { ...DEFAULT_CONFIG.format_checks, ...(cfg.format_checks ?? {}) };
+  const format_checks = Object.fromEntries(
+    Object.entries(rawFmt).map(([k, v]) => [k, normalizeFormatItem(v as CheckItem)]),
+  ) as AuthSpoofingConfig['format_checks'];
   return {
     ...DEFAULT_CONFIG,
     ...cfg,
-    format_checks: { ...DEFAULT_CONFIG.format_checks, ...(cfg.format_checks ?? {}) },
+    format_checks,
     protocol_checks: {
       ...DEFAULT_CONFIG.protocol_checks,
       ...(p ?? {}),

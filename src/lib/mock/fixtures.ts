@@ -685,7 +685,7 @@ function threatSeriesValue(
 }
 
 // 5 条 series 对齐 demo THREAT_SERIES：phishing / spoofing / spam / virus /
-// malicious（demo「恶意链接」→ malicious）。点数：today 24（1h，00:00..23:00）、
+// malicious（demo「���意链接」→ malicious）。点数：today 24（1h，00:00..23:00）、
 // 7d 7 日、30d 30 日；7d/30d 数值按 demo scale（6 / 5）放大。值域对齐 demo：
 // phishing 20-60、spoofing 10-40、spam 40-120、virus 3-18、malicious 8-33。
 const SECURITY_DATES = ["11/1", "11/2", "11/3", "11/4", "11/5", "11/6", "11/7"];
@@ -864,7 +864,7 @@ const DRILL_NAMES: Record<DrillDimension, string[]> = {
   action: ["block", "quarantine", "review", "drop", "recall"],
   sender_domain: ["notice-secure.example", "billing-alert.example", "mail-update.example", "promo.example", "unknown.example"],
   client_ip: ["203.0.113.42", "198.51.100.18", "192.0.2.77", "203.0.113.90", "198.51.100.31"],
-  matched_rule: ["仿冒登录页", "恶意附件", "高危垃圾邮件", "异常发件域", "批量外发"],
+  matched_rule: ["仿冒登录��", "恶意附件", "高危垃圾邮件", "异常发件域", "批量外发"],
 };
 
 export function mockSecurityDrill(dimension: DrillDimension): DrillDownResponse {
@@ -1230,7 +1230,7 @@ export function mockOpsTopCsv(response: OpsTopResponse): string {
 
 export function mockOpsTopAi(): { markdown: string } {
   return {
-    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- 建议优先复核失败率超过 50% 的连接来源及持续飙升对象。\n- 展开行可查看固定近 7 日趋势与关联子维度。",
+    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源��中度较高。\n- 建议优先复核失败率超过 50% 的连接来源及持续飙升对象。\n- 展开行可查看固定近 7 日趋势与关联子维度。",
   };
 }
 
@@ -3230,7 +3230,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
 //   - metadata 携带 `{feature:'sender_filter', sender_config, ip_range, list_type}`，
 //     与 condition_tree 保持一致（`resolveSenderFilterRule` 的 metadata/tree 双重校验）。
-// ════════════════════════════════════════════════════════════════════════════════
+// ═��══════════════════════════════════════════════════════════════════════════════
 
 function sfRule(o: {
   id: number;
@@ -4083,7 +4083,7 @@ export function mockContentGroupsList(): { items: Rule[] } {
 function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
   return {
     format_checks: {
-      mailfrom_empty: { enabled: true, action: "accept", observe_mode: false },
+      mailfrom_empty: { enabled: true, action: "quarantine", observe_mode: false },
       mailfrom_invalid: {
         enabled: true,
         action: "reject",
@@ -4153,7 +4153,7 @@ export function mockAuthSpoofingConfig(): AuthSpoofingConfig {
 
 // 观测统计：hits 总和固定为 23，对齐 demo 硬编码的
 // `observeStats.wouldDrop`（AuthSpoofingPage.tsx），让「预计丢弃」脉冲徽标
-// 在 Mock 模式下与 demo 展示一致。`days` 只影响回显字段，不影响样本条数/分布。
+// 在 Mock 模式下与 demo 展示一致。`days` 只影响回显字段，不影响��本条数/分布。
 function authSpoofingObservePoints(): ObserveStatPoint[] {
   return [
     {

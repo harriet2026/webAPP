@@ -52,6 +52,7 @@ interface FormatCheckCardProps {
 
 function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabled }: FormatCheckCardProps) {
   const t = useTranslations('authSpoofing');
+  const tDesc = useTranslations('authSpoofing.formatActionDesc');
   const [pendingEnable, setPendingEnable] = useState(false);
 
   const handleEnableChange = (enabled: boolean) => {
@@ -112,7 +113,11 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
                 disabled={disabled || !item.enabled}
               >
                 <SelectTrigger className="w-[220px]">
-                  <SelectValue>{t(formatActionKey(item.action) as any)}</SelectValue>
+                  <SelectValue>
+                    {FORMAT_ACTIONS.includes(item.action as typeof FORMAT_ACTIONS[number])
+                      ? t(formatActionKey(item.action) as any)
+                      : item.action}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="w-72">
                   {FORMAT_ACTIONS.map((a) => (
@@ -120,7 +125,7 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
                       <div className="flex flex-col gap-0.5 py-0.5">
                         <span>{t(formatActionKey(a) as any)}</span>
                         <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
-                          {t(`formatActionDesc.${a}` as any)}
+                          {tDesc(a as any)}
                         </span>
                       </div>
                     </SelectItem>
