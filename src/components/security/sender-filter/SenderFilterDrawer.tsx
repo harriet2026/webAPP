@@ -834,7 +834,6 @@ export function SenderFilterDrawer({
                               form.setValue('sender_config', { type: 'individual', value: 'partner@trusted.com' }, { shouldDirty: true });
                               form.setValue('ip_range', { type: 'all' }, { shouldDirty: true });
                               form.setValue('action', 'accept', { shouldDirty: true });
-                              form.setValue('whitelist_mode', 'bypass_content', { shouldDirty: true });
                               form.setValue('priority', 800, { shouldDirty: true });
                               setShowExamples(false);
                             }}
@@ -858,7 +857,6 @@ export function SenderFilterDrawer({
                               form.setValue('sender_config', { type: 'domain', value: 'trusted-partner.com' }, { shouldDirty: true });
                               form.setValue('ip_range', { type: 'all' }, { shouldDirty: true });
                               form.setValue('action', 'accept', { shouldDirty: true });
-                              form.setValue('whitelist_mode', 'bypass_content', { shouldDirty: true });
                               form.setValue('priority', 800, { shouldDirty: true });
                               setShowExamples(false);
                             }}
