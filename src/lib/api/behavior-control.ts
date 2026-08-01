@@ -78,16 +78,19 @@ export function buildConditionTreeFromForm(
 }
 
 export function formToCreateBody(form: BehaviorControlFormData) {
+  // 将 conditions[] 映射回后端兼容的 dim_a/threshold_a/dim_b/threshold_b 旧字段
+  const c0 = form.conditions[0];
+  const c1 = form.conditions[1];
   const meta: BehaviorControlMetadata = {
     feature: 'behavior_control',
     direction: form.direction,
     object_config: form.object_config,
     time_window: form.time_window,
-    dim_a: form.dim_a,
-    threshold_a: form.threshold_a,
-    or_enabled: form.or_enabled,
-    dim_b: form.or_enabled ? form.dim_b : undefined,
-    threshold_b: form.or_enabled ? form.threshold_b : undefined,
+    dim_a: c0?.dim ?? form.dim_a,
+    threshold_a: c0?.threshold ?? form.threshold_a,
+    or_enabled: form.conditions.length > 1 ? form.or_enabled : false,
+    dim_b: form.conditions.length > 1 ? c1?.dim : undefined,
+    threshold_b: form.conditions.length > 1 ? c1?.threshold : undefined,
   };
   return {
     name: form.name,
@@ -118,7 +121,18 @@ export function resolveBehaviorControlRule(rawRule: BehaviorControlRuleWire): Be
     parsed.dim_a &&
     typeof parsed.threshold_a === 'number'
   ) {
-    meta = parsed as unknown as BehaviorControlMetadata;
+    const base = parsed as unknown as BehaviorControlMetadata;
+    // 向前兼容：将旧字段 dim_a/dim_b 还原为 conditions[] 数组
+    if (!('conditions' in base)) {
+      const conditions: import('@/types/behavior-control').BehaviorCondition[] = [
+        { dim: base.dim_a, threshold: base.threshold_a },
+      ];
+      if (base.or_enabled && base.dim_b && base.threshold_b != null) {
+        conditions.push({ dim: base.dim_b, threshold: base.threshold_b });
+      }
+      (base as unknown as Record<string, unknown>).conditions = conditions;
+    }
+    meta = base;
   }
   return {
     rule,

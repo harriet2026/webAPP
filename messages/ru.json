@@ -4629,7 +4629,13 @@
       "thresholdPlaceholder": "Введите порог",
       "actionLabel": "Выполняемое действие",
       "remark": "Примечание",
-      "remarkPlaceholder": "Добавьте примечание (до 200 символов)"
+      "remarkPlaceholder": "Добавьте примечание (до 200 символов)",
+      "addCondition": "Добавить условие",
+      "conditionN": "Условие {n}",
+      "conditionRelation": "Связь условий",
+      "relationAnd": "AND (все совпадают)",
+      "relationOr": "OR (любое совпадает)",
+      "conditionCount": "Добавлено {count}/4"
     },
     "preview": {
       "title": "Текущий эффект конфигурации",
@@ -4644,7 +4650,8 @@
       "expirePrefix": "Действует до: ",
       "priorityPrefix": "Приоритет: ",
       "objAny": "любой объект",
-      "permanent": "Бессрочно"
+      "permanent": "Бессрочно",
+      "and": "И"
     },
     "delete": {
       "title": "Подтвердить удаление",
@@ -4674,7 +4681,9 @@
       "orgRequired": "Выберите подразделение",
       "ipRequired": "Введите IP-адрес или диапазон",
       "ipGroupRequired": "Выберите группу IP",
-      "domainRequired": "Введите домен"
+      "domainRequired": "Введите домен",
+      "conditionsMin": "Требуется хотя бы одно условие обнаружения",
+      "conditionsMax": "Допускается не более 4 условий обнаружения"
     },
     "import": {
       "button": "Импорт",

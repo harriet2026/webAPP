@@ -4772,7 +4772,13 @@
       "thresholdPlaceholder": "请输入阈值",
       "actionLabel": "执行动作",
       "remark": "备注",
-      "remarkPlaceholder": "添加备注信息（最多200字）"
+      "remarkPlaceholder": "添加备注信息（最多200字）",
+      "addCondition": "添加条件",
+      "conditionN": "条件 {n}",
+      "conditionRelation": "条件关系",
+      "relationAnd": "AND（同时满足）",
+      "relationOr": "OR（任一满足）",
+      "conditionCount": "已添加 {count}/4"
     },
     "preview": {
       "title": "当前配置效果",
@@ -4787,7 +4793,8 @@
       "expirePrefix": "有效期至：",
       "priorityPrefix": "优先级：",
       "objAny": "任意对象",
-      "permanent": "永久"
+      "permanent": "永久",
+      "and": "且"
     },
     "delete": {
       "title": "确认删除",
@@ -4817,7 +4824,9 @@
       "orgRequired": "请选择组织部门",
       "ipRequired": "请输入IP地址或IP段",
       "ipGroupRequired": "请选择IP群组",
-      "domainRequired": "请输入域名"
+      "domainRequired": "请输入域名",
+      "conditionsMin": "至少需要一条检测条件",
+      "conditionsMax": "最多允许 4 条检测条件"
     },
     "import": {
       "button": "导入",

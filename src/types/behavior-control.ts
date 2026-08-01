@@ -28,6 +28,11 @@ export type BehaviorControlFormObjectConfig =
   | { type: 'senderIp'; sub_type: 'single' | 'ipGroup'; value: string }
   | { type: 'senderDomain'; value: string };
 
+export interface BehaviorCondition {
+  dim: BehaviorDimension;
+  threshold: number;
+}
+
 export interface BehaviorControlMetadata {
   feature: 'behavior_control';
   direction: BehaviorDirection;
@@ -50,10 +55,17 @@ export interface BehaviorControlFormData {
   direction: BehaviorDirection;
   object_config: BehaviorControlFormObjectConfig;
   time_window: BehaviorTimeWindow;
-  dim_a: BehaviorDimension;
-  threshold_a: number;
+  /** 动态条件列表，最少 1 条最多 4 条，替代旧的 dim_a/threshold_a/or_enabled/dim_b/threshold_b 固定字段 */
+  conditions: BehaviorCondition[];
+  /** 条件关系：false = AND（所有条件同时触发），true = OR（任一条件触发） */
   or_enabled: boolean;
+  /** @deprecated 保留供 API 映射层使用，由 conditions[0] 派生 */
+  dim_a: BehaviorDimension;
+  /** @deprecated 保留供 API 映射层使用，由 conditions[0] 派生 */
+  threshold_a: number;
+  /** @deprecated 保留供 API 映射层使用，由 conditions[1] 派生 */
   dim_b?: BehaviorDimension;
+  /** @deprecated 保留供 API 映射层使用，由 conditions[1] 派生 */
   threshold_b?: number;
   action: BehaviorProductAction;
 }

@@ -4812,7 +4812,13 @@
       "thresholdPlaceholder": "กรุณาใส่เกณฑ์",
       "actionLabel": "การดำเนินการ",
       "remark": "หมายเหตุ",
-      "remarkPlaceholder": "เพิ่มหมายเหตุ (ไม่เกิน 200 ตัวอักษร)"
+      "remarkPlaceholder": "เพิ่มหมายเหตุ (ไม่เกิน 200 ตัวอักษร)",
+      "addCondition": "เพิ่มเงื่อนไข",
+      "conditionN": "เงื่อนไข {n}",
+      "conditionRelation": "ความสัมพันธ์ของเงื่อนไข",
+      "relationAnd": "AND (ทุกเงื่อนไขต้องตรง)",
+      "relationOr": "OR (ตรงเงื่อนไขใดก็ได้)",
+      "conditionCount": "เพิ่มแล้ว {count}/4"
     },
     "preview": {
       "title": "ผลการกำหนดค่าปัจจุบัน",
@@ -4827,7 +4833,8 @@
       "expirePrefix": "มีผลถึง: ",
       "priorityPrefix": "ลำดับความสำคัญ: ",
       "objAny": "วัตถุใดๆ",
-      "permanent": "ถาวร"
+      "permanent": "ถาวร",
+      "and": "และ"
     },
     "delete": {
       "title": "ยืนยันการลบ",
@@ -4857,7 +4864,9 @@
       "orgRequired": "���รุณาเลือกแผนก",
       "ipRequired": "กรุณากรอก IP หรือช่วง IP",
       "ipGroupRequired": "กรุณาเลือกกลุ่ม IP",
-      "domainRequired": "กรุณากรอกโดเมน"
+      "domainRequired": "กรุณากรอกโดเมน",
+      "conditionsMin": "ต้องมีเงื่อนไขการตรวจจับอย่างน้อยหนึ่งข้อ",
+      "conditionsMax": "อนุญาตให้มีเงื่อนไขการตรวจจับได้สูงสุด 4 ข้อ"
     },
     "import": {
       "button": "นำเข้า",
