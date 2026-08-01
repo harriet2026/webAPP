@@ -114,6 +114,9 @@
     .interaction-preview img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
     .screenshot-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem; }
     @media (max-width: 700px) { .screenshot-pair { grid-template-columns: 1fr; } }
+    .screenshot-wrap { margin: 0.6rem 0 1rem; }
+    .screenshot-wrap img { max-width: 100%; height: auto; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
+    .screenshot-caption { font-size: 0.78rem; color: #6b7280; margin-top: 0.35rem; font-style: italic; }
 
     /* ── callout boxes ── */
     .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
@@ -996,7 +999,7 @@
             <td>「隔离/审核」拆分为「隔离」+「审核」</td>
             <td>隔离/审核 (<code>quarantine</code>)</td>
             <td>隔离 (<code>quarantine</code>) + 审核 (<code>audit</code>)</td>
-            <td>原 <code>quarantine</code> 文案「隔离/审核」混淆两种语义；现拆分为独立选项，隔离=进隔离队列、审核=正常投递+写日志</td>
+            <td>原 <code>quarantine</code> 文案「隔离/审核」混淆两种语义；现拆分为独立选项��隔离=进隔离队列、审核=正常投递+写日志</td>
           </tr>
           <tr>
             <td>遗留数据 fallback</td>
@@ -1208,7 +1211,7 @@
 
   <!-- ══════════════════════════════════════════════════════════
        GT-12705 身份认证与仿冒检测——认证协议检查：去掉例外配置说明文案
-  ══════════════════════════════════════════════════════════ -->
+  ═══════════��══════════════════════════════════════════════ -->
   <div id="req-gt12705" style="scroll-margin-top:1.5rem;"></div>
 
   <div class="incr-header" id="gt12705-header">
