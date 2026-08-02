@@ -565,7 +565,6 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
         page="content_rules"
         title={t("contentRules.title")}
         actions={actionButtons}
-        deferred
       >
         {content}
       </ModuleMasterSwitch>
@@ -575,7 +574,7 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
   return (
     <PageShell>
       <PageHeader title={t("contentRules.title")} />
-      <ModuleMasterSwitch page="content_rules" actions={actionButtons} deferred>{content}</ModuleMasterSwitch>
+      <ModuleMasterSwitch page="content_rules" actions={actionButtons}>{content}</ModuleMasterSwitch>
     </PageShell>
   );
 }
