@@ -242,7 +242,7 @@
     "showPassword": "显示密码",
     "hidePassword": "隐藏密码",
     "forgotPassword": "忘记密码？",
-    "captchaLabel": "图形验证码",
+    "captchaLabel": "���形验证码",
     "captchaRefresh": "点击刷新",
     "remainingAttempts": "账号或密码错误，还可尝试 {n} 次",
     "accountLocked": "账号已锁定，请于 {time} 后重试",
@@ -3502,7 +3502,7 @@
       "whenIP": "当 IP 地址",
       "allIP": "全部 IP",
       "notFilled": "未填写",
-      "affectAbout": "（影响约 {count} 个 IP）",
+      "affectAbout": "（影响��� {count} 个 IP）",
       "triggerCondition": "触发以下任一条件时：",
       "noConditions": "暂未配置触发条件",
       "systemWill": "系统将：",
@@ -4449,7 +4449,7 @@
       "spf_none": "未维护 (None)",
       "spf_noneDesc": "域名未配置SPF记录",
       "spf_temperror": "查询失败 (TempError)",
-      "spf_temperrorDesc": "DNS查询超时或失败",
+      "spf_temperrorDesc": "DNS查询超时或��败",
       "dkim_fail": "验证失败",
       "dkim_failDesc": "DKIM签名验证不通过",
       "dkim_neutral": "中性 (Neutral)",
@@ -7118,7 +7118,47 @@
       "previewEmptyHint": "添加条件后将自动生成逻辑表达式",
       "notMarker": "(NOT)",
       "foldedMore": "+{count}",
-      "groupSelectLabel": "选择对象"
+      "groupSelectLabel": "选择对象",
+      "descInputTypeLabel": "输入类型",
+      "descUnitLabel": "单位",
+      "descRangeLabel": "有效范围",
+      "descObjectLabel": "对象含义",
+      "descOperatorsLabel": "支持运算符",
+      "descExampleLabel": "有效示例",
+      "descRecommendedLabel": "推荐配置",
+      "rangeBoth": "{min} ~ {max}",
+      "rangeMin": "≥ {min}",
+      "rangeMax": "≤ {max}",
+      "mapWildcardHint": "* 表示任意对象（匹配全部键）；如需限定具体对象，请在上方选择。",
+      "mapObjectHint": "仅匹配所选对象；选择 * 可匹配任意对象。",
+      "inputType": {
+        "text": "文本（每行一个值）",
+        "number": "数值",
+        "select": "枚举选择",
+        "group": "群组对象",
+        "featureGroup": "特征组",
+        "cidr": "IP / CIDR（每行一个）",
+        "time": "时间区间",
+        "weekday": "星期",
+        "mime": "MIME 类型"
+      },
+      "units": {
+        "count": "个",
+        "mb": "MB",
+        "level": "层",
+        "editDistance": "字符差异数"
+      },
+      "desc_similarDomain": {
+        "object": "受保护域名档案；* 表示对全部受保护域名档案生效。",
+        "operators": "大于/大于等于：差异越大越宽松，命中范围越大；小于/小于等于：差异越小越严格，只命中高度相似域名；介于：命中差异落在指定区间的域名。",
+        "example": "对象选择「公司主域名档案」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超过 2 的仿冒域名。",
+        "recommended": "推荐使用「小于等于 2」，与内置相似域名规则一致，兼顾召回与误报。"
+      },
+      "desc_attachmentCount": {
+        "operators": "大于/大于等于：附件数达到或超过阈值即命中；小于/小于等于：附件数不超过阈值即命中；介于：命中数量落在区间内的邮件。",
+        "example": "比较方式「大于等于」，阈值「10」——命中附件数达到 10 个及以上的邮件。",
+        "recommended": "常规办公场景推荐阈值 10~20，可按业务附件习惯调整。"
+      }
     },
     "placeholder": {
       "conditions": "条件构建器（即将上线）",
@@ -7236,7 +7276,7 @@
       "descNoteLabel": "注意",
       "addonDescUsage": "在执行动作之上叠加「{name}」处理",
       "addonDisabledHint": "未勾选：表单已禁用；勾选后将自动展开并聚焦首个输入项",
-      "quarantineHint": "邮件隔离无需配置参数；被隔离邮件可在邮件隔离模块查看。",
+      "quarantineHint": "邮件隔离无需配置参数；被隔离邮件可在���件隔离模块查看。",
       "tagStyleLabel": "标记样式",
       "tagDeliverStyleDisabledHint": "标记位置为信头时样式不生效",
       "blockSmtpCodeHint": "常用: 550/554/571",
@@ -9539,7 +9579,7 @@
     "errUrlInvalid": "请输入正确的 URL 地址",
     "export": "导出",
     "exportFailures": "导出失败明细",
-    "exportLimitToast": "数据量超过 50,000 条导出上限，请添加筛选条件",
+    "exportLimitToast": "数据量超过 50,000 条导出上限���请添加筛选条件",
     "exportSelected": "导出选中",
     "exportTaskToast": "已生成导出任务，共 {count} 条记录",
     "eyebrow": "系统管理 / 组织通讯录",
@@ -9925,7 +9965,7 @@
     "refresh": "刷新",
     "health": {
       "danger": "检测到 {n} 项紧急事件待处理，请立即查看待办与告警面板",
-      "warning": "检测到 {n} 项警告事项，请及时处理",
+      "warning": "检测到 {n} 项警��事项，请及时处理",
       "normal": "系统运行正常，{range}已拦截 {n} 封威胁邮件，无待处理告警",
       "error": "系统状态数据加载失败，请刷新后重试"
     },
@@ -10845,7 +10885,7 @@
       "access_denied": "无权访问该附件记录",
       "request_body_unreadable": "请求内容读取失败",
       "scan_result_format_invalid": "附件扫描结果数据格式不正确",
-      "scan_result_missing": "未提供附件扫描结果数据",
+      "scan_result_missing": "未提供��件扫描结果数据",
       "scan_result_all_invalid": "校验后没有任何有效的扫描结果"
     },
     "url_protection": {
@@ -11157,7 +11197,7 @@
     "spoofing_notification_preview": {
       "admin_emails_invalid": "管理员邮箱列表中含有无效邮箱",
       "sample_sender_invalid": "样本发件人必须是合法邮箱地址",
-      "sample_subject_too_long": "样本主题最多 500 个字符",
+      "sample_subject_too_long": "样本主题最多 500 ���字符",
       "sample_confidence_out_of_range": "样本置信度必须在 0-100 之间"
     },
     "spoofing_persons_bulk": {
