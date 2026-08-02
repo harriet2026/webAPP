@@ -5087,7 +5087,8 @@
       "mode_none": "Disabled",
       "mode_light": "Light",
       "mode_deep": "Deep",
-      "pending": "Coming Soon"
+      "pending": "Coming Soon",
+      "ocrMode_deep_hint": "Deep detection recognizes both handwritten and printed text. Recommended for outbound direction to prevent screenshot leaks. Results are handled according to the Detection Limit setting below."
     },
     "encrypted": {
       "detectPolicy": "Detection Policy",

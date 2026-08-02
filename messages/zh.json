@@ -5092,7 +5092,8 @@
       "mode_none": "禁用",
       "mode_light": "轻度",
       "mode_deep": "深度",
-      "pending": "敬请期待"
+      "pending": "敬请期待",
+      "ocrMode_deep_hint": "深度检测同时识别手写与印刷体文字，适用于外发方向防截图泄密场景。检测结果将依照下方「检测数量上限」设置处理。"
     },
     "encrypted": {
       "detectPolicy": "检测策略",

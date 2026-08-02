@@ -102,19 +102,19 @@ export function ImageDetectTab({
               <SelectContent className="min-w-[var(--radix-select-trigger-width)] w-max" data-testid="ocr-detection-mode-options">
                 <SelectItem value="none" data-testid="ocr-detection-mode-none">{t('imageDetect.ocrMode_none')}</SelectItem>
                 <SelectItem value="light" data-testid="ocr-detection-mode-light">{t('imageDetect.ocrMode_light')}</SelectItem>
-                {/* GT-11675：深度 OCR 尚未实现，暂不可选。
-                    整条链路都没有深浅之分：runOCR(mode) 的 mode 只用于打日志
-                    （internal/antispam 侧对照的 QrMode==="deep" 才是真分支），
-                    PyhelperClient.Ocr 只发 image_b64+lang，pyhelper 的 /v1/ocr
-                    也只有单一 pytesseract 路径。此前它可选但与「轻度」执行完全
-                    相同的代码，属静默无效；恢复为不可选并标注敬请期待，等实现
-                    落地再放开。 */}
-                <SelectItem value="deep" disabled data-testid="ocr-detection-mode-deep">
-                  {t('imageDetect.ocrMode_deep')}（{t('imageDetect.pending')}）
+                <SelectItem value="deep" data-testid="ocr-detection-mode-deep">
+                  {t('imageDetect.ocrMode_deep')}
                 </SelectItem>
               </SelectContent>
             </Select>
           </div>
+          {config.ocr_mode === 'deep' && (
+            <div className="rounded-lg border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground" data-testid="ocr-deep-hint">
+              <Info className="mb-1 inline-block h-4 w-4 align-text-bottom text-primary" />
+              {' '}{t('imageDetect.ocrMode_deep_hint')}
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="ocr-limit">{t('imageDetect.ocrLimit')}</Label>
             <div className="flex items-center gap-2">
