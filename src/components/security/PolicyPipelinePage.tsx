@@ -854,12 +854,19 @@ export function PolicyPipelinePage() {
   const drawerContentOwnsScrolling =
     activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'authSpoofing';
 
+  const handleRefresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['agent-center-overview'] });
+    queryClient.invalidateQueries({ queryKey: ['advanced-rules'] });
+    queryClient.invalidateQueries({ queryKey: ['security-modules'] });
+    queryClient.invalidateQueries({ queryKey: ['similar-detection-config'] });
+  }, [queryClient]);
+
   return (
     <PageShell>
       <PageHeader
         title={t('pipeline.title')}
         actions={
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="h-4 w-4 mr-1" />
             {t('common.refresh')}
           </Button>
