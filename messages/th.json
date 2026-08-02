@@ -4952,6 +4952,17 @@
       "item4": "กลุ่มและองค์กรม��จากการกำหนดค่านโยบายกลุ่ม",
       "item5": "เงื่อนไข OR ใดๆ เกินก็จะกระตุ้น",
       "item6": "กลุ่ม IP มาจากโมดูลการจัดการกลุ่ม IP"
+    },
+    "groupPreview": {
+      "title": "ดูตัวอย่างสมาชิกกลุ่ม {name}",
+      "memberCount": "สมาชิกทั้งหมด {count} คน",
+      "searchPlaceholder": "ค้นหาสมาชิก...",
+      "noMembers": "ไม่มีข้อมูลสมาชิก",
+      "truncateHint": "แสดง {shown} รายการแรกจากทั้งหมด {total}",
+      "close": "ปิด",
+      "typeSender": "กลุ่มผู้ส่ง",
+      "typeIp": "กลุ่ม IP",
+      "typeOrg": "กลุ่มองค์กร"
     }
   },
   "attachmentSecurity": {

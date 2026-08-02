@@ -44,7 +44,6 @@ import type {
   BehaviorCondition,
 } from '@/types/behavior-control';
 import { BACKEND_TO_PRODUCT } from '@/types/behavior-control';
-import Link from 'next/link';
 import { useApiRequest } from '@/lib/api/client';
 import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
@@ -115,6 +114,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
   const [showSimulator, setShowSimulator] = useState(false);
+  const [previewGroupName, setPreviewGroupName] = useState<string | null>(null);
   const [simSender, setSimSender] = useState('');
   const [simIp, setSimIp] = useState('192.168.1.1');
   const [simUniqueSenderIPCount, setSimUniqueSenderIPCount] = useState(1);
@@ -156,6 +156,34 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
 
   const senderGroups = useMemo(() => groupTypeOptions('sender'), [groupTypeOptions]);
   const ipGroups = useMemo(() => groupTypeOptions('ip'), [groupTypeOptions]);
+
+  // 预览数据：根据 previewGroupName 从 groupsQuery.data 中找到对应条目，生成成员列表
+  const previewGroupData = useMemo<{ name: string; groupType: string; members: string[]; totalCount: number } | null>(() => {
+    if (!previewGroupName || !groupsQuery.data) return null;
+    const rule = groupsQuery.data.find((r) => r.name === previewGroupName);
+    if (!rule) return null;
+    let groupType = 'sender';
+    let totalCount = 0;
+    try {
+      const m = JSON.parse(rule.metadata);
+      groupType = m.group_type ?? 'sender';
+      totalCount = m.member_count ?? 0;
+    } catch { /* noop */ }
+
+    // mock 数据 condition_tree 为空，按 groupType 生成示例成员
+    const members: string[] = [];
+    if (groupType === 'ip') {
+      for (let i = 1; i <= Math.min(totalCount, 100); i++) {
+        members.push(`192.168.${Math.floor(i / 255)}.${i % 255 || 1}`);
+      }
+    } else {
+      const domains = ['corp.com', 'company.org', 'example.net', 'biz.cn', 'mail.com'];
+      for (let i = 1; i <= Math.min(totalCount, 100); i++) {
+        members.push(`user${i}@${domains[i % domains.length]}`);
+      }
+    }
+    return { name: previewGroupName, groupType, members, totalCount };
+  }, [previewGroupName, groupsQuery.data]);
 
   const initial = useMemo<BehaviorControlFormData>(() => {
     if (!editing?.meta) return { ...defaultForm(priorityRange.defaultValue), ...defaults };
@@ -432,10 +460,17 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                     </Select>
                                     <div className="flex items-center gap-2 mt-1">
                                       <span className="text-xs text-muted-foreground">{t('behaviorControl.form.groupSource')}</span>
-                                      <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-blue-600" asChild>
-                                        <Link href="/security/groups" target="_blank" rel="noopener noreferrer">
-                                          {t('behaviorControl.form.manageGroup')} <ExternalLink className="h-3 w-3 ml-1" />
-                                        </Link>
+                                      <Button
+                                        type="button"
+                                        variant="link"
+                                        size="sm"
+                                        className="h-auto p-0 text-xs text-blue-600"
+                                        onClick={() => {
+                                          const selected = watchAll.object_config.type === 'sender' ? (watchAll.object_config.value ?? '') : '';
+                                          setPreviewGroupName(selected || null);
+                                        }}
+                                      >
+                                        {t('behaviorControl.form.manageGroup')} <ExternalLink className="h-3 w-3 ml-1" />
                                       </Button>
                                     </div>
                                     {objectConfigError && (
@@ -515,10 +550,17 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                     </Select>
                                     <div className="flex items-center gap-2 mt-1">
                                       <span className="text-xs text-muted-foreground">{t('behaviorControl.form.ipGroupSource')}</span>
-                                      <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-blue-600" asChild>
-                                        <Link href="/security/groups" target="_blank" rel="noopener noreferrer">
-                                          {t('behaviorControl.form.manageIpGroup')} <ExternalLink className="h-3 w-3 ml-1" />
-                                        </Link>
+                                      <Button
+                                        type="button"
+                                        variant="link"
+                                        size="sm"
+                                        className="h-auto p-0 text-xs text-blue-600"
+                                        onClick={() => {
+                                          const selected = watchAll.object_config.type === 'senderIp' ? (watchAll.object_config.value ?? '') : '';
+                                          setPreviewGroupName(selected || null);
+                                        }}
+                                      >
+                                        {t('behaviorControl.form.manageIpGroup')} <ExternalLink className="h-3 w-3 ml-1" />
                                       </Button>
                                     </div>
                                     {objectConfigError && (
@@ -1102,6 +1144,14 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
         </SheetContent>
       </Sheet>
 
+      {/* 群组成员预览 Dialog */}
+      <GroupPreviewDialog
+        open={previewGroupName !== null}
+        onClose={() => setPreviewGroupName(null)}
+        data={previewGroupData}
+        t={t}
+      />
+
       <Dialog open={closeConfirmOpen} onOpenChange={setCloseConfirmOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
@@ -1123,5 +1173,106 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+// ── 群组成员预览 Dialog ────────────────────────────────────────────────────────
+
+interface GroupPreviewDialogProps {
+  open: boolean;
+  onClose: () => void;
+  data: { name: string; groupType: string; members: string[]; totalCount: number } | null;
+  t: ReturnType<typeof useTranslations>;
+}
+
+function GroupPreviewDialog({ open, onClose, data, t }: GroupPreviewDialogProps) {
+  const [search, setSearch] = useState('');
+
+  // 关闭时重置搜索
+  useEffect(() => {
+    if (!open) setSearch('');
+  }, [open]);
+
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    const q = search.trim().toLowerCase();
+    if (!q) return data.members;
+    return data.members.filter((m) => m.toLowerCase().includes(q));
+  }, [data, search]);
+
+  const typeLabel = data
+    ? data.groupType === 'ip'
+      ? t('behaviorControl.groupPreview.typeIp')
+      : data.groupType === 'org'
+        ? t('behaviorControl.groupPreview.typeOrg')
+        : t('behaviorControl.groupPreview.typeSender')
+    : '';
+
+  const SHOW_LIMIT = 100;
+  const isSearch = search.trim().length > 0;
+  const displayList = isSearch ? filtered : filtered.slice(0, SHOW_LIMIT);
+  const showTruncate = !isSearch && data && data.totalCount > SHOW_LIMIT;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col gap-0 p-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
+          <div className="flex items-start gap-2">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-base leading-tight truncate">
+                {data ? t('behaviorControl.groupPreview.title', { name: data.name }) : ''}
+              </DialogTitle>
+              <DialogDescription className="mt-1 flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs shrink-0">{typeLabel}</Badge>
+                {data && (
+                  <span className="text-xs text-muted-foreground">
+                    {t('behaviorControl.groupPreview.memberCount', { count: data.totalCount })}
+                  </span>
+                )}
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        {/* 搜索框 */}
+        <div className="px-6 py-3 border-b shrink-0">
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('behaviorControl.groupPreview.searchPlaceholder')}
+            className="h-8 text-sm"
+          />
+        </div>
+
+        {/* 成员列表 */}
+        <div className="flex-1 overflow-y-auto px-6 py-2 min-h-0">
+          {!data || data.members.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              {t('behaviorControl.groupPreview.noMembers')}
+            </p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {displayList.map((member) => (
+                <li key={member} className="py-2 text-sm font-mono text-foreground">
+                  {member}
+                </li>
+              ))}
+            </ul>
+          )}
+          {showTruncate && (
+            <p className="pt-2 pb-3 text-center text-xs text-muted-foreground">
+              {t('behaviorControl.groupPreview.truncateHint', { shown: SHOW_LIMIT, total: data!.totalCount })}
+            </p>
+          )}
+        </div>
+
+        {/* 底部按钮 */}
+        <DialogFooter className="px-6 py-4 border-t shrink-0">
+          <Button type="button" variant="outline" size="sm" onClick={onClose}>
+            {t('behaviorControl.groupPreview.close')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

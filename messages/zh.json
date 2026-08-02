@@ -4912,6 +4912,17 @@
       "item4": "群组和组织来自群组策略配置",
       "item5": "OR条件任一超限即触发",
       "item6": "IP群组来自IP群组管理模块"
+    },
+    "groupPreview": {
+      "title": "{name} 群组成员预览",
+      "memberCount": "共 {count} 个成员",
+      "searchPlaceholder": "搜索成员...",
+      "noMembers": "暂无成员数据",
+      "truncateHint": "仅显示前 {shown} 条，共 {total} 条",
+      "close": "关闭",
+      "typeSender": "发信人群组",
+      "typeIp": "IP 群组",
+      "typeOrg": "组织群组"
     }
   },
   "attachmentSecurity": {

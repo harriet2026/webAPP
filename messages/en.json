@@ -4907,6 +4907,17 @@
       "item4": "Groups and organizations come from Group Policy Configuration",
       "item5": "For OR conditions, exceeding either threshold triggers the rule",
       "item6": "IP groups come from the IP Group Management module"
+    },
+    "groupPreview": {
+      "title": "{name} Group Members Preview",
+      "memberCount": "{count} members total",
+      "searchPlaceholder": "Search members...",
+      "noMembers": "No member data available",
+      "truncateHint": "Showing first {shown} of {total} members",
+      "close": "Close",
+      "typeSender": "Sender Group",
+      "typeIp": "IP Group",
+      "typeOrg": "Organization Group"
     }
   },
   "attachmentSecurity": {
