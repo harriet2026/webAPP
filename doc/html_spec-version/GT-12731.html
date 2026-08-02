@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 · 增量功能规格 · v1</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f6f8;
+      color: #1a1d23;
+      line-height: 1.6;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .page-wrap { max-width: 980px; margin: 0 auto; }
+
+    /* ── section ── */
+    section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    section > h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    section > h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+
+    /* ── incremental section ── */
+    .incremental-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .incr-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: #f8f9fb;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .incr-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #2563eb; color: #fff;
+      font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+    }
+    .incr-header h2 { font-size: 1rem; font-weight: 700; color: #1a1d23; margin: 0; }
+    .incr-header .incr-meta { font-size: 0.72rem; color: #6b7280; margin-left: auto; text-align: right; }
+    .incr-body { padding: 1.5rem 2rem; }
+    .incr-body h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+    .incr-body h4 { font-size: 0.87rem; font-weight: 600; color: #1a1d23; margin-top: 1rem; margin-bottom: 0.5rem; }
+    .incr-body p { font-size: 0.875rem; color: #374151; margin-bottom: 0.75rem; }
+
+    /* ── tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.845rem; margin-bottom: 0.75rem; }
+    th { background: #f3f4f6; color: #374151; font-weight: 600; text-align: left; padding: 0.55rem 0.8rem; border: 1px solid #e5e7eb; }
+    td { padding: 0.5rem 0.8rem; border: 1px solid #e5e7eb; vertical-align: top; color: #374151; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    /* ── code ── */
+    code { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.1em 0.4em; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82em; color: #1a1d23; }
+    pre { background: #1a1d23; color: #e8eaf0; border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; font-size: 0.8rem; line-height: 1.55; margin: 0.75rem 0; }
+    pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+
+    /* ── interaction-preview ── */
+    .interaction-preview {
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+    .interaction-preview h4 { font-size: 0.88rem; font-weight: 700; color: #1a1d23; margin-bottom: 0.35rem; }
+    .interaction-preview .trigger-path { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.9rem; }
+    .interaction-preview figure { margin: 0 0 0.9rem; }
+    .interaction-preview figcaption { font-size: 0.78rem; color: #6b7280; margin-top: 0.35rem; font-style: italic; }
+    .interaction-preview img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
+
+    /* ── callout boxes ── */
+    .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
+    .callout-info    { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; }
+    .callout-warn    { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .callout-removed { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; }
+    .callout-ok      { background: #f0fdf4; border-left: 4px solid #16a34a; color: #15532e; }
+
+    /* ── tag badges ── */
+    .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.15em 0.5em; border-radius: 4px; margin-right: 0.3em; }
+    .tag-removed  { background: #fee2e2; color: #991b1b; }
+    .tag-added    { background: #dcfce7; color: #15532e; }
+    .tag-changed  { background: #fef9c3; color: #854d0e; }
+    .tag-unverif  { background: #f3f4f6; color: #6b7280; }
+    .tag-info     { background: #dbeafe; color: #1e40af; }
+
+    del { color: #9ca3af; text-decoration-color: #dc2626; }
+
+    .version-badge { display: inline-flex; align-items: center; gap: 0.4em; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 0.2em 0.8em; font-size: 0.78rem; color: #374151; }
+    .version-badge .vnum { font-weight: 700; color: #1a1d23; }
+
+    .matrix-legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.78rem; color: #374151; margin-bottom: 0.75rem; }
+
+    /* ── TOC ── */
+    .toc { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
+    .toc a:hover { text-decoration: underline; }
+
+    .toc-l1 {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; border-radius: 6px;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      margin-top: 0.4rem; margin-bottom: 0.15rem;
+    }
+    .toc-l1 > a { font-weight: 700; font-size: 0.9rem; color: #1d4ed8; }
+
+    .toc-l2-group { list-style: none; display: flex; flex-direction: column; gap: 0.2rem; padding-left: 1.5rem; margin-bottom: 0.4rem; }
+    .toc-change {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.65rem; border-radius: 6px;
+      background: #f8f9ff; border: 1px solid #dbeafe;
+    }
+    .toc-change a { font-weight: 600; font-size: 0.85rem; color: #1d4ed8; }
+    .toc-change .toc-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #3b82f6; color: #fff;
+      font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+    }
+    .toc-l3 { padding-left: 2.8rem; }
+    .back-link { display: inline-block; margin-top: 1.5rem; font-size: 0.82rem; color: #2563eb; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ══════════════ 目录 ══════════════ -->
+  <section id="toc">
+    <h2>目录</h2>
+    <ul class="toc">
+      <li><a href="#meta">A. 元信息与事实源</a></li>
+      <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
+
+      <!-- 一级需求：GT-12723 禁用模块的切换交互闪回问题 -->
+      <li class="toc-l1"><a href="#gt-12723">GT-12723 禁用模块的切换交互：加载状态下标签闪回问题解决</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">子页启用态上报门控：加载完成前不上报乐观默认值</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c1-elements">1.3 文件与逐元素变更</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">父级导航兜底真值：抽屉打开即预取模块开关映射</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c2-elements">2.3 逐元素变更</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-003）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-002）</a></li>
+      <li><a href="#version-history">E. 版本历史</a></li>
+    </ul>
+  </section>
+
+  <!-- 需求入口锚点（供目录一级链接跳转）-->
+  <div id="gt-12723" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ A. 元信息 ══════════════ -->
+  <section id="meta">
+    <h2>A. 元信息与事实源</h2>
+    <table>
+      <thead><tr><th>字段</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>文档编号（文件 ticket）</td><td>GT-12731</td></tr>
+        <tr><td>需求名称</td><td>GT-12723 禁用模块的切换交互：点击切换至未启用的模块时，加载状态下模块标签会变更为启用状态，然后再闪回未启用状态问题解决</td></tr>
+        <tr><td>规格类型</td><td>增量规格（Incremental）· 缺陷修复</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v1</span></span></td></tr>
+        <tr><td>生成日期</td><td>2026-08-02</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层抽屉）</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/security/useModuleMaster.ts</code>、
+          <code>src/components/security/UrlProtectionPage.tsx</code>、
+          <code>src/components/security/intent-engine/IntentEnginePage.tsx</code>、
+          <code>src/components/security/AttachmentSecurityPage.tsx</code>、
+          <code>src/components/security/PolicyPipelinePage.tsx</code>
+        </td></tr>
+        <tr><td>webapp commit</td><td><code>19bb469</code></td></tr>
+        <tr><td>对照 spec commit</td><td>not-used</td></tr>
+        <tr><td>历史对话记录</td><td>当前上下文已提供（用户缺陷描述 + 两张问题现象截图 + 代码修复记录）</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 运行中 webapp 浏览器真实截图；3. webapp 源码</td></tr>
+        <tr><td>浏览器验证状态</td><td>2026-08-02 演示环境真实截图（浅色主题 / AI版·单租户 / 平台管理员 / 阶段3 内容层抽屉，宽屏 1920×900）；问题现象截图为用户实拍</td></tr>
+        <tr><td>变更类型</td><td>缺陷修复（渲染时序 / 竞态消除）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本规格为增量文档，记录 GT-12723 的缺陷修复。缺陷现象：点击切换到一个「未启用」模块时，加载期左侧导航的模块标签（圆点 + 摘要）会先短暂变为「已启用」，待真实状态加载完成后又闪回「未启用」。修复从两个层面消除该闪烁：子页在真实状态加载完成前不再向导航上报乐观默认值（变更 1），父级流水线页在抽屉打开时预取模块开关映射作为首帧兜底真值（变更 2）。
+    </div>
+  </section>
+
+  <!-- ══════════════ B. 产品形态 × 角色矩阵 ══════════════ -->
+  <section id="form-role-matrix">
+    <h2>B. 产品形态 × 角色差异矩阵</h2>
+    <div class="matrix-legend">
+      <span>&#x2705; 显示且可操作</span>
+      <span>&#x1F512; 显示但只读</span>
+      <span>&#x274C; 隐藏 / 不存在</span>
+      <span>&#x2014; 该形态无此角色</span>
+      <span>? 无法验证</span>
+    </div>
+    <p style="font-size:0.85rem;color:#374151;margin-bottom:0.75rem;">
+      本次修复作用于「策略流水线 → 阶段3 内容层」抽屉左侧导航的圆点 / 摘要渲染时序，不改变任何模块的可见性或可编辑权限，仅修正加载期的显示时序。矩阵记录抽屉内 4 个内容层模块导航项在各形态 / 角色下的可见性（与本次修复相关的呈现载体）。
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>功能 / 元素</th>
+          <th>变更</th>
+          <th>AI-单<br/>平台管理员</th>
+          <th>传统-单<br/>平台管理员</th>
+          <th>云-多<br/>平台管理员</th>
+          <th>云-多<br/>租户管理员</th>
+          <th>AI-多<br/>平台管理员</th>
+          <th>AI-多<br/>租户管理员</th>
+          <th>传统-多<br/>平台管理员</th>
+          <th>传统-多<br/>租户管理员</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>阶段3 导航 · 附件安全检测圆点/摘要</td>
+          <td>#2</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+        <tr>
+          <td>阶段3 导航 · URL检测与防护圆点/摘要</td>
+          <td>#1 #2</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+        <tr>
+          <td>阶段3 导航 · 内容规则圆点/摘要</td>
+          <td>#2</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+        <tr>
+          <td>阶段3 导航 · 意图引擎圆点/摘要</td>
+          <td>#1 #2</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.8rem;color:#6b7280;margin-top:0.5rem;">
+      ? 标记项：本次仅在 AI版·单租户 / 平台管理员形态下通过浏览器验证（该形态可访问策略流水线抽屉并展示完整 4 模块导航）。其余形态 / 角色（尤其是多租户下的策略流水线抽屉可见性）未在本次逐一验证，列入待确认 Q-001。修复本身为纯前端渲染时序调整，逻辑与形态 / 角色无关。
+    </p>
+  </section>
+
+  <!-- ═════════════ 变更 1 ══════════════ -->
+  <div class="incremental-section" id="change-1">
+    <div class="incr-header">
+      <span class="incr-num">1</span>
+      <h2>子页启用态上报门控：加载完成前不上报乐观默认值</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>useModuleMaster.ts</code>、<code>UrlProtectionPage.tsx</code>、<code>IntentEnginePage.tsx</code>、<code>AttachmentSecurityPage.tsx</code><br/>变更类型：缺陷修复 · 2026-08-02</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c1-overview">1.1 方案概述</h3>
+      <p>
+        阶段3 内容层抽屉的左侧导航（<code>PolicyPipelinePage</code> 渲染）会为每个模块显示一个「圆点 + 摘要」：模块启用时圆点填充、摘要显示能力清单（如「信誉评估/沙箱分析/仿冒检测」）；未启用时圆点空心、摘要显示「未启用」。各模块子页负责把自己的真实启用态通过 <code>onEnabledChange</code> 回调上报给导航。
+      </p>
+      <div class="callout callout-removed">
+        <strong>缺陷根因：</strong>URL检测与防护、意图引擎子页通过 <code>useModuleMaster</code> 读取启用态，附件安全检测子页通过其本地 draft 读取。两者在 <code>GET /security/modules</code>（或附件配置）返回<strong>之前</strong>，都把启用态<strong>乐观初始化为 <code>true</code></strong>，并立即经 <code>onEnabledChange</code> 上报。于是点击一个「未启用」模块时，导航先按「已启用」渲染（圆点亮起、摘要显示能力清单），等真实状态加载完成后才翻转回「未启用」——形成用户观察到的「标签先变启用、再闪回未启用」。
+      </div>
+      <div class="callout callout-ok">
+        <strong>最终实现方案：</strong>为 <code>useModuleMaster</code> 新增 <code>loaded: boolean</code> 状态，区分「加载中的乐观默认」与「已知的真实状态」；仅当 <code>loaded === true</code> 时子页才向导航上报。URL / 意图子页改用 <code>if (moduleLoaded) onEnabledChange?.(moduleEnabled)</code> 门控上报；附件子页复用其已有的 <code>loading</code> 状态，改为 <code>if (!loading) onEnabledChange?.(draft.enabled)</code>。加载期间子页不再推送乐观值，导航首帧改由父级兜底真值决定（见变更 2）。
+      </div>
+
+      <h3 id="c1-states">1.2 截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>S-1 · 问题现象（修复前）：URL检测与防护处于「未启用」稳态</h4>
+        <p class="trigger-path">触发路径：策略流水线 → 打开阶段3 内容层抽屉 → 当前停留在「内容规则」，左侧导航中「URL检测与防护」为未启用态（空心圆点 + 摘要「未启用」）· 用户实拍（浅色主题）</p>
+        <figure>
+          <img src="./screenshots/GT-12723-S1-problem-url-disabled-nav-light.png" alt="内容规则页面，左侧导航 URL检测与防护 显示未启用（空心圆点 + 未启用摘要），红框标注" />
+          <figcaption>图 S-1：修复前稳态。左侧导航「URL检测与防护」为空心圆点、摘要文字为「未启用」（红框标注）。这是点击进入该模块前的起始态。</figcaption>
+        </figure>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>S-2 · 问题现象（修复前）：点击后加载期标签闪变为「已启用」</h4>
+        <p class="trigger-path">触发路径：从 S-1 起，点击左侧导航「URL检测与防护」→ 加载期间该导航项标签闪变为已启用（实心圆点 + 能力摘要「信誉评估/沙箱分析/仿冒检测」）→ 真实状态返回后又闪回未启用 · 用户实拍（浅色主题）</p>
+        <figure>
+          <img src="./screenshots/GT-12723-S2-problem-url-enabled-flash-light.png" alt="点击 URL检测与防护 后加载态，导航标签短暂显示已启用与能力摘要，红框标注" />
+          <figcaption>图 S-2：修复前的瞬时闪变态。加载期导航项被子页乐观上报的 <code>true</code> 覆盖，圆点填充、摘要变为「信誉评估/沙箱分析/仿冒检测」、右上角出现「已启用」——与 S-1 的真实未启用态矛盾，随后闪回。此为缺陷的直接观感。</figcaption>
+        </figure>
+        <div class="callout callout-warn">
+          该「闪回」为毫秒级瞬时竞态，取决于接口返回时机，<strong>无法稳定截取为静态图</strong>。S-2 为用户实拍到的其中一帧，用于说明现象；修复后该中间帧不再出现（见变更 2 的稳态截图 S-3）。
+        </div>
+      </div>
+
+      <h3 id="c1-elements">1.3 文件与逐元素变更</h3>
+      <table>
+        <thead>
+          <tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>useModuleMaster.ts</code> · 状态</td>
+            <td>仅 <code>enabled</code>（初值 <code>true</code>）</td>
+            <td>新增 <code>loaded</code>（初值 <code>false</code>），<code>getSecurityModules</code> 成功后置 <code>true</code></td>
+            <td><span class="tag tag-added">新增</span>区分乐观默认与真实状态；<code>return</code> 中导出 <code>loaded</code></td>
+          </tr>
+          <tr>
+            <td><code>UrlProtectionPage.tsx</code> · 上报 effect</td>
+            <td><code>onEnabledChange?.(moduleEnabled)</code>（无条件）</td>
+            <td><code>if (moduleLoaded) onEnabledChange?.(moduleEnabled)</code></td>
+            <td><span class="tag tag-changed">变更</span>依赖数组新增 <code>moduleLoaded</code></td>
+          </tr>
+          <tr>
+            <td><code>IntentEnginePage.tsx</code> · 上报 effect</td>
+            <td><code>onEnabledChange?.(moduleEnabled)</code>（无条件）</td>
+            <td><code>if (moduleLoaded) onEnabledChange?.(moduleEnabled)</code></td>
+            <td><span class="tag tag-changed">变更</span>依赖数组新增 <code>moduleLoaded</code></td>
+          </tr>
+          <tr>
+            <td><code>AttachmentSecurityPage.tsx</code> · 上报 effect</td>
+            <td><code>onEnabledChange?.(draft.enabled)</code>（无条件）</td>
+            <td><code>if (!loading) onEnabledChange?.(draft.enabled)</code></td>
+            <td><span class="tag tag-changed">变更</span>复用已有 <code>loading</code> 状态门控，依赖数组新增 <code>loading</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">
+        附件子页与 URL / 意图子页的门控字段不同（<code>loading</code> vs <code>useModuleMaster.loaded</code>），因为附件页未使用 <code>useModuleMaster</code> 而是自有 draft 加载逻辑；两者的语义与效果一致——加载完成前不上报。详见差异 D-002。
+      </div>
+
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ═════════════ 变更 2 ══════════════ -->
+  <div class="incremental-section" id="change-2">
+    <div class="incr-header">
+      <span class="incr-num">2</span>
+      <h2>父级导航兜底真值：抽屉打开即预取模块开关映射</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>PolicyPipelinePage.tsx</code><br/>变更类型：缺陷修复 · 2026-08-02</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c2-overview">2.1 方案概述</h3>
+      <p>
+        变更 1 让子页在加载完成前不上报，但此时父级 <code>PolicyPipelinePage</code> 中对应模块的本地状态（<code>urlModuleEnabled</code> / <code>attachmentEnabled</code> / <code>intentEngineEnabled</code>）仍为 <code>undefined</code>。原逻辑在 <code>undefined</code> 时会退回 <code>item.functional</code>（恒为 <code>true</code>），因此首帧仍会把「未启用」模块画成启用——虽然不再「闪回」，但首帧依旧不正确。
+      </p>
+      <div class="callout callout-ok">
+        <strong>最终实现方案：</strong>父级复用已有的 <code>security-modules</code> 查询（原仅在 stage5 启用），将其 <code>enabled</code> 门控从 <code>stage5Active</code> 放宽为 <code>drawerOpen</code>，使抽屉一打开就预取模块开关映射 <code>securityModulesMap</code>。在导航渲染时，stage3 三个模块（<code>url</code> / <code>attachment</code> / <code>intentEngine</code>）的圆点 <code>dotOn</code> 与摘要 <code>summaryText</code> 判断改为「<strong>本地状态 <code>??</code> 父级兜底真值</strong>」：本地状态存在（含用户未保存的草稿切换）时优先，否则用 <code>securityModulesMap</code> 中的真实持久化值，只有二者都缺失时才退回 <code>item.functional</code>。这样首帧即用真值渲染。</strong>
+      </div>
+      <pre><code>// PolicyPipelinePage.tsx（导航渲染，简化示意）
+const stage3Fallback = securityModulesMap?.[stage3ModuleKey[item.key]];
+const urlEnabled = item.key === 'url' ? (urlModuleEnabled ?? stage3Fallback) : undefined;
+// …attachment / intentEngine 同理
+const dotOn = stage5Enabled !== undefined ? stage5Enabled
+  : urlEnabled !== undefined ? urlEnabled
+  : /* … */ item.functional;</code></pre>
+
+      <h3 id="c2-states">2.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-3 · 修复后稳态：阶段3 左侧导航首帧即显示正确启用态</h4>
+        <p class="trigger-path">触发路径：策略流水线 → 点击「内容规则 · 配置」打开阶段3 内容层抽屉 → 展开左侧导航 · 浏览器实拍（浅色主题 / AI版·单租户 / 平台管理员 / 1920×900）</p>
+        <figure>
+          <img src="./screenshots/GT-12723-S3-stage3-nav-all-enabled-steady-light-1920x900.png" alt="阶段3 内容层抽屉，左侧导航 4 个模块均显示实心圆点与能力摘要，稳态无闪烁" />
+          <figcaption>图 S-3：修复后稳态。左侧导航 4 个模块（附件安全检测 / URL检测与防护 / 内容规则 / 意图引擎）圆点与摘要在首帧即反映真实持久化状态，模块切换过程中不再出现「先启用后闪回」的中间帧。当前演示（mock）环境下 4 个模块均为启用态，故均显示实心圆点与能力摘要。</figcaption>
+        </figure>
+      </div>
+      <div class="interaction-preview">
+        <h4>S-4 · URL检测与防护 模块详情页（切换目标模块）</h4>
+        <p class="trigger-path">触发路径：从 S-3 起，点击左侧导航「URL检测与防护」→ 右侧内容区切换为该模块详情（链接保护 / 点击时安全策略）· 浏览器实拍（浅色主题 / 1920×900）</p>
+        <figure>
+          <img src="./screenshots/GT-12723-S4-url-module-detail-light-1920x900.png" alt="切换到 URL检测与防护 模块，左侧导航该项高亮选中，圆点与摘要稳定，无闪回" />
+          <figcaption>图 S-4：切换到 URL检测与防护 后，左侧导航该项高亮选中，其圆点 / 摘要保持稳定，切换全程无「已启用 → 未启用」闪回。右上角总开关反映真实启用态。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c2-elements">2.3 逐元素变更</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>useQuery(['security-modules'])</code> · <code>enabled</code></td>
+            <td><code>stage5Active</code></td>
+            <td><code>drawerOpen</code></td>
+            <td><span class="tag tag-changed">变更</span>抽屉一打开即预取，供 stage3 首帧兜底</td>
+          </tr>
+          <tr>
+            <td>导航 <code>dotOn</code>（url/attachment/intentEngine）</td>
+            <td>本地状态 <code>undefined</code> → <code>item.functional</code>（恒 true）</td>
+            <td>本地状态 <code>??</code> <code>securityModulesMap[key]</code> → 最后才 <code>item.functional</code></td>
+            <td><span class="tag tag-changed">变更</span>新增 <code>stage3ModuleKey</code> 映射（url→url_protection 等）</td>
+          </tr>
+          <tr>
+            <td>导航 <code>summaryText</code>（url/attachment/intentEngine）</td>
+            <td>仅依据本地状态判断「未启用」摘要</td>
+            <td>依据「本地状态 <code>??</code> 兜底真值」判断，首帧即显示正确摘要</td>
+            <td><span class="tag tag-changed">变更</span>新增 <code>*EnabledForSummary</code> 中间量</td>
+          </tr>
+          <tr>
+            <td><code>import</code> · <code>SecurityModulePage</code> 类型</td>
+            <td>（未导入）</td>
+            <td>从 <code>@/lib/api/security-modules</code> 追加 <code>type SecurityModulePage</code></td>
+            <td><span class="tag tag-added">新增</span>供 <code>stage3ModuleKey</code> 映射类型标注</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ C. 差异标注 ══════════════ -->
+  <section id="diff">
+    <h2>C. 差异标注</h2>
+
+    <h3>D-001 · 演示（mock）环境 URL 模块「加载设置失败」，无法在本环境复现「未启用」稳态</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">已知·环境限制</span></td></tr>
+        <tr><td>描述</td><td>在当前演示环境点击「URL检测与防护」详情页会出现 <code>加载设置失败</code> toast，其总开关无法持久化切换（保持已启用）。因此 4 个内容层模块在本环境均呈启用态，无法在浏览器中复现用户截图（S-1）中的「未启用」稳态来直接对比修复前后。</td></tr>
+        <tr><td>处理</td><td>以用户实拍的问题现象截图（S-1 / S-2）作为修复前证据；以浏览器实拍稳态（S-3 / S-4）证明修复后导航渲染稳定、无闪回中间帧。</td></tr>
+        <tr><td>验证依据</td><td>S-4 截图右下角 <code>加载设置失败</code> toast；<code>useModuleMaster</code> 的 <code>getSecurityModules().catch(() =&gt; {})</code> 静默失败分支</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-002 · 附件子页门控字段与 URL/意图子页不同（loading vs loaded），机制不同但效果一致</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·有意保留</span></td></tr>
+        <tr><td>描述</td><td>URL / 意图子页经 <code>useModuleMaster</code>，以新增的 <code>loaded</code> 门控上报；附件子页未使用 <code>useModuleMaster</code>，而是复用其自有的 <code>loading</code> 状态门控（<code>!loading</code> 时上报）。两条路径语义一致——真实状态加载完成前不向导航上报乐观默认值——但字段来源不同。</td></tr>
+        <tr><td>解决版本</td><td>GT-12723 · 2026-08-02</td></tr>
+        <tr><td>验证依据</td><td><code>UrlProtectionPage.tsx</code> / <code>IntentEnginePage.tsx</code> 使用 <code>moduleLoaded</code>；<code>AttachmentSecurityPage.tsx</code> 使用 <code>!loading</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-003 · security-modules 查询门控由 stage5Active 放宽为 drawerOpen，取数时机提前</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·预期内</span></td></tr>
+        <tr><td>描述</td><td><code>useQuery(['security-modules'])</code> 原仅在 stage5 激活时取数，现放宽为抽屉打开（<code>drawerOpen</code>）即取数。这会让该请求在打开任意阶段抽屉时都触发一次（此前仅 stage5）。由于使用 React Query 缓存（同 queryKey），重复打开不会重复请求，额外开销可忽略。</td></tr>
+        <tr><td>解决版本</td><td>GT-12723 · 2026-08-02</td></tr>
+        <tr><td>验证依据</td><td><code>PolicyPipelinePage.tsx</code> 中 <code>enabled: drawerOpen</code>；queryKey 未变（<code>['security-modules']</code>）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ D. 待确认 ══════════════ -->
+  <section id="questions">
+    <h2>D. 待确认事项</h2>
+
+    <h3>Q-001 · 多租户形态 / 租户管理员角色下策略流水线抽屉的可见性与导航呈现</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>本次仅在 AI版·单租户 / 平台管理员下验证（该形态可打开阶段3 抽屉并展示 4 模块导航）。多租户形态、以及租户管理员角色下是否可访问策略流水线抽屉、导航呈现是否一致，未逐一验证。</td></tr>
+        <tr><td>影响</td><td>产品形态 × 角色矩阵中标记为 ? 的单元格</td></tr>
+        <tr><td>建议</td><td>在各形态 / 角色账号下打开策略流水线阶段3 抽屉，确认导航可见性与圆点 / 摘要渲染后补充矩阵</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Q-002 · 真实后端环境下的闪回消除效果需回归验证</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>演示环境模块状态由 mock 提供且加载极快 / 或加载失败（D-001），难以放大加载窗口来直观观察闪回。真实后端下 <code>GET /security/modules</code> 有网络延迟时，修复效果（首帧即真值、无闪回）需在存在「未启用」模块的真实数据下回归确认。</td></tr>
+        <tr><td>影响</td><td>修复在慢速网络下的实际观感</td></tr>
+        <tr><td>建议</td><td>在测试环境将某内容层模块设为未启用，配合网络限速打开阶段3 抽屉并在模块间切换，确认导航项全程稳定为「未启用」，无「已启用」中间帧</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ E. 版本历史 ══════════════ -->
+  <section id="version-history">
+    <h2>E. 版本历史</h2>
+    <table>
+      <thead><tr><th>版本</th><th>日期</th><th>commit</th><th>摘要</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>v1</td>
+          <td>2026-08-02</td>
+          <td><code>19bb469</code></td>
+          <td>新建 GT-12731.html，记录 GT-12723 禁用模块切换交互闪回修复：变更 1（子页 useModuleMaster 新增 loaded、URL/意图/附件子页加载完成前不上报乐观启用态）、变更 2（PolicyPipelinePage 抽屉打开即预取 security-modules 作为 stage3 导航首帧兜底真值，dotOn/summaryText 改为「本地状态 ?? 兜底真值」）；含用户实拍问题现象截图 S-1/S-2 与浏览器实拍修复后稳态 S-3/S-4；差异 D-001~D-003、待确认 Q-001~Q-002。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <a class="back-link" href="#toc">↑ 返回目录</a>
+
+</div>
+</body>
+</html>
