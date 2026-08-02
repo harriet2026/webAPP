@@ -102,19 +102,10 @@ export function ImageDetectTab({
               <SelectContent className="min-w-[var(--radix-select-trigger-width)] w-max" data-testid="ocr-detection-mode-options">
                 <SelectItem value="none" data-testid="ocr-detection-mode-none">{t('imageDetect.ocrMode_none')}</SelectItem>
                 <SelectItem value="light" data-testid="ocr-detection-mode-light">{t('imageDetect.ocrMode_light')}</SelectItem>
-                <SelectItem value="deep" data-testid="ocr-detection-mode-deep">
-                  {t('imageDetect.ocrMode_deep')}
-                </SelectItem>
+                <SelectItem value="deep" data-testid="ocr-detection-mode-deep">{t('imageDetect.ocrMode_deep')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          {config.ocr_mode === 'deep' && (
-            <div className="rounded-lg border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground" data-testid="ocr-deep-hint">
-              <Info className="mb-1 inline-block h-4 w-4 align-text-bottom text-primary" />
-              {' '}{t('imageDetect.ocrMode_deep_hint')}
-            </div>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="ocr-limit">{t('imageDetect.ocrLimit')}</Label>
             <div className="flex items-center gap-2">
@@ -132,6 +123,12 @@ export function ImageDetectTab({
             </div>
           </div>
         </div>
+        {config.ocr_mode === 'deep' && (
+          <div className="flex items-start gap-2 rounded-lg border border-border/70 bg-muted/30 p-3 text-sm text-muted-foreground" data-testid="ocr-deep-hint">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <span>{t('imageDetect.ocrMode_deep_hint')}</span>
+          </div>
+        )}
       </section>
 
       <section className="space-y-4 rounded-lg border border-border/70 bg-muted/30 p-4">
