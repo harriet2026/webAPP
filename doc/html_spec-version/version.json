@@ -1,6 +1,6 @@
 {
   "module": "sender-filter-optimization",
-  "current_version": 15,
+  "current_version": 16,
   "history": [
     {
       "version": 1,
@@ -136,6 +136,15 @@
       "ticket": "GT-12716",
       "incremental": true,
       "summary": "GT-12716 v12（发信行为管控——新建规则：查看配置示例功能不可用问题修复）：追加 GT-12716 需求节（1个变更点）：为「查看配置示例」三张示例卡片补充 onClick 填充处理器，卡片 div 加 cursor-pointer hover 样式+group，标题行右侧新增悬停提示 span（behaviorControl.examples.fill，4语言各1个key共4个）；onClick 依次调用 setValue（shouldDirty:true）写入 time_window/conditions[]/or_enabled 三字段；三场景预设值：正常用户（15min,[mail_count:50,ip_count:2],AND）/账号被盗（15min,[ip_count:10,mail_count:200],OR）/销售部群发（1hour,[recipient_count:500],AND）；仅修改 BehaviorControlDrawer.tsx 和四语言JSON（各1key）；目录追加GT-12716卡片块；补充截图S-40（折叠态）/S-41（展开三卡片）/S-42（正常用户场景填充后）；差异标注新增D-13（已修复）；版本历史追加v12。"
+    },
+    {
+      "version": 16,
+      "generated_at": "2026-08-02",
+      "webapp_commit": "1623c58",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12717",
+      "incremental": true,
+      "summary": "GT-12717 v13（发信行为管控——新建规则：【选择群组】选择框及【管理群组】按钮不可用）：追加 GT-12717 需求节（2个变更点）：① groupsQuery 加 enabled:open 守卫 + groupTypeOptions map 改从解析后 metadata 取 m.member_count，修复 senderGroups 始终为空导致 Select 无选项；② onClick 空值守卫从 '' || null 改为 '' || '__all__'，并新增 GroupPreviewDialog 子组件（叠在抽屉上方，含群组名标题/类型Badge/成员总数/搜索框/成员列表最多100条+截断提示/关闭按钮，数据复用已有 groupsQuery 无额外 API 请求）；仅修改 BehaviorControlDrawer.tsx；四语言各新增9个 i18n key（behaviorControl.groupPreview.*，共36个）；目录追加GT-12717卡片块；补充截图S-43（切换群组类型后表单出现）/S-44（Select展开5个群组选项含成员数）/S-45（选中VIP客户回显）/S-46（管理群组预览Dialog全貌）/S-47（搜索corp过滤成员）；差异标注新增D-14（已修复）；版本历史追加v13。"
     }
   ]
 }
