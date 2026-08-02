@@ -19,6 +19,18 @@ export type PanelKind =
   | 'weekday'
   | 'mime';
 
+// 数值/阈值类条件的取值约束（语言无关）。unitKey 指向 i18n 单位词
+// （v3Conditions.units.*）；min/max/step 同时用于 <input type="number"> 的原生
+// 约束、配置说明卡的「有效范围」以及表达式预览的「超出范围」诊断。仅需要的
+// 条件声明；缺省表示无额外约束。此处只放语言无关的数字/键，可翻译文案（对象
+// 含义、运算符业务影响、示例、推荐配置）走 i18n 的 desc_<key> 可选子键。
+export interface ConditionMeta {
+  unitKey?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+}
+
 export interface ConditionDef {
   key: string; // i18n + identity key
   category: ConditionCategory;
@@ -26,6 +38,7 @@ export interface ConditionDef {
   envelope?: boolean; // SMTP envelope marker for the preview
   panel: PanelKind;
   subgroup?: 'headerLayer' | 'envelopeLayer' | 'senderAttr' | 'connection' | 'contentAttr';
+  meta?: ConditionMeta; // 数值约束 + 单位（可选，仅数值/阈值类条件声明）
 }
 
 export const CONDITIONS: ConditionDef[] = [
@@ -54,19 +67,19 @@ export const CONDITIONS: ConditionDef[] = [
   { key: 'attachmentContent', category: 'attachment', field: 'doccontent', panel: 'text' },
   { key: 'attachmentName', category: 'attachment', field: 'attachment_names', panel: 'text' },
   { key: 'attachmentType', category: 'attachment', field: 'attachment_types', panel: 'mime' },
-  { key: 'attachmentCount', category: 'attachment', field: 'attachment_count', panel: 'number' },
+  { key: 'attachmentCount', category: 'attachment', field: 'attachment_count', panel: 'number', meta: { unitKey: 'count', min: 0, max: 100, step: 1 } },
   { key: 'encryptedAttachment', category: 'attachment', field: 'is_encrypted_attachment', panel: 'select' },
   { key: 'attachmentMd5', category: 'attachment', field: 'attachment_md5', panel: 'text' },
-  { key: 'attachmentSizeTotal', category: 'attachment', field: 'attachment_size_total', panel: 'number' },
-  { key: 'attachmentSizeSingle', category: 'attachment', field: 'attachment_size_single', panel: 'number' },
-  { key: 'nestedZipLevel', category: 'attachment', field: 'nested_zip_level', panel: 'number' },
-  { key: 'nestedFileCount', category: 'attachment', field: 'nested_file_count', panel: 'number' },
+  { key: 'attachmentSizeTotal', category: 'attachment', field: 'attachment_size_total', panel: 'number', meta: { unitKey: 'mb', min: 0, max: 1024, step: 1 } },
+  { key: 'attachmentSizeSingle', category: 'attachment', field: 'attachment_size_single', panel: 'number', meta: { unitKey: 'mb', min: 0, max: 1024, step: 1 } },
+  { key: 'nestedZipLevel', category: 'attachment', field: 'nested_zip_level', panel: 'number', meta: { unitKey: 'level', min: 1, max: 20, step: 1 } },
+  { key: 'nestedFileCount', category: 'attachment', field: 'nested_file_count', panel: 'number', meta: { unitKey: 'count', min: 0, max: 10000, step: 1 } },
   { key: 'imageQrCodeResult', category: 'attachment', field: 'image_qr_code_result', panel: 'select' },
-  { key: 'qrCodeCount', category: 'attachment', field: 'qr_code_count', panel: 'number' },
+  { key: 'qrCodeCount', category: 'attachment', field: 'qr_code_count', panel: 'number', meta: { unitKey: 'count', min: 0, max: 100, step: 1 } },
   { key: 'attachmentZipBomb', category: 'attachment', field: 'is_zip_bomb', panel: 'select' },
 
   // --- 安全检测 (22) ---
-  { key: 'urlCount', category: 'security', field: 'url_count', panel: 'number' },
+  { key: 'urlCount', category: 'security', field: 'url_count', panel: 'number', meta: { unitKey: 'count', min: 0, max: 1000, step: 1 } },
   { key: 'url', category: 'security', field: 'urls', panel: 'text' },
   { key: 'rblResult', category: 'security', field: 'rbl', panel: 'select' },
   { key: 'urlSandboxResult', category: 'security', field: null, panel: 'select' },
@@ -76,18 +89,18 @@ export const CONDITIONS: ConditionDef[] = [
   { key: 'dkimResult', category: 'security', field: 'dkim_result', panel: 'select' },
   { key: 'dmarcResult', category: 'security', field: 'dmarc_result', panel: 'select' },
   { key: 'ptrResult', category: 'security', field: 'ptr_result', panel: 'select' },
-  { key: 'similarDomain', category: 'security', field: 'domain_imp', panel: 'number' },
+  { key: 'similarDomain', category: 'security', field: 'domain_imp', panel: 'number', meta: { unitKey: 'editDistance', min: 0, max: 10, step: 1 } },
   { key: 'displayNameSpoof', category: 'security', field: 'exec_imp', panel: 'select' },
   { key: 'mailFromEmpty', category: 'security', field: 'mailfrom_empty', panel: 'select' },
   { key: 'mailFromFromConsistency', category: 'security', field: 'envelope_header_mismatch', panel: 'select' },
   { key: 'virusScanResult', category: 'security', field: 'virus_scan_result', panel: 'select' },
   { key: 'comprehensiveEngineResult', category: 'security', field: 'cac_tag', panel: 'select' },
-  { key: 'senderIpCount15Min', category: 'security', field: 'sender_ip_count_15min', panel: 'number' },
-  { key: 'senderRecipientCount15Min', category: 'security', field: 'sender_recipient_count_15min', panel: 'number' },
-  { key: 'senderMailCount15Min', category: 'security', field: 'sender_mail_count_15min', panel: 'number' },
-  { key: 'senderMailCountDaily', category: 'security', field: 'sender_mail_count_daily', panel: 'number' },
-  { key: 'senderRateLimit15', category: 'security', field: 'sender_rate_limit_15', panel: 'number' },
-  { key: 'recipientCount', category: 'security', field: 'recipient_count', panel: 'number' },
+  { key: 'senderIpCount15Min', category: 'security', field: 'sender_ip_count_15min', panel: 'number', meta: { unitKey: 'count', min: 0, max: 10000, step: 1 } },
+  { key: 'senderRecipientCount15Min', category: 'security', field: 'sender_recipient_count_15min', panel: 'number', meta: { unitKey: 'count', min: 0, max: 100000, step: 1 } },
+  { key: 'senderMailCount15Min', category: 'security', field: 'sender_mail_count_15min', panel: 'number', meta: { unitKey: 'count', min: 0, max: 100000, step: 1 } },
+  { key: 'senderMailCountDaily', category: 'security', field: 'sender_mail_count_daily', panel: 'number', meta: { unitKey: 'count', min: 0, max: 1000000, step: 1 } },
+  { key: 'senderRateLimit15', category: 'security', field: 'sender_rate_limit_15', panel: 'number', meta: { unitKey: 'count', min: 0, max: 100000, step: 1 } },
+  { key: 'recipientCount', category: 'security', field: 'recipient_count', panel: 'number', meta: { unitKey: 'count', min: 0, max: 10000, step: 1 } },
 ];
 
 export interface CatalogueItem {

@@ -43,7 +43,55 @@ export interface LeafSummary {
   /** How many trailing values are folded into "+N" beyond the first two shown. */
   foldedCount: number;
   incomplete: boolean;
+  /**
+   * 已翻译的精细诊断文案列表：指出「缺哪个字段 / 合法区间 / 超出有效范围」等，
+   * 供预览逐条展示，替代原先扁平的「配置不完整」。incomplete 为真时至少含一条
+   * 阻断性原因；即使 incomplete 为假，也可能含「超出建议范围」这类提示性原因。
+   */
+  incompleteReasons: string[];
   exclude: boolean;
+}
+
+// 数值面板的取值诊断：返回 { incomplete, reasons }。incomplete 表示存在阻断性
+// 缺失（必填阈值/区间端点为空）；reasons 为逐条已翻译文案，含缺失与超范围提示。
+// def.meta 提供 min/max 用于范围校验（缺省则跳过范围检查）。
+function diagnoseNumber(
+  leaf: ConditionLeaf,
+  meta: { min?: number; max?: number } | undefined,
+  t: (key: string, values?: Record<string, string | number>) => string,
+): { incomplete: boolean; reasons: string[] } {
+  const reasons: string[] = [];
+  const inRange = (n: number) =>
+    (meta?.min === undefined || n >= meta.min) && (meta?.max === undefined || n <= meta.max);
+  const rangeText = () =>
+    t('incompleteReasonRange', {
+      min: meta?.min ?? Number.NEGATIVE_INFINITY,
+      max: meta?.max ?? Number.POSITIVE_INFINITY,
+    });
+
+  if (leaf.operator === 'between') {
+    const [loRaw, hiRaw] = leaf.value.split(',');
+    const lo = (loRaw ?? '').trim();
+    const hi = (hiRaw ?? '').trim();
+    if (lo === '' || hi === '') {
+      reasons.push(t('incompleteReasonBetween'));
+      return { incomplete: true, reasons };
+    }
+    const loN = Number(lo);
+    const hiN = Number(hi);
+    if (Number.isFinite(loN) && Number.isFinite(hiN) && loN > hiN) reasons.push(t('incompleteReasonBetweenOrder'));
+    if ((Number.isFinite(loN) && !inRange(loN)) || (Number.isFinite(hiN) && !inRange(hiN))) reasons.push(rangeText());
+    return { incomplete: false, reasons };
+  }
+
+  const raw = (leaf.value.split(',')[0] ?? '').trim();
+  if (raw === '') {
+    reasons.push(t('incompleteReasonThreshold'));
+    return { incomplete: true, reasons };
+  }
+  const n = Number(raw);
+  if (Number.isFinite(n) && !inRange(n)) reasons.push(rangeText());
+  return { incomplete: false, reasons };
 }
 
 
@@ -56,7 +104,10 @@ export function mapKeyDisplayName(leaf: ConditionLeaf): string {
   return key.startsWith('grp:') ? key.slice('grp:'.length) : key;
 }
 
-export function summarizeLeaf(leaf: ConditionLeaf, t: (key: string) => string): LeafSummary {
+export function summarizeLeaf(
+  leaf: ConditionLeaf,
+  t: (key: string, values?: Record<string, string | number>) => string,
+): LeafSummary {
   const def = defFor(leaf);
   const panel = def?.panel;
   const envelope = !!def?.envelope;
@@ -84,8 +135,20 @@ export function summarizeLeaf(leaf: ConditionLeaf, t: (key: string) => string): 
   const shown = values.slice(0, 2);
   const foldedCount = values.length > 2 ? values.length - 2 : 0;
 
-  const needsValue = panelNeedsValueForCompleteness(panel);
-  const incomplete = needsValue && values.every((v) => v.trim() === '');
+  // 诊断：数值面板走 diagnoseNumber（修复此前 number 恒判「完整」的缺陷——空
+  // 阈值/缺区间端点现在会被判为不完整并给出具体原因 + 超范围提示）；其余面板
+  // 沿用原「必填且全空即不完整」规则，并补一条通用缺失原因文案。
+  let incomplete: boolean;
+  let incompleteReasons: string[];
+  if (panel === 'number') {
+    const diag = diagnoseNumber(leaf, def?.meta, t);
+    incomplete = diag.incomplete;
+    incompleteReasons = diag.reasons;
+  } else {
+    const needsValue = panelNeedsValueForCompleteness(panel);
+    incomplete = needsValue && values.every((v) => v.trim() === '');
+    incompleteReasons = incomplete ? [t('incompleteReasonMissingValue')] : [];
+  }
 
   return {
     leaf,
@@ -98,6 +161,7 @@ export function summarizeLeaf(leaf: ConditionLeaf, t: (key: string) => string): 
     values: shown,
     foldedCount,
     incomplete,
+    incompleteReasons,
     exclude: leaf.exclude,
   };
 }

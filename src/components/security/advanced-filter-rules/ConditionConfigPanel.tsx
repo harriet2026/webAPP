@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MapKeySelect } from '@/components/rules/MapKeySelect';
 import { cn } from '@/lib/utils';
-import { CONDITIONS, type ConditionDef } from './catalogue';
+import { CONDITIONS, type ConditionDef, type ConditionMeta, type PanelKind } from './catalogue';
 import { MATCH_MODE_TO_OPERATOR, OPERATOR_TO_MATCH_MODE, type ConditionLeaf, type MatchMode } from './serde';
 import { splitDisplayValues } from './expression';
 import type { FieldDef } from '@/types/unified-rules';
@@ -74,7 +74,12 @@ interface Props {
 }
 
 export function ConditionConfigPanel({ leaf, fieldDefs, onChange }: Props) {
-  const t = useTranslations('advancedRulesFeature') as unknown as T;
+  const tt = useTranslations('advancedRulesFeature');
+  const t = tt as unknown as T;
+  // 说明卡的对象含义 / 运算符影响 / 有效示例 / 推荐配置为「可选」子键：仅当
+  // desc_<key> 里声明了该子键才渲染，未声明的条件自动退化为原三段式，避免对
+  // 全部 54 条条件强制补齐。用 next-intl 的 has() 做存在性判断，不臆造缺省文案。
+  const hasKey = (key: string) => tt.has(key);
 
   if (!leaf) {
     return (
@@ -103,14 +108,7 @@ export function ConditionConfigPanel({ leaf, fieldDefs, onChange }: Props) {
         </span>
       </div>
 
-      {def && (
-        <div className="rounded-md border border-green-200 bg-green-50 p-2.5 text-xs text-green-800 dark:border-green-900 dark:bg-green-950/30 dark:text-green-300" data-testid="condition-desc-card">
-          <b className="mb-1 block">{t('v3Conditions.descCardTitle')}</b>
-          <div>{t('v3Conditions.descSourceLabel')}: {t(`v3Conditions.desc_${def.key}.source`)}</div>
-          <div>{t('v3Conditions.descUsageLabel')}: {t(`v3Conditions.desc_${def.key}.usage`)}</div>
-          <div>{t('v3Conditions.descNoteLabel')}: {t(`v3Conditions.desc_${def.key}.note`)}</div>
-        </div>
-      )}
+      {def && <DescriptionCard def={def} fd={fd} t={t} hasKey={hasKey} />}
 
       <PanelBody leaf={leaf} def={def} fd={fd} onChange={patch} t={t} />
 
@@ -131,6 +129,70 @@ export function ConditionConfigPanel({ leaf, fieldDefs, onChange }: Props) {
   );
 }
 
+// inputTypePanel — 说明卡「输入类型」的取值：map_* 字段统一归为「群组」（走
+// MapKeySelect），否则用 def.panel。与 PanelBody 的实际渲染分支保持一致。
+function inputTypePanel(def: ConditionDef, fd: FieldDef | undefined): PanelKind {
+  return fd?.type?.startsWith('map_') ? 'group' : def.panel;
+}
+
+// rangeText — 由 meta.min/max 拼出「有效范围」可读文本。仅一端有界时给出
+// 「≥min」/「≤max」，两端都有界给出「min ~ max」。
+function rangeText(meta: ConditionMeta, t: T): string {
+  const { min, max } = meta;
+  if (min !== undefined && max !== undefined) return t('v3Conditions.rangeBoth', { min, max });
+  if (min !== undefined) return t('v3Conditions.rangeMin', { min });
+  if (max !== undefined) return t('v3Conditions.rangeMax', { max });
+  return '';
+}
+
+// DescriptionCard — 条件配置说明卡。在原「数据来源 / 用途 / 注意」三段之上，
+// 追加贴合当前控件的结构化说明：输入类型、单位、有效范围，以及可选的对象含义、
+// 支持运算符、有效示例、推荐配置（后四项仅当 desc_<key> 声明了对应子键才渲染）。
+function DescriptionCard({
+  def,
+  fd,
+  t,
+  hasKey,
+}: {
+  def: ConditionDef;
+  fd: FieldDef | undefined;
+  t: T;
+  hasKey: (key: string) => boolean;
+}) {
+  const base = `v3Conditions.desc_${def.key}`;
+  const meta = def.meta;
+  const range = meta ? rangeText(meta, t) : '';
+  const optionalRows: Array<{ label: string; sub: string }> = [
+    { label: t('v3Conditions.descObjectLabel'), sub: 'object' },
+    { label: t('v3Conditions.descOperatorsLabel'), sub: 'operators' },
+    { label: t('v3Conditions.descExampleLabel'), sub: 'example' },
+    { label: t('v3Conditions.descRecommendedLabel'), sub: 'recommended' },
+  ];
+  return (
+    <div
+      className="space-y-0.5 rounded-md border border-green-200 bg-green-50 p-2.5 text-xs text-green-800 dark:border-green-900 dark:bg-green-950/30 dark:text-green-300"
+      data-testid="condition-desc-card"
+    >
+      <b className="mb-1 block">{t('v3Conditions.descCardTitle')}</b>
+      <div>{t('v3Conditions.descSourceLabel')}: {t(`${base}.source`)}</div>
+      <div>{t('v3Conditions.descUsageLabel')}: {t(`${base}.usage`)}</div>
+      <div>
+        {t('v3Conditions.descInputTypeLabel')}: {t(`v3Conditions.inputType.${inputTypePanel(def, fd)}`)}
+      </div>
+      {meta?.unitKey && (
+        <div>{t('v3Conditions.descUnitLabel')}: {t(`v3Conditions.units.${meta.unitKey}`)}</div>
+      )}
+      {range && <div>{t('v3Conditions.descRangeLabel')}: {range}</div>}
+      {optionalRows.map(({ label, sub }) =>
+        hasKey(`${base}.${sub}`) ? (
+          <div key={sub}>{label}: {t(`${base}.${sub}`)}</div>
+        ) : null,
+      )}
+      <div>{t('v3Conditions.descNoteLabel')}: {t(`${base}.note`)}</div>
+    </div>
+  );
+}
+
 function PanelBody({
   leaf,
   def,
@@ -145,7 +207,7 @@ function PanelBody({
   t: T;
 }) {
   if (fd?.type?.startsWith('map_')) {
-    return <MapValueSection leaf={leaf} fd={fd} onChange={onChange} t={t} />;
+    return <MapValueSection leaf={leaf} def={def} fd={fd} onChange={onChange} t={t} />;
   }
 
   switch (def?.panel) {
@@ -154,7 +216,7 @@ function PanelBody({
     case 'mime':
       return <TextSection leaf={leaf} onChange={onChange} t={t} mime />;
     case 'number':
-      return <NumberSection leaf={leaf} onChange={onChange} t={t} />;
+      return <NumberSection leaf={leaf} meta={def?.meta} onChange={onChange} t={t} />;
     case 'cidr':
       return <CidrSection leaf={leaf} onChange={onChange} t={t} />;
     case 'time':
@@ -245,10 +307,16 @@ function TextSection({ leaf, onChange, t, mime }: { leaf: ConditionLeaf; onChang
   );
 }
 
-function NumberSection({ leaf, onChange, t }: { leaf: ConditionLeaf; onChange: (p: Partial<ConditionLeaf>) => void; t: T }) {
+function NumberSection({ leaf, meta, onChange, t }: { leaf: ConditionLeaf; meta?: ConditionMeta; onChange: (p: Partial<ConditionLeaf>) => void; t: T }) {
   const mode = OPERATOR_TO_MATCH_MODE[leaf.operator] ?? 'gt';
   const isBetween = mode === 'between';
   const [lo, hi] = leaf.value.split(',');
+  // 单位与原生约束来自 catalogue meta：给 <input> 加 min/max/step，并在标签旁标
+  // 单位、在输入框下给出有效范围提示，帮助管理员判断可接受区间。
+  const unit = meta?.unitKey ? t(`v3Conditions.units.${meta.unitKey}`) : '';
+  const unitSuffix = unit ? ` (${unit})` : '';
+  const rangeHint = meta ? rangeText(meta, t) : '';
+  const num = { min: meta?.min, max: meta?.max, step: meta?.step ?? 1 };
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
@@ -273,19 +341,24 @@ function NumberSection({ leaf, onChange, t }: { leaf: ConditionLeaf; onChange: (
       {isBetween ? (
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1.5">
-            <Label>{t('v3Conditions.betweenLoLabel')}</Label>
-            <Input data-testid="config-number-lo" type="number" value={lo ?? ''} onChange={(e) => onChange({ value: `${e.target.value},${hi ?? ''}` })} />
+            <Label>{t('v3Conditions.betweenLoLabel')}{unitSuffix}</Label>
+            <Input data-testid="config-number-lo" type="number" min={num.min} max={num.max} step={num.step} value={lo ?? ''} onChange={(e) => onChange({ value: `${e.target.value},${hi ?? ''}` })} />
           </div>
           <div className="space-y-1.5">
-            <Label>{t('v3Conditions.betweenHiLabel')}</Label>
-            <Input data-testid="config-number-hi" type="number" value={hi ?? ''} onChange={(e) => onChange({ value: `${lo ?? ''},${e.target.value}` })} />
+            <Label>{t('v3Conditions.betweenHiLabel')}{unitSuffix}</Label>
+            <Input data-testid="config-number-hi" type="number" min={num.min} max={num.max} step={num.step} value={hi ?? ''} onChange={(e) => onChange({ value: `${lo ?? ''},${e.target.value}` })} />
           </div>
         </div>
       ) : (
         <div className="space-y-1.5">
-          <Label>{t('v3Conditions.thresholdLabel')}</Label>
-          <Input data-testid="config-number-threshold" type="number" value={leaf.value} onChange={(e) => onChange({ value: e.target.value })} />
+          <Label>{t('v3Conditions.thresholdLabel')}{unitSuffix}</Label>
+          <Input data-testid="config-number-threshold" type="number" min={num.min} max={num.max} step={num.step} value={leaf.value} onChange={(e) => onChange({ value: e.target.value })} />
         </div>
+      )}
+      {rangeHint && (
+        <p className="text-[11px] text-muted-foreground" data-testid="config-number-range-hint">
+          {t('v3Conditions.descRangeLabel')}: {rangeHint}
+        </p>
       )}
     </div>
   );
@@ -444,13 +517,19 @@ function StringEqualsSection({ leaf, onChange, t }: { leaf: ConditionLeaf; onCha
   );
 }
 
-function MapValueSection({ leaf, fd, onChange, t }: { leaf: ConditionLeaf; fd: FieldDef; onChange: (p: Partial<ConditionLeaf>) => void; t: T }) {
+function MapValueSection({ leaf, def, fd, onChange, t }: { leaf: ConditionLeaf; def: ConditionDef | undefined; fd: FieldDef; onChange: (p: Partial<ConditionLeaf>) => void; t: T }) {
   const mapKey = leaf.mapKey ?? '*';
+  const isWildcard = mapKey === '*';
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
         <Label>{t('v3Conditions.groupSelectLabel')}</Label>
         <MapKeySelect mapSource={fd.map_keys_source ?? ''} value={mapKey} onChange={(v) => onChange({ mapKey: v || '*' })} className="w-full" />
+        {/* 说明「选择对象」的含义，尤其是默认值 * 代表「任意对象/全部键」，
+            避免管理员误以为 * 是无效或占位值。 */}
+        <p className="text-[11px] text-muted-foreground" data-testid="config-map-object-hint">
+          {isWildcard ? t('v3Conditions.mapWildcardHint') : t('v3Conditions.mapObjectHint')}
+        </p>
       </div>
       {fd.type === 'map_boolean' && (
         <div className="space-y-1.5">
@@ -459,7 +538,7 @@ function MapValueSection({ leaf, fd, onChange, t }: { leaf: ConditionLeaf; fd: F
         </div>
       )}
       {fd.type === 'map_number' && (
-        <NumberSection leaf={leaf} onChange={onChange} t={t} />
+        <NumberSection leaf={leaf} meta={def?.meta} onChange={onChange} t={t} />
       )}
       {fd.type === 'map_string' && (
         <StringEqualsSection leaf={leaf} onChange={onChange} t={t} />

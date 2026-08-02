@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系需同时满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系需同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1024,7 +1024,7 @@
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
         },
-        "deleteDialogTitle": "删除路由规则「{name}」？",
+        "deleteDialogTitle": "删除路由规��「{name}」？",
         "deleteDialogDescription": "删除后立即生效，命中该规则的邮件将改由其余规则处理。",
         "deleteConfirmButton": "确认删除"
       }
@@ -1339,7 +1339,7 @@
     "sectionTargets": "适用对象",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
     "sectionPolicies": "分阶段策略配置",
-    "sectionPoliciesHint": "默认为「继承全局」；「预留」策略本迭代仅入库、不改变实际检测行为。",
+    "sectionPoliciesHint": "默认为「继承全局」；「预留」策略本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
     "priorityHint": "优先级仅在多条策略命中同一邮件、且配置了同一模块时用于仲裁（数值越大越优先）。它不决定模块的跨阶段执行顺序——执行顺序由阶段流水线固定。",
     "priorityRange": "可填 {min}-{max}，数值越大越优先",
@@ -2098,7 +2098,7 @@
       "copied": "密码已复制",
       "copyFailed": "复制失败，请手动复制",
       "success": "密码已重置，用户首次登录需修改密码",
-      "confirm": "确定重置"
+      "confirm": "确定��置"
     },
     "accountUsername": "账号/用户名",
     "currentlyOnline": "当前在线",
@@ -2226,7 +2226,7 @@
         "nameLabel": "角色名称",
         "namePlaceholder": "如 自定义运营",
         "nameRequired": "请输入角色名称",
-        "nameDuplicate": "角色名称已存在",
+        "nameDuplicate": "角色名称已��在",
         "remarkLabel": "备注",
         "remarkPlaceholder": "选填",
         "visibleSectionTitle": "模块可见权限",
@@ -2860,7 +2860,7 @@
       "dmarc_policy": "DMARC 策略",
       "dmarc_spf_aligned": "DMARC SPF 对齐",
       "dmarc_dkim_aligned": "DMARC DKIM 对齐",
-      "dmarc_from_domain": "DMARC 发件域名",
+      "dmarc_from_domain": "DMARC ��件域名",
       "ptr_valid": "PTR 验证",
       "ptr_domain": "PTR 域名",
       "cac_tid": "CAC 事务 ID",
@@ -3370,7 +3370,7 @@
     "actionQuarantineAction": "隔离",
     "policyEffectQuarantine": "命中则隔离，邮件保留至隔离区",
     "quarantineModuleLink": "被隔离邮件可在邮件隔离模块查看",
-    "urlNavSummary": "信誉评估/沙箱分析/仿冒检测",
+    "urlNavSummary": "信誉评估/沙箱分析/仿冒检���",
     "urlNavSummaryDisabled": "未启用",
     "attachmentNavSummary": "病毒扫描/沙箱分析/类型检测",
     "contentNavSummary": "关键词/正则/DLP检测",
@@ -4114,7 +4114,7 @@
     "exampleQuarantineSuspiciousDesc": "隔离 suspicious.test 从 192.168.1.0/24 发来的邮件",
     "simEmailLabel": "模拟发信人邮箱",
     "simEmailPlaceholder": "test@example.com",
-    "startTest": "开始测试",
+    "startTest": "���始测试",
     "hitRule": "命中规则",
     "notHit": "未命中",
     "configHintsTitle": "配置提示",
@@ -4751,7 +4751,7 @@
       "remarkPlaceholder": "添加备注信息（最多200字）"
     },
     "preview": {
-      "title": "当前配置效果",
+      "title": "当��配置效果",
       "incomplete": "请完善检测阈值以预览效果",
       "objectPrefix": "当发信人为",
       "directionPrefix": "且方向为",
@@ -4824,7 +4824,7 @@
       "export": "导出"
     },
     "pagination": {
-      "total": "共",
+      "total": "��",
       "rules": "条规则",
       "goToPage": "前往第",
       "page": "页",
@@ -5166,7 +5166,7 @@
       "toggle": "沙箱检测",
       "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁",
       "toggleTip": "对未知URL进行动态行为分析，模拟用户访问以检测恶意行为",
-      "detectGroup": "检测结果处置（当前方向）",
+      "detectGroup": "检测结果处置（当前方向���",
       "maliciousLabel": "发现恶意URL",
       "maliciousTip": "当沙箱分析判定URL为恶意时执行的动作",
       "actionIsolate": "隔离（邮件存入隔离区）",
@@ -5249,7 +5249,7 @@
       },
       "m2": {
         "title": "查询情报",
-        "desc": "查询本地与云端威胁情报库，命中已知恶意情报即拦截"
+        "desc": "查询本地与云端威胁情报库，命中已���恶意情报即拦截"
       },
       "m3": {
         "title": "深度复检",
@@ -6092,7 +6092,7 @@
           },
           "notOperable": "不可操作",
           "noContent": "(无原文)",
-          "missingObjectIdTooltip": "缺少可处置对象标识，请刷新或使用列表整封处置",
+          "missingObjectIdTooltip": "缺少可��置对象标识，请刷新或使用列表整封处置",
           "action": {
             "deliver": "投递",
             "quarantine": "隔离",
@@ -6405,6 +6405,11 @@
     "description": "基于多条件组合的灵活过滤规则",
     "moduleDescription": "多维度条件组合过滤，支持{count}种条件类型与AND/OR逻辑",
     "incompleteCondition": "[配置不完整]",
+    "incompleteReasonMissingValue": "缺少取值：请填写该条件的匹配值",
+    "incompleteReasonThreshold": "缺少阈值：请填写数值阈值",
+    "incompleteReasonBetween": "区间不完整：请同时填写最小值和最大值",
+    "incompleteReasonBetweenOrder": "区间无效：最小值不应大于最大值",
+    "incompleteReasonRange": "超出有效范围：请填写 {min} 至 {max} 之间的数值",
     "moduleEnabled": "模块已启用",
     "moduleDisabled": "模块已禁用",
     "moduleDisabledDesc": "模块已禁用，规则不参与邮件过滤",
@@ -6890,7 +6895,7 @@
       },
       "desc_geoIpCountry": {
         "source": "GeoIP地理位置库",
-        "usage": "根据IP解析发信服务器所在国家",
+        "usage": "根据IP解析发信服务���所在国家",
         "note": "GeoIP库定期更新，确保准确性"
       },
       "desc_geoIpRegion": {
@@ -8020,7 +8025,7 @@
       },
       "blockSuccess": "域名 \"{domain}\" 已拉黑",
       "blockConflict": "该域名已在拉黑规则中",
-      "blockFailed": "拉黑失败，请稍后重试"
+      "blockFailed": "拉黑失败，请稍后��试"
     },
     "topAttachments": {
       "rank": "排名",
@@ -8100,7 +8105,7 @@
       "7d": "近7天"
     },
     "refresh": "刷新",
-    "updatedAt": "数据更新时间",
+    "updatedAt": "��据更新时间",
     "noData": "暂无数据",
     "loadTimeout": "加载超时，请稍后重试",
     "retry": "重试",
@@ -8458,7 +8463,7 @@
     "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
     "admission": {
       "title": "准入规则",
-      "description": "决定哪些邮件进入钓鱼邮件检测智能体。命中后使用当前部署级运行限制。",
+      "description": "决定哪些邮件���入钓鱼邮件检测智能体。命中后使用当前部署级运行限制。",
       "loading": "加载中...",
       "empty": "暂无准入规则，点击「新建」添加。",
       "create": "新建",
@@ -9043,7 +9048,7 @@
     "manualScan": {
       "entry": "紧急手动扫描",
       "title": "紧急手动扫描",
-      "description": "选择回溯策略与时间范围，立即对窗口内邮件复检。",
+      "description": "选择回溯策略与时间范��，立即对窗口内邮件复检。",
       "strategy": "回溯策略",
       "strategyPlaceholder": "请选择策略",
       "start": "开始时间",
@@ -9255,7 +9260,7 @@
     "circuitBreaker": "已熔断，自动召回暂停",
     "degraded": "部分失败",
     "toast": {
-      "stateSaved": "智能体状态已更新",
+      "stateSaved": "智能体状态已更��",
       "stateError": "更新智能体状态失败",
       "recallSuccess": "召回请求已提交",
       "recallError": "召回请求失败",
