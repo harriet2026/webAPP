@@ -36,7 +36,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12649",
       "incremental": true,
-      "summary": "文档规范修复：按技能规范重写目录（每个需求点使用完整名称作为主入口，子章节使用编号层级 1.1/1.2/…/4.3，尾部三项以 C/D/E 字母编号）；变更总览标题由"v2 新增 3 项"修正为"共 4 项需求"；各变更区块 incr-header 补充路由路径；批量修复文档中全部 UTF-8 replacement character 乱码（共 6 处：侧边栏底部、执行动作 ×2、审核、导航区域、平台管控策略）。"
+      "summary": "文档规范修复：按技能规范重写目录（每个需求点使用完整名称作为主入口，子章节使用编号层级 1.1/1.2/…/4.3，尾部三项以 C/D/E 字母编号）；变更总览标题由\"v2 新增 3 项\"修正为\"共 4 项需求\"；各变更区块 incr-header 补充路由路径；批量修复文档中全部 UTF-8 replacement character 乱码（共 6 处：侧边栏底部、执行动作 ×2、审核、导航区域、平台管控策略）。"
     },
     {
       "version": 5,
@@ -127,6 +127,15 @@
       "ticket": "GT-12715",
       "incremental": true,
       "summary": "GT-12695 v11（GT-12715 发信行为管控检测条件最多可添加4项）：追加 GT-12715 需求节（1个变更点）：检测条件从固定双字段重构为动态 conditions[] 数组（min 1/max 4），每条含维度 Select+阈值 Input+删除按钮，添加条件按钮+计数，满4条 disabled，条件数>1时 AND/OR 单选替代旧 OR 复选框；共修改7处文件（types/schema/API/simulator/Drawer/两个单测）；四语言各新增11个 i18n key（共44个）；目录追加 GT-12715 卡片块；补充截图 S-37（单条）/S-38（双条+AND/OR）/S-39（四条满额 disabled）；差异标注新增 D-12（已优化）；版本历史追加 v11。"
+    },
+    {
+      "version": 15,
+      "generated_at": "2026-08-02",
+      "webapp_commit": "06e7bca",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12716",
+      "incremental": true,
+      "summary": "GT-12716 v12（发信行为管控——新建规则：查看配置示例功能不可用问题修复）：追加 GT-12716 需求节（1个变更点）：为「查看配置示例」三张示例卡片补充 onClick 填充处理器，卡片 div 加 cursor-pointer hover 样式+group，标题行右侧新增悬停提示 span（behaviorControl.examples.fill，4语言各1个key共4个）；onClick 依次调用 setValue（shouldDirty:true）写入 time_window/conditions[]/or_enabled 三字段；三场景预设值：正常用户（15min,[mail_count:50,ip_count:2],AND）/账号被盗（15min,[ip_count:10,mail_count:200],OR）/销售部群发（1hour,[recipient_count:500],AND）；仅修改 BehaviorControlDrawer.tsx 和四语言JSON（各1key）；目录追加GT-12716卡片块；补充截图S-40（折叠态）/S-41（展开三卡片）/S-42（正常用户场景填充后）；差异标注新增D-13（已修复）；版本历史追加v12。"
     }
   ]
 }
