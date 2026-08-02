@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系����同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系�����同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1339,7 +1339,7 @@
     "sectionTargets": "适用对象",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
     "sectionPolicies": "分阶段策略配置",
-    "sectionPoliciesHint": "默认为「继承全局」；「��留��策��本迭代��入库、不改变实际检测行为。",
+    "sectionPoliciesHint": "默认为「继承全局」��「��留��策��本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
     "priorityHint": "优先级仅在多条策略命中同一邮件、且配置了同一模块时用于仲裁（数值越大越优先）。它不决定模块的跨阶段执行顺序——执行顺序由阶段流水线固定。",
     "priorityRange": "可填 {min}-{max}，数值越大越优先",
@@ -2097,7 +2097,7 @@
       "copy": "复制密码",
       "copied": "密码已复制",
       "copyFailed": "复制失败，请手动复制",
-      "success": "密码已重置，用户首次登录需修改密���",
+      "success": "密码已重置，用户首��登录需修改密���",
       "confirm": "确定��置"
     },
     "accountUsername": "账号/用户名",
@@ -2225,7 +2225,7 @@
         "readonlyDescription": "以下为该角色的完整权限矩阵（只读）",
         "nameLabel": "角色名称",
         "namePlaceholder": "如 自定义运营",
-        "nameRequired": "请输入角色���称",
+        "nameRequired": "请输���角色���称",
         "nameDuplicate": "角色名称已��在",
         "remarkLabel": "备注",
         "remarkPlaceholder": "选填",
@@ -2455,7 +2455,7 @@
     },
     "detail": {
       "breadcrumb": "日志审计 / 认证日志",
-      "description": "查看该次认证尝���的详细信���与诊断建议",
+      "description": "查看���次认证尝���的详细信���与诊断建议",
       "summary": "认证概要",
       "protocolServer": "协议与服务器",
       "matchedConfig": "命中配置",
@@ -2639,7 +2639,7 @@
       "case": "包含大小写字母",
       "digit": "包含数字",
       "special": "包含特殊字符",
-      "classes": "至少包含 {n} 类字符（大写/小写/数字/特殊）",
+      "classes": "至少包含 {n} 类字符（大写/小写/数���/特殊）",
       "mismatch": "两次输入的密码不��致",
       "strength1": "弱",
       "strength2": "中",
@@ -3558,7 +3558,7 @@
       "orRelation": "各维度为\"或\"关系，满足任一即触发"
     },
     "platformEnabled": "已启用",
-    "embeddedDescription": "针对IP发信频率过滤限制，防止暴力破解或滥发邮件。各维度为\"或\"关系，任一达到阈值即触发处置动作。",
+    "embeddedDescription": "针对IP发信频率过滤限制，防止暴力破解或滥发邮件。各维度为\"或\"关系，任一达到阈值即��发处置动作。",
     "detailIpProtection": "IP级防护",
     "detailConnectionProtection": "单连接防护",
     "detailAction": "处置动作",
@@ -3820,7 +3820,7 @@
     "addServer": "添加服务器",
     "deleteServer": "删除服务器",
     "keepOneServer": "请至少保留一个 RBL 服务器",
-    "serverDomain": "服务器域名",
+    "serverDomain": "服务��域名",
     "timeout": "超时",
     "retry": "重试次数",
     "testServer": "测试",
@@ -3959,7 +3959,7 @@
     "actionTagDeliverDesc": "添加标记头后投递",
     "actionQuarantineDesc": "隔离邮件，等待管理员处理",
     "actionReviewDesc": "进入审核队列，需管理员审批",
-    "actionBlockDesc": "拒绝接收，返回错误信息",
+    "actionBlockDesc": "��绝接收，返回错误信息",
     "actionDropDesc": "静默丢弃邮件，���件方收到成功响应",
     "effectPreview": "效果预览",
     "effectSkipped": "该方向邮件跳过海外检测",
@@ -4137,7 +4137,7 @@
     "createRule": "新建规则",
     "editRule": "编辑规则",
     "deleteRule": "删除规则",
-    "deleteConfirm": "确定要删除规则「{name}」吗？此操��不可恢复。",
+    "deleteConfirm": "确��要删除规则「{name}」吗？此操��不可恢复。",
     "ruleId": "规则ID",
     "ruleName": "规则名称",
     "description": "描述",
@@ -4425,7 +4425,7 @@
       "quarantine": "隔离：将匹配的邮件放入隔离区，待管理员审核后再决定放行或删除。",
       "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知。",
       "audit": "审核：将邮件放入审核队列，等待管理员人工审批后再投递。",
-      "discard": "丢弃：静默丢弃该邮件，不通知发件方也不投递给收件方。"
+      "discard": "丢弃：静默丢弃该邮件，不���知发件方也不投递给收件方。"
     },
     "formatChecks": {
       "title": "基础格式检查",
@@ -4544,7 +4544,7 @@
     },
     "protocolWarning": {
       "title": "启用此条件可能引发误判",
-      "desc": "此条件（如 SPF None、DKIM None、PTR 无记录等）表示认证信息「缺失」，而非邮件「造假」。正常邮件也常见此情况���启用规则后可能误判合法���件。\n\n请在充分评估误判风险后再决定是否启用。",
+      "desc": "此条件（如 SPF None、DKIM None、PTR 无记录等）表示认证信息「缺失」，而非邮���「造假」。正常邮件也常见此情况���启用规则后可能误判合法���件。\n\n请在充分评估误判风险后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
     },
@@ -4782,7 +4782,7 @@
       "nameRequired": "请输入规则名称",
       "nameMaxLength": "规则名称过长",
       "descriptionMaxLength": "备注过长",
-      "priorityMin": "优先级最小为1",
+      "priorityMin": "优先���最小为1",
       "priorityMax": "优先级最大为9999",
       "thresholdMax": "阈值过大",
       "valueRequired": "请填写该字段",
@@ -5164,7 +5164,7 @@
         "desc": "本功能将在后续版本提供。当前版本仅支持链接保护。"
       },
       "toggle": "沙箱检测",
-      "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁",
+      "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、��意下载等威胁",
       "toggleTip": "对未���URL进行动态行为分析，模拟用���访问以检测恶意行为",
       "detectGroup": "检测结果处置（当前方向���",
       "maliciousLabel": "发现恶意URL",
@@ -5462,7 +5462,7 @@
     "atLeastOneDirection": "至少选择一个检测方向",
     "navSummary": "窗口{window}分钟 / 阈值{threshold}%",
     "tooltipObserve": "开启后仅记录日志，不执行实际拦截动作",
-    "errorTagRequired": "标记投递需至少启用一种标记方式"
+    "errorTagRequired": "标记投递需至少��用一种标记方式"
   },
   "mailMarking": {
     "title": "邮件标记与声明",
@@ -6968,7 +6968,7 @@
       },
       "desc_nestedFileCount": {
         "source": "压缩包解析引擎",
-        "usage": "检测压缩包内文件总数",
+        "usage": "检测压缩包内文件总��",
         "note": "防止解压后文件数量过多"
       },
       "desc_imageQrCodeResult": {
@@ -7106,6 +7106,7 @@
       "andGroupName": "匹配所有条件",
       "groupConditionCount": "已添加 {count} 个条件",
       "conditionSearchPlaceholder": "搜索条件...",
+      "addConditionHeader": "添加条件",
       "noMatchingConditions": "未找到匹配的条件",
       "emptyConfigPanel": "选择一个条件进行配置",
       "descCardTitle": "条件说明",
@@ -7461,7 +7462,7 @@
     "timeoutMarkText": "标记文本",
     "senderNotification": "发件人通知管理",
     "queueEntryNotify": "进入队列通知",
-    "queueEntryDesc": "邮件进入审核队列时通知发件人",
+    "queueEntryDesc": "邮件进入审核队列��通知发件人",
     "resultNotify": "审核结果通知",
     "resultNotifyDesc": "审核完成后通知发件人结果",
     "reviewerNotification": "审核人通知机制",
@@ -8991,7 +8992,7 @@
       "importCheckingExisting": "检查中",
       "importExistingCheckFailed": "检查失败",
       "importDisabledExisting": "已存在",
-      "importDisabledLimit": "已达上限"
+      "importDisabledLimit": "已达上���"
     },
     "batch": {
       "title": "批量操作",
@@ -9190,7 +9191,7 @@
       "testRun": "测试",
       "selectRuns": "选择任务",
       "triggerType": "触发来源",
-      "window": "扫描范围",
+      "window": "���描范围",
       "mode": "检测模式",
       "agentRounds": "复检轮数",
       "confidence": "置信度",
@@ -9386,7 +9387,7 @@
       "title": "触发配置",
       "listenSources": "监听来源",
       "listenSource": {
-        "phishing_agent": "钓鱼邮件检测智能体",
+        "phishing_agent": "钓鱼���件检测智能体",
         "sideline_phishing": "旁路钓鱼",
         "attachd": "附件深度扫描"
       },
@@ -9508,7 +9509,7 @@
     },
     "delete": {
       "title": "删除策略",
-      "description": "将删除策略「{name}」，此操作不可撤销。已有任务和已入队通知仍会按冻结配置继续执行。",
+      "description": "将删除策略「{name}」，此操作不可撤销。已有任务和已���队通知仍会按冻结配置继续执行。",
       "confirm": "删除",
       "cancel": "取消"
     },
@@ -9567,7 +9568,7 @@
     "colSyncStatus": "同步状态",
     "colTag": "标记",
     "corpDomainPlaceholder": "如 corp.cn",
-    "csvEmailColMissing": "无法自动识别邮箱列，请确认 CSV 表头",
+    "csvEmailColMissing": "无��自动识别邮箱列，请确认 CSV 表头",
     "csvUploadFailed": "CSV 文件处理失败：{reason}",
     "deleteConfirm": "确认删除",
     "deleteDesc": "删除后将同步清除该数据源下的通讯录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略将受影响（引用人员降级为未匹配）。是否继续？",
@@ -10825,7 +10826,7 @@
       "admin_account_password_pair_required": "管理员账号与密码必须同时填写",
       "admin_account_too_long": "管理员账号长度不能超过 {max} 个字符",
       "code_immutable": "租户编码创建后不可修改",
-      "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请先放行或清除后再删除租户",
+      "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请先放行或清除后再���除租户",
       "next_hop_pair_required": "下一跳主��与端口必须同时填写",
       "next_hop_triad_required": "下一跳类型、主机与端口必须同时填写",
       "next_hop_host_empty": "下一跳主机不能为空"

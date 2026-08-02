@@ -127,47 +127,65 @@ export function ConditionTree({
 
   return (
     <div className="flex h-full flex-col gap-2 overflow-hidden" data-testid="conditions-tree">
-      <GroupButton
-        kind="any"
-        active={activeGroup === 'any'}
-        count={groups.any.length}
-        onClick={() => onActiveGroupChange('any')}
-        badgeLabel={t('v3Conditions.orGroupBadge')}
-        nameLabel={t('v3Conditions.orGroupName')}
-        countLabel={t('v3Conditions.groupConditionCount', { count: groups.any.length })}
-      />
-      <SelectedLeavesList
-        leaves={leavesForGroup('any')}
-        selectedLeafId={selectedLeafId}
-        onSelectLeaf={onSelectLeaf}
-        onRemoveLeaf={onRemoveLeaf}
-      />
+      {/* 已添加条件区：OR/AND 组切换 + 已选条件列表整体限高（≤45%）并独立滚动。
+          此前该区无高度上限也不滚动，条件一多就把下方"添加条件"区挤出视野——
+          这正是"选中条件较多时无法再添加其他条件"的根因。限高后无论加多少条件，
+          下方的搜索框与分类目录始终可见、可用。 */}
+      <div
+        className="flex shrink-0 flex-col gap-2 overflow-y-auto pr-0.5"
+        style={{ maxHeight: '45%' }}
+        data-testid="condition-groups"
+      >
+        <GroupButton
+          kind="any"
+          active={activeGroup === 'any'}
+          count={groups.any.length}
+          onClick={() => onActiveGroupChange('any')}
+          badgeLabel={t('v3Conditions.orGroupBadge')}
+          nameLabel={t('v3Conditions.orGroupName')}
+          countLabel={t('v3Conditions.groupConditionCount', { count: groups.any.length })}
+        />
+        <SelectedLeavesList
+          leaves={leavesForGroup('any')}
+          selectedLeafId={selectedLeafId}
+          onSelectLeaf={onSelectLeaf}
+          onRemoveLeaf={onRemoveLeaf}
+        />
 
-      <GroupButton
-        kind="all"
-        active={activeGroup === 'all'}
-        count={groups.all.length}
-        onClick={() => onActiveGroupChange('all')}
-        badgeLabel={t('v3Conditions.andGroupBadge')}
-        nameLabel={t('v3Conditions.andGroupName')}
-        countLabel={t('v3Conditions.groupConditionCount', { count: groups.all.length })}
-      />
-      <SelectedLeavesList
-        leaves={leavesForGroup('all')}
-        selectedLeafId={selectedLeafId}
-        onSelectLeaf={onSelectLeaf}
-        onRemoveLeaf={onRemoveLeaf}
-      />
+        <GroupButton
+          kind="all"
+          active={activeGroup === 'all'}
+          count={groups.all.length}
+          onClick={() => onActiveGroupChange('all')}
+          badgeLabel={t('v3Conditions.andGroupBadge')}
+          nameLabel={t('v3Conditions.andGroupName')}
+          countLabel={t('v3Conditions.groupConditionCount', { count: groups.all.length })}
+        />
+        <SelectedLeavesList
+          leaves={leavesForGroup('all')}
+          selectedLeafId={selectedLeafId}
+          onSelectLeaf={onSelectLeaf}
+          onRemoveLeaf={onRemoveLeaf}
+        />
+      </div>
 
-      <Input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder={t('v3Conditions.conditionSearchPlaceholder')}
-        className="h-8 text-xs"
-        data-testid="condition-search"
-      />
+      {/* 添加条件区：始终可见。表头 + 搜索框固定在顶部，分类目录占据剩余高度独立滚动。 */}
+      <div className="flex min-h-0 flex-1 flex-col gap-2 border-t pt-2" data-testid="condition-add-area">
+        <div className="flex items-center gap-1.5">
+          <Plus className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <span className="text-xs font-semibold text-muted-foreground">
+            {t('v3Conditions.addConditionHeader')}
+          </span>
+        </div>
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('v3Conditions.conditionSearchPlaceholder')}
+          className="h-8 shrink-0 text-xs"
+          data-testid="condition-search"
+        />
 
-      <div className="flex-1 overflow-y-auto space-y-1" data-testid="condition-categories">
+        <div className="min-h-0 flex-1 overflow-y-auto space-y-1" data-testid="condition-categories">
         {CATEGORY_ORDER.map((cat) => {
           const defs = byCategory.get(cat) ?? [];
           const filtered = defs.filter(matchesSearch);
@@ -197,6 +215,7 @@ export function ConditionTree({
             {t('v3Conditions.noMatchingConditions')}
           </p>
         )}
+        </div>
       </div>
     </div>
   );
