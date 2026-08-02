@@ -44,6 +44,7 @@ import type {
   BehaviorCondition,
 } from '@/types/behavior-control';
 import { BACKEND_TO_PRODUCT } from '@/types/behavior-control';
+import Link from 'next/link';
 import { useApiRequest } from '@/lib/api/client';
 import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
@@ -130,6 +131,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
       return res.items || [];
     },
     staleTime: 30_000,
+    enabled: open,
   });
 
   const groupTypeOptions = useCallback((groupType: string): GroupOption[] => {
@@ -142,7 +144,14 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
           return m.group_type === groupType;
         } catch { return false; }
       })
-      .map((r) => ({ name: r.name, memberCount: (r as Record<string, unknown>).member_count as number | undefined }));
+      .map((r) => {
+        try {
+          const m = JSON.parse(r.metadata);
+          return { name: r.name, memberCount: m.member_count as number | undefined };
+        } catch {
+          return { name: r.name };
+        }
+      });
   }, [groupsQuery.data]);
 
   const senderGroups = useMemo(() => groupTypeOptions('sender'), [groupTypeOptions]);
@@ -423,8 +432,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                     </Select>
                                     <div className="flex items-center gap-2 mt-1">
                                       <span className="text-xs text-muted-foreground">{t('behaviorControl.form.groupSource')}</span>
-                                      <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-blue-600">
-                                        {t('behaviorControl.form.manageGroup')} <ExternalLink className="h-3 w-3 ml-1" />
+                                      <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-blue-600" asChild>
+                                        <Link href="/security/groups" target="_blank" rel="noopener noreferrer">
+                                          {t('behaviorControl.form.manageGroup')} <ExternalLink className="h-3 w-3 ml-1" />
+                                        </Link>
                                       </Button>
                                     </div>
                                     {objectConfigError && (
@@ -504,8 +515,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                     </Select>
                                     <div className="flex items-center gap-2 mt-1">
                                       <span className="text-xs text-muted-foreground">{t('behaviorControl.form.ipGroupSource')}</span>
-                                      <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-blue-600">
-                                        {t('behaviorControl.form.manageIpGroup')} <ExternalLink className="h-3 w-3 ml-1" />
+                                      <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-blue-600" asChild>
+                                        <Link href="/security/groups" target="_blank" rel="noopener noreferrer">
+                                          {t('behaviorControl.form.manageIpGroup')} <ExternalLink className="h-3 w-3 ml-1" />
+                                        </Link>
                                       </Button>
                                     </div>
                                     {objectConfigError && (
