@@ -163,9 +163,11 @@ export function AttachmentSecurityPage({
     onDirtyChange?.(dirty);
   }, [dirty, onDirtyChange]);
 
+  // 仅在配置加载完成后上报启用态，避免把 defaultDraft 的乐观默认值先推给流水线
+  // 左导航、导致「未启用」模块先亮起再闪回的问题（GT-12731）。
   useEffect(() => {
-    onEnabledChange?.(draft.enabled);
-  }, [draft.enabled, onEnabledChange]);
+    if (!loading) onEnabledChange?.(draft.enabled);
+  }, [loading, draft.enabled, onEnabledChange]);
 
   useEffect(() => {
     let active = true;

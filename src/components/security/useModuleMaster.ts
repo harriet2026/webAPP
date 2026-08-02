@@ -28,11 +28,18 @@ export function useModuleMaster(page: SecurityModulePage) {
     selectedTenantId,
   });
   const [enabled, setEnabled] = useState(true);
+  // `enabled` 初始乐观为 true，但真实持久化状态尚未加载。`loaded` 用来区分
+  // 「加载中的乐观默认」与「已知的真实状态」，避免消费方（流水线左导航圆点/摘要）
+  // 在拿到真值前先按启用渲染、再闪回未启用（GT-12731）。
+  const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     getSecurityModules(apiRequest)
-      .then((m) => setEnabled(m[page] ?? true))
+      .then((m) => {
+        setEnabled(m[page] ?? true);
+        setLoaded(true);
+      })
       .catch(() => {});
   }, [apiRequest, page]);
 
@@ -50,5 +57,5 @@ export function useModuleMaster(page: SecurityModulePage) {
     }
   };
 
-  return { enabled, saving, toggle, editable };
+  return { enabled, loaded, saving, toggle, editable };
 }

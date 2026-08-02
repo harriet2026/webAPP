@@ -31,7 +31,7 @@ interface Props {
 export function UrlProtectionPage({ direction = 'receive', embedded, onDirtyChange, onEnabledChange }: Props) {
   const t = useTranslations('urlProtection');
   const { apiRequest } = useApiRequest();
-  const { enabled: moduleEnabled, saving: moduleSaving, toggle: toggleModule, editable: moduleEditable } = useModuleMaster('url_protection');
+  const { enabled: moduleEnabled, loaded: moduleLoaded, saving: moduleSaving, toggle: toggleModule, editable: moduleEditable } = useModuleMaster('url_protection');
   const { capabilities } = useProductForm();
   const showSandbox = !capabilities?.ai;
 
@@ -45,10 +45,12 @@ export function UrlProtectionPage({ direction = 'receive', embedded, onDirtyChan
   const dirty = saved !== null && draft !== null && JSON.stringify(saved) !== JSON.stringify(draft);
   useEffect(() => { onDirtyChange?.(dirty); }, [dirty, onDirtyChange]);
 
-  // 左导航圆点/摘要即时联动（demo 行为：总开关一切即变，不等保存）
+  // 左导航圆点/摘要即时联动（demo 行为：总开关一切即变，不等保存）。
+  // 但仅在持久化状态加载完成后上报，避免把 useModuleMaster 的乐观默认值 true
+  // 先推给导航、导致「未启用」模块先亮起再闪回的问题（GT-12731）。
   useEffect(() => {
-    onEnabledChange?.(moduleEnabled);
-  }, [moduleEnabled, onEnabledChange]);
+    if (moduleLoaded) onEnabledChange?.(moduleEnabled);
+  }, [moduleLoaded, moduleEnabled, onEnabledChange]);
 
   useEffect(() => {
     getURLProtectionSettings(apiRequest)

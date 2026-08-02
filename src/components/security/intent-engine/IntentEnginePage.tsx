@@ -67,7 +67,7 @@ export function IntentEnginePage({
 } = {}) {
   const t = useTranslations('intentEngine');
   const { apiRequest } = useApiRequest();
-  const { enabled: moduleEnabled, saving: moduleSaving, toggle: toggleModule, editable: moduleEditable } = useModuleMaster('intent_engine');
+  const { enabled: moduleEnabled, loaded: moduleLoaded, saving: moduleSaving, toggle: toggleModule, editable: moduleEditable } = useModuleMaster('intent_engine');
 
   const [direction, setDirection] = useState<IntentDirection>('receive');
   const [config, setConfig] = useState<IntentEngineConfig>(createDefaultIntentEngineConfig);
@@ -114,9 +114,11 @@ export function IntentEnginePage({
 
   // 总开关已迁移到注册表（config_overrides system/intent_engine/enabled，见 useModuleMaster）。
   // config.engine_enabled 的三方向保留为后端 AND 层（默认全开、决策C 三值相等），本页不再直接切换它。
+  // 仅在持久化状态加载完成后上报，避免把 useModuleMaster 的乐观默认值 true 先推给
+  // 左导航、导致「未启用」模块先亮起再闪回的问题（GT-12731）。
   useEffect(() => {
-    onEnabledChange?.(moduleEnabled);
-  }, [moduleEnabled, onEnabledChange]);
+    if (moduleLoaded) onEnabledChange?.(moduleEnabled);
+  }, [moduleLoaded, moduleEnabled, onEnabledChange]);
 
   const dirConfig = config.directions[direction];
 
@@ -210,7 +212,7 @@ export function IntentEnginePage({
         }
       }
     }
-    // D-11：启用的标记但文案为空时回填默认文案，避免落空标记。
+    // D-11：启用的标��但文案为空时回填默认文案，避免落空标记。
     const payload = structuredClone(config);
     for (const d of ['receive', 'send', 'internal'] as IntentDirection[]) {
       for (const it of INTENT_TYPES) {
