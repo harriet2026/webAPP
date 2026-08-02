@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系���同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系����同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1024,7 +1024,7 @@
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
         },
-        "deleteDialogTitle": "删����由规��「{name}」？",
+        "deleteDialogTitle": "������由规��「{name}」？",
         "deleteDialogDescription": "删除后立即生效，命中该规则的邮件将改由其余规则处理。",
         "deleteConfirmButton": "确认删除"
       }
@@ -1339,7 +1339,7 @@
     "sectionTargets": "适用对象",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
     "sectionPolicies": "分阶段策略配置",
-    "sectionPoliciesHint": "默认为「继承全局」；「预留��策��本迭代��入库、不改变实际检测行为。",
+    "sectionPoliciesHint": "默认为「继承全局」；「��留��策��本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
     "priorityHint": "优先级仅在多条策略命中同一邮件、且配置了同一模块时用于仲裁（数值越大越优先）。它不决定模块的跨阶段执行顺序——执行顺序由阶段流水线固定。",
     "priorityRange": "可填 {min}-{max}，数值越大越优先",
@@ -2225,7 +2225,7 @@
         "readonlyDescription": "以下为该角色的完整权限矩阵（只读）",
         "nameLabel": "角色名称",
         "namePlaceholder": "如 自定义运营",
-        "nameRequired": "请输入角色名称",
+        "nameRequired": "请输入角色���称",
         "nameDuplicate": "角色名称已��在",
         "remarkLabel": "备注",
         "remarkPlaceholder": "选填",
@@ -2455,7 +2455,7 @@
     },
     "detail": {
       "breadcrumb": "日志审计 / 认证日志",
-      "description": "查看该次认证尝试的详细信���与诊断建议",
+      "description": "查看该次认证尝���的详细信���与诊断建议",
       "summary": "认证概要",
       "protocolServer": "协议与服务器",
       "matchedConfig": "命中配置",
@@ -2827,7 +2827,7 @@
       "contains": "包含",
       "notContains": "不包含",
       "startsWith": "开头是",
-      "endsWith": "结尾是",
+      "endsWith": "���尾是",
       "regex": "正则匹配",
       "gt": "大于",
       "lt": "小于",
@@ -3007,7 +3007,7 @@
       "updatedAt": "更新时间",
       "prompt": "调查说明",
       "error": "错误信息",
-      "targetAction": "目标处置动作",
+      "targetAction": "目标处置���作",
       "targetStatus": "目标状态",
       "usedEml": "是否使用 EML",
       "targetSuspiciousUrlCount": "可疑 URL 数",
@@ -3534,7 +3534,7 @@
       "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1小时。",
       "antiSpam": "防滥发邮件",
       "antiSpamDesc": "限制高频发信行为，防止垃圾邮件泛滥",
-      "antiSpamEffect": "每15分钟内连接超过200次，或当日累计超过5000次，将被封禁1小时。",
+      "antiSpamEffect": "每15分钟内连接超过200次，或当日累计超过5000次，将��封禁1小时。",
       "useThis": "使用该示例"
     },
     "simulator": {
@@ -3683,7 +3683,7 @@
     "expireAtTip": "规则到期后自动失效，留空表示永久有效",
     "expireAtHint": "留空表示永久有效",
     "priorityTip": "数值越大越优先。建议常规规则设为 100-500，需要更优先的规则设更大数值。",
-    "priorityHint": "数值越大越优先",
+    "priorityHint": "数值越大���优先",
     "executeAction": "执行动作",
     "executeActionBlacklistTip": "选择当IP命中黑名单规则时的处理方式。隔离/审核会暂存邮件待处理，阻断会退回邮件，丢弃会静默删除邮件。",
     "executeActionWhitelistTip": "选择当IP命中白名单规则时的处理方式。投递会直接放行，标记投递会添加标记后放行。",
@@ -4137,7 +4137,7 @@
     "createRule": "新建规则",
     "editRule": "编辑规则",
     "deleteRule": "删除规则",
-    "deleteConfirm": "确定要删除规则「{name}」吗？此操作不可恢复。",
+    "deleteConfirm": "确定要删除规则「{name}」吗？此操��不可恢复。",
     "ruleId": "规则ID",
     "ruleName": "规则名称",
     "description": "描述",
@@ -4448,7 +4448,7 @@
       "spf_softfailDesc": "SPF记录使用~all（过渡配置）",
       "spf_none": "未维护 (None)",
       "spf_noneDesc": "域名未配置SPF记录",
-      "spf_temperror": "查询失败 (TempError)",
+      "spf_temperror": "查��失败 (TempError)",
       "spf_temperrorDesc": "DNS查��超时或��败",
       "dkim_fail": "验证失败",
       "dkim_failDesc": "DKIM签名验证不通过",
@@ -4544,7 +4544,7 @@
     },
     "protocolWarning": {
       "title": "启用此条件可能引发误判",
-      "desc": "此条件（如 SPF None、DKIM None、PTR 无记录等）表示认证信息「缺失」，而非邮件「造假」。正常邮件也常见此情况，启用规则后可能误判合法���件。\n\n请在充分评估误判风险后再决定是否启用。",
+      "desc": "此条件（如 SPF None、DKIM None、PTR 无记录等）表示认证信息「缺失」，而非邮件「造假」。正常邮件也常见此情况���启用规则后可能误判合法���件。\n\n请在充分评估误判风险后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
     },
@@ -5165,7 +5165,7 @@
       },
       "toggle": "沙箱检测",
       "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁",
-      "toggleTip": "对未知URL进行动态行为分析，模拟用���访问以检测恶意行为",
+      "toggleTip": "对未���URL进行动态行为分析，模拟用���访问以检测恶意行为",
       "detectGroup": "检测结果处置（当前方向���",
       "maliciousLabel": "发现恶意URL",
       "maliciousTip": "当沙箱分析判定URL为恶意时执行的动作",
@@ -5412,7 +5412,7 @@
     "observingDirections": "正在观察中",
     "viewObserveLogs": "查看观察日志",
     "modeAggregate": "全方向聚合（合并统计）",
-    "modeSeparate": "按方向独立检测（可勾选多个）",
+    "modeSeparate": "按方向独立检测（可勾选多���）",
     "directionConfig": "检测方向配置",
     "directionReceive": "接收",
     "directionSend": "外发",
@@ -5806,7 +5806,7 @@
         "not_contains": "不包含",
         "starts_with": "开头是",
         "ends_with": "结尾是",
-        "regex": "正则匹配",
+        "regex": "正���匹配",
         "is_null": "为空",
         "is_not_null": "非空",
         "gt": "大于",
@@ -5935,7 +5935,7 @@
       "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
       "releaseAuditHint": "放行与类型改判都会写入审计记录。",
       "recallDescription": "尝试从收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
-      "recallAuditHint": "召回可能受目标邮件系统限制；操作结���与类型改判会写入审计记录。",
+      "recallAuditHint": "召回��能受目标邮件系统限制；操作结���与类型改判会写入审计记录。",
       "similarLimit": "最多支持 10 封样本",
       "similarFound": "找到 {n} 封相似邮件",
       "exportNotImplemented": "导出功能即将推出",
@@ -6258,7 +6258,7 @@
         "viewRecallLog": "查看召回日志",
         "noEvents": "暂无事件",
         "aiVerdict": {
-          "title": "AI 智能研判",
+          "title": "AI 智能���判",
           "viewDetails": "查看详情",
           "hideDetails": "收起详情",
           "threat": {
@@ -6607,7 +6607,7 @@
     },
     "deliver": {
       "paramsTitle": "投递参数",
-      "skipSubsequent": "命中后不再执行后续高级规则"
+      "skipSubsequent": "命中后不再��行后续高级规则"
     },
     "discard": {
       "paramsTitle": "丢弃参数",
@@ -6881,7 +6881,7 @@
       "desc_featureGroup": {
         "source": "群组策略 - 特征组",
         "usage": "引用预定义的特征组（一组条件的命名组合）",
-        "note": "特征组变更后规则即时生���，无需重新保存规则"
+        "note": "特征组变更后规则即时生效，无需重新保存规则"
       },
       "desc_senderIp": {
         "source": "SMTP连接层",
@@ -6895,7 +6895,7 @@
       },
       "desc_geoIpCountry": {
         "source": "GeoIP地理位置库",
-        "usage": "根据IP解析发信服务���所在国家",
+        "usage": "根据IP解析发信服务器所在国家",
         "note": "GeoIP库定期更新，确保准确性"
       },
       "desc_geoIpRegion": {
@@ -7544,7 +7544,7 @@
     "privateKeyPem": "私钥 (PEM)",
     "pemRequired": "请填写私钥 PEM",
     "noKeys": "该域名暂无 DKIM 密钥",
-    "active": "活跃",
+    "active": "���跃",
     "created": "创建时间",
     "dnsCheckedAt": "校验时间",
     "pendingDnsRecord": "待发布 DNS TXT 记录",
@@ -10572,7 +10572,7 @@
       "upload_token_invalid": "上传凭证无效或已过期，请重新上传 CSV 文件",
       "user_file_empty": "上传的 CSV 文件为空",
       "user_file_missing": "请选择要上传的用户通讯录 CSV 文件",
-      "user_file_read_failed": "读取上传的 CSV 文件失败，请确认文件未损坏后重试",
+      "user_file_read_failed": "读取上传的 CSV 文���失败，请确认文件未损坏后重试",
       "user_file_ref_empty": "缺少已上传文件的引用，请重新上传"
     },
     "detection_profile": {
@@ -10675,7 +10675,7 @@
       "rcpt_match_invalid": "收件人匹配方式无效，只能是：{allowed}",
       "source_auth_required": "至少要指定一种来源认证方式：来源 IP 段或 SPF 校验",
       "tenant_domain_cross_tenant": "所选域名属于其他租户",
-      "tenant_domain_not_found": "所选域名不存在，可能已被删除",
+      "tenant_domain_not_found": "所选���名不存在，可能已被删除",
       "use_spf_requires_privileged": "启用 SPF 校验的规则必须同时设为特权规则——SPF 规则不受可信中继 IP 池的约束",
       "use_spf_requires_sender_domain": "启用 SPF 校验必须指定具体的发件域，否则没有 SPF 记录可查",
       "tenant_domain_id_belongs_different_tenant": "所选域名属于其他租户"
@@ -10826,7 +10826,7 @@
       "admin_account_too_long": "管理员账号长度不能超过 {max} 个字符",
       "code_immutable": "租户编码创建后不可修改",
       "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请先放行或清除后再删除租户",
-      "next_hop_pair_required": "下一跳主机与端口必须同时填写",
+      "next_hop_pair_required": "下一跳主��与端口必须同时填写",
       "next_hop_triad_required": "下一跳类型、主机与端口必须同时填写",
       "next_hop_host_empty": "下一跳主机不能为空"
     },
