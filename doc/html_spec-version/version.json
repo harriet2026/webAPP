@@ -1,6 +1,6 @@
 {
   "module": "sender-filter-optimization",
-  "current_version": 17,
+  "current_version": 18,
   "history": [
     {
       "version": 1,
@@ -154,6 +154,15 @@
       "ticket": "GT-12720",
       "incremental": true,
       "summary": "GT-12720 v14（附件安全检测——图片识别：图片OCR检测模式的推荐配置—深度检测不可选问题解决）：追加 GT-12720 需求节（1个变更点，含3项子修复）：① 移除 SelectItem value='deep' 的 disabled 属性及（敬请期待）拼接文字，恢复深度检测可选；② SelectTrigger 加 className='w-full max-w-[400px]'，SelectContent 加 className='min-w-[var(--radix-select-trigger-width)] w-max'，修复 Select 文字截断；③ ocr_mode==='deep' 时在 grid 外部条件渲染 hint banner（Info 图标 + ocrMode_deep_hint i18n 文案，独占一行）；仅修改 ImageDetectTab.tsx；四语言各新增1个 i18n key（attachmentSecurity.imageDetect.ocrMode_deep_hint，共4个）；目录追加GT-12720卡片块；补充截图S-48（OCR light默认态SelectTrigger完整显示）/S-49（下拉展开三选项均可选无disabled无敬请期待）/S-50（选中深度检测后hint banner显示）；差异标注新增D-15（已修复）；版本历史追加v14。"
+    },
+    {
+      "version": 18,
+      "generated_at": "2026-08-02",
+      "webapp_commit": "current",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12721",
+      "incremental": true,
+      "summary": "GT-12721 v15（附件安全检测——图片识别——二维码图片检测：超限处置的执行动作表述修改）：追加 GT-12721 需求节（1个变更点，含4条i18n变更）：① passWarn 改为「进行下一步」（原「放行并记录告警」，四语言）；② isolateFallback 改为「隔离」（原「隔离兜底」，四语言）；③ 新增 exceedActionHint_pass 和 exceedActionHint_quarantine 两个key（四语言各2个，共8个），在超限处置Select正下方条件渲染对应说明文案（data-testid=qr-deep-exceed-action-hint）；仅修改ImageDetectTab.tsx和四语言JSON；目录追加GT-12721卡片块；补充截图S-51（进行下一步+说明文案）/S-52（下拉展开两选项）/S-53（隔离+说明文案）；差异标注新增D-16（已修复）；版本历史追加v15。"
     }
   ]
 }

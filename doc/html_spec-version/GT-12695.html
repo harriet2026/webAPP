@@ -581,13 +581,32 @@
       </div>
     </div>
 
+    <!-- 需求：GT-12721 QR 深度检测超限处置表述修改 -->
+    <div class="toc-req">
+      <div class="toc-req-header">
+        <a href="#req-gt12721">GT-12721 附件安全检测——图片识别——二维码图片检测：超限处置的执行动作表述修改</a>
+      </div>
+      <div class="toc-req-body">
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">1</span>
+            <a href="#gt12721-c1">i18n 文案修改：passWarn「放行并记录告警」→「进行下一步」，isolateFallback「隔离兜底」→「隔离」；新增两种超限处置策略说明 hint（exceedActionHint_pass / exceedActionHint_quarantine）</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#gt12721-c1-states">1.1 截图式交互预览（进行下一步 S-51 / 下拉两选项 S-52 / 隔离说明文案 S-53）</a></li>
+            <li><a href="#gt12721-c1-elements">1.2 逐元素说明（超限处置 Select、两条说明 hint、四语言 i18n key 变更清单）</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- 附录 -->
     <ul class="toc-misc">
       <li><a href="#meta">A. 元信息与事实源</a></li>
       <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
-      <li><a href="#diff">C. 差异标注（D-1 ~ D-15）</a></li>
+      <li><a href="#diff">C. 差异标注（D-1 ~ D-16）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-1 ~ Q-3）</a></li>
-      <li><a href="#version-history">E. 版本历史（v1 ~ v14）</a></li>
+      <li><a href="#version-history">E. 版本历史（v1 ~ v15）</a></li>
     </ul>
   </section>
 
@@ -703,7 +722,7 @@
         黑名单「执行动作」下拉的「阻断」选项已重命名为「拒收」，含义一致（向发信方返回 SMTP 拒绝响应），仅文案调整。
       </div>
 
-      <h3 id="c1-states">1.1 截图式交互预览</h3>
+      <h3 id="c1-states">1.1 截图式交��预览</h3>
 
       <div class="interaction-preview">
         <h4>状态 S-15：黑名单新建规则抽屉默认态 — 执行动作默认值「拒收」</h4>
@@ -1555,7 +1574,7 @@
           </tr>
           <tr>
             <td><code>AuthSpoofingPage.tsx</code></td>
-            <td><code>DEFAULT_CONFIG.protocol_checks.dmarc</code> 追加 <code>no_record</code>/<code>query_fail</code> 两项（与 standard 模板默认值一致），确保初始 state 与 mock 合并后包含完整五个 key</td>
+            <td><code>DEFAULT_CONFIG.protocol_checks.dmarc</code> 追�� <code>no_record</code>/<code>query_fail</code> 两项（与 standard 模板默认值一致），确保初始 state 与 mock 合并后包含完整五个 key</td>
           </tr>
           <tr>
             <td><code>fixtures.ts</code></td>
@@ -2331,14 +2350,14 @@
       <div class="screenshot-wrap">
         <img src="./screenshots/S-41-gt12716-examples-expanded.png"
              alt="「查看配置示例」展开态，显示三张示例卡片：正常用户场景（日常办公发信，不触发规则）、账号被盗场景（异常高频发信，触发隔离）、销售部群发场景（正常业务群发，阈值宽松）" />
-        <p class="screenshot-caption">S-41 · 查看配置示例展开态（AI版·单租户，Mock，租户管理员，zh，dark，1528×832，2026-08-02）。三张卡片依次展示：①正常用户场景——标题+副标题+效果文案；②账号被盗场景；③销售部群发场景。修复前：卡片无 onClick，点击无反应；修复后：悬停右上角出现「点击填充示例」文字提示，点击自动填充 time_window / conditions[] / or_enabled。</p>
+        <p class="screenshot-caption">S-41 · 查看配置示例展开态（AI版·单租户，Mock，租户管理员，zh，dark，1528×832，2026-08-02）。三张卡片依次展示：①正常用户场景——标题+副标题+效果文案；②账号被盗场景；③销售部群发场景。修复前：卡片无 onClick，点击无反应；修复后：��停右上角出现「点击填充示例」文字提示，点击自动填充 time_window / conditions[] / or_enabled。</p>
       </div>
 
       <p class="state-label">状态 C — 点击「正常用户场景」后表单填充效果</p>
       <div class="screenshot-wrap">
         <img src="./screenshots/S-42-gt12716-normal-user-filled.png"
              alt="点击正常用户场景卡片后，左侧表单检测条件区域已填充：时间窗口 15分钟，条件 1 检测条件「发出邮件的总数上限」阈值 50，底部可见第二条条件（不同发信 IP 数上限，阈值 2），AND 关系" />
-        <p class="screenshot-caption">S-42 · 正常用户场景填充后（AI版·单租户，Mock，租户管理员，zh，dark，1528×832，2026-08-02）。点击卡片后 setValue 同时写入三个字段：time_window=15min、conditions=[{dim:mail_count,threshold:50},{dim:ip_count,threshold:2}]、or_enabled=false（AND）；表单检测条件区域条件 1 阈值已变为 50，可滚动查看条件 2。</p>
+        <p class="screenshot-caption">S-42 · 正���用户场景填充后（AI版·单租户，Mock，租户管理员，zh，dark，1528×832，2026-08-02）。点击卡片后 setValue 同时写入三个字段：time_window=15min、conditions=[{dim:mail_count,threshold:50},{dim:ip_count,threshold:2}]、or_enabled=false（AND）；表单检测条件区域条件 1 阈值已变为 50，可滚动查看条件 2。</p>
       </div>
 
       <h3 id="gt12716-c1-elements">1.2 逐元素说明</h3>
@@ -2739,6 +2758,113 @@
     </div>
   </div>
 
+  <!-- ══════════════ GT-12721 增量节 ═══════════════ -->
+  <div id="req-gt12721" style="scroll-margin-top:1.5rem;"></div>
+
+  <div class="incr-header" id="gt12721-header">
+    <div>
+      <span class="incr-badge">GT-12721</span>
+      <span class="incr-title">附件安全检测——图片识别——二维码图片检测：超限处置的执行动作表述修改</span>
+    </div>
+    <div class="incr-meta">
+      关联模块：附件安全检测（策略流水线 阶段3）·
+      Tab：图片识别 → 二维码图片检测 → 深度检测配置 → 超限处置·
+      组件：<code>ImageDetectTab.tsx</code>（仅此一处）·
+      i18n：<code>messages/{zh,en,ru,th}.json</code> → <code>attachmentSecurity.imageDetect.*</code>（修改 2 个 key + 新增 2 个 key，共 4 语言 × 4 = 16 处变更）·
+      变更类型：文案修改 + 功能新增（超限处置说明 hint）·
+      最后更新：2026-08-02
+    </div>
+  </div>
+
+  <div class="incremental-section" id="gt12721-c1">
+    <div class="incr-section-header">
+      <span class="incr-num">1</span>
+      <span>超限处置文案修改 + 新增两种策略说明 hint</span>
+      <span class="tag tag-fixed">文案修改</span>
+      <span class="tag tag-added">新增功能</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12721-c1-states">1.1 截图式交互预览</h3>
+
+      <p><strong>触发路径：</strong>策略流水线（AI版·单租户，Mock，租户管理员）→ 附件安全检测「配置」→ Tab「图片识别」→ 二维码图片检测「检测模式」切换为「深度检测」→ 深度检测配置区域底部「超限处置」</p>
+
+      <p class="state-label">状态 A — 超限处置 = 「进行下一步」（默认），Select 下方显示对应说明文案</p>
+      <div class="screenshot-wrap">
+        <img src="./screenshots/S-51-gt12721-qr-deep-pass.png"
+             alt="二维码图片检测深度检测配置区底部：超限处置 Select 当前值「进行下一步」，Select 正下方显示说明文案「超出检测数量上限的二维码图片将跳过深度检测，直接进入下一检测阶段处理。」" />
+        <p class="screenshot-caption">S-51 · 超限处置「进行下一步」+ 说明文案（AI版·单租户，Mock，租户管理员，zh，dark，1528×832，2026-08-02）。修改后 <code>passWarn</code> i18n key = 「进行下一步」（原「放行并记录告警」）；<code>exceedActionHint_pass</code> 说明文案显示在 Select 正下方（<code>data-testid="qr-deep-exceed-action-hint"</code>）。</p>
+      </div>
+
+      <p class="state-label">状态 B — 超限处置 Select 展开，两个选项均使用修改后文案</p>
+      <div class="screenshot-wrap">
+        <img src="./screenshots/S-52-gt12721-qr-deep-quarantine.png"
+             alt="超限处置 Select 展开，选项列表显示「进行下一步」（已选，带对勾）和「隔离」两个选项，无「放行并记录告警」和「隔离兜底」旧文案" />
+        <p class="screenshot-caption">S-52 · 超限处置下拉展开（AI版·单租户，Mock，租户管理员，zh，dark，1528×832，2026-08-02）。两个 SelectItem 均使用修改后 i18n 文案：<code>passWarn</code>=「进行下一步」，<code>isolateFallback</code>=「隔离」（原「隔离兜底」）。</p>
+      </div>
+
+      <p class="state-label">状态 C — 超限处置切换为「隔离」后，说明文案同步切换为隔离说明</p>
+      <div class="screenshot-wrap">
+        <img src="./screenshots/S-53-gt12721-qr-deep-quarantine-hint.png"
+             alt="超限处置 Select 已选「隔离」，Select 正下方说明文案切换为「超出检测数量上限的二维码图片将直接隔离，不再进入后续检测阶段。」" />
+        <p class="screenshot-caption">S-53 · 超限处置「隔离」+ 说明文案（AI版·单租户，Mock，租户管理员，zh，dark，1528×832，2026-08-02）。<code>actions.qr_deep_exceed_action === 'accept'</code> 为 false 时，hint 切换为 <code>exceedActionHint_quarantine</code>=「超出检测数量上限的二维码图片将直接隔离，不再进入后续检测阶段。」。</p>
+      </div>
+
+      <h3 id="gt12721-c1-elements">1.2 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>#</th><th>元素 / i18n key</th><th>修改前</th><th>修改后</th><th>说明</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><code>attachmentSecurity.imageDetect.passWarn</code>（SelectItem value="pass_warn"）</td>
+            <td>放行并记录告警</td>
+            <td>进行下一步</td>
+            <td>原文案「放行并记录告警」暗示邮件会投递（放行），实际行为是跳过深度检测进入下一检测阶段，并非最终放行；改为「进行下一步」准确描述流程语义</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><code>attachmentSecurity.imageDetect.isolateFallback</code>（SelectItem value="quarantine"）</td>
+            <td>隔离兜底</td>
+            <td>隔离</td>
+            <td>「兜底」属于实现层面描述，对用户无实际指导意义；改为直接动作名词「隔离」，与系统其他模块执行动作名称保持一致</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><code>attachmentSecurity.imageDetect.exceedActionHint_pass</code>（新增）</td>
+            <td>不存在</td>
+            <td>超出检测数量上限的二维码图片将跳过深度检测，直接进入下一检测阶段处理。</td>
+            <td>当 <code>actions.qr_deep_exceed_action === 'accept'</code> 时，在超限处置 Select 正下方条件渲染此说明（<code>data-testid="qr-deep-exceed-action-hint"</code>，<code>text-xs text-muted-foreground</code>）</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><code>attachmentSecurity.imageDetect.exceedActionHint_quarantine</code>（新增）</td>
+            <td>不存在</td>
+            <td>超出检测数量上限的二维码图片将直接隔离，不再进入后续检测阶段。</td>
+            <td>当 <code>actions.qr_deep_exceed_action !== 'accept'</code> 时切换为此说明；hint 元素 <code>data-testid</code> 和样式与 pass 态共用同一节点，内容通过三目运算符切换</td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>i18n 变更清单（四语言各 4 条，共 16 条）</h4>
+      <table>
+        <thead><tr><th>key</th><th>zh</th><th>en</th><th>类型</th></tr></thead>
+        <tbody>
+          <tr><td>passWarn</td><td>进行下一步</td><td>Proceed to next step</td><td>修改</td></tr>
+          <tr><td>isolateFallback</td><td>隔离</td><td>Quarantine</td><td>修改</td></tr>
+          <tr><td>exceedActionHint_pass</td><td>超出检测数量上限的二维码图片将跳过深度检测，直接进入下一检测阶段处理。</td><td>QR code images exceeding the detection limit will skip deep detection and proceed to the next stage.</td><td>新增</td></tr>
+          <tr><td>exceedActionHint_quarantine</td><td>超出检测数量上限的二维码图片将直接隔离，不再进入后续检测阶段。</td><td>QR code images exceeding the detection limit will be quarantined immediately without further processing.</td><td>新增</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
   <!-- ══════════════ C. 差异标注 ═══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -2858,6 +2984,13 @@
           <td>2026-08-02</td>
           <td>已修复（GT-12720）：① 移除 SelectItem value="deep" 的 <code>disabled</code> 属性及「（敬请期待）」拼接；② SelectTrigger 加 <code>className="w-full max-w-[400px]"</code>；③ SelectContent 加 <code>className="min-w-[var(--radix-select-trigger-width)] w-max"</code>；④ 新增深度检测 hint banner（<code>ocr_mode === 'deep'</code> 时条件渲染，置于 grid 外部独占一行，Info 图标 + <code>t('imageDetect.ocrMode_deep_hint')</code>）；四语言各新增 1 个 i18n key（<code>attachmentSecurity.imageDetect.ocrMode_deep_hint</code>，共4个）；仅修改 ImageDetectTab.tsx；截图 S-48（OCR light 默认态）/ S-49（下拉三选项均可选）/ S-50（选中深度检测后 hint banner）验证</td>
         </tr>
+        <tr>
+          <td>D-16</td>
+          <td><span class="tag tag-fixed">已修复</span></td>
+          <td>GT-12721：附件安全检测图片识别二维码深度检测「超限处置」Select 选项文案不准确——「放行并记录告警」暗示最终放行而实际是跳过深度检测继续下一阶段；「隔离兜底」含实现层细节对用户无指导意义</td>
+          <td>2026-08-02</td>
+          <td>已修复（GT-12721）：① <code>passWarn</code> 改为「进行下一步」（四语言）；② <code>isolateFallback</code> 改为「隔离」（四语言）；③ 新增 <code>exceedActionHint_pass</code> 和 <code>exceedActionHint_quarantine</code> 两个 i18n key（四语言各 2 个，共 8 个），在超限处置 Select 正下方条件渲染对应说明文案（<code>data-testid="qr-deep-exceed-action-hint"</code>，<code>text-xs text-muted-foreground</code>）；仅修改 ImageDetectTab.tsx 和四语言 JSON；截图 S-51（进行下一步说明文案）/ S-52（下拉展开两选项）/ S-53（隔离说明文案）验证</td>
+        </tr>
       </tbody>
     </table>
   </section>
@@ -2952,7 +3085,7 @@
           <td>v7</td>
           <td>2026-08-01</td>
           <td>GT-12708</td>
-          <td>GT-12708 v7（SPF/DKIM/DMARC策略显示的执行配置与实际设置的配置不符问题解决）：追加 GT-12708 需求节（1 个变更点）：修复流程��节点 badge 硬编码单 key 读取 bug；新增 dominantAction() 函数按 5 级 severity 计算协议组最严重 action；flowSubKey() 补充 audit→flowSub.tag、accept→flowSub.pass 两个分支；四语言各追加 2 个 i18n key（共 8 个）；目录追加 GT-12708 卡片块；补充截图 S-29（标准模板流程图节点修复后：SPF阻断、DKIM隔离、DMARC隔离、PTR检查）；差异标注新增 D-8（已解决）；版本历史追加 v7。</td>
+          <td>GT-12708 v7（SPF/DKIM/DMARC策略显示的执行配置与实际设置的配置不符问题解决）：追加 GT-12708 需求节（1 个变更点）：修复流程��节点 badge 硬编码单 key 读取 bug；新增 dominantAction() 函数按 5 级 severity 计算协议组最严重 action；flowSubKey() 补充 audit→flowSub.tag、accept→flowSub.pass 两个分支；四语言各追加 2 个 i18n key（共 8 个）；目录追加 GT-12708 卡片块；补充截图 S-29（标准模板流程图节点修复后：SPF阻断、DKIM隔离、DMARC隔离���PTR检查）；差异标注新增 D-8（已解决）；版本历史追加 v7。</td>
         </tr>
         <tr>
           <td>v8</td>
@@ -2995,6 +3128,12 @@
           <td>2026-08-02</td>
           <td>GT-12720</td>
           <td>GT-12720 v14（附件安全检测——图片识别：图片OCR检测模式的推荐配置—深度检测不可选问题解决）：追加 GT-12720 需求节（1 个变更点，含 3 项子修复）：① 移除 SelectItem value="deep" 的 <code>disabled</code> 属性及「（敬请期待）」拼接文字，恢复深度检测可选；② SelectTrigger 加 <code>className="w-full max-w-[400px]"</code>，SelectContent 加 <code>className="min-w-[var(--radix-select-trigger-width)] w-max"</code>，修复 Select 文字截断；③ <code>ocr_mode === 'deep'</code> 时在 grid 外部条件渲染 hint banner（Info 图标 + <code>ocrMode_deep_hint</code> i18n 文案，独占一行）；仅修改 ImageDetectTab.tsx；四语言各新增 1 个 i18n key（<code>attachmentSecurity.imageDetect.ocrMode_deep_hint</code>，共4个）；目录追加 GT-12720 卡片块；补充截图 S-48（OCR light 默认态，SelectTrigger 完整显示）/ S-49（下拉展开三选项均可选）/ S-50（选中深度检测后 hint banner 显示）；差异标注新增 D-15（已修复）；版本历史追加 v14。</td>
+        </tr>
+        <tr>
+          <td>v15</td>
+          <td>2026-08-02</td>
+          <td>GT-12721</td>
+          <td>GT-12721 v15（附件安全检测——图片识别——二维码图片检测：超限处置的执行动作表述修改）：追加 GT-12721 需求节（1 个变更点，含 4 条 i18n 变更）：① <code>passWarn</code> 改为「进行下一步」（原「放行并记录告警」，四语言）；② <code>isolateFallback</code> 改为「隔离」（原「隔离兜底」，四语言）；③ 新增 <code>exceedActionHint_pass</code> 和 <code>exceedActionHint_quarantine</code> 两个 key（四语言各 2 个，共 8 个），在超限处置 Select 正下方条件渲染对应策略说明文案（<code>data-testid="qr-deep-exceed-action-hint"</code>）；仅修改 ImageDetectTab.tsx 和四语言 JSON；目录追加 GT-12721 卡片块；补充截图 S-51（进行下一步+说明文案）/ S-52（下拉展开两选项文案）/ S-53（隔离+说明文案）；差异标注新增 D-16（已修复）；版本历史追加 v15。</td>
         </tr>
       </tbody>
     </table>
