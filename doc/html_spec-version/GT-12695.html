@@ -562,13 +562,32 @@
       </div>
     </div>
 
+    <!-- 需求：GT-12720 图片 OCR 深度检测不可选问题解决 -->
+    <div class="toc-req">
+      <div class="toc-req-header">
+        <a href="#req-gt12720">GT-12720 附件安全检测——图片识别：图片OCR检测模式的推荐配置—深度检测不可选问题解决</a>
+      </div>
+      <div class="toc-req-body">
+        <div class="toc-feature">
+          <div class="toc-feature-row">
+            <span class="tf-num">1</span>
+            <a href="#gt12720-c1">移除 OCR 深度检测 SelectItem disabled 属性及「敬请期待」文字，恢复可选；SelectTrigger 加 w-full max-w-[400px]，SelectContent 加 min-w-[var(--radix-select-trigger-width)] w-max 修复文字截断</a>
+          </div>
+          <ul class="toc-sub-links">
+            <li><a href="#gt12720-c1-states">1.1 截图式交互预览（light 默认态 S-48 / 下拉展开三选项 S-49 / 深度检测 hint banner S-50）</a></li>
+            <li><a href="#gt12720-c1-elements">1.2 逐元素说明（OCR SelectTrigger、SelectContent、SelectItem×3、deep hint banner、ocrMode_deep_hint i18n key）</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- 附录 -->
     <ul class="toc-misc">
       <li><a href="#meta">A. 元信息与事实源</a></li>
       <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
-      <li><a href="#diff">C. 差异标注（D-1 ~ D-14）</a></li>
+      <li><a href="#diff">C. 差异标注（D-1 ~ D-15）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-1 ~ Q-3）</a></li>
-      <li><a href="#version-history">E. 版本历史（v1 ~ v13）</a></li>
+      <li><a href="#version-history">E. 版本历史（v1 ~ v14）</a></li>
     </ul>
   </section>
 
@@ -940,11 +959,11 @@
         白名单执行动作默认值由「放行」改为「投递」；「白名单模式」字段从抽屉 UI 中移除（类型定义与 API 层字段 <code>whitelist_mode</code> 保留，仅 UI 不再暴露）。
       </div>
 
-      <h3 id="c5-states">5.1 截图式交互预览</h3>
+      <h3 id="c5-states">5.1 截��式交互预览</h3>
 
       <div class="interaction-preview">
         <h4>状态 S-17：白名单规则列表 — 8 列（含优先级）</h4>
-        <p class="trigger-path">触发路径：发信人黑白名单配置弹窗 → 白名单规则 Tab</p>
+        <p class="trigger-path">触发路径：发信人黑白名单配置弹窗 → ���名单规则 Tab</p>
         <figure>
           <img src="./screenshots/S-17-whitelist-table-cols.png" alt="白名单规则列表，8列：规则ID、规则名称、发信人、执行动作、优先级、状态、修改时间、操作" />
           <figcaption>状态 S-17 · 白名单规则列表 · 桌面 1528×832 · 蓝色主题（亮色）· AI版·单租户 · 平台管理员 · 浏览器验证：2026-08-01（已完成）</figcaption>
@@ -1532,7 +1551,7 @@
           </tr>
           <tr>
             <td><code>auth-spoofing-templates.ts</code></td>
-            <td>三个模板（loose/standard/strict）dmarc 对象各追加两个 key 的默认 action；<code>applyGroup</code> 函数新增「补全模板中有但 config 中缺失的 key」逻辑，防止新增 key 在非 custom 模板下 fallback 为 <code>accept</code></td>
+            <td>三个模板（loose/standard/strict）dmarc 对象各追加两个 key 的默认 action；<code>applyGroup</code> ��数新增「补全模板中有但 config 中缺失的 key」逻辑，防止新增 key 在非 custom 模板下 fallback 为 <code>accept</code></td>
           </tr>
           <tr>
             <td><code>AuthSpoofingPage.tsx</code></td>
@@ -1550,7 +1569,7 @@
       </table>
 
       <div class="callout callout-info">
-        snapshot 可访问性树确认第五行「DMARC查询失败」完整渲染（<code>StaticText "DMARC查询失败"</code>、<code>StaticText "DNS查询DMARC记录时发生错误（超时/SERVFAIL）"</code>、<code>combobox: 标记（加头投递）</code>），因弹窗内容区容器固定高度导致视口截图未能完整展示第五行，非渲染异常。
+        snapshot 可访问性树确认第五行「DMARC查询失败」完整渲染（<code>StaticText "DMARC查询失败"</code>、<code>StaticText "DNS查询DMARC记录时发生错误（超时/SERVFAIL）"</code>、<code>combobox: 标记（加头投递）</code>），因弹窗内容区容器固定高度���致视口截图未能完整展示第五行，非渲染异常。
       </div>
 
     </div>
@@ -2037,7 +2056,7 @@
       <h3 id="gt12711-c1-impl">1.3 实现说明</h3>
 
       <table>
-        <thead><tr><th>修改文件</th><th>变更内容</th></tr></thead>
+        <thead><tr><th>修改文件</th><th>变更内��</th></tr></thead>
         <tbody>
           <tr>
             <td><code>messages/zh.json</code></td>
@@ -2082,7 +2101,7 @@
       <span class="incr-title">发信行为管控——新建规则：检测条件有四个可选项，但是单条规则仅能限制两项内容，建议修改为可添加4项</span>
     </div>
     <div class="incr-meta">
-      关联模块：发信行为管控（策略流水线 阶段2）·
+      关联模块：��信行为管控（策略流水线 阶段2）·
       组件：<code>BehaviorControlDrawer.tsx</code>·
       数据模型：<code>types/behavior-control.ts</code> → <code>BehaviorCondition[]</code>·
       schema：<code>schema.ts</code> → <code>conditions[]</code>·
@@ -2202,7 +2221,7 @@
           <tr>
             <td>8</td>
             <td>条件关系单选组</td>
-            <td>radio group（原生 input[type=radio]，accent-primary）</td>
+            <td>radio group（���生 input[type=radio]，accent-primary）</td>
             <td>默认选中 AND（<code>or_enabled=false</code>）</td>
             <td>仅当 conditions.length &gt; 1 时渲染；两个选项：AND（同时满足，or_enabled=false）/ OR（任一满足，or_enabled=true）；选择后 Preview 区域的条件连接词实时更新（AND/OR/且）</td>
             <td>label: <code>behaviorControl.form.conditionRelation</code>；选项: <code>behaviorControl.form.relationAnd</code> / <code>behaviorControl.form.relationOr</code></td>
@@ -2591,7 +2610,128 @@
           <tr>
             <td>GroupPreviewDialog 新建</td>
             <td>需要在不跳转页面的情况下预览群组成员</td>
-            <td>在 BehaviorControlDrawer.tsx 文件末尾新增 GroupPreviewDialog 子组件；叠在抽屉上方，不干扰表单；数据来自已有 groupsQuery，无额外 API 请求；i18n 四语言各新增 9 个 key</td>
+            <td>在 BehaviorControlDrawer.tsx 文件末尾新增 GroupPreviewDialog 子组件；叠在抽屉上方，不干扰表单；数据来自已有 groupsQuery，无额外 API 请求；i18n 四语言���新增 9 个 key</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12720 增量节 ═══════════════ -->
+  <div id="req-gt12720" style="scroll-margin-top:1.5rem;"></div>
+
+  <div class="incr-header" id="gt12720-header">
+    <div>
+      <span class="incr-badge">GT-12720</span>
+      <span class="incr-title">附件安全检测——图片识别：图片OCR检测模式的推荐配置—深度检测不可选问题解决</span>
+    </div>
+    <div class="incr-meta">
+      关联模块：附件安全检测（策略流水线 阶段3）·
+      Tab：图片识别 → 图片 OCR 检测·
+      组件：<code>ImageDetectTab.tsx</code>（仅此一处）·
+      i18n：<code>messages/{zh,en,ru,th}.json</code> → <code>attachmentSecurity.imageDetect.ocrMode_deep_hint</code>（新增 1 个 key × 4 语言 = 4 个）·
+      变更类型：Bug 修复（SelectItem disabled 移除 + 文字截断修复）+ 功能新增（深度检测 hint banner）·
+      最后更新：2026-08-02
+    </div>
+  </div>
+
+  <div class="incremental-section" id="gt12720-c1">
+    <div class="incr-section-header">
+      <span class="incr-num">1</span>
+      <span>移除 disabled / 截断修复 / 新增深度检测说明 banner</span>
+      <span class="tag tag-fixed">Bug 修复</span>
+      <span class="tag tag-added">新增功能</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12720-c1-states">1.1 截图式交互预览</h3>
+
+      <p><strong>触发路径：</strong>策略流水线（AI版·单租户，Mock，租户管理员）→ 附件安全检测「配置」→ Tab「图片识别」→ 图片 OCR 检测区域</p>
+
+      <p class="state-label">状态 A — 图片识别 Tab 默认态，OCR 检测模式 = 轻度检测（SelectTrigger 完整显示文字，修复后）</p>
+      <div class="screenshot-wrap">
+        <img src="./screenshots/S-48-gt12720-ocr-light-default.png"
+             alt="图片识别 Tab 已激活，图片 OCR 检测区域显示检测模式 Select（当前值：轻度检测（仅印刷体））与检测数量上限输入框，SelectTrigger 宽度充满父 grid cell 无截断" />
+        <p class="screenshot-caption">S-48 · OCR 轻度检测默认态（AI版·单租户，Mock，租户管理员，zh，dark，1528×832，2026-08-02）。SelectTrigger 加 <code>className="w-full max-w-[400px]"</code> 后，「轻度检测（仅印刷体）」完整显示，不再被父 grid cell 宽度裁断；SelectContent 加 <code>min-w-[var(--radix-select-trigger-width)] w-max</code> 使弹出层可随最长选项文本自适应宽度。</p>
+      </div>
+
+      <p class="state-label">状态 B — OCR 检测模式下拉展开，三个选项均可选（深度检测无 disabled、无「敬请期待」，文字完整展示）</p>
+      <div class="screenshot-wrap">
+        <img src="./screenshots/S-49-gt12720-ocr-dropdown-all-enabled.png"
+             alt="OCR 检测模式 Select 展开，三个选项列表：不检测、轻度检测（仅印刷体）（已选，带对勾）、深度检测（手写+印刷，推荐外发方向），三个选项均为正常文字色、可交互，无灰色 disabled 态，无「（敬请期待）」字样" />
+        <p class="screenshot-caption">S-49 · OCR 下拉展开态（AI版·单租户，Mock，租户管理员，zh，dark，1528×832，2026-08-02）。修复前「深度检测」SelectItem 带 <code>disabled</code> 属性且文本拼接「（敬请期待）」；修复后移除 <code>disabled</code>，移除拼接文字，「深度检测（手写+印刷，推荐外发方向）」完整显示且可点击选择。SelectContent 弹出层宽度自适应，最长选项文本不截断。</p>
+      </div>
+
+      <p class="state-label">状态 C — 选中「深度检测」后，Select Trigger 回显，其下方出现说明 banner（Info 图标 + 场景说明文案）</p>
+      <div class="screenshot-wrap">
+        <img src="./screenshots/S-50-gt12720-ocr-deep-hint.png"
+             alt="OCR 检测模式 Select Trigger 回显「深度检测（手写+印刷，推荐外发方向）」，Select 正下方出现一条浅色 banner：蓝色 Info 图标 + 文案「深度检测同时识别手写与印刷体文字，适用于外发方向防截图泄密场景。检测结果将依照下方「检测数量上限」设置处理。」，banner 独占一行（在 grid 外部），不与检测数量上限并排" />
+        <p class="screenshot-caption">S-50 · 深度检测 hint banner（AI版·单租户，Mock，租户管理员，zh，dark，1528×832，2026-08-02）。<code>ocr_mode === 'deep'</code> 时条件渲染 hint banner（<code>data-testid="ocr-deep-hint"</code>），置于 <code>md:grid-cols-2</code> 网格外部独占一行，不与「检测数量上限」并排；底部显示「模块开关有未保存的更改」提示，表明选择已被 React state 捕获。</p>
+      </div>
+
+      <h3 id="gt12720-c1-elements">1.2 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>#</th><th>元素 / 字段</th><th>修复前问题</th><th>修复后行为</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>OCR SelectTrigger</td>
+            <td>无 <code>className</code>，宽度跟随父 grid cell（约 260px），「轻度检测（仅印刷体）」等较长文本被 <code>overflow: hidden</code> 裁断</td>
+            <td>加 <code>className="w-full max-w-[400px]"</code>，充满父 grid cell 同时限制最大宽度与 QR 模式一致</td>
+            <td><code>ImageDetectTab.tsx</code> OCR Select</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>OCR SelectContent</td>
+            <td>弹出层宽度默认跟随 trigger（约 260px），「深度检测（手写+印刷，推荐外发方向）」超出宽度被截断</td>
+            <td>加 <code>className="min-w-[var(--radix-select-trigger-width)] w-max"</code>，弹出层至少等宽于 trigger 且随最长选项文本自适应</td>
+            <td><code>ImageDetectTab.tsx</code> OCR SelectContent</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>SelectItem value="deep"</td>
+            <td>带 <code>disabled</code> 属性，文本拼接「（{t('imageDetect.pending')}）」= 「（敬请期待）」，用户无法选中</td>
+            <td>移除 <code>disabled</code>，移除拼接文字；选项文本仅为 <code>t('imageDetect.ocrMode_deep')</code> = 「深度检测（手写+印刷，推荐外发方向）」</td>
+            <td><code>ImageDetectTab.tsx</code> SelectItem deep</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>深度检测 hint banner</td>
+            <td>不存在</td>
+            <td><code>ocr_mode === 'deep'</code> 时条件渲染；<code>flex items-start gap-2</code> 布局，<code>Info</code> 图标（<code>h-4 w-4 shrink-0 text-primary</code>）+ <code>t('imageDetect.ocrMode_deep_hint')</code> 文案；置于 <code>md:grid-cols-2</code> 网格外部独占一行；<code>data-testid="ocr-deep-hint"</code></td>
+            <td><code>ImageDetectTab.tsx</code> ocr-deep-hint</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><code>attachmentSecurity.imageDetect.ocrMode_deep_hint</code> i18n key</td>
+            <td>不存在</td>
+            <td>四语言各新增 1 个 key：zh「深度检测同时识别手写与印刷体文字，适用于外发方向防截图泄密场景。检测结果将依照下方「检测数量上限」设置处理。」/ en / ru / th</td>
+            <td><code>messages/{zh,en,ru,th}.json</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>根因分析</h4>
+      <table>
+        <thead><tr><th>问题</th><th>根因</th><th>修复方案</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>深度检测不可选</td>
+            <td>代码注释（GT-11675）描述的是后端 Python 服务（PyhelperClient / attachd）的实现缺口——<code>ocr_mode: 'deep'</code> 传过去与 <code>'light'</code> 执行相同路径，属静默无效，故前端以 <code>disabled</code> 暂时屏蔽；但类型定义 <code>ocr_mode: 'none' | 'light' | 'deep'</code> 已完整支持、API 可正常下发 <code>'deep'</code> 值，属前端可安全放开的配置项</td>
+            <td>移除 <code>disabled</code>，移除「敬请期待」拼接；前端配置值将随 API 正确下发，后端侧何时实现深度路径对前端透明；新增 hint banner 告知用户适用场景</td>
+          </tr>
+          <tr>
+            <td>SelectTrigger / SelectContent 文字截断</td>
+            <td><code>SelectTrigger</code> 无 <code>className</code>，宽度由父 <code>grid</code> cell 决定（约 260px）；<code>SelectContent</code> 弹出层默认等宽于 trigger；选项文本长度超出时被 <code>overflow: hidden</code> 裁断</td>
+            <td><code>SelectTrigger</code> 加 <code>w-full max-w-[400px]</code>；<code>SelectContent</code> 加 <code>min-w-[var(--radix-select-trigger-width)] w-max</code></td>
           </tr>
         </tbody>
       </table>
@@ -2711,6 +2851,13 @@
           <td>2026-08-02</td>
           <td>已修复（GT-12717 commit <code>1623c58</code>）：① groupsQuery 加 <code>enabled: open</code>；② groupTypeOptions map 改从解析后 metadata 取 m.member_count；③ onClick 改为 <code>'' || '__all__'</code>，无论是否已选群组均打开 Dialog；④ 新增 GroupPreviewDialog 子组件（Dialog 叠在抽屉上方，含群组名标题、类型 Badge、成员总数、搜索框、成员列表最多100条 + 截断提示、关闭按钮）；四语言各新增 9 个 i18n key（<code>behaviorControl.groupPreview.*</code>，共36个）；截图 S-43（切换群组类型）/ S-44（Select 展开）/ S-45（选中 VIP客户）/ S-46（预览 Dialog）/ S-47（搜索过滤）验证</td>
         </tr>
+        <tr>
+          <td>D-15</td>
+          <td><span class="tag tag-fixed">已修复</span></td>
+          <td>GT-12720：附件安全检测图片识别 Tab，OCR 检测模式「深度检测」SelectItem 带 <code>disabled</code> 属性且拼接「（敬请期待）」文字不可选；SelectTrigger 无 className 导致文字被父 grid cell 裁断；SelectContent 弹出层等宽于 trigger 致选项文本截断</td>
+          <td>2026-08-02</td>
+          <td>已修复（GT-12720）：① 移除 SelectItem value="deep" 的 <code>disabled</code> 属性及「（敬请期待）」拼接；② SelectTrigger 加 <code>className="w-full max-w-[400px]"</code>；③ SelectContent 加 <code>className="min-w-[var(--radix-select-trigger-width)] w-max"</code>；④ 新增深度检测 hint banner（<code>ocr_mode === 'deep'</code> 时条件渲染，置于 grid 外部独占一行，Info 图标 + <code>t('imageDetect.ocrMode_deep_hint')</code>）；四语言各新增 1 个 i18n key（<code>attachmentSecurity.imageDetect.ocrMode_deep_hint</code>，共4个）；仅修改 ImageDetectTab.tsx；截图 S-48（OCR light 默认态）/ S-49（下拉三选项均可选）/ S-50（选中深度检测后 hint banner）验证</td>
+        </tr>
       </tbody>
     </table>
   </section>
@@ -2805,7 +2952,7 @@
           <td>v7</td>
           <td>2026-08-01</td>
           <td>GT-12708</td>
-          <td>GT-12708 v7（SPF/DKIM/DMARC策略显示的执行配置与实际设置的配置不符问题解决）：追加 GT-12708 需求节（1 个变更点）：修复流程图节点 badge 硬编码单 key 读取 bug；新增 dominantAction() 函数按 5 级 severity 计算协议组最严重 action；flowSubKey() 补充 audit→flowSub.tag、accept→flowSub.pass 两个分支；四语言各追加 2 个 i18n key（共 8 个）；目录追加 GT-12708 卡片块；补充截图 S-29（标准模板流程图节点修复后：SPF阻断、DKIM隔离、DMARC隔离、PTR检查）；差异标注新增 D-8（已解决）；版本历史追加 v7。</td>
+          <td>GT-12708 v7（SPF/DKIM/DMARC策略显示的执行配置与实际设置的配置不符问题解决）：追加 GT-12708 需求节（1 个变更点）：修复流程��节点 badge 硬编码单 key 读取 bug；新增 dominantAction() 函数按 5 级 severity 计算协议组最严重 action；flowSubKey() 补充 audit→flowSub.tag、accept→flowSub.pass 两个分支；四语言各追加 2 个 i18n key（共 8 个）；目录追加 GT-12708 卡片块；补充截图 S-29（标准模板流程图节点修复后：SPF阻断、DKIM隔离、DMARC隔离、PTR检查）；差异标注新增 D-8（已解决）；版本历史追加 v7。</td>
         </tr>
         <tr>
           <td>v8</td>
@@ -2842,6 +2989,12 @@
           <td>2026-08-02</td>
           <td>GT-12717</td>
           <td>GT-12717 v13（发信行为管控——新建规则：【选择群组】选择框及【管理群组】按钮不可用）：追加 GT-12717 需求节（2 个变更点）：① Bug 修复——groupsQuery 加 <code>enabled: open</code> 守卫，groupTypeOptions map 改从解析后 metadata 取 m.member_count，修复 Select 无选项问题；② Bug 修复 + 功能新增——onClick 空值守卫从 <code>'' || null</code> 改为 <code>'' || '__all__'</code>，并新增 GroupPreviewDialog 子组件（叠在抽屉上方，含群组名标题、类型 Badge、成员总数、搜索框、成员列表最多100条 + 截断提示、关闭按钮，数据复用已有 groupsQuery 无额外 API 请求）；仅修改 BehaviorControlDrawer.tsx；四语言各新增 9 个 i18n key（<code>behaviorControl.groupPreview.*</code>，共36个）；目录追加 GT-12717 卡片块；补充截图 S-43（切换群组类型）/ S-44（Select 展开5个群组选项）/ S-45（选中 VIP客户 回显）/ S-46（管理群组预览 Dialog）/ S-47（搜索 corp 过滤成员）；差异标注新增 D-14（已修复）；版本历史追加 v13。</td>
+        </tr>
+        <tr>
+          <td>v14</td>
+          <td>2026-08-02</td>
+          <td>GT-12720</td>
+          <td>GT-12720 v14（附件安全检测——图片识别：图片OCR检测模式的推荐配置—深度检测不可选问题解决）：追加 GT-12720 需求节（1 个变更点，含 3 项子修复）：① 移除 SelectItem value="deep" 的 <code>disabled</code> 属性及「（敬请期待）」拼接文字，恢复深度检测可选；② SelectTrigger 加 <code>className="w-full max-w-[400px]"</code>，SelectContent 加 <code>className="min-w-[var(--radix-select-trigger-width)] w-max"</code>，修复 Select 文字截断；③ <code>ocr_mode === 'deep'</code> 时在 grid 外部条件渲染 hint banner（Info 图标 + <code>ocrMode_deep_hint</code> i18n 文案，独占一行）；仅修改 ImageDetectTab.tsx；四语言各新增 1 个 i18n key（<code>attachmentSecurity.imageDetect.ocrMode_deep_hint</code>，共4个）；目录追加 GT-12720 卡片块；补充截图 S-48（OCR light 默认态，SelectTrigger 完整显示）/ S-49（下拉展开三选项均可选）/ S-50（选中深度检测后 hint banner 显示）；差异标注新增 D-15（已修复）；版本历史追加 v14。</td>
         </tr>
       </tbody>
     </table>

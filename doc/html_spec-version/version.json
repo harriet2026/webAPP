@@ -1,6 +1,6 @@
 {
   "module": "sender-filter-optimization",
-  "current_version": 16,
+  "current_version": 17,
   "history": [
     {
       "version": 1,
@@ -145,6 +145,15 @@
       "ticket": "GT-12717",
       "incremental": true,
       "summary": "GT-12717 v13（发信行为管控——新建规则：【选择群组】选择框及【管理群组】按钮不可用）：追加 GT-12717 需求节（2个变更点）：① groupsQuery 加 enabled:open 守卫 + groupTypeOptions map 改从解析后 metadata 取 m.member_count，修复 senderGroups 始终为空导致 Select 无选项；② onClick 空值守卫从 '' || null 改为 '' || '__all__'，并新增 GroupPreviewDialog 子组件（叠在抽屉上方，含群组名标题/类型Badge/成员总数/搜索框/成员列表最多100条+截断提示/关闭按钮，数据复用已有 groupsQuery 无额外 API 请求）；仅修改 BehaviorControlDrawer.tsx；四语言各新增9个 i18n key（behaviorControl.groupPreview.*，共36个）；目录追加GT-12717卡片块；补充截图S-43（切换群组类型后表单出现）/S-44（Select展开5个群组选项含成员数）/S-45（选中VIP客户回显）/S-46（管理群组预览Dialog全貌）/S-47（搜索corp过滤成员）；差异标注新增D-14（已修复）；版本历史追加v13。"
+    },
+    {
+      "version": 17,
+      "generated_at": "2026-08-02",
+      "webapp_commit": "current",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12720",
+      "incremental": true,
+      "summary": "GT-12720 v14（附件安全检测——图片识别：图片OCR检测模式的推荐配置—深度检测不可选问题解决）：追加 GT-12720 需求节（1个变更点，含3项子修复）：① 移除 SelectItem value='deep' 的 disabled 属性及（敬请期待）拼接文字，恢复深度检测可选；② SelectTrigger 加 className='w-full max-w-[400px]'，SelectContent 加 className='min-w-[var(--radix-select-trigger-width)] w-max'，修复 Select 文字截断；③ ocr_mode==='deep' 时在 grid 外部条件渲染 hint banner（Info 图标 + ocrMode_deep_hint i18n 文案，独占一行）；仅修改 ImageDetectTab.tsx；四语言各新增1个 i18n key（attachmentSecurity.imageDetect.ocrMode_deep_hint，共4个）；目录追加GT-12720卡片块；补充截图S-48（OCR light默认态SelectTrigger完整显示）/S-49（下拉展开三选项均可选无disabled无敬请期待）/S-50（选中深度检测后hint banner显示）；差异标注新增D-15（已修复）；版本历史追加v14。"
     }
   ]
 }
