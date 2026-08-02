@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系�������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1336,10 +1336,10 @@
     "previewPath": "有效执行路径预览",
     "stageCountHint": "当前形态共启用 {count} 个阶段。",
     "sectionBasic": "基本信息",
-    "sectionTargets": "适用对��",
+    "sectionTargets": "适用����",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
     "sectionPolicies": "分阶段策略配置",
-    "sectionPoliciesHint": "默认为「继承全局����「��留��策��本迭代��入库、不改变实际检测行为。",
+    "sectionPoliciesHint": "默认为「继承��局����「��留��策��本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
     "priorityHint": "优先级仅在多条策略命中同一邮件、且配置了同一模块时用于仲裁（数值越大越优先）。它不决定模块的跨阶段执行顺序——执行顺序由阶段流水线固定。",
     "priorityRange": "可填 {min}-{max}，数值越大越优先",
@@ -1460,7 +1460,7 @@
       "drop": "丢弃"
     },
     "previewDescriptionWithRule": "策略「{name}」的有效执行路径：",
-    "previewNoRuleSelected": "请选择一条群组策略以预览。",
+    "previewNoRuleSelected": "请选择一条群组策略以预览���",
     "previewShortCircuit": "邮件在【阶段{stage}】因策略「{rule}」的{action}处置被终止，后续阶段不再执行。",
     "previewSkipped": "未执行（前序已短路）",
     "previewNoOverride": "无群组覆盖（按全局执行）",
@@ -2074,7 +2074,7 @@
         "activeKeys": "已启用密钥 {count} 个",
         "smtpTitle": "SMTP 凭证",
         "smtpDescription": "管理发信认证账号、后端路由与锁定状态",
-        "smtpLink": "前往 SMTP 凭证管理"
+        "smtpLink": "前往 SMTP ���证管理"
       }
     },
     "eyebrow": "租户中心",
@@ -2440,7 +2440,7 @@
       "serverTimeout": "服务器超时",
       "connectionRefused": "连接拒绝",
       "certError": "证书错误",
-      "protocolMismatch": "协议不匹配",
+      "protocolMismatch": "��议不匹配",
       "unknown": "未知错误"
     },
     "failAdvice": {
@@ -2809,7 +2809,7 @@
   },
   "advancedFilter": {
     "title": "高级搜索",
-    "conditionGroup": "搜索条件组",
+    "conditionGroup": "搜索���件组",
     "match": "满足条件",
     "all": "所有条件",
     "any": "任一条件",
@@ -3558,7 +3558,7 @@
       "orRelation": "各维度为\"或\"关系，满足任一即触发"
     },
     "platformEnabled": "已启用",
-    "embeddedDescription": "针对IP发信频率过滤限制，防止暴力破解或滥发邮件。各维度为\"或\"关��，任一达到阈值即��发处置动作。",
+    "embeddedDescription": "针对IP发信频率过滤限制，防止暴力破解或滥发邮件。各维���为\"或\"关��，任一达到阈值即��发处置动作。",
     "detailIpProtection": "IP级防护",
     "detailConnectionProtection": "单连接防护",
     "detailAction": "处置动作",
@@ -3849,7 +3849,7 @@
     "matchMode": "匹配模式",
     "matchModeAny": "任一服务器",
     "matchModeSpecific": "指定服务器",
-    "matchServers": "匹配服务器",
+    "matchServers": "匹配服���器",
     "productAction": "操作",
     "actionReject": "拒收",
     "actionQuarantine": "隔离",
@@ -4815,7 +4815,7 @@
     "drawerSubtitle": "配置发信人行为管控规则",
     "filter": {
       "allDirections": "全部方向",
-      "allTypes": "全部类型",
+      "allTypes": "���部类型",
       "allStatus": "全部状态",
       "enabled": "启用",
       "disabled": "禁用",
@@ -5461,7 +5461,7 @@
     "goToGroupPolicy": "前往群组策略配置",
     "atLeastOneDirection": "至少选择一个检测方向",
     "navSummary": "窗口{window}分钟 / 阈值{threshold}%",
-    "tooltipObserve": "开启后仅记录日志，不执行实际拦截��作",
+    "tooltipObserve": "开启后仅��录日志，不执行实际拦截��作",
     "errorTagRequired": "标记投递需至少��用一种标记方式"
   },
   "mailMarking": {
@@ -6779,7 +6779,6 @@
         "envelopeRecipient": "信封收件人",
         "senderGroup": "发件人组",
         "senderOrganization": "发件组织",
-        "featureGroup": "功能组",
         "senderIp": "发件 IP",
         "senderIpGroup": "发件 IP 组",
         "geoIpCountry": "GeoIP 国家",
@@ -6803,8 +6802,6 @@
         "urlCount": "URL 数量",
         "url": "URL",
         "rblResult": "RBL 结果",
-        "urlSandboxResult": "URL 沙箱结果",
-        "shortLinkExpanded": "短链展开",
         "urlDomain": "URL 域名",
         "spfResult": "SPF 结果",
         "dkimResult": "DKIM 结果",
@@ -6877,11 +6874,6 @@
         "source": "组织架构模块",
         "usage": "匹配发信人所属组织",
         "note": "支持多级组织架构匹配"
-      },
-      "desc_featureGroup": {
-        "source": "群组策略 - 特征组",
-        "usage": "引用预定义的特征组（一组条件的命名组合）",
-        "note": "特征组变更后规则即时生效，无需重新保存规则"
       },
       "desc_senderIp": {
         "source": "SMTP连接层",
@@ -7000,16 +6992,6 @@
         "source": "RBL实时黑名单服务",
         "usage": "根据RBL查询结果过滤邮件",
         "note": "支持多个RBL源联合查询"
-      },
-      "desc_urlSandboxResult": {
-        "source": "URL沙箱分析引擎",
-        "usage": "根据URL安全沙箱分析结果过滤",
-        "note": "检测URL指向的恶意内容"
-      },
-      "desc_shortLinkExpanded": {
-        "source": "短链接展开服务",
-        "usage": "检测短链接展开后的真实URL",
-        "note": "防止通过短链接隐藏恶意URL"
       },
       "desc_urlDomain": {
         "source": "URL域名解析",
@@ -7832,7 +7814,7 @@
     "tenantScope": "租户范围",
     "kpi": {
       "inboundTotal": "接收总量",
-      "outboundTotal": "外发总量",
+      "outboundTotal": "��发总量",
       "internalTotal": "域内总量",
       "totalSuccessRate": "总投递成功率",
       "queueBacklog": "总队列积压",
@@ -8632,7 +8614,7 @@
       "autoDeliverOn": "已开启",
       "autoDeliverOff": "已关闭",
       "timeoutCloseConfirmTitle": "确认关闭超时自动投递？",
-      "timeoutCloseConfirmDesc": "关闭后超时邮件将不会自动投递，可能延误正常邮件投递。",
+      "timeoutCloseConfirmDesc": "关闭后超时邮件将不会自动投递，可能延���正常邮件投递。",
       "confirmClose": "确认关闭",
       "timeoutTempDisposal": "超时临时处置",
       "timeoutTempSectionTitle": "超时临时处置",
@@ -8835,7 +8817,7 @@
     },
     "person": {
       "title": "保护对象",
-      "subtitle": "每个对象独立维护合法邮箱、灵敏度、阈值与处置策略",
+      "subtitle": "每个对象独立维护合法邮箱、灵敏度、阈值与处置���略",
       "add": "添加保护对象",
       "searchPlaceholder": "按姓名、邮箱搜索",
       "levelFilter": "保护等级",
@@ -9109,7 +9091,7 @@
       "entry": "紧急手动扫描",
       "title": "紧急手动扫描",
       "description": "选择回溯策略与时间范��，立即对窗口内邮件复检。",
-      "strategy": "回溯策略",
+      "strategy": "���溯策略",
       "strategyPlaceholder": "请选择策略",
       "start": "开始时间",
       "end": "结束时间",
@@ -9504,7 +9486,7 @@
       "statsRecalled": "累计召回",
       "nextRun": "下次执行",
       "confirmCloseTitle": "放弃未保存改动？",
-      "confirmCloseDescription": "当前抽屉有未保存的改动，确认放弃？",
+      "confirmCloseDescription": "当前抽屉有未保存��改动，确认放弃？",
       "keepEditing": "继续编辑",
       "discard": "放弃"
     },
@@ -10188,7 +10170,7 @@
       "historyLimit": "新密码不能与最近 N 次重复；0 表示不限制",
       "passwordMaxAgeDays": "0 表示永不过期",
       "maxOnline": "0 表示不限制",
-      "overflowPolicy": "「拒绝新登录」更严：合法会话在线时，攻击者的新登录会被直接拒绝",
+      "overflowPolicy": "「拒���新登录」更严：合法会话在线时，攻击者的新登录会被直接拒绝",
       "lockoutMinutes": "-1 = 永久锁定，只能由管���员在用户列表里手工解锁",
       "captchaAfterFailures": "连续失败达该次数后，后续登录需输入图形验证码",
       "twoFactorEnabled": "启用后，本租户全体成员登录需进行二次认证",
@@ -10246,7 +10228,7 @@
         "inbound": "（外部→内部）",
         "outbound": "（内部→外部）",
         "internal": "（内部→内部）",
-        "merged": "外发与域内合并累计计数，防止把收件人拆分到不同方向以规避阈值"
+        "merged": "外发与域内合并累计计数，防止把收件人���分到不同方向以规避阈值"
       },
       "mergedTitle": "内部发信",
       "maxRecipients": "最大收信人",
@@ -10824,7 +10806,7 @@
     "tenant": {
       "not_found": "租户不存在",
       "access_denied": "无权访问该租户",
-      "admin_account_password_pair_required": "管理员账号与密码必须同时填写",
+      "admin_account_password_pair_required": "管理员账号与密码必须同时填���",
       "admin_account_too_long": "管理员账号长度不能超过 {max} 个字符",
       "code_immutable": "租户编码创建后不可修改",
       "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请先放行或清除后再���除租户",
@@ -10837,7 +10819,7 @@
       "domain_not_found": "域名不存在",
       "domain_not_verified": "该域名尚未通过验证",
       "egress_not_in_pool": "所选出口不在出口池中",
-      "egress_binding_exists": "该域名已绑定出口，请勿重复绑定",
+      "egress_binding_exists": "该域名已绑定出���，请勿重复绑定",
       "egress_binding_not_found": "出口绑定不存在"
     },
     "mail_log": {

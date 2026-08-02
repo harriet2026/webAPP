@@ -6722,7 +6722,6 @@
         "envelopeRecipient": "Envelope Recipient",
         "senderGroup": "Sender Group",
         "senderOrganization": "Sender Organization",
-        "featureGroup": "Feature Group",
         "senderIp": "Sender IP",
         "senderIpGroup": "Sender IP Group",
         "geoIpCountry": "GeoIP Country",
@@ -6746,8 +6745,6 @@
         "urlCount": "URL Count",
         "url": "URL",
         "rblResult": "RBL Result",
-        "urlSandboxResult": "URL Sandbox Result",
-        "shortLinkExpanded": "Short Link Expanded",
         "urlDomain": "URL Domain",
         "spfResult": "SPF Result",
         "dkimResult": "DKIM Result",
@@ -6820,11 +6817,6 @@
         "source": "Organization Module",
         "usage": "Match sender organization",
         "note": "Supports multi-level org matching"
-      },
-      "desc_featureGroup": {
-        "source": "Group Policy - Feature Groups",
-        "usage": "Reference a predefined feature group (a named set of conditions)",
-        "note": "Feature group changes take effect immediately"
       },
       "desc_senderIp": {
         "source": "SMTP connection layer",
@@ -6943,16 +6935,6 @@
         "source": "RBL real-time blacklist",
         "usage": "Filter based on RBL query result",
         "note": "Supports multiple RBL sources"
-      },
-      "desc_urlSandboxResult": {
-        "source": "URL sandbox analysis",
-        "usage": "Filter based on URL sandbox result",
-        "note": "Detects malicious content at URL"
-      },
-      "desc_shortLinkExpanded": {
-        "source": "Short link expansion",
-        "usage": "Detect actual URL after expansion",
-        "note": "Prevent hiding malicious URLs via short links"
       },
       "desc_urlDomain": {
         "source": "URL domain parsing",

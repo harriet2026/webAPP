@@ -1,6 +1,6 @@
 import type { FieldDef } from '@/types/unified-rules';
 
-// 54-condition catalogue for the advanced filter rules ConditionsEditor
+// 51-condition catalogue for the advanced filter rules ConditionsEditor
 // (layer-3-conditions.html rewrite). Field/category/envelope values are
 // carried over verbatim from the legacy pre-rewrite catalogue module (already
 // verified against the backend field registry) — only `panel` and `subgroup`
@@ -48,7 +48,7 @@ export interface ConditionDef {
 }
 
 export const CONDITIONS: ConditionDef[] = [
-  // --- 邮件基础信息 (19) ---
+  // --- 邮件基础信息 (18) ---
   { key: 'sender', category: 'mailBasic', field: 'from_address', panel: 'text', subgroup: 'headerLayer' },
   { key: 'recipient', category: 'mailBasic', field: 'recipient', panel: 'text', subgroup: 'headerLayer' },
   { key: 'subject', category: 'mailBasic', field: 'subject', panel: 'text', subgroup: 'headerLayer' },
@@ -60,7 +60,6 @@ export const CONDITIONS: ConditionDef[] = [
   { key: 'envelopeRecipient', category: 'mailBasic', field: 'onercpt', envelope: true, panel: 'text', subgroup: 'envelopeLayer' },
   { key: 'senderGroup', category: 'mailBasic', field: 'sender_group', panel: 'group', subgroup: 'senderAttr' },
   { key: 'senderOrganization', category: 'mailBasic', field: null, panel: 'group', subgroup: 'senderAttr' },
-  { key: 'featureGroup', category: 'mailBasic', field: 'feature_group', panel: 'featureGroup', subgroup: 'senderAttr' },
   { key: 'senderIp', category: 'mailBasic', field: 'client_ip', panel: 'cidr', subgroup: 'connection' },
   { key: 'senderIpGroup', category: 'mailBasic', field: 'sender_ip_group', panel: 'group', subgroup: 'senderAttr' },
   { key: 'geoIpCountry', category: 'mailBasic', field: 'geo_region', panel: 'group', subgroup: 'senderAttr' },
@@ -84,12 +83,10 @@ export const CONDITIONS: ConditionDef[] = [
   { key: 'qrCodeCount', category: 'attachment', field: 'qr_code_count', panel: 'number', meta: { unitKey: 'count', min: 0, max: 100, step: 1, recommend: { mode: 'ge', value: '3' } } },
   { key: 'attachmentZipBomb', category: 'attachment', field: 'is_zip_bomb', panel: 'select' },
 
-  // --- 安全检测 (22) ---
+  // --- 安全检测 (20) ---
   { key: 'urlCount', category: 'security', field: 'url_count', panel: 'number', meta: { unitKey: 'count', min: 0, max: 1000, step: 1, recommend: { mode: 'gt', value: '20' } } },
   { key: 'url', category: 'security', field: 'urls', panel: 'text' },
   { key: 'rblResult', category: 'security', field: 'rbl', panel: 'select' },
-  { key: 'urlSandboxResult', category: 'security', field: null, panel: 'select' },
-  { key: 'shortLinkExpanded', category: 'security', field: null, panel: 'select' },
   { key: 'urlDomain', category: 'security', field: 'urls', panel: 'text' },
   { key: 'spfResult', category: 'security', field: 'spf_result', panel: 'select' },
   { key: 'dkimResult', category: 'security', field: 'dkim_result', panel: 'select' },

@@ -174,15 +174,15 @@ describe('buildExpressionText', () => {
 describe('summarizeLeaf map_key rendering (GT-12261)', () => {
   const mapLeaf = (mapKey: string | undefined) => ({
     id: 'x',
-    conditionKey: 'featureGroup',
-    field: 'feature_group',
+    conditionKey: 'senderGroup',
+    field: 'sender_group',
     mapKey,
     operator: 'eq',
     value: 'true',
     exclude: false,
   });
 
-  it('shows the feature group name instead of a bare boolean expression', () => {
+  it('shows the sender group name instead of a bare boolean expression', () => {
     const s = summarizeLeaf(mapLeaf('grp:myfeature'), fakeT);
     expect(s.mapKeyLabel).toBe('myfeature');
     expect(s.name).toContain('myfeature');
