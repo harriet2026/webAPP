@@ -98,8 +98,8 @@ export function ImageDetectTab({
           <div className="space-y-2">
             <Label>{infoLabel(t('imageDetect.detectionMode'), t('tooltips.ocrMode'), 'ocr-detection-mode')}</Label>
             <Select value={config.ocr_mode} onValueChange={(mode) => onChange({ ...config, ocr_mode: mode as ImageDetectConfig['ocr_mode'] })}>
-              <SelectTrigger data-testid="ocr-detection-mode"><SelectValue /></SelectTrigger>
-              <SelectContent data-testid="ocr-detection-mode-options">
+              <SelectTrigger className="w-full max-w-[400px]" data-testid="ocr-detection-mode"><SelectValue /></SelectTrigger>
+              <SelectContent className="min-w-[var(--radix-select-trigger-width)] w-max" data-testid="ocr-detection-mode-options">
                 <SelectItem value="none" data-testid="ocr-detection-mode-none">{t('imageDetect.ocrMode_none')}</SelectItem>
                 <SelectItem value="light" data-testid="ocr-detection-mode-light">{t('imageDetect.ocrMode_light')}</SelectItem>
                 {/* GT-11675：深度 OCR 尚未实现，暂不可选。
