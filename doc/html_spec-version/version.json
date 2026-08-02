@@ -118,6 +118,15 @@
       "ticket": "GT-12563",
       "incremental": true,
       "summary": "GT-12563 搜索模板实现增量：追加一级目录条目「GT-12563 搜索模板实现」及变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-9 暗色 1253×832 / 1.3 逐元素变更表 9 项）；涵盖模板按钮 disabled 修复（始终 false）、SaveTemplateDialog 新建组件（保存/重命名复用）、同名覆盖警告（amber Warning + 按钮改为覆盖保存）、铅笔重命名按钮、应用确认 AlertDialog（有活跃条件时弹出）、SearchTemplate 类型扩展（aiQuery/updatedAt）、19 个新增 i18n key；追加差异 D-010（localStorage 跨设备不同步）；目录 C 项编号更新为 D-001~D-010；version.json current_version 12→13。"
+    },
+    {
+      "version": 14,
+      "generated_at": "2026-08-02",
+      "webapp_commit": "99410b4",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12731",
+      "incremental": true,
+      "summary": "GT-12723 禁用模块切换交互闪烁修复：新建 GT-12731.html（ticket=GT-12731，需求名称=GT-12723），记录点击切换至未启用模块时加载态下左导航标签先变为启用态再闪回未启用的问题及解决方案。追加一级目录条目及变更 1 区块（1.1 方案概述 / 1.2 问题现象截图 S-1~S-2 用户实拍 + 修复后稳态 S-3~S-4 浅色 1920×900 / 1.3 逐元素变更表）；核心方案：useModuleMaster 暴露 loaded 标志、UrlProtectionPage/IntentEnginePage/AttachmentSecurityPage 在真实启用态加载完成前不上报乐观默认值、PolicyPipelinePage 预取 securityModulesMap 作为 stage3 圆点/摘要加载期兜底真值；追加差异 D-011；version.json current_version 13→14。"
     }
   ]
 }

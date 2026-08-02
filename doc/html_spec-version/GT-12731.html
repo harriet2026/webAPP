@@ -196,7 +196,7 @@
           <code>src/components/security/AttachmentSecurityPage.tsx</code>、
           <code>src/components/security/PolicyPipelinePage.tsx</code>
         </td></tr>
-        <tr><td>webapp commit</td><td><code>19bb469</code></td></tr>
+        <tr><td>webapp commit</td><td><code>0b41d26</code>（工作区含 GT-12723 修复变更，待提交）</td></tr>
         <tr><td>对照 spec commit</td><td>not-used</td></tr>
         <tr><td>历史对话记录</td><td>当前上下文已提供（用户缺陷描述 + 两张问题现象截图 + 代码修复记录）</td></tr>
         <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 运行中 webapp 浏览器真实截图；3. webapp 源码</td></tr>
@@ -362,7 +362,7 @@
         变更 1 让子页在加载完成前不上报，但此时父级 <code>PolicyPipelinePage</code> 中对应模块的本地状态（<code>urlModuleEnabled</code> / <code>attachmentEnabled</code> / <code>intentEngineEnabled</code>）仍为 <code>undefined</code>。原逻辑在 <code>undefined</code> 时会退回 <code>item.functional</code>（恒为 <code>true</code>），因此首帧仍会把「未启用」模块画成启用——虽然不再「闪回」，但首帧依旧不正确。
       </p>
       <div class="callout callout-ok">
-        <strong>最终实现方案：</strong>父级复用已有的 <code>security-modules</code> 查询（原仅在 stage5 启用），将其 <code>enabled</code> 门控从 <code>stage5Active</code> 放宽为 <code>drawerOpen</code>，使抽屉一打开就预取模块开关映射 <code>securityModulesMap</code>。在导航渲染时，stage3 三个模块（<code>url</code> / <code>attachment</code> / <code>intentEngine</code>）的圆点 <code>dotOn</code> 与摘要 <code>summaryText</code> 判断改为「<strong>本地状态 <code>??</code> 父级兜底真值</strong>」：本地状态存在（含用户未保存的草稿切换）时优先，否则用 <code>securityModulesMap</code> 中的真实持久化值，只有二者都缺失时才退回 <code>item.functional</code>。这样首帧即用真值渲染。</strong>
+        <strong>最终实现方案：</strong>父级复用已有的 <code>security-modules</code> 查询（原仅在 stage5 启用），将其 <code>enabled</code> 门控从 <code>stage5Active</code> 放宽为 <code>drawerOpen</code>，使抽屉一打开就预取模块开关映射 <code>securityModulesMap</code>。在导航渲染时，stage3 三个模块（<code>url</code> / <code>attachment</code> / <code>intentEngine</code>）的圆点 <code>dotOn</code> 与摘要 <code>summaryText</code> 判断改为「<strong>本地状态 <code>??</code> 父级兜底真值</strong>」：本地状态存在（含用户未保存的草稿切换）时优先，否则用 <code>securityModulesMap</code> 中的真实持久化值，只有二者都缺失时才退回 <code>item.functional</code>。这样首帧即用真值渲染。
       </div>
       <pre><code>// PolicyPipelinePage.tsx（导航渲染，简化示意）
 const stage3Fallback = securityModulesMap?.[stage3ModuleKey[item.key]];
@@ -496,7 +496,7 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
         <tr>
           <td>v1</td>
           <td>2026-08-02</td>
-          <td><code>19bb469</code></td>
+          <td><code>0b41d26</code></td>
           <td>新建 GT-12731.html，记录 GT-12723 禁用模块切换交互闪回修复：变更 1（子页 useModuleMaster 新增 loaded、URL/意图/附件子页加载完成前不上报乐观启用态）、变更 2（PolicyPipelinePage 抽屉打开即预取 security-modules 作为 stage3 导航首帧兜底真值，dotOn/summaryText 改为「本地状态 ?? 兜底真值」）；含用户实拍问题现象截图 S-1/S-2 与浏览器实拍修复后稳态 S-3/S-4；差异 D-001~D-003、待确认 Q-001~Q-002。</td>
         </tr>
       </tbody>
