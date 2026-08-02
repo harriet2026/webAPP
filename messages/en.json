@@ -6879,6 +6879,9 @@
       "desc_attachmentCount": {
         "source": "Email attachment parsing",
         "usage": "Limit attachment count",
+        "operators": "Greater / greater-or-equal: matches when attachment count reaches or exceeds the threshold; less / less-or-equal: matches when it does not exceed the threshold; between: matches counts within the range.",
+        "example": "Comparison 'greater than or equal', threshold '10' — matches mail with 10 or more attachments.",
+        "recommended": "For typical office scenarios, 10-20 is recommended; adjust to your attachment habits.",
         "note": "Prevent resource consumption"
       },
       "desc_encryptedAttachment": {
@@ -6979,6 +6982,10 @@
       "desc_similarDomain": {
         "source": "Similar domain detection",
         "usage": "Detect lookalike domain spoofing",
+        "object": "Protected domain profile; * applies to all protected domain profiles.",
+        "operators": "Greater / greater-or-equal: larger distance is more lenient and matches more; less / less-or-equal: smaller distance is stricter and matches only highly similar domains; between: matches domains whose distance falls in the range.",
+        "example": "Object 'Company primary domain profile', comparison 'less than or equal', threshold '2' — matches lookalike domains within 2 character differences of a protected domain.",
+        "recommended": "Recommended 'less than or equal to 2', consistent with the built-in lookalike rule, balancing recall and false positives.",
         "note": "Pick a protected-domain profile first, then set the edit-distance threshold: the number of character edits between the sender domain and the protected domain (integer, typically 1-5). Smaller means more similar. The built-in lookalike rule uses \"less than or equal to 2\"."
       },
       "desc_displayNameSpoof": {
@@ -7061,7 +7068,36 @@
       "previewEmptyHint": "The logic expression is generated automatically once conditions are added",
       "notMarker": "(NOT)",
       "foldedMore": "+{count}",
-      "groupSelectLabel": "Select object"
+      "groupSelectLabel": "Select object",
+      "descInputTypeLabel": "Input type",
+      "descUnitLabel": "Unit",
+      "descRangeLabel": "Valid range",
+      "descObjectLabel": "Object meaning",
+      "descOperatorsLabel": "Supported operators",
+      "descExampleLabel": "Example",
+      "descRecommendedLabel": "Recommended",
+      "rangeBoth": "{min} ~ {max}",
+      "rangeMin": "≥ {min}",
+      "rangeMax": "≤ {max}",
+      "mapWildcardHint": "* means any object (matches all keys); select an object above to scope it.",
+      "mapObjectHint": "Matches only the selected object; choose * to match any object.",
+      "inputType": {
+        "text": "Text (one value per line)",
+        "number": "Number",
+        "select": "Enum select",
+        "group": "Group object",
+        "featureGroup": "Feature group",
+        "cidr": "IP / CIDR (one per line)",
+        "time": "Time range",
+        "weekday": "Weekday",
+        "mime": "MIME type"
+      },
+      "units": {
+        "count": "items",
+        "mb": "MB",
+        "level": "levels",
+        "editDistance": "char differences"
+      }
     },
     "placeholder": {
       "conditions": "Conditions builder (coming soon)",
@@ -10500,7 +10536,7 @@
         "valid_days_out_of_range": "The link validity for “{permission}” must be between {min} and {max} days"
       },
       "recall": {
-        "notify_email_invalid": "Recall notification email “{value}” is not a valid address",
+        "notify_email_invalid": "Recall notification email “{value}�� is not a valid address",
         "notify_frequency_invalid": "Invalid recall notification frequency. Allowed: {allowed}",
         "policy_invalid": "Invalid recall policy “{value}”. Allowed: {allowed}",
         "task_timeout_out_of_range": "The recall task timeout must be between {min} and {max} seconds"

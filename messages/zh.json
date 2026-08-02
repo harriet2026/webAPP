@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系需同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系��同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1024,7 +1024,7 @@
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
         },
-        "deleteDialogTitle": "删除路由规��「{name}」？",
+        "deleteDialogTitle": "删除��由规��「{name}」？",
         "deleteDialogDescription": "删除后立即生效，命中该规则的邮件将改由其余规则处理。",
         "deleteConfirmButton": "确认删除"
       }
@@ -1339,7 +1339,7 @@
     "sectionTargets": "适用对象",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
     "sectionPolicies": "分阶段策略配置",
-    "sectionPoliciesHint": "默认为「继承全局」；「预留」策略本迭代��入库、不改变实际检测行为。",
+    "sectionPoliciesHint": "默认为「继承全局」；「预留」策��本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
     "priorityHint": "优先级仅在多条策略命中同一邮件、且配置了同一模块时用于仲裁（数值越大越优先）。它不决定模块的跨阶段执行顺序——执行顺序由阶段流水线固定。",
     "priorityRange": "可填 {min}-{max}，数值越大越优先",
@@ -1843,7 +1843,7 @@
       "delivered_at": "投递时间",
       "bounced_at": "退信时间",
       "created_at": "创建时间",
-      "updated_at": "更新时间",
+      "updated_at": "���新时间",
       "dkim_outbound_signed": "DKIM 签名"
     },
     "actionChip": {
@@ -2052,7 +2052,7 @@
         "domainRequired": "请选择发信域"
       },
       "egress": {
-        "senderDomain": "发信域",
+        "senderDomain": "发信���",
         "name": "出口 IP",
         "nameRequired": "请选择出口 IP",
         "empty": "请先在网络设置配置出口 IP",
@@ -2640,7 +2640,7 @@
       "digit": "包含数字",
       "special": "包含特殊字符",
       "classes": "至少包含 {n} 类字符（大写/小写/数字/特殊）",
-      "mismatch": "两次输入的密码不一致",
+      "mismatch": "两次输入的密码不��致",
       "strength1": "弱",
       "strength2": "中",
       "strength3": "强",
@@ -4374,7 +4374,7 @@
     "discardChanges": "放弃更改",
     "jumpToPage": "跳至页码",
     "actionSection": "执行动作",
-    "actionTip": "选择规则命中后执行的处置动作",
+    "actionTip": "选择规则命中后执行的处置��作",
     "actionHint": "适用于所有勾选的生效范围",
     "remarkTitle": "备注说明",
     "remarkPlaceholder": "添加规则说明，最多200字",
@@ -4449,7 +4449,7 @@
       "spf_none": "未维护 (None)",
       "spf_noneDesc": "域名未配置SPF记录",
       "spf_temperror": "查询失败 (TempError)",
-      "spf_temperrorDesc": "DNS查询超时或��败",
+      "spf_temperrorDesc": "DNS查��超时或��败",
       "dkim_fail": "验证失败",
       "dkim_failDesc": "DKIM签名验证不通过",
       "dkim_neutral": "中性 (Neutral)",
@@ -4944,7 +4944,7 @@
     "toast": {
       "saveSuccess": "配置已保存",
       "saveFailed": "保存失败",
-      "loadFailed": "加载配置失败，已显示默认值",
+      "loadFailed": "加载配���失败，已显示默认值",
       "deleteSuccess": "规则已删除"
     },
     "antivirus": {
@@ -5486,7 +5486,7 @@
     "delete": "删除",
     "cancel": "取消",
     "save": "保存",
-    "createReceiveRule": "新建接收标记规则",
+    "createReceiveRule": "新建接收标记���则",
     "editReceiveRule": "编辑接收标记规则",
     "createSendRule": "新建外发声明规则",
     "editSendRule": "编辑外发声明规则",
@@ -6936,6 +6936,9 @@
       "desc_attachmentCount": {
         "source": "邮件附件解析",
         "usage": "限制邮件包含的附件数量",
+        "operators": "大于/大于等于：附件数达到或超过阈值即命中；小于/小于等于：附件数不超过阈值即命中；介于：命中数量落在区间内的邮件。",
+        "example": "比较方式「大于等于」，阈值「10」——命中附件数达到 10 个及以上的邮件。",
+        "recommended": "常规办公场景推荐阈值 10~20，可按业务附件习惯调整。",
         "note": "防止大量附件造成资源占用"
       },
       "desc_encryptedAttachment": {
@@ -6980,7 +6983,7 @@
       },
       "desc_attachmentZipBomb": {
         "source": "压缩包安全检测",
-        "usage": "检测是否为恶意压缩炸弹文件",
+        "usage": "检测是否为恶意��缩炸弹文件",
         "note": "压缩炸弹解压后可能导致系统资源耗尽"
       },
       "desc_urlCount": {
@@ -7036,6 +7039,10 @@
       "desc_similarDomain": {
         "source": "相似域名检测引擎",
         "usage": "检测是否存在仿冒相似域名",
+        "object": "受保护域名档案；* 表示对全部受保护域名档案生效。",
+        "operators": "大于/大于等于：差异越大越宽松，命中范围越大；小于/小于等于：差异越小越严格，只命中高度相似域名；介于：命中差异落在指定区间的域名。",
+        "example": "对象选择「公司主域名档案」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超过 2 的仿冒域名。",
+        "recommended": "推荐使用「小于等于 2」，与内置相似域名规则一致，兼顾召回与误报。",
         "note": "先选择受保护域名档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
       },
       "desc_displayNameSpoof": {
@@ -7147,17 +7154,6 @@
         "mb": "MB",
         "level": "层",
         "editDistance": "字符差异数"
-      },
-      "desc_similarDomain": {
-        "object": "受保护域名档案；* 表示对全部受保护域名档案生效。",
-        "operators": "大于/大于等于：差异越大越宽松，命中范围越大；小于/小于等于：差异越小越严格，只命中高度相似域名；介于：命中差异落在指定区间的域名。",
-        "example": "对象选择「公司主域名档案」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超过 2 的仿冒域名。",
-        "recommended": "推荐使用「小于等于 2」，与内置相似域名规则一致，兼顾召回与误报。"
-      },
-      "desc_attachmentCount": {
-        "operators": "大于/大于等于：附件数达到或超过阈值即命中；小于/小于等于：附件数不超过阈值即命中；介于：命中数量落在区间内的邮件。",
-        "example": "比较方式「大于等于」，阈值「10」——命中附件数达到 10 个及以上的邮件。",
-        "recommended": "常规办公场景推荐阈值 10~20，可按业务附件习惯调整。"
       }
     },
     "placeholder": {
@@ -7481,7 +7477,7 @@
     "recallKeys": "召回密钥",
     "newRecallKey": "新建召回密钥",
     "agentType": "所属 Agent 类型",
-    "noRecallKeys": "暂无召回密钥",
+    "noRecallKeys": "暂���召回密钥",
     "actions": "操作",
     "cancel": "取消",
     "create": "创建",
@@ -7849,7 +7845,7 @@
         "sidelineQueue": "当前等待旁路处理的任务数（近似反垃圾队列）。",
         "latencyP99": "99% 的外发邮件在该耗时内完成；超过 30 秒告警。",
         "outboundQueueBacklog": "基于投递中邮件估算的外发队列积压。",
-        "threatRate": "检测到内部威胁的域内邮件占比。",
+        "threatRate": "检测到内部威胁的域内邮���占比。",
         "internalThreatCount": "检测到垃圾、钓鱼或病毒的域内邮件数。"
       }
     },
@@ -8503,7 +8499,7 @@
     "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
     "admission": {
       "title": "准入规则",
-      "description": "决定哪些邮件���入钓鱼邮件检测智能体。命中后使用当前部署级运行限制。",
+      "description": "决定哪些邮件���入钓鱼邮件检测智能���。命中后使用当前部署级运行限制。",
       "loading": "加载中...",
       "empty": "暂无准入规则，点击「新建」添加。",
       "create": "新建",
@@ -9018,7 +9014,7 @@
       "sectionDetection": "检测规则",
       "sectionDetectionDescription": "设定置信度阈值，决定命中判定的严格程度",
       "sectionDisposition": "处置策略",
-      "sectionDispositionDescription": "命中仿冒后如何处理邮件与通知",
+      "sectionDispositionDescription": "命中仿冒后如何处理邮��与通知",
       "brandName": "品牌名称",
       "brandNamePlaceholder": "CACTER科技",
       "brandNameHint": "最多 30 字符",
@@ -9219,7 +9215,7 @@
       "disposition": "处置",
       "recheckConfidence": "复检置信度",
       "recallStatus": "召回状态",
-      "actions": "操作",
+      "actions": "操��",
       "mailId": "邮件 ID",
       "originalDisposition": "原始处置",
       "rationale": "判定依据",
@@ -9765,7 +9761,7 @@
     },
     "severity": {
       "critical": "严重",
-      "major": "重要",
+      "major": "重��",
       "minor": "次要",
       "warning": "警告",
       "info": "提示"
@@ -10154,7 +10150,7 @@
       "maxLoginAttempts": "连续密码错误次数",
       "lockoutMinutes": "锁定时长",
       "sessionTimeoutSecs": "会话超时时间",
-      "ipMode": "访问模式",
+      "ipMode": "��问模式",
       "maxOnline": "同一账号最大在线数",
       "overflowPolicy": "超出后策略",
       "cidr": "IP 地址/段",
@@ -10751,7 +10747,7 @@
       "name_exists": "规则名称已存在，请换一个",
       "not_found": "规则不存在，可能已被删除",
       "role_not_permitted": "当前角色没有创建规则的权限",
-      "route_metadata_required": "路由类规则必须填写下一跳信息：{required}",
+      "route_metadata_required": "路由类规则必须���写下一跳信息：{required}",
       "stage_not_allowed_for_role": "租户管理员只能管理以下阶段的规则：{allowed}",
       "system_baseline_no_convert": "普通规则不能转换为系统基线规则",
       "system_baseline_no_create": "系统基线规则不能通过接口创建",
