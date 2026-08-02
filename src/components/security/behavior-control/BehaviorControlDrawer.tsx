@@ -900,15 +900,63 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                           <span>{t('behaviorControl.examples.toggle')}</span>
                         </CollapsibleSectionTrigger>
                         <CollapsibleContent className="mt-3 space-y-3">
-                          {[
-                            { name: t('behaviorControl.examples.normalName'), desc: t('behaviorControl.examples.normalDesc'), effect: t('behaviorControl.examples.normalEffect') },
-                            { name: t('behaviorControl.examples.stolenName'), desc: t('behaviorControl.examples.stolenDesc'), effect: t('behaviorControl.examples.stolenEffect') },
-                            { name: t('behaviorControl.examples.salesName'), desc: t('behaviorControl.examples.salesDesc'), effect: t('behaviorControl.examples.salesEffect') },
-                          ].map((example) => (
-                            <div key={example.name} className="bg-background rounded-lg p-4 border">
-                              <div className="mb-2">
-                                <h4 className="font-medium text-sm">{example.name}</h4>
-                                <p className="text-xs text-muted-foreground">{example.desc}</p>
+                          {([
+                            {
+                              name: t('behaviorControl.examples.normalName'),
+                              desc: t('behaviorControl.examples.normalDesc'),
+                              effect: t('behaviorControl.examples.normalEffect'),
+                              preset: {
+                                time_window: '15min' as BehaviorTimeWindow,
+                                conditions: [
+                                  { dim: 'mail_count' as BehaviorDimension, threshold: 50 },
+                                  { dim: 'ip_count' as BehaviorDimension, threshold: 2 },
+                                ],
+                                or_enabled: false,
+                              },
+                            },
+                            {
+                              name: t('behaviorControl.examples.stolenName'),
+                              desc: t('behaviorControl.examples.stolenDesc'),
+                              effect: t('behaviorControl.examples.stolenEffect'),
+                              preset: {
+                                time_window: '15min' as BehaviorTimeWindow,
+                                conditions: [
+                                  { dim: 'ip_count' as BehaviorDimension, threshold: 10 },
+                                  { dim: 'mail_count' as BehaviorDimension, threshold: 200 },
+                                ],
+                                or_enabled: true,
+                              },
+                            },
+                            {
+                              name: t('behaviorControl.examples.salesName'),
+                              desc: t('behaviorControl.examples.salesDesc'),
+                              effect: t('behaviorControl.examples.salesEffect'),
+                              preset: {
+                                time_window: '1hour' as BehaviorTimeWindow,
+                                conditions: [
+                                  { dim: 'recipient_count' as BehaviorDimension, threshold: 500 },
+                                ],
+                                or_enabled: false,
+                              },
+                            },
+                          ] as const).map((example) => (
+                            <div
+                              key={example.name}
+                              className="bg-background rounded-lg p-4 border cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors group"
+                              onClick={() => {
+                                setValue('time_window', example.preset.time_window, { shouldDirty: true });
+                                setValue('conditions', example.preset.conditions.map(c => ({ ...c })), { shouldDirty: true });
+                                setValue('or_enabled', example.preset.or_enabled, { shouldDirty: true });
+                              }}
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <div>
+                                  <h4 className="font-medium text-sm">{example.name}</h4>
+                                  <p className="text-xs text-muted-foreground">{example.desc}</p>
+                                </div>
+                                <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2 mt-0.5">
+                                  {t('behaviorControl.examples.fill')}
+                                </span>
                               </div>
                               <p className="text-xs text-muted-foreground bg-muted/40 rounded p-2">{example.effect}</p>
                             </div>

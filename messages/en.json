@@ -4878,7 +4878,8 @@
       "stolenEffect": "An account thief sends 200 emails in 15 minutes using 10 IPs, triggering quarantine",
       "salesName": "Sales Bulk Mail Scenario",
       "salesDesc": "Normal bulk business email, relaxed threshold",
-      "salesEffect": "Sales dept sends a daily report to 500 recipients; internal-direction thresholds are relaxed, so the outbound rule is not triggered"
+      "salesEffect": "Sales dept sends a daily report to 500 recipients; internal-direction thresholds are relaxed, so the outbound rule is not triggered",
+      "fill": "Apply example"
     },
     "simulator": {
       "toggle": "Simulation Test",
