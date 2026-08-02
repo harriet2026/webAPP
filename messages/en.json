@@ -7076,6 +7076,12 @@
       "descOperatorsLabel": "Supported operators",
       "descExampleLabel": "Example",
       "descRecommendedLabel": "Recommended",
+      "descFormatLabel": "Format & example",
+      "descStepGuideLabel": "Steps",
+      "applyRecommended": "Apply recommended",
+      "numericOperatorsHint": "Greater than / greater or equal: matches when the value reaches or exceeds the threshold; less than / less or equal: matches when it stays within the threshold; between: matches when the value falls inside the given range.",
+      "exampleTemplate": "Comparison \"{mode}\", threshold \"{value}\" ({unit}).",
+      "recommendTemplate": "{mode} {value} ({unit})",
       "rangeBoth": "{min} ~ {max}",
       "rangeMin": "≥ {min}",
       "rangeMax": "≤ {max}",
@@ -7097,6 +7103,22 @@
         "mb": "MB",
         "level": "levels",
         "editDistance": "char differences"
+      },
+      "stepGuideMapNumber": [
+        "First pick the object to compare in \"Select object\" (* means all objects).",
+        "Then choose the comparison (greater than / less than / between, etc.).",
+        "Finally enter the threshold; click \"Apply recommended\" to fill a common value quickly."
+      ],
+      "formats": {
+        "number": "Enter an integer threshold with a comparison; click \"Apply recommended\" to fill a common value.",
+        "text": "One value per line; matched by the selected mode (contains / equals / wildcard / regex).",
+        "mime": "One MIME type per line, e.g. application/zip; or add via the common-type shortcuts below.",
+        "cidr": "One IP or CIDR per line, e.g. 192.168.1.0/24.",
+        "time": "24-hour time range, e.g. 09:00 ~ 18:00.",
+        "weekday": "Select one or more days of the week.",
+        "select": "Pick a fixed result value (e.g. pass / fail) from the dropdown, or enter a single value for equals / not-equals.",
+        "group": "Pick an object from a preset group / profile; * means any object.",
+        "featureGroup": "Select a feature group to match."
       }
     },
     "placeholder": {

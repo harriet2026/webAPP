@@ -80,6 +80,12 @@ export function ConditionConfigPanel({ leaf, fieldDefs, onChange }: Props) {
   // desc_<key> 里声明了该子键才渲染，未声明的条件自动退化为原三段式，避免对
   // 全部 54 条条件强制补齐。用 next-intl 的 has() 做存在性判断，不臆造缺省文案。
   const hasKey = (key: string) => tt.has(key);
+  // tList — 读取 i18n 里的字符串数组（如分步引导 stepGuideMapNumber）。next-intl
+  // 的 t() 只返回字符串，数组要走 raw()；非数组时回退空数组以免渲染出错。
+  const tList = (key: string): string[] => {
+    const raw = (tt as unknown as { raw: (k: string) => unknown }).raw(key);
+    return Array.isArray(raw) ? (raw as string[]) : [];
+  };
 
   if (!leaf) {
     return (
@@ -108,7 +114,7 @@ export function ConditionConfigPanel({ leaf, fieldDefs, onChange }: Props) {
         </span>
       </div>
 
-      {def && <DescriptionCard def={def} fd={fd} t={t} hasKey={hasKey} />}
+      {def && <DescriptionCard def={def} fd={fd} t={t} hasKey={hasKey} tList={tList} />}
 
       <PanelBody leaf={leaf} def={def} fd={fd} onChange={patch} t={t} />
 
@@ -145,29 +151,62 @@ function rangeText(meta: ConditionMeta, t: T): string {
   return '';
 }
 
+// recommendDisplay — 把语言无关的 meta.recommend 拼成可读的「比较方式 + 阈值
+// (+ 单位)」，供说明卡自动生成「有效示例 / 推荐配置」两行以及数值输入占位使用。
+// between 写作「lo ~ hi」；无 recommend 时返回 null。
+function recommendDisplay(meta: ConditionMeta | undefined, t: T): { modeLabel: string; valueText: string; unit: string } | null {
+  const rec = meta?.recommend;
+  if (!rec) return null;
+  const modeLabel = t(`v3Conditions.matchModes.${rec.mode}`);
+  const unit = meta?.unitKey ? t(`v3Conditions.units.${meta.unitKey}`) : '';
+  const valueText = rec.mode === 'between'
+    ? rec.value.split(',').map((s) => s.trim()).join(' ~ ')
+    : rec.value;
+  return { modeLabel, valueText, unit };
+}
+
 // DescriptionCard — 条件配置说明卡。在原「数据来源 / 用途 / 注意」三段之上，
-// 追加贴合当前控件的结构化说明：输入类型、单位、有效范围，以及可选的对象含义、
-// 支持运算符、有效示例、推荐配置（后四项仅当 desc_<key> 声明了对应子键才渲染）。
+// 追加贴合当前控件的结构化说明：输入类型、格式与示例（按面板类型统一给出）、
+// 单位、有效范围，以及对象含义、支持运算符、有效示例、推荐配置。后四项优先取
+// desc_<key> 里手写的子键；数值/阈值类条件（含 map_number 的相似域名）在未手写
+// 时，由 meta 自动生成通用的运算符说明与「示例 / 推荐」两行，无需逐条件补文案。
+// map_number 这类需要「先选对象、再比大小」的复杂条件额外给出分步引导。
 function DescriptionCard({
   def,
   fd,
   t,
   hasKey,
+  tList,
 }: {
   def: ConditionDef;
   fd: FieldDef | undefined;
   t: T;
   hasKey: (key: string) => boolean;
+  tList: (key: string) => string[];
 }) {
   const base = `v3Conditions.desc_${def.key}`;
   const meta = def.meta;
   const range = meta ? rangeText(meta, t) : '';
-  const optionalRows: Array<{ label: string; sub: string }> = [
-    { label: t('v3Conditions.descObjectLabel'), sub: 'object' },
-    { label: t('v3Conditions.descOperatorsLabel'), sub: 'operators' },
-    { label: t('v3Conditions.descExampleLabel'), sub: 'example' },
-    { label: t('v3Conditions.descRecommendedLabel'), sub: 'recommended' },
-  ];
+  const isMapNumber = fd?.type === 'map_number';
+  const isNumeric = def.panel === 'number' || isMapNumber;
+  // 格式与示例按面板类型统一给出：数值/阈值统一走 number；其余用 map_* 归一后的
+  // 实际输入面板，从而覆盖 text/cidr/time/weekday/select/group/featureGroup。
+  const formatPanel = isNumeric ? 'number' : inputTypePanel(def, fd);
+  const rec = recommendDisplay(meta, t);
+  const stepGuide = isMapNumber ? tList('v3Conditions.stepGuideMapNumber') : [];
+
+  // 可选行：先手写子键，数值条件在缺省时回退到 meta 自动生成的通用文案。
+  const objectRow = hasKey(`${base}.object`) ? t(`${base}.object`) : '';
+  const operatorsRow = hasKey(`${base}.operators`)
+    ? t(`${base}.operators`)
+    : isNumeric ? t('v3Conditions.numericOperatorsHint') : '';
+  const exampleRow = hasKey(`${base}.example`)
+    ? t(`${base}.example`)
+    : rec ? t('v3Conditions.exampleTemplate', { mode: rec.modeLabel, value: rec.valueText, unit: rec.unit }) : '';
+  const recommendedRow = hasKey(`${base}.recommended`)
+    ? t(`${base}.recommended`)
+    : rec ? t('v3Conditions.recommendTemplate', { mode: rec.modeLabel, value: rec.valueText, unit: rec.unit }) : '';
+
   return (
     <div
       className="space-y-0.5 rounded-md border border-green-200 bg-green-50 p-2.5 text-xs text-green-800 dark:border-green-900 dark:bg-green-950/30 dark:text-green-300"
@@ -179,14 +218,26 @@ function DescriptionCard({
       <div>
         {t('v3Conditions.descInputTypeLabel')}: {t(`v3Conditions.inputType.${inputTypePanel(def, fd)}`)}
       </div>
+      {hasKey(`v3Conditions.formats.${formatPanel}`) && (
+        <div data-testid="desc-format-row">{t('v3Conditions.descFormatLabel')}: {t(`v3Conditions.formats.${formatPanel}`)}</div>
+      )}
       {meta?.unitKey && (
         <div>{t('v3Conditions.descUnitLabel')}: {t(`v3Conditions.units.${meta.unitKey}`)}</div>
       )}
       {range && <div>{t('v3Conditions.descRangeLabel')}: {range}</div>}
-      {optionalRows.map(({ label, sub }) =>
-        hasKey(`${base}.${sub}`) ? (
-          <div key={sub}>{label}: {t(`${base}.${sub}`)}</div>
-        ) : null,
+      {objectRow && <div>{t('v3Conditions.descObjectLabel')}: {objectRow}</div>}
+      {operatorsRow && <div data-testid="desc-operators-row">{t('v3Conditions.descOperatorsLabel')}: {operatorsRow}</div>}
+      {exampleRow && <div data-testid="desc-example-row">{t('v3Conditions.descExampleLabel')}: {exampleRow}</div>}
+      {recommendedRow && <div data-testid="desc-recommended-row">{t('v3Conditions.descRecommendedLabel')}: {recommendedRow}</div>}
+      {stepGuide.length > 0 && (
+        <div className="pt-0.5" data-testid="desc-step-guide">
+          <div>{t('v3Conditions.descStepGuideLabel')}:</div>
+          <ol className="ml-4 list-decimal">
+            {stepGuide.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ol>
+        </div>
       )}
       <div>{t('v3Conditions.descNoteLabel')}: {t(`${base}.note`)}</div>
     </div>
@@ -317,6 +368,14 @@ function NumberSection({ leaf, meta, onChange, t }: { leaf: ConditionLeaf; meta?
   const unitSuffix = unit ? ` (${unit})` : '';
   const rangeHint = meta ? rangeText(meta, t) : '';
   const num = { min: meta?.min, max: meta?.max, step: meta?.step ?? 1 };
+  // recommend：语言无关的默认有效模板。既作为输入框占位示例，又提供「应用推荐
+  // 配置」按钮，一键把比较方式与阈值填入，降低复杂阈值条件的上手成本。
+  const rec = meta?.recommend;
+  const [recLo, recHi] = (rec?.value ?? '').split(',');
+  const singlePlaceholder = rec && rec.mode !== 'between' ? rec.value : undefined;
+  const applyRecommended = rec
+    ? () => onChange({ operator: MATCH_MODE_TO_OPERATOR[rec.mode], value: rec.value })
+    : undefined;
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
@@ -342,17 +401,17 @@ function NumberSection({ leaf, meta, onChange, t }: { leaf: ConditionLeaf; meta?
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1.5">
             <Label>{t('v3Conditions.betweenLoLabel')}{unitSuffix}</Label>
-            <Input data-testid="config-number-lo" type="number" min={num.min} max={num.max} step={num.step} value={lo ?? ''} onChange={(e) => onChange({ value: `${e.target.value},${hi ?? ''}` })} />
+            <Input data-testid="config-number-lo" type="number" min={num.min} max={num.max} step={num.step} placeholder={recLo} value={lo ?? ''} onChange={(e) => onChange({ value: `${e.target.value},${hi ?? ''}` })} />
           </div>
           <div className="space-y-1.5">
             <Label>{t('v3Conditions.betweenHiLabel')}{unitSuffix}</Label>
-            <Input data-testid="config-number-hi" type="number" min={num.min} max={num.max} step={num.step} value={hi ?? ''} onChange={(e) => onChange({ value: `${lo ?? ''},${e.target.value}` })} />
+            <Input data-testid="config-number-hi" type="number" min={num.min} max={num.max} step={num.step} placeholder={recHi} value={hi ?? ''} onChange={(e) => onChange({ value: `${lo ?? ''},${e.target.value}` })} />
           </div>
         </div>
       ) : (
         <div className="space-y-1.5">
           <Label>{t('v3Conditions.thresholdLabel')}{unitSuffix}</Label>
-          <Input data-testid="config-number-threshold" type="number" min={num.min} max={num.max} step={num.step} value={leaf.value} onChange={(e) => onChange({ value: e.target.value })} />
+          <Input data-testid="config-number-threshold" type="number" min={num.min} max={num.max} step={num.step} placeholder={singlePlaceholder} value={leaf.value} onChange={(e) => onChange({ value: e.target.value })} />
         </div>
       )}
       {rangeHint && (
@@ -360,8 +419,28 @@ function NumberSection({ leaf, meta, onChange, t }: { leaf: ConditionLeaf; meta?
           {t('v3Conditions.descRangeLabel')}: {rangeHint}
         </p>
       )}
+      {rec && applyRecommended && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          data-testid="config-number-apply-recommended"
+          onClick={applyRecommended}
+          title={`${t(`v3Conditions.matchModes.${rec.mode}`)} ${recommendValueText(rec)}`}
+        >
+          <Sparkles className="mr-1 h-3.5 w-3.5" />
+          {t('v3Conditions.applyRecommended')}
+        </Button>
+      )}
     </div>
   );
+}
+
+// recommendValueText — between 显示为「lo ~ hi」，其余原样返回（供按钮 title 提示）。
+function recommendValueText(rec: NonNullable<ConditionMeta['recommend']>): string {
+  return rec.mode === 'between'
+    ? rec.value.split(',').map((s) => s.trim()).join(' ~ ')
+    : rec.value;
 }
 
 function CidrSection({ leaf, onChange, t }: { leaf: ConditionLeaf; onChange: (p: Partial<ConditionLeaf>) => void; t: T }) {

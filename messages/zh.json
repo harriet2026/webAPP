@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系��同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系���同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1024,7 +1024,7 @@
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
         },
-        "deleteDialogTitle": "删除��由规��「{name}」？",
+        "deleteDialogTitle": "删����由规��「{name}」？",
         "deleteDialogDescription": "删除后立即生效，命中该规则的邮件将改由其余规则处理。",
         "deleteConfirmButton": "确认删除"
       }
@@ -1339,7 +1339,7 @@
     "sectionTargets": "适用对象",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
     "sectionPolicies": "分阶段策略配置",
-    "sectionPoliciesHint": "默认为「继承全局」；「预留」策��本迭代��入库、不改变实际检测行为。",
+    "sectionPoliciesHint": "默认为「继承全局」；「预留��策��本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
     "priorityHint": "优先级仅在多条策略命中同一邮件、且配置了同一模块时用于仲裁（数值越大越优先）。它不决定模块的跨阶段执行顺序——执行顺序由阶段流水线固定。",
     "priorityRange": "可填 {min}-{max}，数值越大越优先",
@@ -2097,7 +2097,7 @@
       "copy": "复制密码",
       "copied": "密码已复制",
       "copyFailed": "复制失败，请手动复制",
-      "success": "密码已重置，用户首次登录需修改密码",
+      "success": "密码已重置，用户首次登录需修改密���",
       "confirm": "确定��置"
     },
     "accountUsername": "账号/用户名",
@@ -2455,7 +2455,7 @@
     },
     "detail": {
       "breadcrumb": "日志审计 / 认证日志",
-      "description": "查看该次认证尝试的详细信息与诊断建议",
+      "description": "查看该次认证尝试的详细信���与诊断建议",
       "summary": "认证概要",
       "protocolServer": "协议与服务器",
       "matchedConfig": "命中配置",
@@ -2671,7 +2671,7 @@
       "codeSent": "验证码已发送",
       "enable": "开启",
       "enableFailed": "开启失败",
-      "disableTitle": "关闭二次认证",
+      "disableTitle": "关��二次认证",
       "disable": "关闭二次认证",
       "disableConfirm": "关闭前需验证身份，请输入当前登录密码",
       "passwordPlaceholder": "请输入当前密码",
@@ -2859,7 +2859,7 @@
       "dmarc_domain": "DMARC 域名",
       "dmarc_policy": "DMARC 策略",
       "dmarc_spf_aligned": "DMARC SPF 对齐",
-      "dmarc_dkim_aligned": "DMARC DKIM 对齐",
+      "dmarc_dkim_aligned": "DMARC DKIM 对��",
       "dmarc_from_domain": "DMARC ��件域名",
       "ptr_valid": "PTR 验证",
       "ptr_domain": "PTR 域名",
@@ -3036,7 +3036,7 @@
       "authAttemptCount": "认证尝试数",
       "authFailureCount": "认证失败数",
       "authSuccessCount": "认证成功数",
-      "uniqueIpCount": "唯一 IP 数",
+      "uniqueIpCount": "唯�� IP 数",
       "recentMailCount": "最近邮件数",
       "uniqueRecipientCount": "唯一收件人数",
       "recentIps": "最近 IP 列表",
@@ -3960,7 +3960,7 @@
     "actionQuarantineDesc": "隔离邮件，等待管理员处理",
     "actionReviewDesc": "进入审核队列，需管理员审批",
     "actionBlockDesc": "拒绝接收，返回错误信息",
-    "actionDropDesc": "静默丢弃邮件，发件方收到成功响应",
+    "actionDropDesc": "静默丢弃邮件，���件方收到成功响应",
     "effectPreview": "效果预览",
     "effectSkipped": "该方向邮件跳过海外检测",
     "enabled": "启用",
@@ -4544,7 +4544,7 @@
     },
     "protocolWarning": {
       "title": "启用此条件可能引发误判",
-      "desc": "此条件（如 SPF None、DKIM None、PTR 无记录等）表示认证信息「缺失」，而非邮件「造假」。正常邮件也常见此情况，启用规则后可能误判合法邮件。\n\n请在充分评估误判风险后再决定是否启用。",
+      "desc": "此条件（如 SPF None、DKIM None、PTR 无记录等）表示认证信息「缺失」，而非邮件「造假」。正常邮件也常见此情况，启用规则后可能误判合法���件。\n\n请在充分评估误判风险后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
     },
@@ -5165,7 +5165,7 @@
       },
       "toggle": "沙箱检测",
       "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁",
-      "toggleTip": "对未知URL进行动态行为分析，模拟用户访问以检测恶意行为",
+      "toggleTip": "对未知URL进行动态行为分析，模拟用���访问以检测恶意行为",
       "detectGroup": "检测结果处置（当前方向���",
       "maliciousLabel": "发现恶意URL",
       "maliciousTip": "当沙箱分析判定URL为恶意时执行的动作",
@@ -5565,7 +5565,7 @@
     "sampleRecipient": "张三",
     "sampleSubject": "项目进展说明",
     "sampleGreeting": "您好，",
-    "sampleBody": "这是一封用于预览标记和免责声明效果的示例邮件。",
+    "sampleBody": "这是一��用于预览标记和免责声明效果的示例邮件。",
     "errorNameRequired": "请输入规则名称",
     "errorPriorityPositive": "优先级必须为正整数",
     "errorMarkRequired": "请输入标记文案",
@@ -5935,7 +5935,7 @@
       "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
       "releaseAuditHint": "放行与类型改判都会写入审计记录。",
       "recallDescription": "尝试从收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
-      "recallAuditHint": "召回可能受目标邮件系统限制；操作结果与类型改判会写入审计记录。",
+      "recallAuditHint": "召回可能受目标邮件系统限制；操作结���与类型改判会写入审计记录。",
       "similarLimit": "最多支持 10 封样本",
       "similarFound": "找到 {n} 封相似邮件",
       "exportNotImplemented": "导出功能即将推出",
@@ -6881,7 +6881,7 @@
       "desc_featureGroup": {
         "source": "群组策略 - 特征组",
         "usage": "引用预定义的特征组（一组条件的命名组合）",
-        "note": "特征组变更后规则即时生效，无需重新保存规则"
+        "note": "特征组变更后规则即时生���，无需重新保存规则"
       },
       "desc_senderIp": {
         "source": "SMTP连接层",
@@ -6983,7 +6983,7 @@
       },
       "desc_attachmentZipBomb": {
         "source": "压缩包安全检测",
-        "usage": "检测是否为恶意��缩炸弹文件",
+        "usage": "检测是否为恶意压缩炸弹文件",
         "note": "压缩炸弹解压后可能导致系统资源耗尽"
       },
       "desc_urlCount": {
@@ -7133,6 +7133,12 @@
       "descOperatorsLabel": "支持运算符",
       "descExampleLabel": "有效示例",
       "descRecommendedLabel": "推荐配置",
+      "descFormatLabel": "格式与示例",
+      "descStepGuideLabel": "配置步骤",
+      "applyRecommended": "应用推荐配置",
+      "numericOperatorsHint": "大于 / 大于等于：数值达到或超过阈值即命中；小于 / 小于等于：不超过阈值即命中；介于：数值落在指定区间内即命中。",
+      "exampleTemplate": "比较方式「{mode}」，阈值「{value}」（{unit}）。",
+      "recommendTemplate": "{mode} {value}（{unit}）",
       "rangeBoth": "{min} ~ {max}",
       "rangeMin": "≥ {min}",
       "rangeMax": "≤ {max}",
@@ -7154,6 +7160,22 @@
         "mb": "MB",
         "level": "层",
         "editDistance": "字符差异数"
+      },
+      "stepGuideMapNumber": [
+        "先在「选择对象」中选择要比较的对象（* 表示全部对象）。",
+        "再选择比较方式（大于 / 小于 / 介于等）。",
+        "最后填写阈值，可点「应用推荐配置」快速填入常用值。"
+      ],
+      "formats": {
+        "number": "填写整数阈值并配合比较方式使用；可点「应用推荐配置」一键填入常用值。",
+        "text": "每行一个值；按所选匹配方式（包含 / 等于 / 通配符 / 正则）进行匹配。",
+        "mime": "每行一个 MIME 类型，如 application/zip；也可点下方常用类型快捷添加。",
+        "cidr": "每行一个 IP 或 CIDR，如 192.168.1.0/24。",
+        "time": "24 小时制时间区间，如 09:00 ~ 18:00。",
+        "weekday": "勾选一个或多个星期几。",
+        "select": "从下拉选择固定结果值（如 pass / fail），或输入单个值做等于 / 不等于匹配。",
+        "group": "从预置群组 / 档案中选择对象；* 表示任意对象。",
+        "featureGroup": "选择一个特征组进行匹配。"
       }
     },
     "placeholder": {
@@ -7272,7 +7294,7 @@
       "descNoteLabel": "注意",
       "addonDescUsage": "在执行动作之上叠加「{name}」处理",
       "addonDisabledHint": "未勾选：表单已禁用；勾选后将自动展开并聚焦首个输入项",
-      "quarantineHint": "邮件隔离无需配置参数；被隔离邮件可在���件隔离模块查看。",
+      "quarantineHint": "邮件隔离无需配置参数；被隔离邮件可在邮件隔离模块查看。",
       "tagStyleLabel": "标记样式",
       "tagDeliverStyleDisabledHint": "标记位置为信头时样式不生效",
       "blockSmtpCodeHint": "常用: 550/554/571",
@@ -7310,7 +7332,7 @@
         },
         "quarantine": {
           "source": "隔离区",
-          "usage": "移至隔离区待审",
+          "usage": "移��隔离区待审",
           "note": "被隔离邮件可在邮件隔离模块查看"
         },
         "review": {
@@ -7565,7 +7587,7 @@
     "eyebrow": "DKIM"
   },
   "passwordPolicy": {
-    "title": "密码策略",
+    "title": "密码策���",
     "minLength": "密码最小长度",
     "minCharClasses": "最少字符类别数",
     "classesHint": "字符类别：大写字母、小写字母、数字、特殊符号（共 4 类）"
@@ -7640,7 +7662,7 @@
       "high_risk_spam": "高风险垃圾",
       "phishing": "钓鱼邮件",
       "virus": "病毒邮件",
-      "malicious": "恶意邮件",
+      "malicious": "恶���邮件",
       "invalid": "无效邮件"
     },
     "emailTypes": {
@@ -8428,7 +8450,7 @@
       "subject": "主题",
       "sidelinedAt": "旁路时间",
       "direction": "方向",
-      "confidence": "置信度",
+      "confidence": "置信��",
       "agentVerdict": "智能体研判",
       "urlRiskSummary": "链接风险汇总",
       "unknownUrl": "未知链接",
@@ -8499,7 +8521,7 @@
     "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
     "admission": {
       "title": "准入规则",
-      "description": "决定哪些邮件���入钓鱼邮件检测智能���。命中后使用当前部署级运行限制。",
+      "description": "决定哪些邮件���入钓鱼邮件检测智能���。命中后��用当前部署级运行限制。",
       "loading": "加载中...",
       "empty": "暂无准入规则，点击「新建」添加。",
       "create": "新建",
@@ -8555,7 +8577,7 @@
       "cancel": "取消",
       "errors": {
         "needDirection": "请至少选择一个邮件流方向",
-        "qrNoOutbound": "二维码风险信号暂不支持外发方向",
+        "qrNoOutbound": "二维码风险信号���不支持外发方向",
         "needRiskSignal": "请至少启用一个风险信号",
         "needRecipientTarget": "开启收件人筛选时至少填写一个标签或邮箱",
         "maxSizeTooLarge": "邮件大小上限不能超过 100000 MB"
@@ -8863,7 +8885,7 @@
       "modeContacts": "从组织架构导入",
       "sourceRecommended": "推荐",
       "sourceContactsTitle": "从组织架构导入",
-      "sourceContactsDesc": "搜索并选择特定人员，自动填充身份信息，支持多选批量创建。",
+      "sourceContactsDesc": "搜索并选择特定人员，自动填充身份信息，支��多选批量创建。",
       "sourceSingleTitle": "手动添加",
       "sourceSingleDesc": "手动维护一个保护对象及其合法邮箱。",
       "sourcePasteTitle": "批量粘贴",
@@ -9014,7 +9036,7 @@
       "sectionDetection": "检测规则",
       "sectionDetectionDescription": "设定置信度阈值，决定命中判定的严格程度",
       "sectionDisposition": "处置策略",
-      "sectionDispositionDescription": "命中仿冒后如何处理邮��与通知",
+      "sectionDispositionDescription": "命中仿冒后如何处理邮��与���知",
       "brandName": "品牌名称",
       "brandNamePlaceholder": "CACTER科技",
       "brandNameHint": "最多 30 字符",
@@ -9137,7 +9159,7 @@
     },
     "recallStatus": {
       "recalled": "已召回",
-      "pending_recall": "待召回",
+      "pending_recall": "��召回",
       "recall_failed": "召回失败",
       "no_need": "无需召回",
       "": "无需召回",
@@ -9905,7 +9927,7 @@
         "nameRequired": "规则名称不能为空",
         "reservedPrefix": "名称不能以 __deleted__ 开头",
         "thresholdRequired": "阈值为必填",
-        "thresholdPositive": "阈值必须为正数",
+        "thresholdPositive": "阈值��须为正数",
         "durationPositive": "持续时间必须大于 0",
         "samplesPositive": "采样数必须大于 0",
         "email": "收件人邮箱格式不正确",
@@ -10270,7 +10292,7 @@
     "footerNote": "收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。"
   },
   "userList": {
-    "blacklistRules": "黑名单规则",
+    "blacklistRules": "��名单规则",
     "whitelistRules": "白名单规则",
     "searchPlaceholder": "搜索规则ID、发信人或收信人...",
     "ruleId": "规则ID",
