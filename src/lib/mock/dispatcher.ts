@@ -218,6 +218,8 @@ import { GROUPS_PAGE_KEY } from '@/types/groups';
 import { GROUP_POLICY_PAGE_KEY } from '@/types/group-policy';
 import type { OpsDimension, OpsTopCount } from '@/lib/api/ops-top';
 import { rbacSubmodulesForScope, type RbacScope } from '@/lib/rbac/rbac-modules';
+import { CONDITIONS, type PanelKind } from '@/components/security/advanced-filter-rules/catalogue';
+import type { FieldDef } from '@/types/unified-rules';
 
 export interface MockRequest {
   method: string;
@@ -313,6 +315,50 @@ const mockSecurityModules: Record<string, boolean> = {
   // demo URL检测与防护默认总开关为启用；用于统一模块注册表的 GET/PUT mock。
   url_protection: true,
 };
+
+// ─── 高级过滤规则：字段注册表 mock ─────────────────────────────────────
+// 真实后端在 /unified-rules/field-definitions 返回字段注册表；mock 环境没有
+// 后端，此前该端点无 handler 而落到 fallback（返回 { items:[], total:0 }，无
+// fields 字段）→ 前端 fieldDefs 为空 → computeCatalogueItem 把所有 field 非
+// null 的条件判为 "即将上线"。这里按 catalogue 的 CONDITIONS 合成一份注册表，
+// 把每个条件用到的 field 都标为 supported，使 mock 下这些条件全部变为 "可用"。
+// 仅影响 mock 模式；真实模式仍请求后端，不受影响。field 为 null 的目录项
+//（如 senderOrganization "仅目录（无后端支持）"）不在此列，保持原状。
+//
+// panel → (type, operators, map_keys_source) 的推导仅用于让配置面板拿到合理的
+// 元数据；条件的显示名走 i18n（cond_<key>），与 fd.label 无关，故 label 用
+// field 名占位即可。operators 给该 panel 的常见算子，createDefaultLeaf 命中
+// fd 时取首个、否则回退 PANEL_FALLBACK_OPERATOR，两条路径都安全。
+function fieldDefForPanel(field: string, panel: PanelKind): FieldDef {
+  const base = { label: field, min_stage: 'data', supported: true, available: true };
+  switch (panel) {
+    case 'number':
+      return { ...base, type: 'number', operators: ['gt', 'lt', 'eq', 'between'] };
+    case 'select':
+      return { ...base, type: 'enum', operators: ['in', 'not_in'] };
+    case 'group':
+    case 'featureGroup':
+      return { ...base, type: 'map', operators: ['in', 'not_in'], map_keys_source: field };
+    case 'cidr':
+      return { ...base, type: 'cidr', operators: ['in_cidr', 'not_in_cidr'] };
+    case 'time':
+      return { ...base, type: 'time', operators: ['between'] };
+    case 'weekday':
+      return { ...base, type: 'enum', operators: ['in', 'not_in'] };
+    case 'mime':
+      return { ...base, type: 'string', operators: ['in', 'not_in'] };
+    case 'text':
+    default:
+      return { ...base, type: 'string', operators: ['contains', 'not_contains', 'equals', 'regex'] };
+  }
+}
+
+const mockAdvancedFieldDefs: Record<string, FieldDef> = Object.fromEntries(
+  CONDITIONS.filter((c) => c.field !== null).map((c) => [
+    c.field as string,
+    fieldDefForPanel(c.field as string, c.panel),
+  ]),
+);
 
 // ─── 角色（RBAC）mock 数据 ──────────────────────────────────────────────
 // 平台/租户两套内置角色。`_level` 仅用于本地生成权限矩阵，不属于 Role 线上
@@ -1448,6 +1494,14 @@ const routes: Route[] = [
   // 不同的查询），其余模块的 `/unified-rules` GET 一律不 mockable，继续放行到
   // 真实后端 —— 保持它们 "接口缺失 → 由后端返回真实数据/错误" 的原有行为，
   // 不再落到本路由的空壳。
+  // 高级过滤规则条件配置的字段注册表（GET /unified-rules/field-definitions）。
+  // 精确 path，pathname 已 strip query，无需 matchQuery。返回合成的可用字段集，
+  // 让 mock 下条件目录不再全是 "即将上线"。
+  {
+    method: 'GET',
+    pattern: '/unified-rules/field-definitions',
+    handler: () => ({ status: 200, data: { fields: mockAdvancedFieldDefs } }),
+  },
   {
     method: 'GET',
     pattern: '/unified-rules',
