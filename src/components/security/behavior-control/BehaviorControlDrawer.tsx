@@ -159,7 +159,11 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
 
   // 预览数据：根据 previewGroupName 从 groupsQuery.data 中找到对应条目，生成成员列表
   const previewGroupData = useMemo<{ name: string; groupType: string; members: string[]; totalCount: number } | null>(() => {
-    if (!previewGroupName || !groupsQuery.data) return null;
+    if (!previewGroupName) return null;
+    // 未选群组时（__all__ 占位符）：返回空数据让 Dialog 显示提示
+    if (previewGroupName === '__all__' || !groupsQuery.data) {
+      return { name: '', groupType: 'sender', members: [], totalCount: 0 };
+    }
     const rule = groupsQuery.data.find((r) => r.name === previewGroupName);
     if (!rule) return null;
     let groupType = 'sender';
@@ -373,7 +377,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                             </Select>
                           </div>
 
-                          {/* 管控对象类型 */}
+                          {/* 管控象类型 */}
                           <div className="flex items-center gap-3">
                             <Label className="min-w-[100px] text-right">
                               <span className="text-red-500">*</span> {t('behaviorControl.form.objectTypeLabel')}
@@ -467,7 +471,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                         className="h-auto p-0 text-xs text-blue-600"
                                         onClick={() => {
                                           const selected = watchAll.object_config.type === 'sender' ? (watchAll.object_config.value ?? '') : '';
-                                          setPreviewGroupName(selected || null);
+                                          setPreviewGroupName(selected || '__all__');
                                         }}
                                       >
                                         {t('behaviorControl.form.manageGroup')} <ExternalLink className="h-3 w-3 ml-1" />
@@ -557,7 +561,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                         className="h-auto p-0 text-xs text-blue-600"
                                         onClick={() => {
                                           const selected = watchAll.object_config.type === 'senderIp' ? (watchAll.object_config.value ?? '') : '';
-                                          setPreviewGroupName(selected || null);
+                                          setPreviewGroupName(selected || '__all__');
                                         }}
                                       >
                                         {t('behaviorControl.form.manageIpGroup')} <ExternalLink className="h-3 w-3 ml-1" />
@@ -1144,7 +1148,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
         </SheetContent>
       </Sheet>
 
-      {/* 群组成员预览 Dialog */}
+      {/* 群组成员预 Dialog */}
       <GroupPreviewDialog
         open={previewGroupName !== null}
         onClose={() => setPreviewGroupName(null)}
