@@ -96,6 +96,7 @@ import {
   mockDeleteGeoIpRule,
   mockSenderFilterRulesList,
   mockSenderFilterGroupsList,
+  mockGroupsMetaByType,
   mockAuthSpoofingConfig,
   mockAuthSpoofingObserveStats,
   mockAuthSpoofingProbe,
@@ -214,7 +215,7 @@ import type { DkimAlgorithm } from '@/lib/api/dkim';
 import type { IPFrequencyRulePayload } from '@/types/ip-frequency';
 import type { OverseasMailConfigResponse } from '@/types/overseas-mail';
 import type { DisposalSettings } from '@/types/disposal-settings';
-import { GROUPS_PAGE_KEY } from '@/types/groups';
+import { GROUPS_PAGE_KEY, type GroupType } from '@/types/groups';
 import { GROUP_POLICY_PAGE_KEY } from '@/types/group-policy';
 import type { OpsDimension, OpsTopCount } from '@/lib/api/ops-top';
 import { rbacSubmodulesForScope, type RbacScope } from '@/lib/rbac/rbac-modules';
@@ -329,6 +330,18 @@ const mockSecurityModules: Record<string, boolean> = {
 // 元数据；条件的显示名走 i18n（cond_<key>），与 fd.label 无关，故 label 用
 // field 名占位即可。operators 给该 panel 的常见算子，createDefaultLeaf 命中
 // fd 时取首个、否则回退 PANEL_FALLBACK_OPERATOR，两条路径都安全。
+// group / featureGroup 面板字段 → 群组元信息端点的映射。真实后端在 FieldDef 里
+// 下发 map_keys_source（一个 API 路径），配置面板据此用 MapKeySelect 渲染「可筛选
+// 下拉」。此前 mock 误把它填成裸字段名（如 "sender_group"），MapKeySelect 拿去
+// 请求必然失败 → 回退成纯文本框，导致「发信人组」无法从群组策略里筛选选择。这里
+// 按字段映射到正确路径：发信人组→sender、发信人 IP 组→ip、特征组→feature-groups。
+// 未列入的 group 面板字段（如 GeoIP 地区）暂无群组数据面，保持原状（纯文本键输入）。
+const GROUP_FIELD_META_SOURCE: Record<string, string> = {
+  sender_group: '/unified-rules/_meta/groups?type=sender',
+  sender_ip_group: '/unified-rules/_meta/groups?type=ip',
+  feature_group: '/unified-rules/_meta/feature-groups',
+};
+
 function fieldDefForPanel(field: string, panel: PanelKind): FieldDef {
   const base = { label: field, min_stage: 'data', supported: true, available: true };
   switch (panel) {
@@ -337,8 +350,16 @@ function fieldDefForPanel(field: string, panel: PanelKind): FieldDef {
     case 'select':
       return { ...base, type: 'enum', operators: ['in', 'not_in'] };
     case 'group':
-    case 'featureGroup':
+    case 'featureGroup': {
+      const source = GROUP_FIELD_META_SOURCE[field];
+      // 真·群组字段：type 用 map_boolean，配置面板（PanelBody）据 `map_` 前缀路由到
+      // MapValueSection → MapKeySelect 渲染可筛选下拉，值为「命中/未命中」的组成员判定。
+      if (source) {
+        return { ...base, type: 'map_boolean', operators: ['eq', 'ne'], map_keys_source: source };
+      }
+      // 其余 group 面板字段维持既有行为（type 'map' 不匹配 `map_` 前缀 → 纯文本键输入）。
       return { ...base, type: 'map', operators: ['in', 'not_in'], map_keys_source: field };
+    }
     case 'cidr':
       return { ...base, type: 'cidr', operators: ['in_cidr', 'not_in_cidr'] };
     case 'time':
@@ -429,7 +450,7 @@ const routes: Route[] = [
   // HttpOnly osgateway_token cookie，后续受保护路由的 middleware 校验才能通过。
   // 见 src/proxy.ts 的 AUTH_COOKIE 门控。
 
-  // ─── Bootstrap ──────────────────────────────────────────────────────────
+  // ─── Bootstrap ───────────────────────��──────────────────────────────────
   {
     method: 'GET',
     pattern: '/bootstrap',
@@ -1330,6 +1351,27 @@ const routes: Route[] = [
     }),
   },
 
+  // ─── 群组元信息（发信人组等，高级过滤规则 group 面板下拉数据源）────────────────
+  // 复用群组管理 / 群组策略同源的 mockSenderFilterGroupsList，按 type 派生。只接管
+  // sender/recipient/content；type=ip 由上面的 mockIPGroupsMetaList 接管（更完整的
+  // 独立列表），互不重叠。这样「发信人组」条件即可从群组策略的发信人组里筛选选择。
+  {
+    method: 'GET',
+    pattern: '/unified-rules/_meta/groups',
+    matchQuery: (q) => /(^|&)type=(sender|recipient|content)($|&)/.test(q),
+    handler: (req) => {
+      const type = (/(?:^|&)type=(\w+)/.exec(rawQuery(req.path))?.[1] ?? 'sender') as GroupType;
+      return { status: 200, data: mockGroupsMetaByType(type) };
+    },
+  },
+
+  // ─── 特征组元信息（真实端点 GET /unified-rules/_meta/feature-groups）──────────
+  {
+    method: 'GET',
+    pattern: '/unified-rules/_meta/feature-groups',
+    handler: () => ({ status: 200, data: mockGroupsMetaByType('feature') }),
+  },
+
   // ─── RBL 过滤（mock）────────────────────────────────────────────────────────
   {
     method: 'GET',
@@ -1699,7 +1741,7 @@ const routes: Route[] = [
     handler: (req) => ({ status: 200, data: mockExecuteContentRulesImport(req.body) }),
   },
   // 邮件路由出站规则（mock id 段 5000-5999）：必须排在下面通用的无 scope
-  // DELETE 兜底之前，否则会被那条更早注册、同样匹配 \d+ 的路由吞掉，
+  // DELETE 兜底之前，否则会被那条更早注册���同样匹配 \d+ 的路由吞掉，
   // 导致状态假装删除成功但 outboundRulesState 从未真正变化。
   {
     method: 'DELETE',

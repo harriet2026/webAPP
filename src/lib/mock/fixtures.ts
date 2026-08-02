@@ -1235,7 +1235,7 @@ export function mockOpsTopAi(): { markdown: string } {
   };
 }
 
-// ─── 监控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
+// ─── ��控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
 export function mockMonitorDashboardOverview(range: MonitorDashboardRange): MonitorDashboardOverview {
   const volumes: Record<MonitorDashboardRange, number> = {
     today: 125847,
@@ -2401,7 +2401,7 @@ export function mockTestIPFrequency(body: {
   test_ip: string;
   action: string;
 }): IPFrequencyTestResponse {
-  // 无真实流量：以当前挂起列表判定该 IP 是否已被限制，给出可见的测试结果。
+  // 无真实流量：以当前挂起列表判定该 IP 是否已被限制，给出可见的测试结���。
   const hit = mockSuspendedIPs.find((s) => s.ip === body.test_ip);
   if (hit) {
     return {
@@ -3480,6 +3480,30 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
   };
 }
 
+// 从共享的「群组」数据（mockSenderFilterGroupsList，与群组管理 / 群组策略同源）
+// 按 group_type 派生 `_meta/groups` 元信息，供高级过滤规则的 group 面板条件
+//（发信人组、特征组等）在配置面板的下拉里筛选选择。契约对齐真实端点
+// GET /unified-rules/_meta/groups?type=<T> 的 {items:[{id,label,rule_id}]}：
+//   - id 取 tag（grp:<名>，引擎按该 tag 建键，MapKeySelect 直接用 id 作为存储值）；
+//   - label 取群组名；rule_id 取规则 ID。
+// 复用同一份数据面，保证下拉选项与群组策略模块的发信人组始终一致。
+export function mockGroupsMetaByType(type: GroupType): { items: IPGroupMeta[] } {
+  const items: IPGroupMeta[] = mockSenderFilterGroupsList()
+    .items.filter((r) => {
+      try {
+        return (JSON.parse(r.metadata ?? "{}") as { group_type?: string }).group_type === type;
+      } catch {
+        return false;
+      }
+    })
+    .map((r) => ({
+      id: r.tags?.[0] ?? `${GROUP_TAG_PREFIX}${r.name}`,
+      label: r.name,
+      rule_id: r.id,
+    }));
+  return { items };
+}
+
 // ════════════════════════════════════════════════════════════════════════════════
 // 群组策略（page=group_policy，mock）
 // 5 条演示规则照抄群组策略页 demo 的 mockGroupPolicies（含「IP群组1」双规则短路场景，
@@ -4421,7 +4445,7 @@ function generateDemoBehaviorRules(): DemoBehaviorRule[] {
     },
   ];
 
-  // 生成更多规则用于分页演示（混合不同方向）。
+  // 生成更多规则用于分页演示（���合不同方向）。
   const directions: BehaviorDirection[] = [
     "inbound",
     "outbound",
@@ -6467,7 +6491,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
           ]
         : undefined,
     // 域名年龄（命中特征「域名年龄」badge）：仅在 seed 显式提供时出现，其余行
-    // 保持缺省（deriveDomainAge() 优雅降级为不渲染）。
+    // 保���缺省（deriveDomainAge() 优雅降级为不渲染）。
     domain_age_days: seed.domainAgeDays,
     cac_tid: seed.tid,
     cac_result: {
@@ -7062,7 +7086,7 @@ export function mockEmailDisposalFields() {
   }));
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ══════════════════════��═════════════════════════════════════════════════════════
 // 处置设置（email-disposal/disposal-settings，mock）
 // ════════════════════════════════════════════════════════════════════════════════
 
@@ -7505,7 +7529,7 @@ export function mockAuthAttemptStatsData(): AuthAttemptStats {
 // ==================== 组织通讯录（admin-contacts html_spec）====================
 // fixture 数据逐值照抄 demo components/admin/contacts/types.ts 的 MOCK_*，
 // 保证 Mock 模式下 webapp 渲染的 DOM 与 demo 逐字段一致。
-// 状态化：数据源 CRUD/同步状态机/测试交替、人员标记，均在模块级可变数组上进行。
+// 状态化：数据源 CRUD/同步状态机/测试交替、人员标记，��在模块级可变数组上进行。
 
 interface MockContactSourceRow {
   id: number;

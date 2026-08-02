@@ -603,7 +603,7 @@ function MapValueSection({ leaf, def, fd, onChange, t }: { leaf: ConditionLeaf; 
     <div className="space-y-3">
       <div className="space-y-1.5">
         <Label>{t('v3Conditions.groupSelectLabel')}</Label>
-        <MapKeySelect mapSource={fd.map_keys_source ?? ''} value={mapKey} onChange={(v) => onChange({ mapKey: v || '*' })} className="w-full" />
+        <MapKeySelect mapSource={fd.map_keys_source ?? ''} value={mapKey} onChange={(v) => onChange({ mapKey: v || '*' })} placeholder={t('v3Conditions.groupSelectPlaceholder')} className="w-full" />
         {/* 说明「选择对象」的含义，尤其是默认值 * 代表「任意对象/全部键」，
             避免管理员误以为 * 是无效或占位值。 */}
         <p className="text-[11px] text-muted-foreground" data-testid="config-map-object-hint">
