@@ -5069,8 +5069,8 @@
       "detectLimit": "检测数量上限",
       "items": "个",
       "exceedAction": "超限处置",
-      "passWarn": "放行并记录告警",
-      "isolateFallback": "隔离兜底",
+      "passWarn": "进行下一步",
+      "isolateFallback": "隔离",
       "enable": "启用",
       "ocrSection": "OCR 配置",
       "ocrMode": "OCR 模式",
@@ -5093,7 +5093,9 @@
       "mode_light": "轻度",
       "mode_deep": "深度",
       "pending": "敬请期待",
-      "ocrMode_deep_hint": "深度检测同时识别手写与印刷体文字，适用于外发方向防截图泄密场景。检测结果将依照下方「检测数量上限」设置处理。"
+      "ocrMode_deep_hint": "深度检测同时识别手写与印刷体文字，适用于外发方向防截图泄密场景。检测结果将依照下方「检测数量上限」设置处理。",
+      "exceedActionHint_pass": "超出检测数量上限的二维码图片将跳过深度检测，直接进入下一检测阶段处理。",
+      "exceedActionHint_quarantine": "超出检测数量上限的二维码图片将直接隔离，不再进入后续检测阶段。"
     },
     "encrypted": {
       "detectPolicy": "检测策略",

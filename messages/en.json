@@ -5064,8 +5064,8 @@
       "detectLimit": "Detection Limit",
       "items": "items",
       "exceedAction": "Exceed Limit Action",
-      "passWarn": "Pass and log warning",
-      "isolateFallback": "Isolate as fallback",
+      "passWarn": "Proceed to next step",
+      "isolateFallback": "Quarantine",
       "enable": "Enable",
       "ocrSection": "OCR Configuration",
       "ocrMode": "OCR Mode",
@@ -5088,7 +5088,9 @@
       "mode_light": "Light",
       "mode_deep": "Deep",
       "pending": "Coming Soon",
-      "ocrMode_deep_hint": "Deep detection recognizes both handwritten and printed text. Recommended for outbound direction to prevent screenshot leaks. Results are handled according to the Detection Limit setting below."
+      "ocrMode_deep_hint": "Deep detection recognizes both handwritten and printed text. Recommended for outbound direction to prevent screenshot leaks. Results are handled according to the Detection Limit setting below.",
+      "exceedActionHint_pass": "QR code images exceeding the detection limit will skip deep detection and proceed to the next stage.",
+      "exceedActionHint_quarantine": "QR code images exceeding the detection limit will be quarantined immediately without further processing."
     },
     "encrypted": {
       "detectPolicy": "Detection Policy",

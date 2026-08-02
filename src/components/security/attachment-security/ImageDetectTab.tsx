@@ -298,6 +298,11 @@ export function ImageDetectTab({
                     <SelectItem value="quarantine" data-testid="qr-deep-exceed-action-quarantine">{t('imageDetect.isolateFallback')}</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground" data-testid="qr-deep-exceed-action-hint">
+                  {actions.qr_deep_exceed_action === 'accept'
+                    ? t('imageDetect.exceedActionHint_pass')
+                    : t('imageDetect.exceedActionHint_quarantine')}
+                </p>
               </div>
             </div>
           </div>
