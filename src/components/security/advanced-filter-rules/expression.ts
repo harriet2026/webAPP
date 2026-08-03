@@ -1,5 +1,5 @@
 import { CONDITIONS, type ConditionDef, type PanelKind } from './catalogue';
-import { OPERATOR_TO_MATCH_MODE, type ConditionLeaf, type ConditionGroups } from './serde';
+import { OPERATOR_TO_MATCH_MODE, parseIntentEngineValue, type ConditionLeaf, type ConditionGroups } from './serde';
 
 // expression.ts — pure functions backing the right-column "logic expression
 // preview" of the three-column conditions editor (layer-3-conditions.html
@@ -124,7 +124,13 @@ export function summarizeLeaf(
   const operatorLabel = mode ? t(`v3Conditions.matchModes.${mode}`) : leaf.operator;
 
   let values: string[];
-  if (leaf.operator === 'between') {
+  if (panel === 'intentEngine') {
+    // 意图引擎双模式：分类优先展示所选意图 token，分段阈值展示 [lo, hi]。前置于
+    // between/within 通用分支，避免「classification:phishing,spam」这类编码串被
+    // 通用 split 逗号误拆（见 serde.encodeIntentEngineValue）。
+    const iev = parseIntentEngineValue(leaf.value);
+    values = iev.mode === 'threshold' ? [iev.lo, iev.hi] : iev.intents;
+  } else if (leaf.operator === 'between') {
     values = leaf.value.split(',').map((v) => v.trim());
   } else if (panel === 'text' || panel === 'mime' || panel === 'cidr' || panel === 'weekday' || panel === 'orgDept') {
     values = splitDisplayValues(leaf.value);
@@ -144,6 +150,28 @@ export function summarizeLeaf(
     const diag = diagnoseNumber(leaf, def?.meta, t);
     incomplete = diag.incomplete;
     incompleteReasons = diag.reasons;
+  } else if (panel === 'intentEngine') {
+    // 分类优先：未选任何意图 → 阻断性不完整；分段阈值：区间端点缺失 → 阻断，
+    // 端点齐全时再给出「大小顺序 / 超出 [0,1] 范围」提示性原因（复用既有 i18n）。
+    const iev = parseIntentEngineValue(leaf.value);
+    if (iev.mode === 'threshold') {
+      if (iev.lo === '' || iev.hi === '') {
+        incomplete = true;
+        incompleteReasons = [t('incompleteReasonBetween')];
+      } else {
+        incomplete = false;
+        const reasons: string[] = [];
+        const loN = Number(iev.lo);
+        const hiN = Number(iev.hi);
+        if (Number.isFinite(loN) && Number.isFinite(hiN) && loN > hiN) reasons.push(t('incompleteReasonBetweenOrder'));
+        const outOfRange = (n: number) => Number.isFinite(n) && (n < 0 || n > 1);
+        if (outOfRange(loN) || outOfRange(hiN)) reasons.push(t('incompleteReasonRange', { min: 0, max: 1 }));
+        incompleteReasons = reasons;
+      }
+    } else {
+      incomplete = iev.intents.length === 0;
+      incompleteReasons = incomplete ? [t('incompleteReasonMissingValue')] : [];
+    }
   } else {
     const needsValue = panelNeedsValueForCompleteness(panel);
     incomplete = needsValue && values.every((v) => v.trim() === '');

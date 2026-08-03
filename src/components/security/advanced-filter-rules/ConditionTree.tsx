@@ -9,7 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { cn } from '@/lib/utils';
 import { CONDITIONS, computeCatalogueItem, type ConditionCategory, type ConditionDef } from './catalogue';
-import { MATCH_MODE_TO_OPERATOR, defaultModeForField, type ConditionGroups, type ConditionLeaf } from './serde';
+import { MATCH_MODE_TO_OPERATOR, INTENT_ENGINE_OPERATOR, defaultModeForField, encodeIntentEngineValue, type ConditionGroups, type ConditionLeaf } from './serde';
 import type { FieldDef } from '@/types/unified-rules';
 
 // ConditionTree.tsx — layer-3-conditions.html 左栏：OR/AND 组切换 + 搜索 +
@@ -32,6 +32,7 @@ const PANEL_FALLBACK_OPERATOR: Record<ConditionDef['panel'], string> = {
   time: 'between',
   weekday: 'within',
   mime: 'contain',
+  intentEngine: 'within',
 };
 
 // createDefaultLeaf — 点击左栏条件按钮时构造的新叶子。fieldDefs 可选：传入时
@@ -58,6 +59,14 @@ export function createDefaultLeaf(def: ConditionDef, fieldDefs: Record<string, F
       operator = 'eq';
       value = 'true';
     }
+  }
+
+  // 意图引擎（综合研判）默认走「分类优先」模式、空意图集合（operator within），
+  // 由 IntentEngineSection 引导选择意图类别；未选时表达式预览判为不完整，与枚举
+  // 单选「起始为空即不完整」的既有语义一致。覆盖上面按 fieldDef 推断的默认。
+  if (def.panel === 'intentEngine') {
+    operator = INTENT_ENGINE_OPERATOR.classification;
+    value = encodeIntentEngineValue({ mode: 'classification', intents: [], lo: '', hi: '' });
   }
 
   return {

@@ -18,8 +18,18 @@ import { useApiRequest } from '@/lib/api/client';
 import { listContactDepartments } from '@/lib/api/contacts';
 import { buildDepartmentTree, flattenDepartmentTree, getSelfAndDescendantPaths, type DepartmentNode } from '@/lib/org-departments';
 import { CONDITIONS, type ConditionDef, type ConditionMeta, type PanelKind } from './catalogue';
-import { MATCH_MODE_TO_OPERATOR, OPERATOR_TO_MATCH_MODE, type ConditionLeaf, type MatchMode } from './serde';
+import {
+  MATCH_MODE_TO_OPERATOR,
+  OPERATOR_TO_MATCH_MODE,
+  INTENT_ENGINE_OPERATOR,
+  parseIntentEngineValue,
+  encodeIntentEngineValue,
+  type ConditionLeaf,
+  type MatchMode,
+  type IntentEngineMode,
+} from './serde';
 import { splitDisplayValues } from './expression';
+import { INTENT_TYPES } from '@/types/intent-engine';
 import type { FieldDef } from '@/types/unified-rules';
 
 // ConditionConfigPanel.tsx — layer-3-conditions.html 中栏：按 def.panel 动态
@@ -32,8 +42,9 @@ import type { FieldDef } from '@/types/unified-rules';
 // catalogue.ts 本身的 panel 归类。
 
 // 已知结果枚举的字段（demo/spec 明确给出的固定取值集合）；未收录的
-// select-panel 字段（如 cac_tag 这类无固定清单的 string 字段）回退为
-// 「等于/不等于 + 单值输入」，不臆造错误的枚举值。
+// select-panel 字段回退为「等于/不等于 + 单值输入」，不臆造错误的枚举值。
+// 注：意图引擎（cac_tag）已改用专门的 'intentEngine' 面板（IntentEngineSection，
+// 分类优先 / 分段阈值双模式），不再走 select，故不在此表内。
 const ENUM_VALUES: Record<string, string[]> = {
   spf_result: ['pass', 'fail', 'softfail', 'neutral', 'none', 'temperror', 'permerror'],
   dkim_result: ['pass', 'fail', 'neutral', 'none', 'temperror', 'permerror'],
@@ -304,6 +315,8 @@ function PanelBody({
       return <WeekdaySection leaf={leaf} onChange={onChange} t={t} />;
     case 'orgDept':
       return <OrgDepartmentSection leaf={leaf} onChange={onChange} t={t} />;
+    case 'intentEngine':
+      return <IntentEngineSection leaf={leaf} onChange={onChange} t={t} />;
     default: {
       if (fd?.type === 'boolean') {
         return (
@@ -608,6 +621,83 @@ function EnumSection({ leaf, enumOpts, onChange, t, hasKey }: { leaf: ConditionL
           </Select>
         )}
       </div>
+    </div>
+  );
+}
+
+// IntentEngineSection — 「意图引擎」（综合研判，字段 cac_tag）取值控件，与阶段3
+// 内容层意图引擎模块同源、共用其 i18n（useTranslations('intentEngine')，不重复造词）。
+// 顶部「检测模式」下拉在两种模式间切换：
+//   - 分类优先 classification：多选 INTENT_TYPES 意图类别（复选框），operator within；
+//   - 分段阈值 threshold：填写置信度 [0,1] 区间下/上限（复用 between 下/上限文案），
+//     operator between。
+// 模式 + 载荷编码进单个 leaf.value（serde.encodeIntentEngineValue），切换模式时保留
+// 该模式各自的载荷、不互相污染。
+function IntentEngineSection({ leaf, onChange, t }: { leaf: ConditionLeaf; onChange: (p: Partial<ConditionLeaf>) => void; t: T }) {
+  const ti = useTranslations('intentEngine');
+  const parsed = parseIntentEngineValue(leaf.value);
+
+  const setMode = (mode: IntentEngineMode) => {
+    onChange({ operator: INTENT_ENGINE_OPERATOR[mode], value: encodeIntentEngineValue({ ...parsed, mode }) });
+  };
+  const toggleIntent = (token: string, checked: boolean) => {
+    const next = new Set(parsed.intents);
+    if (checked) next.add(token); else next.delete(token);
+    onChange({
+      operator: INTENT_ENGINE_OPERATOR.classification,
+      value: encodeIntentEngineValue({ ...parsed, mode: 'classification', intents: Array.from(next) }),
+    });
+  };
+  const setBound = (which: 'lo' | 'hi', v: string) => {
+    onChange({
+      operator: INTENT_ENGINE_OPERATOR.threshold,
+      value: encodeIntentEngineValue({ ...parsed, mode: 'threshold', [which]: v }),
+    });
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1.5">
+        <Label>{ti('detectionMode.label')}</Label>
+        <Select value={parsed.mode} onValueChange={(v) => { if (v) setMode(v as IntentEngineMode); }}>
+          <SelectTrigger data-testid="config-intent-mode" className="w-full"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="classification">{ti('detectionMode.classification')}</SelectItem>
+            <SelectItem value="threshold">{ti('detectionMode.threshold')}</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-[11px] text-muted-foreground" data-testid="config-intent-mode-desc">
+          {parsed.mode === 'threshold' ? ti('detectionMode.thresholdDesc') : ti('detectionMode.classificationDesc')}
+        </p>
+      </div>
+
+      {parsed.mode === 'classification' ? (
+        <div className="space-y-1.5">
+          <Label>{t('v3Conditions.valueLabel')}</Label>
+          <div className="space-y-1" data-testid="config-intent-classification">
+            {INTENT_TYPES.map((token) => {
+              const checked = parsed.intents.includes(token);
+              return (
+                <label key={token} className="flex items-center gap-2 text-xs cursor-pointer">
+                  <Checkbox checked={checked} onCheckedChange={(v) => toggleIntent(token, !!v)} />
+                  <span>{ti(`intent.${token}`)}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2" data-testid="config-intent-threshold">
+          <div className="space-y-1.5">
+            <Label>{t('v3Conditions.betweenLoLabel')}</Label>
+            <Input data-testid="config-intent-threshold-lo" type="number" min={0} max={1} step={0.01} value={parsed.lo} onChange={(e) => setBound('lo', e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t('v3Conditions.betweenHiLabel')}</Label>
+            <Input data-testid="config-intent-threshold-hi" type="number" min={0} max={1} step={0.01} value={parsed.hi} onChange={(e) => setBound('hi', e.target.value)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

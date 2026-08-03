@@ -387,6 +387,12 @@ function fieldDefForPanel(field: string, panel: PanelKind): FieldDef {
       return { ...base, type: 'enum', operators: ['in', 'not_in'] };
     case 'mime':
       return { ...base, type: 'string', operators: ['in', 'not_in'] };
+    case 'intentEngine':
+      // 意图引擎（综合研判，字段 cac_tag）：配置面板走专门的 IntentEngineSection
+      // （分类优先 / 分段阈值双模式，见 ConditionConfigPanel）。operator 白名单含
+      // within（分类命中意图集合）与 between（置信度落入区间）；type 'enum' 仅为占位，
+      // 真正的取值渲染由 catalogue panel 决定，不经此 type 分派。
+      return { ...base, type: 'enum', operators: ['within', 'between'] };
     case 'text':
     default:
       return { ...base, type: 'string', operators: ['contains', 'not_contains', 'equals', 'regex'] };

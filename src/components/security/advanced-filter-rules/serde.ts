@@ -210,3 +210,45 @@ export function defaultModeForField(def: FieldDef, fieldName?: string): MatchMod
   }
   return 'equals';
 }
+
+// ── 意图引擎（综合研判引擎）取值编解码 ─────────────────────────────────────
+// 「意图引擎」条件（catalogue key comprehensiveEngineResult / field cac_tag）与
+// 阶段3内容层的意图引擎模块同源，支持两种配置模式（对齐 IntentCard 的 detectionMode）：
+//   - classification 分类优先：命中所选意图分类集合任意其一（intents ⊆ INTENT_TYPES），
+//     operator = 'within'；
+//   - threshold 分段阈值：置信度分数落入 [lo, hi] ⊆ [0,1] 区间，operator = 'between'。
+// 单值 leaf.value 用「模式前缀 + 载荷」编码，既复用现有 string value 模型 / serde
+// 往返、又能在配置面板与表达式预览间无歧义解析：
+//   classification:phishing,spam   /   threshold:0.60,0.90
+export type IntentEngineMode = 'classification' | 'threshold';
+
+export interface IntentEngineValue {
+  mode: IntentEngineMode;
+  intents: string[];
+  lo: string;
+  hi: string;
+}
+
+export const INTENT_ENGINE_OPERATOR: Record<IntentEngineMode, string> = {
+  classification: 'within',
+  threshold: 'between',
+};
+
+export function parseIntentEngineValue(value: string): IntentEngineValue {
+  const raw = value ?? '';
+  const idx = raw.indexOf(':');
+  const prefix = idx >= 0 ? raw.slice(0, idx) : '';
+  const payload = idx >= 0 ? raw.slice(idx + 1) : raw;
+  if (prefix === 'threshold') {
+    const [lo = '', hi = ''] = payload.split(',');
+    return { mode: 'threshold', intents: [], lo: lo.trim(), hi: hi.trim() };
+  }
+  // 'classification' 前缀，或无前缀的历史值（尽力当作意图 token 列表解析，不丢数据）。
+  const intents = payload.split(',').map((s) => s.trim()).filter((s) => s !== '');
+  return { mode: 'classification', intents, lo: '', hi: '' };
+}
+
+export function encodeIntentEngineValue(v: IntentEngineValue): string {
+  if (v.mode === 'threshold') return `threshold:${v.lo.trim()},${v.hi.trim()}`;
+  return `classification:${v.intents.join(',')}`;
+}

@@ -18,7 +18,8 @@ export type PanelKind =
   | 'cidr'
   | 'time'
   | 'weekday'
-  | 'mime';
+  | 'mime'
+  | 'intentEngine';
 
 // 数值/阈值类条件的取值约束（语言无关）。unitKey 指向 i18n 单位词
 // （v3Conditions.units.*）；min/max/step 同时用于 <input type="number"> 的原生
@@ -102,7 +103,10 @@ export const CONDITIONS: ConditionDef[] = [
   { key: 'mailFromEmpty', category: 'security', field: 'mailfrom_empty', panel: 'select' },
   { key: 'mailFromFromConsistency', category: 'security', field: 'envelope_header_mismatch', panel: 'select' },
   { key: 'virusScanResult', category: 'security', field: 'virus_scan_result', panel: 'select' },
-  { key: 'comprehensiveEngineResult', category: 'security', field: 'cac_tag', panel: 'select' },
+  // 意图引擎（与阶段3内容层「意图引擎」模块同源）：panel 'intentEngine' 走
+  // IntentEngineSection 双模式配置——分类优先（命中 INTENT_TYPES 意图集合）/
+  // 分段阈值（置信度分数落入 [0,1] 区间），取值编码见 serde.encodeIntentEngineValue。
+  { key: 'comprehensiveEngineResult', category: 'security', field: 'cac_tag', panel: 'intentEngine' },
   { key: 'senderIpCount15Min', category: 'security', field: 'sender_ip_count_15min', panel: 'number', meta: { unitKey: 'count', min: 0, max: 10000, step: 1, recommend: { mode: 'gt', value: '50' } } },
   { key: 'senderRecipientCount15Min', category: 'security', field: 'sender_recipient_count_15min', panel: 'number', meta: { unitKey: 'count', min: 0, max: 100000, step: 1, recommend: { mode: 'gt', value: '500' } } },
   { key: 'senderMailCount15Min', category: 'security', field: 'sender_mail_count_15min', panel: 'number', meta: { unitKey: 'count', min: 0, max: 100000, step: 1, recommend: { mode: 'gt', value: '200' } } },
