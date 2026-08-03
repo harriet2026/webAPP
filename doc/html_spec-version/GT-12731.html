@@ -479,7 +479,7 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
     </div>
   </section>
 
-  <!-- ═════════════ 变更 3 ══════════════ -->
+  <!-- ══════════════ 变更 3 ══════════════ -->
   <div class="incremental-section" id="change-3">
     <div class="incr-header">
       <span class="incr-num">3</span>
@@ -561,10 +561,25 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
             <td>新增 <code>v3Conditions.intentAddLabel</code> / <code>intentRemoveLabel</code>；补齐 <code>inputType.intentEngine</code></td>
             <td><span class="tag tag-added">新增</span>四语齐全；意图名 / 描述 / 检测模式复用 <code>intentEngine.*</code> 命名空间</td>
           </tr>
+          <tr>
+            <td><code>serde.test.ts</code> · 编解码测试</td>
+            <td>仅单条 codec 断言</td>
+            <td>新增「多意图 list codec」describe：多意图往返、同意图去重（保留后写）、空条目丢弃、单值向后兼容子集</td>
+            <td><span class="tag tag-added">新增</span>断言 <code>phishing:threshold:0.6,0.9;spam:classification</code> 等往返一致</td>
+          </tr>
+          <tr>
+            <td><code>ConditionConfigPanel.test.tsx</code> · 面板意图用例</td>
+            <td>旧 testid（<code>config-intent-type</code> / <code>config-intent-mode</code> / <code>config-intent-type-desc</code> / <code>config-intent-threshold</code>）断言单意图两级 UI</td>
+            <td>重写 3 条用例匹配列表式 UI（<code>config-intent-add</code>、行内 <code>config-intent-mode-*</code> / <code>config-intent-threshold-*</code>、多意图行），新增「描述卡渲染 inputType 行不抛错」回归断言</td>
+            <td><span class="tag tag-changed">变更</span>覆盖多意图行渲染 + D-006 回归防护</td>
+          </tr>
         </tbody>
       </table>
       <div class="callout callout-info">
         意图名（钓鱼 / 涉政 / 垃圾 / 诈骗 / 订阅）、意图描述、检测模式（分类优先 / 分段阈值）文案复用阶段3 内容层意图引擎模块的 <code>intentEngine.*</code> i18n 命名空间，不重复造词；本次仅新增「添加意图 / 移除」两个动作词与补齐缺失的输入类型键。详见差异 D-004、D-005。
+      </div>
+      <div class="callout callout-ok">
+        <strong>测试与验证：</strong>本模块单元测试全量 <strong>72 项通过</strong>，覆盖多意图 list 编解码（<code>serde.test.ts</code>）、意图引擎面板多意图行渲染与描述卡回归（<code>ConditionConfigPanel.test.tsx</code>）、条件目录计数不变量（<code>catalogue.test.ts</code>）。到意图引擎面板的 UI 深链依赖登录态与后端；本次已在 AI版·单租户 / Mock 数据环境完成浏览器实拍（S-1），真实后端「保存 / 回显」链路回归见待确认 Q-003。
       </div>
 
       <a class="back-link" href="#toc">↑ 返回目录</a>
