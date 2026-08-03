@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系���������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系����������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1188,7 +1188,7 @@
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除，只有系统管理员可编辑部分字段",
     "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条件阈值，其余字段已锁定。",
-    "stage": "阶段"
+    "stage": "阶���"
   },
   "tagRules": {
     "title": "标��管理",
@@ -1338,7 +1338,7 @@
     "sectionBasic": "基本信息",
     "sectionTargets": "适������",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
-    "sectionPolicies": "分阶段策略配置",
+    "sectionPolicies": "分阶段策略配��",
     "sectionPoliciesHint": "��认为「继承����局����「��留��策��本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
     "priorityHint": "优先级仅在多条策略命中同一邮件、且配置了同一模块时用于仲裁（数值越大越优先）。它不决定模块的跨阶段执行顺序——执行顺序由阶段流水线固定。",
@@ -2222,7 +2222,7 @@
         "editTitle": "编辑角色",
         "viewTitle": "查看角色权限",
         "createDescription": "配置角色名称、备注与权限矩阵",
-        "readonlyDescription": "以下为该角色的完整权限矩��（只读）",
+        "readonlyDescription": "以下为该角色的完整权限�����（只读）",
         "nameLabel": "���色名称",
         "namePlaceholder": "如 自定义运营",
         "nameRequired": "请输���角色���称",
@@ -2437,7 +2437,7 @@
       "wrongPassword": "密码错误",
       "userNotExist": "账号不存在",
       "accountLocked": "账号锁定",
-      "serverTimeout": "服务器超时",
+      "serverTimeout": "服务��超时",
       "connectionRefused": "连接拒绝",
       "certError": "证书错误",
       "protocolMismatch": "��议不匹配",
@@ -2451,7 +2451,7 @@
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
-      "unknown": "未能识别的失败原因，请��看��始失败��息��联系��持。"
+      "unknown": "未能识别的失败原因��请��看��始失败��息��联系��持。"
     },
     "detail": {
       "breadcrumb": "日���审计 / 认证日志",
@@ -3530,7 +3530,7 @@
     "examples": {
       "title": "查看配置示例",
       "antiBruteforce": "防暴力破解",
-      "antiBruteforceDesc": "防止密码爆破攻击，短时间内多次认证失败将被封禁",
+      "antiBruteforceDesc": "防止密码爆破攻击，短时间内多次认证失败��被封禁",
       "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1��时。",
       "antiSpam": "防滥发邮件",
       "antiSpamDesc": "限制高频发信行为，防止���圾邮件泛滥",
@@ -3678,7 +3678,7 @@
     "groupCountBadge": "+{count} 组",
     "validUntilBeforeNow": "有效期不能早于当前时间",
     "singleIpHint": "输入单个IP地址，如：192.168.1.1",
-    "ipFormatHint": "支持格式：192.168.1.0/24（网段）或包含多个IP段",
+    "ipFormatHint": "支持格式：192.168.1.0/24（网段��或包含多个IP段",
     "expireAt": "��效期至",
     "expireAtTip": "规则到期后���动失效，留空表示永久有效",
     "expireAtHint": "留空表示永久有效",
@@ -3843,7 +3843,7 @@
     "dnsResult": "DNS 结果",
     "responseTime": "响应时间",
     "hitRules": "命中规则",
-    "createRule": "新增规则",
+    "createRule": "新���规则",
     "editRule": "编辑规则",
     "ruleName": "��则名称",
     "matchMode": "匹配模式",
@@ -4269,7 +4269,7 @@
     "testMatched": "匹配",
     "testNotMatched": "不匹配",
     "noRules": "暂无内容规则",
-    "batchEnable": "批量启用",
+    "batchEnable": "��量启用",
     "batchDisable": "批量���用",
     "batchDelete": "批量删除",
     "scopesLabel": "范围 ({count})",
@@ -4538,7 +4538,7 @@
     },
     "envelopeMismatchWarning": {
       "title": "信封与头部不匹配可能引发误判",
-      "desc": "部分邮件订阅服务、自动转发系统和邮件列表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮件头（From）不一致。开启此检测可能会将这些正常邮���误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
+      "desc": "部分邮件订阅服务、自动转发系统和邮件列表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮件头（From）不一致。开启此检���可能会将这些正常邮���误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
     },
@@ -6805,14 +6805,12 @@
         "attachmentZipBomb": "ZIP 炸弹",
         "urlCount": "URL 数量",
         "url": "URL",
-        "rblResult": "RBL 结果",
         "urlDomain": "URL 域名",
         "spfResult": "SPF 结果",
         "dkimResult": "DKIM 结果",
         "dmarcResult": "DMARC 结果",
         "ptrResult": "PTR 结果",
         "similarDomain": "相似域名",
-        "displayNameSpoof": "显示名仿冒",
         "mailFromEmpty": "Mail From 为空",
         "mailFromFromConsistency": "信封-头 From 一致性",
         "virusScanResult": "病毒扫描结果",
@@ -7029,7 +7027,7 @@
         "operators": "大于/大于等于：差异越大越宽松，命中范围越大；小于/小于等于：差异越小越严格，只命中高度相似域名；介于：命中差异落在指定区间的域名。",
         "example": "对象选择「公司主域名档案」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超过 2 的仿冒域名。",
         "recommended": "推荐使用「小于等于 2」，与内置相似域名规则一致，兼顾召回与误报。",
-        "note": "先选择受保护域名档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
+        "note": "先选择受保护域名档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异��（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
       },
       "desc_displayNameSpoof": {
         "source": "仿冒检测模块",
@@ -8367,7 +8365,7 @@
       "todayDetected": "今日检测",
       "todayQuarantined": "今日隔离",
       "pendingReview": "待审核",
-      "todayRecalled": "今日召回",
+      "todayRecalled": "��日召回",
       "recallSuccess": "召回成功",
       "accuracy": "准确率"
     },
@@ -8522,7 +8520,7 @@
         "benign": "安全"
       }
     },
-    "navPhishingAgent": "钓鱼邮件检测智能体",
+    "navPhishingAgent": "钓鱼��件检测智能体",
     "collapseMenu": "折叠菜单",
     "expandMenu": "展开菜单"
   },
@@ -9540,7 +9538,7 @@
     "addSource": "新增数据源",
     "appIdPlaceholder": "如 app-8821",
     "authCodePlaceholderNew": "请输入授权码",
-    "autoSyncDesc": "开启后按 Cron 周期自动拉取远端数据",
+    "autoSyncDesc": "开启后按 Cron 周期自动��取远端数据",
     "autoSyncOff": "关闭",
     "autoSyncOn": "开启",
     "autoSyncTitle": "开启自动同步",
@@ -10111,7 +10109,7 @@
       "rbl": "RBL 过滤",
       "overseas": "海外邮件检测",
       "ipFrequencySummary": "阈值: {threshold} 次/分钟",
-      "ipFilterSummary": "黑名单: {blacklist} 条 / 白名单: {whitelist} 条",
+      "ipFilterSummary": "��名单: {blacklist} 条 / 白名单: {whitelist} 条",
       "rblSummary": "{servers} 个服务器 / 超时 {timeout}s",
       "overseasSummary": "{directions} 已启用",
       "ipFrequencyHint": "限制单个 IP 的发信频率",
@@ -10280,7 +10278,7 @@
       "mergedNote": "合并模式下外发和域内方向使用统一配置，防止通过切换方向绕过限制"
     },
     "existence": {
-      "title": "存在性验证策略",
+      "title": "存���性验证策略",
       "desc": "验证收件人在目录服务的真实存在性",
       "directionNote": "仅接收方向（外部→内部）生效，内部发信自动跳过验证",
       "strictMode": "严格模式",
@@ -10681,7 +10679,7 @@
       "privileged_requires_system_admin": "创建特权准入规则需要平台管理员权限",
       "rate_limit_must_be_positive": "每小时限额必须大于 0",
       "rcpt_domain_not_owned": "收件域必须是本租户已验证的域名或其子域",
-      "rcpt_domain_regex_invalid": "收件域匹配的正则表达式不合法，请检查语法",
+      "rcpt_domain_regex_invalid": "收件域匹���的正则表达式不合法，请检查语法",
       "rcpt_match_invalid": "收件人匹配方式无效，只能是：{allowed}",
       "source_auth_required": "至少要指定一种来源认证方式：来源 IP 段或 SPF 校验",
       "tenant_domain_cross_tenant": "所选域名属于其他租户",
@@ -10823,7 +10821,7 @@
       "strategy_id_required": "请选择处置策略",
       "mail_log_id_required": "请选择邮件",
       "mail_log_ids_required": "请至少选择一封邮件",
-      "leak_mail_not_in_run": "该邮件不属于本次回溯运行",
+      "leak_mail_not_in_run": "该邮件不属于本次回溯��行",
       "window_start_invalid": "开始时间格式不正确",
       "window_end_invalid": "结束时间格式不正确",
       "window_order_invalid": "开���时间必须早于结束时间",
@@ -11118,7 +11116,7 @@
     "group_policy": {
       "group_policy_requires_tenant_administrator_acces": "分组策略需要租户管理员权限",
       "group_policy_accessed_within_tenant_context": "多租户模式下，��组策略需要先选择租户",
-      "group_policy_rules_stay_within_active": "分组策略规则必须属于当前所选租户"
+      "group_policy_rules_stay_within_active": "分组策略规则必须属���当前所选租户"
     },
     "intent_engine": {
       "engine_enabled_receive_engine_enabled_send": "请分别设置收信、发信和���部信的引擎开关"
@@ -11281,7 +11279,7 @@
     "users": {
       "cannot_demote_last_system_administrator": "不能降级最后一个平台管理员",
       "cannot_delete_your_own_account": "不能删除自己的账号",
-      "cannot_delete_last_system_administrator": "不能删除最后一个平台管理员",
+      "cannot_delete_last_system_administrator": "不能删除最后一个��台管理员",
       "cannot_disable_last_enabled_super_administrator": "不能停用最后一个启用的超级管理员",
       "bulk_action_would_leave_zero_enabled": "该批量操作会导致没有任何启用的超级管理员"
     },

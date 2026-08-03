@@ -89,17 +89,17 @@ export const CONDITIONS: ConditionDef[] = [
   { key: 'qrCodeCount', category: 'attachment', field: 'qr_code_count', panel: 'number', meta: { unitKey: 'count', min: 0, max: 100, step: 1, recommend: { mode: 'ge', value: '3' } } },
   { key: 'attachmentZipBomb', category: 'attachment', field: 'is_zip_bomb', panel: 'select' },
 
-  // --- 安全检测 (20) ---
+  // --- 安全检测 (18) ---
+  // 说明：已按产品要求移除「RBL 结果」(rblResult) 与「显示名仿冒」(displayNameSpoof)
+  // 两个条件；安全检测由 20 降为 18，目录总数由 51 降为 49。其余条件不受影响。
   { key: 'urlCount', category: 'security', field: 'url_count', panel: 'number', meta: { unitKey: 'count', min: 0, max: 1000, step: 1, recommend: { mode: 'gt', value: '20' } } },
   { key: 'url', category: 'security', field: 'urls', panel: 'text' },
-  { key: 'rblResult', category: 'security', field: 'rbl', panel: 'select' },
   { key: 'urlDomain', category: 'security', field: 'urls', panel: 'text' },
   { key: 'spfResult', category: 'security', field: 'spf_result', panel: 'select' },
   { key: 'dkimResult', category: 'security', field: 'dkim_result', panel: 'select' },
   { key: 'dmarcResult', category: 'security', field: 'dmarc_result', panel: 'select' },
   { key: 'ptrResult', category: 'security', field: 'ptr_result', panel: 'select' },
   { key: 'similarDomain', category: 'security', field: 'domain_imp', panel: 'number', meta: { unitKey: 'editDistance', min: 0, max: 10, step: 1, recommend: { mode: 'le', value: '2' } } },
-  { key: 'displayNameSpoof', category: 'security', field: 'exec_imp', panel: 'select' },
   { key: 'mailFromEmpty', category: 'security', field: 'mailfrom_empty', panel: 'select' },
   { key: 'mailFromFromConsistency', category: 'security', field: 'envelope_header_mismatch', panel: 'select' },
   { key: 'virusScanResult', category: 'security', field: 'virus_scan_result', panel: 'select' },
