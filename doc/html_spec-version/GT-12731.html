@@ -169,7 +169,7 @@
       </ul>
 
       <!-- 一级需求：GT-12751 高级过滤规则优化项 -->
-      <li class="toc-l1"><a href="#gt-12751">GT-12751 高级过滤规则优化项：意图引擎多意图配置 + 移除 RBL / 显示名仿冒条件</a></li>
+      <li class="toc-l1"><a href="#gt-12751">GT-12751 高级过滤规则优化项（条件配置全面优化：意图引擎 / 条件目录裁剪 / 值控件规范化 / 群组来源 / 发件组织 / 说明卡 / 选择区滚动）</a></li>
       <ul class="toc-l2-group">
         <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">意图引擎条件升级为「多意图 · 双检测模式」独立配置面板</a></li>
         <ul class="toc-l2-group">
@@ -183,10 +183,16 @@
           <li class="toc-l3"><a href="#c4-states">4.2 截图式交互预览</a></li>
           <li class="toc-l3"><a href="#c4-elements">4.3 文件与逐元素变更</a></li>
         </ul>
+        <li class="toc-change"><span class="toc-num">5</span><a href="#change-5">条件目录裁剪：移除「功能组」「URL 沙箱结果」「短链展开」</a></li>
+        <li class="toc-change"><span class="toc-num">6</span><a href="#change-6">条件「值」控件规范化：加密附件 / Mail From 为空（是/否）、二维码 ODR（成功/失败）、信封-头 From 一致性（一致/不一致）、病毒扫描（有毒/无毒）</a></li>
+        <li class="toc-change"><span class="toc-num">7</span><a href="#change-7">「发信人组」条件下拉可从「群组策略」模块筛选发信人组</a></li>
+        <li class="toc-change"><span class="toc-num">8</span><a href="#change-8">「发件组织」条件：组织通讯录部门树多选实现</a></li>
+        <li class="toc-change"><span class="toc-num">9</span><a href="#change-9">条件配置说明卡片增强（输入类型 / 格式示例 / 有效范围 / 运算符 / 推荐配置）</a></li>
+        <li class="toc-change"><span class="toc-num">10</span><a href="#change-10">修复「选中条件较多时无法再添加其他条件」（已选区限高独立滚动）</a></li>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-006）</a></li>
-      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-003）</a></li>
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-012）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-004）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
   </section>
@@ -379,7 +385,7 @@
         变更 1 让子页在加载完成前不上报，但此时父级 <code>PolicyPipelinePage</code> 中对应模块的本地状态（<code>urlModuleEnabled</code> / <code>attachmentEnabled</code> / <code>intentEngineEnabled</code>）仍为 <code>undefined</code>。原逻辑在 <code>undefined</code> 时会退回 <code>item.functional</code>（恒为 <code>true</code>），因此首帧仍会把「未启用」模块画成启用——虽然不再「闪回」，但首帧依旧不正确。
       </p>
       <div class="callout callout-ok">
-        <strong>最终实现方案：</strong>父级复用已有的 <code>security-modules</code> 查询（原仅在 stage5 启用），将其 <code>enabled</code> 门控从 <code>stage5Active</code> 放宽为 <code>drawerOpen</code>，使抽屉一打开就预取模块开关映射 <code>securityModulesMap</code>。在导航渲染时，stage3 三个模块（<code>url</code> / <code>attachment</code> / <code>intentEngine</code>）的圆点 <code>dotOn</code> 与摘要 <code>summaryText</code> 判断改为「<strong>本地状态 <code>??</code> 父级兜底真值</strong>」：本地状态存在（含用户未保存的草稿切换）时优先，否则用 <code>securityModulesMap</code> 中的真实持久化值，只有二者都缺失时才退回 <code>item.functional</code>。这样首帧即用真值渲染。
+        <strong>最终实现方案：</strong>父级复用已有的 <code>security-modules</code> 查询���原仅在 stage5 启用），将其 <code>enabled</code> 门控从 <code>stage5Active</code> 放宽为 <code>drawerOpen</code>，使抽屉一打开就预取模块开关映射 <code>securityModulesMap</code>。在导航渲染时，stage3 三个模块（<code>url</code> / <code>attachment</code> / <code>intentEngine</code>）的圆点 <code>dotOn</code> 与摘要 <code>summaryText</code> 判断改为「<strong>本地状态 <code>??</code> 父级兜底真值</strong>」：本地状态存在（含用户未保存的草稿切换）时优先，否则用 <code>securityModulesMap</code> 中的真实持久化值，只有二者都缺失时才退回 <code>item.functional</code>。这样首帧即用真值渲染。
       </div>
       <pre><code>// PolicyPipelinePage.tsx（导航渲染，简化示意）
 const stage3Fallback = securityModulesMap?.[stage3ModuleKey[item.key]];
@@ -456,26 +462,46 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
         <tr><td>文档编号（文件 ticket）</td><td>GT-12731（同文件追加，一文件多需求）</td></tr>
         <tr><td>需求名称</td><td>GT-12751 高级过滤规则优化项</td></tr>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 功能优化</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v2</span></span></td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v3</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-08-03</td></tr>
         <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段4 综合策略 → 高级过滤规则 → 新建/编辑规则抽屉 → 「条件配置」页签）</td></tr>
         <tr><td>组件路径</td><td>
           <code>src/components/security/advanced-filter-rules/catalogue.ts</code>、
-          <code>ConditionConfigPanel.tsx</code>（<code>IntentEngineSection</code>）、
-          <code>serde.ts</code>、
-          <code>expression.ts</code>、
+          <code>ConditionConfigPanel.tsx</code>（<code>DescriptionCard</code> / <code>IntentEngineSection</code> / <code>MapValueSection</code> / <code>OrgDepartmentSection</code> / <code>BooleanValueSelect</code> / <code>EnumSection</code>）、
           <code>ConditionTree.tsx</code>、
+          <code>ConditionsTab.tsx</code>、
+          <code>serde.ts</code>、<code>expression.ts</code>、
+          <code>src/lib/mock/dispatcher.ts</code>（字段元信息 map_keys_source / 布尔字段派生）、
           <code>messages/{zh,en,ru,th}.json</code>
         </td></tr>
-        <tr><td>webapp commit</td><td><code>工作区已提交</code>（意图引擎双模式/多意图 + 移除 RBL/显示名仿冒条件）</td></tr>
+        <tr><td>webapp commit</td><td><code>工作区已提交</code>（意图引擎双模式/多意图、条件目录裁剪、值控件规范化、群组来源修复、发件组织、说明卡增强、选择区滚动修复）</td></tr>
         <tr><td>对照 spec commit</td><td>not-used</td></tr>
         <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 运行中 webapp 浏览器真实截图；3. webapp 源码 + 单元测试</td></tr>
-        <tr><td>浏览器验证状态</td><td>2026-08-03 演示环境真实截图（浅色主题 / AI版·单租户 / 平台管理员 / Mock 数据 / 阶段4 高级过滤规则抽屉，1575×847）</td></tr>
-        <tr><td>变更类型</td><td>功能优化（条件配置面板增强 + 条件目录裁剪）</td></tr>
+        <tr><td>浏览器验证状态</td><td>2026-08-03 演示环境真实截图（浅色主题 / AI版·单租户 / 平台管理员 / Mock 数据 / 阶段4 高级过滤规则抽屉，1575×847）；实拍 S-1 ~ S-7</td></tr>
+        <tr><td>变更类型</td><td>功能优化（条件配置面板增强 + 条件目录裁剪 + 值控件规范化 + 数据源修复 + 布局修复）</td></tr>
       </tbody>
     </table>
     <div class="callout callout-info">
-      本需求记录「高级过滤规则」模块条件配置的两项优化：<strong>变更 3</strong> 将「意图引擎」（综合研判，字段 <code>cac_tag</code>）条件从普通枚举单选升级为专属的「多意图 · 双检测模式」配置面板——可同时配置多个意图，每个意图各自选择「分类优先 / 分段阈值」检测模式；<strong>变更 4</strong> 按产品要求从「安全检测」分组移除「RBL 结果」与「显示名仿冒」两个条件，条件目录总数由 51 降为 49、安全检测由 20 降为 18。两项优化全程使用项目国际化框架（<code>next-intl</code> / <code>messages/*.json</code>），覆盖中/英/俄/泰四语。
+      本需求汇总「高级过滤规则」模块（新建/编辑规则 → 条件配置）本轮全部优化，全程使用项目国际化框架（<code>next-intl</code> / <code>messages/*.json</code>），涉及页面文案覆盖中/英/俄/泰四语。共分 <strong>变更 3 ~ 变更 10</strong> 八个区块。
+    </div>
+    <div class="callout callout-ok">
+      <strong>用户提出的 10 个优化点 → 文档区块对照（确保无遗漏）：</strong>
+      <table style="margin-top:0.5rem;">
+        <thead><tr><th>#</th><th>用户描述</th><th>对应区块</th><th>关键实现</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>条件说明卡片的变更</td><td><a href="#change-9">变更 9</a></td><td><code>DescriptionCard</code> 增输入类型/格式示例/单位/有效范围/对象含义/运算符/示例/推荐配置多段</td></tr>
+          <tr><td>2</td><td>选中条件较多时无法再配置其他条件</td><td><a href="#change-10">变更 10</a></td><td>已选区限高 <code>maxHeight:45%</code> 独立滚动，「添加条件」区 <code>min-h-0 flex-1</code> 始终可见</td></tr>
+          <tr><td>3</td><td>发信人组下拉可筛选「群组策略」发信人组</td><td><a href="#change-7">变更 7</a></td><td>dispatcher 修正 <code>sender_group</code> 的 <code>map_keys_source</code> 指向 <code>/unified-rules/_meta/groups?type=sender</code></td></tr>
+          <tr><td>4</td><td>去掉「功能组」「URL 沙箱结果」「短链展开」</td><td><a href="#change-5">变更 5</a></td><td><code>catalogue.ts</code> 删 3 条条目，54 → 51</td></tr>
+          <tr><td>5</td><td>发件组织配置实现</td><td><a href="#change-8">变更 8</a></td><td><code>OrgDepartmentSection</code> 复用组织通讯录部门树多选（<code>panel:'orgDept'</code>）</td></tr>
+          <tr><td>6</td><td>加密附件「值」→ 是/否</td><td><a href="#change-6">变更 6</a></td><td><code>is_encrypted_attachment</code> 布尔字段 → <code>BooleanValueSelect</code>（是/否）</td></tr>
+          <tr><td>7</td><td>二维码 ODR 结果「值」→ 成功/失败</td><td><a href="#change-6">变更 6</a></td><td><code>image_qr_code_result: ['success','fail']</code> + i18n <code>qrResultValues</code></td></tr>
+          <tr><td>8</td><td>信封-头 From 一致性「值」→ 一致/不一致</td><td><a href="#change-6">变更 6</a></td><td><code>envelope_header_mismatch: ['match','mismatch']</code> + i18n <code>envelopeHeaderConsistencyValues</code></td></tr>
+          <tr><td>9</td><td>Mail From 为空「值」→ 是/否</td><td><a href="#change-6">变更 6</a></td><td><code>mailfrom_empty</code> 布尔字段 → <code>BooleanValueSelect</code>（是/否）</td></tr>
+          <tr><td>10</td><td>病毒扫描结果「值」→ 有毒/无毒</td><td><a href="#change-6">变更 6</a></td><td><code>virus_scan_result: ['infected','clean']</code> + i18n <code>virusScanResultValues</code></td></tr>
+        </tbody>
+      </table>
+      另含前序已记录的 <strong>变更 3</strong>（意图引擎多意图·双模式）与 <strong>变更 4</strong>（移除 RBL 结果 / 显示名仿冒）。条件目录总数变化：基线 <strong>54 → 51</strong>（变更 5）<strong> → 49</strong>（变更 4）。
     </div>
   </section>
 
@@ -563,7 +589,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           </tr>
           <tr>
             <td><code>serde.test.ts</code> · 编解码测试</td>
-            <td>仅单条 codec 断言</td>
+            <td>��单条 codec 断言</td>
             <td>新增「多意图 list codec」describe：多意图往返、同意图去重（保留后写）、空条目丢弃、单值向后兼容子集</td>
             <td><span class="tag tag-added">新增</span>断言 <code>phishing:threshold:0.6,0.9;spam:classification</code> 等往返一致</td>
           </tr>
@@ -659,7 +685,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
   </div>
 
-  <!-- ══════════════ C. 差异标注 ══════════════ -->
+  <!-- ══���═══════════ C. 差异标注 ══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
 
@@ -707,7 +733,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·设计取舍</span></td></tr>
-        <tr><td>描述</td><td>多意图混合模式后，单个 <code>leaf.operator</code> 无法同时表达「分类（within）/ 阈值（between）」两种；故将 operator 固定为 <code>within</code> 伞值（表示「命中所选意图集合之一」），真正的分类 / 阈值细节由 value 编码（<code>意图:模式[:lo,hi]</code>）承载，由面板与表达式预览解析。此举不破坏 leaf 的单 operator 模型，且兼容旧单意图值。</td></tr>
+        <tr><td>描述</td><td>多意图混合模式���，单个 <code>leaf.operator</code> 无法同时表达「分类（within）/ 阈值（between）」两种；故将 operator 固定为 <code>within</code> 伞值（表示「命中所选意图集合之一」），真正的分类 / 阈值细节由 value 编码（<code>意图:模式[:lo,hi]</code>）承载，由面板与表达式预览解析。此举不破坏 leaf 的单 operator 模型，且兼容旧单意图值。</td></tr>
         <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
         <tr><td>验证依据</td><td><code>ConditionConfigPanel.tsx</code> <code>commit()</code> 恒传 <code>operator: INTENT_ENGINE_OPERATOR.classification</code>（=within）；<code>serde.ts</code> 注释与 codec</td></tr>
       </tbody>
@@ -744,7 +770,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
         <tr><td>问题</td><td>演示环境模块状态由 mock 提供且加载极快 / 或加载失败（D-001），难以放大加载窗口来直观观察闪回。真实后端下 <code>GET /security/modules</code> 有网络延迟时，修复效果（首帧即真值、无闪回）需在存在「未启用」模块的真实数据下回归确认。</td></tr>
         <tr><td>影响</td><td>修复在慢速网络下的实际观感</td></tr>
-        <tr><td>建议</td><td>在测试环境将某内容层模块设为未启用，配合网络限速打开阶段3 抽屉并在模块间切换，确认导航项全程稳定为「未启用」，无「已启用」中间帧</td></tr>
+        <tr><td>建议</td><td>在测试环境将某内容层模块��为未启用，配合网络限速打开阶段3 抽屉并在模块间切换，确认导航项全程稳定为「未启用」，无「已启用」中间帧</td></tr>
       </tbody>
     </table>
 
