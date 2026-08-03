@@ -7068,6 +7068,10 @@
         "match": "Consistent",
         "mismatch": "Inconsistent"
       },
+      "virusScanResultValues": {
+        "infected": "Infected",
+        "clean": "Clean"
+      },
       "descInputTypeLabel": "Input type",
       "descUnitLabel": "Unit",
       "descRangeLabel": "Valid range",
@@ -7522,7 +7526,7 @@
       "ed25519": "Ed25519"
     },
     "dnsStatus": {
-      "unverified": "⚠ Unverified",
+      "unverified": "�� Unverified",
       "verified": "✅ Verified",
       "mismatch": "Mismatch",
       "not_found": "Not found",

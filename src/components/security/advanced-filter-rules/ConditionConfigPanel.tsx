@@ -39,7 +39,10 @@ const ENUM_VALUES: Record<string, string[]> = {
   dkim_result: ['pass', 'fail', 'neutral', 'none', 'temperror', 'permerror'],
   dmarc_result: ['pass', 'fail', 'quarantine', 'reject', 'none'],
   ptr_result: ['pass', 'fail', 'none'],
-  virus_scan_result: ['clean', 'infected', 'suspicious', 'error'],
+  // 病毒扫描结果：固定枚举下拉，取值为「有毒 / 无毒」两态（扫描是否检出病毒）。
+  // token 用 infected/clean，标签经 i18n 本地化（v3Conditions.virusScanResultValues.*），
+  // 杜绝自由输入产生的脏值。
+  virus_scan_result: ['infected', 'clean'],
   // 二维码 OCR 结果：固定枚举下拉，取值为「成功 / 失败」两态（OCR 识别是否成功），
   // 标签经 i18n 本地化（v3Conditions.qrResultValues.*），杜绝自由输入产生的脏值。
   image_qr_code_result: ['success', 'fail'],
@@ -51,11 +54,12 @@ const ENUM_VALUES: Record<string, string[]> = {
 
 // 枚举值需本地化显示的字段 → i18n 子命名空间（相对 advancedRulesFeature）。
 // 仅这些字段的选项走 v3Conditions.<ns>.<value> 文案；其余 enum 字段（spf/dkim/
-// virus_scan 等协议结果码）仍逐字显示原始 token，不受影响。字段级作用域可避免
-// 误改共享 token（如 virus_scan_result 也含 'suspicious'）的其它字段渲染。
+// dmarc/ptr 等协议结果码）仍逐字显示原始 token，不受影响。字段级作用域确保只有
+// 收录字段被本地化，不波及其它 enum 字段的渲染。
 const ENUM_VALUE_I18N_NS: Record<string, string> = {
   image_qr_code_result: 'qrResultValues',
   envelope_header_mismatch: 'envelopeHeaderConsistencyValues',
+  virus_scan_result: 'virusScanResultValues',
 };
 
 // 20 个常用 MIME 快捷徽标（技术常量，非文案，不走 i18n —— 同 ENUM_VALUES 的

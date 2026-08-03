@@ -260,4 +260,36 @@ describe('ConditionConfigPanel enriched guidance', () => {
     // Raw token must not leak when a localized label exists.
     expect(multi.textContent).not.toContain('mismatch');
   });
+
+  // virusScanResult (病毒扫描结果) is a fixed-value enum: the panel renders an enum
+  // dropdown, never the free-text StringEqualsSection.
+  it('renders an enum dropdown for 病毒扫描结果, not free text', () => {
+    renderPanel(
+      leaf({ conditionKey: 'virusScanResult', field: 'virus_scan_result', operator: 'eq', value: '' }),
+      { virus_scan_result: { type: 'enum' } as FieldDef },
+    );
+
+    expect(screen.getByTestId('config-enum-single')).toBeInTheDocument();
+    expect(screen.queryByTestId('config-string-eq-value')).not.toBeInTheDocument();
+  });
+
+  // In multi (within) mode the labels render inline and are localized via
+  // v3Conditions.virusScanResultValues.* (infected → 有毒, clean → 无毒),
+  // proving the values go through the project i18n framework.
+  it('localizes 病毒扫描结果 enum labels through i18n (有毒/无毒)', () => {
+    renderPanel(
+      leaf({ conditionKey: 'virusScanResult', field: 'virus_scan_result', operator: 'within', value: '' }),
+      { virus_scan_result: { type: 'enum' } as FieldDef },
+    );
+
+    const multi = screen.getByTestId('config-enum-multi');
+    expect(multi.textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.virusScanResultValues.infected,
+    );
+    expect(multi.textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.virusScanResultValues.clean,
+    );
+    // Raw token must not leak when a localized label exists.
+    expect(multi.textContent).not.toContain('infected');
+  });
 });

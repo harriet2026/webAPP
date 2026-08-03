@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系�������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1020,7 +1020,7 @@
         "toasts": {
           "created": "路由规则已添加",
           "updated": "路由规则已更新",
-          "deleted": "路由规������除",
+          "deleted": "路由��������除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
         },
@@ -2451,7 +2451,7 @@
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
-      "unknown": "未能识别的失败原因，请查看原始失败信息并联系��持。"
+      "unknown": "未能识别的失败原因，请查看原始失败信息��联系��持。"
     },
     "detail": {
       "breadcrumb": "日���审计 / 认证日志",
@@ -2719,7 +2719,7 @@
       "abnormal": "异常",
       "abnormalDefault": "非���用登录地点，请确认是否为本人操作",
       "success": "成功",
-      "fail": "失败",
+      "fail": "失��",
       "query": "查询",
       "startDate": "开始日期",
       "endDate": "结束日期",
@@ -3845,7 +3845,7 @@
     "hitRules": "命中规则",
     "createRule": "新增规则",
     "editRule": "编辑规则",
-    "ruleName": "规则名称",
+    "ruleName": "��则名称",
     "matchMode": "匹配模式",
     "matchModeAny": "任一服���器",
     "matchModeSpecific": "指定服务器",
@@ -3880,7 +3880,7 @@
     "rblServers": "RBL服务器",
     "add": "添加",
     "timeoutTip": "DNS 查询超时时间，超时后视为未命中。建议设置 3-10 秒，过短可能漏检，过长影响邮件处理速度。",
-    "serverTipGeneric": "实时黑名单查询服务器，用于检测发信IP是否在垃圾邮件黑名单中",
+    "serverTipGeneric": "实时黑名单查询服务器，用于检测发��IP是否在垃圾邮件黑名单中",
     "serverTipZenSpamhaus": "Spamhaus综合黑名单，包含SBL、XBL、PBL等多个子列表，覆盖范围广",
     "serverTipBlSpamcop": "SpamCop用户举报黑名单，基于用户举报的垃圾邮件来源IP",
     "serverTipBarracuda": "Barracuda实时黑名单，由Barracuda安全网络维护",
@@ -4929,7 +4929,7 @@
       "dangerExtEnabled": "启用危险扩展名检测",
       "dangerExtList": "危险扩展名列表",
       "mimeMismatchCheck": "启用MIME类型不一致检查",
-      "mimeMismatchAction": "MIME不一致处理动作",
+      "mimeMismatchAction": "MIME不一致处理���作",
       "action_quarantine": "隔离",
       "action_sideline": "搁置",
       "action_reject": "拒绝",
@@ -4965,7 +4965,7 @@
       "virusDbStatus": "病毒库状态",
       "signatures": "特征数",
       "updateNow": "立即更新",
-      "autoUpdate": "自动更新",
+      "autoUpdate": "��动更新",
       "daily": "每日 02:00",
       "engineStatus": "引擎状态",
       "online": "在线",
@@ -5102,7 +5102,7 @@
     },
     "tooltips": {
       "attachmentCount": "单封邮件允许进入检测的附件数量，-1 表示不限制",
-      "attachmentSize": "单个附件大小上限，-1 表示不限制",
+      "attachmentSize": "单个附件大小上���，-1 表示不限制",
       "nestedProtection": "限制压缩包数量、内部文件数量和解压层级，避免压缩炸弹���尽资源",
       "scanTimeout": "单封邮件附件扫描允许占用的��长时间",
       "exceedAction": "基础限制任一项超限时��取的处置",
@@ -5457,7 +5457,7 @@
     "ignoreNumbers": "忽略数字",
     "similarSubject": "相似度>90%视为相同",
     "realtimeNote": "此检测在邮件进入时实时计算，命中后立即拦截或标记",
-    "observeNote": "观察模式下命中仅记录日志，不执行拦截动作",
+    "observeNote": "观察模式下命中仅记录日���，不执行拦截动作",
     "goToGroupPolicy": "前往��组策略配置",
     "atLeastOneDirection": "至少选择一个检测��向",
     "navSummary": "窗口{window}分钟 / 阈值{threshold}%",
@@ -6075,7 +6075,7 @@
         "recipientStatus": {
           "title": "收件人状态",
           "header": "收件人状态 ({n} 人)",
-          "expandAll": "展开全部 {n} 个收件人",
+          "expandAll": "展开全部 {n} ���收件人",
           "colRecipients": "收件人",
           "colStatus": "状态",
           "colActions": "操作",
@@ -6246,7 +6246,7 @@
         "totalElapsed": "总耗时: {ms}ms",
         "elapsed": "耗时: {ms}ms",
         "policyCount": "{n} 项策略",
-        "hitPolicyLabel": "命中策略",
+        "hitPolicyLabel": "命��策略",
         "agentJudgementLabel": "智能体研判",
         "timeline": "时间线",
         "postDetectionTimeline": "事后处置时间线",
@@ -7125,6 +7125,10 @@
         "match": "一致",
         "mismatch": "不一致"
       },
+      "virusScanResultValues": {
+        "infected": "有毒",
+        "clean": "无毒"
+      },
       "descInputTypeLabel": "输入类型",
       "descUnitLabel": "单��",
       "descRangeLabel": "有效范围",
@@ -7591,7 +7595,7 @@
     "title": "密码策���",
     "minLength": "密码最小长度",
     "minCharClasses": "最少字符类别数",
-    "classesHint": "字符类别：大写字母、小写字母、数字、特殊符号（共 4 类）"
+    "classesHint": "字符类别：大写字母、小写字母、数字、特殊符���（共 4 类）"
   },
   "securityOverview": {
     "trendPeakHint": "单击图例可切换系列，双击可单独查看某一类",
@@ -7935,7 +7939,7 @@
       "mockSummary": "## 投递健康摘要\n\n整体投递成功率稳定。外发队列仍在健康范围内，建议持续关注 P99 延迟和目标域名退信率。"
     },
     "dataLag": "数据更新于约 {minutes} 分钟前",
-    "dataLagHours": "统计数据更新于约 {hours} 小时前",
+    "dataLagHours": "统计数据更���于约 {hours} 小时前",
     "loadFailed": "投递统计加载失败，请稍后重试。",
     "retry": "重试",
     "noData": "暂无数据",
@@ -9868,7 +9872,7 @@
       "queue_incoming": "入站队列",
       "queue_active": "活动队列",
       "queue_deferred": "延迟队列",
-      "queue_held": "挂起队列",
+      "queue_held": "���起队列",
       "queue_corrupt": "损坏队列",
       "queue_age_4h_ratio": "队列 >4h 占比",
       "delivery_latency_avg": "平均投递延迟",
@@ -10375,7 +10379,7 @@
       "executiveMonitoring": "高管保护监控",
       "network": "网络设置",
       "dataManagement": "数据管理",
-      "authorizationUpgrade": "升级更新",
+      "authorizationUpgrade": "升级更��",
       "userPermission": "管理员与权限",
       "rolePermission": "角色权限",
       "organization": "组织与成员",
@@ -10559,7 +10563,7 @@
       "email_field_unmapped": "必填字段「邮箱」尚未映射，请在字段映射中指定它对应的列",
       "encryption_key_missing": "服务端未配置通讯录加密密钥（至少 32 字节），无法保存或测试含密码等敏感字段的配置，请联系管理员配置后重试",
       "file_store_uninitialized": "服务端未启用 CSV 文件存储，请联系管理员配置后重试",
-      "multipart_parse_failed": "上传表单解析失败，请重新提交",
+      "multipart_parse_failed": "上传表单解析失败，请���新提交",
       "no_running_sync": "当前没有正在运行的同步任务",
       "no_sync_log": "该数据源还没有同步记录",
       "not_found": "通讯录数据源不存在，可能已被删除",
@@ -10826,7 +10830,7 @@
       "admin_account_password_pair_required": "管理员账号与密码必须同时填���",
       "admin_account_too_long": "管理员账号长度不能超过 {max} 个字符",
       "code_immutable": "租户编码创建后不可修改",
-      "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请先放行或清除后再���除租户",
+      "has_withheld_mail": "该租户���有被扣留的邮件（隔离 / 旁路 / 外发审核），请先放行或清除后再���除租户",
       "next_hop_pair_required": "下一跳主��与端口必须同时填写",
       "next_hop_triad_required": "下一跳类型、主机与端口必须同时填写",
       "next_hop_host_empty": "下一跳主机不能为空"
@@ -11108,7 +11112,7 @@
     },
     "group_policy": {
       "group_policy_requires_tenant_administrator_acces": "分组策略需要租户管理员权限",
-      "group_policy_accessed_within_tenant_context": "多租户模式下，分组策略需要先选择租户",
+      "group_policy_accessed_within_tenant_context": "多租户模式下，��组策略需要先选择租户",
       "group_policy_rules_stay_within_active": "分组策略规则必须属于当前所选租户"
     },
     "intent_engine": {
