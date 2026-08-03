@@ -6,6 +6,8 @@ import {
   defaultModeForField,
   MATCH_MODE_TO_OPERATOR,
   OPERATOR_TO_MATCH_MODE,
+  parseIntentEngineValue,
+  encodeIntentEngineValue,
   type ConditionLeaf,
   type ConditionGroups,
   type MatchMode,
@@ -290,5 +292,38 @@ describe('defaultModeForField', () => {
 
   it('ignores a field override whose operator is unsupported and falls through to the type preference', () => {
     expect(defaultModeForField(fd({ type: 'number', operators: ['eq'] }), 'send_time')).toBe('equals');
+  });
+});
+
+// 意图引擎（方案B）取值编解码：单个 value 字符串承载「模式 + 载荷」，面板与表达式
+// 预览共用，往返必须无损，且分类载荷里的逗号不能被误当区间分隔符。
+describe('intent engine value codec', () => {
+  it('classification round-trips its intent token list', () => {
+    const s = encodeIntentEngineValue({ mode: 'classification', intents: ['phishing', 'spam'], lo: '', hi: '' });
+    expect(s).toBe('classification:phishing,spam');
+    const back = parseIntentEngineValue(s);
+    expect(back.mode).toBe('classification');
+    expect(back.intents).toEqual(['phishing', 'spam']);
+  });
+
+  it('threshold round-trips its [lo, hi] bounds', () => {
+    const s = encodeIntentEngineValue({ mode: 'threshold', intents: [], lo: '0.6', hi: '0.9' });
+    expect(s).toBe('threshold:0.6,0.9');
+    const back = parseIntentEngineValue(s);
+    expect(back.mode).toBe('threshold');
+    expect(back.lo).toBe('0.6');
+    expect(back.hi).toBe('0.9');
+  });
+
+  it('empty classification (no intents) encodes to a bare prefix and parses back empty', () => {
+    const s = encodeIntentEngineValue({ mode: 'classification', intents: [], lo: '', hi: '' });
+    expect(s).toBe('classification:');
+    expect(parseIntentEngineValue(s).intents).toEqual([]);
+  });
+
+  it('defaults an unprefixed legacy value to classification without dropping tokens', () => {
+    const back = parseIntentEngineValue('phishing,spam');
+    expect(back.mode).toBe('classification');
+    expect(back.intents).toEqual(['phishing', 'spam']);
   });
 });

@@ -27,7 +27,11 @@ describe('CONDITIONS catalogue — 51 条件目录', () => {
     const byPanel = (panel: PanelKind) => CONDITIONS.filter((c) => c.panel === panel).length;
     expect(byPanel('text')).toBe(15);
     expect(byPanel('number')).toBe(14);
-    expect(byPanel('select')).toBe(13);
+    // comprehensiveEngineResult（意图引擎）已从 'select' 独立为专门的 'intentEngine'
+    // 面板（分类优先 / 分段阈值双模式，见 ConditionConfigPanel 的 IntentEngineSection），
+    // 因此 select 由 13 降为 12、新增 intentEngine=1，两者之和不变，总数仍为 51。
+    expect(byPanel('select')).toBe(12);
+    expect(byPanel('intentEngine')).toBe(1);
     // senderOrganization 已从 'group' 独立为专门的 'orgDept' 面板（配置面板复用
     // 组织通讯录部门树多选，见 ConditionConfigPanel 的 OrgDepartmentSection），
     // 因此 group 由 5 降为 4、新增 orgDept=1，两者之和不变，总数仍为 51。
@@ -40,9 +44,9 @@ describe('CONDITIONS catalogue — 51 条件目录', () => {
     expect(byPanel('mime')).toBe(1);
   });
 
-  it('panel kind counts sum to 54', () => {
+  it('panel kind counts sum to 51', () => {
     const kinds: PanelKind[] = [
-      'text', 'number', 'select', 'group', 'featureGroup', 'orgDept', 'cidr', 'time', 'weekday', 'mime',
+      'text', 'number', 'select', 'group', 'featureGroup', 'orgDept', 'cidr', 'time', 'weekday', 'mime', 'intentEngine',
     ];
     const sum = kinds.reduce((acc, k) => acc + CONDITIONS.filter((c) => c.panel === k).length, 0);
     expect(sum).toBe(51);
