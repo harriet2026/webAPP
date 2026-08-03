@@ -11,6 +11,29 @@ vi.mock('@/components/rules/MapKeySelect', () => ({
   MapKeySelect: () => null,
 }));
 
+// OrgDepartmentSection (senderOrganization / orgDept panel) pulls department
+// rows from the org address book via useApiRequest + react-query. Stub both so
+// the panel mounts with a fixed 2-level tree and no network / provider.
+vi.mock('@/lib/api/client', () => ({
+  useApiRequest: () => ({ apiRequest: vi.fn() }),
+}));
+vi.mock('@/lib/api/contacts', () => ({
+  listContactDepartments: vi.fn(),
+}));
+const ORG_DEPT_ROWS = [
+  { path: '研发中心', member_count: 2, source_names: [] },
+  { path: '研发中心 / 后端组', member_count: 3, source_names: [] },
+  { path: '研发中心 / 前端组', member_count: 4, source_names: [] },
+  { path: '市场部', member_count: 1, source_names: [] },
+];
+vi.mock('@tanstack/react-query', () => ({
+  useQuery: ({ queryFn }: { queryFn: () => unknown }) => {
+    void queryFn;
+    // Return the raw rows directly; buildDepartmentTree runs inside the panel.
+    return { data: ORG_DEPT_ROWS };
+  },
+}));
+
 // Faithful next-intl stand-in backed by the REAL zh.json messages. This both
 // renders the panel and proves every key the enriched DescriptionCard / number
 // section reads actually resolves (dot-path lookup + {var} interpolation +
@@ -97,5 +120,35 @@ describe('ConditionConfigPanel enriched guidance', () => {
     const steps = zhMessages.advancedRulesFeature.v3Conditions.stepGuideMapNumber;
     expect(guide.querySelectorAll('li')).toHaveLength(steps.length);
     expect(guide.textContent).toContain(steps[0]);
+  });
+
+  // senderOrganization (orgDept panel) renders the org-address-book department
+  // tree instead of a bare text box, proving the org-contacts联动 is wired.
+  it('renders the org department tree for senderOrganization (发件组织)', () => {
+    renderPanel(leaf({ conditionKey: 'senderOrganization', field: 'sender_dept_path', operator: 'within', value: '' }));
+
+    expect(screen.getByTestId('config-orgdept')).toBeInTheDocument();
+    expect(screen.getByTestId('config-orgdept-search')).toBeInTheDocument();
+    // Root departments derived from the address book rows are shown.
+    expect(screen.getByTestId('config-orgdept-node-研发中心')).toBeInTheDocument();
+    expect(screen.getByTestId('config-orgdept-node-市场部')).toBeInTheDocument();
+  });
+
+  // Selecting a parent department writes the parent + all descendant paths into
+  // the leaf via onChange with operator 'within' — the "选父含子孙" semantics.
+  it('selecting a parent department cascades to all descendants (选父含子孙)', () => {
+    const { onChange } = renderPanel(
+      leaf({ conditionKey: 'senderOrganization', field: 'sender_dept_path', operator: 'within', value: '' }),
+    );
+
+    fireEvent.click(screen.getByTestId('config-orgdept-toggle-研发中心'));
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const [, patch] = onChange.mock.calls[0];
+    expect(patch.operator).toBe('within');
+    // Compare as an unordered set: locale collation of 后/前 is irrelevant here,
+    // what matters is the parent + both descendants are all present.
+    const paths = new Set((patch.value as string).split('\n'));
+    expect(paths).toEqual(new Set(['研发中心', '研发中心 / 后端组', '研发中心 / 前端组']));
   });
 });
