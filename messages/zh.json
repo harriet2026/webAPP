@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系�����������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系�������������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1022,7 +1022,7 @@
           "updated": "路由规则已更新",
           "deleted": "������������除",
           "saveError": "请修正表单中的校验错误",
-          "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
+          "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级��置"
         },
         "deleteDialogTitle": "������由规��「{name}」？",
         "deleteDialogDescription": "删除后立即生效，命中该规则的邮件将改由其余规则处理。",
@@ -1338,7 +1338,7 @@
     "sectionBasic": "基本信息",
     "sectionTargets": "适������",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
-    "sectionPolicies": "分阶段��略配��",
+    "sectionPolicies": "分阶段����略配��",
     "sectionPoliciesHint": "��认为「继承����局����「��留��策��本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
     "priorityHint": "优先级仅在多条策略命中同一邮件、且配置了同一模块时用于仲裁（数值越大越优先）。它不决定模块的跨阶段执行顺序——执行顺序由阶段流水线固定。",
@@ -1459,7 +1459,7 @@
       "block": "阻断",
       "drop": "丢弃"
     },
-    "previewDescriptionWithRule": "策略「{name}」的有效执���路径：",
+    "previewDescriptionWithRule": "策略「{name}」���有效执���路径：",
     "previewNoRuleSelected": "���选择���条群组策略���预览���",
     "previewShortCircuit": "邮件在【阶段{stage}】因策略「{rule}」的{action}处置被终止，后续阶段不再执行。",
     "previewSkipped": "未执行（前序已短路）",
@@ -2222,7 +2222,7 @@
         "editTitle": "编辑角色",
         "viewTitle": "查看角色权限",
         "createDescription": "配置角色名称、备注与权限矩阵",
-        "readonlyDescription": "以下为该角��的完整权限�����（只读）",
+        "readonlyDescription": "���下为该角��的完整权限�����（只读）",
         "nameLabel": "���色名称",
         "namePlaceholder": "如 自定义运营",
         "nameRequired": "请输���角色���称",
@@ -2296,7 +2296,7 @@
   "linkLogs": {
     "title": "链接保护日志",
     "eyebrow": "邮件安全",
-    "subtitle": "记录终端用户点击改写保护链接后的顺序安全检测过程与最终处置，用于钓鱼/恶意链接溯源。",
+    "subtitle": "记录终端用户点击改写保护链��后的顺序安全检测过程与最终处置，用于钓鱼/恶意链接溯源。",
     "total": "共 {count} 条记录",
     "empty": "暂无数据",
     "view": "查看",
@@ -2436,7 +2436,7 @@
     "failReasons": {
       "wrongPassword": "密码错误",
       "userNotExist": "账号不存在",
-      "accountLocked": "账号锁定",
+      "accountLocked": "��号锁定",
       "serverTimeout": "服务��超时",
       "connectionRefused": "连接拒绝",
       "certError": "证书错误",
@@ -3226,7 +3226,7 @@
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
       "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
-      "rule_analysis": "基于相似邮件历史，判断误判或漏判的可能性，并抽取可供人工确认��候选拦截规则。"
+      "rule_analysis": "基于相似邮件历史，判断误判或漏判的可能性��并抽取可供人工确认��候选拦截规则。"
     },
     "statuses": {
       "pending": "待处理",
@@ -3712,7 +3712,7 @@
     "effectBlock": "SMTP 连接被拒绝，发件方收到退信",
     "effectQuarantine": "邮件被移入隔离区，收件人暂不可见",
     "effectQuarantineExtra": "管理员需前往「邮件隔离」模块手动处置",
-    "effectDrop": "邮件静默删除，无退信，发件方无感知",
+    "effectDrop": "邮件静默删��，无退信，发件方无感知",
     "effectDropWarning": "注意：丢弃后无法找回，请谨慎使用",
     "effectReview": "邮件进入审核队列，审批通过后才投递",
     "effectReviewExtra": "管理员需前往「邮件审核」模块处理",
@@ -4178,7 +4178,7 @@
     "exampleBlockSenderDesc": "拒绝 spam@bad.com 发给 user@example.com 的邮件",
     "exampleWhitelistDomain": "白名单合作域名",
     "exampleWhitelistDomainDesc": "放行来自 partner.com 发给 user@example.com 的邮件",
-    "exampleRecipientOnly": "拦截所有发往特定用户的邮件",
+    "exampleRecipientOnly": "拦截所有发往特定用户的邮���",
     "exampleRecipientOnlyDesc": "拒绝任何发信人发给 user@example.com 的邮件",
     "simulationTest": "模拟测试",
     "simSenderPlaceholder": "输入测试发信人，如 spam@bad.com",
@@ -4538,7 +4538,7 @@
     },
     "envelopeMismatchWarning": {
       "title": "信封与头部不匹配可能引发误判",
-      "desc": "部分邮件订阅服务、自动转发系统和邮件列表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮��头（From）不一致。开启此检���可能会将这些正常邮���误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
+      "desc": "部分邮件订阅服务、自动转发系统和邮件��表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮��头（From）不一致。开启此检���可能会将这些正常邮���误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
     },
@@ -4925,7 +4925,7 @@
       "nestedLevelMax": "压缩包嵌套层数上限",
       "scanTimeoutSec": "附件扫描超时时间(秒)",
       "exceedAction": "超出限制处置",
-      "partialSkip": "部分超限时跳过",
+      "partialSkip": "部分超���时跳过",
       "dangerExtEnabled": "启用危险扩展名检测",
       "dangerExtList": "危险扩展名列表",
       "mimeMismatchCheck": "���用MIME类型不一致检查",
@@ -5150,7 +5150,7 @@
     "failedToSave": "保存失败",
     "tenantRequired": {
       "title": "需要选择租户",
-      "description": "URL 检测与防护是租户级别的配置，请先选择要管理的租户。",
+      "description": "URL 检测与防护是租户级别的配置，请��选择要管理的租户。",
       "hint": "请使用页面右上角的租户选择器选择一个租户"
     },
     "tabs": {
@@ -5234,7 +5234,7 @@
       },
       "nonReceive": {
         "title": "该功能仅适用于接收方向",
-        "body": "链接保护仅支持接收方向（防外部钓鱼）。请在页面顶部切换至【接收方向】进行配置。",
+        "body": "链接保护仅支持��收方向（防外部钓鱼）。请在页面顶部切换至【接收方向】进行配置。",
         "policyCard": "安全策略",
         "disabled": "已禁用"
       }
@@ -5919,7 +5919,7 @@
       "empty": "暂无数据",
       "selected": "已选 {n} 封",
       "disposalBasis": "处置依据",
-      "total": "共 {n} 条",
+      "total": "��� {n} 条",
       "settings": "设置",
       "columnSettings": "列设置",
       "headerFilters": "表头筛选",
@@ -6238,7 +6238,7 @@
           "senderBehaviorAgent": "发信人行为智能体",
           "intentRecognitionAgent": "意图识别智能体",
           "marketingEmailAgent": "营销邮件智能体",
-          "phishingDetectionAgent": "钓鱼邮件检测智能体",
+          "phishingDetectionAgent": "钓鱼邮件检测智��体",
           "retrospectiveAgent": "回溯检测智能体"
         },
         "contentDetails": "内容详情",
@@ -6514,7 +6514,7 @@
       "headerName": "信头名称",
       "headerValue": "信头值",
       "mergeWindow": "合并窗口（分钟）",
-      "mergeWindowDesc": "同一规则在此时间内多次触发将合并为一封通知邮件",
+      "mergeWindowDesc": "同一规则���此时间内多次触发将合并为一封通知邮件",
       "deleteAttachmentScope": "删除范围",
       "deleteAttachmentScopeAll": "全���",
       "deleteAttachmentScopeVirus": "含病���",
@@ -6557,10 +6557,6 @@
       "adminNotifyTemplate": "通知模板",
       "adminNotifyTemplateDefault": "默认告警模板",
       "deleteAttachmentExceptionDomainGroup": "域名组白名单",
-      "disclaimerTemplate": "声明模板",
-      "disclaimerTemplateStandard": "标准模板",
-      "disclaimerTemplateLegal": "法务模板",
-      "disclaimerTemplateCustom": "自定义",
       "emailTagStyle": "标记样式",
       "externalReminderAmberHint": "外部邮件提醒仅对判定为外部发件人的邮件生效",
       "forwardServerModeRedirect": "重定向 (redirect)",
@@ -6636,7 +6632,7 @@
     },
     "dkimImpact": {
       "bannerTitle": "DKIM签名影响提示",
-      "bannerBody": "当前规则启用了会修改邮件内容的操作（{count}项）：{items}。这些操��会导致原始DKIM签名失效。",
+      "bannerBody": "��前规则启用了会修改邮件内容的操作（{count}项）：{items}。这些操��会导致原始DKIM签名失效。",
       "tooltip": "此操作会修改邮件内容，可能导致DKIM签名验证失败"
     },
     "priorityPresets": {
@@ -7441,7 +7437,7 @@
     "selfServicePending": "终端用户自助入口待上线，当前仅保存配置",
     "portalBaseUrlLabel": "外部访问地址",
     "portalBaseUrlPlaceholder": "https://gw.example.com",
-    "portalBaseUrlHelp": "收件人浏览器可访问的控制台地址（https）；启用取回、预览、加白或加黑权限时必填。",
+    "portalBaseUrlHelp": "收件人浏览器可访问的控制台地址（https）；启用取回、预览、加白���加黑权限时必填。",
     "periodAndTimeout": "审核时长与超时配置",
     "durationControl": "审核时长控制",
     "duration_unlimited": "不限时长",
@@ -8976,7 +8972,7 @@
       "importSourceId": "来源 ID",
       "importTag": "标签",
       "importMoreFilters": "更多筛选",
-      "importHideFilters": "收起筛选",
+      "importHideFilters": "收起筛���",
       "importAllTags": "全部标签",
       "importKeyPosition": "关键岗位",
       "importNoTag": "��标签",
@@ -9355,7 +9351,7 @@
       "colName": "策略名称",
       "colMode": "检测模式",
       "colTrigger": "触发摘要",
-      "colStats": "运行统计",
+      "colStats": "运行��计",
       "stats": "触发 {triggers} 次 · 发现 {found} · 召回 {recalled}",
       "colNextRun": "下次执行",
       "colStatus": "状态",
@@ -9537,7 +9533,7 @@
     "autoSyncDesc": "开启后按 Cron 周期自动��取远端数据",
     "autoSyncOff": "关闭",
     "autoSyncOn": "开启",
-    "autoSyncTitle": "开启自动同步",
+    "autoSyncTitle": "开启自动同��",
     "baseDnPlaceholder": "如 dc=corp,dc=com",
     "batchConfirmDesc": "标记变更将实时推送至策略引擎并立即生效，无需重新同步。",
     "batchConfirmTag": "确定将选中的 {count} 条记录标记为{tag}吗？",
@@ -9859,7 +9855,7 @@
     },
     "metric": {
       "cpu_usage": "CPU 使用率",
-      "memory_usage": "内存使用率",
+      "memory_usage": "内存使���率",
       "data_dir_usage": "数据目录使用率",
       "network_retransmit": "网络重传率",
       "disk_io": "磁盘 I/O",
@@ -9961,7 +9957,7 @@
       "saveFailed": "保存失败",
       "testFailed": "测试失败",
       "unsavedTitle": "未保存的更改",
-      "unsavedDesc": "您有未保存的更改，离开后将丢失。",
+      "unsavedDesc": "您有未保存的���改，离开后将丢失。",
       "leave": "离开（不保存）",
       "continueEdit": "继续编辑",
       "err": {
@@ -10581,7 +10577,7 @@
     },
     "detection_profile": {
       "access_denied": "没有权限访问该检测档案",
-      "global_rbl_requires_system_admin": "管理全局 RBL 检测档案需要平台管理员权限",
+      "global_rbl_requires_system_admin": "管理��局 RBL 检测档案需要平台管理员权限",
       "id_invalid": "检测档案 ID 无效",
       "name_exists": "已存在同��的检测档案",
       "not_found": "检测档案不存在，可能已被删除",
@@ -10611,7 +10607,7 @@
         "permission_unknown": "无法识别的权限项「{value}」",
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
         "portal_base_url_invalid": "外部访问地址不是合法的网址",
-        "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到，请填写网关对外可达的地址",
+        "portal_base_url_loopback": "外部访问地址不��是本机回环地址——收件人访问不到，请填写网关对外可达的地址",
         "portal_base_url_path_not_allowed": "外部访问地址不能��路径、查询参数或锚点，只填到域名和端口即可",
         "portal_base_url_required": "启用取回、预览、加白或加黑权限时，必须填写外部访问地址——通知信里的��作链接需要它才能生成",
         "portal_base_url_scheme_invalid": "外部访问地址必须使用 {scheme}：取回和预览的令牌不能明文传输",
@@ -10715,7 +10711,7 @@
       "group_not_found": "代理分组不存在，可能已被删除",
       "group_referenced_by_routes": "该分组正被外发路由规则引用，不能删除，请先移除相关路由规则",
       "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP 地址），或��空",
-      "license_key_missing": "服务端未配置授权加密密钥，无法保存授权信息，请联系管理员",
+      "license_key_missing": "服务端未配置授权加密密钥，无��保存授权信息，请联系管理员",
       "member_endpoint_duplicate": "同一个节点不能在分组里重复出现",
       "member_endpoint_id_invalid": "分��成员的节点必须是有效选择",
       "member_ord_duplicate": "分组成员的排序值不能重复",

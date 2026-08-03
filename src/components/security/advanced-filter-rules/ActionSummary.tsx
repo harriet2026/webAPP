@@ -28,16 +28,12 @@ function addonSummary(t: ReturnType<typeof useTranslations>, key: AddonKey, para
   const sep = t('disposition.summarySeparator');
   switch (key) {
     case 'disclaimer': {
-      const template = String(params.template ?? 'standard');
       const position = String(params.position ?? 'body_bottom');
-      const templateLabel = t(`addons.disclaimerTemplate${template === 'standard' ? 'Standard' : template === 'legal' ? 'Legal' : 'Custom'}` as never);
-      const positionLabel =
-        position === 'body_top'
-          ? t('addons.deleteAttachmentNoticePositionTop')
-          : position === 'header'
-            ? t('addons.disclaimerPositionHeader')
-            : t('addons.deleteAttachmentNoticePositionBottom');
-      return `${templateLabel}${sep}${positionLabel}`;
+      return position === 'body_top'
+        ? t('addons.deleteAttachmentNoticePositionTop')
+        : position === 'header'
+          ? t('addons.disclaimerPositionHeader')
+          : t('addons.deleteAttachmentNoticePositionBottom');
     }
     case 'externalReminder': {
       const position = String(params.position ?? 'body_top');

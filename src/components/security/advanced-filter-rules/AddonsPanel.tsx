@@ -77,7 +77,7 @@ export function parseAddons(meta: unknown): AddonsState {
 export function defaultAddonParams(key: AddonKey): Record<string, unknown> {
   switch (key) {
     case 'disclaimer':
-      return { template: 'standard', position: 'body_bottom' };
+      return { position: 'body_bottom' };
     case 'externalReminder':
       return { position: 'body_top' };
     case 'adminNotify':
@@ -285,17 +285,6 @@ export function AddonParamsForm({ addonKey, params, onPatch, autoFocus }: AddonP
     case 'disclaimer':
       return (
         <div className="space-y-3" data-testid="addon-params-disclaimer">
-          <SelectField
-            label={t('addons.disclaimerTemplate')}
-            required
-            value={tv(params, 'template', 'standard')}
-            onChange={(v) => onPatch({ template: v })}
-            options={[
-              { value: 'standard', label: t('addons.disclaimerTemplateStandard') },
-              { value: 'legal', label: t('addons.disclaimerTemplateLegal') },
-              { value: 'custom', label: t('addons.disclaimerTemplateCustom') },
-            ]}
-          />
           <SelectField
             label={t('addons.disclaimerPosition')}
             required
@@ -807,7 +796,7 @@ export function AddonsPanel({ value, onChange, primaryAction, showDetailedLog }:
 // ~100ms after `trigger` changes (layer-4 interaction rule: "勾选自动展开
 // 参数并 focus 首个输入（100ms）"). Exported so ActionsTab.tsx (which owns
 // the "which panel is showing" selection state) can drive the same behavior
-// for its split middle column. ─────────────────────────────────────────────
+// for its split middle column. ────────���────────────────────────────────────
 export function useAutoFocusFirstField(containerRef: React.RefObject<HTMLElement | null>, trigger: unknown) {
   useEffect(() => {
     const id = window.setTimeout(() => {
