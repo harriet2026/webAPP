@@ -22,11 +22,12 @@ import {
   MATCH_MODE_TO_OPERATOR,
   OPERATOR_TO_MATCH_MODE,
   INTENT_ENGINE_OPERATOR,
-  parseIntentEngineValue,
-  encodeIntentEngineValue,
+  parseIntentEngineList,
+  encodeIntentEngineList,
   type ConditionLeaf,
   type MatchMode,
   type IntentEngineMode,
+  type IntentEngineValue,
 } from './serde';
 import { splitDisplayValues } from './expression';
 import { INTENT_TYPES } from '@/types/intent-engine';
@@ -627,80 +628,84 @@ function EnumSection({ leaf, enumOpts, onChange, t, hasKey }: { leaf: ConditionL
 
 // IntentEngineSection — 「意图引擎」（综合研判，字段 cac_tag）取值控件，与阶段3
 // 内容层意图引擎模块同源、共用其 i18n（useTranslations('intentEngine')，不重复造词）。
-// 该模块的 detection_mode / threshold_segments 都挂在单个意图之下，故这里采用「意图
-// 优先」两级结构：
-//   第一级 意图分类（单选）：INTENT_TYPES 之一；
-//   第二级 检测模式：
-//     - 分类优先 classification：命中该意图即匹配，operator within；
-//     - 分段阈值 threshold：命中该意图且置信度分数落入 [0,1] 区间，operator between。
-// 「意图 : 模式 [: lo,hi]」编码进单个 leaf.value（serde.encodeIntentEngineValue），
-// 切换模式保留阈值载荷、不互相污染。
+// 支持配置「多个意图」（每意图单条，各自独立检测模式/阈值），对齐阶段3
+// IntentDirectionConfig 里 5 个意图各自持有 detection_mode / threshold_segments 的结构：
+//   每行 = 一个意图 + 检测模式：
+//     - 分类优先 classification：命中该意图即匹配；
+//     - 分段阈值 threshold：命中该意图且置信度分数落入 [0,1] 区间。
+// 多行以 OR 组合（命中任一意图即匹配），编码为「意图:模式[:lo,hi]」以 ';' 连接
+// （serde.encodeIntentEngineList）。单个 leaf.operator 固定 within 伞值，细节下沉编码。
 function IntentEngineSection({ leaf, onChange, t }: { leaf: ConditionLeaf; onChange: (p: Partial<ConditionLeaf>) => void; t: T }) {
   const ti = useTranslations('intentEngine');
-  const parsed = parseIntentEngineValue(leaf.value);
+  const entries = parseIntentEngineList(leaf.value);
+  const used = new Set(entries.map((e) => e.intent));
+  const available = INTENT_TYPES.filter((token) => !used.has(token));
 
-  const setIntent = (intent: string) => {
-    onChange({ operator: INTENT_ENGINE_OPERATOR[parsed.mode], value: encodeIntentEngineValue({ ...parsed, intent }) });
+  const commit = (next: IntentEngineValue[]) => {
+    onChange({ operator: INTENT_ENGINE_OPERATOR.classification, value: encodeIntentEngineList(next) });
   };
-  const setMode = (mode: IntentEngineMode) => {
-    onChange({ operator: INTENT_ENGINE_OPERATOR[mode], value: encodeIntentEngineValue({ ...parsed, mode }) });
+  const addIntent = (intent: string) => {
+    commit([...entries, { intent, mode: 'classification', lo: '', hi: '' }]);
   };
-  const setBound = (which: 'lo' | 'hi', v: string) => {
-    onChange({
-      operator: INTENT_ENGINE_OPERATOR.threshold,
-      value: encodeIntentEngineValue({ ...parsed, mode: 'threshold', [which]: v }),
-    });
+  const removeAt = (i: number) => {
+    commit(entries.filter((_, idx) => idx !== i));
+  };
+  const patchAt = (i: number, patch: Partial<IntentEngineValue>) => {
+    commit(entries.map((e, idx) => (idx === i ? { ...e, ...patch } : e)));
   };
 
   return (
     <div className="space-y-3">
-      {/* 第一级：意图分类（单选，必填） */}
-      <div className="space-y-1.5">
-        <Label>{t('v3Conditions.intentSelectLabel')}</Label>
-        <Select value={parsed.intent || undefined} onValueChange={(v) => { if (v) setIntent(v); }}>
-          <SelectTrigger data-testid="config-intent-type" className="w-full">
-            <SelectValue placeholder={t('v3Conditions.intentSelectPlaceholder')} />
+      <Label>{t('v3Conditions.intentSelectLabel')}</Label>
+
+      {/* 已配置的意图行列表（每意图单条，各自模式/阈值） */}
+      <div className="space-y-2" data-testid="config-intent-list">
+        {entries.map((entry, i) => (
+          <div key={entry.intent} className="rounded-md border border-border p-2 space-y-2" data-testid={`config-intent-row-${entry.intent}`}>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium">{ti(`intent.${entry.intent}`)}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-[11px]"
+                data-testid={`config-intent-remove-${entry.intent}`}
+                onClick={() => removeAt(i)}
+              >
+                {t('v3Conditions.intentRemoveLabel')}
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <Select value={entry.mode} onValueChange={(v) => { if (v) patchAt(i, { mode: v as IntentEngineMode }); }}>
+                <SelectTrigger data-testid={`config-intent-mode-${entry.intent}`} className="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="classification">{ti('detectionMode.classification')}</SelectItem>
+                  <SelectItem value="threshold">{ti('detectionMode.threshold')}</SelectItem>
+                </SelectContent>
+              </Select>
+              {entry.mode === 'threshold' ? (
+                <div className="grid grid-cols-2 gap-2" data-testid={`config-intent-threshold-${entry.intent}`}>
+                  <Input aria-label={t('v3Conditions.betweenLoLabel')} data-testid={`config-intent-threshold-lo-${entry.intent}`} type="number" min={0} max={1} step={0.01} value={entry.lo} onChange={(e) => patchAt(i, { lo: e.target.value })} />
+                  <Input aria-label={t('v3Conditions.betweenHiLabel')} data-testid={`config-intent-threshold-hi-${entry.intent}`} type="number" min={0} max={1} step={0.01} value={entry.hi} onChange={(e) => patchAt(i, { hi: e.target.value })} />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 添加意图：仅列出尚未添加的意图 */}
+      {available.length > 0 ? (
+        <Select value={undefined} onValueChange={(v) => { if (v) addIntent(v); }}>
+          <SelectTrigger data-testid="config-intent-add" className="w-full">
+            <SelectValue placeholder={t('v3Conditions.intentAddLabel')} />
           </SelectTrigger>
           <SelectContent>
-            {INTENT_TYPES.map((token) => (
+            {available.map((token) => (
               <SelectItem key={token} value={token}>{ti(`intent.${token}`)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {parsed.intent ? (
-          <p className="text-[11px] text-muted-foreground" data-testid="config-intent-type-desc">
-            {ti(`intentDesc.${parsed.intent}`)}
-          </p>
-        ) : null}
-      </div>
-
-      {/* 第二级：检测模式 */}
-      <div className="space-y-1.5">
-        <Label>{ti('detectionMode.label')}</Label>
-        <Select value={parsed.mode} onValueChange={(v) => { if (v) setMode(v as IntentEngineMode); }}>
-          <SelectTrigger data-testid="config-intent-mode" className="w-full"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="classification">{ti('detectionMode.classification')}</SelectItem>
-            <SelectItem value="threshold">{ti('detectionMode.threshold')}</SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="text-[11px] text-muted-foreground" data-testid="config-intent-mode-desc">
-          {parsed.mode === 'threshold' ? ti('detectionMode.thresholdDesc') : ti('detectionMode.classificationDesc')}
-        </p>
-      </div>
-
-      {/* 分段阈值：置信度 [0,1] 区间 */}
-      {parsed.mode === 'threshold' ? (
-        <div className="grid grid-cols-2 gap-2" data-testid="config-intent-threshold">
-          <div className="space-y-1.5">
-            <Label>{t('v3Conditions.betweenLoLabel')}</Label>
-            <Input data-testid="config-intent-threshold-lo" type="number" min={0} max={1} step={0.01} value={parsed.lo} onChange={(e) => setBound('lo', e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>{t('v3Conditions.betweenHiLabel')}</Label>
-            <Input data-testid="config-intent-threshold-hi" type="number" min={0} max={1} step={0.01} value={parsed.hi} onChange={(e) => setBound('hi', e.target.value)} />
-          </div>
-        </div>
       ) : null}
     </div>
   );

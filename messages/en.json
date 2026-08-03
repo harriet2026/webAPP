@@ -6677,6 +6677,8 @@
       "thresholdLabel": "Threshold",
       "intentSelectLabel": "Intent category",
       "intentSelectPlaceholder": "Select an intent category",
+      "intentAddLabel": "Add intent",
+      "intentRemoveLabel": "Remove",
       "betweenLoLabel": "Min",
       "betweenHiLabel": "Max",
       "valueLabel": "Value",
@@ -7102,7 +7104,8 @@
         "cidr": "IP / CIDR (one per line)",
         "time": "Time range",
         "weekday": "Weekday",
-        "mime": "MIME type"
+        "mime": "MIME type",
+        "intentEngine": "Intents (multi-select, per-intent mode)"
       },
       "units": {
         "count": "items",

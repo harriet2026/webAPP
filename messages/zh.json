@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系��������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系���������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -2222,7 +2222,7 @@
         "editTitle": "编辑角色",
         "viewTitle": "查看角色权限",
         "createDescription": "配置角色名称、备注与权限矩阵",
-        "readonlyDescription": "以下为该角色的完整权限矩阵（只读）",
+        "readonlyDescription": "以下为该角色的完整权限矩��（只读）",
         "nameLabel": "���色名称",
         "namePlaceholder": "如 自定义运营",
         "nameRequired": "请输���角色���称",
@@ -2451,7 +2451,7 @@
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
-      "unknown": "未能识别的失败原因，请查看��始失败��息��联系��持。"
+      "unknown": "未能识别的失败原因，请��看��始失败��息��联系��持。"
     },
     "detail": {
       "breadcrumb": "日���审计 / 认证日志",
@@ -2932,7 +2932,7 @@
     "targetMailBatchHelp": "输入多个邮件日志 ID，支持逗号、空格或换行分隔。",
     "targetAccountHelp": "输入一个账号标识，例如 SMTP 用户名或发件人地址。",
     "targetClusterHelp": "输入簇标识，如 cac_tid:abc123，或直接输入一组邮件日志 ID。",
-    "createdByPlaceholder": "按创建人筛选",
+    "createdByPlaceholder": "按创建人���选",
     "promptPlaceholder": "可选：补充调查上下文、关注点或人工线索。",
     "emptyEvidence": "暂无证据项",
     "emptyActions": "暂无推荐动作",
@@ -3001,7 +3001,7 @@
       "storageKind": "存储类型",
       "summary": "摘要",
       "riskLevel": "风险等级",
-      "invalidRange": "结束时间不能早于开��时间",
+      "invalidRange": "结束时��不能早于开��时间",
       "confidence": "置信度",
       "createdBy": "创建人",
       "updatedAt": "更新时间",
@@ -3365,7 +3365,7 @@
     "blacklistTypeDesc": "阻断/隔离/丢弃",
     "whitelistType": "白名单",
     "whitelistTypeDesc": "投递/标记投递",
-    "flowTerminateDesc": "阻断/丢弃/隔离 ��� 终止并退出流水线",
+    "flowTerminateDesc": "阻断/���弃/隔离 ��� 终止并退出流水线",
     "flowContinueDesc": "投递/标���投递 → 继续检测",
     "actionQuarantineAction": "隔离",
     "policyEffectQuarantine": "命中则隔离，邮件保留至隔离区",
@@ -4422,7 +4422,7 @@
     },
     "actionTooltip": {
       "accept": "允许：不对此规则触发的情况采取拦截动作，邮件继续进入下一阶段检测。",
-      "quarantine": "隔离：将匹配的邮件放入隔离区，待管理员审核后再决定放行或删除。",
+      "quarantine": "隔���：将匹配的邮件放入隔离区，待管理员审核后再决定放行或删除。",
       "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知��",
       "audit": "审核：将邮件放入审核��列，等待管理员人工审批后再投递。",
       "discard": "丢弃：静默丢弃该邮件，不���知发件方也不投递给收件方。"
@@ -4538,7 +4538,7 @@
     },
     "envelopeMismatchWarning": {
       "title": "信封与头部不匹配可能引发误判",
-      "desc": "部分邮件订阅服务、自动转发系统和邮件列表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮件头（From）不一致。开启此检测可能会将这些正常邮件误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
+      "desc": "部分邮件订阅服务、自动转发系统和邮件列表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮件头（From）不一致。开启此检测可能会将这些正常邮���误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
     },
@@ -4928,7 +4928,7 @@
       "partialSkip": "部分超限时跳过",
       "dangerExtEnabled": "启用危险扩展名检测",
       "dangerExtList": "危险扩展名列表",
-      "mimeMismatchCheck": "启用MIME类型不一致检查",
+      "mimeMismatchCheck": "���用MIME类型不一致检查",
       "mimeMismatchAction": "MIME不一致处理���作",
       "action_quarantine": "隔离",
       "action_sideline": "搁置",
@@ -5154,7 +5154,7 @@
       "hint": "请使用页面右上角的租户选择器选择一个租户"
     },
     "tabs": {
-      "sandbox": "URL沙箱检测",
+      "sandbox": "URL沙箱检���",
       "linkProtection": "链接保护",
       "receiveOnlyBadge": "仅接收"
     },
@@ -5456,7 +5456,7 @@
     "ignoreRePrefix": "忽略Re:/Fwd:",
     "ignoreNumbers": "忽略数字",
     "similarSubject": "相似度>90%视为相同",
-    "realtimeNote": "此检测在邮件进入时实时计算，命中后立即拦截或标记",
+    "realtimeNote": "此检测在邮件进��时实时计算，命中后立即拦截或标记",
     "observeNote": "���察模式下命中仅记录日���，不执行拦截动作",
     "goToGroupPolicy": "前往��组策略配置",
     "atLeastOneDirection": "至少选择一个检测��向",
@@ -5555,7 +5555,7 @@
     "receiveTip1": "高风险部门建议使用橙色警告样式",
     "receiveTip2": "主题前缀会以纯文本形式写入邮件主题",
     "receiveTip3": "正文顶部适合展示醒目的外站来源提醒",
-    "receiveTip4": "多个位置会同时添加主题前缀和正文顶部标记",
+    "receiveTip4": "多个位���会同时添加主题前缀和正文顶部标记",
     "receiveTip5": "优先级数值越大，越先匹配执行",
     "sendTip1": "免责声明应经过法���或合规团队确认",
     "sendTip2": "自动格式会同时适配 HTML 和纯文本邮件",
@@ -5792,7 +5792,7 @@
         "securityCheck": "安全检测"
       },
       "addCondition": "添加条件",
-      "addGroup": "添加条件组",
+      "addGroup": "添���条件组",
       "groupRelation": "条件��关系",
       "conditionRelation": "组内条件关系",
       "groupLabel": "条件组 {n}",
@@ -6517,7 +6517,7 @@
       "mergeWindow": "合并窗口（分钟）",
       "mergeWindowDesc": "同一规则在此时间内多次触发将合并为一封通知邮件",
       "deleteAttachmentScope": "删除范围",
-      "deleteAttachmentScopeAll": "全部",
+      "deleteAttachmentScopeAll": "全���",
       "deleteAttachmentScopeVirus": "含病���",
       "deleteAttachmentScopeType": "指定类型",
       "deleteAttachmentScopeOverSize": "超过大小",
@@ -6734,6 +6734,8 @@
       "thresholdLabel": "阈值",
       "intentSelectLabel": "意图分类",
       "intentSelectPlaceholder": "请选择意图分类",
+      "intentAddLabel": "添加意图",
+      "intentRemoveLabel": "移除",
       "betweenLoLabel": "最小",
       "betweenHiLabel": "最大",
       "valueLabel": "值",
@@ -7116,7 +7118,7 @@
       "orgDeptSelectedCount": "已选 {n} 个",
       "orgDeptHint": "从组织通讯录选择部门；选中父部门将自动匹配其所有子部门的发信人（支持多级组织架构）。",
       "orgDeptSearchPlaceholder": "搜索部门…",
-      "orgDeptEmpty": "暂无部门数据，请先在组织通讯录同步组织架构。",
+      "orgDeptEmpty": "暂无部门数据��请先在组织通讯录同步组织架构。",
       "orgDeptNoMatch": "未找到匹配的部门",
       "orgDeptClearAll": "清空",
       "qrResultValues": {
@@ -7159,7 +7161,8 @@
         "cidr": "IP / CIDR（每行一个）",
         "time": "时间区间",
         "weekday": "星期",
-        "mime": "MIME 类型"
+        "mime": "MIME 类型",
+        "intentEngine": "意图（可多选，每意图独立模式）"
       },
       "units": {
         "count": "个",
@@ -7935,7 +7938,7 @@
     "ai": {
       "drawerTitle": "AI 分析结果",
       "loading": "AI 分析中...",
-      "failed": "AI 分析失败，请稍后重试",
+      "failed": "AI 分析失败，请稍后���试",
       "empty": "AI 未返回分析内容",
       "retry": "重试",
       "mockSummary": "## 投递健康摘要\n\n整体投递成功率稳定。外发队���仍在健康范围内，建议持续关��� P99 延迟和目标域名退信率。"
@@ -8219,7 +8222,7 @@
       "avgLatency": "平均延迟",
       "slowQuery": "慢查询 Top5",
       "lockWait": "锁等待",
-      "execCount": "执行次数",
+      "execCount": "执行��数",
       "query": "查询语句",
       "avgMs": "平均(ms)",
       "totalMs": "总计(ms)",
@@ -8982,7 +8985,7 @@
       "importHideFilters": "收起筛选",
       "importAllTags": "全部标签",
       "importKeyPosition": "关键岗位",
-      "importNoTag": "无标签",
+      "importNoTag": "��标签",
       "importSelected": "已选 {n}/20 人",
       "importSelectedObjects": "已选保护对象",
       "importSelectedEmpty": "暂未选择联系人",
@@ -9490,7 +9493,7 @@
       "highImmediate": "发现高危威胁时立即通知（置信度 ≥ 90%）",
       "mediumImmediate": "发现中危威胁且置信度达到阈值时立即通知",
       "mediumThresholdInvalid": "中危阈值必须是 70–89 的整数。",
-      "mediumNoFallbackHint": "中危未达到该阈值时不会回退到低危汇总。",
+      "mediumNoFallbackHint": "中危未���到该阈值时不会回退到低危汇总。",
       "lowDigest": "低危威胁每日汇总时间",
       "notifyVersionHint": "修改收件人或汇总时间只影响新任务；当天可能按不同配置版本分别汇总。",
       "previewImmediate": "高/中危即时通知",
@@ -9709,7 +9712,7 @@
     "statusSuccess": "成功",
     "statusUnsynced": "未同步",
     "subtitle": "统一管理企业组织架构数据，为安全策略提供人员与部门信息支撑",
-    "syncTypeAuto": "自动",
+    "syncTypeAuto": "��动",
     "syncTypeManual": "手动",
     "tabContacts": "通讯录查询",
     "tabLogs": "同步日志",
@@ -10224,7 +10227,7 @@
     "addRule": "新增 IP",
     "delete": "删除",
     "save": "保存",
-    "saved": "保存成功",
+    "saved": "保存��功",
     "saveFailed": "保存失败"
   },
   "recipientCheck": {
@@ -10586,7 +10589,7 @@
       "access_denied": "没有权限访问该检测档案",
       "global_rbl_requires_system_admin": "管理全局 RBL 检测档案需要平台管理员权限",
       "id_invalid": "检测档案 ID 无效",
-      "name_exists": "已存在同名的检测档案",
+      "name_exists": "已存在同��的检测档案",
       "not_found": "检测档案不存在，可能已被删除",
       "tenant_context_required": "该操作需要先选择租户",
       "test_supported_for_rbl_only": "仅 RBL 类型的检测档案支持测试"
@@ -10615,7 +10618,7 @@
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
         "portal_base_url_invalid": "外部访问地址不是合法的网址",
         "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到，请填写网关对外可达的地址",
-        "portal_base_url_path_not_allowed": "外部访问地址不能带路径、查询参数或锚点，只填到域名和端口即可",
+        "portal_base_url_path_not_allowed": "外部访问地址不能��路径、查询参数或锚点，只填到域名和端口即可",
         "portal_base_url_required": "启用取回、预览、加白或加黑权限时，必须填写外部访问地址——通知信里的��作链接需要它才能生成",
         "portal_base_url_scheme_invalid": "外部访问地址必须使用 {scheme}：取回和预览的令牌不能明文传输",
         "valid_days_out_of_range": "「{permission}」的链接有效期需在 {min}–{max} 天之间"
@@ -10720,7 +10723,7 @@
       "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP 地址），或留空",
       "license_key_missing": "服务端未配置授权加密密钥，无法保存授权信息，请联系管理员",
       "member_endpoint_duplicate": "同一个节点不能在分组里重复出现",
-      "member_endpoint_id_invalid": "分组成员的节点必须是有效选择",
+      "member_endpoint_id_invalid": "分��成员的节点必须是有效选择",
       "member_ord_duplicate": "分组成员的排序值不能重复",
       "port_out_of_range": "端口需在 {min}–{max} 之间",
       "tls_min_version_invalid": "TLS 最低版本无效，只能是：{allowed}"
@@ -10824,7 +10827,7 @@
       "window_start_invalid": "开始时间格式不正确",
       "window_end_invalid": "结束时间格式不正确",
       "window_order_invalid": "开���时间必须早于结束时间",
-      "indicator_tag_format_invalid": "威胁标签格式应为 indicator:「标签代码」，且代码不能为空"
+      "indicator_tag_format_invalid": "威胁标签���式应为 indicator:「标签代码」，且代码不能为空"
     },
     "tenant": {
       "not_found": "租户不存在",

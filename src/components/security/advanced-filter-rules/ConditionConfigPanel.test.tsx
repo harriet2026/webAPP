@@ -293,37 +293,58 @@ describe('ConditionConfigPanel enriched guidance', () => {
     expect(multi.textContent).not.toContain('infected');
   });
 
-  // 意图引擎 (方案A · 意图优先): the panel renders the intent-first IntentEngineSection,
-  // not the free-text box. Both a first-level intent selector and a second-level
-  // detection-mode selector are present; classification mode shows no threshold inputs.
-  it('renders the intent-first 意图引擎 section (intent + mode selectors, no free text)', () => {
+  // 意图引擎（多意图 · 每意图单条）: the panel renders the list-style IntentEngineSection,
+  // not the free-text box. A single-value legacy value ('phishing:classification') is the
+  // one-entry subset, so it renders exactly one intent row plus the "add intent" selector.
+  it('renders the multi-intent 意图引擎 section (one row per intent + add selector, no free text)', () => {
     renderPanel(
       leaf({ conditionKey: 'comprehensiveEngineResult', field: 'cac_tag', operator: 'within', value: 'phishing:classification' }),
       { cac_tag: { type: 'enum' } as FieldDef },
     );
 
-    // First level: intent selector; second level: detection mode selector.
-    expect(screen.getByTestId('config-intent-type')).toBeInTheDocument();
-    expect(screen.getByTestId('config-intent-mode')).toBeInTheDocument();
-    // Selected intent shows its localized description (shared intentEngine.intentDesc.*).
-    expect(screen.getByTestId('config-intent-type-desc').textContent).toBe(zhMessages.intentEngine.intentDesc.phishing);
-    // Classification mode → no threshold range inputs, and never a free-text box.
-    expect(screen.queryByTestId('config-intent-threshold')).not.toBeInTheDocument();
+    // Description card renders without a MISSING_MESSAGE throw: the intentEngine input-type
+    // key must exist (regression guard for v3Conditions.inputType.intentEngine).
+    expect(screen.getByTestId('condition-desc-card').textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.inputType.intentEngine,
+    );
+    // One configured row for the anchored intent, plus the add-intent selector.
+    expect(screen.getByTestId('config-intent-row-phishing')).toBeInTheDocument();
+    expect(screen.getByTestId('config-intent-mode-phishing')).toBeInTheDocument();
+    expect(screen.getByTestId('config-intent-add')).toBeInTheDocument();
+    // Classification mode → no threshold range inputs for that row, and never a free-text box.
+    expect(screen.queryByTestId('config-intent-threshold-phishing')).not.toBeInTheDocument();
     expect(screen.queryByTestId('config-string-eq-value')).not.toBeInTheDocument();
   });
 
-  // Threshold mode is anchored to a chosen intent and reveals the [0,1] confidence
-  // range inputs, mirroring the stage-3 intent engine's per-intent threshold segments.
-  it('shows [0,1] threshold range inputs for the anchored intent in 分段阈值 mode', () => {
+  // Each threshold-mode intent reveals its own [0,1] confidence range inputs, mirroring
+  // the stage-3 intent engine's per-intent threshold segments.
+  it('shows per-intent [0,1] threshold range inputs in 分段阈值 mode', () => {
     renderPanel(
-      leaf({ conditionKey: 'comprehensiveEngineResult', field: 'cac_tag', operator: 'between', value: 'phishing:threshold:0.6,0.9' }),
+      leaf({ conditionKey: 'comprehensiveEngineResult', field: 'cac_tag', operator: 'within', value: 'phishing:threshold:0.6,0.9' }),
       { cac_tag: { type: 'enum' } as FieldDef },
     );
 
-    // Intent stays selected (intent-first) while the threshold range shows.
-    expect(screen.getByTestId('config-intent-type')).toBeInTheDocument();
-    expect(screen.getByTestId('config-intent-threshold')).toBeInTheDocument();
-    expect(screen.getByTestId('config-intent-threshold-lo')).toHaveValue(0.6);
-    expect(screen.getByTestId('config-intent-threshold-hi')).toHaveValue(0.9);
+    expect(screen.getByTestId('config-intent-row-phishing')).toBeInTheDocument();
+    expect(screen.getByTestId('config-intent-threshold-phishing')).toBeInTheDocument();
+    expect(screen.getByTestId('config-intent-threshold-lo-phishing')).toHaveValue(0.6);
+    expect(screen.getByTestId('config-intent-threshold-hi-phishing')).toHaveValue(0.9);
+  });
+
+  // Multiple intents can be configured at once, each with its own detection mode; every
+  // configured intent renders an independent row with its own mode/threshold controls.
+  it('renders an independent row for each configured intent (multi-intent)', () => {
+    renderPanel(
+      leaf({ conditionKey: 'comprehensiveEngineResult', field: 'cac_tag', operator: 'within', value: 'phishing:threshold:0.6,0.9;spam:classification' }),
+      { cac_tag: { type: 'enum' } as FieldDef },
+    );
+
+    // Two rows, one per intent, with per-intent controls.
+    expect(screen.getByTestId('config-intent-row-phishing')).toBeInTheDocument();
+    expect(screen.getByTestId('config-intent-row-spam')).toBeInTheDocument();
+    // phishing is threshold → its range inputs render; spam is classification → none.
+    expect(screen.getByTestId('config-intent-threshold-phishing')).toBeInTheDocument();
+    expect(screen.queryByTestId('config-intent-threshold-spam')).not.toBeInTheDocument();
+    // Add-intent selector still offered (5 intent types, 2 used → some remain).
+    expect(screen.getByTestId('config-intent-add')).toBeInTheDocument();
   });
 });

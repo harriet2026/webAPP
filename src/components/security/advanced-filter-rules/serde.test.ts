@@ -8,6 +8,8 @@ import {
   OPERATOR_TO_MATCH_MODE,
   parseIntentEngineValue,
   encodeIntentEngineValue,
+  parseIntentEngineList,
+  encodeIntentEngineList,
   type ConditionLeaf,
   type ConditionGroups,
   type MatchMode,
@@ -326,5 +328,41 @@ describe('intent engine value codec', () => {
     const back = parseIntentEngineValue('classification:');
     expect(back.intent).toBe('');
     expect(back.mode).toBe('classification');
+  });
+});
+
+describe('intent engine multi-intent list codec', () => {
+  it('round-trips multiple intents each with its own mode/threshold', () => {
+    const s = encodeIntentEngineList([
+      { intent: 'phishing', mode: 'threshold', lo: '0.6', hi: '0.9' },
+      { intent: 'spam', mode: 'classification', lo: '', hi: '' },
+    ]);
+    expect(s).toBe('phishing:threshold:0.6,0.9;spam:classification');
+    const back = parseIntentEngineList(s);
+    expect(back).toHaveLength(2);
+    expect(back[0]).toMatchObject({ intent: 'phishing', mode: 'threshold', lo: '0.6', hi: '0.9' });
+    expect(back[1]).toMatchObject({ intent: 'spam', mode: 'classification' });
+  });
+
+  it('parses a legacy single-intent value as a one-entry list (backward compatible)', () => {
+    const back = parseIntentEngineList('phishing:classification');
+    expect(back).toHaveLength(1);
+    expect(back[0]).toMatchObject({ intent: 'phishing', mode: 'classification' });
+  });
+
+  it('treats an empty value as an empty list', () => {
+    expect(parseIntentEngineList('')).toEqual([]);
+    expect(encodeIntentEngineList([])).toBe('');
+  });
+
+  it('dedupes the same intent, keeping the last-written entry', () => {
+    const back = parseIntentEngineList('phishing:classification;phishing:threshold:0.2,0.8');
+    expect(back).toHaveLength(1);
+    expect(back[0]).toMatchObject({ intent: 'phishing', mode: 'threshold', lo: '0.2', hi: '0.8' });
+  });
+
+  it('drops empty/blank entries and unselected intents', () => {
+    const back = parseIntentEngineList('phishing:classification;;:threshold:0.1,0.2;spam:classification');
+    expect(back.map((e) => e.intent)).toEqual(['phishing', 'spam']);
   });
 });

@@ -256,3 +256,42 @@ export function encodeIntentEngineValue(v: IntentEngineValue): string {
   if (v.mode === 'threshold') return `${intent}:threshold:${v.lo.trim()},${v.hi.trim()}`;
   return `${intent}:classification`;
 }
+
+// 多意图（每意图单条，各自独立模式/阈值）。对齐阶段3 IntentDirectionConfig 里 5 个
+// 意图各自持有 detection_mode / threshold_segments 的结构。多条目以 ';' 连接，每条
+// 沿用上面的「意图 : 模式 [: lo,hi]」编码，从而完全复用单条 parse/encode：
+//   phishing:threshold:0.60,0.90;spam:classification
+// 多个意图之间语义为 OR（命中任一配置的意图即匹配）；单个 leaf.operator 固定为
+// within 伞值，真正的分类/阈值细节下沉到 value 编码，由面板与预览解析，不破坏
+// leaf 的单 operator 模型。同一意图去重（后写覆盖），空意图条目丢弃。
+export function parseIntentEngineList(value: string): IntentEngineValue[] {
+  const raw = value ?? '';
+  if (raw.trim() === '') return [];
+  const out: IntentEngineValue[] = [];
+  const seen = new Map<string, number>(); // intent → out 索引，实现去重覆盖
+  for (const chunk of raw.split(';')) {
+    if (chunk.trim() === '') continue;
+    const entry = parseIntentEngineValue(chunk);
+    if (entry.intent === '') continue;
+    const idx = seen.get(entry.intent);
+    if (idx === undefined) {
+      seen.set(entry.intent, out.length);
+      out.push(entry);
+    } else {
+      out[idx] = entry; // 同意图后写覆盖，避免矛盾配置
+    }
+  }
+  return out;
+}
+
+export function encodeIntentEngineList(entries: IntentEngineValue[]): string {
+  const seen = new Set<string>();
+  const parts: string[] = [];
+  for (const e of entries) {
+    const intent = e.intent.trim();
+    if (intent === '' || seen.has(intent)) continue;
+    seen.add(intent);
+    parts.push(encodeIntentEngineValue(e));
+  }
+  return parts.join(';');
+}
