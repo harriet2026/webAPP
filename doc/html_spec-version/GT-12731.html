@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 · 增量功能规格 · v2</title>
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 · 增量功能规格 · v3</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -385,7 +385,7 @@
         变更 1 让子页在加载完成前不上报，但此时父级 <code>PolicyPipelinePage</code> 中对应模块的本地状态（<code>urlModuleEnabled</code> / <code>attachmentEnabled</code> / <code>intentEngineEnabled</code>）仍为 <code>undefined</code>。原逻辑在 <code>undefined</code> 时会退回 <code>item.functional</code>（恒为 <code>true</code>），因此首帧仍会把「未启用」模块画成启用——虽然不再「闪回」，但首帧依旧不正确。
       </p>
       <div class="callout callout-ok">
-        <strong>最终实现方案：</strong>父级复用已有的 <code>security-modules</code> 查询���原仅在 stage5 启用），将其 <code>enabled</code> 门控从 <code>stage5Active</code> 放宽为 <code>drawerOpen</code>，使抽屉一打开就预取模块开关映射 <code>securityModulesMap</code>。在导航渲染时，stage3 三个模块（<code>url</code> / <code>attachment</code> / <code>intentEngine</code>）的圆点 <code>dotOn</code> 与摘要 <code>summaryText</code> 判断改为「<strong>本地状态 <code>??</code> 父级兜底真值</strong>」：本地状态存在（含用户未保存的草稿切换）时优先，否则用 <code>securityModulesMap</code> 中的真实持久化值，只有二者都缺失时才退回 <code>item.functional</code>。这样首帧即用真值渲染。
+        <strong>最终实现方案：</strong>父级复用已有的 <code>security-modules</code> 查询（原仅在 stage5 启用），将其 <code>enabled</code> 门控从 <code>stage5Active</code> 放宽为 <code>drawerOpen</code>，使抽屉一打开就预取模块开关映射 <code>securityModulesMap</code>。在导航渲染时，stage3 三个模块（<code>url</code> / <code>attachment</code> / <code>intentEngine</code>）的圆点 <code>dotOn</code> 与摘要 <code>summaryText</code> 判断改为「<strong>本地状态 <code>??</code> 父级兜底真值</strong>」：本地状态存在（含用户未保存的草稿切换）时优先，否则用 <code>securityModulesMap</code> 中的真实持久化值，只有二者都缺失时才退回 <code>item.functional</code>。这样首帧即用真值渲染。
       </div>
       <pre><code>// PolicyPipelinePage.tsx（导航渲染，简化示意）
 const stage3Fallback = securityModulesMap?.[stage3ModuleKey[item.key]];
@@ -589,7 +589,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           </tr>
           <tr>
             <td><code>serde.test.ts</code> · 编解码测试</td>
-            <td>��单条 codec 断言</td>
+            <td>仅单条 codec 断言</td>
             <td>新增「多意图 list codec」describe：多意图往返、同意图去重（保留后写）、空条目丢弃、单值向后兼容子集</td>
             <td><span class="tag tag-added">新增</span>断言 <code>phishing:threshold:0.6,0.9;spam:classification</code> 等往返一致</td>
           </tr>
@@ -685,7 +685,214 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
   </div>
 
-  <!-- ══���═══════════ C. 差异标注 ══════════════ -->
+  <!-- ══════════════ 变更 5 ══════════════ -->
+  <div class="incremental-section" id="change-5">
+    <div class="incr-header">
+      <span class="incr-num">5</span>
+      <h2>条件目录裁剪：移除「功能组」「URL 沙箱结果」「短链展开」</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>catalogue.ts</code>、<code>catalogue.test.ts</code>、<code>messages/{zh,en,ru,th}.json</code><br/>变更类型：功能优化 · 2026-08-03</span>
+    </div>
+    <div class="incr-body">
+      <p>
+        按产品要求，从条件目录移除三个条件：<strong>功能组</strong>（<code>panel:'featureGroup'</code>）、<strong>URL 沙箱结果</strong>（key <code>urlSandbox</code> / 字段 <code>url_sandbox</code>）、<strong>短链展开</strong>（key <code>shortLink</code> / 字段 <code>short_link</code>）。删除 <code>catalogue.ts</code> 对应条目定义与四语 <code>v3Conditions</code> 文案键，并更新 <code>catalogue.test.ts</code> 计数不变量。
+      </p>
+      <div class="callout callout-ok">
+        <strong>目录计数链条：</strong>基线 <strong>54</strong> 条 → 本变更移除 3 条 → <strong>51</strong> 条（此即变更 4 的起点数）→ 变更 4 再移除 RBL/显示名仿冒 2 条 → 最终 <strong>49</strong> 条。<code>catalogue.test.ts</code> 断言 <code>byPanel('featureGroup') === 0</code>。
+      </div>
+      <table>
+        <thead><tr><th>移除条件</th><th>catalogue 定义（变更前）</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>功能组</td><td><del>{ …, panel:'featureGroup' }</del></td><td>（已删除）</td><td><span class="tag tag-removed">移除</span>featureGroup 面板归零</td></tr>
+          <tr><td>URL 沙箱结果 <code>urlSandbox</code></td><td><del>{ key:'urlSandbox', category:'security', field:'url_sandbox', panel:'select' }</del></td><td>（已删除）</td><td><span class="tag tag-removed">移除</span>security -1</td></tr>
+          <tr><td>短链展开 <code>shortLink</code></td><td><del>{ key:'shortLink', category:'security', field:'short_link', panel:'select' }</del></td><td>（已删除）</td><td><span class="tag tag-removed">移除</span>security -1</td></tr>
+          <tr><td>四语 i18n <code>v3Conditions.*</code></td><td>各含三条文案</td><td>（已删除，四语）</td><td><span class="tag tag-removed">移除</span></td></tr>
+        </tbody>
+      </table>
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 6 ══════════════ -->
+  <div class="incremental-section" id="change-6">
+    <div class="incr-header">
+      <span class="incr-num">6</span>
+      <h2>条件「值」控件规范化（布尔化 / 二态枚举）</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>ConditionConfigPanel.tsx</code>（<code>BooleanValueSelect</code> / <code>EnumSection</code>）、<code>dispatcher.ts</code>（字段元信息）、<code>messages/{zh,en,ru,th}.json</code><br/>变更类型：功能优化 · 2026-08-03</span>
+    </div>
+    <div class="incr-body">
+      <h3>6.1 方案概述</h3>
+      <p>
+        将 5 个条件的「值」控件从自由文本 / 不当枚举，规范化为语义明确的二态控件。字段的取值域来自 <code>dispatcher.ts</code> 的字段元信息（布尔字段派生 <code>BooleanValueSelect</code>，枚举字段给定二元 <code>options</code>），控件由 <code>ConditionConfigPanel</code> 按字段类型自动选择；显示文案全部走四语 i18n。
+      </p>
+      <table>
+        <thead><tr><th>条件</th><th>字段</th><th>值（变更前 → 变更后）</th><th>控件 / i18n 键</th></tr></thead>
+        <tbody>
+          <tr><td>加密附件</td><td><code>is_encrypted_attachment</code></td><td>文本/枚举 → <strong>是 / 否</strong></td><td><code>BooleanValueSelect</code> · <code>booleanValues.{true,false}</code></td></tr>
+          <tr><td>Mail From 为空</td><td><code>mailfrom_empty</code></td><td>枚举 → <strong>是 / 否</strong></td><td><code>BooleanValueSelect</code> · <code>booleanValues.{true,false}</code></td></tr>
+          <tr><td>二维码 ODR 结果</td><td><code>image_qr_code_result</code></td><td>多值枚举 → <strong>成功 / 失败</strong></td><td><code>EnumSection</code> · <code>qrResultValues.{success,fail}</code></td></tr>
+          <tr><td>信封-头 From 一致性</td><td><code>envelope_header_mismatch</code></td><td>枚举 → <strong>一致 / 不一致</strong></td><td><code>EnumSection</code> · <code>envelopeHeaderConsistencyValues.{match,mismatch}</code></td></tr>
+          <tr><td>病毒扫描结果</td><td><code>virus_scan_result</code></td><td>枚举 → <strong>有毒 / 无毒</strong></td><td><code>EnumSection</code> · <code>virusScanResultValues.{infected,clean}</code></td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">
+        「信封-头 From 一致性」字段名 <code>envelope_header_mismatch</code> 语义为「是否不一致」，值 <code>match</code> 显示「一致」、<code>mismatch</code> 显示「不一致」，UI 文案与字段布尔方向的映射由 <code>EnumSection</code> 的 options 顺序保证，避免正反颠倒。详见差异 D-009。
+      </div>
+
+      <h3>6.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-4 · 病毒扫描结果「值」下拉：有毒 / 无毒</h4>
+        <p class="trigger-path">触发路径：条件配置 → 添加「病毒扫描结果」→ 展开「值」下拉 · 浏览器实拍（浅色 / 1575×847）</p>
+        <figure>
+          <img src="./screenshots/GT-12751-S4-value-virus-infected-clean-light-1575x847.png" alt="病毒扫描结果条件的值下拉展开，显示有毒与无毒两个选项，说明卡显示数据来源为防病毒引擎" />
+          <figcaption>图 S-4：病毒扫描结果（字段 <code>virus_scan_result</code>）的「值」下拉仅含<strong>有毒 / 无毒</strong>两项；右侧说明卡显示数据来源、运算符等（见变更 9）。加密附件 / Mail From 为空的「是 / 否」、二维码的「成功 / 失败」、一致性的「一致 / 不一致」为同类二态控件。</figcaption>
+        </figure>
+      </div>
+      <table>
+        <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>dispatcher.ts</code> · 字段元信息</td><td>上述字段未标记布尔 / 未给二元枚举</td><td><code>is_encrypted_attachment</code> / <code>mailfrom_empty</code> 标为布尔；三枚举字段给定二元 <code>options</code></td><td><span class="tag tag-changed">变更</span>取值域收敛</td></tr>
+          <tr><td><code>ConditionConfigPanel.tsx</code> · 值控件选择</td><td>文本 / 多值下拉</td><td>布尔字段 → <code>BooleanValueSelect</code>（是/否）；二元枚举 → <code>EnumSection</code></td><td><span class="tag tag-changed">变更</span>按字段类型自动选控件</td></tr>
+          <tr><td><code>messages/{zh,en,ru,th}.json</code></td><td>缺 <code>booleanValues</code> / <code>qrResultValues</code> / <code>envelopeHeaderConsistencyValues</code> / <code>virusScanResultValues</code></td><td>四语补齐上述枚举文案</td><td><span class="tag tag-added">新增</span>四语齐全</td></tr>
+        </tbody>
+      </table>
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 7 ══════════════ -->
+  <div class="incremental-section" id="change-7">
+    <div class="incr-header">
+      <span class="incr-num">7</span>
+      <h2>「发信人组」条件下拉可从「群组策略」模块筛选发信人组</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>ConditionConfigPanel.tsx</code>（<code>MapValueSection</code>）、<code>src/lib/mock/dispatcher.ts</code><br/>变更类型：缺陷修复 · 2026-08-03</span>
+    </div>
+    <div class="incr-body">
+      <h3>7.1 问题与修复</h3>
+      <p>
+        配置「发信人组」条件（<code>panel:'group'</code> / 字段 <code>sender_group</code>）时，其对象下拉应列出「群组策略」模块中类型为「发信人组」的群组，但此前下拉为空 / 未正确取到群组来源。修复方式：在 <code>dispatcher.ts</code> 为 <code>sender_group</code> 字段补正 <code>map_keys_source</code>，指向群组策略的发信人组元数据端点，使 <code>MapValueSection</code> 的 <code>useMapKeys</code> 能拉取到候选群组。
+      </p>
+      <div class="callout callout-ok">
+        <strong>最终实现：</strong><code>sender_group</code> 的字段元信息 <code>map_keys_source</code> 指向群组策略发信人组列表（<code>type=sender</code>）；对象下拉即渲染出「研发部门」「合作伙伴域名」等真实群组项，选定后以 <code>map</code> 语义 + 布尔命中值（是/否）组成条件。
+      </div>
+      <h3>7.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-6 · 发件人组对象下拉（来源：群组策略模块）</h4>
+        <p class="trigger-path">触发路径：条件配置 → 添加「发件人组」→ 展开对象下拉 · 浏览器实拍（浅色 / 1575×847）</p>
+        <figure>
+          <img src="./screenshots/GT-12751-S6-sender-group-policy-dropdown-light-1575x847.png" alt="发件人组条件的对象下拉展开，显示研发部门、合作伙伴域名等群组，说明卡标注数据来源为群组策略模块" />
+          <figcaption>图 S-6：发件人组（字段 <code>sender_group</code>）对象下拉列出来自<strong>群组策略模块</strong>的发信人组（如「研发部门」「合作伙伴域名」）；右侧说明卡「数据来源: 群组策略模块」。选定群组后的命中值为布尔（是/否）。</figcaption>
+        </figure>
+      </div>
+      <table>
+        <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>dispatcher.ts</code> · <code>sender_group.map_keys_source</code></td><td>缺失 / 未指向群组策略</td><td>指向群组策略发信人组元数据（<code>type=sender</code>）</td><td><span class="tag tag-fixed">修复</span>下拉可取到候选群组</td></tr>
+          <tr><td><code>MapValueSection</code> · <code>useMapKeys</code></td><td>无数据源 → 空下拉</td><td>正确拉取群组列表并渲染</td><td><span class="tag tag-changed">变更</span>说明卡标注来源</td></tr>
+        </tbody>
+      </table>
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 8 ══════════════ -->
+  <div class="incremental-section" id="change-8">
+    <div class="incr-header">
+      <span class="incr-num">8</span>
+      <h2>「发件组织」条件：组织通讯录部门树多选实现</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>ConditionConfigPanel.tsx</code>（<code>OrgDepartmentSection</code>）、<code>catalogue.ts</code><br/>变更类型：功能新增 · 2026-08-03</span>
+    </div>
+    <div class="incr-body">
+      <h3>8.1 方案概述</h3>
+      <p>
+        实现「发件组织」条件（<code>panel:'orgDept'</code> / 字段 <code>sender_dept_path</code>）的配置面板：复用组织通讯录的部门树，支持树形多选，命中「发件人所属部门落在所选部门（及子部门）范围内」。
+      </p>
+      <h3>8.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-5 · 发件组织部门树多选</h4>
+        <p class="trigger-path">触发路径：条件配置 → 添加「发件组织」→ 部门树 · 浏览器实拍（浅色 / 1575×847）</p>
+        <figure>
+          <img src="./screenshots/GT-12751-S5-sender-org-department-tree-light-1575x847.png" alt="发件组织条件的组织部门树多选，显示研发部、市场部等部门层级，说明卡标注组织部门树形多选" />
+          <figcaption>图 S-5：发件组织（字段 <code>sender_dept_path</code>）的组织部门树多选控件，展示「研发部 / 市场部」等部门层级；右侧说明卡标注输入类型为「组织部门（树形多选）」（见变更 9）。</figcaption>
+        </figure>
+      </div>
+      <table>
+        <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>catalogue.ts</code> · 发件组织</td><td>无面板 / 未实现</td><td><code>panel:'orgDept'</code>、字段 <code>sender_dept_path</code></td><td><span class="tag tag-added">新增</span></td></tr>
+          <tr><td><code>ConditionConfigPanel.tsx</code> · <code>OrgDepartmentSection</code></td><td>—</td><td>复用组织通讯录部门树、树形多选</td><td><span class="tag tag-added">新增</span>testid <code>config-orgdept-*</code></td></tr>
+        </tbody>
+      </table>
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 9 ══════════════ -->
+  <div class="incremental-section" id="change-9">
+    <div class="incr-header">
+      <span class="incr-num">9</span>
+      <h2>条件配置说明卡片增强</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>ConditionConfigPanel.tsx</code>（<code>DescriptionCard</code>）、<code>messages/{zh,en,ru,th}.json</code><br/>变更类型：功能优化 · 2026-08-03</span>
+    </div>
+    <div class="incr-body">
+      <p>
+        条件配置面板右侧的说明卡（<code>DescriptionCard</code>）从「仅一句描述」增强为结构化多段信息，帮助用户理解每个条件如何取值与判定。展示项按字段类型动态出现：
+      </p>
+      <ul style="margin:0.4rem 0 0.6rem 1.2rem;font-size:0.88rem;color:#374151;line-height:1.6;">
+        <li><strong>输入类型</strong>（<code>inputType.*</code>：文本 / 数值 / 枚举 / 布尔 / 组织部门（树形多选）/ 意图（可多选，每意图独立模式）等）；</li>
+        <li><strong>数据来源</strong>（如「群组策略模块」「防病毒引擎」「AI 意图分类引擎」）；</li>
+        <li><strong>格式示例 / 单位 / 有效范围</strong>（数值型条件的 min/max/step/单位、URL 等文本的示例）；</li>
+        <li><strong>对象含义</strong>（map 型）、<strong>运算符</strong>、<strong>示例</strong>、<strong>推荐配置</strong>（catalogue <code>meta.recommend</code>）。</li>
+      </ul>
+      <div class="callout callout-info">
+        说明卡内容随所选条件字段实时切换；上文各截图（S-1 意图、S-4 病毒扫描、S-5 发件组织、S-6 发件人组）右侧均可见对应说明卡。此增强顺带修复了意图引擎输入类型键缺失（见差异 D-006）。
+      </div>
+      <table>
+        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>DescriptionCard</code></td><td>单行描述文本</td><td>输入类型 / 数据来源 / 格式示例 / 单位 / 有效范围 / 对象含义 / 运算符 / 示例 / 推荐配置多段</td><td><span class="tag tag-changed">变更</span>按字段类型动态渲染</td></tr>
+          <tr><td>i18n <code>v3Conditions.inputType.*</code> 等</td><td>部分缺失（含 <code>intentEngine</code>）</td><td>四语补齐各输入类型与说明段标题</td><td><span class="tag tag-added">新增</span></td></tr>
+        </tbody>
+      </table>
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 10 ══════════════ -->
+  <div class="incremental-section" id="change-10">
+    <div class="incr-header">
+      <span class="incr-num">10</span>
+      <h2>修复「选中条件较多时无法再添加其他条件」</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>ConditionsTab.tsx</code> / <code>ConditionTree.tsx</code><br/>变更类型：缺陷修复 · 2026-08-03</span>
+    </div>
+    <div class="incr-body">
+      <h3>10.1 问题与修复</h3>
+      <p>
+        新建/编辑规则的「条件配置」页签中，已选条件列表与底部「添加条件」（搜索 + 目录）共处一个纵向容器。当已选条件较多时，已选列表把「添加条件」区挤出可视区且整体不滚动，导致<strong>无法再选择 / 添加其他条件</strong>。修复方式：为已选条件区设定上限高度并独立滚动，「添加条件」区以 <code>flex-1 min-h-0</code> 常驻可见，二者各自滚动。
+      </p>
+      <div class="callout callout-ok">
+        <strong>最终布局：</strong>左栏为 <code>flex flex-col</code> 容器——已选条件区 <code>max-h:45%（约）</code> + <code>overflow-y-auto</code> 独立滚动；「添加条件」区 <code>flex-1 min-h-0</code> 常驻并内部滚动。无论已选多少条，条件搜索框与目录始终可见可用。
+      </div>
+      <h3>10.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-7 · 已选 8 个条件时「添加条件」区仍可见可用</h4>
+        <p class="trigger-path">触发路径：条件配置 → 连续添加 8 个条件（发件人组 / 发件组织 / 病毒扫描 / 主题 / 抄送 / 密送 / 正文 / 头字段）· 浏览器实拍（浅色 / 1575×847）</p>
+        <figure>
+          <img src="./screenshots/GT-12751-S7-selected-scroll-add-area-visible-light-1575x847.png" alt="条件配置左栏已选8个条件，上部已选列表限高滚动，下部添加条件搜索框与安全检测目录仍完整可见" />
+          <figcaption>图 S-7：已添加 8 个条件时，上部「已选条件」列表限高独立滚动，下部「添加条件」搜索框与分组目录（安全检测 18 等）<strong>仍完整可见可交互</strong>，可继续添加其他条件——原「挤出后无法再选」问题已修复。</figcaption>
+        </figure>
+      </div>
+      <table>
+        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>已选条件区容器</td><td>随内容无限增高、无独立滚动</td><td>限高 + <code>overflow-y-auto</code> 独立滚动</td><td><span class="tag tag-fixed">修复</span></td></tr>
+          <tr><td>「添加条件」区容器</td><td>被已选列表挤出可视区</td><td><code>flex-1 min-h-0</code> 常驻可见、内部滚动</td><td><span class="tag tag-fixed">修复</span>搜索/目录始终可用</td></tr>
+        </tbody>
+      </table>
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ C. 差异标注 ══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
 
@@ -733,7 +940,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·设计取舍</span></td></tr>
-        <tr><td>描述</td><td>多意图混合模式���，单个 <code>leaf.operator</code> 无法同时表达「分类（within）/ 阈值（between）」两种；故将 operator 固定为 <code>within</code> 伞值（表示「命中所选意图集合之一」），真正的分类 / 阈值细节由 value 编码（<code>意图:模式[:lo,hi]</code>）承载，由面板与表达式预览解析。此举不破坏 leaf 的单 operator 模型，且兼容旧单意图值。</td></tr>
+        <tr><td>描述</td><td>多意图混合模式后，单个 <code>leaf.operator</code> 无法同时表达「分类（within）/ 阈值（between）」两种；故将 operator 固定为 <code>within</code> 伞值（表示「命中所选意图集合之一」），真正的分类 / 阈值细节由 value 编码（<code>意图:模式[:lo,hi]</code>）承载，由面板与表达式预览解析。此举不破坏 leaf 的单 operator 模型，且兼容旧单意图值。</td></tr>
         <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
         <tr><td>验证依据</td><td><code>ConditionConfigPanel.tsx</code> <code>commit()</code> 恒传 <code>operator: INTENT_ENGINE_OPERATOR.classification</code>（=within）；<code>serde.ts</code> 注释与 codec</td></tr>
       </tbody>
@@ -746,6 +953,66 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td>描述</td><td>意图引擎条件从 <code>select</code> 独立为 <code>intentEngine</code> 面板时，描述卡（<code>DescriptionCard</code>）渲染的输入类型行需要 <code>v3Conditions.inputType.intentEngine</code>，但四语此前均缺该键，会在打开意图引擎面板时抛 <code>MISSING_MESSAGE</code>。本次补齐四语该键（「意图（可多选，每意图独立模式）」等），并新增单元断言作回归防护。</td></tr>
         <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
         <tr><td>验证依据</td><td>四语 <code>messages/*.json</code> 均含 <code>v3Conditions.inputType.intentEngine</code>；<code>ConditionConfigPanel.test.tsx</code> 断言描述卡含该文案；浏览器实拍 S-1 面板正常渲染无报错</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-007 · 条件目录基线为 54 条，移除三条（变更 5）后为 51 条，是变更 4 记述的起点</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·计数链条</span></td></tr>
+        <tr><td>描述</td><td>为避免与文档中「51 → 49」的记述冲突，明确完整链条：条件目录基线 <strong>54</strong> 条；变更 5 移除「功能组 / URL 沙箱结果 / 短链展开」3 条 → <strong>51</strong>；变更 4 移除「RBL 结果 / 显示名仿冒」2 条 → <strong>49</strong>。变更 4 表格中的「变更前 51」即变更 5 之后的中间态。</td></tr>
+        <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
+        <tr><td>验证依据</td><td><code>catalogue.test.ts</code>：总数 49、<code>byPanel('featureGroup')===0</code>、security 18、select 10</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-008 · 「发信人组」候选来源为 Mock dispatcher，真实后端群组端点需回归</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待回归</span></td></tr>
+        <tr><td>描述</td><td>变更 7 的修复在 <code>src/lib/mock/dispatcher.ts</code> 层为 <code>sender_group</code> 补正 <code>map_keys_source</code>，S-6 截图中的「研发部门 / 合作伙伴域名」来自 Mock 群组数据。真实后端返回的群组策略发信人组列表结构与该端点契约需在接入后回归。</td></tr>
+        <tr><td>解决版本</td><td>GT-12751 · 2026-08-03（Mock 环境）</td></tr>
+        <tr><td>验证依据</td><td>S-6 浏览器实拍下拉含群组项；<code>dispatcher.ts</code> <code>sender_group</code> 字段元信息 <code>map_keys_source</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-009 · 「信封-头 From 一致性」字段名为 mismatch，值 match/mismatch 与「一致/不一致」的方向映射</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·易错点</span></td></tr>
+        <tr><td>描述</td><td>字段 <code>envelope_header_mismatch</code> 名义为「是否不一致」，而 UI「值」需展示为「一致 / 不一致」。实现约定：枚举值 <code>match</code> → 显示「一致」、<code>mismatch</code> → 显示「不一致」，由 <code>EnumSection</code> 的 options 与 i18n <code>envelopeHeaderConsistencyValues</code> 保证方向一致，避免正反颠倒。</td></tr>
+        <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
+        <tr><td>验证依据</td><td>四语 <code>envelopeHeaderConsistencyValues.match/mismatch</code>；<code>dispatcher.ts</code> 字段 options 顺序</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-010 · 加密附件 / Mail From 为空采用布尔控件（是/否），非枚举字符串</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·设计取舍</span></td></tr>
+        <tr><td>描述</td><td><code>is_encrypted_attachment</code> 与 <code>mailfrom_empty</code> 在字段元信息中标记为布尔字段，渲染为 <code>BooleanValueSelect</code>（是/否），取值编码为布尔而非枚举字符串；其余三个二态条件（二维码/一致性/病毒扫描）仍是二元枚举（各自专用值域），仅显示为两项。二者控件不同但都是「二选一」。</td></tr>
+        <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
+        <tr><td>验证依据</td><td><code>ConditionConfigPanel.tsx</code> 布尔分支渲染 <code>BooleanValueSelect</code>；i18n <code>booleanValues.true/false</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-011 · 「发件组织」命中语义为「所选部门及其子部门」的树形包含</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·语义</span></td></tr>
+        <tr><td>描述</td><td>发件组织（<code>sender_dept_path</code>）为组织部门树多选，命中判定为「发件人所属部门路径落在所选部门（含子部门）范围内」。部门数据复用组织通讯录，S-5 中的「研发部 / 市场部」来自 Mock 组织数据，真实组织树结构需在接入后回归。</td></tr>
+        <tr><td>解决版本</td><td>GT-12751 · 2026-08-03（Mock 环境）</td></tr>
+        <tr><td>验证依据</td><td>S-5 浏览器实拍部门树多选；<code>OrgDepartmentSection</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-012 · 条件配置左栏改为「已选区限高滚动 + 添加区常驻」双滚动布局</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·布局取舍</span></td></tr>
+        <tr><td>描述</td><td>为修复「选中过多无法再添加」（变更 10），左栏由单一纵向增高容器改为 <code>flex flex-col</code>：已选条件区限高（约 45%）独立滚动，「添加条件」区 <code>flex-1 min-h-0</code> 常驻并内部滚动。代价是已选很多时需在上部区域内滚动查看全部已选项，属可接受的取舍。</td></tr>
+        <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
+        <tr><td>验证依据</td><td>S-7 浏览器实拍（8 条件已选，添加区仍可见）；<code>ConditionsTab.tsx</code> / <code>ConditionTree.tsx</code> 布局类</td></tr>
       </tbody>
     </table>
   </section>
@@ -770,7 +1037,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
         <tr><td>问题</td><td>演示环境模块状态由 mock 提供且加载极快 / 或加载失败（D-001），难以放大加载窗口来直观观察闪回。真实后端下 <code>GET /security/modules</code> 有网络延迟时，修复效果（首帧即真值、无闪回）需在存在「未启用」模块的真实数据下回归确认。</td></tr>
         <tr><td>影响</td><td>修复在慢速网络下的实际观感</td></tr>
-        <tr><td>建议</td><td>在测试环境将某内容层模块��为未启用，配合网络限速打开阶段3 抽屉并在模块间切换，确认导航项全程稳定为「未启用」，无「已启用」中间帧</td></tr>
+        <tr><td>建议</td><td>在测试环境将某内容层模块设为未启用，配合网络限速打开阶段3 抽屉并在模块间切换，确认导航项全程稳定为「未启用」，无「已启用」中间帧</td></tr>
       </tbody>
     </table>
 
@@ -781,6 +1048,16 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td>问题</td><td>本次在 AI版·单租户 / 平台管理员 / <strong>Mock 数据</strong>环境下验证了意图引擎多意图面板的配置交互与表达式预览（S-1）。多意图取值 <code>phishing:classification;spam:threshold:…</code> 保存到真实后端、再从后端回显重建面板行的完整链路，尚未在真实后端环境验证。</td></tr>
         <tr><td>影响</td><td>多意图编码在真实持久化 / 回显下的往返一致性</td></tr>
         <tr><td>建议</td><td>在接入真实后端的环境新建含多意图（混合分类 / 阈值）的规则并保存，重新打开编辑抽屉确认各意图行与阈值区间准确回显、表达式一致</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Q-004 · 值控件 / 群组来源 / 组织树在真实后端环境的契约与回显需回归</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>变更 6（二态值控件）、变更 7（发信人组来源）、变更 8（发件组织部门树）的候选数据与取值域本次均来自 Mock（<code>dispatcher.ts</code> / 组织与群组 fixtures）。真实后端返回的枚举值域、群组策略发信人组列表、组织部门树结构，以及这些条件保存后重新打开的回显，需在接入后回归。</td></tr>
+        <tr><td>影响</td><td>加密附件/Mail From（是/否）、二维码（成功/失败）、一致性（一致/不一致）、病毒扫描（有毒/无毒）的值回显；发信人组 / 发件组织候选与回显</td></tr>
+        <tr><td>建议</td><td>接入真实后端后逐条新建并保存，重新打开编辑抽屉确认「值 / 所选群组 / 所选部门」准确回显、表达式一致</td></tr>
       </tbody>
     </table>
   </section>
@@ -802,6 +1079,12 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>2026-08-03</td>
           <td><code>工作区已提交</code></td>
           <td>追加一级需求 GT-12751 高级过滤规则优化项：变更 3（意图引擎条件从枚举单选升级为专属 intentEngine 面板，支持配置多个意图、每意图独立选择「分类优先 / 分段阈值」双检测模式，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重，含 serde 列表编解码 / expression 多条目完整性校验 / 四语新增「添加意图·移除」并补齐 inputType.intentEngine）、变更 4（安全检测移除「RBL 结果」「显示名仿冒」两条件，目录 51→49、安全检测 20→18、select 12→10，四语删对应文案且保留其他命名空间同名键）；含浏览器实拍 S-1（多意图面板）/ S-2（安全检测清单无 RBL/仿冒）/ S-3（模块支持 49 种条件类型）；差异新增 D-004~D-006、待确认新增 Q-003。</td>
+        </tr>
+        <tr>
+          <td>v3</td>
+          <td>2026-08-03</td>
+          <td><code>工作区已提交</code></td>
+          <td>补全 GT-12751 本轮全部条件配置优化，将用户提出的 10 个优化点全部落文档并加「10 点 → 区块」对照表：变更 5（条件目录移除「功能组 / URL 沙箱结果 / 短链展开」，54→51，featureGroup 面板归零）、变更 6（值控件规范化：加密附件 / Mail From 为空→是/否 布尔控件，二维码 ODR→成功/失败，信封-头 From 一致性→一致/不一致，病毒扫描→有毒/无毒，四语补齐枚举文案）、变更 7（修复发信人组下拉：dispatcher 为 sender_group 补正 map_keys_source 指向群组策略发信人组）、变更 8（发件组织 orgDept 部门树多选实现）、变更 9（说明卡 DescriptionCard 增强为输入类型/数据来源/格式示例/有效范围/运算符/推荐配置多段）、变更 10（修复「选中过多无法再添加」：已选区限高独立滚动、添加区 flex-1 min-h-0 常驻）；新增浏览器实拍 S-4（病毒有毒/无毒值）/ S-5（发件组织部门树）/ S-6（发件人组群组下拉）/ S-7（8 条件已选仍可添加）；差异新增 D-007~D-012、待确认新增 Q-004；文档版本 v2→v3；顺带修复本次编辑区 2 处 UTF-8 乱码（多段 / 注释分隔符）。</td>
         </tr>
       </tbody>
     </table>
