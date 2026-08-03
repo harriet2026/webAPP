@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import type { FieldDef } from '@/types/unified-rules';
 import zhMessages from '../../../../messages/zh.json';
 import { ConditionConfigPanel } from './ConditionConfigPanel';
+import { createDefaultLeaf } from './ConditionTree';
+import { CONDITIONS } from './catalogue';
 import type { ConditionLeaf } from './serde';
 
 // MapKeySelect fetches map objects over the network; stub it so the panel can
@@ -150,5 +152,33 @@ describe('ConditionConfigPanel enriched guidance', () => {
     // what matters is the parent + both descendants are all present.
     const paths = new Set((patch.value as string).split('\n'));
     expect(paths).toEqual(new Set(['研发中心', '研发中心 / 后端组', '研发中心 / 前端组']));
+  });
+
+  // encryptedAttachment (加密附件) is a boolean select field: when its fieldDef
+  // reports type 'boolean' the panel renders the 是/否 dropdown (not a text box),
+  // and picking a value emits operator 'eq' with the raw boolean token.
+  it('renders a 是/否 dropdown for the boolean 加密附件 field, not free text', () => {
+    const { onChange } = renderPanel(
+      leaf({ conditionKey: 'encryptedAttachment', field: 'is_encrypted_attachment', operator: 'eq', value: 'true' }),
+      { is_encrypted_attachment: { type: 'boolean' } as FieldDef },
+    );
+
+    expect(screen.getByTestId('config-boolean-value')).toBeInTheDocument();
+    // No free-text value box for this condition.
+    expect(screen.queryByTestId('config-text-values')).not.toBeInTheDocument();
+    expect(screen.getByTestId('config-boolean-value').textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.booleanTrue,
+    );
+  });
+
+  // createDefaultLeaf pre-seeds boolean fields with operator 'eq' and value
+  // 'true' so a freshly-added 加密附件 condition is complete and matches what the
+  // 是/否 dropdown shows (no "shows 是 but data empty / marked incomplete" split).
+  it('createDefaultLeaf seeds boolean fields with eq/true', () => {
+    const def = CONDITIONS.find((c) => c.key === 'encryptedAttachment')!;
+    const l = createDefaultLeaf(def, { is_encrypted_attachment: { type: 'boolean' } as FieldDef });
+    expect(l.operator).toBe('eq');
+    expect(l.value).toBe('true');
+    expect(l.field).toBe('is_encrypted_attachment');
   });
 });

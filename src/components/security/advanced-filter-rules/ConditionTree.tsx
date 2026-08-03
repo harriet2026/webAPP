@@ -44,12 +44,20 @@ export function createDefaultLeaf(def: ConditionDef, fieldDefs: Record<string, F
 
   let operator = PANEL_FALLBACK_OPERATOR[def.panel];
   let mapKey: string | undefined;
+  // 布尔字段（如加密附件 / ZIP 炸弹）默认值预置 'true'，与 BooleanValueSelect 的
+  // 「是」显示一致，避免新建即被 panelNeedsValueForCompleteness 判为不完整
+  // （select 面板需要值），造成「UI 显示是、数据为空、标记未完成」的割裂。
+  let value = '';
 
   if (fd) {
     const mode = defaultModeForField(fd, field);
     const mapped = MATCH_MODE_TO_OPERATOR[mode];
     if (mapped) operator = mapped;
     if (fd.type?.startsWith('map_')) mapKey = '*';
+    if (fd.type === 'boolean') {
+      operator = 'eq';
+      value = 'true';
+    }
   }
 
   return {
@@ -58,7 +66,7 @@ export function createDefaultLeaf(def: ConditionDef, fieldDefs: Record<string, F
     field,
     ...(mapKey ? { mapKey } : {}),
     operator,
-    value: '',
+    value,
     exclude: false,
   };
 }

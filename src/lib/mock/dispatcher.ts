@@ -342,12 +342,25 @@ const GROUP_FIELD_META_SOURCE: Record<string, string> = {
   feature_group: '/unified-rules/_meta/feature-groups',
 };
 
+// select 面板里语义为「是 / 否」二值判定的布尔字段。这些字段的 fieldDef 返回
+// type 'boolean'，配置面板据此渲染 BooleanValueSelect（是/否 固定下拉），而非
+// 结果码枚举或自由文本。其余 select 字段（spf/dkim/virus_scan 等结果码）仍为 enum。
+const BOOLEAN_SELECT_FIELDS = new Set<string>(['is_encrypted_attachment', 'is_zip_bomb']);
+
 function fieldDefForPanel(field: string, panel: PanelKind): FieldDef {
   const base = { label: field, min_stage: 'data', supported: true, available: true };
   switch (panel) {
     case 'number':
       return { ...base, type: 'number', operators: ['gt', 'lt', 'eq', 'between'] };
     case 'select':
+      // 二值判定字段（is_ 前缀，如加密附件 is_encrypted_attachment / ZIP 炸弹
+      // is_zip_bomb）语义只有「是 / 否」，返回 type 'boolean' 让 PanelBody 路由到
+      // BooleanValueSelect（是/否 固定下拉，算子 eq/ne），杜绝自由输入产生的
+      // true/1/yes/加密 等脏值。其余 select 字段维持 enum（结果码枚举下拉，见
+      // ConditionConfigPanel 的 ENUM_VALUES）。
+      if (BOOLEAN_SELECT_FIELDS.has(field)) {
+        return { ...base, type: 'boolean', operators: ['eq', 'ne'] };
+      }
       return { ...base, type: 'enum', operators: ['in', 'not_in'] };
     case 'group':
     case 'featureGroup': {
@@ -420,7 +433,7 @@ function roleListItem({ _level, ...rest }: MockRoleSeed) {
 
 /**
  * 按角色作用域生成权限矩阵——这是让"平台视角 / 租户视角内置角色反映各自可用
- * 授权范围"的关键：矩阵覆盖的子模块集合来自 `rbacSubmodulesForScope(scope)`，
+ * 授权范围"的关键：矩阵覆盖的子��块集合来自 `rbacSubmodulesForScope(scope)`，
  * 平台角色得到平台专属模块（系统管理/监控等），���户角色得到租户专属模块
  * （安全策略/智能体等）。行内 can* 的粒度按角色层级区分：
  *   - admin  ：可见 + 查看/编辑/审批/删除（受子模块能力约束）
