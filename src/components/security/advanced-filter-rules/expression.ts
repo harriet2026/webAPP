@@ -125,11 +125,15 @@ export function summarizeLeaf(
 
   let values: string[];
   if (panel === 'intentEngine') {
-    // 意图引擎双模式：分类优先展示所选意图 token，分段阈值展示 [lo, hi]。前置于
-    // between/within 通用分支，避免「classification:phishing,spam」这类编码串被
+    // 意图引擎「意图优先」：分类优先展示所选意图 token；分段阈值展示 意图 + [lo, hi]。
+    // 前置于 between/within 通用分支，避免「phishing:threshold:0.6,0.9」这类编码串被
     // 通用 split 逗号误拆（见 serde.encodeIntentEngineValue）。
     const iev = parseIntentEngineValue(leaf.value);
-    values = iev.mode === 'threshold' ? [iev.lo, iev.hi] : iev.intents;
+    if (iev.mode === 'threshold') {
+      values = iev.intent ? [iev.intent, iev.lo, iev.hi] : [iev.lo, iev.hi];
+    } else {
+      values = iev.intent ? [iev.intent] : [];
+    }
   } else if (leaf.operator === 'between') {
     values = leaf.value.split(',').map((v) => v.trim());
   } else if (panel === 'text' || panel === 'mime' || panel === 'cidr' || panel === 'weekday' || panel === 'orgDept') {
@@ -151,10 +155,14 @@ export function summarizeLeaf(
     incomplete = diag.incomplete;
     incompleteReasons = diag.reasons;
   } else if (panel === 'intentEngine') {
-    // 分类优先：未选任何意图 → 阻断性不完整；分段阈值：区间端点缺失 → 阻断，
-    // 端点齐全时再给出「大小顺序 / 超出 [0,1] 范围」提示性原因（复用既有 i18n）。
+    // 「意图优先」：两种模式都必须先锚定一个意图，未选意图 → 阻断性不完整。
+    // 分段阈值另需区间端点齐全（缺失 → 阻断），齐全后再给出「大小顺序 / 超出
+    // [0,1] 范围」提示性原因（复用既有 i18n）。
     const iev = parseIntentEngineValue(leaf.value);
-    if (iev.mode === 'threshold') {
+    if (iev.intent === '') {
+      incomplete = true;
+      incompleteReasons = [t('incompleteReasonMissingValue')];
+    } else if (iev.mode === 'threshold') {
       if (iev.lo === '' || iev.hi === '') {
         incomplete = true;
         incompleteReasons = [t('incompleteReasonBetween')];
@@ -169,8 +177,8 @@ export function summarizeLeaf(
         incompleteReasons = reasons;
       }
     } else {
-      incomplete = iev.intents.length === 0;
-      incompleteReasons = incomplete ? [t('incompleteReasonMissingValue')] : [];
+      incomplete = false;
+      incompleteReasons = [];
     }
   } else {
     const needsValue = panelNeedsValueForCompleteness(panel);

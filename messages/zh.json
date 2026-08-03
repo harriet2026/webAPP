@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系�������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系��������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1020,7 +1020,7 @@
         "toasts": {
           "created": "路由规则已添加",
           "updated": "路由规则已更新",
-          "deleted": "路����������除",
+          "deleted": "������������除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
         },
@@ -2451,7 +2451,7 @@
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
-      "unknown": "未能识别的失败原因，请查看原始失败��息��联系��持。"
+      "unknown": "未能识别的失败原因，请查看��始失败��息��联系��持。"
     },
     "detail": {
       "breadcrumb": "日���审计 / 认证日志",
@@ -3001,7 +3001,7 @@
       "storageKind": "存储类型",
       "summary": "摘要",
       "riskLevel": "风险等级",
-      "invalidRange": "结束时间不能早于开始时间",
+      "invalidRange": "结束时间不能早于开��时间",
       "confidence": "置信度",
       "createdBy": "创建人",
       "updatedAt": "更新时间",
@@ -3365,7 +3365,7 @@
     "blacklistTypeDesc": "阻断/隔离/丢弃",
     "whitelistType": "白名单",
     "whitelistTypeDesc": "投递/标记投递",
-    "flowTerminateDesc": "阻断/丢弃/隔离 → 终止并退出流水线",
+    "flowTerminateDesc": "阻断/丢弃/隔离 ��� 终止并退出流水线",
     "flowContinueDesc": "投递/标���投递 → 继续检测",
     "actionQuarantineAction": "隔离",
     "policyEffectQuarantine": "命中则隔离，邮件保留至隔离区",
@@ -3679,7 +3679,7 @@
     "validUntilBeforeNow": "有效期不能早于当前时间",
     "singleIpHint": "输入单个IP地址，如：192.168.1.1",
     "ipFormatHint": "支持格式：192.168.1.0/24（网段）或包含多个IP段",
-    "expireAt": "有效期至",
+    "expireAt": "��效期至",
     "expireAtTip": "规则到期后���动失效，留空表示永久有效",
     "expireAtHint": "留空表示永久有效",
     "priorityTip": "数值���大越优先。建议常规规则设为 100-500，需要更优先的规则设更大数值。",
@@ -3880,7 +3880,7 @@
     "rblServers": "RBL服务器",
     "add": "添加",
     "timeoutTip": "DNS 查询超时时间，超时后视为未命中。建议设置 3-10 秒，过短可能漏检，过长影响邮件处理速度。",
-    "serverTipGeneric": "实时黑名单查询服务器，用于检测发��IP是否在垃圾邮件黑名单中",
+    "serverTipGeneric": "实时黑名单��询服务器，用于检测发��IP是否在垃圾邮件黑名单中",
     "serverTipZenSpamhaus": "Spamhaus综合黑名单，包含SBL、XBL、PBL等多个子列表，覆盖范围广",
     "serverTipBlSpamcop": "SpamCop用户举报黑名单，基于用户举报的垃圾邮件来源IP",
     "serverTipBarracuda": "Barracuda实时黑名单，由Barracuda安全网络维护",
@@ -4270,7 +4270,7 @@
     "testNotMatched": "不匹配",
     "noRules": "暂无内容规则",
     "batchEnable": "批量启用",
-    "batchDisable": "批量禁用",
+    "batchDisable": "批量���用",
     "batchDelete": "批量删除",
     "scopesLabel": "范围 ({count})",
     "directionsLabel": "方向",
@@ -4738,7 +4738,7 @@
       "ipGroupLabel": "IP群组",
       "ipGroupPlaceholder": "请选择IP群组",
       "manageIpGroup": "管理IP群组",
-      "ipGroupSource": "数据来源：IP群组管理",
+      "ipGroupSource": "数据来���：IP群组管理",
       "domainLabel": "域名",
       "expireLabel": "有效期至",
       "expireTooltip": "留空表示永久有效",
@@ -4808,7 +4808,7 @@
     },
     "closeConfirm": {
       "title": "确认离开",
-      "body": "当前配置未保存，是否放弃修改？",
+      "body": "当前配置未保存，���否放弃修改？",
       "stay": "继续编辑",
       "discard": "放弃并关闭"
     },
@@ -5139,7 +5139,7 @@
     }
   },
   "urlProtection": {
-    "title": "URL检测与防护",
+    "title": "URL��测与防护",
     "masterSwitch": "总开关",
     "receiveOnlyNotice": "链接保���仅对接收方向生效",
     "failedToUpdate": "更新失败",
@@ -5793,7 +5793,7 @@
       },
       "addCondition": "添加条件",
       "addGroup": "添加条件组",
-      "groupRelation": "条件组关系",
+      "groupRelation": "条件��关系",
       "conditionRelation": "组内条件关系",
       "groupLabel": "条件组 {n}",
       "deleteGroup": "删除条件组 {n}",
@@ -6518,7 +6518,7 @@
       "mergeWindowDesc": "同一规则在此时间内多次触发将合并为一封通知邮件",
       "deleteAttachmentScope": "删除范围",
       "deleteAttachmentScopeAll": "全部",
-      "deleteAttachmentScopeVirus": "含病毒",
+      "deleteAttachmentScopeVirus": "含病���",
       "deleteAttachmentScopeType": "指定类型",
       "deleteAttachmentScopeOverSize": "超过大小",
       "deleteAttachmentScopeEncrypted": "加密���件",
@@ -6732,6 +6732,8 @@
       "aiGenerateRegex": "AI 生成正则",
       "aiRegexComingSoon": "AI 辅助正则生成即将上线",
       "thresholdLabel": "阈值",
+      "intentSelectLabel": "意图分类",
+      "intentSelectPlaceholder": "请选择意图分类",
       "betweenLoLabel": "最小",
       "betweenHiLabel": "最大",
       "valueLabel": "值",
@@ -6956,7 +6958,7 @@
       "desc_nestedZipLevel": {
         "source": "压缩包解析引擎",
         "usage": "检测压缩包嵌套层级",
-        "note": "用于检测压缩炸弹，建议阈值3-5层"
+        "note": "用于检测���缩炸弹，建议阈值3-5层"
       },
       "desc_nestedFileCount": {
         "source": "压���包解析引擎",
@@ -7529,7 +7531,7 @@
     "category": "分类",
     "notifyStatus": "状态",
     "portalBaseUrlRequired": "请先填写合法的外部访问地址（https），开启权限后该地址用于生成通知链接。",
-    "portalBaseUrlMissingHint": "外部访问地址未填写——取回、预览、加白、加黑权限依赖该地址生成通知链接，��先填写后再开启对应权限。"
+    "portalBaseUrlMissingHint": "外部访问地址未填写——取回、预览、加白、加黑权��依赖该地址生成通知链接，��先填写后再开启对应权限。"
   },
   "dkim": {
     "column": "DKIM",
@@ -7936,7 +7938,7 @@
       "failed": "AI 分析失败，请稍后重试",
       "empty": "AI 未返回分析内容",
       "retry": "重试",
-      "mockSummary": "## 投递健康摘要\n\n整体投递成功率稳定。外发队列仍在健康范围内，建议持续关��� P99 延迟和目标域名退信率。"
+      "mockSummary": "## 投递健康摘要\n\n整体投递成功率稳定。外发队���仍在健康范围内，建议持续关��� P99 延迟和目标域名退信率。"
     },
     "dataLag": "数据更新于约 {minutes} 分钟前",
     "dataLagHours": "统计数据更���于约 {hours} 小时前",
@@ -8627,7 +8629,7 @@
       "timeoutScopeNote": "总超时 / 超时异步对所有旁路检测生效。",
       "soon": "即将支持",
       "totalTimeout": "总超时",
-      "totalTimeoutHint": "邮件进入旁路检测后的最长等待时长。超过此时间仍无检测结论，将执行「超时临时处置」策略。范围：1–60 分钟。",
+      "totalTimeoutHint": "邮件进入旁路检测后的最长等待时长。超过此时间仍无检测结论，��执行「超时临时处置」策略。范围：1–60 分钟。",
       "asyncTimeout": "超时异步",
       "asyncTimeoutHint": "超时投递后，系统继续等待最终检测结论的最长时长。在此窗口内若得出高风险结论，邮件将被自动召回。范围：1–60 分钟。",
       "autoDeliver": "超时自动投递",
@@ -8821,7 +8823,7 @@
       "success": "已拦截并隔离",
       "alreadyBlocked": "该邮件已隔离",
       "error": "拦截失败",
-      "liveStateError": "邮件仍在处理中，暂不可处置",
+      "liveStateError": "邮件仍在处���中，暂不可处置",
       "notActionable": "内联���退记录无可处置旁路件",
       "title": "拦截该邮件",
       "description": "确认拦截该邮件？此操作将阻止该邮件继续投递。",
@@ -9364,7 +9366,7 @@
       "edit": "编辑",
       "clone": "克隆",
       "delete": "删除",
-      "empty": "暂无策略，请新增。",
+      "empty": "暂无策略，请新��。",
       "modeBadge": {
         "realtime": "实时",
         "realtimeUnsupported": "实时（未支持）",
@@ -10488,7 +10490,7 @@
       "mailflow": "邮件流",
       "engine": "检测引擎",
       "alerts": "告警中心",
-      "queueTrend": "队列趋势",
+      "queueTrend": "队��趋势",
       "queue": "队列深度",
       "latency": "延时"
     },
@@ -10614,7 +10616,7 @@
         "portal_base_url_invalid": "外部访问地址不是合法的网址",
         "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到，请填写网关对外可达的地址",
         "portal_base_url_path_not_allowed": "外部访问地址不能带路径、查询参数或锚点，只填到域名和端口即可",
-        "portal_base_url_required": "启用取回、预览、加白或加黑权限时，必须填写外部访问地址——通知信里的操作链接需要它才能生成",
+        "portal_base_url_required": "启用取回、预览、加白或加黑权限时，必须填写外部访问地址——通知信里的��作链接需要它才能生成",
         "portal_base_url_scheme_invalid": "外部访问地址必须使用 {scheme}：取回和预览的令牌不能明文传输",
         "valid_days_out_of_range": "「{permission}」的链接有效期需在 {min}–{max} 天之间"
       },
@@ -11108,7 +11110,7 @@
       "group_management_requires_tenant_administrator_a": "分组管理需要租户管理员权限",
       "group_management_accessed_within_tenant_context": "多租户模式下，分组管理需要先选择租户",
       "access_denied_group_management_rule": "无权访问该分组管理规则",
-      "group_management_rules_imported_with_scope": "分组管理规则必须以 scope=groups 导入"
+      "group_management_rules_imported_with_scope": "分组管理规则��须以 scope=groups 导入"
     },
     "group_policy": {
       "group_policy_requires_tenant_administrator_acces": "分组策略需要租户管理员权限",
@@ -11283,7 +11285,7 @@
     "auth": {
       "authorization_header_required": "请先登录",
       "authorization_header_malformed": "登录凭证格式不正确，请重新登录",
-      "token_invalid_or_expired": "登录已失效，请重新登录",
+      "token_invalid_or_expired": "登录已失效，请重新���录",
       "session_invalid": "会话无效，请重新登录",
       "session_revoked": "会话���被注销，请重新登录",
       "system_admin_required": "该操作需要平台管理员权限",

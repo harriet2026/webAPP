@@ -61,12 +61,12 @@ export function createDefaultLeaf(def: ConditionDef, fieldDefs: Record<string, F
     }
   }
 
-  // 意图引擎（综合研判）默认走「分类优先」模式、空意图集合（operator within），
-  // 由 IntentEngineSection 引导选择意图类别；未选时表达式预览判为不完整，与枚举
-  // 单选「起始为空即不完整」的既有语义一致。覆盖上面按 fieldDef 推断的默认。
+  // 意图引擎（综合研判）默认走「意图优先」：意图未选、模式为分类优先（operator
+  // within），由 IntentEngineSection 引导先选意图再选模式；未选意图时表达式预览判为
+  // 不完整，与枚举单选「起始为空即不完整」的既有语义一致。覆盖上面按 fieldDef 推断的默认。
   if (def.panel === 'intentEngine') {
     operator = INTENT_ENGINE_OPERATOR.classification;
-    value = encodeIntentEngineValue({ mode: 'classification', intents: [], lo: '', hi: '' });
+    value = encodeIntentEngineValue({ intent: '', mode: 'classification', lo: '', hi: '' });
   }
 
   return {

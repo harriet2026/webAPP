@@ -213,18 +213,21 @@ export function defaultModeForField(def: FieldDef, fieldName?: string): MatchMod
 
 // ── 意图引擎（综合研判引擎）取值编解码 ─────────────────────────────────────
 // 「意图引擎」条件（catalogue key comprehensiveEngineResult / field cac_tag）与
-// 阶段3内容层的意图引擎模块同源，支持两种配置模式（对齐 IntentCard 的 detectionMode）：
-//   - classification 分类优先：命中所选意图分类集合任意其一（intents ⊆ INTENT_TYPES），
-//     operator = 'within'；
-//   - threshold 分段阈值：置信度分数落入 [lo, hi] ⊆ [0,1] 区间，operator = 'between'。
-// 单值 leaf.value 用「模式前缀 + 载荷」编码，既复用现有 string value 模型 / serde
+// 阶段3内容层的意图引擎模块同源。该模块的 detection_mode / threshold_segments 均
+// 挂在「单个意图」之下（见 types/intent-engine.ts 的 IntentSingleConfig），因此配置
+// 语义是「意图优先」两级：先锚定一个意图分类，再为该意图选检测模式——
+//   - classification 分类优先：命中「该意图」即匹配，operator = 'within'；
+//   - threshold 分段阈值：命中「该意图」且其判定置信度分数落入 [lo, hi] ⊆ [0,1] 区间，
+//     operator = 'between'。
+// 单值 leaf.value 用「意图 : 模式 [: lo,hi]」编码，既复用现有 string value 模型 / serde
 // 往返、又能在配置面板与表达式预览间无歧义解析：
-//   classification:phishing,spam   /   threshold:0.60,0.90
+//   phishing:classification          （分类优先）
+//   phishing:threshold:0.60,0.90     （分段阈值）
 export type IntentEngineMode = 'classification' | 'threshold';
 
 export interface IntentEngineValue {
+  intent: string;
   mode: IntentEngineMode;
-  intents: string[];
   lo: string;
   hi: string;
 }
@@ -236,19 +239,20 @@ export const INTENT_ENGINE_OPERATOR: Record<IntentEngineMode, string> = {
 
 export function parseIntentEngineValue(value: string): IntentEngineValue {
   const raw = value ?? '';
-  const idx = raw.indexOf(':');
-  const prefix = idx >= 0 ? raw.slice(0, idx) : '';
-  const payload = idx >= 0 ? raw.slice(idx + 1) : raw;
-  if (prefix === 'threshold') {
-    const [lo = '', hi = ''] = payload.split(',');
-    return { mode: 'threshold', intents: [], lo: lo.trim(), hi: hi.trim() };
+  const parts = raw.split(':');
+  let intent = (parts[0] ?? '').trim();
+  // 兼容「模式前缀」形态的历史/异常值（意图段落被写成 mode 关键字）：视为未选意图。
+  if (intent === 'classification' || intent === 'threshold') intent = '';
+  const mode: IntentEngineMode = parts[1] === 'threshold' ? 'threshold' : 'classification';
+  if (mode === 'threshold') {
+    const [lo = '', hi = ''] = (parts[2] ?? '').split(',');
+    return { intent, mode, lo: lo.trim(), hi: hi.trim() };
   }
-  // 'classification' 前缀，或无前缀的历史值（尽力当作意图 token 列表解析，不丢数据）。
-  const intents = payload.split(',').map((s) => s.trim()).filter((s) => s !== '');
-  return { mode: 'classification', intents, lo: '', hi: '' };
+  return { intent, mode, lo: '', hi: '' };
 }
 
 export function encodeIntentEngineValue(v: IntentEngineValue): string {
-  if (v.mode === 'threshold') return `threshold:${v.lo.trim()},${v.hi.trim()}`;
-  return `classification:${v.intents.join(',')}`;
+  const intent = v.intent.trim();
+  if (v.mode === 'threshold') return `${intent}:threshold:${v.lo.trim()},${v.hi.trim()}`;
+  return `${intent}:classification`;
 }

@@ -293,35 +293,37 @@ describe('ConditionConfigPanel enriched guidance', () => {
     expect(multi.textContent).not.toContain('infected');
   });
 
-  // 意图引擎 (方案B): the panel renders the dual-mode IntentEngineSection, not the
-  // free-text box. Default mode is classification → the intent checkbox list shows,
-  // with labels localized via the shared intentEngine.intent.* namespace.
-  it('renders the dual-mode 意图引擎 section with localized intent labels', () => {
+  // 意图引擎 (方案A · 意图优先): the panel renders the intent-first IntentEngineSection,
+  // not the free-text box. Both a first-level intent selector and a second-level
+  // detection-mode selector are present; classification mode shows no threshold inputs.
+  it('renders the intent-first 意图引擎 section (intent + mode selectors, no free text)', () => {
     renderPanel(
-      leaf({ conditionKey: 'comprehensiveEngineResult', field: 'cac_tag', operator: 'within', value: 'classification:' }),
+      leaf({ conditionKey: 'comprehensiveEngineResult', field: 'cac_tag', operator: 'within', value: 'phishing:classification' }),
       { cac_tag: { type: 'enum' } as FieldDef },
     );
 
+    // First level: intent selector; second level: detection mode selector.
+    expect(screen.getByTestId('config-intent-type')).toBeInTheDocument();
     expect(screen.getByTestId('config-intent-mode')).toBeInTheDocument();
-    const list = screen.getByTestId('config-intent-classification');
-    // Reuses stage-3 intent-engine i18n (钓鱼 / 垃圾 …), no free-text box.
-    expect(list.textContent).toContain(zhMessages.intentEngine.intent.phishing);
-    expect(list.textContent).toContain(zhMessages.intentEngine.intent.spam);
+    // Selected intent shows its localized description (shared intentEngine.intentDesc.*).
+    expect(screen.getByTestId('config-intent-type-desc').textContent).toBe(zhMessages.intentEngine.intentDesc.phishing);
+    // Classification mode → no threshold range inputs, and never a free-text box.
+    expect(screen.queryByTestId('config-intent-threshold')).not.toBeInTheDocument();
     expect(screen.queryByTestId('config-string-eq-value')).not.toBeInTheDocument();
   });
 
-  // Switching the mode select to 分段阈值 (threshold) swaps to the [0,1] confidence
-  // range inputs, mirroring the stage-3 intent engine's threshold-segment mode.
-  it('shows [0,1] threshold range inputs in 分段阈值 mode', () => {
+  // Threshold mode is anchored to a chosen intent and reveals the [0,1] confidence
+  // range inputs, mirroring the stage-3 intent engine's per-intent threshold segments.
+  it('shows [0,1] threshold range inputs for the anchored intent in 分段阈值 mode', () => {
     renderPanel(
-      leaf({ conditionKey: 'comprehensiveEngineResult', field: 'cac_tag', operator: 'between', value: 'threshold:0.6,0.9' }),
+      leaf({ conditionKey: 'comprehensiveEngineResult', field: 'cac_tag', operator: 'between', value: 'phishing:threshold:0.6,0.9' }),
       { cac_tag: { type: 'enum' } as FieldDef },
     );
 
+    // Intent stays selected (intent-first) while the threshold range shows.
+    expect(screen.getByTestId('config-intent-type')).toBeInTheDocument();
     expect(screen.getByTestId('config-intent-threshold')).toBeInTheDocument();
     expect(screen.getByTestId('config-intent-threshold-lo')).toHaveValue(0.6);
     expect(screen.getByTestId('config-intent-threshold-hi')).toHaveValue(0.9);
-    // Classification checkbox list must not render in threshold mode.
-    expect(screen.queryByTestId('config-intent-classification')).not.toBeInTheDocument();
   });
 });

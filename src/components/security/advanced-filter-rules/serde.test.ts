@@ -295,35 +295,36 @@ describe('defaultModeForField', () => {
   });
 });
 
-// 意图引擎（方案B）取值编解码：单个 value 字符串承载「模式 + 载荷」，面板与表达式
-// 预览共用，往返必须无损，且分类载荷里的逗号不能被误当区间分隔符。
+// 意图引擎（方案A · 意图优先）取值编解码：单个 value 承载「意图 : 模式 [: lo,hi]」，
+// 面板与表达式预览共用，往返必须无损，且阈值载荷里的逗号不能被误当作意图分隔符。
 describe('intent engine value codec', () => {
-  it('classification round-trips its intent token list', () => {
-    const s = encodeIntentEngineValue({ mode: 'classification', intents: ['phishing', 'spam'], lo: '', hi: '' });
-    expect(s).toBe('classification:phishing,spam');
+  it('classification round-trips its anchored intent', () => {
+    const s = encodeIntentEngineValue({ intent: 'phishing', mode: 'classification', lo: '', hi: '' });
+    expect(s).toBe('phishing:classification');
     const back = parseIntentEngineValue(s);
+    expect(back.intent).toBe('phishing');
     expect(back.mode).toBe('classification');
-    expect(back.intents).toEqual(['phishing', 'spam']);
   });
 
-  it('threshold round-trips its [lo, hi] bounds', () => {
-    const s = encodeIntentEngineValue({ mode: 'threshold', intents: [], lo: '0.6', hi: '0.9' });
-    expect(s).toBe('threshold:0.6,0.9');
+  it('threshold round-trips its anchored intent and [lo, hi] bounds', () => {
+    const s = encodeIntentEngineValue({ intent: 'phishing', mode: 'threshold', lo: '0.6', hi: '0.9' });
+    expect(s).toBe('phishing:threshold:0.6,0.9');
     const back = parseIntentEngineValue(s);
+    expect(back.intent).toBe('phishing');
     expect(back.mode).toBe('threshold');
     expect(back.lo).toBe('0.6');
     expect(back.hi).toBe('0.9');
   });
 
-  it('empty classification (no intents) encodes to a bare prefix and parses back empty', () => {
-    const s = encodeIntentEngineValue({ mode: 'classification', intents: [], lo: '', hi: '' });
-    expect(s).toBe('classification:');
-    expect(parseIntentEngineValue(s).intents).toEqual([]);
+  it('empty intent (unselected) encodes to a bare mode suffix and parses back empty', () => {
+    const s = encodeIntentEngineValue({ intent: '', mode: 'classification', lo: '', hi: '' });
+    expect(s).toBe(':classification');
+    expect(parseIntentEngineValue(s).intent).toBe('');
   });
 
-  it('defaults an unprefixed legacy value to classification without dropping tokens', () => {
-    const back = parseIntentEngineValue('phishing,spam');
+  it('treats a bare mode keyword in the intent slot as an unselected intent', () => {
+    const back = parseIntentEngineValue('classification:');
+    expect(back.intent).toBe('');
     expect(back.mode).toBe('classification');
-    expect(back.intents).toEqual(['phishing', 'spam']);
   });
 });

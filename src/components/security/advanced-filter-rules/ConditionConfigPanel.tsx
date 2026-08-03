@@ -627,26 +627,23 @@ function EnumSection({ leaf, enumOpts, onChange, t, hasKey }: { leaf: ConditionL
 
 // IntentEngineSection — 「意图引擎」（综合研判，字段 cac_tag）取值控件，与阶段3
 // 内容层意图引擎模块同源、共用其 i18n（useTranslations('intentEngine')，不重复造词）。
-// 顶部「检测模式」下拉在两种模式间切换：
-//   - 分类优先 classification：多选 INTENT_TYPES 意图类别（复选框），operator within；
-//   - 分段阈值 threshold：填写置信度 [0,1] 区间下/上限（复用 between 下/上限文案），
-//     operator between。
-// 模式 + 载荷编码进单个 leaf.value（serde.encodeIntentEngineValue），切换模式时保留
-// 该模式各自的载荷、不互相污染。
+// 该模块的 detection_mode / threshold_segments 都挂在单个意图之下，故这里采用「意图
+// 优先」两级结构：
+//   第一级 意图分类（单选）：INTENT_TYPES 之一；
+//   第二级 检测模式：
+//     - 分类优先 classification：命中该意图即匹配，operator within；
+//     - 分段阈值 threshold：命中该意图且置信度分数落入 [0,1] 区间，operator between。
+// 「意图 : 模式 [: lo,hi]」编码进单个 leaf.value（serde.encodeIntentEngineValue），
+// 切换模式保留阈值载荷、不互相污染。
 function IntentEngineSection({ leaf, onChange, t }: { leaf: ConditionLeaf; onChange: (p: Partial<ConditionLeaf>) => void; t: T }) {
   const ti = useTranslations('intentEngine');
   const parsed = parseIntentEngineValue(leaf.value);
 
+  const setIntent = (intent: string) => {
+    onChange({ operator: INTENT_ENGINE_OPERATOR[parsed.mode], value: encodeIntentEngineValue({ ...parsed, intent }) });
+  };
   const setMode = (mode: IntentEngineMode) => {
     onChange({ operator: INTENT_ENGINE_OPERATOR[mode], value: encodeIntentEngineValue({ ...parsed, mode }) });
-  };
-  const toggleIntent = (token: string, checked: boolean) => {
-    const next = new Set(parsed.intents);
-    if (checked) next.add(token); else next.delete(token);
-    onChange({
-      operator: INTENT_ENGINE_OPERATOR.classification,
-      value: encodeIntentEngineValue({ ...parsed, mode: 'classification', intents: Array.from(next) }),
-    });
   };
   const setBound = (which: 'lo' | 'hi', v: string) => {
     onChange({
@@ -657,6 +654,27 @@ function IntentEngineSection({ leaf, onChange, t }: { leaf: ConditionLeaf; onCha
 
   return (
     <div className="space-y-3">
+      {/* 第一级：意图分类（单选，必填） */}
+      <div className="space-y-1.5">
+        <Label>{t('v3Conditions.intentSelectLabel')}</Label>
+        <Select value={parsed.intent || undefined} onValueChange={(v) => { if (v) setIntent(v); }}>
+          <SelectTrigger data-testid="config-intent-type" className="w-full">
+            <SelectValue placeholder={t('v3Conditions.intentSelectPlaceholder')} />
+          </SelectTrigger>
+          <SelectContent>
+            {INTENT_TYPES.map((token) => (
+              <SelectItem key={token} value={token}>{ti(`intent.${token}`)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {parsed.intent ? (
+          <p className="text-[11px] text-muted-foreground" data-testid="config-intent-type-desc">
+            {ti(`intentDesc.${parsed.intent}`)}
+          </p>
+        ) : null}
+      </div>
+
+      {/* 第二级：检测模式 */}
       <div className="space-y-1.5">
         <Label>{ti('detectionMode.label')}</Label>
         <Select value={parsed.mode} onValueChange={(v) => { if (v) setMode(v as IntentEngineMode); }}>
@@ -671,22 +689,8 @@ function IntentEngineSection({ leaf, onChange, t }: { leaf: ConditionLeaf; onCha
         </p>
       </div>
 
-      {parsed.mode === 'classification' ? (
-        <div className="space-y-1.5">
-          <Label>{t('v3Conditions.valueLabel')}</Label>
-          <div className="space-y-1" data-testid="config-intent-classification">
-            {INTENT_TYPES.map((token) => {
-              const checked = parsed.intents.includes(token);
-              return (
-                <label key={token} className="flex items-center gap-2 text-xs cursor-pointer">
-                  <Checkbox checked={checked} onCheckedChange={(v) => toggleIntent(token, !!v)} />
-                  <span>{ti(`intent.${token}`)}</span>
-                </label>
-              );
-            })}
-          </div>
-        </div>
-      ) : (
+      {/* 分段阈值：置信度 [0,1] 区间 */}
+      {parsed.mode === 'threshold' ? (
         <div className="grid grid-cols-2 gap-2" data-testid="config-intent-threshold">
           <div className="space-y-1.5">
             <Label>{t('v3Conditions.betweenLoLabel')}</Label>
@@ -697,7 +701,7 @@ function IntentEngineSection({ leaf, onChange, t }: { leaf: ConditionLeaf; onCha
             <Input data-testid="config-intent-threshold-hi" type="number" min={0} max={1} step={0.01} value={parsed.hi} onChange={(e) => setBound('hi', e.target.value)} />
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

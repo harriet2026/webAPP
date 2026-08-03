@@ -6675,6 +6675,8 @@
       "aiGenerateRegex": "AI Generate Regex",
       "aiRegexComingSoon": "AI-assisted regex generation is coming soon",
       "thresholdLabel": "Threshold",
+      "intentSelectLabel": "Intent category",
+      "intentSelectPlaceholder": "Select an intent category",
       "betweenLoLabel": "Min",
       "betweenHiLabel": "Max",
       "valueLabel": "Value",
