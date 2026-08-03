@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 · 增量功能规格 · v1</title>
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 · 增量功能规格 · v2</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -168,8 +168,25 @@
         </ul>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-003）</a></li>
-      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-002）</a></li>
+      <!-- 一级需求：GT-12751 高级过滤规则优化项 -->
+      <li class="toc-l1"><a href="#gt-12751">GT-12751 高级过滤规则优化项：意图引擎多意图配置 + 移除 RBL / 显示名仿冒条件</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">意图引擎条件升级为「多意图 · 双检测模式」独立配置面板</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c3-elements">3.3 文件与逐元素变更</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">4</span><a href="#change-4">安全检测移除「RBL 结果」「显示名仿冒」两个条件</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c4-overview">4.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c4-states">4.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c4-elements">4.3 文件与逐元素变更</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-006）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-003）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
   </section>
@@ -427,6 +444,206 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
     </div>
   </div>
 
+  <!-- ══════════════ 需求入口锚点 GT-12751 ══════════════ -->
+  <div id="gt-12751" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ GT-12751 元信息 ══════════════ -->
+  <section id="gt-12751-meta">
+    <h2>GT-12751 · 元信息与事实源</h2>
+    <table>
+      <thead><tr><th>字段</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>文档编号（文件 ticket）</td><td>GT-12731（同文件追加，一文件多需求）</td></tr>
+        <tr><td>需求名称</td><td>GT-12751 高级过滤规则优化项</td></tr>
+        <tr><td>规格类型</td><td>增量规格（Incremental）· 功能优化</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v2</span></span></td></tr>
+        <tr><td>生成日期</td><td>2026-08-03</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段4 综合策略 → 高级过滤规则 → 新建/编辑规则抽屉 → 「条件配置」页签）</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/security/advanced-filter-rules/catalogue.ts</code>、
+          <code>ConditionConfigPanel.tsx</code>（<code>IntentEngineSection</code>）、
+          <code>serde.ts</code>、
+          <code>expression.ts</code>、
+          <code>ConditionTree.tsx</code>、
+          <code>messages/{zh,en,ru,th}.json</code>
+        </td></tr>
+        <tr><td>webapp commit</td><td><code>工作区已提交</code>（意图引擎双模式/多意图 + 移除 RBL/显示名仿冒条件）</td></tr>
+        <tr><td>对照 spec commit</td><td>not-used</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 运行中 webapp 浏览器真实截图；3. webapp 源码 + 单元测试</td></tr>
+        <tr><td>浏览器验证状态</td><td>2026-08-03 演示环境真实截图（浅色主题 / AI版·单租户 / 平台管理员 / Mock 数据 / 阶段4 高级过滤规则抽屉，1575×847）</td></tr>
+        <tr><td>变更类型</td><td>功能优化（条件配置面板增强 + 条件目录裁剪）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本需求记录「高级过滤规则」模块条件配置的两项优化：<strong>变更 3</strong> 将「意图引擎」（综合研判，字段 <code>cac_tag</code>）条件从普通枚举单选升级为专属的「多意图 · 双检测模式」配置面板——可同时配置多个意图，每个意图各自选择「分类优先 / 分段阈值」检测模式；<strong>变更 4</strong> 按产品要求从「安全检测」分组移除「RBL 结果」与「显示名仿冒」两个条件，条件目录总数由 51 降为 49、安全检测由 20 降为 18。两项优化全程使用项目国际化框架（<code>next-intl</code> / <code>messages/*.json</code>），覆盖中/英/俄/泰四语。
+    </div>
+  </section>
+
+  <!-- ═════════════ 变更 3 ══════════════ -->
+  <div class="incremental-section" id="change-3">
+    <div class="incr-header">
+      <span class="incr-num">3</span>
+      <h2>意图引擎条件升级为「多意图 · 双检测模式」独立配置面板</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>ConditionConfigPanel.tsx</code>、<code>serde.ts</code>、<code>expression.ts</code>、<code>catalogue.ts</code><br/>变更类型：功能优化 · 2026-08-03</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c3-overview">3.1 方案概述</h3>
+      <p>
+        「意图引擎」条件（catalogue key <code>comprehensiveEngineResult</code> / 字段 <code>cac_tag</code>）与阶段3 内容层的意图引擎模块同源。该模块的 <code>detection_mode</code> / <code>threshold_segments</code> 均挂在「单个意图」之下（见 <code>types/intent-engine.ts</code> 的 <code>IntentSingleConfig</code>），阶段3 的 <code>IntentDirectionConfig</code> 本身就是 5 个意图（钓鱼 / 涉政 / 垃圾 / 诈骗 / 订阅）各自独立配置。为与引擎 1:1 对齐，该条件从普通枚举单选升级为专属 <code>intentEngine</code> 面板。
+      </p>
+      <div class="callout callout-ok">
+        <strong>最终实现方案：</strong>面板采用「可配置多个意图，每意图单条」的列表式结构——
+        <ul style="margin:0.4rem 0 0.2rem 1.2rem;font-size:0.85rem;color:#374151;">
+          <li>每行 = 一个意图 + 该意图的检测模式：<strong>分类优先 <code>classification</code></strong>（命中该意图即匹配）或 <strong>分段阈值 <code>threshold</code></strong>（命中该意图且置信度分数落入 <code>[lo, hi] ⊆ [0,1]</code> 区间）；</li>
+          <li>底部「添加意图」下拉仅列出<strong>尚未添加</strong>的意图；每行可独立「移除」；同一意图去重（后写覆盖）；</li>
+          <li>多个意图之间语义为 <strong>OR</strong>（命中任一配置的意图即匹配）；</li>
+          <li>取值编码为「<code>意图:模式[:lo,hi]</code>」以 <code>;</code> 连接，例如 <code>phishing:threshold:0.60,0.90;spam:classification</code>，复用现有 string value 模型 / serde 往返；单个 <code>leaf.operator</code> 固定为 <code>within</code> 伞值，分类 / 阈值细节下沉到 value 编码由面板与预览解析；</li>
+          <li>旧的单意图值（如 <code>phishing:classification</code>）天然是「只有一条条目」的合法子集，向后兼容、无需迁移。</li>
+        </ul>
+      </div>
+      <p style="margin-top:0.75rem;">
+        完整性校验（<code>expression.ts</code>）：至少配置 1 个意图，否则阻断性不完整；任一分段阈值条目端点缺失 → 阻断，端点齐全后再校验「大小顺序 / 超出 <code>[0,1]</code> 范围」提示。表达式预览把每个意图渲染为「意图」（分类优先）或「意图(lo~hi)」（分段阈值）。
+      </p>
+      <pre><code>// serde.ts — 多意图列表编解码（复用单条 parse/encode）
+//   phishing:threshold:0.60,0.90;spam:classification
+parseIntentEngineList(value: string): IntentEngineValue[]   // 按 ';' 切分、去重、丢弃空条目
+encodeIntentEngineList(entries): string                     // 以 ';' 连接，同意图去重
+export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'between' };</code></pre>
+
+      <h3 id="c3-states">3.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-1 · 意图引擎多意图配置面板（钓鱼=分类优先 / 垃圾=分段阈值）</h4>
+        <p class="trigger-path">触发路径：阶段4 综合策略 → 高级过滤规则 → 新建规则 → 「条件配置」页签 → 添加「意图引擎」条件 → 添加「钓鱼」「垃圾」两个意图，分别选「分类优先」「分段阈值」· 浏览器实拍（浅色主题 / AI版·单租户 / 平台管理员 / Mock / 1575×847）</p>
+        <figure>
+          <img src="./screenshots/GT-12751-S1-intent-multi-intent-dual-mode-light-1575x847.png" alt="意图引擎条件配置面板：意图分类列表含钓鱼（分类优先）与垃圾（分段阈值，带最小/最大值区间输入），底部添加意图下拉，右侧表达式预览" />
+          <figcaption>图 S-1：意图引擎「多意图 · 双检测模式」面板。「意图分类」列表下每个意图独占一行——「钓鱼」选择「分类优先」、「垃圾」选择「分段阈值」（显示 <code>[0,1]</code> 最小/最大值区间输入），每行右侧有「移除」，底部「添加意图」下拉。左侧条件序列化为 <code>phishing:classification;spam:threshold:…</code>；右侧「表达式预览」实时呈现「意图引擎 匹配任意」及分段阈值端点未填时的「区间不完整：请同时填写最小值和最大值」校验提示。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c3-elements">3.3 文件与逐元素变更</h3>
+      <table>
+        <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>catalogue.ts</code> · <code>comprehensiveEngineResult</code> 面板</td>
+            <td><code>panel: 'select'</code>（普通枚举单选）</td>
+            <td><code>panel: 'intentEngine'</code>（专属面板）</td>
+            <td><span class="tag tag-changed">变更</span>select 计数 -1、新增 intentEngine=1</td>
+          </tr>
+          <tr>
+            <td><code>ConditionConfigPanel.tsx</code> · <code>IntentEngineSection</code></td>
+            <td>单意图两级（意图 + 模式）</td>
+            <td>多意图列表：每行意图 + 模式下拉 + 阈值区间 + 移除，底部「添加意图」</td>
+            <td><span class="tag tag-changed">变更</span>testid：<code>config-intent-list</code> / <code>config-intent-row-*</code> / <code>config-intent-mode-*</code> / <code>config-intent-threshold-*</code> / <code>config-intent-add</code></td>
+          </tr>
+          <tr>
+            <td><code>serde.ts</code> · 编解码</td>
+            <td>仅单条 <code>parse/encodeIntentEngineValue</code></td>
+            <td>新增 <code>parseIntentEngineList</code> / <code>encodeIntentEngineList</code>（以 <code>;</code> 连接、去重、丢空）</td>
+            <td><span class="tag tag-added">新增</span>单条 codec 保留，作为列表内每条的复用单元</td>
+          </tr>
+          <tr>
+            <td><code>expression.ts</code> · 取值 / 完整性</td>
+            <td>单意图取值与校验</td>
+            <td>多条目取值（意图 / 意图(lo~hi)）+ 至少 1 意图、每阈值条目端点/顺序/范围校验</td>
+            <td><span class="tag tag-changed">变更</span>预览逐意图渲染；任一条目不完整则整条不完整</td>
+          </tr>
+          <tr>
+            <td><code>ConditionTree.tsx</code> · 默认 leaf</td>
+            <td>单意图空值编码</td>
+            <td>多意图空列表（<code>value=''</code>，operator <code>within</code> 伞值）</td>
+            <td><span class="tag tag-changed">变更</span>空列表 → 预览判为不完整，与枚举单选起始态一致</td>
+          </tr>
+          <tr>
+            <td><code>messages/{zh,en,ru,th}.json</code> · i18n</td>
+            <td>无「添加意图 / 移除」动作词；<code>inputType.intentEngine</code> 缺失（渲染时抛 <code>MISSING_MESSAGE</code>）</td>
+            <td>新增 <code>v3Conditions.intentAddLabel</code> / <code>intentRemoveLabel</code>；补齐 <code>inputType.intentEngine</code></td>
+            <td><span class="tag tag-added">新增</span>四语齐全；意图名 / 描述 / 检测模式复用 <code>intentEngine.*</code> 命名空间</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">
+        意图名（钓鱼 / 涉政 / 垃圾 / 诈骗 / 订阅）、意图描述、检测模式（分类优先 / 分段阈值）文案复用阶段3 内容层意图引擎模块的 <code>intentEngine.*</code> i18n 命名空间，不重复造词；本次仅新增「添加意图 / 移除」两个动作词与补齐缺失的输入类型键。详见差异 D-004、D-005。
+      </div>
+
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ═════════════ 变更 4 ══════════════ -->
+  <div class="incremental-section" id="change-4">
+    <div class="incr-header">
+      <span class="incr-num">4</span>
+      <h2>安全检测移除「RBL 结果」「显示名仿冒」两个条件</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>catalogue.ts</code>、<code>catalogue.test.ts</code>、<code>messages/{zh,en,ru,th}.json</code><br/>变更类型：功能优化 · 2026-08-03</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c4-overview">4.1 方案概述</h3>
+      <p>
+        按产品要求，从「高级过滤规则 → 条件配置 → 安全检测」分组移除两个条件：<strong>RBL 结果</strong>（catalogue key <code>rblResult</code> / 字段 <code>rbl</code>）与<strong>显示名仿冒</strong>（key <code>displayNameSpoof</code> / 字段 <code>exec_imp</code>），二者原均为 <code>panel: 'select'</code> 枚举单选。
+      </p>
+      <div class="callout callout-ok">
+        <strong>最终实现方案：</strong>删除 <code>catalogue.ts</code> 中这两条条目定义，并删除四语 <code>advancedRulesFeature.v3Conditions</code> 命名空间下对应的两个文案键；同步更新 <code>catalogue.test.ts</code> 的计数不变量。裁剪后：<strong>条件目录总数 51 → 49</strong>、<strong>安全检测 20 → 18</strong>、<strong>select 面板 12 → 10</strong>。
+      </div>
+      <div class="callout callout-warn">
+        <strong>同名键辨析（未误删）：</strong>其他功能模块存在同名 i18n 键——邮件处置模块的 <code>emailDisposal.*.rblResult</code>、认证仿冒页的 <code>displayNameSpoof</code>（一整块对象配置）——均属不同命名空间，<strong>原样保留、未受影响</strong>。本次仅删除 <code>v3Conditions</code> 命名空间下的两个字符串键。
+      </div>
+
+      <h3 id="c4-states">4.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-2 · 安全检测条件清单（已无「RBL 结果」「显示名仿冒」）</h4>
+        <p class="trigger-path">触发路径：阶段4 综合策略 → 高级过滤规则 → 新建规则 → 「条件配置」页签 → 展开「安全检测（18）」分组 · 浏览器实拍（浅色主题 / 1575×847）</p>
+        <figure>
+          <img src="./screenshots/GT-12751-S2-security-conditions-no-rbl-no-spoof-light-1575x847.png" alt="条件配置搜索列表展开安全检测分组，显示 SPF/DKIM/DMARC/PTR结果、相似域名、Mail From为空、信封-头From一致性、病毒扫描结果、意图引擎等，无 RBL结果与显示名仿冒" />
+          <figcaption>图 S-2：安全检测分组条件清单。可见 DKIM 结果 / DMARC 结果 / PTR 结果 / 相似域名 / Mail From 为空 / 信封-头 From 一致性 / 病毒扫描结果 / 意图引擎 等条目，其中<strong>不再包含「RBL 结果」与「显示名仿冒」</strong>；分组计数显示为「安全检测 18」。</figcaption>
+        </figure>
+      </div>
+      <div class="interaction-preview">
+        <h4>S-3 · 高级过滤规则模块概览「支持 49 种条件类型」</h4>
+        <p class="trigger-path">触发路径：阶段4 综合策略 → 高级过滤规则（列表页），查看模块副标题与底部条件类型清单 · 浏览器实拍（浅色主题 / 1575×847）</p>
+        <figure>
+          <img src="./screenshots/GT-12751-S3-module-49-condition-types-light-1575x847.png" alt="高级过滤规则列表页，副标题显示支持49种条件类型，底部安全检测清单不含RBL结果与显示名仿冒" />
+          <figcaption>图 S-3：模块列表页。副标题由「支持 51 种条件类型」更新为「<strong>支持 49 种条件类型</strong>」；底部条件类型清单的「安全检测」段落列出 URL 数量 · URL · URL 域名 · SPF/DKIM/DMARC/PTR 结果 · 相似域名 · Mail From 为空 · 信封-头 From 一致性 · 病毒扫描结果 · 意图引擎，已无 RBL 结果 / 显示名仿冒。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c4-elements">4.3 文件与逐元素变更</h3>
+      <table>
+        <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>catalogue.ts</code> · <code>rblResult</code></td>
+            <td><del>{ key:'rblResult', category:'security', field:'rbl', panel:'select' }</del></td>
+            <td>（已删除）</td>
+            <td><span class="tag tag-removed">移除</span>安全检测 -1</td>
+          </tr>
+          <tr>
+            <td><code>catalogue.ts</code> · <code>displayNameSpoof</code></td>
+            <td><del>{ key:'displayNameSpoof', category:'security', field:'exec_imp', panel:'select' }</del></td>
+            <td>（已删除）</td>
+            <td><span class="tag tag-removed">移除</span>安全检测 -1</td>
+          </tr>
+          <tr>
+            <td><code>messages/{zh,en,ru,th}.json</code> · <code>v3Conditions.rblResult</code> / <code>displayNameSpoof</code></td>
+            <td>各含「RBL 结果」/「显示名仿冒」文案（四语）</td>
+            <td>（已删除，四语）</td>
+            <td><span class="tag tag-removed">移除</span>其他命名空间同名键保留</td>
+          </tr>
+          <tr>
+            <td><code>catalogue.test.ts</code> · 计数不变量</td>
+            <td>总数 51 / security 20 / select 12</td>
+            <td>总数 49 / security 18 / select 10</td>
+            <td><span class="tag tag-changed">变更</span>13 项目录测试通过</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
   <!-- ══════════════ C. 差异标注 ══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -460,6 +677,36 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
         <tr><td>验证依据</td><td><code>PolicyPipelinePage.tsx</code> 中 <code>enabled: drawerOpen</code>；queryKey 未变（<code>['security-modules']</code>）</td></tr>
       </tbody>
     </table>
+
+    <h3>D-004 · 意图引擎「每意图单条」：同一意图不允许配置多个不同模式 / 多段区间</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·有意约束</span></td></tr>
+        <tr><td>描述</td><td>多意图面板对同一意图去重（后写覆盖），即一个意图只能有一种检测模式与一段阈值区间，符合引擎 <code>IntentSingleConfig</code>「每意图单份配置」的语义。若未来需要「同一意图配多个阈值区间」（对应引擎 <code>threshold_segments[]</code> 多段），需扩展为「意图 → 多段区间」三级结构，属更大改动。</td></tr>
+        <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
+        <tr><td>验证依据</td><td><code>serde.ts</code> <code>parseIntentEngineList</code> 以 <code>Map&lt;intent,idx&gt;</code> 去重；单元测试「dedupes the same intent, keeping the last-written entry」</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-005 · 意图引擎 <code>leaf.operator</code> 固定为 within 伞值，分类 / 阈值细节下沉 value 编码</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·设计取舍</span></td></tr>
+        <tr><td>描述</td><td>多意图混合模式后，单个 <code>leaf.operator</code> 无法同时表达「分类（within）/ 阈值（between）」两种；故将 operator 固定为 <code>within</code> 伞值（表示「命中所选意图集合之一」），真正的分类 / 阈值细节由 value 编码（<code>意图:模式[:lo,hi]</code>）承载，由面板与表达式预览解析。此举不破坏 leaf 的单 operator 模型，且兼容旧单意图值。</td></tr>
+        <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
+        <tr><td>验证依据</td><td><code>ConditionConfigPanel.tsx</code> <code>commit()</code> 恒传 <code>operator: INTENT_ENGINE_OPERATOR.classification</code>（=within）；<code>serde.ts</code> 注释与 codec</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-006 · <code>inputType.intentEngine</code> i18n 键此前缺失（阶段3 拆分遗留），本次一并补齐</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已修复·顺带</span></td></tr>
+        <tr><td>描述</td><td>意图引擎条件从 <code>select</code> 独立为 <code>intentEngine</code> 面板时，描述卡（<code>DescriptionCard</code>）渲染的输入类型行需要 <code>v3Conditions.inputType.intentEngine</code>，但四语此前均缺该键，会在打开意图引擎面板时抛 <code>MISSING_MESSAGE</code>。本次补齐四语该键（「意图（可多选，每意图独立模式）」等），并新增单元断言作回归防护。</td></tr>
+        <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
+        <tr><td>验证依据</td><td>四语 <code>messages/*.json</code> 均含 <code>v3Conditions.inputType.intentEngine</code>；<code>ConditionConfigPanel.test.tsx</code> 断言描述卡含该文案；浏览器实拍 S-1 面板正常渲染无报错</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- ══════════════ D. 待确认 ══════════════ -->
@@ -485,6 +732,16 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
         <tr><td>建议</td><td>在测试环境将某内容层模块设为未启用，配合网络限速打开阶段3 抽屉并在模块间切换，确认导航项全程稳定为「未启用」，无「已启用」中间帧</td></tr>
       </tbody>
     </table>
+
+    <h3>Q-003 · 意图引擎多意图面板需在真实后端环境回归「保存 / 回显」链路</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>本次在 AI版·单租户 / 平台管理员 / <strong>Mock 数据</strong>环境下验证了意图引擎多意图面板的配置交互与表达式预览（S-1）。多意图取值 <code>phishing:classification;spam:threshold:…</code> 保存到真实后端、再从后端回显重建面板行的完整链路，尚未在真实后端环境验证。</td></tr>
+        <tr><td>影响</td><td>多意图编码在真实持久化 / 回显下的往返一致性</td></tr>
+        <tr><td>建议</td><td>在接入真实后端的环境新建含多意图（混合分类 / 阈值）的规则并保存，重新打开编辑抽屉确认各意图行与阈值区间准确回显、表达式一致</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- ══════════════ E. 版本历史 ══════════════ -->
@@ -498,6 +755,12 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
           <td>2026-08-02</td>
           <td><code>0b41d26</code></td>
           <td>新建 GT-12731.html，记录 GT-12723 禁用模块切换交互闪回修复：变更 1（子页 useModuleMaster 新增 loaded、URL/意图/附件子页加载完成前不上报乐观启用态）、变更 2（PolicyPipelinePage 抽屉打开即预取 security-modules 作为 stage3 导航首帧兜底真值，dotOn/summaryText 改为「本地状态 ?? 兜底真值」）；含用户实拍问题现象截图 S-1/S-2 与浏览器实拍修复后稳态 S-3/S-4；差异 D-001~D-003、待确认 Q-001~Q-002。</td>
+        </tr>
+        <tr>
+          <td>v2</td>
+          <td>2026-08-03</td>
+          <td><code>工作区已提交</code></td>
+          <td>追加一级需求 GT-12751 高级过滤规则优化项：变更 3（意图引擎条件从枚举单选升级为专属 intentEngine 面板，支持配置多个意图、每意图独立选择「分类优先 / 分段阈值」双检测模式，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重，含 serde 列表编解码 / expression 多条目完整性校验 / 四语新增「添加意图·移除」并补齐 inputType.intentEngine）、变更 4（安全检测移除「RBL 结果」「显示名仿冒」两条件，目录 51→49、安全检测 20→18、select 12→10，四语删对应文案且保留其他命名空间同名键）；含浏览器实拍 S-1（多意图面板）/ S-2（安全检测清单无 RBL/仿冒）/ S-3（模块支持 49 种条件类型）；差异新增 D-004~D-006、待确认新增 Q-003。</td>
         </tr>
       </tbody>
     </table>

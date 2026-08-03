@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 14,
+  "current_version": 15,
   "history": [
     {
       "version": 1,
@@ -127,6 +127,15 @@
       "ticket": "GT-12731",
       "incremental": true,
       "summary": "GT-12723 禁用模块切换交互闪烁修复：新建 GT-12731.html（ticket=GT-12731，需求名称=GT-12723），记录点击切换至未启用模块时加载态下左导航标签先变为启用态再闪回未启用的问题及解决方案。追加一级目录条目及变更 1 区块（1.1 方案概述 / 1.2 问题现象截图 S-1~S-2 用户实拍 + 修复后稳态 S-3~S-4 浅色 1920×900 / 1.3 逐元素变更表）；核心方案：useModuleMaster 暴露 loaded 标志、UrlProtectionPage/IntentEnginePage/AttachmentSecurityPage 在真实启用态加载完成前不上报乐观默认值、PolicyPipelinePage 预取 securityModulesMap 作为 stage3 圆点/摘要加载期兜底真值；追加差异 D-011；version.json current_version 13→14。"
+    },
+    {
+      "version": 15,
+      "generated_at": "2026-08-03",
+      "webapp_commit": "工作区已提交",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12731",
+      "incremental": true,
+      "summary": "GT-12731.html 追加一级需求 GT-12751 高级过滤规则优化项（同文件多需求，doc 版本 v1→v2）：变更 3（意图引擎条件 comprehensiveEngineResult/cac_tag 从 panel:'select' 升级为专属 panel:'intentEngine'，多意图列表式面板——每意图独立选择「分类优先 classification/within」或「分段阈值 threshold/between [lo,hi]⊆[0,1]」，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重后写覆盖、空条目丢弃；serde 新增 parse/encodeIntentEngineList 复用单条 codec；expression 多条目取值与至少1意图/端点/顺序/范围完整性校验；ConditionTree 默认空列表；四语新增 v3Conditions.intentAddLabel/intentRemoveLabel 并补齐 inputType.intentEngine 缺失键）、变更 4（安全检测移除 rblResult/rbl 与 displayNameSpoof/exec_imp 两条件，目录 51→49、security 20→18、select 12→10，四语删 v3Conditions 对应文案且保留 emailDisposal/auth-spoofing 同名键，catalogue.test.ts 计数不变量同步）；浏览器实拍 S-1 多意图双模式面板 + S-2 安全检测清单无RBL/仿冒 + S-3 模块支持49种条件类型（浅色 AI版·单租户 平台管理员 Mock 1575×847）；新增差异 D-004~D-006、待确认 Q-003；顺带修复本文件 GT-12723 遗留的 2 处 UTF-8 乱码（导航/阶段3）；乱码自检 CLEAN；version.json current_version 14→15。"
     }
   ]
 }
