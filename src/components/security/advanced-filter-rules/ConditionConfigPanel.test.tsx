@@ -171,6 +171,21 @@ describe('ConditionConfigPanel enriched guidance', () => {
     );
   });
 
+  // mailFromEmpty (Mail From 为空) is the same boolean-select family: it must render
+  // the 是/否 dropdown rather than a free-text box, reusing booleanTrue/False i18n.
+  it('renders a 是/否 dropdown for the boolean Mail From 为空 field, not free text', () => {
+    renderPanel(
+      leaf({ conditionKey: 'mailFromEmpty', field: 'mailfrom_empty', operator: 'eq', value: 'true' }),
+      { mailfrom_empty: { type: 'boolean' } as FieldDef },
+    );
+
+    expect(screen.getByTestId('config-boolean-value')).toBeInTheDocument();
+    expect(screen.queryByTestId('config-text-values')).not.toBeInTheDocument();
+    expect(screen.getByTestId('config-boolean-value').textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.booleanTrue,
+    );
+  });
+
   // createDefaultLeaf pre-seeds boolean fields with operator 'eq' and value
   // 'true' so a freshly-added 加密附件 condition is complete and matches what the
   // 是/否 dropdown shows (no "shows 是 but data empty / marked incomplete" split).

@@ -342,10 +342,11 @@ const GROUP_FIELD_META_SOURCE: Record<string, string> = {
   feature_group: '/unified-rules/_meta/feature-groups',
 };
 
-// select 面板里语义为「是 / 否」二值判定的布尔字段。这些字段的 fieldDef 返回
+// select 面板里语义为「是 / 否」二值判定的布尔字段（如加密附件 is_encrypted_attachment、
+// ZIP 炸弹 is_zip_bomb、Mail From 为空 mailfrom_empty）。这些字段的 fieldDef 返回
 // type 'boolean'，配置面板据此渲染 BooleanValueSelect（是/否 固定下拉），而非
 // 结果码枚举或自由文本。其余 select 字段（spf/dkim/virus_scan 等结果码）仍为 enum。
-const BOOLEAN_SELECT_FIELDS = new Set<string>(['is_encrypted_attachment', 'is_zip_bomb']);
+const BOOLEAN_SELECT_FIELDS = new Set<string>(['is_encrypted_attachment', 'is_zip_bomb', 'mailfrom_empty']);
 
 function fieldDefForPanel(field: string, panel: PanelKind): FieldDef {
   const base = { label: field, min_stage: 'data', supported: true, available: true };
@@ -353,11 +354,11 @@ function fieldDefForPanel(field: string, panel: PanelKind): FieldDef {
     case 'number':
       return { ...base, type: 'number', operators: ['gt', 'lt', 'eq', 'between'] };
     case 'select':
-      // 二值判定字段（is_ 前缀，如加密附件 is_encrypted_attachment / ZIP 炸弹
-      // is_zip_bomb）语义只有「是 / 否」，返回 type 'boolean' 让 PanelBody 路由到
-      // BooleanValueSelect（是/否 固定下拉，算子 eq/ne），杜绝自由输入产生的
-      // true/1/yes/加密 等脏值。其余 select 字段维持 enum（结果码枚举下拉，见
-      // ConditionConfigPanel 的 ENUM_VALUES）。
+      // 二值判定字段（见 BOOLEAN_SELECT_FIELDS，如加密附件 is_encrypted_attachment /
+      // ZIP 炸弹 is_zip_bomb / Mail From 为空 mailfrom_empty）语义只有「是 / 否」，返回
+      // type 'boolean' 让 PanelBody 路由到 BooleanValueSelect（是/否 固定下拉，算子
+      // eq/ne），杜绝自由输入产生的 true/1/yes/加密 等脏值。其余 select 字段维持 enum
+      //（结果码枚举下拉，见 ConditionConfigPanel 的 ENUM_VALUES）。
       if (BOOLEAN_SELECT_FIELDS.has(field)) {
         return { ...base, type: 'boolean', operators: ['eq', 'ne'] };
       }
@@ -1442,7 +1443,7 @@ const routes: Route[] = [
     handler: () => ({ status: 200, data: mockRBLFilterStats(7) }),
   },
 
-  // ─── 管理员操作日志（mock）──────────────────────────────────────────────────
+  // ─── 管理���操作日志（mock）──────────────────────────────────────────────────
   {
     method: 'GET',
     pattern: '/admin-audit',
@@ -2053,7 +2054,7 @@ const routes: Route[] = [
     },
   },
 
-  // ─── 链接保护日志（/logs/link-clicks，html_spec logs-link-logs）───────────
+  // ─── 链接保��日志（/logs/link-clicks，html_spec logs-link-logs）───────────
   {
     method: 'GET',
     pattern: '/link-click-logs',
@@ -2108,7 +2109,7 @@ const routes: Route[] = [
   },
 
   // ─── 系统状态仪表盘：举报待审 / 智能体 stats / 系统健康 ─────────────────────
-  // 举报待审待处理数（KPI，range-less → 按 currentSystemStatusRange 分支：2/6/13）。
+  // 举报待审待处理��（KPI，range-less → 按 currentSystemStatusRange 分支：2/6/13）。
   {
     method: 'GET',
     pattern: '/inbound-audit',
