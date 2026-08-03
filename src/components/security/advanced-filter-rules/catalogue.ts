@@ -14,6 +14,7 @@ export type PanelKind =
   | 'select'
   | 'group'
   | 'featureGroup'
+  | 'orgDept'
   | 'cidr'
   | 'time'
   | 'weekday'
@@ -59,7 +60,11 @@ export const CONDITIONS: ConditionDef[] = [
   { key: 'envelopeSender', category: 'mailBasic', field: 'sender', envelope: true, panel: 'text', subgroup: 'envelopeLayer' },
   { key: 'envelopeRecipient', category: 'mailBasic', field: 'onercpt', envelope: true, panel: 'text', subgroup: 'envelopeLayer' },
   { key: 'senderGroup', category: 'mailBasic', field: 'sender_group', panel: 'group', subgroup: 'senderAttr' },
-  { key: 'senderOrganization', category: 'mailBasic', field: null, panel: 'group', subgroup: 'senderAttr' },
+  // 发件组织：按「组织通讯录」的部门层级匹配发信人所属部门。field 用占位
+  // sender_dept_path（after 后端确定真实字段名再改这一处），panel: 'orgDept'
+  // 使配置面板复用组织通讯录部门树多选（见 ConditionConfigPanel 的
+  // OrgDepartmentSection）。取值为选中部门 path 的换行连接串，operator=within。
+  { key: 'senderOrganization', category: 'mailBasic', field: 'sender_dept_path', panel: 'orgDept', subgroup: 'senderAttr' },
   { key: 'senderIp', category: 'mailBasic', field: 'client_ip', panel: 'cidr', subgroup: 'connection' },
   { key: 'senderIpGroup', category: 'mailBasic', field: 'sender_ip_group', panel: 'group', subgroup: 'senderAttr' },
   { key: 'geoIpCountry', category: 'mailBasic', field: 'geo_region', panel: 'group', subgroup: 'senderAttr' },

@@ -7053,6 +7053,13 @@
       "foldedMore": "+{count}",
       "groupSelectLabel": "Select object",
       "groupSelectPlaceholder": "Select a group",
+      "orgDeptSelectLabel": "Select departments",
+      "orgDeptSelectedCount": "{n} selected",
+      "orgDeptHint": "Select departments from the org address book; selecting a parent department automatically matches senders in all of its sub-departments (multi-level org supported).",
+      "orgDeptSearchPlaceholder": "Search departments…",
+      "orgDeptEmpty": "No department data yet. Sync your org structure in the address book first.",
+      "orgDeptNoMatch": "No matching departments",
+      "orgDeptClearAll": "Clear all",
       "descInputTypeLabel": "Input type",
       "descUnitLabel": "Unit",
       "descRangeLabel": "Valid range",
@@ -7077,6 +7084,7 @@
         "select": "Enum select",
         "group": "Group object",
         "featureGroup": "Feature group",
+        "orgDept": "Org department (tree multi-select)",
         "cidr": "IP / CIDR (one per line)",
         "time": "Time range",
         "weekday": "Weekday",
@@ -7102,7 +7110,8 @@
         "weekday": "Select one or more days of the week.",
         "select": "Pick a fixed result value (e.g. pass / fail) from the dropdown, or enter a single value for equals / not-equals.",
         "group": "Pick an object from a preset group / profile; * means any object.",
-        "featureGroup": "Select a feature group to match."
+        "featureGroup": "Select a feature group to match.",
+        "orgDept": "Check one or more departments from the org address book tree; checking a parent department automatically matches senders in all sub-departments."
       }
     },
     "placeholder": {

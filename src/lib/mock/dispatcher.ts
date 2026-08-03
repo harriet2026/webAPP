@@ -360,6 +360,11 @@ function fieldDefForPanel(field: string, panel: PanelKind): FieldDef {
       // 其余 group 面板字段维持既有行为（type 'map' 不匹配 `map_` 前缀 → 纯文本键输入）。
       return { ...base, type: 'map', operators: ['in', 'not_in'], map_keys_source: field };
     }
+    case 'orgDept':
+      // 发件组织：按组织通讯录部门层级匹配。type 用 'string'（非 map_，配置面板
+      // 走专门的 OrgDepartmentSection 部门树，不走 MapKeySelect），算子 within
+      // 承载「命中所选部门及其子孙」的多值判定。
+      return { ...base, type: 'string', operators: ['within'] };
     case 'cidr':
       return { ...base, type: 'cidr', operators: ['in_cidr', 'not_in_cidr'] };
     case 'time':
@@ -416,10 +421,10 @@ function roleListItem({ _level, ...rest }: MockRoleSeed) {
 /**
  * 按角色作用域生成权限矩阵——这是让"平台视角 / 租户视角内置角色反映各自可用
  * 授权范围"的关键：矩阵覆盖的子模块集合来自 `rbacSubmodulesForScope(scope)`，
- * 平台角色得到平台专属模块（系统管理/监控等），租户角色得到租户专属模块
+ * 平台角色得到平台专属模块（系统管理/监控等），���户角色得到租户专属模块
  * （安全策略/智能体等）。行内 can* 的粒度按角色层级区分：
  *   - admin  ：可见 + 查看/编辑/审批/删除（受子模块能力约束）
- *   - operator：可见 + 查看/编辑（审批/删除留空）
+ *   - operator：可见 + 查���/编辑（审批/删除留空）
  *   - viewer ：可见 + 仅查看（只读）
  * canApprove/canDelete 对不支持该操作的子模块回落为 null（"不适用"）。
  */
@@ -2507,7 +2512,7 @@ const routes: Route[] = [
     },
   },
   // 收信域抽屉「测试连通性」按钮专用的 mock-only 虚拟 endpoint（receiving-tab.tsx，任意
-  // host/port 组合的一次性连通性测试，真实后端没有对应 API）；出站代理/通道已改用真实 TCP/TLS
+  // host/port 组合的一次性连通性测试��真实后端没有对应 API）；出站代理/通道已改用真实 TCP/TLS
   // 探测（POST /proxysvr-endpoints/:id/probe），不再复用这个端点。
   {
     method: 'POST',

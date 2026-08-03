@@ -1,16 +1,22 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Sparkles } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Sparkles, ChevronRight, Search, X, Building2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MapKeySelect } from '@/components/rules/MapKeySelect';
 import { cn } from '@/lib/utils';
+import { useApiRequest } from '@/lib/api/client';
+import { listContactDepartments } from '@/lib/api/contacts';
+import { buildDepartmentTree, flattenDepartmentTree, getSelfAndDescendantPaths, type DepartmentNode } from '@/lib/org-departments';
 import { CONDITIONS, type ConditionDef, type ConditionMeta, type PanelKind } from './catalogue';
 import { MATCH_MODE_TO_OPERATOR, OPERATOR_TO_MATCH_MODE, type ConditionLeaf, type MatchMode } from './serde';
 import { splitDisplayValues } from './expression';
@@ -274,6 +280,8 @@ function PanelBody({
       return <TimeSection leaf={leaf} onChange={onChange} t={t} />;
     case 'weekday':
       return <WeekdaySection leaf={leaf} onChange={onChange} t={t} />;
+    case 'orgDept':
+      return <OrgDepartmentSection leaf={leaf} onChange={onChange} t={t} />;
     default: {
       if (fd?.type === 'boolean') {
         return (
@@ -369,7 +377,7 @@ function NumberSection({ leaf, meta, onChange, t }: { leaf: ConditionLeaf; meta?
   const rangeHint = meta ? rangeText(meta, t) : '';
   const num = { min: meta?.min, max: meta?.max, step: meta?.step ?? 1 };
   // recommend：语言无关的默认有效模板。既作为输入框占位示例，又提供「应用推荐
-  // 配置」按钮，一键把比较方式与阈值填入，降低复杂阈值条件的上手成本。
+  // 配置」按钮，一键把比较方式与阈值填入，降��复杂阈值条件的上手成本。
   const rec = meta?.recommend;
   const [recLo, recHi] = (rec?.value ?? '').split(',');
   const singlePlaceholder = rec && rec.mode !== 'between' ? rec.value : undefined;
@@ -621,6 +629,179 @@ function MapValueSection({ leaf, def, fd, onChange, t }: { leaf: ConditionLeaf; 
       )}
       {fd.type === 'map_string' && (
         <StringEqualsSection leaf={leaf} onChange={onChange} t={t} />
+      )}
+    </div>
+  );
+}
+
+// OrgDepartmentSection — 「发件组织」取值控件。复用组织通讯录部门数据
+// （GET /contacts/_departments → buildDepartmentTree）以树形多选方式选择部门，
+// 与「隔离区通知范围」的部门选择器同源同交互，从而与组织通讯录实时联动。
+// 选中父部门自动含其所有子孙（getSelfAndDescendantPaths），兑现 catalogue
+// 「支持多级组织架构匹配」的语义。取值以部门 path 的换行连接串写入 leaf.value，
+// operator 固定为 within（命中所选部门集合）。源头被删的 path 在 chip 里保留展示，
+// 便于管理员察觉失效项，而非静默丢弃。
+// testid 里的部门 slug 是稳定业务 key（path 本身不随 UI 语言变化），不违反
+// testid 禁 locale 依赖的约定。
+function orgDeptSlug(path: string): string {
+  return path.replaceAll(' / ', '__');
+}
+
+function OrgDepartmentSection({ leaf, onChange, t }: { leaf: ConditionLeaf; onChange: (p: Partial<ConditionLeaf>) => void; t: T }) {
+  const { apiRequest } = useApiRequest();
+  const [query, setQuery] = useState('');
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const selectedPaths = splitDisplayValues(leaf.value);
+  const setPaths = (paths: string[]) => onChange({ operator: 'within', value: paths.join('\n') });
+
+  const { data: deptRows = [] } = useQuery({
+    queryKey: ['contacts', 'departments'],
+    queryFn: async () => (await listContactDepartments(apiRequest)).items,
+  });
+
+  const deptTree = useMemo(() => buildDepartmentTree(deptRows), [deptRows]);
+  const deptList = useMemo(() => flattenDepartmentTree(deptTree), [deptTree]);
+
+  // 选中/取消部门：含自身及所有子孙
+  const toggleDept = (node: DepartmentNode) => {
+    const paths = getSelfAndDescendantPaths(node);
+    const allSelected = paths.every((p) => selectedPaths.includes(p));
+    if (allSelected) {
+      setPaths(selectedPaths.filter((p) => !paths.includes(p)));
+    } else {
+      setPaths(Array.from(new Set([...selectedPaths, ...paths])));
+    }
+  };
+
+  const toggleExpand = (path: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+  };
+
+  // 搜索时命中路径及其祖先默认展开
+  const matchedPaths = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return null;
+    const set = new Set<string>();
+    deptList.forEach((d) => {
+      if (d.path.toLowerCase().includes(q)) {
+        d.path.split(' / ').forEach((_, i, arr) => set.add(arr.slice(0, i + 1).join(' / ')));
+      }
+    });
+    return set;
+  }, [query, deptList]);
+
+  const renderNode = (node: DepartmentNode, depth = 0) => {
+    if (matchedPaths && !matchedPaths.has(node.path)) return null;
+    const descendants = getSelfAndDescendantPaths(node);
+    const selectedCount = descendants.filter((p) => selectedPaths.includes(p)).length;
+    const checked = selectedCount === descendants.length;
+    const indeterminate = selectedCount > 0 && !checked;
+    const isOpen = matchedPaths ? true : expanded.has(node.path);
+    const hasChildren = node.children.length > 0;
+    const nodeSlug = orgDeptSlug(node.path);
+
+    return (
+      <div key={node.path} data-testid={`config-orgdept-node-${nodeSlug}`}>
+        <div className="flex items-center gap-1.5 rounded py-1.5 hover:bg-muted/50" style={{ paddingLeft: depth * 20 }}>
+          {hasChildren ? (
+            <button
+              type="button"
+              data-testid={`config-orgdept-expand-${nodeSlug}`}
+              onClick={() => toggleExpand(node.path)}
+              className="p-0.5 text-muted-foreground hover:text-foreground"
+            >
+              <ChevronRight className={cn('h-3.5 w-3.5 transition-transform', isOpen && 'rotate-90')} />
+            </button>
+          ) : (
+            <span className="w-4" />
+          )}
+          <Checkbox
+            data-testid={`config-orgdept-toggle-${nodeSlug}`}
+            checked={checked}
+            indeterminate={indeterminate}
+            onCheckedChange={() => toggleDept(node)}
+          />
+          <span className="text-sm text-foreground">{node.name}</span>
+          <span className="text-xs text-muted-foreground">({node.memberCount})</span>
+        </div>
+        {isOpen && hasChildren && <div>{node.children.map((c) => renderNode(c, depth + 1))}</div>}
+      </div>
+    );
+  };
+
+  const hasDepts = deptTree.length > 0;
+
+  return (
+    <div className="space-y-2" data-testid="config-orgdept">
+      <div className="flex items-center gap-1.5">
+        <Building2 className="h-4 w-4 text-muted-foreground" />
+        <Label>{t('v3Conditions.orgDeptSelectLabel')}</Label>
+        <span className="text-xs text-muted-foreground">
+          {t('v3Conditions.orgDeptSelectedCount', { n: selectedPaths.length })}
+        </span>
+      </div>
+      <p className="text-[11px] text-muted-foreground" data-testid="config-orgdept-hint">
+        {t('v3Conditions.orgDeptHint')}
+      </p>
+      {!hasDepts ? (
+        <div
+          data-testid="config-orgdept-empty"
+          className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground"
+        >
+          {t('v3Conditions.orgDeptEmpty')}
+        </div>
+      ) : (
+        <div className="rounded-lg border border-border">
+          <div className="relative border-b border-border p-2">
+            <Search className="absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              data-testid="config-orgdept-search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t('v3Conditions.orgDeptSearchPlaceholder')}
+              className="h-8 pl-8"
+            />
+          </div>
+          <ScrollArea className="h-52">
+            <div className="p-2">
+              {matchedPaths && matchedPaths.size === 0 ? (
+                <p data-testid="config-orgdept-no-match" className="py-6 text-center text-sm text-muted-foreground">
+                  {t('v3Conditions.orgDeptNoMatch')}
+                </p>
+              ) : (
+                deptTree.map((n) => renderNode(n))
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+      )}
+      {selectedPaths.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {selectedPaths.map((path) => (
+            <Badge key={path} variant="secondary" className="gap-1" data-testid={`config-orgdept-chip-${orgDeptSlug(path)}`}>
+              {path}
+              <button type="button" onClick={() => setPaths(selectedPaths.filter((p) => p !== path))}>
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs"
+            data-testid="config-orgdept-clear"
+            onClick={() => setPaths([])}
+          >
+            {t('v3Conditions.orgDeptClearAll')}
+          </Button>
+        </div>
       )}
     </div>
   );

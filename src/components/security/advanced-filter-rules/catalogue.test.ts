@@ -28,12 +28,11 @@ describe('CONDITIONS catalogue — 51 条件目录', () => {
     expect(byPanel('text')).toBe(15);
     expect(byPanel('number')).toBe(14);
     expect(byPanel('select')).toBe(13);
-    // NOTE: layer-3-conditions.html's own KINDMAP classifies senderOrganization
-    // as kind 'grp' alongside senderGroup/senderIpGroup/geoIpCountry/geoIpRegion,
-    // giving group=5 (not 4 as a shorthand elsewhere might suggest). Using
-    // group=4 would leave the panel-kind total at 53, one short of 54, so this
-    // count follows the HTML spec's own kind column per its own tie-break rule.
-    expect(byPanel('group')).toBe(5);
+    // senderOrganization 已从 'group' 独立为专门的 'orgDept' 面板（配置面板复用
+    // 组织通讯录部门树多选，见 ConditionConfigPanel 的 OrgDepartmentSection），
+    // 因此 group 由 5 降为 4、新增 orgDept=1，两者之和不变，总数仍为 51。
+    expect(byPanel('group')).toBe(4);
+    expect(byPanel('orgDept')).toBe(1);
     expect(byPanel('featureGroup')).toBe(0);
     expect(byPanel('cidr')).toBe(1);
     expect(byPanel('time')).toBe(1);
@@ -43,7 +42,7 @@ describe('CONDITIONS catalogue — 51 条件目录', () => {
 
   it('panel kind counts sum to 54', () => {
     const kinds: PanelKind[] = [
-      'text', 'number', 'select', 'group', 'featureGroup', 'cidr', 'time', 'weekday', 'mime',
+      'text', 'number', 'select', 'group', 'featureGroup', 'orgDept', 'cidr', 'time', 'weekday', 'mime',
     ];
     const sum = kinds.reduce((acc, k) => acc + CONDITIONS.filter((c) => c.panel === k).length, 0);
     expect(sum).toBe(51);
@@ -59,9 +58,10 @@ describe('CONDITIONS catalogue — 51 条件目录', () => {
     expect(envelopeKeys.sort()).toEqual(['envelopeRecipient', 'envelopeSender']);
   });
 
-  it('catalogue-only entry (field===null) is senderOrganization', () => {
+  it('no catalogue-only (field===null) entries remain: senderOrganization now maps to sender_dept_path', () => {
     const nullFieldKeys = CONDITIONS.filter((c) => c.field === null).map((c) => c.key).sort();
-    expect(nullFieldKeys).toEqual(['senderOrganization']);
+    expect(nullFieldKeys).toEqual([]);
+    expect(CONDITIONS.find((c) => c.key === 'senderOrganization')?.field).toBe('sender_dept_path');
   });
 });
 

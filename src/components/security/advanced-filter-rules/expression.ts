@@ -126,7 +126,7 @@ export function summarizeLeaf(
   let values: string[];
   if (leaf.operator === 'between') {
     values = leaf.value.split(',').map((v) => v.trim());
-  } else if (panel === 'text' || panel === 'mime' || panel === 'cidr' || panel === 'weekday') {
+  } else if (panel === 'text' || panel === 'mime' || panel === 'cidr' || panel === 'weekday' || panel === 'orgDept') {
     values = splitDisplayValues(leaf.value);
   } else {
     values = leaf.value.trim() === '' ? [] : [leaf.value.trim()];

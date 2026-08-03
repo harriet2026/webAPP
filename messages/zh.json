@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系�������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系���������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1191,7 +1191,7 @@
     "stage": "阶段"
   },
   "tagRules": {
-    "title": "标签管理",
+    "title": "标��管理",
     "ruleType": "规则类型",
     "pattern": "模式匹配",
     "rbl": "RBL 查询",
@@ -1336,10 +1336,10 @@
     "previewPath": "有效执行路径预览",
     "stageCountHint": "当前形态共启用 {count} 个阶段。",
     "sectionBasic": "基本信息",
-    "sectionTargets": "适用����",
+    "sectionTargets": "适������",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
     "sectionPolicies": "分阶段策略配置",
-    "sectionPoliciesHint": "默认为「继承��局����「��留��策��本迭代��入库、不改变实际检测行为。",
+    "sectionPoliciesHint": "默认为「继承����局����「��留��策��本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
     "priorityHint": "优先级仅在多条策略命中同一邮件、且配置了同一模块时用于仲裁（数值越大越优先）。它不决定模块的跨阶段执行顺序——执行顺序由阶段流水线固定。",
     "priorityRange": "可填 {min}-{max}，数值越大越优先",
@@ -1460,7 +1460,7 @@
       "drop": "丢弃"
     },
     "previewDescriptionWithRule": "策略「{name}」的有效执行路径：",
-    "previewNoRuleSelected": "请选择一条群组策略以预览���",
+    "previewNoRuleSelected": "请选择一条群组策略���预览���",
     "previewShortCircuit": "邮件在【阶段{stage}】因策略「{rule}」的{action}处置被终止，后续阶段不再执行。",
     "previewSkipped": "未执行（前序已短路）",
     "previewNoOverride": "无群组覆盖（按全局执行）",
@@ -2049,7 +2049,7 @@
         "add": "添加绑定",
         "edit": "编辑绑定",
         "empty": "暂无出口绑定",
-        "domainRequired": "请选择发信域"
+        "domainRequired": "请选��发信域"
       },
       "egress": {
         "senderDomain": "发信���",
@@ -2454,7 +2454,7 @@
       "unknown": "未能识别的失败原因，请查看原始失败信息并联系支持。"
     },
     "detail": {
-      "breadcrumb": "日志审计 / 认证日志",
+      "breadcrumb": "日���审计 / 认证日志",
       "description": "查看���次认证尝���的详细信���与诊断建议",
       "summary": "认证概要",
       "protocolServer": "协议与服务器",
@@ -2742,7 +2742,7 @@
     "title": "邮件预览",
     "subject": "主题",
     "from": "发件人",
-    "to": "收件人",
+    "to": "���件人",
     "cc": "抄送",
     "date": "日期",
     "attachments": "附件",
@@ -3533,7 +3533,7 @@
       "antiBruteforceDesc": "防止密码爆破攻击，短时间内多次认证失败将被封禁",
       "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1小时。",
       "antiSpam": "防滥发邮件",
-      "antiSpamDesc": "限制高频发信行为，防止垃圾邮件泛滥",
+      "antiSpamDesc": "限制高频发信行为，防止���圾邮件泛滥",
       "antiSpamEffect": "每15分钟内连接超过200次，或当日累计超过5000次，将��封禁1小时。",
       "useThis": "使用该示例"
     },
@@ -3558,7 +3558,7 @@
       "orRelation": "各维度为\"或\"关系，满足任一即触发"
     },
     "platformEnabled": "已启用",
-    "embeddedDescription": "针对IP发信频率过滤限制，防止暴力破解或滥发邮件。各维���为\"或\"关��，任一达到阈值即��发处置动作。",
+    "embeddedDescription": "针对IP发信频率过滤限制，防止暴力���解或滥发邮件。各维���为\"或\"关��，任一达到阈值即��发处置动作。",
     "detailIpProtection": "IP级防护",
     "detailConnectionProtection": "单连接防护",
     "detailAction": "处置动作",
@@ -3682,7 +3682,7 @@
     "expireAt": "有效期至",
     "expireAtTip": "规则到期后自动失效，留空表示永久有效",
     "expireAtHint": "留空表示永久有效",
-    "priorityTip": "数值越大越优先。建议常规规则设为 100-500，需要更优先的规则设更大数值。",
+    "priorityTip": "数值���大越优先。建议常规规则设为 100-500，需要更优先的规则设更大数值。",
     "priorityHint": "数值越大���优先",
     "executeAction": "执行动作",
     "executeActionBlacklistTip": "选择当IP命中黑名单规则时的处理方式。隔离/审核会暂存邮件待处理，阻断会退回邮件，丢弃会静默删除邮件。",
@@ -4424,7 +4424,7 @@
       "accept": "允许：不对此规则触发的情况采取拦截动作，邮件继续进入下一阶段检测。",
       "quarantine": "隔离：将匹配的邮件放入隔离区，待管理员审核后再决定放行或删除。",
       "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知。",
-      "audit": "审核：将邮件放入审核队列，等待管理员人工审批后再投递。",
+      "audit": "审核：将邮件放入审核��列，等待管理员人工审批后再投递。",
       "discard": "丢弃：静默丢弃该邮件，不���知发件方也不投递给收件方。"
     },
     "formatChecks": {
@@ -4445,7 +4445,7 @@
       "spf_fail": "硬拒绝 (Fail)",
       "spf_failDesc": "发信IP不在SPF记录允许范围内",
       "spf_softfail": "软拒绝 (SoftFail)",
-      "spf_softfailDesc": "SPF记录使用~all（过渡配置）",
+      "spf_softfailDesc": "SPF记录使���~all（过渡配置）",
       "spf_none": "未维护 (None)",
       "spf_noneDesc": "域名未配置SPF记录",
       "spf_temperror": "查��失败 (TempError)",
@@ -5104,7 +5104,7 @@
       "attachmentCount": "单封邮件允许进入检测的附件数量，-1 表示不限制",
       "attachmentSize": "单个附件大小上限，-1 表示不限制",
       "nestedProtection": "限制压缩包数量、内部文件数量和解压层级，避免压缩炸弹耗尽资源",
-      "scanTimeout": "单封邮件附件扫描允许占用的最长时间",
+      "scanTimeout": "单封邮件附件扫描允许占用的��长时间",
       "exceedAction": "基础限制任一项超限时��取的处置",
       "antivirusHost": "attachd 连接的通用 AV 服务地址",
       "virusAction": "确认检出病毒后对邮件采取的动作",
@@ -5800,7 +5800,7 @@
       "groupLimit": "最多可添加 {n} 个条件组",
       "operator": "运算符",
       "operators": {
-        "eq": "等于",
+        "eq": "等���",
         "neq": "不等于",
         "contains": "包含",
         "not_contains": "不包含",
@@ -6876,7 +6876,7 @@
         "note": "支持多级组织架构匹配"
       },
       "desc_senderIp": {
-        "source": "SMTP连接层",
+        "source": "SMTP连��层",
         "usage": "匹配发信服务器IP地址",
         "note": "支持CIDR格式，如10.0.0.0/8"
       },
@@ -6965,7 +6965,7 @@
       },
       "desc_imageQrCodeResult": {
         "source": "图片二维码识别引擎",
-        "usage": "检测图片附件中的二维码内容",
+        "usage": "检测图片附件中的二��码内容",
         "note": "可识别钓鱼链接、恶意URL等"
       },
       "desc_qrCodeCount": {
@@ -7110,6 +7110,13 @@
       "foldedMore": "+{count}",
       "groupSelectLabel": "选择对象",
       "groupSelectPlaceholder": "请选择群组",
+      "orgDeptSelectLabel": "选择部门",
+      "orgDeptSelectedCount": "已选 {n} 个",
+      "orgDeptHint": "从组织通讯录选择部门；选中父部门将自动匹配其所有子部门的发信人（支持多级组织架构）。",
+      "orgDeptSearchPlaceholder": "搜索部门…",
+      "orgDeptEmpty": "暂无部门数据，请先在组织通讯录同步组织架构。",
+      "orgDeptNoMatch": "未找到匹配的部门",
+      "orgDeptClearAll": "清空",
       "descInputTypeLabel": "输入类型",
       "descUnitLabel": "单位",
       "descRangeLabel": "有效范围",
@@ -7134,6 +7141,7 @@
         "select": "枚举选择",
         "group": "群组对象",
         "featureGroup": "特征组",
+        "orgDept": "组织部门（树形多选）",
         "cidr": "IP / CIDR（每行一个）",
         "time": "时间区间",
         "weekday": "星期",
@@ -7159,7 +7167,8 @@
         "weekday": "勾选一个或多个星期几。",
         "select": "从下拉选择固定结果值（如 pass / fail），或输入单个值做等于 / 不等于匹配。",
         "group": "从预置群组 / 档案中选择对象；* 表示任意对象。",
-        "featureGroup": "选择一个特征组进行匹配。"
+        "featureGroup": "选择一个特征组进行匹配。",
+        "orgDept": "从组织通讯录部门树中勾选一个或多个部门；勾选父部门会自动匹配其所有子部门的发信人。"
       }
     },
     "placeholder": {
@@ -7540,7 +7549,7 @@
     "copy": "复制",
     "copied": "已复制到剪贴板",
     "copyFailed": "复制失败",
-    "switchBeforeDelete": "请先切换到其它 selector",
+    "switchBeforeDelete": "请先��换到其它 selector",
     "generateSuccess": "密钥已生成",
     "importSuccess": "私钥已导入",
     "activateSuccess": "已设为当前密钥",
@@ -8464,7 +8473,7 @@
       "title": "误报豁免",
       "description": "标记该邮件为误报并豁免拦截，请填写豁免原因。",
       "reasonPlaceholder": "请输入豁免原因...",
-      "reasonRequired": "请填写豁免原因",
+      "reasonRequired": "请填写豁免原���",
       "submit": "提交豁免",
       "success": "已豁免",
       "error": "豁免失败"
@@ -8634,7 +8643,7 @@
     },
     "bands": {
       "title": "置信度分级处置",
-      "description": "按置信度区间连续覆盖 0–100，每段配置不同的处置动作。",
+      "description": "按置信度区间连续覆盖 0–100��每段配置不同的处置动作。",
       "loading": "加载中...",
       "save": "保存",
       "saving": "保存中...",
@@ -8990,7 +8999,7 @@
       "title": "保护品牌列表",
       "subtitle": "针对重点品牌资产的精细化专项防护",
       "add": "添加品牌",
-      "searchPlaceholder": "按品牌名称、保护域名搜索",
+      "searchPlaceholder": "按品牌��称、保护域名搜索",
       "modeFilter": "处置模式",
       "allModes": "全部模式",
       "protectedDomains": "保护域名",
@@ -9110,7 +9119,7 @@
       "totalLeaks": "发现漏报",
       "pendingRecall": "待确认漏报",
       "todayRecalled": "召回成功",
-      "recallSucceeded": "召回成功",
+      "recallSucceeded": "召���成功",
       "recallFailed": "召回失败",
       "leakRate": "漏报检出率",
       "hint": {
@@ -9989,7 +9998,7 @@
         "inbound": "查看统计",
         "threats": "查看威胁",
         "pending": "去处置",
-        "nodes": "查看状态"
+        "nodes": "查看��态"
       }
     },
     "trend": {
@@ -10248,7 +10257,7 @@
       "actionDesc": {
         "quarantine": "邮件进入隔离区，管理员审核后可放行或删除",
         "audit": "邮件进入待审核队列，人工确认后投递或退回",
-        "reject": "拒绝接收，发送方收到退信通知（452/550）",
+        "reject": "拒绝接收，发送��收到退信通知（452/550）",
         "discard": "静默丢弃，发送方无感知，无退信"
       },
       "mergedNote": "合并模式下外发和域内方向使用统一配置，防止通过切换方向绕过限制"
@@ -10305,7 +10314,7 @@
     "confirmDeleteSingle": "确认删除规则",
     "confirmDeleteBatch": "确认删除选中的",
     "rulesText": "条规则",
-    "cannotUndo": "此操作不可撤销",
+    "cannotUndo": "此��作不可撤销",
     "cancel": "取消",
     "confirm": "确认",
     "moduleEnabled": "已启用",
@@ -10510,7 +10519,7 @@
       "username_immutable": "用户名创建后不可修改"
     },
     "advanced_rule": {
-      "addon_type_invalid": "附加动作类型无效",
+      "addon_type_invalid": "附加动���类型无效",
       "delete_attachment_scope_invalid": "删除附件的适用范围无效，只能是：{allowed}",
       "primary_action_invalid": "规则的主处置动作取值无效",
       "scope_invalid": "规则的生效范围取值无效"
@@ -10587,7 +10596,7 @@
         "custom_weekdays_empty": "自定义频率下至少要选择一天",
         "notify_frequency_invalid": "通知频率取值无效，只能是：{allowed}",
         "notify_time_format_invalid": "通知时间「{value}」格式不正确，应为 HH:MM（00:00–23:59）",
-        "notify_times_empty": "通知频率不为「从不」时，至少要设置一个通知时间",
+        "notify_times_empty": "通知频率不��「从不」时，至少要设置一个通知时间",
         "permission_unknown": "无法识别的权限项「{value}」",
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
         "portal_base_url_invalid": "外部访问地址不是合法的网址",
@@ -10817,7 +10826,7 @@
     "tenant_routing": {
       "nexthop_not_found": "下一跳配置不存在",
       "domain_not_found": "域名不存在",
-      "domain_not_verified": "该域名尚未通过验证",
+      "domain_not_verified": "该域名��未通过验证",
       "egress_not_in_pool": "所选出口不在出口池中",
       "egress_binding_exists": "该域名已绑定出���，请勿重复绑定",
       "egress_binding_not_found": "出口绑定不存在"

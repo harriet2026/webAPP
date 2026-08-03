@@ -27,6 +27,7 @@ const PANEL_FALLBACK_OPERATOR: Record<ConditionDef['panel'], string> = {
   select: 'eq',
   group: 'eq',
   featureGroup: 'eq',
+  orgDept: 'within',
   cidr: 'cidr',
   time: 'between',
   weekday: 'within',
