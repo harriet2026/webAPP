@@ -7060,6 +7060,11 @@
       "orgDeptEmpty": "No department data yet. Sync your org structure in the address book first.",
       "orgDeptNoMatch": "No matching departments",
       "orgDeptClearAll": "Clear all",
+      "qrResultValues": {
+        "maliciousUrl": "Malicious URL",
+        "suspicious": "Suspicious",
+        "normal": "Normal"
+      },
       "descInputTypeLabel": "Input type",
       "descUnitLabel": "Unit",
       "descRangeLabel": "Valid range",
@@ -9603,7 +9608,7 @@
     "resetFilters": "Reset filters",
     "resultSummary": "Added {added} / Updated {updated} / Deleted {deleted} / Failed {failed}",
     "runningTip": "This source is syncing, please wait for it to finish",
-    "searchContacts": "Search username or email…",
+    "searchContacts": "Search username or email��",
     "searchLogs": "Search source name…",
     "searchPlaceholder": "Search source name or address…",
     "sectionBasic": "Basic Info",

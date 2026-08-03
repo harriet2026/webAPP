@@ -181,4 +181,33 @@ describe('ConditionConfigPanel enriched guidance', () => {
     expect(l.value).toBe('true');
     expect(l.field).toBe('is_encrypted_attachment');
   });
+
+  // imageQrCodeResult (二维码OCR结果) is a fixed-value enum: the panel renders an
+  // enum dropdown (config-enum-single), never the free-text StringEqualsSection.
+  it('renders an enum dropdown for 二维码OCR结果, not free text', () => {
+    renderPanel(
+      leaf({ conditionKey: 'imageQrCodeResult', field: 'image_qr_code_result', operator: 'eq', value: '' }),
+      { image_qr_code_result: { type: 'enum' } as FieldDef },
+    );
+
+    expect(screen.getByTestId('config-enum-single')).toBeInTheDocument();
+    expect(screen.queryByTestId('config-string-eq-value')).not.toBeInTheDocument();
+  });
+
+  // In multi (matchAny → within) mode the option labels render inline and are
+  // localized via v3Conditions.qrResultValues.* (e.g. maliciousUrl → 恶意链接),
+  // proving the enum values go through the project i18n framework, not raw token.
+  it('localizes 二维码OCR结果 enum labels through i18n', () => {
+    renderPanel(
+      leaf({ conditionKey: 'imageQrCodeResult', field: 'image_qr_code_result', operator: 'within', value: '' }),
+      { image_qr_code_result: { type: 'enum' } as FieldDef },
+    );
+
+    const multi = screen.getByTestId('config-enum-multi');
+    expect(multi.textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.qrResultValues.maliciousUrl,
+    );
+    // Raw token must not leak when a localized label exists.
+    expect(multi.textContent).not.toContain('maliciousUrl');
+  });
 });

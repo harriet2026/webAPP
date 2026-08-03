@@ -32,14 +32,25 @@ import type { FieldDef } from '@/types/unified-rules';
 // catalogue.ts 本身的 panel 归类。
 
 // 已知结果枚举的字段（demo/spec 明确给出的固定取值集合）；未收录的
-// select-panel 字段（如 cac_tag/image_qr_code_result 这类无固定清单的
-// string 字段）回退为「等于/不等于 + 单值输入」，不臆造错误的枚举值。
+// select-panel 字段（如 cac_tag 这类无固定清单的 string 字段）回退为
+// 「等于/不等于 + 单值输入」，不臆造错误的枚举值。
 const ENUM_VALUES: Record<string, string[]> = {
   spf_result: ['pass', 'fail', 'softfail', 'neutral', 'none', 'temperror', 'permerror'],
   dkim_result: ['pass', 'fail', 'neutral', 'none', 'temperror', 'permerror'],
   dmarc_result: ['pass', 'fail', 'quarantine', 'reject', 'none'],
   ptr_result: ['pass', 'fail', 'none'],
   virus_scan_result: ['clean', 'infected', 'suspicious', 'error'],
+  // 二维码 OCR 结果：固定枚举下拉，取值取自邮件处置模块 advanced-filters 的
+  // 权威定义（qr_code_result），杜绝自由输入产生的脏值。
+  image_qr_code_result: ['maliciousUrl', 'suspicious', 'normal'],
+};
+
+// 枚举值需本地化显示的字段 → i18n 子命名空间（相对 advancedRulesFeature）。
+// 仅这些字段的选项走 v3Conditions.<ns>.<value> 文案；其余 enum 字段（spf/dkim/
+// virus_scan 等协议结果码）仍逐字显示原始 token，不受影响。字段级作用域可避免
+// 误改共享 token（如 virus_scan_result 也含 'suspicious'）的其它字段渲染。
+const ENUM_VALUE_I18N_NS: Record<string, string> = {
+  image_qr_code_result: 'qrResultValues',
 };
 
 // 20 个常用 MIME 快捷徽标（技术常量，非文案，不走 i18n —— 同 ENUM_VALUES 的
@@ -122,7 +133,7 @@ export function ConditionConfigPanel({ leaf, fieldDefs, onChange }: Props) {
 
       {def && <DescriptionCard def={def} fd={fd} t={t} hasKey={hasKey} tList={tList} />}
 
-      <PanelBody leaf={leaf} def={def} fd={fd} onChange={patch} t={t} />
+      <PanelBody leaf={leaf} def={def} fd={fd} onChange={patch} t={t} hasKey={hasKey} />
 
       {def?.panel !== 'number' && (
         <div className="flex items-center gap-2 border-t pt-2">
@@ -256,12 +267,14 @@ function PanelBody({
   fd,
   onChange,
   t,
+  hasKey,
 }: {
   leaf: ConditionLeaf;
   def: ConditionDef | undefined;
   fd: FieldDef | undefined;
   onChange: (patch: Partial<ConditionLeaf>) => void;
   t: T;
+  hasKey: (key: string) => boolean;
 }) {
   if (fd?.type?.startsWith('map_')) {
     return <MapValueSection leaf={leaf} def={def} fd={fd} onChange={onChange} t={t} />;
@@ -291,8 +304,8 @@ function PanelBody({
           </div>
         );
       }
-      const enumOpts = leaf.field ? ENUM_VALUES[leaf.field] : undefined;
-      if (enumOpts) return <EnumSection leaf={leaf} enumOpts={enumOpts} onChange={onChange} t={t} />;
+    const enumOpts = leaf.field ? ENUM_VALUES[leaf.field] : undefined;
+    if (enumOpts) return <EnumSection leaf={leaf} enumOpts={enumOpts} onChange={onChange} t={t} hasKey={hasKey} />;
       return <StringEqualsSection leaf={leaf} onChange={onChange} t={t} />;
     }
   }
@@ -370,14 +383,14 @@ function NumberSection({ leaf, meta, onChange, t }: { leaf: ConditionLeaf; meta?
   const mode = OPERATOR_TO_MATCH_MODE[leaf.operator] ?? 'gt';
   const isBetween = mode === 'between';
   const [lo, hi] = leaf.value.split(',');
-  // 单位与原生约束来自 catalogue meta：给 <input> 加 min/max/step，并在标签旁标
+  // 单位与原生约束来自 catalogue meta：给 <input> 加 min/max/step，并在标签旁标注
   // 单位、在输入框下给出有效范围提示，帮助管理员判断可接受区间。
   const unit = meta?.unitKey ? t(`v3Conditions.units.${meta.unitKey}`) : '';
   const unitSuffix = unit ? ` (${unit})` : '';
   const rangeHint = meta ? rangeText(meta, t) : '';
   const num = { min: meta?.min, max: meta?.max, step: meta?.step ?? 1 };
   // recommend：语言无关的默认有效模板。既作为输入框占位示例，又提供「应用推荐
-  // 配置」按钮，一键把比较方式与阈值填入，降��复杂阈值条件的上手成本。
+  // 配置」按钮，一键把比较方式与阈值填入，降低复杂阈值条件的上手成本。
   const rec = meta?.recommend;
   const [recLo, recHi] = (rec?.value ?? '').split(',');
   const singlePlaceholder = rec && rec.mode !== 'between' ? rec.value : undefined;
@@ -531,10 +544,18 @@ function BooleanValueSelect({ value, onChange, t }: { value: string; onChange: (
   );
 }
 
-function EnumSection({ leaf, enumOpts, onChange, t }: { leaf: ConditionLeaf; enumOpts: string[]; onChange: (p: Partial<ConditionLeaf>) => void; t: T }) {
+function EnumSection({ leaf, enumOpts, onChange, t, hasKey }: { leaf: ConditionLeaf; enumOpts: string[]; onChange: (p: Partial<ConditionLeaf>) => void; t: T; hasKey: (key: string) => boolean }) {
   const mode = OPERATOR_TO_MATCH_MODE[leaf.operator] ?? 'equals';
   const multi = mode === 'matchAny';
   const values = splitDisplayValues(leaf.value);
+  // 字段级本地化：仅 ENUM_VALUE_I18N_NS 收录的字段（如二维码 OCR 结果）走
+  // v3Conditions.<ns>.<value> 文案，其余 enum 字段（协议结果码）逐字显示原始
+  // token。用 hasKey 存在性判断做兜底，缺文案时回退原值，绝不臆造。
+  const ns = leaf.field ? ENUM_VALUE_I18N_NS[leaf.field] : undefined;
+  const optLabel = (opt: string) => {
+    if (ns && hasKey(`v3Conditions.${ns}.${opt}`)) return t(`v3Conditions.${ns}.${opt}`);
+    return opt;
+  };
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
@@ -564,7 +585,7 @@ function EnumSection({ leaf, enumOpts, onChange, t }: { leaf: ConditionLeaf; enu
                       onChange({ value: Array.from(next).join('\n') });
                     }}
                   />
-                  <span>{opt}</span>
+                  <span>{optLabel(opt)}</span>
                 </label>
               );
             })}
@@ -573,7 +594,7 @@ function EnumSection({ leaf, enumOpts, onChange, t }: { leaf: ConditionLeaf; enu
           <Select value={leaf.value || ''} onValueChange={(v) => { if (v) onChange({ value: v }); }}>
             <SelectTrigger data-testid="config-enum-single" className="w-full"><SelectValue /></SelectTrigger>
             <SelectContent>
-              {enumOpts.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+              {enumOpts.map((opt) => <SelectItem key={opt} value={opt}>{optLabel(opt)}</SelectItem>)}
             </SelectContent>
           </Select>
         )}

@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系���������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系����������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1020,7 +1020,7 @@
         "toasts": {
           "created": "路由规则已添加",
           "updated": "路由规则已更新",
-          "deleted": "路由规则已删除",
+          "deleted": "路由规则已��除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
         },
@@ -1339,7 +1339,7 @@
     "sectionTargets": "适������",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
     "sectionPolicies": "分阶段策略配置",
-    "sectionPoliciesHint": "默认为「继承����局����「��留��策��本迭代��入库、不改变实际检测行为。",
+    "sectionPoliciesHint": "��认为「继承����局����「��留��策��本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
     "priorityHint": "优先级仅在多条策略命中同一邮件、且配置了同一模块时用于仲裁（数值越大越优先）。它不决定模块的跨阶段执行顺序——执行顺序由阶段流水线固定。",
     "priorityRange": "可填 {min}-{max}，数值越大越优先",
@@ -1460,7 +1460,7 @@
       "drop": "丢弃"
     },
     "previewDescriptionWithRule": "策略「{name}」的有效执行路径：",
-    "previewNoRuleSelected": "请选择一条群组策略���预览���",
+    "previewNoRuleSelected": "请选择���条群组策略���预览���",
     "previewShortCircuit": "邮件在【阶段{stage}】因策略「{rule}」的{action}处置被终止，后续阶段不再执行。",
     "previewSkipped": "未执行（前序已短路）",
     "previewNoOverride": "无群组覆盖（按全局执行）",
@@ -1886,7 +1886,7 @@
   },
   "tenants": {
     "title": "租户管理",
-    "createTenant": "创建租户",
+    "createTenant": "���建租户",
     "editTenant": "编辑租户",
     "deleteTenant": "删除租户",
     "tenantName": "租户名称",
@@ -2079,7 +2079,7 @@
     },
     "eyebrow": "租户中心",
     "domainsEyebrow": "租户域名",
-    "nameRequired": "请输入租户名称",
+    "nameRequired": "请输入租���名称",
     "codeRequired": "请输入租户编码",
     "adminAccountRequired": "请输入主管理员账号",
     "adminPasswordRequired": "请输入初始密码",
@@ -2456,7 +2456,7 @@
     "detail": {
       "breadcrumb": "日���审计 / 认证日志",
       "description": "查看���次认证尝���的详细信���与诊断建议",
-      "summary": "认证概要",
+      "summary": "认���概要",
       "protocolServer": "协议与服务器",
       "matchedConfig": "命中配置",
       "failDiagnosis": "失败诊断",
@@ -3231,7 +3231,7 @@
     "statuses": {
       "pending": "待处理",
       "running": "执行中",
-      "completed": "已完成",
+      "completed": "��完成",
       "failed": "失败",
       "needs_approval": "待审批",
       "cancelled": "已取消"
@@ -3817,7 +3817,7 @@
     "title": "RBL 过滤",
     "description": "基于实时黑名单的邮件安全过滤",
     "serverList": "RBL 服务器列表",
-    "addServer": "添加服务器",
+    "addServer": "添加服���器",
     "deleteServer": "删除服务器",
     "keepOneServer": "请至少保留一个 RBL 服务器",
     "serverDomain": "服务��域名",
@@ -3847,7 +3847,7 @@
     "editRule": "编辑规则",
     "ruleName": "规则名称",
     "matchMode": "匹配模式",
-    "matchModeAny": "任一服务器",
+    "matchModeAny": "任一服���器",
     "matchModeSpecific": "指定服务器",
     "matchServers": "匹配服���器",
     "productAction": "操作",
@@ -4274,7 +4274,7 @@
     "batchDelete": "批量删除",
     "scopesLabel": "范围 ({count})",
     "directionsLabel": "方向",
-    "preview": "配置预览",
+    "preview": "配置��览",
     "testResult": "测试结果",
     "atLeastOneScope": "请至少选择一个范围",
     "atLeastOneDirection": "请至少启用一个方向",
@@ -4423,7 +4423,7 @@
     "actionTooltip": {
       "accept": "允许：不对此规则触发的情况采取拦截动作，邮件继续进入下一阶段检测。",
       "quarantine": "隔离：将匹配的邮件放入隔离区，待管理员审核后再决定放行或删除。",
-      "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知。",
+      "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知��",
       "audit": "审核：将邮件放入审核��列，等待管理员人工审批后再投递。",
       "discard": "丢弃：静默丢弃该邮件，不���知发件方也不投递给收件方。"
     },
@@ -4444,7 +4444,7 @@
       "ptr": "PTR",
       "spf_fail": "硬拒绝 (Fail)",
       "spf_failDesc": "发信IP不在SPF记录允许范围内",
-      "spf_softfail": "软拒绝 (SoftFail)",
+      "spf_softfail": "软拒�� (SoftFail)",
       "spf_softfailDesc": "SPF记录使���~all（过渡配置）",
       "spf_none": "未维护 (None)",
       "spf_noneDesc": "域名未配置SPF记录",
@@ -4812,7 +4812,7 @@
       "stay": "继续编辑",
       "discard": "放弃并关闭"
     },
-    "drawerSubtitle": "配置发信人行为管控规则",
+    "drawerSubtitle": "配置发信人���为管控规则",
     "filter": {
       "allDirections": "全部方向",
       "allTypes": "���部类型",
@@ -5103,7 +5103,7 @@
     "tooltips": {
       "attachmentCount": "单封邮件允许进入检测的附件数量，-1 表示不限制",
       "attachmentSize": "单个附件大小上限，-1 表示不限制",
-      "nestedProtection": "限制压缩包数量、内部文件数量和解压层级，避免压缩炸弹耗尽资源",
+      "nestedProtection": "限制压缩包数量、内部文件数量和解压层级，避免压缩炸弹���尽资源",
       "scanTimeout": "单封邮件附件扫描允许占用的��长时间",
       "exceedAction": "基础限制任一项超限时��取的处置",
       "antivirusHost": "attachd 连接的通用 AV 服务地址",
@@ -5161,7 +5161,7 @@
     "sandbox": {
       "placeholder": {
         "title": "URL 沙箱检测",
-        "desc": "本功能将在后续版本提供。当前版本仅支持链接保护。"
+        "desc": "本功能将在后续��本提供。当前版本仅支持链接保护。"
       },
       "toggle": "沙箱检测",
       "toggleDesc": "启用后，对邮件��的未知URL进行动态行为分析，识别钓鱼、��意下载等威胁",
@@ -5408,7 +5408,7 @@
     "observeModeOn": "开启",
     "observeModeOff": "关闭",
     "observeWarningTitle": "当前处于观察模式",
-    "observeWarningDesc": "命中后仅记录不拦截。确认策略效果后请及时切换为正式模式。",
+    "observeWarningDesc": "命中后仅记录不拦截���确认策略效果后请及时切换为正式模式。",
     "observingDirections": "正在观察中",
     "viewObserveLogs": "查看观察日志",
     "modeAggregate": "全方向聚合（合并统计）",
@@ -5459,7 +5459,7 @@
     "realtimeNote": "此检测在邮件进入时实时计算，命中后立即拦截或标记",
     "observeNote": "观察模式下命中仅记录日志，不执行拦截动作",
     "goToGroupPolicy": "前往群组策略配置",
-    "atLeastOneDirection": "至少选择一个检测方向",
+    "atLeastOneDirection": "至少选择一个检测��向",
     "navSummary": "窗口{window}分钟 / 阈值{threshold}%",
     "tooltipObserve": "开启后仅��录日志，不执行实际拦截��作",
     "errorTagRequired": "标记投递需至少��用一种标记方式"
@@ -6080,7 +6080,7 @@
           "colStatus": "状态",
           "colActions": "操作",
           "status": {
-            "delivered": "投递成功",
+            "delivered": "��递成功",
             "marked_delivered": "已标记投递",
             "quarantined": "隔离中",
             "pending_review": "待审核",
@@ -6162,7 +6162,7 @@
           "linksTab": "链接 ({n})",
           "attachmentsTab": "附件 ({n})",
           "globalHint": "当前实体处置将作用于全局策略，影响所有收件人。",
-          "noLinks": "未检测到链接",
+          "noLinks": "未��测到链接",
           "noAttachments": "未检测到附件",
           "blacklistDomain": "域名加黑",
           "blacklistUrl": "URL加黑",
@@ -6250,7 +6250,7 @@
         "agentJudgementLabel": "智能体研判",
         "timeline": "时间线",
         "postDetectionTimeline": "事后处置时间线",
-        "eventCount": "{n} 个事件",
+        "eventCount": "{n} 个事���",
         "detectionComplete": "检测完成",
         "recallScope": "召回范围",
         "recallAction": "召回动作",
@@ -6873,7 +6873,7 @@
       "desc_senderOrganization": {
         "source": "组织架构模块",
         "usage": "匹配发信人所属组织",
-        "note": "支持多级组织架构匹配"
+        "note": "支持多级组织架构���配"
       },
       "desc_senderIp": {
         "source": "SMTP连��层",
@@ -7117,6 +7117,11 @@
       "orgDeptEmpty": "暂无部门数据，请先在组织通讯录同步组织架构。",
       "orgDeptNoMatch": "未找到匹配的部门",
       "orgDeptClearAll": "清空",
+      "qrResultValues": {
+        "maliciousUrl": "恶意链接",
+        "suspicious": "可疑",
+        "normal": "正常"
+      },
       "descInputTypeLabel": "输入类型",
       "descUnitLabel": "单位",
       "descRangeLabel": "有效范围",
@@ -7283,7 +7288,7 @@
       "addonsHeading": "附加策略",
       "descCardTitle": "条件说明",
       "descSourceLabel": "数据来源",
-      "descUsageLabel": "用途",
+      "descUsageLabel": "用��",
       "descNoteLabel": "注意",
       "addonDescUsage": "在执行动作之上叠加「{name}」处理",
       "addonDisabledHint": "未勾选：表单已禁用；勾选后将自动展开并聚焦首个输入项",
@@ -7822,7 +7827,7 @@
     },
     "tenantScope": "租户范围",
     "kpi": {
-      "inboundTotal": "接收总量",
+      "inboundTotal": "接���总量",
       "outboundTotal": "��发总量",
       "internalTotal": "域内总量",
       "totalSuccessRate": "总投递成功率",
@@ -8060,7 +8065,7 @@
       "domain": "域名",
       "count": "检出次数",
       "blockRate": "点击拦截率",
-      "blockRateHelp": "��域名点击后进入威胁拦截页面的比例",
+      "blockRateHelp": "��域��点击后进入威胁拦截页面的比例",
       "firstSeen": "首次出现",
       "status": "封禁状态",
       "block": "封禁",
@@ -8623,7 +8628,7 @@
       "autoDeliverOn": "已开启",
       "autoDeliverOff": "已关闭",
       "timeoutCloseConfirmTitle": "确认关闭超时自动投递？",
-      "timeoutCloseConfirmDesc": "关闭后超时邮件将不会自动投递，可能延���正常邮件投递。",
+      "timeoutCloseConfirmDesc": "关���后超时邮件将不会自动投递，可能延���正常邮件投递。",
       "confirmClose": "确认关闭",
       "timeoutTempDisposal": "超时临时处置",
       "timeoutTempSectionTitle": "超时临时处置",
@@ -8826,7 +8831,7 @@
     },
     "person": {
       "title": "保护对象",
-      "subtitle": "每个对象独立维护合法邮箱、灵敏度、阈值与处置���略",
+      "subtitle": "每个���象独立维护合法邮箱、灵敏度、阈值与处置���略",
       "add": "添加保护对象",
       "searchPlaceholder": "按姓名、邮箱搜索",
       "levelFilter": "保护等级",
@@ -9369,7 +9374,7 @@
       "nameHint": "最长 50 字符。",
       "nameRequired": "请输入策略名称（最长 50 字符）",
       "status": "启用状态",
-      "statusHint": "关闭后该策略不再被调度执行。",
+      "statusHint": "关闭后该策略不再被调度��行。",
       "mode": "检测模式",
       "modeRealtime": "实时检测",
       "modeDeep": "深度检测",
@@ -10119,7 +10124,7 @@
   },
   "portalPreview": {
     "loading": "加载中...",
-    "title": "隔离邮件预览",
+    "title": "���离邮件预览",
     "subjectLabel": "主题",
     "senderLabel": "发件人",
     "timeLabel": "时间",
@@ -10289,7 +10294,7 @@
     "whitelistRules": "白名单规则",
     "searchPlaceholder": "搜索规则ID、发信人或收信人...",
     "ruleId": "规则ID",
-    "sender": "发信人",
+    "sender": "��信人",
     "recipient": "收信人",
     "action": "执行动作",
     "status": "状态",
@@ -10826,7 +10831,7 @@
     "tenant_routing": {
       "nexthop_not_found": "下一跳配置不存在",
       "domain_not_found": "域名不存在",
-      "domain_not_verified": "该域名��未通过验证",
+      "domain_not_verified": "该域名��未通过验���",
       "egress_not_in_pool": "所选出口不在出口池中",
       "egress_binding_exists": "该域名已绑定出���，请勿重复绑定",
       "egress_binding_not_found": "出口绑定不存在"
@@ -10968,7 +10973,7 @@
       "review_timeout_action_accept_reject_keep": "审核超时处置只能是放行、拒绝或继续等待",
       "forward_rate_limit_per_minute_non": "每分钟转发速率上限不能为负数",
       "tarpit_max_concurrent_non_negative": "延时限流并发上限不能为负数",
-      "admin_notify_max_recipients_non_negative": "管理员通知收件人上限不能为负数"
+      "admin_notify_max_recipients_non_negative": "管理员��知收件人上限不能为负数"
     },
     "alert_rules": {
       "rule_name_exists": "规则名称已存在",
@@ -11285,7 +11290,7 @@
     },
     "login": {
       "rate_limited": "请求过于频繁，请稍后再试",
-      "code_already_sent": "验证码已发送，请稍后再试",
+      "code_already_sent": "验证码已发送，请���后再试",
       "channel_disabled": "该接收方式未启用",
       "ticket_invalid_or_expired": "登录校验已失效，请重新登录",
       "verification_code_incorrect": "验证码错误",
