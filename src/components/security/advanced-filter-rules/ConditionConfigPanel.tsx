@@ -43,6 +43,10 @@ const ENUM_VALUES: Record<string, string[]> = {
   // 二维码 OCR 结果：固定枚举下拉，取值为「成功 / 失败」两态（OCR 识别是否成功），
   // 标签经 i18n 本地化（v3Conditions.qrResultValues.*），杜绝自由输入产生的脏值。
   image_qr_code_result: ['success', 'fail'],
+  // 信封-头 From 一致性：固定枚举下拉，取值为「一致 / 不一致」两态（信封 MAIL FROM
+  // 与信头 From 是否匹配）。token 用 match/mismatch，标签经 i18n 本地化
+  // （v3Conditions.envelopeHeaderConsistencyValues.*），杜绝自由输入产生的脏值。
+  envelope_header_mismatch: ['match', 'mismatch'],
 };
 
 // 枚举值需本地化显示的字段 → i18n 子命名空间（相对 advancedRulesFeature）。
@@ -51,6 +55,7 @@ const ENUM_VALUES: Record<string, string[]> = {
 // 误改共享 token（如 virus_scan_result 也含 'suspicious'）的其它字段渲染。
 const ENUM_VALUE_I18N_NS: Record<string, string> = {
   image_qr_code_result: 'qrResultValues',
+  envelope_header_mismatch: 'envelopeHeaderConsistencyValues',
 };
 
 // 20 个常用 MIME 快捷徽标（技术常量，非文案，不走 i18n —— 同 ENUM_VALUES 的

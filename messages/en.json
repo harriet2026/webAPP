@@ -7064,6 +7064,10 @@
         "success": "Success",
         "fail": "Fail"
       },
+      "envelopeHeaderConsistencyValues": {
+        "match": "Consistent",
+        "mismatch": "Inconsistent"
+      },
       "descInputTypeLabel": "Input type",
       "descUnitLabel": "Unit",
       "descRangeLabel": "Valid range",

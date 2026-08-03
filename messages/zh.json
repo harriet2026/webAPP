@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系�����������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1020,7 +1020,7 @@
         "toasts": {
           "created": "路由规则已添加",
           "updated": "路由规则已更新",
-          "deleted": "路由规则����除",
+          "deleted": "路由规������除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
         },
@@ -2048,7 +2048,7 @@
         "description": "将已校验的发信域绑定到集群出口 IP",
         "add": "添加绑定",
         "edit": "编辑绑定",
-        "empty": "暂无出口绑定",
+        "empty": "暂无出口��定",
         "domainRequired": "请选��发信域"
       },
       "egress": {
@@ -2451,7 +2451,7 @@
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
-      "unknown": "未能识别的失败原因，请查看原始失败信息并联系支持。"
+      "unknown": "未能识别的失败原因，请查看原始失败信息并联系��持。"
     },
     "detail": {
       "breadcrumb": "日���审计 / 认证日志",
@@ -2717,7 +2717,7 @@
       "location": "地点",
       "result": "结果",
       "abnormal": "异常",
-      "abnormalDefault": "非常用登录地点，请确认是否为本人操作",
+      "abnormalDefault": "非���用登录地点，请确认是否为本人操作",
       "success": "成功",
       "fail": "失败",
       "query": "查询",
@@ -3531,7 +3531,7 @@
       "title": "查看配置示例",
       "antiBruteforce": "防暴力破解",
       "antiBruteforceDesc": "防止密码爆破攻击，短时间内多次认证失败将被封禁",
-      "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1小时。",
+      "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1��时。",
       "antiSpam": "防滥发邮件",
       "antiSpamDesc": "限制高频发信行为，防止���圾邮件泛滥",
       "antiSpamEffect": "每15分钟内连接超过200次，或当日累计超过5000次，将��封禁1小时。",
@@ -3680,7 +3680,7 @@
     "singleIpHint": "输入单个IP地址，如：192.168.1.1",
     "ipFormatHint": "支持格式：192.168.1.0/24（网段）或包含多个IP段",
     "expireAt": "有效期至",
-    "expireAtTip": "规则到期后自动失效，留空表示永久有效",
+    "expireAtTip": "规则到期后���动失效，留空表示永久有效",
     "expireAtHint": "留空表示永久有效",
     "priorityTip": "数值���大越优先。建议常规规则设为 100-500，需要更优先的规则设更大数值。",
     "priorityHint": "数值越大���优先",
@@ -4131,7 +4131,7 @@
     "statusDisabled": "已禁用"
   },
   "personalFilter": {
-    "title": "用户黑白名单",
+    "title": "用户黑白���单",
     "blacklist": "黑名单",
     "whitelist": "白名单",
     "createRule": "新建规则",
@@ -4443,7 +4443,7 @@
       "dmarc": "DMARC",
       "ptr": "PTR",
       "spf_fail": "硬拒绝 (Fail)",
-      "spf_failDesc": "发信IP不在SPF记录允许范围内",
+      "spf_failDesc": "发��IP不在SPF记录允许范围内",
       "spf_softfail": "软拒�� (SoftFail)",
       "spf_softfailDesc": "SPF记录使���~all（过渡配置）",
       "spf_none": "未维护 (None)",
@@ -5141,7 +5141,7 @@
   "urlProtection": {
     "title": "URL检测与防护",
     "masterSwitch": "总开关",
-    "receiveOnlyNotice": "链接保护仅对接收方向生效",
+    "receiveOnlyNotice": "链接保���仅对接收方向生效",
     "failedToUpdate": "更新失败",
     "failedToLoad": "加载设置失败",
     "enabled": "已启用",
@@ -5557,7 +5557,7 @@
     "receiveTip3": "正文顶部适合展示醒目的外站来源提醒",
     "receiveTip4": "多个位置会同时添加主题前缀和正文顶部标记",
     "receiveTip5": "优先级数值越大，越先匹配执行",
-    "sendTip1": "免责声明应经过法务或合规团队确认",
+    "sendTip1": "免责声明应经过法���或合规团队确认",
     "sendTip2": "自动格式会同时适配 HTML 和纯文本邮件",
     "sendTip3": "正文底部最适合常规企业免责声明",
     "sendTip4": "变量会在邮件投递时替换为实际信息",
@@ -5930,7 +5930,7 @@
       "release": "放行",
       "delete": "丢弃",
       "export": "导出",
-      "confirmRelease": "确认放行选中邮件？",
+      "confirmRelease": "确认放行���中邮件？",
       "confirmDelete": "确认丢弃选中邮件？丢弃后无法恢复。",
       "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
       "releaseAuditHint": "放行与类型改判都会写入审计记录。",
@@ -7121,8 +7121,12 @@
         "success": "成功",
         "fail": "失败"
       },
+      "envelopeHeaderConsistencyValues": {
+        "match": "一致",
+        "mismatch": "不一致"
+      },
       "descInputTypeLabel": "输入类型",
-      "descUnitLabel": "单位",
+      "descUnitLabel": "单��",
       "descRangeLabel": "有效范围",
       "descObjectLabel": "对象含义",
       "descOperatorsLabel": "支持运算符",
@@ -7282,7 +7286,7 @@
     },
     "disposition": {
       "primaryActionLabel": "执行动作",
-      "noneHint": "未设置执行动作，邮件将仅执行下方已���用的附加策略。",
+      "noneHint": "未设置执行动作，邮件将仅执行下���已���用的附加策略。",
       "configureActionButton": "配置「{action}」参数",
       "addonsHeading": "附加策略",
       "descCardTitle": "条件说明",
@@ -8980,7 +8984,7 @@
       "importLimitHint": "单次最多选择 20 人。",
       "importEmpty": "暂无联系人",
       "importHint": "仅保存姓名、邮箱、分类、灵敏度和检测处置配置；部门、职位、外部 ID 只用于导入判断与预览。",
-      "importBatchIdentity": "已选择 {n} 人进行批量创建，身份信息以组织架构为准，保护等级与下方检测配置将统一应用���",
+      "importBatchIdentity": "已选择 {n} 人进行批量创建，身份信息以组织架构为准，保护等级与下方���测配置将统一应用���",
       "importIdentityHint": "姓名、邮箱和职位来自组织架构，仅用于导入确认；姓名和邮箱不可在此修改。",
       "importSensitivityHint": "导入对象的分类与灵敏度按联系人职位自动推荐；部门、职位不会写入保护对象。",
       "importDisabledInvalidEmail": "邮箱无效",
@@ -9163,7 +9167,7 @@
       "recalling": "召回中",
       "handling": "处理中",
       "expanded": "等待执行",
-      "pending": "等待执行",
+      "pending": "���待执行",
       "success": "召回成功",
       "failed": "召回失败"
     },
@@ -9492,7 +9496,7 @@
       "description": "配置回溯策略的触发、资源、处置与通知。",
       "cancel": "取消",
       "save": "保存配置",
-      "saveAndTest": "保存并立即测试",
+      "saveAndTest": "保存��立即测试",
       "runStats": "运行统计",
       "statsTriggers": "累计触发",
       "statsLeaks": "累计发现漏报",
@@ -9715,7 +9719,7 @@
     "title": "组织通讯录",
     "toastBatchTagged": "成功标记 {count} 条记录",
     "toastBatchUntagged": "已取消 {count} 条记录的标记",
-    "toastCreated": "数据源已新增",
+    "toastCreated": "数据��已新增",
     "toastDeleted": "数据源已删除",
     "toastFailuresExported": "已导出失败明细 CSV",
     "toastFixErrors": "请修正表单中的校验错误",
@@ -10117,7 +10121,7 @@
     "expiredTitle": "链接已过期或无效",
     "expiredDesc": "请联系管理员获取新的取回链接。",
     "errorTitle": "操作失败",
-    "errorDesc": "请稍后重试或联系管理员。",
+    "errorDesc": "请稍后重试或联系���理员。",
     "alreadyReleased": "该邮件已被管理员删除，无法取回",
     "confirmWarning": "您正在取回被网关隔离的邮件，成功后该邮件将重新投递到您的收件箱，请谨慎操作！"
   },
@@ -10286,7 +10290,7 @@
         "stale": "通讯录数据已超过 24 小时未更新"
       }
     },
-    "footerNote": "收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。"
+    "footerNote": "收信人检测在 RCPT TO 阶段执行，与发信行为管控形��「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。"
   },
   "userList": {
     "blacklistRules": "��名单规则",
@@ -11108,7 +11112,7 @@
       "group_policy_rules_stay_within_active": "分组策略规则必须属于当前所选租户"
     },
     "intent_engine": {
-      "engine_enabled_receive_engine_enabled_send": "请分别设置收信、发信和内部信的引擎开关"
+      "engine_enabled_receive_engine_enabled_send": "请分别设置收信、发信和���部信的引擎开关"
     },
     "ip_filter": {
       "rule_not_found": "规则不存在"
@@ -11282,7 +11286,7 @@
       "super_admin_required": "该操作需要超级管理员权限",
       "admin_required": "该操作需要管理员权限",
       "tenant_header_cross_tenant": "请求的租户与当前所选租户不一致，已拒绝跨租户操作",
-      "tenant_id_not_integer": "租户 ID 必须是整数",
+      "tenant_id_not_integer": "���户 ID 必须是整数",
       "tenant_id_required": "请先选择租户，再管理其设置",
       "tenant_id_invalid": "租户 ID 无效",
       "tenant_access_denied": "无权访问该租户"

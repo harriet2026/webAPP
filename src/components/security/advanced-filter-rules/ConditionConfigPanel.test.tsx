@@ -213,4 +213,36 @@ describe('ConditionConfigPanel enriched guidance', () => {
     // Raw token must not leak when a localized label exists.
     expect(multi.textContent).not.toContain('success');
   });
+
+  // mailFromFromConsistency (信封-头 From 一致性) is a fixed-value enum: the panel
+  // renders an enum dropdown, never the free-text StringEqualsSection.
+  it('renders an enum dropdown for 信封-头 From 一致性, not free text', () => {
+    renderPanel(
+      leaf({ conditionKey: 'mailFromFromConsistency', field: 'envelope_header_mismatch', operator: 'eq', value: '' }),
+      { envelope_header_mismatch: { type: 'enum' } as FieldDef },
+    );
+
+    expect(screen.getByTestId('config-enum-single')).toBeInTheDocument();
+    expect(screen.queryByTestId('config-string-eq-value')).not.toBeInTheDocument();
+  });
+
+  // In multi (within) mode the labels render inline and are localized via
+  // v3Conditions.envelopeHeaderConsistencyValues.* (match → 一致, mismatch →
+  // 不一致), proving the values go through the project i18n framework.
+  it('localizes 信封-头 From 一致性 enum labels through i18n (一致/不一致)', () => {
+    renderPanel(
+      leaf({ conditionKey: 'mailFromFromConsistency', field: 'envelope_header_mismatch', operator: 'within', value: '' }),
+      { envelope_header_mismatch: { type: 'enum' } as FieldDef },
+    );
+
+    const multi = screen.getByTestId('config-enum-multi');
+    expect(multi.textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.envelopeHeaderConsistencyValues.match,
+    );
+    expect(multi.textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.envelopeHeaderConsistencyValues.mismatch,
+    );
+    // Raw token must not leak when a localized label exists.
+    expect(multi.textContent).not.toContain('mismatch');
+  });
 });
