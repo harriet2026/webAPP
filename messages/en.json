@@ -6755,7 +6755,7 @@
         "mailFromEmpty": "Mail From Empty",
         "mailFromFromConsistency": "Envelope-Header From Consistency",
         "virusScanResult": "Virus Scan Result",
-        "comprehensiveEngineResult": "Comprehensive Engine Result",
+        "comprehensiveEngineResult": "Intent Engine",
         "senderIpCount15Min": "Sender IP Count (15min)",
         "senderRecipientCount15Min": "Sender Recipient Count (15min)",
         "senderMailCount15Min": "Sender Mail Count (15min)",

@@ -863,7 +863,7 @@
         "emptyText": "暂无通道，建议先配置自定义通道",
         "proxyDeletedBadge": "代理已删除",
         "systemDefaultHelo": "系统默认",
-        "drawerTitleNew": "新建投递通道",
+        "drawerTitleNew": "新��投递通道",
         "drawerTitleEdit": "编辑投递通道",
         "drawerDescription": "从步骤一已配置的代理 IP 中选择并排序",
         "sectionBasic": "基础信息",
@@ -1020,7 +1020,7 @@
         "toasts": {
           "created": "路由规则已添加",
           "updated": "路由规则已更新",
-          "deleted": "路由��������除",
+          "deleted": "路����������除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
         },
@@ -1889,7 +1889,7 @@
     "createTenant": "���建租户",
     "editTenant": "编辑租户",
     "deleteTenant": "删除租户",
-    "tenantName": "租户名称",
+    "tenantName": "���户名称",
     "domain": "域名",
     "domainCount": "域名数",
     "domains": "域名",
@@ -2451,7 +2451,7 @@
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
-      "unknown": "未能识别的失败原因，请查看原始失败信息��联系��持。"
+      "unknown": "未能识别的失败原因，请查看原始失败��息��联系��持。"
     },
     "detail": {
       "breadcrumb": "日���审计 / 认证日志",
@@ -4442,7 +4442,7 @@
       "dkim": "DKIM",
       "dmarc": "DMARC",
       "ptr": "PTR",
-      "spf_fail": "硬拒绝 (Fail)",
+      "spf_fail": "���拒绝 (Fail)",
       "spf_failDesc": "发��IP不在SPF记录允许范围内",
       "spf_softfail": "软拒�� (SoftFail)",
       "spf_softfailDesc": "SPF记录使���~all（过渡配置）",
@@ -5240,7 +5240,7 @@
       }
     },
     "rescan": {
-      "title": "点击时复检策略",
+      "title": "点击时复���策略",
       "engine": "钓鱼邮件智能体",
       "costHint": "复检耗时预期：回扫黑名单（即时）→ 查询情报（秒级）→ 深度复检（约 30-60 秒）。开启深度复检会让用户点击后产生等待。",
       "m1": {
@@ -5457,7 +5457,7 @@
     "ignoreNumbers": "忽略数字",
     "similarSubject": "相似度>90%视为相同",
     "realtimeNote": "此检测在邮件进入时实时计算，命中后立即拦截或标记",
-    "observeNote": "观察模式下命中仅记录日���，不执行拦截动作",
+    "observeNote": "���察模式下命中仅记录日���，不执行拦截动作",
     "goToGroupPolicy": "前往��组策略配置",
     "atLeastOneDirection": "至少选择一个检测��向",
     "navSummary": "窗口{window}分钟 / 阈值{threshold}%",
@@ -6245,7 +6245,7 @@
         "detectionPipeline": "检测流程",
         "totalElapsed": "总耗时: {ms}ms",
         "elapsed": "耗时: {ms}ms",
-        "policyCount": "{n} 项策略",
+        "policyCount": "{n} 项��略",
         "hitPolicyLabel": "命��策略",
         "agentJudgementLabel": "智能体研判",
         "timeline": "时间线",
@@ -6640,7 +6640,7 @@
     },
     "dkimImpact": {
       "bannerTitle": "DKIM签名影响提示",
-      "bannerBody": "当前规则启用了会修改邮件内容的操作（{count}项）：{items}。这些操作会导致原始DKIM签名失效。",
+      "bannerBody": "当前规则启用了会修改邮件内容的操作（{count}项）：{items}。这些操��会导致原始DKIM签名失效。",
       "tooltip": "此操作会修改邮件内容，可能导致DKIM签名验证失败"
     },
     "priorityPresets": {
@@ -6783,7 +6783,7 @@
         "senderIpGroup": "发件 IP 组",
         "geoIpCountry": "GeoIP 国家",
         "geoIpRegion": "GeoIP 区域",
-        "keywordMatch": "关键词匹配",
+        "keywordMatch": "关键词���配",
         "sendTime": "发送时间",
         "sendDayOfWeek": "发送星期",
         "attachmentContent": "附件内容",
@@ -6812,7 +6812,7 @@
         "mailFromEmpty": "Mail From 为空",
         "mailFromFromConsistency": "信封-头 From 一致性",
         "virusScanResult": "病毒扫描结果",
-        "comprehensiveEngineResult": "综合引擎结果",
+        "comprehensiveEngineResult": "意图引擎",
         "senderIpCount15Min": "发件 IP 数 (15分钟)",
         "senderRecipientCount15Min": "发件收件人数 (15分钟)",
         "senderMailCount15Min": "发件邮件数 (15分钟)",
@@ -7529,7 +7529,7 @@
     "category": "分类",
     "notifyStatus": "状态",
     "portalBaseUrlRequired": "请先填写合法的外部访问地址（https），开启权限后该地址用于生成通知链接。",
-    "portalBaseUrlMissingHint": "外部访问地址未填写——取回、预览、加白、加黑权限依赖该地址生成通知链接，请先填写后再开启对应权限。"
+    "portalBaseUrlMissingHint": "外部访问地址未填写——取回、预览、加白、加黑权限依赖该地址生成通知链接，��先填写后再开启对应权限。"
   },
   "dkim": {
     "column": "DKIM",
@@ -7936,7 +7936,7 @@
       "failed": "AI 分析失败，请稍后重试",
       "empty": "AI 未返回分析内容",
       "retry": "重试",
-      "mockSummary": "## 投递健康摘要\n\n整体投递成功率稳定。外发队列仍在健康范围内，建议持续关注 P99 延迟和目标域名退信率。"
+      "mockSummary": "## 投递健康摘要\n\n整体投递成功率稳定。外发队列仍在健康范围内，建议持续关��� P99 延迟和目标域名退信率。"
     },
     "dataLag": "数据更新于约 {minutes} 分钟前",
     "dataLagHours": "统计数据更���于约 {hours} 小时前",
@@ -8057,7 +8057,7 @@
       "clickOverviewMetrics": {
         "clickRate": "点击率",
         "threatClicks": "拦截点击",
-        "totalClicks": "总点击"
+        "totalClicks": "总点��"
       },
       "topMaliciousDomains": "TOP 恶意域名",
       "showAllDomains": "查看全部 20",
@@ -8455,7 +8455,7 @@
       "subject": "主题",
       "sidelinedAt": "旁路时间",
       "direction": "方向",
-      "confidence": "置信��",
+      "confidence": "置信����",
       "agentVerdict": "智能体研判",
       "urlRiskSummary": "链接风险汇总",
       "unknownUrl": "未知链接",
@@ -8822,7 +8822,7 @@
       "alreadyBlocked": "该邮件已隔离",
       "error": "拦截失败",
       "liveStateError": "邮件仍在处理中，暂不可处置",
-      "notActionable": "内联回退记录无可处置旁路件",
+      "notActionable": "内联���退记录无可处置旁路件",
       "title": "拦截该邮件",
       "description": "确认拦截该邮件？此操作将阻止该邮件继续投递。",
       "confirm": "确认拦截"
@@ -8985,7 +8985,7 @@
       "importSelectedObjects": "已选保护对象",
       "importSelectedEmpty": "暂未选择联系人",
       "importRemoveSelected": "移除该联系人",
-      "importLimitHint": "单次最多选择 20 人。",
+      "importLimitHint": "��次最多选择 20 人。",
       "importEmpty": "暂无联系人",
       "importHint": "仅保存姓名、邮箱、分类、灵敏度和检测处置配置；部门、职位、外部 ID 只用于导入判断与预览。",
       "importBatchIdentity": "已选择 {n} 人进行批量创建，身份信息以组织架构为准，保护等级与下方���测配置将统一应用���",
@@ -9091,7 +9091,7 @@
       "delete": "删除",
       "empty": "暂无放行名单",
       "errDup": "该条目已存在",
-      "errMatchType": "类型必须是邮箱或域名"
+      "errMatchType": "类型��须是邮箱或域名"
     }
   },
   "threatRetro": {
@@ -9160,7 +9160,7 @@
       "running": "进行中",
       "completed": "已完成",
       "failed": "失败",
-      "cancelled": "已取消"
+      "cancelled": "已���消"
     },
     "recallStatus": {
       "recalled": "已召回",
@@ -9715,7 +9715,7 @@
     "tagExecutive": "高管",
     "tagKeyPosition": "关键岗位",
     "tagNone": "无标记",
-    "test": "测试连接",
+    "test": "测���连接",
     "testFailPrefix": "连接失败：{reason}",
     "testFailTimeout": "超时",
     "testOk": "连通正常",
@@ -9971,7 +9971,7 @@
         "sender": "发件邮箱格式不正确",
         "username": "用户名不能为空",
         "password": "密码不能为空",
-        "noEncKey": "缺少加密密钥；无法保存外部 SMTP 密码",
+        "noEncKey": "缺少加密密钥；无法���存外部 SMTP 密码",
         "testEmail": "请输入有效的测试收件人"
       }
     }
@@ -10118,7 +10118,7 @@
   },
   "portalRelease": {
     "loading": "加载中...",
-    "confirmTitle": "确认取回隔离邮件",
+    "confirmTitle": "确认取回���离邮件",
     "confirmButton": "确认取回",
     "releasedTitle": "取回成功",
     "releasedDesc": "邮件已成功重新投递到您的收件箱。",
@@ -10814,7 +10814,7 @@
     },
     "threat_retro": {
       "run_not_found": "回溯运行记录不存在",
-      "strategy_not_found": "处置策略不存在",
+      "strategy_not_found": "处置��略不存在",
       "strategy_id_required": "请选择处置策略",
       "mail_log_id_required": "请选择邮件",
       "mail_log_ids_required": "请至少选择一封邮件",
@@ -10968,7 +10968,7 @@
     "mail_auth_config": {
       "overlaps_existing_active": "与已启用的邮件认证配置在相同域范围和场景下重叠",
       "not_found": "邮件认证配置不存在",
-      "server_fields_required": "请填写协议、服务器地址和端口",
+      "server_fields_required": "请填写协议、服务器地���和端口",
       "auth_timeout_out_of_range": "认证超时时间必须在 {min}-{max} 秒之间",
       "protocol_unsupported": "不支持的协议"
     },
@@ -11128,7 +11128,7 @@
     },
     "rbl_filter": {
       "rule_not_found": "规则不存在",
-      "invalid_client_ip": "客户端 IP 无效"
+      "invalid_client_ip": "客户端 IP 无��"
     },
     "mail_routing_helper": {
       "mail_routing_rules_managed_by_system": "邮件路由规则仅平台管理员可管理",
@@ -11285,7 +11285,7 @@
       "authorization_header_malformed": "登录凭证格式不正确，请重新登录",
       "token_invalid_or_expired": "登录已失效，请重新登录",
       "session_invalid": "会话无效，请重新登录",
-      "session_revoked": "会话已被注销，请重新登录",
+      "session_revoked": "会话���被注销，请重新登录",
       "system_admin_required": "该操作需要平台管理员权限",
       "super_admin_required": "该操作需要超级管理员权限",
       "admin_required": "该操作需要管理员权限",
