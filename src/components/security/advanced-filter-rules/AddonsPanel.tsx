@@ -79,7 +79,7 @@ export function defaultAddonParams(key: AddonKey): Record<string, unknown> {
     case 'disclaimer':
       return { template: 'standard', position: 'body_bottom' };
     case 'externalReminder':
-      return { template: 'standard', position: 'body_top' };
+      return { position: 'body_top' };
     case 'adminNotify':
       return { recipient_type: 'adminList', recipients: '', merge_window_minutes: 5, template: 'default' };
     case 'deleteAttachment':
@@ -313,17 +313,6 @@ export function AddonParamsForm({ addonKey, params, onPatch, autoFocus }: AddonP
     case 'externalReminder':
       return (
         <div className="space-y-3" data-testid="addon-params-externalReminder">
-          <SelectField
-            label={t('addons.externalReminderTemplate')}
-            required
-            value={tv(params, 'template', 'standard')}
-            onChange={(v) => onPatch({ template: v })}
-            options={[
-              { value: 'standard', label: t('addons.externalReminderTemplateStandard') },
-              { value: 'security', label: t('addons.externalReminderTemplateSecurity') },
-              { value: 'custom', label: t('addons.externalReminderTemplateCustom') },
-            ]}
-          />
           <SelectField
             label={t('addons.externalReminderPosition')}
             required

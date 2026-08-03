@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系����������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系�����������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1188,7 +1188,7 @@
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除，只有系统管理员可编辑部分字段",
     "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条件阈值，其余字段已锁定。",
-    "stage": "阶���"
+    "stage": "������"
   },
   "tagRules": {
     "title": "标��管理",
@@ -1338,7 +1338,7 @@
     "sectionBasic": "基本信息",
     "sectionTargets": "适������",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
-    "sectionPolicies": "分阶段策略配��",
+    "sectionPolicies": "分阶段��略配��",
     "sectionPoliciesHint": "��认为「继承����局����「��留��策��本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
     "priorityHint": "优先级仅在多条策略命中同一邮件、且配置了同一模块时用于仲裁（数值越大越优先）。它不决定模块的跨阶段执行顺序——执行顺序由阶段流水线固定。",
@@ -1459,7 +1459,7 @@
       "block": "阻断",
       "drop": "丢弃"
     },
-    "previewDescriptionWithRule": "策略「{name}」的有效执行路径：",
+    "previewDescriptionWithRule": "策略「{name}」的有效执���路径：",
     "previewNoRuleSelected": "���选择���条群组策略���预览���",
     "previewShortCircuit": "邮件在【阶段{stage}】因策略「{rule}」的{action}处置被终止，后续阶段不再执行。",
     "previewSkipped": "未执行（前序已短路）",
@@ -2094,7 +2094,7 @@
       "placeholder": "请输入或生成新密码",
       "generate": "生成",
       "hint": "可自动生成 16 位随机密码，需满足密码策略",
-      "copy": "复制密码",
+      "copy": "复���密码",
       "copied": "密码已复制",
       "copyFailed": "复制失败，请手动复制",
       "success": "密码已重置，用���首��登录需修改密���",
@@ -2222,7 +2222,7 @@
         "editTitle": "编辑角色",
         "viewTitle": "查看角色权限",
         "createDescription": "配置角色名称、备注与权限矩阵",
-        "readonlyDescription": "以下为该角色的完整权限�����（只读）",
+        "readonlyDescription": "以下为该角��的完整权限�����（只读）",
         "nameLabel": "���色名称",
         "namePlaceholder": "如 自定义运营",
         "nameRequired": "请输���角色���称",
@@ -2451,7 +2451,7 @@
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
-      "unknown": "未能识别的失败原因��请��看��始失败��息��联系��持。"
+      "unknown": "��能识别的失败原因��请��看��始失败��息��联系��持。"
     },
     "detail": {
       "breadcrumb": "日���审计 / 认证日志",
@@ -3226,7 +3226,7 @@
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
       "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
-      "rule_analysis": "基于相似邮件历史，判断误判或漏判的可能性，并抽取可供人工确认的候选拦截规则。"
+      "rule_analysis": "基于相似邮件历史，判断误判或漏判的可能性，并抽取可供人工确认��候选拦截规则。"
     },
     "statuses": {
       "pending": "待处理",
@@ -3364,7 +3364,7 @@
     "blacklistType": "黑名单",
     "blacklistTypeDesc": "阻断/隔离/丢弃",
     "whitelistType": "白名单",
-    "whitelistTypeDesc": "投递/标记投递",
+    "whitelistTypeDesc": "投递/标��投递",
     "flowTerminateDesc": "阻断/���弃/隔离 ��� 终止并退出流水线",
     "flowContinueDesc": "投递/标���投递 → 继续检测",
     "actionQuarantineAction": "隔离",
@@ -3530,7 +3530,7 @@
     "examples": {
       "title": "查看配置示例",
       "antiBruteforce": "防暴力破解",
-      "antiBruteforceDesc": "防止密码爆破攻击，短时间内多次认证失败��被封禁",
+      "antiBruteforceDesc": "防止密码爆破攻击，短��间内多次认证失败��被封禁",
       "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1��时。",
       "antiSpam": "防滥发邮件",
       "antiSpamDesc": "限制高频发信行为，防止���圾邮件泛滥",
@@ -3554,7 +3554,7 @@
       "title": "配置提示",
       "negOne": "-1 表示不限制",
       "priorityLower": "优先级越大越先匹配",
-      "permanent": "留空 = 永久有效",
+      "permanent": "留空 = 永���有效",
       "orRelation": "各维度为\"或\"关系，满足任一即触发"
     },
     "platformEnabled": "已启用",
@@ -3678,7 +3678,7 @@
     "groupCountBadge": "+{count} 组",
     "validUntilBeforeNow": "有效期不能早于当前时间",
     "singleIpHint": "输入单个IP地址，如：192.168.1.1",
-    "ipFormatHint": "支持格式：192.168.1.0/24（网段��或包含多个IP段",
+    "ipFormatHint": "支持格���：192.168.1.0/24（网段��或包含多个IP段",
     "expireAt": "��效期至",
     "expireAtTip": "规则到期后���动失效，留空表示永久有效",
     "expireAtHint": "留空表示永久有效",
@@ -3811,7 +3811,7 @@
     "preview": "预览",
     "download": "下载",
     "approvedBy": "审核人",
-    "reviewedAt": "审核时间"
+    "reviewedAt": "审核时���"
   },
   "rblFilter": {
     "title": "RBL 过滤",
@@ -3842,7 +3842,7 @@
     "queryDomain": "查询域名",
     "dnsResult": "DNS 结果",
     "responseTime": "响应时间",
-    "hitRules": "命中规则",
+    "hitRules": "命中���则",
     "createRule": "新���规则",
     "editRule": "编辑规则",
     "ruleName": "��则名称",
@@ -4104,7 +4104,7 @@
     "useExample": "使用该示例",
     "effectSenderLabel": "当发信人为",
     "effectActionLabel": "系统将执行：",
-    "effectExpireLabel": "有效期至",
+    "effectExpireLabel": "有效���至",
     "effectPriorityLabel": "优先级",
     "effectSenderEmpty": "未填写",
     "effectExpirePermanent": "永久",
@@ -4268,7 +4268,7 @@
     "testContentRequired": "请输入测试内容",
     "testMatched": "匹配",
     "testNotMatched": "不匹配",
-    "noRules": "暂无内容规则",
+    "noRules": "���无内容规则",
     "batchEnable": "��量启用",
     "batchDisable": "批量���用",
     "batchDelete": "批量删除",
@@ -4421,7 +4421,7 @@
       "discard": "丢弃"
     },
     "actionTooltip": {
-      "accept": "允许：不对此规则触发的情况采取拦截动作，邮件继续进入下一阶段检测。",
+      "accept": "允许：不对此规则触发的情况采取拦截动作，��件继续进入下一阶段检测。",
       "quarantine": "隔���：将匹配的邮件放入隔离区，待管理员审核后再决定放行或删除。",
       "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知��",
       "audit": "审核：将邮件放入审核��列，等待管理员人工审批后再投递。",
@@ -4538,7 +4538,7 @@
     },
     "envelopeMismatchWarning": {
       "title": "信封与头部不匹配可能引发误判",
-      "desc": "部分邮件订阅服务、自动转发系统和邮件列表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮件头（From）不一致。开启此检���可能会将这些正常邮���误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
+      "desc": "部分邮件订阅服务、自动转发系统和邮件列表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮��头（From）不一致。开启此检���可能会将这些正常邮���误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
     },
@@ -4804,7 +4804,7 @@
     },
     "toast": {
       "saveOk": "规则已保存",
-      "deleteOk": "规则已删除"
+      "deleteOk": "规��已删除"
     },
     "closeConfirm": {
       "title": "确认离开",
@@ -5554,7 +5554,7 @@
     "configurationTips": "配置提示",
     "receiveTip1": "高风险部门建议使用橙色警告样式",
     "receiveTip2": "主题前缀会以纯文本形式写入邮件主题",
-    "receiveTip3": "正文顶部适合展示醒目的外站来源提醒",
+    "receiveTip3": "��文顶部适合展示醒目的外站来源提醒",
     "receiveTip4": "多个位���会同时添加主题前缀和正文顶部标记",
     "receiveTip5": "优先级数值越大，越先匹配执行",
     "sendTip1": "免责声明应经过法���或合规团队确认",
@@ -5711,7 +5711,7 @@
       "subject": "主题",
       "executionAction": "执行动作",
       "emailStatus": "邮件状态",
-      "ipLocation": "IP 归属地",
+      "ipLocation": "IP 归���地",
       "all": "全部",
       "incoming": "接收",
       "outgoing": "外发",
@@ -6488,7 +6488,6 @@
       "upcoming": "即将上线",
       "storedNotWiredHint": "该附加策略已可配置，但运行时尚未接入。",
       "incompatibleWithAction": "与所选执行动作不兼容",
-      "externalReminderTemplate": "模板",
       "externalReminderTemplateDefault": "默认",
       "adminNotify": "管理员通知",
       "adminNotifyDesc": "发送通知邮件给管理员",
@@ -6564,9 +6563,6 @@
       "disclaimerTemplateCustom": "自定义",
       "emailTagStyle": "标记样式",
       "externalReminderAmberHint": "外部邮件提醒仅对判定为外部发件人的邮件生效",
-      "externalReminderTemplateStandard": "标准模板",
-      "externalReminderTemplateSecurity": "安全提醒",
-      "externalReminderTemplateCustom": "自定义",
       "forwardServerModeRedirect": "重定向 (redirect)",
       "modifyHeaderCustomFieldName": "自定义字段名",
       "modifyHeaderDkimWarning": "修改信头可能破坏 SPF/DKIM 验证结果",
@@ -6778,7 +6774,7 @@
         "cc": "抄送",
         "bcc": "密送",
         "body": "正文",
-        "header": "头字段",
+        "header": "头��段",
         "envelopeSender": "信封发件人",
         "envelopeRecipient": "信封收件人",
         "senderGroup": "发件人组",
@@ -6951,7 +6947,7 @@
         "note": "单位为MB，防止超大附件"
       },
       "desc_attachmentSizeSingle": {
-        "source": "邮件附件解析",
+        "source": "邮���附件解析",
         "usage": "限制单个附件的大小",
         "note": "单位为MB"
       },
@@ -7027,7 +7023,7 @@
         "operators": "大于/大于等于：差异越大越宽松，命中范围越大；小于/小于等于：差异越小越严格，只命中高度相似域名；介于：命中差异落在指定区间的域名。",
         "example": "对象选择「公司主域名档案」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超过 2 的仿冒域名。",
         "recommended": "推荐使用「小于等于 2」，与内置相似域名规则一致，兼顾召回与误报。",
-        "note": "先选择受保护域名档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异��（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
+        "note": "先选择受保护域名档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异��（整数，通常 1-5），越小越���似。内置的相似域名规则用「小于等于 2」。"
       },
       "desc_displayNameSpoof": {
         "source": "仿冒检测模块",
@@ -7193,7 +7189,7 @@
     },
     "test": {
       "sectionTitle": "规则测试",
-      "attributesLabel": "测试属性 (JSON)",
+      "attributesLabel": "测���属性 (JSON)",
       "attributesHint": "用于评估规则的字段值 JSON 对象。示例：{\"sender\":\"attacker@example.com\",\"subject\":\"紧急\"}",
       "runButton": "运行测试",
       "running": "运行中...",
@@ -7274,7 +7270,7 @@
       "exportCsvButton": "导出 CSV",
       "colVersion": "版本",
       "colChangedAt": "修改时间",
-      "colChangedBy": "修改人",
+      "colChangedBy": "��改人",
       "colChangeSummary": "修改内容",
       "colActions": "操作",
       "rollbackButton": "回滚",
@@ -8813,7 +8809,7 @@
       "exempt": "放行",
       "fallbackHint": "该记录为内联回退（已投递并标记），无可处置旁路件",
       "signals": "仿冒信号",
-      "gateDetail": "闸门命中详情",
+      "gateDetail": "闸门命中详���",
       "llmBasis": "LLM 研判依据",
       "socialSignals": "社工信号",
       "noSignals": "暂无仿冒信号",
@@ -10278,7 +10274,7 @@
       "mergedNote": "合并模式下外发和域内方向使用统一配置，防止通过切换方向绕过限制"
     },
     "existence": {
-      "title": "存���性验证策略",
+      "title": "存���性验证���略",
       "desc": "验证收件人在目录服务的真实存在性",
       "directionNote": "仅接收方向（外部→内部）生效，内部发信自动跳过验证",
       "strictMode": "严格模式",
@@ -10478,7 +10474,7 @@
     },
     "kpi": {
       "todayVolume": "今日邮件量",
-      "deliverySuccessRate": "投递成功率",
+      "deliverySuccessRate": "���递成功率",
       "queueDepth": "队列深度",
       "alerts": "告警",
       "nodes": "节点",
@@ -10718,7 +10714,7 @@
       "group_name_exists": "已存在同名的代理分组",
       "group_not_found": "代理分组不存在，可能已被删除",
       "group_referenced_by_routes": "该分组正被外发路由规则引用，不能删除，请先移除相关路由规则",
-      "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP 地址），或留空",
+      "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP 地址），或��空",
       "license_key_missing": "服务端未配置授权加密密钥，无法保存授权信息，请联系管理员",
       "member_endpoint_duplicate": "同一个节点不能在分组里重复出现",
       "member_endpoint_id_invalid": "分��成员的节点必须是有效选择",
@@ -11105,7 +11101,7 @@
     "geoip_rules": {
       "ip_range_already_exists": "该 IP 段已存在",
       "geoip_rule_not_found": "IP 归属地规则不存在",
-      "format_json_csv": "导出格式只能是 json 或 csv"
+      "format_json_csv": "导出��式只能是 json 或 csv"
     },
     "group_management_access": {
       "group_management_requires_tenant_administrator_a": "分组管理需要租户管理员权限",
@@ -11279,7 +11275,7 @@
     "users": {
       "cannot_demote_last_system_administrator": "不能降级最后一个平台管理员",
       "cannot_delete_your_own_account": "不能删除自己的账号",
-      "cannot_delete_last_system_administrator": "不能删除最后一个��台管理员",
+      "cannot_delete_last_system_administrator": "不能删除最后一个�����管理员",
       "cannot_disable_last_enabled_super_administrator": "不能停用最后一个启用的超级管理员",
       "bulk_action_would_leave_zero_enabled": "该批量操作会导致没有任何启用的超级管理员"
     },

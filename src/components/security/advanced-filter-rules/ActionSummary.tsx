@@ -40,14 +40,10 @@ function addonSummary(t: ReturnType<typeof useTranslations>, key: AddonKey, para
       return `${templateLabel}${sep}${positionLabel}`;
     }
     case 'externalReminder': {
-      const template = String(params.template ?? 'standard');
-      const label =
-        template === 'security'
-          ? t('addons.externalReminderTemplateSecurity')
-          : template === 'custom'
-            ? t('addons.externalReminderTemplateCustom')
-            : t('addons.externalReminderTemplateStandard');
-      return label;
+      const position = String(params.position ?? 'body_top');
+      return position === 'body_bottom'
+        ? t('addons.externalReminderPositionBottom')
+        : t('addons.externalReminderPositionTop');
     }
     case 'adminNotify': {
       const rt = String(params.recipient_type ?? 'adminList');
