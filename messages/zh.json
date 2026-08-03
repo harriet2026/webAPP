@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND 关系����������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条件为 AND 关系�����������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -1020,7 +1020,7 @@
         "toasts": {
           "created": "路由规则已添加",
           "updated": "路由规则已更新",
-          "deleted": "路由规则已��除",
+          "deleted": "路由规则����除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
         },
@@ -1460,7 +1460,7 @@
       "drop": "丢弃"
     },
     "previewDescriptionWithRule": "策略「{name}」的有效执行路径：",
-    "previewNoRuleSelected": "请选择���条群组策略���预览���",
+    "previewNoRuleSelected": "���选择���条群组策略���预览���",
     "previewShortCircuit": "邮件在【阶段{stage}】因策略「{rule}」的{action}处置被终止，后续阶段不再执行。",
     "previewSkipped": "未执行（前序已短路）",
     "previewNoOverride": "无群组覆盖（按全局执行）",
@@ -2223,7 +2223,7 @@
         "viewTitle": "查看角色权限",
         "createDescription": "配置角色名称、备注与权限矩阵",
         "readonlyDescription": "以下为该角色的完整权限矩阵（只读）",
-        "nameLabel": "角色名称",
+        "nameLabel": "���色名称",
         "namePlaceholder": "如 自定义运营",
         "nameRequired": "请输���角色���称",
         "nameDuplicate": "角色名称已��在",
@@ -3366,7 +3366,7 @@
     "whitelistType": "白名单",
     "whitelistTypeDesc": "投递/标记投递",
     "flowTerminateDesc": "阻断/丢弃/隔离 → 终止并退出流水线",
-    "flowContinueDesc": "投递/标记投递 → 继续检测",
+    "flowContinueDesc": "投递/标���投递 → 继续检测",
     "actionQuarantineAction": "隔离",
     "policyEffectQuarantine": "命中则隔离，邮件保留至隔离区",
     "quarantineModuleLink": "被隔离邮件可在邮件隔离模块查看",
@@ -5432,7 +5432,7 @@
     "errorVersionConflict": "配置已被他人修改,请刷新后重试",
     "errorWindowRange": "检测窗口必须在 1 到 1440 之间",
     "similarEmailTab": "相似邮件检测",
-    "sameSubjectTab": "相同主题检测",
+    "sameSubjectTab": "相同主题检���",
     "detectionWindow": "检测窗口",
     "minutes": "分钟",
     "triggerCount": "触发数量",
@@ -5458,7 +5458,7 @@
     "similarSubject": "相似度>90%视为相同",
     "realtimeNote": "此检测在邮件进入时实时计算，命中后立即拦截或标记",
     "observeNote": "观察模式下命中仅记录日志，不执行拦截动作",
-    "goToGroupPolicy": "前往群组策略配置",
+    "goToGroupPolicy": "前往��组策略配置",
     "atLeastOneDirection": "至少选择一个检测��向",
     "navSummary": "窗口{window}分钟 / 阈值{threshold}%",
     "tooltipObserve": "开启后仅��录日志，不执行实际拦截��作",
@@ -5762,7 +5762,7 @@
       "disposalPolicyKeys": "处置依据",
       "policyModuleMode": "策略模块",
       "policyRuleMode": "规则名称 / ID",
-      "policyRulePlaceholder": "输入规则名称或 ID",
+      "policyRulePlaceholder": "输入��则名称或 ID",
       "policyRuleEmpty": "没有匹配的规则",
       "policyClear": "清空处置依据",
       "platformManagedPolicy": "平台管控策略",
@@ -6161,7 +6161,7 @@
         "entityDetection": {
           "linksTab": "链接 ({n})",
           "attachmentsTab": "附件 ({n})",
-          "globalHint": "当前实体处置将作用于全局策略，影响所有收件人。",
+          "globalHint": "当前实体处置将��用于全局策略，影响所有收件人。",
           "noLinks": "未��测到链接",
           "noAttachments": "未检测到附件",
           "blacklistDomain": "域名加黑",
@@ -6439,7 +6439,7 @@
     "expiresAt": "到期时间",
     "emailType": "邮件类型",
     "emailTypeNotSet": "不设置",
-    "emailTypeHint": "命中此规则的邮件将被标记为该邮件类型",
+    "emailTypeHint": "命中此��则的邮件将被标记为该邮件类型",
     "permanent": "永久",
     "conditionSummary": "条件摘要",
     "action": "动作",
@@ -6521,7 +6521,7 @@
       "deleteAttachmentScopeVirus": "含病毒",
       "deleteAttachmentScopeType": "指定类型",
       "deleteAttachmentScopeOverSize": "超过大小",
-      "deleteAttachmentScopeEncrypted": "加密附件",
+      "deleteAttachmentScopeEncrypted": "加密���件",
       "deleteAttachmentScopeNestedZip": "嵌套压缩包",
       "deleteAttachmentScopeQrCode": "含二维码",
       "deleteAttachmentReplacementText": "替换文本",
@@ -6961,11 +6961,11 @@
       "desc_nestedFileCount": {
         "source": "压���包解析引擎",
         "usage": "检测压缩包内文件总��",
-        "note": "防止解压后文件数量过多"
+        "note": "���止解压后文件数量过多"
       },
       "desc_imageQrCodeResult": {
         "source": "图片二维码识别引擎",
-        "usage": "检测图片附件中的二��码内容",
+        "usage": "检测图片附件中的二维码内容",
         "note": "可识别钓鱼链接、恶意URL等"
       },
       "desc_qrCodeCount": {
@@ -7118,9 +7118,8 @@
       "orgDeptNoMatch": "未找到匹配的部门",
       "orgDeptClearAll": "清空",
       "qrResultValues": {
-        "maliciousUrl": "恶意链接",
-        "suspicious": "可疑",
-        "normal": "正常"
+        "success": "成功",
+        "fail": "失败"
       },
       "descInputTypeLabel": "输入类型",
       "descUnitLabel": "单位",
@@ -7283,7 +7282,7 @@
     },
     "disposition": {
       "primaryActionLabel": "执行动作",
-      "noneHint": "未设置执行动作，邮件将仅执行下方已启用的附加策略。",
+      "noneHint": "未设置执行动作，邮件将仅执行下方已���用的附加策略。",
       "configureActionButton": "配置「{action}」参数",
       "addonsHeading": "附加策略",
       "descCardTitle": "条件说明",
@@ -8227,7 +8226,7 @@
       "partitions": "磁盘分区使用率",
       "backupTasks": "备份任务列表",
       "execTime": "执行时间",
-      "duration": "耗时",
+      "duration": "��时",
       "size": "大小",
       "viewLog": "查看日志",
       "name": "名称",
@@ -8456,7 +8455,7 @@
       "recall": "召回",
       "configSnapshot": "配置快照",
       "configPlaceholder": "配置模块上线后提供",
-      "configSnapshotStaleNotice": "当前配置已变更，此为历史快照",
+      "configSnapshotStaleNotice": "当���配置已变更，此为历史快照",
       "runLog": "运行日志",
       "searchSteps": "搜索步骤...",
       "exportJson": "导出 JSON",
@@ -8624,7 +8623,7 @@
       "asyncTimeout": "超时异步",
       "asyncTimeoutHint": "超时投递后，系统继续等待最终检测结论的最长时长。在此窗口内若得出高风险结论，邮件将被自动召回。范围：1–60 分钟。",
       "autoDeliver": "超时自动投递",
-      "autoDeliverHint": "开启：超时邮件自动投递，无需人工干预；关闭：超时邮件不自动投递，需人工处置。",
+      "autoDeliverHint": "开启：超时邮件自动投递，无需人工干预��关闭：超时邮件不自动投递，需人工处置。",
       "autoDeliverOn": "已开启",
       "autoDeliverOff": "已关闭",
       "timeoutCloseConfirmTitle": "确认关闭超时自动投递？",
@@ -8823,7 +8822,7 @@
     "exempt": {
       "title": "放行此邮件",
       "description": "将该仿冒判定标记为误报并放行",
-      "reasonPlaceholder": "请输入放行原因",
+      "reasonPlaceholder": "��输入放行原因",
       "reasonRequired": "请填写放行原因",
       "submit": "确认放行",
       "success": "已放行",
@@ -8981,7 +8980,7 @@
       "importLimitHint": "单次最多选择 20 人。",
       "importEmpty": "暂无联系人",
       "importHint": "仅保存姓名、邮箱、分类、灵敏度和检测处置配置；部门、职位、外部 ID 只用于导入判断与预览。",
-      "importBatchIdentity": "已选择 {n} 人进行批量创建，身份信息以组织架构为准，保护等级与下方检测配置将统一应用。",
+      "importBatchIdentity": "已选择 {n} 人进行批量创建，身份信息以组织架构为准，保护等级与下方检测配置将统一应用���",
       "importIdentityHint": "姓名、邮箱和职位来自组织架构，仅用于导入确认；姓名和邮箱不可在此修改。",
       "importSensitivityHint": "导入对象的分类与灵敏度按联系人职位自动推荐；部门、职位不会写入保护对象。",
       "importDisabledInvalidEmail": "邮箱无效",
@@ -10234,7 +10233,7 @@
         "merged": "外发+域内合并控制"
       },
       "direction": {
-        "inbound": "接收方向",
+        "inbound": "接���方向",
         "outbound": "外发方向",
         "internal": "域内方向"
       },
@@ -10614,7 +10613,7 @@
       "recall": {
         "notify_email_invalid": "召回通知邮箱「{value}」格式不正确",
         "notify_frequency_invalid": "召回通知频率取值无效，只能是：{allowed}",
-        "policy_invalid": "召回策略「{value}」无效，只能是：{allowed}",
+        "policy_invalid": "召回策略「{value}」无���，只能是：{allowed}",
         "task_timeout_out_of_range": "召回任务超时需在 {min}–{max} 秒之间"
       },
       "recipient_not_in_mail": "该收件人不属于这封邮件",
@@ -10723,7 +10722,7 @@
       "name_required": "请填写角色名称",
       "not_found": "角色不存在，可能已被删除",
       "scope_invalid": "角色范围无效，只能是：{allowed}",
-      "status_invalid": "角色状态无效，只能是：{allowed}",
+      "status_invalid": "角色状态无效，只能���：{allowed}",
       "super_admin_required": "管理平台级角色需要超级管理员权限",
       "system_default_cannot_delete": "系统内置角色不能删除",
       "system_default_cannot_disable": "系统内置角色与超级管理员角色不能停用",
@@ -10814,7 +10813,7 @@
       "leak_mail_not_in_run": "该邮件不属于本次回溯运行",
       "window_start_invalid": "开始时间格式不正确",
       "window_end_invalid": "结束时间格式不正确",
-      "window_order_invalid": "开始时间必须早于结束时间",
+      "window_order_invalid": "开���时间必须早于结束时间",
       "indicator_tag_format_invalid": "威胁标签格式应为 indicator:「标签代码」，且代码不能为空"
     },
     "tenant": {

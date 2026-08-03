@@ -40,9 +40,9 @@ const ENUM_VALUES: Record<string, string[]> = {
   dmarc_result: ['pass', 'fail', 'quarantine', 'reject', 'none'],
   ptr_result: ['pass', 'fail', 'none'],
   virus_scan_result: ['clean', 'infected', 'suspicious', 'error'],
-  // 二维码 OCR 结果：固定枚举下拉，取值取自邮件处置模块 advanced-filters 的
-  // 权威定义（qr_code_result），杜绝自由输入产生的脏值。
-  image_qr_code_result: ['maliciousUrl', 'suspicious', 'normal'],
+  // 二维码 OCR 结果：固定枚举下拉，取值为「成功 / 失败」两态（OCR 识别是否成功），
+  // 标签经 i18n 本地化（v3Conditions.qrResultValues.*），杜绝自由输入产生的脏值。
+  image_qr_code_result: ['success', 'fail'],
 };
 
 // 枚举值需本地化显示的字段 → i18n 子命名空间（相对 advancedRulesFeature）。

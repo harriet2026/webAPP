@@ -7061,9 +7061,8 @@
       "orgDeptNoMatch": "No matching departments",
       "orgDeptClearAll": "Clear all",
       "qrResultValues": {
-        "maliciousUrl": "Malicious URL",
-        "suspicious": "Suspicious",
-        "normal": "Normal"
+        "success": "Success",
+        "fail": "Fail"
       },
       "descInputTypeLabel": "Input type",
       "descUnitLabel": "Unit",
