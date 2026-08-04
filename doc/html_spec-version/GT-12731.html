@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 · 增量功能规格 · v8</title>
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 · 增量功能规格 · v9</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -230,7 +230,13 @@
         <li class="toc-change"><span class="toc-num">24</span><a href="#change-24">轻度检测配置：移除「一维码豁免：条形码（Code128/EAN等）」Switch</a></li>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-022）</a></li>
+      <!-- 一级需求：GT-12276 系统状态：去掉"待办与告警"模块 -->
+      <li class="toc-l1"><a href="#gt-12276">GT-12276 系统状态：去掉"待办与告警"模块</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">25</span><a href="#change-25">移除系统首页「待办与告警」卡片，威胁态势趋势图独占全宽</a></li>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-023）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-007）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
@@ -246,9 +252,9 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>文档编号（文件 ticket）</td><td>GT-12731</td></tr>
-        <tr><td>需求名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化</td></tr>
+        <tr><td>需��名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块</td></tr>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 缺陷修复 + 功能优化</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v8</span></span></td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v9</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-08-02</td></tr>
         <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层抽屉）</td></tr>
         <tr><td>组件路径</td><td>
@@ -353,7 +359,7 @@
         <h4>S-1 · 问题现象（修复前）：URL检测与防护处于「未启用」稳态</h4>
         <p class="trigger-path">触发路径：策略流水线 → 打开阶段3 内容层抽屉 → 当前停留在「内容规则」，左侧导航中「URL检测与防护」为未启用态（空心圆点 + 摘要「未启用」）· 用户实拍（浅色主题）</p>
         <figure>
-          <img src="./screenshots/GT-12723-S1-problem-url-disabled-nav-light.png" alt="内容规则页面，左侧导航 URL检测与防护 显示未启用（空心圆点 + 未启用摘要），红框标注" />
+          <img src="./screenshots/GT-12723-S1-problem-url-disabled-nav-light.png" alt="内容规则页面，左侧导航 URL检测与防护 显示未启用（空心圆点 + 未启用摘要），红框标��" />
           <figcaption>图 S-1：修复前稳态。左侧导航「URL检测与防护」为空心圆点、摘要文字为「未启用」（红框标注）。这是点击进入该模块前的起始态。</figcaption>
         </figure>
       </div>
@@ -444,11 +450,11 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
         </figure>
       </div>
       <div class="interaction-preview">
-        <h4>S-4 · URL检测与防护 模块详情页（切换目标模块）</h4>
+        <h4>S-4 · URL���测与防护 模块详情页（切换目标模块）</h4>
         <p class="trigger-path">触发路径：从 S-3 起，点击左侧导航「URL检测与防护」→ 右侧内容区切换为该模块详情（链接保护 / 点击时安全策略）· 浏览器实拍（浅色主题 / 1920×900）</p>
         <figure>
           <img src="./screenshots/GT-12723-S4-url-module-detail-light-1920x900.png" alt="切换到 URL检测与防护 模块，左侧导航该项高亮选中，圆点与摘要稳定，无闪回" />
-          <figcaption>图 S-4：切换到 URL检测与防护 后，左侧导航该项高亮选中，其圆点 / 摘要保持稳定，切换全程无「已启用 → 未启用」闪回。右上角总开关反映真实启用态。</figcaption>
+          <figcaption>图 S-4：��换到 URL检测与防护 后，左侧导航该项高亮选中，其圆点 / 摘要保持稳定，切换全程无「已启用 → 未启用」闪回。右上角总开关反映真实启用态。</figcaption>
         </figure>
       </div>
 
@@ -540,7 +546,7 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
           <tr><td>10</td><td>病毒扫描结果「值」→ 有毒/无毒</td><td><a href="#change-6">变更 6</a></td><td><code>virus_scan_result: ['infected','clean']</code> + i18n <code>virusScanResultValues</code></td></tr>
         </tbody>
       </table>
-      另含前序已记录的 <strong>变更 3</strong>（意图引擎多意图·双模式）与 <strong>变更 4</strong>（移除 RBL 结果 / 显示名仿冒）。条件目录总数变化：基线 <strong>54 → 51</strong>（变更 5）<strong> → 49</strong>（变更 4）。
+      另含前序已记录的 <strong>变更 3</strong>（意图引擎多意图·双模式）与 <strong>变更 4</strong>（移除 RBL 结�� / 显示名仿冒）。条件目录总数变化：基线 <strong>54 → 51</strong>（变更 5）<strong> → 49</strong>（变更 4）。
     </div>
   </section>
 
@@ -615,7 +621,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
             <td><span class="tag tag-changed">变更</span>预览逐意图渲染；任一条目不完整则整条不完整</td>
           </tr>
           <tr>
-            <td><code>ConditionTree.tsx</code> · 默认 leaf</td>
+            <td><code>ConditionTree.tsx</code> · ���认 leaf</td>
             <td>单意图空值编码</td>
             <td>多意图空列表（<code>value=''</code>，operator <code>within</code> 伞值）</td>
             <td><span class="tag tag-changed">变更</span>空列表 → 预览判为不完整，与枚举单选起始态一致</td>
@@ -790,7 +796,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
         <tbody>
           <tr><td><code>dispatcher.ts</code> · 字段元信息</td><td>上述字段未标记布尔 / 未给二元枚举</td><td><code>is_encrypted_attachment</code> / <code>mailfrom_empty</code> 标为布尔；三枚举字段给定二元 <code>options</code></td><td><span class="tag tag-changed">变更</span>取值域收敛</td></tr>
-          <tr><td><code>ConditionConfigPanel.tsx</code> · 值控件选择</td><td>文本 / 多值下拉</td><td>布尔字段 → <code>BooleanValueSelect</code>（是/否）；二元枚举 → <code>EnumSection</code></td><td><span class="tag tag-changed">变更</span>按字段类型自动选控件</td></tr>
+          <tr><td><code>ConditionConfigPanel.tsx</code> · 值控件选择</td><td>文本 / 多值下拉</td><td>布尔��段 → <code>BooleanValueSelect</code>（是/否）；二元枚举 → <code>EnumSection</code></td><td><span class="tag tag-changed">变更</span>按字段类型自动选控件</td></tr>
           <tr><td><code>messages/{zh,en,ru,th}.json</code></td><td>缺 <code>booleanValues</code> / <code>qrResultValues</code> / <code>envelopeHeaderConsistencyValues</code> / <code>virusScanResultValues</code></td><td>四语补齐上述枚举文案</td><td><span class="tag tag-added">新增</span>四语齐全</td></tr>
         </tbody>
       </table>
@@ -808,7 +814,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <div class="incr-body">
       <h3>7.1 问题与修复</h3>
       <p>
-        配置「发信人组」条件（<code>panel:'group'</code> / 字段 <code>sender_group</code>）时，其对象下拉应列出「群组策略」模块中类型为「发信人组」的群组，但此前下拉为空 / 未正确取到群组来源。修复方式：在 <code>dispatcher.ts</code> 为 <code>sender_group</code> 字段补正 <code>map_keys_source</code>，指向群组策略的发信人组元数据端点，使 <code>MapValueSection</code> 的 <code>useMapKeys</code> 能拉取到候选群组。
+        配置「发信人组」条件（<code>panel:'group'</code> / 字段 <code>sender_group</code>）时，其对象下拉应列出「群组策略」模块中类型为「发信人组」的群组，但此前下拉为空 / 未正确取到群组来源。修复方式：在 <code>dispatcher.ts</code> 为 <code>sender_group</code> 字段补正 <code>map_keys_source</code>，指向群���策略的发信人组元数据端点，使 <code>MapValueSection</code> 的 <code>useMapKeys</code> 能拉取到候选群组。
       </p>
       <div class="callout callout-ok">
         <strong>最终实现：</strong><code>sender_group</code> 的字段元信息 <code>map_keys_source</code> 指向群组策略发信人组列表（<code>type=sender</code>）；对象下拉即渲染出「研发部门」「合作伙伴域名」等真实群组项，选定后以 <code>map</code> 语义 + 布尔命中值（是/否）组成条件。
@@ -1060,7 +1066,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       </div>
       <table>
         <thead>
-          <tr><th>功能 / 元素</th><th>变更</th><th>AI-单<br/>平台管理员</th><th>传统-单<br/>平台管理员</th><th>云-多<br/>租户管理员</th><th>AI-多<br/>租户管理员</th><th>传统-多<br/>租户管理员</th></tr>
+          <tr><th>功能 / 元素</th><th>变更</th><th>AI-单<br/>平台管理员</th><th>传统-单<br/>平台管理员</th><th>云-多<br/>租户��理员</th><th>AI-多<br/>租户管理员</th><th>传统-多<br/>租户管理员</th></tr>
         </thead>
         <tbody>
           <tr><td>图片OCR检测 · 检测模式下拉（不检测 / 检测）</td><td>#13</td><td>&#x2705;</td><td>&#x2705;</td><td>?</td><td>?</td><td>?</td></tr>
@@ -1091,10 +1097,10 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <h3>13.2 截图式交互预览</h3>
       <div class="interaction-preview">
         <h4>S-1 · 检测模式下拉展开态（仅「不检测 / 检测」两项，无深度检测）</h4>
-        <p class="trigger-path">触发路径：<code>/zh/security/pipeline</code> → 阶段3 附件安全检测 → 「图片识别」页签 → 点击「图片OCR检测 · 检测模式」下拉 · 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1694×1046）</p>
+        <p class="trigger-path">触发路径：<code>/zh/security/pipeline</code> → 阶段3 附件安全检测 → 「图片识别」页签 → 点击「图片OCR检测 · 检测模���」下拉 · 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1694×1046）</p>
         <figure>
           <img src="./screenshots/GT-11675-S1-ocr-mode-two-options-light-1694x1046.png" alt="图片OCR检测的检测模式下拉展开，仅显示不检测与检测两个选项，无深度检测" />
-          <figcaption>图 S-1：检测模式下拉展开后仅两项——「不检测」与「检测」（当前选中，带勾）。对照修改前该下拉曾含置灰的「深度检测（手写+印刷）」，现已删除。</figcaption>
+          <figcaption>图 S-1：检测模式下拉展开后仅两项——「不检测」与「检测」（当前选中，带勾）。对照修改前该下拉曾含置灰的「深度检测（手写+印刷）」，现已删���。</figcaption>
         </figure>
       </div>
       <h3>13.3 逐元素与 i18n 变更</h3>
@@ -1131,7 +1137,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         「检测数量上限（防止性能耗尽）」是"每封邮件最多对几个附件做 OCR"的性能保护参数，仅在真正执行 OCR（检测模式=检测）时才有意义。原实现下该输入框无论检测模式如何始终可编辑，选「不检测」时仍可改，属逻辑瑕疵。
       </p>
       <div class="callout callout-ok">
-        <strong>最终实现方案（方案 A）：</strong>当 <code>ocr_mode === 'none'</code>（不检测）时，禁用「检测数量上限」输入框（<code>disabled</code>），并在其下方显示灰字提示「选择「检测」后可配置」；切换回「检测」时输入框恢复可编辑、提示消失。采用禁用而非隐藏，使「检测模式 / 检测数量上限」并排两列布局在模式切换时保持稳定、不跳动。
+        <strong>最终实现方案（方案 A）：</strong>当 <code>ocr_mode === 'none'</code>（不检测）时，禁用「检测数量上限」输入框（<code>disabled</code>），并在其下方显示灰字提示「选择「检测」后可配置」；切换回「检测」时输入框恢复可编辑、提示消失。采用禁用而非隐藏，使���检测模式 / 检测数量上限」并排两列布局在模式切换时保持稳定、不跳动。
       </div>
       <h3>14.2 截图式交互预览</h3>
       <div class="interaction-preview">
@@ -1218,7 +1224,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         内容规则「执行动作」下拉原有 6 项：<code>deliver</code>（放行）、<code>tag_deliver</code>（标记投递）、<code>isolate</code>（隔离）、<code>review</code>（审核）、<code>block</code>（阻断）、<code>discard</code>（丢弃）。本次从 <code>ACTIONS</code> 数组移除 <code>tag_deliver</code>，下拉减为 5 项。
       </p>
       <div class="callout callout-ok">
-        <strong>最终实现方案：</strong>经用户确认——仅去掉 <code>tag_deliver</code>，<strong>保留</strong> <code>deliver</code>（放行 / 投递）；其余项与现有顺序保持不变。<code>ContentRuleDrawer.tsx</code> 的 <code>ACTIONS</code> 数组删除 <code>'tag_deliver'</code> 一项即可，下拉渲染由该数组驱动，自动少一项。
+        <strong>最终实现方案：</strong>经用户确认——仅去掉 <code>tag_deliver</code>，<strong>保留</strong> <code>deliver</code>（放行 / 投递）；其余项与现有顺序保持不变。<code>ContentRuleDrawer.tsx</code> 的 <code>ACTIONS</code> 数组删除 <code>'tag_deliver'</code> 一项即可，下拉渲染���该数组驱动，自动少一项。
       </div>
       <div class="callout callout-info">
         <code>ContentRuleUiAction</code> 类型仍保留 <code>tag_deliver</code>，抽屉中针对历史数据命中 <code>tag_deliver</code> 的「标记配置块」渲染逻辑亦保留（仅历史规则会命中），本需求不删除，避免越界影响其它功能。
@@ -1503,7 +1509,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
-        <tr><td>问题</td><td>本次仅在 AI版·单租户 / 平台管理员下验证（该形态可打开阶段3 抽屉并展示 4 模块导航）。多租户形态、以及租户管理员角色下是否可访问策略流水线抽屉、导航呈现是否一致，未逐一验证。</td></tr>
+        <tr><td>问题</td><td>本次仅在 AI版·单租户 / 平台管理员下验证（该形态可打开阶段3 抽屉并展示 4 模块导航）。多租户形态、以及租户管理员角色下是否可访问策略流水���抽屉、导航呈现是否一致，未逐一验证。</td></tr>
         <tr><td>影响</td><td>产品形态 × 角色矩阵中标记为 ? 的单元格</td></tr>
         <tr><td>建议</td><td>在各形态 / 角色账号下打开策略流水线阶段3 抽屉，确认导航可见性与圆点 / 摘要渲染后补充矩阵</td></tr>
       </tbody>
@@ -1669,7 +1675,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       </table>
       <div class="callout callout-info">value 值 <code>"reject"</code> 不变，仅 label 文案改变；与 GT-11651 内容规则的「阻断→拒收」改动保持一致的语义对齐。</div>
       <figure style="margin-top:1rem;">
-        <img src="./screenshots/GT-12754-antivirus-tab-virus-dropdown-open.png" alt="发现病毒后的处置下拉 - 拒收选项">
+        <img src="./screenshots/GT-12754-antivirus-tab-virus-dropdown-open.png" alt="发现���毒后的处置下拉 - 拒收选项">
         <figcaption>S-6：「发现病毒后的处置」下拉展开（1440×900）：原「阻断」已改为「拒收」，与其余选项一起显示在列表中。</figcaption>
       </figure>
     </div>
@@ -1846,6 +1852,81 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
   </section>
 
   <!-- ══════════════ E. 版本历史 ══════════════ -->
+  <!-- ══════════════ 一级需求 GT-12276 ══════════════ -->
+  <div id="gt-12276" style="scroll-margin-top:1rem;"></div>
+  <section id="section-gt-12276">
+    <h2 style="border-bottom:2px solid #2563eb;padding-bottom:0.4rem;">GT-12276 系统状态：去掉"待办与告警"模块</h2>
+    <table>
+      <tbody>
+        <tr><td width="140">需求名称</td><td>GT-12276 系统状态：去掉"待办与告警"模块</td></tr>
+        <tr><td>生成日期</td><td>2026-08-04</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/dashboard</code>（系统状态首页）</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/dashboard/system-status/system-status-dashboard.tsx</code>（唯一改动文件）<br>
+          移除：<code>import { TodoAlerts } from './todo-alerts'</code> 及布局 wrapper <code>xl:grid-cols-3</code><br>
+          保留不变：<code>todo-alerts.tsx</code>、<code>hooks.ts</code>（<code>alerts</code> 数据流）、<code>health-banner.tsx</code>、<code>gt12553-platform-todos.test.tsx</code>
+        </td></tr>
+        <tr><td>变更类型</td><td>功能移除（UI 模块移除 + 布局调整）</td></tr>
+        <tr><td>webapp commit</td><td><code>当前工作区</code></td></tr>
+        <tr><td>浏览器验证</td><td>2026-08-04，AI版·多租户·平台管理员·Mock，1440×900，深色主题</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本需求仅包含一项变更：移除系统状态首页右侧的「待办与告警」卡片模块（含「待处置队列」和「举报待审」两个条目），同时将原本占 <code>xl:col-span-2</code> 的「威胁态势趋势」图扩展为独占全宽。<code>todo-alerts.tsx</code> 组件文件保留（供后续复用），<code>hooks.ts</code> 的 <code>alerts</code> 数据字段和 <code>HealthBanner</code> 顶部横幅不受影响。
+    </div>
+
+    <!-- 变更 25 -->
+    <div class="interaction-preview" id="change-25" style="margin-top:1.5rem;">
+      <h4><span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">25</span>移除系统首页「待办与告警」卡片，威胁态势趋势图独占全宽</h4>
+      <div class="trigger-path">触发路径：任意形态任意角色 → 导航到系统状态（<code>/zh/dashboard</code>）</div>
+      <table>
+        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>代码路径</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>第二屏布局</td>
+            <td><code>xl:grid-cols-3</code> 两栏布局：「威胁态势趋势」占 <code>xl:col-span-2</code>，右侧「待办与告警」卡片占 1 栏</td>
+            <td><code>&lt;ThreatTrend&gt;</code> 直接渲染，独占全宽，无外层 grid wrapper</td>
+            <td><code>system-status-dashboard.tsx</code> 第二屏布局块</td>
+          </tr>
+          <tr>
+            <td>待办与告警卡片</td>
+            <td>白色卡片，包含：<br>「待处置队列」（红点 ● + 标题 + "11 待处理" 副文案 + 右箭头跳转链接）<br>「举报待审」（橙点 ● + 标题 + "6 条" 副文案 + 右箭头跳转链接）</td>
+            <td>从 DOM 中完全移除，<code>&lt;TodoAlerts&gt;</code> 组件不再挂载</td>
+            <td><code>todo-alerts.tsx</code>（文件保留，import 已从 dashboard 中移除）</td>
+          </tr>
+          <tr>
+            <td>HealthBanner 横幅</td>
+            <td>顶部警示横幅（"检测到 N 项紧急事件待处理"）继续显示</td>
+            <td>不变，HealthBanner 与本次变更无关</td>
+            <td><code>health-banner.tsx</code>，数据来自 <code>hooks.ts alerts</code> 字段</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-removed">移除原因：「待办与告警」模块内的「待处置队列」和「举报待审」信息已在顶部 HealthBanner 横幅和「待处置邮件」KPI 卡片中体现，独立卡片造成信息重复；移除后威胁态势趋势图获得更充裕的横向展示空间。</div>
+      <figure style="margin-top:1rem;">
+        <img src="./screenshots/GT-12276-dashboard-mock-default.png" alt="系统状态首页 - 待办与告警已移除，威胁态势趋势独占全宽">
+        <figcaption>S-1：系统状态首页（AI版·多租户·平台管理员·Mock，1440×900，深色主题）：「待办与告警」模块已移除，「威胁态势趋势」图独占全宽；顶部 HealthBanner 「检测到 3 项紧急事件待处理」横幅保持不变。</figcaption>
+      </figure>
+    </div>
+
+    <!-- 差异标注 D-023 -->
+    <section id="incremental-gt12276-diff" style="margin-top:1.5rem;">
+      <h3>差异标注（本次增量 D-023）</h3>
+      <div class="interaction-preview">
+        <h3>D-023 · 「待办与告警」卡片与顶部横幅及 KPI 卡片信息重复，移除以减少噪声</h3>
+        <table>
+          <tbody>
+            <tr><td width="120">类型</td><td>UI 模块移除 + 布局调整</td></tr>
+            <tr><td>描述</td><td>「待处置队列」（隔离 N 封）和「举报待审」（N 条）数据已分别在「待处置邮件」KPI 卡片（含「隔离 N 封 / 举报待审 N 封」副文案）和 HealthBanner 中呈现；独立卡片无新增信息价值，额外占据首页 1/3 列宽，使威胁态势趋势图被压缩；移除后布局更简洁，趋势图可利用完整内容宽度。</td></tr>
+            <tr><td>影响范围</td><td><code>system-status-dashboard.tsx</code>：移除 <code>xl:grid-cols-3</code> wrapper 和 <code>&lt;TodoAlerts&gt;</code>，<code>import { TodoAlerts }</code> 同步移除，注释更新；其余文件（<code>todo-alerts.tsx</code>、<code>hooks.ts</code>、测试文件）均不变</td></tr>
+            <tr><td>不受影响</td><td>HealthBanner 横幅（<code>alerts</code> 字段驱动，继续工作）、KPI 卡片区（3/4 列独立布局不变）、<code>gt12553-platform-todos.test.tsx</code>（直接单元测试 <code>TodoAlerts</code>，不经过 Dashboard）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <!-- ══════════════ E. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>E. 版本历史</h2>
     <table>
@@ -1897,7 +1978,23 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>v8</td>
           <td>2026-08-04</td>
           <td><code>c7a3e81</code></td>
-          <td>追加一级需求 GT-12201 二维码检测优化：变更 22（移除深度检测配置区「结果仲裁策略」模块——含 disabled Select 与「敬请期待」提示；QrDeepRoutesConfig.arbitration 从类型/API声明/mock/DEFAULT_QR_DEEP_ROUTES 及 zh/en/ru/th 四语 imageDetect.arbitration/highestPriority/firstMatch/tooltips.arbitration 共 4 个 key 全链路删除；parity 测试同步移除 4 个必需 key）、变更 23（超限处置文案：pass_warn「放行并记录告警」→「进行下一步」、quarantine「隔离兜底」→「隔离」；仅改 messages/zh/en/ru/th 各 2 行文案值，value/data-testid/类型/API 不变）、变更 24（移除轻度检测配置区「一维码豁免：条形码（Code128/EAN等）」Switch；ImageDetectConfig.qr_barcode_exempt 从类型/API声明/mock/AttachmentSecurityPage 读写 2 处/DEFAULT_IMAGE_DETECT_CONFIG 及 zh/en/ru/th 四语 imageDetect.barcodeExempt 各 1 行全链路删除；parity 测试移除 barcodeExempt 必需 key）；浏览器实拍 S-1（深度检测无仲裁策略模块）/ S-2（超限处置下拉展开：进行下一步/隔离）/ S-3（轻度检测无一维码豁免 Switch）/ S-4（轻度检测执行动作下拉 4 项）；差异新增 D-020~D-022；目录追加 GT-12201 分组（变更 22~24）；title/元信息/差异范围同步更新；文档版本 v7→v8。</td>
+          <td>追加一级需求 GT-12201 二维码检测优化（下略，见原 v8 记录）。</td>
+        </tr>
+        <tr>
+          <td>v9</td>
+          <td>2026-08-04</td>
+          <td><code>当前工作区</code></td>
+          <td>追加一级需求 GT-12276 系统状态：去掉"待办与告警"模块：变更 25（<code>system-status-dashboard.tsx</code> 移除 <code>xl:grid-cols-3</code> wrapper 和 <code>&lt;TodoAlerts&gt;</code> 组件渲染；<code>import { TodoAlerts }</code> 同步移除；<code>ThreatTrend</code> 独占全宽；<code>todo-alerts.tsx</code> 文件保留、<code>hooks.ts</code> <code>alerts</code> 数据流和 <code>HealthBanner</code> 均不受影响；测试文件无需修改）；差异新增 D-023；目录追加 GT-12276 分组（变更 25）；title / 元信息 / 差异范围同步更新；浏览器实拍 S-1（AI版·多租户·Mock，1440×900，深色主题）；文档版本 v8→v9。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <a class="back-link" href="#toc">↑ 返回目录</a>
+
+</div>
+</body>
+</html>：变更 22（移除深度检测配置区「结果仲裁策略」模块——含 disabled Select 与「敬请期待」提示；QrDeepRoutesConfig.arbitration 从类型/API声明/mock/DEFAULT_QR_DEEP_ROUTES 及 zh/en/ru/th 四语 imageDetect.arbitration/highestPriority/firstMatch/tooltips.arbitration 共 4 个 key 全链路删除；parity 测试同步移除 4 个必需 key）、变更 23（超限处置文案：pass_warn「放行并记录告警」→「进行下一步」、quarantine「隔离兜底」→「隔离」；仅改 messages/zh/en/ru/th 各 2 行文案值，value/data-testid/类型/API 不变）、变更 24（移除轻度检测配置区「一维码豁免：条形码（Code128/EAN等）」Switch；ImageDetectConfig.qr_barcode_exempt 从类型/API声明/mock/AttachmentSecurityPage 读写 2 处/DEFAULT_IMAGE_DETECT_CONFIG 及 zh/en/ru/th 四语 imageDetect.barcodeExempt 各 1 行全链路删除；parity 测试移除 barcodeExempt 必需 key）；浏览器实拍 S-1（深度检测无仲裁策略模块）/ S-2（超限处置下拉展开：进行下一步/隔离）/ S-3（轻度检测无一维码豁免 Switch）/ S-4（轻度检测执行动作下拉 4 项）；差异新增 D-020~D-022；目录追加 GT-12201 分组（变更 22~24）；title/元信息/差异范围同步更新；文档版本 v7→v8。</td>
         </tr>
       </tbody>
     </table>
