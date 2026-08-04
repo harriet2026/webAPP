@@ -21,7 +21,7 @@ const required = [
   ...[
     'serverConfig', 'antivirusServerHost', 'antivirusServerPort', 'virusDbStatus', 'actualCapabilityHint',
     'updateNow', 'configured', 'notConfigured', 'autoUpdate', 'daily', 'actionConfig', 'virusAction',
-    'timeoutAction', 'receiveDefault', 'updateSuccess', 'updateFailed',
+    'timeoutAction', 'receiveDefault', 'updateSuccess', 'updateFailed', 'platformManagedHint',
   ].map((key) => `antivirus.${key}`),
   ...[
     'ocrDetection', 'detectionMode', 'ocrLimit', 'ocrLimitDisabledHint', 'attachments', 'ocrMode_none', 'ocrMode_light',
