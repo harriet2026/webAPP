@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 18,
+  "current_version": 19,
   "history": [
     {
       "version": 1,
@@ -162,7 +162,16 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12695",
       "incremental": true,
-      "summary": "新建 GT-12695.html 文档（文件名 ticket=GT-12695，内容需求名=GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失），首次生成 v1：变更 1（图片OCR检测「检测模式」去掉从未实现的「深度检测（手写+印刷）」禁用占位项，ImageDetectTab SelectContent 删除 deep SelectItem，检测模式收窄为「不检测 / 检测」；唯一有效模式 ocrMode_light 文案「轻度检测（仅印刷体）」重命名为「检测」；attachment-security.ts 类型 ocr_mode 由 'none'|'light'|'deep' 收窄为 'none'|'light'；lib/api/attachment-security.ts getImageDetectConfig 对历史 ocr_mode='deep' 归一为 'light'；四语删 imageDetect.ocrMode_deep、改 ocrMode_light、改写 tooltips.ocrMode 与 imageDetect.ocrSendHint 去掉深度；AttachmentSecurityPage.i18n-parity.test.ts 移除 ocrMode_deep 必需键）、变更 2（方案 A：检测模式=不检测即 ocr_mode==='none' 时，ImageDetectTab 新增 ocrDisabled 派生量，检测数量上限 Input 加 disabled 并在下方渲染灰字提示，切回检测恢复；新增四语 imageDetect.ocrLimitDisabledHint 中「选择「检测」后可配置」并登记 i18n-parity 必需键）；浏览器实拍 S-1 检测模式下拉仅两项（浅色 AI版·单租户 平台管理员 Mock 1694×1046）+ S-2 不检测时数量上限禁用+提示；差异 D-001~D-003、待确认 Q-001；文档遵循新头部约定（无 hero/无变更卡片总览，从目录起始），D/Q 本文档从 001 起；version.json current_version 17→18。"
+      "summary": "新建 GT-12695.html 文档（文件名 ticket=GT-12695，内容需求名=GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失），首次生成 v1：变更 1（图片OCR检测「检测模式」去掉从未实现的「深度检测（手写+印刷）」禁用占位项，ImageDetectTab SelectContent 删除 deep SelectItem，检测模式收窄为「不检测 / 检测」；唯一有效模式 ocrMode_light 文案「轻度检测（仅印刷体）」重命名为「检测」；attachment-security.ts 类型 ocr_mode 由 'none'|'light'|'deep' 收窄为 'none'|'light'；lib/api/attachment-security.ts getImageDetectConfig 对历史 ocr_mode='deep' 归一为 'light'；四语删 imageDetect.ocrMode_deep、改 ocrMode_light、改写 tooltips.ocrMode 与 imageDetect.ocrSendHint 去掉深度；AttachmentSecurityPage.i18n-parity.test.ts 移除 ocrMode_deep 必需键）、变更 2（方案 A：检测模式=不检测即 ocr_mode==='none' 时，ImageDetectTab 新增 ocrDisabled 派生量，检测数量上限 Input 加 disabled 并在下方渲染灰字提示，切回检测恢复；新增四语 imageDetect.ocrLimitDisabledHint 中「选择「检测」后可配置」并登记 i18n-parity 必需键）；浏览器实拍 S-1 检测模式下拉仅两项（浅色 AI版·单租户 平台管理员 Mock 1694×1046）+ S-2 不检测时数量上限禁用+提示；差异 D-001~D-003、待确认 Q-001；文档遵循新头部约定（无 hero/无变更卡片总览，从目录起始），D/Q 本文档从 001 起；version.json current_version 17→18。（注：本文档已于 version 19 移入 GT-12731.html 并删除，本记录保留作历史。）"
+    },
+    {
+      "version": 19,
+      "generated_at": "2026-08-04",
+      "webapp_commit": "02a906d",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-11675",
+      "incremental": true,
+      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续追加（编号在 GT-12753 的变更 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更新为 D-001~D-016、D 范围更新为 Q-001~Q-006，标题追加 GT-11675（v5），版本历史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。"
     }
   ]
 }

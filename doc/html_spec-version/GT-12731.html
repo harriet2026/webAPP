@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 · 增量功能规格 · v4</title>
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 · 增量功能规格 · v5</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -198,8 +198,15 @@
         <li class="toc-change"><span class="toc-num">12</span><a href="#change-12">「外部邮件提醒」附加策略：移除「模板」配置，仅保留「插入位置」</a></li>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-013）</a></li>
-      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-005）</a></li>
+      <!-- 一级需求：GT-11675 OCR 深度检测功能缺失 -->
+      <li class="toc-l1"><a href="#gt-11675">GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">13</span><a href="#change-13">图片OCR检测模式：去掉「深度检测」，「轻度检测（仅印刷体）」重命名为「检测」</a></li>
+        <li class="toc-change"><span class="toc-num">14</span><a href="#change-14">检测模式为「不检测」时禁用「检测数量上限」并提示</a></li>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-016）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-006）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
   </section>
@@ -995,6 +1002,143 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
   </div>
 
+  <!-- ══════════════ 一级需求 GT-11675 ══════════════ -->
+  <section id="gt-11675">
+    <h2 style="border-bottom:2px solid #2563eb;padding-bottom:0.4rem;">GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失</h2>
+    <table>
+      <tbody>
+        <tr><td width="140">需求名称</td><td>GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失</td></tr>
+        <tr><td>生成日期</td><td>2026-08-04</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层 → 附件安全检测 → 「图片识别」页签 → 图片OCR检测）</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/security/attachment-security/ImageDetectTab.tsx</code>、
+          <code>src/types/attachment-security.ts</code>、
+          <code>src/lib/api/attachment-security.ts</code>（<code>getImageDetectConfig</code>）、
+          <code>AttachmentSecurityPage.i18n-parity.test.ts</code>、
+          <code>messages/{zh,en,ru,th}.json</code>
+        </td></tr>
+        <tr><td>变更类型</td><td>功能移除（去掉从未实现的深度检测）+ 文案调整 + 交互优化</td></tr>
+        <tr><td>webapp commit</td><td><code>02a906d</code></td></tr>
+        <tr><td>浏览器验证状态</td><td>2026-08-04 演示环境真实截图（浅色 / AI版·单租户 / 平台管理员 / Mock 数据 / 阶段3 附件安全检测 → 图片识别，1694×1046）；实拍 S-1 / S-2</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本需求针对「图片OCR检测」：OCR 链路只有单一 pytesseract 路径，深浅模式在执行层完全相同，原「深度检测（手写+印刷）」是从未实现的置灰占位项。<strong>变更 13</strong> 删除该占位项、检测模式收窄为「不检测 / 检测」并把唯一有效模式重命名为「检测」；<strong>变更 14</strong> 采用方案 A，在「不检测」时禁用「检测数量上限」并提示。改动使用项目 next-intl 框架，涉及页面文案覆盖中/英/俄/泰四语。此二变更对应目录变更 13、14。
+    </div>
+    <div class="interaction-preview" style="margin-top:1rem;">
+      <h4>产品形态 × 角色 可见性矩阵（本需求）</h4>
+      <div class="legend" style="font-size:0.8rem;color:#6b7280;margin:0.3rem 0;">
+        <span>&#x2705; 显示且可操作</span>&nbsp;
+        <span>&#x1F512; 显示但只读</span>&nbsp;
+        <span>&#x274C; 隐藏 / 不存在</span>&nbsp;
+        <span>? 无法验证</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th>功能 / 元素</th><th>变更</th><th>AI-单<br/>平台管理员</th><th>传统-单<br/>平台管理员</th><th>云-多<br/>租户管理员</th><th>AI-多<br/>租户管理员</th><th>传统-多<br/>租户管理员</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>图片OCR检测 · 检测模式下拉（不检测 / 检测）</td><td>#13</td><td>&#x2705;</td><td>&#x2705;</td><td>?</td><td>?</td><td>?</td></tr>
+          <tr><td><del>图片OCR检测 · 检测模式 · 深度检测（手写+印刷）选项（已移除）</del></td><td>#13</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td><td>&#x274C;</td></tr>
+          <tr><td>图片OCR检测 · 检测数量上限输入（检测模式=检测时可编辑）</td><td>#14</td><td>&#x2705;</td><td>&#x2705;</td><td>?</td><td>?</td><td>?</td></tr>
+          <tr><td>图片OCR检测 · 检测数量上限输入（检测模式=不检测时禁用）</td><td>#14</td><td>&#x1F512;</td><td>&#x1F512;</td><td>?</td><td>?</td><td>?</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.8rem;color:#6b7280;margin-top:0.5rem;">? 标记项：多租户形态下租户管理员对该配置的可见/可编辑性本次未逐一验证，列入待确认 Q-006。本次实拍在 AI版·单租户 / 平台管理员下完成。</p>
+    </div>
+  </section>
+
+  <!-- ══════════════ 变更 13 ══════════════ -->
+  <div class="incremental-section" id="change-13">
+    <div class="incr-header">
+      <span class="incr-num">13</span>
+      <h2>图片OCR检测模式：去掉「深度检测」，「轻度检测（仅印刷体）」重命名为「检测」</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>ImageDetectTab.tsx</code> 等<br/>功能移除 + 文案调整 · 2026-08-04</span>
+    </div>
+    <div class="incr-body">
+      <h3>13.1 方案概述</h3>
+      <p>
+        「图片OCR检测 → 检测模式」原为三项下拉：<code>不检测</code>（none）、<code>轻度检测（仅印刷体）</code>（light）、<code>深度检测（手写+印刷）</code>（deep，一直置灰不可选）。经核查，OCR 链路只有单一 pytesseract 路径，深浅模式在执行层完全相同，<code>deep</code> 属从未实现的占位项。
+      </p>
+      <div class="callout callout-ok">
+        <strong>最终实现方案：</strong>删除 <code>deep</code> 下拉项，检测模式收窄为「不检测 / 检测」两项；唯一有效模式的文案由「轻度检测（仅印刷体）」精简为「<strong>检测</strong>」。类型 <code>ocr_mode</code> 由 <code>'none' | 'light' | 'deep'</code> 收窄为 <code>'none' | 'light'</code>；读取配置时对历史租户可能残留的 <code>ocr_mode='deep'</code> 做归一化，映射为 <code>'light'</code>，避免下拉空白。
+      </div>
+      <h3>13.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-1 · 检测模式下拉展开态（仅「不检测 / 检测」两项，无深度检测）</h4>
+        <p class="trigger-path">触发路径：<code>/zh/security/pipeline</code> → 阶段3 附件安全检测 → 「图片识别」页签 → 点击「图片OCR检测 · 检测模式」下拉 · 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1694×1046）</p>
+        <figure>
+          <img src="./screenshots/GT-11675-S1-ocr-mode-two-options-light-1694x1046.png" alt="图片OCR检测的检测模式下拉展开，仅显示不检测与检测两个选项，无深度检测" />
+          <figcaption>图 S-1：检测模式下拉展开后仅两项——「不检测」与「检测」（当前选中，带勾）。对照修改前该下拉曾含置灰的「深度检测（手写+印刷）」，现已删除。</figcaption>
+        </figure>
+      </div>
+      <h3>13.3 逐元素与 i18n 变更</h3>
+      <table>
+        <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>ImageDetectTab.tsx</code> · 检测模式 SelectContent</td><td>none + light + deep（disabled）三项</td><td>none + light 两项</td><td><span class="tag tag-removed">移除</span>删除 deep 的 SelectItem 与占位注释</td></tr>
+          <tr><td><code>attachment-security.ts</code> · 类型 <code>ocr_mode</code></td><td><code>'none' | 'light' | 'deep'</code></td><td><code>'none' | 'light'</code></td><td><span class="tag tag-changed">变更</span>收窄联合类型</td></tr>
+          <tr><td><code>attachment-security.ts</code> · <code>getImageDetectConfig</code></td><td>直接强转返回</td><td>读取时 <code>ocr_mode==='deep'</code> 归一为 <code>'light'</code></td><td><span class="tag tag-added">新增</span>历史数据兼容防御</td></tr>
+          <tr><td>四语 <code>imageDetect.ocrMode_light</code></td><td>zh「轻度检测（仅印刷体）」等</td><td>zh「检测」/ en「Detection」/ ru「Обнаружение」/ th「ตรวจจับ」</td><td><span class="tag tag-changed">变更</span>重命名</td></tr>
+          <tr><td>四语 <code>imageDetect.ocrMode_deep</code></td><td>存在（深度检测文案）</td><td>四语删除</td><td><span class="tag tag-removed">移除</span></td></tr>
+          <tr><td>四语 <code>tooltips.ocrMode</code></td><td>「轻度模式仅识别印刷体，深度模式同时识别手写与印刷…」</td><td>「检测并识别图片中的印刷体文字内容」</td><td><span class="tag tag-changed">变更</span>去掉深浅对比</td></tr>
+          <tr><td>四语 <code>imageDetect.ocrSendHint</code></td><td>「外发方向建议启用深度检测…」</td><td>「外发方向建议启用，防截图泄密」（去深度）</td><td><span class="tag tag-changed">变更</span>该键当前未被渲染，属死键，一并去深度表述</td></tr>
+          <tr><td><code>AttachmentSecurityPage.i18n-parity.test.ts</code> · 必需键列表</td><td>含 <code>ocrMode_deep</code></td><td>移除 <code>ocrMode_deep</code></td><td><span class="tag tag-removed">移除</span>同步测试断言</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">
+        二维码图片检测的 <code>qr_mode</code> 中的 <code>deep</code>（识别到二维码并深度校验）是<strong>真实功能</strong>，与本次 OCR 的 deep 无关，未改动；历史死键 <code>ocrMode_deep</code> 之外的 <code>...TemplateDefault</code> 类键不在本需求范围。
+      </div>
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 14 ══════════════ -->
+  <div class="incremental-section" id="change-14">
+    <div class="incr-header">
+      <span class="incr-num">14</span>
+      <h2>检测模式为「不检测」时禁用「检测数量上限」并提示</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>ImageDetectTab.tsx</code>、<code>messages/{zh,en,ru,th}.json</code><br/>交互优化 · 2026-08-04</span>
+    </div>
+    <div class="incr-body">
+      <h3>14.1 方案概述</h3>
+      <p>
+        「检测数量上限（防止性能耗尽）」是"每封邮件最多对几个附件做 OCR"的性能保护参数，仅在真正执行 OCR（检测模式=检测）时才有意义。原实现下该输入框无论检测模式如何始终可编辑，选「不检测」时仍可改，属逻辑瑕疵。
+      </p>
+      <div class="callout callout-ok">
+        <strong>最终实现方案（方案 A）：</strong>当 <code>ocr_mode === 'none'</code>（不检测）时，禁用「检测数量上限」输入框（<code>disabled</code>），并在其下方显示灰字提示「选择「检测」后可配置」；切换回「检测」时输入框恢复可编辑、提示消失。采用禁用而非隐藏，使「检测模式 / 检测数量上限」并排两列布局在模式切换时保持稳定、不跳动。
+      </div>
+      <h3>14.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-2 · 检测模式=不检测时，检测数量上限禁用 + 提示</h4>
+        <p class="trigger-path">触发路径：图片OCR检测 → 检测模式选「不检测」 · 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1694×1046）</p>
+        <figure>
+          <img src="./screenshots/GT-11675-S2-ocr-limit-disabled-when-none-light-1694x1046.png" alt="检测模式为不检测时，检测数量上限输入框灰显禁用，下方提示选择检测后可配置" />
+          <figcaption>图 S-2：检测模式=「不检测」时，「检测数量上限」输入框灰显禁用（值 2 变浅、不可编辑），下方显示灰字「选择「检测」后可配置」；检测模式旁 tooltip 显示「检测并识别图片中的印刷体文字内容」。选回「检测」后输入框恢复可编辑、提示消失（见 S-1 中输入框为可编辑态）。</figcaption>
+        </figure>
+      </div>
+      <h3>14.3 逐元素与 i18n 变更</h3>
+      <table>
+        <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>ImageDetectTab.tsx</code> · 派生变量</td><td>无</td><td><code>const ocrDisabled = config.ocr_mode === 'none'</code></td><td><span class="tag tag-added">新增</span></td></tr>
+          <tr><td><code>ImageDetectTab.tsx</code> · 数量上限 <code>Input</code></td><td>始终可编辑</td><td>增加 <code>disabled={ocrDisabled}</code></td><td><span class="tag tag-changed">变更</span></td></tr>
+          <tr><td><code>ImageDetectTab.tsx</code> · 提示文本</td><td>无</td><td><code>ocrDisabled</code> 为真时渲染灰字 <code>&lt;p&gt;</code>（testid <code>ocr-max-count-disabled-hint</code>）</td><td><span class="tag tag-added">新增</span></td></tr>
+          <tr><td>四语 <code>imageDetect.ocrLimitDisabledHint</code></td><td>不存在</td><td>zh「选择「检测」后可配置」/ en「Configurable after selecting "Detection"」/ ru / th 对应</td><td><span class="tag tag-added">新增</span>四语齐全</td></tr>
+          <tr><td><code>AttachmentSecurityPage.i18n-parity.test.ts</code> · 必需键列表</td><td>无该键</td><td>新增 <code>ocrLimitDisabledHint</code></td><td><span class="tag tag-added">新增</span>登记必需键</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead><tr><th>元素</th><th>类型</th><th>默认值 / 边界</th><th>禁用条件</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>检测数量上限输入</td><td>number input（<code>min=1</code>，失焦 clamp 到 ≥1 整数）</td><td>默认 2 个附件</td><td><code>ocr_mode === 'none'</code> 时禁用</td><td><code>imageDetect.ocrLimit</code> / <code>imageDetect.attachments</code></td></tr>
+          <tr><td>禁用提示</td><td>灰字说明（仅禁用时显示）</td><td>—</td><td>仅 <code>ocr_mode === 'none'</code> 时渲染</td><td><code>imageDetect.ocrLimitDisabledHint</code></td></tr>
+        </tbody>
+      </table>
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
   <!-- ══════════════ C. 差异标注 ══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -1128,6 +1272,36 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td>验证依据</td><td>S-1 / S-2 浏览器实拍；<code>ActionSummary.tsx</code> disclaimer / externalReminder 分支；四语已删除 <code>disclaimerTemplate*</code> / <code>externalReminderTemplate{Standard,Security,Custom}</code> 且全库无残留引用</td></tr>
       </tbody>
     </table>
+
+    <h3>D-014 · OCR 深度检测（手写+印刷）从未实现，本次移除禁用占位项</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·已解决</span></td></tr>
+        <tr><td>描述</td><td>OCR 链路只有单一 pytesseract 路径，<code>runOCR(mode)</code> 的 mode 仅用于日志，深浅在执行层无差异；原「深度检测」下拉项一直 <code>disabled</code>，属静默无效占位。本次删除该项，检测模式收窄为「不检测 / 检测」。</td></tr>
+        <tr><td>解决版本</td><td>GT-11675 · 2026-08-04</td></tr>
+        <tr><td>验证依据</td><td>S-1 浏览器实拍（下拉仅两项）；<code>ImageDetectTab.tsx</code> SelectContent；<code>ocr_mode</code> 类型收窄</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-015 · 历史租户可能残留 <code>ocr_mode='deep'</code>，读取时归一为 'light'</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·连带处理</span></td></tr>
+        <tr><td>描述</td><td>移除 deep 后，后端历史配置若仍存 <code>ocr_mode='deep'</code>，下拉会因无匹配项而空白。<code>getImageDetectConfig</code> 读取时将 <code>'deep'</code> 归一为 <code>'light'</code>（即「检测」），保证兼容与显示正确。</td></tr>
+        <tr><td>解决版本</td><td>GT-11675 · 2026-08-04</td></tr>
+        <tr><td>验证依据</td><td><code>src/lib/api/attachment-security.ts</code> · <code>getImageDetectConfig</code> 归一化分支</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-016 · 「检测数量上限」在「不检测」下曾可编辑，现禁用（方案 A）</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·已解决</span></td></tr>
+        <tr><td>描述</td><td>「检测数量上限」仅在执行 OCR 时有意义。原实现在「不检测」下仍可编辑，给用户"改了有用"的错觉。改为禁用 + 灰字提示「选择「检测」后可配置」，采用禁用而非隐藏以保持并排布局稳定。</td></tr>
+        <tr><td>解决版本</td><td>GT-11675 · 2026-08-04</td></tr>
+        <tr><td>验证依据</td><td>S-2 浏览器实拍（禁用 + 提示）；<code>ImageDetectTab.tsx</code> <code>ocrDisabled</code> 与 <code>disabled</code> 绑定；新增 i18n key <code>ocrLimitDisabledHint</code></td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- ══════════════ D. 待确认 ══════════════ -->
@@ -1183,6 +1357,16 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td>建议</td><td>与后端确认 <code>addon_policy</code> 生效时的正文内容来源；若需用户可编辑内容，评估是否在别处提供入口</td></tr>
       </tbody>
     </table>
+
+    <h3>Q-006 · 多租户形态下租户管理员对图片OCR检测配置的可见 / 可编辑性未逐一验证</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>GT-11675 变更 13 / 14 的实拍在 AI版·单租户 / 平台管理员下完成；云-多 / AI-多 / 传统-多 形态下租户管理员是否可见并可编辑「图片OCR检测」及其检测数量上限，未逐形态验证（本需求可见性矩阵中标 ?）。</td></tr>
+        <tr><td>影响</td><td>产品形态 × 角色矩阵中多租户租户管理员列的准确性</td></tr>
+        <tr><td>建议</td><td>在多租户形态、租户管理员账号下逐一验证附件安全检测入口可见性与该配置可编辑性后回填矩阵</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- ══════════════ E. 版本历史 ══════════════ -->
@@ -1214,6 +1398,12 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>2026-08-04</td>
           <td><code>工作区已提交</code></td>
           <td>追加一级需求 GT-12753 高级过滤规则——新建规则——处置策略：免责声明 / 外部邮件提醒，去掉「自定义模板」：变更 11（免责声明 addon_policy 移除「声明模板」下拉——standard/legal/custom，defaultAddonParams 不再写 template，配置区仅保留「插入位置」；ActionSummary disclaimer 摘要改为显示插入位置；四语删 disclaimerTemplate/Standard/Legal/Custom）、变更 12（外部邮件提醒移除「模板」下拉——standard/security/custom，defaultAddonParams 不再写 template，仅保留「插入位置」+ 外部发件人提示；ActionSummary externalReminder 摘要改为显示插入位置；四语删 externalReminderTemplate/Standard/Security/Custom）；新增浏览器实拍 S-1（免责声明去模板仅剩插入位置）/ S-2（外部邮件提醒去模板仅剩插入位置，摘要显示正文顶部）；差异新增 D-013、待确认新增 Q-005；文档版本 v3→v4；顺带修复免责声明 / 外部邮件提醒功能块内既有 UTF-8 乱码（ru/th 名称、描述、位置、提示、内容占位符）。</td>
+        </tr>
+        <tr>
+          <td>v5</td>
+          <td>2026-08-04</td>
+          <td><code>02a906d</code></td>
+          <td>将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html <strong>移入本文档</strong>（GT-12695.html 已删除，version.json 同步标注移动）：新增变更 13（图片OCR检测模式去掉从未实现的「深度检测（手写+印刷）」禁用占位项，检测模式收窄为「不检测 / 检测」，唯一有效模式文案「轻度检测（仅印刷体）」重命名为「检测」；ImageDetectTab 删 deep SelectItem；类型 ocr_mode 收窄 'none'|'light'；getImageDetectConfig 对历史 'deep' 归一为 'light'；四语删 ocrMode_deep、改 ocrMode_light、改写 tooltips.ocrMode 与 ocrSendHint；i18n-parity 移除 ocrMode_deep）、变更 14（方案 A：检测模式=不检测时禁用「检测数量上限」输入并显示灰字提示「选择「检测」后可配置」，新增四语 imageDetect.ocrLimitDisabledHint 并登记 i18n-parity 必需键）；沿用浏览器实拍 S-1（检测模式下拉仅两项）+ S-2（不检测时数量上限禁用+提示，1694×1046）；差异新增 D-014~D-016（原 GT-12695 的 D-001~D-003 重排）、待确认新增 Q-006（原 Q-001 重排）；C 差异范围 D-001~D-016、待确认 Q-001~Q-006；文档版本 v4→v5。</td>
         </tr>
       </tbody>
     </table>
