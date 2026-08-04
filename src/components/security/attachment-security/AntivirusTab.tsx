@@ -71,7 +71,7 @@ export function AntivirusTab({
               value={actions.virus_action}
               onValueChange={(action) => onActionsChange({ ...actions, virus_action: action as AntivirusActionConfig['virus_action'] })}
             >
-              <SelectTrigger className="w-[280px] max-w-full" data-testid="antivirus-virus-action"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[280px] max-w-full" data-testid="antivirus-virus-action"><SelectValue>{t(`actions.${actions.virus_action}`)}</SelectValue></SelectTrigger>
               <SelectContent data-testid="antivirus-virus-action-options">
                 {VIRUS_ACTIONS.map((action) => (
                   <SelectItem key={action} value={action} textValue={t(`actions.${action}`)} data-testid={`antivirus-virus-action-${action}`}>
@@ -91,7 +91,7 @@ export function AntivirusTab({
               value={actions.timeout_action}
               onValueChange={(action) => onActionsChange({ ...actions, timeout_action: action as AntivirusActionConfig['timeout_action'] })}
             >
-              <SelectTrigger className="w-[280px] max-w-full" data-testid="antivirus-timeout-action"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[280px] max-w-full" data-testid="antivirus-timeout-action"><SelectValue>{t(`actions.${actions.timeout_action}`)}</SelectValue></SelectTrigger>
               <SelectContent data-testid="antivirus-timeout-action-options">
                 {TIMEOUT_ACTIONS.map((action) => (
                   <SelectItem key={action} value={action} textValue={t(`actions.${action}`)} data-testid={`antivirus-timeout-action-${action}`}>
