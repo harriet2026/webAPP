@@ -4971,8 +4971,9 @@
       "antivirusServerPort": "AV Server Port",
       "configured": "Configured",
       "notConfigured": "Not configured",
-      "hostRequired": "Antivirus server host is required",
-      "actualCapabilityHint": "Shows the generic virus-scanning capability currently available from attachd without inventing vendor engine status",
+  "hostRequired": "Antivirus server host is required",
+  "platformManagedHint": "The antivirus server and virus database are configured centrally by the platform administrator under \"Platform Security Policy → Antivirus Engine\". Only this tenant's disposition actions are set here.",
+  "actualCapabilityHint": "Shows the generic virus-scanning capability currently available from attachd without inventing vendor engine status",
       "updateSuccess": "Virus database update requested",
       "updateFailed": "Virus database update failed",
       "receiveDefault": "Inbound defaults: quarantine detected viruses; continue the pipeline on timeout"
@@ -10034,11 +10035,13 @@
     "subtitle": "Platform-level security baseline, applied to all tenants. Only platform admins can configure; tenant admins cannot view or modify.",
     "accessDenied": "Only platform administrators can access this page.",
     "tabs": {
-      "ipStrategy": "IP Strategy",
-      "attachmentLimit": "Attachment Basic Limits",
-      "groupPolicy": "Group Policy"
-    },
-    "attachmentHint": "Attachment size, count, and nesting-depth limits are platform-level resource constraints applied uniformly to all tenants. Tenant-side attachment security inspection does not include this item.",
+  "ipStrategy": "IP Strategy",
+  "attachmentLimit": "Attachment Basic Limits",
+  "groupPolicy": "Group Policy",
+  "antivirusEngine": "Antivirus Engine"
+  },
+  "attachmentHint": "Attachment size, count, and nesting-depth limits are platform-level resource constraints applied uniformly to all tenants. Tenant-side attachment security inspection does not include this item.",
+  "antivirusHint": "The antivirus server host and virus database are platform-level configuration applied uniformly to all tenants; tenants can only set virus disposition actions.",
     "modules": {
       "ipFrequency": "IP Frequency Limit",
       "ipFilter": "IP Blacklist / Whitelist",

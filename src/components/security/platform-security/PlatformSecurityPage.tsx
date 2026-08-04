@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/tabs';
 import { BasicLimitTab } from '@/components/security/attachment-security/BasicLimitTab';
 import { GroupManagementPage } from '@/components/security/groups/group-management-page';
+import { AntivirusEnginePanel } from './AntivirusEnginePanel';
 import { ConnectionLayerPanel } from './ConnectionLayerPanel';
 import { usePermission } from '@/hooks/use-permission';
 
@@ -68,6 +69,11 @@ export function PlatformSecurityPage() {
             <TabsTrigger value="attachment">
               {t('tabs.attachmentLimit')}
             </TabsTrigger>
+            {/* 反病毒引擎：平台级反病毒服务器 + 病毒库配置，统一作用于全部租户。
+                多租户下租户管理员不应配置，故唯一入口收敛到此。 */}
+            <TabsTrigger value="antivirus" data-testid="platform-security-tab-antivirus">
+              {t('tabs.antivirusEngine')}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="ip" className="mt-0">
@@ -84,6 +90,10 @@ export function PlatformSecurityPage() {
               <span className="text-pretty">{t('attachmentHint')}</span>
             </div>
             <BasicLimitTab />
+          </TabsContent>
+
+          <TabsContent value="antivirus" className="mt-0">
+            <AntivirusEnginePanel />
           </TabsContent>
         </Tabs>
       </PageSurface>

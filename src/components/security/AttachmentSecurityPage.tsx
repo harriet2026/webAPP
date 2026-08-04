@@ -149,6 +149,11 @@ export function AttachmentSecurityPage({
       ? moduleT('selectTenantFirst')
       : moduleT('systemAdminOnly');
 
+  // 多租户形态（云网关 / AI版多租户 / 传统版多租户）下，反病毒服务器与病毒库属
+  // 平台级能力，唯一入口为「平台安全策略 → 反病毒引擎」。此处隐藏反病毒页签的平台
+  // 两段并跳过其保存；单租户形态维持现状。
+  const antivirusPlatformManaged = capabilities?.multiTenant ?? false;
+
   const visibleTabs = useMemo(
     () => TABS.filter((tab) => !hideBasicLimit || tab.key !== 'basicLimit'),
     [hideBasicLimit],
@@ -284,7 +289,11 @@ export function AttachmentSecurityPage({
     try {
       const tasks: Promise<void>[] = [];
       if (!same(draft.basic, baseline.basic)) tasks.push(saveBasicLimitConfig(direction, draft.basic, apiRequest));
-      if (!same(draft.antivirus, baseline.antivirus)) tasks.push(saveAntivirusConfig(draft.antivirus, apiRequest));
+      // 多租户下反病毒平台段（host/port）UI 已隐藏、由平台安全策略统一管理，
+      // 此处不再提交，避免租户视角误写平台级配置。
+      if (!antivirusPlatformManaged && !same(draft.antivirus, baseline.antivirus)) {
+        tasks.push(saveAntivirusConfig(draft.antivirus, apiRequest));
+      }
       // GT-12196：归租户的三节（反病毒处置 / 图片识别 / 加密附件）改走租户级端点，
       // 一次提交整份配置。任一节有改动就整体保存 —— 服务端存的是一整个 JSON，
       // 分节 PUT 会互相覆盖。
@@ -413,6 +422,7 @@ export function AttachmentSecurityPage({
                     actions={draft.antivirusActions}
                     onChange={(config) => updateDraft('antivirus', config)}
                     onActionsChange={(actions) => updateDraft('antivirusActions', actions)}
+                    hidePlatformConfig={antivirusPlatformManaged}
                   />
                 ) : activeTab === 'image' ? (
                   <ImageDetectTab

@@ -394,7 +394,7 @@
     },
     "status": {
       "running": "运行中",
-      "paused": "已暂停",
+      "paused": "已���停",
       "locked": "未开通"
     },
     "metrics": {
@@ -709,7 +709,7 @@
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
-      "matchInfoBanner": "各条件为 AND ��系�������������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
+      "matchInfoBanner": "各条���为 AND ��系�������������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
         "ruleNameRequired": "请输入规则名称",
@@ -862,7 +862,7 @@
         "deleteButton": "删除",
         "emptyText": "暂无通道，建议先配置自定义通道",
         "proxyDeletedBadge": "代理已删除",
-        "systemDefaultHelo": "系统默��",
+        "systemDefaultHelo": "系��默��",
         "drawerTitleNew": "新��投递通道",
         "drawerTitleEdit": "编辑投递通道",
         "drawerDescription": "从步骤一已配置的代理 IP 中选择并排序",
@@ -1019,7 +1019,7 @@
         },
         "toasts": {
           "created": "路由规则已添加",
-          "updated": "路由规则已更��",
+          "updated": "路由规��已更��",
           "deleted": "������������除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级��置"
@@ -1187,7 +1187,7 @@
     "globalRule": "全局规则",
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除，只有系统管理员可编辑部分字段",
-    "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条件阈值，其余字段已锁��。",
+    "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条件阈值，其余��段已锁��。",
     "stage": "������"
   },
   "tagRules": {
@@ -1294,7 +1294,7 @@
       "disable": "禁用",
       "custom": "自定义"
     },
-    "targetSenderIpLabel": "发信IP组",
+    "targetSenderIpLabel": "发���IP组",
     "drawerSubtitle": "针对特定业务对象配置差异化检测策略",
     "namePlaceholder": "请输入便于识别的规则名称，如「研发部门外发」",
     "nameRequired": "请输入规则名称",
@@ -1334,10 +1334,10 @@
     "deleteConfirmDesc": "删除后无法恢复，规则名：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效执行路径预览",
-    "stageCountHint": "当前形态共启用 {count} 个阶����",
+    "stageCountHint": "当前形态��启用 {count} 个阶����",
     "sectionBasic": "基本信息",
     "sectionTargets": "适������",
-    "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
+    "sectionTargetsHint": "选择 1 类或多类群组；命中任��目标即生效。",
     "sectionPolicies": "分阶段����略配��",
     "sectionPoliciesHint": "��认为「继承����局����「��留��策��本迭代��入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
@@ -2731,7 +2731,7 @@
     "confirmPassword": "确认新密码",
     "changePassword": "修改密码",
     "allFieldsRequired": "请填写所有字段",
-    "passwordTooShort": "新密码至少6个字符",
+    "passwordTooShort": "��密码至少6个字符",
     "passwordMismatch": "两次输入的新密码不一致",
     "passwordChanged": "密码修改成功",
     "errors": {
@@ -2848,7 +2848,7 @@
       "message_uuid": "消息 UUID",
       "smtp_user": "SMTP 用户",
       "auth_type": "认证类型",
-      "authenticated": "已认证",
+      "authenticated": "已��证",
       "spf_valid": "SPF 验证",
       "spf_record": "SPF 记录",
       "spf_reason": "SPF 原因",
@@ -3225,7 +3225,7 @@
       "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼风险。",
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
-      "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同���威胁传播。",
+      "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内���相似性判断是否存在同���威胁传播。",
       "rule_analysis": "基��相似邮件历史，��断误判或漏判的可能性��并抽取可供人工确认��候选拦截规则。"
     },
     "statuses": {
@@ -3548,7 +3548,7 @@
       "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次，超过限制 {limit} 次",
       "dailyHit": "触发\"每日连接数\"阈值，当日已连接 {count} 次，超过限制 {limit} 次",
       "notHitReason": "未触发阈值",
-      "noThresholds": "当前配置未设置有效阈值，连接将被放行"
+      "noThresholds": "当前配置未设置有效阈值，连接将��放行"
     },
     "tips": {
       "title": "配置提示",
@@ -3674,7 +3674,7 @@
     "expressionTooManyItems": "表达式最多100项",
     "expressionTooManyGroups": "最多选择20个IP组",
     "ipGroupsLabel": "引用IP组",
-    "noIpGroups": "暂无平台 IP 组，可在「平台安全策略 → 群组策略」中创建",
+    "noIpGroups": "暂无平台 IP 组，可在「��台安全策略 → 群组策略」中创建",
     "groupCountBadge": "+{count} 组",
     "validUntilBeforeNow": "有效期不能早于当前时间",
     "singleIpHint": "输入单个IP地址，如：192.168.1.1",
@@ -3946,7 +3946,7 @@
     "directionInbound": "收件方向",
     "directionOutbound": "外发方向",
     "directionInternal": "域内方向",
-    "directionInboundDesc": "检测来自海外的入站邮件",
+    "directionInboundDesc": "检测来自海外的入站���件",
     "directionOutboundDesc": "检测��本网关外发至海外的邮件",
     "directionInternalDesc": "检测域内用户之间经网关转发的邮件",
     "actionDeliver": "投递",
@@ -4260,7 +4260,7 @@
     "createRule": "新建规则",
     "editRule": "编辑规则",
     "createRuleTitle": "新建内容规则",
-    "editRuleTitle": "编辑内容规则",
+    "editRuleTitle": "编辑内���规则",
     "deleteRule": "删除规则",
     "deleteConfirm": "确定要删除此规则吗？",
     "test": "测试",
@@ -4406,7 +4406,7 @@
       "recipients": "收件人",
       "run": "执行测试",
       "finalAction": "最终动作",
-      "hits": "命中规则",
+      "hits": "��中规则",
       "noHits": "未命中任何规���",
       "close": "关闭"
     },
@@ -4432,7 +4432,7 @@
       "mailFromEmpty": "空MAIL FROM",
       "mailFromInvalid": "无效MAIL FROM",
       "envelopeHeaderMismatch": "信封与头部不匹配",
-      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。",
+      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系��邮件，但也可能被滥用发送匿名邮件。",
       "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，建议阻断。",
       "envelopeHeaderDesc": "检查邮件��中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
     },
@@ -4532,7 +4532,7 @@
     },
     "mailfromEmptyWarning": {
       "title": "开启空 MAIL FROM 检测将拦截退信",
-      "desc": "开启此功能后，所有 MAIL FROM 为空的邮件将被拦截。邮件系统中的退信（Delivery Status Notification）正是以空 MAIL FROM 发送的，开启此功能会导致退信丢失，收件人将无法收到发送失败的通知。\n\n请确认您了解此风险后再开启。",
+      "desc": "开启此功能后，所有 MAIL FROM 为空的邮件将被拦截。邮件系统中的退信（Delivery Status Notification）正是��空 MAIL FROM 发送的，开启此功能会导致退信丢失，收件人将无法收到发送失败的通知。\n\n请确认您了解此风险后再开启。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
     },
@@ -4918,7 +4918,7 @@
       "scanSection": "扫描设置",
       "dangerExtSection": "危险扩展名",
       "mimeSection": "MIME类型检查",
-      "attachmentCountMax": "单个邮件附件个数上限",
+      "attachmentCountMax": "单个邮���附件个数上限",
       "attachmentSizeMaxKb": "单个附件大小上限 (KB)",
       "nestedZipCountMax": "单个附件嵌套压缩包数量上限",
       "nestedFileCountMax": "单个附件嵌套文件数量上限",
@@ -4951,7 +4951,7 @@
       "actionConfig": "当前方向执行动作",
       "virusAction": "发现病毒后的处置",
       "timeoutAction": "扫描超时处置（超过30秒）",
-      "engineConfig": "引擎配置",
+      "engineConfig": "��擎配置",
       "primaryEngine": "主引擎",
       "backupEngine": "备引擎",
       "engineQianxin": "奇安信（国内病毒库覆盖好）",
@@ -4977,6 +4977,7 @@
       "configured": "已配置",
       "notConfigured": "未配置",
       "hostRequired": "请填写杀毒引擎服务器地址",
+      "platformManagedHint": "反病毒服务器与病毒库由平台管理员在「平台安全策略 → 反病毒引擎」统一配置，此处仅设置本租户的处置动作。",
       "actualCapabilityHint": "显示 attachd 当前可用的通用病毒扫描能力，不虚构厂商引擎状态",
       "updateSuccess": "病毒库更新请求已提交",
       "updateFailed": "病毒库更新失败",
@@ -5391,7 +5392,7 @@
       "noTarget": "请至少选择一个目标方向"
     },
     "resetDialog": {
-      "title": "确认重置配置",
+      "title": "确认重���配置",
       "description": "确定要将当前【{dir}】方向的意图引擎配置重置为系统缺省值吗？此操作不可撤销。",
       "confirm": "确认重置"
     },
@@ -6939,7 +6940,7 @@
       },
       "desc_attachmentSizeTotal": {
         "source": "邮件附件解析",
-        "usage": "限制所有附件的总大小",
+        "usage": "限制所有���件的总大小",
         "note": "单位为MB，防止超大附件"
       },
       "desc_attachmentSizeSingle": {
@@ -7262,7 +7263,7 @@
       "trendChartMaxLabel": "最大值 {max}",
       "historySectionTitle": "历史版本",
       "exportPdfButton": "导出 PDF",
-      "exportPdfTooltip": "通过浏览器打印另存为 PDF",
+      "exportPdfTooltip": "通过浏览���打印另存为 PDF",
       "exportCsvButton": "导出 CSV",
       "colVersion": "版本",
       "colChangedAt": "修改时间",
@@ -7434,7 +7435,7 @@
     "perm_preview_desc": "允许用户预览隔离邮件内容",
     "perm_whitelist_desc": "允许用户将发信人加入白名单",
     "perm_blacklist_desc": "允许用户将发信人加入黑名单",
-    "selfServicePending": "终端用户自助入口待上线，当前仅保存配置",
+    "selfServicePending": "终��用户自助入口待上线，当前仅保存配置",
     "portalBaseUrlLabel": "外部访问地址",
     "portalBaseUrlPlaceholder": "https://gw.example.com",
     "portalBaseUrlHelp": "收件人浏览器可访问的控制台地址（https）；启用取回、预览、加白���加黑权限时必填。",
@@ -7566,7 +7567,7 @@
     "deleteConfirmTitle": "删除密钥",
     "deleteConfirmDesc": "确定要删除 selector {selector} 吗？此操作不可恢复。",
     "overviewTitle": "DKIM 总览",
-    "overviewDescription": "跨租户查看所有发信域的 DKIM 签名密钥状态。",
+    "overviewDescription": "跨租户查看所有发信域的 DKIM 签��密钥状态。",
     "tenant": "租户",
     "dnsStatusColumn": "DNS 状态",
     "jumpToTenant": "管理",
@@ -8354,7 +8355,7 @@
       "configPlaceholder": "检测引擎配置 — 配置模块上线后提供"
     },
     "kpi": {
-      "todayDetected": "今日检测",
+      "todayDetected": "今���检测",
       "todayQuarantined": "今日隔离",
       "pendingReview": "待审核",
       "todayRecalled": "��日召回",
@@ -8800,7 +8801,7 @@
       "direction": "方向",
       "riskAssessment": "风险研判",
       "confidence": "置信度",
-      "finalDisposition": "最终处置",
+      "finalDisposition": "最终��置",
       "block": "拦截",
       "exempt": "放行",
       "fallbackHint": "该记录为内联回退（已投递并标记），无可处置旁路件",
@@ -9133,7 +9134,7 @@
         "snapshot": "当前快照，不受时间范围筛选影响。",
         "range": "按当前时间范围统计。",
         "recallSuccess": "按当前时间范围内的召回最终结果统计；所有目标成功才计为成功。",
-        "recallFailure": "按当前时间范围内的召回最终结果统计；部分成功归入召回失败。",
+        "recallFailure": "按当前时间范围内的召回最终结果统计；部��成功归入召回失败。",
         "rate": "当前时间范围内发现漏报数 / 扫描邮件数。"
       }
     },
@@ -9339,7 +9340,7 @@
     "cancelDialog": {
       "title": "取消回溯任务",
       "body": "确认取消该回溯任务？将取消其下全部子任务，且不可恢复。",
-      "confirm": "确认取消",
+      "confirm": "确认��消",
       "cancel": "返回"
     }
   },
@@ -9847,7 +9848,7 @@
     },
     "module": {
       "system": "基础设施",
-      "database": "数据库与缓存",
+      "database": "数���库与缓存",
       "mailflow_queue": "邮件流 - 队列",
       "mailflow_delivery": "邮件流 - 投递",
       "mailflow_connection": "邮件流 - 连接",
@@ -10092,9 +10093,11 @@
     "tabs": {
       "ipStrategy": "IP 策略",
       "attachmentLimit": "附件基础限制",
-      "groupPolicy": "群组策略"
+      "groupPolicy": "群组策略",
+      "antivirusEngine": "反病毒引擎"
     },
     "attachmentHint": "附件大小、数量与嵌套层级等基础上限为平台级资源约束，统一作用于全部租户，租户侧的附件安全检测不含此项。",
+    "antivirusHint": "反病毒服务器地址与病毒库为平台级配置，统一作用于全部租户；租户侧仅可设置病毒处置动作。",
     "modules": {
       "ipFrequency": "IP 频率限制",
       "ipFilter": "IP 黑白名单",
@@ -10264,7 +10267,7 @@
       "actionDesc": {
         "quarantine": "邮件进入隔离区，管理员审核后可放行或删除",
         "audit": "邮件进入待审核队列，人工确认后投递或退回",
-        "reject": "拒绝接收，发送��收到退信通知（452/550）",
+        "reject": "拒绝接收，发送���收到退信通知（452/550）",
         "discard": "静默丢弃，发送方无感知，无退信"
       },
       "mergedNote": "合并模式下外发和域内方向使用统一配置，防止通过切换方向绕过限制"
@@ -10459,7 +10462,7 @@
     "mailflowVolume": "邮件量",
     "latencyP95": "投递延时 P95",
     "mailflowTrend": "邮件流健康趋势（24h）",
-    "engineTrend": "检测引擎性能趋势（24h）",
+    "engineTrend": "检测引擎性能趋势（24h��",
     "alertsHealth": "告警健康",
     "alertMarquee": "实时告警",
     "range": {
@@ -10602,7 +10605,7 @@
         "custom_weekday_out_of_range": "星期取值「{value}」超出范围，应在 {min}–{max} 之间",
         "custom_weekdays_empty": "自定义频率下至少要选择一天",
         "notify_frequency_invalid": "通知频率取值无效，只能是：{allowed}",
-        "notify_time_format_invalid": "通知时间「{value}」格式不正确，应为 HH:MM（00:00–23:59）",
+        "notify_time_format_invalid": "通知时间「{value}」格式不正确，应为 HH:MM（00:00���23:59）",
         "notify_times_empty": "通知频率不��「从不」时，至少要��置一个通知时间",
         "permission_unknown": "无法识别的权限项「{value}」",
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
@@ -10796,7 +10799,7 @@
       "name_required": "姓名不能为空",
       "password_incorrect": "密码错误",
       "verification_code_incorrect": "验证码错误",
-      "method_invalid": "无效的验证方式",
+      "method_invalid": "��效的验证方式",
       "purpose_invalid": "无效的验证用途",
       "type_invalid": "无效的类型",
       "method_purpose_mismatch": "验证方式与验证用途不匹配",
@@ -11089,7 +11092,7 @@
       "content_rules_managed_by_system_administrators": "内容规则仅平台管理员可管理"
     },
     "feature_group": {
-      "type_query_param_one_ip_sender": "类型只能是 ip/sender/recipient/content/feature"
+      "type_query_param_one_ip_sender": "类型只能��� ip/sender/recipient/content/feature"
     },
     "forward_queue_admin": {
       "invalid_id": "ID 无效"
