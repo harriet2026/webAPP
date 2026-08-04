@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 17,
+  "current_version": 18,
   "history": [
     {
       "version": 1,
@@ -154,6 +154,15 @@
       "ticket": "GT-12753",
       "incremental": true,
       "summary": "GT-12731.html 追加一级需求 GT-12753 高级过滤规则——新建规则——处置策略：免责声明 / 外部邮件提醒，去掉「自定义模板」（doc 版本 v3→v4）：变更 11（AddonsPanel 免责声明 defaultAddonParams('disclaimer') 去掉 template:'standard' 仅留 position:'body_bottom'；移除「声明模板」SelectField（standard/legal/custom），配置区仅剩「插入位置」；ActionSummary disclaimer 分支不再引用 params.template，改为返回插入位置；四语删 addons.disclaimerTemplate/Standard/Legal/Custom）、变更 12（外部邮件提醒 defaultAddonParams('externalReminder') 去掉 template 仅留 position:'body_top'；移除「模板」SelectField（standard/security/custom），仅剩「插入位置」+ 外部发件人提示；ActionSummary externalReminder 分支改为返回插入位置；四语删 addons.externalReminderTemplate/Standard/Security/Custom）；浏览器实拍 S-1 免责声明去模板仅剩插入位置 + S-2 外部邮件提醒去模板仅剩插入位置且摘要显示正文顶部（浅色 AI版·单租户 平台管理员 Mock 1737×1046）；差异新增 D-013（摘要由模板名改为插入位置、历史死键 disclaimerTemplateDefault/externalReminderTemplateDefault 未删）、待确认新增 Q-005（去模板后正文内容来源需与后端确认）；四语 JSON 均合法、无残留 disclaimer/externalReminder Template 引用；顺带修复两功能块内既有 UTF-8 乱码（ru/th 名称、描述、位置、提示、内容占位符）；乱码自检 CLEAN；version.json current_version 16→17。"
+    },
+    {
+      "version": 18,
+      "generated_at": "2026-08-04",
+      "webapp_commit": "02a906d",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12695",
+      "incremental": true,
+      "summary": "新建 GT-12695.html 文档（文件名 ticket=GT-12695，内容需求名=GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失），首次生成 v1：变更 1（图片OCR检测「检测模式」去掉从未实现的「深度检测（手写+印刷）」禁用占位项，ImageDetectTab SelectContent 删除 deep SelectItem，检测模式收窄为「不检测 / 检测」；唯一有效模式 ocrMode_light 文案「轻度检测（仅印刷体）」重命名为「检测」；attachment-security.ts 类型 ocr_mode 由 'none'|'light'|'deep' 收窄为 'none'|'light'；lib/api/attachment-security.ts getImageDetectConfig 对历史 ocr_mode='deep' 归一为 'light'；四语删 imageDetect.ocrMode_deep、改 ocrMode_light、改写 tooltips.ocrMode 与 imageDetect.ocrSendHint 去掉深度；AttachmentSecurityPage.i18n-parity.test.ts 移除 ocrMode_deep 必需键）、变更 2（方案 A：检测模式=不检测即 ocr_mode==='none' 时，ImageDetectTab 新增 ocrDisabled 派生量，检测数量上限 Input 加 disabled 并在下方渲染灰字提示，切回检测恢复；新增四语 imageDetect.ocrLimitDisabledHint 中「选择「检测」后可配置」并登记 i18n-parity 必需键）；浏览器实拍 S-1 检测模式下拉仅两项（浅色 AI版·单租户 平台管理员 Mock 1694×1046）+ S-2 不检测时数量上限禁用+提示；差异 D-001~D-003、待确认 Q-001；文档遵循新头部约定（无 hero/无变更卡片总览，从目录起始），D/Q 本文档从 001 起；version.json current_version 17→18。"
     }
   ]
 }
