@@ -156,7 +156,7 @@
       <ul class="toc-l2-group">
         <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">子页启用态上报门控：加载完成前不上报乐观默认值</a></li>
         <ul class="toc-l2-group">
-          <li class="toc-l3"><a href="#c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c1-overview">1.1 方��概述</a></li>
           <li class="toc-l3"><a href="#c1-states">1.2 截图式交互预览</a></li>
           <li class="toc-l3"><a href="#c1-elements">1.3 文件与逐元素变更</a></li>
         </ul>
@@ -354,7 +354,7 @@
         <h4>S-2 · 问题现象（修复前）：点击后加载期标签闪变为「已启用」</h4>
         <p class="trigger-path">触发路径：从 S-1 起，点击左侧导航「URL检测与防护」→ 加载期间该导航项标签闪变为已启用（实心圆点 + 能力摘要「信誉评估/沙箱分析/仿冒检测」）→ 真实状态返回后又闪回未启用 · 用户实拍（浅色主题）</p>
         <figure>
-          <img src="./screenshots/GT-12723-S2-problem-url-enabled-flash-light.png" alt="点击 URL检测与防护 后加载态，导航标签短暂显示已启用与能力摘要，红框标注" />
+          <img src="./screenshots/GT-12723-S2-problem-url-enabled-flash-light.png" alt="���击 URL检测与防护 后加载态，导航标签短暂显示已启用与能力摘要，红框标注" />
           <figcaption>图 S-2：修复前的瞬时闪变态。加载期导航项被子页乐观上报的 <code>true</code> 覆盖，圆点填充、摘要变为「信誉评估/沙箱分析/仿冒检测」、右上角出现「已启用」——与 S-1 的真实未启用态矛盾，随后闪回。此为缺陷的直接观感。</figcaption>
         </figure>
         <div class="callout callout-warn">
@@ -669,7 +669,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <p class="trigger-path">触发路径：阶段4 综合策略 → 高级过滤规则 → 新建规则 → 「条件配置」页签 → 展开「安全检测（18）」分组 · 浏览器实拍（浅色主题 / 1575×847）</p>
         <figure>
           <img src="./screenshots/GT-12751-S2-security-conditions-no-rbl-no-spoof-light-1575x847.png" alt="条件配置搜索列表展开安全检测分组，显示 SPF/DKIM/DMARC/PTR结果、相似域名、Mail From为空、信封-头From一致性、病毒扫描结果、意图引擎等，无 RBL结果与显示名仿冒" />
-          <figcaption>图 S-2：安全检测分组条件清单。可见 DKIM 结果 / DMARC 结果 / PTR 结果 / 相似域名 / Mail From 为空 / 信封-头 From 一致性 / 病毒扫描结果 / 意图引擎 等条目，其中<strong>不再包含「RBL 结果」与「显示名仿冒」</strong>；分组计数显示为「安全检测 18」。</figcaption>
+          <figcaption>图 S-2：安全检测分组条件清单。可见 DKIM 结果 / DMARC 结果 / PTR 结果 / 相似域名 / Mail From 为空 / 信封-头 From 一致性 / 病毒扫描结果 / 意��引擎 等条目，其中<strong>不再包含「RBL 结果」与「显示名仿冒」</strong>；分组计数显示为「安全检测 18」。</figcaption>
         </figure>
       </div>
       <div class="interaction-preview">
@@ -725,7 +725,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
     <div class="incr-body">
       <p>
-        按产品要求，从条件目录移除三个条件：<strong>功能组</strong>（<code>panel:'featureGroup'</code>）、<strong>URL 沙箱结果</strong>（key <code>urlSandbox</code> / 字段 <code>url_sandbox</code>）、<strong>短链展开</strong>（key <code>shortLink</code> / 字段 <code>short_link</code>）。删除 <code>catalogue.ts</code> 对应条目定义与四语 <code>v3Conditions</code> 文案键，并更新 <code>catalogue.test.ts</code> 计数不变量。
+        按产品要求��从条件目录移除三个条件：<strong>功能组</strong>（<code>panel:'featureGroup'</code>）、<strong>URL 沙箱结果</strong>（key <code>urlSandbox</code> / 字段 <code>url_sandbox</code>）、<strong>短链展开</strong>（key <code>shortLink</code> / 字段 <code>short_link</code>）。删除 <code>catalogue.ts</code> 对应条目定义与四语 <code>v3Conditions</code> 文案键，并更新 <code>catalogue.test.ts</code> 计数不变量。
       </p>
       <div class="callout callout-ok">
         <strong>目录计数链条：</strong>基线 <strong>54</strong> 条 → 本变更移除 3 条 → <strong>51</strong> 条（此即变更 4 的起点数）→ 变更 4 再移除 RBL/显示名仿冒 2 条 → 最终 <strong>49</strong> 条。<code>catalogue.test.ts</code> 断言 <code>byPanel('featureGroup') === 0</code>。
@@ -991,7 +991,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <div class="incr-body">
       <h3>12.1 方案概述</h3>
       <p>
-        勾选「外部邮件提醒」附加策略后，其配置区原有「模板」（标准模板 / 安全提醒 / 自定义）与「插入位置」两个下拉。本次<strong>移除「模板」下拉</strong>，配置区仅保留「插入位置」（默认正文顶部）与底部提示「外部邮件提醒仅对判定为外部发件人的邮件生效」。默认参数不再写入 <code>template</code> 字段；右侧摘要由原「模板名」改为显示「插入位置」。
+        勾选「外部邮件提醒」附加策略后，其配置区原有「模板」（标准模板 / 安全提醒 / 自定义）与「插入位置」两个下拉。本次<strong>移除「模板」下拉</strong>，配置区仅保留「插入位置」（默认正文顶部）与底部提示「外部邮件提醒仅对判定为外部发件��的邮件生效」。默认参数不再写入 <code>template</code> 字段；右侧摘要由原「模板名」改为显示「插入位置」。
       </p>
       <h3>12.2 截图式交互预览</h3>
       <div class="interaction-preview">
@@ -1095,7 +1095,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tbody>
           <tr><td><code>ImageDetectTab.tsx</code> · 检测模式 SelectContent</td><td>none + light + deep（disabled）三项</td><td>none + light 两项</td><td><span class="tag tag-removed">移除</span>删除 deep 的 SelectItem 与占位注释</td></tr>
           <tr><td><code>attachment-security.ts</code> · 类型 <code>ocr_mode</code></td><td><code>'none' | 'light' | 'deep'</code></td><td><code>'none' | 'light'</code></td><td><span class="tag tag-changed">变更</span>收窄联合类型</td></tr>
-          <tr><td><code>attachment-security.ts</code> · <code>getImageDetectConfig</code></td><td>直接强转返回</td><td>读取时 <code>ocr_mode==='deep'</code> 归一为 <code>'light'</code></td><td><span class="tag tag-added">新增</span>历史数据兼容防御</td></tr>
+          <tr><td><code>attachment-security.ts</code> · <code>getImageDetectConfig</code></td><td>直���强转返回</td><td>读取时 <code>ocr_mode==='deep'</code> 归一为 <code>'light'</code></td><td><span class="tag tag-added">新增</span>历史数据兼容防御</td></tr>
           <tr><td>四语 <code>imageDetect.ocrMode_light</code></td><td>zh「轻度检测（仅印刷体）」等</td><td>zh「检测」/ en「Detection」/ ru「Обнаружение」/ th「ตรวจจับ」</td><td><span class="tag tag-changed">变更</span>重命名</td></tr>
           <tr><td>四语 <code>imageDetect.ocrMode_deep</code></td><td>存在（深度检测文案）</td><td>四语删除</td><td><span class="tag tag-removed">移除</span></td></tr>
           <tr><td>四语 <code>tooltips.ocrMode</code></td><td>「轻度模式仅识别印刷体，深度模式同时识别手写与印刷…」</td><td>「检测并识别图片中的印刷体文字内容」</td><td><span class="tag tag-changed">变更</span>去掉深浅对比</td></tr>
@@ -1131,7 +1131,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <p class="trigger-path">触发路径：图片OCR检测 → 检测模式选「不检测」 · 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1694×1046）</p>
         <figure>
           <img src="./screenshots/GT-11675-S2-ocr-limit-disabled-when-none-light-1694x1046.png" alt="检测模式为不检测时，检测数量上限输入框灰显禁用，下方提示选择检测后可配置" />
-          <figcaption>图 S-2：检测模式=「不检测」时，「检测数量上限」输入框灰显禁用（值 2 变浅、不可编辑），下方显示灰字「选择「检测」后可配置」；检测模式旁 tooltip 显示「检测并识别图片中的印刷体文字内容」。选回「检测」后输入框恢复可编辑、提示消失（见 S-1 中输入框为可编辑态）。</figcaption>
+          <figcaption>图 S-2：检测模式=「不检测」时，「检测数量上限」输入框灰显禁用（值 2 变浅、不可编辑），下方显示灰字「���择「检测」后可配置」；检测模式旁 tooltip 显示「检测并识别图片中的印刷体文字内容」。选回「检测」后输入框恢复可编辑、提示消失（见 S-1 中输入框为可编辑态）。</figcaption>
         </figure>
       </div>
       <h3>14.3 逐元素与 i18n 变更</h3>
@@ -1300,7 +1300,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-unverif">已知·环境限制</span></td></tr>
-        <tr><td>描述</td><td>在当前演示环境点击「URL检测与防护」详情页会出现 <code>加载设置失败</code> toast，其总开关无法持久化切换（保持已启用）。因此 4 个内容层模块在本环境均呈启用态，无法在浏览器中复现用户截图（S-1）中的「未启用」稳态来直接对比修复前后。</td></tr>
+        <tr><td>描述</td><td>在当前演示环境点击「URL检测与防护」详情页会出现 <code>加载设置失败</code> toast，其总开关无���持久化切换（保持已启用）。因此 4 个内容层模块在本环境均呈启用态，无法在浏览器中复现用户截图（S-1）中的「未启用」稳态来直接对比修复前后。</td></tr>
         <tr><td>处理</td><td>以用户实拍的问题现象截图（S-1 / S-2）作为修复前证据；以浏览器实拍稳态（S-3 / S-4）证明修复后导航渲染稳定、无闪回中间帧。</td></tr>
         <tr><td>验证依据</td><td>S-4 截图右下角 <code>加载设置失败</code> toast；<code>useModuleMaster</code> 的 <code>getSecurityModules().catch(() =&gt; {})</code> 静默失败分支</td></tr>
       </tbody>
@@ -1399,7 +1399,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <h3>D-011 · 「发件组织」命中语义为「所选部门及其子部门」的树形包含</h3>
     <table>
       <tbody>
-        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·语义</span></td></tr>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认��语义</span></td></tr>
         <tr><td>描述</td><td>发件组织（<code>sender_dept_path</code>）为组织部门树多选，命中判定为「发件人所属部门路径落在所选部门（含子部门）范围内」。部门数据复用组织通讯录，S-5 中的「研发部 / 市场部」来自 Mock 组织数据，真实组织树结构需在接入后回归。</td></tr>
         <tr><td>解决版本</td><td>GT-12751 · 2026-08-03（Mock 环境）</td></tr>
         <tr><td>验证依据</td><td>S-5 浏览器实拍部门树多选；<code>OrgDepartmentSection</code></td></tr>
@@ -1593,7 +1593,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <span>? 无法验证</span>
       </div>
       <table>
-        <thead><tr><th>形态</th><th>云网关·多租户<br>平台管理员</th><th>云网关·多租户<br>租户管理员</th><th>AI版·单租户<br>平台管理员</th><th>传统版·多租户<br>租户管理员</th></tr></thead>
+        <thead><tr><th>形态</th><th>云网关·多租户<br>平台管理员</th><th>云网��·多租户<br>租户管理员</th><th>AI版·单租户<br>平台管理员</th><th>传统版·多租户<br>租户管理员</th></tr></thead>
         <tbody>
           <tr><td>反病毒引擎 Tab 入口</td><td>&#x2705;</td><td>&#x2705;</td><td>&#x2705;</td><td>&#x2705;</td></tr>
           <tr><td>info 横幅（变更 18，已移除）</td><td>&#x274C;（已移除）</td><td>&#x274C;（已移除）</td><td>&#x274C;（已移除）</td><td>&#x274C;（已移除）</td></tr>
@@ -1619,6 +1619,10 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         </tbody>
       </table>
       <div class="callout callout-removed">移除原因：租户管理员已知道服务器配置由平台统一管理（通过隐藏服务器配置区本身即已传达权限边界），冗余横幅增加视觉噪声。</div>
+      <figure style="margin-top:1rem;">
+        <img src="../html-spec/filter-rules-pipeline-attachment-security/screenshots/GT-12754-antivirus-tab-tenant-admin-default.png" alt="租户管理员视角 - 反病毒引擎 Tab（无横幅）">
+        <figcaption>S-4：租户管理员视角（AI版·多租户 Mock，示例租户 A，1440×900）：info 横幅已移除，页面直接展示「发现病毒后的处置」与「扫描超时处置」两个下拉，服务器配置区不可见。</figcaption>
+      </figure>
     </div>
 
     <!-- 变更 19 -->
@@ -1636,6 +1640,10 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           </tr>
         </tbody>
       </table>
+      <figure style="margin-top:1rem;">
+        <img src="../html-spec/filter-rules-pipeline-attachment-security/screenshots/GT-12754-antivirus-tab-tenant-admin-default.png" alt="反病毒引擎 Tab 标题行已移除">
+        <figcaption>S-5：任意形态下反病毒引擎 Tab（此处为租户管理员视角，1440×900）：「当前方向执行动作」Label 标题行已移除，section 内容直接从「发现病毒后的处置」字段开始。</figcaption>
+      </figure>
     </div>
 
     <!-- 变更 20 -->
@@ -1652,6 +1660,10 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         </tbody>
       </table>
       <div class="callout callout-info">value 值 <code>"reject"</code> 不变，仅 label 文案改变；与 GT-11651 内容规则的「阻断→拒收」改动保持一致的语义对齐。</div>
+      <figure style="margin-top:1rem;">
+        <img src="../html-spec/filter-rules-pipeline-attachment-security/screenshots/GT-12754-antivirus-tab-virus-dropdown-open.png" alt="发现病毒后的处置下拉 - 拒收选项">
+        <figcaption>S-6：「发现病毒后的处置」下拉展开（1440×900）：原「阻断」已改为「拒收」，与其余选项一起显示在列表中。</figcaption>
+      </figure>
     </div>
 
     <!-- 变更 21 -->
@@ -1675,7 +1687,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <tr><td>accept</td><td>继续流水线</td><td>不对此结果采取拦截动作，继续进入下一阶段检测</td><td><code>actionDesc.accept</code></td></tr>
         </tbody>
       </table>
-      <p style="font-size:0.83rem;color:#6b7280;margin-top:0.5rem;">新增 i18n 节 <code>attachmentSecurity.actionDesc.*</code>（zh/en/ru/th 四语），并在 <code>AttachmentSecurityPage.i18n-parity.test.ts</code> 中登记全部 5 个 key 为必需键。</p>
+      <p style="font-size:0.83rem;color:#6b7280;margin-top:0.5rem;">新增 i18n 节 <code>attachmentSecurity.actionDesc.*</code>（zh/en/ru/th 四语���，并在 <code>AttachmentSecurityPage.i18n-parity.test.ts</code> 中登记全部 5 个 key 为必需键。</p>
 
       <figure style="margin-top:1rem;">
         <img src="../html-spec/filter-rules-pipeline-attachment-security/screenshots/GT-12754-antivirus-tab-virus-dropdown-open.png" alt="发现病毒后的处置下拉展开态">
