@@ -4982,6 +4982,7 @@
       "ocrSendHint": " (Recommended for outbound to prevent screenshot leaks)",
       "detectionMode": "Detection Mode",
       "ocrLimit": "Detection Limit (prevent performance exhaustion)",
+      "ocrLimitDisabledHint": "Configurable after selecting \"Detection\"",
       "attachments": "attachments",
       "ocrMode_none": "No Detection",
       "ocrMode_light": "Detection",

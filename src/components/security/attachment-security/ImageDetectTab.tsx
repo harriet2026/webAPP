@@ -85,6 +85,9 @@ export function ImageDetectTab({
     if (next !== config.ocr_max_count) onChange({ ...config, ocr_max_count: next });
   };
 
+  // GT-12xxx：检测模式为「不检测」时，「检测数量上限」不生效，禁用输入。
+  const ocrDisabled = config.ocr_mode === 'none';
+
   const setQrLimit = (raw: number) => {
     const next = Math.min(50, Math.max(1, Number.isFinite(raw) ? Math.trunc(raw) : 1));
     onChange({ ...config, qr_max_count: next });
@@ -118,11 +121,18 @@ export function ImageDetectTab({
                 value={config.ocr_max_count}
                 onChange={(event) => onChange({ ...config, ocr_max_count: Number(event.target.value) })}
                 onBlur={clampOcr}
+                disabled={ocrDisabled}
                 className="w-20"
                 data-testid="ocr-max-count"
               />
               <span className="text-sm text-muted-foreground">{t('imageDetect.attachments')}</span>
             </div>
+            {/* GT-12xxx：检测模式为「不检测」时不执行 OCR，「检测数量上限」无意义，禁用并提示。 */}
+            {ocrDisabled ? (
+              <p className="text-xs text-muted-foreground" data-testid="ocr-max-count-disabled-hint">
+                {t('imageDetect.ocrLimitDisabledHint')}
+              </p>
+            ) : null}
           </div>
         </div>
       </section>

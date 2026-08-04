@@ -24,7 +24,7 @@ const required = [
     'timeoutAction', 'receiveDefault', 'updateSuccess', 'updateFailed',
   ].map((key) => `antivirus.${key}`),
   ...[
-    'ocrDetection', 'detectionMode', 'ocrLimit', 'attachments', 'ocrMode_none', 'ocrMode_light',
+    'ocrDetection', 'detectionMode', 'ocrLimit', 'ocrLimitDisabledHint', 'attachments', 'ocrMode_none', 'ocrMode_light',
     'qrDetection', 'qrMode_none', 'qrMode_light', 'qrMode_deep', 'lightConfig',
     'deepConfig', 'routeModules', 'execAction', 'barcodeExempt', 'urlDetection', 'expandShortLink',
     'keywordFilter', 'scanRange', 'urlPath', 'textContent', 'intentEngine', 'detectCategory',

@@ -213,7 +213,7 @@
     "password": "密码",
     "loginTitle": "OSGateway 管理系统",
     "loginButton": "登录",
-    "demoEntry": "进入演��环境",
+    "demoEntry": "进入演���环境",
     "loginError": "用户名或密码错误",
     "sessionExpired": "会话已过期，请重新登录",
     "showAdvancedRules": "显示高级规则设置",
@@ -1334,7 +1334,7 @@
     "deleteConfirmDesc": "删除后无法恢复，规则名：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效执行路径预览",
-    "stageCountHint": "当前形态共启用 {count} 个阶段。",
+    "stageCountHint": "当前形态共启用 {count} 个阶段��",
     "sectionBasic": "基本信息",
     "sectionTargets": "适������",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
@@ -1459,7 +1459,7 @@
       "block": "阻断",
       "drop": "丢弃"
     },
-    "previewDescriptionWithRule": "策���「{name}」���有效执���路径：",
+    "previewDescriptionWithRule": "������「{name}」���有效执���路径：",
     "previewNoRuleSelected": "���选择���条群组策略���预览���",
     "previewShortCircuit": "邮件在【阶段{stage}】因策略「{rule}」的{action}处置被终止，后续阶段不再执行。",
     "previewSkipped": "未执行（前序已短路）",
@@ -1717,7 +1717,7 @@
     "deliveryRecipientsSummary": "收件人投递详情",
     "deliveryEvents": "投递事件",
     "attemptCount": "{count} 次尝试",
-    "noDeliveryEvents": "暂无投递事件",
+    "noDeliveryEvents": "暂无���递事件",
     "noDeliveryInfo": "暂无投递追踪信息",
     "email": {
       "aiInterpret": {
@@ -2361,7 +2361,7 @@
       "skipped": "未执行",
       "running": "检测中",
       "cached": "已缓存",
-      "done": "实时检测",
+      "done": "实时���测",
       "timeout": "超时",
       "userSkipped": "用户跳过",
       "unknown": "未知"
@@ -2450,7 +2450,7 @@
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
-      "protocolMismatch": "协议不匹配，请确认客户端使用的协议���该域名认证配置一致。",
+      "protocolMismatch": "协议不匹配，请确认客户���使用的协议���该域名认证配置一致。",
       "unknown": "��能识别的失败原因��请��看��始失败��息��联系��持。"
     },
     "detail": {
@@ -3226,7 +3226,7 @@
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
       "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
-      "rule_analysis": "基于相似邮件历史，��断误判或漏判的可能性��并抽取可供人工确认��候选拦截规则。"
+      "rule_analysis": "基��相似邮件历史，��断误判或漏判的可能性��并抽取可供人工确认��候选拦截规则。"
     },
     "statuses": {
       "pending": "待处理",
@@ -3552,7 +3552,7 @@
     },
     "tips": {
       "title": "配置提示",
-      "negOne": "-1 表示不限制",
+      "negOne": "-1 表示���限制",
       "priorityLower": "优先级越大越先匹配",
       "permanent": "留空 = 永���有效",
       "orRelation": "各维度为\"或\"关系，满足任一即触发"
@@ -4124,7 +4124,7 @@
     "configHint4": "群组和组织来自群组策略配置",
     "scheduleSection": "生效时间",
     "complexEditTitle": "复杂条件",
-    "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑。可修改规则名称、备注、优先级与有效期；保存不会���动原有条件与执行动作。",
+    "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑。可修改规则名称、备注���优先级与有效期；保存不会���动原有条件与执行动作。",
     "statusFilter": "状态筛选",
     "statusAll": "全部状态",
     "statusEnabled": "已启用",
@@ -4537,7 +4537,7 @@
       "cancel": "取消"
     },
     "envelopeMismatchWarning": {
-      "title": "信封与头部不匹配可能引发误判",
+      "title": "信封与头部不匹配��能引发误判",
       "desc": "部分邮��订阅服务、自动转发系统和邮件��表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮��头（From）不一致。开启此检���可能会将这些正常邮���误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
@@ -4987,6 +4987,7 @@
       "ocrSendHint": "（外发方向建议启用，防截图泄密）",
       "detectionMode": "检测模式",
       "ocrLimit": "检测数量上限（防止性能耗尽）",
+      "ocrLimitDisabledHint": "选择「检测」后可配置",
       "attachments": "个附件",
       "ocrMode_none": "不检测",
       "ocrMode_light": "检测",
@@ -6068,7 +6069,7 @@
         "urgent": "紧急",
         "urgentTooltip": "邮件命中敏感/紧急关键词",
         "domainAge": "域名年龄{n}天",
-        "domainAgeTooltip": "发件人域名注册仅 {n} 天，新注册域名是钓鱼/仿冒的常见信号",
+        "domainAgeTooltip": "发件人域名注册仅 {n} ���，新注册域名是钓鱼/仿冒的常见信号",
         "aiJudgmentBasis": "AI判定依据",
         "cloudCheckBasis": "云查依据",
         "recipientStatus": {
@@ -6150,7 +6151,7 @@
           "whitelistDialog": {
             "title": "确认将发信人 \"{sender}\" 加入白名单？",
             "desc": "后续来自该发��人的邮件将跳过部分安全检测。",
-            "scopeLabel": "生效范围",
+            "scopeLabel": "生��范围",
             "scopeTenant": "本租户",
             "scopeGlobal": "全系统",
             "success": "已加入白名单",
@@ -6861,7 +6862,7 @@
       "desc_senderGroup": {
         "source": "群组策略模块",
         "usage": "匹配预定义的人员���组",
-        "note": "群组变更后规则即时生效，无需重新保存规则"
+        "note": "群组变更后规则即时生效，无需��新保存规则"
       },
       "desc_senderOrganization": {
         "source": "组织架构模块",
@@ -6923,7 +6924,7 @@
         "usage": "限制邮件包含的附件数量",
         "operators": "大于/大于等于：附件数达到或超过阈值即命中；小于/小于等于：附件数不超过阈值即命中；介于：命中数量落在区间内的邮件。",
         "example": "比较方式「大于等于」，阈值「10」——命中附件数达到 10 个及以上的邮件。",
-        "recommended": "常规办公场景推荐阈值 10~20，可按业务附件习惯调整。",
+        "recommended": "常规办公场景推荐阈值 10~20，可按业务附件习���调整。",
         "note": "防止大量附件造成资源占用"
       },
       "desc_encryptedAttachment": {
@@ -7188,7 +7189,7 @@
       "attributesHint": "用于评估规则的字段值 JSON 对象。示例：{\"sender\":\"attacker@example.com\",\"subject\":\"紧急\"}",
       "runButton": "运行测试",
       "running": "运行中...",
-      "noConditions": "请在“条件”页签添加至少一个条件后再进行测试。",
+      "noConditions": "请在“条件”页签添加至少一���条件后再进行测试。",
       "verdictMatched": "命中",
       "verdictNotMatched": "未命中",
       "verdictLabel": "判定结果",
@@ -7523,7 +7524,7 @@
     "category": "分类",
     "notifyStatus": "状态",
     "portalBaseUrlRequired": "请先填写合法的外部访问地址（https），开启权限后该地址用于生���通知链接。",
-    "portalBaseUrlMissingHint": "外部访问地址未填写——取回、预览、加白、加黑权��依赖该地址生成通知链接，��先填写后再开启对应权限。"
+    "portalBaseUrlMissingHint": "外部访���地址未填写——取回、预览、加白、加黑权��依赖该地址生成通知链接，��先填写后再开启对应权限。"
   },
   "dkim": {
     "column": "DKIM",
@@ -10578,7 +10579,7 @@
       "access_denied": "没有权限访问该检测档案",
       "global_rbl_requires_system_admin": "管理��局 RBL 检测档案需要平台管理员权限",
       "id_invalid": "检测档案 ID 无��",
-      "name_exists": "已存在同��的检测档案",
+      "name_exists": "已存在�����的检测档案",
       "not_found": "检测档案不存在，可能已被删除",
       "tenant_context_required": "该操作需要先选择租户",
       "test_supported_for_rbl_only": "仅 RBL 类型的检测档案支持测试"
@@ -10815,7 +10816,7 @@
       "leak_mail_not_in_run": "该邮件不属于本次回溯��行",
       "window_start_invalid": "开始时间格式不正确",
       "window_end_invalid": "结束时间格式不正确",
-      "window_order_invalid": "开���时间必须早于结束时间",
+      "window_order_invalid": "开���时间必须��于结束时间",
       "indicator_tag_format_invalid": "威胁标签���式应为 indicator:「标签代码」，且代码不能为空"
     },
     "tenant": {
@@ -10923,7 +10924,7 @@
       "two_factor_self_service_tenant_only": "二次认证自助开关是租户级设置，全局基线不支持",
       "baseline_platform_admin_only": "仅平台管理员可修改平台基线",
       "rule_platform_admin_only": "仅平台管理员可修改平台规则",
-      "ip_or_cidr_format_invalid": "请输入正确的 IP 地址或 CIDR 格式（如 192.168.1.0/24）",
+      "ip_or_cidr_format_invalid": "请输入���确的 IP 地址或 CIDR 格式（如 192.168.1.0/24）",
       "rule_already_exists": "该 IP/CIDR 规则已存在",
       "delete_would_lock_out_self": "删除后白名单将不再包含你当前的 IP 地址，你将无法登录",
       "rule_not_found": "规则不存在"
