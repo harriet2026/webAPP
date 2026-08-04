@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 13,
+  "current_version": 27,
   "history": [
     {
       "version": 1,
@@ -18,7 +18,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12649",
       "incremental": true,
-      "summary": "GT-12649 v2：新增变更 #2（DevMode 变更规格独立分区）、#3（处置中心执行动作移除"标记投递"）、#4（安全总览执行动作图表移除"标记投递"）；重构为多变更点格式，补充真实浏览器截图 S-3~S-7；新增 D-3/D-4/D-5、Q-3。"
+      "summary": "GT-12649 v2：新增变更 #2（DevMode 变更规格独立分区）、#3（处置中心执行动作移除“标记投递”）、#4（安全总览执行动作图表移除“标记投递”）；重构为多变更点格式，补充真实浏览器截图 S-3~S-7；新增 D-3/D-4/D-5、Q-3。"
     },
     {
       "version": 3,
@@ -36,7 +36,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12649",
       "incremental": true,
-      "summary": "文档规范修复：按技能规范重写目录（每个需求点使用完整名称作为主入口，子章节使用编号层级 1.1/1.2/…/4.3，尾部三项以 C/D/E 字母编号）；变更总览标题由"v2 新增 3 项"修正为"共 4 项需求"；各变更区块 incr-header 补充路由路径；批量修复文档中全部 UTF-8 replacement character 乱码（共 6 处：侧边栏底部、执行动作 ×2、审核、导航区域、平台管控策略）。"
+      "summary": "文档规范修复：按技能规范重写目录（每个需求点使用完整名称作为主入口，子章节使用编号层级 1.1/1.2/…/4.3，尾部三项以 C/D/E 字母编号）；变更总览标题由“v2 新增 3 项”修正为“共 4 项需求”；各变更区块 incr-header 补充路由路径；批量修复文档中全部 UTF-8 replacement character 乱码（共 6 处：侧边栏底部、执行动作 ×2、审核、导航区域、平台管控策略）。"
     },
     {
       "version": 5,
@@ -63,7 +63,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12660",
       "incremental": true,
-      "summary": "GT-12660 增量：邮件安全总览执行动作图表移除"灰名单"系列（后端 key advanced_review）；追加一级目录条目 GT-12660、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-2 暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-004（key 排查过程记录）；目录 C 项编号更新为 D-001~D-004；version.json current_version 6→7。"
+      "summary": "GT-12660 增量：邮件安全总览执行动作图表移除“灰名单”系列（后端 key advanced_review）；追加一级目录条目 GT-12660、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-2 暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-004（key 排查过程记录）；目录 C 项编号更新为 D-001~D-004；version.json current_version 6→7。"
     },
     {
       "version": 8,
@@ -72,7 +72,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12659",
       "incremental": true,
-      "summary": "GT-12659 增量：邮件处置中心搜索模块执行动作筛选移除"灰名单"（从 EXECUTION_ACTIONS 移除 advanced_review）；追加一级目录条目 GT-12659、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 下拉展开 7 项无灰名单，暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-005（EXECUTION_ACTIONS 共享事实源说明）；目录 C 项编号更新为 D-001~D-005；version.json current_version 7→8。"
+      "summary": "GT-12659 增量：邮件处置中心搜索模块执行动作筛选移除“灰名单”（从 EXECUTION_ACTIONS 移除 advanced_review）；追加一级目录条目 GT-12659、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 下拉展开 7 项无灰名单，暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-005（EXECUTION_ACTIONS 共享事实源说明）；目录 C 项编号更新为 D-001~D-005；version.json current_version 7→8。"
     },
     {
       "version": 9,
@@ -118,6 +118,146 @@
       "ticket": "GT-12563",
       "incremental": true,
       "summary": "GT-12563 搜索模板实现增量：追加一级目录条目「GT-12563 搜索模板实现」及变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-9 暗色 1253×832 / 1.3 逐元素变更表 9 项）；涵盖模板按钮 disabled 修复（始终 false）、SaveTemplateDialog 新建组件（保存/重命名复用）、同名覆盖警告（amber Warning + 按钮改为覆盖保存）、铅笔重命名按钮、应用确认 AlertDialog（有活跃条件时弹出）、SearchTemplate 类型扩展（aiQuery/updatedAt）、19 个新增 i18n key；追加差异 D-010（localStorage 跨设备不同步）；目录 C 项编号更新为 D-001~D-010；version.json current_version 12→13。"
+    },
+    {
+      "version": 14,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12695",
+      "incremental": true,
+      "summary": "GT-12695 v2（GT-12696 发信人黑白名单优化）：新增 GT-12695.html，完整重生成 6 个变更点规格；补充全部 7 张真实浏览器截图（S-12~S-18），覆盖：开发菜单 GT-12695 入口、策略流水线、黑名单列表8列（含优先级）、黑名单抽屉默认态（拒收）、执行动作下拉展开（含丢弃及说明文字）、白名单列表8列、白名单抽屉默认态（投递，无白名单模式）；D-1~D-3，Q-1~Q-2。",
+      "demo_version": 5
+    },
+    {
+      "version": 15,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12700",
+      "incremental": true,
+      "summary": "GT-12695 v3（GT-12700 身份认证与仿冒检测—基础格式检查）：在 GT-12695.html 中追加 GT-12700 需求节（2 个变更点）：①执行动作统一为隔离/审核/拒收/丢弃（移除 accept/新增 audit/文案精简/前端 normalizeFormatItem fallback）；②下拉新增说明文字（288px，i18n formatActionDesc 四语言）；目录追加 GT-12700 卡片块；补充真实截图 S-19~S-23（共 5 张）；新增差异 D-4、待确认 Q-3；版本历史追加 v3。",
+      "demo_version": 6
+    },
+    {
+      "version": 16,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12701",
+      "incremental": true,
+      "summary": "GT-12695 v4（GT-12701 认证仿冒检测配置页面优化项：认证协议组件修复）：在 GT-12695.html 中追加 GT-12701 需求节（1个变更点）：邮件身份验证流程节点选中态上边缘裁切 Bug 修复（pb-2→py-1，顶部 4px 留白）；目录追加 GT-12701 卡片块；补充真实截图 S-24~S-26（SPF/DMARC/PTR 三节点选中态修复后验证）；差异标注新增 D-5（已解决）；版本历史追加 v4。",
+      "demo_version": 7
+    },
+    {
+      "version": 17,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12705",
+      "incremental": true,
+      "summary": "GT-12695 v5（GT-12705 身份认证与仿冒检测——认证协议检查：去掉例外配置说明文案）：追加 GT-12705 需求节（1个变更点）：移除认证协议检查区块顶部蓝色例外配置说明条（exceptionBanner + 前往策略流水线 Link，ProtocolChecksSection.tsx 7行JSX+Info导入移除，i18n key保留）；目录追加 GT-12705 卡片块；补充真实截图 S-27（移除后默认态验证）；差异标注新增 D-6（已移除）；版本历史追加 v5。",
+      "demo_version": 8
+    },
+    {
+      "version": 18,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12707",
+      "incremental": true,
+      "summary": "GT-12695 v6（GT-12707 DMARC补充两个场景）：追加 GT-12707 需求节（1个变更点）：DMARC检查新增 no_record（DMARC无记录）和 query_fail（DMARC查询失败）两个技术异常场景；修改5处文件（ProtocolChecksSection.tsx keys数组、auth-spoofing-templates.ts三模板+applyGroup修复、AuthSpoofingPage.tsx DEFAULT_CONFIG、fixtures.ts mock、四语言JSON各4个i18n key共16个）；目录追加GT-12707卡片块；补充截图S-28（DMARC Tab五行标准模板）；差异标注新增D-7（已解决）；版本历史追加v6。",
+      "demo_version": 9
+    },
+    {
+      "version": 19,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12708",
+      "incremental": true,
+      "summary": "GT-12695 v7（GT-12708 SPF/DKIM/DMARC策略显示的执行配置与实际设置的配置不符问题解决）：追加 GT-12708 需求节（1个变更点）：修复流程图节点 badge 硬编码单 key 读取 bug；新增 dominantAction() 函数按 5 级 severity 计算协议组最严重 action；flowSubKey() 补充 audit→flowSub.tag、accept→flowSub.pass 两个缺失分支；四语言各追加 flowSub.tag/flowSub.pass 共 8 个 i18n key；目录追加 GT-12708 卡片块；补充截图 S-29（标准模板流程图节点修复后：SPF阻断、DKIM隔离、DMARC隔离、PTR检查）；差异标注新增 D-8（已解决）；版本历史追加 v7。",
+      "demo_version": 10
+    },
+    {
+      "version": 20,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12713",
+      "incremental": true,
+      "summary": "GT-12695 v8（GT-12713 认证协议检查执行动作解释格式参照发信人黑白名单）：追加 GT-12713 需求节（1个变更点）：Select 格式对齐发信人黑白名单——Trigger 改为短名（140px），SelectContent 改为 w-72+alignItemWithTrigger=false，SelectItem 改为短名+灰色描述文案两行布局；新增 protocolActionShortKey()/protocolActionDescKey() 映射函数；四语言各追加 protocolActionShort/protocolActionDesc 各5项共40个 i18n key；目录追加 GT-12713 卡片块；补充截图 S-30（Trigger短名关闭态）/S-31（展开态五选项两行格式）；差异标注新增 D-9（已优化）；版本历史追加 v8。",
+      "demo_version": 11
+    },
+    {
+      "version": 21,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12710",
+      "incremental": true,
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史追加 v9。",
+      "demo_version": 12
+    },
+    {
+      "version": 22,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12711",
+      "incremental": true,
+      "summary": "GT-12695 v10（GT-12711 发信行为管控管控方向双向文案修改）：追加 GT-12711 需求节（1个变更点）：四语言 messages JSON 各修改 behaviorControl.direction.bidirectional 一个 key（共4处），zh:双向→外发+域内，en:Bidirectional→Outbound+Internal，ru:Двусторонние→Исходящие+Внутренние，th:สองทิศทาง→ขาออก+ภายใน；不修改任何组件代码；目录追加 GT-12711 卡片块；补充截图 S-35（Select关闭态）/S-36（展开态四选项）；差异标注新增 D-11（已优化）；版本历史追加 v10。",
+      "demo_version": 13
+    },
+    {
+      "version": 23,
+      "generated_at": "2026-08-01",
+      "webapp_commit": "9531e5b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12715",
+      "incremental": true,
+      "summary": "GT-12695 v11（GT-12715 发信行为管控检测条件最多可添加4项）：追加 GT-12715 需求节（1个变更点）：检测条件从固定双字段重构为动态 conditions[] 数组（min 1/max 4），每条含维度 Select+阈值 Input+删除按钮，添加条件按钮+计数，满4条 disabled，条件数>1时 AND/OR 单选替代旧 OR 复选框；共修改7处文件（types/schema/API/simulator/Drawer/两个单测）；四语言各新增11个 i18n key（共44个）；目录追加 GT-12715 卡片块；补充截图 S-37（单条）/S-38（双条+AND/OR）/S-39（四条满额 disabled）；差异标注新增 D-12（已优化）；版本历史追加 v11。",
+      "demo_version": 14
+    },
+    {
+      "version": 24,
+      "generated_at": "2026-08-02",
+      "webapp_commit": "06e7bca",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12716",
+      "incremental": true,
+      "summary": "GT-12716 v12（发信行为管控——新建规则：查看配置示例功能不可用问题修复）：追加 GT-12716 需求节（1个变更点）：为「查看配置示例」三张示例卡片补充 onClick 填充处理器，卡片 div 加 cursor-pointer hover 样式+group，标题行右侧新增悬停提示 span（behaviorControl.examples.fill，4语言各1个key共4个）；onClick 依次调用 setValue（shouldDirty:true）写入 time_window/conditions[]/or_enabled 三字段；三场景预设值：正常用户（15min,[mail_count:50,ip_count:2],AND）/账号被盗（15min,[ip_count:10,mail_count:200],OR）/销售部群发（1hour,[recipient_count:500],AND）；仅修改 BehaviorControlDrawer.tsx 和四语言JSON（各1key）；目录追加GT-12716卡片块；补充截图S-40（折叠态）/S-41（展开三卡片）/S-42（正常用户场景填充后）；差异标注新增D-13（已修复）；版本历史追加v12。",
+      "demo_version": 15
+    },
+    {
+      "version": 25,
+      "generated_at": "2026-08-02",
+      "webapp_commit": "1623c58",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12717",
+      "incremental": true,
+      "summary": "GT-12717 v13（发信行为管控——新建规则：【选择群组】选择框及【管理群组】按钮不可用）：追加 GT-12717 需求节（2个变更点）：① groupsQuery 加 enabled:open 守卫 + groupTypeOptions map 改从解析后 metadata 取 m.member_count，修复 senderGroups 始终为空导致 Select 无选项；② onClick 空值守卫从 '' || null 改为 '' || '__all__'，并新增 GroupPreviewDialog 子组件（叠在抽屉上方，含群组名标题/类型Badge/成员总数/搜索框/成员列表最多100条+截断提示/关闭按钮，数据复用已有 groupsQuery 无额外 API 请求）；仅修改 BehaviorControlDrawer.tsx；四语言各新增9个 i18n key（behaviorControl.groupPreview.*，共36个）；目录追加GT-12717卡片块；补充截图S-43（切换群组类型后表单出现）/S-44（Select展开5个群组选项含成员数）/S-45（选中VIP客户回显）/S-46（管理群组预览Dialog全貌）/S-47（搜索corp过滤成员）；差异标注新增D-14（已修复）；版本历史追加v13。",
+      "demo_version": 16
+    },
+    {
+      "version": 26,
+      "generated_at": "2026-08-02",
+      "webapp_commit": "current",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12720",
+      "incremental": true,
+      "summary": "GT-12720 v14（附件安全检测——图片识别：图片OCR检测模式的推荐配置—深度检测不可选问题解决）：追加 GT-12720 需求节（1个变更点，含3项子修复）：① 移除 SelectItem value='deep' 的 disabled 属性及（敬请期待）拼接文字，恢复深度检测可选；② SelectTrigger 加 className='w-full max-w-[400px]'，SelectContent 加 className='min-w-[var(--radix-select-trigger-width)] w-max'，修复 Select 文字截断；③ ocr_mode==='deep' 时在 grid 外部条件渲染 hint banner（Info 图标 + ocrMode_deep_hint i18n 文案，独占一行）；仅修改 ImageDetectTab.tsx；四语言各新增1个 i18n key（attachmentSecurity.imageDetect.ocrMode_deep_hint，共4个）；目录追加GT-12720卡片块；补充截图S-48（OCR light默认态SelectTrigger完整显示）/S-49（下拉展开三选项均可选无disabled无敬请期待）/S-50（选中深度检测后hint banner显示）；差异标注新增D-15（已修复）；版本历史追加v14。",
+      "demo_version": 17
+    },
+    {
+      "version": 27,
+      "generated_at": "2026-08-02",
+      "webapp_commit": "current",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12721",
+      "incremental": true,
+      "summary": "GT-12721 v15（附件安全检测——图片识别——二维码图片检测：超限处置的执行动作表述修改）：追加 GT-12721 需求节（1个变更点，含4条i18n变更）：① passWarn 改为「进行下一步」（原「放行并记录告警」，四语言）；② isolateFallback 改为「隔离」（原「隔离兜底」，四语言）；③ 新增 exceedActionHint_pass 和 exceedActionHint_quarantine 两个key（四语言各2个，共8个），在超限处置Select正下方条件渲染对应说明文案（data-testid=qr-deep-exceed-action-hint）；仅修改ImageDetectTab.tsx和四语言JSON；目录追加GT-12721卡片块；补充截图S-51（进行下一步+说明文案）/S-52（下拉展开两选项）/S-53（隔离+说明文案）；差异标注新增D-16（已修复）；版本历史追加v15。",
+      "demo_version": 18
     }
   ]
 }

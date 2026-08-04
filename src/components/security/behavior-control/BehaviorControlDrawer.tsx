@@ -3,12 +3,14 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useForm, useWatch, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { Resolver } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import {
   HelpCircle, Lightbulb, Play, Check, X, Zap,
   Shield, Clock, Ban, Users, Globe, ExternalLink, AlertTriangle,
+  Plus, Trash2,
 } from 'lucide-react';
 import {
   Sheet, SheetContent, SheetTitle,
@@ -20,7 +22,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -40,6 +41,7 @@ import type {
   BehaviorControlFormData, BehaviorControlRuleView,
   BehaviorDirection, BehaviorObjectType, BehaviorDimension,
   BehaviorTimeWindow, BehaviorProductAction, BehaviorControlFormObjectConfig,
+  BehaviorCondition,
 } from '@/types/behavior-control';
 import { BACKEND_TO_PRODUCT } from '@/types/behavior-control';
 import { useApiRequest } from '@/lib/api/client';
@@ -48,6 +50,9 @@ import { cn } from '@/lib/utils';
 import { simulateBehaviorControl } from '@/lib/behavior-control-simulator';
 import { createBehaviorControlSchema, getBehaviorControlPriorityRange } from './schema';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
+import { parseMembers } from '@/lib/api/groups';
+import type { GroupType } from '@/types/groups';
+import type { RuleNode } from '@/types/unified-rules';
 
 const BEHAVIOR_DIMENSIONS: BehaviorDimension[] = [
   'ip_count',
@@ -69,7 +74,10 @@ function defaultForm(priority: number): BehaviorControlFormData {
     direction: 'outbound',
     object_config: { type: 'sender', sub_type: 'individual', value: '' },
     time_window: '15min',
-    dim_a: 'ip_count', threshold_a: 0, or_enabled: false,
+    conditions: [{ dim: 'mail_count', threshold: 0 }],
+    or_enabled: false,
+    // 旧字段由 conditions[0] 派生，保持兼容
+    dim_a: 'mail_count', threshold_a: 0,
     action: 'review',
   };
 }
@@ -111,6 +119,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
   const [showSimulator, setShowSimulator] = useState(false);
+  const [previewGroupName, setPreviewGroupName] = useState<string | null>(null);
   const [simSender, setSimSender] = useState('');
   const [simIp, setSimIp] = useState('192.168.1.1');
   const [simUniqueSenderIPCount, setSimUniqueSenderIPCount] = useState(1);
@@ -121,12 +130,14 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   const groupsQuery = useQuery({
     queryKey: ['groups', 'behavior-control'],
     queryFn: async () => {
-      const res = await apiRequest<{ items: { id: number; name: string; metadata: string; is_active: boolean }[] }>(
+      // condition_tree 一并取回：群组成员预览要按它解析出真实成员名单。
+      const res = await apiRequest<{ items: { id: number; name: string; metadata: string; is_active: boolean; condition_tree?: string | RuleNode }[] }>(
         '/unified-rules?rule_class=tag&page=groups&include=member_count&page_size=5000',
       );
       return res.items || [];
     },
     staleTime: 30_000,
+    enabled: open,
   });
 
   const groupTypeOptions = useCallback((groupType: string): GroupOption[] => {
@@ -139,15 +150,60 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
           return m.group_type === groupType;
         } catch { return false; }
       })
-      .map((r) => ({ name: r.name, memberCount: (r as Record<string, unknown>).member_count as number | undefined }));
+      .map((r) => {
+        try {
+          const m = JSON.parse(r.metadata);
+          return { name: r.name, memberCount: m.member_count as number | undefined };
+        } catch {
+          return { name: r.name };
+        }
+      });
   }, [groupsQuery.data]);
 
   const senderGroups = useMemo(() => groupTypeOptions('sender'), [groupTypeOptions]);
   const ipGroups = useMemo(() => groupTypeOptions('ip'), [groupTypeOptions]);
 
+  // 预览数据：根据 previewGroupName 从 groupsQuery.data 中找到对应条目，生成成员列表
+  const previewGroupData = useMemo<{ name: string; groupType: string; members: string[]; totalCount: number } | null>(() => {
+    if (!previewGroupName) return null;
+    // 未选群组时（__all__ 占位符）：返回空数据让 Dialog 显示提示
+    if (previewGroupName === '__all__' || !groupsQuery.data) {
+      return { name: '', groupType: 'sender', members: [], totalCount: 0 };
+    }
+    const rule = groupsQuery.data.find((r) => r.name === previewGroupName);
+    if (!rule) return null;
+    let groupType = 'sender';
+    let totalCount = 0;
+    try {
+      const m = JSON.parse(rule.metadata);
+      groupType = m.group_type ?? 'sender';
+      totalCount = m.member_count ?? 0;
+    } catch { /* noop */ }
+
+    // 成员名单从群组规则自身的 condition_tree 解析（与群组管理同一套 parseMembers），
+    // 不再像原型那样按 member_count 造 user1@corp.com / 192.168.x.y 这类假数据。
+    let tree: RuleNode | null = null;
+    try {
+      tree = typeof rule.condition_tree === 'string'
+        ? (JSON.parse(rule.condition_tree) as RuleNode)
+        : (rule.condition_tree ?? null);
+    } catch { tree = null; }
+    const members = parseMembers(tree, groupType as GroupType) ?? [];
+    return { name: previewGroupName, groupType, members, totalCount: totalCount || members.length };
+  }, [previewGroupName, groupsQuery.data]);
+
   const initial = useMemo<BehaviorControlFormData>(() => {
     if (!editing?.meta) return { ...defaultForm(priorityRange.defaultValue), ...defaults };
     const m = editing.meta;
+    // 从旧字段还原 conditions[]（resolveBehaviorControlRule 已预填，此处作兜底）
+    const metaWithConditions = m as typeof m & { conditions?: BehaviorCondition[] };
+    const conditions: BehaviorCondition[] = metaWithConditions.conditions ?? (() => {
+      const arr: BehaviorCondition[] = [{ dim: m.dim_a, threshold: m.threshold_a }];
+      if (m.or_enabled && m.dim_b && m.threshold_b != null) {
+        arr.push({ dim: m.dim_b, threshold: m.threshold_b });
+      }
+      return arr;
+    })();
     return {
       name: editing.rule.name,
       description: editing.rule.description ?? '',
@@ -158,9 +214,11 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
       direction: m.direction,
       object_config: m.object_config as BehaviorControlFormData['object_config'],
       time_window: m.time_window,
+      conditions,
+      or_enabled: conditions.length > 1 ? m.or_enabled : false,
+      // 旧字段保留
       dim_a: m.dim_a,
       threshold_a: m.threshold_a,
-      or_enabled: m.or_enabled,
       dim_b: m.dim_b,
       threshold_b: m.threshold_b,
       action: BACKEND_TO_PRODUCT[editing.rule.action as keyof typeof BACKEND_TO_PRODUCT] ?? 'review',
@@ -168,7 +226,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   }, [editing, defaults, priorityRange]);
 
   const methods = useForm<BehaviorControlFormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as unknown as Resolver<BehaviorControlFormData>,
     defaultValues: initial,
     // Validate on submit (RHF default), not onBlur. The drawer auto-focuses the
     // required-but-empty name field, so onBlur made the *first* click on any of the
@@ -213,18 +271,15 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   const objectType = watch('object_config.type');
   const senderSubType = watch('object_config.sub_type');
   const ipSubType = watch('object_config.sub_type');
-  const dimA = watch('dim_a');
-  const dimB = watch('dim_b');
   const orEnabled = watch('or_enabled');
   const description = watch('description');
+  const conditions = watch('conditions');
 
   const runSimulation = useCallback(() => {
+    const currentConditions = getValues('conditions');
     const hit = simulateBehaviorControl({
-      dimensionA: getValues('dim_a'),
-      thresholdA: getValues('threshold_a'),
+      conditions: currentConditions,
       orEnabled: getValues('or_enabled'),
-      dimensionB: getValues('dim_b'),
-      thresholdB: getValues('threshold_b'),
       inputs: {
         uniqueSenderIPCount: simUniqueSenderIPCount,
         mailCount: simMailCount,
@@ -254,14 +309,11 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
     });
   }, [getValues, simMailCount, simRecipientCount, simUniqueSenderIPCount, t]);
 
-  const needsUniqueSenderIPCount = dimA === 'ip_count' || (orEnabled && dimB === 'ip_count');
+  const needsUniqueSenderIPCount = (conditions ?? []).some((c) => c?.dim === 'ip_count');
 
   const isIncomplete = !watchAll.name
-    || watchAll.threshold_a <= 0
-    || (watchAll.or_enabled && (watchAll.threshold_b ?? 0) <= 0);
-
-  const dimALabel = t(`behaviorControl.dim.${watchAll.dim_a}`).replace(/上限$/, '');
-  const dimBLabel = watchAll.dim_b ? t(`behaviorControl.dim.${watchAll.dim_b}`).replace(/上限$/, '') : '';
+    || !(watchAll.conditions?.length > 0)
+    || (watchAll.conditions ?? []).some((c) => !c.threshold || c.threshold <= 0);
 
   return (
     <>
@@ -271,22 +323,12 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
           side="right"
         >
           <FormProvider {...methods}>
-            <form onSubmit={handleSubmit((v) => saveMutation.mutate(v))} className="flex flex-col flex-1 overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0">
-                <div>
-                  <SheetTitle className="text-[18px] font-semibold">
-                    {editing ? t('behaviorControl.editTitle') : t('behaviorControl.createTitle')}
-                  </SheetTitle>
-                  <p className="text-sm text-muted-foreground mt-1">{t('behaviorControl.drawerSubtitle')}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => handleClose(false)}>
-                    {t('common.cancel')}
-                  </Button>
-                  <Button type="submit" size="sm" disabled={saveMutation.isPending}>
-                    {t('common.save')}
-                  </Button>
-                </div>
+            <form onSubmit={handleSubmit((v) => saveMutation.mutate(v as BehaviorControlFormData))} className="flex flex-col flex-1 overflow-hidden">
+              <div className="px-6 py-4 border-b flex-shrink-0">
+                <SheetTitle className="text-[18px] font-semibold">
+                  {editing ? t('behaviorControl.editTitle') : t('behaviorControl.createTitle')}
+                </SheetTitle>
+                <p className="text-sm text-muted-foreground mt-1">{t('behaviorControl.drawerSubtitle')}</p>
               </div>
 
               <div className="flex flex-1 overflow-hidden">
@@ -338,7 +380,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                             </Select>
                           </div>
 
-                          {/* 管控对象类型 */}
+                          {/* 管控象类型 */}
                           <div className="flex items-center gap-3">
                             <Label className="min-w-[100px] text-right">
                               <span className="text-red-500">*</span> {t('behaviorControl.form.objectTypeLabel')}
@@ -425,7 +467,16 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                     </Select>
                                     <div className="flex items-center gap-2 mt-1">
                                       <span className="text-xs text-muted-foreground">{t('behaviorControl.form.groupSource')}</span>
-                                      <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-blue-600">
+                                      <Button
+                                        type="button"
+                                        variant="link"
+                                        size="sm"
+                                        className="h-auto p-0 text-xs text-blue-600"
+                                        onClick={() => {
+                                          const selected = watchAll.object_config.type === 'sender' ? (watchAll.object_config.value ?? '') : '';
+                                          setPreviewGroupName(selected || '__all__');
+                                        }}
+                                      >
                                         {t('behaviorControl.form.manageGroup')} <ExternalLink className="h-3 w-3 ml-1" />
                                       </Button>
                                     </div>
@@ -506,7 +557,16 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                     </Select>
                                     <div className="flex items-center gap-2 mt-1">
                                       <span className="text-xs text-muted-foreground">{t('behaviorControl.form.ipGroupSource')}</span>
-                                      <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-blue-600">
+                                      <Button
+                                        type="button"
+                                        variant="link"
+                                        size="sm"
+                                        className="h-auto p-0 text-xs text-blue-600"
+                                        onClick={() => {
+                                          const selected = watchAll.object_config.type === 'senderIp' ? (watchAll.object_config.value ?? '') : '';
+                                          setPreviewGroupName(selected || '__all__');
+                                        }}
+                                      >
                                         {t('behaviorControl.form.manageIpGroup')} <ExternalLink className="h-3 w-3 ml-1" />
                                       </Button>
                                     </div>
@@ -621,101 +681,152 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                             </Select>
                           </div>
 
-                          {/* 检测维度A */}
-                          <div className="flex items-center gap-3">
-                            <Label className="min-w-[100px] text-right">
-                              <span className="text-red-500">*</span> {t('behaviorControl.form.dimA')}
-                            </Label>
-                            <Select
-                              value={dimA}
-                              onValueChange={(v) => setValue('dim_a', v as BehaviorDimension, { shouldDirty: true })}
-                            >
-                              <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                {BEHAVIOR_DIMENSIONS.map((d) => (
-                                  <SelectItem key={d} value={d}>{t(`behaviorControl.dim.${d}`)}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
+                          {/* 动态条件列表 */}
+                          {(watchAll.conditions ?? []).map((cond, idx) => {
+                            const condErrors = (formState.errors.conditions as Record<number, { threshold?: { message?: string } }> | undefined)?.[idx];
+                            return (
+                              <div key={idx} className="border border-border rounded-md p-3 space-y-3 bg-background/60">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-medium text-muted-foreground">
+                                    {t('behaviorControl.form.conditionN', { n: idx + 1 })}
+                                  </span>
+                                  {idx > 0 && (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                                      onClick={() => {
+                                        const next = (watchAll.conditions ?? []).filter((_, i) => i !== idx);
+                                        setValue('conditions', next, { shouldDirty: true });
+                                      }}
+                                      aria-label={t('behaviorControl.form.conditionN', { n: idx + 1 })}
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                  )}
+                                </div>
 
-                          {/* 阈值A */}
-                          <div className="flex items-center gap-3">
-                            <Label className="min-w-[100px] text-right">
-                              <span className="text-red-500">*</span> {t('behaviorControl.form.thresholdA')}
-                            </Label>
-                            <div className="flex-1 flex items-center gap-2">
-                              <Input
-                                type="number"
-                                placeholder={t('behaviorControl.form.thresholdPlaceholder')}
-                                {...register('threshold_a', { valueAsNumber: true })}
-                                className={cn('w-32', formState.errors.threshold_a && 'border-red-500')}
-                              />
-                              <span className="text-sm text-muted-foreground">{t(`behaviorControl.unit.${dimA}`)}</span>
-                            </div>
-                          </div>
-                          {formState.errors.threshold_a && (
-                            <div className="flex gap-3">
-                              <div className="min-w-[100px]" />
-                              <p className="text-xs text-red-500">{t(`behaviorControl.errors.${formState.errors.threshold_a.message}`)}</p>
-                            </div>
-                          )}
+                                {/* 检测维度 */}
+                                <div className="flex items-center gap-3">
+                                  <Label className="min-w-[80px] text-right text-sm">
+                                    <span className="text-red-500">*</span> {t('behaviorControl.col.detection')}
+                                  </Label>
+                                  <Select
+                                    value={cond.dim ?? ''}
+                                    onValueChange={(v) => {
+                                      const next = [...(watchAll.conditions ?? [])];
+                                      next[idx] = { ...next[idx], dim: v as BehaviorDimension };
+                                      setValue('conditions', next, { shouldDirty: true });
+                                    }}
+                                  >
+                                    <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                      {/* 其他条件已占用的维度置灰：后端要求条件维度互不重复
+                                          （validateBehaviorControlConditions 的 duplicate dim 校验） */}
+                                      {BEHAVIOR_DIMENSIONS.map((d) => {
+                                        const usedElsewhere = (watchAll.conditions ?? []).some(
+                                          (c, i) => i !== idx && c.dim === d,
+                                        );
+                                        return (
+                                          <SelectItem key={d} value={d} disabled={usedElsewhere}>
+                                            {t(`behaviorControl.dim.${d}`)}
+                                          </SelectItem>
+                                        );
+                                      })}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
 
-                          {/* OR组合条件 */}
+                                {/* 阈值 */}
+                                <div className="flex items-center gap-3">
+                                  <Label className="min-w-[80px] text-right text-sm">
+                                    <span className="text-red-500">*</span> {t('behaviorControl.form.threshold')}
+                                  </Label>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="number"
+                                      min={1}
+                                      placeholder={t('behaviorControl.form.thresholdPlaceholder')}
+                                      value={cond.threshold > 0 ? cond.threshold : ''}
+                                      onChange={(e) => {
+                                        const next = [...(watchAll.conditions ?? [])];
+                                        next[idx] = { ...next[idx], threshold: parseInt(e.target.value, 10) || 0 };
+                                        setValue('conditions', next, { shouldDirty: true });
+                                      }}
+                                      className={cn('w-28', condErrors?.threshold && 'border-red-500')}
+                                    />
+                                    <span className="text-sm text-muted-foreground">
+                                      {cond.dim ? t(`behaviorControl.unit.${cond.dim}`) : ''}
+                                    </span>
+                                  </div>
+                                </div>
+                                {condErrors?.threshold && (
+                                  <div className="flex gap-3">
+                                    <div className="min-w-[80px]" />
+                                    <p className="text-xs text-red-500">
+                                      {t(`behaviorControl.errors.${condErrors.threshold.message}`)}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+
+                          {/* 添加条件按钮 */}
                           <div className="flex items-center gap-3">
                             <div className="min-w-[100px]" />
-                            <div className="flex items-center gap-2">
-                              <Checkbox
-                                id="orEnabled"
-                                checked={orEnabled}
-                                onCheckedChange={(checked) => setValue('or_enabled', checked === true, { shouldDirty: true })}
-                              />
-                              <Label htmlFor="orEnabled" className="text-sm cursor-pointer">
-                                {t('behaviorControl.form.orToggle')}
-                              </Label>
+                            <div className="flex items-center gap-3">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={(watchAll.conditions ?? []).length >= 4}
+                                onClick={() => {
+                                  // 默认维度取第一个未被占用的（维度不允许重复）
+                                  const used = new Set((watchAll.conditions ?? []).map((c) => c.dim));
+                                  const firstFree = BEHAVIOR_DIMENSIONS.find((d) => !used.has(d)) ?? 'mail_count';
+                                  const next = [
+                                    ...(watchAll.conditions ?? []),
+                                    { dim: firstFree as BehaviorDimension, threshold: 0 },
+                                  ];
+                                  setValue('conditions', next, { shouldDirty: true });
+                                }}
+                                className="h-8 text-xs gap-1.5"
+                              >
+                                <Plus className="h-3.5 w-3.5" />
+                                {t('behaviorControl.form.addCondition')}
+                              </Button>
+                              <span className="text-xs text-muted-foreground">
+                                {t('behaviorControl.form.conditionCount', { count: (watchAll.conditions ?? []).length })}
+                              </span>
                             </div>
                           </div>
 
-                          {orEnabled && (
-                            <>
-                              <div className="flex items-center gap-3">
-                                <Label className="min-w-[100px] text-right">
-                                  <span className="text-red-500">*</span> {t('behaviorControl.form.dimB')}
-                                </Label>
-                                <Select
-                                  value={dimB ?? ''}
-                                  onValueChange={(v) => setValue('dim_b', v as BehaviorDimension, { shouldDirty: true })}
-                                >
-                                  <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
-                                  <SelectContent>
-                                    {BEHAVIOR_DIMENSIONS.map((d) => (
-                                      <SelectItem key={d} value={d}>{t(`behaviorControl.dim.${d}`)}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                          {/* 条件关系：多于 1 条时显示 */}
+                          {(watchAll.conditions ?? []).length > 1 && (
+                            <div className="flex items-center gap-3">
+                              <Label className="min-w-[100px] text-right text-sm">
+                                {t('behaviorControl.form.conditionRelation')}
+                              </Label>
+                              <div className="flex gap-4">
+                                {([
+                                  { value: false, label: t('behaviorControl.form.relationAnd') },
+                                  { value: true, label: t('behaviorControl.form.relationOr') },
+                                ] as { value: boolean; label: string }[]).map(({ value, label }) => (
+                                  <label key={String(value)} className="flex items-center gap-1.5 cursor-pointer text-sm">
+                                    <input
+                                      type="radio"
+                                      name="or_enabled"
+                                      checked={orEnabled === value}
+                                      onChange={() => setValue('or_enabled', value, { shouldDirty: true })}
+                                      className="accent-primary"
+                                    />
+                                    {label}
+                                  </label>
+                                ))}
                               </div>
-
-                              <div className="flex items-center gap-3">
-                                <Label className="min-w-[100px] text-right">
-                                  <span className="text-red-500">*</span> {t('behaviorControl.form.thresholdB')}
-                                </Label>
-                                <div className="flex-1 flex items-center gap-2">
-                                  <Input
-                                    type="number"
-                                    placeholder={t('behaviorControl.form.thresholdPlaceholder')}
-                                    {...register('threshold_b', { valueAsNumber: true })}
-                                    className={cn('w-32', formState.errors.threshold_b && 'border-red-500')}
-                                  />
-                                  <span className="text-sm text-muted-foreground">{dimB ? t(`behaviorControl.unit.${dimB}`) : ''}</span>
-                                </div>
-                              </div>
-                              {formState.errors.threshold_b && (
-                                <div className="flex gap-3">
-                                  <div className="min-w-[100px]" />
-                                  <p className="text-xs text-red-500">{t(`behaviorControl.errors.${formState.errors.threshold_b.message}`)}</p>
-                                </div>
-                              )}
-                            </>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -810,16 +921,26 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
 
                             <div className="flex items-start gap-2">
                               <Ban className="h-4 w-4 text-muted-foreground mt-0.5" />
-                              <div>
-                                <span className="text-muted-foreground">{dimALabel}{t('behaviorControl.preview.exceed')}</span>
-                                <Badge variant="outline" className="mx-1.5 font-mono">{watchAll.threshold_a}</Badge>
-                                {watchAll.or_enabled && watchAll.dim_b && (
-                                  <>
-                                    <span className="text-muted-foreground mx-1">{t('behaviorControl.preview.or')}</span>
-                                    <span className="text-muted-foreground">{dimBLabel}{t('behaviorControl.preview.exceed')}</span>
-                                    <Badge variant="outline" className="mx-1.5 font-mono">{watchAll.threshold_b ?? 0}</Badge>
-                                  </>
-                                )}
+                              <div className="flex flex-wrap items-center gap-y-1">
+                                {(watchAll.conditions ?? []).map((cond, idx) => {
+                                  const dimLabel = cond.dim
+                                    ? t(`behaviorControl.dim.${cond.dim}`).replace(/上限$/, '')
+                                    : '';
+                                  const sep = idx > 0
+                                    ? (watchAll.or_enabled
+                                        ? t('behaviorControl.preview.or')
+                                        : t('behaviorControl.preview.and', { defaultValue: 'AND' }))
+                                    : null;
+                                  return (
+                                    <span key={idx} className="flex items-center gap-0.5">
+                                      {sep && (
+                                        <span className="text-muted-foreground mx-1 font-medium">{sep}</span>
+                                      )}
+                                      <span className="text-muted-foreground">{dimLabel}{t('behaviorControl.preview.exceed')}</span>
+                                      <Badge variant="outline" className="mx-1.5 font-mono">{cond.threshold > 0 ? cond.threshold : '—'}</Badge>
+                                    </span>
+                                  );
+                                })}
                               </div>
                             </div>
 
@@ -853,15 +974,63 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                           <span>{t('behaviorControl.examples.toggle')}</span>
                         </CollapsibleSectionTrigger>
                         <CollapsibleContent className="mt-3 space-y-3">
-                          {[
-                            { name: t('behaviorControl.examples.normalName'), desc: t('behaviorControl.examples.normalDesc'), effect: t('behaviorControl.examples.normalEffect') },
-                            { name: t('behaviorControl.examples.stolenName'), desc: t('behaviorControl.examples.stolenDesc'), effect: t('behaviorControl.examples.stolenEffect') },
-                            { name: t('behaviorControl.examples.salesName'), desc: t('behaviorControl.examples.salesDesc'), effect: t('behaviorControl.examples.salesEffect') },
-                          ].map((example) => (
-                            <div key={example.name} className="bg-background rounded-lg p-4 border">
-                              <div className="mb-2">
-                                <h4 className="font-medium text-sm">{example.name}</h4>
-                                <p className="text-xs text-muted-foreground">{example.desc}</p>
+                          {([
+                            {
+                              name: t('behaviorControl.examples.normalName'),
+                              desc: t('behaviorControl.examples.normalDesc'),
+                              effect: t('behaviorControl.examples.normalEffect'),
+                              preset: {
+                                time_window: '15min' as BehaviorTimeWindow,
+                                conditions: [
+                                  { dim: 'mail_count' as BehaviorDimension, threshold: 50 },
+                                  { dim: 'ip_count' as BehaviorDimension, threshold: 2 },
+                                ],
+                                or_enabled: false,
+                              },
+                            },
+                            {
+                              name: t('behaviorControl.examples.stolenName'),
+                              desc: t('behaviorControl.examples.stolenDesc'),
+                              effect: t('behaviorControl.examples.stolenEffect'),
+                              preset: {
+                                time_window: '15min' as BehaviorTimeWindow,
+                                conditions: [
+                                  { dim: 'ip_count' as BehaviorDimension, threshold: 10 },
+                                  { dim: 'mail_count' as BehaviorDimension, threshold: 200 },
+                                ],
+                                or_enabled: true,
+                              },
+                            },
+                            {
+                              name: t('behaviorControl.examples.salesName'),
+                              desc: t('behaviorControl.examples.salesDesc'),
+                              effect: t('behaviorControl.examples.salesEffect'),
+                              preset: {
+                                time_window: '1hour' as BehaviorTimeWindow,
+                                conditions: [
+                                  { dim: 'recipient_count' as BehaviorDimension, threshold: 500 },
+                                ],
+                                or_enabled: false,
+                              },
+                            },
+                          ] as const).map((example) => (
+                            <div
+                              key={example.name}
+                              className="bg-background rounded-lg p-4 border cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors group"
+                              onClick={() => {
+                                setValue('time_window', example.preset.time_window, { shouldDirty: true });
+                                setValue('conditions', example.preset.conditions.map(c => ({ ...c })), { shouldDirty: true });
+                                setValue('or_enabled', example.preset.or_enabled, { shouldDirty: true });
+                              }}
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <div>
+                                  <h4 className="font-medium text-sm">{example.name}</h4>
+                                  <p className="text-xs text-muted-foreground">{example.desc}</p>
+                                </div>
+                                <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2 mt-0.5">
+                                  {t('behaviorControl.examples.fill')}
+                                </span>
                               </div>
                               <p className="text-xs text-muted-foreground bg-muted/40 rounded p-2">{example.effect}</p>
                             </div>
@@ -981,10 +1150,26 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                   </div>
                 </TooltipProvider>
               </div>
+              <div className="flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0">
+                <Button type="button" variant="outline" size="sm" onClick={() => handleClose(false)}>
+                  {t('common.cancel')}
+                </Button>
+                <Button type="submit" size="sm" disabled={saveMutation.isPending}>
+                  {t('common.save')}
+                </Button>
+              </div>
             </form>
           </FormProvider>
         </SheetContent>
       </Sheet>
+
+      {/* 群组成员预览 Dialog */}
+      <GroupPreviewDialog
+        open={previewGroupName !== null}
+        onClose={() => setPreviewGroupName(null)}
+        data={previewGroupData}
+        t={t}
+      />
 
       <Dialog open={closeConfirmOpen} onOpenChange={setCloseConfirmOpen}>
         <DialogContent className="sm:max-w-[400px]">
@@ -1007,5 +1192,108 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+// ── 群组成员预览 Dialog ────────────────────────────────────────────────────────
+
+interface GroupPreviewDialogProps {
+  open: boolean;
+  onClose: () => void;
+  data: { name: string; groupType: string; members: string[]; totalCount: number } | null;
+  t: ReturnType<typeof useTranslations>;
+}
+
+function GroupPreviewDialog({ open, onClose, data, t }: GroupPreviewDialogProps) {
+  const [search, setSearch] = useState('');
+
+  // 关闭时重置搜索。写在关闭回调里而不是 useEffect 里：eslint 的
+  // react-hooks/set-state-in-effect 禁止在 effect 体内同步 setState。
+  const handleClose = useCallback(() => {
+    setSearch('');
+    onClose();
+  }, [onClose]);
+
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    const q = search.trim().toLowerCase();
+    if (!q) return data.members;
+    return data.members.filter((m) => m.toLowerCase().includes(q));
+  }, [data, search]);
+
+  const typeLabel = data
+    ? data.groupType === 'ip'
+      ? t('behaviorControl.groupPreview.typeIp')
+      : data.groupType === 'org'
+        ? t('behaviorControl.groupPreview.typeOrg')
+        : t('behaviorControl.groupPreview.typeSender')
+    : '';
+
+  const SHOW_LIMIT = 100;
+  const isSearch = search.trim().length > 0;
+  const displayList = isSearch ? filtered : filtered.slice(0, SHOW_LIMIT);
+  const showTruncate = !isSearch && data && data.totalCount > SHOW_LIMIT;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) handleClose(); }}>
+      <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col gap-0 p-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
+          <div className="flex items-start gap-2">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-base leading-tight truncate">
+                {data ? t('behaviorControl.groupPreview.title', { name: data.name }) : ''}
+              </DialogTitle>
+              <DialogDescription className="mt-1 flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs shrink-0">{typeLabel}</Badge>
+                {data && (
+                  <span className="text-xs text-muted-foreground">
+                    {t('behaviorControl.groupPreview.memberCount', { count: data.totalCount })}
+                  </span>
+                )}
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        {/* 搜索框 */}
+        <div className="px-6 py-3 border-b shrink-0">
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('behaviorControl.groupPreview.searchPlaceholder')}
+            className="h-8 text-sm"
+          />
+        </div>
+
+        {/* 成员列表 */}
+        <div className="flex-1 overflow-y-auto px-6 py-2 min-h-0">
+          {!data || data.members.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              {t('behaviorControl.groupPreview.noMembers')}
+            </p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {displayList.map((member) => (
+                <li key={member} className="py-2 text-sm font-mono text-foreground">
+                  {member}
+                </li>
+              ))}
+            </ul>
+          )}
+          {showTruncate && (
+            <p className="pt-2 pb-3 text-center text-xs text-muted-foreground">
+              {t('behaviorControl.groupPreview.truncateHint', { shown: SHOW_LIMIT, total: data!.totalCount })}
+            </p>
+          )}
+        </div>
+
+        {/* 底部按钮 */}
+        <DialogFooter className="px-6 py-4 border-t shrink-0">
+          <Button type="button" variant="outline" size="sm" onClick={handleClose}>
+            {t('behaviorControl.groupPreview.close')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

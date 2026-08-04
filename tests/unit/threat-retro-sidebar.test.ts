@@ -20,4 +20,14 @@ describe('agent-center sidebar entry', () => {
       expect(sidebar.agentOverview).toBeTruthy();
     }
   });
+
+  it('uses the same center name in the sidebar and page heading (GT-12737)', () => {
+    for (const m of [zh, en, th, ru]) {
+      const messages = m as {
+        sidebar: { agentCenter: string };
+        agentCenterOverview: { centerTitle: string };
+      };
+      expect(messages.agentCenterOverview.centerTitle).toBe(messages.sidebar.agentCenter);
+    }
+  });
 });

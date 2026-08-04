@@ -70,7 +70,7 @@ export function AuthFlowDiagram({ failActions, activeTab, onNodeClick }: AuthFlo
   return (
     <div className="rounded-lg border bg-muted/30 p-4">
       <div className="mb-3 text-xs text-muted-foreground">{t('flowTitle')}</div>
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
+      <div className="flex items-center gap-2 overflow-x-auto py-1">
         {nodes.map((node, idx) => (
           <div key={node.id} className="flex items-center gap-2">
             <FlowNodeButton

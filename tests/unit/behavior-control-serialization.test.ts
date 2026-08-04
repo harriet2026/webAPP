@@ -15,9 +15,10 @@ const baseForm: BehaviorControlFormData = {
   direction: 'outbound',
   object_config: { type: 'sender', sub_type: 'individual', value: 'a@b.com' },
   time_window: '15min',
+  conditions: [{ dim: 'mail_count', threshold: 50 }],
+  or_enabled: false,
   dim_a: 'mail_count',
   threshold_a: 50,
-  or_enabled: false,
   action: 'review',
 };
 
@@ -153,5 +154,79 @@ describe('formToCreateBody', () => {
     expect(body.page).toBe('behavior_control');
     expect(body.stage).toBe('rcpt');
     expect(body.rule_class).toBe('action');
+  });
+});
+
+// GT-12707：conditions[]/relation 权威模型 + 旧字段镜像的序列化契约。
+describe('formToCreateBody conditions/relation (GT-12707)', () => {
+  it('single condition: no relation, mirror only dim_a', () => {
+    const body = formToCreateBody(baseForm);
+    expect(body.metadata.conditions).toEqual([{ dim: 'mail_count', threshold: 50 }]);
+    expect(body.metadata.relation).toBeUndefined();
+    expect(body.metadata.dim_a).toBe('mail_count');
+    expect(body.metadata.threshold_a).toBe(50);
+    expect(body.metadata.or_enabled).toBe(false);
+    expect(body.metadata.dim_b).toBeUndefined();
+  });
+
+  it('two conditions OR: relation=or and legacy pair mirrors conditions[0..1]', () => {
+    const body = formToCreateBody({
+      ...baseForm,
+      conditions: [
+        { dim: 'mail_count', threshold: 50 },
+        { dim: 'ip_count', threshold: 3 },
+      ],
+      or_enabled: true,
+    });
+    expect(body.metadata.relation).toBe('or');
+    expect(body.metadata.or_enabled).toBe(true);
+    expect(body.metadata.dim_b).toBe('ip_count');
+    expect(body.metadata.threshold_b).toBe(3);
+  });
+
+  it('multi conditions AND: relation=and, or_enabled=false, no dim_b (后端镜像一致性要求)', () => {
+    const body = formToCreateBody({
+      ...baseForm,
+      conditions: [
+        { dim: 'mail_count', threshold: 50 },
+        { dim: 'ip_count', threshold: 3 },
+        { dim: 'recipient_count', threshold: 200 },
+      ],
+      or_enabled: false,
+    });
+    expect(body.metadata.conditions).toHaveLength(3);
+    expect(body.metadata.relation).toBe('and');
+    expect(body.metadata.or_enabled).toBe(false);
+    expect(body.metadata.dim_b).toBeUndefined();
+    expect(body.metadata.threshold_b).toBeUndefined();
+  });
+
+  it('resolve prefers metadata conditions over legacy synthesis', () => {
+    const rule = {
+      id: 9,
+      action: 'audit',
+      tags: [],
+      page: 'behavior_control',
+      stage: 'rcpt',
+      condition_tree: '',
+      metadata: JSON.stringify({
+        feature: 'behavior_control',
+        direction: 'outbound',
+        object_config: { type: 'global' },
+        time_window: '15min',
+        conditions: [
+          { dim: 'mail_count', threshold: 50 },
+          { dim: 'ip_count', threshold: 3 },
+          { dim: 'recipient_count', threshold: 200 },
+        ],
+        relation: 'and',
+        dim_a: 'mail_count',
+        threshold_a: 50,
+        or_enabled: false,
+      }),
+    } as unknown as Rule;
+    const view = resolveBehaviorControlRule(rule);
+    expect(view.meta?.conditions).toHaveLength(3);
+    expect(view.meta?.relation).toBe('and');
   });
 });

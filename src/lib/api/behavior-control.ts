@@ -78,16 +78,27 @@ export function buildConditionTreeFromForm(
 }
 
 export function formToCreateBody(form: BehaviorControlFormData) {
+  // GT-12707：conditions[]/relation 是权威模型（后端已支持 1~4 条 + AND/OR，
+  // 见 internal/api/behavior_control_helper.go 的 validateBehaviorControlConditions）。
+  // dim_a/threshold_a/or_enabled/dim_b/threshold_b 是必须随附的派生镜像，供
+  // N-1 滚动升级窗口里的旧引擎降级消费（旧引擎只读这一对，AND 语义降级为
+  // 只按 conditions[0] 触发）——后端会校验镜像一致性，别单独改动其中一侧。
+  const c0 = form.conditions[0];
+  const c1 = form.conditions[1];
+  const multi = form.conditions.length > 1;
+  const relation = multi ? (form.or_enabled ? 'or' : 'and') : undefined;
   const meta: BehaviorControlMetadata = {
     feature: 'behavior_control',
     direction: form.direction,
     object_config: form.object_config,
     time_window: form.time_window,
-    dim_a: form.dim_a,
-    threshold_a: form.threshold_a,
-    or_enabled: form.or_enabled,
-    dim_b: form.or_enabled ? form.dim_b : undefined,
-    threshold_b: form.or_enabled ? form.threshold_b : undefined,
+    conditions: form.conditions.map((c) => ({ ...c })),
+    relation,
+    dim_a: c0?.dim ?? form.dim_a,
+    threshold_a: c0?.threshold ?? form.threshold_a,
+    or_enabled: relation === 'or',
+    dim_b: relation === 'or' ? c1?.dim : undefined,
+    threshold_b: relation === 'or' ? c1?.threshold : undefined,
   };
   return {
     name: form.name,
@@ -118,7 +129,18 @@ export function resolveBehaviorControlRule(rawRule: BehaviorControlRuleWire): Be
     parsed.dim_a &&
     typeof parsed.threshold_a === 'number'
   ) {
-    meta = parsed as unknown as BehaviorControlMetadata;
+    const base = parsed as unknown as BehaviorControlMetadata;
+    // 向前兼容：旧规则 metadata 没有 conditions[]，从 dim_a/dim_b 还原
+    if (!Array.isArray(base.conditions) || base.conditions.length === 0) {
+      const conditions: import('@/types/behavior-control').BehaviorCondition[] = [
+        { dim: base.dim_a, threshold: base.threshold_a },
+      ];
+      if (base.or_enabled && base.dim_b && base.threshold_b != null) {
+        conditions.push({ dim: base.dim_b, threshold: base.threshold_b });
+      }
+      (base as unknown as Record<string, unknown>).conditions = conditions;
+    }
+    meta = base;
   }
   return {
     rule,

@@ -39,7 +39,6 @@ export function ExceptionRulesEntry({ count, onGoPipeline, onViewCurrent }: Exce
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-medium">{t('exceptionEntry.title')}</h3>
-          <p className="text-xs text-muted-foreground mt-1">{t('exceptionEntry.desc')}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleGoPipeline}>

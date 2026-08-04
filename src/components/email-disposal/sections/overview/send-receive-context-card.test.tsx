@@ -93,11 +93,18 @@ describe('SendReceiveContextCard', () => {
     expect(senderRow.textContent).toContain('上海');
   });
 
+  // 状态文案取自组件实际使用的那棵 i18n 子树（emailDisposal.detail.overview.
+  // recipientStatus.status.*，与 RecipientStatus 表格共用同一套 key）。早先这里
+  // 硬编码了 '已投递'/'已隔离'——那是 investigations.*/logs.* 命名空间的措辞，
+  // emailDisposal 下从来是 '投递成功'/'隔离中'，于是断言恒红。改成引用 key 本身：
+  // 组件换错 key 或不渲染状态依旧会红，纯文案微调则不再误报。
+  const STATUS = zh.emailDisposal.detail.overview.recipientStatus.status;
+
   it('renders single-recipient pill with status (B2)', () => {
     renderCard(baseDetail());
     const row = screen.getByTestId('email-disposal-overview-context-recipient');
     expect(row.textContent).toContain('victim@company.com');
-    expect(row.textContent).toContain('已隔离');
+    expect(row.textContent).toContain(STATUS.quarantined);
   });
 
   it('renders multi-recipient status distribution and RecipientStatus table (B2/B3)', () => {
@@ -109,8 +116,8 @@ describe('SendReceiveContextCard', () => {
     }));
     const row = screen.getByTestId('email-disposal-overview-context-recipient');
     expect(row.textContent).toContain('2 个收件人');
-    expect(row.textContent).toContain('已投递: 1');
-    expect(row.textContent).toContain('已隔离: 1');
+    expect(row.textContent).toContain(`${STATUS.delivered}: 1`);
+    expect(row.textContent).toContain(`${STATUS.quarantined}: 1`);
     // B3: RecipientStatus's own table renders both recipients as rows.
     expect(screen.getByText('a@company.com')).toBeInTheDocument();
     expect(screen.getByText('b@company.com')).toBeInTheDocument();

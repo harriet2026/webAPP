@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { LoginPolicyResponse } from '@/lib/api/login-policy';
 
@@ -222,5 +223,33 @@ describe('LoginSecurityTab', () => {
     const list = screen.getByTestId('ip-rules');
     expect(within(list).getByText('192.168.1.0/24')).toBeInTheDocument();
     expect(within(list).queryByText('10.0.0.0/8')).not.toBeInTheDocument();
+  });
+
+  it('preserves a touched IP mode when an IP-rule refetch returns the previous mode', async () => {
+    policy = makePolicy('tenant');
+    const user = userEvent.setup();
+    const { LoginSecurityTab } = await import('../LoginSecurityTab');
+    const view = render(<LoginSecurityTab />);
+
+    await user.click(screen.getByLabelText('访问模式'));
+    await user.click(screen.getByRole('option', { name: 'ipModes.blacklist' }));
+
+    // Adding/deleting an IP rule invalidates the whole login-policy query. The
+    // server still has `none` until Save, so this refetch must update the rules
+    // without replacing the user's unsaved `blacklist` draft.
+    policy = makePolicy('tenant', {
+      effective: { ...BASELINE, ipMode: 'none' },
+      ipRules: {
+        platform: [],
+        tenant: [{ id: 7, tenant_id: 3, cidr: '192.0.2.10/32', remark: 'new', updated_at: '' }],
+      },
+    });
+    view.rerender(<LoginSecurityTab />);
+
+    await user.click(screen.getByTestId('login-security-save'));
+    expect(mockUpdate).toHaveBeenCalledWith(
+      { ipMode: 'blacklist' },
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+    );
   });
 });

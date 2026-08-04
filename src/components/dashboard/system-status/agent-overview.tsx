@@ -2,10 +2,7 @@
 
 // Agent overview card (Plan Task 6, spec §4.7 / §4.11.4).
 //
-// Rendered ONLY when `showAgents` (== `capabilities.ai`, from Task 5's
-// `useSystemStatusVisibility`) is true — the parent is responsible for that
-// coarse gate, mirroring how `hooks.ts` itself only fetches the three
-// agent-stats endpoints when `aiEnabled` is true.
+// Rendered only when `showAgents` from `useSystemStatusVisibility` is true.
 //
 // That coarse `capabilities.ai` gate is NOT sufficient per-row, though: all
 // three registry features (`phishing-detection`/`spoofing-detection`/
@@ -17,32 +14,18 @@
 // `resolve()` mechanism `sidebar-visibility.ts` uses per nav item — this
 // component does not otherwise re-derive product-form capability itself.
 //
-// fetchAgentStats in hooks.ts is intentionally left gated on the coarse
-// `aiEnabled` flag only, NOT re-gated per-row here: (1) the three stats
-// endpoints are already tenant-scoped by the shared `scopedRequest` (same
-// backend RBAC/tenant isolation as every other dashboard call), so an
-// ungranted-but-AI-enabled fetch cannot leak cross-tenant data — the actual
-// UI exposure this review flagged is fixed by the per-row hide below; (2)
-// gating the fetch itself would require pulling `registry`/`grants` into
-// `hooks.ts`, duplicating the scope/entitlement derivation that already
-// lives in `useProductForm`/`resolve()` and that this file's own doc
-// comments (see `useSystemStatusData`) explicitly avoid duplicating
-// elsewhere on this page. Precedent: `hooks.ts` already fetches
-// nodes/alerts off the coarser `isPlatform` signal rather than the finer
-// `resolve('monitor-infrastructure')` check `visibility.ts` uses for
-// display — "fetch coarse, gate display fine" is the established pattern
-// here.
+// hooks.ts consumes the same per-feature resolution and requests only rows
+// whose capability is enabled. Results are independently nullable so a grant
+// change racing an in-flight request affects only that row.
 //
 // "Today" metric per row is FIXED per the plan's Global Constraints (the
 // three stats endpoints do not share a field shape): phishing/spoofing use
 // `todayDetected`, threat-retro uses `recalledToday` (it has no
 // `todayDetected`). There is no backend "agent health" signal in any of the
 // three stats endpoints (`PhishingStats`/`SpoofingStats`/`ThreatRetroStats`
-// carry only counts, no status field) — so "abnormal" is not a fabricated
-// per-agent state. Status is derived from whether `agents` data loaded at
-// all: `agents != null` -> enabled (green) for all three rows; `agents ==
-// null` while not loading (the combined query errored) -> abnormal (red)
-// for all three, with "—" for the count per spec §4.11.4.
+// carry only counts, no status field). Availability is therefore tracked per
+// requested row: a missing row renders abnormal with "—" without affecting
+// any other agent.
 import { useTranslations } from 'next-intl';
 import { Bot } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -65,6 +48,7 @@ interface AgentRow {
   href: string;
   todayLabelKey: 'todayDetected' | 'todayRecalled';
   todayValue: number | undefined;
+  enabled: boolean;
 }
 
 const AGENT_CENTER_HREF = '/agent-center/overview';
@@ -74,29 +58,30 @@ export function AgentOverview({ agents, isLoading }: AgentOverviewProps) {
   const tSidebar = useTranslations('sidebar');
   const rowVisibility = useAgentRowVisibility();
 
-  const enabled = agents != null;
-
   const allRows: AgentRow[] = [
     {
       key: 'phishing',
       sidebarKey: 'phishingDetection',
       href: '/agent-center/overview?agent=phishing',
       todayLabelKey: 'todayDetected',
-      todayValue: agents?.phishing.todayDetected,
+      todayValue: agents?.phishing?.todayDetected,
+      enabled: agents?.phishing != null,
     },
     {
       key: 'spoofing',
       sidebarKey: 'spoofingDetection',
       href: '/agent-center/overview?agent=spoofing',
       todayLabelKey: 'todayDetected',
-      todayValue: agents?.spoofing.todayDetected,
+      todayValue: agents?.spoofing?.todayDetected,
+      enabled: agents?.spoofing != null,
     },
     {
       key: 'threat-retro',
       sidebarKey: 'threatRetro',
       href: '/agent-center/overview?agent=threat-retro',
       todayLabelKey: 'todayRecalled',
-      todayValue: agents?.threatRetro.recalledToday,
+      todayValue: agents?.threatRetro?.recalledToday,
+      enabled: agents?.threatRetro != null,
     },
   ];
 
@@ -135,16 +120,16 @@ export function AgentOverview({ agents, isLoading }: AgentOverviewProps) {
                         variant="outline"
                         data-testid={`system-status-agent-status-${row.key}`}
                         className={
-                          enabled
+                          row.enabled
                             ? 'border-emerald-300 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400'
                             : 'border-rose-300 text-rose-700 dark:border-rose-800 dark:text-rose-400'
                         }
                       >
-                        {enabled ? t('enabled') : t('abnormal')}
+                        {row.enabled ? t('enabled') : t('abnormal')}
                       </Badge>
                     </div>
                     <span className="text-sm tabular-nums text-muted-foreground">
-                      {enabled ? t(row.todayLabelKey, { n: row.todayValue ?? 0 }) : '—'}
+                      {row.enabled ? t(row.todayLabelKey, { n: row.todayValue ?? 0 }) : '—'}
                     </span>
                   </Link>
                 </InteractiveSurface>

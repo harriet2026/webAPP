@@ -98,20 +98,19 @@ export function ImageDetectTab({
           <div className="space-y-2">
             <Label>{infoLabel(t('imageDetect.detectionMode'), t('tooltips.ocrMode'), 'ocr-detection-mode')}</Label>
             <Select value={config.ocr_mode} onValueChange={(mode) => onChange({ ...config, ocr_mode: mode as ImageDetectConfig['ocr_mode'] })}>
-              <SelectTrigger data-testid="ocr-detection-mode"><SelectValue /></SelectTrigger>
-              <SelectContent data-testid="ocr-detection-mode-options">
+              <SelectTrigger className="w-full max-w-[400px]" data-testid="ocr-detection-mode"><SelectValue /></SelectTrigger>
+              <SelectContent className="min-w-[var(--radix-select-trigger-width)] w-max" data-testid="ocr-detection-mode-options">
                 <SelectItem value="none" data-testid="ocr-detection-mode-none">{t('imageDetect.ocrMode_none')}</SelectItem>
                 <SelectItem value="light" data-testid="ocr-detection-mode-light">{t('imageDetect.ocrMode_light')}</SelectItem>
-                {/* GT-11675：深度 OCR 尚未实现，暂不可选。
-                    整条链路都没有深浅之分：runOCR(mode) 的 mode 只用于打日志
-                    （internal/antispam 侧对照的 QrMode==="deep" 才是真分支），
-                    PyhelperClient.Ocr 只发 image_b64+lang，pyhelper 的 /v1/ocr
-                    也只有单一 pytesseract 路径。此前它可选但与「轻度」执行完全
-                    相同的代码，属静默无效；恢复为不可选并标注敬请期待，等实现
-                    落地再放开。 */}
-                <SelectItem value="deep" disabled data-testid="ocr-detection-mode-deep">
-                  {t('imageDetect.ocrMode_deep')}（{t('imageDetect.pending')}）
-                </SelectItem>
+                {/* GT-12720：按原型恢复「深度」可选（此前 GT-11675 因后端未实现而置灰）。
+                    ⚠️ 后端仍未区分深浅：apiserver 只校验 ocr_mode ∈ none/light/deep
+                    （internal/api/attachment_security_settings.go），attachd 的
+                    runOCR(ctx, client, imageB64, mode) 把 mode 只用于打日志，实际调用
+                    client.Ocr(ctx, imageB64, "eng") 没有 mode 入参，pyhelper /v1/ocr
+                    也只有单一 pytesseract 路径（cmd/attachd/internal/image_workflow.go:117）。
+                    也就是说选「深度」目前与「轻度」执行完全一致，仅配置值不同。
+                    深度 OCR 的后端实现需另行排期，见移植说明的后端待办清单。 */}
+                <SelectItem value="deep" data-testid="ocr-detection-mode-deep">{t('imageDetect.ocrMode_deep')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -132,6 +131,12 @@ export function ImageDetectTab({
             </div>
           </div>
         </div>
+        {config.ocr_mode === 'deep' && (
+          <div className="flex items-start gap-2 rounded-lg border border-border/70 bg-muted/30 p-3 text-sm text-muted-foreground" data-testid="ocr-deep-hint">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <span>{t('imageDetect.ocrMode_deep_hint')}</span>
+          </div>
+        )}
       </section>
 
       <section className="space-y-4 rounded-lg border border-border/70 bg-muted/30 p-4">
@@ -301,6 +306,11 @@ export function ImageDetectTab({
                     <SelectItem value="quarantine" data-testid="qr-deep-exceed-action-quarantine">{t('imageDetect.isolateFallback')}</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground" data-testid="qr-deep-exceed-action-hint">
+                  {actions.qr_deep_exceed_action === 'accept'
+                    ? t('imageDetect.exceedActionHint_pass')
+                    : t('imageDetect.exceedActionHint_quarantine')}
+                </p>
               </div>
             </div>
           </div>

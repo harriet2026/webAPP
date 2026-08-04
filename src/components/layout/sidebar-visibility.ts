@@ -88,6 +88,7 @@ export interface GatedNavItem {
   href?: string;
   permission?: Permission;
   requiresAdvancedRules?: boolean;
+  requiresProductFormSwitcher?: boolean;
 }
 
 /**
@@ -128,11 +129,12 @@ export interface NavGateContext {
   formVisible: Set<string> | null;
   capabilities?: Capabilities | null;
   viewer?: Viewer;
+  switcherEnabled?: boolean;
 }
 
 /**
  * The single source of truth for "is this nav item visible to the current
- * viewer" — the AND of permission + advance-gate + product-form + RBAC. Extracted
+ * viewer" — the AND of permission + advance-gate + switcher-gate + product-form + RBAC. Extracted
  * (GT-12376) so the admin-audit「操作模块」filter can reuse the EXACT same gate
  * the sidebar menu uses, instead of a second hand-written copy that would drift
  * (the recurring authorization-drift bug class). sidebar-nav.tsx's isItemAllowed
@@ -141,6 +143,7 @@ export interface NavGateContext {
 export function isNavItemAllowed(item: GatedNavItem, ctx: NavGateContext): boolean {
   if (item.permission && !ctx.hasPermission(item.permission)) return false;
   if (item.requiresAdvancedRules && !(ctx.isSystemAdmin && ctx.showAdvancedRules)) return false;
+  if (item.requiresProductFormSwitcher && ctx.switcherEnabled === false) return false;
   if (ctx.formVisible && !isItemVisibleByForm(item, ctx.registry, ctx.formVisible)) return false;
   if (!isItemVisibleByRole(item, ctx.canSeeRoute)) return false;
   if (

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
@@ -245,7 +245,7 @@ describe('RuleStep drawer', () => {
     await user.type(screen.getByTestId('mr-ob-rule-name-input'), '垃圾邮件专用路由');
     await user.type(screen.getByTestId('mr-ob-rule-target-host-input'), 'spam-relay.example.com');
     await user.click(screen.getByTestId('mr-ob-rule-intent-tag-select'));
-    await user.click(screen.getByRole('option', { name: '垃圾' }));
+    await user.click(await screen.findByRole('option', { name: '垃圾' }));
     expect(screen.queryByTestId('mr-ob-rule-no-condition-warning')).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId('mr-ob-rule-save'));
@@ -272,7 +272,12 @@ describe('RuleStep drawer', () => {
     await user.click(addButton);
     await user.click(screen.getByTestId('mr-ob-rule-more-condition-field-0'));
 
-    expect(screen.getByRole('option', { name: /Subject.*subject/ })).toBeInTheDocument();
+    // 第一条断言必须用 findBy*：Base UI 的 select 弹层是延迟挂载的，紧跟在
+    // user.click 之后同步查询会在 React 冲刷之前读到空 DOM（约 50% 概率）。
+    // 先 await 一条，弹层落定后下面的同步查询才成立 —— 尤其是那两条
+    // queryByRole().not.toBeInTheDocument() 负向断言：弹层没开时它们恒真，
+    // 靠这条 await 才有区分力。
+    expect(await screen.findByRole('option', { name: /Subject.*subject/ })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: /Attachment Count.*attachment_count/ })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: /Headers.*headers/ })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: /Is Outbound.*is_outbound/ })).toBeInTheDocument();
@@ -280,12 +285,12 @@ describe('RuleStep drawer', () => {
     expect(screen.queryByRole('option', { name: /Client IP.*client_ip/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('option', { name: /CAC Int Tag.*cac_int_tag/ })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('option', { name: /Subject.*subject/ }));
+    await user.click(await screen.findByRole('option', { name: /Subject.*subject/ }));
     await user.click(screen.getByTestId('mr-ob-rule-more-condition-operator-0'));
-    await user.click(screen.getByRole('option', { name: '正则匹配' }));
-    await user.type(screen.getByTestId('mr-ob-rule-more-condition-value-0'), '^财务.+审批$');
-    await user.type(screen.getByTestId('mr-ob-rule-name-input'), '财务主题路由');
-    await user.type(screen.getByTestId('mr-ob-rule-target-host-input'), 'finance-relay.example.com');
+    await user.click(await screen.findByRole('option', { name: '正则匹配' }));
+    fireEvent.change(screen.getByTestId('mr-ob-rule-more-condition-value-0'), { target: { value: '^财务.+审批$' } });
+    fireEvent.change(screen.getByTestId('mr-ob-rule-name-input'), { target: { value: '财务主题路由' } });
+    fireEvent.change(screen.getByTestId('mr-ob-rule-target-host-input'), { target: { value: 'finance-relay.example.com' } });
     await user.click(screen.getByTestId('mr-ob-rule-save'));
 
     await waitFor(() => expect(mockApiRequest).toHaveBeenCalled());
@@ -311,8 +316,8 @@ describe('RuleStep drawer', () => {
     await user.click(addButton);
     await screen.findByTestId('mr-ob-rule-more-condition-error');
 
-    await user.type(screen.getByTestId('mr-ob-rule-name-input'), '未完成条件');
-    await user.type(screen.getByTestId('mr-ob-rule-target-host-input'), 'relay.example.com');
+    fireEvent.change(screen.getByTestId('mr-ob-rule-name-input'), { target: { value: '未完成条件' } });
+    fireEvent.change(screen.getByTestId('mr-ob-rule-target-host-input'), { target: { value: 'relay.example.com' } });
     await user.click(screen.getByTestId('mr-ob-rule-save'));
     expect(mockApiRequest).not.toHaveBeenCalled();
   });
@@ -323,8 +328,10 @@ describe('RuleStep drawer', () => {
     await screen.findByTestId('mr-ob-rule-empty');
     await user.click(screen.getByTestId('mr-ob-rule-create'));
     await screen.findByTestId('mr-ob-rule-drawer');
-    await user.type(screen.getByTestId('mr-ob-rule-target-host-input'), '127.0.0.1');
-    expect(await screen.findByTestId('mr-ob-rule-target-host-error')).toHaveTextContent('目的地址不能与网关本地地址相同');
+    fireEvent.change(screen.getByTestId('mr-ob-rule-target-host-input'), { target: { value: '127.0.0.1' } });
+    await waitFor(() => {
+      expect(screen.getByTestId('mr-ob-rule-target-host-error')).toHaveTextContent('目的地址不能与网关本地地址相同');
+    });
   });
 
   it('模拟测试结果 pre 含「└── 预计对端响应：250 2.0.0 Ok」', async () => {
@@ -580,7 +587,7 @@ describe('RuleStep：TLS 等级编辑保存回写 metadata.tls_level', () => {
     await user.click(screen.getByTestId('mr-ob-rule-edit-5001'));
     await screen.findByTestId('mr-ob-rule-drawer');
     await user.click(screen.getByTestId('mr-ob-rule-tls-level-select'));
-    await user.click(screen.getByRole('option', { name: '强制 TLS' }));
+    await user.click(await screen.findByRole('option', { name: '强制 TLS' }));
     await user.click(screen.getByTestId('mr-ob-rule-save'));
 
     await waitFor(() => expect(mockApiRequest).toHaveBeenCalled());

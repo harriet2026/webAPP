@@ -162,9 +162,11 @@ describe('SenderFilterPage', () => {
     const createButtons = screen.getAllByText('senderFilter.createRule');
     fireEvent.click(createButtons[createButtons.length - 1]);
 
+    // GT-12696：白名单模式选择器已下线，白名单固定按「跳过内容检测」提交。
     await waitFor(() => {
-      expect(screen.getByText('senderFilter.whitelistMode')).toBeInTheDocument();
+      expect(screen.getByLabelText(/senderFilter\.ruleName/)).toBeInTheDocument();
     });
+    expect(screen.queryByText('senderFilter.whitelistMode')).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText(/senderFilter\.ruleName/), {
       target: { value: 'Trusted sender' },
     });

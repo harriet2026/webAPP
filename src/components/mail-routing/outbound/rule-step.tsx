@@ -17,7 +17,7 @@
 // 条件节点"分开处理；其余叶子条件交给紧凑型“更多条件”组件编辑，复合子树仍作为不透明节点
 // 原样保留，保存时把两部分合并回同一棵树。
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Plus, Pencil, Trash2, FlaskConical, AlertTriangle, Loader2 } from 'lucide-react';
@@ -350,10 +350,14 @@ export function RuleStep({ tenantId, channels, proxies }: RuleStepProps) {
   const [moreConditionsValid, setMoreConditionsValid] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<OutboundRuleRow | null>(null);
   const [simText, setSimText] = useState<string | null>(null);
+  // React Query updates isPending on the next render. A fast double click can
+  // therefore enter handleSave twice before the button becomes disabled.
+  const saveStartedRef = useRef(false);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey });
 
   const openCreate = () => {
+    saveStartedRef.current = false;
     setDraft(emptyDraft());
     setMoreConditionsValid(true);
     setEditingId(null);
@@ -362,6 +366,7 @@ export function RuleStep({ tenantId, channels, proxies }: RuleStepProps) {
   };
 
   const openEdit = (row: OutboundRuleRow) => {
+    saveStartedRef.current = false;
     setDraft(draftFromRow(row));
     setMoreConditionsValid(true);
     setEditingId(row.id);
@@ -477,14 +482,19 @@ export function RuleStep({ tenantId, channels, proxies }: RuleStepProps) {
       closeDrawer();
       invalidate();
     },
-    onError: (e: Error) => toast.error(apiErrorMessage(e)),
+    onError: (e: Error) => {
+      saveStartedRef.current = false;
+      toast.error(apiErrorMessage(e));
+    },
   });
 
   const handleSave = () => {
+    if (saveStartedRef.current) return;
     if (hasError) {
       toast.error(t('toasts.saveError'));
       return;
     }
+    saveStartedRef.current = true;
     saveMutation.mutate();
   };
 

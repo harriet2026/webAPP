@@ -362,7 +362,7 @@
     "monitorDashboard": "Monitor Overview"
   },
   "agentCenterOverview": {
-    "centerTitle": "Agent Management Center",
+    "centerTitle": "Agent Center",
     "title": "Agent Overview",
     "description": "A consolidated view of authorization, configuration state, and today metrics for the phishing detection, spoofing detection, and threat retro agents.",
     "switchAgent": "Switch agent",
@@ -370,7 +370,8 @@
     "summaryRailLabel": "Agent summary list",
     "collapseSummaryRail": "Collapse agent summary",
     "expandSummaryRail": "Expand agent summary",
-    "summaryAll": "3 agents running status",
+    "summaryCount": "{count} agents running status",
+    "descriptionPhishingOnly": "A consolidated view of authorization, configuration state, and today metrics for the phishing detection agent.",
     "summaryHitRate": "detection rate",
     "loadFailed": "Failed to load the agent overview",
     "detailLockedTitle": "This agent is not enabled",
@@ -4054,10 +4055,16 @@
     "ipType_range": "IP Range (CIDR)",
     "ipType_ipGroup": "IP Group",
     "action": "Action",
-    "action_reject": "Block",
+    "action_reject": "Reject",
+    "action_reject_desc": "Return an SMTP rejection response; the email never enters the system",
+    "action_discard": "Discard",
+    "action_discard_desc": "Silently drop the email; the sender receives a delivery-success response but the email is discarded",
     "action_quarantine": "Quarantine",
-    "action_audit": "Review",
-    "action_accept": "Allow",
+    "action_quarantine_desc": "Move the email to the quarantine queue for administrator review",
+    "action_audit": "Audit",
+    "action_audit_desc": "Deliver the email normally and write an audit log entry for later review",
+    "action_accept": "Deliver",
+    "action_accept_desc": "Deliver the email directly to the inbox, bypassing further checks",
     "whitelistMode": "Whitelist Mode",
     "whitelistMode_bypass_content": "Bypass Content Check",
     "whitelistMode_direct_deliver": "Direct Deliver",
@@ -4103,10 +4110,14 @@
     "effectPriorityLabel": "Priority",
     "effectSenderEmpty": "Not set",
     "effectExpirePermanent": "Permanent",
-    "exampleBlockSpam": "Block spam senders",
-    "exampleBlockSpamDesc": "Directly block known spam senders",
+    "exampleBlockSpam": "Reject spam senders",
+    "exampleBlockSpamDesc": "Directly reject known spam senders",
     "exampleQuarantineSuspicious": "Quarantine suspicious sources",
     "exampleQuarantineSuspiciousDesc": "Quarantine mail from suspicious.test via 192.168.1.0/24",
+    "exampleAllowTrustedSender": "Allow trusted sender",
+    "exampleAllowTrustedSenderDesc": "Whitelist partner@trusted.com to bypass content scanning and deliver directly",
+    "exampleAllowTrustedDomain": "Allow trusted domain",
+    "exampleAllowTrustedDomainDesc": "Allow all mail from trusted-partner.com, bypassing content security checks",
     "simEmailLabel": "Simulate sender email",
     "simEmailPlaceholder": "test@example.com",
     "startTest": "Start Test",
@@ -4470,6 +4481,10 @@
       "templateCancel": "Cancel",
       "templateApply": "Apply",
       "ptrReadonlyNotice": "PTR settings are managed by system administrator",
+      "dmarc_no_record": "No DMARC Record",
+      "dmarc_no_recordDesc": "The sending domain has not published a DMARC record",
+      "dmarc_query_fail": "DMARC Query Failed",
+      "dmarc_query_failDesc": "An error occurred when querying the DMARC DNS record (timeout / SERVFAIL)",
       "ptr_noptr": "Record Not Found",
       "ptr_noptrDesc": "Sending IP has no PTR reverse resolution record",
       "ptr_nomatch": "A Record Mismatch",
@@ -4544,10 +4559,10 @@
       "cancel": "Cancel"
     },
     "formatActionLabel": {
-      "accept": "Allow (Proceed to Next Check)",
-      "quarantine": "Quarantine/Review",
-      "reject": "Block with Bounce",
-      "discard": "Silent Drop"
+      "quarantine": "Quarantine",
+      "audit": "Audit",
+      "reject": "Reject",
+      "discard": "Discard"
     },
     "protocolActionLabel": {
       "accept": "Proceed to Next Check",
@@ -4560,7 +4575,9 @@
       "drop": "Drop",
       "block": "Block",
       "quarantine": "Quarantine",
-      "check": "Check"
+      "check": "Check",
+      "tag": "Tag",
+      "pass": "Pass"
     },
     "flowTitle": "Email Authentication Flow",
     "flowNode": {
@@ -4595,7 +4612,27 @@
       "strict": "Zero-trust; heavy discard use; for finance/government high-security scenarios",
       "custom": "Full manual control; no template protection; assess risk yourself"
     },
-    "strictObserveNotice": "Switching will force-enable observe mode"
+    "strictObserveNotice": "Switching will force-enable observe mode",
+    "formatActionDesc": {
+      "quarantine": "Move the email to the quarantine queue for administrator review before release or deletion",
+      "audit": "Deliver the email normally and write an audit log entry for later administrator review",
+      "reject": "Return an SMTP rejection response to the sender; the email never enters the system",
+      "discard": "Silently drop the email; the sender receives a delivery-success response but the email is discarded"
+    },
+    "protocolActionShort": {
+      "accept": "Pass",
+      "reject": "Reject",
+      "quarantine": "Quarantine",
+      "audit": "Tag",
+      "discard": "Discard"
+    },
+    "protocolActionDesc": {
+      "accept": "No action taken; pass to next protocol check",
+      "reject": "Return an SMTP 5xx rejection to the sender",
+      "quarantine": "Move to quarantine for administrator review",
+      "audit": "Deliver with an added tag header",
+      "discard": "Silently drop; sender receives delivery-success response"
+    }
   },
   "behaviorControl": {
     "title": "Behavior Control",
@@ -4623,7 +4660,7 @@
       "inbound": "Inbound",
       "outbound": "Outbound",
       "internal": "Internal",
-      "bidirectional": "Bidirectional"
+      "bidirectional": "Outbound + Internal"
     },
     "object": {
       "global": "Global",
@@ -4743,7 +4780,14 @@
       "thresholdPlaceholder": "Enter threshold",
       "actionLabel": "Execute Action",
       "remark": "Remark",
-      "remarkPlaceholder": "Add a remark (up to 200 characters)"
+      "remarkPlaceholder": "Add a remark (up to 200 characters)",
+      "addCondition": "Add Condition",
+      "conditionN": "Condition {n}",
+      "conditionRelation": "Condition Relation",
+      "relationAnd": "AND (all must match)",
+      "relationOr": "OR (any one matches)",
+      "conditionCount": "{count}/4 added",
+      "threshold": "Threshold"
     },
     "preview": {
       "title": "Current Configuration Effect",
@@ -4758,7 +4802,8 @@
       "expirePrefix": "Valid until: ",
       "priorityPrefix": "Priority: ",
       "objAny": "any object",
-      "permanent": "Permanent"
+      "permanent": "Permanent",
+      "and": "AND"
     },
     "delete": {
       "title": "Confirm Delete",
@@ -4788,7 +4833,9 @@
       "orgRequired": "Please select a department",
       "ipRequired": "Please enter an IP address or range",
       "ipGroupRequired": "Please select an IP group",
-      "domainRequired": "Please enter a domain"
+      "domainRequired": "Please enter a domain",
+      "conditionsMin": "At least one detection condition is required",
+      "conditionsMax": "A maximum of 4 detection conditions is allowed"
     },
     "import": {
       "button": "Import",
@@ -4844,7 +4891,8 @@
       "stolenEffect": "An account thief sends 200 emails in 15 minutes using 10 IPs, triggering quarantine",
       "salesName": "Sales Bulk Mail Scenario",
       "salesDesc": "Normal bulk business email, relaxed threshold",
-      "salesEffect": "Sales dept sends a daily report to 500 recipients; internal-direction thresholds are relaxed, so the outbound rule is not triggered"
+      "salesEffect": "Sales dept sends a daily report to 500 recipients; internal-direction thresholds are relaxed, so the outbound rule is not triggered",
+      "fill": "Apply example"
     },
     "simulator": {
       "toggle": "Simulation Test",
@@ -4872,6 +4920,17 @@
       "item4": "Groups and organizations come from Group Policy Configuration",
       "item5": "For OR conditions, exceeding either threshold triggers the rule",
       "item6": "IP groups come from the IP Group Management module"
+    },
+    "groupPreview": {
+      "title": "{name} Group Members Preview",
+      "memberCount": "{count} members total",
+      "searchPlaceholder": "Search members...",
+      "noMembers": "No member data available",
+      "truncateHint": "Showing first {shown} of {total} members",
+      "close": "Close",
+      "typeSender": "Sender Group",
+      "typeIp": "IP Group",
+      "typeOrg": "Organization Group"
     }
   },
   "attachmentSecurity": {
@@ -5018,8 +5077,8 @@
       "detectLimit": "Detection Limit",
       "items": "items",
       "exceedAction": "Exceed Limit Action",
-      "passWarn": "Pass and log warning",
-      "isolateFallback": "Isolate as fallback",
+      "passWarn": "Proceed to next step",
+      "isolateFallback": "Quarantine",
       "enable": "Enable",
       "ocrSection": "OCR Configuration",
       "ocrMode": "OCR Mode",
@@ -5041,7 +5100,10 @@
       "mode_none": "Disabled",
       "mode_light": "Light",
       "mode_deep": "Deep",
-      "pending": "Coming Soon"
+      "pending": "Coming Soon",
+      "ocrMode_deep_hint": "Deep detection recognizes both handwritten and printed text. Recommended for outbound direction to prevent screenshot leaks. Results are handled according to the Detection Limit setting below.",
+      "exceedActionHint_pass": "QR code images exceeding the detection limit will skip deep detection and proceed to the next stage.",
+      "exceedActionHint_quarantine": "QR code images exceeding the detection limit will be quarantined immediately without further processing."
     },
     "encrypted": {
       "detectPolicy": "Detection Policy",
@@ -10839,7 +10901,8 @@
     },
     "phishing_admission": {
       "profile_id_invalid_for_tenant": "The selected detection profile does not exist or does not belong to the current tenant",
-      "rule_not_found": "Admission rule not found"
+      "rule_not_found": "Admission rule not found",
+      "rule_name_exists": "An admission rule with this name already exists. Use a different name"
     },
     "mail_auth_config": {
       "overlaps_existing_active": "This config overlaps an existing active mail-auth config with the same domain scope and scenes",

@@ -18,7 +18,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { X } from 'lucide-react';
-import { useApiRequest, ApiError } from '@/lib/api/client';
+import { useApiRequest } from '@/lib/api/client';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { GROUPS_LIST_QUERY, ruleToGroup } from '@/lib/api/groups';
 import { createAdmissionRule, updateAdmissionRule, getAdmissionTagSuggestions } from '@/lib/api/phishing-config';
 import type { PhishAdmissionRule } from '@/types/phishing-config';
@@ -49,15 +50,11 @@ function emptyDraft(): PhishAdmissionRule {
   };
 }
 
-function isValidationError(err: unknown): string | null {
-  if (!(err instanceof ApiError)) return null;
-  return err.message || null;
-}
-
 export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props) {
   const t = useTranslations('phishingConfig.admission');
   const tdir = useTranslations('phishingConfig.admission.direction');
   const { apiRequest } = useApiRequest();
+  const apiErrorMessage = useApiErrorMessage();
 
   const [draft, setDraft] = useState<PhishAdmissionRule>(emptyDraft());
   const [tagInput, setTagInput] = useState('');
@@ -196,7 +193,7 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
       toast.success(payload.id !== undefined ? t('updated') : t('created'));
       onSaved();
     } catch (err) {
-      toast.error(isValidationError(err) ?? t('saveFailed'));
+      toast.error(apiErrorMessage(err, t('saveFailed')));
     } finally {
       setSaving(false);
     }

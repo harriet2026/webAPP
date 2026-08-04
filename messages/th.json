@@ -445,7 +445,7 @@
     "detectionOverview": "ภาพรวมการตรวจจับ"
   },
   "agentCenterOverview": {
-    "centerTitle": "ศูนย์จัดการ Agent",
+    "centerTitle": "ศูนย์ Agent",
     "title": "ภาพรวม Agent",
     "description": "ภาพรวมสถานะสิทธิ์ สถานะการตั้งค่า และตัวชี้วัดวันนี้ของเอเจนต์ตรวจจับอีเมลฟิชชิง เอเจนต์ตรวจจับการปลอมแปลง และเอเจนต์ย้อนรอยภัยคุกคาม",
     "switchAgent": "สลับ Agent",
@@ -453,7 +453,8 @@
     "summaryRailLabel": "รายการสรุป Agent",
     "collapseSummaryRail": "ย่อรายการสรุป Agent",
     "expandSummaryRail": "ขยายรายการสรุป Agent",
-    "summaryAll": "สถานะ Agent 3 รายการ",
+    "summaryCount": "สถานะ Agent {count} รายการ",
+    "descriptionPhishingOnly": "ภาพรวมสถานะสิทธิ์ สถานะการตั้งค่า และตัวชี้วัดวันนี้ของเอเจนต์ตรวจจับอีเมลฟิชชิง",
     "summaryHitRate": "อัตราการตรวจพบ",
     "loadFailed": "โหลดภาพรวม Agent ไม่สำเร็จ",
     "detailLockedTitle": "Agent นี้ยังไม่เปิดใช้",
@@ -4099,10 +4100,16 @@
     "ipType_range": "ช่วง IP (CIDR)",
     "ipType_ipGroup": "กลุ่ม IP",
     "action": "การดำเนินการ",
-    "action_reject": "บล็อก",
+    "action_reject": "ปฏิเสธ",
+    "action_reject_desc": "ส่งคืน SMTP rejection response; อีเมลจะไม่เข้าสู่ระบบ",
+    "action_discard": "ทิ้ง",
+    "action_discard_desc": "ลบอีเมลอย่างเงียบ ผู้ส่งได้รับการยืนยันการส่ง แต่อีเมลถูกทิ้งจริง",
     "action_quarantine": "กักกัน",
+    "action_quarantine_desc": "ย้ายอีเมลไปยังคิวกักกันเพื่อให้ผู้ดูแลระบบตรวจสอบ",
     "action_audit": "ตรวจสอบ",
-    "action_accept": "อนุญาต",
+    "action_audit_desc": "ส่งอีเมลตามปกติและบันทึกรายการตรวจสอบสำหรับการตรวจสอบภายหลัง",
+    "action_accept": "ส่งมอบ",
+    "action_accept_desc": "ส่งอีเมลตรงไปยังกล่องจดหมาย โดยข้ามการตรวจสอบเพิ่มเติม",
     "whitelistMode": "โหมดบัญชีขาว",
     "whitelistMode_bypass_content": "ข้ามการตรวจสอบเนื้อหา",
     "whitelistMode_direct_deliver": "จัดส่งโดยตรง",
@@ -4147,10 +4154,14 @@
     "effectPriorityLabel": "ลำดับความสำคัญ",
     "effectSenderEmpty": "ไม่ได้กรอก",
     "effectExpirePermanent": "ถาวร",
-    "exampleBlockSpam": "บล็อกผู้ส่งสแปม",
-    "exampleBlockSpamDesc": "บล็อกผู้ส่งสแปมที่รู้จักโดยตรง",
+    "exampleBlockSpam": "ปฏิเสธผู้ส่งสแปม",
+    "exampleBlockSpamDesc": "ปฏิเสธผู้ส่งสแปมที่รู้จักโดยตรง",
     "exampleQuarantineSuspicious": "กักกันแหล่งที่น่าสงสัย",
     "exampleQuarantineSuspiciousDesc": "กักกันอีเมลจาก suspicious.test ผ่าน 192.168.1.0/24",
+    "exampleAllowTrustedSender": "อนุญาตผู้ส่งที่เชื่อถือได้",
+    "exampleAllowTrustedSenderDesc": "เพิ่ม partner@trusted.com ในรายการขาวเพื่อข้ามการตรวจสอบเนื้อหาและส่งตรง",
+    "exampleAllowTrustedDomain": "อนุญาตโดเมนที่เชื่อถือได้",
+    "exampleAllowTrustedDomainDesc": "อนุญาตอีเมลทั้งหมดจาก trusted-partner.com โดยข้ามการตรวจสอบความปลอดภัยของเนื้อหา",
     "simEmailLabel": "จำลองอีเมลผู้ส่ง",
     "simEmailPlaceholder": "test@example.com",
     "startTest": "เริ่มทดสอบ",
@@ -4514,6 +4525,10 @@
       "templateCancel": "ยกเลิก",
       "templateApply": "นำไปใช้",
       "ptrReadonlyNotice": "การตั้งค่า PTR จัดการโดยผู้ดูแลระบบ",
+      "dmarc_no_record": "ไม่มีระเบียน DMARC",
+      "dmarc_no_recordDesc": "โดเมนผู้ส่งยังไม่ได้เผยแพร่ระเบียน DMARC",
+      "dmarc_query_fail": "การสืบค้น DMARC ล้มเหลว",
+      "dmarc_query_failDesc": "เกิดข้อผิดพลาดขณะสืบค้นระเบียน DNS ของ DMARC (หมดเวลา / SERVFAIL)",
       "ptr_noptr": "ไม่มีระเบียน",
       "ptr_noptrDesc": "IP ผู้ส่งไม่มีระเบียน PTR แบบย้อนกลับ",
       "ptr_nomatch": "ไม่ตรงกับระเบียน A",
@@ -4588,10 +4603,10 @@
       "cancel": "ยกเลิก"
     },
     "formatActionLabel": {
-      "accept": "อนุญาต (ดำเนินการตรวจสอบขั้นต่อไป)",
-      "quarantine": "กักกัน/ตรวจสอบ",
-      "reject": "บล็อกและตีกลับ",
-      "discard": "ทิ้งแบบเงียบ"
+      "quarantine": "กักกัน",
+      "audit": "ตรวจสอบ",
+      "reject": "ปฏิเสธ",
+      "discard": "ทิ้ง"
     },
     "protocolActionLabel": {
       "accept": "ดำเนินการตรวจสอบขั้นต่อไป",
@@ -4604,7 +4619,9 @@
       "drop": "ทิ้ง",
       "block": "บล็อก",
       "quarantine": "กักกัน",
-      "check": "ตรวจสอบ"
+      "check": "ตรวจสอบ",
+      "tag": "แท็ก",
+      "pass": "ผ่านไปยังขั้นตอนถัดไป"
     },
     "flowTitle": "กระบวนการยืนยันตัวตนอีเมล",
     "flowNode": {
@@ -4639,7 +4656,27 @@
       "strict": "นโยบาย Zero-trust ใช้การทิ้งอย่างมาก เหมาะสำหรับสถานการณ์ความปลอดภัยสูง เช่น การเงิน/รัฐบาล",
       "custom": "ควบคุมด้วยตนเองทั้งหมด ไม่มีการป้องกันจากเทมเพลต ต้องประเมินความเสี่ยงด้วยตนเอง"
     },
-    "strictObserveNotice": "หลังจากสลับแล้วจะบังคับเปิดโหมดสังเกต"
+    "strictObserveNotice": "หลังจากสลับแล้วจะบังคับเปิดโหมดสังเกต",
+    "formatActionDesc": {
+      "quarantine": "อีเมลถูกส่งไปยังคิวกักกันเพื่อให้ผู้ดูแลระบบตรวจสอบก่อนปล่อยหรือลบ",
+      "audit": "ส่งอีเมลตามปกติและบันทึกรายการตรวจสอบสำหรับการตรวจสอบของผู้ดูแลระบบในภายหลัง",
+      "reject": "ส่งการตอบสนอง SMTP ปฏิเสธไปยังผู้ส่ง อีเมลจะไม่เข้าสู่ระบบ",
+      "discard": "ทิ้งอีเมลอย่างเงียบ ผู้ส่งได้รับการยืนยันการส่งแต่อีเมลถูกทิ้งจริง"
+    },
+    "protocolActionShort": {
+      "accept": "ผ่าน",
+      "reject": "ปฏิเสธ",
+      "quarantine": "กักกัน",
+      "audit": "แท็ก",
+      "discard": "ทิ้ง"
+    },
+    "protocolActionDesc": {
+      "accept": "ไม่มีการดำเนินการ ส่งต่อไปยังการตรวจสอบโปรโตคอลถัดไป",
+      "reject": "ส่ง SMTP 5xx กลับไปยังผู้ส่ง",
+      "quarantine": "ย้ายไปยังพื้นที่กักกันเพื่อให้ผู้ดูแลระบบตรวจสอบ",
+      "audit": "ส่งอีเมลพร้อมเพิ่ม header แท็ก",
+      "discard": "ลบโดยไม่แจ้ง ผู้ส่งได้รับการตอบกลับว่าส่งสำเร็จ"
+    }
   },
   "behaviorControl": {
     "title": "การควบคุมพฤติกรรม",
@@ -4667,7 +4704,7 @@
       "inbound": "ขาเข้า",
       "outbound": "ขาออก",
       "internal": "ภายใน",
-      "bidirectional": "สองทิศทาง"
+      "bidirectional": "ขาออก + ภายใน"
     },
     "object": {
       "global": "ทั่วโลก",
@@ -4787,7 +4824,14 @@
       "thresholdPlaceholder": "กรุณาใส่เกณฑ์",
       "actionLabel": "การดำเนินการ",
       "remark": "หมายเหตุ",
-      "remarkPlaceholder": "เพิ่มหมายเหตุ (ไม่เกิน 200 ตัวอักษร)"
+      "remarkPlaceholder": "เพิ่มหมายเหตุ (ไม่เกิน 200 ตัวอักษร)",
+      "addCondition": "เพิ่มเงื่อนไข",
+      "conditionN": "เงื่อนไข {n}",
+      "conditionRelation": "ความสัมพันธ์ของเงื่อนไข",
+      "relationAnd": "AND (ทุกเงื่อนไขต้องตรง)",
+      "relationOr": "OR (ตรงเงื่อนไขใดก็ได้)",
+      "conditionCount": "เพิ่มแล้ว {count}/4",
+      "threshold": "เกณฑ์"
     },
     "preview": {
       "title": "ผลการกำหนดค่าปัจจุบัน",
@@ -4802,7 +4846,8 @@
       "expirePrefix": "มีผลถึง: ",
       "priorityPrefix": "ลำดับความสำคัญ: ",
       "objAny": "วัตถุใดๆ",
-      "permanent": "ถาวร"
+      "permanent": "ถาวร",
+      "and": "และ"
     },
     "delete": {
       "title": "ยืนยันการลบ",
@@ -4832,7 +4877,9 @@
       "orgRequired": "กรุณาเลือกแผนก",
       "ipRequired": "กรุณากรอก IP หรือช่วง IP",
       "ipGroupRequired": "กรุณาเลือกกลุ่ม IP",
-      "domainRequired": "กรุณากรอกโดเมน"
+      "domainRequired": "กรุณากรอกโดเมน",
+      "conditionsMin": "ต้องมีเงื่อนไขการตรวจจับอย่างน้อยหนึ่งข้อ",
+      "conditionsMax": "อนุญาตให้มีเงื่อนไขการตรวจจับได้สูงสุด 4 ข้อ"
     },
     "import": {
       "button": "นำเข้า",
@@ -4888,7 +4935,8 @@
       "stolenEffect": "ผู้ขโมยบัญชีใช้ 10 IP ส่งอีเมล 200 ฉบับใน 15 นาที กระตุ้นการกักกัน",
       "salesName": "สถานการณ์ส่งกลุ่มของฝ่ายขาย",
       "salesDesc": "ส่งกลุ่มทางธุรกิจปกติ เกณฑ์ผ่อนปรน",
-      "salesEffect": "ฝ่ายขายส่งรายงานประจำวันถึงผู้รับ 500 คน เกณฑ์ทิศทางภายในผ่อนปรน ไม่กระตุ้นกฎการส่งออก"
+      "salesEffect": "ฝ่ายขายส่งรายงานประจำวันถึงผู้รับ 500 คน เกณฑ์ทิศทางภายในผ่อนปรน ไม่กระตุ้นกฎการส่งออก",
+      "fill": "ใช้ตัวอย่าง"
     },
     "simulator": {
       "toggle": "ทดสอบจำลอง",
@@ -4916,6 +4964,17 @@
       "item4": "กลุ่มและองค์กรมาจากการกำหนดค่านโยบายกลุ่ม",
       "item5": "เงื่อนไข OR ใดๆ เกินก็จะกระตุ้น",
       "item6": "กลุ่ม IP มาจากโมดูลการจัดการกลุ่ม IP"
+    },
+    "groupPreview": {
+      "title": "ดูตัวอย่างสมาชิกกลุ่ม {name}",
+      "memberCount": "สมาชิกทั้งหมด {count} คน",
+      "searchPlaceholder": "ค้นหาสมาชิก...",
+      "noMembers": "ไม่มีข้อมูลสมาชิก",
+      "truncateHint": "แสดง {shown} รายการแรกจากทั้งหมด {total}",
+      "close": "ปิด",
+      "typeSender": "กลุ่มผู้ส่ง",
+      "typeIp": "กลุ่ม IP",
+      "typeOrg": "กลุ่มองค์กร"
     }
   },
   "attachmentSecurity": {
@@ -5054,8 +5113,8 @@
       "detectLimit": "จำนวนสูงสุดที่ตรวจจับได้",
       "items": "รายการ",
       "exceedAction": "การดำเนินการเมื่อเกินขีดจำกัด",
-      "passWarn": "ผ่านและบันทึกคำเตือน",
-      "isolateFallback": "กักกันเป็นทางเลือกสำรอง",
+      "passWarn": "ดำเนินการขั้นตอนถัดไป",
+      "isolateFallback": "กักกัน",
       "enable": "เปิดใช้งาน",
       "ocrSection": "การตั้งค่า OCR",
       "ocrMode": "โหมด OCR",
@@ -5085,7 +5144,10 @@
       "actionQuarantine": "กักกัน",
       "actionSideline": "ตรวจสอบ",
       "actionReject": "บล็อก",
-      "actionDiscard": "ทิ้ง"
+      "actionDiscard": "ทิ้ง",
+      "ocrMode_deep_hint": "การตรวจจับเชิงลึกรองรับทั้งตัวเขียนและตัวพิมพ์ เหมาะสำหรับทิศทางขาออกเพื่อป้องกันการรั่วไหลผ่านการถ่ายภาพหน้าจอ ผลลัพธ์จะถูกจัดการตามการตั้งค่าจำนวนสูงสุดที่ตรวจจับด้านล่าง",
+      "exceedActionHint_pass": "ภาพ QR code ที่เกินขีดจำกัดการตรวจจับจะข้ามการตรวจจับเชิงลึกและดำเนินการในขั้นตอนถัดไป",
+      "exceedActionHint_quarantine": "ภาพ QR code ที่เกินขีดจำกัดการตรวจจับจะถูกกักกันทันทีโดยไม่มีการประมวลผลเพิ่มเติม"
     },
     "encrypted": {
       "detectPolicy": "นโยบายการตรวจจับ",
@@ -10981,7 +11043,8 @@
     },
     "phishing_admission": {
       "profile_id_invalid_for_tenant": "โปรไฟล์ตรวจจับที่เลือกไม่มีอยู่หรือไม่ได้เป็นของผู้เช่าปัจจุบัน",
-      "rule_not_found": "ไม่พบกฎการรับเข้า"
+      "rule_not_found": "ไม่พบกฎการรับเข้า",
+      "rule_name_exists": "มีกฎการรับเข้าชื่อนี้อยู่แล้ว โปรดใช้ชื่ออื่น"
     },
     "mail_auth_config": {
       "overlaps_existing_active": "การตั้งค่านี้ทับซ้อนกับการตั้งค่ายืนยันตัวตนอีเมลที่เปิดใช้อยู่ในขอบเขตโดเมนและสถานการณ์เดียวกัน",

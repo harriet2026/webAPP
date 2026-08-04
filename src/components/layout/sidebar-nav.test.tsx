@@ -11,6 +11,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 let mockCanSeeRoute: (href: string) => boolean = () => true;
 let mockIsSystemAdmin = true;
 let mockShowAdvancedRules = true;
+let mockSwitcherEnabled = true;
 
 vi.mock('@/contexts/auth-context', () => ({
   useAuth: () => ({
@@ -23,7 +24,13 @@ vi.mock('@/contexts/auth-context', () => ({
 
 vi.mock('@/contexts/product-form-context', () => ({
   // capabilities: null skips the form-visibility gate entirely (unrelated to this task).
-  useProductForm: () => ({ capabilities: null, registry: [], viewer: {}, grants: [] }),
+  useProductForm: () => ({
+    capabilities: null,
+    registry: [],
+    viewer: {},
+    grants: [],
+    switcherEnabled: mockSwitcherEnabled,
+  }),
 }));
 
 vi.mock('@/i18n/navigation', () => ({
@@ -50,6 +57,7 @@ describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
     mockCanSeeRoute = () => true;
     mockIsSystemAdmin = true;
     mockShowAdvancedRules = true;
+    mockSwitcherEnabled = true;
   });
 
   it('true super admin sees every group, including advance-gated and system/users', async () => {
@@ -61,6 +69,16 @@ describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
     const user = userEvent.setup();
     await user.click(screen.getByText('sidebar.system'));
     expect(screen.getByText('sidebar.users')).toBeInTheDocument();
+  });
+
+  it('hides the entire logs group when the product-form switcher is disabled', () => {
+    mockSwitcherEnabled = false;
+
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
+
+    expect(screen.queryByText('sidebar.logs')).not.toBeInTheDocument();
+    expect(screen.queryByText('sidebar.authAttempts')).not.toBeInTheDocument();
+    expect(screen.queryByText('sidebar.adminAuditLogs')).not.toBeInTheDocument();
   });
 
   it('keeps the browser tab title aligned with the sidebar brand name', () => {

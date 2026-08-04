@@ -25,26 +25,13 @@ for (const { name, path } of RULES_PAGES) {
     page.on('pageerror', (err) => {
       pageErrors.push(err.message);
     });
-    // Track failing responses by URL. The auth fixture lands on the dashboard
-    // first, whose system-status widget (AI editions) probes the per-tenant agent
-    // stats via a fault-isolated Promise.all (optionalSource → null on error). For
-    // the platform viewer (system_admin, no tenant selected) those endpoints are
-    // capability-gated and legitimately reject — /spoofing-agent/stats → 403,
-    // /threat-retro-agent/stats → 400 "tenant_id required". Those in-flight
-    // requests resolve after we navigate here, so the browser logs a generic
-    // "Failed to load resource" console error on this page. Tolerate ONLY those
-    // known-expected endpoints; any other 4xx/5xx is a real failure.
-    const ALLOWED_FAILING = [
-      /\/api\/v1\/spoofing-agent\/stats\b/,
-      /\/api\/v1\/threat-retro-agent\/stats\b/,
-    ];
+    // The dashboard must not probe capability-gated agent endpoints for the
+    // platform viewer. Any 4xx/5xx response is therefore a real regression.
     const unexpectedFailures: string[] = [];
     page.on('response', (r) => {
       if (r.status() >= 400) {
         const url = r.url();
-        if (!ALLOWED_FAILING.some((re) => re.test(url))) {
-          unexpectedFailures.push(`[${r.status()}] ${r.request().method()} ${url}`);
-        }
+        unexpectedFailures.push(`[${r.status()}] ${r.request().method()} ${url}`);
       }
     });
 

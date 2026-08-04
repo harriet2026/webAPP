@@ -1,6 +1,7 @@
 import { test, expect } from '../fixtures/auth.fixture';
 import { EmailLogsPage } from '../pages/email-logs.page';
 import { seedMailLogs } from '../helpers/seed-data';
+import { PENDING_DISPOSAL_FILTER } from '../../../src/components/email-disposal/lib/pending-filter';
 
 test.describe('Email Logs', () => {
   let emailLogsPage: EmailLogsPage;
@@ -323,12 +324,47 @@ test.describe('Email Logs - Advanced Filter', () => {
       expect(body.fields).toBeDefined();
       expect(body.fields.length).toBeGreaterThan(0);
 
-      const keys = body.fields.map((f: any) => f.key);
+      const keys = body.fields.map((f: { key: string }) => f.key);
       expect(keys).toContain('client_ip');
       expect(keys).toContain('spf_valid');
       expect(keys).toContain('geo_region');
       expect(keys).toContain('status');
     }
+  });
+
+  test('pending-disposal filter matches the backend field contract', async ({ request }) => {
+    const loginResp = await request.post('http://localhost:18080/api/v1/auth/login', {
+      data: { username: 'admin', password: 'admin123' },
+    });
+    expect(loginResp.ok()).toBeTruthy();
+    const token = (await loginResp.json()).token;
+    const headers = { Authorization: `Bearer ${token}` };
+
+    const fieldsResp = await request.get('http://localhost:18080/api/v1/mail-logs/fields', { headers });
+    expect(fieldsResp.ok()).toBeTruthy();
+    const fields = (await fieldsResp.json()).fields as Array<{
+      key: string;
+      enum_values?: Array<{ value: string }>;
+    }>;
+    const statusField = fields.find((field) => field.key === 'display_status');
+    expect(statusField).toBeDefined();
+
+    const pendingCondition = PENDING_DISPOSAL_FILTER.groups[0].conditions[0];
+    expect(pendingCondition.field).toBe('display_status');
+    expect(pendingCondition.op).toBe('in');
+    expect(Array.isArray(pendingCondition.value)).toBeTruthy();
+    const backendValues = new Set(statusField?.enum_values?.map(({ value }) => value));
+    for (const value of pendingCondition.value as string[]) {
+      expect(backendValues.has(value)).toBeTruthy();
+    }
+
+    const query = new URLSearchParams({
+      page: '1',
+      page_size: '1',
+      advanced_filters: JSON.stringify(PENDING_DISPOSAL_FILTER),
+    });
+    const logsResp = await request.get(`http://localhost:18080/api/v1/mail-logs?${query}`, { headers });
+    expect(logsResp.status()).toBe(200);
   });
 
   test('advanced filter with multiple condition groups', async () => {

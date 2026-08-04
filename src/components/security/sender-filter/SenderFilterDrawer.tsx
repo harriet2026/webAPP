@@ -34,7 +34,6 @@ import type {
   SenderConfigType,
   IPRangeType,
   ListType,
-  WhitelistMode,
   SenderFilterAction,
 } from '@/types/sender-filter';
 import { normalizeDomain } from '@/lib/api/sender-filter';
@@ -169,7 +168,6 @@ export const senderFilterErrorKeys = [
   // {min}/{max} 参数），旧的 priorityMin/priorityMax 已不再被 schema 发出，
   // 四语文案也随之替换 —— 声明必须跟着改，否则 i18n 守卫会一直红。
   'priorityRange',
-  'whitelistModeRequired',
   'invalidEmail',
   'invalidDomain',
   'selectGroup',
@@ -189,7 +187,7 @@ const ruleSchema = z.object({
   is_active: z.boolean(),
   valid_until: z.string().optional(),
   list_type: z.enum(['blacklist', 'whitelist']),
-  action: z.enum(['accept', 'reject', 'quarantine', 'audit']),
+  action: z.enum(['accept', 'reject', 'quarantine', 'audit', 'discard']),
   whitelist_mode: z.enum(['bypass_content', 'direct_deliver']).optional(),
   // GT-11486: 复杂规则编辑态——条件/动作字段隐藏且不参与提交，
   // superRefine 的条件类校验对其全部跳过（只校验基础字段）。
@@ -204,9 +202,6 @@ const ruleSchema = z.object({
   }),
 }).superRefine((data, ctx) => {
   if (data.is_complex) return;
-  if (data.list_type === 'whitelist' && !data.whitelist_mode) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['whitelist_mode'], message: 'whitelistModeRequired' });
-  }
   if (data.sender_config.type === 'individual' && data.sender_config.value) {
     if (!emailRegex.test(data.sender_config.value)) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['sender_config', 'value'], message: 'invalidEmail' });
@@ -374,16 +369,15 @@ export function SenderFilterDrawer({
           is_complex: true,
         });
       } else {
-        const whitelistMode = listTypeTab === 'whitelist' ? 'bypass_content' : undefined;
         form.reset({
           name: '',
           description: '',
-          priority: getDefaultPriority(listTypeTab, whitelistMode),
+          priority: getDefaultPriority(listTypeTab),
           is_active: true,
           valid_until: '',
           list_type: listTypeTab,
           action: listTypeTab === 'whitelist' ? 'accept' : 'reject',
-          whitelist_mode: whitelistMode,
+          whitelist_mode: undefined,
           sender_config: { type: 'individual', value: '' },
           ip_range: { type: 'all', value: undefined },
           is_complex: false,
@@ -417,9 +411,14 @@ export function SenderFilterDrawer({
   const handleSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
     try {
+      // GT-12696：白名单模式选择器已从抽屉移除，白名单语义统一为「跳过内容检测」
+      // （文案 senderFilter.action_accept_desc / exampleAllowTrusted*Desc 都是这个口径）。
+      // 原型没有后端，直接把 whitelist_mode 置空；产品这边必须显式落成
+      // bypass_content，否则 SenderFilterPage 不会带上 `sys:nocontent` tag，
+      // 白名单规则就不再绕过内容检测了。direct_deliver 这一档随之下线。
       const formData: SenderFilterFormData = {
         ...data,
-        whitelist_mode: data.list_type === 'whitelist' ? data.whitelist_mode : undefined,
+        whitelist_mode: data.list_type === 'whitelist' ? 'bypass_content' : undefined,
       };
       await onSubmit(formData);
       onOpenChange(false);
@@ -449,7 +448,6 @@ export function SenderFilterDrawer({
   const watchSenderType = form.watch('sender_config.type');
   const watchIpType = form.watch('ip_range.type');
   const watchAction = form.watch('action');
-  const watchWhitelistMode = form.watch('whitelist_mode');
   const watchSenderValue = form.watch('sender_config.value');
   const watchPriority = form.watch('priority');
   const watchValidUntil = form.watch('valid_until');
@@ -483,6 +481,7 @@ export function SenderFilterDrawer({
     quarantine: t('senderFilter.action_quarantine'),
     audit: t('senderFilter.action_audit'),
     accept: t('senderFilter.action_accept'),
+    discard: t('senderFilter.action_discard'),
   };
 
   const labelCls = 'min-w-[100px] w-[100px] shrink-0 whitespace-nowrap text-right';
@@ -737,54 +736,47 @@ export function SenderFilterDrawer({
                           <SelectTrigger className="w-40">
                             <SelectValue>{actionLabel[watchAction]}</SelectValue>
                           </SelectTrigger>
-                          <SelectContent alignItemWithTrigger={false}>
+                          <SelectContent alignItemWithTrigger={false} className="w-72">
                             {watchListType === 'blacklist' ? (
                               <>
-                                <SelectItem value="reject">{actionLabel.reject}</SelectItem>
-                                <SelectItem value="quarantine">{actionLabel.quarantine}</SelectItem>
-                                <SelectItem value="audit">{actionLabel.audit}</SelectItem>
+                                <SelectItem value="reject">
+                                  <div className="flex flex-col gap-0.5 py-0.5">
+                                    <span>{actionLabel.reject}</span>
+                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_reject_desc')}</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="discard">
+                                  <div className="flex flex-col gap-0.5 py-0.5">
+                                    <span>{actionLabel.discard}</span>
+                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_discard_desc')}</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="quarantine">
+                                  <div className="flex flex-col gap-0.5 py-0.5">
+                                    <span>{actionLabel.quarantine}</span>
+                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_quarantine_desc')}</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="audit">
+                                  <div className="flex flex-col gap-0.5 py-0.5">
+                                    <span>{actionLabel.audit}</span>
+                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_audit_desc')}</span>
+                                  </div>
+                                </SelectItem>
                               </>
                             ) : (
-                              <SelectItem value="accept">{actionLabel.accept}</SelectItem>
+                              <SelectItem value="accept">
+                                <div className="flex flex-col gap-0.5 py-0.5">
+                                  <span>{actionLabel.accept}</span>
+                                  <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_accept_desc')}</span>
+                                </div>
+                              </SelectItem>
                             )}
                           </SelectContent>
                         </Select>
                       </div>
 
-                      {watchListType === 'whitelist' && (
-                        <div className="flex items-center gap-3">
-                          <Label htmlFor="sender-filter-whitelist-mode" className={labelCls}>
-                            {t('senderFilter.whitelistMode')}
-                          </Label>
-                          <div className="flex-1">
-                            <Select
-                              value={watchWhitelistMode ?? ''}
-                              onValueChange={(value) => {
-                                const mode = value as WhitelistMode;
-                                form.setValue('whitelist_mode', mode, { shouldDirty: true, shouldValidate: true });
-                                form.setValue('priority', getDefaultPriority('whitelist', mode), { shouldDirty: true });
-                              }}
-                            >
-                              <SelectTrigger id="sender-filter-whitelist-mode" className="w-48" aria-invalid={!!form.formState.errors.whitelist_mode}>
-                                <SelectValue>
-                                  {watchWhitelistMode
-                                    ? t(`senderFilter.whitelistMode_${watchWhitelistMode}`)
-                                    : undefined}
-                                </SelectValue>
-                              </SelectTrigger>
-                              <SelectContent alignItemWithTrigger={false}>
-                                <SelectItem value="bypass_content">{t('senderFilter.whitelistMode_bypass_content')}</SelectItem>
-                                <SelectItem value="direct_deliver">{t('senderFilter.whitelistMode_direct_deliver')}</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            {form.formState.errors.whitelist_mode && (
-                              <p className="text-xs text-destructive mt-1">
-                                {t(`senderFilter.errors.${form.formState.errors.whitelist_mode.message}`)}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
+
                     </div>
                   </div>
 
@@ -863,54 +855,105 @@ export function SenderFilterDrawer({
                   }
                 />
                 <CollapsibleContent className="mt-3 space-y-3">
-                  <div className="rounded-lg border bg-card p-4">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <h4 className="text-sm font-medium">{t('senderFilter.exampleBlockSpam')}</h4>
-                        <p className="text-xs text-muted-foreground">{t('senderFilter.exampleBlockSpamDesc')}</p>
+                  {watchListType === 'blacklist' ? (
+                    <>
+                      <div className="rounded-lg border bg-card p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <h4 className="text-sm font-medium">{t('senderFilter.exampleBlockSpam')}</h4>
+                            <p className="text-xs text-muted-foreground">{t('senderFilter.exampleBlockSpamDesc')}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs shrink-0"
+                            type="button"
+                            onClick={() => {
+                              form.setValue('sender_config', { type: 'individual', value: 'spam@bad.com' }, { shouldDirty: true });
+                              form.setValue('ip_range', { type: 'all' }, { shouldDirty: true });
+                              form.setValue('action', 'reject', { shouldDirty: true });
+                              form.setValue('priority', 500, { shouldDirty: true });
+                              setShowExamples(false);
+                            }}
+                          >
+                            {t('senderFilter.useExample')}
+                          </Button>
+                        </div>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs shrink-0"
-                        type="button"
-                        onClick={() => {
-                          form.setValue('sender_config', { type: 'individual', value: 'spam@bad.com' }, { shouldDirty: true });
-                          form.setValue('ip_range', { type: 'all' }, { shouldDirty: true });
-                          form.setValue('list_type', 'blacklist', { shouldDirty: true });
-                          form.setValue('action', 'reject', { shouldDirty: true });
-                          form.setValue('priority', 500, { shouldDirty: true });
-                          setShowExamples(false);
-                        }}
-                      >
-                        {t('senderFilter.useExample')}
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="rounded-lg border bg-card p-4">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <h4 className="text-sm font-medium">{t('senderFilter.exampleQuarantineSuspicious')}</h4>
-                        <p className="text-xs text-muted-foreground">{t('senderFilter.exampleQuarantineSuspiciousDesc')}</p>
+                      <div className="rounded-lg border bg-card p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <h4 className="text-sm font-medium">{t('senderFilter.exampleQuarantineSuspicious')}</h4>
+                            <p className="text-xs text-muted-foreground">{t('senderFilter.exampleQuarantineSuspiciousDesc')}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs shrink-0"
+                            type="button"
+                            onClick={() => {
+                              form.setValue('sender_config', { type: 'domain', value: 'suspicious.test' }, { shouldDirty: true });
+                              form.setValue('ip_range', { type: 'range', value: '192.168.1.0/24' }, { shouldDirty: true });
+                              form.setValue('action', 'quarantine', { shouldDirty: true });
+                              form.setValue('priority', 500, { shouldDirty: true });
+                              setShowExamples(false);
+                            }}
+                          >
+                            {t('senderFilter.useExample')}
+                          </Button>
+                        </div>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs shrink-0"
-                        type="button"
-                        onClick={() => {
-                          form.setValue('sender_config', { type: 'domain', value: 'suspicious.test' }, { shouldDirty: true });
-                          form.setValue('ip_range', { type: 'range', value: '192.168.1.0/24' }, { shouldDirty: true });
-                          form.setValue('list_type', 'blacklist', { shouldDirty: true });
-                          form.setValue('action', 'quarantine', { shouldDirty: true });
-                          form.setValue('priority', 500, { shouldDirty: true });
-                          setShowExamples(false);
-                        }}
-                      >
-                        {t('senderFilter.useExample')}
-                      </Button>
-                    </div>
-                  </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="rounded-lg border bg-card p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <h4 className="text-sm font-medium">{t('senderFilter.exampleAllowTrustedSender')}</h4>
+                            <p className="text-xs text-muted-foreground">{t('senderFilter.exampleAllowTrustedSenderDesc')}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs shrink-0"
+                            type="button"
+                            onClick={() => {
+                              form.setValue('sender_config', { type: 'individual', value: 'partner@trusted.com' }, { shouldDirty: true });
+                              form.setValue('ip_range', { type: 'all' }, { shouldDirty: true });
+                              form.setValue('action', 'accept', { shouldDirty: true });
+                              form.setValue('priority', 800, { shouldDirty: true });
+                              setShowExamples(false);
+                            }}
+                          >
+                            {t('senderFilter.useExample')}
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="rounded-lg border bg-card p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <h4 className="text-sm font-medium">{t('senderFilter.exampleAllowTrustedDomain')}</h4>
+                            <p className="text-xs text-muted-foreground">{t('senderFilter.exampleAllowTrustedDomainDesc')}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs shrink-0"
+                            type="button"
+                            onClick={() => {
+                              form.setValue('sender_config', { type: 'domain', value: 'trusted-partner.com' }, { shouldDirty: true });
+                              form.setValue('ip_range', { type: 'all' }, { shouldDirty: true });
+                              form.setValue('action', 'accept', { shouldDirty: true });
+                              form.setValue('priority', 800, { shouldDirty: true });
+                              setShowExamples(false);
+                            }}
+                          >
+                            {t('senderFilter.useExample')}
+                          </Button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </CollapsibleContent>
               </Collapsible>
 

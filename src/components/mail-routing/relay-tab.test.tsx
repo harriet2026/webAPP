@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
@@ -310,9 +310,9 @@ describe('RelayTab', () => {
 
     await user.click(screen.getByTestId('mr-relay-create'));
     await screen.findByTestId('mr-relay-drawer');
-    await user.type(screen.getByTestId('mr-relay-name-input'), '补上来源 IP');
-    await user.type(screen.getByTestId('mr-relay-from-domain-input'), 'example.cn');
-    await user.type(screen.getByTestId('mr-relay-source-ip-input'), '192.168.1.0/24');
+    fireEvent.change(screen.getByTestId('mr-relay-name-input'), { target: { value: '补上来源 IP' } });
+    fireEvent.change(screen.getByTestId('mr-relay-from-domain-input'), { target: { value: 'example.cn' } });
+    fireEvent.change(screen.getByTestId('mr-relay-source-ip-input'), { target: { value: '192.168.1.0/24' } });
     expect(screen.queryByTestId('mr-relay-source-ip-error')).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId('mr-relay-save'));
@@ -410,17 +410,16 @@ describe('RelayTab', () => {
     await user.click(screen.getByTestId('mr-relay-create'));
     await screen.findByTestId('mr-relay-drawer');
 
-    await user.type(screen.getByTestId('mr-relay-name-input'), '已验证域名规则');
-    await user.type(screen.getByTestId('mr-relay-from-domain-input'), 'example.cn');
+    fireEvent.change(screen.getByTestId('mr-relay-name-input'), { target: { value: '已验证域名规则' } });
+    fireEvent.change(screen.getByTestId('mr-relay-from-domain-input'), { target: { value: 'example.cn' } });
     // I11：新建规则的来源必填校验（CIDR 或 SPF 二选一）与本用例要测的域名校验相互独立，
     // 这里随手补一个来源 IP 让本用例只受它自己关心的那条校验影响。
-    await user.type(screen.getByTestId('mr-relay-source-ip-input'), '192.168.1.0/24');
+    fireEvent.change(screen.getByTestId('mr-relay-source-ip-input'), { target: { value: '192.168.1.0/24' } });
     expect(screen.queryByTestId('mr-relay-from-domain-error')).not.toBeInTheDocument();
 
     const priorityInput = screen.getByTestId('mr-relay-priority-input');
-    await user.clear(priorityInput);
-    await user.type(priorityInput, '500');
-    await user.type(screen.getByTestId('mr-relay-helo-input'), 'mail.example.cn');
+    fireEvent.change(priorityInput, { target: { value: '500' } });
+    fireEvent.change(screen.getByTestId('mr-relay-helo-input'), { target: { value: 'mail.example.cn' } });
 
     await user.click(screen.getByTestId('mr-relay-save'));
 
@@ -454,12 +453,12 @@ describe('RelayTab', () => {
     await user.click(screen.getByTestId('mr-relay-create'));
     await screen.findByTestId('mr-relay-drawer');
 
-    await user.type(screen.getByTestId('mr-relay-name-input'), '收信域名未验证');
+    fireEvent.change(screen.getByTestId('mr-relay-name-input'), { target: { value: '收信域名未验证' } });
     // 发信域名先填一个已验证域，隔离出本用例只测 rcptDomain 这一条校验。
-    await user.type(screen.getByTestId('mr-relay-from-domain-input'), 'example.cn');
+    fireEvent.change(screen.getByTestId('mr-relay-from-domain-input'), { target: { value: 'example.cn' } });
     await user.click(screen.getByTestId('mr-relay-rcpt-match-select'));
-    await user.click(screen.getByRole('option', { name: '等于' }));
-    await user.type(screen.getByTestId('mr-relay-rcpt-domain-input'), 'unverified-rcpt.com');
+    await user.click(await screen.findByRole('option', { name: '等于' }));
+    fireEvent.change(screen.getByTestId('mr-relay-rcpt-domain-input'), { target: { value: 'unverified-rcpt.com' } });
     await user.click(screen.getByTestId('mr-relay-save'));
 
     expect(screen.getByTestId('mr-relay-rcpt-domain-error')).toHaveTextContent(
@@ -482,13 +481,13 @@ describe('RelayTab', () => {
     await user.click(screen.getByTestId('mr-relay-create'));
     await screen.findByTestId('mr-relay-drawer');
 
-    await user.type(screen.getByTestId('mr-relay-name-input'), '收信域名已验证');
-    await user.type(screen.getByTestId('mr-relay-from-domain-input'), 'example.cn');
+    fireEvent.change(screen.getByTestId('mr-relay-name-input'), { target: { value: '收信域名已验证' } });
+    fireEvent.change(screen.getByTestId('mr-relay-from-domain-input'), { target: { value: 'example.cn' } });
     // I11：见上方同名注释。
-    await user.type(screen.getByTestId('mr-relay-source-ip-input'), '192.168.1.0/24');
+    fireEvent.change(screen.getByTestId('mr-relay-source-ip-input'), { target: { value: '192.168.1.0/24' } });
     await user.click(screen.getByTestId('mr-relay-rcpt-match-select'));
-    await user.click(screen.getByRole('option', { name: '等于' }));
-    await user.type(screen.getByTestId('mr-relay-rcpt-domain-input'), rcptDomain);
+    await user.click(await screen.findByRole('option', { name: '等于' }));
+    fireEvent.change(screen.getByTestId('mr-relay-rcpt-domain-input'), { target: { value: rcptDomain } });
     expect(screen.queryByTestId('mr-relay-rcpt-domain-error')).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId('mr-relay-save'));
@@ -518,16 +517,16 @@ describe('RelayTab', () => {
     await user.click(screen.getByTestId('mr-relay-create'));
     await screen.findByTestId('mr-relay-drawer');
 
-    await user.type(screen.getByTestId('mr-relay-name-input'), '非 equals 不校验');
-    await user.type(screen.getByTestId('mr-relay-from-domain-input'), 'example.cn');
+    fireEvent.change(screen.getByTestId('mr-relay-name-input'), { target: { value: '非 equals 不校验' } });
+    fireEvent.change(screen.getByTestId('mr-relay-from-domain-input'), { target: { value: 'example.cn' } });
     // I11：见上方同名注释。
-    await user.type(screen.getByTestId('mr-relay-source-ip-input'), '192.168.1.0/24');
+    fireEvent.change(screen.getByTestId('mr-relay-source-ip-input'), { target: { value: '192.168.1.0/24' } });
     if (optionLabel) {
       await user.click(screen.getByTestId('mr-relay-rcpt-match-select'));
-      await user.click(screen.getByRole('option', { name: optionLabel }));
+      await user.click(await screen.findByRole('option', { name: optionLabel }));
     }
     // 完全不相干的域名——equals 形态下会命中红字，contains/regex 形态下不应该。
-    await user.type(screen.getByTestId('mr-relay-rcpt-domain-input'), 'totally-unrelated.org');
+    fireEvent.change(screen.getByTestId('mr-relay-rcpt-domain-input'), { target: { value: 'totally-unrelated.org' } });
     expect(screen.queryByTestId('mr-relay-rcpt-domain-error')).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId('mr-relay-save'));
@@ -607,7 +606,10 @@ describe('RelayTab', () => {
     await screen.findByTestId('mr-relay-drawer');
     // 只切启停，不碰域名/SPF——这次保存本不该触碰 privileged 语义。
     await user.click(screen.getByTestId('mr-relay-active-switch'));
-    await user.click(screen.getByTestId('mr-relay-save'));
+    // Two clicks in the same render frame must still result in one PUT. The
+    // disabled state is render-driven and cannot be the only duplicate guard.
+    fireEvent.click(screen.getByTestId('mr-relay-save'));
+    fireEvent.click(screen.getByTestId('mr-relay-save'));
 
     await waitFor(() => {
       const putCalls = mockApiRequest.mock.calls.filter(

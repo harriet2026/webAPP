@@ -27,6 +27,9 @@ import { getSecurityOverview } from '@/lib/api/security-overview';
 import { fetchOpsTop } from '@/lib/api/ops-top';
 import { getDisposalList } from '@/components/email-disposal/lib/disposal-api';
 import { getInboundAuditItems } from '@/lib/api/inbound-audit';
+import { getDetectionStats } from '@/lib/api/phishing-detection';
+import { getSpoofingStats } from '@/lib/api/spoofing-detection';
+import { getThreatRetroStats } from '@/lib/api/threat-retro';
 
 const mock = (fn: unknown) => fn as unknown as ReturnType<typeof vi.fn>;
 
@@ -36,7 +39,7 @@ function args() {
     dates: resolveRangeDates('7d', new Date('2026-07-10T12:00:00')),
     apiRequest: vi.fn() as never,
     isPlatform: false,
-    aiEnabled: false,
+    agentAccess: { phishing: false, spoofing: false, 'threat-retro': false },
   };
 }
 
@@ -159,5 +162,63 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
     mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
 
     await expect(fetchSystemStatusData(args())).rejects.toThrow();
+  });
+
+  it('does not probe any agent endpoint when the current scope has no agent capability', async () => {
+    mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
+
+    const data = await fetchSystemStatusData(args());
+
+    expect(mock(getDetectionStats)).not.toHaveBeenCalled();
+    expect(mock(getSpoofingStats)).not.toHaveBeenCalled();
+    expect(mock(getThreatRetroStats)).not.toHaveBeenCalled();
+    expect(data.agents).toBeNull();
+  });
+
+  it('requests only individually authorized agent stats', async () => {
+    mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
+    mock(getDetectionStats).mockResolvedValue({ today_detected: 9, pending_review: 2 });
+
+    const data = await fetchSystemStatusData({
+      ...args(),
+      agentAccess: { phishing: true, spoofing: false, 'threat-retro': false },
+    });
+
+    expect(mock(getDetectionStats)).toHaveBeenCalledOnce();
+    expect(mock(getSpoofingStats)).not.toHaveBeenCalled();
+    expect(mock(getThreatRetroStats)).not.toHaveBeenCalled();
+    expect(data.agents).toEqual({
+      phishing: { todayDetected: 9, pendingReview: 2 },
+      spoofing: null,
+      threatRetro: null,
+    });
+    expect(data.alerts).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'agent-phishing-pending', count: 2 }),
+    ]));
+  });
+
+  it('a raced 403 degrades only that agent and preserves other authorized data', async () => {
+    mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
+    mock(getDetectionStats).mockResolvedValue({ today_detected: 7, pending_review: 1 });
+    mock(getSpoofingStats).mockRejectedValue(new ApiError(403, 'capability revoked'));
+
+    const data = await fetchSystemStatusData({
+      ...args(),
+      agentAccess: { phishing: true, spoofing: true, 'threat-retro': false },
+    });
+
+    expect(data.agents?.phishing).toEqual({ todayDetected: 7, pendingReview: 1 });
+    expect(data.agents?.spoofing).toBeNull();
+    expect(data.agents?.threatRetro).toBeNull();
+  });
+
+  it('a 500 from an authorized agent remains a real dashboard failure', async () => {
+    mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
+    mock(getSpoofingStats).mockRejectedValue(new ApiError(500, 'db down'));
+
+    await expect(fetchSystemStatusData({
+      ...args(),
+      agentAccess: { phishing: false, spoofing: true, 'threat-retro': false },
+    })).rejects.toThrow();
   });
 });

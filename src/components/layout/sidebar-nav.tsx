@@ -139,7 +139,7 @@ export function SidebarNav() {
     return expanded;
   });
   const { hasPermission, isSystemAdmin, showAdvancedRules, canSeeRoute } = useAuth();
-  const { capabilities, registry, registryReady, viewer, grants } = useProductForm();
+  const { capabilities, registry, registryReady, viewer, grants, switcherEnabled } = useProductForm();
   const t = useTranslations();
   const brandName = capabilities?.saas ? t('branding.saasName') : t('branding.selfHostedName');
 
@@ -174,6 +174,7 @@ export function SidebarNav() {
     formVisible,
     capabilities,
     viewer,
+    switcherEnabled,
   };
   const isItemAllowed = (item: NavItem): boolean => isNavItemAllowed(item, navGateCtx);
 

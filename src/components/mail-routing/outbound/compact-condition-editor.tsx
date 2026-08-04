@@ -263,7 +263,10 @@ export function CompactConditionEditor({
             data-testid={`mr-ob-rule-more-condition-row-${index}`}
           >
             <Select
-              value={node.field || undefined}
+              // Keep Base UI controlled for the row's whole lifetime. Using
+              // undefined here made a newly-added empty row uncontrolled and
+              // selecting its first field switched it to controlled.
+              value={node.field || null}
               onValueChange={(field) => {
                 if (!field || !fieldDefs[field]) return;
                 updateAt(index, nextConditionForField(field, fieldDefs[field]));
@@ -310,7 +313,7 @@ export function CompactConditionEditor({
             )}
 
             <Select
-              value={node.operator || undefined}
+              value={node.operator || null}
               onValueChange={(operator) => {
                 if (!operator) return;
                 updateAt(index, {

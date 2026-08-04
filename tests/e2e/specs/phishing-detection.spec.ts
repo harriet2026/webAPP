@@ -507,10 +507,7 @@ test.describe('Phishing Detection Tab A', () => {
     }
   });
 
-  test('exempt button opens reason dialog and empty submit is blocked (TC-05)', async ({ authenticatedPage }) => {
-    // The exempt flow requires a reason — submitting an empty reason must
-    // surface the inline validation error (zod min(1)) and NOT call the API.
-    // This is the negative branch of TC-05.
+  test('exempt button keeps submit disabled until a non-blank reason is entered (TC-05, GT-12522)', async ({ authenticatedPage }) => {
     const { itemId, subject } = await seedDetectionRow('exempt-flow', {
       status: 'quarantined',
     });
@@ -531,15 +528,15 @@ test.describe('Phishing Detection Tab A', () => {
         { timeout: 10000 },
       ).toContain('误报');
 
-      // Submit without typing a reason — zod resolver must block the submit
-      // and surface the validation message.
       const submitBtn = dialog.getByRole('button', { name: /提交|Submit/ }).first();
-      await submitBtn.click();
-      // The validation message is rendered in a <p> inside the dialog.
-      await expect.poll(
-        async () => dialog.innerText(),
-        { timeout: 5000 },
-      ).toContain('请填写');
+      await expect(submitBtn).toBeDisabled();
+
+      const reason = dialog.getByPlaceholder(/豁免原因|exemption reason/i);
+      await reason.fill('   ');
+      await expect(submitBtn).toBeDisabled();
+
+      await reason.fill('QC 验证误报');
+      await expect(submitBtn).toBeEnabled();
     } finally {
       await cleanupItem(itemId);
     }

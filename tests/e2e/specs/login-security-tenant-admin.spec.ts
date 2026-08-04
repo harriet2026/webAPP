@@ -98,12 +98,10 @@ test.describe('tenant_admin on /users (GT-11959 §7.3)', () => {
 
     await loginAs(page, TENANT_ADMIN.username, TENANT_ADMIN.password);
 
-    // Only police /users. Login lands on the dashboard, whose agent-stats /
-    // inbound-audit sources are capability-gated and DELIBERATELY fault-isolated
-    // (optionalSource(..., null, 'agent-stats') — GT-12005/GT-12008): a tenant
-    // without the AI grants gets a 403 there, the card degrades to null and no
-    // banner is shown. Collecting from before login made this test police that
-    // unrelated dashboard traffic instead of the page it is about.
+    // Only police /users. Login lands on the dashboard, whose platform-only
+    // inbound-audit source is deliberately fault-isolated for tenant viewers.
+    // Collecting from before login would police that unrelated dashboard traffic
+    // instead of the page this test is about.
     //
     // Wait for that dashboard traffic to SETTLE before clearing. Clearing right
     // after loginAs() only empties the array — the dashboard's capability-gated

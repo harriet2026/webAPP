@@ -22,7 +22,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, subDays, subHours } from 'date-fns';
-import { useProductForm } from '@/contexts/product-form-context';
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { ApiError, type ApiRequestFn } from '@/lib/api/client';
 import { getDashboardSummary } from '@/lib/api/statistics';
@@ -37,6 +36,7 @@ import { getInboundAuditItems } from '@/lib/api/inbound-audit';
 import { getDetectionStats } from '@/lib/api/phishing-detection';
 import { getSpoofingStats } from '@/lib/api/spoofing-detection';
 import { getThreatRetroStats } from '@/lib/api/threat-retro';
+import { useAgentFeatureAccess, type AgentRowKey } from './visibility';
 
 export type SystemStatusRange = '24h' | 'today' | '7d' | '30d';
 
@@ -149,10 +149,12 @@ export interface SystemHealthSummary {
 //   phishing / spoofing "today" -> today_detected; pending -> pending_review
 //   threat-retro        "today" -> recalled_today; pending -> pending_recall
 export interface SystemStatusAgentStats {
-  phishing: { todayDetected: number; pendingReview: number };
-  spoofing: { todayDetected: number; todayIntercepted: number; pendingReview: number };
-  threatRetro: { recalledToday: number; inProgress: number; pendingRecall: number };
+  phishing: { todayDetected: number; pendingReview: number } | null;
+  spoofing: { todayDetected: number; todayIntercepted: number; pendingReview: number } | null;
+  threatRetro: { recalledToday: number; inProgress: number; pendingRecall: number } | null;
 }
+
+export type AgentStatsAccess = Record<AgentRowKey, boolean>;
 
 export interface SystemStatusData {
   inbound: number;
@@ -188,24 +190,37 @@ function severityToLevel(sev: AlertSeverity): SystemStatusAlertLevel {
   return 'info';
 }
 
-async function fetchAgentStats(apiRequest: ApiRequestFn): Promise<SystemStatusAgentStats> {
+async function fetchAgentStats(
+  apiRequest: ApiRequestFn,
+  access: AgentStatsAccess,
+): Promise<SystemStatusAgentStats | null> {
+  if (!Object.values(access).some(Boolean)) return null;
+
   const [phishing, spoofing, threatRetro] = await Promise.all([
-    getDetectionStats({}, apiRequest),
-    getSpoofingStats({}, apiRequest),
-    getThreatRetroStats({}, apiRequest),
+    access.phishing
+      ? optionalSource(getDetectionStats({}, apiRequest), null, 'phishing-agent-stats')
+      : Promise.resolve(null),
+    access.spoofing
+      ? optionalSource(getSpoofingStats({}, apiRequest), null, 'spoofing-agent-stats')
+      : Promise.resolve(null),
+    access['threat-retro']
+      ? optionalSource(getThreatRetroStats({}, apiRequest), null, 'threat-retro-agent-stats')
+      : Promise.resolve(null),
   ]);
   return {
-    phishing: { todayDetected: phishing.today_detected, pendingReview: phishing.pending_review },
-    spoofing: {
+    phishing: phishing
+      ? { todayDetected: phishing.today_detected, pendingReview: phishing.pending_review }
+      : null,
+    spoofing: spoofing ? {
       todayDetected: spoofing.today_detected,
       todayIntercepted: spoofing.today_intercepted,
       pendingReview: spoofing.pending_review,
-    },
-    threatRetro: {
+    } : null,
+    threatRetro: threatRetro ? {
       recalledToday: threatRetro.range.recall_succeeded,
       inProgress: threatRetro.snapshot.in_progress,
       pendingRecall: threatRetro.snapshot.pending_recall,
-    },
+    } : null,
   };
 }
 
@@ -214,7 +229,7 @@ interface FetchArgs {
   dates: RangeDates;
   apiRequest: ApiRequestFn;
   isPlatform: boolean;
-  aiEnabled: boolean;
+  agentAccess: AgentStatsAccess;
 }
 
 // GT-12005 / GT-12008: the dashboard used to fetch every source in one
@@ -251,7 +266,7 @@ async function optionalSource<T>(p: Promise<T>, fallback: T, label: string): Pro
 }
 
 export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<SystemStatusData, 'isLoading' | 'isError'>> {
-  const { range, dates, apiRequest, isPlatform, aiEnabled } = args;
+  const { range, dates, apiRequest, isPlatform, agentAccess } = args;
 
   const [
     summaryCur,
@@ -300,11 +315,10 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
         { items: [], page: 1, page_size: 1, total: 0 },
         'inbound-audit',
       ),
-      // Overlay: AI 版 only (spec §4.7) — skip the three agent-stats calls
-      // entirely for the traditional form.
-      aiEnabled
-        ? optionalSource(fetchAgentStats(apiRequest), null, 'agent-stats')
-        : Promise.resolve(null),
+      // Request only the individually authorized agent sources. Each 403 is
+      // isolated inside fetchAgentStats, so one revoked capability cannot erase
+      // another agent's valid data.
+      fetchAgentStats(apiRequest, agentAccess),
     ]);
 
   const inbound = summaryCur.metrics.total_emails;
@@ -426,7 +440,7 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
     });
   }
   if (agents) {
-    if (agents.phishing.pendingReview > 0) {
+    if (agents.phishing && agents.phishing.pendingReview > 0) {
       tenantAlerts.push({
         id: 'agent-phishing-pending',
         level: 'info',
@@ -437,7 +451,7 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
         count: agents.phishing.pendingReview,
       });
     }
-    if (agents.spoofing.pendingReview > 0) {
+    if (agents.spoofing && agents.spoofing.pendingReview > 0) {
       tenantAlerts.push({
         id: 'agent-spoofing-pending',
         level: 'info',
@@ -448,7 +462,7 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
         count: agents.spoofing.pendingReview,
       });
     }
-    if (agents.threatRetro.pendingRecall > 0) {
+    if (agents.threatRetro && agents.threatRetro.pendingRecall > 0) {
       tenantAlerts.push({
         id: 'agent-threat-retro-pending',
         level: 'info',
@@ -481,14 +495,18 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
 }
 
 export function useSystemStatusData(range: SystemStatusRange): SystemStatusData {
-  const { capabilities } = useProductForm();
+  const agentFeatureAccess = useAgentFeatureAccess();
   // scopeTenantId: null — this hook never overrides the tenant scope from a
   // page-level selector (unlike security-overview's drill-down), so it
   // always defers to the default resolution (selectedTenantId / viewer).
   const scope = useSecurityScope(null);
   const apiRequest = scope.scopedRequest;
   const isPlatform = scope.effectiveViewer === 'platform';
-  const aiEnabled = capabilities?.ai === true;
+  const agentAccess: AgentStatsAccess = {
+    phishing: agentFeatureAccess.phishing.canRequest,
+    spoofing: agentFeatureAccess.spoofing.canRequest,
+    'threat-retro': agentFeatureAccess['threat-retro'].canRequest,
+  };
 
   const dates = useMemo(() => resolveRangeDates(range), [range]);
 
@@ -498,12 +516,14 @@ export function useSystemStatusData(range: SystemStatusRange): SystemStatusData 
       range,
       scope.resolvedScopeTenant,
       isPlatform,
-      aiEnabled,
+      agentAccess.phishing,
+      agentAccess.spoofing,
+      agentAccess['threat-retro'],
       dates.startDate,
       dates.endDate,
     ],
     enabled: scope.scopeResolved,
-    queryFn: () => fetchSystemStatusData({ range, dates, apiRequest, isPlatform, aiEnabled }),
+    queryFn: () => fetchSystemStatusData({ range, dates, apiRequest, isPlatform, agentAccess }),
     staleTime: 30_000,
     refetchOnWindowFocus: false,
     retry: 1,

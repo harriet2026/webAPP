@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
@@ -165,7 +165,11 @@ export function PolicyPipelinePage() {
   const router = useRouter();
   const { isSystemAdmin, user } = useAuth();
   const isTenantAdmin = user?.role === 'tenant_admin';
-  const { capabilities } = useProductForm();
+  // switcherEnabled：高级过滤规则暂不对外露出，仅在产品形态切换器
+  // （OSGATEWAY_PRODUCT_FORM_SWITCHER=true，演示/开发环境）开启时渲染
+  // 阶段5的该卡片与抽屉导航项（智能分析层的仿冒/威胁回溯同一门控，
+  // 由 useAgentCenterOverview 统一过滤）。
+  const { capabilities, switcherEnabled } = useProductForm();
   const { effectiveViewer } = useSecurityScope(null);
   const caps = capabilities ?? { ai: false, multiTenant: false, saas: false };
   const overviewQuery = useAgentCenterOverview();
@@ -231,6 +235,8 @@ export function PolicyPipelinePage() {
   const { data: advancedRulesList } = useQuery({
     queryKey: ['advanced-rules', 'list'],
     queryFn: () => listAdvancedRules(apiRequest),
+    // 卡片被切换器门控隐藏时不再取数（该 query 只喂卡片的配置态）。
+    enabled: switcherEnabled,
   });
   const advancedRulesUnconfigured = (advancedRulesList?.length ?? 0) === 0;
 
@@ -249,6 +255,16 @@ export function PolicyPipelinePage() {
   // html_spec §2.3-13 对齐：左导航「相似邮件与主题检测」摘要=「窗口{N}分钟 / 阈值{M}%」，
   // 取自当前生效方向组（mode==='separate' 取 similar_email.receive，'aggregate' 取 aggregate）。
   // 同 advancedRulesEnabledResp/securityModulesMap，仅在抽屉处于阶段5时取数。
+  // 刷新按钮：让本页四类查询全部失效重取（原型只在 demo 里有 queryClient，
+  // 产品这边要显式取一个）。
+  const queryClient = useQueryClient();
+  const handleRefresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['agent-center-overview'] });
+    queryClient.invalidateQueries({ queryKey: ['advanced-rules'] });
+    queryClient.invalidateQueries({ queryKey: ['security-modules'] });
+    queryClient.invalidateQueries({ queryKey: ['similar-detection-config'] });
+  }, [queryClient]);
+
   const { data: similarDetectionConfigResp } = useQuery({
     queryKey: ['similar-detection-config'],
     queryFn: () => getSimilarDetection(apiRequest),
@@ -395,7 +411,7 @@ export function PolicyPipelinePage() {
       // → configurable + unconfigured（灰色虚线 / 去配置）。
       policies: [
         { key: 'similarDetection', nameKey: 'pipeline.similarDetection', descKey: 'pipeline.similarDetectionDesc', type: 'configurable', functional: true },
-        { key: 'advancedRules', nameKey: 'pipeline.advancedRules', descKey: 'pipeline.advancedRulesDesc', type: 'configurable', functional: true, unconfigured: advancedRulesUnconfigured },
+        ...(switcherEnabled ? [{ key: 'advancedRules', nameKey: 'pipeline.advancedRules', descKey: 'pipeline.advancedRulesDesc', type: 'configurable', functional: true, unconfigured: advancedRulesUnconfigured } as PipelinePolicy] : []),
         { key: 'mailMarking', nameKey: 'pipeline.mailMarking', descKey: 'pipeline.mailMarkingDesc', type: 'configurable', functional: true },
       ],
     },
@@ -601,7 +617,10 @@ export function PolicyPipelinePage() {
     );
   };
 
-  const navItems = activeDrawerPolicy.stage === 5 ? stage5NavItems : activeDrawerPolicy.stage === 3 ? stage3NavItems : activeDrawerPolicy.stage === 2 ? stage2NavItems : stage1NavItems;
+  // 高级过滤规则随卡片同一门控从抽屉左导航隐藏（stage5NavItems 常量保持
+  // 完整顺序，供单测/其它消费方引用）。
+  const visibleStage5NavItems = switcherEnabled ? stage5NavItems : stage5NavItems.filter((item) => item.key !== 'advancedRules');
+  const navItems = activeDrawerPolicy.stage === 5 ? visibleStage5NavItems : activeDrawerPolicy.stage === 3 ? stage3NavItems : activeDrawerPolicy.stage === 2 ? stage2NavItems : stage1NavItems;
   // html_spec §2.1-2 对齐面包屑：IP 抽屉保持「IP策略」（无编号，同 demo connection.title），
   // 阶段2/3/5 抽屉带「阶段N: 」前缀。
   const navStageLabel = activeDrawerPolicy.stage === 5
@@ -841,7 +860,7 @@ export function PolicyPipelinePage() {
       <PageHeader
         title={t('pipeline.title')}
         actions={
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="h-4 w-4 mr-1" />
             {t('common.refresh')}
           </Button>

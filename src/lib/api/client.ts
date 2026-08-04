@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
 import type { User } from '@/types/user';
 import { isDemoSessionEnabled, isMockEnabled } from '@/lib/mock/storage';
@@ -10,7 +11,12 @@ export const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  body?: unknown;
+  // GT-12704：故意是 `object` 而不是 `unknown`。apiRequest 会对 body 做一次
+  // `JSON.stringify`，所以调用方必须传**未序列化的对象**；`unknown` 会把
+  // 「调用方自己先 stringify 一遍」这种双重序列化放过去（发出的请求体顶层是
+  // 字符串，后端按结构体绑定直接 400），而 TS 一声不吭。收成 `object` 后同类
+  // 写法在编译期就报错。
+  body?: object;
   headers?: Record<string, string>;
   signal?: AbortSignal;
   responseType?: 'json' | 'blob';
@@ -117,6 +123,32 @@ function replicaReadOnlyMessage(primaryAddr?: string): string {
   return fn(primaryAddr);
 }
 
+// GT-12697：规则变更后端会同步等执行面(antispam)重载快照；等不到确认时响应带
+// X-OSG-Rule-Sync: pending，这里统一提示"数秒内生效"，避免管理员误以为已即时
+// 生效。挂在 apiRequest 单收口，与 replica_readonly 同理：所有规则页一次覆盖。
+const RULE_SYNC_PENDING_FALLBACK: Record<string, string> = {
+  zh: '已保存，正在同步到检测引擎（数秒内自动生效）',
+  en: 'Saved. Syncing to the detection engine (takes effect within seconds).',
+  th: 'บันทึกแล้ว กำลังซิงค์ไปยังเอนจินตรวจจับ (มีผลภายในไม่กี่วินาที)',
+  ru: 'Сохранено. Синхронизация с движком обнаружения (вступит в силу через несколько секунд).',
+};
+
+function notifyRuleSyncPending(response: Response): void {
+  if (typeof window === 'undefined') return;
+  // GT-12697 回归实录（mail-admission-api-path.test.ts）：真实浏览器 fetch 的
+  // Response 恒有 headers，但仓库里存在合法的"最小 fetch stub"测试模式——只
+  // mock `{ ok, status, json }` 裸对象、不带 headers（该模式在本改动之前是
+  // 安全的，因为 apiRequest 从未读过 headers）。这里做一次形状守卫：headers
+  // 缺失或不是真正的 Headers（没有 .get 方法）时直接跳过，不去改那批测试。
+  const headers = (response as { headers?: unknown }).headers;
+  if (!headers || typeof (headers as Headers).get !== 'function') return;
+  if ((headers as Headers).get('X-OSG-Rule-Sync') !== 'pending') return;
+  const locale = window.location.pathname.split('/')[1];
+  toast.info(RULE_SYNC_PENDING_FALLBACK[locale] ?? RULE_SYNC_PENDING_FALLBACK.zh, {
+    id: 'rule-sync-pending',
+  });
+}
+
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   // Mock 拦截：当开关开启时，命中已注册的 mock 路由直接返回 fixture，
   // 不发起真实网络请求。开关由 ProductFormSwitcher 里的「Mock 数据」
@@ -205,6 +237,8 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     }
     throw new ApiError(response.status, message, error);
   }
+
+  notifyRuleSyncPending(response);
 
   if (response.status === 204) {
     return {} as T;

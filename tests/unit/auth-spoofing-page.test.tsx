@@ -268,7 +268,8 @@ describe('AuthSpoofingPage AI-form gating (task 9)', () => {
   });
 
   // GT-12661：认证仿冒检测配置面板底部的「例外规则管理」横幅已移除
-  //（两个按钮都是无效入口）。ProtocolChecksSection 自己的 goToPipeline 链接保留。
+  //（两个按钮都是无效入口）。GT-12705 起 ProtocolChecksSection 里那条
+  // exceptionBanner + goToPipeline 提示也一并移除，页面上不应再出现任何一处。
   it('no longer renders the ExceptionRulesEntry banner', async () => {
     useProductFormMock.mockReturnValue({ capabilities: { ai: true } });
     mockApiRequest.mockResolvedValue(mockConfig);
@@ -279,6 +280,6 @@ describe('AuthSpoofingPage AI-form gating (task 9)', () => {
     });
     expect(screen.queryByText('exceptionEntry.title')).not.toBeInTheDocument();
     expect(screen.queryByText('exceptionEntry.viewCurrent')).not.toBeInTheDocument();
-    expect(screen.getAllByText('goToPipeline').length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText('goToPipeline')).not.toBeInTheDocument();
   });
 });

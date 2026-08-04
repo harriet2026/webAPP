@@ -47,6 +47,8 @@ function actionVariant(action: string): 'success' | 'error' | 'warning' | 'defau
       return 'success';
     case 'reject':
       return 'error';
+    case 'discard':
+      return 'error';
     case 'quarantine':
       return 'warning';
     case 'audit':
@@ -138,6 +140,14 @@ export function SenderFilterTable({
           />
         );
       },
+    },
+    {
+      accessorKey: 'rule.priority',
+      header: t('senderFilter.priority'),
+      cell: ({ row }) => (
+        <span className="text-sm tabular-nums">{row.original.rule.priority}</span>
+      ),
+      size: 80,
     },
     {
       id: 'status',

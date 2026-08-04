@@ -49,7 +49,24 @@ const allowAllContext: NavGateContext = {
   canSeeRoute: () => true,
   registry: [],
   formVisible: null,
+  switcherEnabled: true,
 };
+
+describe('isNavItemAllowed — product-form switcher gate', () => {
+  const logsGroup = { id: 'logs', requiresProductFormSwitcher: true };
+
+  it('hides switcher-only groups when the product-form switcher is disabled', () => {
+    expect(isNavItemAllowed(logsGroup, { ...allowAllContext, switcherEnabled: false })).toBe(false);
+  });
+
+  it('shows switcher-only groups when the product-form switcher is enabled', () => {
+    expect(isNavItemAllowed(logsGroup, allowAllContext)).toBe(true);
+  });
+
+  it('does not hide ordinary groups when the product-form switcher is disabled', () => {
+    expect(isNavItemAllowed({ id: 'statistics' }, { ...allowAllContext, switcherEnabled: false })).toBe(true);
+  });
+});
 
 describe('isNavItemAllowed — multi-tenant tenant-view pruning', () => {
   const tenantContext: NavGateContext = {

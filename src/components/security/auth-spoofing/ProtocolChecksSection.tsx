@@ -20,14 +20,14 @@ import { AuthFlowDiagram } from './AuthFlowDiagram';
 import { ConfigHealthPanel } from './ConfigHealthPanel';
 import { DkimOutboundSigningSection } from './DkimOutboundSigningSection';
 import { applyTemplate } from '@/lib/auth-spoofing-templates';
-import { protocolActionKey } from '@/lib/auth-spoofing-labels';
-import { AlertTriangle, ChevronDown, Info } from 'lucide-react';
+import { protocolActionShortKey, protocolActionDescKey, dominantAction } from '@/lib/auth-spoofing-labels';
+import { AlertTriangle, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const PROTOCOL_GROUPS: { key: 'spf' | 'dkim' | 'dmarc' | 'ptr'; labelKey: string; keys: string[] }[] = [
   { key: 'spf', labelKey: 'protocolChecks.spf', keys: ['fail', 'softfail', 'none', 'temperror'] },
   { key: 'dkim', labelKey: 'protocolChecks.dkim', keys: ['fail', 'neutral', 'partial', 'none'] },
-  { key: 'dmarc', labelKey: 'protocolChecks.dmarc', keys: ['reject', 'quarantine', 'none'] },
+  { key: 'dmarc', labelKey: 'protocolChecks.dmarc', keys: ['reject', 'quarantine', 'none', 'no_record', 'query_fail'] },
   { key: 'ptr', labelKey: 'protocolChecks.ptr', keys: ['noptr', 'nomatch', 'ehlo_mismatch'] },
 ];
 
@@ -84,10 +84,10 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
   };
 
   const flowFailActions: Record<'spf' | 'dkim' | 'dmarc' | 'ptr', AuthSpoofingAction> = {
-    spf: config.spf?.fail?.action ?? 'accept',
-    dkim: config.dkim?.fail?.action ?? 'accept',
-    dmarc: config.dmarc?.reject?.action ?? 'accept',
-    ptr: config.ptr?.ehlomismatch?.action ?? 'accept',
+    spf: dominantAction(config.spf),
+    dkim: dominantAction(config.dkim),
+    dmarc: dominantAction(config.dmarc),
+    ptr: dominantAction(config.ptr),
   };
 
   return (
@@ -136,14 +136,6 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                     </div>
                   )}
                 </div>
-              </div>
-
-              <div className="flex items-center gap-2 rounded border border-blue-200 bg-blue-100/50 p-2 dark:border-blue-700 dark:bg-blue-900/20">
-                <Info className="h-4 w-4 flex-shrink-0 text-blue-600 dark:text-blue-400" />
-                <span className="text-xs text-blue-700 dark:text-blue-300">{t('exceptionBanner')}</span>
-                <Button variant="link" size="sm" className="ml-auto h-auto p-0 text-xs text-blue-600 dark:text-blue-400">
-                  {t('goToPipeline')}
-                </Button>
               </div>
             </div>
 
@@ -201,13 +193,18 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                             }
                             disabled={isDisabled}
                           >
-                            <SelectTrigger className="w-[160px]">
-                              <SelectValue>{t(protocolActionKey(item.action) as any)}</SelectValue>
+                            <SelectTrigger className="w-[140px]">
+                              <SelectValue>{t(protocolActionShortKey(item.action) as any)}</SelectValue>
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent alignItemWithTrigger={false} className="w-72">
                               {actions.map((a) => (
                                 <SelectItem key={a} value={a}>
-                                  {t(protocolActionKey(a) as any)}
+                                  <div className="flex flex-col gap-0.5 py-0.5">
+                                    <span>{t(protocolActionShortKey(a) as any)}</span>
+                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
+                                      {t(protocolActionDescKey(a) as any)}
+                                    </span>
+                                  </div>
                                 </SelectItem>
                               ))}
                             </SelectContent>

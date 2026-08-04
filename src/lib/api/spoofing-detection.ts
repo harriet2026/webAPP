@@ -35,7 +35,8 @@ export async function getSpoofingStats(
   const q = new URLSearchParams();
   setScalar(q, 'start', params.start);
   setScalar(q, 'end', params.end);
-  return fn<SpoofingStats>(`${BASE}/stats?${q.toString()}`);
+  const query = q.toString();
+  return fn<SpoofingStats>(`${BASE}/stats${query ? `?${query}` : ''}`);
 }
 
 export async function getSpoofingLogs(

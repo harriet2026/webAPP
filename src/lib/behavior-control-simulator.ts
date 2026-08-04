@@ -1,4 +1,4 @@
-import type { BehaviorDimension } from '@/types/behavior-control';
+import type { BehaviorDimension, BehaviorCondition } from '@/types/behavior-control';
 
 export interface BehaviorSimulationInputs {
   uniqueSenderIPCount: number;
@@ -7,16 +7,19 @@ export interface BehaviorSimulationInputs {
 }
 
 export interface BehaviorSimulationRequest {
-  dimensionA: BehaviorDimension;
-  thresholdA: number;
-  orEnabled?: boolean;
+  conditions: BehaviorCondition[];
+  orEnabled: boolean;
+  inputs: BehaviorSimulationInputs;
+  // 向下兼容旧调用
+  dimensionA?: BehaviorDimension;
+  thresholdA?: number;
+  orEnabled_legacy?: boolean;
   dimensionB?: BehaviorDimension;
   thresholdB?: number;
-  inputs: BehaviorSimulationInputs;
 }
 
 export interface BehaviorSimulationHit {
-  condition: 'A' | 'B';
+  condition: string;
   dimension: BehaviorDimension;
   count: number;
   threshold: number;
@@ -39,28 +42,35 @@ function countForDimension(
   }
 }
 
-function evaluateCondition(
-  condition: 'A' | 'B',
-  dimension: BehaviorDimension | undefined,
-  threshold: number | undefined,
-  inputs: BehaviorSimulationInputs,
-): BehaviorSimulationHit | null {
-  if (!dimension || !threshold || threshold <= 0) return null;
-  const count = countForDimension(dimension, inputs);
-  if (count === null || count < threshold) return null;
-  return { condition, dimension, count, threshold };
-}
-
 // 模拟器只使用用户在抽屉中输入的样本数据，不调用后端接口。
 export function simulateBehaviorControl(
   request: BehaviorSimulationRequest,
 ): BehaviorSimulationHit | null {
-  const hitA = evaluateCondition(
-    'A', request.dimensionA, request.thresholdA, request.inputs,
-  );
-  if (hitA) return hitA;
-  if (!request.orEnabled) return null;
-  return evaluateCondition(
-    'B', request.dimensionB, request.thresholdB, request.inputs,
-  );
+  const { conditions, orEnabled, inputs } = request;
+
+  if (!conditions || conditions.length === 0) return null;
+
+  if (orEnabled) {
+    // OR 模式：任一条件命中即触发
+    for (let i = 0; i < conditions.length; i++) {
+      const { dim, threshold } = conditions[i];
+      if (!dim || !threshold || threshold <= 0) continue;
+      const count = countForDimension(dim, inputs);
+      if (count !== null && count >= threshold) {
+        return { condition: String(i + 1), dimension: dim, count, threshold };
+      }
+    }
+    return null;
+  } else {
+    // AND 模式：所有条件同时满足才触发，返回第一个命中的条件作为展示
+    const allHit = conditions.every(({ dim, threshold }) => {
+      if (!dim || !threshold || threshold <= 0) return false;
+      const count = countForDimension(dim, inputs);
+      return count !== null && count >= threshold;
+    });
+    if (!allHit) return null;
+    const first = conditions[0];
+    const count = countForDimension(first.dim, inputs);
+    return { condition: '1', dimension: first.dim, count: count ?? 0, threshold: first.threshold };
+  }
 }

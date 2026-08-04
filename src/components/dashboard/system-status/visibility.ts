@@ -21,6 +21,7 @@
 // `effectiveViewer` itself, since that logic already lives in
 // `resolveSecurityScope` and duplicating it was flagged in Task 4's review).
 import { useProductForm } from '@/contexts/product-form-context';
+import { useAuth } from '@/contexts/auth-context';
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { resolve, type Capabilities, type FeatureDef, type Viewer } from '@/lib/product-form/resolve';
 
@@ -43,26 +44,75 @@ const AGENT_FEATURE_IDS = {
 
 export type AgentRowKey = keyof typeof AGENT_FEATURE_IDS;
 
+export type AgentFeatureAccess = Record<
+  AgentRowKey,
+  { visible: boolean; canRequest: boolean }
+>;
+
+const NO_AGENT_ACCESS: AgentFeatureAccess = {
+  phishing: { visible: false, canRequest: false },
+  spoofing: { visible: false, canRequest: false },
+  'threat-retro': { visible: false, canRequest: false },
+};
+
 /**
- * Pure per-row resolve, additive "未登记=放行" default (mirrors
- * `isItemVisibleByForm` in `sidebar-visibility.ts` and the infra check
- * below). A `locked` result (SaaS tenant, feature not yet granted) is still
- * `visible` here — same convention `sidebar-visibility.ts` uses: it gates
- * nav items on `.visible` alone and does not special-case `.locked` (the
- * sidebar shows locked items un-decorated; any upsell/lock treatment lives
- * on the target feature's own page, not the nav or this overview row). We
- * follow that precedent rather than inventing a distinct locked-row style
- * here.
+ * Resolve both display visibility and whether the backing endpoint may be
+ * called. A SaaS upsell/locked feature is visible but cannot be requested;
+ * the backend capability middleware represents that state as HTTP 403.
+ *
+ * Before bootstrap has delivered the registry/grants, fail closed. Treating
+ * the initial empty registry as "unregistered = allowed" caused the dashboard
+ * to fire capability-gated requests during hydration.
  */
-export function isAgentFeatureVisible(
+export function resolveAgentFeatureAccess(
   registry: FeatureDef[],
   caps: Capabilities,
   viewer: Viewer,
   grants: string[],
-  featureId: string,
-): boolean {
-  const feat = registry.find((f) => f.id === featureId);
-  return feat ? resolve(feat, caps, viewer, grants).visible : true;
+  registryReady: boolean,
+  bypassTenantGrants = false,
+  switcherEnabled = true,
+): AgentFeatureAccess {
+  if (!registryReady || !caps.ai) return NO_AGENT_ACCESS;
+
+  const effectiveGrants = bypassTenantGrants
+    ? [...new Set([...grants, ...Object.values(AGENT_FEATURE_IDS)])]
+    : grants;
+
+  return Object.fromEntries(
+    (Object.entries(AGENT_FEATURE_IDS) as [AgentRowKey, string][]).map(([key, featureId]) => {
+      // 仿冒与威胁回溯目前只在产品形态切换器开启的演示/开发环境露出。
+      // 在这里统一门控展示与接口请求，使运行概况、待办提醒及数据请求
+      // 与智能体中心保持一致；钓鱼智能体不受该临时门控影响。
+      if (!switcherEnabled && key !== 'phishing') {
+        return [key, { visible: false, canRequest: false }];
+      }
+      const feature = registry.find((item) => item.id === featureId);
+      // Preserve the registry's additive default only after bootstrap has
+      // completed. AI capability still gates the fallback above.
+      if (!feature) return [key, { visible: true, canRequest: true }];
+      const access = resolve(feature, caps, viewer, effectiveGrants);
+      return [key, { visible: access.visible, canRequest: access.visible && !access.locked }];
+    }),
+  ) as AgentFeatureAccess;
+}
+
+export function useAgentFeatureAccess(): AgentFeatureAccess {
+  const { capabilities, registry, grants, registryReady, switcherEnabled } = useProductForm();
+  const { isSystemAdmin } = useAuth();
+  const scope = useSecurityScope(null);
+  const caps = capabilities ?? { ai: false, multiTenant: false, saas: false };
+  const bypassTenantGrants = isSystemAdmin && scope.resolvedScopeTenant != null;
+
+  return resolveAgentFeatureAccess(
+    registry,
+    caps,
+    scope.effectiveViewer,
+    grants,
+    registryReady,
+    bypassTenantGrants,
+    switcherEnabled,
+  );
 }
 
 /**
@@ -73,15 +123,10 @@ export function isAgentFeatureVisible(
  * `useSystemStatusVisibility` above.
  */
 export function useAgentRowVisibility(): Record<AgentRowKey, boolean> {
-  const { capabilities, registry, grants } = useProductForm();
-  const { effectiveViewer } = useSecurityScope(null);
-  const caps = capabilities ?? { ai: false, multiTenant: false, saas: false };
+  const access = useAgentFeatureAccess();
 
   return Object.fromEntries(
-    (Object.entries(AGENT_FEATURE_IDS) as [AgentRowKey, string][]).map(([key, featureId]) => [
-      key,
-      isAgentFeatureVisible(registry, caps, effectiveViewer, grants, featureId),
-    ]),
+    (Object.keys(AGENT_FEATURE_IDS) as AgentRowKey[]).map((key) => [key, access[key].visible]),
   ) as Record<AgentRowKey, boolean>;
 }
 
@@ -162,6 +207,7 @@ export function deriveVisibility(
 export function useSystemStatusVisibility(): SystemStatusVisibility {
   const { capabilities, registry, registryReady, grants } = useProductForm();
   const { effectiveViewer } = useSecurityScope(null);
+  const agentAccess = useAgentFeatureAccess();
 
   const caps = capabilities ?? { ai: false, multiTenant: false, saas: false };
 
@@ -183,9 +229,7 @@ export function useSystemStatusVisibility(): SystemStatusVisibility {
   // the page level, but agent-overview.tsx returns null when every per-agent
   // resolve() is hidden — mirror that here so overviewCols doesn't leave a
   // dangling column for an AI form whose agent rows all resolved hidden.
-  const anyAgentVisible = Object.values(AGENT_FEATURE_IDS).some((featureId) =>
-    isAgentFeatureVisible(registry, caps, effectiveViewer, grants, featureId),
-  );
+  const anyAgentVisible = Object.values(agentAccess).some((access) => access.visible);
 
   return deriveVisibility({ ai: caps.ai === true }, infraVisible, anyAgentVisible);
 }

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>变更记录 · GT-12696 发信人黑白名单优化 · 2026-08-01</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #1a1a2e; background: #f4f6fb; }
+
+  .cl-header { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); color: #fff; padding: 32px 48px 28px; }
+  .cl-header h1 { font-size: 22px; font-weight: 700; letter-spacing: .01em; margin-bottom: 6px; }
+  .cl-header .subtitle { font-size: 13px; opacity: .75; margin-bottom: 20px; }
+  .cl-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 24px; }
+  .cl-meta-grid dt { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; opacity: .6; margin-bottom: 2px; }
+  .cl-meta-grid dd { font-size: 13px; font-weight: 500; font-family: "SF Mono", "Cascadia Code", monospace; }
+
+  .cl-wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  .cl-section-title { font-size: 16px; font-weight: 700; color: #1e3a5f; border-left: 4px solid #2563eb; padding-left: 12px; margin: 40px 0 16px; }
+
+  .tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; margin: 1px 2px; white-space: nowrap; }
+  .tag-layout   { background: #dbeafe; color: #1d4ed8; }
+  .tag-ux       { background: #f3e8ff; color: #7c3aed; }
+  .tag-validate { background: #fef9c3; color: #a16207; }
+  .tag-error    { background: #fee2e2; color: #b91c1c; }
+  .tag-i18n     { background: #dcfce7; color: #15803d; }
+  .tag-feature  { background: #fef3c7; color: #b45309; }
+  .tag-bugfix   { background: #fff1f2; color: #e11d48; }
+
+  .overview-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .overview-table thead tr { background: #1e3a5f; color: #fff; }
+  .overview-table thead th { padding: 11px 14px; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+  .overview-table tbody tr { border-bottom: 1px solid #f0f0f5; }
+  .overview-table tbody tr:last-child { border-bottom: none; }
+  .overview-table tbody tr:hover { background: #f8faff; }
+  .overview-table td { padding: 10px 14px; vertical-align: top; font-size: 13px; }
+  .overview-table td:first-child { color: #6b7280; font-weight: 600; width: 36px; }
+  .path-cell { font-weight: 600; color: #1e3a5f; }
+  .path-route { display: block; font-size: 11px; font-family: monospace; color: #6b7280; margin-top: 2px; font-weight: 400; }
+  .count-badge { display: inline-block; background: #e0f2fe; color: #0369a1; border-radius: 9999px; padding: 1px 8px; font-size: 11px; font-weight: 700; }
+
+  .cl-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 28px; overflow: hidden; }
+  .cl-card-header { background: #f8faff; border-bottom: 1px solid #e5e7f0; padding: 16px 24px; display: flex; align-items: flex-start; gap: 14px; }
+  .cl-card-index { width: 30px; height: 30px; border-radius: 50%; background: #2563eb; color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .cl-card-title { flex: 1; }
+  .cl-card-title h3 { font-size: 16px; font-weight: 700; color: #1e3a5f; margin-bottom: 4px; }
+  .cl-card-title .cl-route { font-size: 12px; font-family: monospace; color: #6b7280; }
+  .cl-card-body { padding: 20px 24px; }
+  .cl-card-body h4 { font-size: 13px; font-weight: 700; color: #374151; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: .04em; }
+  .cl-card-body h4:first-child { margin-top: 0; }
+  .cl-card-body ul { padding-left: 18px; }
+  .cl-card-body ul li { margin-bottom: 5px; font-size: 13px; color: #374151; }
+  .cl-card-body ul li strong { color: #1e3a5f; }
+  .cl-card-body p { font-size: 13px; color: #4b5563; line-height: 1.7; }
+  .cl-card-body blockquote { border-left: 3px solid #2563eb; padding: 8px 14px; background: #f0f6ff; border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 13px; color: #1e3a5f; }
+
+  .impact-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .impact-table thead tr { background: #f1f5f9; }
+  .impact-table thead th { padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b7280; letter-spacing: .04em; border-bottom: 1px solid #e5e7eb; }
+  .impact-table tbody tr { border-bottom: 1px solid #f3f4f6; }
+  .impact-table tbody tr:last-child { border-bottom: none; }
+  .impact-table td { padding: 8px 12px; font-size: 12px; vertical-align: top; }
+  .impact-table td:first-child { font-family: monospace; color: #1e3a5f; font-size: 11.5px; }
+  .impact-new  { background: #dcfce7; color: #15803d; border-radius: 4px; padding: 1px 6px; font-size: 11px; font-weight: 600; }
+  .impact-mod  { background: #dbeafe; color: #1d4ed8; border-radius: 4px; padding: 1px 6px; font-size: 11px; font-weight: 600; }
+  .impact-del  { background: #fee2e2; color: #b91c1c; border-radius: 4px; padding: 1px 6px; font-size: 11px; font-weight: 600; }
+  .impact-i18n { background: #dcfce7; color: #15803d; border-radius: 4px; padding: 1px 6px; font-size: 11px; font-weight: 600; }
+
+  footer { text-align: center; padding: 24px; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<header class="cl-header">
+  <h1>变更记录 · GT-12696 发信人黑白名单优化</h1>
+  <p class="subtitle">发信人黑白名单模块执行动作重构、丢弃动作新增、配置示例分类修复、白名单模式 UI 移除、优先级列新增</p>
+  <dl class="cl-meta-grid">
+    <div><dt>需求编号</dt><dd>GT-12696</dd></div>
+    <div><dt>变更日期</dt><dd>2026-08-01</dd></div>
+    <div><dt>关联 commit</dt><dd>GT-12695</dd></div>
+    <div><dt>影响模块</dt><dd>发信人黑白名单</dd></div>
+    <div><dt>变更条目</dt><dd>6 条</dd></div>
+  </dl>
+</header>
+
+<div class="cl-wrap">
+
+  <h2 class="cl-section-title">变更概览</h2>
+  <table class="overview-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>变更位置</th>
+        <th>变更描述</th>
+        <th>类型</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td class="path-cell">黑名单规则 · 执行动作
+          <span class="path-route">SenderFilterDrawer → action 选择器</span>
+        </td>
+        <td>「阻断」改名为「拒收」，含义保持不变（SMTP 拒绝响应）</td>
+        <td><span class="tag tag-ux">文案</span> <span class="tag tag-i18n">i18n</span></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td class="path-cell">黑名单规则 · 执行动作
+          <span class="path-route">SenderFilterDrawer → action 选择器</span>
+        </td>
+        <td>新增「丢弃」执行动作（静默丢弃，发信方收到成功响应但邮件实际被丢弃）</td>
+        <td><span class="tag tag-feature">新增</span> <span class="tag tag-i18n">i18n</span></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td class="path-cell">黑/白名单规则 · 执行动作
+          <span class="path-route">SenderFilterDrawer → action 选择器</span>
+        </td>
+        <td>执行动作下拉每个选项新增一行说明文字，并将下拉宽度扩展至 288px 防止截断</td>
+        <td><span class="tag tag-ux">可用性</span> <span class="tag tag-layout">布局</span></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td class="path-cell">白名单规则 · 配置示例
+          <span class="path-route">SenderFilterDrawer → 查看配置示例</span>
+        </td>
+        <td>修复白名单规则中「查看配置示例」展示黑名单示例并点击后跳转至黑名单的 bug；改为按当前 Tab 分类展示对应示例</td>
+        <td><span class="tag tag-bugfix">Bug 修复</span></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td class="path-cell">白名单规则 · 执行动作
+          <span class="path-route">SenderFilterDrawer → action 选择器 · 白名单模式字段</span>
+        </td>
+        <td>「放行」改名为「投递」；移除「白名单模式」UI 字段（含 superRefine 校验、watchWhitelistMode、getDefaultPriority）</td>
+        <td><span class="tag tag-ux">文案</span> <span class="tag tag-feature">移除</span> <span class="tag tag-i18n">i18n</span></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td class="path-cell">黑/白名单规则列表 · 展示列
+          <span class="path-route">SenderFilterTable → columns</span>
+        </td>
+        <td>列表新增「优先级」列，位于「执行动作」列与「状态」列之间，使用 tabular-nums 等宽数字展示</td>
+        <td><span class="tag tag-feature">新增</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="cl-section-title">详细变更说明</h2>
+
+  <!-- 1 -->
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-index">1</div>
+      <div class="cl-card-title">
+        <h3>黑名单执行动作：「阻断」改为「拒收」</h3>
+        <div class="cl-route">messages/{zh,en,ru,th}.json → senderFilter.action_reject</div>
+      </div>
+    </div>
+    <div class="cl-card-body">
+      <h4>变更内容</h4>
+      <ul>
+        <li><strong>zh：</strong>「阻断」→「拒收」</li>
+        <li><strong>en：</strong>「Block」→「Reject」</li>
+        <li><strong>ru：</strong>「Блокировать」→「Отклонить」</li>
+        <li><strong>th：</strong>「บล็อก」→「ปฏิเสธ」</li>
+      </ul>
+      <h4>原因</h4>
+      <p>「阻断」语义偏向网络层屏蔽，「拒收」更准确地描述 SMTP 级 5xx 拒绝响应行为，与 RFC 2821 术语对齐。</p>
+      <h4>影响范围</h4>
+      <table class="impact-table">
+        <thead><tr><th>文件</th><th>操作</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>messages/zh.json</td><td><span class="impact-mod">改</span></td><td>senderFilter.action_reject: "阻断" → "拒收"</td></tr>
+          <tr><td>messages/en.json</td><td><span class="impact-mod">改</span></td><td>senderFilter.action_reject: "Block" → "Reject"</td></tr>
+          <tr><td>messages/ru.json</td><td><span class="impact-mod">改</span></td><td>senderFilter.action_reject: "Блокировать" → "Отклонить"</td></tr>
+          <tr><td>messages/th.json</td><td><span class="impact-mod">改</span></td><td>senderFilter.action_reject: "บล็อก" → "ปฏิเสธ"</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-index">2</div>
+      <div class="cl-card-title">
+        <h3>黑名单执行动作：新增「丢弃」</h3>
+        <div class="cl-route">src/types/sender-filter.ts · SenderFilterDrawer.tsx · messages/*.json</div>
+      </div>
+    </div>
+    <div class="cl-card-body">
+      <h4>行为定义</h4>
+      <blockquote>静默丢弃邮件。发信方收到 SMTP 250 成功响应，但邮件实际不进入任何队列，也不产生退信。适用于需要静默处理且不希望触发发信方重试的场景。</blockquote>
+      <h4>影响范围</h4>
+      <table class="impact-table">
+        <thead><tr><th>文件</th><th>操作</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>src/types/sender-filter.ts</td><td><span class="impact-mod">改</span></td><td>BlacklistAction 联合类型新增 'discard'</td></tr>
+          <tr><td>SenderFilterDrawer.tsx</td><td><span class="impact-mod">改</span></td><td>Zod schema enum 新增 'discard'；actionLabel 映射新增；action 下拉新增选项</td></tr>
+          <tr><td>SenderFilterTable.tsx</td><td><span class="impact-mod">改</span></td><td>actionVariant 新增 discard → 'error' 样式（红色 Badge）</td></tr>
+          <tr><td>messages/zh.json</td><td><span class="impact-new">增</span></td><td>senderFilter.action_discard / action_discard_desc</td></tr>
+          <tr><td>messages/en.json</td><td><span class="impact-new">增</span></td><td>senderFilter.action_discard / action_discard_desc</td></tr>
+          <tr><td>messages/ru.json</td><td><span class="impact-new">增</span></td><td>senderFilter.action_discard / action_discard_desc</td></tr>
+          <tr><td>messages/th.json</td><td><span class="impact-new">增</span></td><td>senderFilter.action_discard / action_discard_desc</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-index">3</div>
+      <div class="cl-card-title">
+        <h3>执行动作下拉：每个选项新增说明文字 + 宽度修复</h3>
+        <div class="cl-route">SenderFilterDrawer.tsx · messages/*.json → action_*_desc</div>
+      </div>
+    </div>
+    <div class="cl-card-body">
+      <h4>变更内容</h4>
+      <ul>
+        <li>每个 <code>SelectItem</code> 改为双行布局：上行为动作名称，下行为 <code>text-xs text-muted-foreground</code> 灰色说明</li>
+        <li><code>SelectContent</code> 新增 <code>w-72</code>（288px）固定宽度，防止说明文字被截断</li>
+        <li>说明文字加 <code>whitespace-normal leading-snug</code>，超长自动换行</li>
+      </ul>
+      <h4>各动作说明文案（中文）</h4>
+      <table class="impact-table">
+        <thead><tr><th>动作</th><th>说明文案</th></tr></thead>
+        <tbody>
+          <tr><td>拒收</td><td>向发信方返回 SMTP 拒绝响应，邮件不进入系统</td></tr>
+          <tr><td>丢弃</td><td>静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃</td></tr>
+          <tr><td>隔离</td><td>邮件进入隔离区，管理员可审阅后决定是否放行</td></tr>
+          <tr><td>审核</td><td>邮件正常投递，同时写入审核日志供管理员事后审查</td></tr>
+          <tr><td>投递（白名单）</td><td>允许邮件通过，跳过后续检测直接投递至收件箱</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-index">4</div>
+      <div class="cl-card-title">
+        <h3>Bug 修复：白名单「查看配置示例」显示黑名单内容并跳转错误</h3>
+        <div class="cl-route">SenderFilterDrawer.tsx → CollapsibleContent · messages/*.json</div>
+      </div>
+    </div>
+    <div class="cl-card-body">
+      <h4>问题根因</h4>
+      <p>配置示例卡片的「使用该示例」回调中硬编码了 <code>form.setValue('list_type', 'blacklist')</code>，无论当前处于白名单 Tab 均强制切换为黑名单，导致表单跳转至黑名单状态。</p>
+      <h4>修复方案</h4>
+      <ul>
+        <li>配置示例区块改为按 <code>watchListType</code> 分支渲染</li>
+        <li>黑名单 Tab：显示「拒收垃圾邮件发送者」和「隔离可疑来源」两个黑名单示例</li>
+        <li>白名单 Tab：显示「放行可信发信人」和「放行可信域名」两个白名单示例</li>
+        <li>所有「使用该示例」回调中移除 <code>list_type</code> 的硬编码赋值</li>
+      </ul>
+      <h4>影响范围</h4>
+      <table class="impact-table">
+        <thead><tr><th>文件</th><th>操作</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>SenderFilterDrawer.tsx</td><td><span class="impact-mod">改</span></td><td>CollapsibleContent 分 blacklist / whitelist 分支渲染；移除 list_type 赋值</td></tr>
+          <tr><td>messages/zh.json</td><td><span class="impact-new">增</span></td><td>exampleAllowTrustedSender / exampleAllowTrustedSenderDesc / exampleAllowTrustedDomain / exampleAllowTrustedDomainDesc</td></tr>
+          <tr><td>messages/en,ru,th.json</td><td><span class="impact-new">增</span></td><td>同上，对应语言版本</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-index">5</div>
+      <div class="cl-card-title">
+        <h3>白名单执行动作：「放行」改为「投递」+ 移除「白名单模式」UI 字段</h3>
+        <div class="cl-route">SenderFilterDrawer.tsx · messages/*.json</div>
+      </div>
+    </div>
+    <div class="cl-card-body">
+      <h4>文案变更</h4>
+      <ul>
+        <li><strong>zh：</strong>「放行」→「投递」</li>
+        <li><strong>en：</strong>「Allow」→「Deliver」</li>
+        <li><strong>ru：</strong>「Разрешить」→「Доставить」</li>
+        <li><strong>th：</strong>「อนุญาต」→「ส่งมอบ」</li>
+      </ul>
+      <h4>UI 移除范围</h4>
+      <ul>
+        <li>删除「白名单模式」<code>Select</code> 字段（含 label、Select 触发器、SelectContent 两个选项、错误提示）</li>
+        <li>删除 <code>watchWhitelistMode</code> watch 声明</li>
+        <li>删除 <code>getDefaultPriority</code> 辅助函数</li>
+        <li>从 import 中移除 <code>WhitelistMode</code> 类型</li>
+        <li>删除 <code>superRefine</code> 中白名单 <code>whitelist_mode</code> 必填校验</li>
+        <li>删除 <code>senderFilterErrorKeys</code> 中 <code>'whitelistModeRequired'</code></li>
+        <li><code>resetForm</code> 新建分支：优先级改为内联常量（白名单 800 / 黑名单 500），<code>whitelist_mode</code> 默认值改为 <code>undefined</code></li>
+        <li><code>handleSubmit</code> 始终以 <code>undefined</code> 透传 <code>whitelist_mode</code></li>
+      </ul>
+      <blockquote>类型定义（sender-filter.ts）、API 层（sender-filter.ts）、i18n 中 whitelistMode 相关 key 均保留，仅移除 UI 层展示。</blockquote>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-index">6</div>
+      <div class="cl-card-title">
+        <h3>规则列表：新增「优先级」列</h3>
+        <div class="cl-route">SenderFilterTable.tsx → columns 数组</div>
+      </div>
+    </div>
+    <div class="cl-card-body">
+      <h4>变更内容</h4>
+      <ul>
+        <li>在「执行动作」列之后、「状态」列之前插入「优先级」列</li>
+        <li>数据取自 <code>row.original.rule.priority</code>，i18n key 使用已有的 <code>senderFilter.priority</code></li>
+        <li>样式：<code>tabular-nums</code> 等宽数字，列宽 <code>size: 80</code></li>
+        <li>黑/白名单 Tab 均展示，字段已存在于原有数据模型中</li>
+      </ul>
+      <h4>影响范围</h4>
+      <table class="impact-table">
+        <thead><tr><th>文件</th><th>操作</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>SenderFilterTable.tsx</td><td><span class="impact-mod">改</span></td><td>columns 数组新增优先级列定义，共 8 列（原 7 列）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+<footer>GT-12696 · 发信人黑白名单优化 · 2026-08-01 · 由 html-spec-PM-version 技能生成</footer>
+</body>
+</html>

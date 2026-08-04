@@ -97,12 +97,13 @@ describe('SenderFilterDrawer (demo rewrite)', () => {
     expect(screen.queryByText('senderFilter.validFrom')).toBeNull();
   });
 
-  it('白名单抽屉展示模式并将默认 bypass_content 随表单提交', async () => {
+  it('白名单抽屉不再展示模式选择器，提交时固定 bypass_content', async () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined);
     renderDrawer({ listTypeTab: 'whitelist', onSubmit });
 
-    expect(screen.getByText('senderFilter.whitelistMode')).toBeInTheDocument();
-    expect(screen.getByText('senderFilter.whitelistMode_bypass_content')).toBeInTheDocument();
+    // GT-12696：白名单模式选择器下线，白名单语义统一为「跳过内容检测」。
+    expect(screen.queryByText('senderFilter.whitelistMode')).not.toBeInTheDocument();
+    expect(screen.queryByText('senderFilter.whitelistMode_bypass_content')).not.toBeInTheDocument();
     expect(screen.getByDisplayValue('800')).toBeInTheDocument();
 
     fireEvent.change(screen.getByRole('textbox', { name: /senderFilter\.ruleName/ }), {

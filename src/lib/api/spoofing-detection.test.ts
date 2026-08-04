@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ApiRequestFn } from './client';
-import { getSpoofingLogs, listSpoofBrands, listSpoofPersons, previewSpoofBrandNotification, previewSpoofPersonNotification } from './spoofing-detection';
+import { getSpoofingLogs, getSpoofingStats, listSpoofBrands, listSpoofPersons, previewSpoofBrandNotification, previewSpoofPersonNotification } from './spoofing-detection';
 import type { SpoofBrandConfig, SpoofNotificationPreviewResponse, SpoofPersonConfig } from '@/types/spoofing-detection';
 
 const response: SpoofNotificationPreviewResponse = {
@@ -55,6 +55,12 @@ describe('spoof notification preview API', () => {
 });
 
 describe('spoof detection-log API', () => {
+  it('does not append an empty query marker to the stats endpoint', async () => {
+    const request = vi.fn(async () => ({ today_detected: 0 })) as unknown as ApiRequestFn;
+    await getSpoofingStats({}, request);
+    expect(request).toHaveBeenCalledWith('/spoofing-agent/stats');
+  });
+
   it('serializes repeated method and KPI drilldown filters', async () => {
     const listResponse = { items: [], total: 0, page: 1, page_size: 20 };
     const request = vi.fn(async () => listResponse) as unknown as ApiRequestFn;

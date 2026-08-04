@@ -19,6 +19,7 @@ import {
 
 import { Link } from '@/i18n/navigation';
 import { useAgentCenterOverview } from '@/hooks/use-agent-center-overview';
+import { useProductForm } from '@/contexts/product-form-context';
 import { resolveAgentPresentation } from '@/lib/agent-center/presentation';
 import { cn } from '@/lib/utils';
 import type { AgentCenterCard, AgentCenterKey } from '@/types/agent-center';
@@ -72,6 +73,10 @@ function threatRetroTab(tab: string | null): ThreatRetroAgentTab {
 
 export function AgentCenterOverviewPage() {
   const t = useTranslations('agentCenterOverview');
+  // 切换器未开启时仿冒/威胁回溯智能体隐藏（useAgentCenterOverview 过滤），
+  // 页头描述同步降为仅钓鱼智能体的口径，避免文案泄漏未开放能力。
+  const { switcherEnabled } = useProductForm();
+  const overviewDescription = t(switcherEnabled ? 'description' : 'descriptionPhishingOnly');
   const locale = useLocale();
   const searchParams = useSearchParams();
   const agentParam = searchParams.get('agent');
@@ -139,7 +144,7 @@ export function AgentCenterOverviewPage() {
   return (
     <TooltipProvider>
       <PageShell className="space-y-0" data-testid="agent-center-overview">
-        <AgentCenterHeader currentTitle={t('title')} description={t('description')} />
+        <AgentCenterHeader currentTitle={t('title')} description={overviewDescription} />
         <AgentCenterWorkspace
           cards={visibleCards}
           numberFmt={numberFmt}
@@ -172,7 +177,9 @@ export function AgentCenterOverviewPage() {
                     ))}
                   </div>
                 </section>
-                <CollaborationOverview />
+                {/* 协作总览描述的是三个智能体间的协同，切换器未开启时仅剩
+                    钓鱼智能体，整块随门控隐藏，避免文案泄漏未开放能力。 */}
+                {switcherEnabled ? <CollaborationOverview /> : null}
               </div>
             </>
           )}
@@ -338,7 +345,7 @@ function AgentSummaryRail({
         ) : (
           <>
             <div className={cn('text-xs font-semibold', overviewSelected ? 'text-primary' : 'text-foreground')}>{t('title')}</div>
-            <div className="mt-0.5 text-[11px] leading-4 text-muted-foreground">{t('summaryAll')}</div>
+            <div className="mt-0.5 text-[11px] leading-4 text-muted-foreground">{t('summaryCount', { count: cards.length })}</div>
           </>
         )}
       </Link>

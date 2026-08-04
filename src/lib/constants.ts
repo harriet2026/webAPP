@@ -34,6 +34,7 @@ export interface NavItem {
   children?: NavItem[];
   permission?: 'manage_tenants' | 'manage_users' | 'view_auth_attempts' | 'view_admin_audit_logs' | 'view_link_logs' | 'manage_ip_frequency' | 'manage_login_security';
   requiresAdvancedRules?: boolean;
+  requiresProductFormSwitcher?: boolean;
 }
 
 // 一级分组顺序对齐 demo 原型（component-sidebar-nav html_spec）：
@@ -155,10 +156,10 @@ export const sidebarNavItems: NavItem[] = [
     id: 'logs',
     titleKey: 'sidebar.logs',
     icon: AlertCircle,
-    // NOTE: the group itself is NOT advanced-gated. Auth logs must be reachable
-    // by a tenant_admin (spec §4.2), and tenant_admin has no advanced-rules
-    // toggle. Per-item permission does the gating; the group renders whenever
-    // a child is visible.
+    // 日志审计整组暂不对外露出，仅在产品形态切换器开启的演示/开发环境显示。
+    // 这与 advanced-rules 权限门控相互独立：切换器开启后，子项仍按各自
+    // permission 决定是否可见。
+    requiresProductFormSwitcher: true,
     children: [
       // GT-12501: 「邮件调查中心」入口按验收要求从导航隐藏（页面
       // /logs/mail-investigation 保留，同 /logs/email、/investigations 先例）。

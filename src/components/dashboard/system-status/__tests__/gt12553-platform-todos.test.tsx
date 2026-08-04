@@ -30,7 +30,10 @@ vi.mock('@/i18n/navigation', () => ({
   ),
 }));
 vi.mock('@/components/statistics/security-overview/hooks/useSecurityScope', () => ({
-  useSecurityScope: () => ({ effectiveViewer: 'platform' }),
+  useSecurityScope: () => ({ effectiveViewer: 'platform', resolvedScopeTenant: null }),
+}));
+vi.mock('@/contexts/auth-context', () => ({
+  useAuth: () => ({ isSystemAdmin: true }),
 }));
 vi.mock('../agent-overview', () => ({ useAgentRowVisibility: () => ({ phishing: true, spoofing: true, 'threat-retro': true }) }));
 
@@ -67,7 +70,7 @@ function platformArgs(apiRequest: unknown) {
     dates: resolveRangeDates('7d', new Date('2026-07-10T12:00:00')),
     apiRequest: apiRequest as never,
     isPlatform: true,
-    aiEnabled: false,
+    agentAccess: { phishing: false, spoofing: false, 'threat-retro': false },
   };
 }
 

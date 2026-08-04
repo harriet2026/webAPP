@@ -372,7 +372,7 @@
     "monitorDashboard": "监控总览"
   },
   "agentCenterOverview": {
-    "centerTitle": "智能体管理中心",
+    "centerTitle": "智能体中心",
     "title": "智能体总览",
     "description": "汇总钓鱼邮件检测、仿冒邮件检测和威胁回溯三个智能体的授权状态、配置状态和当日处理指标。",
     "switchAgent": "切换智能体",
@@ -380,7 +380,8 @@
     "summaryRailLabel": "智能体摘要列表",
     "collapseSummaryRail": "收起智能体摘要",
     "expandSummaryRail": "展开智能体摘要",
-    "summaryAll": "3 个智能体运行状态",
+    "summaryCount": "{count} 个智能体运行状态",
+    "descriptionPhishingOnly": "汇总钓鱼邮件检测智能体的授权状态、配置状态和当日处理指标。",
     "summaryHitRate": "检出率",
     "loadFailed": "智能体总览加载失败",
     "detailLockedTitle": "当前智能体未开通",
@@ -4059,10 +4060,16 @@
     "ipType_range": "IP范围(CIDR)",
     "ipType_ipGroup": "IP组",
     "action": "执行动作",
-    "action_reject": "阻断",
+    "action_reject": "拒收",
+    "action_reject_desc": "向发信方返回 SMTP 拒绝响应，邮件不进入系统",
+    "action_discard": "丢弃",
+    "action_discard_desc": "静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃",
     "action_quarantine": "隔离",
+    "action_quarantine_desc": "邮件进入隔离区，管理员可审阅后决定是否放行",
     "action_audit": "审核",
-    "action_accept": "放行",
+    "action_audit_desc": "邮件正常投递，同时写入审核日志供管理员事后审查",
+    "action_accept": "投递",
+    "action_accept_desc": "允许邮件通过，跳过后续检测直接投递至收件箱",
     "whitelistMode": "白名单模式",
     "whitelistMode_bypass_content": "跳过内容检测",
     "whitelistMode_direct_deliver": "直接投递",
@@ -4108,10 +4115,14 @@
     "effectPriorityLabel": "优先级",
     "effectSenderEmpty": "未填写",
     "effectExpirePermanent": "永久",
-    "exampleBlockSpam": "阻断垃圾邮件发送者",
-    "exampleBlockSpamDesc": "直接阻断已知的垃圾邮件发送者",
+    "exampleBlockSpam": "拒收垃圾邮件发送者",
+    "exampleBlockSpamDesc": "直接拒收已知的垃圾邮件发送者",
     "exampleQuarantineSuspicious": "隔离可疑来源",
     "exampleQuarantineSuspiciousDesc": "隔离 suspicious.test 从 192.168.1.0/24 发来的邮件",
+    "exampleAllowTrustedSender": "放行可信发信人",
+    "exampleAllowTrustedSenderDesc": "将 partner@trusted.com 加入白名单，跳过内容检测直接投递",
+    "exampleAllowTrustedDomain": "放行可信域名",
+    "exampleAllowTrustedDomainDesc": "放行来自 trusted-partner.com 的所有邮件，绕过内容安全检测",
     "simEmailLabel": "模拟发信人邮箱",
     "simEmailPlaceholder": "test@example.com",
     "startTest": "开始测试",
@@ -4475,6 +4486,10 @@
       "templateCancel": "取消",
       "templateApply": "应用",
       "ptrReadonlyNotice": "PTR 设置由系统管理员管理",
+      "dmarc_no_record": "DMARC无记录",
+      "dmarc_no_recordDesc": "发信域未发布DMARC记录",
+      "dmarc_query_fail": "DMARC查询失败",
+      "dmarc_query_failDesc": "DNS查询DMARC记录时发生错误（超时/SERVFAIL）",
       "ptr_noptr": "记录不存在",
       "ptr_noptrDesc": "发信IP无PTR反向解析记录",
       "ptr_nomatch": "与A记录不匹配",
@@ -4549,10 +4564,10 @@
       "cancel": "取消"
     },
     "formatActionLabel": {
-      "accept": "允许（进行下一步检测）",
-      "quarantine": "隔离/审核",
-      "reject": "阻断并退信",
-      "discard": "静默丢弃"
+      "quarantine": "隔离",
+      "audit": "审核",
+      "reject": "拒收",
+      "discard": "丢弃"
     },
     "protocolActionLabel": {
       "accept": "进行下一步检测",
@@ -4565,7 +4580,9 @@
       "drop": "丢弃",
       "block": "阻断",
       "quarantine": "隔离",
-      "check": "检查"
+      "check": "检查",
+      "tag": "标记",
+      "pass": "进行下一步检测"
     },
     "flowTitle": "邮件身份验证流程",
     "flowNode": {
@@ -4600,7 +4617,27 @@
       "strict": "零信任策略，大量使用丢弃动作，适用于金融/政务等高安全场景",
       "custom": "完全手动控制，脱离模板保护，需自行评估风险"
     },
-    "strictObserveNotice": "切换后将强制开启观察模式"
+    "strictObserveNotice": "切换后将强制开启观察模式",
+    "formatActionDesc": {
+      "quarantine": "邮件进入隔离区，管理员可审阅后决定是否放行",
+      "audit": "邮件正常投递，同时写入审核日志供管理员事后审查",
+      "reject": "向发信方返回 SMTP 拒绝响应，邮件不进入系统",
+      "discard": "静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃"
+    },
+    "protocolActionShort": {
+      "accept": "进行下一步",
+      "reject": "阻断",
+      "quarantine": "隔离",
+      "audit": "标记",
+      "discard": "丢弃"
+    },
+    "protocolActionDesc": {
+      "accept": "不做处理，传递给下一个协议检查",
+      "reject": "向发信方返回 SMTP 5xx 拒绝响应",
+      "quarantine": "移入隔离区，等待管理员审阅",
+      "audit": "添加标记头后正常投递",
+      "discard": "静默丢弃，发信方收到投递成功响应"
+    }
   },
   "behaviorControl": {
     "title": "发信行为管控",
@@ -4628,7 +4665,7 @@
       "inbound": "接收",
       "outbound": "外发",
       "internal": "域内",
-      "bidirectional": "双向"
+      "bidirectional": "外发 + 域内"
     },
     "object": {
       "global": "全局",
@@ -4748,7 +4785,14 @@
       "thresholdPlaceholder": "请输入阈值",
       "actionLabel": "执行动作",
       "remark": "备注",
-      "remarkPlaceholder": "添加备注信息（最多200字）"
+      "remarkPlaceholder": "添加备注信息（最多200字）",
+      "addCondition": "添加条件",
+      "conditionN": "条件 {n}",
+      "conditionRelation": "条件关系",
+      "relationAnd": "AND（同时满足）",
+      "relationOr": "OR（任一满足）",
+      "conditionCount": "已添加 {count}/4",
+      "threshold": "阈值"
     },
     "preview": {
       "title": "当前配置效果",
@@ -4763,7 +4807,8 @@
       "expirePrefix": "有效期至：",
       "priorityPrefix": "优先级：",
       "objAny": "任意对象",
-      "permanent": "永久"
+      "permanent": "永久",
+      "and": "且"
     },
     "delete": {
       "title": "确认删除",
@@ -4793,7 +4838,9 @@
       "orgRequired": "请选择组织部门",
       "ipRequired": "请输入IP地址或IP段",
       "ipGroupRequired": "请选择IP群组",
-      "domainRequired": "请输入域名"
+      "domainRequired": "请输入域名",
+      "conditionsMin": "至少需要一条检测条件",
+      "conditionsMax": "最多允许 4 条检测条件"
     },
     "import": {
       "button": "导入",
@@ -4849,7 +4896,8 @@
       "stolenEffect": "盗号者15分钟用10个IP发信200封，触发隔离",
       "salesName": "销售部群发场景",
       "salesDesc": "正常业务群发，阈值宽松",
-      "salesEffect": "销售部正常日报群发500人，域内方向阈值宽松，不触发外发规则"
+      "salesEffect": "销售部正常日报群发500人，域内方向阈值宽松，不触发外发规则",
+      "fill": "点击填充示例"
     },
     "simulator": {
       "toggle": "模拟测试",
@@ -4877,6 +4925,17 @@
       "item4": "群组和组织来自群组策略配置",
       "item5": "OR条件任一超限即触发",
       "item6": "IP群组来自IP群组管理模块"
+    },
+    "groupPreview": {
+      "title": "{name} 群组成员预览",
+      "memberCount": "共 {count} 个成员",
+      "searchPlaceholder": "搜索成员...",
+      "noMembers": "暂无成员数据",
+      "truncateHint": "仅显示前 {shown} 条，共 {total} 条",
+      "close": "关闭",
+      "typeSender": "发信人群组",
+      "typeIp": "IP 群组",
+      "typeOrg": "组织群组"
     }
   },
   "attachmentSecurity": {
@@ -5023,8 +5082,8 @@
       "detectLimit": "检测数量上限",
       "items": "个",
       "exceedAction": "超限处置",
-      "passWarn": "放行并记录告警",
-      "isolateFallback": "隔离兜底",
+      "passWarn": "进行下一步",
+      "isolateFallback": "隔离",
       "enable": "启用",
       "ocrSection": "OCR 配置",
       "ocrMode": "OCR 模式",
@@ -5046,7 +5105,10 @@
       "mode_none": "禁用",
       "mode_light": "轻度",
       "mode_deep": "深度",
-      "pending": "敬请期待"
+      "pending": "敬请期待",
+      "ocrMode_deep_hint": "深度检测同时识别手写与印刷体文字，适用于外发方向防截图泄密场景。检测结果将依照下方「检测数量上限」设置处理。",
+      "exceedActionHint_pass": "超出检测数量上限的二维码图片将跳过深度检测，直接进入下一检测阶段处理。",
+      "exceedActionHint_quarantine": "超出检测数量上限的二维码图片将直接隔离，不再进入后续检测阶段。"
     },
     "encrypted": {
       "detectPolicy": "检测策略",
@@ -10895,7 +10957,8 @@
     },
     "phishing_admission": {
       "profile_id_invalid_for_tenant": "所选检测档案不存在或不属于当前租户",
-      "rule_not_found": "准入规则不存在"
+      "rule_not_found": "准入规则不存在",
+      "rule_name_exists": "准入规则名称已存在，请使用其他名称"
     },
     "mail_auth_config": {
       "overlaps_existing_active": "与已启用的邮件认证配置在相同域范围和场景下重叠",

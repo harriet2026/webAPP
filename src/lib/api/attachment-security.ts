@@ -387,12 +387,18 @@ export async function getTenantAttachmentSecuritySettings(
   return requestFn<TenantAttachmentSecuritySettings>('/attachment-security/settings');
 }
 
+// GT-12704：body 必须是**对象**，不能在这里先 JSON.stringify。
+// 公共请求层 apiRequest 已经统一做一次 `JSON.stringify(options.body)`
+// （webapp/src/lib/api/client.ts），这里再序列化一次就变成双重序列化 ——
+// 发出去的请求体顶层是个被引号包住的字符串，后端按结构体绑定直接 400
+// （json: cannot unmarshal string into Go value of type
+// models.AttachmentSecurityTenantConfig），三节租户级配置全都存不下去。
 export async function saveTenantAttachmentSecuritySettings(
   settings: TenantAttachmentSecuritySettings,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<TenantAttachmentSecuritySettings> {
   return requestFn<TenantAttachmentSecuritySettings>('/attachment-security/settings', {
     method: 'PUT',
-    body: JSON.stringify(settings),
+    body: settings,
   });
 }

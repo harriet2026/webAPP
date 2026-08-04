@@ -51,20 +51,20 @@ describe('scene filter options', () => {
   });
 });
 
-// B1 regression: the auth-logs sidebar entry must be reachable by a tenant_admin
-// (spec §4.2). The bug was that the `logs` GROUP carried requiresAdvancedRules,
-// which hid it from every non-system-admin regardless of permission. This test
-// replicates the real isItemAllowed predicate (sidebar-nav.tsx) and asserts the
-// tenant_admin outcome, so re-adding the group-level advanced gate fails CI.
+// B1 regression: when the product-form switcher is enabled, the auth-logs
+// sidebar entry must remain reachable by a tenant_admin (spec §4.2). The logs
+// group now has an independent temporary switcher gate; this test keeps that
+// separate from the historical requiresAdvancedRules/permission contract.
 describe('sidebar auth-logs visibility', () => {
   // Faithful copy of sidebar-nav.tsx isItemAllowed (form gating omitted: it is
   // additive / default-visible for items with no registry counterpart).
   function isItemAllowed(
     item: NavItem,
-    ctx: { perms: string[]; isSystemAdmin: boolean; showAdvancedRules: boolean },
+    ctx: { perms: string[]; isSystemAdmin: boolean; showAdvancedRules: boolean; switcherEnabled: boolean },
   ): boolean {
     if (item.permission && !ctx.perms.includes(item.permission)) return false;
     if (item.requiresAdvancedRules && !(ctx.isSystemAdmin && ctx.showAdvancedRules)) return false;
+    if (item.requiresProductFormSwitcher && !ctx.switcherEnabled) return false;
     return true;
   }
 
@@ -80,6 +80,7 @@ describe('sidebar auth-logs visibility', () => {
   it('structure: logs group is not advanced-gated; auth-attempts is permission-gated', () => {
     expect(logsGroup).toBeDefined();
     expect(logsGroup!.requiresAdvancedRules).toBeFalsy();
+    expect(logsGroup!.requiresProductFormSwitcher).toBe(true);
     expect(authItem?.permission).toBe('view_auth_attempts');
     expect(linkClicksItem?.permission).toBe('view_link_logs');
   });
@@ -94,15 +95,25 @@ describe('sidebar auth-logs visibility', () => {
   });
 
   it('tenant_admin (with view_admin_audit_logs perm) sees the group, auth-attempts AND admin-audit (review finding #3)', () => {
-    const tenantAdmin = { perms: ['view_auth_attempts', 'view_admin_audit_logs'], isSystemAdmin: false, showAdvancedRules: false };
+    const tenantAdmin = { perms: ['view_auth_attempts', 'view_admin_audit_logs'], isSystemAdmin: false, showAdvancedRules: false, switcherEnabled: true };
     expect(isItemAllowed(logsGroup!, tenantAdmin)).toBe(true);
     expect(isItemAllowed(authItem!, tenantAdmin)).toBe(true);
     // admin-audit-logs is now visible to tenant_admin via permission, not advanced-rules.
     expect(isItemAllowed(adminAuditItem!, tenantAdmin)).toBe(true);
   });
 
+  it('hides the whole logs group when the product-form switcher is disabled', () => {
+    const tenantAdmin = {
+      perms: ['view_auth_attempts', 'view_admin_audit_logs'],
+      isSystemAdmin: false,
+      showAdvancedRules: false,
+      switcherEnabled: false,
+    };
+    expect(isItemAllowed(logsGroup!, tenantAdmin)).toBe(false);
+  });
+
   it('a role without the permission still cannot see auth-attempts', () => {
-    const noPerm = { perms: [] as string[], isSystemAdmin: false, showAdvancedRules: false };
+    const noPerm = { perms: [] as string[], isSystemAdmin: false, showAdvancedRules: false, switcherEnabled: true };
     expect(isItemAllowed(authItem!, noPerm)).toBe(false);
   });
 });

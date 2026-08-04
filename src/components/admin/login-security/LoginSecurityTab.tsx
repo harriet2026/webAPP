@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { AlertTriangle, Loader2, Lock, Save, Trash2, Plus, ShieldCheck } from 'lucide-react';
@@ -86,7 +86,7 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
   const addRule = useAddLoginIPRule(tenantId);
   const delRule = useDeleteLoginIPRule(tenantId);
 
-  const [draft, setDraft] = useState<LoginPolicyWrite>({});
+  const [edits, setEdits] = useState<LoginPolicyWrite>({});
   // Which fields the user actually TOUCHED this session.
   //
   // §4.4: the server deliberately never rewrites a tenant's stale below-baseline
@@ -111,10 +111,10 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
   // and both must pass). It used to carry the BASELINE's mode, which meant a tenant
   // saved `whitelist`, reloaded, saw 关闭, and the next save of any unrelated field
   // wrote `ipMode: "none"` back over its own whitelist.
-  useEffect(() => {
-    if (!data) return;
+  const serverDraft = useMemo<LoginPolicyWrite>(() => {
+    if (!data) return {};
     const e = data.effective;
-    setDraft({
+    return {
       minLength: e.minLength,
       minCharClasses: e.minCharClasses,
       historyLimit: e.historyLimit,
@@ -134,8 +134,13 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
       // must see the enforced state, not an inert one it once chose.
       twoFactorEnabled: e.twoFactorEnabled,
       forceTwoFactor: e.forceTwoFactor,
-    });
+    };
   }, [data]);
+
+  // Rule mutations refetch the whole policy. Keep unsaved edits as a separate
+  // overlay so refetches update untouched fields without replacing what the user
+  // is still editing (especially ipMode before its first rule is added).
+  const draft = useMemo(() => ({ ...serverDraft, ...edits }), [serverDraft, edits]);
 
   const isTenant = data?.scope === 'tenant';
   const baseline = data?.baseline;
@@ -154,7 +159,7 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
   if (isLoading || !data) return <LoadingPanel />;
 
   const set = <K extends keyof LoginPolicyWrite>(k: K, v: LoginPolicyWrite[K]) => {
-    setDraft((d) => ({ ...d, [k]: v }));
+    setEdits((d) => ({ ...d, [k]: v }));
     setTouched((s) => new Set(s).add(k as string));
   };
 
@@ -166,22 +171,7 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
   // 清空 touched。放弃全部未保存修改。
   const onCancel = () => {
     if (!data) return;
-    const e = data.effective;
-    setDraft({
-      minLength: e.minLength,
-      minCharClasses: e.minCharClasses,
-      historyLimit: e.historyLimit,
-      passwordMaxAgeDays: e.passwordMaxAgeDays,
-      sessionTimeoutSecs: e.sessionTimeoutSecs,
-      maxOnline: e.maxOnline,
-      overflowPolicy: e.overflowPolicy,
-      ipMode: e.ipMode,
-      maxLoginAttempts: data.globalOnly.maxLoginAttempts,
-      lockoutMinutes: data.globalOnly.lockoutMinutes,
-      captchaAfterFailures: data.globalOnly.captchaAfterFailures,
-      twoFactorEnabled: e.twoFactorEnabled,
-      forceTwoFactor: e.forceTwoFactor,
-    });
+    setEdits({});
     setTouched(new Set());
   };
 
@@ -211,7 +201,7 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
           overflowPolicy: 'kick_earliest',
           ipMode: 'none',
         };
-    setDraft((d) => ({ ...d, ...target }));
+    setEdits((d) => ({ ...d, ...target }));
     setTouched((prev) => {
       const next = new Set(prev);
       Object.keys(target).forEach((k) => next.add(k));
@@ -232,6 +222,7 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
     }
     update.mutate(body, {
       onSuccess: () => {
+        setEdits({});
         setTouched(new Set());
         toast.success(t('saved'));
       },

@@ -1,14 +1,18 @@
 import { readFile } from 'node:fs/promises';
-import { extname, resolve, sep } from 'node:path';
+import { extname, join, sep } from 'node:path';
 
 import { isDemoAuthBypassEnabled } from '@/lib/demo-auth-bypass';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const HTML_SPEC_ROOT = resolve(process.cwd(), 'doc', 'html-spec');
+const HTML_SPEC_ROOT = join(/* turbopackIgnore: true */ process.cwd(), 'doc', 'html-spec');
 // 增量功能变更规格目录：/html-spec/version/* → doc/html_spec-version/*
-const HTML_SPEC_VERSION_ROOT = resolve(process.cwd(), 'doc', 'html_spec-version');
+const HTML_SPEC_VERSION_ROOT = join(
+  /* turbopackIgnore: true */ process.cwd(),
+  'doc',
+  'html_spec-version',
+);
 const CONTENT_TYPES: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
@@ -33,11 +37,23 @@ function resolveSpecFile(pathSegments: string[]): string | null {
   if (pathSegments[0] === 'version') {
     const rest = pathSegments.slice(1);
     if (rest.length === 0) return null;
-    const filePath = resolve(HTML_SPEC_VERSION_ROOT, ...rest);
+    // Keep the dynamic tail statically scoped so Turbopack's file tracer does
+    // not conservatively include the entire project in the standalone output.
+    const filePath = join(
+      /* turbopackIgnore: true */ process.cwd(),
+      'doc',
+      'html_spec-version',
+      ...rest,
+    );
     return filePath.startsWith(`${HTML_SPEC_VERSION_ROOT}${sep}`) ? filePath : null;
   }
 
-  const filePath = resolve(HTML_SPEC_ROOT, ...pathSegments);
+  const filePath = join(
+    /* turbopackIgnore: true */ process.cwd(),
+    'doc',
+    'html-spec',
+    ...pathSegments,
+  );
   return filePath.startsWith(`${HTML_SPEC_ROOT}${sep}`) ? filePath : null;
 }
 
@@ -55,7 +71,7 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 
   try {
-    const file = await readFile(filePath);
+    const file = await readFile(/* turbopackIgnore: true */ filePath);
     return new Response(new Uint8Array(file), {
       headers: {
         'Cache-Control': 'no-store',

@@ -32,9 +32,12 @@ const productForm = {
 vi.mock('@/contexts/product-form-context', () => ({
   useProductForm: () => productForm,
 }));
+vi.mock('@/contexts/auth-context', () => ({
+  useAuth: () => ({ isSystemAdmin: false }),
+}));
 let effectiveViewer = 'tenant';
 vi.mock('@/components/statistics/security-overview/hooks/useSecurityScope', () => ({
-  useSecurityScope: () => ({ effectiveViewer }),
+  useSecurityScope: () => ({ effectiveViewer, resolvedScopeTenant: null }),
 }));
 
 import { useSystemStatusVisibility } from '../visibility';

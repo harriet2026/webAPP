@@ -24,7 +24,7 @@
 // 恒满足；仍保留 canPrivilege 判定作为纵深防御，避免未来复用本组件到非 system_admin 场景时静默
 // 撞 400。
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Plus, Pencil, Trash2, Loader2, FlaskConical, Info } from 'lucide-react';
@@ -187,6 +187,9 @@ export function RelayTab({ tenantId }: RelayTabProps) {
   const [deleteTarget, setDeleteTarget] = useState<RelayRuleRow | null>(null);
   const [sim, setSim] = useState({ sourceIp: '', fromDomain: '', rcptDomain: '' });
   const [simResult, setSimResult] = useState<RelayRuleRow | null | undefined>(undefined);
+  // isPending is render-driven, so it cannot by itself stop two click events
+  // dispatched before React has disabled the button.
+  const saveStartedRef = useRef(false);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey });
 
@@ -200,6 +203,7 @@ export function RelayTab({ tenantId }: RelayTabProps) {
   });
 
   const openCreate = () => {
+    saveStartedRef.current = false;
     setDraft(emptyRelayRow());
     setEditingId(null);
     setEditingRule(null);
@@ -209,6 +213,7 @@ export function RelayTab({ tenantId }: RelayTabProps) {
   };
 
   const openEdit = (row: RelayRuleRow) => {
+    saveStartedRef.current = false;
     setDraft({ ...row });
     setEditingId(row.id);
     setEditingRule(rules.find((r) => r.id === row.id) ?? null);
@@ -350,14 +355,19 @@ export function RelayTab({ tenantId }: RelayTabProps) {
       closeDrawer();
       invalidate();
     },
-    onError: (e: Error) => toast.error(apiErrorMessage(e)),
+    onError: (e: Error) => {
+      saveStartedRef.current = false;
+      toast.error(apiErrorMessage(e));
+    },
   });
 
   const handleSave = () => {
+    if (saveStartedRef.current) return;
     if (hasError) {
       toast.error(t('toasts.saveError'));
       return;
     }
+    saveStartedRef.current = true;
     saveMutation.mutate();
   };
 

@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { deriveVisibility } from '../visibility';
+import { deriveVisibility, resolveAgentFeatureAccess } from '../visibility';
+
+const AGENT_FEATURES = [
+  { id: 'phishing-detection', visibility: 'AI_ELSE_LOCK', scope: 'mixed', platformAccess: 'edit', tenantAccess: 'edit', platformHidden: true, grantable: true },
+  { id: 'spoofing-detection', visibility: 'AI_ELSE_LOCK', scope: 'mixed', platformAccess: 'edit', tenantAccess: 'edit', platformHidden: true, grantable: true },
+  { id: 'threat-retro', visibility: 'AI_ELSE_LOCK', scope: 'mixed', platformAccess: 'edit', tenantAccess: 'edit', platformHidden: true, grantable: true },
+];
+
+const AI_MULTI = { ai: true, multiTenant: true, saas: false };
 
 describe('deriveVisibility', () => {
   it('tenant hides infra, collapses grid', () => {
@@ -49,5 +57,61 @@ describe('deriveVisibility', () => {
     const v = deriveVisibility({ ai: true }, false, /* agentsVisible */ true);
     expect(v.showAgents).toBe(true);
     expect(v.overviewCols).toBe(2);
+  });
+});
+
+describe('resolveAgentFeatureAccess', () => {
+  it('fails closed before bootstrap supplies registry and grants', () => {
+    const access = resolveAgentFeatureAccess([], AI_MULTI, 'platform', [], false);
+    expect(Object.values(access).every((item) => !item.visible && !item.canRequest)).toBe(true);
+  });
+
+  it('does not request platform-hidden agents from an unscoped platform view', () => {
+    const access = resolveAgentFeatureAccess(AGENT_FEATURES, AI_MULTI, 'platform', [], true);
+    expect(Object.values(access).every((item) => !item.visible && !item.canRequest)).toBe(true);
+  });
+
+  it('requests only the feature granted to a tenant', () => {
+    const access = resolveAgentFeatureAccess(
+      AGENT_FEATURES,
+      AI_MULTI,
+      'tenant',
+      ['phishing-detection'],
+      true,
+    );
+    expect(access.phishing).toEqual({ visible: true, canRequest: true });
+    expect(access.spoofing).toEqual({ visible: false, canRequest: false });
+    expect(access['threat-retro']).toEqual({ visible: false, canRequest: false });
+  });
+
+  it('matches backend system-admin tenant-scope grant bypass', () => {
+    const access = resolveAgentFeatureAccess(AGENT_FEATURES, AI_MULTI, 'tenant', [], true, true);
+    expect(Object.values(access).every((item) => item.visible && item.canRequest)).toBe(true);
+  });
+
+  it('hides switcher-only agents and their requests when the product-form switcher is disabled', () => {
+    const access = resolveAgentFeatureAccess(
+      AGENT_FEATURES,
+      AI_MULTI,
+      'tenant',
+      ['phishing-detection', 'spoofing-detection', 'threat-retro'],
+      true,
+      false,
+      false,
+    );
+    expect(access.phishing).toEqual({ visible: true, canRequest: true });
+    expect(access.spoofing).toEqual({ visible: false, canRequest: false });
+    expect(access['threat-retro']).toEqual({ visible: false, canRequest: false });
+  });
+
+  it('keeps a SaaS upsell row visible without requesting its forbidden endpoint', () => {
+    const access = resolveAgentFeatureAccess(
+      AGENT_FEATURES,
+      { ai: true, multiTenant: true, saas: true },
+      'tenant',
+      [],
+      true,
+    );
+    expect(access.spoofing).toEqual({ visible: true, canRequest: false });
   });
 });

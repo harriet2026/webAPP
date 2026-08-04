@@ -75,6 +75,11 @@ const objectConfigSchema = z.discriminatedUnion('type', [
   }),
 ]);
 
+const conditionItemSchema = z.object({
+  dim: behaviorDimensionSchema,
+  threshold: z.number().int().positive('thresholdRequired').max(1_000_000, 'thresholdMax'),
+});
+
 export function createBehaviorControlSchema(priorityRange: BehaviorControlPriorityRange) {
   return z.object({
     name: z.string().min(1, 'nameRequired').max(50, 'nameMaxLength'),
@@ -86,16 +91,15 @@ export function createBehaviorControlSchema(priorityRange: BehaviorControlPriori
     direction: z.enum(['inbound', 'outbound', 'internal', 'bidirectional']),
     object_config: objectConfigSchema,
     time_window: z.enum(['1min', '5min', '15min', '1hour', '6hour', '24hour', 'day']),
-    dim_a: behaviorDimensionSchema,
-    threshold_a: z.number().int().positive('thresholdRequired').max(1_000_000, 'thresholdMax'),
+    conditions: z.array(conditionItemSchema).min(1, 'conditionsMin').max(4, 'conditionsMax'),
     or_enabled: z.boolean(),
+    // 以下旧字段保留供 API 映射层使用，不做前端校验
+    dim_a: behaviorDimensionSchema.optional(),
+    threshold_a: z.number().optional(),
     dim_b: behaviorDimensionSchema.optional(),
-    threshold_b: z.number().int().positive('thresholdRequired').max(1_000_000, 'thresholdMax').optional(),
+    threshold_b: z.number().optional(),
     action: z.enum(['review', 'quarantine', 'drop', 'block']),
   }).superRefine((d, ctx) => {
-    if (d.or_enabled && (!d.dim_b || !d.threshold_b)) {
-      ctx.addIssue({ path: ['threshold_b'], code: 'custom', message: 'orRequiresB' });
-    }
     if (d.valid_until && new Date(d.valid_until) < new Date(new Date().toDateString())) {
       ctx.addIssue({ path: ['valid_until'], code: 'custom', message: 'validUntilPast' });
     }

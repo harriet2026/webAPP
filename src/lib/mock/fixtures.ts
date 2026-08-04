@@ -4086,7 +4086,7 @@ export function mockContentGroupsList(): { items: Rule[] } {
 function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
   return {
     format_checks: {
-      mailfrom_empty: { enabled: true, action: "accept", observe_mode: false },
+      mailfrom_empty: { enabled: true, action: "quarantine", observe_mode: false },
       mailfrom_invalid: {
         enabled: true,
         action: "reject",
@@ -4121,6 +4121,8 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
           observe_mode: false,
         },
         none: { enabled: true, action: "audit", observe_mode: false },
+        no_record: { enabled: true, action: "quarantine", observe_mode: false },
+        query_fail: { enabled: true, action: "audit", observe_mode: false },
       },
       ptr: {
         noptr: { enabled: true, action: "audit", observe_mode: false },
@@ -5154,7 +5156,7 @@ interface MockDisposalSeed {
   sender: string;
   recipients: string;
   subject: string;
-  action: "quarantine" | "block" | "discard" | "deliver";
+  action: "quarantine" | "block" | "discard" | "deliver" | "mixed";
   reason: string;
   mailType: string;
   deliveryStatus: string;
@@ -5217,7 +5219,10 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients:
       "alice@company.com, bob@company.com, carol@company.com, dave@company.com, eve@company.com, frank@company.com, grace@company.com, henry@company.com",
     subject: "季度营销报告 - 部分收件人白名单（混合处置演示）",
-    action: "mixed",
+    // 种子里记规则命中的那一半处置；整封的 action='mixed' 由下面的 isMixed
+    // 派生（mockMailLog 的 `seed.isMixed ? "mixed" : disposalAction(seed)`），
+    // 不能直接写进 action —— MockDisposalSeed.action 是逐收件人的基础处置。
+    action: "quarantine",
     reason: "混合处置：白名单收件人投递 + 规则命中隔离",
     mailType: "normal",
     deliveryStatus: "partial_delivered",
@@ -6230,6 +6235,9 @@ function disposalAction(seed: MockDisposalSeed): string {
     deliver: "accept",
     discard: "discard",
     quarantine: "quarantine",
+    // Aggregate mixed rows still need a scalar fallback in detail-only mock
+    // fields; the per-recipient actions are emitted separately below.
+    mixed: "accept",
   }[seed.action];
 }
 

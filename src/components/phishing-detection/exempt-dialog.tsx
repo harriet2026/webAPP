@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
 const schema = z.object({
-  reason: z.string().min(1),
+  reason: z.string().trim().min(1),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -37,6 +37,7 @@ export function ExemptDialog({ open, onOpenChange, onSubmit, isLoading }: Exempt
     resolver: zodResolver(schema),
     defaultValues: { reason: '' },
   });
+  const reason = useWatch({ control: form.control, name: 'reason' });
 
   useEffect(() => {
     if (open) {
@@ -70,7 +71,7 @@ export function ExemptDialog({ open, onOpenChange, onSubmit, isLoading }: Exempt
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {tCommon('cancel')}
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading || !reason.trim()}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               {t('exempt.submit')}
             </Button>

@@ -8,7 +8,10 @@ import {
 const base = {
   name: 'r', description: '', priority: 2000, is_active: true,
   direction: 'outbound' as const, object_config: { type: 'global' as const },
-  time_window: '15min' as const, dim_a: 'ip_count' as const, threshold_a: 5,
+  time_window: '15min' as const,
+  // GT-12707：检测条件从固定的 dim_a/dim_b 两条改为 conditions 数组（1~4 条），
+  // dim_a/threshold_a 等旧字段降级为 API 映射用的可选字段，不再参与前端校验。
+  conditions: [{ dim: 'ip_count' as const, threshold: 5 }],
   or_enabled: false, action: 'review' as const,
 };
 
@@ -41,8 +44,8 @@ describe('behaviorControlSchema', () => {
     expect(systemSchema.safeParse({ ...base, priority: 9999 }).success).toBe(true);
     expect(systemSchema.safeParse({ ...base, priority: 10000 }).success).toBe(false);
   });
-  it('rejects thresholdA <= 0', () => {
-    expect(behaviorControlSchema.safeParse({ ...base, threshold_a: 0 }).success).toBe(false);
+  it('rejects a condition threshold <= 0', () => {
+    expect(behaviorControlSchema.safeParse({ ...base, conditions: [{ dim: 'ip_count', threshold: 0 }] }).success).toBe(false);
   });
   it('individual email must match wildcard-capable pattern', () => {
     const ok = { ...base, object_config: { type: 'sender', sub_type: 'individual', value: '*@corp.com' } };
@@ -57,8 +60,14 @@ describe('behaviorControlSchema', () => {
   it('rejects the unsupported organization sender subtype', () => {
     expect(behaviorControlSchema.safeParse({ ...base, object_config: { type: 'sender', sub_type: 'organization', value: 'engineering' } }).success).toBe(false);
   });
-  it('OR enabled requires thresholdB > 0', () => {
-    expect(behaviorControlSchema.safeParse({ ...base, or_enabled: true, dim_b: 'mail_count', threshold_b: 0 }).success).toBe(false);
-    expect(behaviorControlSchema.safeParse({ ...base, or_enabled: true, dim_b: 'mail_count', threshold_b: 10 }).success).toBe(true);
+  it('requires between 1 and 4 conditions', () => {
+    const mk = (n: number) => Array.from({ length: n }, () => ({ dim: 'mail_count' as const, threshold: 10 }));
+    const empty = behaviorControlSchema.safeParse({ ...base, conditions: [] });
+    expect(empty.success).toBe(false);
+    if (!empty.success) expect(empty.error.issues.some((i) => i.message === 'conditionsMin')).toBe(true);
+    expect(behaviorControlSchema.safeParse({ ...base, conditions: mk(4) }).success).toBe(true);
+    const tooMany = behaviorControlSchema.safeParse({ ...base, conditions: mk(5) });
+    expect(tooMany.success).toBe(false);
+    if (!tooMany.success) expect(tooMany.error.issues.some((i) => i.message === 'conditionsMax')).toBe(true);
   });
 });

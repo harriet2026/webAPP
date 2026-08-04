@@ -88,7 +88,7 @@ export function AdminAuditFilters({
   // platform admin no longer sees tenant-only modules (组织通讯录) or locked
   // agents (钓鱼/仿冒智能体) as filter options.
   const { hasPermission, isSystemAdmin, showAdvancedRules, canSeeRoute } = useAuth();
-  const { capabilities, registry, viewer, grants } = useProductForm();
+  const { capabilities, registry, viewer, grants, switcherEnabled } = useProductForm();
   const visibleGroups = useMemo(() => {
     const formVisible = capabilities ? new Set(visibleNavIds(registry, capabilities, viewer, grants)) : null;
     const ctx = {
@@ -100,13 +100,14 @@ export function AdminAuditFilters({
       formVisible,
       capabilities,
       viewer,
+      switcherEnabled,
     };
     return filterVisibleModuleGroups(
       AUDIT_MODULE_GROUPS,
       (item) => isNavItemAllowed(item, ctx),
       (featureId) => !!formVisible?.has(featureId),
     );
-  }, [hasPermission, isSystemAdmin, showAdvancedRules, canSeeRoute, capabilities, registry, viewer, grants]);
+  }, [hasPermission, isSystemAdmin, showAdvancedRules, canSeeRoute, capabilities, registry, viewer, grants, switcherEnabled]);
   // Base UI's <Select.Value> shows the raw value unless the Root gets `items`,
   // so every Select here rendered its raw code (tenant id, module key,
   // "success", ...) in the trigger instead of the label (GT-12021).

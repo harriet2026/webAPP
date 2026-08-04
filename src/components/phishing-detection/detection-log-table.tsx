@@ -241,20 +241,6 @@ export function DetectionLogTable({
       },
     },
     {
-      id: 'evidence_basis',
-      header: tpd('table.evidenceBasis'),
-      cell: ({ row }) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 whitespace-nowrap px-2 text-xs text-blue-600 hover:text-blue-700"
-          onClick={() => onOpenDetail(row.original.sideline_id)}
-        >
-          {tpd('table.viewBasis')}
-        </Button>
-      ),
-    },
-    {
       id: 'actions',
       header: tpd('table.actions'),
       cell: ({ row }) => {
@@ -308,7 +294,7 @@ export function DetectionLogTable({
         </div>
       ) : null}
       <div className="overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-card shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
-        <Table className="w-full min-w-[1320px]">
+        <Table className="w-full min-w-[1220px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
