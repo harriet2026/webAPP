@@ -122,8 +122,8 @@
     <ul class="toc-list">
       <li><a href="#component-2-1">2.1 策略流水线入口卡片（阶段3）</a><span class="toc-badge">1层</span></li>
       <li><a href="#component-2-2">2.2 内容策略抽屉宿主 + 基础限制 Tab</a><span class="toc-badge">2层</span></li>
-      <li><a href="#component-2-3">2.3 附件安全检测配置 Tab 组（多层交互）</a><span class="toc-badge">5层</span><br>
-        <a href="layer-1-antivirus-tab.html">层级2：反病毒引擎</a> · <a href="layer-2-image-detect-tab.html">层级3：图片识别（轻度/深度）</a> · <a href="layer-3-encrypted-tab.html">层级4：加密附件</a> · <a href="layer-4-disabled-tenant-states.html">层级5：禁用/租户/多语言变体</a></li>
+      <li><a href="#component-2-3">2.3 附件安全检测配置 Tab 组（多层交互）</a><span class="toc-badge">5层</span><span class="toc-badge" style="background:#dcfce7;color:#15803d;">GT-12754 已更新</span><br>
+        <a href="layer-1-antivirus-tab.html">层级2：反病毒引擎</a>（<a href="layer-1-antivirus-tab.html#incremental-GT-12754-antivirus-engine-opt">↑ GT-12754 增量</a>） · <a href="layer-2-image-detect-tab.html">层级3：图片识别（轻度/深度）</a> · <a href="layer-3-encrypted-tab.html">层级4：加密附件</a> · <a href="layer-4-disabled-tenant-states.html">层级5：禁用/租户/多语言变体</a></li>
       <li><a href="#api-mapping">4. 数据模型与 API 映射</a><span class="toc-badge">配置系统映射</span></li>
     </ul>
   </nav>
@@ -166,7 +166,7 @@
         <tbody>
           <tr><th>交互层级</th><td>层级0：页面默认态中的策略入口卡片</td></tr>
           <tr><th>触发路径</th><td>打开 <code>/filter-rules/pipeline</code>，在阶段3内容层定位「附件安全检测」卡片。</td></tr>
-          <tr><th>可点击目标</th><td>卡片整体与「配置 →」按钮共用打开逻辑：<code>setContentDrawerPolicy("attachment")</code> + <code>setContentDrawerOpen(true)</code>。</td></tr>
+          <tr><th>可点击目标</th><td>卡片整体与「配置 →」按钮共��打开逻辑：<code>setContentDrawerPolicy("attachment")</code> + <code>setContentDrawerOpen(true)</code>。</td></tr>
           <tr><th>Hover Tooltip</th><td>浏览器实测悬浮 1.2s 出现：「策略：附件安全检测 / 动作：隔离、投递 / 影响：命中则隔离，邮件保留至隔离区 / 被隔离邮件可在邮件隔离模块查看」。</td></tr>
         </tbody>
       </table>
@@ -279,7 +279,7 @@
                 <select class="sel" data-dirty style="width:280px;">
                   <option selected>隔离</option><option>审核</option><option>阻断</option><option>丢弃</option><option>超出部分不检测</option>
                 </select>
-                <div class="hint">接收方向默认隔离</div>
+                <div class="hint">接收方向默��隔离</div>
               </div>
               <div class="save-bar">
                 <span class="unsaved" data-unsaved><span class="pulse"></span>有未保存的更改</span>
@@ -336,7 +336,7 @@
         graph LR
           A[层级0 策略卡] --> B[层级1 抽屉默认态·基础限制]
           B --> C[层级2 反病毒引擎 Tab]
-          B --> D[层级3 图片识别 Tab]
+          B --> D[层级3 图片识��� Tab]
           D --> D2[3B 二维码深度检测展开]
           B --> E[层级4 加密附件 Tab]
           E --> E2[密码本添加/删除]
@@ -421,7 +421,7 @@ interface EncryptedAttachmentConfig { detectMode: "none"|"detect_only"|"deep"; d
         <tr><td>嵌套压缩包/文件/层数</td><td>2 / 20 / 2</td><td>3 / 30 / 2</td><td>3 / 30 / 2</td></tr>
         <tr><td>基础限制超限处置</td><td>隔离</td><td>审核</td><td>审核</td></tr>
         <tr><td>病毒处置 / 扫描超时处置</td><td>隔离 / 进行下一步检测</td><td>审核 / 审核</td><td>审核 / 审核</td></tr>
-        <tr><td>OCR 模式</td><td>轻度</td><td>深度（防截图泄密提示）</td><td>轻度</td></tr>
+        <tr><td>OCR 模式</td><td>轻度</td><td>深度（防截图泄密提���）</td><td>轻度</td></tr>
         <tr><td>二维码轻度动作</td><td>隔离</td><td>审核</td><td>审核</td></tr>
         <tr><td>加密附件检测模式 / 解密失败处置</td><td>仅检测 / 放行</td><td>深度检测 / 审核</td><td>仅检测 / 放行</td></tr>
       </tbody>
@@ -431,8 +431,8 @@ interface EncryptedAttachmentConfig { detectMode: "none"|"detect_only"|"deep"; d
       <thead><tr><th>上下文</th><th>可选动作</th><th>实测</th></tr></thead>
       <tbody>
         <tr><td>基础限制超限（basic）</td><td>隔离、审核、阻断、丢弃、超出部分不检测</td><td>✅ 5 项</td></tr>
-        <tr><td>发现病毒（virus）</td><td>隔离、审核、阻断、丢弃</td><td>✅ 4 项</td></tr>
-        <tr><td>扫描超时（timeout）</td><td>隔离、审核、阻断、丢弃、进行下一步检测</td><td>✅ 5 项</td></tr>
+        <tr><td>发现病毒（virus）</td><td>隔离、审核、<strong>拒收</strong>（原「阻断」，GT-12754 变更）、丢弃</td><td>✅ 4 项</td></tr>
+        <tr><td>扫描超时（timeout）</td><td>隔离、审核、<strong>拒收</strong>（原「阻断」，GT-12754 变更）、丢弃、继续流水线</td><td>✅ 5 项</td></tr>
         <tr><td>二维码轻度检测</td><td>隔离、审核、阻断、丢弃</td><td>✅ 4 项（源码 lightActions）</td></tr>
         <tr><td>二维码深度超限</td><td>放行并记录告警、隔离兜底</td><td>✅ 2 项</td></tr>
         <tr><td>解密失败（decrypt，receive）</td><td>隔离、放行、阻断</td><td>✅ 3 项；send/internal 为 审核、放行、阻断（源码）</td></tr>
@@ -507,7 +507,7 @@ interface EncryptedAttachmentConfig { detectMode: "none"|"detect_only"|"deep"; d
     <table class="spec-table">
       <thead><tr><th>#</th><th>位置</th><th>PRD 描述</th><th>demo 实际</th><th>建议处理</th></tr></thead>
       <tbody>
-        <tr><td>D-1</td><td>加密附件检测模式</td><td>两档：不检测 / 尝试解密并检测（§1.4）</td><td>三档：不检测 / 仅检测（识别加密，不尝试解密）/ 深度检测（尝试解密并扫描）</td><td>以 demo 三档为准。</td></tr>
+        <tr><td>D-1</td><td>加密附件检测模式</td><td>两档：不检测 / ��试解密并检测（§1.4）</td><td>三档：不检测 / 仅检测（识别加密，不尝试解密）/ 深度检测（尝试解密并扫描）</td><td>以 demo 三档为准。</td></tr>
         <tr><td>D-2</td><td>方向切换</td><td>配置按 receive/send/internal 三方向独立（§1、§5 上游依赖）</td><td>数据模型按方向三份，但抽屉内<strong>无方向切换 UI</strong>，固定显示接收方向</td><td>高影响，见 Q2。</td></tr>
         <tr><td>D-3</td><td>字段 Hover Tooltip</td><td>§3 列出 10 条字段悬浮提示</td><td>配置表单字段均无 Tooltip</td><td>落地按 PRD 补齐。</td></tr>
         <tr><td>D-4</td><td>病毒库立即更新</td><td>点击触发更新、按钮 loading、完成显示新版本（§3/§4）</td><td>按钮无 onClick 绑定，点击无反馈</td><td>落地需实现（依赖引擎状态 API，Q3）。</td></tr>
@@ -521,6 +521,7 @@ interface EncryptedAttachmentConfig { detectMode: "none"|"detect_only"|"deep"; d
         <tr><td>D-12</td><td>默认值示意</td><td>§2 布局图示例值（-1 个数 / 嵌套 3/100/3）</td><td>接收方向实际默认 10 / 10240KB / 2/20/2</td><td>示意图非规格值，以 demo 默认为准。</td></tr>
         <tr><td>D-13</td><td>主备引擎相同</td><td>§4：主备相同时自动将备设为「无」并提示</td><td>源码无该校验，可主备同为奇安信</td><td>落地补联动校验。</td></tr>
         <tr><td>D-14</td><td>左导航切换丢状态</td><td>PRD 未提</td><td>切走再切回：Tab 重置为基础限制、未保存改动丢失（组件重挂载，浏览器实测）</td><td>落地建议加未保存拦截，见 Q1。</td></tr>
+        <tr><td>D-15</td><td>layer-1-antivirus-tab.html 旧交互预览</td><td>技能规范禁止在规格文档中放置可操作控件或脚本</td><td>旧 component-preview 块含 &lt;select&gt;/&lt;input&gt;/&lt;button&gt;/&lt;script&gt;；script 标签已在 GT-12754 增量中移除，component-preview DOM 块保留以避免破坏历史索引，下次全量重生成时应彻底清理</td><td>计划全量重生成时清理。</td></tr>
       </tbody>
     </table>
   </section>
@@ -576,7 +577,7 @@ interface EncryptedAttachmentConfig { detectMode: "none"|"detect_only"|"deep"; d
       markDirty();
     });
 
-    // 大小 KB→MB 实时换算（demo formatSize）
+    // 大小 KB→MB 实时换算��demo formatSize）
     const sizeInput = document.querySelector("[data-size-input]");
     const sizeMb = document.querySelector("[data-size-mb]");
     sizeInput.addEventListener("input", () => {
