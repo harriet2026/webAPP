@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测智能�������",
+    "spoofingDetection": "仿冒邮件检测智能���������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -705,7 +705,7 @@
       "drawerTitleNew": "新建转发规则",
       "drawerTitleEdit": "编辑转发规则",
       "drawerDescription": "在 SMTP 握手阶段决定连接的接入与过滤策略",
-      "sectionBasic": "基础信息",
+      "sectionBasic": "���础信息",
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
@@ -1455,7 +1455,7 @@
     "previewConflict": "同模块冲突 → 优先级仲裁：「{rule}」（优先级 {priority}）生效",
     "terminalActions": {
       "quarantine": "隔离",
-      "reject": "拒绝",
+      "reject": "拒���",
       "block": "阻断",
       "drop": "丢弃"
     },
@@ -1628,7 +1628,7 @@
     "eyebrow": "隔离区",
     "subtitle": "按发件人、主题、放行状态和原因筛选被隔离的邮件，然后预览或批量放行所选项。",
     "releaseToOptional": "释放至（可选，留空则投递给原收件人）",
-    "releaseToPlaceholder": "留空投递给原收件人"
+    "releaseToPlaceholder": "留空投递给原收��人"
   },
   "sideline": {
     "title": "旁路队列",
@@ -3224,7 +3224,7 @@
     "typeDescriptions": {
       "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼风险。",
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
-      "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
+      "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为���",
       "threat_traceback": "围绕可疑样��向��史邮件回溯，结合簇 ID 和内���相似性判断是否存在同���威胁传播。",
       "rule_analysis": "基��相似邮件历史，��断误判或漏判的可能性��并抽取可供人工确认��候选拦截规则。"
     },
@@ -3672,7 +3672,7 @@
     "expressionRangeInvalid": "IP区间无效：两端必须同为IPv4或IPv6，且起始不能大于结束",
     "expressionDuplicateItem": "表达式包含重复项",
     "expressionTooManyItems": "表达式最多100项",
-    "expressionTooManyGroups": "最多选择20个IP组",
+    "expressionTooManyGroups": "最多���择20个IP组",
     "ipGroupsLabel": "引用IP组",
     "noIpGroups": "暂无平台 IP 组，可在「��台安全策略 → 群组策略」中创建",
     "groupCountBadge": "+{count} 组",
@@ -4121,7 +4121,7 @@
     "configHint1": "数值越大优先级越高，优先级高的规则先匹配",
     "configHint2": "支持通配符如 *@domain.com",
     "configHint3": "留空有效期表示永久有效",
-    "configHint4": "群组和组织来自群组策略配置",
+    "configHint4": "群组���组织来自群组策略配置",
     "scheduleSection": "生效时��",
     "complexEditTitle": "复杂条件",
     "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑���可修改规则名称、备注���优先级与有效期；保存不会���动原有条件与执行动作。",
@@ -4786,7 +4786,7 @@
       "priorityMax": "优先级最大为9999",
       "thresholdMax": "阈值过大",
       "valueRequired": "请填写该字段",
-      "priorityRange": "优先级范围应为 {min}-{max}",
+      "priorityRange": "优先级范��应为 {min}-{max}",
       "validUntilPast": "有效期不能��于当前日期",
       "emailRequired": "请输入邮箱地址",
       "groupRequired": "请选择发信人群组",
@@ -5021,8 +5021,8 @@
       "detectLimit": "检测数量上限",
       "items": "个",
       "exceedAction": "超限处置",
-      "passWarn": "放行并记录告警",
-      "isolateFallback": "隔离兜底",
+      "passWarn": "进行下一步",
+      "isolateFallback": "隔离",
       "enable": "启用",
       "ocrSection": "OCR 配置",
       "ocrMode": "OCR 模式",
@@ -5437,7 +5437,7 @@
     "errorWindowRange": "检测窗口必须在 1 到 1440 之间",
     "similarEmailTab": "相似邮件检测",
     "sameSubjectTab": "相同主题检���",
-    "detectionWindow": "检测窗口",
+    "detectionWindow": "检测��口",
     "minutes": "分钟",
     "triggerCount": "触发数量",
     "emails": "封",
@@ -6040,7 +6040,7 @@
         "context": {
           "title": "收发信上下文",
           "recipientsCount": "{n} 个收件人",
-          "notOperableWarning": "该邮件已被阻断/丢弃，系统未保留原文，不可执行后续操作。",
+          "notOperableWarning": "该邮件已被阻断/丢弃，系统未保留原文，不��执行后续操作。",
           "viewPolicyDetail": "查看策略命中详情",
           "time": "时间",
           "size": "大小",
@@ -7560,7 +7560,7 @@
     "copy": "复制",
     "copied": "已复制到剪贴板",
     "copyFailed": "复制失败",
-    "switchBeforeDelete": "请先��换到其它 selector",
+    "switchBeforeDelete": "请先��换到���它 selector",
     "generateSuccess": "密钥已生成",
     "importSuccess": "私钥已导入",
     "activateSuccess": "已设为当前密钥",
@@ -7775,7 +7775,7 @@
       "direction": "邮件方向",
       "generatedAt": "生成时间",
       "kpiSection": "关键指标",
-      "trendSection": "趋势明细",
+      "trendSection": "趋势���细",
       "noData": "暂无数据",
       "loading": "加载中…"
     },
@@ -8597,7 +8597,7 @@
       "description": "实时/观察模式、超时时间线与超时临时处置（对所有旁路检测生效）。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
-      "disposalLoadFailed": "超时配置加载失败，运行模式仍按真实引擎配置展示。",
+      "disposalLoadFailed": "超时配置加载失败，运行模式仍按真实引擎配置展示��",
       "editUnavailable": "超时配置加载成功后才能编辑",
       "edit": "编辑",
       "save": "保存",
@@ -9467,7 +9467,7 @@
         "recall": "召回（软删除）",
         "notify": "仅告警"
       },
-      "maxRecallPerRun": "单次召回上限",
+      "maxRecallPerRun": "单次召��上限",
       "circuitBreakerThreshold": "熔断阈值",
       "exclusions": "排除策略",
       "excludeTags": "排除收件人系统标签",
@@ -9679,7 +9679,7 @@
     "selectAllPageAria": "全选本页",
     "selectRowAria": "选择 {name}",
     "selectTenantDesc": "请使用上方的租户选择器选择租户后，再管理组织通讯录。",
-    "selectTenantPlaceholder": "选择租户",
+    "selectTenantPlaceholder": "选��租户",
     "selectTenantTitle": "请先选择租户",
     "selected": "已选 {count} 条",
     "serverPlaceholder": "如 ldap.corp.com",
@@ -11117,7 +11117,7 @@
       "group_policy_rules_stay_within_active": "分组策略规则必须属���当前所选租户"
     },
     "intent_engine": {
-      "engine_enabled_receive_engine_enabled_send": "请分别设置收信、发信和���部信��引擎开关"
+      "engine_enabled_receive_engine_enabled_send": "请分别设置收信、发信和���部信��引���开关"
     },
     "ip_filter": {
       "rule_not_found": "规则不存在"
