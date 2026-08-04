@@ -176,7 +176,11 @@ export async function getImageDetectConfig(
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<ImageDetectConfig | null> {
   const obj = await fetchConfigSection('image_detect', requestFn);
-  return obj as ImageDetectConfig | null;
+  if (!obj) return null;
+  const cfg = obj as ImageDetectConfig;
+  // GT-12xxx：OCR 深度模式已下线；历史租户可能存有 ocr_mode='deep'，归一为 'light'。
+  if ((cfg.ocr_mode as string) === 'deep') cfg.ocr_mode = 'light';
+  return cfg;
 }
 
 export async function saveImageDetectConfig(

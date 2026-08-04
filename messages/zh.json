@@ -213,7 +213,7 @@
     "password": "密码",
     "loginTitle": "OSGateway 管理系统",
     "loginButton": "登录",
-    "demoEntry": "进入演示环境",
+    "demoEntry": "进入演��环境",
     "loginError": "用户名或密码错误",
     "sessionExpired": "会话已过期，请重新登录",
     "showAdvancedRules": "显示高级规则设置",
@@ -1459,7 +1459,7 @@
       "block": "阻断",
       "drop": "丢弃"
     },
-    "previewDescriptionWithRule": "策略「{name}」���有效执���路径：",
+    "previewDescriptionWithRule": "策���「{name}」���有效执���路径：",
     "previewNoRuleSelected": "���选择���条群组策略���预览���",
     "previewShortCircuit": "邮件在【阶段{stage}】因策略「{rule}」的{action}处置被终止，后续阶段不再执行。",
     "previewSkipped": "未执行（前序已短路）",
@@ -1838,7 +1838,7 @@
       "priority": "优先级",
       "retries": "重试次数",
       "session_id": "会话 ID",
-      "received_at": "接收时间",
+      "received_at": "接收时���",
       "processed_at": "处理时间",
       "delivered_at": "投递时间",
       "bounced_at": "退信时间",
@@ -1887,7 +1887,7 @@
   "tenants": {
     "title": "租户管理",
     "createTenant": "���建租户",
-    "editTenant": "编辑租户",
+    "editTenant": "编辑��户",
     "deleteTenant": "删除租户",
     "tenantName": "���户名称",
     "domain": "域名",
@@ -2450,7 +2450,7 @@
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
-      "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
+      "protocolMismatch": "协议不匹配，请确认客户端使用的协议���该域名认证配置一致。",
       "unknown": "��能识别的失败原因��请��看��始失败��息��联系��持。"
     },
     "detail": {
@@ -3226,7 +3226,7 @@
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
       "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
-      "rule_analysis": "基于相似邮件历史，判断误判或漏判的可能性��并抽取可供人工确认��候选拦截规则。"
+      "rule_analysis": "基于相似邮件历史，��断误判或漏判的可能性��并抽取可供人工确认��候选拦截规则。"
     },
     "statuses": {
       "pending": "待处理",
@@ -3529,7 +3529,7 @@
     },
     "examples": {
       "title": "查看配置示例",
-      "antiBruteforce": "防暴力破解",
+      "antiBruteforce": "���暴力破解",
       "antiBruteforceDesc": "防止密码爆破攻击，短��间内多次认证失败��被封禁",
       "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1��时。",
       "antiSpam": "防滥发邮件",
@@ -3808,7 +3808,7 @@
     "approveConfirm": "确认放行此邮件？",
     "rejectConfirm": "确认拒绝此邮件？",
     "noItems": "暂无入站审核项",
-    "preview": "预览",
+    "preview": "���览",
     "download": "下载",
     "approvedBy": "审核人",
     "reviewedAt": "审核时���"
@@ -4124,7 +4124,7 @@
     "configHint4": "群组和组织来自群组策略配置",
     "scheduleSection": "生效时间",
     "complexEditTitle": "复杂条件",
-    "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑。可修改规则名称、备注、优先级与有效期；保存不会改动原有条件与执行动作。",
+    "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑。可修改规则名称、备注、优先级与有效期；保存不会���动原有条件与执行动作。",
     "statusFilter": "状态筛选",
     "statusAll": "全部状态",
     "statusEnabled": "已启用",
@@ -4538,7 +4538,7 @@
     },
     "envelopeMismatchWarning": {
       "title": "信封与头部不匹配可能引发误判",
-      "desc": "部分邮件订阅服务、自动转发系统和邮件��表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮��头（From）不一致。开启此检���可能会将这些正常邮���误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
+      "desc": "部分邮��订阅服务、自动转发系统和邮件��表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮��头（From）不一致。开启此检���可能会将这些正常邮���误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
     },
@@ -4924,7 +4924,7 @@
       "nestedFileCountMax": "单个附件嵌套文件数量上限",
       "nestedLevelMax": "压缩包嵌套层数上限",
       "scanTimeoutSec": "附件扫描超时时间(秒)",
-      "exceedAction": "超出限制处置",
+      "exceedAction": "超出限���处置",
       "partialSkip": "部分超���时跳过",
       "dangerExtEnabled": "启用危险扩展名检测",
       "dangerExtList": "危险扩展名列表",
@@ -4959,7 +4959,7 @@
       "engineQianxinShort": "奇安信",
       "engineKasperskyShort": "卡巴斯基",
       "engineNone": "无",
-      "autoSwitch": "主引擎故障/超时时自动启用备引擎",
+      "autoSwitch": "主引��故障/超时时自动启用备引擎",
       "dualEngine": "双引擎同时扫描（提升检出率）",
       "doubleResource": "消耗双倍资源",
       "virusDbStatus": "病毒库状态",
@@ -4984,13 +4984,12 @@
     },
     "imageDetect": {
       "ocrDetection": "图片OCR检测",
-      "ocrSendHint": "（外发方向建议启用深度检测，防截图泄密）",
+      "ocrSendHint": "（外发方向建议启用，防截图泄密）",
       "detectionMode": "检测模式",
       "ocrLimit": "检测数量上限（防止性能耗尽）",
       "attachments": "个附件",
       "ocrMode_none": "不检测",
-      "ocrMode_light": "轻度检测（仅印刷体）",
-      "ocrMode_deep": "深度检测（手写+印刷，推荐外发方向）",
+      "ocrMode_light": "检测",
       "qrDetection": "二维码图片检测",
       "qrMode_none": "不检测",
       "qrMode_light": "轻度检测 - 识别到二维码即拦截",
@@ -5109,7 +5108,7 @@
       "antivirusHost": "attachd 连接的通用 AV 服务地址",
       "virusAction": "确认检出病毒后对邮件采取的动作",
       "antivirusTimeout": "AV 服务超过扫描时限或不可用时采取的动作",
-      "ocrMode": "轻度模式仅识别印刷体，深度模式同时识别手写与印刷内容",
+      "ocrMode": "检测并识别图片中的印刷体文字内容",
       "qrMode": "轻度模式识别到二维码后直接处置；深度模式解码并路由至后续模块",
       "arbitration": "二维码内容命中多个后续模块时如何选择最终动作",
       "qrLimit": "单封邮件最多深度解码 1–50 个二维码",
@@ -6150,7 +6149,7 @@
           },
           "whitelistDialog": {
             "title": "确认将发信人 \"{sender}\" 加入白名单？",
-            "desc": "后续来自该发信人的邮件将跳过部分安全检测。",
+            "desc": "后续来自该发��人的邮件将跳过部分安全检测。",
             "scopeLabel": "生效范围",
             "scopeTenant": "本租户",
             "scopeGlobal": "全系统",
@@ -6513,7 +6512,7 @@
       "disclaimerPosition": "插入位置",
       "headerName": "信头名称",
       "headerValue": "信头值",
-      "mergeWindow": "合并窗口（分钟）",
+      "mergeWindow": "��并窗口（分钟）",
       "mergeWindowDesc": "同一规则���此时间内多次触发将合并为一封通知邮件",
       "deleteAttachmentScope": "删除范围",
       "deleteAttachmentScopeAll": "全���",
@@ -6861,7 +6860,7 @@
       },
       "desc_senderGroup": {
         "source": "群组策略模块",
-        "usage": "匹配预定义的人员群组",
+        "usage": "匹配预定义的人员���组",
         "note": "群组变更后规则即时生效，无需重新保存规则"
       },
       "desc_senderOrganization": {
@@ -7523,7 +7522,7 @@
     "notifyModeAllHint": "通知信将发送给所有用户",
     "category": "分类",
     "notifyStatus": "状态",
-    "portalBaseUrlRequired": "请先填写合法的外部访问地址（https），开启权限后该地址用于生成通知链接。",
+    "portalBaseUrlRequired": "请先填写合法的外部访问地址（https），开启权限后该地址用于生���通知链接。",
     "portalBaseUrlMissingHint": "外部访问地址未填写——取回、预览、加白、加黑权��依赖该地址生成通知链接，��先填写后再开启对应权限。"
   },
   "dkim": {
@@ -7580,7 +7579,7 @@
     "dnsStatus": {
       "unverified": "⚠ 未验证",
       "verified": "✅ 已验证",
-      "mismatch": "不匹配",
+      "mismatch": "���匹配",
       "not_found": "未找到",
       "dns_error": "DNS 错误"
     },
@@ -7929,7 +7928,7 @@
       "drawerTitle": "AI 分析结果",
       "loading": "AI 分析中...",
       "failed": "AI 分析失败，请稍后���试",
-      "empty": "AI 未返回分析内容",
+      "empty": "AI 未���回分析内容",
       "retry": "重试",
       "mockSummary": "## 投递健康摘要\n\n整体投递成功率稳定。外发队���仍在健康范围内，建议持续关��� P99 延迟和目标域名退信率。"
     },
@@ -9079,7 +9078,7 @@
       "subtitle": "命中信封发件人即整封放行、不进检测（不以 Header-From 放行）",
       "value": "邮箱 / 域名",
       "valuePlaceholder": "boss@corp.com 或 corp.com",
-      "matchType": "类型",
+      "matchType": "���型",
       "email": "邮箱",
       "domain": "域名",
       "add": "添加",
@@ -9483,7 +9482,7 @@
       "highImmediate": "发现高危威胁时立即通知（置信度 ≥ 90%）",
       "mediumImmediate": "发现中危威胁且置信度达到阈值时立即通知",
       "mediumThresholdInvalid": "中危阈值必须是 70–89 的整数。",
-      "mediumNoFallbackHint": "中危未���到该阈值时不会回退到低危汇总。",
+      "mediumNoFallbackHint": "中危未������该阈值时不会回退到低危汇总。",
       "lowDigest": "低危威胁每日汇总时间",
       "notifyVersionHint": "修改收件人或汇总时间只影响新任务；当天可能按不同配置版本分别汇总。",
       "previewImmediate": "高/中危即时通知",
@@ -9660,7 +9659,7 @@
     "policyExecProtect": "高管邮件保护：{state}",
     "policyImpersonation": "显示名仿冒检测：{state}",
     "policyRecipientCheck": "收件人合法性校验：内部白名单",
-    "priorityHint": "数值越大优先级越高，冲突时高优先级覆盖低优先级",
+    "priorityHint": "数值越大优先级越高，冲突时高优先级覆盖��优先级",
     "refresh": "刷新",
     "relatedPolicies": "关联策略",
     "resetFilters": "重置筛选",
@@ -9857,7 +9856,7 @@
       "cpu_usage": "CPU 使用率",
       "memory_usage": "内存使���率",
       "data_dir_usage": "数据目录使用率",
-      "network_retransmit": "网络重传率",
+      "network_retransmit": "网络重��率",
       "disk_io": "磁盘 I/O",
       "kb_repl_delay": "DB 复制延迟",
       "kb_active_conn": "DB 活跃连接",
@@ -10578,7 +10577,7 @@
     "detection_profile": {
       "access_denied": "没有权限访问该检测档案",
       "global_rbl_requires_system_admin": "管理��局 RBL 检测档案需要平台管理员权限",
-      "id_invalid": "检测档案 ID 无效",
+      "id_invalid": "检测档案 ID 无��",
       "name_exists": "已存在同��的检测档案",
       "not_found": "检测档案不存在，可能已被删除",
       "tenant_context_required": "该操作需要先选择租户",
@@ -10712,7 +10711,7 @@
       "group_referenced_by_routes": "该分组正被外发路由规则引用，不能删除，请先移除相关路由规则",
       "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP 地址），或��空",
       "license_key_missing": "服务端未配置授权加密密钥，无��保存授权信息，请联系管理员",
-      "member_endpoint_duplicate": "同一个节点不能在分组里重复出现",
+      "member_endpoint_duplicate": "同一��节点不能在分组里重复出现",
       "member_endpoint_id_invalid": "分��成员的节点必须是有效选择",
       "member_ord_duplicate": "分组成员的排序值不能重复",
       "port_out_of_range": "端口需在 {min}–{max} 之间",
@@ -10803,7 +10802,7 @@
       "target_invalid": "无效的接收目标",
       "action_unsupported": "不支持的操作",
       "start_time_invalid": "开始时间格式不正确，请使用 RFC3339 或 YYYY-MM-DD",
-      "end_time_invalid": "结束时间格式不正确，请使用 RFC3339 或 YYYY-MM-DD",
+      "end_time_invalid": "结束时间格式不正确，���使用 RFC3339 或 YYYY-MM-DD",
       "two_factor_required_by_policy": "系统策略要求必须开启二次认证，无法关闭",
       "two_factor_enable_via_endpoint": "请在二次认证设置中开启二次认证"
     },
@@ -11111,7 +11110,7 @@
       "group_policy_rules_stay_within_active": "分组策略规则必须属���当前所选租户"
     },
     "intent_engine": {
-      "engine_enabled_receive_engine_enabled_send": "请分别设置收信、发信和���部信的引擎开关"
+      "engine_enabled_receive_engine_enabled_send": "请分别设置收信、发信和���部信��引擎开关"
     },
     "ip_filter": {
       "rule_not_found": "规则不存在"

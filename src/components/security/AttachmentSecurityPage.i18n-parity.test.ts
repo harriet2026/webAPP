@@ -25,7 +25,7 @@ const required = [
   ].map((key) => `antivirus.${key}`),
   ...[
     'ocrDetection', 'detectionMode', 'ocrLimit', 'attachments', 'ocrMode_none', 'ocrMode_light',
-    'ocrMode_deep', 'qrDetection', 'qrMode_none', 'qrMode_light', 'qrMode_deep', 'lightConfig',
+    'qrDetection', 'qrMode_none', 'qrMode_light', 'qrMode_deep', 'lightConfig',
     'deepConfig', 'routeModules', 'execAction', 'barcodeExempt', 'urlDetection', 'expandShortLink',
     'keywordFilter', 'scanRange', 'urlPath', 'textContent', 'intentEngine', 'detectCategory',
     'highRisk', 'mediumRisk', 'lowRisk', 'advancedRule', 'advancedRuleHint', 'arbitration',

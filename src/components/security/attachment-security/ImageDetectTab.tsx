@@ -101,17 +101,10 @@ export function ImageDetectTab({
               <SelectTrigger data-testid="ocr-detection-mode"><SelectValue /></SelectTrigger>
               <SelectContent data-testid="ocr-detection-mode-options">
                 <SelectItem value="none" data-testid="ocr-detection-mode-none">{t('imageDetect.ocrMode_none')}</SelectItem>
+                {/* GT-12xxx：OCR 仅单一 pytesseract 路径，无深浅之分，
+                    原「深度检测（手写+印刷）」为从未实现的禁用占位，已移除；
+                    「轻度检测（仅印刷体）」即唯一检测模式，文案精简为「检测」。 */}
                 <SelectItem value="light" data-testid="ocr-detection-mode-light">{t('imageDetect.ocrMode_light')}</SelectItem>
-                {/* GT-11675：深度 OCR 尚未实现，暂不可选。
-                    整条链路都没有深浅之分：runOCR(mode) 的 mode 只用于打日志
-                    （internal/antispam 侧对照的 QrMode==="deep" 才是真分支），
-                    PyhelperClient.Ocr 只发 image_b64+lang，pyhelper 的 /v1/ocr
-                    也只有单一 pytesseract 路径。此前它可选但与「轻度」执行完全
-                    相同的代码，属静默无效；恢复为不可选并标注敬请期待，等实现
-                    落地再放开。 */}
-                <SelectItem value="deep" disabled data-testid="ocr-detection-mode-deep">
-                  {t('imageDetect.ocrMode_deep')}（{t('imageDetect.pending')}）
-                </SelectItem>
               </SelectContent>
             </Select>
           </div>
