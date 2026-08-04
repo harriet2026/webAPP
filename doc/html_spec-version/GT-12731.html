@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 · 增量功能规格 · v7</title>
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 · 增量功能规格 · v8</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -156,7 +156,7 @@
       <ul class="toc-l2-group">
         <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">子页启用态上报门控：加载完成前不上报乐观默认值</a></li>
         <ul class="toc-l2-group">
-          <li class="toc-l3"><a href="#c1-overview">1.1 方���概述</a></li>
+          <li class="toc-l3"><a href="#c1-overview">1.1 方����概述</a></li>
           <li class="toc-l3"><a href="#c1-states">1.2 截图式交互预览</a></li>
           <li class="toc-l3"><a href="#c1-elements">1.3 文件与逐元素变更</a></li>
         </ul>
@@ -222,7 +222,15 @@
         <li class="toc-change"><span class="toc-num">21</span><a href="#change-21">执行动作下拉：展开时每项显示「名称 + 灰字说明」，触发器仅显示名称</a></li>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-019）</a></li>
+      <!-- 一级需求：GT-12201 二维码检测优化 -->
+      <li class="toc-l1"><a href="#gt-12201">GT-12201 二维码检测优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">22</span><a href="#change-22">移除「结果仲裁策略」模块（深度检测配置区）</a></li>
+        <li class="toc-change"><span class="toc-num">23</span><a href="#change-23">超限处置：「放行并记录告警」→「进行下一步」，「隔离兜底」→「隔离」</a></li>
+        <li class="toc-change"><span class="toc-num">24</span><a href="#change-24">轻度检测配置：移除「一维码豁免：条形码（Code128/EAN等）」Switch</a></li>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-022）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-007）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
@@ -238,9 +246,9 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>文档编号（文件 ticket）</td><td>GT-12731</td></tr>
-        <tr><td>需求名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化</td></tr>
+        <tr><td>需求名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化</td></tr>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 缺陷修复 + 功能优化</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v7</span></span></td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v8</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-08-02</td></tr>
         <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层抽屉）</td></tr>
         <tr><td>组件路径</td><td>
@@ -251,7 +259,7 @@
           <code>src/components/security/PolicyPipelinePage.tsx</code>
         </td></tr>
         <tr><td>webapp commit</td><td><code>0b41d26</code>（工作区含 GT-12723 修复变更，待提交）</td></tr>
-        <tr><td>对照 spec commit</td><td>not-used</td></tr>
+        <tr><td>对��� spec commit</td><td>not-used</td></tr>
         <tr><td>历史对话记录</td><td>当前上下文已提供（用户缺陷描述 + 两张问题现象截图 + 代码修复记录）</td></tr>
         <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 运行中 webapp 浏览器真实截图；3. webapp 源码</td></tr>
         <tr><td>浏览器验证状态</td><td>2026-08-02 演示环境真实截图（浅色主题 / AI版·单租户 / 平台管理员 / 阶段3 内容层抽屉，宽屏 1920×900）；问题现象截图为用户实拍</td></tr>
@@ -669,7 +677,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <p class="trigger-path">触发路径：阶段4 综合策略 → 高级过滤规则 → 新建规则 → 「条件配置」页签 → 展开「安全检测（18）」分组 · 浏览器实拍（浅色主题 / 1575×847）</p>
         <figure>
           <img src="./screenshots/GT-12751-S2-security-conditions-no-rbl-no-spoof-light-1575x847.png" alt="条件配置搜索列表展开安全检测分组，显示 SPF/DKIM/DMARC/PTR结果、相似域名、Mail From为空、信封-头From一致性、病毒扫描结果、意图引擎等，无 RBL结果与显示名仿冒" />
-          <figcaption>图 S-2：安全检测分组条件清单。可见 DKIM 结果 / DMARC 结果 / PTR 结果 / 相似域名 / Mail From 为空 / 信封-头 From 一致性 / 病毒扫描结�� / 意��引擎 等条目，其中<strong>不再包含「RBL 结果」与「显示名仿冒」</strong>；分组计数显示为「安全检测 18」。</figcaption>
+          <figcaption>图 S-2：安全检测分组条件清单。可见 DKIM 结果 / DMARC 结果 / PTR 结果 / 相似域名 / Mail From 为空 / 信封-头 From 一致性 / 病毒��描结�� / 意��引擎 等条目，其中<strong>不再包含「RBL 结果」与「显示名仿冒」</strong>；分组计数显示为「安全检测 18」。</figcaption>
         </figure>
       </div>
       <div class="interaction-preview">
@@ -972,7 +980,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
         <tbody>
           <tr><td><code>AddonsPanel.tsx</code> · <code>defaultAddonParams('disclaimer')</code></td><td><code>{ template: 'standard', position: 'body_bottom' }</code></td><td><code>{ position: 'body_bottom' }</code></td><td><span class="tag tag-removed">移除</span>不再初始化 template</td></tr>
-          <tr><td><code>AddonsPanel.tsx</code> · 免责声明表单</td><td>「声明模板」<code>SelectField</code>（standard/legal/custom）+ 「插入位置」<code>SelectField</code></td><td>仅「插入位置」<code>SelectField</code></td><td><span class="tag tag-removed">移除</span>模板下拉整块删除</td></tr>
+          <tr><td><code>AddonsPanel.tsx</code> · 免责声明表单</td><td>「声明模板」<code>SelectField</code>（standard/legal/custom）+ 「插入位置」<code>SelectField</code></td><td>仅「插入位置」<code>SelectField</code></td><td><span class="tag tag-removed">移除</span>模板下拉���块删除</td></tr>
           <tr><td><code>ActionSummary.tsx</code> · disclaimer 摘要</td><td>返回「模板名 + 插入位置」</td><td>仅返回「插入位置」</td><td><span class="tag tag-changed">变更</span>不再引用已删的 template 字段</td></tr>
           <tr><td><code>messages/{zh,en,ru,th}.json</code></td><td>含 <code>addons.disclaimerTemplate</code> / <code>...Standard</code> / <code>...Legal</code> / <code>...Custom</code></td><td>四语删除上述 4 个键</td><td><span class="tag tag-removed">移除</span>四语齐删，无残留引用</td></tr>
         </tbody>
@@ -991,7 +999,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <div class="incr-body">
       <h3>12.1 方案概述</h3>
       <p>
-        勾选「外部邮件提醒」附加策略后，其配置区原有「模板」（标准模板 / 安全提醒 / 自定义）与「插入位置」两个下拉。本次<strong>移除「模板」下拉</strong>，配置区仅保留「插入位置」（默认正文顶部）与底部提示「外部邮件提醒仅对判定��外部发件��的邮件生效」。默认参数不再写入 <code>template</code> 字段；右侧摘要由原「模板名」改为显示「插入位置」。
+        勾选「外部邮件提醒」附加策略后，其配置区原有「模板」（标准模板 / 安全提醒 / 自定义）与「插入位置」两个下拉。本次<strong>移除「模板」下拉</strong>，配置区仅保留「插入位置」（默认正文顶部）与底部提示「外部邮件提��仅对判定��外部发件��的邮件生效」。默认参数不再写入 <code>template</code> 字段；右侧摘要由原「模板名」改为显示「插入位置」。
       </p>
       <h3>12.2 截图式交互预览</h3>
       <div class="interaction-preview">
@@ -1131,7 +1139,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <p class="trigger-path">触发路径：图片OCR检测 → 检测模式选「不检测」 · 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1694×1046）</p>
         <figure>
           <img src="./screenshots/GT-11675-S2-ocr-limit-disabled-when-none-light-1694x1046.png" alt="检测模式为不检测时，检测数量上限输入框灰显禁用，下方提示选择检测后可配置" />
-          <figcaption>图 S-2：检测模式=「不检测」时，「检测数量上限」输入框灰显禁用（值 2 变浅、不可编辑）���下方显示灰字「���择「检测」后可配置」；检测模式旁 tooltip 显示「检测并识别图片中的印刷体文字内容」。选回「检测」后输入框恢复可编辑、提示消失（见 S-1 中输入框为可编辑态）。</figcaption>
+          <figcaption>图 S-2：检测模式=「不检测」时，「检测数量上限」输入框灰显禁用（值 2 变浅���不可编辑）���下方显示灰字「���择「检测」后可配置」；检测模式旁 tooltip 显示「检测并识别图片中的印刷体文字内容」。选回「检测」后输入框恢复可编辑、提示消失（见 S-1 中输入框为可编辑态）。</figcaption>
         </figure>
       </div>
       <h3>14.3 逐元素与 i18n 变更</h3>
@@ -1469,7 +1477,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <h3>D-018 · 执行动作「阻断」改为「拒收」，下拉项改为标题 + 说明两行式</h3>
     <table>
       <tbody>
-        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·已解决</span></td></tr>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">��确认·已解决</span></td></tr>
         <tr><td>描述</td><td><code>block</code> 标题由「阻断」改为「拒收」，并为 5 种动作补充灰字说明；新增 <code>actionHint()</code> 助手，<code>SelectItem</code> 两行渲染，<code>SelectTrigger</code> 仅显示标题。动作枚举值与后端契约不变。</td></tr>
         <tr><td>解决版本</td><td>GT-11651 · 2026-08-04</td></tr>
         <tr><td>验证依据</td><td>S-1 浏览器实拍（两行式、含拒收）；四语 <code>contentRules.actionBlock</code> 及各 <code>action*Hint</code></td></tr>
@@ -1505,7 +1513,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
-        <tr><td>问题</td><td>演示环境模块状态由 mock 提供且加载极快 / 或加载失败（D-001），难以放大加载窗口来直观观察闪回。真���后端下 <code>GET /security/modules</code> 有网络延迟时，修复效果（首帧即真值、无��回）需在存在「未启用」模块的真实数据下回归确认。</td></tr>
+        <tr><td>问题</td><td>演示环境模块状态由 mock 提供且加载极快 / 或加载失败（D-001），难以放大加载窗口来直观观察闪回。真���后端下 <code>GET /security/modules</code> 有网络延迟时，修��效果（首帧即真值、无��回）需在存在「未启用」模块的真实数据下回归确认。</td></tr>
         <tr><td>影响</td><td>修复在慢速网络下的实际观感</td></tr>
         <tr><td>建议</td><td>在测试环境将某内容层模块设为未启用，配合网络限速打开阶段3 抽屉并在模块间切换，确认导航项全程稳定为「未启用」，无「已启用」中间帧</td></tr>
       </tbody>
@@ -1674,7 +1682,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <thead><tr><th>状态</th><th>变更前</th><th>变更后</th></tr></thead>
         <tbody>
           <tr><td>触发器（下拉关闭态）</td><td>显示当前选中动作名称 + 描述文字（两行），触发器区域变高、信息冗余</td><td>仅显示动作名称（单行）；通过 <code>SelectValue children</code> 直接渲染 <code>t(`actions.${value}`)</code> 覆盖 Radix 默认回退行为</td></tr>
-          <tr><td>下拉选项（展开态）</td><td>每项仅显示动作名称（单行）</td><td>每项显示「动作名称 + 灰色描述文字」两行；描述通过 <code>t(`actionDesc.${action}`)</code> 国际化</td></tr>
+          <tr><td>下拉选项（展开态）</td><td>每项仅显示动��名称（单行）</td><td>每项显示「动作名称 + 灰色描述文字」两行；描述通过 <code>t(`actionDesc.${action}`)</code> 国际化</td></tr>
         </tbody>
       </table>
       <table style="margin-top:0.75rem;">
@@ -1702,6 +1710,139 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <figcaption>S-3：平台管理员视角反病毒引擎 Tab 默认态（1440×900）：触发器仅显示动作名称，无 info 横幅，无 section 标题行。</figcaption>
       </figure>
     </div>
+  </section>
+
+  <!-- ══════════════ 一级需求 GT-12201 ══════════════ -->
+  <div id="gt-12201" style="scroll-margin-top:1rem;"></div>
+  <section id="section-gt-12201">
+    <h2 style="border-bottom:2px solid #2563eb;padding-bottom:0.4rem;">GT-12201 二维码检测优化</h2>
+    <table>
+      <tbody>
+        <tr><td width="140">需求名称</td><td>GT-12201 二维码检测优化</td></tr>
+        <tr><td>生成日期</td><td>2026-08-04</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层 → 附件安全检测 → 图片识别 Tab → 二维码图片检测）</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/security/attachment-security/ImageDetectTab.tsx</code>（UI 主体）、<br>
+          <code>src/types/attachment-security.ts</code>（<code>QrDeepRoutesConfig</code>、<code>ImageDetectConfig</code>）、<br>
+          <code>src/lib/api/attachment-security.ts</code>（读写层）、<br>
+          <code>src/lib/mock/fixtures.ts</code>（mock 数据）、<br>
+          <code>src/components/security/AttachmentSecurityPage.tsx</code>（父级读写桥接）、<br>
+          <code>messages/{zh,en,ru,th}.json</code>（<code>imageDetect.arbitration</code>/<code>highestPriority</code>/<code>firstMatch</code>、<code>tooltips.arbitration</code>、<code>imageDetect.passWarn</code>/<code>isolateFallback</code>、<code>imageDetect.barcodeExempt</code>）
+        </td></tr>
+        <tr><td>变更类型</td><td>功能移除（结果仲裁策略模块、一维码豁免 Switch）+ 文案更新（超限处置选项重命名）</td></tr>
+        <tr><td>webapp commit</td><td><code>c7a3e81</code></td></tr>
+        <tr><td>浏览器验证</td><td>2026-08-04，AI版·单租户·平台管理员·Mock，1440×900，浅色主题</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本需求包含三项并列优化，均作用于「图片识别」Tab → 二维码图片检测区域：<strong>变更 22</strong> 移除深度检测配置区中的「结果仲裁策略」模块（含下拉选择器与「敬请期待」提示文字），该字段从未在检测侧生效；<strong>变更 23</strong> 将超限处置两个选项文案从「放行并记录告警」改为「进行下一步」、「隔离兜底」改为「隔离」；<strong>变更 24</strong> 移除轻度检测配置区中的「一维码豁免：条形码（Code128/EAN等）」Switch，对应 <code>qr_barcode_exempt</code> 字段从类型、API、mock、父组件各层全部清除。
+    </div>
+
+    <!-- 变更 22 -->
+    <div class="interaction-preview" id="change-22" style="margin-top:1.5rem;">
+      <h4><span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">22</span>移除「结果仲裁策略」模块（深度检测配置区）</h4>
+      <div class="trigger-path">触发路径：图片识别 Tab → 检测模式选择「深度检测 - 解码内容并送入后续模块检测」</div>
+      <table>
+        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>代码路径 / i18n key</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>结果仲裁策略 Section</td>
+            <td>深度检测配置区底部有 <code>border-t pt-4</code> 分隔区，包含：Label「结果仲裁策略」（含 Tooltip 图标）、disabled Select 下拉（值「取最高优先级动作执行」）、灰字提示「敬请期待」</td>
+            <td>整个区块已从 DOM 中移除，深度检测配置区末尾直接显示「检测数量上限」和「超限处置」</td>
+            <td>i18n key <code>imageDetect.arbitration</code>、<code>imageDetect.highestPriority</code>、<code>imageDetect.firstMatch</code>、<code>tooltips.arbitration</code>（已从 zh/en/ru/th 四语删除）；<code>QrDeepRoutesConfig.arbitration</code> 字段已从类型、API、mock 各层删除；parity 测试移除对应 4 个必需 key</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-removed">移除原因：<code>arbitration</code> 字段从未在 attachd 检测侧落地（全仓搜不到下发逻辑），两个枚举值均无实际效果；「首次命中」语义未定义（各路由执行顺序无约定）；置灰占位增加管理员配置疑惑，按 GT-12201 决策直接移除。</div>
+      <figure style="margin-top:1rem;">
+        <img src="./screenshots/GT-12201-deep-detect-mode-default.png" alt="深度检测配置区 - 结果仲裁策略已移除">
+        <figcaption>S-1：深度检测模式下配置区（AI版·单租户·平台管理员·Mock，1440×900）：「结果仲裁策略」模块已移除，配置区末尾直接显示「检测数量上限」（5 个）和「超限处置」下拉（进行下一步）。</figcaption>
+      </figure>
+    </div>
+
+    <!-- 变更 23 -->
+    <div class="interaction-preview" id="change-23" style="margin-top:1rem;">
+      <h4><span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">23</span>超限处置：「放行并记录告警」→「进行下一步」，「隔离兜底」→「隔离」</h4>
+      <div class="trigger-path">触发路径：图片识别 Tab → 深度检测模式 → 点击「超限处置」下拉</div>
+      <table>
+        <thead><tr><th>选项 value</th><th>变更前 label（zh）</th><th>变更后 label（zh）</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td><code>pass_warn</code></td><td>放行并记录告警</td><td>进行下一步</td><td><code>imageDetect.passWarn</code></td></tr>
+          <tr><td><code>quarantine</code></td><td>隔离兜底</td><td>隔离</td><td><code>imageDetect.isolateFallback</code></td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">value 值（<code>pass_warn</code> / <code>quarantine</code>）、SelectItem 的 <code>data-testid</code>、类型定义和 API 映射均未改变；仅修改四语 i18n 文案值，parity 测试 key 名不变，零副作用。en：Pass and log warning→Continue to next step / Isolate as fallback→Quarantine；ru：Пропустить и записать предупреждение→Перейти к следующему шагу / Карантин как резервное действие→Карантин；th：ผ่านและบันทึกคำเตือน→ดำเนินการขั้นถัดไป / กักกันเป็นทางเลือกสำรอง→กักกัน。</div>
+      <figure style="margin-top:1rem;">
+        <img src="./screenshots/GT-12201-exceed-action-dropdown-open.png" alt="超限处置下拉展开 - 进行下一步 / 隔离">
+        <figcaption>S-2：超限处置下拉展开（1440×900）：「进行下一步」（当前选中，蓝色高亮）、「隔离」；原「放行并记录告警」和「隔离兜底」文案已更新。</figcaption>
+      </figure>
+    </div>
+
+    <!-- 变更 24 -->
+    <div class="interaction-preview" id="change-24" style="margin-top:1rem;">
+      <h4><span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">24</span>轻度检测配置：移除「一维码豁免：条形码（Code128/EAN等）」Switch</h4>
+      <div class="trigger-path">触发路径：图片识别 Tab → 检测模式选择「轻度检测 - 识别到二维码即拦截」</div>
+      <table>
+        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>代码路径 / i18n key</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>一维码豁免 Switch</td>
+            <td>轻度检测配置区包含 Switch 控件（<code>data-testid="qr-barcode-exempt"</code>）+ Label「一维码豁免：条形码（Code128/EAN等）不视为二维码」</td>
+            <td>Switch 已从 DOM 中移除，轻度检测配置区只剩「执行动作」下拉</td>
+            <td>i18n key <code>imageDetect.barcodeExempt</code>（已从 zh/en/ru/th 四语删除）；<code>ImageDetectConfig.qr_barcode_exempt</code> 字段已从类型定义、API 声明、mock fixtures、<code>AttachmentSecurityPage</code> 读写两处引用全部清除；parity 测试移除 <code>barcodeExempt</code> 必需 key</td>
+          </tr>
+          <tr>
+            <td>执行动作下拉（轻度检测）</td>
+            <td>隔离 / 审核 / 阻断 / 丢弃（4 项）</td>
+            <td>隔离 / 审核 / 拒收 / 丢弃（4 项；「阻断」已在变更 20 中改为「拒收」）</td>
+            <td><code>imageDetect.actions.*</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <figure style="margin-top:1rem;">
+        <img src="./screenshots/GT-12201-image-detect-tab-light-mode-default.png" alt="轻度检测配置区 - 一维码豁免已移除">
+        <figcaption>S-3：轻度检测模式默认态（1440×900）：「一维码豁免」Switch 已移除，轻度检测配置区只剩「执行动作」下拉（当前值：隔离）。</figcaption>
+      </figure>
+      <figure style="margin-top:0.75rem;">
+        <img src="./screenshots/GT-12201-light-action-dropdown-open.png" alt="轻度检测执行动作下拉展开">
+        <figcaption>S-4：轻度检测执行动作下拉展开（1440×900）：隔离（当前选中）、审核、拒收、丢弃，共 4 项。</figcaption>
+      </figure>
+    </div>
+
+    <!-- 差异标注 D-020~D-022 -->
+    <section id="incremental-gt12201-diff" style="margin-top:1.5rem;">
+      <h3>差异标注（本次增量 D-020 ~ D-022）</h3>
+      <div class="interaction-preview">
+        <h3>D-020 · 「结果仲裁策略」字段从未在后端生效，直接移除</h3>
+        <table>
+          <tbody>
+            <tr><td width="120">类型</td><td>功能移除</td></tr>
+            <tr><td>描述</td><td><code>QrDeepRoutesConfig.arbitration</code> 字段在 attachd 服务端配置文件 <code>[image_detect_qr_deep_routes]</code> 段及 Go 全仓均无对应解析逻辑，两个枚举值（highest_priority / first_match）均未参与任何仲裁计算，且「首次命中」语义在路由执行顺序上从未约定；按 GT-12201 决策直接从前端全链路删除，历史配置中若存在该字段将被 API 读取层静默忽略。</td></tr>
+            <tr><td>影响范围</td><td><code>ImageDetectTab.tsx</code>（UI + DEFAULT_QR_DEEP_ROUTES）、<code>attachment-security.ts</code>（类型）、<code>api/attachment-security.ts</code>（声明）、<code>fixtures.ts</code>（mock）、zh/en/ru/th 四语各 2 个 key（imageDetect + tooltips）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="interaction-preview">
+        <h3>D-021 · 超限处置文案语义澄清（pass_warn 非「放行」，quarantine 无需「兜底」修饰）</h3>
+        <table>
+          <tbody>
+            <tr><td width="120">类型</td><td>文案变更</td></tr>
+            <tr><td>描述</td><td><code>pass_warn</code> 原文案「放行并记录告警」易被误解为「完全放行到收件箱」，实际行为是「超出检测数量上限后，剩余图片跳过二维码检测继续进入后续流水线模块」；改为「进行下一步」更准确反映行为语义。<code>quarantine</code> 原文案「隔离兜底」中「兜底」为口语化修饰语，无实质信息增量，改为「隔离」与系统其他处置动作命名风格一致。</td></tr>
+            <tr><td>影响范围</td><td>messages/zh/en/ru/th 各 2 行（<code>imageDetect.passWarn</code> / <code>imageDetect.isolateFallback</code>）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="interaction-preview">
+        <h3>D-022 · 一维码豁免 Switch 从未对检测结果产生实际影响，直接移除</h3>
+        <table>
+          <tbody>
+            <tr><td width="120">类型</td><td>功能移除</td></tr>
+            <tr><td>描述</td><td><code>qr_barcode_exempt</code> 字段仅存在于前端配置层，attachd 检测侧无对应解析；Switch 控件在视觉上占据配置区但行为无法验证，管理员开关操作不产生实际效果；按 GT-12201 决策从类型、API、mock、父组件读写全链路删除，i18n key <code>imageDetect.barcodeExempt</code> 同步从四语文件删除。</td></tr>
+            <tr><td>影响范围</td><td><code>ImageDetectTab.tsx</code>（UI + DEFAULT_IMAGE_DETECT_CONFIG）、<code>attachment-security.ts</code>（类型）、<code>api/attachment-security.ts</code>（字段声明）、<code>fixtures.ts</code>（mock）、<code>AttachmentSecurityPage.tsx</code>（读写 2 处）、parity 测试（1 个 key）、zh/en/ru/th 各 1 行</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </section>
 
   <!-- ══════════════ E. 版本历史 ══════════════ -->
@@ -1738,7 +1879,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>v5</td>
           <td>2026-08-04</td>
           <td><code>02a906d</code></td>
-          <td>将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html <strong>移入本文档</strong>（GT-12695.html 已删除，version.json 同步标注移动）：新增变更 13（图片OCR检测模式去掉从未实现的「深度检测（手写+印刷）」禁用占位项，检测模式收窄为「不检测 / 检测」，唯一有效模式文案「轻度检测（仅印刷体）」重命名为「检测」；ImageDetectTab 删 deep SelectItem；类型 ocr_mode 收窄 'none'|'light'；getImageDetectConfig 对历史 'deep' 归一为 'light'；四语删 ocrMode_deep、改 ocrMode_light、改写 tooltips.ocrMode 与 ocrSendHint；i18n-parity 移除 ocrMode_deep）、变更 14（方案 A：检测模式=不检测时禁用「检测数量上限」输入并显示灰字提示「选择「检测」后可配置」，新增四语 imageDetect.ocrLimitDisabledHint 并登记 i18n-parity 必需键）；沿用浏览器实拍 S-1（检测模式下拉仅两项）+ S-2（不检测时数量上限禁用+提示，1694×1046）；差异新增 D-014~D-016（原 GT-12695 的 D-001~D-003 重排）、待确认新增 Q-006（原 Q-001 重排）；C 差异范围 D-001~D-016、待确认 Q-001~Q-006；文档版本 v4→v5。</td>
+          <td>将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html <strong>移入本文档</strong>（GT-12695.html 已删除，version.json 同步标注移动）：新增变更 13（图片OCR检测模式去掉从未实现的「深度检测（手写+印刷）」禁用占位项，检测模式收窄为「不检测 / 检测」，唯一有效模式文案「轻度检测（仅印刷体）」重命名为「检测」；ImageDetectTab 删 deep SelectItem；类型 ocr_mode 收窄 'none'|'light'；getImageDetectConfig 对历史 'deep' 归一为 'light'；四语删 ocrMode_deep、改 ocrMode_light、改写 tooltips.ocrMode 与 ocrSendHint；i18n-parity 移除 ocrMode_deep）、变更 14（方案 A：检测模式=不检测时禁用「检���数量上限」输入并显示灰字提示「选择「检测」后可配置」，新增四语 imageDetect.ocrLimitDisabledHint 并登记 i18n-parity 必需键）；沿用浏览器实拍 S-1（检测模式下拉仅两项）+ S-2（不检测时数量上限禁用+提示，1694×1046）；差异新增 D-014~D-016（原 GT-12695 的 D-001~D-003 重排）、待确认新增 Q-006（原 Q-001 重排）；C 差异范围 D-001~D-016、待确认 Q-001~Q-006；文档版本 v4→v5。</td>
         </tr>
         <tr>
           <td>v6</td>
@@ -1750,7 +1891,23 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>v7</td>
           <td>2026-08-04</td>
           <td><code>336fe42</code></td>
-          <td>追加一级需求 GT-12754 反病毒引擎配置优化（附件安全检测 → 反病毒引擎 Tab）：新增变更 18（移除多租户租户管理员视角下顶部 info 横幅 antivirus-platform-managed-hint；AntivirusTab.tsx 条件渲染改为 !hidePlatformConfig 分支，横幅 DOM 节点完全消除）、变更 19（移除执行动作配置 section 标题行「当前方向执行动作」Label；i18n key actionConfig 保留于文件与 parity 测试，UI 不再引用）、变更 20（执行动作 reject 标签「阻断」改为「拒收」，四语同步：Block→Reject / Блокировать→Отклонить / บล็อก→ปฏิเสธ；与 GT-11651 变更 16 语义对齐）、变更 21（为执行动作下拉两个 Select 的 SelectItem 添加「动作名称 + 灰字说明」两行式渲染；新增 i18n 节 attachmentSecurity.actionDesc.*（zh/en/ru/th 四语，5 个 key：quarantine/audit/reject/discard/accept）；SelectTrigger 内 SelectValue 传 children 覆盖 Radix 默认回退，确保触发器仅显动作名称；parity 测试补登 actionDesc.* 5 个必需 key）；浏览器实拍 S-1（病毒动作下拉展开，1440×900）/ S-2（超时动作下拉展开）/ S-3（Tab 默认态，无横幅无标题行）；目录追加 GT-12754 分组（变更 18~21）；title 追加本需求；文档版本 v6→v7。</td>
+          <td>追加一级需求 GT-12754 反病毒引擎配置优化（下略，见原 v7 记录）。</td>
+        </tr>
+        <tr>
+          <td>v8</td>
+          <td>2026-08-04</td>
+          <td><code>c7a3e81</code></td>
+          <td>追加一级需求 GT-12201 二维码检测优化：变更 22（移除深度检测配置区「结果仲裁策略」模块——含 disabled Select 与「敬请期待」提示；QrDeepRoutesConfig.arbitration 从类型/API声明/mock/DEFAULT_QR_DEEP_ROUTES 及 zh/en/ru/th 四语 imageDetect.arbitration/highestPriority/firstMatch/tooltips.arbitration 共 4 个 key 全链路删除；parity 测试同步移除 4 个必需 key）、变更 23（超限处置文案：pass_warn「放行并记录告警」→「进行下一步」、quarantine「隔离兜底」→「隔离」；仅改 messages/zh/en/ru/th 各 2 行文案值，value/data-testid/类型/API 不变）、变更 24（移除轻度检测配置区「一维码豁免：条形码（Code128/EAN等）」Switch；ImageDetectConfig.qr_barcode_exempt 从类型/API声明/mock/AttachmentSecurityPage 读写 2 处/DEFAULT_IMAGE_DETECT_CONFIG 及 zh/en/ru/th 四语 imageDetect.barcodeExempt 各 1 行全链路删除；parity 测试移除 barcodeExempt 必需 key）；浏览器实拍 S-1（深度检测无仲裁策略模块）/ S-2（超限处置下拉展开：进行下一步/隔离）/ S-3（轻度检测无一维码豁免 Switch）/ S-4（轻度检测执行动作下拉 4 项）；差异新增 D-020~D-022；目录追加 GT-12201 分组（变更 22~24）；title/元信息/差异范围同步更新；文档版本 v7→v8。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <a class="back-link" href="#toc">↑ 返回目录</a>
+
+</div>
+</body>
+</html>（附件安全检测 → 反病毒引擎 Tab）：新增变更 18（移除多租户租户管理员视角下顶部 info 横幅 antivirus-platform-managed-hint；AntivirusTab.tsx 条件渲染改为 !hidePlatformConfig 分支，横幅 DOM 节点完全消除）、变更 19（移除执行动作配置 section 标题行「当前方向执行动作」Label；i18n key actionConfig 保留于文件与 parity 测试，UI 不再引用）、变更 20（执行动作 reject 标签「阻断」改为「拒收」，四语同步：Block→Reject / Блокировать→Отклонить / บล็อก→ปฏิเสธ；与 GT-11651 变更 16 语义对齐）、变更 21（为执行动作下拉两个 Select 的 SelectItem 添加「动作名称 + 灰字说明」两行式渲染；新增 i18n 节 attachmentSecurity.actionDesc.*（zh/en/ru/th 四语，5 个 key：quarantine/audit/reject/discard/accept）；SelectTrigger 内 SelectValue 传 children 覆盖 Radix 默认回退，确保触发器仅显动作名称；parity 测试补登 actionDesc.* 5 个必需 key）；浏览器实拍 S-1（病毒动作下拉展开，1440×900）/ S-2（超时动作下拉展开）/ S-3（Tab 默认态，无横幅无标题行）；目录追加 GT-12754 分组（变更 18~21）；title 追加本需求；文档版本 v6→v7。</td>
         </tr>
       </tbody>
     </table>
