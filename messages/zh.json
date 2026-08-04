@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测智能���",
+    "spoofingDetection": "仿冒邮件检测智能�����",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -862,7 +862,7 @@
         "deleteButton": "删除",
         "emptyText": "暂无通道，建议先配置自定义通道",
         "proxyDeletedBadge": "代理已删除",
-        "systemDefaultHelo": "系统默认",
+        "systemDefaultHelo": "系统默��",
         "drawerTitleNew": "新��投递通道",
         "drawerTitleEdit": "编辑投递通道",
         "drawerDescription": "从步骤一已配置的代理 IP 中选择并排序",
@@ -1019,7 +1019,7 @@
         },
         "toasts": {
           "created": "路由规则已添加",
-          "updated": "路由规则已更新",
+          "updated": "路由规则已更��",
           "deleted": "������������除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级��置"
@@ -1187,7 +1187,7 @@
     "globalRule": "全局规则",
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除，只有系统管理员可编辑部分字段",
-    "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条件阈值，其余字段已锁定。",
+    "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条件阈值，其余字段已锁��。",
     "stage": "������"
   },
   "tagRules": {
@@ -1661,7 +1661,7 @@
     "sender": "发件人",
     "recipients": "收件人",
     "subject": "主题",
-    "clientIp": "客户端 IP",
+    "clientIp": "客户�� IP",
     "action": "动作",
     "reason": "原因",
     "ruleType": "规则类型",
@@ -2221,7 +2221,7 @@
         "createTitle": "新增角色",
         "editTitle": "编辑角色",
         "viewTitle": "查看角色权限",
-        "createDescription": "配置角色名称、备注与权限矩阵",
+        "createDescription": "配置���色名称、备注与权限矩阵",
         "readonlyDescription": "���下为该角��的完整权限�����（只读）",
         "nameLabel": "���色名称",
         "namePlaceholder": "如 自定义运营",
@@ -2434,7 +2434,7 @@
       "mailsync": "邮件同步代理"
     },
     "failReasons": {
-      "wrongPassword": "密码错误",
+      "wrongPassword": "���码错误",
       "userNotExist": "账号不存在",
       "accountLocked": "��号锁定",
       "serverTimeout": "服务��超时",
@@ -2707,7 +2707,7 @@
       "expires": "到期时间",
       "revoke": "撤销",
       "revokeTitle": "撤销授信终端",
-      "revokeConfirm": "确认撤销「{name}」的授信？该设备下次登录将需要二次认证。",
+      "revokeConfirm": "确认撤销「{name}」的授信？该��备下次登录将需要二次认证。",
       "revoked": "已撤销授信终端"
     },
     "history": {
@@ -3225,7 +3225,7 @@
       "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼风险。",
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
-      "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
+      "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同���威胁传播。",
       "rule_analysis": "基��相似邮件历史，��断误判或漏判的可能性��并抽取可供人工确认��候选拦截规则。"
     },
     "statuses": {
@@ -3360,7 +3360,7 @@
     "flowTerminateShort": "阻断",
     "flowQuarantineShort": "隔离",
     "flowContinueShort": "继续",
-    "listTypeLegend": "名单类型",
+    "listTypeLegend": "名单���型",
     "blacklistType": "黑名单",
     "blacklistTypeDesc": "阻断/隔离/丢弃",
     "whitelistType": "白名单",
@@ -3947,7 +3947,7 @@
     "directionOutbound": "外发方向",
     "directionInternal": "域内方向",
     "directionInboundDesc": "检测来自海外的入站邮件",
-    "directionOutboundDesc": "检测经本网关外发至海外的邮件",
+    "directionOutboundDesc": "检测��本网关外发至海外的邮件",
     "directionInternalDesc": "检测域内用户之间经网关转发的邮件",
     "actionDeliver": "投递",
     "actionTagDeliver": "标记投递",
@@ -4330,7 +4330,7 @@
     "enableRule": "启用规则",
     "disableRule": "禁用规则",
     "batchDeleteConfirm": "确定删除选中的 {count} 条规则吗？此操作无法撤销。",
-    "actionDeliver": "放行",
+    "actionDeliver": "投递",
     "actionDeliverHint": "正常投递邮件",
     "actionTagDeliver": "标记并放行",
     "actionTagDeliverHint": "添加邮件头后继续投递",
@@ -4407,7 +4407,7 @@
       "run": "执行测试",
       "finalAction": "最终动作",
       "hits": "命中规则",
-      "noHits": "未命中任何规则",
+      "noHits": "未命中任何规���",
       "close": "关闭"
     },
     "observing": "观察中",
@@ -5126,7 +5126,7 @@
     "activeContent": {
       "vbaSection": "VBA 宏检测",
       "vbaEnabled": "启用 VBA 宏检测",
-      "vbaToKeyword": "将宏源码发送到关键词评估",
+      "vbaToKeyword": "将宏源码发送到关键���评估",
       "vbaAction": "VBA 宏触发动作",
       "pdfJsSection": "PDF JavaScript 检测",
       "pdfJsEnabled": "启用 PDF JavaScript 检测",
@@ -5548,7 +5548,7 @@
     "testMatched": "匹配成功",
     "testMatchedRule": "匹配成功：{name}",
     "testNotMatched": "未匹配",
-    "unnamedRule": "未命名规则",
+    "unnamedRule": "��命名规则",
     "receiveEditorSubtitle": "配置外站邮件的适用对象、标记位置与显示样式",
     "sendEditorSubtitle": "配置外发邮件的适用对象、免责声明位置与格式",
     "configurationTips": "配置提��",
@@ -6855,7 +6855,7 @@
         "note": "用户通常不可见。与发信人(信头)的区别：信头是展示给用户的From字段，两者可能不一致(钓鱼场景)"
       },
       "desc_envelopeRecipient": {
-        "source": "SMTP协议层 RCPT TO 地址",
+        "source": "SMTP协议层 RCPT TO 地��",
         "usage": "服务器的真实投递目标",
         "note": "群发时信封收信人只有一个，信头To可能有多个"
       },
@@ -7184,7 +7184,7 @@
       "test": "规则测试与分析（即将上线）"
     },
     "test": {
-      "sectionTitle": "规则测试",
+      "sectionTitle": "规则测��",
       "attributesLabel": "测���属性 (JSON)",
       "attributesHint": "用于评估规则的字段值 JSON 对象。示例：{\"sender\":\"attacker@example.com\",\"subject\":\"紧急\"}",
       "runButton": "运行测试",
@@ -7601,7 +7601,7 @@
     "error": {
       "forbiddenTitle": "无权查看邮件安全总览",
       "forbiddenDescription": "当前账号缺少统计查看权限，请联系管理员授权后重试。",
-      "loadFailedTitle": "邮件安全总览加载失败",
+      "loadFailedTitle": "邮件安���总览加载失败",
       "loadFailedDescription": "服务暂时不可用或网络异常，请稍后重试。",
       "retry": "重新加载",
       "retrying": "正在重试…"
@@ -8985,7 +8985,7 @@
       "importHint": "仅保存姓名、邮箱、分类、灵敏度和检测处置配置；部门、职位、外部 ID 只用于导入判断与预览。",
       "importBatchIdentity": "已选择 {n} 人进行批量创建，身份信息以组织架构为准，保护等级与下方���测配置将统一应用���",
       "importIdentityHint": "姓名、邮箱和职位来自组织架构，仅用于导入确认；姓名和邮箱不可在此修改。",
-      "importSensitivityHint": "导入对象的分类与灵敏度按联系人职位自动推荐；部门、职位不会写入保护对象。",
+      "importSensitivityHint": "导入对象的分类与灵敏度按联系人职位自动推荐；部门、职位不会写入保护对象��",
       "importDisabledInvalidEmail": "邮箱无效",
       "importDisabledInactive": "人员失效",
       "importCheckingExisting": "检查中",
@@ -10211,7 +10211,7 @@
     "neverExpires": "永不过期",
     "permanentLock": "永久锁定",
     "platformOnly": "由平台统一设置，租户不可修改",
-    "tenantBanner": "平台已下发登录安全基线。本租户只能在基线之上加严，不可低于基线；置灰选项即为低于基线、不可选择的取值。",
+    "tenantBanner": "平台��下发登录安全基线。本租户只能在基线之上加严，不可低于基线；置灰选项即为低于基线、不可选择的取值。",
     "belowBaseline": "低于平台基线，当前按基线生效",
     "noRules": "暂无 IP 规则",
     "addRule": "新增 IP",
@@ -10572,7 +10572,7 @@
       "upload_token_invalid": "上传凭证无效或已过期，请重新上传 CSV 文件",
       "user_file_empty": "上传的 CSV 文件为空",
       "user_file_missing": "请选择要上传的用户通讯录 CSV 文件",
-      "user_file_read_failed": "读取上传的 CSV 文���失败，请确认文件未损坏后重试",
+      "user_file_read_failed": "读取上传的 CSV 文���失败，请确认文件未损坏��重试",
       "user_file_ref_empty": "缺少已上传文件的引用，请重新上传"
     },
     "detection_profile": {
@@ -10603,7 +10603,7 @@
         "custom_weekdays_empty": "自定义频率下至少要选择一天",
         "notify_frequency_invalid": "通知频率取值无效，只能是：{allowed}",
         "notify_time_format_invalid": "通知时间「{value}」格式不正确，应为 HH:MM（00:00–23:59）",
-        "notify_times_empty": "通知频率不��「从不」时，至少要设置一个通知时间",
+        "notify_times_empty": "通知频率不��「从不」时，至少要��置一个通知时间",
         "permission_unknown": "无法识别的权限项「{value}」",
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
         "portal_base_url_invalid": "外部访问地址不是合法的网址",
@@ -10708,7 +10708,7 @@
       "endpoint_name_exists": "已存在同名的代理节点",
       "endpoint_not_found": "代理节点不存在，可能已被删除",
       "group_name_exists": "已存在同名的代理分组",
-      "group_not_found": "代理分组不存在，可能已被删除",
+      "group_not_found": "代理分组不存在，可能已被���除",
       "group_referenced_by_routes": "该分组正被外发路由规则引用，不能删除，请先移除相关路由规则",
       "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP 地址），或��空",
       "license_key_missing": "服务端未��置授权加密密钥，无��保存授权信息，请联系管理员",
@@ -10809,7 +10809,7 @@
     },
     "threat_retro": {
       "run_not_found": "回溯运行记录不存在",
-      "strategy_not_found": "处置��略不存在",
+      "strategy_not_found": "处置��略不���在",
       "strategy_id_required": "请选择处置策略",
       "mail_log_id_required": "请选择邮件",
       "mail_log_ids_required": "请至少选择一封邮件",
@@ -11266,7 +11266,7 @@
       "user_generated_user_list_rules_deleted": "此处只能删除用户自建的名单规则"
     },
     "user_unlock": {
-      "user_not_found": "用户不存在"
+      "user_not_found": "用户不存��"
     },
     "users": {
       "cannot_demote_last_system_administrator": "不能降级最后一个平台管理员",
