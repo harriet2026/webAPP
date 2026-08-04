@@ -56,15 +56,7 @@ export function AntivirusTab({
 
   return (
     <div className="space-y-6" data-testid="antivirus-tab" data-direction={direction}>
-      {hidePlatformConfig ? (
-        <div
-          className="flex items-start gap-2 rounded-md border border-info/20 bg-info/10 px-4 py-3 text-sm text-info"
-          data-testid="antivirus-platform-managed-hint"
-        >
-          <Info className="mt-0.5 h-4 w-4 shrink-0" />
-          <span className="text-pretty">{t('antivirus.platformManagedHint')}</span>
-        </div>
-      ) : (
+      {!hidePlatformConfig && (
         <>
           <AntivirusServerFields config={config} onChange={onChange} />
           <AntivirusStatusSection />
@@ -72,7 +64,6 @@ export function AntivirusTab({
       )}
 
       <section className="space-y-4 rounded-lg border border-border/70 bg-muted/30 p-4">
-        <Label className="font-medium">{t('antivirus.actionConfig')}</Label>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>{infoLabel(t('antivirus.virusAction'), t('tooltips.virusAction'), 'antivirus-virus-action')}</Label>
