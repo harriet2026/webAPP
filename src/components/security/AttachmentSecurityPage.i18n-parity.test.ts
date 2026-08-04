@@ -12,6 +12,7 @@ const required = [
   'direction.receiveFull',
   'toast.loadFailed', 'toast.saveSuccess', 'toast.saveFailed',
   ...['quarantine', 'audit', 'reject', 'discard', 'accept', 'partial_skip'].map((key) => `actions.${key}`),
+  ...['quarantine', 'audit', 'reject', 'discard', 'accept'].map((key) => `actionDesc.${key}`),
   ...[
     'attachmentStructure', 'currentDirection', 'items', 'levels', 'unlimited', 'unlimitedHint',
     'unlimitedWarning', 'nestedProtection', 'performanceProtection', 'seconds', 'receiveDefault',

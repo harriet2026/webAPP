@@ -2837,7 +2837,7 @@
       "isNotNull": "不为空",
       "between": "介于",
       "in": "属于",
-      "notIn": "不属于"
+      "notIn": "���属于"
     },
     "fields": {
       "client_ip": "客户端 IP",
@@ -3225,7 +3225,7 @@
       "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼风险。",
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
-      "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内���相似性判断是否存在同���威胁传播。",
+      "threat_traceback": "围绕可疑样本向��史邮件回溯，结合簇 ID 和内���相似性判断是否存在同���威胁传播。",
       "rule_analysis": "基��相似邮件历史，��断误判或漏判的可能性��并抽取可供人工确认��候选拦截规则。"
     },
     "statuses": {
@@ -3548,7 +3548,7 @@
       "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次，超过限制 {limit} 次",
       "dailyHit": "触发\"每日连接数\"阈值，当日已连接 {count} 次，超过限制 {limit} 次",
       "notHitReason": "未触发阈值",
-      "noThresholds": "当前配置未设置有效阈值，连接将��放行"
+      "noThresholds": "��前配置未设置有效阈值，连接将��放行"
     },
     "tips": {
       "title": "配置提示",
@@ -4122,7 +4122,7 @@
     "configHint2": "支持通配符如 *@domain.com",
     "configHint3": "留空有效期表示永久有效",
     "configHint4": "群组和组织来自群组策略配置",
-    "scheduleSection": "生效时间",
+    "scheduleSection": "生效时��",
     "complexEditTitle": "复杂条件",
     "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑���可修改规则名称、备注���优先级与有效期；保存不会���动原有条件与执行动作。",
     "statusFilter": "状态筛选",
@@ -4432,7 +4432,7 @@
       "mailFromEmpty": "空MAIL FROM",
       "mailFromInvalid": "无效MAIL FROM",
       "envelopeHeaderMismatch": "信封与头部不匹配",
-      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系��邮件，但也可能被滥用发送匿名邮件。",
+      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，��信封常用于退信通知、自动回复、邮件列表等系��邮件，但也可能被滥用发送匿名邮件。",
       "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，建议阻断。",
       "envelopeHeaderDesc": "检查邮件��中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
     },
@@ -5094,12 +5094,19 @@
       }
     },
     "actions": {
-      "quarantine": "���离",
+      "quarantine": "隔离",
       "audit": "审核",
-      "reject": "阻断",
+      "reject": "拒收",
       "discard": "丢弃",
       "accept": "继续流水线",
       "partial_skip": "超出部分不检测"
+    },
+    "actionDesc": {
+      "quarantine": "邮件进入隔离区，管理员审核后可放行或删除",
+      "audit": "邮件进入待审核队列，人工确认后投递或退回",
+      "reject": "在 SMTP 阶段拒绝接收，发件方收到退信通知（452/550）",
+      "discard": "静默丢弃，发件方无感知，无退信",
+      "accept": "不对此结果采取拦截动作，继续进入下一阶段检测"
     },
     "tooltips": {
       "attachmentCount": "单封邮件允许进入检测的附件数量，-1 表示不限制",
@@ -7176,7 +7183,7 @@
         "select": "从下拉选择固定结果值（如 pass / fail），或输入单个值做等于 / 不等于匹配。",
         "group": "从预置群组 / 档案中选择对象；* 表示任意对象。",
         "featureGroup": "选择一个特征组进行匹配。",
-        "orgDept": "从组织通讯录部门树中勾选一个或多个部门；勾选父部门会自动匹配其所有子部门的发信人。"
+        "orgDept": "从组织通讯录部门树中勾选一个或多个部门；勾���父部门会自动匹配其所有子部门的发信人。"
       }
     },
     "placeholder": {
@@ -10568,7 +10575,7 @@
       "source_type_empty": "请选择数据源类型",
       "stale_write": "该数据源已被他人修改，请刷新后重试",
       "sync_already_running": "该数据源已有同步任务在运行，请等待完成后再试",
-      "sync_mode_invalid": "同步方式无效，只能是：{allowed}",
+      "sync_mode_invalid": "同步���式无效，只能是：{allowed}",
       "test_connection_required": "请先测试连接成功后再保存",
       "updated_at_required": "缺少数据版本信息，请刷新页面后重试",
       "upload_token_empty": "请先上传 CSV 文件",
@@ -10789,7 +10796,7 @@
       "not_ready_for_actions": "调查任务尚未完成，暂时无法执行处置动作",
       "type_unsupported": "不支持的调查类型",
       "target_type_unsupported": "不支持的调查对象类型",
-      "traceback_created_elsewhere": "威胁回溯任务由威胁回溯扫描创建，不能从此处新建",
+      "traceback_created_elsewhere": "威胁回溯任务由威胁回溯扫描��建，不能从此处新建",
       "traceback_cancelled_elsewhere": "威胁回溯任务请在威胁回溯运行记录中取消"
     },
     "profile": {

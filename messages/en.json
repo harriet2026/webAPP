@@ -5091,10 +5091,17 @@
     "actions": {
       "quarantine": "Quarantine",
       "audit": "Review",
-      "reject": "Block",
+      "reject": "Reject",
       "discard": "Discard",
       "accept": "Continue pipeline",
       "partial_skip": "Skip excess items"
+    },
+    "actionDesc": {
+      "quarantine": "Message is placed in quarantine; admin can release or delete it",
+      "audit": "Message enters the review queue; delivered or returned after manual approval",
+      "reject": "Rejected at SMTP stage; sender receives a bounce notification (452/550)",
+      "discard": "Silently dropped; sender has no awareness and receives no bounce",
+      "accept": "No blocking action taken; message continues to the next inspection stage"
     },
     "tooltips": {
       "attachmentCount": "Number of attachments per message admitted to scanning; -1 means unlimited",
