@@ -212,7 +212,7 @@ export function AttachmentSecurityPage({
             ...(image ?? {}),
             ...(tImg ? {
               ocr_mode: tImg.ocr_mode, ocr_max_count: tImg.ocr_max_count,
-              qr_mode: tImg.qr_mode, qr_barcode_exempt: tImg.qr_barcode_exempt,
+              qr_mode: tImg.qr_mode,
               qr_max_count: tImg.qr_max_count,
             } : {}),
           } as AttachmentDraft['image'],
@@ -315,7 +315,6 @@ export function AttachmentSecurityPage({
               ocr_mode: draft.image.ocr_mode,
               ocr_max_count: draft.image.ocr_max_count,
               qr_mode: draft.image.qr_mode,
-              qr_barcode_exempt: draft.image.qr_barcode_exempt,
               qr_max_count: draft.image.qr_max_count,
               qr_light_action: draft.imageActions.qr_light_action,
               qr_deep_exceed_action: draft.imageActions.qr_deep_exceed_action,

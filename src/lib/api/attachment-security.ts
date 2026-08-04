@@ -364,7 +364,6 @@ export interface TenantAttachmentSecuritySettings {
     ocr_mode: string;
     ocr_max_count: number;
     qr_mode: string;
-    qr_barcode_exempt: boolean;
     qr_max_count: number;
     qr_light_action: string;
     qr_deep_exceed_action: string;

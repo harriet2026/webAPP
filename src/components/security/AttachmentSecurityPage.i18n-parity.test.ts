@@ -27,7 +27,7 @@ const required = [
   ...[
     'ocrDetection', 'detectionMode', 'ocrLimit', 'ocrLimitDisabledHint', 'attachments', 'ocrMode_none', 'ocrMode_light',
     'qrDetection', 'qrMode_none', 'qrMode_light', 'qrMode_deep', 'lightConfig',
-    'deepConfig', 'routeModules', 'execAction', 'barcodeExempt', 'urlDetection', 'expandShortLink',
+    'deepConfig', 'routeModules', 'execAction', 'urlDetection', 'expandShortLink',
     'keywordFilter', 'scanRange', 'urlPath', 'textContent', 'intentEngine', 'detectCategory',
     'highRisk', 'mediumRisk', 'lowRisk', 'advancedRule', 'advancedRuleHint',
     'detectLimit', 'items', 'exceedAction', 'passWarn',

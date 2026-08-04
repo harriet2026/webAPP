@@ -3332,7 +3332,7 @@ export function mockSenderFilterRulesList(): { items: Rule[] } {
 //   - 分组名取自 tags 里 `grp:<name>` 前缀（GROUP_TAG_PREFIX），而非 `name` 字段；
 //   - 分组类型优先取 metadata.group_type，其次由 stage 反推（GROUP_TYPE_TO_STAGE 的反映射）；
 //   - 普通组 condition_tree 用 `serializeMembers` 生成（与 `parseMembers` 互为逆运算）；
-//     特征组直接给 condition_tree（serde 的 AND[OR[any],AND[all]] 形态）；
+//     特征组直接给 condition_tree（serde 的 AND[OR[any],AND[all]] ���态）；
 //   - member_count / reference_count 显式下发（与真实后端 include=member_count,reference_count
 //     的响应一致），memberCount 不再依赖成员数组长度，特征组的 member_count = 条件数。
 // 数据值照抄群组策略页 demo 的 staticGroups + 特征组（html_spec filter-rules-group-policy），
@@ -3557,7 +3557,7 @@ function groupPolicyRulesSeed(): Rule[] {
     gpRule({
       id: 9001,
       name: "高管邮箱快速通道",
-      description: "针对高管邮箱的优化通道",
+      description: "���对高管邮箱的优化通道",
       priority: 0,
       is_active: true,
       target_groups: { recipientGroup: ["高管邮箱"] },
@@ -5048,7 +5048,6 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
     ocr_mode: "light",
     ocr_max_count: 2,
     qr_mode: "light",
-    qr_barcode_exempt: true,
     qr_max_count: 5,
   }),
   ...attachmentConfigSeed("image_detect_qr_deep_routes", {
@@ -5286,7 +5285,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "incoming",
     sender: "support@bank-verify.com",
     recipients: "user@company.com, sales@company.com, marketing@company.com",
-    subject: "账���安全验证通知（多投信）",
+    subject: "账���安全验证通���（多投信）",
     action: "block",
     reason: "AI-URL沙箱检测到钓鱼页面",
     mailType: "phishing",

@@ -21,7 +21,6 @@ export const DEFAULT_IMAGE_DETECT_CONFIG: ImageDetectConfig = {
   ocr_mode: 'light',
   ocr_max_count: 2,
   qr_mode: 'light',
-  qr_barcode_exempt: true,
   qr_max_count: 5,
 };
 
@@ -164,14 +163,6 @@ export function ImageDetectTab({
                   {LIGHT_ACTIONS.map((action) => <SelectItem key={action} value={action} data-testid={`qr-light-action-${action}`}>{t(`actions.${action}`)}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={config.qr_barcode_exempt}
-                onCheckedChange={(checked) => onChange({ ...config, qr_barcode_exempt: checked })}
-                data-testid="qr-barcode-exempt"
-              />
-              <Label>{t('imageDetect.barcodeExempt')}</Label>
             </div>
           </div>
         )}

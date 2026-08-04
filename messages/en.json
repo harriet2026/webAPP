@@ -4999,7 +4999,6 @@
       "actionSideline": "Review",
       "actionReject": "Block",
       "actionDiscard": "Discard",
-      "barcodeExempt": "Barcode Exempt: Linear barcodes (Code128/EAN) not treated as QR codes",
       "urlDetection": "URL Detection & Protection",
       "expandShortLink": "Auto-expand short links",
       "keywordFilter": "Content Keyword Filter",
