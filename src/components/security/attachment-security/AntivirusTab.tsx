@@ -74,7 +74,7 @@ export function AntivirusTab({
               <SelectTrigger className="w-[280px] max-w-full" data-testid="antivirus-virus-action"><SelectValue /></SelectTrigger>
               <SelectContent data-testid="antivirus-virus-action-options">
                 {VIRUS_ACTIONS.map((action) => (
-                  <SelectItem key={action} value={action} data-testid={`antivirus-virus-action-${action}`}>
+                  <SelectItem key={action} value={action} textValue={t(`actions.${action}`)} data-testid={`antivirus-virus-action-${action}`}>
                     <span className="flex flex-col gap-0.5">
                       <span>{t(`actions.${action}`)}</span>
                       <span className="text-xs text-muted-foreground">{t(`actionDesc.${action}` as `actionDesc.quarantine`)}</span>
@@ -94,7 +94,7 @@ export function AntivirusTab({
               <SelectTrigger className="w-[280px] max-w-full" data-testid="antivirus-timeout-action"><SelectValue /></SelectTrigger>
               <SelectContent data-testid="antivirus-timeout-action-options">
                 {TIMEOUT_ACTIONS.map((action) => (
-                  <SelectItem key={action} value={action} data-testid={`antivirus-timeout-action-${action}`}>
+                  <SelectItem key={action} value={action} textValue={t(`actions.${action}`)} data-testid={`antivirus-timeout-action-${action}`}>
                     <span className="flex flex-col gap-0.5">
                       <span>{t(`actions.${action}`)}</span>
                       <span className="text-xs text-muted-foreground">{t(`actionDesc.${action}` as `actionDesc.quarantine`)}</span>
