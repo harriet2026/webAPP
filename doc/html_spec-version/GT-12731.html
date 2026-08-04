@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 · 增量功能规格 · v6</title>
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 · 增量功能规格 · v7</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -213,6 +213,15 @@
         <li class="toc-change"><span class="toc-num">17</span><a href="#change-17">「放行」重命名为「投递」</a></li>
       </ul>
 
+      <!-- 一级需求：GT-12754 反病毒引擎配置优化 -->
+      <li class="toc-l1"><a href="#gt-12754">GT-12754 反病毒引擎配置优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">18</span><a href="#change-18">多租户租户管理员视角：移除「平台统一配置」info 横幅</a></li>
+        <li class="toc-change"><span class="toc-num">19</span><a href="#change-19">移除「当前方向执行动作」section 标题行</a></li>
+        <li class="toc-change"><span class="toc-num">20</span><a href="#change-20">执行动作「阻断」重命名为「拒收」（四语同步）</a></li>
+        <li class="toc-change"><span class="toc-num">21</span><a href="#change-21">执行动作下拉：展开时每项显示「名称 + 灰字说明」，触发器仅显示名称</a></li>
+      </ul>
+
       <li><a href="#diff">C. 差异标注（D-001 ~ D-019）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-007）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
@@ -229,9 +238,9 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>文档编号（文件 ticket）</td><td>GT-12731</td></tr>
-        <tr><td>需求名称</td><td>GT-12723 禁用模块的切换交互：点击切换至未启用的模块时，加载状态下模块标签会变更为启用状态，然后再闪回未启用状态问题解决</td></tr>
-        <tr><td>规格类型</td><td>增量规格（Incremental）· 缺陷修复</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v1</span></span></td></tr>
+        <tr><td>需求名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化</td></tr>
+        <tr><td>规格类型</td><td>增量规格（Incremental）· 缺陷修复 + 功能优化</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v7</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-08-02</td></tr>
         <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层抽屉）</td></tr>
         <tr><td>组件路径</td><td>
@@ -816,7 +825,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
   </div>
 
-  <!-- ══════════════ 变更 8 ══════════════ -->
+  <!-- ══════════════ 变更 8 ════════��═════ -->
   <div class="incremental-section" id="change-8">
     <div class="incr-header">
       <span class="incr-num">8</span>
@@ -990,7 +999,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <p class="trigger-path">触发路径：新建规则 → 处置策略 → 附加策略勾选「外部邮件提醒」· 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1737×1046）</p>
         <figure>
           <img src="./screenshots/GT-12753-S2-external-reminder-no-template-position-only-light-1737x1046.png" alt="外部邮件提醒配置区仅显示插入位置下拉与外部发件人提示，无模板下拉" />
-          <figcaption>图 S-2：勾选「外部邮件提醒」后，<code>addon_policy</code> 配置区仅含「插入位置」（正文顶部）与提示文案，<strong>不再有「模板」下拉</strong>；右侧「配置摘要」显示「外部邮件提醒 → 正文顶部」，「逻辑表达式预览」显示「外部邮件提醒（正文顶部）」。</figcaption>
+          <figcaption>图 S-2：勾选「外部邮件提醒」后，<code>addon_policy</code> 配置区仅含「插入位置」（正文顶部）与提示文案，<strong>不再有「模板」下拉</strong>；右侧���配置摘要」显示「外部邮件提醒 → 正文顶部」，「逻辑表达式预览」显示「外部邮件提醒（正文顶部）」。</figcaption>
         </figure>
       </div>
       <h3>12.3 文件与逐元素变更</h3>
@@ -1090,7 +1099,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <tr><td>四语 <code>imageDetect.ocrMode_light</code></td><td>zh「轻度检测（仅印刷体）」等</td><td>zh「检测」/ en「Detection」/ ru「Обнаружение」/ th「ตรวจจับ」</td><td><span class="tag tag-changed">变更</span>重命名</td></tr>
           <tr><td>四语 <code>imageDetect.ocrMode_deep</code></td><td>存在（深度检测文案）</td><td>四语删除</td><td><span class="tag tag-removed">移除</span></td></tr>
           <tr><td>四语 <code>tooltips.ocrMode</code></td><td>「轻度模式仅识别印刷体，深度模式同时识别手写与印刷…」</td><td>「检测并识别图片中的印刷体文字内容」</td><td><span class="tag tag-changed">变更</span>去掉深浅对比</td></tr>
-          <tr><td>四语 <code>imageDetect.ocrSendHint</code></td><td>「外发方向建议启用深度检测…」</td><td>「外发方向建议启用，防截图泄密」（去深度）</td><td><span class="tag tag-changed">变更</span>该键当前未被渲染，属死键，一并去深度表述</td></tr>
+          <tr><td>四语 <code>imageDetect.ocrSendHint</code></td><td>���外发方向建议启用深度检测…」</td><td>「外发方向建议启用，防截图泄密」（去深度）</td><td><span class="tag tag-changed">变更</span>该键当前未被渲染，属死键，一并去深度表述</td></tr>
           <tr><td><code>AttachmentSecurityPage.i18n-parity.test.ts</code> · 必需键列表</td><td>含 <code>ocrMode_deep</code></td><td>移除 <code>ocrMode_deep</code></td><td><span class="tag tag-removed">移除</span>同步测试断言</td></tr>
         </tbody>
       </table>
@@ -1317,7 +1326,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       </tbody>
     </table>
 
-    <h3>D-004 · 意图引擎「每意图单条」：同一意图不允许配置多个不同模式 / 多段区间</h3>
+    <h3>D-004 · 意图引擎「每意图单条」：同一意图不允许配置多个不同模式 / ��段区间</h3>
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·有意约束</span></td></tr>
@@ -1361,7 +1370,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-unverif">待回归</span></td></tr>
-        <tr><td>描述</td><td>变更 7 的修复在 <code>src/lib/mock/dispatcher.ts</code> 层为 <code>sender_group</code> 补正 <code>map_keys_source</code>，S-6 截图中的「研发部门 / 合作伙伴域名」来自 Mock 群组数据。真实后端返回的群组策略发信人组列表结构与该端点契约需在接入后回归。</td></tr>
+        <tr><td>描述</td><td>变更 7 的修复在 <code>src/lib/mock/dispatcher.ts</code> 层为 <code>sender_group</code> 补正 <code>map_keys_source</code>，S-6 截图中的「研发部门 / 合作伙伴域名」来自 Mock ���组数据。真实后端返回的群组策略发信人组列表结构与该端点契约需在接入后回归。</td></tr>
         <tr><td>解决版本</td><td>GT-12751 · 2026-08-03（Mock 环境）</td></tr>
         <tr><td>验证依据</td><td>S-6 浏览器实拍下拉含群组项；<code>dispatcher.ts</code> <code>sender_group</code> 字段元信息 <code>map_keys_source</code></td></tr>
       </tbody>
@@ -1401,7 +1410,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·布局取舍</span></td></tr>
-        <tr><td>描述</td><td>为修复「选中过多无法再添加」（变更 10），左栏由单一纵向增高容器改为 <code>flex flex-col</code>：已选条件区限高（约 45%）独立滚动，「添加条件」区 <code>flex-1 min-h-0</code> 常驻并内部滚动。代价是已选很多时需在上部区域内滚动查看全部已选项，属可接受的取舍。</td></tr>
+        <tr><td>描述</td><td>为修复「选中过多无法再添加」（变更 10），左栏由单一纵向增高容器改为 <code>flex flex-col</code>：已��条件区限高（约 45%）独立滚动，「添加条件」区 <code>flex-1 min-h-0</code> 常驻并内部滚动。代价是已选很多时需在上部区域内滚动查看全部已选项，属可接受的取舍。</td></tr>
         <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
         <tr><td>验证依据</td><td>S-7 浏览器实拍（8 条件已选，添加区仍可见）；<code>ConditionsTab.tsx</code> / <code>ConditionTree.tsx</code> 布局类</td></tr>
       </tbody>
@@ -1496,7 +1505,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
-        <tr><td>问题</td><td>演示环境模块状态由 mock 提供且加载极快 / 或加载失败（D-001），难以放大加载窗口来直观观察闪回。真实后端下 <code>GET /security/modules</code> 有网络延迟时，修复效果（首帧即真值、无闪回）需在存在「未启用」模块的真实数据下回归确认。</td></tr>
+        <tr><td>问题</td><td>演示环境模块状态由 mock 提供且加载极快 / 或加载失败（D-001），难以放大加载窗口来直观观察闪回。真���后端下 <code>GET /security/modules</code> 有网络延迟时，修复效果（首帧即真值、无闪回）需在存在「未启用」模块的真实数据下回归确认。</td></tr>
         <tr><td>影响</td><td>修复在慢速网络下的实际观感</td></tr>
         <tr><td>建议</td><td>在测试环境将某内容层模块设为未启用，配合网络限速打开阶段3 抽屉并在模块间切换，确认导航项全程稳定为「未启用」，无「已启用」中间帧</td></tr>
       </tbody>
@@ -1553,6 +1562,136 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </table>
   </section>
 
+  <!-- ══════════════ 一级需求 GT-12754 ══════════════ -->
+  <div id="gt-12754" style="scroll-margin-top:1rem;"></div>
+  <section id="section-gt-12754">
+    <h2 style="border-bottom:2px solid #2563eb;padding-bottom:0.4rem;">GT-12754 反病毒引擎配置优化</h2>
+    <table>
+      <tbody>
+        <tr><td width="140">需求名称</td><td>GT-12754 反病毒引擎配置优化</td></tr>
+        <tr><td>生成日期</td><td>2026-08-04</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层 → 附件安全检测 → 反病毒引擎 Tab）</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/security/attachment-security/AntivirusTab.tsx</code>（UI 主体）、<br>
+          <code>messages/{zh,en,ru,th}.json</code>（<code>attachmentSecurity.actions.*</code>、<code>attachmentSecurity.actionDesc.*</code>、<code>attachmentSecurity.antivirus.platformManagedHint</code>）
+        </td></tr>
+        <tr><td>变更类型</td><td>UI 文案去除 + 交互优化（下拉项增加说明 + 触发器仅显名称）+ 文案调整（阻断→拒收）</td></tr>
+        <tr><td>webapp commit</td><td><code>336fe42</code></td></tr>
+        <tr><td>浏览器验证状态</td><td>2026-08-04 演示环境真实截图（浅色 / AI版·单租户 / 平台管理员 / 阶段3 附件安全检测 → 反病毒引擎 Tab，1440×900）；实拍 S-1 / S-2 / S-3</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本需求针对附件安全检测「反病毒引擎」Tab 的三类优化：<strong>变更 18</strong> 在多租户租户管理员视角下移除顶部蓝色 info 横幅（原文案「反病毒服务器与病毒库由平台管理员统一配置」）；<strong>变更 19</strong> 移除执行动作配置区的 section 标题「当前方向执行动作」；<strong>变更 20</strong> 将执行动作「阻断」重命名为「拒收」（四语同步）；<strong>变更 21</strong> 为执行动作下拉每个选项增加灰字说明（展开时显示），触发器通过 <code>SelectValue children</code> 覆盖确保仅显示动作名称。改动使用项目 next-intl 框架，涉及页面文案覆盖中/英/俄/泰四语。此四变更对应目录变更 18、19、20、21。
+    </div>
+
+    <div class="interaction-preview" style="margin-top:1rem;">
+      <h4>产品形态 × 角色 可见性矩阵（本需求）</h4>
+      <div class="legend" style="font-size:0.8rem;color:#6b7280;margin:0.3rem 0;">
+        <span>&#x2705; 显示且可操作</span>&nbsp;
+        <span>&#x1F512; 显示但只读</span>&nbsp;
+        <span>&#x274C; 隐藏 / 不存在</span>&nbsp;
+        <span>? 无法验证</span>
+      </div>
+      <table>
+        <thead><tr><th>形态</th><th>云网关·多租户<br>平台管理员</th><th>云网关·多租户<br>租户管理员</th><th>AI版·单租户<br>平台管理员</th><th>传统版·多租户<br>租户管理员</th></tr></thead>
+        <tbody>
+          <tr><td>反病毒引擎 Tab 入口</td><td>&#x2705;</td><td>&#x2705;</td><td>&#x2705;</td><td>&#x2705;</td></tr>
+          <tr><td>info 横幅（变更 18，已移除）</td><td>&#x274C;（已移除）</td><td>&#x274C;（已移除）</td><td>&#x274C;（已移除）</td><td>&#x274C;（已移除）</td></tr>
+          <tr><td>服务器配置区（hidePlatformConfig=false）</td><td>&#x2705;</td><td>&#x274C;（多租户隐藏）</td><td>&#x2705;</td><td>&#x274C;（多租户隐藏）</td></tr>
+          <tr><td>执行动作配置区（变更 19/20/21）</td><td>&#x2705;</td><td>&#x2705;</td><td>&#x2705;</td><td>&#x2705;</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 变更 18 -->
+    <div class="interaction-preview" id="change-18" style="margin-top:1.5rem;">
+      <h4><span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">18</span>多租户租户管理员视角：移除「平台统一配置」info 横幅</h4>
+      <div class="trigger-path">触发路径：产品形态切换为「云网关·多租户」或「AI版·多租户」→ 以租户管理员视角进入附件安全检测 → 点击「反病毒引擎」Tab</div>
+      <table>
+        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>i18n key / 代码路径</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>蓝色 info 横幅</td>
+            <td>多租户租户管理员进入反病毒引擎 Tab 时，页面顶部渲染 <code>data-testid="antivirus-platform-managed-hint"</code> 横幅，文案「反病毒服务器与病毒库由平台管理员在「平台安全策略 → 反病毒引擎」统一配置，此处仅设置本租户的处置动作。」</td>
+            <td>横幅已完全移除，DOM 中不再出现 <code>antivirus-platform-managed-hint</code> 节点；多租户视角下直接显示执行动作配置区</td>
+            <td>i18n key <code>attachmentSecurity.antivirus.platformManagedHint</code>（key 保留，UI 不再引用）<br><code>AntivirusTab.tsx</code>：条件渲染 <code>{hidePlatformConfig ? &lt;Banner/&gt; : &lt;ServerFields/&gt;}</code> 改为 <code>{!hidePlatformConfig &amp;&amp; &lt;ServerFields/&gt;}</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-removed">移除原因：租户管理员已知道服务器配置由平台统一管理（通过隐藏服务器配置区本身即已传达权限边界），冗余横幅增加视觉噪声。</div>
+    </div>
+
+    <!-- 变更 19 -->
+    <div class="interaction-preview" id="change-19" style="margin-top:1rem;">
+      <h4><span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">19</span>移除「当前方向执行动作」section 标题行</h4>
+      <div class="trigger-path">触发路径：（任意形态）进入附件安全检测 → 反病毒引擎 Tab</div>
+      <table>
+        <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>i18n key / 代码路径</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>section 标题 Label</td>
+            <td>执行动作配置 section 顶部有 <code>&lt;Label className="font-medium"&gt;</code> 渲染「当前方向执行动作」</td>
+            <td>Label 已移除；section 内容直接从「发现病毒后的处置」字段开始</td>
+            <td>i18n key <code>attachmentSecurity.antivirus.actionConfig</code>（key 保留于 i18n 文件和 parity 测试，UI 不再引用）<br><code>AntivirusTab.tsx</code>：section 内 Label 组件删除</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 变更 20 -->
+    <div class="interaction-preview" id="change-20" style="margin-top:1rem;">
+      <h4><span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">20</span>执行动作「阻断」重命名为「拒收」（四语同步）</h4>
+      <div class="trigger-path">触发路径：反病毒引擎 Tab → 点击「发现病毒后的处置」或「扫描超时处置」下拉</div>
+      <table>
+        <thead><tr><th>语言</th><th>变更前（reject 标签）</th><th>变更后（reject 标签）</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>中文 (zh)</td><td>阻断</td><td>拒收</td><td><code>attachmentSecurity.actions.reject</code></td></tr>
+          <tr><td>英文 (en)</td><td>Block</td><td>Reject</td><td><code>attachmentSecurity.actions.reject</code></td></tr>
+          <tr><td>俄文 (ru)</td><td>Блокировать</td><td>Отклонить</td><td><code>attachmentSecurity.actions.reject</code></td></tr>
+          <tr><td>泰文 (th)</td><td>บล็อก</td><td>ปฏิเสธ</td><td><code>attachmentSecurity.actions.reject</code></td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">value 值 <code>"reject"</code> 不变，仅 label 文案改变；与 GT-11651 内容规则的「阻断→拒收」改动保持一致的语义对齐。</div>
+    </div>
+
+    <!-- 变更 21 -->
+    <div class="interaction-preview" id="change-21" style="margin-top:1rem;">
+      <h4><span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">21</span>执行动作下拉：展开时每项显示「名称 + 灰字说明」，触发器仅显示名称</h4>
+      <div class="trigger-path">触发路径：反病毒引擎 Tab → 点击「发现病毒后的处置」或「扫描超时处置」下拉触发器 → 下拉展开</div>
+      <table>
+        <thead><tr><th>状态</th><th>变更前</th><th>变更后</th></tr></thead>
+        <tbody>
+          <tr><td>触发器（下拉关闭态）</td><td>显示当前选中动作名称 + 描述文字（两行），触发器区域变高、信息冗余</td><td>仅显示动作名称（单行）；通过 <code>SelectValue children</code> 直接渲染 <code>t(`actions.${value}`)</code> 覆盖 Radix 默认回退行为</td></tr>
+          <tr><td>下拉选项（展开态）</td><td>每项仅显示动作名称（单行）</td><td>每项显示「动作名称 + 灰色描述文字」两行；描述通过 <code>t(`actionDesc.${action}`)</code> 国际化</td></tr>
+        </tbody>
+      </table>
+      <table style="margin-top:0.75rem;">
+        <thead><tr><th>选项值</th><th>动作名称（zh）</th><th>描述文案（zh）</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>quarantine</td><td>隔离</td><td>邮件进入隔离区，管理员审核后可放行或删除</td><td><code>actionDesc.quarantine</code></td></tr>
+          <tr><td>audit</td><td>审核</td><td>邮件进入待审核队列，人工确认后投递或退回</td><td><code>actionDesc.audit</code></td></tr>
+          <tr><td>reject</td><td>拒收</td><td>在 SMTP 阶段拒绝接收，发件方收到退信通知（452/550）</td><td><code>actionDesc.reject</code></td></tr>
+          <tr><td>discard</td><td>丢弃</td><td>静默丢弃，发件方无感知，无退信</td><td><code>actionDesc.discard</code></td></tr>
+          <tr><td>accept</td><td>继续流水线</td><td>不对此结果采取拦截动作，继续进入下一阶段检测</td><td><code>actionDesc.accept</code></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.83rem;color:#6b7280;margin-top:0.5rem;">新增 i18n 节 <code>attachmentSecurity.actionDesc.*</code>（zh/en/ru/th 四语），并在 <code>AttachmentSecurityPage.i18n-parity.test.ts</code> 中登记全部 5 个 key 为必需键。</p>
+
+      <figure style="margin-top:1rem;">
+        <img src="../html-spec/filter-rules-pipeline-attachment-security/screenshots/GT-12754-antivirus-tab-virus-dropdown-open.png" alt="发现病毒后的处置下拉展开态">
+        <figcaption>S-1：发现病毒后的处置下拉展开（1440×900）：触发器仅显示「隔离」，展开后四项各含名称+说明，「拒收」替代原「阻断」。</figcaption>
+      </figure>
+      <figure style="margin-top:0.75rem;">
+        <img src="../html-spec/filter-rules-pipeline-attachment-security/screenshots/GT-12754-antivirus-tab-timeout-dropdown-open.png" alt="扫描超时处置下拉展开态">
+        <figcaption>S-2：扫描超时处置下拉展开（1440×900）：五项含名称+说明，「继续流水线」当前选中（蓝色高亮）。</figcaption>
+      </figure>
+      <figure style="margin-top:0.75rem;">
+        <img src="../html-spec/filter-rules-pipeline-attachment-security/screenshots/GT-12754-antivirus-tab-platform-admin-default.png" alt="反病毒引擎 Tab 默认态（平台管理员）">
+        <figcaption>S-3：平台管理员视角反病毒引擎 Tab 默认态（1440×900）：触发器仅显示动作名称，无 info 横幅，无 section 标题行。</figcaption>
+      </figure>
+    </div>
+  </section>
+
   <!-- ══════════════ E. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>E. 版本历史</h2>
@@ -1575,7 +1714,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>v3</td>
           <td>2026-08-03</td>
           <td><code>工作区已提交</code></td>
-          <td>补全 GT-12751 本轮全部条件配置优化，将用户提出的 10 个优化点全部落文档并加「10 点 → 区块」对照表：变更 5（条件目录移除「功能组 / URL 沙箱结果 / 短链展开」，54→51，featureGroup 面板归零）、变更 6（值控件规范化：加密附件 / Mail From 为空→是/否 布尔控件，二维码 ODR→成功/失败，信封-头 From 一致性→一致/不一致，病毒扫描→有毒/无毒，四语补齐枚举文案）、变更 7（修复发信人组下拉：dispatcher 为 sender_group 补正 map_keys_source 指向群组策略发信人组）、变更 8（发件组织 orgDept 部门树多选实现）、变更 9（说明卡 DescriptionCard 增强为输入类型/数据来源/格式示例/有效范围/运算符/推荐配置多段）、变更 10（修复「选中过多无法再添加」：已选区限高独立滚动、添加区 flex-1 min-h-0 常驻）；新增浏览器实拍 S-4（病毒有毒/无毒值）/ S-5（发件组织部门树）/ S-6（发件人组群组下拉）/ S-7（8 条件已选仍可添加）；差异新增 D-007~D-012、待确认新增 Q-004；文档版本 v2→v3；顺带修复本次编辑区 2 处 UTF-8 乱码（多段 / 注释分隔符）。</td>
+          <td>补全 GT-12751 本轮全部条件配置优化，将用户提出的 10 个优化点全部落文档并加「10 点 → 区块」对照表：变更 5（条件目录移除「功能组 / URL 沙箱结果 / 短链展开」，54→51，featureGroup 面板归零）、变更 6（值控件规范化：加密附件 / Mail From 为空→是/否 布尔控件，二维码 ODR→成功/失败，信封-头 From 一致性→一致/不一致，病毒扫描→有毒/无毒，四语补齐枚举文案）、变更 7（修复发信人组下拉：dispatcher 为 sender_group 补正 map_keys_source 指向群组策略发信人组）、变更 8（发件组织 orgDept 部门树多选实现）、变更 9（说明卡 DescriptionCard 增强��输入类型/数据来源/格式示例/有效范围/运算符/推荐配置多段）、变更 10（修复「选中过多无法再添加」：已选区限高独立滚动、添加区 flex-1 min-h-0 常驻）；新增浏览器实拍 S-4（病毒有毒/无毒值）/ S-5（发件组织部门树）/ S-6（发件人组群组下拉）/ S-7（8 条件已选仍可添加）；差异新增 D-007~D-012、待确认新增 Q-004；文档版本 v2→v3；顺带修复本次编辑区 2 处 UTF-8 乱码（多段 / 注释分隔符）。</td>
         </tr>
         <tr>
           <td>v4</td>
@@ -1594,6 +1733,12 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>2026-08-04</td>
           <td><code>02a906d</code></td>
           <td>追加一级需求 GT-11651 内容规则-执行动作调整（内容规则新建/编辑抽屉 → 执行动作下拉）：新增变更 15（ContentRuleDrawer 的 ACTIONS 数组移除 tag_deliver，下拉由 6 项减为 5 项；经用户确认保留 deliver；ContentRuleUiAction 类型与历史 tag_deliver 标记配置块保留不删）、变更 16（block 标题「阻断」改为「拒收」，为 5 种动作补充灰字说明，新增 actionHint() 助手、SelectItem 改标题+说明两行式、SelectTrigger 仅显示标题；四语改 contentRules.actionBlock 及 actionBlock/Discard/Isolate/ReviewHint）、变更 17（deliver 标题「放行」改为「投递」，zh 改文案、th 由 ส่งต่อ 对齐为 ส่งมอบ、en/ru 语义本即投递不变）；浏览器实拍 S-1（执行动作下拉 5 项两行式：投递/隔离/审核/拒收/丢弃，1694×1046）；差异新增 D-017~D-019、待确认新增 Q-007；C 差异范围 D-001~D-019、待确认 Q-001~Q-007；顺带修复本文档 3 处既有 UTF-8 乱码（change-14 表格 clamp 说明、两处章节注释）；文档版本 v5→v6。</td>
+        </tr>
+        <tr>
+          <td>v7</td>
+          <td>2026-08-04</td>
+          <td><code>336fe42</code></td>
+          <td>追加一级需求 GT-12754 反病毒引擎配置优化（附件安全检测 → 反病毒引擎 Tab）：新增变更 18（移除多租户租户管理员视角下顶部 info 横幅 antivirus-platform-managed-hint；AntivirusTab.tsx 条件渲染改为 !hidePlatformConfig 分支，横幅 DOM 节点完全消除）、变更 19（移除执行动作配置 section 标题行「当前方向执行动作」Label；i18n key actionConfig 保留于文件与 parity 测试，UI 不再引用）、变更 20（执行动作 reject 标签「阻断」改为「拒收」，四语同步：Block→Reject / Блокировать→Отклонить / บล็อก→ปฏิเสธ；与 GT-11651 变更 16 语义对齐）、变更 21（为执行动作下拉两个 Select 的 SelectItem 添加「动作名称 + 灰字说明」两行式渲染；新增 i18n 节 attachmentSecurity.actionDesc.*（zh/en/ru/th 四语，5 个 key：quarantine/audit/reject/discard/accept）；SelectTrigger 内 SelectValue 传 children 覆盖 Radix 默认回退，确保触发器仅显动作名称；parity 测试补登 actionDesc.* 5 个必需 key）；浏览器实拍 S-1（病毒动作下拉展开，1440×900）/ S-2（超时动作下拉展开）/ S-3（Tab 默认态，无横幅无标题行）；目录追加 GT-12754 分组（变更 18~21）；title 追加本需求；文档版本 v6→v7。</td>
         </tr>
       </tbody>
     </table>
