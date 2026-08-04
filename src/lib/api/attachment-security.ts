@@ -209,7 +209,6 @@ export async function getQrDeepRoutesConfig(
     intent_medium: intentCategories.split(',').includes('medium'),
     intent_low: intentCategories.split(',').includes('low'),
     advanced_rules: obj.advanced_rules === true,
-    arbitration: obj.arbitration === 'first_match' ? 'first_match' : 'highest_priority',
   };
 }
 
@@ -234,7 +233,6 @@ export async function saveQrDeepRoutesConfig(
         config.intent_low ? 'low' : null,
       ].filter(Boolean).join(','),
       advanced_rules: config.advanced_rules,
-      arbitration: config.arbitration,
     },
     requestFn,
   );

@@ -299,7 +299,7 @@ let mockMailMarkingRules: Rule[] = [
     date: "2024-03-05",
     disclaimer: {
       content:
-        "本邮件及其附件仅供收件人使用，包含的信息可能是机密的。如果您不是预期的收件人，请立即删除本邮件并通知发件人。",
+        "本邮件及其附件仅供收件人使用���包含的信息可能是机密的。如果您不是预期的收件人，请立即删除本邮件并通知发件人。",
       positions: ["body_bottom"],
       format: "auto",
     },
@@ -1235,7 +1235,7 @@ export function mockOpsTopAi(): { markdown: string } {
   };
 }
 
-// ─── ��控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
+// ─── ���控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
 export function mockMonitorDashboardOverview(range: MonitorDashboardRange): MonitorDashboardOverview {
   const volumes: Record<MonitorDashboardRange, number> = {
     today: 125847,
@@ -1845,7 +1845,7 @@ export function mockInboundAuditPending(): InboundAuditListResponse {
 }
 
 // ─── 智能体运行概况 / 待办（agent stats）─────────────────────────────────────
-// demo DASHBOARD_AGENTS：全部运行；今日处理量与待审数照抄。
+// demo DASHBOARD_AGENTS：全部运行；今日处理量��待审数照抄。
 export function mockPhishingStats(): PhishingStats {
   return {
     today_detected: 12450,
@@ -4177,7 +4177,7 @@ export function mockAuthSpoofingConfig(): AuthSpoofingConfig {
   return JSON.parse(JSON.stringify(defaultAuthSpoofingConfig()));
 }
 
-// 观测统计：hits 总和固定为 23，对齐 demo 硬编码的
+// 观测统计：hits ��和固定为 23，对齐 demo 硬编码的
 // `observeStats.wouldDrop`（AuthSpoofingPage.tsx），让「预计丢弃」脉冲徽标
 // 在 Mock 模式下与 demo 展示一致。`days` 只影响回显字段，不影响样本条数/分布。
 function authSpoofingObservePoints(): ObserveStatPoint[] {
@@ -5059,7 +5059,6 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
     intent_engine: true,
     intent_categories: "high,medium,low",
     advanced_rules: false,
-    arbitration: "highest_priority",
   }),
   ...attachmentConfigSeed("image_detect_actions_receive", {
     qr_light_action: "quarantine",
@@ -5287,7 +5286,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "incoming",
     sender: "support@bank-verify.com",
     recipients: "user@company.com, sales@company.com, marketing@company.com",
-    subject: "账户安全验证通知（多投信）",
+    subject: "账���安全验证通知（多投信）",
     action: "block",
     reason: "AI-URL沙箱检测到钓鱼页面",
     mailType: "phishing",

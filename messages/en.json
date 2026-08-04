@@ -5013,9 +5013,6 @@
       "lowRisk": "Low Risk (Subscription)",
       "advancedRule": "Advanced Rules",
       "advancedRuleHint": "Requires 'Pipeline Stage 5 - Advanced Rules' module enabled",
-      "arbitration": "Result Arbitration Strategy",
-      "highestPriority": "Execute highest priority action",
-      "firstMatch": "Execute first match in module order",
       "detectLimit": "Detection Limit",
       "items": "items",
       "exceedAction": "Exceed Limit Action",
@@ -5114,7 +5111,6 @@
       "antivirusTimeout": "Action taken when the AV service times out or is unavailable",
       "ocrMode": "Detects and recognizes printed text content in images",
       "qrMode": "Light mode acts immediately; deep mode decodes QR content and routes it to downstream modules",
-      "arbitration": "How the final action is selected when multiple downstream modules match",
       "qrLimit": "Decode at most 1–50 QR codes per message",
       "encryptedMode": "Choose whether to detect and whether to attempt decrypting encrypted attachments",
       "decryptFailAction": "Action taken when no valid password is found or decryption fails"

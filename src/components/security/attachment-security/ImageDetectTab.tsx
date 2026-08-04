@@ -36,7 +36,6 @@ export const DEFAULT_QR_DEEP_ROUTES: QrDeepRoutesConfig = {
   intent_medium: true,
   intent_low: true,
   advanced_rules: false,
-  arbitration: 'highest_priority',
 };
 
 export const DEFAULT_IMAGE_DETECT_ACTIONS: ImageDetectActionConfig = {
@@ -250,25 +249,6 @@ export function ImageDetectTab({
                 </div>
                 {routes.advanced_rules && <p className="ml-6 text-xs text-muted-foreground" data-testid="advanced-rule-hint">{t('imageDetect.advancedRuleHint')}</p>}
               </div>
-            </div>
-
-            {/* GT-12201：结果仲裁暂不可配置。
-                arbitration 目前是纯前端字段 —— cmd/attachd、configs/attachd/attachd.cf
-                的 [image_detect_qr_deep_routes] 段、以及 Go 全仓都搜不到它，
-                即两个取值都从未下发到检测侧、不参与任何仲裁。放开可选会让管理员
-                配出永不生效的策略（GT-12194 同类问题）。且「首次命中」的语义
-                本身也未定义——各路由的执行顺序在任何地方都没有约定。
-                按工单决策先置灰，待产品明确语义并在 attachd 落地后再放开。 */}
-            <div className="space-y-2 border-t pt-4">
-              <Label>{infoLabel(t('imageDetect.arbitration'), t('tooltips.arbitration'), 'qr-deep-arbitration')}</Label>
-              <Select disabled value={routes.arbitration} onValueChange={(arbitration) => onRoutesChange({ ...routes, arbitration: arbitration as QrDeepRoutesConfig['arbitration'] })}>
-                <SelectTrigger className="w-[280px] max-w-full" data-testid="qr-deep-arbitration"><SelectValue /></SelectTrigger>
-                <SelectContent data-testid="qr-deep-arbitration-options">
-                  <SelectItem value="highest_priority" data-testid="qr-deep-arbitration-highest-priority">{t('imageDetect.highestPriority')}</SelectItem>
-                  <SelectItem value="first_match" data-testid="qr-deep-arbitration-first-match">{t('imageDetect.firstMatch')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground" data-testid="qr-deep-arbitration-pending">{t('imageDetect.pending')}</p>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
