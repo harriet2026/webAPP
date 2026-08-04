@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 · 增量功能规格 · v3</title>
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 · 增量功能规格 · v4</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -191,8 +191,15 @@
         <li class="toc-change"><span class="toc-num">10</span><a href="#change-10">修复「选中条件较多时无法再添加其他条件」（已选区限高独立滚动）</a></li>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-012）</a></li>
-      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-004）</a></li>
+      <!-- 一级需求：GT-12753 处置策略去自定义模板 -->
+      <li class="toc-l1"><a href="#gt-12753">GT-12753 高级过滤规则——新建规则——处置策略：免责声明 / 外部邮件提醒，去掉「自定义模板」</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">11</span><a href="#change-11">「免责声明」附加策略：移除「声明模板」配置，仅保留「插入位置」</a></li>
+        <li class="toc-change"><span class="toc-num">12</span><a href="#change-12">「外部邮件提醒」附加策略：移除「模板」配置，仅保留「插入位置」</a></li>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-013）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-005）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
   </section>
@@ -892,6 +899,102 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
   </div>
 
+  <!-- ══════════════ 一级需求 GT-12753 ══════════════ -->
+  <section id="gt-12753">
+    <h2 style="border-bottom:2px solid #2563eb;padding-bottom:0.4rem;">GT-12753 高级过滤规则——新建规则——处置策略：免责声明 / 外部邮件提醒，去掉「自定义模板」</h2>
+    <table>
+      <tbody>
+        <tr><td width="140">需求名称</td><td>GT-12753 高级过滤规则——新建规则——处置策略：免责声明 / 外部邮件提醒，去掉「自定义模板」</td></tr>
+        <tr><td>生成日期</td><td>2026-08-04</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段4 综合策略 → 高级过滤规则 → 新建/编辑规则抽屉 → 「处置策略」页签 → 附加策略）</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/security/advanced-filter-rules/AddonsPanel.tsx</code>（<code>defaultAddonParams</code> / <code>AddonParamsForm</code>）、
+          <code>ActionSummary.tsx</code>（附加策略摘要）、
+          <code>messages/{zh,en,ru,th}.json</code>
+        </td></tr>
+        <tr><td>变更类型</td><td>功能移除（去掉「自定义模板」配置）</td></tr>
+        <tr><td>webapp commit</td><td><code>工作区已提交</code>（免责声明 / 外部邮件提醒去模板）</td></tr>
+        <tr><td>浏览器验证状态</td><td>2026-08-04 演示环境真实截图（浅色 / AI版·单租户 / 平台管理员 / Mock 数据 / 阶段4 高级过滤规则抽屉 → 处置策略，1737×1046）；实拍 S-1 / S-2</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本需求从「处置策略 → 附加策略」的两个附加策略中移除「模板」配置项：<strong>免责声明</strong>（<code>addon_policy</code>）移除「声明模板」（标准 / 法务 / 自定义），<strong>外部邮件提醒</strong>移除「模板」（标准 / 安全提醒 / 自定义）。两者均仅保留「插入位置」下拉。改动使用项目 next-intl 框架，涉及页面文案覆盖中/英/俄/泰四语。此二变更对应目录变更 11、12。
+    </div>
+  </section>
+
+  <!-- ══════════════ 变更 11 ══════════════ -->
+  <div class="incremental-section" id="change-11">
+    <div class="incr-header">
+      <span class="incr-num">11</span>
+      <h2>「免责声明」附加策略：移除「声明模板」配置</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>AddonsPanel.tsx</code>、<code>ActionSummary.tsx</code>、<code>messages/{zh,en,ru,th}.json</code><br/>变更类型：功能移除 · 2026-08-04</span>
+    </div>
+    <div class="incr-body">
+      <h3>11.1 方案概述</h3>
+      <p>
+        勾选「免责声明」（<code>addon_policy</code>）附加策略后，其配置区原有「声明模板」（标准模板 / 法务模板 / 自定义）与「插入位置」两个下拉。本次<strong>移除「声明模板」下拉</strong>，配置区仅保留「插入位置」（正文顶部 / 正文底部 / 邮件头，默认正文底部）。默认参数不再写入 <code>template</code> 字段；右侧「配置摘要 / 逻辑表达式预览」中的免责声明行由原「模板名」改为显示「插入位置」。
+      </p>
+      <h3>11.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-1 · 免责声明配置区（已去除「声明模板」，仅剩「插入位置」）</h4>
+        <p class="trigger-path">触发路径：新建规则 → 处置策略 → 附加策略勾选「免责声明」· 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1737×1046）</p>
+        <figure>
+          <img src="./screenshots/GT-12753-S1-disclaimer-no-template-position-only-light-1737x1046.png" alt="免责声明配置区仅显示插入位置下拉，无声明模板下拉" />
+          <figcaption>图 S-1：勾选「免责声明」后，右侧 <code>addon_policy</code> 配置区仅含「插入位置」（正文底部），<strong>不再有「声明模板」下拉</strong>。对照修改前该区曾有「声明模板：标准模板」下拉（红框位置，见需求截图）。</figcaption>
+        </figure>
+      </div>
+      <h3>11.3 文件与逐元素变更</h3>
+      <table>
+        <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>AddonsPanel.tsx</code> · <code>defaultAddonParams('disclaimer')</code></td><td><code>{ template: 'standard', position: 'body_bottom' }</code></td><td><code>{ position: 'body_bottom' }</code></td><td><span class="tag tag-removed">移除</span>不再初始化 template</td></tr>
+          <tr><td><code>AddonsPanel.tsx</code> · 免责声明表单</td><td>「声明模板」<code>SelectField</code>（standard/legal/custom）+ 「插入位置」<code>SelectField</code></td><td>仅「插入位置」<code>SelectField</code></td><td><span class="tag tag-removed">移除</span>模板下拉整块删除</td></tr>
+          <tr><td><code>ActionSummary.tsx</code> · disclaimer 摘要</td><td>返回「模板名 + 插入位置」</td><td>仅返回「插入位置」</td><td><span class="tag tag-changed">变更</span>不再引用已删的 template 字段</td></tr>
+          <tr><td><code>messages/{zh,en,ru,th}.json</code></td><td>含 <code>addons.disclaimerTemplate</code> / <code>...Standard</code> / <code>...Legal</code> / <code>...Custom</code></td><td>四语删除上述 4 个键</td><td><span class="tag tag-removed">移除</span>四语齐删，无残留引用</td></tr>
+        </tbody>
+      </table>
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更 12 ══════════════ -->
+  <div class="incremental-section" id="change-12">
+    <div class="incr-header">
+      <span class="incr-num">12</span>
+      <h2>「外部邮件提醒」附加策略：移除「模板」配置</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>AddonsPanel.tsx</code>、<code>ActionSummary.tsx</code>、<code>messages/{zh,en,ru,th}.json</code><br/>变更类型：功能移除 · 2026-08-04</span>
+    </div>
+    <div class="incr-body">
+      <h3>12.1 方案概述</h3>
+      <p>
+        勾选「外部邮件提醒」附加策略后，其配置区原有「模板」（标准模板 / 安全提醒 / 自定义）与「插入位置」两个下拉。本次<strong>移除「模板」下拉</strong>，配置区仅保留「插入位置」（默认正文顶部）与底部提示「外部邮件提醒仅对判定为外部发件人的邮件生效」。默认参数不再写入 <code>template</code> 字段；右侧摘要由原「模板名」改为显示「插入位置」。
+      </p>
+      <h3>12.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-2 · 外部邮件提醒配置区（已去除「模板」，仅剩「插入位置」）</h4>
+        <p class="trigger-path">触发路径：新建规则 → 处置策略 → 附加策略勾选「外部邮件提醒」· 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1737×1046）</p>
+        <figure>
+          <img src="./screenshots/GT-12753-S2-external-reminder-no-template-position-only-light-1737x1046.png" alt="外部邮件提醒配置区仅显示插入位置下拉与外部发件人提示，无模板下拉" />
+          <figcaption>图 S-2：勾选「外部邮件提醒」后，<code>addon_policy</code> 配置区仅含「插入位置」（正文顶部）与提示文案，<strong>不再有「模板」下拉</strong>；右侧「配置摘要」显示「外部邮件提醒 → 正文顶部」，「逻辑表达式预览」显示「外部邮件提醒（正文顶部）」。</figcaption>
+        </figure>
+      </div>
+      <h3>12.3 文件与逐元素变更</h3>
+      <table>
+        <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>AddonsPanel.tsx</code> · <code>defaultAddonParams('externalReminder')</code></td><td><code>{ template: 'standard', position: 'body_top' }</code></td><td><code>{ position: 'body_top' }</code></td><td><span class="tag tag-removed">移除</span>不再初始化 template</td></tr>
+          <tr><td><code>AddonsPanel.tsx</code> · 外部邮件提醒表单</td><td>「模板」<code>SelectField</code>（standard/security/custom）+ 「插入位置」<code>SelectField</code></td><td>仅「插入位置」<code>SelectField</code></td><td><span class="tag tag-removed">移除</span>模板下拉整块删除</td></tr>
+          <tr><td><code>ActionSummary.tsx</code> · externalReminder 摘要</td><td>返回「模板名」</td><td>返回「插入位置」（顶部 / 底部）</td><td><span class="tag tag-changed">变更</span>不再引用已删的 template 字段</td></tr>
+          <tr><td><code>messages/{zh,en,ru,th}.json</code></td><td>含 <code>addons.externalReminderTemplate</code> / <code>...Standard</code> / <code>...Security</code> / <code>...Custom</code></td><td>四语删除上述 4 个键</td><td><span class="tag tag-removed">移除</span>四语齐删，无残留引用</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">
+        <code>externalReminderTemplateDefault</code> / <code>disclaimerTemplateDefault</code> 为改动前即无引用的历史死键，不属本次范围，未删除。
+      </div>
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
   <!-- ══════════════ C. 差异标注 ══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -1015,6 +1118,16 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td>验证依据</td><td>S-7 浏览器实拍（8 条件已选，添加区仍可见）；<code>ConditionsTab.tsx</code> / <code>ConditionTree.tsx</code> 布局类</td></tr>
       </tbody>
     </table>
+
+    <h3>D-013 · 免责声明 / 外部邮件提醒去模板后，附加策略摘要由「模板名」改为「插入位置」</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·连带变更</span></td></tr>
+        <tr><td>描述</td><td>变更 11 / 12 移除「模板」下拉后，<code>ActionSummary.tsx</code> 中两个附加策略的摘要不再能引用 <code>params.template</code>，改为显示「插入位置」（免责声明：正文顶部/底部/邮件头；外部邮件提醒：正文顶部/底部）。右侧「配置摘要」表与「逻辑表达式预览」相应改为展示插入位置，S-2 实拍可见「外部邮件提醒 → 正文顶部」。历史死键 <code>disclaimerTemplateDefault</code> / <code>externalReminderTemplateDefault</code> 改动前即无引用，未在本次删除。</td></tr>
+        <tr><td>解决版本</td><td>GT-12753 · 2026-08-04</td></tr>
+        <tr><td>验证依据</td><td>S-1 / S-2 浏览器实拍；<code>ActionSummary.tsx</code> disclaimer / externalReminder 分支；四语已删除 <code>disclaimerTemplate*</code> / <code>externalReminderTemplate{Standard,Security,Custom}</code> 且全库无残留引用</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- ══════════════ D. 待确认 ══════════════ -->
@@ -1060,6 +1173,16 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td>建议</td><td>接入真实后端后逐条新建并保存，重新打开编辑抽屉确认「值 / 所选群组 / 所选部门」准确回显、表达式一致</td></tr>
       </tbody>
     </table>
+
+    <h3>Q-005 · 去模板后免责声明 / 外部邮件提醒的正文内容来源需与后端确认</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>移除「模板」选择后，免责声明 / 外部邮件提醒实际插入的正文内容（文案）如何确定——是后端使用固定默认文案、还是在其他配置入口维护——需与后端 / 产品确认。本次仅移除新建规则抽屉内的「模板」下拉，未涉及内容来源的其他配置面。</td></tr>
+        <tr><td>影响</td><td>规则实际生效时插入的免责声明 / 外部提醒正文内容</td></tr>
+        <tr><td>建议</td><td>与后端确认 <code>addon_policy</code> 生效时的正文内容来源；若需用户可编辑内容，评估是否在别处提供入口</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- ══════════════ E. 版本历史 ══════════════ -->
@@ -1085,6 +1208,12 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>2026-08-03</td>
           <td><code>工作区已提交</code></td>
           <td>补全 GT-12751 本轮全部条件配置优化，将用户提出的 10 个优化点全部落文档并加「10 点 → 区块」对照表：变更 5（条件目录移除「功能组 / URL 沙箱结果 / 短链展开」，54→51，featureGroup 面板归零）、变更 6（值控件规范化：加密附件 / Mail From 为空→是/否 布尔控件，二维码 ODR→成功/失败，信封-头 From 一致性→一致/不一致，病毒扫描→有毒/无毒，四语补齐枚举文案）、变更 7（修复发信人组下拉：dispatcher 为 sender_group 补正 map_keys_source 指向群组策略发信人组）、变更 8（发件组织 orgDept 部门树多选实现）、变更 9（说明卡 DescriptionCard 增强为输入类型/数据来源/格式示例/有效范围/运算符/推荐配置多段）、变更 10（修复「选中过多无法再添加」：已选区限高独立滚动、添加区 flex-1 min-h-0 常驻）；新增浏览器实拍 S-4（病毒有毒/无毒值）/ S-5（发件组织部门树）/ S-6（发件人组群组下拉）/ S-7（8 条件已选仍可添加）；差异新增 D-007~D-012、待确认新增 Q-004；文档版本 v2→v3；顺带修复本次编辑区 2 处 UTF-8 乱码（多段 / 注释分隔符）。</td>
+        </tr>
+        <tr>
+          <td>v4</td>
+          <td>2026-08-04</td>
+          <td><code>工作区已提交</code></td>
+          <td>追加一级需求 GT-12753 高级过滤规则——新建规则——处置策略：免责声明 / 外部邮件提醒，去掉「自定义模板」：变更 11（免责声明 addon_policy 移除「声明模板」下拉——standard/legal/custom，defaultAddonParams 不再写 template，配置区仅保留「插入位置」；ActionSummary disclaimer 摘要改为显示插入位置；四语删 disclaimerTemplate/Standard/Legal/Custom）、变更 12（外部邮件提醒移除「模板」下拉——standard/security/custom，defaultAddonParams 不再写 template，仅保留「插入位置」+ 外部发件人提示；ActionSummary externalReminder 摘要改为显示插入位置；四语删 externalReminderTemplate/Standard/Security/Custom）；新增浏览器实拍 S-1（免责声明去模板仅剩插入位置）/ S-2（外部邮件提醒去模板仅剩插入位置，摘要显示正文顶部）；差异新增 D-013、待确认新增 Q-005；文档版本 v3→v4；顺带修复免责声明 / 外部邮件提醒功能块内既有 UTF-8 乱码（ru/th 名称、描述、位置、提示、内容占位符）。</td>
         </tr>
       </tbody>
     </table>

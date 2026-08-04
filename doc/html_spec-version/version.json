@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 16,
+  "current_version": 17,
   "history": [
     {
       "version": 1,
@@ -18,7 +18,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12649",
       "incremental": true,
-      "summary": "GT-12649 v2：新增变更 #2（DevMode 变更规格独立分区）、#3（处置中心执行动作移除"标记投递"）、#4（安全总览执行动作图表移除"标记投递"）；重构为多变更点格式，补充真实浏览器截图 S-3~S-7；新增 D-3/D-4/D-5、Q-3。"
+      "summary": "GT-12649 v2：新增变更 #2（DevMode 变更规格独立分区）、#3（处置中心执行动作移除「标记投递」）、#4（安全总览执行动作图表移除「标记投递」）；重构为多变更点格式，补充真实浏览器截图 S-3~S-7；新增 D-3/D-4/D-5、Q-3。"
     },
     {
       "version": 3,
@@ -36,7 +36,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12649",
       "incremental": true,
-      "summary": "文档规范修复：按技能规范重写目录（每个需求点使用完整名称作为主入口，子章节使用编号层级 1.1/1.2/…/4.3，尾部三项以 C/D/E 字母编号）；变更总览标题由"v2 新增 3 项"修正为"共 4 项需求"；各变更区块 incr-header 补充路由路径；批量修复文档中全部 UTF-8 replacement character 乱码（共 6 处：侧边栏底部、执行动作 ×2、审核、导航区域、平台管控策略）。"
+      "summary": "文档规范修复：按技能规范重写目录（每个需求点使用完整名称作为主入口，子章节使用编号层级 1.1/1.2/…/4.3，尾部三项以 C/D/E 字母编号）；变更总览标题由「v2 新增 3 项」修正为「共 4 项需求」；各变更区块 incr-header 补充路由路径；批量修复文档中全部 UTF-8 replacement character 乱码（共 6 处：侧边栏底部、执行动作 ×2、审核、导航区域、平台管控策略）。"
     },
     {
       "version": 5,
@@ -63,7 +63,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12660",
       "incremental": true,
-      "summary": "GT-12660 增量：邮件安全总览执行动作图表移除"灰名单"系列（后端 key advanced_review）；追加一级目录条目 GT-12660、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-2 暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-004（key 排查过程记录）；目录 C 项编号更新为 D-001~D-004；version.json current_version 6→7。"
+      "summary": "GT-12660 增量：邮件安全总览执行动作图表移除「灰名单」系列（后端 key advanced_review）；追加一级目录条目 GT-12660、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1~S-2 暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-004（key 排查过程记录）；目录 C 项编号更新为 D-001~D-004；version.json current_version 6→7。"
     },
     {
       "version": 8,
@@ -72,7 +72,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12659",
       "incremental": true,
-      "summary": "GT-12659 增量：邮件处置中心搜索模块执行动作筛选移除"灰名单"（从 EXECUTION_ACTIONS 移除 advanced_review）；追加一级目录条目 GT-12659、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 下拉展开 7 项无灰名单，暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-005（EXECUTION_ACTIONS 共享事实源说明）；目录 C 项编号更新为 D-001~D-005；version.json current_version 7→8。"
+      "summary": "GT-12659 增量：邮件处置中心搜索模块执行动作筛选移除「灰名单」（从 EXECUTION_ACTIONS 移除 advanced_review）；追加一级目录条目 GT-12659、变更 1 区块（1.1 方案概述 / 1.2 截图式交互预览 S-1 默认态 + S-2 下拉展开 7 项无灰名单，暗色 1305×832 / 1.3 逐元素变更表）；追加差异 D-005（EXECUTION_ACTIONS 共享事实源说明）；目录 C 项编号更新为 D-001~D-005；version.json current_version 7→8。"
     },
     {
       "version": 9,
@@ -145,6 +145,15 @@
       "ticket": "GT-12731",
       "incremental": true,
       "summary": "GT-12731.html 补全 GT-12751 本轮全部条件配置优化（doc 版本 v2→v3），将用户提出的 10 个优化点全部落文档并加「10 点→区块」对照表：变更 5（catalogue 移除功能组 panel:featureGroup / urlSandbox:url_sandbox / shortLink:short_link 三条，目录基线 54→51，catalogue.test.ts 断言 byPanel('featureGroup')===0）、变更 6（值控件规范化：is_encrypted_attachment 与 mailfrom_empty 标为布尔字段→BooleanValueSelect 是/否；image_qr_code_result→[success,fail] 成功/失败；envelope_header_mismatch→[match,mismatch] 一致/不一致；virus_scan_result→[infected,clean] 有毒/无毒；四语补齐 booleanValues/qrResultValues/envelopeHeaderConsistencyValues/virusScanResultValues）、变更 7（修复发信人组下拉：dispatcher 为 sender_group 补正 map_keys_source 指向群组策略发信人组 type=sender，MapValueSection useMapKeys 取到候选）、变更 8（发件组织 sender_dept_path panel:orgDept 组织通讯录部门树多选 OrgDepartmentSection）、变更 9（DescriptionCard 说明卡增强为输入类型/数据来源/格式示例/单位/有效范围/对象含义/运算符/示例/推荐配置多段，顺带修 inputType.intentEngine 缺失）、变更 10（修复选中过多无法再添加：已选区限高约45% overflow-y-auto 独立滚动、添加条件区 flex-1 min-h-0 常驻，ConditionsTab/ConditionTree）；新增浏览器实拍 S-4 病毒有毒/无毒值 + S-5 发件组织部门树 + S-6 发件人组群组下拉 + S-7 已选8条件仍可添加（浅色 1575×847）；差异新增 D-007~D-012（目录基线54链条、群组Mock来源待回归、一致性字段方向映射、布尔vs枚举取舍、发件组织树形包含语义、双滚动布局取舍）、待确认新增 Q-004（值/群组/组织真实后端契约与回显回归）；顺带修复本次编辑区 2 处 UTF-8 乱码（多段/C节注释分隔符）；乱码自检 CLEAN；version.json current_version 15→16。"
+    },
+    {
+      "version": 17,
+      "generated_at": "2026-08-04",
+      "webapp_commit": "工作区已提交",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12753",
+      "incremental": true,
+      "summary": "GT-12731.html 追加一级需求 GT-12753 高级过滤规则——新建规则——处置策略：免责声明 / 外部邮件提醒，去掉「自定义模板」（doc 版本 v3→v4）：变更 11（AddonsPanel 免责声明 defaultAddonParams('disclaimer') 去掉 template:'standard' 仅留 position:'body_bottom'；移除「声明模板」SelectField（standard/legal/custom），配置区仅剩「插入位置」；ActionSummary disclaimer 分支不再引用 params.template，改为返回插入位置；四语删 addons.disclaimerTemplate/Standard/Legal/Custom）、变更 12（外部邮件提醒 defaultAddonParams('externalReminder') 去掉 template 仅留 position:'body_top'；移除「模板」SelectField（standard/security/custom），仅剩「插入位置」+ 外部发件人提示；ActionSummary externalReminder 分支改为返回插入位置；四语删 addons.externalReminderTemplate/Standard/Security/Custom）；浏览器实拍 S-1 免责声明去模板仅剩插入位置 + S-2 外部邮件提醒去模板仅剩插入位置且摘要显示正文顶部（浅色 AI版·单租户 平台管理员 Mock 1737×1046）；差异新增 D-013（摘要由模板名改为插入位置、历史死键 disclaimerTemplateDefault/externalReminderTemplateDefault 未删）、待确认新增 Q-005（去模板后正文内容来源需与后端确认）；四语 JSON 均合法、无残留 disclaimer/externalReminder Template 引用；顺带修复两功能块内既有 UTF-8 乱码（ru/th 名称、描述、位置、提示、内容占位符）；乱码自检 CLEAN；version.json current_version 16→17。"
     }
   ]
 }
