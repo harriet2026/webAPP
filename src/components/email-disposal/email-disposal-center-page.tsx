@@ -621,9 +621,11 @@ export function EmailDisposalCenterPage({
       if (similarMode) {
         exportToCsv(similarItems);
       } else {
-        // 后端 QueryMailLogs 把 page_size 硬顶在 200——单次 pageSize=5000 的调用
-        // 只会静默返回前 200 条，因此按 200/页分页拉取到 EXPORT_MAX 为止。
-        const EXPORT_PAGE_SIZE = 200;
+        // 后端 QueryMailLogs 把 page_size 硬顶在 100；以 100/页分页拉取到
+        // EXPORT_MAX 或服务端数据取尽为止。
+        // 终止条件只使用"本页返回 0 条（数据已取尽）"，不依赖"本页数量 < 请求数量"，
+        // 避免后端静默截断导致第 1 页就误判为最后一页（GT-12571 根因修复）。
+        const EXPORT_PAGE_SIZE = 100;
         const target = Math.min(total, EXPORT_MAX);
         const items: DisposalMailItem[] = [];
         for (let page = 1; items.length < target; page++) {
@@ -632,7 +634,10 @@ export function EmailDisposalCenterPage({
             apiRequest,
           );
           items.push(...result.items);
-          if (result.items.length < EXPORT_PAGE_SIZE) break;
+          // 防御兜底：服务端总量已全部取回
+          if (items.length >= result.total) break;
+          // 空页：后端已无更多数据
+          if (result.items.length === 0) break;
         }
         exportToCsv(items.slice(0, target));
       }
