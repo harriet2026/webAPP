@@ -3,13 +3,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { ColumnDef } from '@tanstack/react-table';
-import { Plus, Pencil, Trash2, Loader2, Search, LockOpen, Power, LogOut, FileText, KeyRound, Filter } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Search, LockOpen, Power, LogOut, FileText, KeyRound, Filter, Copy, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTable } from '@/components/shared/data-table';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -129,6 +130,10 @@ export default function UsersPage() {
   const [forceOfflineId, setForceOfflineId] = useState<number | null>(null);
   // GT-12314：独立重置密码对话框的目标账号
   const [resetTarget, setResetTarget] = useState<User | null>(null);
+  // 创建用户成功后，将初始密码暂存此 state 以弹出「密码确认 Dialog」；
+  // 管理员点「我已记录」后清空并关抽屉。
+  const [createdUserPassword, setCreatedUserPassword] = useState<string | null>(null);
+  const [createdUsername, setCreatedUsername] = useState<string>('');
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [batchAction, setBatchAction] = useState<BulkUsersAction | null>(null);
   const unlockMutation = useMutation({
@@ -452,7 +457,13 @@ export default function UsersPage() {
         } else {
           await createUser(payload, apiRequest);
         }
-        toast.success(t('common.createSuccess'));
+        // 创建成功：将初始密码保存到 state，弹出密码确认 Dialog；
+        // 关抽屉动作推迟到管理员主动确认后，防止密码在关闭前丢失。
+        queryClient.invalidateQueries({ queryKey: [usersQueryKey] });
+        setCreatedUsername(data.username);
+        setCreatedUserPassword(data.password!);
+        setDialogOpen(false);
+        return;
       }
       queryClient.invalidateQueries({ queryKey: [usersQueryKey] });
       setDialogOpen(false);
@@ -984,6 +995,62 @@ export default function UsersPage() {
           queryClient.invalidateQueries({ queryKey: [usersQueryKey] });
         }}
       />
+
+      {/* 创建用户成功后弹出「初始密码确认」Dialog：明文展示 + 复制按钮，
+          管理员点「我已记录」后才关闭，防止密码在关闭前丢失。 */}
+      <Dialog
+        open={createdUserPassword !== null}
+        onOpenChange={(open) => { if (!open) setCreatedUserPassword(null); }}
+      >
+        <DialogContent data-testid="created-password-dialog" className="max-w-md rounded-[28px] border-border/70 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              {t('users.createdDialog.title')}
+            </DialogTitle>
+            <DialogDescription>
+              {t('users.createdDialog.description', { username: createdUsername })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>{t('users.createdDialog.passwordLabel')}</Label>
+            <div className="flex gap-2">
+              <Input
+                data-testid="created-password-value"
+                value={createdUserPassword ?? ''}
+                readOnly
+                className="flex-1 font-mono"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                data-testid="created-password-copy"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(createdUserPassword ?? '');
+                    toast.success(t('users.resetPassword.copied'));
+                  } catch {
+                    toast.error(t('users.resetPassword.copyFailed'));
+                  }
+                }}
+              >
+                <Copy className="h-4 w-4 mr-1" />
+                {t('users.createdDialog.copyBtn')}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">{t('users.createdDialog.hint')}</p>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              data-testid="created-password-confirm"
+              onClick={() => setCreatedUserPassword(null)}
+            >
+              {t('users.createdDialog.confirmBtn')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Task 9: batch enable/disable/delete, always confirmed. */}
       <ConfirmDialog

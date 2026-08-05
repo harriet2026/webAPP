@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测智能�����������",
+    "spoofingDetection": "仿冒邮件检测智能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -708,7 +708,7 @@
       "sectionBasic": "���础信息",
       "sectionMatch": "匹配条件",
       "sectionSimulator": "规则模拟器",
-      "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
+      "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结��",
       "matchInfoBanner": "���条���为 AND ��系�������������������同��满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
         "ruleName": "规则名称",
@@ -861,7 +861,7 @@
         "editButton": "编辑",
         "deleteButton": "删除",
         "emptyText": "暂无通道，建议先配置自定义通道",
-        "proxyDeletedBadge": "代理已删���",
+        "proxyDeletedBadge": "代���已删���",
         "systemDefaultHelo": "系��默��",
         "drawerTitleNew": "新��投递通道",
         "drawerTitleEdit": "编辑投递通道",
@@ -1187,7 +1187,7 @@
     "globalRule": "全局规则",
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除，只有系统管理员可编辑部分字段",
-    "systemRuleEditBanner": "正在编辑系统基线规则。只允��修改 action / priority / 条��阈值，其余��段已锁��。",
+    "systemRuleEditBanner": "正在编辑系统基��规则。只允��修改 action / priority / 条��阈值，其余��段已锁��。",
     "stage": "������"
   },
   "tagRules": {
@@ -2087,6 +2087,14 @@
   },
   "users": {
     "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全契约）",
+    "createdDialog": {
+      "title": "用户已创建",
+      "description": "账号「{username}」已成功创建。请将以下初始密码转交给该用户，首次登录须修改密码。",
+      "passwordLabel": "初始密码",
+      "copyBtn": "复制密码",
+      "hint": "请务必在关闭前复制并转交密码，关闭后将无法再次查看。",
+      "confirmBtn": "我已记录"
+    },
     "resetPassword": {
       "title": "重置密码",
       "description": "为管理员「{username}」设置新密码，重置后需用新密码登录。",
@@ -2429,7 +2437,7 @@
       "LOCAL": "本地"
     },
     "scenes": {
-      "userspace": "用户空间认证",
+      "userspace": "用户空���认证",
       "smtpsend": "SMTP 发信认证",
       "mailsync": "邮件同步代理"
     },
@@ -2627,7 +2635,7 @@
       "lastLoginIp": "最近登录IP"
     },
     "pwd": {
-      "old": "旧密码",
+      "old": "旧���码",
       "new": "新密码",
       "confirm": "确认新密码",
       "oldPlaceholder": "请输入旧密码",
@@ -2810,7 +2818,7 @@
   "advancedFilter": {
     "title": "高级搜索",
     "conditionGroup": "搜索���件组",
-    "match": "满足条件",
+    "match": "��足条件",
     "all": "所有条件",
     "any": "任一条件",
     "exclude": "��除",
@@ -2991,7 +2999,7 @@
       "warnings": "警告",
       "request": "请求",
       "result": "结果",
-      "ruleClass": "规则类别",
+      "ruleClass": "规���类别",
       "isActive": "启���",
       "mailLogId": "邮件日志 ID",
       "sender": "发件人",
@@ -3224,7 +3232,7 @@
     "typeDescriptions": {
       "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼风险。",
       "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
-      "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用���异常发信行为���",
+      "account_anomaly_analysis": "结合最近认证尝试与邮件活动���识别账号滥用、被盗用���异常发信行为���",
       "threat_traceback": "围绕可疑样��向��史邮件回溯，结合簇 ID 和内���相似性判断是否存在同���威胁传播。",
       "rule_analysis": "基��相似邮件历史，��断误判或漏判的可能性��并抽取可供人工确认��候选拦截规则。"
     },
@@ -3546,7 +3554,7 @@
       "notHit": "未命中",
       "diffLeft": "距离触发阈值还差 {diff} 次",
       "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次，超过限制 {limit} 次",
-      "dailyHit": "触发\"每日连接数\"阈值，当日已连接 {count} 次，超过限��� {limit} 次",
+      "dailyHit": "触发\"每日连接数\"阈值，���日已连接 {count} 次，超过限��� {limit} 次",
       "notHitReason": "未触发阈值",
       "noThresholds": "��前配置未设置有效阈值，连接将��放行"
     },
@@ -3942,7 +3950,7 @@
   "overseasMail": {
     "title": "海外邮件检测",
     "summary": "已启用方向：{directions}",
-    "summaryNone": "所有方向均已禁用",
+    "summaryNone": "所有方��均已禁用",
     "directionInbound": "收���方向",
     "directionOutbound": "外发方向",
     "directionInternal": "域内方向",
@@ -4005,7 +4013,7 @@
     "autoFillHint": "选择地区后自动填充，可手动修改，最多50字符",
     "ipRequired": "请输入IP段",
     "regionRequired": "请选择地区代码",
-    "usageTip": "自定义IP定位库的优先级高于系统内置GeoIP库，配置后将优先使用自定义映射进行地域识别。",
+    "usageTip": "自定义IP定位库的优先级高于系统内置GeoIP库，��置后将优先使用自定义映射进行地域识别。",
     "countryCN": "中国",
     "countryUS": "美国",
     "countryHK": "中国香港",
@@ -4093,7 +4101,7 @@
     "unsavedChanges": "有未保存的修改，确定要关闭吗？所有修改将丢失。",
     "groupDeleted": "群组已删除",
     "resetFilters": "重置",
-    "simGroupNotice": "群组类型规则的模拟需在生产环境验证",
+    "simGroupNotice": "群组类型规则���模拟需在生产环境验证",
     "sectionBasic": "基础设置",
     "sectionAction": "执行动作",
     "expireAt": "有效期至",
@@ -4255,7 +4263,7 @@
     "validUntil": "失效时间",
     "effectiveUntil": "有效期至",
     "validUntilTip": "设置规则的过期日期，过期后规则自动失效",
-    "permanentHint": "留空表示永久有效",
+    "permanentHint": "留空表示永久���效",
     "priorityRangeHint": "范围1-9999，数��越大优先级越高",
     "createRule": "新建规则",
     "editRule": "编辑规则",
@@ -4528,7 +4536,7 @@
       "days": "天",
       "noData": "暂无观察统计数据",
       "breakdown": "命中明细（Top 10）",
-      "close": "关闭"
+      "close": "关��"
     },
     "mailfromEmptyWarning": {
       "title": "开启��� MAIL FROM 检测将拦截退信",
@@ -4719,7 +4727,7 @@
       "save": "保存",
       "cancel": "取消",
       "namePlaceholder": "如：销售部外发限制",
-      "directionLabel": "管控方向",
+      "directionLabel": "管控方���",
       "objectTypeLabel": "管控对象类型",
       "senderSubTypeLabel": "发信人类型",
       "emailLabel": "邮箱地址",
@@ -4944,7 +4952,7 @@
     "toast": {
       "saveSuccess": "配置已保存",
       "saveFailed": "保存失败",
-      "loadFailed": "加载配���失败，已显示默认值",
+      "loadFailed": "加载配���失败，已显示���认值",
       "deleteSuccess": "规则已删除"
     },
     "antivirus": {
@@ -5384,7 +5392,7 @@
     "discard": "丢弃修改",
     "dirty": "配置已修改未保存",
     "unsavedChanges": "有未保存的更改",
-    "saveGapBlocked": "存在未覆盖区间，请修复后保存",
+    "saveGapBlocked": "存在未覆盖���间，请修复后保存",
     "saveOverlapBlocked": "存在重叠区间，请修复后保存",
     "copyDialog": {
       "title": "复制配置到其他方向",
@@ -6566,7 +6574,7 @@
       "modifyHeaderCustomFieldName": "自定义字段名",
       "modifyHeaderDkimWarning": "修改信头可能破坏 SPF/DKIM 验证结果",
       "modifyHeaderNewValue": "新值",
-      "modifyHeaderOperation": "���作类型",
+      "modifyHeaderOperation": "���作类���",
       "modifyHeaderOperationDelete": "删除",
       "modifyHeaderOperationPrefix": "添加前缀",
       "modifyHeaderOperationRegexReplace": "正则替换",
@@ -6819,7 +6827,7 @@
       },
       "desc_sender": {
         "source": "邮件头 From 字段",
-        "usage": "识别用户邮箱客户端中看到的��件人",
+        "usage": "识别用户邮箱客户端中看到的��件��",
         "note": "钓鱼邮件常伪造此字段，建议配合信封发信人(SMTP)检测"
       },
       "desc_recipient": {
@@ -6845,7 +6853,7 @@
       "desc_body": {
         "source": "邮��正文内容",
         "usage": "过滤邮件正文中的敏感内容",
-        "note": "支持文本和HTML格式，HTML会自动提取纯文本"
+        "note": "支持文本和HTML格式，HTML会自动提取纯���本"
       },
       "desc_header": {
         "source": "完整邮件头部",
@@ -6927,7 +6935,7 @@
         "usage": "限制邮件包含的附件数量",
         "operators": "大于/大于等于：附件数达到或超过阈值即命中；小于/小于等于：附件数不超过阈值即命中；介于：命中数量落在区间内的邮件。",
         "example": "比较方式「大于等于」，阈值「10」——命���附件数达到 10 个及以上的邮件。",
-        "recommended": "常规办公场景推荐阈值 10~20，可按业务附件�����调整。",
+        "recommended": "常规办公场景推荐阈值 10~20，可按业务附件������调整。",
         "note": "防止大量附件造成资源占用"
       },
       "desc_encryptedAttachment": {
@@ -7424,7 +7432,7 @@
     "invalidRef": "已失效",
     "clearAll": "清空",
     "userPermissionSettings": "用户权限设置",
-    "permissionDescription": "配置��户在隔离区的操作权限和有效期",
+    "permissionDescription": "配置���户在隔离区的操作权限和有效期",
     "permissionItem": "权限项",
     "status": "状态",
     "validDays": "有效天数",
@@ -8417,7 +8425,7 @@
       "urlSuspicious": "可疑",
       "urlNormal": "正常",
       "urlFindings": "链接研判明细",
-      "urlFindingsTitle": "本封邮件的链接检��（{count} 个链接）",
+      "urlFindingsTitle": "本封���件的链接检��（{count} 个链接）",
       "urlLinks": "链接",
       "urlColumn": "URL",
       "urlResult": "URL 结果",
@@ -8596,7 +8604,7 @@
       "description": "实时/观察模式、超时时间线与超时临时处置（对所有旁路检测生效）。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
-      "disposalLoadFailed": "超时配置加载失败，运行模式仍按真实引擎配置展示��",
+      "disposalLoadFailed": "超���配置加载失败，运行模式仍按真实引擎配置展示��",
       "editUnavailable": "超时配置加载成功后才能编辑",
       "edit": "编辑",
       "save": "保存",
@@ -8707,7 +8715,7 @@
     "collapseMenu": "收起菜单",
     "expandMenu": "展开菜单",
     "enableSwitch": "启用智能体",
-    "auditOnlyBanner": "已进入「仅审���」模式：检测流程仍运行，但处置动作统一降级���「标记投递」，下方配置项不可编辑。",
+    "auditOnlyBanner": "已进入「仅审���」模式：检测流程仍运行，但处置动作统一降级���「标记投递」，下��配置项不可编辑。",
     "inheritedReadOnly": "继承自平台（只读）",
     "whitelistEntry": "放行名单",
     "detectionLogs": "仿冒检测日志",
@@ -9324,13 +9332,13 @@
       "stateSaved": "智能体状态已更��",
       "stateError": "更新智能体状态失败",
       "recallSuccess": "��回请求已提交",
-      "recallError": "召回请求失败",
+      "recallError": "召回请���失败",
       "scanStarted": "扫描已启动",
       "fpMarked": "已标记为误报",
       "cancelSuccess": "任务已取消",
       "cancelError": "取消任务失败",
       "exportError": "导出报告失败",
-      "bulkCancelResult": "请求 {requested} 个，已取消 {cancelled}，跳过 {skipped}，失败 {failed}"
+      "bulkCancelResult": "请求 {requested} 个，已取消 {cancelled}，��过 {skipped}，失败 {failed}"
     },
     "runStatus": {
       "pending": "等待中",
@@ -9891,7 +9899,7 @@
     "editor": {
       "stepBasic": "基本信息",
       "stepTrigger": "触发条件",
-      "stepNotification": "通知设置",
+      "stepNotification": "��知设置",
       "stepAdvanced": "高级降噪",
       "stepPreview": "规则预览",
       "saveAndTest": "保存并测试",
@@ -10090,7 +10098,7 @@
   },
   "platformSecurity": {
     "title": "平台安全策略",
-    "subtitle": "平台级安全基线，作用于所有租户。以下策略仅平台管理员可配置，租户管理员不可见、不可修改。",
+    "subtitle": "平台级安全基线，作用于所有租户。以下策略仅平台管���员可配置，租户管理员不可见、不可修改。",
     "accessDenied": "仅平台管理员可访问。",
     "tabs": {
       "ipStrategy": "IP 策略",
@@ -10251,7 +10259,7 @@
         "internal": "（内部→内部）",
         "merged": "外发与域内合并累计计数，防止把收件人���分到不同方向以规避阈值"
       },
-      "mergedTitle": "内部发信",
+      "mergedTitle": "内部��信",
       "maxRecipients": "最大收信人",
       "unit": "个",
       "countScope": "计数范围",
@@ -10446,7 +10454,7 @@
       "rblSource": "RBL源",
       "averageResponseTime": "平均响应时间",
       "timeoutRate": "超时率",
-      "queryThroughput": "查询吞吐量"
+      "queryThroughput": "查询��吐量"
     }
   },
   "monitorDashboard": {
@@ -10564,7 +10572,7 @@
       "encryption_key_missing": "服务端未配置通讯录加密密钥（至少 32 字节），无法保存或测试含密码等敏感字段的配置，请联系管理员配置后重试",
       "file_store_uninitialized": "服务端未启用 CSV 文件存储，请联系管理员配置后重试",
       "multipart_parse_failed": "上传表单解析失败，请���新提交",
-      "no_running_sync": "当前没有正在运行的同步任务",
+      "no_running_sync": "当前没有正在运行的同步��务",
       "no_sync_log": "该数据源还没有同步记录",
       "not_found": "通讯录数据源不存在，可能已被删除",
       "source_type_empty": "请选择数据源类型",
@@ -10785,7 +10793,7 @@
     },
     "investigation": {
       "not_found": "调查任务不存在",
-      "access_denied": "无权访问该调查任务",
+      "access_denied": "无权访问该调查��务",
       "id_required": "请填写调查任务 ID",
       "confirm_required": "该操作需要确认后才能执行",
       "not_ready_for_actions": "调查任务尚未完成，暂时无法执行处置动作",
@@ -11072,7 +11080,7 @@
       "raw_log_search_busy_retry_shortly": "原始日志检索正忙，请稍后重试"
     },
     "mail_log_attachment": {
-      "access_denied": "无权执行该操作",
+      "access_denied": "无权执行��操作",
       "invalid_attachment_md5": "附件 MD5 无效",
       "mail_log_not_found": "邮件日志不存在",
       "eml_not_available": "邮件原文不可用",

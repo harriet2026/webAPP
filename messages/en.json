@@ -2508,6 +2508,14 @@
   },
   "users": {
     "tenantMustChangeNotice": "New accounts use a temporary password and must change it at first login (platform security contract)",
+    "createdDialog": {
+      "title": "User Created",
+      "description": "Account \"{username}\" has been created. Please share the initial password below with the user — they must change it at first login.",
+      "passwordLabel": "Initial Password",
+      "copyBtn": "Copy",
+      "hint": "Make sure to copy and share the password before closing. It will not be shown again.",
+      "confirmBtn": "Got it"
+    },
     "resetPassword": {
       "title": "Reset Password",
       "description": "Set a new password for administrator \"{username}\". They must sign in with the new password afterwards.",
