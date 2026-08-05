@@ -1,7 +1,14 @@
 {
   "module": "statistics-ops-top-trend",
-  "current_version": 1,
+  "current_version": 2,
   "history": [
+    {
+      "version": 2,
+      "generated_at": "2026-08-05",
+      "webapp_commit": "c3ae048",
+      "comparison_spec_commit": "not-used",
+      "summary": "GT-12783：修复连接会话 TOP 榜单序号徽标因飙升图标导致的错位（BUG-A），以及内网 IP 行地理位置列与来源IP列重复显示"内网"标签的冗余问题（BUG-B）。新增变更补丁文档 GT-12783.html，仅修改 TopTable.tsx。"
+    },
     {
       "version": 1,
       "generated_at": "2026-07-14",

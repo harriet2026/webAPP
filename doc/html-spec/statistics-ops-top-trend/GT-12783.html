@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GT-12783 榜单序号错位 &amp; 内网地理位置标签重复 - 运营TOP与趋势规格</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --background: #f7f8fa;
+      --foreground: #172033;
+      --card: #ffffff;
+      --muted: #f1f3f7;
+      --muted-foreground: #64748b;
+      --border: #dbe1ea;
+      --danger: #b42318;
+      --danger-bg: #fff1f0;
+      --warning: #9a6700;
+      --warning-bg: #fff8db;
+      --success: #16794a;
+      --radius: 10px;
+      --font-sans: "Geist", "Noto Sans SC", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 32px;
+      background: var(--background);
+      color: var(--foreground);
+      font: 14px/1.65 var(--font-sans);
+    }
+    a { color: var(--primary); }
+    code { font-family: var(--font-mono); background: var(--muted); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+    h1, h2, h3, h4 { line-height: 1.35; }
+
+    .spec-header,
+    .toc,
+    section {
+      margin-bottom: 24px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+    }
+    .spec-header h1 {
+      margin: 0 0 16px;
+      color: var(--primary);
+      font-size: 22px;
+    }
+    .spec-header .req-id {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 650;
+    }
+    section > h2 {
+      margin: 0 0 18px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--primary);
+      color: var(--primary);
+      font-size: 18px;
+    }
+    h3 { margin: 22px 0 10px; font-size: 16px; }
+    h4 { margin: 16px 0 8px; font-size: 14px; }
+
+    .meta-table,
+    .spec-table {
+      width: 100%;
+      margin: 12px 0;
+      border-collapse: collapse;
+    }
+    .meta-table th,
+    .meta-table td,
+    .spec-table th,
+    .spec-table td {
+      padding: 9px 10px;
+      border: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+    .meta-table th,
+    .spec-table th {
+      background: var(--muted);
+      font-weight: 650;
+      white-space: nowrap;
+    }
+    .meta-table th { width: 180px; }
+
+    .toc ul {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 8px 20px;
+      margin: 0;
+      padding-left: 20px;
+    }
+    .toc a { text-decoration: none; }
+
+    .interaction-preview {
+      margin: 20px 0;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      border-radius: var(--radius);
+      background: var(--card);
+    }
+    .interaction-preview > h3 { margin-top: 0; color: var(--primary); }
+    .state-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px 16px;
+      margin: 10px 0 16px;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--muted);
+    }
+    .state-meta dt { font-weight: 650; }
+    .state-meta dd { margin: 0; }
+
+    .screenshot-figure {
+      margin: 16px 0 22px;
+      text-align: center;
+    }
+    .screenshot-figure img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 3px 14px rgb(15 23 42 / 10%);
+    }
+    .screenshot-figure figcaption {
+      margin-top: 8px;
+      color: var(--muted-foreground);
+      font-size: 13px;
+    }
+
+    .sequence-label {
+      display: inline-block;
+      margin-bottom: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .preview-sequence {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+
+    .source-note {
+      padding: 12px 14px;
+      border-left: 4px solid var(--primary);
+      background: var(--muted);
+      border-radius: 4px;
+      margin-top: 12px;
+    }
+    .legend {
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--muted);
+      margin-top: 8px;
+    }
+    .diff-section {
+      border-left: 4px solid var(--danger) !important;
+      background: var(--danger-bg) !important;
+    }
+    .diff-section > h2 { color: var(--danger) !important; border-bottom-color: var(--danger) !important; }
+    .status-done { color: var(--success); font-weight: 650; }
+    .status-open { color: var(--danger); font-weight: 650; }
+    .fix-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #15803d;
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .bug-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .table-scroll { overflow-x: auto; }
+
+    .code-block {
+      margin: 10px 0;
+      padding: 14px;
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .code-block .comment { color: #94a3b8; }
+    .code-block .keyword { color: #93c5fd; }
+    .code-block .string { color: #86efac; }
+
+    @media (max-width: 760px) {
+      body { padding: 12px; }
+      .spec-header, .toc, section { padding: 16px; }
+      .meta-table th { width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="spec-header">
+    <span class="req-id">GT-12783</span>
+    <h1>GT-12778 运营TOP与趋势 - 榜单序号错位且内网地理位置标签重复问题解决</h1>
+    <div class="table-scroll">
+      <table class="meta-table">
+        <tbody>
+          <tr><th>规格版本</th><td>v2（变更补丁文档）</td></tr>
+          <tr><th>生成日期</th><td>2026-08-05</td></tr>
+          <tr><th>需求编号</th><td>GT-12778</td></tr>
+          <tr><th>文档编号</th><td>GT-12783</td></tr>
+          <tr><th>页面路由</th><td><code>/zh/statistics/ops-top-trend</code></td></tr>
+          <tr><th>源码文件</th><td><code>src/components/statistics/ops-top-trend/TopTable.tsx</code></td></tr>
+          <tr><th>webapp commit</th><td><code>c3ae048</code></td></tr>
+          <tr><th>需求依据</th><td>用户当前描述 + 附件截图（红框标注问题区域）+ TopTable.tsx 源码审查</td></tr>
+          <tr><th>历史对话</th><td>已使用；本次对话中确认问题现象与解决方案</td></tr>
+          <tr><th>对照 spec</th><td><a href="./index.html">statistics-ops-top-trend/index.html</a>（v1，仅作差异对照）</td></tr>
+          <tr><th>父规格</th><td><a href="./index.html">统-运营TOP与趋势 v1</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="source-note">
+      本文档为 GT-12783 变更补丁说明，聚焦记录两个视觉缺陷的问题定位、根本原因、修复方案与代码变更。
+      仅修改 <code>TopTable.tsx</code>，不涉及其他功能模块。
+    </p>
+  </header>
+
+  <nav class="toc" aria-label="规格目录">
+    <h2>目录</h2>
+    <ul>
+      <li><a href="#problems">1. 问题描述与截图</a></li>
+      <li><a href="#root-cause">2. 根本原因分析</a></li>
+      <li><a href="#solution">3. 修复方案</a></li>
+      <li><a href="#code-changes">4. 代码变更</a></li>
+      <li><a href="#diffs">5. 差异标注</a></li>
+      <li><a href="#history">6. 版本历史</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== 1. 问题描述 ===== -->
+  <section id="problems">
+    <h2>1. 问题描述与截图</h2>
+
+    <p>在"运营TOP与趋势"页面的"连接会话 TOP 10"榜单表格中，存在以下两处视觉缺陷（截图中红框标注区域）：</p>
+
+    <article class="interaction-preview" id="bug-rank-misalign">
+      <h3>缺陷 1 — 榜单序号徽标错位（BUG-A）</h3>
+      <dl class="state-meta">
+        <div><dt>缺陷类型</dt><dd><span class="bug-badge">视觉错位</span></dd></div>
+        <div><dt>触发条件</dt><dd>存在飙升行（<code>isSpike = true</code>）时，第 1、2 名序号徽标被向右偏移</dd></div>
+        <div><dt>影响范围</dt><dd>六个维度中含有飙升标记的所有行</dd></div>
+        <div><dt>验证依据</dt><dd>附件截图红框区域 + TopTable.tsx 源码审查</dd></div>
+      </dl>
+
+      <div class="preview-sequence">
+        <figure class="screenshot-figure">
+          <span class="sequence-label">问题现象</span>
+          <img src="./screenshots/layer-0-top-list.png" alt="榜单序号徽标错位问题截图">
+          <figcaption>
+            第 1、2 名含火焰图标（<code>isSpike=true</code>），序号徽标被图标向右推移；
+            第 3、4 名无图标，序号徽标从左侧起始，两类行徽标水平位置不一致。
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="table-scroll">
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>层级</th>
+              <th>元素</th>
+              <th>现象</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>序号列 <code>&lt;td&gt;</code></td>
+              <td>火焰图标 <code>&lt;Flame&gt;</code></td>
+              <td>飙升行有图标（12px），非飙升行无图标</td>
+              <td>flex 容器使用 <code>gap-1</code>，图标存在与否改变了徽标的起始 x 坐标</td>
+            </tr>
+            <tr>
+              <td>序号列 <code>&lt;td&gt;</code></td>
+              <td>排名徽标 <code>&lt;span&gt;</code></td>
+              <td>飙升行徽标向右偏移约 16px</td>
+              <td>偏移量 = 图标宽 <code>w-3</code>（12px）+ <code>gap-1</code>（4px）= 16px</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="interaction-preview" id="bug-geo-duplicate">
+      <h3>缺陷 2 — 内网地理位置标签重复（BUG-B）</h3>
+      <dl class="state-meta">
+        <div><dt>缺陷类型</dt><dd><span class="bug-badge">冗余标签</span></dd></div>
+        <div><dt>触发条件</dt><dd>来源 IP 为内网地址（<code>isInternal = true</code>，<code>geoLocation = 'internal'</code>）</dd></div>
+        <div><dt>影响范围</dt><dd>"连接会话"维度及其他含来源IP和地理位置双列的维度</dd></div>
+        <div><dt>验证依据</dt><dd>附件截图红框区域 + TopTable.tsx 源码审查</dd></div>
+      </dl>
+
+      <div class="preview-sequence">
+        <figure class="screenshot-figure">
+          <span class="sequence-label">问题现象</span>
+          <img src="./screenshots/layer-1-dim-连接会话.png" alt="内网地理位置标签重复问题截图">
+          <figcaption>
+            来源IP列末尾已渲染"内网"蓝色徽章；地理位置列同时再次渲染"内网"蓝色徽章，
+            同一行出现两个意义相同的"内网"标签。
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="table-scroll">
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>列</th>
+              <th>渲染来源</th>
+              <th>现象</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>来源IP列（<code>sourceIp</code>）</td>
+              <td><code>isInternal === true</code> 时追加 Badge</td>
+              <td>显示"内网"蓝色标签</td>
+              <td>正常，表示该 IP 为内网地址</td>
+            </tr>
+            <tr>
+              <td>地理位置列（<code>geoLocation</code>）</td>
+              <td><code>geo === 'internal'</code> 时渲染 Badge</td>
+              <td>同样显示"内网"蓝色标签</td>
+              <td>与来源IP列语义重复；内网地址本身无地理位置概念，标签无信息增量</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <!-- ===== 2. 根本原因 ===== -->
+  <section id="root-cause">
+    <h2>2. 根本原因分析</h2>
+
+    <h3>BUG-A：序号徽标错位</h3>
+    <p>
+      序号列 <code>&lt;td&gt;</code> 使用 <code>flex items-center gap-1</code> 布局，子元素顺序为：
+      <strong>火焰图标（条件渲染）→ 排名徽标</strong>。
+      当 <code>isSpike = true</code> 时渲染 <code>&lt;Flame className="h-3 w-3"&gt;</code>，
+      占据 12px + gap 4px = 16px 空间，将徽标整体右移；
+      当 <code>isSpike = false</code> 时图标不渲染，徽标从左边缘起始。
+      两类行徽标在同一列中水平起点不同，产生视觉错位。
+    </p>
+    <div class="code-block"><span class="comment">// 修复前 — 飙升行与非飙升行徽标起点不一致</span>
+&lt;div className=<span class="string">"flex items-center gap-1"</span>&gt;
+  {row.isSpike ? (
+    &lt;Flame className=<span class="string">"h-3 w-3 text-orange-500"</span> /&gt;
+  ) : <span class="keyword">null</span>}
+  &lt;span className=<span class="string">{`inline-flex h-5 w-5 ... ${RANK_BADGE[row.rank]}`}</span>&gt;
+    {row.rank}
+  &lt;/span&gt;
+&lt;/div&gt;</div>
+
+    <h3>BUG-B：内网标签重复</h3>
+    <p>
+      来源IP列（<code>col.key === 'sourceIp'</code>）在 <code>row.metrics.isInternal === true</code>
+      时渲染国际化文本 <code>t('internal')</code> 的 Badge。
+      地理位置列（<code>col.key === 'geoLocation'</code>）在 <code>geo === 'internal'</code>
+      时同样渲染相同文本的 Badge，而内网 IP 的 <code>geoLocation</code> 字段值正是 <code>'internal'</code>，
+      因此两个条件同时成立，导致同行出现两个"内网"标签。
+    </p>
+  </section>
+
+  <!-- ===== 3. 修复方案 ===== -->
+  <section id="solution">
+    <h2>3. 修复方案</h2>
+
+    <h3>方案 A：序号徽标对齐</h3>
+    <p>
+      将火焰图标（条件渲染）包裹在一个<strong>固定宽度占位容器</strong>中：
+      <code>&lt;span className="inline-flex w-3 shrink-0 items-center justify-center"&gt;</code>。
+      无论 <code>isSpike</code> 是否为 <code>true</code>，该容器始终占据 <code>w-3</code>（12px）空间，
+      从而保证所有行的排名徽标始终从相同的 x 轴位置起始，消除错位。
+    </p>
+    <p>
+      选择此方案而非绝对定位叠加的原因：占位 span 方案不影响行高、不修改列宽，
+      且在 flex 布局下语义清晰、不引入额外的 <code>relative/absolute</code> 层级。
+    </p>
+
+    <h3>方案 B：消除地理位置列重复内网标签</h3>
+    <p>
+      在 <code>geoLocation</code> 列的渲染逻辑中，增加前置守卫判断：
+      当 <code>isInternalGeo === true</code> 且 <code>row.metrics.isInternal === true</code> 时，
+      返回 <code>&lt;span className="text-muted-foreground"&gt;-&lt;/span&gt;</code> 占位，
+      不渲染"内网"Badge，因为来源IP列已承载该信息。
+    </p>
+    <p>
+      选择"地理位置列显示 <code>-</code>"而非"来源IP列去掉标签"的原因：
+      内网地址本身没有地理位置概念，<code>-</code> 的语义（无数据）比重复显示"内网"更准确；
+      来源IP列保留标签可以让用户在扫描IP列时即可判断内外网属性。
+    </p>
+  </section>
+
+  <!-- ===== 4. 代码变更 ===== -->
+  <section id="code-changes">
+    <h2>4. 代码变更</h2>
+
+    <h3>变更文件</h3>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead>
+          <tr><th>文件</th><th>变更类型</th><th>变更行数（估）</th><th>是否影响其他功能模块</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>src/components/statistics/ops-top-trend/TopTable.tsx</code></td>
+            <td><span class="fix-badge">BUG FIX</span></td>
+            <td>+8 行，-2 行</td>
+            <td>否；仅修改序号列布局与地理位置列条件渲染</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>变更一：序号列火焰图标占位容器（BUG-A 修复）</h3>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead>
+          <tr><th>属性</th><th>内容</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>位置</th><td>序号列 <code>&lt;td&gt;</code> 内，<code>flex</code> 容器首个子元素</td></tr>
+          <tr><th>改动前</th><td><code>{row.isSpike ? &lt;Flame .../&gt; : null}</code>（直接条件渲染，无占位）</td></tr>
+          <tr><th>改动后</th><td>包裹为 <code>&lt;span className="inline-flex w-3 shrink-0 items-center justify-center"&gt;{row.isSpike ? &lt;Flame .../&gt; : null}&lt;/span&gt;</code></td></tr>
+          <tr><th>效果</th><td>所有行在序号徽标左侧均预留 12px 空间，徽标列左边界对齐</td></tr>
+          <tr><th>国际化影响</th><td>无（纯布局调整，无文案变更）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block"><span class="comment">// 修复后 — 固定宽度占位槽保证徽标始终左对齐</span>
+&lt;div className=<span class="string">"flex items-center gap-1"</span>&gt;
+  <span class="comment">{/* 固定宽度占位槽，保证排名徽标始终左对齐 */}</span>
+  &lt;span className=<span class="string">"inline-flex w-3 shrink-0 items-center justify-center"</span>&gt;
+    {row.isSpike ? (
+      &lt;Flame className=<span class="string">"h-3 w-3 text-orange-500"</span> /&gt;
+    ) : <span class="keyword">null</span>}
+  &lt;/span&gt;
+  &lt;span className=<span class="string">{`inline-flex h-5 w-5 ... ${RANK_BADGE[row.rank]}`}</span>&gt;
+    {row.rank}
+  &lt;/span&gt;
+&lt;/div&gt;</div>
+
+    <h3>变更二：地理位置列内网判断守卫（BUG-B 修复）</h3>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead>
+          <tr><th>属性</th><th>内容</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>位置</th><td><code>geoLocation</code> 列渲染分支，Badge 渲染前</td></tr>
+          <tr><th>改动前</th><td>直接渲染 Badge，<code>isInternalGeo</code> 时显示 <code>t('internal')</code></td></tr>
+          <tr>
+            <th>改动后</th>
+            <td>
+              新增守卫：<code>if (isInternalGeo &amp;&amp; Boolean(row.metrics.isInternal))</code>，
+              满足时返回 <code>&lt;span className="text-muted-foreground"&gt;-&lt;/span&gt;</code>，
+              不渲染重复 Badge
+            </td>
+          </tr>
+          <tr><th>效果</th><td>内网行地理位置列显示 <code>-</code>，仅来源IP列保留唯一"内网"标签</td></tr>
+          <tr><th>国际化影响</th><td>无（<code>t('internal')</code> 调用路径未删除，仅新增 early return 跳过；<code>-</code> 为通用占位符，不需要 i18n key）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block"><span class="comment">// 修复后 — 内网行地理位置列不重复渲染标签</span>
+<span class="keyword">if</span> (col.key === <span class="string">'geoLocation'</span>) {
+  <span class="keyword">const</span> geo = String(value ?? <span class="string">''</span>);
+  <span class="keyword">const</span> isInternalGeo = geo === <span class="string">'internal'</span>;
+  <span class="comment">// 当来源IP列已展示"内网"标签时，地理位置列不再重复显示，</span>
+  <span class="comment">// 内网地址本身无地理位置含义，以 "-" 占位。</span>
+  <span class="keyword">if</span> (isInternalGeo && Boolean(row.metrics.isInternal)) {
+    <span class="keyword">return</span> &lt;span className=<span class="string">"text-muted-foreground"</span>&gt;-&lt;/span&gt;;
+  }
+  <span class="keyword">return</span> (
+    &lt;Badge variant=<span class="string">"outline"</span> className={...}&gt;
+      {isInternalGeo ? (t(<span class="string">'internal'</span>) as string) : geo.split(<span class="string">' '</span>)[0]}
+    &lt;/Badge&gt;
+  );
+}</div>
+
+    <h3>国际化合规说明</h3>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead>
+          <tr><th>项目</th><th>处理方式</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>现有 <code>t('internal')</code> 调用</td>
+            <td>保留原有调用路径，未删除或修改任何 i18n key</td>
+          </tr>
+          <tr>
+            <td>新增 <code>-</code> 占位符</td>
+            <td>通用占位符，无需 i18n key，不涉及翻译</td>
+          </tr>
+          <tr>
+            <td>注释文案</td>
+            <td>代码注释为中文，UTF-8 编码，修改后已通过 <code>grep '?'</code> 自检，零乱码</td>
+          </tr>
+          <tr>
+            <td>布局变更注释</td>
+            <td><code>{/* 固定宽度占位槽，保证排名徽标始终左对齐 */}</code>，UTF-8，零乱码</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== 5. 差异标注 ===== -->
+  <section id="diffs" class="diff-section">
+    <h2>5. 差异标注</h2>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>编号</th>
+            <th>目标要求</th>
+            <th>修复前（webapp v1 状态）</th>
+            <th>修复后（webapp v2 状态）</th>
+            <th>状态</th>
+            <th>复核日期</th>
+            <th>验证依据</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>D-GT-01</td>
+            <td>榜单序号徽标在同一列中应水平左对齐，飙升图标不应影响徽标位置</td>
+            <td>飙升行（<code>isSpike=true</code>）的徽标被火焰图标推移约 16px，与非飙升行错位</td>
+            <td>增加 <code>w-3 shrink-0</code> 占位 span，所有行徽标左边界一致</td>
+            <td class="status-done">已解决</td>
+            <td>2026-08-05</td>
+            <td>源码审查 + 用户截图 + TopTable.tsx commit c3ae048</td>
+          </tr>
+          <tr>
+            <td>D-GT-02</td>
+            <td>内网 IP 行的地理位置列不应重复显示"内网"标签（来源IP列已显示）</td>
+            <td>来源IP列与地理位置列同时渲染"内网" Badge，信息冗余</td>
+            <td>地理位置列检测到 <code>isInternal=true</code> 时返回 <code>-</code> 占位，Badge 不再重复渲染</td>
+            <td class="status-done">已解决</td>
+            <td>2026-08-05</td>
+            <td>源码审查 + 用户截图 + TopTable.tsx commit c3ae048</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== 6. 版本历史 ===== -->
+  <section id="history">
+    <h2>6. 版本历史</h2>
+    <div class="table-scroll">
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>版本</th>
+            <th>日期</th>
+            <th>文档编号</th>
+            <th>webapp commit</th>
+            <th>对照 spec commit</th>
+            <th>摘要</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>v2</td>
+            <td>2026-08-05</td>
+            <td>GT-12783</td>
+            <td><code>c3ae048</code></td>
+            <td><code>not-used</code></td>
+            <td>
+              新增变更补丁文档 GT-12783：修复连接会话 TOP 榜单序号徽标因飙升图标导致的错位问题（BUG-A），
+              以及内网 IP 行地理位置列"内网"标签与来源IP列重复显示的冗余问题（BUG-B）。
+              仅修改 TopTable.tsx 共两处，不影响其他功能模块。
+            </td>
+          </tr>
+          <tr>
+            <td>v1</td>
+            <td>2026-07-14</td>
+            <td>—</td>
+            <td><code>804efb9</code></td>
+            <td><code>8db3a98</code></td>
+            <td>初版：六维度 TOP 富列表规格，修复 14 条损坏中文，标注连接成败口径最大缺口</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</body>
+</html>
