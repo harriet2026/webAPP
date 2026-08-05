@@ -289,6 +289,11 @@ function CellContent({
       if (col.key === 'geoLocation') {
         const geo = String(value ?? '');
         const isInternalGeo = geo === 'internal';
+        // 当来源IP列已展示"内网"标签时，地理位置列不再重复显示，
+        // 内网地址本身无地理位置含义，以 "-" 占位。
+        if (isInternalGeo && Boolean(row.metrics.isInternal)) {
+          return <span className="text-muted-foreground">-</span>;
+        }
         return (
           <Badge
             variant="outline"
@@ -490,9 +495,12 @@ export function TopTable({
                     >
                       <td className="px-2 py-[7.6px]">
                         <div className="flex items-center gap-1">
-                          {row.isSpike ? (
-                            <Flame className="h-3 w-3 text-orange-500" />
-                          ) : null}
+                          {/* 固定宽度占位槽，保证排名徽标始终左对齐 */}
+                          <span className="inline-flex w-3 shrink-0 items-center justify-center">
+                            {row.isSpike ? (
+                              <Flame className="h-3 w-3 text-orange-500" />
+                            ) : null}
+                          </span>
                           <span
                             className={`inline-flex h-5 w-5 items-center justify-center rounded text-xs font-medium ${RANK_BADGE[row.rank] ?? 'bg-muted text-muted-foreground'}`}
                           >
