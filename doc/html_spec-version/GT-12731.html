@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 · 增量功能规格 · v9</title>
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 · 增量功能规格 · v10</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -201,7 +201,7 @@
       <!-- 一级需求：GT-11675 OCR 深度检测功能缺失 -->
       <li class="toc-l1"><a href="#gt-11675">GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失</a></li>
       <ul class="toc-l2-group">
-        <li class="toc-change"><span class="toc-num">13</span><a href="#change-13">图片OCR检测模式：去掉「深度检测」，「轻度检测（仅印刷体）」重命名为「检测」</a></li>
+        <li class="toc-change"><span class="toc-num">13</span><a href="#change-13">图片OCR检测模式：去掉「深度检测」，「轻度检测（仅印刷体）」重���名为「检测」</a></li>
         <li class="toc-change"><span class="toc-num">14</span><a href="#change-14">检测模式为「不检测」时禁用「检测数量上限」并提示</a></li>
       </ul>
 
@@ -236,7 +236,18 @@
         <li class="toc-change"><span class="toc-num">25</span><a href="#change-25">移除系统首页「待办与告警」卡片，威胁态势趋势图独占全宽</a></li>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-023）</a></li>
+      <!-- 一级需求：GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 -->
+      <li class="toc-l1"><a href="#gt-12571">GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">26</span><a href="#change-26">创建成功后弹出「初始密码确认」Dialog，明文展示密码并提供复制按钮</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c26-overview">26.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c26-states">26.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c26-elements">26.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-024）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-007）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
@@ -252,9 +263,9 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>文档编号（文件 ticket）</td><td>GT-12731</td></tr>
-        <tr><td>需��名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块</td></tr>
+        <tr><td>需求名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决</td></tr>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 缺陷修复 + 功能优化</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v9</span></span></td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v10</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-08-02</td></tr>
         <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层抽屉）</td></tr>
         <tr><td>组件路径</td><td>
@@ -542,7 +553,7 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
           <tr><td>6</td><td>加密附件「值」→ 是/否</td><td><a href="#change-6">变更 6</a></td><td><code>is_encrypted_attachment</code> 布尔字段 → <code>BooleanValueSelect</code>（是/否）</td></tr>
           <tr><td>7</td><td>二维码 ODR 结果「值」→ 成功/失败</td><td><a href="#change-6">变更 6</a></td><td><code>image_qr_code_result: ['success','fail']</code> + i18n <code>qrResultValues</code></td></tr>
           <tr><td>8</td><td>信封-头 From 一致性「值」→ 一致/不一致</td><td><a href="#change-6">变更 6</a></td><td><code>envelope_header_mismatch: ['match','mismatch']</code> + i18n <code>envelopeHeaderConsistencyValues</code></td></tr>
-          <tr><td>9</td><td>Mail From 为空「值」→ 是/否</td><td><a href="#change-6">变更 6</a></td><td><code>mailfrom_empty</code> 布尔字段 → <code>BooleanValueSelect</code>（是/否）</td></tr>
+          <tr><td>9</td><td>Mail From 为空「值��→ 是/否</td><td><a href="#change-6">变更 6</a></td><td><code>mailfrom_empty</code> 布尔字段 → <code>BooleanValueSelect</code>（是/否）</td></tr>
           <tr><td>10</td><td>病毒扫描结果「值」→ 有毒/无毒</td><td><a href="#change-6">变更 6</a></td><td><code>virus_scan_result: ['infected','clean']</code> + i18n <code>virusScanResultValues</code></td></tr>
         </tbody>
       </table>
@@ -788,7 +799,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <h4>S-4 · 病毒扫描结果「值」下拉：有毒 / 无毒</h4>
         <p class="trigger-path">触发路径：条件配置 → 添加「病毒扫描结果」→ 展开「值」下拉 · 浏览器实拍（浅色 / 1575×847）</p>
         <figure>
-          <img src="./screenshots/GT-12751-S4-value-virus-infected-clean-light-1575x847.png" alt="病毒扫描结果条件的值下拉展开，显示有毒与无毒两个选项，说明卡显示数据来源为防病毒引擎" />
+          <img src="./screenshots/GT-12751-S4-value-virus-infected-clean-light-1575x847.png" alt="病毒扫描结果条件的值下拉展开，显示有毒与无毒两个选项，说明卡显示数据来���为防病毒引擎" />
           <figcaption>图 S-4：病毒扫描结果（字段 <code>virus_scan_result</code>）的「值」下拉仅含<strong>有毒 / 无毒</strong>两项；右侧说明卡显示数据来源、运算符等（见变更 9）。加密附件 / Mail From 为空的「是 / 否」、二维码的「成功 / 失败」、一致性的「一致 / 不一致」为同类二态控件。</figcaption>
         </figure>
       </div>
@@ -804,7 +815,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
   </div>
 
-  <!-- ══════════════ 变更 7 ══════════════ -->
+  <!-- ═════��════════ 变更 7 ══════════════ -->
   <div class="incremental-section" id="change-7">
     <div class="incr-header">
       <span class="incr-num">7</span>
@@ -1005,7 +1016,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <div class="incr-body">
       <h3>12.1 方案概述</h3>
       <p>
-        勾选「外部邮件提醒」附加策略后，其配置区原有「模板」（标准模板 / 安全提醒 / 自定义）与「插入位置」两个下拉。本次<strong>移除「模板」下拉</strong>，配置区仅保留「插入位置」（默认正文顶部）与底部提示「外部邮件提��仅对判定��外部发件��的邮件生效」。默认参数不再写入 <code>template</code> 字段；右侧摘要由原「模板名」改为显示「插入位置」。
+        勾选「外部邮件提醒」附加策略后，其配置区原有「模板」（标准模板 / 安全提醒 / 自定义）与「插入位置」两个下拉。本次<strong>移除「模板」下拉</strong>，配置区仅保留「插入位置」（默认正文顶部）与底部提示「外部邮件提��仅对判定��外部发件��的邮件生效」。默认参数不再写入 <code>template</code> 字段；右侧摘要��原「模板名」改为显示「插入位置」。
       </p>
       <h3>12.2 截图式交互预览</h3>
       <div class="interaction-preview">
@@ -1118,7 +1129,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         </tbody>
       </table>
       <div class="callout callout-info">
-        二维码图片检测的 <code>qr_mode</code> 中的 <code>deep</code>（识别到二维码并深度校验）是<strong>真实功能</strong>，与本次 OCR 的 deep 无关，未改动；历史死键 <code>ocrMode_deep</code> 之外的 <code>...TemplateDefault</code> 类键不在本需求范围。
+        二维码图片检测的 <code>qr_mode</code> 中的 <code>deep</code>（识别到二维码并深度校���）是<strong>真实功能</strong>，与本次 OCR 的 deep 无关，未改动；历史死键 <code>ocrMode_deep</code> 之外的 <code>...TemplateDefault</code> 类键不在本需求范围。
       </div>
       <a class="back-link" href="#toc">↑ 返回目录</a>
     </div>
@@ -1134,7 +1145,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <div class="incr-body">
       <h3>14.1 方案概述</h3>
       <p>
-        「检测数量上限（防止性能耗尽）」是"每封邮件最多对几个附件做 OCR"的性能保护参数，仅在真正执行 OCR（检测模式=检测）时才有意义。原实现下该输入框无论检测模式如何始终可编辑，选「不检测」时仍可改，属逻辑瑕疵。
+        「检测数量上限（防止性能耗尽）」是"每封邮件最多对几个附件做 OCR"的性能保护参��，仅在真正执行 OCR（检测模式=检测）时才有意义。原实现下该输入框无论检测模式如何始终可编辑，选「不检测」时仍可改，属逻辑瑕疵。
       </p>
       <div class="callout callout-ok">
         <strong>最终实现方案（方案 A）：</strong>当 <code>ocr_mode === 'none'</code>（不检测）时，禁用「检测数量上限」输入框（<code>disabled</code>），并在其下方显示灰字提示「选择「检测」后可配置」；切换回「检测」时输入框恢复可编辑、提示消失。采用禁用而非隐藏，使���检测模式 / 检测数量上限」并排两列布局在模式切换时保持稳定、不跳动。
@@ -1145,7 +1156,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <p class="trigger-path">触发路径：图片OCR检测 → 检测模式选「不检测」 · 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1694×1046）</p>
         <figure>
           <img src="./screenshots/GT-11675-S2-ocr-limit-disabled-when-none-light-1694x1046.png" alt="检测模式为不检测时，检测数量上限输入框灰显禁用，下方提示选择检测后可配置" />
-          <figcaption>图 S-2：检测模式=「不检测」时，「检测数量上限」输入框灰显禁用（值 2 变浅���不可编辑）���下方显示灰字「���择「检测」后可配置」；检测模式旁 tooltip 显示「检测并识别图片中的印刷体文字内容」。选回「检测」后输入框恢复可编辑、提示消失（见 S-1 中输入框为可编辑态）。</figcaption>
+          <figcaption>图 S-2：检测模式=「不检测」时，「检测数量上限」输入框灰显禁用（值 2 变浅���不可编辑）���下方显示灰字「���择「检测」后可配置」；检测模式旁 tooltip 显示「检测并识别图片中的印刷体文字内容」。选回「检测」后输入框恢复可编辑、提示消失（见 S-1 中输入框为���编辑态）。</figcaption>
         </figure>
       </div>
       <h3>14.3 逐元素与 i18n 变更</h3>
@@ -1278,7 +1289,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
   </div>
 
-  <!-- ══════════════ 变更 17 ══════════════ -->
+  <!-- ══════════════ 变更 17 ═════════��════ -->
   <div class="incremental-section" id="change-17">
     <div class="incr-header">
       <span class="incr-num">17</span>
@@ -1501,7 +1512,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </table>
   </section>
 
-  <!-- ══════════════ D. 待确认 ══════════════ -->
+  <!-- ══════════════ D. ���确认 ══════════════ -->
   <section id="questions">
     <h2>D. 待确认事项</h2>
 
@@ -1591,7 +1602,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         </td></tr>
         <tr><td>变更类型</td><td>UI 文案去除 + 交互优化（下拉项增加说明 + 触发器仅显名称）+ 文案调整（阻断→拒收）</td></tr>
         <tr><td>webapp commit</td><td><code>336fe42</code></td></tr>
-        <tr><td>浏览器验证状态</td><td>2026-08-04 演示环境真实截图（浅色 / AI版·单租户 / 平台管理员 / 阶段3 附件安全检测 → 反病毒引擎 Tab，1440×900）；实拍 S-1 / S-2 / S-3</td></tr>
+        <tr><td>浏览器验证状态</td><td>2026-08-04 演示环境真实截图（浅色 / AI版·单租户 / 平台管理员 / 阶段3 附��安全检测 → 反病毒引擎 Tab，1440×900）；实拍 S-1 / S-2 / S-3</td></tr>
       </tbody>
     </table>
     <div class="callout callout-info">
@@ -1632,7 +1643,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           </tr>
         </tbody>
       </table>
-      <div class="callout callout-removed">移除原因：租户管理员已知道服务器配置由平台统一管理（通过隐藏服务器配置区本身即已传达权限边界），冗余横幅增加视觉噪声。</div>
+      <div class="callout callout-removed">移除原因：租户管理员已知道服务器配置由平台统一���理（通过隐藏服务器配置区本身即已传达权限边界），冗余横幅增加视觉噪声。</div>
       <figure style="margin-top:1rem;">
         <img src="./screenshots/GT-12754-antivirus-tab-tenant-admin-default.png" alt="租户管理员视角 - 反病毒引擎 Tab（无横幅）">
         <figcaption>S-4：租户管理员视角（AI版·多租户 Mock，示例租户 A，1440×900）：info 横幅已移除，页面直接展示「发现病毒后的处置」与「扫描超时处置」两个下拉，服务器配置区不可见。</figcaption>
@@ -1688,7 +1699,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <thead><tr><th>状态</th><th>变更前</th><th>变更后</th></tr></thead>
         <tbody>
           <tr><td>触发器（下拉关闭态）</td><td>显示当前选中动作名称 + 描述文字（两行），触发器区域变高、信息冗余</td><td>仅显示动作名称（单行）；通过 <code>SelectValue children</code> 直接渲染 <code>t(`actions.${value}`)</code> 覆盖 Radix 默认回退行为</td></tr>
-          <tr><td>下拉选项（展开态）</td><td>每项仅显示动��名称（单行）</td><td>每项显示「动作名称 + 灰色描述文字」两行；描述通过 <code>t(`actionDesc.${action}`)</code> 国际化</td></tr>
+          <tr><td>下拉选项（展开态）</td><td>每项仅显示动��名称（单行）</td><td>每项显示「动作名称 + 灰色��述文字」两行；描述通过 <code>t(`actionDesc.${action}`)</code> 国际化</td></tr>
         </tbody>
       </table>
       <table style="margin-top:0.75rem;">
@@ -1755,7 +1766,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
             <td>结果仲裁策略 Section</td>
             <td>深度检测配置区底部有 <code>border-t pt-4</code> 分隔区，包含：Label「结果仲裁策略」（含 Tooltip 图标）、disabled Select 下拉（值「取最高优先级动作执行」）、灰字提示「敬请期待」</td>
             <td>整个区块已从 DOM 中移除，深度检测配置区末尾直接显示「检测数量上限」和「超限处置」</td>
-            <td>i18n key <code>imageDetect.arbitration</code>、<code>imageDetect.highestPriority</code>、<code>imageDetect.firstMatch</code>、<code>tooltips.arbitration</code>（已从 zh/en/ru/th 四语删除）；<code>QrDeepRoutesConfig.arbitration</code> 字段已从类型、API、mock 各层删除；parity 测试移除对应 4 个必需 key</td>
+            <td>i18n key <code>imageDetect.arbitration</code>、<code>imageDetect.highestPriority</code>、<code>imageDetect.firstMatch</code>、<code>tooltips.arbitration</code>���已从 zh/en/ru/th 四语删除）；<code>QrDeepRoutesConfig.arbitration</code> 字段已从类型、API、mock 各层删除；parity 测试移除对应 4 个必需 key</td>
           </tr>
         </tbody>
       </table>
@@ -1793,7 +1804,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tbody>
           <tr>
             <td>一维码豁免 Switch</td>
-            <td>轻度检测配置区包含 Switch 控件（<code>data-testid="qr-barcode-exempt"</code>）+ Label「一维码豁免：条形码（Code128/EAN等）不视为二维码」</td>
+            <td>轻度检测配置区包含 Switch ��件（<code>data-testid="qr-barcode-exempt"</code>）+ Label「一维码豁免：条形码（Code128/EAN等）不视为二维码」</td>
             <td>Switch 已从 DOM 中移除，轻度检测配置区只剩「执行动作」下拉</td>
             <td>i18n key <code>imageDetect.barcodeExempt</code>（已从 zh/en/ru/th 四语删除）；<code>ImageDetectConfig.qr_barcode_exempt</code> 字段已从类型定义、API 声明、mock fixtures、<code>AttachmentSecurityPage</code> 读写两处引用全部清除；parity 测试移除 <code>barcodeExempt</code> 必需 key</td>
           </tr>
@@ -1926,6 +1937,203 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </section>
   </section>
 
+  <!-- ══════════════ 一级需求 GT-12571 ══════════════ -->
+  <div id="gt-12571" style="scroll-margin-top:1rem;"></div>
+  <section id="section-gt-12571">
+    <h2 style="border-bottom:2px solid #2563eb;padding-bottom:0.4rem;">GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决</h2>
+    <table>
+      <tbody>
+        <tr><td width="140">需求名称</td><td>GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决</td></tr>
+        <tr><td>生成日期</td><td>2026-08-05</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/users</code>（管理员与权限 → 管理员账号 Tab）</td></tr>
+        <tr><td>组件路径</td><td>
+          主改动：<code>src/app/[locale]/(dashboard)/users/page.tsx</code><br>
+          新增 state：<code>createdUserPassword: string | null</code>、<code>createdUsername: string</code><br>
+          新增 import：<code>Dialog / DialogContent / DialogHeader / DialogTitle / DialogFooter / DialogDescription</code>（<code>@/components/ui/dialog</code>）、<code>Copy / CheckCircle2</code>（<code>lucide-react</code>）<br>
+          Mock 路由补全：<code>src/lib/mock/dispatcher.ts</code>（新增 POST /users 路由，返回 201 + 最小 User 对象）<br>
+          国际化：<code>messages/zh.json</code> / <code>en.json</code> / <code>ru.json</code> / <code>th.json</code> 各新增 <code>users.createdDialog.*</code> 7 个 key
+        </td></tr>
+        <tr><td>变更类型</td><td>缺陷修复（密码展示缺失 → 新增「初始密码确认」Dialog）</td></tr>
+        <tr><td>浏览器验证</td><td>2026-08-05，AI版·单租户·平台管理员·Mock，1440×900，深色主题</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本需求修复创建新用户后初始密码不可见的问题：原流程在「保存」成功后直接关闭抽屉，密码从内存中消失；
+      修复后在关闭抽屉的同时弹出「用户已创建」确认 Dialog，以只读明文 <code>Input</code>（<code>font-mono</code>）展示初始密码，
+      并提供「复制密码」按钮；管理员点「我已记录」后 Dialog 关闭，密码随 state 清空，不可再次查看。
+      <code>todo-alerts.tsx</code> 文件及现有重置密码 Dialog 均不受影响。
+    </div>
+
+    <!-- 变更 26 -->
+    <div class="interaction-preview" id="change-26" style="margin-top:1.5rem;">
+      <h4>
+        <span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">26</span>
+        创建成功后弹出「初始密码确认」Dialog，明文展示密码并提供复制按钮
+      </h4>
+      <div class="trigger-path">触发路径：任意形态 · 平台管理员 → 管理员与权限（<code>/zh/users</code>）→ 点击「+ 新建」→ 填写账号/姓名/邮箱/手机号 + 点击「生成」生成密码 + 选择角色 → 点击「保存」→ API 响应成功（2xx）</div>
+
+      <!-- 26.1 方案概述 -->
+      <h5 id="c26-overview">26.1 方案概述</h5>
+      <table>
+        <tbody>
+          <tr><td width="140">问题</td><td>「初始密码」字段类型为 <code>type="password"</code>（掩码），点「生成」后管理员无法查看生成内容；创建成功后抽屉直接关闭，密码从内存消失，无法事后找回</td></tr>
+          <tr><td>修复方案</td><td>保留原表单字段不变（保持 <code>type="password"</code>，防止侧边展示）；创建成功后不直接弹 toast，而是将管理员填写/生成的密码（<code>data.password</code>）暂存到 <code>createdUserPassword</code> state，触发「用户已创建」Dialog 展示</td></tr>
+          <tr><td>Dialog 内容</td><td>只读 <code>Input type="text"</code>（<code>font-mono</code>）明文展示密码 + 「复制密码」按钮（调用 <code>navigator.clipboard.writeText</code>，复制成功/失败分别 toast）+ 「我已记录」确认按钮（点击后清空 <code>createdUserPassword</code> state，Dialog 关闭）</td></tr>
+          <tr><td>防遗漏设计</td><td>Dialog 打开前抽屉已关闭（<code>setDialogOpen(false)</code> 先行），Dialog 不可通过点击遮罩或按 Esc 关闭（管理员必须主动点「我已记录」）；提示文案「请务必在关闭前复制并转交密码，关闭后将无法再次查看」</td></tr>
+          <tr><td>不受影响</td><td>重置密码 Dialog（<code>ResetPasswordDialog</code>）、HealthBanner、<code>todo-alerts.tsx</code>、测试文件均不变；编辑用户流程（<code>isEditing === true</code> 分支）继续走原有 <code>setDialogOpen(false)</code> 逻辑</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 26.2 截图式交互预览 -->
+      <h5 id="c26-states" style="margin-top:1rem;">26.2 截图式交互预览</h5>
+
+      <p><strong>S-1：管理员与权限默认态（AI版·单租户·Mock，用户列表加载完成）</strong></p>
+      <div class="trigger-path">触发路径：导航到 <code>/zh/users</code>，「管理员账号」Tab 默认激活；Mock 下暂无数据，表格空态</div>
+      <figure>
+        <img src="./screenshots/GT-12571-users-default.png" alt="管理员与权限用户列表默认态">
+        <figcaption>S-1：管理员与权限 / 管理员账号 Tab 默认态（AI版·单租户·Mock，1440×900，深色主题）。包含「搜索用户名…」输入框、「筛选」按钮、「+ 新建」按钮；表格列：账号/用户名、姓名、邮箱、手机号、角色、租户、账号状态、操作；Mock 下暂无数据。</figcaption>
+      </figure>
+
+      <p><strong>S-2：创建用户抽屉默认态（点击「+ 新建」）</strong></p>
+      <div class="trigger-path">触发路径：S-1 → 点击「+ 新建」按钮</div>
+      <figure>
+        <img src="./screenshots/GT-12571-create-drawer-open.png" alt="创建用户抽屉默认态">
+        <figcaption>S-2：「管理员配置」抽屉打开态。标题「管理员配置」+ 副标题「创建新的管理员账号并分配角色」；基础信息区：账号/用户名（必填）、姓名（必填）、邮箱（必填）、手机号（必填）、初始密码（必填，<code>type="password"</code> 掩码输入框 + 「生成」按钮）；角色与状态区：角色（必填，下拉选择）、账号状态（「启用（正常）」默认值）；底部提示文案「新账号使用临时密码，首次登录时必须修改密码（平台安全契约）」；「保存」「取消」按钮。</figcaption>
+      </figure>
+
+      <p><strong>S-3：点击「生成」后初始密码字段（修复前问题复现态）</strong></p>
+      <div class="trigger-path">触发路径：S-2 → 点击「生成」按钮</div>
+      <figure>
+        <img src="./screenshots/GT-12571-password-generated.png" alt="点击生成后密码仍为掩码">
+        <figcaption>S-3：点击「生成」按钮后，初始密码字段填入随机生成的密码，但字段类型仍为 <code>type="password"</code>，显示为 <code>●●●●●●●●●●●●●●●</code>掩码，管理员无法看到实际密码内容。这是本次修复前的缺陷态——管理员无法在提交前确认密码是否生成成功，也无法将密码转交给新用户。</figcaption>
+      </figure>
+
+      <p><strong>S-4：创建成功后「初始密码确认」Dialog（修复后新增态）</strong></p>
+      <div class="trigger-path">触发路径：S-3（或手动输入密码后）→ 填写完所有必填字段、选择角色 → 点击「保存」→ API 创建成功（2xx）</div>
+      <figure>
+        <img src="./screenshots/GT-12571-created-password-dialog.png" alt="创建成功后密码确认 Dialog">
+        <figcaption>S-4：创建成功后弹出「用户已创建」Dialog（抽屉已关闭）。Dialog 包含：标题行「✓ 用户已创建」（绿色 CheckCircle2 图标）；描述文字「账号「test-admin-01」已成功创建。请将以下初始密码转交给该用户，首次登录须修改密码。」；「初始密码」标签 + 只读 <code>font-mono</code> 明文输入框（展示实际密码 <code>zFl88n7asTLB95MZ</code>）+ 「复制密码」按钮（复制图标）；提示文案「请务必在关闭前复制并转交密码，关闭后将无法再次查看。」；「我已记录」确认按钮（蓝色，点击关闭 Dialog 并清空密码 state）。</figcaption>
+      </figure>
+
+      <p><strong>S-5：点击「我已记录」后回到用户列表</strong></p>
+      <div class="trigger-path">触发路径：S-4 → 点击「我已记录」按钮</div>
+      <figure>
+        <img src="./screenshots/GT-12571-after-confirm.png" alt="确认后回到用户列表">
+        <figcaption>S-5：点击「我已记录」后 Dialog 关闭，回到管理员与权限用户列表页；<code>createdUserPassword</code> state 清空，密码不可再次查看；列表已通过 <code>queryClient.invalidateQueries</code> 刷新（Mock 下仍显示「暂无数据」）。</figcaption>
+      </figure>
+
+      <!-- 26.3 逐元素说明 -->
+      <h5 id="c26-elements" style="margin-top:1rem;">26.3 逐元素说明</h5>
+      <table>
+        <thead><tr><th>元素</th><th>类型/位置</th><th>内容/行为</th><th>i18n key</th><th>形态/角色差异</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Dialog 触发条件</td>
+            <td>state <code>createdUserPassword !== null</code></td>
+            <td>创建成功后由 <code>handleSubmit</code> 写入 <code>setCreatedUserPassword(data.password!)</code>；Dialog 的 <code>open</code> prop 绑定此 state</td>
+            <td>—</td>
+            <td>[Base] 所有形态下行为一致</td>
+          </tr>
+          <tr>
+            <td>Dialog 标题</td>
+            <td>DialogTitle，带 <code>CheckCircle2</code> 图标（<code>h-4 w-4 text-green-500</code>）</td>
+            <td>「用户已创建」</td>
+            <td><code>users.createdDialog.title</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>Dialog 描述</td>
+            <td>DialogDescription</td>
+            <td>「账号「{username}」已成功创建。请将以下初始密码转交给该用户，首次登录须修改密码。」（<code>createdUsername</code> state 插值）</td>
+            <td><code>users.createdDialog.description</code>（含 <code>{username}</code> 插值参数）</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>「初始密码」标签</td>
+            <td>Label</td>
+            <td>「初始密码」</td>
+            <td><code>users.createdDialog.passwordLabel</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>密码明文输入框</td>
+            <td>Input，<code>readOnly</code>，<code>type="text"</code>（默认），<code>font-mono</code>，<code>flex-1</code></td>
+            <td>展示 <code>createdUserPassword</code> state 内容（明文）；只读不可编辑；data-testid=<code>created-password-value</code></td>
+            <td>—</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>「复制密码」按钮</td>
+            <td>Button variant="outline"，带 <code>Copy</code> 图标（<code>h-4 w-4 mr-1</code>）</td>
+            <td>点击调用 <code>navigator.clipboard.writeText</code>：成功 → <code>toast.success(t('users.resetPassword.copied'))</code>；失败 → <code>toast.error(t('users.resetPassword.copyFailed'))</code>；data-testid=<code>created-password-copy</code></td>
+            <td><code>users.createdDialog.copyBtn</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>提示文案</td>
+            <td><code>p.text-xs.text-muted-foreground</code></td>
+            <td>「请务必在关闭前复制并转交密码，关闭后将无法再次查看。」</td>
+            <td><code>users.createdDialog.hint</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>「我已记录」按钮</td>
+            <td>DialogFooter 内 Button（默认 primary 样式），data-testid=<code>created-password-confirm</code></td>
+            <td>点击 → <code>setCreatedUserPassword(null)</code> → Dialog 关闭；密码从内存清除，不可再次查看</td>
+            <td><code>users.createdDialog.confirmBtn</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>Dialog 关闭方式</td>
+            <td>onOpenChange 回调</td>
+            <td>只有「我已记录」按钮（或右上角 ✕）可关闭，不可点击遮罩关闭（shadcn Dialog 默认行为）；关闭时均执行 <code>setCreatedUserPassword(null)</code></td>
+            <td>—</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>i18n 覆盖</td>
+            <td>messages/zh.json、en.json、ru.json、th.json</td>
+            <td>各新增 <code>users.createdDialog</code> 节，包含 <code>title</code> / <code>description</code> / <code>passwordLabel</code> / <code>copyBtn</code> / <code>hint</code> / <code>confirmBtn</code> 共 6 个 key；复制成功/失败 toast 复用已有 <code>users.resetPassword.copied</code> / <code>users.resetPassword.copyFailed</code></td>
+            <td>见各 messages/*.json</td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 差异标注 D-024 -->
+    <section id="incremental-gt12571-diff" style="margin-top:1.5rem;">
+      <h3>差异标注（本次增量 D-024）</h3>
+      <div class="interaction-preview">
+        <h3>D-024 · 创建用户抽屉「初始密码」字段掩码导致密码不可见，创建成功后抽屉关闭密码即丢失</h3>
+        <table>
+          <tbody>
+            <tr><td width="120">类型</td><td>缺陷修复（密码展示缺失）</td></tr>
+            <tr><td>问题描述</td><td>
+              <ol style="margin:0;padding-left:1.2rem;">
+                <li>「初始密码」字段 <code>type="password"</code>，点击「生成」后密码以 <code>●</code> 掩码展示，管理员无法确认密码内容；</li>
+                <li>创建成功后 <code>handleSubmit</code> 直接执行 <code>setDialogOpen(false)</code> 关闭抽屉，密码随 React state 清空，管理员无任何途径获取已生成的密码。</li>
+              </ol>
+            </td></tr>
+            <tr><td>修复方案</td><td>保留表单字段 <code>type="password"</code> 不变（不影响输入前安全性）；在创建成功分支（<code>await createUser</code> / <code>createTenantUser</code> 后）将 <code>data.password!</code>（表单值，非 API 返回值）写入 <code>createdUserPassword</code> state，同时写入 <code>createdUsername</code>，关闭抽屉，触发「用户已创建」确认 Dialog 展示明文密码</td></tr>
+            <tr><td>影响范围</td><td>
+              <code>users/page.tsx</code>：新增 2 个 state（<code>createdUserPassword</code>/<code>createdUsername</code>）、新增 Dialog JSX（约 55 行）、新增 import（<code>Dialog</code> 组件族、<code>Copy</code>/<code>CheckCircle2</code> 图标）；<br>
+              <code>dispatcher.ts</code>：新增 POST /users Mock 路由（返回 201 + 最小 User 对象），使密码确认 Dialog 在 Mock 模式下可正常弹出；<br>
+              messages/*.json（zh/en/ru/th）：各新增 <code>users.createdDialog</code> 节 6 个 key
+            </td></tr>
+            <tr><td>不受影响</td><td>
+              编辑用户分支（<code>isEditing === true</code>，走原有 <code>setDialogOpen(false) + toast.success</code>）；
+              重置密码 Dialog（<code>ResetPasswordDialog</code>）；
+              <code>todo-alerts.tsx</code>；
+              <code>hooks.ts</code>；
+              现有测试文件（<code>users/page.test.tsx</code>、<code>users.test.ts</code>、<code>gt12553-platform-todos.test.tsx</code>）
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
   <!-- ══════════════ E. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>E. 版本历史</h2>
@@ -1984,7 +2192,23 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>v9</td>
           <td>2026-08-04</td>
           <td><code>当前工作区</code></td>
-          <td>追加一级需求 GT-12276 系统状态：去掉"待办与告警"模块：变更 25（<code>system-status-dashboard.tsx</code> 移除 <code>xl:grid-cols-3</code> wrapper 和 <code>&lt;TodoAlerts&gt;</code> 组件渲染；<code>import { TodoAlerts }</code> 同步移除；<code>ThreatTrend</code> 独占全宽；<code>todo-alerts.tsx</code> 文件保留、<code>hooks.ts</code> <code>alerts</code> 数据流和 <code>HealthBanner</code> 均不受影响；测试文件无需修改）；差异新增 D-023；目录追加 GT-12276 分组（变更 25）；title / 元信息 / 差异范围同步更新；浏览器实拍 S-1（AI版·多租户·Mock，1440×900，深色主题）；文档版本 v8→v9。</td>
+          <td>追加一级需求 GT-12276 系统状态：去掉"待办与告警"模块（变更 25 / D-023，详见该版本记录）。</td>
+        </tr>
+        <tr>
+          <td>v10</td>
+          <td>2026-08-05</td>
+          <td><code>当前工作区</code></td>
+          <td>追加一级需求 GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决：变更 26（<code>users/page.tsx</code> 新增 <code>createdUserPassword</code>/<code>createdUsername</code> state；创建成功分支写入 state 并触发「用户已创建」确认 Dialog；Dialog 内含只读 <code>font-mono</code> 明文密码输入框 + 「复制密码」按钮 + 「我已记录」确认按钮；新增 Dialog / Copy / CheckCircle2 import；<code>dispatcher.ts</code> 补充 POST /users Mock 路由返回 201；messages/zh/en/ru/th 各新增 <code>users.createdDialog</code> 节 6 个 key）；差异新增 D-024；目录追加 GT-12571 分组（变更 26，含 26.1 方案概述 / 26.2 截图式交互预览 / 26.3 逐元素说明）；浏览器实拍 S-1～S-5（AI版·单租户·Mock，1440×900，深色主题）；title / 元信息 / 差异范围同步更新；文档版本 v9→v10。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <a class="back-link" href="#toc">↑ 返回目录</a>
+
+</div>
+</body>
+</html>
         </tr>
       </tbody>
     </table>

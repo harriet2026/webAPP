@@ -623,7 +623,7 @@ const routes: Route[] = [
   },
   // 系统状态仪表盘的「待处置邮件」KPI 探针：page_size=1 且 advanced_filters 含
   // sideline（隔离/旁路）——只命中这一探针，不影响处置中心默认视图（其 page_size 更大）。
-  // 返回按当前范围分支的 total（3/11/19），items 留空即可（KPI 卡只读 total）。
+  // 返回按当前范围分支的 total（3/11/19），items 留���即可（KPI 卡只读 total）。
   {
     method: 'GET', pattern: '/mail-logs',
     matchQuery: (q) => {
@@ -2532,12 +2532,30 @@ const routes: Route[] = [
     },
   },
   // 收信域抽屉「测试连通性」按钮专用的 mock-only 虚拟 endpoint（receiving-tab.tsx，任意
-  // host/port 组合的一次性连通性测试��真实后端没有对应 API）；出站代理/通道已改用真实 TCP/TLS
+  // host/port 组合的一次性连通性测试，真实后端没有对应 API）；出站代理/通道已改用真实 TCP/TLS
   // 探测（POST /proxysvr-endpoints/:id/probe），不再复用这个端点。
   {
     method: 'POST',
     pattern: '/mail-routing/connectivity-test',
     handler: () => ({ status: 200, data: mockConnectivityTest() }),
+  },
+  // GT-12571：Mock 创建用户（POST /users）——返回 201 + 最小 User 对象，
+  // 使密码确认 Dialog 可以在 Mock 模式下正常弹出以供规格截图验证。
+  {
+    method: 'POST',
+    pattern: '/users',
+    handler: (req) => ({
+      status: 201,
+      data: {
+        id: Date.now(),
+        username: (req.body as Record<string, string>)?.username ?? 'mock-user',
+        role: 'system_admin' as const,
+        tenant_id: null,
+        status: 'normal',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    }),
   },
 ];
 
