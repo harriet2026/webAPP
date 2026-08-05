@@ -3003,6 +3003,8 @@
       "strength3": "Strong",
       "reloginHint": "Password changed. Please log in again.",
       "changed": "Password changed",
+      "changedDesc": "Your password has been updated. Keep it safe.",
+      "done": "Done",
       "incorrect": "Current password is incorrect",
       "changeFailed": "Password change failed"
     },
