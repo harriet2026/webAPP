@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 / GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决 / GT-12769 邮件处置中心-详情改判邮件类型下拉层被弹窗和页面内容遮挡问题解决 / GT-12581 邮件处置中心-详情页内容实体检测与处置模块缺少标题问题解决 · 增量功能规格 · v13</title>
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 / GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决 / GT-12769 邮件处置中心-详情改判邮件类型下拉层被弹窗和页面内容遮挡问题解决 / GT-12581 邮件处置中心-详情页内容实体检测与处置模块缺少标题问题解决 / GT-11969 个人中心优化 · 增量功能规格 · v14</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -236,7 +236,7 @@
         <li class="toc-change"><span class="toc-num">25</span><a href="#change-25">移除系统首页「待办与告警」卡片，威胁态势趋势图独占全宽</a></li>
       </ul>
 
-      <!-- 一级需求：GT-12571 管理员与权限-创建新用户后初始密码未展示���无法复制问题解决 -->
+      <!-- 一级需求：GT-12571 管理员与权限-创建新用户后初始密码未展示�����无法复制问题解决 -->
       <li class="toc-l1"><a href="#gt-12571">GT-12571 管理�����与权限-创建新用户后初始密码未展示且无法复制问题解决</a></li>
       <ul class="toc-l2-group">
         <li class="toc-change"><span class="toc-num">26</span><a href="#change-26">创建成功后弹出「初始密码确认」Dialog，明文展示密码并提供复制按钮</a></li>
@@ -280,7 +280,24 @@
         </ul>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-027）</a></li>
+      <!-- 一级需求：GT-11969 个人中心优化 -->
+      <li class="toc-l1"><a href="#gt-11969">GT-11969 个人中心优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">30</span><a href="#change-30">密码修改成功由右下角 toast 改为 Card 内嵌成功 panel</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c30-overview">30.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c30-states">30.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c30-elements">30.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">31</span><a href="#change-31">补全个人中心各 Tab Mock 数据（二次认证 / 登录会话 / 授信终端 / 登录历史）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c31-overview">31.1 根因与修复方案</a></li>
+          <li class="toc-l3"><a href="#c31-states">31.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c31-elements">31.3 新增 Mock 接口说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-029）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-007）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
@@ -296,9 +313,9 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>文档编号（文件 ticket）</td><td>GT-12731</td></tr>
-        <tr><td>需求名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 / GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决 / GT-12769 邮件处置中心-详情改判邮件类型下拉层被弹窗和页面内容遮挡问题解决 / GT-12581 邮件处置中心-详情页内容实体检测与处置模块缺少标题问题解决</td></tr>
+        <tr><td>需求名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 / GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决 / GT-12769 邮件处置中心-详情改判邮件类型下拉层被弹窗和页面内容遮挡问题解决 / GT-12581 邮件处置中心-详情页内容实体检测与处置模块缺少标题问题解决 / GT-11969 个人中心优化</td></tr>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 缺陷修复 + 功能优化</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v13</span></span></td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v14</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-08-02</td></tr>
         <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层抽屉）</td></tr>
         <tr><td>组件路径</td><td>
@@ -346,7 +363,7 @@
           <th>AI-多<br/>平台管理员</th>
           <th>AI-多<br/>租户管理员</th>
           <th>传统-多<br/>平台管理员</th>
-          <th>传统-多<br/>租户管理员</th>
+          <th>传���-多<br/>租户管理员</th>
         </tr>
       </thead>
       <tbody>
@@ -618,7 +635,7 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
         </ul>
       </div>
       <p style="margin-top:0.75rem;">
-        完整性校验（<code>expression.ts</code>）：至少配置 1 个意图，否则阻断性不完整；任一分段阈值条目端点缺失 → 阻断，端点齐全后再校验「大小顺序 / 超出 <code>[0,1]</code> 范围」提示。表达式预��把每个意图渲染为「意图」（分类优先）或「意图(lo~hi)」（分段阈值）。
+        完整性校验（<code>expression.ts</code>）：至少配置 1 个意图，否则阻断性不完整；任一分段阈值条目端点缺失 → 阻断，端点齐全后再校验「大小顺序 / 超出 <code>[0,1]</code> 范围」提示。表达��预��把每个意图渲染为「意图」（分类优先）或「意图(lo~hi)」（分段阈值）。
       </p>
       <pre><code>// serde.ts — 多意图列表编解码（复用单条 parse/encode）
 //   phishing:threshold:0.60,0.90;spam:classification
@@ -712,7 +729,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
 
       <h3 id="c4-overview">4.1 方案概述</h3>
       <p>
-        按产品要求，从「高级过滤规则 → 条件配置 → 安全检测」分组移除两个条件：<strong>RBL 结果</strong>（catalogue key <code>rblResult</code> / 字段 <code>rbl</code>）与<strong>显示名仿冒</strong>（key <code>displayNameSpoof</code> / 字段 <code>exec_imp</code>），二者原均为 <code>panel: 'select'</code> 枚举单选。
+        按产品要求，从「高级过滤规则 → 条件配置 → 安全检测」分组移除两个条件：<strong>RBL 结果</strong>（catalogue key <code>rblResult</code> / 字段 <code>rbl</code>）与<strong>显示名仿冒</strong>（key <code>displayNameSpoof</code> / 字段 <code>exec_imp</code>），二者原���为 <code>panel: 'select'</code> 枚举单选。
       </p>
       <div class="callout callout-ok">
         <strong>最终实现方案：</strong>删除 <code>catalogue.ts</code> 中这两条条目定义，并删除四语 <code>advancedRulesFeature.v3Conditions</code> 命名空间下对应的两个文案键；同步更新 <code>catalogue.test.ts</code> 的计数不变量。裁剪后：<strong>条件目录总数 51 → 49</strong>、<strong>安全检测 20 → 18</strong>、<strong>select 面板 12 → 10</strong>。
@@ -805,8 +822,8 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
   <div class="incremental-section" id="change-6">
     <div class="incr-header">
       <span class="incr-num">6</span>
-      <h2>条件「值」控件规范化（布尔��� / 二态枚举）</h2>
-      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>ConditionConfigPanel.tsx</code>（<code>BooleanValueSelect</code> / <code>EnumSection</code>）、<code>dispatcher.ts</code>（字段元信息）、<code>messages/{zh,en,ru,th}.json</code><br/>变更类型：功能优化 · 2026-08-03</span>
+      <h2>条件「值」控件规范化���布尔��� / 二态枚举）</h2>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>ConditionConfigPanel.tsx</code>（<code>BooleanValueSelect</code> / <code>EnumSection</code>���、<code>dispatcher.ts</code>（字段元信息）、<code>messages/{zh,en,ru,th}.json</code><br/>变更类型：功能优化 · 2026-08-03</span>
     </div>
     <div class="incr-body">
       <h3>6.1 方案概述</h3>
@@ -883,7 +900,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
   </div>
 
-  <!-- ══════════════ 变更 8 ════════��═════ -->
+  <!-- ══════════════ 变更 8 ══════���═��═════ -->
   <div class="incremental-section" id="change-8">
     <div class="incr-header">
       <span class="incr-num">8</span>
@@ -974,7 +991,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
         <tbody>
           <tr><td>已选条件区容器</td><td>随内容无限增高、无独立滚动</td><td>限高 + <code>overflow-y-auto</code> 独立滚动</td><td><span class="tag tag-fixed">修复</span></td></tr>
-          <tr><td>「添加条件」区容器</td><td>被已选列表挤出可视区</td><td><code>flex-1 min-h-0</code> 常驻可见、内部滚动</td><td><span class="tag tag-fixed">修复</span>搜索/目录始终可用</td></tr>
+          <tr><td>「添加条件」区容器</td><td>被已选列表挤出可视区</td><td><code>flex-1 min-h-0</code> 常驻可见、内部滚���</td><td><span class="tag tag-fixed">修复</span>搜索/目录始终可用</td></tr>
         </tbody>
       </table>
       <a class="back-link" href="#toc">↑ 返回目录</a>
@@ -1057,7 +1074,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <p class="trigger-path">触发路径：新建规则 → 处置策略 → 附加策略勾选「外部邮件提醒」· 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1737×1046）</p>
         <figure>
           <img src="./screenshots/GT-12753-S2-external-reminder-no-template-position-only-light-1737x1046.png" alt="外部邮件提醒配置区仅显示插入位置下拉与外部发件人提示，无模板下拉" />
-          <figcaption>图 S-2：勾选「外部邮件提醒」后，<code>addon_policy</code> 配置区仅含「插入位置」（正文顶部）与提示文案，<strong>不再有「模板」下拉</strong>；右侧���配置摘要」显示「外部邮件提醒 → 正文顶部」，「逻辑表达式预览」显示「外部邮件提醒（正文顶部）」。</figcaption>
+          <figcaption>图 S-2：勾选「外部邮件提醒」后，<code>addon_policy</code> 配置区仅含「插入位置」（正文顶部）与提示文案，<strong>不再有「模板」下��</strong>；右侧���配置摘要」显示「外部邮件提醒 → 正文顶部」，「逻辑表达式预览」显示「外部邮件提醒（正文顶部）」。</figcaption>
         </figure>
       </div>
       <h3>12.3 文件与逐元素变更</h3>
@@ -1141,7 +1158,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <h3>13.2 截图式交互预览</h3>
       <div class="interaction-preview">
         <h4>S-1 · 检测模式下拉展开态（仅「不检测 / 检测」两项，无深度检测）</h4>
-        <p class="trigger-path">触发路径：<code>/zh/security/pipeline</code> → 阶段3 附件���全检测 → 「图片识别」页签 → 点击「图片OCR检测 · 检测模���」下拉 · 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1694×1046）</p>
+        <p class="trigger-path">触发路径：<code>/zh/security/pipeline</code> ��� 阶段3 附件���全检测 → 「图片识别」页签 → 点击「图片OCR检测 · 检测模���」下拉 · 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1694×1046）</p>
         <figure>
           <img src="./screenshots/GT-11675-S1-ocr-mode-two-options-light-1694x1046.png" alt="图片OCR检测的检测模式下拉展开，仅显示不检测与检测两个选项，无深度检测" />
           <figcaption>图 S-1：检测模式下拉展开后仅两项——「不检测」与「检测」（当前选中，带勾）。对照修改前该下拉曾含置灰的「深度检测（手写+印刷）」，现已删���。</figcaption>
@@ -1214,7 +1231,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
   </div>
 
-  <!-- ══════════════ 一级需求 GT-11651 ══════════════ -->
+  <!-- ══════════════ 一级需求 GT-11651 ═══��══════════ -->
   <section id="gt-11651">
     <h2 style="border-bottom:2px solid #2563eb;padding-bottom:0.4rem;">GT-11651 内容规则-执行动作调整</h2>
     <table>
@@ -1298,7 +1315,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <p class="trigger-path">触发��径：<code>/zh/security/pipeline</code> → 阶段3 内容规则 → 「新建规则」 → 点击「执行动作」下拉 · 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1694×1046）</p>
         <figure>
           <img src="./screenshots/GT-11651-S1-action-5options-two-line-light-1694x1046.png" alt="内容规则新建抽屉执行动作下拉展开，显示投递、隔离、审核、拒收、丢弃五项，每项为标题加灰字说明两行式" />
-          <figcaption>图 S-1：执行动作下拉展开，5 项均为「标题 + 灰字说明」两行式：投递（正常投递邮件）、隔离（邮件进入隔离区，管理员可审阅后决定是否放行）、审核（邮件正常投递，同���写入审核日志供管理员事后审查）、拒收（向发信方返回 SMTP 拒绝响应，邮件不进入系统）、丢弃（静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃）。无「标记投递」，「阻断」已改为「拒收」，「放行」已改为「投递」（见变更 15、17）。</figcaption>
+          <figcaption>图 S-1：执行动作下拉展开，5 项均为「标题 + 灰字说明」两行式：投递（正常投递邮件）、隔离（邮件进入隔离区，管理员可审阅后决定是否放行）、审���（邮件正常投递，同���写入审核日志供管理员事后审查）、拒收（向发信方返回 SMTP 拒绝响应，邮件不进入系统）、丢弃（静默丢弃邮件，发信方收到投递成功响���但邮件实际被丢弃）。无「标记投递」，「阻断」已改为「拒收」，「放行」已改为「投递」（见变更 15、17）。</figcaption>
         </figure>
       </div>
       <h3>16.3 逐元素与 i18n 变更</h3>
@@ -1360,7 +1377,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td width="140">状态</td><td><span class="tag tag-unverif">已知·环境限制</span></td></tr>
         <tr><td>描述</td><td>在当前演示环境点击「URL检测与防护」详情页会出现 <code>加载设置失败</code> toast，其总开关无���持久化切换（保持已启用）。因此 4 个内容层模块在本环境均呈启用态，无法在浏览器中复现用户截图（S-1）中的「未启用」稳态来直接对比修复前后。</td></tr>
         <tr><td>处理</td><td>以用户实拍的问题现象截图（S-1 / S-2）作为修复前证据；以浏览器实拍稳态（S-3 / S-4）证明修复后导航渲染稳定、无闪回中间帧。</td></tr>
-        <tr><td>验证依据</td><td>S-4 截图右下角 <code>加载设置失败</code> toast；<code>useModuleMaster</code> 的 <code>getSecurityModules().catch(() =&gt; {})</code> 静默失败分支</td></tr>
+        <tr><td>验证依据</td><td>S-4 ���图右下角 <code>加载设置失败</code> toast；<code>useModuleMaster</code> 的 <code>getSecurityModules().catch(() =&gt; {})</code> 静默失败分支</td></tr>
       </tbody>
     </table>
 
@@ -1464,7 +1481,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       </tbody>
     </table>
 
-    <h3>D-012 · 条件配置左栏改为「已选区限高滚动 + 添加区常驻」双滚动布局</h3>
+    <h3>D-012 · 条��配置左栏改为「已选区限高滚动 + 添加区常驻」双滚动布局</h3>
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·布局取舍</span></td></tr>
@@ -1585,7 +1602,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
         <tr><td>问题</td><td>变更 6（二态值控件）、变更 7（发信人组来源）、变更 8（发件组织部门树）的候选数据与取值域本次均来自 Mock（<code>dispatcher.ts</code> / 组织与群组 fixtures）。真实后端返回的枚举值域、群组策略发信人组列表、组织部门树结构，以及这些条件保存后重新打开的回显，需在接入后回归。</td></tr>
         <tr><td>影响</td><td>加密附件/Mail From（是/否）、二维码（成功/失败）、一致性（一致/不一致）、病毒扫描（有毒/无毒）的值回显；发信人组 / 发件组织候选与回显</td></tr>
-        <tr><td>建议</td><td>接入真实后端后逐条新建并保存，重新打开编辑抽屉确认「值 / 所���群组 / 所选部门」准确回显、表达式一致</td></tr>
+        <tr><td>建议</td><td>接入真实后端后逐条新建并保存���重新打开编辑抽屉确认「值 / 所���群组 / 所选部门」准确回显、表达式一致</td></tr>
       </tbody>
     </table>
 
@@ -1756,7 +1773,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <figcaption>S-2：扫描超时处置下拉展开（1440×900）：五项含名称+说明，「继续流水线」当前选中（蓝色高亮）。</figcaption>
       </figure>
       <figure style="margin-top:0.75rem;">
-        <img src="./screenshots/GT-12754-antivirus-tab-platform-admin-default.png" alt="反病毒引擎 Tab 默认态（平台管理员）">
+        <img src="./screenshots/GT-12754-antivirus-tab-platform-admin-default.png" alt="反病毒��擎 Tab 默认态（平台管理员）">
         <figcaption>S-3：平台管理员视角反病毒引擎 Tab 默认态（1440×900）：触发器仅显示动作名称，无 info 横幅，无 section 标题行。</figcaption>
       </figure>
     </div>
@@ -1806,7 +1823,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <div class="callout callout-removed">移除原因：<code>arbitration</code> 字段从未在 attachd 检测侧落地（全仓搜不到下发逻辑），两个枚举值均无实际效果；「首次命中」语义未定义（各路由执行顺序无约定）；置灰占位增加管理员配置疑惑，按 GT-12201 决策直接移除。</div>
       <figure style="margin-top:1rem;">
         <img src="./screenshots/GT-12201-deep-detect-mode-default.png" alt="深度检测配置区 - 结果仲裁策略已移除">
-        <figcaption>S-1：深度检测模式下配置区（AI版·单租户·平台管理员·Mock，1440×900）：「结果仲裁策略」模块已移除，配置区末尾���接显示「检测数量上限」（5 个）和「超限处置」下拉（进行下一步）。</figcaption>
+        <figcaption>S-1：深度检测模式下配置区（AI版·单租户·平台管理员·Mock，1440×900）：「结���仲裁策略」模块已移除，配置区末尾���接显示「检测数量上限」（5 个）和「超限处置」下拉（进行下一步）。</figcaption>
       </figure>
     </div>
 
@@ -1922,7 +1939,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <!-- 变更 25 -->
     <div class="interaction-preview" id="change-25" style="margin-top:1.5rem;">
       <h4><span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">25</span>移除系统首页「待办与告警」卡片，威胁态势趋势图独占全宽</h4>
-      <div class="trigger-path">触发路径：任意形态任意角色 → 导航到系统状态（<code>/zh/dashboard</code>）</div>
+      <div class="trigger-path">触发路径：任意形态���意角色 → 导航到系统状态（<code>/zh/dashboard</code>）</div>
       <table>
         <thead><tr><th>元素</th><th>变更前</th><th>变更后</th><th>代码路径</th></tr></thead>
         <tbody>
@@ -1982,7 +1999,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td>组件路径</td><td>
           主改动：<code>src/app/[locale]/(dashboard)/users/page.tsx</code><br>
           新增 state：<code>createdUserPassword: string | null</code>、<code>createdUsername: string</code><br>
-          新增 import：<code>Dialog / DialogContent / DialogHeader / DialogTitle / DialogFooter / DialogDescription</code>（<code>@/components/ui/dialog</code>）、<code>Copy / CheckCircle2</code>（<code>lucide-react</code>）<br>
+          新增 import：<code>Dialog / DialogContent / DialogHeader / DialogTitle / DialogFooter / DialogDescription</code>（<code>@/components/ui/dialog</code>）、<code>Copy / CheckCircle2</code>（<code>lucide-react</code>��<br>
           Mock 路由补全：<code>src/lib/mock/dispatcher.ts</code>（新增 POST /users 路由，返回 201 + 最小 User 对象）<br>
           国际化：<code>messages/zh.json</code> / <code>en.json</code> / <code>ru.json</code> / <code>th.json</code> 各新增 <code>users.createdDialog.*</code> 7 个 key
         </td></tr>
@@ -2177,7 +2194,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tr><td>生成日期</td><td>2026-08-05</td></tr>
         <tr><td>路由路径</td><td><code>/zh/email-disposal/center</code>（邮件处置 → 邮件处置中心）</td></tr>
         <tr><td>组件路径</td><td>
-          主改动：<code>src/components/email-disposal/email-disposal-center-page.tsx</code>（<code>exportAllFiltered</code> 函数，第 611 行起）<br>
+          主改动：<code>src/components/email-disposal/email-disposal-center-page.tsx</code>（<code>exportAllFiltered</code> 函数，第 611 行��）<br>
           相关：<code>src/components/email-disposal/lib/disposal-api.ts</code>（<code>getDisposalList</code>，返回 <code>DisposalListResponse.total</code>）<br>
           相关：<code>src/types/email-disposal.ts</code>（<code>DisposalListResponse</code> 类型定义，含 <code>total</code> 字段）
         </td></tr>
@@ -2405,7 +2422,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <div class="trigger-path">触发路径：S-1 → 在收件人矩阵中点击某收件人行「投递」按钮</div>
       <figure>
         <img src="./screenshots/GT-12769-reclassify-dialog-open.png" alt="改判邮件类型 AlertDialog 打开态，下拉收起">
-        <figcaption>S-2：「改判邮件类型」AlertDialog（放行操作）打开态，Select 下拉收起。Dialog 标题「改判邮件类型」；副标题「选择该邮件应被重新归类到的类型」；Select 触发器显示默认值「正常」（对应 release 操作的 defaultType）；「同时将发信人加入白名单」复选框；「取消」「确认」按钮。</figcaption>
+        <figcaption>S-2：「改判邮件类型」AlertDialog（放行操作）打开态，Select 下拉收起。Dialog 标题「改判邮件类型」；副标题「选择该邮件应被重新归类到的类型」；Select 触发器显示默认值「正常」（对应 release 操作的 defaultType）；「同时将发信人加入白名单��复选框；「取消」「确认」按钮。</figcaption>
       </figure>
 
       <p><strong>S-3：Select 下拉展开态（修复后，下拉层正确浮于弹窗之上）</strong></p>
@@ -2499,7 +2516,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           联动改动：<code>src/components/email-disposal/sections/overview/entity-detection.tsx</code>（Tab 按钮行 JSX 移除，新增受控 <code>tab</code>/<code>onTabChange</code> prop，<code>LinkIcon</code>/<code>Paperclip</code> import 移除，补回误删的 <code>useState</code> import）
         </td></tr>
         <tr><td>变更类型</td><td>功能优化（Tab 按钮位置调整，与标题文字同行）+ 缺陷修复（误删 <code>useState</code> import 导致详情页 crash）</td></tr>
-        <tr><td>浏览器验证</td><td>2026-08-05，AI版·单租户·Mock，1440×900，深色主题</td></tr>
+        <tr><td>浏览器验证</td><td>2026-08-05，AI版·单租���·Mock，1440×900，深色主题</td></tr>
       </tbody>
     </table>
     <div class="callout callout-info">
@@ -2557,7 +2574,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <figcaption>S-1：「内容实体检测与处置」标题居左，「链接 (2)」（蓝色激活态）和「附件 (2)」Tab 按钮靠右同行显示（AI版·单租户·Mock，1440×900，深色主题）。右侧内容区展示链接列表：evil.com（MALWARE + VirusTotal检测：47/90）和 safe.company.com（VirusTotal检测：0/90），各含「域名加黑」「URL加黑」操作按钮。左列「邮件原文」区域并列展示，视觉对称。</figcaption>
       </figure>
 
-      <p><strong>S-2：「附件(2)」Tab 激活态</strong></p>
+      <p><strong>S-2：��附件(2)」Tab 激活态</strong></p>
       <div class="trigger-path">触发路径：S-1 → 点击「附件 (2)」Tab 按钮</div>
       <figure>
         <img src="./screenshots/GT-12581-entity-tab-attachments.png" alt="附件Tab激活态，展示附件列表">
@@ -2648,6 +2665,148 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </section>
   </section>
 
+  <!-- ══════════════ 一级需求 GT-11969 ══════════════ -->
+  <div id="gt-11969" style="scroll-margin-top: 1rem;"></div>
+  <section id="section-gt-11969">
+    <h2 style="border-bottom:2px solid #2563eb;padding-bottom:0.4rem;">GT-11969 个人中心优化</h2>
+    <table style="margin-bottom:1rem;">
+      <tbody>
+        <tr><td width="140">需求名称</td><td>GT-11969 个人中心优化</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/profile</code></td></tr>
+        <tr><td>组件路径</td><td><code>src/components/profile/PasswordTab.tsx</code>、<code>src/lib/mock/dispatcher.ts</code></td></tr>
+        <tr><td>变更类型</td><td>功能优化（密码修改成功反馈）+ 缺陷修复（Mock 数据缺失）</td></tr>
+        <tr><td>浏览器验证</td><td>AI版·多租户·Mock，1440×900，深色主题，2026-08-05</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 变更 30：密码修改成功内嵌 panel -->
+    <div class="interaction-preview" id="change-30" style="margin-top:1.5rem;">
+      <h3>变更 30：密码修改成功由右下角 toast 改为 Card 内嵌成功 panel</h3>
+
+      <h4 id="c30-overview">30.1 方案概述</h4>
+      <table>
+        <tbody>
+          <tr><td width="140">问题</td><td>密码修改成功后，仅在页面右下角弹出一条小 toast（「密码修改成功」），字号小、位置偏僻，用户视线聚焦表单区域时极易忽略</td></tr>
+          <tr><td>方案</td><td>API 成功回调（非 relogin 分支）时将 Card 内容整体替换为内嵌成功 panel：居中显示大绿色图标（CheckCircle2 h-12 w-12）+ 标题「密码修改成功」+ 副文案「您的密码已更新，请妥善保管」+ 「完成」按钮（点击 reset 并恢复表单）；移除原 toast.success；relogin 分支保持原 toast 逻辑</td></tr>
+          <tr><td>改动文件</td><td><code>PasswordTab.tsx</code>（新增 success state、setSuccess(true)、成功 panel JSX、reset 补 setSuccess(false)）；<code>messages/zh.json</code>、<code>messages/en.json</code>（新增 pwd.changedDesc、pwd.done 两个 i18n key）</td></tr>
+          <tr><td>i18n key</td><td><code>profile.pwd.changedDesc</code>（zh：您的密码已更新，请妥善保管；en：Your password has been updated. Keep it safe.）；<code>profile.pwd.done</code>（zh：完成；en：Done）</td></tr>
+        </tbody>
+      </table>
+
+      <h4 id="c30-states">30.2 截图式交互预览</h4>
+
+      <p><strong>状态 1：密码修改 Tab 默认态（三个输入框 + 取消/保存按钮）</strong></p>
+      <p>触发路径：个人中心 → 密码修改 Tab → 默认</p>
+      <figure>
+        <img src="./screenshots/GT-11969-profile-password-default.png" alt="密码修改 Tab 默认态，三个输入框，保存按钮禁用" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;">
+        <figcaption>密码修改 Tab 默认态 · AI版·多租户·Mock · 1440×900 · 深色主题</figcaption>
+      </figure>
+
+      <h4 id="c30-elements">30.3 逐元素说明</h4>
+      <table>
+        <thead><tr><th>元素</th><th>类型</th><th>文案 / 行为</th><th>i18n key</th><th>形态/角色差异</th></tr></thead>
+        <tbody>
+          <tr><td>成功图标</td><td>图标（CheckCircle2）</td><td>h-12 w-12，text-green-500，居中</td><td>—</td><td>[Base]</td></tr>
+          <tr><td>成功标题</td><td>h4</td><td>密码修改成功</td><td>profile.pwd.changed</td><td>[Base]</td></tr>
+          <tr><td>成功副文案</td><td>p.text-sm.text-muted-foreground</td><td>您的密码已更新，请妥善保管</td><td>profile.pwd.changedDesc（新增）</td><td>[Base]</td></tr>
+          <tr><td>完成按钮</td><td>Button（primary）</td><td>点击后 reset()：清空三个输入框、setSuccess(false)，恢复表单态；data-testid="profile-password-done"</td><td>profile.pwd.done（新增）</td><td>[Base]</td></tr>
+          <tr><td>relogin 分支</td><td>（不变）</td><td>密码修改后需重新登录时，仍走 toast.success(t('pwd.reloginHint')) + setTimeout logout</td><td>profile.pwd.reloginHint</td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 变更 31：补全 Mock 数据 -->
+    <div class="interaction-preview" id="change-31" style="margin-top:2rem;">
+      <h3>变更 31：补全个人中心各 Tab Mock 数据</h3>
+
+      <h4 id="c31-overview">31.1 根因与修复方案</h4>
+      <table>
+        <tbody>
+          <tr><td width="140">根因</td><td><code>dispatcher.ts</code>（Mock 层）中未注册 <code>/profile/2fa</code>、<code>/profile/security-policy</code>、<code>/profile/devices</code>、<code>/profile/trusted-devices</code>、<code>/profile/login-history</code> 等路由；Mock 开关在浏览器端需 <code>localStorage.osgateway_mock_enabled=1</code> 才生效，SSR 阶段恒为 false（注释明确标注），客户端请求走到 Next.js API Route (<code>[[...path]]/route.ts</code>) 时无 Mock 层拦截，直接 proxy 到未运行的后端 18080 → ECONNREFUSED → 500</td></tr>
+          <tr><td>修复</td><td>在 <code>dispatcher.ts</code> 的 <code>/profile/account</code> handler 之后补全全部缺失路由 handler；Mock 必须在浏览器端通过 <code>agent-browser eval</code> 注入 localStorage 后验证（见截图）</td></tr>
+          <tr><td>改动文件</td><td><code>src/lib/mock/dispatcher.ts</code>（新增 172 行，约 15 个 handler）</td></tr>
+        </tbody>
+      </table>
+
+      <h4 id="c31-states">31.2 截图式交互预览</h4>
+
+      <p><strong>状态 1：账号信息 Tab（Mock 开启后正常渲染）</strong></p>
+      <figure>
+        <img src="./screenshots/GT-11969-profile-account-mock.png" alt="账号信息 Tab，显示用户名、角色、姓名、绑定手机、绑定邮箱、最近登录时间" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;">
+        <figcaption>账号信息 Tab · Mock 开启 · AI版·多租户 · 1440×900 · 深色主题</figcaption>
+      </figure>
+
+      <p><strong>状态 2：二次认证 Tab（已关闭态，选择认证方式）</strong></p>
+      <p>触发路径：个人中心 → 二次认证 Tab</p>
+      <figure>
+        <img src="./screenshots/GT-11969-profile-2fa-default.png" alt="二次认证 Tab，状态显示已关闭，认证方式选短信验证码，输入手机号和6位验证码，开启按钮" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;">
+        <figcaption>二次认证 Tab · 已关闭态 · Mock enabled={false} · 1440×900 · 深色主题</figcaption>
+      </figure>
+
+      <p><strong>状态 3：登录会话 Tab（两条 Mock 会话记录）</strong></p>
+      <figure>
+        <img src="./screenshots/GT-11969-profile-devices.png" alt="登录会话 Tab，表格显示两条会话：macOS 14 Chrome（当前）+ Windows 11 Firefox，各有下线操作" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;">
+        <figcaption>登录会话 Tab · 2 条会话 · 1440×900 · 深色主题</figcaption>
+      </figure>
+
+      <p><strong>状态 4：授信终端 Tab（一条 Mock 授信设备）</strong></p>
+      <figure>
+        <img src="./screenshots/GT-11969-profile-trusted-devices.png" alt="授信终端 Tab，表格显示一条授信终端：macOS 14 Chrome，含授信时间、最近使用、到期时间，撤销按钮" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;">
+        <figcaption>授信终端 Tab · 1 条记录 · 1440×900 · 深色主题</figcaption>
+      </figure>
+
+      <p><strong>状态 5：登录历史 Tab（三条含成功/失败/异常记录）</strong></p>
+      <figure>
+        <img src="./screenshots/GT-11969-profile-login-history.png" alt="登录历史 Tab，表格显示三条记录：两条成功（结果绿色）、一条失败（结果红色）含异常告警图标" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;">
+        <figcaption>登录历史 Tab · 3 条记录（含 1 条异常）· 1440×900 · 深色主题</figcaption>
+      </figure>
+
+      <h4 id="c31-elements">31.3 新增 Mock 接口说明</h4>
+      <table>
+        <thead><tr><th>方法</th><th>路径 pattern</th><th>Mock 响应摘要</th></tr></thead>
+        <tbody>
+          <tr><td>GET</td><td>/profile/security-policy</td><td>minLength:10, minCharClasses:2, historyLimit:5, smsChannelAvailable:true</td></tr>
+          <tr><td>GET</td><td>/profile/2fa</td><td>enabled:false, method:'', smsChannelAvailable:true</td></tr>
+          <tr><td>PUT</td><td>/profile/2fa</td><td>{} 200</td></tr>
+          <tr><td>PUT</td><td>/profile/2fa/status</td><td>{} 200</td></tr>
+          <tr><td>POST</td><td>/profile/code</td><td>{} 200（发送验证码）</td></tr>
+          <tr><td>POST</td><td>/profile/contact/bind</td><td>{} 200（绑定联系方式）</td></tr>
+          <tr><td>GET</td><td>/profile/devices</td><td>items: 2 条会话（macOS·上海 + Windows·北京），current:true 标记当前设备</td></tr>
+          <tr><td>POST</td><td>/profile/devices/:jti/logout</td><td>{} 200</td></tr>
+          <tr><td>POST</td><td>/profile/devices/bulk</td><td>count:1 200</td></tr>
+          <tr><td>GET</td><td>/profile/trusted-devices</td><td>items: 1 条（macOS Chrome，expires_at 2026-12-01）</td></tr>
+          <tr><td>DELETE</td><td>/profile/trusted-devices/:id</td><td>{} 200</td></tr>
+          <tr><td>GET</td><td>/profile/login-history*</td><td>items: 3 条（2 成功 + 1 失败 abnormal:true），total:3，支持分页 QS</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 差异标注 D-028~D-029 -->
+    <section id="incremental-gt11969-diff" style="margin-top:1.5rem;">
+      <h3>差异标注（本次增量 D-028 ~ D-029）</h3>
+      <div class="interaction-preview">
+        <h3>D-028 · 密码修改成功反馈：原 toast 在用户视线聚焦表单时不够显眼</h3>
+        <table>
+          <tbody>
+            <tr><td width="120">类型</td><td>UX 优化</td></tr>
+            <tr><td>问题</td><td>密码修改成功后 toast 出现在右下角，字号小；用户聚焦中心表单区域时易忽略，不够醒目</td></tr>
+            <tr><td>修复</td><td>成功时将 Card 内容整体替换为居中成功 panel（大图标 + 标题 + 副文案 + 完成按钮），强迫用户视线落在反馈区</td></tr>
+            <tr><td>影响范围</td><td>PasswordTab.tsx；zh.json / en.json 各新增 2 个 key；relogin 分支不受影响</td></tr>
+          </tbody>
+        </table>
+        <h3>D-029 · 个人中心多个 Tab 无数据（Mock 路由未注册）</h3>
+        <table>
+          <tbody>
+            <tr><td width="120">类型</td><td>缺陷修复（Mock 层）</td></tr>
+            <tr><td>问题</td><td><code>dispatcher.ts</code> 未注册 profile/2fa、security-policy、devices、trusted-devices、login-history 等路由；Mock 只在浏览器端生效，SSR 阶段请求穿透到后端 18080 → ECONNREFUSED 500；即使客户端 SWR 重试也因 mock 开关未开而穿透</td></tr>
+            <tr><td>修复</td><td>补全全部缺失 handler，含 GET/PUT/POST/DELETE 12 条路由；Mock 开关（localStorage osgateway_mock_enabled=1）开启后各 Tab 正常渲染（见截图）</td></tr>
+            <tr><td>遗留风险</td><td>Mock 数据中的 session_id、trusted-device id、login-history 字段格式以推断为主，待后端接口文档确认后对齐</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
   <!-- ══════════════ E. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>E. 版本历史</h2>
@@ -2731,6 +2890,12 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>2026-08-05</td>
           <td><code>当前工作区</code></td>
           <td>追加一级需求 GT-12581 邮件处置中心-详情页内容实体检测与处置模块缺少标题问题解决：变更 29（功能优化A：Tab 按钮从 EntityDetection 内部独立行上移至 investigation-workbench 标题行右侧，标题行加 <code>justify-between</code>，EntityDetection 改为受控 <code>tab</code>/<code>onTabChange</code> prop，workbench 持有 <code>entityTab</code> state 并透传，LinkIcon/Paperclip import 移至 workbench，i18n 由 workbench 的 useTranslations 处理；缺陷修复B：补回上一次重构误删的 <code>import &#123; useState &#125; from 'react'</code>，消除详情页 crash）；差异新增 D-027；目录追加 GT-12581 分组（变更 29，含 29.1 方案概述 / 29.2 截图式交互预览 / 29.3 逐元素说明）；浏览器实拍 S-1 链接 Tab 激活态 + S-2 附件 Tab 激活态（AI版·单租户·Mock，1440×900，深色主题）；title / 元信息 / 差异范围同步更新；文档版本 v12→v13。</td>
+        </tr>
+        <tr>
+          <td>v14</td>
+          <td>2026-08-05</td>
+          <td><code>当前工作区</code></td>
+          <td>追加一级需求 GT-11969 个人中心优化：变更 30（密码修改成功反馈优化——API 成功时 <code>setSuccess(true)</code> 替代 <code>toast.success</code>，Card 内容整体替换为居中成功 panel：CheckCircle2 大图标 + 标题 + 副文案「您的密码已更新，请妥善保管」+ 「完成」按钮；<code>reset()</code> 补充 <code>setSuccess(false)</code>；relogin 分支保持原 toast 逻辑；zh/en.json 新增 <code>pwd.changedDesc</code>/<code>pwd.done</code> 两个 i18n key）、变更 31（个人中心各 Tab Mock 数据补全——根因：<code>dispatcher.ts</code> 未注册 profile/2fa、security-policy、devices、trusted-devices、login-history 等 12 条路由，Mock 只在浏览器端 localStorage=1 时生效，SSR 阶段穿透后端 18080 → ECONNREFUSED 500；修复：在 dispatcher.ts 补全全部缺失 handler）；差异新增 D-028~D-029；浏览器实拍 5 张（账号信息/密码修改/二次认证/登录会话/授信终端/登录历史，AI版·多租户·Mock，1440×900，深色主题）；title / 元信息 / 目录差异范围同步更新；文档版本 v13→v14。</td>
         </tr>
       </tbody>
     </table>
