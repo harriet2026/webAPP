@@ -152,12 +152,12 @@ export function ReclassifyDialog({
             </SelectTrigger>
             {/*
               GT-12774 遮挡修复：
-              - className="z-[200]" 将 SelectContent 的 Positioner 层叠顺序提升至高于
+              - positionerClassName="isolate z-[200]" 将 Positioner 层叠顺序提升至高于
                 AlertDialogContent（z-50），消除下拉层被弹窗内容区遮挡的问题。
               - collisionPadding={8} 启用 Base UI Positioner 碰撞检测，弹窗偏下时
                 下方空间不足会自动向上翻转，避免下拉项列表被截断。
             */}
-            <SelectContent className="z-[200]" collisionPadding={8}>
+            <SelectContent positionerClassName="isolate z-[200]" collisionPadding={8}>
               {EMAIL_TYPES.map((type) => (
                 <SelectItem key={type} value={type}>
                   {tDetail(stripDetailPrefix(mailTypeConfig[type].labelKey))}
