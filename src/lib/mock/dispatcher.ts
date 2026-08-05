@@ -512,6 +512,178 @@ const routes: Route[] = [
     }),
   },
 
+  // ─── 个人中心：安全策略 ────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/profile/security-policy',
+    handler: () => ({
+      status: 200,
+      data: {
+        minLength: 10,
+        minCharClasses: 2,
+        historyLimit: 5,
+        reloginAfterPwdChange: false,
+        twoFactorRequired: false,
+        phoneBound: true,
+        emailBound: true,
+        smsChannelAvailable: true,
+      },
+    }),
+  },
+
+  // ─── 个人中心：二次认证 ────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/profile/2fa',
+    handler: () => ({
+      status: 200,
+      data: {
+        enabled: false,
+        method: '',
+        smsPhone: '',
+        emailMasked: '',
+        required: false,
+        smsChannelAvailable: true,
+      },
+    }),
+  },
+  {
+    method: 'PUT',
+    pattern: '/profile/2fa',
+    handler: () => ({ status: 200, data: {} }),
+  },
+  {
+    method: 'PUT',
+    pattern: '/profile/2fa/status',
+    handler: () => ({ status: 200, data: {} }),
+  },
+
+  // ─── 个人中心：发送验证码 / 绑定联系方式 ─────────────────────────────
+  {
+    method: 'POST',
+    pattern: '/profile/code',
+    handler: () => ({ status: 200, data: {} }),
+  },
+  {
+    method: 'POST',
+    pattern: '/profile/contact/bind',
+    handler: () => ({ status: 200, data: {} }),
+  },
+
+  // ─── 个人中心：会话管理 ────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/profile/devices',
+    handler: () => ({
+      status: 200,
+      data: {
+        items: [
+          {
+            session_id: 'mock-session-001',
+            device: 'macOS 14',
+            browser: 'Chrome 124',
+            ip: '192.168.1.100',
+            location: '中国上海',
+            login_time: '2026-07-28T08:30:00+08:00',
+            last_seen_at: '2026-07-28T10:15:00+08:00',
+            current: true,
+          },
+          {
+            session_id: 'mock-session-002',
+            device: 'Windows 11',
+            browser: 'Firefox 125',
+            ip: '10.0.0.42',
+            location: '中国北京',
+            login_time: '2026-07-25T14:00:00+08:00',
+            last_seen_at: '2026-07-26T09:30:00+08:00',
+            current: false,
+          },
+        ],
+      },
+    }),
+  },
+  {
+    method: 'POST',
+    pattern: /^\/profile\/devices\/[^/]+\/logout$/,
+    handler: () => ({ status: 200, data: {} }),
+  },
+  {
+    method: 'POST',
+    pattern: '/profile/devices/bulk',
+    handler: () => ({ status: 200, data: { count: 1 } }),
+  },
+
+  // ─── 个人中心：授信设备 ────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/profile/trusted-devices',
+    handler: () => ({
+      status: 200,
+      data: {
+        items: [
+          {
+            id: 1,
+            device: 'macOS 14',
+            browser: 'Chrome 124',
+            ip: '192.168.1.100',
+            created_at: '2026-06-01T10:00:00+08:00',
+            last_used_at: '2026-07-28T08:30:00+08:00',
+            expires_at: '2026-12-01T10:00:00+08:00',
+          },
+        ],
+      },
+    }),
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/profile\/trusted-devices\/\d+$/,
+    handler: () => ({ status: 200, data: {} }),
+  },
+
+  // ─── 个人中心：登录历史 ────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: /^\/profile\/login-history/,
+    handler: () => ({
+      status: 200,
+      data: {
+        items: [
+          {
+            id: 1,
+            time: '2026-07-28T08:30:00+08:00',
+            ip: '192.168.1.100',
+            client: 'Chrome 124 / macOS 14',
+            location: '中国上海',
+            result: 'success',
+            abnormal: false,
+          },
+          {
+            id: 2,
+            time: '2026-07-25T14:00:00+08:00',
+            ip: '10.0.0.42',
+            client: 'Firefox 125 / Windows 11',
+            location: '中国北京',
+            result: 'success',
+            abnormal: false,
+          },
+          {
+            id: 3,
+            time: '2026-07-22T09:10:00+08:00',
+            ip: '203.0.113.55',
+            client: 'Chrome 123 / Linux',
+            location: '未知地区',
+            result: 'fail',
+            abnormal: true,
+            abnormal_reason: '密码错误超过 5 次',
+          },
+        ],
+        total: 3,
+        page: 1,
+        page_size: 20,
+      },
+    }),
+  },
+
   // ─── 角色列表（管理员账号 role_id 下拉 + 角色权限页）───────────────────
   // 真实后端 GET /roles 由 GetEffectiveTenantID 做作用域裁剪；纯 mock 模式下
   // 该接口原本未覆盖，dispatcher 兜底返回 { items: [] }，导致「新建管理员」
@@ -623,7 +795,7 @@ const routes: Route[] = [
   },
   // 系统状态仪表盘的「待处置邮件」KPI 探针：page_size=1 且 advanced_filters 含
   // sideline（隔离/旁路）——只命中这一探针，不影响处置中心默认视图（其 page_size 更大）。
-  // 返回按当前范围分支的 total（3/11/19），items 留���即可（KPI 卡只读 total）。
+  // 返回按当前范围分支的 total（3/11/19），items 留�����即可（KPI 卡只读 total）。
   {
     method: 'GET', pattern: '/mail-logs',
     matchQuery: (q) => {
