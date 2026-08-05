@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 / GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决 · 增量功能规格 · v11</title>
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 / GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决 / GT-12769 邮件处置中心-详情改判邮件类型下拉层被弹窗和页面内容遮挡问题解决 · 增量功能规格 · v12</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -237,7 +237,7 @@
       </ul>
 
       <!-- 一级需求：GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 -->
-      <li class="toc-l1"><a href="#gt-12571">GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决</a></li>
+      <li class="toc-l1"><a href="#gt-12571">GT-12571 管理���与权限-创建新用户后初始密码未展示且无法复制问题解决</a></li>
       <ul class="toc-l2-group">
         <li class="toc-change"><span class="toc-num">26</span><a href="#change-26">创建成功后弹出「初始密码确认」Dialog，明文展示密码并提供复制按钮</a></li>
         <ul class="toc-l2-group">
@@ -258,7 +258,18 @@
         </ul>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-025）</a></li>
+      <!-- 一级需求：GT-12769 邮件处置中心-详情改判邮件类型下拉层被弹窗和页面内容遮挡问题解决 -->
+      <li class="toc-l1"><a href="#gt-12769">GT-12769 邮件处置中心-详情改判邮件类型下拉层被弹窗和页面内容遮挡问题解决</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">28</span><a href="#change-28">SelectContent 追加 positionerClassName z-[200] + collisionPadding 消除遮挡</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c28-overview">28.1 根因与修复方案</a></li>
+          <li class="toc-l3"><a href="#c28-states">28.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c28-elements">28.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-026）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-007）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
@@ -274,9 +285,9 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>文档编号（文件 ticket）</td><td>GT-12731</td></tr>
-        <tr><td>需求名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 / GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决</td></tr>
+        <tr><td>需求名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 / GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决 / GT-12769 邮件处置中心-详情改判邮件类型下拉层被弹窗和页面内容遮挡问题解决</td></tr>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 缺陷修复 + 功能优化</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v11</span></span></td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v12</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-08-02</td></tr>
         <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层抽屉）</td></tr>
         <tr><td>组件路径</td><td>
@@ -452,7 +463,7 @@
         变更 1 让子页在加载完成前不上报，但此时父级 <code>PolicyPipelinePage</code> 中对应模块的本地状态（<code>urlModuleEnabled</code> / <code>attachmentEnabled</code> / <code>intentEngineEnabled</code>）仍为 <code>undefined</code>。原逻辑在 <code>undefined</code> 时会退回 <code>item.functional</code>（恒为 <code>true</code>），因此首帧仍会把「未启用」模块画成启用——虽然不再「闪回」，但首帧依旧不正确。
       </p>
       <div class="callout callout-ok">
-        <strong>最终实现方案：</strong>父级复用已有的 <code>security-modules</code> 查询（原仅在 stage5 启用），将其 <code>enabled</code> 门控从 <code>stage5Active</code> 放宽为 <code>drawerOpen</code>，使抽屉一打开就预取模块开关映射 <code>securityModulesMap</code>。在导航渲染时，stage3 三个模块（<code>url</code> / <code>attachment</code> / <code>intentEngine</code>）的圆点 <code>dotOn</code> 与摘要 <code>summaryText</code> 判断改为「<strong>本地状态 <code>??</code> 父级兜底真值</strong>」：本地状态存在（含用户未保存的草稿切换）时优先，否则用 <code>securityModulesMap</code> 中的真实持久化值，只有二者都缺失时才退回 <code>item.functional</code>。这样首帧即用真值渲染。
+        <strong>最终实现方案：</strong>父级复用已有的 <code>security-modules</code> 查询（原仅在 stage5 启用），将��� <code>enabled</code> 门控从 <code>stage5Active</code> 放宽为 <code>drawerOpen</code>，使抽屉一打开就预取模块开关映射 <code>securityModulesMap</code>。在导航渲染时，stage3 三个模块（<code>url</code> / <code>attachment</code> / <code>intentEngine</code>）的圆点 <code>dotOn</code> 与摘要 <code>summaryText</code> 判断改为「<strong>本地状态 <code>??</code> 父级兜底真值</strong>」：本地状态存在（含用户未保存的草稿切换）时优先，否则用 <code>securityModulesMap</code> 中的真实持久化值，只有二者都缺失时��退回 <code>item.functional</code>。这样首帧即用真值渲染。
       </div>
       <pre><code>// PolicyPipelinePage.tsx（导航渲染，简化示意）
 const stage3Fallback = securityModulesMap?.[stage3ModuleKey[item.key]];
@@ -607,7 +618,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <h3 id="c3-states">3.2 截图式交互预览</h3>
       <div class="interaction-preview">
         <h4>S-1 · 意图引擎多意图配置面板（钓鱼=分类优先 / 垃圾=分段阈值）</h4>
-        <p class="trigger-path">触发路径：阶段4 综合策略 → 高级过滤规则 → 新建规则 → 「条件配置」页签 → 添加「意图引擎」条件 → 添加「钓鱼」「垃圾」两个意图，分别选「分类优先」「分段阈值」· 浏览器实拍（浅色主题 / AI版·单租户 / 平台管理员 / Mock / 1575×847）</p>
+        <p class="trigger-path">触发路径：阶段4 综合策略 → 高级过滤规则 → 新建规则 → 「条件配置」页签 → 添加「意图引擎」条件 → 添加「钓鱼」「垃圾」两个意图，分别选「分类优先」「分段阈��」· 浏览器实拍（浅色主题 / AI版·单租户 / 平台管理员 / Mock / 1575×847）</p>
         <figure>
           <img src="./screenshots/GT-12751-S1-intent-multi-intent-dual-mode-light-1575x847.png" alt="意图引擎条件配置面板：意图分类列表含钓鱼（分类优先）与垃圾（分段阈值，带最小/最大值区间输入），底部添加意图下拉，右侧表达式预览" />
           <figcaption>图 S-1：意图引擎「多意图 · 双检测模式」面板。「意图分类」列表下每个意图独占一行——「钓鱼」选择「分类优先」、「垃圾」选择「分段阈值」（显示 <code>[0,1]</code> 最小/最大值区间输入），每行右侧有「移除」，底部「添加意图」下拉。左侧条件序列化为 <code>phishing:classification;spam:threshold:…</code>；右侧「表达式预览」实时呈现「意图引擎 匹配任意」及分段阈值端点未填时的「区间不完整：请同时填写最小值和最大值」校验提示。</figcaption>
@@ -705,7 +716,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <p class="trigger-path">触发路径：阶段4 综合策略 → 高级过滤规则 → 新建规则 → 「条件配置」页签 → 展开「安全检测（18）」分组 · 浏览器实拍（浅色主题 / 1575×847）</p>
         <figure>
           <img src="./screenshots/GT-12751-S2-security-conditions-no-rbl-no-spoof-light-1575x847.png" alt="条件配置搜索列表展开安全检测分组，显示 SPF/DKIM/DMARC/PTR结果、相似域名、Mail From为空、信封-头From一致性、病毒扫描结果、意图引擎等，无 RBL结果与显示名仿冒" />
-          <figcaption>图 S-2：安全检测分组条件清单。可见 DKIM 结果 / DMARC 结果 / PTR 结果 / 相似域名 / Mail From 为空 / 信封-头 From 一致性 / 病毒��描结�� / 意��引擎 等条目，其中<strong>不再包含「RBL 结果」与「显示名仿冒」</strong>；分组计数显示为「安全检测 18」。</figcaption>
+          <figcaption>图 S-2：安全检测分组条件清单。可见 DKIM 结果 / DMARC 结果 / PTR 结果 / 相似域名 / Mail From 为空 / 信封-头 From 一致性 / 病毒��描结�� / 意��引擎 等条目，其中<strong>不再包含「RBL 结果」与「显示名仿冒」</strong>；分组计数显示为「安全检�� 18」。</figcaption>
         </figure>
       </div>
       <div class="interaction-preview">
@@ -794,7 +805,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <table>
         <thead><tr><th>条件</th><th>字段</th><th>值（变更前 → 变更后）</th><th>控件 / i18n 键</th></tr></thead>
         <tbody>
-          <tr><td>加密附件</td><td><code>is_encrypted_attachment</code></td><td>文本/枚举 → <strong>是 / 否</strong></td><td><code>BooleanValueSelect</code> · <code>booleanValues.{true,false}</code></td></tr>
+          <tr><td>加���附件</td><td><code>is_encrypted_attachment</code></td><td>文本/枚举 → <strong>是 / 否</strong></td><td><code>BooleanValueSelect</code> · <code>booleanValues.{true,false}</code></td></tr>
           <tr><td>Mail From 为空</td><td><code>mailfrom_empty</code></td><td>枚举 → <strong>是 / 否</strong></td><td><code>BooleanValueSelect</code> · <code>booleanValues.{true,false}</code></td></tr>
           <tr><td>二维码 ODR 结果</td><td><code>image_qr_code_result</code></td><td>多值枚举 → <strong>成功 / 失败</strong></td><td><code>EnumSection</code> · <code>qrResultValues.{success,fail}</code></td></tr>
           <tr><td>信封-头 From 一致性</td><td><code>envelope_header_mismatch</code></td><td>枚举 → <strong>一致 / 不一致</strong></td><td><code>EnumSection</code> · <code>envelopeHeaderConsistencyValues.{match,mismatch}</code></td></tr>
@@ -817,7 +828,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <table>
         <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
         <tbody>
-          <tr><td><code>dispatcher.ts</code> · 字段元信息</td><td>上述字段未标记布尔 / ��给二元枚举</td><td><code>is_encrypted_attachment</code> / <code>mailfrom_empty</code> 标为布尔；三枚举字段给定二元 <code>options</code></td><td><span class="tag tag-changed">变更</span>取值域收敛</td></tr>
+          <tr><td><code>dispatcher.ts</code> · 字段元信息</td><td>上述字段��标记布尔 / ��给二元枚举</td><td><code>is_encrypted_attachment</code> / <code>mailfrom_empty</code> 标为布尔；三枚举字段给定二元 <code>options</code></td><td><span class="tag tag-changed">变更</span>取值域收敛</td></tr>
           <tr><td><code>ConditionConfigPanel.tsx</code> · 值控件选择</td><td>文本 / 多值下拉</td><td>布尔��段 → <code>BooleanValueSelect</code>（是/否）；二元枚举 → <code>EnumSection</code></td><td><span class="tag tag-changed">变更</span>按字段类型自动选控件</td></tr>
           <tr><td><code>messages/{zh,en,ru,th}.json</code></td><td>缺 <code>booleanValues</code> / <code>qrResultValues</code> / <code>envelopeHeaderConsistencyValues</code> / <code>virusScanResultValues</code></td><td>四语补齐上述枚举文案</td><td><span class="tag tag-added">新增</span>四语齐全</td></tr>
         </tbody>
@@ -1008,7 +1019,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
         <tbody>
           <tr><td><code>AddonsPanel.tsx</code> · <code>defaultAddonParams('disclaimer')</code></td><td><code>{ template: 'standard', position: 'body_bottom' }</code></td><td><code>{ position: 'body_bottom' }</code></td><td><span class="tag tag-removed">移除</span>不再初始化 template</td></tr>
-          <tr><td><code>AddonsPanel.tsx</code> · 免责声明表单</td><td>「声明模板」<code>SelectField</code>（standard/legal/custom）+ 「插入位置」<code>SelectField</code></td><td>仅「插入位置」<code>SelectField</code></td><td><span class="tag tag-removed">移除</span>模板下拉���块删除</td></tr>
+          <tr><td><code>AddonsPanel.tsx</code> · ��责声明表单</td><td>「声明模板」<code>SelectField</code>（standard/legal/custom）+ 「插入位置」<code>SelectField</code></td><td>仅「插入位置」<code>SelectField</code></td><td><span class="tag tag-removed">移除</span>模板下拉���块删除</td></tr>
           <tr><td><code>ActionSummary.tsx</code> · disclaimer 摘要</td><td>返回「模板名 + 插入位置」</td><td>仅返回「插入位置」</td><td><span class="tag tag-changed">变更</span>不再引用已删的 template 字段</td></tr>
           <tr><td><code>messages/{zh,en,ru,th}.json</code></td><td>含 <code>addons.disclaimerTemplate</code> / <code>...Standard</code> / <code>...Legal</code> / <code>...Custom</code></td><td>四语删除上述 4 个键</td><td><span class="tag tag-removed">移除</span>四语齐删，无残留引用</td></tr>
         </tbody>
@@ -1076,7 +1087,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       </tbody>
     </table>
     <div class="callout callout-info">
-      本需求针对「图片OCR检测」：OCR 链路只有单一 pytesseract 路径，深浅模式在执行层完全相同，原「深度检测（手写+印刷）」是从未实现的置灰占位项。<strong>变更 13</strong> 删除该占位项、检测模式收窄为「不检测 / 检测」并把唯一有效模式重命名为「检测」；<strong>变更 14</strong> 采用方案 A，在「不检测」时禁用「检测数量上限」并提示。改动使用项目 next-intl 框架，涉及页面文案覆盖中/英/俄/泰四语。此二变更对应目录变更 13、14。
+      本需求针对「图片OCR检���」：OCR 链路只有单一 pytesseract 路径，深浅模式在执行层完全相同，原「深度检测（手写+印刷）」是从未实现的置灰占位项。<strong>变更 13</strong> 删除该占位项、检测模式收窄为「不检测 / 检测」并把唯一有效模式重命名为「检测」；<strong>变更 14</strong> 采用方案 A，在「不检测」时禁用「检测数量上限」并提示。改动使用项目 next-intl 框架，涉及页面文案覆盖中/英/俄/泰四语。此二变更对应目录变更 13、14。
     </div>
     <div class="interaction-preview" style="margin-top:1rem;">
       <h4>产品形态 × 角色 可见性矩阵（本需求）</h4>
@@ -1482,7 +1493,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       </tbody>
     </table>
 
-    <h3>D-016 · 「检测数量上限」在「不检测」下曾可编辑，现禁用（方案 A）</h3>
+    <h3>D-016 · 「检测数量上限」在「不检测」下曾可编���，现禁用（方案 A）</h3>
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·已解决</span></td></tr>
@@ -1777,7 +1788,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
             <td>结果仲裁策略 Section</td>
             <td>深度检测配置区底部有 <code>border-t pt-4</code> 分隔区，包含：Label「结果仲裁策略」（含 Tooltip 图标）、disabled Select 下拉（值「取最高优先级动作执行」）、灰字提示「敬请期待」</td>
             <td>整个区块已从 DOM 中移除，深度检测配置区末尾直接显示「检测数量上限」和「超限处置」</td>
-            <td>i18n key <code>imageDetect.arbitration</code>、<code>imageDetect.highestPriority</code>、<code>imageDetect.firstMatch</code>、<code>tooltips.arbitration</code>���已从 zh/en/ru/th 四语删除）；<code>QrDeepRoutesConfig.arbitration</code> 字段已从类型、API、mock 各层删除；parity 测试移除对应 4 个必需 key</td>
+            <td>i18n key <code>imageDetect.arbitration</code>、<code>imageDetect.highestPriority</code>、<code>imageDetect.firstMatch</code>、<code>tooltips.arbitration</code>���已从 zh/en/ru/th 四语删除）；<code>QrDeepRoutesConfig.arbitration</code> 字段已从类型、API、mock 各层���除；parity 测试移除对应 4 个必需 key</td>
           </tr>
         </tbody>
       </table>
@@ -1801,7 +1812,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       </table>
       <div class="callout callout-info">value 值（<code>pass_warn</code> / <code>quarantine</code>）、SelectItem 的 <code>data-testid</code>、类型定义和 API 映射均未改变；仅修改四语 i18n 文案值，parity 测试 key 名不变，零副作用。en：Pass and log warning→Continue to next step / Isolate as fallback→Quarantine；ru：Пропустить и записать предупреждение→Перейти к следующему шагу / Карантин как резервное действие→Карантин；th：ผ่านและบันทึกคำเตือน→ดำเนินการขั้นถัดไป / กักกันเป็นทางเลือกสำรอง→กักกัน。</div>
       <figure style="margin-top:1rem;">
-        <img src="./screenshots/GT-12201-exceed-action-dropdown-open.png" alt="超限处置下拉展开 - 进行下一步 / 隔离">
+        <img src="./screenshots/GT-12201-exceed-action-dropdown-open.png" alt="超限处置下拉展开 - ��行下一步 / 隔离">
         <figcaption>S-2：超限处置下拉展开（1440×900）：「进行下一步」（当前选中，蓝色高亮）、「隔离」；原「放行并记录告警」和「隔离兜底」文案已更新。</figcaption>
       </figure>
     </div>
@@ -1927,7 +1938,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <div class="callout callout-removed">移除原因：「待办与告警」模块内的「待处置队列」和「举报待审」信息已在顶部 HealthBanner 横幅和「待处置邮件」KPI 卡片中体现，独立卡片造成信息重复；移除后威胁态势趋势图获得更充裕的横向展示空间。</div>
       <figure style="margin-top:1rem;">
         <img src="./screenshots/GT-12276-dashboard-mock-default.png" alt="系统状态首页 - 待办与告警已移除，威胁态势趋势独占全宽">
-        <figcaption>S-1：系统状态首页（AI版·多租户·平台管理员·Mock，1440×900，深色主题）：「待办与告警」模块已移除，「威胁态势趋势」图独占全宽；顶部 HealthBanner 「检测到 3 项紧急事件待处理」横幅保持不变。</figcaption>
+        <figcaption>S-1：系统状态首页（AI版·多租户·平台管理员·Mock，1440×900，深色主题）：「待���与告警」模块已移除，「威胁态势趋势」图独占全宽；顶部 HealthBanner 「检测到 3 项紧急事件待处理」横幅保持不变。</figcaption>
       </figure>
     </div>
 
@@ -1971,7 +1982,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <div class="callout callout-info">
       本需求修复创建新用户后初始密码不可见的问题：原流程在「保存」成功后直接关闭抽屉，密码从内存中消失；
       修复后在关闭抽屉的同时弹出「用户已创建」确认 Dialog，以只读明文 <code>Input</code>（<code>font-mono</code>）展示初始密码，
-      并提供「复制密码」按钮；管理员点「我已记录」后 Dialog 关闭，密码随 state 清空，不可再次查看。
+      并提供「复制密码」按钮；管理员点「我已记录」后 Dialog 关闭，密码随 state 清空，不可再次查���。
       <code>todo-alerts.tsx</code> 文件及现有重置密码 Dialog 均不受影响。
     </div>
 
@@ -2009,7 +2020,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <div class="trigger-path">触发路径：S-1 → 点击「+ 新建」按钮</div>
       <figure>
         <img src="./screenshots/GT-12571-create-drawer-open.png" alt="创建用户抽屉默认态">
-        <figcaption>S-2：「管理员配置」抽屉打开态。标题「管理员配置」+ 副标题「创建新的管理员账号并分配角色」；基础信息区：账号/用户名（必填）、姓名（必填）、邮箱（必填）、手机号（必填）、初始密码（必填，<code>type="password"</code> 掩码输入框 + 「生成」按钮）；角色与状态区：角色（必填，下拉选择）、账号状态（「启用（正常）」默认值）；底部提示文案「新账号使用临时密码，首次登录时必须修改密码（平台安全契约）」；「保存」「取消」按钮。</figcaption>
+        <figcaption>S-2：「管理员配置」抽屉打开态。标题「管理员配置」+ 副标题「创建新的管理员账号并分配角色」��基础信息区：账号/用户名（必填）、姓名（必填）、邮箱（必填）、手机号（必填）、初始密码（必填，<code>type="password"</code> 掩码输入框 + 「生成」按钮）；角色与状态区：角色（必填，下拉选择）、账号状态（「启用（正常）」默认值）；底部提示文案「新账号使用临时密码，首次登录时必须修改密码（平台安全契约）」；「保存」「取消」按钮。</figcaption>
       </figure>
 
       <p><strong>S-3：点击「生成」后初始密码字段（修复前问题复现态）</strong></p>
@@ -2122,7 +2133,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
             <tr><td width="120">类型</td><td>缺陷修复（密码展示缺失）</td></tr>
             <tr><td>问题描述</td><td>
               <ol style="margin:0;padding-left:1.2rem;">
-                <li>「初始密码」字段 <code>type="password"</code>，点击「生成」后密码以 <code>●</code> 掩码展示，管理员无法确认密码内容；</li>
+                <li>「初始密码」字段 <code>type="password"</code>，点击「生成」���密码以 <code>●</code> 掩码展示，管理员无法确认密码内容；</li>
                 <li>创建成功后 <code>handleSubmit</code> 直接执行 <code>setDialogOpen(false)</code> 关闭抽屉，密码随 React state 清空，管理员无任何途径获取已生成的密码。</li>
               </ol>
             </td></tr>
@@ -2216,7 +2227,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <div class="trigger-path">触发路径：导航到 <code>/zh/email-disposal/center</code>，不勾选任何邮件，列表数据加载完成</div>
       <figure>
         <img src="./screenshots/GT-12774-export-button-visible.png" alt="邮件处置中心表格工具栏，导出全部筛选按钮可见">
-        <figcaption>S-1：邮件处置中心（AI版·单租户·Mock，1440×900，深色主题）。表格工具栏显示「导出全部筛选（53 条）」按钮（下载图标 + 文案），当前 Mock 数据 53 条（&lt; 5000），点击将直接导出全部不触发超限 Warning。表格列：时间、收发类型、主题、发信 IP、发信人、操作（查看/找相似）。</figcaption>
+        <figcaption>S-1：邮件处置中心（AI版·单租户·Mock，1440×900，深色主题）。���格工具栏显示「导出全部筛选（53 条）」按钮（下载图标 + 文案），当前 Mock 数据 53 条（&lt; 5000），点击将直接导出全部不触发超限 Warning。表格列：时间、收发类型、主题、发信 IP、发信人、操作（查看/找相似）。</figcaption>
       </figure>
 
       <p><strong>S-2：点击「导出全部筛选」后恢复态（53 条，无超限 Warning）</strong></p>
@@ -2312,6 +2323,157 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </section>
   </section>
 
+  <!-- ══════════════ 一级需求 GT-12769 ══════════════ -->
+  <div id="gt-12769" style="scroll-margin-top:1rem;"></div>
+  <section id="section-gt-12769">
+    <h2 style="border-bottom:2px solid #2563eb;padding-bottom:0.4rem;">GT-12769 邮件处置中心-详情改判邮件类型下拉层被弹窗和页面内容遮挡问题解决</h2>
+    <table>
+      <tbody>
+        <tr><td width="140">需求名称</td><td>GT-12769 邮件处置中心-详情改判邮件类型下拉层被弹窗和页面内容遮挡问题解决</td></tr>
+        <tr><td>生成日期</td><td>2026-08-05</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/email-disposal/center</code> → 点击邮件行「查看」→ 详情弹窗 → 收件人矩阵中点击「投递」操作按钮</td></tr>
+        <tr><td>组件路径</td><td>
+          主改动：<code>src/components/email-disposal/components/reclassify-dialog.tsx</code>（<code>&lt;SelectContent&gt;</code> 追加 <code>positionerClassName</code> 和 <code>collisionPadding</code>）<br>
+          底层改动：<code>src/components/ui/select.tsx</code>（<code>SelectContent</code> 函数签名新增 <code>positionerClassName?: string</code> 和 <code>collisionPadding</code>，透传至 <code>SelectPrimitive.Positioner</code>）
+        </td></tr>
+        <tr><td>变更类型</td><td>缺陷修复（z-index 层叠冲突 + 下拉碰撞翻转缺失）</td></tr>
+        <tr><td>浏览器验证</td><td>2026-08-05，AI版·单租户·Mock，1440×900，深色主题</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本需求修复「改判邮件类型」AlertDialog 中 Select 下拉层被弹窗内容区和页面底部遮挡的问题。<strong>根因 A</strong>——<code>AlertDialogContent</code> 与 <code>SelectContent</code> 的 Positioner 均使用 <code>z-50</code>，前者创建新的 stacking context，导致 Select 下拉层在视觉层叠顺序上低于弹窗内容区；<strong>根因 B</strong>——Positioner 未启用碰撞检测，弹窗偏下时下方空间不足，下拉项列表被截断而非向上翻转。修复方案：在 <code>select.tsx</code> 中为 <code>SelectContent</code> 新增 <code>positionerClassName</code> 和 <code>collisionPadding</code> prop 并透传至 <code>SelectPrimitive.Positioner</code>；在 <code>reclassify-dialog.tsx</code> 使用侧追加 <code>positionerClassName="isolate z-[200]"</code> 和 <code>collisionPadding={8}</code>。
+    </div>
+
+    <!-- 变更 28 -->
+    <div class="interaction-preview" id="change-28" style="margin-top:1.5rem;">
+      <h4>
+        <span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">28</span>
+        SelectContent 追加 positionerClassName z-[200] + collisionPadding 消除遮挡
+      </h4>
+      <div class="trigger-path">触发路径：邮件处置中心（<code>/zh/email-disposal/center</code>）→ 点击邮件行「查看」→ 详情弹窗打开 → 收件人矩阵中点击「投递」→「改判邮件类型」AlertDialog 出现 → 点击 Select 触发器展开下拉</div>
+
+      <!-- 28.1 根因与修复方案 -->
+      <h5 id="c28-overview">28.1 根因与修复方案</h5>
+      <table>
+        <thead><tr><th>维度</th><th>修复前（缺陷态）</th><th>修复后（正确态）</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>根因 A：z-index 层叠冲突</td>
+            <td><code>AlertDialogContent</code>（z-50）与 <code>SelectContent</code> Positioner（z-50）同层，AlertDialogContent 创建新 stacking context，Select 下拉 Popup 渲染在其视觉层叠之下，被弹窗内容区遮挡</td>
+            <td><code>positionerClassName="isolate z-[200]"</code> 将 Positioner 提升到 z-200，高于所有 z-50 层，下拉层始终浮于 AlertDialogContent 之上</td>
+          </tr>
+          <tr>
+            <td>根因 B：下拉不翻转</td>
+            <td>Positioner 未传 <code>collisionPadding</code>，Base UI 不执行碰撞检测，弹窗偏下时下拉项被视口底部截断而非向上翻转</td>
+            <td><code>collisionPadding={8}</code> 激活 Base UI Positioner 碰撞检测，空间不足时自动向上翻转，下拉项全部可见</td>
+          </tr>
+          <tr>
+            <td>select.tsx 底层改动</td>
+            <td><code>SelectContent</code> 函数签名无 <code>positionerClassName</code> 和 <code>collisionPadding</code>，无法从使用侧覆盖 Positioner className 和碰撞行为</td>
+            <td>新增 <code>positionerClassName?: string</code>（JSDoc 注释说明用途）和 <code>collisionPadding</code>（从 <code>SelectPrimitive.Positioner.Props</code> Pick），分别用 <code>cn("isolate z-50", positionerClassName)</code> 合并传入 Positioner</td>
+          </tr>
+          <tr>
+            <td>影响范围</td>
+            <td>仅「改判邮件类型」AlertDialog 内的 Select 下拉受影响；其他使用 <code>&lt;SelectContent&gt;</code> 的组件无 positionerClassName/collisionPadding 时行为不变（默认值与修复前一致：<code>cn("isolate z-50", undefined)</code> = <code>"isolate z-50"</code>）</td>
+            <td>两文件共 3 处改动，不影响其他使用 <code>&lt;SelectContent&gt;</code> 的组件</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 28.2 截图式交互预览 -->
+      <h5 id="c28-states" style="margin-top:1rem;">28.2 截图式交互预览</h5>
+
+      <p><strong>S-1：邮件处置中心详情弹窗默认态</strong></p>
+      <div class="trigger-path">触发路径：导航到 <code>/zh/email-disposal/center</code> → 点击邮件行「查看」按钮</div>
+      <figure>
+        <img src="./screenshots/GT-12769-detail-default.png" alt="邮件处置中心详情弹窗默认态">
+        <figcaption>S-1：详情弹窗（概览与处置 Tab）默认态（AI版·单租户·Mock，1440×900，深色主题）。全屏侧边弹窗，顶部面包屑「邮件处置中心 / 详情」+ 邮件主题；左侧 Tab 导航（概览与处置、安全分析、原始日志）；右上角「查找相似邮件」+ 关闭按钮。内容区：邮件类型+置信度、发信人操作区（发信人加黑/加白/更多）；命中特征标签组；AI判定依据；处置依据；收发信上下文（发信人、收信人、收件人状态矩阵）。</figcaption>
+      </figure>
+
+      <p><strong>S-2：「改判邮件类型」AlertDialog 打开态（下拉收起）</strong></p>
+      <div class="trigger-path">触发路径：S-1 → 在收件人矩阵中点击某收件人行「投递」按钮</div>
+      <figure>
+        <img src="./screenshots/GT-12769-reclassify-dialog-open.png" alt="改判邮件类型 AlertDialog 打开态，下拉收起">
+        <figcaption>S-2：「改判邮件类型」AlertDialog（放行操作）打开态，Select 下拉收起。Dialog 标题「改判邮件类型」；副标题「选择该邮件应被重新归类到的类型」；Select 触发器显示默认值「正常」（对应 release 操作的 defaultType）；「同时将发信人加入白名单」复选框；「取消」「确认」按钮。</figcaption>
+      </figure>
+
+      <p><strong>S-3：Select 下拉展开态（修复后，下拉层正确浮于弹窗之上）</strong></p>
+      <div class="trigger-path">触发路径：S-2 → 点击 Select 触发器（「正常」下拉框）</div>
+      <figure>
+        <img src="./screenshots/GT-12769-select-dropdown-fixed.png" alt="修复后 Select 下拉层正确浮于 AlertDialog 之上，全部选项可见">
+        <figcaption>S-3：修复后 Select 下拉层展开态。下拉层完整浮于 AlertDialogContent 之上（<code>z-[200]</code>），不被弹窗内容区或底部收件人矩阵遮挡。全部 12 个选项清晰可见：正常（当前选中，带勾）、订阅、垃圾邮件、广告邮件、有害内容邮件、钓鱼邮件、账号被盗、可疑邮件、仿冒邮件、病毒邮件、敏感内容邮件、暂不改判。碰撞检测已激活（<code>collisionPadding={8}</code>），弹窗偏下时下拉自动向上翻转。</figcaption>
+      </figure>
+    </div>
+
+    <!-- 28.3 逐元素说明 -->
+    <section id="c28-elements" style="margin-top:1rem;">
+      <h5>28.3 逐元素说明</h5>
+      <table>
+        <thead><tr><th>元素</th><th>类型/位置</th><th>修复前行为</th><th>修复后行为</th><th>代码路径</th><th>形态/角色差异</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>SelectContent Positioner</td>
+            <td><code>SelectPrimitive.Positioner</code>，Base UI 定位层</td>
+            <td><code>className="isolate z-50"</code>（硬编码，无法覆盖）；Positioner 与 AlertDialogContent 同在 z-50，下拉 Popup 被弹窗 stacking context 遮挡</td>
+            <td><code>className={cn("isolate z-50", positionerClassName)}</code>；使用侧传 <code>positionerClassName="isolate z-[200]"</code>，z-index 提升至 200；碰撞检测由 <code>collisionPadding</code> 控制</td>
+            <td><code>src/components/ui/select.tsx</code> L147</td>
+            <td>[Base] 所有使用 SelectContent 的场景，不传 positionerClassName 时默认行为不变</td>
+          </tr>
+          <tr>
+            <td>SelectContent collisionPadding</td>
+            <td><code>SelectPrimitive.Positioner</code> prop</td>
+            <td>未传递，Base UI 不执行碰撞检测，下拉项在空间不足时被截断</td>
+            <td>透传使用侧的 <code>collisionPadding={8}</code>，激活碰撞检测，空间不足时触发向上翻转</td>
+            <td><code>src/components/ui/select.tsx</code> L146；<code>reclassify-dialog.tsx</code> L160</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>positionerClassName prop（新增）</td>
+            <td><code>SelectContent</code> 函数签名，类型 <code>string | undefined</code></td>
+            <td>不存在，无法从使用侧覆盖 Positioner className</td>
+            <td>新增，JSDoc 注释说明用途（例：覆盖 z-index）；未传时 <code>cn("isolate z-50", undefined)</code> 行为与修复前完全一致，不影响其他调用方</td>
+            <td><code>src/components/ui/select.tsx</code> L122、L135–L137</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>reclassify-dialog.tsx SelectContent 使用侧</td>
+            <td><code>&lt;SelectContent positionerClassName="isolate z-[200]" collisionPadding={8}&gt;</code></td>
+            <td><code>&lt;SelectContent&gt;</code>（无额外 prop）</td>
+            <td>追加两个 prop；JSDoc 注释说明修复原因（GT-12769）</td>
+            <td><code>src/components/email-disposal/components/reclassify-dialog.tsx</code> L153–L167</td>
+            <td>[Base] 所有形态和角色下行为一致</td>
+          </tr>
+          <tr>
+            <td>下拉选项列表（EMAIL_TYPES）</td>
+            <td>12 个 SelectItem：正常、订阅、垃圾邮件、广告邮件、有害内容邮件、钓鱼邮件、账号被盗、可疑邮件、仿冒邮件、病毒邮件、敏感内容邮件 + 暂不改判（NO_RECLASSIFY sentinel）</td>
+            <td>受遮挡时仅顶部几项可见，底部选项被弹窗/页面内容遮挡，无法点击</td>
+            <td>全部 12 项完整可见，可正常点击选择</td>
+            <td>i18n key 通过 <code>tDetail(stripDetailPrefix(mailTypeConfig[type].labelKey))</code> / <code>t("reclassify.noChange")</code> 解析</td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 差异标注 D-026 -->
+    <section id="incremental-gt12769-diff" style="margin-top:1.5rem;">
+      <h3>差异标注（本次增量 D-026）</h3>
+      <div class="interaction-preview">
+        <h3>D-026 · SelectContent Positioner z-index 与 AlertDialogContent 同层，导致下拉层被弹窗内容区遮挡</h3>
+        <table>
+          <tbody>
+            <tr><td width="120">类型</td><td>缺陷修复（z-index 层叠冲突 + 碰撞检测缺失）</td></tr>
+            <tr><td>根因 A</td><td><code>SelectPrimitive.Positioner</code> 硬编码 <code>className="isolate z-50"</code>，与 <code>AlertDialogContent</code>（z-50）同层；AlertDialogContent 创建新的 stacking context，Select 下拉 Popup 视觉层叠顺序低于弹窗内容区，被遮挡</td></tr>
+            <tr><td>根因 B</td><td><code>SelectPrimitive.Positioner</code> 未传 <code>collisionPadding</code>，Base UI 不执行碰撞检测，弹窗偏下时下拉项列表被视口底部截断</td></tr>
+            <tr><td>修复（select.tsx）</td><td>为 <code>SelectContent</code> 新增 <code>positionerClassName?: string</code> prop（<code>cn("isolate z-50", positionerClassName)</code> 合并传入 Positioner）和 <code>collisionPadding</code>（从 <code>Positioner.Props</code> Pick，直接透传）；不影响现有调用方（未传 positionerClassName 时行为不变）</td></tr>
+            <tr><td>修复（reclassify-dialog.tsx）</td><td>使用侧追加 <code>positionerClassName="isolate z-[200]"</code> 和 <code>collisionPadding={8}</code></td></tr>
+            <tr><td>影响范围</td><td>仅 <code>reclassify-dialog.tsx</code> 中的 <code>&lt;SelectContent&gt;</code> 行为变化；<code>select.tsx</code> 改动向后兼容，其他使用 SelectContent 的组件不受影响</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
   <!-- ══════════════ E. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>E. 版本历史</h2>
@@ -2328,7 +2490,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>v2</td>
           <td>2026-08-03</td>
           <td><code>工作区已提交</code></td>
-          <td>追加一级需求 GT-12751 高级过滤规则优化项：变更 3（意图引擎条件从枚举单选升级为专属 intentEngine 面板，支持配置多个意图、每意图独立选择「分类优先 / 分段阈值」双检测模式，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重，含 serde 列表编解码 / expression 多条目完整性校验 / 四语新增「添加意图·移除」并补齐 inputType.intentEngine）、变更 4（安全检测移除「RBL 结果」「显示名仿冒」两条件，目录 51→49、安全检测 20→18、select 12→10，四语删对应文案且保留其他命名空间同名键）；含浏览器实拍 S-1（多意图面板）/ S-2（安全检测清单无 RBL/仿冒）/ S-3（模块支持 49 种条件类型）；差异新增 D-004~D-006、待确认新增 Q-003。</td>
+          <td>追加一级需求 GT-12751 高级过滤规则优化项：变更 3（意图引擎条件从枚举单选升级为专属 intentEngine 面板，支持配置多个意图、每意图独立选择「分类优先 / 分段阈值」双检测模式，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重，含 serde 列表编解码 / expression 多条目完整性校验 / ��语新增「添加意图·移除」并补齐 inputType.intentEngine）、变更 4（安全检测移除「RBL 结果」「显示名仿冒」两条件，目录 51→49、安全检测 20→18、select 12→10，四语删对应文案且保留其他命名空间同名键）；含浏览器实拍 S-1（多意图面板）/ S-2（安全检测清单无 RBL/仿冒）/ S-3（模块支持 49 种条件类型）；差异新增 D-004~D-006、待确认新增 Q-003。</td>
         </tr>
         <tr>
           <td>v3</td>
@@ -2382,7 +2544,23 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>v11</td>
           <td>2026-08-05</td>
           <td><code>当前工作区</code></td>
-          <td>追加一级需求 GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决：变更 27（<code>email-disposal-center-page.tsx</code> <code>exportAllFiltered</code> 函数修复两个并列根因——根因A：<code>EXPORT_PAGE_SIZE</code> 从 200 修正为 100 与后端硬限对齐；根因B：移除原终止条件 <code>result.items.length &lt; EXPORT_PAGE_SIZE</code>（后端截断后第1页即触发 break），新增双重防御：<code>items.length &gt;= result.total</code>（total兜底）+ <code>result.items.length === 0</code>（空页兜底），不依赖后端原样返回 page_size；修复后筛选128500条时实际导出5000条与 UI 提示一致；similarMode/选中行导出分支不受影响）；差异新增 D-025；目录追加 GT-12774 分组（变更 27，含 27.1 根因与修复方案 / 27.2 截图式交互预览 / 27.3 逐元素说明）；浏览器实拍 S-1～S-2（AI版·单租户·Mock，1440×900，深色主题）；title / 元信息 / 差异范围同步更新；文档版本 v10→v11。</td>
+          <td>追加一级需求 GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决（下略，见原 v11 记录）。</td>
+        </tr>
+        <tr>
+          <td>v12</td>
+          <td>2026-08-05</td>
+          <td><code>当前工作区</code></td>
+          <td>追加一级需求 GT-12769 邮件处置中心-详情改判邮件类型下拉层被弹窗和页面内容遮挡问题解决：变更 28（根因A：<code>SelectContent</code> Positioner <code>z-50</code> 与 <code>AlertDialogContent</code> 同层被遮挡 → <code>positionerClassName="isolate z-[200]"</code> 提升层叠顺序；根因B：Positioner 无碰撞检测，下拉项被截断 → <code>collisionPadding={8}</code> 激活翻转；<code>select.tsx</code> 新增 <code>positionerClassName</code>/<code>collisionPadding</code> prop 并透传至 Positioner，向后兼容不影响其他调用方；<code>reclassify-dialog.tsx</code> 使用侧追加两个 prop）；差异新增 D-026；目录追加 GT-12769 分组（变更 28，含 28.1 根因与修复方案 / 28.2 截图式交互预览 / 28.3 逐元素说明）；浏览器实拍 S-1～S-3（AI版·单租户·Mock，1440×900，深色主题）；title / 元信息 / 差异范围同步更新；文档版本 v11→v12。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <a class="back-link" href="#toc">↑ 返回目录</a>
+
+</div>
+</body>
+</html>：变更 27（<code>email-disposal-center-page.tsx</code> <code>exportAllFiltered</code> 函数修复两个并列根因——根因A：<code>EXPORT_PAGE_SIZE</code> 从 200 修正为 100 与后端硬限对齐；根因B：移除原终止条件 <code>result.items.length &lt; EXPORT_PAGE_SIZE</code>（后端截断后第1页即触发 break），新增双重防御：<code>items.length &gt;= result.total</code>（total兜底）+ <code>result.items.length === 0</code>（空页兜底），不依赖后端原样返回 page_size；修复后筛选128500条时实际导出5000条与 UI 提示一致；similarMode/选中行导出分支不受影响）；差异新增 D-025；目录追加 GT-12774 分组（变更 27，含 27.1 根因与修复方案 / 27.2 截图式交互预览 / 27.3 逐元素说明）；浏览器实拍 S-1～S-2（AI版·单租户·Mock，1440×900，深色主题）；title / 元信息 / 差异范围同步更新；文档版本 v10→v11。</td>
         </tr>
       </tbody>
     </table>
