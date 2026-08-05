@@ -28,7 +28,7 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { AlertTriangle, Download, Shield } from 'lucide-react';
+import { AlertTriangle, Download, Link as LinkIcon, Paperclip, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { ApiRequestFn } from '@/lib/api/client';
@@ -127,6 +127,7 @@ export function InvestigationWorkbench({
 }: InvestigationWorkbenchProps) {
   const t = useTranslations('emailDisposal.detail.overview');
   const [view, setView] = useState<ContentView>('text');
+  const [entityTab, setEntityTab] = useState<'links' | 'attachments'>('links');
   const [preview, setPreview] = useState<EmailPreviewResponse | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewFetched, setPreviewFetched] = useState(false);
@@ -313,8 +314,31 @@ export function InvestigationWorkbench({
 
         {/* 右列：内容实体检测（C6/C7，Task 9） */}
         <div className="p-4">
-          <div className="mb-3 flex items-center">
-            <h3 className="text-sm font-semibold">{t('entityDetection.title')}</h3>
+          {/* 标题行：文案居左，Tab 按钮靠右同行显示 */}
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h3 className="shrink-0 text-sm font-semibold">{t('entityDetection.title')}</h3>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant={entityTab === 'links' ? 'default' : 'outline'}
+                onClick={() => setEntityTab('links')}
+                data-testid="email-disposal-overview-entity-tab-links"
+              >
+                <LinkIcon className="mr-1 h-3.5 w-3.5" />
+                {t('entityDetection.linksTab', { n: detail.entity_urls?.length ?? 0 })}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={entityTab === 'attachments' ? 'default' : 'outline'}
+                onClick={() => setEntityTab('attachments')}
+                data-testid="email-disposal-overview-entity-tab-attachments"
+              >
+                <Paperclip className="mr-1 h-3.5 w-3.5" />
+                {t('entityDetection.attachmentsTab', { n: detail.attachments?.length ?? 0 })}
+              </Button>
+            </div>
           </div>
           <EntityDetection
             detail={detail}
@@ -322,6 +346,8 @@ export function InvestigationWorkbench({
             readOnly={readOnly}
             onDownload={onDownload}
             onDisposed={onDisposed}
+            tab={entityTab}
+            onTabChange={setEntityTab}
           />
         </div>
       </div>
