@@ -476,7 +476,7 @@
     "changeNew": "New",
     "showingPartial": "Showing {shown} / {total} total",
     "dimConnection": "Connection",
-    "dimConnectionTip": "TOP client IPs by SMTP session count. Success means the server answered EHLO/HELO with 250; delivery outcome does not affect it.",
+    "dimConnectionTip": "TOP client IPs by SMTP session count. Success means the server answered EHLO/HELO with 250; delivery outcome does not affect it. Failures only include transport-layer anomalies that reached the server (e.g. SMTP/TLS handshake failure, immediate disconnection after connect); policy rejections such as blocklists, anti-spam rules, and rate limits are excluded.",
     "yAxisConnection": "Connections",
     "dimAuth": "Auth",
     "dimAuthTip": "TOP accounts/IPs by SMTP AUTH attempts",
@@ -556,8 +556,8 @@
       "successCount": "Number of successes",
       "authSuccess": "Number of successful authentications",
       "authFailure": "Number of failed authentications",
-      "failureCount": "Number of failures",
-      "failureRate": "Connection failure rate (failed sessions / all sessions). Values above 50% are red; this differs from the monitoring page's 5% alert threshold. GeoIP failure attribution does not apply to private internal connections.",
+      "failureCount": "Failure count (transport anomalies only: SMTP/TLS handshake failure, immediate disconnect, etc.; excludes policy rejections such as blocklists, anti-spam rules, and rate limits)",
+      "failureRate": "Connection failure rate (failed sessions / all sessions). Values above 50% are red; this differs from the monitoring page's 5% alert threshold. GeoIP failure attribution does not apply to private internal connections. Failure scope: transport anomalies only, policy rejections excluded.",
       "firstConn": "First connection time",
       "lastConn": "Most recent connection time",
       "firstAuth": "First authentication time",
@@ -635,7 +635,7 @@
       "topSection": "TOP Rankings",
       "printHint": "Tip: use your browser's print feature to save as PDF"
     },
-    "connCaliberTip": "Counted per SMTP session. Success means the server answered EHLO/HELO with 250; delivery outcome does not affect it.",
+    "connCaliberTip": "Counted per SMTP session. Success means the server answered EHLO/HELO with 250; delivery outcome does not affect it. Failures cover only transport anomalies that reached the server (SMTP/TLS handshake failure, immediate disconnect); policy rejections (blocklists, anti-spam, rate limits) are excluded. Visible to platform administrators only.",
     "connDrilldownUnitTip": "Sub-dimensions below are counted per message, not per session."
   },
   "mailRouting": {

@@ -486,7 +486,7 @@
     "changeNew": "新增",
     "showingPartial": "显示 {shown} / 共 {total}",
     "dimConnection": "连接会话",
-    "dimConnectionTip": "按客户端 IP 统计 SMTP 会话 TOP。成功指服务器对 EHLO/HELO 回了 250；投递结果不影响连接判定。",
+    "dimConnectionTip": "按客户端 IP 统计 SMTP 会话 TOP。成功指服务器对 EHLO/HELO 回了 250；投递结果不影响连接判定。失败仅统计已到达服务器后的传输异常（如 SMTP/TLS 握手失败、建连即断），不含黑白名单、反垃圾规则、并发限制等策略主动拒绝。",
     "yAxisConnection": "连接数",
     "dimAuth": "发信认证",
     "dimAuthTip": "按账号/IP 统计 SMTP AUTH 认证尝试 TOP",
@@ -566,8 +566,8 @@
       "successCount": "成功次数",
       "authSuccess": "认证成功次数",
       "authFailure": "认证失败次数",
-      "failureCount": "失败次数",
-      "failureRate": "连接失败率（失败会话 / 总会话），超过 50% 标红；与监控页 5% 告警阈值口径不同。域内私网连接不适用 GeoIP 类失败归因。",
+      "failureCount": "失败次数（仅含传输异常：SMTP/TLS 握手失败、建连即断等；不含策略拒绝如黑白名单、反垃圾规则、并发限制）",
+      "failureRate": "连接失败率（失败会话 / 总会话），超过 50% 标红；与监控页 5% 告警阈值口径不同。域内私网连接不适用 GeoIP 类失败归因。失败口径仅含传输异常，不含策略主动拒绝。",
       "firstConn": "首次连接时间",
       "lastConn": "最近连接时间",
       "firstAuth": "首次认证时间",
@@ -645,7 +645,7 @@
       "topSection": "TOP 排名",
       "printHint": "提示：使用浏览器的打印功能可保存为 PDF"
     },
-    "connCaliberTip": "按 SMTP 会话计数。成功指服务器对 EHLO/HELO 回了 250；投递结果不影响连接判定。",
+    "connCaliberTip": "按 SMTP 会话计数。成功指服务器对 EHLO/HELO 回了 250；投递结果不影响连接判定。失败仅统计已到达服务器的传输异常（SMTP/TLS 握手失败、建连即断），不含黑白名单、反垃圾规则、并发限制等策略主动拒绝。该统计仅平台管理员可见。",
     "connDrilldownUnitTip": "下方子维度按邮件计数，非按会话计数。"
   },
   "mailRouting": {
@@ -1332,7 +1332,7 @@
     "editPolicy": "编辑群组策略",
     "deleteConfirm": "确定删除该群组策略吗？",
     "deleteConfirmDesc": "删除后无法恢复，规则名：{name}",
-    "noPolicyConfigured": "未配置策略（全部继承全���）",
+    "noPolicyConfigured": "未配置策略（全���继承全���）",
     "previewPath": "有效执行路径预览",
     "stageCountHint": "当前形态��启用 {count} 个阶����",
     "sectionBasic": "基本信息",
@@ -1656,7 +1656,7 @@
   "logs": {
     "emailLogs": "邮件日志",
     "authAttempts": "认证日志",
-    "adminAuditLogs": "操作日志",
+    "adminAuditLogs": "操作日���",
     "timestamp": "时间",
     "sender": "发件人",
     "recipients": "收件人",
@@ -3177,7 +3177,7 @@
       "rank_urls": "排序候选 URL",
       "llm_analysis": "LLM 分析",
       "analyze_traceback": "分析威胁回溯",
-      "evaluate_rule_candidates": "评估候选规则",
+      "evaluate_rule_candidates": "评��候选规则",
       "complete": "完成"
     },
     "relatedObjectLabels": {
@@ -3544,7 +3544,7 @@
       "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1��时。",
       "antiSpam": "防滥发邮件",
       "antiSpamDesc": "限制高频发信行为，防止���圾邮件泛滥",
-      "antiSpamEffect": "每15分钟内连接超过200次，或当日累计超过5000次，将��封禁1小时。",
+      "antiSpamEffect": "每15分钟��连接超过200次，或当日累计超过5000次，将��封禁1小时。",
       "useThis": "使用该示例"
     },
     "simulator": {
@@ -4431,7 +4431,7 @@
       "discard": "丢弃"
     },
     "actionTooltip": {
-      "accept": "允许：不对此规则触发的情况采取拦截动作，��件继续进入下一阶段检测。",
+      "accept": "允许：不对此规���触发的情况采取拦截动作，��件继续进入下一阶段检测。",
       "quarantine": "隔���：将匹配的邮件放入隔离区，���管理员审核后再决定放行或删除。",
       "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知��",
       "audit": "审核：将邮件放入审核��列，等待管理员人工审批后再投递。",
@@ -5578,7 +5578,7 @@
     "sampleRecipient": "张三",
     "sampleSubject": "项目进展说明",
     "sampleGreeting": "您好，",
-    "sampleBody": "这是一��用于预览标记和免责声明效果的示例邮件。",
+    "sampleBody": "这是����用于预览标记和免责声明效果的示例邮件。",
     "errorNameRequired": "请输入规则名称",
     "errorPriorityPositive": "优先级必须为正整数",
     "errorMarkRequired": "请输入标记文案",
@@ -7175,7 +7175,7 @@
       },
       "stepGuideMapNumber": [
         "先在「选择对象」中选择要比较的对象（* 表示全部对象）。",
-        "再选择比较方式（大于 / 小于 / 介于等）。",
+        "再选择比较方式（大于 / 小于 / 介于等）���",
         "最后填写阈值，可点「应用推荐配置」快速填入常用值。"
       ],
       "formats": {
@@ -7217,7 +7217,7 @@
       "resultFalse": "假",
       "invalidJson": "JSON 无效，请输入有效的 JSON 对象。",
       "emlTitle": "EML 上传",
-      "emlComingSoon": "EML 上传即将上线，请暂时使用 JSON 属性测试。",
+      "emlComingSoon": "EML 上传即将上线��请暂时使用 JSON 属性测试。",
       "analysisTitle": "分析",
       "hitCount": "命中数 (7 天)",
       "lastHit": "最近命中",
@@ -9054,7 +9054,7 @@
       "brandNamePlaceholder": "CACTER科技",
       "brandNameHint": "最多 30 字符",
       "keywords": "品牌关键词",
-      "keywordsHint": "仅供 AI 研判参考，不参与命中；单个 ≤30 字符，最多 20 个",
+      "keywordsHint": "仅供 AI 研判参考，不参与命中；单个 ≤30 字符，最多 20 ���",
       "addKeyword": "添加关键词",
       "protectedDomains": "受保护域名",
       "addDomain": "添加域名",
