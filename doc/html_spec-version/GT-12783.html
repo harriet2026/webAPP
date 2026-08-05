@@ -176,6 +176,25 @@
         <li><strong>内网标签重复</strong>：当 <code>row.metrics.isInternal=true</code> 时，来源IP列已显示"内网"标签；与此同时 <code>geoLocation</code> 字段值为 <code>'internal'</code>，地理位置列也独立渲染了一个"内网"标签，同一行出现两个相同含义的"内网"徽章。</li>
       </ol>
 
+      <div class="interaction-preview">
+        <h4>问题截图 S-1 &mdash; 连接会话 TOP 榜单，序号错位 + 内网标签重复（修复前）</h4>
+        <p class="trigger-path">路径：统计报表 &rarr; 运营TOP与趋势 &rarr; 连接会话 &rarr; 近7日 &rarr; TOP 10</p>
+        <figure>
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-VVlnucAum5E9yAjMJ0goZlIlKCjPTv.png"
+            alt="连接会话TOP10榜单修复前截图：红框标出序号列第1、2行火焰图标导致排名徽标向右偏移，以及地理位置列与来源IP列双重显示内网标签"
+          />
+          <figcaption>红框区域一：第1、2行带火焰图标，排名徽标（1、2）较第3、4行明显右移；红框区域二：地理位置列出现与来源IP列相同的"内网"标签（双重展示）。</figcaption>
+        </figure>
+        <figure>
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-ljUnAsAF8DfIi2BRIsfLjSebkxyJQY.png"
+            alt="连接会话TOP10榜单修复前截图（更大视角）：序号列整体错位与地理位置内网标签重复更为直观"
+          />
+          <figcaption>更大视角：红框清晰呈现 #1（10.12.100.61）、#2（10.13.0.53）排名徽标偏右，以及地理位置列"内网"标签与来源IP列的"内网"标签重复出现。</figcaption>
+        </figure>
+      </div>
+
       <div class="callout callout-info">
         <strong>国际化合规说明</strong>：修复代码不涉及新增 i18n key，仅使用现有的
         <code>t('internal')</code> 与结构性 JSX 调整，无需修改任何语言文件。
