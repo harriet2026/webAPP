@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 20,
+  "current_version": 21,
   "history": [
     {
       "version": 1,
@@ -181,6 +181,15 @@
       "ticket": "GT-11651",
       "incremental": true,
       "summary": "GT-12731.html 追加一级需求 GT-11651 内容规则-执行动作调整（内容规则新建/编辑抽屉 → 执行动作下拉，doc 版本 GT-12731 v5→v6）：新增变更 15（ContentRuleDrawer 的 ACTIONS 数组移除 'tag_deliver'，下拉由 6 项减为 5 项；经用户确认保留 'deliver'；ContentRuleUiAction 类型与历史 tag_deliver 标记配置块保留不删以免越界）、变更 16（block 标题「阻断」改为「拒收」，为 5 种动作补充灰字说明——新增 actionHint() 助手、SelectItem 改标题+说明两行式、SelectTrigger 经 SelectValue 仅显示标题；四语改 contentRules.actionBlock 及 actionBlock/Discard/Isolate/ReviewHint，deliver 的 actionDeliverHint 不变）、变更 17（deliver 标题「放行」改为「投递」，zh contentRules.actionDeliver 改文案、th 由 ส่งต่อ 对齐为 ส่งมอบ、en Deliver/ru Доставить 语义本即投递不变）；浏览器实拍 S-1 执行动作下拉 5 项两行式（投递/隔离/审核/拒收/丢弃，浅色 AI版·单租户 平台管理员 Mock 1694×1046）；差异新增 D-017~D-019、待确认新增 Q-007；TOC 增 GT-11651 一级条目与变更 15/16/17、C 范围 D-001~D-019、D 范围 Q-001~Q-007，标题追加 GT-11651（v6），版本历史新增 v6 行；顺带修复本文档 6 处既有 UTF-8 乱码（TOC 1.2、back-link、S-7 figcaption、S-2 标题、GT-11675 一级标题、change-14 clamp 说明）；乱码自检 CLEAN；version.json current_version 19→20。"
+    },
+    {
+      "version": 21,
+      "generated_at": "2026-08-05",
+      "webapp_commit": "工作区已提交",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12783",
+      "incremental": true,
+      "summary": "新建 GT-12783.html（ticket=GT-12783，需求名=GT-12778 运营TOP与趋势-榜单序号错位且内网地理位置标签重复问题解决）：变更 1（序号列火焰图标包裹 w-3 shrink-0 固定占位容器，isSpike=false 时容器为空但保持宽度，排名徽标始终从同一 x 轴位置开始，消除与普通行的视觉错位）、变更 2（geoLocation 列新增提前 return 分支：isInternalGeo && isInternal 同时为 true 时返回 - 纯文本占位，不渲染重复的内网 Badge，内网地址本身无地理位置含义）；修改文件唯一：TopTable.tsx；无新增 i18n key；差异 D-001~D-002；乱码自检 CLEAN；version.json current_version 20→21。"
     }
   ]
 }
