@@ -15,6 +15,7 @@
 // 本组件本任务不挂载进 overview-section（Task 10 负责组装研判工作台并把它放进
 // 右列），浏览器像素对齐同样是 Task 10 的范围。
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Ban, Download, Info } from 'lucide-react';
