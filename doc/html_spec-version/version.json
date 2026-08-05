@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 21,
+  "current_version": 22,
   "history": [
     {
       "version": 1,
@@ -190,6 +190,15 @@
       "ticket": "GT-12783",
       "incremental": true,
       "summary": "新建 GT-12783.html（ticket=GT-12783，需求名=GT-12778 运营TOP与趋势-榜单序号错位且内网地理位置标签重复问题解决）：变更 1（序号列火焰图标包裹 w-3 shrink-0 固定占位容器，isSpike=false 时容器为空但保持宽度，排名徽标始终从同一 x 轴位置开始，消除与普通行的视觉错位）、变更 2（geoLocation 列新增提前 return 分支：isInternalGeo && isInternal 同时为 true 时返回 - 纯文本占位，不渲染重复的内网 Badge，内网地址本身无地理位置含义）；修改文件唯一：TopTable.tsx；无新增 i18n key；差异 D-001~D-002；乱码自检 CLEAN；version.json current_version 20→21。"
+    },
+    {
+      "version": 22,
+      "generated_at": "2026-08-05",
+      "webapp_commit": "工作区已提交",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12783",
+      "incremental": true,
+      "summary": "GT-12783.html v1→v2：追加需求 GT-12468 运营TOP与趋势-连接异常失败与策略拒绝未分开统计问题解决（方案 A Tooltip 口径说明增强）；变更 3（四语 dimConnectionTip 末尾追加失败口径说明：仅含传输异常/不含策略拒绝）、变更 4（四语 leftColTip.failureCount 从极简文案扩展为含包含/不含口径说明）、变更 5（四语 leftColTip.failureRate 末尾追加失败口径说明）、变更 6（四语 connCaliberTip 末尾追加失败口径说明及仅平台管理员可见）；修改文件：messages/zh.json、en.json、ru.json、th.json；无前端代码变更；无新增 i18n key；差异新增 D-003~D-004；TOC 新增需求 2 及变更 3~6 条目；版本历史新增 v2 行；乱码自检 CLEAN；version.json current_version 21→22。"
     }
   ]
 }
