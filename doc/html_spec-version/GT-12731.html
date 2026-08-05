@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 · 增量功能规格 · v10</title>
+  <title>GT-12731 · GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 / GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决 · 增量功能规格 · v11</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -247,7 +247,18 @@
         </ul>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-024）</a></li>
+      <!-- 一级需求：GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决 -->
+      <li class="toc-l1"><a href="#gt-12774">GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">27</span><a href="#change-27">修复分页导出终止条件：EXPORT_PAGE_SIZE 100 + 空页/total 双重兜底</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c27-overview">27.1 根因与修复方案</a></li>
+          <li class="toc-l3"><a href="#c27-states">27.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c27-elements">27.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-025）</a></li>
       <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-007）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
@@ -263,9 +274,9 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>文档编号（文件 ticket）</td><td>GT-12731</td></tr>
-        <tr><td>需求名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决</td></tr>
+        <tr><td>需求名称</td><td>GT-12723 禁用模块切换交互闪回修复 / GT-12751 高级过滤规则优化项 / GT-12753 处置策略去自定义模板 / GT-11675 图片识别OCR深度检测缺失 / GT-11651 内容规则执行动作调整 / GT-12754 反病毒引擎配置优化 / GT-12201 二维码检测优化 / GT-12276 系统状态：去掉"待办与告警"模块 / GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决 / GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决</td></tr>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 缺陷修复 + 功能优化</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v10</span></span></td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v11</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-08-02</td></tr>
         <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层抽屉）</td></tr>
         <tr><td>组件路径</td><td>
@@ -368,7 +379,7 @@
 
       <div class="interaction-preview">
         <h4>S-1 · 问题现象（修复前）：URL检测与防护处于「未启用」稳态</h4>
-        <p class="trigger-path">触发路径：策略流水线 → 打开阶段3 内容层抽屉 → 当前停留在「内容规则」，左侧导航中「URL检测与防护」为未启用态（空心圆点 + 摘要「未启用」）· 用户实拍（浅色主题）</p>
+        <p class="trigger-path">触发路径：策略流水线 → 打开阶段3 内容层抽屉 → 当前停留在「内容规则」，左侧导航中「URL检测��防护」为未启用态（空心圆点 + 摘要「未启用」）· 用户实拍（浅色主题）</p>
         <figure>
           <img src="./screenshots/GT-12723-S1-problem-url-disabled-nav-light.png" alt="内容规则页面，左侧导航 URL检测与防护 显示未启用（空心圆点 + 未启用摘要），红框标��" />
           <figcaption>图 S-1：修复前稳态。左侧导航「URL检测与防护」为空心圆点、摘要文字为「未启用」（红框标注）。这是点击进入该模块前的起始态。</figcaption>
@@ -453,7 +464,7 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
 
       <h3 id="c2-states">2.2 截图式交互预览</h3>
       <div class="interaction-preview">
-        <h4>S-3 · 修复后稳态：阶段3 左侧导航首帧即显示正确启用态</h4>
+        <h4>S-3 · 修复��稳态：阶段3 左侧导航首帧即显示正确启用态</h4>
         <p class="trigger-path">触发路径：策略流水线 → 点击「内容规则 · 配置」打开阶段3 内容层抽屉 → 展开左侧导航 · 浏览器实拍（浅色主题 / AI版·单租户 / 平台管理员 / 1920×900）</p>
         <figure>
           <img src="./screenshots/GT-12723-S3-stage3-nav-all-enabled-steady-light-1920x900.png" alt="阶段3 内容层抽屉，左侧导航 4 个模块均显示实心圆点与能力摘要，稳态无闪烁" />
@@ -543,7 +554,7 @@ const dotOn = stage5Enabled !== undefined ? stage5Enabled
     <div class="callout callout-ok">
       <strong>用户提出的 10 个优化点 → 文档区块对照（确保无遗漏）：</strong>
       <table style="margin-top:0.5rem;">
-        <thead><tr><th>#</th><th>用户描述</th><th>对应区块</th><th>关键实现</th></tr></thead>
+        <thead><tr><th>#</th><th>用��描述</th><th>对应区块</th><th>关键实现</th></tr></thead>
         <tbody>
           <tr><td>1</td><td>条件说明卡片的变更</td><td><a href="#change-9">变更 9</a></td><td><code>DescriptionCard</code> 增输入类型/格式示例/单位/有效范围/对象含义/运算符/示例/推荐配置多段</td></tr>
           <tr><td>2</td><td>选中条件较多时无法再配置其他条件</td><td><a href="#change-10">变更 10</a></td><td>已选区限高 <code>maxHeight:45%</code> 独立滚动，「添加条件」区 <code>min-h-0 flex-1</code> 始终可见</td></tr>
@@ -661,7 +672,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         意图名（钓鱼 / 涉政 / 垃圾 / 诈骗 / 订阅）、意图描述、检测模式（分类优先 / 分段阈值）文案复用阶段3 内容层意图引擎模块的 <code>intentEngine.*</code> i18n 命名空间，不重复造词；本次仅新增「添加意图 / 移除」两个动作词与补齐缺失的输入类型键。详见差异 D-004、D-005。
       </div>
       <div class="callout callout-ok">
-        <strong>测试与验证：</strong>本模块单元测试全量 <strong>72 项通过</strong>，覆盖多意图 list 编解码（<code>serde.test.ts</code>）、意图引擎面板多意图行渲染与描述卡回归（<code>ConditionConfigPanel.test.tsx</code>）、条件目录计数不变量（<code>catalogue.test.ts</code>）。到意图引擎面板的 UI 深链依赖登录态与后端；本次已在 AI版·单租户 / Mock 数据环境完成浏览器实拍（S-1），真实后端「保存 / 回显」链路回归见待确认 Q-003。
+        <strong>测试与验证：</strong>本模块单元测试全量 <strong>72 项通过</strong>，覆盖多意图 list 编解码（<code>serde.test.ts</code>）、意���引擎面板多意图行渲染与描述卡回归（<code>ConditionConfigPanel.test.tsx</code>）、条件目录计数不变量（<code>catalogue.test.ts</code>）。到意图引擎面板的 UI 深链依赖登录态与后端；本次已在 AI版·单租户 / Mock 数据环境完成浏览器实拍（S-1），真实后端「保存 / 回显」链路回归见待确认 Q-003。
       </div>
 
       <a class="back-link" href="#toc">↑ 返回目录</a>
@@ -673,7 +684,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <div class="incr-header">
       <span class="incr-num">4</span>
       <h2>安全检测移除「RBL 结果」「显示名仿冒」两个条件</h2>
-      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>catalogue.ts</code>、<code>catalogue.test.ts</code>、<code>messages/{zh,en,ru,th}.json</code><br/>变更类型：功能优化 · 2026-08-03</span>
+      <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>catalogue.ts</code>、<code>catalogue.test.ts</code>、<code>messages/{zh,en,ru,th}.json</code><br/>变更类型：功���优化 · 2026-08-03</span>
     </div>
     <div class="incr-body">
 
@@ -702,7 +713,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <p class="trigger-path">触发路径：阶段4 综合策略 → 高级过滤规则（列表页），查看模块副标题与底部条件类型清单 · 浏览器实拍（浅色主题 / 1575×847）</p>
         <figure>
           <img src="./screenshots/GT-12751-S3-module-49-condition-types-light-1575x847.png" alt="高级过滤规则列表页，副标题显示支持49种条件类型，底部安全检测清单不含RBL结果与显示名仿冒" />
-          <figcaption>图 S-3：模块列表页。副标题由「支持 51 种条件类型」更新为「<strong>支持 49 种条件类型</strong>」；底部条件类型清单的「安全检测」段落列出 URL 数量 · URL · URL 域名 · SPF/DKIM/DMARC/PTR 结果 · 相似域名 · Mail From 为空 · 信封-头 From 一致性 · 病毒扫描结果 · 意图引擎，已无 RBL 结果 / 显示名仿冒。</figcaption>
+          <figcaption>图 S-3：模块列表页。副标题由「支持 51 种条件类型」更新为「<strong>支持 49 种条件类型</strong>」；底部条件类型清单的「安全检测」段落列出 URL 数量 · URL · URL 域名 · SPF/DKIM/DMARC/PTR 结果 · 相似域名 · Mail From 为空 · 信封-头 From 一致性 · 病毒扫描结果 · 意图引擎，���无 RBL 结果 / 显示名仿冒。</figcaption>
         </figure>
       </div>
 
@@ -791,7 +802,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         </tbody>
       </table>
       <div class="callout callout-info">
-        「信封-头 From 一致性」字段名 <code>envelope_header_mismatch</code> 语义为「是否不一致」，值 <code>match</code> 显示「一致」、<code>mismatch</code> 显示「不一致」，UI 文案与字段布尔方向的映射由 <code>EnumSection</code> 的 options 顺序保证，避免正反颠倒。详见差异 D-009。
+        「信封-头 From 一致性」字段名 <code>envelope_header_mismatch</code> 语义为「是否不一���」，值 <code>match</code> 显示「一致」、<code>mismatch</code> 显示「不一致」，UI 文案与字段布尔方向的映射由 <code>EnumSection</code> 的 options 顺序保证，避免正反颠倒。详见差异 D-009。
       </div>
 
       <h3>6.2 截图式交互预览</h3>
@@ -799,14 +810,14 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <h4>S-4 · 病毒扫描结果「值」下拉：有毒 / 无毒</h4>
         <p class="trigger-path">触发路径：条件配置 → 添加「病毒扫描结果」→ 展开「值」下拉 · 浏览器实拍（浅色 / 1575×847）</p>
         <figure>
-          <img src="./screenshots/GT-12751-S4-value-virus-infected-clean-light-1575x847.png" alt="病毒扫描结果条件的值下拉展开，显示有毒与无毒两个选项，说明卡显示数据来���为防病毒引擎" />
+          <img src="./screenshots/GT-12751-S4-value-virus-infected-clean-light-1575x847.png" alt="病毒扫描结果条件的值下拉展开，显示有毒与无毒两个选项，说明卡显示数���来���为防病毒引擎" />
           <figcaption>图 S-4：病毒扫描结果（字段 <code>virus_scan_result</code>）的「值」下拉仅含<strong>有毒 / 无毒</strong>两项；右侧说明卡显示数据来源、运算符等（见变更 9）。加密附件 / Mail From 为空的「是 / 否」、二维码的「成功 / 失败」、一致性的「一致 / 不一致」为同类二态控件。</figcaption>
         </figure>
       </div>
       <table>
         <thead><tr><th>文件 / 元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr></thead>
         <tbody>
-          <tr><td><code>dispatcher.ts</code> · 字段元信息</td><td>上述字段未标记布尔 / 未给二元枚举</td><td><code>is_encrypted_attachment</code> / <code>mailfrom_empty</code> 标为布尔；三枚举字段给定二元 <code>options</code></td><td><span class="tag tag-changed">变更</span>取值域收敛</td></tr>
+          <tr><td><code>dispatcher.ts</code> · 字段元信息</td><td>上述字段未标记布尔 / ��给二元枚举</td><td><code>is_encrypted_attachment</code> / <code>mailfrom_empty</code> 标为布尔；三枚举字段给定二元 <code>options</code></td><td><span class="tag tag-changed">变更</span>取值域收敛</td></tr>
           <tr><td><code>ConditionConfigPanel.tsx</code> · 值控件选择</td><td>文本 / 多值下拉</td><td>布尔��段 → <code>BooleanValueSelect</code>（是/否）；二元枚举 → <code>EnumSection</code></td><td><span class="tag tag-changed">变更</span>按字段类型自动选控件</td></tr>
           <tr><td><code>messages/{zh,en,ru,th}.json</code></td><td>缺 <code>booleanValues</code> / <code>qrResultValues</code> / <code>envelopeHeaderConsistencyValues</code> / <code>virusScanResultValues</code></td><td>四语补齐上述枚举文案</td><td><span class="tag tag-added">新增</span>四语齐全</td></tr>
         </tbody>
@@ -815,7 +826,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
   </div>
 
-  <!-- ═════��════════ 变更 7 ══════════════ -->
+  <!-- ═��═══��════════ 变更 7 ══════════════ -->
   <div class="incremental-section" id="change-7">
     <div class="incr-header">
       <span class="incr-num">7</span>
@@ -983,7 +994,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <p>
         勾选「免责声明」（<code>addon_policy</code>）附加策略后，其配置区原有「声明模板」（标准模板 / 法务模板 / 自定义）与「插入位置」两个下拉。本次<strong>移除「声明模板」下拉</strong>，配置区仅保留「插入位置」（正文顶部 / 正文底部 / 邮件头，默认正文底部）。默认参数不再写入 <code>template</code> 字段；右侧「配置摘要 / 逻辑表达式预览」中的免责声明行由原「模板名」改为显示「插入位置」。
       </p>
-      <h3>11.2 截图式交互预览</h3>
+      <h3>11.2 ��图式交互预览</h3>
       <div class="interaction-preview">
         <h4>S-1 · 免责声明配置区（已去除「声明模板」，仅剩「插入位置」）</h4>
         <p class="trigger-path">触发路径：新建规则 → 处置策略 → 附加策略勾选「免责声明」· 浏览器实拍（浅色 / AI版·单租户 / 平台管理员 / 1737×1046）</p>
@@ -1059,7 +1070,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <code>AttachmentSecurityPage.i18n-parity.test.ts</code>、
           <code>messages/{zh,en,ru,th}.json</code>
         </td></tr>
-        <tr><td>变更类型</td><td>功能移除（去掉从未实现的深度检测）+ 文案调整 + 交互优化</td></tr>
+        <tr><td>变更类型</td><td>功能移除（去掉从未实现��深度检测）+ 文案调整 + 交互优化</td></tr>
         <tr><td>webapp commit</td><td><code>02a906d</code></td></tr>
         <tr><td>浏览器验证状态</td><td>2026-08-04 演示环境真实截图（浅色 / AI版·单租户 / 平台管理员 / Mock 数据 / 阶段3 附件安全检测 → 图片识别，1694×1046）；实拍 S-1 / S-2</td></tr>
       </tbody>
@@ -1129,7 +1140,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         </tbody>
       </table>
       <div class="callout callout-info">
-        二维码图片检测的 <code>qr_mode</code> 中的 <code>deep</code>（识别到二维码并深度校���）是<strong>真实功能</strong>，与本次 OCR 的 deep 无关，未改动；历史死键 <code>ocrMode_deep</code> 之外的 <code>...TemplateDefault</code> 类键不在本需求范围。
+        二维码图片检测的 <code>qr_mode</code> 中的 <code>deep</code>（识别到二维���并深度校���）是<strong>真实功能</strong>，与本次 OCR 的 deep 无关，未改动；历史死键 <code>ocrMode_deep</code> 之外的 <code>...TemplateDefault</code> 类键不在本需求范围���
       </div>
       <a class="back-link" href="#toc">↑ 返回目录</a>
     </div>
@@ -1289,11 +1300,11 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </div>
   </div>
 
-  <!-- ══════════════ 变更 17 ═════════��════ -->
+  <!-- ══════════════ 变更 17 ══��══════��════ -->
   <div class="incremental-section" id="change-17">
     <div class="incr-header">
       <span class="incr-num">17</span>
-      <h2>「放行」重命名为「投递」</h2>
+      <h2>「放行」重命名���「投递」</h2>
       <span class="incr-meta">路由：<code>/zh/security/pipeline</code><br/>组件：<code>messages/{zh,th}.json</code><br/>文案调整 · 2026-08-04</span>
     </div>
     <div class="incr-body">
@@ -1351,7 +1362,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       </tbody>
     </table>
 
-    <h3>D-004 · 意图引擎「每意图单条」：同一意图不允许配置多个不同模式 / ��段区间</h3>
+    <h3>D-004 · 意图引擎「��意图单条」：同一意图不允许配置多个不同模式 / ��段区间</h3>
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·有意约束</span></td></tr>
@@ -1451,7 +1462,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       </tbody>
     </table>
 
-    <h3>D-014 · OCR 深度检测（手写+印刷）从未实现，本次移除禁用占位项</h3>
+    <h3>D-014 · OCR ���度检测（手写+印刷）从未实现，本次移除禁用占位项</h3>
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·已解决</span></td></tr>
@@ -1465,7 +1476,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·连带处理</span></td></tr>
-        <tr><td>描述</td><td>移除 deep 后，后端历史配置若仍存 <code>ocr_mode='deep'</code>，下拉会因无匹配项而空白。<code>getImageDetectConfig</code> 读取时将 <code>'deep'</code> 归一为 <code>'light'</code>（即「检测」），保证兼容与显示正确。</td></tr>
+        <tr><td>描述</td><td>移除 deep 后，后端历史配置若仍存 <code>ocr_mode='deep'</code>，下拉会因无匹配项而空白。<code>getImageDetectConfig</code> 读取��将 <code>'deep'</code> 归一为 <code>'light'</code>（即「检测」），保证兼容与显示正确。</td></tr>
         <tr><td>解决版本</td><td>GT-11675 · 2026-08-04</td></tr>
         <tr><td>验证依据</td><td><code>src/lib/api/attachment-security.ts</code> · <code>getImageDetectConfig</code> 归一化分支</td></tr>
       </tbody>
@@ -1643,7 +1654,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           </tr>
         </tbody>
       </table>
-      <div class="callout callout-removed">移除原因：租户管理员已知道服务器配置由平台统一���理（通过隐藏服务器配置区本身即已传达权限边界），冗余横幅增加视觉噪声。</div>
+      <div class="callout callout-removed">移除原因：租户管理员已知道服务���配置由平台统一���理（通过隐藏服务器配置区本身即已传达权限边界），冗余横幅增加视觉噪声。</div>
       <figure style="margin-top:1rem;">
         <img src="./screenshots/GT-12754-antivirus-tab-tenant-admin-default.png" alt="租户管理员视角 - 反病毒引擎 Tab（无横幅）">
         <figcaption>S-4：租户管理员视角（AI版·多租户 Mock，示例租户 A，1440×900）：info 横幅已移除，页面直接展示「发现病毒后的处置」与「扫描超时处置」两个下拉，服务器配置区不可见。</figcaption>
@@ -1804,7 +1815,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tbody>
           <tr>
             <td>一维码豁免 Switch</td>
-            <td>轻度检测配置区包含 Switch ��件（<code>data-testid="qr-barcode-exempt"</code>）+ Label「一维码豁免：条形码（Code128/EAN等）不视为二维码」</td>
+            <td>轻度���测配置区包含 Switch ��件（<code>data-testid="qr-barcode-exempt"</code>）+ Label「一维码豁免：条形码（Code128/EAN等）不视为二维码」</td>
             <td>Switch 已从 DOM 中移除，轻度检测配置区只剩「执行动作」下拉</td>
             <td>i18n key <code>imageDetect.barcodeExempt</code>（已从 zh/en/ru/th 四语删除）；<code>ImageDetectConfig.qr_barcode_exempt</code> 字段已从类型定义、API 声明、mock fixtures、<code>AttachmentSecurityPage</code> 读写两处引用全部清除；parity 测试移除 <code>barcodeExempt</code> 必需 key</td>
           </tr>
@@ -1970,7 +1981,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">26</span>
         创建成功后弹出「初始密码确认」Dialog，明文展示密码并提供复制按钮
       </h4>
-      <div class="trigger-path">触发路径：任意形态 · 平台管理员 → 管理员与权限（<code>/zh/users</code>）→ 点击「+ 新建」→ 填写账号/姓名/邮箱/手机号 + 点击「生成」生成密码 + 选择角色 → 点击「保存」→ API 响应成功（2xx）</div>
+      <div class="trigger-path">触发路径：任意形态 · 平台管理员 → 管理员与权限（<code>/zh/users</code>）→ 点击���+ 新建」→ 填写账号/姓名/邮箱/手机号 + 点击「生成」生成密码 + 选择角色 → 点击「保存」→ API 响应成功（2xx）</div>
 
       <!-- 26.1 方案概述 -->
       <h5 id="c26-overview">26.1 方案概述</h5>
@@ -1979,7 +1990,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <tr><td width="140">问题</td><td>「初始密码」字段类型为 <code>type="password"</code>（掩码），点「生成」后管理员无法查看生成内容；创建成功后抽屉直接关闭，密码从内存消失，无法事后找回</td></tr>
           <tr><td>修复方案</td><td>保留原表单字段不变（保持 <code>type="password"</code>，防止侧边展示）；创建成功后不直接弹 toast，而是将管理员填写/生成的密码（<code>data.password</code>）暂存到 <code>createdUserPassword</code> state，触发「用户已创建」Dialog 展示</td></tr>
           <tr><td>Dialog 内容</td><td>只读 <code>Input type="text"</code>（<code>font-mono</code>）明文展示密码 + 「复制密码」按钮（调用 <code>navigator.clipboard.writeText</code>，复制成功/失败分别 toast）+ 「我已记录」确认按钮（点击后清空 <code>createdUserPassword</code> state，Dialog 关闭）</td></tr>
-          <tr><td>防遗漏设计</td><td>Dialog 打开前抽屉已关闭（<code>setDialogOpen(false)</code> 先行），Dialog 不可通过点击遮罩或按 Esc 关闭（管理员必须主动点「我已记录」）；提示文案「请务必在关闭前复制并转交密码，关闭后将无法再次查看」</td></tr>
+          <tr><td>防遗漏设计</td><td>Dialog 打开前抽屉已关闭（<code>setDialogOpen(false)</code> 先行），Dialog 不可通过点击遮罩或按 Esc 关闭（管理员必须主动点「我已记录」）；提���文案「请务必在关闭前复制并转交密码，关闭后将无法再次查看」</td></tr>
           <tr><td>不受影响</td><td>重置密码 Dialog（<code>ResetPasswordDialog</code>）、HealthBanner、<code>todo-alerts.tsx</code>、测试文件均不变；编辑用户流程（<code>isEditing === true</code> 分支）继续走原有 <code>setDialogOpen(false)</code> 逻辑</td></tr>
         </tbody>
       </table>
@@ -2005,7 +2016,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <div class="trigger-path">触发路径：S-2 → 点击「生成」按钮</div>
       <figure>
         <img src="./screenshots/GT-12571-password-generated.png" alt="点击生成后密码仍为掩码">
-        <figcaption>S-3：点击「生成」按钮后，初始密码字段填入随机生成的密码，但字段类型仍为 <code>type="password"</code>，显示为 <code>●●●●●●●●●●●●●●●</code>掩码，管理员无法看到实际密码内容。这是本次修复前的缺陷态——管理员无法在提交前确认密码是否生成成功，也无法将密码转交给新用户。</figcaption>
+        <figcaption>S-3：点击「生成」按钮后，初始密码字段填入随机生成的密码，但字段类型仍为 <code>type="password"</code>，显示为 <code>●●●●●●●●●●●●●●●</code>掩码，管理员无法看到实���密码内容。这是本次修复前的缺陷态——管理员无法在提交前确认密码是否生成成功，也无法将密码转交给新用户。</figcaption>
       </figure>
 
       <p><strong>S-4：创建成功后「初始密码确认」Dialog（修复后新增态）</strong></p>
@@ -2134,6 +2145,173 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     </section>
   </section>
 
+  <!-- ══════════════ 一级需求 GT-12774 ══════════════ -->
+  <div id="gt-12774" style="scroll-margin-top:1rem;"></div>
+  <section id="section-gt-12774">
+    <h2 style="border-bottom:2px solid #2563eb;padding-bottom:0.4rem;">GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决</h2>
+    <table>
+      <tbody>
+        <tr><td width="140">需求名称</td><td>GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决</td></tr>
+        <tr><td>生成日期</td><td>2026-08-05</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/email-disposal/center</code>（邮件处置 → 邮件处置中心）</td></tr>
+        <tr><td>组件路径</td><td>
+          主改动：<code>src/components/email-disposal/email-disposal-center-page.tsx</code>（<code>exportAllFiltered</code> 函数，第 611 行起）<br>
+          相关：<code>src/components/email-disposal/lib/disposal-api.ts</code>（<code>getDisposalList</code>，返回 <code>DisposalListResponse.total</code>）<br>
+          相关：<code>src/types/email-disposal.ts</code>（<code>DisposalListResponse</code> 类型定义，含 <code>total</code> 字段）
+        </td></tr>
+        <tr><td>变更类型</td><td>缺陷修复（分页导出终止条件错误导致仅导出首页 100 条）</td></tr>
+        <tr><td>Bug 触发条件</td><td>筛选结果 &gt; 100 条，点击「导出全部筛选」；尤其是 &gt; 5000 条时触发上限 Warning 后仍只下载 100 条</td></tr>
+        <tr><td>浏览器验证</td><td>2026-08-05，AI版·单租户·Mock，1440×900，深色主题；Mock 下数据 53 条（&lt; 5000），验证按钮可见和点击行为；超限 Warning + 多页拉取逻辑通过代码审查确认</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本需求修复「导出全部筛选」功能中的两个并列根因：<strong>根因 A</strong>——<code>EXPORT_PAGE_SIZE</code> 设为 200，而后端 <code>QueryMailLogs</code> 硬限 100/页，导致每次请求被静默截断为 100 条；<strong>根因 B</strong>——翻页终止条件为 <code>result.items.length &lt; EXPORT_PAGE_SIZE</code>（即 <code>100 &lt; 200</code>），第一页返回时即为 <code>true</code>，循环立即 <code>break</code>，后续所有页均被跳过，最终只导出 100 条。修复方案：将 <code>EXPORT_PAGE_SIZE</code> 修正为 100，终止条件改为双重防御——「<code>items.length &gt;= result.total</code>（服务端数据已全部取回）」和「<code>result.items.length === 0</code>（后端返回空页）」，两者均不依赖后端原样返回请求 page_size 这一不可靠前提。
+    </div>
+
+    <!-- 变更 27 -->
+    <div class="interaction-preview" id="change-27" style="margin-top:1.5rem;">
+      <h4>
+        <span class="toc-num" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;font-size:0.7rem;font-weight:700;margin-right:0.4rem;">27</span>
+        修复分页导出终止条件：EXPORT_PAGE_SIZE 100 + 空页/total 双重兜底
+      </h4>
+      <div class="trigger-path">触发路径：邮件处置 → 邮件处置中心（<code>/zh/email-disposal/center</code>）→ 不勾选单条邮件 → 点击「导出全部筛选（N 条）」按钮</div>
+
+      <!-- 27.1 根因与修复方案 -->
+      <h5 id="c27-overview">27.1 根因与修复方案</h5>
+      <table>
+        <thead><tr><th>维度</th><th>修复前（缺陷态）</th><th>修复后（正确态）</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>EXPORT_PAGE_SIZE</td>
+            <td><code>200</code>（与后端实际上限不符）</td>
+            <td><code>100</code>（与后端 QueryMailLogs 硬限对齐）</td>
+          </tr>
+          <tr>
+            <td>翻页终止条件</td>
+            <td><code>result.items.length &lt; EXPORT_PAGE_SIZE</code><br>→ 后端静默截断 200→100 后，第 1 页即满足 <code>100 &lt; 200</code>，<code>break</code> 退出，仅拉取 1 页</td>
+            <td>双重防御：<br>① <code>items.length &gt;= result.total</code>（服务端总量已取完）<br>② <code>result.items.length === 0</code>（空页，后端无更多数据）<br>任一满足才退出，不依赖后端返回数量 = 请求数量</td>
+          </tr>
+          <tr>
+            <td>实际导出条数（筛选 128500 条）</td>
+            <td>100 条（仅第 1 页）</td>
+            <td>5000 条（EXPORT_MAX，分 50 页×100 条拉取完整）</td>
+          </tr>
+          <tr>
+            <td>UI 提示（超限 warning）</td>
+            <td>Toast 提示「仅导出前 5000 条」，但实际文件只有 100 条，存在静默数据丢失</td>
+            <td>Toast 提示「仅导出前 5000 条」，实际文件包含 5000 条，提示与结果一致</td>
+          </tr>
+          <tr>
+            <td>影响范围</td>
+            <td>筛选结果 &gt; 100 条时均受影响；&gt; 5000 条时用户同时遭遇 UI 误导和数据截断双重问题</td>
+            <td>仅修改 <code>exportAllFiltered</code> 函数内 2 处常量/终止条件；其他导出路径（选中行导出、similarMode 导出）不受影响</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 27.2 截图式交互预览 -->
+      <h5 id="c27-states" style="margin-top:1rem;">27.2 截图式交互预览</h5>
+
+      <p><strong>S-1：邮件处置中心默认态，「导出全部筛选」按钮可见</strong></p>
+      <div class="trigger-path">触发路径：导航到 <code>/zh/email-disposal/center</code>，不勾选任何邮件，列表数据加载完成</div>
+      <figure>
+        <img src="./screenshots/GT-12774-export-button-visible.png" alt="邮件处置中心表格工具栏，导出全部筛选按钮可见">
+        <figcaption>S-1：邮件处置中心（AI版·单租户·Mock，1440×900，深色主题）。表格工具栏显示「导出全部筛选（53 条）」按钮（下载图标 + 文案），当前 Mock 数据 53 条（&lt; 5000），点击将直接导出全部不触发超限 Warning。表格列：时间、收发类型、主题、发信 IP、发信人、操作（查看/找相似）。</figcaption>
+      </figure>
+
+      <p><strong>S-2：点击「导出全部筛选」后恢复态（53 条，无超限 Warning）</strong></p>
+      <div class="trigger-path">触发路径：S-1 → 点击「导出全部筛选（53 条）」按钮 → Mock 环境下 API 直接返回，浏览器触发 CSV 下载</div>
+      <figure>
+        <img src="./screenshots/GT-12774-export-under-limit-done.png" alt="导出完成后页面恢复态，无超限 Warning">
+        <figcaption>S-2：点击导出后页面恢复正常态（53 条 &lt; 5000，不弹超限 Warning）。修复后分页拉取逻辑：<code>EXPORT_PAGE_SIZE=100</code>，第 1 页返回 53 条，<code>items.length(53) &gt;= result.total(53)</code> 满足，退出循环，导出 53 条完整数据。超限场景（&gt; 5000 条）在 production 环境验证，Mock 下无法复现。</figcaption>
+      </figure>
+
+      <p style="color:var(--muted-fg,#888);font-style:italic;font-size:0.85rem;">注：超限 Warning Toast（「仅导出前 5000 条」）+ 多页拉取 50 次循环场景（128500 条 → 5000 条导出）需在 production 环境验证，Mock 下数据量不足 5000 条，无法触发该路径。修复前缺陷（100 条截断）已通过代码审查确认根因，无需在 Mock 环境复现。</p>
+
+      <!-- 27.3 逐元素说明 -->
+      <h5 id="c27-elements" style="margin-top:1rem;">27.3 逐元素说明</h5>
+      <table>
+        <thead><tr><th>元素</th><th>位置/类型</th><th>修复前行为</th><th>修复后行为</th><th>代码路径</th><th>形态/角色差异</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>EXPORT_PAGE_SIZE 常量</td>
+            <td><code>exportAllFiltered</code> 函数内局部常量</td>
+            <td><code>200</code>，与后端实际上限 100 不符</td>
+            <td><code>100</code>，与 QueryMailLogs 硬限对齐</td>
+            <td><code>email-disposal-center-page.tsx</code> L628</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>翻页 break 条件 1（原有，已移除）</td>
+            <td>for 循环内 <code>if</code></td>
+            <td><code>result.items.length &lt; EXPORT_PAGE_SIZE</code>：后端截断后第 1 页即触发，仅拉 1 页</td>
+            <td>已删除，替换为下方两条防御条件</td>
+            <td>原 L635（已删除）</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>翻页 break 条件 2（新增）：total 兜底</td>
+            <td>for 循环内 <code>if</code></td>
+            <td>—（不存在）</td>
+            <td><code>if (items.length &gt;= result.total) break;</code>：累计已拉取 &gt;= 服务端总量，数据已取尽，退出</td>
+            <td><code>email-disposal-center-page.tsx</code> L638</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>翻页 break 条件 3（新增）：空页兜底</td>
+            <td>for 循环内 <code>if</code></td>
+            <td>—（不存在）</td>
+            <td><code>if (result.items.length === 0) break;</code>：后端返回空页，无更多数据，退出</td>
+            <td><code>email-disposal-center-page.tsx</code> L640</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>超限 Warning Toast（total &gt; 5000 时）</td>
+            <td><code>toast.warning(t("batch.exportLimitWarning", ...))</code></td>
+            <td>提示「仅导出前 5000 条」，但实际文件仅 100 条，存在静默数据丢失</td>
+            <td>提示「仅导出前 5000 条」，实际文件包含 5000 条，提示与结果一致</td>
+            <td>L615，i18n key <code>batch.exportLimitWarning</code>（文案未变更）</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>similarMode 导出分支</td>
+            <td><code>if (similarMode) exportToCsv(similarItems)</code></td>
+            <td>不受影响（直接导出内存中已有数据）</td>
+            <td>不变</td>
+            <td>L621–622</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>选中行导出分支</td>
+            <td><code>if (selectedIds.size &gt; 0)</code></td>
+            <td>不受影响（仅导出已勾选行）</td>
+            <td>不变</td>
+            <td>L655–663</td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 差异标注 D-025 -->
+    <section id="incremental-gt12774-diff" style="margin-top:1.5rem;">
+      <h3>差异标注（本次增量 D-025）</h3>
+      <div class="interaction-preview">
+        <h3>D-025 · 分页导出终止条件依赖后端返回数量等于请求数量，导致后端静默截断时第 1 页即退出</h3>
+        <table>
+          <tbody>
+            <tr><td width="120">类型</td><td>缺陷修复（逻辑错误）</td></tr>
+            <tr><td>根因 A</td><td><code>EXPORT_PAGE_SIZE = 200</code> 与后端 QueryMailLogs 硬限 100/页不符；每次请求被静默截断为 100 条，前端不知情</td></tr>
+            <tr><td>根因 B</td><td>终止条件 <code>result.items.length &lt; EXPORT_PAGE_SIZE</code>（即 <code>100 &lt; 200</code>）在第 1 页即为 <code>true</code>，<code>break</code> 退出循环，后续 49 页全部跳过，实际只导出 100 条</td></tr>
+            <tr><td>修复</td><td>① <code>EXPORT_PAGE_SIZE</code> 修正为 <code>100</code>；② 移除原终止条件，新增双重防御：<code>items.length &gt;= result.total</code>（total 兜底）和 <code>result.items.length === 0</code>（空页兜底），两者均不依赖后端原样返回请求 page_size</td></tr>
+            <tr><td>影响范围</td><td><code>email-disposal-center-page.tsx</code>：<code>EXPORT_PAGE_SIZE</code> 常量值（L628）+ 移除原 <code>break</code> 条件 + 新增两条 <code>break</code> 条件（L638、L640）；其余文件均不变</td></tr>
+            <tr><td>验证状态</td><td>代码审查确认根因；Mock 环境验证按钮可见和点击行为（53 条，&lt; 5000）；超限多页拉取场景需 production 环境验证（无法在 Mock 下安全复现 128500 条数据集）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
   <!-- ══════════════ E. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>E. 版本历史</h2>
@@ -2162,7 +2340,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>v4</td>
           <td>2026-08-04</td>
           <td><code>工作区已提交</code></td>
-          <td>追加一级需求 GT-12753 高级过滤规则——新建规则——处置策略：免责声明 / 外部邮件提醒，去掉「自定义模板」：变更 11（免责声明 addon_policy 移除「声明模板」下拉——standard/legal/custom，defaultAddonParams 不再写 template，配置区仅保留「插入位置」；ActionSummary disclaimer 摘要改为显示插入位置；四语删 disclaimerTemplate/Standard/Legal/Custom）、变更 12（外部邮件提醒移除「模板」下拉——standard/security/custom，defaultAddonParams 不再写 template，仅保留「插入位置」+ 外部发件人提示；ActionSummary externalReminder 摘要改为显示插入位置；四语删 externalReminderTemplate/Standard/Security/Custom）；新增浏览器实拍 S-1（免责声明去模板仅剩插入位置）/ S-2（外部邮件提醒去模板仅剩插入位置，摘要显示正文顶部）；差异新增 D-013、待确认新增 Q-005；文档版本 v3→v4；顺带修复免责声明 / 外部邮件提醒功能块内既有 UTF-8 乱码（ru/th 名称、描述、位置、提示、内容占位符）。</td>
+          <td>追加一级需求 GT-12753 高级过滤规则——新建规则——处置策略：免责声明 / 外部邮件提醒，去掉「自定义模板」：变更 11（免责声明 addon_policy 移除「声明模板」下拉——standard/legal/custom，defaultAddonParams 不再写 template，配置区仅保留「插入位置」；ActionSummary disclaimer 摘要改为显示插入位置；四语删 disclaimerTemplate/Standard/Legal/Custom）、变更 12（外部邮件提醒移除「模板」下拉——standard/security/custom，defaultAddonParams 不再写 template，仅保留「插入位置」+ 外部发件人提示；ActionSummary externalReminder 摘要改为显示插入位置；四语删 externalReminderTemplate/Standard/Security/Custom）；新增浏览器实拍 S-1（免责声明去模板仅剩插入位置）/ S-2（外部邮件提醒去模板���剩插入位置，摘要显示正文顶部）；差异新增 D-013、待确认新增 Q-005；文档版本 v3→v4；顺带修复免责声明 / 外部邮件提醒功能块内既有 UTF-8 乱码（ru/th 名称、描述、位置、提示、内容占位符）。</td>
         </tr>
         <tr>
           <td>v5</td>
@@ -2198,7 +2376,23 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <td>v10</td>
           <td>2026-08-05</td>
           <td><code>当前工作区</code></td>
-          <td>追加一级需求 GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决：变更 26（<code>users/page.tsx</code> 新增 <code>createdUserPassword</code>/<code>createdUsername</code> state；创建成功分支写入 state 并触发「用户已创建」确认 Dialog；Dialog 内含只读 <code>font-mono</code> 明文密码输入框 + 「复制密码」按钮 + 「我已记录」确认按钮；新增 Dialog / Copy / CheckCircle2 import；<code>dispatcher.ts</code> 补充 POST /users Mock 路由返回 201；messages/zh/en/ru/th 各新增 <code>users.createdDialog</code> 节 6 个 key）；差异新增 D-024；目录追加 GT-12571 分组（变更 26，含 26.1 方案概述 / 26.2 截图式交互预览 / 26.3 逐元素说明）；浏览器实拍 S-1～S-5（AI版·单租户·Mock，1440×900，深色主题）；title / 元信息 / 差异范围同步更新；文档版本 v9→v10。</td>
+          <td>追加一级需求 GT-12571 管理员与权限-创建新用户后初始密码未展示且无法复制问题解决（下略，见原 v10 记录）。</td>
+        </tr>
+        <tr>
+          <td>v11</td>
+          <td>2026-08-05</td>
+          <td><code>当前工作区</code></td>
+          <td>追加一级需求 GT-12774 邮件处置中心-筛选结果超过5000条时实际仅导出100条问题解决：变更 27（<code>email-disposal-center-page.tsx</code> <code>exportAllFiltered</code> 函数修复两个并列根因——根因A：<code>EXPORT_PAGE_SIZE</code> 从 200 修正为 100 与后端硬限对齐；根因B：移除原终止条件 <code>result.items.length &lt; EXPORT_PAGE_SIZE</code>（后端截断后第1页即触发 break），新增双重防御：<code>items.length &gt;= result.total</code>（total兜底）+ <code>result.items.length === 0</code>（空页兜底），不依赖后端原样返回 page_size；修复后筛选128500条时实际导出5000条与 UI 提示一致；similarMode/选中行导出分支不受影响）；差异新增 D-025；目录追加 GT-12774 分组（变更 27，含 27.1 根因与修复方案 / 27.2 截图式交互预览 / 27.3 逐元素说明）；浏览器实拍 S-1～S-2（AI版·单租户·Mock，1440×900，深色主题）；title / 元信息 / 差异范围同步更新；文档版本 v10→v11。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <a class="back-link" href="#toc">↑ 返回目录</a>
+
+</div>
+</body>
+</html>：变更 26（<code>users/page.tsx</code> 新增 <code>createdUserPassword</code>/<code>createdUsername</code> state；创建成功分支写入 state 并触发「用户已创建」确认 Dialog；Dialog 内含只读 <code>font-mono</code> 明文密码输入框 + 「复制密码」按钮 + 「我已记录」确认按钮；新增 Dialog / Copy / CheckCircle2 import；<code>dispatcher.ts</code> 补充 POST /users Mock 路由返回 201；messages/zh/en/ru/th 各新增 <code>users.createdDialog</code> 节 6 个 key）；差异新增 D-024；目录追加 GT-12571 分组（变更 26，含 26.1 方案概述 / 26.2 截图式交互预览 / 26.3 逐元素说明）；浏览器实拍 S-1～S-5（AI版·单租户·Mock，1440×900，深色主题）；title / 元信息 / 差异范围同步更新；文档版本 v9→v10。</td>
         </tr>
       </tbody>
     </table>
