@@ -512,6 +512,15 @@ const routes: Route[] = [
     }),
   },
 
+  // ─── 个人中心：修改密码 ────────────────────────────────────────────────
+  // 默认返回成功（relogin: false）。如需测试旧密码错误场景，
+  // 可在 handler 中改为返回 status:400 + message:'Current password is incorrect'。
+  {
+    method: 'PUT',
+    pattern: '/auth/password',
+    handler: () => ({ status: 200, data: { relogin: false } }),
+  },
+
   // ─── 个人中心：安全策略 ────────────────────────────────────────────────
   {
     method: 'GET',

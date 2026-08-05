@@ -236,7 +236,7 @@
         <li class="toc-change"><span class="toc-num">25</span><a href="#change-25">移除系统首页「待办与告警」卡片，威胁态势趋势图独占全宽</a></li>
       </ul>
 
-      <!-- 一级需求：GT-12571 管理员与权限-创建新用户后初始密码未展示�����无法复制问题解决 -->
+      <!-- 一级需求：GT-12571 管理员与权限-创建新���户后初始密码未展示�����无法复制问题解决 -->
       <li class="toc-l1"><a href="#gt-12571">GT-12571 管理�����与权限-创建新用户后初始密码未展示且无法复制问题解决</a></li>
       <ul class="toc-l2-group">
         <li class="toc-change"><span class="toc-num">26</span><a href="#change-26">创建成功后弹出「初始密码确认」Dialog，明文展示密码并提供复制按钮</a></li>
@@ -338,7 +338,7 @@
     </div>
   </section>
 
-  <!-- ══════════════ B. 产品形态 × 角色矩阵 ══════════════ -->
+  <!-- ══════════════ B. 产品形态 × 角色矩阵 ═══════���══════ -->
   <section id="form-role-matrix">
     <h2>B. 产品形态 × 角色差异矩阵</h2>
     <div class="matrix-legend">
@@ -711,7 +711,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         意图名（钓鱼 / 涉政 / 垃圾 / 诈骗 / 订阅）、意图描述、检测模式（分类优先 / 分段阈值）文案复用阶段3 内容层意图引擎模块的 <code>intentEngine.*</code> i18n 命名空间，不重复造词；本次仅新增「添加意图 / 移除」两个动作词与补齐缺失的输入类型键。详见差异 D-004、D-005。
       </div>
       <div class="callout callout-ok">
-        <strong>测试与验证：</strong>本模块单元测试全量 <strong>72 项通过</strong>，覆盖多意图 list 编解码（<code>serde.test.ts</code>）、意���引擎面板多意图行渲染与描述卡回归（<code>ConditionConfigPanel.test.tsx</code>）、条件目录计数不变量（<code>catalogue.test.ts</code>）。到意图引擎面板的 UI 深链依赖登录态与后端；本次已在 AI版·单租户 / Mock 数据环境完成浏览器实拍（S-1），真实后端「保存 / 回显」链路回归见待确认 Q-003。
+        <strong>测试与验证：</strong>本模块单元测试全量 <strong>72 项通过</strong>，覆盖多意图 list 编解码（<code>serde.test.ts</code>）、意���引擎面板多意图行渲染与描述卡回归（<code>ConditionConfigPanel.test.tsx</code>）、条件目录计数不变量（<code>catalogue.test.ts</code>）。到意图引擎面板的 UI ���链依赖登录态与后端；本次已在 AI版·单租户 / Mock 数据环境完成浏览器实拍（S-1），真实后端「保存 / 回显」链路回归见待确认 Q-003。
       </div>
 
       <a class="back-link" href="#toc">↑ 返回目录</a>
@@ -809,7 +809,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <thead><tr><th>移除条件</th><th>catalogue 定义（变更前）</th><th>变更后</th><th>说明</th></tr></thead>
         <tbody>
           <tr><td>功能组</td><td><del>{ …, panel:'featureGroup' }</del></td><td>（已删除）</td><td><span class="tag tag-removed">移除</span>featureGroup 面板归零</td></tr>
-          <tr><td>URL 沙箱结果 <code>urlSandbox</code></td><td><del>{ key:'urlSandbox', category:'security', field:'url_sandbox', panel:'select' }</del></td><td>（已删除）</td><td><span class="tag tag-removed">移除</span>security -1</td></tr>
+          <tr><td>URL ��箱结果 <code>urlSandbox</code></td><td><del>{ key:'urlSandbox', category:'security', field:'url_sandbox', panel:'select' }</del></td><td>（已删除）</td><td><span class="tag tag-removed">移除</span>security -1</td></tr>
           <tr><td>短链展开 <code>shortLink</code></td><td><del>{ key:'shortLink', category:'security', field:'short_link', panel:'select' }</del></td><td>（已删除）</td><td><span class="tag tag-removed">移除</span>security -1</td></tr>
           <tr><td>四语 i18n <code>v3Conditions.*</code></td><td>各含三条文案</td><td>（已删除，四语）</td><td><span class="tag tag-removed">移除</span></td></tr>
         </tbody>
@@ -885,7 +885,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <h4>S-6 · 发件人组对象下拉（来源：群组策略模块）</h4>
         <p class="trigger-path">触发路径：条件配置 → 添加「发件人组」→ 展开对象下拉 · 浏览器实拍（浅色 / 1575×847）</p>
         <figure>
-          <img src="./screenshots/GT-12751-S6-sender-group-policy-dropdown-light-1575x847.png" alt="发件人组条件的对象下拉展开，显示研发部门、合作伙伴域名等群组，说明卡标注数据来源为群组策略模块" />
+          <img src="./screenshots/GT-12751-S6-sender-group-policy-dropdown-light-1575x847.png" alt="发件人组条件的对象下拉展开，显示研发部门、合作伙伴域名���群组，说明卡标注数据来源为群组策略模块" />
           <figcaption>图 S-6：发件人组（字段 <code>sender_group</code>）对象下拉列出来自<strong>群组策略模块</strong>的发信人组（如「研发部门」「合作伙伴域名」）；右侧说明卡「数据来源: 群组策略模块」。选定群组后的命中值为布尔（是/否）。</figcaption>
         </figure>
       </div>
@@ -976,7 +976,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         新建/编辑规则的「条件配置」页签中，已选条件列表与底部「添加条件」（搜索 + 目录）共处一个纵向容器。当已选条件较多时，已选列表把「添加条件」区挤出可视区且整体不滚动，导致<strong>无法再选择 / 添加其他条件</strong>。修复方式：为已选条件区设定上限高度并独立滚动，「添加条件」区以 <code>flex-1 min-h-0</code> 常驻可见，二者各自滚动。
       </p>
       <div class="callout callout-ok">
-        <strong>最终布局：</strong>左栏为 <code>flex flex-col</code> 容器——已选条件区 <code>max-h:45%（约）</code> + <code>overflow-y-auto</code> 独立滚动；「添加条件」区 <code>flex-1 min-h-0</code> 常驻并内部滚动。无论已选多少条，条件搜索框与目录始终可见可用。
+        <strong>最终布局：</strong>左栏为 <code>flex flex-col</code> 容器——已选条件区 <code>max-h:45%（约）</code> + <code>overflow-y-auto</code> 独立滚动；「添加条件」区 <code>flex-1 min-h-0</code> 常驻并内部滚动。无论已选多少条，条件搜索框与目录始终可见���用。
       </div>
       <h3>10.2 截图式交互预览</h3>
       <div class="interaction-preview">
@@ -1066,7 +1066,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <div class="incr-body">
       <h3>12.1 方案概述</h3>
       <p>
-        勾选「外部邮件提醒」附加策略后，其配置区原有「模板」（标准模板 / 安全提醒 / 自定义）与「插入位置」两个下拉。本次<strong>移除「模板」下拉</strong>，配置区仅保留「插入位置」（默认正文顶部）与底部提示「外部邮件提��仅对判定��外部发件��的邮件生效」。默认参数不再写入 <code>template</code> 字段；右侧摘要��原「模板名」改为显示「插入位置」。
+        勾选「外部邮件提���」附加策略后，其配置区原有「模板」（标准模板 / 安全提醒 / 自定义）与「插入位置」两个下拉。本次<strong>移除「模板」下拉</strong>，配置区仅保留「插入位置」（默认正文顶部）与底部提示「外部邮件提��仅对判定��外部发件��的邮件生效」。默认参数不再写入 <code>template</code> 字段；右侧摘要��原「模板名」改为显示「插入位置」。
       </p>
       <h3>12.2 截图式交互预览</h3>
       <div class="interaction-preview">
@@ -1360,7 +1360,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tbody>
           <tr><td>zh <code>contentRules.actionDeliver</code></td><td>放行</td><td>投递</td><td><span class="tag tag-changed">变更</span></td></tr>
           <tr><td>th <code>contentRules.actionDeliver</code></td><td>ส่งต่อ（转发）</td><td>ส่งมอบ（投递）</td><td><span class="tag tag-changed">变更</span>对齐语义</td></tr>
-          <tr><td>en / ru <code>contentRules.actionDeliver</code></td><td>Deliver / Доставить</td><td>Deliver / Доставить</td><td><span class="tag tag-info">不变</span>语义本即"投递"</td></tr>
+          <tr><td>en / ru <code>contentRules.actionDeliver</code></td><td>Deliver / Доставить</td><td>Deliver / Достави��ь</td><td><span class="tag tag-info">不变</span>语义本即"投递"</td></tr>
         </tbody>
       </table>
       <a class="back-link" href="#toc">↑ 返回目录</a>
@@ -1385,7 +1385,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·有意保留</span></td></tr>
-        <tr><td>描述</td><td>URL / 意图子页经 <code>useModuleMaster</code>，以新增的 <code>loaded</code> 门控上报；附件子页未使用 <code>useModuleMaster</code>，而是复用其自有的 <code>loading</code> 状态门控（<code>!loading</code> 时上报）。两条路径语义一致——真实状态加载完成前不向导航上报乐观默认值——但字段来源不同。</td></tr>
+        <tr><td>描述</td><td>URL / 意图子页经 <code>useModuleMaster</code>，以新增的 <code>loaded</code> 门控上报；附件子页未使用 <code>useModuleMaster</code>，而是复用其自有的 <code>loading</code> 状��门控（<code>!loading</code> 时上报）。两条路径语义一致——真实状态加载完成前不向导航上报乐观默认值——但字段来源不同。</td></tr>
         <tr><td>解决版本</td><td>GT-12723 · 2026-08-02</td></tr>
         <tr><td>验证依据</td><td><code>UrlProtectionPage.tsx</code> / <code>IntentEnginePage.tsx</code> 使用 <code>moduleLoaded</code>；<code>AttachmentSecurityPage.tsx</code> 使用 <code>!loading</code></td></tr>
       </tbody>
@@ -1465,7 +1465,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·设计取舍</span></td></tr>
-        <tr><td>描述</td><td><code>is_encrypted_attachment</code> 与 <code>mailfrom_empty</code> 在字段元信息中标记为布尔字段，渲染为 <code>BooleanValueSelect</code>（是/否），取值编码为布尔而非枚举字符串；其余三个二态条件（二维码/一致性/病毒扫描）仍是二元枚举（各自专用值域），仅显示为两项。二者控件不同但都是「二选一」。</td></tr>
+        <tr><td>描述</td><td><code>is_encrypted_attachment</code> 与 <code>mailfrom_empty</code> 在字段元信息中标记为布尔字段，渲染为 <code>BooleanValueSelect</code>（是/否），取值编码为布尔而非枚���字符串；其余三个二态条件（二维码/一致性/病毒扫描）仍是二元枚举（各自专用值域），仅显示为两项。二者控件不同但都是「二选一」。</td></tr>
         <tr><td>解决版本</td><td>GT-12751 · 2026-08-03</td></tr>
         <tr><td>验证依据</td><td><code>ConditionConfigPanel.tsx</code> 布尔分支渲染 <code>BooleanValueSelect</code>；i18n <code>booleanValues.true/false</code></td></tr>
       </tbody>
@@ -1495,7 +1495,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·连带变更</span></td></tr>
-        <tr><td>描述</td><td>变更 11 / 12 移除「模板」下拉后，<code>ActionSummary.tsx</code> 中两个附加策略的摘要不再能引用 <code>params.template</code>，改为显示「插入位置」（免责声明：正文顶部/底部/邮件头；外部邮件提醒：正文顶部/底部）。右侧「配置摘要」表与「逻辑表达式预览」相应改为展示插入位置，S-2 实拍可见「外部邮件提醒 → 正文顶部」。历史死键 <code>disclaimerTemplateDefault</code> / <code>externalReminderTemplateDefault</code> 改动前即无引用，未在本次删除。</td></tr>
+        <tr><td>描述</td><td>变更 11 / 12 移除「模板」下拉后，<code>ActionSummary.tsx</code> 中两个附加策略的摘要不再能引用 <code>params.template</code>，改为显示「插入位置」（免责声明：正文顶部/底部/邮件头；外部邮件提醒：正文顶部/底部）。右侧「配置摘要」表与「逻辑表达式预览」相应改为展示插入位置，S-2 实拍可见「外部邮件提醒 → 正文顶部」。历���死键 <code>disclaimerTemplateDefault</code> / <code>externalReminderTemplateDefault</code> 改动前即无引用，未在本次删除。</td></tr>
         <tr><td>解决版本</td><td>GT-12753 · 2026-08-04</td></tr>
         <tr><td>验证依据</td><td>S-1 / S-2 浏览器实拍；<code>ActionSummary.tsx</code> disclaimer / externalReminder 分支；四语已删除 <code>disclaimerTemplate*</code> / <code>externalReminderTemplate{Standard,Security,Custom}</code> 且全库无残留引用</td></tr>
       </tbody>
@@ -1787,7 +1787,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
       <tbody>
         <tr><td width="140">需求名称</td><td>GT-12201 二维码检测优化</td></tr>
         <tr><td>生成日期</td><td>2026-08-04</td></tr>
-        <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层 → 附件安全检测 → 图片识别 Tab → 二维码图片检测）</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线 → 阶段3 内容层 → 附件安全检测 → 图片识别 Tab → 二维码图��检测）</td></tr>
         <tr><td>组件路径</td><td>
           <code>src/components/security/attachment-security/ImageDetectTab.tsx</code>（UI 主体）、<br>
           <code>src/types/attachment-security.ts</code>（<code>QrDeepRoutesConfig</code>、<code>ImageDetectConfig</code>）、<br>
@@ -1814,7 +1814,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <tbody>
           <tr>
             <td>结果仲裁策略 Section</td>
-            <td>深度检测配置区底部有 <code>border-t pt-4</code> 分隔区，包含：Label「结果仲裁策略」（含 Tooltip 图标）、disabled Select 下拉（值「取最高优先级动作执行」）、灰字提示「敬请期待」</td>
+            <td>深度检测配置区底部有 <code>border-t pt-4</code> 分隔区，包含：Label「��果仲裁策略」（含 Tooltip 图标）、disabled Select 下拉（值「取最高优先级动作执行」）、灰字提示「敬请期待」</td>
             <td>整个区块已从 DOM 中移除，深度检测配置区末尾直接显示「检测数量上限」和「超限处置」</td>
             <td>i18n key <code>imageDetect.arbitration</code>、<code>imageDetect.highestPriority</code>、<code>imageDetect.firstMatch</code>、<code>tooltips.arbitration</code>���已从 zh/en/ru/th 四语删除）；<code>QrDeepRoutesConfig.arbitration</code> 字段已从类型、API、mock 各层���除；parity 测试移除对应 4 个必需 key</td>
           </tr>
@@ -1838,7 +1838,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <tr><td><code>quarantine</code></td><td>隔离兜底</td><td>隔离</td><td><code>imageDetect.isolateFallback</code></td></tr>
         </tbody>
       </table>
-      <div class="callout callout-info">value 值（<code>pass_warn</code> / <code>quarantine</code>）、SelectItem 的 <code>data-testid</code>、类型定义和 API 映射均未改变；仅修改四语 i18n 文案值，parity 测试 key 名不变，零副作用。en：Pass and log warning→Continue to next step / Isolate as fallback→Quarantine；ru：Пропустить и записать предупреждение→Перейти к следующему шагу / Карантин как резервное действие→Карантин；th：ผ่านและบันทึกคำเตือน→ดำเนินการขั้นถัดไป / กักกันเป็นทางเลือกสำรอง→กักกัน。</div>
+      <div class="callout callout-info">value 值（<code>pass_warn</code> / <code>quarantine</code>）、SelectItem 的 <code>data-testid</code>、类型定义和 API 映射均未改变；仅修改四语 i18n 文案值，parity 测试 key 名不变，零副作用。en：Pass and log warning→Continue to next step / Isolate as fallback→Quarantine；ru：Пр��пустить и записать предупреждение→Перейти к следующему шагу / Карантин как резервное действие→Карантин；th：ผ่านและบันทึกคำเตือน→ดำเนินการขั้นถัดไป / กักกันเป็นทางเลือกสำรอง→กักกัน。</div>
       <figure style="margin-top:1rem;">
         <img src="./screenshots/GT-12201-exceed-action-dropdown-open.png" alt="超限处置下拉展开 - ��行下一步 / 隔离">
         <figcaption>S-2：超限处置下拉展开（1440×900）：「进行下一步」（当前选中，蓝色高亮）、「隔离」；原「放行并记录告警」和「隔离兜底」文案已更新。</figcaption>
@@ -1927,7 +1927,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           移除：<code>import { TodoAlerts } from './todo-alerts'</code> 及布局 wrapper <code>xl:grid-cols-3</code><br>
           保留不变：<code>todo-alerts.tsx</code>、<code>hooks.ts</code>（<code>alerts</code> 数据流）、<code>health-banner.tsx</code>、<code>gt12553-platform-todos.test.tsx</code>
         </td></tr>
-        <tr><td>变更类型</td><td>功能移除（UI 模块移除 + 布局调整）</td></tr>
+        <tr><td>变更类��</td><td>功能移除（UI 模块移除 + 布局调整）</td></tr>
         <tr><td>webapp commit</td><td><code>当前工作区</code></td></tr>
         <tr><td>浏览器验证</td><td>2026-08-04，AI版·多租户·平台管理员·Mock，1440×900，深色主题</td></tr>
       </tbody>
@@ -1980,7 +1980,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
             <tr><td width="120">类型</td><td>UI 模块移除 + 布局调整</td></tr>
             <tr><td>描述</td><td>「待处置队列」（隔离 N 封）和「举报待审」（N 条）数据已分别在「待处置邮件」KPI 卡片（含「隔离 N 封 / 举报待审 N 封」副文案）和 HealthBanner 中呈现；独立卡片无新增信息价值，额外占据首页 1/3 列宽，使威胁态势趋势图被压缩；移除后布局更简洁，趋势图可利用完整内容宽度。</td></tr>
             <tr><td>影响范围</td><td><code>system-status-dashboard.tsx</code>：移除 <code>xl:grid-cols-3</code> wrapper 和 <code>&lt;TodoAlerts&gt;</code>，<code>import { TodoAlerts }</code> 同步移除，注释更新；其余文件（<code>todo-alerts.tsx</code>、<code>hooks.ts</code>、测试文件）均不变</td></tr>
-            <tr><td>不受影响</td><td>HealthBanner 横幅（<code>alerts</code> 字段驱动，继续工作）、KPI 卡片区（3/4 列独立布局不变）、<code>gt12553-platform-todos.test.tsx</code>（直接单元测试 <code>TodoAlerts</code>，不经过 Dashboard）</td></tr>
+            <tr><td>不受影响</td><td>HealthBanner 横幅（<code>alerts</code> 字段驱动，继续工作）、KPI 卡片区（3/4 列独立布局不变）、<code>gt12553-platform-todos.test.tsx</code>（直接单元���试 <code>TodoAlerts</code>，不经过 Dashboard）</td></tr>
           </tbody>
         </table>
       </div>
@@ -2101,7 +2101,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
           <tr>
             <td>「初始密码」标签</td>
             <td>Label</td>
-            <td>「初始密码」</td>
+            <td>「初始密��」</td>
             <td><code>users.createdDialog.passwordLabel</code></td>
             <td>[Base]</td>
           </tr>
@@ -2702,6 +2702,20 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
         <figcaption>密码修改 Tab 默认态 · AI版·多租户·Mock · 1440×900 · 深色主题</figcaption>
       </figure>
 
+      <p><strong>状态 2：修改成功——Card 内嵌成功 panel</strong></p>
+      <p>触发路径：状态 1 → 填写合法旧密码 + 合法新密码 + 确认新密码 → 点击「保存」→ API 返回 200</p>
+      <figure>
+        <img src="./screenshots/GT-11969-pwd-success.png" alt="密码修改成功 panel：居中绿色大图标、标题「密码修改成功」、副文案「您的密码已更新，请妥善保管」、完成按钮" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;">
+        <figcaption>状态 2：修改成功 panel · Card 内容整体替换，无 toast · AI版·多租户·Mock · 1440×900 · 深色主题</figcaption>
+      </figure>
+
+      <p><strong>状态 3：修改失败——旧密码不正确（内联错误提示）</strong></p>
+      <p>触发路径：状态 1 → 填写错误旧密码 → 点击「保存」→ API 返回 400 + message 含"current"</p>
+      <figure>
+        <img src="./screenshots/GT-11969-pwd-wrong-pwd-error.png" alt="旧密码输入框红色边框，下方显示红色内联提示「当前密码不正确」，表单保持可编辑" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;">
+        <figcaption>状态 3：旧密码错误 · 内联 inline 错误（非 toast）· 旧密码输入框红色边框 + 「当前密码不正确」提示 · AI版·多租户·Mock · 1440×900 · 深色主题</figcaption>
+      </figure>
+
       <h4 id="c30-elements">30.3 逐元素说明</h4>
       <table>
         <thead><tr><th>元素</th><th>类型</th><th>文案 / 行为</th><th>i18n key</th><th>形态/角色差异</th></tr></thead>
@@ -2757,7 +2771,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
 
       <p><strong>状态 5：登录历史 Tab（三条含成功/失败/异常记录）</strong></p>
       <figure>
-        <img src="./screenshots/GT-11969-profile-login-history.png" alt="登录历史 Tab，表格显示三条记录：两条成功（结果绿色）、一条失败（结果红色）含异常告警图标" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;">
+        <img src="./screenshots/GT-11969-profile-login-history.png" alt="登录历史 Tab，表格显示三条记录：两条成功（结��绿色）、一条失败（结果红色）含异常告警图标" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;">
         <figcaption>登录历史 Tab · 3 条记录（含 1 条异常）· 1440×900 · 深色主题</figcaption>
       </figure>
 
@@ -2955,7 +2969,7 @@ export const INTENT_ENGINE_OPERATOR = { classification: 'within', threshold: 'be
 
 </div>
 </body>
-</html>（附件安全检测 → 反病毒引擎 Tab）：新增变更 18（移除多租户租户管理员视角下顶部 info 横幅 antivirus-platform-managed-hint；AntivirusTab.tsx 条件渲染改为 !hidePlatformConfig 分支，横幅 DOM 节点完全消除）、变更 19（移除执行动作配置 section 标题行「当前方向执行动作」Label；i18n key actionConfig 保留于文件与 parity 测试，UI 不再引用）、变更 20（执行动作 reject 标签「阻断」改为「拒收」，四语同步：Block→Reject / Блокировать→Отклонить / บล็อก→ปฏิเสธ；与 GT-11651 变更 16 语义对齐）、变更 21（为执行动作下拉两个 Select 的 SelectItem 添加「动作名称 + 灰字说明」两行式渲染；新增 i18n 节 attachmentSecurity.actionDesc.*（zh/en/ru/th 四语，5 个 key：quarantine/audit/reject/discard/accept）；SelectTrigger 内 SelectValue 传 children 覆盖 Radix 默认回退，确保触发器仅显动作名称；parity 测试补登 actionDesc.* 5 个必需 key）；浏览器实拍 S-1（病毒动作下拉展开，1440×900）/ S-2（超时动作下拉展开）/ S-3（Tab 默认态，无横幅无标题行）；目录追加 GT-12754 分组（变更 18~21）；title 追加本需求；文档版本 v6→v7。</td>
+</html>（附件安全检测 → 反病毒引擎 Tab）：新增变更 18（移除多租户租户管理员视角下顶部 info 横幅 antivirus-platform-managed-hint；AntivirusTab.tsx 条件渲染改为 !hidePlatformConfig 分支，横幅 DOM 节点完全消除）、变更 19（移除执行动作配置 section 标题行「当前方向执行动作」Label；i18n key actionConfig 保留于文件与 parity 测试，UI 不再引用）、变更 20（执行动作 reject 标签「阻断」改为「拒收」，四语同步：Block→Reject / Блокировать���Отклонить / บล็อก→ปฏิเสธ；与 GT-11651 变更 16 语义对齐）、变更 21（为执行动作下拉两个 Select 的 SelectItem 添加「动作名称 + 灰字说明」两行式渲染；新增 i18n 节 attachmentSecurity.actionDesc.*（zh/en/ru/th 四语，5 个 key：quarantine/audit/reject/discard/accept）；SelectTrigger 内 SelectValue 传 children 覆盖 Radix 默认回退，确保触发器仅显动作名称；parity 测试补登 actionDesc.* 5 个必需 key）；浏览器实拍 S-1（病毒动作下拉展开，1440×900）/ S-2（超时动作下拉展开）/ S-3（Tab 默认态，无横幅无标题行）；目录追加 GT-12754 分组（变更 18~21）；title 追加本需求；文档版本 v6→v7。</td>
         </tr>
       </tbody>
     </table>

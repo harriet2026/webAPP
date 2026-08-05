@@ -121,7 +121,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   // Mock 拦截：当开关开启时，命中已注册的 mock 路由直接返回 fixture，
   // 不发起真实网络请求。开关由 ProductFormSwitcher 里的「Mock 数据」
   // 菜单项控制（localStorage: osgateway_mock_enabled）。
-  // 注意：只在浏览器端生效（SSR 时 isMockEnabled() 恒为 false），避免
+  // 注意：只在浏��器端生效（SSR 时 isMockEnabled() 恒为 false），避免
   // 影响 Next.js 服务端渲染时的 bootstrap 预取。
   const method = options.method || 'GET';
   if (
@@ -136,7 +136,12 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       headers: options.headers,
     });
     if (status >= 400) {
-      throw new ApiError(status, `Mock error ${status}`, data as Record<string, unknown>);
+      const mockData = data as Record<string, unknown>;
+      const mockMsg =
+        typeof mockData?.message === 'string'
+          ? mockData.message
+          : `Mock error ${status}`;
+      throw new ApiError(status, mockMsg, mockData);
     }
     if (status === 204) return {} as T;
     return data as T;
