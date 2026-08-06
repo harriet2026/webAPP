@@ -159,43 +159,48 @@ function getEventDotInfo(ev: MailChildEvent): EventDotInfo {
   return { bg: 'bg-gray-500', Icon: User };
 }
 
-// 「操作类型」翻译表：key = "event_source:event_type" 复合键 → 中文完整文案
-// 操作类型由 source + type 组合决定：同为 recall 的事件，
-// admin_api 发起和 threat_retro_agent 发起语义不同，必须用复合键区分。
-const OPERATION_TYPE_ZH: Record<string, string> = {
-  'threat_retro_agent:recall': '威胁回溯智能体发起召回',
-  'threat_retro_agent:notify': '威胁回溯智能体发起通知',
-  'admin_api:recall':          '管理员召回',
+// 事后处置时间线白名单来源：只有这两种 event_source 属于"事后处置动作"。
+// admin_api = 管理员手动召回；threat_retro_agent = 威胁回溯智能体发起召回/通知。
+// postfix/antispam 等投递流程来源均排除在外。
+const DISPOSAL_SOURCES = new Set(['admin_api', 'threat_retro_agent']);
+
+// event_result 原始值 → i18n sub-key 映射（emailDisposal.detail.analysis.eventResult.*）
+// 未命中时 fallback 到原始值，不会显示空白。
+const EVENT_RESULT_KEY_MAP: Record<string, string> = {
+  success:     'success',
+  completed:   'completed',
+  failed:      'failed',
+  failure:     'failure',
+  pending:     'pending',
+  in_progress: 'in_progress',
+  timeout:     'timeout',
+  skipped:     'skipped',
+  cancelled:   'cancelled',
 };
 
-// 「执行结果」翻译表：event_result 原始值 → 中文
-// 语义：本次操作（召回/通知）是否执行成功。
-// 只映射操作结果语义值；邮件状态枚举（quarantine_pending、delivery_failed 等）
-// 是 MailLogDetail 层的字段，不属于 event_result，不在此处映射。
-const EVENT_RESULT_ZH: Record<string, string> = {
-  success:    '成功',
-  completed:  '成功',
-  failed:     '失败',
-  failure:    '失败',
-  pending:    '执行中',
-  in_progress:'执行中',
-  timeout:    '超时',
-  skipped:    '已跳过',
-  cancelled:  '已取消',
+// event_source + event_type 复合键 → i18n sub-key 映射（emailDisposal.detail.analysis.operationType.*）
+// 只映射白名单内的三种组合，未命中时 fallback 到 event_type 原始值。
+const OPERATION_TYPE_KEY_MAP: Record<string, string> = {
+  'admin_api:recall':          'adminApiRecall',
+  'threat_retro_agent:recall': 'threatRetroAgentRecall',
+  'threat_retro_agent:notify': 'threatRetroAgentNotify',
 };
 
+type TFn = (key: string) => string;
 
-
-function translateEventType(source: string | undefined, type: string | undefined, isZh: boolean): string {
-  if (!type) return '—';
-  if (!isZh) return type;
-  const key = `${source ?? ''}:${type}`;
-  return OPERATION_TYPE_ZH[key] ?? type;
+function getEventResultLabel(val: string | undefined, t: TFn): string {
+  if (!val) return '—';
+  const subKey = EVENT_RESULT_KEY_MAP[val];
+  if (!subKey) return val;
+  return t(`eventResult.${subKey}`);
 }
 
-function translateEventResult(val: string | undefined, isZh: boolean): string {
-  if (!val) return '—';
-  return isZh ? (EVENT_RESULT_ZH[val] ?? val) : val;
+function getOperationTypeLabel(source: string | undefined, type: string | undefined, t: TFn): string {
+  if (!type) return '—';
+  const key = `${source ?? ''}:${type}`;
+  const subKey = OPERATION_TYPE_KEY_MAP[key];
+  if (!subKey) return type;
+  return t(`operationType.${subKey}`);
 }
 
 // aiEnabled defaults to false (fail-closed): this is an entitlement gate for
@@ -211,8 +216,6 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
   // rather than adding a fourth duplicate translation of the same string.
   const tSenderActions = useTranslations('emailDisposal.detail.overview.senderActions');
   const rawLocale = useLocale();
-  // 是否处于中文语言环境——用于 event_type/event_result 翻译
-  const isZh = rawLocale === 'zh';
   const router = useRouter();
   // Same locale mapping pattern as mail-list-table.tsx; the disposal-basis
   // dictionary only carries zh/en/th/ru, so unknown locales fall back to zh.
@@ -255,17 +258,10 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
-  // 「事后处置时间线」是事后**处置动作**日志（召回/放行/丢弃等管理员操作），
-  // 不是常规 SMTP 投递 DSN 事件流水 -- 后者（event_source === 'postfix'，见
-  // internal/api/postfix_events.go）在这里展示会造成语义混淆（review finding）。
-  // 后端真实写入的 event_source 只有 5 个常量（internal/models/delivery_events.go）：
-  // 'postfix'（Postfix 投递状态回传，routine）与 4 个 'workflow.*'（quarantine/
-  // sideline/audit/bounce -- 均由 RecordWorkflowReinject 在管理员 release/approve
-  // 时写入，即处置动作）。用黑名单排除 'postfix' 而非枚举白名单 'workflow.*'，
-  // 这样任何非 postfix 来源（含未来新增的 workflow.* 变体、以及本组件测试夹具
-  // 里的 'admin_api'）都天然落入"处置相关"一侧，不需要跟着后端新增来源同步改这里。
+  // 白名单过滤：只保留真正的事后处置动作事件（admin_api / threat_retro_agent）。
+  // postfix（投递状态）、antispam（策略裁决）等均属投递流程，不属于事后处置，一律排除。
   const disposalEvents = useMemo(
-    () => events.filter((ev) => ev.event_source !== 'postfix'),
+    () => events.filter((ev) => DISPOSAL_SOURCES.has(ev.event_source ?? '')),
     [events],
   );
   const sortedEvents = useMemo(
@@ -508,7 +504,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
             <span className="text-muted-foreground leading-relaxed">
               {isPlatformPolicyContext
                 ? tFeatures('platformPolicyHitDetail')
-                : (formatHitDetail(basis, disposalLang) || '—')}
+                : (formatHitDetail(basis, disposalLang) || '��')}
             </span>
             {!isPlatformPolicyContext && basis.detection_tags && basis.detection_tags.length > 0 && (
               <>
@@ -602,7 +598,9 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
                             </span>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
-                            <Badge variant="outline" className="text-xs">{translateEventResult(ev.event_result || ev.correlation_status, isZh)}</Badge>
+                            <Badge variant="outline" className="text-xs">{
+                              getEventResultLabel(ev.event_result || ev.correlation_status, t)
+                            }</Badge>
                             <ChevronDown className={cn('h-4 w-4 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', !isOpen && '-rotate-90')} />
                           </div>
                         </div>
@@ -618,11 +616,11 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
                             </div>
                             <div className="flex items-start gap-2">
                               <span className="w-20 shrink-0 text-muted-foreground">{t('recallAction')}:</span>
-                              <span>{translateEventType(ev.event_source, ev.event_type, isZh)}</span>
+                              <span>{getOperationTypeLabel(ev.event_source, ev.event_type, t)}</span>
                             </div>
                             <div className="flex items-start gap-2">
                               <span className="w-20 shrink-0 text-muted-foreground">{t('executionResult')}:</span>
-                              <span>{translateEventResult(ev.event_result, isZh)}{ev.dsn ? `（${ev.dsn}）` : ''}</span>
+                              <span>{getEventResultLabel(ev.event_result, t)}{ev.dsn ? `（${ev.dsn}）` : ''}</span>
                             </div>
                             <div className="pt-1">
                               {/* 优化四：有 onViewRawLogs 时跳转原始日志区，否则退回 toast */}

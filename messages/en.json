@@ -6337,10 +6337,26 @@
         "eventCount": "{n} events",
         "detectionComplete": "Detection Complete",
         "recallScope": "Target",
-            "recallAction": "Action Type",
-            "executionResult": "Execution Result",
-            "viewRecallLog": "View Raw Logs",
+        "recallAction": "Action Type",
+        "executionResult": "Execution Result",
+        "viewRecallLog": "View Raw Logs",
         "noEvents": "No Events",
+        "operationType": {
+          "adminApiRecall": "Admin Recall",
+          "threatRetroAgentRecall": "Threat Retro Agent Recall",
+          "threatRetroAgentNotify": "Threat Retro Agent Notify"
+        },
+        "eventResult": {
+          "success": "Success",
+          "completed": "Success",
+          "failed": "Failed",
+          "failure": "Failed",
+          "pending": "In Progress",
+          "in_progress": "In Progress",
+          "timeout": "Timeout",
+          "skipped": "Skipped",
+          "cancelled": "Cancelled"
+        },
         "aiVerdict": {
           "title": "AI Verdict",
           "viewDetails": "View Details",
