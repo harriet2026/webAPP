@@ -141,6 +141,12 @@
         <li class="toc-change"><span class="toc-num">6</span><a href="#change-6">Mock 数据：补充三种事后处置事件</a></li>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-12801">GT-12801 DMARC协议执行动作对齐以及增加"进行下一步"</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12801-change-1">"阻断"重命名为"拒收"（DMARC处置策略）</a></li>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12801-change-2">DMARC处置策略新增"进行下一步"选项</a></li>
+      </ul>
+
       <li><a href="#diffs">D. 差异标注</a></li>
       <li><a href="#questions">Q. 待确认事项</a></li>
       <li><a href="#version-history">V. 版本历史</a></li>
@@ -452,6 +458,129 @@ onViewRawLogs?: () =&gt; void;
     </table>
   </section>
 
+  <!-- ══════════════ GT-12801 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12801">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#7c3aed">GT</span>
+      <h2>GT-12801 DMARC协议执行动作对齐以及增加"进行下一步"</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/auth-spoofing</code><br/>
+        组件：<code>ProtocolChecksSection.tsx</code><br/>
+        2026-08-06
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- 变更 1 -->
+      <h3 id="gt12801-change-1">1. "阻断"重命名为"拒收"（DMARC处置策略）</h3>
+
+      <h4>1.1 方案概述</h4>
+      <p>DMARC 处置策略下拉中，<code>reject</code> 动作的显示文案由「阻断」修改为「拒收」，与内容规则、反病毒引擎语义对齐，统一使用「拒收」表达 SMTP 5xx 拒绝响应，消除模块间文案差异。SPF / DKIM / PTR 共享同一 i18n key，四个协议 Tab 文案同步更新。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr><td>i18n key</td><td><code>authSpoofing.protocolActionShort.reject</code></td><td>key 不变</td></tr>
+          <tr><td>zh 文案</td><td>阻断</td><td>拒收</td></tr>
+          <tr><td>描述文案（protocolActionDesc.reject）</td><td colspan="2">向发信方返回 SMTP 5xx 拒绝响应（不变）</td></tr>
+          <tr><td>影响协议</td><td colspan="2">SPF / DKIM / DMARC / PTR 共享同一 key，四个协议 Tab 同步更新</td></tr>
+          <tr><td>修改文件</td><td colspan="2"><code>messages/zh.json</code> — <code>authSpoofing.protocolActionShort.reject</code></td></tr>
+        </tbody>
+      </table>
+
+      <h4>1.2 逐元素变更说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>源码路径</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Select Trigger / Item · reject 短名</td>
+            <td>文案</td>
+            <td>阻断</td>
+            <td>拒收</td>
+            <td><code>authSpoofing.protocolActionShort.reject</code></td>
+            <td><code>messages/zh.json</code></td>
+          </tr>
+          <tr>
+            <td>Select Item · reject 描述</td>
+            <td>文案</td>
+            <td colspan="2">向发信方返回 SMTP 5xx 拒绝响应（不变）</td>
+            <td><code>authSpoofing.protocolActionDesc.reject</code></td>
+            <td><code>messages/zh.json</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12801-change-2" style="margin-top:2rem;">2. DMARC处置策略新增"进行下一步"选项</h3>
+
+      <h4>2.1 方案概述</h4>
+      <p>修改前 <code>DMARC_ACTIONS</code> 为 4 项（不含 <code>accept</code>），SPF / DKIM / PTR 的 <code>PROTOCOL_ACTIONS</code> 含全部 5 项。本次将 <code>DMARC_ACTIONS</code> 扩充至 5 项，使 DMARC 支持「进行下一步」处置策略；<code>accept</code> 语义为当邮件命中该 DMARC 条件行时，直接传递给流水线下一节点，不做阻断 / 隔离 / 标记。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>DMARC_ACTIONS 枚举</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit']</code>（4 项）</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'accept']</code>（5 项）</td>
+          </tr>
+          <tr>
+            <td>新增选项短名</td>
+            <td>—</td>
+            <td>进行下一步（<code>authSpoofing.protocolActionShort.accept</code>，key 已存在）</td>
+          </tr>
+          <tr>
+            <td>新增选项描述</td>
+            <td>—</td>
+            <td>不做处理，传递给下一个协议检查（<code>authSpoofing.protocolActionDesc.accept</code>，key 已存在）</td>
+          </tr>
+          <tr>
+            <td>i18n 变更</td>
+            <td colspan="2">无需新增 key，相关 key 已存在于 <code>messages/zh.json</code></td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>src/components/security/auth-spoofing/ProtocolChecksSection.tsx</code> — <code>DMARC_ACTIONS</code> 常量</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>2.2 逐元素变更说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>源码路径</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DMARC_ACTIONS 常量</td>
+            <td>枚举数组</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit']</code></td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'accept']</code></td>
+            <td>—</td>
+            <td><code>ProtocolChecksSection.tsx</code> L37</td>
+          </tr>
+          <tr>
+            <td>Select · 「进行下一步」选项短名</td>
+            <td>文案（新增项）</td>
+            <td>—（选项不存在）</td>
+            <td>进行下一步</td>
+            <td><code>authSpoofing.protocolActionShort.accept</code></td>
+            <td><code>messages/zh.json</code></td>
+          </tr>
+          <tr>
+            <td>Select · 「进行下一步」选项描述</td>
+            <td>文案（新增项）</td>
+            <td>—（选项不存在）</td>
+            <td>不做处理，传递给下一个协议检查</td>
+            <td><code>authSpoofing.protocolActionDesc.accept</code></td>
+            <td><code>messages/zh.json</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
   <!-- ══════════════ V. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>V. 版本历史</h2>
@@ -460,6 +589,11 @@ onViewRawLogs?: () =&gt; void;
         <tr><th>版本</th><th>日期</th><th>摘要</th></tr>
       </thead>
       <tbody>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v2</span></span></td>
+          <td>2026-08-06</td>
+          <td>追加 GT-12801 需求体（DMARC协议执行动作对齐以及增加"进行下一步"）：变更 1「阻断」→「拒收」（messages/zh.json authSpoofing.protocolActionShort.reject）；变更 2 DMARC_ACTIONS 由 4 项扩充至 5 项追加 accept（ProtocolChecksSection.tsx）；同步更新目录</td>
+        </tr>
         <tr>
           <td><span class="version-badge"><span class="vnum">v1</span></span></td>
           <td>2026-08-06</td>
