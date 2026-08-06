@@ -1235,7 +1235,7 @@ export function mockOpsTopAi(): { markdown: string } {
   };
 }
 
-// ─── 监控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
+// ─── ��控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
 export function mockMonitorDashboardOverview(range: MonitorDashboardRange): MonitorDashboardOverview {
   const volumes: Record<MonitorDashboardRange, number> = {
     today: 125847,
@@ -3557,7 +3557,7 @@ function groupPolicyRulesSeed(): Rule[] {
     gpRule({
       id: 9001,
       name: "高管邮箱快速通道",
-      description: "针对高管邮箱的优化通道",
+      description: "针对高管邮箱的��化通道",
       priority: 0,
       is_active: true,
       target_groups: { recipientGroup: ["高管邮箱"] },
@@ -4878,7 +4878,7 @@ export function mockPutURLProtectionSettings(
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
 // 动作映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），
 // 非 receive 方向默认区间 accept→quarantine（D-06）。
-// 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF、DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
+// 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF���DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
 
 function intentMockSegments(risk: "high" | "medium" | "low", dir: string) {
   const acc = dir === "receive" ? "accept" : "quarantine";
@@ -6930,7 +6930,60 @@ export function mockEmailDisposalEvents(id: number) {
       };
     },
   );
-  const events = [...genericEvents, ...perRecipientEvents];
+  // 事后处置时间线 mock 数据：三种业务场景各一条，固定追加在每封邮件的事件列表末尾。
+  // event_source 为白名单内的值（admin_api / threat_retro_agent），
+  // 不会被 disposalEvents 白名单过滤掉，即可在时间线中可见。
+  const postDisposalEvents = [
+    // 场景一：管理员手动召回（admin_api:recall）
+    {
+      id: id * 100 + 90,
+      mail_log_id: id,
+      event_source: "admin_api",
+      event_type: "recall",
+      event_result: "success",
+      queue_id: item.queue_id,
+      message_id: item.message_id,
+      sender: item.sender,
+      recipients: item.recipients.join(", "),
+      event_time: new Date(new Date(item.received_at).getTime() + 5 * 60 * 1000).toISOString(),
+      raw_payload: JSON.stringify({ event: "recall", triggered_by: "admin", action: "manual_recall" }),
+      raw_line: `${item.received_at} ${item.queue_id} admin_api recall success`,
+      correlation_status: "matched",
+    },
+    // 场景二：威胁回溯智能体发起召回（threat_retro_agent:recall）
+    {
+      id: id * 100 + 91,
+      mail_log_id: id,
+      event_source: "threat_retro_agent",
+      event_type: "recall",
+      event_result: "success",
+      queue_id: item.queue_id,
+      message_id: item.message_id,
+      sender: item.sender,
+      recipients: item.recipients.join(", "),
+      event_time: new Date(new Date(item.received_at).getTime() + 10 * 60 * 1000).toISOString(),
+      raw_payload: JSON.stringify({ event: "recall", triggered_by: "threat_retro_agent", policy: "recall" }),
+      raw_line: `${item.received_at} ${item.queue_id} threat_retro_agent recall success`,
+      correlation_status: "matched",
+    },
+    // 场景三：威胁回溯智能体发起通知（threat_retro_agent:notify）
+    {
+      id: id * 100 + 92,
+      mail_log_id: id,
+      event_source: "threat_retro_agent",
+      event_type: "notify",
+      event_result: "success",
+      queue_id: item.queue_id,
+      message_id: item.message_id,
+      sender: item.sender,
+      recipients: item.recipients.join(", "),
+      event_time: new Date(new Date(item.received_at).getTime() + 15 * 60 * 1000).toISOString(),
+      raw_payload: JSON.stringify({ event: "notify", triggered_by: "threat_retro_agent", policy: "notify" }),
+      raw_line: `${item.received_at} ${item.queue_id} threat_retro_agent notify success`,
+      correlation_status: "matched",
+    },
+  ];
+  const events = [...genericEvents, ...perRecipientEvents, ...postDisposalEvents];
   return { items: events, total: events.length, page: 1, page_size: 100 };
 }
 
@@ -7246,7 +7299,7 @@ export function mockRecallKeyDelete(id: number): void {
 // ─── 链接保护日志（logs-link-logs html_spec §2.2/§4.1）────────────────────────
 // 数据照抄 demo components/link-logs/link-logs-page.tsx 的 MOCK_LOGS 6 行，
 // 租户按 demo 同样的轮转规则分配（idx % 租户数 → mockTenants 1/2/3）。
-// demo 行3 的 triggerStage 是 "sandbox"（URL沙箱）；本产品按 2026-07-09 v2 spec
+// demo 行3 的 triggerStage 是 "sandbox"（URL沙箱）；���产品按 2026-07-09 v2 spec
 // §3.1 只有 回扫黑名单→查询情报→深度复检 三段、无独立沙箱段，映射为 phishing_agent。
 const mockLinkClickLogs: LinkClickLog[] = [
   {
