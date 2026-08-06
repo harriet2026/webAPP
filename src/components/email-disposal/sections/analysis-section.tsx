@@ -184,31 +184,7 @@ const EVENT_RESULT_ZH: Record<string, string> = {
   cancelled:  '已取消',
 };
 
-// 「执行结果」翻译表：event_result 原始值 → 中文
-// 语义：此次操作是否成功
-const EVENT_RESULT_ZH: Record<string, string> = {
-  success:              '成功',
-  failed:               '失败',
-  failure:              '失败',
-  completed:            '已完成',
-  partial:              '部分成功',
-  partial_success:      '部分成功',
-  partial_recall_success: '部分召回成功',
-  delivered:            '已投递',
-  delivery_failed:      '投递失败',
-  skipped:              '已跳过',
-  cancelled:            '已取消',
-  pending:              '待执行',
-  timeout:              '超时',
-  rejected:             '已拒绝',
-  discarded:            '已丢弃',
-  quarantine_pending:   '隔离中',
-  audit_pending:        '待审核',
-  recall_success:       '召回成功',
-  recall_failed:        '召回失败',
-  in_progress:          '执行中',
-  error:                '错误',
-};
+
 
 function translateEventType(val: string | undefined, isZh: boolean): string {
   if (!val) return '—';
