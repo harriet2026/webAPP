@@ -63,6 +63,7 @@ import {
   mockPhishingStats,
   mockSpoofingStats,
   mockThreatRetroStats,
+  mockAgentCenterOverview,
   mockSystemHealthSummary,
   spanToRange,
   type SystemStatusRangeKey,
@@ -1731,7 +1732,7 @@ const routes: Route[] = [
   // query 形态：sender_filter 列表页（`rule_page=sender_filter`）、
   // behavior_control 列表页（`rule_page=behavior_control`）和群组下拉
   // （`page=<GROUPS_PAGE_KEY>`，注意参数名是 `page`，不是 `rule_page`）。
-  // 群组下拉又有两个来源，靠 `include` 参数分流、互不污染：
+  // 群组下拉又��两个来源，靠 `include` 参数分流、互不污染：
   //   - sender_filter 的 `GROUPS_LIST_QUERY`（src/lib/api/groups.ts）发
   //     `include=member_count,reference_count` → 返回 `mockSenderFilterGroupsList()`；
   //   - behavior-control 抽屉（BehaviorControlDrawer.tsx 的 groupsQuery）发
@@ -2302,6 +2303,13 @@ const routes: Route[] = [
     pattern: '/inbound-audit',
     handler: () => ({ status: 200, data: mockInboundAuditPending() }),
   },
+  // ─── 智能体中心总览 ────────────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/agent-center/overview',
+    handler: () => ({ status: 200, data: mockAgentCenterOverview() }),
+  },
+
   // 智能体运行概况 / 待办：钓鱼、仿冒、威胁回溯 stats。
   {
     method: 'GET',

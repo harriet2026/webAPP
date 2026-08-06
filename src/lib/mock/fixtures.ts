@@ -2736,7 +2736,7 @@ function makeMockIPFilterRules(): IPFilterRuleView[] {
     }),
     makeIpFilterRule({
       id: 13,
-      name: "恶意IP库联动",
+      name: "恶意IP库���动",
       description: "表达式引用恶意 IP 库并排除误报网段",
       list_type: "blacklist",
       ip_config_type: "expression",
@@ -5653,7 +5653,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "outgoing",
     sender: "pm@company.com",
     recipients: "blogger@tech-media.com",
-    subject: "内部产品路线图（含未发布代号）",
+    subject: "内部产品路线图（含未发布���号）",
     action: "block",
     reason: "内容规则命中：竞品/机密关键词",
     mailType: "sensitive",
@@ -8281,7 +8281,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 6, operation_id: 'OP20260622006', admin_user_id: 6, username: 'liyang', operator_name: '李扬',
     operator_role: 'platform', layer: 'platform', action: 'update', resource_type: 'security_config',
     status: 'success', client_ip: '10.8.0.31', ip_location: '内网',
-    details: { summary: '对蓝海物流集团强制启用二次认证' }, before_value: { text: '未强制' },
+    details: { summary: '对蓝海物流集团强制启��二次认证' }, before_value: { text: '未强制' },
     after_value: { text: '强制开启' }, created_at: '2026-06-22T09:30:45Z' },
   { id: 7, operation_id: 'OP20260622007', admin_user_id: 1, username: 'admin', operator_name: '张运维（我）',
     operator_role: 'platform', layer: 'platform', action: 'update', resource_type: 'tenants', resource_id: 6,
@@ -8374,4 +8374,66 @@ export function mockAdminAuditStats(
   const all = mockAdminAuditLogs.filter((l) => matchAdminAudit(l, params));
   const success = all.filter((l) => l.status === 'success').length;
   return { total: all.length, success, failed: all.length - success };
+}
+
+// ─── 智能体中心总览（GET /agent-center/overview）────────────────────────────
+// 返回三个智能体的运行卡片数据。
+// policy_pages 字段须与 presentation.ts 中 AGENT_PRESENTATIONS[key].requiredPages
+// 精确匹配（page / role / management 三字段），resolveAgentPresentation 才会置
+// canConfigure=true，点击「配置」按钮才可用。
+export function mockAgentCenterOverview() {
+  return {
+    agents: [
+      {
+        key: 'phishing',
+        module_key: 'phishing_agent',
+        feature_id: 'phishing_agent',
+        access: 'enabled',
+        status: 'running',
+        stage_position: 'AI 同步分析层',
+        policy_pages: [
+          { page: 'phishing_admission',   role: 'admission',   management: 'dedicated' },
+          { page: 'phishing_disposition', role: 'disposition', management: 'dedicated' },
+        ],
+        today_processed: 124580,
+        hit_count:       12450,
+        processed_count: 124580,
+        hit_rate:        0.0999,
+        fallback_count:  0,
+      },
+      {
+        key: 'spoofing',
+        module_key: 'spoofing_agent',
+        feature_id: 'spoofing_agent',
+        access: 'enabled',
+        status: 'running',
+        stage_position: 'AI 同步分析层',
+        policy_pages: [
+          { page: 'spoofing_admission',   role: 'admission',   management: 'internal' },
+          { page: 'spoofing_disposition', role: 'disposition', management: 'internal' },
+        ],
+        today_processed: 98320,
+        hit_count:       8650,
+        processed_count: 98320,
+        hit_rate:        0.088,
+        fallback_count:  0,
+      },
+      {
+        key: 'threat-retro',
+        module_key: 'threat_retro_agent',
+        feature_id: 'threat_retro_agent',
+        access: 'enabled',
+        status: 'running',
+        stage_position: 'AI 异步回溯层',
+        policy_pages: [
+          { page: 'threat_retro_strategy', role: 'strategy', management: 'dedicated' },
+        ],
+        today_processed: 326,
+        hit_count:       326,
+        processed_count: 326,
+        hit_rate:        1.0,
+        fallback_count:  0,
+      },
+    ],
+  };
 }
