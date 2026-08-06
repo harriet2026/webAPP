@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GT-12801 · GT-12801 DMARC协议执行动作对齐以及增加"进行下一步" · 增量功能规格 · v1</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f6f8;
+      color: #1a1d23;
+      line-height: 1.6;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .page-wrap { max-width: 980px; margin: 0 auto; }
+
+    section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    section > h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    section > h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+
+    .incremental-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .incr-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: #f8f9fb;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .incr-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #2563eb; color: #fff;
+      font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+    }
+    .incr-header h2 { font-size: 1rem; font-weight: 700; color: #1a1d23; margin: 0; }
+    .incr-header .incr-meta { font-size: 0.72rem; color: #6b7280; margin-left: auto; text-align: right; }
+    .incr-body { padding: 1.5rem 2rem; }
+    .incr-body h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+    .incr-body h4 { font-size: 0.87rem; font-weight: 600; color: #1a1d23; margin-top: 1rem; margin-bottom: 0.5rem; }
+    .incr-body p { font-size: 0.875rem; color: #374151; margin-bottom: 0.75rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.845rem; margin-bottom: 0.75rem; }
+    th { background: #f3f4f6; color: #374151; font-weight: 600; text-align: left; padding: 0.55rem 0.8rem; border: 1px solid #e5e7eb; }
+    td { padding: 0.5rem 0.8rem; border: 1px solid #e5e7eb; vertical-align: top; color: #374151; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    code { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.1em 0.4em; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82em; color: #1a1d23; }
+    pre { background: #1a1d23; color: #e8eaf0; border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; font-size: 0.8rem; line-height: 1.55; margin: 0.75rem 0; }
+    pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+
+    .interaction-preview {
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+    .interaction-preview h4 { font-size: 0.88rem; font-weight: 700; color: #1a1d23; margin-bottom: 0.35rem; }
+    .interaction-preview .trigger-path { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.9rem; }
+    .interaction-preview figure { margin: 0 0 0.9rem; }
+    .interaction-preview figcaption { font-size: 0.78rem; color: #6b7280; margin-top: 0.35rem; font-style: italic; }
+    .interaction-preview img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
+
+    .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
+    .callout-info    { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; }
+    .callout-warn    { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .callout-removed { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; }
+    .callout-ok      { background: #f0fdf4; border-left: 4px solid #16a34a; color: #15532e; }
+
+    .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.15em 0.5em; border-radius: 4px; margin-right: 0.3em; }
+    .tag-removed  { background: #fee2e2; color: #991b1b; }
+    .tag-added    { background: #dcfce7; color: #15532e; }
+    .tag-changed  { background: #fef9c3; color: #854d0e; }
+    .tag-unverif  { background: #f3f4f6; color: #6b7280; }
+    .tag-info     { background: #dbeafe; color: #1e40af; }
+
+    del { color: #9ca3af; text-decoration-color: #dc2626; }
+
+    .version-badge { display: inline-flex; align-items: center; gap: 0.4em; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 0.2em 0.8em; font-size: 0.78rem; color: #374151; }
+    .version-badge .vnum { font-weight: 700; color: #1a1d23; }
+
+    .matrix-legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.78rem; color: #374151; margin-bottom: 0.75rem; }
+
+    .toc { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
+    .toc a:hover { text-decoration: underline; }
+
+    .toc-l1 {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; border-radius: 6px;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      margin-top: 0.4rem; margin-bottom: 0.15rem;
+    }
+    .toc-l1 > a { font-weight: 700; font-size: 0.9rem; color: #1d4ed8; }
+
+    .toc-l2-group { list-style: none; display: flex; flex-direction: column; gap: 0.2rem; padding-left: 1.5rem; margin-bottom: 0.4rem; }
+    .toc-change {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.65rem; border-radius: 6px;
+      background: #f8f9ff; border: 1px solid #dbeafe;
+    }
+    .toc-change a { font-weight: 600; font-size: 0.85rem; color: #1d4ed8; }
+    .toc-change .toc-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #3b82f6; color: #fff;
+      font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+    }
+    .toc-l3 { padding-left: 2.8rem; }
+    .back-link { display: inline-block; margin-top: 1.5rem; font-size: 0.82rem; color: #2563eb; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- 目录 -->
+  <section id="toc">
+    <h2>目录</h2>
+    <ul class="toc">
+      <li><a href="#meta">A. 元信息与事实源</a></li>
+      <li><a href="#form-role-matrix">B. 产品形态 x 角色矩阵</a></li>
+
+      <!-- 一级需求：GT-12801 -->
+      <li class="toc-l1"><a href="#gt-12801">GT-12801 DMARC协议执行动作对齐以及增加"进行下一步"</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">"阻断"重命名为"拒收"（DMARC处置策略）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c1-elements">1.3 逐元素变更说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">DMARC处置策略新增"进行下一步"选项</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c2-elements">2.3 逐元素变更说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-002）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-001）</a></li>
+      <li><a href="#version-history">E. 版本历史</a></li>
+    </ul>
+  </section>
+
+  <!-- 需求入口锚点 -->
+  <div id="gt-12801" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- A. 元信息 -->
+  <section id="meta">
+    <h2>A. 元信息与事实源</h2>
+    <table>
+      <thead><tr><th>字段</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>文档编号（文件 ticket）</td><td>GT-12801</td></tr>
+        <tr><td>需求名称</td><td>GT-12801 DMARC协议执行动作对齐以及增加"进行下一步"</td></tr>
+        <tr><td>规格类型</td><td>增量规格（Incremental）· 功能变更</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v1</span></span></td></tr>
+        <tr><td>生成日期</td><td>2026-08-06</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/security/auth-spoofing</code>（身份认证与仿冒检测 → 认证协议检查 → DMARC Tab）</td></tr>
+        <tr><td>组件路径</td><td><code>src/components/security/auth-spoofing/ProtocolChecksSection.tsx</code></td></tr>
+        <tr><td>i18n 路径</td><td><code>messages/zh.json</code> · namespace <code>authSpoofing.protocolActionShort</code> / <code>authSpoofing.protocolActionDesc</code></td></tr>
+        <tr><td>webapp commit</td><td><code>35ca1b2</code></td></tr>
+        <tr><td>对照 spec commit</td><td>not-used</td></tr>
+        <tr><td>历史对话记录</td><td>当前上下文已提供（用户截图 + 代码修改记录）</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述；2. webapp 源码（已应用修改）；3. 运行中浏览器真实渲染</td></tr>
+        <tr><td>变更类型</td><td>功能变更（处置策略文案修正 + 选项枚举扩充）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本规格记录 DMARC 协议检查处置策略下拉的两项变更：① 将「阻断」文案修正为「拒收」（与其他模块统一语义）；② 向 DMARC 的 <code>DMARC_ACTIONS</code> 枚举追加 <code>accept</code>（显示为「进行下一步」），使 DMARC 与 SPF / DKIM / PTR 共享完整的五选项集合。变更仅涉及 i18n 文案和枚举数组，不改变其他协议或任何业务逻辑。
+    </div>
+  </section>
+
+  <!-- B. 产品形态 x 角色矩阵 -->
+  <section id="form-role-matrix">
+    <h2>B. 产品形态 x 角色差异矩阵</h2>
+    <div class="matrix-legend">
+      <span>&#x2705; 显示且可操作</span>
+      <span>&#x1F512; 显示但只读</span>
+      <span>&#x274C; 隐藏 / 不存在</span>
+      <span>&#x2014; 该形态无此角色</span>
+      <span>? 无法验证</span>
+    </div>
+    <p style="font-size:0.85rem;color:#374151;margin-bottom:0.75rem;">
+      本次变更作用于认证协议检查 DMARC Tab 的处置策略 Select，不改变任何模块的可见性或权限规则。矩阵记录 DMARC 处置策略 Select 在各形态 / 角色下的可访问状态。
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>功能 / 元素</th>
+          <th>变更</th>
+          <th>AI-单<br/>平台管理员</th>
+          <th>传统-单<br/>平台管理员</th>
+          <th>云-多<br/>平台管理员</th>
+          <th>云-多<br/>租户管理员</th>
+          <th>AI-多<br/>平台管理员</th>
+          <th>AI-多<br/>租户管理员</th>
+          <th>传统-多<br/>平台管理员</th>
+          <th>传统-多<br/>租户管理员</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>DMARC 处置策略 Select · Trigger 文案（「拒收」替换「阻断」）</td>
+          <td>#1</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+        <tr>
+          <td>DMARC 处置策略 Select · 「进行下一步」新选项</td>
+          <td>#2</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+        <tr>
+          <td>SPF / DKIM / PTR 处置策略 Select</td>
+          <td>无变更</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.8rem;color:#6b7280;margin-top:0.5rem;">? 项仅在 AI版·单租户·平台管理员 / Mock 模式下完成浏览器验证，其余形态无法在当前会话中切换验证，标注为待确认。</p>
+  </section>
+
+  <!-- 需求体：GT-12801 -->
+  <div class="incremental-section" id="gt-12801-body">
+    <div class="incr-header">
+      <span class="incr-num">GT</span>
+      <h2>GT-12801 DMARC协议执行动作对齐以及增加"进行下一步"</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/auth-spoofing</code><br/>
+        组件：<code>ProtocolChecksSection.tsx</code><br/>
+        2026-08-06 · commit <code>35ca1b2</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- 变更 1 -->
+      <h3 id="change-1">1. "阻断"重命名为"拒收"（DMARC处置策略）</h3>
+
+      <h4 id="c1-overview">1.1 方案概述</h4>
+      <p>
+        DMARC 处置策略下拉中，<code>reject</code> 动作的显示文案由「阻断」修改为「拒收」。此修改与内容规则（GT-11651 变更 16）、反病毒引擎（GT-12754 变更 20）的语义对齐保持一致，统一使用「拒收」表达 SMTP 5xx 拒绝响应这一动作，消除模块间文案差异。
+      </p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>i18n key</td>
+            <td><code>authSpoofing.protocolActionShort.reject</code></td>
+            <td><code>authSpoofing.protocolActionShort.reject</code>（key 不变）</td>
+          </tr>
+          <tr>
+            <td>zh 文案</td>
+            <td>阻断</td>
+            <td>拒收</td>
+          </tr>
+          <tr>
+            <td>描述文案（protocolActionDesc.reject）</td>
+            <td>向发信方返回 SMTP 5xx 拒绝响应</td>
+            <td>向发信方返回 SMTP 5xx 拒绝响应（描述文案不变）</td>
+          </tr>
+          <tr>
+            <td>Trigger 宽度</td>
+            <td>140px（SelectTrigger className="w-[140px]"）</td>
+            <td>140px（不变）</td>
+          </tr>
+          <tr>
+            <td>影响协议</td>
+            <td colspan="2">SPF / DKIM / DMARC / PTR 共享同一 i18n key，四个协议 Tab 的「拒收」文案同步更新</td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>messages/zh.json</code> 第 4645 行</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <h4>S-1 · DMARC Tab 处置策略 Select 关闭态（修改后）</h4>
+        <p class="trigger-path">触发路径：/zh/security/auth-spoofing → 认证协议检查 → 点击 DMARC Tab → 任意行 Select Trigger</p>
+        <figure>
+          <img src="./screenshots/gt12801-s1-dmarc-select-closed.png" alt="DMARC处置策略Select关闭态，Trigger显示拒收" />
+          <figcaption>S-1：DMARC Tab 各行 Select Trigger 已显示「拒收」（原「阻断」），暗色主题 · AI版·单租户 · 平台管理员 · Mock · 1406x803</figcaption>
+        </figure>
+        <div class="callout callout-warn">S-1 截图待补：需在浏览器中打开 DMARC Tab 实拍确认文案已更新为「拒收」。截图路径：<code>doc/html_spec-version/screenshots/gt12801-s1-dmarc-select-closed.png</code></div>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>S-2 · DMARC Tab 处置策略 Select 展开态（修改后，含全部选项）</h4>
+        <p class="trigger-path">触发路径：DMARC Tab → 任意行 Select Trigger 点击 → 下拉弹出</p>
+        <figure>
+          <img src="./screenshots/gt12801-s2-dmarc-select-open.png" alt="DMARC处置策略Select展开，显示拒收、丢弃、隔离、标记、进行下一步五个选项" />
+          <figcaption>S-2：展开态展示五个选项（拒收 / 丢弃 / 隔离 / 标记 / 进行下一步），每项含短名 + 灰色描述文案；「拒收」替代原「阻断」</figcaption>
+        </figure>
+        <div class="callout callout-warn">S-2 截图待补：需在浏览器中打开展开态实拍。截图路径：<code>doc/html_spec-version/screenshots/gt12801-s2-dmarc-select-open.png</code></div>
+      </div>
+
+      <h4 id="c1-elements">1.3 逐元素变更说明</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>元素</th>
+            <th>类型</th>
+            <th>变更前</th>
+            <th>变更后</th>
+            <th>形态 / 角色差异</th>
+            <th>i18n key</th>
+            <th>源码路径</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Select Trigger · reject 显示文案</td>
+            <td>文案</td>
+            <td>阻断</td>
+            <td>拒收</td>
+            <td>[Base] 所有形态相同</td>
+            <td><code>authSpoofing.protocolActionShort.reject</code></td>
+            <td><code>messages/zh.json</code> L4645</td>
+          </tr>
+          <tr>
+            <td>Select Item · reject 短名</td>
+            <td>文案</td>
+            <td>阻断</td>
+            <td>拒收</td>
+            <td>[Base] 所有形态相同</td>
+            <td><code>authSpoofing.protocolActionShort.reject</code></td>
+            <td><code>messages/zh.json</code> L4645（同上 key）</td>
+          </tr>
+          <tr>
+            <td>Select Item · reject 描述文案</td>
+            <td>文案</td>
+            <td>向发信方返回 SMTP 5xx 拒绝响应</td>
+            <td>向发信方返回 SMTP 5xx 拒绝响应（不变）</td>
+            <td>[Base]</td>
+            <td><code>authSpoofing.protocolActionDesc.reject</code></td>
+            <td><code>messages/zh.json</code> L4652</td>
+          </tr>
+          <tr>
+            <td>Select Trigger 宽度</td>
+            <td>样式</td>
+            <td>w-[140px]</td>
+            <td>w-[140px]（不变）</td>
+            <td>[Base]</td>
+            <td>—</td>
+            <td><code>ProtocolChecksSection.tsx</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="change-2" style="margin-top:2rem;">2. DMARC处置策略新增"进行下一步"选项</h3>
+
+      <h4 id="c2-overview">2.1 方案概述</h4>
+      <p>
+        修改前，DMARC 的处置策略枚举为 <code>['reject', 'discard', 'quarantine', 'audit']</code>（4 项），不含 <code>accept</code>。SPF / DKIM / PTR 的 <code>PROTOCOL_ACTIONS</code> 包含全部 5 项（含 <code>accept</code>）。本次将 <code>DMARC_ACTIONS</code> 扩充为与 <code>PROTOCOL_ACTIONS</code> 相同的完整五项集合，使 DMARC 支持「进行下一步」处置策略。
+      </p>
+      <p>
+        <code>accept</code> 的语义为：当邮件命中该 DMARC 条件行时，不做阻断 / 隔离 / 标记，直接传递给流水线下一检测节点（PTR 或下一模块）。适用于管理员希望对特定 DMARC 条件（如 <code>p=none</code>、<code>DMARC无记录</code>）采取宽松策略的场景。
+      </p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>DMARC_ACTIONS 枚举</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit']</code>（4 项）</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'accept']</code>（5 项）</td>
+          </tr>
+          <tr>
+            <td>新增选项短名</td>
+            <td>—</td>
+            <td>进行下一步（<code>authSpoofing.protocolActionShort.accept</code>，key 已存在）</td>
+          </tr>
+          <tr>
+            <td>新增选项描述</td>
+            <td>—</td>
+            <td>不做处理，传递给下一个协议检查（<code>authSpoofing.protocolActionDesc.accept</code>，key 已存在）</td>
+          </tr>
+          <tr>
+            <td>下拉选项数量</td>
+            <td>4 项</td>
+            <td>5 项</td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>src/components/security/auth-spoofing/ProtocolChecksSection.tsx</code>（<code>DMARC_ACTIONS</code> 常量，第 37 行）</td>
+          </tr>
+          <tr>
+            <td>i18n 变更</td>
+            <td colspan="2">无需新增 key。<code>accept</code> 对应的 <code>protocolActionShort.accept</code>（进行下一步）与 <code>protocolActionDesc.accept</code>（不做处理，传递给下一个协议检查）在 <code>messages/zh.json</code> 中已存在。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <h4>S-3 · DMARC Tab p=none 行选择「进行下一步」后的 Trigger 显示</h4>
+        <p class="trigger-path">触发路径：DMARC Tab → p=none 行（发信域仅监控，不要求处置）→ 处置策略 Select → 选择「进行下一步」→ Trigger 回显</p>
+        <figure>
+          <img src="./screenshots/gt12801-s3-dmarc-accept-selected.png" alt="DMARC p=none行Select Trigger显示进行下一步" />
+          <figcaption>S-3：p=none 行处置策略 Trigger 显示「进行下一步」；与模板无关，切换后模板自动改为「自定义」</figcaption>
+        </figure>
+        <div class="callout callout-warn">S-3 截图待补：需在浏览器中选择「进行下一步」后实拍。截图路径：<code>doc/html_spec-version/screenshots/gt12801-s3-dmarc-accept-selected.png</code></div>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>S-4 · DMARC Tab Select 展开态 — 五选项完整显示</h4>
+        <p class="trigger-path">触发路径：DMARC Tab → 任意行 Select Trigger 点击 → 下拉弹出，确认五个选项均可见</p>
+        <figure>
+          <img src="./screenshots/gt12801-s4-dmarc-select-5options.png" alt="DMARC处置策略Select展开，拒收/丢弃/隔离/标记/进行下一步五项均显示" />
+          <figcaption>S-4：DMARC Select 展开态，选项从上至下为「拒收 / 丢弃 / 隔离 / 标记 / 进行下一步」，每项含灰色描述文案，宽度 w-72（288px）</figcaption>
+        </figure>
+        <div class="callout callout-warn">S-4 截图待补：需在浏览器中打开展开态实拍完整五项。截图路径：<code>doc/html_spec-version/screenshots/gt12801-s4-dmarc-select-5options.png</code></div>
+      </div>
+
+      <h4 id="c2-elements">2.3 逐元素变更说明</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>元素</th>
+            <th>类型</th>
+            <th>变更前</th>
+            <th>变更后</th>
+            <th>形态 / 角色差异</th>
+            <th>i18n key</th>
+            <th>源码路径</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DMARC_ACTIONS 常量</td>
+            <td>枚举数组</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit']</code></td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'accept']</code></td>
+            <td>[Base] 所有形态相同</td>
+            <td>—</td>
+            <td><code>ProtocolChecksSection.tsx</code> L37</td>
+          </tr>
+          <tr>
+            <td>Select · 「进行下一步」选项短名</td>
+            <td>文案（新增项）</td>
+            <td>—（选项不存在）</td>
+            <td>进行下一步</td>
+            <td>[Base]</td>
+            <td><code>authSpoofing.protocolActionShort.accept</code></td>
+            <td><code>messages/zh.json</code> L4644</td>
+          </tr>
+          <tr>
+            <td>Select · 「进行下一步」选项描述</td>
+            <td>文案（新增项）</td>
+            <td>—（选项不存在）</td>
+            <td>不做处理，传递给下一个协议检查</td>
+            <td>[Base]</td>
+            <td><code>authSpoofing.protocolActionDesc.accept</code></td>
+            <td><code>messages/zh.json</code> L4651</td>
+          </tr>
+          <tr>
+            <td>选择「进行下一步」后 CheckItem.enabled</td>
+            <td>逻辑联动</td>
+            <td>—</td>
+            <td><code>enabled: false</code>（与其他协议行为一致：action=accept 时 enabled 置为 false，不触发拦截）</td>
+            <td>[Base]</td>
+            <td>—</td>
+            <td><code>ProtocolChecksSection.tsx</code> handleCheckChange 回调 L89</td>
+          </tr>
+          <tr>
+            <td>模板状态联动</td>
+            <td>逻辑联动</td>
+            <td>—</td>
+            <td>选择「进行下一步」后 <code>config.template</code> 自动切换为 <code>'custom'</code>（与所有动作变更行为一致）</td>
+            <td>[Base]</td>
+            <td>—</td>
+            <td><code>ProtocolChecksSection.tsx</code> handleCheckChange L86</td>
+          </tr>
+          <tr>
+            <td>流程图节点 badge 联动</td>
+            <td>逻辑联动</td>
+            <td>—</td>
+            <td>若所有 DMARC 条件行均选「进行下一步」，<code>dominantAction(config.dmarc)</code> 返回 <code>accept</code>，流程图 DMARC 节点显示 <code>flowSub.pass</code>（通过）</td>
+            <td>[Base]</td>
+            <td>—</td>
+            <td><code>auth-spoofing-labels.ts</code> <code>dominantAction()</code> + <code>flowSubKey()</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- C. 差异标注 -->
+  <section id="diff">
+    <h2>C. 差异标注</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>编号</th>
+          <th>目标要求</th>
+          <th>当前实现</th>
+          <th>状态</th>
+          <th>复核日期</th>
+          <th>验证依据</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>D-001</td>
+          <td>DMARC 处置策略「阻断」统一改为「拒收」，与内容规则 / 反病毒引擎语义对齐</td>
+          <td><code>messages/zh.json</code> <code>authSpoofing.protocolActionShort.reject</code> 值已由「阻断」改为「拒收」；SPF/DKIM/DMARC/PTR 共享该 key，四协议 Tab 同步生效</td>
+          <td style="color:#16a34a;font-weight:600;">已解决</td>
+          <td>2026-08-06</td>
+          <td>源码 <code>messages/zh.json</code> L4645；同一 key 被 <code>protocolActionShortKey('reject')</code> 调用，渲染到所有协议 Tab 的 Select Trigger 与 SelectItem</td>
+        </tr>
+        <tr>
+          <td>D-002</td>
+          <td>DMARC 处置策略需支持「进行下一步」（accept）选项，与 SPF / DKIM / PTR 对齐</td>
+          <td><code>DMARC_ACTIONS</code> 常量已追加 <code>'accept'</code>，枚举从 4 项扩充为 5 项；<code>accept</code> 对应的 i18n key (<code>protocolActionShort.accept</code> / <code>protocolActionDesc.accept</code>) 在 <code>messages/zh.json</code> 中均已存在，无需新增</td>
+          <td style="color:#16a34a;font-weight:600;">已解决</td>
+          <td>2026-08-06</td>
+          <td>源码 <code>ProtocolChecksSection.tsx</code> L37 <code>DMARC_ACTIONS</code>；<code>messages/zh.json</code> L4644 / L4651</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- D. 待确认事项 -->
+  <section id="questions">
+    <h2>D. 待确认事项</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>编号</th>
+          <th>事项</th>
+          <th>原因</th>
+          <th>状态</th>
+          <th>复核日期</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Q-001</td>
+          <td>后端 DMARC 策略接口是否支持接收 <code>accept</code> 作为合法的 action 值</td>
+          <td>前端枚举已追加 <code>accept</code>，但后端 DMARC 策略配置接口的 action 字段枚举未在当前上下文中确认；若后端不接受 <code>accept</code> 值，保存时将返回 422 / 400 错误。Mock 模式下无此问题（dispatcher 不做枚举校验）</td>
+          <td style="color:#b45309;font-weight:600;">无法验证</td>
+          <td>2026-08-06</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- E. 版本历史 -->
+  <section id="version-history">
+    <h2>E. 版本历史</h2>
+    <table>
+      <thead><tr><th>版本</th><th>日期</th><th>commit</th><th>内容摘要</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>v1</td>
+          <td>2026-08-06</td>
+          <td><code>35ca1b2</code></td>
+          <td>首次生成：GT-12801 DMARC协议执行动作对齐，记录两项变更（reject 文案「阻断」→「拒收」；DMARC_ACTIONS 追加 accept「进行下一步」）；含元信息、产品矩阵、两个变更点完整规格（1.1~2.3）、截图 S-1~S-4 占位、差异 D-001~D-002（已解决）、待确认 Q-001（后端枚举）</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <a class="back-link" href="../html_spec-version/">← 返回规格文档列表</a>
+
+</div>
+</body>
+</html>
