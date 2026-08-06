@@ -125,13 +125,12 @@ export const pipelineDrawerResponsiveClasses = {
  * supports (GT-11894 shipped four).
  */
 export const actionLegendItems: {
-  key: 'deliver' | 'tagDeliver' | 'quarantine' | 'review' | 'block' | 'drop' | 'nextStep';
+  key: 'deliver' | 'quarantine' | 'review' | 'block' | 'drop' | 'nextStep';
   color: string;
   labelKey: string;
   descKey: string;
 }[] = [
   { key: 'deliver', color: 'var(--action-deliver)', labelKey: 'pipeline.actionDeliver', descKey: 'pipeline.actionDeliverDesc' },
-  { key: 'tagDeliver', color: 'var(--action-mark-deliver)', labelKey: 'pipeline.actionTagDeliver', descKey: 'pipeline.actionTagDeliverDesc' },
   { key: 'nextStep', color: 'var(--action-mark-deliver)', labelKey: 'pipeline.actionNextStep', descKey: 'pipeline.actionNextStepDesc' },
   { key: 'quarantine', color: 'var(--action-quarantine)', labelKey: 'pipeline.actionQuarantine', descKey: 'pipeline.actionQuarantineDesc' },
   { key: 'review', color: 'var(--action-review)', labelKey: 'pipeline.actionReview', descKey: 'pipeline.actionReviewDesc' },
