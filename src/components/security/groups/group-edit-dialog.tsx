@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -121,56 +121,59 @@ export function GroupEditDialog({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="sm:max-w-md w-full flex flex-col p-0" data-testid="group-edit-drawer">
         <SheetHeader className="px-6 py-4 border-b">
-          <SheetTitle>{isEdit ? t('editGroup') : t('newGroup')}</SheetTitle>
+          <SheetTitle>
+            {isEdit
+              ? t('editGroup')
+              : t('newGroupOfType', {
+                  typeLabel: ({ ip: t('ipGroup'), sender: t('senderGroup'), recipient: t('recipientGroup'), content: t('contentGroup'), feature: t('featureGroup') })[type],
+                })}
+          </SheetTitle>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-          {/* demo：名称与类型并排两列 */}
-          <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>{t('groupName')} *</Label>
-            <Input
-              value={name}
-              onChange={e => { setName(e.target.value); if (!nameTouched) setNameTouched(true); }}
-              placeholder={t('namePlaceholder')}
-              disabled={isEdit}
-              aria-invalid={showNameError || undefined}
-              className={showNameError ? 'border-destructive focus-visible:ring-destructive' : ''}
-              data-testid="group-edit-name"
-            />
-            {showNameError && (
-              <p className="text-xs text-destructive" data-testid="group-edit-name-error">{nameErrorText}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label>{t('groupType')} *</Label>
-            <Select
-              value={type}
-              onValueChange={v => {
-                if (v === 'feature') {
-                  // demo：类型选特征组即切换为宽屏条件编辑器抽屉
-                  onOpenChange(false);
-                  onSwitchToFeature?.();
-                  return;
-                }
-                setType(v as GroupType);
-              }}
-              disabled={isEdit}
-            >
-              <SelectTrigger data-testid="group-edit-type">
-                <SelectValue>{({ ip: t('ipGroup'), sender: t('senderGroup'), recipient: t('recipientGroup'), content: t('contentGroup'), feature: t('featureGroup') })[type]}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {allowedTypes.includes('ip') && <SelectItem value="ip">{t('ipGroup')}</SelectItem>}
-                {allowedTypes.includes('sender') && <SelectItem value="sender">{t('senderGroup')}</SelectItem>}
-                {allowedTypes.includes('recipient') && <SelectItem value="recipient">{t('recipientGroup')}</SelectItem>}
-                {allowedTypes.includes('content') && <SelectItem value="content">{t('contentGroup')}</SelectItem>}
-                {allowedTypes.includes('feature') && !isEdit && (
-                  <SelectItem value="feature">{t('featureGroup')}</SelectItem>
+          {/* 新建时：类型已由 Tab 上下文确定，直接全宽显示名称输入框
+              编辑时：类型只读展示，名称禁止修改，两列并排保持原有布局 */}
+          {isEdit ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t('groupName')} *</Label>
+                <Input
+                  value={name}
+                  onChange={e => { setName(e.target.value); if (!nameTouched) setNameTouched(true); }}
+                  placeholder={t('namePlaceholder')}
+                  disabled={true}
+                  aria-invalid={showNameError || undefined}
+                  className={showNameError ? 'border-destructive focus-visible:ring-destructive' : ''}
+                  data-testid="group-edit-name"
+                />
+                {showNameError && (
+                  <p className="text-xs text-destructive" data-testid="group-edit-name-error">{nameErrorText}</p>
                 )}
-              </SelectContent>
-            </Select>
-          </div>
-          </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('groupType')}</Label>
+                <Input
+                  value={({ ip: t('ipGroup'), sender: t('senderGroup'), recipient: t('recipientGroup'), content: t('contentGroup'), feature: t('featureGroup') })[type]}
+                  disabled={true}
+                  data-testid="group-edit-type-readonly"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label>{t('groupName')} *</Label>
+              <Input
+                value={name}
+                onChange={e => { setName(e.target.value); if (!nameTouched) setNameTouched(true); }}
+                placeholder={t('namePlaceholder')}
+                aria-invalid={showNameError || undefined}
+                className={showNameError ? 'border-destructive focus-visible:ring-destructive' : ''}
+                data-testid="group-edit-name"
+              />
+              {showNameError && (
+                <p className="text-xs text-destructive" data-testid="group-edit-name-error">{nameErrorText}</p>
+              )}
+            </div>
+          )}
           <div className="space-y-2">
             <Label>{t('memberListPerLine')} *</Label>
             <Textarea

@@ -213,7 +213,7 @@
     "password": "密码",
     "loginTitle": "OSGateway 管理系统",
     "loginButton": "登录",
-    "demoEntry": "进入演示环境",
+    "demoEntry": "进入演��环境",
     "loginError": "用户名或密码错误",
     "sessionExpired": "会话已过期，请重新登录",
     "showAdvancedRules": "显示高级规则设置",
@@ -242,7 +242,7 @@
     "showPassword": "显示密码",
     "hidePassword": "隐藏密码",
     "forgotPassword": "忘记密码？",
-    "captchaLabel": "图形验证码",
+    "captchaLabel": "���形验证码",
     "captchaRefresh": "点击刷新",
     "remainingAttempts": "账号或密码错误，还可尝试 {n} 次",
     "accountLocked": "账号已锁定，请于 {time} 后重试",
@@ -862,7 +862,7 @@
         "editButton": "编辑",
         "deleteButton": "删除",
         "emptyText": "暂无通道，建议先配置自定义通道",
-        "proxyDeletedBadge": "代理�����删除",
+        "proxyDeletedBadge": "代理�������删除",
         "systemDefaultHelo": "系统默认",
         "drawerTitleNew": "新建投递通道",
         "drawerTitleEdit": "编辑投递通道",
@@ -1019,7 +1019,7 @@
           "response": "预计对端响应：250 2.0.0 Ok"
         },
         "toasts": {
-          "created": "路由规��已��加",
+          "created": "路��规��已��加",
           "updated": "路由规则已更新",
           "deleted": "路由规则已删除",
           "saveError": "请修正表单中的校验错误",
@@ -1229,6 +1229,7 @@
     "recipientGroup": "收信人组",
     "contentGroup": "内容组",
     "newGroup": "新建群组",
+    "newGroupOfType": "新建{typeLabel}",
     "editGroup": "编辑群组",
     "groupName": "群组名称",
     "groupType": "群组类型",
@@ -1338,7 +1339,7 @@
     "stageCountHint": "当前��态共启�� {count} 个阶段。",
     "sectionBasic": "基本信息",
     "sectionTargets": "适用对象",
-    "sectionTargetsHint": "选择 1 类或多类群组；命中任一目��即生效。",
+    "sectionTargetsHint": "选择 1 类或多类群组；命中任���目��即生效。",
     "sectionPolicies": "分阶段策略配置",
     "sectionPoliciesHint": "默认为「继承全局」；「预留」策略本迭代仅入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
@@ -1664,7 +1665,7 @@
     "subject": "主题",
     "clientIp": "客户端 IP",
     "action": "动作",
-    "reason": "原因",
+    "reason": "���因",
     "ruleType": "规则类型",
     "messageId": "消息 ID",
     "spf": "SPF",
@@ -2097,7 +2098,7 @@
     "createdDialog": {
       "title": "用户已创建",
       "description": "账号「{username}」已成功创建。请将以下初始密码转交给该用户，首次登录须修改密码。",
-      "passwordLabel": "初始密码",
+      "passwordLabel": "初始密��",
       "copyBtn": "复制密码",
       "hint": "请务必在关闭前复制并转交密码，关闭后将无法再次查看。",
       "confirmBtn": "我已记录"
@@ -2461,7 +2462,7 @@
     "failAdvice": {
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号是否泄露并启用登录限速。",
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
-      "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
+      "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必��时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
       "connectionRefused": "连接被拒绝，���检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
@@ -2860,7 +2861,7 @@
       "client_ip": "客户端 IP",
       "sender": "发件人",
       "sender_name": "发件人名称",
-      "sender_domain": "发件人域名",
+      "sender_domain": "���件人域名",
       "message_id": "消息 ID",
       "message_uuid": "消息 UUID",
       "smtp_user": "SMTP 用户",
@@ -3239,7 +3240,7 @@
       "rule_analysis": "规则分析"
     },
     "typeDescriptions": {
-      "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼风险。",
+      "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼���险。",
       "similarity_search": "围绕发���人和主题等特征���找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
       "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
@@ -3535,7 +3536,7 @@
       "conditionWindow": "每 {minutes} 分钟超过 {count} 次",
       "conditionAuthFail": "每小时认证失败超过 {count} 次",
       "conditionCmdError": "单连接命令错误超过 {count} 次",
-      "conditionConnAuthFail": "单连接认证失败超过 {count} 次",
+      "conditionConnAuthFail": "单连接认��失败超过 {count} 次",
       "suspend15minText": "15分钟",
       "suspend30minText": "30分钟",
       "suspend1hourText": "1小时",
@@ -3562,7 +3563,7 @@
       "hit": "命中规则",
       "notHit": "未命中",
       "diffLeft": "距离触发阈值还差 {diff} 次",
-      "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次，超��限制 {limit} 次",
+      "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} ��钟内已连接 {count} 次，超��限制 {limit} 次",
       "dailyHit": "触发\"每日连接数\"阈值，当日已连接 {count} 次，超过限制 {limit} 次",
       "notHitReason": "未触发阈值",
       "noThresholds": "当前配置未设置有效阈值，连接将被放行"
@@ -4569,7 +4570,7 @@
     },
     "envelopeMismatchWarning": {
       "title": "信封与头部不匹配可能引发误判",
-      "desc": "部分邮件订阅服务、自动转发系统和邮件列表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮件头（From）不一致。开启此检测可能会将这些正常邮件误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
+      "desc": "部分邮件订阅服务、自动转发系��和邮件列表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮件头（From）不一致。开启此检测可能会将这些正常邮件误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
     },
@@ -4795,7 +4796,7 @@
       "domainLabel": "域名",
       "expireLabel": "有效期至",
       "expireTooltip": "留空表示永久有效",
-      "expireHint": "(留空=永久有效)",
+      "expireHint": "(留空=��久有效)",
       "priorityLabel": "优先级",
       "priorityHint": "{min}-{max}",
       "thresholdPlaceholder": "请输入阈值",
@@ -4959,7 +4960,7 @@
     "masterSwitchLabel": "启用附件安全检测",
     "masterSwitch": "模块开关",
     "moduleDisabled": "模块已停用",
-    "moduleDisabledHint": "启用后可配置附件安全策略",
+    "moduleDisabledHint": "启用后可配置附件��全策略",
     "comingSoon": "即将推出",
     "comingSoonHint": "此功能正在开发中，敬请期待",
     "tabs": {
@@ -5274,7 +5275,7 @@
       "cleanupError": "清理周期需在 30-365 天之间",
       "cloudIntel": "云端URL情报查询",
       "cloudIntelDesc": "启用后，查询云端威胁情报库；禁用后仅依赖本地沙箱",
-      "cloudIntelTip": "查询云端威胁情报库，获取更全面的URL风险评估"
+      "cloudIntelTip": "查询云端��胁情报库，获取更全面的URL风险评估"
     },
     "linkProtection": {
       "toggle": "链接保护",
@@ -5461,7 +5462,7 @@
     "dirty": "配置已修改未保存",
     "unsavedChanges": "有未保存的更改",
     "saveGapBlocked": "存在未覆盖区间，请修复后保存",
-    "saveOverlapBlocked": "存在重叠区间，请修复后保存",
+    "saveOverlapBlocked": "存在重叠区间，请修复��保存",
     "copyDialog": {
       "title": "复制配置到其他方向",
       "description": "选择目标方向，将当前【{src}】方向的配置复制过去。",
@@ -5588,7 +5589,7 @@
     "markTextPlaceholder": "如：【外站邮件】",
     "markTextTip": "最多 50 个字符；点击变量标签可插入动态内容",
     "availableVariables": "可用变量",
-    "markPosition": "标记位置",
+    "markPosition": "��记位置",
     "posSubjectPrefix": "主题前缀",
     "posBodyTop": "正文顶部",
     "posBodyBottom": "正文底部",
@@ -5642,7 +5643,7 @@
     "sendTip4": "变量会在邮件投递时替换为实际信息",
     "sendTip5": "优先级数值越大，越先匹配执行",
     "sampleRecipient": "张三",
-    "sampleSubject": "项目进展说明",
+    "sampleSubject": "项���进展说明",
     "sampleGreeting": "您好，",
     "sampleBody": "这是一封用于预览标记和免责声明效果的示例邮件。",
     "errorNameRequired": "请输入规则名称",
@@ -7333,7 +7334,7 @@
       "colResult": "结果",
       "resultTrue": "真",
       "resultFalse": "假",
-      "unavailableFieldsTitle": "以下字段本次测试无法评估",
+      "unavailableFieldsTitle": "以下字段本���测试无法评估",
       "unavailableFieldsNote": "上述字段涉及的条件按未命中计",
       "listSeparator": "、",
       "derivedTitle": "推导字段说明",
@@ -7579,7 +7580,7 @@
     "threatIntel": "威胁情报触发",
     "aiDetection": "AI 检测触发",
     "readEmail": "已读邮件处理策略",
-    "unreadEmail": "未读邮件处理策略",
+    "unreadEmail": "未读邮件处���策略",
     "policy_recall": "直接召回",
     "policy_notify": "仅通知用户",
     "policy_wait": "等待管理员确认",
@@ -7662,7 +7663,7 @@
     "deleteConfirmTitle": "删除密钥",
     "deleteConfirmDesc": "确定要删除 selector {selector} 吗？此操作不可恢复。",
     "overviewTitle": "DKIM 总览",
-    "overviewDescription": "跨租户查看所有发信域的 DKIM 签名密钥状态。",
+    "overviewDescription": "跨租户查看所有发信域�� DKIM 签名密钥状态。",
     "tenant": "租户",
     "dnsStatusColumn": "DNS 状态",
     "jumpToTenant": "管理",
@@ -8335,7 +8336,7 @@
       "logTitle": "备份日志 - {name}",
       "logDescription": "{time} · 节点 {node}",
       "logEmpty": "该任务未上报日志内容",
-      "logLoadError": "备份任务数据加载失败"
+      "logLoadError": "��份任务数据加载失败"
     },
     "nodesUnavailable": "监控节点列表不可用，请检查数据采集 Agent 或 TSDB 状态"
   },
@@ -9084,7 +9085,7 @@
       "importSensitivityHint": "导入对象的分类与灵敏度按联系人职位自动推荐；部门、职位不会写入保护对象。",
       "importDisabledInvalidEmail": "邮箱无效",
       "importDisabledInactive": "人员失效",
-      "importCheckingExisting": "检查中",
+      "importCheckingExisting": "检查���",
       "importExistingCheckFailed": "检查失败",
       "importDisabledExisting": "已存在",
       "importDisabledLimit": "已达上限"
@@ -9801,7 +9802,7 @@
     "syncTypeAuto": "自动",
     "syncTypeManual": "手动",
     "tabContacts": "通讯录查询",
-    "tabLogs": "同步日志",
+    "tabLogs": "同步���志",
     "tabSources": "数据源管理",
     "tagExecutive": "高管",
     "tagKeyPosition": "关键岗位",
@@ -10371,7 +10372,7 @@
       "title": "存在性验证策略",
       "desc": "验证收件人在目录服务的真实存在性",
       "directionNote": "仅接收方向（外部→内部）生效，内部发信自动跳过验证",
-      "strictMode": "严格模式",
+      "strictMode": "严格模��",
       "badge": {
         "ldap": "LDAP/AD验证",
         "api": "API实时校验",
@@ -10574,7 +10575,7 @@
       "nodes": "节点",
       "todo": "未处理告警",
       "engineHealth": "检测引擎",
-      "infrastructureHealth": "基础设施"
+      "infrastructureHealth": "基��设施"
     },
     "module": {
       "infrastructure": "基础设施",
@@ -10615,7 +10616,7 @@
       "last_super_admin": "不能停用最后一个启用中的超级管理员，否则将无人可管理系统",
       "last_system_admin": "不能删除或降级最后一个系统管理员，否则将无人可管理系统",
       "not_found": "账号不存在，可能已被删除",
-      "password_recently_used": "新密码不能与近期使用过的密码相同",
+      "password_recently_used": "新密码不能与近期使用过的密��相同",
       "role_id_required": "请选择角色",
       "tenant_id_required": "选择「{role}」角色时必须指定所属租户",
       "tenant_scope_required": "该操作需要先选择租户",
@@ -10706,7 +10707,7 @@
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
         "portal_base_url_invalid": "外部访问地址不是合法的网址",
         "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到，请填写网关对外可达的地址",
-        "portal_base_url_path_not_allowed": "外部访问地址不能带路径、查询参数或锚点，只填到域名和端口即可",
+        "portal_base_url_path_not_allowed": "外部访问地址不能��路径、查询参数或锚点，只填到域名和端口即可",
         "portal_base_url_required": "启用取回、预览、加白或加黑权限时，必须填写外部访问地址——通知信里的操作链接需要它才能生成",
         "portal_base_url_scheme_invalid": "外部访问地址必须使用 {scheme}：取回和预览的令牌不能明文传输",
         "valid_days_out_of_range": "「{permission}」的链接有效期需在 {min}–{max} 天之间"
@@ -10811,7 +10812,7 @@
       "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP 地址），或留空",
       "license_key_missing": "服务端未配置授权加密密钥，无法保存授权信息，请联系管理员",
       "member_endpoint_duplicate": "同一个节点不能在分组里重复出现",
-      "member_endpoint_id_invalid": "分组成员的节点必须是有效选择",
+      "member_endpoint_id_invalid": "分组成员的节点��须是有效选择",
       "member_ord_duplicate": "分组成员的排序值不能重复",
       "port_out_of_range": "端口需在 {min}–{max} 之间",
       "tls_min_version_invalid": "TLS 最低版本无效，只能是：{allowed}"
@@ -11237,7 +11238,7 @@
     },
     "overseas_mail": {
       "directions_required": "请选择邮件方向",
-      "config_modified_by_another": "配置已被他人修改，请刷新后重试",
+      "config_modified_by_another": "配置已被他人修改��请刷新后重试",
       "invalid_ip_address": "IP 地址格式不正确"
     },
     "password_policy_settings": {

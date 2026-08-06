@@ -1619,6 +1619,7 @@
     "recipientGroup": "Recipient Group",
     "contentGroup": "Content Group",
     "newGroup": "New Group",
+    "newGroupOfType": "New {typeLabel}",
     "editGroup": "Edit Group",
     "groupName": "Group Name",
     "groupType": "Group Type",
