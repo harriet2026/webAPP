@@ -159,13 +159,13 @@ function getEventDotInfo(ev: MailChildEvent): EventDotInfo {
   return { bg: 'bg-gray-500', Icon: User };
 }
 
-// 「操作类型」翻译表：event_type 原始值 → 中文
-// 时间线里只有两种业务操作：管理员/智能体发起的召回，以及智能体策略=notify时的通知。
-// 其余 event_type（policy_decided、delivered 等投递流程值）已被 sortedEvents 过滤掉，
-// 不会出现在时间线里，所以不在此处映射。
-const EVENT_TYPE_ZH: Record<string, string> = {
-  recall: '召回',
-  notify: '通知',
+// 「操作类型」翻译表：key = "event_source:event_type" 复合键 → 中文完整文案
+// 操作类型由 source + type 组合决定：同为 recall 的事件，
+// admin_api 发起和 threat_retro_agent 发起语义不同，必须用复合键区分。
+const OPERATION_TYPE_ZH: Record<string, string> = {
+  'threat_retro_agent:recall': '威胁回溯智能体发起召回',
+  'threat_retro_agent:notify': '威胁回溯智能体发起通知',
+  'admin_api:recall':          '管理员召回',
 };
 
 // 「执行结果」翻译表：event_result 原始值 → 中文
@@ -186,9 +186,11 @@ const EVENT_RESULT_ZH: Record<string, string> = {
 
 
 
-function translateEventType(val: string | undefined, isZh: boolean): string {
-  if (!val) return '—';
-  return isZh ? (EVENT_TYPE_ZH[val] ?? val) : val;
+function translateEventType(source: string | undefined, type: string | undefined, isZh: boolean): string {
+  if (!type) return '—';
+  if (!isZh) return type;
+  const key = `${source ?? ''}:${type}`;
+  return OPERATION_TYPE_ZH[key] ?? type;
 }
 
 function translateEventResult(val: string | undefined, isZh: boolean): string {
@@ -304,7 +306,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
     : (basis?.rule_id || '—');
 
   // 方案A：多租户产品形态 + 租户管理员视角 + 阶段1（连接层/IP策略）→ 显示"平台策略"，
-  // 不暴露策略模块细节、规则名、命中详情，也不提供"前往策略配置页"跳转。
+  // 不暴露策略模块细节、规则名、命中详情，也不提供"前往策略配置��"跳转。
   const isPlatformPolicyContext =
     viewer === 'tenant' &&
     capabilities?.multiTenant === true &&
@@ -312,7 +314,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
 
   return (
     <div className="space-y-5">
-      {/* 检测流程：5 个阶段卡片，默认全部展开，命中策略明细内联在卡片内 */}
+      {/* 检测流程：5 个阶段卡片，默认全部展���，命中策略明细内联在卡片内 */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-sm font-semibold">{t('detectionPipeline')}</h4>
@@ -472,7 +474,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
           <div className="grid grid-cols-[72px_1fr] gap-x-3 gap-y-2.5 text-sm">
             <span className="text-muted-foreground">{tFeatures('module')}</span>
             {isPlatformPolicyContext ? (
-              // 平台策略模糊化：不展示阶段色点和具体模块名，仅显示"平台策略"
+              // 平台策略模糊化：不展示阶段色点和具体模块名��仅显示"平台策略"
               <span className="font-medium text-muted-foreground">
                 {tFeatures('platformPolicyModule')}
               </span>
@@ -616,7 +618,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
                             </div>
                             <div className="flex items-start gap-2">
                               <span className="w-20 shrink-0 text-muted-foreground">{t('recallAction')}:</span>
-                              <span>{translateEventType(ev.event_type, isZh)}</span>
+                              <span>{translateEventType(ev.event_source, ev.event_type, isZh)}</span>
                             </div>
                             <div className="flex items-start gap-2">
                               <span className="w-20 shrink-0 text-muted-foreground">{t('executionResult')}:</span>
