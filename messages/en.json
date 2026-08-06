@@ -1627,6 +1627,7 @@
     "memberCount": "Members",
     "referenceCount": "References",
     "memberListPerLine": "One member per line",
+    "contentMemberListPerLine": "One keyword per line",
     "namePlaceholder": "Enter group name",
     "namePattern": "Group name allows letters, digits, dots, underscores, dashes, or Chinese characters; 1-64 chars",
     "ipPlaceholder": "192.168.1.0/24\n10.0.0.0/8",

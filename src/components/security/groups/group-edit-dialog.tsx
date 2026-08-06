@@ -175,7 +175,7 @@ export function GroupEditDialog({
             </div>
           )}
           <div className="space-y-2">
-            <Label>{t('memberListPerLine')} *</Label>
+            <Label>{type === 'content' ? t('contentMemberListPerLine') : t('memberListPerLine')} *</Label>
             <Textarea
               rows={8}
               value={membersText}
