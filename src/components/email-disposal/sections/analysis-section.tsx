@@ -160,32 +160,28 @@ function getEventDotInfo(ev: MailChildEvent): EventDotInfo {
 }
 
 // 「操作类型」翻译表：event_type 原始值 → 中文
-// 按业务语义分两大类：召回 / 通知，其余为辅助操作
+// 时间线里只有两种业务操作：管理员/智能体发起的召回，以及智能体策略=notify时的通知。
+// 其余 event_type（policy_decided、delivered 等投递流程值）已被 sortedEvents 过滤掉，
+// 不会出现在时间线里，所以不在此处映射。
 const EVENT_TYPE_ZH: Record<string, string> = {
-  // 核心：召回
-  recall:           '召回',
-  // 核心：通知（威胁回溯智能体策略 = notify）
-  notify:           '通知',
-  notification:     '通知',
-  // 辅助处置操作
-  approve:          '审核放行',
-  reject:           '审核拒绝',
-  release:          '放行',
-  discard:          '丢弃',
-  send:             '退信发送',
-  bounce:           '退信',
-  delivery:         '投递',
-  delivered:        '已投递',
-  policy_decided:   '策略裁决',
-  message_received: '邮件接收',
-  connected:        '连接建立',
-  quarantine:       '隔离',
-  block:            '拦截',
-  defer:            '延迟',
-  filter:           '过滤',
-  rewrite:          '改写',
-  accept:           '接受',
-  drop:             '丢弃',
+  recall: '召回',
+  notify: '通知',
+};
+
+// 「执行结果」翻译表：event_result 原始值 → 中文
+// 语义：本次操作（召回/通知）是否执行成功。
+// 只映射操作结果语义值；邮件状态枚举（quarantine_pending、delivery_failed 等）
+// 是 MailLogDetail 层的字段，不属于 event_result，不在此处映射。
+const EVENT_RESULT_ZH: Record<string, string> = {
+  success:    '成功',
+  completed:  '成功',
+  failed:     '失败',
+  failure:    '失败',
+  pending:    '执行中',
+  in_progress:'执行中',
+  timeout:    '超时',
+  skipped:    '已跳过',
+  cancelled:  '已取消',
 };
 
 // 「执行结果」翻译表：event_result 原始值 → 中文
