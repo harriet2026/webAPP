@@ -284,7 +284,15 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                   className="scroll-mt-4"
                 >
                   <h3 className="text-base font-semibold mb-2">{t('securityAnalysis')}</h3>
-                  <AnalysisSection detail={detail} aiEnabled={aiEnabled} events={eventsQ.data ?? []} />
+                  <AnalysisSection
+                    detail={detail}
+                    aiEnabled={aiEnabled}
+                    events={eventsQ.data ?? []}
+                    onViewRawLogs={() => {
+                      setRawLogsExpanded(true);
+                      scrollToSection('rawlogs');
+                    }}
+                  />
                 </section>
                 <section
                   data-testid="disposal-detail-rawlogs"

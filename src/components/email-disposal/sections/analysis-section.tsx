@@ -7,7 +7,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import {
   CheckCircle2, AlertTriangle, XCircle, MinusCircle, ChevronDown,
-  Clock, ShieldQuestion, ShieldAlert, ExternalLink, ArrowRight, User,
+  Clock, ShieldQuestion, ShieldAlert, ExternalLink, ArrowRight, User, RotateCcw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -38,6 +38,10 @@ interface AnalysisSectionProps {
   // for the recipient delivery-detail line. Powers the 事后处置时间线
   // subsection (v2 spec gap 2.5): real per-event rows, not mock data.
   events?: MailChildEvent[];
+  // 「查看原始日志」的回调，由 detail-modal.tsx 注入，滚动至原始日志区段。
+  // 有值时替代 notImplementedToast；无值时（如独立挂载 AnalysisSection 的测试）
+  // 退回 toast，保持向后兼容。
+  onViewRawLogs?: () => void;
 }
 
 const STATUS_ICON: Record<CheckStatus, React.ReactElement> = {
@@ -118,12 +122,49 @@ function connectorArrowClass(i: number, hitIndex: number): string {
 
 const ALL_STAGE_NUMBERS = [1, 2, 3, 4, 5];
 
+// 优化二：事件行人性化文案。对常见 event_source + event_type 组合做中文映射，
+// fallback 到原始拼接字符串，保证新增 event_source 不需要同步修改此处也能显示。
+function formatEventLabel(ev: MailChildEvent): string {
+  const key = `${ev.event_source}:${ev.event_type}`;
+  const map: Record<string, string> = {
+    'workflow.quarantine:recall':  '召回执行（隔离区）',
+    'workflow.sideline:recall':    '召回执行（侧线区）',
+    'workflow.audit:approve':      '审核放行',
+    'workflow.audit:reject':       '审核拒绝',
+    'workflow.bounce:send':        '退信发送',
+    'admin_api:recall':            '管理员手动召回',
+    'workflow.quarantine:release': '从隔离区放行',
+    'workflow.sideline:release':   '从侧线区放行',
+    'workflow.quarantine:discard': '隔离区丢弃',
+    'workflow.sideline:discard':   '侧线区丢弃',
+  };
+  return map[key] ?? `${ev.event_source} · ${ev.event_type}`;
+}
+
+// 优化三：根据 event_type / event_result 返回语义化圆点样式（bg 色）和图标组件名称。
+// 返回 { bg, Icon } 供渲染使用。
+type EventDotInfo = {
+  bg: string;
+  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+};
+
+function getEventDotInfo(ev: MailChildEvent): EventDotInfo {
+  const t = ev.event_type?.toLowerCase() ?? '';
+  const r = ev.event_result?.toLowerCase() ?? '';
+  if (t.includes('recall')) return { bg: 'bg-blue-500', Icon: RotateCcw };
+  if (r.includes('fail') || r.includes('error') || t.includes('reject'))
+    return { bg: 'bg-red-500', Icon: XCircle };
+  if (t.includes('approve') || t.includes('release'))
+    return { bg: 'bg-emerald-500', Icon: CheckCircle2 };
+  return { bg: 'bg-gray-500', Icon: User };
+}
+
 // aiEnabled defaults to false (fail-closed): this is an entitlement gate for
 // the AI verdict block (spec §5.4/§4.4 CapAI), so a future call site that
 // forgets to pass it must not silently show AI-only content on the
 // non-AI/传统版 tier -- the current call site (detail-modal.tsx) always
 // passes an explicit value derived from capabilities.ai.
-export function AnalysisSection({ detail, aiEnabled = false, events = [] }: AnalysisSectionProps) {
+export function AnalysisSection({ detail, aiEnabled = false, events = [], onViewRawLogs }: AnalysisSectionProps) {
   const t = useTranslations('emailDisposal.detail.analysis');
   const tFeatures = useTranslations('emailDisposal.detail.features');
   const { viewer, capabilities } = useProductForm();
@@ -164,7 +205,8 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   }, [detail.stage_timings, detail.processing_time_ms]);
 
   // --- 事后处置时间线（gap 2.5，两级展开）---
-  const [showTimeline, setShowTimeline] = useState(false);
+  // 默认展开：事后处置时间线是高频有效信息，优化前默认收起导致有事件也不可见。
+  const [showTimeline, setShowTimeline] = useState(true);
   const [expandedEvents, setExpandedEvents] = useState<Set<number>>(new Set());
   const toggleEvent = (id: number) =>
     setExpandedEvents((p) => {
@@ -482,10 +524,12 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
               </div>
               {sortedEvents.map((ev) => {
                 const isOpen = expandedEvents.has(ev.id);
+                // 优化三：语义化圆点 — 颜色和图标根据 event_type/event_result 派生。
+                const { bg: dotBg, Icon: DotIcon } = getEventDotInfo(ev);
                 return (
                   <div key={ev.id} className="relative -ml-[25px]">
-                    <div className="absolute left-0 flex h-4 w-4 items-center justify-center rounded-full bg-gray-500">
-                      <User className="h-2.5 w-2.5 text-white" />
+                    <div className={cn('absolute left-0 flex h-4 w-4 items-center justify-center rounded-full', dotBg)}>
+                      <DotIcon className="h-2.5 w-2.5 text-white" />
                     </div>
                     <InteractiveSurface
                       asChild
@@ -510,8 +554,9 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                             <span className="shrink-0 text-xs text-muted-foreground">
                               {formatTimestamp(ev.event_time) || ev.event_time}
                             </span>
+                            {/* 优化二：人性化文案，替换原始 event_source · event_type 拼接 */}
                             <span className="truncate text-sm font-medium">
-                              {ev.event_source} · {ev.event_type}
+                              {formatEventLabel(ev)}
                               {ev.recipient ? ` (${ev.recipient})` : ''}
                             </span>
                           </div>
@@ -526,6 +571,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                             data-testid={`analysis-timeline-event-${ev.id}-detail`}
                           >
                             <div className="flex items-start gap-2">
+                              {/* 优化五：通用标签取代"召回范围" */}
                               <span className="w-20 shrink-0 text-muted-foreground">{t('recallScope')}:</span>
                               <span>{ev.recipient || ev.recipients || '—'}</span>
                             </div>
@@ -538,6 +584,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                               <span>{ev.event_result || '—'}{ev.dsn ? `（${ev.dsn}）` : ''}</span>
                             </div>
                             <div className="pt-1">
+                              {/* 优化四：有 onViewRawLogs 时跳转原始日志区，否则退回 toast */}
                               <Button
                                 type="button"
                                 variant="outline"
@@ -546,7 +593,11 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                                 data-testid={`analysis-timeline-event-${ev.id}-view-log`}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  toast.info(tSenderActions('notImplementedToast'));
+                                  if (onViewRawLogs) {
+                                    onViewRawLogs();
+                                  } else {
+                                    toast.info(tSenderActions('notImplementedToast'));
+                                  }
                                 }}
                               >
                                 {t('viewRecallLog')}
