@@ -147,6 +147,28 @@
         <li class="toc-change"><span class="toc-num">2</span><a href="#gt12801-change-2">DMARC处置策略新增"进行下一步"选项</a></li>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-12797">GT-12797 群组策略——新建群组：不支持切换群组类型</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12797-change-1">新建按钮文案由"新建群组"改为"新建 X 组"</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12797-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12797-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12797-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12797-change-2">新建抽屉移除"群组类型"选择器</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12797-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12797-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12797-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12797-change-3">内容组"每行一条成员"标签改为"每行一条关键词"</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12797-c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12797-c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12797-c3-elements">3.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
       <li><a href="#diffs">D. 差异标注</a></li>
       <li><a href="#questions">Q. 待确认事项</a></li>
       <li><a href="#version-history">V. 版本历史</a></li>
@@ -288,7 +310,7 @@ function getOperationTypeLabel(
     </div>
     <div class="incr-body">
       <h3>3.1 语义边界</h3>
-      <p><code>event_result</code> 表示"本次事后处置操作是否成功"，只映射操作结果语义值。邮件状态枚举（<code>quarantine_pending</code>、<code>delivery_failed</code> 等）属 <code>MailLogDetail</code> 层字段，<strong>不在此映射</strong>。</p>
+      <p><code>event_result</code> 表示"本次事后处置操作是否成功"，只映射操作结果语义值。邮件状态��举（<code>quarantine_pending</code>、<code>delivery_failed</code> 等）属 <code>MailLogDetail</code> 层字段，<strong>不在此映射</strong>。</p>
 
       <h3>3.2 执行结果枚举（完整）</h3>
       <table>
@@ -309,7 +331,7 @@ function getOperationTypeLabel(
       </table>
       <p>i18n 命名空间：<code>emailDisposal.detail.analysis.eventResult.*</code>；未命中时 fallback 原始值。</p>
       <div class="callout callout-warn">
-        <strong>待验证：</strong>上述枚举值基于 mock 数据和代码推断，未查阅后端完整枚举定义。如后端存在其他值，当前会 fallback 到原始英文显示。
+        <strong>待验证：</strong>上述枚举值基于 mock 数据和代码推断，未查阅后端完整枚举定义。如后端存在其他值，当前会 fallback 到���始英文显示。
       </div>
     </div>
   </div>
@@ -581,6 +603,186 @@ onViewRawLogs?: () =&gt; void;
     </div>
   </div>
 
+  <!-- ══════════════ GT-12797 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12797">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12797 群组策略——新建群组：不支持切换群组类型</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/groups</code><br/>
+        组件：<code>src/components/security/groups/group-management-page.tsx</code>、<code>group-edit-dialog.tsx</code><br/>
+        2026-08-06 · commit <code>81e7555</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- 变更 1 -->
+      <h3 id="gt12797-change-1">1. 新建按钮文案由"新建群组"改为"新建 X 组"</h3>
+
+      <h4 id="gt12797-c1-overview">1.1 方案概述</h4>
+      <p>优化前，群组管理区各 Tab 下方的工具栏右侧按钮统一显示「新建群组」，用户无法从按钮文案判断将要新建的类型，需要在弹窗内再通过「群组类型」下拉做决策，认知路径不清晰。</p>
+      <p>优化后，按钮文案随当前激活 Tab 动态渲染为「新建IP组」「新建发信人组」「新建收信人组」「新建内容组」「新建特征组」，Tab 上下文即决定类型，按钮点击即进入对应类型的新建表单，零额外决策。</p>
+      <table>
+        <thead><tr><th>Tab</th><th>优化前按钮文案</th><th>优化后按钮文案</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>IP 组</td><td>新建群组</td><td>新建IP组</td><td><code>groups.newGroupOfType</code>（typeLabel=<code>groups.ipGroup</code>）</td></tr>
+          <tr><td>发信人组</td><td>新建群组</td><td>新建发信人组</td><td><code>groups.newGroupOfType</code>（typeLabel=<code>groups.senderGroup</code>）</td></tr>
+          <tr><td>收信人组</td><td>新建群组</td><td>新建收信人组</td><td><code>groups.newGroupOfType</code>（typeLabel=<code>groups.recipientGroup</code>）</td></tr>
+          <tr><td>内容组</td><td>新建群组</td><td>新建内容组</td><td><code>groups.newGroupOfType</code>（typeLabel=<code>groups.contentGroup</code>）</td></tr>
+          <tr><td>特征组</td><td>新建群组</td><td>新建特征组</td><td><code>groups.newGroupOfType</code>（typeLabel=<code>groups.featureGroup</code>）</td></tr>
+        </tbody>
+      </table>
+      <p>新增 i18n key：<code>groups.newGroupOfType</code>（zh：<code>新建{typeLabel}</code>，en：<code>New {typeLabel}</code>）。修改文件：<code>messages/zh.json</code>、<code>messages/en.json</code>、<code>group-management-page.tsx</code>。</p>
+
+      <h4 id="gt12797-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态：IP 组 Tab 默认态</strong>（触发路径：租户管理员 → 安全策略 → 群组策略 → 群组管理区 IP 组 Tab）</p>
+        <figure>
+          <img src="./screenshots/gt12797-groups-default.png" alt="群组管理 IP 组 Tab 默认态，工具栏右上角按钮显示「新建IP组」" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>群组管理区 IP 组 Tab 默认态：工具栏右上角按钮文案为「新建IP组」（优化后）</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12797-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>群组管理区工具栏「新建」按钮文案</td>
+            <td>文案（动态）</td>
+            <td>新建群组</td>
+            <td>新建{当前Tab类型名}组（5 种值，随 Tab 切换）</td>
+            <td><code>groups.newGroupOfType</code></td>
+            <td><code>group-management-page.tsx</code> renderTab / renderFeatureTab</td>
+            <td>[Base] 所有形态/角色一致</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12797-change-2" style="margin-top:2rem">2. 新建抽屉移除"群组类型"选择器</h3>
+
+      <h4 id="gt12797-c2-overview">2.1 方案概述</h4>
+      <p>优化前，新建群组抽屉内包含「群组名称」和「群组类型」两个并排字段，用户需在表单内再次选择类型，与已在 Tab 上做出的类型选择重复决策，且类型切换会改变成员输入区的校验规则和占位符，造成认知负担。</p>
+      <p>优化后，新建时隐藏「群组类型」Select，抽屉标题直接显示类型（如「新建IP组」），表单内只有「群组名称」（全宽）和「每行一条成员」两个字段，表单职责单一。编辑已有群组时，「群组类型」改为只读 Input 展示，保持信息完整性但不允许修改。</p>
+      <table>
+        <thead><tr><th>场景</th><th>优化前</th><th>优化后</th></tr></thead>
+        <tbody>
+          <tr><td>新建</td><td>「群组名称」+「群组类型」Select（可改）+「每行一条成员」</td><td>「群组名称」全宽 +「每行一条成员」；SheetTitle 为「新建 X 组」</td></tr>
+          <tr><td>编辑</td><td>「群组名称」禁用 +「群组类型」Select 禁用 +「每行一条成员」</td><td>「群组名称」禁用 +「群组类型」只读 Input +「每行一条成员」</td></tr>
+        </tbody>
+      </table>
+      <p>修改文件：<code>group-edit-dialog.tsx</code>（移除 Select import，新建路径替换为只读展示，SheetTitle 改用 <code>groups.newGroupOfType</code>）。</p>
+
+      <h4 id="gt12797-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：新建IP组抽屉打开态</strong>（触发路径：群组管理区 IP 组 Tab → 点击「新建IP组」按钮）</p>
+        <figure>
+          <img src="./screenshots/gt12797-new-ip-drawer.png" alt="新建IP组抽屉：标题「新建IP组」，表单只有群组名称和每行一条成员，无群组类型选择器" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：新建IP组抽屉 — 标题「新建IP组」，表单无「群组类型」字段，「群组名称」全宽显示，焦点自动落入名称输入框</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12797-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SheetTitle</td>
+            <td>标题文案</td>
+            <td>新建群组（<code>groups.newGroup</code>）</td>
+            <td>新建IP组 / 新建发信人组…（<code>groups.newGroupOfType</code>，typeLabel 随 type 变化）</td>
+            <td><code>groups.newGroupOfType</code></td>
+            <td><code>group-edit-dialog.tsx</code> SheetTitle</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>群组类型 Select（新建场景）</td>
+            <td>交互控件</td>
+            <td>显示，可选 IP组/发信人组/收信人组/内容组/特征组</td>
+            <td>已移除（不渲染）</td>
+            <td>—</td>
+            <td><code>group-edit-dialog.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>群组类型展示（编辑场景）</td>
+            <td>只读 Input</td>
+            <td>禁用 Select，显示当前类型</td>
+            <td>只读 Input，显示类型文案（如「IP 组」）</td>
+            <td><code>groups.ipGroup</code> 等</td>
+            <td><code>group-edit-dialog.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>群组名称输入框（新建场景）</td>
+            <td>Input</td>
+            <td>grid-cols-2 左列，宽度约 50%</td>
+            <td>全宽（grid 移除，单列布局）</td>
+            <td><code>groups.groupName</code></td>
+            <td><code>group-edit-dialog.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 3 -->
+      <h3 id="gt12797-change-3" style="margin-top:2rem">3. 内容组"每行一条成员"标签改为"每行一条关键词"</h3>
+
+      <h4 id="gt12797-c3-overview">3.1 方案概述</h4>
+      <p>内容组的成员是关键词 / 敏感词，使用「成员」一词语义不准确，占位符（敏感词1/敏感词2）与标签（每行一条成员）文案不一致，造成歧义。优化后，仅内容组将标签改为「每行一条关键词」，并将占位符由「敏感词1/敏感词2」改为「关键词1/关键词2」，语义统一；其他类型保持「每行一条成员」不变。</p>
+      <table>
+        <thead><tr><th>字段</th><th>变更前</th><th>变更后</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>内容组成员区标签</td><td>每行一条成员</td><td>每行一条关键词</td><td><code>groups.contentMemberListPerLine</code>（新增）</td></tr>
+          <tr><td>内容组成员区占位符</td><td>敏感词1\n敏感词2</td><td>关键词1\n关键词2</td><td><code>groups.contentPlaceholder</code>（已存在，值已修改）</td></tr>
+          <tr><td>其他类型成员区标签</td><td colspan="2">每行一条成员（不变，<code>groups.memberListPerLine</code>）</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12797-c3-states">3.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-2：新建内容组抽屉打开态</strong>（触发路径：群组管理区 内容组 Tab → 点击「新建内容组」按钮）</p>
+        <figure>
+          <img src="./screenshots/gt12797-new-content-drawer.png" alt="新建内容组抽屉：标题「新建内容组」，成员区标签「每行一条关键词」，占位符「关键词1/关键词2」" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：新建内容组抽屉 — 标题「新建内容组」，成员区标签「每行一条关键词」，占位符「关键词1/关键词2」</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12797-c3-elements">3.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>修改文件</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>内容组成员区 Label</td>
+            <td>标签文案</td>
+            <td>每行一条成员（<code>groups.memberListPerLine</code>）</td>
+            <td>每行一条关键词（<code>groups.contentMemberListPerLine</code>）</td>
+            <td><code>groups.contentMemberListPerLine</code>（新增）</td>
+            <td><code>group-edit-dialog.tsx</code>、<code>messages/zh.json</code>、<code>messages/en.json</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>内容组成员区 Textarea 占位符</td>
+            <td>占位符文案</td>
+            <td>敏感词1\n敏感词2</td>
+            <td>关键词1\n关键词2</td>
+            <td><code>groups.contentPlaceholder</code></td>
+            <td><code>messages/zh.json</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
   <!-- ══════════════ V. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>V. 版本历史</h2>
@@ -590,6 +792,11 @@ onViewRawLogs?: () =&gt; void;
       </thead>
       <tbody>
         <tr>
+          <td><span class="version-badge"><span class="vnum">v3</span></span></td>
+          <td>2026-08-06</td>
+          <td>追加 GT-12797 需求体（群组策略——新建群组：不支持切换群组类型）：变更 1 新建按钮文案「新建群组」→「新建X组」（group-management-page.tsx + messages 新增 groups.newGroupOfType）；变更 2 新建抽屉移除群组类型 Select，SheetTitle 改为「新建X组」，编辑场景改为只读 Input（group-edit-dialog.tsx）；变更 3 内容组标签「每行一条成员」→「每行一条关键词」，占位符「敏感词1/2」→「关键词1/2」（zh.json + en.json 新增 groups.contentMemberListPerLine）；附截图 S-1（新建IP组抽屉）、S-2（新建内容组抽屉）</td>
+        </tr>
+        <tr>
           <td><span class="version-badge"><span class="vnum">v2</span></span></td>
           <td>2026-08-06</td>
           <td>追加 GT-12801 需求体（DMARC协议执行动作对齐以及增加"进行下一步"）：变更 1「阻断」→「拒收」（messages/zh.json authSpoofing.protocolActionShort.reject）；变更 2 DMARC_ACTIONS 由 4 项扩充至 5 项追加 accept（ProtocolChecksSection.tsx）；同步更新目录</td>
@@ -597,7 +804,7 @@ onViewRawLogs?: () =&gt; void;
         <tr>
           <td><span class="version-badge"><span class="vnum">v1</span></span></td>
           <td>2026-08-06</td>
-          <td>初版：GT-12772 全部 6 个变更点（白名单过滤 / 操作类型 i18n / 执行结果 i18n / 默认展开 / 查看原始日志接入 / Mock 数据补充）；4 项差异标注，2 项待确认事项</td>
+          <td>初版：GT-12772 全部 6 个变更点（白名单过滤 / 操作类型 i18n / 执行结果 i18n / 默认展开 / 查看原始日志接入 / Mock 数据补充）；4 项差异标注，2 项���确认事项</td>
         </tr>
       </tbody>
     </table>

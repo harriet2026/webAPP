@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 35,
+  "current_version": 36,
   "history": [
     {
       "version": 1,
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史���加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史����加 v9。",
       "demo_version": 12
     },
     {
@@ -316,7 +316,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-11675",
       "incremental": true,
-      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续追加（编号在 GT-12753 的变更 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更新为 D-001~D-016、D 范围更新为 Q-001~Q-006，标题追加 GT-11675（v5），��本��史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
+      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续追加（编号在 GT-12753 的变更 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更新为 D-001~D-016、D 范围更新为 Q-001~Q-006，标题追加 GT-11675（v5��，��本��史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
       "demo_version": 19
     },
     {
@@ -337,6 +337,15 @@
       "ticket": "GT-12807",
       "incremental": true,
       "summary": "GT-12807.html v1→v2：将 GT-12801「DMARC协议执行动作对齐以及增加进行下一步」追加到 GT-12807 文档中（不单独新建文档）。变更 1：messages/zh.json authSpoofing.protocolActionShort.reject 由「阻断」改为「拒收」；变更 2：ProtocolChecksSection.tsx DMARC_ACTIONS 由 4 项扩充为 5 项（追加 accept，对应「进行下一步」，i18n key 已存在）。目录追加 GT-12801 一级条目，版本历史 v1→v2。"
+    },
+    {
+      "version": 36,
+      "generated_at": "2026-08-06",
+      "webapp_commit": "81e7555",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12807",
+      "incremental": true,
+      "summary": "GT-12807.html v2→v3：追加 GT-12797「群组策略——新建群组：不支持切换群组类型」需求体（3 个变更点）。变更 1：新建按钮文案「新建群组」→「新建X组」（group-management-page.tsx，messages 新增 groups.newGroupOfType）；变更 2：新建抽屉移除「群组类型」Select，SheetTitle 改为「新建X组」，编辑场景改为只读 Input（group-edit-dialog.tsx）；变更 3：内容组标签「每行一条成员」→「每行一条关键词」，占位符「敏感词1/2」→「关键词1/2」（messages 新增 groups.contentMemberListPerLine）。附截图 S-1（新建IP组抽屉）、S-2（新建内容组抽屉）；目录追加 GT-12797 一级条目及三级子章节；版本历史 v2→v3。"
     }
   ]
 }
