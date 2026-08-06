@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 36,
+  "current_version": 37,
   "history": [
     {
       "version": 1,
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史����加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史�����加 v9。",
       "demo_version": 12
     },
     {
@@ -276,7 +276,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12731",
       "incremental": true,
-      "summary": "GT-12731.html 追加一级需求 GT-12751 高级过滤规则优化项（同文件多需求，doc 版本 v1→v2）：变更 3（意图引擎条件 comprehensiveEngineResult/cac_tag 从 panel:'select' 升级为专属 panel:'intentEngine'，多意图列表式面板——每意图独立选择「分类优先 classification/within」或「分段阈值 threshold/between [lo,hi]⊆[0,1]」，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重后写覆盖、空条目丢弃；serde 新增 parse/encodeIntentEngineList 复用单条 codec；expression 多条目取值与至少1意图/端点/顺序/范围完整性校验；ConditionTree 默认空列表；四语新增 v3Conditions.intentAddLabel/intentRemoveLabel 并补齐 inputType.intentEngine 缺失键）、变更 4（安全检测移除 rblResult/rbl 与 displayNameSpoof/exec_imp 两条件，目录 51→49、security 20→18、select 12→10，四语删 v3Conditions 对应文案且保留 emailDisposal/auth-spoofing 同名键，catalogue.test.ts 计数不变量同步）；浏览器实拍 S-1 多意图双模式面板 + S-2 安全检测清单无RBL/仿冒 + S-3 模块支持49种条件类型（浅色 AI版·单租户 平台管理员 Mock 1575×847）；新增差异 D-004~D-006、待确认 Q-003；顺带修复本文件 GT-12723 遗留的 2 处 UTF-8 乱码（导航/阶段3）；乱码自检 CLEAN；version.json current_version 14→15。",
+      "summary": "GT-12731.html 追加一级需求 GT-12751 高级过滤规则优化项（同文件多需求，doc 版本 v1→v2）：变更 3（意图引擎条件 comprehensiveEngineResult/cac_tag 从 panel:'select' 升级���专属 panel:'intentEngine'，多意图列表式面板——每意图独立选择「分类优先 classification/within」或「分段阈值 threshold/between [lo,hi]⊆[0,1]」，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重后写覆盖、空条目丢弃；serde 新增 parse/encodeIntentEngineList 复用单条 codec；expression 多条目取值与至少1意图/端点/顺序/范围完整性校验；ConditionTree 默认空列表；四语新增 v3Conditions.intentAddLabel/intentRemoveLabel 并补齐 inputType.intentEngine 缺失键）、变更 4（安全检测移除 rblResult/rbl 与 displayNameSpoof/exec_imp 两条件，目录 51→49、security 20→18、select 12→10，四语删 v3Conditions 对应文案且保留 emailDisposal/auth-spoofing 同名键，catalogue.test.ts 计数不变量同步）；浏览器实拍 S-1 多意图双模式面板 + S-2 安全检测清单无RBL/仿冒 + S-3 模块支持49种条件类型（浅色 AI版·单租户 平台管理员 Mock 1575×847）；新增差异 D-004~D-006、待确认 Q-003；顺带修复本文件 GT-12723 遗留的 2 处 UTF-8 乱码（导航/阶段3）；乱码自检 CLEAN；version.json current_version 14→15。",
       "demo_version": 15
     },
     {
@@ -346,6 +346,15 @@
       "ticket": "GT-12807",
       "incremental": true,
       "summary": "GT-12807.html v2→v3：追加 GT-12797「群组策略——新建群组：不支持切换群组类型」需求体（3 个变更点）。变更 1：新建按钮文案「新建群组」→「新建X组」（group-management-page.tsx，messages 新增 groups.newGroupOfType）；变更 2：新建抽屉移除「群组类型」Select，SheetTitle 改为「新建X组」，编辑场景改为只读 Input（group-edit-dialog.tsx）；变更 3：内容组标签「每行一条成员」→「每行一条关键词」，占位符「敏感词1/2」→「关键词1/2」（messages 新增 groups.contentMemberListPerLine）。附截图 S-1（新建IP组抽屉）、S-2（新建内容组抽屉）；目录追加 GT-12797 一级条目及三级子章节；版本历史 v2→v3。"
+    },
+    {
+      "version": 37,
+      "generated_at": "2026-08-06",
+      "webapp_commit": "c6f98d9",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12807",
+      "incremental": true,
+      "summary": "GT-12807.html v3→v4：追加 GT-12719「策略流水线执行动作/黑白名单文案解释」需求体（3 个变更点）。变更 1：执行动作图例「阻断」→「拒收」，新增「进行下一步·继续执行后续策略」（pipeline.actionNextStep/actionNextStepDesc），移除「标记投递」条目（PolicyPipelinePage.tsx actionLegendItems 删除 tagDeliver，union type 收窄）；变更 2：名单类型黑名单描述「阻断/隔离/丢弃」→「拒收/隔离/丢弃」（pipeline.blacklistTypeDesc），白名单描述「投递/标记投递」→「投递」（pipeline.whitelistTypeDesc）；变更 3：流程控制终止短文案/描述「阻断」→「拒收」（pipeline.flowTerminateShort/flowTerminateDesc），继续描述移除「标记投递」（pipeline.flowContinueDesc）；附截图 S-1（策略流水线默认态含图例区，暗色主题 1406×803）；目录追加 GT-12719 一级条目及三级子章节；版本历史 v3→v4。"
     }
   ]
 }
