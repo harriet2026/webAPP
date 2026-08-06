@@ -199,6 +199,9 @@ export interface EmailLogSearchParams {
   dkim_outbound_signed?: string;
   // 'matched' = similar_detection/same_subject_detection 任一命中；其余值后端静默忽略。
   similar?: string;
+  // 邮件来源：不传/'' = 只看客户邮件（默认，自产信隐身）；'gateway' = 只看
+  // 网关自产信（通知信/DSN/告警等）；'all' = 两者。
+  origin?: string;
   page?: number;
   page_size?: number;
   advanced_filters?: string;

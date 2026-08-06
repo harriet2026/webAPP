@@ -37,10 +37,9 @@ export interface AntivirusActionConfig {
 }
 
 export interface ImageDetectConfig {
-  ocr_mode: 'none' | 'light' | 'deep';
+  ocr_mode: 'none' | 'light';
   ocr_max_count: number;
   qr_mode: 'none' | 'light' | 'deep';
-  qr_barcode_exempt: boolean;
   qr_max_count: number;
 }
 
@@ -55,7 +54,6 @@ export interface QrDeepRoutesConfig {
   intent_medium: boolean;
   intent_low: boolean;
   advanced_rules: boolean;
-  arbitration: 'highest_priority' | 'first_match';
 }
 
 export interface ImageDetectActionConfig {

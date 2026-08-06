@@ -115,7 +115,7 @@ beforeEach(() => {
   mocks.getTenantSettings.mockResolvedValue({
     antivirus: { virus_action: 'quarantine', timeout_action: 'accept' },
     image_detect: {
-      ocr_mode: 'light', ocr_max_count: 2, qr_mode: 'light', qr_barcode_exempt: true,
+      ocr_mode: 'light', ocr_max_count: 2, qr_mode: 'light',
       qr_max_count: 5, qr_light_action: 'quarantine', qr_deep_exceed_action: 'accept',
       qr_deep_exceed_warn: true, qr_deep_routes: {},
     },

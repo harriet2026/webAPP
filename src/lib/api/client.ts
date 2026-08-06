@@ -168,7 +168,12 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       headers: options.headers,
     });
     if (status >= 400) {
-      throw new ApiError(status, `Mock error ${status}`, data as Record<string, unknown>);
+      const mockData = data as Record<string, unknown>;
+      const mockMsg =
+        typeof mockData?.message === 'string'
+          ? mockData.message
+          : `Mock error ${status}`;
+      throw new ApiError(status, mockMsg, mockData);
     }
     if (status === 204) return {} as T;
     return data as T;

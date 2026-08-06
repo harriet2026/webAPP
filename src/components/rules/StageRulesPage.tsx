@@ -463,14 +463,23 @@ export function StageRulesPage({ stage }: StageRulesPageProps) {
       header: t('common.actions'),
       cell: ({ row }) => {
         const rule = row.original;
-        const canEdit = !rule.is_system || isSystemAdmin;
-        const canDelete = !rule.is_system;
+        // GT-12729：由租户配置(tenant_config)物化生成的规则,DB 层 CRUD 已 403,
+        // 前端同步隐藏编辑/删除入口并禁用启停开关,避免用户点了才收到后端拒绝。
+        const isTenantConfigManaged = (() => {
+          try {
+            return JSON.parse(rule.metadata || '{}')?.managed_by === 'tenant_config';
+          } catch {
+            return false;
+          }
+        })();
+        const canEdit = (!rule.is_system || isSystemAdmin) && !isTenantConfigManaged;
+        const canDelete = !rule.is_system && !isTenantConfigManaged;
         return (
           <div className="flex gap-1">
             <Button
               variant="ghost"
               size="icon"
-              disabled={rule.is_system && !isSystemAdmin}
+              disabled={(rule.is_system && !isSystemAdmin) || isTenantConfigManaged}
               onClick={() => toggleMutation.mutate({ id: rule.id, isActive: !rule.is_active })}
               title={rule.is_active ? t('common.disabled') : t('common.enabled')}
             >

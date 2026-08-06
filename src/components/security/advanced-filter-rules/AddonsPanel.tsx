@@ -77,9 +77,9 @@ export function parseAddons(meta: unknown): AddonsState {
 export function defaultAddonParams(key: AddonKey): Record<string, unknown> {
   switch (key) {
     case 'disclaimer':
-      return { template: 'standard', position: 'body_bottom' };
+      return { position: 'body_bottom' };
     case 'externalReminder':
-      return { template: 'standard', position: 'body_top' };
+      return { position: 'body_top' };
     case 'adminNotify':
       return { recipient_type: 'adminList', recipients: '', merge_window_minutes: 5, template: 'default' };
     case 'deleteAttachment':
@@ -286,17 +286,6 @@ export function AddonParamsForm({ addonKey, params, onPatch, autoFocus }: AddonP
       return (
         <div className="space-y-3" data-testid="addon-params-disclaimer">
           <SelectField
-            label={t('addons.disclaimerTemplate')}
-            required
-            value={tv(params, 'template', 'standard')}
-            onChange={(v) => onPatch({ template: v })}
-            options={[
-              { value: 'standard', label: t('addons.disclaimerTemplateStandard') },
-              { value: 'legal', label: t('addons.disclaimerTemplateLegal') },
-              { value: 'custom', label: t('addons.disclaimerTemplateCustom') },
-            ]}
-          />
-          <SelectField
             label={t('addons.disclaimerPosition')}
             required
             value={tv(params, 'position', 'body_bottom')}
@@ -307,23 +296,15 @@ export function AddonParamsForm({ addonKey, params, onPatch, autoFocus }: AddonP
               { value: 'header', label: t('addons.disclaimerPositionHeader') },
             ]}
           />
+          <p className="text-xs text-muted-foreground" data-testid="addon-disclaimer-content-source-hint">
+            {t('addons.disclaimerContentSourceHint')}
+          </p>
         </div>
       );
 
     case 'externalReminder':
       return (
         <div className="space-y-3" data-testid="addon-params-externalReminder">
-          <SelectField
-            label={t('addons.externalReminderTemplate')}
-            required
-            value={tv(params, 'template', 'standard')}
-            onChange={(v) => onPatch({ template: v })}
-            options={[
-              { value: 'standard', label: t('addons.externalReminderTemplateStandard') },
-              { value: 'security', label: t('addons.externalReminderTemplateSecurity') },
-              { value: 'custom', label: t('addons.externalReminderTemplateCustom') },
-            ]}
-          />
           <SelectField
             label={t('addons.externalReminderPosition')}
             required

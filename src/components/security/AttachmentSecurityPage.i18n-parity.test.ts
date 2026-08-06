@@ -12,6 +12,7 @@ const required = [
   'direction.receiveFull',
   'toast.loadFailed', 'toast.saveSuccess', 'toast.saveFailed',
   ...['quarantine', 'audit', 'reject', 'discard', 'accept', 'partial_skip'].map((key) => `actions.${key}`),
+  ...['quarantine', 'audit', 'reject', 'discard', 'accept'].map((key) => `actionDesc.${key}`),
   ...[
     'attachmentStructure', 'currentDirection', 'items', 'levels', 'unlimited', 'unlimitedHint',
     'unlimitedWarning', 'nestedProtection', 'performanceProtection', 'seconds', 'receiveDefault',
@@ -21,15 +22,15 @@ const required = [
   ...[
     'serverConfig', 'antivirusServerHost', 'antivirusServerPort', 'virusDbStatus', 'actualCapabilityHint',
     'updateNow', 'configured', 'notConfigured', 'autoUpdate', 'daily', 'actionConfig', 'virusAction',
-    'timeoutAction', 'receiveDefault', 'updateSuccess', 'updateFailed',
+    'timeoutAction', 'receiveDefault', 'updateSuccess', 'updateFailed', 'platformManagedHint',
   ].map((key) => `antivirus.${key}`),
   ...[
-    'ocrDetection', 'detectionMode', 'ocrLimit', 'attachments', 'ocrMode_none', 'ocrMode_light',
-    'ocrMode_deep', 'qrDetection', 'qrMode_none', 'qrMode_light', 'qrMode_deep', 'lightConfig',
-    'deepConfig', 'routeModules', 'execAction', 'barcodeExempt', 'urlDetection', 'expandShortLink',
+    'ocrDetection', 'detectionMode', 'ocrLimit', 'ocrLimitDisabledHint', 'attachments', 'ocrMode_none', 'ocrMode_light',
+    'qrDetection', 'qrMode_none', 'qrMode_light', 'qrMode_deep', 'lightConfig',
+    'deepConfig', 'routeModules', 'execAction', 'urlDetection', 'expandShortLink',
     'keywordFilter', 'scanRange', 'urlPath', 'textContent', 'intentEngine', 'detectCategory',
-    'highRisk', 'mediumRisk', 'lowRisk', 'advancedRule', 'advancedRuleHint', 'arbitration',
-    'highestPriority', 'firstMatch', 'detectLimit', 'items', 'exceedAction', 'passWarn',
+    'highRisk', 'mediumRisk', 'lowRisk', 'advancedRule', 'advancedRuleHint',
+    'detectLimit', 'items', 'exceedAction', 'passWarn',
     'isolateFallback', 'enable',
   ].map((key) => `imageDetect.${key}`),
   ...[
@@ -45,7 +46,7 @@ const required = [
   'validation.duplicatePassword', 'validation.emptyPassword',
   ...[
     'attachmentCount', 'attachmentSize', 'nestedProtection', 'scanTimeout', 'exceedAction',
-    'antivirusHost', 'virusAction', 'antivirusTimeout', 'ocrMode', 'qrMode', 'arbitration',
+    'antivirusHost', 'virusAction', 'antivirusTimeout', 'ocrMode', 'qrMode',
     'qrLimit', 'encryptedMode', 'decryptFailAction',
   ].map((key) => `tooltips.${key}`),
 ];

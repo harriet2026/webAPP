@@ -18,7 +18,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Ban, Download, Info, Link as LinkIcon, Paperclip } from 'lucide-react';
+import { Ban, Download, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -38,6 +38,9 @@ interface EntityDetectionProps {
   // 成功创建加黑规则后回调，供调用方刷新任何派生视图（对齐 SenderActions 的
   // onDisposed）。
   onDisposed?: () => void;
+  // 受控 tab：Tab 按钮已上移至 InvestigationWorkbench 标题行（GT-12769），
+  // 组件本身不再含切换入口；未提供时默认展示 'links'。
+  tab?: EntityTab;
 }
 
 type EntityTab = 'links' | 'attachments';
@@ -72,11 +75,12 @@ function vtScoreIsPositive(vtScore: string): boolean {
   return Number.isFinite(numerator) && numerator > 0;
 }
 
-export function EntityDetection({ detail, requestFn, readOnly = false, onDownload, onDisposed }: EntityDetectionProps) {
+export function EntityDetection({ detail, requestFn, readOnly = false, onDownload, onDisposed, tab: tabProp }: EntityDetectionProps) {
   const t = useTranslations('emailDisposal.detail.overview.entityDetection');
   const tOverview = useTranslations('emailDisposal.detail.overview');
   const { isSystemAdmin } = useAuth();
-  const [tab, setTab] = useState<EntityTab>('links');
+  // 受控模式：调用方提供 tab 时使用外部 state；未提供时固定默认 'links'。
+  const tab: EntityTab = tabProp ?? 'links';
   const [busyKey, setBusyKey] = useState<string | null>(null);
 
   const urls = detail.entity_urls ?? [];
@@ -119,29 +123,6 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
 
   return (
     <div className="space-y-3" data-testid="email-disposal-overview-entity-detection">
-      <div className="flex gap-2">
-        <Button
-          type="button"
-          size="sm"
-          variant={tab === 'links' ? 'default' : 'outline'}
-          onClick={() => setTab('links')}
-          data-testid="email-disposal-overview-entity-tab-links"
-        >
-          <LinkIcon className="mr-1 h-3.5 w-3.5" />
-          {t('linksTab', { n: urls.length })}
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant={tab === 'attachments' ? 'default' : 'outline'}
-          onClick={() => setTab('attachments')}
-          data-testid="email-disposal-overview-entity-tab-attachments"
-        >
-          <Paperclip className="mr-1 h-3.5 w-3.5" />
-          {t('attachmentsTab', { n: attachments.length })}
-        </Button>
-      </div>
-
       <div
         className="flex items-start gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/20 dark:text-blue-300"
         data-testid="email-disposal-overview-entity-global-hint"

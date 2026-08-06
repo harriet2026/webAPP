@@ -1858,6 +1858,12 @@
       "signed": "已签",
       "notSigned": "未签"
     },
+    "originFilter": {
+      "label": "邮件来源",
+      "customer": "客户邮件",
+      "gateway": "网关自产信",
+      "all": "全部"
+    },
     "similarFilter": {
       "active": "相似检测命中",
       "clear": "清除筛选"
@@ -2088,6 +2094,14 @@
   },
   "users": {
     "tenantMustChangeNotice": "新账号使用临时密码，首次登录时必须修改密码（平台安全契约）",
+    "createdDialog": {
+      "title": "用户已创建",
+      "description": "账号「{username}」已成功创建。请将以下初始密码转交给该用户，首次登录须修改密码。",
+      "passwordLabel": "初始密码",
+      "copyBtn": "复制密码",
+      "hint": "请务必在关闭前复制并转交密码，关闭后将无法再次查看。",
+      "confirmBtn": "我已记录"
+    },
     "resetPassword": {
       "title": "重置密码",
       "description": "为管理员「{username}」设置新密码，重置后需用新密码登录。",
@@ -2647,6 +2661,8 @@
       "strength3": "强",
       "reloginHint": "密码已修改，请重新登录",
       "changed": "密码修改成功",
+      "changedDesc": "您的密码已更新，请妥善保管",
+      "done": "完成",
       "incorrect": "当前密码不正确",
       "changeFailed": "密码修改失败"
     },
@@ -4341,18 +4357,18 @@
     "enableRule": "启用规则",
     "disableRule": "禁用规则",
     "batchDeleteConfirm": "确定删除选中的 {count} 条规则吗？此操作无法撤销。",
-    "actionDeliver": "放行",
+    "actionDeliver": "投递",
     "actionDeliverHint": "正常投递邮件",
     "actionTagDeliver": "标记并放行",
     "actionTagDeliverHint": "添加邮件头后继续投递",
     "actionIsolate": "隔离",
-    "actionIsolateHint": "将邮件移入隔离区",
+    "actionIsolateHint": "邮件进入隔离区，管理员可审阅后决定是否放行",
     "actionReview": "审核",
-    "actionReviewHint": "等待管理员人工审核",
-    "actionBlock": "阻断",
-    "actionBlockHint": "在 SMTP 会话中拒绝邮件",
+    "actionReviewHint": "邮件正常投递，同时写入审核日志供管理员事后审查",
+    "actionBlock": "拒收",
+    "actionBlockHint": "向发信方返回 SMTP 拒绝响应，邮件不进入系统",
     "actionDiscard": "丢弃",
-    "actionDiscardHint": "静默丢弃邮件",
+    "actionDiscardHint": "静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃",
     "scopeHeader": "邮件头",
     "scopeDisplaySubject": "主题",
     "scopeDisplayBody": "正文",
@@ -5036,6 +5052,7 @@
       "configured": "已配置",
       "notConfigured": "未配置",
       "hostRequired": "请填写杀毒引擎服务器地址",
+      "platformManagedHint": "反病毒服务器与病毒库由平台管理员在「平台安全策略 → 反病毒引擎」统一配置，此处仅设置本租户的处置动作。",
       "actualCapabilityHint": "显示 attachd 当前可用的通用病毒扫描能力，不虚构厂商引擎状态",
       "updateSuccess": "病毒库更新请求已提交",
       "updateFailed": "病毒库更新失败",
@@ -5043,13 +5060,13 @@
     },
     "imageDetect": {
       "ocrDetection": "图片OCR检测",
-      "ocrSendHint": "（外发方向建议启用深度检测，防截图泄密）",
+      "ocrSendHint": "（外发方向建议启用，防截图泄密）",
       "detectionMode": "检测模式",
       "ocrLimit": "检测数量上限（防止性能耗尽）",
+      "ocrLimitDisabledHint": "选择「检测」后可配置",
       "attachments": "个附件",
       "ocrMode_none": "不检测",
-      "ocrMode_light": "轻度检测（仅印刷体）",
-      "ocrMode_deep": "深度检测（手写+印刷，推荐外发方向）",
+      "ocrMode_light": "检测",
       "qrDetection": "二维码图片检测",
       "qrMode_none": "不检测",
       "qrMode_light": "轻度检测 - 识别到二维码即拦截",
@@ -5062,7 +5079,6 @@
       "actionSideline": "审核",
       "actionReject": "阻断",
       "actionDiscard": "丢弃",
-      "barcodeExempt": "一维码豁免：条形码（Code128/EAN等）不视为二维码",
       "urlDetection": "URL检测与防护",
       "expandShortLink": "短链接自动展开",
       "keywordFilter": "内容关键词过滤",
@@ -5076,9 +5092,6 @@
       "lowRisk": "低危（订阅）",
       "advancedRule": "高级规则",
       "advancedRuleHint": "需配合「策略流水线-阶段5-高级规则」模块启用",
-      "arbitration": "结果仲裁策略",
-      "highestPriority": "取最高优先级动作执行",
-      "firstMatch": "按模块顺序首个命中执行",
       "detectLimit": "检测数量上限",
       "items": "个",
       "exceedAction": "超限处置",
@@ -5091,7 +5104,6 @@
       "qrSection": "二维码检测",
       "qrMode": "二维码模式",
       "qrMaxCount": "二维码最大数量",
-      "qrBarcodeExempt": "条形码豁免",
       "qrDeepRoutesSection": "二维码深度路由配置",
       "urlCheck": "URL 检查",
       "urlUnshorten": "URL 短链展开",
@@ -5106,7 +5118,6 @@
       "mode_light": "轻度",
       "mode_deep": "深度",
       "pending": "敬请期待",
-      "ocrMode_deep_hint": "深度检测同时识别手写与印刷体文字，适用于外发方向防截图泄密场景。检测结果将依照下方「检测数量上限」设置处理。",
       "exceedActionHint_pass": "超出检测数量上限的二维码图片将跳过深度检测，直接进入下一检测阶段处理。",
       "exceedActionHint_quarantine": "超出检测数量上限的二维码图片将直接隔离，不再进入后续检测阶段。"
     },
@@ -5157,10 +5168,17 @@
     "actions": {
       "quarantine": "隔离",
       "audit": "审核",
-      "reject": "阻断",
+      "reject": "拒收",
       "discard": "丢弃",
       "accept": "继续流水线",
       "partial_skip": "超出部分不检测"
+    },
+    "actionDesc": {
+      "quarantine": "邮件进入隔离区，管理员审核后可放行或删除",
+      "audit": "邮件进入待审核队列，人工确认后投递或退回",
+      "reject": "在 SMTP 阶段拒绝接收，发件方收到退信通知（452/550）",
+      "discard": "静默丢弃，发件方无感知，无退信",
+      "accept": "不对此结果采取拦截动作，继续进入下一阶段检测"
     },
     "tooltips": {
       "attachmentCount": "单封邮件允许进入检测的附件数量，-1 表示不限制",
@@ -5171,9 +5189,8 @@
       "antivirusHost": "attachd 连接的通用 AV 服务地址",
       "virusAction": "确认检出病毒后对邮件采取的动作",
       "antivirusTimeout": "AV 服务超过扫描时限或不可用时采取的动作",
-      "ocrMode": "轻度模式仅识别印刷体，深度模式同时识别手写与印刷内容",
+      "ocrMode": "检测并识别图片中的印刷体文字内容",
       "qrMode": "轻度模式识别到二维码后直接处置；深度模式解码并路由至后续模块",
-      "arbitration": "二维码内容命中多个后续模块时如何选择最终动作",
       "qrLimit": "单封邮件最多深度解码 1–50 个二维码",
       "encryptedMode": "选择是否检测以及是否尝试解密加密附件",
       "decryptFailAction": "无法获得有效密码或解密失败时采取的处置"
@@ -6467,6 +6484,11 @@
     "description": "基于多条件组合的灵活过滤规则",
     "moduleDescription": "多维度条件组合过滤，支持{count}种条件类型与AND/OR逻辑",
     "incompleteCondition": "[配置不完整]",
+    "incompleteReasonMissingValue": "缺少取值：请填写该条件的匹配值",
+    "incompleteReasonThreshold": "缺少阈值：请填写数值阈值",
+    "incompleteReasonBetween": "区间不完整：请同时填写最小值和最大值",
+    "incompleteReasonBetweenOrder": "区间无效：最小值不应大于最大值",
+    "incompleteReasonRange": "超出有效范围：请填写 {min} 至 {max} 之间的数值",
     "moduleEnabled": "模块已启用",
     "moduleDisabled": "模块已禁用",
     "moduleDisabledDesc": "模块已禁用，规则不参与邮件过滤",
@@ -6545,7 +6567,6 @@
       "upcoming": "即将上线",
       "storedNotWiredHint": "该附加策略已可配置，但运行时尚未接入。",
       "incompatibleWithAction": "与所选执行动作不兼容",
-      "externalReminderTemplate": "模板",
       "externalReminderTemplateDefault": "默认",
       "adminNotify": "管理员通知",
       "adminNotifyDesc": "发送通知邮件给管理员",
@@ -6615,15 +6636,8 @@
       "adminNotifyTemplate": "通知模板",
       "adminNotifyTemplateDefault": "默认告警模板",
       "deleteAttachmentExceptionDomainGroup": "域名组白名单",
-      "disclaimerTemplate": "声明模板",
-      "disclaimerTemplateStandard": "标准模板",
-      "disclaimerTemplateLegal": "法务模板",
-      "disclaimerTemplateCustom": "自定义",
       "emailTagStyle": "标记样式",
       "externalReminderAmberHint": "外部邮件提醒仅对判定为外部发件人的邮件生效",
-      "externalReminderTemplateStandard": "标准模板",
-      "externalReminderTemplateSecurity": "安全提醒",
-      "externalReminderTemplateCustom": "自定义",
       "forwardServerModeRedirect": "重定向 (redirect)",
       "modifyHeaderCustomFieldName": "自定义字段名",
       "modifyHeaderDkimWarning": "修改信头可能破坏 SPF/DKIM 验证结果",
@@ -6648,7 +6662,8 @@
       "tagStyleHtmlOrange": "HTML橙色",
       "tagStyleHtmlRed": "HTML红色",
       "tagStyleHtmlYellow": "HTML黄色",
-      "tagStylePlainText": "纯文本"
+      "tagStylePlainText": "纯文本",
+      "disclaimerContentSourceHint": "声明正文取自系统统一配置的免责声明文案，此处只需选择插入位置；正文内容请联系管理员在系统配置中修改。"
     },
     "block": {
       "paramsTitle": "阻断参数",
@@ -6789,6 +6804,10 @@
       "aiGenerateRegex": "AI 生成正则",
       "aiRegexComingSoon": "AI 辅助正则生成即将上线",
       "thresholdLabel": "阈值",
+      "intentSelectLabel": "意图分类",
+      "intentSelectPlaceholder": "请选择意图分类",
+      "intentAddLabel": "添加意图",
+      "intentRemoveLabel": "移除",
       "betweenLoLabel": "最小",
       "betweenHiLabel": "最大",
       "valueLabel": "值",
@@ -6836,7 +6855,6 @@
         "envelopeRecipient": "信封收件人",
         "senderGroup": "发件人组",
         "senderOrganization": "发件组织",
-        "featureGroup": "功能组",
         "senderIp": "发件 IP",
         "senderIpGroup": "发件 IP 组",
         "geoIpCountry": "GeoIP 国家",
@@ -6854,25 +6872,21 @@
         "attachmentSizeSingle": "单个附件大小",
         "nestedZipLevel": "嵌套 ZIP 层数",
         "nestedFileCount": "嵌套文件数",
-        "imageQrCodeResult": "二维码 OCR 结果",
+        "imageQrCodeResult": "图片识别处理结果",
         "qrCodeCount": "二维码数量",
         "attachmentZipBomb": "ZIP 炸弹",
         "urlCount": "URL 数量",
         "url": "URL",
-        "rblResult": "RBL 结果",
-        "urlSandboxResult": "URL 沙箱结果",
-        "shortLinkExpanded": "短链展开",
         "urlDomain": "URL 域名",
         "spfResult": "SPF 结果",
         "dkimResult": "DKIM 结果",
         "dmarcResult": "DMARC 结果",
         "ptrResult": "PTR 结果",
         "similarDomain": "相似域名",
-        "displayNameSpoof": "显示名仿冒",
         "mailFromEmpty": "Mail From 为空",
         "mailFromFromConsistency": "信封-头 From 一致性",
         "virusScanResult": "病毒扫描结果",
-        "comprehensiveEngineResult": "综合引擎结果",
+        "comprehensiveEngineResult": "意图引擎",
         "senderIpCount15Min": "发件 IP 数 (15分钟)",
         "senderRecipientCount15Min": "发件收件人数 (15分钟)",
         "senderMailCount15Min": "发件邮件数 (15分钟)",
@@ -6935,11 +6949,6 @@
         "usage": "匹配发信人所属组织",
         "note": "支持多级组织架构匹配"
       },
-      "desc_featureGroup": {
-        "source": "群组策略 - 特征组",
-        "usage": "引用预定义的特征组（一组条件的命名组合）",
-        "note": "特征组变更后规则即时生效，无需重新保存规则"
-      },
       "desc_senderIp": {
         "source": "SMTP连接层",
         "usage": "匹配发信服务器IP地址",
@@ -6993,6 +7002,9 @@
       "desc_attachmentCount": {
         "source": "邮件附件解析",
         "usage": "限制邮件包含的附件数量",
+        "operators": "大于/大于等于：附件数达到或超过阈值即命中；小于/小于等于：附件数不超过阈值即命中；介于：命中数量落在区间内的邮件。",
+        "example": "比较方式「大于等于」，阈值「10」——命中附件数达到 10 个及以上的邮件。",
+        "recommended": "常规办公场景推荐阈值 10~20，可按业务附件习惯调整。",
         "note": "防止大量附件造成资源占用"
       },
       "desc_encryptedAttachment": {
@@ -7026,9 +7038,9 @@
         "note": "防止解压后文件数量过多"
       },
       "desc_imageQrCodeResult": {
-        "source": "图片二维码识别引擎",
-        "usage": "检测图片附件中的二维码内容",
-        "note": "可识别钓鱼链接、恶意URL等"
+        "source": "附件图片识别引擎（OCR/二维码）",
+        "usage": "判断图片识别处理是否成功完成：成功=识别步骤正常跑完（即使无发现）；失败=识别服务出错或超时截断，结果可能不完整",
+        "note": "二维码数量用「二维码数量」条件；识别失败的邮件可转人工或隔离兜底"
       },
       "desc_qrCodeCount": {
         "source": "图片二维码识别引擎",
@@ -7054,16 +7066,6 @@
         "source": "RBL实时黑名单服务",
         "usage": "根据RBL查询结果过滤邮件",
         "note": "支持多个RBL源联合查询"
-      },
-      "desc_urlSandboxResult": {
-        "source": "URL沙箱分析引擎",
-        "usage": "根据URL安全沙箱分析结果过滤",
-        "note": "检测URL指向的恶意内容"
-      },
-      "desc_shortLinkExpanded": {
-        "source": "短链接展开服务",
-        "usage": "检测短链接展开后的真实URL",
-        "note": "防止通过短链接隐藏恶意URL"
       },
       "desc_urlDomain": {
         "source": "URL域名解析",
@@ -7093,6 +7095,10 @@
       "desc_similarDomain": {
         "source": "相似域名检测引擎",
         "usage": "检测是否存在仿冒相似域名",
+        "object": "受保护域名档案；* 表示对全部受保护域名档案生效。",
+        "operators": "大于/大于等于：差异越大越宽松，命中范围越大；小于/小于等于：差异越小越严格，只命中高度相似域名；介于：命中差异落在指定区间的域名。",
+        "example": "对象选择「公司主域名档案」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超过 2 的仿冒域名。",
+        "recommended": "推荐使用「小于等于 2」，与内置相似域名规则一致，兼顾召回与误报。",
         "note": "先选择受保护域名档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
       },
       "desc_displayNameSpoof": {
@@ -7156,6 +7162,7 @@
       "andGroupName": "匹配所有条件",
       "groupConditionCount": "已添加 {count} 个条件",
       "conditionSearchPlaceholder": "搜索条件...",
+      "addConditionHeader": "添加条件",
       "noMatchingConditions": "未找到匹配的条件",
       "emptyConfigPanel": "选择一个条件进行配置",
       "descCardTitle": "条件说明",
@@ -7175,7 +7182,81 @@
       "previewEmptyHint": "添加条件后将自动生成逻辑表达式",
       "notMarker": "(NOT)",
       "foldedMore": "+{count}",
-      "groupSelectLabel": "选择对象"
+      "groupSelectLabel": "选择对象",
+      "groupSelectPlaceholder": "请选择群组",
+      "orgDeptSelectLabel": "选择部门",
+      "orgDeptSelectedCount": "已选 {n} 个",
+      "orgDeptHint": "从组织通讯录选择部门；选中父部门将自动匹配其所有子部门的发信人（支持多级组织架构）。",
+      "orgDeptSearchPlaceholder": "搜索部门…",
+      "orgDeptEmpty": "暂无部门数据，请先在组织通讯录同步组织架构。",
+      "orgDeptNoMatch": "未找到匹配的部门",
+      "orgDeptClearAll": "清空",
+      "qrResultValues": {
+        "success": "成功",
+        "fail": "失败"
+      },
+      "envelopeHeaderConsistencyValues": {
+        "false": "一致",
+        "true": "不一致"
+      },
+      "virusScanResultValues": {
+        "infected": "有毒",
+        "clean": "无毒"
+      },
+      "descInputTypeLabel": "输入类型",
+      "descUnitLabel": "单位",
+      "descRangeLabel": "有效范围",
+      "descObjectLabel": "对象含义",
+      "descOperatorsLabel": "支持运算符",
+      "descExampleLabel": "有效示例",
+      "descRecommendedLabel": "推荐配置",
+      "descFormatLabel": "格式与示例",
+      "descStepGuideLabel": "配置步骤",
+      "applyRecommended": "应用推荐配置",
+      "numericOperatorsHint": "大于 / 大于等于：数值达到或超过阈值即命中；小于 / 小于等于：不超过阈值即命中；介于：数值落在指定区间内即命中。",
+      "exampleTemplate": "比较方式「{mode}」，阈值「{value}」（{unit}）。",
+      "recommendTemplate": "{mode} {value}（{unit}）",
+      "rangeBoth": "{min} ~ {max}",
+      "rangeMin": "≥ {min}",
+      "rangeMax": "≤ {max}",
+      "mapWildcardHint": "* 表示任意对象（匹配全部键）；如需限定具体对象，请在上方选择。",
+      "mapObjectHint": "仅匹配所选对象；选择 * 可匹配任意对象。",
+      "inputType": {
+        "text": "文本（每行一个值）",
+        "number": "数值",
+        "select": "枚举选择",
+        "group": "群组对象",
+        "featureGroup": "特征组",
+        "orgDept": "组织部门（树形多选）",
+        "cidr": "IP / CIDR（每行一个）",
+        "time": "时间区间",
+        "weekday": "星期",
+        "mime": "MIME 类型",
+        "intentEngine": "意图（可多选，每意图独立模式）"
+      },
+      "units": {
+        "count": "个",
+        "mb": "MB",
+        "level": "层",
+        "editDistance": "字符差异数"
+      },
+      "stepGuideMapNumber": [
+        "先在「选择对象」中选择要比较的对象（* 表示全部对象）。",
+        "再选择比较方式（大于 / 小于 / 介于等）。",
+        "最后填写阈值，可点「应用推荐配置」快速填入常用值。"
+      ],
+      "formats": {
+        "number": "填写整数阈值并配合比较方式使用；可点「应用推荐配置」一键填入常用值。",
+        "text": "每行一个值；按所选匹配方式（包含 / 等于 / 通配符 / 正则）进行匹配。",
+        "mime": "每行一个 MIME 类型，如 application/zip；也可点下方常用类型快捷添加。",
+        "cidr": "每行一个 IP 或 CIDR，如 192.168.1.0/24。",
+        "time": "24 小时制时间区间，如 09:00 ~ 18:00。",
+        "weekday": "勾选一个或多个星期几。",
+        "select": "从下拉选择固定结果值（如 pass / fail），或输入单个值做等于 / 不等于匹配。",
+        "group": "从预置群组 / 档案中选择对象；* 表示任意对象。",
+        "featureGroup": "选择一个特征组进行匹配。",
+        "orgDept": "从组织通讯录部门树中勾选一个或多个部门；勾选父部门会自动匹配其所有子部门的发信人。"
+      }
     },
     "placeholder": {
       "conditions": "条件构建器（即将上线）",
@@ -10091,9 +10172,11 @@
     "tabs": {
       "ipStrategy": "IP 策略",
       "attachmentLimit": "附件基础限制",
-      "groupPolicy": "群组策略"
+      "groupPolicy": "群组策略",
+      "antivirusEngine": "反病毒引擎"
     },
     "attachmentHint": "附件大小、数量与嵌套层级等基础上限为平台级资源约束，统一作用于全部租户，租户侧的附件安全检测不含此项。",
+    "antivirusHint": "反病毒服务器地址与病毒库为平台级配置，统一作用于全部租户；租户侧仅可设置病毒处置动作。",
     "modules": {
       "ipFrequency": "IP 频率限制",
       "ipFilter": "IP 黑白名单",
@@ -10774,6 +10857,7 @@
       "system_baseline_no_create": "系统基线规则不能通过接口创建",
       "system_baseline_no_edit": "系统基线规则不能由租户管理员编辑",
       "tag_required": "标记类规则至少要指定一个标记",
+      "tenant_config_managed": "该规则由租户附件安全设置管理，无法直接修改，请前往附件安全设置页编辑",
       "tenant_context_required": "该操作需要先选择租户",
       "valid_range_invalid": "生效结束时间不能早于开始时间"
     },
@@ -10821,6 +10905,7 @@
     "tenant": {
       "not_found": "租户不存在",
       "access_denied": "无权访问该租户",
+      "domain_delete_gated": "收信域必须先停用并保持停用满排水窗口（默认 7 天，让队列在途邮件投递完毕）才能删除",
       "admin_account_password_pair_required": "管理员账号与密码必须同时填写",
       "admin_account_too_long": "管理员账号长度不能超过 {max} 个字符",
       "code_immutable": "租户编码创建后不可修改",
@@ -10915,7 +11000,8 @@
       "cidr_limit_exceeded": "每个租户最多 {max} 个 IP 段",
       "cidr_already_exists": "该 IP 段已存在",
       "tenant_id_required": "请指定租户",
-      "tenant_id_invalid": "租户 ID 无效"
+      "tenant_id_invalid": "租户 ID 无效",
+      "link_redirect_tls_not_configured": "链接跳转服务(8082)未配置 TLS 证书。请先在集群管理台「对外服务 TLS 证书」上传证书，或确认已由前置反代终结 TLS 后开启 link_protection/tls_terminated_by_proxy"
     },
     "login_policy": {
       "two_factor_platform_admin_only": "二次认证强制策略仅平台管理员可设置",

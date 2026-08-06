@@ -57,15 +57,18 @@ beforeEach(() => {
 });
 
 describe('EntityDetection', () => {
-  it('renders the links/attachments tab toggle buttons with counts', () => {
-    render(<EntityDetection {...baseProps({
-      detail: baseDetail({
-        entity_urls: [{ url: 'https://evil.com/a', domain: 'evil.com', check_result: 'THREAT', threat_type: 'MALWARE' }],
-        attachments: [{ filename: 'report.pdf', size: 1024, md5sum: 'abc123', content_type: 'application/pdf', inline: false, content_length: 1024 }],
-      }),
-    })} />);
-    expect(screen.getByTestId('email-disposal-overview-entity-tab-links')).toHaveTextContent('1');
-    expect(screen.getByTestId('email-disposal-overview-entity-tab-attachments')).toHaveTextContent('1');
+  // GT-12769：links/attachments 切换按钮已上移至 InvestigationWorkbench 标题行
+  // （testid 不变），本组件改为受控 tab —— 此处改测受控切换行为。
+  it('renders the panel selected by the controlled tab prop (buttons live in the workbench now)', () => {
+    const detail = baseDetail({
+      entity_urls: [{ url: 'https://evil.com/a', domain: 'evil.com', check_result: 'THREAT', threat_type: 'MALWARE' }],
+      attachments: [{ filename: 'report.pdf', size: 1024, md5sum: 'abc123', content_type: 'application/pdf', inline: false, content_length: 1024 }],
+    });
+    const { rerender } = render(<EntityDetection {...baseProps({ detail, tab: 'links' })} />);
+    expect(screen.queryByTestId('email-disposal-overview-entity-tab-links')).not.toBeInTheDocument();
+    expect(screen.getByText('https://evil.com/a')).toBeInTheDocument();
+    rerender(<EntityDetection {...baseProps({ detail, tab: 'attachments' })} />);
+    expect(screen.getByTestId('email-disposal-overview-entity-attachment-abc123')).toBeInTheDocument();
   });
 
   it('renders the global-effect hint', () => {
@@ -195,9 +198,8 @@ describe('EntityDetection', () => {
     const user = userEvent.setup();
     const requestFn = vi.fn().mockResolvedValue({}) as never;
     const attachments = [{ filename: 'report.pdf', size: 2048, md5sum: 'deadbeef', content_type: 'application/pdf', inline: false, content_length: 2048 }];
-    render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ attachments }) })} />);
+    render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ attachments }), tab: 'attachments' })} />);
 
-    await user.click(screen.getByTestId('email-disposal-overview-entity-tab-attachments'));
     await user.click(screen.getByTestId('email-disposal-overview-entity-attachment-deadbeef-blacklist-hash'));
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
@@ -206,11 +208,9 @@ describe('EntityDetection', () => {
   });
 
   it('shows the report.pdf attachment with its hash-blacklist button on the attachments tab', async () => {
-    const user = userEvent.setup();
     const attachments = [{ filename: 'report.pdf', size: 2048, md5sum: 'deadbeef', content_type: 'application/pdf', inline: false, content_length: 2048 }];
-    render(<EntityDetection {...baseProps({ detail: baseDetail({ attachments }) })} />);
+    render(<EntityDetection {...baseProps({ detail: baseDetail({ attachments }), tab: 'attachments' })} />);
 
-    await user.click(screen.getByTestId('email-disposal-overview-entity-tab-attachments'));
     const row = screen.getByTestId('email-disposal-overview-entity-attachment-deadbeef');
     expect(within(row).getByText('report.pdf')).toBeInTheDocument();
     expect(within(row).getByTestId('email-disposal-overview-entity-attachment-deadbeef-blacklist-hash')).toBeInTheDocument();
@@ -223,9 +223,8 @@ describe('EntityDetection', () => {
     const user = userEvent.setup();
     const onDownload = vi.fn();
     const attachments = [{ filename: 'report.pdf', size: 2048, md5sum: 'deadbeef', content_type: 'application/pdf', inline: false, content_length: 2048 }];
-    render(<EntityDetection {...baseProps({ onDownload, detail: baseDetail({ attachments }) })} />);
+    render(<EntityDetection {...baseProps({ onDownload, detail: baseDetail({ attachments }), tab: 'attachments' })} />);
 
-    await user.click(screen.getByTestId('email-disposal-overview-entity-tab-attachments'));
     await user.click(screen.getByTestId('email-disposal-overview-entity-attachment-deadbeef-download'));
 
     expect(onDownload).toHaveBeenCalledTimes(1);
@@ -236,9 +235,8 @@ describe('EntityDetection', () => {
     const user = userEvent.setup();
     const requestFn = vi.fn().mockResolvedValue({}) as never;
     const attachments = [{ filename: 'report.pdf', size: 2048, md5sum: 'deadbeef', content_type: 'application/pdf', inline: false, content_length: 2048 }];
-    render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ attachments }) })} />);
+    render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ attachments }), tab: 'attachments' })} />);
 
-    await user.click(screen.getByTestId('email-disposal-overview-entity-tab-attachments'));
     await user.click(screen.getByTestId('email-disposal-overview-entity-attachment-deadbeef-blacklist-hash'));
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
@@ -250,22 +248,18 @@ describe('EntityDetection', () => {
   });
 
   it('shows an AV verdict badge when scan_results has a matching virus_name', async () => {
-    const user = userEvent.setup();
     const attachments = [{ filename: 'invoice.exe', size: 512, md5sum: 'badc0de', content_type: 'application/octet-stream', inline: false, content_length: 512 }];
     const scan_results = [{ scan_id: 's1', message_id: 'm1', direction: 'receive', final_disposition: 'blocked', is_encrypted: false, attachment_md5: 'badc0de', qr_code_count: 0, is_zip_bomb: false, virus_name: 'Trojan.Generic', duration_ms: 10 }];
-    render(<EntityDetection {...baseProps({ detail: baseDetail({ attachments, scan_results }) })} />);
+    render(<EntityDetection {...baseProps({ detail: baseDetail({ attachments, scan_results }), tab: 'attachments' })} />);
 
-    await user.click(screen.getByTestId('email-disposal-overview-entity-tab-attachments'));
     const row = screen.getByTestId('email-disposal-overview-entity-attachment-badc0de');
     expect(within(row).getByText('Trojan.Generic')).toBeInTheDocument();
   });
 
   it('disables the hash-blacklist button when the attachment has no md5sum', async () => {
-    const user = userEvent.setup();
     const attachments = [{ filename: 'no-hash.txt', size: 10, content_type: 'text/plain', inline: false, content_length: 10 }];
-    render(<EntityDetection {...baseProps({ detail: baseDetail({ attachments }) })} />);
+    render(<EntityDetection {...baseProps({ detail: baseDetail({ attachments }), tab: 'attachments' })} />);
 
-    await user.click(screen.getByTestId('email-disposal-overview-entity-tab-attachments'));
     expect(screen.getByTestId('email-disposal-overview-entity-attachment-0-blacklist-hash')).toBeDisabled();
   });
 });

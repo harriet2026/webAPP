@@ -176,7 +176,11 @@ export async function getImageDetectConfig(
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<ImageDetectConfig | null> {
   const obj = await fetchConfigSection('image_detect', requestFn);
-  return obj as ImageDetectConfig | null;
+  if (!obj) return null;
+  const cfg = obj as unknown as ImageDetectConfig;
+  // GT-12xxx：OCR 深度模式已下线；历史租户可能存有 ocr_mode='deep'，归一为 'light'。
+  if ((cfg.ocr_mode as string) === 'deep') cfg.ocr_mode = 'light';
+  return cfg;
 }
 
 export async function saveImageDetectConfig(
@@ -205,7 +209,6 @@ export async function getQrDeepRoutesConfig(
     intent_medium: intentCategories.split(',').includes('medium'),
     intent_low: intentCategories.split(',').includes('low'),
     advanced_rules: obj.advanced_rules === true,
-    arbitration: obj.arbitration === 'first_match' ? 'first_match' : 'highest_priority',
   };
 }
 
@@ -230,7 +233,6 @@ export async function saveQrDeepRoutesConfig(
         config.intent_low ? 'low' : null,
       ].filter(Boolean).join(','),
       advanced_rules: config.advanced_rules,
-      arbitration: config.arbitration,
     },
     requestFn,
   );
@@ -362,7 +364,6 @@ export interface TenantAttachmentSecuritySettings {
     ocr_mode: string;
     ocr_max_count: number;
     qr_mode: string;
-    qr_barcode_exempt: boolean;
     qr_max_count: number;
     qr_light_action: string;
     qr_deep_exceed_action: string;

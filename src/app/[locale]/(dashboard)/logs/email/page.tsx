@@ -222,6 +222,8 @@ export default function EmailLogsPage() {
   const [actionChip, setActionChip] = useState<string>('');
   const [dkimSignedFilter, setDkimSignedFilter] = useState<string>('');
   const [similarFilter, setSimilarFilter] = useState<string>('');
+  // 邮件来源筛选：默认空 = 只看客户邮件（后端同一默认口径，自产信隐身）。
+  const [originFilter, setOriginFilter] = useState<string>('');
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
   const [selectedEmailId, setSelectedEmailId] = useState<number | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -307,10 +309,11 @@ export default function EmailLogsPage() {
       action,
       dkim_outbound_signed: dkimSignedFilter || undefined,
       similar: similarFilter || undefined,
+      origin: originFilter || undefined,
       page,
       page_size: 20,
     };
-  }, [searchForm, actionChip, dkimSignedFilter, similarFilter, page]);
+  }, [searchForm, actionChip, dkimSignedFilter, similarFilter, originFilter, page]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['email-logs', params, effectiveTenantId],
@@ -337,6 +340,12 @@ export default function EmailLogsPage() {
 
   const handleDkimSignedChange = useCallback((next: string | null) => {
     setDkimSignedFilter(!next || next === 'all' ? '' : next);
+    setPage(1);
+  }, []);
+
+  const handleOriginChange = useCallback((next: string | null) => {
+    // 'customer' 是 UI 上的显式选项，对应后端的默认口径（空串）。
+    setOriginFilter(!next || next === 'customer' ? '' : next);
     setPage(1);
   }, []);
 
@@ -1042,6 +1051,19 @@ export default function EmailLogsPage() {
                   <SelectItem value="all">{t('logs.dkimSignedFilter.all')}</SelectItem>
                   <SelectItem value="true">{t('logs.dkimSignedFilter.signed')}</SelectItem>
                   <SelectItem value="false">{t('logs.dkimSignedFilter.notSigned')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">{t('logs.originFilter.label')}:</span>
+              <Select value={originFilter || 'customer'} onValueChange={handleOriginChange}>
+                <SelectTrigger className="h-8 w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="customer">{t('logs.originFilter.customer')}</SelectItem>
+                  <SelectItem value="gateway">{t('logs.originFilter.gateway')}</SelectItem>
+                  <SelectItem value="all">{t('logs.originFilter.all')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

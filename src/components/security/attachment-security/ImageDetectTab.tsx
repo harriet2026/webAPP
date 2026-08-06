@@ -21,7 +21,6 @@ export const DEFAULT_IMAGE_DETECT_CONFIG: ImageDetectConfig = {
   ocr_mode: 'light',
   ocr_max_count: 2,
   qr_mode: 'light',
-  qr_barcode_exempt: true,
   qr_max_count: 5,
 };
 
@@ -36,7 +35,6 @@ export const DEFAULT_QR_DEEP_ROUTES: QrDeepRoutesConfig = {
   intent_medium: true,
   intent_low: true,
   advanced_rules: false,
-  arbitration: 'highest_priority',
 };
 
 export const DEFAULT_IMAGE_DETECT_ACTIONS: ImageDetectActionConfig = {
@@ -45,7 +43,7 @@ export const DEFAULT_IMAGE_DETECT_ACTIONS: ImageDetectActionConfig = {
   qr_deep_exceed_warn: true,
 };
 
-const LIGHT_ACTIONS: AttachmentAction[] = ['quarantine', 'audit', 'reject', 'discard'];
+const LIGHT_ACTIONS: AttachmentAction[] = ['quarantine', 'reject', 'discard'];
 
 interface ImageDetectTabProps {
   direction?: Direction;
@@ -85,6 +83,9 @@ export function ImageDetectTab({
     if (next !== config.ocr_max_count) onChange({ ...config, ocr_max_count: next });
   };
 
+  // GT-12xxx：检测模式为「不检测」时，「检测数量上限」不生效，禁用输入。
+  const ocrDisabled = config.ocr_mode === 'none';
+
   const setQrLimit = (raw: number) => {
     const next = Math.min(50, Math.max(1, Number.isFinite(raw) ? Math.trunc(raw) : 1));
     onChange({ ...config, qr_max_count: next });
@@ -101,16 +102,15 @@ export function ImageDetectTab({
               <SelectTrigger className="w-full max-w-[400px]" data-testid="ocr-detection-mode"><SelectValue /></SelectTrigger>
               <SelectContent className="min-w-[var(--radix-select-trigger-width)] w-max" data-testid="ocr-detection-mode-options">
                 <SelectItem value="none" data-testid="ocr-detection-mode-none">{t('imageDetect.ocrMode_none')}</SelectItem>
+                {/* GT-12xxx：OCR 仅单一 pytesseract 路径，无深浅之分，
+                    原「深度检测（手写+印刷）」为从未实现的禁用占位，已移除；
+                    「轻度检测（仅印刷体）」即唯一检测模式，文案精简为「检测」。 */}
                 <SelectItem value="light" data-testid="ocr-detection-mode-light">{t('imageDetect.ocrMode_light')}</SelectItem>
-                {/* GT-12720：按原型恢复「深度」可选（此前 GT-11675 因后端未实现而置灰）。
-                    ⚠️ 后端仍未区分深浅：apiserver 只校验 ocr_mode ∈ none/light/deep
-                    （internal/api/attachment_security_settings.go），attachd 的
-                    runOCR(ctx, client, imageB64, mode) 把 mode 只用于打日志，实际调用
-                    client.Ocr(ctx, imageB64, "eng") 没有 mode 入参，pyhelper /v1/ocr
-                    也只有单一 pytesseract 路径（cmd/attachd/internal/image_workflow.go:117）。
-                    也就是说选「深度」目前与「轻度」执行完全一致，仅配置值不同。
-                    深度 OCR 的后端实现需另行排期，见移植说明的后端待办清单。 */}
-                <SelectItem value="deep" data-testid="ocr-detection-mode-deep">{t('imageDetect.ocrMode_deep')}</SelectItem>
+                {/* GT-12753：原型移除「深度」OCR 选项（GT-12720 曾按原型恢复可选，
+                    但后端始终未区分深浅 —— runOCR 的 mode 只用于打日志，pyhelper
+                    /v1/ocr 只有单一 pytesseract 路径，选「深度」与「轻度」执行完全
+                    一致。产品决策改为不提供该档位；后端 ocr_mode 校验仍接受 deep
+                    以兼容存量配置。 */}
               </SelectContent>
             </Select>
           </div>
@@ -124,19 +124,20 @@ export function ImageDetectTab({
                 value={config.ocr_max_count}
                 onChange={(event) => onChange({ ...config, ocr_max_count: Number(event.target.value) })}
                 onBlur={clampOcr}
+                disabled={ocrDisabled}
                 className="w-20"
                 data-testid="ocr-max-count"
               />
               <span className="text-sm text-muted-foreground">{t('imageDetect.attachments')}</span>
             </div>
+            {/* GT-12xxx：检测模式为「不检测」时不执行 OCR，「检测数量上限」无意义，禁用并提示。 */}
+            {ocrDisabled ? (
+              <p className="text-xs text-muted-foreground" data-testid="ocr-max-count-disabled-hint">
+                {t('imageDetect.ocrLimitDisabledHint')}
+              </p>
+            ) : null}
           </div>
         </div>
-        {config.ocr_mode === 'deep' && (
-          <div className="flex items-start gap-2 rounded-lg border border-border/70 bg-muted/30 p-3 text-sm text-muted-foreground" data-testid="ocr-deep-hint">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            <span>{t('imageDetect.ocrMode_deep_hint')}</span>
-          </div>
-        )}
       </section>
 
       <section className="space-y-4 rounded-lg border border-border/70 bg-muted/30 p-4">
@@ -167,14 +168,6 @@ export function ImageDetectTab({
                   {LIGHT_ACTIONS.map((action) => <SelectItem key={action} value={action} data-testid={`qr-light-action-${action}`}>{t(`actions.${action}`)}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={config.qr_barcode_exempt}
-                onCheckedChange={(checked) => onChange({ ...config, qr_barcode_exempt: checked })}
-                data-testid="qr-barcode-exempt"
-              />
-              <Label>{t('imageDetect.barcodeExempt')}</Label>
             </div>
           </div>
         )}
@@ -252,25 +245,6 @@ export function ImageDetectTab({
                 </div>
                 {routes.advanced_rules && <p className="ml-6 text-xs text-muted-foreground" data-testid="advanced-rule-hint">{t('imageDetect.advancedRuleHint')}</p>}
               </div>
-            </div>
-
-            {/* GT-12201：结果仲裁暂不可配置。
-                arbitration 目前是纯前端字段 —— cmd/attachd、configs/attachd/attachd.cf
-                的 [image_detect_qr_deep_routes] 段、以及 Go 全仓都搜不到它，
-                即两个取值都从未下发到检测侧、不参与任何仲裁。放开可选会让管理员
-                配出永不生效的策略（GT-12194 同类问题）。且「首次命中」的语义
-                本身也未定义——各路由的执行顺序在任何地方都没有约定。
-                按工单决策先置灰，待产品明确语义并在 attachd 落地后再放开。 */}
-            <div className="space-y-2 border-t pt-4">
-              <Label>{infoLabel(t('imageDetect.arbitration'), t('tooltips.arbitration'), 'qr-deep-arbitration')}</Label>
-              <Select disabled value={routes.arbitration} onValueChange={(arbitration) => onRoutesChange({ ...routes, arbitration: arbitration as QrDeepRoutesConfig['arbitration'] })}>
-                <SelectTrigger className="w-[280px] max-w-full" data-testid="qr-deep-arbitration"><SelectValue /></SelectTrigger>
-                <SelectContent data-testid="qr-deep-arbitration-options">
-                  <SelectItem value="highest_priority" data-testid="qr-deep-arbitration-highest-priority">{t('imageDetect.highestPriority')}</SelectItem>
-                  <SelectItem value="first_match" data-testid="qr-deep-arbitration-first-match">{t('imageDetect.firstMatch')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground" data-testid="qr-deep-arbitration-pending">{t('imageDetect.pending')}</p>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

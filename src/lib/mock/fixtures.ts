@@ -3480,6 +3480,30 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
   };
 }
 
+// 从共享的「群组」数据（mockSenderFilterGroupsList，与群组管理 / 群组策略同源）
+// 按 group_type 派生 `_meta/groups` 元信息，供高级过滤规则的 group 面板条件
+//（发信人组、特征组等）在配置面板的下拉里筛选选择。契约对齐真实端点
+// GET /unified-rules/_meta/groups?type=<T> 的 {items:[{id,label,rule_id}]}：
+//   - id 取 tag（grp:<名>，引擎按该 tag 建键，MapKeySelect 直接用 id 作为存储值）；
+//   - label 取群组名；rule_id 取规则 ID。
+// 复用同一份数据面，保证下拉选项与群组策略模块的发信人组始终一致。
+export function mockGroupsMetaByType(type: GroupType): { items: IPGroupMeta[] } {
+  const items: IPGroupMeta[] = mockSenderFilterGroupsList()
+    .items.filter((r) => {
+      try {
+        return (JSON.parse(r.metadata ?? "{}") as { group_type?: string }).group_type === type;
+      } catch {
+        return false;
+      }
+    })
+    .map((r) => ({
+      id: r.tags?.[0] ?? `${GROUP_TAG_PREFIX}${r.name}`,
+      label: r.name,
+      rule_id: r.id,
+    }));
+  return { items };
+}
+
 // ════════════════════════════════════════════════════════════════════════════════
 // 群组策略（page=group_policy，mock）
 // 5 条演示规则照抄群组策略页 demo 的 mockGroupPolicies（含「IP群组1」双规则短路场景，
@@ -5026,7 +5050,6 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
     ocr_mode: "light",
     ocr_max_count: 2,
     qr_mode: "light",
-    qr_barcode_exempt: true,
     qr_max_count: 5,
   }),
   ...attachmentConfigSeed("image_detect_qr_deep_routes", {
@@ -5037,7 +5060,6 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
     intent_engine: true,
     intent_categories: "high,medium,low",
     advanced_rules: false,
-    arbitration: "highest_priority",
   }),
   ...attachmentConfigSeed("image_detect_actions_receive", {
     qr_light_action: "quarantine",
@@ -7070,7 +7092,7 @@ export function mockEmailDisposalFields() {
   }));
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
 // 处置设置（email-disposal/disposal-settings，mock）
 // ════════════════════════════════════════════════════════════════════════════════
 

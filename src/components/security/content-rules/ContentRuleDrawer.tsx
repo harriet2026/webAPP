@@ -81,7 +81,6 @@ type FormErrors = Partial<Record<'name' | 'priority' | 'direction' | 'match_cont
 
 const ACTIONS: ContentRuleUiAction[] = [
   'deliver',
-  'tag_deliver',
   'isolate',
   'review',
   'block',
@@ -379,6 +378,10 @@ export function ContentRuleDrawer({
     const suffix = action.split('_').map((part) => part[0].toUpperCase() + part.slice(1)).join('');
     return t(`contentRules.action${suffix}` as 'contentRules.actionDeliver');
   };
+  const actionHint = (action: ContentRuleUiAction) => {
+    const suffix = action.split('_').map((part) => part[0].toUpperCase() + part.slice(1)).join('');
+    return t(`contentRules.action${suffix}Hint` as 'contentRules.actionDeliverHint');
+  };
 
   const applyExample = (
     matchType: ContentRuleFormData['match_type'],
@@ -575,12 +578,17 @@ export function ContentRuleDrawer({
                   <Field label={t('contentRules.actionSection')} required hint={t('contentRules.actionTip')}>
                     <Select value={uiAction} onValueChange={(value) => value && updateAction(value as ContentRuleUiAction)}>
                       <SelectTrigger className={cn('w-full', actionTextClass(uiAction))} data-testid="content-rule-action">
-                        <SelectValue />
+                        <SelectValue aria-label={uiAction}>
+                          <span className={actionTextClass(uiAction)}>{actionLabel(uiAction)}</span>
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="z-[80]" data-content-rule-layer="editor">
                         {ACTIONS.map((action) => (
-                          <SelectItem key={action} value={action}>
-                            <span className={actionTextClass(action)}>{actionLabel(action)}</span>
+                          <SelectItem key={action} value={action} className="items-start">
+                            <span className="flex flex-col gap-0.5">
+                              <span className={actionTextClass(action)}>{actionLabel(action)}</span>
+                              <span className="text-xs text-muted-foreground">{actionHint(action)}</span>
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>

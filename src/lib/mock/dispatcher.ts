@@ -96,6 +96,7 @@ import {
   mockDeleteGeoIpRule,
   mockSenderFilterRulesList,
   mockSenderFilterGroupsList,
+  mockGroupsMetaByType,
   mockAuthSpoofingConfig,
   mockAuthSpoofingObserveStats,
   mockAuthSpoofingProbe,
@@ -214,10 +215,12 @@ import type { DkimAlgorithm } from '@/lib/api/dkim';
 import type { IPFrequencyRulePayload } from '@/types/ip-frequency';
 import type { OverseasMailConfigResponse } from '@/types/overseas-mail';
 import type { DisposalSettings } from '@/types/disposal-settings';
-import { GROUPS_PAGE_KEY } from '@/types/groups';
+import { GROUPS_PAGE_KEY, type GroupType } from '@/types/groups';
 import { GROUP_POLICY_PAGE_KEY } from '@/types/group-policy';
 import type { OpsDimension, OpsTopCount } from '@/lib/api/ops-top';
 import { rbacSubmodulesForScope, type RbacScope } from '@/lib/rbac/rbac-modules';
+import { CONDITIONS, type PanelKind } from '@/components/security/advanced-filter-rules/catalogue';
+import type { FieldDef } from '@/types/unified-rules';
 
 export interface MockRequest {
   method: string;
@@ -313,6 +316,95 @@ const mockSecurityModules: Record<string, boolean> = {
   // demo URL检测与防护默认总开关为启用；用于统一模块注册表的 GET/PUT mock。
   url_protection: true,
 };
+
+// ─── 高级过滤规则：字段注册表 mock ─────────────────────────────────────
+// 真实后端在 /unified-rules/field-definitions 返回字段注册表；mock 环境没有
+// 后端，此前该端点无 handler 而落到 fallback（返回 { items:[], total:0 }，无
+// fields 字段）→ 前端 fieldDefs 为空 → computeCatalogueItem 把所有 field 非
+// null 的条件判为 "即将上线"。这里按 catalogue 的 CONDITIONS 合成一份注册表，
+// 把每个条件用到的 field 都标为 supported，使 mock 下这些条件全部变为 "可用"。
+// 仅影响 mock 模式；真实模式仍请求后端，不受影响。field 为 null 的目录项
+//（如 senderOrganization "仅目录（无后端支持）"）不在此列，保持原状。
+//
+// panel → (type, operators, map_keys_source) 的推导仅用于让配置面板拿到合理的
+// 元数据；条件的显示名走 i18n（cond_<key>），与 fd.label 无关，故 label 用
+// field 名占位即可。operators 给该 panel 的常见算子，createDefaultLeaf 命中
+// fd 时取首个、否则回退 PANEL_FALLBACK_OPERATOR，两条路径都安全。
+// group / featureGroup 面板字段 → 群组元信息端点的映射。真实后端在 FieldDef 里
+// 下发 map_keys_source（一个 API 路径），配置面板据此用 MapKeySelect 渲染「可筛选
+// 下拉」。此前 mock 误把它填成裸字段名（如 "sender_group"），MapKeySelect 拿去
+// 请求必然失败 → 回退成纯文本框，导致「发信人组」无法从群组策略里筛选选择。这里
+// 按字段映射到正确路径：发信人组→sender、发信人 IP 组→ip、特征组→feature-groups。
+// 未列入的 group 面板字段（如 GeoIP 地区）暂无群组数据面，保持原状（纯文本键输入）。
+const GROUP_FIELD_META_SOURCE: Record<string, string> = {
+  sender_group: '/unified-rules/_meta/groups?type=sender',
+  sender_ip_group: '/unified-rules/_meta/groups?type=ip',
+  feature_group: '/unified-rules/_meta/feature-groups',
+};
+
+// select 面板里语义为「是 / 否」二值判定的布尔字段（如加密附件 is_encrypted_attachment、
+// ZIP 炸弹 is_zip_bomb、Mail From 为空 mailfrom_empty）。这些字段的 fieldDef 返回
+// type 'boolean'，配置面板据此渲染 BooleanValueSelect（是/否 固定下拉），而非
+// 结果码枚举或自由文本。其余 select 字段（spf/dkim/virus_scan 等结果码）仍为 enum。
+const BOOLEAN_SELECT_FIELDS = new Set<string>(['is_encrypted_attachment', 'is_zip_bomb', 'mailfrom_empty']);
+
+function fieldDefForPanel(field: string, panel: PanelKind): FieldDef {
+  const base = { label: field, min_stage: 'data', supported: true, available: true };
+  switch (panel) {
+    case 'number':
+      return { ...base, type: 'number', operators: ['gt', 'lt', 'eq', 'between'] };
+    case 'select':
+      // 二值判定字段（见 BOOLEAN_SELECT_FIELDS，如加密附件 is_encrypted_attachment /
+      // ZIP 炸弹 is_zip_bomb / Mail From 为空 mailfrom_empty）语义只有「是 / 否」，返回
+      // type 'boolean' 让 PanelBody 路由到 BooleanValueSelect（是/否 固定下拉，算子
+      // eq/ne），杜绝自由输入产生的 true/1/yes/加密 等脏值。其余 select 字段维持 enum
+      //（结果码枚举下拉，见 ConditionConfigPanel 的 ENUM_VALUES）。
+      if (BOOLEAN_SELECT_FIELDS.has(field)) {
+        return { ...base, type: 'boolean', operators: ['eq', 'ne'] };
+      }
+      return { ...base, type: 'enum', operators: ['in', 'not_in'] };
+    case 'group':
+    case 'featureGroup': {
+      const source = GROUP_FIELD_META_SOURCE[field];
+      // 真·群组字段：type 用 map_boolean，配置面板（PanelBody）据 `map_` 前缀路由到
+      // MapValueSection → MapKeySelect 渲染可筛选下拉，值为「命中/未命中」的组成员判定。
+      if (source) {
+        return { ...base, type: 'map_boolean', operators: ['eq', 'ne'], map_keys_source: source };
+      }
+      // 其余 group 面板字段维持既有行为（type 'map' 不匹配 `map_` 前缀 → 纯文本键输入）。
+      return { ...base, type: 'map', operators: ['in', 'not_in'], map_keys_source: field };
+    }
+    case 'orgDept':
+      // 发件组织：按组织通讯录部门层级匹配。type 用 'string'（非 map_，配置面板
+      // 走专门的 OrgDepartmentSection 部门树，不走 MapKeySelect），算子 within
+      // 承载「命中所选部门及其子孙」的多值判定。
+      return { ...base, type: 'string', operators: ['within'] };
+    case 'cidr':
+      return { ...base, type: 'cidr', operators: ['in_cidr', 'not_in_cidr'] };
+    case 'time':
+      return { ...base, type: 'time', operators: ['between'] };
+    case 'weekday':
+      return { ...base, type: 'enum', operators: ['in', 'not_in'] };
+    case 'mime':
+      return { ...base, type: 'string', operators: ['in', 'not_in'] };
+    case 'intentEngine':
+      // 意图引擎（综合研判，字段 cac_tag）：配置面板走专门的 IntentEngineSection
+      // （分类优先 / 分段阈值双模式，见 ConditionConfigPanel）。operator 白名单含
+      // within（分类命中意图集合）与 between（置信度落入区间）；type 'enum' 仅为占位，
+      // 真正的取值渲染由 catalogue panel 决定，不经此 type 分派。
+      return { ...base, type: 'enum', operators: ['within', 'between'] };
+    case 'text':
+    default:
+      return { ...base, type: 'string', operators: ['contains', 'not_contains', 'equals', 'regex'] };
+  }
+}
+
+const mockAdvancedFieldDefs: Record<string, FieldDef> = Object.fromEntries(
+  CONDITIONS.filter((c) => c.field !== null).map((c) => [
+    c.field as string,
+    fieldDefForPanel(c.field as string, c.panel),
+  ]),
+);
 
 // ─── 角色（RBAC）mock 数据 ──────────────────────────────────────────────
 // 平台/租户两套内置角色。`_level` 仅用于本地生成权限矩阵，不属于 Role 线上
@@ -416,6 +508,187 @@ const routes: Route[] = [
         email: 'zhangyunwei@example.com',
         lastLoginTime: '2026-07-28T08:30:00+08:00',
         lastLoginIp: '192.168.1.100',
+      },
+    }),
+  },
+
+  // ─── 个人中心：修改密码 ────────────────────────────────────────────────
+  // 默认返回成功（relogin: false）。如需测试旧密码错误场景，
+  // 可在 handler 中改为返回 status:400 + message:'Current password is incorrect'。
+  {
+    method: 'PUT',
+    pattern: '/auth/password',
+    handler: () => ({ status: 200, data: { relogin: false } }),
+  },
+
+  // ─── 个人中心：安全策略 ────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/profile/security-policy',
+    handler: () => ({
+      status: 200,
+      data: {
+        minLength: 10,
+        minCharClasses: 2,
+        historyLimit: 5,
+        reloginAfterPwdChange: false,
+        twoFactorRequired: false,
+        phoneBound: true,
+        emailBound: true,
+        smsChannelAvailable: true,
+      },
+    }),
+  },
+
+  // ─── 个人中心：二次认证 ────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/profile/2fa',
+    handler: () => ({
+      status: 200,
+      data: {
+        enabled: false,
+        method: '',
+        smsPhone: '',
+        emailMasked: '',
+        required: false,
+        smsChannelAvailable: true,
+      },
+    }),
+  },
+  {
+    method: 'PUT',
+    pattern: '/profile/2fa',
+    handler: () => ({ status: 200, data: {} }),
+  },
+  {
+    method: 'PUT',
+    pattern: '/profile/2fa/status',
+    handler: () => ({ status: 200, data: {} }),
+  },
+
+  // ─── 个人中心：发送验证码 / 绑定联系方式 ─────────────────────────────
+  {
+    method: 'POST',
+    pattern: '/profile/code',
+    handler: () => ({ status: 200, data: {} }),
+  },
+  {
+    method: 'POST',
+    pattern: '/profile/contact/bind',
+    handler: () => ({ status: 200, data: {} }),
+  },
+
+  // ─── 个人中心：会话管理 ────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/profile/devices',
+    handler: () => ({
+      status: 200,
+      data: {
+        items: [
+          {
+            session_id: 'mock-session-001',
+            device: 'macOS 14',
+            browser: 'Chrome 124',
+            ip: '192.168.1.100',
+            location: '中国上海',
+            login_time: '2026-07-28T08:30:00+08:00',
+            last_seen_at: '2026-07-28T10:15:00+08:00',
+            current: true,
+          },
+          {
+            session_id: 'mock-session-002',
+            device: 'Windows 11',
+            browser: 'Firefox 125',
+            ip: '10.0.0.42',
+            location: '中国北京',
+            login_time: '2026-07-25T14:00:00+08:00',
+            last_seen_at: '2026-07-26T09:30:00+08:00',
+            current: false,
+          },
+        ],
+      },
+    }),
+  },
+  {
+    method: 'POST',
+    pattern: /^\/profile\/devices\/[^/]+\/logout$/,
+    handler: () => ({ status: 200, data: {} }),
+  },
+  {
+    method: 'POST',
+    pattern: '/profile/devices/bulk',
+    handler: () => ({ status: 200, data: { count: 1 } }),
+  },
+
+  // ─── 个人中心：授信设备 ────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/profile/trusted-devices',
+    handler: () => ({
+      status: 200,
+      data: {
+        items: [
+          {
+            id: 1,
+            device: 'macOS 14',
+            browser: 'Chrome 124',
+            ip: '192.168.1.100',
+            created_at: '2026-06-01T10:00:00+08:00',
+            last_used_at: '2026-07-28T08:30:00+08:00',
+            expires_at: '2026-12-01T10:00:00+08:00',
+          },
+        ],
+      },
+    }),
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/profile\/trusted-devices\/\d+$/,
+    handler: () => ({ status: 200, data: {} }),
+  },
+
+  // ─── 个人中心：登录历史 ────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: /^\/profile\/login-history/,
+    handler: () => ({
+      status: 200,
+      data: {
+        items: [
+          {
+            id: 1,
+            time: '2026-07-28T08:30:00+08:00',
+            ip: '192.168.1.100',
+            client: 'Chrome 124 / macOS 14',
+            location: '中国上海',
+            result: 'success',
+            abnormal: false,
+          },
+          {
+            id: 2,
+            time: '2026-07-25T14:00:00+08:00',
+            ip: '10.0.0.42',
+            client: 'Firefox 125 / Windows 11',
+            location: '中国北京',
+            result: 'success',
+            abnormal: false,
+          },
+          {
+            id: 3,
+            time: '2026-07-22T09:10:00+08:00',
+            ip: '203.0.113.55',
+            client: 'Chrome 123 / Linux',
+            location: '未知地区',
+            result: 'fail',
+            abnormal: true,
+            abnormal_reason: '密码错误超过 5 次',
+          },
+        ],
+        total: 3,
+        page: 1,
+        page_size: 20,
       },
     }),
   },
@@ -1284,6 +1557,27 @@ const routes: Route[] = [
     }),
   },
 
+  // ─── 群组元信息（发信人组等，高级过滤规则 group 面板下拉数据源）────────────────
+  // 复用群组管理 / 群组策略同源的 mockSenderFilterGroupsList，按 type 派生。只接管
+  // sender/recipient/content；type=ip 由上面的 mockIPGroupsMetaList 接管（更完整的
+  // 独立列表），互不重叠。这样「发信人组」条件即可从群组策略的发信人组里筛选选择。
+  {
+    method: 'GET',
+    pattern: '/unified-rules/_meta/groups',
+    matchQuery: (q) => /(^|&)type=(sender|recipient|content)($|&)/.test(q),
+    handler: (req) => {
+      const type = (/(?:^|&)type=(\w+)/.exec(rawQuery(req.path))?.[1] ?? 'sender') as GroupType;
+      return { status: 200, data: mockGroupsMetaByType(type) };
+    },
+  },
+
+  // ─── 特征组元信息（真实端点 GET /unified-rules/_meta/feature-groups）──────────
+  {
+    method: 'GET',
+    pattern: '/unified-rules/_meta/feature-groups',
+    handler: () => ({ status: 200, data: mockGroupsMetaByType('feature') }),
+  },
+
   // ─── RBL 过滤（mock）────────────────────────────────────────────────────────
   {
     method: 'GET',
@@ -1448,6 +1742,14 @@ const routes: Route[] = [
   // 不同的查询），其余模块的 `/unified-rules` GET 一律不 mockable，继续放行到
   // 真实后端 —— 保持它们 "接口缺失 → 由后端返回真实数据/错误" 的原有行为，
   // 不再落到本路由的空壳。
+  // 高级过滤规则条件配置的字段注册表（GET /unified-rules/field-definitions）。
+  // 精确 path，pathname 已 strip query，无需 matchQuery。返回合成的可用字段集，
+  // 让 mock 下条件目录不再全是 "即将上线"。
+  {
+    method: 'GET',
+    pattern: '/unified-rules/field-definitions',
+    handler: () => ({ status: 200, data: { fields: mockAdvancedFieldDefs } }),
+  },
   {
     method: 'GET',
     pattern: '/unified-rules',
@@ -1645,7 +1947,7 @@ const routes: Route[] = [
     handler: (req) => ({ status: 200, data: mockExecuteContentRulesImport(req.body) }),
   },
   // 邮件路由出站规则（mock id 段 5000-5999）：必须排在下面通用的无 scope
-  // DELETE 兜底之前，否则会被那条更早注册、同样匹配 \d+ 的路由吞掉，
+  // DELETE 兜底之前，否则会被那条更早注册的同样匹配 \d+ 的路由吞掉，
   // 导致状态假装删除成功但 outboundRulesState 从未真正变化。
   {
     method: 'DELETE',
@@ -2417,6 +2719,24 @@ const routes: Route[] = [
     method: 'POST',
     pattern: '/mail-routing/connectivity-test',
     handler: () => ({ status: 200, data: mockConnectivityTest() }),
+  },
+  // GT-12571：Mock 创建用户（POST /users）——返回 201 + 最小 User 对象，
+  // 使密码确认 Dialog 可以在 Mock 模式下正常弹出以供规格截图验证。
+  {
+    method: 'POST',
+    pattern: '/users',
+    handler: (req) => ({
+      status: 201,
+      data: {
+        id: Date.now(),
+        username: (req.body as Record<string, string>)?.username ?? 'mock-user',
+        role: 'system_admin' as const,
+        tenant_id: null,
+        status: 'normal',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    }),
   },
 ];
 

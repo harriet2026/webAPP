@@ -38,7 +38,7 @@ import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useApiRequest } from '@/lib/api/client';
 import { getModuleEnabled, listAdvancedRules } from '@/lib/api/advanced-rules';
-import { getSecurityModules } from '@/lib/api/security-modules';
+import { getSecurityModules, type SecurityModulePage } from '@/lib/api/security-modules';
 import { getSimilarDetection } from '@/lib/api/similar-detection';
 import { useAgentCenterOverview } from '@/hooks/use-agent-center-overview';
 import { resolveAgentPresentation } from '@/lib/agent-center/presentation';
@@ -245,10 +245,13 @@ export function PolicyPipelinePage() {
   // in <ModuleMasterSwitch page="similar_detection">). The SimilarDetectionConfig
   // object exposed by GET /security/similar-detection does NOT carry the enabled
   // flag -- it's a config_overrides-level toggle, same as advanced_rules.
+  // GT-12731：该映射不仅供 stage5 圆点使用，还作为 stage3（url/attachment/intentEngine）
+  // 左导航圆点/摘要在子页真实启用态加载完成前的「兜底真值」，避免默认按启用渲染再闪回。
+  // 因此不再用 stage5Active 门控——抽屉一打开就取数，让 stage3 首帧也能拿到真值。
   const { data: securityModulesMap } = useQuery({
     queryKey: ['security-modules'],
     queryFn: () => getSecurityModules(apiRequest),
-    enabled: stage5Active,
+    enabled: drawerOpen,
   });
   const similarDetectionEnabled = securityModulesMap?.similar_detection ?? true;
   const comprehensiveStrategyEnabled = securityModulesMap?.comprehensive_strategy ?? true;
@@ -681,10 +684,22 @@ export function PolicyPipelinePage() {
     // stage5: real enabled state when known (advancedRules/similarDetection),
     // else falls back to item.functional (mailMarking — no enabled API, see above).
     const stage5Enabled = isStage5 ? stage5EnabledByKey[item.key as Stage5PolicyKey] : undefined;
-    const urlEnabled = item.key === 'url' ? urlModuleEnabled : undefined;
-    const attachmentModuleEnabled = item.key === 'attachment' ? attachmentEnabled : undefined;
+    // GT-12731：stage3（url/attachment/intentEngine）在对应子页把真实启用态回传前，
+    // 本地状态为 undefined。此前会退回 item.functional（恒 true），使「未启用」模块的
+    // 圆点先亮起、子页加载完成后再闪回熄灭。改为优先用父级预取的 securityModulesMap
+    // 作为加载期兜底真值，让首帧就正确。子页回传后（含未保存草稿）本地状态优先。
+    const stage3ModuleKey: Record<string, SecurityModulePage> = {
+      url: 'url_protection',
+      attachment: 'attachment_security',
+      intentEngine: 'intent_engine',
+    };
+    const stage3Fallback = stage3ModuleKey[item.key] !== undefined
+      ? securityModulesMap?.[stage3ModuleKey[item.key]]
+      : undefined;
+    const urlEnabled = item.key === 'url' ? (urlModuleEnabled ?? stage3Fallback) : undefined;
+    const attachmentModuleEnabled = item.key === 'attachment' ? (attachmentEnabled ?? stage3Fallback) : undefined;
     // html_spec 宿主对齐（Task 10）：意图引擎圆点跟随总开关启用态，同 url 模块模式。
-    const intentEnabled = item.key === 'intentEngine' ? intentEngineEnabled : undefined;
+    const intentEnabled = item.key === 'intentEngine' ? (intentEngineEnabled ?? stage3Fallback) : undefined;
     const dotOn = stage5Enabled !== undefined ? stage5Enabled
       : urlEnabled !== undefined ? urlEnabled
       : attachmentModuleEnabled !== undefined ? attachmentModuleEnabled
@@ -694,12 +709,17 @@ export function PolicyPipelinePage() {
     // 意图引擎摘要 启用=「涉黄赌/涉政/钓鱼/垃圾/订阅」，禁用=「未启用」（Task 10）
     // 相似检测摘要 启用=「窗口{N}分钟 / 阈值{M}%」（Task 13），禁用=「已禁用」（复用 common.disabled，
     // demo D-8 未新造 key）；配置 query 未就绪前退回静态描述文案，避免摘要闪烁。
+    // GT-12731：摘要的启用/未启用判断同样以「本地状态 ?? 父级兜底真值」为准，
+    // 使加载期首帧就显示正确的摘要（未启用模块直接显示「未启用」，不再先显示能力摘要再闪回）。
+    const urlEnabledForSummary = urlModuleEnabled ?? (item.key === 'url' ? stage3Fallback : undefined);
+    const attachmentEnabledForSummary = attachmentEnabled ?? (item.key === 'attachment' ? stage3Fallback : undefined);
+    const intentEnabledForSummary = intentEngineEnabled ?? (item.key === 'intentEngine' ? stage3Fallback : undefined);
     const summaryText = item.key === 'url'
-      ? (urlModuleEnabled === false ? t('pipeline.urlNavSummaryDisabled') : t('pipeline.urlNavSummary'))
+      ? (urlEnabledForSummary === false ? t('pipeline.urlNavSummaryDisabled') : t('pipeline.urlNavSummary'))
       : item.key === 'attachment'
-        ? (attachmentEnabled === false ? t('securityModules.disabled') : t('pipeline.attachmentNavSummary'))
+        ? (attachmentEnabledForSummary === false ? t('securityModules.disabled') : t('pipeline.attachmentNavSummary'))
       : item.key === 'intentEngine'
-        ? (intentEngineEnabled === false ? t('pipeline.intentEngineNavSummaryDisabled') : t('pipeline.intentEngineNavSummary'))
+        ? (intentEnabledForSummary === false ? t('pipeline.intentEngineNavSummaryDisabled') : t('pipeline.intentEngineNavSummary'))
         : item.key === 'similarDetection'
           ? (similarDetectionEnabled === false
               ? t('common.disabled')

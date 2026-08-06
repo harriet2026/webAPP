@@ -6,6 +6,8 @@ import {
   defaultModeForField,
   MATCH_MODE_TO_OPERATOR,
   OPERATOR_TO_MATCH_MODE,
+  parseIntentEngineList,
+  encodeIntentEngineList,
   type ConditionLeaf,
   type ConditionGroups,
   type MatchMode,
@@ -290,5 +292,62 @@ describe('defaultModeForField', () => {
 
   it('ignores a field override whose operator is unsupported and falls through to the type preference', () => {
     expect(defaultModeForField(fd({ type: 'number', operators: ['eq'] }), 'send_time')).toBe('equals');
+  });
+});
+
+// 意图引擎取值编解码（GT-12750 契约裁决：leaf.value 为 JSON 数组，废弃早期
+// 「intent:mode[:lo,hi];...」自定义文法——分隔符与后端 within 逗号拆分冲突）。
+// 面板与表达式预览共用，往返必须无损；lo/hi 以字符串原样往返（编辑中间态如
+// "0." 不能被数字化毁掉）。
+describe('intent engine multi-intent list codec (JSON)', () => {
+  it('round-trips multiple intents each with its own mode/threshold', () => {
+    const s = encodeIntentEngineList([
+      { intent: 'phishing', mode: 'threshold', lo: '0.6', hi: '0.9' },
+      { intent: 'spam', mode: 'classification', lo: '', hi: '' },
+    ]);
+    expect(JSON.parse(s)).toEqual([
+      { intent: 'phishing', mode: 'threshold', lo: '0.6', hi: '0.9' },
+      { intent: 'spam', mode: 'classification' },
+    ]);
+    const back = parseIntentEngineList(s);
+    expect(back).toHaveLength(2);
+    expect(back[0]).toMatchObject({ intent: 'phishing', mode: 'threshold', lo: '0.6', hi: '0.9' });
+    expect(back[1]).toMatchObject({ intent: 'spam', mode: 'classification' });
+  });
+
+  it('treats an empty value as an empty list', () => {
+    expect(parseIntentEngineList('')).toEqual([]);
+    expect(encodeIntentEngineList([])).toBe('');
+  });
+
+  it('dedupes the same intent, keeping the last-written entry', () => {
+    const back = parseIntentEngineList(JSON.stringify([
+      { intent: 'phishing', mode: 'classification' },
+      { intent: 'phishing', mode: 'threshold', lo: '0.2', hi: '0.8' },
+    ]));
+    expect(back).toHaveLength(1);
+    expect(back[0]).toMatchObject({ intent: 'phishing', mode: 'threshold', lo: '0.2', hi: '0.8' });
+  });
+
+  it('drops empty/blank entries and unselected intents', () => {
+    const back = parseIntentEngineList(JSON.stringify([
+      { intent: 'phishing', mode: 'classification' },
+      {},
+      { intent: '', mode: 'threshold', lo: '0.1', hi: '0.2' },
+      { intent: 'spam', mode: 'classification' },
+    ]));
+    expect(back.map((e) => e.intent)).toEqual(['phishing', 'spam']);
+  });
+
+  it('fails closed on malformed / non-JSON / legacy-grammar values', () => {
+    expect(parseIntentEngineList('phishing:classification')).toEqual([]);
+    expect(parseIntentEngineList('{"intent":"phishing"}')).toEqual([]);
+    expect(parseIntentEngineList('[not json')).toEqual([]);
+  });
+
+  it('preserves in-progress threshold input verbatim (string round-trip)', () => {
+    const s = encodeIntentEngineList([{ intent: 'spam', mode: 'threshold', lo: '0.', hi: '' }]);
+    const back = parseIntentEngineList(s);
+    expect(back[0]).toMatchObject({ lo: '0.', hi: '' });
   });
 });

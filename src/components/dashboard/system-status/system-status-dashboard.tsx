@@ -12,9 +12,7 @@
 //   1. Health banner (full width) + KPI grid (self-collapsing, see
 //      kpi-cards.tsx's own `showInfra`-derived column count — this component
 //      does not re-derive that grid).
-//   2. "第二屏": trend (xl:col-span-2) + todo-alerts, `xl:grid-cols-3`.
-//      The xl breakpoint keeps the row stacked while the 256px sidebar leaves
-//      too little real page-body width for three useful columns.
+//   2. "第二屏": ThreatTrend 独占全宽（已移除 TodoAlerts）。
 //   3. Bottom overview (§6/§7/§8): agent-overview (AI only) + threat-top5 +
 //      system-health-card (platform/infra only), `lg:grid-cols-${overviewCols}`
 //      from Task 5's `deriveVisibility` (3 when infra visible, 2 otherwise).
@@ -39,7 +37,6 @@ import { useSystemStatusVisibility, overviewGridClass } from './visibility';
 import { HealthBanner } from './health-banner';
 import { KpiCards } from './kpi-cards';
 import { ThreatTrend } from './threat-trend';
-import { TodoAlerts } from './todo-alerts';
 import { AgentOverview } from './agent-overview';
 import { ThreatTop5 } from './threat-top5';
 import { SystemHealthCard } from './system-health-card';
@@ -115,12 +112,7 @@ export function SystemStatusDashboard() {
 
       <KpiCards data={data} showInfra={showInfra} />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2">
-          <ThreatTrend trend={data.threatTrend} isLoading={data.isLoading} isError={data.isError} />
-        </div>
-        <TodoAlerts alerts={data.alerts} isLoading={data.isLoading} />
-      </div>
+      <ThreatTrend trend={data.threatTrend} isLoading={data.isLoading} isError={data.isError} />
 
       <div className={`grid grid-cols-1 gap-6 ${overviewGrid}`}>
         {showAgents && <AgentOverview agents={data.agents} isLoading={data.isLoading} />}

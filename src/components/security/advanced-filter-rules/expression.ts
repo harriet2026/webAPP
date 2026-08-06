@@ -1,5 +1,5 @@
 import { CONDITIONS, type ConditionDef, type PanelKind } from './catalogue';
-import { OPERATOR_TO_MATCH_MODE, type ConditionLeaf, type ConditionGroups } from './serde';
+import { OPERATOR_TO_MATCH_MODE, parseIntentEngineList, type ConditionLeaf, type ConditionGroups } from './serde';
 
 // expression.ts — pure functions backing the right-column "logic expression
 // preview" of the three-column conditions editor (layer-3-conditions.html
@@ -43,7 +43,55 @@ export interface LeafSummary {
   /** How many trailing values are folded into "+N" beyond the first two shown. */
   foldedCount: number;
   incomplete: boolean;
+  /**
+   * 已翻译的精细诊断文案列表：指出「缺哪个字段 / 合法区间 / 超出有效范围」等，
+   * 供预览逐条展示，替代原先扁平的「配置不完整」。incomplete 为真时至少含一条
+   * 阻断性原因；即使 incomplete 为假，也可能含「超出建议范围」这类提示性原因。
+   */
+  incompleteReasons: string[];
   exclude: boolean;
+}
+
+// 数值面板的取值诊断：返回 { incomplete, reasons }。incomplete 表示存在阻断性
+// 缺失（必填阈值/区间端点为空）；reasons 为逐条已翻译文案，含缺失与超范围提示。
+// def.meta 提供 min/max 用于范围校验（缺省则跳过范围检查）。
+function diagnoseNumber(
+  leaf: ConditionLeaf,
+  meta: { min?: number; max?: number } | undefined,
+  t: (key: string, values?: Record<string, string | number>) => string,
+): { incomplete: boolean; reasons: string[] } {
+  const reasons: string[] = [];
+  const inRange = (n: number) =>
+    (meta?.min === undefined || n >= meta.min) && (meta?.max === undefined || n <= meta.max);
+  const rangeText = () =>
+    t('incompleteReasonRange', {
+      min: meta?.min ?? Number.NEGATIVE_INFINITY,
+      max: meta?.max ?? Number.POSITIVE_INFINITY,
+    });
+
+  if (leaf.operator === 'between') {
+    const [loRaw, hiRaw] = leaf.value.split(',');
+    const lo = (loRaw ?? '').trim();
+    const hi = (hiRaw ?? '').trim();
+    if (lo === '' || hi === '') {
+      reasons.push(t('incompleteReasonBetween'));
+      return { incomplete: true, reasons };
+    }
+    const loN = Number(lo);
+    const hiN = Number(hi);
+    if (Number.isFinite(loN) && Number.isFinite(hiN) && loN > hiN) reasons.push(t('incompleteReasonBetweenOrder'));
+    if ((Number.isFinite(loN) && !inRange(loN)) || (Number.isFinite(hiN) && !inRange(hiN))) reasons.push(rangeText());
+    return { incomplete: false, reasons };
+  }
+
+  const raw = (leaf.value.split(',')[0] ?? '').trim();
+  if (raw === '') {
+    reasons.push(t('incompleteReasonThreshold'));
+    return { incomplete: true, reasons };
+  }
+  const n = Number(raw);
+  if (Number.isFinite(n) && !inRange(n)) reasons.push(rangeText());
+  return { incomplete: false, reasons };
 }
 
 
@@ -56,7 +104,10 @@ export function mapKeyDisplayName(leaf: ConditionLeaf): string {
   return key.startsWith('grp:') ? key.slice('grp:'.length) : key;
 }
 
-export function summarizeLeaf(leaf: ConditionLeaf, t: (key: string) => string): LeafSummary {
+export function summarizeLeaf(
+  leaf: ConditionLeaf,
+  t: (key: string, values?: Record<string, string | number>) => string,
+): LeafSummary {
   const def = defFor(leaf);
   const panel = def?.panel;
   const envelope = !!def?.envelope;
@@ -73,9 +124,16 @@ export function summarizeLeaf(leaf: ConditionLeaf, t: (key: string) => string): 
   const operatorLabel = mode ? t(`v3Conditions.matchModes.${mode}`) : leaf.operator;
 
   let values: string[];
-  if (leaf.operator === 'between') {
+  if (panel === 'intentEngine') {
+    // 意图引擎多意图（每意图单条）：每个意图渲染为一个可读片段——分类优先为「意图」，
+    // 分段阈值为「意图(lo~hi)」。前置于 between/within 通用分支，避免
+    // JSON 数组编码串被通用 split 误拆
+    // （见 serde.encodeIntentEngineList）。
+    const list = parseIntentEngineList(leaf.value);
+    values = list.map((e) => (e.mode === 'threshold' ? `${e.intent}(${e.lo}~${e.hi})` : e.intent));
+  } else if (leaf.operator === 'between') {
     values = leaf.value.split(',').map((v) => v.trim());
-  } else if (panel === 'text' || panel === 'mime' || panel === 'cidr' || panel === 'weekday') {
+  } else if (panel === 'text' || panel === 'mime' || panel === 'cidr' || panel === 'weekday' || panel === 'orgDept') {
     values = splitDisplayValues(leaf.value);
   } else {
     values = leaf.value.trim() === '' ? [] : [leaf.value.trim()];
@@ -84,8 +142,47 @@ export function summarizeLeaf(leaf: ConditionLeaf, t: (key: string) => string): 
   const shown = values.slice(0, 2);
   const foldedCount = values.length > 2 ? values.length - 2 : 0;
 
-  const needsValue = panelNeedsValueForCompleteness(panel);
-  const incomplete = needsValue && values.every((v) => v.trim() === '');
+  // 诊断：数值面板走 diagnoseNumber（修复此前 number 恒判「完整」的缺陷——空
+  // 阈值/缺区间端点现在会被判为不完整并给出具体原因 + 超范围提示）；其余面板
+  // 沿用原「必填且全空即不完整」规则，并补一条通用缺失原因文案。
+  let incomplete: boolean;
+  let incompleteReasons: string[];
+  if (panel === 'number') {
+    const diag = diagnoseNumber(leaf, def?.meta, t);
+    incomplete = diag.incomplete;
+    incompleteReasons = diag.reasons;
+  } else if (panel === 'intentEngine') {
+    // 多意图（每意图单条）：至少配置 1 个意图，否则阻断性不完整。任一分段阈值条目
+    // 区间端点缺失 → 阻断；端点齐全的条目再累计「大小顺序 / 超出 [0,1] 范围」提示性
+    // 原因（复用既有 i18n）。任一条目不完整则整条不完整。
+    const list = parseIntentEngineList(leaf.value);
+    if (list.length === 0) {
+      incomplete = true;
+      incompleteReasons = [t('incompleteReasonMissingValue')];
+    } else {
+      let blocking = false;
+      const reasons = new Set<string>();
+      for (const e of list) {
+        if (e.mode !== 'threshold') continue;
+        if (e.lo === '' || e.hi === '') {
+          blocking = true;
+          reasons.add(t('incompleteReasonBetween'));
+          continue;
+        }
+        const loN = Number(e.lo);
+        const hiN = Number(e.hi);
+        if (Number.isFinite(loN) && Number.isFinite(hiN) && loN > hiN) reasons.add(t('incompleteReasonBetweenOrder'));
+        const outOfRange = (n: number) => Number.isFinite(n) && (n < 0 || n > 1);
+        if (outOfRange(loN) || outOfRange(hiN)) reasons.add(t('incompleteReasonRange', { min: 0, max: 1 }));
+      }
+      incomplete = blocking;
+      incompleteReasons = Array.from(reasons);
+    }
+  } else {
+    const needsValue = panelNeedsValueForCompleteness(panel);
+    incomplete = needsValue && values.every((v) => v.trim() === '');
+    incompleteReasons = incomplete ? [t('incompleteReasonMissingValue')] : [];
+  }
 
   return {
     leaf,
@@ -98,6 +195,7 @@ export function summarizeLeaf(leaf: ConditionLeaf, t: (key: string) => string): 
     values: shown,
     foldedCount,
     incomplete,
+    incompleteReasons,
     exclude: leaf.exclude,
   };
 }

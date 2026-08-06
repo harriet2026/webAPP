@@ -94,7 +94,6 @@ const TENANT_SETTINGS: TenantAttachmentSecuritySettings = {
     ocr_mode: 'none',
     ocr_max_count: 2,
     qr_mode: 'light',
-    qr_barcode_exempt: true,
     qr_max_count: 5,
     qr_light_action: 'quarantine',
     qr_deep_exceed_action: 'accept',

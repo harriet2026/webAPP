@@ -7,7 +7,6 @@ import { AntivirusTab } from './AntivirusTab';
 const mocks = vi.hoisted(() => ({
   apiRequest: vi.fn(),
   getAntivirusStatus: vi.fn(),
-  switcherEnabled: true,
 }));
 
 vi.mock('next-intl', () => ({
@@ -15,10 +14,6 @@ vi.mock('next-intl', () => ({
 }));
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
-
-vi.mock('@/contexts/product-form-context', () => ({
-  useProductForm: () => ({ switcherEnabled: mocks.switcherEnabled }),
-}));
 
 vi.mock('@/lib/api/client', () => ({
   useApiRequest: () => ({ apiRequest: mocks.apiRequest }),
@@ -29,7 +24,7 @@ vi.mock('@/lib/api/attachment-security', () => ({
   triggerAntivirusUpdate: vi.fn(),
 }));
 
-function renderTab() {
+function renderTab(hidePlatformConfig: boolean) {
   render(
     <TooltipProvider>
       <AntivirusTab
@@ -37,23 +32,25 @@ function renderTab() {
         actions={{ virus_action: 'quarantine', timeout_action: 'accept' }}
         onChange={vi.fn()}
         onActionsChange={vi.fn()}
+        hidePlatformConfig={hidePlatformConfig}
       />
     </TooltipProvider>,
   );
 }
 
 beforeEach(() => {
-  mocks.switcherEnabled = true;
   mocks.getAntivirusStatus.mockReset();
   mocks.getAntivirusStatus.mockReturnValue(new Promise(() => {}));
 });
 
-describe('AntivirusTab product-form switcher gate', () => {
-  it('hides AV server and virus database configuration when the switcher is disabled', () => {
-    mocks.switcherEnabled = false;
-    renderTab();
+// GT-12754：平台两段（服务器配置 + 病毒库状态）按 hidePlatformConfig 门控——
+// 多租户形态由 AttachmentSecurityPage 传 true（唯一入口改为平台安全策略 → 反病毒引擎），
+// 单租户形态传 false 在本页内联展示。
+describe('AntivirusTab platform-config gate', () => {
+  it('hides AV server and virus database sections when platform-managed (multi-tenant)', () => {
+    renderTab(true);
 
-    expect(screen.queryByTestId('antivirus-server-config')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('antivirus-server-fields')).not.toBeInTheDocument();
     expect(screen.queryByTestId('antivirus-host')).not.toBeInTheDocument();
     expect(screen.queryByTestId('antivirus-port')).not.toBeInTheDocument();
     expect(screen.queryByTestId('antivirus-status-section')).not.toBeInTheDocument();
@@ -62,10 +59,10 @@ describe('AntivirusTab product-form switcher gate', () => {
     expect(mocks.getAntivirusStatus).not.toHaveBeenCalled();
   });
 
-  it('shows AV server and virus database configuration when the switcher is enabled', () => {
-    renderTab();
+  it('shows AV server and virus database sections inline for single-tenant forms', () => {
+    renderTab(false);
 
-    expect(screen.getByTestId('antivirus-server-config')).toBeInTheDocument();
+    expect(screen.getByTestId('antivirus-server-fields')).toBeInTheDocument();
     expect(screen.getByTestId('antivirus-host')).toHaveValue('av-server');
     expect(screen.getByTestId('antivirus-port')).toHaveValue('6600');
     expect(screen.getByTestId('antivirus-status-section')).toBeInTheDocument();

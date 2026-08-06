@@ -2200,6 +2200,12 @@
       "signed": "Signed",
       "notSigned": "Not signed"
     },
+    "originFilter": {
+      "label": "Mail source",
+      "customer": "Customer mail",
+      "gateway": "Gateway-generated",
+      "all": "All"
+    },
     "similarFilter": {
       "active": "Similar detection matched",
       "clear": "Clear filter"
@@ -2509,6 +2515,14 @@
   },
   "users": {
     "tenantMustChangeNotice": "New accounts use a temporary password and must change it at first login (platform security contract)",
+    "createdDialog": {
+      "title": "User Created",
+      "description": "Account \"{username}\" has been created. Please share the initial password below with the user — they must change it at first login.",
+      "passwordLabel": "Initial Password",
+      "copyBtn": "Copy",
+      "hint": "Make sure to copy and share the password before closing. It will not be shown again.",
+      "confirmBtn": "Got it"
+    },
     "resetPassword": {
       "title": "Reset Password",
       "description": "Set a new password for administrator \"{username}\". They must sign in with the new password afterwards.",
@@ -2996,6 +3010,8 @@
       "strength3": "Strong",
       "reloginHint": "Password changed. Please log in again.",
       "changed": "Password changed",
+      "changedDesc": "Your password has been updated. Keep it safe.",
+      "done": "Done",
       "incorrect": "Current password is incorrect",
       "changeFailed": "Password change failed"
     },
@@ -4341,13 +4357,13 @@
     "actionTagDeliver": "Tag and deliver",
     "actionTagDeliverHint": "Add a message header, then deliver",
     "actionIsolate": "Isolate",
-    "actionIsolateHint": "Move the message to quarantine",
+    "actionIsolateHint": "The message enters quarantine; an admin can review it and decide whether to release it",
     "actionReview": "Review",
-    "actionReviewHint": "Hold the message for manual review",
-    "actionBlock": "Block",
-    "actionBlockHint": "Reject the message during SMTP",
+    "actionReviewHint": "The message is delivered normally and an audit log entry is written for later review by the admin",
+    "actionBlock": "Reject",
+    "actionBlockHint": "Return an SMTP rejection response to the sender; the message does not enter the system",
     "actionDiscard": "Discard",
-    "actionDiscardHint": "Silently discard the message",
+    "actionDiscardHint": "Silently discard the message; the sender receives a delivery-success response but the message is actually dropped",
     "scopeHeader": "Header",
     "scopeDisplaySubject": "Subject",
     "scopeDisplayBody": "Body",
@@ -5031,6 +5047,7 @@
       "configured": "Configured",
       "notConfigured": "Not configured",
       "hostRequired": "Antivirus server host is required",
+      "platformManagedHint": "The antivirus server and virus database are configured centrally by the platform administrator under \"Platform Security Policy → Antivirus Engine\". Only this tenant's disposition actions are set here.",
       "actualCapabilityHint": "Shows the generic virus-scanning capability currently available from attachd without inventing vendor engine status",
       "updateSuccess": "Virus database update requested",
       "updateFailed": "Virus database update failed",
@@ -5038,13 +5055,13 @@
     },
     "imageDetect": {
       "ocrDetection": "Image OCR Detection",
-      "ocrSendHint": " (Deep detection recommended for outbound to prevent screenshot leaks)",
+      "ocrSendHint": " (Recommended for outbound to prevent screenshot leaks)",
       "detectionMode": "Detection Mode",
       "ocrLimit": "Detection Limit (prevent performance exhaustion)",
+      "ocrLimitDisabledHint": "Configurable after selecting \"Detection\"",
       "attachments": "attachments",
       "ocrMode_none": "No Detection",
-      "ocrMode_light": "Light Detection (Print only)",
-      "ocrMode_deep": "Deep Detection (Handwritten + Print, recommended for outbound)",
+      "ocrMode_light": "Detection",
       "qrDetection": "QR Code Detection",
       "qrMode_none": "No Detection",
       "qrMode_light": "Light Detection - Block on QR code detected",
@@ -5057,7 +5074,6 @@
       "actionSideline": "Review",
       "actionReject": "Block",
       "actionDiscard": "Discard",
-      "barcodeExempt": "Barcode Exempt: Linear barcodes (Code128/EAN) not treated as QR codes",
       "urlDetection": "URL Detection & Protection",
       "expandShortLink": "Auto-expand short links",
       "keywordFilter": "Content Keyword Filter",
@@ -5071,13 +5087,10 @@
       "lowRisk": "Low Risk (Subscription)",
       "advancedRule": "Advanced Rules",
       "advancedRuleHint": "Requires 'Pipeline Stage 5 - Advanced Rules' module enabled",
-      "arbitration": "Result Arbitration Strategy",
-      "highestPriority": "Execute highest priority action",
-      "firstMatch": "Execute first match in module order",
       "detectLimit": "Detection Limit",
       "items": "items",
       "exceedAction": "Exceed Limit Action",
-      "passWarn": "Proceed to next step",
+      "passWarn": "Continue to next step",
       "isolateFallback": "Quarantine",
       "enable": "Enable",
       "ocrSection": "OCR Configuration",
@@ -5086,7 +5099,6 @@
       "qrSection": "QR Code Detection",
       "qrMode": "QR Mode",
       "qrMaxCount": "QR Max Count",
-      "qrBarcodeExempt": "Barcode Exempt",
       "qrDeepRoutesSection": "QR Deep Route Configuration",
       "urlCheck": "URL Check",
       "urlUnshorten": "URL Unshorten",
@@ -5101,7 +5113,6 @@
       "mode_light": "Light",
       "mode_deep": "Deep",
       "pending": "Coming Soon",
-      "ocrMode_deep_hint": "Deep detection recognizes both handwritten and printed text. Recommended for outbound direction to prevent screenshot leaks. Results are handled according to the Detection Limit setting below.",
       "exceedActionHint_pass": "QR code images exceeding the detection limit will skip deep detection and proceed to the next stage.",
       "exceedActionHint_quarantine": "QR code images exceeding the detection limit will be quarantined immediately without further processing."
     },
@@ -5152,10 +5163,17 @@
     "actions": {
       "quarantine": "Quarantine",
       "audit": "Review",
-      "reject": "Block",
+      "reject": "Reject",
       "discard": "Discard",
       "accept": "Continue pipeline",
       "partial_skip": "Skip excess items"
+    },
+    "actionDesc": {
+      "quarantine": "Message is placed in quarantine; admin can release or delete it",
+      "audit": "Message enters the review queue; delivered or returned after manual approval",
+      "reject": "Rejected at SMTP stage; sender receives a bounce notification (452/550)",
+      "discard": "Silently dropped; sender has no awareness and receives no bounce",
+      "accept": "No blocking action taken; message continues to the next inspection stage"
     },
     "tooltips": {
       "attachmentCount": "Number of attachments per message admitted to scanning; -1 means unlimited",
@@ -5166,9 +5184,8 @@
       "antivirusHost": "Address of the generic AV service used by attachd",
       "virusAction": "Action taken after a virus is positively detected",
       "antivirusTimeout": "Action taken when the AV service times out or is unavailable",
-      "ocrMode": "Light mode recognizes print; deep mode recognizes handwritten and printed content",
+      "ocrMode": "Detects and recognizes printed text content in images",
       "qrMode": "Light mode acts immediately; deep mode decodes QR content and routes it to downstream modules",
-      "arbitration": "How the final action is selected when multiple downstream modules match",
       "qrLimit": "Decode at most 1–50 QR codes per message",
       "encryptedMode": "Choose whether to detect and whether to attempt decrypting encrypted attachments",
       "decryptFailAction": "Action taken when no valid password is found or decryption fails"
@@ -6472,6 +6489,11 @@
     "description": "Flexible filtering rules based on multi-condition combinations",
     "moduleDescription": "Multi-dimensional condition combination filtering, supporting {count} condition types with AND/OR logic",
     "incompleteCondition": "[Not configured]",
+    "incompleteReasonMissingValue": "Missing value: please enter the match value for this condition",
+    "incompleteReasonThreshold": "Missing threshold: please enter a numeric threshold",
+    "incompleteReasonBetween": "Incomplete range: please enter both the minimum and maximum",
+    "incompleteReasonBetweenOrder": "Invalid range: the minimum should not exceed the maximum",
+    "incompleteReasonRange": "Out of valid range: please enter a value between {min} and {max}",
     "moduleEnabled": "Module Enabled",
     "moduleDisabled": "Module Disabled",
     "moduleDisabledDesc": "Module is disabled, rules will not participate in mail filtering",
@@ -6548,7 +6570,6 @@
       "upcoming": "Upcoming",
       "storedNotWiredHint": "This addon is stored but its runtime engine is not yet available.",
       "incompatibleWithAction": "Incompatible with selected action",
-      "externalReminderTemplate": "Template",
       "externalReminderTemplateDefault": "Default",
       "detailedLog": "Detailed Log",
       "detailedLogDesc": "Log detailed email interception info",
@@ -6620,15 +6641,8 @@
       "adminNotifyTemplate": "Notification Template",
       "adminNotifyTemplateDefault": "Default Alert Template",
       "deleteAttachmentExceptionDomainGroup": "Domain Group Whitelist",
-      "disclaimerTemplate": "Disclaimer Template",
-      "disclaimerTemplateStandard": "Standard Template",
-      "disclaimerTemplateLegal": "Legal Template",
-      "disclaimerTemplateCustom": "Custom",
       "emailTagStyle": "Tag Style",
       "externalReminderAmberHint": "External reminders apply only to mail identified as from an external sender",
-      "externalReminderTemplateStandard": "Standard Template",
-      "externalReminderTemplateSecurity": "Security Reminder",
-      "externalReminderTemplateCustom": "Custom",
       "forwardServerModeRedirect": "Redirect",
       "modifyHeaderCustomFieldName": "Custom Field Name",
       "modifyHeaderDkimWarning": "Modifying headers may break SPF/DKIM verification results",
@@ -6653,7 +6667,8 @@
       "tagStyleHtmlOrange": "HTML Orange",
       "tagStyleHtmlRed": "HTML Red",
       "tagStyleHtmlYellow": "HTML Yellow",
-      "tagStylePlainText": "Plain Text"
+      "tagStylePlainText": "Plain Text",
+      "disclaimerContentSourceHint": "The disclaimer text comes from the system-wide disclaimer configuration; only the insert position is set here. Ask an administrator to change the text in system configuration."
     },
     "block": {
       "paramsTitle": "Block Parameters",
@@ -6732,6 +6747,10 @@
       "aiGenerateRegex": "AI Generate Regex",
       "aiRegexComingSoon": "AI-assisted regex generation is coming soon",
       "thresholdLabel": "Threshold",
+      "intentSelectLabel": "Intent category",
+      "intentSelectPlaceholder": "Select an intent category",
+      "intentAddLabel": "Add intent",
+      "intentRemoveLabel": "Remove",
       "betweenLoLabel": "Min",
       "betweenHiLabel": "Max",
       "valueLabel": "Value",
@@ -6779,7 +6798,6 @@
         "envelopeRecipient": "Envelope Recipient",
         "senderGroup": "Sender Group",
         "senderOrganization": "Sender Organization",
-        "featureGroup": "Feature Group",
         "senderIp": "Sender IP",
         "senderIpGroup": "Sender IP Group",
         "geoIpCountry": "GeoIP Country",
@@ -6797,25 +6815,21 @@
         "attachmentSizeSingle": "Single Attachment Size",
         "nestedZipLevel": "Nested ZIP Level",
         "nestedFileCount": "Nested File Count",
-        "imageQrCodeResult": "QR Code OCR Result",
+        "imageQrCodeResult": "Image Detect Status",
         "qrCodeCount": "QR Code Count",
         "attachmentZipBomb": "ZIP Bomb",
         "urlCount": "URL Count",
         "url": "URL",
-        "rblResult": "RBL Result",
-        "urlSandboxResult": "URL Sandbox Result",
-        "shortLinkExpanded": "Short Link Expanded",
         "urlDomain": "URL Domain",
         "spfResult": "SPF Result",
         "dkimResult": "DKIM Result",
         "dmarcResult": "DMARC Result",
         "ptrResult": "PTR Result",
         "similarDomain": "Similar Domain",
-        "displayNameSpoof": "Display Name Spoof",
         "mailFromEmpty": "Mail From Empty",
         "mailFromFromConsistency": "Envelope-Header From Consistency",
         "virusScanResult": "Virus Scan Result",
-        "comprehensiveEngineResult": "Comprehensive Engine Result",
+        "comprehensiveEngineResult": "Intent Engine",
         "senderIpCount15Min": "Sender IP Count (15min)",
         "senderRecipientCount15Min": "Sender Recipient Count (15min)",
         "senderMailCount15Min": "Sender Mail Count (15min)",
@@ -6878,11 +6892,6 @@
         "usage": "Match sender organization",
         "note": "Supports multi-level org matching"
       },
-      "desc_featureGroup": {
-        "source": "Group Policy - Feature Groups",
-        "usage": "Reference a predefined feature group (a named set of conditions)",
-        "note": "Feature group changes take effect immediately"
-      },
       "desc_senderIp": {
         "source": "SMTP connection layer",
         "usage": "Match sender server IP address",
@@ -6936,6 +6945,9 @@
       "desc_attachmentCount": {
         "source": "Email attachment parsing",
         "usage": "Limit attachment count",
+        "operators": "Greater / greater-or-equal: matches when attachment count reaches or exceeds the threshold; less / less-or-equal: matches when it does not exceed the threshold; between: matches counts within the range.",
+        "example": "Comparison 'greater than or equal', threshold '10' — matches mail with 10 or more attachments.",
+        "recommended": "For typical office scenarios, 10-20 is recommended; adjust to your attachment habits.",
         "note": "Prevent resource consumption"
       },
       "desc_encryptedAttachment": {
@@ -6969,9 +6981,9 @@
         "note": "Prevent excessive files after extraction"
       },
       "desc_imageQrCodeResult": {
-        "source": "QR code recognition engine",
-        "usage": "Detect QR codes in image attachments",
-        "note": "Can identify phishing links, malicious URLs"
+        "source": "Attachment image detection engine (OCR/QR)",
+        "usage": "Whether image detection completed successfully: success = the step ran to completion (even with no findings); fail = the detection service errored or timed out, results may be incomplete",
+        "note": "Use the \"QR Code Count\" condition for counts; failed mail can be quarantined as a fallback"
       },
       "desc_qrCodeCount": {
         "source": "QR code recognition engine",
@@ -6997,16 +7009,6 @@
         "source": "RBL real-time blacklist",
         "usage": "Filter based on RBL query result",
         "note": "Supports multiple RBL sources"
-      },
-      "desc_urlSandboxResult": {
-        "source": "URL sandbox analysis",
-        "usage": "Filter based on URL sandbox result",
-        "note": "Detects malicious content at URL"
-      },
-      "desc_shortLinkExpanded": {
-        "source": "Short link expansion",
-        "usage": "Detect actual URL after expansion",
-        "note": "Prevent hiding malicious URLs via short links"
       },
       "desc_urlDomain": {
         "source": "URL domain parsing",
@@ -7036,6 +7038,10 @@
       "desc_similarDomain": {
         "source": "Similar domain detection",
         "usage": "Detect lookalike domain spoofing",
+        "object": "Protected domain profile; * applies to all protected domain profiles.",
+        "operators": "Greater / greater-or-equal: larger distance is more lenient and matches more; less / less-or-equal: smaller distance is stricter and matches only highly similar domains; between: matches domains whose distance falls in the range.",
+        "example": "Object 'Company primary domain profile', comparison 'less than or equal', threshold '2' — matches lookalike domains within 2 character differences of a protected domain.",
+        "recommended": "Recommended 'less than or equal to 2', consistent with the built-in lookalike rule, balancing recall and false positives.",
         "note": "Pick a protected-domain profile first, then set the edit-distance threshold: the number of character edits between the sender domain and the protected domain (integer, typically 1-5). Smaller means more similar. The built-in lookalike rule uses \"less than or equal to 2\"."
       },
       "desc_displayNameSpoof": {
@@ -7099,6 +7105,7 @@
       "andGroupName": "Match all conditions",
       "groupConditionCount": "{count} condition(s) added",
       "conditionSearchPlaceholder": "Search conditions...",
+      "addConditionHeader": "Add condition",
       "noMatchingConditions": "No matching conditions found",
       "emptyConfigPanel": "Select a condition to configure",
       "descCardTitle": "Condition description",
@@ -7118,7 +7125,81 @@
       "previewEmptyHint": "The logic expression is generated automatically once conditions are added",
       "notMarker": "(NOT)",
       "foldedMore": "+{count}",
-      "groupSelectLabel": "Select object"
+      "groupSelectLabel": "Select object",
+      "groupSelectPlaceholder": "Select a group",
+      "orgDeptSelectLabel": "Select departments",
+      "orgDeptSelectedCount": "{n} selected",
+      "orgDeptHint": "Select departments from the org address book; selecting a parent department automatically matches senders in all of its sub-departments (multi-level org supported).",
+      "orgDeptSearchPlaceholder": "Search departments…",
+      "orgDeptEmpty": "No department data yet. Sync your org structure in the address book first.",
+      "orgDeptNoMatch": "No matching departments",
+      "orgDeptClearAll": "Clear all",
+      "qrResultValues": {
+        "success": "Success",
+        "fail": "Fail"
+      },
+      "envelopeHeaderConsistencyValues": {
+        "false": "Consistent",
+        "true": "Inconsistent"
+      },
+      "virusScanResultValues": {
+        "infected": "Infected",
+        "clean": "Clean"
+      },
+      "descInputTypeLabel": "Input type",
+      "descUnitLabel": "Unit",
+      "descRangeLabel": "Valid range",
+      "descObjectLabel": "Object meaning",
+      "descOperatorsLabel": "Supported operators",
+      "descExampleLabel": "Example",
+      "descRecommendedLabel": "Recommended",
+      "descFormatLabel": "Format & example",
+      "descStepGuideLabel": "Steps",
+      "applyRecommended": "Apply recommended",
+      "numericOperatorsHint": "Greater than / greater or equal: matches when the value reaches or exceeds the threshold; less than / less or equal: matches when it stays within the threshold; between: matches when the value falls inside the given range.",
+      "exampleTemplate": "Comparison \"{mode}\", threshold \"{value}\" ({unit}).",
+      "recommendTemplate": "{mode} {value} ({unit})",
+      "rangeBoth": "{min} ~ {max}",
+      "rangeMin": "≥ {min}",
+      "rangeMax": "≤ {max}",
+      "mapWildcardHint": "* means any object (matches all keys); select an object above to scope it.",
+      "mapObjectHint": "Matches only the selected object; choose * to match any object.",
+      "inputType": {
+        "text": "Text (one value per line)",
+        "number": "Number",
+        "select": "Enum select",
+        "group": "Group object",
+        "featureGroup": "Feature group",
+        "orgDept": "Org department (tree multi-select)",
+        "cidr": "IP / CIDR (one per line)",
+        "time": "Time range",
+        "weekday": "Weekday",
+        "mime": "MIME type",
+        "intentEngine": "Intents (multi-select, per-intent mode)"
+      },
+      "units": {
+        "count": "items",
+        "mb": "MB",
+        "level": "levels",
+        "editDistance": "char differences"
+      },
+      "stepGuideMapNumber": [
+        "First pick the object to compare in \"Select object\" (* means all objects).",
+        "Then choose the comparison (greater than / less than / between, etc.).",
+        "Finally enter the threshold; click \"Apply recommended\" to fill a common value quickly."
+      ],
+      "formats": {
+        "number": "Enter an integer threshold with a comparison; click \"Apply recommended\" to fill a common value.",
+        "text": "One value per line; matched by the selected mode (contains / equals / wildcard / regex).",
+        "mime": "One MIME type per line, e.g. application/zip; or add via the common-type shortcuts below.",
+        "cidr": "One IP or CIDR per line, e.g. 192.168.1.0/24.",
+        "time": "24-hour time range, e.g. 09:00 ~ 18:00.",
+        "weekday": "Select one or more days of the week.",
+        "select": "Pick a fixed result value (e.g. pass / fail) from the dropdown, or enter a single value for equals / not-equals.",
+        "group": "Pick an object from a preset group / profile; * means any object.",
+        "featureGroup": "Select a feature group to match.",
+        "orgDept": "Check one or more departments from the org address book tree; checking a parent department automatically matches senders in all sub-departments."
+      }
     },
     "placeholder": {
       "conditions": "Conditions builder (coming soon)",
@@ -10035,9 +10116,11 @@
     "tabs": {
       "ipStrategy": "IP Strategy",
       "attachmentLimit": "Attachment Basic Limits",
-      "groupPolicy": "Group Policy"
+      "groupPolicy": "Group Policy",
+      "antivirusEngine": "Antivirus Engine"
     },
     "attachmentHint": "Attachment size, count, and nesting-depth limits are platform-level resource constraints applied uniformly to all tenants. Tenant-side attachment security inspection does not include this item.",
+    "antivirusHint": "The antivirus server host and virus database are platform-level configuration applied uniformly to all tenants; tenants can only set virus disposition actions.",
     "modules": {
       "ipFrequency": "IP Frequency Limit",
       "ipFilter": "IP Blacklist / Whitelist",
@@ -10718,6 +10801,7 @@
       "system_baseline_no_create": "System baseline rules cannot be created through the API",
       "system_baseline_no_edit": "System baseline rules cannot be edited by tenant administrators",
       "tag_required": "Tag rules must specify at least one tag",
+      "tenant_config_managed": "This rule is managed by the tenant's attachment-security settings and cannot be edited directly; edit it on the attachment-security settings page",
       "tenant_context_required": "Select a tenant before performing this action",
       "valid_range_invalid": "The validity end time cannot be earlier than the start time"
     },
@@ -10765,6 +10849,7 @@
     "tenant": {
       "not_found": "Tenant not found",
       "access_denied": "Access to this tenant is denied",
+      "domain_delete_gated": "The receiving domain must stay disabled for the full drain window (default 7 days, letting queued in-flight mail finish delivering) before it can be deleted",
       "admin_account_password_pair_required": "The admin account and password must be provided together",
       "admin_account_too_long": "The admin account must not exceed {max} characters",
       "code_immutable": "The tenant code cannot be changed after creation",
@@ -10859,7 +10944,8 @@
       "cidr_limit_exceeded": "At most {max} IP ranges per tenant",
       "cidr_already_exists": "This CIDR already exists",
       "tenant_id_required": "A tenant must be specified",
-      "tenant_id_invalid": "Invalid tenant ID"
+      "tenant_id_invalid": "Invalid tenant ID",
+      "link_redirect_tls_not_configured": "The link-redirect service (port 8082) has no TLS certificate configured. Upload one under \"External Service TLS Certificates\" in the cluster console, or confirm TLS is terminated by a front proxy and enable link_protection/tls_terminated_by_proxy."
     },
     "login_policy": {
       "two_factor_platform_admin_only": "Only platform admins may set the two-factor enforcement policy",

@@ -1,0 +1,355 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import type { FieldDef } from '@/types/unified-rules';
+import zhMessages from '../../../../messages/zh.json';
+import { ConditionConfigPanel } from './ConditionConfigPanel';
+import { createDefaultLeaf } from './ConditionTree';
+import { CONDITIONS } from './catalogue';
+import type { ConditionLeaf } from './serde';
+
+// MapKeySelect fetches map objects over the network; stub it so the panel can
+// mount for the map_number (similarDomain) step-guide case without any I/O.
+vi.mock('@/components/rules/MapKeySelect', () => ({
+  MapKeySelect: () => null,
+}));
+
+// OrgDepartmentSection (senderOrganization / orgDept panel) pulls department
+// rows from the org address book via useApiRequest + react-query. Stub both so
+// the panel mounts with a fixed 2-level tree and no network / provider.
+vi.mock('@/lib/api/client', () => ({
+  useApiRequest: () => ({ apiRequest: vi.fn() }),
+}));
+vi.mock('@/lib/api/contacts', () => ({
+  listContactDepartments: vi.fn(),
+}));
+const ORG_DEPT_ROWS = [
+  { path: '研发中心', member_count: 2, source_names: [] },
+  { path: '研发中心 / 后端组', member_count: 3, source_names: [] },
+  { path: '研发中心 / 前端组', member_count: 4, source_names: [] },
+  { path: '市场部', member_count: 1, source_names: [] },
+];
+vi.mock('@tanstack/react-query', () => ({
+  useQuery: ({ queryFn }: { queryFn: () => unknown }) => {
+    void queryFn;
+    // Return the raw rows directly; buildDepartmentTree runs inside the panel.
+    return { data: ORG_DEPT_ROWS };
+  },
+}));
+
+// Faithful next-intl stand-in backed by the REAL zh.json messages. This both
+// renders the panel and proves every key the enriched DescriptionCard / number
+// section reads actually resolves (dot-path lookup + {var} interpolation +
+// .has() existence checks + .raw() array reads), mirroring next-intl semantics.
+vi.mock('next-intl', () => {
+  const get = (obj: unknown, path: string): unknown =>
+    path.split('.').reduce<unknown>((o, k) => (o == null ? undefined : (o as Record<string, unknown>)[k]), obj);
+  return {
+    useTranslations: (ns: string) => {
+      const base = get(zhMessages, ns);
+      const fn = ((key: string, values?: Record<string, string | number>) => {
+        let v = get(base, key);
+        if (typeof v !== 'string') return key;
+        if (values) for (const [k, val] of Object.entries(values)) v = (v as string).split(`{${k}}`).join(String(val));
+        return v as string;
+      }) as ((key: string, values?: Record<string, string | number>) => string) & {
+        has: (key: string) => boolean;
+        raw: (key: string) => unknown;
+      };
+      fn.has = (key: string) => get(base, key) != null;
+      fn.raw = (key: string) => get(base, key);
+      return fn;
+    },
+  };
+});
+
+function leaf(partial: Partial<ConditionLeaf> & { conditionKey: string; field: string }): ConditionLeaf {
+  return { id: 'l1', operator: 'gt', value: '', exclude: false, ...partial };
+}
+
+function renderPanel(l: ConditionLeaf, fieldDefs: Record<string, FieldDef> = {}) {
+  const onChange = vi.fn();
+  render(<ConditionConfigPanel leaf={l} fieldDefs={fieldDefs} onChange={onChange} />);
+  return { onChange };
+}
+
+describe('ConditionConfigPanel enriched guidance', () => {
+  // Item 1 + 2: a numeric condition with no hand-written desc subkeys
+  // (urlCount) auto-generates the operators hint + example/recommended rows
+  // from meta.recommend, and shows the per-panel format row.
+  it('auto-generates operators/example/recommended + format rows for numeric conditions', () => {
+    renderPanel(leaf({ conditionKey: 'urlCount', field: 'url_count', operator: 'gt', value: '' }));
+
+    expect(screen.getByTestId('desc-format-row')).toBeInTheDocument();
+    expect(screen.getByTestId('desc-operators-row').textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.numericOperatorsHint,
+    );
+    // meta.recommend for urlCount is { mode: 'gt', value: '20' } → both rows carry 20.
+    expect(screen.getByTestId('desc-example-row').textContent).toContain('20');
+    expect(screen.getByTestId('desc-recommended-row').textContent).toContain('20');
+  });
+
+  // Item 3 (default template): the "Apply recommended" button fills the
+  // language-invariant recommend template into the leaf via onChange.
+  it('applies the recommended threshold when the button is clicked', () => {
+    const { onChange } = renderPanel(leaf({ conditionKey: 'urlCount', field: 'url_count', operator: 'gt', value: '' }));
+
+    const btn = screen.getByTestId('config-number-apply-recommended');
+    expect(btn).toBeInTheDocument();
+    fireEvent.click(btn);
+    expect(onChange).toHaveBeenCalledWith('l1', { operator: 'gt', value: '20' });
+  });
+
+  // Item 2: non-numeric panels still get a format-and-example row, but no
+  // auto numeric operators row.
+  it('shows a format row for text panels without a numeric operators row', () => {
+    renderPanel(leaf({ conditionKey: 'subject', field: 'subject', operator: 'contain', value: '' }));
+
+    const formatRow = screen.getByTestId('desc-format-row');
+    expect(formatRow.textContent).toContain(zhMessages.advancedRulesFeature.v3Conditions.formats.text);
+    expect(screen.queryByTestId('desc-operators-row')).not.toBeInTheDocument();
+  });
+
+  // Item 3 (step guide): map_number conditions (similarDomain) render the
+  // numbered "select object → choose comparison → enter threshold" guide.
+  it('renders the step guide for map_number (similar domain) conditions', () => {
+    renderPanel(
+      leaf({ conditionKey: 'similarDomain', field: 'domain_imp', operator: 'le', value: '2', mapKey: '*' }),
+      { domain_imp: { type: 'map_number' } as FieldDef },
+    );
+
+    const guide = screen.getByTestId('desc-step-guide');
+    expect(guide).toBeInTheDocument();
+    const steps = zhMessages.advancedRulesFeature.v3Conditions.stepGuideMapNumber;
+    expect(guide.querySelectorAll('li')).toHaveLength(steps.length);
+    expect(guide.textContent).toContain(steps[0]);
+  });
+
+  // senderOrganization (orgDept panel) renders the org-address-book department
+  // tree instead of a bare text box, proving the org-contacts联动 is wired.
+  it('renders the org department tree for senderOrganization (发件组织)', () => {
+    renderPanel(leaf({ conditionKey: 'senderOrganization', field: 'sender_dept_path', operator: 'within', value: '' }));
+
+    expect(screen.getByTestId('config-orgdept')).toBeInTheDocument();
+    expect(screen.getByTestId('config-orgdept-search')).toBeInTheDocument();
+    // Root departments derived from the address book rows are shown.
+    expect(screen.getByTestId('config-orgdept-node-研发中心')).toBeInTheDocument();
+    expect(screen.getByTestId('config-orgdept-node-市场部')).toBeInTheDocument();
+  });
+
+  // Selecting a parent department writes the parent + all descendant paths into
+  // the leaf via onChange with operator 'within' — the "选父含子孙" semantics.
+  it('selecting a parent department cascades to all descendants (选父含子孙)', () => {
+    const { onChange } = renderPanel(
+      leaf({ conditionKey: 'senderOrganization', field: 'sender_dept_path', operator: 'within', value: '' }),
+    );
+
+    fireEvent.click(screen.getByTestId('config-orgdept-toggle-研发中心'));
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const [, patch] = onChange.mock.calls[0];
+    expect(patch.operator).toBe('within');
+    // Compare as an unordered set: locale collation of 后/前 is irrelevant here,
+    // what matters is the parent + both descendants are all present.
+    const paths = new Set((patch.value as string).split('\n'));
+    expect(paths).toEqual(new Set(['研发中心', '研发中心 / 后端组', '研发中心 / 前端组']));
+  });
+
+  // encryptedAttachment (加密附件) is a boolean select field: when its fieldDef
+  // reports type 'boolean' the panel renders the 是/否 dropdown (not a text box),
+  // and picking a value emits operator 'eq' with the raw boolean token.
+  it('renders a 是/否 dropdown for the boolean 加密附件 field, not free text', () => {
+    const { onChange } = renderPanel(
+      leaf({ conditionKey: 'encryptedAttachment', field: 'is_encrypted_attachment', operator: 'eq', value: 'true' }),
+      { is_encrypted_attachment: { type: 'boolean' } as FieldDef },
+    );
+
+    expect(screen.getByTestId('config-boolean-value')).toBeInTheDocument();
+    // No free-text value box for this condition.
+    expect(screen.queryByTestId('config-text-values')).not.toBeInTheDocument();
+    expect(screen.getByTestId('config-boolean-value').textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.booleanTrue,
+    );
+  });
+
+  // mailFromEmpty (Mail From 为空) is the same boolean-select family: it must render
+  // the 是/否 dropdown rather than a free-text box, reusing booleanTrue/False i18n.
+  it('renders a 是/否 dropdown for the boolean Mail From 为空 field, not free text', () => {
+    renderPanel(
+      leaf({ conditionKey: 'mailFromEmpty', field: 'mailfrom_empty', operator: 'eq', value: 'true' }),
+      { mailfrom_empty: { type: 'boolean' } as FieldDef },
+    );
+
+    expect(screen.getByTestId('config-boolean-value')).toBeInTheDocument();
+    expect(screen.queryByTestId('config-text-values')).not.toBeInTheDocument();
+    expect(screen.getByTestId('config-boolean-value').textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.booleanTrue,
+    );
+  });
+
+  // createDefaultLeaf pre-seeds boolean fields with operator 'eq' and value
+  // 'true' so a freshly-added 加密附件 condition is complete and matches what the
+  // 是/否 dropdown shows (no "shows 是 but data empty / marked incomplete" split).
+  it('createDefaultLeaf seeds boolean fields with eq/true', () => {
+    const def = CONDITIONS.find((c) => c.key === 'encryptedAttachment')!;
+    const l = createDefaultLeaf(def, { is_encrypted_attachment: { type: 'boolean' } as FieldDef });
+    expect(l.operator).toBe('eq');
+    expect(l.value).toBe('true');
+    expect(l.field).toBe('is_encrypted_attachment');
+  });
+
+  // imageQrCodeResult (二维码OCR结果) is a fixed-value enum: the panel renders an
+  // enum dropdown (config-enum-single), never the free-text StringEqualsSection.
+  it('renders an enum dropdown for 二维码OCR结果, not free text', () => {
+    renderPanel(
+      leaf({ conditionKey: 'imageQrCodeResult', field: 'image_detect_status', operator: 'eq', value: '' }),
+      { image_detect_status: { type: 'enum' } as FieldDef },
+    );
+
+    expect(screen.getByTestId('config-enum-single')).toBeInTheDocument();
+    expect(screen.queryByTestId('config-string-eq-value')).not.toBeInTheDocument();
+  });
+
+  // In multi (matchAny → within) mode the option labels render inline and are
+  // localized via v3Conditions.qrResultValues.* (e.g. success → 成功),
+  // proving the enum values go through the project i18n framework, not raw token.
+  it('localizes 二维码OCR结果 enum labels through i18n', () => {
+    renderPanel(
+      leaf({ conditionKey: 'imageQrCodeResult', field: 'image_detect_status', operator: 'within', value: '' }),
+      { image_detect_status: { type: 'enum' } as FieldDef },
+    );
+
+    const multi = screen.getByTestId('config-enum-multi');
+    expect(multi.textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.qrResultValues.success,
+    );
+    expect(multi.textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.qrResultValues.fail,
+    );
+    // Raw token must not leak when a localized label exists.
+    expect(multi.textContent).not.toContain('success');
+  });
+
+  // mailFromFromConsistency (信封-头 From 一致性)：后端字段是 boolean，但收录
+  // 进 ENUM_VALUES 的字段必须优先走带「一致/不一致」标签的枚举控件（而非通用
+  // 是/否布尔下拉）——GT-12751 方案裁决。FieldDef 用真实的 boolean 形态。
+  it('renders the labeled enum (not the generic boolean select) for 信封-头 From 一致性', () => {
+    renderPanel(
+      leaf({ conditionKey: 'mailFromFromConsistency', field: 'envelope_header_mismatch', operator: 'eq', value: '' }),
+      { envelope_header_mismatch: { type: 'boolean' } as FieldDef },
+    );
+
+    expect(screen.getByTestId('config-enum-single')).toBeInTheDocument();
+    expect(screen.queryByTestId('config-boolean-value')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('config-string-eq-value')).not.toBeInTheDocument();
+  });
+
+  // boolean 背书的枚举禁用多选：后端 evaluateBoolCondition 只支持 eq/ne，
+  // within 会静默恒不命中。即使 operator 被写成 within，也必须渲染单选而非
+  // 多选清单。
+  it('never renders multi-select for the boolean-backed 一致性 enum (within degrades to single)', () => {
+    renderPanel(
+      leaf({ conditionKey: 'mailFromFromConsistency', field: 'envelope_header_mismatch', operator: 'within', value: '' }),
+      { envelope_header_mismatch: { type: 'boolean' } as FieldDef },
+    );
+
+    expect(screen.queryByTestId('config-enum-multi')).not.toBeInTheDocument();
+    expect(screen.getByTestId('config-enum-single')).toBeInTheDocument();
+  });
+
+  // token 契约守卫（GT-12751 第4项根因）：一致性枚举提交的 token 必须是布尔
+  // 字面量 'false'（一致）/'true'（不一致）。后端把任何非 "true" 的值当 false，
+  // 早期原型的 match/mismatch token 会让「不一致」选项反向命中一致的邮件。
+  it("uses boolean literal tokens ('false'/'true') for the 一致性 enum, never match/mismatch", () => {
+    const vals = zhMessages.advancedRulesFeature.v3Conditions.envelopeHeaderConsistencyValues as Record<string, string>;
+    expect(Object.keys(vals).sort()).toEqual(['false', 'true']);
+    expect(vals.false).toBe('一致');
+    expect(vals.true).toBe('不一致');
+  });
+
+  // virusScanResult (病毒扫描结果) is a fixed-value enum: the panel renders an enum
+  // dropdown, never the free-text StringEqualsSection.
+  it('renders an enum dropdown for 病毒扫描结果, not free text', () => {
+    renderPanel(
+      leaf({ conditionKey: 'virusScanResult', field: 'virus_scan_result', operator: 'eq', value: '' }),
+      { virus_scan_result: { type: 'enum' } as FieldDef },
+    );
+
+    expect(screen.getByTestId('config-enum-single')).toBeInTheDocument();
+    expect(screen.queryByTestId('config-string-eq-value')).not.toBeInTheDocument();
+  });
+
+  // In multi (within) mode the labels render inline and are localized via
+  // v3Conditions.virusScanResultValues.* (infected → 有毒, clean → 无毒),
+  // proving the values go through the project i18n framework.
+  it('localizes 病毒扫描结果 enum labels through i18n (有毒/无毒)', () => {
+    renderPanel(
+      leaf({ conditionKey: 'virusScanResult', field: 'virus_scan_result', operator: 'within', value: '' }),
+      { virus_scan_result: { type: 'enum' } as FieldDef },
+    );
+
+    const multi = screen.getByTestId('config-enum-multi');
+    expect(multi.textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.virusScanResultValues.infected,
+    );
+    expect(multi.textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.virusScanResultValues.clean,
+    );
+    // Raw token must not leak when a localized label exists.
+    expect(multi.textContent).not.toContain('infected');
+  });
+
+  // 意图引擎（多意图 · 每意图单条）: the panel renders the list-style IntentEngineSection,
+  // not the free-text box. A one-entry JSON list value is the
+  // one-entry subset, so it renders exactly one intent row plus the "add intent" selector.
+  it('renders the multi-intent 意图引擎 section (one row per intent + add selector, no free text)', () => {
+    renderPanel(
+      leaf({ conditionKey: 'comprehensiveEngineResult', field: 'cac_tag', operator: 'within', value: JSON.stringify([{ intent: 'phishing', mode: 'classification' }]) }),
+      { cac_tag: { type: 'enum' } as FieldDef },
+    );
+
+    // Description card renders without a MISSING_MESSAGE throw: the intentEngine input-type
+    // key must exist (regression guard for v3Conditions.inputType.intentEngine).
+    expect(screen.getByTestId('condition-desc-card').textContent).toContain(
+      zhMessages.advancedRulesFeature.v3Conditions.inputType.intentEngine,
+    );
+    // One configured row for the anchored intent, plus the add-intent selector.
+    expect(screen.getByTestId('config-intent-row-phishing')).toBeInTheDocument();
+    expect(screen.getByTestId('config-intent-mode-phishing')).toBeInTheDocument();
+    expect(screen.getByTestId('config-intent-add')).toBeInTheDocument();
+    // Classification mode → no threshold range inputs for that row, and never a free-text box.
+    expect(screen.queryByTestId('config-intent-threshold-phishing')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('config-string-eq-value')).not.toBeInTheDocument();
+  });
+
+  // Each threshold-mode intent reveals its own [0,1] confidence range inputs, mirroring
+  // the stage-3 intent engine's per-intent threshold segments.
+  it('shows per-intent [0,1] threshold range inputs in 分段阈值 mode', () => {
+    renderPanel(
+      leaf({ conditionKey: 'comprehensiveEngineResult', field: 'cac_tag', operator: 'within', value: JSON.stringify([{ intent: 'phishing', mode: 'threshold', lo: '0.6', hi: '0.9' }]) }),
+      { cac_tag: { type: 'enum' } as FieldDef },
+    );
+
+    expect(screen.getByTestId('config-intent-row-phishing')).toBeInTheDocument();
+    expect(screen.getByTestId('config-intent-threshold-phishing')).toBeInTheDocument();
+    expect(screen.getByTestId('config-intent-threshold-lo-phishing')).toHaveValue(0.6);
+    expect(screen.getByTestId('config-intent-threshold-hi-phishing')).toHaveValue(0.9);
+  });
+
+  // Multiple intents can be configured at once, each with its own detection mode; every
+  // configured intent renders an independent row with its own mode/threshold controls.
+  it('renders an independent row for each configured intent (multi-intent)', () => {
+    renderPanel(
+      leaf({ conditionKey: 'comprehensiveEngineResult', field: 'cac_tag', operator: 'within', value: JSON.stringify([{ intent: 'phishing', mode: 'threshold', lo: '0.6', hi: '0.9' }, { intent: 'spam', mode: 'classification' }]) }),
+      { cac_tag: { type: 'enum' } as FieldDef },
+    );
+
+    // Two rows, one per intent, with per-intent controls.
+    expect(screen.getByTestId('config-intent-row-phishing')).toBeInTheDocument();
+    expect(screen.getByTestId('config-intent-row-spam')).toBeInTheDocument();
+    // phishing is threshold → its range inputs render; spam is classification → none.
+    expect(screen.getByTestId('config-intent-threshold-phishing')).toBeInTheDocument();
+    expect(screen.queryByTestId('config-intent-threshold-spam')).not.toBeInTheDocument();
+    // Add-intent selector still offered (5 intent types, 2 used → some remain).
+    expect(screen.getByTestId('config-intent-add')).toBeInTheDocument();
+  });
+});

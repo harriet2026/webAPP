@@ -127,6 +127,15 @@ function LeafRow({
           </span>
         )}
       </div>
+      {s.incompleteReasons.length > 0 && (
+        <ul className="mt-0.5 space-y-0.5 pl-3" data-testid="preview-incomplete-reasons">
+          {s.incompleteReasons.map((reason, i) => (
+            <li key={i} className="list-disc text-[11px] text-amber-600 dark:text-amber-400">
+              {reason}
+            </li>
+          ))}
+        </ul>
+      )}
       {!last && <div className={cn('py-0.5 text-[11px]', connector === 'OR' ? 'text-blue-500' : 'text-green-600')}>{connector}</div>}
     </div>
   );

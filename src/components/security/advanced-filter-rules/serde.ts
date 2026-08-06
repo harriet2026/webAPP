@@ -210,3 +210,92 @@ export function defaultModeForField(def: FieldDef, fieldName?: string): MatchMod
   }
   return 'equals';
 }
+
+// ── 意图引擎（综合研判引擎）取值编解码 ─────────────────────────────────────
+// 「意图引擎」条件（catalogue key comprehensiveEngineResult / field cac_tag）与
+// 阶段3内容层的意图引擎模块同源。该模块的 detection_mode / threshold_segments 均
+// 挂在「单个意图」之下（见 types/intent-engine.ts 的 IntentSingleConfig），因此配置
+// 语义是「意图优先」两级：先锚定一个意图分类，再为该意图选检测模式——
+//   - classification 分类优先：命中「该意图」即匹配，operator = 'within'；
+//   - threshold 分段阈值：命中「该意图」且其判定置信度分数落入 [lo, hi] ⊆ [0,1] 区间，
+//     operator = 'between'。
+// 单值 leaf.value 用「意图 : 模式 [: lo,hi]」编码，既复用现有 string value 模型 / serde
+// 往返、又能在配置面板与表达式预览间无歧义解析：
+//   phishing:classification          （分类优先）
+//   phishing:threshold:0.60,0.90     （分段阈值）
+export type IntentEngineMode = 'classification' | 'threshold';
+
+export interface IntentEngineValue {
+  intent: string;
+  mode: IntentEngineMode;
+  lo: string;
+  hi: string;
+}
+
+export const INTENT_ENGINE_OPERATOR: Record<IntentEngineMode, string> = {
+  classification: 'within',
+  threshold: 'between',
+};
+
+// 多意图（每意图单条，各自独立模式/阈值）。对齐阶段3 IntentDirectionConfig 里 5 个
+// 意图各自持有 detection_mode / threshold_segments 的结构。leaf.value 是 JSON 数组
+// （契约裁决见 GT-12750：废弃早期原型的「intent:mode[:lo,hi];...」自定义文法，
+// 避免分隔符与后端 within 逗号拆分冲突）：
+//   [{"intent":"phishing","mode":"threshold","lo":"0.60","hi":"0.90"},
+//    {"intent":"spam","mode":"classification"}]
+// lo/hi 保持字符串原样往返：面板每次输入都会 re-encode，数字化会毁掉用户输入到
+// 一半的 "0."；数值校验在 expression.ts 的完整性诊断与后端求值侧完成。
+// 多个意图之间语义为 OR（命中任一配置的意图即匹配）；单个 leaf.operator 固定为
+// within 伞值，分类/阈值细节下沉到 value 编码，不破坏 leaf 的单 operator 模型。
+// 同一意图去重（后写覆盖），空意图条目丢弃。
+export function parseIntentEngineList(value: string): IntentEngineValue[] {
+  const raw = (value ?? '').trim();
+  if (raw === '' || !raw.startsWith('[')) return [];
+  let decoded: unknown;
+  try {
+    decoded = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(decoded)) return [];
+  const out: IntentEngineValue[] = [];
+  const seen = new Map<string, number>(); // intent → out 索引，实现去重覆盖
+  for (const item of decoded) {
+    if (typeof item !== 'object' || item === null) continue;
+    const rec = item as Record<string, unknown>;
+    const intent = typeof rec.intent === 'string' ? rec.intent.trim() : '';
+    if (intent === '') continue;
+    const mode: IntentEngineMode = rec.mode === 'threshold' ? 'threshold' : 'classification';
+    const entry: IntentEngineValue = {
+      intent,
+      mode,
+      lo: mode === 'threshold' && typeof rec.lo === 'string' ? rec.lo.trim() : '',
+      hi: mode === 'threshold' && typeof rec.hi === 'string' ? rec.hi.trim() : '',
+    };
+    const idx = seen.get(intent);
+    if (idx === undefined) {
+      seen.set(intent, out.length);
+      out.push(entry);
+    } else {
+      out[idx] = entry; // 同意图后写覆盖，避免矛盾配置
+    }
+  }
+  return out;
+}
+
+export function encodeIntentEngineList(entries: IntentEngineValue[]): string {
+  const seen = new Set<string>();
+  const items: Array<Record<string, string>> = [];
+  for (const e of entries) {
+    const intent = e.intent.trim();
+    if (intent === '' || seen.has(intent)) continue;
+    seen.add(intent);
+    if (e.mode === 'threshold') {
+      items.push({ intent, mode: 'threshold', lo: e.lo.trim(), hi: e.hi.trim() });
+    } else {
+      items.push({ intent, mode: 'classification' });
+    }
+  }
+  if (items.length === 0) return '';
+  return JSON.stringify(items);
+}

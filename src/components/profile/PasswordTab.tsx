@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Eye, EyeOff, Check, X, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Check, X, Loader2, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -82,6 +82,7 @@ export function PasswordTab() {
   const [confirmPwd, setConfirmPwd] = useState('');
   const [oldErr, setOldErr] = useState('');
   const [confirmErr, setConfirmErr] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const strength = passwordStrength(newPwd);
   const ruleResults = rules.map((r) => ({ ...r, passed: r.test(newPwd) }));
@@ -113,7 +114,7 @@ export function PasswordTab() {
           router.push(`/${locale}/login`);
         }, 1200);
       } else {
-        toast.success(t('pwd.changed'));
+        setSuccess(true);
       }
     } catch (e) {
       // GT-11969: wrong current password -> localized inline error; everything
@@ -133,6 +134,7 @@ export function PasswordTab() {
     setConfirmPwd('');
     setOldErr('');
     setConfirmErr('');
+    setSuccess(false);
   };
 
   const strengthColor =
@@ -144,6 +146,16 @@ export function PasswordTab() {
       <h3 className="text-base font-medium">{t('tabs.password')}</h3>
       <div className="my-4 border-t border-border" />
 
+      {success ? (
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <CheckCircle2 className="h-12 w-12 text-green-500" strokeWidth={1.5} />
+          <h4 className="mt-4 text-lg font-semibold text-foreground">{t('pwd.changed')}</h4>
+          <p className="mt-1.5 text-sm text-muted-foreground">{t('pwd.changedDesc')}</p>
+          <Button className="mt-6" onClick={reset} data-testid="profile-password-done">
+            {t('pwd.done')}
+          </Button>
+        </div>
+      ) : (
       <div className="max-w-2xl space-y-5">
         <div className="grid grid-cols-[120px_1fr] items-start gap-3">
           <span className="pt-2 text-sm text-foreground">
@@ -242,6 +254,7 @@ export function PasswordTab() {
           </Button>
         </div>
       </div>
+      )}
     </Card>
   );
 }
