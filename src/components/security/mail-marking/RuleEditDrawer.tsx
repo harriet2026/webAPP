@@ -120,20 +120,10 @@ export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriori
         data-testid="mail-marking-rule-editor"
       >
         <SheetHeader className="shrink-0 border-b px-6 py-4 text-left">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <SheetTitle className="text-lg font-semibold">{title}</SheetTitle>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {isReceive ? t('receiveEditorSubtitle') : t('sendEditorSubtitle')}
-              </p>
-            </div>
-            <div className="mr-8 flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>{t('cancel')}</Button>
-              <Button size="sm" data-testid="mail-marking-save-rule" onClick={() => void onSave()} disabled={saving}>
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t('save')}
-              </Button>
-            </div>
-          </div>
+          <SheetTitle className="text-lg font-semibold">{title}</SheetTitle>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {isReceive ? t('receiveEditorSubtitle') : t('sendEditorSubtitle')}
+          </p>
         </SheetHeader>
 
         <div className="grid min-h-0 flex-1 grid-cols-[560px_1fr] overflow-hidden">
@@ -239,7 +229,15 @@ export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriori
             </div>
           </div>
         </div>
-      </SheetContent>
+        <footer className="shrink-0 border-t px-6 py-4">
+          <div className="flex justify-end gap-2">
+            <Button size="sm" variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>{t('cancel')}</Button>
+            <Button size="sm" data-testid="mail-marking-save-rule" onClick={() => void onSave()} disabled={saving}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t('save')}
+            </Button>
+          </div>
+        </footer>
+        </SheetContent>
     </Sheet>
   )
 
