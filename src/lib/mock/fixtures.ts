@@ -1235,7 +1235,7 @@ export function mockOpsTopAi(): { markdown: string } {
   };
 }
 
-// ─── ��控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
+// ─── ���控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
 export function mockMonitorDashboardOverview(range: MonitorDashboardRange): MonitorDashboardOverview {
   const volumes: Record<MonitorDashboardRange, number> = {
     today: 125847,
@@ -2401,7 +2401,7 @@ export function mockTestIPFrequency(body: {
   test_ip: string;
   action: string;
 }): IPFrequencyTestResponse {
-  // 无真实流量：以当前挂起列表判定该 IP 是否已被限制，给出可见的测试结果。
+  // 无真实流量：以当前挂起列表判定该 IP 是否已被限制，给出可见的测试���果。
   const hit = mockSuspendedIPs.find((s) => s.ip === body.test_ip);
   if (hit) {
     return {
@@ -3229,7 +3229,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 // ════════════════════════════════════════════════════════════════════════════════
 // 发信人黑白名单（sender_filter，mock）
 // 数据结构对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
-//   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
+//   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）���成，
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
 //   - metadata 携带 `{feature:'sender_filter', sender_config, ip_range, list_type}`，
 //     与 condition_tree 保持一致（`resolveSenderFilterRule` 的 metadata/tree 双重校验）。
@@ -3557,7 +3557,7 @@ function groupPolicyRulesSeed(): Rule[] {
     gpRule({
       id: 9001,
       name: "高管邮箱快速通道",
-      description: "针对高管邮箱的��化通道",
+      description: "针对高管邮箱的优化通道",
       priority: 0,
       is_active: true,
       target_groups: { recipientGroup: ["高管邮箱"] },
@@ -5278,7 +5278,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     // demo html_spec layer-10-detail-overview-single 对齐：首次出现新发信人 +
     // 域名年龄2天（新注册域名）+ 处置依据展示为「隔离」（而不是
     // deliveryStatus=audit_pending 派生出的「审核」，两者是独立字段——见
-    // MockDisposalSeed.disposalBasisActionOverride 的注释）+ 大小≈2.3MB。
+    // MockDisposalSeed.disposalBasisActionOverride 的注释���+ 大小≈2.3MB。
     senderIsNewOnThisMail: true,
     domainAgeDays: 2,
     storageSizeBytes: 2_411_724,
@@ -5653,7 +5653,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "outgoing",
     sender: "pm@company.com",
     recipients: "blogger@tech-media.com",
-    subject: "内部产品路线图（含未发布���号）",
+    subject: "内部产品路线图（含未���布���号）",
     action: "block",
     reason: "内容规则命中：竞品/机密关键词",
     mailType: "sensitive",
@@ -7222,7 +7222,7 @@ function buildDefaultDisposalSettingsFixture(): DisposalSettings {
 export function mockRecipientGroupRulesList(): { items: Rule[]; total: number } {
   const groups: Array<[number, string, number]> = [
     [9101, "高管邮箱", 15],
-    [9102, "财务人员", 28],
+    [9102, "财���人员", 28],
     [9103, "IT 管理员", 9],
     [9104, "全体员工", 460],
     [9105, "客服团队", 42],
@@ -7634,7 +7634,7 @@ const contactPeople: MockContactRow[] = [
   { id: 1, source_id: 3, source_name: '总部 AD', department_path: '研发部 / 后端组', display_name: '张三', email: 'zhangsan@corp.cn', job_title: '工程师', tag: 'executive', status: 'active', email_alias: '张三.alias@corp.cn' },
   { id: 2, source_id: 3, source_name: '总部 AD', department_path: '财务部', display_name: '李四', email: 'lisi@corp.cn', job_title: '总监', tag: 'key_position', status: 'active', email_alias: '李四.alias@corp.cn' },
   { id: 3, source_id: 3, source_name: '总部 AD', department_path: '研发部 / 前端组', display_name: '王五', email: 'wangwu@corp.cn', job_title: '工程师', tag: 'none', status: 'active', email_alias: '王五.alias@corp.cn' },
-  { id: 4, source_id: 5, source_name: '邮件系统', department_path: '市场部', display_name: '赵六', email: 'zhaoliu@corp.cn', job_title: '经理', tag: 'none', status: 'active', email_alias: '赵六.alias@corp.cn' },
+  { id: 4, source_id: 5, source_name: '邮件系统', department_path: '市��部', display_name: '赵六', email: 'zhaoliu@corp.cn', job_title: '经理', tag: 'none', status: 'active', email_alias: '赵六.alias@corp.cn' },
   { id: 5, source_id: 11, source_name: '网易企邮', department_path: '总裁办', display_name: '陈总', email: 'chenzong@corp.cn', job_title: '首席执行官', tag: 'executive', status: 'active', email_alias: '陈总.alias@corp.cn' },
   { id: 6, source_id: 11, source_name: '网易企邮', department_path: '人力资源部', display_name: '孙七', email: 'sunqi@corp.cn', job_title: 'HRBP', tag: 'none', status: 'active', email_alias: '孙七.alias@corp.cn' },
   { id: 7, source_id: 5, source_name: '邮件系统', department_path: '销售部 / 华东区', display_name: '周八', email: 'zhouba@corp.cn', job_title: '区域总监', tag: 'key_position', status: 'active', email_alias: '周八.alias@corp.cn' },
