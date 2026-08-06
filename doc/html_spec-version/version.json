@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史��加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史���加 v9。",
       "demo_version": 12
     },
     {
@@ -286,7 +286,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12731",
       "incremental": true,
-      "summary": "GT-12731.html 补全 GT-12751 本轮全部条件配置优化（doc 版本 v2→v3），将用户提出的 10 个优化点全部落文档并加「10 点→区块」对照表：变更 5（catalogue 移除功能组 panel:featureGroup / urlSandbox:url_sandbox / shortLink:short_link 三条，目录基线 54→51，catalogue.test.ts 断言 byPanel('featureGroup')===0）、变更 6（值控件规范化：is_encrypted_attachment 与 mailfrom_empty 标为布尔字段→BooleanValueSelect 是/否；image_qr_code_result→[success,fail] 成功/失败；envelope_header_mismatch→[match,mismatch] 一致/不一致；virus_scan_result→[infected,clean] 有毒/无毒；四语补齐 booleanValues/qrResultValues/envelopeHeaderConsistencyValues/virusScanResultValues）、变更 7（��复发信人组下拉：dispatcher 为 sender_group 补正 map_keys_source 指向群组策略发信人组 type=sender，MapValueSection useMapKeys 取到候选）、变更 8（发件组织 sender_dept_path panel:orgDept 组织通讯录部门树多选 OrgDepartmentSection）、变更 9（DescriptionCard 说明卡增强为输入类型/数据来源/格式示例/单位/有效范围/对象含义/运算符/示例/推荐配置多段，顺带修 inputType.intentEngine 缺失）、变更 10（修复选中过多无法再添加：已选区限高约45% overflow-y-auto 独立滚动、添加条件区 flex-1 min-h-0 常驻，ConditionsTab/ConditionTree）；新增浏览器实拍 S-4 病毒有毒/无毒值 + S-5 发件组织部门树 + S-6 发件人组群组下拉 + S-7 已选8条件仍可添加（浅色 1575×847）；差异新增 D-007~D-012（目录基线54链条、群组Mock来源待回归、一致性字段方向映射、布尔vs枚举取舍、发件组织树形包含语义、双滚动布局取舍）、待确认新增 Q-004（值/群组/组织真实后端契约与回显回归）；顺带修复本次编辑区 2 处 UTF-8 乱码（多段/C节注释分隔符）；乱码自检 CLEAN；version.json current_version 15→16。",
+      "summary": "GT-12731.html 补全 GT-12751 本轮全部条件配置优化（doc 版本 v2→v3），将用户提出的 10 个优化点全部落文档并加「10 点→区块」对照表：变更 5（catalogue 移除功能组 panel:featureGroup / urlSandbox:url_sandbox / shortLink:short_link 三条，目录基线 54→51，catalogue.test.ts 断言 byPanel('featureGroup')===0）、变更 6（值控件规范化：is_encrypted_attachment 与 mailfrom_empty 标为布尔字段→BooleanValueSelect 是/否；image_qr_code_result→[success,fail] 成功/失败；envelope_header_mismatch→[match,mismatch] 一致/不一致；virus_scan_result→[infected,clean] 有毒/无毒；四语补齐 booleanValues/qrResultValues/envelopeHeaderConsistencyValues/virusScanResultValues）、变更 7����复发信人组下拉：dispatcher 为 sender_group 补正 map_keys_source 指向群组策略发信人组 type=sender，MapValueSection useMapKeys 取到候选）、变更 8（发件组织 sender_dept_path panel:orgDept 组织通讯录部门树多选 OrgDepartmentSection）、变更 9（DescriptionCard 说明卡增强为输入类型/数据来源/格式示例/单位/有效范围/对象含义/运算符/示例/推荐配置多段，顺带修 inputType.intentEngine 缺失）、变更 10（修复选中过多无法再添加：已选区限高约45% overflow-y-auto 独立滚动、添加条件区 flex-1 min-h-0 常驻，ConditionsTab/ConditionTree）；新增浏览器实拍 S-4 病毒有毒/无毒值 + S-5 发件组织部门树 + S-6 发件人组群组下拉 + S-7 已选8条件仍可添加（浅色 1575×847）；差异新增 D-007~D-012（目录基线54链条、群组Mock来源待回归、一致性字段方向映射、布尔vs枚举取舍、发件组织树形包含语义、双滚动布局取舍）、待确认新增 Q-004（值/群组/组织真实后端契约与回显回归）；顺带修复本次编辑区 2 处 UTF-8 乱码（多段/C节注释分隔符）；乱码自检 CLEAN；version.json current_version 15→16。",
       "demo_version": 16
     },
     {
@@ -316,7 +316,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-11675",
       "incremental": true,
-      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续追加（编号在 GT-12753 的变更 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更新为 D-001~D-016、D 范围更新为 Q-001~Q-006，标题追加 GT-11675（v5），版本��史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
+      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续追加（编号在 GT-12753 的变更 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更新为 D-001~D-016、D 范围更新为 Q-001~Q-006，标题追加 GT-11675（v5），��本��史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
       "demo_version": 19
     },
     {
@@ -334,9 +334,9 @@
       "generated_at": "2026-08-06",
       "webapp_commit": "35ca1b2",
       "comparison_spec_commit": "not-used",
-      "ticket": "GT-12801",
+      "ticket": "GT-12807",
       "incremental": true,
-      "summary": "新建 GT-12801.html：GT-12801 DMARC协议执行动作对齐以及增加\"进行下一步\"。变更 1：messages/zh.json authSpoofing.protocolActionShort.reject 由「阻断」改为「拒收」，与内容规则/反病毒引擎语义对齐，四协议 Tab 共享同一 key 同步生效。变更 2：ProtocolChecksSection.tsx DMARC_ACTIONS 由 4 项扩充为 5 项（追加 accept），accept 对应 i18n key protocolActionShort.accept「进行下一步」已存在无需新增；选择 accept 后 CheckItem.enabled=false、模板自动切为 custom、dominantAction 返回 accept 驱动流程图节点。文档含元信息、产品矩阵、两变更点完整规格（1.1~2.3）、截图 S-1~S-4 占位（待浏览器实拍）、差异 D-001~D-002（均已解决）、待确认 Q-001（后端 accept 枚举兼容性）、版本历史 v1；version.json current_version 34→35。"
+      "summary": "GT-12807.html v1→v2：将 GT-12801「DMARC协议执行动作对齐以及增加进行下一步」追加到 GT-12807 文档中（不单独新建文档）。变更 1：messages/zh.json authSpoofing.protocolActionShort.reject 由「阻断」改为「拒收」；变更 2：ProtocolChecksSection.tsx DMARC_ACTIONS 由 4 项扩充为 5 项（追加 accept，对应「进行下一步」，i18n key 已存在）。目录追加 GT-12801 一级条目，版本历史 v1→v2。"
     }
   ]
 }
