@@ -1,6 +1,6 @@
 {
   "module": "email-handling-disposal-center",
-  "current_version": 2,
+  "current_version": 3,
   "history": [
     {
       "version": 1,
@@ -15,6 +15,15 @@
       "demo_commit": "2cdad33",
       "spec_commit": "804efb9",
       "summary": "对齐详情抽屉（日志查看详情）三模块与实时渲染：明确真实详情组件为 mail-investigation Sheet 抽屉（overview-action-section / security-analysis-section / raw-logs-section），email-disposal-center/detail-modal + tabs/ 为死代码；逐层修正 layer-10~14 的 component-preview / 元素表 / DOM 树比对表 / 交互 JS 使其对齐 demo 当前渲染；记录 demo 实测未翻译 i18n key（面包屑 common.details、安全分析阶段5 智能体名 pipeline.intentAgent/marketingAgent/phishingAgent/retrospectAgent）等交互与样式差异"
+    },
+    {
+      "version": 3,
+      "generated_at": "2026-08-06",
+      "webapp_commit": "aa466b7",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12807",
+      "incremental": true,
+      "summary": "GT-12772：事后处置时间线白名单过滤（DISPOSAL_SOURCES 替代黑名单）、操作类型和执行结果改用 i18n t() 映射（getOperationTypeLabel / getEventResultLabel，删除 OPERATION_TYPE_ZH / EVENT_RESULT_ZH 硬编码表）、时间线默认展开（useState true）、「查看原始日志」按钮接入 onViewRawLogs prop（由 detail-modal 注入）、mock 数据补充三种白名单内事后处置事件；新增独立文档 GT-12807.html，在 layer-12 末尾插入增量小节"
     }
   ]
 }
