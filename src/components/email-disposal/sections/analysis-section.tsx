@@ -159,6 +159,71 @@ function getEventDotInfo(ev: MailChildEvent): EventDotInfo {
   return { bg: 'bg-gray-500', Icon: User };
 }
 
+// 「操作类型」翻译表：event_type 原始值 → 中文
+// 按业务语义分两大类：召回 / 通知，其余为辅助操作
+const EVENT_TYPE_ZH: Record<string, string> = {
+  // 核心：召回
+  recall:           '召回',
+  // 核心：通知（威胁回溯智能体策略 = notify）
+  notify:           '通知',
+  notification:     '通知',
+  // 辅助处置操作
+  approve:          '审核放行',
+  reject:           '审核拒绝',
+  release:          '放行',
+  discard:          '丢弃',
+  send:             '退信发送',
+  bounce:           '退信',
+  delivery:         '投递',
+  delivered:        '已投递',
+  policy_decided:   '策略裁决',
+  message_received: '邮件接收',
+  connected:        '连接建立',
+  quarantine:       '隔离',
+  block:            '拦截',
+  defer:            '延迟',
+  filter:           '过滤',
+  rewrite:          '改写',
+  accept:           '接受',
+  drop:             '丢弃',
+};
+
+// 「执行结果」翻译表：event_result 原始值 → 中文
+// 语义：此次操作是否成功
+const EVENT_RESULT_ZH: Record<string, string> = {
+  success:              '成功',
+  failed:               '失败',
+  failure:              '失败',
+  completed:            '已完成',
+  partial:              '部分成功',
+  partial_success:      '部分成功',
+  partial_recall_success: '部分召回成功',
+  delivered:            '已投递',
+  delivery_failed:      '投递失败',
+  skipped:              '已跳过',
+  cancelled:            '已取消',
+  pending:              '待执行',
+  timeout:              '超时',
+  rejected:             '已拒绝',
+  discarded:            '已丢弃',
+  quarantine_pending:   '隔离中',
+  audit_pending:        '待审核',
+  recall_success:       '召回成功',
+  recall_failed:        '召回失败',
+  in_progress:          '执行中',
+  error:                '错误',
+};
+
+function translateEventType(val: string | undefined, isZh: boolean): string {
+  if (!val) return '—';
+  return isZh ? (EVENT_TYPE_ZH[val] ?? val) : val;
+}
+
+function translateEventResult(val: string | undefined, isZh: boolean): string {
+  if (!val) return '—';
+  return isZh ? (EVENT_RESULT_ZH[val] ?? val) : val;
+}
+
 // aiEnabled defaults to false (fail-closed): this is an entitlement gate for
 // the AI verdict block (spec §5.4/§4.4 CapAI), so a future call site that
 // forgets to pass it must not silently show AI-only content on the
@@ -172,6 +237,8 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
   // rather than adding a fourth duplicate translation of the same string.
   const tSenderActions = useTranslations('emailDisposal.detail.overview.senderActions');
   const rawLocale = useLocale();
+  // 是否处于中文语言环境——用于 event_type/event_result 翻译
+  const isZh = rawLocale === 'zh';
   const router = useRouter();
   // Same locale mapping pattern as mail-list-table.tsx; the disposal-basis
   // dictionary only carries zh/en/th/ru, so unknown locales fall back to zh.
@@ -561,7 +628,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
                             </span>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
-                            <Badge variant="outline" className="text-xs">{ev.event_result || ev.correlation_status || '—'}</Badge>
+                            <Badge variant="outline" className="text-xs">{translateEventResult(ev.event_result || ev.correlation_status, isZh)}</Badge>
                             <ChevronDown className={cn('h-4 w-4 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', !isOpen && '-rotate-90')} />
                           </div>
                         </div>
@@ -577,11 +644,11 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
                             </div>
                             <div className="flex items-start gap-2">
                               <span className="w-20 shrink-0 text-muted-foreground">{t('recallAction')}:</span>
-                              <span>{ev.event_type || '—'}</span>
+                              <span>{translateEventType(ev.event_type, isZh)}</span>
                             </div>
                             <div className="flex items-start gap-2">
                               <span className="w-20 shrink-0 text-muted-foreground">{t('executionResult')}:</span>
-                              <span>{ev.event_result || '—'}{ev.dsn ? `（${ev.dsn}）` : ''}</span>
+                              <span>{translateEventResult(ev.event_result, isZh)}{ev.dsn ? `（${ev.dsn}）` : ''}</span>
                             </div>
                             <div className="pt-1">
                               {/* 优化四：有 onViewRawLogs 时跳转原始日志区，否则退回 toast */}
