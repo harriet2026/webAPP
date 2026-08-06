@@ -862,7 +862,7 @@
         "editButton": "编辑",
         "deleteButton": "删除",
         "emptyText": "暂无通道，建议先配置自定义通道",
-        "proxyDeletedBadge": "代理���删除",
+        "proxyDeletedBadge": "代理�����删除",
         "systemDefaultHelo": "系统默认",
         "drawerTitleNew": "新建投递通道",
         "drawerTitleEdit": "编辑投递通道",
@@ -1019,7 +1019,7 @@
           "response": "预计对端响应：250 2.0.0 Ok"
         },
         "toasts": {
-          "created": "路由规则已��加",
+          "created": "路由规��已��加",
           "updated": "路由规则已更新",
           "deleted": "路由规则已删除",
           "saveError": "请修正表单中的校验错误",
@@ -1188,7 +1188,7 @@
     "globalRule": "全局规则",
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除，只有系统管理员可编辑部分字段",
-    "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条件阈值��其��字段已锁定。",
+    "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条��阈值��其��字段已锁定。",
     "stage": "阶段"
   },
   "tagRules": {
@@ -1335,10 +1335,10 @@
     "deleteConfirmDesc": "删除后无法恢复，规则名：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效执行路径预览",
-    "stageCountHint": "当前形态共启�� {count} 个阶段。",
+    "stageCountHint": "当前��态共启�� {count} 个阶段。",
     "sectionBasic": "基本信息",
     "sectionTargets": "适用对象",
-    "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
+    "sectionTargetsHint": "选择 1 类或多类群组；命中任一目��即生效。",
     "sectionPolicies": "分阶段策略配置",
     "sectionPoliciesHint": "默认为「继承全局」；「预留」策略本迭代仅入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
@@ -1484,7 +1484,7 @@
   },
   "detectionSettings": {
     "title": "检测设置",
-    "description": "配置邮件检测相关的各项参数和规则"
+    "description": "配置邮件检测相关的各���参数和规则"
   },
   "detectionSections": {
     "configurableProfiles": "可配置检测",
@@ -2080,7 +2080,7 @@
         "dkimDescription": "为每个发信域生成或导入 DKIM 密钥并完成 DNS 校验",
         "activeKeys": "已启用密钥 {count} 个",
         "smtpTitle": "SMTP 凭证",
-        "smtpDescription": "管理发信认证账号、后端路由与锁定状态",
+        "smtpDescription": "管理发信认��账号、后端路由与锁定状态",
         "smtpLink": "前往 SMTP 凭证管理"
       }
     },
@@ -2463,7 +2463,7 @@
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
-      "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
+      "connectionRefused": "连接被拒绝，���检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
       "protocolMismatch": "协议不匹配，请确认客户端使用的协议与该域名认证配置一致。",
       "unknown": "未能识别的失败原因，请查看原始失败信息并联系支持。"
@@ -2670,7 +2670,7 @@
       "statusLabel": "二次认证状态",
       "enabled": "已开启",
       "disabled": "已关闭",
-      "forced": "已强制开启",
+      "forced": "已��制开启",
       "sms": "短信验证码",
       "smsUnavailable": "本服务器未配置短信通道",
       "email": "邮件验证码",
@@ -3562,7 +3562,7 @@
       "hit": "命中规则",
       "notHit": "未命中",
       "diffLeft": "距离触发阈值还差 {diff} 次",
-      "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次，超过限制 {limit} 次",
+      "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次，超��限制 {limit} 次",
       "dailyHit": "触发\"每日连接数\"阈值，当日已连接 {count} 次，超过限制 {limit} 次",
       "notHitReason": "未触发阈值",
       "noThresholds": "当前配置未设置有效阈值，连接将被放行"
@@ -4539,7 +4539,7 @@
       "thresholdStrict": "严格",
       "protectedDomains": "受保护域名",
       "protectedDomainsPlaceholder": "每行一个域名\nexample.com\ntest.local",
-      "protectedDomainsHint": "每行一个域名，将检测这些域名的相似域名仿��"
+      "protectedDomainsHint": "每行一个域名，将��测这些域名的相似域名仿��"
     },
     "displayNameSpoof": {
       "title": "显示名仿冒检测",
@@ -4642,7 +4642,7 @@
     },
     "protocolActionShort": {
       "accept": "进行下一步",
-      "reject": "阻断",
+      "reject": "拒收",
       "quarantine": "隔离",
       "audit": "标记",
       "discard": "丢弃"
@@ -4922,7 +4922,7 @@
       "ip": "测试IP",
       "ipCount": "测试发信 IP 数",
       "mailCount": "测试邮件数",
-      "recipientCount": "测试收信人数",
+      "recipientCount": "测���收信人数",
       "run": "执���测试",
       "hit": "命中规则",
       "miss": "未命中",
@@ -7772,7 +7772,7 @@
       "spoofing": "仿冒邮件",
       "phishing": "钓鱼邮件",
       "virus": "病毒邮件",
-      "account_compromised": "账号被盗"
+      "account_compromised": "账号被��"
     },
     "geo": {
       "title": "攻击来源地理分布",
@@ -8017,7 +8017,7 @@
       "topBounceDomains": "目标域名退信率 TOP"
     },
     "bottomActions": {
-      "exportCsv": "导出 CSV",
+      "exportCsv": "��出 CSV",
       "generateReport": "生成报告",
       "aiAnalysis": "AI 分析"
     },
@@ -8788,7 +8788,7 @@
         "mustStartAt0": "置信度区间必须从 0 开始",
         "mustEndAt100": "置信度区间必须覆盖到 100",
         "minLtMax": "区间非法：min({min}) 必须小于 max({max})",
-        "contiguous": "置信度区间必须连续覆盖 0-100，不可重叠、不可留空"
+        "contiguous": "���信度区间必须连续覆盖 0-100，不可重叠、不可留空"
       }
     }
   },
@@ -9486,7 +9486,7 @@
         "sideline_phishing": "旁路钓鱼",
         "attachd": "附件深度扫描"
       },
-      "listenSourcesRequired": "至少选择一个监听来源",
+      "listenSourcesRequired": "至少选择一个��听来源",
       "offlineSourceHint": "离线来源将在恢复后自动生效。",
       "confidenceThreshold": "置信度阈值（1–100）",
       "confidenceRange": "置信度阈值范围 1–100",
@@ -10095,7 +10095,7 @@
       "nOffline": "{n} 个离线",
       "attention": "待处理",
       "nodesNormal": "节点运行正常",
-      "nodesIssue": "存在离线节点",
+      "nodesIssue": "存在离线节���",
       "nodesUnavailable": "数据源不可用",
       "cta": {
         "inbound": "查看统计",
@@ -10652,7 +10652,7 @@
       "cron_expr_required": "启用自动同步时必须填写同步周期",
       "csv_auto_sync_unsupported": "CSV 数据源不支持自动同步，请改用手动导入",
       "csv_preview_failed": "读取 CSV 预览失败，请确认文件格式正确后重试",
-      "department_id_unmapped": "部门必填字段「部门ID」尚未映射，请在字段映射中指定它对应的列",
+      "department_id_unmapped": "部门必填字段「部门ID」尚未映射，请在字段映射中指定它对��的列",
       "email_field_unmapped": "必填字段「邮箱」尚未映射，请在字段映射中指定它对应的列",
       "encryption_key_missing": "服务端未配置通讯录加密密钥（至少 32 字节），无法保存或测试含密码等敏感字段的配置，请联系管理员配置后重试",
       "file_store_uninitialized": "服务端未启用 CSV 文件存储，请联系管理员配置后重试",
@@ -10836,7 +10836,7 @@
     "sideline": {
       "access_denied": "没有权限访问该旁路邮件",
       "id_required": "请指定要操作的条目",
-      "not_found": "旁路邮件不存在，或没有权限访问"
+      "not_found": "旁路邮件���存在，或没有权限访问"
     },
     "smtp_credential": {
       "access_denied": "没有权限访问该发信凭证",
@@ -10853,7 +10853,7 @@
     },
     "unified_rule": {
       "access_denied": "没有权限访问该规则",
-      "action_required": "动作类规则必须指定一个执行动作",
+      "action_required": "动作类规则必须指定���个执行动作",
       "advanced_rules_need_tenant": "高级过滤规则不在平台视角下提供，请先选择租户",
       "bulk_action_invalid": "批量操作无效，只能是：{allowed}",
       "condition_tree_invalid": "规则条件配置不正确，请检查各条件是否填写完整",

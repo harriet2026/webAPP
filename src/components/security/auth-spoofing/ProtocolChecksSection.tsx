@@ -31,9 +31,9 @@ const PROTOCOL_GROUPS: { key: 'spf' | 'dkim' | 'dmarc' | 'ptr'; labelKey: string
   { key: 'ptr', labelKey: 'protocolChecks.ptr', keys: ['noptr', 'nomatch', 'ehlo_mismatch'] },
 ];
 
-/** DMARC has no "accept" option (demo: block/drop/quarantine/tag only); the rest offer all 5 unified actions. */
+/** All protocols including DMARC now offer all 5 unified actions (reject/discard/quarantine/audit/accept). */
 const PROTOCOL_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'accept'];
-const DMARC_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit'];
+const DMARC_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'accept'];
 
 const TEMPLATE_NAMES: Template[] = ['loose', 'standard', 'strict', 'custom'];
 
