@@ -255,17 +255,15 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [], onView
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
-  // 「事后处置时间线」是事后**处置动作**日志（召回/放行/丢弃等管理员操作），
-  // 不是常规 SMTP 投递 DSN 事件流水 -- 后者（event_source === 'postfix'，见
-  // internal/api/postfix_events.go）在这里展示会造成语义混淆（review finding）。
-  // 后端真实写入的 event_source 只有 5 个常量（internal/models/delivery_events.go）：
-  // 'postfix'（Postfix 投递状态回传，routine）与 4 个 'workflow.*'（quarantine/
-  // sideline/audit/bounce -- 均由 RecordWorkflowReinject 在管理员 release/approve
-  // 时写入，即处置动作）。用黑名单排除 'postfix' 而非枚举白名单 'workflow.*'，
-  // 这样任何非 postfix 来源（含未来新增的 workflow.* 变体、以及本组件测试夹具
-  // 里的 'admin_api'）都天然落入"处置相关"一侧，不需要跟着后端新增来源同步改这里。
+  // 「事后处置时间线」只展示真正的事后处置动作：
+  // - admin_api：管理员手动召回
+  // - threat_retro_agent：威胁回溯智能体发起的召回或通知
+  // postfix（投递状态）、antispam（策略裁决）等属于投递流程事件，不属于事后处置，
+  // 用白名单精确过滤，避免 mock 或未来新增来源误混入。
+  const DISPOSAL_SOURCES = new Set(['admin_api', 'threat_retro_agent']);
   const disposalEvents = useMemo(
-    () => events.filter((ev) => ev.event_source !== 'postfix'),
+    () => events.filter((ev) => DISPOSAL_SOURCES.has(ev.event_source ?? '')),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [events],
   );
   const sortedEvents = useMemo(
