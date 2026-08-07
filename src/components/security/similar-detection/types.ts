@@ -21,6 +21,8 @@ export interface SimilarDetectionDirectionConfig {
   tag_header_enabled?: boolean;
   tag_header_name?: string;
   tag_header_value?: string;
+  tag_body_enabled?: boolean;
+  tag_body_content?: string;
 }
 
 export interface SubjectNormalization {
