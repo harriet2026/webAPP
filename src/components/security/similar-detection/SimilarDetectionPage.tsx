@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Link } from '@/i18n/navigation';
+
 import type {
   SimilarDetectionDirection,
   SimilarDetectionMode,
@@ -32,7 +32,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Save, AlertTriangle, Info, ExternalLink, Mail, Send, Building2 } from 'lucide-react';
+import { Loader2, Save, AlertTriangle, Info, Mail, Send, Building2 } from 'lucide-react';
 import { DirectionCard } from './DirectionCard';
 import { AggregateCard } from './AggregateCard';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
@@ -305,22 +305,6 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
     );
   };
 
-  // 豁免提示条（similar_email/same_subject 两个 Tab 共用）
-  const renderExemptionNote = () => (
-    <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Info className="h-4 w-4 text-blue-500" />
-          <span className="text-sm text-blue-700 dark:text-blue-300">{t('exemptionNote')}</span>
-        </div>
-        <Button variant="link" size="sm" className="text-blue-600" nativeButton={false} render={<Link href="/security/groups" />}>
-          {t('goToGroupPolicy')}
-          <ExternalLink className="h-3 w-3 ml-1" />
-        </Button>
-      </div>
-    </div>
-  );
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -363,7 +347,6 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
 
         <TabsContent value="similar_email" className="space-y-6">
           {renderDirectionSection('similar_email')}
-          {renderExemptionNote()}
         </TabsContent>
 
         <TabsContent value="same_subject" className="space-y-6">
@@ -403,15 +386,14 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
             </div>
           </div>
 
-          {renderExemptionNote()}
         </TabsContent>
       </Tabs>
 
-      <div className="flex items-center gap-2 pt-2 flex-wrap">
+      <div className="flex items-center justify-end gap-2 pt-2 flex-wrap">
         <Button variant="outline" size="sm" onClick={handleCancel} disabled={saving} data-testid="similar-detection-cancel">
           {tc('cancel')}
         </Button>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2">
           {dirty && (
             <span className="text-xs text-amber-600 flex items-center gap-1">
               <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
