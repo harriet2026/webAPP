@@ -40,14 +40,18 @@ export function MailMarkingPage({ embedded }: Props) {
   const loadRules = useCallback(async () => {
     setLoading(true)
     try {
-      const [ruleList, scopeList] = await Promise.all([
+      // 规则请求是核心，失败则报错；scopes 请求失败时静默降级为空列表（不影响规则展示）
+      const [ruleResult, scopeResult] = await Promise.allSettled([
         listMailMarkingRules(direction, apiRequest),
         listMailMarkingScopes(direction, apiRequest),
       ])
-      setRules(ruleList)
-      setScopes(scopeList)
-    } catch (error: unknown) {
-      toast.error(t('loadFailed') + ': ' + errorMessage(error))
+      if (ruleResult.status === 'fulfilled') {
+        setRules(ruleResult.value)
+      } else {
+        setRules([])
+        toast.error(t('loadFailed') + ': ' + errorMessage(ruleResult.reason))
+      }
+      setScopes(scopeResult.status === 'fulfilled' ? scopeResult.value : [])
     } finally {
       setLoading(false)
     }
