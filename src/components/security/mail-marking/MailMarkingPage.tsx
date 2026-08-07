@@ -69,10 +69,11 @@ export function MailMarkingPage({ embedded }: Props) {
     () => Object.fromEntries(scopes.map((scope) => [scope.key, scope.name])),
     [scopes],
   )
-  const nextPriority = useMemo(
-    () => Math.max(0, ...rules.map((rule) => rule.priority)) + 1,
-    [rules],
-  )
+  const nextPriority = useMemo(() => {
+    if (rules.length === 0) return 100
+    const max = Math.max(...rules.map((rule) => rule.priority))
+    return Math.min(max + 10, 1000)
+  }, [rules])
 
   const handleSaved = useCallback(() => {
     setEditorOpen(false)

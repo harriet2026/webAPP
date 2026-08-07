@@ -144,10 +144,11 @@ export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriori
                   <div className="flex items-center gap-2">
                     <Input
                       type="number"
-                      min={1}
+                      min={100}
+                      max={1000}
                       step={1}
                       value={form.priority}
-                      className="w-20 shrink-0"
+                      className="w-24 shrink-0"
                       data-testid="mail-marking-priority"
                       onChange={(event) => setForm({ ...form, priority: Number(event.target.value) })}
                     />
@@ -551,7 +552,7 @@ function emptyForm(direction: MailMarkingDirection, priority: number): SaveMailM
 function validate(form: SaveMailMarkingPayload, t: ReturnType<typeof useTranslations>): FormErrors {
   const errors: FormErrors = {}
   if (!form.name.trim()) errors.name = t('errorNameRequired')
-  if (!Number.isInteger(form.priority) || form.priority < 1) errors.priority = t('errorPriorityPositive')
+  if (!Number.isInteger(form.priority) || form.priority < 100 || form.priority > 1000) errors.priority = t('errorPriorityRange')
   if (form.metadata.direction === 'receive') {
     const mark = form.metadata.mark
     if (!mark?.text.trim()) errors.markText = t('errorMarkRequired')
