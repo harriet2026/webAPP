@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 40,
+  "current_version": 41,
   "history": [
     {
       "version": 1,
@@ -126,7 +126,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12695",
       "incremental": true,
-      "summary": "GT-12695 v2（GT-12696 发信人黑白名单优化）：新增 GT-12695.html，完整重生成 6 个变更点规格；补充全部 7 张真实浏览器截图（S-12~S-18），覆盖：开发菜单 GT-12695 入口、策略流水线、黑名单列表8列（含优先级）、黑名单抽屉默认态（拒收）、执行动作下拉展开（含丢弃及说明文字）、白名单列表8列、白名单抽屉默认态（投递，无白名单模式）；D-1~D-3，Q-1~Q-2。",
+      "summary": "GT-12695 v2（GT-12696 发信人黑白名单优化）：新增 GT-12695.html，完整重生成 6 个变更点规格；补充全部 7 张真实浏览器截图（S-12~S-18），覆盖：开���菜单 GT-12695 入口、策略流水线、黑名单列表8列（含优先级）、黑名单抽屉默认态（拒收）、执行动作下拉展开（含丢弃及说明文字）、白名单列表8列、白名单抽屉默认态（投递，无白名单模式）；D-1~D-3，Q-1~Q-2。",
       "demo_version": 5
     },
     {
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史��������加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史���������加 v9。",
       "demo_version": 12
     },
     {
@@ -382,6 +382,15 @@
       "ticket": "GT-12828",
       "incremental": true,
       "summary": "GT-12807.html v6→v7：追加 GT-12828「策略：优先级统一」需求体（3 个变更点）。方案A：邮件标记模块接入 getRulePriorityRange(isSystemAdmin)——MailMarkingPage 引入 useAuth + getRulePriorityRange，RuleEditDrawer 新增 priorityRange prop（FALLBACK_PRIORITY_RANGE 兜底），Input/validate/priorityTip/priorityHint 全部参数化，新增 mailMarking.errors.priorityRange。方案B：ContentRuleDrawer、IPFilterPage、IPFrequencyPage 按行为管控标准模式（createRuleSchema工厂函数+useMemo动态schema），priority schema 从 nonnegative/无约束 改为 min(range.min).max(range.max)，新增 ipFilter.priorityOutOfRange 和 ipFrequency.priorityOutOfRange，IP频率新增 priority inline 错误渲染，TypeScript 编译零新增错误。方案C：仅改 zh.json/en.json 共10处，统一 senderFilter/contentRules/behaviorControl 措辞（en dash、「需在」、行内提示完整）。附截图 gt12828-mail-marking-priority（邮件标记 priorityTip参数化渲染）、gt12828-content-rule-drawer（内容规则 min=100 max=1000 value=100）、gt12828-pipeline-overview（策略流水线全景）。目录追加 GT-12828 一级条目及三个变更点子章节；版本历史 v6→v7。"
+    },
+    {
+      "version": 41,
+      "generated_at": "2026-08-07",
+      "webapp_commit": "0b575c4",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12791",
+      "incremental": true,
+      "summary": "GT-12807.html v7→v8：追加 GT-12791「相似检测模块优化」需求体（3 个变更点）。变更1：触发动作 label 调整——actionMarkDelivery「标记投递」→「投递」、actionBlock「阻断」→「拒收」（value 不变，action-options.ts 不改），动作顺序：投递/隔离/审核/拒收/丢弃。变更2：附加策略新增正文标记——TagDeliveryPanel.tsx 信头标记下方对称追加第三行（tag_body_enabled Switch + tag_body_content 自由文本 Input，data-testid=similar-detection-tag-body-switch/content），types.ts 追加两个可选字段，新增 i18n key tagBodyLabel/tagBodyPlaceholder（zh/en），tagModeHint 提示文案同步更新（含「正文标记」）。变更3：① 校验逻辑拆分——「未选任何标记」→ errorTagRequired，「已选但字段为空」→ 新增 errorTagFieldRequired（zh「已启用的标记方式内容不能为空」/en「Enabled tag modes cannot have empty content」）；② 移除豁免提示条（renderExemptionNote函数+两处调用+Link/ExternalLink import）；③ 按钮区 justify-between→justify-end。附截图 5 张：gt12791-page-default（页面全景）、gt12791-action-dropdown-send（5选项下拉：投递/隔离/审核/拒收/丢弃）、gt12791-tag-panel-default（投递动作选中后标记面板）、gt12791-footer-buttons（完整面板+靠右按钮区 justify-end）、gt12791-validation-error-none（errorTagFieldRequired toast）。目录追加 GT-12791 一级条目及三个变更点子章节；版本历史 v7→v8。"
     }
   ]
 }

@@ -244,6 +244,28 @@
         </ul>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-12791">GT-12791 相似检测模块优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12791-change-1">触发动作调整：5 个标准动作 + 「标记投递」改名为「投递」+「阻断」改名为「拒收」</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12791-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12791-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12791-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12791-change-2">附加策略：投递动作下新增「正文标记」Switch + 自由文本 Input</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12791-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12791-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12791-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12791-change-3">校验逻辑优化：区分「未选标记方式」与「已选但内容为空」两类错误 + 豁免提示条移除 + 按钮区靠右对齐</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12791-c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12791-c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12791-c3-elements">3.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
       <li><a href="#diffs">D. 差异标注</a></li>
       <li><a href="#questions">Q. 待确认事项</a></li>
       <li><a href="#version-history">V. 版本历史</a></li>
@@ -256,7 +278,7 @@
     <table>
       <tbody>
         <tr><th style="width:160px">文档编号</th><td>GT-12807</td></tr>
-        <tr><th>关联需求</th><td>GT-12772 邮件处置中心-标准SMTP邮件召回失败仍提示成功且召回日志入口未实现问题解决</td></tr>
+        <tr><th>��联需求</th><td>GT-12772 邮件处置中心-标准SMTP邮件召回失败仍提示成功且召回日志入口未实现问题解决</td></tr>
         <tr><th>变更类型</th><td><span class="tag tag-changed">功能修复</span></td></tr>
         <tr><th>版本</th><td><span class="version-badge"><span class="vnum">v1</span></span>（2026-08-06）</td></tr>
         <tr><th>路由路径</th><td><code>/email-disposal/center</code></td></tr>
@@ -823,7 +845,7 @@ onViewRawLogs?: () =&gt; void;
       <div class="interaction-preview">
         <p><strong>状态 S-2：新建内容组抽屉打开态</strong>（触发路径：群组管理区 内容组 Tab → 点击「新建内容组」按钮）</p>
         <figure>
-          <img src="./screenshots/gt12797-new-content-drawer.png" alt="新建内容组抽屉：标题「新建内容组」，成员区标签「每行一条关键词」，占位符「关键词1/关键词2」" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <img src="./screenshots/gt12797-new-content-drawer.png" alt="新建内容组���屉：标题「新建内容组」，成员区标签「每行一条关键词」，占位符「关键词1/关键词2」" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
           <figcaption>S-2：新建内容组抽屉 — 标题「新建内容组」，成员区标签「每行一条关键词」，占位符「关键词1/关键词2」</figcaption>
         </figure>
       </div>
@@ -889,7 +911,7 @@ onViewRawLogs?: () =&gt; void;
         <p><strong>状态 S-1：策略流水线页面默认态（含图例区）</strong><br/>触发路径：租户管理员 → 安全策略 → 策略流水线 → 默认打开，滚动至页面底部图例区</p>
         <figure>
           <img src="./screenshots/gt12719-pipeline-default.png" alt="策略流水线页面默认态，底部图例区显示执行动作、名单类型、流程控制三行说明" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
-          <figcaption>S-1：策略流水线页面默认态 — 底部图例区三行可见（执行动作 / 名单类型 / 流程控制），「拒收」替代「阻断」，「进行下一步」新增，「标记投递」已移除</figcaption>
+          <figcaption>S-1：策略流水线页面默认��� — 底部图例区三行可见（执行动作 / 名单类型 / 流程控制），「拒收」替代「阻断」，「进行下一步」新增，「标记投递」已移除</figcaption>
         </figure>
       </div>
 
@@ -1409,7 +1431,7 @@ onViewRawLogs?: () =&gt; void;
         <li><strong>工厂函数模式</strong>：将模块级常量 <code>ruleSchema</code> 重构为 <code>createRuleSchema(range: PriorityRange)</code> 工厂函数，组件内通过 <code>useMemo(() =&gt; getRulePriorityRange(isSystemAdmin), [isSystemAdmin])</code> 获取 range，再用 <code>useMemo(() =&gt; createRuleSchema(range), [range])</code> 生成动态 schema 传给 <code>zodResolver</code>。</li>
         <li><strong>内容规则（<code>ContentRuleDrawer.tsx</code>）</strong>：组件内直接 <code>useAuth()</code>，<code>validate</code> 改用 <code>range.min/max</code>，Input <code>min/max</code> 参数化，<code>priorityRangeHint</code> 和 <code>priorityInvalid</code> 均加 <code>{min}/{max}</code> 插值。</li>
         <li><strong>IP 过滤（<code>IPFilterPage.tsx</code>）</strong>：<code>createRuleSchema</code> 中 priority 从 <code>nonnegative()</code> 改为 <code>.min(range.min, 'priorityOutOfRange').max(range.max, 'priorityOutOfRange')</code>；<code>handleOpenDialog</code> 新建默认值改为 <code>Math.min(Math.max(prev+1, range.min), range.max)</code>；Input 加 <code>max={range.max}</code>，<code>min={range.min}</code>；新增 priority inline 错误渲染；新增 i18n <code>ipFilter.priorityOutOfRange</code>。</li>
-        <li><strong>IP 频率（<code>IPFrequencyPage.tsx</code>）</strong>：同上工厂函数模式；<code>defaultForm</code> 从模块级常量改为 <code>makeDefaultForm(range.defaultValue)</code> 工厂函数，组件内用 <code>useMemo</code>；新增 priority inline 错误渲染；新增 i18n <code>ipFrequency.priorityOutOfRange</code>。</li>
+        <li><strong>IP 频率（<code>IPFrequencyPage.tsx</code>）</strong>：同上工厂函数模式；<code>defaultForm</code> 从模块级常量改为 <code>makeDefaultForm(range.defaultValue)</code> 工厂函数，组件内用 <code>useMemo</code>；���增 priority inline 错误渲染；新增 i18n <code>ipFrequency.priorityOutOfRange</code>。</li>
         <li><strong>i18n 提示文案</strong>：<code>ipFilter.priorityTip/priorityHint</code>、<code>ipFrequency.priorityTip/priorityDesc</code> 均加入 <code>{min}/{max}</code> 插值，让渲染文案随角色动态变化。</li>
       </ul>
 
@@ -1431,7 +1453,7 @@ onViewRawLogs?: () =&gt; void;
         </table>
 
         <p style="margin-top:1.5rem"><strong>状态 S-2：IP 过滤 / IP 频率（AI版·多租户·租户管理员）</strong><br/>
-        触发路径：租户管理员 → 安全策略 → IP 过滤（或 IP 频率限制）→ 点击「新建规则」</p>
+        触发路径：租户管理员 → 安全策略 → IP 过���（或 IP 频率限制）→ 点击「新建规则」</p>
         <p style="color:#6b7280;font-style:italic">无法验证：AI版·多租户模式下租户管理员访问 <code>/zh/security/ip-filter</code> 和 <code>/zh/security/ip-frequency</code> 返回「未授权」，Mock 环境不提供该权限组合。代码层已通过 TypeScript 编译验证（无新增 TS 错误）；IP 过滤 DOM 属性变化（<code>min: nonnegative → 100, max: 无 → 1000</code>）已在源码层确认。</p>
       </div>
 
@@ -1489,6 +1511,162 @@ onViewRawLogs?: () =&gt; void;
     </div>
   </div>
 
+  <!-- ══════════════ GT-12791 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12791">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12791 相似检测模块优化</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/rules/similar-detection</code>（相似邮件与主题检测配置页）<br/>
+        组件：<code>src/components/security/similar-detection/SimilarDetectionPage.tsx</code>、<code>src/components/security/similar-detection/TagDeliveryPanel.tsx</code>、<code>src/components/security/similar-detection/types.ts</code>、<code>src/components/security/similar-detection/action-options.ts</code><br/>
+        i18n：<code>messages/zh.json</code> / <code>messages/en.json</code>（命名空间 similarDetection）<br/>
+        2026-08-07 · commit <code>0b575c4</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- ── 变更 1：触发动作调整 ── -->
+      <h3 id="gt12791-change-1">1. 触发动作调整：5 个标准动作 + 改名统一</h3>
+
+      <h4 id="gt12791-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>原触发动作有 5 个（标记投递、隔离、审核、阻断、丢弃），其中「标记投递」语义模糊（执行动作与附加策略混为一体），「阻断」与系统其他模块的「拒收」语义不一致。</p>
+      <p><strong>决策过程：</strong>讨论中考虑了「新增纯投递动作」方案，最终基于两点决定不新增：① 纯投递等同于「命中规则但什么都不做」，与观察模式语义重叠；② 系统已有观察模式供测试/调试使用，无需额外动作。</p>
+      <p><strong>最终方案：</strong></p>
+      <ul>
+        <li><code>mark-delivery</code> value 不变，i18n label 从「标记投递」改为「投递」（en: <code>Mark &amp; Deliver</code> → <code>Deliver</code>）</li>
+        <li><code>block</code> value 不变，i18n label 从「阻断」改为「拒收」（en: <code>Block</code> → <code>Reject</code>）</li>
+        <li>最终 5 个动作：<strong>投递 / 隔离 / 审核 / 拒收 / 丢弃</strong>（顺序不变，<code>action-options.ts</code> 不修改）</li>
+        <li><code>tagModeHint</code> 同步更新（从「标记投递需至少启用一种标记方式」改为「投递需至少启用一种标记方式」）</li>
+      </ul>
+
+      <h4 id="gt12791-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：触发动作下拉展开（发送方向，5 个选项）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 相似邮件与主题检测 → 发送方向触发动作下拉 → 点击展开</p>
+        <figure>
+          <img src="./screenshots/gt12791-action-dropdown-send.png" alt="发送方向触发动作下拉展开，显示5个选项：投递、隔离（选中）、审核、拒收、丢弃" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：触发动作下拉展开 — 5 个选项：<strong>投递 / 隔离（当前选中）/ 审核 / 拒收 / 丢弃</strong>。原「标记投递」已改名为「投递」，原「阻断」已改名为「拒收」；value 不变。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>选项</th><th>value</th><th>变更前 label</th><th>变更后 label</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>投递</td><td><code>mark-delivery</code></td><td>标记投递</td><td><strong>投递</strong></td><td>value 不变；附加标记策略仍附属于此动作</td></tr>
+            <tr><td>隔离</td><td><code>quarantine</code></td><td>隔离</td><td>隔离</td><td>未变更</td></tr>
+            <tr><td>审核</td><td><code>review</code></td><td>审核</td><td>审核</td><td>未变更</td></tr>
+            <tr><td>拒收</td><td><code>block</code></td><td>阻断</td><td><strong>拒收</strong></td><td>value 不变；与其他模块术语统一</td></tr>
+            <tr><td>丢弃</td><td><code>discard</code></td><td>丢弃</td><td>丢弃</td><td>未变更</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12791-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>触发动作「投递」选项 label</td><td>Select option</td><td>「标记投递」</td><td>「投递」</td><td><code>similarDetection.actionMarkDelivery</code></td><td>[Base]</td></tr>
+          <tr><td>触发动作「拒收」选项 label</td><td>Select option</td><td>「阻断」</td><td>「拒收」</td><td><code>similarDetection.actionBlock</code></td><td>[Base]</td></tr>
+          <tr><td>标记方式区域 hint 文案</td><td>说明文字</td><td>「至少选择一种标记方式，可同时启用主题标记与信头标记」</td><td>「至少选择一种标记方式，可同时启用主题标记、信头标记与正文标记」</td><td><code>similarDetection.tagModeHint</code></td><td>[Base]</td></tr>
+          <tr><td>保存校验错误文案（未选任何标记）</td><td>toast 错误</td><td>「标记投递需至少启用一种标记方式」</td><td>「投递需至少启用一种标记方式」</td><td><code>similarDetection.errorTagRequired</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ── 变更 2：附加策略正文标记 ── -->
+      <h3 id="gt12791-change-2">2. 附加策略：投递动作下新增「正文标记」Switch + 自由文本 Input</h3>
+
+      <h4 id="gt12791-c2-overview">2.1 方案概述</h4>
+      <p><strong>背景：</strong>原「标记方式」面板仅支持主题标记和信头标记两种位置，用户无法在邮件正文中插入标记文本。</p>
+      <p><strong>最终方案：</strong>在信头标记行下方对称追加第三行「正文标记」Switch；Switch 开启后，其下展示一个自由文本 Input（格式由后端处理，前端不限制）。字段：<code>tag_body_enabled: boolean</code> / <code>tag_body_content: string</code>，新增到 <code>SimilarDetectionConfig</code> type 中。</p>
+      <p><strong>附加策略语义说明：</strong>「投递」动作（value=<code>mark-delivery</code>）本身就是「放行 + 可选标记」——标记是附加策略，三个位置均可选，均不选等同于静默放行（此场景建议使用观察模式代替）。</p>
+
+      <h4 id="gt12791-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-2：投递动作选中，标记方式面板默认态（仅主题标记开启）</strong><br/>
+        触发路径：发送方向触发动作 → 选择「投递」→ 标记方式面板展开，主题标记默认开启</p>
+        <figure>
+          <img src="./screenshots/gt12791-tag-panel-default.png" alt="选择投递动作后标记方式面板出现，主题标记开启填有[相似邮件]，信头标记和正文标记Switch均关闭" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：标记方式面板默认态 — 主题标记已开启（前缀模式，填入「[相似邮件]」），信头标记与正文标记均关闭。面板以青色虚线框呈现，三行 Switch 对称排列。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-3：投递动作 + 标记面板完整视图（含按钮区靠右）</strong><br/>
+        触发路径：页面滚动至底部，可见标记方式面板三行 Switch + 底部按钮区</p>
+        <figure>
+          <img src="./screenshots/gt12791-footer-buttons.png" alt="页面底部：发送方向标记面板三行Switch（主题/信头/正文），底部取消按钮靠左保存按钮靠右" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-3：标记方式面板完整视图 — 三行 Switch（主题标记/信头标记/正文标记）。底部按钮区：取消在左、保存（蓝色）在右，<code>justify-end</code> 布局，两按钮紧靠右端。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>可见元素</th><th>内容/值</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>标记方式面板标题</td><td>「标记方式」</td><td>仅在触发动作为「投递」（<code>mark-delivery</code>）时显示</td></tr>
+            <tr><td>标记方式面板提示文案</td><td>「至少选择一种标记方式，可同时启用主题标记、信头标记与正文标记」</td><td><code>tagModeHint</code></td></tr>
+            <tr><td>主题标记 Switch</td><td>开启（默认）；下方：前缀/后缀 Radio + 内容 Input</td><td><code>tag_subject_enabled</code></td></tr>
+            <tr><td>信头标记 Switch</td><td>关闭（默认）；开启后显示字段名 + 字段值两个 Input</td><td><code>tag_header_enabled</code></td></tr>
+            <tr><td>正文标记 Switch（新增）</td><td>关闭（默认）；开启后显示自由文本 Input（placeholder「如：[相似邮件]」）</td><td><code>tag_body_enabled</code>（新增字段）</td></tr>
+            <tr><td>正文内容 Input（新增）</td><td>仅在 tag_body_enabled=true 时显示；自由文本，无格式限制</td><td><code>tag_body_content</code>（新增字段）；<code>data-testid="similar-detection-tag-body-content"</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12791-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key / 源码</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>正文标记 Switch（新增）</td><td>Switch</td><td>不存在</td><td>信头标记行下方对称追加；<code>data-testid="similar-detection-tag-body-switch"</code></td><td><code>similarDetection.tagBodyLabel</code></td><td>[Base]</td></tr>
+          <tr><td>正文标记内容 Input（新增）</td><td>Input</td><td>不存在</td><td>Switch 开启后展示，<code>pl-10</code> 与其他字段行对齐；<code>data-testid="similar-detection-tag-body-content"</code></td><td><code>similarDetection.tagBodyPlaceholder</code>（zh：「如：[相似邮件]」；en：「e.g., [Similar Mail]」）</td><td>[Base]</td></tr>
+          <tr><td>types.ts 新增字段</td><td>TypeScript 类型</td><td>无 <code>tag_body_*</code></td><td><code>tag_body_enabled?: boolean</code>、<code>tag_body_content?: string</code>（追加到 <code>SimilarDetectionConfig</code>）</td><td><code>src/components/security/similar-detection/types.ts</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ── 变更 3：校验逻辑优化 + 豁免条移除 + 按钮靠右 ── -->
+      <h3 id="gt12791-change-3">3. 校验逻辑优化 + 豁免提示条移除 + 按钮区靠右对齐</h3>
+
+      <h4 id="gt12791-c3-overview">3.1 方案概述</h4>
+      <p><strong>校验错误文案拆分：</strong>原校验逻辑中，「未选任何标记方式」和「已选但字段为空」三种情形（主题内容为空、信头字段为空、正文内容为空）均触发同一错误 key <code>errorTagRequired</code>，错误文案为「标记投递需至少启用一种标记方式」，误导用户（字段已填仍提示「需至少启用一种」）。拆分为：</p>
+      <ul>
+        <li><code>errorTagRequired</code>：仅当三个 Switch 全部关闭时触发，文案「投递需至少启用一种标记方式」</li>
+        <li><code>errorTagFieldRequired</code>（新增）：当某个 Switch 开启但对应字段为空时触发，文案「已启用的标记方式内容不能为空」</li>
+      </ul>
+      <p><strong>豁免提示条移除：</strong>原页面底部有一条蓝色信息提示「豁免名单统一由群组策略模块配置，本模块不再提供免检测发信人管理入口 / 前往群组策略配置」，两处调用（相似邮件 Tab、主题检测 Tab）均已移除，连带清理 <code>renderExemptionNote</code> 函数体及 <code>Link</code>、<code>ExternalLink</code> 两个孤立 import。</p>
+      <p><strong>按钮区靠右对齐：</strong>原底部按钮区 <code>justify-between</code>（取消靠左、保存靠右，在宽屏下两端相距约 900px），改为 <code>justify-end</code>，与系统其他弹窗 footer 保持一致。</p>
+
+      <h4 id="gt12791-c3-states">3.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-4：校验错误 toast — 已启用标记但内容为空</strong><br/>
+        触发路径：发送方向选「投递」→ 开启信头标记但不填字段名/字段值 → 点击「保存」</p>
+        <figure>
+          <img src="./screenshots/gt12791-validation-error-none.png" alt="保存时底部弹出红色toast：已启用的标记方式内容不能为空" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-4：校验错误 toast（<code>errorTagFieldRequired</code>）— 右下角红色 X 图标 + 文案「已启用的标记方式内容不能为空」。底部按钮区同时可见：取消和保存均靠右排列（<code>justify-end</code>）。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>触发条件</th><th>错误 key</th><th>文案（zh）</th><th>文案（en）</th></tr></thead>
+          <tbody>
+            <tr><td>三个 Switch 全部关闭，点击保存</td><td><code>errorTagRequired</code></td><td>「投递需至少启用一种标记方式」</td><td>Deliver requires at least one tag mode</td></tr>
+            <tr><td>主题标记开启但内容为空</td><td><code>errorTagFieldRequired</code></td><td>「已启用的标记方式内容不能为空」</td><td>Enabled tag modes cannot have empty content</td></tr>
+            <tr><td>信头标记开启但字段名或字段值为空</td><td><code>errorTagFieldRequired</code></td><td>「已启用的标记方式内容不能为空」</td><td>Enabled tag modes cannot have empty content</td></tr>
+            <tr><td>正文标记开启但内容为空</td><td><code>errorTagFieldRequired</code></td><td>「已启用的标记方式内容不能为空」</td><td>Enabled tag modes cannot have empty content</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12791-c3-elements">3.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>豁免提示条（蓝色信息条）</td><td>两个 Tab 底部各渲染一次（<code>renderExemptionNote()</code>）；含「前往群组策略配置」链接</td><td><strong>已完全移除</strong>，<code>renderExemptionNote</code> 函数、<code>Link</code> import、<code>ExternalLink</code> import 全部删除</td><td><code>SimilarDetectionPage.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>底部按钮区布局</td><td><code>justify-between</code>（取消靠左，保存靠右，宽屏约 900px 间距）</td><td><code>justify-end</code>（取消/保存紧靠右侧排列）；内层 <code>ml-auto</code> div 移除</td><td><code>SimilarDetectionPage.tsx</code> 底部 footer</td><td>[Base]</td></tr>
+          <tr><td>校验逻辑（mark-delivery 动作）</td><td>「未选」/「已选但空」均用 <code>t('errorTagRequired')</code></td><td>「未选」→ <code>t('errorTagRequired')</code>；「已选但空」→ <code>t('errorTagFieldRequired')</code></td><td><code>SimilarDetectionPage.tsx</code> 第 157–160 行</td><td>[Base]</td></tr>
+          <tr><td><code>errorTagFieldRequired</code>（新增 i18n key）</td><td>不存在</td><td>zh：「已启用的标记方式内容不能为空」；en：「Enabled tag modes cannot have empty content」</td><td><code>messages/zh.json</code> / <code>messages/en.json</code>（<code>similarDetection.errorTagFieldRequired</code>）</td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
   <!-- ══════════════ V. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>V. 版本历史</h2>
@@ -1498,6 +1676,11 @@ onViewRawLogs?: () =&gt; void;
       </thead>
       <tbody>
           <tr>
+          <td><span class="version-badge"><span class="vnum">v8</span></span></td>
+          <td>2026-08-07</td>
+          <td>追加 GT-12791「相似检测模块优化」需求体（3 个变更点）。变更1：触发动作 label 调整——<code>actionMarkDelivery</code>「标记投递」→「投递」、<code>actionBlock</code>「阻断」→「拒收」（value 不变），<code>action-options.ts</code> 不改；顺序保持投递/隔离/审核/拒收/丢弃 5 个。变更2：附加策略新增正文标记——<code>TagDeliveryPanel.tsx</code> 信头标记行下方对称追加第三行（<code>tag_body_enabled</code> Switch + <code>tag_body_content</code> 自由文本 Input），<code>types.ts</code> 追加两个可选字段，新增 i18n key <code>tagBodyLabel</code>/<code>tagBodyPlaceholder</code>（zh/en），<code>tagModeHint</code> 提示文案同步更新。变更3：① 校验逻辑拆分两类错误——「未选任何标记」→<code>errorTagRequired</code>，「已选但字段为空」→新增<code>errorTagFieldRequired</code>（zh「已启用的标记方式内容不能为空」）；② 移除豁免提示条（<code>renderExemptionNote</code>函数+两处调用+<code>Link</code>/<code>ExternalLink</code> import）；③ 按钮区 <code>justify-between</code>→<code>justify-end</code>。附截图 5 张：gt12791-page-default（页面全景）、gt12791-action-dropdown-send（5 个选项下拉）、gt12791-tag-panel-default（投递选中后标记面板）、gt12791-footer-buttons（完整面板+靠右按钮区）、gt12791-validation-error-none（errorTagFieldRequired toast）。</td>
+        </tr>
+        <tr>
           <td><span class="version-badge"><span class="vnum">v7</span></span></td>
           <td>2026-08-07</td>
           <td>追加 GT-12828「策略：优先级统一」需求体（3 个变更点）。方案A：邮件标记模块接入 getRulePriorityRange(isSystemAdmin)，MailMarkingPage 引入 useAuth 计算 priorityRange，RuleEditDrawer 新增 priorityRange prop（FALLBACK 兜底），Input min/max/validate/priorityTip/priorityHint 全部参数化，新增 mailMarking.errors.priorityRange i18n key。方案B：ContentRuleDrawer、IPFilterPage、IPFrequencyPage 三模块按行为管控标准模式（createRuleSchema 工厂函数 + useMemo 动态 schema）改造，priority schema 从 nonnegative/无约束 改为 min(range.min).max(range.max)，Input min/max 参数化，提示文案加 {min}/{max} 插值，新增 ipFilter.priorityOutOfRange 和 ipFrequency.priorityOutOfRange i18n key，IP频率新增 priority inline 错误渲染。方案C：仅改 zh.json/en.json 共 10 处，统一 senderFilter/contentRules/behaviorControl 优先级文案措辞（en dash、「需在」、行内提示完整）。附截图 gt12828-mail-marking-priority（邮件标记 100）、gt12828-content-rule-drawer（内容规则 100 + 提示文案参数化）、gt12828-pipeline-overview（策略流水线全景）。</td>
