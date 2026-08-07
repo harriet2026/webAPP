@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 37,
+  "current_version": 38,
   "history": [
     {
       "version": 1,
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史�����加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史������加 v9。",
       "demo_version": 12
     },
     {
@@ -355,6 +355,15 @@
       "ticket": "GT-12807",
       "incremental": true,
       "summary": "GT-12807.html v3→v4：追加 GT-12719「策略流水线执行动作/黑白名单文案解释」需求体（3 个变更点）。变更 1：执行动作图例「阻断」→「拒收」，新增「进行下一步·继续执行后续策略」（pipeline.actionNextStep/actionNextStepDesc），移除「标记投递」条目（PolicyPipelinePage.tsx actionLegendItems 删除 tagDeliver，union type 收窄）；变更 2：名单类型黑名单描述「阻断/隔离/丢弃」→「拒收/隔离/丢弃」（pipeline.blacklistTypeDesc），白名单描述「投递/标记投递」→「投递」（pipeline.whitelistTypeDesc）；变更 3：流程控制终止短文案/描述「阻断」→「拒收」（pipeline.flowTerminateShort/flowTerminateDesc），继续描述移除「标记投递」（pipeline.flowContinueDesc）；附截图 S-1（策略流水线默认态含图例区，暗色主题 1406×803）；目录追加 GT-12719 一级条目及三级子章节；版本历史 v3→v4。"
+    },
+    {
+      "version": 38,
+      "generated_at": "2026-08-07",
+      "webapp_commit": "1a445a9",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12807",
+      "incremental": true,
+      "summary": "GT-12807.html v4→v5：追加 GT-12793「邮件标记与声明模块优化」需求体（3 个变更点）。变更 1：RuleEditDrawer「取消」「保存」按钮从 SheetHeader 右上移至 SheetContent 底部 footer 右下；变更 2：MailMarkingPage.loadRules Promise.all→Promise.allSettled，scopes 失败不再阻断规则展示，修复 zh.json mailMarking 4 处 UTF-8 乱码（priorityHint/noData/markPosition/sampleSubject）；变更 3：RuleListTable「优先级」列从第1列移至第5列（状态之后、操作之前）；附截图 gt12793-receive-list（接收标记4条）、gt12793-send-list（外发声明2条）；目录追加 GT-12793 一级条目及三级子章节；版本历史 v4→v5。"
     }
   ]
 }

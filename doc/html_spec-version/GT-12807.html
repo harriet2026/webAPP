@@ -191,6 +191,28 @@
         </ul>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-12793">GT-12793 邮件标记与声明模块优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12793-change-1">接收标记 / 外发声明规则列表：「取消」「保存」按钮从右上移至右下</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12793-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12793-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12793-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12793-change-2">规则列表补齐「优先级」字段（Promise.allSettled 容错）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12793-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12793-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12793-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12793-change-3">「优先级」列位置调整至「状态」之后</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12793-c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12793-c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12793-c3-elements">3.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
       <li><a href="#diffs">D. 差异标注</a></li>
       <li><a href="#questions">Q. 待确认事项</a></li>
       <li><a href="#version-history">V. 版本历史</a></li>
@@ -989,6 +1011,177 @@ onViewRawLogs?: () =&gt; void;
     </div>
   </div>
 
+  <!-- ══════════════ GT-12793 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12793">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12793 邮件标记与声明模块优化</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（阶段5 邮件标记与声明面板）<br/>
+        组件：<code>src/components/security/mail-marking/RuleEditDrawer.tsx</code>、<code>src/components/security/mail-marking/MailMarkingPage.tsx</code>、<code>src/components/security/mail-marking/RuleListTable.tsx</code><br/>
+        i18n：<code>messages/zh.json</code>（<code>mailMarking.*</code> 命名空间，已有 key 复用，乱码修复）<br/>
+        2026-08-07 · commit <code>1a445a9</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- 变更 1 -->
+      <h3 id="gt12793-change-1">1. 接收标记 / 外发声明规则列表：「取消」「保存」按钮从右上移至右下</h3>
+
+      <h4 id="gt12793-c1-overview">1.1 方案概述</h4>
+      <p>新建规则 / 编辑规则抽屉（<code>RuleEditDrawer</code>）中，「取消」「保存」按钮原来位于 <code>SheetHeader</code> 右上角（<code>flex items-center justify-between</code> 内），与标题并排显示。</p>
+      <p>优化后：按钮区域从 <code>SheetHeader</code> 中移除，改为在 <code>SheetContent</code> 底部新增 <code>&lt;footer class="shrink-0 border-t px-6 py-4"&gt;</code>，按钮右对齐（<code>flex justify-end gap-2</code>）。<code>SheetHeader</code> 仅保留标题和副标题，布局更简洁。i18n key <code>mailMarking.cancel</code>、<code>mailMarking.save</code> 和 <code>data-testid="mail-marking-save-rule"</code> 均未改变。</p>
+
+      <h4 id="gt12793-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：接收标记规则列表默认态（含规则数据）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 策略流水线 → 阶段5 邮件标记与声明卡片 → 「接收标记」Tab（默认）</p>
+        <figure>
+          <img src="./screenshots/gt12793-receive-list.png" alt="邮件标记与声明面板，接收标记Tab，规则列表显示4条规则，表头包含规则名称、适用对象、位置、状态、优先级、操作列" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：接收标记规则列表默认态 — 共4条规则，按钮「+ 新建规则」位于右上角，规则表格完整展示</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12793-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key / testid</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SheetHeader 按钮区域</td>
+            <td>布局区域</td>
+            <td><code>flex items-center justify-between</code>，标题+副标题+[取消][保存]并排</td>
+            <td>SheetHeader 仅保留标题和副标题，按钮区域移除</td>
+            <td>—</td>
+            <td><code>RuleEditDrawer.tsx</code> SheetHeader</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>底部 footer 按钮区域（新增）</td>
+            <td>布局区域</td>
+            <td>不存在</td>
+            <td><code>&lt;footer class="shrink-0 border-t px-6 py-4"&gt;</code>，右对齐，位于表单内容下方、SheetContent 底部</td>
+            <td>—</td>
+            <td><code>RuleEditDrawer.tsx</code> footer</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>取消按钮</td>
+            <td>Button（outline）</td>
+            <td>SheetHeader 右上角</td>
+            <td>footer 右下角（位置变更，行为不变）</td>
+            <td><code>mailMarking.cancel</code></td>
+            <td><code>RuleEditDrawer.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>保存按钮</td>
+            <td>Button（primary）</td>
+            <td>SheetHeader 右上角</td>
+            <td>footer 右下角（位置变更，行为不变；Loader2 loading 态保留）</td>
+            <td><code>mailMarking.save</code> / <code>data-testid="mail-marking-save-rule"</code></td>
+            <td><code>RuleEditDrawer.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12793-change-2" style="margin-top:2rem">2. 规则列表补齐「优先级」字段（Promise.allSettled 容错）</h3>
+
+      <h4 id="gt12793-c2-overview">2.1 方案概述</h4>
+      <p>规则列表中「优先级」列的表头和数据行（<code>RuleListTable.tsx</code>）在代码层面已存在，但因 <code>MailMarkingPage.loadRules()</code> 使用 <code>Promise.all</code>：当 <code>listMailMarkingScopes</code>（获取适用对象列表）请求失败时，整体抛出异常，进入 catch 后 <code>setRules</code> 不被调用，规则列表永远为空数组 <code>[]</code>，导致 priority 列虽存在于表头但无数据行可显示。</p>
+      <p>修复方案：将 <code>Promise.all</code> 改为 <code>Promise.allSettled</code>，规则请求和 scopes 请求独立容错——规则请求失败才 toast 报错并 <code>setRules([])</code>；scopes 请求失败时静默降级为空列表（不影响规则行显示）。同时修复 <code>zh.json</code> 中 <code>mailMarking</code> 命名空间的 4 处 UTF-8 乱码（<code>priorityHint</code>、<code>noData</code>、<code>markPosition</code>、<code>sampleSubject</code>）。</p>
+
+      <h4 id="gt12793-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1（同上）</strong>：接收标记规则列表，scopes 加载无论成功与否，规则行均正常显示（含 priority 数值）。</p>
+        <p><strong>状态 S-2：外发声明规则列表</strong><br/>
+        触发路径：同 S-1 → 点击「外发声明」Tab</p>
+        <figure>
+          <img src="./screenshots/gt12793-send-list.png" alt="外发声明Tab规则列表，显示2条规则，表头包含规则名称、适用对象、位置、状态、优先级、操作列" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：外发声明规则列表 — 共2条规则，底部显示优先级提示文案</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12793-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key / 源码</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>loadRules</code> 错误处理</td>
+            <td>异步逻辑</td>
+            <td><code>Promise.all</code>：scopes 失败 → 整体 catch → rules 永远为空</td>
+            <td><code>Promise.allSettled</code>：rules / scopes 独立容错，rules 加载成功即展示</td>
+            <td><code>MailMarkingPage.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>zh.json 乱码修复</td>
+            <td>i18n 文案</td>
+            <td><code>priorityHint</code>「…规??」、<code>noData</code>「???无规则」、<code>markPosition</code>「??记位置」、<code>sampleSubject</code>「项???进展说明」</td>
+            <td>全部修复为正确 UTF-8 汉字：「…规则」「暂无规则」「标记位置」「项目进展说明」</td>
+            <td><code>messages/zh.json</code> mailMarking.*</td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 3 -->
+      <h3 id="gt12793-change-3" style="margin-top:2rem">3. 「优先级」列位置调整至「状态」之后</h3>
+
+      <h4 id="gt12793-c3-overview">3.1 方案概述</h4>
+      <p>原表头列序为：<strong>优先级 | 规则名称 | 适用对象 | 位置 | 状态 | 操作</strong>。按需求调整为：<strong>规则名称 | 适用对象 | 位置 | 状态 | 优先级 | 操作</strong>（优先级列移至状态之后、操作之前）。</p>
+      <p>修改范围：<code>RuleListTable.tsx</code> 的 <code>&lt;thead&gt;</code> 中 <code>priority</code> <code>&lt;th&gt;</code> 和 <code>&lt;tbody&gt;</code> 中 <code>priority</code> <code>&lt;td&gt;</code> 同步调整，列宽 <code>w-[92px]</code> 保持不变，<code>colSpan={6}</code> 的空行/加载行列数不变。</p>
+
+      <h4 id="gt12793-c3-states">3.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1（接收标记列顺序）</strong>：表头列序为「规则名称 | 适用对象 | 位置 | 状态 | 优先级 | 操作」，优先级值（4/3/2/1）位于状态徽章右侧。</p>
+        <figure>
+          <img src="./screenshots/gt12793-receive-list.png" alt="接收标记规则列表，列顺序为规则名称、适用对象、位置、状态、优先级、操作" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1（列顺序）：「优先级」列位于「状态」之后（接收标记 4 条规则）</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12793-c3-elements">3.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前列序</th><th>变更后列序</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>规则列表表头</td>
+            <td>表格 thead</td>
+            <td>优先级 / 规则名称 / 适用对象 / 位置 / 状态 / 操作</td>
+            <td>规则名称 / 适用对象 / 位置 / 状态 / <strong>优先级</strong> / 操作</td>
+            <td><code>RuleListTable.tsx</code> thead tr</td>
+            <td>[Base]，接收标记与外发声明共用同一组件</td>
+          </tr>
+          <tr>
+            <td>规则列表数据行 priority 单元格</td>
+            <td>表格 tbody td</td>
+            <td>第1列（<code>font-mono tabular-nums</code>）</td>
+            <td>第5列（状态 Badge 之后，操作之前）</td>
+            <td><code>RuleListTable.tsx</code> tbody tr</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级提示文案（表格底部）</td>
+            <td>说明文案</td>
+            <td>不变（「数值越大优先级越高，命中多条规则时优先执行数值大的规则」）</td>
+            <td>不变</td>
+            <td><code>mailMarking.priorityHint</code>（乱码已修复）</td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
   <!-- ══════════════ V. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>V. 版本历史</h2>
@@ -998,6 +1191,11 @@ onViewRawLogs?: () =&gt; void;
       </thead>
       <tbody>
           <tr>
+          <td><span class="version-badge"><span class="vnum">v5</span></span></td>
+          <td>2026-08-07</td>
+          <td>追加 GT-12793 需求体（邮件标记与声明模块优化，3 个变更点）。变更 1：RuleEditDrawer「取消」「保存」按钮从 SheetHeader 右上移至 SheetContent 底部 footer 右下，标题区仅保留标题和副标题；变更 2：MailMarkingPage.loadRules 由 Promise.all 改为 Promise.allSettled，scopes 失败不再阻断规则展示，修复 zh.json mailMarking 4 处 UTF-8 乱码（priorityHint/noData/markPosition/sampleSubject）；变更 3：RuleListTable 「优先级」列从第1列（规则名称前）移至第5列（状态之后、操作之前），接收标记和外发声明共用同一组件。附截图 gt12793-receive-list（接收标记4条规则）、gt12793-send-list（外发声明2条规则）；目录追加 GT-12793 一级条目及三级子章节；版本历史 v4→v5。</td>
+        </tr>
+        <tr>
           <td><span class="version-badge"><span class="vnum">v4</span></span></td>
           <td>2026-08-06</td>
           <td>追加 GT-12719 需求体（策略流水线执行动作/黑白名单文案解释）：变更 1 执行动作图例「阻断」→「拒收」，新增「进行下一步 · 继续执行后续策略」（pipeline.actionNextStep/actionNextStepDesc），移除「标记投递」（actionLegendItems 删除 tagDeliver 条目，PolicyPipelinePage.tsx）；变更 2 名单类型黑名单描述「阻断/隔离/丢弃」→「拒收/隔离/丢弃」（pipeline.blacklistTypeDesc），白名单描述「投递/标记投递」→「投递」（pipeline.whitelistTypeDesc）；变更 3 流程控制终止短文案「阻断」→「拒收」（pipeline.flowTerminateShort），终止描述「阻断/丢弃/隔离」→「拒收/丢弃/隔离」（pipeline.flowTerminateDesc），继续描述移除「标记投递」（pipeline.flowContinueDesc）；附截图 S-1（策略流水线默认态含图例区）；目录追加 GT-12719 一级条目及三级子章节；版本历史 v3→v4。</td>
@@ -1015,7 +1213,7 @@ onViewRawLogs?: () =&gt; void;
         <tr>
           <td><span class="version-badge"><span class="vnum">v1</span></span></td>
           <td>2026-08-06</td>
-          <td>初版：GT-12772 全部 6 个变更点（白名单过滤 / 操作类型 i18n / 执行结果 i18n / 默认展开 / 查看原始日志接入 / Mock 数据补充）；4 项差异标注，2 项���确认事项</td>
+          <td>初版：GT-12772 全部 6 个变更点（白名单过滤 / 操作类型 i18n / 执行结果 i18n / 默认展开 / 查看原始日志接入 / Mock 数据补充）；4 项差异标注，2 项待确认事项</td>
         </tr>
       </tbody>
     </table>
