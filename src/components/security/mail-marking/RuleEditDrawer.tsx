@@ -21,6 +21,10 @@ import {
 } from '@/lib/api/mail-marking'
 import { useApiRequest } from '@/lib/api/client'
 import {
+  getRulePriorityRange, isPriorityInRange,
+  type PriorityRange,
+} from '@/components/security/advanced-filter-rules/priority-range'
+import {
   DEFAULT_CUSTOM_COLORS, DEFAULT_RECEIVE_METADATA, DEFAULT_SEND_METADATA,
   RECEIVE_MARKING_VARIABLES, SEND_DISCLAIMER_VARIABLES,
 } from './defaults'
@@ -32,21 +36,26 @@ import { MarkPreview } from './MarkPreview'
 import { DisclaimerPreview } from './DisclaimerPreview'
 import { SimulateTestPanel } from './SimulateTestPanel'
 
+// Fallback for callers that don't yet inject a role-aware range (matches tenant default).
+const FALLBACK_PRIORITY_RANGE: PriorityRange = getRulePriorityRange(false)
+
 interface Props {
   open: boolean
   onOpenChange: (value: boolean) => void
   direction: MailMarkingDirection
   rule: MailMarkingRule | null
   nextPriority: number
+  priorityRange?: PriorityRange
   onSaved: () => void
 }
 
 type FormErrors = Partial<Record<'name' | 'priority' | 'markText' | 'disclaimer' | 'header' | 'colors', string>>
 type PositionChoice = 'subject_prefix' | 'body_top' | 'body_bottom' | 'header' | 'multiple'
 
-export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriority, onSaved }: Props) {
+export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriority, priorityRange, onSaved }: Props) {
   const t = useTranslations('mailMarking')
   const { apiRequest } = useApiRequest()
+  const range = priorityRange ?? FALLBACK_PRIORITY_RANGE
   const [form, setForm] = useState<SaveMailMarkingPayload>(() => emptyForm(direction, nextPriority))
   const [availableScopes, setAvailableScopes] = useState<MailMarkingScope[]>([])
   const [errors, setErrors] = useState<FormErrors>({})
@@ -94,7 +103,7 @@ export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriori
   }))
 
   const onSave = async () => {
-    const nextErrors = validate(form, t)
+    const nextErrors = validate(form, t, range)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
     setSaving(true)
@@ -144,15 +153,15 @@ export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriori
                   <div className="flex items-center gap-2">
                     <Input
                       type="number"
-                      min={100}
-                      max={1000}
+                      min={range.min}
+                      max={range.max}
                       step={1}
                       value={form.priority}
                       className="w-24 shrink-0"
                       data-testid="mail-marking-priority"
                       onChange={(event) => setForm({ ...form, priority: Number(event.target.value) })}
                     />
-                    <span className="text-xs leading-5 text-muted-foreground">({t('priorityTip')})</span>
+                    <span className="text-xs leading-5 text-muted-foreground">({t('priorityTip', { min: range.min, max: range.max })})</span>
                   </div>
                 </FieldBlock>
               </FormRow>
@@ -549,10 +558,12 @@ function emptyForm(direction: MailMarkingDirection, priority: number): SaveMailM
   }
 }
 
-function validate(form: SaveMailMarkingPayload, t: ReturnType<typeof useTranslations>): FormErrors {
+function validate(form: SaveMailMarkingPayload, t: ReturnType<typeof useTranslations>, range: PriorityRange): FormErrors {
   const errors: FormErrors = {}
   if (!form.name.trim()) errors.name = t('errorNameRequired')
-  if (!Number.isInteger(form.priority) || form.priority < 100 || form.priority > 1000) errors.priority = t('errorPriorityRange')
+  if (!Number.isInteger(form.priority) || !isPriorityInRange(form.priority, range)) {
+    errors.priority = t('errors.priorityRange', { min: range.min, max: range.max })
+  }
   if (form.metadata.direction === 'receive') {
     const mark = form.metadata.mark
     if (!mark?.text.trim()) errors.markText = t('errorMarkRequired')
