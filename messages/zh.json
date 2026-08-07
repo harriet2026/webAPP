@@ -537,7 +537,7 @@
       "sendCount": "发信量",
       "threatCount": "威胁量",
       "blockRate": "拦截率",
-      "bounceCount": "退信量",
+      "bounceCount": "��信量",
       "relatedSenders": "关联发信人",
       "firstSend": "首次发信",
       "subjectKeyword": "主题关键词",
@@ -704,7 +704,7 @@
       "editButton": "编辑",
       "deleteButton": "删除",
       "drawerTitleNew": "新建转发规则",
-      "drawerTitleEdit": "编辑��发��则",
+      "drawerTitleEdit": "编辑���发��则",
       "drawerDescription": "在 SMTP 握手阶段决定连接的接入与过滤策略",
       "sectionBasic": "基础信息",
       "sectionMatch": "匹配条件",
@@ -861,7 +861,7 @@
         },
         "editButton": "编辑",
         "deleteButton": "删除",
-        "emptyText": "暂无通道，建议先配置��定义通道",
+        "emptyText": "暂无通道，建议先配�����定义通道",
         "proxyDeletedBadge": "代理�������删除",
         "systemDefaultHelo": "系统默认",
         "drawerTitleNew": "新建投递通道",
@@ -1834,7 +1834,7 @@
       "delivery_recipients_summary": "收件人投递详情",
       "tenant_id": "租户 ID",
       "tenant_name": "租户",
-      "processing_time_ms": "处理耗���",
+      "processing_time_ms": "处���耗���",
       "parse_error": "解析错误",
       "storage_path": "存���路径",
       "storage_size": "存储大小",
@@ -2461,7 +2461,7 @@
       "unknown": "未知错误"
     },
     "failAdvice": {
-      "wrongPassword": "短时间内多次密��错误可能为撞��/暴力破解，建议核查账号是���泄露并启用登录限速。",
+      "wrongPassword": "短��间内多次密��错误可能为撞��/暴力破解，建议核查账号是���泄露并启用登录限速。",
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必��时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链��，或适当调大认证超时时间。",
@@ -3803,7 +3803,7 @@
     "importPartialFail": "部分失败：新增 {created}，覆盖 {overwritten}，失败 {failed}",
     "importFileLoaded": "{name}（{count} 条）",
     "importFileClear": "清除已选文件",
-    "importJsonInvalid": "JSON 解析失败，请上传「导出」生成的 .json 文件",
+    "importJsonInvalid": "JSON 解析失败，请上传「导出」生成的 .json 文���",
     "importJsonNotEnvelope": "不是有效的规则导出文件（缺少 data.rules）",
     "importJsonWrongScope": "不是 IP 黑白名单的导出文件",
     "importJsonEmpty": "导出文件中没有规则",
@@ -3949,7 +3949,7 @@
     "greylistTTLInvalid": "白名单有效期必须不少于 1 小时",
     "greylistDelayShortWarning": "延迟时间过短可能无法有效过滤",
     "greylistDelayLongWarning": "延迟时间过长可能影响正常邮件",
-    "unsavedChanges": "有未保存的更改",
+    "unsavedChanges": "有未保存的���改",
     "noUnsavedChanges": "暂无未保存更改",
     "demoParityNotice": "当前页面按 demo 的 RBL 配置面板重新实现：服务器列表、超时、命中动作与灰名单子配置在同一面板内维护。",
     "testIP": "测试 IP：127.0.0.2（标准 RBL 测试地��）",
@@ -4252,7 +4252,7 @@
     "matchType": "匹配类型",
     "typeLabel": "类型",
     "matchCondition": "匹配条件",
-    "matchTypeTip": "选择关键词、正则表达式或全局内容��进行匹配",
+    "matchTypeTip": "选择关键词、正则���达式或全局内容��进行匹配",
     "matchTypeKeyword": "关键词",
     "matchTypeRegex": "正则表达式",
     "matchTypeContentGroup": "内容组",
@@ -4429,7 +4429,7 @@
     "restoreDefault": "恢复系统默认",
     "moduleEnabled": "启用认证仿冒检测",
     "moduleEnabledHint": "关闭后，所有认证仿冒检测规则将不再生效",
-    "observeModeTip": "观察模式：开启后，规则仅记录命中日志，不会对邮件执行拦截/隔离等动作。建议在首次��署或调整策略时开启观察模式，验证规则影响范围后再正式启用。",
+    "observeModeTip": "观察模式：开启后，规则仅记录命中日志，不会对邮件执行拦截/隔��等动作。建议在首次��署或调整策略时开启观察模式，验证规则影响范围后再正式启用。",
     "probe": {
       "title": "模拟测试邮件认证",
       "description": "输入邮件参数测试认证仿冒检测的结果",
@@ -4524,7 +4524,7 @@
       "description": "为本租户的发信域名生成并管理 DKIM 私钥、发布 DNS 公钥，对经本网关外发的邮件进行 DKIM 签名。",
       "domainCol": "发信域名",
       "statusCol": "签名状态",
-      "actionsCol": "操作",
+      "actionsCol": "操���",
       "activeSelector": "已启用 selector：{selector}",
       "notSigned": "未签名",
       "pendingVerify": "待验证",
@@ -5542,14 +5542,15 @@
     "ignoreCase": "忽略大小写",
     "ignoreRePrefix": "忽略Re:/Fwd:",
     "ignoreNumbers": "忽略数字",
-    "similarSubject": "相似度>90%视为相同",
+    "similarSubject": "��似度>90%视为相同",
     "realtimeNote": "此检测在邮件进入时实时计算，命中后立即拦截或标记",
     "observeNote": "��察模式下命中仅记录日志，不执行拦截动作",
     "goToGroupPolicy": "前往群组策略配置",
     "atLeastOneDirection": "至少选择一个检测方向",
     "navSummary": "窗口{window}分钟 / 阈值{threshold}%",
     "tooltipObserve": "开启后仅记录日志��不执行实际拦截动作",
-    "errorTagRequired": "标记投递需至少启用一种标记方式"
+    "errorTagRequired": "投递需至少启用一种标记方式",
+    "errorTagFieldRequired": "已启用的标记方式内容不能为空"
   },
   "mailMarking": {
     "title": "邮件标记与声明",
@@ -7182,7 +7183,7 @@
       "desc_recipientCount": {
         "source": "邮件收信人解析",
         "usage": "限制单封邮件的收信人数量",
-        "note": "防止大规模群发"
+        "note": "防��大规模群发"
       },
       "orGroupBadge": "OR",
       "andGroupBadge": "AND",
@@ -7736,7 +7737,7 @@
         "30d": "近30天",
         "this_month": "本月",
         "last_month": "上月",
-        "custom": "自定义"
+        "custom": "��定义"
       },
       "comparePrevious": "对比上一周期",
       "tenantScope": {
@@ -7890,7 +7891,7 @@
       "failed": "失败",
       "cancelled": "已取消",
       "in_delivery": "投递中",
-      "partial_delivered": "部分投递",
+      "partial_delivered": "���分投递",
       "unknown": "未知"
     },
     "threatLevels": {
@@ -8762,7 +8763,7 @@
       "loading": "加载中...",
       "save": "保存",
       "saving": "保存中...",
-      "saved": "分级配置已保存",
+      "saved": "分级配置已保���",
       "saveFailed": "保存失败",
       "discard": "放弃改动",
       "colRange": "置信度区间",
@@ -8964,7 +8965,7 @@
       "edit": "编辑",
       "delete": "删除",
       "deleteConfirmTitle": "删除保护对象",
-      "deleteConfirmDesc": "删除后将停止对该对象的仿冒检测，历史检测日志保留。",
+      "deleteConfirmDesc": "删除后将停止对该对象的仿冒���测，历史检测日志保留。",
       "emptyTitle": "暂无保护对象",
       "emptyDescription": "添加保护对象后开启防护，引擎需至少 1 个对象才能启用",
       "emptyFiltered": "未找到匹配的保护对象",
@@ -9117,7 +9118,7 @@
       "searchPlaceholder": "按品牌名称、保护域名搜索",
       "modeFilter": "处置模式",
       "allModes": "全部模式",
-      "protectedDomains": "保护���名",
+      "protectedDomains": "保护����名",
       "keywords": "品牌关键词",
       "keywordsCount": "品牌关键词：{count}个",
       "confidenceThreshold": "置信度阈值",
@@ -10830,7 +10831,7 @@
     },
     "role": {
       "cross_tenant_denied": "无权修改其他租户的角色",
-      "name_conflicts_template": "角色名称与已有的租户角色或全局模板重名",
+      "name_conflicts_template": "角���名称与已有的租户角色或全局模板重名",
       "name_exists": "该范围内已存在同名角色",
       "name_required": "�����写角色名称",
       "not_found": "角色不存在，可能已被删除",
@@ -11094,7 +11095,7 @@
     "alert_rules": {
       "rule_name_exists": "规则名称已存在",
       "rule_not_found": "规则不存在",
-      "rule_has_open_alerts": "该规则有未处理告警，无法删除，请先处理"
+      "rule_has_open_alerts": "该规则有未��理告警，无法删除，请先处理"
     },
     "alert_smtp": {
       "alert_smtp_enc_key_missing": "未配置告警 SMTP 加密密钥，无法保存����� SMTP 凭据",
@@ -11395,7 +11396,7 @@
       "token_invalid_or_expired": "登录已失效，请重新登录",
       "session_invalid": "会话无效，请重新登录",
       "session_revoked": "会话已被注销，请重新登录",
-      "system_admin_required": "该操作需要平台管理员权限",
+      "system_admin_required": "该操��需要平台管理员权限",
       "super_admin_required": "该操作需要超级管理员权限",
       "admin_required": "该操作需要管理员权限",
       "tenant_header_cross_tenant": "请求的租户与当前所选租户不一致，已拒绝跨租户操作",

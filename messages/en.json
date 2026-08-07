@@ -5544,7 +5544,8 @@
     "atLeastOneDirection": "Select at least one detection direction",
     "navSummary": "Window {window} min / Threshold {threshold}%",
     "tooltipObserve": "When enabled, hits are only logged; no interception is performed",
-    "errorTagRequired": "Mark & Deliver requires at least one tag mode"
+    "errorTagRequired": "Deliver requires at least one tag mode",
+    "errorTagFieldRequired": "Enabled tag modes cannot have empty content"
   },
   "mailMarking": {
     "title": "Mail Marking & Disclaimer",
