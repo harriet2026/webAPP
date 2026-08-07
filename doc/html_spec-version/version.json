@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 38,
+  "current_version": 39,
   "history": [
     {
       "version": 1,
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史������加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史�������加 v9。",
       "demo_version": 12
     },
     {
@@ -276,7 +276,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12731",
       "incremental": true,
-      "summary": "GT-12731.html 追加一级需求 GT-12751 高级过滤规则优化项（同文件多需求，doc 版本 v1→v2）：变更 3（意图引擎条件 comprehensiveEngineResult/cac_tag 从 panel:'select' 升级���专属 panel:'intentEngine'，多意图列表式面板——每意图独立选择「分类优先 classification/within」或「分段阈值 threshold/between [lo,hi]⊆[0,1]」，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重后写覆盖、空条目丢弃；serde 新增 parse/encodeIntentEngineList 复用单条 codec；expression 多条目取值与至少1意图/端点/顺序/范围完整性校验；ConditionTree 默认空列表；四语新增 v3Conditions.intentAddLabel/intentRemoveLabel 并补齐 inputType.intentEngine 缺失键）、变更 4（安全检测移除 rblResult/rbl 与 displayNameSpoof/exec_imp 两条件，目录 51→49、security 20→18、select 12→10，四语删 v3Conditions 对应文案且保留 emailDisposal/auth-spoofing 同名键，catalogue.test.ts 计数不变量同步）；浏览器实拍 S-1 多意图双模式面板 + S-2 安全检测清单无RBL/仿冒 + S-3 模块支持49种条件类型（浅色 AI版·单租户 平台管理员 Mock 1575×847）；新增差异 D-004~D-006、待确认 Q-003；顺带修复本文件 GT-12723 遗留的 2 处 UTF-8 乱码（导航/阶段3）；乱码自检 CLEAN；version.json current_version 14→15。",
+      "summary": "GT-12731.html 追加一级需求 GT-12751 高级过滤规则优化项（同文件多需求，doc 版本 v1→v2）：变更 3（意图引擎条件 comprehensiveEngineResult/cac_tag 从 panel:'select' ���级���专属 panel:'intentEngine'，多意图列表式面板——每意图独立选择「分类优先 classification/within」或「分段阈值 threshold/between [lo,hi]⊆[0,1]」，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重后写覆盖、空条目丢弃；serde 新增 parse/encodeIntentEngineList 复用单条 codec；expression 多条目取值与至少1意图/端点/顺序/范围完整性校验；ConditionTree 默认空列表；四语新增 v3Conditions.intentAddLabel/intentRemoveLabel 并补齐 inputType.intentEngine 缺失键）、变更 4（安全检测移除 rblResult/rbl 与 displayNameSpoof/exec_imp 两条件，目录 51→49、security 20→18、select 12→10，四语删 v3Conditions 对应文案且保留 emailDisposal/auth-spoofing 同名键，catalogue.test.ts 计数不变量同步）；浏览器实拍 S-1 多意图双模式面板 + S-2 安全检测清单无RBL/仿冒 + S-3 模块支持49种条件类型（浅色 AI版·单租户 平台管理员 Mock 1575×847）；新增差异 D-004~D-006、待确认 Q-003；顺带修复本文件 GT-12723 遗留的 2 处 UTF-8 乱码（导航/阶段3）；乱码自检 CLEAN；version.json current_version 14→15。",
       "demo_version": 15
     },
     {
@@ -364,6 +364,15 @@
       "ticket": "GT-12807",
       "incremental": true,
       "summary": "GT-12807.html v4→v5：追加 GT-12793「邮件标记与声明模块优化」需求体（3 个变更点）。变更 1：RuleEditDrawer「取消」「保存」按钮从 SheetHeader 右上移至 SheetContent 底部 footer 右下；变更 2：MailMarkingPage.loadRules Promise.all→Promise.allSettled，scopes 失败不再阻断规则展示，修复 zh.json mailMarking 4 处 UTF-8 乱码（priorityHint/noData/markPosition/sampleSubject）；变更 3：RuleListTable「优先级」列从第1列移至第5列（状态之后、操作之前）；附截图 gt12793-receive-list（接收标记4条）、gt12793-send-list（外发声明2条）；目录追加 GT-12793 一级条目及三级子章节；版本历史 v4→v5。"
+    },
+    {
+      "version": 39,
+      "generated_at": "2026-08-07",
+      "webapp_commit": "db8a95b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12795",
+      "incremental": true,
+      "summary": "GT-12807.html v5→v6：追加 GT-12795「邮件标记与声明：创建规则优先级问题处理」需求体（1 个变更点）。变更 1：nextPriority 无规则时默认 100（原为 1），有规则时 Math.min(Math.max(max+1,100),1000)；RuleEditDrawer Input min 从 1 改为 100，新增 max=1000，宽度 w-20→w-24；validate 校验条件改为 100~1000，新增 i18n key mailMarking.errorPriorityRange（zh：优先级必须为 100 到 1000 之间的整数；en：Priority must be an integer between 100 and 1000）；mailMarking.priorityTip 更新为「取值范围 100～1000；数值越大，规则越优先执行」；附截图 gt12795-drawer-default（默认值100，DOM 验证 min/max/value）、gt12795-priority-validation-error（校验失败态）；目录追加 GT-12795 一级条目及子章节；版本历史 v5→v6。"
     }
   ]
 }

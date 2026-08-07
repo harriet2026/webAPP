@@ -213,6 +213,16 @@
         </ul>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-12795">GT-12795 邮件标记与声明：创建规则优先级问题处理</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12795-change-1">新建规则优先级默认值与范围修正（1 → 100，范围 100~1000）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12795-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12795-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12795-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
       <li><a href="#diffs">D. 差异标注</a></li>
       <li><a href="#questions">Q. 待确认事项</a></li>
       <li><a href="#version-history">V. 版本历史</a></li>
@@ -901,7 +911,7 @@ onViewRawLogs?: () =&gt; void;
             <td>标记投递 · 投递并标记可疑（蓝绿色圆点）</td>
             <td><del>已移除（标记投递动作已从流水线中下线）</del></td>
             <td><del><code>pipeline.actionTagDeliver</code> / <code>pipeline.actionTagDeliverDesc</code></del></td>
-            <td><code>PolicyPipelinePage.tsx</code>（<code>tagDeliver</code> 条目已删除）</td>
+            <td><code>PolicyPipelinePage.tsx</code>（<code>tagDeliver</code> 条���已删除）</td>
             <td>[Base]</td>
           </tr>
         </tbody>
@@ -965,7 +975,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12719-c3-states">3.2 截图式交互预览</h4>
       <div class="interaction-preview">
-        <p><strong>状态 S-1（复用）</strong>：同上截图，流程控制行位于图例区第三行，流程图中红色箭头旁可见「拒收」短文案。</p>
+        <p><strong>状态 S-1（复用）</strong>：���上截图，流程控制行位于图例区第三行，流程图中红色箭头旁可见「拒收」短文案。</p>
         <figure>
           <img src="./screenshots/gt12719-pipeline-default.png" alt="策略流水线页面，流程图中红色箭头旁标注拒收，底部流程控制行描述已更新" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
           <figcaption>S-1（流程控制行）：红色箭头旁短文案「拒收」，终止描述「拒收/丢弃/隔离 → 终止并退出流水线」，继续描述「投递 → 继续检测」</figcaption>
@@ -1123,7 +1133,7 @@ onViewRawLogs?: () =&gt; void;
             <td>zh.json 乱码修复</td>
             <td>i18n 文案</td>
             <td><code>priorityHint</code>「…规??」、<code>noData</code>「???无规则」、<code>markPosition</code>「??记位置」、<code>sampleSubject</code>「项???进展说明」</td>
-            <td>全部修复为正确 UTF-8 汉字：「…规则」「暂无规则」「标记位置」「项目进展说明」</td>
+            <td>全部修复为正��� UTF-8 汉字：「…规则」「暂无规则」「标记位置」「项目进展说明」</td>
             <td><code>messages/zh.json</code> mailMarking.*</td>
             <td>[Base]</td>
           </tr>
@@ -1182,6 +1192,131 @@ onViewRawLogs?: () =&gt; void;
     </div>
   </div>
 
+  <!-- ══════════════ GT-12795 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12795">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12795 邮件标记与声明：创建规则优先级问题处理</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（阶段5 邮件标记与声明面板 → 新建规则抽屉）<br/>
+        组件：<code>src/components/security/mail-marking/RuleEditDrawer.tsx</code>、<code>src/components/security/mail-marking/MailMarkingPage.tsx</code><br/>
+        i18n：<code>messages/zh.json</code> / <code>messages/en.json</code>（<code>mailMarking.priorityTip</code>、<code>mailMarking.errorPriorityRange</code>）<br/>
+        2026-08-07 · commit <code>db8a95b</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12795-change-1">1. 新建规则优先级默认值与范围修正（1 → 100，范围 100~1000）</h3>
+
+      <h4 id="gt12795-c1-overview">1.1 方案概述</h4>
+      <p><strong>问题：</strong>新建接收标记规则 / 外发声明规则时，优先级字段默认值为 <code>1</code>，后端接口要求租户管理员的优先级必须在 100~1000 范围内，导致提交时出现报错「tenant admin priority must be between 100 and 1000」。</p>
+      <p><strong>修复方案：</strong></p>
+      <ul>
+        <li><strong><code>MailMarkingPage.tsx</code> — <code>nextPriority</code> 计算逻辑</strong>：无规则时默认返回 <code>100</code>；有规则时取现有最大优先级 +1，并使用 <code>Math.max(..., 100)</code> 钳制下限、<code>Math.min(..., 1000)</code> 钳制上限，确保默认值始终在合法区间。</li>
+        <li><strong><code>RuleEditDrawer.tsx</code> — Input 属性</strong>：<code>min</code> 从 <code>1</code> 改为 <code>100</code>，新增 <code>max={1000}</code>，输入框宽度从 <code>w-20</code> 调整为 <code>w-24</code>（容纳4位数字）。</li>
+        <li><strong><code>RuleEditDrawer.tsx</code> — <code>validate</code> 函数</strong>：校验条件从 <code>priority &lt; 1</code> 改为 <code>priority &lt; 100 || priority &gt; 1000</code>，使用新 i18n key <code>errorPriorityRange</code>。</li>
+        <li><strong><code>zh.json</code> / <code>en.json</code></strong>：<code>mailMarking.priorityTip</code> 更新为「取值范围 100～1000；数值越大，规则越优先执行」；新增 <code>mailMarking.errorPriorityRange</code>「优先级必须为 100 到 1000 之间的整数」。</li>
+      </ul>
+
+      <h4 id="gt12795-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+
+        <p><strong>状态 S-1：新建接收标记规则抽屉默认态</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 策略流水线 → 阶段5 邮件标记与声明 → 接收标记 Tab → 点击「+ 新建规则」按钮</p>
+        <figure>
+          <img src="./screenshots/gt12795-drawer-default.png" alt="新建接收标记规则抽屉默认态，优先级字段显示默认值100，提示文案为「取值范围100～1000；数值越大，规则越优先执行」，取消和保存按钮位于底部footer" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：新建规则抽屉默认态 — 优先级默认值 <strong>100</strong>，Input min=100 max=1000，提示文案已更新；「取消」「保存」按钮位于底部 footer 右下角</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>可见元素</th><th>内容 / 值</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>优先级输入框</td><td>默认值 <code>100</code>，type=number，min=100，max=1000</td><td>原默认值为 1，已修正</td></tr>
+            <tr><td>优先级提示文案</td><td>「取值范围 100～1000；数值越大，规则越优先执行」</td><td>i18n key <code>mailMarking.priorityTip</code>，原文案「必须为正整数；数值越大，规则越优先执行」</td></tr>
+            <tr><td>「保存」按钮</td><td>底部 footer 右侧，data-testid="mail-marking-save-rule"</td><td>位置：SheetContent 底部 footer（GT-12793 变更1 已将按钮从标题区移至此处）</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-2：规则名称为空时点击保存的校验失败态</strong><br/>
+        触发路径：S-1 → 不填写规则名称 → 直接点击「保存」</p>
+        <figure>
+          <img src="./screenshots/gt12795-priority-validation-error.png" alt="新建规则表单校验失败，规则名称字段下方显示红色错误文案，优先级字段仍显示100且提示文案正常" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：校验失败态 — 规则名称未填，显示红色错误文案；优先级保持 100，范围提示文案完整显示；优先级校验（100~1000）独立触发 <code>errorPriorityRange</code> 错误文案</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>校验条件</th><th>错误文案</th><th>i18n key</th><th>触发时机</th></tr></thead>
+          <tbody>
+            <tr><td>优先级不在 100~1000 范围内（含非整数）</td><td>「优先级必须为 100 到 1000 之间的整数」</td><td><code>mailMarking.errorPriorityRange</code>（新增）</td><td>点击「保存」时前端校验</td></tr>
+            <tr><td>规则名称为空</td><td>「规则名称不能为空」（原有校验，未变更）</td><td><code>mailMarking.errorNameRequired</code></td><td>点击「保存」时前端校验</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12795-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key / testid</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>优先级输入框默认值</td>
+            <td>Input[type=number]</td>
+            <td><code>nextPriority = Math.max(0,...rules.map(r=&gt;r.priority)) + 1</code>，无规则时返回 <code>1</code></td>
+            <td><code>nextPriority</code>：无规则时返回 <code>100</code>；有规则时 <code>Math.min(Math.max(max+1, 100), 1000)</code></td>
+            <td><code>data-testid="mail-marking-priority"</code></td>
+            <td><code>MailMarkingPage.tsx</code> useMemo nextPriority</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级输入框 min/max 属性</td>
+            <td>Input[type=number]</td>
+            <td><code>min={1}</code>，无 <code>max</code></td>
+            <td><code>min={100} max={1000}</code></td>
+            <td>—</td>
+            <td><code>RuleEditDrawer.tsx</code> Input priority</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级输入框宽度</td>
+            <td>CSS class</td>
+            <td><code>w-20</code>（80px，容纳3位数字）</td>
+            <td><code>w-24</code>（96px，容纳4位数字）</td>
+            <td>—</td>
+            <td><code>RuleEditDrawer.tsx</code> Input priority</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级提示文案</td>
+            <td>行内提示文本</td>
+            <td>「必须为正整数；数值越大，规则越优先执行」</td>
+            <td>「取值范围 100～1000；数值越大，规则越优先执行」</td>
+            <td><code>mailMarking.priorityTip</code></td>
+            <td><code>messages/zh.json</code>、<code>messages/en.json</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级校验函数</td>
+            <td>validate 逻辑</td>
+            <td><code>priority &lt; 1</code> → <code>errorPriorityPositive</code></td>
+            <td><code>priority &lt; 100 || priority &gt; 1000</code> → <code>errorPriorityRange</code></td>
+            <td><code>mailMarking.errorPriorityRange</code>（新增）</td>
+            <td><code>RuleEditDrawer.tsx</code> validate()</td>
+            <td>[Base]，租户管理员范围 100~1000（后端约束）</td>
+          </tr>
+          <tr>
+            <td>错误文案（新增 key）</td>
+            <td>i18n 字符串</td>
+            <td>不存在</td>
+            <td>zh：「优先级必须为 100 到 1000 之间的整数」<br/>en：「Priority must be an integer between 100 and 1000」</td>
+            <td><code>mailMarking.errorPriorityRange</code></td>
+            <td><code>messages/zh.json</code>、<code>messages/en.json</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
   <!-- ══════════════ V. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>V. 版本历史</h2>
@@ -1191,6 +1326,11 @@ onViewRawLogs?: () =&gt; void;
       </thead>
       <tbody>
           <tr>
+          <td><span class="version-badge"><span class="vnum">v6</span></span></td>
+          <td>2026-08-07</td>
+          <td>追加 GT-12795 需求体（邮件标记与声明：创建规则优先级问题处理，1 个变更点）。变更 1：nextPriority 无规则时默认 100（原为 1），有规则时 Math.min(Math.max(max+1,100),1000)；Input min 从 1 改为 100，新增 max=1000，宽度 w-20→w-24；validate 校验条件改为 100~1000，新增 i18n key errorPriorityRange（zh/en 双语）；priorityTip 更新为「取值范围 100～1000」。附截图 gt12795-drawer-default（默认值100）、gt12795-priority-validation-error（校验失败态）；目录追加 GT-12795 一级条目及子章节；版本历史 v5→v6。</td>
+        </tr>
+        <tr>
           <td><span class="version-badge"><span class="vnum">v5</span></span></td>
           <td>2026-08-07</td>
           <td>追加 GT-12793 需求体（邮件标记与声明模块优化，3 个变更点）。变更 1：RuleEditDrawer「取消」「保存」按钮从 SheetHeader 右上移至 SheetContent 底部 footer 右下，标题区仅保留标题和副标题；变更 2：MailMarkingPage.loadRules 由 Promise.all 改为 Promise.allSettled，scopes 失败不再阻断规则展示，修复 zh.json mailMarking 4 处 UTF-8 乱码（priorityHint/noData/markPosition/sampleSubject）；变更 3：RuleListTable 「优先级」列从第1列（规则名称前）移至第5列（状态之后、操作之前），接收标记和外发声明共用同一组件。附截图 gt12793-receive-list（接收标记4条规则）、gt12793-send-list（外发声明2条规则）；目录追加 GT-12793 一级条目及三级子章节；版本历史 v4→v5。</td>
@@ -1203,7 +1343,7 @@ onViewRawLogs?: () =&gt; void;
         <tr>
           <td><span class="version-badge"><span class="vnum">v3</span></span></td>
           <td>2026-08-06</td>
-          <td>追加 GT-12797 需求体（群组策略——新建群组：不支持切换群组类型）：变更 1 新建按钮文案「新建群组」→「新建X组」（group-management-page.tsx + messages 新增 groups.newGroupOfType）；变更 2 新建抽屉移除群组类型 Select，SheetTitle 改为「新建X组」，编辑场景改为只读 Input（group-edit-dialog.tsx）；变更 3 内容组标签「每行一条成员」→「每行一条关键词」，占位符「敏感词1/2」→「关键词1/2」（zh.json + en.json 新增 groups.contentMemberListPerLine）；附截图 S-1（新建IP组抽屉）、S-2（新建内容组抽屉）</td>
+          <td>追加 GT-12797 需求体（群组策略——新建群组：不支持切换群组类型）：变更 1 新建按钮文案「新建群组」→「新建X组」（group-management-page.tsx + messages 新增 groups.newGroupOfType）；变更 2 新建抽屉移除群组类型 Select，SheetTitle 改为「新建X组」，编辑场景��为只读 Input（group-edit-dialog.tsx）；变更 3 内容组标签「每行一条成员」→「每行一条关键词」，占位符「敏感词1/2」→「关键词1/2」（zh.json + en.json 新增 groups.contentMemberListPerLine）；附截图 S-1（新建IP组抽屉）、S-2（新建内容组抽屉）</td>
         </tr>
         <tr>
           <td><span class="version-badge"><span class="vnum">v2</span></span></td>
