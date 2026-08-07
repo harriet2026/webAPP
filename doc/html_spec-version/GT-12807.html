@@ -223,6 +223,27 @@
         </ul>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-12828">GT-12828 策略：优先级统一</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12828-change-1">方案A：邮件标记模块接入 getRulePriorityRange，消除硬编码</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12828-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12828-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12828-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12828-change-2">方案B：内容规则、IP 过滤、IP 频率补齐角色感知范围校验</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12828-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12828-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12828-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12828-change-3">方案C：统一各模块 priority 错误文案与行内提示文案</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12828-c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12828-c3-elements">3.2 逐 key 说明</a></li>
+        </ul>
+      </ul>
+
       <li><a href="#diffs">D. 差异标注</a></li>
       <li><a href="#questions">Q. 待确认事项</a></li>
       <li><a href="#version-history">V. 版本历史</a></li>
@@ -251,7 +272,7 @@
   <!-- ══════════════ B. 产品形态 x 角色矩阵 ══════════════ -->
   <section id="form-role-matrix">
     <h2>B. 产品形态 x 角色矩阵</h2>
-    <p style="font-size:0.845rem;color:#374151;margin-bottom:0.75rem">以下各变更点在所有产品形态和角色下表现一致，无差异分支。</p>
+    <p style="font-size:0.845rem;color:#374151;margin-bottom:0.75rem">以下各变更点在所有���品形态和角色下表现一致，无差异分支。</p>
     <table>
       <thead>
         <tr><th>产品形态</th><th>平台管理员</th><th>租户管理员</th></tr>
@@ -402,7 +423,7 @@ function getOperationTypeLabel(
       <table>
         <tbody>
           <tr><th style="width:120px">修复前</th><td><code>useState(false)</code>：时间线默认折叠，有事件也不可见</td></tr>
-          <tr><th>修复后</th><td><code>useState(true)</code>：时间线默认展开，进入安全分析 Tab 即可直接看到事件列表</td></tr>
+          <tr><th>修复后</th><td><code>useState(true)</code>：时间线默认展开，进入安全分析 Tab 即可直接看到事件列���</td></tr>
         </tbody>
       </table>
     </div>
@@ -825,7 +846,7 @@ onViewRawLogs?: () =&gt; void;
           <tr>
             <td>内容组成员区 Textarea 占位符</td>
             <td>占位符文案</td>
-            <td>敏感词1\n敏感词2</td>
+            <td>敏感���1\n敏感词2</td>
             <td>关键词1\n关键词2</td>
             <td><code>groups.contentPlaceholder</code></td>
             <td><code>messages/zh.json</code></td>
@@ -1214,7 +1235,7 @@ onViewRawLogs?: () =&gt; void;
       <ul>
         <li><strong><code>MailMarkingPage.tsx</code> — <code>nextPriority</code> 计算逻辑</strong>：无规则时默认返回 <code>100</code>；有规则时取现有最大优先级 +1，并使用 <code>Math.max(..., 100)</code> 钳制下限、<code>Math.min(..., 1000)</code> 钳制上限，确保默认值始终在合法区间。</li>
         <li><strong><code>RuleEditDrawer.tsx</code> — Input 属性</strong>：<code>min</code> 从 <code>1</code> 改为 <code>100</code>，新增 <code>max={1000}</code>，输入框宽度从 <code>w-20</code> 调整为 <code>w-24</code>（容纳4位数字）。</li>
-        <li><strong><code>RuleEditDrawer.tsx</code> — <code>validate</code> 函数</strong>：校验条件从 <code>priority &lt; 1</code> 改为 <code>priority &lt; 100 || priority &gt; 1000</code>，使用新 i18n key <code>errorPriorityRange</code>。</li>
+        <li><strong><code>RuleEditDrawer.tsx</code> — <code>validate</code> 函数</strong>：校���条件从 <code>priority &lt; 1</code> 改为 <code>priority &lt; 100 || priority &gt; 1000</code>，使用新 i18n key <code>errorPriorityRange</code>。</li>
         <li><strong><code>zh.json</code> / <code>en.json</code></strong>：<code>mailMarking.priorityTip</code> 更新为「取值范围 100～1000；数值越大，规则越优先执行」；新增 <code>mailMarking.errorPriorityRange</code>「优先级必须为 100 到 1000 之间的整数」。</li>
       </ul>
 
@@ -1317,6 +1338,157 @@ onViewRawLogs?: () =&gt; void;
     </div>
   </div>
 
+  <!-- ══════════════ GT-12828 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12828">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12828 策略：优先级统一</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（各策略模块新建/编辑规则抽屉）<br/>
+        组件：<code>src/components/security/mail-marking/MailMarkingPage.tsx</code>、<code>src/components/security/mail-marking/RuleEditDrawer.tsx</code>、<code>src/components/security/content-rules/ContentRuleDrawer.tsx</code>、<code>src/components/security/IPFilterPage.tsx</code>、<code>src/components/security/IPFrequencyPage.tsx</code><br/>
+        公共工具：<code>src/components/security/advanced-filter-rules/priority-range.ts</code>（<code>getRulePriorityRange</code>、<code>isPriorityInRange</code>、<code>PriorityRange</code>）<br/>
+        i18n：<code>messages/zh.json</code> / <code>messages/en.json</code>（命名空间 mailMarking、contentRules、senderFilter、behaviorControl、ipFilter、ipFrequency）<br/>
+        2026-08-07 · commit <code>4dab352</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- ── 变更 1：方案A ── -->
+      <h3 id="gt12828-change-1">1. 方案A：邮件标记模块接入 getRulePriorityRange，消除硬编码</h3>
+
+      <h4 id="gt12828-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>GT-12795 修复邮件标记优先级默认值时，将 100/1000 直接写入组件，未接入项目已有的 <code>getRulePriorityRange(isSystemAdmin)</code> 公共工具，导致系统管理员登录时仍被错误限制在租户范围。</p>
+      <p><strong>修复内容：</strong></p>
+      <ul>
+        <li><strong><code>MailMarkingPage.tsx</code></strong>：引入 <code>useAuth()</code> 和 <code>getRulePriorityRange</code>，以 <code>isSystemAdmin</code> 计算 <code>priorityRange</code>（租户管理员 100–1000，系统管理员 0–9999），传入 <code>RuleEditDrawer</code>；<code>nextPriority</code>、<code>priorityHint</code> 均改用 <code>priorityRange.min/max/defaultValue</code>，不再硬编码。</li>
+        <li><strong><code>RuleEditDrawer.tsx</code></strong>：新增 <code>priorityRange?: PriorityRange</code> prop（有 <code>FALLBACK_PRIORITY_RANGE</code> 兜底）；Input 的 <code>min/max</code>、提示文案 <code>priorityTip</code>、<code>validate</code> 校验均改为从 <code>range</code> 读取；新增 <code>mailMarking.errors.priorityRange</code> 参数化 i18n key。</li>
+        <li><strong>i18n</strong>：<code>mailMarking.priorityTip</code> 和 <code>mailMarking.priorityHint</code> 改为参数化 <code>{min}/{max}</code>；新增 <code>mailMarking.errors.priorityRange</code>（与 <code>advancedRulesFeature.errors.priorityRange</code> 对齐）；<code>mailMarking.errorPriorityRange</code> 同步参数化（向后兼容）。</li>
+      </ul>
+
+      <h4 id="gt12828-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：新建接收标记规则抽屉默认态（租户管理员）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 策略流水线 → 阶段5 邮件标记与声明 → 接收标记 Tab → 点击「+ 新建规则」按钮</p>
+        <figure>
+          <img src="./screenshots/gt12828-mail-marking-priority.png" alt="新建接收标记规则抽屉，优先级默认值100，提示文案取值范围100～1000，保存按钮位于底部footer" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：新建接收标记规则抽屉 — 优先级默认值 <strong>100</strong>，提示文案「（取值范围 100～1000；数值越大，规则越优先执行）」参数化渲染；DOM 验证：<code>value=100, min=100, max=1000</code>（租户管理员）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>可见元素</th><th>内容/值</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>优先级输入框</td><td>默认值 100，min=100，max=1000（租户管理员）；0–9999（系统管理员）</td><td>由 <code>getRulePriorityRange(isSystemAdmin)</code> 动态决定</td></tr>
+            <tr><td>优先级提示文案</td><td>「（取值范围 {min}～{max}；数值越大，规则越优先执行）」参数化渲染</td><td>i18n key <code>mailMarking.priorityTip</code>，从 <code>{min}/{max}</code> 参数注入实际值</td></tr>
+            <tr><td>底部 footer</td><td>「取消」「保存」按钮</td><td>GT-12793 变更1 已定义位置；本次未改动</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12828-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key / 源码</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>nextPriority 默认值计算</td><td>useMemo</td><td>无规则→100，有规则→<code>Math.min(Math.max(max+1,100),1000)</code>（硬编码）</td><td>无规则→<code>range.defaultValue</code>，有规则→<code>Math.min(Math.max(max+1,range.min),range.max)</code></td><td><code>MailMarkingPage.tsx</code></td><td>[Overlay] 租户管理员 defaultValue=600，系统管理员 defaultValue=600（range.min=0）</td></tr>
+          <tr><td>priorityRange prop</td><td>RuleEditDrawer prop</td><td>不存在</td><td>新增 <code>priorityRange?: PriorityRange</code>，有 <code>FALLBACK_PRIORITY_RANGE</code>（租户默认）兜底</td><td><code>RuleEditDrawer.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>Input min/max</td><td>HTML 属性</td><td><code>min={100} max={1000}</code> 硬编码</td><td><code>min={range.min} max={range.max}</code></td><td><code>RuleEditDrawer.tsx</code></td><td>[Overlay] 租户 100/1000，系统管理员 0/9999</td></tr>
+          <tr><td>validate 函数签名</td><td>函数参数</td><td><code>validate(form, t)</code>，校验 <code>&lt;100 || &gt;1000</code></td><td><code>validate(form, t, range)</code>，校验 <code>!isPriorityInRange(priority, range)</code></td><td><code>RuleEditDrawer.tsx</code></td><td>[Overlay]</td></tr>
+          <tr><td>priorityTip 提示文案</td><td>i18n 字符串</td><td><code>'取值范围 100～1000；数值越大，规则越优先执行'</code>（硬编码数字）</td><td><code>'取值范围 {min}～{max}；数值越大，规则越优先执行'</code></td><td><code>mailMarking.priorityTip</code></td><td>[Base]</td></tr>
+          <tr><td>priorityHint 列表提示</td><td>i18n 字符串</td><td><code>'数值越大优先级越高，命中多条规则时优先执行数值大的规则'</code>（无范围）</td><td><code>'数值越大优先级越高，命中多条规则时优先执行数值大的规则（范围 {min}–{max}）'</code></td><td><code>mailMarking.priorityHint</code></td><td>[Base]</td></tr>
+          <tr><td>errors.priorityRange（新增）</td><td>i18n 字符串</td><td>不存在</td><td>zh：<code>'优先级需在 {min}–{max} 之间'</code>；en：<code>'Priority must be between {min} and {max}'</code></td><td><code>mailMarking.errors.priorityRange</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ── 变更 2：方案B ── -->
+      <h3 id="gt12828-change-2">2. 方案B：内容规则、IP 过滤、IP 频率补齐角色感知范围校验</h3>
+
+      <h4 id="gt12828-c2-overview">2.1 方案概述</h4>
+      <p><strong>问题：</strong>内容规则 Input 硬编码 <code>min={1}</code>、提示文案写死「范围1-9999」；IP 过滤 schema <code>z.number().int().nonnegative()</code>（无上限）；IP 频率 schema <code>z.number()</code>（无任何范围约束）。三个模块均不感知角色，租户管理员应受 100–1000 限制的约束未被前端校验拦截。</p>
+      <p><strong>统一修复方案：</strong>三个模块均按行为管控的标准模式改造：</p>
+      <ul>
+        <li><strong>工厂函数模式</strong>：将模块级常量 <code>ruleSchema</code> 重构为 <code>createRuleSchema(range: PriorityRange)</code> 工厂函数，组件内通过 <code>useMemo(() =&gt; getRulePriorityRange(isSystemAdmin), [isSystemAdmin])</code> 获取 range，再用 <code>useMemo(() =&gt; createRuleSchema(range), [range])</code> 生成动态 schema 传给 <code>zodResolver</code>。</li>
+        <li><strong>内容规则（<code>ContentRuleDrawer.tsx</code>）</strong>：组件内直接 <code>useAuth()</code>，<code>validate</code> 改用 <code>range.min/max</code>，Input <code>min/max</code> 参数化，<code>priorityRangeHint</code> 和 <code>priorityInvalid</code> 均加 <code>{min}/{max}</code> 插值。</li>
+        <li><strong>IP 过滤（<code>IPFilterPage.tsx</code>）</strong>：<code>createRuleSchema</code> 中 priority 从 <code>nonnegative()</code> 改为 <code>.min(range.min, 'priorityOutOfRange').max(range.max, 'priorityOutOfRange')</code>；<code>handleOpenDialog</code> 新建默认值改为 <code>Math.min(Math.max(prev+1, range.min), range.max)</code>；Input 加 <code>max={range.max}</code>，<code>min={range.min}</code>；新增 priority inline 错误渲染；新增 i18n <code>ipFilter.priorityOutOfRange</code>。</li>
+        <li><strong>IP 频率（<code>IPFrequencyPage.tsx</code>）</strong>：同上工厂函数模式；<code>defaultForm</code> 从模块级常量改为 <code>makeDefaultForm(range.defaultValue)</code> 工厂函数，组件内用 <code>useMemo</code>；新增 priority inline 错误渲染；新增 i18n <code>ipFrequency.priorityOutOfRange</code>。</li>
+        <li><strong>i18n 提示文案</strong>：<code>ipFilter.priorityTip/priorityHint</code>、<code>ipFrequency.priorityTip/priorityDesc</code> 均加入 <code>{min}/{max}</code> 插值，让渲染文案随角色动态变化。</li>
+      </ul>
+
+      <h4 id="gt12828-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：内容规则新建抽屉默认态（租户管理员）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 策略流水线 → 阶段3 内容层/内容规则 → 点击「配置」→ 点击「新建规则」按钮</p>
+        <figure>
+          <img src="./screenshots/gt12828-content-rule-drawer.png" alt="内容规则新建抽屉，优先级默认值100，提示文案范围100–1000数值越大优先级越高" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：内容规则新建抽屉 — 优先级默认值 <strong>100</strong>，提示文案「范围 100–1000，数值越大优先级越高」参数化渲染；DOM 验证：<code>value=100, min=100, max=1000</code>（租户管理员）。原「范围1-9999」已修正。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>可见元素</th><th>内容/值</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>优先级输入框</td><td>默认值 100，min=100，max=1000（租户管理员）；0–9999（系统管理员）</td><td>原为 min=1，max=9999，无角色区分</td></tr>
+            <tr><td>优先级提示文案</td><td>「范围 {min}–{max}，数值越大优先级越高」参数化渲染</td><td>i18n key <code>contentRules.priorityRangeHint</code>，原「范围1-9999，数值越大优先级越高」</td></tr>
+            <tr><td>右侧预览面板：优先级</td><td>显示当前输入值 100</td><td>实时同步</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-2：IP 过滤 / IP 频率（AI版·多租户·租户管理员）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → IP 过滤（或 IP 频率限制）→ 点击「新建规则」</p>
+        <p style="color:#6b7280;font-style:italic">无法验证：AI版·多租户模式下租户管理员访问 <code>/zh/security/ip-filter</code> 和 <code>/zh/security/ip-frequency</code> 返回「未授权」，Mock 环境不提供该权限组合。代码层已通过 TypeScript 编译验证（无新增 TS 错误）；IP 过滤 DOM 属性变化（<code>min: nonnegative → 100, max: 无 → 1000</code>）已在源码层确认。</p>
+      </div>
+
+      <h4 id="gt12828-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>模块</th><th>元素</th><th>变更前</th><th>变更后</th><th>i18n key / 源码</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>内容规则</td><td>Input min/max</td><td><code>min={1} max={9999}</code>（硬编码，无角色区分）</td><td><code>min={range.min} max={range.max}</code></td><td><code>ContentRuleDrawer.tsx</code></td><td>[Overlay] 租户 100/1000，系统管理员 0/9999</td></tr>
+          <tr><td>内容规则</td><td>priorityRangeHint</td><td><code>'范围1-9999，数值越大优先级越高'</code>（硬编码）</td><td><code>'范围 {min}–{max}，数值越大优先级越高'</code></td><td><code>contentRules.priorityRangeHint</code></td><td>[Base]</td></tr>
+          <tr><td>内容规则</td><td>priorityInvalid 错误文案</td><td><code>'优先级必须是 {min} 到 {max} 的整数'</code>（已参数化，措辞不一致）</td><td><code>'优先级需在 {min}–{max} 之间'</code>（与其他模块统一措辞）</td><td><code>contentRules.priorityInvalid</code></td><td>[Base]</td></tr>
+          <tr><td>IP 过滤</td><td>ruleSchema priority</td><td><code>z.number().int().nonnegative()</code>（无上限）</td><td><code>z.number().int().min(range.min,'priorityOutOfRange').max(range.max,'priorityOutOfRange')</code></td><td><code>IPFilterPage.tsx createRuleSchema</code></td><td>[Overlay]</td></tr>
+          <tr><td>IP 过滤</td><td>Input min/max</td><td><code>min={0}</code>，无 max</td><td><code>min={range.min} max={range.max}</code></td><td><code>IPFilterPage.tsx</code></td><td>[Overlay]</td></tr>
+          <tr><td>IP 过滤</td><td>新建默认值</td><td><code>(items[0]?.priority ?? 99) + 1</code>（无 range 钳制）</td><td><code>Math.min(Math.max(prev+1, range.min), range.max)</code></td><td><code>IPFilterPage.tsx handleOpenDialog</code></td><td>[Overlay]</td></tr>
+          <tr><td>IP 过滤</td><td>priorityHint/priorityTip</td><td>「数值越大越优先」（无范围）</td><td>「范围 {min}–{max}，数值越大越优先」/ 「数值越大越优先，范围 {min}–{max}...」</td><td><code>ipFilter.priorityHint</code> / <code>ipFilter.priorityTip</code></td><td>[Base]</td></tr>
+          <tr><td>IP 过滤</td><td>priorityOutOfRange（新增）</td><td>不存在</td><td>zh：<code>'优先级需在 {min}–{max} 之间'</code>；en：<code>'Priority must be between {min} and {max}'</code></td><td><code>ipFilter.priorityOutOfRange</code></td><td>[Base]</td></tr>
+          <tr><td>IP 频率</td><td>ruleSchema priority</td><td><code>z.number()</code>（无任何约束）</td><td><code>z.number().int().min(range.min,'ipFrequency.priorityOutOfRange').max(range.max,'...')</code></td><td><code>IPFrequencyPage.tsx createRuleSchema</code></td><td>[Overlay]</td></tr>
+          <tr><td>IP 频率</td><td>defaultForm priority</td><td>模块级常量 <code>priority: 100</code>（硬编码）</td><td><code>makeDefaultForm(range.defaultValue)</code> 工厂函数，组件内 useMemo</td><td><code>IPFrequencyPage.tsx</code></td><td>[Overlay] 租户 defaultValue=600</td></tr>
+          <tr><td>IP 频率</td><td>Input min/max</td><td><code>min={0}</code>，无 max</td><td><code>min={range.min} max={range.max}</code></td><td><code>IPFrequencyPage.tsx</code></td><td>[Overlay]</td></tr>
+          <tr><td>IP 频率</td><td>priority inline 错误渲染（新增）</td><td>无 inline 错误，仅 toast</td><td>Input 下方新增 <code>&lt;p class="text-xs text-red-500"&gt;</code> 错误行，与其他字段一致</td><td><code>IPFrequencyPage.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>IP 频率</td><td>priorityDesc/priorityTip</td><td>「数值越大越先匹配」/「数值越大优先级越高」（无范围）</td><td>「范围 {min}–{max}，数值越大越先匹配」/「数值越大优先级越高，范围 {min}–{max}」</td><td><code>ipFrequency.priorityDesc</code> / <code>ipFrequency.priorityTip</code></td><td>[Base]</td></tr>
+          <tr><td>IP 频率</td><td>priorityOutOfRange（新增）</td><td>不存在</td><td>zh：<code>'优先级需在 {min}–{max} 之间'</code>；en：<code>'Priority must be between {min} and {max}'</code></td><td><code>ipFrequency.priorityOutOfRange</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ── 变更 3：方案C ── -->
+      <h3 id="gt12828-change-3">3. 方案C：统一各模块 priority 错误文案与行内提示文案</h3>
+
+      <h4 id="gt12828-c3-overview">3.1 方案概述</h4>
+      <p><strong>问题：</strong>项目中 6 个策略模块各自定义了语义相同的优先级相关文案，但措辞、分隔符、有无范围信息均不一致：错误文案混用「须在」/「范围应为」/「必须是…的整数」；行内提示有的只有裸数字范围、有的没有范围、有的有范围但用 <code>-</code>（连字符）而非 <code>–</code>（en dash）。</p>
+      <p><strong>统一规范（以 <code>advancedRulesFeature</code> 为基准）：</strong></p>
+      <ul>
+        <li><strong>错误文案</strong>：统一为「优先级需在 {min}–{max} 之间」（en dash，无句号）</li>
+        <li><strong>行内提示</strong>：统一为「范围 {min}–{max}，数值越大优先级越高」</li>
+        <li><strong>tooltip</strong>：统一为「数值越大越优先，范围 {min}–{max}」</li>
+        <li><strong>零代码改动</strong>：仅修改 <code>messages/zh.json</code> 和 <code>messages/en.json</code>，共 5 处 zh + 5 处 en。</li>
+      </ul>
+
+      <h4 id="gt12828-c3-elements">3.2 逐 key 说明</h4>
+      <table>
+        <thead>
+          <tr><th>命名空间.key</th><th>变更前（zh）</th><th>变更后（zh）</th><th>类别</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>senderFilter.errors.priorityRange</code></td><td>「优先级须在 {min}-{max} 之间」（连字符 <code>-</code>，「须」）</td><td>「优先级需在 {min}–{max} 之间」（en dash，「需」）</td><td>错误文案</td></tr>
+          <tr><td><code>contentRules.priorityInvalid</code></td><td>「优先级必须是 {min} 到 {max} 的整数」</td><td>「优先级需在 {min}–{max} 之间」</td><td>错误文案</td></tr>
+          <tr><td><code>behaviorControl.errors.priorityRange</code></td><td>「优先级范围应为 {min}-{max}」</td><td>「优先级需在 {min}–{max} 之间」</td><td>错误文案</td></tr>
+          <tr><td><code>behaviorControl.form.priorityHint</code></td><td>「{min}-{max}」（裸数字，无说明）</td><td>「范围 {min}–{max}，数值越大优先级越高」</td><td>行内提示</td></tr>
+          <tr><td><code>behaviorControl.form.priorityTooltip</code></td><td>「数值越大越优先，范围 {min}-{max}」（连字符）</td><td>「数值越大越优先，范围 {min}–{max}」（en dash）</td><td>tooltip</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.875rem;color:#6b7280">en.json 同步更新对应 key，措辞与中文版语义一致。<code>advancedRulesFeature.errors.priorityRange</code>、<code>mailMarking.errors.priorityRange</code> 已是标准格式，本次未改动。</p>
+
+    </div>
+  </div>
+
   <!-- ══════════════ V. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>V. 版本历史</h2>
@@ -1326,6 +1498,11 @@ onViewRawLogs?: () =&gt; void;
       </thead>
       <tbody>
           <tr>
+          <td><span class="version-badge"><span class="vnum">v7</span></span></td>
+          <td>2026-08-07</td>
+          <td>追加 GT-12828「策略：优先级统一」需求体（3 个变更点）。方案A：邮件标记模块接入 getRulePriorityRange(isSystemAdmin)，MailMarkingPage 引入 useAuth 计算 priorityRange，RuleEditDrawer 新增 priorityRange prop（FALLBACK 兜底），Input min/max/validate/priorityTip/priorityHint 全部参数化，新增 mailMarking.errors.priorityRange i18n key。方案B：ContentRuleDrawer、IPFilterPage、IPFrequencyPage 三模块按行为管控标准模式（createRuleSchema 工厂函数 + useMemo 动态 schema）改造，priority schema 从 nonnegative/无约束 改为 min(range.min).max(range.max)，Input min/max 参数化，提示文案加 {min}/{max} 插值，新增 ipFilter.priorityOutOfRange 和 ipFrequency.priorityOutOfRange i18n key，IP频率新增 priority inline 错误渲染。方案C：仅改 zh.json/en.json 共 10 处，统一 senderFilter/contentRules/behaviorControl 优先级文案措辞（en dash、「需在」、行内提示完整）。附截图 gt12828-mail-marking-priority（邮件标记 100）、gt12828-content-rule-drawer（内容规则 100 + 提示文案参数化）、gt12828-pipeline-overview（策略流水线全景）。</td>
+        </tr>
+        <tr>
           <td><span class="version-badge"><span class="vnum">v6</span></span></td>
           <td>2026-08-07</td>
           <td>追加 GT-12795 需求体（邮件标记与声明：创建规则优先级问题处理，1 个变更点）。变更 1：nextPriority 无规则时默认 100（原为 1），有规则时 Math.min(Math.max(max+1,100),1000)；Input min 从 1 改为 100，新增 max=1000，宽度 w-20→w-24；validate 校验条件改为 100~1000，新增 i18n key errorPriorityRange（zh/en 双语）；priorityTip 更新为「取值范围 100～1000」。附截图 gt12795-drawer-default（默认值100）、gt12795-priority-validation-error（校验失败态）；目录追加 GT-12795 一级条目及子章节；版本历史 v5→v6。</td>
@@ -1333,7 +1510,7 @@ onViewRawLogs?: () =&gt; void;
         <tr>
           <td><span class="version-badge"><span class="vnum">v5</span></span></td>
           <td>2026-08-07</td>
-          <td>追加 GT-12793 需求体（邮件标记与声明模块优化，3 个变更点）。变更 1：RuleEditDrawer「取消」「保存」按钮从 SheetHeader 右上移至 SheetContent 底部 footer 右下，标题区仅保留标题和副标题；变更 2：MailMarkingPage.loadRules 由 Promise.all 改为 Promise.allSettled，scopes 失败不再阻断规则展示，修复 zh.json mailMarking 4 处 UTF-8 乱码（priorityHint/noData/markPosition/sampleSubject）；变更 3：RuleListTable 「优先级」列从第1列（规则名称前）移至第5列（状态之后、操作之前），接收标记和外发声明共用同一组件。附截图 gt12793-receive-list（接收标记4条规则）、gt12793-send-list（外发声明2条规则）；目录追加 GT-12793 一级条目及三级子章节；版本历史 v4→v5。</td>
+          <td>追加 GT-12793 需求体（邮件标记与声明���块优化，3 个变更点）。变更 1：RuleEditDrawer「取消」「保存」按钮从 SheetHeader 右上移至 SheetContent 底部 footer 右下，标题区仅保留标题和副标题；变更 2：MailMarkingPage.loadRules 由 Promise.all 改为 Promise.allSettled，scopes 失败不再阻断规则展示，修复 zh.json mailMarking 4 处 UTF-8 乱码（priorityHint/noData/markPosition/sampleSubject）；变更 3：RuleListTable 「优先级」列从第1列（规则名称前）移至第5列（状态之后、操作之前），接收标记和外发声明共用同一组件。附截图 gt12793-receive-list（接收标记4条规则）、gt12793-send-list（外发声明2条规则）；目录追加 GT-12793 一级条目及三级子章节；版本历史 v4→v5。</td>
         </tr>
         <tr>
           <td><span class="version-badge"><span class="vnum">v4</span></span></td>
