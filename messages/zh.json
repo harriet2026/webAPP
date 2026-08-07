@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测��能�������",
+    "spoofingDetection": "仿冒邮件检测��能���������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -760,7 +760,7 @@
         "masterSwitchDisabled": "转发规则总开关已关闭",
         "saveError": "请修正表单中的校验错误"
       },
-      "deleteDialogTitle": "删除转发规则「{name}」？",
+      "deleteDialogTitle": "删除转发规则「{name}」���",
       "deleteDialogDescription": "删除后该连接层过滤规则立即失效。",
       "deleteConfirmButton": "确认删除"
     },
@@ -1188,7 +1188,7 @@
     "globalRule": "全局规则",
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除，只有系统管理员可编辑部分字段",
-    "systemRuleEditBanner": "正在编辑��统基线规����。只允������ action / priority / 条��阈值��其��字段已锁定。",
+    "systemRuleEditBanner": "正在��辑��统基线规����。只允������ action / priority / 条��阈值��其��字段已锁定。",
     "stage": "阶段"
   },
   "tagRules": {
@@ -1334,10 +1334,10 @@
     "newPolicy": "新建群组策略",
     "editPolicy": "编辑群组策略",
     "deleteConfirm": "确定删除该群组策略吗？",
-    "deleteConfirmDesc": "删除后无法���复，规则���：{name}",
+    "deleteConfirmDesc": "删除���无法���复，规则���：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效执行路径预览",
-    "stageCountHint": "当前��态共启���� {count} 个阶段。",
+    "stageCountHint": "当前����态共启���� {count} 个阶段。",
     "sectionBasic": "基本信息",
     "sectionTargets": "适用对象",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任���目��即生效。",
@@ -1455,7 +1455,7 @@
     "previewNotExecuted": "未执行（前序已短路）",
     "previewShortCircuitPoint": "短路点 · {action}",
     "previewNoGroupConfig": "无群组配置（按全局执行）",
-    "previewConflict": "同模块冲突 → 优先级仲裁：「{rule}」（优先级 {priority}）��效",
+    "previewConflict": "同模块冲突 → 优先级仲裁：「{rule}」（优���级 {priority}）��效",
     "terminalActions": {
       "quarantine": "隔离",
       "reject": "拒绝",
@@ -1659,7 +1659,7 @@
   "logs": {
     "emailLogs": "邮件日志",
     "authAttempts": "认证日志",
-    "adminAuditLogs": "操作日志",
+    "adminAuditLogs": "操��日志",
     "timestamp": "时间",
     "sender": "发���人",
     "recipients": "收件人",
@@ -2073,7 +2073,7 @@
         "ruleCount": "出站规则数",
         "smtpCount": "SMTP 凭证数",
         "manageTitle": "管理出站策略",
-        "manageDesc": "出站内容规则与审核队列在独立页面管理",
+        "manageDesc": "出站内容规则��审核队列在独立页面管理",
         "contentRulesLink": "前往内���规则",
         "auditLink": "前往出站审核"
       },
@@ -2461,7 +2461,7 @@
       "unknown": "未知错误"
     },
     "failAdvice": {
-      "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号是否泄露并启用登录限速。",
+      "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号是���泄露并启用登录限速。",
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必��时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链��，或适当调大认证超时时间。",
@@ -2732,7 +2732,7 @@
     "history": {
       "time": "登录时间",
       "ip": "IP 地址",
-      "client": "浏览器/客户端",
+      "client": "浏览器/��户端",
       "location": "地���",
       "result": "结果",
       "abnormal": "异常",
@@ -3191,7 +3191,7 @@
     },
     "relatedObjectLabels": {
       "mailLogIds": "邮件日志",
-      "domains": "域名",
+      "domains": "域���",
       "urls": "URL",
       "attachments": "附件",
       "accounts": "账号"
@@ -3715,7 +3715,7 @@
     "blacklistRuleDesc": "配置IP黑名单规则，阻断或处置指定IP地址/段",
     "whitelistRuleDesc": "配置IP白名单规则，信任的IP直接放行或标记",
     "addBlacklistRule": "新建黑名单规则",
-    "addWhitelistRule": "新建白名单规则",
+    "addWhitelistRule": "新建白名单规��",
     "editBlacklistRule": "编辑黑名单规则",
     "editWhitelistRule": "编辑白名单规则",
     "blacklistRules": "黑名单���则",
@@ -3806,7 +3806,7 @@
     "importJsonWrongScope": "不是 IP 黑白名单的导出文件",
     "importJsonEmpty": "导出文件中没有规则",
     "importJsonBadRule": "规则数据不完整或非 IP 规则",
-    "importListTypeMismatch": "名单类型与当前页不符",
+    "importListTypeMismatch": "名单类型与当前页���符",
     "importExpressionUnsupported": "表达式规��不支持批量导入，请手动创建"
   },
   "inboundAudit": {
@@ -4048,7 +4048,7 @@
       "nameRequired": "规则名称不能为空",
       "nameMaxLength": "名称最多50个字符",
       "descriptionMaxLength": "备注最多200个字符",
-      "priorityRange": "优先级须在 {min}-{max} 之间",
+      "priorityRange": "优先级需在 {min}–{max} 之间",
       "whitelistModeRequired": "请选择白名单模式",
       "invalidEmail": "请输入有效的邮箱地址",
       "invalidDomain": "请输入有效的域名",
@@ -4256,7 +4256,7 @@
     "matchTypeContentGroup": "内容组",
     "matchContent": "匹配内容",
     "matchContentTip": "填写需要在所选邮件区域中识别的内容",
-    "matchContentPlaceholder": "输入以 | 分隔的关键词或正则表达式",
+    "matchContentPlaceholder": "输入以 | 分隔的关键词或正��表达式",
     "matchContentRequired": "请输入匹配内���",
     "scope": "范围",
     "scopeSubject": "主题",
@@ -4397,7 +4397,7 @@
     "simulateTest": "模拟测试",
     "ruleNameTooLong": "规则名称不能超过 50 个字符",
     "ruleNameForbiddenChars": "规则名称不能包含 <、>、& 或双引号",
-    "priorityInvalid": "优先级必须是 {min} 到 {max} 的整数",
+    "priorityInvalid": "优先级需在 {min}–{max} 之间",
     "invalidDate": "请输入有效的失效时间",
     "mixedDirectionActionsPreserved": "此历史规则在不同方向使用不同动作；除非重新选择动作，否则将原样保留。",
     "unsavedTitle": "放弃未保存的更改？",
@@ -4529,7 +4529,7 @@
       "manage": "管理",
       "loading": "加载中…",
       "selectTenant": "请先在页面顶部选择一个租户，再管理其 DKIM 外发签名。",
-      "noDomains": "该租户暂无发信域名，请先在「租户域名管理」中添加域名后再配置签名。"
+      "noDomains": "该租户暂无发信域名，请先在「租户���名管理」中添加域名后再配置签名。"
     },
     "flow": {
       "start": "策略流水线",
@@ -4760,7 +4760,7 @@
       },
       "name": "规则名称",
       "priority": "优先级",
-      "priorityTooltip": "数值越大越优先，范围 {min}-{max}",
+      "priorityTooltip": "数值越大越优先，范围 {min}–{max}",
       "validFrom": "有效期开始",
       "validUntil": "有效期结束",
       "isActive": "启用",
@@ -4787,7 +4787,7 @@
       "manageGroup": "管理群组",
       "groupSource": "数据来源：群组策略配置",
       "orgLabel": "组织部门",
-      "orgPlaceholder": "请选择部门",
+      "orgPlaceholder": "请选择��门",
       "manageOrg": "管理组织",
       "orgSource": "数据来源：组织架���",
       "ipTypeLabel": "IP类��",
@@ -4801,7 +4801,7 @@
       "expireTooltip": "留空表示永久有效",
       "expireHint": "(留空=��久有效)",
       "priorityLabel": "优先级",
-      "priorityHint": "{min}-{max}",
+      "priorityHint": "范围 {min}–{max}，数值越大优先级越高",
       "thresholdPlaceholder": "请输入阈值",
       "actionLabel": "执行动作",
       "remark": "备注",
@@ -4851,7 +4851,7 @@
       "priorityMax": "优先级最大为9999",
       "thresholdMax": "阈值过大",
       "valueRequired": "请填写该字段",
-      "priorityRange": "优先级范围应为 {min}-{max}",
+      "priorityRange": "优先级需在 {min}–{max} 之间",
       "validUntilPast": "有效期不能早于当前日期",
       "emailRequired": "请输入邮箱地址",
       "groupRequired": "请选择发信人群组",
@@ -4913,7 +4913,7 @@
       "normalEffect": "正常用户日发50封邮件，使用2个IP，未触发规则",
       "stolenName": "账号被盗场景",
       "stolenDesc": "异常高频发信，触发隔离",
-      "stolenEffect": "盗号者15分钟用10个IP发信200封，触发隔离",
+      "stolenEffect": "���号者15分钟用10个IP发信200封，触发隔离",
       "salesName": "销售部群发场景",
       "salesDesc": "正常业务��发，阈值宽松",
       "salesEffect": "销售部正常���报群发500人，域内方向阈值宽松，不���发外发规则",
@@ -5384,7 +5384,7 @@
     "statusDisabled": "已禁用",
     "actionLabel": "处置动作",
     "sendMarkUnsupported": "外发方向不支持\"标记投递\"动作，相关配置将自动降级为\"隔离\"",
-    "internalMarkUnsupported": "域内方向不支持\"标记投递\"动作，相关配置将自动降级为\"隔离\"",
+    "internalMarkUnsupported": "域内方向不支持\"标记投递\"动作，相关��置将自动降级为\"隔离\"",
     "directionMarkUnsupported": "外发/域内方向不支持\"标记投递\"，相关动作将自���降级为\"隔离\"",
     "highRiskWarning": "高危意图采用标记��递，邮件将投递至用户邮箱，请确认风险",
     "panel": {
@@ -5703,7 +5703,7 @@
     },
     "switchConfirm": {
       "title": "确认切换为副本（replica）？",
-      "description": "本节点当前有 {count} 条全局规则（不含租户规则）。切换为 replica 后，首次同步会用主节点的全量快照覆盖本地全局规则：快照之外的规则会被删除，同 uid/同名的规则会被主节点版本覆盖，此操作不可逆。租户规则（tenant_id 非空）不受影响。请确认已在主节点核实规则内容后再继续。",
+      "description": "本节点当前有 {count} 条全局规则（不含租户规则）。切换为 replica 后，首次同步会用主节点的全量快照覆盖本地全局规则：快照之外的规则会被删除，同 uid/同名的规则会被主节点版本覆盖，此操作不可逆。租户规则（tenant_id 非空）��受影响。请确认已在主节点核实规则内容后再继续。",
       "confirmText": "确认切换为 replica",
       "cancelText": "取消"
     },
@@ -6508,7 +6508,7 @@
     "description": "基于多条件组合的灵活过滤规则",
     "moduleDescription": "多维度条件组合过滤，支持{count}种条件类型与AND/OR逻辑",
     "incompleteCondition": "[配置不完整]",
-    "incompleteReasonMissingValue": "缺少取值：请填写该条件的匹配值",
+    "incompleteReasonMissingValue": "缺少取��：请填写该条件的匹配值",
     "incompleteReasonThreshold": "缺少阈值：请填写数值阈值",
     "incompleteReasonBetween": "区间不完整：请同时填写最小值和最大值",
     "incompleteReasonBetweenOrder": "区间无效：最小值不应大于最大值",
@@ -7426,7 +7426,7 @@
         },
         "deliver": {
           "source": "投递引擎",
-          "usage": "正常投递到收件箱",
+          "usage": "正常投递到���件箱",
           "note": "可选择跳过后续规则"
         },
         "tagDeliver": {
@@ -7520,7 +7520,7 @@
     "searchGroups": "搜索收信人组",
     "searchDepts": "搜索部门",
     "noMatch": "无匹配结果",
-    "noGroupsHint": "暂无收信人组，请先到「群组管理」创建",
+    "noGroupsHint": "暂无收信人组��请先到「群组管理」创建",
     "noDeptsHint": "组织通讯录暂未同步，请先到「��织通讯录」配置数据源",
     "invalidRef": "已失效",
     "clearAll": "清空",
@@ -10070,7 +10070,7 @@
         "sender": "发件邮箱格式不正确",
         "username": "用户名不能为空",
         "password": "密码不能为空",
-        "noEncKey": "缺少加密密钥；无法保存外部 SMTP 密码",
+        "noEncKey": "缺少加密密钥；无法保存外��� SMTP 密码",
         "testEmail": "请输入有效的测试收件人"
       }
     }
@@ -10821,7 +10821,7 @@
       "member_endpoint_duplicate": "同一个节点不能在分组里重复出现",
       "member_endpoint_id_invalid": "分组成员的节点��须是有效选择",
       "member_ord_duplicate": "分组成员的排序值不能重复",
-      "port_out_of_range": "端口需在 {min}–{max} 之间",
+      "port_out_of_range": "端口需在 {min}–{max} 之��",
       "tls_min_version_invalid": "TLS 最低版本无效，只能是：{allowed}"
     },
     "role": {
@@ -11085,7 +11085,7 @@
       "review_timeout_action_accept_reject_keep": "审核超时处置只能是放行、拒绝或继续等待",
       "forward_rate_limit_per_minute_non": "每分钟转发速率上限不能为负数",
       "tarpit_max_concurrent_non_negative": "延时限流并发上限不能为负数",
-      "admin_notify_max_recipients_non_negative": "管理员通知收件人上限不能为负数"
+      "admin_notify_max_recipients_non_negative": "管理员���知收件人上限不能为负数"
     },
     "alert_rules": {
       "rule_name_exists": "规则名称已存在",
