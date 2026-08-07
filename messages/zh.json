@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测��能���������",
+    "spoofingDetection": "仿冒邮件检测��能�����������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -704,11 +704,11 @@
       "editButton": "编辑",
       "deleteButton": "删除",
       "drawerTitleNew": "新建转发规则",
-      "drawerTitleEdit": "编辑转发规则",
+      "drawerTitleEdit": "编辑转发��则",
       "drawerDescription": "在 SMTP 握手阶段决定连接的接入与过滤策略",
       "sectionBasic": "基础信息",
       "sectionMatch": "匹配条件",
-      "sectionSimulator": "规则模拟器",
+      "sectionSimulator": "���则模拟器",
       "simulatorDesc": "按当���列表规则优先级逐条匹配，验证命中结果",
       "matchInfoBanner": "各条件为 AND 关系需同时满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
@@ -1455,7 +1455,7 @@
     "previewNotExecuted": "未执行（前序已短路）",
     "previewShortCircuitPoint": "短路点 · {action}",
     "previewNoGroupConfig": "无群组配置（按全局执行）",
-    "previewConflict": "同模块冲突 → 优先级仲裁：「{rule}」（优���级 {priority}）��效",
+    "previewConflict": "同模块冲突 → 优先级���裁：「{rule}」（优���级 {priority}）��效",
     "terminalActions": {
       "quarantine": "隔离",
       "reject": "拒绝",
@@ -2045,7 +2045,7 @@
         "port": "端口",
         "type": "类型",
         "priority": "优先级",
-        "priorityHint": "数值越小越优先;同优先级将轮询",
+        "priorityHint": "数值越小���优先;同优先级将轮询",
         "hostRequired": "请��入主机或地址",
         "portInvalid": "端口需为 1-65535",
         "add": "添加下一跳",
@@ -2461,7 +2461,7 @@
       "unknown": "未知错误"
     },
     "failAdvice": {
-      "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号是���泄露并启用登录限速。",
+      "wrongPassword": "短时间内多次密码错误可能为撞��/暴力破解，建议核查账号是���泄露并启用登录限速。",
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必��时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链��，或适当调大认证超时时间。",
@@ -2815,7 +2815,7 @@
     "addMember": "添加成员代理服务器",
     "noMoreEndpoints": "没有更多可选代理服务器",
     "membersEmptyHint": "至少添加一个代理服务器；顺序即 failover 顺序（上者先）。",
-    "createEndpoint": "新建代理服务器",
+    "createEndpoint": "新建代理服务���",
     "editEndpoint": "编辑代理服务器",
     "deleteEndpoint": "删除代理服务器",
     "createGroup": "新建分组",
@@ -3407,8 +3407,9 @@
     "scope": "生效范围",
     "expireTime": "有效期至",
     "expireTimePermanent": "留空=永久有效",
-    "priorityTip": "数值越大优先级越高",
-    "priorityDesc": "数值越大越先匹配",
+    "priorityTip": "数值越大优先级越高，范围 {min}–{max}",
+    "priorityDesc": "范围 {min}–{max}，数值越大越先匹配",
+    "priorityOutOfRange": "优先级需在 {min}–{max} 之间",
     "descriptionField": "备注",
     "descriptionPlaceholder": "可选，规则说明...",
     "ipLevelProtection": "IP级防护",
@@ -3531,7 +3532,7 @@
       "suspendFor": "额外封禁 {duration}",
       "suspendLogTip": "阈值触发后仅当次处置，不会额外封禁 IP。如需封禁请配置挂起策略。",
       "priorityLabel": "优先级：",
-      "lowerFirst": "（越大越优先）",
+      "lowerFirst": "��越大越优先）",
       "validityLabel": "有效期：",
       "permanent": "永久有效",
       "conditionDaily": "当日连���超过 {count} 次",
@@ -3703,8 +3704,9 @@
     "expireAt": "有效期至",
     "expireAtTip": "规则到期后自动失效，留空表示永久有效",
     "expireAtHint": "留空表示永久有效",
-    "priorityTip": "数值越大越优先。建议常规规则设为 100-500，需要更优先的规则设更大数值。",
-    "priorityHint": "数值越大越优先",
+    "priorityTip": "数值越大越优先，范围 {min}–{max}。建议常规规则设为 100–500，需要更优先的规则设更大数值。",
+    "priorityHint": "范围 {min}–{max}，数值越大越优先",
+    "priorityOutOfRange": "优先级需在 {min}–{max} 之间",
     "executeAction": "执行动作",
     "executeActionBlacklistTip": "选择当IP命中黑名单规则时的处理方式。隔离/审核会暂存邮件待处理，阻断会退回邮件，丢弃会静默删除邮件。",
     "executeActionWhitelistTip": "选择当IP命中白名单规则时的处理方式。投递会直接放行，标记投递会添加标记后放行。",
@@ -3950,7 +3952,7 @@
     "unsavedChanges": "有未保存的更改",
     "noUnsavedChanges": "暂无未保存更改",
     "demoParityNotice": "当前页面按 demo 的 RBL 配置面板重新实现：服务器列表、超时、命中动作与灰名单子配置在同一面板内维护。",
-    "testIP": "测试 IP：127.0.0.2（标准 RBL 测试地址）",
+    "testIP": "测试 IP：127.0.0.2（标准 RBL 测试地��）",
     "dryRun": "模拟测试",
     "dryRunPlaceholder": "输入命中的 RBL 服务器，多个用逗号分隔",
     "dryRunButton": "测试匹配",
@@ -5247,7 +5249,7 @@
         "desc": "本功能将在后续版本提供。当前版本仅支持链接保护。"
       },
       "toggle": "沙箱检测",
-      "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁",
+      "toggleDesc": "启用后，对邮��中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁",
       "toggleTip": "对未知URL进行动态行为分析，模拟用户访问以检测恶意行为",
       "detectGroup": "检测结果处置（当前方向）",
       "maliciousLabel": "发现恶意URL",
@@ -5449,7 +5451,7 @@
       "overlapWarning": "存在重叠区间，请修复或点击\"智能填充\"",
       "addSegment": "添加区间",
       "fillGaps": "智能填充",
-      "applyPreset": "应用模板",
+      "applyPreset": "���用模板",
       "presetStrict": "严格",
       "presetStandard": "标准（推荐）",
       "presetLoose": "宽松"
@@ -5544,7 +5546,7 @@
     "goToGroupPolicy": "前往群组策略配置",
     "atLeastOneDirection": "至少选择一个检测方向",
     "navSummary": "窗口{window}分钟 / 阈值{threshold}%",
-    "tooltipObserve": "开启后仅记录日志，不执行实际拦截动作",
+    "tooltipObserve": "开启后仅记录日志��不执行实际拦截动作",
     "errorTagRequired": "标记投递需至少启用一种标记方式"
   },
   "mailMarking": {
@@ -5758,7 +5760,7 @@
       "templateNameRequired": "请输入模板名称",
       "templateOverwriteWarning": "已存在同名模板，保存将覆盖原有条件",
       "templateOverwriteConfirm": "覆盖保存",
-      "templateLimitWarning": "已达上限（{max} 个），保存将删除最旧的一条模板",
+      "templateLimitWarning": "已达上限（{max} 个），保存将删除最旧的一条���板",
       "templateApplyConfirmTitle": "应用搜索模板",
       "templateApplyConfirmDesc": "应用「{name}」将替换当前所有搜索条件，是否继续？",
       "templateApplyConfirm": "确认应用",
@@ -5883,7 +5885,7 @@
       "groupRelation": "条件组关系",
       "conditionRelation": "组内条件关系",
       "groupLabel": "条件组 {n}",
-      "deleteGroup": "删除条件组 {n}",
+      "deleteGroup": "删除��件组 {n}",
       "groupLimit": "最多可添加 {n} 个条件组",
       "operator": "运算符",
       "operators": {
@@ -6506,7 +6508,7 @@
   "advancedRulesFeature": {
     "title": "高级过滤规则",
     "description": "基于多条件组合的灵活过滤规则",
-    "moduleDescription": "多维度条件组合过滤，支持{count}种条件类型与AND/OR逻辑",
+    "moduleDescription": "多维度条件组合过滤，支持{count}种条件类型与AND/OR��辑",
     "incompleteCondition": "[配置不完整]",
     "incompleteReasonMissingValue": "缺少取��：请填写该条件的匹配值",
     "incompleteReasonThreshold": "缺少阈值：请填写数值阈值",
@@ -6842,7 +6844,7 @@
       "booleanFalse": "否",
       "weekdayLabel": "星期",
       "timeStartLabel": "开始 (HH:MM)",
-      "timeEndLabel": "结束 (HH:MM)",
+      "timeEndLabel": "结�� (HH:MM)",
       "timeRangeHint": "时间范围使用 24 小时制 HH:MM。",
       "exclude": "排除 (NOT)",
       "weekday_0": "周日",
@@ -7266,7 +7268,7 @@
       },
       "stepGuideMapNumber": [
         "先在「选择对象」中选择要比较的对象（* 表示全部对象）。",
-        "再选择比较方式（大于 / 小于 / 介于等）。",
+        "再选择比较方式（大于 / 小�� / 介于等）。",
         "最后填写阈值，可点「应用推荐配置」快速填入常用值。"
       ],
       "formats": {
@@ -8171,7 +8173,7 @@
       "domain": "域名",
       "count": "检出次数",
       "blockRate": "点击拦截率",
-      "blockRateHelp": "该域名点击后进入威胁拦截页面的比例",
+      "blockRateHelp": "该域名点击后进入威��拦截页面的比例",
       "firstSeen": "首次出现",
       "status": "封禁状态",
       "block": "封禁",
@@ -8769,7 +8771,7 @@
       "colActions": "操作",
       "advancedEdit": "高级编辑",
       "dialogTitle": "编辑第 {index} 段",
-      "dialogDescription": "调整该置信度段的区间、处置与标记设置。",
+      "dialogDescription": "调整该置信度段的区间、处置与��记设置。",
       "cancel": "取消",
       "apply": "应用",
       "markPositionLabel": "标记位置",
@@ -10141,7 +10143,7 @@
       "itemLicenseExpiry": "许可证将在 {n} 天后到期",
       "licenseRenewHint": "请及时续期",
       "itemRuleLibLatest": "规则库已是最新版",
-      "itemRuleLibOutdated": "规则库有可用更新",
+      "itemRuleLibOutdated": "规则库有��用更新",
       "lastSeen": "最近心跳：{time}",
       "itemPendingDisposalDesc": "{n} 封待处理",
       "itemPendingReportDesc": "{n} 条"
@@ -10211,7 +10213,7 @@
       "rblSummary": "{servers} 个服务器 / 超时 {timeout}s",
       "overseasSummary": "{directions} 已启用",
       "ipFrequencyHint": "限制单个 IP 的发信频率",
-      "ipFilterHint": "IP 黑名单与白名单规则",
+      "ipFilterHint": "IP 黑名单与白名��规则",
       "rblHint": "拦截命中 RBL 服务的发件方",
       "overseasHint": "检测境外来源邮件"
     },
@@ -10252,7 +10254,7 @@
     "selectTenantFirst": "请先选择租户，再修改此模块",
     "adminOnly": "仅系统管理员或租户管理员可修改此模块",
     "disableWarning": "关闭本模块后，其全部规则停止生效，该模块的拦截能力将不再起作用。",
-    "whitelistWarning": "注意：本模块的白名单 / 放行规则也会一并停用，原本��放行的邮件将继续走后续检测。",
+    "whitelistWarning": "注意：本模块的白名单 / 放行规���也会一并停用，原本��放行的邮件将继续走后续检测。",
     "saveFailed": "保存失败，请重试",
     "unsavedChanges": "模块开关有未保存的更改"
   },
@@ -10585,7 +10587,7 @@
       "infrastructureHealth": "基��设施"
     },
     "module": {
-      "infrastructure": "基础设施",
+      "infrastructure": "���础设施",
       "mailflow": "邮件流",
       "engine": "检测引擎",
       "alerts": "告警中心",
@@ -10739,7 +10741,7 @@
         "timeout_mark_positions_empty": "选择「打标记」时，至少要指定一个标记位置",
         "timeout_mark_text_empty": "标记文本不能为空",
         "timeout_mark_text_too_long": "标记文本不能超过 {max} 个字符",
-        "timeout_temp_disposal_invalid": "超时临时处置「{value}」无效，只能是：{allowed}"
+        "timeout_temp_disposal_invalid": "超时临��处置「{value}」无效，只能是：{allowed}"
       },
       "timezone_invalid": "时区「{value}」无效，请填写标准的 IANA 时区名（如 Asia/Shanghai）",
       "too_many_items": "一次最多处理 {max} 项，请减少选择后重试"
@@ -11416,7 +11418,7 @@
       "credential_invalid_or_expired": "凭证无效或已过期，请重新发起"
     },
     "password_reset": {
-      "feature_disabled": "密码重置功能未���用",
+      "feature_disabled": "密码重置功能未����用",
       "code_invalid_or_expired": "验证码错误或已过期",
       "ticket_invalid_or_expired": "凭证无效或已过期",
       "rate_limited": "请求过于频繁，请稍后再试"

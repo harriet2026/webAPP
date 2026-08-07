@@ -111,13 +111,17 @@ import { PageHeader, PageShell } from '@/components/shared/page-shell';
 import { format } from 'date-fns';
 import { toRFC3339 } from '@/lib/format-time';
 import { useAuth } from '@/contexts/auth-context';
+import { getRulePriorityRange } from '@/components/security/advanced-filter-rules/priority-range';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
-const ruleSchema = z.object({
+import type { PriorityRange } from '@/components/security/advanced-filter-rules/priority-range';
+
+function createRuleSchema(range: PriorityRange) {
+  return z.object({
   name: z.string().min(1, 'ipFrequency.nameRequired').max(50, 'ipFrequency.nameTooLong'),
   description: z.string().optional(),
-  priority: z.number(),
+  priority: z.number().int().min(range.min, 'ipFrequency.priorityOutOfRange').max(range.max, 'ipFrequency.priorityOutOfRange'),
   scope_type: z.enum(['all', 'single', 'range', 'group']),
   scope_value: z.string().optional(),
   action: z.enum(['reject', 'tempfail', 'disconnect']),
@@ -149,14 +153,16 @@ const ruleSchema = z.object({
   if (data.window_minutes === -1 && data.window_connection_limit !== -1) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['window_connection_limit'], message: 'ipFrequency.windowLimitHint' });
   }
-});
+  });
+}
 
-type RuleForm = z.infer<typeof ruleSchema>;
+type RuleForm = z.infer<ReturnType<typeof createRuleSchema>>;
 
-const defaultForm: RuleForm = {
+function makeDefaultForm(priorityDefault: number): RuleForm {
+  return {
   name: '',
   description: '',
-  priority: 100,
+  priority: priorityDefault,
   scope_type: 'all',
   scope_value: '',
   action: 'reject',
@@ -172,7 +178,8 @@ const defaultForm: RuleForm = {
   is_active: true,
   valid_from: '',
   valid_until: '',
-};
+  };
+}
 
 export function IPFrequencyPage({
   embedded,
@@ -186,6 +193,9 @@ export function IPFrequencyPage({
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin } = useAuth();
+  const range = useMemo(() => getRulePriorityRange(isSystemAdmin), [isSystemAdmin]);
+  const schema = useMemo(() => createRuleSchema(range), [range]);
+  const defaultForm = useMemo(() => makeDefaultForm(range.defaultValue), [range]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<IPFrequencyRuleView | null>(null);
@@ -313,7 +323,7 @@ export function IPFrequencyPage({
   }, []);
 
   const form = useForm<RuleForm>({
-    resolver: zodResolver(ruleSchema),
+    resolver: zodResolver(schema),
     defaultValues: defaultForm,
   });
   // React Hook Form publishes formState on the next render. A close event can
@@ -1416,7 +1426,7 @@ export function IPFrequencyPage({
                         <Tooltip>
                           <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />} />
                           <TooltipContent>
-                            <p>{t('ipFrequency.priorityTip')}</p>
+                            <p>{t('ipFrequency.priorityTip', { min: range.min, max: range.max })}</p>
                           </TooltipContent>
                         </Tooltip>
                       </Label>
@@ -1425,13 +1435,20 @@ export function IPFrequencyPage({
                           type="number"
                           {...form.register('priority', { valueAsNumber: true })}
                           className={cn('w-[100px]', priorityConflict && 'border-amber-500')}
-                          min={0}
+                          min={range.min}
+                          max={range.max}
                         />
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {t('ipFrequency.priorityDesc')}
+                          {t('ipFrequency.priorityDesc', { min: range.min, max: range.max })}
                         </span>
                       </div>
                     </div>
+                    {form.formState.errors.priority && (
+                      <div className="flex gap-3">
+                        <div className="min-w-[110px] w-[110px] shrink-0" />
+                        <p className="text-xs text-red-500">{t('ipFrequency.priorityOutOfRange', { min: range.min, max: range.max })}</p>
+                      </div>
+                    )}
                     {priorityConflict && (
                       <div className="flex gap-3">
                         <div className="min-w-[110px] w-[110px] shrink-0" />
