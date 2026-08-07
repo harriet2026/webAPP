@@ -72,7 +72,7 @@ export function MailMarkingPage({ embedded }: Props) {
   const nextPriority = useMemo(() => {
     if (rules.length === 0) return 100
     const max = Math.max(...rules.map((rule) => rule.priority))
-    return Math.min(max + 10, 1000)
+    return Math.min(Math.max(max + 1, 100), 1000)
   }, [rules])
 
   const handleSaved = useCallback(() => {
