@@ -59,6 +59,8 @@ import {
   toContentRuleUiAction,
 } from '@/lib/api/content-rules';
 import { useApiRequest } from '@/lib/api/client';
+import { useAuth } from '@/contexts/auth-context';
+import { getRulePriorityRange } from '@/components/security/advanced-filter-rules/priority-range';
 import type {
   ContentRuleDirections,
   ContentRuleFormData,
@@ -171,6 +173,8 @@ export function ContentRuleDrawer({
 }: ContentRuleDrawerProps) {
   const t = useTranslations();
   const { apiRequest } = useApiRequest();
+  const { isSystemAdmin } = useAuth();
+  const range = useMemo(() => getRulePriorityRange(isSystemAdmin), [isSystemAdmin]);
   const [draft, setDraft] = useState<ContentRuleFormData>(defaultDraft);
   const [uiAction, setUiAction] = useState<ContentRuleUiAction>('isolate');
   const [headerName, setHeaderName] = useState(DEFAULT_HEADER_NAME);
@@ -280,8 +284,8 @@ export function ContentRuleDrawer({
     if (!name) next.name = t('contentRules.ruleNameRequired');
     else if (name.length > 50) next.name = t('contentRules.ruleNameTooLong');
     else if (/[<>&"]/.test(name)) next.name = t('contentRules.ruleNameForbiddenChars');
-    if (!Number.isInteger(draft.priority) || draft.priority < 1 || draft.priority > 9999) {
-      next.priority = t('contentRules.priorityInvalid');
+    if (!Number.isInteger(draft.priority) || draft.priority < range.min || draft.priority > range.max) {
+      next.priority = t('contentRules.priorityInvalid', { min: range.min, max: range.max });
     }
     if (!Object.values(draft.directions).some((config) => config?.enabled)) {
       next.direction = t('contentRules.atLeastOneDirection');
@@ -470,13 +474,13 @@ export function ContentRuleDrawer({
                     <Input
                       data-testid="content-rule-priority"
                       type="number"
-                      min={1}
-                      max={9999}
+                      min={range.min}
+                      max={range.max}
                       value={draft.priority}
                       onChange={(event) => setDraft((current) => ({ ...current, priority: Number(event.target.value) }))}
                       className="w-24"
                     />
-                    <span className="ml-2 text-xs text-muted-foreground">{t('contentRules.priorityRangeHint')}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{t('contentRules.priorityRangeHint', { min: range.min, max: range.max })}</span>
                   </Field>
                   <Field label={t('contentRules.effectiveUntil')} error={errors.valid_until} hint={t('contentRules.validUntilTip')}>
                     <div className="flex flex-wrap items-center gap-2">
