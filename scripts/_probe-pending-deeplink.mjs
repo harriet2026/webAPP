@@ -14,6 +14,18 @@ p.on('request', (r) => {
   const u = r.url();
   if (u.includes('/mail-logs?')) apiCalls.push(decodeURIComponent(u.split('/mail-logs?')[1]));
 });
+p.on('console', (m) => {
+  if (['error', 'warning'].includes(m.type())) console.log(`[c.${m.type()}]`, m.text().slice(0, 200));
+});
+p.on('response', async (r) => {
+  const u = r.url();
+  if (u.includes('/mail-logs?') && u.includes('page_size') && !u.includes('page_size=1&')) {
+    try {
+      const j = await r.json();
+      console.log('[resp] status=', r.status(), 'total=', j?.total, 'itemsLen=', Array.isArray(j?.items) ? j.items.length : 'n/a');
+    } catch { console.log('[resp] non-json', r.status(), u.slice(-60)); }
+  }
+});
 await p.goto(`${BASE}/zh/email-disposal/center?view=pending`, { waitUntil: 'domcontentloaded', timeout: 120000 });
 await p.waitForFunction(() => document.body.innerText.replace(/\s+/g, '').length > 200, { timeout: 90000 });
 // 等表格真正出行（非“加载中”）

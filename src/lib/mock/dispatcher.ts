@@ -408,7 +408,7 @@ const mockAdvancedFieldDefs: Record<string, FieldDef> = Object.fromEntries(
 );
 
 // ─── 角色（RBAC）mock 数据 ──────────────────────────────────────────────
-// 平台/租户两套内置角色。`_level` 仅用于本地生成权限矩阵，不属于 Role 线上
+// 平台/租户两套内置角色。`_level` 仅用于本地生成权限矩阵，不属于 Role ���上
 // 字段，列表响应里会被剥离。真实后端按 GetEffectiveTenantID 裁剪作用域，这里
 // 返回全集、由页面按视角（platform/tenant）过滤。
 type RoleLevel = 'admin' | 'operator' | 'viewer';
@@ -684,7 +684,7 @@ const routes: Route[] = [
             location: '未知地区',
             result: 'fail',
             abnormal: true,
-            abnormal_reason: '密码错误超过 5 次',
+            abnormal_reason: '���码错误超过 5 次',
           },
         ],
         total: 3,
@@ -804,13 +804,14 @@ const routes: Route[] = [
     },
   },
   // 系统状态仪表盘的「待处置邮件」KPI 探针：page_size=1 且 advanced_filters 含
-  // sideline（隔离/旁路）——只命中这一探针，不影响处置中心默认视图（其 page_size 更大）。
-  // 返回按当前范围分支的 total（3/11/19），items 留空即可（KPI 卡只读 total）。
+  // audit_pending（待处置口径 = 隔离中 quarantine_pending + 待审核 audit_pending，
+  // GT-12818）——只命中这一探针，不影响处置中心默认视图（其 page_size 更大）。
+  // 返回按当前范围分支的 total（3/11/19），items 留空即可（KPI 卡只用 total）。
   {
     method: 'GET', pattern: '/mail-logs',
     matchQuery: (q) => {
       const p = new URLSearchParams(q);
-      return p.get('page_size') === '1' && (p.get('advanced_filters') ?? '').includes('sideline');
+      return p.get('page_size') === '1' && (p.get('advanced_filters') ?? '').includes('audit_pending');
     },
     handler: () => ({ status: 200, data: mockDisposalPendingProbe() }),
   },
@@ -1731,7 +1732,7 @@ const routes: Route[] = [
   // src/lib/api/unified-rules.ts 的通用 getUnifiedRules）。这里 mock 了这些
   // query 形态：sender_filter 列表页（`rule_page=sender_filter`）、
   // behavior_control 列表页（`rule_page=behavior_control`）和群组下拉
-  // （`page=<GROUPS_PAGE_KEY>`，注意参数名是 `page`，不是 `rule_page`）。
+  // （`page=<GROUPS_PAGE_KEY>`，注意参数名是 `page`，不是 `rule_page`��。
   // 群组下拉又��两个来源，靠 `include` 参数分流、互不污染：
   //   - sender_filter 的 `GROUPS_LIST_QUERY`（src/lib/api/groups.ts）发
   //     `include=member_count,reference_count` → 返回 `mockSenderFilterGroupsList()`；
