@@ -1235,7 +1235,7 @@ export function mockOpsTopAi(): { markdown: string } {
   };
 }
 
-// ─── ���控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
+// ─── ����控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
 export function mockMonitorDashboardOverview(range: MonitorDashboardRange): MonitorDashboardOverview {
   const volumes: Record<MonitorDashboardRange, number> = {
     today: 125847,
@@ -4586,7 +4586,7 @@ export function mockRecipientCheckConfig(): RecipientCheckConfig {
 
 // 发信人/IP/组织群组下拉（behavior-control 抽屉里的群组选择器，见
 // `BehaviorControlDrawer.tsx` 的 `groupsQuery`）。三类群组用 `metadata.group_type`
-// 区分（'sender' | 'ip' | 'org'，注意 'org' 不是通用 `GroupType`
+// 区���（'sender' | 'ip' | 'org'，注意 'org' 不是通用 `GroupType`
 // （src/types/groups.ts）的成员）；抽屉自己按 `metadata.group_type` 过滤、直接读
 // `name` 字段展示，不经过 `tags`。
 //
@@ -5653,7 +5653,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "outgoing",
     sender: "pm@company.com",
     recipients: "blogger@tech-media.com",
-    subject: "内部产品路线图（含未���布���号）",
+    subject: "内部产品���线图（含未���布���号）",
     action: "block",
     reason: "内容规则命中：竞品/机密关键词",
     mailType: "sensitive",
@@ -6673,6 +6673,11 @@ function mockAdvancedValue(
     threat_level:
       (item.phish_agent_check?.confidence ?? 0) >= 0.8 ? "critical" : "none",
     disposal_rule_id: item.disposal_basis?.rule_id,
+    // GT-12818：advanced_filters 里的 display_status 需与普通 display_status
+    // 查询参数（mockEmailDisposalList 用 displayStatusOf）同源，否则「待处置
+    // 邮件」深链（display_status in [quarantine_pending, audit_pending]）在 mock
+    // 下匹配为 0，落地列表误显示「暂无数据」。
+    display_status: displayStatusOf(item),
   };
   return values[field] ?? (item as unknown as Record<string, unknown>)[field];
 }

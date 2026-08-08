@@ -13,7 +13,7 @@ describe('GT-12608 pending deep-link filter', () => {
           {
             field: 'display_status',
             op: 'in',
-            value: ['quarantine_pending', 'sideline_pending'],
+            value: ['quarantine_pending', 'audit_pending'],
           },
         ],
       },
