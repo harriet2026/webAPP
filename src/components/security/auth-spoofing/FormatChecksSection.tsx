@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { FORMAT_ACTIONS } from './CheckItemRow';
 import { AuthSpoofingTagPanel } from './AuthSpoofingTagPanel';
-import { formatActionKey } from '@/lib/auth-spoofing-labels';
+import { formatActionKey, toMessageKeySegment } from '@/lib/auth-spoofing-labels';
 import { ChevronDown, Info, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -126,7 +126,7 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
                       <div className="flex flex-col gap-0.5 py-0.5">
                         <span>{t(formatActionKey(a) as any)}</span>
                         <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
-                          {tDesc(a as any)}
+                          {tDesc(toMessageKeySegment(a) as any)}
                         </span>
                       </div>
                     </SelectItem>

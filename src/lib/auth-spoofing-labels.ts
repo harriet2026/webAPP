@@ -1,12 +1,20 @@
 import type { AuthSpoofingAction } from '@/types/auth-spoofing';
 
+// i18n message keys cannot contain hyphens (next-intl treats `.` as the only
+// nesting separator, but a literal `-` inside a segment breaks key lookup and
+// falls back to showing the raw key string). Storage values like
+// 'mark-delivery' must stay hyphenated, so we camelCase only when building the
+// message key, e.g. 'mark-delivery' -> 'markDelivery'.
+export const toMessageKeySegment = (a: AuthSpoofingAction): string =>
+  a.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
+
 // Keys are RELATIVE to the `authSpoofing` i18n namespace — consumers must
 // resolve them with `useTranslations('authSpoofing')` (NOT the root translator,
 // which would double-prefix to `authSpoofing.authSpoofing.*`).
-export const formatActionKey = (a: AuthSpoofingAction) => `formatActionLabel.${a}`;
-export const protocolActionKey = (a: AuthSpoofingAction) => `protocolActionLabel.${a}`;
-export const protocolActionShortKey = (a: AuthSpoofingAction) => `protocolActionShort.${a}`;
-export const protocolActionDescKey = (a: AuthSpoofingAction) => `protocolActionDesc.${a}`;
+export const formatActionKey = (a: AuthSpoofingAction) => `formatActionLabel.${toMessageKeySegment(a)}`;
+export const protocolActionKey = (a: AuthSpoofingAction) => `protocolActionLabel.${toMessageKeySegment(a)}`;
+export const protocolActionShortKey = (a: AuthSpoofingAction) => `protocolActionShort.${toMessageKeySegment(a)}`;
+export const protocolActionDescKey = (a: AuthSpoofingAction) => `protocolActionDesc.${toMessageKeySegment(a)}`;
 
 export function flowSubKey(a: AuthSpoofingAction, isPtr: boolean): string {
   if (a === 'discard') return 'flowSub.drop';

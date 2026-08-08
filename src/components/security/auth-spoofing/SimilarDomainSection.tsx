@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { AuthSpoofingTagPanel } from './AuthSpoofingTagPanel';
+import { toMessageKeySegment } from '@/lib/auth-spoofing-labels';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -45,7 +46,7 @@ export function SimilarDomainSection({ config, onChange, disabled }: SimilarDoma
                 <CardTitle className="text-base font-semibold">{t('similarDomain.title')}</CardTitle>
                 {config.enabled && (
                   <Badge variant="secondary" className="text-[10px] ml-2">
-                    {t('action.' + config.action as any)}
+                    {t(`action.${toMessageKeySegment(config.action)}` as any)}
                   </Badge>
                 )}
               </CollapsibleCardTrigger>
@@ -66,12 +67,12 @@ export function SimilarDomainSection({ config, onChange, disabled }: SimilarDoma
                   disabled={disabled || !config.enabled}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue>{t(`action.${config.action}` as any)}</SelectValue>
+                    <SelectValue>{t(`action.${toMessageKeySegment(config.action)}` as any)}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {ACTIONS.map((a) => (
                       <SelectItem key={a} value={a}>
-                        {t(`action.${a}` as any)}
+                        {t(`action.${toMessageKeySegment(a)}` as any)}
                       </SelectItem>
                     ))}
                   </SelectContent>
