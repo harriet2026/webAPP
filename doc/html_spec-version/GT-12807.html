@@ -276,6 +276,28 @@
         </ul>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-12833">GT-12833 认证协议检查：动作精简为5项，默认动作改为"标记放行"</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12833-change-1">PROTOCOL_ACTIONS / DMARC_ACTIONS 由6项精简为5项：移除"进行下一步"（accept）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12833-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12833-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12833-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12833-change-2">默认动作与"启用"语义统一改为"标记放行"，行不再因动作为"accept"而隐藏</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12833-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12833-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12833-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12833-change-3">"宽松"模板：SPF/DKIM/PTR 中原 accept 场景全部改为 mark-delivery</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12833-c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12833-c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12833-c3-elements">3.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
       <li><a href="#diffs">D. 差异标注</a></li>
       <li><a href="#questions">Q. 待确认事项</a></li>
       <li><a href="#version-history">V. 版本历史</a></li>
@@ -557,6 +579,13 @@ onViewRawLogs?: () =&gt; void;
           <td class="status-pending">待处理</td>
           <td>2026-08-06</td>
         </tr>
+        <tr>
+          <td>D-005</td>
+          <td>GT-12801 变更2「DMARC处置策略新增&quot;进行下一步&quot;选项」的目标要求已被后续需求 GT-12833 反向调整</td>
+          <td>GT-12833 将 <code>accept</code> 从 <code>PROTOCOL_ACTIONS</code> / <code>DMARC_ACTIONS</code> 中彻底移除（不再是"新增"而是"移除"），GT-12801 变更2 章节已打删除线标注并链接到 GT-12833</td>
+          <td class="status-resolved">已解决（以 GT-12833 为准）</td>
+          <td>2026-08-08</td>
+        </tr>
       </tbody>
     </table>
   </section>
@@ -641,10 +670,11 @@ onViewRawLogs?: () =&gt; void;
       </table>
 
       <!-- 变更 2 -->
-      <h3 id="gt12801-change-2" style="margin-top:2rem;">2. DMARC处置策略新增"进行下一步"选项</h3>
+      <h3 id="gt12801-change-2" style="margin-top:2rem;"><del>2. DMARC处置策略新增"进行下一步"选项</del></h3>
+      <div class="callout callout-removed">此变更点已被 <a href="#gt-12833">GT-12833</a> 反向调整替代：<code>accept</code>（"进行下一步"）已从 <code>PROTOCOL_ACTIONS</code> / <code>DMARC_ACTIONS</code> 中移除，SPF / DKIM / DMARC / PTR 统一收敛为 5 项动作，详见 GT-12833 变更 1。</div>
 
-      <h4>2.1 方案概述</h4>
-      <p>修改前 <code>DMARC_ACTIONS</code> 为 4 项（不含 <code>accept</code>），SPF / DKIM / PTR 的 <code>PROTOCOL_ACTIONS</code> 含全部 5 项。本次将 <code>DMARC_ACTIONS</code> 扩充至 5 项，使 DMARC 支持「进行下一步」处置策略；<code>accept</code> 语义为当邮件命中该 DMARC 条件行时，直接传递给流水线下一节点，不做阻断 / 隔离 / 标记。</p>
+      <h4>2.1 方案概述（历史记录，已失效）</h4>
+      <p><del>修改前 <code>DMARC_ACTIONS</code> 为 4 项（不含 <code>accept</code>），SPF / DKIM / PTR 的 <code>PROTOCOL_ACTIONS</code> 含全部 5 项。本次将 <code>DMARC_ACTIONS</code> 扩充至 5 项，使 DMARC 支持「进行下一步」处置策略；<code>accept</code> 语义为当邮件命中该 DMARC 条件行时，直接传递给流水线下一节点，不做阻断 / 隔离 / 标记。</del></p>
       <table>
         <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
         <tbody>
@@ -810,7 +840,7 @@ onViewRawLogs?: () =&gt; void;
           <tr>
             <td>群组类型 Select（新建场景）</td>
             <td>交互控件</td>
-            <td>显示，可选 IP组/发信人组/收信人组/内容组/特征组</td>
+            <td>显示，可选 IP组/发��人组/收信人组/内容组/特征组</td>
             <td>已移除（不渲染）</td>
             <td>—</td>
             <td><code>group-edit-dialog.tsx</code></td>
@@ -1552,7 +1582,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12791-c1-states">1.2 截图式交互预览</h4>
       <div class="interaction-preview">
-        <p><strong>状态 S-1：触发动作下拉展开（发送方向，5 个选项）</strong><br/>
+        <p><strong>状态 S-1：触发动作下拉展开（发��方向，5 个选项）</strong><br/>
         触发路径：租户管理员 → 安全策略 → 相似邮件与主题检测 → 发送方向触发动作下拉 → 点击展开<br/>
         <em>注：本状态截图摄制于改名为「投递」阶段，实际界面文案以「进行下一步」为准，选项顺序与位置不变。</em></p>
         <figure>
@@ -1605,7 +1635,7 @@ onViewRawLogs?: () =&gt; void;
         <p style="margin-top:1.5rem"><strong>状态 S-3：进行下一步动作 + 标记面板完整视图（含按钮区靠右）</strong><br/>
         触发路径：页面滚动至底部，可见标记方式面板三行 Switch + 底部按钮区</p>
         <figure>
-          <img src="./screenshots/gt12791-footer-buttons.png" alt="页面底部：发送方向标记面板三行Switch（主题/信头/正文），底部取消按钮靠左保存按钮靠右" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <img src="./screenshots/gt12791-footer-buttons.png" alt="页面底部：发送方向标记面板三行Switch（主题/信头/正文），底部取消按��靠左保存按钮靠右" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
           <figcaption>S-3：标记方式面板完整视图 — 三行 Switch（主题标记/信头标记/正文标记）。底部按钮区：取消在左、保存（蓝色）在右，<code>justify-end</code> 布局，两按钮紧靠右端。</figcaption>
         </figure>
         <table>
@@ -1698,7 +1728,7 @@ onViewRawLogs?: () =&gt; void;
       <h3 id="gt12790-change-1">1. 全方向聚合卡片观察模式配色对齐：与按方向独立检测卡片一致的黄色标签卡</h3>
 
       <h4 id="gt12790-c1-overview">1.1 方案概述</h4>
-      <p><strong>背景：</strong>页面顶部检测粒度可切换「全方向聚合（合并统计）」与「按方向独立检测（可勾选多个）」两种模式。「按方向独立检测」模式下，每个方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后，卡片外层容器的边框与背景色会随之切换为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），配合内部「观察中」黄色徽标，整卡呈现统一的黄色标签视觉。但「全方向聚合」模式下的聚合卡片（<code>AggregateCard.tsx</code>）开启观察模式后，只有内部徽标变黄，卡片外层容器颜色是硬编码的固定值（<code>border-blue-200</code> / <code>bg-white</code>），从不随 <code>observe_mode</code> 变化，导致两种检测粒度下观察模式的视觉表现不一致——用户在"聚合"和"独立"两个模式之间切换时，同样开着观察模式，但卡片颜色表现不同，容易造成"聚合模式下观察模式没生效"的误判。</p>
+      <p><strong>背景：</strong>页面顶部检测粒度可切换「全方向聚合（合并统计）」与「按方向独立检测（可勾选多个）」两种模式。「按方向独立检测」模式下，每个方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后，卡片外层容器的边框与背景色会随之切换为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），配合内部「观察中」黄色徽标，整卡呈现统一的黄色标签视觉。但「全方��聚合」模式下的聚合卡片（<code>AggregateCard.tsx</code>）开启观察模式后，只有内部徽标变黄，卡片外层容器颜色是硬编码的固定值（<code>border-blue-200</code> / <code>bg-white</code>），从不随 <code>observe_mode</code> 变化，导致两种检测粒度下观察模式的视觉表现不一致——用户在"聚合"和"独立"两个模式之间切换时，同样开着观察模式，但卡片颜色表现不同，容易造成"聚合模式下观察模式没生效"的误判。</p>
       <p><strong>决策过程：</strong>讨论了两种实现路径：① 给 <code>AggregateCard.tsx</code>新写一套独立的黄色配色值；② 直接复用 <code>DirectionCard.tsx</code> 已验证过的条件判断逻辑和色值。选择方案②，理由：两个卡片本质上是同一份配置模型（<code>SimilarDetectionConfig</code>）在不同聚合粒度下的两种视图，观察模式的视觉语义应当完全一致，复用同一套色值可以保证以后颜色调整只需改一处，不会出现两处配色逐渐漂移的问题。</p>
       <p><strong>最终方案：</strong>将 <code>AggregateCard.tsx</code> 外层容器 className 从硬编码固定值改为与 <code>DirectionCard.tsx</code> 完全一致的条件判断（三元表达式基于 <code>value.observe_mode</code>），并保留过渡动画（<code>transition-[background-color,border-color] duration-[240ms]</code>），使颜色切换有平滑过渡而非跳变。不引入新的颜色定义，不修改 <code>DirectionCard.tsx</code>。</p>
 
@@ -1741,8 +1771,229 @@ onViewRawLogs?: () =&gt; void;
           <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
         </thead>
         <tbody>
-          <tr><td>聚合卡片外层容器 className</td><td>div className</td><td>硬编码固定值：<code>'border rounded-lg p-4 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-950'</code>（不随 observe_mode 变化）</td><td><code>cn()</code> 条件判断：<code>observe_mode</code> 为 true 时使用 <code>'border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20'</code>，否则使用原蓝白配色；新增过渡动画 <code>transition-[background-color,border-color] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none</code></td><td><code>AggregateCard.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>聚合卡片外层容器 className</td><td>div className</td><td>硬编码固定值：<code>'border rounded-lg p-4 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-950'</code>（不随 observe_mode 变化）</td><td><code>cn()</code> 条件判断：<code>observe_mode</code> 为 true 时使用 <code>'border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20'</code>，否则使用原蓝白配���；新增过渡动画 <code>transition-[background-color,border-color] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none</code></td><td><code>AggregateCard.tsx</code></td><td>[Base]</td></tr>
           <tr><td>方向卡片外层容器 className（对齐参照，未变更）</td><td>div className</td><td>—</td><td>本次未修改，作为色值与逻辑的复用来源</td><td><code>DirectionCard.tsx</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12833 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12833">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#b91c1c">GT</span>
+      <h2>GT-12833 认证协议检查：动作精简为5项，默认动作改为"标记放行"</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（策略流水线 → 身份认证与仿冒检测 → 认证协议检查）<br/>
+        组件：<code>src/components/security/auth-spoofing/ProtocolChecksSection.tsx</code>、<code>src/lib/auth-spoofing-labels.ts</code>、<code>src/lib/auth-spoofing-templates.ts</code><br/>
+        2026-08-08 · commit <code>386aa38</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-info">本需求直接影响并反向调整了 <a href="#gt-12801">GT-12801</a> 变更2「DMARC处置策略新增&quot;进行下一步&quot;选项」的结论，相关章节已在 GT-12801 处打删除线标注（另见 <a href="#diffs">D-005</a>）。</div>
+
+      <!-- 变更 1 -->
+      <h3 id="gt12833-change-1">1. PROTOCOL_ACTIONS / DMARC_ACTIONS 由6项精简为5项：移除"进行下一步"（accept）</h3>
+
+      <h4 id="gt12833-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>GT-12801 曾将 <code>accept</code>（"进行下一步"，语义为不做处理、直接传递给下一个协议检查）补齐进 <code>DMARC_ACTIONS</code>，使 SPF / DKIM / DMARC / PTR 四个协议 Tab 统一拥有 6 个动作：<code>reject</code> / <code>discard</code> / <code>quarantine</code> / <code>audit</code> / <code>mark-delivery</code> / <code>accept</code>。但 <code>accept</code> 与 <code>mark-delivery</code>（"标记放行"，语义为不拦截、继续走后续检测流程、可选择附加标记后再投递）在实际处置效果上高度重叠——两者都不拦截邮件、都会继续走流水线下一节点，唯一区别是 <code>mark-delivery</code> 支持附加标记而 <code>accept</code> 不支持，导致管理员在配置动作时容易混淆"进行下一步"与"标记放行"该选哪个。</p>
+      <p><strong>最终方案：</strong>将 <code>accept</code> 从 <code>PROTOCOL_ACTIONS</code> 和 <code>DMARC_ACTIONS</code" 枚举数组中移除，统一收敛为 5 项动作：<code>reject</code> / <code>discard</code> / <code>quarantine</code> / <code>audit</code> / <code>mark-delivery</code>。所有"不拦截、继续检测"的处置需求统一通过 <code>mark-delivery</code> 表达，不再区分"进行下一步"与"标记放行"两个语义重叠的选项。SPF / DKIM / DMARC / PTR 四个协议 Tab 共享同一份精简后的动作列表，改动只需修改 <code>ProtocolChecksSection.tsx</code> 中的两个常量数组，不新增 i18n key（<code>accept</code> 对应的 <code>protocolActionShort.accept</code> / <code>protocolActionDesc.accept</code> key 保留在 <code>messages/zh.json</code> 中未删除，仅不再被这两个动作列表引用）。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>PROTOCOL_ACTIONS 枚举（SPF / DKIM / PTR 共用）</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'mark-delivery', 'accept']</code>（6 项）</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'mark-delivery']</code>（5 项）</td>
+          </tr>
+          <tr>
+            <td>DMARC_ACTIONS 枚举</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'mark-delivery', 'accept']</code>（6 项，GT-12801 扩充所得）</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'mark-delivery']</code>（5 项，与 PROTOCOL_ACTIONS 重新对齐）</td>
+          </tr>
+          <tr>
+            <td>i18n key</td>
+            <td colspan="2"><code>authSpoofing.protocolActionShort.accept</code> / <code>authSpoofing.protocolActionDesc.accept</code> 保留在 <code>messages/zh.json</code>，仅不再被任何动作数组引用（未删除 key，避免影响其它可能的引用点）</td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>src/components/security/auth-spoofing/ProtocolChecksSection.tsx</code> — <code>PROTOCOL_ACTIONS</code> / <code>DMARC_ACTIONS</code> 常量（L36-37）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12833-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：SPF「硬拒绝 (Fail)」动作下拉展开态（自定义模板）</strong><br/>
+        触发路径：租户管理员 → 策略流水线 → 身份认证与仿冒检测 → 策略模板切换为「自定义」→ 认证协议检查 → SPF Tab → 点击「硬拒绝 (Fail)」行动作下拉框</p>
+        <figure>
+          <img src="./screenshots/gt12833-spf-fail-dropdown-5options.png" alt="SPF硬拒绝动作下拉框展开，显示拒收、丢弃、隔离、审核、标记放行共5个选项，不再包含进行下一步" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：下拉框展开后共 5 个选项——拒收 / 丢弃 / 隔离 / 审核 / 标记放行，按此顺序排列；「进行下一步」选项已不再出现。当前选中「拒收」。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-2：SPF「软拒绝 (SoftFail)」动作下拉展开态</strong><br/>
+        触发路径：同上 → 点击「软拒绝 (SoftFail)」行动作下拉框</p>
+        <figure>
+          <img src="./screenshots/gt12833-spf-softfail-dropdown-5options.png" alt="SPF软拒绝动作下拉框展开，同样显示5个选项，当前选中隔离" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：同一份 5 项动作列表在 SPF 组内其它检查项（软拒绝）复用，当前选中「隔离」。验证 <code>PROTOCOL_ACTIONS</code> 常量在同一协议 Tab 内跨行共享。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-3：DMARC「p=reject」动作下拉展开态</strong><br/>
+        触发路径：认证协议检查 → 切换到 DMARC Tab → 点击「p=reject」行动作下拉框</p>
+        <figure>
+          <img src="./screenshots/gt12833-dmarc-reject-dropdown-5options.png" alt="DMARC p=reject动作下拉框展开，显示拒绝、丢弃、隔离、审核、标记放行共5个选项，进行下一步已移除" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-3：DMARC Tab 同样收敛为 5 个选项，与 SPF/DKIM/PTR 完全一致，验证 <code>DMARC_ACTIONS</code> 已与 <code>PROTOCOL_ACTIONS</code> 重新对齐；GT-12801 曾专门为 DMARC 新增的「进行下一步」选项已不再出现。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>协议 Tab</th><th>修改前动作数量</th><th>修改后动作数量</th><th>「进行下一步」是否仍存在</th></tr></thead>
+          <tbody>
+            <tr><td>SPF</td><td>6</td><td>5</td><td>否</td></tr>
+            <tr><td>DKIM</td><td>6</td><td>5</td><td>否</td></tr>
+            <tr><td>DMARC</td><td>6（GT-12801 扩充）</td><td>5</td><td>否</td></tr>
+            <tr><td>PTR</td><td>6</td><td>5</td><td>否</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12833-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>PROTOCOL_ACTIONS 常量</td><td>枚举数组</td><td><code>['reject','discard','quarantine','audit','mark-delivery','accept']</code></td><td><code>['reject','discard','quarantine','audit','mark-delivery']</code></td><td><code>ProtocolChecksSection.tsx</code> L36</td><td>[Base]</td></tr>
+          <tr><td>DMARC_ACTIONS 常量</td><td>枚举数组</td><td><code>['reject','discard','quarantine','audit','mark-delivery','accept']</code></td><td><code>['reject','discard','quarantine','audit','mark-delivery']</code></td><td><code>ProtocolChecksSection.tsx</code> L37</td><td>[Base]</td></tr>
+          <tr><td>Select · 「进行下一步」选项</td><td>下拉选项（移除）</td><td>存在于全部 4 个协议 Tab</td><td>不再渲染（数组中移除，Select 由数组 <code>map</code> 生成，无需额外条件判断）</td><td><code>ProtocolChecksSection.tsx</code> Select 渲染逻辑</td><td>[Base]</td></tr>
+          <tr><td>i18n key <code>protocolActionShort.accept</code> / <code>protocolActionDesc.accept</code></td><td>文案 key（保留未删除）</td><td>被 6 项动作数组引用</td><td>不再被任何动作数组引用，key 本身仍在 <code>messages/zh.json</code> 中保留</td><td><code>messages/zh.json</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12833-change-2" style="margin-top:2rem;">2. 默认动作与"启用"语义统一改为"标记放行"，行不再因动作为"accept"而隐藏</h3>
+
+      <h4 id="gt12833-c2-overview">2.1 方案概述</h4>
+      <p><strong>背景：</strong>移除 <code>accept</code> 后，原先依赖 <code>action === 'accept'</code> 判断"该检查项是否关闭"的逻辑需要同步调整。修改前，当某检查子项（<code>CheckItem</code>）在配置中缺省时，会 fallback 到 <code>{ enabled: false, action: 'accept' }</code>，即"未配置 = 关闭 + 进行下一步"；同时用户在下拉框中手动选择「进行下一步」时，代码会将该行的 <code>enabled</code> 同步置为 <code>false</code>（等效于关闭该检查项）。这是一处容易引起误解的隐式耦合：动作选择「进行下一步」在 UI 上看起来只是选了一个处置方式，但实际会连带把整行检查"关闭"。</p>
+      <p><strong>最终方案：</strong>fallback 默认值改为 <code>{ enabled: true, action: 'mark-delivery' }</code>，即"未配置 = 开启 + 标记放行"；动作选择回调中的 <code>enabled: (v as AuthSpoofingAction) !== 'accept'</code> 简化为固定 <code>enabled: true</code>，动作选择与检查项启停彻底解耦——选择任意动作（包括「标记放行」）都不会再影响该行的启用状态，启用状态只能通过每行独立的启停开关控制。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>缺省 CheckItem fallback</td>
+            <td><code>{ enabled: false, action: 'accept', observe_mode: false }</code></td>
+            <td><code>{ enabled: true, action: 'mark-delivery', observe_mode: false }</code></td>
+          </tr>
+          <tr>
+            <td>动作切换时的 enabled 联动逻辑</td>
+            <td><code>enabled: (v as AuthSpoofingAction) !== 'accept'</code>（选择"进行下一步"会关闭该行）</td>
+            <td><code>enabled: true</code>（动作选择与启停彻底解耦）</td>
+          </tr>
+          <tr>
+            <td><code>dominantAction</code> 兜底值（<code>auth-spoofing-labels.ts</code>）</td>
+            <td><code>fallback: AuthSpoofingAction = 'accept'</code></td>
+            <td><code>fallback: AuthSpoofingAction = 'mark-delivery'</code></td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>ProtocolChecksSection.tsx</code>（L172、L194 附近）、<code>auth-spoofing-labels.ts</code>（<code>dominantAction</code> 函数签名默认值）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12833-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-4：「宽松」模板下 SPF「未维护 (None)」/「查询失败 (TempError)」行（修改后）</strong><br/>
+        触发路径：策略模板切换为「宽松」→ 确认覆盖当前配置 → 认证协议检查 → SPF Tab → 滚动查看「未维护」「查询失败」两行</p>
+        <figure>
+          <img src="./screenshots/gt12833-loose-template-none-tmperror-enabled.png" alt="宽松模板下SPF未维护和查询失败两行均已启用，动作为标记放行，并展开标记方式配置面板" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-4：「未维护 (None)」「查询失败 (TempError)」两行在「宽松」模板下动作均为「标记放行」，且检查项本身处于启用态（行下方展开「标记方式」附加配置面板）。经可访问性树核对，两行的动作下拉框文本值均为「标记放行」，行标题与描述文案渲染正常；该截图中「标记方式」面板内部的选项文案（主题标记/信头标记/正文标记）在本次截图环境下出现字体渲染异常（显示为空白方块），经核对可访问性树确认其底层文本未受影响，该渲染异常与本次改动无关，已作为 <a href="#questions">Q-003</a> 待确认事项记录。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>检查项</th><th>修改前动作</th><th>修改前启用状态</th><th>修改后动作</th><th>修改后启用状态</th></tr></thead>
+          <tbody>
+            <tr><td>SPF · 未维护 (None)</td><td><code>accept</code></td><td>关闭（<code>enabled: false</code>，由 <code>accept</code> 联动）</td><td><code>mark-delivery</code></td><td>开启（<code>enabled: true</code>）</td></tr>
+            <tr><td>SPF · 查询失败 (TempError)</td><td><code>accept</code></td><td>关闭</td><td><code>mark-delivery</code></td><td>开启</td></tr>
+            <tr><td>DKIM · partial / none</td><td><code>accept</code></td><td>关闭</td><td><code>mark-delivery</code></td><td>开启</td></tr>
+            <tr><td>PTR · noptr</td><td><code>accept</code></td><td>关闭</td><td><code>mark-delivery</code></td><td>开启</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12833-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>CheckItem 缺省 fallback</td><td>对象字面量</td><td><code>{ enabled: false, action: 'accept', observe_mode: false }</code></td><td><code>{ enabled: true, action: 'mark-delivery', observe_mode: false }</code></td><td><code>ProtocolChecksSection.tsx</code> L172</td><td>[Base]</td></tr>
+          <tr><td>Select onValueChange 回调</td><td>事件处理逻辑</td><td><code>enabled: v !== 'accept'</code></td><td><code>enabled: true</code></td><td><code>ProtocolChecksSection.tsx</code> L194 附近</td><td>[Base]</td></tr>
+          <tr><td><code>dominantAction()</code> fallback 参数</td><td>函数默认参数</td><td><code>'accept'</code></td><td><code>'mark-delivery'</code></td><td><code>auth-spoofing-labels.ts</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 3 -->
+      <h3 id="gt12833-change-3" style="margin-top:2rem;">3. "宽松"模板：SPF/DKIM/PTR 中原 accept 场景全部改为 mark-delivery</h3>
+
+      <h4 id="gt12833-c3-overview">3.1 方案概述</h4>
+      <p><strong>背景：</strong>「宽松」预设模板（<code>TEMPLATES.loose</code>）此前对部分低风险场景（SPF <code>none</code> / <code>temperror</code>、DKIM <code>partial</code> / <code>none</code>、PTR <code>noptr</code>）使用 <code>accept</code> 作为预设动作，语义为"不做处理直接放行、且该检查行关闭"。「标准」「严格」模板未使用 <code>accept</code>（已全部是 <code>mark-delivery</code> 或更严格的动作）。</p>
+      <p><strong>最终方案：</strong>「宽松」模板中原先所有 <code>accept</code> 预设值统一替换为 <code>mark-delivery</code>，与「标准」「严格」模板的动作取值风格保持一致；同时 <code>applyGroup()</code> 内部两处根据 <code>action !== 'accept'</code> 计算 <code>enabled</code> 的逻辑（应用模板时的已有 key 分支与新增 key 分支）均简化为固定 <code>enabled: true</code>，与变更 2 的解耦逻辑保持一致——应用任何模板后，所有检查行都是启用态，只是动作严格度不同。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>loose.spf</td>
+            <td><code>{ fail:'quarantine', softfail:'mark-delivery', none:'accept', temperror:'accept' }</code></td>
+            <td><code>{ fail:'quarantine', softfail:'mark-delivery', none:'mark-delivery', temperror:'mark-delivery' }</code></td>
+          </tr>
+          <tr>
+            <td>loose.dkim</td>
+            <td><code>{ fail:'quarantine', neutral:'mark-delivery', partial:'accept', none:'accept' }</code></td>
+            <td><code>{ fail:'quarantine', neutral:'mark-delivery', partial:'mark-delivery', none:'mark-delivery' }</code></td>
+          </tr>
+          <tr>
+            <td>loose.dmarc</td>
+            <td colspan="2">未使用 <code>accept</code>，本次未修改：<code>{ reject:'quarantine', quarantine:'mark-delivery', none:'mark-delivery', no_record:'mark-delivery', query_fail:'mark-delivery' }</code></td>
+          </tr>
+          <tr>
+            <td>loose.ptr</td>
+            <td><code>{ noptr:'accept', nomatch:'mark-delivery', ehlo_mismatch:'mark-delivery' }</code></td>
+            <td><code>{ noptr:'mark-delivery', nomatch:'mark-delivery', ehlo_mismatch:'mark-delivery' }</code></td>
+          </tr>
+          <tr>
+            <td><code>applyGroup()</code> 已有 key 分支 enabled 计算</td>
+            <td><code>enabled: action !== 'accept'</code></td>
+            <td><code>enabled: true</code></td>
+          </tr>
+          <tr>
+            <td><code>applyGroup()</code> 新增 key 分支 enabled 计算</td>
+            <td><code>enabled: action !== 'accept'</code></td>
+            <td><code>enabled: true</code></td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>src/lib/auth-spoofing-templates.ts</code> — <code>TEMPLATES.loose</code> 与 <code>applyGroup()</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12833-c3-states">3.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p>本变更点的可观察效果与变更 2 状态 S-4 完全一致（「宽松」模板应用后 SPF「未维护」「查询失败」两行由"关闭 + accept"变为"开启 + 标记放行"），复用 <a href="#gt12833-c2-states">2.2 截图式交互预览 · S-4</a>，不再重复截图。</p>
+        <p><strong>「标准」「严格」模板对照（无变更）：</strong>「标准」「严格」模板预设值本身未使用 <code>accept</code>，切换到这两个模板不会观察到本次变更带来的行为差异，仅「宽松」模板受影响。</p>
+      </div>
+
+      <h4 id="gt12833-c3-elements">3.3 逐 key 说明</h4>
+      <table>
+        <thead>
+          <tr><th>模板</th><th>协议</th><th>场景 key</th><th>修改前动作</th><th>修改后动作</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>宽松</td><td>SPF</td><td>none</td><td><code>accept</code></td><td><code>mark-delivery</code></td></tr>
+          <tr><td>宽松</td><td>SPF</td><td>temperror</td><td><code>accept</code></td><td><code>mark-delivery</code></td></tr>
+          <tr><td>宽松</td><td>DKIM</td><td>partial</td><td><code>accept</code></td><td><code>mark-delivery</code></td></tr>
+          <tr><td>宽松</td><td>DKIM</td><td>none</td><td><code>accept</code></td><td><code>mark-delivery</code></td></tr>
+          <tr><td>宽松</td><td>PTR</td><td>noptr</td><td><code>accept</code></td><td><code>mark-delivery</code></td></tr>
         </tbody>
       </table>
 
@@ -1760,12 +2011,12 @@ onViewRawLogs?: () =&gt; void;
           <tr>
           <td><span class="version-badge"><span class="vnum">v9</span></span></td>
           <td>2026-08-08</td>
-          <td>追加 GT-12790「相似邮件与主题检测：交互优化」需求体（1 个变更点）。背景：检测粒度可切换「全方向聚合」与「按方向独立检测」，「按方向独立检测」模式下方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后外层容器会切换为黄色（<code>border-amber-300</code>/<code>bg-amber-50/50</code>），但「全方向聚合」模式下聚合卡片（<code>AggregateCard.tsx</code>）外层容器颜色是硬编码固定值，从不随 <code>observe_mode</code> 变化，只有内部徽标变黄，导致两种检测粒度下观察模式视觉表现不一致。修复方案：将 <code>AggregateCard.tsx</code> 外层容器 className 改为与 <code>DirectionCard.tsx</code> 完全一致的条件判断（复用相同色值与逻辑，不新增颜色定义，不修改 <code>DirectionCard.tsx</code>），并保留 240ms 过渡动画使颜色切换平滑。附截图 3 张：gt12790-aggregate-before-fix（聚合卡片观察模式关闭态）、gt12790-aggregate-after-fix（聚合卡片观察模式开启态，修复后已变黄）、gt12790-direction-observe-reference（按方向独立检测卡片观察模式开启态，作为对齐参照）。目录追加 GT-12790 一级条目及变更点子章节；版本历史 v8→v9。</td>
+          <td>追加 GT-12790「相似邮件与主题检测：交互优化」需求体（1 个变更点）。背景：检测粒度可切换「全方向聚合」与「按方向独立检测」，「按方向独立检测」模式下方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后外层容器会切换为黄色（<code>border-amber-300</code>/<code>bg-amber-50/50</code>），但「全方向聚合」模式下聚合卡片（<code>AggregateCard.tsx</code>）外层容器颜色是硬编码固定值，从不随 <code>observe_mode</code> 变化，只有内部徽标变黄，导致两种检测粒度下观察模式视觉表现不一致。修复方案：将 <code>AggregateCard.tsx</code> 外层容器 className 改为与 <code>DirectionCard.tsx</code> 完全一致的条件判断（复用相同色值与逻辑，不新增颜色定义，不修改 <code>DirectionCard.tsx</code>），并保留 240ms 过渡动画使颜色切换平滑。附截图 3 张：gt12790-aggregate-before-fix（聚合卡片观察模式关闭态）、gt12790-aggregate-after-fix（聚合卡片观察模式开启态，修复后已变黄）、gt12790-direction-observe-reference（按方向独立检测卡片观察模式开启态，作为对齐参照）。目录追加 GT-12790 一级���目及变更点子章节；版本历史 v8→v9。</td>
         </tr>
         <tr>
           <td><span class="version-badge"><span class="vnum">v8</span></span></td>
           <td>2026-08-07</td>
-          <td>追加 GT-12791「相似检测模块优化」��求体（3 个变更点）。变更1：触发动作 label 调整——<code>actionMarkDelivery</code>「标记投递」→「进行下一步」（en: Mark &amp; Deliver → Next Step，与 GT-12719 策略流水线模块 <code>pipeline.actionNextStep</code> 术语呼应但 key 独立）、<code>actionBlock</code>「阻断」→「拒收」（value 不变），<code>action-options.ts</code> 不改；顺序保持进行下一步/隔离/审核/拒收/丢弃 5 个；<code>errorTagRequired</code> 文案去除动作名引用改为「启用该动作时需至少启用一种标记方式」。变更2：附加策略新增正文标记——<code>TagDeliveryPanel.tsx</code> 信头标记行下方对称追加第三行（<code>tag_body_enabled</code> Switch + <code>tag_body_content</code> 自由文本 Input），<code>types.ts</code> 追加两个可选字段，新增 i18n key <code>tagBodyLabel</code>/<code>tagBodyPlaceholder</code>（zh/en），<code>tagModeHint</code> 提示文案同步更新。变更3：① 校验逻辑拆分两类错误——「未选任何标记」→<code>errorTagRequired</code>，「已选但字段为空」→新增<code>errorTagFieldRequired</code>（zh「已启用的标记方式内容不能为空」）；② 移除豁免提示条（<code>renderExemptionNote</code>函数+两处调用+<code>Link</code>/<code>ExternalLink</code> import）；③ 按钮区 <code>justify-between</code>→<code>justify-end</code>。附截图 5 张：gt12791-page-default（页面全景）、gt12791-action-dropdown-send（5 个选项下拉，摄制于「投递」措辞阶段，实际以「进行下一步」为准）、gt12791-tag-panel-default（进行下一步选中后标记面板）、gt12791-footer-buttons（完整面板+靠右按��区）、gt12791-validation-error-none（errorTagFieldRequired toast）。目录追加 GT-12791 一级条目及三个变更点子章节；版本历史 v7→v8。</td>
+          <td>追加 GT-12791「相似检测模块优化」��求体（3 个变更点）。变更1：触发动作 label 调整——<code>actionMarkDelivery</code>「标记投递」→「进行下一步」（en: Mark &amp; Deliver → Next Step，与 GT-12719 策略流水线模块 <code>pipeline.actionNextStep</code> 术语呼应但 key 独立）、<code>actionBlock</code>「阻断」→「拒收」（value 不变），<code>action-options.ts</code> 不改；顺序保持进行下一步/隔离/审核/拒收/丢弃 5 个；<code>errorTagRequired</code> 文案去除动作名引用改为「启用该动作时需至少启用一种标记方式」。变更2：附加策略新增正文标记——<code>TagDeliveryPanel.tsx</code> 信头标记行下方对称追��第三行（<code>tag_body_enabled</code> Switch + <code>tag_body_content</code> 自由文本 Input），<code>types.ts</code> 追加两个可选字段，新增 i18n key <code>tagBodyLabel</code>/<code>tagBodyPlaceholder</code>（zh/en），<code>tagModeHint</code> 提示文案同步更新。变更3：① 校验逻辑拆分两类错误——「未选任何标记」→<code>errorTagRequired</code>，「已选但字段为空」→新增<code>errorTagFieldRequired</code>（zh「已启用的标记方式内容不能为空」）；② 移除豁免提示条（<code>renderExemptionNote</code>函数+两处调用+<code>Link</code>/<code>ExternalLink</code> import）；③ 按钮区 <code>justify-between</code>→<code>justify-end</code>。附截图 5 张：gt12791-page-default（页面全景）、gt12791-action-dropdown-send（5 个选项下拉，摄制于「投递」措辞阶段，实际以「进行下一步」为准）、gt12791-tag-panel-default（进行下一步选中后标记面板）、gt12791-footer-buttons（完整面板+靠右按��区）、gt12791-validation-error-none（errorTagFieldRequired toast）。目录追加 GT-12791 一级条目及三个变更点子章节；版本历史 v7→v8。</td>
         </tr>
         <tr>
           <td><span class="version-badge"><span class="vnum">v7</span></span></td>
