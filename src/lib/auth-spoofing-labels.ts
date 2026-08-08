@@ -13,7 +13,8 @@ export function flowSubKey(a: AuthSpoofingAction, isPtr: boolean): string {
   if (isPtr) return 'flowSub.check';
   if (a === 'reject') return 'flowSub.block';
   if (a === 'quarantine') return 'flowSub.quarantine';
-  if (a === 'audit') return 'flowSub.tag';
+  if (a === 'audit') return 'flowSub.review';
+  if (a === 'mark-delivery') return 'flowSub.tag';
   return 'flowSub.pass';
 }
 
@@ -21,8 +22,9 @@ export function flowSubKey(a: AuthSpoofingAction, isPtr: boolean): string {
 const ACTION_SEVERITY: Record<AuthSpoofingAction, number> = {
   discard: 5,
   reject: 4,
+  audit: 3.5,
   quarantine: 3,
-  audit: 2,
+  'mark-delivery': 2,
   accept: 1,
 };
 

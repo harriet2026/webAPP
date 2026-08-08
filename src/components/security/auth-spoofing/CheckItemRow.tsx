@@ -30,18 +30,21 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { AuthSpoofingTagPanel } from "./AuthSpoofingTagPanel";
 
 const ACTIONS: AuthSpoofingAction[] = [
   "accept",
   "quarantine",
   "reject",
   "audit",
+  "mark-delivery",
   "discard",
 ];
 
 export const FORMAT_ACTIONS: AuthSpoofingAction[] = [
   "quarantine",
   "audit",
+  "mark-delivery",
   "reject",
   "discard",
 ];
@@ -90,6 +93,8 @@ export function CheckItemRow({
       onChange({ ...item, enabled });
     }
   };
+
+  const showTagPanel = item.enabled && item.action === "mark-delivery";
 
   return (
     <>
@@ -162,6 +167,14 @@ export function CheckItemRow({
           </div>
         )}
       </div>
+
+      {showTagPanel && (
+        <AuthSpoofingTagPanel
+          value={item}
+          onChange={(patch) => onChange({ ...item, ...patch })}
+          disabled={disabled}
+        />
+      )}
 
       {warningI18nKey && (
       <AlertDialog

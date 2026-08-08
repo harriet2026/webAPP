@@ -10,10 +10,11 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { AuthSpoofingTagPanel } from './AuthSpoofingTagPanel';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const ACTIONS: AuthSpoofingAction[] = ['accept', 'quarantine', 'reject', 'audit', 'discard'];
+const ACTIONS: AuthSpoofingAction[] = ['accept', 'quarantine', 'reject', 'audit', 'mark-delivery', 'discard'];
 
 interface SimilarDomainSectionProps {
   config: SimilarDomainConfig;
@@ -88,6 +89,14 @@ export function SimilarDomainSection({ config, onChange, disabled }: SimilarDoma
                 )}
               </div>
             </div>
+
+            {config.enabled && !config.observe_mode && config.action === 'mark-delivery' && (
+              <AuthSpoofingTagPanel
+                value={config}
+                onChange={(patch) => onChange({ ...config, ...patch })}
+                disabled={disabled}
+              />
+            )}
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">

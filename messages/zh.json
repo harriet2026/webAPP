@@ -1333,7 +1333,7 @@
     "priority": "优先级",
     "newPolicy": "新建群组策略",
     "editPolicy": "编辑群组策略",
-    "deleteConfirm": "确定删除该群组策��吗？",
+    "deleteConfirm": "确定删除��群组策��吗？",
     "deleteConfirmDesc": "删除���无法���复，规则���：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效��行路径预览",
@@ -1657,7 +1657,7 @@
     "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已存储内容，并在需要时重新注入或删除项目。"
   },
   "logs": {
-    "emailLogs": "邮件日志",
+    "emailLogs": "邮��日志",
     "authAttempts": "认证日志",
     "adminAuditLogs": "操��日志",
     "timestamp": "时间",
@@ -4403,7 +4403,7 @@
     "invalidDate": "请输入有效的失效时间",
     "mixedDirectionActionsPreserved": "此历史规则在不同方向使用不同动作；除非重新选择动作，否则将原样保留。",
     "unsavedTitle": "放弃未保存的更改？",
-    "unsavedDescription": "当前修改尚未保存，确定放弃并关闭编辑器吗？",
+    "unsavedDescription": "当前修改尚未保存，确定放弃并关闭编辑器吗��",
     "discardChanges": "放弃更改",
     "jumpToPage": "跳至页码",
     "actionSection": "执行动作",
@@ -4451,6 +4451,7 @@
       "quarantine": "隔离",
       "reject": "阻断",
       "audit": "审核",
+      "markDelivery": "进行下一步",
       "discard": "丢弃"
     },
     "actionTooltip": {
@@ -4458,6 +4459,7 @@
       "quarantine": "隔离：将匹配的邮件放入隔离区，待管理员审核后再决定放行或删除。",
       "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知。",
       "audit": "审核：将邮件放入审核队列，等待管理员人工审批后再投递。",
+      "markDelivery": "进行下一步：不拦截该邮件，继续走后续检测流程，可选择附加标记后再投递。",
       "discard": "丢弃：静默丢弃该邮件，不通知发件方也不投递给收件方。"
     },
     "formatChecks": {
@@ -4521,7 +4523,7 @@
     },
     "dkimOutbound": {
       "title": "DKIM 外发签名",
-      "description": "为本租户的发信域名生成并管理 DKIM 私钥、发布 DNS 公钥，对经本网关外发的邮件进行 DKIM 签名。",
+      "description": "为本租户的发信域名生成并管理 DKIM 私钥、发布 DNS 公钥，对经本网关外发的邮件进行 DKIM 签��。",
       "domainCol": "发信域名",
       "statusCol": "签名状态",
       "actionsCol": "操���",
@@ -4588,6 +4590,7 @@
     "formatActionLabel": {
       "quarantine": "隔离",
       "audit": "审核",
+      "markDelivery": "进行下一步",
       "reject": "拒收",
       "discard": "丢弃"
     },
@@ -4596,6 +4599,7 @@
       "quarantine": "隔离（进垃圾箱）",
       "reject": "阻断（返回5xx）",
       "audit": "审核（待审批）",
+      "markDelivery": "进行下一步（可标记）",
       "discard": "丢弃（静默删除）"
     },
     "flowSub": {
@@ -4604,6 +4608,7 @@
       "quarantine": "隔离",
       "check": "检查",
       "tag": "标记",
+      "review": "审核",
       "pass": "进行下一步检测"
     },
     "flowTitle": "邮件身份验证流程",
@@ -4642,7 +4647,8 @@
     "strictObserveNotice": "切换后将强制开启观察模式",
     "formatActionDesc": {
       "quarantine": "邮件进入隔离区，管理员可审阅后决定是否放行",
-      "audit": "邮件正常投递，同时写入审核日志供管理员事后审查",
+      "audit": "邮件放入审核队列，等待管理员人工审批后再投递",
+      "markDelivery": "不拦截，继续走后续检测流程，可选择附加标记后再投递",
       "reject": "向发信方返回 SMTP 拒绝响应，邮件不进入系统",
       "discard": "静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃"
     },
@@ -4650,15 +4656,31 @@
       "accept": "进行下一步",
       "reject": "拒收",
       "quarantine": "隔离",
-      "audit": "标记",
+      "audit": "审核",
+      "markDelivery": "进行下一步",
       "discard": "丢弃"
     },
     "protocolActionDesc": {
       "accept": "不做处理，传递给下一个协议检查",
       "reject": "向发信方返回 SMTP 5xx 拒绝响应",
       "quarantine": "移入隔离区，等待管理员审阅",
-      "audit": "添加标记头后正常投递",
+      "audit": "放入审核队列，等待管理员人工审批后再投递",
+      "markDelivery": "不拦截，继续走后续检测流程，可选择附加标记后再投递",
       "discard": "静默丢弃，发信方收到投递成功响应"
+    },
+    "tagPanel": {
+      "title": "标记方式",
+      "hint": "至少选择一种标记方式，可同时启用主题标记、信头标记与正文标记",
+      "subjectLabel": "主题标记",
+      "subjectPositionPrefix": "前缀",
+      "subjectPositionSuffix": "后缀",
+      "subjectPlaceholder": "如：[疑似仿冒]",
+      "headerLabel": "信头标记",
+      "headerNamePlaceholder": "信头字段名，如 X-Spoof-Warning",
+      "headerValuePlaceholder": "信头字段值",
+      "bodyLabel": "正文标记",
+      "bodyPlaceholder": "将插入邮件正文的提示内容",
+      "errorTagRequired": "启用该动作时需至少启用一种标记方式"
     }
   },
   "behaviorControl": {
@@ -5236,7 +5258,7 @@
     "tenantRequired": {
       "title": "需要选择租户",
       "description": "URL 检测与防护是租户级别的配置，请先选择要管理的租户。",
-      "hint": "请使用页面右上角的租户选择器选择一个租户"
+      "hint": "请使用页面右上角的租户选择器���择一个租户"
     },
     "tabs": {
       "sandbox": "URL沙箱检测",
@@ -5284,7 +5306,7 @@
     },
     "linkProtection": {
       "toggle": "链接保护",
-      "toggleTip": "将邮件中的URL改写为网关代理链接，用户点击时实时检测",
+      "toggleTip": "将邮件中的URL改写为网关代���链接，用户点击时实时检测",
       "directionSend": "发送方向",
       "directionInternal": "内部方向",
       "publicBaseUrl": "点击主机名",
@@ -5539,7 +5561,7 @@
     "tagHeaderNamePlaceholder": "字段名，如：X-Similar-Tag",
     "tagHeaderValuePlaceholder": "字段值，如：matched",
     "subjectNormalization": "主题标准化（全局）",
-    "ignoreCase": "忽略大小写",
+    "ignoreCase": "��略大小写",
     "ignoreRePrefix": "忽略Re:/Fwd:",
     "ignoreNumbers": "忽略数字",
     "similarSubject": "��似度>90%视为相同",
@@ -5754,7 +5776,7 @@
       "templateSaved": "已保存“{name}”",
       "templateSaveError": "保存失败，请检查浏览器存储空间",
       "templateNameConflict": "重命名失败，已存在同名模板",
-      "saveTemplateTitle": "保存搜索模板",
+      "saveTemplateTitle": "保存搜索��板",
       "saveTemplateDesc": "当前已有 {count} 个模板（上限 {max} 个）",
       "renameTemplateTitle": "重命名模板",
       "renameTemplateDesc": "修改后将立即生效",
@@ -6213,7 +6235,7 @@
           },
           "confirmNotify": {
             "title": "确认发送安全提醒",
-            "body": "向该收件人发送一封安全提醒邮件，告知其近期收到的邮件存在风险？"
+            "body": "向该收件人发送一封安全提醒邮件，告知其近���收到的邮件存在风险？"
           },
           "whitelistCheckbox": "同时将发信人加入白名单"
         },
@@ -6394,7 +6416,7 @@
         "sessionId": "会话ID",
         "queueId": "队列ID",
         "receiveTime": "接收时间",
-        "direction": "收发类型",
+        "direction": "收发类��",
         "emailSize": "邮件大小",
         "action": "执行动作",
         "reason": "原因",
@@ -7098,7 +7120,7 @@
       },
       "desc_urlDomain": {
         "source": "URL域名解析",
-        "usage": "过滤特定域名的URL",
+        "usage": "过滤特定域���的URL",
         "note": "支持域名黑白名单"
       },
       "desc_spfResult": {
@@ -7955,7 +7977,7 @@
       "inboundSuccessRate": "接收成功率",
       "inboundBounceRate": "接收侧退信率",
       "avgInboundLatency": "平均接收延迟",
-      "antispamQueue": "反垃圾处理队列",
+      "antispamQueue": "反垃圾处理��列",
       "outboundSuccessRate": "外发成功率",
       "outboundBounceRate": "外发��信率",
       "outboundLatencyP99": "外发延迟P99",
@@ -8159,7 +8181,7 @@
       "urlReputationDistribution": "URL信誉分布",
       "clickOverview": "链接保护点击概览",
       "clickOverviewMetrics": {
-        "clickRate": "点击率",
+        "clickRate": "��击率",
         "threatClicks": "拦截点击",
         "totalClicks": "总点击"
       },
@@ -8214,7 +8236,7 @@
       "malwareDownload": "恶意软件下载",
       "cAndCCommunication": "C&C通信",
       "spamPromotion": "垃圾推广",
-      "totalAttachmentMail": "含附件邮件总量",
+      "totalAttachmentMail": "含��件邮件总量",
       "safeAttachmentMail": "安全附件邮件",
       "maliciousAttachmentMail": "恶意附件邮件",
       "virusAttachment": "病毒附件",
@@ -9500,7 +9522,7 @@
         "attachd": "附件深度扫描"
       },
       "listenSourcesRequired": "至少选择一个��听来源",
-      "offlineSourceHint": "离线来源将在恢复后自动生效。",
+      "offlineSourceHint": "离���来源将在恢复后自动生效。",
       "confidenceThreshold": "置信度阈值（1–100）",
       "confidenceRange": "置信���阈值范围 1–100",
       "cooldown": "冷却时间（分钟）",
@@ -10244,7 +10266,7 @@
     "expiredTitle": "链接已过期��无效",
     "expiredDesc": "请联系管理员获取新的预览链接。",
     "purgedTitle": "邮件已超出保留期",
-    "purgedDesc": "该邮件已超出隔离区保留期限并被清理，无法再预览。",
+    "purgedDesc": "该邮件已超��隔离区保留期限并被清理，无法再预览。",
     "errorTitle": "加载失败",
     "errorDesc": "请稍后重试或联系管理员��",
     "emptyBody": "该邮件没有可显示的正文内容。"
@@ -10825,7 +10847,7 @@
       "license_key_missing": "服务端未配置授权加密密钥，无法保存授权信息，请联系管理员",
       "member_endpoint_duplicate": "同一个节点不能在分组里重复出现",
       "member_endpoint_id_invalid": "分组成员的节点��须是有效选择",
-      "member_ord_duplicate": "分组成员的排序值不能重复",
+      "member_ord_duplicate": "分组���员的排序值不能重复",
       "port_out_of_range": "端口需在 {min}–{max} 之��",
       "tls_min_version_invalid": "TLS 最低版本无效，���能是：{allowed}"
     },

@@ -19,6 +19,7 @@ import {
 import { AuthFlowDiagram } from './AuthFlowDiagram';
 import { ConfigHealthPanel } from './ConfigHealthPanel';
 import { DkimOutboundSigningSection } from './DkimOutboundSigningSection';
+import { AuthSpoofingTagPanel } from './AuthSpoofingTagPanel';
 import { applyTemplate } from '@/lib/auth-spoofing-templates';
 import { protocolActionShortKey, protocolActionDescKey, dominantAction } from '@/lib/auth-spoofing-labels';
 import { AlertTriangle, ChevronDown } from 'lucide-react';
@@ -31,9 +32,9 @@ const PROTOCOL_GROUPS: { key: 'spf' | 'dkim' | 'dmarc' | 'ptr'; labelKey: string
   { key: 'ptr', labelKey: 'protocolChecks.ptr', keys: ['noptr', 'nomatch', 'ehlo_mismatch'] },
 ];
 
-/** All protocols including DMARC now offer all 5 unified actions (reject/discard/quarantine/audit/accept). */
-const PROTOCOL_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'accept'];
-const DMARC_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'accept'];
+/** All protocols including DMARC now offer all 6 unified actions (reject/discard/quarantine/audit/mark-delivery/accept). */
+const PROTOCOL_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'mark-delivery', 'accept'];
+const DMARC_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'mark-delivery', 'accept'];
 
 const TEMPLATE_NAMES: Template[] = ['loose', 'standard', 'strict', 'custom'];
 
@@ -173,42 +174,52 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                       const desc = t(`protocolChecks.${g.key}_${subkey}Desc` as any);
                       const isDisabled = lockNonCustom || (g.key === 'ptr' && ptrReadonly);
                       const actions = g.key === 'dmarc' ? DMARC_ACTIONS : PROTOCOL_ACTIONS;
+                      const showTagPanel = item.enabled && item.action === 'mark-delivery';
                       return (
                         <div
                           key={subkey}
-                          className="flex items-center justify-between gap-3 rounded-lg border bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900"
+                          className="space-y-2 rounded-lg border bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900"
                         >
-                          <div>
-                            <div className="text-sm font-medium">{label}</div>
-                            <div className="text-xs text-muted-foreground">{desc}</div>
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <div className="text-sm font-medium">{label}</div>
+                              <div className="text-xs text-muted-foreground">{desc}</div>
+                            </div>
+                            <Select
+                              value={item.action}
+                              onValueChange={(v) =>
+                                handleCheckChange(g.key, subkey, {
+                                  ...item,
+                                  action: v as AuthSpoofingAction,
+                                  enabled: (v as AuthSpoofingAction) !== 'accept',
+                                })
+                              }
+                              disabled={isDisabled}
+                            >
+                              <SelectTrigger className="w-[140px]">
+                                <SelectValue>{t(protocolActionShortKey(item.action) as any)}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent alignItemWithTrigger={false} className="w-72">
+                                {actions.map((a) => (
+                                  <SelectItem key={a} value={a}>
+                                    <div className="flex flex-col gap-0.5 py-0.5">
+                                      <span>{t(protocolActionShortKey(a) as any)}</span>
+                                      <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
+                                        {t(protocolActionDescKey(a) as any)}
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
-                          <Select
-                            value={item.action}
-                            onValueChange={(v) =>
-                              handleCheckChange(g.key, subkey, {
-                                ...item,
-                                action: v as AuthSpoofingAction,
-                                enabled: (v as AuthSpoofingAction) !== 'accept',
-                              })
-                            }
-                            disabled={isDisabled}
-                          >
-                            <SelectTrigger className="w-[140px]">
-                              <SelectValue>{t(protocolActionShortKey(item.action) as any)}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent alignItemWithTrigger={false} className="w-72">
-                              {actions.map((a) => (
-                                <SelectItem key={a} value={a}>
-                                  <div className="flex flex-col gap-0.5 py-0.5">
-                                    <span>{t(protocolActionShortKey(a) as any)}</span>
-                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
-                                      {t(protocolActionDescKey(a) as any)}
-                                    </span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          {showTagPanel && (
+                            <AuthSpoofingTagPanel
+                              value={item}
+                              onChange={(patch) => handleCheckChange(g.key, subkey, { ...item, ...patch })}
+                              disabled={isDisabled}
+                            />
+                          )}
                         </div>
                       );
                     })}

@@ -4446,6 +4446,7 @@
       "quarantine": "Quarantine",
       "reject": "Reject",
       "audit": "Audit",
+      "markDelivery": "Next Step",
       "discard": "Discard"
     },
     "actionTooltip": {
@@ -4453,6 +4454,7 @@
       "quarantine": "Quarantine: Move matching emails to the quarantine area for administrator review before release or deletion.",
       "reject": "Reject: Refuse the email at the SMTP stage; the sender receives a bounce notification.",
       "audit": "Audit: Route the email to an approval queue for manual administrator review before delivery.",
+      "markDelivery": "Next Step: Do not block the email; it continues through the remaining detection stages, with an optional tag applied before delivery.",
       "discard": "Discard: Silently drop the email without notifying the sender or delivering to the recipient."
     },
     "formatChecks": {
@@ -4583,6 +4585,7 @@
     "formatActionLabel": {
       "quarantine": "Quarantine",
       "audit": "Audit",
+      "markDelivery": "Next Step",
       "reject": "Reject",
       "discard": "Discard"
     },
@@ -4591,6 +4594,7 @@
       "quarantine": "Quarantine (to Junk)",
       "reject": "Block (5xx)",
       "audit": "Audit (Pending Approval)",
+      "markDelivery": "Next Step (Taggable)",
       "discard": "Discard (Silent Delete)"
     },
     "flowSub": {
@@ -4599,6 +4603,7 @@
       "quarantine": "Quarantine",
       "check": "Check",
       "tag": "Tag",
+      "review": "Audit",
       "pass": "Pass"
     },
     "flowTitle": "Email Authentication Flow",
@@ -4637,7 +4642,8 @@
     "strictObserveNotice": "Switching will force-enable observe mode",
     "formatActionDesc": {
       "quarantine": "Move the email to the quarantine queue for administrator review before release or deletion",
-      "audit": "Deliver the email normally and write an audit log entry for later administrator review",
+      "audit": "Route the email to an approval queue and wait for manual administrator review before delivery",
+      "markDelivery": "Do not block; continue through the remaining detection stages, with an optional tag applied before delivery",
       "reject": "Return an SMTP rejection response to the sender; the email never enters the system",
       "discard": "Silently drop the email; the sender receives a delivery-success response but the email is discarded"
     },
@@ -4645,15 +4651,31 @@
       "accept": "Pass",
       "reject": "Reject",
       "quarantine": "Quarantine",
-      "audit": "Tag",
+      "audit": "Audit",
+      "markDelivery": "Next Step",
       "discard": "Discard"
     },
     "protocolActionDesc": {
       "accept": "No action taken; pass to next protocol check",
       "reject": "Return an SMTP 5xx rejection to the sender",
       "quarantine": "Move to quarantine for administrator review",
-      "audit": "Deliver with an added tag header",
+      "audit": "Route to an approval queue and wait for manual administrator review before delivery",
+      "markDelivery": "Do not block; continue through the remaining detection stages, with an optional tag applied before delivery",
       "discard": "Silently drop; sender receives delivery-success response"
+    },
+    "tagPanel": {
+      "title": "Tag Mode",
+      "hint": "Select at least one tag mode; subject, header, and body tags can be enabled together",
+      "subjectLabel": "Subject Tag",
+      "subjectPositionPrefix": "Prefix",
+      "subjectPositionSuffix": "Suffix",
+      "subjectPlaceholder": "e.g. [Suspected Spoof]",
+      "headerLabel": "Header Tag",
+      "headerNamePlaceholder": "Header field name, e.g. X-Spoof-Warning",
+      "headerValuePlaceholder": "Header field value",
+      "bodyLabel": "Body Tag",
+      "bodyPlaceholder": "Content to insert into the email body",
+      "errorTagRequired": "At least one tag mode is required when this action is enabled"
     }
   },
   "behaviorControl": {
