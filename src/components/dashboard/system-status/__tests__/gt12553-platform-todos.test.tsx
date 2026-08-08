@@ -9,6 +9,8 @@ vi.mock('@/lib/api/statistics', () => ({
   getDashboardSummary: vi.fn(),
   getTypeStatistics: vi.fn(),
 }));
+// 收发信总量核心源改为 delivery-traffic（direction=all 三向量之和），与「投递与流量分析」页同源。
+vi.mock('@/lib/api/delivery-traffic', () => ({ fetchDeliveryTraffic: vi.fn() }));
 vi.mock('@/lib/api/security-overview', () => ({ getSecurityOverview: vi.fn() }));
 vi.mock('@/lib/api/ops-top', () => ({ fetchOpsTop: vi.fn() }));
 vi.mock('@/lib/api/monitoring', () => ({ fetchNodes: vi.fn(), fetchAlerts: vi.fn() }));
@@ -40,7 +42,8 @@ vi.mock('../agent-overview', () => ({ useAgentRowVisibility: () => ({ phishing: 
 import { fetchSystemStatusData, resolveRangeDates } from '../hooks';
 import { TodoAlerts } from '../todo-alerts';
 import { ApiError } from '@/lib/api/client';
-import { getDashboardSummary, getTypeStatistics } from '@/lib/api/statistics';
+import { getTypeStatistics } from '@/lib/api/statistics';
+import { fetchDeliveryTraffic } from '@/lib/api/delivery-traffic';
 import { getSecurityOverview } from '@/lib/api/security-overview';
 import { fetchOpsTop } from '@/lib/api/ops-top';
 import { fetchNodes, fetchAlerts } from '@/lib/api/monitoring';
@@ -50,9 +53,9 @@ import { getInboundAuditItems } from '@/lib/api/inbound-audit';
 const mock = (fn: unknown) => fn as unknown as ReturnType<typeof vi.fn>;
 
 function baseMocks() {
-  mock(getDashboardSummary)
-    .mockResolvedValueOnce({ metrics: { total_emails: 82 } })
-    .mockResolvedValueOnce({ metrics: { total_emails: 41 } });
+  mock(fetchDeliveryTraffic)
+    .mockResolvedValueOnce({ kpi: { inbound_total: 50, outbound_total: 20, internal_total: 12 } })
+    .mockResolvedValueOnce({ kpi: { inbound_total: 25, outbound_total: 10, internal_total: 6 } });
   mock(getSecurityOverview)
     .mockResolvedValueOnce({ kpi: { blocked: 12, block_rate: 14.6 } })
     .mockResolvedValueOnce({ kpi: { blocked: 6, block_rate: 10 } });

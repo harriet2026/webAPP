@@ -11,6 +11,8 @@ vi.mock('@/lib/api/statistics', () => ({
   getDashboardSummary: vi.fn(),
   getTypeStatistics: vi.fn(),
 }));
+// 收发信总量核心源改为 delivery-traffic（direction=all 三向量之和），与「投递与流量分析」页同源。
+vi.mock('@/lib/api/delivery-traffic', () => ({ fetchDeliveryTraffic: vi.fn() }));
 vi.mock('@/lib/api/security-overview', () => ({ getSecurityOverview: vi.fn() }));
 vi.mock('@/lib/api/ops-top', () => ({ fetchOpsTop: vi.fn() }));
 vi.mock('@/lib/api/monitoring', () => ({ fetchNodes: vi.fn(), fetchAlerts: vi.fn() }));
@@ -22,7 +24,8 @@ vi.mock('@/lib/api/threat-retro', () => ({ getThreatRetroStats: vi.fn() }));
 
 import { fetchSystemStatusData, resolveRangeDates } from '../hooks';
 import { ApiError } from '@/lib/api/client';
-import { getDashboardSummary, getTypeStatistics } from '@/lib/api/statistics';
+import { getTypeStatistics } from '@/lib/api/statistics';
+import { fetchDeliveryTraffic } from '@/lib/api/delivery-traffic';
 import { getSecurityOverview } from '@/lib/api/security-overview';
 import { fetchOpsTop } from '@/lib/api/ops-top';
 import { getDisposalList } from '@/components/email-disposal/lib/disposal-api';
@@ -47,9 +50,10 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // The two CORE sources succeed — the tenant's data really is available.
-    mock(getDashboardSummary)
-      .mockResolvedValueOnce({ metrics: { total_emails: 82 } })
-      .mockResolvedValueOnce({ metrics: { total_emails: 41 } });
+    // 收发信总量 = 接收 + 外发 + 域内：cur 50+20+12=82，prev 25+10+6=41。
+    mock(fetchDeliveryTraffic)
+      .mockResolvedValueOnce({ kpi: { inbound_total: 50, outbound_total: 20, internal_total: 12 } })
+      .mockResolvedValueOnce({ kpi: { inbound_total: 25, outbound_total: 10, internal_total: 6 } });
     mock(getSecurityOverview)
       .mockResolvedValueOnce({ kpi: { blocked: 12, block_rate: 14.6 } })
       .mockResolvedValueOnce({ kpi: { blocked: 6, block_rate: 10 } });
@@ -78,9 +82,9 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
     );
 
     vi.clearAllMocks();
-    mock(getDashboardSummary)
-      .mockResolvedValueOnce({ metrics: { total_emails: 82 } })
-      .mockResolvedValueOnce({ metrics: { total_emails: 41 } });
+    mock(fetchDeliveryTraffic)
+      .mockResolvedValueOnce({ kpi: { inbound_total: 50, outbound_total: 20, internal_total: 12 } })
+      .mockResolvedValueOnce({ kpi: { inbound_total: 25, outbound_total: 10, internal_total: 6 } });
     mock(getSecurityOverview)
       .mockResolvedValueOnce({ kpi: { blocked: 12, block_rate: 14.6 }, trend: { threat_type: [] } })
       .mockResolvedValueOnce({ kpi: { blocked: 6, block_rate: 10 } });
@@ -157,8 +161,8 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
   });
 
   it('a CORE source failing still fails hard (the error banner must be honest)', async () => {
-    mock(getDashboardSummary).mockReset();
-    mock(getDashboardSummary).mockRejectedValue(new Error('db down'));
+    mock(fetchDeliveryTraffic).mockReset();
+    mock(fetchDeliveryTraffic).mockRejectedValue(new Error('db down'));
     mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
 
     await expect(fetchSystemStatusData(args())).rejects.toThrow();

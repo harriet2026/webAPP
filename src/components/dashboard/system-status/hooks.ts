@@ -24,7 +24,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format, subDays, subHours } from 'date-fns';
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { ApiError, type ApiRequestFn } from '@/lib/api/client';
-import { getDashboardSummary } from '@/lib/api/statistics';
+import { fetchDeliveryTraffic, type KpiData } from '@/lib/api/delivery-traffic';
 import { getSecurityOverview, type TrendSeriesPoint } from '@/lib/api/security-overview';
 import { fetchOpsTop, type OpsTopRow } from '@/lib/api/ops-top';
 import { fetchNodes, fetchAlerts } from '@/lib/api/monitoring';
@@ -240,8 +240,8 @@ interface FetchArgs {
 // happily return that tenant's real data (verified: 200 / 200 / 403).
 //
 // Auxiliary sources now degrade to a neutral value on failure instead of
-// destroying the page. The CORE KPI sources (summary + security-overview) are
-// deliberately NOT wrapped: if those are unavailable the dashboard genuinely has
+// destroying the page. The CORE KPI sources (delivery-traffic + security-overview)
+// are deliberately NOT wrapped: if those are unavailable the dashboard genuinely has
 // nothing to show, and the existing isError banner is the honest answer.
 async function optionalSource<T>(p: Promise<T>, fallback: T, label: string): Promise<T> {
   try {
@@ -269,8 +269,8 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
   const { range, dates, apiRequest, isPlatform, agentAccess } = args;
 
   const [
-    summaryCur,
-    summaryPrev,
+    volumeCur,
+    volumePrev,
     securityOverview,
     securityOverviewPrev,
     top5Resp,
@@ -278,8 +278,18 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
     inboundAudit,
     agents,
   ] = await Promise.all([
-      getDashboardSummary(dates.startDate, dates.endDate, apiRequest),
-      getDashboardSummary(dates.prevStart, dates.prevEnd, apiRequest),
+      // 收发信总量 = 接收 + 外发 + 域内，与「投递与流量分析」页 KPI 严格同源
+      // （/statistics/delivery-traffic，direction=all 的 inbound/outbound/internal 之和）。
+      // 此前用 /statistics/dashboard 的 total_emails（仅入站过滤口径），与该页三向量之和
+      // 对不上（数值不同、且总量随时间范围变化而三向量恒定），故统一改为同一数据源。
+      fetchDeliveryTraffic(
+        { direction: 'all', startDate: dates.startDate, endDate: dates.endDate, interval: dates.interval },
+        apiRequest,
+      ),
+      fetchDeliveryTraffic(
+        { direction: 'all', startDate: dates.prevStart, endDate: dates.prevEnd, interval: dates.interval },
+        apiRequest,
+      ),
       getSecurityOverview(
         { startDate: dates.startDate, endDate: dates.endDate, interval: dates.interval },
         apiRequest,
@@ -321,8 +331,11 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
       fetchAgentStats(apiRequest, agentAccess),
     ]);
 
-  const inbound = summaryCur.metrics.total_emails;
-  const inboundDelta = computeDelta(inbound, summaryPrev.metrics.total_emails);
+  // 三向量求和口径；缺字段按 0 处理，与 delivery-traffic KpiCards 的 `all` 卡一致。
+  const sumVolume = (k: KpiData) =>
+    (k.inbound_total ?? 0) + (k.outbound_total ?? 0) + (k.internal_total ?? 0);
+  const inbound = sumVolume(volumeCur.kpi);
+  const inboundDelta = computeDelta(inbound, sumVolume(volumePrev.kpi));
   // Global Constraint: 拦截威胁数用 blocked，不是 total_filtered.
   const threats = securityOverview.kpi.blocked;
   const threatsDelta = computeDelta(threats, securityOverviewPrev.kpi.blocked);
@@ -377,7 +390,7 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
     }
 
     // GT-12553: 许可证/规则库平台待办，数据源为健康聚合接口（GT-12346）。
-    // 接口未上线（404）时按"无该类待办"处理，其余错误如实抛出（不吞 500）。
+    // 接口未上线（404）时按"无��类待办"处理，其余错误如实抛出（不吞 500）。
     let health: SystemHealthSummary | null = null;
     try {
       health = await apiRequest<SystemHealthSummary>('/system/health-summary');
