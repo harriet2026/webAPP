@@ -43,7 +43,7 @@ const ACTION_SEVERITY: Record<AuthSpoofingAction, number> = {
  */
 export function dominantAction(
   group: Record<string, { action: AuthSpoofingAction }> | undefined,
-  fallback: AuthSpoofingAction = 'accept',
+  fallback: AuthSpoofingAction = 'mark-delivery',
 ): AuthSpoofingAction {
   if (!group) return fallback;
   const actions = Object.values(group).map((item) => item.action);

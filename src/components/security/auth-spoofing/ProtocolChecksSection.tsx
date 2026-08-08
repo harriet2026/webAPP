@@ -32,9 +32,9 @@ const PROTOCOL_GROUPS: { key: 'spf' | 'dkim' | 'dmarc' | 'ptr'; labelKey: string
   { key: 'ptr', labelKey: 'protocolChecks.ptr', keys: ['noptr', 'nomatch', 'ehlo_mismatch'] },
 ];
 
-/** All protocols including DMARC now offer all 6 unified actions (reject/discard/quarantine/audit/mark-delivery/accept). */
-const PROTOCOL_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'mark-delivery', 'accept'];
-const DMARC_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'mark-delivery', 'accept'];
+/** All protocols including DMARC now offer all 5 unified actions (reject/discard/quarantine/audit/mark-delivery). */
+const PROTOCOL_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'mark-delivery'];
+const DMARC_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'mark-delivery'];
 
 const TEMPLATE_NAMES: Template[] = ['loose', 'standard', 'strict', 'custom'];
 
@@ -169,7 +169,7 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                       // Always render every defined subkey row; if the loaded config
                       // omits it (e.g. an older backend payload), fall back to a default
                       // item so the demo's full row set still shows and Save writes it back.
-                      const item: CheckItem = config[g.key]?.[subkey] ?? { enabled: false, action: 'accept', observe_mode: false };
+                      const item: CheckItem = config[g.key]?.[subkey] ?? { enabled: true, action: 'mark-delivery', observe_mode: false };
                       const label = t(`protocolChecks.${g.key}_${subkey}` as any);
                       const desc = t(`protocolChecks.${g.key}_${subkey}Desc` as any);
                       const isDisabled = lockNonCustom || (g.key === 'ptr' && ptrReadonly);
@@ -191,7 +191,7 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                                 handleCheckChange(g.key, subkey, {
                                   ...item,
                                   action: v as AuthSpoofingAction,
-                                  enabled: (v as AuthSpoofingAction) !== 'accept',
+                                  enabled: true,
                                 })
                               }
                               disabled={isDisabled}
