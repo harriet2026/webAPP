@@ -1235,7 +1235,7 @@ export function mockOpsTopAi(): { markdown: string } {
   };
 }
 
-// ─── ����控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
+// ─── 监控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
 export function mockMonitorDashboardOverview(range: MonitorDashboardRange): MonitorDashboardOverview {
   const volumes: Record<MonitorDashboardRange, number> = {
     today: 125847,
@@ -4878,7 +4878,7 @@ export function mockPutURLProtectionSettings(
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
 // 动作映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），
 // 非 receive 方向默认区间 accept→quarantine（D-06）。
-// 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF���DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
+// 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF、DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
 
 function intentMockSegments(risk: "high" | "medium" | "low", dir: string) {
   const acc = dir === "receive" ? "accept" : "quarantine";
@@ -5653,7 +5653,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "outgoing",
     sender: "pm@company.com",
     recipients: "blogger@tech-media.com",
-    subject: "内部产品���线图（含未���布���号）",
+    subject: "内���产品���线图（含未���布���号）",
     action: "block",
     reason: "内容规则命中：竞品/机密关键词",
     mailType: "sensitive",
@@ -7884,6 +7884,24 @@ export function mockDeliveryTrafficFor(
   const scale = tenantId && tenantId > 0 ? 0.16 + (tenantId % 5) * 0.04 : 1;
   const n = (value: number) => Math.max(0, Math.round(value * scale));
 
+  // 系统状态「收发信总量」与本页「全部」KPI 必须共享同一组三向量。
+  // 无日期请求保留原有 7 日 demo 基线；带日期请求按当前期/上一期匹配系统状态范围。
+  const deliveryTotals = startDate && endDate
+    ? (() => {
+        const span = deliverySpanDays(startDate, endDate);
+        const range = span <= 1 ? 'today' : span <= 7 ? '7d' : '30d';
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const current = endDate >= today;
+        const totals = {
+          today: { current: [67000, 48000, 13456], previous: [59777, 43800, 11116] },
+          '7d': { current: [470000, 320000, 112331], previous: [435000, 300000, 100492] },
+          '30d': { current: [2050000, 1400000, 534210], previous: [2150000, 1450000, 550219] },
+        }[range];
+        return current ? totals.current : totals.previous;
+      })()
+    : [89234, 45678, 12345];
+
   const isToday = deliveryIsToday(startDate, endDate);
   const spanDays = isToday ? 1 : deliverySpanDays(startDate, endDate);
 
@@ -7988,9 +8006,9 @@ export function mockDeliveryTrafficFor(
 
   if (direction === 'all') {
     return {
-      kpi: { inbound_total: n(89234), outbound_total: n(45678), internal_total: n(12345), total_success_rate: 96.5, queue_backlog: n(1234), trends: { totalSuccessRate: 1.2, queueBacklog: -5.3 } },
+      kpi: { inbound_total: n(deliveryTotals[0]), outbound_total: n(deliveryTotals[1]), internal_total: n(deliveryTotals[2]), total_success_rate: 96.5, queue_backlog: n(1234), trends: { totalSuccessRate: 1.2, queueBacklog: -5.3 } },
       trend: { points: trendPoints, granularity: isToday ? 'hour' : 'day' } as DeliveryTrafficResponse['trend'] & { granularity: string },
-      distribution: [{ name: 'receive', value: n(89234) }, { name: 'send', value: n(45678) }, { name: 'internal', value: n(12345) }],
+      distribution: [{ name: 'receive', value: n(deliveryTotals[0]) }, { name: 'send', value: n(deliveryTotals[1]) }, { name: 'internal', value: n(deliveryTotals[2]) }],
       latency: { buckets: [] },
       detail_table: detail('receive', 'all'),
       generated_at: new Date().toISOString(),
