@@ -32,7 +32,7 @@ export interface AVStatusResponse {
 }
 
 export interface AntivirusActionConfig {
-  // 「发现病毒后的处置」不提供“拒收”动作，仅支持隔离/丢弃等。
+  // 「发现病毒后的处置」不提供“拒收”动作，仅支持隔离/审核/丢弃等。
   virus_action: Exclude<AttachmentAction, 'accept' | 'partial_skip' | 'reject'>;
   timeout_action: Exclude<AttachmentAction, 'partial_skip'>;
 }
