@@ -15,8 +15,9 @@ describe('delivery traffic frontend fixes', () => {
     render(<DetailTable data={[]} direction="receive" isLoading={false} />);
 
     expect(screen.getByRole('columnheader', { name: 'date' })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'userNotExist' })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'mailboxFull' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'detecting' })).toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', { name: 'userNotExist' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', { name: 'mailboxFull' })).not.toBeInTheDocument();
     expect(screen.getByText('noData')).toBeInTheDocument();
   });
 
@@ -26,7 +27,7 @@ describe('delivery traffic frontend fixes', () => {
       'direction.label', 'direction.all', 'direction.receive', 'direction.send', 'direction.internal',
       'timeRange.label', 'timeRange.7d',
       'kpi.inboundTotal', 'kpi.outboundTotal', 'kpi.internalTotal', 'kpi.totalSuccessRate', 'kpi.queueBacklog',
-      'table.title', 'table.date', 'table.total', 'table.success', 'table.failure', 'table.deferred',
+      'table.title', 'table.date', 'table.total', 'table.success', 'table.failure', 'table.detecting',
       'table.cancelled', 'table.successRate', 'table.change',
       'bottomActions.exportCsv',
     ] as const;

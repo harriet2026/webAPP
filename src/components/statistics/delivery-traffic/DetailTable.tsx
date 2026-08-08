@@ -27,16 +27,14 @@ interface ColDef {
 }
 
 export const COLUMNS_BY_DIRECTION: Record<Direction, ColDef[]> = {
-  // GT-11989: the 全部 view shipped 6 columns while receive/send had 延迟投递 and
-  // 取消. `cancelled` was already on the wire for `all`; `deferred` was not
-  // computed by deliveryTrafficDetailAll at all (it is now). Both are rendered
-  // here so 全部 matches the other directions — and so total reconciles.
+  // 全部、接收和外发方向展示检测中与取消状态；内部方向仅展示可用的基础投递状态。
+  // `deferred` 是后端字段，页面通过国际化文案显示为“检测中”。
   all: [
     { key: 'date', labelKey: 'date' },
     { key: 'total', labelKey: 'total', align: 'right' },
     { key: 'success', labelKey: 'success', align: 'right' },
     { key: 'failure', labelKey: 'failure', align: 'right' },
-    { key: 'deferred', labelKey: 'deferred', align: 'right' },
+    { key: 'deferred', labelKey: 'detecting', align: 'right' },
     { key: 'cancelled', labelKey: 'cancelled', align: 'right' },
     { key: 'success_rate', labelKey: 'successRate', align: 'right', format: (v) => `${Number(v).toFixed(1)}%` },
     { key: 'change', labelKey: 'change', align: 'right', format: (v) => (v == null ? '—' : `${Number(v) > 0 ? '+' : ''}${Number(v).toFixed(1)}%`) },
@@ -46,10 +44,8 @@ export const COLUMNS_BY_DIRECTION: Record<Direction, ColDef[]> = {
     { key: 'total', labelKey: 'total', align: 'right' },
     { key: 'success', labelKey: 'success', align: 'right' },
     { key: 'failure', labelKey: 'failure', align: 'right' },
-    { key: 'deferred', labelKey: 'deferred', align: 'right' },
+    { key: 'deferred', labelKey: 'detecting', align: 'right' },
     { key: 'cancelled', labelKey: 'cancelled', align: 'right' },
-    { key: 'user_not_exist', labelKey: 'userNotExist', align: 'right' },
-    { key: 'mailbox_full', labelKey: 'mailboxFull', align: 'right' },
     { key: 'success_rate', labelKey: 'successRate', align: 'right', format: (v) => `${Number(v).toFixed(1)}%` },
     { key: 'change', labelKey: 'change', align: 'right', format: (v) => (v == null ? '—' : `${Number(v) > 0 ? '+' : ''}${Number(v).toFixed(1)}%`) },
   ],
@@ -58,11 +54,8 @@ export const COLUMNS_BY_DIRECTION: Record<Direction, ColDef[]> = {
     { key: 'total', labelKey: 'total', align: 'right' },
     { key: 'success', labelKey: 'success', align: 'right' },
     { key: 'failure', labelKey: 'failure', align: 'right' },
-    { key: 'deferred', labelKey: 'deferred', align: 'right' },
+    { key: 'deferred', labelKey: 'detecting', align: 'right' },
     { key: 'cancelled', labelKey: 'cancelled', align: 'right' },
-    { key: 'target_reject', labelKey: 'targetReject', align: 'right' },
-    { key: 'dns_fail', labelKey: 'dnsFail', align: 'right' },
-    { key: 'rbl_block', labelKey: 'rblBlock', align: 'right' },
     { key: 'success_rate', labelKey: 'successRate', align: 'right', format: (v) => `${Number(v).toFixed(1)}%` },
     { key: 'change', labelKey: 'change', align: 'right', format: (v) => (v == null ? '—' : `${Number(v) > 0 ? '+' : ''}${Number(v).toFixed(1)}%`) },
   ],
@@ -71,9 +64,6 @@ export const COLUMNS_BY_DIRECTION: Record<Direction, ColDef[]> = {
     { key: 'total', labelKey: 'total', align: 'right' },
     { key: 'success', labelKey: 'success', align: 'right' },
     { key: 'failure', labelKey: 'failure', align: 'right' },
-    { key: 'internal_spam', labelKey: 'internalSpam', align: 'right' },
-    { key: 'internal_phishing', labelKey: 'internalPhishing', align: 'right' },
-    { key: 'internal_virus', labelKey: 'internalVirus', align: 'right' },
     { key: 'success_rate', labelKey: 'successRate', align: 'right', format: (v) => `${Number(v).toFixed(1)}%` },
     { key: 'change', labelKey: 'change', align: 'right', format: (v) => (v == null ? '—' : `${Number(v) > 0 ? '+' : ''}${Number(v).toFixed(1)}%`) },
   ],
