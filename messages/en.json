@@ -5150,7 +5150,6 @@
       "mode_none": "Do not detect",
       "mode_deep": "Deep detection (decrypt and scan content)",
       "decryptFailAction": "Decryption Failure Action",
-      "receiveDefault": "Inbound default: Continue the pipeline",
       "advancedOptions": "Advanced Options",
       "recursiveDetectDepth": "Recursively scan decrypted content (depth limit: 3)",
       "markSuspicious": "Keep marking the message as suspicious after downstream checks pass",
