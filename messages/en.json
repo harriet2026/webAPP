@@ -5540,7 +5540,7 @@
     "triggerCount": "Trigger Count",
     "emails": "emails",
     "triggerAction": "Trigger Action",
-    "actionMarkDelivery": "Deliver",
+    "actionMarkDelivery": "Next Step",
     "actionReview": "Review",
     "actionBlock": "Reject",
     "actionDiscard": "Discard",

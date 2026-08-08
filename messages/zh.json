@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测��能�����������������",
+    "spoofingDetection": "仿冒邮件检测��能���������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1333,7 +1333,7 @@
     "priority": "优先级",
     "newPolicy": "新建群组策略",
     "editPolicy": "编辑群组策略",
-    "deleteConfirm": "确��删除���群组策��吗？",
+    "deleteConfirm": "确定删除���群组策��吗？",
     "deleteConfirmDesc": "删除���无法���复，规则���：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效��行路径预览",
@@ -2458,7 +2458,7 @@
       "connectionRefused": "连接拒绝",
       "certError": "证书错误",
       "protocolMismatch": "协议不匹配",
-      "unknown": "未知错���"
+      "unknown": "未知错误"
     },
     "failAdvice": {
       "wrongPassword": "短��间内多次密��错误可能为撞��/暴力破解，建议核查账号是���泄露并启用登录限速。",
@@ -3683,7 +3683,7 @@
     "ipAddressTip": "支持单个IP地址、CIDR网段或IP组",
     "ipAddressRequired": "请输入IP地址/段",
     "invalidIp": "请输入有效的IP地址",
-    "invalidCidr": "请输入有效的IP地���或CIDR格式",
+    "invalidCidr": "请输入有效的IP地址或CIDR格式",
     "cidrPrefixMax": "CIDR前缀长度必须在0-32��间",
     "ipConfigTypeExpression": "表达式",
     "expressionPlaceholder": "192.0.2.1;10.0.0.0/8;192.0.2.10-192.0.2.50;!192.0.2.33",
@@ -3802,7 +3802,7 @@
     "importDone": "导入完成：新增 {created}，覆盖 {overwritten}",
     "importPartialFail": "部分失败：新增 {created}，覆盖 {overwritten}，失败 {failed}",
     "importFileLoaded": "{name}（{count} 条）",
-    "importFileClear": "清除���选文件",
+    "importFileClear": "清除已选文件",
     "importJsonInvalid": "JSON 解析失败，请上传「导出」生成的 .json 文���",
     "importJsonNotEnvelope": "不是有效的规则导出文件（缺少 data.rules）",
     "importJsonWrongScope": "不是 IP 黑白名单的导出文件",
@@ -4428,7 +4428,7 @@
     "viewObserveStats": "查看观察统计",
     "restoreDefault": "恢复系统默认",
     "moduleEnabled": "启用认证仿冒检测",
-    "moduleEnabledHint": "关闭后，所有认证仿冒检测规则���不再生效",
+    "moduleEnabledHint": "关闭后，所有认证仿冒检测规则将不再生效",
     "observeModeTip": "观察模式：开启后，规则仅记录命中日志，不会对邮件执行拦截/隔��等动作。建议在首次��署或调整策略时开启观察模式，验证规则影响范围后再正式启用。",
     "probe": {
       "title": "模拟测试邮件认证",
@@ -4763,7 +4763,7 @@
       "actionLabel": "处置动作",
       "action": {
         "reject": "阻断",
-        "quarantine": "隔��",
+        "quarantine": "隔离",
         "audit": "审核"
       },
       "reset": "重置为默认"
@@ -4880,7 +4880,7 @@
       "emailRequired": "请输入邮箱地址",
       "groupRequired": "请选择发信人群组",
       "orgRequired": "请选择组织部门",
-      "ipRequired": "请输入IP地址���IP段",
+      "ipRequired": "请输入IP地址或IP段",
       "ipGroupRequired": "请选择IP群组",
       "domainRequired": "请输入域名",
       "conditionsMin": "至少需要一条检测条件",
@@ -5371,7 +5371,7 @@
       "costBanner": "深度复检由【{engine}】执行，通常需 30-60 秒。用户点击链接后需等待，请结合下方超时策略配置。",
       "skip": {
         "title": "允许用户跳过深度检测",
-        "desc": "允许终端用户在等待期间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风���。开启会降低防护强度，请谨慎使用。",
+        "desc": "允许终端用户在等待期间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风险。开启会降低防护强度，请谨慎使用。",
         "riskBanner": "已允许用户跳过深度复检：用户可在等待期间点击“跳过并访问”，经二次风险确认后直接访问未完成检测的链接，存在放行恶意链接的风险。该操作将记录到链接日志以供审计。"
       },
       "timeoutFixedNotice": "深度复检超时的链接将被视为未知风险链接，展示提示页。",
@@ -5534,7 +5534,7 @@
     "exemptionNote": "豁免名单统一由群组策略模块配置，本模块不再提供免检测发信人管理入口",
     "tooltipWindow": "统计相似邮件的时间范围,单位为分钟",
     "tooltipThreshold": "邮件内容相似度达到此百分比时被视为相似邮件",
-    "tooltipMinCount": "相似邮件数量达到此���值后才触发动作",
+    "tooltipMinCount": "相似邮件数量达到此阈值后才触发动作",
     "errorMinCountRange": "触发次数必须在1到9999之间",
     "errorVersionConflict": "配置已被他人修改,请刷新后重试",
     "errorWindowRange": "检测窗口必须在 1 到 1440 之间",
@@ -5545,7 +5545,7 @@
     "triggerCount": "触发数量",
     "emails": "封",
     "triggerAction": "触发动作",
-    "actionMarkDelivery": "投递",
+    "actionMarkDelivery": "进行下一步",
     "actionReview": "审核",
     "actionBlock": "拒收",
     "actionDiscard": "丢弃",
@@ -5787,7 +5787,7 @@
       "templateOverwriteConfirm": "覆盖保存",
       "templateLimitWarning": "已达上限（{max} 个），保存将删除最旧的一条���板",
       "templateApplyConfirmTitle": "应用搜索模板",
-      "templateApplyConfirmDesc": "应用「{name}」将替换当前所有搜索条件，是否继���？",
+      "templateApplyConfirmDesc": "应用「{name}」将替换当前所有搜索条件，是否继续？",
       "templateApplyConfirm": "确认应用",
       "cancel": "取消",
       "save": "保存",
@@ -6208,7 +6208,7 @@
           "noContent": "(无原文)",
           "missingObjectIdTooltip": "缺少可处置对象标识，请刷新或使用列表整封处置",
           "action": {
-            "deliver": "��递",
+            "deliver": "投递",
             "quarantine": "隔离",
             "block": "阻断",
             "discard": "丢弃",
@@ -6487,7 +6487,7 @@
         "spam": "垃圾邮件",
         "advertising": "广告邮件",
         "suspicious": "可疑邮件",
-        "sensitive": "敏感内���邮件",
+        "sensitive": "敏感内容邮件",
         "normal": "正���",
         "subscription": "订阅"
       },
@@ -6726,7 +6726,7 @@
     "review": {
       "paramsTitle": "审核参数",
       "reviewers": "审核人邮箱",
-      "timeoutHours": "超���时间（小时）"
+      "timeoutHours": "超时时间（小时）"
     },
     "deliver": {
       "paramsTitle": "投递参数",
@@ -6827,7 +6827,7 @@
       "name": "请填写规则名称",
       "scope": "请至少选择一个范围",
       "priority": "优先级需在 1–100 之间",
-      "actionOrAddon": "请选择一个主动作或��少启用一个附加项",
+      "actionOrAddon": "请选择一个主动作或至少启用一个附加项",
       "tagDeliverEmailTag": "「标记后投递」需要启用「邮件标记」附加项",
       "incompleteCondition": "有一个或多个条件尚未配置完整"
     },
@@ -7090,7 +7090,7 @@
       },
       "desc_imageQrCodeResult": {
         "source": "附件图片识别引擎（OCR/二维码）",
-        "usage": "判断图片识别处理是否成功���成：成功=识别步骤正常跑完（���使无发现）；失败=识别服务出错或超时截断，结果可能不完整",
+        "usage": "判断图片识别处理是否成功完成：成功=识别步骤正常跑完（���使无发现）；失败=识别服务出错或超时截断，结果可能不完整",
         "note": "二维码数量用「二维码数量」条件；识别失败的邮件可转人工或隔离兜底"
       },
       "desc_qrCodeCount": {
@@ -8579,7 +8579,7 @@
       "sender": "发件人",
       "recipients": "收件人",
       "subject": "主题",
-      "sidelinedAt": "旁路时���",
+      "sidelinedAt": "旁路时间",
       "direction": "方向",
       "confidence": "置信度",
       "agentVerdict": "智能体研判",
@@ -8700,7 +8700,7 @@
       "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
       "validationFailed": "请检查必填字段。",
-      "created": "准入规则已��建",
+      "created": "准入规则已创建",
       "updated": "准入规则已更新",
       "saveFailed": "保存失败",
       "saving": "保存中...",
@@ -8753,7 +8753,7 @@
       "timeoutScopeNote": "总超时 / 超时异步对所有旁路检测生效。",
       "soon": "即将支持",
       "totalTimeout": "总超时",
-      "totalTimeoutHint": "邮件进入旁路检测后的最长等待时长。超过此时间仍无检测结论，将执行「���时临时处置」策略。范围：1–60 分钟。",
+      "totalTimeoutHint": "邮件进入旁路检测后的最长等待时长。超过此时间仍无检测结论，将执行「超时临时处置」策略。范围：1–60 分钟。",
       "asyncTimeout": "超时异步",
       "asyncTimeoutHint": "超时投递后，系统继续等待最终检测结论的最长时长。在此窗口内若得出高风险结论，邮件将被自动召回。范围：1–60 分钟。",
       "autoDeliver": "超时自动投递",
@@ -9269,7 +9269,7 @@
       }
     },
     "filters": {
-      "keywordPlaceholder": "搜索任务ID / 触发来源 / 判���依据",
+      "keywordPlaceholder": "搜索任务ID / 触发来源 / 判定依据",
       "taskStatus": "任务状态",
       "recallStatus": "召回状态",
       "riskLevel": "风险等级",
@@ -10404,7 +10404,7 @@
     },
     "existence": {
       "title": "存在性验证策略",
-      "desc": "验证收件人在目录���务的真实存在性",
+      "desc": "验证收件人在目录服务的真实存在性",
       "directionNote": "仅接收方向（外部→内部）生效，内部发信自动跳过验证",
       "strictMode": "严格模��",
       "badge": {
@@ -10604,7 +10604,7 @@
     "kpi": {
       "todayVolume": "今日邮件量",
       "deliverySuccessRate": "投递成功率",
-      "queueDepth": "队列���度",
+      "queueDepth": "队列深度",
       "alerts": "告警",
       "nodes": "节点",
       "todo": "未处理告警",
@@ -10815,7 +10815,7 @@
     },
     "ops_top": {
       "account_required": "下钻认证明细时必须指定账号",
-      "ai_interpretation_disabled": "AI 智能解读未��用，请联系管理员开启",
+      "ai_interpretation_disabled": "AI 智能解读未启用，请联系管理员开启",
       "ai_too_many_concurrent": "AI 解读请求过多，请稍后重试",
       "connection_requires_platform": "连接维度只在平台视角下可用，请切换到平台视角",
       "dimension_invalid": "统计维度无效",
@@ -11391,7 +11391,7 @@
     "unified_rules_pagespec": {
       "behavior_control_rule_have_metadata_feature": "发信行为管控��则的 metadata.feature 必须是 behavior_control",
       "content_rules_rule_have_metadata_feature": "内容规则的 metadata.feature 必须是 content_rules",
-      "sender_filter_rule_priority_between_1": "发件人过滤规则���先级必须在 1-9999 之间",
+      "sender_filter_rule_priority_between_1": "发件人过滤规则优先级必须在 1-9999 之间",
       "invalid_metadata": "元数据格式不正确"
     },
     "user_list_access": {
