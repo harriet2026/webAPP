@@ -342,7 +342,7 @@
             <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独立页）</p>
             <p>spec: IP黑白名单需求文档.md</p>
             <p>组件: connection-layer-page.tsx (renderIpFilterConfig)</p>
-            <p>v2: 黑/白名���独立选中、跨页全选、行高亮、删除选中（N）与批量删除确认；<a href="filter-rules-pipeline-ip-filter/layer-7-batch-delete.html">查看可交互层级 7</a></p>
+            <p>v2: 黑/白名�����独立选中、跨页全选、行高亮、删除选中（N）与批量删除确认；<a href="filter-rules-pipeline-ip-filter/layer-7-batch-delete.html">查看可交互层级 7</a></p>
             <p>第 9 节 D-001～D-017、第 10 节 Q-001～Q-008 已逐项复核并记录状态与证据。</p>
           </div>
         </details>
@@ -433,6 +433,24 @@
             <p>组件: identity-strategy-page.tsx（renderAuthSpoofingConfig）</p>
             <p>子文件: <a href="filter-rules-identity-auth-spoofing/layer-1-observe-mode.html">观察模式</a> / <a href="filter-rules-identity-auth-spoofing/layer-2-check-disabled.html">检查项禁用</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-auth-protocol-tabs.html">协议Tab</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-template-dialog.html">模板Dialog</a> / <a href="filter-rules-identity-auth-spoofing/layer-2-custom-template.html">自定义模板</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-module-disabled.html">模块禁用态</a></p>
             <p>预览可交互 · 5 组件 / 6 交互层级 · 10 项差异 / 10 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12807.html" target="_blank" rel="noopener noreferrer">GT-12833 · 认证协议检查：动作精简为5项，默认动作改为"标记放行"（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v10</span>
+              <span class="card-generated-at">2026-08-08</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /zh/security/pipeline（策略流水线 → 身份认证与仿冒检测 → 认证协议检查）</p>
+            <p>组件: src/components/security/auth-spoofing/ProtocolChecksSection.tsx、src/lib/auth-spoofing-labels.ts、src/lib/auth-spoofing-templates.ts</p>
+            <p>变更类型: 动作枚举精简 + 默认值/联动逻辑调整（增量规格）· commit 386aa38</p>
+            <p>内含: PROTOCOL_ACTIONS/DMARC_ACTIONS 由6项精简为5项（移除"进行下一步"accept）· 缺省态与动作联动改为"标记放行"+启用解耦 ·「宽松」模板 accept 场景全部改为 mark-delivery · S-1~S-4 真实浏览器截图 · D-005 · Q-003</p>
+            <p>关联: 本链接指向的 GT-12807.html 为滚动容器文档，同时收录 GT-12801/GT-12793/GT-12795/GT-12797/GT-12719/GT-12828/GT-12790/GT-12791/GT-12833 等多个需求的增量规格，本条特指其中 GT-12833 部分；反向调整了同文档内 GT-12801 变更2 的结论</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -814,7 +832,7 @@
       <div class="grid">
         <details class="spec-card status-done">
           <summary><div class="card-summary"><span class="chevron"></span>
-            <a class="card-title" href="logs-link-logs/index.html">链接保护日��</a>
+            <a class="card-title" href="logs-link-logs/index.html">链��保护日��</a>
             <span class="badge badge-done">✅</span><span class="card-version-badge">v1</span><span class="card-generated-at">2026-07-14</span>
           </div></summary>
           <div class="card-detail">
@@ -1405,7 +1423,7 @@
             </div>
             <div class="cl-modules">
               <ul>
-                <li>Tab 激活态样式修复（下划线高亮丢失问题）</li>
+                <li>Tab 激活态样式修复（下划���高亮丢失问题）</li>
                 <li>i18n 乱码批量修复（zh/en/th/ru 共 202 处 ）</li>
                 <li>FramedPage 结构重构（统一页面容器框架）</li>
                 <li>分类通知控��改为紧凑表格布局，节省约 60% 页面高度</li>

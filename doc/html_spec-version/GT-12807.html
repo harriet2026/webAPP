@@ -612,6 +612,13 @@ onViewRawLogs?: () =&gt; void;
           <td class="status-unverif">无法验证</td>
           <td>2026-08-06</td>
         </tr>
+        <tr>
+          <td>Q-003</td>
+          <td>GT-12833 截图验证（S-4，「宽松」模板下 SPF「标记方式」附加配置面板）中「主题标记/信头标记/正文标记」三个 Switch 的行内文案在浏览器截图环境下渲染为空白方块</td>
+          <td>经可访问性树核对，DOM 层文本本身未损坏（三个标签文字均可正常读取），推测为截图当时页面字体资源尚未完全加载完成所致，与本次 <code>PROTOCOL_ACTIONS</code> 精简改动无关；建议在正式验收环境下用真实浏览器复核该面板视觉渲染</td>
+          <td class="status-pending">待处理</td>
+          <td>2026-08-08</td>
+        </tr>
       </tbody>
     </table>
   </section>
@@ -803,7 +810,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12797-c2-overview">2.1 方案概述</h4>
       <p>优化前，新建群组抽屉内包含「群组名称」和「群组类型」两个并排字段，用户需在表单内再次选择类型，与已在 Tab 上做出的类型选择重复决策，且类型切换会改变成员输入区的校验规则和占位符，造成认知负担。</p>
-      <p>优化后，新建时隐藏「群组类型」Select，抽屉标题直接显示类型（如「新建IP组」），表单内只有「群组名称」（全宽）和「每行一条成员」两个字段，表单职责单一。编辑已有群组时，「群组类型」改为只读 Input 展示，保持信息完整性但不允许修改。</p>
+      <p>优化后，新建时隐藏「群���类型」Select，抽屉标题直接显示类型（如「新建IP组」），表单内只有「群组名称」（全宽）和「每行一条成员」两个字段，表单职责单一。编辑已有群组时，「群组类型」改为只读 Input 展示，保持信息完整性但不允许修改。</p>
       <table>
         <thead><tr><th>场景</th><th>优化前</th><th>优化后</th></tr></thead>
         <tbody>
@@ -940,7 +947,7 @@ onViewRawLogs?: () =&gt; void;
       <h4 id="gt12719-c1-overview">1.1 方案概述</h4>
       <p>策略流水线页面底部图例区「执行动作」行列出��水线中可能出现的所有动作及其说明。本次同步三项变更：</p>
       <ul>
-        <li><strong>重命名</strong>：动作名「阻断」→「拒收」，描述「拒绝并退信」保持不变（i18n key <code>pipeline.actionBlock</code> / <code>pipeline.actionBlockDesc</code>）。</li>
+        <li><strong>重命名</strong>：动作名「阻断」→「拒收」，描述「���绝并退信」保持不变（i18n key <code>pipeline.actionBlock</code> / <code>pipeline.actionBlockDesc</code>）。</li>
         <li><strong>新增</strong>：「进行下一步 · 继续执行后续策略」条目，位于「标记投递」原位后方，使用 <code>--action-mark-deliver</code>（蓝绿色）圆点，区别于直接投递（绿色），与 DMARC 「进行下一步」语义一致（新增 i18n key <code>pipeline.actionNextStep</code>、<code>pipeline.actionNextStepDesc</code>）。</li>
         <li><strong>移除</strong>：「标记投递」条目——已从流水线执行动作中移除，图例随之去除（<code>actionLegendItems</code> 中删除 <code>tagDeliver</code> 条目，union type 同步收窄）。</li>
       </ul>
@@ -1307,8 +1314,8 @@ onViewRawLogs?: () =&gt; void;
         <p><strong>状态 S-1：新建接收标记规则抽屉默认态</strong><br/>
         触发路径：租户管理员 → 安全策略 → 策略流水线 → 阶段5 邮件标记与声明 → 接收标记 Tab → 点击「+ 新建规则」按钮</p>
         <figure>
-          <img src="./screenshots/gt12795-drawer-default.png" alt="新建接收标记规则抽屉默认态，优先级字段显示默认值100，提示文案为「取值范围100～1000；数值越大，规则越优先执行」，取消和保存按钮位于底部footer" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
-          <figcaption>S-1：新建规则抽屉默认态 — 优先级默认值 <strong>100</strong>，Input min=100 max=1000，提示文案已更新；「取消」「保存」按钮位于底部 footer 右下角</figcaption>
+          <img src="./screenshots/gt12795-drawer-default.png" alt="新建接收标记规则抽屉默认态，优先级字段显示默认值100，提示文案为「取值范围100～1000；数值���大，规则越优先执行」，取消和保存按钮位于底部footer" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：新建规则抽屉默认态 — 优先级默��值 <strong>100</strong>，Input min=100 max=1000，提示文案已更新；「取消」「保存」按钮位于底部 footer 右下角</figcaption>
         </figure>
         <table>
           <thead><tr><th>可见元素</th><th>内容 / 值</th><th>说明</th></tr></thead>
@@ -1480,7 +1487,7 @@ onViewRawLogs?: () =&gt; void;
         <p><strong>状态 S-1：内容规则新建抽屉默认态（租户管理员）</strong><br/>
         触发路径：租户管理员 → 安全策略 → 策略流水线 → 阶段3 内容层/内容规则 → 点击「配置」→ 点击「新建规则」按钮</p>
         <figure>
-          <img src="./screenshots/gt12828-content-rule-drawer.png" alt="内容规则新建抽屉，优先级默认值100，提示文案范围100–1000数值越大优先级越高" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <img src="./screenshots/gt12828-content-rule-drawer.png" alt="内容规则新建抽屉，优先级默认值100，提示文案范围100–1000数值越大优先级��高" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
           <figcaption>S-1：内容规则新建抽屉 — 优先级默认值 <strong>100</strong>，提示文案「范围 100–1000，数值越大优先级越高」参数化渲染；DOM 验证：<code>value=100, min=100, max=1000</code>（租户管理员）。原「范围1-9999」已修正。</figcaption>
         </figure>
         <table>
@@ -1540,7 +1547,7 @@ onViewRawLogs?: () =&gt; void;
         </thead>
         <tbody>
           <tr><td><code>senderFilter.errors.priorityRange</code></td><td>「优先级须在 {min}-{max} 之间」（连字符 <code>-</code>，「须」）</td><td>「优先级需在 {min}–{max} 之间」（en dash，「需」）</td><td>错误文案</td></tr>
-          <tr><td><code>contentRules.priorityInvalid</code></td><td>「优先级必须是 {min} 到 {max} 的整数」</td><td>「优先级需在 {min}–{max} 之间」</td><td>错误文案</td></tr>
+          <tr><td><code>contentRules.priorityInvalid</code></td><td>「优先级必须是 {min} 到 {max} 的整���」</td><td>「优先级需在 {min}–{max} 之间」</td><td>错误文案</td></tr>
           <tr><td><code>behaviorControl.errors.priorityRange</code></td><td>「优先级范围应为 {min}-{max}」</td><td>「优先级需在 {min}–{max} 之间」</td><td>错误文案</td></tr>
           <tr><td><code>behaviorControl.form.priorityHint</code></td><td>「{min}-{max}」（裸数字，无说明）</td><td>「范围 {min}–{max}，数值越大优先级越高」</td><td>行内提示</td></tr>
           <tr><td><code>behaviorControl.form.priorityTooltip</code></td><td>「数值越大越优先，范围 {min}-{max}」（连字符）</td><td>「数值越大越优先，范围 {min}–{max}」（en dash）</td><td>tooltip</td></tr>
@@ -1615,7 +1622,7 @@ onViewRawLogs?: () =&gt; void;
       </table>
 
       <!-- ── 变更 2：附加策略正文标记 ── -->
-      <h3 id="gt12791-change-2">2. 附加策略：进行下一步动作下新增「正文标记」Switch + 自由文本 Input</h3>
+      <h3 id="gt12791-change-2">2. 附加策略：进行下一步动作下新增「正文���记」Switch + 自由文本 Input</h3>
 
       <h4 id="gt12791-c2-overview">2.1 方案概述</h4>
       <p><strong>背景：</strong>原「标记方式」面板仅支持主题标记和信头标记两种位置，用户无法在邮件正文中插入标记文本。</p>
@@ -1745,10 +1752,10 @@ onViewRawLogs?: () =&gt; void;
         触发路径：同上 → 点击聚合卡片右上角「观察模式」Switch → 卡片配色随即切换</p>
         <figure>
           <img src="./screenshots/gt12790-aggregate-after-fix.png" alt="全方向聚合卡片观察模式开启后，卡片边框与背景变为黄色，与按方向独立检测卡片配色一致" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
-          <figcaption>S-2：聚合卡片观察模式开启态（修复后）— 边框与背景已同步变为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），与内部「观察中」黄色徽标视觉统一。</figcaption>
+          <figcaption>S-2：聚合卡片观察模式开启态（修复后）— 边框与背景已同步变为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），与内���「观察中」黄色徽标视觉统一。</figcaption>
         </figure>
 
-        <p style="margin-top:1.5rem"><strong>状态 S-3：按方向独立检测卡片，观察模式开启态（对齐参照，无变更）</strong><br/>
+        <p style="margin-top:1.5rem"><strong>状态 S-3：按方向独立检测卡片，观察模式开启态（对齐参照，无��更）</strong><br/>
         触发路径：检测粒度切换回「按方向独立检测（可勾选多个）」→ 接收方向卡片开启观察模式</p>
         <figure>
           <img src="./screenshots/gt12790-direction-observe-reference.png" alt="按方向独立检测下接收方向卡片观察模式开启，卡片边框与背景为黄色，作为对齐参照" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
@@ -1799,7 +1806,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12833-c1-overview">1.1 方案概述</h4>
       <p><strong>背景：</strong>GT-12801 曾将 <code>accept</code>（"进行下一步"，语义为不做处理、直接传递给下一个协议检查）补齐进 <code>DMARC_ACTIONS</code>，使 SPF / DKIM / DMARC / PTR 四个协议 Tab 统一拥有 6 个动作：<code>reject</code> / <code>discard</code> / <code>quarantine</code> / <code>audit</code> / <code>mark-delivery</code> / <code>accept</code>。但 <code>accept</code> 与 <code>mark-delivery</code>（"标记放行"，语义为不拦截、继续走后续检测流程、可选择附加标记后再投递）在实际处置效果上高度重叠——两者都不拦截邮件、都会继续走流水线下一节点，唯一区别是 <code>mark-delivery</code> 支持附加标记而 <code>accept</code> 不支持，导致管理员在配置动作时容易混淆"进行下一步"与"标记放行"该选哪个。</p>
-      <p><strong>最终方案：</strong>将 <code>accept</code> 从 <code>PROTOCOL_ACTIONS</code> 和 <code>DMARC_ACTIONS</code" 枚举数组中移除，统一收敛为 5 项动作：<code>reject</code> / <code>discard</code> / <code>quarantine</code> / <code>audit</code> / <code>mark-delivery</code>。所有"不拦截、继续检测"的处置需求统一通过 <code>mark-delivery</code> 表达，不再区分"进行下一步"与"标记放行"两个语义重叠的选项。SPF / DKIM / DMARC / PTR 四个协议 Tab 共享同一份精简后的动作列表，改动只需修改 <code>ProtocolChecksSection.tsx</code> 中的两个常量数组，不新增 i18n key（<code>accept</code> 对应的 <code>protocolActionShort.accept</code> / <code>protocolActionDesc.accept</code> key 保留在 <code>messages/zh.json</code> 中未删除，仅不再被这两个动作列表引用）。</p>
+      <p><strong>最终方案：</strong>将 <code>accept</code> 从 <code>PROTOCOL_ACTIONS</code> 和 <code>DMARC_ACTIONS</code> 枚举数组中移除，统一收敛为 5 项动作：<code>reject</code> / <code>discard</code> / <code>quarantine</code> / <code>audit</code> / <code>mark-delivery</code>。所有"不拦截、继续检测"的处置需求统一通过 <code>mark-delivery</code> 表达，不再区分"进行下一步"与"标记放行"两个语义重叠的选项。SPF / DKIM / DMARC / PTR 四个协议 Tab 共享同一份精简后的动作列表，改动只需修改 <code>ProtocolChecksSection.tsx</code> 中的两个常量数组，不新增 i18n key（<code>accept</code> 对应的 <code>protocolActionShort.accept</code> / <code>protocolActionDesc.accept</code> key 保留在 <code>messages/zh.json</code> 中未删除，仅不再被这两个动作列表引用）。</p>
       <table>
         <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
         <tbody>
@@ -2009,9 +2016,14 @@ onViewRawLogs?: () =&gt; void;
       </thead>
       <tbody>
           <tr>
+          <td><span class="version-badge"><span class="vnum">v10</span></span></td>
+          <td>2026-08-08</td>
+          <td>追加 GT-12833「认证协议检查：动作精简为5项，默认动作改为"标记放行"」需求体（3 个变更点）。变更 1：<code>PROTOCOL_ACTIONS</code>（SPF/DKIM/PTR）与 <code>DMARC_ACTIONS</code> 均由 6 项精简为 5 项，移除语义与「标记放行」重叠的 <code>accept</code>（「进行下一步」），四个协议 Tab 统一收敛为 拒收/丢弃/隔离/审核/标记放行；本变更反向调整了 GT-12801 变更2「DMARC处置策略新增&quot;进行下一步&quot;选项」的结论，已在 GT-12801 处打删除线标注并交叉链接（另见差异标注 D-005）。变更 2：<code>CheckItem</code> 缺省 fallback 由 <code>{ enabled: false, action: 'accept' }</code> 改为 <code>{ enabled: true, action: 'mark-delivery' }</code>，动作选择回调不再联动 <code>enabled</code>（固定为 <code>true</code>），<code>dominantAction()</code> fallback 参数同步改为 <code>mark-delivery</code>，检查项启停与动作选择彻底解耦。变更 3：「宽松」预设模板中 SPF（none/temperror）、DKIM（partial/none）、PTR（noptr）原 <code>accept</code> 预设值全部改为 <code>mark-delivery</code>，<code>applyGroup()</code> 两处 enabled 联动逻辑同步简化为固定 <code>true</code>；「标准」「严格」模板未使用 <code>accept</code>，不受影响。附截图 4 张：gt12833-spf-fail-dropdown-5options（SPF硬拒绝动作下拉5项）、gt12833-spf-softfail-dropdown-5options（SPF软拒绝动作下拉5项）、gt12833-dmarc-reject-dropdown-5options（DMARC p=reject动作下拉5项）、gt12833-loose-template-none-tmperror-enabled（宽松模板下SPF未维护/查询失败两行启用态+标记放行）。目录追加 GT-12833 一级条目及三个变更点子章节；差异标注追加 D-005；待确认事项追加 Q-003；版本历史 v9→v10。</td>
+        </tr>
+          <tr>
           <td><span class="version-badge"><span class="vnum">v9</span></span></td>
           <td>2026-08-08</td>
-          <td>追加 GT-12790「相似邮件与主题检测：交互优化」需求体（1 个变更点）。背景：检测粒度可切换「全方向聚合」与「按方向独立检测」，「按方向独立检测」模式下方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后外层容器会切换为黄色（<code>border-amber-300</code>/<code>bg-amber-50/50</code>），但「全方向聚合」模式下聚合卡片（<code>AggregateCard.tsx</code>）外层容器颜色是硬编码固定值，从不随 <code>observe_mode</code> 变化，只有内部徽标变黄，导致两种检测粒度下观察模式视觉表现不一致。修复方案：将 <code>AggregateCard.tsx</code> 外层容器 className 改为与 <code>DirectionCard.tsx</code> 完全一致的条件判断（复用相同色值与逻辑，不新增颜色定义，不修改 <code>DirectionCard.tsx</code>），并保留 240ms 过渡动画使颜色切换平滑。附截图 3 张：gt12790-aggregate-before-fix（聚合卡片观察模式关闭态）、gt12790-aggregate-after-fix（聚合卡片观察模式开启态，修复后已变黄）、gt12790-direction-observe-reference（按方向独立检测卡片观察模式开启态，作为对齐参照）。目录追加 GT-12790 一级���目及变更点子章节；版本历史 v8→v9。</td>
+          <td>追加 GT-12790「相似邮件与主题检测：交互优化」需求体（1 个变更点）。背景：检测粒度可切换「全方向聚合」与「按方向独立检测」，「按方向独立检测」模式下方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后外层容器会切换为黄色（<code>border-amber-300</code>/<code>bg-amber-50/50</code>），但「全方向聚合」���式下聚合卡片（<code>AggregateCard.tsx</code>）外层容器颜色是硬编码固定值，从不随 <code>observe_mode</code> 变化，只有内部徽标变黄，导致两种检测粒度下观察模式视觉表现不一致。修复方案：将 <code>AggregateCard.tsx</code> 外层容器 className 改为与 <code>DirectionCard.tsx</code> 完全一致的条件判断（复用相同色值与逻辑，不新增颜色定义，不修改 <code>DirectionCard.tsx</code>），并保留 240ms 过渡动画使颜色切换平滑。附截图 3 张：gt12790-aggregate-before-fix（聚合卡片观察模式关闭态）、gt12790-aggregate-after-fix（聚合卡片观察模式开启态，修复后已变黄）、gt12790-direction-observe-reference（按方向独立检测卡片观察模式开启态，作为对齐参照）。目录追加 GT-12790 一级���目及变更点子章节；版本历史 v8→v9。</td>
         </tr>
         <tr>
           <td><span class="version-badge"><span class="vnum">v8</span></span></td>

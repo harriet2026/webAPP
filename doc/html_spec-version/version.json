@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 42,
+  "current_version": 43,
   "history": [
     {
       "version": 1,
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本���史���������加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本����史���������加 v9。",
       "demo_version": 12
     },
     {
@@ -276,7 +276,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12731",
       "incremental": true,
-      "summary": "GT-12731.html 追加一级需求 GT-12751 高级过滤规则优化项（同文件多需求，doc 版本 v1→v2）：变更 3（意图引擎条件 comprehensiveEngineResult/cac_tag �� panel:'select' ���级���专属 panel:'intentEngine'，多意图列表式面板——每意图独立选择「分类优先 classification/within」或「分段阈值 threshold/between [lo,hi]⊆[0,1]」，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重后写覆盖、空条目丢弃；serde 新增 parse/encodeIntentEngineList 复用单条 codec；expression 多条目取值与至少1意图/端点/顺序/范围完整性校验；ConditionTree 默认空列表；四语新增 v3Conditions.intentAddLabel/intentRemoveLabel 并补齐 inputType.intentEngine 缺失键）、变更 4（安全检测移除 rblResult/rbl 与 displayNameSpoof/exec_imp 两条件，目录 51→49、security 20→18、select 12→10，四语删 v3Conditions 对应文案且保留 emailDisposal/auth-spoofing 同名键，catalogue.test.ts 计数不变量同步）；浏览器实拍 S-1 多意图双模式面板 + S-2 安全检测清单无RBL/仿冒 + S-3 模块支持49种条件类型（浅色 AI版·单租户 平台管理员 Mock 1575×847）；新增差异 D-004~D-006、待确认 Q-003；顺带修复本文件 GT-12723 遗留的 2 处 UTF-8 乱码（导航/阶段3）；乱码自检 CLEAN；version.json current_version 14→15。",
+      "summary": "GT-12731.html 追加一级需求 GT-12751 高级过滤规则优化项（同文件多需求，doc 版本 v1→v2）：变更 3（意图引擎条件 comprehensiveEngineResult/cac_tag ���� panel:'select' ���级���专属 panel:'intentEngine'，多意图列表式面板——每意图独立选择「分类优先 classification/within」或「分段阈值 threshold/between [lo,hi]⊆[0,1]」，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重后写覆盖、空条目丢弃；serde 新增 parse/encodeIntentEngineList 复用单条 codec；expression 多条目取值与至少1意图/端点/顺序/范围完整性校验；ConditionTree 默认空列表；四语新增 v3Conditions.intentAddLabel/intentRemoveLabel 并补齐 inputType.intentEngine 缺失键）、变更 4（安全检测移除 rblResult/rbl 与 displayNameSpoof/exec_imp 两条件，目录 51→49、security 20→18、select 12→10，四语删 v3Conditions 对应文案且保留 emailDisposal/auth-spoofing 同名键，catalogue.test.ts 计数不变量同步）；浏览器实拍 S-1 多意图双模式面板 + S-2 安全检测清单无RBL/仿冒 + S-3 模块支持49种条件类型（浅色 AI版·单租户 平台管理员 Mock 1575×847）；新增差异 D-004~D-006、待确认 Q-003；顺带修复本文件 GT-12723 遗留的 2 处 UTF-8 乱码（导航/阶段3）；乱码自检 CLEAN；version.json current_version 14→15。",
       "demo_version": 15
     },
     {
@@ -316,7 +316,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-11675",
       "incremental": true,
-      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续追加（编���� GT-12753 ���变更 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更新为 D-001~D-016、D 范围更���为 Q-001~Q-006，标题追加 GT-11675（v5��，��本��史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
+      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续追��（编���� GT-12753 ���变更 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更新为 D-001~D-016、D 范围更���为 Q-001~Q-006，标题追加 GT-11675（v5��，��本��史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
       "demo_version": 19
     },
     {
@@ -400,6 +400,15 @@
       "ticket": "GT-12790",
       "incremental": true,
       "summary": "GT-12807.html v8→v9：追加 GT-12790「相似邮件与主题检测：交互优化」需求体（1 个变更点）。背景：检测粒度可切换「全方向聚合」与「按方向独立检测」，方向卡片（DirectionCard.tsx）开启观察模式后外层容器会切换为黄色（border-amber-300/bg-amber-50/50），但聚合卡片（AggregateCard.tsx）外层容器颜色是硬编码固定值，从不随 observe_mode 变化，只有内部徽标变黄，导致两种检测粒度下观察模式视觉表现不一致。修复方案：AggregateCard.tsx 外层容器 className 改为与 DirectionCard.tsx 完全一致的条件判断（复用相同色值与逻辑，不新增颜色定义，不修改 DirectionCard.tsx），保留 240ms 过渡动画使颜色切换平滑。附截图 3 张：gt12790-aggregate-before-fix（聚合卡片观察模式关闭态）、gt12790-aggregate-after-fix（聚合卡片观察模式开启态，修复后已变黄）、gt12790-direction-observe-reference（方向卡片观察模式开启态，对齐参照）。目录追加 GT-12790 一级条目及变更点子章节；版本历史 v8→v9。"
+    },
+    {
+      "version": 43,
+      "generated_at": "2026-08-08",
+      "webapp_commit": "386aa38",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12833",
+      "incremental": true,
+      "summary": "GT-12807.html v9→v10：追加 GT-12833「认证协议检查：动作精简为5项，默认动作改为“标记放行”」需求体（3 个变更点）。变更1：PROTOCOL_ACTIONS（SPF/DKIM/PTR 共用）与 DMARC_ACTIONS 均由 6 项精简为 5 项，移除语义与「标记放行」（mark-delivery）高度重叠的 accept（「进行下一步」），四个协议 Tab 统一收敛为拒收/丢弃/隔离/审核/标记放行；i18n key protocolActionShort.accept/protocolActionDesc.accept 保留未删除，仅不再被引用。本变更反向调整了 GT-12801 变更2「DMARC处置策略新增“进行下一步”选项」的原有结论（GT-12801 曾专门为 DMARC 扩充 accept，本次又将其移除），已在 GT-12801 处对应标题/方案概述打删除线标注并交叉链接到本需求，另追加差异标注 D-005 说明反向调整关系。变更2：CheckItem 缺省 fallback 由 { enabled: false, action: 'accept' } 改为 { enabled: true, action: 'mark-delivery' }（未配置项默认变为“开启+标记放行”而非“关闭+进行下一步”）；Select onValueChange 回调中原 enabled: action !== 'accept' 联动逻辑简化为固定 enabled: true，动作选择与检查项启停彻底解耦；auth-spoofing-labels.ts 中 dominantAction() 的 fallback 参数默认值同步由 'accept' 改为 'mark-delivery'。变更3：「宽松」预设模板（TEMPLATES.loose）中 SPF（none/temperror）、DKIM（partial/none）、PTR（noptr）原 accept 预设值全部替换为 mark-delivery，与「标准」「严格」模板动作取值风格保持一致；auth-spoofing-templates.ts 的 applyGroup() 函数内两处（已有 key 分支、新增 key 分支）根据 action !== 'accept' 计算 enabled 的逻辑同步简化为固定 enabled: true；「标准」「严格」模板本身未使用 accept，不受影响。附截图 4 张（真实浏览器 agent-browser 采集，自定义/宽松模板下拉展开态）：gt12833-spf-fail-dropdown-5options（SPF硬拒绝Fail动作下拉，5项：拒收/丢弃/隔离/审核/标记放行）、gt12833-spf-softfail-dropdown-5options（SPF软拒绝SoftFail动作下拉，同5项）、gt12833-dmarc-reject-dropdown-5options（DMARC p=reject动作下拉，验证DMARC_ACTIONS与PROTOCOL_ACTIONS已重新对齐）、gt12833-loose-template-none-tmperror-enabled（宽松模板下SPF“未维护None”“查询失败TempError”两行均为启用态+标记放行，展开标记方式附加配置面板）。目录追加 GT-12833 一级条目及三个变更点子章节（各含1.1方案概述/1.2截图式交互预览/1.3逐元素说明结构）；差异标注区追加 D-005（记录 GT-12801 变更2 已被本需求反向调整）；待确认事项区追加 Q-003（截图中“标记方式”面板内 主题标记/信头标记/正文标记 三个 Switch 行内文案在本次截图环境下渲染为空白方块，经可访问性树核对 DOM 文本本身未损坏，推测为截图当时字体资源未完全加载，与本次改动无关，待正式验收环境复核）；版本历史 v9→v10。"
     }
   ]
 }
