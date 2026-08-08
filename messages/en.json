@@ -10064,13 +10064,12 @@
       "error": "Failed to load system status. Please refresh and try again."
     },
     "kpi": {
-      "inbound": "Total Inbound",
+      "inbound": "Total Sent & Received",
       "threats": "Threats Blocked",
       "pending": "Pending Emails",
       "nodes": "Nodes Online",
       "ratio": "vs. previous",
       "blockRate": "Block Rate",
-      "pendingSplit": "Quarantined {a} / Report review {b}",
       "allOnline": "All Online",
       "nOffline": "{n} Offline",
       "attention": "Needs Attention",
