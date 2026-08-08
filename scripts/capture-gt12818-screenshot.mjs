@@ -1,9 +1,15 @@
 // GT-12818 截图脚本：在 VM 内用 Playwright chromium（VM 已装 Noto Sans CJK 字体，
 // 故中文可正常渲染，不会出现 agent-browser 沙箱的方块乱码）捕获
 // 「附件安全检测 → 反病毒引擎 → 发现病毒后的处置」下拉打开态。
+//
+// 认证：OSGATEWAY_PRODUCT_FORM_SWITCHER=true 时 proxy 的 demo bypass 让所有路由
+// 视为已登录（无需 token cookie），AuthProvider 亦会自动恢复 DEMO_SUPER_ADMIN。
+// 仅需 osg_form_override=ai-single 选定「AI版·单租户」形态，pipeline 才直出模块卡片。
 import { chromium } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:3000';
+// 必须用 localhost（非 127.0.0.1）：Next dev 把 127.0.0.1 视作不允许的跨域 host，
+// 会阻断 HMR/客户端水合，导致页面永远停在 auth loading 转圈。
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 const OUT = process.env.OUT || '/tmp/gt12818/virus-action-dropdown.png';
 
 async function main() {
@@ -14,80 +20,47 @@ async function main() {
     locale: 'zh-CN',
     colorScheme: 'light',
   });
-
-  // proxy(src/proxy.ts) 未带 osgateway_token 会 302 到 /login；osg_form_override
-  // 选定「AI版·单租户」形态，pipeline 才会直接渲染模块卡片。
-  await context.addCookies([
-    { name: 'osgateway_token', value: 'gt12818-demo-token', url: BASE_URL, httpOnly: true },
-    { name: 'osg_form_override', value: 'ai-single', url: BASE_URL },
-  ]);
-  // 应用挂载前写入 mock + demo 会话开关（键见 src/lib/mock/storage.ts）。
-  await context.addInitScript(() => {
-    try {
-      localStorage.setItem('osgateway_mock_enabled', '1');
-      localStorage.setItem('osgateway_demo_session', '1');
-    } catch {}
-  });
+  await context.addCookies([{ name: 'osg_form_override', value: 'ai-single', url: BASE_URL }]);
 
   const page = await context.newPage();
   page.on('pageerror', (e) => console.log('[pageerror]', e.message));
-  page.on('console', (m) => {
-    const t = m.text();
-    if (m.type() === 'error' || m.type() === 'warning') console.log(`[console.${m.type()}]`, t.slice(0, 300));
-  });
-  page.on('requestfailed', (r) => {
-    if (!r.url().includes('hmr') && !r.url().includes('_next/static/chunks/_')) {
-      console.log('[requestfailed]', r.url().slice(-80), r.failure()?.errorText);
-    }
-  });
-  page.on('response', (r) => {
-    if (r.status() >= 400 && !r.url().includes('hmr')) console.log('[resp]', r.status(), r.url().slice(-90));
-  });
 
-  console.log('[step] goto pipeline (warmup)');
-  await page.goto(`${BASE_URL}/zh/security/pipeline`, { waitUntil: 'networkidle', timeout: 90000 });
+  const configBtn = page.getByTestId('pipeline-policy-config-attachment_security');
 
-  // 冷编译时首帧只有 auth loading 转圈；轮询等待附件安全卡片出现，
-  // 必要时 reload 一次触发已编译产物直出。
-  const configBtn = page.getByTestId('pipeline-policy-config-attachment');
+  console.log('[step] goto pipeline (cold compile 首访可能数十秒)');
+  await page.goto(`${BASE_URL}/zh/security/pipeline`, { waitUntil: 'domcontentloaded', timeout: 120000 });
+
+  // 冷编译期首帧可能只有 auth loading；轮询等待卡片出现，最多 ~2 分钟。
   let ready = false;
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 40; i++) {
     if (await configBtn.count()) { ready = true; break; }
-    await page.waitForTimeout(2500);
-    if (i === 3) {
-      console.log('[step] reload after warmup');
-      await page.reload({ waitUntil: 'networkidle', timeout: 90000 });
-    }
-    const snip = await page.evaluate(() => document.body.innerText.slice(0, 120).replace(/\n+/g, ' | '));
+    await page.waitForTimeout(3000);
+    const snip = await page.evaluate(() => document.body.innerText.slice(0, 100).replace(/\s+/g, ' ').trim());
     console.log(`[poll ${i}] hasBtn=${await configBtn.count()} body="${snip}"`);
   }
   if (!ready) {
     await page.screenshot({ path: '/tmp/gt12818/debug-initial.png' });
     throw new Error('attachment config button never appeared');
   }
-  await configBtn.first().waitFor({ state: 'visible', timeout: 20000 });
+  await configBtn.first().scrollIntoViewIfNeeded();
   console.log('[step] open attachment-security drawer');
-  await configBtn.click();
+  await configBtn.first().click();
 
-  // 抽屉内切到「反病毒引擎」页签
   const antivirusTab = page.getByTestId('tab-antivirus');
-  await antivirusTab.waitFor({ state: 'visible', timeout: 20000 });
+  await antivirusTab.waitFor({ state: 'visible', timeout: 30000 });
   console.log('[step] switch to antivirus tab');
   await antivirusTab.click();
 
-  // 打开「发现病毒后的处置」下拉
   const trigger = page.getByTestId('antivirus-virus-action');
-  await trigger.waitFor({ state: 'visible', timeout: 20000 });
+  await trigger.waitFor({ state: 'visible', timeout: 30000 });
   await trigger.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(400);
   console.log('[step] open virus-action select');
   await trigger.click();
 
-  // 等选项面板出现
-  await page.getByTestId('antivirus-virus-action-options').waitFor({ state: 'visible', timeout: 10000 });
-  await page.waitForTimeout(500);
+  await page.getByTestId('antivirus-virus-action-options').waitFor({ state: 'visible', timeout: 15000 });
+  await page.waitForTimeout(600);
 
-  // 核对候选项权威文本
   const optionTexts = await page
     .getByTestId('antivirus-virus-action-options')
     .locator('[data-testid^="antivirus-virus-action-"]')
