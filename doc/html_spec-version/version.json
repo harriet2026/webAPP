@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 43,
+  "current_version": 44,
   "history": [
     {
       "version": 1,
@@ -126,7 +126,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12695",
       "incremental": true,
-      "summary": "GT-12695 v2（GT-12696 发信人黑白名单优化）：新增 GT-12695.html，完整重生成 6 个变更点规格；补充全部 7 张真实浏览器截图（S-12~S-18），覆盖：开���菜单 GT-12695 入口、策略流水线、黑名单列表8列（含优先级）、黑名单抽屉默认态（拒收）、执行动作下拉展开（含丢弃及说明文字）、白名单列表8列、白名单抽屉默认态（投递，无白名单模式）；D-1~D-3，Q-1~Q-2。",
+      "summary": "GT-12695 v2（GT-12696 发信人黑白名单优化）：新增 GT-12695.html，完整重生成 6 个变更点规格；补充全部 7 张真实浏览器截图（S-12~S-18），覆盖：开���菜单 GT-12695 入口、策略流水线、黑名单列表8列（含优先级）、黑名单抽屉默认态（���收）、执行动作下拉展开（含丢弃及说明文字）、白名单列表8列、白名单抽屉默认态（投递，无白名单模式）；D-1~D-3，Q-1~Q-2。",
       "demo_version": 5
     },
     {
@@ -156,7 +156,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12705",
       "incremental": true,
-      "summary": "GT-12695 v5（GT-12705 身份认证与仿冒检测——认证协议检查：去掉例外配置说明文案）：追加 GT-12705 需求节（1个变更点）：移除认证协议检查区块顶部蓝色例外配置说明条（exceptionBanner + 前往策略流水线 Link，ProtocolChecksSection.tsx 7行JSX+Info导入移除，i18n key保留）；目录追加 GT-12705 卡片块；补充真实截图 S-27（移除后默认态验证）；差异标注新增 D-6（已移除）；版本历史追加 v5。",
+      "summary": "GT-12695 v5（GT-12705 身份认证与仿冒检测—��认证协议检查：去掉例外配置说明文案）：追加 GT-12705 需求节（1个变更点）：移除认证协议检查区块顶部蓝色例外配置说明条（exceptionBanner + 前往策略流水线 Link，ProtocolChecksSection.tsx 7行JSX+Info导入移除，i18n key保留）；目录追加 GT-12705 卡片块；补充真实截图 S-27（移除后默认态验证）；差异标注新增 D-6（已移除）；版本历史追加 v5。",
       "demo_version": 8
     },
     {
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本����史���������加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本�����史���������加 v9。",
       "demo_version": 12
     },
     {
@@ -316,7 +316,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-11675",
       "incremental": true,
-      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续追��（编���� GT-12753 ���变更 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更新为 D-001~D-016、D 范围更���为 Q-001~Q-006，标题追加 GT-11675（v5��，��本��史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
+      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 ��续追��（编���� GT-12753 ���变更 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更新为 D-001~D-016、D 范围更���为 Q-001~Q-006，标题追加 GT-11675（v5��，��本��史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
       "demo_version": 19
     },
     {
@@ -409,6 +409,15 @@
       "ticket": "GT-12833",
       "incremental": true,
       "summary": "GT-12807.html v9→v10：追加 GT-12833「认证协议检查：动作精简为5项，默认动作改为“标记放行”」需求体（3 个变更点）。变更1：PROTOCOL_ACTIONS（SPF/DKIM/PTR 共用）与 DMARC_ACTIONS 均由 6 项精简为 5 项，移除语义与「标记放行」（mark-delivery）高度重叠的 accept（「进行下一步」），四个协议 Tab 统一收敛为拒收/丢弃/隔离/审核/标记放行；i18n key protocolActionShort.accept/protocolActionDesc.accept 保留未删除，仅不再被引用。本变更反向调整了 GT-12801 变更2「DMARC处置策略新增“进行下一步”选项」的原有结论（GT-12801 曾专门为 DMARC 扩充 accept，本次又将其移除），已在 GT-12801 处对应标题/方案概述打删除线标注并交叉链接到本需求，另追加差异标注 D-005 说明反向调整关系。变更2：CheckItem 缺省 fallback 由 { enabled: false, action: 'accept' } 改为 { enabled: true, action: 'mark-delivery' }（未配置项默认变为“开启+标记放行”而非“关闭+进行下一步”）；Select onValueChange 回调中原 enabled: action !== 'accept' 联动逻辑简化为固定 enabled: true，动作选择与检查项启停彻底解耦；auth-spoofing-labels.ts 中 dominantAction() 的 fallback 参数默认值同步由 'accept' 改为 'mark-delivery'。变更3：「宽松」预设模板（TEMPLATES.loose）中 SPF（none/temperror）、DKIM（partial/none）、PTR（noptr）原 accept 预设值全部替换为 mark-delivery，与「标准」「严格」模板动作取值风格保持一致；auth-spoofing-templates.ts 的 applyGroup() 函数内两处（已有 key 分支、新增 key 分支）根据 action !== 'accept' 计算 enabled 的逻辑同步简化为固定 enabled: true；「标准」「严格」模板本身未使用 accept，不受影响。附截图 4 张（真实浏览器 agent-browser 采集，自定义/宽松模板下拉展开态）：gt12833-spf-fail-dropdown-5options（SPF硬拒绝Fail动作下拉，5项：拒收/丢弃/隔离/审核/标记放行）、gt12833-spf-softfail-dropdown-5options（SPF软拒绝SoftFail动作下拉，同5项）、gt12833-dmarc-reject-dropdown-5options（DMARC p=reject动作下拉，验证DMARC_ACTIONS与PROTOCOL_ACTIONS已重新对齐）、gt12833-loose-template-none-tmperror-enabled（宽松模板下SPF“未维护None”“查询失败TempError”两行均为启用态+标记放行，展开标记方式附加配置面板）。目录追加 GT-12833 一级条目及三个变更点子章节（各含1.1方案概述/1.2截图式交互预览/1.3逐元素说明结构）；差异标注区追加 D-005（记录 GT-12801 变更2 已被本需求反向调整）；待确认事项区追加 Q-003（截图中“标记方式”面板内 主题标记/信头标记/正文标记 三个 Switch 行内文案在本次截图环境下渲染为空白方块，经可访问性树核对 DOM 文本本身未损坏，推测为截图当时字体资源未完全加载，与本次改动无关，待正式验收环境复核）；版本历史 v9→v10。"
+    },
+    {
+      "version": 44,
+      "generated_at": "2026-08-08",
+      "webapp_commit": "bc57fee",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12826",
+      "incremental": true,
+      "summary": "GT-12807.html v10→v11：追加 GT-12826「内容规则规则使用错误图标问题解决」需求体（2 个变更点）。背景（现场验收意见）：内容规则新建/编辑抽屉「模拟测试」结果反馈中，“命中”使用红色 XCircle 失败图标（border-rose-200 bg-rose-50 text-rose-700），“未命中”反而使用绿色 CheckCircle2 成功图标（border-emerald-200 bg-emerald-50 text-emerald-700），与“命中/未命中均为正常判定结果、不代表处置好坏”的实际语义直接矛盾。变更1：命中态改为中性信息色 sky + Target 靶心图标（border-sky-200 bg-sky-50 text-sky-700，暗色态 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300），未命中态改为设计系统中性 muted token + MinusCircle 图标（border-border bg-muted text-muted-foreground，非硬编码颜色），文案 contentRules.testMatched「匹配」/testNotMatched「不匹配」不变，仅调整配色与图标；lucide-react import 移除 CheckCircle2/XCircle，新增 Target/MinusCircle。变更2：新增独立 testRunError state，testContentRule 接口调用失败（catch 分支）不再 setTestMatch(false) 伪装成“未命中”渲染绿色成功态，改为写入 testRunError 并单独渲染红色 destructive + AlertTriangle 提示（新增 i18n key contentRules.testFailed，zh:“测试执行失败，请稍后重试”/en:“Test failed to run, please try again”），与命中/未命中结果渲染路径互斥；测试内容变更、动作切换、重新点击运行测试三处既有清空联动同步补齐 testRunError 清空。新增单元测试 ContentRuleDrawer.test.tsx 锁定该交互语义（断言命中态 className 不含 rose/destructive，未命中态不含绿色成功态），避免回归。附截图 2 张（真实浏览器 agent-browser 采集）：gt12826-test-matched-sky（命中态，匹配内容与测试内容均为 aaaa，结果框浅蓝+靶心图标）、gt12826-test-not-matched-neutral（未命中态，测试内容改为 zzzz，结果框 muted 中性灰+减号圆圈图标）；接口执行失败态因需人工构造异常触发未截图，行为已通过源码 catch 分支逻辑确认，记为“不适用”。目录追加 GT-12826 一级条目及两个变更点子章节；版本历史 v10→v11。"
     }
   ]
 }

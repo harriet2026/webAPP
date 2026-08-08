@@ -298,6 +298,21 @@
         </ul>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-12826">GT-12826 内容规则规则使用错误图标问题解决</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12826-change-1">模拟测试结果态：命中/未命中不再使用红色失败图标与绿色成功图标，改为中性信息色 + 靶心图标 / muted 中性灰</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12826-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12826-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12826-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12826-change-2">新增独立的接口执行错误态（testRunError），与命中/未命中结果彻底解耦</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12826-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12826-c2-elements">2.2 逐元素说明</a></li>
+        </ul>
+      </ul>
+
       <li><a href="#diffs">D. 差异标注</a></li>
       <li><a href="#questions">Q. 待确认事项</a></li>
       <li><a href="#version-history">V. 版本历史</a></li>
@@ -669,7 +684,7 @@ onViewRawLogs?: () =&gt; void;
           <tr>
             <td>Select Item · reject 描述</td>
             <td>文案</td>
-            <td colspan="2">向发信方返回 SMTP 5xx 拒绝响应（不变）</td>
+            <td colspan="2">��发信方返回 SMTP 5xx 拒绝响应（不变）</td>
             <td><code>authSpoofing.protocolActionDesc.reject</code></td>
             <td><code>messages/zh.json</code></td>
           </tr>
@@ -878,7 +893,7 @@ onViewRawLogs?: () =&gt; void;
       <h3 id="gt12797-change-3" style="margin-top:2rem">3. 内容组"每行一条成员"标签改为"每行一条关键词"</h3>
 
       <h4 id="gt12797-c3-overview">3.1 方案概述</h4>
-      <p>内容组的成员是关键词 / 敏感词，使用「成员」一词语义不准确，占位符（敏感词1/敏感词2）与标签（每行一条成员）文案不一致，造成歧义。优化后，仅内容组将标签改为「每行一条关键词」，并将占位符由「敏感词1/敏感词2」改为「关键词1/关键词2」，语义统一；其他类型保持「每行一条成员」不变。</p>
+      <p>内容组的成员是关键词 / 敏感词，使用「成���」一词语义不准确，占位符（敏感词1/敏感词2）与标签（每行一条成员）文案不一致，造成歧义。优化后，仅内容组将标签改为「每行一条关键词」，并将占位符由「敏感词1/敏感词2」改为「关键词1/关键词2」，语义统一；其他类型保持「每行一条成员」不变。</p>
       <table>
         <thead><tr><th>字段</th><th>变更前</th><th>变更后</th><th>i18n key</th></tr></thead>
         <tbody>
@@ -1063,7 +1078,7 @@ onViewRawLogs?: () =&gt; void;
         <li><strong>继续描述</strong>（绿色箭头标注）：「投递/标记投递 → 继续检测」→「投递 → 继续检测」（i18n key <code>pipeline.flowContinueDesc</code>）。</li>
       </ul>
 
-      <h4 id="gt12719-c3-states">3.2 截图式交互预览</h4>
+      <h4 id="gt12719-c3-states">3.2 截图式���互预览</h4>
       <div class="interaction-preview">
         <p><strong>状态 S-1（复用）</strong>：���上截图，流程控制行位于图例区第三行，流程图中红色箭头旁可见「拒收」短文案。</p>
         <figure>
@@ -1223,7 +1238,7 @@ onViewRawLogs?: () =&gt; void;
             <td>zh.json 乱码修复</td>
             <td>i18n 文案</td>
             <td><code>priorityHint</code>「…规??」、<code>noData</code>「???无规则」、<code>markPosition</code>「??记位置」、<code>sampleSubject</code>「项???进展说明」</td>
-            <td>全部修复为正��� UTF-8 汉字：「…规则」「暂无规则」「标记位置」「项目进展说明」</td>
+            <td>全部修复为正��� UTF-8 汉字：「…规则」「暂无规则」���标记位置」「项目进展说明」</td>
             <td><code>messages/zh.json</code> mailMarking.*</td>
             <td>[Base]</td>
           </tr>
@@ -1305,7 +1320,7 @@ onViewRawLogs?: () =&gt; void;
         <li><strong><code>MailMarkingPage.tsx</code> — <code>nextPriority</code> 计算逻辑</strong>：无规则时默认返回 <code>100</code>；有规则时取现有最大优先级 +1，并使用 <code>Math.max(..., 100)</code> 钳制下限、<code>Math.min(..., 1000)</code> 钳制上限，确保默认值始终在合法区间。</li>
         <li><strong><code>RuleEditDrawer.tsx</code> — Input 属性</strong>：<code>min</code> 从 <code>1</code> 改为 <code>100</code>，新增 <code>max={1000}</code>，输入框宽度从 <code>w-20</code> 调整为 <code>w-24</code>（容纳4位数字）。</li>
         <li><strong><code>RuleEditDrawer.tsx</code> — <code>validate</code> 函数</strong>：校���条件从 <code>priority &lt; 1</code> 改为 <code>priority &lt; 100 || priority &gt; 1000</code>，使用新 i18n key <code>errorPriorityRange</code>。</li>
-        <li><strong><code>zh.json</code> / <code>en.json</code></strong>：<code>mailMarking.priorityTip</code> 更新为「取值范围 100～1000；数值越大，规则越优先执行」；新增 <code>mailMarking.errorPriorityRange</code>「优先级必须为 100 到 1000 之间的整数」。</li>
+        <li><strong><code>zh.json</code> / <code>en.json</code></strong>：<code>mailMarking.priorityTip</code> 更新为「取值范围 100～1000；数值越大，规则越优先执行���；新增 <code>mailMarking.errorPriorityRange</code>「优先级必须为 100 到 1000 之间的整数」。</li>
       </ul>
 
       <h4 id="gt12795-c1-states">1.2 截图式交互预览</h4>
@@ -1329,7 +1344,7 @@ onViewRawLogs?: () =&gt; void;
         <p style="margin-top:1.5rem"><strong>状态 S-2：规则名称为空时点击保存的校验失败态</strong><br/>
         触发路径：S-1 → 不填写规则名称 → 直接点击「保存」</p>
         <figure>
-          <img src="./screenshots/gt12795-priority-validation-error.png" alt="新建规则表单校验失败，规则名称字段下方显示红色错误文案，优先级字段仍显示100且提示文案正常" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <img src="./screenshots/gt12795-priority-validation-error.png" alt="新建规则表单校验失败，规则名称字段下���显示红色错误文案，优先级字段仍显示100且提示文案正常" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
           <figcaption>S-2：校验失败态 — 规则名称未填，显示红色错误文案；优先级保持 100，范围提示文案完整显示；优先级校验（100~1000）独立触发 <code>errorPriorityRange</code> 错误文案</figcaption>
         </figure>
         <table>
@@ -1500,7 +1515,7 @@ onViewRawLogs?: () =&gt; void;
         </table>
 
         <p style="margin-top:1.5rem"><strong>状态 S-2：IP 过滤 / IP 频率（AI版·多租户·租户管理员）</strong><br/>
-        触发路径：租户管理员 → 安全策略 → IP 过���（或 IP 频率限制）→ 点击「新建规则」</p>
+        触发路径：租户管理员 → 安全策略 → IP 过�����（或 IP 频率限制）→ 点击「新建规则」</p>
         <p style="color:#6b7280;font-style:italic">无法验证：AI版·多租户模式下租户管理员访问 <code>/zh/security/ip-filter</code> 和 <code>/zh/security/ip-frequency</code> 返回「未授权」，Mock 环境不提供该权限组合。代码层已通过 TypeScript 编译验证（无新增 TS 错误）；IP 过滤 DOM 属性变化（<code>min: nonnegative → 100, max: 无 → 1000</code>）已在源码层确认。</p>
       </div>
 
@@ -1632,7 +1647,7 @@ onViewRawLogs?: () =&gt; void;
       <h4 id="gt12791-c2-states">2.2 截图式交互预览</h4>
       <div class="interaction-preview">
         <p><strong>状态 S-2：进行下一步动作选中，标记方式面板默认态（仅主题标记开启）</strong><br/>
-        触发路径：发送方向触发动作 → 选择「进行下一步」→ 标记方式面板展开，主题标记默认开启<br/>
+        触发路径：发送方向触发动作 → 选择「进行下一步」→ 标记方式面板展开，主题标��默认开启<br/>
         <em>注：本状态截图摄制于改名为「投递」阶段，实际界面文案以「进行下一步」为准，面板结构和交互不变。</em></p>
         <figure>
           <img src="./screenshots/gt12791-tag-panel-default.png" alt="选择进行下一步动作后标记方式面板出现，主题标记开启填有[相似邮件]，信头标记和正文标记Switch均关闭" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
@@ -1765,7 +1780,7 @@ onViewRawLogs?: () =&gt; void;
           <thead><tr><th>状态</th><th>卡片边框</th><th>卡片背景</th><th>内部徽标</th><th>是否一致</th></tr></thead>
           <tbody>
             <tr><td>聚合卡片 · 观察模式关闭</td><td><code>border-blue-200</code></td><td><code>bg-white</code></td><td>无徽标</td><td>—</td></tr>
-            <tr><td>聚合卡片 · 观察模式开启（修复前）</td><td><code>border-blue-200</code>（未变）</td><td><code>bg-white</code>（未变）</td><td>黄色「观察中」</td><td>否，卡片主体颜色不随模式变化</td></tr>
+            <tr><td>聚合卡片 · 观察模式开启（修复前）</td><td><code>border-blue-200</code>（未变）</td><td><code>bg-white</code>（未变）</td><td>黄色「观察中」</td><td>否，���片主体颜色不随模式变化</td></tr>
             <tr><td>聚合卡片 · 观察模式开启（修复后）</td><td><code>border-amber-300</code></td><td><code>bg-amber-50/50</code></td><td>黄色「观察中」</td><td>是</td></tr>
             <tr><td>方向卡片 · 观察模式开启（参照，未变更）</td><td><code>border-amber-300</code></td><td><code>bg-amber-50/50</code></td><td>黄色「观察中」</td><td>是（基准）</td></tr>
           </tbody>
@@ -1910,7 +1925,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12833-c2-states">2.2 截图式交互预览</h4>
       <div class="interaction-preview">
-        <p><strong>状态 S-4：「宽松」模板下 SPF「未维护 (None)」/「查询失败 (TempError)」行（修改后）</strong><br/>
+        <p><strong>状态 S-4：「宽松」模板下 SPF「未维护 (None)」/「查询失�� (TempError)」行（修改后）</strong><br/>
         触发路径：策略模板切换为「宽松」→ 确认覆盖当前配置 → 认证协议检查 → SPF Tab → 滚动查看「未维护」「查询失败」两行</p>
         <figure>
           <img src="./screenshots/gt12833-loose-template-none-tmperror-enabled.png" alt="宽松模板下SPF未维护和查询失败两行均已启用，动作为标记放行，并展开标记方式配置面板" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
@@ -2007,6 +2022,155 @@ onViewRawLogs?: () =&gt; void;
     </div>
   </div>
 
+  <!-- ══════════════ GT-12826 ══════════════ -->
+  <div class="incremental-section" id="gt-12826">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#b91c1c">GT</span>
+      <h2>GT-12826 内容规则规则使用错误图标问题解决</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（策略流水线 → 内容规则 → 新建/编辑规则 → 模拟测试）<br/>
+        组件：<code>src/components/security/content-rules/ContentRuleDrawer.tsx</code>、<code>messages/zh.json</code>、<code>messages/en.json</code><br/>
+        2026-08-08 · commit <code>bc57fee</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-info"><strong>现场验收意见：</strong>内容规则新建/编辑抽屉中的「模拟测试」功能，输入测试文本并运行后，「命中」该规则的结果使用了红色 <code>XCircle</code> 失败图标（<code>border-rose-200 bg-rose-50 text-rose-700</code>），「未命中」反而使用绿色 <code>CheckCircle2</code> 成功图标（<code>border-emerald-200 bg-emerald-50 text-emerald-700</code>）。「命中」是模拟测试按用户配置的匹配条件正常判定出的结果，代表规则本身工作正常，不应展示为失败态；红色 destructive 视觉应只保留给接口调用失败、正则解析异常等真正的执行错误。</div>
+
+      <!-- 变更 1 -->
+      <h3 id="gt12826-change-1">1. 模拟测试结果态：命中/未命中不再使用红色失败图标与绿色成功图标，改为中性信息色 + 靶心图标 / muted 中性灰</h3>
+
+      <h4 id="gt12826-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>「命中」「未命中」是模拟测试对"测试文本是否触发该规则"给出的两种正常判定结果，二者都不代表处置好坏——命中不等于"出错"，未命中也不等于"通过"。修改前的实现借用了通用的成功/失败配色语义（红=失败、绿=成功），把"命中"渲染成红色叉号，容易让管理员误判为"测试失败/规则配置有问题"，而"未命中"却显示绿色对勾，容易误判为"测试通过"，两者含义与颜色语义直接矛盾。</p>
+      <p><strong>最终方案：</strong>命中态改为中性信息配色（浅蓝 <code>sky</code> 系）+ <code>Target</code>（靶心）图标，语义为"已命中该匹配条件"，不含好坏判断；未命中态改为使用设计系统的中性 <code>muted</code> 前景/背景 token（浅色主题下接近浅灰）+ <code>MinusCircle</code>（减号圆圈）图标，语义为"未命中，无需处理"。两者都移除 destructive 红色与 success 绿色，视觉上不再暗示对错。图标由 <code>lucide-react</code> 的 <code>XCircle</code>/<code>CheckCircle2</code> 替换为 <code>Target</code>/<code>MinusCircle</code>。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>命中态容器 className</td>
+            <td><code>border-rose-200 bg-rose-50 text-rose-700</code></td>
+            <td><code>border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300</code></td>
+          </tr>
+          <tr>
+            <td>未命中态容器 className</td>
+            <td><code>border-emerald-200 bg-emerald-50 text-emerald-700</code></td>
+            <td><code>border-border bg-muted text-muted-foreground</code>（跟随设计系统主题 token，非硬编码颜色）</td>
+          </tr>
+          <tr>
+            <td>命中态图标</td>
+            <td><code>XCircle</code>（叉号，失败语义）</td>
+            <td><code>Target</code>（靶心，中性"已命中"语义）</td>
+          </tr>
+          <tr>
+            <td>未命中态图标</td>
+            <td><code>CheckCircle2</code>（对勾，成功语义）</td>
+            <td><code>MinusCircle</code>（减号圆圈，中性"无内容/无需处理"语义）</td>
+          </tr>
+          <tr>
+            <td>文案（未变）</td>
+            <td colspan="2"><code>contentRules.testMatched</code>「匹配」/ <code>contentRules.testNotMatched</code>「不匹配」，文案本身未调整，仅调整配色与图标</td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>src/components/security/content-rules/ContentRuleDrawer.tsx</code> — <code>lucide-react</code> import 与结果渲染区块（原 <code>testMatch !== null</code> 分支）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12826-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：命中态（修改后）</strong><br/>
+        触发路径：租户管理员 → 策略流水线 → 内容规则 → 新建规则 → 匹配内容填入「aaaa」→ 点击「模拟测试」展开面板 → 测试内容填入「aaaa」→ 点击「运行测试」</p>
+        <figure>
+          <img src="./screenshots/gt12826-test-matched-sky.png" alt="模拟测试命中态：结果框使用浅蓝色背景、靶心图标，展示“匹配”文案，不再是红色叉号失败态" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：右侧模拟测试面板中，运行测试后结果框显示「匹配」，背景为浅蓝（<code>bg-sky-50</code>）、图标为靶心 <code>Target</code>，不含红色或失败语义。已通过浏览器实测验证（测试内容与匹配内容均为「aaaa」，规则命中）。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-2：未命中态（修改后）</strong><br/>
+        触发路径：同上 → 测试内容改为「zzzz」（与匹配内容「aaaa」不同）→ 点击「运行测试」</p>
+        <figure>
+          <img src="./screenshots/gt12826-test-not-matched-neutral.png" alt="模拟测试未命中态：结果框使用中性灰背景、减号圆圈图标，展示“不匹配”文案，不再是绿色对勾成功态" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：测试内容与匹配内容不一致时，结果框显示「不匹配」，背景改为设计系统 <code>bg-muted</code> 中性灰、图标为减号圆圈 <code>MinusCircle</code>，不再显示绿色对勾成功态。已通过浏览器实测验证。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-3：接口执行失败态（未变更，行为说明）</strong><br/>
+        触发路径：同上 → <code>testContentRule</code> 接口调用抛出异常（网络失败 / 正则解析异常等）</p>
+        <p>本状态是变更 2 新增的独立 <code>testRunError</code> 分支，与命中/未命中结果渲染路径互斥，详见 <a href="#gt12826-change-2">变更 2</a>；由于需要人工构造接口异常才能触发，未安全验证的截图记为「不适用」，行为已通过源码逻辑（<code>catch</code> 分支）确认。</p>
+        <table>
+          <thead><tr><th>结果类型</th><th>修改前配色</th><th>修改后配色</th><th>修改前图标</th><th>修改后图标</th></tr></thead>
+          <tbody>
+            <tr><td>命中（Target 语义变更）</td><td>红色 rose（失败语义）</td><td>浅蓝 sky（中性信息）</td><td>XCircle</td><td>Target</td></tr>
+            <tr><td>未命中</td><td>绿色 emerald（成功语义）</td><td>muted 中性灰（主题 token）</td><td>CheckCircle2</td><td>MinusCircle</td></tr>
+            <tr><td>接口执行失败（新增独立分支）</td><td colspan="2">红色 destructive（<code>border-destructive/30 bg-destructive/10 text-destructive</code>），此前与"未命中"共用同一渲染路径</td><td colspan="2"><code>AlertTriangle</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12826-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>模拟测试结果框（命中）</td><td>状态反馈容器</td><td><code>border-rose-200 bg-rose-50 text-rose-700</code> + <code>XCircle</code></td><td><code>border-sky-200 bg-sky-50 text-sky-700</code>（暗色 <code>dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300</code>）+ <code>Target</code></td><td><code>ContentRuleDrawer.tsx</code> 结果渲染区块</td><td>[Base]</td></tr>
+          <tr><td>模拟测试结果框（未命中）</td><td>状态反馈容器</td><td><code>border-emerald-200 bg-emerald-50 text-emerald-700</code> + <code>CheckCircle2</code></td><td><code>border-border bg-muted text-muted-foreground</code> + <code>MinusCircle</code></td><td><code>ContentRuleDrawer.tsx</code> 结果渲染区块</td><td>[Base]</td></tr>
+          <tr><td>lucide-react 图标 import</td><td>依赖引用</td><td><code>CheckCircle2</code>、<code>XCircle</code></td><td><code>Target</code>、<code>MinusCircle</code>（新增），移除 <code>CheckCircle2</code>/<code>XCircle</code> 引用</td><td><code>ContentRuleDrawer.tsx</code> 顶部 import</td><td>[Base]</td></tr>
+          <tr><td>i18n key <code>contentRules.testMatched</code> / <code>testNotMatched</code></td><td>文案 key（未变）</td><td>「匹配」/「不匹配」</td><td>文案不变，仅去除与颜色语义的隐性绑定</td><td><code>messages/zh.json</code> / <code>messages/en.json</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12826-change-2" style="margin-top:2rem;">2. 新增独立的接口执行错误态（testRunError），与命中/未命中结果彻底解耦</h3>
+
+      <h4 id="gt12826-c2-overview">2.1 方案概述</h4>
+      <p><strong>背景：</strong>修改前，<code>testContentRule</code> 接口调用失败时（<code>catch</code> 分支）直接 <code>setTestMatch(false)</code>，把"接口报错"当作"未命中"处理，渲染成绿色成功态图标，彻底掩盖了真实的执行故障——管理员看到绿色对勾，会误以为测试已正常跑完且未命中，无法察觉后端异常。</p>
+      <p><strong>最终方案：</strong>新增独立状态 <code>testRunError</code>，与 <code>testMatch</code>（命中/未命中，均为正常结果）完全分离：接口调用失败时不再写入 <code>testMatch</code>（保持为 <code>null</code>），而是把 <code>t('contentRules.testFailed')</code>（新增 i18n key，zh:「测试执行失败，请稍后重试」/ en:「Test failed to run, please try again」）写入 <code>testRunError</code>，渲染为红色 <code>destructive</code> 态 + <code>AlertTriangle</code> 图标；结果渲染逻辑改为优先判断 <code>testRunError</code>，仅当无执行错误时才展示 <code>testMatch</code> 命中/未命中结果，两条路径互斥。测试内容变更、动作切换、重新点击「运行测试」等场景均同步清空 <code>testRunError</code>，与既有 <code>testMatch</code>/<code>testError</code> 清空逻辑保持一致。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>接口调用失败（catch 分支）</td>
+            <td><code>setTestMatch(false)</code>（伪装成"未命中"，渲染绿色成功态）</td>
+            <td><code>setTestMatch(null); setTestRunError(t('contentRules.testFailed'))</code>（保持中立，单独走 destructive 提示）</td>
+          </tr>
+          <tr>
+            <td>结果渲染优先级</td>
+            <td>仅 <code>testMatch !== null</code> 一条分支</td>
+            <td><code>testRunError</code> 优先渲染；否则 <code>testMatch !== null</code> 渲染命中/未命中（互斥）</td>
+          </tr>
+          <tr>
+            <td>状态清空联动</td>
+            <td><code>setTestMatch(null); setTestError('')</code>（测试内容变更、切换动作、重新测试时）</td>
+            <td>额外同步 <code>setTestRunError('')</code>，三处清空点均已补齐</td>
+          </tr>
+          <tr>
+            <td>新增 i18n key</td>
+            <td>—</td>
+            <td><code>contentRules.testFailed</code>（zh:「测试执行失败，请稍后重试」/ en:「Test failed to run, please try again」）</td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>ContentRuleDrawer.tsx</code>（新增 <code>testRunError</code> state、<code>handleTest</code> catch 分支、3 处清空联动、结果渲染 JSX）、<code>messages/zh.json</code>、<code>messages/en.json</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12826-c2-elements">2.2 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>testRunError</code> state</td><td>新增 <code>useState</code></td><td>不存在</td><td><code>const [testRunError, setTestRunError] = useState('')</code></td><td><code>ContentRuleDrawer.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>接口失败提示框</td><td>状态反馈容器（新增独立渲染分支）</td><td>复用未命中态绿色成功框</td><td><code>border-destructive/30 bg-destructive/10 text-destructive</code> + <code>AlertTriangle</code>，独立于命中/未命中渲染</td><td><code>ContentRuleDrawer.tsx</code> 结果渲染区块</td><td>[Base]</td></tr>
+          <tr><td>i18n key <code>contentRules.testFailed</code></td><td>文案 key（新增）</td><td>不存在</td><td>zh:「测试执行失败，请稍后重试」/ en:「Test failed to run, please try again」</td><td><code>messages/zh.json</code> / <code>messages/en.json</code></td><td>[Base]</td></tr>
+          <tr><td>单元测试锁定回归</td><td>测试文件（新增）</td><td>不存在</td><td><code>ContentRuleDrawer.test.tsx</code> 新增用例，断言命中态 className 不含 <code>rose</code>/<code>destructive</code>，未命中态不含绿色成功态</td><td><code>src/components/security/content-rules/ContentRuleDrawer.test.tsx</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
   <!-- ══════════════ V. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>V. 版本历史</h2>
@@ -2015,6 +2179,11 @@ onViewRawLogs?: () =&gt; void;
         <tr><th>版本</th><th>日期</th><th>摘要</th></tr>
       </thead>
       <tbody>
+          <tr>
+          <td><span class="version-badge"><span class="vnum">v11</span></span></td>
+          <td>2026-08-08</td>
+          <td>追加 GT-12826「内容规则规则使用错误图标问题解决」需求体（2 个变更点）。背景：内容规则新建/编辑抽屉「模拟测试」结果反馈中，「命中」使用红色 <code>XCircle</code> 失败图标（<code>border-rose-200 bg-rose-50 text-rose-700</code>），「未命中」反而使用绿色 <code>CheckCircle2</code> 成功图标（<code>border-emerald-200 bg-emerald-50 text-emerald-700</code>），与"命中/未命中均为正常判定结果、不代表好坏"的实际语义矛盾。变更 1：命中态改为中性信息色 <code>sky</code> + <code>Target</code> 靶心图标（<code>border-sky-200 bg-sky-50 text-sky-700</code>，暗色态 <code>dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300</code>），未命中态改为设计系统中性 <code>muted</code> token + <code>MinusCircle</code> 图标（<code>border-border bg-muted text-muted-foreground</code>），文案「匹配」「不匹配」不变。变更 2：新增独立 <code>testRunError</code> state，接口调用失败（<code>catch</code> 分支）不再 <code>setTestMatch(false)</code> 伪装成"未命中"，改为写入 <code>testRunError</code> 并渲染红色 <code>destructive</code> + <code>AlertTriangle</code> 提示（新增 i18n key <code>contentRules.testFailed</code>，zh/en 双语），与命中/未命中结果渲染路径互斥；测试内容变更、动作切换、重新测试三处清空联动同步补齐 <code>testRunError</code> 清空。新增单元测试 <code>ContentRuleDrawer.test.tsx</code> 锁定该交互语义（断言命中态 className 不含 <code>rose</code>/<code>destructive</code>，未命中态不含绿色成功态），避免回归。附截图 2 张：gt12826-test-matched-sky（命中态，浅蓝+靶心）、gt12826-test-not-matched-neutral（未命中态，muted 中性灰+减号圆圈）；接口执行失败态因需人工构造异常未截图，行为已通过源码 <code>catch</code> 分支确认。目录追加 GT-12826 一级条目及两个变更点子章节；版本历史 v10→v11。</td>
+        </tr>
           <tr>
           <td><span class="version-badge"><span class="vnum">v10</span></span></td>
           <td>2026-08-08</td>
