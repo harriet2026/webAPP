@@ -4652,7 +4652,7 @@
       "reject": "Reject",
       "quarantine": "Quarantine",
       "audit": "Audit",
-      "markDelivery": "Next Step",
+      "markDelivery": "Tag & Deliver",
       "discard": "Discard"
     },
     "protocolActionDesc": {

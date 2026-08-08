@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测��能�������������",
+    "spoofingDetection": "仿冒邮件检测��能���������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1021,7 +1021,7 @@
         "toasts": {
           "created": "路��规��已��加",
           "updated": "路由规则已更新",
-          "deleted": "路由规则已删除",
+          "deleted": "路��规则已删除",
           "saveError": "请修正表单中的校验��误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
         },
@@ -1333,7 +1333,7 @@
     "priority": "优先级",
     "newPolicy": "新建群组策略",
     "editPolicy": "编辑群组策略",
-    "deleteConfirm": "确定删除��群组策��吗？",
+    "deleteConfirm": "确定删除���群组策��吗？",
     "deleteConfirmDesc": "删除���无法���复，规则���：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效��行路径预览",
@@ -1657,7 +1657,7 @@
     "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已存储内容，并在需要时重新注入或删除项目。"
   },
   "logs": {
-    "emailLogs": "邮��日志",
+    "emailLogs": "����日志",
     "authAttempts": "认证日志",
     "adminAuditLogs": "操��日志",
     "timestamp": "时间",
@@ -3365,7 +3365,7 @@
     "collapseNav": "收起菜单",
     "senderFilterConfig": "发信人黑白名单配置",
     "authSpoofingConfig": "认证仿冒检测配置",
-    "behaviorControlConfig": "发信行为管控配置",
+    "behaviorControlConfig": "发信行为管控���置",
     "similarDetectionConfig": "相似检测配置",
     "mailMarking": "邮件标记与声明",
     "mailMarkingDesc": "外站标记 / 外发免责声明",
@@ -4403,7 +4403,7 @@
     "invalidDate": "请输入有效的失效时间",
     "mixedDirectionActionsPreserved": "此历史规则在不同方向使用不同动作；除非重新选择动作，否则将原样保留。",
     "unsavedTitle": "放弃未保存的更改？",
-    "unsavedDescription": "当前修改尚未保存，确定放弃并关闭编辑器吗��",
+    "unsavedDescription": "当前修改尚未保存，确定放弃并关闭编辑器吗����",
     "discardChanges": "放弃更改",
     "jumpToPage": "跳至页码",
     "actionSection": "执行动作",
@@ -4555,7 +4555,7 @@
       "outbound": "出站邮件",
       "internal": "内部邮件",
       "internalUsers": "内部用户列表",
-      "exact": "精确匹配",
+      "exact": "���确匹配",
       "substring": "子串匹配",
       "addUser": "添加",
       "userNamePlaceholder": "输入用户名或显示名",
@@ -4657,7 +4657,7 @@
       "reject": "拒收",
       "quarantine": "隔离",
       "audit": "审核",
-      "markDelivery": "进行下一步",
+      "markDelivery": "标记放行",
       "discard": "丢弃"
     },
     "protocolActionDesc": {
@@ -5431,7 +5431,7 @@
       "subscription": "订阅"
     },
     "intentDesc": {
-      "porn_gambling": "检测色情、赌博等违规内容邮件",
+      "porn_gambling": "��测色情、赌博等违规内容邮件",
       "political": "检测涉及政治敏感、反动内容的邮件",
       "phishing": "检测伪装身份诱骗用户信息的钓鱼邮件",
       "spam": "检测垃圾邮件、骚扰邮件、广告邮件",
@@ -5725,7 +5725,7 @@
       "lastSync": "最后同步：{time}",
       "primaryAddr": "主地址：{addr}",
       "neverSynced": "尚未同步",
-      "staleWarning": "同步滞后，本页规则可能不是主节点的最新版本",
+      "staleWarning": "同步滞后���本页规则可能不是主节点的最新版本",
       "unknown": "未知"
     },
     "switchConfirm": {
@@ -6488,7 +6488,7 @@
         "advertising": "广告邮件",
         "suspicious": "可疑邮件",
         "sensitive": "敏感内容邮件",
-        "normal": "正常",
+        "normal": "正���",
         "subscription": "订阅"
       },
       "correctionSource": {
@@ -7090,7 +7090,7 @@
       },
       "desc_imageQrCodeResult": {
         "source": "附件图片识别引擎（OCR/二维码）",
-        "usage": "判断图片识别处理是否成功完成：成功=识别步骤正常跑完（即使无发现）；失败=识别服务出错或超时截断，结果可能不完整",
+        "usage": "判断图片识别处理是否成功完成：成功=识别步骤正常跑完（���使无发现）；失败=识别服务出错或超时截断，结果可能不完整",
         "note": "二维码数量用「二维码数量」条件；识别失败的邮件可转人工或隔离兜底"
       },
       "desc_qrCodeCount": {
@@ -7169,7 +7169,7 @@
       },
       "desc_virusScanResult": {
         "source": "防病毒引擎",
-        "usage": "根据病毒扫描结果过滤邮件",
+        "usage": "根据病毒扫描结果过滤���件",
         "note": "支持多引擎联合检测"
       },
       "desc_comprehensiveEngineResult": {
@@ -8350,7 +8350,7 @@
       "lockWaitType": "等待类型",
       "lockObject": "对象",
       "waitMs": "等待(ms)",
-      "viewLog": "查看日志",
+      "viewLog": "查看��志",
       "cacheHitRatio": "缓存命中率",
       "activeConns": "活跃连接数",
       "dbSize": "数据库大小",
@@ -9435,7 +9435,7 @@
       "threatType": {
         "phishing": "钓鱼",
         "malware": "恶意软件",
-        "impersonation": "冒充",
+        "impersonation": "��充",
         "unknown": "未知"
       },
       "disposition": {
