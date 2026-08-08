@@ -313,6 +313,16 @@
         </ul>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-12556">GT-12556 攻击时段分析：去掉雍总的邮件类型陈列模块</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12556-change-1">移除攻击类型图例陈列</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12556-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12556-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12556-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
       <li class="toc-l1"><a href="#gt-11990">GT-11990 投递与流量分析页面优化</a></li>
       <ul class="toc-l2-group">
         <li class="toc-change"><span class="toc-num">1</span><a href="#gt11990-change-1">指标名称与统计口径明确</a></li>
@@ -645,7 +655,7 @@ onViewRawLogs?: () =&gt; void;
     </table>
   </section>
 
-  <!-- ══════════════ Q. 待确认事项 ══════════════ -->
+  <!-- ══════════════ Q. 待确认事项 ════════════���═ -->
   <section id="questions">
     <h2>Q. 待确认事项</h2>
     <table>
@@ -1075,7 +1085,7 @@ onViewRawLogs?: () =&gt; void;
       <h4 id="gt12719-c2-overview">2.1 方案概述</h4>
       <p>图例第二行「名单类型」中：</p>
       <ul>
-        <li><strong>黑名单描述</strong>：「阻断/隔离/丢弃」→「拒收/隔离/丢弃」（跟随「阻断」→「拒收」重命名，i18n key <code>pipeline.blacklistTypeDesc</code>）。</li>
+        <li><strong>黑名单描述</strong>：「阻断/隔离/丢弃」→「拒收/���离/丢弃」（跟随「阻断」→「拒收」重命名，i18n key <code>pipeline.blacklistTypeDesc</code>）。</li>
         <li><strong>白名单描述</strong>：「投递/标记投递」→「��递」（标记投递已下线，i18n key <code>pipeline.whitelistTypeDesc</code>）。</li>
       </ul>
 
@@ -1204,7 +1214,7 @@ onViewRawLogs?: () =&gt; void;
         </figure>
       </div>
 
-      <h4 id="gt12793-c1-elements">1.3 逐元素说明</h4>
+      <h4 id="gt12793-c1-elements">1.3 逐元素说��</h4>
       <table>
         <thead>
           <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key / testid</th><th>源码路径</th><th>形态/角色差异</th></tr>
@@ -1297,7 +1307,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12793-c3-overview">3.1 方案概述</h4>
       <p>原表头列序为：<strong>优先级 | 规则名称 | 适用对象 | 位置 | 状态 | 操作</strong>。按需求调整为：<strong>规则名称 | 适用对象 | 位置 | 状态 | 优先级 | 操作</strong>（优先级列移至状态之后、操作之前）。</p>
-      <p>修改范围：<code>RuleListTable.tsx</code> 的 <code>&lt;thead&gt;</code> 中 <code>priority</code> <code>&lt;th&gt;</code> 和 <code>&lt;tbody&gt;</code> 中 <code>priority</code> <code>&lt;td&gt;</code> 同步调整，列宽 <code>w-[92px]</code> 保持不变，<code>colSpan={6}</code> 的空行/加载行列数不变。</p>
+      <p>修改���围：<code>RuleListTable.tsx</code> 的 <code>&lt;thead&gt;</code> 中 <code>priority</code> <code>&lt;th&gt;</code> 和 <code>&lt;tbody&gt;</code> 中 <code>priority</code> <code>&lt;td&gt;</code> 同步调整，列宽 <code>w-[92px]</code> 保持不变，<code>colSpan={6}</code> 的空行/加载行列数不变。</p>
 
       <h4 id="gt12793-c3-states">3.2 截图式交互预览</h4>
       <div class="interaction-preview">
@@ -1508,7 +1518,7 @@ onViewRawLogs?: () =&gt; void;
           <thead><tr><th>可见元素</th><th>内容/值</th><th>说明</th></tr></thead>
           <tbody>
             <tr><td>优先级输入框</td><td>默认值 100，min=100，max=1000（租户管理员）；0–9999（系统管理员）</td><td>由 <code>getRulePriorityRange(isSystemAdmin)</code> 动态决定</td></tr>
-            <tr><td>优先级提示文案</td><td>「（取值范围 {min}～{max}；数值越大，规则越优先执行）」参数化渲染</td><td>i18n key <code>mailMarking.priorityTip</code>，从 <code>{min}/{max}</code> 参数注入实际值</td></tr>
+            <tr><td>优先级提示文案</td><td>「（取值范围 {min}～{max}；数值越大，规则越优先执行）」参数化��染</td><td>i18n key <code>mailMarking.priorityTip</code>，从 <code>{min}/{max}</code> 参数注入实际值</td></tr>
             <tr><td>底部 footer</td><td>「取消」「保存」按钮</td><td>GT-12793 变更1 已定义位置；本次未改动</td></tr>
           </tbody>
         </table>
@@ -1689,7 +1699,7 @@ onViewRawLogs?: () =&gt; void;
       <h4 id="gt12791-c2-overview">2.1 方案概述</h4>
       <p><strong>背景：</strong>原「标记方式」面板仅支持主题标记和信头标记两种位置，用户无法在邮件正文中插入标记文本。</p>
       <p><strong>最终方案：</strong>在信头标记行下方对称追加第三行「正文标记」Switch；Switch 开启后，其下展示一个自由文本 Input（格式由后端处理，前端不限制）。字段：<code>tag_body_enabled: boolean</code> / <code>tag_body_content: string</code>，新增到 <code>SimilarDetectionConfig</code> type 中。</p>
-      <p><strong>附加策略语义说明：</strong>「进行下一步」动作（value=<code>mark-delivery</code>）本身就是「不拦截、继续走流程 + 可选标记」——标记是附加策略，三个位置均可选，均不选等��于静默放行（此场景建议使用观察模式代替）。</p>
+      <p><strong>附加��略语义说明：</strong>「进行下一步」动作（value=<code>mark-delivery</code>）本身就是「不拦截、继续走流程 + 可选标记」——标记是附加策略，三个位置均可选，均不选等��于静默放行（此场景建议使用观察模式代替）。</p>
 
       <h4 id="gt12791-c2-states">2.2 截图式交互预览</h4>
       <div class="interaction-preview">
@@ -1798,7 +1808,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12790-c1-overview">1.1 方案概述</h4>
       <p><strong>背景：</strong>页面顶部检测粒度可切换「全方向聚合（合并统计）」与「按方向独立检测（可勾选多个）」两种模式。「按方向独立检测」模式下，每个方向卡片（<code>DirectionCard.tsx</code>）开启观���模式后，卡片外层容器的边框与背景色会随之切换为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），配合内部「观察中」黄色徽标，整卡呈现统一的黄色标签视觉。但「全方��聚合」模式下的聚合卡片（<code>AggregateCard.tsx</code>）开启观察模式后，只有内部徽标变黄，卡片外层容器颜色是硬编码的固定值（<code>border-blue-200</code> / <code>bg-white</code>），从不随 <code>observe_mode</code> 变化，导致两种检测粒度下观察模式的视��表现不一致——用户在"聚合"和"独立"两个模式之间切换时，同样开着观察模式，但卡片颜色表现不同，容易造成"聚合模式下观察模式没生效"的误判。</p>
-      <p><strong>决策过程：</strong>讨论了两种实现路径：① 给 <code>AggregateCard.tsx</code>新写一套独立的黄色配色值；② 直接复用 <code>DirectionCard.tsx</code> 已验证过的条件判断逻辑和色值。选择方案②，理由：两个卡片本��上是同一份配置模型（<code>SimilarDetectionConfig</code>）在不同聚合粒度下的两种视图，观察模式的视觉语义应当完全一致，复用同一套色值可以保证以后颜色调整只需改一处，不会出现两处配色逐渐漂移的问题。</p>
+      <p><strong>决策过程：</strong>讨论了��种实现路径：① 给 <code>AggregateCard.tsx</code>新写一套独立的黄色配色值；② 直接复用 <code>DirectionCard.tsx</code> 已验证过的条件判断逻辑和色值。选择方案②，理由：两个卡片本��上是同一份配置模型（<code>SimilarDetectionConfig</code>）在不同聚合粒度下的两种视图，观察模式的视觉语义应当完全一致，复用同一套色值可以保证以后颜色调整只需改一处，不会出现两处配色逐渐漂移的问题。</p>
       <p><strong>最终方案：</strong>将 <code>AggregateCard.tsx</code> 外层容器 className 从硬编码固定值改���与 <code>DirectionCard.tsx</code> 完全一致的条件判断（三元表达式基于 <code>value.observe_mode</code>），并保留过渡动画（<code>transition-[background-color,border-color] duration-[240ms]</code>），使颜色切换有平滑过渡而非跳变。不引入新的颜色定义，不修改 <code>DirectionCard.tsx</code>。</p>
 
       <h4 id="gt12790-c1-states">1.2 截图式交互预览</h4>
@@ -1913,7 +1923,7 @@ onViewRawLogs?: () =&gt; void;
         触发路径：认证协议检查 → 切换到 DMARC Tab → 点击「p=reject」行动作下拉框</p>
         <figure>
           <img src="./screenshots/gt12833-dmarc-reject-dropdown-5options.png" alt="DMARC p=reject动作下拉框展开，显示拒绝、丢弃、隔离、审核、标记放行共5个选项，进行下一步已移除" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
-          <figcaption>S-3：DMARC Tab 同样收敛为 5 个选项，与 SPF/DKIM/PTR 完全一致，验证 <code>DMARC_ACTIONS</code> 已与 <code>PROTOCOL_ACTIONS</code> 重新对齐；GT-12801 曾专门为 DMARC 新增的「进行下一步」选项已不再出现。</figcaption>
+          <figcaption>S-3：DMARC Tab 同样收敛为 5 个选项，与 SPF/DKIM/PTR 完全��致，验证 <code>DMARC_ACTIONS</code> 已与 <code>PROTOCOL_ACTIONS</code> 重新对齐；GT-12801 曾专门为 DMARC 新增的「进行下一步」选项已不再出现。</figcaption>
         </figure>
         <table>
           <thead><tr><th>协议 Tab</th><th>修改前动作数量</th><th>修改后动作数量</th><th>「进行下一步」是否仍存在</th></tr></thead>
@@ -2089,7 +2099,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12826-c1-overview">1.1 方案概述</h4>
       <p><strong>背景：</strong>「命中」「未命中」是模拟测试对"测试文本是否触发该规则"给出的两种正常判定结果，二者都不代表处置好坏——命中不等于"出错"，未命中也不等���"通过"。修改前的实现借用了通用的成功/失败配色语义（红=失败、绿=成功），把"命中"渲染成红色叉号，容易让管理员误判为"测试失败/规则配置有问题"，而"未命中"却显示绿色对勾，容易误判为"测试通过"，两者含义与颜色语义直接矛盾。</p>
-      <p><strong>最终方案：</strong>命中态改为中性信息配色（浅蓝 <code>sky</code> 系）+ <code>Target</code>（靶心）图标，语义为"已命中该匹配条件"，不含好坏判断；未命中态改为使用设计系统的中性 <code>muted</code> 前景/背景 token（浅色主题下接近浅灰）+ <code>MinusCircle</code>（减号圆圈）图标，语义为"未命中，无需处理"。两者都移除 destructive 红色与 success 绿色，视觉上不再暗示对错。图标由 <code>lucide-react</code> 的 <code>XCircle</code>/<code>CheckCircle2</code> 替换为 <code>Target</code>/<code>MinusCircle</code>。</p>
+      <p><strong>最终方案：</strong>命中态改为中性信息配色（浅蓝 <code>sky</code> 系）+ <code>Target</code>（靶心）图标，语义为"已命中该匹配条件"，不含好坏判断；未命中态改为使用设计系统的中性 <code>muted</code> 前景/背景 token（浅色主题下接近浅灰）+ <code>MinusCircle</code>（减���圆圈）图标，语义为"未命中，无需处理"。两者都移除 destructive 红色与 success 绿色，视觉上不再暗示对错。图标由 <code>lucide-react</code> 的 <code>XCircle</code>/<code>CheckCircle2</code> 替换为 <code>Target</code>/<code>MinusCircle</code>。</p>
       <table>
         <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
         <tbody>
@@ -2266,7 +2276,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12818-c1-states">1.2 截图式交互预览</h4>
       <div class="interaction-preview">
-        <p><strong>状态 S-1：发现病毒后的处置下拉打开态（修改后，不含「拒收」）</strong><br/>
+        <p><strong>状态 S-1：发现病毒后的处置下拉打开态（修改���，不含「拒收」）</strong><br/>
         触发路径：产品形态切换为「AI版·单租户」→ 策略流水线 → 「附件安全检测」卡片点击「配置」→ 抽屉内切换到「反病毒引擎」页签 → 点击「发现病毒后的处置」下拉。</p>
         <figure>
           <img src="./screenshots/gt12818-virus-action-dropdown.png" alt="发现病毒后的处置下拉打开态，候选项为隔离、审核、丢弃三项，不含拒收" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
@@ -2368,12 +2378,49 @@ onViewRawLogs?: () =&gt; void;
     </div>
   </div>
 
+  <!-- ══════════════ GT-12556 ══════════════ -->
+  <section id="gt-12556" class="incremental-section">
+    <div class="incr-header">
+      <span class="incr-num">14</span>
+      <h2>GT-12556 攻击时段分析：去掉雍总的邮件类型陈列模块</h2>
+      <span class="incr-meta">路由：<code>/zh/statistics/security-overview</code><br/>增量日期：2026-08-08</span>
+    </div>
+    <div class="incr-body">
+      <h3 id="gt12556-change-1">1. 移除攻击类型图例陈列</h3>
+      <h4 id="gt12556-c1-overview">1.1 方案概述</h4>
+      <p><strong>需求名称：</strong>GT-12556 攻击时段分析：去掉雍总的邮件类型陈列模块。</p>
+      <p>在邮件安全总览的“攻击时段分析”卡片中，移除堆叠柱状图底部的攻击类型图例陈列模块。仅移除图例展示及其占用的底部布局空间，不改变攻击时段数据、堆叠柱状图、方向筛选、日内/周内分布切换、攻击峰值提示或高峰时段列表。</p>
+      <p>本次变更不新增页面文案；页面继续使用项目现有国际化框架。由于仅移除展示组件，没有新增或修改国际化键。</p>
+
+      <h4 id="gt12556-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：攻击时段分析移除攻击类型图例后的正常态</strong><br/>
+        <strong>触发路径：</strong>打开邮件安全总览 → 定位“攻击时段分析”卡片 → 保持“全部”和“日内分布”选中。</p>
+        <figure>
+          <img src="./screenshots/gt12556-attack-time-after.png" alt="攻击时段分析移除攻击类型图例后的页面状态" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>用户提供的真实页面截图，足以作为修改后结果态证据。攻击时段图表底部不再显示攻击类型图例；筛选器、峰值提示、柱状图和高峰时段列表仍保留。</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12556-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead><tr><th>元素</th><th>修改前</th><th>修改后</th><th>事实源</th><th>形态/角色差异</th></tr></thead>
+        <tbody>
+          <tr><td>攻击类型图例</td><td>显示在堆叠柱状图底部，列出多种攻击邮件类型及颜色标识</td><td>完全移除，不保留空占位</td><td><code>src/components/statistics/security-overview/TimeDistributionCard.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>图表布局</td><td>为底部单行滚动图例预留空间</td><td>取消图例预留空间，图表内容区域恢复为无图例布局</td><td><code>TimeDistributionCard.tsx</code> 的 ECharts <code>grid</code> 配置</td><td>[Base]</td></tr>
+          <tr><td>保留元素</td><td colspan="2">攻击峰值提示、全部/方向筛选、日内分布/周内分布切换、堆叠柱状图、高峰时段列表均保持不变</td><td><code>TimeDistributionCard.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>验证</td><td colspan="2">攻击时段测试通过；相关中文源码完成乱码字符搜索自检，无匹配</td><td><code>time-distribution-peaks.test.tsx</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <!-- ══════════════ GT-11990 ══════════════ -->
   <section id="gt-11990" class="incremental-section">
     <div class="incr-header">
       <span class="incr-num">13</span>
       <h2>GT-11990 投递与流量分析页面优化</h2>
-      <span class="incr-meta">路由：<code>/zh/statistics/delivery-traffic</code><br/>增量日期：2026-08-08</span>
+      <span class="incr-meta">路由：<code>/zh/statistics/delivery-traffic</code><br/>���量日期：2026-08-08</span>
     </div>
     <div class="incr-body">
       <h3 id="gt11990-change-1">变更 1：指标名称与统计口径明确</h3>
@@ -2457,12 +2504,12 @@ onViewRawLogs?: () =&gt; void;
           <tr>
           <td><span class="version-badge"><span class="vnum">v13</span></span></td>
           <td>2026-08-08</td>
-          <td>追加 GT-11990「投递与流量分析页面优化」需求体：明确收发信、方向、成功率、退信率、延迟、威胁与检测队列的业务含义及统计口径；按方向优化明细分类和“检测中/检测队列”文案，隐藏指定失败原因但保留其原始统计；彻底移除外发方向“延迟百分位趋势”和“队列趋势”模块及其页面、类型、mock、测试、国际化引用；附真实浏览器默认态截图。版本历史 v12→v13。</td>
+          <td>追加 GT-11990「投递与流量分析页面优化」需求体：明确收发信、方向、成功率、退信率、延迟、威胁与检测队列的业务含义及统计口径；按方向优化明细分类和“检测中/检测队列”文案，隐藏指定失败原因但保留其���始统计；彻底移除外发方向“延迟百分位趋势”和“队列趋势”模块及其页面、类型、mock、测试、国际化引用；附真实浏览器默认态截图。版本历史 v12→v13。</td>
         </tr>
           <tr>
           <td><span class="version-badge"><span class="vnum">v12</span></span></td>
           <td>2026-08-08</td>
-          <td>追加 GT-12818「附件安全-反病毒去掉拒收，增加审核」需求体（2 个变更点）。变更 1：反病毒引擎「发现病毒后的处置」（<code>virus_action</code>）移除「拒收」（<code>reject</code>）执行动作——<code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code> 由 <code>['quarantine', 'reject', 'discard']</code> 去掉 <code>reject</code>，并在 <code>attachment-security.ts</code> 的 <code>AntivirusActionConfig.virus_action</code> 类型 <code>Exclude</code> 追加 <code>'reject'</code>；i18n key <code>actions.reject</code>/<code>actionDesc.reject</code> 保留（仍被 <code>timeout_action</code> 引用），仅从本下拉解除引用。变更 2：同一下拉新增「审核」（<code>audit</code>）执行动作，最终顺序为 <code>['quarantine', 'audit', 'discard']</code>（隔离/审核/丢弃），名称与描述复用既有 i18n key <code>actions.audit</code>「审核」/<code>actionDesc.audit</code>「邮件进入待审核队列，人工确认后投递或退回」（zh/en 均已存在），<code>virus_action</code> 类型本身已允许 <code>audit</code> 无需改动，默认值仍为 <code>quarantine</code>。不改动「扫描超时/不可用动作」<code>timeout_action</code>（仍为拒收/丢弃/隔离/继续流水线）及其它模块。附截图 1 张（VM 内 Playwright chromium 采集，VM 已装 Noto Sans CJK 字体，中文正常渲染）：gt12818-virus-action-dropdown（发现病毒后的处置下拉展开，候选隔离/审核/丢弃三项、无拒收），并已用可访问性树核对选项权威文本与视觉一致。目录追加 GT-12818 一级条目及两个变更点子章节；差异标注追加 D-006；待确认事项追加 Q-004（初���为字体渲染方块，现已改用 VM 内 Playwright 重采中文正常渲染，标记为已解决）；版本历史 v11→v12。</td>
+          <td>追加 GT-12818「附件安全-反病毒去掉拒收，增加审核」需求体（2 个变更点）。变更 1：反病毒引擎「发现病毒后的处置」（<code>virus_action</code>）移除「拒收」（<code>reject</code>）执行动作——<code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code> 由 <code>['quarantine', 'reject', 'discard']</code> 去掉 <code>reject</code>，并在 <code>attachment-security.ts</code> 的 <code>AntivirusActionConfig.virus_action</code> 类型 <code>Exclude</code> 追加 <code>'reject'</code>；i18n key <code>actions.reject</code>/<code>actionDesc.reject</code> 保留（仍被 <code>timeout_action</code> 引用），仅从本下拉解除引用。变更 2���同一下拉新增「审核」（<code>audit</code>）执行动作，最终顺序为 <code>['quarantine', 'audit', 'discard']</code>（隔离/审核/丢弃），名称与描述复用既有 i18n key <code>actions.audit</code>「审核」/<code>actionDesc.audit</code>「邮件进入待审核队列，人工确认后投递或退回」（zh/en 均已存在），<code>virus_action</code> 类型本身已允许 <code>audit</code> 无需改动，默认值仍为 <code>quarantine</code>。不改动「扫描超时/不可用动作」<code>timeout_action</code>（仍为拒收/丢弃/隔离/继续流水线）及其它模块。附截图 1 张（VM 内 Playwright chromium 采集，VM 已装 Noto Sans CJK 字体，中文正常渲染）：gt12818-virus-action-dropdown（发现病毒后的处置下拉展开，候选隔离/审核/丢弃三项、无拒收），并已用可访问性树核对选项权威文本与视觉一致。目录追加 GT-12818 一级条目及两个变更点子章节；差异标注追加 D-006；待确认事项追加 Q-004（初���为字体渲染方块，现已改用 VM 内 Playwright 重采中文正常渲染，标记为已解决）；版本历史 v11→v12。</td>
         </tr>
           <tr>
           <td><span class="version-badge"><span class="vnum">v11</span></span></td>
@@ -2482,7 +2529,7 @@ onViewRawLogs?: () =&gt; void;
         <tr>
           <td><span class="version-badge"><span class="vnum">v8</span></span></td>
           <td>2026-08-07</td>
-          <td>追加 GT-12791「相似检测模块优化」��求体（3 个变更点）。变更1：触发动作 label 调整——<code>actionMarkDelivery</code>「标记投递」→「进行下一步」（en: Mark &amp; Deliver → Next Step，与 GT-12719 策略流水线模块 <code>pipeline.actionNextStep</code> 术语呼应但 key 独立）、<code>actionBlock</code>「阻断」→「拒收」（value 不变），<code>action-options.ts</code> 不改；顺序保持进行下一步/隔离/审核/拒收/丢弃 5 个；<code>errorTagRequired</code> 文案去除动作名引用改为「启用该动作时需至少启用一种标记方式」。变更2：附加策略新增正文标记——<code>TagDeliveryPanel.tsx</code> 信头标记行下方对称追��第三行（<code>tag_body_enabled</code> Switch + <code>tag_body_content</code> 自由文本 Input），<code>types.ts</code> 追加两个可选字段，新增 i18n key <code>tagBodyLabel</code>/<code>tagBodyPlaceholder</code>（zh/en），<code>tagModeHint</code> 提示文案同步更新。变更3：① 校验逻辑拆分两类错误——「未选任何标记」→<code>errorTagRequired</code>，「已选但字段为空」→新增<code>errorTagFieldRequired</code>（zh「已启用的标记方式内容不能为空」）；② 移除豁免提示条（<code>renderExemptionNote</code>函数+两处调用+<code>Link</code>/<code>ExternalLink</code> import）；③ 按钮区 <code>justify-between</code>→<code>justify-end</code>。附截图 5 张：gt12791-page-default（页面全景）、gt12791-action-dropdown-send（5 个选项下拉，摄制于「投递」措辞阶段，实际以「进行下一步」为准）、gt12791-tag-panel-default（进行下一步选中后标记面板）、gt12791-footer-buttons（完整面板+靠右按��区）、gt12791-validation-error-none（errorTagFieldRequired toast）。目录追加 GT-12791 一级条目及三个变更点子章节；版本历史 v7→v8。</td>
+          <td>追加 GT-12791「相似检测模块优化」��求体（3 个变更点）。变更1：触发动作 label 调整——<code>actionMarkDelivery</code>「标记投递」→「进行下一步」（en: Mark &amp; Deliver → Next Step，与 GT-12719 策略流水线模块 <code>pipeline.actionNextStep</code> 术语呼应但 key 独立）、<code>actionBlock</code>「阻断」→「拒收」（value 不变），<code>action-options.ts</code> 不改；顺序保持进行下一步/隔离/审核/拒收/丢弃 5 个；<code>errorTagRequired</code> 文案去除动作名引用改为「启用该动作时需至少启用一种标记方式」。变更2：附加策略新增正文标记——<code>TagDeliveryPanel.tsx</code> 信头标记行下方对称追��第三行（<code>tag_body_enabled</code> Switch + <code>tag_body_content</code> 自由文本 Input），<code>types.ts</code> 追加两个可选字段，新增 i18n key <code>tagBodyLabel</code>/<code>tagBodyPlaceholder</code>（zh/en），<code>tagModeHint</code> 提示文案同步更新��变更3：① 校验逻辑拆分两类错误——「未选任何标记」→<code>errorTagRequired</code>，「已选但字段为空」→新增<code>errorTagFieldRequired</code>（zh「已启用的标记方式内容不能为空」）；② 移除豁免提示条（<code>renderExemptionNote</code>函数+两处调用+<code>Link</code>/<code>ExternalLink</code> import）；③ 按钮区 <code>justify-between</code>→<code>justify-end</code>。附截图 5 张：gt12791-page-default（页面全景）、gt12791-action-dropdown-send（5 个选项下拉，摄制于「投递」措辞阶段，实际以「进行下一步」为准）、gt12791-tag-panel-default（进行下一步选中后标记面板）、gt12791-footer-buttons（完整面板+靠右按��区）、gt12791-validation-error-none（errorTagFieldRequired toast）。目录追加 GT-12791 一级条目及三个变更点子章节；版本历史 v7→v8。</td>
         </tr>
         <tr>
           <td><span class="version-badge"><span class="vnum">v7</span></span></td>
@@ -2497,7 +2544,7 @@ onViewRawLogs?: () =&gt; void;
         <tr>
           <td><span class="version-badge"><span class="vnum">v5</span></span></td>
           <td>2026-08-07</td>
-          <td>追加 GT-12793 需求体（邮件标记与声明���块优化，3 个变更点）。变更 1：RuleEditDrawer「取消」「保存」按钮从 SheetHeader 右上移至 SheetContent 底部 footer 右下，标题区仅保留标题和副标题；变更 2：MailMarkingPage.loadRules 由 Promise.all 改为 Promise.allSettled，scopes 失败不再阻断规则展示，修复 zh.json mailMarking 4 处 UTF-8 乱码（priorityHint/noData/markPosition/sampleSubject）；变更 3：RuleListTable 「优先级」列从第1列（规则名称前）移至第5列（状态之后、操作之前），接收标记和外发声明共用同一组件。附截图 gt12793-receive-list（接收标记4条规则）、gt12793-send-list（外发声明2条规则）；目录追加 GT-12793 一级条目及三级子章节；版本历史 v4→v5。</td>
+          <td>追加 GT-12793 需求体（邮件标记与声明���块优化，3 个变更点）。变更 1：RuleEditDrawer「取消」「保存」按钮从 SheetHeader 右上移至 SheetContent 底部 footer 右下，标题区仅保留标题和副标题；变更 2：MailMarkingPage.loadRules 由 Promise.all 改为 Promise.allSettled，scopes 失败不再阻断规则展示，修复 zh.json mailMarking 4 �� UTF-8 乱码（priorityHint/noData/markPosition/sampleSubject）；变更 3：RuleListTable 「优先级」列从第1列（规则名称前）移至第5列（状态之后、操作之前），接收标记和外发声明共用同一组件。附截图 gt12793-receive-list（接收标记4条规则）、gt12793-send-list（外发声明2条规则）；目录追加 GT-12793 一级条目及三级子章节；版本历史 v4→v5。</td>
         </tr>
         <tr>
           <td><span class="version-badge"><span class="vnum">v4</span></span></td>
