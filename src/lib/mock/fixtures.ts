@@ -1235,7 +1235,7 @@ export function mockOpsTopAi(): { markdown: string } {
   };
 }
 
-// ─── 监控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
+// ─── ��控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
 export function mockMonitorDashboardOverview(range: MonitorDashboardRange): MonitorDashboardOverview {
   const volumes: Record<MonitorDashboardRange, number> = {
     today: 125847,
@@ -2961,7 +2961,7 @@ function makeMockRBLFilterRules(): RBLFilterRuleView[] {
     }),
     makeRBLRule({
       id: 3,
-      name: "开放转发源标记",
+      name: "开���转发源标记",
       description: "公共 RBL 命中后添加 header 标记",
       match_mode: "specific",
       match_servers: ["zen.spamhaus.org"],
@@ -3229,7 +3229,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 // ════════════════════════════════════════════════════════════════════════════════
 // 发信人黑白名单（sender_filter，mock）
 // 数据结构对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
-//   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）���成，
+//   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts������成，
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
 //   - metadata 携带 `{feature:'sender_filter', sender_config, ip_range, list_type}`，
 //     与 condition_tree 保持一致（`resolveSenderFilterRule` 的 metadata/tree 双重校验）。
@@ -3332,7 +3332,7 @@ export function mockSenderFilterRulesList(): { items: Rule[] } {
 //   - 分组名取自 tags 里 `grp:<name>` 前缀（GROUP_TAG_PREFIX），而非 `name` 字段；
 //   - 分组类型优先取 metadata.group_type，其次由 stage 反推（GROUP_TYPE_TO_STAGE 的反映射）；
 //   - 普通组 condition_tree 用 `serializeMembers` 生成（与 `parseMembers` 互为逆运算）；
-//     特征组直接给 condition_tree（serde 的 AND[OR[any],AND[all]] 形态）；
+//     特征组直接给 condition_tree（serde 的 AND[OR[any],AND[all]] 形��）；
 //   - member_count / reference_count 显式下发（与真实后端 include=member_count,reference_count
 //     的响应一致），memberCount 不再依赖成员数组长度，特征组的 member_count = 条件数。
 // 数据值照抄群组策略页 demo 的 staticGroups + 特征组（html_spec filter-rules-group-policy），
@@ -3557,7 +3557,7 @@ function groupPolicyRulesSeed(): Rule[] {
     gpRule({
       id: 9001,
       name: "高管邮箱快速通道",
-      description: "针对高管邮箱的优化通道",
+      description: "针��高管邮箱的优化通道",
       priority: 0,
       is_active: true,
       target_groups: { recipientGroup: ["高管邮箱"] },
@@ -4948,7 +4948,7 @@ export function mockPutIntentEngineConfig(
 ): Record<string, unknown> {
   intentEngineMockState = structuredClone(body);
   // 与 spec §5 对齐：PUT 覆写内存态后返回覆写后的配置（而不是 {ok:true}），
-  // 使前端 putIntentEngineConfig 的返回值可直接用于回填页面状态。
+  // 使前端 putIntentEngineConfig 的返回值可���接用于回填页面状态。
   return structuredClone(intentEngineMockState);
 }
 
@@ -5278,7 +5278,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     // demo html_spec layer-10-detail-overview-single 对齐：首次出现新发信人 +
     // 域名年龄2天（新注册域名）+ 处置依据展示为「隔离」（而不是
     // deliveryStatus=audit_pending 派生出的「审核」，两者是独立字段——见
-    // MockDisposalSeed.disposalBasisActionOverride 的注释���+ 大小≈2.3MB。
+    // MockDisposalSeed.disposalBasisActionOverride 的���释���+ 大小≈2.3MB。
     senderIsNewOnThisMail: true,
     domainAgeDays: 2,
     storageSizeBytes: 2_411_724,
@@ -5653,7 +5653,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "outgoing",
     sender: "pm@company.com",
     recipients: "blogger@tech-media.com",
-    subject: "内���产品���线图（含未���布���号）",
+    subject: "内���产品�����线图（含未���布���号）",
     action: "block",
     reason: "内容规则命中：竞品/机密关键词",
     mailType: "sensitive",
@@ -7022,7 +7022,7 @@ export function mockEmailDisposalMutate(
 
   // 对象级处置（DD-5）：disposeByObject 打的也是这个端点，但只带一个
   // mail_log_id + object_id，且读的是 `{results: ObjectDisposeResult[]}`，
-  // 不是整封维度的 succeeded/failed 汇总——真实后端 dispatchDisposeObject 同样
+  // 不是整封维度的 succeeded/failed 汇总—��真实后端 dispatchDisposeObject 同样
   // 分流（internal/api/mail_log_disposal.go 的 BulkDisposeMailLogs），mock 需
   // 要镜像这个分支，否则 useRecipientDisposition 的单/多收件人处置按钮读不到
   // results[] 而永远显示失败。
@@ -7221,7 +7221,7 @@ function buildDefaultDisposalSettingsFixture(): DisposalSettings {
 // 且群组策略演示规则本身占用 9001-9005）----
 // 复用既有的 sfGroupRule（见本文件 group-management 区）生成一个符合
 // ruleToGroup（webapp/src/lib/api/groups.ts）判型条件的 Rule：
-// stage='rcpt' → GroupType 'recipient'，且 tags 带 `grp:<name>` 前缀
+// stage='rcpt' → GroupType 'recipient'���且 tags 带 `grp:<name>` 前缀
 // （否则 ruleToGroup 会因找不到 tag 直接判空丢弃这条数据）。member_count
 // 用 demo 的聚合数字直接覆盖（不虚构不存在的真实成员邮箱列表）。
 export function mockRecipientGroupRulesList(): { items: Rule[]; total: number } {
@@ -8040,8 +8040,7 @@ export function mockDeliveryTrafficFor(
         { name: 'gmail.com', value: 5.2, count: n(320) }, { name: 'qq.com', value: 3.8, count: n(245) },
         { name: 'outlook.com', value: 2.1, count: n(156) }, { name: 'yahoo.com', value: 1.9, count: n(134) }, { name: '163.com', value: 1.5, count: n(98) },
       ],
-      latency: { percentiles: dates.map((date, i) => ({ date, p50: 850 + i * 30, p90: 6200 + i * 120, p99: 24500 + i * 600 })), buckets: [] },
-      queue_trend: dates.map((date, i) => ({ date, count: n(520 + i * 57) })),
+      latency: { buckets: [] },
       detail_table: detail('send'),
       generated_at: new Date().toISOString(), data_lag_seconds: 420,
     };

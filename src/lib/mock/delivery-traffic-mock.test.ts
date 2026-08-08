@@ -27,7 +27,6 @@ describe('delivery traffic mock coverage', () => {
     });
     expect(all.trend.points.map((point: { date: string }) => point.date)).toEqual(expectedTrendDates);
     expect(tenant.kpi.inbound_total ?? 0).toBeLessThan(all.kpi.inbound_total ?? 0);
-    expect(send.latency.percentiles).toHaveLength(7);
-    expect(send.queue_trend).toHaveLength(7);
+    expect(send.latency.buckets).toEqual([]);
   });
 });

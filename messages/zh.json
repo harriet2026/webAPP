@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测������能���������������",
+    "spoofingDetection": "仿冒邮件检测��������能���������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1113,7 +1113,7 @@
       },
       "toasts": {
         "created": "认证配置已添加",
-        "updated": "认证配置���更���",
+        "updated": "���证配置���更���",
         "deleted": "认证配置已删除",
         "saveError": "请修正表单中的校验错误"
       },
@@ -1332,7 +1332,7 @@
     "policyConfig": "策略配置",
     "priority": "优先级",
     "newPolicy": "新建群组策略",
-    "editPolicy": "编辑群组策略",
+    "editPolicy": "编辑群组��略",
     "deleteConfirm": "确��删除���群组策��吗？",
     "deleteConfirmDesc": "删除���无法���复，规则���：{name}",
     "noPolicyConfigured": "未配置策略���全部继承全局）",
@@ -1629,7 +1629,7 @@
     "noItems": "无隔离邮件",
     "confirmRelease": "确定要释放选中的邮件吗？",
     "eyebrow": "隔离区",
-    "subtitle": "按发件人、主题、放行状态和原因筛选被隔离的邮件，然后预览或批量放行所选项。",
+    "subtitle": "按发件人、主题、放行���态和原因筛选被隔离的邮件，然后预览或批量放行所选项。",
     "releaseToOptional": "释放至（可选，留空则投递给原收件人）",
     "releaseToPlaceholder": "留空投递���原收件人"
   },
@@ -2422,7 +2422,7 @@
     "occurredAt": "发生时间",
     "logId": "日志编号",
     "eyebrow": "日志审计",
-    "subtitle": "记录发信认证模块每一次认证尝试的结果，用于安全审计与异常排查",
+    "subtitle": "记录发信认证模块每一次认证尝试的结果，用��安全审计与异常排查",
     "protocol": "协议",
     "scene": "场景",
     "domain": "域���",
@@ -2720,7 +2720,7 @@
     },
     "trustedDevices": {
       "count": "授信终端（{n}）",
-      "empty": "暂无授信终端。登录时勾选「信任此设备」后，下次在此设备可跳过二次认证。",
+      "empty": "暂无��信终端。登录时勾选「信任此设备」后，下次在此设备可跳过二次认证。",
       "createdAt": "授信时间",
       "lastUsed": "最近使用",
       "expires": "到期时间",
@@ -2812,7 +2812,7 @@
     "licenseEditPlaceholder": "留空则保持原 License 不变",
     "isActive": "启用",
     "members": "成员代理服务器",
-    "addMember": "添加成员代理服务器",
+    "addMember": "添加成员代理��务器",
     "noMoreEndpoints": "没有更多可���代理服务器",
     "membersEmptyHint": "至少添加一个代理服务器；顺序即 failover ��序（上者先）。",
     "createEndpoint": "新建代理服务���",
@@ -3182,7 +3182,7 @@
       "search_similar_messages": "搜索相似邮件",
       "query_auth_attempts": "加载认证尝试",
       "query_recent_mail": "加载最近邮件活动",
-      "analyze_account_activity": "分析账号活动",
+      "analyze_account_activity": "分析账号���动",
       "rank_urls": "排序候选 URL",
       "llm_analysis": "LLM 分析",
       "analyze_traceback": "分析威胁回溯",
@@ -3525,7 +3525,7 @@
       "allIP": "全部 IP",
       "notFilled": "未填写",
       "affectAbout": "（影响约 {count} 个 IP）",
-      "triggerCondition": "触发以下任一条件时：",
+      "triggerCondition": "触发以��任一条件时：",
       "noConditions": "暂未配置触发条件",
       "systemWill": "系统将：",
       "logOnly": "仅当次处置，不额外封禁",
@@ -3829,7 +3829,7 @@
     "comment": "审核意见",
     "commentPlaceholder": "请输入审核意见...",
     "approveConfirm": "确认放行此邮件？",
-    "rejectConfirm": "确认拒绝此邮件？",
+    "rejectConfirm": "确认拒绝此���件？",
     "noItems": "暂无入站审核项",
     "preview": "预览",
     "download": "下载",
@@ -3867,7 +3867,7 @@
     "responseTime": "响应时间",
     "hitRules": "命中规则",
     "createRule": "新增规则",
-    "editRule": "编辑规则",
+    "editRule": "编辑规��",
     "ruleName": "规则名称",
     "matchMode": "匹配模式",
     "matchModeAny": "任一服务器",
@@ -4517,7 +4517,7 @@
       "dmarc_query_failDesc": "DNS查询DMARC记录时发生错误（超时/SERVFAIL）",
       "ptr_noptr": "记录不存在",
       "ptr_noptrDesc": "发信IP无PTR反向解析记录",
-      "ptr_nomatch": "与A记录不匹配",
+      "ptr_nomatch": "���A记录不匹配",
       "ptr_nomatchDesc": "PTR反查的A记录不指向原IP",
       "ptr_ehlo_mismatch": "与EHLO不��配",
       "ptr_ehlo_mismatchDesc": "PTR记录与SMTP EHLO/HELO不一致"
@@ -4877,7 +4877,7 @@
       "thresholdMax": "阈值过大",
       "valueRequired": "请填写该字段",
       "priorityRange": "优先级需在 {min}–{max} 之间",
-      "validUntilPast": "有效期不能早于当前日期",
+      "validUntilPast": "有��期不能早于当前日期",
       "emailRequired": "请输入邮箱地址",
       "groupRequired": "请选择发信人群组",
       "orgRequired": "请选择组织部门",
@@ -5130,7 +5130,7 @@
       "ocrSection": "OCR 配置",
       "ocrMode": "OCR 模式",
       "ocrMaxCount": "OCR 最大数量",
-      "qrSection": "二维码检测",
+      "qrSection": "二���码检测",
       "qrMode": "二维码模式",
       "qrMaxCount": "二维码最大数量",
       "qrDeepRoutesSection": "二��码深度路由配置",
@@ -5369,7 +5369,7 @@
         "unit": "秒",
         "hint": "{engine}分析通常需 30-60 秒（有效范围：10-120 秒）"
       },
-      "costBanner": "深度复检由【{engine}】执行，通常需 30-60 秒。用户点击链接后需等待，请结合下方超时策略配置。",
+      "costBanner": "深度复检由【{engine}】执行，通常需 30-60 秒。用户点击链接后需等待，���结合下方超时策略配置。",
       "skip": {
         "title": "允许用户跳过深度检测",
         "desc": "允许终端用户在等待期间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风险。开启会降低防护强度，请谨慎使用。",
@@ -5532,7 +5532,7 @@
     "actionQuarantine": "隔离",
     "tooltipAction": "检测到相似邮件时执行的触发动作。选择「仅采集信号」则只记录不执行动作。",
     "syncToOthers": "同步到其他方向",
-    "exemptionNote": "豁免名单统一由群组策略模块配置，本模块不再提供免检测发信人管理入口",
+    "exemptionNote": "豁免名单统一由群组策略模块配置，本模块不再提供免检测发���人管理入口",
     "tooltipWindow": "统计相似邮件的时间范围,单位为分钟",
     "tooltipThreshold": "邮件内容相似度达到此百分比时被视为相似邮件",
     "tooltipMinCount": "相似邮件数量达到此阈值后才触发动作",
@@ -5683,7 +5683,7 @@
     "errors": {
       "priorityRange": "优先级需在 {min}–{max} 之间"
     },
-    "errorMarkRequired": "请输入标记文案",
+    "errorMarkRequired": "请输入标记文���",
     "errorMarkTooLong": "标记文案不能超过 50 个字符",
     "errorDisclaimerRequired": "请输入免责声明内容",
     "errorDisclaimerTooLong": "免责声明不能超过 10240 UTF-8 bytes",
@@ -6373,7 +6373,7 @@
         "viewRecallLog": "查看原始日志",
         "noEvents": "暂无事件",
         "operationType": {
-          "adminApiRecall": "管理员召回",
+          "adminApiRecall": "管理员召��",
           "threatRetroAgentRecall": "威胁回溯智能体发起召回",
           "threatRetroAgentNotify": "威胁回溯智能体发起通知"
         },
@@ -6482,7 +6482,7 @@
       "mailType": {
         "phishing": "钓鱼邮件",
         "virus": "病毒邮件",
-        "accountCompromised": "账号被盗",
+        "accountCompromised": "账号��盗",
         "spoofing": "仿冒邮件",
         "harmful": "有��内容邮件",
         "spam": "垃圾邮件",
@@ -6719,7 +6719,7 @@
     },
     "block": {
       "paramsTitle": "阻断参数",
-      "smtpCode": "SMTP 错误码",
+      "smtpCode": "SMTP 错���码",
       "responseText": "回应文本",
       "tarpitEnabled": "启用��迟响应",
       "tarpitSeconds": "延迟时间（秒）"
@@ -7085,7 +7085,7 @@
         "note": "用于检测压缩炸弹，建议阈值3-5层"
       },
       "desc_nestedFileCount": {
-        "source": "压缩包解析引擎",
+        "source": "压��包解析引擎",
         "usage": "检测压缩包内文件总数",
         "note": "防止解压后文件数量过多"
       },
@@ -7166,7 +7166,7 @@
       "desc_mailFromFromConsistency": {
         "source": "SMTP会话MAIL FROM + 邮件头From字段",
         "usage": "检测信封层与信头层发信人是否一致",
-        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC��果综合判断"
+        "note": "钓鱼邮��常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC��果综合判断"
       },
       "desc_virusScanResult": {
         "source": "防病毒引擎",
@@ -7857,7 +7857,7 @@
       "pageOf": "第 {page} 页，共 {total} 页",
       "col": {
         "sender": "发件人",
-        "recipients": "收件人",
+        "recipients": "收件���",
         "recalledAt": "召回时间",
         "reason": "召回原因"
       }
@@ -8044,8 +8044,6 @@
       "bounceReasons": "退信原因分布",
       "receiveBounceReasons": "接收侧退信原因",
       "threatDistribution": "威胁类型分布",
-      "latencyPercentiles": "延迟百分位趋势",
-      "queueTrend": "队列趋势",
       "latencyDistribution": "延迟区间分布",
       "receiveTrend": "接收流量趋势分析",
       "sendTrend": "外发流量趋势分析",
@@ -8698,7 +8696,7 @@
       "senderFirstSeen": "收发信人之前没有邮件往来",
       "senderFirstSeenHint": "仅对无历史收发记录的发信人启用——常见钓鱼/社工高风险来源。",
       "qrcode": "邮件包含二维码",
-      "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
+      "qrcodeDesc": "附件/图片中解���出二维码时命中（需附件深度检查）",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
       "validationFailed": "请检查必填字段。",
       "created": "准入规则已��建",
@@ -8750,7 +8748,7 @@
         "deliver": "投递",
         "mark": "标记"
       },
-      "timeoutSectionTitle": "超时时间线",
+      "timeoutSectionTitle": "超时时间���",
       "timeoutScopeNote": "总超时 / 超时异步对所有旁路检测生效。",
       "soon": "即将支持",
       "totalTimeout": "总超时",
@@ -9064,7 +9062,7 @@
       "cancelConfirmDescription": "当前抽屉中有未保存的修改，关闭后将无法恢复。",
       "continueEditing": "继续编辑",
       "discardChanges": "放弃修改",
-      "warnSensThreshold": "检测灵敏度极高时，建议置信度阈值 ≥ 80 以避免误报",
+      "warnSensThreshold": "检测��敏度极高时，建议置信度阈值 ≥ 80 以避免误报",
       "errDiscardNeedsAlert": "丢弃动作必须开启告警通知",
       "errEmailDup": "���邮箱已作为保护对象存在",
       "errEmailInvalid": "请输入合法的邮箱地址",
@@ -9662,7 +9660,7 @@
     "addSource": "新增数���源",
     "appIdPlaceholder": "如 app-8821",
     "authCodePlaceholderNew": "请输入授权码",
-    "autoSyncDesc": "开启后按 Cron 周期自动拉取远端数据",
+    "autoSyncDesc": "开启后按 Cron 周��自动拉取远端数据",
     "autoSyncOff": "关闭",
     "autoSyncOn": "开启",
     "autoSyncTitle": "开启自动同步",
@@ -10398,7 +10396,7 @@
         "quarantine": "邮件进入隔离区，管理员审核后可放行或删除",
         "audit": "邮件进入待审核队列，人工确认后投递或退回",
         "reject": "拒绝接收，发送方收到退信通知（452/550）",
-        "discard": "静默丢弃，发送方无感知，无退信"
+        "discard": "静默丢弃，发送方无感知，无退���"
       },
       "mergedNote": "合并模式下外发和域内方向使用统���配置，防止通过切换方向绕过限制"
     },
@@ -11398,7 +11396,7 @@
       "user_list_rules_require_tenant_administrator": "用户名单规则需要租户管理员权限",
       "user_list_rules_available_owning_tenant": "多租户模式下，用户名单规则仅归属租户可见",
       "user_list_rules_require_tenant_context": "用户名单规则需要先选择租户",
-      "user_list_rules_created_managed_by": "用户名单规则由用户自行创建和管理，不通过通用管理接口",
+      "user_list_rules_created_managed_by": "用户名单规则由用户自行创建和管理，不通过通用管���接口",
       "access_denied_user_list_rule": "无权访问该用户名单规则",
       "user_generated_user_list_rules_deleted": "此处只能删除用户自建���名单规则"
     },

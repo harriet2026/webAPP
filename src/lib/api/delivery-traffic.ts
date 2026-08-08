@@ -57,7 +57,6 @@ export interface LatencyBucket {
 }
 
 export interface LatencyData {
-  percentiles?: TrendPoint[];
   buckets?: LatencyBucket[];
 }
 
@@ -76,7 +75,6 @@ export interface DeliveryTrafficResponse {
   trend: TrendData;
   distribution: DistributionItem[];
   latency: LatencyData;
-  queue_trend?: TrendPoint[];
   detail_table: DetailTableRow[];
   generated_at?: string;
   data_lag_seconds?: number | null;

@@ -17,7 +17,6 @@ import { KpiCards } from './KpiCards';
 import { TrendChart } from './TrendChart';
 import { SideChart } from './SideChart';
 import { LatencyChart } from './LatencyChart';
-import { QueueTrendChart } from './QueueTrendChart';
 import { DetailTable } from './DetailTable';
 import { BottomActions } from './BottomActions';
 import { useDeliveryTraffic } from './hooks/useDeliveryTraffic';
@@ -139,16 +138,9 @@ export function DeliveryTrafficPage() {
           />
         </div>
 
-        {direction === 'send' && (
-          <div className="grid gap-6 lg:grid-cols-2" data-testid="delivery-send-extended">
-            <LatencyChart latency={visibleData?.latency} direction={direction} isLoading={showLoading} />
-            <QueueTrendChart points={visibleData?.queue_trend} isLoading={showLoading} />
-          </div>
-        )}
-
         {direction === 'internal' && (
           <div className="grid gap-6" data-testid="delivery-internal-extended">
-            <LatencyChart latency={visibleData?.latency} direction={direction} isLoading={showLoading} />
+            <LatencyChart latency={visibleData?.latency} isLoading={showLoading} />
           </div>
         )}
 

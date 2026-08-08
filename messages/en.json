@@ -7987,8 +7987,6 @@
       "bounceReasons": "Bounce Reasons",
       "receiveBounceReasons": "Inbound Bounce Reasons",
       "threatDistribution": "Threat Distribution",
-      "latencyPercentiles": "Latency Percentiles",
-      "queueTrend": "Queue Trend",
       "latencyDistribution": "Latency Distribution",
       "receiveTrend": "Inbound Traffic Trend",
       "sendTrend": "Outbound Traffic Trend",

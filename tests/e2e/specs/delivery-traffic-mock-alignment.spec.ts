@@ -78,7 +78,7 @@ test.describe('Delivery Traffic html_spec alignment (mock runtime)', () => {
     await expect(page.getByTestId('delivery-internal-extended')).toBeVisible();
     await page.getByTestId('delivery-direction-send').click();
     await page.waitForTimeout(450);
-    await expect(page.getByTestId('delivery-send-extended')).toBeVisible();
+    await expect(page.getByTestId('delivery-send-extended')).toHaveCount(0);
 
     await page.getByTestId('delivery-direction-receive').click();
     await page.waitForTimeout(450);
