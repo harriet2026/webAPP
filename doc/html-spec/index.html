@@ -342,7 +342,7 @@
             <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独立页）</p>
             <p>spec: IP黑白名单需求文档.md</p>
             <p>组件: connection-layer-page.tsx (renderIpFilterConfig)</p>
-            <p>v2: 黑/白名�����独立选中、跨页全选、行高亮、删除选中（N）与批量删除确认；<a href="filter-rules-pipeline-ip-filter/layer-7-batch-delete.html">查看可交互层级 7</a></p>
+            <p>v2: 黑/白名�������独立选中、跨页全选、行高亮、删除选中（N）与批量删除确认；<a href="filter-rules-pipeline-ip-filter/layer-7-batch-delete.html">查看可交互层级 7</a></p>
             <p>第 9 节 D-001～D-017、第 10 节 Q-001～Q-008 已逐项复核并记录状态与证据。</p>
           </div>
         </details>
@@ -450,7 +450,7 @@
             <p>组件: src/components/security/auth-spoofing/ProtocolChecksSection.tsx、src/lib/auth-spoofing-labels.ts、src/lib/auth-spoofing-templates.ts</p>
             <p>变更类型: 动作枚举精简 + 默认值/联动逻辑调整（增量规格）· commit 386aa38</p>
             <p>内含: PROTOCOL_ACTIONS/DMARC_ACTIONS 由6项精简为5项（移除"进行下一步"accept）· 缺省态与动作联动改为"标记放行"+启用解耦 ·「宽松」模板 accept 场景全部改为 mark-delivery · S-1~S-4 真实浏览器截图 · D-005 · Q-003</p>
-            <p>关联: 本链接指向的 GT-12807.html 为滚动容器文档，同时收录 GT-12801/GT-12793/GT-12795/GT-12797/GT-12719/GT-12828/GT-12790/GT-12791/GT-12833 等多个需求的增量规格，本条特指其中 GT-12833 部分；反向调整了同文档内 GT-12801 变更2 的结论</p>
+            <p>关联: 本链接指向的 GT-12807.html 为滚动容器文档，同时收录 GT-12801/GT-12793/GT-12795/GT-12797/GT-12719/GT-12828/GT-12790/GT-12791/GT-12833 等多个需求的增量规��，本条特指其中 GT-12833 部分；反向调整了同文档内 GT-12801 变更2 的结论</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -938,8 +938,9 @@
             <p>spec: 0702邮件处置中心.md / 邮件处置中心.md / 邮件处置中心（多租户视角）.md / 邮件处置中心—详情查看页面.md / 0702…「查看」页面.md / 0703处置依据.md / V1·V2邮件状态机 / 0702邮件调查中心.md</p>
             <p>组件: mail-investigation-page.tsx + compact-search-filters.tsx + investigation-logs-table.tsx + overview-action-section.tsx + security-analysis-section.tsx + raw-logs-section.tsx</p>
             <p>子文件: <a href="email-handling-disposal-center/layer-1-search-mailtype.html">邮件类型多选</a> / <a href="email-handling-disposal-center/layer-2-search-more-filters.html">更多筛选(27字段)</a> / <a href="email-handling-disposal-center/layer-3-search-sample-mode.html">样本检索态</a> / <a href="email-handling-disposal-center/layer-4-table-header-filter.html">表头筛选</a> / <a href="email-handling-disposal-center/layer-5-table-batch-selected.html">批量选中</a> / <a href="email-handling-disposal-center/layer-6-release-dialog.html">放行</a> / <a href="email-handling-disposal-center/layer-7-delete-dialog.html">删除</a> / <a href="email-handling-disposal-center/layer-8-recall-dialog.html">召回</a> / <a href="email-handling-disposal-center/layer-9-similar-mode.html">找相似</a> / <a href="email-handling-disposal-center/layer-10-detail-overview-single.html">详情·概览与处置</a> / <a href="email-handling-disposal-center/layer-11-detail-recipient-matrix.html">详情·收件人矩阵</a> / <a href="email-handling-disposal-center/layer-12-detail-security-analysis.html">详情·安全分析</a> / <a href="email-handling-disposal-center/layer-13-detail-raw-logs.html">详情·原始日志</a> / <a href="email-handling-disposal-center/layer-14-detail-dialogs.html">详情·弹窗组</a></p>
-            <p>增量文档: <a href="email-handling-disposal-center/GT-12807.html">GT-12807 — GT-12772 邮件处置中心事后处置时间线修复</a>（2026-08-06）</p>
-            <p>预览可交互 · 14 交互层级 · 30 截图 · 15 项差异 / 8 项需确认 · 增量 v3（GT-12807）</p>
+  <p>增量文档: <a href="email-handling-disposal-center/GT-12807.html">GT-12807 — GT-12772 邮件处置中心事后处置时间线修复</a>（2026-08-06）</p>
+  <p>关联增量规格：<a href="/html-spec/version/GT-12807.html">GT-12807.html v14</a>，追加 GT-11990 投递与流量分析页面优化、GT-12818 附件安全检测——加密附件：提示词存在误导性问题解决。</p>
+  <p>预览可交互 · 14 交互层级 · 31 截图 · 15 项差异 / 8 项需确认 · 增量 v4（GT-12807）</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1049,7 +1050,7 @@
           <div class="card-detail">
             <p>路由: /admin/users（三 Tab：管理员账号 / 角色权限 / 登录安全；平台/租户双视角）</p>
             <p>业务源: demo/docs/prd-admin-user-permission.md（专属 PRD）+ 对话记录（租户首管理员生命周期三处修复）；UI 事实以浏览器渲染为准</p>
-            <p>组件: user-permission-page.tsx + admin-account-tab.tsx + role-permission-tab.tsx + login-security-tab.tsx + types.ts；跨模块: tenant-list-tab.tsx + credential-result-dialog.tsx + tenant-center-page.tsx + product-profile-context.tsx</p>
+            <p>组件: user-permission-page.tsx + admin-account-tab.tsx + role-permission-tab.tsx + login-security-tab.tsx + types.ts；��模块: tenant-list-tab.tsx + credential-result-dialog.tsx + tenant-center-page.tsx + product-profile-context.tsx</p>
             <p>子文件: <a href="admin-users/layer-1-admin-drawer.html">管理员抽屉</a> / <a href="admin-users/layer-2-admin-dialogs.html">弹窗组(重置/下线/删除/筛选)</a> / <a href="admin-users/layer-3-role-drawer.html">角色抽屉·权限矩阵</a> / <a href="admin-users/layer-4-login-ip-reset.html">IP控制/重置</a> / <a href="admin-users/layer-5-tenant-view.html">租户视角</a> / <a href="admin-users/layer-6-tenant-primary-admin-lifecycle.html">租户首管理员生命周期(凭据/改密/再建)</a></p>
             <p>预览可交互 · 6 交互层级 · 新增 §0.5 产品形态×视角「新建管理员」语义 + 首管理员改密/再建路径 · 5 形态×2角色矩阵 · 9 项差异(D-006 已解决/新增 D-008/D-009) / 9 项需确认 · agent-browser 实测截图 + DOM 比对</p>
           </div>
@@ -1081,7 +1082,7 @@
           <div class="card-detail">
             <p>路由: /monitor/dashboard（「监控中心」分组首页）· spec: 未提供（demo/docs 下无监控中心需求文档，以浏览器运行态为准）</p>
             <p>组件: monitor-dashboard-page.tsx（6 KPI 卡 + 四模块健康看板 + 双趋势图 + 告警跑马灯 + 时间范围/刷新间隔双选择器）</p>
-            <p>子文件: <a href="monitor-dashboard/layer-1-range-select.html">时间范围下拉</a> / <a href="monitor-dashboard/layer-2-refresh-select.html">刷新间隔下拉</a></p>
+            <p>子文件: <a href="monitor-dashboard/layer-1-range-select.html">时间��围下拉</a> / <a href="monitor-dashboard/layer-2-refresh-select.html">刷新间隔下拉</a></p>
             <p>预览可交互（Select/卡片下钻 toast/跑马灯动画）· 形态×角色 5×2 矩阵浏览器实测 · v2 纠正 v1「切范围数据刷新」错误结论（实测静态 mock 不变）· 8 项差异（导出PDF无响应、刷新间隔不生效、Thai 缺 key、URL 直连未拦截等）/ 4 项需确认</p>
           </div>
         </details>
@@ -1391,7 +1392,7 @@
                 <li>发件人动作弹窗去除「作用域」选择，简化操作路径</li>
                 <li>AlertDialog z-index / Portal 层级修复（被 Sheet 遮挡问题）</li>
                 <li>黑名单动作移除 Destructive 危险样式，与加白保持一致</li>
-                <li>IP 声誉外部链接移除（避免跳转至未维护的外部页面）</li>
+                <li>IP 声誉外部链接移除（避��跳转至未维护的外部页面）</li>
                 <li>调查工作台「实体检测」标题层级新增</li>
               </ul>
             </div>
