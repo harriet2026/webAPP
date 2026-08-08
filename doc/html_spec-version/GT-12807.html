@@ -266,6 +266,16 @@
         </ul>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-12790">GT-12790 相似邮件与主题检测：交互优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12790-change-1">全方向聚合卡片观察模式配色对齐：与按方向独立检测卡片一致的黄色标签卡</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12790-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12790-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12790-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
       <li><a href="#diffs">D. 差异标注</a></li>
       <li><a href="#questions">Q. 待确认事项</a></li>
       <li><a href="#version-history">V. 版本历史</a></li>
@@ -898,7 +908,7 @@ onViewRawLogs?: () =&gt; void;
       <h3 id="gt12719-change-1">1. 执行动作图例："阻断"改为"拒收"，新增"进行下一步"，移除"标记投递"</h3>
 
       <h4 id="gt12719-c1-overview">1.1 方案概述</h4>
-      <p>策略流水线页面底部图例区「执行动作」行列出流水线中可能出现的所有动作及其说明。本次同步三项变更：</p>
+      <p>策略流水线页面底部图例区「执行动作」行列出��水线中可能出现的所有动作及其说明。本次同步三项变更：</p>
       <ul>
         <li><strong>重命名</strong>：动作名「阻断」→「拒收」，描述「拒绝并退信」保持不变（i18n key <code>pipeline.actionBlock</code> / <code>pipeline.actionBlockDesc</code>）。</li>
         <li><strong>新增</strong>：「进行下一步 · 继续执行后续策略」条目，位于「标记投递」原位后方，使用 <code>--action-mark-deliver</code>（蓝绿色）圆点，区别于直接投递（绿色），与 DMARC 「进行下一步」语义一致（新增 i18n key <code>pipeline.actionNextStep</code>、<code>pipeline.actionNextStepDesc</code>）。</li>
@@ -1425,7 +1435,7 @@ onViewRawLogs?: () =&gt; void;
       <h3 id="gt12828-change-2">2. 方案B：内容规则、IP 过滤、IP 频率补齐角色感知范围校验</h3>
 
       <h4 id="gt12828-c2-overview">2.1 方案概述</h4>
-      <p><strong>问题：</strong>内容规则 Input 硬编码 <code>min={1}</code>、提示文案写死「范围1-9999」；IP 过滤 schema <code>z.number().int().nonnegative()</code>（无上限）；IP 频率 schema <code>z.number()</code>（无任何范围约束）。三个模��均不感知角色，租户管理员应受 100–1000 限制的约束未被前端校验拦截。</p>
+      <p><strong>问题：</strong>内容规则 Input 硬编码 <code>min={1}</code>、提示文案写死「范围1-9999」；IP 过滤 schema <code>z.number().int().nonnegative()</code>（无上限）；IP 频率 schema <code>z.number()</code>（无任何范围约���）。三个模��均不感知角色，租户管理员应受 100–1000 限制的约束未被前端校验拦截。</p>
       <p><strong>统一修复方案：</strong>三个模块均按行为管控的标准模式改造：</p>
       <ul>
         <li><strong>工厂函数模式</strong>：将模块级常量 <code>ruleSchema</code> 重构为 <code>createRuleSchema(range: PriorityRange)</code> 工厂函数，组件内通过 <code>useMemo(() =&gt; getRulePriorityRange(isSystemAdmin), [isSystemAdmin])</code> 获取 range，再用 <code>useMemo(() =&gt; createRuleSchema(range), [range])</code> 生成动态 schema 传给 <code>zodResolver</code>。</li>
@@ -1547,7 +1557,7 @@ onViewRawLogs?: () =&gt; void;
         <em>注：本状态截图摄制于改名为「投递」阶段，实际界面文案以「进行下一步」为准，选项顺序与位置不变。</em></p>
         <figure>
           <img src="./screenshots/gt12791-action-dropdown-send.png" alt="发送方向触发动作下拉展开，显示5个选项：投递（现已改名为进行下一步）、隔离（选中）、审核、拒收、丢弃" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
-          <figcaption>S-1：触发动作下拉展开 — 5 个选项：<strong>进行下一步 / 隔离（当前选中）/ 审核 / 拒收 / 丢弃</strong>。原「标记投递」已改名为「进行下一步」，原「阻断」已改名为「拒收」；value 不变。</figcaption>
+          <figcaption>S-1：触��动作下拉展开 — 5 个选项：<strong>进行下一步 / 隔离（当前选中）/ 审核 / 拒收 / 丢弃</strong>。原「标记投递」已改名为「进行下一步」，原「阻断」已改名为「拒收」；value 不变。</figcaption>
         </figure>
         <table>
           <thead><tr><th>选项</th><th>value</th><th>变更前 label</th><th>变更后 label</th><th>说明</th></tr></thead>
@@ -1602,7 +1612,7 @@ onViewRawLogs?: () =&gt; void;
           <thead><tr><th>可见元素</th><th>内容/值</th><th>说明</th></tr></thead>
           <tbody>
             <tr><td>标记方式面板标题</td><td>「标记方式」</td><td>仅在触发动作为「进行下一步」（<code>mark-delivery</code>）时显示</td></tr>
-            <tr><td>标记方式面板提示文案</td><td>「至少选择一种标记方式，可同时启用主题标记、信头标记与正文标记」</td><td><code>tagModeHint</code></td></tr>
+            <tr><td>标记方式面板��示文案</td><td>「至少选择一种标记方式，可同时启用主题标记、信头标记与正文标记」</td><td><code>tagModeHint</code></td></tr>
             <tr><td>主题标记 Switch</td><td>开启（默认）；下方：前缀/后缀 Radio + 内容 Input</td><td><code>tag_subject_enabled</code></td></tr>
             <tr><td>信头标记 Switch</td><td>关闭（默认）；开启后显示字段名 + 字段值两个 Input</td><td><code>tag_header_enabled</code></td></tr>
             <tr><td>正文标记 Switch（新增）</td><td>关闭（默认）；开启后显示自由文本 Input（placeholder「如：[相似邮件]」）</td><td><code>tag_body_enabled</code>（新增字段）</td></tr>
@@ -1671,6 +1681,74 @@ onViewRawLogs?: () =&gt; void;
     </div>
   </div>
 
+  <!-- ══════════════ GT-12790 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12790">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12790 相似邮件与主题检测：交互优化</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/rules/similar-detection</code>（相似邮件与主题检测配置页）<br/>
+        组件：<code>src/components/security/similar-detection/AggregateCard.tsx</code>（对齐参照：<code>DirectionCard.tsx</code>）<br/>
+        2026-08-08 · commit <code>9f5217a</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- ── 变更 1：聚合卡片观察模式配色对齐 ── -->
+      <h3 id="gt12790-change-1">1. 全方向聚合卡片观察模式配色对齐：与按方向独立检测卡片一致的黄色标签卡</h3>
+
+      <h4 id="gt12790-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>页面顶部检测粒度可切换「全方向聚合（合并统计）」与「按方向独立检测（可勾选多个）」两种模式。「按方向独立检测」模式下，每个方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后，卡片外层容器的边框与背景色会随之切换为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），配合内部「观察中」黄色徽标，整卡呈现统一的黄色标签视觉。但「全方向聚合」模式下的聚合卡片（<code>AggregateCard.tsx</code>）开启观察模式后，只有内部徽标变黄，卡片外层容器颜色是硬编码的固定值（<code>border-blue-200</code> / <code>bg-white</code>），从不随 <code>observe_mode</code> 变化，导致两种检测粒度下观察模式的视觉表现不一致——用户在"聚合"和"独立"两个模式之间切换时，同样开着观察模式，但卡片颜色表现不同，容易造成"聚合模式下观察模式没生效"的误判。</p>
+      <p><strong>决策过程：</strong>讨论了两种实现路径：① 给 <code>AggregateCard.tsx</code>新写一套独立的黄色配色值；② 直接复用 <code>DirectionCard.tsx</code> 已验证过的条件判断逻辑和色值。选择方案②，理由：两个卡片本质上是同一份配置模型（<code>SimilarDetectionConfig</code>）在不同聚合粒度下的两种视图，观察模式的视觉语义应当完全一致，复用同一套色值可以保证以后颜色调整只需改一处，不会出现两处配色逐渐漂移的问题。</p>
+      <p><strong>最终方案：</strong>将 <code>AggregateCard.tsx</code> 外层容器 className 从硬编码固定值改为与 <code>DirectionCard.tsx</code> 完全一致的条件判断（三元表达式基于 <code>value.observe_mode</code>），并保留过渡动画（<code>transition-[background-color,border-color] duration-[240ms]</code>），使颜色切换有平滑过渡而非跳变。不引入新的颜色定义，不修改 <code>DirectionCard.tsx</code>。</p>
+
+      <h4 id="gt12790-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：全方向聚合卡片，观察模式关闭态（修复前后一致）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 相似邮件与主题检测 → 检测粒度选择「全方向聚合（合并统计）」→ 观察模式关闭</p>
+        <figure>
+          <img src="./screenshots/gt12790-aggregate-before-fix.png" alt="全方向聚合卡片观察模式关闭时，卡片为蓝色边框白色背景" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：聚合卡片默认态（观察模式关闭）— 蓝色边框（<code>border-blue-200</code>）+ 白色背景（<code>bg-white</code>），此状态修复前后表现一致。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-2：全方向聚合卡片，观察模式开启态（修复后）</strong><br/>
+        触发路径：同上 → 点击聚合卡片右上角「观察模式」Switch → 卡片配色随即切换</p>
+        <figure>
+          <img src="./screenshots/gt12790-aggregate-after-fix.png" alt="全方向聚合卡片观察模式开启后，卡片边框与背景变为黄色，与按方向独立检测卡片配色一致" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：聚合卡片观察模式开启态（修复后）— 边框与背景已同步变为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），与内部「观察中」黄色徽标视觉统一。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-3：按方向独立检测卡片，观察模式开启态（对齐参照，无变更）</strong><br/>
+        触发路径：检测粒度切换回「按方向独立检测（可勾选多个）」→ 接收方向卡片开启观察模式</p>
+        <figure>
+          <img src="./screenshots/gt12790-direction-observe-reference.png" alt="按方向独立检测下接收方向卡片观察模式开启，卡片边框与背景为黄色，作为对齐参照" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-3：按方向独立检测 · 接收方向卡片观察模式开启态（对齐参照，<code>DirectionCard.tsx</code> 原有逻辑，本次未修改）— 与 S-2 修复后的聚合卡片配色完全一致：黄色边框 + 黄色浅底 + 黄色「观察中」徽标。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>状态</th><th>卡片边框</th><th>卡片背景</th><th>内部徽标</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>聚合卡片 · 观察模式关闭</td><td><code>border-blue-200</code></td><td><code>bg-white</code></td><td>无徽标</td><td>—</td></tr>
+            <tr><td>聚合卡片 · 观察模式开启（修复前）</td><td><code>border-blue-200</code>（未变）</td><td><code>bg-white</code>（未变）</td><td>黄色「观察中」</td><td>否，卡片主体颜色不随模式变化</td></tr>
+            <tr><td>聚合卡片 · 观察模式开启（修复后）</td><td><code>border-amber-300</code></td><td><code>bg-amber-50/50</code></td><td>黄色「观察中」</td><td>是</td></tr>
+            <tr><td>方向卡片 · 观察模式开启（参照，未变更）</td><td><code>border-amber-300</code></td><td><code>bg-amber-50/50</code></td><td>黄色「观察中」</td><td>是（基准）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12790-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>聚合卡片外层容器 className</td><td>div className</td><td>硬编码固定值：<code>'border rounded-lg p-4 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-950'</code>（不随 observe_mode 变化）</td><td><code>cn()</code> 条件判断：<code>observe_mode</code> 为 true 时使用 <code>'border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20'</code>，否则使用原蓝白配色；新增过渡动画 <code>transition-[background-color,border-color] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none</code></td><td><code>AggregateCard.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>方向卡片外层容器 className（对齐参照，未变更）</td><td>div className</td><td>—</td><td>本次未修改，作为色值与逻辑的复用来源</td><td><code>DirectionCard.tsx</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
   <!-- ══════════════ V. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>V. 版本历史</h2>
@@ -1680,9 +1758,14 @@ onViewRawLogs?: () =&gt; void;
       </thead>
       <tbody>
           <tr>
+          <td><span class="version-badge"><span class="vnum">v9</span></span></td>
+          <td>2026-08-08</td>
+          <td>追加 GT-12790「相似邮件与主题检测：交互优化」需求体（1 个变更点）。背景：检测粒度可切换「全方向聚合」与「按方向独立检测」，「按方向独立检测」模式下方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后外层容器会切换为黄色（<code>border-amber-300</code>/<code>bg-amber-50/50</code>），但「全方向聚合」模式下聚合卡片（<code>AggregateCard.tsx</code>）外层容器颜色是硬编码固定值，从不随 <code>observe_mode</code> 变化，只有内部徽标变黄，导致两种检测粒度下观察模式视觉表现不一致。修复方案：将 <code>AggregateCard.tsx</code> 外层容器 className 改为与 <code>DirectionCard.tsx</code> 完全一致的条件判断（复用相同色值与逻辑，不新增颜色定义，不修改 <code>DirectionCard.tsx</code>），并保留 240ms 过渡动画使颜色切换平滑。附截图 3 张：gt12790-aggregate-before-fix（聚合卡片观察模式关闭态）、gt12790-aggregate-after-fix（聚合卡片观察模式开启态，修复后已变黄）、gt12790-direction-observe-reference（按方向独立检测卡片观察模式开启态，作为对齐参照）。目录追加 GT-12790 一级条目及变更点子章节；版本历史 v8→v9。</td>
+        </tr>
+        <tr>
           <td><span class="version-badge"><span class="vnum">v8</span></span></td>
           <td>2026-08-07</td>
-          <td>追加 GT-12791「相似检测模块优化」��求体（3 个变更点）。变更1：触发动作 label 调整——<code>actionMarkDelivery</code>「标记投递」→「进行下一步」（en: Mark &amp; Deliver → Next Step，与 GT-12719 策略流水线模块 <code>pipeline.actionNextStep</code> 术语呼应但 key 独立）、<code>actionBlock</code>「阻断」→「拒收」（value 不变），<code>action-options.ts</code> 不改；顺序保持进行下一步/隔离/审核/拒收/丢弃 5 个；<code>errorTagRequired</code> 文案去除动作名引用改为「启用该动作时需至少启用一种标记方式」。变更2：附加策略新增正文标记——<code>TagDeliveryPanel.tsx</code> 信头标记行下方对称追加第三行（<code>tag_body_enabled</code> Switch + <code>tag_body_content</code> 自由文本 Input），<code>types.ts</code> 追加两个可选字段，新增 i18n key <code>tagBodyLabel</code>/<code>tagBodyPlaceholder</code>（zh/en），<code>tagModeHint</code> 提示文案同步更新。变更3：① 校验逻辑拆分两类错误——「未选任何标记」→<code>errorTagRequired</code>，「已选但字段为空」→新增<code>errorTagFieldRequired</code>（zh「已启用的标记方式内容不能为空」）；② 移除豁免提示条（<code>renderExemptionNote</code>函数+两处调用+<code>Link</code>/<code>ExternalLink</code> import）；③ 按钮区 <code>justify-between</code>→<code>justify-end</code>。附截图 5 张：gt12791-page-default（页面全景）、gt12791-action-dropdown-send（5 个选项下拉，摄制于「投递」措辞阶段，实际以「进行下一步」为准）、gt12791-tag-panel-default（进行下一步选中后标记面板）、gt12791-footer-buttons（完整面板+靠右按钮区）、gt12791-validation-error-none（errorTagFieldRequired toast）。目录追加 GT-12791 一级条目及三个变更点子章节；版本历史 v7→v8。</td>
+          <td>追加 GT-12791「相似检测模块优化」��求体（3 个变更点）。变更1：触发动作 label 调整——<code>actionMarkDelivery</code>「标记投递」→「进行下一步」（en: Mark &amp; Deliver → Next Step，与 GT-12719 策略流水线模块 <code>pipeline.actionNextStep</code> 术语呼应但 key 独立）、<code>actionBlock</code>「阻断」→「拒收」（value 不变），<code>action-options.ts</code> 不改；顺序保持进行下一步/隔离/审核/拒收/丢弃 5 个；<code>errorTagRequired</code> 文案去除动作名引用改为「启用该动作时需至少启用一种标记方式」。变更2：附加策略新增正文标记——<code>TagDeliveryPanel.tsx</code> 信头标记行下方对称追加第三行（<code>tag_body_enabled</code> Switch + <code>tag_body_content</code> 自由文本 Input），<code>types.ts</code> 追加两个可选字段，新增 i18n key <code>tagBodyLabel</code>/<code>tagBodyPlaceholder</code>（zh/en），<code>tagModeHint</code> 提示文案同步更新。变更3：① 校验逻辑拆分两类错误——「未选任何标记」→<code>errorTagRequired</code>，「已选但字段为空」→新增<code>errorTagFieldRequired</code>（zh「已启用的标记方式内容不能为空」）；② 移除豁免提示条（<code>renderExemptionNote</code>函数+两处调用+<code>Link</code>/<code>ExternalLink</code> import）；③ 按钮区 <code>justify-between</code>→<code>justify-end</code>。附截图 5 张：gt12791-page-default（页面全景）、gt12791-action-dropdown-send（5 个选项下拉，摄制于「投递」措辞阶段，实际以「进行下一步」为准）、gt12791-tag-panel-default（进行下一步选中后标记面板）、gt12791-footer-buttons（完整面板+靠右按��区）、gt12791-validation-error-none（errorTagFieldRequired toast）。目录追加 GT-12791 一级条目及三个变更点子章节；版本历史 v7→v8。</td>
         </tr>
         <tr>
           <td><span class="version-badge"><span class="vnum">v7</span></span></td>
