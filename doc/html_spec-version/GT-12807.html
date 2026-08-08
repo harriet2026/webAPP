@@ -334,11 +334,15 @@
           <li class="toc-l3"><a href="#gt12818-c2-states">2.2 截图式交互预览</a></li>
           <li class="toc-l3"><a href="#gt12818-c2-elements">2.3 逐元素说明</a></li>
         </ul>
-        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12818-change-3">加密附件：移除误导性默认提示词</a></li>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12818-encrypted-attachment">GT-12818 附件安全检测——加密附件：提示词存在误导性问题解决</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12818-encrypted-change-1">移除误导性默认提示词</a></li>
         <ul class="toc-l2-group">
-          <li class="toc-l3"><a href="#gt12818-c3-overview">3.1 方案概述</a></li>
-          <li class="toc-l3"><a href="#gt12818-c3-states">3.2 截图式交互预览</a></li>
-          <li class="toc-l3"><a href="#gt12818-c3-elements">3.3 逐元素说明</a></li>
+          <li class="toc-l3"><a href="#gt12818-c3-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12818-c3-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12818-c3-elements">1.3 逐元素说明</a></li>
         </ul>
       </ul>
 
@@ -787,7 +791,7 @@ onViewRawLogs?: () =&gt; void;
             <td>Select · 「进行下一步」选项短名</td>
             <td>文案（新增项）</td>
             <td>—（选项不存在）</td>
-            <td>进行下一步</td>
+            <td>进行下一��</td>
             <td><code>authSpoofing.protocolActionShort.accept</code></td>
             <td><code>messages/zh.json</code></td>
           </tr>
@@ -1072,7 +1076,7 @@ onViewRawLogs?: () =&gt; void;
       <p>图例第二行「名单类型」中：</p>
       <ul>
         <li><strong>黑名单描述</strong>：「阻断/隔离/丢弃」→「拒收/隔离/丢弃」（跟随「阻断」→「拒收」重命名，i18n key <code>pipeline.blacklistTypeDesc</code>）。</li>
-        <li><strong>白名单描述</strong>：「投递/标记投递」→「投递」（标记投递已下线，i18n key <code>pipeline.whitelistTypeDesc</code>）。</li>
+        <li><strong>白名单描述</strong>：「投递/标记投递」→「��递」（标记投递已下线，i18n key <code>pipeline.whitelistTypeDesc</code>）。</li>
       </ul>
 
       <h4 id="gt12719-c2-states">2.2 截图式交互预览</h4>
@@ -1576,7 +1580,7 @@ onViewRawLogs?: () =&gt; void;
           <tr><td>IP 过滤</td><td>新建默认值</td><td><code>(items[0]?.priority ?? 99) + 1</code>（无 range 钳制）</td><td><code>Math.min(Math.max(prev+1, range.min), range.max)</code></td><td><code>IPFilterPage.tsx handleOpenDialog</code></td><td>[Overlay]</td></tr>
           <tr><td>IP 过滤</td><td>priorityHint/priorityTip</td><td>「数值越大越优先」（无范围）</td><td>「范围 {min}–{max}，数值越大越优先」/ 「数值越大越优先，范围 {min}–{max}...」</td><td><code>ipFilter.priorityHint</code> / <code>ipFilter.priorityTip</code></td><td>[Base]</td></tr>
           <tr><td>IP 过滤</td><td>priorityOutOfRange（新增）</td><td>不存在</td><td>zh：<code>'优先级需在 {min}–{max} 之间'</code>；en：<code>'Priority must be between {min} and {max}'</code></td><td><code>ipFilter.priorityOutOfRange</code></td><td>[Base]</td></tr>
-          <tr><td>IP 频率</td><td>ruleSchema priority</td><td><code>z.number()</code>（无任何约束）</td><td><code>z.number().int().min(range.min,'ipFrequency.priorityOutOfRange').max(range.max,'...')</code></td><td><code>IPFrequencyPage.tsx createRuleSchema</code></td><td>[Overlay]</td></tr>
+          <tr><td>IP 频率</td><td>ruleSchema priority</td><td><code>z.number()</code>（无任何���束）</td><td><code>z.number().int().min(range.min,'ipFrequency.priorityOutOfRange').max(range.max,'...')</code></td><td><code>IPFrequencyPage.tsx createRuleSchema</code></td><td>[Overlay]</td></tr>
           <tr><td>IP 频率</td><td>defaultForm priority</td><td>模块级常量 <code>priority: 100</code>（硬编码）</td><td><code>makeDefaultForm(range.defaultValue)</code> 工厂函数，组件内 useMemo</td><td><code>IPFrequencyPage.tsx</code></td><td>[Overlay] 租户 defaultValue=600</td></tr>
           <tr><td>IP 频率</td><td>Input min/max</td><td><code>min={0}</code>，无 max</td><td><code>min={range.min} max={range.max}</code></td><td><code>IPFrequencyPage.tsx</code></td><td>[Overlay]</td></tr>
           <tr><td>IP 频率</td><td>priority inline 错误渲染（新增）</td><td>无 inline 错误，仅 toast</td><td>Input 下方新增 <code>&lt;p class="text-xs text-red-500"&gt;</code> 错误行，与其他字段一致</td><td><code>IPFrequencyPage.tsx</code></td><td>[Base]</td></tr>
@@ -1642,7 +1646,7 @@ onViewRawLogs?: () =&gt; void;
         <li><code>mark-delivery</code> value 不变，i18n label 从「标记投递」改为「进行下一步」（en: <code>Mark &amp; Deliver</code> → <code>Next Step</code>）</li>
         <li><code>block</code> value 不变，i18n label 从「阻断」改为「拒收」（en: <code>Block</code> → <code>Reject</code>）</li>
         <li>最终 5 个动作：<strong>进行下一步 / 隔离 / 审核 / 拒收 / 丢弃</strong>（顺序不变，<code>action-options.ts</code> 不修改）</li>
-        <li><code>errorTagRequired</code> 错误文案去除对具体动作名的引用，改为「启用该动作时需至少启用一种标记方式」（en: <code>At least one tag mode is required when this action is enabled</code>），避免以后动作名再变还要同步改错误文案</li>
+        <li><code>errorTagRequired</code> 错误文案去除对具体动作名的引用，改为「启用该动作时需至少启用一种标记方式」（en: <code>At least one tag mode is required when this action is enabled</code>），避免以后动作名再变还要同���改错误文案</li>
       </ul>
 
       <h4 id="gt12791-c1-states">1.2 截图式交互预览</h4>
@@ -1685,7 +1689,7 @@ onViewRawLogs?: () =&gt; void;
       <h4 id="gt12791-c2-overview">2.1 方案概述</h4>
       <p><strong>背景：</strong>原「标记方式」面板仅支持主题标记和信头标记两种位置，用户无法在邮件正文中插入标记文本。</p>
       <p><strong>最终方案：</strong>在信头标记行下方对称追加第三行「正文标记」Switch；Switch 开启后，其下展示一个自由文本 Input（格式由后端处理，前端不限制）。字段：<code>tag_body_enabled: boolean</code> / <code>tag_body_content: string</code>，新增到 <code>SimilarDetectionConfig</code> type 中。</p>
-      <p><strong>附加策略语义说明：</strong>「进行下一步」动作（value=<code>mark-delivery</code>）本身就是「不拦截、继续走流程 + 可选标记」——标记是附加策略，三个位置均可选，均不选等同于静默放行（此场景建议使用观察模式代替）。</p>
+      <p><strong>附加策略语义说明：</strong>「进行下一步」动作（value=<code>mark-delivery</code>）本身就是「不拦截、继续走流程 + 可选标记」——标记是附加策略，三个位置均可选，均不选等��于静默放行（此场景建议使用观察模式代替）。</p>
 
       <h4 id="gt12791-c2-states">2.2 截图式交互预览</h4>
       <div class="interaction-preview">
@@ -1767,7 +1771,7 @@ onViewRawLogs?: () =&gt; void;
         </thead>
         <tbody>
           <tr><td>豁免提示条（蓝色信息条）</td><td>两个 Tab 底部各渲染一次（<code>renderExemptionNote()</code>）；含「前往群组策略配置」链接</td><td><strong>已完全移除</strong>，<code>renderExemptionNote</code> 函数、<code>Link</code> import、<code>ExternalLink</code> import 全部删除</td><td><code>SimilarDetectionPage.tsx</code></td><td>[Base]</td></tr>
-          <tr><td>底部按钮区布局</td><td><code>justify-between</code>（取消靠左，保存靠右，宽屏约 900px 间距）</td><td><code>justify-end</code>（取消/保存紧靠右侧排列）；内层 <code>ml-auto</code> div 移除</td><td><code>SimilarDetectionPage.tsx</code> 底部 footer</td><td>[Base]</td></tr>
+          <tr><td>底部按钮区布局</td><td><code>justify-between</code>（���消靠左，保存靠右，宽屏约 900px 间距）</td><td><code>justify-end</code>（取消/保存紧靠右侧排列）；内层 <code>ml-auto</code> div 移除</td><td><code>SimilarDetectionPage.tsx</code> 底部 footer</td><td>[Base]</td></tr>
           <tr><td>校验逻辑（mark-delivery 动作）</td><td>「未选」/「已选但空」均用 <code>t('errorTagRequired')</code></td><td>「未选」→ <code>t('errorTagRequired')</code>（文案已去除动作名引用）；「已选但空」→ <code>t('errorTagFieldRequired')</code></td><td><code>SimilarDetectionPage.tsx</code> 第 157–160 行</td><td>[Base]</td></tr>
           <tr><td><code>errorTagFieldRequired</code>（新增 i18n key）</td><td>不存在</td><td>zh：「已启用的标记方式内容不能为空」；en：「Enabled tag modes cannot have empty content」</td><td><code>messages/zh.json</code> / <code>messages/en.json</code>（<code>similarDetection.errorTagFieldRequired</code>）</td><td>[Base]</td></tr>
         </tbody>
@@ -1793,8 +1797,8 @@ onViewRawLogs?: () =&gt; void;
       <h3 id="gt12790-change-1">1. 全方向聚合卡片观察模式配色对齐：与按方向独立检测卡片一致的黄色标签卡</h3>
 
       <h4 id="gt12790-c1-overview">1.1 方案概述</h4>
-      <p><strong>背景：</strong>页面顶部检测粒度可切换「全方向聚合（合并统计）」与「按方向独立检测（可勾选多个）」两种模式。「按方向独立检测」模式下，每个方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后，卡片外层容器的边框与背景色会随之切换为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），配合内部「观察中」黄色徽标，整卡呈现统一的黄色标签视觉。但「全方��聚合」模式下的聚合卡片（<code>AggregateCard.tsx</code>）开启观察模式后，只有内部徽标变黄，卡片外层容器颜色是硬编码的固定值（<code>border-blue-200</code> / <code>bg-white</code>），从不随 <code>observe_mode</code> 变化，导致两种检测粒度下观察模式的视��表现不一致——用户在"聚合"和"独立"两个模式之间切换时，同样开着观察模式，但卡片颜色表现不同，容易造成"聚合模式下观察模式没生效"的误判。</p>
-      <p><strong>决策过程：</strong>讨论了两种实现路径：① 给 <code>AggregateCard.tsx</code>新写一套独立的黄色配色值；② 直接复用 <code>DirectionCard.tsx</code> 已验证过的条件判断逻辑和色值。选择方案②，理由：两个卡片本质上是同一份配置模型（<code>SimilarDetectionConfig</code>）在不同聚合粒度下的两种视图，观察模式的视觉语义应当完全一致，复用同一套色值可以保证以后颜色调整只需改一处，不会出现两处配色逐渐漂移的问题。</p>
+      <p><strong>背景：</strong>页面顶部检测粒度可切换「全方向聚合（合并统计）」与「按方向独立检测（可勾选多个）」两种模式。「按方向独立检测」模式下，每个方向卡片（<code>DirectionCard.tsx</code>）开启观���模式后，卡片外层容器的边框与背景色会随之切换为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），配合内部「观察中」黄色徽标，整卡呈现统一的黄色标签视觉。但「全方��聚合」模式下的聚合卡片（<code>AggregateCard.tsx</code>）开启观察模式后，只有内部徽标变黄，卡片外层容器颜色是硬编码的固定值（<code>border-blue-200</code> / <code>bg-white</code>），从不随 <code>observe_mode</code> 变化，导致两种检测粒度下观察模式的视��表现不一致——用户在"聚合"和"独立"两个模式之间切换时，同样开着观察模式，但卡片颜色表现不同，容易造成"聚合模式下观察模式没生效"的误判。</p>
+      <p><strong>决策过程：</strong>讨论了两种实现路径：① 给 <code>AggregateCard.tsx</code>新写一套独立的黄色配色值；② 直接复用 <code>DirectionCard.tsx</code> 已验证过的条件判断逻辑和色值。选择方案②，理由：两个卡片本��上是同一份配置模型（<code>SimilarDetectionConfig</code>）在不同聚合粒度下的两种视图，观察模式的视觉语义应当完全一致，复用同一套色值可以保证以后颜色调整只需改一处，不会出现两处配色逐渐漂移的问题。</p>
       <p><strong>最终方案：</strong>将 <code>AggregateCard.tsx</code> 外层容器 className 从硬编码固定值改���与 <code>DirectionCard.tsx</code> 完全一致的条件判断（三元表达式基于 <code>value.observe_mode</code>），并保留过渡动画（<code>transition-[background-color,border-color] duration-[240ms]</code>），使颜色切换有平滑过渡而非跳变。不引入新的颜色定义，不修改 <code>DirectionCard.tsx</code>。</p>
 
       <h4 id="gt12790-c1-states">1.2 截图式交互预览</h4>
@@ -1940,7 +1944,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12833-c2-overview">2.1 方案概述</h4>
       <p><strong>背景：</strong>移除 <code>accept</code> 后，原先依赖 <code>action === 'accept'</code> 判断"该检查项是否关闭"的逻辑需要同步调整。修改前，当某检查子项（<code>CheckItem</code>）在配置中缺省时，会 fallback 到 <code>{ enabled: false, action: 'accept' }</code>，即"未配置 = 关闭 + 进行下一步"；同时用户在下拉框中手动选择「进行下一步」时，代码会将该行的 <code>enabled</code> 同步置为 <code>false</code>（等效于关闭该检查项）。这是一处容易引起误解的隐式耦合：动作选择「进行下一步」在 UI 上看起来只是选了一个处置方式，但实际会连带把整行检查"关闭"。</p>
-      <p><strong>最终方案：</strong>fallback 默认值改为 <code>{ enabled: true, action: 'mark-delivery' }</code>，即"未配置 = 开启 + 标记放行"；动作选择回调中的 <code>enabled: (v as AuthSpoofingAction) !== 'accept'</code> 简化为固定 <code>enabled: true</code>，动作选择与检查项启停彻底解耦——选择任意动作（包括「标记放行」）都不会再影响该行的启用状态，启用状态只能通过每行独立的启停开关控制。</p>
+      <p><strong>最终方案：</strong>fallback 默认值改为 <code>{ enabled: true, action: 'mark-delivery' }</code>，即"未配置 = 开启 + 标记放行"；动作选择回调中的 <code>enabled: (v as AuthSpoofingAction) !== 'accept'</code> 简化为固定 <code>enabled: true</code>，动作选择与检查项启停彻底解耦——选��任意动作（包括「标记放行」）都不会再影响该行的启用状态，启用状态只能通过每行独立的启停开关控制。</p>
       <table>
         <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
         <tbody>
@@ -2319,14 +2323,28 @@ onViewRawLogs?: () =&gt; void;
           <tr><td>单元测试</td><td>回归验证</td><td colspan="2"><code>AntivirusTab.test.tsx</code> 现有用例通过；类型检查（<code>tsc --noEmit</code>）无附件安全相关报错</td><td><code>src/components/security/attachment-security/AntivirusTab.test.tsx</code></td><td>[Base]</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
 
-      <h3 id="gt12818-change-3" style="margin-top:2rem;">3. 加密附件：移除误导性默认提示词</h3>
-      <h4 id="gt12818-c3-overview">3.1 方案概述</h4>
+  <!-- ══════════════ GT-12818（加密附件） ══════════════ -->
+  <div class="incremental-section" id="gt-12818-encrypted-attachment">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#b91c1c">GT</span>
+      <h2>GT-12818 附件安全检测——加密附件：提示词存在误导性问题解决</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（策略流水线 → 附件安全检测 → 配置 → 「加密附件」页签）<br/>
+        组件：<code>src/components/security/attachment-security/EncryptedAttachmentTab.tsx</code>、<code>messages/zh.json</code>、<code>messages/en.json</code>、<code>messages/th.json</code>、<code>messages/ru.json</code><br/>
+        2026-08-08 · commit <code>c16eb51</code>
+      </div>
+    </div>
+    <div class="incr-body">
+      <h3 id="gt12818-encrypted-change-1">1. 加密附件：移除误导性默认提示词</h3>
+      <h4 id="gt12818-c3-overview">1.1 方案概述</h4>
       <p><strong>需求名称：</strong>GT-12818 附件安全检测——加密附件：提示词存在误导性问题解决。</p>
       <p>移除“加密附件”页签中“收信方向默认：继续流水线”辅助描述。该文案容易使用户误以为页面存在单独的收信方向默认配置，且可能将解密失败处置与收信方向混淆。仅移除展示文案及其专用国际化键，不改变检测策略、解密失败处置、密码来源、密码本、高级选项或保存逻辑。</p>
       <p>文案继续由项目 next-intl 国际化框架管理；本次同步移除中、英、泰、俄语言资源中仅服务于该描述的 <code>encrypted.receiveDefault</code> 键，未新增硬编码中文。</p>
 
-      <h4 id="gt12818-c3-states">3.2 截图式交互预览</h4>
+      <h4 id="gt12818-c3-states">1.2 截图式交互预览</h4>
       <div class="interaction-preview">
         <p><strong>状态 S-3：加密附件页签移除误导性提示后的正常态</strong><br/>
         <strong>触发路径：</strong>阶段3：内容层 → 附件安全检测 → 配置 → 切换“加密附件”页签。</p>
@@ -2336,7 +2354,7 @@ onViewRawLogs?: () =&gt; void;
         </figure>
       </div>
 
-      <h4 id="gt12818-c3-elements">3.3 逐元素说明</h4>
+      <h4 id="gt12818-c3-elements">1.3 逐元素说明</h4>
       <table>
         <thead><tr><th>元素</th><th>修改前</th><th>修改后</th><th>事实源</th><th>形态/角色差异</th></tr></thead>
         <tbody>
@@ -2434,7 +2452,7 @@ onViewRawLogs?: () =&gt; void;
           <tr>
           <td><span class="version-badge"><span class="vnum">v14</span></span></td>
           <td>2026-08-08</td>
-          <td>追加 GT-12818「附件安全检测——加密附件：提示词存在误导性问题解决」变更 3：移除“收信方向默认：继续流水线”辅助描述；通过项目 next-intl 同步移除 zh/en/th/ru 的 <code>encrypted.receiveDefault</code> 专用键；检测策略、解密失败处置、密码来源、密码本、高级选项及保存逻辑不变；使用用户提供的修改后真实页面截图作为 S-3 结果态证据。版本历史 v13→v14。</td>
+          <td>新增独立一级需求目录 GT-12818「附件安全检测——加密附件：提示词存在误导性问题解决」（不作为既有 GT-12818 反病毒需求的第 3 个变更点）：移除“收信方向默认：继续流水线”辅助描述；通过项目 next-intl 同步移除 zh/en/th/ru 的 <code>encrypted.receiveDefault</code> 专用键；检测策略、解密失败处置、密码来源、密码本、高级选项及保存逻辑不变；使用用户提供的修改后真实页面截图作为 S-3 结果态证据。版本历史 v13→v14。</td>
         </tr>
           <tr>
           <td><span class="version-badge"><span class="vnum">v13</span></span></td>
@@ -2484,7 +2502,7 @@ onViewRawLogs?: () =&gt; void;
         <tr>
           <td><span class="version-badge"><span class="vnum">v4</span></span></td>
           <td>2026-08-06</td>
-          <td>追加 GT-12719 需求体（策略流水线执行动作/黑白名单文案解释）：变更 1 执行动作图例「阻断」→「拒收」，新增「进行下一步 · 继续执行后续策略」（pipeline.actionNextStep/actionNextStepDesc），移除「标记投递」（actionLegendItems 删除 tagDeliver 条目，PolicyPipelinePage.tsx）；变更 2 名单类型黑名单描述「阻断/隔离/丢弃」→「拒收/隔离/丢弃」（pipeline.blacklistTypeDesc），白名单描述「投递/标记投递」→「投递」（pipeline.whitelistTypeDesc）；变更 3 流程控制终止短文案「阻断」→「拒收」（pipeline.flowTerminateShort），终止描述「阻断/丢弃/隔离」→「拒收/丢弃/隔离」（pipeline.flowTerminateDesc），继续描述移除「标记投递」（pipeline.flowContinueDesc）；附截图 S-1（策略流水线默认态含图例区）；目录追加 GT-12719 一级条目及三级子章节；版本历史 v3→v4。</td>
+          <td>追加 GT-12719 需求体（策略流水线执行动作/黑白名单文案解释）：变更 1 执行动作图例「阻断」→「拒收」，新增「进行下一步 · 继续执行后续策略」（pipeline.actionNextStep/actionNextStepDesc），移除「标记投递」（actionLegendItems 删除 tagDeliver 条目，PolicyPipelinePage.tsx）；变更 2 名单类型黑名单描述「阻断/隔离/丢弃」→「拒收/隔离/丢弃」（pipeline.blacklistTypeDesc），白名单描述「投递/标记投递」→「投递」（pipeline.whitelistTypeDesc）；变更 3 流程控制终止短文案「阻断」→「拒收」（pipeline.flowTerminateShort），终止描���「阻断/丢弃/隔离」→「拒收/丢弃/隔离」（pipeline.flowTerminateDesc），继续描述移除「标记投递」（pipeline.flowContinueDesc）；附截图 S-1（策略流水线默认态含图例区）；目录追加 GT-12719 一级条目及三级子章节；版本历史 v3→v4。</td>
         </tr>
         <tr>
           <td><span class="version-badge"><span class="vnum">v3</span></span></td>
