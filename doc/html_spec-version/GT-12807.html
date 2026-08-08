@@ -313,6 +313,22 @@
         </ul>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-12818">GT-12818 附件安全-反病毒去掉拒收，增加审核</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12818-change-1">发现病毒后的处置：移除「拒收」（reject）执行动作</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12818-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12818-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12818-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12818-change-2">发现病毒后的处置：新增「审核」（audit）执行动作</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12818-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12818-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12818-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
       <li><a href="#diffs">D. 差异标注</a></li>
       <li><a href="#questions">Q. 待确认事项</a></li>
       <li><a href="#version-history">V. 版本历史</a></li>
@@ -510,7 +526,7 @@ function getOperationTypeLabel(
       <table>
         <tbody>
           <tr><th style="width:120px">修复前</th><td>点击「查看召回日志」触发 <code>toast.info(tSenderActions('notImplementedToast'))</code>，显示"暂未实现"提示</td></tr>
-          <tr><th>修复后</th><td>点击「查看原始日志」调用 <code>onViewRawLogs()</code> 回调，由 <code>detail-modal.tsx</code> 注入：先 <code>setRawLogsExpanded(true)</code> 展开原始日志区，再 <code>scrollToSection('rawlogs')</code> 平滑滚动至原始日志区段</td></tr>
+          <tr><th>修复后</th><td>点击���查看原始日志」调用 <code>onViewRawLogs()</code> 回调，由 <code>detail-modal.tsx</code> 注入：先 <code>setRawLogsExpanded(true)</code> 展开原始日志区，再 <code>scrollToSection('rawlogs')</code> 平滑滚动至原始日志区段</td></tr>
           <tr><th>文案</th><td>按钮文案由「查看召回日志」改为「查看原始日志」（i18n key：<code>emailDisposal.detail.analysis.viewRecallLog</code>）</td></tr>
           <tr><th>降级</th><td>若 <code>onViewRawLogs</code> prop 未传（如独立挂载测试），退回 <code>toast.info</code>，向后兼容</td></tr>
         </tbody>
@@ -601,6 +617,13 @@ onViewRawLogs?: () =&gt; void;
           <td class="status-resolved">已解决（以 GT-12833 为准）</td>
           <td>2026-08-08</td>
         </tr>
+        <tr>
+          <td>D-006</td>
+          <td>GT-12818：附件安全「发现病毒后的处置」的可选执行动作需为 隔离 / 审核 / 丢弃</td>
+          <td><code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code> 由 <code>['quarantine', 'reject', 'discard']</code> 改为 <code>['quarantine', 'audit', 'discard']</code>（移除 <code>reject</code>、新增 <code>audit</code>），<code>virus_action</code> 类型 <code>Exclude</code> 追加 <code>'reject'</code>；<code>timeout_action</code> 及其它模块不变，已通过浏览器可访问性树核对下拉候选</td>
+          <td class="status-resolved">已解决</td>
+          <td>2026-08-08</td>
+        </tr>
       </tbody>
     </table>
   </section>
@@ -631,6 +654,13 @@ onViewRawLogs?: () =&gt; void;
           <td>Q-003</td>
           <td>GT-12833 截图验证（S-4，「宽松」模板下 SPF「标记方式」附加配置面板）中「主题标记/信头标记/正文标记」三个 Switch 的行内文案在浏览器截图环境下渲染为空白方块</td>
           <td>经可访问性树核对，DOM 层文本本身未损坏（三个标签文字均可正常读取），推测为截图当时页面字体资源尚未完全加载完成所致，与本次 <code>PROTOCOL_ACTIONS</code> 精简改动无关；建议在正式验收环境下用真实浏览器复核该面板视觉渲染</td>
+          <td class="status-pending">待处理</td>
+          <td>2026-08-08</td>
+        </tr>
+        <tr>
+          <td>Q-004</td>
+          <td>GT-12818 截图验证（S-1/S-2，「发现病毒后的处置」下拉打开态）中所有中文渲染为空白方块（□）</td>
+          <td>本次沙箱浏览器缺少中文字体，页面全部汉字均渲染为方块，非本需求引入的问题；下拉候选文本已通过可访问性树读取权威值（隔离 / 审核 / 丢弃，不含拒收）确认改动生效。与 Q-003 为同一类字体渲染现象，建议在具备中文字体的正式验收环境用真实浏览器复核视觉渲染</td>
           <td class="status-pending">待处理</td>
           <td>2026-08-08</td>
         </tr>
@@ -1314,7 +1344,7 @@ onViewRawLogs?: () =&gt; void;
       <h3 id="gt12795-change-1">1. 新建规则优先级默认值与范围修正（1 → 100，范围 100~1000）</h3>
 
       <h4 id="gt12795-c1-overview">1.1 方案概述</h4>
-      <p><strong>问题：</strong>新建接收标记规则 / 外发声明规则时，优先级字段默认值为 <code>1</code>，后端接口要求租户管理员的优先级必须在 100~1000 范围内，导致提交时出现报错「tenant admin priority must be between 100 and 1000」。</p>
+      <p><strong>问题：</strong>新建接收标记规则 / 外发声明规则时，优先级字段默认值为 <code>1</code>，后端接口要求租户管理员的优先级必须在 100~1000 范围内，导致��交时出现报错「tenant admin priority must be between 100 and 1000」。</p>
       <p><strong>修复方案：</strong></p>
       <ul>
         <li><strong><code>MailMarkingPage.tsx</code> — <code>nextPriority</code> 计算逻辑</strong>：无规则时默认返回 <code>100</code>；有规则时取现有最大优先级 +1，并使用 <code>Math.max(..., 100)</code> 钳制下限、<code>Math.min(..., 1000)</code> 钳制上限，确保默认值始终在合法区间。</li>
@@ -1752,7 +1782,7 @@ onViewRawLogs?: () =&gt; void;
       <h4 id="gt12790-c1-overview">1.1 方案概述</h4>
       <p><strong>背景：</strong>页面顶部检测粒度可切换「全方向聚合（合并统计）」与「按方向独立检测（可勾选多个）」两种模式。「按方向独立检测」模式下，每个方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后，卡片外层容器的边框与背景色会随之切换为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），配合内部「观察中」黄色徽标，整卡呈现统一的黄色标签视觉。但「全方��聚合」模式下的聚合卡片（<code>AggregateCard.tsx</code>）开启观察模式后，只有内部徽标变黄，卡片外层容器颜色是硬编码的固定值（<code>border-blue-200</code> / <code>bg-white</code>），从不随 <code>observe_mode</code> 变化，导致两种检测粒度下观察模式的视觉表现不一致——用户在"聚合"和"独立"两个模式之间切换时，同样开着观察模式，但卡片颜色表现不同，容易造成"聚合模式下观察模式没生效"的误判。</p>
       <p><strong>决策过程：</strong>讨论了两种实现路径：① 给 <code>AggregateCard.tsx</code>新写一套独立的黄色配色值；② 直接复用 <code>DirectionCard.tsx</code> 已验证过的条件判断逻辑和色值。选择方案②，理由：两个卡片本质上是同一份配置模型（<code>SimilarDetectionConfig</code>）在不同聚合粒度下的两种视图，观察模式的视觉语义应当完全一致，复用同一套色值可以保证以后颜色调整只需改一处，不会出现两处配色逐渐漂移的问题。</p>
-      <p><strong>最终方案：</strong>将 <code>AggregateCard.tsx</code> 外层容器 className 从硬编码固定值改为与 <code>DirectionCard.tsx</code> 完全一致的条件判断（三元表达式基于 <code>value.observe_mode</code>），并保留过渡动画（<code>transition-[background-color,border-color] duration-[240ms]</code>），使颜色切换有平滑过渡而非跳变。不引入新的颜色定义，不修改 <code>DirectionCard.tsx</code>。</p>
+      <p><strong>最终方案：</strong>将 <code>AggregateCard.tsx</code> 外层容器 className 从硬编码固定值改���与 <code>DirectionCard.tsx</code> 完全一致的条件判断（三元表达式基于 <code>value.observe_mode</code>），并保留过渡动画（<code>transition-[background-color,border-color] duration-[240ms]</code>），使颜色切换有平滑过渡而非跳变。不引入新的颜色定义，不修改 <code>DirectionCard.tsx</code>。</p>
 
       <h4 id="gt12790-c1-states">1.2 截图式交互预览</h4>
       <div class="interaction-preview">
@@ -2041,7 +2071,7 @@ onViewRawLogs?: () =&gt; void;
       <h3 id="gt12826-change-1">1. 模拟测试结果态：命中/未命中不再使用红色失败图标与绿色成功图标，改为中性信息色 + 靶心图标 / muted 中性灰</h3>
 
       <h4 id="gt12826-c1-overview">1.1 方案概述</h4>
-      <p><strong>背景：</strong>「命中」「未命中」是模拟测试对"测试文本是否触发该规则"给出的两种正常判定结果，二者都不代表处置好坏——命中不等于"出错"，未命中也不等于"通过"。修改前的实现借用了通用的成功/失败配色语义（红=失败、绿=成功），把"命中"渲染成红色叉号，容易让管理员误判为"测试失败/规则配置有问题"，而"未命中"却显示绿色对勾，容易误判为"测试通过"，两者含义与颜色语义直接矛盾。</p>
+      <p><strong>背景：</strong>「命中」「未命中」是模拟测试对"测试文本是否触发该规则"给出的两种正常判定结果，二者都不代表处置好坏——命中不等于"出错"，未命中也不等���"通过"。修改前的实现借用了通用的成功/失败配色语义（红=失败、绿=成功），把"命中"渲染成红色叉号，容易让管理员误判为"测试失败/规则配置有问题"，而"未命中"却显示绿色对勾，容易误判为"测试通过"，两者含义与颜色语义直接矛盾。</p>
       <p><strong>最终方案：</strong>命中态改为中性信息配色（浅蓝 <code>sky</code> 系）+ <code>Target</code>（靶心）图标，语义为"已命中该匹配条件"，不含好坏判断；未命中态改为使用设计系统的中性 <code>muted</code> 前景/背景 token（浅色主题下接近浅灰）+ <code>MinusCircle</code>（减号圆圈）图标，语义为"未命中，无需处理"。两者都移除 destructive 红色与 success 绿色，视觉上不再暗示对错。图标由 <code>lucide-react</code> 的 <code>XCircle</code>/<code>CheckCircle2</code> 替换为 <code>Target</code>/<code>MinusCircle</code>。</p>
       <table>
         <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
@@ -2094,7 +2124,7 @@ onViewRawLogs?: () =&gt; void;
         </figure>
 
         <p style="margin-top:1.5rem"><strong>状态 S-3：接口执行失败态（未变更，行为说明）</strong><br/>
-        触发路径：同上 → <code>testContentRule</code> 接口调用抛出异常（网络失败 / 正则解析异常等）</p>
+        触发���径：同上 → <code>testContentRule</code> 接口调用抛出异常（网络失败 / 正则解析异常等）</p>
         <p>本状态是变更 2 新增的独立 <code>testRunError</code> 分支，与命中/未命中结果渲染路径互斥，详见 <a href="#gt12826-change-2">变更 2</a>；由于需要人工构造接口异常才能触发，未安全验证的截图记为「不适用」，行为已通过源码逻辑（<code>catch</code> 分支）确认。</p>
         <table>
           <thead><tr><th>结果类型</th><th>修改前配色</th><th>修改后配色</th><th>修改前图标</th><th>修改后图标</th></tr></thead>
@@ -2123,7 +2153,7 @@ onViewRawLogs?: () =&gt; void;
       <h3 id="gt12826-change-2" style="margin-top:2rem;">2. 新增独立的接口执行错误态（testRunError），与命中/未命中结果彻底解耦</h3>
 
       <h4 id="gt12826-c2-overview">2.1 方案概述</h4>
-      <p><strong>背景：</strong>修改前，<code>testContentRule</code> 接口调用失败时（<code>catch</code> 分支）直接 <code>setTestMatch(false)</code>，把"接口报错"当作"未命中"处理，渲染成绿色成功态图标，彻底掩盖了真实的执行故障——管理员看到绿色对勾，会误以为测试已正常跑完且未命中，无法察觉后端异常。</p>
+      <p><strong>背景：</strong>���改前，<code>testContentRule</code> 接口调用失败时（<code>catch</code> 分支）直接 <code>setTestMatch(false)</code>，把"接口报错"当作"未命中"处理，渲染成绿色成功态图标，彻底掩盖了真实的执行故障——管理员看到绿色对勾，会误以为测试已正常跑完且未命中，无法察觉后端异常。</p>
       <p><strong>最终方案：</strong>新增独立状态 <code>testRunError</code>，与 <code>testMatch</code>（命中/未命中，均为正常结果）完全分离：接口调用失败时不再写入 <code>testMatch</code>（保持为 <code>null</code>），而是把 <code>t('contentRules.testFailed')</code>（新增 i18n key，zh:「测试执行失败，请稍后重试」/ en:「Test failed to run, please try again」）写入 <code>testRunError</code>，渲染为红色 <code>destructive</code> 态 + <code>AlertTriangle</code> 图标；结果渲染逻辑改为优先判断 <code>testRunError</code>，仅当无执行错误时才展示 <code>testMatch</code> 命中/未命中结果，两条路径互斥。测试内容变更、动作切换、重新点击「运行测试」等场景均同步清空 <code>testRunError</code>，与既有 <code>testMatch</code>/<code>testError</code> 清空逻辑保持一致。</p>
       <table>
         <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
@@ -2171,6 +2201,115 @@ onViewRawLogs?: () =&gt; void;
     </div>
   </div>
 
+  <!-- ══════════════ GT-12818 ══════════════ -->
+  <div class="incremental-section" id="gt-12818">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#b91c1c">GT</span>
+      <h2>GT-12818 附件安全-反病毒去掉拒收，增加审核</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（策略流水线 → 附件安全检测 → 配置 → 「反病毒引擎」页签）<br/>
+        组件：<code>src/components/security/attachment-security/AntivirusTab.tsx</code>、<code>src/types/attachment-security.ts</code>、<code>messages/zh.json</code>、<code>messages/en.json</code><br/>
+        2026-08-08 · commit <code>c16eb51</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-info"><strong>需求说明：</strong>反病毒引擎「发现病毒后的处置」（<code>virus_action</code>）执行动作列表需要调整——移除「拒收」（<code>reject</code>）动作，并新增「审核」（<code>audit</code>）动作。调整后该下拉的可选动作为 <strong>隔离 / 审核 / 丢弃</strong> 三项。本需求仅调整「发现病毒后的处置」的动作候选列表，不改动同一页签下的「扫描超时/不可用时的动作」（<code>timeout_action</code>，仍为 拒收 / 丢弃 / 隔离 / 继续流水线 四项）以及其它任何功能模块。文案与描述全部复用项目 next-intl 国际化框架的既有 key（<code>actions.*</code> / <code>actionDesc.*</code>），未新增硬编码文案。</div>
+
+      <!-- 变更 1 -->
+      <h3 id="gt12818-change-1">1. 发现病毒后的处置：移除「拒收」（reject）执行动作</h3>
+
+      <h4 id="gt12818-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>「发现病毒后的处置」用于配置确认检出病毒后对邮件采取的动作。此前候选列表为 <code>['quarantine', 'reject', 'discard']</code>（隔离 / 拒收 / 丢弃）。「拒收」（<code>reject</code>）表示在 SMTP 阶段拒绝接收并向发件方回退信（452/550），对"已确认为病毒"的邮件不再作为推荐处置动作，需从该下拉中移除。</p>
+      <p><strong>最终方案：</strong>在 <code>AntivirusTab.tsx</code> 中把 <code>VIRUS_ACTIONS</code> 常量移除 <code>'reject'</code>；同时在 <code>attachment-security.ts</code> 的 <code>AntivirusActionConfig.virus_action</code> 类型上追加 <code>'reject'</code> 到 <code>Exclude</code> 排除项，从类型层面禁止该动作被写入。i18n key <code>actions.reject</code> / <code>actionDesc.reject</code> 本身保留（仍被 <code>timeout_action</code> 等其它场景引用），仅不再出现在「发现病毒后的处置」下拉中。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>VIRUS_ACTIONS</code> 常量</td>
+            <td><code>['quarantine', 'reject', 'discard']</code></td>
+            <td><code>['quarantine', 'audit', 'discard']</code>（同步含变更 2 的 <code>audit</code>）</td>
+          </tr>
+          <tr>
+            <td><code>virus_action</code> 类型</td>
+            <td><code>Exclude&lt;AttachmentAction, 'accept' | 'partial_skip'&gt;</code></td>
+            <td><code>Exclude&lt;AttachmentAction, 'accept' | 'partial_skip' | 'reject'&gt;</code></td>
+          </tr>
+          <tr>
+            <td>下拉候选项（发现病毒后的处置）</td>
+            <td>隔离 / <del>拒收</del> / 丢弃</td>
+            <td>隔离 / 审核 / 丢弃（不含拒收）</td>
+          </tr>
+          <tr>
+            <td>不受影响项</td>
+            <td colspan="2"><code>TIMEOUT_ACTIONS</code>（扫描超时/不可用动作）保持 <code>['quarantine', 'reject', 'discard', 'accept']</code> 不变，「拒收」在超时动作中仍保留</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12818-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：发现病毒后的处置下拉打开态（修改后，不含「拒收」）</strong><br/>
+        触发路径：产品形态切换为「AI版·单租户」→ 策略流水线 → 「附件安全检测」卡片点击「配置」→ 抽屉内切换到「反病毒引擎」页签 → 点击「发现病毒后的处置」下拉。</p>
+        <figure>
+          <img src="./screenshots/gt12818-virus-action-dropdown.png" alt="发现病毒后的处置下拉打开态，候选项为隔离、审核、丢弃三项，不含拒收" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：「发现病毒后的处置」下拉展开后仅有三项候选（每项含动作名 + 描述副行），当前选中第一项「隔离」（带勾选）。经浏览器可访问性树核对，三项 <code>option</code> 的权威文本依次为「隔离 邮件进入隔离区，管理员审核后可放行或删除」「审核 邮件进入待审核队列，人工确认后投递或退回」「丢弃 静默丢弃，发件方无感知，无退信」，<strong>列表中已不再包含「拒收」</strong>。注：本沙箱浏览器缺少中文字体，截图中汉字渲染为空白方块（□），选项文本以可访问性树读取值为权威依据，详见 <a href="#questions">Q-004</a>。</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12818-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>「发现病毒后的处置」下拉（<code>data-testid="antivirus-virus-action"</code>）</td><td>Select 单选</td><td>候选 隔离 / 拒收 / 丢弃</td><td>候选 隔离 / 审核 / 丢弃（移除拒收）</td><td><code>AntivirusTab.tsx</code> — <code>VIRUS_ACTIONS.map</code></td><td>[Base]</td></tr>
+          <tr><td><code>reject</code> 选项项（<code>antivirus-virus-action-reject</code>）</td><td>SelectItem</td><td>存在，文案「拒收 / 在 SMTP 阶段拒绝接收，发件方收到退信通知（452/550）」</td><td><del>已移除，不再渲染</del></td><td><code>AntivirusTab.tsx</code></td><td>[Base]</td></tr>
+          <tr><td><code>virus_action</code> 类型约束</td><td>TS 类型</td><td>允许 <code>reject</code></td><td>类型 <code>Exclude</code> 追加 <code>'reject'</code>，禁止写入</td><td><code>attachment-security.ts</code></td><td>[Base]</td></tr>
+          <tr><td>i18n key <code>actions.reject</code> / <code>actionDesc.reject</code></td><td>文案 key（保留）</td><td colspan="2">保留不删除（仍被 <code>timeout_action</code> 等场景引用），仅从本下拉解除引用</td><td><code>messages/zh.json</code> / <code>messages/en.json</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12818-change-2" style="margin-top:2rem;">2. 发现病毒后的处置：新增「审核」（audit）执行动作</h3>
+
+      <h4 id="gt12818-c2-overview">2.1 方案概述</h4>
+      <p><strong>背景：</strong>对确认检出病毒的邮件，除「隔离」「丢弃」外，还需要一种"进入待审核队列、由人工确认后再投递或退回"的处置方式，即「审核」（<code>audit</code>）。<code>audit</code> 动作已存在于系统通用动作枚举 <code>AttachmentAction</code> 及 i18n（<code>actions.audit</code> = 审核 / Review，<code>actionDesc.audit</code> = 「邮件进入待审核队列，人工确认后投递或退回」），此前仅未在「发现病毒后的处置」下拉中提供。</p>
+      <p><strong>最终方案：</strong>在 <code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code> 中新增 <code>'audit'</code>，位于「隔离」与「丢弃」之间，最终顺序为 <code>['quarantine', 'audit', 'discard']</code>（隔离 / 审核 / 丢弃）。<code>virus_action</code> 类型本身已允许 <code>audit</code>（未在 <code>Exclude</code> 中排除），无需改动类型；下拉选项的名称与描述副行直接复用 <code>t('actions.audit')</code> / <code>t('actionDesc.audit')</code>，无新增文案。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr><td>候选项是否含「审核」</td><td>否</td><td>是（<code>audit</code>，位于隔离与丢弃之间）</td></tr>
+          <tr><td>选项名称 / 描述来源</td><td>—</td><td><code>actions.audit</code>「审核」/ <code>actionDesc.audit</code>「邮件进入待审核队列，人工确认后投递或退回」（既有 i18n key，zh/en 均已存在）</td></tr>
+          <tr><td>默认值（<code>DEFAULT_ANTIVIRUS_ACTIONS.virus_action</code>）</td><td colspan="2"><code>'quarantine'</code>（隔离）不变，新增「审核」不改变默认选中项</td></tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12818-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-2：下拉中「审核」选项可见（修改后）</strong><br/>
+        触发路径：同 S-1，展开「发现病毒后的处置」下拉。</p>
+        <figure>
+          <img src="./screenshots/gt12818-virus-action-dropdown.png" alt="发现病毒后的处置下拉中第二项为审核，含描述副行" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：与 S-1 为同一下拉打开态截图。下拉第二项即新增的「审核」，其副行描述为「邮件进入待审核队列，人工确认后投递或退回」；选项顺序为 隔离（选中）→ 审核 → 丢弃。经可访问性树核对第二项 <code>option</code> 权威文本为「审核 邮件进入待审核队列，人工确认后投递或退回」，确认新增生效。中文字体渲染问题同 <a href="#questions">Q-004</a>。</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12818-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>「审核」选项项（<code>antivirus-virus-action-audit</code>）</td><td>SelectItem（新增）</td><td>不存在于本下拉</td><td>名称「审核」+ 描述「邮件进入待审核队列，人工确认后投递或退回」，位于隔离与丢弃之间</td><td><code>AntivirusTab.tsx</code> — <code>VIRUS_ACTIONS</code></td><td>[Base]</td></tr>
+          <tr><td>选项名称 / 描述</td><td>i18n 文案（复用）</td><td>—</td><td><code>t('actions.audit')</code> / <code>t('actionDesc.audit')</code>（既有 key，未新增）</td><td><code>messages/zh.json</code> / <code>messages/en.json</code></td><td>[Base]</td></tr>
+          <tr><td>单元测试</td><td>回归验证</td><td colspan="2"><code>AntivirusTab.test.tsx</code> 现有用例通过；类型检查（<code>tsc --noEmit</code>）无附件安全相关报错</td><td><code>src/components/security/attachment-security/AntivirusTab.test.tsx</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
   <!-- ══════════════ V. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>V. 版本历史</h2>
@@ -2179,6 +2318,11 @@ onViewRawLogs?: () =&gt; void;
         <tr><th>版本</th><th>日期</th><th>摘要</th></tr>
       </thead>
       <tbody>
+          <tr>
+          <td><span class="version-badge"><span class="vnum">v12</span></span></td>
+          <td>2026-08-08</td>
+          <td>追加 GT-12818「附件安全-反病毒去掉拒收，增加审核」需求体（2 个变更点）。变更 1：反病毒引擎「发现病毒后的处置」（<code>virus_action</code>）移除「拒收」（<code>reject</code>）执行动作——<code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code> 由 <code>['quarantine', 'reject', 'discard']</code> 去掉 <code>reject</code>，并在 <code>attachment-security.ts</code> 的 <code>AntivirusActionConfig.virus_action</code> 类型 <code>Exclude</code> 追加 <code>'reject'</code>；i18n key <code>actions.reject</code>/<code>actionDesc.reject</code> 保留（仍被 <code>timeout_action</code> 引用），仅从本下拉解除引用。变更 2：同一下拉新增「审核」（<code>audit</code>）执行动作，最终顺序为 <code>['quarantine', 'audit', 'discard']</code>（隔离/审核/丢弃），名称与描述复用既有 i18n key <code>actions.audit</code>「审核」/<code>actionDesc.audit</code>「邮件进入待审核队列，人工确认后投递或退回」（zh/en 均已存在），<code>virus_action</code> 类型本身已允许 <code>audit</code> 无需改动，默认值仍为 <code>quarantine</code>。不改动「扫描超时/不可用动作」<code>timeout_action</code>（仍为拒收/丢弃/隔离/继续流水线）及其它模块。附截图 1 张（真实浏览器 agent-browser 采集，下拉打开态）：gt12818-virus-action-dropdown（发现病毒后的处置下拉展开，候选隔离/审核/丢弃三项、无拒收）；因沙箱浏览器缺中文字体截图汉字渲染为空白方块，选项文本以可访问性树读取值（隔离/审核/丢弃）为权威依据。目录追加 GT-12818 一级条目及两个变更点子章节；差异标注追加 D-006；待确认事项追加 Q-004（截图中文字体渲染现象，同 Q-003）；版本历史 v11→v12。</td>
+        </tr>
           <tr>
           <td><span class="version-badge"><span class="vnum">v11</span></span></td>
           <td>2026-08-08</td>

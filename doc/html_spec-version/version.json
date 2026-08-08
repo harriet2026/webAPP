@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 44,
+  "current_version": 45,
   "history": [
     {
       "version": 1,
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本�����史���������加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）��版本�����史���������加 v9。",
       "demo_version": 12
     },
     {
@@ -418,6 +418,15 @@
       "ticket": "GT-12826",
       "incremental": true,
       "summary": "GT-12807.html v10→v11：追加 GT-12826「内容规则规则使用错误图标问题解决」需求体（2 个变更点）。背景（现场验收意见）：内容规则新建/编辑抽屉「模拟测试」结果反馈中，“命中”使用红色 XCircle 失败图标（border-rose-200 bg-rose-50 text-rose-700），“未命中”反而使用绿色 CheckCircle2 成功图标（border-emerald-200 bg-emerald-50 text-emerald-700），与“命中/未命中均为正常判定结果、不代表处置好坏”的实际语义直接矛盾。变更1：命中态改为中性信息色 sky + Target 靶心图标（border-sky-200 bg-sky-50 text-sky-700，暗色态 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300），未命中态改为设计系统中性 muted token + MinusCircle 图标（border-border bg-muted text-muted-foreground，非硬编码颜色），文案 contentRules.testMatched「匹配」/testNotMatched「不匹配」不变，仅调整配色与图标；lucide-react import 移除 CheckCircle2/XCircle，新增 Target/MinusCircle。变更2：新增独立 testRunError state，testContentRule 接口调用失败（catch 分支）不再 setTestMatch(false) 伪装成“未命中”渲染绿色成功态，改为写入 testRunError 并单独渲染红色 destructive + AlertTriangle 提示（新增 i18n key contentRules.testFailed，zh:“测试执行失败，请稍后重试”/en:“Test failed to run, please try again”），与命中/未命中结果渲染路径互斥；测试内容变更、动作切换、重新点击运行测试三处既有清空联动同步补齐 testRunError 清空。新增单元测试 ContentRuleDrawer.test.tsx 锁定该交互语义（断言命中态 className 不含 rose/destructive，未命中态不含绿色成功态），避免回归。附截图 2 张（真实浏览器 agent-browser 采集）：gt12826-test-matched-sky（命中态，匹配内容与测试内容均为 aaaa，结果框浅蓝+靶心图标）、gt12826-test-not-matched-neutral（未命中态，测试内容改为 zzzz，结果框 muted 中性灰+减号圆圈图标）；接口执行失败态因需人工构造异常触发未截图，行为已通过源码 catch 分支逻辑确认，记为“不适用”。目录追加 GT-12826 一级条目及两个变更点子章节；版本历史 v10→v11。"
+    },
+    {
+      "version": 45,
+      "generated_at": "2026-08-08",
+      "webapp_commit": "c16eb51",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12818",
+      "incremental": true,
+      "summary": "GT-12807.html v11→v12：追加 GT-12818「附件安全-反病毒去掉拒收，增加审核」需求体（2 个变更点）。功能路径：/zh/security/pipeline → 附件安全检测 → 配置 → 反病毒引擎页签 → 发现病毒后的处置（virus_action）下拉。变更1（移除拒收）：AntivirusTab.tsx 的 VIRUS_ACTIONS 由 ['quarantine', 'reject', 'discard'] 去掉 reject；attachment-security.ts 的 AntivirusActionConfig.virus_action 类型由 Exclude<AttachmentAction, 'accept' | 'partial_skip'> 收窄为 Exclude<AttachmentAction, 'accept' | 'partial_skip' | 'reject'>，从类型层面禁止写入 reject；i18n key actions.reject/actionDesc.reject 保留不删除（仍被 timeout_action 等场景引用），仅从本下拉解除引用；同一页签的扫描超时/不可用动作 timeout_action（['quarantine','reject','discard','accept']）不变，其中拒收保留。变更2（新增审核）：同一 VIRUS_ACTIONS 新增 audit，最终为 ['quarantine', 'audit', 'discard']（隔离/审核/丢弃），审核插在隔离与丢弃之间；名称与描述复用既有 i18n key actions.audit「审核」/actionDesc.audit「邮件进入待审核队列，人工确认后投递或退回」（zh/en 均已存在，无新增硬编码文案）；virus_action 类型本身已允许 audit 无需改动；DEFAULT_ANTIVIRUS_ACTIONS.virus_action 默认值仍为 quarantine 不变。仅调整该下拉动作候选列表，未改动其它功能模块。验证：tsc --noEmit 无附件安全相关报错，AntivirusTab.test.tsx 现有用例通过；真实浏览器 agent-browser 采集下拉打开态并经可访问性树核对候选项权威文本为隔离/审核/丢弃（不含拒收）。附截图 1 张：gt12818-virus-action-dropdown（发现病毒后的处置下拉展开，三项候选）；因沙箱浏览器缺中文字体，截图汉字渲染为空白方块，已记为 Q-004（与 Q-003 同类字体渲染现象，非本次改动引入）。目录追加 GT-12818 一级条目及两个变更点子章节（各含 x.1 方案概述/x.2 截图式交互预览/x.3 逐元素说明）；差异标注追加 D-006（已解决）；待确认事项追加 Q-004；版本历史 v11→v12。"
     }
   ]
 }
