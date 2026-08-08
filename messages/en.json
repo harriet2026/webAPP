@@ -5518,7 +5518,7 @@
     "triggerCount": "Trigger Count",
     "emails": "emails",
     "triggerAction": "Trigger Action",
-    "actionMarkDelivery": "Deliver",
+    "actionMarkDelivery": "Next Step",
     "actionReview": "Review",
     "actionBlock": "Reject",
     "actionDiscard": "Discard",
@@ -5544,7 +5544,7 @@
     "atLeastOneDirection": "Select at least one detection direction",
     "navSummary": "Window {window} min / Threshold {threshold}%",
     "tooltipObserve": "When enabled, hits are only logged; no interception is performed",
-    "errorTagRequired": "Deliver requires at least one tag mode",
+    "errorTagRequired": "At least one tag mode is required when this action is enabled",
     "errorTagFieldRequired": "Enabled tag modes cannot have empty content"
   },
   "mailMarking": {
