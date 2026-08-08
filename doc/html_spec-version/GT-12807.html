@@ -659,9 +659,9 @@ onViewRawLogs?: () =&gt; void;
         </tr>
         <tr>
           <td>Q-004</td>
-          <td>GT-12818 截图验证（S-1/S-2，「发现病毒后的处置」下拉打开态）中所有中文渲染为空白方块（□）</td>
-          <td>本次沙箱浏览器缺少中文字体，页面全部汉字均渲染为方块，非本需求引入的问题；下拉候选文本已通过可访问性树读取权威值（隔离 / 审核 / 丢弃，不含拒收）确认改动生效。与 Q-003 为同一类字体渲染现象，建议在具备中文字体的正式验收环境用真实浏览器复核视觉渲染</td>
-          <td class="status-pending">待处理</td>
+          <td>GT-12818 截图验证（S-1/S-2，「发现病毒后的处置」下拉打开态）此前因 agent-browser 沙箱缺中文字体而汉字渲染为空白方块（□）</td>
+          <td>已解决：改用 VM 内 Playwright chromium（VM 已装 Noto Sans CJK 字体）重新采集 gt12818-virus-action-dropdown 截图，中文渲染正常，下拉三项「隔离 / 审核 / 丢弃」肉眼可读且不含「拒收」，并已用可访问性树二次核对与视觉一致。原方块现象仅为 agent-browser 沙箱字体缺失，非产品问题</td>
+          <td class="status-resolved">已解决</td>
           <td>2026-08-08</td>
         </tr>
       </tbody>
@@ -796,7 +796,7 @@ onViewRawLogs?: () =&gt; void;
   <div class="incremental-section" id="gt-12797">
     <div class="incr-header">
       <span class="incr-num" style="background:#0369a1">GT</span>
-      <h2>GT-12797 群组策略——新建群组：不支持切换群组类型</h2>
+      <h2>GT-12797 群��策略——新建群组：不支持切换群组类型</h2>
       <div class="incr-meta">
         路由：<code>/zh/security/groups</code><br/>
         组件：<code>src/components/security/groups/group-management-page.tsx</code>、<code>group-edit-dialog.tsx</code><br/>
@@ -1078,7 +1078,7 @@ onViewRawLogs?: () =&gt; void;
         </thead>
         <tbody>
           <tr>
-            <td>名单类型 黑名单 描述</td>
+            <td>名��类型 黑名单 描述</td>
             <td>图例文案</td>
             <td>阻断/隔离/丢弃</td>
             <td>拒收/隔离/丢弃</td>
@@ -1298,7 +1298,7 @@ onViewRawLogs?: () =&gt; void;
         </thead>
         <tbody>
           <tr>
-            <td>规则列表表头</td>
+            <td>规则列��表头</td>
             <td>表格 thead</td>
             <td>优先级 / 规则名称 / 适用对象 / 位置 / 状态 / 操作</td>
             <td>规则名称 / 适用对象 / 位置 / 状态 / <strong>优先级</strong> / 操作</td>
@@ -1623,7 +1623,7 @@ onViewRawLogs?: () =&gt; void;
       <h4 id="gt12791-c1-overview">1.1 方案概述</h4>
       <p><strong>背景：</strong>原触发动作有 5 个（标记投递、隔离、审核、阻断、丢弃），其中「标记投递」语义模糊（执行动作与附加策略混为一体），「阻断」与系统其他模块的「拒收」语义不一致。</p>
       <p><strong>决策过程：</strong>讨论中考虑了「新增纯投递动作」和「改名为投递」两个方案，最终定为「进行下一步」：① 「投递」容易被理解为"最终送达收件箱"，但该动作实际语义是"这一阶段不拦截、继续走检测流水线后续阶段"，用"投递"存在歧义；② 系统已有观察模式供测试/调试使用，无需额外新增动作。</p>
-      <p><strong>与 GT-12719（策略流水线模块）术语的关系：</strong>策略流水线模块（<code>PolicyPipelinePage.tsx</code>）已存在一个语义相近的图例条目「进行下一步 · 继续执行后续策略」（<code>pipeline.actionNextStep</code>，蓝绿色圆点，DMARC 场景下"继续执行后续策略"）。本次相似检测模块沿用同一中文措辞——两者本质都是"不拦截，继续走后续流程/阶段"，用同一个词对管理员而言学习成本更低；但两者是完全独立的 i18n key（<code>similarDetection.actionMarkDelivery</code> vs <code>pipeline.actionNextStep</code>），互不影响，各自模块内部语义自洽。</p>
+      <p><strong>与 GT-12719（策略流水线模块）术语的关系：</strong>策略流水线模块（<code>PolicyPipelinePage.tsx</code>）已存在一个语义相近的图例条目「进行下一步 · 继续执行后续策略」（<code>pipeline.actionNextStep</code>，蓝绿色圆点，DMARC 场景下"继续执行后续策略"）。本次相似检测模块沿用同一中文措辞——两者本质都��"不拦截，继续走后续流程/阶段"，用同一个词对管理员而言学习成本更低；但两者是完全独立的 i18n key（<code>similarDetection.actionMarkDelivery</code> vs <code>pipeline.actionNextStep</code>），互不影响，各自模块内部语义自洽。</p>
       <p><strong>最终方案：</strong></p>
       <ul>
         <li><code>mark-delivery</code> value 不变，i18n label 从「标记投递」改为「进行下一步」（en: <code>Mark &amp; Deliver</code> → <code>Next Step</code>）</li>
@@ -2253,7 +2253,7 @@ onViewRawLogs?: () =&gt; void;
         触发路径：产品形态切换为「AI版·单租户」→ 策略流水线 → 「附件安全检测」卡片点击「配置」→ 抽屉内切换到「反病毒引擎」页签 → 点击「发现病毒后的处置」下拉。</p>
         <figure>
           <img src="./screenshots/gt12818-virus-action-dropdown.png" alt="发现病毒后的处置下拉打开态，候选项为隔离、审核、丢弃三项，不含拒收" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
-          <figcaption>S-1：「发现病毒后的处置」下拉展开后仅有三项候选（每项含动作名 + 描述副行），当前选中第一项「隔离」（带勾选）。经浏览器可访问性树核对，三项 <code>option</code> 的权威文本依次为「隔离 邮件进入隔离区，管理员审核后可放行或删除」「审核 邮件进入待审核队列，人工确认后投递或退回」「丢弃 静默丢弃，发件方无感知，无退信」，<strong>列表中已不再包含「拒收」</strong>。注：本沙箱浏览器缺少中文字体，截图中汉字渲染为空白方块（□），选项文本以可访问性树读取值为权威依据，详见 <a href="#questions">Q-004</a>。</figcaption>
+          <figcaption>S-1：「发现病毒后的处置」下拉展开后仅有三项候选（每项含动作名 + 描述副行），当前选中第一项「隔离」（带勾选）。三项 <code>option</code> 文本依次为「隔离 邮件进入隔离区，管理员审核后可放行或删除」「审核 邮件进入待审核队列，人工确认后投递或退回」「丢弃 静默丢弃，发件方无感知，无退信」，<strong>列表中已不再包含「拒收」</strong>。（本截图为 VM 内 Playwright + Noto Sans CJK 采集，中文正常渲染；并已用可访问性树核对三项 <code>option</code> 权威文本与上述一致。）</figcaption>
         </figure>
       </div>
 
@@ -2291,7 +2291,7 @@ onViewRawLogs?: () =&gt; void;
         触发路径：同 S-1，展开「发现病毒后的处置」下拉。</p>
         <figure>
           <img src="./screenshots/gt12818-virus-action-dropdown.png" alt="发现病毒后的处置下拉中第二项为审核，含描述副行" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
-          <figcaption>S-2：与 S-1 为同一下拉打开态截图。下拉第二项即新增的「审核」，其副行描述为「邮件进入待审核队列，人工确认后投递或退回」；选项顺序为 隔离（选中）→ 审核 → 丢弃。经可访问性树核对第二项 <code>option</code> 权威文本为「审核 邮件进入待审核队列，人工确认后投递或退回」，确认新增生效。中文字体渲染问题同 <a href="#questions">Q-004</a>。</figcaption>
+          <figcaption>S-2：与 S-1 为同一下拉打开态截图。下拉第二项即新增的「审核」，其副行描述为「邮件进入待审核队列，人工确认后投递或退回」；选项顺序为 隔离（选中）→ 审核 → 丢弃。经可访问性树核对第二项 <code>option</code> 权威文本为「审核 邮件进入待审核队列，人工确认后投递或退回」，确认新增生效。</figcaption>
         </figure>
       </div>
 
@@ -2321,7 +2321,7 @@ onViewRawLogs?: () =&gt; void;
           <tr>
           <td><span class="version-badge"><span class="vnum">v12</span></span></td>
           <td>2026-08-08</td>
-          <td>追加 GT-12818「附件安全-反病毒去掉拒收，增加审核」需求体（2 个变更点）。变更 1：反病毒引擎「发现病毒后的处置」（<code>virus_action</code>）移除「拒收」（<code>reject</code>）执行动作——<code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code> 由 <code>['quarantine', 'reject', 'discard']</code> 去掉 <code>reject</code>，并在 <code>attachment-security.ts</code> 的 <code>AntivirusActionConfig.virus_action</code> 类型 <code>Exclude</code> 追加 <code>'reject'</code>；i18n key <code>actions.reject</code>/<code>actionDesc.reject</code> 保留（仍被 <code>timeout_action</code> 引用），仅从本下拉解除引用。变更 2：同一下拉新增「审核」（<code>audit</code>）执行动作，最终顺序为 <code>['quarantine', 'audit', 'discard']</code>（隔离/审核/丢弃），名称与描述复用既有 i18n key <code>actions.audit</code>「审核」/<code>actionDesc.audit</code>「邮件进入待审核队列，人工确认后投递或退回」（zh/en 均已存在），<code>virus_action</code> 类型本身已允许 <code>audit</code> 无需改动，默认值仍为 <code>quarantine</code>。不改动「扫描超时/不可用动作」<code>timeout_action</code>（仍为拒收/丢弃/隔离/继续流水线）及其它模块。附截图 1 张（真实浏览器 agent-browser 采集，下拉打开态）：gt12818-virus-action-dropdown（发现病毒后的处置下拉展开，候选隔离/审核/丢弃三项、无拒收）；因沙箱浏览器缺中文字体截图汉字渲染为空白方块，选项文本以可访问性树读取值（隔离/审核/丢弃）为权威依据。目录追加 GT-12818 一级条目及两个变更点子章节；差异标注追加 D-006；待确认事项追加 Q-004（截图中文字体渲染现象，同 Q-003）；版本历史 v11→v12。</td>
+          <td>追加 GT-12818「附件安全-反病毒去掉拒收，增加审核」需求体（2 个变更点）。变更 1：反病毒引擎「发现病毒后的处置」（<code>virus_action</code>）移除「拒收」（<code>reject</code>）执行动作——<code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code> 由 <code>['quarantine', 'reject', 'discard']</code> 去掉 <code>reject</code>，并在 <code>attachment-security.ts</code> 的 <code>AntivirusActionConfig.virus_action</code> 类型 <code>Exclude</code> 追加 <code>'reject'</code>；i18n key <code>actions.reject</code>/<code>actionDesc.reject</code> 保留（仍被 <code>timeout_action</code> 引用），仅从本下拉解除引用。变更 2：同一下拉新增「审核」（<code>audit</code>）执行动作，最终顺序为 <code>['quarantine', 'audit', 'discard']</code>（隔离/审核/丢弃），名称与描述复用既有 i18n key <code>actions.audit</code>「审核」/<code>actionDesc.audit</code>「邮件进入待审核队列，人工确认后投递或退回」（zh/en 均已存在），<code>virus_action</code> 类型本身已允许 <code>audit</code> 无需改动，默认值仍为 <code>quarantine</code>。不改动「扫描超时/不可用动作」<code>timeout_action</code>（仍为拒收/丢弃/隔离/继续流水线）及其它模块。附截图 1 张（VM 内 Playwright chromium 采集，VM 已装 Noto Sans CJK 字体，中文正常渲染）：gt12818-virus-action-dropdown（发现病毒后的处置下拉展开，候选隔离/审核/丢弃三项、无拒收），并已用可访问性树核对选项权威文本与视觉一致。目录追加 GT-12818 一级条目及两个变更点子章节；差异标注追加 D-006；待确认事项追加 Q-004（初记为字体渲染方块，现已改用 VM 内 Playwright 重采中文正常渲染，标记为已解决）；版本历史 v11→v12。</td>
         </tr>
           <tr>
           <td><span class="version-badge"><span class="vnum">v11</span></span></td>
