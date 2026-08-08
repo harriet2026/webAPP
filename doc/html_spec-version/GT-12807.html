@@ -313,6 +313,13 @@
         </ul>
       </ul>
 
+      <li class="toc-l1"><a href="#gt-11990">GT-11990 投递与流量分析页面优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt11990-change-1">指标名称与统计口径明确</a></li>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt11990-change-2">方向明细分类与展示文案优化</a></li>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt11990-change-3">外发方向移除延迟百分位趋势与队列趋势</a></li>
+      </ul>
+
       <li class="toc-l1"><a href="#gt-12818">GT-12818 附件安全-反病毒去掉拒收，增加审核</a></li>
       <ul class="toc-l2-group">
         <li class="toc-change"><span class="toc-num">1</span><a href="#gt12818-change-1">发现病毒后的处置：移除「拒收」（reject）执行动作</a></li>
@@ -855,7 +862,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12797-c2-overview">2.1 方案概述</h4>
       <p>优化前，新建群组抽屉内包含「群组名称」和「群组类型」两个并排字段，用户需在表单内再次选择类型，与已在 Tab 上做出的类型选择重复决策，且类型切换会改变成员输入区的校验规则和占位符，造成认知负担。</p>
-      <p>优化后，新建时隐藏「群���类型」Select，抽屉标题直接显示类型（如「新建IP组」），表单内只有「群组名称」（全宽）和「每行一条成员」两个字段，表单职责单一。编辑已有群组时，「群组类型」改为只读 Input 展示，保持信息完整性但不允许修改。</p>
+      <p>优化后，新建时隐藏「群���类型」Select，抽屉标题直接显示类型（如「新建IP组」），表单内只有「群组名称」（全宽）和「每行一条成员」两个字段，表单职责单一。编辑已有群组时，「群组类型」改为只读 Input 展示，保持���息完整性但不允许修改。</p>
       <table>
         <thead><tr><th>场景</th><th>优化前</th><th>优化后</th></tr></thead>
         <tbody>
@@ -1179,7 +1186,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12793-c1-states">1.2 截图式交互预览</h4>
       <div class="interaction-preview">
-        <p><strong>状态 S-1：接收标记规则列表默认态（含规则数据）</strong><br/>
+        <p><strong>状态 S-1：接收���记规则列表默认态（含规则数据）</strong><br/>
         触发路径：租户管理员 → 安全策略 → 策略流水线 → 阶段5 邮件标记与声明卡片 → 「接收标记」Tab（默认）</p>
         <figure>
           <img src="./screenshots/gt12793-receive-list.png" alt="邮件标记与声明面板，接收标记Tab，规则列表显示4条规则，表头包含规则名称、适用对象、位置、状态、优先级、操作列" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
@@ -1301,7 +1308,7 @@ onViewRawLogs?: () =&gt; void;
             <td>规则列��表头</td>
             <td>表格 thead</td>
             <td>优先级 / 规则名称 / 适用对象 / 位置 / 状态 / 操作</td>
-            <td>规则名称 / 适用对象 / 位置 / 状态 / <strong>优先级</strong> / 操作</td>
+            <td>规则名称 / 适用对��� / 位置 / 状态 / <strong>优先级</strong> / 操作</td>
             <td><code>RuleListTable.tsx</code> thead tr</td>
             <td>[Base]，接收标记与外发声明共用同一组件</td>
           </tr>
@@ -1623,7 +1630,7 @@ onViewRawLogs?: () =&gt; void;
       <h4 id="gt12791-c1-overview">1.1 方案概述</h4>
       <p><strong>背景：</strong>原触发动作有 5 个（标记投递、隔离、审核、阻断、丢弃），其中「标记投递」语义模糊（执行动作与附加策略混为一体），「阻断」与系统其他模块的「拒收」语义不一致。</p>
       <p><strong>决策过程：</strong>讨论中考虑了「新增纯投递动作」和「改名为投递」两个方案，最终定为「进行下一步」：① 「投递」容易被理解为"最终送达收件箱"，但该动作实际语义是"这一阶段不拦截、继续走检测流水线后续阶段"，用"投递"存在歧义；② 系统已有观察模式供测试/调试使用，无需额外新增动作。</p>
-      <p><strong>与 GT-12719（策略流水线模块）术语的关系：</strong>策略流水线模块（<code>PolicyPipelinePage.tsx</code>）已存在一个语义相近的图例条目「进行下一步 · 继续执行后续策略」（<code>pipeline.actionNextStep</code>，蓝绿色圆点，DMARC 场景下"继续执行后续策略"）。本次相似检测模块沿用同一中文措辞——两者本质都��"不拦截，继续走后续流程/阶段"，用同一个词对管理员而言学习成本更低；但两者是完全独立的 i18n key（<code>similarDetection.actionMarkDelivery</code> vs <code>pipeline.actionNextStep</code>），互不影响，各自模块内部语义自洽。</p>
+      <p><strong>与 GT-12719（策略流水线模块）术语的关系：</strong>策略流水线模块（<code>PolicyPipelinePage.tsx</code>）已存在一个语义相近的图例条目「进行下一步 · 继续执行后续策略」（<code>pipeline.actionNextStep</code>，蓝绿色圆点，DMARC 场景下"继续执行后续策略"）。本次相似检测模块沿���同一中文措辞——两者本质都��"不拦截，继续走后续流程/阶段"，用同一个词对管理员而言学习成本更低；但两者是完全独立的 i18n key（<code>similarDetection.actionMarkDelivery</code> vs <code>pipeline.actionNextStep</code>），互不影响，各自模块内部语义自洽。</p>
       <p><strong>最终方案：</strong></p>
       <ul>
         <li><code>mark-delivery</code> value 不变，i18n label 从「标记投递」改为「进行下一步」（en: <code>Mark &amp; Deliver</code> → <code>Next Step</code>）</li>
@@ -1917,7 +1924,7 @@ onViewRawLogs?: () =&gt; void;
         <tbody>
           <tr><td>PROTOCOL_ACTIONS 常量</td><td>枚举数组</td><td><code>['reject','discard','quarantine','audit','mark-delivery','accept']</code></td><td><code>['reject','discard','quarantine','audit','mark-delivery']</code></td><td><code>ProtocolChecksSection.tsx</code> L36</td><td>[Base]</td></tr>
           <tr><td>DMARC_ACTIONS 常量</td><td>枚举数组</td><td><code>['reject','discard','quarantine','audit','mark-delivery','accept']</code></td><td><code>['reject','discard','quarantine','audit','mark-delivery']</code></td><td><code>ProtocolChecksSection.tsx</code> L37</td><td>[Base]</td></tr>
-          <tr><td>Select · 「进行下一步」选项</td><td>下拉选项（移除）</td><td>存在于全部 4 个协议 Tab</td><td>不再渲染（数组中移除，Select 由数组 <code>map</code> 生成，无需额外条件判断）</td><td><code>ProtocolChecksSection.tsx</code> Select 渲染逻辑</td><td>[Base]</td></tr>
+          <tr><td>Select · 「进行��一步」选项</td><td>下拉选项（移除）</td><td>存在于全部 4 个协议 Tab</td><td>不再渲染（数组中移除，Select 由数组 <code>map</code> 生成，无需额外条件判断）</td><td><code>ProtocolChecksSection.tsx</code> Select 渲染逻辑</td><td>[Base]</td></tr>
           <tr><td>i18n key <code>protocolActionShort.accept</code> / <code>protocolActionDesc.accept</code></td><td>文案 key（保留未删除）</td><td>被 6 项动作数组引用</td><td>不再被任何动作数组引用，key 本身仍在 <code>messages/zh.json</code> 中保留</td><td><code>messages/zh.json</code></td><td>[Base]</td></tr>
         </tbody>
       </table>
@@ -1989,7 +1996,7 @@ onViewRawLogs?: () =&gt; void;
 
       <h4 id="gt12833-c3-overview">3.1 方案概述</h4>
       <p><strong>背景：</strong>「宽松」预设模板（<code>TEMPLATES.loose</code>）此前对部分低风险场景（SPF <code>none</code> / <code>temperror</code>、DKIM <code>partial</code> / <code>none</code>、PTR <code>noptr</code>）使用 <code>accept</code> 作为预设动作，语义为"不做处理直接放行、且该检查行关闭"。「标准」「严格」模板未使用 <code>accept</code>（已全部是 <code>mark-delivery</code> 或更严格的动作）。</p>
-      <p><strong>最终方案：</strong>「宽松」模板中原先所有 <code>accept</code> 预设值统一替换为 <code>mark-delivery</code>，与「标准」「严格」模板的动作取值风格保持一致；同时 <code>applyGroup()</code> 内部两处根据 <code>action !== 'accept'</code> 计算 <code>enabled</code> 的逻辑（应用模板时的已有 key 分支与新增 key 分支）均简化为固定 <code>enabled: true</code>，与变更 2 的解耦逻辑保持一致——应用任何模板后，所有检查行都是启用态，只是动作严格度不同。</p>
+      <p><strong>最终方案：</strong>「宽松」模板中原先所有 <code>accept</code> 预设值统一替换为 <code>mark-delivery</code>，与「标准」「严格」模板的动作取值风格保持一致；同时 <code>applyGroup()</code> 内部两处根据 <code>action !== 'accept'</code> 计算 <code>enabled</code> 的逻辑（应用模板时的已有 key 分支与新增 key 分支）均简化为固定 <code>enabled: true</code>，与变更 2 的解耦逻辑保持一致—���应用任何模板后，所有检查行都是启用态，只是动作严格度不同。</p>
       <table>
         <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
         <tbody>
@@ -2068,7 +2075,7 @@ onViewRawLogs?: () =&gt; void;
       <div class="callout callout-info"><strong>现场验收意见：</strong>内容规则新建/编辑抽屉中的「模拟测试」功能，输入测试文本并运行后，「命中」该规则的结果使用了红色 <code>XCircle</code> 失败图标（<code>border-rose-200 bg-rose-50 text-rose-700</code>），「未命中」反而使用绿色 <code>CheckCircle2</code> 成功图标（<code>border-emerald-200 bg-emerald-50 text-emerald-700</code>）。「命中」是模拟测试按用户配置的匹配条件正常判定出的结果，代表规则本身工作正常，不应展示为失败态；红色 destructive 视觉应只保留给接口调用失败、正则解析异常等真正的执行错误。</div>
 
       <!-- 变更 1 -->
-      <h3 id="gt12826-change-1">1. 模拟测试结果态：命中/未命中不再使用红色失败图标与绿色成功图标，改为中性信息色 + 靶心图标 / muted 中性灰</h3>
+      <h3 id="gt12826-change-1">1. 模拟测试结果态：命中/未命中不再使用红色失败图标与绿色成功图标，改为中性信息色 + 靶心图��� / muted 中性灰</h3>
 
       <h4 id="gt12826-c1-overview">1.1 方案概述</h4>
       <p><strong>背景：</strong>「命中」「未命中」是模拟测试对"测试文本是否触发该规则"给出的两种正常判定结果，二者都不代表处置好坏——命中不等于"出错"，未命中也不等���"通过"。修改前的实现借用了通用的成功/失败配色语义（红=失败、绿=成功），把"命中"渲染成红色叉号，容易让管理员误判为"测试失败/规则配置有问题"，而"未命中"却显示绿色对勾，容易误判为"测试通过"，两者含义与颜色语义直接矛盾。</p>
@@ -2098,7 +2105,7 @@ onViewRawLogs?: () =&gt; void;
           </tr>
           <tr>
             <td>文案（未变）</td>
-            <td colspan="2"><code>contentRules.testMatched</code>「匹配」/ <code>contentRules.testNotMatched</code>「不匹配」，文案本身未调整，仅调整配色与图标</td>
+            <td colspan="2"><code>contentRules.testMatched</code>「匹配」/ <code>contentRules.testNotMatched</code>「不匹配」，文案本���未调整，仅调整配色与图标</td>
           </tr>
           <tr>
             <td>修改文件</td>
@@ -2310,6 +2317,79 @@ onViewRawLogs?: () =&gt; void;
     </div>
   </div>
 
+  <!-- ══════════════ GT-11990 ══════════════ -->
+  <section id="gt-11990" class="incremental-section">
+    <div class="incr-header">
+      <span class="incr-num">13</span>
+      <h2>GT-11990 投递与流量分析页面优化</h2>
+      <span class="incr-meta">路由：<code>/zh/statistics/delivery-traffic</code><br/>增量日期：2026-08-08</span>
+    </div>
+    <div class="incr-body">
+      <h3 id="gt11990-change-1">变更 1：指标名称与统计口径明确</h3>
+      <p>本需求统一页面指标的业务含义与统计口径。所有范围指标受时间范围、方向和租户范围筛选条件约束；今日按小时展示，其他范围按天展示。</p>
+      <table>
+        <thead><tr><th>指标</th><th>业务含义</th><th>统计口径</th></tr></thead>
+        <tbody>
+          <tr><td>收发信总量</td><td>接收、外发、域内邮件的总量</td><td><code>接收总量 + 外发总量 + 域内总量</code>；三类方向互斥，不重复计数。</td></tr>
+          <tr><td>接收总量 / 外发总量 / 域内总量</td><td>对应方向的邮件数量</td><td>选定时间范围与租户范围内，对应方向的邮件总数。</td></tr>
+          <tr><td>方向成功率</td><td>对应方向完成成功的比例</td><td><code>方向成功数 ÷ 方向总量</code>。</td></tr>
+          <tr><td>退信率</td><td>对应方向失败或退信的比例</td><td><code>方向失败/退信数 ÷ 方向总量</code>；明细隐藏项仍计入该统计。</td></tr>
+          <tr><td>平均延迟</td><td>邮件完成该方向处理的平均耗时</td><td>从进入系统到完成接收、外发或域内投递的平均耗时。</td></tr>
+          <tr><td>外发延迟 P99</td><td>外发延迟的高位尾部表现</td><td>99% 的外发邮件在该耗时内完成；该指标已从外发方向页面移除，不再展示。</td></tr>
+          <tr><td>威胁邮件数 / 内部威胁检出率</td><td>域内邮件安全检测结果</td><td>威胁邮件数为选定范围内识别出的域内威胁数；检出率为威胁邮件数 ÷ 域内总量。</td></tr>
+          <tr><td>检测队列</td><td>当前等待安全检测或旁路处理的任务量</td><td>当前时点的检测积压快照，不是所选时间范围内新增邮件量。</td></tr>
+          <tr><td>队列趋势</td><td>各时间点的待处理/待投递队列快照</td><td>该模块已从外发方向页面移除，不再展示或参与页面统计。</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="gt11990-change-2">变更 2：方向明细分类与展示文案优化</h3>
+      <p>仅调整当前方向的明细展示，不删除后端原始失败原因，不改变总量、成功率、退信率或威胁指标。隐藏分类仍属于失败原因统计，并继续计入整体统计；“延迟投递”仅改显示文案为“检测中”。</p>
+      <table>
+        <thead><tr><th>方向</th><th>展示变更</th><th>统计影响</th></tr></thead>
+        <tbody>
+          <tr><td>全部</td><td>“延迟投递”改为“检测中”。</td><td>仅文案变化，原始数量与统计含义不变。</td></tr>
+          <tr><td>接收</td><td>“反垃圾处理队列”改为“检测队列”；“延迟投递”改为“检测中”；明细隐藏“用户不存在”“邮箱已满”。</td><td>隐藏项仍计入接收失败/退信统计，未从分母或总量扣除。</td></tr>
+          <tr><td>外发</td><td>“延迟投递”改为“检测中”；明细隐藏“目标拒绝”“DNS失败”“RBL拦截”。</td><td>隐藏项仍计入外发失败/退信统计，未从分母或总量扣除。</td></tr>
+          <tr><td>域内</td><td>明细隐藏“内部垃圾”“内部钓鱼”“内部病毒”。</td><td>隐藏项仍计入域内威胁及整体统计。</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="gt11990-change-3">变更 3：外发方向移除延迟百分位趋势与队列趋势</h3>
+      <p>外发方向不再提供“延迟百分位趋势”和“队列趋势”两个模块。模块代码、页面引用、专用数据字段、mock 数据、测试引用及对应国际化键均已删除；内部方向仍保留其自身的延迟区间分布，不受本次变更影响。</p>
+      <div class="callout callout-removed"><strong>已移除：</strong>外发方向的“延迟百分位趋势”（P50/P90/P99）和“队列趋势”。<br/><strong>保留：</strong>外发 KPI、流量趋势、失败原因明细及其他方向的延迟/队列能力。</div>
+
+      <h3 id="gt11990-preview">截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>状态 S-1：投递与流量分析页面默认态</h4>
+        <p><strong>触发路径：</strong>打开 <code>/zh/statistics/delivery-traffic</code>，选择外发方向。</p>
+        <figure>
+          <img src="./screenshots/GT-11990-delivery-traffic-default.png" alt="投递与流量分析页面默认态截图" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px" />
+          <figcaption>真实浏览器验证截图。外发方向不再渲染延迟百分位趋势和队列趋势两个模块。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="gt11990-elements">逐元素与事实源</h3>
+      <table>
+        <thead><tr><th>元素/数据</th><th>变更后</th><th>事实源</th><th>形态/角色差异</th></tr></thead>
+        <tbody>
+          <tr><td>页面路由</td><td><code>/zh/statistics/delivery-traffic</code></td><td><code>DeliveryTrafficPage.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>方向筛选</td><td>接收、外发、域内、全部；外发方向不显示两个已移除模块</td><td><code>DeliveryTrafficPage.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>明细分类</td><td>按方向展示/隐藏分类；隐藏项不改变原始统计</td><td><code>DetailTable.tsx</code>、delivery-traffic API</td><td>[Base]</td></tr>
+          <tr><td>国际化</td><td>“检测中”“检测队列”等文案来自 messages 多语言资源</td><td><code>messages/zh.json</code>、<code>messages/en.json</code></td><td>[Base]</td></tr>
+          <tr><td>外发趋势模块</td><td><del>延迟百分位趋势、队列趋势</del> 已移除</td><td><code>QueueTrendChart.tsx</code> 已删除；外发百分位分支已删除</td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="gt11990-validation">验证与待确认事项</h3>
+      <ul>
+        <li>已按需求保留原始失败原因统计，仅从对应方向明细列表移除指定分类。</li>
+        <li>已验证外发方向不再出现两个被移除模块；相关页面单元测试通过。</li>
+        <li>中文文档使用 UTF-8；本次新增内容未使用 replacement character（<code>�</code>）。</li>
+        <li>产品形态/角色矩阵：本次为同一路由同一展示规则，无新增形态或角色差异，沿用既有矩阵 [Base]。</li>
+      </ul>
+    </div>
+  </section>
+
   <!-- ══════════════ V. 版本历史 ══════════════ -->
   <section id="version-history">
     <h2>V. 版本历史</h2>
@@ -2319,6 +2399,11 @@ onViewRawLogs?: () =&gt; void;
       </thead>
       <tbody>
           <tr>
+          <td><span class="version-badge"><span class="vnum">v13</span></span></td>
+          <td>2026-08-08</td>
+          <td>追加 GT-11990「投递与流量分析页面优化」需求体：明确收发信、方向、成功率、退信率、延迟、威胁与检测队列的业务含义及统计口径；按方向优化明细分类和“检测中/检测队列”文案，隐藏指定失败原因但保留其原始统计；彻底移除外发方向“延迟百分位趋势”和“队列趋势”模块及其页面、类型、mock、测试、国际化引用；附真实浏览器默认态截图。版本历史 v12→v13。</td>
+        </tr>
+          <tr>
           <td><span class="version-badge"><span class="vnum">v12</span></span></td>
           <td>2026-08-08</td>
           <td>追加 GT-12818「附件安全-反病毒去掉拒收，增加审核」需求体（2 个变更点）。变更 1：反病毒引擎「发现病毒后的处置」（<code>virus_action</code>）移除「拒收」（<code>reject</code>）执行动作——<code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code> 由 <code>['quarantine', 'reject', 'discard']</code> 去掉 <code>reject</code>，并在 <code>attachment-security.ts</code> 的 <code>AntivirusActionConfig.virus_action</code> 类型 <code>Exclude</code> 追加 <code>'reject'</code>；i18n key <code>actions.reject</code>/<code>actionDesc.reject</code> 保留（仍被 <code>timeout_action</code> 引用），仅从本下拉解除引用。变更 2：同一下拉新增「审核」（<code>audit</code>）执行动作，最终顺序为 <code>['quarantine', 'audit', 'discard']</code>（隔离/审核/丢弃），名称与描述复用既有 i18n key <code>actions.audit</code>「审核」/<code>actionDesc.audit</code>「邮件进入待审核队列，人工确认后投递或退回」（zh/en 均已存在），<code>virus_action</code> 类型本身已允许 <code>audit</code> 无需改动，默认值仍为 <code>quarantine</code>。不改动「扫描超时/不可用动作」<code>timeout_action</code>（仍为拒收/丢弃/隔离/继续流水线）及其它模块。附截图 1 张（VM 内 Playwright chromium 采集，VM 已装 Noto Sans CJK 字体，中文正常渲染）：gt12818-virus-action-dropdown（发现病毒后的处置下拉展开，候选隔离/审核/丢弃三项、无拒收），并已用可访问性树核对选项权威文本与视觉一致。目录追加 GT-12818 一级条目及两个变更点子章节；差异标注追加 D-006；待确认事项追加 Q-004（初记为字体渲染方块，现已改用 VM 内 Playwright 重采中文正常渲染，标记为已解决）；版本历史 v11→v12。</td>
@@ -2326,7 +2411,7 @@ onViewRawLogs?: () =&gt; void;
           <tr>
           <td><span class="version-badge"><span class="vnum">v11</span></span></td>
           <td>2026-08-08</td>
-          <td>追加 GT-12826「内容规则规则使用错误图标问题解决」需求体（2 个变更点）。背景：内容规则新建/编辑抽屉「模拟测试」结果反馈中，「命中」使用红色 <code>XCircle</code> 失败图标（<code>border-rose-200 bg-rose-50 text-rose-700</code>），「未命中」反而使用绿色 <code>CheckCircle2</code> 成功图标（<code>border-emerald-200 bg-emerald-50 text-emerald-700</code>），与"命中/未命中均为正常判定结果、不代表好坏"的实际语义矛盾。变更 1：命中态改为中性信息色 <code>sky</code> + <code>Target</code> 靶心图标（<code>border-sky-200 bg-sky-50 text-sky-700</code>，暗色态 <code>dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300</code>），未命中态改为设计系统中性 <code>muted</code> token + <code>MinusCircle</code> 图标（<code>border-border bg-muted text-muted-foreground</code>），文案「匹配」「不匹配」不变。变更 2：新增独立 <code>testRunError</code> state，接口调用失败（<code>catch</code> 分支）不再 <code>setTestMatch(false)</code> 伪装成"未命中"，改为写入 <code>testRunError</code> 并渲染红色 <code>destructive</code> + <code>AlertTriangle</code> 提示（新增 i18n key <code>contentRules.testFailed</code>，zh/en 双语），与命中/未命中结果渲染路径互斥；测试内容变更、动作切换、重新测试三处清空联动同步补齐 <code>testRunError</code> 清空。新增单元测试 <code>ContentRuleDrawer.test.tsx</code> 锁定该交互语义（断言命中态 className 不含 <code>rose</code>/<code>destructive</code>，未命中态不含绿色成功态），避免回归。附截图 2 张：gt12826-test-matched-sky（命中态，浅蓝+靶心）、gt12826-test-not-matched-neutral（未命中态，muted 中性灰+减号圆圈）；接口执行失败态因需人工构造异常未截图，行为已通过源码 <code>catch</code> 分支确认。目录追加 GT-12826 一级条目及两个变更点子章节；版本历史 v10→v11。</td>
+          <td>追加 GT-12826「内容规则规则使用错误图标问题解决」需求体（2 个变更点）。背景：内容规则新建/编辑抽屉「模拟测���」结果反馈中，「命中」使用红色 <code>XCircle</code> 失败图标（<code>border-rose-200 bg-rose-50 text-rose-700</code>），「未命中」反而使用绿色 <code>CheckCircle2</code> 成功图标（<code>border-emerald-200 bg-emerald-50 text-emerald-700</code>），与"命中/未命中均为正常判定结果、不代表好坏"的实际语义矛盾。变更 1：命中态改为中性信息色 <code>sky</code> + <code>Target</code> 靶心图标（<code>border-sky-200 bg-sky-50 text-sky-700</code>，暗色态 <code>dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300</code>），未命中态改为设计系统中性 <code>muted</code> token + <code>MinusCircle</code> 图标（<code>border-border bg-muted text-muted-foreground</code>），文案「匹配」「不匹配」不变。变更 2：新增独立 <code>testRunError</code> state，接口调用失败（<code>catch</code> 分支）不再 <code>setTestMatch(false)</code> 伪装成"未命中"，改为写入 <code>testRunError</code> 并渲染红色 <code>destructive</code> + <code>AlertTriangle</code> 提示（新增 i18n key <code>contentRules.testFailed</code>，zh/en 双语），与命中/未命中结果渲染路径互斥；测试内容变更、动作切换、重新测试三处清空联动同步补齐 <code>testRunError</code> 清空。新增单元测试 <code>ContentRuleDrawer.test.tsx</code> 锁定该交互语义（断言命中态 className 不含 <code>rose</code>/<code>destructive</code>，未命中态不含绿色成功态），避免回归。附截图 2 张：gt12826-test-matched-sky（命中态，浅蓝+靶心）、gt12826-test-not-matched-neutral（未命中态，muted 中性灰+减号圆圈）；接口执行失败态因需人工构造异常未截图，行为已通过源码 <code>catch</code> 分支确认。目录追加 GT-12826 一级条目及两个变更点子章节；版本历史 v10→v11。</td>
         </tr>
           <tr>
           <td><span class="version-badge"><span class="vnum">v10</span></span></td>

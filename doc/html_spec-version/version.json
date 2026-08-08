@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 45,
+  "current_version": 46,
   "history": [
     {
       "version": 1,
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）���版本�����史���������加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）����版本�����史���������加 v9。",
       "demo_version": 12
     },
     {
@@ -316,7 +316,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-11675",
       "incremental": true,
-      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 ��续追��（编���� GT-12753 ���变更 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更新为 D-001~D-016、D 范围更���为 Q-001~Q-006，标题追加 GT-11675（v5��，��本��史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
+      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 ��续追��（编���� GT-12753 ���变更 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14��C 范围更新为 D-001~D-016、D 范围更���为 Q-001~Q-006，标题追加 GT-11675（v5��，��本��史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
       "demo_version": 19
     },
     {
@@ -427,6 +427,15 @@
       "ticket": "GT-12818",
       "incremental": true,
       "summary": "GT-12807.html v11→v12：追加 GT-12818「附件安全-反病毒去掉拒收，增加审核」需求体（2 个变更点）。功能路径：/zh/security/pipeline → 附件安全检测 → 配置 → 反病毒引擎页签 → 发现病毒后的处置（virus_action）下拉。变更1（移除拒收）：AntivirusTab.tsx 的 VIRUS_ACTIONS 由 ['quarantine', 'reject', 'discard'] 去掉 reject；attachment-security.ts 的 AntivirusActionConfig.virus_action 类型由 Exclude<AttachmentAction, 'accept' | 'partial_skip'> 收窄为 Exclude<AttachmentAction, 'accept' | 'partial_skip' | 'reject'>，从类型层面禁止写入 reject；i18n key actions.reject/actionDesc.reject 保留不删除（仍被 timeout_action 等场景引用），仅从本下拉解除引用；同一页签的扫描超时/不可用动作 timeout_action（['quarantine','reject','discard','accept']）不变，其中拒收保留。变更2（新增审核）：同一 VIRUS_ACTIONS 新增 audit，最终为 ['quarantine', 'audit', 'discard']（隔离/审核/丢弃），审核插在隔离与丢弃之间；名称与描述复用既有 i18n key actions.audit「审核」/actionDesc.audit「邮件进入待审核队列，人工确认后投递或退回」（zh/en 均已存在，无新增硬编码文案）；virus_action 类型本身已允许 audit 无需改动；DEFAULT_ANTIVIRUS_ACTIONS.virus_action 默认值仍为 quarantine 不变。仅调整该下拉动作候选列表，未改动其它功能模块。验证：tsc --noEmit 无附件安全相关报错，AntivirusTab.test.tsx 现有用例通过。附截图 1 张：gt12818-virus-action-dropdown（发现病毒后的处置下拉展开，三项候选 隔离/审核/丢弃、无拒收）——改用 VM 内 Playwright chromium 采集（VM 已装 Noto Sans CJK 字体），中文正常渲染肉眼可读，并经可访问性树核对候选项权威文本为 隔离/审核/丢弃（不含拒收）与视觉一致。注：截图脚本须用 localhost（非 127.0.0.1）访问 dev server，否则 Next dev 跨域 host 限制会阻断客户端水合导致页面停在 auth loading。目录追加 GT-12818 一级条目及两个变更点子章节（各含 x.1 方案概述/x.2 截图式交互预览/x.3 逐元素说明）；差异标注追加 D-006（已解决）；待确认事项 Q-004 初记为 agent-browser 沙箱字体缺失致方块，现已用 VM 内 Playwright 重采中文正常渲染并标记为已解决；版本历史 v11→v12。"
+    },
+    {
+      "version": 46,
+      "generated_at": "2026-08-08",
+      "webapp_commit": "c16eb51",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-11990",
+      "incremental": true,
+      "summary": "GT-12807.html v12→v13：追加 GT-11990「投递与流量分析页面优化」需求体。明确各统计指标含义与统计口径；按方向将“延迟投递”改为“检测中”、接收“反垃圾处理队列”改为“检测队列”，并仅从明细展示中隐藏指定失败原因，保留其原始统计；彻底移除外发方向“延迟百分位趋势”和“队列趋势”模块及其页面引用、类型、mock、测试、国际化引用；附真实浏览器验证截图 GT-11990-delivery-traffic-default.png。"
     }
   ]
 }
