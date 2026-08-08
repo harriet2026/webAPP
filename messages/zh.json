@@ -213,7 +213,7 @@
     "password": "密码",
     "loginTitle": "OSGateway 管理系统",
     "loginButton": "登录",
-    "demoEntry": "进入演��环境",
+    "demoEntry": "进入演����环境",
     "loginError": "用户名或密码错误",
     "sessionExpired": "会话已过期，请重新登录",
     "showAdvancedRules": "显示高级规则设置",
@@ -1333,7 +1333,7 @@
     "priority": "优先级",
     "newPolicy": "新建群组策略",
     "editPolicy": "编辑群组策略",
-    "deleteConfirm": "确定删除���群组策��吗？",
+    "deleteConfirm": "确��删除���群组策��吗？",
     "deleteConfirmDesc": "删除���无法���复，规则���：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效��行路径预览",
@@ -2458,7 +2458,7 @@
       "connectionRefused": "连接拒绝",
       "certError": "证书错误",
       "protocolMismatch": "协议不匹配",
-      "unknown": "未知错误"
+      "unknown": "未知错���"
     },
     "failAdvice": {
       "wrongPassword": "短��间内多次密��错误可能为撞��/暴力破解，建议核查账号是���泄露并启用登录限速。",
@@ -4301,6 +4301,7 @@
     "testContentRequired": "请输入测试内容",
     "testMatched": "匹配",
     "testNotMatched": "不匹配",
+    "testFailed": "测试执行失败，请稍后重试",
     "noRules": "暂无内容规则",
     "batchEnable": "批量启用",
     "batchDisable": "批量禁用",
@@ -4428,7 +4429,7 @@
     "viewObserveStats": "查看观察统计",
     "restoreDefault": "恢复系统默认",
     "moduleEnabled": "启用认证仿冒检测",
-    "moduleEnabledHint": "关闭后，所有认证仿冒检测规则将不再生效",
+    "moduleEnabledHint": "关闭后，所有认证仿冒检测规则���不再生效",
     "observeModeTip": "观察模式：开启后，规则仅记录命中日志，不会对邮件执行拦截/隔��等动作。建议在首次��署或调整策略时开启观察模式，验证规则影响范围后再正式启用。",
     "probe": {
       "title": "模拟测试邮件认证",
@@ -4554,7 +4555,7 @@
       "inbound": "入站邮件",
       "outbound": "出站邮件",
       "internal": "内部邮件",
-      "internalUsers": "内部用户列表",
+      "internalUsers": "��部用户列表",
       "exact": "���确匹配",
       "substring": "子串匹配",
       "addUser": "添加",
@@ -4763,7 +4764,7 @@
       "actionLabel": "处置动作",
       "action": {
         "reject": "阻断",
-        "quarantine": "隔离",
+        "quarantine": "隔��",
         "audit": "审核"
       },
       "reset": "重置为默认"
@@ -6487,7 +6488,7 @@
         "spam": "垃圾邮件",
         "advertising": "广告邮件",
         "suspicious": "可疑邮件",
-        "sensitive": "敏感内容邮件",
+        "sensitive": "敏感内���邮件",
         "normal": "正���",
         "subscription": "订阅"
       },
@@ -6827,7 +6828,7 @@
       "name": "请填写规则名称",
       "scope": "请至少选择一个范围",
       "priority": "优先级需在 1–100 之间",
-      "actionOrAddon": "请选择一个主动作或至少启用一个附加项",
+      "actionOrAddon": "请选择一个主动作或��少启用一个附加项",
       "tagDeliverEmailTag": "「标记后投递」需要启用「邮件标记」附加项",
       "incompleteCondition": "有一个或多个条件尚未配置完整"
     },
@@ -8700,7 +8701,7 @@
       "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
       "validationFailed": "请检查必填字段。",
-      "created": "准入规则已创建",
+      "created": "准入规则已��建",
       "updated": "准入规则已更新",
       "saveFailed": "保存失败",
       "saving": "保存中...",
@@ -9269,7 +9270,7 @@
       }
     },
     "filters": {
-      "keywordPlaceholder": "搜索任务ID / 触发来源 / 判定依据",
+      "keywordPlaceholder": "搜索任务ID / 触发来源 / 判���依据",
       "taskStatus": "任务状态",
       "recallStatus": "召回状态",
       "riskLevel": "风险等级",
@@ -9283,7 +9284,7 @@
     },
     "taskStatus": {
       "pending": "等待中",
-      "running": "进行中",
+      "running": "��行中",
       "completed": "已完成",
       "failed": "失败",
       "cancelled": "已取消"
@@ -10815,7 +10816,7 @@
     },
     "ops_top": {
       "account_required": "下钻认证明细时必须指定账号",
-      "ai_interpretation_disabled": "AI 智能解读未启用，请联系管理员开启",
+      "ai_interpretation_disabled": "AI 智能解读未��用，请联系管理员开启",
       "ai_too_many_concurrent": "AI 解读请求过多，请稍后重试",
       "connection_requires_platform": "连接维度只在平台视角下可用，请切换到平台视角",
       "dimension_invalid": "统计维度无效",
@@ -11391,7 +11392,7 @@
     "unified_rules_pagespec": {
       "behavior_control_rule_have_metadata_feature": "发信行为管控��则的 metadata.feature 必须是 behavior_control",
       "content_rules_rule_have_metadata_feature": "内容规则的 metadata.feature 必须是 content_rules",
-      "sender_filter_rule_priority_between_1": "发件人过滤规则优先级必须在 1-9999 之间",
+      "sender_filter_rule_priority_between_1": "发件人过滤规则���先级必须在 1-9999 之间",
       "invalid_metadata": "元数据格式不正确"
     },
     "user_list_access": {
