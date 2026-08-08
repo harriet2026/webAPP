@@ -205,22 +205,8 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
     return {
       animationDurationUpdate: 200,
       tooltip,
-      legend: {
-        // 'scroll' keeps all legend items on a single row with prev/next arrows
-        // when they exceed the container width, avoiding multi-row overlap.
-        type: 'scroll',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        itemWidth: 10,
-        itemHeight: 10,
-        itemGap: 12,
-        pageIconSize: 10,
-        pageTextStyle: axisLabel,
-        textStyle: { ...axisLabel, padding: [0, 4, 0, 2] },
-      },
-      // Fixed bottom clearance for the single-row scroll legend (≈28 px).
-      grid: { left: 42, right: 12, top: 8, bottom: 36 },
+      // 攻击类型图例已从攻击时段分析中移除，释放图表底部空间。
+      grid: { left: 42, right: 12, top: 8, bottom: 8 },
       xAxis: {
         type: 'category',
         data: buckets.map((bucket) => bucket.label.slice(0, 2)),
