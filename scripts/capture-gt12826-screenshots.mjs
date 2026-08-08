@@ -21,7 +21,20 @@ const OUT_DIR = path.resolve(
 
 async function main() {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1588, height: 920 } });
+  const context = await browser.newContext({ viewport: { width: 1588, height: 920 } });
+  // The proxy (src/proxy.ts) gates every non-login/portal route on the
+  // presence of the osgateway_token HttpOnly cookie. Set a dummy value so it
+  // does not redirect our dev-only route to /login (the mocked AuthContext on
+  // the page itself is what actually drives rendering, not this cookie).
+  await context.addCookies([
+    {
+      name: 'osgateway_token',
+      value: 'dev-screenshot-token',
+      url: BASE_URL,
+      httpOnly: true,
+    },
+  ]);
+  const page = await context.newPage();
   await page.emulateMedia({ colorScheme: 'dark' });
 
   // Intercept the simulate-test API call. We flip the mocked response between
@@ -35,8 +48,90 @@ async function main() {
     });
   });
 
-  await page.goto(`${BASE_URL}/zh/dev-screenshot-gt12826`, { waitUntil: 'networkidle' });
-  await page.waitForSelector('[data-testid="content-rule-drawer"]');
+  page.on('console', (msg) => console.log('[browser]', msg.type(), msg.text()));
+  page.on('pageerror', (err) => console.log('[pageerror]', err.message));
+  page.on('requestfailed', (req) => {
+    if (!req.url().includes('webpack-hmr')) {
+      console.log('[requestfailed]', req.url(), req.failure()?.errorText);
+    }
+  });
+  page.on('response', (res) => {
+    if (res.status() >= 400 && !res.url().includes('webpack-hmr')) {
+      console.log('[badresponse]', res.status(), res.url());
+    }
+  });
+
+  const resp = await page.goto(`${BASE_URL}/zh/dev-screenshot-gt12826`, {
+    waitUntil: 'domcontentloaded',
+  });
+  console.log('[debug] response status:', resp?.status(), 'url:', resp?.url());
+  for (let i = 0; i < 5; i++) {
+    await page.waitForTimeout(1000);
+    const counts = await page.evaluate(() => ({
+      drawer: document.querySelectorAll('[data-testid="content-rule-drawer"]').length,
+      minimal: document.querySelectorAll('[data-testid="minimal-sheet-content"]').length,
+    }));
+    console.log(`[poll ${i}]`, JSON.stringify(counts));
+    if (counts.drawer > 0) break;
+  }
+  console.log('[debug] html length:', (await page.content()).length);
+  console.log('[debug] final url:', page.url());
+  const domInfo = await page.evaluate(() => ({
+    dialogCount: document.querySelectorAll('[role="dialog"]').length,
+    drawerCount: document.querySelectorAll('[data-testid="content-rule-drawer"]').length,
+    rootChildCount: document.getElementById('__next')?.children.length ?? -1,
+    bodyChildTags: Array.from(document.body.children).map((el) => el.tagName),
+    reactErrorOverlay: !!document.querySelector('nextjs-portal'),
+  }));
+  console.log('[debug] domInfo:', JSON.stringify(domInfo));
+  const errorText = await page.evaluate(() => {
+    function walk(node, depth) {
+      let out = '';
+      const tag = node.tagName || node.nodeName;
+      out += `${'  '.repeat(depth)}<${tag}>\n`;
+      if (node.shadowRoot) {
+        for (const child of node.shadowRoot.children) {
+          out += walk(child, depth + 1);
+        }
+      }
+      if (node.children) {
+        for (const child of node.children) {
+          out += walk(child, depth + 1);
+        }
+      }
+      return out;
+    }
+    const portal = document.querySelector('nextjs-portal');
+    if (!portal) return 'no portal';
+    return walk(portal, 0);
+  });
+  console.log('[debug] portal tree:', errorText);
+  const bodyClasses = await page.evaluate(() => document.body.className);
+  console.log('[debug] body class:', bodyClasses);
+  const rootDivHtml = await page.evaluate(() => {
+    const divs = document.querySelectorAll('body > div');
+    return Array.from(divs).map((d) => d.outerHTML.slice(0, 200));
+  });
+  console.log('[debug] root divs:', JSON.stringify(rootDivHtml, null, 2));
+  const drawerInfo = await page.evaluate(() => {
+    const el = document.querySelector('[data-testid="content-rule-drawer"]');
+    if (!el) return { found: false };
+    const style = getComputedStyle(el);
+    const rect = el.getBoundingClientRect();
+    return {
+      found: true,
+      display: style.display,
+      opacity: style.opacity,
+      visibility: style.visibility,
+      transform: style.transform,
+      rect: { w: rect.width, h: rect.height, x: rect.x, y: rect.y },
+      dataState: el.getAttribute('data-state'),
+    };
+  });
+  console.log('[debug] drawerInfo:', JSON.stringify(drawerInfo));
+  await page.screenshot({ path: '/tmp/debug-initial.png' });
+  console.log('[debug] body text:', (await page.textContent('body'))?.slice(0, 500));
+  await page.waitForSelector('[data-testid="content-rule-drawer"]', { timeout: 15000 });
 
   // Fill required match-content field so "运行测试" is enabled.
   await page.getByTestId('content-rule-match-content').fill('aaaa');

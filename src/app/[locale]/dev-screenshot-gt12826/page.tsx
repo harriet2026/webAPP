@@ -11,6 +11,7 @@
 
 import { AuthContext } from '@/contexts/auth-context';
 import { ContentRuleDrawer } from '@/components/security/content-rules/ContentRuleDrawer';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 const MOCK_AUTH = {
   user: {
@@ -46,6 +47,13 @@ export default function DevScreenshotGT12826Page() {
   return (
     <AuthContext.Provider value={MOCK_AUTH}>
       <div className="min-h-screen bg-muted/30 p-8">
+        <div data-testid="minimal-sheet-probe">
+          <Sheet open>
+            <SheetContent data-testid="minimal-sheet-content">
+              minimal sheet probe ok
+            </SheetContent>
+          </Sheet>
+        </div>
         <ContentRuleDrawer
           open
           onOpenChange={() => {}}
