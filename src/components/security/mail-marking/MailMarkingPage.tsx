@@ -20,12 +20,16 @@ import {
 import type { MailMarkingDirection, MailMarkingRule } from './types'
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch'
 import { useApiRequest } from '@/lib/api/client'
+import { useAuth } from '@/contexts/auth-context'
+import { getRulePriorityRange } from '@/components/security/advanced-filter-rules/priority-range'
 
 interface Props { embedded?: boolean }
 
 export function MailMarkingPage({ embedded }: Props) {
   const t = useTranslations('mailMarking')
   const { apiRequest } = useApiRequest()
+  const { isSystemAdmin } = useAuth()
+  const priorityRange = useMemo(() => getRulePriorityRange(isSystemAdmin), [isSystemAdmin])
   const [direction, setDirection] = useState<MailMarkingDirection>('receive')
   const [rules, setRules] = useState<MailMarkingRule[]>([])
   const [scopes, setScopes] = useState<MailMarkingScope[]>([])
@@ -40,14 +44,18 @@ export function MailMarkingPage({ embedded }: Props) {
   const loadRules = useCallback(async () => {
     setLoading(true)
     try {
-      const [ruleList, scopeList] = await Promise.all([
+      // 规则请求是核心，失败则报错；scopes 请求失败时静默降级为空列表（不影响规则展示）
+      const [ruleResult, scopeResult] = await Promise.allSettled([
         listMailMarkingRules(direction, apiRequest),
         listMailMarkingScopes(direction, apiRequest),
       ])
-      setRules(ruleList)
-      setScopes(scopeList)
-    } catch (error: unknown) {
-      toast.error(t('loadFailed') + ': ' + errorMessage(error))
+      if (ruleResult.status === 'fulfilled') {
+        setRules(ruleResult.value)
+      } else {
+        setRules([])
+        toast.error(t('loadFailed') + ': ' + errorMessage(ruleResult.reason))
+      }
+      setScopes(scopeResult.status === 'fulfilled' ? scopeResult.value : [])
     } finally {
       setLoading(false)
     }
@@ -65,10 +73,11 @@ export function MailMarkingPage({ embedded }: Props) {
     () => Object.fromEntries(scopes.map((scope) => [scope.key, scope.name])),
     [scopes],
   )
-  const nextPriority = useMemo(
-    () => Math.max(0, ...rules.map((rule) => rule.priority)) + 1,
-    [rules],
-  )
+  const nextPriority = useMemo(() => {
+    if (rules.length === 0) return priorityRange.defaultValue
+    const max = Math.max(...rules.map((rule) => rule.priority))
+    return Math.min(Math.max(max + 1, priorityRange.min), priorityRange.max)
+  }, [rules, priorityRange])
 
   const handleSaved = useCallback(() => {
     setEditorOpen(false)
@@ -159,7 +168,7 @@ export function MailMarkingPage({ embedded }: Props) {
               </div>
             )}
 
-            <p className="text-xs text-muted-foreground" data-testid="mail-marking-priority-hint">{t('priorityHint')}</p>
+            <p className="text-xs text-muted-foreground" data-testid="mail-marking-priority-hint">{t('priorityHint', { min: priorityRange.min, max: priorityRange.max })}</p>
           </TabsContent>
         </Tabs>
 
@@ -169,6 +178,7 @@ export function MailMarkingPage({ embedded }: Props) {
           direction={direction}
           rule={editing}
           nextPriority={nextPriority}
+          priorityRange={priorityRange}
           onSaved={handleSaved}
         />
 

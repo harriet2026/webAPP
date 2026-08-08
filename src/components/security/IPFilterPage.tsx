@@ -65,7 +65,7 @@ import type {
   IPFilterIPConfigType,
   DemoAction,
 } from '@/types/ip-filter';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -87,6 +87,7 @@ import { useApiRequest } from '@/lib/api/client';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/auth-context';
+import { getRulePriorityRange, isPriorityInRange } from '@/components/security/advanced-filter-rules/priority-range';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
 import { IPFilterImportDialog } from '@/components/security/IPFilterImportDialog';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
@@ -94,7 +95,10 @@ import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 const BLACKLIST_ACTION_SET = new Set<DemoAction>(BLACKLIST_DEMO_ACTIONS);
 const WHITELIST_ACTION_SET = new Set<DemoAction>(WHITELIST_DEMO_ACTIONS);
 
-export const ruleSchema = z
+import type { PriorityRange } from '@/components/security/advanced-filter-rules/priority-range';
+
+export function createRuleSchema(range: PriorityRange) {
+  return z
   .object({
     name: z.string().min(1, 'nameRequired'),
     description: z.string().max(200).optional(),
@@ -104,7 +108,7 @@ export const ruleSchema = z
     // 仅 expression 使用：全局 IP 组的数值规则 ID，≤20 个（与后端一致）。
     ip_groups: z.array(z.number()).max(MAX_IP_GROUPS, 'expressionTooManyGroups').optional(),
     demo_action: z.enum(['block', 'quarantine', 'drop', 'review', 'deliver', 'tagDeliver']),
-    priority: z.number().int().nonnegative(),
+    priority: z.number().int().min(range.min, 'priorityOutOfRange').max(range.max, 'priorityOutOfRange'),
     is_active: z.boolean(),
     valid_until: z.string().optional(),
   })
@@ -146,8 +150,12 @@ export const ruleSchema = z
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['valid_until'], message: 'validUntilBeforeNow' });
     }
   });
+}
 
-type RuleForm = z.infer<typeof ruleSchema>;
+// Backward-compatible export for existing tests (tenant-admin range).
+export const ruleSchema = createRuleSchema({ min: 100, max: 1000, defaultValue: 600 });
+
+type RuleForm = z.infer<ReturnType<typeof createRuleSchema>>;
 
 /**
  * Every i18n key `ruleSchema` can attach to the `ip_value` field (GT-12087).
@@ -198,6 +206,8 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin } = useAuth();
+  const range = useMemo(() => getRulePriorityRange(isSystemAdmin), [isSystemAdmin]);
+  const schema = useMemo(() => createRuleSchema(range), [range]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<IPFilterRuleView | null>(null);
@@ -217,7 +227,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const [simResult, setSimResult] = useState<SimResult | null>(null);
 
   const form = useForm<RuleForm>({
-    resolver: zodResolver(ruleSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       name: '',
       description: '',
@@ -226,7 +236,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
       ip_value: '',
       ip_groups: [],
       demo_action: 'block',
-      priority: 100,
+      priority: range.defaultValue,
       is_active: true,
       valid_until: '',
     },
@@ -302,7 +312,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
           ip_value: '',
           ip_groups: [],
           demo_action: listTypeTab === 'whitelist' ? 'deliver' : 'block',
-          priority: (rulesData?.items?.[0]?.priority ?? 99) + 1,
+          priority: Math.min(Math.max((rulesData?.items?.[0]?.priority ?? (range.defaultValue - 1)) + 1, range.min), range.max),
           is_active: true,
           valid_until: '',
         });
@@ -310,7 +320,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
       resetPreview();
       setDialogOpen(true);
     },
-    [form, listTypeTab, rulesData?.items, resetPreview],
+    [form, listTypeTab, rulesData?.items, resetPreview, range],
   );
 
   const onSubmit = form.handleSubmit(async (data) => {
@@ -823,7 +833,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                           <Tooltip>
                             <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />} />
                             <TooltipContent className="max-w-[300px]">
-                              <p>{t('ipFilter.priorityTip')}</p>
+                              <p>{t('ipFilter.priorityTip', { min: range.min, max: range.max })}</p>
                             </TooltipContent>
                           </Tooltip>
                         </Label>
@@ -832,11 +842,18 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                             type="number"
                             {...form.register('priority', { valueAsNumber: true })}
                             className="w-24"
-                            min={0}
+                            min={range.min}
+                            max={range.max}
                           />
-                          <span className="text-xs text-muted-foreground">{t('ipFilter.priorityHint')}</span>
+                          <span className="text-xs text-muted-foreground">{t('ipFilter.priorityHint', { min: range.min, max: range.max })}</span>
                         </div>
                       </div>
+                      {form.formState.errors.priority && (
+                        <div className="flex gap-3">
+                          <div className="min-w-[100px] w-[100px] shrink-0" />
+                          <p className="text-xs text-red-500">{t('ipFilter.priorityOutOfRange', { min: range.min, max: range.max })}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -904,7 +921,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
               </TooltipProvider>
             </form>
 
-            {/* 右栏：预览与帮助 */}
+            {/* 右栏：预览���帮助 */}
             <div className="flex-1 overflow-y-auto bg-muted/30 p-6">
               <div className="space-y-6">
                 {/* 当前配置效果 */}

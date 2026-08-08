@@ -1235,7 +1235,7 @@ export function mockOpsTopAi(): { markdown: string } {
   };
 }
 
-// ─── 监控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
+// ─── ����控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
 export function mockMonitorDashboardOverview(range: MonitorDashboardRange): MonitorDashboardOverview {
   const volumes: Record<MonitorDashboardRange, number> = {
     today: 125847,
@@ -2401,7 +2401,7 @@ export function mockTestIPFrequency(body: {
   test_ip: string;
   action: string;
 }): IPFrequencyTestResponse {
-  // 无真实流量：以当前挂起列表判定该 IP 是否已被限制，给出可见的测试结果。
+  // 无真实流量：以当前挂起列表判定该 IP 是否已被限制，给出可见的测试���果。
   const hit = mockSuspendedIPs.find((s) => s.ip === body.test_ip);
   if (hit) {
     return {
@@ -2736,7 +2736,7 @@ function makeMockIPFilterRules(): IPFilterRuleView[] {
     }),
     makeIpFilterRule({
       id: 13,
-      name: "恶意IP库联动",
+      name: "恶意IP库���动",
       description: "表达式引用恶意 IP 库并排除误报网段",
       list_type: "blacklist",
       ip_config_type: "expression",
@@ -3229,7 +3229,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 // ════════════════════════════════════════════════════════════════════════════════
 // 发信人黑白名单（sender_filter，mock）
 // 数据结构对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
-//   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
+//   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）���成，
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
 //   - metadata 携带 `{feature:'sender_filter', sender_config, ip_range, list_type}`，
 //     与 condition_tree 保持一致（`resolveSenderFilterRule` 的 metadata/tree 双重校验）。
@@ -4586,7 +4586,7 @@ export function mockRecipientCheckConfig(): RecipientCheckConfig {
 
 // 发信人/IP/组织群组下拉（behavior-control 抽屉里的群组选择器，见
 // `BehaviorControlDrawer.tsx` 的 `groupsQuery`）。三类群组用 `metadata.group_type`
-// 区分（'sender' | 'ip' | 'org'，注意 'org' 不是通用 `GroupType`
+// 区���（'sender' | 'ip' | 'org'，注意 'org' 不是通用 `GroupType`
 // （src/types/groups.ts）的成员）；抽屉自己按 `metadata.group_type` 过滤、直接读
 // `name` 字段展示，不经过 `tags`。
 //
@@ -4878,7 +4878,7 @@ export function mockPutURLProtectionSettings(
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
 // 动作映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），
 // 非 receive 方向默认区间 accept→quarantine（D-06）。
-// 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF、DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
+// 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF���DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
 
 function intentMockSegments(risk: "high" | "medium" | "low", dir: string) {
   const acc = dir === "receive" ? "accept" : "quarantine";
@@ -5278,7 +5278,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     // demo html_spec layer-10-detail-overview-single 对齐：首次出现新发信人 +
     // 域名年龄2天（新注册域名）+ 处置依据展示为「隔离」（而不是
     // deliveryStatus=audit_pending 派生出的「审核」，两者是独立字段——见
-    // MockDisposalSeed.disposalBasisActionOverride 的注释）+ 大小≈2.3MB。
+    // MockDisposalSeed.disposalBasisActionOverride 的注释���+ 大小≈2.3MB。
     senderIsNewOnThisMail: true,
     domainAgeDays: 2,
     storageSizeBytes: 2_411_724,
@@ -5653,7 +5653,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "outgoing",
     sender: "pm@company.com",
     recipients: "blogger@tech-media.com",
-    subject: "内部产品路线图（含未发布代号）",
+    subject: "内部产品���线图（含未���布���号）",
     action: "block",
     reason: "内容规则命中：竞品/机密关键词",
     mailType: "sensitive",
@@ -6673,6 +6673,11 @@ function mockAdvancedValue(
     threat_level:
       (item.phish_agent_check?.confidence ?? 0) >= 0.8 ? "critical" : "none",
     disposal_rule_id: item.disposal_basis?.rule_id,
+    // GT-12818：advanced_filters 里的 display_status 需与普通 display_status
+    // 查询参数（mockEmailDisposalList 用 displayStatusOf）同源，否则「待处置
+    // 邮件」深链（display_status in [quarantine_pending, audit_pending]）在 mock
+    // 下匹配为 0，落地列表误显示「暂无数据」。
+    display_status: displayStatusOf(item),
   };
   return values[field] ?? (item as unknown as Record<string, unknown>)[field];
 }
@@ -6930,7 +6935,60 @@ export function mockEmailDisposalEvents(id: number) {
       };
     },
   );
-  const events = [...genericEvents, ...perRecipientEvents];
+  // 事后处置时间线 mock 数据：三种业务场景各一条，固定追加在每封邮件的事件列表末尾。
+  // event_source 为白名单内的值（admin_api / threat_retro_agent），
+  // 不会被 disposalEvents 白名单过滤掉，即可在时间线中可见。
+  const postDisposalEvents = [
+    // 场景一：管理员手动召回（admin_api:recall）
+    {
+      id: id * 100 + 90,
+      mail_log_id: id,
+      event_source: "admin_api",
+      event_type: "recall",
+      event_result: "success",
+      queue_id: item.queue_id,
+      message_id: item.message_id,
+      sender: item.sender,
+      recipients: item.recipients.join(", "),
+      event_time: new Date(new Date(item.received_at).getTime() + 5 * 60 * 1000).toISOString(),
+      raw_payload: JSON.stringify({ event: "recall", triggered_by: "admin", action: "manual_recall" }),
+      raw_line: `${item.received_at} ${item.queue_id} admin_api recall success`,
+      correlation_status: "matched",
+    },
+    // 场景二：威胁回溯智能体发起召回（threat_retro_agent:recall）
+    {
+      id: id * 100 + 91,
+      mail_log_id: id,
+      event_source: "threat_retro_agent",
+      event_type: "recall",
+      event_result: "success",
+      queue_id: item.queue_id,
+      message_id: item.message_id,
+      sender: item.sender,
+      recipients: item.recipients.join(", "),
+      event_time: new Date(new Date(item.received_at).getTime() + 10 * 60 * 1000).toISOString(),
+      raw_payload: JSON.stringify({ event: "recall", triggered_by: "threat_retro_agent", policy: "recall" }),
+      raw_line: `${item.received_at} ${item.queue_id} threat_retro_agent recall success`,
+      correlation_status: "matched",
+    },
+    // 场景三：威胁回溯智能体发起通知（threat_retro_agent:notify）
+    {
+      id: id * 100 + 92,
+      mail_log_id: id,
+      event_source: "threat_retro_agent",
+      event_type: "notify",
+      event_result: "success",
+      queue_id: item.queue_id,
+      message_id: item.message_id,
+      sender: item.sender,
+      recipients: item.recipients.join(", "),
+      event_time: new Date(new Date(item.received_at).getTime() + 15 * 60 * 1000).toISOString(),
+      raw_payload: JSON.stringify({ event: "notify", triggered_by: "threat_retro_agent", policy: "notify" }),
+      raw_line: `${item.received_at} ${item.queue_id} threat_retro_agent notify success`,
+      correlation_status: "matched",
+    },
+  ];
+  const events = [...genericEvents, ...perRecipientEvents, ...postDisposalEvents];
   return { items: events, total: events.length, page: 1, page_size: 100 };
 }
 
@@ -7169,7 +7227,7 @@ function buildDefaultDisposalSettingsFixture(): DisposalSettings {
 export function mockRecipientGroupRulesList(): { items: Rule[]; total: number } {
   const groups: Array<[number, string, number]> = [
     [9101, "高管邮箱", 15],
-    [9102, "财务人员", 28],
+    [9102, "财���人员", 28],
     [9103, "IT 管理员", 9],
     [9104, "全体员工", 460],
     [9105, "客服团队", 42],
@@ -7246,7 +7304,7 @@ export function mockRecallKeyDelete(id: number): void {
 // ─── 链接保护日志（logs-link-logs html_spec §2.2/§4.1）────────────────────────
 // 数据照抄 demo components/link-logs/link-logs-page.tsx 的 MOCK_LOGS 6 行，
 // 租户按 demo 同样的轮转规则分配（idx % 租户数 → mockTenants 1/2/3）。
-// demo 行3 的 triggerStage 是 "sandbox"（URL沙箱）；本产品按 2026-07-09 v2 spec
+// demo 行3 的 triggerStage 是 "sandbox"（URL沙箱）；���产品按 2026-07-09 v2 spec
 // §3.1 只有 回扫黑名单→查询情报→深度复检 三段、无独立沙箱段，映射为 phishing_agent。
 const mockLinkClickLogs: LinkClickLog[] = [
   {
@@ -7581,7 +7639,7 @@ const contactPeople: MockContactRow[] = [
   { id: 1, source_id: 3, source_name: '总部 AD', department_path: '研发部 / 后端组', display_name: '张三', email: 'zhangsan@corp.cn', job_title: '工程师', tag: 'executive', status: 'active', email_alias: '张三.alias@corp.cn' },
   { id: 2, source_id: 3, source_name: '总部 AD', department_path: '财务部', display_name: '李四', email: 'lisi@corp.cn', job_title: '总监', tag: 'key_position', status: 'active', email_alias: '李四.alias@corp.cn' },
   { id: 3, source_id: 3, source_name: '总部 AD', department_path: '研发部 / 前端组', display_name: '王五', email: 'wangwu@corp.cn', job_title: '工程师', tag: 'none', status: 'active', email_alias: '王五.alias@corp.cn' },
-  { id: 4, source_id: 5, source_name: '邮件系统', department_path: '市场部', display_name: '赵六', email: 'zhaoliu@corp.cn', job_title: '经理', tag: 'none', status: 'active', email_alias: '赵六.alias@corp.cn' },
+  { id: 4, source_id: 5, source_name: '邮件系统', department_path: '市��部', display_name: '赵六', email: 'zhaoliu@corp.cn', job_title: '经理', tag: 'none', status: 'active', email_alias: '赵六.alias@corp.cn' },
   { id: 5, source_id: 11, source_name: '网易企邮', department_path: '总裁办', display_name: '陈总', email: 'chenzong@corp.cn', job_title: '首席执行官', tag: 'executive', status: 'active', email_alias: '陈总.alias@corp.cn' },
   { id: 6, source_id: 11, source_name: '网易企邮', department_path: '人力资源部', display_name: '孙七', email: 'sunqi@corp.cn', job_title: 'HRBP', tag: 'none', status: 'active', email_alias: '孙七.alias@corp.cn' },
   { id: 7, source_id: 5, source_name: '邮件系统', department_path: '销售部 / 华东区', display_name: '周八', email: 'zhouba@corp.cn', job_title: '区域总监', tag: 'key_position', status: 'active', email_alias: '周八.alias@corp.cn' },
@@ -8228,7 +8286,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 6, operation_id: 'OP20260622006', admin_user_id: 6, username: 'liyang', operator_name: '李扬',
     operator_role: 'platform', layer: 'platform', action: 'update', resource_type: 'security_config',
     status: 'success', client_ip: '10.8.0.31', ip_location: '内网',
-    details: { summary: '对蓝海物流集团强制启用二次认证' }, before_value: { text: '未强制' },
+    details: { summary: '对蓝海物流集团强制启��二次认证' }, before_value: { text: '未强制' },
     after_value: { text: '强制开启' }, created_at: '2026-06-22T09:30:45Z' },
   { id: 7, operation_id: 'OP20260622007', admin_user_id: 1, username: 'admin', operator_name: '张运维（我）',
     operator_role: 'platform', layer: 'platform', action: 'update', resource_type: 'tenants', resource_id: 6,
@@ -8321,4 +8379,66 @@ export function mockAdminAuditStats(
   const all = mockAdminAuditLogs.filter((l) => matchAdminAudit(l, params));
   const success = all.filter((l) => l.status === 'success').length;
   return { total: all.length, success, failed: all.length - success };
+}
+
+// ─── 智能体中心总览（GET /agent-center/overview）────────────────────────────
+// 返回三个智能体的运行卡片数据。
+// policy_pages 字段须与 presentation.ts 中 AGENT_PRESENTATIONS[key].requiredPages
+// 精确匹配（page / role / management 三字段），resolveAgentPresentation 才会置
+// canConfigure=true，点击「配置」按钮才可用。
+export function mockAgentCenterOverview() {
+  return {
+    agents: [
+      {
+        key: 'phishing',
+        module_key: 'phishing_agent',
+        feature_id: 'phishing_agent',
+        access: 'enabled',
+        status: 'running',
+        stage_position: 'AI 同步分析层',
+        policy_pages: [
+          { page: 'phishing_admission',   role: 'admission',   management: 'dedicated' },
+          { page: 'phishing_disposition', role: 'disposition', management: 'dedicated' },
+        ],
+        today_processed: 124580,
+        hit_count:       12450,
+        processed_count: 124580,
+        hit_rate:        0.0999,
+        fallback_count:  0,
+      },
+      {
+        key: 'spoofing',
+        module_key: 'spoofing_agent',
+        feature_id: 'spoofing_agent',
+        access: 'enabled',
+        status: 'running',
+        stage_position: 'AI 同步分析层',
+        policy_pages: [
+          { page: 'spoofing_admission',   role: 'admission',   management: 'internal' },
+          { page: 'spoofing_disposition', role: 'disposition', management: 'internal' },
+        ],
+        today_processed: 98320,
+        hit_count:       8650,
+        processed_count: 98320,
+        hit_rate:        0.088,
+        fallback_count:  0,
+      },
+      {
+        key: 'threat-retro',
+        module_key: 'threat_retro_agent',
+        feature_id: 'threat_retro_agent',
+        access: 'enabled',
+        status: 'running',
+        stage_position: 'AI 异步回溯层',
+        policy_pages: [
+          { page: 'threat_retro_strategy', role: 'strategy', management: 'dedicated' },
+        ],
+        today_processed: 326,
+        hit_count:       326,
+        processed_count: 326,
+        hit_rate:        1.0,
+        fallback_count:  0,
+      },
+    ],
+  };
 }

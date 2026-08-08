@@ -1,0 +1,2389 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GT-12807 · GT-12772 邮件处置中心-标准SMTP邮件召回失败仍提示成功且召回日志入口未实现问题解决 · 增量功能规格</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f6f8;
+      color: #1a1d23;
+      line-height: 1.6;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .page-wrap { max-width: 980px; margin: 0 auto; }
+
+    section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    section > h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    section > h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+
+    .incremental-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .incr-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: #f8f9fb;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .incr-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #2563eb; color: #fff;
+      font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+    }
+    .incr-header h2 { font-size: 1rem; font-weight: 700; color: #1a1d23; margin: 0; }
+    .incr-header .incr-meta { font-size: 0.72rem; color: #6b7280; margin-left: auto; text-align: right; }
+    .incr-body { padding: 1.5rem 2rem; }
+    .incr-body h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+    .incr-body h4 { font-size: 0.87rem; font-weight: 600; color: #1a1d23; margin-top: 1rem; margin-bottom: 0.5rem; }
+    .incr-body p { font-size: 0.875rem; color: #374151; margin-bottom: 0.75rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.845rem; margin-bottom: 0.75rem; }
+    th { background: #f3f4f6; color: #374151; font-weight: 600; text-align: left; padding: 0.55rem 0.8rem; border: 1px solid #e5e7eb; }
+    td { padding: 0.5rem 0.8rem; border: 1px solid #e5e7eb; vertical-align: top; color: #374151; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    code { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.1em 0.4em; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82em; color: #1a1d23; }
+    pre { background: #1a1d23; color: #e8eaf0; border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; font-size: 0.8rem; line-height: 1.55; margin: 0.75rem 0; }
+    pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+
+    .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
+    .callout-info    { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; }
+    .callout-warn    { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .callout-removed { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; }
+    .callout-ok      { background: #f0fdf4; border-left: 4px solid #16a34a; color: #15532e; }
+
+    .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.15em 0.5em; border-radius: 4px; margin-right: 0.3em; }
+    .tag-removed  { background: #fee2e2; color: #991b1b; }
+    .tag-added    { background: #dcfce7; color: #15532e; }
+    .tag-changed  { background: #fef9c3; color: #854d0e; }
+    .tag-unverif  { background: #f3f4f6; color: #6b7280; }
+    .tag-info     { background: #dbeafe; color: #1e40af; }
+
+    del { color: #9ca3af; text-decoration-color: #dc2626; }
+
+    .version-badge { display: inline-flex; align-items: center; gap: 0.4em; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 0.2em 0.8em; font-size: 0.78rem; color: #374151; }
+    .version-badge .vnum { font-weight: 700; color: #1a1d23; }
+
+    .toc { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
+    .toc a:hover { text-decoration: underline; }
+
+    .toc-l1 {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; border-radius: 6px;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      margin-top: 0.4rem; margin-bottom: 0.15rem;
+    }
+    .toc-l1 > a { font-weight: 700; font-size: 0.9rem; color: #1d4ed8; }
+
+    .toc-l2-group { list-style: none; display: flex; flex-direction: column; gap: 0.2rem; padding-left: 1.5rem; margin-bottom: 0.4rem; }
+    .toc-change {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.65rem; border-radius: 6px;
+      background: #f8f9ff; border: 1px solid #dbeafe;
+    }
+    .toc-change a { font-weight: 600; font-size: 0.85rem; color: #1d4ed8; }
+    .toc-change .toc-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #3b82f6; color: #fff;
+      font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+    }
+    .back-link { display: inline-block; margin-top: 1.5rem; font-size: 0.82rem; color: #2563eb; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+
+    .status-resolved { color: #15532e; font-weight: 600; }
+    .status-pending   { color: #854d0e; font-weight: 600; }
+    .status-unverif   { color: #6b7280; font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ══════════════ 目录 ══════════════ -->
+  <section id="toc">
+    <h2>目录</h2>
+    <ul class="toc">
+      <li><a href="#meta">A. 元信息与事实源</a></li>
+      <li><a href="#form-role-matrix">B. 产品形态 x 角色矩阵</a></li>
+
+      <li class="toc-l1"><a href="#gt-12772">GT-12772 邮件处置中心-标准SMTP邮件召回失败仍提示成功且召回日志入口未实现问题解决</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">事后处置时间线：事件来源白名单过滤（根本原因修复）</a></li>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">操作类型：event_source + event_type 复合键 i18n</a></li>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">执行结果：操作成功与否 i18n 映射</a></li>
+        <li class="toc-change"><span class="toc-num">4</span><a href="#change-4">事后处置时间线：默认展开</a></li>
+        <li class="toc-change"><span class="toc-num">5</span><a href="#change-5">查看原始日志按钮：从 notImplementedToast 改为真实跳转</a></li>
+        <li class="toc-change"><span class="toc-num">6</span><a href="#change-6">Mock 数据：补充三种事后处置事件</a></li>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12801">GT-12801 DMARC协议执行动作对齐以及增加"进行下一步"</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12801-change-1">"阻断"重命名为"拒收"（DMARC处置策略）</a></li>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12801-change-2">DMARC处置策略新增"进行下一步"选项</a></li>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12797">GT-12797 群组策略——新建群组：不支持切换群组类型</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12797-change-1">新建按钮文案由"新建群组"改为"新建 X 组"</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12797-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12797-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12797-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12797-change-2">新建抽屉移除"群组类型"选择器</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12797-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12797-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12797-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12797-change-3">内容组"每行一条成员"标签改为"每行一条关键词"</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12797-c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12797-c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12797-c3-elements">3.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12719">GT-12719 策略流水线执行动作/黑白名单文案解释</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12719-change-1">执行动作图例："阻断"改为"拒收"，新增"进行下一步"，移除"标记投递"</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12719-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12719-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12719-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12719-change-2">名单类型图例：黑名单描述"阻断→拒收"，白名单描述移除"标记投递"</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12719-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12719-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12719-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12719-change-3">流程控制图例："阻断/丢弃/隔离→拒收/丢弃/隔离"，流继续描述移除"标记投递"</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12719-c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12719-c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12719-c3-elements">3.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12793">GT-12793 邮件标记与声明模块优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12793-change-1">接收标记 / 外发声明规则列表：「取消」「保存」按钮从右上移至右下</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12793-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12793-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12793-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12793-change-2">规则列表补齐「优先级」字段（Promise.allSettled 容错）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12793-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12793-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12793-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12793-change-3">「优先级」列位置调整至「状态」之后</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12793-c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12793-c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12793-c3-elements">3.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12795">GT-12795 邮件标记与声明：创建规则优先级问题处理</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12795-change-1">新建规则优先级默认值与范围修正（1 → 100，范围 100~1000）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12795-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12795-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12795-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12828">GT-12828 策略：优先级统一</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12828-change-1">方案A：邮件标记模块接入 getRulePriorityRange，消除硬编码</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12828-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12828-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12828-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12828-change-2">方案B：内容规则、IP 过滤、IP 频率补齐角色感知范围校验</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12828-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12828-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12828-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12828-change-3">方案C：统一各模块 priority 错误文案与行内提示文案</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12828-c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12828-c3-elements">3.2 逐 key 说明</a></li>
+        </ul>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12791">GT-12791 相似检测模块优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12791-change-1">触发动作调整：5 个标准动作 + 「标记投递」改名为「进行下一步」+「阻断」改名为「拒收」</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12791-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12791-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12791-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12791-change-2">附加策略：进行下一步动作下新增「正文标记」Switch + 自由文本 Input</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12791-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12791-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12791-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12791-change-3">校验逻辑优化：区分「未选标记方式」与「已选但内容为空」两类错误 + 豁免提示条移除 + 按钮区靠右对齐</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12791-c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12791-c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12791-c3-elements">3.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12790">GT-12790 相似邮件与主题检测：交互优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12790-change-1">全方向聚合卡片观察模式配色对齐：与按方向独立检测卡片一致的黄色标签卡</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12790-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12790-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12790-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12833">GT-12833 认证协议检查：动作精简为5项，默认动作改为"标记放行"</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12833-change-1">PROTOCOL_ACTIONS / DMARC_ACTIONS 由6项精简为5项：移除"进行下一步"（accept）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12833-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12833-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12833-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12833-change-2">默认动作与"启用"语义统一改为"标记放行"，行不再因动作为"accept"而隐藏</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12833-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12833-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12833-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12833-change-3">"宽松"模板：SPF/DKIM/PTR 中原 accept 场景全部改为 mark-delivery</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12833-c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12833-c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12833-c3-elements">3.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12826">GT-12826 内容规则规则使用错误图标问题解决</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12826-change-1">模拟测试结果态：命中/未命中不再使用红色失败图标与绿色成功图标，改为中性信息色 + 靶心图标 / muted 中性灰</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12826-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12826-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12826-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12826-change-2">新增独立的接口执行错误态（testRunError），与命中/未命中结果彻底解耦</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12826-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12826-c2-elements">2.2 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li class="toc-l1"><a href="#gt-12818">GT-12818 附件安全-反病毒去掉拒收，增加审核</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12818-change-1">发现病毒后的处置：移除「拒收」（reject）执行动作</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12818-c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12818-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12818-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12818-change-2">发现病毒后的处置：新增「审核」（audit）执行动作</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12818-c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12818-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12818-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diffs">D. 差异标注</a></li>
+      <li><a href="#questions">Q. 待确认事项</a></li>
+      <li><a href="#version-history">V. 版本历史</a></li>
+    </ul>
+  </section>
+
+  <!-- ══════════════ A. 元信息 ══════════════ -->
+  <section id="meta">
+    <h2>A. 元信息与事实源</h2>
+    <table>
+      <tbody>
+        <tr><th style="width:160px">文档编号</th><td>GT-12807</td></tr>
+        <tr><th>��联需求</th><td>GT-12772 邮件处置中心-标准SMTP邮件召回失败仍提示成功且召回日志入口未实现问题解决</td></tr>
+        <tr><th>变更类型</th><td><span class="tag tag-changed">功能修复</span></td></tr>
+        <tr><th>版本</th><td><span class="version-badge"><span class="vnum">v1</span></span>（2026-08-06）</td></tr>
+        <tr><th>路由路径</th><td><code>/email-disposal/center</code></td></tr>
+        <tr><th>核心组件</th><td><code>src/components/email-disposal/sections/analysis-section.tsx</code></td></tr>
+        <tr><th>关联组件</th><td><code>src/components/email-disposal/detail-modal.tsx</code></td></tr>
+        <tr><th>Mock 数据</th><td><code>src/lib/mock/fixtures.ts</code> — <code>mockEmailDisposalEvents()</code></td></tr>
+        <tr><th>i18n 文件</th><td><code>messages/zh.json</code> / <code>messages/en.json</code>（命名空间：<code>emailDisposal.detail.analysis</code>）</td></tr>
+        <tr><th>HTML Spec 增量</th><td><a href="/html-spec/email-handling-disposal-center/layer-12-detail-security-analysis.html#incremental-gt-12807-post-disposal-timeline">layer-12-detail-security-analysis.html § GT-12807</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ B. 产品形态 x 角色矩阵 ══════════════ -->
+  <section id="form-role-matrix">
+    <h2>B. 产品形态 x 角色矩阵</h2>
+    <p style="font-size:0.845rem;color:#374151;margin-bottom:0.75rem">以下各变更点在所有���品形态和角色下表现一致，无差异分支。</p>
+    <table>
+      <thead>
+        <tr><th>产品形态</th><th>平台管理员</th><th>租户管理员</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>云网关 · AI版多租户</td><td>全部变更点生效</td><td>全部变更点生效</td></tr>
+        <tr><td>云网关 · AI版单租户</td><td>全部变更点生效</td><td>全部变更点生效</td></tr>
+        <tr><td>云网关 · 传统版多租户</td><td>全部变更点生效</td><td>全部变更点生效</td></tr>
+        <tr><td>云网关 · 传统版单租户</td><td>全部变更点生效</td><td>全部变更点生效</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ 变更点 1 ══════════════ -->
+  <div class="incremental-section" id="change-1">
+    <div class="incr-header">
+      <span class="incr-num">1</span>
+      <h2>事后处置时间线：事件来源白名单过滤（根本原因修复）</h2>
+      <div class="incr-meta">analysis-section.tsx · DISPOSAL_SOURCES</div>
+    </div>
+    <div class="incr-body">
+      <h3>1.1 问题根因</h3>
+      <p>原过滤逻辑为黑名单，仅排除 <code>event_source === 'postfix'</code>，导致 <code>antispam · policy_decided</code>、<code>antispam · quarantine_pending</code> 等投递流程/策略裁决事件穿透过滤，出现在事后处置时间线中，且因这些值不在映射表中，渲染原始英文。</p>
+
+      <h3>1.2 修复方案</h3>
+      <p>改为白名单：仅保留 <code>admin_api</code> 和 <code>threat_retro_agent</code> 两种来源的事件。</p>
+      <pre><code>// 修复前（黑名单）
+const disposalEvents = useMemo(
+  () =&gt; events.filter((ev) =&gt; ev.event_source !== 'postfix'),
+  [events],
+);
+
+// 修复后（白名单）
+const DISPOSAL_SOURCES = new Set(['admin_api', 'threat_retro_agent']);
+const disposalEvents = useMemo(
+  () =&gt; events.filter((ev) =&gt; DISPOSAL_SOURCES.has(ev.event_source ?? '')),
+  [events],
+);</code></pre>
+
+      <h3>1.3 白名单来源说明</h3>
+      <table>
+        <thead>
+          <tr><th>event_source</th><th>触发方</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>admin_api</code></td><td>管理员手动</td><td>管理员在详情页或列表页手动发起的召回操作</td></tr>
+          <tr><td><code>threat_retro_agent</code></td><td>威胁回溯智能体</td><td>威胁回溯智能体依据配置策略（recall / notify）自动发起的操作</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-info">
+        <strong>业务边界：</strong>事后处置时间线只展示"事后处置动作"，不展示邮件投递流水（postfix）或策略裁决事件（antispam）。
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更点 2 ══════════════ -->
+  <div class="incremental-section" id="change-2">
+    <div class="incr-header">
+      <span class="incr-num">2</span>
+      <h2>操作类型：event_source + event_type 复合键 i18n</h2>
+      <div class="incr-meta">analysis-section.tsx · OPERATION_TYPE_KEY_MAP · getOperationTypeLabel</div>
+    </div>
+    <div class="incr-body">
+      <h3>2.1 问题</h3>
+      <p>展开事件详情后，「操作类型」值渲染 <code>ev.event_type</code> 原始英文。且 <code>admin_api:recall</code> 与 <code>threat_retro_agent:recall</code> 的 <code>event_type</code> 同为 <code>recall</code>，单字段翻译无法区分。</p>
+
+      <h3>2.2 操作类型枚举（完整）</h3>
+      <table>
+        <thead>
+          <tr><th>event_source</th><th>event_type</th><th>中文（zh）</th><th>英文（en）</th><th>触发场景</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>admin_api</code></td><td><code>recall</code></td><td>管理员召回</td><td>Admin Recall</td><td>管理员在详情页或列表页手动发起召回</td></tr>
+          <tr><td><code>threat_retro_agent</code></td><td><code>recall</code></td><td>威胁回溯智能体发起召回</td><td>Threat Retro Agent Recall</td><td>威胁回溯智能体策略配置为 <code>recall</code> 时自动触发</td></tr>
+          <tr><td><code>threat_retro_agent</code></td><td><code>notify</code></td><td>威胁回溯智能体发起通知</td><td>Threat Retro Agent Notify</td><td>威胁回溯智能体策略配置为 <code>notify</code> 时自动触发</td></tr>
+        </tbody>
+      </table>
+
+      <h3>2.3 实现方案</h3>
+      <pre><code>// analysis-section.tsx
+const OPERATION_TYPE_KEY_MAP: Record&lt;string, string&gt; = {
+  'admin_api:recall':          'adminApiRecall',
+  'threat_retro_agent:recall': 'threatRetroAgentRecall',
+  'threat_retro_agent:notify': 'threatRetroAgentNotify',
+};
+
+function getOperationTypeLabel(
+  source: string | undefined,
+  type: string | undefined,
+  t: TFn,
+): string {
+  if (!type) return '—';
+  const key = `${source ?? ''}:${type}`;
+  const subKey = OPERATION_TYPE_KEY_MAP[key];
+  if (!subKey) return type; // fallback 到原始值
+  return t(`operationType.${subKey}`);
+}</code></pre>
+
+      <p>i18n 命名空间：<code>emailDisposal.detail.analysis.operationType.{adminApiRecall | threatRetroAgentRecall | threatRetroAgentNotify}</code></p>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更点 3 ══════════════ -->
+  <div class="incremental-section" id="change-3">
+    <div class="incr-header">
+      <span class="incr-num">3</span>
+      <h2>执行结果：操作成功与否 i18n 映射</h2>
+      <div class="incr-meta">analysis-section.tsx · EVENT_RESULT_KEY_MAP · getEventResultLabel</div>
+    </div>
+    <div class="incr-body">
+      <h3>3.1 语义边界</h3>
+      <p><code>event_result</code> 表示"本次事后处置操作是否成功"，只映射操作结果语义值。邮件状态��举（<code>quarantine_pending</code>、<code>delivery_failed</code> 等）属 <code>MailLogDetail</code> 层字段，<strong>不在此映射</strong>。</p>
+
+      <h3>3.2 执行结果枚举（完整）</h3>
+      <table>
+        <thead>
+          <tr><th>event_result 原始值</th><th>中文（zh）</th><th>英文（en）</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>success</code></td><td>成功</td><td>Success</td></tr>
+          <tr><td><code>completed</code></td><td>成功</td><td>Success</td></tr>
+          <tr><td><code>failed</code></td><td>失败</td><td>Failed</td></tr>
+          <tr><td><code>failure</code></td><td>失败</td><td>Failed</td></tr>
+          <tr><td><code>pending</code></td><td>执行中</td><td>In Progress</td></tr>
+          <tr><td><code>in_progress</code></td><td>执行中</td><td>In Progress</td></tr>
+          <tr><td><code>timeout</code></td><td>超时</td><td>Timeout</td></tr>
+          <tr><td><code>skipped</code></td><td>已跳过</td><td>Skipped</td></tr>
+          <tr><td><code>cancelled</code></td><td>已取消</td><td>Cancelled</td></tr>
+        </tbody>
+      </table>
+      <p>i18n 命名空间：<code>emailDisposal.detail.analysis.eventResult.*</code>；未命中时 fallback 原始值。</p>
+      <div class="callout callout-warn">
+        <strong>待验证：</strong>上述枚举值基于 mock 数据和代码推断，未查阅后端完整枚举定义。如后端存在其他值，当前会 fallback 到���始英文显示。
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更点 4 ══════════════ -->
+  <div class="incremental-section" id="change-4">
+    <div class="incr-header">
+      <span class="incr-num">4</span>
+      <h2>事后处置时间线：默认展开</h2>
+      <div class="incr-meta">analysis-section.tsx · showTimeline</div>
+    </div>
+    <div class="incr-body">
+      <h3>4.1 变更</h3>
+      <table>
+        <tbody>
+          <tr><th style="width:120px">修复前</th><td><code>useState(false)</code>：时间线默认折叠，有事件也不可见</td></tr>
+          <tr><th>修复后</th><td><code>useState(true)</code>：时间线默认展开，进入安全分析 Tab 即可直接看到事件列���</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更点 5 ══════════════ -->
+  <div class="incremental-section" id="change-5">
+    <div class="incr-header">
+      <span class="incr-num">5</span>
+      <h2>查看原始日志按钮：从 notImplementedToast 改为真实跳转</h2>
+      <div class="incr-meta">analysis-section.tsx · onViewRawLogs · detail-modal.tsx</div>
+    </div>
+    <div class="incr-body">
+      <h3>5.1 变更</h3>
+      <table>
+        <tbody>
+          <tr><th style="width:120px">修复前</th><td>点击「查看召回日志」触发 <code>toast.info(tSenderActions('notImplementedToast'))</code>，显示"暂未实现"提示</td></tr>
+          <tr><th>修复后</th><td>点击���查看原始日志」调用 <code>onViewRawLogs()</code> 回调，由 <code>detail-modal.tsx</code> 注入：先 <code>setRawLogsExpanded(true)</code> 展开原始日志区，再 <code>scrollToSection('rawlogs')</code> 平滑滚动至原始日志区段</td></tr>
+          <tr><th>文案</th><td>按钮文案由「查看召回日志」改为「查看原始日志」（i18n key：<code>emailDisposal.detail.analysis.viewRecallLog</code>）</td></tr>
+          <tr><th>降级</th><td>若 <code>onViewRawLogs</code> prop 未传（如独立挂载测试），退回 <code>toast.info</code>，向后兼容</td></tr>
+        </tbody>
+      </table>
+
+      <h3>5.2 新增 Props</h3>
+      <pre><code>// AnalysisSectionProps 新增：
+onViewRawLogs?: () =&gt; void;
+
+// detail-modal.tsx 注入：
+&lt;AnalysisSection
+  detail={detail}
+  aiEnabled={aiEnabled}
+  events={eventsQ.data ?? []}
+  onViewRawLogs={() =&gt; {
+    setRawLogsExpanded(true);
+    scrollToSection('rawlogs');
+  }}
+/&gt;</code></pre>
+    </div>
+  </div>
+
+  <!-- ══════════════ 变更点 6 ══════════════ -->
+  <div class="incremental-section" id="change-6">
+    <div class="incr-header">
+      <span class="incr-num">6</span>
+      <h2>Mock 数据：补充三种事后处置事件</h2>
+      <div class="incr-meta">src/lib/mock/fixtures.ts · mockEmailDisposalEvents</div>
+    </div>
+    <div class="incr-body">
+      <p>为使时间线模块在开发环境可见，在 <code>mockEmailDisposalEvents()</code> 末尾追加了三条固定事件，覆盖三种业务场景：</p>
+      <table>
+        <thead>
+          <tr><th>event_source</th><th>event_type</th><th>event_result</th><th>时间戳偏移</th><th>场景说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>admin_api</code></td><td><code>recall</code></td><td><code>success</code></td><td>+5 min</td><td>管理员手动召回，成功</td></tr>
+          <tr><td><code>threat_retro_agent</code></td><td><code>recall</code></td><td><code>success</code></td><td>+10 min</td><td>威胁回溯智能体策略 = recall，成功</td></tr>
+          <tr><td><code>threat_retro_agent</code></td><td><code>notify</code></td><td><code>success</code></td><td>+15 min</td><td>威胁回溯智能体策略 = notify，成功</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">
+        三条事件的 <code>event_source</code> 均在白名单内（变更点 1），不会被过滤，可直接在安全分析 Tab 的事后处置时间线中看到。
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ D. 差异标注 ══════════════ -->
+  <section id="diffs">
+    <h2>D. 差异标注</h2>
+    <table>
+      <thead>
+        <tr><th>编号</th><th>目标要求</th><th>当前实现</th><th>状态</th><th>复核日期</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>D-001</td>
+          <td>时间线只展示事后处置动作，不展示投递流程/策略裁决事件</td>
+          <td>白名单过滤已实装（<code>DISPOSAL_SOURCES = {admin_api, threat_retro_agent}</code>），antispam / postfix 事件已被过滤</td>
+          <td class="status-resolved">已解决</td>
+          <td>2026-08-06</td>
+        </tr>
+        <tr>
+          <td>D-002</td>
+          <td>操作类型、执行结果在中文环境显示中文</td>
+          <td><code>getOperationTypeLabel</code> / <code>getEventResultLabel</code> + i18n 已实装；zh.json / en.json 已添加所有枚举翻译</td>
+          <td class="status-resolved">已解决</td>
+          <td>2026-08-06</td>
+        </tr>
+        <tr>
+          <td>D-003</td>
+          <td>「查看召回日志」按钮需真实跳转，不弹未实现 Toast</td>
+          <td>已接入 <code>onViewRawLogs</code> prop，实现展开 + 滚动；文案改为「查看原始日志」</td>
+          <td class="status-resolved">已解决</td>
+          <td>2026-08-06</td>
+        </tr>
+        <tr>
+          <td>D-004</td>
+          <td>layer-12 现有规格「时间线默认态：折叠」描述已失效</td>
+          <td>layer-12 原始表格行未修改（保留历史），本文档以增量方式标注修正；下次全量重生成时统一对齐</td>
+          <td class="status-pending">待处理</td>
+          <td>2026-08-06</td>
+        </tr>
+        <tr>
+          <td>D-005</td>
+          <td>GT-12801 变更2「DMARC处置策略新增&quot;进行下一步&quot;选项」的目标要求已被后续需求 GT-12833 反向调整</td>
+          <td>GT-12833 将 <code>accept</code> 从 <code>PROTOCOL_ACTIONS</code> / <code>DMARC_ACTIONS</code> 中彻底移除（不再是"新增"而是"移除"），GT-12801 变更2 章节已打删除线标注并链接到 GT-12833</td>
+          <td class="status-resolved">已解决（以 GT-12833 为准）</td>
+          <td>2026-08-08</td>
+        </tr>
+        <tr>
+          <td>D-006</td>
+          <td>GT-12818：附件安全「发现病毒后的处置」的可选执行动作需为 隔离 / 审核 / 丢弃</td>
+          <td><code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code> 由 <code>['quarantine', 'reject', 'discard']</code> 改为 <code>['quarantine', 'audit', 'discard']</code>（移除 <code>reject</code>、新增 <code>audit</code>），<code>virus_action</code> 类型 <code>Exclude</code> 追加 <code>'reject'</code>；<code>timeout_action</code> 及其它模块不变，已通过浏览器可访问性树核对下拉候选</td>
+          <td class="status-resolved">已解决</td>
+          <td>2026-08-08</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ Q. 待确认事项 ══════════════ -->
+  <section id="questions">
+    <h2>Q. 待确认事项</h2>
+    <table>
+      <thead>
+        <tr><th>编号</th><th>事项</th><th>原因</th><th>状态</th><th>复核日期</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Q-001</td>
+          <td>后端 <code>GET /mail-logs/{id}/events</code> 实际是否会返回 <code>threat_retro_agent</code> 来源的事件</td>
+          <td>当前 mock 数据已构造该来源事件，但真实 API 的 <code>event_source</code> 枚举值未在后端文档中确认；如值不同需同步修改白名单</td>
+          <td class="status-unverif">无法验证</td>
+          <td>2026-08-06</td>
+        </tr>
+        <tr>
+          <td>Q-002</td>
+          <td><code>event_result</code> 除已映射的 9 个枚举值外，是否存在其他真实返回值</td>
+          <td>映射表基于 mock 数据和代码推断，未查阅后端完整枚举定义；未命中值当前 fallback 到原始英文</td>
+          <td class="status-unverif">无法验证</td>
+          <td>2026-08-06</td>
+        </tr>
+        <tr>
+          <td>Q-003</td>
+          <td>GT-12833 截图验证（S-4，「宽松」模板下 SPF「标记方式」附加配置面板）中「主题标记/信头标记/正文标记」三个 Switch 的行内文案在浏览器截图环境下渲染为空白方块</td>
+          <td>经可访问性树核对，DOM 层文本本身未损坏（三个标签文字均可正常读取），推测为截图当时页面字体资源尚未完全加载完成所致，与本次 <code>PROTOCOL_ACTIONS</code> 精简改动无关；建议在正式验收环境下用真实浏览器复核该面板视觉渲染</td>
+          <td class="status-pending">待处理</td>
+          <td>2026-08-08</td>
+        </tr>
+        <tr>
+          <td>Q-004</td>
+          <td>GT-12818 截图验证（S-1/S-2，「发现病毒后的处置」下拉打开态）此前因 agent-browser 沙箱缺中文字体而汉字渲染为空白方块（□）</td>
+          <td>已解决：改用 VM 内 Playwright chromium（VM 已装 Noto Sans CJK 字体）重新采集 gt12818-virus-action-dropdown 截图，中文渲染正常，下拉三项「隔离 / 审核 / 丢弃」肉眼可读且不含「拒收」，并已用可访问性树二次核对与视觉一致。原方块现象仅为 agent-browser 沙箱字体缺失，非产品问题</td>
+          <td class="status-resolved">已解决</td>
+          <td>2026-08-08</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ GT-12801 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12801">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#7c3aed">GT</span>
+      <h2>GT-12801 DMARC协议执行动作对齐以及增加"进行下一步"</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/auth-spoofing</code><br/>
+        组件：<code>ProtocolChecksSection.tsx</code><br/>
+        2026-08-06
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- 变更 1 -->
+      <h3 id="gt12801-change-1">1. "阻断"重命名为"拒收"（DMARC处置策略）</h3>
+
+      <h4>1.1 方案概述</h4>
+      <p>DMARC 处置策略下拉中，<code>reject</code> 动作的显示文案由「阻断」修改为「拒收」，与内容规则、反病毒引擎语义对齐，统一使用「拒收」表达 SMTP 5xx 拒绝响应，消除模块间文案差异。SPF / DKIM / PTR 共享同一 i18n key，四个协议 Tab 文案同步更新。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr><td>i18n key</td><td><code>authSpoofing.protocolActionShort.reject</code></td><td>key 不变</td></tr>
+          <tr><td>zh 文案</td><td>阻断</td><td>拒收</td></tr>
+          <tr><td>描述文案（protocolActionDesc.reject）</td><td colspan="2">向发信方返回 SMTP 5xx 拒绝响应（不变）</td></tr>
+          <tr><td>影响协议</td><td colspan="2">SPF / DKIM / DMARC / PTR 共享同一 key，四个协议 Tab 同步更新</td></tr>
+          <tr><td>修改文件</td><td colspan="2"><code>messages/zh.json</code> — <code>authSpoofing.protocolActionShort.reject</code></td></tr>
+        </tbody>
+      </table>
+
+      <h4>1.2 逐元素变更说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>源码路径</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Select Trigger / Item · reject 短名</td>
+            <td>文案</td>
+            <td>阻断</td>
+            <td>拒收</td>
+            <td><code>authSpoofing.protocolActionShort.reject</code></td>
+            <td><code>messages/zh.json</code></td>
+          </tr>
+          <tr>
+            <td>Select Item · reject 描述</td>
+            <td>文案</td>
+            <td colspan="2">��发信方返回 SMTP 5xx 拒绝响应（不变）</td>
+            <td><code>authSpoofing.protocolActionDesc.reject</code></td>
+            <td><code>messages/zh.json</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12801-change-2" style="margin-top:2rem;"><del>2. DMARC处置策略新增"进行下一步"选项</del></h3>
+      <div class="callout callout-removed">此变更点已被 <a href="#gt-12833">GT-12833</a> 反向调整替代：<code>accept</code>（"进行下一步"）已从 <code>PROTOCOL_ACTIONS</code> / <code>DMARC_ACTIONS</code> 中移除，SPF / DKIM / DMARC / PTR 统一收敛为 5 项动作，详见 GT-12833 变更 1。</div>
+
+      <h4>2.1 方案概述（历史记录，已失效）</h4>
+      <p><del>修改前 <code>DMARC_ACTIONS</code> 为 4 项（不含 <code>accept</code>），SPF / DKIM / PTR 的 <code>PROTOCOL_ACTIONS</code> 含全部 5 项。本次将 <code>DMARC_ACTIONS</code> 扩充至 5 项，使 DMARC 支持「进行下一步」处置策略；<code>accept</code> 语义为当邮件命中该 DMARC 条件行时，直接传递给流水线下一节点，不做阻断 / 隔离 / 标记。</del></p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>DMARC_ACTIONS 枚举</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit']</code>（4 项）</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'accept']</code>（5 项）</td>
+          </tr>
+          <tr>
+            <td>新增选项短名</td>
+            <td>—</td>
+            <td>进行下一步（<code>authSpoofing.protocolActionShort.accept</code>，key 已存在）</td>
+          </tr>
+          <tr>
+            <td>新增选项描述</td>
+            <td>—</td>
+            <td>不做处理，传递给下一个协议检查（<code>authSpoofing.protocolActionDesc.accept</code>，key 已存在）</td>
+          </tr>
+          <tr>
+            <td>i18n 变更</td>
+            <td colspan="2">无需新增 key，相关 key 已存在于 <code>messages/zh.json</code></td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>src/components/security/auth-spoofing/ProtocolChecksSection.tsx</code> — <code>DMARC_ACTIONS</code> 常量</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>2.2 逐元素变更说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>源码路径</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DMARC_ACTIONS 常量</td>
+            <td>枚举数组</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit']</code></td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'accept']</code></td>
+            <td>—</td>
+            <td><code>ProtocolChecksSection.tsx</code> L37</td>
+          </tr>
+          <tr>
+            <td>Select · 「进行下一步」选项短名</td>
+            <td>文案（新增项）</td>
+            <td>—（选项不存在）</td>
+            <td>进行下一步</td>
+            <td><code>authSpoofing.protocolActionShort.accept</code></td>
+            <td><code>messages/zh.json</code></td>
+          </tr>
+          <tr>
+            <td>Select · 「进行下一步」选项描述</td>
+            <td>文案（新增项）</td>
+            <td>—（选项不存在）</td>
+            <td>不做处理，传递给下一个协议检查</td>
+            <td><code>authSpoofing.protocolActionDesc.accept</code></td>
+            <td><code>messages/zh.json</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12797 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12797">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12797 群��策略——新建群组：不支持切换群组类型</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/groups</code><br/>
+        组件：<code>src/components/security/groups/group-management-page.tsx</code>、<code>group-edit-dialog.tsx</code><br/>
+        2026-08-06 · commit <code>81e7555</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- 变更 1 -->
+      <h3 id="gt12797-change-1">1. 新建按钮文案由"新建群组"改为"新建 X 组"</h3>
+
+      <h4 id="gt12797-c1-overview">1.1 方案概述</h4>
+      <p>优化前，群组管理区各 Tab 下方的工具栏右侧按钮统一显示「新建群组」，用户无法从按钮文案判断将要新建的类型，需要在弹窗内再通过「群组类型」下拉做决策，认知路径不清晰。</p>
+      <p>优化后，按钮文案随当前激活 Tab 动态渲染为「新建IP组」「新建发信人组」「新建收信人组」「新建内容组」「新建特征组」，Tab 上下文即决定类型，按钮点击即进入对应类型的新建表单，零额外决策。</p>
+      <table>
+        <thead><tr><th>Tab</th><th>优化前按钮文案</th><th>优化后按钮文案</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>IP 组</td><td>新建群组</td><td>新建IP组</td><td><code>groups.newGroupOfType</code>（typeLabel=<code>groups.ipGroup</code>）</td></tr>
+          <tr><td>发信人组</td><td>新建群组</td><td>新建发信人组</td><td><code>groups.newGroupOfType</code>（typeLabel=<code>groups.senderGroup</code>）</td></tr>
+          <tr><td>收信人组</td><td>新建群组</td><td>新建收信人组</td><td><code>groups.newGroupOfType</code>（typeLabel=<code>groups.recipientGroup</code>）</td></tr>
+          <tr><td>内容组</td><td>新建群组</td><td>新建内容组</td><td><code>groups.newGroupOfType</code>（typeLabel=<code>groups.contentGroup</code>）</td></tr>
+          <tr><td>特征组</td><td>新建群组</td><td>新建特征组</td><td><code>groups.newGroupOfType</code>（typeLabel=<code>groups.featureGroup</code>）</td></tr>
+        </tbody>
+      </table>
+      <p>新增 i18n key：<code>groups.newGroupOfType</code>（zh：<code>新建{typeLabel}</code>，en：<code>New {typeLabel}</code>）。修改文件：<code>messages/zh.json</code>、<code>messages/en.json</code>、<code>group-management-page.tsx</code>。</p>
+
+      <h4 id="gt12797-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态：IP 组 Tab 默认态</strong>（触发路径：租户管理员 → 安全策略 → 群组策略 → 群组管理区 IP 组 Tab）</p>
+        <figure>
+          <img src="./screenshots/gt12797-groups-default.png" alt="群组管理 IP 组 Tab 默认态，工具栏右上角按钮显示「新建IP组」" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>群组管理区 IP 组 Tab 默认态：工具栏右上角按钮文案为「新建IP组」（优化后）</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12797-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>群组管理区工具栏「新建」按钮文案</td>
+            <td>文案（动态）</td>
+            <td>新建群组</td>
+            <td>新建{当前Tab类型名}组（5 种值，随 Tab 切换）</td>
+            <td><code>groups.newGroupOfType</code></td>
+            <td><code>group-management-page.tsx</code> renderTab / renderFeatureTab</td>
+            <td>[Base] 所有形态/角色一致</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12797-change-2" style="margin-top:2rem">2. 新建抽屉移除"群组类型"选择器</h3>
+
+      <h4 id="gt12797-c2-overview">2.1 方案概述</h4>
+      <p>优化前，新建群组抽屉内包含「群组名称」和「群组类型」两个并排字段，用户需在表单内再次选择类型，与已在 Tab 上做出的类型选择重复决策，且类型切换会改变成员输入区的校验规则和占位符，造成认知负担。</p>
+      <p>优化后，新建时隐藏「群���类型」Select，抽屉标题直接显示类型（如「新建IP组」），表单内只有「群组名称」（全宽）和「每行一条成员」两个字段，表单职责单一。编辑已有群组时，「群组类型」改为只读 Input 展示，保持信息完整性但不允许修改。</p>
+      <table>
+        <thead><tr><th>场景</th><th>优化前</th><th>优化后</th></tr></thead>
+        <tbody>
+          <tr><td>新建</td><td>「群组名称」+「群组类型」Select（可改）+「每行一条成员」</td><td>「群组名称」全宽 +「每行一条成员」；SheetTitle 为「新建 X 组」</td></tr>
+          <tr><td>编辑</td><td>「群组名称」禁用 +「群组类型」Select 禁用 +「每行一条成员」</td><td>「群组名称」禁用 +「群组类型」只读 Input +「每行一条成员」</td></tr>
+        </tbody>
+      </table>
+      <p>修改文件：<code>group-edit-dialog.tsx</code>（移除 Select import，新建路径替换为只读展示，SheetTitle 改用 <code>groups.newGroupOfType</code>）。</p>
+
+      <h4 id="gt12797-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：新建IP组抽屉打开态</strong>（触发路径：群组管理区 IP 组 Tab → 点击「新建IP组」按钮）</p>
+        <figure>
+          <img src="./screenshots/gt12797-new-ip-drawer.png" alt="新建IP组抽屉：标题「新建IP组」，表单只有群组名称和每行一条成员，无群组类型选择器" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：新建IP组抽屉 — 标题「新建IP组」，表单无「群组类型」字段，「群组名称」全宽显示，焦点自动落入名称输入框</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12797-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SheetTitle</td>
+            <td>标题文案</td>
+            <td>新建群组（<code>groups.newGroup</code>）</td>
+            <td>新建IP组 / 新建发信人组…（<code>groups.newGroupOfType</code>，typeLabel 随 type 变化）</td>
+            <td><code>groups.newGroupOfType</code></td>
+            <td><code>group-edit-dialog.tsx</code> SheetTitle</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>群组类型 Select（新建场景）</td>
+            <td>交互控件</td>
+            <td>显示，可选 IP组/发��人组/收信人组/内容组/特征组</td>
+            <td>已移除（不渲染）</td>
+            <td>—</td>
+            <td><code>group-edit-dialog.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>群组类型展示（编辑场景）</td>
+            <td>只读 Input</td>
+            <td>禁用 Select，显示当前类型</td>
+            <td>只读 Input，显示类型文案（如「IP 组」）</td>
+            <td><code>groups.ipGroup</code> 等</td>
+            <td><code>group-edit-dialog.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>群组名称输入框（新建场景）</td>
+            <td>Input</td>
+            <td>grid-cols-2 左列，宽度约 50%</td>
+            <td>全宽（grid 移除，单列布局）</td>
+            <td><code>groups.groupName</code></td>
+            <td><code>group-edit-dialog.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 3 -->
+      <h3 id="gt12797-change-3" style="margin-top:2rem">3. 内容组"每行一条成员"标签改为"每行一条关键词"</h3>
+
+      <h4 id="gt12797-c3-overview">3.1 方案概述</h4>
+      <p>内容组的成员是关键词 / 敏感词，使用「成���」一词语义不准确，占位符（敏感词1/敏感词2）与标签（每行一条成员）文案不一致，造成歧义。优化后，仅内容组将标签改为「每行一条关键词」，并将占位符由「敏感词1/敏感词2」改为「关键词1/关键词2」，语义统一；其他类型保持「每行一条成员」不变。</p>
+      <table>
+        <thead><tr><th>字段</th><th>变更前</th><th>变更后</th><th>i18n key</th></tr></thead>
+        <tbody>
+          <tr><td>内容组成员区标签</td><td>每行一条成员</td><td>每行一条关键词</td><td><code>groups.contentMemberListPerLine</code>（新增）</td></tr>
+          <tr><td>内容组成员区占位符</td><td>敏感词1\n敏感词2</td><td>关键词1\n关键词2</td><td><code>groups.contentPlaceholder</code>（已存在，值已修改）</td></tr>
+          <tr><td>其他类型成员区标签</td><td colspan="2">每行一条成员（不变，<code>groups.memberListPerLine</code>）</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12797-c3-states">3.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-2：新建内容组抽屉打开态</strong>（触发路径：群组管理区 内容组 Tab → 点击「新建内容组」按钮）</p>
+        <figure>
+          <img src="./screenshots/gt12797-new-content-drawer.png" alt="新建内容组���屉：标题「新建内容组」，成员区标签「每行一条关键词」，占位符「关键词1/关键词2」" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：新建内容组抽屉 — 标题「新建内容组」，成员区标签「每行一条关键词」，占位符「关键词1/关键词2」</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12797-c3-elements">3.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>修改文件</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>内容组成员区 Label</td>
+            <td>标签文案</td>
+            <td>每行一条成员（<code>groups.memberListPerLine</code>）</td>
+            <td>每行一条关键词（<code>groups.contentMemberListPerLine</code>）</td>
+            <td><code>groups.contentMemberListPerLine</code>（新增）</td>
+            <td><code>group-edit-dialog.tsx</code>、<code>messages/zh.json</code>、<code>messages/en.json</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>内容组成员区 Textarea 占位符</td>
+            <td>占位符文案</td>
+            <td>敏感���1\n敏感词2</td>
+            <td>关键词1\n关键词2</td>
+            <td><code>groups.contentPlaceholder</code></td>
+            <td><code>messages/zh.json</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12719 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12719">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12719 策略流水线执行动作/黑白名单文案解释</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code><br/>
+        组件：<code>src/components/security/PolicyPipelinePage.tsx</code><br/>
+        i18n：<code>messages/zh.json</code>（<code>pipeline.*</code> 命名空间）、<code>messages/en.json</code><br/>
+        2026-08-06 · commit <code>c6f98d9</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- 变更 1 -->
+      <h3 id="gt12719-change-1">1. 执行动作图例："阻断"改为"拒收"，新增"进行下一步"，移除"标记投递"</h3>
+
+      <h4 id="gt12719-c1-overview">1.1 方案概述</h4>
+      <p>策略流水线页面底部图例区「执行动作」行列出��水线中可能出现的所有动作及其说明。本次同步三项变更：</p>
+      <ul>
+        <li><strong>重命名</strong>：动作名「阻断」→「拒收」，描述「���绝并退信」保持不变（i18n key <code>pipeline.actionBlock</code> / <code>pipeline.actionBlockDesc</code>）。</li>
+        <li><strong>新增</strong>：「进行下一步 · 继续执行后续策略」条目，位于「标记投递」原位后方，使用 <code>--action-mark-deliver</code>（蓝绿色）圆点，区别于直接投递（绿色），与 DMARC 「进行下一步」语义一致（新增 i18n key <code>pipeline.actionNextStep</code>、<code>pipeline.actionNextStepDesc</code>）。</li>
+        <li><strong>移除</strong>：「标记投递」条目——已从流水线执行动作中移除，图例随之去除（<code>actionLegendItems</code> 中删除 <code>tagDeliver</code> 条目，union type 同步收窄）。</li>
+      </ul>
+      <p>修改文件：<code>PolicyPipelinePage.tsx</code>（<code>actionLegendItems</code> 数组）、<code>messages/zh.json</code>、<code>messages/en.json</code>（<code>pipeline.*</code> 命名空间）。</p>
+
+      <h4 id="gt12719-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：策略流水线页面默认态（含图例区）</strong><br/>触发路径：租户管理员 → 安全策略 → 策略流水线 → 默认打开，滚动至页面底部图例区</p>
+        <figure>
+          <img src="./screenshots/gt12719-pipeline-default.png" alt="策略流水线页面默认态，底部图例区显示执行动作、名单类型、流程控制三行说明" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：策略流水线页面默认��� — 底部图例区三行可见（执行动作 / 名单类型 / 流程控制），「拒收」替代「阻断」，「进行下一步」新增，「标记投递」已移除</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12719-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>执行动作「阻断」圆点标签</td>
+            <td>图例标签文案</td>
+            <td>阻断（红色圆点）</td>
+            <td>拒收（红色圆点，颜色不变）</td>
+            <td><code>pipeline.actionBlock</code></td>
+            <td><code>PolicyPipelinePage.tsx</code> actionLegendItems</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>执行动作「阻断」描述</td>
+            <td>图例描述文案</td>
+            <td>拒绝并退信（不变）</td>
+            <td>拒绝并退信（不变）</td>
+            <td><code>pipeline.actionBlockDesc</code></td>
+            <td><code>PolicyPipelinePage.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>执行动作「进行下一步」条目（新增）</td>
+            <td>图例条目</td>
+            <td>不存在</td>
+            <td>进行下一步 · 继续执行后续策略（蓝绿色圆点，位于「标记投递」原位后）</td>
+            <td><code>pipeline.actionNextStep</code> / <code>pipeline.actionNextStepDesc</code>（新增）</td>
+            <td><code>PolicyPipelinePage.tsx</code> actionLegendItems[2]</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>执行动作「标记投递」条目（移除）</td>
+            <td>图例条目</td>
+            <td>标记投递 · 投递并标记可疑（蓝绿色圆点）</td>
+            <td><del>已移除（标记投递动作已从流水线中下线）</del></td>
+            <td><del><code>pipeline.actionTagDeliver</code> / <code>pipeline.actionTagDeliverDesc</code></del></td>
+            <td><code>PolicyPipelinePage.tsx</code>（<code>tagDeliver</code> 条���已删除）</td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12719-change-2" style="margin-top:2rem">2. 名单类型图例：黑名单描述"阻断→拒收"，白名单描述移除"标记投递"</h3>
+
+      <h4 id="gt12719-c2-overview">2.1 方案概述</h4>
+      <p>图例第二行「名单类型」中：</p>
+      <ul>
+        <li><strong>黑名单描述</strong>：「阻断/隔离/丢弃」→「拒收/隔离/丢弃」（跟随「阻断」→「拒收」重命名，i18n key <code>pipeline.blacklistTypeDesc</code>）。</li>
+        <li><strong>白名单描述</strong>：「投递/标记投递」→「投递」（标记投递已下线，i18n key <code>pipeline.whitelistTypeDesc</code>）。</li>
+      </ul>
+
+      <h4 id="gt12719-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1（复用）</strong>：同上截图，名单类型行位于图例区第二行。</p>
+        <figure>
+          <img src="./screenshots/gt12719-pipeline-legend.png" alt="策略流水线底部图例区，名单类型行黑名单显示拒收/隔离/丢弃，白名单显示投递" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1（名单类型行）：黑名单描述为「拒收/隔离/丢弃」，白名单描述为「投递」（已去除「标记投递」）</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12719-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>修改文件</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>名��类型 黑名单 描述</td>
+            <td>图例文案</td>
+            <td>阻断/隔离/丢弃</td>
+            <td>拒收/隔离/丢弃</td>
+            <td><code>pipeline.blacklistTypeDesc</code></td>
+            <td><code>messages/zh.json</code>、<code>messages/en.json</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>名单类型 白名单 描述</td>
+            <td>图例文案</td>
+            <td>投递/标记投递</td>
+            <td>投递</td>
+            <td><code>pipeline.whitelistTypeDesc</code></td>
+            <td><code>messages/zh.json</code>、<code>messages/en.json</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 3 -->
+      <h3 id="gt12719-change-3" style="margin-top:2rem">3. 流程控制图例："阻断/丢弃/隔离→拒收/丢弃/隔离"，流继续描述移除"标记投递"</h3>
+
+      <h4 id="gt12719-c3-overview">3.1 方案概述</h4>
+      <p>图例第三行「流程控制」中：</p>
+      <ul>
+        <li><strong>终止描述</strong>（红色箭头标注）：「阻断/丢弃/隔离 → 终止并退出流水线」→「拒收/丢弃/隔离 → 终止并退出流水线」（i18n key <code>pipeline.flowTerminateDesc</code>）；<code>flowTerminateShort</code>（箭头旁短文案）同步改为「拒收」。</li>
+        <li><strong>继续描述</strong>（绿色箭头标注）：「投递/标记投递 → 继续检测」→「投递 → 继续检测」（i18n key <code>pipeline.flowContinueDesc</code>）。</li>
+      </ul>
+
+      <h4 id="gt12719-c3-states">3.2 截图式���互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1（复用）</strong>：���上截图，流程控制行位于图例区第三行，流程图中红色箭头旁可见「拒收」短文案。</p>
+        <figure>
+          <img src="./screenshots/gt12719-pipeline-default.png" alt="策略流水线页面，流程图中红色箭头旁标注拒收，底部流程控制行描述已更新" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1（流程控制行）：红色箭头旁短文案「拒收」，终止描述「拒收/丢弃/隔离 → 终止并退出流水线」，继续描述「投递 → 继续检测」</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12719-c3-elements">3.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>修改文件</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>流程控制 红色箭头 短文案</td>
+            <td>箭头标注文案</td>
+            <td>阻断</td>
+            <td>拒收</td>
+            <td><code>pipeline.flowTerminateShort</code></td>
+            <td><code>messages/zh.json</code>、<code>messages/en.json</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>流程控制 终止描述</td>
+            <td>图例文案</td>
+            <td>阻断/丢弃/隔离 → 终止并退出流水线</td>
+            <td>拒收/丢弃/隔离 → 终止并退出流水线</td>
+            <td><code>pipeline.flowTerminateDesc</code></td>
+            <td><code>messages/zh.json</code>、<code>messages/en.json</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>流程控制 继续描述</td>
+            <td>图例文案</td>
+            <td>投递/标记投递 → 继续检测</td>
+            <td>投递 → 继续检测</td>
+            <td><code>pipeline.flowContinueDesc</code></td>
+            <td><code>messages/zh.json</code>、<code>messages/en.json</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12793 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12793">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12793 邮件标记与声明模块优化</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（阶段5 邮件标记与声明面板）<br/>
+        组件：<code>src/components/security/mail-marking/RuleEditDrawer.tsx</code>、<code>src/components/security/mail-marking/MailMarkingPage.tsx</code>、<code>src/components/security/mail-marking/RuleListTable.tsx</code><br/>
+        i18n：<code>messages/zh.json</code>（<code>mailMarking.*</code> 命名空间，已有 key 复用，乱码修复）<br/>
+        2026-08-07 · commit <code>1a445a9</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- 变更 1 -->
+      <h3 id="gt12793-change-1">1. 接收标记 / 外发声明规则列表：「取消」「保存」按钮从右上移至右下</h3>
+
+      <h4 id="gt12793-c1-overview">1.1 方案概述</h4>
+      <p>新建规则 / 编辑规则抽屉（<code>RuleEditDrawer</code>）中，「取消」「保存」按钮原来位于 <code>SheetHeader</code> 右上角（<code>flex items-center justify-between</code> 内），与标题并排显示。</p>
+      <p>优化后：按钮区域从 <code>SheetHeader</code> 中移除，改为在 <code>SheetContent</code> 底部新增 <code>&lt;footer class="shrink-0 border-t px-6 py-4"&gt;</code>，按钮右对齐（<code>flex justify-end gap-2</code>）。<code>SheetHeader</code> 仅保留标题和副标题，布局更简洁。i18n key <code>mailMarking.cancel</code>、<code>mailMarking.save</code> 和 <code>data-testid="mail-marking-save-rule"</code> 均未改变。</p>
+
+      <h4 id="gt12793-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：接收标记规则列表默认态（含规则数据）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 策略流水线 → 阶段5 邮件标记与声明卡片 → 「接收标记」Tab（默认）</p>
+        <figure>
+          <img src="./screenshots/gt12793-receive-list.png" alt="邮件标记与声明面板，接收标记Tab，规则列表显示4条规则，表头包含规则名称、适用对象、位置、状态、优先级、操作列" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：接收标记规则列表默认态 — 共4条规则，按钮「+ 新建规则」位于右上角，规则表格完整展示</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12793-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key / testid</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SheetHeader 按钮区域</td>
+            <td>布局区域</td>
+            <td><code>flex items-center justify-between</code>，标题+副标题+[取消][保存]并排</td>
+            <td>SheetHeader 仅保留标题和副标题，按钮区域移除</td>
+            <td>—</td>
+            <td><code>RuleEditDrawer.tsx</code> SheetHeader</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>底部 footer 按钮区域（新增）</td>
+            <td>布局区域</td>
+            <td>不存在</td>
+            <td><code>&lt;footer class="shrink-0 border-t px-6 py-4"&gt;</code>，右对齐，位于表单内容下方、SheetContent 底部</td>
+            <td>—</td>
+            <td><code>RuleEditDrawer.tsx</code> footer</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>取消按钮</td>
+            <td>Button（outline）</td>
+            <td>SheetHeader 右上角</td>
+            <td>footer 右下角（位置变更，行为不变）</td>
+            <td><code>mailMarking.cancel</code></td>
+            <td><code>RuleEditDrawer.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>保存按钮</td>
+            <td>Button（primary）</td>
+            <td>SheetHeader 右上角</td>
+            <td>footer 右下角（位置变更，行为不变；Loader2 loading 态保留）</td>
+            <td><code>mailMarking.save</code> / <code>data-testid="mail-marking-save-rule"</code></td>
+            <td><code>RuleEditDrawer.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12793-change-2" style="margin-top:2rem">2. 规则列表补齐「优先级」字段（Promise.allSettled 容错）</h3>
+
+      <h4 id="gt12793-c2-overview">2.1 方案概述</h4>
+      <p>规则列表中「优先级」列的表头和数据行（<code>RuleListTable.tsx</code>）在代码层面已存在，但因 <code>MailMarkingPage.loadRules()</code> 使用 <code>Promise.all</code>：当 <code>listMailMarkingScopes</code>（获取适用对象列表）请求失败时，整体抛出异常，进入 catch 后 <code>setRules</code> 不被调用，规则列表永远为空数组 <code>[]</code>，导致 priority 列虽存在于表头但无数据行可显示。</p>
+      <p>修复方案：将 <code>Promise.all</code> 改为 <code>Promise.allSettled</code>，规则请求和 scopes 请求独立容错——规则请求失败才 toast 报错并 <code>setRules([])</code>；scopes 请求失败时静默降级为空列表（不影响规则行显示）。同时修复 <code>zh.json</code> 中 <code>mailMarking</code> 命名空间的 4 处 UTF-8 乱码（<code>priorityHint</code>、<code>noData</code>、<code>markPosition</code>、<code>sampleSubject</code>）。</p>
+
+      <h4 id="gt12793-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1（同上）</strong>：接收标记规则列表，scopes 加载无论成功与否，规则行均正常显示（含 priority 数值）。</p>
+        <p><strong>状态 S-2：外发声明规则列表</strong><br/>
+        触发路径：同 S-1 → 点击「外发声明」Tab</p>
+        <figure>
+          <img src="./screenshots/gt12793-send-list.png" alt="外发声明Tab规则列表，显示2条规则，表头包含规则名称、适用对象、位置、状态、优先级、操作列" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：外发声明规则列表 — 共2条规则，底部显示优先级提示文案</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12793-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key / 源码</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>loadRules</code> 错误处理</td>
+            <td>异步逻辑</td>
+            <td><code>Promise.all</code>：scopes 失败 → 整体 catch → rules 永远为空</td>
+            <td><code>Promise.allSettled</code>：rules / scopes 独立容错，rules 加载成功即展示</td>
+            <td><code>MailMarkingPage.tsx</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>zh.json 乱码修复</td>
+            <td>i18n 文案</td>
+            <td><code>priorityHint</code>「…规??」、<code>noData</code>「???无规则」、<code>markPosition</code>「??记位置」、<code>sampleSubject</code>「项???进展说明」</td>
+            <td>全部修复为正��� UTF-8 汉字：「…规则」「暂无规则」���标记位置」「项目进展说明」</td>
+            <td><code>messages/zh.json</code> mailMarking.*</td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 3 -->
+      <h3 id="gt12793-change-3" style="margin-top:2rem">3. 「优先级」列位置调整至「状态」之后</h3>
+
+      <h4 id="gt12793-c3-overview">3.1 方案概述</h4>
+      <p>原表头列序为：<strong>优先级 | 规则名称 | 适用对象 | 位置 | 状态 | 操作</strong>。按需求调整为：<strong>规则名称 | 适用对象 | 位置 | 状态 | 优先级 | 操作</strong>（优先级列移至状态之后、操作之前）。</p>
+      <p>修改范围：<code>RuleListTable.tsx</code> 的 <code>&lt;thead&gt;</code> 中 <code>priority</code> <code>&lt;th&gt;</code> 和 <code>&lt;tbody&gt;</code> 中 <code>priority</code> <code>&lt;td&gt;</code> 同步调整，列宽 <code>w-[92px]</code> 保持不变，<code>colSpan={6}</code> 的空行/加载行列数不变。</p>
+
+      <h4 id="gt12793-c3-states">3.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1（接收标记列顺序）</strong>：表头列序为「规则名称 | 适用对象 | 位置 | 状态 | 优先级 | 操作」，优先级值（4/3/2/1）位于状态徽章右侧。</p>
+        <figure>
+          <img src="./screenshots/gt12793-receive-list.png" alt="接收标记规则列表，列顺序为规则名称、适用对象、位置、状态、优先级、操作" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1（列顺序）：「优先级」列位于「状态」之后（接收标记 4 条规则）</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12793-c3-elements">3.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前列序</th><th>变更后列序</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>规则列��表头</td>
+            <td>表格 thead</td>
+            <td>优先级 / 规则名称 / 适用对象 / 位置 / 状态 / 操作</td>
+            <td>规则名称 / 适用对象 / 位置 / 状态 / <strong>优先级</strong> / 操作</td>
+            <td><code>RuleListTable.tsx</code> thead tr</td>
+            <td>[Base]，接收标记与外发声明共用同一组件</td>
+          </tr>
+          <tr>
+            <td>规则列表数据行 priority 单元格</td>
+            <td>表格 tbody td</td>
+            <td>第1列（<code>font-mono tabular-nums</code>）</td>
+            <td>第5列（状态 Badge 之后，操作之前）</td>
+            <td><code>RuleListTable.tsx</code> tbody tr</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级提示文案（表格底部）</td>
+            <td>说明文案</td>
+            <td>不变（「数值越大优先级越高，命中多条规则时优先执行数值大的规则」）</td>
+            <td>不变</td>
+            <td><code>mailMarking.priorityHint</code>（乱码已修复）</td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12795 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12795">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12795 邮件标记与声明：创建规则优先级问题处理</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（阶段5 邮件标记与声明面板 → 新建规则抽屉）<br/>
+        组件：<code>src/components/security/mail-marking/RuleEditDrawer.tsx</code>、<code>src/components/security/mail-marking/MailMarkingPage.tsx</code><br/>
+        i18n：<code>messages/zh.json</code> / <code>messages/en.json</code>（<code>mailMarking.priorityTip</code>、<code>mailMarking.errorPriorityRange</code>）<br/>
+        2026-08-07 · commit <code>db8a95b</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12795-change-1">1. 新建规则优先级默认值与范围修正（1 → 100，范围 100~1000）</h3>
+
+      <h4 id="gt12795-c1-overview">1.1 方案概述</h4>
+      <p><strong>问题：</strong>新建接收标记规则 / 外发声明规则时，优先级字段默认值为 <code>1</code>，后端接口要求租户管理员的优先级必须在 100~1000 范围内，导致��交时出现报错「tenant admin priority must be between 100 and 1000」。</p>
+      <p><strong>修复方案：</strong></p>
+      <ul>
+        <li><strong><code>MailMarkingPage.tsx</code> — <code>nextPriority</code> 计算逻辑</strong>：无规则时默认返回 <code>100</code>；有规则时取现有最大优先级 +1，并使用 <code>Math.max(..., 100)</code> 钳制下限、<code>Math.min(..., 1000)</code> 钳制上限，确保默认值始终在合法区间。</li>
+        <li><strong><code>RuleEditDrawer.tsx</code> — Input 属性</strong>：<code>min</code> 从 <code>1</code> 改为 <code>100</code>，新增 <code>max={1000}</code>，输入框宽度从 <code>w-20</code> 调整为 <code>w-24</code>（容纳4位数字）。</li>
+        <li><strong><code>RuleEditDrawer.tsx</code> — <code>validate</code> 函数</strong>：校���条件从 <code>priority &lt; 1</code> 改为 <code>priority &lt; 100 || priority &gt; 1000</code>，使用新 i18n key <code>errorPriorityRange</code>。</li>
+        <li><strong><code>zh.json</code> / <code>en.json</code></strong>：<code>mailMarking.priorityTip</code> 更新为「取值范围 100～1000；数值越大，规则越优先执行���；新增 <code>mailMarking.errorPriorityRange</code>「优先级必须为 100 到 1000 之间的整数」。</li>
+      </ul>
+
+      <h4 id="gt12795-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+
+        <p><strong>状态 S-1：新建接收标记规则抽屉默认态</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 策略流水线 → 阶段5 邮件标记与声明 → 接收标记 Tab → 点击「+ 新建规则」按钮</p>
+        <figure>
+          <img src="./screenshots/gt12795-drawer-default.png" alt="新建接收标记规则抽屉默认态，优先级字段显示默认值100，提示文案为「取值范围100～1000；数值���大，规则越优先执行」，取消和保存按钮位于底部footer" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：新建规则抽屉默认态 — 优先级默��值 <strong>100</strong>，Input min=100 max=1000，提示文案已更新；「取消」「保存」按钮位于底部 footer 右下角</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>可见元素</th><th>内容 / 值</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>优先级输入框</td><td>默认值 <code>100</code>，type=number，min=100，max=1000</td><td>原默认值为 1，已修正</td></tr>
+            <tr><td>优先级提示文案</td><td>「取值范围 100～1000；数值越大，规则越优先执行」</td><td>i18n key <code>mailMarking.priorityTip</code>，原文案「必须为正整数；数值越大，规则越优先执行」</td></tr>
+            <tr><td>「保存」按钮</td><td>底部 footer 右侧，data-testid="mail-marking-save-rule"</td><td>位置：SheetContent 底部 footer（GT-12793 变更1 已将按钮从标题区移至此处）</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-2：规则名称为空时点击保存的校验失败态</strong><br/>
+        触发路径：S-1 → 不填写规则名称 → 直接点击「保存」</p>
+        <figure>
+          <img src="./screenshots/gt12795-priority-validation-error.png" alt="新建规则表单校验失败，规则名称字段下���显示红色错误文案，优先级字段仍显示100且提示文案正常" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：校验失败态 — 规则名称未填，显示红色错误文案；优先级保持 100，范围提示文案完整显示；优先级校验（100~1000）独立触发 <code>errorPriorityRange</code> 错误文案</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>校验条件</th><th>错误文案</th><th>i18n key</th><th>触发时机</th></tr></thead>
+          <tbody>
+            <tr><td>优先级不在 100~1000 范围内（含非整数）</td><td>「优先级必须为 100 到 1000 之间的整数」</td><td><code>mailMarking.errorPriorityRange</code>（新增）</td><td>点击「保存」时前端校验</td></tr>
+            <tr><td>规则名称为空</td><td>「规则名称不能为空」（原有校验，未变更）</td><td><code>mailMarking.errorNameRequired</code></td><td>点击「保存」时前端校验</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12795-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key / testid</th><th>源码路径</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>优先级输入框默认值</td>
+            <td>Input[type=number]</td>
+            <td><code>nextPriority = Math.max(0,...rules.map(r=&gt;r.priority)) + 1</code>，无规则时返回 <code>1</code></td>
+            <td><code>nextPriority</code>：无规则时返回 <code>100</code>；有规则时 <code>Math.min(Math.max(max+1, 100), 1000)</code></td>
+            <td><code>data-testid="mail-marking-priority"</code></td>
+            <td><code>MailMarkingPage.tsx</code> useMemo nextPriority</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级输入框 min/max 属性</td>
+            <td>Input[type=number]</td>
+            <td><code>min={1}</code>，无 <code>max</code></td>
+            <td><code>min={100} max={1000}</code></td>
+            <td>—</td>
+            <td><code>RuleEditDrawer.tsx</code> Input priority</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级输入框宽度</td>
+            <td>CSS class</td>
+            <td><code>w-20</code>（80px，容纳3位数字）</td>
+            <td><code>w-24</code>（96px，容纳4位数字）</td>
+            <td>—</td>
+            <td><code>RuleEditDrawer.tsx</code> Input priority</td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级提示文案</td>
+            <td>行内提示文本</td>
+            <td>「必须为正整数；数值越大，规则越优先执行」</td>
+            <td>「取值范围 100～1000；数值越大，规则越优先执行」</td>
+            <td><code>mailMarking.priorityTip</code></td>
+            <td><code>messages/zh.json</code>、<code>messages/en.json</code></td>
+            <td>[Base]</td>
+          </tr>
+          <tr>
+            <td>优先级校验函数</td>
+            <td>validate 逻辑</td>
+            <td><code>priority &lt; 1</code> → <code>errorPriorityPositive</code></td>
+            <td><code>priority &lt; 100 || priority &gt; 1000</code> → <code>errorPriorityRange</code></td>
+            <td><code>mailMarking.errorPriorityRange</code>（新增）</td>
+            <td><code>RuleEditDrawer.tsx</code> validate()</td>
+            <td>[Base]，租户管理员范围 100~1000（后端约束）</td>
+          </tr>
+          <tr>
+            <td>错误文案（新增 key）</td>
+            <td>i18n 字符串</td>
+            <td>不存在</td>
+            <td>zh：「优先级必须为 100 到 1000 之间的整数」<br/>en：「Priority must be an integer between 100 and 1000」</td>
+            <td><code>mailMarking.errorPriorityRange</code></td>
+            <td><code>messages/zh.json</code>、<code>messages/en.json</code></td>
+            <td>[Base]</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12828 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12828">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12828 策略：优先级统一</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（各策略模块新建/编辑规则抽屉）<br/>
+        组件：<code>src/components/security/mail-marking/MailMarkingPage.tsx</code>、<code>src/components/security/mail-marking/RuleEditDrawer.tsx</code>、<code>src/components/security/content-rules/ContentRuleDrawer.tsx</code>、<code>src/components/security/IPFilterPage.tsx</code>、<code>src/components/security/IPFrequencyPage.tsx</code><br/>
+        公共工具：<code>src/components/security/advanced-filter-rules/priority-range.ts</code>（<code>getRulePriorityRange</code>、<code>isPriorityInRange</code>、<code>PriorityRange</code>）<br/>
+        i18n：<code>messages/zh.json</code> / <code>messages/en.json</code>（命名空间 mailMarking、contentRules、senderFilter、behaviorControl、ipFilter、ipFrequency）<br/>
+        2026-08-07 · commit <code>4dab352</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- ── 变更 1：方案A ── -->
+      <h3 id="gt12828-change-1">1. 方案A：邮件标记模块接入 getRulePriorityRange，消除硬编码</h3>
+
+      <h4 id="gt12828-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>GT-12795 修复邮件标记优先级默认值时，将 100/1000 直接写入组件，未接入项目已有的 <code>getRulePriorityRange(isSystemAdmin)</code> 公共工具，导致系统管理员登录时仍被错误限制在租户范围。</p>
+      <p><strong>修复内容：</strong></p>
+      <ul>
+        <li><strong><code>MailMarkingPage.tsx</code></strong>：引入 <code>useAuth()</code> 和 <code>getRulePriorityRange</code>，以 <code>isSystemAdmin</code> 计算 <code>priorityRange</code>（租户管理员 100–1000，系统管理员 0–9999），传入 <code>RuleEditDrawer</code>；<code>nextPriority</code>、<code>priorityHint</code> 均改用 <code>priorityRange.min/max/defaultValue</code>，不再硬编码。</li>
+        <li><strong><code>RuleEditDrawer.tsx</code></strong>：新增 <code>priorityRange?: PriorityRange</code> prop（有 <code>FALLBACK_PRIORITY_RANGE</code> 兜底）；Input 的 <code>min/max</code>、提示文案 <code>priorityTip</code>、<code>validate</code> 校验均改为从 <code>range</code> 读取；新增 <code>mailMarking.errors.priorityRange</code> 参数化 i18n key。</li>
+        <li><strong>i18n</strong>：<code>mailMarking.priorityTip</code> 和 <code>mailMarking.priorityHint</code> 改为参数化 <code>{min}/{max}</code>；新增 <code>mailMarking.errors.priorityRange</code>（与 <code>advancedRulesFeature.errors.priorityRange</code> 对齐）；<code>mailMarking.errorPriorityRange</code> 同步参数化（向后兼容）。</li>
+      </ul>
+
+      <h4 id="gt12828-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：新建接收标记规则抽屉默认态（租户管理员）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 策略流水线 → 阶段5 邮件标记与声明 → 接收标记 Tab → 点击「+ 新建规则」按钮</p>
+        <figure>
+          <img src="./screenshots/gt12828-mail-marking-priority.png" alt="新建接收标记规则抽屉，优先级默认值100，提示文案取值范围100～1000，保存按钮位于底部footer" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：新建接收标记规则抽屉 — 优先级默认值 <strong>100</strong>，提示文案「（取值范围 100～1000；数值越大，规则越优先执行）」参数化渲染；DOM 验证：<code>value=100, min=100, max=1000</code>（租户管理员）</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>可见元素</th><th>内容/值</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>优先级输入框</td><td>默认值 100，min=100，max=1000（租户管理员）；0–9999（系统管理员）</td><td>由 <code>getRulePriorityRange(isSystemAdmin)</code> 动态决定</td></tr>
+            <tr><td>优先级提示文案</td><td>「（取值范围 {min}～{max}；数值越大，规则越优先执行）」参数化渲染</td><td>i18n key <code>mailMarking.priorityTip</code>，从 <code>{min}/{max}</code> 参数注入实际值</td></tr>
+            <tr><td>底部 footer</td><td>「取消」「保存」按钮</td><td>GT-12793 变更1 已定义位置；本次未改动</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12828-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key / 源码</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>nextPriority 默认值计算</td><td>useMemo</td><td>无规则→100，有规则→<code>Math.min(Math.max(max+1,100),1000)</code>（硬编码）</td><td>无规则→<code>range.defaultValue</code>，有规则→<code>Math.min(Math.max(max+1,range.min),range.max)</code></td><td><code>MailMarkingPage.tsx</code></td><td>[Overlay] 租户管理员 defaultValue=600，系统管理员 defaultValue=600（range.min=0）</td></tr>
+          <tr><td>priorityRange prop</td><td>RuleEditDrawer prop</td><td>不存在</td><td>新增 <code>priorityRange?: PriorityRange</code>，有 <code>FALLBACK_PRIORITY_RANGE</code>（租户默认）兜底</td><td><code>RuleEditDrawer.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>Input min/max</td><td>HTML 属性</td><td><code>min={100} max={1000}</code> 硬编码</td><td><code>min={range.min} max={range.max}</code></td><td><code>RuleEditDrawer.tsx</code></td><td>[Overlay] 租户 100/1000，系统管理员 0/9999</td></tr>
+          <tr><td>validate 函数签名</td><td>函数参数</td><td><code>validate(form, t)</code>，校验 <code>&lt;100 || &gt;1000</code></td><td><code>validate(form, t, range)</code>，校验 <code>!isPriorityInRange(priority, range)</code></td><td><code>RuleEditDrawer.tsx</code></td><td>[Overlay]</td></tr>
+          <tr><td>priorityTip 提示文案</td><td>i18n 字符串</td><td><code>'取值范围 100～1000；数值越大，规则越优先执行'</code>（硬编码数字）</td><td><code>'取值范围 {min}～{max}；数值越大，规则越优先执行'</code></td><td><code>mailMarking.priorityTip</code></td><td>[Base]</td></tr>
+          <tr><td>priorityHint 列表提示</td><td>i18n 字符串</td><td><code>'数值越大优先级越高，命中多条规则时优先执行数值大的规则'</code>（无范围）</td><td><code>'数值越大优先级越高，命中多条规则时优先执行数值大的规则（范围 {min}–{max}）'</code></td><td><code>mailMarking.priorityHint</code></td><td>[Base]</td></tr>
+          <tr><td>errors.priorityRange（新增）</td><td>i18n 字符串</td><td>不存在</td><td>zh：<code>'优先级需在 {min}–{max} 之间'</code>；en：<code>'Priority must be between {min} and {max}'</code></td><td><code>mailMarking.errors.priorityRange</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ── 变更 2：方案B ── -->
+      <h3 id="gt12828-change-2">2. 方案B：内容规则、IP 过滤、IP 频率补齐角色感知范围校验</h3>
+
+      <h4 id="gt12828-c2-overview">2.1 方案概述</h4>
+      <p><strong>问题：</strong>内容规则 Input 硬编码 <code>min={1}</code>、提示文案写死「范围1-9999」；IP 过滤 schema <code>z.number().int().nonnegative()</code>（无上限）；IP 频率 schema <code>z.number()</code>（无任何范围约���）。三个模��均不感知角色，租户管理员应受 100–1000 限制的约束未被前端校验拦截。</p>
+      <p><strong>统一修复方案：</strong>三个模块均按行为管控的标准模式改造：</p>
+      <ul>
+        <li><strong>工厂函数模式</strong>：将模块级常量 <code>ruleSchema</code> 重构为 <code>createRuleSchema(range: PriorityRange)</code> 工厂函数，组件内通过 <code>useMemo(() =&gt; getRulePriorityRange(isSystemAdmin), [isSystemAdmin])</code> 获取 range，再用 <code>useMemo(() =&gt; createRuleSchema(range), [range])</code> 生成动态 schema 传给 <code>zodResolver</code>。</li>
+        <li><strong>内容规则（<code>ContentRuleDrawer.tsx</code>）</strong>：组件内直接 <code>useAuth()</code>，<code>validate</code> 改用 <code>range.min/max</code>，Input <code>min/max</code> 参数化，<code>priorityRangeHint</code> 和 <code>priorityInvalid</code> 均加 <code>{min}/{max}</code> 插值。</li>
+        <li><strong>IP 过滤（<code>IPFilterPage.tsx</code>）</strong>：<code>createRuleSchema</code> 中 priority 从 <code>nonnegative()</code> 改为 <code>.min(range.min, 'priorityOutOfRange').max(range.max, 'priorityOutOfRange')</code>；<code>handleOpenDialog</code> 新建默认值改为 <code>Math.min(Math.max(prev+1, range.min), range.max)</code>；Input 加 <code>max={range.max}</code>，<code>min={range.min}</code>；新增 priority inline 错误渲染；新增 i18n <code>ipFilter.priorityOutOfRange</code>。</li>
+        <li><strong>IP 频率（<code>IPFrequencyPage.tsx</code>）</strong>：同上工厂函数模式；<code>defaultForm</code> 从模块级常量改为 <code>makeDefaultForm(range.defaultValue)</code> 工厂函数，组件内用 <code>useMemo</code>；���增 priority inline 错误渲染；新增 i18n <code>ipFrequency.priorityOutOfRange</code>。</li>
+        <li><strong>i18n 提示文案</strong>：<code>ipFilter.priorityTip/priorityHint</code>、<code>ipFrequency.priorityTip/priorityDesc</code> 均加入 <code>{min}/{max}</code> 插值，让渲染文案随角色动态变化。</li>
+      </ul>
+
+      <h4 id="gt12828-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：内容规则新建抽屉默认态（租户管理员）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 策略流水线 → 阶段3 内容层/内容规则 → 点击「配置」→ 点击「新建规则」按钮</p>
+        <figure>
+          <img src="./screenshots/gt12828-content-rule-drawer.png" alt="内容规则新建抽屉，优先级默认值100，提示文案范围100–1000数值越大优先级��高" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：内容规则新建抽屉 — 优先级默认值 <strong>100</strong>，提示文案「范围 100–1000，数值越大优先级越高」参数化渲染；DOM 验证：<code>value=100, min=100, max=1000</code>（租户管理员）。原「范围1-9999」已修正。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>可见元素</th><th>内容/值</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>优先级输入框</td><td>默认值 100，min=100，max=1000（租户管理员）；0–9999（系统管理员）</td><td>原为 min=1，max=9999，无角色区分</td></tr>
+            <tr><td>优先级提示文案</td><td>「范围 {min}–{max}，数值越大优先级越高」参数化渲染</td><td>i18n key <code>contentRules.priorityRangeHint</code>，原「范围1-9999，数值越大优先级越高」</td></tr>
+            <tr><td>右侧预览面板：优先级</td><td>显示当前输入值 100</td><td>实时同步</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-2：IP 过滤 / IP 频率（AI版·多租户·租户管理员）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → IP 过�����（或 IP 频率限制）→ 点击「新建规则」</p>
+        <p style="color:#6b7280;font-style:italic">无法验证：AI版·多租户模式下租户管理员访问 <code>/zh/security/ip-filter</code> 和 <code>/zh/security/ip-frequency</code> 返回「未授权」，Mock 环境不提供该权限组合。代码层已通过 TypeScript 编译验证（无新增 TS 错误）；IP 过滤 DOM 属性变化（<code>min: nonnegative → 100, max: 无 → 1000</code>）已在源码层确认。</p>
+      </div>
+
+      <h4 id="gt12828-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>模块</th><th>元素</th><th>变更前</th><th>变更后</th><th>i18n key / 源码</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>内容规则</td><td>Input min/max</td><td><code>min={1} max={9999}</code>（硬编码，无角色区分）</td><td><code>min={range.min} max={range.max}</code></td><td><code>ContentRuleDrawer.tsx</code></td><td>[Overlay] 租户 100/1000，系统管理员 0/9999</td></tr>
+          <tr><td>内容规则</td><td>priorityRangeHint</td><td><code>'范围1-9999，数值越大优先级越高'</code>（硬编码）</td><td><code>'范围 {min}–{max}，数值越大优先级越高'</code></td><td><code>contentRules.priorityRangeHint</code></td><td>[Base]</td></tr>
+          <tr><td>内容规则</td><td>priorityInvalid 错误文案</td><td><code>'优先级必须是 {min} 到 {max} 的整数'</code>（已参数化，措辞不一致）</td><td><code>'优先级需在 {min}–{max} 之间'</code>（与其他模块统一措辞）</td><td><code>contentRules.priorityInvalid</code></td><td>[Base]</td></tr>
+          <tr><td>IP 过滤</td><td>ruleSchema priority</td><td><code>z.number().int().nonnegative()</code>（无上限）</td><td><code>z.number().int().min(range.min,'priorityOutOfRange').max(range.max,'priorityOutOfRange')</code></td><td><code>IPFilterPage.tsx createRuleSchema</code></td><td>[Overlay]</td></tr>
+          <tr><td>IP 过滤</td><td>Input min/max</td><td><code>min={0}</code>，无 max</td><td><code>min={range.min} max={range.max}</code></td><td><code>IPFilterPage.tsx</code></td><td>[Overlay]</td></tr>
+          <tr><td>IP 过滤</td><td>新建默认值</td><td><code>(items[0]?.priority ?? 99) + 1</code>（无 range 钳制）</td><td><code>Math.min(Math.max(prev+1, range.min), range.max)</code></td><td><code>IPFilterPage.tsx handleOpenDialog</code></td><td>[Overlay]</td></tr>
+          <tr><td>IP 过滤</td><td>priorityHint/priorityTip</td><td>「数值越大越优先」（无范围）</td><td>「范围 {min}–{max}，数值越大越优先」/ 「数值越大越优先，范围 {min}–{max}...」</td><td><code>ipFilter.priorityHint</code> / <code>ipFilter.priorityTip</code></td><td>[Base]</td></tr>
+          <tr><td>IP 过滤</td><td>priorityOutOfRange（新增）</td><td>不存在</td><td>zh：<code>'优先级需在 {min}–{max} 之间'</code>；en：<code>'Priority must be between {min} and {max}'</code></td><td><code>ipFilter.priorityOutOfRange</code></td><td>[Base]</td></tr>
+          <tr><td>IP 频率</td><td>ruleSchema priority</td><td><code>z.number()</code>（无任何约束）</td><td><code>z.number().int().min(range.min,'ipFrequency.priorityOutOfRange').max(range.max,'...')</code></td><td><code>IPFrequencyPage.tsx createRuleSchema</code></td><td>[Overlay]</td></tr>
+          <tr><td>IP 频率</td><td>defaultForm priority</td><td>模块级常量 <code>priority: 100</code>（硬编码）</td><td><code>makeDefaultForm(range.defaultValue)</code> 工厂函数，组件内 useMemo</td><td><code>IPFrequencyPage.tsx</code></td><td>[Overlay] 租户 defaultValue=600</td></tr>
+          <tr><td>IP 频率</td><td>Input min/max</td><td><code>min={0}</code>，无 max</td><td><code>min={range.min} max={range.max}</code></td><td><code>IPFrequencyPage.tsx</code></td><td>[Overlay]</td></tr>
+          <tr><td>IP 频率</td><td>priority inline 错误渲染（新增）</td><td>无 inline 错误，仅 toast</td><td>Input 下方新增 <code>&lt;p class="text-xs text-red-500"&gt;</code> 错误行，与其他字段一致</td><td><code>IPFrequencyPage.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>IP 频率</td><td>priorityDesc/priorityTip</td><td>「数值越大越先匹配」/「数值越大优先级越高」（无范围）</td><td>「范围 {min}–{max}，数值越大越先匹配」/「数值越大优先级越高，范围 {min}–{max}」</td><td><code>ipFrequency.priorityDesc</code> / <code>ipFrequency.priorityTip</code></td><td>[Base]</td></tr>
+          <tr><td>IP 频率</td><td>priorityOutOfRange（新增）</td><td>不存在</td><td>zh：<code>'优先级需在 {min}–{max} 之间'</code>；en：<code>'Priority must be between {min} and {max}'</code></td><td><code>ipFrequency.priorityOutOfRange</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ── 变更 3：方案C ── -->
+      <h3 id="gt12828-change-3">3. 方案C：统一各模块 priority 错误文案与行内提示文案</h3>
+
+      <h4 id="gt12828-c3-overview">3.1 方案概述</h4>
+      <p><strong>问题：</strong>项目中 6 个策略模块各自定义了语义相同的优先级相关文案，但措辞、分隔符、有无范围信息均不一致：错误文案混用「须在」/「范围应为」/「必须是…的整数」；行内提示有的只有裸数字范围、有的没有范围、有的有范围但用 <code>-</code>（连字符）而非 <code>–</code>（en dash）。</p>
+      <p><strong>统一规范（以 <code>advancedRulesFeature</code> 为基准）：</strong></p>
+      <ul>
+        <li><strong>错误文案</strong>：统一为「优先级需在 {min}–{max} 之间」（en dash，无句号）</li>
+        <li><strong>行内提示</strong>：统一为「范围 {min}–{max}，数值越大优先级越高」</li>
+        <li><strong>tooltip</strong>：统一为「数值越大越优先，范围 {min}–{max}」</li>
+        <li><strong>零代码改动</strong>：仅修改 <code>messages/zh.json</code> 和 <code>messages/en.json</code>，共 5 处 zh + 5 处 en。</li>
+      </ul>
+
+      <h4 id="gt12828-c3-elements">3.2 逐 key 说明</h4>
+      <table>
+        <thead>
+          <tr><th>命名空间.key</th><th>变更前（zh）</th><th>变更后（zh）</th><th>类别</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>senderFilter.errors.priorityRange</code></td><td>「优先级须在 {min}-{max} 之间」（连字符 <code>-</code>，「须」）</td><td>「优先级需在 {min}–{max} 之间」（en dash，「需」）</td><td>错误文案</td></tr>
+          <tr><td><code>contentRules.priorityInvalid</code></td><td>「优先级必须是 {min} 到 {max} 的整���」</td><td>「优先级需在 {min}–{max} 之间」</td><td>错误文案</td></tr>
+          <tr><td><code>behaviorControl.errors.priorityRange</code></td><td>「优先级范围应为 {min}-{max}」</td><td>「优先级需在 {min}–{max} 之间」</td><td>错误文案</td></tr>
+          <tr><td><code>behaviorControl.form.priorityHint</code></td><td>「{min}-{max}」（裸数字，无说明）</td><td>「范围 {min}–{max}，数值越大优先级越高」</td><td>行内提示</td></tr>
+          <tr><td><code>behaviorControl.form.priorityTooltip</code></td><td>「数值越大越优先，范围 {min}-{max}」（连字符）</td><td>「数值越大越优先，范围 {min}–{max}」（en dash）</td><td>tooltip</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.875rem;color:#6b7280">en.json 同步更新对应 key，措辞与中文版语义一致。<code>advancedRulesFeature.errors.priorityRange</code>、<code>mailMarking.errors.priorityRange</code> 已是标准格式，本次未改动。</p>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12791 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12791">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12791 相似检测模块优化</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/rules/similar-detection</code>（相似邮件与主题检测配置页）<br/>
+        组件：<code>src/components/security/similar-detection/SimilarDetectionPage.tsx</code>、<code>src/components/security/similar-detection/TagDeliveryPanel.tsx</code>、<code>src/components/security/similar-detection/types.ts</code>、<code>src/components/security/similar-detection/action-options.ts</code><br/>
+        i18n：<code>messages/zh.json</code> / <code>messages/en.json</code>（命名空间 similarDetection）<br/>
+        2026-08-07 · commit <code>0b575c4</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- ── 变更 1：触发动作调整 ── -->
+      <h3 id="gt12791-change-1">1. 触发动作调整：5 个标准动作 + 改名统一</h3>
+
+      <h4 id="gt12791-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>原触发动作有 5 个（标记投递、隔离、审核、阻断、丢弃），其中「标记投递」语义模糊（执行动作与附加策略混为一体），「阻断」与系统其他模块的「拒收」语义不一致。</p>
+      <p><strong>决策过程：</strong>讨论中考虑了「新增纯投递动作」和「改名为投递」两个方案，最终定为「进行下一步」：① 「投递」容易被理解为"最终送达收件箱"，但该动作实际语义是"这一阶段不拦截、继续走检测流水线后续阶段"，用"投递"存在歧义；② 系统已有观察模式供测试/调试使用，无需额外新增动作。</p>
+      <p><strong>与 GT-12719（策略流水线模块）术语的关系：</strong>策略流水线模块（<code>PolicyPipelinePage.tsx</code>）已存在一个语义相近的图例条目「进行下一步 · 继续执行后续策略」（<code>pipeline.actionNextStep</code>，蓝绿色圆点，DMARC 场景下"继续执行后续策略"）。本次相似检测模块沿用同一中文措辞——两者本质都��"不拦截，继续走后续流程/阶段"，用同一个词对管理员而言学习成本更低；但两者是完全独立的 i18n key（<code>similarDetection.actionMarkDelivery</code> vs <code>pipeline.actionNextStep</code>），互不影响，各自模块内部语义自洽。</p>
+      <p><strong>最终方案：</strong></p>
+      <ul>
+        <li><code>mark-delivery</code> value 不变，i18n label 从「标记投递」改为「进行下一步」（en: <code>Mark &amp; Deliver</code> → <code>Next Step</code>）</li>
+        <li><code>block</code> value 不变，i18n label 从「阻断」改为「拒收」（en: <code>Block</code> → <code>Reject</code>）</li>
+        <li>最终 5 个动作：<strong>进行下一步 / 隔离 / 审核 / 拒收 / 丢弃</strong>（顺序不变，<code>action-options.ts</code> 不修改）</li>
+        <li><code>errorTagRequired</code> 错误文案去除对具体动作名的引用，改为「启用该动作时需至少启用一种标记方式」（en: <code>At least one tag mode is required when this action is enabled</code>），避免以后动作名再变还要同步改错误文案</li>
+      </ul>
+
+      <h4 id="gt12791-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：触发动作下拉展开（发��方向，5 个选项）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 相似邮件与主题检测 → 发送方向触发动作下拉 → 点击展开<br/>
+        <em>注：本状态截图摄制于改名为「投递」阶段，实际界面文案以「进行下一步」为准，选项顺序与位置不变。</em></p>
+        <figure>
+          <img src="./screenshots/gt12791-action-dropdown-send.png" alt="发送方向触发动作下拉展开，显示5个选项：投递（现已改名为进行下一步）、隔离（选中）、审核、拒收、丢弃" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：触��动作下拉展开 — 5 个选项：<strong>进行下一步 / 隔离（当前选中）/ 审核 / 拒收 / 丢弃</strong>。原「标记投递」已改名为「进行下一步」，原「阻断」已改名为「拒收」；value 不变。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>选项</th><th>value</th><th>变更前 label</th><th>变更后 label</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>进行下一步</td><td><code>mark-delivery</code></td><td>标记投递</td><td><strong>进行下一步</strong></td><td>value 不变；附加标记策略仍附属于此动作</td></tr>
+            <tr><td>隔离</td><td><code>quarantine</code></td><td>隔离</td><td>隔离</td><td>未变更</td></tr>
+            <tr><td>审核</td><td><code>review</code></td><td>审核</td><td>审核</td><td>未变更</td></tr>
+            <tr><td>拒收</td><td><code>block</code></td><td>阻断</td><td><strong>拒收</strong></td><td>value 不变；与其他模块术语统一</td></tr>
+            <tr><td>丢弃</td><td><code>discard</code></td><td>丢弃</td><td>丢弃</td><td>未变更</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12791-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>触发动作「进行下一步」选项 label</td><td>Select option</td><td>「标记投递」</td><td>「进行下一步」</td><td><code>similarDetection.actionMarkDelivery</code></td><td>[Base]</td></tr>
+          <tr><td>触发动作「拒收」选项 label</td><td>Select option</td><td>「阻断」</td><td>「拒收」</td><td><code>similarDetection.actionBlock</code></td><td>[Base]</td></tr>
+          <tr><td>标记方式区域 hint 文案</td><td>说明文字</td><td>「至少选择一种标记方式，可同时启用主题标记与信头标记」</td><td>「至少选择一种标记方式，可同时启用主题标记、信头标记与正文标记」</td><td><code>similarDetection.tagModeHint</code></td><td>[Base]</td></tr>
+          <tr><td>保存校验错误文案（未选任何标记）</td><td>toast 错误</td><td>「标记投递需至少启用一种标记方式」</td><td>「启用该动作时需至少启用一种标记方式」</td><td><code>similarDetection.errorTagRequired</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ── 变更 2：附加策略正文标记 ── -->
+      <h3 id="gt12791-change-2">2. 附加策略：进行下一步动作下新增「正文���记」Switch + 自由文本 Input</h3>
+
+      <h4 id="gt12791-c2-overview">2.1 方案概述</h4>
+      <p><strong>背景：</strong>原「标记方式」面板仅支持主题标记和信头标记两种位置，用户无法在邮件正文中插入标记文本。</p>
+      <p><strong>最终方案：</strong>在信头标记行下方对称追加第三行「正文标记」Switch；Switch 开启后，其下展示一个自由文本 Input（格式由后端处理，前端不限制）。字段：<code>tag_body_enabled: boolean</code> / <code>tag_body_content: string</code>，新增到 <code>SimilarDetectionConfig</code> type 中。</p>
+      <p><strong>附加策略语义说明：</strong>「进行下一步」动作（value=<code>mark-delivery</code>）本身就是「不拦截、继续走流程 + 可选标记」——标记是附加策略，三个位置均可选，均不选等同于静默放行（此场景建议使用观察模式代替）。</p>
+
+      <h4 id="gt12791-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-2：进行下一步动作选中，标记方式面板默认态（仅主题标记开启）</strong><br/>
+        触发路径：发送方向触发动作 → 选择「进行下一步」→ 标记方式面板展开，主题标��默认开启<br/>
+        <em>注：本状态截图摄制于改名为「投递」阶段，实际界面文案以「进行下一步」为准，面板结构和交互不变。</em></p>
+        <figure>
+          <img src="./screenshots/gt12791-tag-panel-default.png" alt="选择进行下一步动作后标记方式面板出现，主题标记开启填有[相似邮件]，信头标记和正文标记Switch均关闭" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：标记方式面板默认态 — 主题标记已开启（前缀模式，填入「[相似邮件]」），信头标记与正文标记均关闭。面板以青色虚线框呈现，三行 Switch 对称排列。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-3：进行下一步动作 + 标记面板完整视图（含按钮区靠右）</strong><br/>
+        触发路径：页面滚动至底部，可见标记方式面板三行 Switch + 底部按钮区</p>
+        <figure>
+          <img src="./screenshots/gt12791-footer-buttons.png" alt="页面底部：发送方向标记面板三行Switch（主题/信头/正文），底部取消按��靠左保存按钮靠右" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-3：标记方式面板完整视图 — 三行 Switch（主题标记/信头标记/正文标记）。底部按钮区：取消在左、保存（蓝色）在右，<code>justify-end</code> 布局，两按钮紧靠右端。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>可见元素</th><th>内容/值</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>标记方式面板标题</td><td>「标记方式」</td><td>仅在触发动作为「进行下一步」（<code>mark-delivery</code>）时显示</td></tr>
+            <tr><td>标记方式面板��示文案</td><td>「至少选择一种标记方式，可同时启用主题标记、信头标记与正文标记」</td><td><code>tagModeHint</code></td></tr>
+            <tr><td>主题标记 Switch</td><td>开启（默认）；下方：前缀/后缀 Radio + 内容 Input</td><td><code>tag_subject_enabled</code></td></tr>
+            <tr><td>信头标记 Switch</td><td>关闭（默认）；开启后显示字段名 + 字段值两个 Input</td><td><code>tag_header_enabled</code></td></tr>
+            <tr><td>正文标记 Switch（新增）</td><td>关闭（默认）；开启后显示自由文本 Input（placeholder「如：[相似邮件]」）</td><td><code>tag_body_enabled</code>（新增字段）</td></tr>
+            <tr><td>正文内容 Input（新增）</td><td>仅在 tag_body_enabled=true 时显示；自由文本，无格式限制</td><td><code>tag_body_content</code>（新增字段）；<code>data-testid="similar-detection-tag-body-content"</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12791-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>i18n key / 源码</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>正文标记 Switch（新增）</td><td>Switch</td><td>不存在</td><td>信头标记行下方对称追加；<code>data-testid="similar-detection-tag-body-switch"</code></td><td><code>similarDetection.tagBodyLabel</code></td><td>[Base]</td></tr>
+          <tr><td>正文标记内容 Input（新增）</td><td>Input</td><td>不存在</td><td>Switch 开启后展示，<code>pl-10</code> 与其他字段行对齐；<code>data-testid="similar-detection-tag-body-content"</code></td><td><code>similarDetection.tagBodyPlaceholder</code>（zh：「如：[相似邮件]」；en：「e.g., [Similar Mail]」）</td><td>[Base]</td></tr>
+          <tr><td>types.ts 新增字段</td><td>TypeScript 类型</td><td>无 <code>tag_body_*</code></td><td><code>tag_body_enabled?: boolean</code>、<code>tag_body_content?: string</code>（追加到 <code>SimilarDetectionConfig</code>）</td><td><code>src/components/security/similar-detection/types.ts</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ── 变更 3：校验逻辑优化 + 豁免条移除 + 按钮靠右 ── -->
+      <h3 id="gt12791-change-3">3. 校验逻辑优化 + 豁免提示条移除 + 按钮区靠右对齐</h3>
+
+      <h4 id="gt12791-c3-overview">3.1 方案概述</h4>
+      <p><strong>校验错误文案拆分：</strong>原校验逻辑中，「未选任何标记方式」和「已选但字段为空」三种情形（主题内容为空、信头字段为空、正文内容为空）均触发同一错误 key <code>errorTagRequired</code>，错误文案为「标记投递需至少启用一种标记方式」，误导用户（字段已填仍提示「需至少启用一种」）。拆分为：</p>
+      <ul>
+        <li><code>errorTagRequired</code>：仅当三个 Switch 全部关闭时触发，文案改为「启用该动作时需至少启用一种标记方式」（去除对具体动作名的引用，避免动作改名时需要同步改错误文案）</li>
+        <li><code>errorTagFieldRequired</code>（新增）：当某个 Switch 开启但对应字段为空时触发，文案「已启用的标记方式内容不能为空」</li>
+      </ul>
+      <p><strong>豁免提示条移除：</strong>原页面底部有一条蓝色信息提示「豁免名单统一由群组策略模块配置，本模块不再提供免检测发信人管理入口 / 前往群组策略配置」，两处调用（相似邮件 Tab、主题检测 Tab）均已移除，连带清理 <code>renderExemptionNote</code> 函数体及 <code>Link</code>、<code>ExternalLink</code> 两个孤立 import。</p>
+      <p><strong>按钮区靠右对齐：</strong>原底部按钮区 <code>justify-between</code>（取消靠左、保存靠右，在宽屏下两端相距约 900px），改为 <code>justify-end</code>，与系统其他弹窗 footer 保持一致。</p>
+
+      <h4 id="gt12791-c3-states">3.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-4：校验错误 toast — 已启用标记但内容为空</strong><br/>
+        触发路径：发送方向选「进行下一步」→ 开启信头标记但不填字段名/字段值 → 点击「保存」<br/>
+        <em>注：本状态截图摄制于改名为「投递」阶段，实际界面文案以「进行下一步」为准，校验逻辑与错误文案不受影响。</em></p>
+        <figure>
+          <img src="./screenshots/gt12791-validation-error-none.png" alt="保存时底部弹出红色toast：已启用的标记方式内容不能为空" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-4：校验错误 toast（<code>errorTagFieldRequired</code>）— 右下角红色 X 图标 + 文案「已启用的标记方式内容不能为空」。底部按钮区同时可见：取消和保存均靠右排列（<code>justify-end</code>）。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>触发条件</th><th>错误 key</th><th>文案（zh）</th><th>文案（en）</th></tr></thead>
+          <tbody>
+            <tr><td>三个 Switch 全部关闭，点击保存</td><td><code>errorTagRequired</code></td><td>「启用该动作时需至少启用一种标记方式」</td><td>At least one tag mode is required when this action is enabled</td></tr>
+            <tr><td>主题标记开启但内容为空</td><td><code>errorTagFieldRequired</code></td><td>「已启用的标记方式内容不能为空」</td><td>Enabled tag modes cannot have empty content</td></tr>
+            <tr><td>信头标记开启但字段名或字段值为空</td><td><code>errorTagFieldRequired</code></td><td>「已启用的标记方式内容不能为空」</td><td>Enabled tag modes cannot have empty content</td></tr>
+            <tr><td>正文标记开启但内容为空</td><td><code>errorTagFieldRequired</code></td><td>「已启用的标记方式内容不能为空」</td><td>Enabled tag modes cannot have empty content</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12791-c3-elements">3.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>豁免提示条（蓝色信息条）</td><td>两个 Tab 底部各渲染一次（<code>renderExemptionNote()</code>）；含「前往群组策略配置」链接</td><td><strong>已完全移除</strong>，<code>renderExemptionNote</code> 函数、<code>Link</code> import、<code>ExternalLink</code> import 全部删除</td><td><code>SimilarDetectionPage.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>底部按钮区布局</td><td><code>justify-between</code>（取消靠左，保存靠右，宽屏约 900px 间距）</td><td><code>justify-end</code>（取消/保存紧靠右侧排列）；内层 <code>ml-auto</code> div 移除</td><td><code>SimilarDetectionPage.tsx</code> 底部 footer</td><td>[Base]</td></tr>
+          <tr><td>校验逻辑（mark-delivery 动作）</td><td>「未选」/「已选但空」均用 <code>t('errorTagRequired')</code></td><td>「未选」→ <code>t('errorTagRequired')</code>（文案已去除动作名引用）；「已选但空」→ <code>t('errorTagFieldRequired')</code></td><td><code>SimilarDetectionPage.tsx</code> 第 157–160 行</td><td>[Base]</td></tr>
+          <tr><td><code>errorTagFieldRequired</code>（新增 i18n key）</td><td>不存在</td><td>zh：「已启用的标记方式内容不能为空」；en：「Enabled tag modes cannot have empty content」</td><td><code>messages/zh.json</code> / <code>messages/en.json</code>（<code>similarDetection.errorTagFieldRequired</code>）</td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12790 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12790">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#0369a1">GT</span>
+      <h2>GT-12790 相似邮件与主题检测：交互优化</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/rules/similar-detection</code>（相似邮件与主题检测配置页）<br/>
+        组件：<code>src/components/security/similar-detection/AggregateCard.tsx</code>（对齐参照：<code>DirectionCard.tsx</code>）<br/>
+        2026-08-08 · commit <code>9f5217a</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <!-- ── 变更 1：聚合卡片观察模式配色对齐 ── -->
+      <h3 id="gt12790-change-1">1. 全方向聚合卡片观察模式配色对齐：与按方向独立检测卡片一致的黄色标签卡</h3>
+
+      <h4 id="gt12790-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>页面顶部检测粒度可切换「全方向聚合（合并统计）」与「按方向独立检测（可勾选多个）」两种模式。「按方向独立检测」模式下，每个方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后，卡片外层容器的边框与背景色会随之切换为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），配合内部「观察中」黄色徽标，整卡呈现统一的黄色标签视觉。但「全方��聚合」模式下的聚合卡片（<code>AggregateCard.tsx</code>）开启观察模式后，只有内部徽标变黄，卡片外层容器颜色是硬编码的固定值（<code>border-blue-200</code> / <code>bg-white</code>），从不随 <code>observe_mode</code> 变化，导致两种检测粒度下观察模式的视觉表现不一致——用户在"聚合"和"独立"两个模式之间切换时，同样开着观察模式，但卡片颜色表现不同，容易造成"聚合模式下观察模式没生效"的误判。</p>
+      <p><strong>决策过程：</strong>讨论了两种实现路径：① 给 <code>AggregateCard.tsx</code>新写一套独立的黄色配色值；② 直接复用 <code>DirectionCard.tsx</code> 已验证过的条件判断逻辑和色值。选择方案②，理由：两个卡片本质上是同一份配置模型（<code>SimilarDetectionConfig</code>）在不同聚合粒度下的两种视图，观察模式的视觉语义应当完全一致，复用同一套色值可以保证以后颜色调整只需改一处，不会出现两处配色逐渐漂移的问题。</p>
+      <p><strong>最终方案：</strong>将 <code>AggregateCard.tsx</code> 外层容器 className 从硬编码固定值改���与 <code>DirectionCard.tsx</code> 完全一致的条件判断（三元表达式基于 <code>value.observe_mode</code>），并保留过渡动画（<code>transition-[background-color,border-color] duration-[240ms]</code>），使颜色切换有平滑过渡而非跳变。不引入新的颜色定义，不修改 <code>DirectionCard.tsx</code>。</p>
+
+      <h4 id="gt12790-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：全方向聚合卡片，观察模式关闭态（修复前后一致）</strong><br/>
+        触发路径：租户管理员 → 安全策略 → 相似邮件与主题检测 → 检测粒度选择「全方向聚合（合并统计）」→ 观察模式关闭</p>
+        <figure>
+          <img src="./screenshots/gt12790-aggregate-before-fix.png" alt="全方向聚合卡片观察模式关闭时，卡片为蓝色边框白色背景" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：聚合卡片默认态（观察模式关闭）— 蓝色边框（<code>border-blue-200</code>）+ 白色背景（<code>bg-white</code>），此状态修复前后表现一致。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-2：全方向聚合卡片，观察模式开启态（修复后）</strong><br/>
+        触发路径：同上 → 点击聚合卡片右上角「观察模式」Switch → 卡片配色随即切换</p>
+        <figure>
+          <img src="./screenshots/gt12790-aggregate-after-fix.png" alt="全方向聚合卡片观察模式开启后，卡片边框与背景变为黄色，与按方向独立检测卡片配色一致" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：聚合卡片观察模式开启态（修复后）— 边框与背景已同步变为黄色（<code>border-amber-300</code> / <code>bg-amber-50/50</code>），与内���「观察中」黄色徽标视觉统一。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-3：按方向独立检测卡片，观察模式开启态（对齐参照，无��更）</strong><br/>
+        触发路径：检测粒度切换回「按方向独立检测（可勾选多个）」→ 接收方向卡片开启观察模式</p>
+        <figure>
+          <img src="./screenshots/gt12790-direction-observe-reference.png" alt="按方向独立检测下接收方向卡片观察模式开启，卡片边框与背景为黄色，作为对齐参照" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-3：按方向独立检测 · 接收方向卡片观察模式开启态（对齐参照，<code>DirectionCard.tsx</code> 原有逻辑，本次未修改）— 与 S-2 修复后的聚合卡片配色完全一致：黄色边框 + 黄色浅底 + 黄色「观察中」徽标。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>状态</th><th>卡片边框</th><th>卡片背景</th><th>内部徽标</th><th>是否一致</th></tr></thead>
+          <tbody>
+            <tr><td>聚合卡片 · 观察模式关闭</td><td><code>border-blue-200</code></td><td><code>bg-white</code></td><td>无徽标</td><td>—</td></tr>
+            <tr><td>聚合卡片 · 观察模式开启（修复前）</td><td><code>border-blue-200</code>（未变）</td><td><code>bg-white</code>（未变）</td><td>黄色「观察中」</td><td>否，���片主体颜色不随模式变化</td></tr>
+            <tr><td>聚合卡片 · 观察模式开启（修复后）</td><td><code>border-amber-300</code></td><td><code>bg-amber-50/50</code></td><td>黄色「观察中」</td><td>是</td></tr>
+            <tr><td>方向卡片 · 观察模式开启（参照，未变更）</td><td><code>border-amber-300</code></td><td><code>bg-amber-50/50</code></td><td>黄色「观察中」</td><td>是（基准）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12790-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>聚合卡片外层容器 className</td><td>div className</td><td>硬编码固定值：<code>'border rounded-lg p-4 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-950'</code>（不随 observe_mode 变化）</td><td><code>cn()</code> 条件判断：<code>observe_mode</code> 为 true 时使用 <code>'border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20'</code>，否则使用原蓝白配���；新增过渡动画 <code>transition-[background-color,border-color] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none</code></td><td><code>AggregateCard.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>方向卡片外层容器 className（对齐参照，未变更）</td><td>div className</td><td>—</td><td>本次未修改，作为色值与逻辑的复用来源</td><td><code>DirectionCard.tsx</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12833 需求体 ══════════════ -->
+  <div class="incremental-section" id="gt-12833">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#b91c1c">GT</span>
+      <h2>GT-12833 认证协议检查：动作精简为5项，默认动作改为"标记放行"</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（策略流水线 → 身份认证与仿冒检测 → 认证协议检查）<br/>
+        组件：<code>src/components/security/auth-spoofing/ProtocolChecksSection.tsx</code>、<code>src/lib/auth-spoofing-labels.ts</code>、<code>src/lib/auth-spoofing-templates.ts</code><br/>
+        2026-08-08 · commit <code>386aa38</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-info">本需求直接影响并反向调整了 <a href="#gt-12801">GT-12801</a> 变更2「DMARC处置策略新增&quot;进行下一步&quot;选项」的结论，相关章节已在 GT-12801 处打删除线标注（另见 <a href="#diffs">D-005</a>）。</div>
+
+      <!-- 变更 1 -->
+      <h3 id="gt12833-change-1">1. PROTOCOL_ACTIONS / DMARC_ACTIONS 由6项精简为5项：移除"进行下一步"（accept）</h3>
+
+      <h4 id="gt12833-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>GT-12801 曾将 <code>accept</code>（"进行下一步"，语义为不做处理、直接传递给下一个协议检查）补齐进 <code>DMARC_ACTIONS</code>，使 SPF / DKIM / DMARC / PTR 四个协议 Tab 统一拥有 6 个动作：<code>reject</code> / <code>discard</code> / <code>quarantine</code> / <code>audit</code> / <code>mark-delivery</code> / <code>accept</code>。但 <code>accept</code> 与 <code>mark-delivery</code>（"标记放行"，语义为不拦截、继续走后续检测流程、可选择附加标记后再投递）在实际处置效果上高度重叠——两者都不拦截邮件、都会继续走流水线下一节点，唯一区别是 <code>mark-delivery</code> 支持附加标记而 <code>accept</code> 不支持，导致管理员在配置动作时容易混淆"进行下一步"与"标记放行"该选哪个。</p>
+      <p><strong>最终方案：</strong>将 <code>accept</code> 从 <code>PROTOCOL_ACTIONS</code> 和 <code>DMARC_ACTIONS</code> 枚举数组中移除，统一收敛为 5 项动作：<code>reject</code> / <code>discard</code> / <code>quarantine</code> / <code>audit</code> / <code>mark-delivery</code>。所有"不拦截、继续检测"的处置需求统一通过 <code>mark-delivery</code> 表达，不再区分"进行下一步"与"标记放行"两个语义重叠的选项。SPF / DKIM / DMARC / PTR 四个协议 Tab 共享同一份精简后的动作列表，改动只需修改 <code>ProtocolChecksSection.tsx</code> 中的两个常量数组，不新增 i18n key（<code>accept</code> 对应的 <code>protocolActionShort.accept</code> / <code>protocolActionDesc.accept</code> key 保留在 <code>messages/zh.json</code> 中未删除，仅不再被这两个动作列表引用）。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>PROTOCOL_ACTIONS 枚举（SPF / DKIM / PTR 共用）</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'mark-delivery', 'accept']</code>（6 项）</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'mark-delivery']</code>（5 项）</td>
+          </tr>
+          <tr>
+            <td>DMARC_ACTIONS 枚举</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'mark-delivery', 'accept']</code>（6 项，GT-12801 扩充所得）</td>
+            <td><code>['reject', 'discard', 'quarantine', 'audit', 'mark-delivery']</code>（5 项，与 PROTOCOL_ACTIONS 重新对齐）</td>
+          </tr>
+          <tr>
+            <td>i18n key</td>
+            <td colspan="2"><code>authSpoofing.protocolActionShort.accept</code> / <code>authSpoofing.protocolActionDesc.accept</code> 保留在 <code>messages/zh.json</code>，仅不再被任何动作数组引用（未删除 key，避免影响其它可能的引用点）</td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>src/components/security/auth-spoofing/ProtocolChecksSection.tsx</code> — <code>PROTOCOL_ACTIONS</code> / <code>DMARC_ACTIONS</code> 常量（L36-37）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12833-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：SPF「硬拒绝 (Fail)」动作下拉展开态（自定义模板）</strong><br/>
+        触发路径：租户管理员 → 策略流水线 → 身份认证与仿冒检测 → 策略模板切换为「自定义」→ 认证协议检查 → SPF Tab → 点击「硬拒绝 (Fail)」行动作下拉框</p>
+        <figure>
+          <img src="./screenshots/gt12833-spf-fail-dropdown-5options.png" alt="SPF硬拒绝动作下拉框展开，显示拒收、丢弃、隔离、审核、标记放行共5个选项，不再包含进行下一步" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：下拉框展开后共 5 个选项——拒收 / 丢弃 / 隔离 / 审核 / 标记放行，按此顺序排列；「进行下一步」选项已不再出现。当前选中「拒收」。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-2：SPF「软拒绝 (SoftFail)」动作下拉展开态</strong><br/>
+        触发路径：同上 → 点击「软拒绝 (SoftFail)」行动作下拉框</p>
+        <figure>
+          <img src="./screenshots/gt12833-spf-softfail-dropdown-5options.png" alt="SPF软拒绝动作下拉框展开，同样显示5个选项，当前选中隔离" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：同一份 5 项动作列表在 SPF 组内其它检查项（软拒绝）复用，当前选中「隔离」。验证 <code>PROTOCOL_ACTIONS</code> 常量在同一协议 Tab 内跨行共享。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-3：DMARC「p=reject」动作下拉展开态</strong><br/>
+        触发路径：认证协议检查 → 切换到 DMARC Tab → 点击「p=reject」行动作下拉框</p>
+        <figure>
+          <img src="./screenshots/gt12833-dmarc-reject-dropdown-5options.png" alt="DMARC p=reject动作下拉框展开，显示拒绝、丢弃、隔离、审核、标记放行共5个选项，进行下一步已移除" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-3：DMARC Tab 同样收敛为 5 个选项，与 SPF/DKIM/PTR 完全一致，验证 <code>DMARC_ACTIONS</code> 已与 <code>PROTOCOL_ACTIONS</code> 重新对齐；GT-12801 曾专门为 DMARC 新增的「进行下一步」选项已不再出现。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>协议 Tab</th><th>修改前动作数量</th><th>修改后动作数量</th><th>「进行下一步」是否仍存在</th></tr></thead>
+          <tbody>
+            <tr><td>SPF</td><td>6</td><td>5</td><td>否</td></tr>
+            <tr><td>DKIM</td><td>6</td><td>5</td><td>否</td></tr>
+            <tr><td>DMARC</td><td>6（GT-12801 扩充）</td><td>5</td><td>否</td></tr>
+            <tr><td>PTR</td><td>6</td><td>5</td><td>否</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12833-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>PROTOCOL_ACTIONS 常量</td><td>枚举数组</td><td><code>['reject','discard','quarantine','audit','mark-delivery','accept']</code></td><td><code>['reject','discard','quarantine','audit','mark-delivery']</code></td><td><code>ProtocolChecksSection.tsx</code> L36</td><td>[Base]</td></tr>
+          <tr><td>DMARC_ACTIONS 常量</td><td>枚举数组</td><td><code>['reject','discard','quarantine','audit','mark-delivery','accept']</code></td><td><code>['reject','discard','quarantine','audit','mark-delivery']</code></td><td><code>ProtocolChecksSection.tsx</code> L37</td><td>[Base]</td></tr>
+          <tr><td>Select · 「进行下一步」选项</td><td>下拉选项（移除）</td><td>存在于全部 4 个协议 Tab</td><td>不再渲染（数组中移除，Select 由数组 <code>map</code> 生成，无需额外条件判断）</td><td><code>ProtocolChecksSection.tsx</code> Select 渲染逻辑</td><td>[Base]</td></tr>
+          <tr><td>i18n key <code>protocolActionShort.accept</code> / <code>protocolActionDesc.accept</code></td><td>文案 key（保留未删除）</td><td>被 6 项动作数组引用</td><td>不再被任何动作数组引用，key 本身仍在 <code>messages/zh.json</code> 中保留</td><td><code>messages/zh.json</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12833-change-2" style="margin-top:2rem;">2. 默认动作与"启用"语义统一改为"标记放行"，行不再因动作为"accept"而隐藏</h3>
+
+      <h4 id="gt12833-c2-overview">2.1 方案概述</h4>
+      <p><strong>背景：</strong>移除 <code>accept</code> 后，原先依赖 <code>action === 'accept'</code> 判断"该检查项是否关闭"的逻辑需要同步调整。修改前，当某检查子项（<code>CheckItem</code>）在配置中缺省时，会 fallback 到 <code>{ enabled: false, action: 'accept' }</code>，即"未配置 = 关闭 + 进行下一步"；同时用户在下拉框中手动选择「进行下一步」时，代码会将该行的 <code>enabled</code> 同步置为 <code>false</code>（等效于关闭该检查项）。这是一处容易引起误解的隐式耦合：动作选择「进行下一步」在 UI 上看起来只是选了一个处置方式，但实际会连带把整行检查"关闭"。</p>
+      <p><strong>最终方案：</strong>fallback 默认值改为 <code>{ enabled: true, action: 'mark-delivery' }</code>，即"未配置 = 开启 + 标记放行"；动作选择回调中的 <code>enabled: (v as AuthSpoofingAction) !== 'accept'</code> 简化为固定 <code>enabled: true</code>，动作选择与检查项启停彻底解耦——选择任意动作（包括「标记放行」）都不会再影响该行的启用状态，启用状态只能通过每行独立的启停开关控制。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>缺省 CheckItem fallback</td>
+            <td><code>{ enabled: false, action: 'accept', observe_mode: false }</code></td>
+            <td><code>{ enabled: true, action: 'mark-delivery', observe_mode: false }</code></td>
+          </tr>
+          <tr>
+            <td>动作切换时的 enabled 联动逻辑</td>
+            <td><code>enabled: (v as AuthSpoofingAction) !== 'accept'</code>（选择"进行下一步"会关闭该行）</td>
+            <td><code>enabled: true</code>（动作选择与启停彻底解耦）</td>
+          </tr>
+          <tr>
+            <td><code>dominantAction</code> 兜底值（<code>auth-spoofing-labels.ts</code>）</td>
+            <td><code>fallback: AuthSpoofingAction = 'accept'</code></td>
+            <td><code>fallback: AuthSpoofingAction = 'mark-delivery'</code></td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>ProtocolChecksSection.tsx</code>（L172、L194 附近）、<code>auth-spoofing-labels.ts</code>（<code>dominantAction</code> 函数签名默认值）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12833-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-4：「宽松」模板下 SPF「未维护 (None)」/「查询失�� (TempError)」行（修改后）</strong><br/>
+        触发路径：策略模板切换为「宽松」→ 确认覆盖当前配置 → 认证协议检查 → SPF Tab → 滚动查看「未维护」「查询失败」两行</p>
+        <figure>
+          <img src="./screenshots/gt12833-loose-template-none-tmperror-enabled.png" alt="宽松模板下SPF未维护和查询失败两行均已启用，动作为标记放行，并展开标记方式配置面板" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-4：「未维护 (None)」「查询失败 (TempError)」两行在「宽松」模板下动作均为「标记放行」，且检查项本身处于启用态（行下方展开「标记方式」附加配置面板）。经可访问性树核对，两行的动作下拉框文本值均为「标记放行」，行标题与描述文案渲染正常；该截图中「标记方式」面板内部的选项文案（主题标记/信头标记/正文标记）在本次截图环境下出现字体渲染异常（显示为空白方块），经核对可访问性树确认其底层文本未受影响，该渲染异常与本次改动无关，已作为 <a href="#questions">Q-003</a> 待确认事项记录。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>检查项</th><th>修改前动作</th><th>修改前启用状态</th><th>修改后动作</th><th>修改后启用状态</th></tr></thead>
+          <tbody>
+            <tr><td>SPF · 未维护 (None)</td><td><code>accept</code></td><td>关闭（<code>enabled: false</code>，由 <code>accept</code> 联动）</td><td><code>mark-delivery</code></td><td>开启（<code>enabled: true</code>）</td></tr>
+            <tr><td>SPF · 查询失败 (TempError)</td><td><code>accept</code></td><td>关闭</td><td><code>mark-delivery</code></td><td>开启</td></tr>
+            <tr><td>DKIM · partial / none</td><td><code>accept</code></td><td>关闭</td><td><code>mark-delivery</code></td><td>开启</td></tr>
+            <tr><td>PTR · noptr</td><td><code>accept</code></td><td>关闭</td><td><code>mark-delivery</code></td><td>开启</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12833-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>CheckItem 缺省 fallback</td><td>对象字面量</td><td><code>{ enabled: false, action: 'accept', observe_mode: false }</code></td><td><code>{ enabled: true, action: 'mark-delivery', observe_mode: false }</code></td><td><code>ProtocolChecksSection.tsx</code> L172</td><td>[Base]</td></tr>
+          <tr><td>Select onValueChange 回调</td><td>事件处理逻辑</td><td><code>enabled: v !== 'accept'</code></td><td><code>enabled: true</code></td><td><code>ProtocolChecksSection.tsx</code> L194 附近</td><td>[Base]</td></tr>
+          <tr><td><code>dominantAction()</code> fallback 参数</td><td>函数默认参数</td><td><code>'accept'</code></td><td><code>'mark-delivery'</code></td><td><code>auth-spoofing-labels.ts</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 3 -->
+      <h3 id="gt12833-change-3" style="margin-top:2rem;">3. "宽松"模板：SPF/DKIM/PTR 中原 accept 场景全部改为 mark-delivery</h3>
+
+      <h4 id="gt12833-c3-overview">3.1 方案概述</h4>
+      <p><strong>背景：</strong>「宽松」预设模板（<code>TEMPLATES.loose</code>）此前对部分低风险场景（SPF <code>none</code> / <code>temperror</code>、DKIM <code>partial</code> / <code>none</code>、PTR <code>noptr</code>）使用 <code>accept</code> 作为预设动作，语义为"不做处理直接放行、且该检查行关闭"。「标准」「严格」模板未使用 <code>accept</code>（已全部是 <code>mark-delivery</code> 或更严格的动作）。</p>
+      <p><strong>最终方案：</strong>「宽松」模板中原先所有 <code>accept</code> 预设值统一替换为 <code>mark-delivery</code>，与「标准」「严格」模板的动作取值风格保持一致；同时 <code>applyGroup()</code> 内部两处根据 <code>action !== 'accept'</code> 计算 <code>enabled</code> 的逻辑（应用模板时的已有 key 分支与新增 key 分支）均简化为固定 <code>enabled: true</code>，与变更 2 的解耦逻辑保持一致——应用任何模板后，所有检查行都是启用态，只是动作严格度不同。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>loose.spf</td>
+            <td><code>{ fail:'quarantine', softfail:'mark-delivery', none:'accept', temperror:'accept' }</code></td>
+            <td><code>{ fail:'quarantine', softfail:'mark-delivery', none:'mark-delivery', temperror:'mark-delivery' }</code></td>
+          </tr>
+          <tr>
+            <td>loose.dkim</td>
+            <td><code>{ fail:'quarantine', neutral:'mark-delivery', partial:'accept', none:'accept' }</code></td>
+            <td><code>{ fail:'quarantine', neutral:'mark-delivery', partial:'mark-delivery', none:'mark-delivery' }</code></td>
+          </tr>
+          <tr>
+            <td>loose.dmarc</td>
+            <td colspan="2">未使用 <code>accept</code>，本次未修改：<code>{ reject:'quarantine', quarantine:'mark-delivery', none:'mark-delivery', no_record:'mark-delivery', query_fail:'mark-delivery' }</code></td>
+          </tr>
+          <tr>
+            <td>loose.ptr</td>
+            <td><code>{ noptr:'accept', nomatch:'mark-delivery', ehlo_mismatch:'mark-delivery' }</code></td>
+            <td><code>{ noptr:'mark-delivery', nomatch:'mark-delivery', ehlo_mismatch:'mark-delivery' }</code></td>
+          </tr>
+          <tr>
+            <td><code>applyGroup()</code> 已有 key 分支 enabled 计算</td>
+            <td><code>enabled: action !== 'accept'</code></td>
+            <td><code>enabled: true</code></td>
+          </tr>
+          <tr>
+            <td><code>applyGroup()</code> 新增 key 分支 enabled 计算</td>
+            <td><code>enabled: action !== 'accept'</code></td>
+            <td><code>enabled: true</code></td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>src/lib/auth-spoofing-templates.ts</code> — <code>TEMPLATES.loose</code> 与 <code>applyGroup()</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12833-c3-states">3.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p>本变更点的可观察效果与变更 2 状态 S-4 完全一致（「宽松」模板应用后 SPF「未维护」「查询失败」两行由"关闭 + accept"变为"开启 + 标记放行"），复用 <a href="#gt12833-c2-states">2.2 截图式交互预览 · S-4</a>，不再重复截图。</p>
+        <p><strong>「标准」「严格」模板对照（无变更）：</strong>「标准」「严格」模板预设值本身未使用 <code>accept</code>，切换到这两个模板不会观察到本次变更带来的行为差异，仅「宽松」模板受影响。</p>
+      </div>
+
+      <h4 id="gt12833-c3-elements">3.3 逐 key 说明</h4>
+      <table>
+        <thead>
+          <tr><th>模板</th><th>协议</th><th>场景 key</th><th>修改前动作</th><th>修改后动作</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>宽松</td><td>SPF</td><td>none</td><td><code>accept</code></td><td><code>mark-delivery</code></td></tr>
+          <tr><td>宽松</td><td>SPF</td><td>temperror</td><td><code>accept</code></td><td><code>mark-delivery</code></td></tr>
+          <tr><td>宽松</td><td>DKIM</td><td>partial</td><td><code>accept</code></td><td><code>mark-delivery</code></td></tr>
+          <tr><td>宽松</td><td>DKIM</td><td>none</td><td><code>accept</code></td><td><code>mark-delivery</code></td></tr>
+          <tr><td>宽松</td><td>PTR</td><td>noptr</td><td><code>accept</code></td><td><code>mark-delivery</code></td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12826 ══════════════ -->
+  <div class="incremental-section" id="gt-12826">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#b91c1c">GT</span>
+      <h2>GT-12826 内容规则规则使用错误图标问题解决</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（策略流水线 → 内容规则 → 新建/编辑规则 → 模拟测试）<br/>
+        组件：<code>src/components/security/content-rules/ContentRuleDrawer.tsx</code>、<code>messages/zh.json</code>、<code>messages/en.json</code><br/>
+        2026-08-08 · commit <code>bc57fee</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-info"><strong>现场验收意见：</strong>内容规则新建/编辑抽屉中的「模拟测试」功能，输入测试文本并运行后，「命中」该规则的结果使用了红色 <code>XCircle</code> 失败图标（<code>border-rose-200 bg-rose-50 text-rose-700</code>），「未命中」反而使用绿色 <code>CheckCircle2</code> 成功图标（<code>border-emerald-200 bg-emerald-50 text-emerald-700</code>）。「命中」是模拟测试按用户配置的匹配条件正常判定出的结果，代表规则本身工作正常，不应展示为失败态；红色 destructive 视觉应只保留给接口调用失败、正则解析异常等真正的执行错误。</div>
+
+      <!-- 变更 1 -->
+      <h3 id="gt12826-change-1">1. 模拟测试结果态：命中/未命中不再使用红色失败图标与绿色成功图标，改为中性信息色 + 靶心图标 / muted 中性灰</h3>
+
+      <h4 id="gt12826-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>「命中」「未命中」是模拟测试对"测试文本是否触发该规则"给出的两种正常判定结果，二者都不代表处置好坏——命中不等于"出错"，未命中也不等���"通过"。修改前的实现借用了通用的成功/失败配色语义（红=失败、绿=成功），把"命中"渲染成红色叉号，容易让管理员误判为"测试失败/规则配置有问题"，而"未命中"却显示绿色对勾，容易误判为"测试通过"，两者含义与颜色语义直接矛盾。</p>
+      <p><strong>最终方案：</strong>命中态改为中性信息配色（浅蓝 <code>sky</code> 系）+ <code>Target</code>（靶心）图标，语义为"已命中该匹配条件"，不含好坏判断；未命中态改为使用设计系统的中性 <code>muted</code> 前景/背景 token（浅色主题下接近浅灰）+ <code>MinusCircle</code>（减号圆圈）图标，语义为"未命中，无需处理"。两者都移除 destructive 红色与 success 绿色，视觉上不再暗示对错。图标由 <code>lucide-react</code> 的 <code>XCircle</code>/<code>CheckCircle2</code> 替换为 <code>Target</code>/<code>MinusCircle</code>。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>命中态容器 className</td>
+            <td><code>border-rose-200 bg-rose-50 text-rose-700</code></td>
+            <td><code>border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300</code></td>
+          </tr>
+          <tr>
+            <td>未命中态容器 className</td>
+            <td><code>border-emerald-200 bg-emerald-50 text-emerald-700</code></td>
+            <td><code>border-border bg-muted text-muted-foreground</code>（跟随设计系统主题 token，非硬编码颜色）</td>
+          </tr>
+          <tr>
+            <td>命中态图标</td>
+            <td><code>XCircle</code>（叉号，失败语义）</td>
+            <td><code>Target</code>（靶心，中性"已命中"语义）</td>
+          </tr>
+          <tr>
+            <td>未命中态图标</td>
+            <td><code>CheckCircle2</code>（对勾，成功语义）</td>
+            <td><code>MinusCircle</code>（减号圆圈，中性"无内容/无需处理"语义）</td>
+          </tr>
+          <tr>
+            <td>文案（未变）</td>
+            <td colspan="2"><code>contentRules.testMatched</code>「匹配」/ <code>contentRules.testNotMatched</code>「不匹配」，文案本身未调整，仅调整配色与图标</td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>src/components/security/content-rules/ContentRuleDrawer.tsx</code> — <code>lucide-react</code> import 与结果渲染区块（原 <code>testMatch !== null</code> 分支）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12826-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：命中态（修改后）</strong><br/>
+        触发路径：租户管理员 → 策略流水线 → 内容规则 → 新建规则 → 匹配内容填入「aaaa」→ 点击「模拟测试」展开面板 → 测试内容填入「aaaa」→ 点击「运行测试」</p>
+        <figure>
+          <img src="./screenshots/gt12826-test-matched-sky.png" alt="模拟测试命中态：结果框使用浅蓝色背景、靶心图标，展示“匹配”文案，不再是红色叉号失败态" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：右侧模拟测试面板中，运行测试后结果框显示「匹配」，背景为浅蓝（<code>bg-sky-50</code>）、图标为靶心 <code>Target</code>，不含红色或失败语义。已通过浏览器实测验证（测试内容与匹配内容均为「aaaa」，规则命中）。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-2：未命中态（修改后）</strong><br/>
+        触发路径：同上 → 测试内容改为「zzzz」（与匹配内容「aaaa」不同）→ 点击「运行测试」</p>
+        <figure>
+          <img src="./screenshots/gt12826-test-not-matched-neutral.png" alt="模拟测试未命中态：结果框使用中性灰背景、减号圆圈图标，展示“不匹配”文案，不再是绿色对勾成功态" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：测试内容与匹配内容不一致时，结果框显示「不匹配」，背景改为设计系统 <code>bg-muted</code> 中性灰、图标为减号圆圈 <code>MinusCircle</code>，不再显示绿色对勾成功态。已通过浏览器实测验证。</figcaption>
+        </figure>
+
+        <p style="margin-top:1.5rem"><strong>状态 S-3：接口执行失败态（未变更，行为说明）</strong><br/>
+        触发���径：同上 → <code>testContentRule</code> 接口调用抛出异常（网络失败 / 正则解析异常等）</p>
+        <p>本状态是变更 2 新增的独立 <code>testRunError</code> 分支，与命中/未命中结果渲染路径互斥，详见 <a href="#gt12826-change-2">变更 2</a>；由于需要人工构造接口异常才能触发，未安全验证的截图记为「不适用」，行为已通过源码逻辑（<code>catch</code> 分支）确认。</p>
+        <table>
+          <thead><tr><th>结果类型</th><th>修改前配色</th><th>修改后配色</th><th>修改前图标</th><th>修改后图标</th></tr></thead>
+          <tbody>
+            <tr><td>命中（Target 语义变更）</td><td>红色 rose（失败语义）</td><td>浅蓝 sky（中性信息）</td><td>XCircle</td><td>Target</td></tr>
+            <tr><td>未命中</td><td>绿色 emerald（成功语义）</td><td>muted 中性灰（主题 token）</td><td>CheckCircle2</td><td>MinusCircle</td></tr>
+            <tr><td>接口执行失败（新增独立分支）</td><td colspan="2">红色 destructive（<code>border-destructive/30 bg-destructive/10 text-destructive</code>），此前与"未命中"共用同一渲染路径</td><td colspan="2"><code>AlertTriangle</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 id="gt12826-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>模拟测试结果框（命中）</td><td>状态反馈容器</td><td><code>border-rose-200 bg-rose-50 text-rose-700</code> + <code>XCircle</code></td><td><code>border-sky-200 bg-sky-50 text-sky-700</code>（暗色 <code>dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300</code>）+ <code>Target</code></td><td><code>ContentRuleDrawer.tsx</code> 结果渲染区块</td><td>[Base]</td></tr>
+          <tr><td>模拟测试结果框（未命中）</td><td>状态反馈容器</td><td><code>border-emerald-200 bg-emerald-50 text-emerald-700</code> + <code>CheckCircle2</code></td><td><code>border-border bg-muted text-muted-foreground</code> + <code>MinusCircle</code></td><td><code>ContentRuleDrawer.tsx</code> 结果渲染区块</td><td>[Base]</td></tr>
+          <tr><td>lucide-react 图标 import</td><td>依赖引用</td><td><code>CheckCircle2</code>、<code>XCircle</code></td><td><code>Target</code>、<code>MinusCircle</code>（新增），移除 <code>CheckCircle2</code>/<code>XCircle</code> 引用</td><td><code>ContentRuleDrawer.tsx</code> 顶部 import</td><td>[Base]</td></tr>
+          <tr><td>i18n key <code>contentRules.testMatched</code> / <code>testNotMatched</code></td><td>文案 key（未变）</td><td>「匹配」/「不匹配」</td><td>文案不变，仅去除与颜色语义的隐性绑定</td><td><code>messages/zh.json</code> / <code>messages/en.json</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12826-change-2" style="margin-top:2rem;">2. 新增独立的接口执行错误态（testRunError），与命中/未命中结果彻底解耦</h3>
+
+      <h4 id="gt12826-c2-overview">2.1 方案概述</h4>
+      <p><strong>背景：</strong>���改前，<code>testContentRule</code> 接口调用失败时（<code>catch</code> 分支）直接 <code>setTestMatch(false)</code>，把"接口报错"当作"未命中"处理，渲染成绿色成功态图标，彻底掩盖了真实的执行故障——管理员看到绿色对勾，会误以为测试已正常跑完且未命中，无法察觉后端异常。</p>
+      <p><strong>最终方案：</strong>新增独立状态 <code>testRunError</code>，与 <code>testMatch</code>（命中/未命中，均为正常结果）完全分离：接口调用失败时不再写入 <code>testMatch</code>（保持为 <code>null</code>），而是把 <code>t('contentRules.testFailed')</code>（新增 i18n key，zh:「测试执行失败，请稍后重试」/ en:「Test failed to run, please try again」）写入 <code>testRunError</code>，渲染为红色 <code>destructive</code> 态 + <code>AlertTriangle</code> 图标；结果渲染逻辑改为优先判断 <code>testRunError</code>，仅当无执行错误时才展示 <code>testMatch</code> 命中/未命中结果，两条路径互斥。测试内容变更、动作切换、重新点击「运行测试」等场景均同步清空 <code>testRunError</code>，与既有 <code>testMatch</code>/<code>testError</code> 清空逻辑保持一致。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>接口调用失败（catch 分支）</td>
+            <td><code>setTestMatch(false)</code>（伪装成"未命中"，渲染绿色成功态）</td>
+            <td><code>setTestMatch(null); setTestRunError(t('contentRules.testFailed'))</code>（保持中立，单独走 destructive 提示）</td>
+          </tr>
+          <tr>
+            <td>结果渲染优先级</td>
+            <td>仅 <code>testMatch !== null</code> 一条分支</td>
+            <td><code>testRunError</code> 优先渲染；否则 <code>testMatch !== null</code> 渲染命中/未命中（互斥）</td>
+          </tr>
+          <tr>
+            <td>状态清空联动</td>
+            <td><code>setTestMatch(null); setTestError('')</code>（测试内容变更、切换动作、重新测试时）</td>
+            <td>额外同步 <code>setTestRunError('')</code>，三处清空点均已补齐</td>
+          </tr>
+          <tr>
+            <td>新增 i18n key</td>
+            <td>—</td>
+            <td><code>contentRules.testFailed</code>（zh:「测试执行失败，请稍后重试」/ en:「Test failed to run, please try again」）</td>
+          </tr>
+          <tr>
+            <td>修改文件</td>
+            <td colspan="2"><code>ContentRuleDrawer.tsx</code>（新增 <code>testRunError</code> state、<code>handleTest</code> catch 分支、3 处清空联动、结果渲染 JSX）、<code>messages/zh.json</code>、<code>messages/en.json</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12826-c2-elements">2.2 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>testRunError</code> state</td><td>新增 <code>useState</code></td><td>不存在</td><td><code>const [testRunError, setTestRunError] = useState('')</code></td><td><code>ContentRuleDrawer.tsx</code></td><td>[Base]</td></tr>
+          <tr><td>接口失败提示框</td><td>状态反馈容器（新增独立渲染分支）</td><td>复用未命中态绿色成功框</td><td><code>border-destructive/30 bg-destructive/10 text-destructive</code> + <code>AlertTriangle</code>，独立于命中/未命中渲染</td><td><code>ContentRuleDrawer.tsx</code> 结果渲染区块</td><td>[Base]</td></tr>
+          <tr><td>i18n key <code>contentRules.testFailed</code></td><td>文案 key（新增）</td><td>不存在</td><td>zh:「测试执行失败，请稍后重试」/ en:「Test failed to run, please try again」</td><td><code>messages/zh.json</code> / <code>messages/en.json</code></td><td>[Base]</td></tr>
+          <tr><td>单元测试锁定回归</td><td>测试文件（新增）</td><td>不存在</td><td><code>ContentRuleDrawer.test.tsx</code> 新增用例，断言命中态 className 不含 <code>rose</code>/<code>destructive</code>，未命中态不含绿色成功态</td><td><code>src/components/security/content-rules/ContentRuleDrawer.test.tsx</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ GT-12818 ══════════════ -->
+  <div class="incremental-section" id="gt-12818">
+    <div class="incr-header">
+      <span class="incr-num" style="background:#b91c1c">GT</span>
+      <h2>GT-12818 附件安全-反病毒去掉拒收，增加审核</h2>
+      <div class="incr-meta">
+        路由：<code>/zh/security/pipeline</code>（策略流水线 → 附件安全检测 → 配置 → 「反病毒引擎」页签）<br/>
+        组件：<code>src/components/security/attachment-security/AntivirusTab.tsx</code>、<code>src/types/attachment-security.ts</code>、<code>messages/zh.json</code>、<code>messages/en.json</code><br/>
+        2026-08-08 · commit <code>c16eb51</code>
+      </div>
+    </div>
+    <div class="incr-body">
+
+      <div class="callout callout-info"><strong>需求说明：</strong>反病毒引擎「发现病毒后的处置」（<code>virus_action</code>）执行动作列表需要调整——移除「拒收」（<code>reject</code>）动作，并新增「审核」（<code>audit</code>）动作。调整后该下拉的可选动作为 <strong>隔离 / 审核 / 丢弃</strong> 三项。本需求仅调整「发现病毒后的处置」的动作候选列表，不改动同一页签下的「扫描超时/不可用时的动作」（<code>timeout_action</code>，仍为 拒收 / 丢弃 / 隔离 / 继续流水线 四项）以及其它任何功能模块。文案与描述全部复用项目 next-intl 国际化框架的既有 key（<code>actions.*</code> / <code>actionDesc.*</code>），未新增硬编码文案。</div>
+
+      <!-- 变更 1 -->
+      <h3 id="gt12818-change-1">1. 发现病毒后的处置：移除「拒收」（reject）执行动作</h3>
+
+      <h4 id="gt12818-c1-overview">1.1 方案概述</h4>
+      <p><strong>背景：</strong>「发现病毒后的处置」用于配置确认检出病毒后对邮件采取的动作。此前候选列表为 <code>['quarantine', 'reject', 'discard']</code>（隔离 / 拒收 / 丢弃）。「拒收」（<code>reject</code>）表示在 SMTP 阶段拒绝接收并向发件方回退信（452/550），对"已确认为病毒"的邮件不再作为推荐处置动作，需从该下拉中移除。</p>
+      <p><strong>最终方案：</strong>在 <code>AntivirusTab.tsx</code> 中把 <code>VIRUS_ACTIONS</code> 常量移除 <code>'reject'</code>；同时在 <code>attachment-security.ts</code> 的 <code>AntivirusActionConfig.virus_action</code> 类型上追加 <code>'reject'</code> 到 <code>Exclude</code> 排除项，从类型层面禁止该动作被写入。i18n key <code>actions.reject</code> / <code>actionDesc.reject</code> 本身保留（仍被 <code>timeout_action</code> 等其它场景引用），仅不再出现在「发现病毒后的处置」下拉中。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>VIRUS_ACTIONS</code> 常量</td>
+            <td><code>['quarantine', 'reject', 'discard']</code></td>
+            <td><code>['quarantine', 'audit', 'discard']</code>（同步含变更 2 的 <code>audit</code>）</td>
+          </tr>
+          <tr>
+            <td><code>virus_action</code> 类型</td>
+            <td><code>Exclude&lt;AttachmentAction, 'accept' | 'partial_skip'&gt;</code></td>
+            <td><code>Exclude&lt;AttachmentAction, 'accept' | 'partial_skip' | 'reject'&gt;</code></td>
+          </tr>
+          <tr>
+            <td>下拉候选项（发现病毒后的处置）</td>
+            <td>隔离 / <del>拒收</del> / 丢弃</td>
+            <td>隔离 / 审核 / 丢弃（不含拒收）</td>
+          </tr>
+          <tr>
+            <td>不受影响项</td>
+            <td colspan="2"><code>TIMEOUT_ACTIONS</code>（扫描超时/不可用动作）保持 <code>['quarantine', 'reject', 'discard', 'accept']</code> 不变，「拒收」在超时动作中仍保留</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12818-c1-states">1.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-1：发现病毒后的处置下拉打开态（修改后，不含「拒收」）</strong><br/>
+        触发路径：产品形态切换为「AI版·单租户」→ 策略流水线 → 「附件安全检测」卡片点击「配置」→ 抽屉内切换到「反病毒引擎」页签 → 点击「发现病毒后的处置」下拉。</p>
+        <figure>
+          <img src="./screenshots/gt12818-virus-action-dropdown.png" alt="发现病毒后的处置下拉打开态，候选项为隔离、审核、丢弃三项，不含拒收" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-1：「发现病毒后的处置」下拉展开后仅有三项候选（每项含动作名 + 描述副行），当前选中第一项「隔离」（带勾选）。三项 <code>option</code> 文本依次为「隔离 邮件进入隔离区，管理员审核后可放行或删除」「审核 邮件进入待审核队列，人工确认后投递或退回」「丢弃 静默丢弃，发件方无感知，无退信」，<strong>列表中已不再包含「拒收」</strong>。（本截图为 VM 内 Playwright + Noto Sans CJK 采集，中文正常渲染；并已用可访问性树核对三项 <code>option</code> 权威文本与上述一致。）</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12818-c1-elements">1.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>「发现病毒后的处置」下拉（<code>data-testid="antivirus-virus-action"</code>）</td><td>Select 单选</td><td>候选 隔离 / 拒收 / 丢弃</td><td>候选 隔离 / 审核 / 丢弃（移除拒收）</td><td><code>AntivirusTab.tsx</code> — <code>VIRUS_ACTIONS.map</code></td><td>[Base]</td></tr>
+          <tr><td><code>reject</code> 选项项（<code>antivirus-virus-action-reject</code>）</td><td>SelectItem</td><td>存在，文案「拒收 / 在 SMTP 阶段拒绝接收，发件方收到退信通知（452/550）」</td><td><del>已移除，不再渲染</del></td><td><code>AntivirusTab.tsx</code></td><td>[Base]</td></tr>
+          <tr><td><code>virus_action</code> 类型约束</td><td>TS 类型</td><td>允许 <code>reject</code></td><td>类型 <code>Exclude</code> 追加 <code>'reject'</code>，禁止写入</td><td><code>attachment-security.ts</code></td><td>[Base]</td></tr>
+          <tr><td>i18n key <code>actions.reject</code> / <code>actionDesc.reject</code></td><td>文案 key（保留）</td><td colspan="2">保留不删除（仍被 <code>timeout_action</code> 等场景引用），仅从本下拉解除引用</td><td><code>messages/zh.json</code> / <code>messages/en.json</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 变更 2 -->
+      <h3 id="gt12818-change-2" style="margin-top:2rem;">2. 发现病毒后的处置：新增「审核」（audit）执行动作</h3>
+
+      <h4 id="gt12818-c2-overview">2.1 方案概述</h4>
+      <p><strong>背景：</strong>对确认检出病毒的邮件，除「隔离」「丢弃」外，还需要一种"进入待审核队列、由人工确认后再投递或退回"的处置方式，即「审核」（<code>audit</code>）。<code>audit</code> 动作已存在于系统通用动作枚举 <code>AttachmentAction</code> 及 i18n（<code>actions.audit</code> = 审核 / Review，<code>actionDesc.audit</code> = 「邮件进入待审核队列，人工确认后投递或退回」），此前仅未在「发现病毒后的处置」下拉中提供。</p>
+      <p><strong>最终方案：</strong>在 <code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code> 中新增 <code>'audit'</code>，位于「隔离」与「丢弃」之间，最终顺序为 <code>['quarantine', 'audit', 'discard']</code>（隔离 / 审核 / 丢弃）。<code>virus_action</code> 类型本身已允许 <code>audit</code>（未在 <code>Exclude</code> 中排除），无需改动类型；下拉选项的名称与描述副行直接复用 <code>t('actions.audit')</code> / <code>t('actionDesc.audit')</code>，无新增文案。</p>
+      <table>
+        <thead><tr><th>字段</th><th>修改前</th><th>修改后</th></tr></thead>
+        <tbody>
+          <tr><td>候选项是否含「审核」</td><td>否</td><td>是（<code>audit</code>，位于隔离与丢弃之间）</td></tr>
+          <tr><td>选项名称 / 描述来源</td><td>—</td><td><code>actions.audit</code>「审核」/ <code>actionDesc.audit</code>「邮件进入待审核队列，人工确认后投递或退回」（既有 i18n key，zh/en 均已存在）</td></tr>
+          <tr><td>默认值（<code>DEFAULT_ANTIVIRUS_ACTIONS.virus_action</code>）</td><td colspan="2"><code>'quarantine'</code>（隔离）不变，新增「审核」不改变默认选中项</td></tr>
+        </tbody>
+      </table>
+
+      <h4 id="gt12818-c2-states">2.2 截图式交互预览</h4>
+      <div class="interaction-preview">
+        <p><strong>状态 S-2：下拉中「审核」选项可见（修改后）</strong><br/>
+        触发路径：同 S-1，展开「发现病毒后的处置」下拉。</p>
+        <figure>
+          <img src="./screenshots/gt12818-virus-action-dropdown.png" alt="发现病毒后的处置下拉中第二项为审核，含描述副行" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px"/>
+          <figcaption>S-2：与 S-1 为同一下拉打开态截图。下拉第二项即新增的「审核」，其副行描述为「邮件进入待审核队列，人工确认后投递或退回」；选项顺序为 隔离（选中）→ 审核 → 丢弃。经可访问性树核对第二项 <code>option</code> 权威文本为「审核 邮件进入待审核队列，人工确认后投递或退回」，确认新增生效。</figcaption>
+        </figure>
+      </div>
+
+      <h4 id="gt12818-c2-elements">2.3 逐元素说明</h4>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>变更前</th><th>变更后</th><th>源码位置</th><th>形态/角色差异</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>「审核」选项项（<code>antivirus-virus-action-audit</code>）</td><td>SelectItem（新增）</td><td>不存在于本下拉</td><td>名称「审核」+ 描述「邮件进入待审核队列，人工确认后投递或退回」，位于隔离与丢弃之间</td><td><code>AntivirusTab.tsx</code> — <code>VIRUS_ACTIONS</code></td><td>[Base]</td></tr>
+          <tr><td>选项名称 / 描述</td><td>i18n 文案（复用）</td><td>—</td><td><code>t('actions.audit')</code> / <code>t('actionDesc.audit')</code>（既有 key，未新增）</td><td><code>messages/zh.json</code> / <code>messages/en.json</code></td><td>[Base]</td></tr>
+          <tr><td>单元测试</td><td>回归验证</td><td colspan="2"><code>AntivirusTab.test.tsx</code> 现有用例通过；类型检查（<code>tsc --noEmit</code>）无附件安全相关报错</td><td><code>src/components/security/attachment-security/AntivirusTab.test.tsx</code></td><td>[Base]</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ V. 版本历史 ══════════════ -->
+  <section id="version-history">
+    <h2>V. 版本历史</h2>
+    <table>
+      <thead>
+        <tr><th>版本</th><th>日期</th><th>摘要</th></tr>
+      </thead>
+      <tbody>
+          <tr>
+          <td><span class="version-badge"><span class="vnum">v12</span></span></td>
+          <td>2026-08-08</td>
+          <td>追加 GT-12818「附件安全-反病毒去掉拒收，增加审核」需求体（2 个变更点）。变更 1：反病毒引擎「发现病毒后的处置」（<code>virus_action</code>）移除「拒收」（<code>reject</code>）执行动作——<code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code> 由 <code>['quarantine', 'reject', 'discard']</code> 去掉 <code>reject</code>，并在 <code>attachment-security.ts</code> 的 <code>AntivirusActionConfig.virus_action</code> 类型 <code>Exclude</code> 追加 <code>'reject'</code>；i18n key <code>actions.reject</code>/<code>actionDesc.reject</code> 保留（仍被 <code>timeout_action</code> 引用），仅从本下拉解除引用。变更 2：同一下拉新增「审核」（<code>audit</code>）执行动作，最终顺序为 <code>['quarantine', 'audit', 'discard']</code>（隔离/审核/丢弃），名称与描述复用既有 i18n key <code>actions.audit</code>「审核」/<code>actionDesc.audit</code>「邮件进入待审核队列，人工确认后投递或退回」（zh/en 均已存在），<code>virus_action</code> 类型本身已允许 <code>audit</code> 无需改动，默认值仍为 <code>quarantine</code>。不改动「扫描超时/不可用动作」<code>timeout_action</code>（仍为拒收/丢弃/隔离/继续流水线）及其它模块。附截图 1 张（VM 内 Playwright chromium 采集，VM 已装 Noto Sans CJK 字体，中文正常渲染）：gt12818-virus-action-dropdown（发现病毒后的处置下拉展开，候选隔离/审核/丢弃三项、无拒收），并已用可访问性树核对选项权威文本与视觉一致。目录追加 GT-12818 一级条目及两个变更点子章节；差异标注追加 D-006；待确认事项追加 Q-004（初记为字体渲染方块，现已改用 VM 内 Playwright 重采中文正常渲染，标记为已解决）；版本历史 v11→v12。</td>
+        </tr>
+          <tr>
+          <td><span class="version-badge"><span class="vnum">v11</span></span></td>
+          <td>2026-08-08</td>
+          <td>追加 GT-12826「内容规则规则使用错误图标问题解决」需求体（2 个变更点）。背景：内容规则新建/编辑抽屉「模拟测试」结果反馈中，「命中」使用红色 <code>XCircle</code> 失败图标（<code>border-rose-200 bg-rose-50 text-rose-700</code>），「未命中」反而使用绿色 <code>CheckCircle2</code> 成功图标（<code>border-emerald-200 bg-emerald-50 text-emerald-700</code>），与"命中/未命中均为正常判定结果、不代表好坏"的实际语义矛盾。变更 1：命中态改为中性信息色 <code>sky</code> + <code>Target</code> 靶心图标（<code>border-sky-200 bg-sky-50 text-sky-700</code>，暗色态 <code>dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300</code>），未命中态改为设计系统中性 <code>muted</code> token + <code>MinusCircle</code> 图标（<code>border-border bg-muted text-muted-foreground</code>），文案「匹配」「不匹配」不变。变更 2：新增独立 <code>testRunError</code> state，接口调用失败（<code>catch</code> 分支）不再 <code>setTestMatch(false)</code> 伪装成"未命中"，改为写入 <code>testRunError</code> 并渲染红色 <code>destructive</code> + <code>AlertTriangle</code> 提示（新增 i18n key <code>contentRules.testFailed</code>，zh/en 双语），与命中/未命中结果渲染路径互斥；测试内容变更、动作切换、重新测试三处清空联动同步补齐 <code>testRunError</code> 清空。新增单元测试 <code>ContentRuleDrawer.test.tsx</code> 锁定该交互语义（断言命中态 className 不含 <code>rose</code>/<code>destructive</code>，未命中态不含绿色成功态），避免回归。附截图 2 张：gt12826-test-matched-sky（命中态，浅蓝+靶心）、gt12826-test-not-matched-neutral（未命中态，muted 中性灰+减号圆圈）；接口执行失败态因需人工构造异常未截图，行为已通过源码 <code>catch</code> 分支确认。目录追加 GT-12826 一级条目及两个变更点子章节；版本历史 v10→v11。</td>
+        </tr>
+          <tr>
+          <td><span class="version-badge"><span class="vnum">v10</span></span></td>
+          <td>2026-08-08</td>
+          <td>追加 GT-12833「认证协议检查：动作精简为5项，默认动作改为"标记放行"」需求体（3 个变更点）。变更 1：<code>PROTOCOL_ACTIONS</code>（SPF/DKIM/PTR）与 <code>DMARC_ACTIONS</code> 均由 6 项精简为 5 项，移除语义与「标记放行」重叠的 <code>accept</code>（「进行下一步」），四个协议 Tab 统一收敛为 拒收/丢弃/隔离/审核/标记放行；本变更反向调整了 GT-12801 变更2「DMARC处置策略新增&quot;进行下一步&quot;选项」的结论，已在 GT-12801 处打删除线标注并交叉链接（另见差异标注 D-005）。变更 2：<code>CheckItem</code> 缺省 fallback 由 <code>{ enabled: false, action: 'accept' }</code> 改为 <code>{ enabled: true, action: 'mark-delivery' }</code>，动作选择回调不再联动 <code>enabled</code>（固定为 <code>true</code>），<code>dominantAction()</code> fallback 参数同步改为 <code>mark-delivery</code>，检查项启停与动作选择彻底解耦。变更 3：「宽松」预设模板中 SPF（none/temperror）、DKIM（partial/none）、PTR（noptr）原 <code>accept</code> 预设值全部改为 <code>mark-delivery</code>，<code>applyGroup()</code> 两处 enabled 联动逻辑同步简化为固定 <code>true</code>；「标准」「严格」模板未使用 <code>accept</code>，不受影响。附截图 4 张：gt12833-spf-fail-dropdown-5options（SPF硬拒绝动作下拉5项）、gt12833-spf-softfail-dropdown-5options（SPF软拒绝动作下拉5项）、gt12833-dmarc-reject-dropdown-5options（DMARC p=reject动作下拉5项）、gt12833-loose-template-none-tmperror-enabled（宽松模板下SPF未维护/查询失败两行启用态+标记放行）。目录追加 GT-12833 一级条目及三个变更点子章节；差异标注追加 D-005；待确认事项追加 Q-003；版本历史 v9→v10。</td>
+        </tr>
+          <tr>
+          <td><span class="version-badge"><span class="vnum">v9</span></span></td>
+          <td>2026-08-08</td>
+          <td>追加 GT-12790「相似邮件与主题检测：交互优化」需求体（1 个变更点）。背景：检测粒度可切换「全方向聚合」与「按方向独立检测」，「按方向独立检测」模式下方向卡片（<code>DirectionCard.tsx</code>）开启观察模式后外层容器会切换为黄色（<code>border-amber-300</code>/<code>bg-amber-50/50</code>），但「全方向聚合」���式下聚合卡片（<code>AggregateCard.tsx</code>）外层容器颜色是硬编码固定值，从不随 <code>observe_mode</code> 变化，只有内部徽标变黄，导致两种检测粒度下观察模式视觉表现不一致。修复方案：将 <code>AggregateCard.tsx</code> 外层容器 className 改为与 <code>DirectionCard.tsx</code> 完全一致的条件判断（复用相同色值与逻辑，不新增颜色定义，不修改 <code>DirectionCard.tsx</code>），并保留 240ms 过渡动画使颜色切换平滑。附截图 3 张：gt12790-aggregate-before-fix（聚合卡片观察模式关闭态）、gt12790-aggregate-after-fix（聚合卡片观察模式开启态，修复后已变黄）、gt12790-direction-observe-reference（按方向独立检测卡片观察模式开启态，作为对齐参照）。目录追加 GT-12790 一级���目及变更点子章节；版本历史 v8→v9。</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v8</span></span></td>
+          <td>2026-08-07</td>
+          <td>追加 GT-12791「相似检测模块优化」��求体（3 个变更点）。变更1：触发动作 label 调整——<code>actionMarkDelivery</code>「标记投递」→「进行下一步」（en: Mark &amp; Deliver → Next Step，与 GT-12719 策略流水线模块 <code>pipeline.actionNextStep</code> 术语呼应但 key 独立）、<code>actionBlock</code>「阻断」→「拒收」（value 不变），<code>action-options.ts</code> 不改；顺序保持进行下一步/隔离/审核/拒收/丢弃 5 个；<code>errorTagRequired</code> 文案去除动作名引用改为「启用该动作时需至少启用一种标记方式」。变更2：附加策略新增正文标记——<code>TagDeliveryPanel.tsx</code> 信头标记行下方对称追��第三行（<code>tag_body_enabled</code> Switch + <code>tag_body_content</code> 自由文本 Input），<code>types.ts</code> 追加两个可选字段，新增 i18n key <code>tagBodyLabel</code>/<code>tagBodyPlaceholder</code>（zh/en），<code>tagModeHint</code> 提示文案同步更新。变更3：① 校验逻辑拆分两类错误——「未选任何标记」→<code>errorTagRequired</code>，「已选但字段为空」→新增<code>errorTagFieldRequired</code>（zh「已启用的标记方式内容不能为空」）；② 移除豁免提示条（<code>renderExemptionNote</code>函数+两处调用+<code>Link</code>/<code>ExternalLink</code> import）；③ 按钮区 <code>justify-between</code>→<code>justify-end</code>。附截图 5 张：gt12791-page-default（页面全景）、gt12791-action-dropdown-send（5 个选项下拉，摄制于「投递」措辞阶段，实际以「进行下一步」为准）、gt12791-tag-panel-default（进行下一步选中后标记面板）、gt12791-footer-buttons（完整面板+靠右按��区）、gt12791-validation-error-none（errorTagFieldRequired toast）。目录追加 GT-12791 一级条目及三个变更点子章节；版本历史 v7→v8。</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v7</span></span></td>
+          <td>2026-08-07</td>
+          <td>追加 GT-12828「策略：优先级统一」需求体（3 个变更点）。方案A：邮件标记模块接入 getRulePriorityRange(isSystemAdmin)，MailMarkingPage 引入 useAuth 计算 priorityRange，RuleEditDrawer 新增 priorityRange prop（FALLBACK 兜底），Input min/max/validate/priorityTip/priorityHint 全部参数化，新增 mailMarking.errors.priorityRange i18n key。方案B：ContentRuleDrawer、IPFilterPage、IPFrequencyPage 三模块按行为管控标准模式（createRuleSchema 工厂函数 + useMemo 动态 schema）改造，priority schema 从 nonnegative/无约束 改为 min(range.min).max(range.max)，Input min/max 参数化，提示文案加 {min}/{max} 插值，新增 ipFilter.priorityOutOfRange 和 ipFrequency.priorityOutOfRange i18n key，IP频率新增 priority inline 错误渲染。方案C：仅改 zh.json/en.json 共 10 处，统一 senderFilter/contentRules/behaviorControl 优先级文案措辞（en dash、「需在」、行内提示完整）。附截图 gt12828-mail-marking-priority（邮件标记 100）、gt12828-content-rule-drawer（内容规则 100 + 提示文案参数化）、gt12828-pipeline-overview（策略流水线全景）。</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v6</span></span></td>
+          <td>2026-08-07</td>
+          <td>追加 GT-12795 需求体（邮件标记与声明：创建规则优先级问题处理，1 个变更点）。变更 1：nextPriority 无规则时默认 100（原为 1），有规则时 Math.min(Math.max(max+1,100),1000)；Input min 从 1 改为 100，新增 max=1000，宽度 w-20→w-24；validate 校验条件改为 100~1000，新增 i18n key errorPriorityRange（zh/en 双语）；priorityTip 更新为「取值范围 100～1000」。附截图 gt12795-drawer-default（默认值100）、gt12795-priority-validation-error（校验失败态）；目录追加 GT-12795 一级条目及子章节；版本历史 v5→v6。</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v5</span></span></td>
+          <td>2026-08-07</td>
+          <td>追加 GT-12793 需求体（邮件标记与声明���块优化，3 个变更点）。变更 1：RuleEditDrawer「取消」「保存」按钮从 SheetHeader 右上移至 SheetContent 底部 footer 右下，标题区仅保留标题和副标题；变更 2：MailMarkingPage.loadRules 由 Promise.all 改为 Promise.allSettled，scopes 失败不再阻断规则展示，修复 zh.json mailMarking 4 处 UTF-8 乱码（priorityHint/noData/markPosition/sampleSubject）；变更 3：RuleListTable 「优先级」列从第1列（规则名称前）移至第5列（状态之后、操作之前），接收标记和外发声明共用同一组件。附截图 gt12793-receive-list（接收标记4条规则）、gt12793-send-list（外发声明2条规则）；目录追加 GT-12793 一级条目及三级子章节；版本历史 v4→v5。</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v4</span></span></td>
+          <td>2026-08-06</td>
+          <td>追加 GT-12719 需求体（策略流水线执行动作/黑白名单文案解释）：变更 1 执行动作图例「阻断」→「拒收」，新增「进行下一步 · 继续执行后续策略」（pipeline.actionNextStep/actionNextStepDesc），移除「标记投递」（actionLegendItems 删除 tagDeliver 条目，PolicyPipelinePage.tsx）；变更 2 名单类型黑名单描述「阻断/隔离/丢弃」→「拒收/隔离/丢弃」（pipeline.blacklistTypeDesc），白名单描述「投递/标记投递」→「投递」（pipeline.whitelistTypeDesc）；变更 3 流程控制终止短文案「阻断」→「拒收」（pipeline.flowTerminateShort），终止描述「阻断/丢弃/隔离」→「拒收/丢弃/隔离」（pipeline.flowTerminateDesc），继续描述移除「标记投递」（pipeline.flowContinueDesc）；附截图 S-1（策略流水线默认态含图例区）；目录追加 GT-12719 一级条目及三级子章节；版本历史 v3→v4。</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v3</span></span></td>
+          <td>2026-08-06</td>
+          <td>追加 GT-12797 需求体（群组策略——新建群组：不支持切换群组类型）：变更 1 新建按钮文案「新建群组」→「新建X组」（group-management-page.tsx + messages 新增 groups.newGroupOfType）；变更 2 新建抽屉移除群组类型 Select，SheetTitle 改为「新建X组」，编辑场景��为只读 Input（group-edit-dialog.tsx）；变更 3 内容组标签「每行一条成员」→「每行一条关键词」，占位符「敏感词1/2」→「关键词1/2」（zh.json + en.json 新增 groups.contentMemberListPerLine）；附截图 S-1（新建IP组抽屉）、S-2（新建内容组抽屉）</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v2</span></span></td>
+          <td>2026-08-06</td>
+          <td>追加 GT-12801 需求体（DMARC协议执行动作对齐以及增加"进行下一步"）：变更 1「阻断」→「拒收」（messages/zh.json authSpoofing.protocolActionShort.reject）；变更 2 DMARC_ACTIONS 由 4 项扩充至 5 项追加 accept（ProtocolChecksSection.tsx）；同步更新目录</td>
+        </tr>
+        <tr>
+          <td><span class="version-badge"><span class="vnum">v1</span></span></td>
+          <td>2026-08-06</td>
+          <td>初版：GT-12772 全部 6 个变更点（白名单过滤 / 操作类型 i18n / 执行结果 i18n / 默认展开 / 查看原始日志接入 / Mock 数据补充）；4 项差异标注，2 项待确认事项</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <a class="back-link" href="/html-spec/index.html">返回 HTML Spec 总索引</a>
+  </section>
+
+</div>
+</body>
+</html>

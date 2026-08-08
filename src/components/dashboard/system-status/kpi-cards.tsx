@@ -91,19 +91,13 @@ export function KpiCards({ data, showInfra }: KpiCardsProps) {
       key: 'pending',
       icon: ClipboardList,
       // GT-12608：带 view=pending 深链，落地页应用与本卡同口径的待处置筛选。
+      // 本卡口径与「邮件处置中心」严格一致，仅统计处置中心待处置（pendingIsolated）；
+      // 不再合并举报待审（pendingReport 仅用于「待办事项」告警列表，属其他模块，保持不变）。
       href: '/email-disposal/center?view=pending',
       ctaKey: 'pending',
-      value: data.pending.toLocaleString(),
-      sub: (
-        <>
-          {t('pendingSplit', {
-            a: data.pendingIsolated,
-            b: data.pendingReport,
-          })}
-        </>
-      ),
+      value: data.pendingIsolated.toLocaleString(),
       badge:
-        data.pending > 0 ? (
+        data.pendingIsolated > 0 ? (
           <Badge
             data-testid="system-status-kpi-badge-pending"
             className="rounded-md bg-warning-soft text-warning"

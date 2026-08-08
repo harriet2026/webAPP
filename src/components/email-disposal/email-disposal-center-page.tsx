@@ -151,9 +151,9 @@ export function EmailDisposalCenterPage({
   // GT-12423: html_spec（index「按 demo（默认展开）落地」）要求高级筛选默认
   // 展开；「更多筛选条件」(AdvancedFilters) 仍默认折叠（PRD 口径）。
   const [quickFilterCollapsed, setQuickFilterCollapsed] = useState(false);
-  // GT-12608：系统状态「待处置邮件 → 去处置」深链。?view=pending 时首载即
-  // 应用与 KPI 卡同一口径的待处置筛选（action ∈ quarantine|sideline），
-  // 落地列表与卡片数字一致；无参数时维持 V2 默认全部邮件。
+  // GT-12608/GT-12818：系统状态「待处置邮件 → 去处置」深链。?view=pending 时首载
+  // 即应用与 KPI 卡同一口径的待处置筛选（display_status ∈ 隔离中 quarantine_pending
+  // | 待审核 audit_pending），落地列表与卡片数字一致；无参数时维持 V2 默认全部邮件。
   const initialView = useSearchParams().get('view');
   const [advancedFilter, setAdvancedFilter] = useState<AdvancedFilter>(
     () => pendingViewFilter(initialView) ?? DEFAULT_ADVANCED,
@@ -163,8 +163,12 @@ export function EmailDisposalCenterPage({
   // copies that draft into these applied states and changes the list query.
   const [appliedQuickFilter, setAppliedQuickFilter] =
     useState<DisposalQuickFilter>(getDefaultQuickFilter);
+  // GT-12608/GT-12818：applied 状态也须从 ?view=pending 深链初始化，否则列表查询
+  // 仍用空的 DEFAULT_ADVANCED（= 全部邮件），只有 draft 筛选 UI 被填充、列表却没
+  // 真正过滤，导致「默认展示待审核+隔离中」失效。其他入口 pendingViewFilter 返回
+  // null，回落 DEFAULT_ADVANCED，行为不变。
   const [appliedAdvancedFilter, setAppliedAdvancedFilter] =
-    useState<AdvancedFilter>(DEFAULT_ADVANCED);
+    useState<AdvancedFilter>(() => pendingViewFilter(initialView) ?? DEFAULT_ADVANCED);
   const [appliedAiConditions, setAppliedAiConditions] = useState<AICondition[]>(
     [],
   );
@@ -625,7 +629,7 @@ export function EmailDisposalCenterPage({
         // 见 internal/api/mail_logs.go）；以 200/页分页拉取到 EXPORT_MAX 或服务端
         // 数据取尽为止。原型曾误记为 100，已按后端事实修正。
         // 终止条件只使用"本页返回 0 条（数据已取尽）"，不依赖"本页数量 < 请求数量"，
-        // 避免后端静默截断导致第 1 页就误判为最后一页（GT-12571 根因修复）。
+        // 避免��端静默截断导致第 1 页就误判为最后一页（GT-12571 根因修复）。
         const EXPORT_PAGE_SIZE = 200;
         const target = Math.min(total, EXPORT_MAX);
         const items: DisposalMailItem[] = [];

@@ -76,7 +76,7 @@
     <h3 style="color:#b91c1c;margin:0 0 .5rem">源码 vs 实时渲染差异（demo 缺陷，须以浏览器为准）</h3>
     <ul style="margin:0;padding-left:1.25rem;line-height:1.7">
       <li><strong class="bad">阶段 5「智能体研判」有 4 个智能体名渲染成原始 i18n key</strong>：<code>pipeline.intentAgent</code> / <code>pipeline.marketingAgent</code>（窄卡内被 <code>truncate</code> 截断为 <code>pipeline.marketingAge...</code>）/ <code>pipeline.phishingAgent</code> / <code>pipeline.retrospectAgent</code>。只有第一个「发信人行为智能体」正常显示中文。<br><span class="warn">根因：mock 数据的 <code>agent.name</code> 直接是 <code>"pipeline.xxxAgent"</code> 字符串，模板中以 <code>{agent.name}</code> 原样输出（等价于 <code>t(key)</code> 但 zh 词典缺该 key → 回落原始 key）；而「发信人行为智能体」在 mock 里本就是中文常量。预览已 1:1 保留此缺陷。</span></li>
-      <li><strong>本 layer 旧版预览用错了样本数据</strong>：曾显示「钓鱼邮件检测智能体 / BEC钓鱼识别（AI-PHISH-003）/ 置信度 91%，BEC：是 / 检测标签 attack:business_email_compromise」。实时 matrix 样本实际为「仿冒邮件检测智能体 / 高管仿冒识别（AI-SPOOF-012）/ 置信度 94% / 无检测标签」。已按实时 DOM 更正，并移除多出的「检测标签」行。</li>
+      <li><strong>本 layer 旧版预览用错了样本数据</strong>��曾显示「钓鱼邮件检测智能体 / BEC钓鱼识别（AI-PHISH-003）/ 置信度 91%，BEC：是 / 检测标签 attack:business_email_compromise」。实时 matrix 样本实际为「仿冒邮件检测智能体 / 高管仿冒识别（AI-SPOOF-012）/ 置信度 94% / 无检测标签」。已按实时 DOM 更正，并移除多出的「检测标签」行。</li>
       <li><strong>「查看详情」按钮不渲染</strong>：仅当 <code>log.phishingAgent</code> 存在时，阶段 5 才用「拦截依据 + 钓鱼邮件智能体 + 查看详情」替代「智能体研判」列表。本 matrix 样本无 <code>phishingAgent</code>，故渲染的是 5 行智能体研判、无「查看详情」——与实时一致。</li>
       <li><strong>时间线 / 关联分析展开内容为源码重建</strong>：实时截图仅捕获折叠态；预览中展开后注入的时间线事件卡与维度卡片依据 <code>security-analysis-section.tsx</code> 的 mock 结构重建（管理员手动召回场景 / 发信人 + 攻击活动维度），非 live outerHTML 逐字节。</li>
       <li><strong>已对齐两处交互（对照运行中的 demo 逐项校准）</strong>：① <strong>阶段卡片可 toggle</strong> —— 5 个阶段明细默认全部展开（以 <code>live-analysis-collapsed.html</code> 为准，阶段1-4 命中策略 + 阶段5 智能体研判均在），点击卡片以 DOM 插入/移除命中策略明细节点在展开/折叠间切换（等价 <code>toggleStage</code> 的 <code>isExpanded &amp;&amp; (...)</code> 条件渲染，非 <code>display:none</code>）。② <strong>事后处置时间线为两级展开</strong> —— 点标题/「时间线」按钮只展开到事件摘要（不含召回范围等明细），再点事件卡才展开事件明细（召回范围/召回动作/执行结果/查看召回日志，逐字对齐 <code>live-analysis-expanded.html</code>）。两处折叠均用节点插入/移除实现，使折叠态 DOM 文本不残留被折叠内容。</li>
@@ -108,6 +108,203 @@
   </table>
 </div>
 </section>
+<section id="incremental-gt-12807-post-disposal-timeline" style="margin-top:2rem;padding:1.5rem;border:1px solid #dbe1ea;border-left:4px solid #4f46e5;border-radius:.625rem;background:#fff">
+  <h2 style="color:#4f46e5;margin:0 0 1rem;font-size:1.125rem">增量：GT-12772 邮件处置中心-标准SMTP邮件召回失败仍提示成功且召回日志入口未实现问题解决（2026-08-06）</h2>
+  <p style="color:#64748b;font-size:.875rem;margin:0 0 1.25rem">关联文档：GT-12807　变更类型：功能修复　组件路径：<code>src/components/email-disposal/sections/analysis-section.tsx</code></p>
+
+  <nav style="margin-bottom:1.5rem">
+    <ul style="list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;font-size:.875rem">
+      <li><a href="#gt12807-c1" style="color:#4f46e5">1. 事后处置时间线 — 过滤逻辑修正（白名单）</a></li>
+      <li><a href="#gt12807-c2" style="color:#4f46e5">2. 操作类型枚举中文化</a></li>
+      <li><a href="#gt12807-c3" style="color:#4f46e5">3. 执行结果枚举中文化</a></li>
+      <li><a href="#gt12807-c4" style="color:#4f46e5">4. 时间线默认展开</a></li>
+      <li><a href="#gt12807-c5" style="color:#4f46e5">5. 查看原始日志按钮接入</a></li>
+      <li><a href="#gt12807-diffs" style="color:#4f46e5">D. 差异标注</a></li>
+      <li><a href="#gt12807-questions" style="color:#4f46e5">Q. 待确认事项</a></li>
+    </ul>
+  </nav>
+
+  <!-- ====== 变更点 1：过滤逻辑修正 ====== -->
+  <article id="gt12807-c1" style="margin-bottom:2rem">
+    <h3 style="font-size:1rem;margin:0 0 .75rem">1. 事后处置时间线 — 事件来源白名单过滤</h3>
+
+    <h4 style="font-size:.875rem;margin:.75rem 0 .5rem">1.1 方案概述</h4>
+    <table style="width:100%;border-collapse:collapse;font-size:.8125rem;margin-bottom:.75rem">
+      <tbody>
+        <tr style="border:1px solid #dbe1ea"><th style="width:140px;background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">问题根因</th><td style="padding:7px 10px;border:1px solid #dbe1ea">原过滤逻辑为黑名单（仅排除 <code>event_source === 'postfix'</code>），导致 <code>antispam · policy_decided</code>、<code>antispam · quarantine_pending</code> 等投递流程事件穿透过滤，错误出现在事后处置时间线中，且因这些值不在映射表中而渲染原始英文</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">修复方案</th><td style="padding:7px 10px;border:1px solid #dbe1ea">改为白名单：<code>DISPOSAL_SOURCES = new Set(['admin_api', 'threat_retro_agent'])</code>，只保留两种事后处置来源的事件，其余（postfix / antispam 等）一律过滤</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">业务语义</th><td style="padding:7px 10px;border:1px solid #dbe1ea">事后处置时间线只展示"事后处置动作"，不展示邮件投递/策略裁决流水</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">源码路径</th><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>src/components/email-disposal/sections/analysis-section.tsx</code>：<code>DISPOSAL_SOURCES</code> 常量 + <code>disposalEvents</code> useMemo 过滤</td></tr>
+      </tbody>
+    </table>
+
+    <h4 style="font-size:.875rem;margin:.75rem 0 .5rem">1.2 操作类型枚举（白名单内三种组合）</h4>
+    <table style="width:100%;border-collapse:collapse;font-size:.8125rem;margin-bottom:.75rem">
+      <thead>
+        <tr style="background:#f1f3f7">
+          <th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">event_source</th>
+          <th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">event_type</th>
+          <th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">中文显示（zh）</th>
+          <th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">英文显示（en）</th>
+          <th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">触发方式</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>admin_api</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>recall</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">管理员召回</td><td style="padding:7px 10px;border:1px solid #dbe1ea">Admin Recall</td><td style="padding:7px 10px;border:1px solid #dbe1ea">管理员在详情页或列表页手动发起召回</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>threat_retro_agent</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>recall</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">威胁回溯智能体发起召回</td><td style="padding:7px 10px;border:1px solid #dbe1ea">Threat Retro Agent Recall</td><td style="padding:7px 10px;border:1px solid #dbe1ea">威胁回溯智能体策略配置为 <code>recall</code> 时自动触发</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>threat_retro_agent</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>notify</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">威胁回溯智能体发起通知</td><td style="padding:7px 10px;border:1px solid #dbe1ea">Threat Retro Agent Notify</td><td style="padding:7px 10px;border:1px solid #dbe1ea">威胁回溯智能体策略配置为 <code>notify</code> 时自动触发</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.8125rem;color:#64748b;margin:.25rem 0 0">i18n key（zh / en）：<code>emailDisposal.detail.analysis.operationType.adminApiRecall</code> / <code>.threatRetroAgentRecall</code> / <code>.threatRetroAgentNotify</code>；未命中时 fallback 到 <code>event_type</code> 原始值</p>
+  </article>
+
+  <!-- ====== 变更点 2：操作类型中文化 ====== -->
+  <article id="gt12807-c2" style="margin-bottom:2rem">
+    <h3 style="font-size:1rem;margin:0 0 .75rem">2. 操作类型 — 由 <code>event_source:event_type</code> 复合键驱动 i18n</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:.8125rem;margin-bottom:.75rem">
+      <tbody>
+        <tr style="border:1px solid #dbe1ea"><th style="width:140px;background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">修复前</th><td style="padding:7px 10px;border:1px solid #dbe1ea">展开事件详情后，「操作类型」值渲染 <code>ev.event_type</code> 原始英文（如 <code>policy_decided</code>、<code>recall</code>）</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">修复后</th><td style="padding:7px 10px;border:1px solid #dbe1ea">调用 <code>getOperationTypeLabel(ev.event_source, ev.event_type, t)</code>，以 <code>"source:type"</code> 复合键查 <code>OPERATION_TYPE_KEY_MAP</code>，再通过 <code>t()</code> 读取 i18n 翻译；未命中时 fallback 原始 type 值</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">原因</th><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>admin_api:recall</code> 与 <code>threat_retro_agent:recall</code> 的 <code>event_type</code> 同为 <code>recall</code>，单字段翻译无法区分二者；需复合键</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">i18n key</th><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>emailDisposal.detail.analysis.operationType.{adminApiRecall | threatRetroAgentRecall | threatRetroAgentNotify}</code></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- ====== 变更点 3：执行结果中文化 ====== -->
+  <article id="gt12807-c3" style="margin-bottom:2rem">
+    <h3 style="font-size:1rem;margin:0 0 .75rem">3. 执行结果 — 操作成功与否的 i18n 映射</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:.8125rem;margin-bottom:.75rem">
+      <tbody>
+        <tr style="border:1px solid #dbe1ea"><th style="width:140px;background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">修复前</th><td style="padding:7px 10px;border:1px solid #dbe1ea">「执行结果」值及行头 Badge 渲染 <code>ev.event_result</code> 原始英文（如 <code>success</code>、<code>quarantine_pending</code>）</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">修复后</th><td style="padding:7px 10px;border:1px solid #dbe1ea">调用 <code>getEventResultLabel(ev.event_result, t)</code>，查 <code>EVENT_RESULT_KEY_MAP</code> 后通过 <code>t()</code> 读取翻译；Badge 同步使用该函数</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">语义边界</th><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>event_result</code> 只表示"本次操作是否成功"；邮件状态枚举（<code>quarantine_pending</code>、<code>delivery_failed</code> 等）属 <code>MailLogDetail</code> 层，<strong>不在此映射</strong></td></tr>
+      </tbody>
+    </table>
+    <h4 style="font-size:.875rem;margin:.75rem 0 .5rem">执行结果枚举对照</h4>
+    <table style="width:100%;border-collapse:collapse;font-size:.8125rem">
+      <thead><tr style="background:#f1f3f7"><th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">event_result 原始值</th><th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">中文（zh）</th><th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">英文（en）</th></tr></thead>
+      <tbody>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>success</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">成功</td><td style="padding:7px 10px;border:1px solid #dbe1ea">Success</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>completed</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">成功</td><td style="padding:7px 10px;border:1px solid #dbe1ea">Success</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>failed</code> / <code>failure</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">失败</td><td style="padding:7px 10px;border:1px solid #dbe1ea">Failed</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>pending</code> / <code>in_progress</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">执行中</td><td style="padding:7px 10px;border:1px solid #dbe1ea">In Progress</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>timeout</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">超时</td><td style="padding:7px 10px;border:1px solid #dbe1ea">Timeout</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>skipped</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">已跳过</td><td style="padding:7px 10px;border:1px solid #dbe1ea">Skipped</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>cancelled</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">已取消</td><td style="padding:7px 10px;border:1px solid #dbe1ea">Cancelled</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.8125rem;color:#64748b;margin:.5rem 0 0">i18n 命名空间：<code>emailDisposal.detail.analysis.eventResult.*</code>；未命中时 fallback 原始值</p>
+  </article>
+
+  <!-- ====== 变更点 4：时间线默认展开 ====== -->
+  <article id="gt12807-c4" style="margin-bottom:2rem">
+    <h3 style="font-size:1rem;margin:0 0 .75rem">4. 事后处置时间线 — 默认展开</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:.8125rem">
+      <tbody>
+        <tr style="border:1px solid #dbe1ea"><th style="width:140px;background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">修复前</th><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>useState(false)</code>：时间线默认折叠，有事件也不可见</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">修复后</th><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>useState(true)</code>：时间线默认展开，进入安全分析 Tab 即可直接看到事件列表</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">影响元素</th><td style="padding:7px 10px;border:1px solid #dbe1ea">时间线标题行 chevron 由 chevron-right（折叠）改为 chevron-down（展开）；「时间线」按钮状态同步</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.8125rem;color:#64748b;margin:.5rem 0">注：layer-12 现有规格中「时间线默认态：折叠（chevron-right）」描述已失效，以本增量为准。</p>
+  </article>
+
+  <!-- ====== 变更点 5：查看原始日志按钮接入 ====== -->
+  <article id="gt12807-c5" style="margin-bottom:2rem">
+    <h3 style="font-size:1rem;margin:0 0 .75rem">5. 「查看原始日志」按钮 — 从 notImplementedToast 改为跳转原始日志区</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:.8125rem">
+      <tbody>
+        <tr style="border:1px solid #dbe1ea"><th style="width:140px;background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">修复前</th><td style="padding:7px 10px;border:1px solid #dbe1ea">点击「查看召回日志」→ <code>toast.info(tSenderActions('notImplementedToast'))</code>（暂未实现提示）</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">修复后</th><td style="padding:7px 10px;border:1px solid #dbe1ea">点击「查看原始日志」→ 调用 <code>onViewRawLogs()</code> 回调，由 <code>detail-modal.tsx</code> 注入：先 <code>setRawLogsExpanded(true)</code> 展开原始日志区，再 <code>scrollToSection('rawlogs')</code> 平滑滚动至原始日志区段</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">文案变更</th><td style="padding:7px 10px;border:1px solid #dbe1ea">按钮文案由「查看召回日志」改为「查看原始日志」（i18n key：<code>emailDisposal.detail.analysis.viewRecallLog</code>，值更新为「查看原始日志」/ "View Raw Logs"）</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">降级逻辑</th><td style="padding:7px 10px;border:1px solid #dbe1ea">若 <code>onViewRawLogs</code> prop 未传（如独立挂载 AnalysisSection 的测试场景），退回 <code>toast.info(notImplementedToast)</code>，保持向后兼容</td></tr>
+        <tr style="border:1px solid #dbe1ea"><th style="background:#f1f3f7;padding:7px 10px;text-align:left;white-space:nowrap">新增 prop</th><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>AnalysisSectionProps.onViewRawLogs?: () =&gt; void</code></td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- ====== Mock 数据补充 ====== -->
+  <article style="margin-bottom:2rem">
+    <h3 style="font-size:1rem;margin:0 0 .75rem">附：Mock 数据 — 三种事后处置事件</h3>
+    <p style="font-size:.8125rem;color:#334155;margin:0 0 .75rem">为使时间线模块在开发环境可见，<code>src/lib/mock/fixtures.ts</code> 的 <code>mockEmailDisposalEvents</code> 末尾追加了三条固定事件（时间戳：+5/+10/+15 分钟），覆盖三种业务场景：</p>
+    <table style="width:100%;border-collapse:collapse;font-size:.8125rem">
+      <thead><tr style="background:#f1f3f7"><th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">event_source</th><th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">event_type</th><th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">event_result</th><th style="padding:7px 10px;border:1px solid #dbe1ea;text-align:left">场景说明</th></tr></thead>
+      <tbody>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>admin_api</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>recall</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>success</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">管理员手动召回，成功</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>threat_retro_agent</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>recall</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>success</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">威胁回溯智能体策略 = recall，成功</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>threat_retro_agent</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>notify</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea"><code>success</code></td><td style="padding:7px 10px;border:1px solid #dbe1ea">威胁回溯智能体策略 = notify，成功</td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- ====== 差异标注 ====== -->
+  <section id="gt12807-diffs" style="margin-bottom:1.5rem;padding:1rem 1.25rem;border:1px solid #fecaca;background:#fef2f2;border-radius:.5rem">
+    <h3 style="color:#b91c1c;margin:0 0 .75rem;font-size:.9375rem" id="gt12807-diffs">D. 差异标注</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:.8125rem">
+      <thead><tr style="background:#fee2e2"><th style="padding:7px 10px;border:1px solid #fecaca;text-align:left">编号</th><th style="padding:7px 10px;border:1px solid #fecaca;text-align:left">目标要求</th><th style="padding:7px 10px;border:1px solid #fecaca;text-align:left">当前实现</th><th style="padding:7px 10px;border:1px solid #fecaca;text-align:left">状态</th><th style="padding:7px 10px;border:1px solid #fecaca;text-align:left">复核日期</th><th style="padding:7px 10px;border:1px solid #fecaca;text-align:left">验证依据</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="padding:7px 10px;border:1px solid #fecaca">D-001</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">时间线只展示事后处置动作，不展示投递流程事件</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">白名单过滤已实装（<code>DISPOSAL_SOURCES = {admin_api, threat_retro_agent}</code>），<code>antispam / postfix</code> 事件已被过滤</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca;color:#16794a;font-weight:600">已解决</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">2026-08-06</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">源码 <code>analysis-section.tsx</code> DISPOSAL_SOURCES + useMemo 过滤</td>
+        </tr>
+        <tr>
+          <td style="padding:7px 10px;border:1px solid #fecaca">D-002</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">操作类型、执行结果在中文环境下显示中文</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca"><code>getOperationTypeLabel</code> / <code>getEventResultLabel</code> + i18n 命名空间 <code>emailDisposal.detail.analysis.operationType.*</code> / <code>.eventResult.*</code> 已实装；zh.json / en.json 已添加所有枚举翻译</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca;color:#16794a;font-weight:600">已解决</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">2026-08-06</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">源码 OPERATION_TYPE_KEY_MAP / EVENT_RESULT_KEY_MAP + messages/zh.json lines 6331–6360</td>
+        </tr>
+        <tr>
+          <td style="padding:7px 10px;border:1px solid #fecaca">D-003</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">「查看召回日志」按钮需真实跳转，不弹未实现 Toast</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">已接入 <code>onViewRawLogs</code> prop，实现展开 + 滚动至原始日志区；文案改为「查看原始日志」</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca;color:#16794a;font-weight:600">已解决</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">2026-08-06</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">源码 <code>detail-modal.tsx</code> onViewRawLogs 注入 + <code>analysis-section.tsx</code> AnalysisSectionProps</td>
+        </tr>
+        <tr>
+          <td style="padding:7px 10px;border:1px solid #fecaca">D-004</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">layer-12 现有规格中「时间线默认态：折叠」描述已失效</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">现有元素清单第 70 行「时间线标题 · 默认态：折叠（chevron-right）」描述与新实现不符；本增量以文字标注，未修改原有表格行（保留历史）</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca;color:#a16207;font-weight:600">待处理（下次全量重生成时统一对齐）</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">2026-08-06</td>
+          <td style="padding:7px 10px;border:1px solid #fecaca">源码 useState(true)</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ====== 待确认事项 ====== -->
+  <section id="gt12807-questions" style="padding:1rem 1.25rem;border:1px solid #fde68a;background:#fffbeb;border-radius:.5rem">
+    <h3 style="color:#92400e;margin:0 0 .75rem;font-size:.9375rem">Q. 待确认事项</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:.8125rem">
+      <thead><tr style="background:#fef3c7"><th style="padding:7px 10px;border:1px solid #fde68a;text-align:left">编号</th><th style="padding:7px 10px;border:1px solid #fde68a;text-align:left">事项</th><th style="padding:7px 10px;border:1px solid #fde68a;text-align:left">原因</th><th style="padding:7px 10px;border:1px solid #fde68a;text-align:left">状态</th><th style="padding:7px 10px;border:1px solid #fde68a;text-align:left">复核日期</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="padding:7px 10px;border:1px solid #fde68a">Q-001</td>
+          <td style="padding:7px 10px;border:1px solid #fde68a">后端 <code>GET /mail-logs/{id}/events</code> 实际是否会返回 <code>threat_retro_agent</code> 来源的事件</td>
+          <td style="padding:7px 10px;border:1px solid #fde68a">当前 mock 数据已构造该来源事件，但真实 API 的 <code>event_source</code> 枚举值未在后端文档中确认；如值不同需同步修改白名单</td>
+          <td style="padding:7px 10px;border:1px solid #fde68a;color:#b45309;font-weight:600">无法验证</td>
+          <td style="padding:7px 10px;border:1px solid #fde68a">2026-08-06</td>
+        </tr>
+        <tr>
+          <td style="padding:7px 10px;border:1px solid #fde68a">Q-002</td>
+          <td style="padding:7px 10px;border:1px solid #fde68a"><code>event_result</code> 除已映射的 9 个枚举值外，是否存在其他真实返回值</td>
+          <td style="padding:7px 10px;border:1px solid #fde68a">映射表基于 mock 数据和代码推断，未查阅后端完整枚举定义；未命中值当前 fallback 到原始英文</td>
+          <td style="padding:7px 10px;border:1px solid #fde68a;color:#b45309;font-weight:600">无法验证</td>
+          <td style="padding:7px 10px;border:1px solid #fde68a">2026-08-06</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</section>
+
 <script src="../assets/disposal-preview.js"></script>
 <script>
 /* 复刻 security-analysis-section.tsx 的三类交互：阶段卡片展开/收起、事后处置时间线展开、关联分析展开。

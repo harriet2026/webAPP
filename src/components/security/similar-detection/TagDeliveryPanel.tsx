@@ -66,6 +66,29 @@ export function TagDeliveryPanel({ value, onChange, disabled }: Props) {
           </div>
         )}
       </div>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Switch
+            data-testid="similar-detection-tag-body-switch"
+            checked={!!value.tag_body_enabled}
+            disabled={disabled}
+            onCheckedChange={(checked) => onChange({ tag_body_enabled: checked })}
+          />
+          <Label className="text-sm">{t('tagBodyLabel')}</Label>
+        </div>
+        {value.tag_body_enabled && (
+          <div className="pl-10">
+            <Input
+              value={value.tag_body_content || ''}
+              disabled={disabled}
+              placeholder={t('tagBodyPlaceholder')}
+              onChange={(e) => onChange({ tag_body_content: e.target.value })}
+              className="h-8 w-full"
+              data-testid="similar-detection-tag-body-content"
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

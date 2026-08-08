@@ -125,13 +125,13 @@ export const pipelineDrawerResponsiveClasses = {
  * supports (GT-11894 shipped four).
  */
 export const actionLegendItems: {
-  key: 'deliver' | 'tagDeliver' | 'quarantine' | 'review' | 'block' | 'drop';
+  key: 'deliver' | 'quarantine' | 'review' | 'block' | 'drop' | 'nextStep';
   color: string;
   labelKey: string;
   descKey: string;
 }[] = [
   { key: 'deliver', color: 'var(--action-deliver)', labelKey: 'pipeline.actionDeliver', descKey: 'pipeline.actionDeliverDesc' },
-  { key: 'tagDeliver', color: 'var(--action-mark-deliver)', labelKey: 'pipeline.actionTagDeliver', descKey: 'pipeline.actionTagDeliverDesc' },
+  { key: 'nextStep', color: 'var(--action-mark-deliver)', labelKey: 'pipeline.actionNextStep', descKey: 'pipeline.actionNextStepDesc' },
   { key: 'quarantine', color: 'var(--action-quarantine)', labelKey: 'pipeline.actionQuarantine', descKey: 'pipeline.actionQuarantineDesc' },
   { key: 'review', color: 'var(--action-review)', labelKey: 'pipeline.actionReview', descKey: 'pipeline.actionReviewDesc' },
   { key: 'block', color: 'var(--action-block)', labelKey: 'pipeline.actionBlock', descKey: 'pipeline.actionBlockDesc' },
@@ -410,7 +410,7 @@ export function PolicyPipelinePage() {
       nameKey: comprehensiveStageNameKey,
       bgClass: 'bg-[#F5F5F5] dark:bg-gray-900',
       borderClass: 'rounded-r-lg border-l-0',
-      // html_spec §3.1 对齐：相似检测/邮件标记隔离 → configurable（橙）；高级过滤规则尚未配置
+      // html_spec §3.1 对��：相似检测/邮件标记隔离 → configurable（橙）；高级过滤规则尚未配置
       // → configurable + unconfigured（灰色虚线 / 去配置）。
       policies: [
         { key: 'similarDetection', nameKey: 'pipeline.similarDetection', descKey: 'pipeline.similarDetectionDesc', type: 'configurable', functional: true },
@@ -584,7 +584,7 @@ export function PolicyPipelinePage() {
               <div>{t('contentRules.cardTooltipQuarantineHint')}</div>
             </div>
           ) : (
-            // 修复：此前该分支与上面的 'content' 分支各自独立 ternary 并列渲染，导致
+            // 修复：此前该分支与���面的 'content' 分支各自独立 ternary 并列渲染，导致
             // intentEngine/url/content 之外的所有卡片（含本次的 similarDetection 修复前）
             // descKey 单行描述被渲染两遍（同一 Tooltip 内文案重复）。合并为单一 ternary 链后
             // 每张卡只命中一个分支，不再重复。

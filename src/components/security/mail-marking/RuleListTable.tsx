@@ -24,11 +24,11 @@ export function RuleListTable({ rules, scopeNames, onEdit, onDelete, loading }: 
       <table className="w-full table-fixed text-sm">
         <thead className="bg-muted/50 text-xs text-muted-foreground">
           <tr>
-            <th className="w-[92px] px-4 py-3 text-left">{t('priority')}</th>
             <th className="px-4 py-3 text-left">{t('ruleName')}</th>
             <th className="w-[220px] px-4 py-3 text-left">{t('applyTo')}</th>
             <th className="w-[150px] px-4 py-3 text-left">{t('position')}</th>
             <th className="w-[92px] px-4 py-3 text-left">{t('status')}</th>
+            <th className="w-[92px] px-4 py-3 text-left">{t('priority')}</th>
             <th className="w-[112px] px-4 py-3 text-right">{t('operation')}</th>
           </tr>
         </thead>
@@ -51,7 +51,6 @@ export function RuleListTable({ rules, scopeNames, onEdit, onDelete, loading }: 
                 data-testid={`mail-marking-rule-row-${rule.id}`}
                 className={cn('transition-colors hover:bg-muted/30', !rule.is_active && 'opacity-50')}
               >
-                <td className="px-4 py-3 font-mono tabular-nums">{rule.priority}</td>
                 <td className="truncate px-4 py-3 font-medium" title={rule.name}>{rule.name}</td>
                 <td className="truncate px-4 py-3 text-muted-foreground" title={formatScopes(scopes, scopeNames, t('applyToAllUsers'))}>
                   {formatScopes(scopes, scopeNames, t('applyToAllUsers'))}
@@ -67,6 +66,7 @@ export function RuleListTable({ rules, scopeNames, onEdit, onDelete, loading }: 
                     {rule.is_active ? t('enabled') : t('disabled')}
                   </Badge>
                 </td>
+                <td className="px-4 py-3 font-mono tabular-nums">{rule.priority}</td>
                 <td className="px-4 py-3 text-right">
                   <TooltipProvider>
                     <Tooltip>

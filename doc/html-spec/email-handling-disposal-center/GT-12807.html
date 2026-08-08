@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GT-12807 — GT-12772 邮件处置中心事后处置时间线修复规格说明</title>
+<link rel="stylesheet" href="../assets/spec-style.css">
+<style>
+  body { max-width:1200px; margin:0 auto; padding:2rem; background:#f7f8fa; color:#172033; font:14px/1.65 system-ui,sans-serif; }
+  h1,h2,h3,h4 { line-height:1.35; }
+  a { color:#4f46e5; }
+  code { font-family:ui-monospace,monospace; font-size:.8125rem; background:#f1f3f7; padding:.1em .35em; border-radius:.25rem; }
+
+  .meta-row { display:flex; flex-wrap:wrap; gap:.5rem 2rem; padding:1rem 1.25rem; background:#fff; border:1px solid #dbe1ea; border-radius:.625rem; margin-bottom:1.5rem; font-size:.875rem; }
+  .meta-row dt { font-weight:650; color:#4f46e5; }
+  .meta-row dd { margin:0; }
+
+  nav.toc { background:#fff; border:1px solid #dbe1ea; border-radius:.625rem; padding:1.25rem; margin-bottom:1.5rem; }
+  nav.toc h2 { font-size:1rem; margin:0 0 .75rem; color:#4f46e5; }
+  nav.toc > ul { list-style:none; padding:0; margin:0; }
+  nav.toc > ul > li { margin:.25rem 0; }
+  nav.toc .toc-l1 > a { font-weight:650; color:#172033; }
+  nav.toc .toc-l2-group { list-style:none; padding-left:1.25rem; margin:.25rem 0 .5rem; }
+  nav.toc .toc-l2-group li { margin:.2rem 0; }
+  nav.toc .toc-num { display:inline-block; width:1.25rem; color:#64748b; font-size:.75rem; }
+
+  section.card { background:#fff; border:1px solid #dbe1ea; border-radius:.625rem; padding:1.5rem; margin-bottom:1.5rem; }
+  section.card > h2 { color:#4f46e5; font-size:1rem; margin:0 0 1rem; padding-bottom:.5rem; border-bottom:2px solid #4f46e5; }
+  h3 { font-size:.9375rem; margin:1.25rem 0 .6rem; }
+  h4 { font-size:.875rem; margin:1rem 0 .5rem; }
+
+  table.st { width:100%; border-collapse:collapse; font-size:.8125rem; margin:.5rem 0; }
+  table.st th { background:#f1f3f7; padding:7px 10px; border:1px solid #dbe1ea; text-align:left; font-weight:650; white-space:nowrap; }
+  table.st td { padding:7px 10px; border:1px solid #dbe1ea; vertical-align:top; }
+  table.st th:first-child { width:160px; }
+
+  .interaction-preview { margin:1.25rem 0; padding:1.25rem; border:1px solid #dbe1ea; border-left:4px solid #4f46e5; border-radius:.625rem; background:#fafbfd; }
+  .interaction-preview > h3 { margin-top:0; color:#4f46e5; }
+  .state-meta { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.5rem 1rem; padding:.75rem; background:#f1f3f7; border-radius:.375rem; margin-bottom:1rem; font-size:.8125rem; }
+  .state-meta dt { font-weight:650; }
+  .state-meta dd { margin:0; }
+
+  .screenshot-figure { text-align:center; margin:1rem 0 1.5rem; }
+  .screenshot-figure img { max-width:100%; border:1px solid #dbe1ea; border-radius:.5rem; box-shadow:0 2px 8px rgb(15 23 42/.08); }
+  .screenshot-figure figcaption { color:#64748b; font-size:.75rem; margin-top:.5rem; }
+
+  .sequence-label { display:inline-block; margin-bottom:.375rem; padding:.125rem .5rem; border-radius:999px; background:#4f46e5; color:#fff; font-size:.6875rem; font-weight:650; }
+
+  .diff-section { border-left:4px solid #b91c1c; background:#fef2f2; }
+  .q-section { border-left:4px solid #a16207; background:#fffbeb; }
+  .status-done { color:#16794a; font-weight:650; }
+  .status-open { color:#b91c1c; font-weight:650; }
+  .status-pending { color:#a16207; font-weight:650; }
+</style>
+</head>
+<body>
+
+<!-- ===== 元信息 ===== -->
+<dl class="meta-row">
+  <div><dt>文档 ticket</dt><dd>GT-12807</dd></div>
+  <div><dt>需求名称</dt><dd>GT-12772 邮件处置中心-标准SMTP邮件召回失败仍提示成功且召回日志入口未实现问题解决</dd></div>
+  <div><dt>生成日期</dt><dd>2026-08-06</dd></div>
+  <div><dt>规格版本</dt><dd>v1（增量文档）</dd></div>
+  <div><dt>webapp commit</dt><dd><code>aa466b7</code></dd></div>
+  <div><dt>对照 spec commit</dt><dd>not-used</dd></div>
+  <div><dt>路由路径</dt><dd><code>/zh/email-disposal/center</code></dd></div>
+  <div><dt>组件路径</dt><dd><code>src/components/email-disposal/sections/analysis-section.tsx</code></dd></div>
+  <div><dt>变更类型</dt><dd>功能修复</dd></div>
+  <div><dt>验证环境</dt><dd>desktop 1534×920, dark mode；dev server mock 数据；历史对话已使用</dd></div>
+</dl>
+
+<!-- ===== 目录 ===== -->
+<nav class="toc" aria-label="规格目录">
+  <h2>目录</h2>
+  <ul>
+    <li class="toc-l1"><a href="#meta">A. 元信息与事实源</a></li>
+    <li class="toc-l1"><a href="#matrix">B. 产品形态 × 角色矩阵</a></li>
+    <li class="toc-l1"><a href="#gt-12772">GT-12772 邮件处置中心-标准SMTP邮件召回失败仍提示成功且召回日志入口未实现问题解决</a></li>
+    <ul class="toc-l2-group">
+      <li><span class="toc-num">1</span><a href="#change-1">事后处置时间线 — 事件来源白名单过滤</a></li>
+      <ul class="toc-l2-group">
+        <li><a href="#c1-overview">1.1 方案概述</a></li>
+        <li><a href="#c1-states">1.2 状态对比（修复前 / 修复后）</a></li>
+        <li><a href="#c1-elements">1.3 逐元素说明</a></li>
+      </ul>
+      <li><span class="toc-num">2</span><a href="#change-2">操作类型 — i18n 复合键映射</a></li>
+      <ul class="toc-l2-group">
+        <li><a href="#c2-overview">2.1 方案概述</a></li>
+        <li><a href="#c2-enum">2.2 操作类型枚举表</a></li>
+      </ul>
+      <li><span class="toc-num">3</span><a href="#change-3">执行结果 — i18n 枚举映射</a></li>
+      <ul class="toc-l2-group">
+        <li><a href="#c3-overview">3.1 方案概述</a></li>
+        <li><a href="#c3-enum">3.2 执行结果枚举表</a></li>
+      </ul>
+      <li><span class="toc-num">4</span><a href="#change-4">事后处置时间线 — 默认展开</a></li>
+      <li><span class="toc-num">5</span><a href="#change-5">「查看原始日志」按钮接入</a></li>
+      <li><span class="toc-num">6</span><a href="#change-6">Mock 数据补充</a></li>
+    </ul>
+    <li class="toc-l1"><a href="#diffs">C. 差异标注</a></li>
+    <li class="toc-l1"><a href="#questions">D. 待确认事项</a></li>
+    <li class="toc-l1"><a href="#history">E. 版本历史</a></li>
+  </ul>
+</nav>
+
+<!-- ===== A. 元信息与事实源 ===== -->
+<section class="card" id="meta">
+  <h2>A. 元信息与事实源</h2>
+  <table class="st">
+    <tbody>
+      <tr><th>需求依据</th><td>用户当前描述（本次对话记录） + webapp 当前运行态 + 源码</td></tr>
+      <tr><th>事实源优先级</th><td>1. 用户当前描述　2. 历史对话决定（已使用）　3. webapp 当前运行态与源码</td></tr>
+      <tr><th>关联 layer</th><td><a href="./layer-12-detail-security-analysis.html#incremental-gt-12807-post-disposal-timeline">layer-12-detail-security-analysis.html — 增量小节 GT-12807</a></td></tr>
+      <tr><th>主规格入口</th><td><a href="./index.html#component-2-4">index.html § 2.4 详情抽屉</a></td></tr>
+      <tr><th>变更文件清单</th><td>
+        <code>src/components/email-disposal/sections/analysis-section.tsx</code>（白名单过滤、操作类型/执行结果 i18n 函数、默认展开、onViewRawLogs prop）<br>
+        <code>src/components/email-disposal/detail-modal.tsx</code>（注入 onViewRawLogs 回调）<br>
+        <code>src/lib/mock/fixtures.ts</code>（追加三条事后处置 mock 事件）<br>
+        <code>messages/zh.json</code>（新增 operationType.* / eventResult.* 翻译 key）<br>
+        <code>messages/en.json</code>（同上，英文）
+      </td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===== B. 产品形态 × 角色矩阵 ===== -->
+<section class="card" id="matrix">
+  <h2>B. 产品形态 × 角色矩阵</h2>
+  <p style="font-size:.8125rem;color:#64748b;margin:0 0 .75rem">本次变更仅影响详情抽屉「安全分析」Tab 中的事后处置时间线区块，不新增功能入口，矩阵沿用主规格设定。</p>
+  <table class="st">
+    <thead>
+      <tr>
+        <th>功能点</th>
+        <th>AI-单</th>
+        <th>传统-单</th>
+        <th>云-多（平台管理员）</th>
+        <th>云-多（租户管理员）</th>
+        <th>AI-多</th>
+        <th>传统-多</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>事后处置时间线区块可见</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>「查看原始日志」按钮可点</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:.75rem;color:#64748b;margin:.5rem 0 0">✅ 显示且可用　? 无法验证（形态差异不影响本变更，按 [Base] 处理）</p>
+</section>
+
+<!-- ===== 需求内容 ===== -->
+<section class="card" id="gt-12772">
+  <h2>GT-12772 邮件处置中心-标准SMTP邮件召回失败仍提示成功且召回日志入口未实现问题解决</h2>
+
+  <!-- 变更点 1 -->
+  <article id="change-1">
+    <h3>1. 事后处置时间线 — 事件来源白名单过滤</h3>
+
+    <h4 id="c1-overview">1.1 方案概述</h4>
+    <table class="st">
+      <tbody>
+        <tr><th>问题根因</th><td>原过滤逻辑为<strong>黑名单</strong>（仅排除 <code>event_source === 'postfix'</code>），导致 <code>antispam</code>（策略裁决）等投递流程事件穿透过滤，在时间线中出现；这类事件的 <code>event_type</code> 在映射表中缺失，进而以原始英文渲染，视觉上误导为"召回成功"</td></tr>
+        <tr><th>修复方案</th><td>改为<strong>白名单</strong>：<code>DISPOSAL_SOURCES = new Set(['admin_api', 'threat_retro_agent'])</code>；过滤逻辑由 <code>ev.event_source !== 'postfix'</code> 改为 <code>DISPOSAL_SOURCES.has(ev.event_source ?? '')</code></td></tr>
+        <tr><th>白名单枚举</th><td><code>admin_api</code>（管理员手动召回）　<code>threat_retro_agent</code>（威胁回溯智能体发起召回/通知）</td></tr>
+        <tr><th>排除的来源</th><td><code>postfix</code>（Postfix 投递状态）、<code>antispam</code>（策略裁决）及任何其他非处置来源</td></tr>
+        <tr><th>源码路径</th><td><code>analysis-section.tsx</code> 第 162 行 <code>DISPOSAL_SOURCES</code> 常量 + 第 262 行 <code>disposalEvents</code> useMemo</td></tr>
+        <tr><th>i18n 变化</th><td>无（仅过滤逻辑，不影响文案）</td></tr>
+      </tbody>
+    </table>
+
+    <h4 id="c1-states">1.2 状态对比（修复前 / 修复后）</h4>
+    <div class="interaction-preview">
+      <h3>时间线内容对比 — antispam 事件的可见性</h3>
+      <dl class="state-meta">
+        <div><dt>触发路径</dt><dd>列表 → 点击邮件行 → 详情抽屉 → 安全分析 Tab → 事后处置时间线</dd></div>
+        <div><dt>前置条件</dt><dd>该封邮件存在 <code>antispam · policy_decided</code> 事件（如 mock 数据第 1～N 条）</dd></div>
+        <div><dt>验证依据</dt><dd>源码 DISPOSAL_SOURCES 常量 + mock fixtures.ts 事件来源字段</dd></div>
+      </dl>
+
+      <table class="st">
+        <thead><tr><th>状态</th><th>时间线显示内容</th><th>结果</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>修复前</strong><br>（黑名单，排除 postfix）</td>
+            <td><code>antispam · policy_decided</code>、<code>antispam · quarantine_pending</code> 等投递流程事件可见；因这些 event_type 不在映射表中，渲染原始英文；「事件数」badge 虚高</td>
+            <td style="color:#b91c1c;font-weight:600">缺陷：混入投递流程事件，歧义提示成功</td>
+          </tr>
+          <tr>
+            <td><strong>修复后</strong><br>（白名单，仅保留 admin_api / threat_retro_agent）</td>
+            <td>只显示 <code>admin_api:recall</code>、<code>threat_retro_agent:recall</code>、<code>threat_retro_agent:notify</code> 三类事件；无处置事件时显示「暂无事件」空态</td>
+            <td style="color:#16794a;font-weight:600">正确：仅展示处置动作</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="font-size:.75rem;color:#64748b;margin:.5rem 0 0">浏览器截图：本次未在 webapp 中实拍截图（开发环境 mock 已补充白名单内事件，可在时间线看到三条事件）。待 webapp dev 可访问时补截图至 <code>./screenshots/gt12807-timeline-whitelist-after.png</code></p>
+    </div>
+
+    <h4 id="c1-elements">1.3 逐元素说明</h4>
+    <table class="st">
+      <thead><tr><th>#</th><th>元素</th><th>文案 / 值</th><th>修复前</th><th>修复后</th><th>形态/角色差异</th><th>i18n key</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td><td>事件计数 Badge</td><td>N 个事件</td>
+          <td>含投递流程事件数量（虚高）</td>
+          <td>仅含白名单内事件数量</td>
+          <td>[Base]</td>
+          <td><code>emailDisposal.detail.analysis.eventCount</code></td>
+        </tr>
+        <tr>
+          <td>2</td><td>事件卡片（每条处置事件）</td><td>—</td>
+          <td>可能渲染 antispam 事件（显示原始英文）</td>
+          <td>只渲染 admin_api / threat_retro_agent 事件</td>
+          <td>[Base]</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3</td><td>空态文案</td><td>暂无事件</td>
+          <td>—（白名单前不触发空态，因有 postfix 事件）</td>
+          <td>当 disposalEvents.length === 0 时显示</td>
+          <td>[Base]</td>
+          <td><code>emailDisposal.detail.analysis.noEvents</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- 变更点 2 -->
+  <article id="change-2" style="margin-top:2rem">
+    <h3>2. 操作类型 — i18n 复合键映射</h3>
+
+    <h4 id="c2-overview">2.1 方案概述</h4>
+    <table class="st">
+      <tbody>
+        <tr><th>问题根因</th><td>详情展开后「操作类型」栏渲染 <code>ev.event_type</code> 原始英文（<code>recall</code>、<code>notify</code> 等），未经翻译</td></tr>
+        <tr><th>修复方案</th><td>新增纯函数 <code>getOperationTypeLabel(source, type, t)</code>；以 <code>"source:type"</code> 复合键查 <code>OPERATION_TYPE_KEY_MAP</code>，再通过项目 i18n 框架 <code>t()</code> 读取中英文翻译；未命中 fallback 到 <code>event_type</code> 原始值</td></tr>
+        <tr><th>使用复合键原因</th><td><code>admin_api:recall</code> 与 <code>threat_retro_agent:recall</code> 的 event_type 同为 <code>recall</code>，单字段无法区分二者的业务语义</td></tr>
+        <tr><th>删除内容</th><td>原 <code>OPERATION_TYPE_ZH</code> 硬编码映射表 + <code>translateEventType()</code> 函数（依赖 <code>isZh</code> 标志位）已删除；<code>isZh</code> 变量随之删除</td></tr>
+        <tr><th>源码路径</th><td><code>analysis-section.tsx</code>：<code>OPERATION_TYPE_KEY_MAP</code> 常量 + <code>getOperationTypeLabel</code> 函数</td></tr>
+      </tbody>
+    </table>
+
+    <h4 id="c2-enum">2.2 操作类型枚举表</h4>
+    <table class="st">
+      <thead><tr><th>event_source</th><th>event_type</th><th>复合键</th><th>i18n sub-key</th><th>中文（zh）</th><th>英文（en）</th></tr></thead>
+      <tbody>
+        <tr><td><code>admin_api</code></td><td><code>recall</code></td><td><code>admin_api:recall</code></td><td><code>adminApiRecall</code></td><td>管理员召回</td><td>Admin Recall</td></tr>
+        <tr><td><code>threat_retro_agent</code></td><td><code>recall</code></td><td><code>threat_retro_agent:recall</code></td><td><code>threatRetroAgentRecall</code></td><td>威胁回溯智能体发起召回</td><td>Threat Retro Agent Recall</td></tr>
+        <tr><td><code>threat_retro_agent</code></td><td><code>notify</code></td><td><code>threat_retro_agent:notify</code></td><td><code>threatRetroAgentNotify</code></td><td>威胁回溯智能体发起通知</td><td>Threat Retro Agent Notify</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.75rem;color:#64748b;margin:.5rem 0 0">i18n 命名空间：<code>emailDisposal.detail.analysis.operationType.*</code></p>
+  </article>
+
+  <!-- 变更点 3 -->
+  <article id="change-3" style="margin-top:2rem">
+    <h3>3. 执行结果 — i18n 枚举映射</h3>
+
+    <h4 id="c3-overview">3.1 方案概述</h4>
+    <table class="st">
+      <tbody>
+        <tr><th>问题根因</th><td>事件行头 Badge 及详情「执行结果」栏均渲染 <code>ev.event_result</code> 原始英文</td></tr>
+        <tr><th>修复方案</th><td>新增纯函数 <code>getEventResultLabel(val, t)</code>；查 <code>EVENT_RESULT_KEY_MAP</code> 后通过 <code>t()</code> 读取翻译；Badge 和详情行均使用同一函数，保持一致</td></tr>
+        <tr><th>语义边界</th><td><code>event_result</code> 只描述"本次操作是否成功"；<code>MailLogDetail</code> 层的 <code>quarantine_pending</code> 等邮件状态枚举<strong>不在此映射</strong></td></tr>
+        <tr><th>删除内容</th><td>原 <code>EVENT_RESULT_ZH</code> 硬编码表 + <code>translateEventResult()</code> 函数已删除</td></tr>
+        <tr><th>源码路径</th><td><code>analysis-section.tsx</code>：<code>EVENT_RESULT_KEY_MAP</code> 常量 + <code>getEventResultLabel</code> 函数</td></tr>
+      </tbody>
+    </table>
+
+    <h4 id="c3-enum">3.2 执行结果枚举表</h4>
+    <table class="st">
+      <thead><tr><th>event_result 原始值</th><th>i18n sub-key</th><th>中文（zh）</th><th>英文（en）</th><th>备注</th></tr></thead>
+      <tbody>
+        <tr><td><code>success</code></td><td><code>success</code></td><td>成功</td><td>Success</td><td>—</td></tr>
+        <tr><td><code>completed</code></td><td><code>completed</code></td><td>成功</td><td>Success</td><td>部分后端用 completed 表示成功</td></tr>
+        <tr><td><code>failed</code></td><td><code>failed</code></td><td>失败</td><td>Failed</td><td>—</td></tr>
+        <tr><td><code>failure</code></td><td><code>failure</code></td><td>失败</td><td>Failed</td><td>—</td></tr>
+        <tr><td><code>pending</code></td><td><code>pending</code></td><td>执行中</td><td>In Progress</td><td>—</td></tr>
+        <tr><td><code>in_progress</code></td><td><code>in_progress</code></td><td>执行中</td><td>In Progress</td><td>—</td></tr>
+        <tr><td><code>timeout</code></td><td><code>timeout</code></td><td>超时</td><td>Timeout</td><td>—</td></tr>
+        <tr><td><code>skipped</code></td><td><code>skipped</code></td><td>已跳过</td><td>Skipped</td><td>—</td></tr>
+        <tr><td><code>cancelled</code></td><td><code>cancelled</code></td><td>已取消</td><td>Cancelled</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.75rem;color:#64748b;margin:.5rem 0 0">i18n 命名空间：<code>emailDisposal.detail.analysis.eventResult.*</code>；未命中时 fallback 到原始值</p>
+  </article>
+
+  <!-- 变更点 4 -->
+  <article id="change-4" style="margin-top:2rem">
+    <h3>4. 事后处置时间线 — 默认展开</h3>
+    <table class="st">
+      <tbody>
+        <tr><th>修复前</th><td><code>const [showPostDetectionTimeline, setShowPostDetectionTimeline] = useState(false)</code>：时间线默认折叠，有事件也不可见</td></tr>
+        <tr><th>修复后</th><td><code>useState(true)</code>：时间线默认展开，进入安全分析 Tab 即直接可见事件列表</td></tr>
+        <tr><th>影响元素</th><td>时间线标题行 chevron：默认由 chevron-right（折叠）改为 chevron-down（展开）；「时间线」按钮图标/文案状态同步</td></tr>
+        <tr><th>注意</th><td>layer-12 现有规格「时间线默认态：折叠（chevron-right）」描述已失效，以本文档为准；现有预览 JS 中 <code>tlOpen = false</code> 初始值亦需下次全量重生成时对齐</td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- 变更点 5 -->
+  <article id="change-5" style="margin-top:2rem">
+    <h3>5. 「查看原始日志」按钮 — 真实跳转接入</h3>
+    <table class="st">
+      <tbody>
+        <tr><th>修复前</th><td>点击「查看召回日志」→ 调用 <code>toast.info(tSenderActions('notImplementedToast'))</code>，弹出「暂未实现」提示；入口存在但功能空转</td></tr>
+        <tr><th>修复后</th><td>点击「查看原始日志」→ 调用 <code>onViewRawLogs()</code>，由 <code>detail-modal.tsx</code> 注入：先 <code>setRawLogsExpanded(true)</code> 展开原始日志区，再 <code>scrollToSection('rawlogs')</code> 平滑滚动至原始日志区段</td></tr>
+        <tr><th>文案变更</th><td>按钮文案由「查看召回日志」改为「查看原始日志」；i18n key：<code>emailDisposal.detail.analysis.viewRecallLog</code>（zh 值更新为「查看原始日志」/ en 值更新为 "View Raw Logs"）</td></tr>
+        <tr><th>新增 prop</th><td><code>AnalysisSectionProps.onViewRawLogs?: () =&gt; void</code>（可选，未传时 fallback 到 notImplementedToast）</td></tr>
+        <tr><th>注入位置</th><td><code>detail-modal.tsx</code> 向 <code>&lt;AnalysisSection&gt;</code> 传入 <code>onViewRawLogs</code></td></tr>
+        <tr><th>可交互结果</th><td>点击后：① 原始日志区段展开（若已折叠）② 抽屉内容区平滑滚动至 <code>#rawlogs</code> 锚点 ③ 用户可直接查看该封邮件的原始日志</td></tr>
+        <tr><th>降级</th><td>未传 <code>onViewRawLogs</code> 时维持 toast 提示，不报错</td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- 变更点 6 -->
+  <article id="change-6" style="margin-top:2rem">
+    <h3>6. Mock 数据补充 — 三种事后处置事件</h3>
+    <table class="st">
+      <tbody>
+        <tr><th>目的</th><td>白名单改造后，现有 mock 数据（仅含 postfix / antispam 事件）将全部被过滤，时间线显示空态；追加三条白名单内事件，确保开发环境可见三种业务场景</td></tr>
+        <tr><th>修改文件</th><td><code>src/lib/mock/fixtures.ts</code> → <code>mockEmailDisposalEvents</code> 末尾追加 <code>postDisposalEvents</code> 数组</td></tr>
+        <tr><th>时间戳规则</th><td>接收时间 +5 分钟 / +10 分钟 / +15 分钟，模拟处置先后顺序</td></tr>
+      </tbody>
+    </table>
+    <table class="st" style="margin-top:.75rem">
+      <thead><tr><th>event_source</th><th>event_type</th><th>event_result</th><th>时间偏移</th><th>场景说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>admin_api</code></td><td><code>recall</code></td><td><code>success</code></td><td>+5 min</td><td>管理员手动召回，成功</td></tr>
+        <tr><td><code>threat_retro_agent</code></td><td><code>recall</code></td><td><code>success</code></td><td>+10 min</td><td>威胁回溯智能体策略 = recall，成功</td></tr>
+        <tr><td><code>threat_retro_agent</code></td><td><code>notify</code></td><td><code>success</code></td><td>+15 min</td><td>威胁回溯智能体策略 = notify，成功</td></tr>
+      </tbody>
+    </table>
+  </article>
+</section>
+
+<!-- ===== C. 差异标注 ===== -->
+<section class="card diff-section" id="diffs">
+  <h2>C. 差异标注</h2>
+  <table class="st">
+    <thead><tr><th>编号</th><th>目标要求</th><th>当前实现</th><th>状态</th><th>复核日期</th><th>验证依据</th><th>处理说明</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>D-001</td>
+        <td>时间线只展示事后处置动作，不展示投递流程事件</td>
+        <td>白名单过滤已实装（<code>DISPOSAL_SOURCES</code>），antispam / postfix 事件被过滤</td>
+        <td class="status-done">已解决</td>
+        <td>2026-08-06</td>
+        <td>源码 DISPOSAL_SOURCES + useMemo 过滤</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>D-002</td>
+        <td>操作类型、执行结果在中文环境下显示中文</td>
+        <td>getOperationTypeLabel / getEventResultLabel + messages/zh.json operationType.* / eventResult.* 已实装</td>
+        <td class="status-done">已解决</td>
+        <td>2026-08-06</td>
+        <td>源码映射常量 + messages/zh.json</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>D-003</td>
+        <td>「查看召回日志」按钮需真实跳转，不弹未实现 Toast</td>
+        <td>已接入 onViewRawLogs prop；文案改为「查看原始日志」</td>
+        <td class="status-done">已解决</td>
+        <td>2026-08-06</td>
+        <td>源码 detail-modal.tsx onViewRawLogs 注入</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>D-004</td>
+        <td>layer-12 规格「时间线默认态：折叠」描述已失效</td>
+        <td>现有元素清单第 70 行描述与新实现（默认展开）不符；本文档以文字标注；layer-12 原有行保留（历史记录）</td>
+        <td class="status-pending">待处理（下次全量重生成时对齐）</td>
+        <td>2026-08-06</td>
+        <td>源码 useState(true)</td>
+        <td>纳入下次 layer-12 全量重生成</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===== D. 待确认事项 ===== -->
+<section class="card q-section" id="questions">
+  <h2>D. 待确认事项</h2>
+  <table class="st">
+    <thead><tr><th>编号</th><th>事项</th><th>原因</th><th>状态</th><th>复核日期</th><th>需要谁确认</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Q-001</td>
+        <td>后端 <code>GET /mail-logs/{id}/events</code> 实际是否会返回 <code>threat_retro_agent</code> 来源的事件，以及确切的 event_source 枚举值</td>
+        <td>当前 mock 已构造该来源事件，但真实 API 的 event_source 枚举值未在后端文档中确认；如值不同需同步修改 DISPOSAL_SOURCES 白名单</td>
+        <td class="status-open">无法验证</td>
+        <td>2026-08-06</td>
+        <td>后端 / API 负责人</td>
+      </tr>
+      <tr>
+        <td>Q-002</td>
+        <td><code>event_result</code> 除已映射的 9 个枚举值外，是否存在其他真实返回值</td>
+        <td>映射表基于 mock 数据和代码推断，未查阅后端完整枚举定义；未命中值当前 fallback 到原始英文</td>
+        <td class="status-open">无法验证</td>
+        <td>2026-08-06</td>
+        <td>后端 / API 负责人</td>
+      </tr>
+      <tr>
+        <td>Q-003</td>
+        <td><code>scrollToSection('rawlogs')</code> 是否已在 detail-modal 中实现，或需新增</td>
+        <td>本规格描述了期望行为；实际 detail-modal.tsx 中是否已有 scrollToSection 函数需代码确认</td>
+        <td class="status-open">无法验证</td>
+        <td>2026-08-06</td>
+        <td>前端开发，对照 detail-modal.tsx</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===== E. 版本历史 ===== -->
+<section class="card" id="history">
+  <h2>E. 版本历史</h2>
+  <table class="st">
+    <thead><tr><th>版本</th><th>日期</th><th>webapp commit</th><th>对照 spec commit</th><th>摘要</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>v1</td>
+        <td>2026-08-06</td>
+        <td><code>aa466b7</code></td>
+        <td><code>not-used</code></td>
+        <td>GT-12772 修复规格初版：事后处置时间线白名单过滤（DISPOSAL_SOURCES）、操作类型和执行结果 i18n 映射（getOperationTypeLabel / getEventResultLabel）、时间线默认展开（useState true）、「查看原始日志」按钮接入 onViewRawLogs prop、mock 数据补充三种事后处置事件</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+</body>
+</html>

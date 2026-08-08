@@ -7,7 +7,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import {
   CheckCircle2, AlertTriangle, XCircle, MinusCircle, ChevronDown,
-  Clock, ShieldQuestion, ShieldAlert, ExternalLink, ArrowRight, User,
+  Clock, ShieldQuestion, ShieldAlert, ExternalLink, ArrowRight, User, RotateCcw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -38,6 +38,10 @@ interface AnalysisSectionProps {
   // for the recipient delivery-detail line. Powers the 事后处置时间线
   // subsection (v2 spec gap 2.5): real per-event rows, not mock data.
   events?: MailChildEvent[];
+  // 「查看原始日志」的回调，由 detail-modal.tsx 注入，滚动至原始日志区段。
+  // 有值时替代 notImplementedToast；无值时（如独立挂载 AnalysisSection 的测试）
+  // 退回 toast，保持向后兼容。
+  onViewRawLogs?: () => void;
 }
 
 const STATUS_ICON: Record<CheckStatus, React.ReactElement> = {
@@ -118,12 +122,93 @@ function connectorArrowClass(i: number, hitIndex: number): string {
 
 const ALL_STAGE_NUMBERS = [1, 2, 3, 4, 5];
 
+// 优化二：事件行人性化文案。对常见 event_source + event_type 组合做中文映射，
+// fallback 到原始拼接字符串，保证新增 event_source 不需要同步修改此处也能显示。
+function formatEventLabel(ev: MailChildEvent): string {
+  const key = `${ev.event_source}:${ev.event_type}`;
+  const map: Record<string, string> = {
+    'workflow.quarantine:recall':  '召回执行（隔离区）',
+    'workflow.sideline:recall':    '召回执行（侧线区）',
+    'workflow.audit:approve':      '审核放行',
+    'workflow.audit:reject':       '审核拒绝',
+    'workflow.bounce:send':        '退信发送',
+    'admin_api:recall':            '管理员手动召回',
+    'workflow.quarantine:release': '从隔离区放行',
+    'workflow.sideline:release':   '从侧线区放行',
+    'workflow.quarantine:discard': '隔离区丢弃',
+    'workflow.sideline:discard':   '侧线区丢弃',
+  };
+  return map[key] ?? `${ev.event_source} · ${ev.event_type}`;
+}
+
+// 优化三：根据 event_type / event_result 返回语义化圆点样式（bg 色）和图标组件名称。
+// 返回 { bg, Icon } 供渲染使用。
+type EventDotInfo = {
+  bg: string;
+  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+};
+
+function getEventDotInfo(ev: MailChildEvent): EventDotInfo {
+  const t = ev.event_type?.toLowerCase() ?? '';
+  const r = ev.event_result?.toLowerCase() ?? '';
+  if (t.includes('recall')) return { bg: 'bg-blue-500', Icon: RotateCcw };
+  if (r.includes('fail') || r.includes('error') || t.includes('reject'))
+    return { bg: 'bg-red-500', Icon: XCircle };
+  if (t.includes('approve') || t.includes('release'))
+    return { bg: 'bg-emerald-500', Icon: CheckCircle2 };
+  return { bg: 'bg-gray-500', Icon: User };
+}
+
+// 事后处置时间线白名单来源：只有这两种 event_source 属于"事后处置动作"。
+// admin_api = 管理员手动召回；threat_retro_agent = 威胁回溯智能体发起召回/通知。
+// postfix/antispam 等投递流程来源均排除在外。
+const DISPOSAL_SOURCES = new Set(['admin_api', 'threat_retro_agent']);
+
+// event_result 原始值 → i18n sub-key 映射（emailDisposal.detail.analysis.eventResult.*）
+// 未命中时 fallback 到原始值，不会显示空白。
+const EVENT_RESULT_KEY_MAP: Record<string, string> = {
+  success:     'success',
+  completed:   'completed',
+  failed:      'failed',
+  failure:     'failure',
+  pending:     'pending',
+  in_progress: 'in_progress',
+  timeout:     'timeout',
+  skipped:     'skipped',
+  cancelled:   'cancelled',
+};
+
+// event_source + event_type 复合键 → i18n sub-key 映射（emailDisposal.detail.analysis.operationType.*）
+// 只映射白名单内的三种组合，未命中时 fallback 到 event_type 原始值。
+const OPERATION_TYPE_KEY_MAP: Record<string, string> = {
+  'admin_api:recall':          'adminApiRecall',
+  'threat_retro_agent:recall': 'threatRetroAgentRecall',
+  'threat_retro_agent:notify': 'threatRetroAgentNotify',
+};
+
+type TFn = (key: string) => string;
+
+function getEventResultLabel(val: string | undefined, t: TFn): string {
+  if (!val) return '—';
+  const subKey = EVENT_RESULT_KEY_MAP[val];
+  if (!subKey) return val;
+  return t(`eventResult.${subKey}`);
+}
+
+function getOperationTypeLabel(source: string | undefined, type: string | undefined, t: TFn): string {
+  if (!type) return '—';
+  const key = `${source ?? ''}:${type}`;
+  const subKey = OPERATION_TYPE_KEY_MAP[key];
+  if (!subKey) return type;
+  return t(`operationType.${subKey}`);
+}
+
 // aiEnabled defaults to false (fail-closed): this is an entitlement gate for
 // the AI verdict block (spec §5.4/§4.4 CapAI), so a future call site that
 // forgets to pass it must not silently show AI-only content on the
 // non-AI/传统版 tier -- the current call site (detail-modal.tsx) always
 // passes an explicit value derived from capabilities.ai.
-export function AnalysisSection({ detail, aiEnabled = false, events = [] }: AnalysisSectionProps) {
+export function AnalysisSection({ detail, aiEnabled = false, events = [], onViewRawLogs }: AnalysisSectionProps) {
   const t = useTranslations('emailDisposal.detail.analysis');
   const tFeatures = useTranslations('emailDisposal.detail.features');
   const { viewer, capabilities } = useProductForm();
@@ -164,7 +249,8 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   }, [detail.stage_timings, detail.processing_time_ms]);
 
   // --- 事后处置时间线（gap 2.5，两级展开）---
-  const [showTimeline, setShowTimeline] = useState(false);
+  // 默认展开：事后处置时间线是高频有效信息，优化前默认收起导致有事件也不可见。
+  const [showTimeline, setShowTimeline] = useState(true);
   const [expandedEvents, setExpandedEvents] = useState<Set<number>>(new Set());
   const toggleEvent = (id: number) =>
     setExpandedEvents((p) => {
@@ -172,17 +258,10 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
-  // 「事后处置时间线」是事后**处置动作**日志（召回/放行/丢弃等管理员操作），
-  // 不是常规 SMTP 投递 DSN 事件流水 -- 后者（event_source === 'postfix'，见
-  // internal/api/postfix_events.go）在这里展示会造成语义混淆（review finding）。
-  // 后端真实写入的 event_source 只有 5 个常量（internal/models/delivery_events.go）：
-  // 'postfix'（Postfix 投递状态回传，routine）与 4 个 'workflow.*'（quarantine/
-  // sideline/audit/bounce -- 均由 RecordWorkflowReinject 在管理员 release/approve
-  // 时写入，即处置动作）。用黑名单排除 'postfix' 而非枚举白名单 'workflow.*'，
-  // 这样任何非 postfix 来源（含未来新增的 workflow.* 变体、以及本组件测试夹具
-  // 里的 'admin_api'）都天然落入"处置相关"一侧，不需要跟着后端新增来源同步改这里。
+  // 白名单过滤：只保留真正的事后处置动作事件（admin_api / threat_retro_agent）。
+  // postfix（投递状态）、antispam（策略裁决）等均属投递流程，不属于事后处置，一律排除。
   const disposalEvents = useMemo(
-    () => events.filter((ev) => ev.event_source !== 'postfix'),
+    () => events.filter((ev) => DISPOSAL_SOURCES.has(ev.event_source ?? '')),
     [events],
   );
   const sortedEvents = useMemo(
@@ -223,7 +302,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
     : (basis?.rule_id || '—');
 
   // 方案A：多租户产品形态 + 租户管理员视角 + 阶段1（连接层/IP策略）→ 显示"平台策略"，
-  // 不暴露策略模块细节、规则名、命中详情，也不提供"前往策略配置页"跳转。
+  // 不暴露策略模块细节、规则名、命中详情，也不提供"前往策略配置��"跳转。
   const isPlatformPolicyContext =
     viewer === 'tenant' &&
     capabilities?.multiTenant === true &&
@@ -231,7 +310,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
 
   return (
     <div className="space-y-5">
-      {/* 检测流程：5 个阶段卡片，默认全部展开，命中策略明细内联在卡片内 */}
+      {/* 检测流程：5 个阶段卡片，默认全部展���，命中策略明细内联在卡片内 */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-sm font-semibold">{t('detectionPipeline')}</h4>
@@ -391,7 +470,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
           <div className="grid grid-cols-[72px_1fr] gap-x-3 gap-y-2.5 text-sm">
             <span className="text-muted-foreground">{tFeatures('module')}</span>
             {isPlatformPolicyContext ? (
-              // 平台策略模糊化：不展示阶段色点和具体模块名，仅显示"平台策略"
+              // 平台策略模糊化：不展示阶段色点和具体模块名��仅显示"平台策略"
               <span className="font-medium text-muted-foreground">
                 {tFeatures('platformPolicyModule')}
               </span>
@@ -425,7 +504,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             <span className="text-muted-foreground leading-relaxed">
               {isPlatformPolicyContext
                 ? tFeatures('platformPolicyHitDetail')
-                : (formatHitDetail(basis, disposalLang) || '—')}
+                : (formatHitDetail(basis, disposalLang) || '��')}
             </span>
             {!isPlatformPolicyContext && basis.detection_tags && basis.detection_tags.length > 0 && (
               <>
@@ -482,10 +561,12 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
               </div>
               {sortedEvents.map((ev) => {
                 const isOpen = expandedEvents.has(ev.id);
+                // 优化三：语义化圆点 — 颜色和图标根据 event_type/event_result 派生。
+                const { bg: dotBg, Icon: DotIcon } = getEventDotInfo(ev);
                 return (
                   <div key={ev.id} className="relative -ml-[25px]">
-                    <div className="absolute left-0 flex h-4 w-4 items-center justify-center rounded-full bg-gray-500">
-                      <User className="h-2.5 w-2.5 text-white" />
+                    <div className={cn('absolute left-0 flex h-4 w-4 items-center justify-center rounded-full', dotBg)}>
+                      <DotIcon className="h-2.5 w-2.5 text-white" />
                     </div>
                     <InteractiveSurface
                       asChild
@@ -510,13 +591,16 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                             <span className="shrink-0 text-xs text-muted-foreground">
                               {formatTimestamp(ev.event_time) || ev.event_time}
                             </span>
+                            {/* 优化二：人性化文案，替换原始 event_source · event_type 拼接 */}
                             <span className="truncate text-sm font-medium">
-                              {ev.event_source} · {ev.event_type}
+                              {formatEventLabel(ev)}
                               {ev.recipient ? ` (${ev.recipient})` : ''}
                             </span>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
-                            <Badge variant="outline" className="text-xs">{ev.event_result || ev.correlation_status || '—'}</Badge>
+                            <Badge variant="outline" className="text-xs">{
+                              getEventResultLabel(ev.event_result || ev.correlation_status, t)
+                            }</Badge>
                             <ChevronDown className={cn('h-4 w-4 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', !isOpen && '-rotate-90')} />
                           </div>
                         </div>
@@ -526,18 +610,20 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                             data-testid={`analysis-timeline-event-${ev.id}-detail`}
                           >
                             <div className="flex items-start gap-2">
+                              {/* 优化五：通用标签取代"召回范围" */}
                               <span className="w-20 shrink-0 text-muted-foreground">{t('recallScope')}:</span>
                               <span>{ev.recipient || ev.recipients || '—'}</span>
                             </div>
                             <div className="flex items-start gap-2">
                               <span className="w-20 shrink-0 text-muted-foreground">{t('recallAction')}:</span>
-                              <span>{ev.event_type || '—'}</span>
+                              <span>{getOperationTypeLabel(ev.event_source, ev.event_type, t)}</span>
                             </div>
                             <div className="flex items-start gap-2">
                               <span className="w-20 shrink-0 text-muted-foreground">{t('executionResult')}:</span>
-                              <span>{ev.event_result || '—'}{ev.dsn ? `（${ev.dsn}）` : ''}</span>
+                              <span>{getEventResultLabel(ev.event_result, t)}{ev.dsn ? `（${ev.dsn}）` : ''}</span>
                             </div>
                             <div className="pt-1">
+                              {/* 优化四：有 onViewRawLogs 时跳转原始日志区，否则退回 toast */}
                               <Button
                                 type="button"
                                 variant="outline"
@@ -546,7 +632,11 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                                 data-testid={`analysis-timeline-event-${ev.id}-view-log`}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  toast.info(tSenderActions('notImplementedToast'));
+                                  if (onViewRawLogs) {
+                                    onViewRawLogs();
+                                  } else {
+                                    toast.info(tSenderActions('notImplementedToast'));
+                                  }
                                 }}
                               >
                                 {t('viewRecallLog')}

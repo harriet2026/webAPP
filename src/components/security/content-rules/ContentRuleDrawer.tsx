@@ -4,18 +4,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   AlertTriangle,
-  CheckCircle2,
   Clock,
   FileText,
   HelpCircle,
   Lightbulb,
   Loader2,
   Mail,
+  MinusCircle,
   Paperclip,
   Play,
   Search,
+  Target,
   Zap,
-  XCircle,
 } from 'lucide-react';
 import {
   Sheet,
@@ -59,6 +59,8 @@ import {
   toContentRuleUiAction,
 } from '@/lib/api/content-rules';
 import { useApiRequest } from '@/lib/api/client';
+import { useAuth } from '@/contexts/auth-context';
+import { getRulePriorityRange } from '@/components/security/advanced-filter-rules/priority-range';
 import type {
   ContentRuleDirections,
   ContentRuleFormData,
@@ -171,6 +173,8 @@ export function ContentRuleDrawer({
 }: ContentRuleDrawerProps) {
   const t = useTranslations();
   const { apiRequest } = useApiRequest();
+  const { isSystemAdmin } = useAuth();
+  const range = useMemo(() => getRulePriorityRange(isSystemAdmin), [isSystemAdmin]);
   const [draft, setDraft] = useState<ContentRuleFormData>(defaultDraft);
   const [uiAction, setUiAction] = useState<ContentRuleUiAction>('isolate');
   const [headerName, setHeaderName] = useState(DEFAULT_HEADER_NAME);
@@ -182,6 +186,9 @@ export function ContentRuleDrawer({
   const [testContent, setTestContent] = useState('');
   const [testMatch, setTestMatch] = useState<boolean | null>(null);
   const [testError, setTestError] = useState('');
+  // 与 testMatch（命中/未命中，均为正常测试结果）区分：仅接口失败、正则解析异常等
+  // 真正的执行错误才写入这里，渲染为 destructive 态；不会被误判为"未匹配"。
+  const [testRunError, setTestRunError] = useState('');
   const [isTesting, setIsTesting] = useState(false);
   const [examplesOpen, setExamplesOpen] = useState(false);
   const [testOpen, setTestOpen] = useState(false);
@@ -280,8 +287,8 @@ export function ContentRuleDrawer({
     if (!name) next.name = t('contentRules.ruleNameRequired');
     else if (name.length > 50) next.name = t('contentRules.ruleNameTooLong');
     else if (/[<>&"]/.test(name)) next.name = t('contentRules.ruleNameForbiddenChars');
-    if (!Number.isInteger(draft.priority) || draft.priority < 1 || draft.priority > 9999) {
-      next.priority = t('contentRules.priorityInvalid');
+    if (!Number.isInteger(draft.priority) || draft.priority < range.min || draft.priority > range.max) {
+      next.priority = t('contentRules.priorityInvalid', { min: range.min, max: range.max });
     }
     if (!Object.values(draft.directions).some((config) => config?.enabled)) {
       next.direction = t('contentRules.atLeastOneDirection');
@@ -345,6 +352,7 @@ export function ContentRuleDrawer({
     }
     if (!draft.match_content.trim() || regexError) return;
     setTestError('');
+    setTestRunError('');
     setIsTesting(true);
     setTestMatch(null);
     try {
@@ -367,7 +375,10 @@ export function ContentRuleDrawer({
       const result = await testContentRule(tree, attrs, apiRequest);
       setTestMatch(result.matched);
     } catch {
-      setTestMatch(false);
+      // 接口失败 / 正则解析异常等真正的执行错误：不写入 testMatch（否则会被渲染成
+      // "未匹配"的中性/成功态，掩盖真实故障），单独走 destructive 提示。
+      setTestMatch(null);
+      setTestRunError(t('contentRules.testFailed'));
     } finally {
       setIsTesting(false);
     }
@@ -393,6 +404,7 @@ export function ContentRuleDrawer({
     updateAction(action);
     setErrors({});
     setTestMatch(null);
+    setTestRunError('');
   };
 
   const directionDescription = (['receive', 'send', 'internal'] as const)
@@ -470,13 +482,13 @@ export function ContentRuleDrawer({
                     <Input
                       data-testid="content-rule-priority"
                       type="number"
-                      min={1}
-                      max={9999}
+                      min={range.min}
+                      max={range.max}
                       value={draft.priority}
                       onChange={(event) => setDraft((current) => ({ ...current, priority: Number(event.target.value) }))}
                       className="w-24"
                     />
-                    <span className="ml-2 text-xs text-muted-foreground">{t('contentRules.priorityRangeHint')}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{t('contentRules.priorityRangeHint', { min: range.min, max: range.max })}</span>
                   </Field>
                   <Field label={t('contentRules.effectiveUntil')} error={errors.valid_until} hint={t('contentRules.validUntilTip')}>
                     <div className="flex flex-wrap items-center gap-2">
@@ -668,7 +680,12 @@ export function ContentRuleDrawer({
                   <CollapsibleContent className="mt-3 rounded-lg border bg-card p-4">
                     <Textarea
                       value={testContent}
-                      onChange={(event) => { setTestContent(event.target.value); setTestMatch(null); setTestError(''); }}
+                      onChange={(event) => {
+                        setTestContent(event.target.value);
+                        setTestMatch(null);
+                        setTestError('');
+                        setTestRunError('');
+                      }}
                       placeholder={t('contentRules.testContent')}
                       className="min-h-24"
                     />
@@ -677,12 +694,23 @@ export function ContentRuleDrawer({
                       {isTesting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       {t('contentRules.runTest')}
                     </Button>
-                    {testMatch !== null && (
+                    {/* 命中 / 未命中是模拟测试的两种正常结果，仅代表"测试文本是否触发该规则"，
+                        不代表处置结果的好坏，因此两者都不使用 destructive 红色：命中用中性
+                        信息色 + 靶心图标，未命中用 muted 中性灰。destructive 红色只保留给下方
+                        真正的执行错误（接口失败 / 正则解析异常等）。 */}
+                    {testRunError ? (
+                      <div className="mt-3 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        {testRunError}
+                      </div>
+                    ) : testMatch !== null && (
                       <div className={cn(
                         'mt-3 flex items-center gap-2 rounded-lg border p-3 text-sm',
-                        testMatch ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                        testMatch
+                          ? 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300'
+                          : 'border-border bg-muted text-muted-foreground',
                       )}>
-                        {testMatch ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                        {testMatch ? <Target className="h-4 w-4" /> : <MinusCircle className="h-4 w-4" />}
                         {testMatch ? t('contentRules.testMatched') : t('contentRules.testNotMatched')}
                       </div>
                     )}

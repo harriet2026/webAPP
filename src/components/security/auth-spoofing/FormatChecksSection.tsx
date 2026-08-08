@@ -25,7 +25,8 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import { FORMAT_ACTIONS } from './CheckItemRow';
-import { formatActionKey } from '@/lib/auth-spoofing-labels';
+import { AuthSpoofingTagPanel } from './AuthSpoofingTagPanel';
+import { formatActionKey, toMessageKeySegment } from '@/lib/auth-spoofing-labels';
 import { ChevronDown, Info, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -125,7 +126,7 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
                       <div className="flex flex-col gap-0.5 py-0.5">
                         <span>{t(formatActionKey(a) as any)}</span>
                         <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
-                          {tDesc(a as any)}
+                          {tDesc(toMessageKeySegment(a) as any)}
                         </span>
                       </div>
                     </SelectItem>
@@ -139,6 +140,16 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
             <div className="ml-12 flex items-start gap-2 rounded border border-amber-200 bg-amber-50 p-2 dark:border-amber-800 dark:bg-amber-950/30">
               <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
               <p className="text-xs text-amber-700 dark:text-amber-300">{t('highRiskWarning')}</p>
+            </div>
+          )}
+
+          {!item.observe_mode && item.action === 'mark-delivery' && (
+            <div className="pl-12">
+              <AuthSpoofingTagPanel
+                value={item}
+                onChange={(patch) => onChange({ ...item, ...patch })}
+                disabled={disabled}
+              />
             </div>
           )}
 
