@@ -41,6 +41,9 @@ const THREAT_TYPE_COLOR: Record<string, string> = {
   virus: 'bg-red-100 text-red-700 border-red-200',
 };
 
+// 运营 TOP 五类语义徽标使用紧凑矩形形态，避免默认 Badge 的胶囊样式撑高表格。
+const SEMANTIC_BADGE_CLASS = 'h-[18px] max-w-full rounded-md px-1.5 py-0 text-[10px] leading-4';
+
 type TranslationFn = ReturnType<typeof useTranslations>;
 
 function Sparkline({ data, color }: { data: number[]; color: string }) {
@@ -292,7 +295,7 @@ function CellContent({
         return (
           <Badge
             variant="outline"
-            className={`px-1 py-0 text-[10px] ${isInternalGeo ? 'border-blue-200 bg-blue-50 text-blue-600' : 'border-border/70 bg-muted/40 text-muted-foreground'}`}
+            className={`${SEMANTIC_BADGE_CLASS} ${isInternalGeo ? 'border-blue-200 bg-blue-50 text-blue-600' : 'border-border/70 bg-muted/40 text-muted-foreground'}`}
           >
             {isInternalGeo ? (t('internal') as string) : geo.split(' ')[0]}
           </Badge>
@@ -305,7 +308,7 @@ function CellContent({
         return (
           <Badge
             variant="outline"
-            className={`px-1 py-0 text-[10px] ${THREAT_TYPE_COLOR[threatType] ?? 'bg-muted/40 text-muted-foreground'}`}
+            className={`${SEMANTIC_BADGE_CLASS} ${THREAT_TYPE_COLOR[threatType] ?? 'border-border/70 bg-muted/40 text-muted-foreground'}`}
           >
             {t(threatType as Parameters<typeof t>[0])}
           </Badge>
@@ -317,7 +320,7 @@ function CellContent({
         return (
           <Badge
             variant="outline"
-            className="border-red-200 bg-red-50 px-1 py-0 text-[10px] text-red-600"
+            className={`${SEMANTIC_BADGE_CLASS} border-red-200 bg-red-50 text-red-600`}
           >
             {String(value)}
           </Badge>
@@ -326,7 +329,7 @@ function CellContent({
       if (col.key === 'bruteForce') {
         if (!value) return <span className="text-muted-foreground">-</span>;
         return (
-          <Badge variant="destructive" className="px-1 py-0 text-[10px]">
+          <Badge variant="destructive" className={SEMANTIC_BADGE_CLASS}>
             {t('bruteForceTag')}
           </Badge>
         );
@@ -337,7 +340,7 @@ function CellContent({
         return (
           <Badge
             variant="outline"
-            className={`px-1 py-0 text-[10px] ${isExternal ? 'bg-muted/40 text-muted-foreground' : 'border-green-200 bg-green-50 text-green-600'}`}
+            className={`${SEMANTIC_BADGE_CLASS} ${isExternal ? 'border-border/70 bg-muted/40 text-muted-foreground' : 'border-green-200 bg-green-50 text-green-600'}`}
           >
             {isExternal ? (t('external') as string) : dept}
           </Badge>
