@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { HelpCircle } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Tooltip,
   TooltipContent,
@@ -78,6 +79,7 @@ export function RuntimeModeSection() {
   const [engineDraft, setEngineDraft] = useState<PhishTenantEngineParams | null>(null);
   const [disposalDraft, setDisposalDraft] = useState<DisposalSettings | null>(null);
   const [pendingTimeoutValue, setPendingTimeoutValue] = useState<boolean | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   // When opening the sheet (or the baseline refreshes while it's open),
   // snapshot the draft from the latest loaded data.
@@ -132,6 +134,18 @@ export function RuntimeModeSection() {
     );
 
   const observeMode = (engine?.run_mode ?? 'realtime') === 'observe';
+
+  const applyPreset = (preset: 'observe' | 'standard' | 'strict') => {
+    if (preset === 'observe') {
+      patchEngine({ enabled: true, run_mode: 'observe', observe_action: 'mark' });
+      return;
+    }
+    patchEngine({ enabled: true, run_mode: 'realtime', observe_action: 'deliver' });
+    patchDisposalReview({
+      timeout_auto_deliver: preset === 'standard',
+      timeout_temp_disposal: preset === 'strict' ? 'mark' : 'deliver',
+    });
+  };
 
   const onToggleTimeoutAutoDeliver = (next: boolean) => {
     if (!next) {
@@ -263,6 +277,29 @@ export function RuntimeModeSection() {
           {engineDraft && disposalDraft ? (
             <>
               <div className="flex-1 space-y-5 overflow-y-auto px-6 py-4">
+                <section className="space-y-3">
+                  <div>
+                    <h3 className="font-medium">{t('preset.title')}</h3>
+                    <p className="text-xs text-muted-foreground">{t('preset.description')}</p>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {(['observe', 'standard', 'strict'] as const).map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        className="rounded-lg border p-3 text-left transition-colors hover:bg-accent/40"
+                        onClick={() => applyPreset(preset)}
+                        data-testid={`phishing-preset-${preset}`}
+                      >
+                        <div className="font-medium">{t(`preset.${preset}.title`)}</div>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                          {t(`preset.${preset}.description`)}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
                 <section className="space-y-3 rounded-lg border p-4">
                   <div className="flex items-center justify-between gap-4">
                     <div>
@@ -331,8 +368,19 @@ export function RuntimeModeSection() {
                   ) : null}
                 </section>
 
-                <section className="space-y-3">
-                  <h3 className="font-medium">{t('timeoutSectionTitle')}</h3>
+                <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+                  <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                    <div>
+                      <h3 className="font-medium">{t('advanced.title')}</h3>
+                      <p className="text-xs text-muted-foreground">{t('advanced.description')}</p>
+                    </div>
+                    <CollapsibleTrigger render={<Button variant="outline" size="sm" />}>
+                      {advancedOpen ? t('advanced.collapse') : t('advanced.expand')}
+                    </CollapsibleTrigger>
+                  </div>
+                  <CollapsibleContent className="space-y-5 pt-4">
+                    <section className="space-y-3">
+                      <h3 className="font-medium">{t('timeoutSectionTitle')}</h3>
                   <p className="text-xs text-muted-foreground">{t('timeoutScopeNote')}</p>
                   <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-1.5">
@@ -477,7 +525,9 @@ export function RuntimeModeSection() {
                       </div>
                     </div>
                   ) : null}
-                </section>
+                    </section>
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
 
               <SheetFooter className="border-t px-6 py-3 flex-row justify-end gap-2">

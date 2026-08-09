@@ -12,8 +12,8 @@ export function PhishingConfigPage() {
         <h2 className="text-lg font-semibold">{t('pageTitle')}</h2>
         <p className="text-sm text-muted-foreground">{t('pageDescription')}</p>
       </div>
-      <AdmissionRulesSection />
       <RuntimeModeSection />
+      <AdmissionRulesSection />
     </div>
   );
 }

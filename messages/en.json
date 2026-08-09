@@ -8673,9 +8673,22 @@
   "enableConfirmDescription": "Enabled messages that match admission rules enter the agent detection flow and may take longer to process.",
   "disableConfirmTitle": "Disable the Phishing Detection Agent?",
   "disableConfirmDescription": "The agent will stop processing new messages. Historical detection records will not be deleted.",
-  "confirm": "Confirm"
-  },
-  "title": "Runtime Mode & Timeouts",
+      "confirm": "Confirm"
+      },
+      "preset": {
+        "title": "Protection preset",
+        "description": "Choose a starting point for your scenario; advanced settings remain adjustable.",
+        "observe": { "title": "Observe", "description": "Detect and record results without directly blocking messages." },
+        "standard": { "title": "Standard protection", "description": "Realtime detection with allow, mark and quarantine by risk level." },
+        "strict": { "title": "Strict protection", "description": "Realtime detection with stricter handling for medium and high risk." }
+      },
+      "advanced": {
+        "title": "Advanced settings",
+        "description": "Timeout and async review parameters; defaults fit most scenarios.",
+        "expand": "Expand",
+        "collapse": "Collapse"
+      },
+      "title": "Runtime Mode & Timeouts",
       "description": "Realtime / observe mode, timeout timeline and timeout temp disposition (applies to all sideline checks).",
       "loading": "Loading...",
       "engineLoadFailed": "Failed to load detection engine config",
