@@ -60,7 +60,6 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
   const apiErrorMessage = useApiErrorMessage();
 
   const [draft, setDraft] = useState<PhishAdmissionRule>(emptyDraft());
-  const [tagInput, setTagInput] = useState('');
   const [filterOn, setFilterOn] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -116,7 +115,6 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
           (d.recipient_emails ?? []).length > 0 ||
           (d.recipient_dept_paths ?? []).length > 0),
     );
-    setTagInput('');
   } else if (!open && lastKey !== '') {
     setLastKey('');
   }
@@ -169,7 +167,6 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
     if (!tag) return;
     const cur = draft.recipient_tags ?? [];
     if (!cur.includes(tag)) patch({ recipient_tags: [...cur, tag] });
-    setTagInput('');
   };
   const removeTag = (tag: string) =>
     patch({ recipient_tags: (draft.recipient_tags ?? []).filter((x) => x !== tag) });

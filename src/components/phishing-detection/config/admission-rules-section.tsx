@@ -121,11 +121,17 @@ export function AdmissionRulesSection() {
     return base.length ? base.join(' · ') : t('noBasicScreen');
   };
   // 群组标签去 `grp:` 前缀显示，与抽屉群组按钮（admission-rule-sheet `g.replace(/^grp:/, '')`）
-  // 保持一致，避免列表显示原始 `grp:finance` 而抽屉显示 `finance`（MI-6）。
-  const recipientText = (rule: PhishAdmissionRule) =>
-    (rule.recipient_tags ?? []).length
-      ? (rule.recipient_tags ?? []).map((tag) => tag.replace(/^grp:/, '')).join(', ')
-      : t('allRecipients');
+  // 保持一致，避免列表显示原始 `grp:finance` 而抽屉显示 `finance`（MI-6）。组织通讯录
+  // 选中的部门路径与个人邮箱与群组/标签一并列出（OR 关系），三者都为空才回退到
+  // 「全部收发信人」。
+  const recipientText = (rule: PhishAdmissionRule) => {
+    const parts = [
+      ...(rule.recipient_tags ?? []).map((tag) => tag.replace(/^grp:/, '')),
+      ...(rule.recipient_dept_paths ?? []),
+      ...(rule.recipient_emails ?? []),
+    ];
+    return parts.length ? parts.join(', ') : t('allRecipients');
+  };
   // 风险信号列仅含真正的风险信号（发件人首现 / 二维码 / 可点击附件），与抽屉
   // section ② 的「发信人特征 / 邮件内容」分组一致；基础筛查门已移至检测范围列
   // 的 tooltip（MI-5）。文案用「、」分隔，内容类信号带「含」前缀，与截图对齐。

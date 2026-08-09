@@ -453,11 +453,12 @@ test.describe('Phishing Detection Tab B — config', () => {
     ).toBeVisible({ timeout: 10000 });
   });
 
-  test('recipient filter on with no tag selected blocks save (D1)', async ({ authenticatedPage }) => {
-    // Spec §4.1 / §7: toggling 收件人筛选 ON requires at least one selected
-    // recipient tag; otherwise the save is rejected client-side (review D1 /
-    // T4). Previously the draft was valid with filterOn=true + empty tags,
-    // which silently compiled to "all recipients" — contrary to the UX intent.
+  test('recipient filter on with no target selected blocks save (D1)', async ({ authenticatedPage }) => {
+    // Spec §4.1 / §7: toggling 收发信人筛选 ON requires at least one selected
+    // group/tag, department, or person; otherwise the save is rejected
+    // client-side (review D1 / T4). Previously the draft was valid with
+    // filterOn=true + empty targets, which silently compiled to "everyone" —
+    // contrary to the UX intent.
     await openConfigTab(authenticatedPage);
     await authenticatedPage.getByTestId('admission-rule-create').click();
     const sheet = authenticatedPage.getByTestId('admission-rule-sheet');
@@ -466,25 +467,25 @@ test.describe('Phishing Detection Tab B — config', () => {
     await sheet.getByTestId('rule-name-input').fill('e2e-filter-empty');
 
     // Ensure sender_first_seen is on so the risk-signal check passes (the only
-    // thing blocking save here must be the empty-recipient-tags rule).
+    // thing blocking save here must be the empty-target rule).
     const firstSeen = sheet.getByTestId('rule-first-seen');
     if ((await firstSeen.getAttribute('aria-checked')) !== 'true') {
       await firstSeen.click();
     }
 
-    // Toggle the recipient filter ON without selecting any tag.
+    // Toggle the recipient/sender filter ON without selecting any target.
     await sheet.getByTestId('rule-recipient-filter').click();
     await expect(sheet.getByTestId('rule-recipient-filter')).toHaveAttribute('aria-checked', 'true');
 
     // Inline error surfaces (zh needRecipientTarget) and Save stays disabled.
     await expect(sheet.getByTestId('rule-validation-error')).toBeVisible({ timeout: 5000 });
     await expect(sheet.getByTestId('rule-validation-error')).toContainText(
-      /开启收件人筛选时至少填写一个标签或邮箱/,
+      /开启收发信人筛选时至少选择一个群组\/标签、部门或个人/,
     );
     await expect(sheet.getByTestId('rule-save')).toBeDisabled();
 
     // Toggle the filter back OFF → the error clears and Save re-enables,
-    // because empty tags with filterOn=false means "all recipients" (valid).
+    // because an empty target with filterOn=false means "everyone" (valid).
     await sheet.getByTestId('rule-recipient-filter').click();
     await expect(sheet.getByTestId('rule-validation-error')).toBeHidden();
     await expect(sheet.getByTestId('rule-save')).toBeEnabled();
@@ -492,42 +493,45 @@ test.describe('Phishing Detection Tab B — config', () => {
     await sheet.getByTestId('rule-cancel').click();
   });
 
-  test('recipient tag entry: add via input, delete badge, save enabled (T-9)', async ({ authenticatedPage }) => {
-    // Spec §10 Part 1: with recipient filtering ON, a custom tag entered via
-    // rule-tag-input must appear as a deletable Badge in rule-tag-list, and the
-    // "filter on + ≥1 tag" happy path must enable Save.
+  test('recipient target via org directory: pick department, remove chip, save enabled (T-9)', async ({
+    authenticatedPage,
+  }) => {
+    // Spec §10 Part 1 (revised): with the sender/recipient filter ON, picking a
+    // whole department from the org directory tree must render a removable
+    // chip, and the "filter on + ≥1 target" happy path must enable Save.
     await openConfigTab(authenticatedPage);
     await authenticatedPage.getByTestId('admission-rule-create').click();
     const sheet = authenticatedPage.getByTestId('admission-rule-sheet');
     await expect(sheet).toBeVisible({ timeout: 5000 });
 
-    await sheet.getByTestId('rule-name-input').fill('e2e-rcpt-tag');
-    // sender_first_seen ON so the only gating concern is the recipient tag.
+    await sheet.getByTestId('rule-name-input').fill('e2e-rcpt-org');
+    // sender_first_seen ON so the only gating concern is the recipient target.
     const firstSeen = sheet.getByTestId('rule-first-seen');
     if ((await firstSeen.getAttribute('aria-checked')) !== 'true') {
       await firstSeen.click();
     }
 
-    // Turn recipient filtering ON → tag input appears.
+    // Turn the sender/recipient filter ON → the org directory tree appears.
     await sheet.getByTestId('rule-recipient-filter').click();
     await expect(sheet.getByTestId('rule-recipient-filter')).toHaveAttribute('aria-checked', 'true');
-    // With filter on and no tag yet, Save is blocked (D1).
+    // With filter on and no target yet, Save is blocked (D1).
     await expect(sheet.getByTestId('rule-save')).toBeDisabled();
 
-    // Enter a custom tag (Enter key commits it).
-    const tagInput = sheet.getByTestId('rule-tag-input');
-    await tagInput.fill('finance');
-    await tagInput.press('Enter');
+    // Pick the first top-level department checkbox in the org tree.
+    const orgTree = sheet.getByTestId('rule-org');
+    const firstDeptToggle = orgTree.locator('[data-testid^="rule-org-dept-toggle-"]').first();
+    await expect(firstDeptToggle).toBeVisible({ timeout: 10000 });
+    await firstDeptToggle.click();
 
-    // Badge shows in the tag list and the error clears, Save re-enables.
-    const tagList = sheet.getByTestId('rule-tag-list');
-    await expect(tagList).toContainText('finance');
+    // A removable chip shows and the error clears, Save re-enables.
+    const deptChip = orgTree.locator('[data-testid^="rule-org-chip-dept-"]').first();
+    await expect(deptChip).toBeVisible();
     await expect(sheet.getByTestId('rule-validation-error')).toBeHidden();
     await expect(sheet.getByTestId('rule-save')).toBeEnabled();
 
-    // The Badge is deletable: removing it re-blocks Save (back to 0 tags).
-    await tagList.getByRole('button', { name: /remove|删除|移除|удалить|ลบ/i }).first().click();
-    await expect(tagList).toBeHidden();
+    // The chip is removable: removing it re-blocks Save (back to 0 targets).
+    await deptChip.getByRole('button').click();
+    await expect(deptChip).toBeHidden();
     await expect(sheet.getByTestId('rule-save')).toBeDisabled();
 
     await sheet.getByTestId('rule-cancel').click();
@@ -587,10 +591,13 @@ test.describe('Phishing Detection Tab B — config', () => {
     await sheet.getByTestId('rule-cancel').click();
   });
 
-  test('edit flow restores name, directions, qrcode, and recipient filter+tag (N1)', async ({ authenticatedPage }) => {
+  test('edit flow restores name, directions, qrcode, and recipient filter+org target (N1)', async ({
+    authenticatedPage,
+  }) => {
     // The most complex new code path: the baseKey snapshot in the sheet must
     // re-populate an existing rule's draft on open — including filter_on (derived
-    // from the saved field) and the recipient tags. Create → reopen → assert.
+    // from the saved field) and the org-directory department target. Create →
+    // reopen → assert.
     await openConfigTab(authenticatedPage);
     await authenticatedPage.getByTestId('admission-rule-create').click();
     let sheet = authenticatedPage.getByTestId('admission-rule-sheet');
@@ -602,12 +609,15 @@ test.describe('Phishing Detection Tab B — config', () => {
     // default direction and QR supports it, so no direction change needed.
     await sheet.getByTestId('rule-qrcode').click();
     await expect(sheet.getByTestId('rule-qrcode')).toHaveAttribute('aria-checked', 'true');
-    // Recipient filter ON + a custom tag.
+    // Recipient/sender filter ON + a department picked from the org directory.
     await sheet.getByTestId('rule-recipient-filter').click();
-    const tagInput = sheet.getByTestId('rule-tag-input');
-    await tagInput.fill('finance');
-    await tagInput.press('Enter');
-    await expect(sheet.getByTestId('rule-tag-list')).toContainText('finance');
+    const orgTree = sheet.getByTestId('rule-org');
+    const firstDeptToggle = orgTree.locator('[data-testid^="rule-org-dept-toggle-"]').first();
+    await expect(firstDeptToggle).toBeVisible({ timeout: 10000 });
+    await firstDeptToggle.click();
+    const deptChip = orgTree.locator('[data-testid^="rule-org-chip-dept-"]').first();
+    await expect(deptChip).toBeVisible();
+    const deptChipText = await deptChip.innerText();
     await sheet.getByTestId('rule-save').click();
 
     // Find the created row and open it for edit.
@@ -621,14 +631,17 @@ test.describe('Phishing Detection Tab B — config', () => {
     await expect(sheet.getByTestId('rule-name-input')).toHaveValue(name);
     await expect(sheet.getByTestId('rule-qrcode')).toHaveAttribute('aria-checked', 'true');
     await expect(sheet.getByTestId('rule-recipient-filter')).toHaveAttribute('aria-checked', 'true');
-    await expect(sheet.getByTestId('rule-tag-list')).toContainText('finance');
+    const reopenedChip = sheet.getByTestId('rule-org').locator('[data-testid^="rule-org-chip-dept-"]').first();
+    await expect(reopenedChip).toBeVisible();
+    await expect(reopenedChip).toHaveText(deptChipText);
 
     await sheet.getByTestId('rule-cancel').click();
   });
 
   test('list row renders scope / recipients / risk columns and footer count (N2)', async ({ authenticatedPage }) => {
     // The new list helpers (scopeText/recipientText/riskText) + footer were
-    // untested. Create a rule with a recipient filter and assert the row cells.
+    // untested. Create a rule with a recipient/sender filter (org directory
+    // department target) and assert the row cells.
     await openConfigTab(authenticatedPage);
     await authenticatedPage.getByTestId('admission-rule-create').click();
     const sheet = authenticatedPage.getByTestId('admission-rule-sheet');
@@ -637,15 +650,18 @@ test.describe('Phishing Detection Tab B — config', () => {
     const name = `e2e-cols-${Date.now()}`;
     await sheet.getByTestId('rule-name-input').fill(name);
     await sheet.getByTestId('rule-recipient-filter').click();
-    const tagInput = sheet.getByTestId('rule-tag-input');
-    await tagInput.fill('vip');
-    await tagInput.press('Enter');
+    const orgTree = sheet.getByTestId('rule-org');
+    const firstDeptToggle = orgTree.locator('[data-testid^="rule-org-dept-toggle-"]').first();
+    await expect(firstDeptToggle).toBeVisible({ timeout: 10000 });
+    await firstDeptToggle.click();
+    const deptChip = orgTree.locator('[data-testid^="rule-org-chip-dept-"]').first();
+    const deptChipText = await deptChip.innerText();
     await sheet.getByTestId('rule-save').click();
 
     const row = authenticatedPage.getByTestId('admission-rule-row').filter({ hasText: name });
     await expect(row).toBeVisible({ timeout: 10000 });
-    // Recipients column reflects the recipient tag (not "all recipients").
-    await expect(row).toContainText('vip');
+    // Recipients column reflects the selected department (not "everyone").
+    await expect(row).toContainText(deptChipText.trim());
     // Footer count is present (locale-agnostic: just assert it's non-empty).
     const footer = authenticatedPage.getByTestId('admission-rules-footer');
     await expect(footer).toBeVisible();
