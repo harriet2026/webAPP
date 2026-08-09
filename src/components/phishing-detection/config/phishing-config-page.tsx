@@ -1,8 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { AgentStatusHeader } from './agent-status-header';
-import { PresetSelection } from './preset-selection';
 import { AdmissionRulesSection } from './admission-rules-section';
 import { RuntimeModeSection } from './runtime-mode-section';
 
@@ -14,8 +12,6 @@ export function PhishingConfigPage() {
         <h2 className="text-lg font-semibold">{t('pageTitle')}</h2>
         <p className="text-sm text-muted-foreground">{t('pageDescription')}</p>
       </div>
-      <AgentStatusHeader />
-      <PresetSelection />
       <AdmissionRulesSection />
       <RuntimeModeSection />
     </div>

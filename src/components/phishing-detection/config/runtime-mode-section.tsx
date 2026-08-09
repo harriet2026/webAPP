@@ -46,6 +46,7 @@ import type {
 } from '@/types/phishing-config';
 import type { DisposalSettings } from '@/types/disposal-settings';
 import { ConfidenceBandsEditor } from './confidence-bands-editor';
+import { PresetSelection } from './preset-selection';
 
 function isValidationError(err: unknown): string | null {
   if (!(err instanceof ApiError) || err.status !== 400) return null;
@@ -158,7 +159,8 @@ export function RuntimeModeSection() {
         <CardTitle>{t('title')}</CardTitle>
         <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
+        <PresetSelection />
         {!engine ? (
           <p className="text-sm text-muted-foreground">
             {engineQuery.isError ? t('engineLoadFailed') : t('loading')}

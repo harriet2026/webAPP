@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/table';
 import { useApiRequest, ApiError } from '@/lib/api/client';
 import {
+  getEngineConfig,
+  putEngineConfig,
   listAdmissionRules,
   setAdmissionRuleStatus,
   deleteAdmissionRule,
@@ -39,6 +41,23 @@ export function AdmissionRulesSection() {
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<PhishAdmissionRule | null>(null);
+
+  const engineQuery = useQuery({
+    queryKey: ['phish-engine-config'],
+    queryFn: () => getEngineConfig(apiRequest),
+  });
+  const scopeMutation = useMutation({
+    mutationFn: (enabled: boolean) => {
+      const engine = engineQuery.data?.engine;
+      if (!engine) throw new Error('engine config not loaded');
+      return putEngineConfig({ ...engine, enabled }, apiRequest);
+    },
+    onSuccess: () => {
+      toast.success(t('scopeToggled'));
+      queryClient.invalidateQueries({ queryKey: ['phish-engine-config'] });
+    },
+    onError: (err) => toast.error(isValidationError(err) ?? t('toggleFailed')),
+  });
 
   const { data: rules = [], isLoading } = useQuery({
     queryKey: ['phish-admission-rules'],
@@ -115,10 +134,31 @@ export function AdmissionRulesSection() {
   return (
     <Card data-testid="admission-rules-section">
       <CardHeader>
-        <CardTitle>{t('title')}</CardTitle>
-        <CardDescription>{t('description')}</CardDescription>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <CardTitle>{t('title')}</CardTitle>
+            <CardDescription>{t('description')}</CardDescription>
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
+            <Badge variant={engineQuery.data?.engine.enabled ? 'default' : 'secondary'}>
+              {engineQuery.data?.engine.enabled ? t('scopeEnabled') : t('scopeDisabled')}
+            </Badge>
+            <Switch
+              checked={engineQuery.data?.engine.enabled ?? false}
+              disabled={!engineQuery.data || scopeMutation.isPending}
+              onCheckedChange={(checked) => scopeMutation.mutate(checked)}
+              aria-label={t('scopeToggleLabel')}
+              data-testid="phishing-scope-enabled-switch"
+            />
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="flex flex-col gap-3">
+        {!engineQuery.data?.engine.enabled ? (
+          <div className="rounded-md border border-muted bg-muted/40 px-3 py-2 text-xs text-muted-foreground" role="status">
+            {t('scopeDisabledHint')}
+          </div>
+        ) : null}
         <div className="flex justify-end">
           <Button onClick={openCreate} size="sm" data-testid="admission-rule-create">
             <Plus className="mr-1.5 h-3.5 w-3.5" />

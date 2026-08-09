@@ -8637,7 +8637,12 @@
     },
     "admission": {
       "title": "Detection Scope",
-      "description": "Decide which messages enter the Phishing Detection Agent. Any one matching rule is enough to hit; rules do not take effect while the agent is disabled.",
+      "description": "Decide which messages enter the detection engine. Any one matching rule is enough; rules do not take effect while the scope is disabled.",
+      "scopeEnabled": "Enabled",
+      "scopeDisabled": "Disabled",
+      "scopeToggleLabel": "Enable detection scope",
+      "scopeDisabledHint": "Detection scope is disabled. Matching messages enter the engine after you enable it.",
+      "scopeToggled": "Detection scope updated",
       "loading": "Loading...",
       "empty": "No detection scope configured yet. Even after enabling the agent, no messages will be detected until you add at least one rule.",
       "create": "Create",

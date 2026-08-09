@@ -3,7 +3,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useApiRequest, ApiError } from '@/lib/api/client';
 import { getEngineConfig, putEngineConfig } from '@/lib/api/phishing-config';
 import { getDisposalSettings, putDisposalSettings } from '@/lib/api/disposal-settings';
@@ -73,15 +72,14 @@ export function PresetSelection() {
   const loaded = !!engineQuery.data && !!disposalQuery.data;
 
   return (
-    <Card data-testid="preset-selection">
-      <CardHeader>
-        <CardTitle>{t('title')}</CardTitle>
-        <CardDescription>{t('description')}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-3 md:grid-cols-3">
-          {PRESETS.map((preset) => (
-            <button
+    <section className="flex flex-col gap-3 rounded-lg border bg-muted/20 p-4" data-testid="preset-selection">
+      <div className="flex flex-col gap-1">
+        <h3 className="font-medium">{t('title')}</h3>
+        <p className="text-xs text-muted-foreground">{t('description')}</p>
+      </div>
+      <div className="grid gap-3 md:grid-cols-3">
+        {PRESETS.map((preset) => (
+          <button
               key={preset}
               type="button"
               disabled={!loaded || applyMutation.isPending}
@@ -94,9 +92,8 @@ export function PresetSelection() {
                 {t(`${preset}.description`)}
               </p>
             </button>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+        ))}
+      </div>
+    </section>
   );
 }
