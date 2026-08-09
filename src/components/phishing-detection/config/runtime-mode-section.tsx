@@ -164,7 +164,7 @@ export function RuntimeModeSection() {
           </p>
         ) : (
           <div className="space-y-3 rounded-lg border p-4">
-            <div className="grid gap-3 md:grid-cols-4">
+            <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
               <ReadonlyField
                 label={t('agentStatus.label')}
                 value={engine.enabled ? t('agentStatus.enabled') : t('agentStatus.disabled')}
@@ -183,18 +183,6 @@ export function RuntimeModeSection() {
                     : '—'
                 }
               />
-              <ReadonlyField
-                label={t('timeoutTempDisposal')}
-                value={
-                  disposal
-                    ? t(`timeoutTempValue.${disposal.review.timeout_temp_disposal || 'deliver'}`)
-                    : disposalQuery.isLoading
-                      ? t('loading')
-                      : '—'
-                }
-              />
-            </div>
-            <div className="grid gap-3 md:grid-cols-3">
               <ReadonlyField
                 label={t('totalTimeout')}
                 value={
@@ -222,6 +210,16 @@ export function RuntimeModeSection() {
                     ? disposal.review.timeout_auto_deliver
                       ? t('autoDeliverOn')
                       : t('autoDeliverOff')
+                    : disposalQuery.isLoading
+                      ? t('loading')
+                      : '—'
+                }
+              />
+              <ReadonlyField
+                label={t('timeoutTempDisposal')}
+                value={
+                  disposal
+                    ? t(`timeoutTempValue.${disposal.review.timeout_temp_disposal || 'deliver'}`)
                     : disposalQuery.isLoading
                       ? t('loading')
                       : '—'
