@@ -5,6 +5,8 @@
 
 export type PhishRunMode = 'realtime' | 'observe';
 export type PhishObserveAction = 'deliver' | 'mark';
+export type PhishProtectionLevel = 'standard' | 'strict' | 'custom';
+export type PhishPresetVersion = '2026-08-01';
 // Kept for the disposal-settings UI (Plan 5 C11: the timeout-temp-disposal
 // knob lives on disposal-settings.Review, NOT on engine params — the sideline
 // worker reads disposal_settings, not engine_config).
@@ -30,6 +32,13 @@ export interface PhishTenantEngineParams {
   netdisk_spoof: boolean;
   run_mode: PhishRunMode;
   observe_action: PhishObserveAction;
+  protection_level: PhishProtectionLevel;
+}
+
+export interface PhishProtectionPreset {
+  level: Exclude<PhishProtectionLevel, 'custom'>;
+  version: PhishPresetVersion;
+  bands: PhishBand[];
 }
 
 // Deployment-wide [phishing_agent] limits retained in effective task
@@ -74,9 +83,18 @@ export interface PhishBand {
 // PhishEffectiveConfigSnapshot mirrors internal/models.PhishEffectiveConfig —
 // the frozen "派发时生效配置" exposed as `config_snapshot` on the detection
 // detail endpoint (Tab A A6).
+export interface PhishTimeoutPolicySnapshot {
+  total_timeout_minutes: number;
+  timeout_action: PhishTimeoutTempDisposal;
+}
+
 export interface PhishEffectiveConfigSnapshot {
   profile_id?: number;
   profile: PhishProfileParams;
   engine: PhishEngineParams;
+  protection_level?: PhishProtectionLevel;
+  protection_preset_version?: PhishPresetVersion;
+  bands?: PhishBand[];
+  timeout_policy?: PhishTimeoutPolicySnapshot;
   matched_rule_id?: number;
 }

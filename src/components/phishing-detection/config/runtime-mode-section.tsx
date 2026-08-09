@@ -35,14 +35,17 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useApiRequest, ApiError } from '@/lib/api/client';
-import { getEngineConfig, putEngineConfig } from '@/lib/api/phishing-config';
+import { getBands, getEngineConfig, putBands, putEngineConfig } from '@/lib/api/phishing-config';
 import { getDisposalSettings, putDisposalSettings } from '@/lib/api/disposal-settings';
 import type {
   PhishTenantEngineParams,
   PhishRunMode,
   PhishObserveAction,
   PhishTimeoutTempDisposal,
+  PhishProtectionLevel,
+  PhishBand,
 } from '@/types/phishing-config';
+import { detectProtectionLevel, PHISHING_PRESETS } from './protection-presets';
 import type { DisposalSettings } from '@/types/disposal-settings';
 import { ConfidenceBandsEditor } from './confidence-bands-editor';
 
@@ -66,8 +69,13 @@ export function RuntimeModeSection() {
     queryKey: ['disposal-settings'],
     queryFn: () => getDisposalSettings(apiRequest),
   });
+  const bandsQuery = useQuery({
+    queryKey: ['phish-bands'],
+    queryFn: () => getBands(apiRequest),
+  });
 
   const engineBaseline = engineQuery.data?.engine ?? null;
+  const bandsBaseline = bandsQuery.data ?? null;
   const disposalBaseline = disposalQuery.data ?? null;
 
   // Local drafts. Loaded into local state via the render-phase snapshot
@@ -76,16 +84,18 @@ export function RuntimeModeSection() {
   const [confirmTimeoutClose, setConfirmTimeoutClose] = useState(false);
   const [engineDraft, setEngineDraft] = useState<PhishTenantEngineParams | null>(null);
   const [disposalDraft, setDisposalDraft] = useState<DisposalSettings | null>(null);
+  const [bandsDraft, setBandsDraft] = useState<PhishBand[] | null>(null);
   const [pendingTimeoutValue, setPendingTimeoutValue] = useState<boolean | null>(null);
 
   // When opening the sheet (or the baseline refreshes while it's open),
   // snapshot the draft from the latest loaded data.
-  const loadKey = `${sheetOpen}:${engineBaseline ? JSON.stringify(engineBaseline) : ''}:${disposalBaseline ? JSON.stringify(disposalBaseline) : ''}`;
+  const loadKey = `${sheetOpen}:${engineBaseline ? JSON.stringify(engineBaseline) : ''}:${disposalBaseline ? JSON.stringify(disposalBaseline) : ''}:${bandsBaseline ? JSON.stringify(bandsBaseline) : ''}`;
   const [lastLoadKey, setLastLoadKey] = useState('');
-  if (sheetOpen && loadKey !== lastLoadKey && engineBaseline && disposalBaseline) {
+  if (sheetOpen && loadKey !== lastLoadKey && engineBaseline && disposalBaseline && bandsBaseline) {
     setLastLoadKey(loadKey);
     setEngineDraft({ ...engineBaseline });
     setDisposalDraft(structuredClone(disposalBaseline));
+    setBandsDraft(structuredClone(bandsBaseline));
   } else if (!sheetOpen && lastLoadKey !== '') {
     // Reset on close so a reopen with an UNCHANGED baseline re-snapshots from
     // scratch. Without this, loadKey ("true:...") matches lastLoadKey on reopen
@@ -94,23 +104,29 @@ export function RuntimeModeSection() {
     setLastLoadKey('');
     setEngineDraft(null);
     setDisposalDraft(null);
+    setBandsDraft(null);
   }
 
   const engine = engineDraft ?? engineBaseline;
   const disposal = disposalDraft ?? disposalBaseline;
+  const bands = bandsDraft ?? bandsBaseline ?? [];
+  const protectionLevel = (engine?.protection_level ?? detectProtectionLevel(bands)) as PhishProtectionLevel;
 
   const dirty = useMemo(() => {
-    if (!engineBaseline || !disposalBaseline || !engineDraft || !disposalDraft) return false;
+    if (!engineBaseline || !disposalBaseline || !bandsBaseline || !engineDraft || !disposalDraft || !bandsDraft) return false;
     return (
       JSON.stringify(engineDraft) !== JSON.stringify(engineBaseline) ||
-      JSON.stringify(disposalDraft) !== JSON.stringify(disposalBaseline)
+      JSON.stringify(disposalDraft) !== JSON.stringify(disposalBaseline) ||
+      JSON.stringify(bandsDraft) !== JSON.stringify(bandsBaseline)
     );
-  }, [engineBaseline, disposalBaseline, engineDraft, disposalDraft]);
+  }, [engineBaseline, disposalBaseline, bandsBaseline, engineDraft, disposalDraft, bandsDraft]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!engineDraft || !disposalDraft) return;
-      await putEngineConfig(engineDraft, apiRequest);
+      const nextBands = bandsDraft ?? bandsBaseline ?? [];
+      await putEngineConfig({ ...engineDraft, protection_level: engineDraft.protection_level ?? detectProtectionLevel(nextBands) }, apiRequest);
+      await putBands(nextBands, apiRequest);
       await putDisposalSettings(disposalDraft, apiRequest);
     },
     onSuccess: () => {
@@ -168,6 +184,11 @@ export function RuntimeModeSection() {
                 label={t('runMode')}
                 value={t(`runModeValue.${engine.run_mode}`)}
                 testId="runtime-mode-summary"
+              />
+              <ReadonlyField
+                label={t('protectionLevel')}
+                value={t(`protectionLevelValue.${protectionLevel}`)}
+                testId="protection-level-summary"
               />
               <ReadonlyField
                 label={t('observeAction')}
@@ -284,6 +305,35 @@ export function RuntimeModeSection() {
                       </label>
                     ))}
                   </div>
+                  {engineDraft.run_mode === 'realtime' ? (
+                    <div className="space-y-2">
+                      <Label>{t('protectionLevel')}</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {(['standard', 'strict', 'custom'] as const).map((level) => (
+                          <Button
+                            key={level}
+                            type="button"
+                            size="sm"
+                            variant={protectionLevel === level ? 'default' : 'outline'}
+                            disabled={level === 'custom'}
+                            onClick={() => {
+                              if (level === 'custom') return;
+                              setBandsDraft(structuredClone(PHISHING_PRESETS[level].bands));
+                              patchEngine({
+                                protection_level: level,
+                              });
+                            }}
+                            data-testid={`protection-level-${level}`}
+                          >
+                            {t(`protectionLevelValue.${level}`)}
+                          </Button>
+                        ))}
+                      </div>
+                      {protectionLevel === 'custom' ? (
+                        <p className="text-xs text-muted-foreground">{t('customProtectionHint')}</p>
+                      ) : null}
+                    </div>
+                  ) : null}
                   {engineDraft.run_mode === 'observe' ? (
                     <div className="ml-7 space-y-1.5">
                       <Label>{t('observeAction')}</Label>

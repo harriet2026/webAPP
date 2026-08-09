@@ -62,6 +62,11 @@ import {
   mockInboundAuditPending,
   mockAgentCenterOverview,
   mockPhishingStats,
+  mockPhishingEngineConfig,
+  mockPutPhishingEngineConfig,
+  mockPhishingBands,
+  mockPutPhishingBands,
+  mockPhishingConfigAudit,
   mockSpoofingStats,
   mockThreatRetroStats,
   mockSystemHealthSummary,
@@ -408,7 +413,7 @@ const mockAdvancedFieldDefs: Record<string, FieldDef> = Object.fromEntries(
 );
 
 // ─── 角色（RBAC）mock 数据 ──────────────────────────────────────────────
-// 平台/租户两套内置角色。`_level` 仅用于本地生成权限矩阵，不属于 Role 线上
+// 平台/租户两套内置角色。`_level` 仅用于本地生成权限矩阵，不属于 Role ���上
 // 字段，列表响应里会被剥离。真实后端按 GetEffectiveTenantID 裁剪作用域，这里
 // 返回全集、由页面按视角（platform/tenant）过滤。
 type RoleLevel = 'admin' | 'operator' | 'viewer';
@@ -805,7 +810,7 @@ const routes: Route[] = [
   },
   // 系统状态仪表盘的「待处置邮件」KPI 探针：page_size=1 且 advanced_filters 含
   // sideline（隔离/旁路）——只命中这一探针，不影响处置中心默认视图（其 page_size 更大）。
-  // 返回按当前范围分支的 total（3/11/19），items 留空即可（KPI 卡只读 total）。
+  // 返回按当前范围分支的 total（3/11/19），items 留空即可（KPI 卡只�� total）。
   {
     method: 'GET', pattern: '/mail-logs',
     matchQuery: (q) => {
@@ -2308,6 +2313,32 @@ const routes: Route[] = [
     method: 'GET',
     pattern: '/agent-center/overview',
     handler: () => ({ status: 200, data: mockAgentCenterOverview() }),
+  },
+  // 钓鱼检测引擎配置与审计。
+  {
+    method: 'GET',
+    pattern: '/phishing-agent/engine-config',
+    handler: () => ({ status: 200, data: mockPhishingEngineConfig() }),
+  },
+  {
+    method: 'PUT',
+    pattern: '/phishing-agent/engine-config',
+    handler: (req) => ({ status: 200, data: mockPutPhishingEngineConfig((req.body ?? {}) as Record<string, unknown>) }),
+  },
+  {
+    method: 'GET',
+    pattern: '/phishing-agent/bands',
+    handler: () => ({ status: 200, data: mockPhishingBands() }),
+  },
+  {
+    method: 'PUT',
+    pattern: '/phishing-agent/bands',
+    handler: (req) => ({ status: 200, data: mockPutPhishingBands((req.body ?? {}) as { bands?: Array<Record<string, unknown>> }) }),
+  },
+  {
+    method: 'GET',
+    pattern: '/phishing-agent/config/audit',
+    handler: () => ({ status: 200, data: mockPhishingConfigAudit() }),
   },
   // 智能体运行概况 / 待办：钓鱼、仿冒、威胁回溯 stats。
   {

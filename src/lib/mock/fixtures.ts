@@ -1232,7 +1232,7 @@ export function mockOpsTopCsv(response: OpsTopResponse): string {
 
 export function mockOpsTopAi(): { markdown: string } {
   return {
-    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- 建议优先复核失败率超过 50% 的连接来源及持续飙升对象。\n- 展开行可查看固定近 7 日趋势与关联子维度。",
+    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- 建议优先复核失败率超过 50% 的连接来源及持续飙升对象。\n- 展开行可查看固定近 7 ���趋势与关联子维度。",
   };
 }
 
@@ -1902,6 +1902,60 @@ export function mockAgentCenterOverview(): AgentCenterOverview {
 }
 
 // demo DASHBOARD_AGENTS：全部运行；今日处理量与待审数照抄。
+let phishingEngineMockState: Record<string, unknown> = {
+  netdisk_domain: true,
+  netdisk_extract: true,
+  netdisk_spoof: true,
+  run_mode: 'realtime',
+  observe_action: 'deliver',
+  protection_level: 'standard',
+};
+let phishingBandsMockState = [
+  { min: 0, max: 40, disposition: 'accept' },
+  { min: 40, max: 70, disposition: 'mark', mark_positions: ['subject_prefix'], mark_text: '[可疑]' },
+  { min: 70, max: 90, disposition: 'quarantine' },
+  { min: 90, max: 100, disposition: 'quarantine' },
+];
+const phishingAuditMockState: Array<Record<string, unknown>> = [];
+
+export function mockPhishingEngineConfig() {
+  return { engine: structuredClone(phishingEngineMockState), version: 1 };
+}
+
+export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
+  const before = structuredClone(phishingEngineMockState);
+  phishingEngineMockState = { ...phishingEngineMockState, ...(body.params as Record<string, unknown> ?? body) };
+  phishingAuditMockState.unshift({
+    action: 'protection_level_changed',
+    changed_fields: Object.keys(phishingEngineMockState).filter((key) => JSON.stringify(before[key]) !== JSON.stringify(phishingEngineMockState[key])),
+    before,
+    after: structuredClone(phishingEngineMockState),
+    created_at: new Date().toISOString(),
+  });
+  return mockPhishingEngineConfig();
+}
+
+export function mockPhishingBands() {
+  return { bands: structuredClone(phishingBandsMockState) };
+}
+
+export function mockPutPhishingBands(body: { bands?: Array<Record<string, unknown>> }) {
+  const before = structuredClone(phishingBandsMockState);
+  phishingBandsMockState = structuredClone(body.bands ?? phishingBandsMockState) as typeof phishingBandsMockState;
+  phishingAuditMockState.unshift({
+    action: 'bands_changed',
+    changed_fields: ['bands'],
+    before,
+    after: structuredClone(phishingBandsMockState),
+    created_at: new Date().toISOString(),
+  });
+  return mockPhishingBands();
+}
+
+export function mockPhishingConfigAudit() {
+  return { items: structuredClone(phishingAuditMockState) };
+}
+
 export function mockPhishingStats(): PhishingStats {
   return {
     today_detected: 12450,
@@ -3660,7 +3714,7 @@ function groupPolicyRulesSeed(): Rule[] {
     gpRule({
       id: 9005,
       name: "IP群组1-RBL隔离",
-      description: "优先级较低，但配置位于阶段1，会先短路",
+      description: "优先级较低，但���置位于阶段1，会先短路",
       priority: 2,
       is_active: true,
       target_groups: { senderIpGroup: ["IP群组1"] },
@@ -4156,7 +4210,7 @@ export function mockContentGroupsList(): { items: Rule[] } {
   };
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ══════════���═════════════════════════════════════════════════════════════════════
 // 身份认证与仿冒防护（auth-spoofing，mock）
 // 配置照抄 demo 默认值（src/components/security/AuthSpoofingPage.tsx 的
 // DEFAULT_CONFIG，已是映射到统一 action 的 demo 默认），保证 Mock 模式下页面
@@ -4894,7 +4948,7 @@ export function mockUserListRulesList(): { items: Rule[] } {
   return { items: [...bl, ...wl] };
 }
 
-// ─── URL检测与防护（url-protection，mock）────────────────────────────────
+// ─── URL检测与防护（url-protection，mock）──────────────────��─────────────
 // 数据源：demo components/filter-rules-new/url-protection-module.tsx 的
 // createDefaultUrlProtectionConfig / createDefaultLinkProtectionConfig 默认值。
 // public_base_url 预置一个占位主机名（链接保护生效需模块统一开关 + master switch + base URL）。
@@ -5220,7 +5274,7 @@ export function mockDeleteAttachmentPassword(id: number) {
   if (index >= 0) mockAttachmentPasswords.splice(index, 1);
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ═══════════════��════════════════════════════════════════════════════════════════
 // 邮件处置中心（email-handling-disposal-center，mock）
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
@@ -7839,7 +7893,7 @@ export function mockContactCSVPreview() {
   return { headers: ['邮箱', '姓名', '部门', '职务'], rows: [], test_token: 'mock-csv-test-token', valid: true };
 }
 
-// 投递与流量分析：数值以 demo 的默认「全部租户 / 近7日」为基线；指定租户时
+// 投递与流量分析：数值以 demo 的默认「���部租户 / 近7日」为基线；指定租户时
 // 只缩放数量，比例与延迟保持不变，便于验证租户切换确实刷新整页。
 function makeDeliveryRng(seed: number) {
   let value = seed >>> 0;

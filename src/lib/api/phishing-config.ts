@@ -11,12 +11,29 @@ import type {
   PhishTenantEngineParams,
   PhishAdmissionRule,
   PhishBand,
+  PhishProtectionLevel,
+  PhishPresetVersion,
 } from '@/types/phishing-config';
 
 export async function getEngineConfig(
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<PhishEngineConfigResponse> {
   return requestFn<PhishEngineConfigResponse>('/phishing-agent/engine-config');
+}
+
+export interface PhishConfigAuditEntry {
+  action: 'protection_level_changed' | 'bands_changed' | 'runtime_mode_changed' | 'timeout_policy_changed' | 'admission_rules_changed';
+  changed_fields: string[];
+  before: unknown;
+  after: unknown;
+  created_at: string;
+}
+
+export interface PhishConfigAggregate {
+  engine: PhishTenantEngineParams;
+  bands: PhishBand[];
+  protection_level: PhishProtectionLevel;
+  protection_preset_version?: PhishPresetVersion;
 }
 
 export async function putEngineConfig(
@@ -27,6 +44,23 @@ export async function putEngineConfig(
     method: 'PUT',
     body: { params },
   });
+}
+
+export async function putPhishingConfig(
+  config: PhishConfigAggregate,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<void> {
+  await requestFn<void>('/phishing-agent/config', {
+    method: 'PUT',
+    body: config,
+  });
+}
+
+export async function listPhishingConfigAudit(
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<PhishConfigAuditEntry[]> {
+  const resp = await requestFn<{ items: PhishConfigAuditEntry[] }>('/phishing-agent/config/audit');
+  return resp.items ?? [];
 }
 
 export async function listAdmissionRules(

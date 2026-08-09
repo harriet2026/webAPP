@@ -862,7 +862,7 @@
         "editButton": "编辑",
         "deleteButton": "删除",
         "emptyText": "暂无通道，建议先配置自定义通道",
-        "proxyDeletedBadge": "代理已删除",
+        "proxyDeletedBadge": "代理已删���",
         "systemDefaultHelo": "系统默认",
         "drawerTitleNew": "新建投递通道",
         "drawerTitleEdit": "编辑投递通道",
@@ -1188,7 +1188,7 @@
     "globalRule": "全局规则",
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除，只有系统管理员可编辑部分字段",
-    "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条件阈值，其余字段已锁定。",
+    "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条件阈值，其��字段已锁定。",
     "stage": "阶段"
   },
   "tagRules": {
@@ -1637,7 +1637,7 @@
     "sender": "发件人",
     "status": "状态",
     "priority": "优先级",
-    "sidelinedAt": "旁路时间",
+    "sidelinedAt": "���路时间",
     "reinject": "重新注入",
     "retryCount": "重试次数",
     "delete": "删除",
@@ -1841,7 +1841,7 @@
       "session_id": "会话 ID",
       "received_at": "接收时间",
       "processed_at": "处理时间",
-      "delivered_at": "投递时间",
+      "delivered_at": "投递���间",
       "bounced_at": "退信时间",
       "created_at": "创建时间",
       "updated_at": "更新时间",
@@ -2226,7 +2226,7 @@
       },
       "toast": {
         "created": "角色已创建",
-        "updated": "角色已更新",
+        "updated": "角色已更���",
         "deleted": "角色已删除",
         "statusUpdated": "角色状态已更新",
         "saveFailed": "保存失败，请重试",
@@ -2821,7 +2821,7 @@
     "deleteGroup": "删除分组",
     "endpointRequiredFields": "名称、主机、License ID 为必填",
     "groupNameRequired": "请输入分组名称",
-    "groupMembersRequired": "请至少添加一个成员代理服务器",
+    "groupMembersRequired": "请至少添加一个成员代理��务器",
     "eyebrow": "proxysvr"
   },
   "advancedFilter": {
@@ -3240,7 +3240,7 @@
     },
     "typeDescriptions": {
       "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼风险。",
-      "similarity_search": "围绕发件人和主题等特征寻找相似邮件，快速判断是否为批量传播。",
+      "similarity_search": "围绕发件人和主题等特征���找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
       "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
       "rule_analysis": "基于相似邮件历史，判断误判或漏判的可能性，并抽取可供人工确认的候选拦截规则。"
@@ -3850,7 +3850,7 @@
     "presetSpamcop": "SpamCop",
     "presetSpamcopTip": "社区驱动的垃圾邮件举报系统",
     "presetBarracuda": "Barracuda",
-    "presetBarracudaTip": "Barracuda Central IP 黑名单",
+    "presetBarracudaTip": "Barracuda Central IP ���名单",
     "presetSorbs": "SORBS",
     "presetSorbsTip": "垃圾邮件和开放中继阻止系统",
     "manualQuery": "手动查询",
@@ -5712,7 +5712,7 @@
     "pageDescription": "查看和分析邮件安全事件，进行威胁调查和处置",
     "pageTitle": "邮件处置中心",
     "investigationTitle": "邮件调查中心",
-    "investigationSubtitle": "查看和分析邮件安全事件，进行威胁调查和处置",
+    "investigationSubtitle": "查看和分析邮件安全事件，进行威胁调��和处置",
     "recipientStatusBar": {
       "delivered": "投递",
       "sideline": "旁路",
@@ -6065,7 +6065,7 @@
       "aiInterpret": "AI 解读",
       "breadcrumb": "邮件处置中心 / 详情",
       "fullscreen": "全屏",
-      "exitFullscreen": "退出全屏",
+      "exitFullscreen": "退出全���",
       "findSimilar": "查找相似邮件",
       "findSimilarTooltip": "查找与本邮件相似的邮件",
       "close": "关闭",
@@ -6770,7 +6770,7 @@
       "sectionScope": "生效范围",
       "sectionValidity": "有效期设置",
       "sectionDescription": "备注说明",
-      "expiresAtHint": "留空=永久有效"
+      "expiresAtHint": "留空=永���有效"
     },
     "cannotSave": {
       "name": "请填写规则名称",
@@ -6950,7 +6950,7 @@
         "note": "支持多级组织架构匹配"
       },
       "desc_senderIp": {
-        "source": "SMTP连接层",
+        "source": "SMTP连接��",
         "usage": "匹配发信服务器IP地址",
         "note": "支持CIDR格式，如10.0.0.0/8"
       },
@@ -7114,7 +7114,7 @@
       "desc_mailFromFromConsistency": {
         "source": "SMTP会话MAIL FROM + 邮件头From字段",
         "usage": "检测信封层与信头层发信人是否一致",
-        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
+        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真��以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
       },
       "desc_virusScanResult": {
         "source": "防病毒引擎",
@@ -7272,7 +7272,7 @@
       "noConditions": "请在“条件”页签添加至少一个条件后再进行测试。",
       "verdictMatched": "命中",
       "verdictNotMatched": "未命中",
-      "verdictLabel": "判定结果",
+      "verdictLabel": "判定��果",
       "verdictPending": "运行测试以查看判定结果。",
       "perConditionTitle": "逐条件评估",
       "emptyPerCondition": "没有可评估的条件。",
@@ -7526,7 +7526,7 @@
     "currentSetting": "当前设置：{minutes}分钟",
     "maxRecheckMinutes": "复检窗口（分钟）",
     "timeoutAutoDeliver": "超时自动投递",
-    "autoDeliverDesc": "审核超时后自动投递邮件",
+    "autoDeliverDesc": "审核超时后自��投递邮件",
     "enabled": "已启用",
     "disabled": "已禁用",
     "currentStatus": "当前状态：",
@@ -7583,7 +7583,7 @@
     "actions": "操作",
     "cancel": "取消",
     "create": "创建",
-    "keyDeleted": "密钥已删除",
+    "keyDeleted": "���钥已删除",
     "keyDeleteFailed": "删除失败",
     "keyCreated": "密钥创建成功",
     "keyCreateFailed": "创建失败",
@@ -8253,7 +8253,7 @@
     "degradeDbUnavailable": "数据库监控数据源暂时不可用",
     "backendUnsupported": "该后端暂不支持",
     "hardware": {
-      "cpuMem": "CPU/内存趋势",
+      "cpuMem": "CPU/内存趋���",
       "netTop5": "网卡实时流量 Top5",
       "rxPps": "收包 pps",
       "txPps": "发包 pps",
@@ -8338,7 +8338,7 @@
     "loadTimeout": "数据加载超时，请稍后重试",
     "retry": "重试",
     "agentOffline": "数据采集异常",
-    "degradeBackendUnavailable": "监控数据源（时序数据库）暂时不可达，数据可能缺失",
+    "degradeBackendUnavailable": "监控数据源（时序数据库）暂时不可达，数据���能缺失",
     "degradeNotInitialized": "监控库尚未初始化",
     "degradeDbUnavailable": "数据库监控数据源暂时不可用",
     "queueDirectionDisabled": "队列为全局共享，不区分方向",
@@ -8628,7 +8628,7 @@
       "namePlaceholder": "规则名称",
       "tagPlaceholder": "输入标签后回车，例如 grp:finance",
       "addTag": "添加",
-      "removeTag": "移除",
+      "removeTag": "移���",
       "tagSectionLabel": "收件人标签",
       "emailSectionLabel": "收件人邮箱（精确匹配）",
       "emailPlaceholder": "输入邮箱后回车，例如 cfo@corp.com",
@@ -8668,8 +8668,16 @@
         "internal": "内部"
       }
     },
-    "runtime": {
-      "title": "运行模式与超时",
+  "runtime": {
+  "title": "运行模式与超时",
+  "protectionLevel": "防护等级",
+  "protectionLevelValue": {
+  "standard": "标准防护",
+  "strict": "严格防护",
+  "custom": "自定义"
+  },
+  "customProtectionHint": "当前分级配置已偏离预设，保存后将按自定义策略执行。",
+
       "description": "实时/观察模式、超时时间线与超时临时处置（对所有旁路检测生效）。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
@@ -9089,7 +9097,7 @@
       "searchPlaceholder": "按品牌名称、保护域名搜索",
       "modeFilter": "处置模式",
       "allModes": "全部模式",
-      "protectedDomains": "保护域名",
+      "protectedDomains": "保护���名",
       "keywords": "品牌关键词",
       "keywordsCount": "品牌关键词：{count}个",
       "confidenceThreshold": "置信度阈值",
@@ -9343,7 +9351,7 @@
     },
     "falsePositive": {
       "title": "标记为误报",
-      "description": "标记后将停止对该邮件执行召回，可选把发件人加入白名单。",
+      "description": "标记后将停止对该邮��执行召回，可选把发件人加入白名单。",
       "addWhitelist": "同时把发件人加入白名单",
       "detailPlaceholder": "补充说明（可选）",
       "cancel": "取消",
@@ -10228,7 +10236,7 @@
     "selectTenantFirst": "请先选择租户，再修改此模块",
     "adminOnly": "仅系统管理员或租户管理员可修改此模块",
     "disableWarning": "关闭本模块后，其全部规则停止生效，该模块的拦截能力将不再起作用。",
-    "whitelistWarning": "注意：本模块的白名单 / 放行规则也会一并停用，原本被放行的邮件将继续走后续检测。",
+    "whitelistWarning": "注意：本模块的白名单 / 放行规则也会一并停用，原本��放行的邮件将继续走后续检测。",
     "saveFailed": "保存失败，请重试",
     "unsavedChanges": "模块开关有未保存的更改"
   },
@@ -10645,7 +10653,7 @@
       "no_sync_log": "该数据源还没有同步记录",
       "not_found": "通讯录数据源不存在，可能已被删除",
       "source_type_empty": "请选择数据源类型",
-      "stale_write": "该数据源已被他人修改，请刷新后重试",
+      "stale_write": "该数据源已被���人修改，请刷新后重试",
       "sync_already_running": "该数据源已有同步任务在运行，请等待完成后再试",
       "sync_mode_invalid": "同步方式无效，只能是：{allowed}",
       "test_connection_required": "请先测试连接成功后再保存",
@@ -11338,7 +11346,7 @@
       "strategy_not_found": "处置策略不存在"
     },
     "unified_rules_pagespec": {
-      "behavior_control_rule_have_metadata_feature": "发信行为管控规则的 metadata.feature 必须是 behavior_control",
+      "behavior_control_rule_have_metadata_feature": "发信行为管控��则的 metadata.feature 必须是 behavior_control",
       "content_rules_rule_have_metadata_feature": "内容规则的 metadata.feature 必须是 content_rules",
       "sender_filter_rule_priority_between_1": "发件人过滤规则优先级必须在 1-9999 之间",
       "invalid_metadata": "元数据格式不正确"

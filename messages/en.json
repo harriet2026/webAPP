@@ -8614,6 +8614,13 @@
     },
     "runtime": {
       "title": "Runtime Mode & Timeouts",
+      "protectionLevel": "Protection level",
+      "protectionLevelValue": {
+        "standard": "Standard protection",
+        "strict": "Strict protection",
+        "custom": "Custom"
+      },
+      "customProtectionHint": "The current bands differ from a preset and will run as a custom policy after saving.",
       "description": "Realtime / observe mode, timeout timeline and timeout temp disposition (applies to all sideline checks).",
       "loading": "Loading...",
       "engineLoadFailed": "Failed to load detection engine config",
