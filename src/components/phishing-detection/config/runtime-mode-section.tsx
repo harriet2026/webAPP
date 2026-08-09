@@ -466,22 +466,3 @@ export function RuntimeModeSection() {
     </Card>
   );
 }
-
-function ReadonlyField({
-  label,
-  value,
-  testId,
-}: {
-  label: string;
-  value: string;
-  testId?: string;
-}) {
-  return (
-    <div data-testid={testId}>
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="text-sm font-medium">
-        <Badge variant="outline">{value}</Badge>
-      </div>
-    </div>
-  );
-}

@@ -8729,6 +8729,12 @@
         "realtime": "Apply band dispositions (quarantine / mark / accept).",
         "observe": "Skip band dispositions; only record observations."
       },
+      "advanced": {
+        "title": "Advanced settings",
+        "description": "Timeout timeline and timeout temp disposition, collapsed by default.",
+        "expand": "Expand",
+        "collapse": "Collapse"
+      },
       "observeAction": "Observe action",
       "observeActionValue": {
         "deliver": "Deliver",
