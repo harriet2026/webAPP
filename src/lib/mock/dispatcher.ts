@@ -60,6 +60,7 @@ import {
   mockPutAlertSmtpConfig,
   mockDisposalPendingProbe,
   mockInboundAuditPending,
+  mockAgentCenterOverview,
   mockPhishingStats,
   mockSpoofingStats,
   mockThreatRetroStats,
@@ -1022,7 +1023,7 @@ const routes: Route[] = [
     method: 'POST', pattern: '/statistics/delivery-traffic/ai-analysis',
     handler: () => ({ status: 200, data: mockDeliveryTrafficAi() }),
   },
-  // 链接与附件安全：子资源必须排在聚合路径之前，保证整页 mock 数据闭环。
+  // 链接与附件���全：子资源必须排在聚合路径之前，保证整页 mock 数据闭环。
   {
     method: 'GET', pattern: '/statistics/link-attachment-security/top-malicious-domains',
     handler: (req) => {
@@ -1731,7 +1732,7 @@ const routes: Route[] = [
   // query 形态：sender_filter 列表页（`rule_page=sender_filter`）、
   // behavior_control 列表页（`rule_page=behavior_control`）和群组下拉
   // （`page=<GROUPS_PAGE_KEY>`，注意参数名是 `page`，不是 `rule_page`）。
-  // 群组下拉又有两个来源，靠 `include` 参数分流、互不污染：
+  // 群组下拉又��两个来源，靠 `include` 参数分流、互不污染：
   //   - sender_filter 的 `GROUPS_LIST_QUERY`（src/lib/api/groups.ts）发
   //     `include=member_count,reference_count` → 返回 `mockSenderFilterGroupsList()`；
   //   - behavior-control 抽屉（BehaviorControlDrawer.tsx 的 groupsQuery）发
@@ -2301,6 +2302,12 @@ const routes: Route[] = [
     method: 'GET',
     pattern: '/inbound-audit',
     handler: () => ({ status: 200, data: mockInboundAuditPending() }),
+  },
+  // 智能体中心总览：提供 pipeline 卡片所需的完整 agents 数据。
+  {
+    method: 'GET',
+    pattern: '/agent-center/overview',
+    handler: () => ({ status: 200, data: mockAgentCenterOverview() }),
   },
   // 智能体运行概况 / 待办：钓鱼、仿冒、威胁回溯 stats。
   {

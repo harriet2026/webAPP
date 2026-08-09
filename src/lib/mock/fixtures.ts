@@ -20,6 +20,7 @@ import type {
   TopMaliciousDomain,
 } from "@/lib/api/link-attachment-security";
 import type { TenantListResponse, TenantStats } from "@/types/tenant";
+import type { AgentCenterOverview } from "@/types/agent-center";
 import type {
   IPFrequencyRuleView,
   IPFrequencyRulePayload,
@@ -1235,7 +1236,7 @@ export function mockOpsTopAi(): { markdown: string } {
   };
 }
 
-// ─── 监控 / 节点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
+// ─── 监控 / ���点（/monitor/nodes，retune 为 NodeInfo 形状，5 节点全在线）────────
 export function mockMonitorDashboardOverview(range: MonitorDashboardRange): MonitorDashboardOverview {
   const volumes: Record<MonitorDashboardRange, number> = {
     today: 125847,
@@ -1844,7 +1845,62 @@ export function mockInboundAuditPending(): InboundAuditListResponse {
   };
 }
 
-// ─── 智能体运行概况 / 待办（agent stats）─────────────────────────────────────
+// ─── 智能体中心总览与运行概况 ────────────────────────────────────────────────
+export function mockAgentCenterOverview(): AgentCenterOverview {
+  return {
+    agents: [
+      {
+        key: 'phishing',
+        module_key: 'phishing_agent',
+        feature_id: 'phishing-detection',
+        access: 'enabled',
+        status: 'running',
+        stage_position: '4.0',
+        policy_pages: [
+          { page: 'phishing_admission', role: 'admission', management: 'dedicated' },
+          { page: 'phishing_disposition', role: 'disposition', management: 'dedicated' },
+        ],
+        today_processed: 12,
+        hit_count: 3,
+        processed_count: 12,
+        hit_rate: 0.25,
+      },
+      {
+        key: 'spoofing',
+        module_key: 'spoofing_agent',
+        feature_id: 'spoofing-detection',
+        access: 'enabled',
+        status: 'running',
+        stage_position: '4.1',
+        policy_pages: [
+          { page: 'spoofing_admission', role: 'admission', management: 'internal' },
+          { page: 'spoofing_disposition', role: 'disposition', management: 'internal' },
+        ],
+        today_processed: 8,
+        hit_count: 2,
+        processed_count: 8,
+        hit_rate: 0.25,
+        fallback_count: 1,
+      },
+      {
+        key: 'threat-retro',
+        module_key: 'threat_retro_agent',
+        feature_id: 'threat-retro',
+        access: 'enabled',
+        status: 'running',
+        stage_position: '4.8',
+        policy_pages: [
+          { page: 'threat_retro_strategy', role: 'strategy', management: 'dedicated' },
+        ],
+        today_processed: 30,
+        hit_count: 5,
+        processed_count: 30,
+        hit_rate: 5 / 30,
+      },
+    ],
+  };
+}
+
 // demo DASHBOARD_AGENTS：全部运行；今日处理量与待审数照抄。
 export function mockPhishingStats(): PhishingStats {
   return {
@@ -2401,7 +2457,7 @@ export function mockTestIPFrequency(body: {
   test_ip: string;
   action: string;
 }): IPFrequencyTestResponse {
-  // 无真实流量：以当前挂起列表判定该 IP 是否已被限制，给出可见的测试结果。
+  // 无真实流量：以当前挂起列表判定该 IP 是否已被限制，给出可见的测试结���。
   const hit = mockSuspendedIPs.find((s) => s.ip === body.test_ip);
   if (hit) {
     return {
@@ -3557,7 +3613,7 @@ function groupPolicyRulesSeed(): Rule[] {
     gpRule({
       id: 9001,
       name: "高管邮箱快速通道",
-      description: "针对高管邮箱的优化通道",
+      description: "针对高管邮箱的��化通道",
       priority: 0,
       is_active: true,
       target_groups: { recipientGroup: ["高管邮箱"] },
@@ -4586,7 +4642,7 @@ export function mockRecipientCheckConfig(): RecipientCheckConfig {
 
 // 发信人/IP/组织群组下拉（behavior-control 抽屉里的群组选择器，见
 // `BehaviorControlDrawer.tsx` 的 `groupsQuery`）。三类群组用 `metadata.group_type`
-// 区分（'sender' | 'ip' | 'org'，注意 'org' 不是通用 `GroupType`
+// 区分（'sender' | 'ip' | 'org'，注�� 'org' 不是通用 `GroupType`
 // （src/types/groups.ts）的成员）；抽屉自己按 `metadata.group_type` 过滤、直接读
 // `name` 字段展示，不经过 `tags`。
 //
@@ -4878,7 +4934,7 @@ export function mockPutURLProtectionSettings(
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
 // 动作映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），
 // 非 receive 方向默认区间 accept→quarantine（D-06）。
-// 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF、DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
+// 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF���DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
 
 function intentMockSegments(risk: "high" | "medium" | "low", dir: string) {
   const acc = dir === "receive" ? "accept" : "quarantine";
@@ -6047,7 +6103,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     attachmentCount: 0,
     hasQrCode: true,
     score: 92,
-    basis: ["AI-PHISH", "加密货币钓鱼模式", "AI-018"],
+    basis: ["AI-PHISH", "加密货币钓���模式", "AI-018"],
     senderIsNewOnThisMail: true,
   },
   {
@@ -8200,7 +8256,7 @@ export function mockLinkAttachmentCsv() {
 // action 用 webapp 侧后端枚举（taxonomy moduleOf / opTypeMeta 能反解标签）：demo 原型的
 // disable/grant/report/recall 等 opType 与 demo module 名不在 webapp 枚举中，故就近取
 // update/create/delete/export 等已有 action 与 tenants/users/policy_pipeline 等已有
-// resource_type。变更前/后放 { text }（drawer diffText 直出原文），操作摘要放 details.summary。
+// resource_type。变更前/后放 { text }（drawer diffText 直出原文），操作摘要�� details.summary。
 export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 1, operation_id: 'OP20260622001', admin_user_id: 1, username: 'admin', operator_name: '张运维（我）',
     operator_role: 'platform', layer: 'platform', action: 'create', resource_type: 'tenants', resource_id: 5,
