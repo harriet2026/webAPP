@@ -75,7 +75,6 @@ export function RuntimeModeSection() {
   // pattern (keyed off open + baseline identity) so Cancel discards.
   const [sheetOpen, setSheetOpen] = useState(false);
   const [confirmTimeoutClose, setConfirmTimeoutClose] = useState(false);
-  const [confirmAgentToggle, setConfirmAgentToggle] = useState<boolean | null>(null);
   const [engineDraft, setEngineDraft] = useState<PhishTenantEngineParams | null>(null);
   const [disposalDraft, setDisposalDraft] = useState<DisposalSettings | null>(null);
   const [pendingTimeoutValue, setPendingTimeoutValue] = useState<boolean | null>(null);
@@ -135,18 +134,6 @@ export function RuntimeModeSection() {
 
   const observeMode = (engine?.run_mode ?? 'realtime') === 'observe';
 
-  const applyPreset = (preset: 'observe' | 'standard' | 'strict') => {
-    if (preset === 'observe') {
-      patchEngine({ enabled: true, run_mode: 'observe', observe_action: 'mark' });
-      return;
-    }
-    patchEngine({ enabled: true, run_mode: 'realtime', observe_action: 'deliver' });
-    patchDisposalReview({
-      timeout_auto_deliver: preset === 'standard',
-      timeout_temp_disposal: preset === 'strict' ? 'mark' : 'deliver',
-    });
-  };
-
   const onToggleTimeoutAutoDeliver = (next: boolean) => {
     if (!next) {
       // PRD TC-11: closing async-timeout requires a confirm dialog.
@@ -177,84 +164,30 @@ export function RuntimeModeSection() {
             {engineQuery.isError ? t('engineLoadFailed') : t('loading')}
           </p>
         ) : (
-          <div className="space-y-3 rounded-lg border p-4">
-            <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
-              <ReadonlyField
-                label={t('agentStatus.label')}
-                value={engine.enabled ? t('agentStatus.enabled') : t('agentStatus.disabled')}
-                testId="phishing-agent-status-summary"
-              />
-              <ReadonlyField
-                label={t('runMode')}
-                value={t(`runModeValue.${engine.run_mode}`)}
-                testId="runtime-mode-summary"
-              />
-              <ReadonlyField
-                label={t('observeAction')}
-                value={
-                  engine.run_mode === 'observe'
-                    ? t(`observeActionValue.${engine.observe_action}`)
-                    : '—'
-                }
-              />
-              <ReadonlyField
-                label={t('totalTimeout')}
-                value={
-                  disposal
-                    ? `${disposal.review.custom_minutes}${t('minutes')}`
-                    : disposalQuery.isLoading
-                      ? t('loading')
-                      : '—'
-                }
-              />
-              <ReadonlyField
-                label={t('asyncTimeout')}
-                value={
-                  disposal
-                    ? `${disposal.review.max_recheck_minutes}${t('minutes')}`
-                    : disposalQuery.isLoading
-                      ? t('loading')
-                      : '—'
-                }
-              />
-              <ReadonlyField
-                label={t('autoDeliver')}
-                value={
-                  disposal
-                    ? disposal.review.timeout_auto_deliver
-                      ? t('autoDeliverOn')
-                      : t('autoDeliverOff')
-                    : disposalQuery.isLoading
-                      ? t('loading')
-                      : '—'
-                }
-              />
-              <ReadonlyField
-                label={t('timeoutTempDisposal')}
-                value={
-                  disposal
-                    ? t(`timeoutTempValue.${disposal.review.timeout_temp_disposal || 'deliver'}`)
-                    : disposalQuery.isLoading
-                      ? t('loading')
-                      : '—'
-                }
-              />
+          <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm font-medium" data-testid="runtime-mode-summary">
+                <Badge variant="outline">{t(`runModeValue.${engine.run_mode}`)}</Badge>
+                {engine.run_mode === 'observe' ? (
+                  <span className="text-xs text-muted-foreground">
+                    {t(`observeActionValue.${engine.observe_action}`)}
+                  </span>
+                ) : null}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {disposalQuery.isError ? t('disposalLoadFailed') : t('timeoutScopeNote')}
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {disposalQuery.isError ? t('disposalLoadFailed') : t('timeoutScopeNote')}
-            </p>
-            <div className="flex justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!disposal}
-                title={!disposal ? t('editUnavailable') : undefined}
-                onClick={() => setSheetOpen(true)}
-                data-testid="runtime-mode-edit"
-              >
-                {t('edit')}
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!disposal}
+              title={!disposal ? t('editUnavailable') : undefined}
+              onClick={() => setSheetOpen(true)}
+              data-testid="runtime-mode-edit"
+            >
+              {t('edit')}
+            </Button>
           </div>
         )}
 
@@ -277,47 +210,6 @@ export function RuntimeModeSection() {
           {engineDraft && disposalDraft ? (
             <>
               <div className="flex-1 space-y-5 overflow-y-auto px-6 py-4">
-                <section className="space-y-3">
-                  <div>
-                    <h3 className="font-medium">{t('preset.title')}</h3>
-                    <p className="text-xs text-muted-foreground">{t('preset.description')}</p>
-                  </div>
-                  <div className="grid gap-3 md:grid-cols-3">
-                    {(['observe', 'standard', 'strict'] as const).map((preset) => (
-                      <button
-                        key={preset}
-                        type="button"
-                        className="rounded-lg border p-3 text-left transition-colors hover:bg-accent/40"
-                        onClick={() => applyPreset(preset)}
-                        data-testid={`phishing-preset-${preset}`}
-                      >
-                        <div className="font-medium">{t(`preset.${preset}.title`)}</div>
-                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                          {t(`preset.${preset}.description`)}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="space-y-3 rounded-lg border p-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <h3 className="font-medium">{t('agentStatus.title')}</h3>
-                      <p className="text-xs text-muted-foreground">
-                        {engineDraft.enabled
-                          ? t('agentStatus.enabledDescription')
-                          : t('agentStatus.disabledDescription')}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={engineDraft.enabled}
-                      onCheckedChange={(next) => setConfirmAgentToggle(!!next)}
-                      data-testid="phishing-agent-enabled-switch"
-                    />
-                  </div>
-                </section>
-
                 <section className="space-y-3">
                   <h3 className="font-medium">{t('runModeSectionTitle')}</h3>
                   <div className="grid gap-2">
@@ -546,38 +438,6 @@ export function RuntimeModeSection() {
           ) : null}
         </SheetContent>
       </Sheet>
-
-      <AlertDialog
-        open={confirmAgentToggle !== null}
-        onOpenChange={(open) => {
-          if (!open) setConfirmAgentToggle(null);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {confirmAgentToggle ? t('agentStatus.enableConfirmTitle') : t('agentStatus.disableConfirmTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {confirmAgentToggle
-                ? t('agentStatus.enableConfirmDescription')
-                : t('agentStatus.disableConfirmDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (confirmAgentToggle !== null) patchEngine({ enabled: confirmAgentToggle });
-                setConfirmAgentToggle(null);
-              }}
-              data-testid="phishing-agent-enabled-confirm"
-            >
-              {t('agentStatus.confirm')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <AlertDialog
         open={confirmTimeoutClose}

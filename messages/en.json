@@ -8613,8 +8613,26 @@
         "disabled": "The agent is disabled. New messages will not enter the phishing detection flow. Historical records are unaffected.",
         "noScope": "The agent is enabled, but there is no enabled detection scope, so no messages are detected yet.",
         "observe": "Messages matching {count} detection-scope rule(s) are observed; results are only recorded and {action}, with no automatic quarantine.",
-        "realtime": "Messages matching {count} detection-scope rule(s) are detected in realtime; {bands}; {timeout}.",
+        "realtime": "Messages matching {count} detection-scope rule(s) are detected in realtime and disposed by confidence band; {timeout}.",
         "timeoutPart": "if detection is not finished within {minutes} minutes, messages are first {temp}, then rechecked for up to {recheck} more minutes"
+      }
+    },
+    "preset": {
+      "title": "Protection Presets",
+      "description": "Pick a preset to quickly fill in the run mode and disposition policy; you can keep adjusting details below after choosing.",
+      "applied": "Applied the \"{name}\" preset. You can keep adjusting the details below.",
+      "applyFailed": "Failed to apply preset",
+      "observe": {
+        "title": "Observe",
+        "description": "Only records detection results; does not auto-quarantine or mark messages. Good for watching hit rates before turning on disposition."
+      },
+      "standard": {
+        "title": "Standard",
+        "description": "Auto-disposes by confidence band, with timed-out messages auto-delivered — balances security and delivery speed."
+      },
+      "strict": {
+        "title": "Strict",
+        "description": "Auto-disposes by confidence band, with timed-out messages marked before delivery — prioritizes security."
       }
     },
     "admission": {
