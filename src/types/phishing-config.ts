@@ -65,6 +65,9 @@ export interface PhishAdmissionRule {
   max_size_mb?: number;
   sender_first_seen: boolean;
   require_qrcode: boolean;
+  // 邮件内容风险信号：附件中含可点击链接/按钮（HTML 附件、可交互 PDF 等）。
+  // 后端字段名与其余风险信号保持一致的 snake_case 约定。
+  require_clickable_attachment: boolean;
   enabled: boolean;
   profile_id?: number | null;
   priority?: number;

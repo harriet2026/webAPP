@@ -45,6 +45,7 @@ function emptyDraft(): PhishAdmissionRule {
     max_size_mb: 0,
     sender_first_seen: true,
     require_qrcode: false,
+    require_clickable_attachment: false,
     enabled: true,
     priority: 0,
   };
@@ -121,7 +122,7 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
     if (draft.require_qrcode && draft.directions.includes('outbound')) {
       return t('errors.qrNoOutbound');
     }
-    if (!draft.sender_first_seen && !draft.require_qrcode) {
+    if (!draft.sender_first_seen && !draft.require_qrcode && !draft.require_clickable_attachment) {
       return t('errors.needRiskSignal');
     }
     // 收件人筛选开启时至少选一个对象（spec §4.1 / §7；review D1）。
@@ -212,7 +213,7 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
         </SheetHeader>
 
         <div className="flex-1 space-y-6 overflow-y-auto px-6 py-4">
-          {/* 规则名称 */}
+          {/* 规则名��� */}
           <div className="space-y-1.5">
             <Label htmlFor="rule-name">{t('colName')}</Label>
             <Input
@@ -440,6 +441,19 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
                 checked={draft.require_qrcode}
                 data-testid="rule-qrcode"
                 onCheckedChange={(v) => patch({ require_qrcode: v })}
+              />
+            </div>
+
+            {/* 邮件内容：可点击附件 */}
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div>
+                <Label>{t('clickableAttachment')}</Label>
+                <p className="mt-1 text-xs text-muted-foreground">{t('clickableAttachmentDesc')}</p>
+              </div>
+              <Switch
+                checked={draft.require_clickable_attachment}
+                data-testid="rule-clickable-attachment"
+                onCheckedChange={(v) => patch({ require_clickable_attachment: v })}
               />
             </div>
 
