@@ -22,6 +22,7 @@ import { useApiRequest } from '@/lib/api/client';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { GROUPS_LIST_QUERY, ruleToGroup } from '@/lib/api/groups';
 import { createAdmissionRule, updateAdmissionRule, getAdmissionTagSuggestions } from '@/lib/api/phishing-config';
+import { OrgContactTreeSelect } from '@/components/organization/org-contact-tree-select';
 import type { PhishAdmissionRule } from '@/types/phishing-config';
 import type { Rule } from '@/types/unified-rules';
 
@@ -41,6 +42,7 @@ function emptyDraft(): PhishAdmissionRule {
     directions: ['inbound'],
     recipient_tags: [],
     recipient_emails: [],
+    recipient_dept_paths: [],
     require_url: true,
     max_size_mb: 0,
     sender_first_seen: true,
@@ -59,7 +61,6 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
 
   const [draft, setDraft] = useState<PhishAdmissionRule>(emptyDraft());
   const [tagInput, setTagInput] = useState('');
-  const [emailInput, setEmailInput] = useState('');
   const [filterOn, setFilterOn] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -102,15 +103,20 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
           directions: [...rule.directions],
           recipient_tags: [...(rule.recipient_tags ?? [])],
           recipient_emails: [...(rule.recipient_emails ?? [])],
+          recipient_dept_paths: [...(rule.recipient_dept_paths ?? [])],
         }
       : emptyDraft();
     setDraft(d);
     // Prefer the persisted filter_on (round-trips from rule metadata); fall
-    // back to deriving from recipient_tags/emails for rules saved before the
-    // field existed. Keeps the toggle faithful to what was saved.
-    setFilterOn(d.filter_on ?? ((d.recipient_tags ?? []).length > 0 || (d.recipient_emails ?? []).length > 0));
+    // back to deriving from recipient_tags/emails/dept_paths for rules saved
+    // before the field existed. Keeps the toggle faithful to what was saved.
+    setFilterOn(
+      d.filter_on ??
+        ((d.recipient_tags ?? []).length > 0 ||
+          (d.recipient_emails ?? []).length > 0 ||
+          (d.recipient_dept_paths ?? []).length > 0),
+    );
     setTagInput('');
-    setEmailInput('');
   } else if (!open && lastKey !== '') {
     setLastKey('');
   }
@@ -125,8 +131,13 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
     if (!draft.sender_first_seen && !draft.require_qrcode && !draft.require_clickable_attachment) {
       return t('errors.needRiskSignal');
     }
-    // 收件人筛选开启时至少选一个对象（spec §4.1 / §7；review D1）。
-    if (filterOn && (draft.recipient_tags ?? []).length === 0 && (draft.recipient_emails ?? []).length === 0) {
+    // 收发信人筛选开启时至少选一个对象（spec §4.1 / §7；review D1）。
+    if (
+      filterOn &&
+      (draft.recipient_tags ?? []).length === 0 &&
+      (draft.recipient_emails ?? []).length === 0 &&
+      (draft.recipient_dept_paths ?? []).length === 0
+    ) {
       return t('errors.needRecipientTarget');
     }
     // 邮件大小上限镜像后端校验（phishing_admission.go validateAdmissionDTO：0..100000）。
@@ -163,15 +174,16 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
   const removeTag = (tag: string) =>
     patch({ recipient_tags: (draft.recipient_tags ?? []).filter((x) => x !== tag) });
 
-  const addEmail = (v: string) => {
-    const email = v.trim().toLowerCase();
-    if (!email || !email.includes('@')) return;
-    const cur = draft.recipient_emails ?? [];
-    if (!cur.includes(email)) patch({ recipient_emails: [...cur, email] });
-    setEmailInput('');
-  };
-  const removeEmail = (em: string) =>
-    patch({ recipient_emails: (draft.recipient_emails ?? []).filter((x) => x !== em) });
+  // 组织通讯录目标随方向自动切换语义提示：outbound 单独出现时约束的是内部
+  // 发信人，其余方向（inbound/internal）约束的是收件人；混选时命中任一侧即算匹配。
+  const recipientTarget = useMemo(() => {
+    const dirs = draft.directions;
+    const hasOutbound = dirs.includes('outbound');
+    const hasOther = dirs.includes('inbound') || dirs.includes('internal');
+    if (hasOutbound && hasOther) return t('targetEither');
+    if (hasOutbound) return t('targetSender');
+    return t('targetRecipient');
+  }, [draft.directions, t]);
 
   const onSave = async () => {
     if (!valid) {
@@ -183,6 +195,7 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
       filter_on: filterOn,
       recipient_tags: filterOn ? draft.recipient_tags ?? [] : [],
       recipient_emails: filterOn ? draft.recipient_emails ?? [] : [],
+      recipient_dept_paths: filterOn ? draft.recipient_dept_paths ?? [] : [],
     };
     setSaving(true);
     try {
@@ -263,55 +276,44 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
               </div>
               {filterOn && (
                 <div className="space-y-4">
-                  {/* Tag sub-section */}
+                  {/* Group / tag sub-section：仅支持点选已有群组与标签建议，不再支持手动输
+                      入自由文本（改由组织通讯录承担精确到人/部门的筛选）。 */}
                   <div className="space-y-2">
                     <p className="text-xs font-medium text-muted-foreground">{t('tagSectionLabel')}</p>
-                    {/* Suggestion buttons from API */}
-                    {tagSuggestions.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {tagSuggestions.map((tag) => {
-                          const on = (draft.recipient_tags ?? []).includes(tag);
-                          return (
-                            <Button key={tag} type="button" size="sm" variant={on ? 'default' : 'outline'}
-                              onClick={() => (on ? removeTag(tag) : addTag(tag))}>
-                              {tag}
-                            </Button>
-                          );
-                        })}
-                      </div>
+                    {tagSuggestions.length === 0 && groups.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">{t('noGroupsHint')}</p>
+                    ) : (
+                      <>
+                        {/* Suggestion buttons from API */}
+                        {tagSuggestions.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {tagSuggestions.map((tag) => {
+                              const on = (draft.recipient_tags ?? []).includes(tag);
+                              return (
+                                <Button key={tag} type="button" size="sm" variant={on ? 'default' : 'outline'}
+                                  onClick={() => (on ? removeTag(tag) : addTag(tag))}>
+                                  {tag}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {/* grp: groups */}
+                        {groups.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {groups.map((g) => {
+                              const on = (draft.recipient_tags ?? []).includes(g);
+                              return (
+                                <Button key={g} type="button" size="sm" variant={on ? 'default' : 'outline'}
+                                  onClick={() => (on ? removeTag(g) : addTag(g))}>
+                                  {g.replace(/^grp:/, '')}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
                     )}
-                    {/* grp: groups */}
-                    {groups.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {groups.map((g) => {
-                          const on = (draft.recipient_tags ?? []).includes(g);
-                          return (
-                            <Button key={g} type="button" size="sm" variant={on ? 'default' : 'outline'}
-                              onClick={() => (on ? removeTag(g) : addTag(g))}>
-                              {g.replace(/^grp:/, '')}
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    )}
-                    {/* Free-text input for custom tags */}
-                    <div className="flex gap-2">
-                      <Input
-                        data-testid="rule-tag-input"
-                        value={tagInput}
-                        onChange={(e) => setTagInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addTag(tagInput);
-                          }
-                        }}
-                        placeholder={t('tagPlaceholder')}
-                      />
-                      <Button type="button" variant="outline" size="sm" onClick={() => addTag(tagInput)}>
-                        {t('addTag')}
-                      </Button>
-                    </div>
                     {(draft.recipient_tags ?? []).length > 0 && (
                       <div className="flex flex-wrap gap-1.5 pt-1" data-testid="rule-tag-list">
                         {(draft.recipient_tags ?? []).map((tag) => (
@@ -331,46 +333,21 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
                     )}
                   </div>
 
-                  {/* Email sub-section */}
+                  {/* 组织通讯录：整体部门或定位到具体人员 */}
                   <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">{t('emailSectionLabel')}</p>
-                    <div className="flex gap-2">
-                      <Input
-                        data-testid="rule-email-input"
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addEmail(emailInput);
-                          }
-                        }}
-                        placeholder={t('emailPlaceholder')}
-                      />
-                      <Button type="button" variant="outline" size="sm" onClick={() => addEmail(emailInput)}>
-                        {t('addEmail')}
-                      </Button>
-                    </div>
-                    {(draft.recipient_emails ?? []).length > 0 && (
-                      <div className="flex flex-wrap gap-1.5" data-testid="rule-email-list">
-                        {(draft.recipient_emails ?? []).map((em) => (
-                          <Badge key={em} variant="secondary" className="gap-1">
-                            {em}
-                            <button
-                              type="button"
-                              onClick={() => removeEmail(em)}
-                              aria-label={t('removeEmail')}
-                              className="ml-0.5"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
+                    <p className="text-xs font-medium text-muted-foreground">{t('orgSectionLabel')}</p>
+                    <OrgContactTreeSelect
+                      testIdPrefix="rule-org"
+                      selectedDeptPaths={draft.recipient_dept_paths ?? []}
+                      selectedEmails={draft.recipient_emails ?? []}
+                      onDeptsChange={(paths) => patch({ recipient_dept_paths: paths })}
+                      onEmailsChange={(emails) => patch({ recipient_emails: emails })}
+                    />
                   </div>
 
-                  <p className="text-xs text-muted-foreground">{t('recipientTagsHint')}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('recipientTagsHint', { target: recipientTarget })}
+                  </p>
                 </div>
               )}
             </div>

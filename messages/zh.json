@@ -862,7 +862,7 @@
         "editButton": "编辑",
         "deleteButton": "删除",
         "emptyText": "暂无通道，建议先配置自定义通道",
-        "proxyDeletedBadge": "代理已删�������",
+        "proxyDeletedBadge": "代理已删���������",
         "systemDefaultHelo": "系统默认",
         "drawerTitleNew": "新建投递通道",
         "drawerTitleEdit": "编辑投递通道",
@@ -1019,7 +1019,7 @@
           "response": "预计对端响应：250 2.0.0 Ok"
         },
         "toasts": {
-          "created": "路由规��已��加",
+          "created": "路��规��已��加",
           "updated": "路由规则已更新",
           "deleted": "路由规则已删除",
           "saveError": "请修正表单中的校验错误",
@@ -1222,6 +1222,16 @@
     "eyebrow": "标签规则",
     "subtitle": "在规则树中应用可复用的标签，以简化分类、报告和后续处理。"
   },
+  "orgContactTreeSelect": {
+    "searchPersonPlaceholder": "按姓名或邮箱搜索人员",
+    "searchDeptPlaceholder": "搜索部门",
+    "departmentTreeLabel": "部门（勾选即含全部子部门）",
+    "noMatch": "没有匹配结果",
+    "noDeptsHint": "暂无部门数据",
+    "loading": "搜索中...",
+    "impliedByDept": "已包含在所选部门中",
+    "clearAll": "清空已选"
+  },
   "groups": {
     "title": "群组管理",
     "ipGroup": "IP 组",
@@ -1338,7 +1348,7 @@
     "stageCountHint": "当前��态共启�� {count} 个阶段。",
     "sectionBasic": "基本信息",
     "sectionTargets": "适用对象",
-    "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生���。",
+    "sectionTargetsHint": "选择 1 类或多类群组；��中任一目标即生���。",
     "sectionPolicies": "分阶段策略配置",
     "sectionPoliciesHint": "默认为「继承全局」；「预留」策略本迭代仅入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
@@ -1664,7 +1674,7 @@
     "subject": "主题",
     "clientIp": "客户端 IP",
     "action": "动作",
-    "reason": "原因",
+    "reason": "原���",
     "ruleType": "规则类型",
     "messageId": "消息 ID",
     "spf": "SPF",
@@ -2049,7 +2059,7 @@
         "add": "添加下一跳",
         "edit": "编辑下一跳",
         "empty": "暂无收信域",
-        "noNexthop": "暂无下一跳"
+        "noNexthop": "暂���下一跳"
       },
       "relay": {
         "description": "将已校验的发信域绑定到集群出口 IP",
@@ -2461,7 +2471,7 @@
     "failAdvice": {
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号是否泄露并启用登录限速。",
       "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
-      "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
+      "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必��时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
       "certError": "TLS 证书校验失败，请检查服务器证书是否过期、链路是否被中间人篡改。",
@@ -2942,7 +2952,7 @@
     "notAvailable": "暂无",
     "targetIdRequired": "请输入至少一个目标标识",
     "targetMailLogPlaceholder": "例如 1024",
-    "targetMailBatchPlaceholder": "例如 1024, 1025, 1031",
+    "targetMailBatchPlaceholder": "例�� 1024, 1025, 1031",
     "targetAccountPlaceholder": "例如 alice@corp.local",
     "targetClusterPlaceholder": "例如 cac_tid:abc123 或 1024,1025",
     "targetMailHelp": "输入单个邮件日志 ID。",
@@ -3202,7 +3212,7 @@
     },
     "targetTypes": {
       "mail": "邮件",
-      "mail_batch": "邮件批次",
+      "mail_batch": "��件批次",
       "account": "账��",
       "cluster": "簇"
     },
@@ -3239,7 +3249,7 @@
       "rule_analysis": "规则分析"
     },
     "typeDescriptions": {
-      "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼风险。",
+      "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼风险���",
       "similarity_search": "���绕发件人和主题等特征���找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
       "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
@@ -3535,7 +3545,7 @@
       "conditionWindow": "每 {minutes} 分钟超过 {count} 次",
       "conditionAuthFail": "每小时认证失败超过 {count} 次",
       "conditionCmdError": "单连接命令错误超过 {count} 次",
-      "conditionConnAuthFail": "单连接认证失败超过 {count} 次",
+      "conditionConnAuthFail": "单连接认证失��超过 {count} 次",
       "suspend15minText": "15分钟",
       "suspend30minText": "30分钟",
       "suspend1hourText": "1小时",
@@ -3562,7 +3572,7 @@
       "hit": "命中规则",
       "notHit": "未命中",
       "diffLeft": "距离触发阈值还差 {diff} 次",
-      "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分钟内已连接 {count} 次��超过限制 {limit} 次",
+      "windowHit": "触发\"时间窗口频率\"阈值，当前 {minutes} 分��内已连接 {count} 次��超过限制 {limit} 次",
       "dailyHit": "触发\"每日连接数\"阈值，当日已连接 {count} 次，超过限制 {limit} 次",
       "notHitReason": "未触发阈值",
       "noThresholds": "当前配置未设置有效阈值，连接将被放行"
@@ -4539,7 +4549,7 @@
       "thresholdStrict": "严格",
       "protectedDomains": "受保护域名",
       "protectedDomainsPlaceholder": "每行一个域名\nexample.com\ntest.local",
-      "protectedDomainsHint": "每行一个域名，将检测��些域名的相似域��仿冒"
+      "protectedDomainsHint": "��行一个域名，将检测��些域名的相似域��仿冒"
     },
     "displayNameSpoof": {
       "title": "显示名仿冒检测",
@@ -4795,7 +4805,7 @@
       "domainLabel": "域名",
       "expireLabel": "有效期至",
       "expireTooltip": "留空表示永久有效",
-      "expireHint": "(留空=永久有效)",
+      "expireHint": "(留空=永久有��)",
       "priorityLabel": "��先级",
       "priorityHint": "{min}-{max}",
       "thresholdPlaceholder": "请输入阈值",
@@ -6154,7 +6164,7 @@
         "recipientStatus": {
           "title": "收件人状态",
           "header": "收件人状态 ({n} 人)",
-          "expandAll": "展开全部 {n} 个收件人",
+          "expandAll": "展开全部 {n} 个���件人",
           "colRecipients": "���件人",
           "colStatus": "��态",
           "colActions": "操作",
@@ -7443,7 +7453,7 @@
   "disposalSettings": {
     "pageTitle": "处置设置",
     "pageDescription": "配置邮件隔离区、审核流程和召回策略的相关设置",
-    "selectTenantEmpty": "请先选择租户以管理其处置设置",
+    "selectTenantEmpty": "请先选择租户以管理其处置��置",
     "save": "保存设置",
     "reset": "重置",
     "saveSuccess": "设置已保存",
@@ -7523,7 +7533,7 @@
     "duration_unlimited": "不限时长",
     "duration_custom": "自定义等待时长",
     "minutes": "分钟",
-    "currentSetting": "当前设置：{minutes}分钟",
+    "currentSetting": "当前设置：{minutes}���钟",
     "maxRecheckMinutes": "复检窗口（分钟）",
     "timeoutAutoDeliver": "超���自动投递",
     "autoDeliverDesc": "审核超时后自��投递邮件",
@@ -8013,7 +8023,7 @@
       "retry": "重试",
       "mockSummary": "## 投递健康摘要\n\n整体投递成功率稳定。外发队列仍在健康范围内，建议持续关注 P99 延迟和目标域名退信率。"
     },
-    "dataLag": "数据更新于约 {minutes} 分钟前",
+    "dataLag": "数据更新于约 {minutes} ��钟前",
     "dataLagHours": "统计数据更新于约 {hours} 小时前",
     "loadFailed": "投递统计加载失败，请稍后重试。",
     "retry": "重试",
@@ -8335,7 +8345,7 @@
     "updatedAt": "数据更新于",
     "refresh": "刷新",
     "noData": "暂无数据",
-    "loadTimeout": "数据加载超时，请稍后重试",
+    "loadTimeout": "数据加载超时，请稍后���试",
     "retry": "重试",
     "agentOffline": "数据采集异常",
     "degradeBackendUnavailable": "监控数据源（时序数据库）暂时不可达，数据���能缺失",
@@ -8632,17 +8642,16 @@
       "statusDisabled": "已禁用",
       "footer": "共 {total} 条规则 · 已启用 {enabled} 条",
       "namePlaceholder": "规则名称",
-      "tagPlaceholder": "输入标签后回车，例如 grp:finance",
-      "addTag": "添加",
       "removeTag": "移除",
-      "tagSectionLabel": "收件人标签",
-      "emailSectionLabel": "收件人邮箱（精确匹配）",
-      "emailPlaceholder": "输入邮箱后回车，例如 cfo@corp.com",
-      "addEmail": "添加",
-      "removeEmail": "移除",
-      "recipientTagsHint": "标签与邮箱命中任一即满足（OR）；同时留空表示对所有匹配方向的收件人生效。",
-      "recipientFilter": "特定收件人筛选",
-      "allRecipients": "全部收件人",
+      "tagSectionLabel": "群组 / 标签",
+      "noGroupsHint": "暂无可选群组或标签，可在「群组管理」中创建",
+      "orgSectionLabel": "组织通讯录（部门或个人）",
+      "targetRecipient": "收件人",
+      "targetSender": "发信人",
+      "targetEither": "收件人或发信人（命中任一侧）",
+      "recipientTagsHint": "群组/标签、部门、个人三者命中任一即满足（OR），按方向自动约束{target}；同时留空表示对所有匹配方向生效。",
+      "recipientFilter": "特定收发信人筛选",
+      "allRecipients": "全部收发信人",
       "enabledLabel": "启用该规则",
       "sectionScope": "检测范围",
       "sectionRisk": "风险信号",
@@ -8673,7 +8682,7 @@
         "needDirection": "请至少选择一个邮件流方向",
         "qrNoOutbound": "二维码风险信号暂不支持外发方向",
         "needRiskSignal": "请至少启用一个风险信号",
-        "needRecipientTarget": "开启收件人筛选时至少填写一个标签或邮箱",
+        "needRecipientTarget": "开启收发信人筛选时至少选择一个群组/标签、部门或个人",
         "maxSizeTooLarge": "邮件大小上限不能超过 100000 MB"
       },
       "direction": {
@@ -9329,7 +9338,7 @@
       "bulkCancelDescription": "取消后不可恢复。已完成或失败的任务会跳过，其余任务将逐项取消。",
       "viewEml": "查看原文",
       "recall": "确认召回",
-      "falsePositive": "标记误报",
+      "falsePositive": "标记���报",
       "prev": "上一页",
       "next": "下一页",
       "empty": "暂无扫描任务"
@@ -9545,7 +9554,7 @@
     "resourceLimits": {
       "title": "资源上限",
       "maxToolCalls": "智能体工具调用上限",
-      "maxToolCallsInvalid": "工具调用上限必须 ≥ 1",
+      "maxToolCallsInvalid": "���具调用上限必须 ≥ 1",
       "maxUrlFetches": "URL 访问上限",
       "maxUrlFetchesInvalid": "URL 访问上限必须 ≥ 0",
       "globalDefaults": "全局默认：工具 {tool} / URL {url}。",
@@ -10090,7 +10099,7 @@
     "refresh": "刷新",
     "health": {
       "danger": "检测到 {n} 项紧急事件待处理，请立即查看待办与告警面板",
-      "warning": "检测到 {n} 项警告事项，请及时处理",
+      "warning": "检测到 {n} 项警告事项���请及时处理",
       "normal": "系统运行正常，{range}已拦截 {n} 封威胁邮件，无待处理告警",
       "error": "系统状态数据加载失败，请刷新后重试"
     },
@@ -10271,7 +10280,7 @@
       "loginControl": "登录控制",
       "ipControl": "IP 访问控制",
       "sso": "单点登录限制",
-      "twoFactor": "二次认证"
+      "twoFactor": "���次认证"
     },
     "fields": {
       "minLength": "最小密码长度",
@@ -10457,7 +10466,7 @@
     "loading": "加载中...",
     "senderLabel": "发件人",
     "expiredTitle": "链接已过期或无效",
-    "expiredDesc": "请联系管理员获取新的链接。",
+    "expiredDesc": "请联系管理员获取��的链接。",
     "errorTitle": "操作失败",
     "errorDesc": "请稍后重试或联系管理员。",
     "confirmTitle": "确认将发件人加入黑名单",
@@ -10753,7 +10762,7 @@
       "algorithm_unsupported": "不支持的签名算法「{value}」，只能是：{allowed}",
       "cross_tenant_manage_denied": "无权管理其他租户的签名密钥",
       "cross_tenant_read_denied": "无权查看其他租户的签名域名",
-      "dns_not_verified": "该密钥的 DNS 记录尚未验证通过，请先在域名服务商处添加 TXT 记录并完成验证，再启用它",
+      "dns_not_verified": "该密钥的 DNS 记录尚未验证通过，请先在域��服务商处添加 TXT 记录并完成验证，再启用它",
       "forbidden": "没有权限执行此操作",
       "key_not_found": "签名密钥不存在，可能已被删除",
       "key_size_too_large": "密钥长度不能超过 {max} 位",
@@ -10845,7 +10854,7 @@
       "version_not_found": "规则版本不存在，可能已被清理"
     },
     "sideline": {
-      "access_denied": "没有权限访问该旁路邮件",
+      "access_denied": "���有权限访问该旁路邮件",
       "id_required": "请指定要操作的条目",
       "not_found": "旁路邮件不存在，或没有权限访问"
     },
@@ -11282,7 +11291,7 @@
       "whitelist_entry_exists": "该白名单条目已存在"
     },
     "phishing_screenshot": {
-      "invalid_storage_node_key": "存储节点或键无效",
+      "invalid_storage_node_key": "���储节点或键无效",
       "invalid_key_missing_task_id": "键无效：缺少任务 ID",
       "screenshot_not_found": "截图不存在"
     },

@@ -60,6 +60,10 @@ export interface PhishAdmissionRule {
   directions: Array<'inbound' | 'outbound' | 'internal'>;
   recipient_tags?: string[];
   recipient_emails?: string[];
+  // 组织通讯录「整体部门」筛选目标——完整部门路径（如 "研发部 / 后端组"），
+  // 与 recipient_emails（组织树里单独勾选的个人）并列，OR 关系。前端新增字段，
+  // 待后端契约确认（准入判断按方向匹配收/发信人 department_path 前缀）。
+  recipient_dept_paths?: string[];
   filter_on?: boolean;
   require_url: boolean;
   max_size_mb?: number;
