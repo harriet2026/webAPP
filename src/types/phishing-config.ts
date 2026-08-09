@@ -25,6 +25,7 @@ export interface PhishEngineParams {
 // Deployment-wide runtime limits are intentionally absent; they are managed
 // only through apiserver.cf and the generic config-management override UI.
 export interface PhishTenantEngineParams {
+  enabled: boolean;
   netdisk_domain: boolean;
   netdisk_extract: boolean;
   netdisk_spoof: boolean;

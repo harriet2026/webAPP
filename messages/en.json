@@ -8661,8 +8661,21 @@
         "internal": "Internal"
       }
     },
-    "runtime": {
-      "title": "Runtime Mode & Timeouts",
+  "runtime": {
+  "agentStatus": {
+  "title": "Phishing Detection Agent",
+  "label": "Agent status",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
+  "enabledDescription": "Only messages matching enabled admission rules enter detection.",
+  "disabledDescription": "The agent is disabled; messages do not enter the phishing detection flow.",
+  "enableConfirmTitle": "Enable the Phishing Detection Agent?",
+  "enableConfirmDescription": "Enabled messages that match admission rules enter the agent detection flow and may take longer to process.",
+  "disableConfirmTitle": "Disable the Phishing Detection Agent?",
+  "disableConfirmDescription": "The agent will stop processing new messages. Historical detection records will not be deleted.",
+  "confirm": "Confirm"
+  },
+  "title": "Runtime Mode & Timeouts",
       "description": "Realtime / observe mode, timeout timeline and timeout temp disposition (applies to all sideline checks).",
       "loading": "Loading...",
       "engineLoadFailed": "Failed to load detection engine config",

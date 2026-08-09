@@ -74,6 +74,7 @@ export function RuntimeModeSection() {
   // pattern (keyed off open + baseline identity) so Cancel discards.
   const [sheetOpen, setSheetOpen] = useState(false);
   const [confirmTimeoutClose, setConfirmTimeoutClose] = useState(false);
+  const [confirmAgentToggle, setConfirmAgentToggle] = useState<boolean | null>(null);
   const [engineDraft, setEngineDraft] = useState<PhishTenantEngineParams | null>(null);
   const [disposalDraft, setDisposalDraft] = useState<DisposalSettings | null>(null);
   const [pendingTimeoutValue, setPendingTimeoutValue] = useState<boolean | null>(null);
@@ -163,7 +164,12 @@ export function RuntimeModeSection() {
           </p>
         ) : (
           <div className="space-y-3 rounded-lg border p-4">
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-4">
+              <ReadonlyField
+                label={t('agentStatus.label')}
+                value={engine.enabled ? t('agentStatus.enabled') : t('agentStatus.disabled')}
+                testId="phishing-agent-status-summary"
+              />
               <ReadonlyField
                 label={t('runMode')}
                 value={t(`runModeValue.${engine.run_mode}`)}
@@ -259,6 +265,24 @@ export function RuntimeModeSection() {
           {engineDraft && disposalDraft ? (
             <>
               <div className="flex-1 space-y-5 overflow-y-auto px-6 py-4">
+                <section className="space-y-3 rounded-lg border p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h3 className="font-medium">{t('agentStatus.title')}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {engineDraft.enabled
+                          ? t('agentStatus.enabledDescription')
+                          : t('agentStatus.disabledDescription')}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={engineDraft.enabled}
+                      onCheckedChange={(next) => setConfirmAgentToggle(!!next)}
+                      data-testid="phishing-agent-enabled-switch"
+                    />
+                  </div>
+                </section>
+
                 <section className="space-y-3">
                   <h3 className="font-medium">{t('runModeSectionTitle')}</h3>
                   <div className="grid gap-2">
@@ -474,6 +498,38 @@ export function RuntimeModeSection() {
           ) : null}
         </SheetContent>
       </Sheet>
+
+      <AlertDialog
+        open={confirmAgentToggle !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmAgentToggle(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAgentToggle ? t('agentStatus.enableConfirmTitle') : t('agentStatus.disableConfirmTitle')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAgentToggle
+                ? t('agentStatus.enableConfirmDescription')
+                : t('agentStatus.disableConfirmDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (confirmAgentToggle !== null) patchEngine({ enabled: confirmAgentToggle });
+                setConfirmAgentToggle(null);
+              }}
+              data-testid="phishing-agent-enabled-confirm"
+            >
+              {t('agentStatus.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={confirmTimeoutClose}

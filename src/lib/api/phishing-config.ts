@@ -16,7 +16,15 @@ import type {
 export async function getEngineConfig(
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<PhishEngineConfigResponse> {
-  return requestFn<PhishEngineConfigResponse>('/phishing-agent/engine-config');
+  const response = await requestFn<PhishEngineConfigResponse>('/phishing-agent/engine-config');
+  return {
+    ...response,
+    engine: {
+      ...response.engine,
+      // Older configurations do not have the module switch; preserve the existing behavior.
+      enabled: response.engine.enabled ?? true,
+    },
+  };
 }
 
 export async function putEngineConfig(
