@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测����������������能���������������",
+    "spoofingDetection": "仿冒邮件检测����������能���������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -644,7 +644,7 @@
       "generatedAt": "生成时间",
       "noData": "暂无数据",
       "topSection": "TOP 排名",
-      "printHint": "提示：使用���览器的打印功能可保存为 PDF"
+      "printHint": "提示：使用浏览器的打印功能可保存为 PDF"
     },
     "connCaliberTip": "按 SMTP 会话计数。成功指服务器对 EHLO/HELO 回了 250；投递结果不影响连接判定。",
     "connDrilldownUnitTip": "下方子维度按邮件计数，非按会话计数。"
@@ -706,7 +706,7 @@
       "drawerTitleNew": "新建转发规则",
       "drawerTitleEdit": "编�����发��则",
       "drawerDescription": "在 SMTP 握手阶段决定连接的接入与过滤策略",
-      "sectionBasic": "基���信息",
+      "sectionBasic": "基础信息",
       "sectionMatch": "匹配条件",
       "sectionSimulator": "���则模拟器",
       "simulatorDesc": "按当���列表规则优先级逐条匹配，验证命中结果",
@@ -1020,7 +1020,7 @@
         },
         "toasts": {
           "created": "路��规��已��加",
-          "updated": "路��规则已更���",
+          "updated": "路由规则已更新",
           "deleted": "路��规则已删除",
           "saveError": "请修正表单中的校验��误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
@@ -1112,7 +1112,7 @@
         "imap": "IMAP"
       },
       "toasts": {
-        "created": "认证��置已添加",
+        "created": "认证配置已添加",
         "updated": "���证配置���更���",
         "deleted": "认证配置已删除",
         "saveError": "请修正表单中的校验错误"
@@ -1187,7 +1187,7 @@
     "timeoutMinutes": "超时(分钟)",
     "globalRule": "全局规则",
     "systemRule": "系统规则",
-    "systemRuleTooltip": "该规则由��统提��，无法删除，只有系统管理员可编辑部分字段",
+    "systemRuleTooltip": "该规则由系统提��，无法删除，只有系统管理员可编辑部分字段",
     "systemRuleEditBanner": "正在��辑��统基线规����。只允������ action / priority / 条��阈值��其��字段已锁定。",
     "stage": "阶段"
   },
@@ -1331,10 +1331,10 @@
     "targetGroups": "适用对象",
     "policyConfig": "策略配置",
     "priority": "优先级",
-    "newPolicy": "新��群��策略",
+    "newPolicy": "新建群组策略",
     "editPolicy": "��辑群组��略",
     "deleteConfirm": "确��删除���群组策��吗？",
-    "deleteConfirmDesc": "删除���无法���复��规则�����{name}",
+    "deleteConfirmDesc": "删除���无法���复，规则���：{name}",
     "noPolicyConfigured": "未配置策略���全部继承全局）",
     "previewPath": "有效��行路径预览",
     "stageCountHint": "当前����态共启���� {count} 个阶段。",
@@ -1453,7 +1453,7 @@
     "previewHitBadge": "优先级 {priority} · {name}",
     "previewIgnoredHigher": "注意：「{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
     "previewNotExecuted": "未执行（前序已短路）",
-    "previewShortCircuitPoint": "���路点 · {action}",
+    "previewShortCircuitPoint": "短路点 · {action}",
     "previewNoGroupConfig": "无群组配置（按全局执行）",
     "previewConflict": "同模块冲突 → 优先级���裁：「{rule}」（优���级 {priority}）��效",
     "terminalActions": {
@@ -2069,7 +2069,7 @@
       },
       "outbound": {
         "title": "出站规则",
-        "description": "������邮件的内容审核与���行策略",
+        "description": "出站邮件的内容审核与���行策略",
         "ruleCount": "出站���则数",
         "smtpCount": "SMTP 凭证数",
         "manageTitle": "管理出站策略",
@@ -2810,7 +2810,7 @@
     "licenseUnset": "未配置",
     "licenseHint": "明文输入，提交后由服务端加密存储，永不回显。",
     "licenseEditPlaceholder": "留空则保持原 License 不变",
-    "isActive": "��用",
+    "isActive": "启用",
     "members": "成员代理服务器",
     "addMember": "添加成员代理��务器",
     "noMoreEndpoints": "没有更多可���代理服务器",
@@ -3180,7 +3180,7 @@
       "parse_eml": "解析 EML",
       "find_similar": "搜索相似邮件",
       "search_similar_messages": "搜索相似邮件",
-      "query_auth_attempts": "���载认证尝试",
+      "query_auth_attempts": "加载认证尝试",
       "query_recent_mail": "加载最近邮件活动",
       "analyze_account_activity": "分析账号���动",
       "rank_urls": "排序候选 URL",
@@ -3223,7 +3223,7 @@
       "deliver": "已投递"
     },
     "mailStatuses": {
-      "pending": "待���理",
+      "pending": "待处理",
       "processing": "处理中",
       "completed": "已完成",
       "delivered": "已投递",
@@ -3547,7 +3547,7 @@
       "suspend2hourText": "2小时",
       "actionReject": "拒绝连接",
       "actionTempfail": "返回 421 临时拒绝",
-      "actionDisconnect": "断开��接"
+      "actionDisconnect": "断开连接"
     },
     "examples": {
       "title": "查看配置示例",
@@ -3679,7 +3679,7 @@
     "ipGroupRequired": "请选择一个IP组",
     "ipGroupMembersUnit": "个IP",
     "ruleNameTip": "为规则添加描述性名称，便于管理识别",
-    "ruleNamePlaceholder": "如：恶意攻击来源、合��伙伴IP等",
+    "ruleNamePlaceholder": "如：恶意攻击来源、合作伙伴IP等",
     "ipAddressTip": "支持单个IP地址、CIDR网段或IP组",
     "ipAddressRequired": "请输入IP地址/段",
     "invalidIp": "请输���有效的IP地址",
@@ -3826,8 +3826,8 @@
     "reject": "拒绝",
     "bulkApprove": "批量放行",
     "bulkReject": "批量拒绝",
-    "comment": "审���意见",
-    "commentPlaceholder": "请输入审核意��...",
+    "comment": "审核意见",
+    "commentPlaceholder": "请输入审核意见...",
     "approveConfirm": "确认放行此邮件？",
     "rejectConfirm": "确认拒绝此���件？",
     "noItems": "暂无入站审核项",
@@ -3944,7 +3944,7 @@
     "greylistExemptInternal": "内部域名互发豁免",
     "greylistDelayInvalid": "延迟秒数必须不少于 10 秒",
     "greylistWindowInvalid": "频率窗口必须不少于 10 秒",
-    "greylistWindowBeforeDelay": "延迟模式下，频率窗口不��短于延迟时间",
+    "greylistWindowBeforeDelay": "延迟模式下，频率窗口不能短于延迟时间",
     "greylistMaxRequestsInvalid": "最大请求数必须不少于 1",
     "greylistTTLInvalid": "白名单有效期必须不少于 1 小时",
     "greylistDelayShortWarning": "延迟时间过短可能无法有��过滤",
@@ -4091,7 +4091,7 @@
     "action_audit": "审核",
     "action_audit_desc": "邮件正常投递，同时写入审核日志供管理员事后审查",
     "action_accept": "投递",
-    "action_accept_desc": "允许邮件通过，跳过后续检测��接投递至收件箱",
+    "action_accept_desc": "允许邮件通过，跳过后续检测直接投递至收件箱",
     "whitelistMode": "白名单模式",
     "whitelistMode_bypass_content": "跳过内容检测",
     "whitelistMode_direct_deliver": "直接投递",
@@ -4116,8 +4116,8 @@
     "currentEffect": "当前配置效果",
     "configExamples": "配置示例",
     "simulationTest": "模拟测试",
-    "simMatch": "匹配成功 - 该规则����对测试���据生效",
-    "simNoMatch": "未匹配 - 该规则���会对���试数据生效",
+    "simMatch": "匹配成功 - 该规则��对测试数据生效",
+    "simNoMatch": "未匹配 - 该规则不会对测试数据生效",
     "unsavedChangesTitle": "放弃更���？",
     "unsavedChanges": "有未保存的修改，确定要关闭吗？所有修改将丢失。",
     "groupDeleted": "群组已删除",
@@ -4241,8 +4241,8 @@
     "basicSettings": "基础设置",
     "ruleName": "规则名称",
     "ruleNameTip": "为规则设置一个易于识别的名称，便于管理和查找",
-    "ruleNamePlaceholder": "如：��份证号红线规则",
-    "ruleNameRequired": "请输入规则名���",
+    "ruleNamePlaceholder": "如：身份证号红线规则",
+    "ruleNameRequired": "请输入规则名称",
     "effectScope": "生效范围",
     "effectScopeTip": "选择该��则需要应用的邮件流转方向",
     "priority": "优先级",
@@ -4399,7 +4399,7 @@
     "runTest": "运行测试",
     "simulateTest": "模拟测试",
     "ruleNameTooLong": "规则名称不能超过 50 个字符",
-    "ruleNameForbiddenChars": "规则名称��能包含 <、>、& 或双引号",
+    "ruleNameForbiddenChars": "规则名称不能包含 <、>、& 或双引号",
     "priorityInvalid": "优先级需在 {min}–{max} 之间",
     "invalidDate": "请输入有效的失效时间",
     "mixedDirectionActionsPreserved": "此历史规则在不同方向使用不同动作；除非重新选择动作，否��将原样保留。",
@@ -4421,7 +4421,7 @@
   },
   "authSpoofing": {
     "title": "认证仿冒检测",
-    "description": "检测伪造发件人和认���仿冒，包括SPF/DKIM/DMARC/PTR验���和显示名仿冒检测",
+    "description": "检测伪造发件人和认证仿冒，包括SPF/DKIM/DMARC/PTR验证和显示名仿冒检测",
     "save": "保存",
     "saveSuccess": "保存成功",
     "saveFailed": "保存失败",
@@ -4547,7 +4547,7 @@
       "thresholdLoose": "宽松",
       "thresholdStrict": "严格",
       "protectedDomains": "受保护域名",
-      "protectedDomainsPlaceholder": "每行一个���名\nexample.com\ntest.local",
+      "protectedDomainsPlaceholder": "每行一个域名\nexample.com\ntest.local",
       "protectedDomainsHint": "每行一个域名，将��测这些域名的相似域名仿��"
     },
     "displayNameSpoof": {
@@ -4750,7 +4750,7 @@
         "merged": "合并"
       },
       "direction": {
-        "inbound": "接收方���",
+        "inbound": "接收方向",
         "outbound": "外发方向",
         "internal": "域内方向"
       },
@@ -5107,10 +5107,10 @@
       "actionQuarantine": "隔离",
       "actionSideline": "审核",
       "actionReject": "阻断",
-      "actionDiscard": "���弃",
+      "actionDiscard": "丢弃",
       "urlDetection": "URL检测与防护",
       "expandShortLink": "短链接自动展开",
-      "keywordFilter": "内容���键词过滤",
+      "keywordFilter": "内容关键词过滤",
       "scanRange": "扫描范围：",
       "urlPath": "URL路径",
       "textContent": "纯文本内容",
@@ -5123,8 +5123,8 @@
       "advancedRuleHint": "需配合「策略流水线-阶段5-高级规则」模块启用",
       "detectLimit": "检测数量上限",
       "items": "个",
-      "exceedAction": "超限处��",
-      "passWarn": "进行��一步",
+      "exceedAction": "超限处置",
+      "passWarn": "进行下一步",
       "isolateFallback": "隔离",
       "enable": "启用",
       "ocrSection": "OCR 配置",
@@ -5220,7 +5220,7 @@
       "ocrMode": "检测并识别图片中的印刷体文字内容",
       "qrMode": "轻度模式识别到二维码后直接处置；深度模式解码并路由至后续模块",
       "qrLimit": "单封邮件最多深度解码 1–50 个二维码",
-      "encryptedMode": "选��是否检测以及是否尝试解密加密附件",
+      "encryptedMode": "选择是否检测以及是否尝试解密加密附件",
       "decryptFailAction": "无法获得有效密码或解密失败时采取的处置"
     },
     "validation": {
@@ -5257,7 +5257,7 @@
     "failedToSave": "保存失败",
     "tenantRequired": {
       "title": "需要选择租户",
-      "description": "URL 检测与防护是租户级别的配置，请先选择要管���的租户。",
+      "description": "URL 检测与防护是租户级别的配置，请先选择要管理的租户。",
       "hint": "请使用页面右上角的租户选择器���择一个租户"
     },
     "tabs": {
@@ -5313,7 +5313,7 @@
       "publicBaseUrlPlaceholder": "https://gw.your-tenant.com:8082",
       "publicBaseUrlWarning": "⚠️ 一旦保存请勿修改。修改后历史邮件中已重写的链接将失效或指向错误地址。",
       "publicBaseUrlChangeConfirmTitle": "确认修改点击主机名?",
-      "publicBaseUrlChangeConfirmBody": "此操作会让所有历史邮件中已重写的链接 (指向旧主机名) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接���效。",
+      "publicBaseUrlChangeConfirmBody": "此操作会让所有历史邮件中已重写的链接 (指向旧主机名) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
       "publicBaseUrlChangeConfirmCta": "我已了解风险并继续",
       "policy": {
         "title": "点击时安全策略（固定）",
@@ -5418,9 +5418,9 @@
       "highHint": "建��阻断或隔离",
       "mediumHint": "建议审核",
       "lowHint": "建议标记后投递",
-      "highDesc": "包含 {n} 个分类，默认处置较为���格，请谨慎调整",
+      "highDesc": "包含 {n} 个分类，默认处置较为严格，请谨慎调整",
       "mediumDesc": "包含 {n} 个分类，建议使用标准处置策略",
-      "lowDesc": "包含 {n} 个分类，可��据业务���要灵活调整",
+      "lowDesc": "包含 {n} 个分类，可根据业务���要灵活调整",
       "count": "({n} 个分类)"
     },
     "intent": {
@@ -5435,7 +5435,7 @@
       "political": "检测涉及政治敏感、反动内容的邮件",
       "phishing": "检测伪装身份诱骗用户信息的钓鱼邮件",
       "spam": "检测垃圾邮件、骚扰邮件、广告邮件",
-      "subscription": "检测新闻订阅、���知邮件、营销推送"
+      "subscription": "检测新闻订阅、通知邮件、营销推送"
     },
     "riskBadge": {
       "high": "高危",
@@ -5529,7 +5529,7 @@
     "directionInternalFull": "域内方向",
     "similarityThreshold": "相似度阈值",
     "actionQuarantine": "隔离",
-    "tooltipAction": "检测到相似邮件时执行的触��动作。选择「仅采集信号」则只记录不执行动作。",
+    "tooltipAction": "检测到相似邮件时执行的触发动作。选择「仅采集信号」则只记录不执行动作。",
     "syncToOthers": "同步到其他方向",
     "exemptionNote": "豁免名���统一由群组策略模块配置，本模块不再提供免检测发���人管理入口",
     "tooltipWindow": "统计相似邮件的时间范围,单位为分钟",
@@ -5714,7 +5714,7 @@
     "overridden": "已覆盖",
     "inactive": "已禁用",
     "addOverride": "添加覆盖",
-    "editOverride": "���辑覆盖",
+    "editOverride": "编辑覆盖",
     "deleteOverride": "删除覆盖",
     "extraOverrides": "额外覆盖项（文件中不存在的键）",
     "noteLabel": "备注"
@@ -5734,7 +5734,7 @@
       "confirmText": "确认切换为 replica",
       "cancelText": "取消"
     },
-    "siteIdHint": "此项可能被环境变量 OSG_RULESYNC_SITE_ID 覆盖——集群形态下由 clustermgr 统��下发，环境变量始终优先于此处的值，修改后��能不会生效，请到 clustermgr 控制��的「跨部署点规则��步」面板确认实际生效值。"
+    "siteIdHint": "此项可能被环境变量 OSG_RULESYNC_SITE_ID 覆盖——集群形态下由 clustermgr 统��下发，环境变量始终优先于此处的值，修改后可能不会生效，请到 clustermgr 控制台的「跨部署点规则同步」面板确认实际生效值。"
   },
   "rulePipeline": {
     "terminate": "终止",
@@ -5889,7 +5889,7 @@
       },
       "mailTypes": {
         "normal": "正常",
-        "subscription": "订阅���讯",
+        "subscription": "订阅资讯",
         "advertising": "广告邮件",
         "spam": "垃圾邮件",
         "harmful": "有害内容邮件",
@@ -6713,8 +6713,8 @@
       "tagStyleHtmlOrange": "HTML橙色",
       "tagStyleHtmlRed": "HTML红色",
       "tagStyleHtmlYellow": "HTML黄色",
-      "tagStylePlainText": "纯文���",
-      "disclaimerContentSourceHint": "声明正文取自系统统一配置的免责声明文案，此处只需选择插入位置；正文��容请联系管理员在系统配置中修改。"
+      "tagStylePlainText": "纯文本",
+      "disclaimerContentSourceHint": "声明正文取自系统统一配置的免责声明文案，此处只需选择插入位置；正文内容请联系管理员在系统配置中修改。"
     },
     "block": {
       "paramsTitle": "阻断参数",
@@ -6816,9 +6816,9 @@
       "descriptionLabel": "描述",
       "charCount": "{count}/{max}",
       "namePlaceholder": "输入规则名称",
-      "descriptionPlaceholder": "输入规��描述（最多500字）",
+      "descriptionPlaceholder": "输入规则描述（最多500字）",
       "sectionBasicInfo": "基础信息",
-      "sectionScope": "生效范��",
+      "sectionScope": "生效范围",
       "sectionValidity": "有效期设置",
       "sectionDescription": "备注说明",
       "expiresAtHint": "留空=永久有效"
@@ -6906,7 +6906,7 @@
         "envelopeRecipient": "信封收件人",
         "senderGroup": "发件人组",
         "senderOrganization": "发件组织",
-        "senderIp": "��件 IP",
+        "senderIp": "发件 IP",
         "senderIpGroup": "发件 IP 组",
         "geoIpCountry": "GeoIP 国家",
         "geoIpRegion": "GeoIP 区域",
@@ -6983,7 +6983,7 @@
       "desc_envelopeSender": {
         "source": "SMTP协议层 MAIL FROM 地址",
         "usage": "退���路由、SPF验证、信封层身份识别",
-        "note": "用户通常不可见。与发信人(信头)的区别：信头是展示给用户的From字段，两者可能不一致(钓鱼��景)"
+        "note": "用户通常不可见。与发信人(信头)的区别：信头是展示给用户的From字段，两者可能不一致(钓鱼场景)"
       },
       "desc_envelopeRecipient": {
         "source": "SMTP协议层 RCPT TO 地址",
@@ -7080,7 +7080,7 @@
       },
       "desc_nestedZipLevel": {
         "source": "压缩包解析引擎",
-        "usage": "检���压缩包嵌套层级",
+        "usage": "检测压缩包嵌套层级",
         "note": "用于检测压缩炸弹，建议阈值3-5层"
       },
       "desc_nestedFileCount": {
@@ -7160,7 +7160,7 @@
       "desc_mailFromEmpty": {
         "source": "SMTP协议层",
         "usage": "检测信封发信人是否为空",
-        "note": "空MAIL FROM常见于��信或系统邮件"
+        "note": "空MAIL FROM常见于退信或系统邮件"
       },
       "desc_mailFromFromConsistency": {
         "source": "SMTP会话MAIL FROM + 邮件头From字段",
@@ -7237,7 +7237,7 @@
       "groupSelectPlaceholder": "请选择群组",
       "orgDeptSelectLabel": "选择部门",
       "orgDeptSelectedCount": "已选 {n} 个",
-      "orgDeptHint": "从组织通讯录选择部门；选中父部门将自动匹配其所有子部门的发信人（支持多级组���架构）。",
+      "orgDeptHint": "从组织通讯录选择部门；选中父部门将自动匹配其所有子部门的发信人（支持多级组织架构）。",
       "orgDeptSearchPlaceholder": "搜索部门…",
       "orgDeptEmpty": "暂无部门数据，请先在组织通讯录同步组织架构。",
       "orgDeptNoMatch": "未找到匹配的部门",
@@ -7393,7 +7393,7 @@
       "trendChartMaxLabel": "最大值 {max}",
       "historySectionTitle": "历史版本",
       "exportPdfButton": "导出 PDF",
-      "exportPdfTooltip": "通过浏览器��印另存为 PDF",
+      "exportPdfTooltip": "通过浏览器打印另存为 PDF",
       "exportCsvButton": "导出 CSV",
       "colVersion": "版本",
       "colChangedAt": "修改时间",
@@ -7493,7 +7493,7 @@
   },
   "disposalSettings": {
     "pageTitle": "处置设置",
-    "pageDescription": "配置邮件隔离区、审核流程��召回策略的相关设��",
+    "pageDescription": "配置邮件隔离区、审核流程和召回策略的相关设置",
     "selectTenantEmpty": "请先选择租户以管理其处置设置",
     "save": "保存设置",
     "reset": "重置",
@@ -7536,13 +7536,13 @@
     "timePoints": "通知时间点",
     "addTimePoint": "添加时间点",
     "tzComputedIn": "通知时间以 {tz} 计算",
-    "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前���知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时���：",
+    "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前���知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间：",
     "tzUseBrowser": "使用浏览器时区（{tz}）",
-    "tzKeepCurrent": "保持当前��区（{tz}）",
+    "tzKeepCurrent": "保持当前时区（{tz}）",
     "range": "通知范围",
     "recipientGroups": "收信人组",
     "departments": "部门",
-    "selectedCount": "��选 {n}",
+    "selectedCount": "已选 {n}",
     "memberCountSuffix": "{n} 人",
     "searchGroups": "搜索收信人组",
     "searchDepts": "搜索部门",
@@ -7695,9 +7695,9 @@
     "activateConfirmTitle": "设为当前密钥",
     "activateConfirmDesc": "确定要将 selector {selector} 设为该域当前生效的 DKIM 密钥吗？",
     "deleteConfirmTitle": "删除密钥",
-    "deleteConfirmDesc": "确定要删除 selector {selector} 吗？此操作不可恢复���",
+    "deleteConfirmDesc": "确定要删除 selector {selector} 吗？此操作不可恢复。",
     "overviewTitle": "DKIM 总览",
-    "overviewDescription": "跨租户查看所有发信域��� DKIM 签名密钥状态。",
+    "overviewDescription": "跨租户查看所有发信域�� DKIM 签名密钥状态。",
     "tenant": "租户",
     "dnsStatusColumn": "DNS 状态",
     "jumpToTenant": "管理",
@@ -7852,7 +7852,7 @@
       "drawerTitle": "漏网邮件明细",
       "truncated": "仅展示前 {shown} 条，共 {total} 条",
       "prev": "上一页",
-      "next": "��一页",
+      "next": "下一页",
       "pageOf": "第 {page} 页，共 {total} 页",
       "col": {
         "sender": "发件人",
@@ -7925,7 +7925,7 @@
     }
   },
   "deliveryTraffic": {
-    "title": "投递与流量���析",
+    "title": "投递与流量分析",
     "subtitle": "分析邮件投递状态和三向流量分布",
     "direction": {
       "label": "方向",
@@ -7963,7 +7963,7 @@
       "inboundTotal": "接收总量",
       "outboundTotal": "外发总量",
       "internalTotal": "域内总量",
-      "totalSuccessRate": "���投递成功率",
+      "totalSuccessRate": "总投递成功率",
       "queueBacklog": "总队列积压",
       "total": "总量",
       "successRate": "成功率",
@@ -8124,7 +8124,7 @@
       "attachmentDetectionRate": "恶意附件检出率",
       "tooltips": {
         "totalLinkMailHelp": "邮件正文或 HTML 中包含 URL 的独立邮件总数",
-        "linkDetectionRateHelp": "恶��链接邮件 / 含链接邮件总数。包含点击后判定结果",
+        "linkDetectionRateHelp": "恶意链接邮件 / 含链接邮件总数。包含点击后判定结果",
         "totalAttachmentMailHelp": "包含至少一个附件的独立邮件总数",
         "attachmentDetectionRateHelp": "恶意附件邮件 / 含附件邮件总数"
       }
@@ -8265,10 +8265,10 @@
     },
     "bottomActions": {
       "exportCsv": "导出 CSV",
-      "generateReport": "��成报告",
+      "generateReport": "生成报告",
       "aiAnalysis": "AI 分析"
     },
-    "sandboxAsyncAlert": "有 {count} 封已���递邮件，沙箱异步检测后报恶意。建议立即查看详情。",
+    "sandboxAsyncAlert": "有 {count} 封已投递邮件，沙箱异步检测后报恶意。建议立即查看详情。",
     "viewDetails": "查看详情",
     "ai": {
       "drawerTitle": "AI 分析结果",
@@ -8562,13 +8562,13 @@
       "viewBasis": "查看依据",
       "actions": "操作",
       "detail": "详情",
-      "block": "拦��",
+      "block": "拦截",
       "exempt": "豁免",
       "empty": "暂无检测记录",
       "truncatedBanner": "调查明细可能因体量被截断"
     },
     "detail": {
-      "title": "检测��情",
+      "title": "检测详情",
       "noSubject": "(无主题)",
       "block": "拦截",
       "exempt": "误报豁免",
@@ -8646,61 +8646,13 @@
     "expandMenu": "展开菜单"
   },
   "phishingConfig": {
-  "pageTitle": "检测引擎配置",
-  "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
-  "status": {
-    "title": "钓鱼邮件检测智能体",
-    "enabledLabel": "已启用",
-    "disabledLabel": "已禁用",
-    "loading": "加载中...",
-    "loadFailed": "智能体状态加载失败",
-    "toggleFailed": "切换失败",
-    "enableConfirmTitle": "启用钓鱼邮件检测智能体？",
-    "enableConfirmDescription": "启用后，符合检测范围规则的邮件将进入智能体检测流程，可能增加邮件处理耗时。",
-    "enableNoScopeConfirmDescription": "当前没有启用的检测范围，启用后暂时不会检测任何邮件。是否继续？",
-    "disableConfirmTitle": "禁用钓鱼邮件检测智能体？",
-    "disableConfirmDescription": "禁用后，新邮件不会进入钓鱼邮件检测流程，历史检测记录不会删除。",
-    "confirm": "确认",
-    "cancel": "取消",
-    "goToScope": "去配置检测范围",
-    "continueEnable": "继续启用",
-    "summary": {
-      "loading": "策略摘要加载中...",
-      "disabled": "智能体已禁用，新邮件不会进入钓鱼邮件检测流程。历史检测记录不受影响。",
-      "noScope": "智能体已启用，但当前没有启用的检测范围，暂时不会检测任何邮件。",
-      "observe": "对符合 {count} 条检测范围规则的邮件执行观察检测，仅记录结果并{action}，不会自动隔离邮件。",
-      "realtime": "对符合 {count} 条检测范围规则的邮件执行实时检测，检测结果按置信度分级处置；{timeout}。",
-      "timeoutPart": "检测超过 {minutes} 分钟未完成时先{temp}，并继续复核 {recheck} 分钟"
-    }
-  },
-  "preset": {
-    "title": "防护方案",
-    "description": "选择一套预设，快速填充运行模式与处置策略；选择后仍可在下方继续调整细节。",
-    "applied": "已应用「{name}」预设，可在下方继续调整。",
-    "applyFailed": "预设应用失败",
-    "observe": {
-      "title": "观察模式",
-      "description": "仅记录检测结果，不自动隔离或标记邮件。适合先观察命中情况，再决定是否启用处置。"
-    },
-    "standard": {
-      "title": "标准防护",
-      "description": "按置信度分级自动处置，超时邮件自动投递，兼顾安全与投递时效。"
-    },
-    "strict": {
-      "title": "严格防护",
-      "description": "按置信度分级自动处置，超时邮件先标记后投递，优先保证安全性。"
-    }
-  },
-  "admission": {
-    "title": "检测范围",
-    "description": "决定哪些邮件会进入检测引擎。多条规则满足任意一条即可命中；关闭检测范围后，规则暂不生效。",
-    "scopeEnabled": "已启用",
-    "scopeDisabled": "已关闭",
-    "scopeToggleLabel": "启用检测范围",
-    "scopeDisabledHint": "检测范围已关闭。开启后，符合已配置规则的邮件才会进入检测引擎。",
-    "scopeToggled": "检测范围状态已更新",
-    "loading": "加载中...",
-    "empty": "尚未配置检测范围。智能体启用后仍不会检测任何邮件，请先新增至少一条规则。",
+    "pageTitle": "检测引擎配置",
+    "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
+    "admission": {
+      "title": "准入规则",
+      "description": "决定哪些邮件进入钓鱼邮件检测智能体。命中后使用当前部��级运行限制。",
+      "loading": "加载中...",
+      "empty": "暂无准入规则，点击「新建」添加。",
       "create": "新建",
       "edit": "编辑",
       "delete": "删除",
@@ -8716,14 +8668,14 @@
       "colDirection": "方向",
       "colEnabled": "启用",
       "colActions": "操作",
-    "colScope": "命中条件",
-    "colRecipients": "收件人",
+      "colScope": "检测范围",
+      "colRecipients": "收件人",
       "colRisk": "风险信号",
       "statusEnabled": "已启用",
       "statusDisabled": "已停用",
       "footer": "共 {total} 条 · 已启用 {enabled} 条",
       "namePlaceholder": "规则名称",
-      "tagPlaceholder": "输入标签后回车，例如 grp:finance",
+      "tagPlaceholder": "输入标��后回车，例如 grp:finance",
       "addTag": "添加",
       "removeTag": "移除",
       "tagSectionLabel": "收件人标签",
@@ -8732,7 +8684,7 @@
       "addEmail": "添加",
       "removeEmail": "移除",
       "recipientTagsHint": "标签与邮箱命中任一即满足（OR）；同时留空表示对所有匹配方向的收件人生效。",
-      "recipientFilter": "特定��件人筛选",
+      "recipientFilter": "特定收件人筛选",
       "allRecipients": "全部收件人",
       "enabledLabel": "启用该规则",
       "sectionScope": "检测范围",
@@ -8743,10 +8695,10 @@
       "senderFirstSeen": "收发信人之前没有邮件往来",
       "senderFirstSeenHint": "仅对无历史收发记录的发信人启用——常见钓鱼/社工高风险来源。",
       "qrcode": "邮件包含二维码",
-      "qrcodeDesc": "附件/图片中解码识别出二维码时命中（需附件深度检查）",
+      "qrcodeDesc": "附件/图片中解�����出二维码时命中（需附件深度检查）",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
       "validationFailed": "请检查必填字段。",
-      "created": "检测范围规则已创建",
+      "created": "准入规则已��建",
       "updated": "准入规则已更新",
       "saveFailed": "保存失败",
       "saving": "保存中...",
@@ -8757,7 +8709,7 @@
         "qrNoOutbound": "二维码风险信号暂不支持外发方向",
         "needRiskSignal": "请至少启用一个风险信号",
         "needRecipientTarget": "开启收件人筛选时至少填写一个标签或邮箱",
-        "maxSizeTooLarge": "邮件大小上限不能超过 100000 MB"
+        "maxSizeTooLarge": "邮件大小上���不能超过 100000 MB"
       },
       "direction": {
         "inbound": "入站",
@@ -8765,9 +8717,9 @@
         "internal": "内部"
       }
     },
-  "runtime": {
-    "title": "处置策略",
-      "description": "选择运行模式、防护等级，并配置检测超时后的处理方式。",
+    "runtime": {
+      "title": "运行模式与超时",
+      "description": "实时/观察模式、超时时间线与超时临时处置（对所有旁路检测生效）。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败，运行模式仍按真实引擎配置展示。",
@@ -8779,7 +8731,7 @@
       "saveFailed": "保存失败",
       "cancel": "取消",
       "sheetTitle": "编辑运行模式与超时",
-      "sheetDescription": "保存后立即生效；取消丢弃所有改动。",
+      "sheetDescription": "保存后立即生��；取消丢弃所有改动。",
       "runMode": "运行模式",
       "runModeSectionTitle": "运行模式",
       "runModeValue": {
@@ -8790,18 +8742,12 @@
         "realtime": "按分级表执行处置（隔离/标记/放行）。",
         "observe": "不执行分级处置，仅记录观察结果。"
       },
-      "advanced": {
-        "title": "高级设置",
-        "description": "检测超时时间线与超时临时处置，默认收起。",
-        "expand": "展开",
-        "collapse": "收起"
-      },
       "observeAction": "观察动作",
       "observeActionValue": {
         "deliver": "投递",
         "mark": "标记"
       },
-      "timeoutSectionTitle": "检测异常处理",
+      "timeoutSectionTitle": "超时时间���",
       "timeoutScopeNote": "总超时 / 超时异步对所有旁路检测生效。",
       "soon": "即将支持",
       "totalTimeout": "总超时",
@@ -8809,7 +8755,7 @@
       "asyncTimeout": "超时异步",
       "asyncTimeoutHint": "超时投递后，系统继续等待最终检测结论的最长时长。在此窗口内若得出高风险结论，邮件将被自动召回。范围：1–60 分钟。",
       "autoDeliver": "超时自动投递",
-      "autoDeliverHint": "开启：超时邮件自动投递，无需人工干预；关闭：超时邮件不自动投递，需人工处置。",
+      "autoDeliverHint": "开启：超时邮件自动投递，无���人工干预；关闭：超时邮件不自动投递，需人工处置。",
       "autoDeliverOn": "已开启",
       "autoDeliverOff": "已关闭",
       "timeoutCloseConfirmTitle": "确认关闭超时自动投递？",
@@ -8833,11 +8779,11 @@
     },
     "bands": {
       "title": "置信度分级处置",
-      "description": "按置信度区间连续覆盖 0–100，每段配置不同的处置动作。",
+      "description": "按置信度区间连续覆盖 0–100，每段配置不同的处置���作。",
       "loading": "加载中...",
       "save": "保存",
       "saving": "保存中...",
-      "saved": "分级配置已保存",
+      "saved": "分级配置已保���",
       "saveFailed": "保存失败",
       "discard": "放弃改动",
       "colRange": "置信度区间",
@@ -8848,7 +8794,7 @@
       "colActions": "操作",
       "advancedEdit": "高级编辑",
       "dialogTitle": "编辑第 {index} 段",
-      "dialogDescription": "调整该置信度段的区间、处置与标记设置。",
+      "dialogDescription": "调整该置信度段的区间、处置与��记设置。",
       "cancel": "取消",
       "apply": "应用",
       "markPositionLabel": "标记位置",
@@ -8875,7 +8821,7 @@
         "mustStartAt0": "置信度区间必须从 0 开始",
         "mustEndAt100": "置信度区间必须覆盖到 100",
         "minLtMax": "区间非法：min({min}) 必须小于 max({max})",
-        "contiguous": "置信度区间必须连续覆盖 0-100，不可重叠、不可留空"
+        "contiguous": "���信度区间必须连续覆盖 0-100，不可重叠、不可留空"
       }
     }
   },
@@ -9114,7 +9060,7 @@
       "cancelConfirmTitle": "放弃未保存的修改？",
       "cancelConfirmDescription": "当前抽屉中有未保存的修改，关闭后将无法恢复。",
       "continueEditing": "继续编辑",
-      "discardChanges": "放��修改",
+      "discardChanges": "放弃修改",
       "warnSensThreshold": "检测��敏度极高时，建议置信度阈值 ≥ 80 以避免误报",
       "errDiscardNeedsAlert": "丢弃动作必须开启告警通知",
       "errEmailDup": "���邮箱已作为保护对象存在",
@@ -9267,7 +9213,7 @@
       "domain": "域名",
       "add": "添加",
       "delete": "删除",
-      "empty": "暂无放行���单",
+      "empty": "暂无放行名单",
       "errDup": "该条目已存在",
       "errMatchType": "类型必须是邮箱或域名"
     }
@@ -9295,7 +9241,7 @@
       "start": "开始时间",
       "end": "结束时间",
       "submit": "发起扫描",
-      "defaultWindowHint": "缺省回��� 8 小时，上限 24 小时。",
+      "defaultWindowHint": "缺省回溯 8 小时，上限 24 小时。",
       "windowTooLarge": "回溯窗超过 24 小时，请缩小时间范围。",
       "toastStarted": "扫描已启动",
       "toastError": "启动扫描失败"
@@ -9315,7 +9261,7 @@
       "hint": {
         "snapshot": "当前快照，不受时间范围筛选影响。",
         "range": "按当前时间范围统计。",
-        "recallSuccess": "按当前时间范围内的召��最终结果统计；所有目标成功才���为成功。",
+        "recallSuccess": "按当前时间范围内的召回最终结果统计；所有目标成功才���为成功。",
         "recallFailure": "按当前时间范围内的召回最终结果统计；部分���功归入召回失败。",
         "rate": "当前时间范围内发现漏报数 / 扫描邮件数。"
       }
@@ -9454,7 +9400,7 @@
       "reasons": {
         "not_phishing": "非钓鱼/恶意",
         "legitimate_business": "正常业务邮件",
-        "internal_test": "内��测试邮件",
+        "internal_test": "内部测试邮件",
         "other": "其他"
       }
     },
@@ -9477,9 +9423,9 @@
       "messageUuid": "Message-UUID",
       "headers": "邮件头",
       "rationale": "复检依据",
-      "body": "邮件正��",
+      "body": "邮件正文",
       "origDisposition": "原始处���",
-      "origConfidence": "原始���信度",
+      "origConfidence": "原始置信度",
       "recheckConfidence": "复检置��度",
       "downloadEml": "下载 EML",
       "loading": "正在加载原文…",
@@ -9665,7 +9611,7 @@
       "preview": "预览通知内容",
       "highImmediate": "发现高危威胁时立即通知（置信度 ≥ 90%）",
       "mediumImmediate": "发现中危威胁且置信度达到阈值时立即通知",
-      "mediumThresholdInvalid": "中危���值必须是 70–89 的整数。",
+      "mediumThresholdInvalid": "中危阈值必须是 70–89 的整数。",
       "mediumNoFallbackHint": "中危未达到该阈值时不会回退到低危汇总。",
       "lowDigest": "低危威胁每日汇总时间",
       "notifyVersionHint": "修改收件人或汇总时间只影响新任务；当天可能按不同配置版本分别汇总。",
@@ -9700,7 +9646,7 @@
       "updated": "策略已更新",
       "saveError": "保存策略失败",
       "testStarted": "测试扫描已启动",
-      "invalid": "请修正表单错误��再保存",
+      "invalid": "请修正表单错误后再保存",
       "cloned": "策略已克隆",
       "deleted": "策略已删除"
     }
@@ -9722,7 +9668,7 @@
     "batchConfirmTag": "确定将选中的 {count} 条记录标记为{tag}吗？",
     "batchConfirmUntag": "取消选中的 {count} 条记录的标记？",
     "batchExec": "批量标记为高管",
-    "batchKey": "��量标记为关键岗位",
+    "batchKey": "批量标记为关键岗位",
     "batchUntag": "取消标记",
     "bindDnPlaceholder": "如 cn=admin,dc=corp,dc=com",
     "btnConfirm": "确定",
@@ -9771,7 +9717,7 @@
     "errBaseDnRequired": "请输入 Base DN",
     "errBindDnRequired": "请输入 Bind DN",
     "errBindPasswordRequired": "请输入绑定密码",
-    "errNameDup": "数据源名称已��在",
+    "errNameDup": "数据源名称已存在",
     "errNameMax": "不能超过 64 个字符",
     "errNameRequired": "数据源名称不能为空",
     "errPortRange": "端口必须为 1-65535 之间的数字",
@@ -9837,7 +9783,7 @@
     "paramSource": "数据源",
     "paramSourceType": "数据源类型",
     "paramStartTime": "开始时间",
-    "paramStatus": "结果状��",
+    "paramStatus": "结果状态",
     "passwordPlaceholderEdit": "••••••••",
     "passwordPlaceholderNew": "请输入密码",
     "policyExecProtect": "高管邮件保护：{state}",
@@ -9854,7 +9800,7 @@
     "searchPlaceholder": "搜索数据源名称或地址…",
     "sectionBasic": "基础信息",
     "sectionConn": "连接参数",
-    "sectionPolicy": "同步策��",
+    "sectionPolicy": "同步策略",
     "selectAllPageAria": "全选本页",
     "selectRowAria": "选择 {name}",
     "selectTenantDesc": "请使用上方的租户选择器选择租户后，再管理组织通讯录。",
@@ -10038,7 +9984,7 @@
     },
     "metric": {
       "cpu_usage": "CPU 使用率",
-      "memory_usage": "���存使用率",
+      "memory_usage": "内存使用率",
       "data_dir_usage": "数据目录使用率",
       "network_retransmit": "网络重传率",
       "disk_io": "磁盘 I/O",
@@ -10109,7 +10055,7 @@
       "err": {
         "nameRequired": "规则名称不能为空",
         "reservedPrefix": "名称不能以 __deleted__ 开头",
-        "thresholdRequired": "阈值为必��",
+        "thresholdRequired": "阈值为必填",
         "thresholdPositive": "阈值必须为正数",
         "durationPositive": "持续时间必须大于 0",
         "samplesPositive": "采样数必须大于 0",
@@ -10230,7 +10176,7 @@
       "abnormal": "异常",
       "todayDetected": "今日检出 {n}",
       "todayRecalled": "今日召回 {n}",
-      "center": "智能��中心"
+      "center": "智能体中心"
     },
     "top5": {
       "title": "威胁来源 TOP5",
@@ -10395,7 +10341,7 @@
     "neverExpires": "永不过期",
     "permanentLock": "永久锁定",
     "platformOnly": "由平台统一设置，租户不可修改",
-    "tenantBanner": "平台已下发登录安全基线。本租户只能在基线之上加严，不可低于基��；置灰选项即为低于基线、不可选择的取值。",
+    "tenantBanner": "平台已下发登录安全基线。本租户只能在基线之上加严，不可低于基线；置灰选项即为低于基线、不可选择的取值。",
     "belowBaseline": "低于平台基线，当前按基线生效",
     "noRules": "暂无 IP 规则",
     "addRule": "新增 IP",
@@ -10448,7 +10394,7 @@
       "actionDesc": {
         "quarantine": "邮件进入隔离区，管理员审核后可放行或删除",
         "audit": "邮件进入待审核队列，人工确认后投递或退回",
-        "reject": "拒绝接收，发送方收���退信通知（452/550）",
+        "reject": "拒绝接收，发送方收到退信通知（452/550）",
         "discard": "��默丢弃，发送方无感知，无退���"
       },
       "mergedNote": "合并模式下外发和域内方向使用统���配置，防止通过切换方向绕过限制"
@@ -10546,7 +10492,7 @@
       "monitorSecurity": "检测引擎状态",
       "ruleStatsV2": "规则��计",
       "greyMailPolicy": "灰邮治理-策略配置",
-      "greyMailQueue": "灰邮治理-���邮队列",
+      "greyMailQueue": "灰邮治理-灰邮队列",
       "report": "举报中心",
       "reportManagement": "举报管理",
       "reportStrategy": "举报策略设置",
@@ -10572,7 +10518,7 @@
     "abnormal": "异常",
     "loading": "正在加载检测引擎数据…",
     "loadFailed": "检测引擎数据加载失败，请重试",
-    "degraded": "监控数据库暂����可用，当前仅显示可用数据",
+    "degraded": "监控数据库暂不可用，当前仅显示可用数据",
     "noData": "所选范围内暂无数据",
     "approximate": "RBL 响应耗时根据邮件端到端处理耗时近似计算",
     "lastUpdated": "最近更新：{time}",
@@ -10839,7 +10785,7 @@
       "access_denied": "没有权限执行该操作",
       "match_type_invalid": "匹配方式取值无效",
       "name_and_pattern_required": "名称和匹配内容都必须填写",
-      "not_found": "链接黑名单规则不���在，可能已被删除",
+      "not_found": "链接黑名单规则不存在，可能已被删除",
       "tenant_access_denied": "没有权限访问该租户的数据",
       "tenant_id_required": "必须指定租户（平台管理员需通过 X-Tenant-ID 指定）",
       "verdict_invalid": "判定结果取值无效"
@@ -10851,8 +10797,8 @@
       "helo_pattern_regex_invalid": "HELO 匹配的正则表达式不合法，请检查语法",
       "is_active_required": "请指定是否生效",
       "not_found": "准入规则不存在，可能已被删除",
-      "null_sender_requires_cidr": "允许空发件��的规则只按来源 IP 匹配，因此必须填写来源 IP 段",
-      "privileged_requires_system_admin": "创建特权准入规��需要平台管理员权限",
+      "null_sender_requires_cidr": "允许空发件人的规则只按来源 IP 匹配，因此必须填写来源 IP 段",
+      "privileged_requires_system_admin": "创建特权准入规则需要平台管理员权限",
       "rate_limit_must_be_positive": "每小时限额必须大于 0",
       "rcpt_domain_not_owned": "收件域必须是本租户已验证的域名或其子域",
       "rcpt_domain_regex_invalid": "收件域匹配的正则表达式不合法，请检查语法",
@@ -10967,7 +10913,7 @@
       "not_found": "调查任务不存在",
       "access_denied": "无权访问该调查任务",
       "id_required": "请填写调查任务 ID",
-      "confirm_required": "该��作需要确认后才能执行",
+      "confirm_required": "该操作需要确认后才能执行",
       "not_ready_for_actions": "调查任务尚未完成，暂时无法执行处置动作",
       "type_unsupported": "不支持的调查类型",
       "target_type_unsupported": "不支持的调查对象类型",
@@ -11087,9 +11033,9 @@
       "id_required": "请填写 ID",
       "sideline_item_not_found": "��路邮件不存在",
       "access_denied": "无权访问该附件记录",
-      "request_body_unreadable": "请求内容���取失败",
+      "request_body_unreadable": "请求内容读取失败",
       "scan_result_format_invalid": "附件扫描结果数据格式不正确",
-      "scan_result_missing": "未提供附件扫描结���数据",
+      "scan_result_missing": "未提供附件扫描结果数据",
       "scan_result_all_invalid": "校验后没有任何有效的扫描结果"
     },
     "url_protection": {
@@ -11099,11 +11045,11 @@
       "domain_limit_exceeded": "每个租户最多 {max} 个域名",
       "domain_already_exists": "该域名已存在",
       "cidr_invalid": "CIDR 格式不正确",
-      "cidr_limit_exceeded": "每个租户最�� {max} 个 IP 段",
+      "cidr_limit_exceeded": "每个租户最多 {max} 个 IP 段",
       "cidr_already_exists": "该 IP 段已存在",
       "tenant_id_required": "请指定租户",
       "tenant_id_invalid": "租户 ID 无效",
-      "link_redirect_tls_not_configured": "链接���转服务(8082)未配置 TLS 证书。请先在集群管理台「对外服务 TLS 证书」上传证书，或确��已由前置反代终结 TLS 后开启 link_protection/tls_terminated_by_proxy"
+      "link_redirect_tls_not_configured": "链接���转服务(8082)未配置 TLS 证书。请先在集群管理台「对外服务 TLS 证书」上传证书，或确认已由前置反代终结 TLS 后开启 link_protection/tls_terminated_by_proxy"
     },
     "login_policy": {
       "two_factor_platform_admin_only": "二次认证强制策略仅平台管理员可设置",
@@ -11113,7 +11059,7 @@
       "rule_platform_admin_only": "仅平台管理员可修改平台规则",
       "ip_or_cidr_format_invalid": "请输入正确的 IP 地址或 CIDR 格式（如 192.168.1.0/24）",
       "rule_already_exists": "该 IP/CIDR 规则已存在",
-      "delete_would_lock_out_self": "删除后白���单将不再��含你当前的 IP 地址，你将无法登录",
+      "delete_would_lock_out_self": "删除后白名单将不再包含你当前的 IP 地址，你将无法登录",
       "rule_not_found": "规则不存在"
     },
     "group_members_io": {
@@ -11249,7 +11195,7 @@
     "mail_lifecycle_logs": {
       "access_denied": "无权执行该操作",
       "mail_log_entry_not_found": "邮件日志不存在",
-      "raw_log_search_busy_all_gateway": "所有网关节点的原始日志检���都在忙，请稍后重试",
+      "raw_log_search_busy_all_gateway": "所有网关节点的原始日志检索都在忙，请稍后重试",
       "message_uuid_required": "请提供邮件 UUID",
       "from_define_valid_time_range": "开始时间必须早于结束时间",
       "raw_log_search_busy_retry_shortly": "原始日志检索正忙，请稍后重试"
@@ -11268,7 +11214,7 @@
       "original_email_content_not_available": "邮件原文不可用"
     },
     "email_preview": {
-      "email_content_not_found": "邮���正文不存在"
+      "email_content_not_found": "邮件正文不存在"
     },
     "portal_quarantine_preview": {
       "email_content_not_found": "邮件正文不存在"
@@ -11290,7 +11236,7 @@
     "group_management_access": {
       "group_management_requires_tenant_administrator_a": "分组管理需要租户管理员权限",
       "group_management_accessed_within_tenant_context": "多租户模式下，分���管理需要先选择租户",
-      "access_denied_group_management_rule": "无权访问该分组管理��则",
+      "access_denied_group_management_rule": "无权访问该分组管理规则",
       "group_management_rules_imported_with_scope": "分组管理规则必须��� scope=groups 导入"
     },
     "group_policy": {
@@ -11393,9 +11339,9 @@
       "scope_invalid": "{name} 的生效范围无效，只能是本域或全部"
     },
     "roles": {
-      "system_default_role_cannot_edited": "系统内置角��不可修���",
+      "system_default_role_cannot_edited": "系统内置角色不可修���",
       "system_default_super_admin_role_cannot": "系统内置角色和超级管理员角色不可停用",
-      "system_default_role_cannot_deleted": "系���内置角色不可删除"
+      "system_default_role_cannot_deleted": "系统内置角色不可删除"
     },
     "smtp_auth_ip_lockout": {
       "invalid_ip": "IP 地址无效"

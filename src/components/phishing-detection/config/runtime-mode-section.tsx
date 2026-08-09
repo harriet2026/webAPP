@@ -29,7 +29,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { HelpCircle } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Tooltip,
   TooltipContent,
@@ -46,7 +45,6 @@ import type {
 } from '@/types/phishing-config';
 import type { DisposalSettings } from '@/types/disposal-settings';
 import { ConfidenceBandsEditor } from './confidence-bands-editor';
-import { PresetSelection } from './preset-selection';
 
 function isValidationError(err: unknown): string | null {
   if (!(err instanceof ApiError) || err.status !== 400) return null;
@@ -79,7 +77,6 @@ export function RuntimeModeSection() {
   const [engineDraft, setEngineDraft] = useState<PhishTenantEngineParams | null>(null);
   const [disposalDraft, setDisposalDraft] = useState<DisposalSettings | null>(null);
   const [pendingTimeoutValue, setPendingTimeoutValue] = useState<boolean | null>(null);
-  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   // When opening the sheet (or the baseline refreshes while it's open),
   // snapshot the draft from the latest loaded data.
@@ -159,37 +156,87 @@ export function RuntimeModeSection() {
         <CardTitle>{t('title')}</CardTitle>
         <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <PresetSelection />
+      <CardContent className="space-y-4">
         {!engine ? (
           <p className="text-sm text-muted-foreground">
             {engineQuery.isError ? t('engineLoadFailed') : t('loading')}
           </p>
         ) : (
-          <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-sm font-medium" data-testid="runtime-mode-summary">
-                <Badge variant="outline">{t(`runModeValue.${engine.run_mode}`)}</Badge>
-                {engine.run_mode === 'observe' ? (
-                  <span className="text-xs text-muted-foreground">
-                    {t(`observeActionValue.${engine.observe_action}`)}
-                  </span>
-                ) : null}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {disposalQuery.isError ? t('disposalLoadFailed') : t('timeoutScopeNote')}
-              </p>
+          <div className="space-y-3 rounded-lg border p-4">
+            <div className="grid gap-3 md:grid-cols-3">
+              <ReadonlyField
+                label={t('runMode')}
+                value={t(`runModeValue.${engine.run_mode}`)}
+                testId="runtime-mode-summary"
+              />
+              <ReadonlyField
+                label={t('observeAction')}
+                value={
+                  engine.run_mode === 'observe'
+                    ? t(`observeActionValue.${engine.observe_action}`)
+                    : '—'
+                }
+              />
+              <ReadonlyField
+                label={t('timeoutTempDisposal')}
+                value={
+                  disposal
+                    ? t(`timeoutTempValue.${disposal.review.timeout_temp_disposal || 'deliver'}`)
+                    : disposalQuery.isLoading
+                      ? t('loading')
+                      : '—'
+                }
+              />
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!disposal}
-              title={!disposal ? t('editUnavailable') : undefined}
-              onClick={() => setSheetOpen(true)}
-              data-testid="runtime-mode-edit"
-            >
-              {t('edit')}
-            </Button>
+            <div className="grid gap-3 md:grid-cols-3">
+              <ReadonlyField
+                label={t('totalTimeout')}
+                value={
+                  disposal
+                    ? `${disposal.review.custom_minutes}${t('minutes')}`
+                    : disposalQuery.isLoading
+                      ? t('loading')
+                      : '—'
+                }
+              />
+              <ReadonlyField
+                label={t('asyncTimeout')}
+                value={
+                  disposal
+                    ? `${disposal.review.max_recheck_minutes}${t('minutes')}`
+                    : disposalQuery.isLoading
+                      ? t('loading')
+                      : '—'
+                }
+              />
+              <ReadonlyField
+                label={t('autoDeliver')}
+                value={
+                  disposal
+                    ? disposal.review.timeout_auto_deliver
+                      ? t('autoDeliverOn')
+                      : t('autoDeliverOff')
+                    : disposalQuery.isLoading
+                      ? t('loading')
+                      : '—'
+                }
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {disposalQuery.isError ? t('disposalLoadFailed') : t('timeoutScopeNote')}
+            </p>
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!disposal}
+                title={!disposal ? t('editUnavailable') : undefined}
+                onClick={() => setSheetOpen(true)}
+                data-testid="runtime-mode-edit"
+              >
+                {t('edit')}
+              </Button>
+            </div>
           </div>
         )}
 
@@ -262,19 +309,8 @@ export function RuntimeModeSection() {
                   ) : null}
                 </section>
 
-                <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-                  <div className="flex items-center justify-between rounded-lg border px-4 py-3">
-                    <div>
-                      <h3 className="font-medium">{t('advanced.title')}</h3>
-                      <p className="text-xs text-muted-foreground">{t('advanced.description')}</p>
-                    </div>
-                    <CollapsibleTrigger render={<Button variant="outline" size="sm" />}>
-                      {advancedOpen ? t('advanced.collapse') : t('advanced.expand')}
-                    </CollapsibleTrigger>
-                  </div>
-                  <CollapsibleContent className="space-y-5 pt-4">
-                    <section className="space-y-3">
-                      <h3 className="font-medium">{t('timeoutSectionTitle')}</h3>
+                <section className="space-y-3">
+                  <h3 className="font-medium">{t('timeoutSectionTitle')}</h3>
                   <p className="text-xs text-muted-foreground">{t('timeoutScopeNote')}</p>
                   <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-1.5">
@@ -419,9 +455,7 @@ export function RuntimeModeSection() {
                       </div>
                     </div>
                   ) : null}
-                    </section>
-                  </CollapsibleContent>
-                </Collapsible>
+                </section>
               </div>
 
               <SheetFooter className="border-t px-6 py-3 flex-row justify-end gap-2">
@@ -466,5 +500,24 @@ export function RuntimeModeSection() {
         </AlertDialogContent>
       </AlertDialog>
     </Card>
+  );
+}
+
+function ReadonlyField({
+  label,
+  value,
+  testId,
+}: {
+  label: string;
+  value: string;
+  testId?: string;
+}) {
+  return (
+    <div data-testid={testId}>
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-sm font-medium">
+        <Badge variant="outline">{value}</Badge>
+      </div>
+    </div>
   );
 }

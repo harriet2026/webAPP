@@ -13,56 +13,20 @@ import type {
   PhishBand,
 } from '@/types/phishing-config';
 
-const MOCK_ENGINE_CONFIG: PhishEngineConfigResponse = {
-  version: 0,
-  engine: {
-    enabled: true,
-    netdisk_domain: true,
-    netdisk_extract: true,
-    netdisk_spoof: false,
-    run_mode: 'realtime',
-    observe_action: 'deliver',
-  },
-};
-
-let mockEngineConfig = structuredClone(MOCK_ENGINE_CONFIG);
-
 export async function getEngineConfig(
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<PhishEngineConfigResponse> {
-  try {
-    const response = await requestFn<PhishEngineConfigResponse>('/phishing-agent/engine-config');
-    return {
-      ...response,
-      engine: {
-        ...response.engine,
-        // Older configurations do not have the module switch; preserve the existing behavior.
-        enabled: response.engine.enabled ?? true,
-      },
-    };
-  } catch {
-    // Keep the configuration page usable in the preview when apiserver is unavailable.
-    return structuredClone(mockEngineConfig);
-  }
+  return requestFn<PhishEngineConfigResponse>('/phishing-agent/engine-config');
 }
 
 export async function putEngineConfig(
   params: PhishTenantEngineParams,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<void> {
-  try {
-    await requestFn<void>('/phishing-agent/engine-config', {
-      method: 'PUT',
-      body: { params },
-    });
-  } catch {
-    // Mirror the saved value in preview memory until the backend is available.
-    mockEngineConfig = {
-      ...mockEngineConfig,
-      engine: { ...params },
-      version: mockEngineConfig.version + 1,
-    };
-  }
+  await requestFn<void>('/phishing-agent/engine-config', {
+    method: 'PUT',
+    body: { params },
+  });
 }
 
 export async function listAdmissionRules(

@@ -8592,59 +8592,11 @@
   "phishingConfig": {
     "pageTitle": "Detection Engine Config",
     "pageDescription": "Tune the phishing detection engine's admission rules, runtime mode and confidence bands.",
-    "status": {
-      "title": "Phishing Detection Agent",
-      "enabledLabel": "Enabled",
-      "disabledLabel": "Disabled",
-      "loading": "Loading...",
-      "loadFailed": "Failed to load agent status",
-      "toggleFailed": "Toggle failed",
-      "enableConfirmTitle": "Enable the Phishing Detection Agent?",
-      "enableConfirmDescription": "Once enabled, messages matching the detection scope will enter the agent's detection flow, which may increase mail processing time.",
-      "enableNoScopeConfirmDescription": "There is no enabled detection scope right now. Enabling will not detect any messages yet. Continue?",
-      "disableConfirmTitle": "Disable the Phishing Detection Agent?",
-      "disableConfirmDescription": "Once disabled, new messages will not enter the phishing detection flow. Historical detection records are not deleted.",
-      "confirm": "Confirm",
-      "cancel": "Cancel",
-      "goToScope": "Go to detection scope",
-      "continueEnable": "Continue enabling",
-      "summary": {
-        "loading": "Loading policy summary...",
-        "disabled": "The agent is disabled. New messages will not enter the phishing detection flow. Historical records are unaffected.",
-        "noScope": "The agent is enabled, but there is no enabled detection scope, so no messages are detected yet.",
-        "observe": "Messages matching {count} detection-scope rule(s) are observed; results are only recorded and {action}, with no automatic quarantine.",
-        "realtime": "Messages matching {count} detection-scope rule(s) are detected in realtime and disposed by confidence band; {timeout}.",
-        "timeoutPart": "if detection is not finished within {minutes} minutes, messages are first {temp}, then rechecked for up to {recheck} more minutes"
-      }
-    },
-    "preset": {
-      "title": "Protection Presets",
-      "description": "Pick a preset to quickly fill in the run mode and disposition policy; you can keep adjusting details below after choosing.",
-      "applied": "Applied the \"{name}\" preset. You can keep adjusting the details below.",
-      "applyFailed": "Failed to apply preset",
-      "observe": {
-        "title": "Observe",
-        "description": "Only records detection results; does not auto-quarantine or mark messages. Good for watching hit rates before turning on disposition."
-      },
-      "standard": {
-        "title": "Standard",
-        "description": "Auto-disposes by confidence band, with timed-out messages auto-delivered — balances security and delivery speed."
-      },
-      "strict": {
-        "title": "Strict",
-        "description": "Auto-disposes by confidence band, with timed-out messages marked before delivery — prioritizes security."
-      }
-    },
     "admission": {
-      "title": "Detection Scope",
-      "description": "Decide which messages enter the detection engine. Any one matching rule is enough; rules do not take effect while the scope is disabled.",
-      "scopeEnabled": "Enabled",
-      "scopeDisabled": "Disabled",
-      "scopeToggleLabel": "Enable detection scope",
-      "scopeDisabledHint": "Detection scope is disabled. Matching messages enter the engine after you enable it.",
-      "scopeToggled": "Detection scope updated",
+      "title": "Admission Rules",
+      "description": "Decide which messages enter the Phishing Detection Agent. Hits use the current deployment-wide runtime limits.",
       "loading": "Loading...",
-      "empty": "No detection scope configured yet. Even after enabling the agent, no messages will be detected until you add at least one rule.",
+      "empty": "No admission rules yet; click Create to add one.",
       "create": "Create",
       "edit": "Edit",
       "delete": "Delete",
@@ -8660,7 +8612,7 @@
       "colDirection": "Direction",
       "colEnabled": "Enabled",
       "colActions": "Actions",
-      "colScope": "Match Criteria",
+      "colScope": "Scope",
       "colRecipients": "Recipients",
       "colRisk": "Risk signals",
       "statusEnabled": "Enabled",
@@ -8709,7 +8661,7 @@
         "internal": "Internal"
       }
     },
-  "runtime": {
+    "runtime": {
       "title": "Runtime Mode & Timeouts",
       "description": "Realtime / observe mode, timeout timeline and timeout temp disposition (applies to all sideline checks).",
       "loading": "Loading...",
@@ -8734,18 +8686,12 @@
         "realtime": "Apply band dispositions (quarantine / mark / accept).",
         "observe": "Skip band dispositions; only record observations."
       },
-      "advanced": {
-        "title": "Advanced settings",
-        "description": "Timeout timeline and timeout temp disposition, collapsed by default.",
-        "expand": "Expand",
-        "collapse": "Collapse"
-      },
       "observeAction": "Observe action",
       "observeActionValue": {
         "deliver": "Deliver",
         "mark": "Mark"
       },
-      "timeoutSectionTitle": "Timeout Handling",
+      "timeoutSectionTitle": "Timeout timeline",
       "timeoutScopeNote": "Total timeout / async timeout apply to all sideline checks.",
       "soon": "Coming soon",
       "totalTimeout": "Total timeout",
