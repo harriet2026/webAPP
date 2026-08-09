@@ -8613,15 +8613,20 @@
       }
     },
     "runtime": {
-      "title": "Runtime Mode & Timeouts",
+      "title": "Disposition Policy",
       "protectionLevel": "Protection level",
       "protectionLevelValue": {
         "standard": "Standard protection",
         "strict": "Strict protection",
         "custom": "Custom"
       },
-      "customProtectionHint": "The current bands differ from a preset and will run as a custom policy after saving.",
-      "description": "Realtime / observe mode, timeout timeline and timeout temp disposition (applies to all sideline checks).",
+      "customProtectionHint": "This is a custom configuration that no longer matches the selected preset.",
+      "restorePreset": "Restore {level}",
+      "switchPresetConfirmTitle": "Switching presets will overwrite your custom configuration",
+      "switchPresetConfirmDesc": "The confidence bands have diverged from the preset. Switching will overwrite them with the selected preset. Continue?",
+      "timeoutEditTitle": "Edit timeout policy",
+      "timeoutEditDescription": "Applying here only updates the page draft; click Save at the bottom of the page to persist it. Cancel discards the edits.",
+      "description": "Run mode decides whether disposition runs at all; protection level and confidence bands decide how. Timeout policy applies to all sideline checks.",
       "loading": "Loading...",
       "engineLoadFailed": "Failed to load detection engine config",
       "disposalLoadFailed": "Timeout settings failed to load; run mode is still shown from the engine config.",
@@ -9745,7 +9750,7 @@
     "testFailPrefix": "Connection failed: {reason}",
     "testFailTimeout": "timeout",
     "testOk": "Connected",
-    "testing": "Testing…",
+    "testing": "Testing���",
     "title": "Organization Contacts",
     "toastBatchTagged": "Tagged {count} records",
     "toastBatchUntagged": "Removed tags from {count} records",

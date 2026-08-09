@@ -862,7 +862,7 @@
         "editButton": "编辑",
         "deleteButton": "删除",
         "emptyText": "暂无通道，建议先配置自定义通道",
-        "proxyDeletedBadge": "代理已删���",
+        "proxyDeletedBadge": "代理已删�����",
         "systemDefaultHelo": "系统默认",
         "drawerTitleNew": "新建投递通道",
         "drawerTitleEdit": "编辑投递通道",
@@ -1019,7 +1019,7 @@
           "response": "预计对端响应：250 2.0.0 Ok"
         },
         "toasts": {
-          "created": "路由规则已添加",
+          "created": "路由规则已��加",
           "updated": "路由规则已更新",
           "deleted": "路由规则已删除",
           "saveError": "请修正表单中的校验错误",
@@ -1188,7 +1188,7 @@
     "globalRule": "全局规则",
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除，只有系统管理员可编辑部分字段",
-    "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条件阈值，其��字段已锁定。",
+    "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条件阈值��其��字段已锁定。",
     "stage": "阶段"
   },
   "tagRules": {
@@ -1335,7 +1335,7 @@
     "deleteConfirmDesc": "删除后无法恢复，规则名：{name}",
     "noPolicyConfigured": "未配置策略（全部继承全局）",
     "previewPath": "有效执行路径预览",
-    "stageCountHint": "当前形态共启用 {count} 个阶段。",
+    "stageCountHint": "当前形态共启�� {count} 个阶段。",
     "sectionBasic": "基本信息",
     "sectionTargets": "适用对象",
     "sectionTargetsHint": "选择 1 类或多类群组；命中任一目标即生效。",
@@ -3203,7 +3203,7 @@
     "targetTypes": {
       "mail": "邮件",
       "mail_batch": "邮件批次",
-      "account": "账号",
+      "account": "账��",
       "cluster": "簇"
     },
     "targetResolution": {
@@ -3240,7 +3240,7 @@
     },
     "typeDescriptions": {
       "phish_analysis": "结合邮件内容、URL、相似样本和 LLM 分析结果，判断是否存在钓鱼风险。",
-      "similarity_search": "围绕发件人和主题等特征���找相似邮件，快速判断是否为批量传播。",
+      "similarity_search": "���绕发件人和主题等特征���找相似邮件，快速判断是否为批量传播。",
       "account_anomaly_analysis": "结合最近认证尝试与邮件活动，识别账号滥用、被盗用或异常发信行为。",
       "threat_traceback": "围绕可疑样本向历史邮件回溯，结合簇 ID 和内容相似性判断是否存在同源威胁传播。",
       "rule_analysis": "基于相似邮件历史，判断误判或漏判的可能性，并抽取可供人工确认的候选拦截规则。"
@@ -4539,7 +4539,7 @@
       "thresholdStrict": "严格",
       "protectedDomains": "受保护域名",
       "protectedDomainsPlaceholder": "每行一个域名\nexample.com\ntest.local",
-      "protectedDomainsHint": "每行一个域名，将检测这些域名的相似域名仿冒"
+      "protectedDomainsHint": "每行一个域名，将检测这些域名的相似域��仿冒"
     },
     "displayNameSpoof": {
       "title": "显示名仿冒检测",
@@ -4958,7 +4958,7 @@
     "title": "附件安全检测",
     "masterSwitchLabel": "启用附件安全检测",
     "masterSwitch": "模块开关",
-    "moduleDisabled": "模块已停用",
+    "moduleDisabled": "模块���停用",
     "moduleDisabledHint": "启用后可配置附件安全策略",
     "comingSoon": "即将推出",
     "comingSoonHint": "此功能正在开发中，敬请期待",
@@ -5240,7 +5240,7 @@
     "sandbox": {
       "placeholder": {
         "title": "URL 沙箱检测",
-        "desc": "本功能将在后续版本提供。当前版本仅支持链接保护。"
+        "desc": "��功能将在后续版本提供。当前版本仅支持链接保护。"
       },
       "toggle": "沙箱检测",
       "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁",
@@ -5770,7 +5770,7 @@
       "aiUnavailable": "语义解析服务繁忙，请稍后重试",
       "truncatedTo500": "已截断至 500 字符",
       "aiTimeout": "语义解析超时，请重试或直接使用结构化筛选",
-      "aiError": "语义解析服务繁忙，请稍后重试或直接使用结构化筛选",
+      "aiError": "语义解析服务繁忙，���稍后重试或直接使用结构化筛选",
       "selectedConditions": "已选条件",
       "pendingConditions": "待应用条件",
       "clearAll": "清空全部",
@@ -6156,7 +6156,7 @@
           "header": "收件人状态 ({n} 人)",
           "expandAll": "展开全部 {n} 个收件人",
           "colRecipients": "收件人",
-          "colStatus": "状态",
+          "colStatus": "��态",
           "colActions": "操作",
           "status": {
             "delivered": "投递成功",
@@ -6518,7 +6518,7 @@
     "expiresAt": "到期时间",
     "emailType": "邮件类型",
     "emailTypeNotSet": "不设置",
-    "emailTypeHint": "命中此规则的邮件将被标记为该邮件类型",
+    "emailTypeHint": "命中此规则的邮件将被标记��该邮件类型",
     "permanent": "永久",
     "conditionSummary": "条件摘要",
     "action": "动作",
@@ -7525,7 +7525,7 @@
     "minutes": "分钟",
     "currentSetting": "当前设置：{minutes}分钟",
     "maxRecheckMinutes": "复检窗口（分钟）",
-    "timeoutAutoDeliver": "超时自动投递",
+    "timeoutAutoDeliver": "超���自动投递",
     "autoDeliverDesc": "审核超时后自��投递邮件",
     "enabled": "已启用",
     "disabled": "已禁用",
@@ -8669,16 +8669,21 @@
       }
     },
   "runtime": {
-  "title": "运行模式与超时",
+  "title": "处置策略",
   "protectionLevel": "防护等级",
   "protectionLevelValue": {
   "standard": "标准防护",
   "strict": "严格防护",
   "custom": "自定义"
   },
-  "customProtectionHint": "当前分级配置已偏离预设，保存后将按自定义策略执行。",
+  "customProtectionHint": "当前为自定义配置，与所选预设不一致。",
+  "restorePreset": "恢复为{level}",
+  "switchPresetConfirmTitle": "切换预设将覆盖当前自定义配置",
+  "switchPresetConfirmDesc": "当前置信度分级已偏离预设，切换后将被所选预设覆盖，是否继续？",
+  "timeoutEditTitle": "编辑超时策略",
+  "timeoutEditDescription": "保存后仅更新本页草稿，点击页面底部「保存」才会真正生效；取消丢弃改动。",
 
-      "description": "实时/观察模式、超时时间线与超时临时处置（对所有旁路检测生效）。",
+      "description": "运行模式决定是否执行处置，防护等级与置信度分级决定如何处置；超时策略对所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败，运行模式仍按真实引擎配置展示。",
@@ -10835,7 +10840,7 @@
       "cross_tenant_denied": "无权为其他租户创建发信凭证",
       "local_auth_disabled": "本地账号库认证已停用，请改用：{allowed}",
       "not_found": "发信凭证不存在，可能已被删除",
-      "password_required": "使用本地账号库认证时必须设置密码"
+      "password_required": "使用本地账号库认证时��须设置密码"
     },
     "statistics": {
       "date_range_required": "请指定统计的起止日期",

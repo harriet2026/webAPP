@@ -93,7 +93,7 @@ test.describe('Phishing Detection Tab B — config', () => {
     await expect(authenticatedPage.getByTestId('max-track-level-input')).toHaveCount(0);
     await expect(authenticatedPage.getByTestId('tool-call-budget-input')).toHaveCount(0);
     await expect(authenticatedPage.getByTestId('admission-rules-section')).toBeVisible();
-    await expect(authenticatedPage.getByTestId('runtime-mode-section')).toBeVisible();
+    await expect(authenticatedPage.getByTestId('disposition-policy-card')).toBeVisible();
     await expect(authenticatedPage.getByTestId('confidence-bands-editor')).toBeVisible();
   });
 
@@ -144,47 +144,52 @@ test.describe('Phishing Detection Tab B — config', () => {
     // Trigger React state update (blur the input).
     await band0Max.dispatchEvent('blur');
 
-    // Validation message must surface and the Save button stay disabled.
+    // Validation message must surface and the page-level Save button stay
+    // disabled (the bands table is now embedded in the disposition-policy
+    // card, sharing its single Save/Cancel — there is no per-table save).
     await expect(authenticatedPage.getByTestId('bands-validation-error')).toBeVisible({ timeout: 5000 });
-    await expect(authenticatedPage.getByTestId('bands-save')).toBeDisabled();
+    await expect(authenticatedPage.getByTestId('policy-save')).toBeDisabled();
   });
 
-  test('observe mode disables the band editor (TC-13)', async ({ authenticatedPage }) => {
+  test('observe mode disables the band editor and hides protection level (TC-13)', async ({ authenticatedPage }) => {
     await openConfigTab(authenticatedPage);
-    // Open the runtime-mode edit sheet and switch mode to observe.
-    await authenticatedPage.getByTestId('runtime-mode-edit').click();
-    const sheet = authenticatedPage.getByTestId('runtime-mode-sheet');
-    await expect(sheet).toBeVisible({ timeout: 5000 });
+    await expect(authenticatedPage.getByTestId('band-row-0')).toBeVisible({ timeout: 10000 });
 
-    // Switch to observe — this only updates local draft (not persisted), but
-    // the editor observes the draft run_mode and disables accordingly.
-    await sheet.getByTestId('run-mode-observe').click();
-    // Apply locally — close the sheet without saving so the draft sticks
-    // for the rest of the assertion. Actually the editor reads the draft,
-    // so once observe is selected we can check immediately.
+    // Run mode is now an inline Select on the card itself (no edit sheet).
+    await authenticatedPage.getByTestId('run-mode-select').click();
+    await authenticatedPage.getByTestId('run-mode-option-observe').click();
+
+    // Observe mode has no disposition concept — the whole 防护等级 row
+    // disappears, and the bands table shows a banner and is disabled.
+    await expect(authenticatedPage.getByTestId('protection-level-row')).toHaveCount(0);
     await expect(authenticatedPage.getByTestId('bands-observe-banner')).toBeVisible({ timeout: 5000 });
+    await expect(authenticatedPage.getByTestId('band-min-0')).toBeDisabled();
 
-    // The bands-save button must be disabled (observe → editor disabled).
-    await expect(authenticatedPage.getByTestId('bands-save')).toBeDisabled();
-    await sheet.getByRole('button', { name: /取消|Cancel/ }).click().catch(() => {});
+    // Switching back to realtime restores the protection-level row.
+    await authenticatedPage.getByTestId('run-mode-select').click();
+    await authenticatedPage.getByTestId('run-mode-option-realtime').click();
+    await expect(authenticatedPage.getByTestId('protection-level-row')).toBeVisible();
+
+    // Discard the draft so the run-mode switch doesn't leak into other tests.
+    await authenticatedPage.getByTestId('policy-cancel').click().catch(() => {});
   });
 
   test('closing async-timeout shows a confirm dialog (TC-11)', async ({ authenticatedPage }) => {
     await openConfigTab(authenticatedPage);
-    await authenticatedPage.getByTestId('runtime-mode-edit').click();
-    const sheet = authenticatedPage.getByTestId('runtime-mode-sheet');
-    await expect(sheet).toBeVisible({ timeout: 5000 });
+    await authenticatedPage.getByTestId('timeout-edit').click();
+    const drawer = authenticatedPage.getByTestId('timeout-edit-drawer');
+    await expect(drawer).toBeVisible({ timeout: 5000 });
 
     // Flip the auto-deliver switch OFF — must trigger the confirm dialog.
-    await sheet.getByTestId('auto-deliver-switch').click();
+    await drawer.getByTestId('auto-deliver-switch').click();
     const dialog = authenticatedPage.locator('[role="alertdialog"]').last();
     await expect(dialog).toBeVisible({ timeout: 5000 });
     await expect(dialog).toContainText(/确认关闭|turn off/i);
 
     // Confirm — the switch state must now read Off.
     await dialog.getByTestId('timeout-close-confirm').click();
-    // Dismiss the sheet without saving to keep the persisted state untouched.
-    await sheet.getByRole('button', { name: /取消|Cancel/ }).click().catch(() => {});
+    // Dismiss the drawer without applying so the page-level draft stays clean.
+    await drawer.getByRole('button', { name: /取消|Cancel/ }).click().catch(() => {});
   });
 
   test('subject prefix >20 chars shows a truncation hint (TC-14)', async ({ authenticatedPage }) => {
@@ -280,11 +285,11 @@ test.describe('Phishing Detection Tab B — config', () => {
 
   test('total timeout clamps to 1–60 minutes (TC-06)', async ({ authenticatedPage }) => {
     await openConfigTab(authenticatedPage);
-    await authenticatedPage.getByTestId('runtime-mode-edit').click();
-    const sheet = authenticatedPage.getByTestId('runtime-mode-sheet');
-    await expect(sheet).toBeVisible({ timeout: 5000 });
+    await authenticatedPage.getByTestId('timeout-edit').click();
+    const drawer = authenticatedPage.getByTestId('timeout-edit-drawer');
+    await expect(drawer).toBeVisible({ timeout: 5000 });
 
-    const total = sheet.getByTestId('total-timeout-input');
+    const total = drawer.getByTestId('total-timeout-input');
     // Below the lower bound → clamps up to 1.
     await total.fill('0');
     await total.press('Tab');  // real browser blur triggers React's onBlur
@@ -295,12 +300,12 @@ test.describe('Phishing Detection Tab B — config', () => {
     await expect(total).toHaveValue('60');
 
     // Async (M) recheck window clamps the same way (lower bound 1).
-    const async = sheet.getByTestId('async-timeout-input');
+    const async = drawer.getByTestId('async-timeout-input');
     await async.fill('0');
     await async.press('Tab');
     await expect(async).toHaveValue('1');
 
-    await sheet.getByRole('button', { name: /取消|Cancel/ }).click().catch(() => {});
+    await drawer.getByRole('button', { name: /取消|Cancel/ }).click().catch(() => {});
   });
 
   test('admission rule save is blocked until name is provided (TC-09)', async ({ authenticatedPage }) => {

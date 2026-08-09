@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { AdmissionRulesSection } from './admission-rules-section';
-import { RuntimeModeSection } from './runtime-mode-section';
+import { DispositionPolicyCard } from './disposition-policy-card';
 
 export function PhishingConfigPage() {
   const t = useTranslations('phishingConfig');
@@ -13,7 +13,7 @@ export function PhishingConfigPage() {
         <p className="text-sm text-muted-foreground">{t('pageDescription')}</p>
       </div>
       <AdmissionRulesSection />
-      <RuntimeModeSection />
+      <DispositionPolicyCard />
     </div>
   );
 }
