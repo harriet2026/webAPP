@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Plus, Trash2, Copy, Mail, Search } from 'lucide-react';
@@ -74,7 +74,9 @@ export function AdmissionRulesSection() {
     mutationFn: (rule: PhishAdmissionRule) => {
       // 复制规则：沿用除 id/priority 之外的全部字段，名称追加「副本」后缀，
       // 新规则以停用状态创建，避免在管理员确认前立即生效影响线上邮件流。
-      const { id: _id, priority: _priority, ...rest } = rule;
+      const rest: PhishAdmissionRule = { ...rule };
+      delete rest.id;
+      delete rest.priority;
       return createAdmissionRule(
         { ...rest, name: t('duplicateName', { name: rule.name }), enabled: false },
         apiRequest,
@@ -136,15 +138,15 @@ export function AdmissionRulesSection() {
   };
 
   // 按规则名称 / 检测范围（方向）/ 风险信号文本做前端过滤——规则数量小，无需
-  // 接口分页搜索。大小写不敏感，兼容中英文混输。
-  const filteredRules = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return rules;
-    return rules.filter((rule) => {
-      const haystack = [rule.name, directionText(rule), riskText(rule)].join(' ').toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [rules, search]); // eslint-disable-line react-hooks/exhaustive-deps
+  // 接口分页搜索，也无需 useMemo（React Compiler 会自动处理）。大小写不敏感，
+  // 兼容中英文混输。
+  const searchQuery = search.trim().toLowerCase();
+  const filteredRules = !searchQuery
+    ? rules
+    : rules.filter((rule) => {
+        const haystack = [rule.name, directionText(rule), riskText(rule)].join(' ').toLowerCase();
+        return haystack.includes(searchQuery);
+      });
 
   return (
     <Card className="border-l-4 border-l-blue-500" data-testid="admission-rules-section">
