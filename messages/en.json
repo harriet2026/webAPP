@@ -8592,11 +8592,36 @@
   "phishingConfig": {
     "pageTitle": "Detection Engine Config",
     "pageDescription": "Tune the phishing detection engine's admission rules, runtime mode and confidence bands.",
-    "admission": {
-      "title": "Admission Rules",
-      "description": "Decide which messages enter the Phishing Detection Agent. Hits use the current deployment-wide runtime limits.",
+    "status": {
+      "title": "Phishing Detection Agent",
+      "enabledLabel": "Enabled",
+      "disabledLabel": "Disabled",
       "loading": "Loading...",
-      "empty": "No admission rules yet; click Create to add one.",
+      "loadFailed": "Failed to load agent status",
+      "toggleFailed": "Toggle failed",
+      "enableConfirmTitle": "Enable the Phishing Detection Agent?",
+      "enableConfirmDescription": "Once enabled, messages matching the detection scope will enter the agent's detection flow, which may increase mail processing time.",
+      "enableNoScopeConfirmDescription": "There is no enabled detection scope right now. Enabling will not detect any messages yet. Continue?",
+      "disableConfirmTitle": "Disable the Phishing Detection Agent?",
+      "disableConfirmDescription": "Once disabled, new messages will not enter the phishing detection flow. Historical detection records are not deleted.",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "goToScope": "Go to detection scope",
+      "continueEnable": "Continue enabling",
+      "summary": {
+        "loading": "Loading policy summary...",
+        "disabled": "The agent is disabled. New messages will not enter the phishing detection flow. Historical records are unaffected.",
+        "noScope": "The agent is enabled, but there is no enabled detection scope, so no messages are detected yet.",
+        "observe": "Messages matching {count} detection-scope rule(s) are observed; results are only recorded and {action}, with no automatic quarantine.",
+        "realtime": "Messages matching {count} detection-scope rule(s) are detected in realtime; {bands}; {timeout}.",
+        "timeoutPart": "if detection is not finished within {minutes} minutes, messages are first {temp}, then rechecked for up to {recheck} more minutes"
+      }
+    },
+    "admission": {
+      "title": "Detection Scope",
+      "description": "Decide which messages enter the Phishing Detection Agent. Any one matching rule is enough to hit; rules do not take effect while the agent is disabled.",
+      "loading": "Loading...",
+      "empty": "No detection scope configured yet. Even after enabling the agent, no messages will be detected until you add at least one rule.",
       "create": "Create",
       "edit": "Edit",
       "delete": "Delete",
@@ -8612,7 +8637,7 @@
       "colDirection": "Direction",
       "colEnabled": "Enabled",
       "colActions": "Actions",
-      "colScope": "Scope",
+      "colScope": "Match Criteria",
       "colRecipients": "Recipients",
       "colRisk": "Risk signals",
       "statusEnabled": "Enabled",
@@ -8662,32 +8687,6 @@
       }
     },
   "runtime": {
-  "agentStatus": {
-  "title": "Phishing Detection Agent",
-  "label": "Agent status",
-  "enabled": "Enabled",
-  "disabled": "Disabled",
-  "enabledDescription": "Only messages matching enabled admission rules enter detection.",
-  "disabledDescription": "The agent is disabled; messages do not enter the phishing detection flow.",
-  "enableConfirmTitle": "Enable the Phishing Detection Agent?",
-  "enableConfirmDescription": "Enabled messages that match admission rules enter the agent detection flow and may take longer to process.",
-  "disableConfirmTitle": "Disable the Phishing Detection Agent?",
-  "disableConfirmDescription": "The agent will stop processing new messages. Historical detection records will not be deleted.",
-      "confirm": "Confirm"
-      },
-      "preset": {
-        "title": "Protection preset",
-        "description": "Choose a starting point for your scenario; advanced settings remain adjustable.",
-        "observe": { "title": "Observe", "description": "Detect and record results without directly blocking messages." },
-        "standard": { "title": "Standard protection", "description": "Realtime detection with allow, mark and quarantine by risk level." },
-        "strict": { "title": "Strict protection", "description": "Realtime detection with stricter handling for medium and high risk." }
-      },
-      "advanced": {
-        "title": "Advanced settings",
-        "description": "Timeout and async review parameters; defaults fit most scenarios.",
-        "expand": "Expand",
-        "collapse": "Collapse"
-      },
       "title": "Runtime Mode & Timeouts",
       "description": "Realtime / observe mode, timeout timeline and timeout temp disposition (applies to all sideline checks).",
       "loading": "Loading...",
@@ -8717,7 +8716,7 @@
         "deliver": "Deliver",
         "mark": "Mark"
       },
-      "timeoutSectionTitle": "Timeout timeline",
+      "timeoutSectionTitle": "Timeout Handling",
       "timeoutScopeNote": "Total timeout / async timeout apply to all sideline checks.",
       "soon": "Coming soon",
       "totalTimeout": "Total timeout",

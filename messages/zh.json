@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测������������能���������������",
+    "spoofingDetection": "仿冒邮件检测��������������能���������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1020,7 +1020,7 @@
         },
         "toasts": {
           "created": "路��规��已��加",
-          "updated": "路由规则已更���",
+          "updated": "路��规则已更���",
           "deleted": "路��规则已删除",
           "saveError": "请修正表单中的校验��误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
@@ -1334,7 +1334,7 @@
     "newPolicy": "新建群组策略",
     "editPolicy": "��辑群组��略",
     "deleteConfirm": "确��删除���群组策��吗？",
-    "deleteConfirmDesc": "删除���无法���复，规则���：{name}",
+    "deleteConfirmDesc": "删除���无法���复，规则�����{name}",
     "noPolicyConfigured": "未配置策略���全部继承全局）",
     "previewPath": "有效��行路径预览",
     "stageCountHint": "当前����态共启���� {count} 个阶段。",
@@ -3180,7 +3180,7 @@
       "parse_eml": "解析 EML",
       "find_similar": "搜索相似邮件",
       "search_similar_messages": "搜索相似邮件",
-      "query_auth_attempts": "加载认证尝试",
+      "query_auth_attempts": "���载认证尝试",
       "query_recent_mail": "加载最近邮件活动",
       "analyze_account_activity": "分析账号���动",
       "rank_urls": "排序候选 URL",
@@ -3547,7 +3547,7 @@
       "suspend2hourText": "2小时",
       "actionReject": "拒绝连接",
       "actionTempfail": "返回 421 临时拒绝",
-      "actionDisconnect": "断开连接"
+      "actionDisconnect": "断开��接"
     },
     "examples": {
       "title": "查看配置示例",
@@ -4421,7 +4421,7 @@
   },
   "authSpoofing": {
     "title": "认证仿冒检测",
-    "description": "检测伪造发件人和认证仿冒，包括SPF/DKIM/DMARC/PTR验证和显示名仿冒检测",
+    "description": "检测伪造发件人和认证仿冒，包括SPF/DKIM/DMARC/PTR验���和显示名仿冒检测",
     "save": "保存",
     "saveSuccess": "保存成功",
     "saveFailed": "保存失败",
@@ -5110,7 +5110,7 @@
       "actionDiscard": "丢弃",
       "urlDetection": "URL检测与防护",
       "expandShortLink": "短链接自动展开",
-      "keywordFilter": "内容关键词过滤",
+      "keywordFilter": "内容���键词过滤",
       "scanRange": "扫描范围：",
       "urlPath": "URL路径",
       "textContent": "纯文本内容",
@@ -5734,7 +5734,7 @@
       "confirmText": "确认切换为 replica",
       "cancelText": "取消"
     },
-    "siteIdHint": "此项可能被环境变量 OSG_RULESYNC_SITE_ID 覆盖——集群形态下由 clustermgr 统��下发，环境变量始终优先于此处的值，修改后可能不会生效，请到 clustermgr 控制台的「跨部署点规则同步」面板确认实际生效值。"
+    "siteIdHint": "此项可能被环境变量 OSG_RULESYNC_SITE_ID 覆盖——集群形态下由 clustermgr 统��下发，环境变量始终优先于此处的值，修改后可能不会生效，请到 clustermgr 控制台的「跨部署点规则��步」面板确认实际生效值。"
   },
   "rulePipeline": {
     "terminate": "终止",
@@ -6816,7 +6816,7 @@
       "descriptionLabel": "描述",
       "charCount": "{count}/{max}",
       "namePlaceholder": "输入规则名称",
-      "descriptionPlaceholder": "输入规则描述（最多500字）",
+      "descriptionPlaceholder": "输入规��描述（最多500字）",
       "sectionBasicInfo": "基础信息",
       "sectionScope": "生效范��",
       "sectionValidity": "有效期设置",
@@ -7160,7 +7160,7 @@
       "desc_mailFromEmpty": {
         "source": "SMTP协议层",
         "usage": "检测信封发信人是否为空",
-        "note": "空MAIL FROM常见于退信或系统邮件"
+        "note": "空MAIL FROM常见于��信或系统邮件"
       },
       "desc_mailFromFromConsistency": {
         "source": "SMTP会话MAIL FROM + 邮件头From字段",
@@ -7538,7 +7538,7 @@
     "tzComputedIn": "通知时间以 {tz} 计算",
     "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前���知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间：",
     "tzUseBrowser": "使用浏览器时区（{tz}）",
-    "tzKeepCurrent": "保持当前时区（{tz}）",
+    "tzKeepCurrent": "保持当前��区（{tz}）",
     "range": "通知范围",
     "recipientGroups": "收信人组",
     "departments": "部门",
@@ -7697,7 +7697,7 @@
     "deleteConfirmTitle": "删除密钥",
     "deleteConfirmDesc": "确定要删除 selector {selector} 吗？此操作不可恢复。",
     "overviewTitle": "DKIM 总览",
-    "overviewDescription": "跨租户查看所有发信域�� DKIM 签名密钥状态。",
+    "overviewDescription": "跨租户查看所有发信域��� DKIM 签名密钥状态。",
     "tenant": "租户",
     "dnsStatusColumn": "DNS 状态",
     "jumpToTenant": "管理",
@@ -8268,7 +8268,7 @@
       "generateReport": "生成报告",
       "aiAnalysis": "AI 分析"
     },
-    "sandboxAsyncAlert": "有 {count} 封已投递邮件，沙箱异步检测后报恶意。建议立即查看详情。",
+    "sandboxAsyncAlert": "有 {count} 封已���递邮件，沙箱异步检测后报恶意。建议立即查看详情。",
     "viewDetails": "查看详情",
     "ai": {
       "drawerTitle": "AI 分析结果",
@@ -8646,13 +8646,38 @@
     "expandMenu": "展开菜单"
   },
   "phishingConfig": {
-    "pageTitle": "检测引擎配置",
-    "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
-    "admission": {
-      "title": "准入规则",
-      "description": "智能体启用后，决定哪些邮件进入钓鱼邮件检测流程。命中后使用当前部署级运行限制。",
-      "loading": "加载中...",
-      "empty": "暂无准入规则，点击「新建」添加。",
+  "pageTitle": "检测引擎配置",
+  "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
+  "status": {
+    "title": "钓鱼邮件检测智能体",
+    "enabledLabel": "已启用",
+    "disabledLabel": "已禁用",
+    "loading": "加载中...",
+    "loadFailed": "智能体状态加载失败",
+    "toggleFailed": "切换失败",
+    "enableConfirmTitle": "启用钓鱼邮件检测智能体？",
+    "enableConfirmDescription": "启用后，符合检测范围规则的邮件将进入智能体检测流程，可能增加邮件处理耗时。",
+    "enableNoScopeConfirmDescription": "当前没有启用的检测范围，启用后暂时不会检测任何邮件。是否继续？",
+    "disableConfirmTitle": "禁用钓鱼邮件检测智能体？",
+    "disableConfirmDescription": "禁用后，新邮件不会进入钓鱼邮件检测流程，历史检测记录不会删除。",
+    "confirm": "确认",
+    "cancel": "取消",
+    "goToScope": "去配置检测范围",
+    "continueEnable": "继续启用",
+    "summary": {
+      "loading": "策略摘要加载中...",
+      "disabled": "智能体已禁用，新邮件不会进入钓鱼邮件检测流程。历史检测记录不受影响。",
+      "noScope": "智能体已启用，但当前没有启用的检测范围，暂时不会检测任何邮件。",
+      "observe": "对符合 {count} 条检测范围规则的邮件执行观察检测，仅记录结果并{action}，不会自动隔离邮件。",
+      "realtime": "对符合 {count} 条检测范围规则的邮件执行实时检测；{bands}；{timeout}。",
+      "timeoutPart": "检测超过 {minutes} 分钟未完成时先{temp}，并继续复核 {recheck} 分钟"
+    }
+  },
+  "admission": {
+    "title": "检测范围",
+    "description": "决定哪些邮件会进入钓鱼邮件检测智能体。多条规则之间满足任意一条即可命中；智能体禁用时，规则暂不生效。",
+    "loading": "加载中...",
+    "empty": "尚未配置检测范围。智能体启用后仍不会检测任何邮件，请先新增至少一条规则。",
       "create": "新建",
       "edit": "编辑",
       "delete": "删除",
@@ -8668,14 +8693,14 @@
       "colDirection": "方向",
       "colEnabled": "启用",
       "colActions": "操作",
-      "colScope": "检测范围",
-      "colRecipients": "收件人",
+    "colScope": "命中条件",
+    "colRecipients": "收件人",
       "colRisk": "风险信号",
       "statusEnabled": "已启用",
       "statusDisabled": "已停用",
       "footer": "共 {total} 条 · 已启用 {enabled} 条",
       "namePlaceholder": "规则名称",
-      "tagPlaceholder": "输入标��后回车，例如 grp:finance",
+      "tagPlaceholder": "输入标签后回车，例如 grp:finance",
       "addTag": "添加",
       "removeTag": "移除",
       "tagSectionLabel": "收件人标签",
@@ -8695,10 +8720,10 @@
       "senderFirstSeen": "收发信人之前没有邮件往来",
       "senderFirstSeenHint": "仅对无历史收发记录的发信人启用——常见钓鱼/社工高风险来源。",
       "qrcode": "邮件包含二维码",
-      "qrcodeDesc": "附件/图片中解�����出二维码时命中（需附件深度检查）",
+      "qrcodeDesc": "附件/图片中解码识别出二维码时命中（需附件深度检查）",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
       "validationFailed": "请检查必填字段。",
-      "created": "准入规则已��建",
+      "created": "检测范围规则已创建",
       "updated": "准入规则已更新",
       "saveFailed": "保存失败",
       "saving": "保存中...",
@@ -8709,7 +8734,7 @@
         "qrNoOutbound": "二维码风险信号暂不支持外发方向",
         "needRiskSignal": "请至少启用一个风险信号",
         "needRecipientTarget": "开启收件人筛选时至少填写一个标签或邮箱",
-        "maxSizeTooLarge": "邮件大小上���不能超过 100000 MB"
+        "maxSizeTooLarge": "邮件大小上限不能超过 100000 MB"
       },
       "direction": {
         "inbound": "入站",
@@ -8718,33 +8743,7 @@
       }
     },
   "runtime": {
-  "agentStatus": {
-  "title": "钓鱼邮件检测智能体",
-  "label": "智能体状态",
-  "enabled": "已启用",
-  "disabled": "已禁用",
-  "enabledDescription": "仅符合已启用准入规则的邮件会进入检测。",
-  "disabledDescription": "智能体已禁用，邮件不会进入钓鱼检测流程。",
-  "enableConfirmTitle": "启用钓鱼邮件检测智能体？",
-  "enableConfirmDescription": "启用后，符合准入规则的邮件将进入智能体检测流程，可能增加邮件处理耗时。",
-  "disableConfirmTitle": "禁用钓鱼邮件检测智能体？",
-  "disableConfirmDescription": "禁用后，智能体将不再处理新邮件，但不会删除历史检测记录。",
-      "confirm": "确认"
-      },
-      "preset": {
-        "title": "防护方案",
-        "description": "选择一个适合当前场景的方案，详细参数仍可在高级设置中调整。",
-        "observe": { "title": "观察模式", "description": "检测并记录结果，不直接拦截邮件。" },
-        "standard": { "title": "标准防护", "description": "实时检测，低风险放行，中风险标记，高风险隔离。" },
-        "strict": { "title": "严格防护", "description": "实时检测，中高风险采用更严格的处置策略。" }
-      },
-      "advanced": {
-        "title": "高级设置",
-        "description": "超时和异步复核参数，默认值适合大多数场景。",
-        "expand": "展开",
-        "collapse": "收起"
-      },
-      "title": "运行模式与超时",
+    "title": "运行模式与超时",
       "description": "实时/观察模式、超时时间线与超时临时处置（对所有旁路检测生效）。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
@@ -8757,7 +8756,7 @@
       "saveFailed": "保存失败",
       "cancel": "取消",
       "sheetTitle": "编辑运行模式与超时",
-      "sheetDescription": "保存后立即生��；取消丢弃所有改动。",
+      "sheetDescription": "保存后立即生效；取消丢弃所有改动。",
       "runMode": "运行模式",
       "runModeSectionTitle": "运行模式",
       "runModeValue": {
@@ -8773,7 +8772,7 @@
         "deliver": "投递",
         "mark": "标记"
       },
-      "timeoutSectionTitle": "超时时间���",
+      "timeoutSectionTitle": "检测异常处理",
       "timeoutScopeNote": "总超时 / 超时异步对所有旁路检测生效。",
       "soon": "即将支持",
       "totalTimeout": "总超时",
@@ -8781,7 +8780,7 @@
       "asyncTimeout": "超时异步",
       "asyncTimeoutHint": "超时投递后，系统继续等待最终检测结论的最长时长。在此窗口内若得出高风险结论，邮件将被自动召回。范围：1–60 分钟。",
       "autoDeliver": "超时自动投递",
-      "autoDeliverHint": "开启：超时邮件自动投递，无���人工干预；关闭：超时邮件不自动投递，需人工处置。",
+      "autoDeliverHint": "开启：超时邮件自动投递，无需人工干预；关闭：超时邮件不自动投递，需人工处置。",
       "autoDeliverOn": "已开启",
       "autoDeliverOff": "已关闭",
       "timeoutCloseConfirmTitle": "确认关闭超时自动投递？",
@@ -8805,11 +8804,11 @@
     },
     "bands": {
       "title": "置信度分级处置",
-      "description": "按置信度区间连续覆盖 0–100，每段配置不同的处置���作。",
+      "description": "按置信度区间连续覆盖 0–100，每段配置不同的处置动作。",
       "loading": "加载中...",
       "save": "保存",
       "saving": "保存中...",
-      "saved": "分级配置已保���",
+      "saved": "分级配置已保存",
       "saveFailed": "保存失败",
       "discard": "放弃改动",
       "colRange": "置信度区间",
@@ -8820,7 +8819,7 @@
       "colActions": "操作",
       "advancedEdit": "高级编辑",
       "dialogTitle": "编辑第 {index} 段",
-      "dialogDescription": "调整该置信度段的区间、处置与��记设置。",
+      "dialogDescription": "调整该置信度段的区间、处置与标记设置。",
       "cancel": "取消",
       "apply": "应用",
       "markPositionLabel": "标记位置",
@@ -8847,7 +8846,7 @@
         "mustStartAt0": "置信度区间必须从 0 开始",
         "mustEndAt100": "置信度区间必须覆盖到 100",
         "minLtMax": "区间非法：min({min}) 必须小于 max({max})",
-        "contiguous": "���信度区间必须连续覆盖 0-100，不可重叠、不可留空"
+        "contiguous": "置信度区间必须连续覆盖 0-100，不可重叠、不可留空"
       }
     }
   },
@@ -9239,7 +9238,7 @@
       "domain": "域名",
       "add": "添加",
       "delete": "删除",
-      "empty": "暂无放行名单",
+      "empty": "暂无放行���单",
       "errDup": "该条目已存在",
       "errMatchType": "类型必须是邮箱或域名"
     }
@@ -9451,7 +9450,7 @@
       "rationale": "复检依据",
       "body": "邮件正��",
       "origDisposition": "原始处���",
-      "origConfidence": "原始置信度",
+      "origConfidence": "原始���信度",
       "recheckConfidence": "复检置��度",
       "downloadEml": "下载 EML",
       "loading": "正在加载原文…",
@@ -10081,7 +10080,7 @@
       "err": {
         "nameRequired": "规则名称不能为空",
         "reservedPrefix": "名称不能以 __deleted__ 开头",
-        "thresholdRequired": "阈值为必填",
+        "thresholdRequired": "阈值为必��",
         "thresholdPositive": "阈值必须为正数",
         "durationPositive": "持续时间必须大于 0",
         "samplesPositive": "采样数必须大于 0",
@@ -10518,7 +10517,7 @@
       "monitorSecurity": "检测引擎状态",
       "ruleStatsV2": "规则��计",
       "greyMailPolicy": "灰邮治理-策略配置",
-      "greyMailQueue": "灰邮治理-灰邮队列",
+      "greyMailQueue": "灰邮治理-���邮队列",
       "report": "举报中心",
       "reportManagement": "举报管理",
       "reportStrategy": "举报策略设置",
@@ -10811,7 +10810,7 @@
       "access_denied": "没有权限执行该操作",
       "match_type_invalid": "匹配方式取值无效",
       "name_and_pattern_required": "名称和匹配内容都必须填写",
-      "not_found": "链接黑名单规则不存在，可能已被删除",
+      "not_found": "链接黑名单规则不���在，可能已被删除",
       "tenant_access_denied": "没有权限访问该租户的数据",
       "tenant_id_required": "必须指定租户（平台管理员需通过 X-Tenant-ID 指定）",
       "verdict_invalid": "判定结果取值无效"
@@ -10823,7 +10822,7 @@
       "helo_pattern_regex_invalid": "HELO 匹配的正则表达式不合法，请检查语法",
       "is_active_required": "请指定是否生效",
       "not_found": "准入规则不存在，可能已被删除",
-      "null_sender_requires_cidr": "允许空发件人的规则只按来源 IP 匹配，因此必须填写来源 IP 段",
+      "null_sender_requires_cidr": "允许空发件��的规则只按来源 IP 匹配，因此必须填写来源 IP 段",
       "privileged_requires_system_admin": "创建特权准入规��需要平台管理员权限",
       "rate_limit_must_be_positive": "每小时限额必须大于 0",
       "rcpt_domain_not_owned": "收件域必须是本租户已验证的域名或其子域",
@@ -10939,7 +10938,7 @@
       "not_found": "调查任务不存在",
       "access_denied": "无权访问该调查任务",
       "id_required": "请填写调查任务 ID",
-      "confirm_required": "该操作需要确认后才能执行",
+      "confirm_required": "该��作需要确认后才能执行",
       "not_ready_for_actions": "调查任务尚未完成，暂时无法执行处置动作",
       "type_unsupported": "不支持的调查类型",
       "target_type_unsupported": "不支持的调查对象类型",
@@ -11061,7 +11060,7 @@
       "access_denied": "无权访问该附件记录",
       "request_body_unreadable": "请求内容读取失败",
       "scan_result_format_invalid": "附件扫描结果数据格式不正确",
-      "scan_result_missing": "未提供附件扫描结果数据",
+      "scan_result_missing": "未提供附件扫描结���数据",
       "scan_result_all_invalid": "校验后没有任何有效的扫描结果"
     },
     "url_protection": {
@@ -11221,7 +11220,7 @@
     "mail_lifecycle_logs": {
       "access_denied": "无权执行该操作",
       "mail_log_entry_not_found": "邮件日志不存在",
-      "raw_log_search_busy_all_gateway": "所有网关节点的原始日志检索都在忙，请稍后重试",
+      "raw_log_search_busy_all_gateway": "所有网关节点的原始日志检���都在忙，请稍后重试",
       "message_uuid_required": "请提供邮件 UUID",
       "from_define_valid_time_range": "开始时间必须早于结束时间",
       "raw_log_search_busy_retry_shortly": "原始日志检索正忙，请稍后重试"
@@ -11367,7 +11366,7 @@
     "roles": {
       "system_default_role_cannot_edited": "系统内置角色不可修���",
       "system_default_super_admin_role_cannot": "系统内置角色和超级管理员角色不可停用",
-      "system_default_role_cannot_deleted": "系统内置角色不可删除"
+      "system_default_role_cannot_deleted": "系���内置角色不可删除"
     },
     "smtp_auth_ip_lockout": {
       "invalid_ip": "IP 地址无效"
