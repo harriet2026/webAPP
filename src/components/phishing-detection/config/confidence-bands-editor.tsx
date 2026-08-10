@@ -115,7 +115,7 @@ export function ConfidenceBandsTable({ bands, onChange, disabled }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-32">{t('colRange')}</TableHead>
+              <TableHead className="min-w-40">{t('colRange')}</TableHead>
               <TableHead className="min-w-24">{t('colRiskLevel')}</TableHead>
               <TableHead className="min-w-28">{t('colDisposition')}</TableHead>
               <TableHead className="min-w-48">{t('colMarkSettings')}</TableHead>
@@ -125,12 +125,12 @@ export function ConfidenceBandsTable({ bands, onChange, disabled }: Props) {
             {bands.map((band, idx) => (
               <TableRow key={`band-${idx}`} data-testid={`band-row-${idx}`}>
                 <TableCell className="py-2">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2 whitespace-nowrap">
                     <Input
                       type="number"
                       min={0}
                       max={100}
-                      className="h-7 w-14"
+                      className="h-8 w-16 shrink-0 px-2 text-center tabular-nums"
                       value={band.min}
                       disabled={disabled}
                       onChange={(e) => setMin(idx, Number(e.target.value))}
@@ -141,7 +141,7 @@ export function ConfidenceBandsTable({ bands, onChange, disabled }: Props) {
                       type="number"
                       min={0}
                       max={100}
-                      className="h-7 w-14"
+                      className="h-8 w-16 shrink-0 px-2 text-center tabular-nums"
                       value={band.max}
                       disabled={disabled}
                       onChange={(e) => setMax(idx, Number(e.target.value))}
