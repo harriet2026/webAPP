@@ -15,14 +15,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { X } from 'lucide-react';
 import { useApiRequest } from '@/lib/api/client';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { GROUPS_LIST_QUERY, ruleToGroup } from '@/lib/api/groups';
 import { createAdmissionRule, updateAdmissionRule } from '@/lib/api/phishing-config';
 import { OrgContactTreeSelect } from '@/components/organization/org-contact-tree-select';
+import { GroupMultiSelect, type GroupMultiSelectOption } from '@/components/security/groups/group-multi-select';
+import { GROUP_TAG_PREFIX } from '@/types/groups';
 import type { PhishAdmissionRule } from '@/types/phishing-config';
 import type { Rule } from '@/types/unified-rules';
 
@@ -68,7 +68,10 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
   // 后端 ListUnifiedRules 不读 group_type 参数，按 rule_class/stage/page 过滤，
   // 所以只发一次请求、在客户端按 g.type 分流到 sender/recipient 两组（与
   // ContentRulesPage 一致），并按名字去重，避免重复渲染。
-  const { data: groupsByType } = useQuery<{ sender: string[]; recipient: string[] }>({
+  const { data: groupsByType } = useQuery<{
+    sender: GroupMultiSelectOption[];
+    recipient: GroupMultiSelectOption[];
+  }>({
     queryKey: ['sender-recipient-groups'],
     queryFn: async () => {
       const resp = await apiRequest<{ items: unknown[] }>(
@@ -76,17 +79,17 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
       );
       const seenSender = new Set<string>();
       const seenRecipient = new Set<string>();
-      const sender: string[] = [];
-      const recipient: string[] = [];
+      const sender: GroupMultiSelectOption[] = [];
+      const recipient: GroupMultiSelectOption[] = [];
       for (const item of resp.items ?? []) {
         const g = ruleToGroup(item as Rule);
         if (!g) continue;
         if (g.type === 'sender' && !seenSender.has(g.name)) {
           seenSender.add(g.name);
-          sender.push(`grp:${g.name}`);
+          sender.push({ id: `${GROUP_TAG_PREFIX}${g.name}`, label: g.name });
         } else if (g.type === 'recipient' && !seenRecipient.has(g.name)) {
           seenRecipient.add(g.name);
-          recipient.push(`grp:${g.name}`);
+          recipient.push({ id: `${GROUP_TAG_PREFIX}${g.name}`, label: g.name });
         }
       }
       return { sender, recipient };
@@ -94,6 +97,10 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
   });
   const senderGroups = groupsByType?.sender ?? [];
   const recipientGroups = groupsByType?.recipient ?? [];
+  const senderGroupIds = useMemo(() => new Set(senderGroups.map((g) => g.id)), [senderGroups]);
+  const recipientGroupIds = useMemo(() => new Set(recipientGroups.map((g) => g.id)), [recipientGroups]);
+  const selectedSenderGroups = (draft.recipient_tags ?? []).filter((id) => senderGroupIds.has(id));
+  const selectedRecipientGroups = (draft.recipient_tags ?? []).filter((id) => recipientGroupIds.has(id));
 
   // 进抽屉时快照 draft（keyed by open + rule identity，无 useEffect）。
   const baseKey = `${open ? 'open' : 'closed'}:${rule?.id ?? 'new'}:${rule?.name ?? ''}`;
@@ -166,14 +173,18 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
     patch({ directions: next });
   };
 
-  const addTag = (v: string) => {
-    const tag = v.trim();
-    if (!tag) return;
-    const cur = draft.recipient_tags ?? [];
-    if (!cur.includes(tag)) patch({ recipient_tags: [...cur, tag] });
+  // 发信人群组 / 收信人群组两个 GroupMultiSelect 各自只回传"自己那一类"的完整选中
+  // 集合；写回 draft.recipient_tags 时需保留另一类已选项（两者共享同一个存储
+  // 数组，按 grp: 前缀 + 群组名区分，互不冲突，因为群组管理里 sender/recipient
+  // 是两个不相交的命名空间）。
+  const handleSenderGroupsChange = (next: string[]) => {
+    const others = (draft.recipient_tags ?? []).filter((id) => !senderGroupIds.has(id));
+    patch({ recipient_tags: [...others, ...next] });
   };
-  const removeTag = (tag: string) =>
-    patch({ recipient_tags: (draft.recipient_tags ?? []).filter((x) => x !== tag) });
+  const handleRecipientGroupsChange = (next: string[]) => {
+    const others = (draft.recipient_tags ?? []).filter((id) => !recipientGroupIds.has(id));
+    patch({ recipient_tags: [...others, ...next] });
+  };
 
   // 组织通讯录目标随方向自动切换语义提示：outbound 单独出现时约束的是内部
   // 发信人，其余方向（inbound/internal）约束的是收件人；混选时命中任一侧即算匹配。
@@ -290,58 +301,37 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
                   {showSenderGroups && (
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-muted-foreground">{t('senderGroupSectionLabel')}</p>
-                      {senderGroups.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">{t('noSenderGroupsHint')}</p>
-                      ) : (
-                        <div className="flex flex-wrap gap-1.5">
-                          {senderGroups.map((g) => {
-                            const on = (draft.recipient_tags ?? []).includes(g);
-                            return (
-                              <Button key={g} type="button" size="sm" variant={on ? 'default' : 'outline'}
-                                onClick={() => (on ? removeTag(g) : addTag(g))}>
-                                {g.replace(/^grp:/, '')}
-                              </Button>
-                            );
-                          })}
-                        </div>
-                      )}
+                      <GroupMultiSelect
+                        options={senderGroups}
+                        selected={selectedSenderGroups}
+                        onChange={handleSenderGroupsChange}
+                        triggerPlaceholder={t('selectSenderGroups')}
+                        searchPlaceholder={t('searchGroups')}
+                        emptyHint={t('noSenderGroupsHint')}
+                        noMatchLabel={t('noMatch')}
+                        selectedCountLabel={t('selectedCount', { n: selectedSenderGroups.length })}
+                        removeLabel={t('removeTag')}
+                        clearAllLabel={t('clearAll')}
+                        testIdPrefix="rule-sender-group"
+                      />
                     </div>
                   )}
                   {showRecipientGroups && (
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-muted-foreground">{t('recipientGroupSectionLabel')}</p>
-                      {recipientGroups.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">{t('noRecipientGroupsHint')}</p>
-                      ) : (
-                        <div className="flex flex-wrap gap-1.5">
-                          {recipientGroups.map((g) => {
-                            const on = (draft.recipient_tags ?? []).includes(g);
-                            return (
-                              <Button key={g} type="button" size="sm" variant={on ? 'default' : 'outline'}
-                                onClick={() => (on ? removeTag(g) : addTag(g))}>
-                                {g.replace(/^grp:/, '')}
-                              </Button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {(draft.recipient_tags ?? []).length > 0 && (
-                    <div className="flex flex-wrap gap-1.5" data-testid="rule-tag-list">
-                      {(draft.recipient_tags ?? []).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="gap-1">
-                          {tag.replace(/^grp:/, '')}
-                          <button
-                            type="button"
-                            onClick={() => removeTag(tag)}
-                            aria-label={t('removeTag')}
-                            className="ml-0.5"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      ))}
+                      <GroupMultiSelect
+                        options={recipientGroups}
+                        selected={selectedRecipientGroups}
+                        onChange={handleRecipientGroupsChange}
+                        triggerPlaceholder={t('selectRecipientGroups')}
+                        searchPlaceholder={t('searchGroups')}
+                        emptyHint={t('noRecipientGroupsHint')}
+                        noMatchLabel={t('noMatch')}
+                        selectedCountLabel={t('selectedCount', { n: selectedRecipientGroups.length })}
+                        removeLabel={t('removeTag')}
+                        clearAllLabel={t('clearAll')}
+                        testIdPrefix="rule-recipient-group"
+                      />
                     </div>
                   )}
 
