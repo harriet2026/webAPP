@@ -8644,7 +8644,15 @@
       }
     },
     "runtime": {
-      "title": "Disposition Policy",
+      "title": "Agent Investigation & Disposition",
+      "runModeFootnote": "The two modes are mutually exclusive; only one applies at a time.",
+      "summaryRealtime": "Auto-deliver on timeout: {autoDeliver} · Timeout temp disposition: {tempDisposal} · Bands: {bandsCount}",
+      "summaryObserve": "Observe action: {action}",
+      "observeModeBanner": "Observe mode is on. The current configuration only detects and marks messages; it does not quarantine, review, or recall them.",
+      "observeActionHint": {
+        "deliver": "Deliver straight to the recipient's inbox; only the detection result is logged, invisible to the user.",
+        "mark": "Add an observe mark to the subject or header before delivery, so admins can identify observed samples."
+      },
       "protectionLevel": "Protection level",
       "protectionLevelValue": {
         "standard": "Standard protection",
@@ -8668,8 +8676,8 @@
       "saved": "Runtime configuration saved",
       "saveFailed": "Save failed",
       "cancel": "Cancel",
-      "sheetTitle": "Edit runtime mode and timeouts",
-      "sheetDescription": "Applies on save; Cancel discards all edits.",
+      "sheetTitle": "Run Mode Configuration",
+      "sheetDescription": "Choose a run mode and configure its associated disposition policy. Saves apply immediately; Cancel discards this edit.",
       "runMode": "Run mode",
       "runModeSectionTitle": "Run mode",
       "runModeValue": {
@@ -8677,8 +8685,8 @@
         "observe": "Observe"
       },
       "runModeHint": {
-        "realtime": "Apply band dispositions (quarantine / mark / accept).",
-        "observe": "Skip band dispositions; only record observations."
+        "realtime": "Apply band dispositions (quarantine / mark / accept). If no verdict is reached before timeout, the Timeout Policy below applies temporarily.",
+        "observe": "Runs the full detection pipeline, but replaces disposition actions with the preset Observe Action below — for tuning and canary observation only."
       },
       "observeAction": "Observe action",
       "observeActionValue": {

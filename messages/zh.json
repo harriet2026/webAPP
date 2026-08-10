@@ -213,7 +213,7 @@
     "password": "密码",
     "loginTitle": "OSGateway 管理系统",
     "loginButton": "登录",
-    "demoEntry": "进入演示环境",
+    "demoEntry": "进入演��环境",
     "loginError": "用户名或密码错误",
     "sessionExpired": "会话已过期，请重新登录",
     "showAdvancedRules": "显示高级规则设置",
@@ -242,7 +242,7 @@
     "showPassword": "显示密码",
     "hidePassword": "隐藏密码",
     "forgotPassword": "忘记密码？",
-    "captchaLabel": "图形验证码",
+    "captchaLabel": "���形验证码",
     "captchaRefresh": "点击刷新",
     "remainingAttempts": "账号或密码错误，还可尝试 {n} 次",
     "accountLocked": "账号已锁定，请于 {time} 后重试",
@@ -2099,7 +2099,7 @@
     "nameRequired": "请输入租户名称",
     "codeRequired": "请输入租户编码",
     "adminAccountRequired": "请输入主管理员账号",
-    "adminPasswordRequired": "请输入初始密码",
+    "adminPasswordRequired": "请输��初始密码",
     "adminAccountTaken": "该账号已存在（不区分大小写），请换一个"
   },
   "users": {
@@ -2635,7 +2635,7 @@
       "phonePlaceholder": "请输入手机号",
       "emailPlaceholder": "请输入邮箱",
       "phoneInvalid": "请输入正确的手机号",
-      "emailInvalid": "请输入正确的邮箱��址",
+      "emailInvalid": "请���入正确的邮箱��址",
       "codePlaceholder": "6位验证码",
       "codeInvalid": "验证码错误，请重新输入",
       "getCode": "获取验证码",
@@ -2821,7 +2821,7 @@
     "isActive": "启用",
     "members": "成员代理服务器",
     "addMember": "添加成员代理服务器",
-    "noMoreEndpoints": "没有更多可选代理服务器",
+    "noMoreEndpoints": "没有更多可选代理���务器",
     "membersEmptyHint": "至少添加��个代理服务器；顺序即 failover 顺序（上者先）。",
     "createEndpoint": "新建代理服务器",
     "editEndpoint": "编辑代理服务器",
@@ -3193,7 +3193,7 @@
       "analyze_account_activity": "分析账号活动",
       "rank_urls": "排序候选 URL",
       "llm_analysis": "LLM 分析",
-      "analyze_traceback": "分析威胁回溯",
+      "analyze_traceback": "分析威���回溯",
       "evaluate_rule_candidates": "评估候��规则",
       "complete": "完成"
     },
@@ -3811,7 +3811,7 @@
     "importJsonNotEnvelope": "不是有效的规则导出文件（缺少 data.rules）",
     "importJsonWrongScope": "不是 IP 黑白名单的导出文件",
     "importJsonEmpty": "导出文件中没有规则",
-    "importJsonBadRule": "规则数据不完整或非 IP 规���",
+    "importJsonBadRule": "规��数据不完整或非 IP 规���",
     "importListTypeMismatch": "名单类型与当前页不符",
     "importExpressionUnsupported": "表达式规则不支持批量导入，请手动创建"
   },
@@ -3956,7 +3956,7 @@
     "unsavedChanges": "有未保存的更改",
     "noUnsavedChanges": "暂无未保存更改",
     "demoParityNotice": "当前页面按 demo 的 RBL 配置面板重新实现：服务器列表、超时、命中动作与灰名单子配置在同一面板内维护。",
-    "testIP": "测试 IP：127.0.0.2（标准 RBL 测试地址）",
+    "testIP": "测试 IP：127.0.0.2���标准 RBL 测试地址）",
     "dryRun": "模拟测试",
     "dryRunPlaceholder": "输入命中的 RBL 服务器，多个用逗号分隔",
     "dryRunButton": "测试匹配",
@@ -4110,7 +4110,7 @@
     "priorityHelp": "数值越大优先级越高，优先级高的规则先匹配",
     "senderType": "发信人",
     "drawerSubtitleBlacklist": "配置发信人黑名单规则，阻断或处置指定发信人",
-    "drawerSubtitleWhitelist": "配置发信人白名单规则，信��的发信人直接放行",
+    "drawerSubtitleWhitelist": "��置发信人白名单规则，信��的发信人直接放行",
     "senderPlaceholder_individual": "如: user@example.com 或 *@domain.com",
     "senderPlaceholder_domain": "如 example.com 或 evil.com",
     "noTenantDomains": "该租户暂无接收域名，请先在『接收域名』中配置",
@@ -6055,7 +6055,7 @@
       "confirm": "确认召回",
       "errors": {
         "forceRequiresType": "强制召回模式下，至少需要选择一种召回类型（已读或未读）",
-        "noRecipients": "没有可召回的收件人",
+        "noRecipients": "没有��召回的收件人",
         "failed": "召回失败，请���试"
       }
     },
@@ -6409,7 +6409,7 @@
         "virus": {
           "detected": "检出病毒",
           "clean": "安全",
-          "error": "检测失败"
+          "error": "检测���败"
         },
         "disposalBasis": "处置依据",
         "module": "策略模块",
@@ -7523,7 +7523,7 @@
     "perm_recall_desc": "允许用户从隔离区取回邮件",
     "perm_preview_desc": "允许用户预览隔离邮件内容",
     "perm_whitelist_desc": "允许用户将发信人加入白名单",
-    "perm_blacklist_desc": "允许用户将发信人加入黑名单",
+    "perm_blacklist_desc": "允许用户将���信人加入黑名单",
     "selfServicePending": "终端用户自助入��待上线，当前仅保存配置",
     "portalBaseUrlLabel": "外部访问地址",
     "portalBaseUrlPlaceholder": "https://gw.example.com",
@@ -7798,7 +7798,7 @@
       "daily": "日内分布",
       "weekly": "周内分布",
       "peakTitle": "高峰时段",
-      "peakLabel": "峰值时段",
+      "peakLabel": "峰值��段",
       "peakSummary": "攻击高峰：{range}（共 {count} 封）",
       "peakCount": "{count} 封",
       "low": "低",
@@ -7920,7 +7920,7 @@
     "tenantScope": "租户范围",
     "kpi": {
       "inboundTotal": "接收总量",
-      "outboundTotal": "外发总量",
+      "outboundTotal": "外���总量",
       "internalTotal": "域内总量",
       "totalSuccessRate": "总投递成功率",
       "queueBacklog": "总队列积压",
@@ -8700,7 +8700,15 @@
       }
     },
   "runtime": {
-  "title": "处置策略",
+  "title": "智能体调查与处置",
+  "runModeFootnote": "两种模式互斥，同一时间仅生效一种",
+  "summaryRealtime": "超时自动投递：{autoDeliver} · 超时临时处置：{tempDisposal} · 分级策略：{bandsCount} 个区间",
+  "summaryObserve": "观察动作：{action}",
+  "observeModeBanner": "观察模式已开启，当前配置仅执行检测与标记，不执行隔离、审核、召回等实质性处置动作。",
+  "observeActionHint": {
+  "deliver": "直接投递至用户收件箱，后台仅记录检测结果，用户无感知。",
+  "mark": "在邮件主题或邮件头中增加观察标记后投递，便于管理员识别观察样本。"
+  },
   "protectionLevel": "防护等级",
   "protectionLevelValue": {
   "standard": "标准防护",
@@ -8717,7 +8725,7 @@
       "description": "运行模式决定是否执行处置，防护等级与置信度分级决定如何处置；超时策略对所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
-      "disposalLoadFailed": "超时配置加载失败，运行模式仍按真实引擎配置展示。",
+      "disposalLoadFailed": "超时配置加载失败��运行模式仍按真实引擎配置展示。",
       "editUnavailable": "超时配置加载成功后才能编辑",
       "edit": "编辑",
       "save": "保存",
@@ -8725,8 +8733,8 @@
       "saved": "运行模式已保存",
       "saveFailed": "保存失败",
       "cancel": "取消",
-      "sheetTitle": "编辑运行模式与超时",
-      "sheetDescription": "保存后立即生效；取消丢弃所有改动。",
+      "sheetTitle": "运行模式配置",
+      "sheetDescription": "选择运行模式并配置其关联的处置策略。保存后生效，取消则放弃本次修改。",
       "runMode": "运行模式",
       "runModeSectionTitle": "运行模式",
       "runModeValue": {
@@ -8734,8 +8742,8 @@
         "observe": "观察模式"
       },
       "runModeHint": {
-        "realtime": "按分级表执行处置（隔离/标记/放行）。",
-        "observe": "不执行分级处置，仅记录观察结果。"
+        "realtime": "按分级表执行处置（隔离/标记/放行）；若超时未出结论，将按下方「超时策略」临时处置。",
+        "observe": "开启后，系统执行完整检测流程，但将实质性处置动作替换为下方预设的观察动作，仅用于策略调优与灰度观察。"
       },
       "observeAction": "观察动作",
       "observeActionValue": {
@@ -8796,7 +8804,7 @@
       "markPosition": {
         "subject_prefix": "主题前缀",
         "header": "邮件头",
-        "headerHint": "在邮件头部追加 X-OSG-Phish-Mark 字段，写入标记文本。收件人不可见，可供邮件客户端规则或下游系统读取。"
+        "headerHint": "在邮件头部追加 X-OSG-Phish-Mark 字段，写入标记文本。收件人不可见，可供邮件��户端规则或下游系统读取。"
       },
       "markTextLabel": "主题前缀文本",
       "markTextPlaceholder": "例如 [可疑]",
@@ -9457,7 +9465,7 @@
       "pending": "等待中",
       "running": "进行中",
       "completed": "已完成",
-      "failed": "失败",
+      "failed": "��败",
       "cancelled": "已取消"
     },
     "cancelDialog": {
@@ -10830,7 +10838,7 @@
     },
     "proxysvr": {
       "cipher_profile_invalid": "加密套件档位无效，只能是：{allowed}",
-      "egress_ip_invalid": "出口 IP 必须是合法的 IPv4 地址，或留空",
+      "egress_ip_invalid": "出口 IP ��须是合法的 IPv4 地址，或留空",
       "endpoint_name_exists": "已存在同名的代理节点",
       "endpoint_not_found": "代理节点不存在，可能已被删除",
       "group_name_exists": "已存在同名的代理分组",

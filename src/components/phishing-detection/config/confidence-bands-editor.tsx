@@ -103,113 +103,115 @@ export function ConfidenceBandsTable({ bands, onChange, disabled }: Props) {
 
   return (
     <div className="space-y-3" data-testid="confidence-bands-editor">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t('colRange')}</TableHead>
-            <TableHead>{t('colDisposition')}</TableHead>
-            <TableHead>{t('colMarkSettings')}</TableHead>
-            <TableHead className="text-right">{t('colActions')}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {bands.map((band, idx) => (
-            <TableRow key={`band-${idx}`} data-testid={`band-row-${idx}`}>
-              <TableCell>
-                <div className="flex items-center gap-1">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    className="h-8 w-16"
-                    value={band.min}
-                    disabled={disabled}
-                    onChange={(e) => setMin(idx, Number(e.target.value))}
-                    data-testid={`band-min-${idx}`}
-                  />
-                  <span className="text-muted-foreground">–</span>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    className="h-8 w-16"
-                    value={band.max}
-                    disabled={disabled}
-                    onChange={(e) => setMax(idx, Number(e.target.value))}
-                    data-testid={`band-max-${idx}`}
-                  />
-                </div>
-              </TableCell>
-              <TableCell>
-                <DispositionSelect
-                  value={band.disposition}
-                  disabled={disabled}
-                  onChange={(d) => setDisposition(idx, d)}
-                  testId={`band-disposition-${idx}`}
-                />
-              </TableCell>
-              <TableCell>
-                {band.disposition === 'mark' ? (
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap gap-2">
-                      {(['subject_prefix', 'header'] as const).map((pos) => (
-                        <label key={pos} className="flex items-center gap-1 text-xs">
-                          <input
-                            type="checkbox"
-                            className="h-3.5 w-3.5"
-                            checked={band.mark_positions?.includes(pos) ?? false}
-                            disabled={disabled}
-                            onChange={() => togglePosition(idx, pos)}
-                            data-testid={`band-mark-pos-${idx}-${pos}`}
-                          />
-                          {t(`markPosition.${pos}`)}
-                          {pos === 'header' && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger render={<HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" />} />
-                                <TooltipContent className="max-w-xs text-xs">
-                                  {t('markPosition.headerHint')}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                        </label>
-                      ))}
-                    </div>
-                    <Input
-                      className="h-7 w-40 text-xs"
-                      value={band.mark_text ?? ''}
-                      disabled={disabled}
-                      onChange={(e) => setMarkText(idx, e.target.value)}
-                      placeholder={t('markTextPlaceholder')}
-                      data-testid={`band-mark-text-${idx}`}
-                    />
-                    {(band.mark_text ?? '').length >= MAX_PREFIX_LEN ? (
-                      <p className="text-[10px] text-muted-foreground">
-                        {t('prefixTruncatedHint', { max: MAX_PREFIX_LEN })}
-                      </p>
-                    ) : null}
-                  </div>
-                ) : (
-                  <span className="text-xs text-muted-foreground">—</span>
-                )}
-              </TableCell>
-              <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  disabled={disabled}
-                  onClick={() => setEditingIdx(idx)}
-                  aria-label={t('advancedEdit')}
-                  data-testid={`band-edit-${idx}`}
-                >
-                  {t('advancedEdit')}
-                </Button>
-              </TableCell>
+      <div className="overflow-x-auto rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="min-w-32">{t('colRange')}</TableHead>
+              <TableHead className="min-w-28">{t('colDisposition')}</TableHead>
+              <TableHead className="min-w-48">{t('colMarkSettings')}</TableHead>
+              <TableHead className="min-w-20 text-right">{t('colActions')}</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {bands.map((band, idx) => (
+              <TableRow key={`band-${idx}`} data-testid={`band-row-${idx}`}>
+                <TableCell className="py-2">
+                  <div className="flex items-center gap-1">
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      className="h-7 w-14"
+                      value={band.min}
+                      disabled={disabled}
+                      onChange={(e) => setMin(idx, Number(e.target.value))}
+                      data-testid={`band-min-${idx}`}
+                    />
+                    <span className="text-muted-foreground">–</span>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      className="h-7 w-14"
+                      value={band.max}
+                      disabled={disabled}
+                      onChange={(e) => setMax(idx, Number(e.target.value))}
+                      data-testid={`band-max-${idx}`}
+                    />
+                  </div>
+                </TableCell>
+                <TableCell className="py-2">
+                  <DispositionSelect
+                    value={band.disposition}
+                    disabled={disabled}
+                    onChange={(d) => setDisposition(idx, d)}
+                    testId={`band-disposition-${idx}`}
+                  />
+                </TableCell>
+                <TableCell className="py-2">
+                  {band.disposition === 'mark' ? (
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap gap-2">
+                        {(['subject_prefix', 'header'] as const).map((pos) => (
+                          <label key={pos} className="flex items-center gap-1 text-xs">
+                            <input
+                              type="checkbox"
+                              className="h-3.5 w-3.5"
+                              checked={band.mark_positions?.includes(pos) ?? false}
+                              disabled={disabled}
+                              onChange={() => togglePosition(idx, pos)}
+                              data-testid={`band-mark-pos-${idx}-${pos}`}
+                            />
+                            {t(`markPosition.${pos}`)}
+                            {pos === 'header' && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger render={<HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" />} />
+                                  <TooltipContent className="max-w-xs text-xs">
+                                    {t('markPosition.headerHint')}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                          </label>
+                        ))}
+                      </div>
+                      <Input
+                        className="h-7 w-40 text-xs"
+                        value={band.mark_text ?? ''}
+                        disabled={disabled}
+                        onChange={(e) => setMarkText(idx, e.target.value)}
+                        placeholder={t('markTextPlaceholder')}
+                        data-testid={`band-mark-text-${idx}`}
+                      />
+                      {(band.mark_text ?? '').length >= MAX_PREFIX_LEN ? (
+                        <p className="text-[10px] text-muted-foreground">
+                          {t('prefixTruncatedHint', { max: MAX_PREFIX_LEN })}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+                <TableCell className="py-2 text-right">
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    disabled={disabled}
+                    onClick={() => setEditingIdx(idx)}
+                    aria-label={t('advancedEdit')}
+                    data-testid={`band-edit-${idx}`}
+                  >
+                    {t('advancedEdit')}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       {errMsg ? (
         <p
@@ -256,10 +258,16 @@ function DispositionSelect({
     { value: 'quarantine', label: t('disposition.quarantine') },
   ];
 
+  const colorClass: Record<BandDisposition, string> = {
+    accept: 'border-input',
+    mark: 'border-yellow-500/60 text-yellow-700 dark:text-yellow-400',
+    quarantine: 'border-destructive/60 text-destructive',
+  };
+
   return (
     <div className="space-y-1" data-testid={testId}>
       <select
-        className="h-8 rounded-md border border-input bg-transparent px-2 text-xs"
+        className={`h-7 rounded-md border bg-transparent px-2 text-xs font-medium ${colorClass[value]}`}
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value as BandDisposition)}
