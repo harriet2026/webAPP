@@ -1348,7 +1348,7 @@
     "stageCountHint": "当前��态共启�� {count} 个阶段。",
     "sectionBasic": "基本信息",
     "sectionTargets": "适用对象",
-    "sectionTargetsHint": "选择 1 类或多类群组；��中任一目标即生���。",
+    "sectionTargetsHint": "选择 1 类或多类群组；��中任��目标即生���。",
     "sectionPolicies": "分阶段策略配置",
     "sectionPoliciesHint": "默认为「继承全局」；「预留」策略本迭代仅入库、不改变实际检测行为。",
     "descriptionPlaceholder": "可选，简述本策略用途",
@@ -1661,7 +1661,7 @@
     "statusReleasedPending": "已放行待复检",
     "statusManualHold": "人工保留",
     "reason": "原因",
-    "eyebrow": "旁路队列",
+    "eyebrow": "���路队列",
     "subtitle": "检查被旁路的邮件，按处理状态筛选，预览已存储内容，并在需要时重新注入或删除项目。"
   },
   "logs": {
@@ -4534,7 +4534,7 @@
       "pendingVerify": "待验证",
       "manage": "管理",
       "loading": "加载中…",
-      "selectTenant": "请先在页面顶部选择一个租户，再管理其 DKIM 外发签��。",
+      "selectTenant": "请先在页��顶部选择一个租户，再管理其 DKIM 外发签��。",
       "noDomains": "该租户暂无发信域名，请先在「租户域名管理」中添加域名后再配置签名。"
     },
     "flow": {
@@ -5147,7 +5147,7 @@
       "maxPasswordAttempts": "最大密码尝试次数",
       "passwordSources": "密码来源",
       "extractFromBody": "从邮件正文提取密码",
-      "extractFromFilename": "从文件名提取密码",
+      "extractFromFilename": "从文件名提取密��",
       "usePasswordBook": "使用密码本",
       "recursiveDetect": "递归检测",
       "passwordBook": {
@@ -7189,7 +7189,7 @@
       "previewAndGroupTooltip": "命中全部条件才触发规则（逻辑与）",
       "previewAndConnector": "AND",
       "previewFullExpressionTitle": "完整表达式",
-      "previewEmptyHint": "添加条件后将自动生成逻辑表达式",
+      "previewEmptyHint": "添加条件后将自动生成��辑表达式",
       "notMarker": "(NOT)",
       "foldedMore": "+{count}",
       "groupSelectLabel": "选��对象",
@@ -7568,7 +7568,7 @@
     "taskTimeout": "任务超时",
     "seconds": "秒",
     "defaultTimeoutHint": "默认30秒",
-    "recallEnginePending": "召回引擎待上线，以下配置仅保存不生效",
+    "recallEnginePending": "��回引擎待上线，以下配置仅保存不生效",
     "recallPolicySettings": "召回策略设置",
     "threatIntel": "威���情报触发",
     "aiDetection": "AI 检测触发",
@@ -8783,25 +8783,16 @@
       "saveFailed": "保存失败",
       "discard": "放弃改动",
       "colRange": "置信度区间",
-      "colMin": "区间下��",
+      "colMin": "区间下限",
       "colMax": "区间上限",
       "colDisposition": "处置动作",
       "colMarkSettings": "标记设置",
-      "colActions": "操作",
-      "advancedEdit": "高级编辑",
-      "dialogTitle": "编辑第 {index} 段",
-      "dialogDescription": "调整该置信度段的区间、处置与标记设置。",
-      "cancel": "取消",
-      "apply": "应用",
-      "markPositionLabel": "标记位置",
       "markPosition": {
         "subject_prefix": "主题前缀",
         "header": "邮件头",
-        "headerHint": "在邮件头部追加 X-OSG-Phish-Mark 字段，写入标记文本。收件人不可见，可供邮件��户端规则或下游系统读取。"
+        "headerHint": "在邮件头部追加 X-OSG-Phish-Mark 字段，写入标记文本。收件人不可见，可供邮件客户端规则或下游系统读取。"
       },
-      "markTextLabel": "主题前缀文本",
       "markTextPlaceholder": "例如 [可疑]",
-      "markTextHint": "最长 20 字符，超出将被截断。",
       "prefixTruncated": "主题前缀超过 {max} 字，已自动截断。",
       "prefixTruncatedHint": "主题前缀最长 {max} 字。",
       "disposition": {
@@ -9259,7 +9250,7 @@
         "range": "按当前时间范围统计。",
         "recallSuccess": "按当前时间范围内的召回最终结果统计；所有目标成功才计为成功。",
         "recallFailure": "按当前时间范围内的召回最终结果统计；部分成功归入召回失败。",
-        "rate": "当前时间范围内发现漏报数 / 扫描邮件数。"
+        "rate": "当前时间范围内发现漏报数 / 扫描邮件数���"
       }
     },
     "filters": {
@@ -10810,7 +10801,7 @@
     "ops_top": {
       "account_required": "下钻认证明细时必须指定账号",
       "ai_interpretation_disabled": "AI 智能解读未启用，请联系管理员开启",
-      "ai_too_many_concurrent": "AI 解读请求过多，请稍后重试",
+      "ai_too_many_concurrent": "AI 解读请求过多，请稍��重试",
       "connection_requires_platform": "连接维度只在平台视角下可用，请切换到平台视角",
       "dimension_invalid": "统计维度无效",
       "filter_enum_invalid": "筛选条件取值无效",
@@ -11389,7 +11380,7 @@
       "invalid_metadata": "元数据格式不正确"
     },
     "user_list_access": {
-      "user_list_rules_require_tenant_administrator": "用户名单规则需要租户管理员权限",
+      "user_list_rules_require_tenant_administrator": "用户名单规则��要租户管理员权限",
       "user_list_rules_available_owning_tenant": "多租户模式下，用户名单规则仅归属租户可见",
       "user_list_rules_require_tenant_context": "用户名单规则需要先选择租户",
       "user_list_rules_created_managed_by": "用户名单规则由���户自行创建和管理，不通过通用管理接口",

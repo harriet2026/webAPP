@@ -1,10 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { HelpCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Table,
@@ -16,7 +14,6 @@ import {
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { BandDisposition, PhishBand } from '@/types/phishing-config';
-import { BandEditDialog } from './band-edit-dialog';
 
 const MAX_PREFIX_LEN = 20;
 
@@ -68,7 +65,6 @@ interface Props {
 // single Save/Cancel — so it only renders the table + row editing here.
 export function ConfidenceBandsTable({ bands, onChange, disabled }: Props) {
   const t = useTranslations('phishingConfig.bands');
-  const [editingIdx, setEditingIdx] = useState<number | null>(null);
 
   const errMsg = validateBandsContiguous(bands);
   const errText = errMsg ? t(`validation.${errMsg.code}`, errMsg.values) : null;
@@ -110,7 +106,6 @@ export function ConfidenceBandsTable({ bands, onChange, disabled }: Props) {
               <TableHead className="min-w-32">{t('colRange')}</TableHead>
               <TableHead className="min-w-28">{t('colDisposition')}</TableHead>
               <TableHead className="min-w-48">{t('colMarkSettings')}</TableHead>
-              <TableHead className="min-w-20 text-right">{t('colActions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -195,18 +190,6 @@ export function ConfidenceBandsTable({ bands, onChange, disabled }: Props) {
                     <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </TableCell>
-                <TableCell className="py-2 text-right">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    disabled={disabled}
-                    onClick={() => setEditingIdx(idx)}
-                    aria-label={t('advancedEdit')}
-                    data-testid={`band-edit-${idx}`}
-                  >
-                    {t('advancedEdit')}
-                  </Button>
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -221,20 +204,6 @@ export function ConfidenceBandsTable({ bands, onChange, disabled }: Props) {
         >
           {errText}
         </p>
-      ) : null}
-
-      {editingIdx !== null ? (
-        <BandEditDialog
-          open
-          onOpenChange={(o) => !o && setEditingIdx(null)}
-          band={bands[editingIdx]}
-          bandIndex={editingIdx}
-          disabled={disabled}
-          onApply={(next) => {
-            patchBand(editingIdx, next);
-            setEditingIdx(null);
-          }}
-        />
       ) : null}
     </div>
   );

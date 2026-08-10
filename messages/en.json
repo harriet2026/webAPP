@@ -8730,21 +8730,12 @@
       "colMax": "Max",
       "colDisposition": "Disposition",
       "colMarkSettings": "Mark settings",
-      "colActions": "Actions",
-      "advancedEdit": "Advanced",
-      "dialogTitle": "Edit band #{index}",
-      "dialogDescription": "Adjust this band's range, disposition and mark settings.",
-      "cancel": "Cancel",
-      "apply": "Apply",
-      "markPositionLabel": "Mark positions",
       "markPosition": {
         "subject_prefix": "Subject prefix",
         "header": "Header",
         "headerHint": "Prepends an X-OSG-Phish-Mark header with the mark text. Not visible to recipients; readable by mail client rules or downstream systems."
       },
-      "markTextLabel": "Subject prefix text",
       "markTextPlaceholder": "e.g. [Suspect]",
-      "markTextHint": "Up to 20 characters; longer values are truncated.",
       "prefixTruncated": "Subject prefix exceeded {max} characters and was truncated.",
       "prefixTruncatedHint": "Subject prefix is capped at {max} characters.",
       "disposition": {
