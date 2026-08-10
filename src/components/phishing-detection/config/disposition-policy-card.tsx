@@ -19,13 +19,6 @@ import {
   SheetDescription,
   SheetFooter,
 } from '@/components/ui/sheet';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { CollapsibleSectionTrigger } from '@/components/ui/collapsible-section-trigger';
 import {
@@ -47,7 +40,6 @@ import type {
   PhishTenantEngineParams,
   PhishRunMode,
   PhishObserveAction,
-  PhishTimeoutTempDisposal,
   PhishBand,
 } from '@/types/phishing-config';
 import { detectProtectionLevel, PHISHING_PRESETS } from './protection-presets';
@@ -59,7 +51,6 @@ function isValidationError(err: unknown): string | null {
   return err.message || null;
 }
 
-const TIMEOUT_DISPOSITIONS: PhishTimeoutTempDisposal[] = ['deliver', 'mark', 'by_result'];
 const RUN_MODES: PhishRunMode[] = ['realtime', 'observe'];
 const OBSERVE_ACTIONS: PhishObserveAction[] = ['deliver', 'mark'];
 
@@ -150,7 +141,11 @@ export function DispositionPolicyCard() {
   const openSheet = () => {
     if (!engineBaseline || !disposalBaseline) return;
     setEngineDraft({ ...engineBaseline });
-    setDisposalDraft(structuredClone(disposalBaseline));
+    const disposalDraftClone = structuredClone(disposalBaseline);
+    // "超时临时处置" 现在只保留「标记」这一种动作（UI 已去掉"正常投递"/"按沙箱透视
+    // 结果处置"），在此归一化，避免存量数据（旧值 deliver/by_result）流入编辑态。
+    disposalDraftClone.review.timeout_temp_disposal = 'mark';
+    setDisposalDraft(disposalDraftClone);
     setBandsDraft(structuredClone(bandsBaseline));
     setAdvancedOpen(false);
     setSheetOpen(true);
@@ -366,76 +361,77 @@ export function DispositionPolicyCard() {
 
                       <div className="space-y-2">
                         <Label>{t('timeoutTempDisposal')}</Label>
-                        <Select
-                          value={disposal.review.timeout_temp_disposal || 'deliver'}
-                          onValueChange={(v) =>
-                            setDisposalDraft((cur) =>
-                              cur
-                                ? { ...cur, review: { ...cur.review, timeout_temp_disposal: v as PhishTimeoutTempDisposal } }
-                                : cur,
-                            )
-                          }
-                        >
-                          <SelectTrigger className="w-full" data-testid="timeout-temp-select"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {TIMEOUT_DISPOSITIONS.map((d) => (
-                              <SelectItem key={d} value={d} data-testid={`timeout-temp-${d}`}>
-                                {t(`timeoutTempValue.${d}`)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
                         <p className="text-xs text-muted-foreground">{t('timeoutTempDisposalHint')}</p>
-                        {(disposal.review.timeout_temp_disposal || 'deliver') === 'mark' ? (
-                          <div className="space-y-2 rounded-md border bg-muted/30 p-3">
-                            <Label htmlFor="timeout-mark-text">{t('timeoutMarkText')}</Label>
-                            <Input
-                              id="timeout-mark-text"
-                              value={disposal.review.timeout_mark_text ?? ''}
-                              maxLength={20}
-                              onChange={(e) =>
-                                setDisposalDraft((cur) =>
-                                  cur
-                                    ? { ...cur, review: { ...cur.review, timeout_mark_text: e.target.value } }
-                                    : cur,
-                                )
-                              }
-                              data-testid="timeout-mark-text"
-                            />
-                            <p className="text-xs text-muted-foreground">{t('timeoutMarkTextHint')}</p>
-                            <div className="flex flex-wrap gap-3">
-                              {(['subject_prefix', 'header'] as const).map((pos) => {
-                                const positions = new Set(disposal.review.timeout_mark_positions ?? []);
-                                return (
-                                  <label key={pos} className="flex items-center gap-1 text-xs">
+                        {/* 超时临时处置目前只保留「标记」这一种动作（已去掉"正常投递"/"按沙箱
+                            透视结果处置"），因此不再需要选择器——直接展示标记配置。 */}
+                        <div className="space-y-2 rounded-md border bg-muted/30 p-3" data-testid="timeout-temp-mark-config">
+                          <Label htmlFor="timeout-mark-text">{t('timeoutMarkText')}</Label>
+                          <Input
+                            id="timeout-mark-text"
+                            value={disposal.review.timeout_mark_text ?? ''}
+                            maxLength={20}
+                            onChange={(e) =>
+                              setDisposalDraft((cur) =>
+                                cur
+                                  ? { ...cur, review: { ...cur.review, timeout_mark_text: e.target.value } }
+                                  : cur,
+                              )
+                            }
+                            data-testid="timeout-mark-text"
+                          />
+                          <p className="text-xs text-muted-foreground">{t('timeoutMarkTextHint')}</p>
+                          <div className="flex flex-wrap items-center gap-3">
+                            {(['subject_prefix', 'header'] as const).map((pos) => {
+                              const positions = new Set(disposal.review.timeout_mark_positions ?? []);
+                              return (
+                                <label key={pos} className="flex items-center gap-1 text-xs">
+                                  <input
+                                    type="checkbox"
+                                    className="h-3.5 w-3.5"
+                                    checked={positions.has(pos)}
+                                    onChange={() => {
+                                      if (positions.has(pos)) positions.delete(pos);
+                                      else positions.add(pos);
+                                      setDisposalDraft((cur) =>
+                                        cur
+                                          ? {
+                                              ...cur,
+                                              review: {
+                                                ...cur.review,
+                                                timeout_mark_positions: Array.from(positions),
+                                              },
+                                            }
+                                          : cur,
+                                      );
+                                    }}
+                                    data-testid={`timeout-mark-pos-${pos}`}
+                                  />
+                                  {t(`markPosition.${pos}`)}
+                                </label>
+                              );
+                            })}
+                            {/* "正文" 标记位置：后端 timeout_mark_positions 校验尚未支持 body，
+                                先只在 UI 上占位并禁用，避免勾选后保存触发 400。 */}
+                            <Tooltip>
+                              <TooltipTrigger
+                                render={
+                                  <label className="flex items-center gap-1 text-xs text-muted-foreground/60 cursor-not-allowed">
                                     <input
                                       type="checkbox"
-                                      className="h-3.5 w-3.5"
-                                      checked={positions.has(pos)}
-                                      onChange={() => {
-                                        if (positions.has(pos)) positions.delete(pos);
-                                        else positions.add(pos);
-                                        setDisposalDraft((cur) =>
-                                          cur
-                                            ? {
-                                                ...cur,
-                                                review: {
-                                                  ...cur.review,
-                                                  timeout_mark_positions: Array.from(positions),
-                                                },
-                                              }
-                                            : cur,
-                                        );
-                                      }}
-                                      data-testid={`timeout-mark-pos-${pos}`}
+                                      className="h-3.5 w-3.5 cursor-not-allowed"
+                                      checked={false}
+                                      disabled
+                                      readOnly
+                                      data-testid="timeout-mark-pos-body"
                                     />
-                                    {t(`markPosition.${pos}`)}
+                                    {t('markPosition.body')}
                                   </label>
-                                );
-                              })}
-                            </div>
+                                }
+                              />
+                              <TooltipContent className="text-xs">{t('soon')}</TooltipContent>
+                            </Tooltip>
                           </div>
-                        ) : null}
+                        </div>
                       </div>
 
                       <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>

@@ -183,4 +183,50 @@ describe('DispositionPolicyCard summary + drawer (智能体调查与处置)', ()
 
     await waitFor(() => expect(screen.queryByTestId('disposition-edit-sheet')).not.toBeInTheDocument());
   });
+
+  it('only shows the "标记" action for timeout temp disposal (no picker, no deliver/by_result options)', async () => {
+    renderCard();
+
+    fireEvent.click(await screen.findByTestId('policy-edit'));
+    await screen.findByTestId('disposition-edit-sheet');
+
+    // The old Select is gone; the mark config (text + positions) is always shown.
+    expect(screen.queryByTestId('timeout-temp-select')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('timeout-temp-deliver')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('timeout-temp-by_result')).not.toBeInTheDocument();
+    expect(screen.getByTestId('timeout-temp-mark-config')).toBeInTheDocument();
+    expect(screen.getByTestId('timeout-mark-text')).toBeInTheDocument();
+    expect(screen.getByTestId('timeout-mark-pos-subject_prefix')).toBeInTheDocument();
+    expect(screen.getByTestId('timeout-mark-pos-header')).toBeInTheDocument();
+  });
+
+  it('renders the "正文" mark position as disabled and unchecked (backend not yet supported)', async () => {
+    renderCard();
+
+    fireEvent.click(await screen.findByTestId('policy-edit'));
+    await screen.findByTestId('disposition-edit-sheet');
+
+    const bodyCheckbox = screen.getByTestId('timeout-mark-pos-body') as HTMLInputElement;
+    expect(bodyCheckbox).toBeDisabled();
+    expect(bodyCheckbox.checked).toBe(false);
+
+    fireEvent.click(bodyCheckbox);
+    expect(bodyCheckbox.checked).toBe(false);
+  });
+
+  it('normalizes a legacy timeout_temp_disposal baseline (e.g. "deliver") to "mark" on save', async () => {
+    getDisposalSettingsMock.mockResolvedValue(makeDisposal({ timeout_temp_disposal: 'deliver' }));
+    renderCard();
+
+    fireEvent.click(await screen.findByTestId('policy-edit'));
+    await screen.findByTestId('disposition-edit-sheet');
+
+    fireEvent.click(screen.getByTestId('policy-save'));
+
+    await waitFor(() => expect(putDisposalSettingsMock).toHaveBeenCalledTimes(1));
+    expect(putDisposalSettingsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ review: expect.objectContaining({ timeout_temp_disposal: 'mark' }) }),
+      apiRequestMock,
+    );
+  });
 });

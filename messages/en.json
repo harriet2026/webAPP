@@ -8710,7 +8710,8 @@
       "timeoutMarkTextHint": "Up to 20 characters.",
       "markPosition": {
         "subject_prefix": "Subject prefix",
-        "header": "Header"
+        "header": "Header",
+        "body": "Body"
       },
       "advancedSettings": "Advanced settings",
       "minutes": "minutes"

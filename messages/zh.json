@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测智能体",
+    "spoofingDetection": "仿冒邮件检测智能���",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -862,7 +862,7 @@
         "editButton": "编辑",
         "deleteButton": "删除",
         "emptyText": "暂无通道，建议先配置自定义通道",
-        "proxyDeletedBadge": "代理已删�������������",
+        "proxyDeletedBadge": "���理已删�������������",
         "systemDefaultHelo": "系统默认",
         "drawerTitleNew": "新建投递通道",
         "drawerTitleEdit": "编辑投递通道",
@@ -1188,7 +1188,7 @@
     "globalRule": "全局规则",
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除，只有系统管理员可编辑部分字段",
-    "systemRuleEditBanner": "正在编辑系统基线规则。只允许修改 action / priority / 条��阈值��其��字段已锁定。",
+    "systemRuleEditBanner": "正在编辑系统基线规则��只允许修改 action / priority / 条��阈值��其��字段已锁定。",
     "stage": "阶段"
   },
   "tagRules": {
@@ -1635,7 +1635,7 @@
     "notes": "备注",
     "preview": "预览",
     "noItems": "无隔离邮件",
-    "confirmRelease": "确定要释放选中的邮件吗？",
+    "confirmRelease": "确定要释放选中��邮件吗？",
     "eyebrow": "���离区",
     "subtitle": "按发件人、主题、放行状态和原因筛选被隔离的邮件，然后预览或批量放行所选项。",
     "releaseToOptional": "释放至（可选，留空则投递给原收件人）",
@@ -2430,7 +2430,7 @@
     "occurredAt": "发生时间",
     "logId": "日志编号",
     "eyebrow": "日志审计",
-    "subtitle": "记录发信认证模块每一次认证尝试的结果，���于安全审计与异���排查",
+    "subtitle": "记录发信认证模块每一次认���尝试的结果，���于安全审计与异���排查",
     "protocol": "协议",
     "scene": "场景",
     "domain": "域名",
@@ -2734,7 +2734,7 @@
       "expires": "到期时间",
       "revoke": "撤销",
       "revokeTitle": "撤销授信终端",
-      "revokeConfirm": "确认撤销「{name}」的授信？该设备下次登录将需要二次认证。",
+      "revokeConfirm": "确认撤��「{name}」的授信？该设备下次登录将需要二次认证。",
       "revoked": "已撤销授信终端"
     },
     "history": {
@@ -2821,7 +2821,7 @@
     "isActive": "启用",
     "members": "成员代理服务器",
     "addMember": "添加成员代理服务器",
-    "noMoreEndpoints": "没有更多可选代理���务器",
+    "noMoreEndpoints": "没有更��可选代理���务器",
     "membersEmptyHint": "至少添加��个代理服务器；顺序即 failover 顺序（上者先）。",
     "createEndpoint": "新建代理服务器",
     "editEndpoint": "编辑代理服务器",
@@ -3535,7 +3535,7 @@
       "systemWill": "系统将：",
       "logOnly": "仅当次处置，不额外封禁",
       "suspendFor": "额外封禁 {duration}",
-      "suspendLogTip": "阈值触发后仅当次处置，不会额外封禁 IP。如需封禁请配置挂起策略。",
+      "suspendLogTip": "阈值触发后仅当次处置，不会额外封禁 IP。如需封禁���配置挂起策略。",
       "priorityLabel": "优先级：",
       "lowerFirst": "��越大越优先）",
       "validityLabel": "有效期：",
@@ -3719,7 +3719,7 @@
     "remarkPlaceholder": "可选，规则说明或备注信息...",
     "saveAndEnable": "保存并启用",
     "blacklistRuleDesc": "配置IP黑名单规则，阻断或处置指定IP地址/段",
-    "whitelistRuleDesc": "配置IP白名单规则，信任的IP直接放行或标记",
+    "whitelistRuleDesc": "配置IP白名单规则��信任的IP直接放行或标记",
     "addBlacklistRule": "新建黑名单规则",
     "addWhitelistRule": "新建白名单规则",
     "editBlacklistRule": "编辑黑名单规则",
@@ -4109,7 +4109,7 @@
     "priority": "优先级",
     "priorityHelp": "数值越大优先级越高，优先级高的规则先匹配",
     "senderType": "发信人",
-    "drawerSubtitleBlacklist": "配置发信人黑名单规则，阻断或处置指定发信人",
+    "drawerSubtitleBlacklist": "配置发信人黑名单规则，阻断或处置指定发���人",
     "drawerSubtitleWhitelist": "��置发信人白名单规则，信��的发信人直接放行",
     "senderPlaceholder_individual": "如: user@example.com 或 *@domain.com",
     "senderPlaceholder_domain": "如 example.com 或 evil.com",
@@ -4132,7 +4132,7 @@
     "expireAt": "有效期至",
     "expireAtHint": "留空表示永久有效",
     "remark": "备注",
-    "remarkPlaceholder": "添加备注信息（���多200字）",
+    "remarkPlaceholder": "添加备注信息������多200字）",
     "viewExamples": "查看配置示例",
     "useExample": "使用该示例",
     "effectSenderLabel": "当发信人为",
@@ -4261,7 +4261,7 @@
     "matchTypeRegex": "正则表达式",
     "matchTypeContentGroup": "内容组",
     "matchContent": "匹配内容",
-    "matchContentTip": "填写需要在所选邮件区域中识别的内容",
+    "matchContentTip": "填写���要在所选邮件区域中识别的内容",
     "matchContentPlaceholder": "输入以 | 分隔的关键词或正则表达式",
     "matchContentRequired": "请输入匹配内容",
     "scope": "范围",
@@ -4534,7 +4534,7 @@
       "pendingVerify": "待验证",
       "manage": "管理",
       "loading": "加载中…",
-      "selectTenant": "请先在页面顶部选择一个租户，再管理其 DKIM 外发签名。",
+      "selectTenant": "请先在页面顶部选择一个租户，再管理其 DKIM 外发签��。",
       "noDomains": "该租户暂无发信域名，请先在「租户域名管理」中添加域名后再配置签名。"
     },
     "flow": {
@@ -4791,7 +4791,7 @@
       "groupLabel": "发信人群组",
       "groupPlaceholder": "请选择群组",
       "manageGroup": "管理群组",
-      "groupSource": "数据来源：群组策略配置",
+      "groupSource": "数据来源：群组策略配���",
       "orgLabel": "组织部门",
       "orgPlaceholder": "请选择部门",
       "manageOrg": "管理组织",
@@ -5253,7 +5253,7 @@
         "desc": "��功能将在后续版本提供。当前版本仅支持链接保护。"
       },
       "toggle": "沙箱检测",
-      "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁",
+      "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、��意下载等威胁",
       "toggleTip": "对未知URL进行动态行为分析，模拟用户访问以检���恶意行为",
       "detectGroup": "检测结果处置（当前方向）",
       "maliciousLabel": "发现恶意URL",
@@ -5295,7 +5295,7 @@
       "publicBaseUrlPlaceholder": "https://gw.your-tenant.com:8082",
       "publicBaseUrlWarning": "⚠️ 一旦保存请勿修改。修改后历史邮件中已重写的链接将失效或指向错误地址。",
       "publicBaseUrlChangeConfirmTitle": "确认修改点击主机名?",
-      "publicBaseUrlChangeConfirmBody": "此操作会让所有历史邮件中已重写的链接 (指向旧主机名) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
+      "publicBaseUrlChangeConfirmBody": "此操作���让所有历史邮件中已重写的链接 (指向旧主机名) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
       "publicBaseUrlChangeConfirmCta": "我已了解风险并继续",
       "policy": {
         "title": "点击时安全策略（固定）",
@@ -5765,7 +5765,7 @@
       "templateApplyConfirmDesc": "应用「{name}」将替换当前所有搜索条件，是否继续？",
       "templateApplyConfirm": "确认应用",
       "cancel": "取消",
-      "save": "保存",
+      "save": "保��",
       "confirm": "确认",
       "sampleSingle": "已选择 1 封样本邮件，正在查找相似邮件",
       "sampleMultiple": "已选择 {n} 封样本邮件，正在查找相似邮件",
@@ -5893,7 +5893,7 @@
         "neq": "不等于",
         "contains": "包含",
         "not_contains": "不包含",
-        "starts_with": "开头是",
+        "starts_with": "开���是",
         "ends_with": "结尾是",
         "regex": "正则匹配",
         "is_null": "为空",
@@ -6593,7 +6593,7 @@
       "externalReminder": "外部邮件提醒",
       "externalReminderDesc": "对外部邮件添加提醒",
       "recipients": "通知收件人",
-      "recipientsHint": "多个邮箱用逗号分隔",
+      "recipientsHint": "多个邮���用逗号分隔",
       "tagContent": "标记内容",
       "tagPosition": "标记位置",
       "tagPositionPrefix": "主题前缀",
@@ -7109,7 +7109,7 @@
         "operators": "大于/大于等于：差异越大越宽松，命中范围越大；小于/小于等于：差异越小越严格，只命中高度相似域名；介于：命中差异落在指定区间的域名。",
         "example": "对象选择「公司主域名档案」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超过 2 的仿冒域名。",
         "recommended": "推荐使用「小于等于 2」，与内置相似域名规则一致，兼顾召回与误报。",
-        "note": "先选择受保护域名档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
+        "note": "先选择受保护域��档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
       },
       "desc_displayNameSpoof": {
         "source": "仿冒检测模块",
@@ -7522,7 +7522,7 @@
     "perm_blacklist": "加黑权限",
     "perm_recall_desc": "允许用户从隔离区取回邮件",
     "perm_preview_desc": "允许用户预览隔离邮件内容",
-    "perm_whitelist_desc": "允许用户将发信人加入白名单",
+    "perm_whitelist_desc": "允许用户将���信人加入白名单",
     "perm_blacklist_desc": "允许用户将���信人加入黑名单",
     "selfServicePending": "终端用户自助入��待上线，当前仅保存配置",
     "portalBaseUrlLabel": "外部访问地址",
@@ -8326,7 +8326,7 @@
       "status": "状态",
       "statusSuccess": "成功",
       "statusFailed": "失败",
-      "logTitle": "备份日志 - {name}",
+      "logTitle": "备���日志 - {name}",
       "logDescription": "{time} · 节点 {node}",
       "logEmpty": "该任务未上报日志内容",
       "logLoadError": "备份任务数据加载失���"
@@ -8712,7 +8712,7 @@
   "timeoutEditTitle": "编辑超时策略",
   "timeoutEditDescription": "保存后仅更新本页草稿，点击页面底部「保存」才会真正生效；取消丢弃改动。",
 
-      "description": "运行模式决定是否执行处置，防护等级与置信度分级决定如何处置；超时策略对所有旁路检测生效。",
+      "description": "运行模式决定是否执���处置，防护等级与置信度分级决定如何处置；超时策略对所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败��运行模式仍按真实引擎配置展示。",
@@ -8760,14 +8760,15 @@
       "timeoutTempSectionTitle": "超时临时处置",
       "timeoutTempValue": {
         "deliver": "正常投递",
-        "mark": "标记投递",
+        "mark": "标记",
         "by_result": "按沙箱透视结果处置"
       },
       "timeoutMarkText": "标记前缀",
       "timeoutMarkTextHint": "最长 20 字符。",
       "markPosition": {
         "subject_prefix": "主题前缀",
-        "header": "邮件头"
+        "header": "邮件头",
+        "body": "正文"
       },
       "advancedSettings": "高级设置",
       "minutes": "分钟"
@@ -9428,7 +9429,7 @@
       "threatType": {
         "phishing": "钓鱼",
         "malware": "恶意软件",
-        "impersonation": "冒充",
+        "impersonation": "冒��",
         "unknown": "未知"
       },
       "disposition": {
@@ -9784,7 +9785,7 @@
     "policyExecProtect": "高管邮件保护：{state}",
     "policyImpersonation": "显示名仿冒检测：{state}",
     "policyRecipientCheck": "收件人合法性校验：内部白名单",
-    "priorityHint": "数值越大优先级越高，冲突时高优先级覆盖低优先级",
+    "priorityHint": "数值越大优先级越高，冲��时高优先级覆盖低优先级",
     "refresh": "刷新",
     "relatedPolicies": "关联策略",
     "resetFilters": "重置筛选",
@@ -10825,7 +10826,7 @@
       "action_invalid": "审核动作无效，只能是：{allowed}",
       "id_invalid": "审核条目 ID 无效",
       "not_found": "审核条目不存在，可能已被处理",
-      "not_pending": "该条目已不在待审核状态，或正在被其他人处理",
+      "not_pending": "该条目已不在待审核状态，��正在被其他人处理",
       "operation_in_progress": "该邮件正有另一个处置操作在进行，请稍后重试"
     },
     "proxysvr": {
@@ -10949,7 +10950,7 @@
     "tenant": {
       "not_found": "租户不存在",
       "access_denied": "无权访问该租户",
-      "domain_delete_gated": "收信域必须先停用并保持停用满排水窗口（默认 7 天，让队列在途邮件投递完毕）才能删除",
+      "domain_delete_gated": "收信域必���先停用并保持停用满排水窗口（默认 7 天，让队列在途邮件投递完毕）才能删除",
       "admin_account_password_pair_required": "管理员账号与密码必须同时填写",
       "admin_account_too_long": "管理员账号长度不能超过 {max} 个字符",
       "code_immutable": "租户编码创建后不可修改",
@@ -11402,7 +11403,7 @@
       "cannot_demote_last_system_administrator": "不能降级最后一个平台管理员",
       "cannot_delete_your_own_account": "不能删除自己的账号",
       "cannot_delete_last_system_administrator": "不能删除最后一个平台管理员",
-      "cannot_disable_last_enabled_super_administrator": "不能停用最后一个启用的超级管理员",
+      "cannot_disable_last_enabled_super_administrator": "不能停用���后一个启用的超级管理员",
       "bulk_action_would_leave_zero_enabled": "该批量操作会导致没有任何启用的超级管理员"
     },
     "auth": {
