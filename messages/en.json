@@ -8653,16 +8653,6 @@
         "deliver": "Deliver straight to the recipient's inbox; only the detection result is logged, invisible to the user.",
         "mark": "Add an observe mark to the subject or header before delivery, so admins can identify observed samples."
       },
-      "protectionLevel": "Protection level",
-      "protectionLevelValue": {
-        "standard": "Standard protection",
-        "strict": "Strict protection",
-        "custom": "Custom"
-      },
-      "customProtectionHint": "This is a custom configuration that no longer matches the selected preset.",
-      "restorePreset": "Restore {level}",
-      "switchPresetConfirmTitle": "Switching presets will overwrite your custom configuration",
-      "switchPresetConfirmDesc": "The confidence bands have diverged from the preset. Switching will overwrite them with the selected preset. Continue?",
       "timeoutEditTitle": "Edit timeout policy",
       "timeoutEditDescription": "Applying here only updates the page draft; click Save at the bottom of the page to persist it. Cancel discards the edits.",
       "description": "Run mode decides whether disposition runs at all; protection level and confidence bands decide how. Timeout policy applies to all sideline checks.",
@@ -8688,6 +8678,7 @@
         "realtime": "Apply band dispositions (quarantine / mark / accept). If no verdict is reached before timeout, the Timeout Policy below applies temporarily.",
         "observe": "Runs the full detection pipeline, but replaces disposition actions with the preset Observe Action below — for tuning and canary observation only."
       },
+      "runModeCascadeHint": "Realtime detection runs first; if it finishes before the timeout, the Realtime Disposition Policy applies. If it times out and async timeout handling is enabled, the Timeout Temp Disposition releases the message while detection continues in the background, then the Async Recall Policy recalls or notifies based on the final result. If it times out and async timeout handling is disabled, the Timeout Temp Disposition applies directly and no further detection runs.",
       "observeAction": "Observe action",
       "observeActionValue": {
         "deliver": "Deliver",
@@ -8700,27 +8691,28 @@
       "totalTimeoutHint": "Maximum time a message waits in sideline detection. When this expires before a verdict, the timeout temp disposition applies. Range: 1–60 minutes.",
       "asyncTimeout": "Async timeout",
       "asyncTimeoutHint": "After timeout delivery, the maximum time the system watches for a late verdict. A high-risk result in this window triggers automatic recall. Range: 1–60 minutes.",
-      "autoDeliver": "Auto-deliver on timeout",
-      "autoDeliverHint": "On: timed-out messages are auto-delivered without manual handling; Off: timed-out messages stay pending and require manual review.",
+      "autoDeliver": "Enable async timeout handling",
+      "autoDeliverHint": "On: messages release per Timeout Temp Disposition while detection continues in the background, then the async recall policy follows up; Off: messages are handled directly per Timeout Temp Disposition and no further detection runs.",
       "autoDeliverOn": "On",
       "autoDeliverOff": "Off",
-      "timeoutCloseConfirmTitle": "Turn off auto-deliver on timeout?",
-      "timeoutCloseConfirmDesc": "Once off, timed-out messages will not be auto-delivered and may delay legitimate mail.",
+      "timeoutCloseConfirmTitle": "Turn off async timeout handling?",
+      "timeoutCloseConfirmDesc": "Once off, timed-out messages will no longer continue background detection and will be handled directly per Timeout Temp Disposition.",
       "confirmClose": "Confirm turn off",
       "timeoutTempDisposal": "Timeout temp disposition",
+      "timeoutTempDisposalHint": "The temporary action applied when a message times out. If async timeout handling is enabled, background detection continues and the async recall policy follows up.",
       "timeoutTempSectionTitle": "Timeout temp disposition",
       "timeoutTempValue": {
         "deliver": "Deliver",
         "mark": "Mark",
-        "by_result": "By result"
+        "by_result": "By sandbox verdict"
       },
-      "timeoutTempByResultSoon": "By result (coming soon)",
       "timeoutMarkText": "Mark prefix",
       "timeoutMarkTextHint": "Up to 20 characters.",
       "markPosition": {
         "subject_prefix": "Subject prefix",
         "header": "Header"
       },
+      "advancedSettings": "Advanced settings",
       "minutes": "minutes"
     },
     "bands": {

@@ -170,12 +170,11 @@ describe('DispositionPolicyCard summary + drawer (智能体调查与处置)', ()
     fireEvent.click(await screen.findByTestId('policy-edit'));
     await screen.findByTestId('disposition-edit-sheet');
 
-    fireEvent.click(screen.getByTestId('protection-level-strict'));
     fireEvent.click(screen.getByTestId('policy-save'));
 
     await waitFor(() => expect(putEngineConfigMock).toHaveBeenCalledTimes(1));
     expect(putEngineConfigMock).toHaveBeenCalledWith(
-      expect.objectContaining({ protection_level: 'strict' }),
+      expect.objectContaining({ protection_level: 'standard' }),
       apiRequestMock,
     );
     expect(putBandsMock).toHaveBeenCalledTimes(1);

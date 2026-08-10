@@ -213,7 +213,7 @@
     "password": "密码",
     "loginTitle": "OSGateway 管理系统",
     "loginButton": "登录",
-    "demoEntry": "进入演��环境",
+    "demoEntry": "进入演���环境",
     "loginError": "用户名或密码错误",
     "sessionExpired": "会话已过期，请重新登录",
     "showAdvancedRules": "显示高级规则设置",
@@ -4132,7 +4132,7 @@
     "expireAt": "有效期至",
     "expireAtHint": "留空表示永久有效",
     "remark": "备注",
-    "remarkPlaceholder": "添加备注信息（最多200字）",
+    "remarkPlaceholder": "添加备注信息（���多200字）",
     "viewExamples": "查看配置示例",
     "useExample": "使用该示例",
     "effectSenderLabel": "当发信人为",
@@ -4578,7 +4578,7 @@
       "cancel": "取消"
     },
     "envelopeMismatchWarning": {
-      "title": "信封与头部不匹配可能引发误判",
+      "title": "信封与头部不匹配可能引��误判",
       "desc": "部分邮件订阅服务、自动转发系统和邮件列表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮件头（From）不一致。开启此检测可能会将这些正常邮件误判为仿冒邮件。\n\n请在充分评估影响后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
@@ -5457,7 +5457,7 @@
       "fillGaps": "智能填充",
       "applyPreset": "应用模板",
       "presetStrict": "严格",
-      "presetStandard": "标准（推荐）",
+      "presetStandard": "���准（推荐）",
       "presetLoose": "宽松"
     },
     "applySameRisk": "应用同风险等级",
@@ -5551,7 +5551,7 @@
     "atLeastOneDirection": "至少选择一个检测方向",
     "navSummary": "窗口{window}分钟 / 阈值{threshold}%",
     "tooltipObserve": "开启后仅记录日志，不执行实际拦截动作",
-    "errorTagRequired": "标记投递需至少启用一种标记方式"
+    "errorTagRequired": "标记投递需至少启用一种标记方���"
   },
   "mailMarking": {
     "title": "邮件标记与声明",
@@ -6152,7 +6152,7 @@
           "softfail": "软失败",
           "none": "无记录"
         },
-        "firstSeenNew": "首次出现",
+        "firstSeenNew": "首次��现",
         "firstSeenEstablished": "已知发信人",
         "firstSeenTooltip": "该发��人最早出现于：{date}",
         "urgent": "紧急",
@@ -7192,7 +7192,7 @@
       "previewEmptyHint": "添加条件后将自动生成逻辑表达式",
       "notMarker": "(NOT)",
       "foldedMore": "+{count}",
-      "groupSelectLabel": "选择对象",
+      "groupSelectLabel": "选��对象",
       "groupSelectPlaceholder": "请选择群组",
       "orgDeptSelectLabel": "选择部门",
       "orgDeptSelectedCount": "已选 {n} 个",
@@ -7570,7 +7570,7 @@
     "defaultTimeoutHint": "默认30秒",
     "recallEnginePending": "召回引擎待上线，以下配置仅保存不生效",
     "recallPolicySettings": "召回策略设置",
-    "threatIntel": "威胁情报触发",
+    "threatIntel": "威���情报触发",
     "aiDetection": "AI 检测触发",
     "readEmail": "已读邮件处理策略",
     "unreadEmail": "未读邮件处理策略",
@@ -8709,16 +8709,6 @@
   "deliver": "直接投递至用户收件箱，后台仅记录检测结果，用户无感知。",
   "mark": "在邮件主题或邮件头中增加观察标记后投递，便于管理员识别观察样本。"
   },
-  "protectionLevel": "防护等级",
-  "protectionLevelValue": {
-  "standard": "标准防护",
-  "strict": "严格防护",
-  "custom": "自定义"
-  },
-  "customProtectionHint": "当前为自定义配置，与所选预设不一致。",
-  "restorePreset": "恢复为{level}",
-  "switchPresetConfirmTitle": "切换预设将覆盖当前自定义配置",
-  "switchPresetConfirmDesc": "当前置信度分级已偏离预设，切换后将被所选预设覆盖，是否继续？",
   "timeoutEditTitle": "编辑超时策略",
   "timeoutEditDescription": "保存后仅更新本页草稿，点击页面底部「保存」才会真正生效；取消丢弃改动。",
 
@@ -8745,6 +8735,7 @@
         "realtime": "按分级表执行处置（隔离/标记/放行）；若超时未出结论，将按下方「超时策略」临时处置。",
         "observe": "开启后，系统执行完整检测流程，但将实质性处置动作替换为下方预设的观察动作，仅用于策略调优与灰度观察。"
       },
+      "runModeCascadeHint": "优先实时检测，超时前完成即按「实时处置策略」执行；若超时且启用超时异步处理，则按「超时临时处置」放行，后台继续检测，完成后按「异步召回策略」执行召回或通知；若超时且禁用超时异步处理，则直接按「超时临时处置」执行，后台不再检测。",
       "observeAction": "观察动作",
       "observeActionValue": {
         "deliver": "投递",
@@ -8757,27 +8748,28 @@
       "totalTimeoutHint": "邮件进入旁路检测后的最长等待时长。超过此时间仍无检测结论，将执行「超时临时处置」策略。范围：1–60 分钟。",
       "asyncTimeout": "超时异步",
       "asyncTimeoutHint": "超时投递后，系统继续等待最终检测结论的最长时长。在此窗口内若得出高风险结论，邮件将被自动召回。范围：1–60 分钟。",
-      "autoDeliver": "超时自动投递",
-      "autoDeliverHint": "开启：超时邮件自动投递，无需人工干预；关闭：超时邮件不自动投递，需人工处置。",
+      "autoDeliver": "启用超时异步处理",
+      "autoDeliverHint": "开启：超时后先按「超时临时处置」放行，后台继续检测并按异步召回策略处理结果；关闭：超时后直接按「超时临时处置」执行，后台不再检测。",
       "autoDeliverOn": "已开启",
       "autoDeliverOff": "已关闭",
-      "timeoutCloseConfirmTitle": "确认关闭超时自动投递？",
-      "timeoutCloseConfirmDesc": "关闭后超时邮件将不会自动投递，可能延误正常邮件投递。",
-      "confirmClose": "确���关闭",
+      "timeoutCloseConfirmTitle": "确认关闭超时异步处理？",
+      "timeoutCloseConfirmDesc": "关闭后超时邮件将不再进行后台异步检测，直接按超时临时处置执行。",
+      "confirmClose": "确认关闭",
       "timeoutTempDisposal": "超时临时处置",
+      "timeoutTempDisposalHint": "超时发生时的临时处置动作；若启用超时异步处理，后台会继续检测并按异步召回策略跟进。",
       "timeoutTempSectionTitle": "超时临时处置",
       "timeoutTempValue": {
-        "deliver": "投递",
-        "mark": "标记",
-        "by_result": "按结果处置"
+        "deliver": "正常投递",
+        "mark": "标记投递",
+        "by_result": "按沙箱透视结果处置"
       },
-      "timeoutTempByResultSoon": "按结果处置（即将支持）",
       "timeoutMarkText": "标记前缀",
       "timeoutMarkTextHint": "最长 20 字符。",
       "markPosition": {
         "subject_prefix": "主题前缀",
         "header": "邮件头"
       },
+      "advancedSettings": "高级设置",
       "minutes": "分钟"
     },
     "bands": {
@@ -9071,7 +9063,7 @@
       "errPasteOverLimit": "批量添加单次最多 20 条",
       "pasteIssue": "第 {line} 行：{reason}",
       "pasteIssueReason": {
-        "format": "请按 姓名,邮箱 格式填写",
+        "format": "请按 姓名,邮箱 ��式填写",
         "email": "邮箱格式不正确",
         "duplicate": "邮箱在本次粘贴中重复",
         "existing": "该邮箱已是保护对象"
@@ -9441,7 +9433,7 @@
       },
       "disposition": {
         "pending_recall": "待召回",
-        "recalled": "已召回",
+        "recalled": "已召��",
         "alert_only": "仅告警",
         "false_positive": "误报"
       },
@@ -10837,7 +10829,7 @@
       "operation_in_progress": "该邮件正有另一个处置操作在进行，请稍后重试"
     },
     "proxysvr": {
-      "cipher_profile_invalid": "加密套件档位无效，只能是：{allowed}",
+      "cipher_profile_invalid": "加密��件档位无效，只能是：{allowed}",
       "egress_ip_invalid": "出口 IP ��须是合法的 IPv4 地址，或留空",
       "endpoint_name_exists": "已存在同名的代理节点",
       "endpoint_not_found": "代理节点不存在，可能已被删除",
@@ -11399,7 +11391,7 @@
       "user_list_rules_require_tenant_administrator": "用户名单规则需要租户管理员权限",
       "user_list_rules_available_owning_tenant": "多租户模式下，用户名单规则仅归属租户可见",
       "user_list_rules_require_tenant_context": "用户名单规则需要先选择租户",
-      "user_list_rules_created_managed_by": "用户名单规则由用户自行创建和管理，不通过通用管理接口",
+      "user_list_rules_created_managed_by": "用户名单规则由���户自行创建和管理，不通过通用管理接口",
       "access_denied_user_list_rule": "无权访问该用户名单规则",
       "user_generated_user_list_rules_deleted": "此处只能删除用户自建的名单规则"
     },

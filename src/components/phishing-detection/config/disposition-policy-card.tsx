@@ -20,6 +20,15 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { CollapsibleSectionTrigger } from '@/components/ui/collapsible-section-trigger';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -39,7 +48,6 @@ import type {
   PhishRunMode,
   PhishObserveAction,
   PhishTimeoutTempDisposal,
-  PhishProtectionLevel,
   PhishBand,
 } from '@/types/phishing-config';
 import { detectProtectionLevel, PHISHING_PRESETS } from './protection-presets';
@@ -51,8 +59,7 @@ function isValidationError(err: unknown): string | null {
   return err.message || null;
 }
 
-const TIMEOUT_DISPOSITIONS: PhishTimeoutTempDisposal[] = ['deliver', 'mark'];
-const PRESET_LEVELS: PhishProtectionLevel[] = ['standard', 'strict', 'custom'];
+const TIMEOUT_DISPOSITIONS: PhishTimeoutTempDisposal[] = ['deliver', 'mark', 'by_result'];
 const RUN_MODES: PhishRunMode[] = ['realtime', 'observe'];
 const OBSERVE_ACTIONS: PhishObserveAction[] = ['deliver', 'mark'];
 
@@ -134,10 +141,7 @@ export function DispositionPolicyCard() {
   const [engineDraft, setEngineDraft] = useState<PhishTenantEngineParams | null>(null);
   const [disposalDraft, setDisposalDraft] = useState<DisposalSettings | null>(null);
   const [bandsDraft, setBandsDraft] = useState<PhishBand[] | null>(null);
-  // Tracks which preset (if any) is currently "applied" so a manual edit can
-  // offer a one-click "恢复为标准/严格防护" back to it (PRD §四.3).
-  const [lastPreset, setLastPreset] = useState<PhishProtectionLevel | null>(null);
-  const [pendingPresetSwitch, setPendingPresetSwitch] = useState<'standard' | 'strict' | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const [confirmTimeoutClose, setConfirmTimeoutClose] = useState(false);
   const [pendingTimeoutValue, setPendingTimeoutValue] = useState<boolean | null>(null);
 
@@ -148,15 +152,13 @@ export function DispositionPolicyCard() {
     setEngineDraft({ ...engineBaseline });
     setDisposalDraft(structuredClone(disposalBaseline));
     setBandsDraft(structuredClone(bandsBaseline));
-    const initialLevel = engineBaseline.protection_level ?? detectProtectionLevel(bandsBaseline);
-    setLastPreset(initialLevel === 'custom' ? null : initialLevel);
+    setAdvancedOpen(false);
     setSheetOpen(true);
   };
 
   const engine = engineDraft;
   const disposal = disposalDraft;
   const bands = bandsDraft ?? [];
-  const protectionLevel = (engine?.protection_level ?? detectProtectionLevel(bands)) as PhishProtectionLevel;
   const draftRunMode = engine?.run_mode ?? 'realtime';
   const draftObserveMode = draftRunMode === 'observe';
   const bandsError = validateBandsContiguous(bands);
@@ -184,32 +186,14 @@ export function DispositionPolicyCard() {
   const patchEngine = (p: Partial<PhishTenantEngineParams>) =>
     setEngineDraft((cur) => (cur ? { ...cur, ...p } : cur));
 
-  const applyPreset = (level: 'standard' | 'strict') => {
-    setBandsDraft(structuredClone(PHISHING_PRESETS[level].bands));
-    patchEngine({ protection_level: level });
-    setLastPreset(level);
-  };
-
-  const onPresetClick = (level: 'standard' | 'strict') => {
-    // A dirty custom table would be silently overwritten by the preset — the
-    // PRD requires a confirm before that happens (TC-06).
-    if (protectionLevel === 'custom' && bandsDraft && bandsBaseline) {
-      setPendingPresetSwitch(level);
-      return;
-    }
-    applyPreset(level);
-  };
-
-  const onRestorePreset = () => {
-    if (lastPreset === 'standard' || lastPreset === 'strict') applyPreset(lastPreset);
-  };
-
   const onRunModeChange = (mode: PhishRunMode) => {
-    patchEngine({ run_mode: mode });
-    if (mode === 'realtime' && !engineDraft?.protection_level) {
-      // Re-entering realtime with no explicit preset chosen yet defaults to
-      // Standard so the bands table is always meaningfully filled in.
-      applyPreset('standard');
+    patchEngine({ run_mode: mode, protection_level: engineDraft?.protection_level ?? 'standard' });
+    if (mode === 'realtime' && (!bandsDraft || bandsDraft.length === 0)) {
+      // Re-entering realtime with no bands configured yet defaults to the
+      // Standard preset so the table is always meaningfully filled in. The
+      // "防护等级" picker itself is no longer exposed in this drawer, but the
+      // backend still stores protection_level, so it's derived silently.
+      setBandsDraft(structuredClone(PHISHING_PRESETS.standard.bands));
     }
   };
 
@@ -301,33 +285,6 @@ export function DispositionPolicyCard() {
         )}
       </CardContent>
 
-      {/* 恢复预设覆盖确认 */}
-      <AlertDialog
-        open={pendingPresetSwitch !== null}
-        onOpenChange={(o) => !o && setPendingPresetSwitch(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('switchPresetConfirmTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>{t('switchPresetConfirmDesc')}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPendingPresetSwitch(null)}>
-              {t('cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (pendingPresetSwitch) applyPreset(pendingPresetSwitch);
-                setPendingPresetSwitch(null);
-              }}
-              data-testid="confirm-preset-switch"
-            >
-              {t('save')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       {/* 运行模式配置 — the single large drawer holding every editable field. */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent
@@ -358,6 +315,11 @@ export function DispositionPolicyCard() {
                       />
                     ))}
                   </div>
+                  {!draftObserveMode ? (
+                    <p className="text-xs text-muted-foreground" data-testid="run-mode-cascade-hint">
+                      {t('runModeCascadeHint')}
+                    </p>
+                  ) : null}
                 </div>
 
                 {draftObserveMode ? (
@@ -386,149 +348,9 @@ export function DispositionPolicyCard() {
                   </div>
                 ) : (
                   <>
-                    {/* 防护等级 */}
-                    <div className="space-y-1.5" data-testid="protection-level-row">
-                      <Label>{t('protectionLevel')}</Label>
-                      <div className="flex flex-wrap items-center gap-2">
-                        {PRESET_LEVELS.map((level) => (
-                          <Button
-                            key={level}
-                            type="button"
-                            size="sm"
-                            variant={protectionLevel === level ? 'default' : 'outline'}
-                            disabled={level === 'custom'}
-                            onClick={() => {
-                              if (level === 'custom') return;
-                              onPresetClick(level);
-                            }}
-                            data-testid={`protection-level-${level}`}
-                          >
-                            {t(`protectionLevelValue.${level}`)}
-                          </Button>
-                        ))}
-                        {protectionLevel === 'custom' && (lastPreset === 'standard' || lastPreset === 'strict') ? (
-                          <Button
-                            type="button"
-                            variant="link"
-                            size="sm"
-                            className="h-auto px-0 text-xs"
-                            onClick={onRestorePreset}
-                            data-testid="restore-preset"
-                          >
-                            {t('restorePreset', { level: t(`protectionLevelValue.${lastPreset}`) })}
-                          </Button>
-                        ) : null}
-                      </div>
-                      {protectionLevel === 'custom' ? (
-                        <p className="text-xs text-muted-foreground" data-testid="custom-protection-hint">
-                          {t('customProtectionHint')}
-                        </p>
-                      ) : null}
-                    </div>
-
                     {/* 超时策略 */}
                     <div className="space-y-4 rounded-lg border p-3" data-testid="timeout-section">
                       <Label>{t('timeoutSectionTitle')}</Label>
-
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-1">
-                          <Label htmlFor="total-timeout">{t('totalTimeout')}</Label>
-                          <Tooltip>
-                            <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />} />
-                            <TooltipContent className="max-w-xs text-xs">{t('totalTimeoutHint')}</TooltipContent>
-                          </Tooltip>
-                        </div>
-                        <div className="relative">
-                          <Input
-                            id="total-timeout"
-                            type="number"
-                            min={1}
-                            max={60}
-                            value={disposal.review.custom_minutes}
-                            onChange={(e) =>
-                              setDisposalDraft((cur) =>
-                                cur
-                                  ? {
-                                      ...cur,
-                                      review: {
-                                        ...cur.review,
-                                        custom_minutes: Math.min(60, Math.max(1, Number(e.target.value) || 0)),
-                                      },
-                                    }
-                                  : cur,
-                              )
-                            }
-                            onBlur={(e) =>
-                              setDisposalDraft((cur) =>
-                                cur
-                                  ? {
-                                      ...cur,
-                                      review: {
-                                        ...cur.review,
-                                        custom_minutes: Math.min(60, Math.max(1, Number(e.target.value) || 1)),
-                                      },
-                                    }
-                                  : cur,
-                              )
-                            }
-                            data-testid="total-timeout-input"
-                            className="pr-12"
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-                            {t('minutes')}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-1">
-                          <Label htmlFor="async-timeout">{t('asyncTimeout')}</Label>
-                          <Tooltip>
-                            <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />} />
-                            <TooltipContent className="max-w-xs text-xs">{t('asyncTimeoutHint')}</TooltipContent>
-                          </Tooltip>
-                        </div>
-                        <div className="relative">
-                          <Input
-                            id="async-timeout"
-                            type="number"
-                            min={1}
-                            max={60}
-                            value={disposal.review.max_recheck_minutes}
-                            onChange={(e) =>
-                              setDisposalDraft((cur) =>
-                                cur
-                                  ? {
-                                      ...cur,
-                                      review: {
-                                        ...cur.review,
-                                        max_recheck_minutes: Math.min(60, Math.max(1, Number(e.target.value) || 0)),
-                                      },
-                                    }
-                                  : cur,
-                              )
-                            }
-                            onBlur={(e) =>
-                              setDisposalDraft((cur) =>
-                                cur
-                                  ? {
-                                      ...cur,
-                                      review: {
-                                        ...cur.review,
-                                        max_recheck_minutes: Math.min(60, Math.max(1, Number(e.target.value) || 1)),
-                                      },
-                                    }
-                                  : cur,
-                              )
-                            }
-                            data-testid="async-timeout-input"
-                            className="pr-12"
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-                            {t('minutes')}
-                          </span>
-                        </div>
-                      </div>
 
                       <div className="flex items-center justify-between rounded-lg border p-3">
                         <div>
@@ -544,24 +366,26 @@ export function DispositionPolicyCard() {
 
                       <div className="space-y-2">
                         <Label>{t('timeoutTempDisposal')}</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {TIMEOUT_DISPOSITIONS.map((d) => (
-                            <Button
-                              key={d}
-                              type="button"
-                              size="sm"
-                              variant={(disposal.review.timeout_temp_disposal || 'deliver') === d ? 'default' : 'outline'}
-                              onClick={() =>
-                                setDisposalDraft((cur) =>
-                                  cur ? { ...cur, review: { ...cur.review, timeout_temp_disposal: d } } : cur,
-                                )
-                              }
-                              data-testid={`timeout-temp-${d}`}
-                            >
-                              {t(`timeoutTempValue.${d}`)}
-                            </Button>
-                          ))}
-                        </div>
+                        <Select
+                          value={disposal.review.timeout_temp_disposal || 'deliver'}
+                          onValueChange={(v) =>
+                            setDisposalDraft((cur) =>
+                              cur
+                                ? { ...cur, review: { ...cur.review, timeout_temp_disposal: v as PhishTimeoutTempDisposal } }
+                                : cur,
+                            )
+                          }
+                        >
+                          <SelectTrigger className="w-full" data-testid="timeout-temp-select"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {TIMEOUT_DISPOSITIONS.map((d) => (
+                              <SelectItem key={d} value={d} data-testid={`timeout-temp-${d}`}>
+                                {t(`timeoutTempValue.${d}`)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">{t('timeoutTempDisposalHint')}</p>
                         {(disposal.review.timeout_temp_disposal || 'deliver') === 'mark' ? (
                           <div className="space-y-2 rounded-md border bg-muted/30 p-3">
                             <Label htmlFor="timeout-mark-text">{t('timeoutMarkText')}</Label>
@@ -613,6 +437,113 @@ export function DispositionPolicyCard() {
                           </div>
                         ) : null}
                       </div>
+
+                      <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+                        <CollapsibleSectionTrigger className="h-9" data-testid="timeout-advanced-trigger">
+                          {t('advancedSettings')}
+                        </CollapsibleSectionTrigger>
+                        <CollapsibleContent className="mt-3 space-y-4">
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-1">
+                              <Label htmlFor="total-timeout">{t('totalTimeout')}</Label>
+                              <Tooltip>
+                                <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />} />
+                                <TooltipContent className="max-w-xs text-xs">{t('totalTimeoutHint')}</TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <div className="relative">
+                              <Input
+                                id="total-timeout"
+                                type="number"
+                                min={1}
+                                max={60}
+                                value={disposal.review.custom_minutes}
+                                onChange={(e) =>
+                                  setDisposalDraft((cur) =>
+                                    cur
+                                      ? {
+                                          ...cur,
+                                          review: {
+                                            ...cur.review,
+                                            custom_minutes: Math.min(60, Math.max(1, Number(e.target.value) || 0)),
+                                          },
+                                        }
+                                      : cur,
+                                  )
+                                }
+                                onBlur={(e) =>
+                                  setDisposalDraft((cur) =>
+                                    cur
+                                      ? {
+                                          ...cur,
+                                          review: {
+                                            ...cur.review,
+                                            custom_minutes: Math.min(60, Math.max(1, Number(e.target.value) || 1)),
+                                          },
+                                        }
+                                      : cur,
+                                  )
+                                }
+                                data-testid="total-timeout-input"
+                                className="pr-12"
+                              />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                                {t('minutes')}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-1">
+                              <Label htmlFor="async-timeout">{t('asyncTimeout')}</Label>
+                              <Tooltip>
+                                <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />} />
+                                <TooltipContent className="max-w-xs text-xs">{t('asyncTimeoutHint')}</TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <div className="relative">
+                              <Input
+                                id="async-timeout"
+                                type="number"
+                                min={1}
+                                max={60}
+                                value={disposal.review.max_recheck_minutes}
+                                onChange={(e) =>
+                                  setDisposalDraft((cur) =>
+                                    cur
+                                      ? {
+                                          ...cur,
+                                          review: {
+                                            ...cur.review,
+                                            max_recheck_minutes: Math.min(60, Math.max(1, Number(e.target.value) || 0)),
+                                          },
+                                        }
+                                      : cur,
+                                  )
+                                }
+                                onBlur={(e) =>
+                                  setDisposalDraft((cur) =>
+                                    cur
+                                      ? {
+                                          ...cur,
+                                          review: {
+                                            ...cur.review,
+                                            max_recheck_minutes: Math.min(60, Math.max(1, Number(e.target.value) || 1)),
+                                          },
+                                        }
+                                      : cur,
+                                  )
+                                }
+                                data-testid="async-timeout-input"
+                                className="pr-12"
+                              />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                                {t('minutes')}
+                              </span>
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
                     </div>
 
                     {/* 置信度分级处置策略 */}
