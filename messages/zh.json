@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测智能���������",
+    "spoofingDetection": "仿冒邮件检测智能�����������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -537,7 +537,7 @@
       "sendCount": "发信量",
       "threatCount": "威胁量",
       "blockRate": "拦截率",
-      "bounceCount": "退信量",
+      "bounceCount": "���信量",
       "relatedSenders": "关联发信人",
       "firstSend": "首次发信",
       "subjectKeyword": "主题关键词",
@@ -704,11 +704,11 @@
       "editButton": "编辑",
       "deleteButton": "删除",
       "drawerTitleNew": "新建转发规则",
-      "drawerTitleEdit": "编辑转发规则",
+      "drawerTitleEdit": "编辑转发规��",
       "drawerDescription": "在 SMTP 握手阶段决定连接的接入与过滤策略",
       "sectionBasic": "基础信息",
       "sectionMatch": "匹配条件",
-      "sectionSimulator": "规则模拟器",
+      "sectionSimulator": "规���模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
       "matchInfoBanner": "各条件为 AND 关系需同时满足；其中来源 IP 与「使用 SPF 记录」为 OR 关系，任一命中即通过来源认证。",
       "fields": {
@@ -2073,7 +2073,7 @@
         "name": "出口 IP",
         "nameRequired": "请选择出口 IP",
         "empty": "请先在网络设置配置出口 IP",
-        "domainNotVerified": "发信域须先完成归属校验"
+        "domainNotVerified": "发信域须先���成归属校验"
       },
       "outbound": {
         "title": "出站规则",
@@ -2461,7 +2461,7 @@
     "failReasons": {
       "wrongPassword": "密码错误",
       "userNotExist": "账号不存在",
-      "accountLocked": "账号锁定",
+      "accountLocked": "账��锁定",
       "serverTimeout": "服务器超时",
       "connectionRefused": "连接拒绝",
       "certError": "证书��误",
@@ -3232,7 +3232,7 @@
     },
     "mailStatuses": {
       "pending": "待处理",
-      "processing": "处理中",
+      "processing": "处理��",
       "completed": "已完成",
       "delivered": "已投递",
       "accepted": "已放行",
@@ -3717,7 +3717,7 @@
     "basicSettings": "基础设置",
     "remarkTitle": "备注说明",
     "remarkPlaceholder": "可选，规则说明或备注信息...",
-    "saveAndEnable": "保存并启用",
+    "saveAndEnable": "保存并启��",
     "blacklistRuleDesc": "配置IP黑名单规则，阻断或处置指定IP地址/段",
     "whitelistRuleDesc": "配置IP白名单规则��信任的IP直接放行或标记",
     "addBlacklistRule": "新建黑名单规则",
@@ -3808,7 +3808,7 @@
     "importFileLoaded": "{name}（{count} 条）",
     "importFileClear": "清除已选文件",
     "importJsonInvalid": "JSON 解析失败，请上传「导出」生成的 .json 文件",
-    "importJsonNotEnvelope": "不是有效的规则导出文件（缺少 data.rules）",
+    "importJsonNotEnvelope": "不是有效的规则导出文件���缺少 data.rules）",
     "importJsonWrongScope": "不是 IP 黑白名单的导出文件",
     "importJsonEmpty": "导出文件中没有规则",
     "importJsonBadRule": "规��数据不完整或非 IP 规���",
@@ -3842,7 +3842,7 @@
   },
   "rblFilter": {
     "title": "RBL 过滤",
-    "description": "基于实时黑名单的邮件安全过滤",
+    "description": "基于实时黑名单的邮件安全��滤",
     "serverList": "RBL 服务器列表",
     "addServer": "添加服务器",
     "deleteServer": "删除服务器",
@@ -4058,7 +4058,7 @@
       "whitelistModeRequired": "请选择白名单模式",
       "invalidEmail": "请输入有效的邮箱地址",
       "invalidDomain": "请输入有效的域名",
-      "selectGroup": "请选择群组",
+      "selectGroup": "请选择��组",
       "senderValueRequired": "请输入发信人邮箱",
       "ipValueRequired": "请输入IP地址",
       "invalidIp": "请输入有效的IP地址",
@@ -4107,7 +4107,7 @@
     "searchPlaceholder": "搜索规则名称或发信人...",
     "description": "描述",
     "priority": "优先级",
-    "priorityHelp": "数值越大优先级越高，优先级高的规则先匹配",
+    "priorityHelp": "数值越大优先级越高，优先��高的规则先匹配",
     "senderType": "发信人",
     "drawerSubtitleBlacklist": "配置发信人黑名单规则，阻断或处置指定发���人",
     "drawerSubtitleWhitelist": "��置发信人白名单规则，信��的发信人直接放行",
@@ -4257,7 +4257,7 @@
     "typeLabel": "类型",
     "matchCondition": "匹配条件",
     "matchTypeTip": "选择关键词、正则表达式或全局内容组进行匹配",
-    "matchTypeKeyword": "关键词",
+    "matchTypeKeyword": "关��词",
     "matchTypeRegex": "正则表达式",
     "matchTypeContentGroup": "内容组",
     "matchContent": "匹配内容",
@@ -4723,7 +4723,7 @@
     },
     "recipientLimit": {
       "title": "收信人数量限制",
-      "description": "按方向限制单封邮件可投递的收件人数量，支持详细模式和合并模式。",
+      "description": "按方向限制单封邮件可投递的收件人数量，支持详细模��和合并模式。",
       "enabled": "启用",
       "modeLabel": "模式",
       "mode": {
@@ -4914,7 +4914,7 @@
     },
     "examples": {
       "toggle": "查看配置示例",
-      "normalName": "正常用户场景",
+      "normalName": "正常用户场��",
       "normalDesc": "日常办公发信，不触发规则",
       "normalEffect": "正常用户日发50封邮件，使用2个IP，未触��规则",
       "stolenName": "账号被盗场景",
@@ -5249,7 +5249,7 @@
     },
     "sandbox": {
       "placeholder": {
-        "title": "URL 沙箱检测",
+        "title": "URL 沙箱检���",
         "desc": "��功能将在后续版本提供。当前版本仅支持链接保护。"
       },
       "toggle": "沙箱检测",
@@ -5705,7 +5705,7 @@
     },
     "switchConfirm": {
       "title": "确认切换为副本（replica）？",
-      "description": "本节点当前有 {count} 条全局规则（不含租户规则）。切换为 replica 后，首次同步会用主节点的全量快照覆盖本地全局规则：快照之外的规则会被删除，同 uid/同名的规则会被主节点版本覆盖，此操作不可逆。租户规则（tenant_id 非空）不受影响。请确认已在主节点核实规则内容后再继续。",
+      "description": "本节点当前有 {count} 条全局规则（不含租户规则）。切换为 replica 后，首次同步会用主节点的全量快照覆盖本地全局规则：快照之外的规则会被删除，同 uid/同名的规则会��主节点版本覆盖，此操作不可逆。租户规则（tenant_id 非空）不受影响。请确认已在主节点核实规则内容后再继续。",
       "confirmText": "确认切换为 replica",
       "cancelText": "取消"
     },
@@ -6048,7 +6048,7 @@
       "colRecipient": "收件人",
       "colMailSystem": "邮件系统",
       "notRecallable": "(不可召回)",
-      "force": "强制召回",
+      "force": "���制召回",
       "recallRead": "召回已读邮���",
       "recallUnread": "召回未读��件",
       "cancel": "取消",
@@ -6225,7 +6225,7 @@
             "exportPdf": "导出PDF报告",
             "markFalsePositive": "标记误报",
             "markFalseNegative": "标记漏报",
-            "addToInvestigation": "加入调查任务"
+            "addToInvestigation": "加入调���任务"
           },
           "blacklistDialog": {
             "title": "确认将发信人 \"{sender}\" 加入黑名单？",
@@ -7562,7 +7562,7 @@
     "intervalHint": "建议 15-60 分钟，避免通知过于频繁",
     "activePeriod": "生效时段",
     "startTime": "开始时间",
-    "endTime": "结束时间",
+    "endTime": "���束时间",
     "currentPeriod": "当前生效时段：{start} - {end}",
     "basicSettings": "基本设置",
     "taskTimeout": "任务超时",
@@ -8316,7 +8316,7 @@
       "dmlRate": "DML 速率"
     },
     "storage": {
-      "partitions": "磁盘分区使用率",
+      "partitions": "磁盘分区��用率",
       "backupTasks": "备份任务列表",
       "execTime": "执行时间",
       "duration": "耗时",
@@ -8715,7 +8715,7 @@
   "timeoutEditTitle": "编辑超时策略",
   "timeoutEditDescription": "保存后仅更新本页草稿，点击页面底部「保存」才会真正生效；取消丢弃改动。",
 
-      "description": "运行模式决定是否执���处置，防护等级与置信度分级决定如何处置；超时策略对所有旁路检测生效。",
+      "description": "运行模式决定是否执行处置，防护等级与置信度分级决定处置方式；超时策略对所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败��运行模式仍按真实引擎配置展示。",
@@ -9054,7 +9054,7 @@
       "cancelConfirmDescription": "当前抽屉中有未保存的修改，关闭后将无法恢复。",
       "continueEditing": "继续编辑",
       "discardChanges": "放弃修改",
-      "warnSensThreshold": "检测灵敏度极高时，建议置信度阈值 ≥ 80 以避免误报",
+      "warnSensThreshold": "检测���敏度极高时，建议置信度阈值 ≥ 80 以避免误报",
       "errDiscardNeedsAlert": "丢弃动作必须开启告警通知",
       "errEmailDup": "该邮箱已作为保护对象存在",
       "errEmailInvalid": "请输入合法的邮箱地址",
@@ -9254,7 +9254,7 @@
       "hint": {
         "snapshot": "当前快照，不受时间范围筛选影响。",
         "range": "按当前时间范围统计。",
-        "recallSuccess": "按当前时间范围内的召回最终结果统计；所有目标成功才计为成功。",
+        "recallSuccess": "按当前时间范围内的召回最终结果统计；所有目标成功才计为成功���",
         "recallFailure": "按当前时间范围内的召回最终结果统计；部分成功归入召回失败。",
         "rate": "当前时间范围内发现漏报数 / 扫描邮件数���"
       }
@@ -9652,7 +9652,7 @@
     "addSource": "新增数据源",
     "appIdPlaceholder": "如 app-8821",
     "authCodePlaceholderNew": "请输入授权码",
-    "autoSyncDesc": "开启后按 Cron 周期自动拉取远端数据",
+    "autoSyncDesc": "开启后按 Cron 周期自���拉取远端数据",
     "autoSyncOff": "关闭",
     "autoSyncOn": "开启",
     "autoSyncTitle": "开启自动同步",
@@ -10221,7 +10221,7 @@
     "antivirusHint": "反病毒服务器地址与病毒库为平台级配置，统一作用于全部租户；租户侧仅可设置病毒处置动作。",
     "modules": {
       "ipFrequency": "IP 频率限制",
-      "ipFilter": "IP 黑白名单",
+      "ipFilter": "IP ���白名单",
       "rbl": "RBL 过滤",
       "overseas": "海外邮件检测",
       "ipFrequencySummary": "阈值: {threshold} 次/分钟",
@@ -10728,7 +10728,7 @@
         "notify_frequency_invalid": "通知频率取值无效，只能是：{allowed}",
         "notify_time_format_invalid": "通知时间「{value}」格式不正确，应为 HH:MM（00:00–23:59）",
         "notify_times_empty": "通知频率不为「从不」时，至少要设置一个通知时间",
-        "permission_unknown": "无法识别的权限项「{value}」",
+        "permission_unknown": "无法识别的权限项��{value}」",
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
         "portal_base_url_invalid": "外部访问地址不是合法的网址",
         "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到，请填写网关对外可达的地址",
@@ -10953,7 +10953,7 @@
       "code_immutable": "租户编码创建后不可修改",
       "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请先放行或清除后再删除租户",
       "next_hop_pair_required": "下一跳主机与端口必须同时填写",
-      "next_hop_triad_required": "下一跳类型、主机与端口必须同时填写",
+      "next_hop_triad_required": "下一跳类型、主机与端���必须同时填写",
       "next_hop_host_empty": "下一跳主机不能为空"
     },
     "tenant_routing": {
@@ -11093,7 +11093,7 @@
       "not_found": "邮件认证配置不存在",
       "server_fields_required": "请填写协议、服务器地址和端口",
       "auth_timeout_out_of_range": "认证超时时间必须在 {min}-{max} 秒之间",
-      "protocol_unsupported": "不支持的协议"
+      "protocol_unsupported": "不支持��协议"
     },
     "admin_audit": {
       "tenant_admin_has_no_tenant_bound": "该租户管理员未绑定任何租户",
