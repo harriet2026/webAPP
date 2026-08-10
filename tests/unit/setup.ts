@@ -50,3 +50,10 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
     writable: true,
   });
 }
+
+// cmdk 在按键/搜索时会对高亮项调用 scrollIntoView 以保持其可见；jsdom 未实现该
+// API。补一个 no-op，避免所有 Command 列表交互测试因 "scrollIntoView is not a
+// function" 崩溃。
+if (!HTMLElement.prototype.scrollIntoView) {
+  HTMLElement.prototype.scrollIntoView = () => {};
+}
