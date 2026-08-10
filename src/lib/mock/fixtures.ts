@@ -468,7 +468,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ─────────────────────────────────────────────────────────────────────
+// ─── 租户 ────────────────────────────────────────────────��────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -2005,7 +2005,7 @@ function phishingRecipientDispositions(
   }));
 }
 
-let mockPhishingDetectionLogsState: DetectionLogItem[] = [
+const mockPhishingDetectionLogsState: DetectionLogItem[] = [
   {
     sideline_id: 'ph-100001',
     message_id: '<8f2c1a0001@corp-outlook-mail.com>',
@@ -2767,7 +2767,7 @@ export function mockSystemHealthSummary(): {
 // ─── IP 频率限制（对齐 demo `mock-data.ts`）─────────────────────────────────
 //
 // 数据结构对齐 webapp `IPFrequencyRuleView`（webapp/src/types/ip-frequency.ts）：
-//   - 顶层包含 `Rule`（id/name/priority/is_active/...）+ 字段大写开头限值列
+//   - 顶层包含 `Rule`（id/name/priority/is_active/...）+ 字段大写开���限值列
 //     (DailyConnectionLimit / WindowMinutes / ...) + SuspendMinutes 等
 //   - ScopeType: 'all' | 'single' | 'range'
 //   - SuspendMinutes: number（demo 用 '15min'/'1hour'/'none' 字符串，这里转成分钟数）
@@ -5454,7 +5454,7 @@ export function mockRecipientCheckConfig(): RecipientCheckConfig {
 //
 // tag 用 `grp:<demoId>`（对齐 brief）。这批群组和 sender_filter 的群组
 // （`mockSenderFilterGroupsList`）虽然都命中 `page=<GROUPS_PAGE_KEY>`，但 dispatcher
-// 用 `include` 参数把两者分流（behavior-control 抽屉发 `include=member_count`，
+// 用 `include` 参数把两者分流（behavior-control 抽屉��� `include=member_count`，
 // sender_filter 发 `include=member_count,reference_count`），互不污染，因此这里可以
 // 安全沿用通用的 'grp:' 前缀。
 function behaviorGroupRule(o: {
@@ -6152,7 +6152,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "incoming",
     sender: "support@bank-verify.com",
     recipients: "user@company.com, sales@company.com, marketing@company.com",
-    subject: "账户安全验证通知（多投信）",
+    subject: "账户安全验���通知（多投信）",
     action: "block",
     reason: "AI-URL沙箱检测到钓鱼页面",
     mailType: "phishing",
@@ -8637,7 +8637,7 @@ export function mockContactSyncLogDetail(id: number) {
   return deepClone({ ...rest, failures: { items: failures, total: failures.length, page: 1, page_size: 200 } });
 }
 
-// CSV 上传/预览（Mock 模式下由 organization/api.ts 短路调用）
+// CSV 上传/预览（Mock 模式下由 organization/api.ts ���路调用）
 export function mockContactCSVUpload() {
   return { upload_token: 'mock-upload-token', user_file_ref: 'mock-user.csv', headers: ['邮箱', '姓名', '部门', '职务'] };
 }
