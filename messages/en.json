@@ -8726,8 +8726,15 @@
       "colRange": "Confidence range",
       "colMin": "Min",
       "colMax": "Max",
+      "colRiskLevel": "Risk level",
       "colDisposition": "Disposition",
       "colMarkSettings": "Mark settings",
+      "riskLevel": {
+        "suspicious": "Suspicious",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
       "markPosition": {
         "subject_prefix": "Subject prefix",
         "header": "Header",

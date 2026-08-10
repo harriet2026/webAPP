@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { HelpCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
   Table,
@@ -13,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { bandRiskLevelBadgeClass, bandRiskLevelForIndex } from '@/components/phishing-detection/badge-styles';
 import type { BandDisposition, PhishBand } from '@/types/phishing-config';
 
 const MAX_PREFIX_LEN = 20;
@@ -69,6 +71,16 @@ export function ConfidenceBandsTable({ bands, onChange, disabled }: Props) {
   const errMsg = validateBandsContiguous(bands);
   const errText = errMsg ? t(`validation.${errMsg.code}`, errMsg.values) : null;
 
+  // 风险等级按置信度从低到高的排名派生（可疑 → 低危 → 中危 → 高危），不落库、
+  // 不新增字段——按 min 排序而非数组原始顺序，避免用户手动改动 min/max 后
+  // 行与行的相对顺序临时错位时，等级标签跟着错乱。
+  const riskRankByIndex = new Map(
+    bands
+      .map((_, i) => i)
+      .sort((a, b) => bands[a].min - bands[b].min)
+      .map((originalIdx, rank) => [originalIdx, rank]),
+  );
+
   const patchBand = (idx: number, patch: Partial<PhishBand>) => {
     onChange(bands.map((b, i) => (i === idx ? { ...b, ...patch } : b)));
   };
@@ -104,6 +116,7 @@ export function ConfidenceBandsTable({ bands, onChange, disabled }: Props) {
           <TableHeader>
             <TableRow>
               <TableHead className="min-w-32">{t('colRange')}</TableHead>
+              <TableHead className="min-w-24">{t('colRiskLevel')}</TableHead>
               <TableHead className="min-w-28">{t('colDisposition')}</TableHead>
               <TableHead className="min-w-48">{t('colMarkSettings')}</TableHead>
             </TableRow>
@@ -135,6 +148,14 @@ export function ConfidenceBandsTable({ bands, onChange, disabled }: Props) {
                       data-testid={`band-max-${idx}`}
                     />
                   </div>
+                </TableCell>
+                <TableCell className="py-2">
+                  <Badge
+                    className={bandRiskLevelBadgeClass(bandRiskLevelForIndex(riskRankByIndex.get(idx) ?? idx, bands.length))}
+                    data-testid={`band-risk-level-${idx}`}
+                  >
+                    {t(`riskLevel.${bandRiskLevelForIndex(riskRankByIndex.get(idx) ?? idx, bands.length)}`)}
+                  </Badge>
                 </TableCell>
                 <TableCell className="py-2">
                   <DispositionSelect
