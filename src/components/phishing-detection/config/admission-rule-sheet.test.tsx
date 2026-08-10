@@ -24,7 +24,6 @@ vi.mock('@/lib/api/client', async (importOriginal) => {
 vi.mock('@/lib/api/phishing-config', () => ({
   createAdmissionRule: (...args: unknown[]) => createAdmissionRuleMock(...args),
   updateAdmissionRule: vi.fn(),
-  getAdmissionTagSuggestions: vi.fn().mockResolvedValue([]),
 }));
 
 import { AdmissionRuleSheet } from './admission-rule-sheet';

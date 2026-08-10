@@ -862,7 +862,7 @@
         "editButton": "编辑",
         "deleteButton": "删除",
         "emptyText": "暂无通道，建议先配置自定义通道",
-        "proxyDeletedBadge": "代理已删���������",
+        "proxyDeletedBadge": "代理已删�����������",
         "systemDefaultHelo": "系统默认",
         "drawerTitleNew": "新建投递通道",
         "drawerTitleEdit": "编辑投递通道",
@@ -1336,7 +1336,7 @@
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
-    "targetGroups": "适用对象",
+    "targetGroups": "适用对���",
     "policyConfig": "策略配置",
     "priority": "优先级",
     "newPolicy": "新建群组策略",
@@ -1636,7 +1636,7 @@
     "preview": "预览",
     "noItems": "无隔离邮件",
     "confirmRelease": "确定要释放选中的邮件吗？",
-    "eyebrow": "隔离区",
+    "eyebrow": "���离区",
     "subtitle": "按发件人、主题、放行状态和原因筛选被隔离的邮件，然后预览或批量放行所选项。",
     "releaseToOptional": "释放至（可选，留空则投递给原收件人）",
     "releaseToPlaceholder": "留空投递给原收件人"
@@ -2077,7 +2077,7 @@
       },
       "outbound": {
         "title": "出站规则",
-        "description": "出站邮件的内容审核与放行策略",
+        "description": "出站邮���的内容审核与放行策略",
         "ruleCount": "出站规则数",
         "smtpCount": "SMTP 凭证数",
         "manageTitle": "管理出站策略",
@@ -2430,7 +2430,7 @@
     "occurredAt": "发生时间",
     "logId": "日志编号",
     "eyebrow": "日志审计",
-    "subtitle": "记录发信认证模块每一次认证尝试的结果，用于安全审计与异常排查",
+    "subtitle": "记录发信认证模块每一次认证尝试的结果，用于安全审计与异���排查",
     "protocol": "协议",
     "scene": "场景",
     "domain": "域名",
@@ -2822,7 +2822,7 @@
     "members": "成员代理服务器",
     "addMember": "添加成员代理服务器",
     "noMoreEndpoints": "没有更多可选代理服务器",
-    "membersEmptyHint": "至少添加一个代理服务器；顺序即 failover 顺序（上者先）。",
+    "membersEmptyHint": "至少添加��个代理服务器；顺序即 failover 顺序（上者先）。",
     "createEndpoint": "新建代理服务器",
     "editEndpoint": "编辑代理服务器",
     "deleteEndpoint": "删除代理服务器",
@@ -3194,7 +3194,7 @@
       "rank_urls": "排序候选 URL",
       "llm_analysis": "LLM 分析",
       "analyze_traceback": "分析威胁回溯",
-      "evaluate_rule_candidates": "评估候选规则",
+      "evaluate_rule_candidates": "评估候��规则",
       "complete": "完成"
     },
     "relatedObjectLabels": {
@@ -3537,7 +3537,7 @@
       "suspendFor": "额外封禁 {duration}",
       "suspendLogTip": "阈值触发后仅当次处置，不会额外封禁 IP。如需封禁请配置挂起策略。",
       "priorityLabel": "优先级：",
-      "lowerFirst": "（越大越优先）",
+      "lowerFirst": "��越大越优先）",
       "validityLabel": "有效期：",
       "permanent": "永久有效",
       "conditionDaily": "当日连接超过 {count} 次",
@@ -3561,7 +3561,7 @@
       "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1小时。",
       "antiSpam": "防滥发邮件",
       "antiSpamDesc": "限制高频发信行为，防止垃圾邮件泛滥",
-      "antiSpamEffect": "每15分钟内连接超过200次，或当日累计超过5000次，将被封禁1小时。",
+      "antiSpamEffect": "每15分钟内连接超过200次，或���日累计超过5000次，将被封禁1小时。",
       "useThis": "使用该示例"
     },
     "simulator": {
@@ -4716,7 +4716,7 @@
       "day": "当天"
     },
     "dim": {
-      "mail_count": "发出邮件的总数上限",
+      "mail_count": "���出邮件的总数上限",
       "ip_count": "使用发信IP个数上限",
       "recipient_count": "收信人总人数上限",
       "attachment_size": "发出附件总大小上限(MB)"
@@ -4920,7 +4920,7 @@
       "stolenName": "账号被盗场景",
       "stolenDesc": "异常高频发信，触发隔离",
       "stolenEffect": "盗号者15分钟用10个IP发信200封，触发隔离",
-      "salesName": "销售部群发场景",
+      "salesName": "销售部���发场景",
       "salesDesc": "正常业务群发，阈值宽松",
       "salesEffect": "销售部正常日报群发500人，域内方向阈值宽松，不触发外发规则",
       "fill": "点击填充示例"
@@ -5152,7 +5152,7 @@
       "recursiveDetect": "递归检测",
       "passwordBook": {
         "globalTitle": "平台全局密码本",
-        "systemAdminOnly": "密码本由平台统一维护，仅系统管理员可查看和修改",
+        "systemAdminOnly": "密码本���平台统一维护，仅系统管理员可查看和修改",
         "newPasswordPlaceholder": "输入新密码",
         "delete": "删除",
         "title": "密码本",
@@ -5391,7 +5391,7 @@
     "actionLabel": "处置动作",
     "sendMarkUnsupported": "外发方向不支持\"标记投递\"动作，相关配置将自动降级为\"隔离\"",
     "internalMarkUnsupported": "域内方向不支持\"标记投递\"动作，相关配置将自动降级为\"隔离\"",
-    "directionMarkUnsupported": "外发/域内方向不支持\"标记投递\"，相关动作将自动降级为\"隔离\"",
+    "directionMarkUnsupported": "外发/域内方向不支持\"标记投递\"，相关动��将自动降级为\"隔离\"",
     "highRiskWarning": "高危意图采用标记投递，邮件将投递至用户邮箱，请确认风险",
     "panel": {
       "high": "高危意图",
@@ -5461,7 +5461,7 @@
       "presetLoose": "宽松"
     },
     "applySameRisk": "应用同风险等级",
-    "applySameRiskDone": "已应用到同风险等级的其他意图",
+    "applySameRiskDone": "已应用到同风��等级的其他意图",
     "copyToDirections": "复制到其他方向",
     "reset": "重置为缺省值",
     "save": "保存",
@@ -6060,7 +6060,7 @@
       }
     },
     "similarResults": {
-      "title": "相似邮件",
+      "title": "相似���件",
       "description": "找到 {n} 封相似邮件（按 textsim 聚类）",
       "loading": "正在查找相似邮件...",
       "empty": "未找到相似邮件"
@@ -6235,7 +6235,7 @@
             "scopeGlobal": "全系统",
             "includeSubdomains": "同时拦截该域名下所有地址",
             "success": "已加入黑名单",
-            "failed": "加入黑名单失败"
+            "failed": "加入黑名���失败"
           },
           "whitelistDialog": {
             "title": "确认将发信人 \"{sender}\" 加入白名单？",
@@ -6421,7 +6421,7 @@
         "viewPolicyConfigTitle": "前往策略配置页",
         "platformPolicyModule": "平台管控策略",
         "platformPolicyRuleName": "平台统一管控",
-        "platformPolicyHitDetail": "该邮件由平台连接层策略拦截，如需了解详情请联系平台管理员",
+        "platformPolicyHitDetail": "该邮件由平台连接层策略拦截���如需了解详情请联系平台管理员",
         "platformPolicyListReason": "平台管控策略拦截"
       },
       "delivery": {
@@ -7924,7 +7924,7 @@
       "internalTotal": "域内总量",
       "totalSuccessRate": "总投递成功率",
       "queueBacklog": "总队列积压",
-      "total": "总量",
+      "total": "��量",
       "successRate": "成功率",
       "bounceRate": "退信率",
       "avgLatencyMs": "平均延迟",
@@ -8620,7 +8620,7 @@
       "edit": "编辑",
       "duplicate": "复制",
       "duplicateName": "{name} 副本",
-      "duplicated": "规则已复制，请检查后启用",
+      "duplicated": "��则已复制，请检查后启用",
       "duplicateFailed": "复制失败",
       "delete": "删除",
       "toggled": "已切换启用状态",
@@ -8643,13 +8643,15 @@
       "footer": "共 {total} 条规则 · 已启用 {enabled} 条",
       "namePlaceholder": "规则名称",
       "removeTag": "移除",
-      "tagSectionLabel": "群组 / 标签",
-      "noGroupsHint": "暂无可选群组或标签，可在「群组管理」中创建",
+      "senderGroupSectionLabel": "发信人群组",
+      "noSenderGroupsHint": "暂无发信人群组，请先到「群组管理」创建",
+      "recipientGroupSectionLabel": "收信人群组",
+      "noRecipientGroupsHint": "暂无收信人群组，请先到「群组管理」创建",
       "orgSectionLabel": "组织通讯录（部门或个人）",
       "targetRecipient": "收件人",
       "targetSender": "发信人",
       "targetEither": "收件人或发信人（命中任一侧）",
-      "recipientTagsHint": "群组/标签、部门、个人三者命中任一即满足（OR），按方向自动约束{target}；同时留空表示对所有匹配方向生效。",
+      "recipientTagsHint": "群组、部门、个人三者命中任一即满足（OR），按方向自动约束{target}；同时留空表示对所有匹配方向生效。",
       "recipientFilter": "特定收发信人筛选",
       "allRecipients": "全部收发信人",
       "enabledLabel": "启用该规则",
@@ -8682,7 +8684,7 @@
         "needDirection": "请至少选择一个邮件流方向",
         "qrNoOutbound": "二维码风险信号暂不支持外发方向",
         "needRiskSignal": "请至少启用一个风险信号",
-        "needRecipientTarget": "开启收发信人筛选时至少选择一个群组/标签、部门或个人",
+        "needRecipientTarget": "开启收发信人筛选时至少选择一个群组、部门或个人",
         "maxSizeTooLarge": "邮件大小上限不能超过 100000 MB"
       },
       "direction": {
@@ -8774,7 +8776,7 @@
       "saveFailed": "保存失败",
       "discard": "放弃改动",
       "colRange": "置信度区间",
-      "colMin": "区间下限",
+      "colMin": "区间下��",
       "colMax": "区间上限",
       "colDisposition": "处置动作",
       "colMarkSettings": "标记设置",
@@ -9080,7 +9082,7 @@
       "previewNotifyUnavailable": "模板预览暂不可用",
       "previewNotifyHint": "由后端正式模板渲染，仅预览，不发送邮件",
       "confidenceThresholdHint": "仿冒概率高于此阈值时触发处置动作（0-100）",
-      "adminEmailsHint": "多个邮箱用英文逗号分隔，留空则发送至系统管理员",
+      "adminEmailsHint": "多个邮箱用英文逗号分隔，留空则发送至系统管理���",
       "importKeyword": "联系人",
       "importKeywordPlaceholder": "搜索姓名 / 邮箱 / 部门",
       "importDept": "部门",
@@ -10262,7 +10264,7 @@
     "systemAdminOnly": "仅超级管理员可修改模块总开关",
     "platformManaged": "阶段 1 IP 策略由平台管理员全局管控",
     "selectTenantFirst": "请先选择租户，再修改此模块",
-    "adminOnly": "仅系统管理员或租户管理员可修改此模块",
+    "adminOnly": "仅系统管理员或租户管��员可修改此模块",
     "disableWarning": "关闭本模块后，其全部规则停止生效，该模块的拦截能力将不再起作用。",
     "whitelistWarning": "注意：本模块的白名单 / 放行规则也会一并停用，原本��放行的邮件将继续走后续检测。",
     "saveFailed": "保存失败，请重试",
@@ -10442,7 +10444,7 @@
     "cannotUndo": "此操作不可撤销",
     "cancel": "取消",
     "confirm": "确认",
-    "moduleEnabled": "已启用",
+    "moduleEnabled": "���启用",
     "moduleDisabled": "已禁用",
     "loadFailed": "加载失败",
     "retry": "重试",
@@ -10829,7 +10831,7 @@
       "group_not_found": "代理分组不存在，可能已被删除",
       "group_referenced_by_routes": "该分组正被外发路由规则引用，不能删除，请先移除相关路由规则",
       "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP 地址），或留空",
-      "license_key_missing": "服务端未配置授权加密密钥，无法保存授权信息，请联系管理员",
+      "license_key_missing": "服务端未配置授权加密密钥，无法保存授权���息，请联系管理员",
       "member_endpoint_duplicate": "同一个节点不能在分组里重复出现",
       "member_endpoint_id_invalid": "分组成员的节点必须是有效选择",
       "member_ord_duplicate": "分组成员的排序值不能重复",
@@ -10843,7 +10845,7 @@
       "name_required": "请填写角色名称",
       "not_found": "角色不存在，可能已被删除",
       "scope_invalid": "角色范围无效，只能是：{allowed}",
-      "status_invalid": "角色状态无效，只能是：{allowed}",
+      "status_invalid": "角色���态无效，只能是：{allowed}",
       "super_admin_required": "管理平台级角色需要超级管理员权限",
       "system_default_cannot_delete": "系统内置角色不能删除",
       "system_default_cannot_disable": "系统内置角色与超级管理员角色不能停用",

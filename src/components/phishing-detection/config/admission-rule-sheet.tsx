@@ -21,7 +21,7 @@ import { X } from 'lucide-react';
 import { useApiRequest } from '@/lib/api/client';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { GROUPS_LIST_QUERY, ruleToGroup } from '@/lib/api/groups';
-import { createAdmissionRule, updateAdmissionRule, getAdmissionTagSuggestions } from '@/lib/api/phishing-config';
+import { createAdmissionRule, updateAdmissionRule } from '@/lib/api/phishing-config';
 import { OrgContactTreeSelect } from '@/components/organization/org-contact-tree-select';
 import type { PhishAdmissionRule } from '@/types/phishing-config';
 import type { Rule } from '@/types/unified-rules';
@@ -63,33 +63,37 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
   const [filterOn, setFilterOn] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // 收件人/内容群组供下拉多选（spec §4.1：两类群组均可作为收件人筛选目标）。
-  // 注意：后端 ListUnifiedRules 不读 group_type 参数，按 rule_class/stage/page 过滤，
-  // 所以只发一次请求、在客户端按 g.type 区分（与 ContentRulesPage 一致），并按名字去重，
-  // 避免重复渲染以及把 ip/sender 群组错误地暴露为收件人筛选目标。
-  const { data: groups = [] } = useQuery<string[]>({
-    queryKey: ['recipient-content-groups'],
+  // 群组策略中的发信人群组 / 收信人群组供下拉多选（不再体现自由标签，也不再暴露
+  // content 类型群组——关键词库属于邮件内容维度，与"筛选收发信人"语义不符）。
+  // 后端 ListUnifiedRules 不读 group_type 参数，按 rule_class/stage/page 过滤，
+  // 所以只发一次请求、在客户端按 g.type 分流到 sender/recipient 两组（与
+  // ContentRulesPage 一致），并按名字去重，避免重复渲染。
+  const { data: groupsByType } = useQuery<{ sender: string[]; recipient: string[] }>({
+    queryKey: ['sender-recipient-groups'],
     queryFn: async () => {
       const resp = await apiRequest<{ items: unknown[] }>(
         `/unified-rules?${new URLSearchParams(GROUPS_LIST_QUERY)}`,
       );
-      const seen = new Set<string>();
-      const names: string[] = [];
+      const seenSender = new Set<string>();
+      const seenRecipient = new Set<string>();
+      const sender: string[] = [];
+      const recipient: string[] = [];
       for (const item of resp.items ?? []) {
         const g = ruleToGroup(item as Rule);
-        if (!g || (g.type !== 'recipient' && g.type !== 'content')) continue;
-        if (seen.has(g.name)) continue;
-        seen.add(g.name);
-        names.push(`grp:${g.name}`);
+        if (!g) continue;
+        if (g.type === 'sender' && !seenSender.has(g.name)) {
+          seenSender.add(g.name);
+          sender.push(`grp:${g.name}`);
+        } else if (g.type === 'recipient' && !seenRecipient.has(g.name)) {
+          seenRecipient.add(g.name);
+          recipient.push(`grp:${g.name}`);
+        }
       }
-      return names;
+      return { sender, recipient };
     },
   });
-
-  const { data: tagSuggestions = [] } = useQuery<string[]>({
-    queryKey: ['admission-tag-suggestions'],
-    queryFn: () => getAdmissionTagSuggestions(apiRequest),
-  });
+  const senderGroups = groupsByType?.sender ?? [];
+  const recipientGroups = groupsByType?.recipient ?? [];
 
   // 进抽屉时快照 draft（keyed by open + rule identity，无 useEffect）。
   const baseKey = `${open ? 'open' : 'closed'}:${rule?.id ?? 'new'}:${rule?.name ?? ''}`;
@@ -182,6 +186,12 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
     return t('targetRecipient');
   }, [draft.directions, t]);
 
+  // 群组策略里的发信人/收信人群组区块各自只在对应方向出现（互斥显示，与组织
+  // 通讯录的方向语义一致）：勾选「外发」时只展示发信人群组；勾选「接收」/
+  // 「域内」时只展示收信人群组；两类方向同时勾选则两个区块都展示。
+  const showSenderGroups = draft.directions.includes('outbound');
+  const showRecipientGroups = draft.directions.includes('inbound') || draft.directions.includes('internal');
+
   const onSave = async () => {
     if (!valid) {
       toast.error(t('validationFailed'));
@@ -273,62 +283,67 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props)
               </div>
               {filterOn && (
                 <div className="space-y-4">
-                  {/* Group / tag sub-section：仅支持点选已有群组与标签建议，不再支持手动输
-                      入自由文本（改由组织通讯录承担精确到人/部门的筛选）。 */}
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">{t('tagSectionLabel')}</p>
-                    {tagSuggestions.length === 0 && groups.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">{t('noGroupsHint')}</p>
-                    ) : (
-                      <>
-                        {/* Suggestion buttons from API */}
-                        {tagSuggestions.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5">
-                            {tagSuggestions.map((tag) => {
-                              const on = (draft.recipient_tags ?? []).includes(tag);
-                              return (
-                                <Button key={tag} type="button" size="sm" variant={on ? 'default' : 'outline'}
-                                  onClick={() => (on ? removeTag(tag) : addTag(tag))}>
-                                  {tag}
-                                </Button>
-                              );
-                            })}
-                          </div>
-                        )}
-                        {/* grp: groups */}
-                        {groups.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5">
-                            {groups.map((g) => {
-                              const on = (draft.recipient_tags ?? []).includes(g);
-                              return (
-                                <Button key={g} type="button" size="sm" variant={on ? 'default' : 'outline'}
-                                  onClick={() => (on ? removeTag(g) : addTag(g))}>
-                                  {g.replace(/^grp:/, '')}
-                                </Button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </>
-                    )}
-                    {(draft.recipient_tags ?? []).length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-1" data-testid="rule-tag-list">
-                        {(draft.recipient_tags ?? []).map((tag) => (
-                          <Badge key={tag} variant="secondary" className="gap-1">
-                            {tag}
-                            <button
-                              type="button"
-                              onClick={() => removeTag(tag)}
-                              aria-label={t('removeTag')}
-                              className="ml-0.5"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  {/* 群组策略子区块：只引用群组管理里已有的「发信人群组」/「收信人群组」
+                      两类原子群组，不再体现自由标签，也不再暴露 content 类型的关键词库
+                      （内容维度与"筛选收发信人"语义无关）。按方向互斥显示，与组织通讯录
+                      的方向语义保持一致。 */}
+                  {showSenderGroups && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground">{t('senderGroupSectionLabel')}</p>
+                      {senderGroups.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">{t('noSenderGroupsHint')}</p>
+                      ) : (
+                        <div className="flex flex-wrap gap-1.5">
+                          {senderGroups.map((g) => {
+                            const on = (draft.recipient_tags ?? []).includes(g);
+                            return (
+                              <Button key={g} type="button" size="sm" variant={on ? 'default' : 'outline'}
+                                onClick={() => (on ? removeTag(g) : addTag(g))}>
+                                {g.replace(/^grp:/, '')}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {showRecipientGroups && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground">{t('recipientGroupSectionLabel')}</p>
+                      {recipientGroups.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">{t('noRecipientGroupsHint')}</p>
+                      ) : (
+                        <div className="flex flex-wrap gap-1.5">
+                          {recipientGroups.map((g) => {
+                            const on = (draft.recipient_tags ?? []).includes(g);
+                            return (
+                              <Button key={g} type="button" size="sm" variant={on ? 'default' : 'outline'}
+                                onClick={() => (on ? removeTag(g) : addTag(g))}>
+                                {g.replace(/^grp:/, '')}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {(draft.recipient_tags ?? []).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5" data-testid="rule-tag-list">
+                      {(draft.recipient_tags ?? []).map((tag) => (
+                        <Badge key={tag} variant="secondary" className="gap-1">
+                          {tag.replace(/^grp:/, '')}
+                          <button
+                            type="button"
+                            onClick={() => removeTag(tag)}
+                            aria-label={t('removeTag')}
+                            className="ml-0.5"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
 
                   {/* 组织通讯录：整体部门或定位到具体人员 */}
                   <div className="space-y-2">
