@@ -36,12 +36,7 @@ import { cn } from '@/lib/utils';
 import { useApiRequest, ApiError } from '@/lib/api/client';
 import { getBands, getEngineConfig, putBands, putEngineConfig } from '@/lib/api/phishing-config';
 import { getDisposalSettings, putDisposalSettings } from '@/lib/api/disposal-settings';
-import type {
-  PhishTenantEngineParams,
-  PhishRunMode,
-  PhishObserveAction,
-  PhishBand,
-} from '@/types/phishing-config';
+import type { PhishTenantEngineParams, PhishRunMode, PhishBand } from '@/types/phishing-config';
 import { detectProtectionLevel, PHISHING_PRESETS } from './protection-presets';
 import type { DisposalSettings } from '@/types/disposal-settings';
 import { ConfidenceBandsTable, defaultBands, validateBandsContiguous } from './confidence-bands-editor';
@@ -52,7 +47,6 @@ function isValidationError(err: unknown): string | null {
 }
 
 const RUN_MODES: PhishRunMode[] = ['realtime', 'observe'];
-const OBSERVE_ACTIONS: PhishObserveAction[] = ['deliver', 'mark'];
 
 // A large radio-style option card used for the two mutually-exclusive choices
 // in this drawer (run mode, observe action). Purely presentational — the
@@ -220,10 +214,21 @@ export function DispositionPolicyCard() {
   // ---- collapsed-card summary (always reads the baseline, never the draft) ----
   const baselineRunMode: PhishRunMode = engineBaseline?.run_mode ?? 'realtime';
   const baselineObserveMode = baselineRunMode === 'observe';
+  // 观察模式不再有「投递/标记」两个可选动作，改成一个"是否追加标记"的开关；
+  // 摘要据此拼出"不追加标记"或"追加标记（位置列表）"。
+  const observeMarkStatus = (() => {
+    if (!engineBaseline) return '';
+    if (engineBaseline.observe_action !== 'mark') return t('observeMarkOff');
+    const positions = engineBaseline.observe_mark_positions ?? [];
+    const positionsText = positions.length
+      ? positions.map((p) => t(`markPosition.${p}`)).join('、')
+      : t('observeMarkNoPosition');
+    return t('observeMarkOn', { positions: positionsText });
+  })();
   const summaryText = !loaded
     ? ''
     : baselineObserveMode
-      ? t('summaryObserve', { action: t(`observeActionValue.${engineBaseline!.observe_action}`) })
+      ? t('summaryObserve', { status: observeMarkStatus })
       : t('summaryRealtime', {
           autoDeliver: disposalBaseline!.review.timeout_auto_deliver ? t('autoDeliverOn') : t('autoDeliverOff'),
           tempDisposal: t(`timeoutTempValue.${disposalBaseline!.review.timeout_temp_disposal || 'deliver'}`),
@@ -331,21 +336,52 @@ export function DispositionPolicyCard() {
                     >
                       {t('observeModeBanner')}
                     </div>
-                    <div className="space-y-2">
-                      <Label>{t('observeAction')}</Label>
-                      <div className="flex flex-col gap-2 sm:flex-row">
-                        {OBSERVE_ACTIONS.map((act) => (
-                          <OptionCard
-                            key={act}
-                            selected={engine.observe_action === act}
-                            title={t(`observeActionValue.${act}`)}
-                            description={t(`observeActionHint.${act}`)}
-                            onClick={() => patchEngine({ observe_action: act })}
-                            testId={`observe-action-${act}`}
-                          />
-                        ))}
+                    <div className="flex items-center justify-between rounded-lg border p-3">
+                      <div>
+                        <div className="text-sm font-medium">{t('observeMarkEnabled')}</div>
+                        <p className="text-xs text-muted-foreground">{t('observeMarkEnabledHint')}</p>
                       </div>
+                      <Switch
+                        checked={engine.observe_action === 'mark'}
+                        onCheckedChange={(v) => patchEngine({ observe_action: v ? 'mark' : 'deliver' })}
+                        data-testid="observe-mark-switch"
+                      />
                     </div>
+
+                    {engine.observe_action === 'mark' ? (
+                      <div className="space-y-2 rounded-md border bg-muted/30 p-3" data-testid="observe-mark-config">
+                        <Label htmlFor="observe-mark-text">{t('observeMarkText')}</Label>
+                        <Input
+                          id="observe-mark-text"
+                          value={engine.observe_mark_text ?? ''}
+                          maxLength={20}
+                          onChange={(e) => patchEngine({ observe_mark_text: e.target.value })}
+                          data-testid="observe-mark-text"
+                        />
+                        <p className="text-xs text-muted-foreground">{t('observeMarkTextHint')}</p>
+                        <div className="flex flex-wrap items-center gap-3">
+                          {(['subject_prefix', 'header'] as const).map((pos) => {
+                            const positions = new Set(engine.observe_mark_positions ?? []);
+                            return (
+                              <label key={pos} className="flex items-center gap-1 text-xs">
+                                <input
+                                  type="checkbox"
+                                  className="h-3.5 w-3.5"
+                                  checked={positions.has(pos)}
+                                  onChange={() => {
+                                    if (positions.has(pos)) positions.delete(pos);
+                                    else positions.add(pos);
+                                    patchEngine({ observe_mark_positions: Array.from(positions) });
+                                  }}
+                                  data-testid={`observe-mark-pos-${pos}`}
+                                />
+                                {t(`markPosition.${pos}`)}
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 ) : (
                   <>

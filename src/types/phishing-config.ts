@@ -32,6 +32,11 @@ export interface PhishTenantEngineParams {
   netdisk_spoof: boolean;
   run_mode: PhishRunMode;
   observe_action: PhishObserveAction;
+  // 观察模式下"追加标记"是否命中主题前缀/邮件头，以及标记文案。仅在
+  // observe_action === 'mark' 时生效；"投递"（不追加标记）不需要这两个字段。
+  // 前端新增字段，尚待后端契约确认。
+  observe_mark_positions?: string[];
+  observe_mark_text?: string;
   protection_level: PhishProtectionLevel;
 }
 

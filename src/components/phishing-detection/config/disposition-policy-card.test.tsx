@@ -131,16 +131,58 @@ describe('DispositionPolicyCard summary + drawer (智能体调查与处置)', ()
     expect(screen.queryByTestId('disposition-edit-sheet')).not.toBeInTheDocument();
   });
 
-  it('shows the observe-mode banner and observe-action summary when baseline is observe mode', async () => {
+  it('shows the observe-mode banner and mark-status summary when baseline has marking enabled', async () => {
     getEngineConfigMock.mockResolvedValue({
-      engine: makeEngine({ run_mode: 'observe', observe_action: 'mark' }),
+      engine: makeEngine({
+        run_mode: 'observe',
+        observe_action: 'mark',
+        observe_mark_positions: ['subject_prefix', 'header'],
+      }),
       version: 1,
     });
     renderCard();
 
     expect(await screen.findByTestId('observe-mode-banner')).toBeInTheDocument();
     expect(screen.getByTestId('run-mode-badge')).toHaveTextContent('观察模式');
-    expect(screen.getByTestId('run-mode-summary')).toHaveTextContent('观察动作：标记');
+    expect(screen.getByTestId('run-mode-summary')).toHaveTextContent('观察模式：追加标记（主题前缀、邮件头）');
+  });
+
+  it('shows a "no marking" summary when baseline has marking disabled', async () => {
+    getEngineConfigMock.mockResolvedValue({
+      engine: makeEngine({ run_mode: 'observe', observe_action: 'deliver' }),
+      version: 1,
+    });
+    renderCard();
+
+    expect(await screen.findByTestId('run-mode-summary')).toHaveTextContent('观察模式：不追加标记');
+  });
+
+  it('toggles the observe mark switch and reveals position checkboxes only while enabled', async () => {
+    getEngineConfigMock.mockResolvedValue({
+      engine: makeEngine({ run_mode: 'observe', observe_action: 'deliver' }),
+      version: 1,
+    });
+    renderCard();
+
+    fireEvent.click(await screen.findByTestId('policy-edit'));
+    expect(await screen.findByTestId('disposition-edit-sheet')).toBeInTheDocument();
+
+    expect(screen.queryByTestId('observe-mark-config')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('observe-mark-switch'));
+    expect(await screen.findByTestId('observe-mark-config')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('observe-mark-pos-subject_prefix'));
+    fireEvent.change(screen.getByTestId('observe-mark-text'), { target: { value: '【观察】' } });
+
+    fireEvent.click(screen.getByTestId('policy-save'));
+
+    await waitFor(() => expect(putEngineConfigMock).toHaveBeenCalledTimes(1));
+    expect(putEngineConfigMock.mock.calls[0][0]).toMatchObject({
+      observe_action: 'mark',
+      observe_mark_positions: ['subject_prefix'],
+      observe_mark_text: '【观察】',
+    });
   });
 
   it('opens the drawer with a cloned draft and discards edits on Cancel without calling any PUT', async () => {

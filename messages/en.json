@@ -8647,12 +8647,15 @@
       "title": "Agent Investigation & Disposition",
       "runModeFootnote": "The two modes are mutually exclusive; only one applies at a time.",
       "summaryRealtime": "Auto-deliver on timeout: {autoDeliver} · Timeout temp disposition: {tempDisposal} · Bands: {bandsCount}",
-      "summaryObserve": "Observe action: {action}",
+      "summaryObserve": "Observe mode: {status}",
       "observeModeBanner": "Observe mode is on. The current configuration only detects and marks messages; it does not quarantine, review, or recall them.",
-      "observeActionHint": {
-        "deliver": "Deliver straight to the recipient's inbox; only the detection result is logged, invisible to the user.",
-        "mark": "Add an observe mark to the subject or header before delivery, so admins can identify observed samples."
-      },
+      "observeMarkEnabled": "Add a mark while observing",
+      "observeMarkEnabledHint": "When on, the system adds a mark to the subject prefix or header before releasing the message, so observed samples can be identified later; when off, the message is released silently with no mark.",
+      "observeMarkOn": "Marking on ({positions})",
+      "observeMarkOff": "No marking",
+      "observeMarkNoPosition": "No position selected",
+      "observeMarkText": "Mark prefix",
+      "observeMarkTextHint": "Up to 20 characters.",
       "timeoutEditTitle": "Edit timeout policy",
       "timeoutEditDescription": "Applying here only updates the page draft; click Save at the bottom of the page to persist it. Cancel discards the edits.",
       "description": "Run mode decides whether disposition runs at all; protection level and confidence bands decide how. Timeout policy applies to all sideline checks.",
@@ -8679,11 +8682,6 @@
         "observe": "Runs the full detection pipeline, but replaces disposition actions with the preset Observe Action below — for tuning and canary observation only."
       },
       "runModeCascadeHint": "Realtime detection runs first; if it finishes before the timeout, the Realtime Disposition Policy applies. If it times out and async timeout handling is enabled, the Timeout Temp Disposition releases the message while detection continues in the background, then the Async Recall Policy recalls or notifies based on the final result. If it times out and async timeout handling is disabled, the Timeout Temp Disposition applies directly and no further detection runs.",
-      "observeAction": "Observe action",
-      "observeActionValue": {
-        "deliver": "Deliver",
-        "mark": "Mark"
-      },
       "timeoutSectionTitle": "Timeout timeline",
       "timeoutScopeNote": "Total timeout / async timeout apply to all sideline checks.",
       "soon": "Coming soon",

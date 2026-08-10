@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测智能�����",
+    "spoofingDetection": "仿冒邮件检测智能�������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -644,7 +644,7 @@
       "generatedAt": "生成时间",
       "noData": "暂无数据",
       "topSection": "TOP 排名",
-      "printHint": "提示：使用浏览器的打印功能可保存为 PDF"
+      "printHint": "提示：使用浏览器的��印功能可保存为 PDF"
     },
     "connCaliberTip": "按 SMTP 会话计数。成功指服务器对 EHLO/HELO 回了 250；投递结果不影响连接判定。",
     "connDrilldownUnitTip": "下方子维度按邮件计数，非按会话计数。"
@@ -1188,7 +1188,7 @@
     "globalRule": "全局规则",
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除，只有系统管理员可编辑部分字段",
-    "systemRuleEditBanner": "正在编辑系统��线规则��只允许修改 action / priority / 条��阈值��其��字段已锁定。",
+    "systemRuleEditBanner": "正在编��系统��线规则��只允许修改 action / priority / 条��阈值��其��字段已锁定。",
     "stage": "阶段"
   },
   "tagRules": {
@@ -1837,7 +1837,7 @@
       "delivery_status_summary": "投递状态",
       "workflow_outcome_summary": "工作流结果",
       "delivery_attempts": "投递次数",
-      "last_delivery_event_at": "最后投递事件",
+      "last_delivery_event_at": "最后投递��件",
       "delivery_error_summary": "投递错误",
       "delivery_recipients_summary": "收件人投递详情",
       "tenant_id": "租户 ID",
@@ -2045,7 +2045,7 @@
         "auth": "发信认证"
       },
       "actions": {
-        "configure": "配置路由",
+        "configure": "配置���由",
         "back": "返回"
       },
       "receiving": {
@@ -4130,7 +4130,7 @@
     "sectionBasic": "基础设置",
     "sectionAction": "执行动作",
     "expireAt": "有效期至",
-    "expireAtHint": "留空表示永久有效",
+    "expireAtHint": "留空表示���久有效",
     "remark": "备��",
     "remarkPlaceholder": "添加备注信息������多200字）",
     "viewExamples": "查看配置示例",
@@ -4533,7 +4533,7 @@
       "notSigned": "未签名",
       "pendingVerify": "待验证",
       "manage": "管理",
-      "loading": "加载中…",
+      "loading": "���载中…",
       "selectTenant": "请��在页��顶部选择一个租户，再管理其 DKIM 外发签��。",
       "noDomains": "该租户暂无发信域名，请先在「租户域名管理」中添加域名后再配置签名。"
     },
@@ -5146,7 +5146,7 @@
       "mode_decrypt": "检测并解密",
       "maxPasswordAttempts": "最大密码尝试次数",
       "passwordSources": "密码来源",
-      "extractFromBody": "从邮件正文提取密码",
+      "extractFromBody": "从邮件���文提取密码",
       "extractFromFilename": "从文件��提取密��",
       "usePasswordBook": "使用密码本",
       "recursiveDetect": "递归检测",
@@ -5762,7 +5762,7 @@
       "templateOverwriteConfirm": "覆盖保存",
       "templateLimitWarning": "已达上限（{max} 个），保存将删除最旧的一条模板",
       "templateApplyConfirmTitle": "应用搜索模板",
-      "templateApplyConfirmDesc": "应用「{name}」将替换当前所有搜索条件，是否继续？",
+      "templateApplyConfirmDesc": "应用「{name}」��替换当前所有搜索条件，是否继续？",
       "templateApplyConfirm": "确认应用",
       "cancel": "取消",
       "save": "保��",
@@ -6050,7 +6050,7 @@
       "notRecallable": "(不可召回)",
       "force": "强制召回",
       "recallRead": "召回已读邮件",
-      "recallUnread": "召回未读邮件",
+      "recallUnread": "召回未读��件",
       "cancel": "取消",
       "confirm": "确认召回",
       "errors": {
@@ -6251,7 +6251,7 @@
           "linksTab": "链接 ({n})",
           "attachmentsTab": "附件 ({n})",
           "globalHint": "当前实体处置将作用于全局策略，影响所有收件人。",
-          "noLinks": "未检测到链接",
+          "noLinks": "未检��到链接",
           "noAttachments": "未检测到附件",
           "blacklistDomain": "域名加黑",
           "blacklistUrl": "URL加黑",
@@ -6961,7 +6961,7 @@
       },
       "desc_senderIp": {
         "source": "SMTP连接��",
-        "usage": "匹配发信服务器IP地址",
+        "usage": "匹配发信���务器IP地址",
         "note": "支持CIDR格式，如10.0.0.0/8"
       },
       "desc_senderIpGroup": {
@@ -7458,7 +7458,7 @@
     "reset": "重置",
     "saveSuccess": "设置已保存",
     "saveFailed": "保存失败",
-    "tabQuarantine": "隔离区设置",
+    "tabQuarantine": "隔离区设���",
     "tabReview": "审核设置",
     "tabRecall": "召回策略设置",
     "notificationSettings": "通知设置",
@@ -7614,7 +7614,7 @@
     "category": "分类",
     "notifyStatus": "状态",
     "portalBaseUrlRequired": "请先填写合法的外部访问地址（https），开启权限后该地址用于生成通知链接。",
-    "portalBaseUrlMissingHint": "外部访问地址未填写——取回、预览、加白、加黑权限依赖该地址生成通知链接，请先填写后再开启对应权限。"
+    "portalBaseUrlMissingHint": "外部访问地址未填写——取回、预览、加白、加黑权限依赖该地址生成通知链接，请先填写后再开启��应权限。"
   },
   "dkim": {
     "column": "DKIM",
@@ -8023,7 +8023,7 @@
       "retry": "重试",
       "mockSummary": "## 投递健康摘要\n\n整体投递成功率稳定。外发队列仍在健康范围内，建议持续关注 P99 延迟和目标域名退信率。"
     },
-    "dataLag": "数据更新于约 {minutes} ��钟前",
+    "dataLag": "数据更���于约 {minutes} ��钟前",
     "dataLagHours": "统计数据更新于约 {hours} 小时前",
     "loadFailed": "投递统计加载失败，请稍后重试。",
     "retry": "重试",
@@ -8703,12 +8703,15 @@
   "title": "智能体调查与处置",
   "runModeFootnote": "两种模式互斥，同一时间仅生效一种",
   "summaryRealtime": "超时自动投递：{autoDeliver} · 超时临时处置：{tempDisposal} · 分级策略：{bandsCount} 个区间",
-  "summaryObserve": "观察动作：{action}",
+  "summaryObserve": "观察模式：{status}",
   "observeModeBanner": "观察模式已开启，当前配置仅执行检测与标记，不执行隔离、审核、召回等实质性处置动作。",
-  "observeActionHint": {
-  "deliver": "直接投递至用户收件箱，后台仅记录检测结果，用户无感知。",
-  "mark": "在邮件主题或邮件头中增加观察标记后投递，便于管理员识别观察样本。"
-  },
+  "observeMarkEnabled": "观察期间追加标记",
+  "observeMarkEnabledHint": "开启后，系统会在放行邮件前按下方设置在主题前缀或邮件头中追加标记，便于后续排查观察样本；关闭则静默放行，不做任何标记。",
+  "observeMarkOn": "追加标记（{positions}）",
+  "observeMarkOff": "不追加标记",
+  "observeMarkNoPosition": "未选择标记位置",
+  "observeMarkText": "标记前缀",
+  "observeMarkTextHint": "最长 20 字符。",
   "timeoutEditTitle": "编辑超时策略",
   "timeoutEditDescription": "保存后仅更新本页草稿，点击页面底部「保存」才会真正生效；取消丢弃改动。",
 
@@ -8736,11 +8739,6 @@
         "observe": "开启后，系统执行完整检测流程，但将实质性处置动作替换为下方预设的观察动作，仅用于策略调优与灰度观察。"
       },
       "runModeCascadeHint": "优先实时检测，超时前完成即按「实时处置策略」执行；若超时且启用超时异步处理，则按「超时临时处置」放行，后台继续检测，完成后按「异步召回策略」执行召回或通知；若超时且禁用超时异步处理，则直接按「超时临时处置」执行，后台不再检测。",
-      "observeAction": "观察动作",
-      "observeActionValue": {
-        "deliver": "投递",
-        "mark": "标记"
-      },
       "timeoutSectionTitle": "超时时间线",
       "timeoutScopeNote": "总超时 / 超时异步对所有旁路检测生效。",
       "soon": "即将支持",
@@ -8999,7 +8997,7 @@
       "editTitle": "编辑保护对象",
       "modeSingle": "单个录入",
       "modePaste": "批量粘贴",
-      "modeContacts": "从组织架构导入",
+      "modeContacts": "从组��架构导入",
       "sourceRecommended": "推荐",
       "sourceContactsTitle": "从组织架构导入",
       "sourceContactsDesc": "搜索并选择特定人员，自动填充身份信息，支持多选批量创建。",
@@ -9056,7 +9054,7 @@
       "errPasteOverLimit": "批量添加单次最多 20 条",
       "pasteIssue": "第 {line} 行：{reason}",
       "pasteIssueReason": {
-        "format": "请按 姓名,邮箱 ��式填写",
+        "format": "请按 姓名,邮箱 ��式填���",
         "email": "邮箱格式不正确",
         "duplicate": "邮箱在本次粘贴中重复",
         "existing": "该邮箱已是保护对象"
@@ -9426,7 +9424,7 @@
       },
       "disposition": {
         "pending_recall": "待召回",
-        "recalled": "已召��",
+        "recalled": "已召����",
         "alert_only": "仅告警",
         "false_positive": "误报"
       },
@@ -9873,7 +9871,7 @@
       "source": "来源",
       "node": "节点",
       "metric": "指标",
-      "currentValue": "当前值",
+      "currentValue": "���前值",
       "threshold": "阈值",
       "firstSeen": "首次发生",
       "lastSeen": "最近发生",
@@ -10471,7 +10469,7 @@
     "errorTitle": "操作失败",
     "errorDesc": "请稍后重试或联系管理员。",
     "confirmTitle": "确认将发件人加入黑名单",
-    "confirmHint": "加入后，该发件人发给您的邮件将被直接拒收。",
+    "confirmHint": "加入后，该发件人发给���的邮件将被直接拒收。",
     "confirmButton": "确认加黑",
     "addedTitle": "已加入黑名单",
     "addedDesc": "该发件人已加入您的黑名单。"
@@ -10819,7 +10817,7 @@
       "id_invalid": "审核条目 ID 无效",
       "not_found": "审核条目不存在，可能已被处理",
       "not_pending": "该条目已不在待审核状态，��正在被其他人处理",
-      "operation_in_progress": "该邮件正有另一个处置操作在进行，请稍后重试"
+      "operation_in_progress": "该邮件正有另一个处置操作在进行，请���后重试"
     },
     "proxysvr": {
       "cipher_profile_invalid": "加密��件档位无效，只能是：{allowed}",
@@ -11063,7 +11061,7 @@
     },
     "rule_test_eml": {
       "file_missing": "请选择要上传的 EML 文件",
-      "file_too_large": "文件过大，最多 {max_mb} MB",
+      "file_too_large": "文件过大，最�� {max_mb} MB",
       "file_unreadable": "文件无法读取",
       "condition_tree_invalid": "条件树 JSON 格式不正确",
       "condition_tree_or_rule_id_required": "请提供条件树或规则 ID",
