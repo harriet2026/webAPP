@@ -200,18 +200,33 @@ describe('DispositionPolicyCard summary + drawer (智能体调查与处置)', ()
     expect(screen.getByTestId('timeout-mark-pos-header')).toBeInTheDocument();
   });
 
-  it('renders the "正文" mark position as disabled and unchecked (backend not yet supported)', async () => {
+  it('does not render a "正文" mark position option', async () => {
     renderCard();
 
     fireEvent.click(await screen.findByTestId('policy-edit'));
     await screen.findByTestId('disposition-edit-sheet');
 
-    const bodyCheckbox = screen.getByTestId('timeout-mark-pos-body') as HTMLInputElement;
-    expect(bodyCheckbox).toBeDisabled();
-    expect(bodyCheckbox.checked).toBe(false);
+    expect(screen.queryByTestId('timeout-mark-pos-body')).not.toBeInTheDocument();
+  });
 
-    fireEvent.click(bodyCheckbox);
-    expect(bodyCheckbox.checked).toBe(false);
+  it('hides "超时临时处置" when "启用超时异步处理" is off, and shows it when on', async () => {
+    getDisposalSettingsMock.mockResolvedValue(makeDisposal({ timeout_auto_deliver: false }));
+    renderCard();
+
+    fireEvent.click(await screen.findByTestId('policy-edit'));
+    await screen.findByTestId('disposition-edit-sheet');
+
+    // Off by baseline: the section is hidden.
+    expect(screen.queryByTestId('timeout-temp-disposal-section')).not.toBeInTheDocument();
+
+    // Turning the switch on reveals it.
+    fireEvent.click(screen.getByTestId('auto-deliver-switch'));
+    expect(await screen.findByTestId('timeout-temp-disposal-section')).toBeInTheDocument();
+
+    // Turning it back off prompts a confirmation; confirming hides the section again.
+    fireEvent.click(screen.getByTestId('auto-deliver-switch'));
+    fireEvent.click(await screen.findByTestId('timeout-close-confirm'));
+    await waitFor(() => expect(screen.queryByTestId('timeout-temp-disposal-section')).not.toBeInTheDocument());
   });
 
   it('normalizes a legacy timeout_temp_disposal baseline (e.g. "deliver") to "mark" on save', async () => {

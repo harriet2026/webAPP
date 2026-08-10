@@ -359,80 +359,62 @@ export function DispositionPolicyCard() {
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label>{t('timeoutTempDisposal')}</Label>
-                        <p className="text-xs text-muted-foreground">{t('timeoutTempDisposalHint')}</p>
-                        {/* 超时临时处置目前只保留「标记」这一种动作（已去掉"正常投递"/"按沙箱
-                            透视结果处置"），因此不再需要选择器——直接展示标记配置。 */}
-                        <div className="space-y-2 rounded-md border bg-muted/30 p-3" data-testid="timeout-temp-mark-config">
-                          <Label htmlFor="timeout-mark-text">{t('timeoutMarkText')}</Label>
-                          <Input
-                            id="timeout-mark-text"
-                            value={disposal.review.timeout_mark_text ?? ''}
-                            maxLength={20}
-                            onChange={(e) =>
-                              setDisposalDraft((cur) =>
-                                cur
-                                  ? { ...cur, review: { ...cur.review, timeout_mark_text: e.target.value } }
-                                  : cur,
-                              )
-                            }
-                            data-testid="timeout-mark-text"
-                          />
-                          <p className="text-xs text-muted-foreground">{t('timeoutMarkTextHint')}</p>
-                          <div className="flex flex-wrap items-center gap-3">
-                            {(['subject_prefix', 'header'] as const).map((pos) => {
-                              const positions = new Set(disposal.review.timeout_mark_positions ?? []);
-                              return (
-                                <label key={pos} className="flex items-center gap-1 text-xs">
-                                  <input
-                                    type="checkbox"
-                                    className="h-3.5 w-3.5"
-                                    checked={positions.has(pos)}
-                                    onChange={() => {
-                                      if (positions.has(pos)) positions.delete(pos);
-                                      else positions.add(pos);
-                                      setDisposalDraft((cur) =>
-                                        cur
-                                          ? {
-                                              ...cur,
-                                              review: {
-                                                ...cur.review,
-                                                timeout_mark_positions: Array.from(positions),
-                                              },
-                                            }
-                                          : cur,
-                                      );
-                                    }}
-                                    data-testid={`timeout-mark-pos-${pos}`}
-                                  />
-                                  {t(`markPosition.${pos}`)}
-                                </label>
-                              );
-                            })}
-                            {/* "正文" 标记位置：后端 timeout_mark_positions 校验尚未支持 body，
-                                先只在 UI 上占位并禁用，避免勾选后保存触发 400。 */}
-                            <Tooltip>
-                              <TooltipTrigger
-                                render={
-                                  <label className="flex items-center gap-1 text-xs text-muted-foreground/60 cursor-not-allowed">
+                      {disposal.review.timeout_auto_deliver ? (
+                        <div className="space-y-2" data-testid="timeout-temp-disposal-section">
+                          <Label>{t('timeoutTempDisposal')}</Label>
+                          <p className="text-xs text-muted-foreground">{t('timeoutTempDisposalHint')}</p>
+                          {/* 超时临时处置目前只保留「标记」这一种动作（已去掉"正常投递"/"按沙箱
+                              透视结果处置"），因此不再需要选择器——直接展示标记配置。 */}
+                          <div className="space-y-2 rounded-md border bg-muted/30 p-3" data-testid="timeout-temp-mark-config">
+                            <Label htmlFor="timeout-mark-text">{t('timeoutMarkText')}</Label>
+                            <Input
+                              id="timeout-mark-text"
+                              value={disposal.review.timeout_mark_text ?? ''}
+                              maxLength={20}
+                              onChange={(e) =>
+                                setDisposalDraft((cur) =>
+                                  cur
+                                    ? { ...cur, review: { ...cur.review, timeout_mark_text: e.target.value } }
+                                    : cur,
+                                )
+                              }
+                              data-testid="timeout-mark-text"
+                            />
+                            <p className="text-xs text-muted-foreground">{t('timeoutMarkTextHint')}</p>
+                            <div className="flex flex-wrap items-center gap-3">
+                              {(['subject_prefix', 'header'] as const).map((pos) => {
+                                const positions = new Set(disposal.review.timeout_mark_positions ?? []);
+                                return (
+                                  <label key={pos} className="flex items-center gap-1 text-xs">
                                     <input
                                       type="checkbox"
-                                      className="h-3.5 w-3.5 cursor-not-allowed"
-                                      checked={false}
-                                      disabled
-                                      readOnly
-                                      data-testid="timeout-mark-pos-body"
+                                      className="h-3.5 w-3.5"
+                                      checked={positions.has(pos)}
+                                      onChange={() => {
+                                        if (positions.has(pos)) positions.delete(pos);
+                                        else positions.add(pos);
+                                        setDisposalDraft((cur) =>
+                                          cur
+                                            ? {
+                                                ...cur,
+                                                review: {
+                                                  ...cur.review,
+                                                  timeout_mark_positions: Array.from(positions),
+                                                },
+                                              }
+                                            : cur,
+                                        );
+                                      }}
+                                      data-testid={`timeout-mark-pos-${pos}`}
                                     />
-                                    {t('markPosition.body')}
+                                    {t(`markPosition.${pos}`)}
                                   </label>
-                                }
-                              />
-                              <TooltipContent className="text-xs">{t('soon')}</TooltipContent>
-                            </Tooltip>
+                                );
+                              })}
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      ) : null}
 
                       <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
                         <CollapsibleSectionTrigger className="h-9" data-testid="timeout-advanced-trigger">
