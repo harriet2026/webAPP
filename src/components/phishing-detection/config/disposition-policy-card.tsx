@@ -146,7 +146,13 @@ export function DispositionPolicyCard() {
     // 结果处置"），在此归一化，避免存量数据（旧值 deliver/by_result）流入编辑态。
     disposalDraftClone.review.timeout_temp_disposal = 'mark';
     setDisposalDraft(disposalDraftClone);
-    setBandsDraft(structuredClone(bandsBaseline));
+    // 「置信度分级处置」的"放行"（accept）动作已从可选项中移除；若存量配置里
+    // 仍带有旧值，在此归一化为"进行下一步"（mark，不预置标记位置/文案）。
+    setBandsDraft(
+      structuredClone(bandsBaseline).map((b) =>
+        (b.disposition as string) === 'accept' ? { ...b, disposition: 'mark' } : b,
+      ),
+    );
     setAdvancedOpen(false);
     setSheetOpen(true);
   };

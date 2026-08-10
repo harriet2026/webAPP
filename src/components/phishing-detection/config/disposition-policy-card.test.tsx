@@ -95,7 +95,7 @@ function makeDisposal(overrides: Partial<DisposalSettings['review']> = {}): Disp
 }
 
 const STANDARD_BANDS: PhishBand[] = [
-  { min: 0, max: 40, disposition: 'accept' },
+  { min: 0, max: 40, disposition: 'mark' },
   { min: 40, max: 70, disposition: 'mark', mark_positions: ['subject_prefix'], mark_text: '[可疑]' },
   { min: 70, max: 90, disposition: 'quarantine' },
   { min: 90, max: 100, disposition: 'quarantine' },
@@ -241,6 +241,41 @@ describe('DispositionPolicyCard summary + drawer (智能体调查与处置)', ()
     await waitFor(() => expect(putDisposalSettingsMock).toHaveBeenCalledTimes(1));
     expect(putDisposalSettingsMock).toHaveBeenCalledWith(
       expect.objectContaining({ review: expect.objectContaining({ timeout_temp_disposal: 'mark' }) }),
+      apiRequestMock,
+    );
+  });
+
+  it('offers "进行下一步/审核/隔离/拒收/丢弃" as band disposition options, with no "放行" option', async () => {
+    renderCard();
+
+    fireEvent.click(await screen.findByTestId('policy-edit'));
+    await screen.findByTestId('disposition-edit-sheet');
+
+    const select = screen.getByTestId('band-disposition-0-native') as HTMLSelectElement;
+    const optionTexts = Array.from(select.options).map((o) => o.text);
+    expect(optionTexts).toEqual(['进行下一步', '审核', '隔离', '拒收', '丢弃']);
+    expect(optionTexts).not.toContain('放行');
+  });
+
+  it('normalizes a legacy band disposition baseline (e.g. "accept") to "mark" on save', async () => {
+    getBandsMock.mockResolvedValue([
+      { min: 0, max: 40, disposition: 'accept' },
+      { min: 40, max: 100, disposition: 'quarantine' },
+    ]);
+    renderCard();
+
+    fireEvent.click(await screen.findByTestId('policy-edit'));
+    await screen.findByTestId('disposition-edit-sheet');
+
+    // The drawer's select for that band already reflects the normalized value.
+    const select = screen.getByTestId('band-disposition-0-native') as HTMLSelectElement;
+    expect(select.value).toBe('mark');
+
+    fireEvent.click(screen.getByTestId('policy-save'));
+
+    await waitFor(() => expect(putBandsMock).toHaveBeenCalledTimes(1));
+    expect(putBandsMock).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ min: 0, max: 40, disposition: 'mark' })]),
       apiRequestMock,
     );
   });

@@ -77,7 +77,9 @@ export interface PhishAdmissionRule {
   priority?: number;
 }
 
-export type BandDisposition = 'accept' | 'mark' | 'quarantine';
+// "accept"（放行）已从可选处置动作中移除（UI 层面），保留在联合类型之外——
+// 存量数据里若仍带有旧值 accept，会在草稿归一化时统一转换为 mark（进行下一步）。
+export type BandDisposition = 'mark' | 'audit' | 'quarantine' | 'reject' | 'discard';
 
 export interface PhishBand {
   min: number;

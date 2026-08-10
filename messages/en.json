@@ -8739,10 +8739,11 @@
       "prefixTruncated": "Subject prefix exceeded {max} characters and was truncated.",
       "prefixTruncatedHint": "Subject prefix is capped at {max} characters.",
       "disposition": {
-        "accept": "Accept",
-        "mark": "Mark",
+        "mark": "Proceed",
+        "audit": "Review",
         "quarantine": "Quarantine",
-        "audit": "Audit"
+        "reject": "Reject",
+        "discard": "Discard"
       },
       "observeBanner": "Observe mode does not apply band dispositions.",
       "soon": "Coming soon",

@@ -40,7 +40,7 @@ export function validateBandsContiguous(
 
 export function defaultBands(): PhishBand[] {
   return [
-    { min: 0, max: 40, disposition: 'accept' },
+    { min: 0, max: 40, disposition: 'mark' },
     { min: 40, max: 70, disposition: 'mark', mark_positions: ['subject_prefix'], mark_text: '[可疑]' },
     { min: 70, max: 90, disposition: 'quarantine' },
     { min: 90, max: 100, disposition: 'quarantine' },
@@ -221,16 +221,21 @@ function DispositionSelect({
   testId?: string;
 }) {
   const t = useTranslations('phishingConfig.bands');
+  // 顺序按处置力度从轻到重排列：进行下一步 → 审核 → 隔离 → 拒收 → 丢弃。
   const options: Array<{ value: BandDisposition; label: string }> = [
-    { value: 'accept', label: t('disposition.accept') },
     { value: 'mark', label: t('disposition.mark') },
+    { value: 'audit', label: t('disposition.audit') },
     { value: 'quarantine', label: t('disposition.quarantine') },
+    { value: 'reject', label: t('disposition.reject') },
+    { value: 'discard', label: t('disposition.discard') },
   ];
 
   const colorClass: Record<BandDisposition, string> = {
-    accept: 'border-input',
     mark: 'border-yellow-500/60 text-yellow-700 dark:text-yellow-400',
+    audit: 'border-blue-500/60 text-blue-700 dark:text-blue-400',
     quarantine: 'border-destructive/60 text-destructive',
+    reject: 'border-orange-500/60 text-orange-700 dark:text-orange-400',
+    discard: 'border-muted-foreground/60 text-muted-foreground',
   };
 
   return (

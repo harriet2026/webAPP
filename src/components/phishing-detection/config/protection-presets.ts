@@ -9,7 +9,7 @@ export const PHISHING_PRESETS: Record<'standard' | 'strict', PhishProtectionPres
     level: 'standard',
     version: '2026-08-01',
     bands: [
-      { min: 0, max: 40, disposition: 'accept' },
+      { min: 0, max: 40, disposition: 'mark' },
       { min: 40, max: 70, disposition: 'mark', mark_positions: ['subject_prefix'], mark_text: '[可疑]' },
       { min: 70, max: 90, disposition: 'quarantine' },
       { min: 90, max: 100, disposition: 'quarantine' },
@@ -19,7 +19,7 @@ export const PHISHING_PRESETS: Record<'standard' | 'strict', PhishProtectionPres
     level: 'strict',
     version: '2026-08-01',
     bands: [
-      { min: 0, max: 30, disposition: 'accept' },
+      { min: 0, max: 30, disposition: 'mark' },
       { min: 30, max: 55, disposition: 'mark', mark_positions: ['subject_prefix'], mark_text: '[可疑]' },
       { min: 55, max: 80, disposition: 'quarantine' },
       { min: 80, max: 100, disposition: 'quarantine' },
