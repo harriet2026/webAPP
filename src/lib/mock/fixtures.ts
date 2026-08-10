@@ -137,7 +137,17 @@ import type {
   SmtpConfigPayload,
 } from "@/types/alerts";
 import type { InboundAuditListResponse } from "@/lib/api/inbound-audit";
-import type { PhishingStats } from "@/types/phishing-detection";
+import type {
+  PhishingStats,
+  DetectionLogItem,
+  DetectionLogDetail,
+  DetectionLogListResponse,
+  RecipientDisposition,
+  InvestigationTask,
+  Disposition,
+  BlockResponse,
+  ExemptResponse,
+} from "@/types/phishing-detection";
 import type { SpoofingStats } from "@/types/spoofing-detection";
 import type { ThreatRetroStats } from "@/types/threat-retro";
 import type { MonitorDashboardOverview, MonitorDashboardRange } from "@/lib/api/monitor-dashboard";
@@ -1232,7 +1242,7 @@ export function mockOpsTopCsv(response: OpsTopResponse): string {
 
 export function mockOpsTopAi(): { markdown: string } {
   return {
-    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- 建议优先复核失败率超过 50% 的连接来源及持续飙升对象。\n- 展开行可查看固定近 7 ���趋势与关联子维度。",
+    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- 建议优先复核失败率超过 50% 的连接来源及持续飙升对象。\n- 展开行可查看固��近 7 ���趋势与关联子维度。",
   };
 }
 
@@ -1957,14 +1967,756 @@ export function mockPhishingConfigAudit() {
 }
 
 export function mockPhishingStats(): PhishingStats {
+  const pendingReview = mockPhishingDetectionLogsState.filter((item) => item.disposition === 'audit').length;
+  const recalledCount = mockPhishingDetectionLogsState.filter((item) => item.recall_status === 'recalled').length;
   return {
     today_detected: 12450,
     today_quarantined: 12450,
-    pending_review: 0,
-    today_recalled: 0,
-    recall_success: 0,
-    accuracy: null,
+    pending_review: pendingReview,
+    today_recalled: recalledCount + 1,
+    recall_success: recalledCount,
+    accuracy: 0.978,
   };
+}
+
+// ─── 钓鱼邮件检测总览：研判日志列表 / 详情（mock）───────────────────────────
+// 真实后端: GET /phishing-agent/detection-logs(/:id)、POST .../block、
+// .../exempt。此前只 mock 了 /phishing-agent/stats，检测总览页的日志表格在
+// 纯 mock 模式下始终为空（无后端时看不到任何数据）——这里补一份覆盖全部
+// disposition/recall_status/risk_level/detection_mode 枚举取值的种子数据，
+// 并支持列表关键字/时间范围/多选筛选分页，以及阻断/豁免对种子状态的迁移。
+const PHISHING_LOG_LOADED_AT = Date.now();
+function phishingHoursAgo(hours: number): string {
+  return new Date(PHISHING_LOG_LOADED_AT - hours * 60 * 60 * 1000).toISOString();
+}
+
+function phishingRecipientDispositions(
+  recipients: string[],
+  finalAction: string,
+  status: string,
+  reason?: string,
+): RecipientDisposition[] {
+  return recipients.map((recipient) => ({
+    recipient,
+    original_action: 'deliver',
+    final_action: finalAction,
+    status,
+    reason,
+  }));
+}
+
+let mockPhishingDetectionLogsState: DetectionLogItem[] = [
+  {
+    sideline_id: 'ph-100001',
+    message_id: '<8f2c1a0001@corp-outlook-mail.com>',
+    sender: 'ceo.office@corp-outlook-mail.com',
+    subject: 'CEO紧急付款指示，请尽快处理',
+    recipients: ['finance-manager@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(0.5),
+    investigation_id: 'inv-100001',
+    verdict: 'phishing',
+    risk_level: 'critical',
+    confidence: 0.96,
+    recalls: [],
+    disposition_actions: ['audit_hold'],
+    recipient_dispositions: phishingRecipientDispositions(
+      ['finance-manager@example.com'],
+      'hold',
+      'pending',
+      '高风险商务邮件诈骗（BEC）特征，等待人工复核',
+    ),
+    processed_at: phishingHoursAgo(0.45),
+    disposition: 'audit',
+    detection_mode: 'realtime',
+    recall_status: 'pending_processing',
+    agent_rounds: 5,
+    url_summary: { total: 4, phishing: 3, suspicious: 1, normal: 0 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100002',
+    message_id: '<8f2c1a0002@hr-portal-secure.cn>',
+    sender: 'payroll-alert@hr-portal-secure.cn',
+    subject: '薪资平台安全升级，请立即验证账户',
+    recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(1.5),
+    investigation_id: 'inv-100002',
+    verdict: 'phishing',
+    risk_level: 'critical',
+    confidence: 0.98,
+    recalls: [
+      { receiver: 'hr1@example.com', operate_result: 'success' },
+      { receiver: 'hr2@example.com', operate_result: 'success' },
+      { receiver: 'hr3@example.com', operate_result: 'pending' },
+    ],
+    disposition_actions: ['quarantine', 'recall'],
+    recipient_dispositions: [
+      ...phishingRecipientDispositions(['hr1@example.com', 'hr2@example.com'], 'quarantine', 'success'),
+      ...phishingRecipientDispositions(['hr3@example.com'], 'quarantine', 'pending'),
+    ],
+    processed_at: phishingHoursAgo(1.4),
+    disposition: 'quarantine',
+    detection_mode: 'realtime',
+    recall_status: 'expanded',
+    agent_rounds: 6,
+    url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 },
+    result_truncated: true,
+  },
+  {
+    sideline_id: 'ph-100003',
+    message_id: '<8f2c1a0003@corp-passwd-reset.cn>',
+    sender: 'it-support@corp-passwd-reset.cn',
+    subject: '【重要】密码即将到期，请点击链接重置',
+    recipients: ['hr@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(3),
+    investigation_id: 'inv-100003',
+    verdict: 'phishing',
+    risk_level: 'high',
+    confidence: 0.79,
+    recalls: [],
+    disposition_actions: ['audit_hold'],
+    recipient_dispositions: phishingRecipientDispositions(
+      ['hr@example.com'],
+      'hold',
+      'pending',
+      '疑似钓鱼链接，等待人工复核',
+    ),
+    processed_at: phishingHoursAgo(2.9),
+    disposition: 'audit',
+    detection_mode: 'realtime',
+    recall_status: 'pending_recall',
+    agent_rounds: 4,
+    url_summary: { total: 2, phishing: 1, suspicious: 0, normal: 1 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100004',
+    message_id: '<8f2c1a0004@invoice-verify-service.cn>',
+    sender: 'finance@invoice-verify-service.cn',
+    subject: '发票红字信息表待确认（含链接）',
+    recipients: ['licheng@example.com', 'wangfang@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(4),
+    investigation_id: 'inv-100004',
+    verdict: 'phishing',
+    risk_level: 'high',
+    confidence: 0.88,
+    recalls: [
+      { receiver: 'licheng@example.com', operate_result: 'failed' },
+      { receiver: 'wangfang@example.com', operate_result: 'failed' },
+    ],
+    disposition_actions: ['quarantine', 'recall'],
+    recipient_dispositions: phishingRecipientDispositions(
+      ['licheng@example.com', 'wangfang@example.com'],
+      'quarantine',
+      'success',
+    ),
+    processed_at: phishingHoursAgo(3.9),
+    disposition: 'quarantine',
+    detection_mode: 'realtime',
+    recall_status: 'recall_failed',
+    agent_rounds: 3,
+    url_summary: { total: 2, phishing: 1, suspicious: 1, normal: 0 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100005',
+    message_id: '<8f2c1a0005@oa-portal-cn.com>',
+    sender: 'security-noreply@oa-portal-cn.com',
+    subject: '紧急：您的OA账号将于今日过期，请立即验证',
+    recipients: ['zhangwei@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(6),
+    investigation_id: 'inv-100005',
+    verdict: 'phishing',
+    risk_level: 'critical',
+    confidence: 0.94,
+    recalls: [{ receiver: 'zhangwei@example.com', operate_result: 'success' }],
+    disposition_actions: ['quarantine', 'recall'],
+    recipient_dispositions: phishingRecipientDispositions(['zhangwei@example.com'], 'quarantine', 'success'),
+    processed_at: phishingHoursAgo(5.9),
+    disposition: 'quarantine',
+    detection_mode: 'realtime',
+    recall_status: 'recalled',
+    agent_rounds: 4,
+    url_summary: { total: 3, phishing: 2, suspicious: 1, normal: 0 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100006',
+    message_id: '<8f2c1a0006@bank-verify-alert.com>',
+    sender: 'security@bank-verify-alert.com',
+    subject: '银行账户异常登录提醒，请核实身份',
+    recipients: ['accounting@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(8),
+    investigation_id: 'inv-100006',
+    verdict: 'phishing',
+    risk_level: 'high',
+    confidence: 0.85,
+    recalls: [{ receiver: 'accounting@example.com', operate_result: 'success' }],
+    disposition_actions: ['quarantine', 'recall'],
+    recipient_dispositions: phishingRecipientDispositions(['accounting@example.com'], 'quarantine', 'success'),
+    processed_at: phishingHoursAgo(7.9),
+    disposition: 'quarantine',
+    detection_mode: 'observe',
+    recall_status: 'recalled',
+    agent_rounds: 3,
+    url_summary: { total: 2, phishing: 2, suspicious: 0, normal: 0 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100007',
+    message_id: '<8f2c1a0007@drive-share-cn.net>',
+    sender: 'notify@drive-share-cn.net',
+    subject: '您有一份共享文档待查看',
+    recipients: ['chenjing@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(9),
+    investigation_id: 'inv-100007',
+    verdict: 'suspicious',
+    risk_level: 'medium',
+    confidence: 0.62,
+    recalls: [],
+    disposition_actions: ['mark_subject'],
+    recipient_dispositions: phishingRecipientDispositions(['chenjing@example.com'], 'mark_subject', 'success'),
+    processed_at: phishingHoursAgo(8.9),
+    disposition: 'mark',
+    detection_mode: 'realtime',
+    recall_status: 'none',
+    agent_rounds: 2,
+    url_summary: { total: 1, phishing: 0, suspicious: 1, normal: 0 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100008',
+    message_id: '<8f2c1a0008@example-internal.com>',
+    sender: 'survey@example-internal.com',
+    subject: '内部问卷调研（限时填写）',
+    recipients: ['allstaff@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(11),
+    investigation_id: 'inv-100008',
+    verdict: '',
+    risk_level: 'medium',
+    confidence: 0.55,
+    recalls: [],
+    disposition_actions: ['manual_hold'],
+    recipient_dispositions: phishingRecipientDispositions(
+      ['allstaff@example.com'],
+      'hold',
+      'pending',
+      '需人工判定是否为内部钓鱼演练邮件',
+    ),
+    processed_at: phishingHoursAgo(10.9),
+    disposition: 'manual_hold',
+    detection_mode: 'realtime',
+    recall_status: 'none',
+    agent_rounds: 1,
+    url_summary: { total: 0, phishing: 0, suspicious: 0, normal: 0 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100009',
+    message_id: '<8f2c1a0009@new-vendor-portal.biz>',
+    sender: 'contact@new-vendor-portal.biz',
+    subject: '待研判：来自新域名的邮件',
+    recipients: ['procurement@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(13),
+    investigation_id: 'inv-100009',
+    verdict: '',
+    risk_level: '',
+    confidence: null,
+    recalls: [],
+    disposition_actions: [],
+    recipient_dispositions: phishingRecipientDispositions(['procurement@example.com'], 'pending', 'pending'),
+    disposition: 'processing',
+    detection_mode: 'realtime',
+    recall_status: 'none',
+    agent_rounds: 2,
+    url_summary: { total: 0, phishing: 0, suspicious: 0, normal: 0 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100010',
+    message_id: '<8f2c1a0010@partner-service.com>',
+    sender: 'noreply@partner-service.com',
+    subject: '批量附件扫描排队中',
+    recipients: ['support@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(15),
+    verdict: '',
+    risk_level: '',
+    confidence: null,
+    recalls: [],
+    disposition_actions: [],
+    recipient_dispositions: phishingRecipientDispositions(['support@example.com'], 'pending', 'pending'),
+    disposition: 'pending',
+    detection_mode: '',
+    recall_status: 'none',
+    agent_rounds: 0,
+    url_summary: { total: 0, phishing: 0, suspicious: 0, normal: 0 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100011',
+    message_id: '<8f2c1a0011@shared-drive-link.co>',
+    sender: 'docs@shared-drive-link.co',
+    subject: '检测失败：附件解析异常',
+    recipients: ['legal@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(20),
+    investigation_id: 'inv-100011',
+    verdict: '',
+    risk_level: '',
+    confidence: null,
+    recalls: [],
+    disposition_actions: ['deliver'],
+    recipient_dispositions: phishingRecipientDispositions(
+      ['legal@example.com'],
+      'deliver',
+      'success',
+      '研判任务失败，按默认策略放行',
+    ),
+    processed_at: phishingHoursAgo(19.9),
+    disposition: 'failed',
+    detection_mode: 'realtime',
+    recall_status: 'none',
+    agent_rounds: 1,
+    url_summary: { total: 0, phishing: 0, suspicious: 0, normal: 0 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100012',
+    message_id: '<8f2c1a0012@sf-express.com>',
+    sender: 'logistics@sf-express.com',
+    subject: '7月部门快递到付通知',
+    recipients: ['opsteam@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(26),
+    investigation_id: 'inv-100012',
+    verdict: 'benign',
+    risk_level: 'low',
+    confidence: 0.18,
+    recalls: [],
+    disposition_actions: ['deliver'],
+    recipient_dispositions: phishingRecipientDispositions(['opsteam@example.com'], 'deliver', 'success'),
+    processed_at: phishingHoursAgo(25.9),
+    disposition: 'pass',
+    detection_mode: 'observe',
+    recall_status: 'none',
+    agent_rounds: 1,
+    url_summary: { total: 1, phishing: 0, suspicious: 0, normal: 1 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100013',
+    message_id: '<8f2c1a0013@example.com>',
+    sender: 'pm@example.com',
+    subject: '周报提交提醒',
+    recipients: ['team@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(48),
+    investigation_id: 'inv-100013',
+    verdict: 'benign',
+    risk_level: 'none',
+    confidence: 0.09,
+    recalls: [],
+    disposition_actions: ['deliver'],
+    recipient_dispositions: phishingRecipientDispositions(['team@example.com'], 'deliver', 'success'),
+    processed_at: phishingHoursAgo(47.9),
+    disposition: 'pass',
+    detection_mode: 'observe',
+    recall_status: 'none',
+    agent_rounds: 1,
+    url_summary: { total: 2, phishing: 0, suspicious: 0, normal: 2 },
+    result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100014',
+    message_id: '<8f2c1a0014@legacy-relay.net>',
+    sender: 'unknown@legacy-relay.net',
+    subject: '（主题解析异常）',
+    recipients: ['archive@example.com'],
+    direction: 'inbound',
+    status: 'sidelined',
+    sidelined_at: phishingHoursAgo(90),
+    verdict: '',
+    risk_level: 'none',
+    confidence: null,
+    recalls: [],
+    disposition_actions: [],
+    recipient_dispositions: phishingRecipientDispositions(['archive@example.com'], 'unknown', 'unknown'),
+    disposition: 'unknown',
+    detection_mode: '',
+    recall_status: 'none',
+    agent_rounds: 0,
+    url_summary: { total: 0, phishing: 0, suspicious: 0, normal: 0 },
+    result_truncated: false,
+  },
+];
+
+// 研判详情：仅有 investigation_id 的行才有对应记录，与摘要行的 sideline_id 对齐。
+const mockPhishingInvestigations: Record<string, InvestigationTask> = {
+  'ph-100001': {
+    id: 'inv-100001',
+    summary: '邮件冒充公司 CEO 要求财务人员紧急转账，发件域名与真实域名高度相似（同形字替换），命中 BEC 诈骗特征库。',
+    status: 'completed',
+    risk_level: 'critical',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'sender_domain_check', status: 'completed', message: '发件域名 corp-outlook-mail.com 非公司备案域名，命中相似域名规则' },
+      { name: 'llm_verdict', status: 'completed', message: '文本要素判定为商务邮件诈骗（BEC），置信度 96%' },
+      { name: 'dispatch_action', status: 'completed', message: '转人工审核（audit_hold）' },
+    ],
+    result: {
+      verdict: 'phishing',
+      summary: '典型 CEO 冒充诈骗，要求非常规紧急转账，建议直接拦截并提醒财务核实。',
+      confidence: 0.96,
+      evidence: [
+        { type: 'sender_domain', severity: 'critical', title: '发件域名疑似仿冒', detail: 'corp-outlook-mail.com 与公司真实域名视觉高度相似' },
+        { type: 'content', severity: 'high', title: '异常转账指令', detail: '邮件正文要求跳过正常审批流程紧急付款' },
+      ],
+      details: {
+        url_findings: [
+          { url: 'https://corp-outlook-mail.com/verify-payment', final_url: 'https://pay-confirm-secure.cn/form', risk_level: 'critical', agent: { verdict: 'phishing', risk_level: 'critical' } },
+          { url: 'https://corp-outlook-mail.com/invoice.pdf', risk_level: 'high', agent: { verdict: 'phishing', risk_level: 'high' } },
+          { url: 'https://corp-outlook-mail.com/contract', risk_level: 'high', agent: { verdict: 'phishing', risk_level: 'high' } },
+          { url: 'https://corp-outlook-mail.com/help', risk_level: 'medium', agent: { verdict: 'suspicious', risk_level: 'medium' } },
+        ],
+      },
+    },
+  },
+  'ph-100002': {
+    id: 'inv-100002',
+    summary: '仿冒 HR 薪资平台的批量钓鱼邮件，页面高度复刻真实登录页，诱导输入账号密码。',
+    status: 'completed',
+    risk_level: 'critical',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'extract_urls', status: 'completed', message: '提取到 5 个链接' },
+      { name: 'sandbox_render', status: 'completed', message: '沙箱渲染命中仿冒登录页特征' },
+      { name: 'llm_verdict', status: 'completed' },
+      { name: 'dispatch_action', status: 'completed', message: '隔离并触发批量召回' },
+    ],
+    result: {
+      verdict: 'phishing',
+      summary: '批量投递的仿冒薪资平台钓鱼邮件，已隔离并对 3 位收件人发起召回。',
+      confidence: 0.98,
+      evidence: [
+        { type: 'page_clone', severity: 'critical', title: '仿冒登录页', detail: '落地页与 HR 门户登录页像素级一致，域名为新注册域名' },
+        { type: 'batch_delivery', severity: 'high', title: '批量投递', detail: '同一发件人在短时间内向多个 HR 相关邮箱投递' },
+      ],
+      details: {
+        url_findings: [
+          { url: 'https://hr-portal-secure.cn/login', final_url: 'https://hr-portal-secure.cn/collect', risk_level: 'critical', agent: { verdict: 'phishing', risk_level: 'critical' } },
+          { url: 'https://hr-portal-secure.cn/verify', risk_level: 'critical', agent: { verdict: 'phishing', risk_level: 'critical' } },
+          { url: 'https://hr-portal-secure.cn/sso', risk_level: 'high', agent: { verdict: 'phishing', risk_level: 'high' } },
+          { url: 'https://hr-portal-secure.cn/policy', risk_level: 'high', agent: { verdict: 'phishing', risk_level: 'high' } },
+          { url: 'https://hr-portal-secure.cn/faq', risk_level: 'medium', agent: { verdict: 'suspicious', risk_level: 'medium' } },
+        ],
+      },
+    },
+  },
+  'ph-100003': {
+    id: 'inv-100003',
+    summary: '仿冒 IT 部门的密码到期提醒，诱导点击重置链接，链接落地页与公司 SSO 页面相似。',
+    status: 'completed',
+    risk_level: 'high',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'extract_urls', status: 'completed' },
+      { name: 'sandbox_render', status: 'completed' },
+      { name: 'llm_verdict', status: 'completed', message: '置信度 79%，转人工复核' },
+    ],
+    result: {
+      verdict: 'phishing',
+      summary: '疑似密码重置钓鱼，建议人工复核后决定是否拦截。',
+      confidence: 0.79,
+      evidence: [
+        { type: 'page_clone', severity: 'high', title: '仿冒 SSO 页面', detail: '落地页表单结构与公司 SSO 页面相似' },
+      ],
+      details: {
+        url_findings: [
+          { url: 'https://corp-passwd-reset.cn/reset', risk_level: 'high', agent: { verdict: 'phishing', risk_level: 'high' } },
+          { url: 'https://corp-passwd-reset.cn/help', risk_level: 'low', agent: { verdict: 'benign', risk_level: 'low' } },
+        ],
+      },
+    },
+  },
+  'ph-100004': {
+    id: 'inv-100004',
+    summary: '仿冒发票红字信息表通知，附带链接诱导下载"确认文件"，实为钓鱼落地页。',
+    status: 'completed',
+    risk_level: 'high',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'extract_urls', status: 'completed' },
+      { name: 'llm_verdict', status: 'completed' },
+      { name: 'dispatch_action', status: 'completed', message: '隔离并尝试召回，2 位收件人均已读取，召回失败' },
+    ],
+    result: {
+      verdict: 'phishing',
+      summary: '财务类钓鱼邮件，2 位收件人在拦截前已读取邮件，召回未成功，建议人工提醒。',
+      confidence: 0.88,
+      evidence: [
+        { type: 'content', severity: 'high', title: '财务话术诱导', detail: '正文以"红字发票""待确认"制造紧迫感' },
+      ],
+      details: {
+        url_findings: [
+          { url: 'https://invoice-verify-service.cn/confirm', risk_level: 'high', agent: { verdict: 'phishing', risk_level: 'high' } },
+          { url: 'https://invoice-verify-service.cn/track', risk_level: 'medium', agent: { verdict: 'suspicious', risk_level: 'medium' } },
+        ],
+      },
+    },
+  },
+  'ph-100005': {
+    id: 'inv-100005',
+    summary: '仿冒 OA 门户账号过期通知，域名与公司 OA 域名相似，落地页收集账号密码。',
+    status: 'completed',
+    risk_level: 'critical',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'extract_urls', status: 'completed' },
+      { name: 'sandbox_render', status: 'completed' },
+      { name: 'llm_verdict', status: 'completed' },
+      { name: 'dispatch_action', status: 'completed', message: '隔离并成功召回' },
+    ],
+    result: {
+      verdict: 'phishing',
+      summary: '仿冒 OA 登录钓鱼邮件，已隔离并成功召回，收件人未点击链接。',
+      confidence: 0.94,
+      evidence: [
+        { type: 'sender_domain', severity: 'critical', title: '仿冒域名', detail: 'oa-portal-cn.com 非公司备案域名' },
+      ],
+      details: {
+        url_findings: [
+          { url: 'https://oa-portal-cn.com/login', risk_level: 'critical', agent: { verdict: 'phishing', risk_level: 'critical' } },
+          { url: 'https://oa-portal-cn.com/verify', risk_level: 'high', agent: { verdict: 'phishing', risk_level: 'high' } },
+          { url: 'https://oa-portal-cn.com/help', risk_level: 'medium', agent: { verdict: 'suspicious', risk_level: 'medium' } },
+        ],
+      },
+    },
+  },
+  'ph-100006': {
+    id: 'inv-100006',
+    summary: '仿冒银行安全提醒，诱导核实身份并输入网银账号密码，属旁路观察模式下的抽样检测。',
+    status: 'completed',
+    risk_level: 'high',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'extract_urls', status: 'completed' },
+      { name: 'llm_verdict', status: 'completed' },
+      { name: 'dispatch_action', status: 'completed', message: '观察模式命中高风险，升级为隔离并召回' },
+    ],
+    result: {
+      verdict: 'phishing',
+      summary: '仿冒银行安全提醒钓鱼邮件，已隔离并成功召回。',
+      confidence: 0.85,
+      evidence: [
+        { type: 'page_clone', severity: 'high', title: '仿冒网银登录页', detail: '落地页表单字段与真实网银登录页一致' },
+      ],
+      details: {
+        url_findings: [
+          { url: 'https://bank-verify-alert.com/secure-login', risk_level: 'high', agent: { verdict: 'phishing', risk_level: 'high' } },
+          { url: 'https://bank-verify-alert.com/otp', risk_level: 'high', agent: { verdict: 'phishing', risk_level: 'high' } },
+        ],
+      },
+    },
+  },
+  'ph-100007': {
+    id: 'inv-100007',
+    summary: '"共享文档"通知邮件，链接跳转至非常见网盘域名，暂无法确认恶意，标记为可疑。',
+    status: 'completed',
+    risk_level: 'medium',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'extract_urls', status: 'completed' },
+      { name: 'llm_verdict', status: 'completed', message: '置信度 62%，标记但不拦截' },
+    ],
+    result: {
+      verdict: 'suspicious',
+      summary: '链接域名注册时间较短且非常见网盘服务，建议提醒用户谨慎点击。',
+      confidence: 0.62,
+      evidence: [
+        { type: 'domain_age', severity: 'medium', title: '新注册域名', detail: '域名注册时间不足 30 天' },
+      ],
+      details: {
+        url_findings: [
+          { url: 'https://drive-share-cn.net/s/8fk2', risk_level: 'medium', agent: { verdict: 'suspicious', risk_level: 'medium' } },
+        ],
+      },
+    },
+  },
+  'ph-100008': {
+    id: 'inv-100008',
+    summary: '内部问卷调研邮件不含外链，但发件域名与内部标准域名不完全一致，转人工判定。',
+    status: 'completed',
+    risk_level: 'medium',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'sender_domain_check', status: 'completed', message: 'example-internal.com 非白名单内部域名' },
+      { name: 'dispatch_action', status: 'completed', message: '转人工判定是否为钓鱼演练' },
+    ],
+    result: {
+      verdict: '',
+      summary: '无外链、无明显恶意特征，但发件域名存疑，建议人工确认是否为安全演练邮件。',
+      confidence: 0.55,
+      evidence: [],
+    },
+  },
+  'ph-100009': {
+    id: 'inv-100009',
+    summary: '',
+    status: 'running',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'sender_domain_check', status: 'completed', message: '新域名 new-vendor-portal.biz，30 天内首次通信' },
+      { name: 'llm_verdict', status: 'running' },
+    ],
+    result: undefined,
+  },
+  'ph-100011': {
+    id: 'inv-100011',
+    summary: '',
+    status: 'failed',
+    error_message: '附件解析超时（压缩包嵌套层数超限），研判任务失败，按默认策略放行并记录',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'extract_attachments', status: 'failed', message: '解压嵌套压缩包超时' },
+    ],
+  },
+  'ph-100012': {
+    id: 'inv-100012',
+    summary: '快递到付通知，链接指向顺丰官方域名，无风险特征。',
+    status: 'completed',
+    risk_level: 'low',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'extract_urls', status: 'completed' },
+      { name: 'llm_verdict', status: 'completed' },
+    ],
+    result: {
+      verdict: 'benign',
+      summary: '链接域名为已知可信物流服务商，正常放行。',
+      confidence: 0.18,
+      evidence: [],
+      details: {
+        url_findings: [
+          { url: 'https://www.sf-express.com/track', risk_level: 'low', agent: { verdict: 'benign', risk_level: 'low' } },
+        ],
+      },
+    },
+  },
+  'ph-100013': {
+    id: 'inv-100013',
+    summary: '常规周报提交提醒，内部发件人，无风险特征。',
+    status: 'completed',
+    risk_level: 'none',
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'llm_verdict', status: 'completed' },
+    ],
+    result: {
+      verdict: 'benign',
+      summary: '内部常规通知邮件，正常放行。',
+      confidence: 0.09,
+      evidence: [],
+      details: {
+        url_findings: [
+          { url: 'https://intranet.example.com/weekly', risk_level: 'low', agent: { verdict: 'benign', risk_level: 'low' } },
+          { url: 'https://intranet.example.com/template', risk_level: 'low', agent: { verdict: 'benign', risk_level: 'low' } },
+        ],
+      },
+    },
+  },
+};
+
+function mockPhishingLogMatchesQuery(item: DetectionLogItem, query: URLSearchParams): boolean {
+  const keyword = query.get('keyword');
+  if (keyword) {
+    const needle = keyword.toLowerCase();
+    const haystack = `${item.sender} ${item.subject} ${item.recipients.join(' ')}`.toLowerCase();
+    if (!haystack.includes(needle)) return false;
+  }
+  const start = query.get('start');
+  const end = query.get('end');
+  const sidelinedAt = Date.parse(item.sidelined_at);
+  if (start && sidelinedAt < Date.parse(start)) return false;
+  if (end && sidelinedAt > Date.parse(end)) return false;
+  const dispositions = query.getAll('disposition');
+  if (dispositions.length > 0 && !dispositions.includes(item.disposition)) return false;
+  const modes = query.getAll('detection_mode');
+  if (modes.length > 0 && !modes.includes(item.detection_mode)) return false;
+  const recallStatuses = query.getAll('recall_status');
+  if (recallStatuses.length > 0 && !recallStatuses.includes(item.recall_status)) return false;
+  const riskLevels = query.getAll('risk_level');
+  if (riskLevels.length > 0 && !riskLevels.includes(item.risk_level ?? '')) return false;
+  return true;
+}
+
+export function mockPhishingDetectionLogsList(path: string): DetectionLogListResponse {
+  const query = new URLSearchParams(path.split('?')[1] ?? '');
+  const filtered = mockPhishingDetectionLogsState
+    .filter((item) => mockPhishingLogMatchesQuery(item, query))
+    .sort((a, b) => Date.parse(b.sidelined_at) - Date.parse(a.sidelined_at));
+  const page = Math.max(1, Number(query.get('page') ?? 1));
+  const pageSize = Math.max(1, Number(query.get('page_size') ?? 20));
+  return {
+    items: structuredClone(filtered.slice((page - 1) * pageSize, page * pageSize)),
+    total: filtered.length,
+    page,
+    page_size: pageSize,
+  };
+}
+
+export function mockPhishingDetectionLogDetail(id: string): DetectionLogDetail | null {
+  const summary = mockPhishingDetectionLogsState.find((item) => item.sideline_id === id);
+  if (!summary) return null;
+  const investigation = mockPhishingInvestigations[id] ?? {};
+  return {
+    summary: structuredClone(summary),
+    investigation: structuredClone(investigation),
+    config_snapshot: null,
+  };
+}
+
+export function mockPhishingBlockDetection(id: string): BlockResponse {
+  const item = mockPhishingDetectionLogsState.find((entry) => entry.sideline_id === id);
+  if (!item) return { status: 'blocked' };
+  if (item.disposition === 'quarantine') return { status: 'already_blocked' };
+  item.disposition = 'quarantine' as Disposition;
+  item.recall_status = item.recipients.length > 0 ? 'pending_recall' : item.recall_status;
+  if (!item.disposition_actions.includes('quarantine')) item.disposition_actions = [...item.disposition_actions, 'quarantine'];
+  item.processed_at = new Date().toISOString();
+  return { status: 'blocked' };
+}
+
+export function mockPhishingExemptDetection(id: string): ExemptResponse {
+  const item = mockPhishingDetectionLogsState.find((entry) => entry.sideline_id === id);
+  if (item) {
+    item.disposition = 'pass' as Disposition;
+    if (!item.disposition_actions.includes('deliver')) item.disposition_actions = [...item.disposition_actions, 'deliver'];
+    item.processed_at = new Date().toISOString();
+  }
+  return { status: 'exempted' };
 }
 
 export function mockSpoofingStats(): SpoofingStats {
@@ -3337,7 +4089,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 发信人黑白名单（sender_filter，mock）
+// 发信人黑���名单（sender_filter，mock）
 // 数据结构对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
 //   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
@@ -3570,7 +4322,7 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
       }),
       sfGroupRule({
         id: 8107,
-        name: "恶意附件特征",
+        name: "恶意附件特���",
         type: "feature",
         created_at: "2024-01-12T00:00:00Z",
         member_count: 2,
@@ -5302,7 +6054,7 @@ interface MockDisposalSeed {
   finalType?: string;
   correctionSource?: string;
   // domainAgeDays -- 命中特征「域名年龄」badge 的 mock 值（新注册域名信号，
-  // deriveDomainAge() 只在存在且 <=7 天时渲染）。缺省 undefined，即真实后端
+  // deriveDomainAge() 只在存在且 <=7 天时渲染）。缺省 undefined���即真实后端
   // 现状（暂无 whois/RDAP 数据）的优雅降级。
   domainAgeDays?: number;
   // senderIsNewOnThisMail -- true 时该行的 sender_first_seen_at 等于自己的
@@ -5631,7 +6383,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     sender: "notifications@social-platform.com",
     recipients:
       "user1@company.com, user2@company.com, user3@company.com, user4@company.com, user5@company.com, user6@company.com",
-    subject: "您有新的消息通知（多投信 - 6人）",
+    subject: "您有新的消息通知（���投信 - 6人）",
     action: "deliver",
     reason: "灰邮件标记投递",
     mailType: "advertising",
@@ -6148,7 +6900,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "user12@company.com",
     subject: "您的数字钱包存在异常登录",
     action: "block",
-    reason: "加密货币钓鱼攻击",
+    reason: "加密货币��鱼攻击",
     mailType: "phishing",
     deliveryStatus: "rejected",
     sourceIp: "139.99.237.15",

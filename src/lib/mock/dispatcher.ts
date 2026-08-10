@@ -62,6 +62,10 @@ import {
   mockInboundAuditPending,
   mockAgentCenterOverview,
   mockPhishingStats,
+  mockPhishingDetectionLogsList,
+  mockPhishingDetectionLogDetail,
+  mockPhishingBlockDetection,
+  mockPhishingExemptDetection,
   mockPhishingEngineConfig,
   mockPutPhishingEngineConfig,
   mockPhishingBands,
@@ -2059,7 +2063,7 @@ const routes: Route[] = [
     }),
   },
 
-  // ─── 意图引擎（intent-engine，mock）──────────────────────────────────
+  // ─── 意图引擎（intent-engine，mock）──���───────────────────────────────
   {
     method: 'GET',
     pattern: '/security/intent-engine',
@@ -2345,6 +2349,39 @@ const routes: Route[] = [
     method: 'GET',
     pattern: '/phishing-agent/stats',
     handler: () => ({ status: 200, data: mockPhishingStats() }),
+  },
+  // 检测总览：研判日志列表 / 详情 / 阻断 / 豁免。
+  {
+    method: 'GET',
+    pattern: '/phishing-agent/detection-logs',
+    handler: (req) => ({ status: 200, data: mockPhishingDetectionLogsList(req.path) }),
+  },
+  {
+    method: 'GET',
+    pattern: /^\/phishing-agent\/detection-logs\/[^/]+$/,
+    handler: (req) => {
+      const id = pathname(req.path).split('/').pop() as string;
+      const detail = mockPhishingDetectionLogDetail(id);
+      return detail ? { status: 200, data: detail } : { status: 404, data: {} };
+    },
+  },
+  {
+    method: 'POST',
+    pattern: /^\/phishing-agent\/detection-logs\/[^/]+\/block$/,
+    handler: (req) => {
+      const segments = pathname(req.path).split('/');
+      const id = segments[segments.length - 2];
+      return { status: 200, data: mockPhishingBlockDetection(id) };
+    },
+  },
+  {
+    method: 'POST',
+    pattern: /^\/phishing-agent\/detection-logs\/[^/]+\/exempt$/,
+    handler: (req) => {
+      const segments = pathname(req.path).split('/');
+      const id = segments[segments.length - 2];
+      return { status: 200, data: mockPhishingExemptDetection(id) };
+    },
   },
   {
     method: 'GET',
