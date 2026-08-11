@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 36,
+  "current_version": 37,
   "history": [
     {
       "version": 1,
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本历史����加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解决）；版本��史����加 v9。",
       "demo_version": 12
     },
     {
@@ -276,7 +276,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12731",
       "incremental": true,
-      "summary": "GT-12731.html 追加一级需求 GT-12751 高级过滤规则优化项（同文件多需求，doc 版本 v1→v2）：变更 3（意图引擎条件 comprehensiveEngineResult/cac_tag 从 panel:'select' 升级为专属 panel:'intentEngine'，多意图列表式面板——每意图独立选择「分类优先 classification/within」或「分段阈值 threshold/between [lo,hi]⊆[0,1]」，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重后写覆盖、空条目丢弃；serde 新增 parse/encodeIntentEngineList 复用单条 codec；expression 多条目取值与至少1意图/端点/顺序/范围完整性校验；ConditionTree 默认空列表；四语新增 v3Conditions.intentAddLabel/intentRemoveLabel 并补齐 inputType.intentEngine 缺失键）、变更 4（安全检测移除 rblResult/rbl 与 displayNameSpoof/exec_imp 两条件，目录 51→49、security 20→18、select 12→10，四语删 v3Conditions 对应文案且保留 emailDisposal/auth-spoofing 同名键，catalogue.test.ts 计数不变量同步）；浏览器实拍 S-1 多意图双模式面板 + S-2 安全检测清单无RBL/仿冒 + S-3 模块支持49种条件类型（浅色 AI版·单租户 平台管理员 Mock 1575×847）；新增差异 D-004~D-006、待确认 Q-003；顺带修复本文件 GT-12723 遗留的 2 处 UTF-8 乱码（导航/阶段3）；乱码自检 CLEAN；version.json current_version 14→15。",
+      "summary": "GT-12731.html 追加一级需求 GT-12751 高级过滤规则优化项（同文件多需求，doc 版本 v1→v2）：变更 3（意图引擎条件 comprehensiveEngineResult/cac_tag 从 panel:'select' ���级为专属 panel:'intentEngine'，多意图列表式面板——每意图独立选择「分类优先 classification/within」或「分段阈值 threshold/between [lo,hi]⊆[0,1]」，取值以「意图:模式[:lo,hi]」经 ';' 连接、OR 组合、同意图去重后写覆盖、空条目丢弃；serde 新增 parse/encodeIntentEngineList 复用单条 codec；expression 多条目取值与至少1意图/端点/顺序/范围完整性校验；ConditionTree 默认空列表；四语新增 v3Conditions.intentAddLabel/intentRemoveLabel 并补齐 inputType.intentEngine 缺失键）、变更 4（安全检测移除 rblResult/rbl 与 displayNameSpoof/exec_imp 两条件，目录 51→49、security 20→18、select 12→10，四语删 v3Conditions 对应文案且保留 emailDisposal/auth-spoofing 同名键，catalogue.test.ts 计数不变量同步）；浏览器实拍 S-1 多意图双模式面板 + S-2 安全检测清单无RBL/仿冒 + S-3 模块支持49种条件类型（浅色 AI版·单租户 平台管理员 Mock 1575×847）；新增差异 D-004~D-006、待确认 Q-003；顺带修复本文件 GT-12723 遗留的 2 处 UTF-8 乱码（导航/阶段3）；乱码自检 CLEAN；version.json current_version 14→15。",
       "demo_version": 15
     },
     {
@@ -348,6 +348,16 @@
       "incremental": true,
       "summary": "按 html-spec-PM-version 技能规范重写 GT-12841.html（doc 版本 v1，取代此前不合规草稿）：移除禁止的 hero header 大标题区与变更卡片总览区块；重建目录为 A/B 固定章节 + GT-12859 一级需求 + 变更 1~4 二级 + 1.1/1.2/1.3 三级结构；补齐元信息与事实源、产品形态×角色矩阵（B）；下载归档用户提供的 6 张真实产品截图至 screenshots/（GT-12859-S1~S6-*.png），改写为 4 个 .interaction-preview 截图式交互预览区块（S-1~S-8，含触发路径/figure+img+figcaption/逐元素变更表），替换原纯外链列表；变更 1（智能体调查与处置卡片文案异常字符修正）、变更 2（置信度分级处置表格新增风险等级徽章）、变更 3（置信度区间数字与列宽优化）为实际功能变更，变更 4（准入规则抽屉/运行模式抽屉现状记录）明确标注为非功能变更的关联界面记录；新增差异标注 D-001~D-003（含 D-003 记录准入规则抽屉既有说明文案字形渲染异常，非本次改动范围）、待确认事项 Q-001~Q-003；文档残留扫描（button/input/select/textarea/form/script/onClick 等）确认无匹配；version.json current_version 34→36（同时修正此前 current_version 与最新历史版本号不一致的漂移）。",
       "demo_version": 22
+    },
+    {
+      "version": 37,
+      "generated_at": "2026-08-11",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12841",
+      "incremental": true,
+      "summary": "按用户要求为 GT-12841.html 中 GT-12859 的变更 1/2/3 各补充 8 类内容（doc 版本 v1→v2）：功能背景与目标、功能点清单（逐条说明实现逻辑）、关键业务逻辑与数据流转、用户角色与权限边界、界面布局设计（信息架构/截图标注/响应式规则/视觉一致性）、交互设计（hover 提示/主流程交互/状态变化/批量与单条操作/弹窗触发条件）、异常场景（输入非法值/权限冲突/后端超时/并发一致性）、关联功能模块（上游依赖/下游影响/配置联动/接口与数据表关联）；原有截图式交互预览与逐元素变更表位置保留，三个变更点整体重排为 1.1~1.10 / 2.1~2.10 / 3.1~3.10 结构，目录同步更新；变更 4（现状记录，非功能变更）与差异标注 D-001~D-003 保持不变；新增待确认事项 Q-004~Q-008（邮件头信息图标 hover 提示文案未知、置信度区间修改后风险等级是否实时联动重算未验证、数字输入框非法值/边界值校验与提示未验证、输入框聚焦态截图缺失、多管理员并发编辑冲突处理机制未验证），编号接续 Q-001~Q-003 不重置；文档残留扫描（button/input/select/textarea/form/script/onClick 等）确认无匹配；version.json current_version 36→37。",
+      "demo_version": 23
     }
   ]
 }
