@@ -1,120 +1,694 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-Hans">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12841 · GT-12859 钓鱼邮件检测智能体-检测配置模块前端优化</title>
+  <title>GT-12841 · GT-12859 钓鱼邮件检测智能体-检测配置模块前端优化 · 增量功能规格 · v1</title>
   <style>
-    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f2937; background: #f4f6fb; }
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 32px 20px 56px; line-height: 1.65; }
-    .page { max-width: 1080px; margin: 0 auto; }
-    header, section { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 2px 8px rgba(15, 23, 42, .06); }
-    header { padding: 28px 32px; margin-bottom: 20px; color: #fff; background: #1e3a5f; }
-    header h1 { margin: 0 0 8px; font-size: 24px; }
-    header p { margin: 0; color: #dbeafe; }
-    .badge { display: inline-block; margin-bottom: 12px; padding: 3px 9px; border-radius: 5px; background: #2563eb; font-size: 12px; font-weight: 700; }
-    section { padding: 24px 28px; margin-bottom: 20px; }
-    h2 { margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid #2563eb; color: #1e3a5f; font-size: 18px; }
-    h3 { margin: 22px 0 8px; color: #374151; font-size: 15px; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { padding: 10px 12px; border: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
-    th { background: #f1f5f9; color: #374151; }
-    code { padding: 2px 5px; border-radius: 4px; background: #f1f5f9; font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; }
-    .callout { padding: 12px 16px; border-left: 4px solid #2563eb; background: #eff6ff; }
-    .change { margin: 14px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8faff; }
-    .change strong { color: #1d4ed8; }
-    ul { margin: 8px 0 0; padding-left: 22px; }
-    footer { color: #6b7280; text-align: center; font-size: 12px; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f6f8;
+      color: #1a1d23;
+      line-height: 1.6;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .page-wrap { max-width: 980px; margin: 0 auto; }
+
+    /* ── section ── */
+    section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    section > h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    section > h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+
+    /* ── incremental section ── */
+    .incremental-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .incr-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: #f8f9fb;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .incr-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #2563eb; color: #fff;
+      font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+    }
+    .incr-header h2 { font-size: 1rem; font-weight: 700; color: #1a1d23; margin: 0; }
+    .incr-header .incr-meta { font-size: 0.72rem; color: #6b7280; margin-left: auto; text-align: right; }
+    .incr-body { padding: 1.5rem 2rem; }
+    .incr-body h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+    .incr-body h4 { font-size: 0.87rem; font-weight: 600; color: #1a1d23; margin-top: 1rem; margin-bottom: 0.5rem; }
+    .incr-body p { font-size: 0.875rem; color: #374151; margin-bottom: 0.75rem; }
+
+    /* ── tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.845rem; margin-bottom: 0.75rem; }
+    th { background: #f3f4f6; color: #374151; font-weight: 600; text-align: left; padding: 0.55rem 0.8rem; border: 1px solid #e5e7eb; }
+    td { padding: 0.5rem 0.8rem; border: 1px solid #e5e7eb; vertical-align: top; color: #374151; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    /* ── code ── */
+    code { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.1em 0.4em; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82em; color: #1a1d23; }
+    pre { background: #1a1d23; color: #e8eaf0; border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; font-size: 0.8rem; line-height: 1.55; margin: 0.75rem 0; }
+    pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+
+    /* ── interaction-preview ── */
+    .interaction-preview {
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+    .interaction-preview h4 { font-size: 0.88rem; font-weight: 700; color: #1a1d23; margin-bottom: 0.35rem; }
+    .interaction-preview .trigger-path { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.9rem; }
+    .interaction-preview figure { margin: 0 0 0.9rem; }
+    .interaction-preview figcaption { font-size: 0.78rem; color: #6b7280; margin-top: 0.35rem; font-style: italic; }
+    .interaction-preview img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
+
+    /* ── callout boxes ── */
+    .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
+    .callout-info    { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; }
+    .callout-warn    { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .callout-removed { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; }
+    .callout-ok      { background: #f0fdf4; border-left: 4px solid #16a34a; color: #15532e; }
+
+    /* ── tag badges ── */
+    .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.15em 0.5em; border-radius: 4px; margin-right: 0.3em; }
+    .tag-removed  { background: #fee2e2; color: #991b1b; }
+    .tag-added    { background: #dcfce7; color: #15532e; }
+    .tag-changed  { background: #fef9c3; color: #854d0e; }
+    .tag-unverif  { background: #f3f4f6; color: #6b7280; }
+    .tag-info     { background: #dbeafe; color: #1e40af; }
+
+    del { color: #9ca3af; text-decoration-color: #dc2626; }
+
+    .version-badge { display: inline-flex; align-items: center; gap: 0.4em; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 0.2em 0.8em; font-size: 0.78rem; color: #374151; }
+    .version-badge .vnum { font-weight: 700; color: #1a1d23; }
+
+    .matrix-legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.78rem; color: #374151; margin-bottom: 0.75rem; }
+
+    /* ── risk badges (仅用于文档内说明风险等级配色，非产品组件复刻) ── */
+    .risk-chip { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 0.1em 0.55em; border-radius: 999px; }
+    .risk-suspect { background: #f3f4f6; color: #4b5563; }
+    .risk-low     { background: #dbeafe; color: #1d4ed8; }
+    .risk-medium  { background: #ffedd5; color: #c2410c; }
+    .risk-high    { background: #fee2e2; color: #b91c1c; }
+
+    /* ── TOC ── */
+    .toc { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
+    .toc a:hover { text-decoration: underline; }
+
+    .toc-l1 {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; border-radius: 6px;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      margin-top: 0.4rem; margin-bottom: 0.15rem;
+    }
+    .toc-l1 > a { font-weight: 700; font-size: 0.9rem; color: #1d4ed8; }
+
+    .toc-l2-group { list-style: none; display: flex; flex-direction: column; gap: 0.2rem; padding-left: 1.5rem; margin-bottom: 0.4rem; }
+    .toc-change {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.65rem; border-radius: 6px;
+      background: #f8f9ff; border: 1px solid #dbeafe;
+    }
+    .toc-change a { font-weight: 600; font-size: 0.85rem; color: #1d4ed8; }
+    .toc-change .toc-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #3b82f6; color: #fff;
+      font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+    }
+    .toc-l3 { padding-left: 2.8rem; }
+    .back-link { display: inline-block; margin-top: 1.5rem; font-size: 0.82rem; color: #2563eb; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <main class="page">
-    <header>
-      <span class="badge">GT-12841</span>
-      <h1>GT-12859 钓鱼邮件检测智能体-检测配置模块前端优化</h1>
-      <p>增量功能规格：智能体调查与处置配置卡片、运行模式配置抽屉与置信度区间编辑体验优化。</p>
-    </header>
+<div class="page-wrap">
 
-    <section>
-      <h2>一、元信息</h2>
-      <table>
-        <tbody>
-          <tr><th>文档编号</th><td>GT-12841</td></tr>
-          <tr><th>需求名称</th><td>GT-12859 钓鱼邮件检测智能体-检测配置模块前端优化</td></tr>
-          <tr><th>规格类型</th><td>增量规格 · 前端布局与交互优化</td></tr>
-          <tr><th>影响模块</th><td>钓鱼邮件检测智能体 · 检测配置 · 智能体调查与处置</td></tr>
-          <tr><th>路由</th><td><code>/zh/security/pipeline</code> · 阶段三内容层抽屉</td></tr>
-          <tr><th>关联实现</th><td><code>src/components/phishing-detection/config/confidence-bands-editor.tsx</code></td></tr>
-          <tr><th>生成日期</th><td>2026-08-11</td></tr>
-        </tbody>
-      </table>
-    </section>
+  <!-- ══════════════ 目录 ══════════════ -->
+  <section id="toc">
+    <h2>目录</h2>
+    <ul class="toc">
+      <li><a href="#meta">A. 元信息与事实源</a></li>
+      <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
 
-    <section>
-      <h2>二、需求入口</h2>
-      <div class="callout">本文件作为 GT-12859 的独立增量规格入口，记录检测配置模块的前端优化方案及已落地的置信度数字显示修正。</div>
-      <h3>入口路径</h3>
-      <p><code>doc/html_spec-version/GT-12841.html</code></p>
-    </section>
-
-    <section>
-      <h2>三、变更概览</h2>
-      <table>
-        <thead><tr><th>编号</th><th>变更位置</th><th>变更内容</th><th>类型</th></tr></thead>
-        <tbody>
-          <tr><td>1</td><td>智能体调查与处置卡片</td><td>修正运行模式说明中的异常字符，统一为“运行模式决定是否执行处置，防护等级与置信度分级决定处置方式；超时策略对所有旁路检测生效”。</td><td>文案优化</td></tr>
-          <tr><td>2</td><td>运行模式配置抽屉</td><td>覆盖实时检测、观察模式、观察期间追加标记、超时临时处置、标记前缀和高级设置等配置区域，保持现有配置项、状态联动和保存行为不变。</td><td>配置体验记录</td></tr>
-          <tr><td>3</td><td>置信度分级处置表格</td><td>新增风险等级徽章列，按置信度区间从低到高自动派生“可疑、低危、中危、高危”，采用中性、蓝色、橙色、红色的语义色阶。</td><td>信息层级优化</td></tr>
-          <tr><td>4</td><td>置信度区间编辑器</td><td>扩大置信度区间列和数字输入框宽度，输入框使用固定宽度、内边距、居中对齐和等宽数字，确保 0 至 100 范围内的数字完整显示。</td><td>可用性优化</td></tr>
-          <tr><td>5</td><td>准入规则抽屉</td><td>记录检测范围、方向、特定收发信人筛选、风险信号和启用规则等现有配置入口，作为检测引擎配置模块的关联界面范围。</td><td>规格补全</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section>
-      <h2>四、已落地优化说明</h2>
-      <div class="change"><strong>4.1 置信度数字完整显示</strong><ul><li>区间列最小宽度由 128px 调整为 160px。</li><li>区间输入框宽度由 56px 调整为 64px，并设置为不收缩。</li><li>输入框增加水平内边距、文本居中和 <code>tabular-nums</code> 等宽数字样式。</li><li>区间两端使用更宽间距，避免输入值、分隔符和容器边界相互挤压。</li></ul></div>
-      <div class="change"><strong>4.2 兼容性边界</strong><ul><li>不修改置信度区间数据结构、校验规则、接口调用和保存逻辑。</li><li>不新增字段、不删除字段、不改变处置动作选项。</li><li>仅调整显示空间和输入框样式，窄屏场景沿用表格横向滚动能力。</li></ul></div>
-    </section>
-
-    <section>
-      <h2>五、界面状态与交互范围</h2>
-      <table>
-        <thead><tr><th>界面状态</th><th>规格记录</th></tr></thead>
-        <tbody>
-          <tr><td>检测引擎配置页</td><td>展示检测总览与检测引擎配置两个页签，配置页包含检测范围与准入规则、智能体调查与处置两张核心卡片。</td></tr>
-          <tr><td>运行模式配置</td><td>实时检测与观察模式互斥选择；实时检测展示超时处理与置信度分级处置；观察模式展示观察期间追加标记，禁用实际隔离、审核和召回等处置动作。</td></tr>
-          <tr><td>置信度分级处置</td><td>表格列为置信度区间、风险等级、处置动作和标记设置。风险等级仅用于展示，不新增可编辑字段，按四档区间的置信度排序自动派生。</td></tr>
-          <tr><td>准入规则抽屉</td><td>支持规则名称、方向、特定收发信人筛选、部门树、风险信号和启用规则等检测范围配置；保存与取消操作固定在抽屉底部。</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section>
-      <h2>六、截图参考</h2>
-      <ul>
-        <li><a href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-uH6lhHDNgfyR2KsrIYQ3YU80Esg0Ew.png" target="_blank" rel="noopener noreferrer">检测引擎配置页总览</a>：展示检测配置页、两张核心配置卡片与文案修正后的目标状态。</li>
-        <li><a href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2o94frutYIeNrnfSPp2s9ZW5GaXKgX.png" target="_blank" rel="noopener noreferrer">实时检测与置信度分级处置</a>：展示四档风险等级徽章、完整置信度区间数字和处置动作列。</li>
-        <li><a href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-FXivV71MhwxWvtKG9KLIcSatRgZ9fC.png" target="_blank" rel="noopener noreferrer">准入规则新建抽屉</a>：展示检测范围、方向、收件人筛选与风险信号配置。</li>
-        <li><a href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-7LgKmeuZ0gEO4hpFBu14xVDrb3T8OB.png" target="_blank" rel="noopener noreferrer">观察模式配置</a>：展示观察模式下的配置说明与追加标记选项。</li>
+      <!-- 一级需求：GT-12859 钓鱼邮件检测智能体-检测配置模块前端优化 -->
+      <li class="toc-l1"><a href="#gt-12859">GT-12859 钓鱼邮件检测智能体-检测配置模块前端优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">智能体调查与处置卡片说明文案修正（消除异常字符，补全语义）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c1-overview">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c1-elements">1.3 逐元素变更</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">置信度分级处置表格新增风险等级徽章（可疑/低危/中危/高危）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c2-overview">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c2-elements">2.3 逐元素变更</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">置信度区间编辑器数字与列宽度优化（完整显示两位/三位数字）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c3-overview">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c3-elements">3.3 逐元素变更</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">4</span><a href="#change-4">检测配置模块关联界面现状记录（准入规则抽屉 / 运行模式抽屉，非本次功能变更）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c4-overview">4.1 记录范围说明</a></li>
+          <li class="toc-l3"><a href="#c4-states">4.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c4-elements">4.3 逐元素说明</a></li>
+        </ul>
       </ul>
-    </section>
 
-    <section>
-      <h2>七、验收标准</h2>
-      <ul>
-        <li>智能体调查与处置说明语义完整，不包含异常字符或乱码。</li>
-        <li>运行模式配置可清晰区分实时检测和观察模式，状态提示与可用配置保持一致。</li>
-        <li>置信度分级表格显示风险等级“可疑、低危、中危、高危”，且等级顺序与置信度区间从低到高一致。</li>
-        <li>置信度区间输入框内的两位数和三位数完整可见，不出现裁切。</li>
-        <li>四组区间的起始值、结束值和中间分隔符保持清晰可辨。</li>
-        <li>输入、校验、保存和处置动作选择行为与优化前一致。</li>
-        <li>准入规则抽屉的检测范围与风险信号配置入口保持可用。</li>
-      </ul>
-    </section>
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-003）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-003）</a></li>
+      <li><a href="#version-history">E. 版本历史</a></li>
+    </ul>
+  </section>
 
-    <footer>GT-12841 · GT-12859 · 检测配置模块前端优化规格</footer>
-  </main>
+  <!-- 需求入口锚点（供目录一级链接跳转）-->
+  <div id="gt-12859" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ A. 元信息 ══════════════ -->
+  <section id="meta">
+    <h2>A. 元信息与事实源</h2>
+    <table>
+      <thead><tr><th>字段</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>文档编号（文件 ticket）</td><td>GT-12841</td></tr>
+        <tr><td>需求名称</td><td>GT-12859 钓鱼邮件检测智能体-检测配置模块前端优化</td></tr>
+        <tr><td>规格类型</td><td>增量规格（Incremental）· 前端文案 / 信息层级 / 布局优化</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v1</span></span></td></tr>
+        <tr><td>生成日期</td><td>2026-08-11</td></tr>
+        <tr><td>路由路径</td><td><code>智能体中心 → 钓鱼邮件检测智能体 → 检测引擎配置</code> Tab</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/phishing-detection/config/confidence-bands-editor.tsx</code>、
+          <code>src/components/phishing-detection/config/*</code>（智能体调查与处置卡片、运行模式配置抽屉、准入规则抽屉相关组件）
+        </td></tr>
+        <tr><td>webapp commit</td><td><code>working-tree</code>（工作区变更，待提交）</td></tr>
+        <tr><td>对照 spec commit</td><td>not-used</td></tr>
+        <tr><td>历史对话记录</td><td>当前上下文已提供（用户本轮描述的检测配置模块优化要求 + 6 张用户实拍产品截图）</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述；2. 用户提供的真实产品截图；3. webapp 源码</td></tr>
+        <tr><td>浏览器验证状态</td><td>用户实拍截图（浅色主题 / 钓鱼邮件检测智能体 / 检测引擎配置页），未在本次生成过程中另行使用浏览器复核；截图即事实源</td></tr>
+        <tr><td>变更类型</td><td>文案修正 + 信息层级优化（风险等级徽章）+ 可用性优化（数字显示）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本规格为增量文档，记录 GT-12859「钓鱼邮件检测智能体-检测配置模块前端优化」本轮的三项实际优化：智能体调查与处置说明文案的异常字符修正（变更 1）、置信度分级处置表格新增风险等级徽章（变更 2）、置信度区间数字输入框与列宽度优化（变更 3）。变更 4 为关联界面（准入规则抽屉、运行模式抽屉整体配置）的现状记录，用于说明这三项优化所处的界面上下文，<strong>本身不是本轮的功能变更</strong>，已在变更概览表和历史记录中明确标注为「记录性」条目，不计入功能变更数量。
+    </div>
+  </section>
+
+  <!-- ══════════════ B. 产品形态 × 角色矩阵 ══════════════ -->
+  <section id="form-role-matrix">
+    <h2>B. 产品形态 × 角色差异矩阵</h2>
+    <div class="matrix-legend">
+      <span>&#x2705; 显示且可操作</span>
+      <span>&#x1F512; 显示但只读</span>
+      <span>&#x274C; 隐藏 / 不存在</span>
+      <span>&#x2014; 该形态无此角色</span>
+      <span>? 无法验证</span>
+    </div>
+    <p style="font-size:0.85rem;color:#374151;margin-bottom:0.75rem;">
+      本次优化作用于钓鱼邮件检测智能体「检测引擎配置」页的文案、信息层级和数字显示样式，不改变任何配置项的可见性或可编辑权限。矩阵记录该配置页在各形态 / 角色下的可访问性；本次全部截图均在 AI版·单租户 / 平台管理员下实拍，其余形态 / 角色未逐一验证。
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>功能 / 元素</th>
+          <th>变更</th>
+          <th>AI-单<br/>平台管理员</th>
+          <th>传统-单<br/>平台管理员</th>
+          <th>云-多<br/>平台管理员</th>
+          <th>云-多<br/>租户管理员</th>
+          <th>AI-多<br/>平台管理员</th>
+          <th>AI-多<br/>租户管理员</th>
+          <th>传统-多<br/>平台管理员</th>
+          <th>传统-多<br/>租户管理员</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>智能体调查与处置卡片说明文案</td>
+          <td>#1</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+        <tr>
+          <td>置信度分级处置表格 · 风险等级徽章</td>
+          <td>#2</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+        <tr>
+          <td>置信度区间编辑器 · 数字与列宽</td>
+          <td>#3</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+        <tr>
+          <td>准入规则抽屉 / 运行模式抽屉（现状记录）</td>
+          <td>#4</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.8rem;color:#6b7280;margin-top:0.5rem;">
+      ? 标记项：钓鱼邮件检测智能体是否在多租户形态下对租户管理员开放、检测引擎配置页在其他产品形态下的呈现是否一致，本次均未验证，列入待确认 Q-001。三项优化均为纯前端文案 / 样式调整，逻辑上不因产品形态或角色而异，但呈现入口的可见性仍需回归确认。
+    </p>
+  </section>
+
+  <!-- ═════════════ 变更 1 ══════════════ -->
+  <div class="incremental-section" id="change-1">
+    <div class="incr-header">
+      <span class="incr-num">1</span>
+      <h2>智能体调查与处置卡片说明文案修正（消除异常字符，补全语义）</h2>
+      <span class="incr-meta">路由：检测引擎配置 Tab<br/>组件：智能体调查与处置卡片说明文案<br/>变更类型：文案修正 · 2026-08-11</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c1-overview">1.1 方案概述</h3>
+      <p>
+        「智能体调查与处置」卡片位于检测引擎配置页第二张核心卡片，卡片说明用于告知用户运行模式、防护等级、置信度分级与超时策略之间的作用关系。此前该说明文案中存在编码异常字符（乱码片段），影响可读性与专业度。
+      </p>
+      <div class="callout callout-removed">
+        <strong>问题现象：</strong>卡片说明文案在渲染时夹带非预期的 Unicode 替换字符，导致语句在「防护等级与置信度分级决定处置方式」附近出现断裂或不可读片段，用户无法准确理解运行模式、防护等级、置信度分级与超时策略四者的关系描述。
+      </div>
+      <div class="callout callout-ok">
+        <strong>最终实现方案：</strong>将卡片说明文案统一改写为语义完整、无异常字符的表述：「运行模式决定是否执行处置，防护等级与置信度分级决定处置方式；超时策略对所有旁路检测生效。」该句以分号分隔两层逻辑——前半句说明「是否处置」由运行模式决定，后半句说明「如何处置」由防护等级与置信度分级共同决定，并补充超时策略的适用范围。不改变卡片的字段来源、i18n key 结构和其余卡片内容（运行模式徽章、超时自动投递状态、分级策略摘要）。
+      </div>
+
+      <h3 id="c1-states">1.2 截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>S-1 · 修正后稳态：检测引擎配置页总览，两张核心卡片均正常渲染</h4>
+        <p class="trigger-path">触发路径：智能体中心 → 钓鱼邮件检测智能体 → 检测引擎配置 Tab → 页面加载后直接可见 · 用户实拍（浅色主题）</p>
+        <figure>
+          <img src="./screenshots/GT-12859-S1-engine-config-overview-light-1605x1026.png" alt="检测引擎配置页，展示检测范围与准入规则卡片和智能体调查与处置卡片，说明文案完整无乱码" />
+          <figcaption>图 S-1：检测引擎配置页总览。左侧智能体列表定位在「钓鱼邮件检测智能体」，右侧「检测范围与准入规则」「智能体调查与处置」两张核心卡片并列展示；「智能体调查与处置」卡片说明文案「运行模式决定是否执行处置，防护等级与置信度分级决定处置方式；超时策略对所有旁路检测生效。」完整可读，无异常字符。卡片下方展示当前运行模式徽章「实时检测」、超时自动投递状态「已开启」及分级策略摘要「4 个区间」。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c1-elements">1.3 逐元素变更</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>智能体调查与处置卡片 · 说明文案</td>
+            <td>含编码异常字符的断裂语句</td>
+            <td>「运行模式决定是否执行处置，防护等级与置信度分级决定处置方式；超时策略对所有旁路检测生效。」</td>
+            <td><span class="tag tag-changed">变更</span>仅替换文案内容，字段结构与 i18n key 不变</td>
+          </tr>
+          <tr>
+            <td>卡片内运行模式徽章（如「实时检测」）</td>
+            <td>不受影响</td>
+            <td>不受影响</td>
+            <td><span class="tag tag-info">[Base]</span>沿用既有渲染逻辑</td>
+          </tr>
+          <tr>
+            <td>卡片右上角「编辑」按钮</td>
+            <td>不受影响</td>
+            <td>不受影响</td>
+            <td><span class="tag tag-info">[Base]</span>点击进入变更 3/4 描述的运行模式配置抽屉</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ═════════════ 变更 2 ══════════════ -->
+  <div class="incremental-section" id="change-2">
+    <div class="incr-header">
+      <span class="incr-num">2</span>
+      <h2>置信度分级处置表格新增风险等级徽章（可疑/低危/中危/高危）</h2>
+      <span class="incr-meta">路由：检测引擎配置 → 智能体调查与处置 → 编辑 → 运行模式配置抽屉（实时检测）<br/>组件：置信度分级处置表格<br/>变更类型：信息层级优化 · 2026-08-11</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c2-overview">2.1 方案概述</h3>
+      <p>
+        「运行模式配置」抽屉选择「实时检测」时，下方展示「置信度分级处置」表格：按 0–100 连续区间分为 4 段，每段配置对应的处置动作。此前表格仅有「置信度区间」「处置动作」「标记设置」三列，用户需要自行换算每个数值区间对应的风险严重程度。
+      </p>
+      <div class="callout callout-ok">
+        <strong>最终实现方案：</strong>在「置信度区间」与「处置动作」之间新增「风险等级」列，按置信度区间从低到高自动派生 4 个等级标签——0–40「可疑」、40–70「低危」（并列展示「低风险」提示）、70–90「中危」、90–100「高危」；四档采用中性灰、蓝色、橙色、红色的语义色阶，颜色强度随风险等级递增，帮助用户在配置处置动作前快速判断该区间的严重程度。风险等级为界面展示派生值，<strong>不作为独立可编辑字段</strong>，不改变置信度区间的数据结构、校验规则或保存逻辑。
+      </div>
+
+      <h3 id="c2-states">2.2 截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>S-2 · 触发前：智能体调查与处置卡片默认态</h4>
+        <p class="trigger-path">触发路径：检测引擎配置页 → 「智能体调查与处置」卡片 → 点击右上角「编辑」按钮之前 · 用户实拍（浅色主题）</p>
+        <figure>
+          <img src="./screenshots/GT-12859-S1-engine-config-overview-light-1605x1026.png" alt="检测引擎配置页默认态，智能体调查与处置卡片显示运行模式为实时检测" />
+          <figcaption>图 S-2（复用图 S-1）：点击「编辑」前的稳态，卡片显示当前运行模式徽章「实时检测」。</figcaption>
+        </figure>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>S-3 · 触发后：运行模式配置抽屉，实时检测态下的置信度分级处置表格</h4>
+        <p class="trigger-path">触发路径：从 S-2 起，点击「编辑」→ 打开「运行模式配置」抽屉 → 运行模式选中「实时检测」→ 下拉查看「置信度分级处置」表格 · 用户实拍（浅色主题）</p>
+        <figure>
+          <img src="./screenshots/GT-12859-S6-runtime-drawer-realtime-confidence-table-light-2089x1175.png" alt="运行模式配置抽屉，实时检测选中，展示超时时间线、超时临时处置和置信度分级处置表格，风险等级列显示可疑、低危低风险、中危、高危四档色阶徽章" />
+          <figcaption>图 S-3：运行模式配置抽屉展示「实时检测」的完整配置——运行模式说明、超时时间线（启用超时异步处理开关）、超时临时处置（标记前缀、高级设置）、以及本次新增风险等级列的置信度分级处置表格。表格 4 行分别为 0–40「可疑」（灰色徽章，处置「进行下一步」）、40–70「低危 低风险」（蓝色徽章，处置「进行下一步」）、70–90「中危」（橙色徽章，处置「隔离」）、90–100「高危」（红色徽章，处置「隔离」）。风险等级列位于置信度区间列与处置动作列之间，随区间数值递增而色阶加深。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c2-elements">2.3 逐元素变更</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>置信度分级处置表格 · 表头</td>
+            <td>置信度区间 / 处置动作 / 标记设置（3 列）</td>
+            <td>置信度区间 / <strong>风险等级</strong> / 处置动作 / 标记设置（4 列）</td>
+            <td><span class="tag tag-added">新增</span>「风险等级」列插入第 2 列</td>
+          </tr>
+          <tr>
+            <td>风险等级徽章 · 0–40 区间</td>
+            <td>（无）</td>
+            <td>「可疑」· 中性灰色徽章</td>
+            <td><span class="tag tag-added">新增</span>按区间下界自动派生，不可编辑</td>
+          </tr>
+          <tr>
+            <td>风险等级徽章 · 40–70 区间</td>
+            <td>（无）</td>
+            <td>「低危 低风险」· 蓝色徽章</td>
+            <td><span class="tag tag-added">新增</span>同时展示等级名与「低风险」补充说明</td>
+          </tr>
+          <tr>
+            <td>风险等级徽章 · 70–90 区间</td>
+            <td>（无）</td>
+            <td>「中危」· 橙色徽章</td>
+            <td><span class="tag tag-added">新增</span></td>
+          </tr>
+          <tr>
+            <td>风险等级徽章 · 90–100 区间</td>
+            <td>（无）</td>
+            <td>「高危」· 红色徽章</td>
+            <td><span class="tag tag-added">新增</span></td>
+          </tr>
+          <tr>
+            <td>置信度区间 / 处置动作 / 标记设置列</td>
+            <td>既有配置与校验逻辑</td>
+            <td>不变</td>
+            <td><span class="tag tag-info">[Base]</span>数据结构、接口字段、保存行为均未改动</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">
+        风险等级的派生规则为固定的 4 段静态映射（0–40 / 40–70 / 70–90 / 90–100 → 可疑 / 低危 / 中危 / 高危），映射关系是否需要随区间边界调整而动态重算、是否需要暴露为可配置项，详见待确认 Q-002。
+      </div>
+
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ═════════════ 变更 3 ══════════════ -->
+  <div class="incremental-section" id="change-3">
+    <div class="incr-header">
+      <span class="incr-num">3</span>
+      <h2>置信度区间编辑器数字与列宽度优化（完整显示两位/三位数字）</h2>
+      <span class="incr-meta">路由：检测引擎配置 → 智能体调查与处置 → 编辑 → 运行模式配置抽屉（实时检测）<br/>组件：<code>confidence-bands-editor.tsx</code><br/>变更类型：可用性优化 · 2026-08-11</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c3-overview">3.1 方案概述</h3>
+      <p>
+        置信度分级处置表格中，「置信度区间」列由两个数字输入框（起始值、结束值）以短横线分隔组成。此前区间列宽度和数字输入框宽度偏窄，当区间边界为两位数（如 40、70、90）或三位数（100）时，数字在输入框内出现裁切或视觉拥挤，尤其在新增风险等级列（变更 2）后可用横向空间进一步减少。
+      </p>
+      <div class="callout callout-removed">
+        <strong>问题根因：</strong>区间列最小宽度固定为 128px，数字输入框宽度固定为 56px 且可收缩；输入框未设置文本居中和等宽数字样式，两位数、三位数在窄输入框中容易贴边或被截断，起始值、结束值与中间分隔符之间的间距也不足，导致整列在视觉上拥挤。
+      </div>
+      <div class="callout callout-ok">
+        <strong>最终实现方案：</strong>区间列最小宽度由 128px 调整为 160px；区间输入框宽度由 56px 调整为 64px，并设置为不收缩（<code>flex-shrink: 0</code>）；输入框增加水平内边距、文本居中对齐，并使用 <code>tabular-nums</code> 等宽数字样式，确保数字对齐美观；区间两端（起始值输入框、分隔符、结束值输入框）之间使用更宽的间距，避免相互挤压。仅调整显示空间与输入框样式，不修改置信度区间的数据结构、校验规则、接口调用和保存逻辑，不新增或删除字段，不改变处置动作选项；窄屏场景沿用表格既有的横向滚动能力。
+      </div>
+
+      <h3 id="c3-states">3.2 截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>S-4 · 修正后稳态：置信度区间两位数与三位数完整显示，无裁切</h4>
+        <p class="trigger-path">触发路径：运行模式配置抽屉 → 运行模式「实时检测」→ 置信度分级处置表格 → 观察「置信度区间」列的 4 行数字 · 用户实拍（浅色主题）</p>
+        <figure>
+          <img src="./screenshots/GT-12859-S6-runtime-drawer-realtime-confidence-table-light-2089x1175.png" alt="置信度分级处置表格，区间列显示0-40、40-70、70-90、90-100，两位数与三位数均完整显示无裁切" />
+          <figcaption>图 S-4（复用图 S-3）：置信度区间列 4 行数值「0 – 40」「40 – 70」「70 – 90」「90 – 100」，两位数（40/70/90）与三位数（100）均在输入框内完整显示、居中对齐，起始值、分隔符「–」与结束值之间间距清晰，未出现数字贴边或截断。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c3-elements">3.3 逐元素变更</h3>
+      <table>
+        <thead>
+          <tr><th>元素 / 样式属性</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>置信度区间列 · 最小宽度</td>
+            <td><code>min-width: 128px</code></td>
+            <td><code>min-width: 160px</code></td>
+            <td><span class="tag tag-changed">变更</span>为新增风险等级列（变更 2）预留显示空间</td>
+          </tr>
+          <tr>
+            <td>区间数字输入框 · 宽度</td>
+            <td><code>width: 56px</code>（可收缩）</td>
+            <td><code>width: 64px</code>，<code>flex-shrink: 0</code></td>
+            <td><span class="tag tag-changed">变更</span>固定宽度，避免被同行其他列挤压收缩</td>
+          </tr>
+          <tr>
+            <td>区间数字输入框 · 文本样式</td>
+            <td>默认左对齐，无等宽数字</td>
+            <td>水平内边距 + 文本居中 + <code>font-variant-numeric: tabular-nums</code></td>
+            <td><span class="tag tag-added">新增</span>数字等宽对齐，视觉更整齐</td>
+          </tr>
+          <tr>
+            <td>起始值 / 分隔符 / 结束值 · 间距</td>
+            <td>间距偏紧</td>
+            <td>加宽间距</td>
+            <td><span class="tag tag-changed">变更</span>避免数字与分隔符、容器边界相互挤压</td>
+          </tr>
+          <tr>
+            <td>数据结构 / 校验规则 / 接口 / 保存逻辑</td>
+            <td>既有实现</td>
+            <td>不变</td>
+            <td><span class="tag tag-info">[Base]</span>仅样式调整，不涉及数据与行为改动</td>
+          </tr>
+          <tr>
+            <td>窄屏表格滚动能力</td>
+            <td>横向滚动</td>
+            <td>横向滚动（沿用）</td>
+            <td><span class="tag tag-info">[Base]</span>列宽调整后仍依赖既有横向滚动兜底</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ═════════════ 变更 4（记录性，非功能变更） ══════════════ -->
+  <div class="incremental-section" id="change-4">
+    <div class="incr-header">
+      <span class="incr-num">4</span>
+      <h2>检测配置模块关联界面现状记录（准入规则抽屉 / 运行模式抽屉，非本次功能变更）</h2>
+      <span class="incr-meta">路由：检测引擎配置 → 检测范围与准入规则 / 智能体调查与处置<br/>组件：准入规则抽屉、运行模式配置抽屉（观察模式分支）<br/>类型：现状记录 · 2026-08-11</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c4-overview">4.1 记录范围说明</h3>
+      <div class="callout callout-warn">
+        本变更点<strong>不涉及功能改动</strong>，仅作为变更 1～3 所处界面上下文的补充记录，用于说明检测配置模块内「准入规则抽屉」与「运行模式配置抽屉 · 观察模式」分支的现状配置项，便于后续需求评审时对照完整模块范围。若后续对这两处发起实际改动，应作为新的变更点单独记录。
+      </div>
+
+      <h3 id="c4-states">4.2 截图式交互预览</h3>
+
+      <div class="interaction-preview">
+        <h4>S-5 · 准入规则抽屉：检测范围步骤，特定收发信人筛选展开</h4>
+        <p class="trigger-path">触发路径：检测引擎配置页 → 「检测范围与准入规则」卡片 → 点击「新增规则」→ 「检测范围」步骤 → 开启「特定收发信人筛选」 · 用户实拍（浅色主题）</p>
+        <figure>
+          <img src="./screenshots/GT-12859-S3-admission-drawer-recipient-filter-light-1951x1173.png" alt="新建准入规则抽屉，检测范围步骤，方向选择接收，特定收发信人筛选开启，展示收信人群组和组织通讯录部门树" />
+          <figcaption>图 S-5：新建准入规则抽屉「检测范围」步骤。规则名称输入框位于顶部；方向单选「接收 / 外发 / 域内」（当前选中「接收」）；「特定收发信人筛选」开启后展开「收信人群组」下拉与「组织通讯录（部门或个人）」搜索框，下方为部门树多选列表（研发部、财务部、市场部、总裁办、人力资源部等，各显示已选人数）；底部说明「群组、部门、个人三者命中任一即满足（OR），按方向自动约束收件人；同时留空表示对所有匹配方向生效。」</figcaption>
+        </figure>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>S-6 · 准入规则抽屉：风险信号步骤，基础筛查条件</h4>
+        <p class="trigger-path">触发路径：从 S-5 起，关闭「特定收发信人筛选」→ 下拉至「风险信号」步骤 · 用户实拍（浅色主题）</p>
+        <figure>
+          <img src="./screenshots/GT-12859-S2-admission-drawer-risk-signals-light-1975x1180.png" alt="新建准入规则抽屉，风险信号步骤，基础筛查条件包含邮件包含URL、邮件大小限制、收发信人之前没有邮件往来、邮件包含二维码、邮件包含可点击附件，底部启用该规则开关" />
+          <figcaption>图 S-6：「风险信号」步骤的「基础筛查条件」区域——「邮件包含 URL」开关（默认开启）、「邮件大小 ≤ __ MB」数值输入、「收发信人之前没有邮件往来」开关（默认开启）、「邮件包含二维码」开关（默认关闭）、「邮件包含可点击附件」开关（默认关闭）；底部为「启用该规则」总开关。「收发信人之前没有邮件往来」项的灰字说明在本次实拍中显示为「仅对无历史收发记录的发信人启用——常见钓鱼/社工高风险来源」，其中「风险」二字在渲染中出现字形异常，已记录为差异 D-003，不在本次文档范围内处理。</figcaption>
+        </figure>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>S-7 · 运行模式配置抽屉：观察模式分支，标记开关关闭态</h4>
+        <p class="trigger-path">触发路径：智能体调查与处置卡片 → 编辑 → 运行模式配置抽屉 → 运行模式选中「观察模式」→ 「观察期间追加标记」保持关闭 · 用户实拍（浅色主题）</p>
+        <figure>
+          <img src="./screenshots/GT-12859-S4-runtime-drawer-observe-mark-off-light-2079x1185.png" alt="运行模式配置抽屉，观察模式选中，警示条说明仅执行检测与标记，观察期间追加标记开关为关闭状态" />
+          <figcaption>图 S-7：运行模式配置抽屉，「观察模式」单选卡片选中，右侧说明「开启后，系统执行完整检测流程，但将实质性处置动作替换为下方预设的观察动作，仅用于策略调优与灰度观察。」下方橙色提示条「观察模式已开启，当前配置仅执行检测与标记，不执行隔离、审核、召回等实质性处置动作。」再下方「观察期间追加标记」开关处于关闭态（灰色）。</figcaption>
+        </figure>
+      </div>
+
+      <div class="interaction-preview">
+        <h4>S-8 · 运行模式配置抽屉：观察模式分支，标记开关开启态与标记前缀配置</h4>
+        <p class="trigger-path">触发路径：从 S-7 起，开启「观察期间追加标记」 · 用户实拍（浅色主题）</p>
+        <figure>
+          <img src="./screenshots/GT-12859-S5-runtime-drawer-observe-mark-on-light-2071x1176.png" alt="运行模式配置抽屉，观察模式，观察期间追加标记开启，展开标记前缀输入框和主题前缀、邮件头两个复选框" />
+          <figcaption>图 S-8：开启「观察期间追加标记」后展开「标记前缀」输入框（最长 20 字符）及「主题前缀」「邮件头」两个复选框，用于选择标记的追加位置。抽屉底部固定「取消」「保存」按钮。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c4-elements">4.3 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>界面 / 区域</th><th>现状配置项</th><th>本次是否变更</th><th>依据</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>准入规则抽屉 · 检测范围步骤</td>
+            <td>规则名称、方向（接收/外发/域内）、特定收发信人筛选（收信人群组 + 组织通讯录部门树）</td>
+            <td>未变更</td>
+            <td>图 S-5</td>
+          </tr>
+          <tr>
+            <td>准入规则抽屉 · 风险信号步骤</td>
+            <td>基础筛查条件（URL / 邮件大小 / 无历史往来 / 二维码 / 可点击附件）、启用该规则总开关</td>
+            <td>未变更</td>
+            <td>图 S-6</td>
+          </tr>
+          <tr>
+            <td>运行模式配置抽屉 · 观察模式分支</td>
+            <td>观察模式说明、橙色限制提示条、观察期间追加标记开关、标记前缀、主题前缀/邮件头复选框</td>
+            <td>未变更</td>
+            <td>图 S-7、图 S-8</td>
+          </tr>
+          <tr>
+            <td>运行模式配置抽屉 · 实时检测分支</td>
+            <td>超时时间线、超时临时处置、置信度分级处置表格</td>
+            <td>置信度分级处置表格新增风险等级列（见变更 2）、区间数字与列宽优化（见变更 3）；其余配置项未变更</td>
+            <td>图 S-3 / S-4，参见变更 2、变更 3</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <a class="back-link" href="#toc">↑ 返回目录</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ C. 差异标注 ══════════════ -->
+  <section id="diff">
+    <h2>C. 差异标注</h2>
+
+    <h3>D-001 · 风险等级为界面展示派生值，未作为独立可编辑字段暴露</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·有意约束</span></td></tr>
+        <tr><td>描述</td><td>变更 2 新增的「可疑/低危/中危/高危」风险等级徽章，是按置信度区间下界的固定 4 段静态映射自动派生的展示值，不对应任何新增或修改的后端字段，也不支持用户单独编辑「风险等级」而不改变区间数值。若某行区间的下界正好落在两个映射段的边界（如恰为 40、70、90），映射结果以“下界所属的目标段”为准。</td></tr>
+        <tr><td>解决版本</td><td>GT-12859 · 2026-08-11</td></tr>
+        <tr><td>验证依据</td><td>图 S-3 / S-4 中区间与风险等级的对应关系；用户当前描述「按置信度区间从低到高自动派生」</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-002 · 置信度区间列宽调整未改变既有的横向滚动兜底机制</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·预期内</span></td></tr>
+        <tr><td>描述</td><td>区间列最小宽度由 128px 调整为 160px、输入框由 56px 调整为 64px 后，表格总宽度增加。窄屏或抽屉收窄场景下，表格仍依赖已有的横向滚动能力展示完整列，未新增专门的响应式断点或列隐藏规则。</td></tr>
+        <tr><td>解决版本</td><td>GT-12859 · 2026-08-11</td></tr>
+        <tr><td>验证依据</td><td>用户当前描述「窄屏场景沿用表格横向滚动能力」</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-003 · 准入规则抽屉「收发信人之前没有邮件往来」说明文案存在渲染字形异常，本次未处理</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">已知·未处理</span></td></tr>
+        <tr><td>描述</td><td>图 S-6 中「收发信人之前没有邮件往来」项的灰字说明「仅对无历史收发记录的发信人启用——常见钓鱼/社工高风险来源」在实拍截图中「风险」二字附近出现字形渲染异常（疑似源文本或字体回退问题）。该文案不属于本轮 GT-12859 三项优化范围（智能体调查与处置文案、风险等级徽章、置信度数字显示），故本次未修复，仅在此记录现象以避免被误认为已解决。</td></tr>
+        <tr><td>处理</td><td>建议作为独立缺陷单独排查该文案的源文件编码与渲染链路，确认后再决定是否需要新增变更点修复。</td></tr>
+        <tr><td>验证依据</td><td>图 S-6 截图中该行说明文案的实际渲染字形</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ D. 待确认事项 ══════════════ -->
+  <section id="questions">
+    <h2>D. 待确认事项</h2>
+
+    <h3>Q-001 · 多租户形态 / 租户管理员角色下检测引擎配置页的可见性未逐一验证</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>本次全部截图均在 AI版·单租户 / 平台管理员下实拍。云-多 / AI-多 / 传统-多形态下，租户管理员是否可访问「钓鱼邮件检测智能体 → 检测引擎配置」页、三项优化的呈现是否一致，未逐一验证。</td></tr>
+        <tr><td>影响</td><td>产品形态 × 角色矩阵中标记为 ? 的单元格</td></tr>
+        <tr><td>建议</td><td>在各形态 / 角色账号下打开检测引擎配置页，确认卡片文案、风险等级徽章与置信度输入框显示一致后补充矩阵</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Q-002 · 风险等级 4 段映射是否需要随区间编辑动态重算或支持自定义，需与产品确认</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>当前风险等级徽章按「区间下界所属的固定 4 段（0–40/40–70/70–90/90–100）」静态映射派生。若用户后续将置信度区间调整为非标准分段（例如新增第 5 段，或将某段下界改为 35），风险等级的映射规则、显示文案（可疑/低危/中危/高危）是否需要同步调整或允许自定义，需与产品确认。</td></tr>
+        <tr><td>影响</td><td>置信度分级处置表格在非默认区间配置下的风险等级显示准确性</td></tr>
+        <tr><td>建议</td><td>与产品确认风险等级映射规则的适用边界，必要时补充映射算法说明或改为可配置项</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Q-003 · 深色主题下三项优化的显示效果需补充验证</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>用户本次提供的 6 张截图均为浅色主题。风险等级徽章的中性灰/蓝/橙/红四档色阶、置信度区间数字的对比度，在深色主题下是否同样清晰可辨，未验证。</td></tr>
+        <tr><td>影响</td><td>深色主题用户对风险等级色阶与置信度数字的辨识度</td></tr>
+        <tr><td>建议</td><td>切换至深色主题打开运行模式配置抽屉，补充实拍截图确认色阶对比度与数字可读性</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ E. 版本历史 ══════════════ -->
+  <section id="version-history">
+    <h2>E. 版本历史</h2>
+    <table>
+      <thead><tr><th>版本</th><th>日期</th><th>commit</th><th>摘要</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>v1</td>
+          <td>2026-08-11</td>
+          <td><code>working-tree</code></td>
+          <td>按 <code>html-spec-PM-version</code> 技能规范重新生成 GT-12841.html（需求名称：GT-12859 钓鱼邮件检测智能体-检测配置模块前端优化），取代此前不合规的草稿版本：移除 hero header 大标题区与变更卡片总览区块；补齐目录（A/B 固定章节 + GT-12859 一级需求 + 变更 1~4 二级 + 1.1/1.2/1.3 三级）、元信息与事实源、产品形态 × 角色矩阵；将原「六、截图参考」的外链列表改写为 4 个 <code>.interaction-preview</code> 截图式交互预览区块（S-1~S-8，含触发路径、figure/img/figcaption、逐元素变更表）；下载并归档用户提供的 6 张截图至 <code>screenshots/</code>（<code>GT-12859-S1~S6-*.png</code>），改为本地相对路径引用；新增差异标注 D-001~D-003（含 D-003 记录准入规则抽屉说明文案的既有字形渲染异常，非本次改动范围）、待确认事项 Q-001~Q-003；变更 1~3 对应实际优化（智能体调查与处置文案修正、风险等级徽章新增、置信度数字与列宽优化），变更 4 明确标注为关联界面现状记录、非功能变更；文档不含 <code>&lt;script&gt;</code>、表单控件或事件属性。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <a class="back-link" href="#toc">↑ 返回目录</a>
+
+</div>
 </body>
 </html>
