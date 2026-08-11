@@ -33,7 +33,7 @@ export type PhishingAgentTab = 'overview' | 'config';
 // 开启时才有意义。数据源复用已有的 /phishing-agent/engine-config 接口，
 // query key 与 disposition-policy-card.tsx / admission-rules-section.tsx 保持
 // 一致（'phish-engine-config' / 'phish-admission-rules'），避免重复请求。
-function usePhishingEngineToggle() {
+function usePhishingEngineToggle({ onToggled }: { onToggled?: () => void } = {}) {
   const t = useTranslations('phishingDetection');
   const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
@@ -62,6 +62,9 @@ function usePhishingEngineToggle() {
     onSuccess: (_result, next) => {
       queryClient.invalidateQueries({ queryKey: ['phish-engine-config'] });
       toast.success(next ? t('toggle.enabledToast') : t('toggle.disabledToast'));
+      // mutation 成功后才关闭确认框（沿用 StageRulesPage 等删除确认框的约定）：
+      // 失败时保留弹窗，方便用户在原地重试，而不会误以为操作已生效。
+      onToggled?.();
     },
     onError: (err) => toast.error(apiErrorMessage(err, t('toggle.saveFailed'))),
   });
@@ -82,6 +85,8 @@ export function PhishingAgentHeaderActions({ className }: { className?: string }
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [disableConfirmOpen, setDisableConfirmOpen] = useState(false);
+  const [admissionGateOpen, setAdmissionGateOpen] = useState(false);
   const {
     enabled,
     isLoading,
@@ -89,11 +94,12 @@ export function PhishingAgentHeaderActions({ className }: { className?: string }
     admissionCheckPending,
     hasActiveAdmissionRule,
     toggle,
-  } = usePhishingEngineToggle();
-  const [disableConfirmOpen, setDisableConfirmOpen] = useState(false);
-  const [admissionGateOpen, setAdmissionGateOpen] = useState(false);
+  } = usePhishingEngineToggle({ onToggled: () => setDisableConfirmOpen(false) });
 
   function goToAdmissionRules() {
+    // 同步跳转，没有异步状态要等待，点击后立即关闭弹窗（沿用 header.tsx
+    // 「模拟登录」确认框的约定），否则全屏遮罩会一直挡住切换后的 tab 内容。
+    setAdmissionGateOpen(false);
     const next = new URLSearchParams(searchParams.toString());
     next.set('agent', 'phishing');
     next.set('tab', 'config');

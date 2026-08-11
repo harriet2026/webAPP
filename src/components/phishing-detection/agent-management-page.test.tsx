@@ -143,6 +143,11 @@ describe('PhishingAgentHeaderActions（GT-12865 智能体总开关）', () => {
     await waitFor(() => expect(putEngineConfigMock).toHaveBeenCalledTimes(1));
     expect(putEngineConfigMock.mock.calls[0][0]).toMatchObject({ enabled: false });
     expect(toastSuccess).toHaveBeenCalled();
+    // 回归：确认框在 mutation 成功后必须自动关闭，否则全屏遮罩会一直挡住
+    // 已经变化的开关状态（此前的 bug：点击确认关闭后界面看起来“一直启用”）。
+    await waitFor(() =>
+      expect(screen.queryByText('确认关闭钓鱼邮件检测智能体？')).not.toBeInTheDocument(),
+    );
   });
 
   it('blocks enabling and prompts to configure admission rules first when none are active', async () => {
@@ -164,6 +169,12 @@ describe('PhishingAgentHeaderActions（GT-12865 智能体总开关）', () => {
       expect.anything(),
     );
     expect(routerReplaceMock.mock.calls[0][0]).toContain('tab=config');
+    // 回归：拦截框点击「前往配置」后必须关闭，否则全屏遮罩会一直挡住切换后
+    // 的 tab 内容（此前的 bug：点击后“界面没有发生变化”）。对话框关闭动画
+    // 是异步的，所以用 waitFor 而不是同步断言。
+    await waitFor(() =>
+      expect(screen.queryByText('请先配置检测范围与准入规则')).not.toBeInTheDocument(),
+    );
   });
 
   it('enables the agent directly when at least one admission rule is already active', async () => {
