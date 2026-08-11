@@ -338,7 +338,7 @@ const mockSecurityModules: Record<string, boolean> = {
 // fields 字段）→ 前端 fieldDefs 为空 → computeCatalogueItem 把所有 field 非
 // null 的条件判为 "即将上线"。这里按 catalogue 的 CONDITIONS 合成一份注册表，
 // 把每个条件用到的 field 都标为 supported，使 mock 下这些条件全部变为 "可用"。
-// 仅影��� mock 模式；真实模式仍请求后端，不受影响。field 为 null 的目录项
+// 仅影响 mock 模式；真实模式仍请求后端，不受影响。field 为 null 的目录项
 //（如 senderOrganization "仅目录（无后端支持）"）不在此列，保持原状。
 //
 // panel → (type, operators, map_keys_source) 的推导仅用于让配置面板拿到合理的
@@ -421,7 +421,7 @@ const mockAdvancedFieldDefs: Record<string, FieldDef> = Object.fromEntries(
   ]),
 );
 
-// ──�� 角色（RBAC）mock 数据 ──────────────────────────────────────────────
+// ─── 角色（RBAC）mock 数据 ──────────────────────────────────────────────
 // 平台/租户两套内置角色。`_level` 仅用于本地生成权限矩阵，不属于 Role ���上
 // 字段，列表响应里会被剥离。真实后端按 GetEffectiveTenantID 裁剪作用域，这里
 // 返回全集、由页面按视角（platform/tenant）过滤。
@@ -817,7 +817,7 @@ const routes: Route[] = [
       return item ? { status: 200, data: item } : { status: 404, data: {} };
     },
   },
-  // 系统状态仪表盘的「待处置��件」KPI 探针：page_size=1 且 advanced_filters 含
+  // 系统状态仪表盘的「待处置邮件」KPI 探针：page_size=1 且 advanced_filters 含
   // sideline（隔离/旁路）——只命中这一探针，不影响处置中心默认视图（其 page_size 更大）。
   // 返回按当前范围分支的 total（3/11/19），items 留空即可（KPI 卡只�� total）。
   {

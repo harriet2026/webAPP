@@ -302,7 +302,7 @@ let mockMailMarkingRules: Rule[] = [
   }),
   mailMarkingRule({
     id: 5105,
-    name: "���售部免责声明",
+    name: "销售部免责声明",
     direction: "send",
     priority: 1,
     active: true,
@@ -468,7 +468,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ────────────────────────────────────────────────���────────────────────
+// ─── 租户 ────────────────────────────────────────────────��────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -1242,7 +1242,7 @@ export function mockOpsTopCsv(response: OpsTopResponse): string {
 
 export function mockOpsTopAi(): { markdown: string } {
   return {
-    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- 建议优先复核失败率超过 50% 的连接来源���持续飙升对象。\n- 展开行可查看固��近 7 ���趋势与关联子维度。",
+    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- 建议优先复核失败率超过 50% 的连接来源及持续飙升对象。\n- 展开行可查看固��近 7 ���趋势与关联子维度。",
   };
 }
 
@@ -2816,7 +2816,7 @@ export function mockSystemHealthSummary(): {
 // ─── IP 频率限制（对齐 demo `mock-data.ts`）─────────────────────────────────
 //
 // 数据结构对齐 webapp `IPFrequencyRuleView`（webapp/src/types/ip-frequency.ts）：
-//   - 顶层包含 `Rule`（id/name/priority/is_active/...）+ 字段大��开���限值列
+//   - 顶层包含 `Rule`（id/name/priority/is_active/...）+ 字段大写开���限值列
 //     (DailyConnectionLimit / WindowMinutes / ...) + SuspendMinutes 等
 //   - ScopeType: 'all' | 'single' | 'range'
 //   - SuspendMinutes: number（demo 用 '15min'/'1hour'/'none' 字符串，这里转成分钟数）
@@ -3326,7 +3326,7 @@ export function mockTestIPFrequency(body: {
     blocked: false,
     action: body.action || "reject",
     product_action: body.action || "reject",
-    reason: "该IP当���未触发任何频率限制阈值",
+    reason: "该IP当前未触发任何频率限制阈值",
   };
 }
 
@@ -9162,7 +9162,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 10, operation_id: 'OP20260622012', admin_user_id: 3, username: 'chenjing@lanhai.cn', operator_name: '陈静（我）',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'update',
     resource_type: 'policy_pipeline', status: 'success', client_ip: '112.65.1.18', ip_location: '上海',
-    details: { summary: '钓鱼邮件处置由隔离���为直接拒收' }, before_value: { text: '隔离' }, after_value: { text: '拒收' },
+    details: { summary: '钓鱼邮件处置由隔离改为直接拒收' }, before_value: { text: '隔离' }, after_value: { text: '拒收' },
     created_at: '2026-06-22T10:15:36Z' },
   { id: 14, operation_id: 'OP20260622016', admin_user_id: 4, username: 'sunqi@lanhai.cn', operator_name: '孙琦',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'create',
