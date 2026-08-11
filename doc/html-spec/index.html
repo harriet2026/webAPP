@@ -1244,6 +1244,7 @@
             <p>组件: phishing-detection-agent-v1.tsx（两 Tab：检测总览/检测引擎配置）+ phishing-url-evidence-drawer.tsx + 外套启用开关与关闭二次确认</p>
             <p>子文件: <a href="component-phishing-detection-agent/layer-1-detail-drawer.html">检测详情抽屉(680px)</a> / <a href="component-phishing-detection-agent/layer-2-rule-drawer.html">准入规则抽屉+收件人树</a> / <a href="component-phishing-detection-agent/layer-3-mode-drawer.html">运行模式+分级策略表</a> / <a href="component-phishing-detection-agent/layer-4-band-edit.html">区间编辑弹窗(80vw)</a> / <a href="component-phishing-detection-agent/layer-5-url-evidence.html">URL透视证据(5Tab)</a> / <a href="component-phishing-detection-agent/layer-6-action-dialogs.html">处置确认对话框</a> / <a href="component-phishing-detection-agent/layer-7-disable-confirm.html">关闭确认</a></p>
             <p>预览可交互 · 7 交互层级子文件 · 6 项差异（主组件未国际化 · enabled 兼表仅审计只读 · traceback 无UI · 异步模式入口缺失 · mark 动作等）/ 7 项需确认（召回状态机 · 误报样本回流 · 准入规则映射统一规则系统 · 配置快照落库等）</p>
+            <p>增量需求文档：<a href="/html-spec/version/GT-12841.html" target="_blank" rel="noopener noreferrer">GT-12841 · GT-12859 检测配置模块前端优化</a>（运行模式说明、风险等级徽章、置信度数字显示、准入规则与截图参考）</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1407,7 +1408,7 @@
                 <li>Tab 激活态样式修复（下划线高亮丢失问题）</li>
                 <li>i18n 乱码批量修复（zh/en/th/ru 共 202 处 ）</li>
                 <li>FramedPage 结构重构（统一页面容器框架）</li>
-                <li>分类通知控制改为紧凑表格布局，节省约 60% 页面高度</li>
+                <li>分类通知控��改为紧凑表格布局，节省约 60% 页面高度</li>
                 <li>操作栏改为 sticky bottom-0 吸附，保存/重置始终可见</li>
                 <li>外部访问地址为空时禁用权限开关 + inline 警告横幅</li>
                 <li>后端英文错误消息本地化（portal_base_url 映射为 i18n 键）</li>
