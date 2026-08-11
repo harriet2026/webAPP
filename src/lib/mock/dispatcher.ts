@@ -68,6 +68,11 @@ import {
   mockPhishingExemptDetection,
   mockPhishingEngineConfig,
   mockPutPhishingEngineConfig,
+  mockPhishingAdmissionRulesList,
+  mockCreatePhishingAdmissionRule,
+  mockUpdatePhishingAdmissionRule,
+  mockSetPhishingAdmissionRuleStatus,
+  mockDeletePhishingAdmissionRule,
   mockPhishingBands,
   mockPutPhishingBands,
   mockPhishingConfigAudit,
@@ -333,7 +338,7 @@ const mockSecurityModules: Record<string, boolean> = {
 // fields 字段）→ 前端 fieldDefs 为空 → computeCatalogueItem 把所有 field 非
 // null 的条件判为 "即将上线"。这里按 catalogue 的 CONDITIONS 合成一份注册表，
 // 把每个条件用到的 field 都标为 supported，使 mock 下这些条件全部变为 "可用"。
-// 仅影响 mock 模式；真实模式仍请求后端，不受影响。field 为 null 的目录项
+// 仅影��� mock 模式；真实模式仍请求后端，不受影响。field 为 null 的目录项
 //（如 senderOrganization "仅目录（无后端支持）"）不在此列，保持原状。
 //
 // panel → (type, operators, map_keys_source) 的推导仅用于让配置面板拿到合理的
@@ -416,7 +421,7 @@ const mockAdvancedFieldDefs: Record<string, FieldDef> = Object.fromEntries(
   ]),
 );
 
-// ─── 角色（RBAC）mock 数据 ──────────────────────────────────────────────
+// ──�� 角色（RBAC）mock 数据 ──────────────────────────────────────────────
 // 平台/租户两套内置角色。`_level` 仅用于本地生成权限矩阵，不属于 Role ���上
 // 字段，列表响应里会被剥离。真实后端按 GetEffectiveTenantID 裁剪作用域，这里
 // 返回全集、由页面按视角（platform/tenant）过滤。
@@ -812,7 +817,7 @@ const routes: Route[] = [
       return item ? { status: 200, data: item } : { status: 404, data: {} };
     },
   },
-  // 系统状态仪表盘的「待处置邮件」KPI 探针：page_size=1 且 advanced_filters 含
+  // 系统状态仪表盘的「待处置��件」KPI 探针：page_size=1 且 advanced_filters 含
   // sideline（隔离/旁路）——只命中这一探针，不影响处置中心默认视图（其 page_size 更大）。
   // 返回按当前范围分支的 total（3/11/19），items 留空即可（KPI 卡只�� total）。
   {
@@ -2328,6 +2333,50 @@ const routes: Route[] = [
     method: 'PUT',
     pattern: '/phishing-agent/engine-config',
     handler: (req) => ({ status: 200, data: mockPutPhishingEngineConfig((req.body ?? {}) as Record<string, unknown>) }),
+  },
+  // 检测范围与准入规则（GT-12865：钓鱼智能体总开关的前置条件校验对象）。
+  {
+    method: 'GET',
+    pattern: '/phishing-agent/admission-rules',
+    handler: () => ({ status: 200, data: mockPhishingAdmissionRulesList() }),
+  },
+  {
+    method: 'POST',
+    pattern: '/phishing-agent/admission-rules',
+    handler: (req) => ({
+      status: 201,
+      data: mockCreatePhishingAdmissionRule((req.body ?? {}) as Record<string, unknown>),
+    }),
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/phishing-agent\/admission-rules\/\d+\/status$/,
+    handler: (req) => {
+      const segments = pathname(req.path).split('/');
+      const id = Number(segments[segments.length - 2]);
+      const body = (req.body ?? {}) as { enabled?: boolean };
+      const rule = mockSetPhishingAdmissionRuleStatus(id, Boolean(body.enabled));
+      return rule ? { status: 200, data: rule } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/phishing-agent\/admission-rules\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/').pop());
+      const rule = mockUpdatePhishingAdmissionRule(id, (req.body ?? {}) as Record<string, unknown>);
+      return rule ? { status: 200, data: rule } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/phishing-agent\/admission-rules\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/').pop());
+      return mockDeletePhishingAdmissionRule(id)
+        ? { status: 200, data: { status: 'deleted' } }
+        : { status: 404, data: { message: 'not found' } };
+    },
   },
   {
     method: 'GET',

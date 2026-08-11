@@ -28,7 +28,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { PhishingAgentPanel, type PhishingAgentTab } from '@/components/phishing-detection/agent-management-page';
+import {
+  PhishingAgentHeaderActions,
+  PhishingAgentPanel,
+  type PhishingAgentTab,
+} from '@/components/phishing-detection/agent-management-page';
 import {
   SpoofingAgentHeaderActions,
   SpoofingAgentPage,

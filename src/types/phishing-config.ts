@@ -27,6 +27,11 @@ export interface PhishEngineParams {
 // Deployment-wide runtime limits are intentionally absent; they are managed
 // only through apiserver.cf and the generic config-management override UI.
 export interface PhishTenantEngineParams {
+  // 智能体总开关（GT-12865）：关闭后钓鱼邮件检测智能体整体停用，检测流程不再
+  // 运行；与 run_mode（实时检测/观察模式）是两个独立维度——run_mode 仅在总开关
+  // 开启时才有意义。镜像 SpoofEngineParams.enabled 的既有约定。前端新增字段，
+  // 尚待后端契约确认。
+  enabled: boolean;
   netdisk_domain: boolean;
   netdisk_extract: boolean;
   netdisk_spoof: boolean;
