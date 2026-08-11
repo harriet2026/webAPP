@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GT-12841 · GT-12859 钓鱼邮件检测智能体-检测配置模块前端优化</title>
+  <style>
+    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f2937; background: #f4f6fb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px 20px 56px; line-height: 1.65; }
+    .page { max-width: 1080px; margin: 0 auto; }
+    header, section { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 2px 8px rgba(15, 23, 42, .06); }
+    header { padding: 28px 32px; margin-bottom: 20px; color: #fff; background: #1e3a5f; }
+    header h1 { margin: 0 0 8px; font-size: 24px; }
+    header p { margin: 0; color: #dbeafe; }
+    .badge { display: inline-block; margin-bottom: 12px; padding: 3px 9px; border-radius: 5px; background: #2563eb; font-size: 12px; font-weight: 700; }
+    section { padding: 24px 28px; margin-bottom: 20px; }
+    h2 { margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid #2563eb; color: #1e3a5f; font-size: 18px; }
+    h3 { margin: 22px 0 8px; color: #374151; font-size: 15px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 10px 12px; border: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+    th { background: #f1f5f9; color: #374151; }
+    code { padding: 2px 5px; border-radius: 4px; background: #f1f5f9; font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; }
+    .callout { padding: 12px 16px; border-left: 4px solid #2563eb; background: #eff6ff; }
+    .change { margin: 14px 0; padding: 16px; border: 1px solid #dbeafe; border-radius: 8px; background: #f8faff; }
+    .change strong { color: #1d4ed8; }
+    ul { margin: 8px 0 0; padding-left: 22px; }
+    footer { color: #6b7280; text-align: center; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <span class="badge">GT-12841</span>
+      <h1>GT-12859 钓鱼邮件检测智能体-检测配置模块前端优化</h1>
+      <p>增量功能规格：智能体调查与处置配置卡片、运行模式配置抽屉与置信度区间编辑体验优化。</p>
+    </header>
+
+    <section>
+      <h2>一、元信息</h2>
+      <table>
+        <tbody>
+          <tr><th>文档编号</th><td>GT-12841</td></tr>
+          <tr><th>需求名称</th><td>GT-12859 钓鱼邮件检测智能体-检测配置模块前端优化</td></tr>
+          <tr><th>规格类型</th><td>增量规格 · 前端布局与交互优化</td></tr>
+          <tr><th>影响模块</th><td>钓鱼邮件检测智能体 · 检测配置 · 智能体调查与处置</td></tr>
+          <tr><th>路由</th><td><code>/zh/security/pipeline</code> · 阶段三内容层抽屉</td></tr>
+          <tr><th>关联实现</th><td><code>src/components/phishing-detection/config/confidence-bands-editor.tsx</code></td></tr>
+          <tr><th>生成日期</th><td>2026-08-11</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>二、需求入口</h2>
+      <div class="callout">本文件作为 GT-12859 的独立增量规格入口，记录检测配置模块的前端优化方案及已落地的置信度数字显示修正。</div>
+      <h3>入口路径</h3>
+      <p><code>doc/html_spec-version/GT-12841.html</code></p>
+    </section>
+
+    <section>
+      <h2>三、变更概览</h2>
+      <table>
+        <thead><tr><th>编号</th><th>变更位置</th><th>变更内容</th><th>类型</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>智能体调查与处置卡片</td><td>优化运行模式摘要展示，并修正异常文案，使说明语义完整、无异常符号。</td><td>文案优化</td></tr>
+          <tr><td>2</td><td>运行模式配置抽屉</td><td>保持配置项和现有业务功能不变，改善配置区域的空间分配。</td><td>布局优化</td></tr>
+          <tr><td>3</td><td>置信度区间编辑器</td><td>扩大置信度区间列和数字输入框宽度，输入框使用固定宽度、内边距、居中对齐和等宽数字，确保 0 至 100 范围内的数字完整显示。</td><td>可用性优化</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>四、已落地优化说明</h2>
+      <div class="change"><strong>4.1 置信度数字完整显示</strong><ul><li>区间列最小宽度由 128px 调整为 160px。</li><li>区间输入框宽度由 56px 调整为 64px，并设置为不收缩。</li><li>输入框增加水平内边距、文本居中和 <code>tabular-nums</code> 等宽数字样式。</li><li>区间两端使用更宽间距，避免输入值、分隔符和容器边界相互挤压。</li></ul></div>
+      <div class="change"><strong>4.2 兼容性边界</strong><ul><li>不修改置信度区间数据结构、校验规则、接口调用和保存逻辑。</li><li>不新增字段、不删除字段、不改变处置动作选项。</li><li>仅调整显示空间和输入框样式，窄屏场景沿用表格横向滚动能力。</li></ul></div>
+    </section>
+
+    <section>
+      <h2>五、验收标准</h2>
+      <ul>
+        <li>置信度区间输入框内的两位数和三位数完整可见，不出现裁切。</li>
+        <li>四组区间的起始值、结束值和中间分隔符保持清晰可辨。</li>
+        <li>输入、校验、保存和处置动作选择行为与优化前一致。</li>
+        <li>页面不引入异常字符，中文文案语义完整。</li>
+      </ul>
+    </section>
+
+    <footer>GT-12841 · GT-12859 · 检测配置模块前端优化规格</footer>
+  </main>
+</body>
+</html>
