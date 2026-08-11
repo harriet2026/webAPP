@@ -8386,6 +8386,18 @@
       "config": "Detection Engine Config",
       "configPlaceholder": "Detection engine configuration — available once the config module is online"
     },
+    "toggle": {
+      "disableConfirmTitle": "Disable the Phishing Detection Agent?",
+      "disableConfirmDescription": "Once disabled, the Phishing Detection Agent will stop running entirely. New incoming mail will no longer be scanned or blocked for phishing, though existing verdict records remain viewable. Please proceed with caution.",
+      "disableConfirmAction": "Disable",
+      "disabledBanner": "The Phishing Detection Agent is disabled. New mail is not currently being scanned or blocked for phishing.",
+      "admissionGateTitle": "Configure detection scope and admission rules first",
+      "admissionGateDescription": "Before enabling the Phishing Detection Agent, configure at least one enabled rule under \"Detection Scope & Admission Rules\" to define the detection scope.",
+      "admissionGateAction": "Go to configuration",
+      "enabledToast": "Phishing Detection Agent enabled",
+      "disabledToast": "Phishing Detection Agent disabled",
+      "saveFailed": "Failed to save the master switch state. Please try again."
+    },
     "kpi": {
       "todayDetected": "Detected Today",
       "todayQuarantined": "Quarantined Today",

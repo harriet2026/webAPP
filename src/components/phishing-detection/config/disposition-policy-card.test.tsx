@@ -47,6 +47,7 @@ import { DispositionPolicyCard } from './disposition-policy-card';
 
 function makeEngine(overrides: Partial<PhishTenantEngineParams> = {}): PhishTenantEngineParams {
   return {
+    enabled: true,
     netdisk_domain: true,
     netdisk_extract: true,
     netdisk_spoof: true,

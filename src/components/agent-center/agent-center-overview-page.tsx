@@ -120,7 +120,9 @@ export function AgentCenterOverviewPage() {
               <h2 className="text-lg font-semibold text-foreground">{detailTitle}</h2>
               {selectedAgent === 'spoofing' && !detailLocked && detailPresentation?.canConfigure
                 ? <SpoofingAgentHeaderActions />
-                : null}
+                : selectedAgent === 'phishing' && !detailLocked
+                  ? <PhishingAgentHeaderActions />
+                  : null}
             </div>
             <div className="min-h-[640px] px-6 py-4">
               {overviewQuery.isLoading ? (
