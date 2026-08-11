@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GT-12865 · GT-12514 钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互 · 增量功能规格 · v1</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f6f8;
+      color: #1a1d23;
+      line-height: 1.6;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .page-wrap { max-width: 980px; margin: 0 auto; }
+
+    section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    section > h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    section > h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+
+    .incremental-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .incr-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: #f8f9fb;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .incr-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #2563eb; color: #fff;
+      font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+    }
+    .incr-header h2 { font-size: 1rem; font-weight: 700; color: #1a1d23; margin: 0; }
+    .incr-header .incr-meta { font-size: 0.72rem; color: #6b7280; margin-left: auto; text-align: right; }
+    .incr-body { padding: 1.5rem 2rem; }
+    .incr-body h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+    .incr-body h4 { font-size: 0.87rem; font-weight: 600; color: #1a1d23; margin-top: 1rem; margin-bottom: 0.5rem; }
+    .incr-body p { font-size: 0.875rem; color: #374151; margin-bottom: 0.75rem; }
+    .incr-body ul, .incr-body ol { margin: 0 0 0.75rem 1.25rem; font-size: 0.875rem; color: #374151; }
+    .incr-body li { margin-bottom: 0.4rem; }
+    .incr-body li strong { color: #1a1d23; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.845rem; margin-bottom: 0.75rem; }
+    th { background: #f3f4f6; color: #374151; font-weight: 600; text-align: left; padding: 0.55rem 0.8rem; border: 1px solid #e5e7eb; }
+    td { padding: 0.5rem 0.8rem; border: 1px solid #e5e7eb; vertical-align: top; color: #374151; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    code { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.1em 0.4em; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82em; color: #1a1d23; }
+
+    .interaction-preview {
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+    .interaction-preview h4 { font-size: 0.88rem; font-weight: 700; color: #1a1d23; margin-bottom: 0.35rem; }
+    .interaction-preview .trigger-path { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.9rem; }
+    .interaction-preview figure { margin: 0 0 0.9rem; }
+    .interaction-preview figcaption { font-size: 0.78rem; color: #6b7280; margin-top: 0.35rem; font-style: italic; }
+    .interaction-preview img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
+
+    .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
+    .callout-info    { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; }
+    .callout-warn    { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .callout-removed { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; }
+    .callout-ok      { background: #f0fdf4; border-left: 4px solid #16a34a; color: #15532e; }
+
+    .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.15em 0.5em; border-radius: 4px; margin-right: 0.3em; }
+    .tag-removed  { background: #fee2e2; color: #991b1b; }
+    .tag-added    { background: #dcfce7; color: #15532e; }
+    .tag-changed  { background: #fef9c3; color: #854d0e; }
+    .tag-unverif  { background: #f3f4f6; color: #6b7280; }
+    .tag-info     { background: #dbeafe; color: #1e40af; }
+
+    del { color: #9ca3af; text-decoration-color: #dc2626; }
+
+    .version-badge { display: inline-flex; align-items: center; gap: 0.4em; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 0.2em 0.8em; font-size: 0.78rem; color: #374151; }
+    .version-badge .vnum { font-weight: 700; color: #1a1d23; }
+
+    .matrix-legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.78rem; color: #374151; margin-bottom: 0.75rem; }
+
+    .toc { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
+    .toc a:hover { text-decoration: underline; }
+
+    .toc-l1 {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; border-radius: 6px;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      margin-top: 0.4rem; margin-bottom: 0.15rem;
+    }
+    .toc-l1 > a { font-weight: 700; font-size: 0.9rem; color: #1d4ed8; }
+
+    .toc-l2-group { list-style: none; display: flex; flex-direction: column; gap: 0.2rem; padding-left: 1.5rem; margin-bottom: 0.4rem; }
+    .toc-change {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.65rem; border-radius: 6px;
+      background: #f8f9ff; border: 1px solid #dbeafe;
+    }
+    .toc-change a { font-weight: 600; font-size: 0.85rem; color: #1d4ed8; }
+    .toc-change .toc-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #3b82f6; color: #fff;
+      font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+    }
+    .toc-l3 { padding-left: 2.8rem; }
+    .back-link { display: inline-block; margin-top: 1.5rem; font-size: 0.82rem; color: #2563eb; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ══════════════ 目录 ══════════════ -->
+  <section id="toc">
+    <h2>目录</h2>
+    <ul class="toc">
+      <li><a href="#meta">A. 元信息与事实源</a></li>
+      <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
+
+      <!-- 一级需求：GT-12514 -->
+      <li class="toc-l1"><a href="#gt-12514">GT-12514 钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">智能体总开关（状态文字 + Switch，挂载于详情页顶部操作栏）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c1-goal">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#change-2">关闭生命周期二次确认 + 禁用横幅（关闭后新邮件不再检测）</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c2-goal">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#change-3">重新开启前置校验（准入规则门禁）与「前往配置」直达新增规则联动</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c3-goal">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c3-elements">3.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-004）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-003）</a></li>
+      <li><a href="#version-history">E. 版本历史</a></li>
+    </ul>
+  </section>
+
+  <!-- 需求入口锚点（供目录一级链接跳转）-->
+  <div id="gt-12514" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ A. 元信息 ══════════════ -->
+  <section id="meta">
+    <h2>A. 元信息与事实源</h2>
+    <table>
+      <thead><tr><th>字段</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>文档编号（文件 ticket）</td><td>GT-12865</td></tr>
+        <tr><td>需求名称</td><td>GT-12514 钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互</td></tr>
+        <tr><td>规格类型</td><td>增量规格（Incremental）· 新增交互能力（总开关 + 生命周期二次确认 + 前置校验联动）</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v1</span></span></td></tr>
+        <tr><td>生成日期</td><td>2026-08-11</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/agent-center/overview?agent=phishing</code>（智能体中心 → 钓鱼邮件检测智能体详情页，顶部操作栏）</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/phishing-detection/agent-management-page.tsx</code>（<code>usePhishingEngineToggle</code> / <code>PhishingAgentHeaderActions</code> / <code>PhishingAgentPanel</code>）、
+          <code>src/components/phishing-detection/config/admission-rules-section.tsx</code>（消费 <code>action=create-admission-rule</code> 自动打开新增规则）、
+          <code>src/components/agent-center/agent-center-overview-page.tsx</code>（挂载点）
+        </td></tr>
+        <tr><td>webapp commit</td><td><code>74d9f27</code>（工作区变更，待提交）</td></tr>
+        <tr><td>对照 spec commit</td><td>not-used</td></tr>
+        <tr><td>历史对话记录</td><td>当前上下文可获得部分历史（i18n 乱码修复与核心功能实现过程），未提供本需求最初的完整讨论记录；本文档以用户最新描述 + webapp 当前源码与浏览器实测为事实源</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述（GT-12514 需求名称）；2. webapp 当前运行态（agent-browser 实测）与源码；3. 其他原始 spec，仅作差异对照（当前无可用对照 spec）</td></tr>
+        <tr><td>浏览器验证状态</td><td>已通过 <code>agent-browser</code> 在 Mock 模式（AI版·单租户·平台管理员·浅色主题·1280×633）下逐状态实测：默认启用态、关闭二次确认、关闭后禁用横幅、重新开启时的准入规则门禁拦截、点击「前往配置」后直达新增规则弹窗、取消门禁后返回配置 Tab。见 §1.2 / §2.2 / §3.2 截图。</td></tr>
+        <tr><td>沙箱渲染限制</td><td><strong>本文档全部截图均在无头浏览器沙箱中实拍，该沙箱缺少中文字体，导致截图中的中文文字统一渲染为方框（tofu box）占位符，而非实际字形缺失或产品文案异常。</strong>这是渲染环境限制，不是产品缺陷。各交互预览下方的表格与说明文字均依据 <code>messages/zh.json</code> 中的真实 i18n 文案与源码逐一核对后如实转录，读者可结合截图中的布局位置与文字表格对照理解实际效果。已在 D-004 中记录该限制，避免被误认为文案渲染缺陷。</td></tr>
+        <tr><td>变更类型</td><td>新增功能（总开关 UI + 生命周期确认交互 + 前置校验联动跳转）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本规格为增量文档，记录 GT-12514「钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互」的完整实现：钓鱼邮件检测智能体此前只能通过「检测引擎配置」内部的 <code>run_mode</code>（实时检测 / 观察模式）间接影响是否处置，缺少一个可以整体启用/禁用该智能体、且带有生命周期确认的总开关。本次新增：①详情页顶部操作栏的总开关（变更 1）；②关闭时的二次确认与关闭后的持续性禁用横幅（变更 2）；③重新开启前的准入规则前置校验，以及门禁弹窗「前往配置」按钮与「检测范围与准入规则」新增规则弹窗之间的直达联动（变更 3）。
+    </div>
+    <div class="callout callout-warn">
+      <strong>范围说明：</strong>总开关（<code>engine.enabled</code>）与「检测引擎配置」内部的 <code>run_mode</code>（实时检测 / 观察模式）是两个独立维度——<code>run_mode</code> 只在总开关开启时才有实际意义；本次未改动 <code>run_mode</code> 本身的行为。总开关数据源复用既有的 <code>/phishing-agent/engine-config</code> 接口（<code>GET</code> / <code>PUT</code>），未新增后端接口；query key 与「检测引擎配置」页内既有的 <code>phish-engine-config</code> / <code>phish-admission-rules</code> 保持一致，避免重复请求。
+    </div>
+  </section>
+
+  <!-- ══════════════ B. 产品形态 × 角色矩阵 ══════════════ -->
+  <section id="form-role-matrix">
+    <h2>B. 产品形态 × 角色差异矩阵</h2>
+    <div class="matrix-legend">
+      <span>&#x2705; 显示且可操作</span>
+      <span>&#x1F512; 显示但只读</span>
+      <span>&#x274C; 隐藏 / 不存在</span>
+      <span>&#x2014; 该形态无此角色</span>
+      <span>? 无法验证</span>
+    </div>
+    <p style="font-size:0.85rem;color:#374151;margin-bottom:0.75rem;">
+      总开关渲染条件为 <code>selectedAgent === 'phishing' && !detailLocked</code>（源码 <code>agent-center-overview-page.tsx</code>），<strong>不依赖</strong> <code>detailPresentation?.canConfigure</code>——即只要该智能体详情页未被锁定（未订阅 / 无查看权限），总开关即会渲染，不因当前角色是否具备「检测引擎配置」编辑权限而隐藏或置灰。该行为已记录在 D-001，其合理性需与产品确认（见 Q-001）。本次全部截图均在 AI版·单租户 / 平台管理员下实拍，其余形态 / 角色未逐一验证。
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>功能 / 元素</th>
+          <th>变更</th>
+          <th>AI-单<br/>平台管理员</th>
+          <th>传统-单<br/>平台管理员</th>
+          <th>云-多<br/>平台管理员</th>
+          <th>云-多<br/>租户管理员</th>
+          <th>AI-多<br/>平台管理员</th>
+          <th>AI-多<br/>租户管理员</th>
+          <th>传统-多<br/>平台管理员</th>
+          <th>传统-多<br/>租户管理员</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>智能体总开关（状态文字 + Switch）</td>
+          <td>#1</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+        <tr>
+          <td>关闭二次确认弹窗 / 禁用横幅</td>
+          <td>#2</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+        <tr>
+          <td>准入规则门禁弹窗 + 直达新增规则</td>
+          <td>#3</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.8rem;color:#6b7280;margin-top:0.5rem;">
+      ? 标记项：其余产品形态与租户管理员角色下，总开关及其生命周期交互的可见性、以及是否存在与「检测引擎配置」编辑权限的联动，均未验证，列入待确认 <strong>Q-001</strong>。
+    </p>
+  </section>
+
+  <!-- ═════════════ 变更 1 ══════════════ -->
+  <div class="incremental-section" id="change-1">
+    <div class="incr-header">
+      <span class="incr-num">1</span>
+      <h2>智能体总开关（状态文字 + Switch，挂载于详情页顶部操作栏）</h2>
+      <span class="incr-meta">路由：/agent-center/overview?agent=phishing<br/>组件：PhishingAgentHeaderActions<br/>变更类型：新增 · 2026-08-11</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c1-goal">1.1 方案概述</h3>
+      <p>
+        <strong>问题背景：</strong>此前钓鱼邮件检测智能体没有一个可以整体启用/禁用的入口——「检测引擎配置」Tab 内的 <code>run_mode</code>（实时检测 / 观察模式）只能切换处置方式，无法让智能体完全停止运行；管理员若想临时下线该智能体（例如排查误报、维护准入规则期间避免误拦截），没有对应的操作路径。
+      </p>
+      <p>
+        <strong>方案：</strong>在钓鱼邮件检测智能体详情页顶部操作栏（标题「钓鱼邮件检测智能体」同一行右侧）新增一枚状态文字 + <code>Switch</code> 组合的总开关：文字随状态在「已启用」（主题色）与「已禁用」（灰色）之间切换，<code>Switch</code> 的选中态直接映射 <code>engine.enabled</code> 字段。开关复用既有的 <code>/phishing-agent/engine-config</code> 接口读取与保存状态，不新增后端字段或接口；<code>usePhishingEngineToggle</code> 内部通过 <code>useQuery</code>（<code>queryKey: ['phish-engine-config']</code>）与「检测引擎配置」页共享缓存，切换后 <code>invalidateQueries</code> 让两处状态保持同步。开关在数据加载中、保存中或准入规则校验中（见变更 3）均处于 <code>disabled</code> 态，避免中间态下的重复点击。
+      </p>
+
+      <h3 id="c1-states">1.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-1 · 默认启用态：总开关位于详情页标题行右侧，两个 Tab 均可见</h4>
+        <p class="trigger-path">触发路径：/zh/agent-center/overview?agent=phishing → 智能体中心选中「钓鱼邮件检测智能体」卡片 → 进入详情页，直接可见 · agent-browser 实拍（Mock · AI版·单租户 · 浅色主题 · 1280×633）</p>
+        <figure>
+          <img src="./screenshots/GT-12514-S1-master-switch-enabled-default-light-1280x633.png" alt="钓鱼邮件检测智能体详情页默认态，标题行右侧显示已启用状态文字与开启的Switch开关，下方检测总览/检测引擎配置两个Tab均可见" />
+          <figcaption>图 S-1：详情页标题行右侧从左到右依次为「已启用」状态文字（主题色）与选中态 <code>Switch</code>；下方 <code>Tabs</code> 展示「检测总览」（当前选中）与「检测引擎配置」两个 Tab，均可正常点击切换，不受总开关状态影响。（本环境沙箱缺少中文字体，中文文字均渲染为方框占位符，见 A 节「沙箱渲染限制」说明；本图对应文案见下方 1.3 逐元素说明表。）</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c1-elements">1.3 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>文案 / 状态</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>状态文字</td>
+            <td>只读文本（<code>span</code>）</td>
+            <td>启用：「已启用」（<code>text-primary</code>）；禁用：「已禁用」（<code>text-muted-foreground</code>）</td>
+            <td>复用 <code>common.enabled</code> / <code>common.disabled</code> i18n key，随 <code>engine.enabled</code> 实时切换文字与颜色</td>
+          </tr>
+          <tr>
+            <td>总开关 Switch</td>
+            <td>开关控件</td>
+            <td><code>checked = engine.enabled</code>；<code>data-testid="phishing-agent-master-switch"</code></td>
+            <td>数据加载中（<code>isLoading</code>）、保存中（<code>isPending</code>）或准入规则校验中（<code>admissionCheckPending</code>，见变更 3）时禁用；点击不直接切换，先经过 <code>handleCheckedChange</code> 分支判断（见变更 2/3）</td>
+          </tr>
+          <tr>
+            <td>检测总览 / 检测引擎配置 Tab</td>
+            <td><code>Tabs</code></td>
+            <td>两个 Tab 始终可见，不受总开关状态影响</td>
+            <td><span class="tag tag-info">[Base]</span>Tab 的显示与否由既有的 <code>configurationEnabled</code>（角色可配置权限）控制，与本次总开关新增逻辑无关，二者是两个独立维度</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═════════════ 变更 2 ══════════════ -->
+  <div class="incremental-section" id="change-2">
+    <div class="incr-header">
+      <span class="incr-num">2</span>
+      <h2>关闭生命周期二次确认 + 禁用横幅（关闭后新邮件不再检测）</h2>
+      <span class="incr-meta">路由：/agent-center/overview?agent=phishing<br/>组件：ConfirmDialog（destructive）/ 禁用横幅<br/>变更类型：新增 · 2026-08-11</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c2-goal">2.1 方案概述</h3>
+      <p>
+        <strong>问题背景：</strong>关闭整个检测智能体是影响面较大的操作——关闭后新到达的邮件不再进行钓鱼检测与拦截，若管理员误触总开关，可能造成一段时间内钓鱼邮件无人拦截却未察觉。此前没有开关级别的确认机制，也没有持续性的「当前已关闭」提示。
+      </p>
+      <p>
+        <strong>方案：</strong>点击总开关由「开」→「关」时，<code>handleCheckedChange</code> 拦截默认切换行为，先弹出 <code>variant="destructive"</code> 的二次确认弹窗（标题「确认关闭钓鱼邮件检测智能体？」），说明关闭后的影响范围（新邮件不再检测、历史研判记录仍可查看），用户点击「确认关闭」后才真正调用 <code>PUT /phishing-agent/engine-config</code> 保存 <code>enabled: false</code>；保存成功后弹窗关闭并 <code>toast.success</code> 提示「钓鱼邮件检测智能体已关闭」，保存失败则保留弹窗在原地重试并 <code>toast.error</code> 提示，不静默关闭弹窗误导用户操作已生效。关闭生效后，<code>PhishingAgentPanel</code>（检测总览 / 检测引擎配置 Tab 的容器）顶部会持续展示一条橙色警示横幅，直到重新开启为止，避免管理员在后续多次进入该页面时忽略当前的禁用状态。
+      </p>
+
+      <h3 id="c2-states">2.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-2 · 关闭二次确认弹窗：destructive 样式，说明关闭后果</h4>
+        <p class="trigger-path">触发路径：S-1 默认启用态 → 点击总开关 Switch（当前为「开」）→ 弹出确认弹窗 · agent-browser 实拍（Mock · 浅色主题 · 1280×633）</p>
+        <figure>
+          <img src="./screenshots/GT-12514-S2-disable-confirm-dialog-light-1280x633.png" alt="确认关闭钓鱼邮件检测智能体的二次确认弹窗，标题为确认关闭钓鱼邮件检测智能体，下方说明文字，底部取消与确认关闭两个按钮，确认关闭为红色危险按钮" />
+          <figcaption>图 S-2：弹窗标题「确认关闭钓鱼邮件检测智能体？」，说明文字「关闭后，钓鱼邮件检测智能体将整体停止运行，新到达的邮件不再进行钓鱼检测与拦截，已生成的研判记录仍可查看。请谨慎操作。」；底部左侧「取消」为默认按钮，右侧「确认关闭」为红色（<code>destructive</code>）按钮。（沙箱中文字体缺失导致文字显示为方框，文案已按 <code>messages/zh.json</code> 的 <code>phishingDetection.toggle.disableConfirmTitle/Description/Action</code> 原文核对转录，见下方 2.3 逐元素说明表。）</figcaption>
+        </figure>
+      </div>
+      <div class="interaction-preview">
+        <h4>S-3 · 关闭后稳态：开关变灰、状态文字变为「已禁用」，检测总览/配置 Tab 上方出现橙色禁用横幅</h4>
+        <p class="trigger-path">触发路径：S-2 点击「确认关闭」→ mutation 成功 → 弹窗关闭，toast 提示「钓鱼邮件检测智能体已关闭」→ 页面稳态 · agent-browser 实拍（Mock · 浅色主题 · 1280×633）</p>
+        <figure>
+          <img src="./screenshots/GT-12514-S3-disabled-banner-and-switch-off-light-1280x633.png" alt="钓鱼邮件检测智能体关闭后的稳态，标题行右侧状态文字变为已禁用，开关变为关闭态，Tab内容区顶部出现橙色警示横幅提示当前不会对新邮件进行检测" />
+          <figcaption>图 S-3：标题行右侧状态文字变为「已禁用」（灰色），<code>Switch</code> 呈未选中态；Tab 内容区（<code>PhishingAgentPanel</code>）顶部新增橙色警示横幅，文案「钓鱼邮件检测智能体已关闭，当前不会对新邮件进行钓鱼检测与拦截。」，<code>data-testid="phishing-agent-disabled-banner"</code>；「检测总览」「检测引擎配置」两个 Tab 仍可正常点击与操作，未被禁用，管理员仍可在关闭期间维护准入规则等配置。图右下角浮现的提示条为前一次操作的 toast 残留。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c2-elements">2.3 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>文案</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>确认弹窗标题</td>
+            <td><code>ConfirmDialog title</code></td>
+            <td>确认关闭钓鱼邮件检测智能体？</td>
+            <td>i18n key <code>phishingDetection.toggle.disableConfirmTitle</code></td>
+          </tr>
+          <tr>
+            <td>确认弹窗说明</td>
+            <td><code>ConfirmDialog description</code></td>
+            <td>关闭后，钓鱼邮件检测智能体将整体停止运行，新到达的邮件不再进行钓鱼检测与拦截，已生成的研判记录仍可查看。请谨慎操作。</td>
+            <td>i18n key <code>phishingDetection.toggle.disableConfirmDescription</code></td>
+          </tr>
+          <tr>
+            <td>确认按钮</td>
+            <td><code>variant="destructive"</code></td>
+            <td>确认关闭</td>
+            <td>i18n key <code>phishingDetection.toggle.disableConfirmAction</code>；点击后调用 <code>toggle(false)</code>，成功后关闭弹窗（<code>onToggled</code> 回调），失败保留弹窗</td>
+          </tr>
+          <tr>
+            <td>取消按钮</td>
+            <td><code>ConfirmDialog</code> 默认按钮</td>
+            <td>取消</td>
+            <td><span class="tag tag-info">[Base]</span>复用 <code>common.cancel</code>，点击直接关闭弹窗，<code>engine.enabled</code> 保持不变</td>
+          </tr>
+          <tr>
+            <td>禁用横幅</td>
+            <td>提示条（<code>rounded-lg border</code>，橙色）</td>
+            <td>钓鱼邮件检测智能体已关闭，当前不会对新邮件进行钓鱼检测与拦截。</td>
+            <td>i18n key <code>phishingDetection.toggle.disabledBanner</code>；<code>data-testid="phishing-agent-disabled-banner"</code>；仅在 <code>engine.enabled === false</code> 时渲染，随开关状态实时出现/消失，不需要手动关闭</td>
+          </tr>
+          <tr>
+            <td>成功 / 失败提示</td>
+            <td><code>sonner toast</code></td>
+            <td>成功：「钓鱼邮件检测智能体已关闭」；失败：「总开关状态保存失败，请稍后重试」（或后端返回的具体错误信息）</td>
+            <td>i18n key <code>phishingDetection.toggle.disabledToast</code> / <code>saveFailed</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═════════════ 变更 3 ══════════════ -->
+  <div class="incremental-section" id="change-3">
+    <div class="incr-header">
+      <span class="incr-num">3</span>
+      <h2>重新开启前置校验（准入规则门禁）与「前往配置」直达新增规则联动</h2>
+      <span class="incr-meta">路由：/agent-center/overview?agent=phishing<br/>组件：ConfirmDialog（门禁） + AdmissionRulesSection<br/>变更类型：新增 · 2026-08-11</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c3-goal">3.1 方案概述</h3>
+      <p>
+        <strong>问题背景：</strong>若管理员在「检测范围与准入规则」中尚未配置任何已启用的规则时就重新开启总开关，智能体会在没有明确检测范围的情况下对所有邮件生效，容易造成误拦截或范围失控。此前重新开启没有任何前置校验。
+      </p>
+      <p>
+        <strong>方案：</strong>点击总开关由「关」→「开」时，<code>handleCheckedChange</code> 先检查 <code>hasActiveAdmissionRule</code>（准入规则列表中是否存在至少一条 <code>enabled: true</code> 的规则）。若列表仍在加载（<code>admissionCheckPending</code>），开关保持禁用态，不放行开启，避免在校验结果未知前误开启（fail-closed）。若校验通过则直接 <code>toggle(true)</code> 正常启用；若不存在任何已启用规则，则弹出非破坏性的门禁弹窗「请先配置检测范围与准入规则」，说明启用前需要至少一条已启用规则；用户点击「前往配置」后，弹窗关闭并通过 <code>router.replace</code> 将当前 URL 的 <code>tab</code> 参数设为 <code>config</code>、并附加 <code>action=create-admission-rule</code> 标记；「检测范围与准入规则」模块（<code>AdmissionRulesSection</code>）挂载时的 <code>useEffect</code> 检测到该标记，直接打开「新增规则」<code>Sheet</code>（而非仅停留在配置 Tab 让用户再点一次「新增规则」按钮），随后立即清掉 <code>action</code> 参数（保留 <code>agent</code> / <code>tab</code>），避免用户之后在 Tab 间切换或使用浏览器前进/后退时重复弹出该弹窗。
+      </p>
+
+      <h3 id="c3-states">3.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>S-4 · 准入规则门禁弹窗：尝试重新开启但无已启用规则时拦截</h4>
+        <p class="trigger-path">触发路径：S-3 关闭态 → 点击总开关 Switch（当前为「关」）→ <code>hasActiveAdmissionRule</code> 为 <code>false</code> → 弹出门禁弹窗（非 destructive 样式，蓝色主按钮） · agent-browser 实拍（Mock · 浅色主题 · 1280×633）</p>
+        <figure>
+          <img src="./screenshots/GT-12514-S4-admission-gate-dialog-on-reenable-light-1280x633.png" alt="请先配置检测范围与准入规则弹窗，说明启用前需先配置至少一条已启用规则，底部取消与前往配置两个按钮，前往配置为蓝色主按钮" />
+          <figcaption>图 S-4：弹窗标题「请先配置检测范围与准入规则」，说明文字「启用钓鱼邮件检测智能体前，需要先在"检测范围与准入规则"中配置至少一条已启用的规则，明确检测范围后才能正式启用。」；按钮为默认蓝色主按钮「前往配置」（非红色 destructive，区别于变更 2 的关闭确认弹窗，因为这是一次引导而非破坏性操作）。背后可见总开关仍处于关闭态、右下角残留上一次关闭操作的 toast 提示。</figcaption>
+        </figure>
+      </div>
+      <div class="interaction-preview">
+        <h4>S-5 · 点击「前往配置」后：直达「新增规则」抽屉，名称输入框自动聚焦</h4>
+        <p class="trigger-path">触发路径：S-4 → 点击「前往配置」→ URL 切换为 <code>?agent=phishing&tab=config&action=create-admission-rule</code> → <code>AdmissionRulesSection</code> 挂载后的 <code>useEffect</code> 自动打开「新增规则」Sheet 并清除 <code>action</code> 参数 · agent-browser 实拍（Mock · 浅色主题 · 1280×633）</p>
+        <figure>
+          <img src="./screenshots/GT-12514-S5-goto-config-auto-open-create-rule-light-1280x633.png" alt="检测范围与准入规则新增规则抽屉自动打开，规则名称输入框自动聚焦为空，下方分为检测范围和风险信号两个编号区块，各含开关和输入控件" />
+          <figcaption>图 S-5：无需用户再手动点击「新增规则」按钮，抽屉即自动展开；顶部「规则名称」输入框为空且处于聚焦态（边框高亮）；下方按编号分为「① 检测范围」（方向单选 + 附件大小上限等开关）与「② 风险信号」（含 URL 检测、附件大小限制等字段）两个区块。URL 已不含 <code>action</code> 参数（已被消费并清除），仅保留 <code>agent=phishing&tab=config</code>，刷新页面或前进/后退不会重复弹出该抽屉。</figcaption>
+        </figure>
+      </div>
+      <div class="interaction-preview">
+        <h4>S-6 · 点击「取消」关闭抽屉后：停留在「检测范围与准入规则」配置 Tab（未自动重开总开关）</h4>
+        <p class="trigger-path">触发路径：S-5 → 点击抽屉底部「取消」→ 抽屉关闭，页面停留在配置 Tab，总开关仍为关闭态（未被联动重新开启） · agent-browser 实拍（Mock · 浅色主题 · 1280×633）</p>
+        <figure>
+          <img src="./screenshots/GT-12514-S6-cancel-back-to-config-tab-light-1280x633.png" alt="取消新增规则抽屉后返回检测范围与准入规则配置Tab，页面上方仍显示禁用横幅，总开关仍为关闭态，配置Tab已选中" />
+          <figcaption>图 S-6：抽屉取消后停留在「检测引擎配置」Tab（已选中态，与图 S-3 的「检测总览」选中态区分），顶部禁用横幅仍在（总开关仍为关闭），下方「检测范围与准入规则」卡片正常展示搜索框和「新增规则」按钮，用户可随时再次点击手动打开。整个门禁流程只负责「引导用户去配置」，不会替用户自动重新开启总开关或强制其必须新建规则。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c3-elements">3.3 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>文案 / 行为</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>门禁弹窗标题</td>
+            <td><code>ConfirmDialog title</code></td>
+            <td>请先配置检测范围与准入规则</td>
+            <td>i18n key <code>phishingDetection.toggle.admissionGateTitle</code></td>
+          </tr>
+          <tr>
+            <td>门禁弹窗说明</td>
+            <td><code>ConfirmDialog description</code></td>
+            <td>启用钓鱼邮件检测智能体前，需要先在"检测范围与准入规则"中配置至少一条已启用的规则，明确检测范围后才能正式启用。</td>
+            <td>i18n key <code>phishingDetection.toggle.admissionGateDescription</code></td>
+          </tr>
+          <tr>
+            <td>「前往配置」按钮</td>
+            <td>默认（非 destructive）主按钮</td>
+            <td>前往配置</td>
+            <td>i18n key <code>phishingDetection.toggle.admissionGateAction</code>；点击调用 <code>goToAdmissionRules()</code>：同步关闭门禁弹窗 + <code>router.replace</code> 携带 <code>tab=config&action=create-admission-rule</code></td>
+          </tr>
+          <tr>
+            <td>URL 标记 <code>action=create-admission-rule</code></td>
+            <td>URL 查询参数（临时）</td>
+            <td>存在时触发自动打开新增规则弹窗</td>
+            <td><code>AdmissionRulesSection</code> 挂载后的 <code>useEffect</code> 消费该参数：<code>setEditing(null)</code> + <code>setSheetOpen(true)</code>，随后立即 <code>router.replace</code> 删除该参数（保留 <code>agent</code> / <code>tab</code>），防止 Tab 切换或历史前进/后退时重复触发</td>
+          </tr>
+          <tr>
+            <td>总开关（门禁场景下）</td>
+            <td>开关控件</td>
+            <td>门禁弹窗展示期间及关闭后，<code>engine.enabled</code> 均不变（仍为 <code>false</code>）</td>
+            <td>门禁流程不会替用户自动开启总开关；用户仍需在配置完规则后手动再次点击总开关</td>
+          </tr>
+          <tr>
+            <td>加载态防抖</td>
+            <td>派生状态 <code>admissionCheckPending</code></td>
+            <td>准入规则列表 <code>isLoading</code> 期间总开关禁用</td>
+            <td>fail-closed 设计：校验结果未知前不放行开启，避免在规则列表尚未返回时误判为「无规则」或「有规则」</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ C. 差异标注 ══════════════ -->
+  <section id="diff">
+    <h2>C. 差异标注</h2>
+
+    <h3>D-001 · 总开关的可见性不受「检测引擎配置」编辑权限（<code>canConfigure</code>）约束，是有意设计而非疏漏</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·有意约束</span></td></tr>
+        <tr><td>描述</td><td>源码中 <code>PhishingAgentHeaderActions</code> 的渲染条件为 <code>selectedAgent === 'phishing' && !detailLocked</code>，未叠加 <code>detailPresentation?.canConfigure</code>；对比之下，同一处 <code>SpoofingAgentHeaderActions</code>（仿冒邮件检测智能体的对应控制栏）额外要求 <code>&& detailPresentation?.canConfigure</code> 才渲染。也就是说，即便当前角色对「检测引擎配置」Tab 只有只读或无权限，只要该智能体未被整体锁定，仍能看到并操作总开关。</td></tr>
+        <tr><td>解决版本</td><td>GT-12514 · 2026-08-11（本次新增即为此行为，非既有代码回归）</td></tr>
+        <tr><td>验证依据</td><td><code>agent-center-overview-page.tsx</code> 第 121~125 行的渲染分支对比；本文档 B 节矩阵</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-002 · 「前往配置」跳转只负责引导，不会自动重新开启总开关，也不强制用户必须新建规则</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·预期内</span></td></tr>
+        <tr><td>描述</td><td>门禁弹窗「前往配置」按钮触发的 <code>goToAdmissionRules()</code> 只做两件事——关闭门禁弹窗、跳转并自动打开新增规则弹窗；不会连带调用 <code>toggle(true)</code>。用户即使取消了自动打开的新增规则弹窗（图 S-6），总开关仍保持关闭，需要手动再次点击总开关才会重新触发准入规则校验。</td></tr>
+        <tr><td>解决版本</td><td>GT-12514 · 2026-08-11</td></tr>
+        <tr><td>验证依据</td><td>图 S-6 截图中总开关仍为关闭态；源码 <code>goToAdmissionRules</code> 函数体未调用 <code>toggle</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-003 · 关闭总开关后，「检测总览」与「检测引擎配置」两个 Tab 均仍可正常访问和操作，不会被禁用</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·有意约束</span></td></tr>
+        <tr><td>描述</td><td>总开关关闭仅影响智能体是否对新邮件执行检测与处置（后端 <code>engine.enabled</code> 字段），不影响前端 Tab 的可访问性——管理员在关闭期间仍可以查看历史检测记录、维护准入规则、调整检测引擎配置等，这些配置会在下次重新开启后生效。</td></tr>
+        <tr><td>解决版本</td><td>GT-12514 · 2026-08-11</td></tr>
+        <tr><td>验证依据</td><td>图 S-3 / S-6 中两个 Tab 均处于可点击、非置灰状态；<code>PhishingAgentPanel</code> 源码中 <code>Tabs</code> 渲染逻辑不读取 <code>agentEnabled</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-004 · 本文档全部截图因沙箱缺少中文字体渲染为方框占位符，属渲染环境限制，非产品文案缺陷</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">已知·环境限制</span></td></tr>
+        <tr><td>描述</td><td><code>agent-browser</code> 无头浏览器沙箱未安装中文字体，导致 S-1~S-6 全部截图中的中文文字（弹窗标题、说明、按钮、Tab 标签等）统一渲染为方框（tofu box）占位符。产品实际渐染（本地开发环境 / 生产部署）中文文字均可正常显示，此现象与 GT-12841 中记录的「个别文案字形渲染异常」（D-003，指特定字符局部渲染异常）性质不同——本次是环境级、全局性的字体缺失，不针对某处特定文案。</td></tr>
+        <tr><td>处理</td><td>本文档各交互预览下方的逐元素说明表已依据 <code>messages/zh.json</code> 真实文案与源码逐一核对转录，读者可结合截图版式与文字表格对照理解；建议后续在支持中文字体渲染的环境中补充一轮复核截图（不影响本次功能验证结论）。</td></tr>
+        <tr><td>验证依据</td><td>S-1~S-6 截图中文字统一显示为方框；同一沙箱环境下英文/数字/图标均正常渲染，排除组件层面的渲染逻辑问题</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ D. 待确认事项 ══════════════ -->
+  <section id="questions">
+    <h2>D. 待确认事项</h2>
+
+    <h3>Q-001 · 多租户形态 / 租户管理员角色下总开关的可见性与操作权限未逐一验证</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>本次全部截图均在 AI版·单租户 / 平台管理员下实拍。云-多 / AI-多 / 传统-多形态下，租户管理员是否可见、可操作总开关，以及总开关是否应该与「检测引擎配置」编辑权限（<code>canConfigure</code>）联动（见 D-001），均未验证，需与产品确认设计意图。</td></tr>
+        <tr><td>影响</td><td>产品形态 × 角色矩阵中标记为 ? 的单元格；D-001 的合理性判断</td></tr>
+        <tr><td>建议</td><td>在各形态 / 角色账号下打开钓鱼邮件检测智能体详情页，确认总开关及其生命周期交互的可见性与操作权限；与产品确认 <code>canConfigure=false</code> 时总开关应隐藏还是保持只读展示</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Q-002 · 准入规则「至少一条已启用规则」的校验粒度是否需要进一步区分方向 / 收发信人范围</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>当前 <code>hasActiveAdmissionRule</code> 只判断准入规则列表中是否存在任意一条 <code>enabled: true</code> 的规则，不区分该规则的检测方向（收信 / 发信）或收发信人范围是否覆盖实际业务场景。理论上，管理员可能配置一条方向 / 范围与实际需求完全不符但已启用的规则，即可绕过门禁顺利开启总开关。是否需要更精细的校验（如至少覆盖收信方向），需与产品确认。</td></tr>
+        <tr><td>影响</td><td>变更 3 门禁校验的严谨性；可能出现「已启用规则但检测范围形同虚设」的开启场景</td></tr>
+        <tr><td>建议</td><td>与产品确认门禁校验是否需要按检测方向或收发信人范围做更细粒度的判断</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Q-003 · 深色主题与其他 locale（en / ru / th）下三处新增交互的视觉与文案换行未验证</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>本次全部截图均为浅色主题、中文 locale。深色主题下禁用横幅（橙色调）、两个 <code>ConfirmDialog</code> 的对比度，以及 en/ru/th 等较长译文在弹窗与横幅内的换行表现，均未验证。</td></tr>
+        <tr><td>影响</td><td>深色主题用户的可读性；非中文 locale 下的文案溢出风险</td></tr>
+        <tr><td>建议</td><td>切换深色主题及其他 locale，补充截图确认横幅配色对比度与多语言文案换行</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ E. 版本历史 ══════════════ -->
+  <section id="version-history">
+    <h2>E. 版本历史</h2>
+    <table>
+      <thead><tr><th>版本</th><th>日期</th><th>commit</th><th>摘要</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>v1</td>
+          <td>2026-08-11</td>
+          <td><code>74d9f27</code></td>
+          <td>新建 GT-12865.html，按 <code>html-spec-PM-version</code> 技能规范记录 GT-12514「钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互」的完整实现：目录含 A/B 固定章节 + GT-12514 一级需求 + 变更 1~3 二级 + 1.1/1.2/1.3 三级结构；元信息与事实源（含沙箱中文字体渲染限制说明）、产品形态 × 角色矩阵（B）。变更 1（详情页顶部操作栏新增状态文字 + <code>Switch</code> 总开关，复用既有 <code>/phishing-agent/engine-config</code> 接口）、变更 2（关闭时 <code>destructive</code> 二次确认弹窗 + 保存成功/失败的 toast 反馈 + 关闭后持续展示的橙色禁用横幅）、变更 3（重新开启前校验「检测范围与准入规则」中是否存在已启用规则，无则弹出非破坏性门禁弹窗，点击「前往配置」后通过 <code>?action=create-admission-rule</code> URL 参数联动「检测范围与准入规则」模块自动打开「新增规则」弹窗并即时清除该参数，避免重复弹出）。补充真实 <code>agent-browser</code> 浏览器实测截图 S-1~S-6（Mock 模式 · AI版·单租户 · 平台管理员 · 浅色主题 · 1280×633），逐元素说明表均依据 <code>messages/zh.json</code> 真实 i18n 文案核对转录；新增差异标注 D-001~D-004（含 D-001 总开关可见性不受编辑权限约束的有意设计、D-004 沙箱中文字体缺失导致截图文字方框化的环境限制说明）、待确认事项 Q-001~Q-003；文档不含 <code>&lt;script&gt;</code>、表单控件或事件属性，已通过残留扫描确认无匹配。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <a class="back-link" href="#toc">↑ 返回目录</a>
+
+</div>
+</body>
+</html>
