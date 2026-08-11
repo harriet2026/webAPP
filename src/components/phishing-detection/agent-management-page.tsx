@@ -103,6 +103,11 @@ export function PhishingAgentHeaderActions({ className }: { className?: string }
     const next = new URLSearchParams(searchParams.toString());
     next.set('agent', 'phishing');
     next.set('tab', 'config');
+    // action=create-admission-rule：告知「检测范围与准入规则」模块在挂载后
+    // 直接打开「新增规则」弹窗，而不是仅停留在配置 tab 让用户自己再点一次
+    // 「新增规则」按钮。AdmissionRulesSection 消费后会清掉该参数，避免后续
+    // 在 tab 间切换时重复弹出。
+    next.set('action', 'create-admission-rule');
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   }
 

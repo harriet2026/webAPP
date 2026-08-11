@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Plus, Trash2, Copy, Mail, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
@@ -38,10 +39,26 @@ export function AdmissionRulesSection() {
   const tdir = useTranslations('phishingConfig.admission.direction');
   const { apiRequest } = useApiRequest();
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<PhishAdmissionRule | null>(null);
   const [search, setSearch] = useState('');
+
+  // 智能体总开关的「准入规则」拦截弹窗点击「前往配置」后，通过
+  // ?action=create-admission-rule 告知本模块直接打开「新增规则」弹窗，而
+  // 不是仅停留在配置 tab。消费后立即清掉该参数（保留 agent/tab），避免用户
+  // 之后在 tab 间来回切换、或前进/后退历史记录时重复弹出。
+  useEffect(() => {
+    if (searchParams.get('action') !== 'create-admission-rule') return;
+    setEditing(null);
+    setSheetOpen(true);
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete('action');
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+  }, [searchParams, router, pathname]);
 
   const { data: rules = [], isLoading } = useQuery({
     queryKey: ['phish-admission-rules'],
