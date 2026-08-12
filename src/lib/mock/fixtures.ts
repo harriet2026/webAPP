@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ────────────────────────────────────────────────���────────────────────
+// ─── 租户 ─────────────────────��──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -2032,7 +2032,7 @@ export function mockPhishingStats(): PhishingStats {
 // ─── 钓鱼邮件检测总览：研判日志列表 / 详情（mock）───────────────────────────
 // 真实后端: GET /phishing-agent/detection-logs(/:id)、POST .../block、
 // .../exempt。此前只 mock 了 /phishing-agent/stats，检测总览页的日志表格在
-// 纯 mock 模式下始终为空（无后端时看不到任何数据）——这里补一份覆盖全部
+// 纯 mock ��式下始终为空（无后端时看不到任何数据）——这里补一份覆盖全部
 // disposition/recall_status/risk_level/detection_mode 枚举取值的种子数据，
 // 并支持列表关键字/时间范围/多选筛选分页，以及阻断/豁免对种子状态的迁移。
 const PHISHING_LOG_LOADED_AT = Date.now();
@@ -2724,15 +2724,18 @@ function mockPhishingLogMatchesQuery(item: DetectionLogItem, query: URLSearchPar
   // 后再比对，保证多选之间是 OR 语义（选中任一状态即命中）。
   const mailStatuses = query.getAll('mail_status');
   if (mailStatuses.length > 0) {
-    const derived = mapPhishingDispositionToDisplayStatus(item.disposition, item.recall_status);
+    const derived = item.display_status ?? mapPhishingDispositionToDisplayStatus(item.disposition, item.recall_status);
     if (!mailStatuses.includes(derived)) return false;
   }
   return true;
 }
 
-export function mockPhishingDetectionLogsList(path: string): DetectionLogListResponse {
+  export function mockPhishingDetectionLogsList(path: string): DetectionLogListResponse {
   const query = new URLSearchParams(path.split('?')[1] ?? '');
-  const filtered = mockPhishingDetectionLogsState
+  const filtered = mockPhishingDetectionLogsState.map((item) => ({
+    ...item,
+    display_status: item.display_status ?? mapPhishingDispositionToDisplayStatus(item.disposition, item.recall_status),
+  })).filter((item) => mockPhishingLogMatchesQuery(item, query))
     .filter((item) => mockPhishingLogMatchesQuery(item, query))
     .sort((a, b) => Date.parse(b.sidelined_at) - Date.parse(a.sidelined_at));
   const page = Math.max(1, Number(query.get('page') ?? 1));
@@ -4249,7 +4252,7 @@ export function mockSenderFilterRulesList(): { items: Rule[] } {
 }
 
 // 群组下拉/群组管理数据：按 `ruleToGroup`（src/lib/api/groups.ts）契约构造 —
-//   - 分组名取自 tags 里 `grp:<name>` 前缀（GROUP_TAG_PREFIX），而非 `name` 字段；
+//   - 分组名取自 tags 里 `grp:<name>` 前缀（GROUP_TAG_PREFIX）���而非 `name` 字段；
 //   - 分组类型优先取 metadata.group_type，其次由 stage 反推（GROUP_TYPE_TO_STAGE 的反映射）；
 //   - 普通组 condition_tree 用 `serializeMembers` 生成（与 `parseMembers` 互为逆运算）；
 //     特征组直接给 condition_tree（serde 的 AND[OR[any],AND[all]] 形态）；
@@ -8455,7 +8458,7 @@ export function mockAuthAttemptStatsData(): AuthAttemptStats {
 // ==================== 组织通讯录（admin-contacts html_spec）====================
 // fixture 数据逐值照抄 demo components/admin/contacts/types.ts 的 MOCK_*，
 // 保证 Mock 模式下 webapp 渲染的 DOM 与 demo 逐字段一致。
-// 状态化：数据源 CRUD/同步状态机/测试交替、人员标记，均在模块级可变数组上进行。
+// 状态化：数据源 CRUD/同步状态机/测试交替、人员标记，均在模块级可变��组上进行。
 
 interface MockContactSourceRow {
   id: number;

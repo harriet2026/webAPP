@@ -227,7 +227,7 @@ export function DetectionLogTable({
         // 检测日志接口没有独立的邮件生命周期状态字段，由 disposition（执行
         // 动作）+ recall_status（召回/通知状态）在前端派生，派生规则与文案/
         // 配色均与「邮件处置中心」保持一致，详见 mapPhishingDispositionToDisplayStatus。
-        const displayStatus = mapPhishingDispositionToDisplayStatus(
+        const displayStatus = row.original.display_status ?? mapPhishingDispositionToDisplayStatus(
           row.original.disposition,
           row.original.recall_status,
         );

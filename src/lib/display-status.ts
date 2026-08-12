@@ -56,23 +56,27 @@ export const DISPLAY_STATUS_VARIANTS: Record<
  *      与处置中心的默认兜底分支一致
  */
 /**
- * mapPhishingDispositionToDisplayStatus() 的全部可能返回值（按召回优先/执行动作
- * 兜底的派生规则枚举得到，顺序即"检测日志 › 邮件状态"筛选下拉框的选项顺序）。
- * 检测日志的 9 种 disposition × 6 种 recall_status 组合最终只会落到这 9 个值，
- * 供 detection-log-filters.tsx 渲染筛选项，避免筛选框里出现派生规则永远不会
- * 产出、因而点了也没有效果的"僵尸选项"（如 rejected/bounced/deleted 等仅
- * 存在于邮件处置中心自身生命周期里的状态）。
+ * 检测日志「邮件状态」筛选项直接复用处置中心的完整 DisplayStatus 枚举。
+ * 这里不维护第二套子集，避免检测日志与处置中心出现状态类型不一致。
  */
 export const PHISHING_MAIL_STATUS_OPTIONS: DisplayStatus[] = [
+  'rejected',
+  'bounced',
+  'discarded',
   'quarantine_pending',
+  'sideline_pending',
   'audit_pending',
   'delivering',
   'delivered',
+  'partial_delivered',
   'delivery_failed',
   'recall_pending',
   'recall_success',
   'recall_failed',
   'partial_recall_success',
+  'deleted',
+  'expired',
+  'reviewed_rejected',
 ];
 
 export function mapPhishingDispositionToDisplayStatus(

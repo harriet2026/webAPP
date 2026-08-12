@@ -66,6 +66,8 @@ export interface DetectionLogItem {
   disposition_actions: string[];
   recipient_dispositions: RecipientDisposition[];
   processed_at?: string;
+  /** 后端统一返回的处置中心 DisplayStatus；旧数据为空时使用前端兼容映射。 */
+  display_status?: import('@/types/email-disposal').DisplayStatus;
   disposition: Disposition;
   detection_mode: DetectionMode;
   recall_status: RecallStatus;
