@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown, Download, Loader2, Search } from 'lucide-react';
+import { ChevronDown, Download, Loader2, RotateCcw, Search, Send, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
   Sheet,
@@ -30,6 +30,8 @@ import {
   normalizePhishingRiskLevel,
   riskBadgeClass,
 } from '@/components/phishing-detection/badge-styles';
+import { getPhishingDetailActions } from '@/components/phishing-detection/detail-actions';
+import { mapPhishingDispositionToDisplayStatus } from '@/lib/display-status';
 import { UrlFindingsTable } from '@/components/phishing-detection/url-findings-table';
 
 interface DetectionDetailSheetProps {
@@ -38,8 +40,9 @@ interface DetectionDetailSheetProps {
   detailId: string | null;
   isAdmin: boolean;
   isLiveState: (disposition: string) => boolean;
-  onBlock: (id: string) => void;
-  onExempt: (id: string) => void;
+  onDeliver: (id: string) => void;
+  onDrop: (id: string) => void;
+  onRecall: (id: string) => void;
 }
 
 export function DetectionDetailSheet({
@@ -48,8 +51,9 @@ export function DetectionDetailSheet({
   detailId,
   isAdmin,
   isLiveState,
-  onBlock,
-  onExempt,
+  onDeliver,
+  onDrop,
+  onRecall,
 }: DetectionDetailSheetProps) {
   const t = useTranslations();
   const tpd = useTranslations('phishingDetection');
@@ -75,6 +79,13 @@ export function DetectionDetailSheet({
   const evidence = investigation?.result?.evidence ?? [];
   const aiSummary = investigation?.summary ?? investigation?.result?.summary ?? '';
   const liveBlocked = summary ? isLiveState(summary.disposition) : false;
+  // 操作按钮按当下的邮件状态（而非执行动作）来决定，与「检测日志」列表及
+  // 「邮件处置中心」批量工具栏的 canRelease / canRecall 规则同源，详见
+  // detail-actions.ts 的注释。
+  const displayStatus = summary
+    ? summary.display_status ?? mapPhishingDispositionToDisplayStatus(summary.disposition, summary.recall_status)
+    : undefined;
+  const detailActions = displayStatus ? getPhishingDetailActions(displayStatus) : null;
 
   const filteredSteps = useMemo(() => {
     const q = stepSearch.trim().toLowerCase();
@@ -119,24 +130,41 @@ export function DetectionDetailSheet({
                     {tpd('detail.resultTruncatedHint')}
                   </div>
                 ) : null}
-                {isAdmin ? (
+                {isAdmin && detailActions && (detailActions.canDeliver || detailActions.canDrop || detailActions.canRecall) ? (
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      disabled={liveBlocked}
-                      onClick={() => onBlock(summary.sideline_id)}
-                    >
-                      {tpd('detail.block')}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={liveBlocked}
-                      onClick={() => onExempt(summary.sideline_id)}
-                    >
-                      {tpd('detail.exempt')}
-                    </Button>
+                    {detailActions.canDeliver ? (
+                      <Button
+                        size="sm"
+                        disabled={liveBlocked}
+                        className="border-transparent bg-emerald-600 text-white hover:bg-emerald-700"
+                        onClick={() => onDeliver(summary.sideline_id)}
+                      >
+                        <Send className="mr-1.5 h-3.5 w-3.5" />
+                        {tpd('detail.deliver')}
+                      </Button>
+                    ) : null}
+                    {detailActions.canDrop ? (
+                      <Button
+                        size="sm"
+                        disabled={liveBlocked}
+                        className="border-transparent bg-red-600 text-white hover:bg-red-700"
+                        onClick={() => onDrop(summary.sideline_id)}
+                      >
+                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                        {tpd('detail.drop')}
+                      </Button>
+                    ) : null}
+                    {detailActions.canRecall ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={liveBlocked}
+                        onClick={() => onRecall(summary.sideline_id)}
+                      >
+                        <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                        {tpd('detail.recall')}
+                      </Button>
+                    ) : null}
                     {liveBlocked ? (
                       <span className="self-center text-xs text-muted-foreground">{tpd('detail.liveStateHint')}</span>
                     ) : null}

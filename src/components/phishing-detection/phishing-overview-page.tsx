@@ -100,6 +100,11 @@ export function PhishingOverviewPage() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [blockId, setBlockId] = useState<string | null>(null);
+  // 「丢弃」（未投递邮件不再投递）与「召回」（已投递邮件尝试撤回）在检测详情
+  // 面板里是两个语义不同的按钮，但底层仍复用同一个 block() 接口——用
+  // blockVariant 记录当前是哪种场景，只影响提示文案/确认对话框文案，不影响
+  // 实际调用的接口。
+  const [blockVariant, setBlockVariant] = useState<'drop' | 'recall'>('drop');
   const [exemptId, setExemptId] = useState<string | null>(null);
 
   const range = useMemo(
@@ -142,18 +147,21 @@ export function PhishingOverviewPage() {
   }, [queryClient]);
 
   const blockMutation = useMutation({
-    mutationFn: (id: string) => blockDetection(id, apiRequest),
-    onSuccess: (data) => {
-      toast.success(data.status === 'already_blocked' ? tpd('block.alreadyBlocked') : tpd('block.success'));
+    mutationFn: ({ id }: { id: string; variant: 'drop' | 'recall' }) => blockDetection(id, apiRequest),
+    onSuccess: (data, variables) => {
+      const alreadyKey = variables.variant === 'recall' ? 'block.recallAlready' : 'block.dropAlready';
+      const successKey = variables.variant === 'recall' ? 'block.recallSuccess' : 'block.dropSuccess';
+      toast.success(data.status === 'already_blocked' ? tpd(alreadyKey) : tpd(successKey));
       setBlockId(null);
       invalidateAll();
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       if (isLiveStateError(error)) {
         toast.error(tpd('block.liveStateError'));
         return;
       }
-      toast.error(apiErrorMessage(error, tpd('block.error')));
+      const errorKey = variables.variant === 'recall' ? 'block.recallError' : 'block.dropError';
+      toast.error(apiErrorMessage(error, tpd(errorKey)));
     },
   });
 
@@ -199,18 +207,29 @@ export function PhishingOverviewPage() {
   }, []);
 
   const handleConfirmBlock = useCallback(() => {
-    if (blockId) blockMutation.mutate(blockId);
-  }, [blockId, blockMutation]);
+    if (blockId) blockMutation.mutate({ id: blockId, variant: blockVariant });
+  }, [blockId, blockVariant, blockMutation]);
 
   const handleExemptSubmit = useCallback((reason: string) => {
     if (exemptId) exemptMutation.mutate({ id: exemptId, reason });
   }, [exemptId, exemptMutation]);
 
-  const handleDetailBlock = useCallback((id: string) => {
+  // 未投递态：「丢弃」调用 block()（阻止继续投递，效果等同于丢弃这封未投递
+  // 的邮件），「投递」调用 exempt()（放行投递，仍需填写原因）。
+  // 已投递态：「召回」同样复用 block()，只是按钮语义与提示文案改成召回相关
+  // 的表述——目前后端没有独立的召回/丢弃接口，这里只是让按钮文案匹配它在
+  // 该状态下的真实效果，见 detail-actions.ts 的规则。
+  const handleDetailDrop = useCallback((id: string) => {
+    setBlockVariant('drop');
     setBlockId(id);
   }, []);
 
-  const handleDetailExempt = useCallback((id: string) => {
+  const handleDetailRecall = useCallback((id: string) => {
+    setBlockVariant('recall');
+    setBlockId(id);
+  }, []);
+
+  const handleDetailDeliver = useCallback((id: string) => {
     setExemptId(id);
   }, []);
 
@@ -264,12 +283,14 @@ export function PhishingOverviewPage() {
         detailId={detailId}
         isAdmin={isAdmin}
         isLiveState={isLiveDisposition}
-        onBlock={handleDetailBlock}
-        onExempt={handleDetailExempt}
+        onDeliver={handleDetailDeliver}
+        onDrop={handleDetailDrop}
+        onRecall={handleDetailRecall}
       />
 
       <BlockDialog
         open={!!blockId}
+        variant={blockVariant}
         onOpenChange={(open) => !open && setBlockId(null)}
         onConfirm={handleConfirmBlock}
       />
