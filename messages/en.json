@@ -8409,10 +8409,9 @@
     "filters": {
       "keywordPlaceholder": "Search sender, subject...",
       "disposition": "Action",
-      "mailStatus": "Mail Status",
-      "detectionMode": "Run Mode",
-      "recallStatus": "Recall Status",
-      "riskLevel": "Risk Level",
+  "mailStatus": "Mail Status",
+  "detectionMode": "Run Mode",
+  "riskLevel": "Risk Level",
       "range": {
         "today": "Today",
         "7d": "Last 7 days",

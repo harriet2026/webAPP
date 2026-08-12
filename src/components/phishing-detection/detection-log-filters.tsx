@@ -73,17 +73,10 @@ export type TimeRangeKey = 'today' | '7d' | '30d' | 'custom';
 
 export interface DetectionFilterState {
   keyword: string;
-  // disposition 与 recall_status 不再由本组件的下拉框直接暴露给用户筛选——
-  // 筛选栏里原来的「执行动作」下拉已替换为下方的「邮件状态」(mail_status)，
-  // 但这两个字段仍保留在筛选状态里，供 KPI 卡片点击穿透使用
-  // （见 phishing-overview-page.tsx 的 applyKpiFilter）。
   disposition: string[];
   detection_mode: string[];
   recall_status: string[];
   risk_level: string[];
-  // 「邮件状态」：由 disposition + recall_status 派生的邮件处置中心同款状态，
-  // 取值见 PHISHING_MAIL_STATUS_OPTIONS。真实后端接口未提供该维度的查询参数，
-  // 因此该筛选目前仅在 Mock 模式下保证结果准确（见 mockPhishingLogMatchesQuery）。
   mail_status: string[];
   rangeKey: TimeRangeKey;
   start: string;
