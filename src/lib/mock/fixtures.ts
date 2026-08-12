@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ─────────────────────�����──────────────────────────���────────────────────
+// ─── 租户 ─────────────────────������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -1243,7 +1243,7 @@ export function mockOpsTopCsv(response: OpsTopResponse): string {
 
 export function mockOpsTopAi(): { markdown: string } {
   return {
-    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- 建议优先复核失败率超过 50% 的连接来源及持续飙升对象。\n- 展开行可查看固��近 7 ���趋势与关联子维度。",
+    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- ���议优先复核失败率超过 50% 的连接来源及持续飙升对象。\n- 展开行可查看固��近 7 ���趋势与关联子维度。",
   };
 }
 
@@ -2080,7 +2080,12 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     processed_at: phishingHoursAgo(0.45),
     disposition: 'review',
     detection_mode: 'realtime',
-    recall_status: 'pending_processing',
+    // 邮件仍处于人工审核持有（hold/pending），recalls 为空、从未送达收件人，
+    // 谈不上"召回"——recall_status 只对已送达过邮箱的邮件才有意义（对照
+    // ph-100002/ph-100004/ph-100006 的调查叙述均明确提到"隔离并召回"）。此
+    // 记录的调查步骤仅"转人工审核"，不含任何召回动作，故应为 'none'，
+    // 派生的邮件状态才会正确落在「待审核」而不是「召回中」。
+    recall_status: 'none',
     agent_rounds: 5,
     url_summary: { total: 4, phishing: 3, suspicious: 1, normal: 0 },
     result_truncated: false,
@@ -2140,7 +2145,10 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     processed_at: phishingHoursAgo(2.9),
     disposition: 'review',
     detection_mode: 'realtime',
-    recall_status: 'pending_recall',
+    // 同 ph-100001：调查叙述是"置信度 79%，转人工复核"，recalls 为空，从未
+    // 送达收件人，不存在召回动作，recall_status 应为 'none'，使派生的邮件
+    // 状态落在「待审核」而不是与执行动作矛盾的「召回中」。
+    recall_status: 'none',
     agent_rounds: 4,
     url_summary: { total: 2, phishing: 1, suspicious: 0, normal: 1 },
     result_truncated: false,
@@ -4249,7 +4257,7 @@ export function mockSenderFilterRulesList(): { items: Rule[] } {
   };
 }
 
-// 群组下拉/群组管理数据：按 `ruleToGroup`（src/lib/api/groups.ts）契约构造 —
+// 群组下拉/群组管理数据：�� `ruleToGroup`（src/lib/api/groups.ts）契约构造 —
 //   - 分组名取自 tags 里 `grp:<name>` 前缀（GROUP_TAG_PREFIX）���而非 `name` 字段；
 //   - 分组类型优先取 metadata.group_type，其次由 stage 反推（GROUP_TYPE_TO_STAGE 的反映射）；
 //   - 普通组 condition_tree 用 `serializeMembers` 生成（与 `parseMembers` 互为逆运算）；
@@ -8621,7 +8629,7 @@ export function mockContactSourceSetAutoSync(id: number, body: { enabled?: boole
   return deepClone(row);
 }
 
-// 测试连接：规格侧口径 —— 确定性交替 成功→失败→成功…，两种��果都能复核。
+// 测试连接：规格侧口径 —— 确定性交替 成功→���败→成功…，两种��果都能复核。
 let contactTestSeq = 0;
 export function mockContactSourceTest() {
   contactTestSeq += 1;
