@@ -25,7 +25,11 @@ import { JsonBlock } from '@/components/phishing-detection/json-block';
 import { getDetectionLogDetail } from '@/lib/api/phishing-detection';
 import { useApiRequest } from '@/lib/api/client';
 import { formatDate } from '@/lib/utils';
-import { dispositionBadgeClass } from '@/components/phishing-detection/badge-styles';
+import {
+  dispositionBadgeClass,
+  normalizePhishingRiskLevel,
+  riskBadgeClass,
+} from '@/components/phishing-detection/badge-styles';
 import { UrlFindingsTable } from '@/components/phishing-detection/url-findings-table';
 
 interface DetectionDetailSheetProps {
@@ -149,8 +153,8 @@ export function DetectionDetailSheet({
                       {tpd(`disposition.${summary.disposition}`)}
                     </Badge>
                     {summary.risk_level ? (
-                      <Badge variant="outline">
-                        {tpd(`riskLevel.${summary.risk_level || 'none'}`)}
+                      <Badge className={riskBadgeClass(summary.risk_level)}>
+                        {tpd(`riskLevel.${normalizePhishingRiskLevel(summary.risk_level)}`)}
                       </Badge>
                     ) : null}
                     {typeof summary.confidence === 'number' ? (

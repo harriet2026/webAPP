@@ -8443,11 +8443,10 @@
       "expanded": "Expanded"
     },
     "riskLevel": {
-      "critical": "Critical Risk",
-      "high": "High Risk",
-      "medium": "Medium Risk",
+      "suspicious": "Suspicious",
       "low": "Low Risk",
-      "none": "Safe"
+      "medium": "Medium Risk",
+      "high": "High Risk"
     },
     "table": {
       "logTitle": "Detection Logs",

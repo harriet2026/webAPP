@@ -29,6 +29,8 @@ import { useApiRequest } from '@/lib/api/client';
 import {
   confidenceClass,
   dispositionBadgeClass,
+  normalizePhishingRiskLevel,
+  riskBadgeClass,
 } from '@/components/phishing-detection/badge-styles';
 import { UrlFindingsTable } from '@/components/phishing-detection/url-findings-table';
 import { DISPLAY_STATUS_VARIANTS, mapPhishingDispositionToDisplayStatus } from '@/lib/display-status';
@@ -207,6 +209,18 @@ export function DetectionLogTable({
       accessorKey: 'confidence',
       header: tpd('table.confidence'),
       cell: ({ row }) => <ConfidenceCell value={row.original.confidence} />,
+    },
+    {
+      id: 'risk_level',
+      header: tpd('table.riskLevel'),
+      cell: ({ row }) => {
+        const riskLevel = normalizePhishingRiskLevel(row.original.risk_level);
+        return (
+          <Badge className={riskBadgeClass(riskLevel)}>
+            {tpd(`riskLevel.${riskLevel}`)}
+          </Badge>
+        );
+      },
     },
     {
       accessorKey: 'disposition',

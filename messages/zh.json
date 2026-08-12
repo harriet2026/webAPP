@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测���能�������������",
+    "spoofingDetection": "仿冒邮件检测�����能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1113,7 +1113,7 @@
       },
       "toasts": {
         "created": "认证配置已添加",
-        "updated": "认证配置已更新",
+        "updated": "认证配置已更���",
         "deleted": "认证配置已删除",
         "saveError": "请修正表单中的校验错误"
       },
@@ -2426,7 +2426,7 @@
     "authBackend": "认证后端",
     "mechanism": "认证方式",
     "sessionId": "会话 ID",
-    "duration": "认证耗时",
+    "duration": "认证耗���",
     "occurredAt": "发生时间",
     "logId": "日志编号",
     "eyebrow": "日志审计",
@@ -3531,7 +3531,7 @@
       "notFilled": "未填写",
       "affectAbout": "（影响约 {count} 个 IP）",
       "triggerCondition": "触发以下任一条件时：",
-      "noConditions": "暂未配置触发条件",
+      "noConditions": "暂未���置触发条件",
       "systemWill": "系统将：",
       "logOnly": "仅当次处置，不额外封禁",
       "suspendFor": "额外封禁 {duration}",
@@ -3557,7 +3557,7 @@
     "examples": {
       "title": "查看配置示例",
       "antiBruteforce": "防暴力破解",
-      "antiBruteforceDesc": "防止密码爆破攻击，短时间内多次认���失败将被封���",
+      "antiBruteforceDesc": "防止密���爆破攻击，短时间内多次认���失败将被封���",
       "antiBruteforceEffect": "每小时认证失败超过10次，将被封禁1小���。",
       "antiSpam": "防滥发邮件",
       "antiSpamDesc": "限制高频发信行为，防止垃圾邮件泛滥",
@@ -4104,7 +4104,7 @@
     "operation": "操作",
     "export": "导出",
     "import": "导入",
-    "searchPlaceholder": "搜索规则名称或发信人...",
+    "searchPlaceholder": "��索规则名称或发信人...",
     "description": "描述",
     "priority": "优先级",
     "priorityHelp": "数值越大优先级越高，优先��高的规则先匹配",
@@ -4254,7 +4254,7 @@
     "enabled": "已启用",
     "disabled": "已禁用",
     "matchType": "匹配类型",
-    "typeLabel": "类型",
+    "typeLabel": "类���",
     "matchCondition": "匹配条件",
     "matchTypeTip": "选择关键词、正则表达式或全局���容组进行匹配",
     "matchTypeKeyword": "关��词",
@@ -4433,7 +4433,7 @@
     "restoreDefault": "恢复系统默认",
     "moduleEnabled": "启用认证仿冒检测",
     "moduleEnabledHint": "关闭后，所有认证仿冒检测规则将不再生效",
-    "observeModeTip": "观察模式：开启后，规则仅记录命中日���，不会对邮件执���拦截/隔离等动作。建议在首次部署或调整策略时开启观察模式，验证规则影响范围后再正式启用。",
+    "observeModeTip": "观���模式：开启后，规则仅记录命中日���，不会对邮件执���拦截/隔离等动作。建议在首次部署或调整策略时开启观察模式，验证规则影响范围后再正式启用。",
     "probe": {
       "title": "模拟测试邮件认证",
       "description": "输入邮件参数测试认证仿冒检测的结果",
@@ -5128,7 +5128,7 @@
       "mode_light": "轻度",
       "mode_deep": "深度",
       "pending": "敬请期待",
-      "exceedActionHint_pass": "超出检测数量上限的二维码图片将跳过深度检测，直接进入下一检测阶段处理。",
+      "exceedActionHint_pass": "超出检测数量上限的二维码图片将跳过深度检测，直接进入下一检测阶段��理。",
       "exceedActionHint_quarantine": "超出检测数量上限的二维码图片将直接隔离，不再进入后续检测阶段。"
     },
     "encrypted": {
@@ -5447,7 +5447,7 @@
       "classification": "分类优先",
       "threshold": "分段阈值",
       "classificationDesc": "只要识别为该意图即执行处置，忽略置信度分数。",
-      "thresholdDesc": "根据置信度分数落入的区间执行不同处置动作。"
+      "thresholdDesc": "根据置信度分数落入的区间执��不同处置动作。"
     },
     "threshold": {
       "segment": "区间",
@@ -5545,7 +5545,7 @@
     "ignoreRePrefix": "忽略Re:/Fwd:",
     "ignoreNumbers": "忽略数字",
     "similarSubject": "相似度>90%视为相同",
-    "realtimeNote": "此检测在邮件进入时实时计算，命中后立即拦��或标记",
+    "realtimeNote": "���检测在邮件进入时实时计算，命中后立即拦��或标记",
     "observeNote": "观察模式下命中仅记录日志，不执行拦截动作",
     "goToGroupPolicy": "前往群组策略配置",
     "atLeastOneDirection": "至少选择一个检测方向",
@@ -6497,7 +6497,7 @@
     "incompleteReasonMissingValue": "缺少取值：请填写该条件的匹配值",
     "incompleteReasonThreshold": "缺少阈值：请填写数值阈值",
     "incompleteReasonBetween": "区间不完整：请同时填写最小值和最大值",
-    "incompleteReasonBetweenOrder": "区间无效：最小值不应大于最大值",
+    "incompleteReasonBetweenOrder": "区间无���：最小值不应大于最大值",
     "incompleteReasonRange": "超出有效范围：请填�� {min} 至 {max} 之间的数值",
     "moduleEnabled": "模块已启用",
     "moduleDisabled": "模块已禁用",
@@ -6582,7 +6582,7 @@
       "adminNotifyDesc": "发送通知邮件给管理员",
       "emailTag": "邮件标记",
       "emailTagDesc": "在邮件主题或信头添加标记",
-      "disclaimer": "免责声明",
+      "disclaimer": "免责���明",
       "disclaimerDesc": "在邮件中插入免责声明",
       "modifyHeader": "修改信头",
       "modifyHeaderDesc": "添加或修改邮件信头",
@@ -6927,7 +6927,7 @@
       "desc_bcc": {
         "source": "邮件头 BCC 字段",
         "usage": "识别密送给哪些收件人",
-        "note": "密送收件人通常不可见，仅发件人知晓"
+        "note": "��送收件人通常不可见，仅发件人知晓"
       },
       "desc_body": {
         "source": "邮件正文内容",
@@ -7900,7 +7900,7 @@
       "30d": "近30日",
       "this_month": "本月",
       "last_month": "上月",
-      "custom": "自定义",
+      "custom": "自定��",
       "over90Days": "时间范围不能超过 90 天",
       "startDate": "开始日期",
       "endDate": "结��日期",
@@ -8449,7 +8449,7 @@
       "disableConfirmAction": "确认关闭",
       "disabledBanner": "钓鱼邮件检测智能体已关闭，当前不会对新邮件进行钓鱼检测与拦截。",
       "admissionGateTitle": "请先配置检测范围与准入规则",
-      "admissionGateDescription": "启用钓鱼邮件检测智能体前，需要先在\u201c检测范围与准入规则\u201d中配置至少一条已启用的规则，明确检测范围后才能正式启用。",
+      "admissionGateDescription": "启用钓鱼邮件检测智能体前，需要先在\u201c检测范围与��入规则\u201d中配置至少一条已启用的规则，明确检测范围后才能正式启用。",
       "admissionGateAction": "前往配置",
       "enabledToast": "钓鱼邮件检测智能体已启用",
       "disabledToast": "钓鱼邮件检测智能体已关闭",
@@ -8500,11 +8500,10 @@
       "expanded": "已展开"
     },
     "riskLevel": {
-      "critical": "极危",
-      "high": "高危",
-      "medium": "中危",
+      "suspicious": "可疑",
       "low": "低危",
-      "none": "安全"
+      "medium": "中危",
+      "high": "高危"
     },
     "table": {
       "logTitle": "检测日志",
@@ -8581,7 +8580,7 @@
     },
     "exempt": {
       "title": "误报豁免",
-      "description": "标记该邮件为误报并豁免拦截，请填写豁免原因。",
+      "description": "标记该邮件为误报并豁免拦截，请填���豁免原因。",
       "reasonPlaceholder": "请输入豁免原因...",
       "reasonRequired": "请填写豁免原因",
       "submit": "提交豁免",
@@ -8909,7 +8908,7 @@
     },
     "table": {
       "time": "时间",
-      "sender": "发信人",
+      "sender": "发���人",
       "subject": "主题",
       "riskScore": "风险评分",
       "spoofMethods": "仿冒手法",
@@ -9230,7 +9229,7 @@
     "description": "对已投递历史邮件按发件人 + 同源聚类复检，发现漏报并软删除召回。",
     "status": {
       "running": "运行中",
-      "paused": "已暂停"
+      "paused": "��暂停"
     },
     "toggle": {
       "label": "总开关"
@@ -10563,7 +10562,7 @@
       "percent": "%"
     },
     "table": {
-      "instanceId": "实例ID",
+      "instanceId": "��例ID",
       "timePeriod": "时间段",
       "scanThroughput": "扫描吞吐量（封/秒）",
       "averageLatency": "平均耗时（毫秒）",
@@ -10801,7 +10800,7 @@
       "enabled_required": "请指定是否启用",
       "expires_at_format_invalid": "过期时间格式不正确，应为 RFC3339（如 2026-08-01T12:00:00+08:00）",
       "helo_match_invalid": "HELO 匹配方式无效，只能是：{allowed}",
-      "helo_pattern_regex_invalid": "HELO 匹配的正则表达式不合法，请检查语���",
+      "helo_pattern_regex_invalid": "HELO ��配的正则表达式不合法，请检查语���",
       "is_active_required": "请指定是否生效",
       "not_found": "准入规则���存在，可能已被删除",
       "null_sender_requires_cidr": "允许���发件人的规则只按来源 IP 匹配，因此必须填写来源 IP 段",
@@ -10809,7 +10808,7 @@
       "rate_limit_must_be_positive": "每小时限额必须大于 0",
       "rcpt_domain_not_owned": "收件域必须是本租户已验证的域名或其子域",
       "rcpt_domain_regex_invalid": "收件域匹配的正则表达式不合法，请检查语法",
-      "rcpt_match_invalid": "收件人匹配方式无效，只能是：{allowed}",
+      "rcpt_match_invalid": "收件人匹配方式无效，只��是：{allowed}",
       "source_auth_required": "至少要��定一种来源认证方式：来源 IP 段或 SPF 校验",
       "tenant_domain_cross_tenant": "所选域名属于其他租户",
       "tenant_domain_not_found": "所选域名不存在，可能已被删除",
@@ -10928,7 +10927,7 @@
       "traceback_cancelled_elsewhere": "威胁回溯任务请在威胁回溯运行记录中取消"
     },
     "profile": {
-      "user_not_found": "用户不存在",
+      "user_not_found": "用户���存在",
       "session_not_found": "登录会话不存在或���失效",
       "session_id_missing": "缺少会话标识",
       "name_required": "姓名不能为空",
@@ -11052,7 +11051,7 @@
       "domain_limit_exceeded": "每个租户最多 {max} 个域名",
       "domain_already_exists": "该域名已存在",
       "cidr_invalid": "CIDR 格式不正确",
-      "cidr_limit_exceeded": "每个租户最多 {max} 个 IP 段",
+      "cidr_limit_exceeded": "每个租户最��� {max} 个 IP 段",
       "cidr_already_exists": "该 IP 段已存在",
       "tenant_id_required": "请指定租户",
       "tenant_id_invalid": "租户 ID 无效",
@@ -11061,7 +11060,7 @@
     "login_policy": {
       "two_factor_platform_admin_only": "二次认证强制策略仅平台管理员可设置",
       "two_factor_locked_by_platform": "平台已强制启用二次认证，租户不可关闭",
-      "two_factor_self_service_tenant_only": "二次认证自助开关是租户级设置，全局基线不支持",
+      "two_factor_self_service_tenant_only": "二次认证自助开关是租户级设置，全局基线不���持",
       "baseline_platform_admin_only": "仅平台管理员可��改平台基线",
       "rule_platform_admin_only": "仅平台管理员可修改平台规则",
       "ip_or_cidr_format_invalid": "请输入正确的 IP 地址或 CIDR 格式（如 192.168.1.0/24）",

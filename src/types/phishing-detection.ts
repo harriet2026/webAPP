@@ -23,7 +23,9 @@ export type RecallStatus =
   | 'recall_failed'
   | 'expanded';
 
-export type RiskLevel = 'critical' | 'high' | 'medium' | 'low' | 'none';
+export type RiskLevel = 'suspicious' | 'low' | 'medium' | 'high';
+
+export type LegacyRiskLevel = 'critical' | 'none';
 
 export interface UrlSummary {
   total: number;
@@ -60,7 +62,7 @@ export interface DetectionLogItem {
   sidelined_at: string;
   investigation_id?: string;
   verdict?: string;
-  risk_level?: RiskLevel | '';
+  risk_level?: RiskLevel | LegacyRiskLevel | '';
   confidence?: number | null;
   recalls: RecallRecord[];
   disposition_actions: string[];

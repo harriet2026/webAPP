@@ -1,6 +1,23 @@
 import { cn } from '@/lib/utils';
 import type { Disposition, RecallStatus, RiskLevel } from '@/types/phishing-detection';
 
+export function normalizePhishingRiskLevel(risk: string | null | undefined): RiskLevel {
+  switch (risk) {
+    case 'critical':
+      return 'high';
+    case 'low':
+      return 'low';
+    case 'medium':
+      return 'medium';
+    case 'high':
+      return 'high';
+    case 'suspicious':
+    case 'none':
+    default:
+      return 'suspicious';
+  }
+}
+
 export function dispositionBadgeClass(disposition: Disposition): string {
   switch (disposition) {
     case 'quarantine':
@@ -27,10 +44,9 @@ export function dispositionBadgeClass(disposition: Disposition): string {
   }
 }
 
-export function riskBadgeClass(risk: RiskLevel | '' | undefined): string {
-  const normalized: RiskLevel = risk === '' || risk === undefined ? 'none' : risk;
+export function riskBadgeClass(risk: string | null | undefined): string {
+  const normalized = normalizePhishingRiskLevel(risk);
   switch (normalized) {
-    case 'critical':
     case 'high':
       return cn('border-transparent bg-rose-500/15 text-rose-700 dark:text-rose-300');
     case 'medium':

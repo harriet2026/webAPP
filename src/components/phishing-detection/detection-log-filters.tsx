@@ -158,11 +158,10 @@ export function DetectionLogFilters({ value, onChange, onReset }: DetectionLogFi
 
         <MultiSelect
           options={[
-            { value: 'critical', labelKey: 'riskLevel.critical' },
-            { value: 'high', labelKey: 'riskLevel.high' },
-            { value: 'medium', labelKey: 'riskLevel.medium' },
+            { value: 'suspicious', labelKey: 'riskLevel.suspicious' },
             { value: 'low', labelKey: 'riskLevel.low' },
-            { value: 'none', labelKey: 'riskLevel.none' },
+            { value: 'medium', labelKey: 'riskLevel.medium' },
+            { value: 'high', labelKey: 'riskLevel.high' },
           ]}
           value={value.risk_level}
           onChange={(next) => update('risk_level', next)}
