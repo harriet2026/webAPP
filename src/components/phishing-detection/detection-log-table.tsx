@@ -52,6 +52,23 @@ function ConfidenceCell({ value }: { value?: number | null }) {
   return <span className={confidenceClass(value)}>{Math.round(value * 100)}%</span>;
 }
 
+type DetectionLogAction = 'deliver' | 'quarantine' | 'details';
+
+function getDetectionLogAction(item: DetectionLogItem): DetectionLogAction {
+  const status = item.display_status ?? mapPhishingDispositionToDisplayStatus(
+    item.disposition,
+    item.recall_status,
+  );
+
+  if (status === 'quarantine_pending' || status === 'sideline_pending' || status === 'audit_pending' || status === 'delivery_failed') {
+    return 'deliver';
+  }
+  if (status === 'delivered' || status === 'partial_delivered') {
+    return 'quarantine';
+  }
+  return 'details';
+}
+
 function UrlSummaryCell({ item }: { item: DetectionLogItem }) {
   const t = useTranslations('phishingDetection');
   const s = item.url_summary;
@@ -255,32 +272,22 @@ export function DetectionLogTable({
       cell: ({ row }) => {
         const item = row.original;
         const live = isLiveState(item.disposition);
+        const action = getDetectionLogAction(item);
         return (
           <div className="flex items-center gap-1.5">
             <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700" onClick={() => onOpenDetail(item.sideline_id)}>
               {tpd('table.detail')}
             </Button>
-            {isAdmin ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 px-2 text-xs"
-                  disabled={live}
-                  onClick={() => onBlock(item)}
-                >
-                  {tpd('table.block')}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs"
-                  disabled={live}
-                  onClick={() => onExempt(item)}
-                >
-                  {tpd('table.exempt')}
-                </Button>
-              </>
+            {isAdmin && action !== 'details' ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                disabled={live}
+                onClick={() => (action === 'deliver' ? onExempt(item) : onBlock(item))}
+              >
+                {tpd(`table.${action}`)}
+              </Button>
             ) : null}
           </div>
         );
