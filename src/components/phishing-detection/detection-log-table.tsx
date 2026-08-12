@@ -32,6 +32,7 @@ import {
   recallBadgeClass,
 } from '@/components/phishing-detection/badge-styles';
 import { UrlFindingsTable } from '@/components/phishing-detection/url-findings-table';
+import { DISPLAY_STATUS_VARIANTS, mapPhishingDispositionToDisplayStatus } from '@/lib/display-status';
 import type { DetectionLogItem } from '@/types/phishing-detection';
 
 const RECALL_SPINNER_STATES = ['pending_processing', 'pending_recall'];
@@ -126,6 +127,9 @@ export function DetectionLogTable({
   onExempt,
 }: DetectionLogTableProps) {
   const tpd = useTranslations('phishingDetection');
+  // 「邮件状态」列直接复用「邮件处置中心」的文案 key，保证同一状态在两个模块
+  // 里显示的文案（与配色）100% 一致，不会随各自维护而逐渐漂移。
+  const ted = useTranslations('emailDisposal');
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const columns = useMemo<ColumnDef<DetectionLogItem>[]>(() => [
@@ -217,6 +221,24 @@ export function DetectionLogTable({
       ),
     },
     {
+      id: 'mail_status',
+      header: tpd('table.mailStatus'),
+      cell: ({ row }) => {
+        // 检测日志接口没有独立的邮件生命周期状态字段，由 disposition（执行
+        // 动作）+ recall_status（召回/通知状态）在前端派生，派生规则与文案/
+        // 配色均与「邮件处置中心」保持一致，详见 mapPhishingDispositionToDisplayStatus。
+        const displayStatus = mapPhishingDispositionToDisplayStatus(
+          row.original.disposition,
+          row.original.recall_status,
+        );
+        return (
+          <Badge variant={DISPLAY_STATUS_VARIANTS[displayStatus]}>
+            {ted(`filters.statuses.${displayStatus}`)}
+          </Badge>
+        );
+      },
+    },
+    {
       accessorKey: 'recall_status',
       header: tpd('table.recallStatus'),
       cell: ({ row }) => {
@@ -277,7 +299,7 @@ export function DetectionLogTable({
         );
       },
     },
-  ], [expanded, isAdmin, isLiveState, onBlock, onExempt, onOpenDetail, tpd]);
+  ], [expanded, isAdmin, isLiveState, onBlock, onExempt, onOpenDetail, tpd, ted]);
 
   const table = useReactTable({
     data,
@@ -294,7 +316,7 @@ export function DetectionLogTable({
         </div>
       ) : null}
       <div className="overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-card shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
-        <Table className="w-full min-w-[1220px]">
+        <Table className="w-full min-w-[1340px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

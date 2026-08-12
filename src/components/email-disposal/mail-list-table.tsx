@@ -29,6 +29,7 @@ import {
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils';
 import { resolveActionBadges, actionToVariant } from '@/lib/email-log-action';
+import { DISPLAY_STATUS_VARIANTS as STATUS_VARIANTS } from '@/lib/display-status';
 import type { DisposalMailItem, DisplayStatus } from '@/types/email-disposal';
 import { formatListReason, isStage1Policy, type DisposalLang } from './lib/disposal-basis-config';
 import { RecipientStatusBadges } from './components/recipient-status-badges';
@@ -61,26 +62,6 @@ export interface TableHeaderFilters {
   emailTypes: string[];
   statuses: DisplayStatus[];
 }
-
-const STATUS_VARIANTS: Record<DisplayStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  rejected: 'destructive',
-  bounced: 'destructive',
-  discarded: 'outline',
-  quarantine_pending: 'destructive',
-  sideline_pending: 'secondary',
-  audit_pending: 'secondary',
-  delivering: 'secondary',
-  delivered: 'default',
-  partial_delivered: 'secondary',
-  delivery_failed: 'destructive',
-  recall_pending: 'secondary',
-  recall_success: 'default',
-  recall_failed: 'destructive',
-  partial_recall_success: 'secondary',
-  deleted: 'outline',
-  expired: 'outline',
-  reviewed_rejected: 'destructive',
-};
 
 // ACTION_VARIANTS is no longer used for rendering; actionToVariant() from
 // email-log-action.ts is used directly so mixed actions expand to per-action badges.

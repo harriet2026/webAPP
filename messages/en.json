@@ -8408,7 +8408,7 @@
     },
     "filters": {
       "keywordPlaceholder": "Search sender, subject...",
-      "disposition": "Disposition",
+      "disposition": "Action",
       "detectionMode": "Run Mode",
       "recallStatus": "Recall Status",
       "riskLevel": "Risk Level",
@@ -8471,7 +8471,8 @@
       "roundUnit": "rounds",
       "confidence": "Confidence",
       "detectionMode": "Run Mode",
-      "disposition": "Final Disposition",
+      "disposition": "Action",
+      "mailStatus": "Status",
       "riskLevel": "Risk",
       "invalidRange": "End time cannot be earlier than start time",
       "recallStatus": "Recall/Notification",
