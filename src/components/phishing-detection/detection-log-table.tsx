@@ -56,32 +56,29 @@ type DetectionLogAction = 'deliver' | 'quarantine' | 'details';
 
 /**
  * 操作栏的可执行动作只能由 block()/exempt() 两个接口驱动，而这两个接口
- * 只翻转记录当前的「执行动作」（disposition，即是否处于隔离/审核态），
+ * 只翻转记录当前的「执行动作」（disposition，即是否处于隔离/审核/阻断态），
  * 与 display_status 承载的投递/召回结果是两套独立维度——不能用后者判断
- * 前者是否可操作，否则会出现「failed（默认放行，从未被拦截）却显示
- * ‘投递’按钮」这类语义错误。因此这里与 isLiveState 一致，直接基于
- * disposition 判断：
- * - 当前处于隔离/审核（quarantine、audit）→ 可投递（豁免释放）；
- * - 当前已放行/标记/因故障默认放行（pass、mark、failed）→ 可隔离（纠正）；
- * - 仍在处理中或无法判断（pending、processing、manual_hold、unknown）→
- *   与 isLiveState 保持一致，只能查看详情。
+ * 前者是否可操作。执行动作仅有 deliver/audit/quarantine/block/discard/recall
+ * 六种取值，因此这里基于 disposition 判断：
+ * - 当前处于隔离/审核/阻断（quarantine、audit、block，均未送达收件人）→
+ *   可投递（豁免释放）；
+ * - 当前已投递（deliver）→ 可隔离（纠正）；
+ * - 丢弃/召回（discard、recall）均为终态，只能查看详情。
  */
 function getDetectionLogAction(disposition: Disposition): DetectionLogAction {
   switch (disposition) {
     case 'quarantine':
     case 'audit':
+    case 'block':
       return 'deliver';
-    case 'pass':
-    case 'mark':
-    case 'failed':
+    case 'deliver':
       return 'quarantine';
-    case 'pending':
-    case 'processing':
-    case 'manual_hold':
-    case 'unknown':
+    case 'discard':
+    case 'recall':
     default:
       return 'details';
   }
+}
 }
 
 function UrlSummaryCell({ item }: { item: DetectionLogItem }) {

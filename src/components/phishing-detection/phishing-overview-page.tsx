@@ -31,7 +31,11 @@ import type { DetectionLogItem, Disposition, DetectionMode, RecallStatus, RiskLe
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const PAGE_SIZE = 20;
-const LIVE_DISPOSITIONS = ['pending', 'processing', 'manual_hold'];
+// 执行动作仅有 deliver/audit/quarantine/block/discard/recall 六种取值，均为
+// 已决策的终态，不再存在「检测进行中」的中间态，故此处无本地即时态需要拦截。
+// 保留该判定入口是为了兼容后端未来可能返回的瞬时状态（如 409
+// live_state_unsupported）；一旦真实接口出现新的瞬时值，加回这里即可。
+const LIVE_DISPOSITIONS: string[] = [];
 
 function toRFC3339(d: Date): string {
   return d.toISOString();

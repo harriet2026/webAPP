@@ -82,16 +82,17 @@ export function mapPhishingDispositionToDisplayStatus(
     case 'quarantine':
       return 'quarantine_pending';
     case 'audit':
-    case 'manual_hold':
       return 'audit_pending';
-    case 'pass':
-    case 'mark':
+    case 'deliver':
       return 'delivered';
-    case 'failed':
-      return 'delivery_failed';
-    case 'pending':
-    case 'processing':
-    case 'unknown':
+    case 'block':
+      return 'rejected';
+    case 'discard':
+      return 'discarded';
+    case 'recall':
+      // recallStatus 为 'none' 时命中此分支的边界情况：召回动作已下发但尚未
+      // 有具体的召回子状态，保守地视为召回处理中。
+      return 'recall_pending';
     default:
       return 'delivering';
   }

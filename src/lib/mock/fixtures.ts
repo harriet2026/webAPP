@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ─────────────────────���──────────────────────────���────────────────────
+// ─── 租户 ─────────────────────����──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -2193,7 +2193,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     disposition_actions: ['quarantine', 'recall'],
     recipient_dispositions: phishingRecipientDispositions(['zhangwei@example.com'], 'quarantine', 'success'),
     processed_at: phishingHoursAgo(5.9),
-    disposition: 'quarantine',
+    disposition: 'recall',
     detection_mode: 'realtime',
     recall_status: 'recalled',
     agent_rounds: 4,
@@ -2241,7 +2241,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     disposition_actions: ['mark_subject'],
     recipient_dispositions: phishingRecipientDispositions(['chenjing@example.com'], 'mark_subject', 'success'),
     processed_at: phishingHoursAgo(8.9),
-    disposition: 'mark',
+    disposition: 'deliver',
     detection_mode: 'realtime',
     recall_status: 'none',
     agent_rounds: 2,
@@ -2270,7 +2270,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
       '需人工判定是否为内部钓鱼演练邮件',
     ),
     processed_at: phishingHoursAgo(10.9),
-    disposition: 'manual_hold',
+    disposition: 'audit',
     detection_mode: 'realtime',
     recall_status: 'none',
     agent_rounds: 1,
@@ -2293,7 +2293,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     recalls: [],
     disposition_actions: [],
     recipient_dispositions: phishingRecipientDispositions(['procurement@example.com'], 'pending', 'pending'),
-    disposition: 'processing',
+    disposition: 'audit',
     detection_mode: 'realtime',
     recall_status: 'none',
     agent_rounds: 2,
@@ -2315,7 +2315,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     recalls: [],
     disposition_actions: [],
     recipient_dispositions: phishingRecipientDispositions(['support@example.com'], 'pending', 'pending'),
-    disposition: 'pending',
+    disposition: 'audit',
     detection_mode: '',
     recall_status: 'none',
     agent_rounds: 0,
@@ -2344,7 +2344,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
       '研判任务失败，按默认策略放行',
     ),
     processed_at: phishingHoursAgo(19.9),
-    disposition: 'failed',
+    disposition: 'deliver',
     detection_mode: 'realtime',
     recall_status: 'none',
     agent_rounds: 1,
@@ -2368,7 +2368,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     disposition_actions: ['deliver'],
     recipient_dispositions: phishingRecipientDispositions(['opsteam@example.com'], 'deliver', 'success'),
     processed_at: phishingHoursAgo(25.9),
-    disposition: 'pass',
+    disposition: 'deliver',
     detection_mode: 'observe',
     recall_status: 'none',
     agent_rounds: 1,
@@ -2392,7 +2392,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     disposition_actions: ['deliver'],
     recipient_dispositions: phishingRecipientDispositions(['team@example.com'], 'deliver', 'success'),
     processed_at: phishingHoursAgo(47.9),
-    disposition: 'pass',
+    disposition: 'deliver',
     detection_mode: 'observe',
     recall_status: 'none',
     agent_rounds: 1,
@@ -2414,7 +2414,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     recalls: [],
     disposition_actions: [],
     recipient_dispositions: phishingRecipientDispositions(['archive@example.com'], 'unknown', 'unknown'),
-    disposition: 'unknown',
+    disposition: 'discard',
     detection_mode: '',
     recall_status: 'none',
     agent_rounds: 0,
@@ -2627,7 +2627,7 @@ const mockPhishingInvestigations: Record<string, InvestigationTask> = {
     ],
     result: {
       verdict: '',
-      summary: '无外链、无明显恶意特征，但发件域名存疑，建议人工确认是否为安全演练邮件。',
+      summary: '无外链、无明显恶意特征，但发件域名存疑，建议人工确认是否为安全演练���件。',
       confidence: 0.55,
       evidence: [],
     },
@@ -2771,7 +2771,7 @@ export function mockPhishingBlockDetection(id: string): BlockResponse {
 export function mockPhishingExemptDetection(id: string): ExemptResponse {
   const item = mockPhishingDetectionLogsState.find((entry) => entry.sideline_id === id);
   if (item) {
-    item.disposition = 'pass' as Disposition;
+    item.disposition = 'deliver' as Disposition;
     if (!item.disposition_actions.includes('deliver')) item.disposition_actions = [...item.disposition_actions, 'deliver'];
     item.processed_at = new Date().toISOString();
   }
@@ -3426,7 +3426,7 @@ export function resetIPFrequencyMock(): void {
     {
       ip: "203.0.113.15",
       rule_id: 1,
-      rule_name: "高频发信限制",
+      rule_name: "高频��信限制",
       action: "reject",
       suspended_at: "2024-01-15T17:12:00Z",
       expires_at: "2024-01-15T17:42:00Z",
@@ -3749,7 +3749,7 @@ function makeMockIPFilterRules(): IPFilterRuleView[] {
     makeIpFilterRule({
       id: 107,
       name: "监控源",
-      description: "内部审计服务调用",
+      description: "内部审��服务调用",
       list_type: "whitelist",
       ip_config_type: "single",
       ip_value: "192.168.99.1",
@@ -4405,7 +4405,7 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
 // 按 group_type 派生 `_meta/groups` 元信息，供高级过滤规则的 group 面板条件
 //（发信人组、特征组等）在配置面板的下拉里筛选选择。契约对齐真实端点
 // GET /unified-rules/_meta/groups?type=<T> 的 {items:[{id,label,rule_id}]}：
-//   - id 取 tag（grp:<名>，引擎按该 tag 建键，MapKeySelect 直接用 id 作为存储值）；
+//   - id 取 tag（grp:<名>，引擎按该 tag 建键，MapKeySelect 直接用 id 作为存储值���；
 //   - label 取群组名；rule_id 取规则 ID。
 // 复用同一份数据面，保证下拉选项与群组策略模块的发信人组始终一致。
 export function mockGroupsMetaByType(type: GroupType): { items: IPGroupMeta[] } {
@@ -5102,7 +5102,7 @@ export function mockAuthSpoofingConfig(): AuthSpoofingConfig {
 
 // 观测统计：hits 总和固定为 23，对齐 demo 硬编码的
 // `observeStats.wouldDrop`（AuthSpoofingPage.tsx），让「预计丢弃」脉冲徽标
-// 在 Mock 模式下与 demo 展示一致。`days` 只影响回显字段，不影响样本条数/分布。
+// 在 Mock 模式下与 demo 展示一致。`days` 只影��回显字段，不影响样本条数/分布。
 function authSpoofingObservePoints(): ObserveStatPoint[] {
   return [
     {
@@ -5170,7 +5170,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
 // `PRODUCT_TO_BACKEND` 转换，is_active=demo.enabled，priority=demo.priority，
 // created_at/updated_at=demo.createdAt/modifiedAt，rule_class:'action'，stage:'rcpt'，
 // page:'behavior_control'，condition_tree:'{}'（该页面不走通用条件树渲染，读取全靠
-// metadata），id 由 'rule-N' 解析为数字 N。
+// metadata），id 由 'rule-N' 解���为数字 N。
 //
 // 注：demo 源数据里 rule-7（"双向合计发信限制"）的 `enabled` 字段是 `true`，但本模块
 // 的验收测试（behavior-control-mock.test.ts）要求它在 mock 里表现为禁用
@@ -5907,7 +5907,7 @@ export function putSimilarDetectionMockState(
 
 // ─── 附件安全检测（attachment-security，mock）──────────────────────────���───
 // 数据源：demo attachment-security-module.tsx 与对应 html_spec 的浏览器实测默认态。
-// config_overrides 采用与真实 API 相同的逐键结构，使统一保存逻辑在 Mock 模式下
+// config_overrides 采���与真实 API 相同的逐键结构，使统一保存逻辑在 Mock 模式下
 // 也会真实执行 GET → POST/PUT → GET，而不是绕过数据映射。
 export interface MockAttachmentConfigOverride {
   id: number;
@@ -6113,7 +6113,7 @@ interface MockDisposalSeed {
   finalType?: string;
   correctionSource?: string;
   // domainAgeDays -- 命中特征「域名年龄」badge 的 mock 值（新注册域名信号，
-  // deriveDomainAge() 只在存在且 <=7 天时渲染）。缺省 undefined���即真实后端
+  // deriveDomainAge() 只在存在且 <=7 天时渲染）。缺省 undefined����即真实后端
   // 现状（暂无 whois/RDAP 数据）的优雅降级。
   domainAgeDays?: number;
   // senderIsNewOnThisMail -- true 时该行的 sender_first_seen_at 等于自己的
@@ -7466,7 +7466,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     },
     recipient_dispositions: recipients.map((recipient, i) => {
       const status = recipientStatusFor(seed, recipients.length, i);
-      // mixed seed: 前半投递、后半隔离/旁路，模拟真实 mixed 场景
+      // mixed seed: 前半投递、后半隔离/��路，模拟真实 mixed 场景
       const mixedActions = ["accept", "accept", "accept", "quarantine", "sideline"];
       const mixedStatuses = ["delivered", "delivered", "delivered", "quarantined", "delivered"];
       const mixedReasons = [

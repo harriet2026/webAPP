@@ -1,15 +1,13 @@
 import type { PhishEffectiveConfigSnapshot } from '@/types/phishing-config';
 
+// 执行动作：仅有以下 6 种，与「邮件处置中心」保持同一套语义（GT-讨论口径）。
 export type Disposition =
-  | 'quarantine'
-  | 'mark'
-  | 'pass'
+  | 'deliver'
   | 'audit'
-  | 'pending'
-  | 'processing'
-  | 'failed'
-  | 'manual_hold'
-  | 'unknown';
+  | 'quarantine'
+  | 'block'
+  | 'discard'
+  | 'recall';
 
 // deriveDetectionMode returns the run_mode from the investigation task's config
 // snapshot: 'realtime' | 'observe' | '' (empty for rows without a task or legacy rows).

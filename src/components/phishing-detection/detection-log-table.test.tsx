@@ -18,7 +18,7 @@ const item: DetectionLogItem = {
   recalls: [],
   disposition_actions: [],
   recipient_dispositions: [],
-  disposition: 'pass',
+  disposition: 'deliver',
   detection_mode: 'realtime',
   recall_status: 'none',
   agent_rounds: 5,
@@ -49,7 +49,7 @@ describe('DetectionLogTable', () => {
     expect(screen.queryByRole('columnheader', { name: '判定依据' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '查看依据' })).not.toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: '详情' })).toHaveLength(1);
-    // disposition: 'pass' 表示邮件已放行、未被隔离，操作栏应给出与之互补的
+    // disposition: 'deliver' 表示邮件已投递、未被隔离，操作栏应给出与之互补的
     // 「隔离」动作（对应邮件处置中心的执行动作语义），而不再是固定的
     // 「拦截」/「豁免」两个按钮。
     expect(screen.queryByRole('button', { name: '拦截' })).not.toBeInTheDocument();
@@ -86,7 +86,7 @@ describe('DetectionLogTable', () => {
     render(
       <NextIntlClientProvider locale="zh" messages={zh as never}>
         <DetectionLogTable
-          data={[{ ...item, disposition: 'pending' }]}
+          data={[{ ...item, disposition: 'audit' }]}
           isAdmin
           isLiveState={() => true}
           onOpenDetail={vi.fn()}
