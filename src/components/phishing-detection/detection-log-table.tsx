@@ -34,7 +34,7 @@ import {
 } from '@/components/phishing-detection/badge-styles';
 import { UrlFindingsTable } from '@/components/phishing-detection/url-findings-table';
 import { DISPLAY_STATUS_VARIANTS, mapPhishingDispositionToDisplayStatus } from '@/lib/display-status';
-import type { DetectionLogItem } from '@/types/phishing-detection';
+import type { Disposition, DetectionLogItem } from '@/types/phishing-detection';
 
 interface DetectionLogTableProps {
   data: DetectionLogItem[];
@@ -54,19 +54,34 @@ function ConfidenceCell({ value }: { value?: number | null }) {
 
 type DetectionLogAction = 'deliver' | 'quarantine' | 'details';
 
-function getDetectionLogAction(item: DetectionLogItem): DetectionLogAction {
-  const status = item.display_status ?? mapPhishingDispositionToDisplayStatus(
-    item.disposition,
-    item.recall_status,
-  );
-
-  if (status === 'quarantine_pending' || status === 'sideline_pending' || status === 'audit_pending' || status === 'delivery_failed') {
-    return 'deliver';
+/**
+ * 操作栏的可执行动作只能由 block()/exempt() 两个接口驱动，而这两个接口
+ * 只翻转记录当前的「执行动作」（disposition，即是否处于隔离/审核态），
+ * 与 display_status 承载的投递/召回结果是两套独立维度——不能用后者判断
+ * 前者是否可操作，否则会出现「failed（默认放行，从未被拦截）却显示
+ * ‘投递’按钮」这类语义错误。因此这里与 isLiveState 一致，直接基于
+ * disposition 判断：
+ * - 当前处于隔离/审核（quarantine、audit）→ 可投递（豁免释放）；
+ * - 当前已放行/标记/因故障默认放行（pass、mark、failed）→ 可隔离（纠正）；
+ * - 仍在处理中或无法判断（pending、processing、manual_hold、unknown）→
+ *   与 isLiveState 保持一致，只能查看详情。
+ */
+function getDetectionLogAction(disposition: Disposition): DetectionLogAction {
+  switch (disposition) {
+    case 'quarantine':
+    case 'audit':
+      return 'deliver';
+    case 'pass':
+    case 'mark':
+    case 'failed':
+      return 'quarantine';
+    case 'pending':
+    case 'processing':
+    case 'manual_hold':
+    case 'unknown':
+    default:
+      return 'details';
   }
-  if (status === 'delivered' || status === 'partial_delivered') {
-    return 'quarantine';
-  }
-  return 'details';
 }
 
 function UrlSummaryCell({ item }: { item: DetectionLogItem }) {
@@ -272,7 +287,7 @@ export function DetectionLogTable({
       cell: ({ row }) => {
         const item = row.original;
         const live = isLiveState(item.disposition);
-        const action = getDetectionLogAction(item);
+        const action = getDetectionLogAction(item.disposition);
         return (
           <div className="flex items-center gap-1.5">
             <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700" onClick={() => onOpenDetail(item.sideline_id)}>

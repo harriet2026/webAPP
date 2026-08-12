@@ -49,11 +49,55 @@ describe('DetectionLogTable', () => {
     expect(screen.queryByRole('columnheader', { name: '判定依据' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '查看依据' })).not.toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: '详情' })).toHaveLength(1);
-    expect(screen.getByRole('button', { name: '拦截' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '豁免' })).toBeInTheDocument();
+    // disposition: 'pass' 表示邮件已放行、未被隔离，操作栏应给出与之互补的
+    // 「隔离」动作（对应邮件处置中心的执行动作语义），而不再是固定的
+    // 「拦截」/「豁免」两个按钮。
+    expect(screen.queryByRole('button', { name: '拦截' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '豁免' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '隔离' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '详情' }));
     expect(onOpenDetail).toHaveBeenCalledOnce();
     expect(onOpenDetail).toHaveBeenCalledWith('sideline-12743');
+  });
+
+  it('shows 投递 for quarantined/audit-held mail and calls onExempt (release)', () => {
+    const onExempt = vi.fn();
+    render(
+      <NextIntlClientProvider locale="zh" messages={zh as never}>
+        <DetectionLogTable
+          data={[{ ...item, disposition: 'quarantine' }]}
+          isAdmin
+          isLiveState={() => false}
+          onOpenDetail={vi.fn()}
+          onBlock={vi.fn()}
+          onExempt={onExempt}
+        />
+      </NextIntlClientProvider>,
+    );
+
+    const deliverButton = screen.getByRole('button', { name: '投递' });
+    expect(deliverButton).toBeInTheDocument();
+    fireEvent.click(deliverButton);
+    expect(onExempt).toHaveBeenCalledOnce();
+  });
+
+  it('hides the action button for still-processing (live) mail, keeping only 详情', () => {
+    render(
+      <NextIntlClientProvider locale="zh" messages={zh as never}>
+        <DetectionLogTable
+          data={[{ ...item, disposition: 'pending' }]}
+          isAdmin
+          isLiveState={() => true}
+          onOpenDetail={vi.fn()}
+          onBlock={vi.fn()}
+          onExempt={vi.fn()}
+        />
+      </NextIntlClientProvider>,
+    );
+
+    expect(screen.queryByRole('button', { name: '投递' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '隔离' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '详情' })).toBeInTheDocument();
   });
 });
