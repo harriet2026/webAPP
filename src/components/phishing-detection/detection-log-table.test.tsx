@@ -49,19 +49,20 @@ describe('DetectionLogTable', () => {
     expect(screen.queryByRole('columnheader', { name: '判定依据' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '查看依据' })).not.toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: '详情' })).toHaveLength(1);
-    // disposition: 'deliver' 表示邮件已投递、未被隔离，操作栏应给出与之互补的
-    // 「隔离」动作（对应邮件处置中心的执行动作语义），而不再是固定的
-    // 「拦截」/「豁免」两个按钮。
-    expect(screen.queryByRole('button', { name: '拦截' })).not.toBeInTheDocument();
+    // disposition: 'deliver' 派生的邮件状态为 delivered（已投递），按「邮件
+    // 处置中心」canRecall 规则，已投递邮件只能召回——检测日志尚无独立召回
+    // 接口，此处复用 onBlock（拦截，将邮件重新置为隔离态）承接同一条
+    // 「状态决定操作」的规则，因此按钮文案是「拦截」而不是「隔离」。
+    expect(screen.queryByRole('button', { name: '投递' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '豁免' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '隔离' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '拦截' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '详情' }));
     expect(onOpenDetail).toHaveBeenCalledOnce();
     expect(onOpenDetail).toHaveBeenCalledWith('sideline-12743');
   });
 
-  it('shows 投递 for quarantined/audit-held mail and calls onExempt (release)', () => {
+  it('shows 豁免 for quarantined mail (quarantine_pending) and calls onExempt (release)', () => {
     const onExempt = vi.fn();
     render(
       <NextIntlClientProvider locale="zh" messages={zh as never}>
@@ -76,9 +77,12 @@ describe('DetectionLogTable', () => {
       </NextIntlClientProvider>,
     );
 
-    const deliverButton = screen.getByRole('button', { name: '投递' });
-    expect(deliverButton).toBeInTheDocument();
-    fireEvent.click(deliverButton);
+    // disposition: 'quarantine' → display_status: quarantine_pending，按
+    // 「邮件处置中心」canRelease 规则可放行，检测日志用 onExempt（豁免）承接
+    // 这一放行操作，按钮文案为「豁免」。
+    const exemptButton = screen.getByRole('button', { name: '豁免' });
+    expect(exemptButton).toBeInTheDocument();
+    fireEvent.click(exemptButton);
     expect(onExempt).toHaveBeenCalledOnce();
   });
 
@@ -86,7 +90,7 @@ describe('DetectionLogTable', () => {
     render(
       <NextIntlClientProvider locale="zh" messages={zh as never}>
         <DetectionLogTable
-          data={[{ ...item, disposition: 'audit' }]}
+          data={[{ ...item, disposition: 'review' }]}
           isAdmin
           isLiveState={() => true}
           onOpenDetail={vi.fn()}
@@ -96,17 +100,17 @@ describe('DetectionLogTable', () => {
       </NextIntlClientProvider>,
     );
 
-    // 审核（audit）对应可执行动作「投递」，但当记录处于 isLiveState（例如后端
-    // 正在异步处理该邮件）时，按钮仍应渲染以保持列宽/布局稳定，只是禁止点击，
-    // 避免与正在进行中的操作冲突。
-    expect(screen.getByRole('button', { name: '投递' })).toBeDisabled();
+    // 审核（review）派生的邮件状态为 audit_pending，可执行动作是「豁免」，但
+    // 当记录处于 isLiveState（例如后端正在异步处理该邮件）时，按钮仍应渲染
+    // 以保持列宽/布局稳定，只是禁止点击，避免与正在进行中的操作冲突。
+    expect(screen.getByRole('button', { name: '豁免' })).toBeDisabled();
   });
 
-  it('offers only 详情 for terminal actions (discard/recall) with no further action available', () => {
+  it('offers only 详情 for a terminal, non-recoverable state (block/rejected) with no further action available', () => {
     render(
       <NextIntlClientProvider locale="zh" messages={zh as never}>
         <DetectionLogTable
-          data={[{ ...item, disposition: 'discard' }]}
+          data={[{ ...item, disposition: 'block' }]}
           isAdmin
           isLiveState={() => false}
           onOpenDetail={vi.fn()}
@@ -116,8 +120,11 @@ describe('DetectionLogTable', () => {
       </NextIntlClientProvider>,
     );
 
-    expect(screen.queryByRole('button', { name: '投递' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: '隔离' })).not.toBeInTheDocument();
+    // disposition: 'block' → display_status: rejected（网关直接拒收，从未
+    // 送达），既不在 canRelease 也不在 canRecall 覆盖的状态集合内，因此只能
+    // 查看详情，与「邮件处置中心」批量工具栏对已拒收邮件的处理保持一致。
+    expect(screen.queryByRole('button', { name: '豁免' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '拦截' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: '详情' })).toBeInTheDocument();
   });
 });
