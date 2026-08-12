@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ─────────────────────��──────────────────────────���────────────────────
+// ─── 租户 ─────────────────────���──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -2252,7 +2252,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     sideline_id: 'ph-100008',
     message_id: '<8f2c1a0008@example-internal.com>',
     sender: 'survey@example-internal.com',
-    subject: '内部问卷调研（限时填写）',
+    subject: '内部问���调研（限时填写）',
     recipients: ['allstaff@example.com'],
     direction: 'inbound',
     status: 'sidelined',
@@ -2715,8 +2715,6 @@ function mockPhishingLogMatchesQuery(item: DetectionLogItem, query: URLSearchPar
   if (dispositions.length > 0 && !dispositions.includes(item.disposition)) return false;
   const modes = query.getAll('detection_mode');
   if (modes.length > 0 && !modes.includes(item.detection_mode)) return false;
-  const recallStatuses = query.getAll('recall_status');
-  if (recallStatuses.length > 0 && !recallStatuses.includes(item.recall_status)) return false;
   const riskLevels = query.getAll('risk_level');
   if (riskLevels.length > 0 && !riskLevels.includes(item.risk_level ?? '')) return false;
   // 「邮件状态」筛选：真实后端接口没有对应查询参数，Mock 模式下按与表格列
@@ -4244,7 +4242,7 @@ export function mockSenderFilterRulesList(): { items: Rule[] } {
         priority: 800,
         is_active: true,
         created_at: "2026-03-17T15:30:00Z",
-        sender: { type: "group", value: "财务部门" },
+        sender: { type: "group", value: "财务��门" },
         list_type: "whitelist",
       }),
     ],
@@ -5907,7 +5905,7 @@ export function putSimilarDetectionMockState(
   return structuredClone(similarDetectionMockState);
 }
 
-// ─── 附件安全检测（attachment-security，mock）──────────────────────────────
+// ─── 附件安全检测（attachment-security，mock）──────────────────────────���───
 // 数据源：demo attachment-security-module.tsx 与对应 html_spec 的浏览器实测默认态。
 // config_overrides 采用与真实 API 相同的逐键结构，使统一保存逻辑在 Mock 模式下
 // 也会真实执行 GET → POST/PUT → GET，而不是绕过数据映射。

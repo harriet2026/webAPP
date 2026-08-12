@@ -162,22 +162,6 @@ export function DetectionLogFilters({ value, onChange, onReset }: DetectionLogFi
           tc={tc}
         />
 
-        <MultiSelect
-          options={[
-            { value: 'none', labelKey: 'recallStatus.none' },
-            { value: 'pending_processing', labelKey: 'recallStatus.pending_processing' },
-            { value: 'pending_recall', labelKey: 'recallStatus.pending_recall' },
-            { value: 'recalled', labelKey: 'recallStatus.recalled' },
-            { value: 'recall_failed', labelKey: 'recallStatus.recall_failed' },
-            { value: 'expanded', labelKey: 'recallStatus.expanded' },
-          ]}
-          value={value.recall_status}
-          onChange={(next) => update('recall_status', next)}
-          placeholder={t('filters.recallStatus')}
-          labelPrefix="recallStatus"
-          t={t}
-          tc={tc}
-        />
 
         <MultiSelect
           options={[
