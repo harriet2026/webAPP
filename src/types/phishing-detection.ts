@@ -1,13 +1,10 @@
 import type { PhishEffectiveConfigSnapshot } from '@/types/phishing-config';
+import type { ExecutionAction } from '@/types/email-disposal';
 
-// 执行动作：仅有以下 6 种，与「邮件处置中心」保持同一套语义（GT-讨论口径）。
-export type Disposition =
-  | 'deliver'
-  | 'audit'
-  | 'quarantine'
-  | 'block'
-  | 'discard'
-  | 'recall';
+// 执行动作：直接复用「邮件处置中心」的唯一枚举 ExecutionAction
+// （deliver/quarantine/review/block/drop/recall），不再自造同义但取值不同名
+// 的独立类型（此前的 audit/discard 与处置中心的 review/drop 分叉）。
+export type Disposition = ExecutionAction;
 
 // deriveDetectionMode returns the run_mode from the investigation task's config
 // snapshot: 'realtime' | 'observe' | '' (empty for rows without a task or legacy rows).

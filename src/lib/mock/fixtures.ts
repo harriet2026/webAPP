@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ─────────────────────����──────────────────────────���────────────────────
+// ─── 租户 ─────────────────────�����──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -2017,7 +2017,7 @@ export function mockPhishingConfigAudit() {
 }
 
 export function mockPhishingStats(): PhishingStats {
-  const pendingReview = mockPhishingDetectionLogsState.filter((item) => item.disposition === 'audit').length;
+  const pendingReview = mockPhishingDetectionLogsState.filter((item) => item.disposition === 'review').length;
   const recalledCount = mockPhishingDetectionLogsState.filter((item) => item.recall_status === 'recalled').length;
   return {
     today_detected: 12450,
@@ -2032,7 +2032,7 @@ export function mockPhishingStats(): PhishingStats {
 // ─── 钓鱼邮件检测总览：研判日志列表 / 详情（mock）───────────────────────────
 // 真实后端: GET /phishing-agent/detection-logs(/:id)、POST .../block、
 // .../exempt。此前只 mock 了 /phishing-agent/stats，检测总览页的日志表格在
-// 纯 mock ��式下始终为空（无后端时看不到任何数据）——这里补一份覆盖全部
+// �� mock ��式下始终为空（无后端时看不到任何数据）——这里补一份覆盖全部
 // disposition/recall_status/risk_level/detection_mode 枚举取值的种子数据，
 // 并支持列表关键字/时间范围/多选筛选分页，以及阻断/豁免对种子状态的迁移。
 const PHISHING_LOG_LOADED_AT = Date.now();
@@ -2078,7 +2078,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
       '高风险商务邮件诈骗（BEC）特征，等待人工复核',
     ),
     processed_at: phishingHoursAgo(0.45),
-    disposition: 'audit',
+    disposition: 'review',
     detection_mode: 'realtime',
     recall_status: 'pending_processing',
     agent_rounds: 5,
@@ -2138,7 +2138,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
       '疑似钓鱼链接，等待人工复核',
     ),
     processed_at: phishingHoursAgo(2.9),
-    disposition: 'audit',
+    disposition: 'review',
     detection_mode: 'realtime',
     recall_status: 'pending_recall',
     agent_rounds: 4,
@@ -2270,7 +2270,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
       '需人工判定是否为内部钓鱼演练邮件',
     ),
     processed_at: phishingHoursAgo(10.9),
-    disposition: 'audit',
+    disposition: 'review',
     detection_mode: 'realtime',
     recall_status: 'none',
     agent_rounds: 1,
@@ -2293,7 +2293,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     recalls: [],
     disposition_actions: [],
     recipient_dispositions: phishingRecipientDispositions(['procurement@example.com'], 'pending', 'pending'),
-    disposition: 'audit',
+    disposition: 'review',
     detection_mode: 'realtime',
     recall_status: 'none',
     agent_rounds: 2,
@@ -2315,7 +2315,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     recalls: [],
     disposition_actions: [],
     recipient_dispositions: phishingRecipientDispositions(['support@example.com'], 'pending', 'pending'),
-    disposition: 'audit',
+    disposition: 'review',
     detection_mode: '',
     recall_status: 'none',
     agent_rounds: 0,
@@ -2414,7 +2414,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     recalls: [],
     disposition_actions: [],
     recipient_dispositions: phishingRecipientDispositions(['archive@example.com'], 'unknown', 'unknown'),
-    disposition: 'discard',
+    disposition: 'drop',
     detection_mode: '',
     recall_status: 'none',
     agent_rounds: 0,
@@ -3426,7 +3426,7 @@ export function resetIPFrequencyMock(): void {
     {
       ip: "203.0.113.15",
       rule_id: 1,
-      rule_name: "高频��信限制",
+      rule_name: "���频��信限制",
       action: "reject",
       suspended_at: "2024-01-15T17:12:00Z",
       expires_at: "2024-01-15T17:42:00Z",
@@ -4405,7 +4405,7 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
 // 按 group_type 派生 `_meta/groups` 元信息，供高级过滤规则的 group 面板条件
 //（发信人组、特征组等）在配置面板的下拉里筛选选择。契约对齐真实端点
 // GET /unified-rules/_meta/groups?type=<T> 的 {items:[{id,label,rule_id}]}：
-//   - id 取 tag（grp:<名>，引擎按该 tag 建键，MapKeySelect 直接用 id 作为存储值���；
+//   - id 取 tag（grp:<名>，引擎按该 tag 建键，MapKeySelect 直接用 id ���为存储值���；
 //   - label 取群组名；rule_id 取规则 ID。
 // 复用同一份数据面，保证下拉选项与群组策略模块的发信人组始终一致。
 export function mockGroupsMetaByType(type: GroupType): { items: IPGroupMeta[] } {
@@ -5170,7 +5170,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
 // `PRODUCT_TO_BACKEND` 转换，is_active=demo.enabled，priority=demo.priority，
 // created_at/updated_at=demo.createdAt/modifiedAt，rule_class:'action'，stage:'rcpt'，
 // page:'behavior_control'，condition_tree:'{}'（该页面不走通用条件树渲染，读取全靠
-// metadata），id 由 'rule-N' 解���为数字 N。
+// metadata���，id 由 'rule-N' 解���为数字 N。
 //
 // 注：demo 源数据里 rule-7（"双向合计发信限制"）的 `enabled` 字段是 `true`，但本模块
 // 的验收测试（behavior-control-mock.test.ts）要求它在 mock 里表现为禁用
@@ -5906,7 +5906,7 @@ export function putSimilarDetectionMockState(
 }
 
 // ─── 附件安全检测（attachment-security，mock）──────────────────────────���───
-// 数据源：demo attachment-security-module.tsx 与对应 html_spec 的浏览器实测默认态。
+// 数据源：demo attachment-security-module.tsx 与对应 html_spec 的浏览器实测默认��。
 // config_overrides 采���与真实 API 相同的逐键结构，使统一保存逻辑在 Mock 模式下
 // 也会真实执行 GET → POST/PUT → GET，而不是绕过数据映射。
 export interface MockAttachmentConfigOverride {
@@ -6879,7 +6879,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "incoming",
     sender: "ceo@companY.com",
     recipients: "finance@company.com",
-    subject: "紧急转账 - 请今日完成",
+    subject: "紧���转账 - 请今日完成",
     action: "quarantine",
     reason: "CEO 欺诈：Unicode 域名仿冒",
     mailType: "spoofing",
@@ -8621,7 +8621,7 @@ export function mockContactSourceSetAutoSync(id: number, body: { enabled?: boole
   return deepClone(row);
 }
 
-// 测试连接：规格侧口径 —— 确定性交替 成功→失败→成功…，两种结果都能复核。
+// 测试连接：规格侧口径 —— 确定性交替 成功→失败→成功…，两种��果都能复核。
 let contactTestSeq = 0;
 export function mockContactSourceTest() {
   contactTestSeq += 1;
@@ -9135,7 +9135,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 3, operation_id: 'OP20260622003', admin_user_id: 1, username: 'admin', operator_name: '张运维（我）',
     operator_role: 'platform', layer: 'platform', action: 'update', resource_type: 'phishing_agent',
     status: 'success', client_ip: '10.8.0.12', ip_location: '内网',
-    details: { summary: '为租户开通智能体能力' }, before_value: { text: '未开通' },
+    details: { summary: '为��户开通智能体能力' }, before_value: { text: '未开通' },
     after_value: { text: '已开通 agent-management' }, created_at: '2026-06-22T10:40:08Z' },
   { id: 4, operation_id: 'OP20260622004', admin_user_id: 6, username: 'liyang', operator_name: '李扬',
     operator_role: 'platform', layer: 'platform', action: 'update', resource_type: 'ip_rules',

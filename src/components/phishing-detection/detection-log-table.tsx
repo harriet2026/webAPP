@@ -34,7 +34,8 @@ import {
 } from '@/components/phishing-detection/badge-styles';
 import { UrlFindingsTable } from '@/components/phishing-detection/url-findings-table';
 import { DISPLAY_STATUS_VARIANTS, mapPhishingDispositionToDisplayStatus } from '@/lib/display-status';
-import type { Disposition, DetectionLogItem } from '@/types/phishing-detection';
+import type { DetectionLogItem } from '@/types/phishing-detection';
+import type { DisplayStatus } from '@/types/email-disposal';
 
 interface DetectionLogTableProps {
   data: DetectionLogItem[];
@@ -52,29 +53,34 @@ function ConfidenceCell({ value }: { value?: number | null }) {
   return <span className={confidenceClass(value)}>{Math.round(value * 100)}%</span>;
 }
 
-type DetectionLogAction = 'deliver' | 'quarantine' | 'details';
+type DetectionLogAction = 'exempt' | 'block' | 'details';
 
 /**
- * 操作栏的可执行动作只能由 block()/exempt() 两个接口驱动，而这两个接口
- * 只翻转记录当前的「执行动作」（disposition，即是否处于隔离/审核/阻断态），
- * 与 display_status 承载的投递/召回结果是两套独立维度——不能用后者判断
- * 前者是否可操作。执行动作仅有 deliver/audit/quarantine/block/discard/recall
- * 六种取值，因此这里基于 disposition 判断：
- * - 当前处于隔离/审核/阻断（quarantine、audit、block，均未送达收件人）→
- *   可投递（豁免释放）；
- * - 当前已投递（deliver）→ 可隔离（纠正）；
- * - 丢弃/召回（discard、recall）均为终态，只能查看详情。
+ * 「邮件状态 → 可执行操作」的映射必须与「邮件处置中心」批量工具栏保持一致
+ * （mail-list-table.tsx 的 canRelease / canRecall），而不是自行按「执行动作」
+ * （disposition）判断——两者不是同一件事：执行动作是研判/处置的结果，邮件
+ * 状态才是当前生命周期节点，只有生命周期节点才能决定"接下来还能做什么"。
+ *
+ * 处置中心的规则：
+ * - quarantine_pending | sideline_pending | audit_pending → 可"放行/投递"
+ * - delivered | partial_delivered → 可"召回"
+ * - 其余终态（rejected/bounced/discarded/deleted/expired/
+ *   reviewed_rejected/delivering/delivery_failed/recall_* 等）→ 无操作
+ *
+ * 检测日志目前只暴露 block()/exempt() 两个接口（尚无独立的召回接口），因此
+ * "可召回"这一档暂时复用 block（拦截，将邮件重新置为隔离态）承接同一条
+ * "状态决定操作"的规则，而不是凭空发明新按钮；一旦检测日志接入召回接口，
+ * 应在此处改为调用真正的召回动作。
  */
-function getDetectionLogAction(disposition: Disposition): DetectionLogAction {
-  switch (disposition) {
-    case 'quarantine':
-    case 'audit':
-    case 'block':
-      return 'deliver';
-    case 'deliver':
-      return 'quarantine';
-    case 'discard':
-    case 'recall':
+function getDetectionLogAction(displayStatus: DisplayStatus): DetectionLogAction {
+  switch (displayStatus) {
+    case 'quarantine_pending':
+    case 'sideline_pending':
+    case 'audit_pending':
+      return 'exempt';
+    case 'delivered':
+    case 'partial_delivered':
+      return 'block';
     default:
       return 'details';
   }
@@ -252,10 +258,13 @@ export function DetectionLogTable({
     },
     {
       accessorKey: 'disposition',
+      // 「执行动作」列直接复用「邮件处置中心」的枚举取值与文案 key
+      // （emailDisposal.filters.actions.*），与「邮件状态」列的做法一致，
+      // 避免维护两套同义但取值不同名的执行动作词表。
       header: tpd('table.disposition'),
       cell: ({ row }) => (
         <Badge className={dispositionBadgeClass(row.original.disposition)}>
-          {tpd(`disposition.${row.original.disposition}`)}
+          {ted(`filters.actions.${row.original.disposition}`)}
         </Badge>
       ),
     },
@@ -282,8 +291,12 @@ export function DetectionLogTable({
       header: tpd('table.actions'),
       cell: ({ row }) => {
         const item = row.original;
+        const displayStatus = item.display_status ?? mapPhishingDispositionToDisplayStatus(
+          item.disposition,
+          item.recall_status,
+        );
         const live = isLiveState(item.disposition);
-        const action = getDetectionLogAction(item.disposition);
+        const action = getDetectionLogAction(displayStatus);
         return (
           <div className="flex items-center gap-1.5">
             <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700" onClick={() => onOpenDetail(item.sideline_id)}>
@@ -295,7 +308,7 @@ export function DetectionLogTable({
                 size="sm"
                 className="h-7 px-2 text-xs"
                 disabled={live}
-                onClick={() => (action === 'deliver' ? onExempt(item) : onBlock(item))}
+                onClick={() => (action === 'exempt' ? onExempt(item) : onBlock(item))}
               >
                 {tpd(`table.${action}`)}
               </Button>

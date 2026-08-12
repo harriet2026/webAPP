@@ -8419,14 +8419,7 @@
         "custom": "Custom"
       }
     },
-    "disposition": {
-      "deliver": "Deliver",
-      "audit": "Audit",
-      "quarantine": "Quarantine",
-      "block": "Block",
-      "discard": "Discard",
-      "recall": "Recall"
-    },
+
     "detectionMode": {
       "realtime": "Realtime",
       "observe": "Observe Mode"
@@ -8476,8 +8469,6 @@
       "viewBasis": "View Basis",
       "actions": "Actions",
       "detail": "Detail",
-      "deliver": "Deliver",
-      "quarantine": "Quarantine",
       "details": "Details",
       "block": "Block",
       "exempt": "Exempt",

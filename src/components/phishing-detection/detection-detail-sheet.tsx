@@ -53,6 +53,10 @@ export function DetectionDetailSheet({
 }: DetectionDetailSheetProps) {
   const t = useTranslations();
   const tpd = useTranslations('phishingDetection');
+  // 执行动作徽章文案与「检测日志」表格写法一致，复用「邮件处置中心」的
+  // emailDisposal.filters.actions.* 命名空间，避免两处维护同义但取值不同名
+  // 的执行动作词表。
+  const ted = useTranslations('emailDisposal');
   const { apiRequest } = useApiRequest();
   const [stepSearch, setStepSearch] = useState('');
   const [configOpen, setConfigOpen] = useState(false);
@@ -150,7 +154,7 @@ export function DetectionDetailSheet({
                   </div>
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     <Badge className={dispositionBadgeClass(summary.disposition)}>
-                      {tpd(`disposition.${summary.disposition}`)}
+                      {ted(`filters.actions.${summary.disposition}`)}
                     </Badge>
                     {summary.risk_level ? (
                       <Badge className={riskBadgeClass(summary.risk_level)}>

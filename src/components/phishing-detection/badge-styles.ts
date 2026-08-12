@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
-import type { Disposition, RecallStatus, RiskLevel } from '@/types/phishing-detection';
+import type { RecallStatus, RiskLevel } from '@/types/phishing-detection';
+import type { ExecutionAction } from '@/types/email-disposal';
 
 export function normalizePhishingRiskLevel(risk: string | null | undefined): RiskLevel {
   switch (risk) {
@@ -18,7 +19,7 @@ export function normalizePhishingRiskLevel(risk: string | null | undefined): Ris
   }
 }
 
-export function dispositionBadgeClass(disposition: Disposition): string {
+export function dispositionBadgeClass(disposition: ExecutionAction): string {
   switch (disposition) {
     case 'block':
       // 阻断：网关直接拒收，未曾进入投递流程，是最严重的执行动作。
@@ -26,13 +27,13 @@ export function dispositionBadgeClass(disposition: Disposition): string {
     case 'quarantine':
       // 隔离：邮件被拦截在隔离区，尚未送达收件人。
       return cn('border-transparent bg-orange-500/15 text-orange-700 dark:text-orange-300');
-    case 'audit':
+    case 'review':
       // 审核：等待人工复核决策。
       return cn('border-transparent bg-amber-500/15 text-amber-700 dark:text-amber-300');
     case 'recall':
       // 召回：邮件已送达收件人邮箱后被撤回。
       return cn('border-transparent bg-sky-500/15 text-sky-700 dark:text-sky-300');
-    case 'discard':
+    case 'drop':
       // 丢弃：静默丢弃，不通知、不留存，语义中性，弱化视觉权重。
       return cn('border-transparent bg-muted text-muted-foreground');
     case 'deliver':

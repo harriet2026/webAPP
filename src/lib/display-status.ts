@@ -81,13 +81,13 @@ export function mapPhishingDispositionToDisplayStatus(
   switch (disposition) {
     case 'quarantine':
       return 'quarantine_pending';
-    case 'audit':
+    case 'review':
       return 'audit_pending';
     case 'deliver':
       return 'delivered';
     case 'block':
       return 'rejected';
-    case 'discard':
+    case 'drop':
       return 'discarded';
     case 'recall':
       // recallStatus 为 'none' 时命中此分支的边界情况：召回动作已下发但尚未
