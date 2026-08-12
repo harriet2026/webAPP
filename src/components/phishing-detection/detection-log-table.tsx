@@ -29,13 +29,10 @@ import { useApiRequest } from '@/lib/api/client';
 import {
   confidenceClass,
   dispositionBadgeClass,
-  recallBadgeClass,
 } from '@/components/phishing-detection/badge-styles';
 import { UrlFindingsTable } from '@/components/phishing-detection/url-findings-table';
 import { DISPLAY_STATUS_VARIANTS, mapPhishingDispositionToDisplayStatus } from '@/lib/display-status';
 import type { DetectionLogItem } from '@/types/phishing-detection';
-
-const RECALL_SPINNER_STATES = ['pending_processing', 'pending_recall'];
 
 interface DetectionLogTableProps {
   data: DetectionLogItem[];
@@ -239,30 +236,6 @@ export function DetectionLogTable({
       },
     },
     {
-      accessorKey: 'recall_status',
-      header: tpd('table.recallStatus'),
-      cell: ({ row }) => {
-        const status = row.original.recall_status;
-        const spinning = RECALL_SPINNER_STATES.includes(status);
-        // recall_failed gets a hover tooltip listing the failing recipients'
-        // operate_result so admins see why the recall failed without opening the
-        // detail drawer (spec §4.4 / §6.2 / TC-16, review P2-3).
-        const failureTitle =
-          status === 'recall_failed'
-            ? (row.original.recalls ?? [])
-                .filter((r) => r.operate_result === 'failed')
-                .map((r) => `${r.receiver}: ${r.operate_result}`)
-                .join('; ') || undefined
-            : undefined;
-        return (
-          <Badge className={recallBadgeClass(status)} title={failureTitle}>
-            {spinning ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
-            {tpd(`recallStatus.${status}`)}
-          </Badge>
-        );
-      },
-    },
-    {
       id: 'actions',
       header: tpd('table.actions'),
       cell: ({ row }) => {
@@ -316,7 +289,7 @@ export function DetectionLogTable({
         </div>
       ) : null}
       <div className="overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-card shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
-        <Table className="w-full min-w-[1340px]">
+        <Table className="w-full min-w-[1220px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
