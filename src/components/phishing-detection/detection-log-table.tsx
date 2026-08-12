@@ -35,55 +35,17 @@ import {
 import { UrlFindingsTable } from '@/components/phishing-detection/url-findings-table';
 import { DISPLAY_STATUS_VARIANTS, mapPhishingDispositionToDisplayStatus } from '@/lib/display-status';
 import type { DetectionLogItem } from '@/types/phishing-detection';
-import type { DisplayStatus } from '@/types/email-disposal';
 
 interface DetectionLogTableProps {
   data: DetectionLogItem[];
   isLoading?: boolean;
   truncated?: boolean;
-  isAdmin: boolean;
-  isLiveState: (disposition: string) => boolean;
   onOpenDetail: (id: string) => void;
-  onBlock: (item: DetectionLogItem) => void;
-  onExempt: (item: DetectionLogItem) => void;
 }
 
 function ConfidenceCell({ value }: { value?: number | null }) {
   if (value === null || value === undefined) return <span className="text-muted-foreground">—</span>;
   return <span className={confidenceClass(value)}>{Math.round(value * 100)}%</span>;
-}
-
-type DetectionLogAction = 'exempt' | 'block' | 'details';
-
-/**
- * 「邮件状态 → 可执行操作」的映射必须与「邮件处置中心」批量工具栏保持一致
- * （mail-list-table.tsx 的 canRelease / canRecall），而不是自行按「执行动作」
- * （disposition）判断——两者不是同一件事：执行动作是研判/处置的结果，邮件
- * 状态才是当前生命周期节点，只有生命周期节点才能决定"接下来还能做什么"。
- *
- * 处置中心的规则：
- * - quarantine_pending | sideline_pending | audit_pending → 可"放行/投递"
- * - delivered | partial_delivered → 可"召回"
- * - 其余终态（rejected/bounced/discarded/deleted/expired/
- *   reviewed_rejected/delivering/delivery_failed/recall_* 等）→ 无操作
- *
- * 检测日志目前只暴露 block()/exempt() 两个接口（尚无独立的召回接口），因此
- * "可召回"这一档暂时复用 block（拦截，将邮件重新置为隔离态）承接同一条
- * "状态决定操作"的规则，而不是凭空发明新按钮；一旦检测日志接入召回接口，
- * 应在此处改为调用真正的召回动作。
- */
-function getDetectionLogAction(displayStatus: DisplayStatus): DetectionLogAction {
-  switch (displayStatus) {
-    case 'quarantine_pending':
-    case 'sideline_pending':
-    case 'audit_pending':
-      return 'exempt';
-    case 'delivered':
-    case 'partial_delivered':
-      return 'block';
-    default:
-      return 'details';
-  }
 }
 
 function UrlSummaryCell({ item }: { item: DetectionLogItem }) {
@@ -153,11 +115,7 @@ export function DetectionLogTable({
   data,
   isLoading,
   truncated,
-  isAdmin,
-  isLiveState,
   onOpenDetail,
-  onBlock,
-  onExempt,
 }: DetectionLogTableProps) {
   const tpd = useTranslations('phishingDetection');
   // 「邮件状态」列直接复用「邮件处置中心」的文案 key，保证同一状态在两个模块
@@ -289,35 +247,20 @@ export function DetectionLogTable({
     {
       id: 'actions',
       header: tpd('table.actions'),
-      cell: ({ row }) => {
-        const item = row.original;
-        const displayStatus = item.display_status ?? mapPhishingDispositionToDisplayStatus(
-          item.disposition,
-          item.recall_status,
-        );
-        const live = isLiveState(item.disposition);
-        const action = getDetectionLogAction(displayStatus);
-        return (
-          <div className="flex items-center gap-1.5">
-            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700" onClick={() => onOpenDetail(item.sideline_id)}>
-              {tpd('table.detail')}
-            </Button>
-            {isAdmin && action !== 'details' ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2 text-xs"
-                disabled={live}
-                onClick={() => (action === 'exempt' ? onExempt(item) : onBlock(item))}
-              >
-                {tpd(`table.${action}`)}
-              </Button>
-            ) : null}
-          </div>
-        );
-      },
+      // 操作栏仅保留「详情」这一查看入口；执行动作（豁免/拦截等）统一在
+      // 「邮件处置中心」完成，检测日志列表不再重复暴露这些操作按钮。
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700"
+          onClick={() => onOpenDetail(row.original.sideline_id)}
+        >
+          {tpd('table.detail')}
+        </Button>
+      ),
     },
-  ], [expanded, isAdmin, isLiveState, onBlock, onExempt, onOpenDetail, tpd, ted]);
+  ], [expanded, onOpenDetail, tpd, ted]);
 
   const table = useReactTable({
     data,

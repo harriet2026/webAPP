@@ -27,7 +27,7 @@ import { DetectionLogTable } from '@/components/phishing-detection/detection-log
 import { DetectionDetailSheet } from '@/components/phishing-detection/detection-detail-sheet';
 import { BlockDialog } from '@/components/phishing-detection/block-dialog';
 import { ExemptDialog } from '@/components/phishing-detection/exempt-dialog';
-import type { DetectionLogItem, Disposition, DetectionMode, RecallStatus, RiskLevel } from '@/types/phishing-detection';
+import type { Disposition, DetectionMode, RecallStatus, RiskLevel } from '@/types/phishing-detection';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const PAGE_SIZE = 20;
@@ -206,22 +206,6 @@ export function PhishingOverviewPage() {
     if (exemptId) exemptMutation.mutate({ id: exemptId, reason });
   }, [exemptId, exemptMutation]);
 
-  const handleRowBlock = useCallback((item: DetectionLogItem) => {
-    if (isLiveDisposition(item.disposition)) {
-      toast.error(tpd('block.liveStateError'));
-      return;
-    }
-    setBlockId(item.sideline_id);
-  }, [tpd]);
-
-  const handleRowExempt = useCallback((item: DetectionLogItem) => {
-    if (isLiveDisposition(item.disposition)) {
-      toast.error(tpd('block.liveStateError'));
-      return;
-    }
-    setExemptId(item.sideline_id);
-  }, [tpd]);
-
   const handleDetailBlock = useCallback((id: string) => {
     setBlockId(id);
   }, []);
@@ -262,11 +246,7 @@ export function PhishingOverviewPage() {
           data={logsQuery.data?.items ?? []}
           isLoading={logsQuery.isLoading}
           truncated={logsQuery.data?.items?.some((item) => item.result_truncated) ?? false}
-          isAdmin={isAdmin}
-          isLiveState={isLiveDisposition}
           onOpenDetail={openDetail}
-          onBlock={handleRowBlock}
-          onExempt={handleRowExempt}
         />
         <div className="mt-3">
           <ServerPagination
