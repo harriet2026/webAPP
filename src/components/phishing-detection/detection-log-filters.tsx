@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { PHISHING_MAIL_STATUS_OPTIONS } from '@/lib/display-status';
 
 const DEFAULT_KEYWORD = '';
 
@@ -72,10 +73,18 @@ export type TimeRangeKey = 'today' | '7d' | '30d' | 'custom';
 
 export interface DetectionFilterState {
   keyword: string;
+  // disposition 与 recall_status 不再由本组件的下拉框直接暴露给用户筛选——
+  // 筛选栏里原来的「执行动作」下拉已替换为下方的「邮件状态」(mail_status)，
+  // 但这两个字段仍保留在筛选状态里，供 KPI 卡片点击穿透使用
+  // （见 phishing-overview-page.tsx 的 applyKpiFilter）。
   disposition: string[];
   detection_mode: string[];
   recall_status: string[];
   risk_level: string[];
+  // 「邮件状态」：由 disposition + recall_status 派生的邮件处置中心同款状态，
+  // 取值见 PHISHING_MAIL_STATUS_OPTIONS。真实后端接口未提供该维度的查询参数，
+  // 因此该筛选目前仅在 Mock 模式下保证结果准确（见 mockPhishingLogMatchesQuery）。
+  mail_status: string[];
   rangeKey: TimeRangeKey;
   start: string;
   end: string;
@@ -90,6 +99,9 @@ interface DetectionLogFiltersProps {
 export function DetectionLogFilters({ value, onChange, onReset }: DetectionLogFiltersProps) {
   const t = useTranslations('phishingDetection');
   const tc = useTranslations('common');
+  // 「邮件状态」选项直接复用「邮件处置中心」的文案 key，保证同一状态在两个
+  // 模块的筛选下拉框和表格列里显示的文案完全一致。
+  const ted = useTranslations('emailDisposal');
   const [keywordDraft, setKeywordDraft] = useState(value.keyword);
 
   const update = <K extends keyof DetectionFilterState>(key: K, next: DetectionFilterState[K]) => {
@@ -125,22 +137,15 @@ export function DetectionLogFilters({ value, onChange, onReset }: DetectionLogFi
         </div>
 
         <MultiSelect
-          options={[
-            { value: 'quarantine', labelKey: 'disposition.quarantine' },
-            { value: 'mark', labelKey: 'disposition.mark' },
-            { value: 'pass', labelKey: 'disposition.pass' },
-            { value: 'audit', labelKey: 'disposition.audit' },
-            { value: 'pending', labelKey: 'disposition.pending' },
-            { value: 'processing', labelKey: 'disposition.processing' },
-            { value: 'failed', labelKey: 'disposition.failed' },
-            { value: 'manual_hold', labelKey: 'disposition.manual_hold' },
-            { value: 'unknown', labelKey: 'disposition.unknown' },
-          ]}
-          value={value.disposition}
-          onChange={(next) => update('disposition', next)}
-          placeholder={t('filters.disposition')}
-          labelPrefix="disposition"
-          t={t}
+          options={PHISHING_MAIL_STATUS_OPTIONS.map((status) => ({
+            value: status,
+            labelKey: `filters.statuses.${status}`,
+          }))}
+          value={value.mail_status}
+          onChange={(next) => update('mail_status', next)}
+          placeholder={t('filters.mailStatus')}
+          labelPrefix="filters.statuses"
+          t={ted}
           tc={tc}
         />
 

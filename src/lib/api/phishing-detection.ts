@@ -47,6 +47,7 @@ export async function getDetectionLogs(
   appendMulti('detection_mode', filters.detection_mode);
   appendMulti('recall_status', filters.recall_status);
   appendMulti('risk_level', filters.risk_level);
+  appendMulti('mail_status', filters.mail_status);
   return requestFn<DetectionLogListResponse>(`/phishing-agent/detection-logs?${query.toString()}`);
 }
 

@@ -35,6 +35,7 @@ import type {
   RBLFilterLegacyProductAction,
 } from "@/types/rbl-filter";
 import type { DetectionProfile } from "@/lib/api/detection-profiles";
+import { mapPhishingDispositionToDisplayStatus } from "@/lib/display-status";
 import type {
   OverseasMailConfigResponse,
   OverseasMailDirConfig,
@@ -468,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ────────────────────────────────────────────────��────────────────────
+// ─── 租户 ────────────────────────────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -2718,6 +2719,14 @@ function mockPhishingLogMatchesQuery(item: DetectionLogItem, query: URLSearchPar
   if (recallStatuses.length > 0 && !recallStatuses.includes(item.recall_status)) return false;
   const riskLevels = query.getAll('risk_level');
   if (riskLevels.length > 0 && !riskLevels.includes(item.risk_level ?? '')) return false;
+  // 「邮件状态」筛选：真实后端接口没有对应查询参数，Mock 模式下按与表格列
+  // 完全一致的派生规则（disposition + recall_status → DisplayStatus）计算
+  // 后再比对，保证多选之间是 OR 语义（选中任一状态即命中）。
+  const mailStatuses = query.getAll('mail_status');
+  if (mailStatuses.length > 0) {
+    const derived = mapPhishingDispositionToDisplayStatus(item.disposition, item.recall_status);
+    if (!mailStatuses.includes(derived)) return false;
+  }
   return true;
 }
 
@@ -3099,7 +3108,7 @@ export const mockSuspendedIPs: SuspendedIP[] = [
     action: "reject",
     suspended_at: "2024-01-15T17:00:00Z",
     expires_at: "2024-01-15T17:30:00Z",
-    reason: "每日连接数超过5000",
+    reason: "���日连接数超过5000",
   },
   {
     ip: "203.0.113.15",

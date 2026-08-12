@@ -66,6 +66,7 @@ const DEFAULT_FILTERS: DetectionFilterState = {
   detection_mode: [],
   recall_status: [],
   risk_level: [],
+  mail_status: [],
   rangeKey: 'today',
   start: '',
   end: '',
@@ -110,6 +111,10 @@ export function PhishingOverviewPage() {
       detection_mode: filters.detection_mode.length > 0 ? (filters.detection_mode as DetectionMode[]) : undefined,
       recall_status: filters.recall_status.length > 0 ? (filters.recall_status as RecallStatus[]) : undefined,
       risk_level: filters.risk_level.length > 0 ? (filters.risk_level as RiskLevel[]) : undefined,
+      // 检测日志接口目前没有独立的邮件生命周期状态查询参数，该维度目前只在
+      // Mock 模式下由 mockPhishingLogMatchesQuery 按派生规则精确过滤；真实
+      // 后端接口会忽略未识别的 mail_status 参数，此时该筛选不生效。
+      mail_status: filters.mail_status.length > 0 ? filters.mail_status : undefined,
       start: range.start,
       end: range.end,
     }),

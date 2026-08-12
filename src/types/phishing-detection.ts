@@ -161,6 +161,10 @@ export interface DetectionLogFilters {
   detection_mode?: DetectionMode[];
   recall_status?: RecallStatus[];
   risk_level?: RiskLevel[];
+  // 「邮件状态」：由 disposition + recall_status 派生的处置中心同款状态
+  // （见 mapPhishingDispositionToDisplayStatus）。真实后端接口目前没有该
+  // 查询参数，此过滤仅在 Mock 模式下由 mockPhishingLogMatchesQuery 精确生效。
+  mail_status?: string[];
   start?: string;
   end?: string;
   status?: string;
