@@ -82,13 +82,33 @@ describe('DetectionLogTable', () => {
     expect(onExempt).toHaveBeenCalledOnce();
   });
 
-  it('hides the action button for still-processing (live) mail, keeping only 详情', () => {
+  it('disables (but still shows) the action button while the record is a live/in-flight state', () => {
     render(
       <NextIntlClientProvider locale="zh" messages={zh as never}>
         <DetectionLogTable
           data={[{ ...item, disposition: 'audit' }]}
           isAdmin
           isLiveState={() => true}
+          onOpenDetail={vi.fn()}
+          onBlock={vi.fn()}
+          onExempt={vi.fn()}
+        />
+      </NextIntlClientProvider>,
+    );
+
+    // 审核（audit）对应可执行动作「投递」，但当记录处于 isLiveState（例如后端
+    // 正在异步处理该邮件）时，按钮仍应渲染以保持列宽/布局稳定，只是禁止点击，
+    // 避免与正在进行中的操作冲突。
+    expect(screen.getByRole('button', { name: '投递' })).toBeDisabled();
+  });
+
+  it('offers only 详情 for terminal actions (discard/recall) with no further action available', () => {
+    render(
+      <NextIntlClientProvider locale="zh" messages={zh as never}>
+        <DetectionLogTable
+          data={[{ ...item, disposition: 'discard' }]}
+          isAdmin
+          isLiveState={() => false}
           onOpenDetail={vi.fn()}
           onBlock={vi.fn()}
           onExempt={vi.fn()}

@@ -79,7 +79,6 @@ function getDetectionLogAction(disposition: Disposition): DetectionLogAction {
       return 'details';
   }
 }
-}
 
 function UrlSummaryCell({ item }: { item: DetectionLogItem }) {
   const t = useTranslations('phishingDetection');

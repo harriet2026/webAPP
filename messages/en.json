@@ -8420,15 +8420,12 @@
       }
     },
     "disposition": {
-      "quarantine": "Quarantine",
-      "mark": "Mark",
-      "pass": "Pass",
+      "deliver": "Deliver",
       "audit": "Audit",
-      "pending": "Pending",
-      "processing": "Processing",
-      "failed": "Failed",
-      "manual_hold": "Manual Hold",
-      "unknown": "Unknown"
+      "quarantine": "Quarantine",
+      "block": "Block",
+      "discard": "Discard",
+      "recall": "Recall"
     },
     "detectionMode": {
       "realtime": "Realtime",
