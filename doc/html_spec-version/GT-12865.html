@@ -424,7 +424,7 @@
             <td>i18n key <code>phishingDetection.toggle.disabledBanner</code>；<code>data-testid="phishing-agent-disabled-banner"</code>；仅在 <code>engine.enabled === false</code> 时渲染，随开关状态实时出现/消失，不需要手动关闭</td>
           </tr>
           <tr>
-            <td>成功 / 失败提示</td>
+            <td>��功 / 失败提示</td>
             <td><code>sonner toast</code></td>
             <td>成功：「钓鱼邮件检测智能体已关闭」；失败：「总开关状态保存失败，请稍后重试」（或后端返回的具体错误信息）</td>
             <td>i18n key <code>phishingDetection.toggle.disabledToast</code> / <code>saveFailed</code></td>
@@ -967,7 +967,7 @@
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·有意约束</span></td></tr>
-        <tr><td>描述</td><td>源码中 <code>PhishingAgentHeaderActions</code> 的渲染条件为 <code>selectedAgent === 'phishing' && !detailLocked</code>，未叠加 <code>detailPresentation?.canConfigure</code>；对比之下，同一处 <code>SpoofingAgentHeaderActions</code>（仿冒邮件检测智能体的对应控制栏）额外要求 <code>&& detailPresentation?.canConfigure</code> 才渲染。也就是说，即便当前角色对「检测引擎配置」Tab 只有只读或无权限，只要该智能体未被整体锁定，仍能看到并操作总开关。</td></tr>
+        <tr><td>描述</td><td>源码中 <code>PhishingAgentHeaderActions</code> 的渲染条件为 <code>selectedAgent === 'phishing' && !detailLocked</code>，未叠加 <code>detailPresentation?.canConfigure</code>；对比之下，同一处 <code>SpoofingAgentHeaderActions</code>（仿冒���件检测智能体的对应控制栏）额外要求 <code>&& detailPresentation?.canConfigure</code> 才渲染。也就是说，即便当前角色对「检测引擎配置」Tab 只有只读或无权限，只要该智能体未被整体锁定，仍能看到并操作总开关。</td></tr>
         <tr><td>解决版本</td><td>GT-12514 · 2026-08-11（本次新增即为此行为，非既有代码回归）</td></tr>
         <tr><td>验证依据</td><td><code>agent-center-overview-page.tsx</code> 第 121~125 行的渲染分支对比；本文档 B 节矩阵</td></tr>
       </tbody>
@@ -1003,13 +1003,13 @@
       </tbody>
     </table>
 
-    <h3>D-005 · GT-12922 两个变更点均未能提供真实浏览器截图，因本沙箱缺少 apiserver 后端</h3>
+    <h3>D-005 · GT-12922 变更 1/2（v3 追加时）未能提供真实浏览器截图；v4 追加变更 3/4/5 时发现页面「Mock」模式开关可绕开该限制</h3>
     <table>
       <tbody>
-        <tr><td width="140">状态</td><td><span class="tag tag-unverif">已知·环境限制</span></td></tr>
-        <tr><td>描述</td><td>本次追加的 GT-12922 变更 1（检测详情面板操作重构）与变更 2（置信度分级处置动作移除「拒收」）均需要进入检测总览/检测引擎配置 Tab 完成交互，但 <code>agent-browser</code> 打开 <code>/zh/agent-center/overview?agent=phishing</code> 时，页面顶部「智能体总览」统计卡区域持续报「智能体总览加载失败」（<code>console</code> 报 <code>[product-form] bootstrap failed after retries; feature registry unavailable</code>），整页刷新后问题依旧。经与仓库 <code>tests/AGENTS.md</code> / 根目录 <code>AGENTS.md</code> 核对，webapp 与 apiserver（<code>:18080</code>）是分离部署的两个服务，本沙箱只运行了 webapp 的 dev server，未运行 apiserver，这是环境搭建缺口，不是本次两个变更点引入的回归，也与此前 D-004 记录的中文字体缺失（渲染层面）性质不同——本次是数据层面完全无法进入目标页面。</td></tr>
-        <tr><td>处理</td><td>§1.2/§2.2 已改为转录真实源码路径、i18n key 与本次会话内已实际运行并全部通过的自动化测试用例（<code>detection-detail-sheet.test.tsx</code> 6 项、<code>disposition-policy-card.test.tsx</code> 相关断言），未使用手绘占位图或臆造截图；真实浏览器截图需在具备 apiserver 后端的完整环境中补充，见待确认 Q-004。</td></tr>
-        <tr><td>验证依据</td><td>agent-browser 截图 <code>gt12922-overview-default.png</code> / <code>gt12922-overview-retry.png</code>（均显示「智能体总览加载失败」红色提示框）；<code>agent-browser console</code> 输出 <code>[product-form] bootstrap failed after retries; feature registry unavailable</code>；整页 <code>reload</code> 后现象不变，排除瞬时抖动</td></tr>
+        <tr><td width="140">状态</td><td><span class="tag tag-changed">已知·环境限制（v4 发现绕开方式，v3 结论需修正）</span></td></tr>
+        <tr><td>描述</td><td>v3 追加 GT-12922 变更 1（检测详情面板操作重构）与变更 2（置信度分级处置动作移除「拒收」）时，<code>agent-browser</code> 打开 <code>/zh/agent-center/overview?agent=phishing</code> 页面顶部「智能体总览」统计卡区域持续报「智能体总览加载失败」（<code>console</code> 报 <code>[product-form] bootstrap failed after retries; feature registry unavailable</code>），整页刷新后问题依旧，当时判断为本沙箱未运行 apiserver 后端（<code>:18080</code>）所致，并得出「本沙箱无法产出真实截图」的结论。v4 追加变更 3/4/5 时发现：页面右上角「产品形态」切换菜单旁存在独立的「Mock」模式开关，写入 <code>localStorage.osgateway_mock_enabled = '1'</code>（注意取值须为字符串 <code>'1'</code>，写入 <code>'true'</code> 不生效）并刷新页面后，统计卡与检测日志均改由前端 <code>src/lib/mock/fixtures.ts</code> 驱动渲染，完全不依赖 apiserver，且中文字体在该模式下渲染正常（非 D-004 记录的方框化问题）。据此完成了变更 3/4/5 的真实浏览器截图（见变更 3/4/5 各节 S-1~S-5）。</td></tr>
+        <tr><td>处理</td><td>变更 1/2（v3 内容）§1.2/§2.2 仍保留转录版本，未在 v4 中回补真实截图（回补工作量与 v4 变更 3/4/5 本身无直接关联，留待后续版本处理，见 Q-004 更新）；变更 3/4/5（v4 新增）§3.2/§4.2/§5.2 均已采用 Mock 模式下的真实浏览器截图。</td></tr>
+        <tr><td>验证依据</td><td>v3 阶段：agent-browser 截图 <code>gt12922-overview-default.png</code> / <code>gt12922-overview-retry.png</code>（均显示「智能体总览加载失败」红色提示框）；v4 阶段：截图 <code>GT-12922-S1~S5</code>（Mock 模式下统计卡与表格正常渲染，中文文字清晰可读，无「加载失败」提示）</td></tr>
       </tbody>
     </table>
 
@@ -1020,6 +1020,26 @@
         <tr><td>描述</td><td><code>confidence-bands-editor.tsx</code> 仅从下拉可选项数组中移除 <code>reject</code>，未修改 <code>BandDisposition</code> 类型定义或 <code>colorClass</code> 颜色映射表中的 <code>reject</code> 分支；<code>messages/*.json</code>（zh/en/th/ru 四语言）中 <code>phishingConfig.bands.disposition.reject</code> 文案 key 同样未删除。这样存量数据中若历史保存过 <code>disposition: 'reject'</code> 的区间，回显时类型与颜色映射仍能正确解析显示（虽然新建/编辑时用户已无法再选择该值），不会因类型缺失而报错崩溃。</td></tr>
         <tr><td>解决版本</td><td>GT-12922 · 2026-08-13（本次变更即为此行为）</td></tr>
         <tr><td>验证依据</td><td><code>confidence-bands-editor.tsx</code> 源码：<code>options</code> 数组不含 <code>reject</code>，但 <code>colorClass: Record&lt;BandDisposition, string&gt;</code> 仍含 <code>reject</code> 键；<code>messages/zh.json</code> 中 <code>phishingConfig.bands.disposition.reject</code>="拒收" 仍存在</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-007 · 变更 3/4/5 对应源码 commit 时间实际早于变更 1/2，本次按接续编号收录而非插入重排；「邮件状态」筛选参数真实后端接口尚未支持</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·编号说明</span></td></tr>
+        <tr><td>描述</td><td>按 <code>git log</code> 时间戳核对，变更 3（检测日志邮件状态列与筛选）、变更 4（执行动作类型统一）、变更 5（风险等级枚举收窄）三处对应的源码 commit 时间均为 2026-08-12，实际早于已收录进 v3 文档的变更 1、变更 2（2026-08-13）。由于变更 1/2 已在 v3 中固定编号为「变更 1」「变更 2」，且 D-005/D-006/Q-004 等既有差异/待确认条目直接引用这两个编号锚点，v4 追加时选择将新变更接续编号为「变更 3」「变更 4」「变更 5」，而非按实际时间顺序插入重排为「变更 1/2」并将现有变更 1/2 顺延——后者会导致 D-005/D-006/Q-004 中已发布的引用编号全部失效，对已阅读过 v3 文档的读者造成理解成本。文档内变更编号顺序（1→2→3→4→5）因此不完全等同于源码变更的实际时间顺序，读者若需要按时间还原变更历史，应参考各变更小节 <code>incr-meta</code> 中标注的 commit 时间，而非仅按编号顺序推断。另外，变更 3 新增的「邮件状态」筛选查询参数 <code>mail_status</code> 目前只在前端 Mock 模式下由 <code>mockPhishingLogMatchesQuery</code> 精确生效，真实后端 <code>/phishing-agent/detection-logs</code> 接口尚未实现该参数的服务端过滤——真实环境下切换该筛选器目前不会改变实际返回的检测日志列表，需要后端配合排期，见待确认 Q-005。</td></tr>
+        <tr><td>解决版本</td><td>GT-12922 · 2026-08-13（v4 文档追加时确认此编号安排）</td></tr>
+        <tr><td>验证依据</td><td><code>git log --format="%h %ci %s"</code> 核对变更 1~5 对应 commit 的时间戳先后顺序；<code>lib/api/phishing-detection.ts</code> 中 <code>mail_status</code> 参数仅被 <code>appendMulti</code> 拼接进请求 URL，未见对应后端 OpenAPI/接口文档声明支持该参数</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-008 · 风险等级历史值 <code>critical</code>/<code>none</code> 通过 <code>normalizePhishingRiskLevel</code> 归一化兼容，不要求后端同步收窄取值范围</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·有意兼容</span></td></tr>
+        <tr><td>描述</td><td><code>RiskLevel</code> 类型收窄为四值（<code>suspicious/low/medium/high</code>）后，<code>DetectionLogItem.risk_level</code> 字段类型仍放宽为 <code>RiskLevel | LegacyRiskLevel | ''</code>，允许后端在未同步收窄取值范围之前继续返回历史的 <code>critical</code>/<code>none</code> 值而不产生前端类型错误；<code>normalizePhishingRiskLevel()</code> 在渲染前统一归一化（<code>critical→high</code>，<code>none</code>/未知值→<code>suspicious</code>），保证筛选器展示的四值枚举与表格「风险等级」列徽章的实际渲染结果始终一致，不会因为后端仍返回旧值而出现界面上从未在筛选选项里出现过的第五种颜色/文案。</td></tr>
+        <tr><td>解决版本</td><td>GT-12922 · 2026-08-13（本次变更即为此行为）</td></tr>
+        <tr><td>验证依据</td><td><code>types/phishing-detection.ts</code> 中 <code>LegacyRiskLevel</code> 类型定义与 <code>risk_level</code> 字段联合类型；<code>badge-styles.ts</code> 中 <code>normalizePhishingRiskLevel()</code> 函数体的 <code>critical→high</code>、<code>none→suspicious</code> 分支</td></tr>
       </tbody>
     </table>
   </section>
@@ -1058,13 +1078,23 @@
       </tbody>
     </table>
 
-    <h3>Q-004 · GT-12922 两个变更点需要在具备 apiserver 后端的完整环境中补充真实浏览器截图</h3>
+    <h3>Q-004 · GT-12922 变更 1/2 仍缺真实浏览器截图；D-005 已证实沙箱内可用「Mock」模式绕开，是否直接回补需与阅读者确认优先级</h3>
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-unverif">待补充验证</span></td></tr>
-        <tr><td>问题</td><td>D-005 记录的沙箱环境限制导致检测详情面板「投递/丢弃/召回」三个状态（未投递态、已投递态、终态）与置信度分级处置动作下拉（移除「拒收」后的四项）均未能截取真实浏览器截图，当前仅依据源码与自动化测试结论转录。</td></tr>
+        <tr><td>问题</td><td>D-005 记录的沙箱环境限制导致检测详情面板「投递/丢弃/召回」三个状态（未投递态、已投递态、终态）与置信度分级处置动作下拉（移除「拒收」后的四项）均未能截取真实浏览器截图，当前仍依据源码与自动化测试结论转录。v4 追加变更 3/4/5 时已证实，本沙箱内开启页面右上角「Mock」模式开关即可绕开 apiserver 依赖、正常渲染中文并完成截图（见变更 3/4/5 与 D-005 更新），理论上可以用同样方式立即回补变更 1/2 的真实截图，但本次 v4 追加聚焦于变更 3/4/5 本身，未一并处理变更 1/2 的截图回补，留待后续版本或读者确认是否需要立即处理。</td></tr>
         <tr><td>影响</td><td>§1.2/§2.2 两个交互预览区块暂无真实截图佐证；无法直接肉眼核对按钮配色（<code>emerald-600</code>/<code>red-600</code>/outline）、Sheet 布局与下拉展开态的实际渲染效果</td></tr>
-        <tr><td>建议</td><td>在 <code>build.py</code> 构建的完整镜像组合（webapp + apiserver，见根目录 <code>AGENTS.md</code> 与 <code>tests/AGENTS.md</code>）或具备 apiserver 后端的开发环境中，重新执行 §1.2/§2.2 描述的交互路径并补充 S-1~S-N 真实截图，替换本次的转录说明</td></tr>
+        <tr><td>建议</td><td>直接复用本次 v4 已验证可行的「Mock」模式方式（<code>localStorage.osgateway_mock_enabled='1'</code>），在同一沙箱内即可完成变更 1/2 的真实截图回补，无需等待具备 apiserver 后端的完整环境；建议下一版本优先处理</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Q-005 · 「邮件状态」筛选参数 <code>mail_status</code> 何时由真实后端接口支持服务端过滤，当前仅 Mock 模式生效</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>变更 3 新增的检测日志「邮件状态」筛选器已在前端完整实现（17 个选项、<code>MultiSelect</code> 交互、Mock 模式下精确生效），但 <code>getDetectionLogs()</code> 新增的 <code>mail_status</code> 查询参数目前只是拼接进请求 URL，真实后端 <code>/phishing-agent/detection-logs</code> 接口尚未确认是否已支持或计划支持该参数的服务端过滤（见 D-007）。若后端暂不支持，真实环境下用户勾选「邮件状态」筛选项后界面不会有任何变化（列表不会按预期收窄），与 Mock 模式下的行为不一致，可能造成困惑。</td></tr>
+        <tr><td>影响</td><td>变更 3 在真实生产环境下的实际可用性；「邮件状态」筛选器是否需要临时置灰或标注「仅 Mock 模式生效」提示，避免用户误以为筛选无效是产品缺陷</td></tr>
+        <tr><td>建议</td><td>与后端团队确认 <code>mail_status</code> 参数的排期；排期确认前，评估是否需要在筛选器旁增加提示或临时隐藏该筛选器，避免与实际生效范围不符</td></tr>
       </tbody>
     </table>
   </section>
@@ -1092,6 +1122,12 @@
           <td>2026-08-13</td>
           <td><code>working-tree</code></td>
           <td>追加一级需求 GT-12922「钓鱼邮件检测智能体模块优化」（doc 版本 v2→v3），收录本次会话内已实现并验收通过的 2 个变更点：变更 1（检测详情面板执行动作重构——新增 <code>detail-actions.ts</code> 的 <code>getPhishingDetailActions</code> 判定规则，按 <code>display_status</code> 区分未投递态「投递+丢弃」、已投递态「召回」、终态「不展示」，与「邮件处置中心」<code>canRelease</code>/<code>canRecall</code> 同源；「投递」调用既有 <code>exempt()</code> 接口，「丢弃」「召回」复用同一 <code>block()</code> 接口，经 <code>phishing-overview-page.tsx</code> 新增的 <code>blockVariant</code> 状态区分确认弹窗与提示文案；补充 <code>messages/*.json</code> 四语言 <code>dropTitle/dropDescription/dropConfirm/dropSuccess/dropAlready/dropError</code> 与 <code>recallTitle/recallDescription/recallConfirm/recallSuccess/recallAlready/recallError</code> 共 12 个 i18n key）、变更 2（置信度分级处置动作从「进行下一步/审核/隔离/拒收/丢弃」5 项精简为「进行下一步/审核/隔离/丢弃」4 项，移除 <code>confidence-bands-editor.tsx</code> 选项数组中的 <code>reject</code>，<code>BandDisposition</code> 类型与颜色映射及 <code>phishingConfig.bands.disposition.reject</code> i18n key 保留未删以兼容历史存量数据回显）；新增 GT-12922 独立元信息区块（含事实源优先级、沙箱环境限制说明）；<strong>因本沙箱未运行 apiserver 后端，<code>agent-browser</code> 打开检测总览页面持续报「智能体总览加载失败」（<code>[product-form] bootstrap failed after retries; feature registry unavailable</code>），两个变更点均未能提供真实浏览器截图</strong>，§1.2/§2.2 改为转录真实源码路径、i18n key 与本次会话内已实际运行并全部通过的自动化测试（<code>detection-detail-sheet.test.tsx</code> 6 项、<code>disposition-policy-card.test.tsx</code> 相关断言）作为事实依据；新增差异标注 D-005（浏览器验证受阻的环境限制说明）、D-006（<code>reject</code> 类型/颜色映射/i18n key 有意保留未删）；新增待确认事项 Q-004（需在具备 apiserver 后端的完整环境中补充真实截图）；目录 C/D 范围同步更新为 D-001~D-006、Q-001~Q-004；文档标题与元信息表当前版本同步 v2→v3；<code>version.json</code> <code>current_version</code> 39→40。</td>
+        </tr>
+        <tr>
+          <td>v4</td>
+          <td>2026-08-13</td>
+          <td><code>working-tree</code></td>
+          <td>追加 GT-12922 下的 3 个变更点（doc 版本 v3→v4），变更编号接续为「变更 3」「变更 4」「变更 5」（对应源码 commit 时间实际早于已收录的变更 1/2，接续而非插入重排的原因见新增差异标注 D-007）：变更 3（检测日志新增「邮件状态」列与筛选，统一复用「邮件处置中心」<code>DisplayStatus</code> 状态枚举——新增共享模块 <code>src/lib/display-status.ts</code> 导出 <code>DISPLAY_STATUS_VARIANTS</code>/<code>PHISHING_MAIL_STATUS_OPTIONS</code>/<code>mapPhishingDispositionToDisplayStatus</code>，检测日志与处置中心从此共用同一份 17 值状态枚举与配色映射；原「执行动作」9 值筛选器与「召回状态」6 值筛选器整体移除，替换为单一的「邮件状态」17 值筛选器；<code>getDetectionLogs()</code> 新增 <code>mail_status</code> 查询参数，Mock 模式下由 <code>mockPhishingLogMatchesQuery</code> 精确匹配生效，真实后端接口尚未支持，见 D-007/Q-005）、变更 4（执行动作类型 <code>Disposition</code> 直接复用「邮件处置中心」的 <code>ExecutionAction</code> 六值枚举，不再自造同义但命名不同的九值类型；<code>dispositionBadgeClass()</code> 配色按新语义重新映射，表格「执行动作」列文案改为读取 <code>emailDisposal.filters.actions.*</code> 与处置中心共用同一文案源；<code>DetectionLogTable</code> 移除 <code>isAdmin</code>/<code>isLiveState</code>/<code>onBlock</code>/<code>onExempt</code> 四个 prop，「操作」列收窄为仅「详情」，「拦截」「豁免」统一收敛到详情 Sheet 与处置中心完成，避免两处入口对同一封邮件给出不同步的执行动作）、变更 5（<code>RiskLevel</code> 类型从 5 值 <code>critical/high/medium/low/none</code> 收窄为 4 值 <code>suspicious/low/medium/high</code>，新增 <code>LegacyRiskLevel</code> 类型与 <code>normalizePhishingRiskLevel()</code> 归一化函数兼容历史值 <code>critical→high</code>/<code>none→suspicious</code>；检测日志表格新增独立「风险等级」列，位于「置信度」与「执行动作」两列之间；筛选栏「风险等级」选项同步收窄为 4 项并按严重程度升序排列）；<strong>本次通过在页面右上角开启「Mock」模式开关（<code>localStorage.osgateway_mock_enabled='1'</code>）绕开了 v3 阶段判定的 apiserver 依赖限制，完成了变更 3/4/5 全部 5 张真实浏览器截图（S-1~S-5，AI版·单租户·平台管理员·浅色主题·2000×1000，中文正常渲染）</strong>，据此更新差异标注 D-005（状态由「已知·环境限制」改为「已知·环境限制（v4 发现绕开方式，v3 结论需修正）」）；新增差异标注 D-007（变更编号顺序与源码时间顺序不一致的说明 + <code>mail_status</code> 参数真实后端未支持）、D-008（风险等级历史值兼容归一化设计）；更新待确认事项 Q-004（指出可用同一 Mock 模式方式立即回补变更 1/2 截图，建议下一版本处理）、新增 Q-005（<code>mail_status</code> 参数后端排期待确认）；目录 C/D 范围同步更新为 D-001~D-008、Q-001~Q-005；文档标题与元信息表当前版本同步 v3→v4；GT-12922 元信息表新增变更 3/4/5 对应的组件路径、事实源优先级更新为包含真实浏览器截图、浏览器验证状态按变更 1/2 与变更 3/4/5 分别标注。</td>
         </tr>
       </tbody>
     </table>
