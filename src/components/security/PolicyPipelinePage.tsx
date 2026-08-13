@@ -94,10 +94,12 @@ export const stage2NavItems: { key: Stage2PolicyKey; nameKey: string; functional
   { key: 'userList', nameKey: 'pipeline.userBlackWhiteList', functional: true },
 ];
 
+// GT-12938：内容规则调整到附件安全上方，成为阶段3的第一项（此处与下方
+// stages[stage3].policies 数组顺序保持一致，二者共同决定卡片区与抽屉左导航的展示顺序）。
 const stage3NavItems: { key: Stage3PolicyKey; nameKey: string; functional: boolean }[] = [
+  { key: 'content', nameKey: 'pipeline.content', functional: true },
   { key: 'attachment', nameKey: 'pipeline.attachment', functional: true },
   { key: 'url', nameKey: 'pipeline.url', functional: true },
-  { key: 'content', nameKey: 'pipeline.content', functional: true },
   { key: 'intentEngine', nameKey: 'pipeline.intentEngine', functional: true },
 ];
 
@@ -397,10 +399,11 @@ export function PolicyPipelinePage() {
       bgClass: '',
       borderClass: 'border-x-0',
       // html_spec §3.1 对齐：附件/URL/内容规则隔离 → configurable（橙）；意图引擎强制 → forced（红）。
+      // GT-12938：内容规则调整到附件安全上方，成为阶段3的第一项策略。
       policies: [
+        { key: 'content', nameKey: 'pipeline.content', descKey: 'pipeline.contentDesc', type: 'configurable', functional: true },
         { key: 'attachment', nameKey: 'pipeline.attachment', descKey: 'pipeline.attachmentDesc', type: 'configurable', functional: true },
         { key: 'url', nameKey: 'pipeline.url', descKey: 'pipeline.urlDesc', type: 'configurable', functional: true },
-        { key: 'content', nameKey: 'pipeline.content', descKey: 'pipeline.contentDesc', type: 'configurable', functional: true },
         { key: 'intentEngine', nameKey: 'pipeline.intentEngine', descKey: 'pipeline.intentEngineDesc', type: 'forced', functional: true },
       ],
     },
