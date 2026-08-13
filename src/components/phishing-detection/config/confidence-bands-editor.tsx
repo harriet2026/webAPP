@@ -242,12 +242,12 @@ function DispositionSelect({
   testId?: string;
 }) {
   const t = useTranslations('phishingConfig.bands');
-  // 顺序按处置力度从轻到重排列：进行下一步 → 审核 → 隔离 → 拒收 → 丢弃。
+  // 顺序按处置力度从轻到重排列：进行下一步 → 审核 → 隔离 → 丢弃。
+  // 「拒收」不属于钓鱼邮件置信度分级的可选处置动作。
   const options: Array<{ value: BandDisposition; label: string }> = [
     { value: 'mark', label: t('disposition.mark') },
     { value: 'audit', label: t('disposition.audit') },
     { value: 'quarantine', label: t('disposition.quarantine') },
-    { value: 'reject', label: t('disposition.reject') },
     { value: 'discard', label: t('disposition.discard') },
   ];
 

@@ -288,7 +288,7 @@ describe('DispositionPolicyCard summary + drawer (智能体调查与处置)', ()
     );
   });
 
-  it('offers "进行下一步/审核/隔离/拒收/丢弃" as band disposition options, with no "放行" option', async () => {
+  it('offers "进行下一步/审核/隔离/丢弃" as band disposition options, with no "拒收" or "放行" option', async () => {
     renderCard();
 
     fireEvent.click(await screen.findByTestId('policy-edit'));
@@ -296,7 +296,8 @@ describe('DispositionPolicyCard summary + drawer (智能体调查与处置)', ()
 
     const select = screen.getByTestId('band-disposition-0-native') as HTMLSelectElement;
     const optionTexts = Array.from(select.options).map((o) => o.text);
-    expect(optionTexts).toEqual(['进行下一步', '审核', '隔离', '拒收', '丢弃']);
+    expect(optionTexts).toEqual(['进行下一步', '审核', '隔离', '丢弃']);
+    expect(optionTexts).not.toContain('拒收');
     expect(optionTexts).not.toContain('放行');
   });
 
