@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测�������������能�������������",
+    "spoofingDetection": "仿冒邮件检测���������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1020,7 +1020,7 @@
         },
         "toasts": {
           "created": "路��规��已��加",
-          "updated": "路由��则已��新",
+          "updated": "��由��则已��新",
           "deleted": "��由规则已删除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
@@ -1336,7 +1336,7 @@
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
-    "targetGroups": "适���对���",
+    "targetGroups": "适���对����",
     "policyConfig": "策略配置",
     "priority": "优先��",
     "newPolicy": "新建群组策略",
@@ -1630,7 +1630,7 @@
     "releasedAt": "释放时间",
     "releasedBy": "释放人",
     "batchRelease": "批量释放",
-    "releaseTo": "释放至",
+    "releaseTo": "释放���",
     "release": "释放",
     "notes": "备注",
     "preview": "预览",
@@ -1834,7 +1834,7 @@
       "rule_type": "规则类型",
       "email_size": "大小",
       "queue_id": "队列 ID",
-      "delivery_status_summary": "投递状态",
+      "delivery_status_summary": "投递状��",
       "workflow_outcome_summary": "工作流结果",
       "delivery_attempts": "投递次数",
       "last_delivery_event_at": "��后投递��件",
@@ -2456,7 +2456,7 @@
     "scenes": {
       "userspace": "用户空间认证",
       "smtpsend": "SMTP 发信认证",
-      "mailsync": "邮件���步代理"
+      "mailsync": "邮件����步代理"
     },
     "failReasons": {
       "wrongPassword": "密码��误",
@@ -2728,7 +2728,7 @@
     },
     "trustedDevices": {
       "count": "授信终端（{n}）",
-      "empty": "暂无授信终端。登录时勾选「信任此设备」后，下次在此设备��跳过二次认证。",
+      "empty": "暂无授信终端。登录时勾��「信任此设备」后，下次在此设备��跳过二次认证。",
       "createdAt": "授信时间",
       "lastUsed": "最近使用",
       "expires": "到期时间",
@@ -3684,7 +3684,7 @@
     "ipGroupRequired": "请选择一个IP组",
     "ipGroupMembersUnit": "个IP",
     "ruleNameTip": "为规则添加描述性名称，便于管理识别",
-    "ruleNamePlaceholder": "如：恶意攻击来源、合作伙伴IP等",
+    "ruleNamePlaceholder": "如：恶意攻击来���、合作伙伴IP等",
     "ipAddressTip": "支持单个IP地址、CIDR网段或IP组",
     "ipAddressRequired": "请输入IP地址/段",
     "invalidIp": "请输入有效的IP地址",
@@ -3833,7 +3833,7 @@
     "comment": "审核意见",
     "commentPlaceholder": "请输入审核意见...",
     "approveConfirm": "确认放行此邮件？",
-    "rejectConfirm": "确认拒绝此邮件？",
+    "rejectConfirm": "确认拒绝此邮件���",
     "noItems": "暂无入站审���项",
     "preview": "���览",
     "download": "下载",
@@ -3950,7 +3950,7 @@
     "greylistWindowInvalid": "频率窗口必须不少于 10 秒",
     "greylistWindowBeforeDelay": "延迟模式下，频率窗口不能短于延迟时间",
     "greylistMaxRequestsInvalid": "最大请求数必须不少于 1",
-    "greylistTTLInvalid": "白名单有效期必须不少于 1 小时",
+    "greylistTTLInvalid": "白名���有效期必须不少于 1 小时",
     "greylistDelayShortWarning": "延迟时��过短可能无法有效过滤",
     "greylistDelayLongWarning": "延迟时间过长可能影响正常邮件",
     "unsavedChanges": "有未保存的更改",
@@ -4248,7 +4248,7 @@
     "ruleNamePlaceholder": "如：身份证号红线规则",
     "ruleNameRequired": "请输入规则名称",
     "effectScope": "生效范围",
-    "effectScopeTip": "选择该规则需要应用的邮件流转方向",
+    "effectScopeTip": "选择该规则需要应用的邮件流转方��",
     "priority": "优先级",
     "status": "状态",
     "enabled": "已启用",
@@ -4405,7 +4405,7 @@
     "ruleNameForbiddenChars": "规则名称不能包含 <、>、& 或双引号",
     "priorityInvalid": "优先级必须是 1 到 9999 的整数",
     "invalidDate": "请输入有效的失效时间",
-    "mixedDirectionActionsPreserved": "此历史规则在不同方向使用不同动作；除非重新选择动作，否则将原样保留。",
+    "mixedDirectionActionsPreserved": "此历史规则在不同方向使用不同动作；除��重新选择动作，否则将原样保留。",
     "unsavedTitle": "放弃未保存的更��？",
     "unsavedDescription": "当前修改尚未保存，确定放弃并关闭编辑器吗？",
     "discardChanges": "放弃更改",
@@ -5077,7 +5077,7 @@
       "attachments": "个附件",
       "ocrMode_none": "不检测",
       "ocrMode_light": "检测",
-      "qrDetection": "二维码图片检测",
+      "qrDetection": "二维码图片检���",
       "qrMode_none": "不检测",
       "qrMode_light": "轻度检测 - 识别到二维码即拦截",
       "qrMode_deep": "深度检测 - 解码内容��送入后续模块检测",
@@ -5867,7 +5867,7 @@
         "normal": "正常",
         "subscription": "订阅资讯",
         "advertising": "广告邮件",
-        "spam": "垃圾邮件",
+        "spam": "���圾邮件",
         "harmful": "有害内容邮件",
         "suspicious": "可疑邮件",
         "sensitive": "敏感内容邮件",
@@ -6017,7 +6017,7 @@
     },
     "batch": {
       "findSimilar": "查找相似",
-      "release": "放行",
+      "release": "投递",
       "delete": "丢弃",
       "export": "导出",
       "confirmRelease": "确认放行选中邮件？",
@@ -6486,7 +6486,7 @@
     },
     "correctionQuality": {
       "title": "纠正质量",
-      "falsePositiveRate": "误判率",
+      "falsePositiveRate": "误���率",
       "falseNegativeRate": "漏判率",
       "countOf": "共 {total} 封已分类邮件中的 {count} 封",
       "summary": "区间内已纠正 {corrected} 封 / 已分类 {classified} 封"
@@ -6910,7 +6910,7 @@
       "desc_sender": {
         "source": "邮件头 From 字段",
         "usage": "识别用户邮箱客户端中看到的发件人",
-        "note": "钓鱼邮件常伪造此字段，建议配合信封发信人(SMTP)检测"
+        "note": "钓鱼邮件���伪造此字段，建议配合信封发信人(SMTP)检测"
       },
       "desc_recipient": {
         "source": "邮件头 To 字段",
@@ -7497,7 +7497,7 @@
     "weekday_6": "周六",
     "timePoints": "通知时间点",
     "addTimePoint": "添加时间点",
-    "tzComputedIn": "通知时间以 {tz} 计算",
+    "tzComputedIn": "通知时间以 {tz} ���算",
     "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间：",
     "tzUseBrowser": "使用浏览器时区（{tz}）",
     "tzKeepCurrent": "保持当前时区（{tz}）",
@@ -8144,7 +8144,7 @@
       "clickOverview": "链接保护点击概览",
       "clickOverviewMetrics": {
         "clickRate": "点击率",
-        "threatClicks": "拦截点击",
+        "threatClicks": "拦��点击",
         "totalClicks": "总点击"
       },
       "topMaliciousDomains": "TOP 恶意域名",
@@ -8716,7 +8716,7 @@
   "summaryObserve": "观察模式：{status}",
   "observeModeBanner": "观察模式已开启，当前配置仅执行检测与标记，不执行隔离、审核、召回等实质性处置动作。",
   "observeMarkEnabled": "观察期间追加标记",
-  "observeMarkEnabledHint": "开启后，系统会在放行邮件前按下方设置在主题前缀或邮件头中追加标记，便于后续��查观察样本；关闭则静默放行，不做任何标记。",
+  "observeMarkEnabledHint": "开启后，系统会在放行邮件前按下方设置在主题前缀或邮件头中追加��记，便于后续��查观察样本；关闭则静默放行，不做任何标记。",
   "observeMarkOn": "追加标记（{positions}）",
   "observeMarkOff": "不追加标记",
   "observeMarkNoPosition": "未选择标记位置",
@@ -9017,7 +9017,7 @@
       "modeContacts": "从组��架构导入",
       "sourceRecommended": "推荐",
       "sourceContactsTitle": "从组织架构导入",
-      "sourceContactsDesc": "搜索并选择特定人员，自动填充身份信息，支持多选批量创建。",
+      "sourceContactsDesc": "搜索并���择特定人员，自动填充身份信息，支持多选批量创建。",
       "sourceSingleTitle": "手动添加",
       "sourceSingleDesc": "手动维护一个保护对象及其合法邮箱。",
       "sourcePasteTitle": "批量粘贴",
@@ -9197,7 +9197,7 @@
     },
     "notificationPreview": {
       "title": "告警通知预览",
-      "description": "以下内容由后端正式模板渲染，本操作不会发送邮件。",
+      "description": "以下内容由后端正式��板渲染，本操作不会发送邮件。",
       "from": "发件人",
       "to": "收件人：",
       "subject": "主题：",
@@ -9971,7 +9971,7 @@
       "notConfigured": "未配置"
     },
     "op": {
-      "gt": "大于",
+      "gt": "大��",
       "ge": "大于等于",
       "lt": "小于",
       "le": "小于等于",
@@ -10333,7 +10333,7 @@
       "blacklist": "黑名单模式"
     },
     "overflowPolicies": {
-      "kick_earliest": "踢掉最早会话",
+      "kick_earliest": "踢掉��早会话",
       "reject_new": "拒绝新登录"
     },
     "classCount": "至少 {n} 类",
@@ -10486,7 +10486,7 @@
     "errorTitle": "操作失败",
     "errorDesc": "请稍后重试或联系管理员。",
     "confirmTitle": "确认将发件人加入黑名单",
-    "confirmHint": "加入后，该发件人发给���的邮件将被直接拒收。",
+    "confirmHint": "加入后���该发件人发给���的邮件将被直接拒收。",
     "confirmButton": "确认加黑",
     "addedTitle": "已加入黑名单",
     "addedDesc": "该发件人已加入您的黑名单。"
@@ -10524,7 +10524,7 @@
     "loadFailed": "检测引擎数据加载失败，请重试",
     "degraded": "监控数据库暂不可用，当前仅显示可用数据",
     "noData": "所选范围内暂无数据",
-    "approximate": "RBL 响应耗时根据邮件端到端处理耗时近似计算",
+    "approximate": "RBL 响应耗时根据邮件端到端处理耗时近���计算",
     "lastUpdated": "最近更新：{time}",
     "performanceTrend": "{engine}性能趋势（{range}）",
     "detailTitle": "{engine}运行明细",
@@ -10701,7 +10701,7 @@
       "sync_already_running": "该数据源已有同步任务在运行，请等待完成后再试",
       "sync_mode_invalid": "同步方式无效，只能是：{allowed}",
       "test_connection_required": "请先测试连接成功后再保存",
-      "updated_at_required": "缺少数据版本信息，请刷新页面后重试",
+      "updated_at_required": "缺少���据版本信息，请刷新页面后重试",
       "upload_token_empty": "请先上传 CSV 文件",
       "upload_token_invalid": "上传凭证无效或已过期，请重新上传 CSV 文件",
       "user_file_empty": "上传的 CSV 文件为空",
@@ -10780,7 +10780,7 @@
       "cross_tenant_read_denied": "无权查看其他租户的签名域名",
       "dns_not_verified": "该密钥的 DNS 记录尚未验证通过，请先在域��服务商处添加 TXT 记录并完成验证，再启用它",
       "forbidden": "没有权限执行此操作",
-      "key_not_found": "签名密钥不存在，可能已被删除",
+      "key_not_found": "签名密钥不存在，可���已被删除",
       "key_size_too_large": "密钥长度不能超过 {max} 位",
       "selector_invalid": "选择器「{value}」格式不正确",
       "tenant_id_invalid": "租户参数无效，必须是正整数"
@@ -10791,7 +10791,7 @@
       "name_and_pattern_required": "名称和匹���内容都必须填写",
       "not_found": "链接黑名单规则不存在，可能已被删除",
       "tenant_access_denied": "���有权限访问该租户的数据",
-      "tenant_id_required": "必须指定租户（平台管理员需通过 X-Tenant-ID 指定）",
+      "tenant_id_required": "必须指定租户（平台管理员��通过 X-Tenant-ID 指定）",
       "verdict_invalid": "判定结果取值无效"
     },
     "mail_admission": {
