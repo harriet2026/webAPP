@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GT-12938 · GT-12940 内容规则顺序调整：调整到「阶段3：内容层」第一个策略 · 增量功能规格 · v1</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f6f8;
+      color: #1a1d23;
+      line-height: 1.6;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .page-wrap { max-width: 980px; margin: 0 auto; }
+
+    section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    section > h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    section > h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+
+    .incremental-section {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .incr-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: #f8f9fb;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .incr-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #2563eb; color: #fff;
+      font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+    }
+    .incr-header h2 { font-size: 1rem; font-weight: 700; color: #1a1d23; margin: 0; }
+    .incr-header .incr-meta { font-size: 0.72rem; color: #6b7280; margin-left: auto; text-align: right; }
+    .incr-body { padding: 1.5rem 2rem; }
+    .incr-body h3 { font-size: 0.92rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.6rem; }
+    .incr-body h4 { font-size: 0.87rem; font-weight: 600; color: #1a1d23; margin-top: 1rem; margin-bottom: 0.5rem; }
+    .incr-body p { font-size: 0.875rem; color: #374151; margin-bottom: 0.75rem; }
+    .incr-body ul, .incr-body ol { margin: 0 0 0.75rem 1.25rem; font-size: 0.875rem; color: #374151; }
+    .incr-body li { margin-bottom: 0.4rem; }
+    .incr-body li strong { color: #1a1d23; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.845rem; margin-bottom: 0.75rem; }
+    th { background: #f3f4f6; color: #374151; font-weight: 600; text-align: left; padding: 0.55rem 0.8rem; border: 1px solid #e5e7eb; }
+    td { padding: 0.5rem 0.8rem; border: 1px solid #e5e7eb; vertical-align: top; color: #374151; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    code { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.1em 0.4em; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82em; color: #1a1d23; }
+
+    .interaction-preview {
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+    .interaction-preview h4 { font-size: 0.88rem; font-weight: 700; color: #1a1d23; margin-bottom: 0.35rem; }
+    .interaction-preview .trigger-path { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.9rem; }
+    .interaction-preview figure { margin: 0 0 0.9rem; }
+    .interaction-preview figcaption { font-size: 0.78rem; color: #6b7280; margin-top: 0.35rem; font-style: italic; }
+    .interaction-preview img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; display: block; }
+
+    .callout { border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.84rem; margin: 0.75rem 0; }
+    .callout-info    { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; }
+    .callout-warn    { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .callout-removed { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; }
+    .callout-ok      { background: #f0fdf4; border-left: 4px solid #16a34a; color: #15532e; }
+
+    .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.15em 0.5em; border-radius: 4px; margin-right: 0.3em; }
+    .tag-removed  { background: #fee2e2; color: #991b1b; }
+    .tag-added    { background: #dcfce7; color: #15532e; }
+    .tag-changed  { background: #fef9c3; color: #854d0e; }
+    .tag-unverif  { background: #f3f4f6; color: #6b7280; }
+    .tag-info     { background: #dbeafe; color: #1e40af; }
+
+    del { color: #9ca3af; text-decoration-color: #dc2626; }
+
+    .version-badge { display: inline-flex; align-items: center; gap: 0.4em; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 0.2em 0.8em; font-size: 0.78rem; color: #374151; }
+    .version-badge .vnum { font-weight: 700; color: #1a1d23; }
+
+    .matrix-legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.78rem; color: #374151; margin-bottom: 0.75rem; }
+
+    .toc { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .toc a { color: #2563eb; text-decoration: none; font-size: 0.85rem; }
+    .toc a:hover { text-decoration: underline; }
+
+    .toc-l1 {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; border-radius: 6px;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      margin-top: 0.4rem; margin-bottom: 0.15rem;
+    }
+    .toc-l1 > a { font-weight: 700; font-size: 0.9rem; color: #1d4ed8; }
+
+    .toc-l2-group { list-style: none; display: flex; flex-direction: column; gap: 0.2rem; padding-left: 1.5rem; margin-bottom: 0.4rem; }
+    .toc-change {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.65rem; border-radius: 6px;
+      background: #f8f9ff; border: 1px solid #dbeafe;
+    }
+    .toc-change a { font-weight: 600; font-size: 0.85rem; color: #1d4ed8; }
+    .toc-change .toc-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #3b82f6; color: #fff;
+      font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+    }
+    .toc-l3 { padding-left: 2.8rem; }
+    .back-link { display: inline-block; margin-top: 1.5rem; font-size: 0.82rem; color: #2563eb; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ══════════════ 目录 ══════════════ -->
+  <section id="toc">
+    <h2>目录</h2>
+    <ul class="toc">
+      <li><a href="#meta">A. 元信息与事实源</a></li>
+      <li><a href="#form-role-matrix">B. 产品形态 × 角色矩阵</a></li>
+
+      <!-- 一级需求：GT-12940 -->
+      <li class="toc-l1"><a href="#gt-12940">GT-12940 内容规则顺序调整：调整到「阶段3：内容层」第一个策略</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#change-1">「内容规则」卡片与抽屉左侧导航顺序调整为阶段3内的第一项</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c1-goal">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001）</a></li>
+      <li><a href="#version-history">E. 版本历史</a></li>
+    </ul>
+  </section>
+
+  <!-- 需求入口锚点（供目录一级链接跳转）-->
+  <div id="gt-12940" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ══════════════ A. 元信息 ══════════════ -->
+  <section id="meta">
+    <h2>A. 元信息与事实源</h2>
+    <table>
+      <thead><tr><th>字段</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>文档编号（文件 ticket）</td><td>GT-12938</td></tr>
+        <tr><td>需求名称</td><td>GT-12940 内容规则顺序调整：调整到「阶段3：内容层」第一个策略</td></tr>
+        <tr><td>规格类型</td><td>增量规格（Incremental）· 展示顺序调整（不涉及策略逻辑、数据模型或接口变更）</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v1</span></span></td></tr>
+        <tr><td>生成日期</td><td>2026-08-13</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线页面 → 「阶段3：内容层」卡片区；策略详情抽屉左侧导航同步复用同一顺序）</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/security/PolicyPipelinePage.tsx</code>（<code>stage3NavItems</code> 数组——驱动策略详情抽屉左侧导航顺序；<code>stages</code> 常量中 <code>stage3</code>（阶段3：内容层）对应的 <code>policies</code> 数组——驱动卡片区展示顺序）
+        </td></tr>
+        <tr><td>webapp commit</td><td><code>3ce30d8</code>（<code>feat: move content rule to stage 3 first policy for GT-12938</code>）</td></tr>
+        <tr><td>对照 spec commit</td><td>not-used</td></tr>
+        <tr><td>历史对话记录</td><td>当前上下文可获得完整历史：本次顺序调整为本次会话内用户直接指令下完成的实现，验收标准（「内容规则」调整为「阶段3：内容层」第一个策略）在当前上下文中完整可得，非转述或推测</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述（GT-12940 需求名称与验收标准）；2. webapp 当前源码与 <code>git show</code> 实际 diff；3. <code>agent-browser</code> 浏览器实测（变更前/变更后对照截图）；4. 其他原始 spec，仅作差异对照（<code>doc/html_spec-version/GT-12731.html</code> 收录本页面此前的完整增量历史，含 GT-11651「内容规则执行动作调整」等既往变更，本文档新建独立记录，未修改 GT-12731.html 内容，仅作交叉参考）。</td></tr>
+        <tr><td>浏览器验证状态</td><td>已通过 <code>agent-browser</code> 打开 <code>/zh/security/pipeline</code> 页面，分别在变更前（<code>git checkout</code> 至上一次提交的 <code>PolicyPipelinePage.tsx</code>）与变更后（当前工作区版本）两个状态下截取「阶段3：内容层」卡片区整列截图，逐一比对卡片顺序变化。见 §1.2 截图。</td></tr>
+        <tr><td>沙箱渲染限制</td><td><strong>S-1、S-2 两张截图均来自本沙箱的无头浏览器环境，该沙箱缺少中文字体，导致截图中的中文文字统一渲染为方框（tofu box）占位符，而非实际字形缺失或产品文案异常。</strong>这是渲染环境限制，不是产品缺陷，性质与既有文档 GT-12865 中记录的 D-004 相同；本文档已尝试开启页面右上角「Mock」模式开关（<code>osgateway_mock_enabled</code>），但该开关只改变数据来源（阶段4卡片内容切换为 AI 智能体数据），未能修复本次「阶段3：内容层」区域截图的中文字体渲染，故本次截图仍保留方框占位符。S-1、S-2 各交互预览下方的表格与说明文字均依据 <code>messages/zh.json</code> 中 <code>pipeline.content</code>/<code>pipeline.attachment</code>/<code>pipeline.url</code>/<code>pipeline.intentEngine</code> 等真实 i18n 文案与源码逐一核对后如实转录，读者可结合截图中卡片的相对位置（第一/第二/第三张卡片）与文字表格对照理解实际效果。已在 D-001 中记录该限制，避免被误认为文案渲染缺陷。</td></tr>
+        <tr><td>变更类型</td><td>功能变更（策略展示顺序调整，不涉及策略配置逻辑、数据模型或后端接口）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      本规格为增量文档，记录 GT-12940「内容规则顺序调整：调整到"阶段3：内容层"第一个策略」的完整实现：策略流水线页面「阶段3：内容层」此前的策略展示顺序为「附件安全检测 → URL检测与防护 → 内容规则 → 意图引擎」，本次调整为「内容规则 → 附件安全检测 → URL检测与防护 → 意图引擎」，即把「内容规则」从原第三位提升为阶段3内的第一个策略（意图引擎因是强制生效的综合判定策略，固定展示在阶段3末位，不参与本次排序调整）。
+    </div>
+    <div class="callout callout-warn">
+      <strong>范围说明：</strong>本次调整仅涉及前端展示顺序（卡片区排列顺序 + 策略详情抽屉左侧导航条目顺序），不改变任一策略自身的配置字段、启用状态、生效逻辑或与后端接口的数据交互方式；「内容规则」「附件安全检测」「URL检测与防护」在阶段3内均标记为 <code>configurable</code>（可独立配置），「意图引擎」标记为 <code>forced</code>（强制生效），该分类未发生变化。
+    </div>
+  </section>
+
+  <!-- ══════════════ B. 产品形态 × 角色矩阵 ══════════════ -->
+  <section id="form-role-matrix">
+    <h2>B. 产品形态 × 角色差异矩阵</h2>
+    <div class="matrix-legend">
+      <span>&#x2705; 显示且可操作</span>
+      <span>&#x1F512; 显示但只读</span>
+      <span>&#x274C; 隐藏 / 不存在</span>
+      <span>&#x2014; 该形态无此角色</span>
+      <span>? 无法验证</span>
+    </div>
+    <p style="font-size:0.85rem;color:#374151;margin-bottom:0.75rem;">
+      「阶段3：内容层」卡片区与其中策略的排列顺序为静态常量数组（<code>stage3NavItems</code> / <code>stages</code> 中 <code>stage3.policies</code>），不依赖产品形态或角色进行条件渲染，理论上各形态与角色下的顺序表现一致。本次截图仅在 AI版·单租户 / 平台管理员下实拍，其余形态 / 角色未逐一验证，标记为「?」。
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>功能 / 元素</th>
+          <th>变更</th>
+          <th>AI-单<br/>平台管理员</th>
+          <th>传统-单<br/>平台管理员</th>
+          <th>云-多<br/>平台管理员</th>
+          <th>云-多<br/>租户管理员</th>
+          <th>AI-多<br/>平台管理员</th>
+          <th>AI-多<br/>租户管理员</th>
+          <th>传统-多<br/>平台管理员</th>
+          <th>传统-多<br/>租户管理员</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>「阶段3：内容层」卡片区展示顺序</td>
+          <td>#1</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+        <tr>
+          <td>策略详情抽屉左侧导航展示顺序</td>
+          <td>#1</td>
+          <td>&#x2705;</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.8rem;color:#6b7280;margin-top:0.5rem;">
+      #1 = 变更 1（见目录）。
+    </p>
+  </section>
+
+  <!-- ═════════════ 变更 1（GT-12940）══════════════ -->
+  <div class="incremental-section" id="change-1">
+    <div class="incr-header">
+      <span class="incr-num">1</span>
+      <h2>「内容规则」卡片与抽屉左侧导航顺序调整为阶段3内的第一项</h2>
+      <span class="incr-meta">路由：/zh/security/pipeline（策略流水线 → 阶段3：内容层）<br/>组件：PolicyPipelinePage.tsx（stage3NavItems / stages.stage3.policies）<br/>变更类型：展示顺序调整 · 2026-08-13</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c1-goal">1.1 方案概述</h3>
+      <p>
+        <strong>问题背景：</strong>策略流水线页面「阶段3：内容层」原有的策略展示顺序为「附件安全检测 → URL检测与防护 → 内容规则 → 意图引擎」。产品要求将「内容规则」提升为该阶段内的第一个策略，使其在卡片区与策略详情抽屉左侧导航中均排在最前，优先于「附件安全检测」和「URL检测与防护」。
+      </p>
+      <p>
+        <strong>方案：</strong>调整 <code>PolicyPipelinePage.tsx</code> 中两处共同决定展示顺序的常量数组，二者保持一致：
+      </p>
+      <ul>
+        <li><code>stage3NavItems</code>（驱动策略详情抽屉左侧导航的顺序）：数组首项由 <code>{'{'} key: 'attachment', ... {'}'}</code> 调整为 <code>{'{'} key: 'content', ... {'}'}</code>，原「内容规则」条目从数组第三位移动到第一位，「附件安全检测」「URL检测与防护」依次后移一位；</li>
+        <li><code>stages</code> 常量中 <code>stage3</code>（阶段3：内容层）对应的 <code>policies</code> 数组（驱动卡片区展示顺序）：同步做相同调整，<code>content</code> 条目移动到数组第一位；</li>
+        <li>「意图引擎」（<code>intentEngine</code>）固定保留在两个数组的末位，不参与本次排序调整——该策略本身标记为 <code>type: 'forced'</code>（强制生效的综合判定策略），产品定位与前三项 <code>configurable</code>（可独立配置隔离/检测类）策略不同，调整后仍作为阶段3的最后一项。</li>
+      </ul>
+      <p>
+        调整后阶段3四项策略的最终顺序为：<strong>内容规则 → 附件安全检测 → URL检测与防护 → 意图引擎</strong>。由于卡片区与抽屉左侧导航共用同一份数据顺序（源码注释「此处与下方 stages[stage3].policies 数组顺序保持一致，二者共同决定卡片区与抽屉左导航的展示顺序」），两处入口的视觉顺序始终保持同步，不会出现卡片区与抽屉导航顺序不一致的情况。本次调整不涉及任一策略的 <code>type</code>（<code>configurable</code>/<code>forced</code>）分类、<code>functional</code> 标记、i18n key 或详情抽屉内的具体配置内容，纯粹是数组元素顺序调整。
+      </p>
+
+      <h3 id="c1-states">1.2 截图式交互预览</h3>
+      <div class="callout callout-warn">
+        <strong>沙箱渲染限制：</strong>以下两张截图均来自本沙箱的无头浏览器环境，中文字体缺失导致文字方框化（性质同 D-001/既有 D-004），已尝试开启页面右上角「Mock」模式开关但未能修复该区域的字体渲染。请结合截图中卡片的相对排列位置（自上而下第一/第二/第三张卡片）与下方 1.3 节逐元素说明表中的真实中文文案对照理解。
+      </div>
+      <div class="interaction-preview">
+        <figure>
+          <img src="./screenshots/GT-12938-S1-stage3-before-order-light-1506x936.png" alt="策略流水线页面变更前状态：阶段3内容层列共4张卡片，自上而下第一张橙色左边条卡片为附件安全检测，第二张橙色左边条卡片为URL检测与防护，第三张橙色左边条卡片为内容规则，第四张红色左边条卡片为意图引擎，因沙箱缺少中文字体卡片标题文字渲染为方框占位符" />
+          <figcaption>图 S-1（变更前）：「阶段3：内容层」列自上而下依次为「附件安全检测」（第一张，橙色左边条 <code>configurable</code>）、「URL检测与防护」（第二张，橙色左边条）、「内容规则」（第三张，橙色左边条）、「意图引擎」（第四张，红色左边条 <code>forced</code>）。取自 <code>git checkout</code> 至本次变更提交之前的源码版本实拍，用于与变更后对照。</figcaption>
+        </figure>
+        <figure>
+          <img src="./screenshots/GT-12938-S2-stage3-after-order-light-1506x936.png" alt="策略流水线页面变更后状态：阶段3内容层列共4张卡片，自上而下第一张橙色左边条卡片为内容规则，第二张橙色左边条卡片为附件安全检测，第三张橙色左边条卡片为URL检测与防护，第四张红色左边条卡片为意图引擎，因沙箱缺少中文字体卡片标题文字渲染为方框占位符" />
+          <figcaption>图 S-2（变更后）：「阶段3：内容层」列自上而下依次调整为「内容规则」（第一张，橙色左边条，<strong>本次提升到首位</strong>）、「附件安全检测」（第二张，橙色左边条，原第一位后移一位）、「URL检测与防护」（第三张，橙色左边条，原第二位后移一位）、「意图引擎」（第四张，红色左边条 <code>forced</code>，位置不变）。与图 S-1 对比可见前三张卡片的相对顺序发生轮转，第四张卡片位置不变。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c1-elements">1.3 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前顺序</th><th>变更后顺序</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>「内容规则」卡片（<code>key: 'content'</code>）</td>
+            <td>阶段3第 3 位</td>
+            <td><span class="tag tag-changed">阶段3第 1 位</span></td>
+            <td>标题文案 <code>pipeline.content</code> = 「内容规则」；描述文案 <code>pipeline.contentDesc</code> = 「邮件内容关键词过滤」；<code>type: 'configurable'</code>（可独立配置），左边条橙色，<code>functional: true</code>，本身的配置内容与交互未发生变化，仅位置提升</td>
+          </tr>
+          <tr>
+            <td>「附件安全检测」卡片（<code>key: 'attachment'</code>）</td>
+            <td>阶段3第 1 位</td>
+            <td><span class="tag tag-changed">阶段3第 2 位</span></td>
+            <td>标题文案 <code>pipeline.attachment</code> = 「附件安全检测」；描述文案 <code>pipeline.attachmentDesc</code> = 「附件类型和大小检查」；因「内容规则」提升到首位而整体后移一位，配置内容未变</td>
+          </tr>
+          <tr>
+            <td>「URL检测与防护」卡片（<code>key: 'url'</code>）</td>
+            <td>阶段3第 2 位</td>
+            <td><span class="tag tag-changed">阶段3第 3 位</span></td>
+            <td>标题文案 <code>pipeline.url</code> = 「URL检测与防护」；描述文案 <code>pipeline.urlDesc</code> = 「恶意URL检测和过滤」；同样因前移调整而整体后移一位，配置内容未变</td>
+          </tr>
+          <tr>
+            <td>「意图引擎」卡片（<code>key: 'intentEngine'</code>）</td>
+            <td>阶段3第 4 位</td>
+            <td><span class="tag tag-info">阶段3第 4 位（不变）</span></td>
+            <td>标题文案 <code>pipeline.intentEngine</code> = 「意图引擎」；<code>type: 'forced'</code>（强制生效），左边条红色，作为综合判定策略固定保留在阶段3末位，未参与本次排序调整</td>
+          </tr>
+          <tr>
+            <td>策略详情抽屉左侧导航（<code>stage3NavItems</code>）</td>
+            <td>附件安全检测 / URL检测与防护 / 内容规则 / 意图引擎</td>
+            <td><span class="tag tag-changed">内容规则 / 附件安全检测 / URL检测与防护 / 意图引擎</span></td>
+            <td>与卡片区共用同一排序意图，改动同步生效，进入任一策略详情抽屉时左侧导航条目顺序与卡片区顺序完全一致</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ C. 差异标注 ══════════════ -->
+  <section id="diff">
+    <h2>C. 差异标注（D-001）</h2>
+
+    <h3>D-001 · S-1、S-2 两张截图因沙箱缺少中文字体渲染为方框占位符，属渲染环境限制，非产品文案缺陷</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">已知·环境限制</span></td></tr>
+        <tr><td>描述</td><td><code>agent-browser</code> 打开 <code>/zh/security/pipeline</code> 页面时，「阶段3：内容层」卡片区标题、描述等中文文字统一渲染为方框（tofu box）占位符，页面结构、卡片数量、左边条颜色与相对排列顺序均正常渲染，仅中文字形缺失。已尝试开启页面右上角「Mock」模式开关（<code>osgateway_mock_enabled</code>），该开关会改变阶段4卡片区的数据来源（切换为 AI 智能体相关数据），但未能修复阶段3区域的中文字体渲染问题，说明该限制与数据来源（真实接口 / Mock）无关，是本沙箱无头浏览器环境本身缺少中文字体导致。</td></tr>
+        <tr><td>影响</td><td>S-1、S-2 两张截图中的卡片标题文字均为方框占位符，无法直接从截图像素读出「内容规则」「附件安全检测」等中文文案，但卡片的相对排列位置（第一/第二/第三/第四张）清晰可辨，可结合 1.3 节逐元素说明表中依据 <code>messages/zh.json</code> 转录的真实文案对照理解实际效果</td></tr>
+        <tr><td>处理</td><td>本文档未在当前沙箱环境内进一步排查字体缺失的根因或安装中文字体包；1.2 节两张截图均保留原始沙箱实拍（未替换为手绘占位图），并在 figcaption 与 1.3 节表格中逐一补全真实中文文案作为替代事实依据</td></tr>
+        <tr><td>验证依据</td><td>agent-browser 截图 <code>GT-12938-S1-stage3-before-order-light-1506x936.png</code>（变更前）/ <code>GT-12938-S2-stage3-after-order-light-1506x936.png</code>（变更后），两张截图均在同一沙箱环境下实拍，字体渲染表现一致；<code>messages/zh.json</code> 中 <code>pipeline.content</code>/<code>pipeline.attachment</code>/<code>pipeline.url</code>/<code>pipeline.intentEngine</code> 等 i18n key 的真实取值</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ D. 待确认事项 ══════════════ -->
+  <section id="questions">
+    <h2>D. 待确认事项（Q-001）</h2>
+
+    <h3>Q-001 · 其余产品形态与角色下的展示顺序是否需要逐一验证</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>本次调整的两个常量数组（<code>stage3NavItems</code> / <code>stages.stage3.policies</code>）为静态数据，不包含任何按产品形态或角色分支的条件逻辑，理论上应在全部形态与角色下表现一致。但本次截图仅在 AI版·单租户 / 平台管理员下完成，未在传统版、云网关多租户、AI版多租户等其余形态与角色下逐一复核。</td></tr>
+        <tr><td>影响</td><td>若后续发现某形态或角色存在独立的策略展示顺序覆盖逻辑（本次未在源码中发现此类分支），可能与本次调整结论不一致</td></tr>
+        <tr><td>建议</td><td>如需完整覆盖验证，可在具备多产品形态切换条件的环境中补充抽样截图；当前基于源码为静态常量数组的事实，判断该调整对全部形态/角色生效</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ E. 版本历史 ══════════════ -->
+  <section id="version-history">
+    <h2>E. 版本历史</h2>
+    <table>
+      <thead><tr><th>版本</th><th>日期</th><th>commit</th><th>摘要</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>v1</td>
+          <td>2026-08-13</td>
+          <td><code>3ce30d8</code></td>
+          <td>新建 GT-12938.html，按 <code>html-spec-PM-version</code> 技能规范记录 GT-12940「内容规则顺序调整：调整到"阶段3：内容层"第一个策略」的完整实现：目录含 A/B 固定章节 + GT-12940 一级需求 + 变更 1 二级 + 1.1/1.2/1.3 三级结构；元信息与事实源（含沙箱中文字体渲染限制说明）、产品形态 × 角色矩阵（B）。变更 1（<code>PolicyPipelinePage.tsx</code> 中 <code>stage3NavItems</code> 与 <code>stages.stage3.policies</code> 两处顺序数组同步调整，「内容规则」由阶段3第 3 位提升为第 1 位，「附件安全检测」「URL检测与防护」依次后移一位，「意图引擎」固定保留末位不变）；补充真实 <code>agent-browser</code> 浏览器实测截图 S-1（变更前）、S-2（变更后）（浅色主题 · 1506×936，因沙箱缺少中文字体渲染为方框占位符），逐元素说明表均依据 <code>messages/zh.json</code> 真实 i18n 文案核对转录；新增差异标注 D-001（沙箱中文字体缺失导致截图文字方框化的环境限制说明）、待确认事项 Q-001（其余产品形态/角色展示顺序待抽样复核）；文档不含 <code>&lt;script&gt;</code>、表单控件或事件属性，已通过残留扫描确认无匹配。</td>
+        </tr>
+      </tbody>
+    </table>
+    <a class="back-link" href="#toc">&#8593; 返回目录</a>
+  </section>
+
+</div>
+</body>
+</html>
