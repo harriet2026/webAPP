@@ -7,6 +7,7 @@ import {
   statusCategory,
   isBucketHighlighted,
   sortBucketsByHighlight,
+  pickPrimaryBucket,
 } from './recipient-status-badges';
 import type { RecipientDisposition } from '@/types/phishing-detection';
 
@@ -137,6 +138,55 @@ describe('isBucketHighlighted', () => {
 
   it('does not match an unrelated action', () => {
     expect(isBucketHighlighted('accept', ['quarantine'])).toBe(false);
+  });
+});
+
+// GT-12923 阶段五 UI 复盘：多桶场景只渲染 1 个"主要类别"Badge，
+// pickPrimaryBucket 决定选哪个桶作为主 Badge——这是解决"UI 占地大/颜色花"
+// 同时又不引入"筛选投递却看到隔离"这类表面矛盾的关键逻辑。
+describe('pickPrimaryBucket', () => {
+  const bucket = (key: string, count: number) => ({ key, recipients: Array(count).fill('x@x.com') });
+
+  it('picks the matched bucket over a larger unmatched one when a filter is active', () => {
+    // 隔离 5 人 > 投递 1 人，但筛选值是"投递"（deliver 归一化后对应 accept），
+    // 必须展示投递，否则用户会觉得"筛投递却看到隔离"前后矛盾。
+    const buckets = [bucket('quarantine', 5), bucket('accept', 1)];
+    const primary = pickPrimaryBucket(buckets, actionCategory, ['deliver']);
+    expect(primary.key).toBe('accept');
+  });
+
+  it('picks the larger matched bucket when multiple buckets match the filter', () => {
+    const buckets = [bucket('accept', 2), bucket('quarantine', 5), bucket('sideline', 1)];
+    const primary = pickPrimaryBucket(buckets, actionCategory, ['deliver', 'quarantine']);
+    expect(primary.key).toBe('quarantine');
+  });
+
+  it('falls back to risk priority when no bucket matches the filter', () => {
+    const buckets = [bucket('accept', 10), bucket('quarantine', 1)];
+    const primary = pickPrimaryBucket(buckets, actionCategory, ['block']);
+    expect(primary.key).toBe('quarantine');
+  });
+
+  it('uses risk priority when there is no active filter (quarantine over delivered)', () => {
+    const buckets = [bucket('accept', 6), bucket('quarantine', 1)];
+    const primary = pickPrimaryBucket(buckets, actionCategory, undefined);
+    expect(primary.key).toBe('quarantine');
+  });
+
+  it('breaks ties within the same risk tier by recipient count', () => {
+    const buckets = [bucket('reject', 2), bucket('discard', 5)];
+    // reject 和 discard 风险优先级不同（reject=3 < discard=4），reject 应该
+    // 胜出，即使 discard 人数更多——验证优先级先于人数。
+    const primary = pickPrimaryBucket(buckets, actionCategory, undefined);
+    expect(primary.key).toBe('reject');
+  });
+
+  it('picks the highest-count bucket among ties in the same risk tier', () => {
+    // 'foo' 和 'bar' 都不在 ACTION_CATEGORY 词表里，actionCategory 都 fallback
+    // 到 'other'（同一优先级层），此时应按人数降序选择。
+    const buckets = [bucket('foo', 2), bucket('bar', 6)];
+    const primary = pickPrimaryBucket(buckets, actionCategory, undefined);
+    expect(primary.recipients.length).toBe(6);
   });
 });
 

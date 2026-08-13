@@ -709,8 +709,9 @@ export function MailListTable({
                 )}
                 {isColVisible('action') && (
                 <TableCell className="text-xs">
-                  {/* 方案 C：mixed + 有逐收件人明细时用 mini 堆叠色条（按 final_action 聚类），
-                      否则走原 badge 路径（单一动作展开） */}
+                  {/* mixed + 有逐收件人明细时，用单一"主要类别"Badge + hover 明细
+                      （见 recipient-status-badges.tsx 顶部注释），否则走原 badge
+                      路径（单一动作展开） */}
                   {item.action === 'mixed' && item.recipientDispositions && item.recipientDispositions.length > 0 ? (
                     <RecipientStatusBadges
                       dispositions={item.recipientDispositions}
@@ -739,7 +740,7 @@ export function MailListTable({
                 )}
                 {isColVisible('status') && (
                 <TableCell className="text-xs">
-                  {/* 方案 C：mixed + 有逐收件人明细时用 status 维度的堆叠条，否则走原 Badge */}
+                  {/* mixed + 有逐收件人明细时用 status 维度的单一"主要类别"Badge */}
                   {item.action === 'mixed' && item.recipientDispositions && item.recipientDispositions.length > 0 ? (
                     <RecipientStatusBadges dispositions={item.recipientDispositions} dimension="status" />
                   ) : (
