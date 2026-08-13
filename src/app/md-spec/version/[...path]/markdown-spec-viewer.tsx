@@ -27,8 +27,11 @@ function slugify(text: string): string {
   return text
     .trim()
     .toLowerCase()
-    .replace(/[.、，,！!？?：:；;「」『』“”"'()（）【】\\/]/g, '')
-    .replace(/\s+/g, '-');
+    .replace(/\s+/g, '-')
+    // 白名单而非黑名单：只保留字母、数字、连字符、下划线、中文/日文/韩文字符，
+    // 其余任何符号（含箭头 → ← 等，之前的黑名单实现遗漏过这类符号导致锚点
+    // id 与预期文本脱节）统一剔除，避免今后新增标点符号时再次出现同样的问题。
+    .replace(/[^a-z0-9\-_\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7a3]/g, '');
 }
 
 function useHeadingIdFactory() {
