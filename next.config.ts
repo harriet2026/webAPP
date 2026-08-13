@@ -10,10 +10,12 @@ const devOrigins = process.env.WEBAPP_DEV_ORIGINS
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone' as const,
-  // The HTML-spec route reads a validated dynamic path at runtime. Include
-  // only its two asset trees instead of letting NFT trace the whole project.
+  // The HTML-spec and MD-spec routes read a validated dynamic path at
+  // runtime. Include only their asset trees instead of letting NFT trace
+  // the whole project.
   outputFileTracingIncludes: {
     '/html-spec/*': ['./doc/html-spec/**/*', './doc/html_spec-version/**/*'],
+    '/md-spec/*': ['./doc/md_spec-version/**/*'],
   },
   allowedDevOrigins: devOrigins,
 };

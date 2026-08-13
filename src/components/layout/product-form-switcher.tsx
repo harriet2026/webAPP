@@ -30,8 +30,10 @@ export function ProductFormSwitcher() {
   // 水合后从 localStorage 读真实值，并经 subscribeMockEnabled 订阅跨标签页变化。
   const mockEnabled = useSyncExternalStore(subscribeMockEnabled, isMockEnabled, () => false);
 
-  // 变更规格索引：动态扫描 doc/html_spec-version/ 下的所有 HTML 文件，
-  // 无需手动维护列表，每次增加新 spec 文件后自动出现在此入口。
+  // 变更规格索引：动态扫描 doc/html_spec-version/（旧的 HTML 规格）和
+  // doc/md_spec-version/（GT-12923【0813】起改用的 Markdown 规格）下的
+  // 全部文件并合并展示，无需手动维护列表，每次增加新 spec 文件后自动
+  // 出现在此入口（见 /api/dev/version-specs）。
   const [versionSpecs, setVersionSpecs] = useState<{ ticket: string; label: string; url: string }[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -198,8 +200,9 @@ export function ProductFormSwitcher() {
             </span>
             <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
           </DropdownMenuItem>
-          {/* 变更规格索引：独立分区，动态读取 doc/html_spec-version/ 下所有 HTML，
-              每新增一个 spec 文件后无需修改前端代码即自动出现在此。 */}
+          {/* 变更规格索引：独立分区，动态读取 doc/html_spec-version/ 和
+              doc/md_spec-version/ 下的全部文件并合并展示，每新增一个 spec
+              文件后无需修改前端代码即自动出现在此。 */}
           {versionSpecs.length > 0 && (
             <>
               <DropdownMenuSeparator />
