@@ -1,7 +1,11 @@
+import type { useTranslations } from "next-intl";
 import type { DisposalMailItem } from "@/types/email-disposal";
 import { actionCategory, labelKeyFor } from "../components/recipient-status-badges";
 
-type Translate = (key: string, values?: Record<string, unknown>) => string;
+// 跟项目里其他 t 参数（如 threat-summary-card.tsx）保持同样的类型写法，
+// 而不是自己定义一个偏窄的函数签名类型——next-intl 的 Translator 类型有
+// 重载和更严格的参数类型，用简化签名会在调用处报类型不兼容。
+type Translate = ReturnType<typeof useTranslations>;
 
 // GT-12923 阶段五（任务20）：CSV 导出此前把"收件人"列直接 join 成一个字符
 // 串、"状态"列只输出 item.displayStatus——对 mixed 记录（同一封邮件不同
