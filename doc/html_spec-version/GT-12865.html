@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12865 · GT-12514 钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互 · 增量功能规格 · v2</title>
+  <title>GT-12865 · GT-12514 钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互 / GT-12922 钓鱼邮件检测智能体模块优化 · 增量功能规格 · v3</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -167,8 +167,25 @@
         </ul>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-004）</a></li>
-      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-003）</a></li>
+      <!-- 一级需求：GT-12922 -->
+      <li class="toc-l1"><a href="#gt-12922">GT-12922 钓鱼邮件检测智能体模块优化</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">1</span><a href="#gt12922-change-1">检测详情面板执行动作重构：按邮件生命周期状态展示「投递/丢弃/召回」，替代固定的「拦截/误报豁免」</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12922-c1-goal">1.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12922-c1-states">1.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12922-c1-elements">1.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">2</span><a href="#gt12922-change-2">置信度分级处置动作移除「拒收」选项</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12922-c2-goal">2.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12922-c2-states">2.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12922-c2-elements">2.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-006）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-004）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
   </section>
@@ -183,9 +200,9 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>文档编号（文件 ticket）</td><td>GT-12865</td></tr>
-        <tr><td>需求名称</td><td>GT-12514 钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互</td></tr>
+        <tr><td>需求名称</td><td>GT-12514 钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互（本文档同时收录 GT-12922 钓鱼邮件检测智能体模块优化，详见下方独立元信息区块）</td></tr>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 新增交互能力（总开关 + 生命周期二次确认 + 前置校验联动）</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v2</span></span></td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v3</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-08-11</td></tr>
         <tr><td>路由路径</td><td><code>/zh/agent-center/overview?agent=phishing</code>（智能体中心 → 钓鱼邮件检测智能体详情页，顶部操作栏）</td></tr>
         <tr><td>组件路径</td><td>
@@ -348,7 +365,7 @@
         <p class="trigger-path">触发路径：S-2 点击「确认关闭」→ mutation 成功 → 弹窗关闭 → 页面稳态 · 真实浏览器实拍（Mock · AI版·单租户 · 平台管理员 · 浅色主题 · 1445×800）</p>
         <figure>
           <img src="./screenshots/GT-12514-S3-disabled-banner-and-switch-off-light-1445x800.png" alt="钓鱼邮件检测智能体关闭后的稳态，标题行右侧状态文字变为已禁用，开关变为关闭态，Tab内容区顶部出现橙色警示横幅提示钓鱼邮件检测智能体已关闭当前不会对新邮件进行钓鱼检测与拦截，检测日志下方另有调查明细可能因体量被截断的提示条" />
-          <figcaption>图 S-3：标题行右侧状态文字变为「已禁用」（灰色），<code>Switch</code> 呈未选中态（灰色滑块）；Tab 内容区（<code>PhishingAgentPanel</code>）顶部新增橙色警示横幅，文案「钓鱼邮件检测智能体已关闭，当前不会对新邮件进行钓鱼检测与拦截。」，<code>data-testid="phishing-agent-disabled-banner"</code>；「检测总览」「检测引擎配置」两个 Tab 仍可正常点击与操作，未被禁用，管理员仍可在关闭期间维护准入规则等配置。图中检测日志区下方出现的「调查明细可能因体量被截断」为检测日志模块自身的既有提示，与总开关关闭无关。</figcaption>
+          <figcaption>图 S-3：标题行右侧状态文字变为「已禁用」（灰色），<code>Switch</code> 呈未选中态（灰色滑块）；Tab 内容区（<code>PhishingAgentPanel</code>）顶部新增橙色警示横幅，文案「钓鱼邮件检测智能体已关闭，当前不会对新邮件进行钓鱼检测与拦截。」，<code>data-testid="phishing-agent-disabled-banner"</code>；「检测��览」「检测引擎配置」两个 Tab 仍可正常点击与操作，未被禁用，管理员仍可在关闭期间维护准入规则等配置。图中检测日志区下方出现的「调查明细可能因体量被截断」为检测日志模块自身的既有提示，与总开关关闭无关。</figcaption>
         </figure>
       </div>
 
@@ -419,7 +436,7 @@
       <h3 id="c3-states">3.2 截图式交互预览</h3>
       <div class="interaction-preview">
         <h4>S-4 · 准入规则门禁弹窗：尝试重新开启但无已启用规则时拦截</h4>
-        <p class="trigger-path">触发路径：S-3 关闭态 → 点击总开关 Switch（当前为「关」）→ <code>hasActiveAdmissionRule</code> 为 <code>false</code> → 弹出门禁弹窗（非 destructive 样式，蓝色主按钮） · 真实浏览器实拍（Mock · AI版·单租户 · 平台管理员 · 浅色主题 · 1445×824）</p>
+        <p class="trigger-path">触发路径：S-3 关闭态 → 点击总开关 Switch（当前为「关」）→ <code>hasActiveAdmissionRule</code> 为 <code>false</code> → 弹���门禁弹窗（非 destructive 样式，蓝色主按钮） · 真实浏览器实拍（Mock · AI版·单租户 · 平台管理员 · 浅色主题 · 1445×824）</p>
         <figure>
           <img src="./screenshots/GT-12514-S4-admission-gate-dialog-on-reenable-light-1445x824.png" alt="请先配置检测范围与准入规则弹窗，说明启用前需先配置至少一条已启用规则，底部取消与前往配置两个按钮，前往配置为蓝色主按钮，弹窗背后可见页面仍处于已禁用状态" />
           <figcaption>图 S-4：弹窗标题「请先配置检测范围与准入规则」，说明文字「启用钓鱼邮件检测智能体前，需要先在"检测范围与准入规则"中配置至少一条已启用的规则，明确检测范围后才能正式启用。」；按钮为默认蓝色主按钮「前往配置」（非红色 destructive，区别于变更 2 的关闭确认弹窗，因为这是一次引导而非破坏性操作）；左侧「取消」按钮为浅色描边按钮。背后可见总开关仍处于关闭态、页面顶部禁用横幅仍在。</figcaption>
@@ -489,6 +506,211 @@
     </div>
   </div>
 
+  <!-- 需求入口锚点 -->
+  <div id="gt-12922" style="scroll-margin-top: 1rem;"></div>
+
+  <!-- ═════════════ GT-12922 元信息（挂在固定 A 节之后，作为本需求独立事实源说明）══════════════ -->
+  <section id="gt12922-meta">
+    <h2>GT-12922 钓鱼邮件检测智能体模块优化 · 元信息与事实源</h2>
+    <table>
+      <thead><tr><th>字段</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>需求名称</td><td>GT-12922 钓鱼邮件检测智能体模块优化</td></tr>
+        <tr><td>本次追加版本</td><td><span class="version-badge"><span class="vnum">v3</span></span>（在既有 GT-12865.html v2 基础上追加，文档整体版本 v2→v3）</td></tr>
+        <tr><td>追加日期</td><td>2026-08-13</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/agent-center/overview?agent=phishing</code>（检测总览 Tab 内检测详情 Sheet；检测引擎配置 Tab 内处置策略 → 置信度分级处置表格）</td></tr>
+        <tr><td>组件路径</td><td>
+          <code>src/components/phishing-detection/detail-actions.ts</code>（新增，邮件状态 → 可执行操作判定规则）、
+          <code>src/components/phishing-detection/detection-detail-sheet.tsx</code>（操作按钮区重构）、
+          <code>src/components/phishing-detection/phishing-overview-page.tsx</code>（<code>blockVariant</code> 状态 + handler 改造）、
+          <code>src/components/phishing-detection/block-dialog.tsx</code> / <code>exempt-dialog.tsx</code>（确认弹窗文案 <code>variant</code> 化）、
+          <code>src/components/phishing-detection/config/confidence-bands-editor.tsx</code>（处置动作选项移除「拒收」）
+        </td></tr>
+        <tr><td>webapp commit</td><td><code>working-tree</code></td></tr>
+        <tr><td>对照 spec commit</td><td>not-used</td></tr>
+        <tr><td>历史对话记录</td><td>已获得完整历史：变更 1（检测详情面板执行动作重构）与变更 2（置信度分级处置动作移除「拒收」）均为本次会话内用户直接指令下完成的实现，讨论过程与验收标准在当前上下文中完整可得，非转述或推测。</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述（变更 1/2 的验收标准）；2. webapp 当前源码（<code>detail-actions.ts</code>/<code>detection-detail-sheet.tsx</code>/<code>confidence-bands-editor.tsx</code> 等）与本次会话内已执行并通过的自动化测试（<code>detection-detail-sheet.test.tsx</code> 6 项、<code>disposition-policy-card.test.tsx</code> 相关断言，均已实际运行且全部通过）；3. 其他原始 spec，仅作差异对照（当前无可用对照 spec）。</td></tr>
+        <tr><td>浏览器验证状态</td><td class="tag tag-unverif" style="display:inline-block;">未能完成浏览器实测</td></tr>
+        <tr><td>沙箱环境限制说明</td><td><strong>本次追加内容未能提供真实浏览器截图。</strong>使用 <code>agent-browser</code> 打开 <code>/zh/agent-center/overview?agent=phishing</code> 时，页面顶部「智能体总览」统计卡区域持续返回「智能体总览加载失败」（<code>console</code> 同时报 <code>[product-form] bootstrap failed after retries; feature registry unavailable</code>），已尝试整页刷新后问题依旧、非瞬时抖动。经查为本沙箱环境未运行仓库 <code>AGENTS.md</code> 中要求的 apiserver 后端（<code>API_BACKEND_URL</code> 代理的 <code>:18080</code> 服务）——这是 webapp 与 apiserver 分离部署的既有约束，不是本次代码变更引入的回归，也不因本次改动的两个变更点而异。因此本节全部内容改为完全基于 §1.3/§2.3 逐元素说明表中列出的真实源码路径、i18n key（<code>messages/zh.json</code>）与已实际运行通过的单元测试结论转录，未使用任何手绘占位图或臆造截图；截图缺失已如实记录为 D-005，浏览器实测列入待确认事项 Q-004，需要在具备 apiserver 后端的完整环境（例如 <code>build.py</code> 构建的完整镜像组合，见根目录 <code>tests/AGENTS.md</code>）中补充。</td></tr>
+        <tr><td>变更类型</td><td>功能变更（检测详情面板操作重构）+ 功能移除（置信度分级处置动作精简）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-warn">
+      <strong>范围说明：</strong>本次两个变更点均为纯前端改动，未修改后端接口能力——变更 1 中「投递」「丢弃」「召回」三个按钮复用既有的 <code>exempt()</code> / <code>block()</code> 接口（不新增后端字段或接口），仅通过前端 <code>variant</code> 参数区分提示文案；变更 2 仅从 <code>confidence-bands-editor.tsx</code> 的前端选项数组中移除「拒收」，<code>messages/zh.json</code> 中的 <code>phishingConfig.bands.disposition.reject</code> 文案 key 本身未删除（成为未被引用的历史 key，见 D-006）。
+    </div>
+  </section>
+
+  <!-- ═════════════ 变更 1（GT-12922）══════════════ -->
+  <div class="incremental-section" id="gt12922-change-1">
+    <div class="incr-header">
+      <span class="incr-num">1</span>
+      <h2>检测详情面板执行动作重构：按邮件生命周期状态展示「投递/丢弃/召回」</h2>
+      <span class="incr-meta">路由：/agent-center/overview?agent=phishing（检测总览 → 详情 Sheet）<br/>组件：detail-actions.ts / DetectionDetailSheet<br/>变更类型：功能变更 · 2026-08-13</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12922-c1-goal">1.1 方案概述</h3>
+      <p>
+        <strong>问题背景：</strong>检测详情面板此前无论邮件处于什么状态，操作区都固定展示「拦截」「误报豁免」两个按钮。这与邮件当下的真实生命周期状态脱节——例如邮件已经投递成功后，「拦截」在语义和效果上都已经不成立（邮件已送达，拦不住），只有「召回」才是有意义的操作；反之邮件仍处于隔离中/待审核（尚未投递）时，「召回」同样没有意义。
+      </p>
+      <p>
+        <strong>方案：</strong>新增 <code>detail-actions.ts</code>，定义 <code>getPhishingDetailActions(displayStatus)</code> 函数，按邮件当前的 <code>display_status</code>（而非静态的执行动作字段）返回 <code>{'{'} canDeliver, canDrop, canRecall {'}'}</code> 三个布尔值：
+      </p>
+      <ul>
+        <li><strong>未投递态</strong>（<code>quarantine_pending</code> 隔离中 / <code>sideline_pending</code> 灰名单中 / <code>audit_pending</code> 待审核）→ <code>canDeliver: true, canDrop: true</code>，展示「投递」「丢弃」两个按钮；</li>
+        <li><strong>已投递态</strong>（<code>delivered</code> 已投递 / <code>partial_delivered</code> 部分投递）→ <code>canRecall: true</code>，仅展示「召回」按钮；</li>
+        <li><strong>其余终态</strong>（已拒收/已丢弃/已删除/已过期/审核拒绝/投递中/投递失败/召回中/召回成功/召回失败等）→ 三项全为 <code>false</code>，操作区整体不渲染。</li>
+      </ul>
+      <p>
+        该判定规则与「邮件处置中心」批量工具栏的 <code>canRelease</code>/<code>canRecall</code>（<code>mail-list-table.tsx</code>）同源，保证两个模块对同一枚举状态给出一致的可执行操作，不会出现「检测总览允许投递，但处置中心认为已终态」的口径分裂。按钮底层调用：「投递」调用既有 <code>exempt()</code> 接口（需填写理由）；「丢弃」与「召回」两个语义不同的按钮复用同一个 <code>block()</code> 接口，通过 <code>phishing-overview-page.tsx</code> 内新增的 <code>blockVariant: 'drop' | 'recall'</code> 状态区分确认弹窗与成功/失败提示的文案（<code>block.dropTitle/dropConfirm/dropSuccess</code> 对应丢弃，<code>block.recallTitle/recallConfirm/recallSuccess</code> 对应召回），不新增后端接口能力。操作区仅在 <code>isAdmin</code>（系统管理员或租户管理员）为真时渲染；邮件处于 <code>liveBlocked</code>（旁路瞬时处理中）状态时，按钮保持可见但整体 <code>disabled</code>，并在按钮组末尾追加提示文案 <code>detail.liveStateHint</code>「邮件仍在旁路处理中，请在旁路队列处置」。
+      </p>
+
+      <h3 id="gt12922-c1-states">1.2 截图式交互预览</h3>
+      <div class="callout callout-warn">
+        <strong>无法提供真实截图：</strong>如本节「GT-12922 元信息」表中「沙箱环境限制说明」所述，本次追加内容涉及的三个状态（未投递态展示投递+丢弃、已投递态展示召回、终态隐藏操作区）均因本沙箱缺少 apiserver 后端、检测总览统计卡区域持续报「智能体总览加载失败」，无法进入检测详情 Sheet 完成真实浏览器截图。以下按状态列出对应的真实数据依据（源码中的 mock 种子记录）与已通过的自动化测试用例名，作为「未使用手绘占位图、不臆造截图」原则下的替代事实来源；截图缺失已记录为差异 D-005，需要在具备完整后端的环境中补充，见待确认 Q-004。
+      </div>
+      <table>
+        <thead><tr><th>状态</th><th>display_status 取值</th><th>期望操作区</th><th>对应 mock 种子 / 自动化测试依据</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>未投递 · 待审核</td>
+            <td><code>audit_pending</code>（源自 <code>disposition: 'review'</code>）</td>
+            <td>「投递」（绿色）+「丢弃」（红色）</td>
+            <td><code>src/lib/mock/fixtures.ts</code> 中 <code>disposition: 'review'</code> 的种子记录（如收件人 <code>procurement@example.com</code>/<code>support@example.com</code> 两条，<code>recipient_dispositions</code> 状态为 <code>pending</code>）；<code>detection-detail-sheet.test.tsx</code> 用例「shows 投递/丢弃 for an audit_pending (review) mail」</td>
+          </tr>
+          <tr>
+            <td>已投递（含召回失败）</td>
+            <td><code>delivered</code> / <code>partial_delivered</code>（源自 <code>disposition: 'quarantine'</code> 且 <code>recall_status: 'recall_failed'</code>，或 <code>disposition: 'deliver'</code>）</td>
+            <td>仅「召回」（outline 样式）</td>
+            <td><code>src/lib/mock/fixtures.ts</code> 中 <code>recall_status: 'recall_failed'</code> 的种子记录；<code>detection-detail-sheet.test.tsx</code> 用例「shows 召回 only for a delivered mail」</td>
+          </tr>
+          <tr>
+            <td>终态（已丢弃 / 召回成功等）</td>
+            <td><code>discarded</code> / <code>recalled</code> 等</td>
+            <td>操作区不渲染</td>
+            <td><code>src/lib/mock/fixtures.ts</code> 中 <code>recall_status: 'recalled'</code> 的种子记录（如收件人 <code>zhangwei@example.com</code>/<code>accounting@example.com</code>）；<code>detection-detail-sheet.test.tsx</code> 用例「hides action buttons for a terminal (block/rejected) mail」</td>
+          </tr>
+          <tr>
+            <td>非管理员视角</td>
+            <td>不适用（权限维度）</td>
+            <td>操作区整体不渲染，与状态无关</td>
+            <td><code>detection-detail-sheet.test.tsx</code> 用例「hides action buttons for non-admin users even when actions are available」</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="gt12922-c1-elements">1.3 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>类型</th><th>文案 / 图标</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>「投递」按钮</td>
+            <td><code>Button size="sm"</code></td>
+            <td><code>tpd('detail.deliver')</code> = 「投递」；图标 <code>Send</code>；<code>bg-emerald-600</code> 绿色实心</td>
+            <td>仅 <code>canDeliver</code> 为真时渲染；<code>onClick</code> 调用 <code>onDeliver(sideline_id)</code> → 打开投递原因 <code>Dialog</code>（<code>exempt-dialog.tsx</code>，标题「确认投递该邮件」，需填写理由）→ 提交后调用 <code>exemptDetection()</code> 接口</td>
+          </tr>
+          <tr>
+            <td>「丢弃」按钮</td>
+            <td><code>Button size="sm"</code></td>
+            <td><code>tpd('detail.drop')</code> = 「丢弃」；图标 <code>Trash2</code>；<code>bg-red-600</code> 红色实心</td>
+            <td>仅 <code>canDrop</code> 为真时渲染；<code>onClick</code> 调用 <code>onDrop(sideline_id)</code> → 设置 <code>blockVariant='drop'</code> 并打开 <code>BlockDialog</code>（标题 <code>block.dropTitle</code>「丢弃该邮件」，说明 <code>block.dropDescription</code>「确认丢弃该邮件？该邮件尚未投递，丢弃后将不会被投递到收件人。」）→ 确认后调用 <code>blockDetection()</code> 接口，成功提示 <code>block.dropSuccess</code>「已丢弃」</td>
+          </tr>
+          <tr>
+            <td>「召回」按钮</td>
+            <td><code>Button variant="outline" size="sm"</code></td>
+            <td><code>tpd('detail.recall')</code> = 「召回」；图标 <code>RotateCcw</code></td>
+            <td>仅 <code>canRecall</code> 为真时渲染；<code>onClick</code> 调用 <code>onRecall(sideline_id)</code> → 设置 <code>blockVariant='recall'</code> 并打开 <code>BlockDialog</code>（标题 <code>block.recallTitle</code>「召回该邮件」，说明 <code>block.recallDescription</code>「确认召回该邮件？该邮件已投递，若收件人已读取可能召回失败。」）→ 确认后同样调用 <code>blockDetection()</code> 接口（与「丢弃」复用同一接口，仅前端文案不同），成功提示 <code>block.recallSuccess</code>「已发起召回」</td>
+          </tr>
+          <tr>
+            <td>旁路瞬时态提示</td>
+            <td>只读文本（<code>span</code>）</td>
+            <td><code>tpd('detail.liveStateHint')</code> = 「邮件仍在旁路处理中，请在旁路队列处置」</td>
+            <td>仅 <code>liveBlocked</code>（<code>isLiveState(summary.disposition)</code> 为真）时展示；三个按钮此时均保持可见但 <code>disabled</code>，不隐藏，避免用户误以为操作已失效而反复尝试</td>
+          </tr>
+          <tr>
+            <td>操作区整体</td>
+            <td><code>div className="flex flex-wrap gap-2"</code></td>
+            <td>—</td>
+            <td>渲染条件为 <code>isAdmin &amp;&amp; detailActions &amp;&amp; (canDeliver || canDrop || canRecall)</code>；非管理员或三项皆为 <code>false</code>（终态）时，整个操作区不渲染（而非渲染后禁用），与「检测日志」列表和「邮件处置中心」的既有做法一致</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═════════════ 变更 2（GT-12922）══════════════ -->
+  <div class="incremental-section" id="gt12922-change-2">
+    <div class="incr-header">
+      <span class="incr-num">2</span>
+      <h2>置信度分级处置动作移除「拒收」选项</h2>
+      <span class="incr-meta">路由：/agent-center/overview?agent=phishing → 检测引擎配置 → 处置策略 → 编辑<br/>组件：ConfidenceBandsEditor<br/>变更类型：功能移除 · 2026-08-13</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12922-c2-goal">2.1 方案概述</h3>
+      <p>
+        <strong>问题背景：</strong>「检测引擎配置 → 置信度分级处置」表格中，每个置信度区间可选的处置动作此前包含「进行下一步 / 审核 / 隔离 / 拒收 / 丢弃」五项。「拒收」（SMTP 层拒绝投递）与「丢弃」（静默丢弃）在钓鱼邮件场景下语义高度重叠且未被后端实际区分处理，产品侧要求精简为不含「拒收」的四项。
+      </p>
+      <p>
+        <strong>方案：</strong>在 <code>confidence-bands-editor.tsx</code> 的处置动作下拉选项数组 <code>options</code> 中移除 <code>{'{'} value: 'reject', label: t('disposition.reject') {'}'}</code> 一项，选项由五项收窄为「进行下一步 → 审核 → 隔离 → 丢弃」四项（按处置力度从轻到重排列不变）。<code>BandDisposition</code> 类型定义与 <code>colorClass</code> 颜色映射表中的 <code>reject</code> 分支未删除（保留但不再被选项数组引用），避免存量历史数据中已保存的 <code>disposition: 'reject'</code> 区间在回显时因类型缺失而报错；<code>messages/zh.json</code> 中 <code>phishingConfig.bands.disposition.reject</code>（文案「拒收」）同样保留未删，成为未被前端引用的历史 i18n key（见差异 D-006）。本次改动仅涉及前端选项数组，未修改置信度区间的数据结构、校验规则（<code>validateBandsContiguous</code>）或后端接口。
+      </p>
+
+      <h3 id="gt12922-c2-states">2.2 截图式交互预览</h3>
+      <div class="callout callout-warn">
+        <strong>无法提供真实截图：</strong>原因同变更 1（本沙箱缺少 apiserver 后端，无法进入「检测引擎配置」Tab 完整交互）。以下改为转录已实际运行并全部通过的自动化测试断言，作为选项数组变更前后结果的事实依据。
+      </div>
+      <table>
+        <thead><tr><th>验证点</th><th>断言内容</th><th>测试文件 / 用例</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>处置动作下拉选项顺序与文案</td>
+            <td><code>expect(optionTexts).toEqual(['进行下一步', '审核', '隔离', '丢弃'])</code></td>
+            <td><code>disposition-policy-card.test.tsx</code> 用例「offers "进行下一步/审核/隔离/丢弃" as band disposition options, with no "拒收" or "放行" option」</td>
+          </tr>
+          <tr>
+            <td>「拒收」选项已移除</td>
+            <td><code>expect(optionTexts).not.toContain('拒收')</code></td>
+            <td>同上用例</td>
+          </tr>
+          <tr>
+            <td>「放行」选项仍不存在（历史约束，非本次新增）</td>
+            <td><code>expect(optionTexts).not.toContain('放行')</code></td>
+            <td>同上用例（该断言在本次改动前已存在，本次未改动其结论）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="gt12922-c2-elements">2.3 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>处置动作下拉（<code>Select</code>）选项</td>
+            <td>进行下一步 / 审核 / 隔离 / <del>拒收</del> / 丢弃（5 项）</td>
+            <td>进行下一步 / 审核 / 隔离 / 丢弃（4 项）</td>
+            <td>选项数组 <code>options: Array&lt;{'{'} value: BandDisposition; label: string {'}'}&gt;</code> 移除 <code>reject</code> 一项；顺序与颜色语义不变</td>
+          </tr>
+          <tr>
+            <td><code>BandDisposition</code> 类型 / <code>colorClass</code> 映射</td>
+            <td>含 <code>reject</code> 分支</td>
+            <td><span class="tag tag-unverif">不变（保留但未被引用）</span></td>
+            <td>类型定义与颜色映射未删除 <code>reject</code>，仅前端可选项收窄，兼容历史已保存的 <code>reject</code> 区间数据回显不报错（见 D-006）</td>
+          </tr>
+          <tr>
+            <td><code>messages/*.json</code> · <code>phishingConfig.bands.disposition.reject</code></td>
+            <td>被选项数组引用</td>
+            <td>文案 key 保留，不再被任何组件引用</td>
+            <td>四语言（zh/en/th/ru）均未删除该 key，成为死键；未在本次范围内清理，见 D-006</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- ══════════════ C. 差异标注 ══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -532,6 +754,26 @@
         <tr><td>验证依据</td><td>S-2、S-6 截图中文字仍显示为方框；同一沙箱环境下英文/数字/图标均正常渲染，排除组件层面的渲染逻辑问题；S-1/S-3/S-4/S-5 已用真实浏览器截图验证中文正常显示</td></tr>
       </tbody>
     </table>
+
+    <h3>D-005 · GT-12922 两个变更点均未能提供真实浏览器截图，因本沙箱缺少 apiserver 后端</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">已知·环境限制</span></td></tr>
+        <tr><td>描述</td><td>本次追加的 GT-12922 变更 1（检测详情面板操作重构）与变更 2（置信度分级处置动作移除「拒收」）均需要进入检测总览/检测引擎配置 Tab 完成交互，但 <code>agent-browser</code> 打开 <code>/zh/agent-center/overview?agent=phishing</code> 时，页面顶部「智能体总览」统计卡区域持续报「智能体总览加载失败」（<code>console</code> 报 <code>[product-form] bootstrap failed after retries; feature registry unavailable</code>），整页刷新后问题依旧。经与仓库 <code>tests/AGENTS.md</code> / 根目录 <code>AGENTS.md</code> 核对，webapp 与 apiserver（<code>:18080</code>）是分离部署的两个服务，本沙箱只运行了 webapp 的 dev server，未运行 apiserver，这是环境搭建缺口，不是本次两个变更点引入的回归，也与此前 D-004 记录的中文字体缺失（渲染层面）性质不同——本次是数据层面完全无法进入目标页面。</td></tr>
+        <tr><td>处理</td><td>§1.2/§2.2 已改为转录真实源码路径、i18n key 与本次会话内已实际运行并全部通过的自动化测试用例（<code>detection-detail-sheet.test.tsx</code> 6 项、<code>disposition-policy-card.test.tsx</code> 相关断言），未使用手绘占位图或臆造截图；真实浏览器截图需在具备 apiserver 后端的完整环境中补充，见待确认 Q-004。</td></tr>
+        <tr><td>验证依据</td><td>agent-browser 截图 <code>gt12922-overview-default.png</code> / <code>gt12922-overview-retry.png</code>（均显示「智能体总览加载失败」红色提示框）；<code>agent-browser console</code> 输出 <code>[product-form] bootstrap failed after retries; feature registry unavailable</code>；整页 <code>reload</code> 后现象不变，排除瞬时抖动</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-006 · 移除「拒收」选项后，<code>BandDisposition</code> 类型、颜色映射与 i18n key 均保留未删，属有意兼容设计</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-info">已确认·有意兼容</span></td></tr>
+        <tr><td>描述</td><td><code>confidence-bands-editor.tsx</code> 仅从下拉可选项数组中移除 <code>reject</code>，未修改 <code>BandDisposition</code> 类型定义或 <code>colorClass</code> 颜色映射表中的 <code>reject</code> 分支；<code>messages/*.json</code>（zh/en/th/ru 四语言）中 <code>phishingConfig.bands.disposition.reject</code> 文案 key 同样未删除。这样存量数据中若历史保存过 <code>disposition: 'reject'</code> 的区间，回显时类型与颜色映射仍能正确解析显示（虽然新建/编辑时用户已无法再选择该值），不会因类型缺失而报错崩溃。</td></tr>
+        <tr><td>解决版本</td><td>GT-12922 · 2026-08-13（本次变更即为此行为）</td></tr>
+        <tr><td>验证依据</td><td><code>confidence-bands-editor.tsx</code> 源码：<code>options</code> 数组不含 <code>reject</code>，但 <code>colorClass: Record&lt;BandDisposition, string&gt;</code> 仍含 <code>reject</code> 键；<code>messages/zh.json</code> 中 <code>phishingConfig.bands.disposition.reject</code>="拒收" 仍存在</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- ══════════════ D. 待确认事项 ══════════════ -->
@@ -567,6 +809,16 @@
         <tr><td>建议</td><td>切换深色主题及其他 locale，补充截图确认横幅配色对比度与多语言文案换行</td></tr>
       </tbody>
     </table>
+
+    <h3>Q-004 · GT-12922 两个变更点需要在具备 apiserver 后端的完整环境中补充真实浏览器截图</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待补充验证</span></td></tr>
+        <tr><td>问题</td><td>D-005 记录的沙箱环境限制导致检测详情面板「投递/丢弃/召回」三个状态（未投递态、已投递态、终态）与置信度分级处置动作下拉（移除「拒收」后的四项）均未能截取真实浏览器截图，当前仅依据源码与自动化测试结论转录。</td></tr>
+        <tr><td>影响</td><td>§1.2/§2.2 两个交互预览区块暂无真实截图佐证；无法直接肉眼核对按钮配色（<code>emerald-600</code>/<code>red-600</code>/outline）、Sheet 布局与下拉展开态的实际渲染效果</td></tr>
+        <tr><td>建议</td><td>在 <code>build.py</code> 构建的完整镜像组合（webapp + apiserver，见根目录 <code>AGENTS.md</code> 与 <code>tests/AGENTS.md</code>）或具备 apiserver 后端的开发环境中，重新执行 §1.2/§2.2 描述的交互路径并补充 S-1~S-N 真实截图，替换本次的转录说明</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- ══════════════ E. 版本历史 ══════════════ -->
@@ -579,13 +831,19 @@
           <td>v1</td>
           <td>2026-08-11</td>
           <td><code>working-tree</code></td>
-          <td>新建 GT-12865.html，按 <code>html-spec-PM-version</code> 技能规范记录 GT-12514「钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互」的完整实现：目录含 A/B 固定章节 + GT-12514 一级需求 + 变更 1~3 二级 + 1.1/1.2/1.3 三级结构；元信息与事实源（含沙箱中文字体渲染限制说明）、产品形态 × 角色矩阵（B）。变更 1（详情页顶部操作栏新增状态文字 + <code>Switch</code> 总开关，复用既有 <code>/phishing-agent/engine-config</code> 接口）、变更 2（关闭时 <code>destructive</code> 二次确认弹窗 + 保存成功/失败的 toast 反馈 + 关闭后持续展示的橙色禁用横幅）、变更 3（重新开启前校验「检测范围与准入规则」中是否存在已启用规则，无则弹出非破坏性门禁弹窗，点击「前往配置」后通过 <code>?action=create-admission-rule</code> URL 参数联动「检测范围与准入规则」模块自动打开「新增规则」弹窗并即时清除该参数，避免重复弹出）。补充真实 <code>agent-browser</code> 浏览器实测截图 S-1~S-6（Mock 模式 · AI版·单租户 · 平台管理员 · 浅色主题 · 1280×633），逐元素说明表均依据 <code>messages/zh.json</code> 真实 i18n 文案核对转录；新增差异标注 D-001~D-004（含 D-001 总开关可见性不受编辑权限约束的有意设计、D-004 沙箱中文字体缺失导致截图文字方框化的环境限制说明）、待确认事项 Q-001~Q-003；文档不含 <code>&lt;script&gt;</code>、表单控件或事件属性，已通过残留扫描确认无匹配。</td>
+          <td>新建 GT-12865.html，按 <code>html-spec-PM-version</code> 技能规范记录 GT-12514「钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互」的完整实现：目录含 A/B 固定章节 + GT-12514 一级需求 + 变更 1~3 二级 + 1.1/1.2/1.3 三级结构；元信息与事实源（含沙箱中文字体渲染限制说明）、产品形态 × 角色矩阵（B）。变更 1（详情页顶部操作栏新增状态文字 + <code>Switch</code> 总开关，复用既有 <code>/phishing-agent/engine-config</code> 接口）、变更 2（关闭时 <code>destructive</code> 二次确认弹窗 + 保存成功/失败的 toast ���馈 + 关闭后持续展示的橙色禁用横幅）、变更 3（重新开启前校验「检测范围与准入规则」中是否存在已启用规则，无则弹出非破坏性门禁弹窗，点击「前往配置」后通过 <code>?action=create-admission-rule</code> URL 参数联动「检测范围与准入规则」模块自动打开「新增规则」弹窗并即时清除该参数，避免重复弹出）。补充真实 <code>agent-browser</code> 浏览器实测截图 S-1~S-6（Mock 模式 · AI版·单租户 · 平台管理员 · 浅色主题 · 1280×633），逐元素说明表均依据 <code>messages/zh.json</code> 真实 i18n 文案核对转录；新增差异标注 D-001~D-004（含 D-001 总开关可见性不受编辑权限约束的有意设计、D-004 沙箱中文字体缺失导致截图文字方框化的环境限制说明）、待确认事项 Q-001~Q-003；文档不含 <code>&lt;script&gt;</code>、表单控件或事件属性，已通过残留扫描确认无匹配。</td>
         </tr>
         <tr>
           <td>v2</td>
           <td>2026-08-11</td>
           <td><code>working-tree</code></td>
           <td>按用户提供的 4 张真实浏览器手动截图（中文正常渲染），替换 v1 中因沙箱缺少中文字体而方框化的 S-1（默认启用态）、S-3（关闭后禁用横幅）、S-4（准入规则门禁弹窗）、S-5（新建准入规则抽屉自动打开）四张截图，图片文件同步重命名为实际像素尺寸（1434×826 / 1445×800 / 1445×824 / 1450×819）；据新截图逐一核对并修正对应 figcaption/alt 文案细节（如 S-5 弹窗标题核对为「新建准入规则」，并补充「方向」单选与「基础筛查条件」下各风险信号开关的真实文案，均与 <code>messages/zh.json</code> 的 <code>phishingDetection.admissionRules.createTitle/sheetDescription</code> 等 key 核对一致）；S-2（关闭二次确认弹窗）与 S-6（取消抽屉后返回配置 Tab）暂无用户提供的对应截图，仍保留原沙箱实拍（中文方框化）；同步收窄 A 节「沙箱渲染限制」提示与 D-004 差异标注的适用范围，明确仅 S-2、S-6 受此环境限制影响，D-004 状态标记为「已知·环境限制（部分已修复）」；文档版本 v1→v2，标题与元信息表同步更新。</td>
+        </tr>
+        <tr>
+          <td>v3</td>
+          <td>2026-08-13</td>
+          <td><code>working-tree</code></td>
+          <td>追加一级需求 GT-12922「钓鱼邮件检测智能体模块优化」（doc 版本 v2→v3），收录本次会话内已实现并验收通过的 2 个变更点：变更 1（检测详情面板执行动作重构——新增 <code>detail-actions.ts</code> 的 <code>getPhishingDetailActions</code> 判定规则，按 <code>display_status</code> 区分未投递态「投递+丢弃」、已投递态「召回」、终态「不展示」，与「邮件处置中心」<code>canRelease</code>/<code>canRecall</code> 同源；「投递」调用既有 <code>exempt()</code> 接口，「丢弃」「召回」复用同一 <code>block()</code> 接口，经 <code>phishing-overview-page.tsx</code> 新增的 <code>blockVariant</code> 状态区分确认弹窗与提示文案；补充 <code>messages/*.json</code> 四语言 <code>dropTitle/dropDescription/dropConfirm/dropSuccess/dropAlready/dropError</code> 与 <code>recallTitle/recallDescription/recallConfirm/recallSuccess/recallAlready/recallError</code> 共 12 个 i18n key）、变更 2（置信度分级处置动作从「进行下一步/审核/隔离/拒收/丢弃」5 项精简为「进行下一步/审核/隔离/丢弃」4 项，移除 <code>confidence-bands-editor.tsx</code> 选项数组中的 <code>reject</code>，<code>BandDisposition</code> 类型与颜色映射及 <code>phishingConfig.bands.disposition.reject</code> i18n key 保留未删以兼容历史存量数据回显）；新增 GT-12922 独立元信息区块（含事实源优先级、沙箱环境限制说明）；<strong>因本沙箱未运行 apiserver 后端，<code>agent-browser</code> 打开检测总览页面持续报「智能体总览加载失败」（<code>[product-form] bootstrap failed after retries; feature registry unavailable</code>），两个变更点均未能提供真实浏览器截图</strong>，§1.2/§2.2 改为转录真实源码路径、i18n key 与本次会话内已实际运行并全部通过的自动化测试（<code>detection-detail-sheet.test.tsx</code> 6 项、<code>disposition-policy-card.test.tsx</code> 相关断言）作为事实依据；新增差异标注 D-005（浏览器验证受阻的环境限制说明）、D-006（<code>reject</code> 类型/颜色映射/i18n key 有意保留未删）；新增待确认事项 Q-004（需在具备 apiserver 后端的完整环境中补充真实截图）；目录 C/D 范围同步更新为 D-001~D-006、Q-001~Q-004；文档标题与元信息表当前版本同步 v2→v3；<code>version.json</code> <code>current_version</code> 39→40。</td>
         </tr>
       </tbody>
     </table>
