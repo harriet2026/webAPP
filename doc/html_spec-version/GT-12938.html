@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12938 · GT-12940 内容规则顺序调整：调整到「阶段3：内容层」第一个策略 · 增量功能规格 · v1</title>
+  <title>GT-12938 · GT-12940 内容规则顺序调整：调整到「阶段3：内容层」第一个策略 · 增量功能规格 · v2</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -173,8 +173,8 @@
         <tr><td>文档编号（文件 ticket）</td><td>GT-12938</td></tr>
         <tr><td>需求名称</td><td>GT-12940 内容规则顺序调整：调整到「阶段3：内容层」第一个策略</td></tr>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 展示顺序调整（不涉及策略逻辑、数据模型或接口变更）</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v1</span></span></td></tr>
-        <tr><td>生成日期</td><td>2026-08-13</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v2</span></span></td></tr>
+        <tr><td>生成日期</td><td>2026-08-13（v2 更新日期：2026-08-13）</td></tr>
         <tr><td>路由路径</td><td><code>/zh/security/pipeline</code>（策略流水线页面 → 「阶段3：内容层」卡片区；策略详情抽屉左侧导航同步复用同一顺序）</td></tr>
         <tr><td>组件路径</td><td>
           <code>src/components/security/PolicyPipelinePage.tsx</code>（<code>stage3NavItems</code> 数组——驱动策略详情抽屉左侧导航顺序；<code>stages</code> 常量中 <code>stage3</code>（阶段3：内容层）对应的 <code>policies</code> 数组——驱动卡片区展示顺序）
@@ -184,7 +184,7 @@
         <tr><td>历史对话记录</td><td>当前上下文可获得完整历史：本次顺序调整为本次会话内用户直接指令下完成的实现，验收标准（「内容规则」调整为「阶段3：内容层」第一个策略）在当前上下文中完整可得，非转述或推测</td></tr>
         <tr><td>事实源优先级</td><td>1. 用户当前描述（GT-12940 需求名称与验收标准）；2. webapp 当前源码与 <code>git show</code> 实际 diff；3. <code>agent-browser</code> 浏览器实测（变更前/变更后对照截图）；4. 其他原始 spec，仅作差异对照（<code>doc/html_spec-version/GT-12731.html</code> 收录本页面此前的完整增量历史，含 GT-11651「内容规则执行动作调整」等既往变更，本文档新建独立记录，未修改 GT-12731.html 内容，仅作交叉参考）。</td></tr>
         <tr><td>浏览器验证状态</td><td>已通过 <code>agent-browser</code> 打开 <code>/zh/security/pipeline</code> 页面，分别在变更前（<code>git checkout</code> 至上一次提交的 <code>PolicyPipelinePage.tsx</code>）与变更后（当前工作区版本）两个状态下截取「阶段3：内容层」卡片区整列截图，逐一比对卡片顺序变化。见 §1.2 截图。</td></tr>
-        <tr><td>沙箱渲染限制</td><td><strong>S-1、S-2 两张截图均来自本沙箱的无头浏览器环境，该沙箱缺少中文字体，导致截图中的中文文字统一渲染为方框（tofu box）占位符，而非实际字形缺失或产品文案异常。</strong>这是渲染环境限制，不是产品缺陷，性质与既有文档 GT-12865 中记录的 D-004 相同；本文档已尝试开启页面右上角「Mock」模式开关（<code>osgateway_mock_enabled</code>），但该开关只改变数据来源（阶段4卡片内容切换为 AI 智能体数据），未能修复本次「阶段3：内容层」区域截图的中文字体渲染，故本次截图仍保留方框占位符。S-1、S-2 各交互预览下方的表格与说明文字均依据 <code>messages/zh.json</code> 中 <code>pipeline.content</code>/<code>pipeline.attachment</code>/<code>pipeline.url</code>/<code>pipeline.intentEngine</code> 等真实 i18n 文案与源码逐一核对后如实转录，读者可结合截图中卡片的相对位置（第一/第二/第三张卡片）与文字表格对照理解实际效果。已在 D-001 中记录该限制，避免被误认为文案渲染缺陷。</td></tr>
+        <tr><td>沙箱渲染限制</td><td><strong>图 S-1（变更前）来自本沙箱的无头浏览器环境，该沙箱缺少中文字体，导致截图中的中文文字统一渲染为方框（tofu box）占位符，而非实际字形缺失或产品文案异常。</strong>这是渲染环境限制，不是产品缺陷，性质与既有文档 GT-12865 中记录的 D-004 相同；本文档已尝试开启页面右上角「Mock」模式开关（<code>osgateway_mock_enabled</code>），但该开关只改变数据来源（阶段4卡片内容切换为 AI 智能体数据），未能修复本次「阶段3：内容层」区域截图的中文字体渲染，故 S-1 仍保留方框占位符。<strong>图 S-2（变更后）已由用户在本地真实浏览器环境手动截取并提供，中文文字正常显示，不受本沙箱字体限制影响</strong>，可作为本次调整最终效果的直接证据。S-1 交互预览下方的表格与说明文字均依据 <code>messages/zh.json</code> 中 <code>pipeline.content</code>/<code>pipeline.attachment</code>/<code>pipeline.url</code>/<code>pipeline.intentEngine</code> 等真实 i18n 文案与源码逐一核对后如实转录，读者可结合 S-1 中卡片的相对位置与 S-2 的真实文案对照理解实际效果。已在 D-001 中记录该限制及其解决状态，避免被误认为文案渲染缺陷。</td></tr>
         <tr><td>变更类型</td><td>功能变更（策略展示顺序调整，不涉及策略配置逻辑、数据模型或后端接口）</td></tr>
       </tbody>
     </table>
@@ -269,16 +269,16 @@
 
       <h3 id="c1-states">1.2 截图式交互预览</h3>
       <div class="callout callout-warn">
-        <strong>沙箱渲染限制：</strong>以下两张截图均来自本沙箱的无头浏览器环境，中文字体缺失导致文字方框化（性质同 D-001/既有 D-004），已尝试开启页面右上角「Mock」模式开关但未能修复该区域的字体渲染。请结合截图中卡片的相对排列位置（自上而下第一/第二/第三张卡片）与下方 1.3 节逐元素说明表中的真实中文文案对照理解。
+        <strong>沙箱渲染限制（部分已解决）：</strong>图 S-1（变更前）仍来自本沙箱的无头浏览器环境，中文字体缺失导致文字方框化（性质同 D-001/既有 D-004）。图 S-2（变更后）已由用户在本地真实浏览器环境手动截取并提供，中文文字正常显示，不存在字体渲染问题，可直接作为「阶段3：内容层」顺序调整后的最终效果证据。请结合 S-1 中卡片的相对排列位置与 S-2 的真实文案、以及下方 1.3 节逐元素说明表对照理解变更前后的差异。
       </div>
       <div class="interaction-preview">
         <figure>
           <img src="./screenshots/GT-12938-S1-stage3-before-order-light-1506x936.png" alt="策略流水线页面变更前状态：阶段3内容层列共4张卡片，自上而下第一张橙色左边条卡片为附件安全检测，第二张橙色左边条卡片为URL检测与防护，第三张橙色左边条卡片为内容规则，第四张红色左边条卡片为意图引擎，因沙箱缺少中文字体卡片标题文字渲染为方框占位符" />
-          <figcaption>图 S-1（变更前）：「阶段3：内容层」列自上而下依次为「附件安全检测」（第一张，橙色左边条 <code>configurable</code>）、「URL检测与防护」（第二张，橙色左边条）、「内容规则」（第三张，橙色左边条）、「意图引擎」（第四张，红色左边条 <code>forced</code>）。取自 <code>git checkout</code> 至本次变更提交之前的源码版本实拍，用于与变更后对照。</figcaption>
+          <figcaption>图 S-1（变更前，沙箱截图）：「阶段3：内容层」列自上而下依次为「附件安全检测」（第一张，橙色左边条 <code>configurable</code>）、「URL检测与防护」（第二张，橙色左边条）、「内容规则」（第三张，橙色左边条）、「意图引擎」（第四张，红色左边条 <code>forced</code>）。取自 <code>git checkout</code> 至本次变更提交之前的源码版本实拍，因沙箱缺少中文字体，卡片标题文字渲染为方框占位符，用于与变更后对照。</figcaption>
         </figure>
         <figure>
-          <img src="./screenshots/GT-12938-S2-stage3-after-order-light-1506x936.png" alt="策略流水线页面变更后状态：阶段3内容层列共4张卡片，自上而下第一张橙色左边条卡片为内容规则，第二张橙色左边条卡片为附件安全检测，第三张橙色左边条卡片为URL检测与防护，第四张红色左边条卡片为意图引擎，因沙箱缺少中文字体卡片标题文字渲染为方框占位符" />
-          <figcaption>图 S-2（变更后）：「阶段3：内容层」列自上而下依次调整为「内容规则」（第一张，橙色左边条，<strong>本次提升到首位</strong>）、「附件安全检测」（第二张，橙色左边条，原第一位后移一位）、「URL检测与防护」（第三张，橙色左边条，原第二位后移一位）、「意图引擎」（第四张，红色左边条 <code>forced</code>，位置不变）。与图 S-1 对比可见前三张卡片的相对顺序发生轮转，第四张卡片位置不变。</figcaption>
+          <img src="./screenshots/GT-12938-S2-stage3-after-order-manual-zh.png" alt="策略流水线页面变更后状态，用户本地浏览器手动截图，中文文字正常显示：阶段3内容层列共4张卡片，自上而下第一张橙色左边条卡片为内容规则，第二张橙色左边条卡片为附件安全检测，第三张橙色左边条卡片为URL检测与防护，第四张红色左边条卡片为意图引擎，页面顶部显示正在以租户示例租户A管理员身份操作提示条" />
+          <figcaption>图 S-2（变更后，用户手动截图，中文正常显示）：「阶段3：内容层」列自上而下依次调整为「内容规则」（第一张，橙色左边条，<strong>本次提升到首位</strong>）、「附件安全检测」（第二张，橙色左边条，原第一位后移一位）、「URL检测与防护」（第三张，橙色左边条，原第二位后移一位）、「意图引擎」（第四张，红色左边条 <code>forced</code>，位置不变）。与图 S-1 对比可见前三张卡片的相对顺序发生轮转，第四张卡片位置不变；本图由用户在本地真实浏览器环境（租户管理员视角）手动截取提供，中文文案清晰可读，可直接核对「内容规则」「附件安全检测」「URL检测与防护」「意图引擎」四个标题文字与描述文案。</figcaption>
         </figure>
       </div>
 
@@ -327,14 +327,14 @@
   <section id="diff">
     <h2>C. 差异标注（D-001）</h2>
 
-    <h3>D-001 · S-1、S-2 两张截图因沙箱缺少中文字体渲染为方框占位符，属渲染环境限制，非产品文案缺陷</h3>
+    <h3>D-001 · agent-browser 沙箱缺少中文字体导致截图方框化；已通过用户手动截图（S-2）解决变更后效果的证据问题</h3>
     <table>
       <tbody>
-        <tr><td width="140">状态</td><td><span class="tag tag-unverif">已知·环境限制</span></td></tr>
-        <tr><td>描述</td><td><code>agent-browser</code> 打开 <code>/zh/security/pipeline</code> 页面时，「阶段3：内容层」卡片区标题、描述等中文文字统一渲染为方框（tofu box）占位符，页面结构、卡片数量、左边条颜色与相对排列顺序均正常渲染，仅中文字形缺失。已尝试开启页面右上角「Mock」模式开关（<code>osgateway_mock_enabled</code>），该开关会改变阶段4卡片区的数据来源（切换为 AI 智能体相关数据），但未能修复阶段3区域的中文字体渲染问题，说明该限制与数据来源（真实接口 / Mock）无关，是本沙箱无头浏览器环境本身缺少中文字体导致。</td></tr>
-        <tr><td>影响</td><td>S-1、S-2 两张截图中的卡片标题文字均为方框占位符，无法直接从截图像素读出「内容规则」「附件安全检测」等中文文案，但卡片的相对排列位置（第一/第二/第三/第四张）清晰可辨，可结合 1.3 节逐元素说明表中依据 <code>messages/zh.json</code> 转录的真实文案对照理解实际效果</td></tr>
-        <tr><td>处理</td><td>本文档未在当前沙箱环境内进一步排查字体缺失的根因或安装中文字体包；1.2 节两张截图均保留原始沙箱实拍（未替换为手绘占位图），并在 figcaption 与 1.3 节表格中逐一补全真实中文文案作为替代事实依据</td></tr>
-        <tr><td>验证依据</td><td>agent-browser 截图 <code>GT-12938-S1-stage3-before-order-light-1506x936.png</code>（变更前）/ <code>GT-12938-S2-stage3-after-order-light-1506x936.png</code>（变更后），两张截图均在同一沙箱环境下实拍，字体渲染表现一致；<code>messages/zh.json</code> 中 <code>pipeline.content</code>/<code>pipeline.attachment</code>/<code>pipeline.url</code>/<code>pipeline.intentEngine</code> 等 i18n key 的真实取值</td></tr>
+        <tr><td width="140">状态</td><td><span class="tag tag-changed">部分解决</span></td></tr>
+        <tr><td>描述</td><td><code>agent-browser</code> 打开 <code>/zh/security/pipeline</code> 页面截图时，「阶段3：内容层」卡片区标题、描述等中文文字统一渲染为方框（tofu box）占位符，页面结构、卡片数量、左边条颜色与相对排列顺序均正常渲染，仅中文字形缺失。已尝试开启页面右上角「Mock」模式开关（<code>osgateway_mock_enabled</code>）及重启沙箱浏览器会话重新扫描本机已预置的 <code>NotoSansSC.otf</code> 字体文件，均未修复该沙箱截图环境的中文渲染，判断为 <code>agent-browser</code> 无头浏览器沙箱与本机文件系统隔离、且该工具不提供字体安装接口所致，属工具环境限制，非产品缺陷。</td></tr>
+        <tr><td>影响</td><td>图 S-1（变更前）的卡片标题文字为方框占位符，无法直接从截图像素读出「附件安全检测」等中文文案，但卡片相对排列位置（第一/第二/第三/第四张）清晰可辨。图 S-2（变更后）<strong>已由用户在本地真实浏览器环境手动截取并提供，中文文字正常显示，不再受此限制影响</strong>，可直接作为本次调整最终效果（内容规则→附件安全检测→URL检测与防护→意图引擎）的证据。</td></tr>
+        <tr><td>处理</td><td>本文档未在 <code>agent-browser</code> 沙箱环境内进一步排查字体缺失根因或寻求安装中文字体包的替代方案；图 S-1 保留原始沙箱实拍（未替换为手绘占位图），并在 figcaption 与 1.3 节表格中补全真实中文文案作为替代事实依据；图 S-2 已替换为用户提供的手动截图（文件名 <code>GT-12938-S2-stage3-after-order-manual-zh.png</code>），彻底解决变更后效果截图的中文可读性问题</td></tr>
+        <tr><td>验证依据</td><td>agent-browser 截图 <code>GT-12938-S1-stage3-before-order-light-1506x936.png</code>（变更前，沙箱实拍）；用户手动截图 <code>GT-12938-S2-stage3-after-order-manual-zh.png</code>（变更后，本地真实浏览器，租户管理员视角，中文正常显示）；<code>messages/zh.json</code> 中 <code>pipeline.content</code>/<code>pipeline.attachment</code>/<code>pipeline.url</code>/<code>pipeline.intentEngine</code> 等 i18n key 的真实取值用于交叉核对 S-2 中的文案与源码一致</td></tr>
       </tbody>
     </table>
   </section>
@@ -365,6 +365,12 @@
           <td>2026-08-13</td>
           <td><code>3ce30d8</code></td>
           <td>新建 GT-12938.html，按 <code>html-spec-PM-version</code> 技能规范记录 GT-12940「内容规则顺序调整：调整到"阶段3：内容层"第一个策略」的完整实现：目录含 A/B 固定章节 + GT-12940 一级需求 + 变更 1 二级 + 1.1/1.2/1.3 三级结构；元信息与事实源（含沙箱中文字体渲染限制说明）、产品形态 × 角色矩阵（B）。变更 1（<code>PolicyPipelinePage.tsx</code> 中 <code>stage3NavItems</code> 与 <code>stages.stage3.policies</code> 两处顺序数组同步调整，「内容规则」由阶段3第 3 位提升为第 1 位，「附件安全检测」「URL检测与防护」依次后移一位，「意图引擎」固定保留末位不变）；补充真实 <code>agent-browser</code> 浏览器实测截图 S-1（变更前）、S-2（变更后）（浅色主题 · 1506×936，因沙箱缺少中文字体渲染为方框占位符），逐元素说明表均依据 <code>messages/zh.json</code> 真实 i18n 文案核对转录；新增差异标注 D-001（沙箱中文字体缺失导致截图文字方框化的环境限制说明）、待确认事项 Q-001（其余产品形态/角色展示顺序待抽样复核）；文档不含 <code>&lt;script&gt;</code>、表单控件或事件属性，已通过残留扫描确认无匹配。</td>
+        </tr>
+        <tr>
+          <td>v2</td>
+          <td>2026-08-13</td>
+          <td><code>3ce30d8</code></td>
+          <td>用户手动截取本地真实浏览器环境下「策略流水线」页面截图（租户管理员视角，中文正常显示），替换图 S-2（变更后）为该手动截图（文件 <code>GT-12938-S2-stage3-after-order-manual-zh.png</code>），解决变更后效果证据的中文可读性问题；同步更新 1.2 节 figure/figcaption/alt 文字、A 节「沙箱渲染限制」行、D-001 差异标注（状态由「已知·环境限制」调整为「部分解决」）；图 S-1（变更前）仍为沙箱实拍、保留原有方框占位符说明，未做变更；未修改 §1.1 方案概述、§1.3 逐元素说明表、B 矩阵、Q-001 待确认事项及任何源码相关内容。</td>
         </tr>
       </tbody>
     </table>
