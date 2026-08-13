@@ -16,7 +16,7 @@ export const DEFAULT_ANTIVIRUS_ACTIONS: AntivirusActionConfig = {
 };
 
 const VIRUS_ACTIONS: AttachmentAction[] = ['quarantine', 'audit', 'discard'];
-const TIMEOUT_ACTIONS: AttachmentAction[] = ['quarantine', 'reject', 'discard', 'accept'];
+const TIMEOUT_ACTIONS: AttachmentAction[] = ['quarantine', 'audit', 'discard', 'accept'];
 
 interface AntivirusTabProps {
   direction?: Direction;
