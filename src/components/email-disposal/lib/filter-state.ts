@@ -38,7 +38,6 @@ export function countQuickFilterConditions(quick: DisposalQuickFilter): number {
     "sender",
     "recipient",
     "subject",
-    "executionAction",
     "ipLocation",
   ] as const) {
     if (quick[key]?.trim()) count += 1;
@@ -51,6 +50,14 @@ export function countQuickFilterConditions(quick: DisposalQuickFilter): number {
         ? [quick.emailStatus]
         : [];
   count += statuses.filter(Boolean).length;
+
+  const executionActions =
+    quick.executionActions && quick.executionActions.length > 0
+      ? quick.executionActions
+      : quick.executionAction
+        ? [quick.executionAction]
+        : [];
+  count += executionActions.filter(Boolean).length;
   count += (quick.emailTypes ?? []).filter(Boolean).length;
   count += (quick.disposalPolicyKeys ?? []).filter(Boolean).length;
   count += (quick.disposalRuleIds ?? []).filter(Boolean).length;

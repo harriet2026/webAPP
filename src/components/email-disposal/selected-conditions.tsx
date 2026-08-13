@@ -129,7 +129,6 @@ const ENUM_VALUE_MAP: Record<string, (v: string) => string | undefined> = {
 const QUICK_ENUM_VALUE_KEYS: Record<string, (v: string) => string | undefined> =
   {
     sendReceiveType: (v) => v, // flat key under filters (incoming/outgoing/internal)
-    executionAction: (v) => `actions.${v}`,
     emailStatus: (v) => `statuses.${v}`,
   };
 
@@ -236,7 +235,6 @@ export function SelectedConditions({
     ["recipient", ft("recipient")],
     ["subject", ft("subject")],
     ["sendReceiveType", ft("sendReceiveType")],
-    ["executionAction", ft("executionAction")],
     ["emailStatus", ft("emailStatus")],
     ["ipLocation", ft("ipLocation")],
   ];
@@ -271,6 +269,26 @@ export function SelectedConditions({
   // Multi-value quick filters (spec §3.3.1 / §4.3): one removable chip per
   // selected value, so clearing a single mail type / policy module doesn't
   // wipe the whole selection.
+  // 执行动作（GT-12923 阶段一）：与 emailStatuses 一致，逐值渲染成可单独移除
+  // 的 chip。若仍是旧模板遗留的单值 executionAction（executionActions 为
+  // 空），chip key 用不带 ":" 的 "q-executionAction"，命中 handleRemoveChip
+  // 里删单字段的分支——否则会拼成 "q-executionActions:xxx" 却去过滤一个不存
+  // 在的数组字段，点击移除没有任何效果。
+  if (quick.executionActions && quick.executionActions.length > 0) {
+    for (const action of quick.executionActions) {
+      chips.push({
+        key: `q-executionActions:${action}`,
+        label: `${ft("executionAction")}: ${ft(`actions.${action}`)}`,
+        isAi: false,
+      });
+    }
+  } else if (quick.executionAction) {
+    chips.push({
+      key: "q-executionAction",
+      label: `${ft("executionAction")}: ${ft(`actions.${quick.executionAction}`)}`,
+      isAi: false,
+    });
+  }
   for (const mt of quick.emailTypes ?? []) {
     let label = mt;
     try {

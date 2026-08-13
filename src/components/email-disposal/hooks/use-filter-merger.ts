@@ -72,7 +72,22 @@ export function useFilterMerger() {
           value: quick.subject,
         });
       }
-      if (quick.executionAction) {
+      // GT-12923 阶段一（过渡期）：执行动作筛选控件已改为多选
+      // (executionActions)，这里先用标准 in 操作符透传多值，让筛选在阶段三
+      // 把 action 挪到顶层查询参数、补齐 mixed 记录的 disposition_actions 交
+      // 集匹配之前也能生效——但对 mixed 记录（action === 'mixed'）仍无法命
+      // 中，这是阶段三要解决的后端语义缺口，不在本阶段范围内。
+      if (quick.executionActions && quick.executionActions.length > 0) {
+        quickConditions.push({
+          field: "action",
+          op: quick.executionActions.length > 1 ? "in" : "eq",
+          value:
+            quick.executionActions.length > 1
+              ? quick.executionActions
+              : quick.executionActions[0],
+        });
+      } else if (quick.executionAction) {
+        // 兼容旧收藏模板里遗留的单值字段。
         quickConditions.push({
           field: "action",
           op: "eq",

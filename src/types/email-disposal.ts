@@ -12,7 +12,12 @@ export interface DisposalQuickFilter {
   sender?: string;
   recipient?: string;
   subject?: string;
+  /** @deprecated Kept only for loading older saved templates; use executionActions. */
   executionAction?: string;
+  // Multi-value (阶段一 GT-12923 落地方案): comma-separated onto the wire as
+  // action=deliver,quarantine (OR semantics) — a mixed 邮件命中筛选值时，只要
+  // 存在任一收件人的 final action 命中即算命中（dispositionActions 交集）。
+  executionActions?: string[];
   /** @deprecated Kept only for loading older saved templates. */
   emailStatus?: string;
   emailStatuses?: string[];

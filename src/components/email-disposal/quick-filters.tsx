@@ -309,31 +309,31 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-11 space-y-1">
+          <div className="order-11 space-y-1" data-testid="disposal-action-filter">
             <label className="text-xs font-medium text-muted-foreground">
               {t("executionAction")}
             </label>
-            <Select
-              value={value.executionAction || ""}
-              onValueChange={(v) =>
-                onChange({ ...value, executionAction: v || undefined })
+            <MultiSelectFilter
+              options={actions.map((a) => ({
+                value: a,
+                label: t(`actions.${a}`),
+              }))}
+              value={
+                value.executionActions ||
+                (value.executionAction ? [value.executionAction] : [])
               }
-            >
-              <SelectTrigger
-                data-testid="disposal-action-filter"
-                className="h-9 w-full text-xs"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">{t("all")}</SelectItem>
-                {actions.map((a) => (
-                  <SelectItem key={a} value={a}>
-                    {t(`actions.${a}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(next) =>
+                onChange({
+                  ...value,
+                  executionAction: undefined,
+                  executionActions: next.length > 0 ? next : undefined,
+                })
+              }
+              placeholder={t("all")}
+              selectedCountLabel={(count) => `${count} ${tCommon("selected")}`}
+              clearLabel={t("clearAll")}
+              className="h-9"
+            />
           </div>
 
           <div className="order-9 space-y-1" data-testid="disposal-status-filter">

@@ -92,7 +92,7 @@ function mapReceivedAt(
 function mapEnumArray(
   cond: FilterCondition,
   draft: Partial<DisposalQuickFilter>,
-  key: "emailStatuses" | "emailTypes" | "disposalPolicyKeys",
+  key: "emailStatuses" | "emailTypes" | "disposalPolicyKeys" | "executionActions",
 ): boolean {
   if (cond.op === "in") {
     if (!Array.isArray(cond.value) || cond.value.length === 0) return false;
@@ -137,15 +137,6 @@ function mapDirection(
   return true;
 }
 
-function mapAction(
-  cond: FilterCondition,
-  draft: Partial<DisposalQuickFilter>,
-): boolean {
-  if (cond.op !== "eq" || !isScalar(cond.value)) return false;
-  draft.executionAction = String(cond.value);
-  return true;
-}
-
 // 第一级字段 -> 处理器映射表。未出现在此表中的字段一律视为第一级不可命中。
 const LEVEL1_HANDLERS: Record<
   string,
@@ -156,7 +147,10 @@ const LEVEL1_HANDLERS: Record<
   email_type: (c, d) => mapEnumArray(c, d, "emailTypes"),
   disposal_policy_key: (c, d) => mapEnumArray(c, d, "disposalPolicyKeys"),
   direction: mapDirection,
-  action: mapAction,
+  // GT-12923 阶段一：执行动作筛选控件已改为多选（executionActions），AI 回填
+  // 与 emailStatuses/emailTypes 等其它枚举字段一致，同时接受 eq 单值和 in
+  // 多值，统一落到数组字段（不再回填已废弃的单值 executionAction）。
+  action: (c, d) => mapEnumArray(c, d, "executionActions"),
   sender: (c, d) => mapContainsText(c, d, "sender"),
   subject: (c, d) => mapContainsText(c, d, "subject"),
   header_recipient: (c, d) => mapContainsText(c, d, "recipient"),

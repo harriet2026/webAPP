@@ -109,11 +109,18 @@ describe('backfillAiFilter', () => {
       expect(result.quick.sendReceiveType).toBe('incoming');
     });
 
-    it('maps action eq to executionAction verbatim', () => {
+    it('wraps an action eq single value into a one-element executionActions array', () => {
       const result = backfillAiFilter(
         andFilter([{ operator: 'AND', conditions: [{ field: 'action', op: 'eq', value: 'quarantine' }] }]),
       );
-      expect(result.quick.executionAction).toBe('quarantine');
+      expect(result.quick.executionActions).toEqual(['quarantine']);
+    });
+
+    it('maps action in to executionActions array', () => {
+      const result = backfillAiFilter(
+        andFilter([{ operator: 'AND', conditions: [{ field: 'action', op: 'in', value: ['deliver', 'quarantine'] }] }]),
+      );
+      expect(result.quick.executionActions).toEqual(['deliver', 'quarantine']);
     });
 
     it('maps sender/subject contains to the matching quick text fields', () => {
