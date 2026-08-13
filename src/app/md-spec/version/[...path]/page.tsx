@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { join, sep } from 'node:path';
+import { basename, join, sep } from 'node:path';
 import { notFound } from 'next/navigation';
 
 import { isDemoAuthBypassEnabled } from '@/lib/demo-auth-bypass';
@@ -23,17 +23,32 @@ type PageProps = {
 };
 
 function resolveSpecFile(pathSegments: string[]): string | null {
-  if (
-    pathSegments.length === 0 ||
-    pathSegments.some((segment) => !segment || segment === '.' || segment === '..')
-  ) {
+  if (pathSegments.length === 0) {
     return null;
   }
+
+  // Next.js does NOT decode catch-all ([...path]) segments before handing
+  // them to the page — each segment still carries its raw percent-encoding
+  // (e.g. "GT-12923%E3%80%900813%E3%80%91....md"). Spec filenames routinely
+  // contain full-width brackets and other non-ASCII characters, so this must
+  // be decoded before it is ever used as a filesystem path, or readFile()
+  // silently ENOENTs on every request (GT-12923 repro).
+  let decodedSegments: string[];
+  try {
+    decodedSegments = pathSegments.map((segment) => decodeURIComponent(segment));
+  } catch {
+    return null;
+  }
+
+  if (decodedSegments.some((segment) => !segment || segment === '.' || segment === '..')) {
+    return null;
+  }
+
   const filePath = join(
     /* turbopackIgnore: true */ process.cwd(),
     'doc',
     'md_spec-version',
-    ...pathSegments,
+    ...decodedSegments,
   );
   return filePath.startsWith(`${MD_SPEC_VERSION_ROOT}${sep}`) ? filePath : null;
 }
@@ -58,7 +73,7 @@ export default async function MarkdownSpecPage({ params }: PageProps) {
     notFound();
   }
 
-  const title = path[path.length - 1]?.replace(/\.md$/, '') ?? '';
+  const title = basename(filePath).replace(/\.md$/, '');
 
   return <MarkdownSpecViewer title={title} content={content} />;
 }

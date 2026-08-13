@@ -26,16 +26,31 @@ type RouteContext = {
 };
 
 function resolveSpecFile(pathSegments: string[]): string | null {
-  if (
-    pathSegments.length === 0 ||
-    pathSegments.some((segment) => !segment || segment === '.' || segment === '..')
-  ) {
+  if (pathSegments.length === 0) {
+    return null;
+  }
+
+  // Next.js does NOT decode catch-all ([...path]) segments before handing
+  // them to the route handler — each segment still carries its raw
+  // percent-encoding. Spec filenames routinely contain full-width brackets
+  // and other non-ASCII characters (e.g. "GT-12923【0813】....html"), so this
+  // must be decoded before it is ever used as a filesystem path, or
+  // readFile() silently ENOENTs on every request (GT-12923 repro, same root
+  // cause as the md-spec viewer).
+  let decodedSegments: string[];
+  try {
+    decodedSegments = pathSegments.map((segment) => decodeURIComponent(segment));
+  } catch {
+    return null;
+  }
+
+  if (decodedSegments.some((segment) => !segment || segment === '.' || segment === '..')) {
     return null;
   }
 
   // /html-spec/version/* → doc/html_spec-version/*（增量功能变更规格目录）
-  if (pathSegments[0] === 'version') {
-    const rest = pathSegments.slice(1);
+  if (decodedSegments[0] === 'version') {
+    const rest = decodedSegments.slice(1);
     if (rest.length === 0) return null;
     // Keep the dynamic tail statically scoped so Turbopack's file tracer does
     // not conservatively include the entire project in the standalone output.
@@ -52,7 +67,7 @@ function resolveSpecFile(pathSegments: string[]): string | null {
     /* turbopackIgnore: true */ process.cwd(),
     'doc',
     'html-spec',
-    ...pathSegments,
+    ...decodedSegments,
   );
   return filePath.startsWith(`${HTML_SPEC_ROOT}${sep}`) ? filePath : null;
 }
