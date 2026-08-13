@@ -5726,7 +5726,7 @@
       "discarded": "Discarded",
       "audit": "Review",
       "other": "Other",
-      "mixedMailHint": "{count} of the results are multi-recipient emails where recipients received different dispositions; matching recipients are highlighted in the Action column"
+      "mixedMailHint": "{count} of the emails on this page are multi-recipient emails where recipients received different dispositions; matching recipients are highlighted in the Action column. (Counted for this page only; other pages may have more.)"
     },
     "search": {
       "placeholder": "Describe email traits, e.g.: phishing emails disguised as Microsoft from last week",
