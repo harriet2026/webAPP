@@ -175,6 +175,23 @@
     .cl-modules ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.2rem; }
     .cl-modules li { font-size: 0.8125rem; color: var(--muted-foreground); }
     .cl-modules li::before { content: "·"; margin-right: 0.375rem; color: var(--primary); font-weight: 700; }
+
+    /* -- 两大分类分区（全量功能模块规格 / 迭代变更规格） -- */
+    .category-header {
+      display: flex; align-items: baseline; gap: 0.75rem;
+      margin: 2.5rem 0 1.25rem; padding-bottom: 0.75rem;
+      border-bottom: 3px solid var(--primary);
+    }
+    .category-header:first-of-type { margin-top: 0; }
+    .category-header h1 { font-size: 1.5rem; margin: 0; }
+    .category-header .category-desc { font-size: 0.8125rem; color: var(--muted-foreground); }
+    .category-header .category-count { margin-left: auto; font-size: 0.875rem; color: var(--muted-foreground); }
+    .category-header .category-count strong { color: var(--primary); }
+
+    /* -- 迭代变更规格：一级区块用琥珀色调与功能模块规格区分 -- */
+    details.l1-section.iteration .l1-icon { background: oklch(0.6 0.16 55); }
+    details.l1-section.iteration[open] > summary .l1-header { border-bottom-color: oklch(0.6 0.16 55); }
+    details.l1-section.iteration .l1-header h2 { color: oklch(0.5 0.16 55); }
   </style>
 </head>
 <body>
@@ -185,6 +202,13 @@
     <div class="overview-item"><div class="num">42</div><div class="label">已生成</div></div>
     <div class="overview-item"><div class="num">7</div><div class="label">待生成</div></div>
     <div class="overview-item"><div class="num">86%</div><div class="label">完成率</div></div>
+  </div>
+
+  <!-- ==================== 大类一：全量功能模块规格 ==================== -->
+  <div class="category-header">
+    <h1>📦 全量功能模块规格</h1>
+    <span class="category-desc">按产品功能模块划分的全量需求文档基线</span>
+    <span class="category-count"><strong>42</strong> / 49 已生成</span>
   </div>
 
   <!-- ==================== 一级：系统状态（首页） ==================== -->
@@ -228,7 +252,7 @@
         <span class="chevron"></span>
         <span class="l1-icon">🧭</span>
         <h2>全局外壳 / 导航</h2>
-        <span class="l1-stats"><span class="done-count">2</span> 已完成 / 2 总计</span>
+        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
       </div>
     </summary>
     <div class="l1-body">
@@ -248,24 +272,6 @@
             <p>可见性数据源: lib/product-profiles.ts（FEATURE_MAP / resolveAccess）+ contexts/product-profile-context.tsx</p>
             <p>子文件: <a href="component-sidebar-nav/layer-1-expand-collapse.html">展开收起</a> / <a href="component-sidebar-nav/layer-2-nested-subgroup.html">三级嵌套</a> / <a href="component-sidebar-nav/layer-3-active-state.html">激活高亮</a> / <a href="component-sidebar-nav/layer-4-profile-visibility.html">形态×视角可见性矩阵</a> / <a href="component-sidebar-nav/layer-5-theme-color.html">主题色</a></p>
             <p>预览可交互（本地复刻 navItems + FEATURE_MAP 逻辑）· 4 组件 · 6 交互层级 · 5×2 形态×视角实测 · zh/en/th 国际化 · 5 项差异 / 5 项需确认</p>
-          </div>
-        </details>
-        <details class="spec-card status-done">
-          <summary>
-            <div class="card-summary">
-              <span class="chevron"></span>
-              <a class="card-title" href="/html-spec/version/GT-12649.html" target="_blank" rel="noopener noreferrer">GT-12649 · SidebarNav 移除 VersionFooter（增量变更规格）</a>
-              <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v1</span>
-              <span class="card-generated-at">2026-07-30</span>
-            </div>
-          </summary>
-          <div class="card-detail">
-            <p>路由: /zh/dashboard 及所有挂载全局侧边栏的后台路由</p>
-            <p>组件: src/components/layout/sidebar-nav.tsx（移除 &lt;VersionFooter /&gt; 及其 import）</p>
-            <p>变更类型: 功能移除（增量规格）· commit c481bf6</p>
-            <p>内含: 变更前/后对比 · QC 2026-07-28 复查记录 · S-1 历史态（QC 截图占位）/ S-2 目标态（截图占位）· D-1~D-2 / Q-1~Q-2</p>
-            <p>关联: GT-11459（VersionFooter 组件保留，待产品确认合规入口）</p>
           </div>
         </details>
       </div>
@@ -342,7 +348,7 @@
             <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独立页）</p>
             <p>spec: IP黑白名单需求文档.md</p>
             <p>组件: connection-layer-page.tsx (renderIpFilterConfig)</p>
-            <p>v2: 黑/白名���独立选中、跨页全选、行高亮、删除选中（N）与批量删除确认；<a href="filter-rules-pipeline-ip-filter/layer-7-batch-delete.html">查看可交互层级 7</a></p>
+            <p>v2: 黑/白名�����独立选中、跨页全选、行高亮、删除选中（N）与批量删除确认；<a href="filter-rules-pipeline-ip-filter/layer-7-batch-delete.html">查看可交互层级 7</a></p>
             <p>第 9 节 D-001～D-017、第 10 节 Q-001～Q-008 已逐项复核并记录状态与证据。</p>
           </div>
         </details>
@@ -996,39 +1002,6 @@
     </div>
   </details>
 
-  <!-- ==================== 一级：GT-12923【0813】邮件处置中心总优化工单 ==================== -->
-  <details class="l1-section" open>
-    <summary>
-      <div class="l1-header">
-        <span class="chevron"></span>
-        <span class="l1-icon">🛠️</span>
-        <h2>GT-12923【0813】邮件处置中心总优化工单</h2>
-        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
-      </div>
-    </summary>
-    <div class="l1-body">
-      <div class="grid">
-        <details class="spec-card status-done">
-          <summary>
-            <div class="card-summary">
-              <span class="chevron"></span>
-              <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md" target="_blank" rel="noopener noreferrer">GT-12923 · 邮件处置中心总优化（增量变更规格）</a>
-              <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v1</span>
-              <span class="card-generated-at">2026-08-13</span>
-            </div>
-          </summary>
-          <div class="card-detail">
-            <p>路由: /email-handling/disposal-center（与既有「邮件处置中心」模块共用同一套路由，本工单为其整体优化）</p>
-            <p>变更类型: 总优化工单（增量规格）· Markdown 需求文档，由 MD-spec-PM-version 技能生成</p>
-            <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（详见其现有 HTML Spec；本工单只记录本次优化范围内的增量变更）</p>
-            <p>内含: 变更背景 · 优化范围 · 交互与状态变更明细 · 差异 / 待确认事项</p>
-          </div>
-        </details>
-      </div>
-    </div>
-  </details>
-
   <details class="l1-section" open>
     <summary>
       <div class="l1-header">
@@ -1062,7 +1035,7 @@
           </summary>
           <div class="card-detail">
             <p>路由: /admin/users（三 Tab：管理员账号 / 角色权限 / 登录安全；平台/租户双视角）</p>
-            <p>业务源: demo/docs/prd-admin-user-permission.md（专属 PRD）+ 对话记录（租户首管理员生命周期三处修复）；UI 事实以浏览器渲染为准</p>
+            <p>业务源: demo/docs/prd-admin-user-permission.md（专属 PRD）+ 对话记录（租户首管理员生命��期三处修复）；UI 事实以浏览器渲染为准</p>
             <p>组件: user-permission-page.tsx + admin-account-tab.tsx + role-permission-tab.tsx + login-security-tab.tsx + types.ts；跨模块: tenant-list-tab.tsx + credential-result-dialog.tsx + tenant-center-page.tsx + product-profile-context.tsx</p>
             <p>子文件: <a href="admin-users/layer-1-admin-drawer.html">管理员抽屉</a> / <a href="admin-users/layer-2-admin-dialogs.html">弹窗组(重置/下线/删除/筛选)</a> / <a href="admin-users/layer-3-role-drawer.html">角色抽屉·权限矩阵</a> / <a href="admin-users/layer-4-login-ip-reset.html">IP控制/重置</a> / <a href="admin-users/layer-5-tenant-view.html">租户视角</a> / <a href="admin-users/layer-6-tenant-primary-admin-lifecycle.html">租户首管理员生命周期(凭据/改密/再建)</a></p>
             <p>预览可交互 · 6 交互层级 · 新增 §0.5 产品形态×视角「新建管理员」语义 + 首管理员改密/再建路径 · 5 形态×2角色矩阵 · 9 项差异(D-006 已解决/新增 D-008/D-009) / 9 项需确认 · agent-browser 实测截图 + DOM 比对</p>
@@ -1483,6 +1456,243 @@
       </div>
     </details>
 
+    </div>
+  </details>
+
+  <!-- ==================== 大类二：迭代变更规格 ==================== -->
+  <div class="category-header">
+    <h1>🛠️ 迭代变更规格</h1>
+    <span class="category-desc">按迭代日期 + 需求名称组织的增量变更规格，一个工单对应一个一级条目</span>
+    <span class="category-count"><strong>7</strong> 个迭代工单</span>
+  </div>
+
+  <!-- ==================== 迭代：GT-12649【0730】SidebarNav 移除 VersionFooter ==================== -->
+  <details class="l1-section iteration" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🧭</span>
+        <h2>GT-12649【0730】SidebarNav 移除 VersionFooter</h2>
+        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12649.html" target="_blank" rel="noopener noreferrer">GT-12649 · SidebarNav 移除 VersionFooter（增量变更规格 · v4）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v4</span>
+              <span class="card-generated-at">2026-07-30</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /zh/dashboard 及所有挂载全局侧边栏的后台路由</p>
+            <p>组件: src/components/layout/sidebar-nav.tsx（移除 &lt;VersionFooter /&gt; 及其 import）</p>
+            <p>关联模块: <a href="component-sidebar-nav/index.html">侧边菜单栏 SidebarNav</a></p>
+            <p>本文件累计收录 4 项需求：① SidebarNav 移除 VersionFooter ② GT-12659 邮件处置中心执行动作筛选移除"标记投递" ③ GT-12660 邮件安全总览执行动作图表移除"标记投递" ④ GT-12655 多租户租户管理员视角处置依据"平台管控策略"显示方案</p>
+            <p>关联: GT-11459（VersionFooter 组件保留，待产品确认合规入口）</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== 迭代：GT-126811【0731】RBL 优化 · 灰名单从执行动作分离 ==================== -->
+  <details class="l1-section iteration" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🛡</span>
+        <h2>GT-126811【0731】RBL 优化 · 灰名单从执行动作分离</h2>
+        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-126811.html" target="_blank" rel="noopener noreferrer">GT-126811 · RBL 优化（增量变更规格 · v13）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v13</span>
+              <span class="card-generated-at">2026-07-31</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/filter-rules（黑白名单 / 处置策略执行动作配置）</p>
+            <p>关联模块: <a href="#">过滤规则</a></p>
+            <p>核心变更: 灰名单从执行动作中分离 · 处置策略互斥卡片选择器 · 执行动作集合调整</p>
+            <p>本文件迭代持续追加至 v13，累计并入 GT-12660 / GT-12659 / GT-12665 / GT-12661 / GT-12657 / GT-12587 / GT-12563 等后续需求点</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== 迭代：GT-12695【0801】黑白名单执行动作与规则列表优化 ==================== -->
+  <details class="l1-section iteration" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🛡</span>
+        <h2>GT-12695【0801】黑白名单执行动作与规则列表优化</h2>
+        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12695.html" target="_blank" rel="noopener noreferrer">GT-12695 · 黑白名单执行动作与规则列表优化（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v7+</span>
+              <span class="card-generated-at">2026-08-01</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/filter-rules（黑名单 / 白名单规则）</p>
+            <p>关联模块: <a href="#">过滤规则</a></p>
+            <p>核心变更: 黑名单「阻断→拒收」并新增「丢弃」· 白名单「放行→投递」并移除「白名单模式」字段 · 规则列表新增「优先级」列</p>
+            <p>本文件迭代持续追加，累计并入 GT-12700 / GT-12701 / GT-12705 / GT-12707 / GT-12708 等邮件身份验证相关后续需求点</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== 迭代：GT-12731【0802】高级过滤规则条件引擎与执行动作优化 ==================== -->
+  <details class="l1-section iteration" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🛡</span>
+        <h2>GT-12731【0802】高级过滤规则条件引擎与执行动作优化</h2>
+        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12731.html" target="_blank" rel="noopener noreferrer">GT-12731 · 高级过滤规则条件引擎与执行动作优化（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v31+</span>
+              <span class="card-generated-at">2026-08-02</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/filter-rules（高级过滤规则 - 新建规则）</p>
+            <p>关联模块: <a href="#">过滤规则</a></p>
+            <p>核心变更（共 17 项）: 意图引擎升级为「多意图 · 双检测模式」· 条件目录裁剪 · 执行动作文案统一为「拒收 / 投递」并去掉「标记投递」· 发信人组 / 发件组织条件增强等</p>
+            <p>本文件迭代持续追加，累计并入 GT-12753 / GT-11675 / GT-11651 / GT-12754 / GT-12201 / GT-12276 / GT-12571 / GT-12774 / GT-12769 / GT-12581 / GT-11969（个人中心优化）等后续需求点</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== 迭代：GT-12841【0811】检测配置模块前端优化 ==================== -->
+  <details class="l1-section iteration" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🤖</span>
+        <h2>GT-12841【0811】检测配置模块前端优化</h2>
+        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12841.html" target="_blank" rel="noopener noreferrer">GT-12841 · GT-12859 检测配置模块前端优化（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-08-11</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /agent-center/overview?agent=phishingV1（检测引擎配置 Tab）</p>
+            <p>关联模块: <a href="component-phishing-detection-agent/index.html">钓鱼邮件检测智能体</a></p>
+            <p>核心变更: 运行模式说明文案修正 · 置信度分级处置表格新增风险等级徽章 · 置信度区间编辑器数字与列宽度优化 · 检测配置模块关联界面现状记录</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== 迭代：GT-12865【0811】智能体总开关与生命周期交互 ==================== -->
+  <details class="l1-section iteration" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🤖</span>
+        <h2>GT-12865【0811】智能体总开关与生命周期交互</h2>
+        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12865.html" target="_blank" rel="noopener noreferrer">GT-12865 · GT-12514 智能体总开关与生命周期交互（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-08-11</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /agent-center/overview?agent=phishingV1（详情页顶部操作栏）</p>
+            <p>关联模块: <a href="component-phishing-detection-agent/index.html">钓鱼邮件检测智能体</a></p>
+            <p>核心变更: 详情页顶部新增智能体总开关 · 关闭生命周期二次确认 + 禁用横幅 · 重新开启前置校验（准入规则门禁）与「前往配置」直达新增规则联动</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== 迭代：GT-12923【0813】邮件处置中心总优化工单 ==================== -->
+  <details class="l1-section iteration" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🛠️</span>
+        <h2>GT-12923【0813】邮件处置中心总优化工单</h2>
+        <span class="l1-stats"><span class="done-count">1</span> 已完成 / 1 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md" target="_blank" rel="noopener noreferrer">GT-12923 · 邮件处置中心总优化（增量变更规格 · Markdown）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-08-13</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（与既有「邮件处置中心」模块共用同一套路由，本工单为其整体优化）</p>
+            <p>变更类型: 总优化工单（增量规格）· Markdown 需求文档，由 MD-spec-PM-version 技能生成</p>
+            <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（详见其现有 HTML Spec；本工单只记录本次优化范围内的增量变更）</p>
+            <p>内含: 变更背景 · 优化范围 · 交互与状态变更明细 · 差异 / 待确认事项</p>
+          </div>
+        </details>
+      </div>
     </div>
   </details>
 
