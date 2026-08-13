@@ -9,7 +9,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Search, X, Inbox as InboxIcon } from "lucide-react";
+import { Search, X, Inbox as InboxIcon, Info } from "lucide-react";
 import { useScopedApiRequest } from "@/lib/api/client";
 import { useTenant } from "@/hooks/use-tenant";
 import { useProductForm } from "@/contexts/product-form-context";
@@ -359,6 +359,14 @@ export function EmailDisposalCenterPage({
     }
     return Array.from(unique, ([id, name]) => ({ id, name })).slice(0, 12);
   }, [data?.items]);
+
+  // GT-12923 阶段四：仅当"执行动作"筛选生效时才统计——不筛选时页面里出现
+  // mixed 记录是完全正常的展示情形，不需要提示；只有筛了"执行动作"却看到
+  // mixed 记录混在结果里，才需要解释"为什么它命中了"。
+  const mixedMailCountInResults = useMemo(() => {
+    if (!searchParams.executionActions || searchParams.executionActions.length === 0) return 0;
+    return (data?.items ?? []).filter((item) => item.action === "mixed").length;
+  }, [searchParams.executionActions, data?.items]);
 
   // AI 解析结果三级回填（design spec §7）：quick 控件覆盖式合并、advanced 构建
   // 器组追加（受 5 组上限约束）、其余条件落回 aiConditions 兜底 chips。summary
@@ -895,6 +903,19 @@ export function EmailDisposalCenterPage({
       />
 
       <PageSurface className="space-y-4">
+        {/* GT-12923 阶段四：当"执行动作"筛选生效、且当前页结果里含有 mixed
+            记录（同一封邮件不同收件人执行了不同动作）时，提示用户这些邮件
+            是因为部分收件人命中了筛选条件才出现在结果里——避免用户误以为
+            "整封邮件都被投递/隔离了"。*/}
+        {!similarMode && mixedMailCountInResults > 0 && (
+          <div
+            data-testid="disposal-mixed-mail-hint"
+            className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+          >
+            <Info className="h-4 w-4 shrink-0" />
+            <span>{t("recipientStatusBar.mixedMailHint", { count: mixedMailCountInResults })}</span>
+          </div>
+        )}
         {similarMode && (
           <div
             data-testid="disposal-similar-mode-banner"
@@ -924,6 +945,8 @@ export function EmailDisposalCenterPage({
           items={similarMode ? similarItems : (data?.items ?? [])}
           total={similarMode ? similarTotal : (data?.total ?? 0)}
           loading={similarMode ? similarLoading : isLoading}
+          // GT-12923 阶段四：相似邮件模式下没有执行动作筛选的概念，不传。
+          activeExecutionActions={similarMode ? undefined : searchParams.executionActions}
           selectedIds={selectedIds}
           onSelectionChange={(newPageIds) => {
             // 跨页追加/移除：以当前页 items 的 id 集合作为"当前页范围"

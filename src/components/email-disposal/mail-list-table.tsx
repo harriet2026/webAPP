@@ -53,6 +53,13 @@ interface MailListTableProps {
   onTimeSortChange: (sort: TimeSortOrder) => void;
   /** 全量筛选导出时的 loading 状态 */
   exportLoading?: boolean;
+  /**
+   * GT-12923 阶段四：当前生效的"执行动作"筛选值（EXECUTION_ACTIONS 词表，
+   * 如 ['quarantine']）。仅用于高亮 mixed 行"执行动作"列里命中筛选的收件
+   * 人徽章，帮助解释这条 mixed 记录为何出现在当前筛选结果里；不影响筛选
+   * 本身（筛选逻辑在阶段三已经挪到 getDisposalList 的顶层 action 参数）。
+   */
+  activeExecutionActions?: string[];
 }
 
 export type TimeSortOrder = 'none' | 'asc' | 'desc';
@@ -92,6 +99,7 @@ export function MailListTable({
   timeSort,
   onTimeSortChange,
   exportLoading = false,
+  activeExecutionActions,
 }: MailListTableProps) {
   const t = useTranslations('emailDisposal');
   const tFeatures = useTranslations('emailDisposal.detail.features');
@@ -704,7 +712,10 @@ export function MailListTable({
                   {/* 方案 C：mixed + 有逐收件人明细时用 mini 堆叠色条（按 final_action 聚类），
                       否则走原 badge 路径（单一动作展开） */}
                   {item.action === 'mixed' && item.recipientDispositions && item.recipientDispositions.length > 0 ? (
-                    <RecipientStatusBadges dispositions={item.recipientDispositions} />
+                    <RecipientStatusBadges
+                      dispositions={item.recipientDispositions}
+                      highlightKeys={activeExecutionActions}
+                    />
                   ) : (
                     <div className="flex flex-wrap items-center gap-1">
                       {(() => {

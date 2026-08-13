@@ -23,6 +23,28 @@ const ACTION_SEVERITY: Record<string, number> = {
   reject: 6,
 };
 
+// GT-12923 阶段四：处置中心的"执行动作"存在两套并存的词表——
+//   1) 本文件的 KnownAction 原始动作词表（accept/reject/quarantine/sideline/
+//      audit/discard/bounce），用于逐收件人明细的徽章分类展示；
+//   2) `EXECUTION_ACTIONS`（types/email-disposal.ts，deliver/quarantine/
+//      review/block/drop/recall），是搜索栏"执行动作"筛选下拉框实际吐给
+//      用户、也是 getDisposalList 顶层查询参数 action= 用的取值（阶段二/三）。
+// 高亮命中收件人徽章时需要拿筛选值（词表 2）去匹配收件人明细的原始动作
+// （词表 1），因此需要一次归一化。未在映射表中的原始值（如 bounce/
+// sideline，词表 2 没有直接对应项）原样返回——它们本就不会命中任何筛选
+// 值，这是预期行为，不是遗漏。
+const RAW_ACTION_TO_EXECUTION_ACTION: Record<string, string> = {
+  accept: 'deliver',
+  audit: 'review',
+  reject: 'block',
+  discard: 'drop',
+};
+
+export function normalizeRawActionToExecutionAction(action: string | undefined | null): string {
+  const raw = (action || '').toLowerCase();
+  return RAW_ACTION_TO_EXECUTION_ACTION[raw] ?? raw;
+}
+
 export function actionToVariant(action: string | undefined | null): ActionBadgeVariant {
   switch ((action || '').toLowerCase()) {
     case 'accept':

@@ -1,6 +1,13 @@
 // recipient-status-badges.test.tsx — 方案 C（Badge 化）单测。
 import { describe, it, expect } from 'vitest';
-import { bucketRecipients, bucketRecipientsByAction, actionCategory, statusCategory } from './recipient-status-badges';
+import {
+  bucketRecipients,
+  bucketRecipientsByAction,
+  actionCategory,
+  statusCategory,
+  isBucketHighlighted,
+  sortBucketsByHighlight,
+} from './recipient-status-badges';
 import type { RecipientDisposition } from '@/types/phishing-detection';
 
 describe('actionCategory', () => {
@@ -103,5 +110,50 @@ describe('bucketRecipients (status dimension)', () => {
       'status',
     );
     expect(result.map((b) => b.key)).toEqual(['delivered', 'quarantined']);
+  });
+});
+
+// GT-12923 阶段四：命中"执行动作"筛选值的收件人徽章需要高亮/置顶。
+// bucket.key 是原始动作词表（accept/audit/reject/discard/quarantine/...），
+// highlightKeys 是筛选值词表（deliver/review/block/drop/quarantine/recall），
+// isBucketHighlighted 负责先归一化再比较——这里覆盖两套词表不同名的场景
+// （accept→deliver、audit→review），以及本就同名的场景（quarantine）。
+describe('isBucketHighlighted', () => {
+  it('matches after normalizing the raw action vocabulary to the filter vocabulary', () => {
+    expect(isBucketHighlighted('accept', ['deliver'])).toBe(true);
+    expect(isBucketHighlighted('audit', ['review'])).toBe(true);
+    expect(isBucketHighlighted('reject', ['block'])).toBe(true);
+    expect(isBucketHighlighted('discard', ['drop'])).toBe(true);
+  });
+
+  it('matches values that are already shared between both vocabularies', () => {
+    expect(isBucketHighlighted('quarantine', ['quarantine'])).toBe(true);
+  });
+
+  it('does not match when highlightKeys is empty or undefined', () => {
+    expect(isBucketHighlighted('accept', [])).toBe(false);
+    expect(isBucketHighlighted('accept', undefined)).toBe(false);
+  });
+
+  it('does not match an unrelated action', () => {
+    expect(isBucketHighlighted('accept', ['quarantine'])).toBe(false);
+  });
+});
+
+describe('sortBucketsByHighlight', () => {
+  const bucket = (key: string) => ({ key });
+
+  it('moves highlighted buckets to the front while preserving relative order within each group', () => {
+    const buckets = [bucket('accept'), bucket('quarantine'), bucket('audit'), bucket('discard')];
+    const sorted = sortBucketsByHighlight(buckets, ['review']);
+    // 'audit' 归一化为 'review'，命中筛选值，被移到最前；其余三个未命中
+    // 桶维持原始相对顺序（accept, quarantine, discard）。
+    expect(sorted.map((b) => b.key)).toEqual(['audit', 'accept', 'quarantine', 'discard']);
+  });
+
+  it('returns the input unchanged when highlightKeys is empty or undefined', () => {
+    const buckets = [bucket('accept'), bucket('quarantine')];
+    expect(sortBucketsByHighlight(buckets, [])).toEqual(buckets);
+    expect(sortBucketsByHighlight(buckets, undefined)).toEqual(buckets);
   });
 });

@@ -5725,7 +5725,8 @@
       "rejected": "Rejected",
       "discarded": "Discarded",
       "audit": "Review",
-      "other": "Other"
+      "other": "Other",
+      "mixedMailHint": "{count} of the results are multi-recipient emails where recipients received different dispositions; matching recipients are highlighted in the Action column"
     },
     "search": {
       "placeholder": "Describe email traits, e.g.: phishing emails disguised as Microsoft from last week",

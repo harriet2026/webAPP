@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { normalizeRawActionToExecutionAction } from '@/lib/email-log-action';
 import type { RecipientDisposition } from '@/types/phishing-detection';
 
 type Dimension = 'action' | 'status';
@@ -167,15 +168,50 @@ export function bucketRecipients(
 /** 向后兼容旧导出名。 */
 export const bucketRecipientsByAction = (d: RecipientDisposition[]) => bucketRecipients(d, 'action');
 
+// GT-12923 阶段四：判断某个 bucket（bucket.key 是原始动作值，如 'accept'）
+// 是否命中"执行动作"筛选值（EXECUTION_ACTIONS 词表，如 'deliver'）。抽成
+// 纯函数导出，便于单测覆盖归一化 + 高亮判定，不依赖组件渲染。
+export function isBucketHighlighted(bucketKey: string, highlightKeys: string[] | undefined): boolean {
+  return !!highlightKeys?.length && highlightKeys.includes(normalizeRawActionToExecutionAction(bucketKey));
+}
+
+// 命中筛选值的桶置顶，未命中的桶维持原有的 CATEGORY_ORDER 相对顺序
+// （Array.prototype.sort 是稳定排序，只要比较函数只在"命中/未命中"两档
+// 之间返回 0/非 0，同档内的原始顺序就会被保留）。highlightKeys 为空/未
+// 传时原样返回，不做任何重排。
+export function sortBucketsByHighlight<T extends { key: string }>(
+  buckets: T[],
+  highlightKeys: string[] | undefined,
+): T[] {
+  if (!highlightKeys?.length) return buckets;
+  return [...buckets].sort((a, b) => {
+    const ah = isBucketHighlighted(a.key, highlightKeys) ? 0 : 1;
+    const bh = isBucketHighlighted(b.key, highlightKeys) ? 0 : 1;
+    return ah - bh;
+  });
+}
+
 interface RecipientStatusBadgesProps {
   dispositions: RecipientDisposition[];
   dimension?: Dimension;
+  // GT-12923 阶段四：搜索栏"执行动作"筛选生效时，命中的收件人徽章需要突出
+  // 显示（否则用户只会看到 [投递 4][隔离 1] 却不知道为什么这封 mixed 邮件
+  // 出现在"隔离"筛选结果里）。传入归一化后的筛选值（EXECUTION_ACTIONS 词
+  // 表，如 ['quarantine']）；仅在 dimension='action' 时生效——status 维度
+  // 走的是完全不同的一套状态词表，与"执行动作"筛选不是同一个语义轴，传
+  // 了也不会产生任何高亮（bucket.key 是原始动作值，不是 displayStatus）。
+  highlightKeys?: string[];
 }
 
-export function RecipientStatusBadges({ dispositions, dimension = 'action' }: RecipientStatusBadgesProps) {
+export function RecipientStatusBadges({ dispositions, dimension = 'action', highlightKeys }: RecipientStatusBadgesProps) {
   const t = useTranslations('emailDisposal');
   const toCat = dimension === 'action' ? actionCategory : statusCategory;
-  const buckets = useMemo(() => bucketRecipients(dispositions, dimension), [dispositions, dimension]);
+  const hasHighlight = !!highlightKeys && highlightKeys.length > 0;
+
+  const buckets = useMemo(
+    () => sortBucketsByHighlight(bucketRecipients(dispositions, dimension), highlightKeys),
+    [dispositions, dimension, highlightKeys],
+  );
 
   if (buckets.length === 0) return null;
 
@@ -199,15 +235,22 @@ export function RecipientStatusBadges({ dispositions, dimension = 'action' }: Re
     );
   }
 
-  // 多桶 → 多个 Badge 排列，每个带人数
+  // 多桶 → 多个 Badge 排列，每个带人数；命中筛选值的桶保持原样突出，其余
+  // 桶降低不透明度弱化，引导视线落在"这条 mixed 记录为什么会出现在当前
+  // 筛选结果里"这个信息点上。
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger render={<div className="flex flex-wrap items-center gap-1" />}>
           {buckets.map((b) => {
             const cat = toCat(b.key);
+            const dimmed = hasHighlight && !isBucketHighlighted(b.key, highlightKeys);
             return (
-              <Badge key={b.key} variant={CATEGORY_VARIANT[cat]} className="gap-1 border-current/30">
+              <Badge
+                key={b.key}
+                variant={CATEGORY_VARIANT[cat]}
+                className={cn('gap-1 border-current/30', dimmed && 'opacity-45')}
+              >
                 <span className={cn('inline-block h-1.5 w-1.5 rounded-full', CATEGORY_DOT[cat])} />
                 <span className={CATEGORY_TEXT[cat]}>{t(labelKeyFor(dimension, cat))} {b.recipients.length}</span>
               </Badge>

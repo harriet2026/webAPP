@@ -2456,7 +2456,7 @@
     "scenes": {
       "userspace": "用户空间认证",
       "smtpsend": "SMTP 发信认证",
-      "mailsync": "邮件同步代理"
+      "mailsync": "邮件��步代理"
     },
     "failReasons": {
       "wrongPassword": "密码��误",
@@ -4123,7 +4123,7 @@
     "simMatch": "匹配成功 - 该规则将对测试数据生效",
     "simNoMatch": "未匹配 - 该规则不会对测试数据生效",
     "unsavedChangesTitle": "放弃更改？",
-    "unsavedChanges": "有未保存的修改，确定要关闭吗？所��修改将丢失。",
+    "unsavedChanges": "有未��存的修改，确定要关闭吗？所��修改将丢失。",
     "groupDeleted": "群组已删除",
     "resetFilters": "重���",
     "simGroupNotice": "群组类型规则的模拟需在生产环境验证",
@@ -4525,7 +4525,7 @@
     },
     "dkimOutbound": {
       "title": "DKIM 外发签名",
-      "description": "为本租户的发信域名生���并管理 DKIM 私钥、发布 DNS 公钥��对经本网关外发的邮��进行 DKIM 签名。",
+      "description": "为本租户的发信域名生�����管理 DKIM 私钥、发布 DNS 公钥��对经本网关外发的邮��进行 DKIM 签名。",
       "domainCol": "发信域名",
       "statusCol": "签名状态",
       "actionsCol": "操作",
@@ -5730,7 +5730,8 @@
       "rejected": "拒收",
       "discarded": "丢弃",
       "audit": "审核",
-      "other": "其他"
+      "other": "其他",
+      "mixedMailHint": "当前结果包含 {count} 封多收件人邮件，同一封邮件的不同收件人执行了不同处置动作，命中的收件人已在\"执行动作\"列中高亮"
     },
     "search": {
       "placeholder": "描述邮件特征，例如：上周伪装成微软的钓鱼邮件",
@@ -6036,7 +6037,7 @@
       "reclassifyPartial": "{n} 封邮件已处置，但改判失败",
       "exportSelected": "导出已选 {n} 条",
       "exportAll": "导出全部筛选（{n} 条）",
-      "exportAllLimit": "导出全部筛选（共 {n} 条，超出上限将只导出前 {limit} 条）",
+      "exportAllLimit": "导出全部筛选（共 {n} 条，超出上限将只导出前 {limit} ��）",
       "exportLimitWarning": "筛选结果较多（{n} 条），将导出前 {limit} 条，建议缩��筛选范围",
       "exportAllFiltered": "导出全部筛选",
       "crossPageSelected": "已���页选中 {n} 条"
@@ -7174,7 +7175,7 @@
       "conditionSearchPlaceholder": "搜索条件...",
       "addConditionHeader": "添加条件",
       "noMatchingConditions": "未找到匹配的条件",
-      "emptyConfigPanel": "选择一个条件进行配置",
+      "emptyConfigPanel": "选择一个条件���行配置",
       "descCardTitle": "条件说明",
       "descSourceLabel": "数据来源",
       "descUsageLabel": "用途",
@@ -7548,7 +7549,7 @@
     "timeoutMarkPositions": "标记位置",
     "markPosition_subject_prefix": "主题前缀",
     "markPosition_header": "邮件头",
-    "timeoutMarkText": "标记文本",
+    "timeoutMarkText": "标��文本",
     "senderNotification": "发件人通��管理",
     "queueEntryNotify": "进入队列通知",
     "queueEntryDesc": "邮件进入审核队列时通知发件人",
@@ -8679,7 +8680,7 @@
       "qrcode": "邮件包含二维码",
       "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
       "clickableAttachment": "邮件包含可点击附件",
-      "clickableAttachmentDesc": "附件内含可点击链接/按钮时命中（如 HTML 附件、可交互 PDF 等）",
+      "clickableAttachmentDesc": "附件内含可点击链接/按钮时命中（如 HTML 附件、可交互 PDF ���）",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
       "riskLabels": {
         "senderFirstSeen": "发信人���次出现",
@@ -10787,7 +10788,7 @@
       "match_type_invalid": "匹配方式取值无效",
       "name_and_pattern_required": "名称和匹���内容都必须填写",
       "not_found": "链接黑名单规则不存在，可能已被删除",
-      "tenant_access_denied": "没有权限访问该租户的数据",
+      "tenant_access_denied": "���有权限访问该租户的数据",
       "tenant_id_required": "必须指定租户（平台管理员需通过 X-Tenant-ID 指定）",
       "verdict_invalid": "判定结果取值无效"
     },
@@ -10797,7 +10798,7 @@
       "helo_match_invalid": "HELO 匹配方式无效，只���是：{allowed}",
       "helo_pattern_regex_invalid": "HELO ��配的正则表达式不合法，请检查语���",
       "is_active_required": "请指定是否生效",
-      "not_found": "准入规则���存在，可能已被删除",
+      "not_found": "准入规则������在，可能已被删除",
       "null_sender_requires_cidr": "允许���发件人的规则只按来源 IP 匹配，因此必须填写来源 IP 段",
       "privileged_requires_system_admin": "创建特权准入规则需要平台管理员权限",
       "rate_limit_must_be_positive": "每小时限额必须大于 0",
@@ -11037,7 +11038,7 @@
       "request_body_unreadable": "请求内容读取失败",
       "scan_result_format_invalid": "附件扫描结果数据格式不正确",
       "scan_result_missing": "未提供附件扫描结果数据",
-      "scan_result_all_invalid": "校验后没有任何有效的扫描结果"
+      "scan_result_all_invalid": "校���后没有任何有效的扫描结果"
     },
     "url_protection": {
       "deep_inspect_timeout_out_of_range": "深度检测超时时间必须在 {min}-{max} 秒之间",
@@ -11345,7 +11346,7 @@
       "system_default_role_cannot_deleted": "系统内置角色不可删除"
     },
     "smtp_auth_ip_lockout": {
-      "invalid_ip": "IP 地址无效"
+      "invalid_ip": "IP 地址���效"
     },
     "spoofing_notification_preview": {
       "admin_emails_invalid": "管理员邮箱列表中含有无效邮箱",
