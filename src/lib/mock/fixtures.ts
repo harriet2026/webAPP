@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ─────────────────────������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────��──������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -686,7 +686,7 @@ const SECURITY_KPI = {
   blocked: 12_101,
 };
 
-// 确定性伪值：在 [base, base+width) 内按 index 平滑取值（无 Math.random，可复现）。
+// 确定性伪值：在 [base, base+width) 内按 index 平滑取值��无 Math.random，可复现）。
 function threatSeriesValue(
   i: number,
   base: number,
@@ -1819,7 +1819,7 @@ export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
   return mockAlertSmtpConfig();
 }
 
-// ─── 待处置邮件 / 举报待审（KPI）──────────────────────────────────────────────
+// ─── 待处置邮件 / 举报待审（KPI）───────────────��──────────────────────────────
 // 隔离（disposal.total）：today 3 / 7d 11 / 30d 19；举报待审（inbound-audit.total）：
 // today 2 / 7d 6 / 30d 13。两个查询都不带范围参数，故按模块级 currentSystemStatusRange 分支。
 const DISPOSAL_PENDING: Record<SystemStatusRangeKey, number> = {
@@ -2031,7 +2031,7 @@ export function mockPhishingStats(): PhishingStats {
 
 // ─── 钓鱼邮件检测总览：研判日志列表 / 详情（mock）───────────────────────────
 // 真实后端: GET /phishing-agent/detection-logs(/:id)、POST .../block、
-// .../exempt。此前只 mock 了 /phishing-agent/stats，检测总览页的日志表格在
+// .../exempt。此前只 mock 了 /phishing-agent/stats，检测总览页的日志��格在
 // �� mock ��式下始终为空（无后端时看不到任何数据）——这里补一份覆盖全部
 // disposition/recall_status/risk_level/detection_mode 枚举取值的种子数据，
 // 并支持列表关键字/时间范围/多选筛选分页，以及阻断/豁免对种子状态的迁移。
@@ -6098,7 +6098,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
 // 为 mock 引入第二套数据模型。
-// ════════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════��═══════════════════════════════════════
 
 interface MockDisposalSeed {
   tid: string;
@@ -7474,7 +7474,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     },
     recipient_dispositions: recipients.map((recipient, i) => {
       const status = recipientStatusFor(seed, recipients.length, i);
-      // mixed seed: 前半投递、后半隔离/��路，模拟真实 mixed 场景
+      // mixed seed: 前半投递、后半隔离/旁路，模拟真实 mixed 场景
       const mixedActions = ["accept", "accept", "accept", "quarantine", "sideline"];
       const mixedStatuses = ["delivered", "delivered", "delivered", "quarantined", "delivered"];
       const mixedReasons = [
@@ -7556,12 +7556,52 @@ function displayStatusOf(item: (typeof mockDisposalMailLogs)[number]): string {
   );
 }
 
+// GT-12923 阶段二：mock 后端语义修正。
+//
+// 处置中心存在两套"动作"词表，历史上从未对齐：
+//   1) 筛选/展示词表 EXECUTION_ACTIONS（deliver/quarantine/review/block/drop/
+//      recall），与真实后端 internal/models/security_overview.go
+//      `AllActions` 一致，是「执行动作」快捷筛选下拉框实际吐给用户、也是
+//      quick-filters.tsx 发给 action 字段的取值。
+//   2) mock 内部生成 item.action / disposition_actions / recipient_dispositions
+//      .final_action 时用的历史词表（accept/audit/reject/discard/quarantine/
+//      sideline，来自 disposalAction()），recipient-status-badges.tsx 的
+//      ACTION_CATEGORY 就是按这套词表做徽章分类展示的。
+// 这两套词表除 quarantine 外互不相等，仅做展示层面的详情徽章渲染不受影响
+// （ACTION_CATEGORY 本就认词表 2），但一旦要拿"执行动作"筛选值去匹配
+// item.action/disposition_actions，词表不对齐会导致非 mixed 记录也筛不出来。
+// 这里只在筛选匹配路径上做一次词表 2 → 词表 1 的归一化，不改动词表 2 本身
+// 的数据生成（disposalAction() 等），避免影响详情页徽章等其它已按词表 2
+// 实现的展示逻辑。
+const RAW_ACTION_TO_EXECUTION_ACTION: Record<string, string> = {
+  accept: "deliver",
+  audit: "review",
+  reject: "block",
+  discard: "drop",
+};
+
+function normalizeToExecutionAction(raw: string): string {
+  return RAW_ACTION_TO_EXECUTION_ACTION[raw] ?? raw;
+}
+
 function mockAdvancedValue(
   item: (typeof mockDisposalMailLogs)[number],
   field: string,
 ): unknown {
   const attachments = item.attachments ?? [];
   const values: Record<string, unknown> = {
+    // action 字段的筛选匹配语义（GT-12923 阶段二）：
+    //   - 非 mixed 记录：按归一化后的单一动作精确匹配；
+    //   - mixed 记录（同一封邮件不同收件人执行了不同动作）：改为对
+    //     disposition_actions 做"归一化后取交集"匹配——只要邮件里任一收件人
+    //     的最终动作命中了筛选值即算命中，而不是要求 item.action 这个整体
+    //     状态字符串（恒为 'mixed'）精确等于筛选值。mockConditionMatches 对
+    //     数组类型的 current 本就是 candidates.some(...) 的 OR 语义，这里返回
+    //     数组即可复用现成的多值匹配逻辑，无需改动 mockConditionMatches 本身。
+    action:
+      item.action === "mixed"
+        ? (item.disposition_actions ?? []).map(normalizeToExecutionAction)
+        : normalizeToExecutionAction(item.action),
     header_sender: item.sender,
     sender: item.sender,
     header_recipient: item.recipients,
@@ -8090,7 +8130,7 @@ function buildDefaultDisposalSettingsFixture(): DisposalSettings {
 // ---- 收信人组（demo recipient-groups.ts，ruleId 用 9101-9105 稳定值；
 // 刻意避开 9001-9099：群组策略的 mock 写路由按 /unified-rules/90\d\d 收窄，
 // 且群组策略演示规则本身占用 9001-9005）----
-// 复用既有的 sfGroupRule（见本文件 group-management 区）生成一个符合
+// 复��既有的 sfGroupRule（见本文件 group-management 区）生成一个符合
 // ruleToGroup（webapp/src/lib/api/groups.ts）判型条件的 Rule：
 // stage='rcpt' → GroupType 'recipient'，且 tags 带 `grp:<name>` 前缀
 // （否则 ruleToGroup 会因找不到 tag 直接判空丢弃这条数据）。member_count

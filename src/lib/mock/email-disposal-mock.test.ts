@@ -128,6 +128,56 @@ describe('email disposal center mock contract', () => {
     expect(blockedDisposition?.final_action).toBe('reject');
   });
 
+  // GT-12923 阶段二：`action` 字段的筛选语义修正。
+  //   1) 非 mixed 记录：mock 内部历史词表（accept/audit/reject/discard/
+  //      quarantine）与筛选值词表（deliver/review/block/drop/quarantine）
+  //      不一致，需要先归一化才能匹配——用 'review'/'block' 验证这条链路，
+  //      避免既有词表不对齐的回归。
+  //   2) mixed 记录（MIC053）：action 恒为 'mixed'，筛选需改为对
+  //      disposition_actions 数组做归一化后取交集（OR），而不是要求
+  //      item.action 本身精确等于筛选值。
+  const advancedFilterFor = (field: string, op: string, value: unknown) =>
+    encodeURIComponent(
+      JSON.stringify({
+        operator: 'AND',
+        groups: [{ operator: 'AND', conditions: [{ field, op, value }] }],
+      }),
+    );
+
+  it('normalizes the legacy raw action vocabulary (audit/reject) to the filter-facing vocabulary (review/block) for non-mixed rows', () => {
+    const reviewResult = mockEmailDisposalList(
+      `/mail-logs?page=1&page_size=100&advanced_filters=${advancedFilterFor('action', 'eq', 'review')}`,
+    );
+    expect(reviewResult.total).toBeGreaterThan(0);
+    expect(reviewResult.items.every((item) => item.action === 'audit')).toBe(true);
+
+    const blockResult = mockEmailDisposalList(
+      `/mail-logs?page=1&page_size=100&advanced_filters=${advancedFilterFor('action', 'eq', 'block')}`,
+    );
+    expect(blockResult.total).toBeGreaterThan(0);
+    expect(blockResult.items.every((item) => item.action === 'reject')).toBe(true);
+  });
+
+  it('matches a mixed row (MIC053) by any recipient action via disposition_actions intersection, not the scalar action=mixed field', () => {
+    const deliverResult = mockEmailDisposalList(
+      `/mail-logs?page=1&page_size=100&advanced_filters=${advancedFilterFor('action', 'in', ['deliver'])}`,
+    );
+    expect(deliverResult.items.some((item) => item.tid === 'MIC053')).toBe(true);
+
+    const quarantineResult = mockEmailDisposalList(
+      `/mail-logs?page=1&page_size=100&advanced_filters=${advancedFilterFor('action', 'in', ['quarantine'])}`,
+    );
+    expect(quarantineResult.items.some((item) => item.tid === 'MIC053')).toBe(true);
+
+    // MIC053 的 disposition_actions 是 ['accept','quarantine','sideline']（归一
+    // 化为 deliver/quarantine/sideline），不包含任何映射到 recall 的原始动
+    // 作，因此不应命中 recall 筛选。
+    const recallResult = mockEmailDisposalList(
+      `/mail-logs?page=1&page_size=100&advanced_filters=${advancedFilterFor('action', 'eq', 'recall')}`,
+    );
+    expect(recallResult.items.some((item) => item.tid === 'MIC053')).toBe(false);
+  });
+
   it('sorts by received time without mutating the canonical fixture order', () => {
     const ascending = mockEmailDisposalList('/mail-logs?page=1&page_size=100&sort_order=asc');
     expect(ascending.items[0].received_at <= ascending.items.at(-1)!.received_at).toBe(true);
