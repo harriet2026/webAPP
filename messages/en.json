@@ -6045,7 +6045,9 @@
       "exportAllLimit": "Export All Filtered ({n} total, only first {limit} will be exported)",
       "exportLimitWarning": "Large result set ({n} records). Only first {limit} will be exported. Consider narrowing your filters.",
       "exportAllFiltered": "Export All Filtered",
-      "crossPageSelected": "{n} items selected across pages"
+      "crossPageSelected": "{n} items selected across pages",
+      "mixedSelectionWarning": "{count} of the selected emails have recipients with different dispositions. This action applies to the whole email; the actual effect on each recipient is determined by the system's processing result.",
+      "csvRecipientDetail": "Recipient Detail"
     },
     "recall": {
       "title": "Mail Recall",

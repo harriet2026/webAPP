@@ -48,6 +48,16 @@ interface ReclassifyDialogProps {
   // never combined whitelist with recall.
   showWhitelistOption?: boolean;
   action?: "release" | "recall";
+  // GT-12923 阶段五：release/recall 的批量接口（bulkDispose / recallMails）
+  // 只接受 mail_log_ids，是整封邮件粒度的操作，没有收件人级参数。但
+  // mixed 记录本身就是"同一封邮件不同收件人已经处于不同处置状态"，对这
+  // 类记录做整封邮件粒度的放行/召回，后端实际会怎样处理每个收件人（是
+  // 对所有收件人生效，还是只对尚未终态的收件人生效，或是直接判定
+  // not_applicable）目前没有文档化的收件人级判断逻辑，需要与后端确认。
+  // 在澄清前，这里只做力所能及的事：如实告知操作员选中范围里有多少封
+  // mixed 记录，避免其在不知情的情况下误判"批量放行/召回对所有收件人生
+  // 效"。传 0 或不传则不显示这条警示。
+  mixedSelectionCount?: number;
 }
 
 export function ReclassifyDialog({
@@ -58,6 +68,7 @@ export function ReclassifyDialog({
   busy = false,
   showWhitelistOption = false,
   action,
+  mixedSelectionCount = 0,
 }: ReclassifyDialogProps) {
   const t = useTranslations("emailDisposal.detail.overview");
   const tDetail = useTranslations("emailDisposal.detail");
@@ -116,6 +127,16 @@ export function ReclassifyDialog({
             }
           >
             {tBatch(`${action}AuditHint`)}
+          </div>
+        )}
+        {action && mixedSelectionCount > 0 && (
+          // GT-12923 阶段五：单独用警示色（区别于上面中性的 AuditHint）
+          // 突出"这不是常规提示，是需要操作员额外确认的风险点"。
+          <div
+            data-testid="disposal-mixed-selection-warning"
+            className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
+          >
+            {tBatch("mixedSelectionWarning", { count: mixedSelectionCount })}
           </div>
         )}
         <div className="py-2">

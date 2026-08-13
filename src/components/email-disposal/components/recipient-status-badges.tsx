@@ -17,8 +17,8 @@ import { cn } from '@/lib/utils';
 import { normalizeRawActionToExecutionAction } from '@/lib/email-log-action';
 import type { RecipientDisposition } from '@/types/phishing-detection';
 
-type Dimension = 'action' | 'status';
-type Category = 'delivered' | 'quarantine' | 'rejected' | 'sideline' | 'discarded' | 'audit' | 'other';
+export type Dimension = 'action' | 'status';
+export type Category = 'delivered' | 'quarantine' | 'rejected' | 'sideline' | 'discarded' | 'audit' | 'other';
 
 export interface RcptStatusBucket {
   key: string;
@@ -128,8 +128,13 @@ const STATUS_LABEL_KEY: Record<Category, string> = {
   other: 'recipientStatusBar.other',
 };
 
-/** 取指定维度的标签 key。 */
-function labelKeyFor(dim: Dimension, cat: Category): string {
+/**
+ * 取指定维度的标签 key。
+ * GT-12923 阶段五（任务20）：CSV 导出的收件人级明细列复用这个函数，确保
+ * 列表页徽章、详情抽屉、CSV 导出三处对同一个动作值展示的文案永远一致——
+ * 不需要在 csv-export.ts 里再维护一份重复的 category→labelKey 映射。
+ */
+export function labelKeyFor(dim: Dimension, cat: Category): string {
   const map = dim === 'action' ? ACTION_LABEL_KEY : STATUS_LABEL_KEY;
   return map[cat] ?? ACTION_LABEL_KEY.other;
 }

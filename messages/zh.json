@@ -2456,7 +2456,7 @@
     "scenes": {
       "userspace": "用户空间认证",
       "smtpsend": "SMTP 发信认证",
-      "mailsync": "邮件��步代理"
+      "mailsync": "邮件���步代理"
     },
     "failReasons": {
       "wrongPassword": "密码��误",
@@ -2720,7 +2720,7 @@
       "logoutCurrentConfirm": "下线当前设备将退出本会话，确定继续？",
       "logoutOthers": "下线���他所有设备",
       "logoutOthersTitle": "下线其他所有设备",
-      "logoutOthersConfirm": "确认下线除当前设备外的所有其他设备（共 {n} 台）？",
+      "logoutOthersConfirm": "确认下线除当前设备外���所有其他设备（共 {n} 台）？",
       "loggedOutDevice": "已下线设备 {name}",
       "loggedOutOthers": "已下线 {n} 台设备",
       "loggedOut": "已退出登录",
@@ -4123,7 +4123,7 @@
     "simMatch": "匹配成功 - 该规则将对测试数据生效",
     "simNoMatch": "未匹配 - 该规则不会对测试数据生效",
     "unsavedChangesTitle": "放弃更改？",
-    "unsavedChanges": "有未��存的修改，确定要关闭吗？所��修改将丢失。",
+    "unsavedChanges": "有����存的修改，确定要关闭吗？所��修改将丢失。",
     "groupDeleted": "群组已删除",
     "resetFilters": "重���",
     "simGroupNotice": "群组类型规则的模拟需在生产环境验证",
@@ -5731,7 +5731,7 @@
       "discarded": "丢弃",
       "audit": "审核",
       "other": "其他",
-      "mixedMailHint": "当前结果包含 {count} 封多收件人邮件，同一封邮件的不同收件人执行了不同处置动作，命中的收件人已在\"执行动作\"列中高亮"
+      "mixedMailHint": "本页结果中有 {count} 封多收件人邮件，同一封邮件的不同收件人执行了不同处置动作，命中的收件人已在\"执行动作\"列中高亮（仅统计当前页，其他分页可能还有更多）"
     },
     "search": {
       "placeholder": "描述邮件特征，例如：上周伪装成微软的钓鱼邮件",
@@ -6037,10 +6037,12 @@
       "reclassifyPartial": "{n} 封邮件已处置，但改判失败",
       "exportSelected": "导出已选 {n} 条",
       "exportAll": "导出全部筛选（{n} 条）",
-      "exportAllLimit": "导出全部筛选（共 {n} 条，超出上限将只导出前 {limit} ��）",
-      "exportLimitWarning": "筛选结果较多（{n} 条），将导出前 {limit} 条，建议缩��筛选范围",
+      "exportAllLimit": "导出全部筛选（共 {n} 条，超出上限将只导出前 {limit} 条）",
+      "exportLimitWarning": "筛选结果较多（{n} 条），将导出前 {limit} 条，建议缩小筛选范围",
       "exportAllFiltered": "导出全部筛选",
-      "crossPageSelected": "已���页选中 {n} 条"
+      "crossPageSelected": "已跨页选中 {n} 条",
+      "mixedSelectionWarning": "选中范围内有 {count} 封邮件的不同收件人已执行不同处置动作，此操作按整封邮件执行，对各收件人的实际生效范围以系统处理结果为准",
+      "csvRecipientDetail": "收件人明细"
     },
     "recall": {
       "title": "邮件召回",
@@ -6492,7 +6494,7 @@
   },
   "advancedRulesFeature": {
     "title": "高级过滤规则",
-    "description": "基于多条件组合的灵活过滤规则",
+    "description": "基��多条件组合的灵活过滤规则",
     "moduleDescription": "多维度条件组合过滤，支持{count}种条件类型与AND/OR逻辑",
     "incompleteCondition": "[配置不完整]",
     "incompleteReasonMissingValue": "缺少取值：请填��该条件的匹配值",
@@ -7024,7 +7026,7 @@
         "note": "加密附件可能用于绕过安全检测"
       },
       "desc_attachmentMd5": {
-        "source": "附件哈希计算",
+        "source": "附件哈希���算",
         "usage": "精确匹配已知恶意文件的MD5值",
         "note": "适用于已知威胁情报匹配"
       },
@@ -8291,7 +8293,7 @@
       "uptime": "运行时长",
       "goroutineTrend": "协程数趋势",
       "heapAllocTrend": "堆内存趋势",
-      "processName": "进程名",
+      "processName": "进程��",
       "cpu": "CPU"
     },
     "database": {
@@ -8678,7 +8680,7 @@
       "senderFirstSeen": "收发信人之前没有邮件往来",
       "senderFirstSeenHint": "仅对无历史收发记录的发信人启用——常见钓鱼/社工高风险来源。",
       "qrcode": "邮件包含二维码",
-      "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
+      "qrcodeDesc": "附件/图片中解码出二维码时��中（需附件深度检查）",
       "clickableAttachment": "邮件包含可点击附件",
       "clickableAttachmentDesc": "附件内含可点击链接/按钮时命中（如 HTML 附件、可交互 PDF ���）",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
@@ -9019,7 +9021,7 @@
       "sourceSingleTitle": "手动添加",
       "sourceSingleDesc": "手动维护一个保护对象及其合法邮箱。",
       "sourcePasteTitle": "批量粘贴",
-      "sourcePasteDesc": "按行粘贴姓名与邮箱，适合快速补充少量对象。",
+      "sourcePasteDesc": "按行粘贴姓名与邮箱，适合快速补充少量���象。",
       "name": "姓名",
       "namePlaceholder": "请输入保护���象姓名",
       "email": "真实邮箱",
@@ -9206,7 +9208,7 @@
     },
     "whitelist": {
       "title": "放行名单",
-      "subtitle": "命中信封发件人即整封放行、不进检测（不以 Header-From 放行）",
+      "subtitle": "命中信封���件人即整封放行、不进检测（不以 Header-From 放行）",
       "value": "邮箱 / 域名",
       "valuePlaceholder": "boss@corp.com 或 corp.com",
       "matchType": "类型",
@@ -9330,7 +9332,7 @@
       "dispositionValue": {
         "no_need": "无需处置",
         "pending_recall": "���确认召回",
-        "recalled": "已发起召回",
+        "recalled": "���发起召回",
         "alert_only": "仅告警",
         "false_positive": "已标误报",
         "multiple": "多种处置",
@@ -9371,7 +9373,7 @@
       "mailId": "邮件 ID",
       "originalDisposition": "���始处置",
       "rationale": "判定依据",
-      "releasedRecipients": "实际投递收件人",
+      "releasedRecipients": "��际投递收件人",
       "dispositionValue": {
         "pending_recall": "待召回",
         "recalled": "已召回",
@@ -10795,7 +10797,7 @@
     "mail_admission": {
       "enabled_required": "���指定是否启���",
       "expires_at_format_invalid": "过期时间格式不正确，应为 RFC3339（如 2026-08-01T12:00:00+08:00）",
-      "helo_match_invalid": "HELO 匹配方式无效，只���是：{allowed}",
+      "helo_match_invalid": "HELO 匹配方式无效，只�����是：{allowed}",
       "helo_pattern_regex_invalid": "HELO ��配的正则表达式不合法，请检查语���",
       "is_active_required": "请指定是否生效",
       "not_found": "准入规则������在，可能已被删除",

@@ -37,6 +37,7 @@ import {
   hasSavableDisposalFilters,
   resolveExecutionActions,
 } from "./lib/filter-state";
+import { buildDisposalCsvTable } from "./lib/csv-export";
 import { SearchBar } from "./search-bar";
 import { SaveTemplateDialog } from "./save-template-dialog";
 import { QuickFilters } from "./quick-filters";
@@ -188,6 +189,13 @@ export function EmailDisposalCenterPage({
   // 筛选条件变更时通过 resetSelection() 清空，避免导出与当前筛选不相关的历史选中。
   const [selectedItemMap, setSelectedItemMap] = useState<Map<number, DisposalMailItem>>(new Map());
   const selectedIds = useMemo(() => new Set(selectedItemMap.keys()), [selectedItemMap]);
+  // GT-12923 阶段五：release/recall 走整封邮件粒度的批量接口，选中范围内
+  // 含 mixed 记录时需要在确认弹窗里提醒操作员（见 reclassify-dialog.tsx
+  // 里 mixedSelectionCount 的注释，收件人级判断逻辑待与后端确认）。
+  const mixedSelectionCount = useMemo(
+    () => Array.from(selectedItemMap.values()).filter((item) => item.action === "mixed").length,
+    [selectedItemMap],
+  );
   const [exportLoading, setExportLoading] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -588,26 +596,11 @@ export function EmailDisposalCenterPage({
   const exportToCsv = useCallback((items: DisposalMailItem[]) => {
     const escapeCsv = (value: unknown) =>
       `"${String(value ?? "").replaceAll('"', '""')}"`;
-    const rows = [
-      [
-        "ID",
-        t("table.time"),
-        t("table.sender"),
-        t("table.recipient"),
-        t("table.subject"),
-        t("table.mailType"),
-        t("table.status"),
-      ],
-      ...items.map((item) => [
-        item.id,
-        item.timestamp,
-        item.sender,
-        item.recipientList?.join("; ") ?? item.recipient,
-        item.subject,
-        item.emailType ?? "",
-        item.displayStatus,
-      ]),
-    ];
+    // GT-12923 阶段五：表头 + 行数据的拼装逻辑（含 mixed 记录的收件人级
+    // 明细列）挪到 lib/csv-export.ts 的纯函数里，这里只负责序列化成
+    // CSV 字符串并触发下载。
+    const { headers, rows: dataRows } = buildDisposalCsvTable(items, t);
+    const rows = [headers, ...dataRows];
     const blob = new Blob(
       [`\uFEFF${rows.map((row) => row.map(escapeCsv).join(",")).join("\n")}`],
       { type: "text/csv;charset=utf-8" },
@@ -1017,6 +1010,7 @@ export function EmailDisposalCenterPage({
         action={pendingAction ?? undefined}
         onConfirm={(finalType) => void handleReclassifyConfirm(finalType)}
         busy={reclassifyBusy}
+        mixedSelectionCount={mixedSelectionCount}
       />
 
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
