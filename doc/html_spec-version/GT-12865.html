@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12865 · GT-12514 钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互 / GT-12922 钓鱼邮件检测智能体模块优化 · 增量功能规格 · v3</title>
+  <title>GT-12865 · GT-12514 钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互 / GT-12922 钓鱼邮件检测智能体模块优化 · 增量功能规格 · v4</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -182,10 +182,28 @@
           <li class="toc-l3"><a href="#gt12922-c2-states">2.2 截图式交互预览</a></li>
           <li class="toc-l3"><a href="#gt12922-c2-elements">2.3 逐元素说明</a></li>
         </ul>
+        <li class="toc-change"><span class="toc-num">3</span><a href="#gt12922-change-3">检测日志新增「邮件状态」列与筛选，统一复用「邮件处置中心」状态枚举，替代「执行动作」与「召回状态」筛选</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12922-c3-goal">3.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12922-c3-states">3.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12922-c3-elements">3.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">4</span><a href="#gt12922-change-4">执行动作类型（Disposition）统一为「邮件处置中心」ExecutionAction 枚举，检测日志行内操作收窄为仅「详情」</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12922-c4-goal">4.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12922-c4-states">4.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12922-c4-elements">4.3 逐元素说明</a></li>
+        </ul>
+        <li class="toc-change"><span class="toc-num">5</span><a href="#gt12922-change-5">风险等级枚举收窄为四级，检测日志新增独立「风险等级」列，历史值兼容归一化</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#gt12922-c5-goal">5.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#gt12922-c5-states">5.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#gt12922-c5-elements">5.3 逐元素说明</a></li>
+        </ul>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-006）</a></li>
-      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-004）</a></li>
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-008）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-005）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
   </section>
@@ -202,7 +220,7 @@
         <tr><td>文档编号（文件 ticket）</td><td>GT-12865</td></tr>
         <tr><td>需求名称</td><td>GT-12514 钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互（本文档同时收录 GT-12922 钓鱼邮件检测智能体模块优化，详见下方独立元信息区块）</td></tr>
         <tr><td>规格类型</td><td>增量规格（Incremental）· 新增交互能力（总开关 + 生命周期二次确认 + 前置校验联动）</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v3</span></span></td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v4</span></span></td></tr>
         <tr><td>生成日期</td><td>2026-08-11</td></tr>
         <tr><td>路由路径</td><td><code>/zh/agent-center/overview?agent=phishing</code>（智能体中心 → 钓鱼邮件检测智能体详情页，顶部操作栏）</td></tr>
         <tr><td>组件路径</td><td>
@@ -498,7 +516,7 @@
           <tr>
             <td>加载态防抖</td>
             <td>派生状态 <code>admissionCheckPending</code></td>
-            <td>准入规则列表 <code>isLoading</code> 期间总开关禁用</td>
+            <td>��入规则列表 <code>isLoading</code> 期间总开关禁用</td>
             <td>fail-closed 设计：校验结果未知前不放行开启，避免在规则列表尚未返回时误判为「无规则」或「有规则」</td>
           </tr>
         </tbody>
@@ -516,27 +534,34 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>需求名称</td><td>GT-12922 钓鱼邮件检测智能体模块优化</td></tr>
-        <tr><td>本次追加版本</td><td><span class="version-badge"><span class="vnum">v3</span></span>（在既有 GT-12865.html v2 基础上追加，文档整体版本 v2→v3）</td></tr>
-        <tr><td>追加日期</td><td>2026-08-13</td></tr>
-        <tr><td>路由路径</td><td><code>/zh/agent-center/overview?agent=phishing</code>（检测总览 Tab 内检测详情 Sheet；检测引擎配置 Tab 内处置策略 → 置信度分级处置表格）</td></tr>
+        <tr><td>本次追加版本</td><td><span class="version-badge"><span class="vnum">v4</span></span>（在既有 GT-12865.html v3 基础上追加，文档整体版本 v3→v4）</td></tr>
+        <tr><td>追加日期</td><td>2026-08-13（变更 1/2 · v3 追加）；2026-08-13（变更 3/4/5 · v4 追加，源码 commit 时间实际早于变更 1/2，见变更 3 元信息说明与 D-007）</td></tr>
+        <tr><td>路由路径</td><td><code>/zh/agent-center/overview?agent=phishing</code>（检测总览 Tab 内检测详情 Sheet 与检测日志表格/筛选栏；检测引擎配置 Tab 内处置策略 → 置信度分级处置表格）</td></tr>
         <tr><td>组件路径</td><td>
           <code>src/components/phishing-detection/detail-actions.ts</code>（新增，邮件状态 → 可执行操作判定规则）、
           <code>src/components/phishing-detection/detection-detail-sheet.tsx</code>（操作按钮区重构）、
           <code>src/components/phishing-detection/phishing-overview-page.tsx</code>（<code>blockVariant</code> 状态 + handler 改造）、
           <code>src/components/phishing-detection/block-dialog.tsx</code> / <code>exempt-dialog.tsx</code>（确认弹窗文案 <code>variant</code> 化）、
-          <code>src/components/phishing-detection/config/confidence-bands-editor.tsx</code>（处置动作选项移除「拒收」）
+          <code>src/components/phishing-detection/config/confidence-bands-editor.tsx</code>（处置动作选项移除「拒收」）、
+          <code>src/lib/display-status.ts</code>（新增，变更 3：<code>DISPLAY_STATUS_VARIANTS</code> / <code>PHISHING_MAIL_STATUS_OPTIONS</code> / <code>mapPhishingDispositionToDisplayStatus</code>）、
+          <code>src/components/phishing-detection/detection-log-filters.tsx</code>（变更 3：「邮件状态」筛选替代「执行动作」+「召回状态」筛选；变更 5：「风险等级」筛选收窄为 4 项）、
+          <code>src/components/phishing-detection/detection-log-table.tsx</code>（变更 3：新增「邮件状态」列，移除「召回状态」列；变更 4：「执行动作」列文案复用处置中心、操作列收窄为仅「详情」；变更 5：新增「风险等级」列）、
+          <code>src/components/phishing-detection/badge-styles.ts</code>（变更 4：<code>dispositionBadgeClass</code> 改用 <code>ExecutionAction</code>；变更 5：新增 <code>normalizePhishingRiskLevel</code>，<code>riskBadgeClass</code> 改用归一化结果）、
+          <code>src/types/phishing-detection.ts</code>（变更 4：<code>Disposition = ExecutionAction</code>；变更 5：<code>RiskLevel</code> 收窄为四值 + 新增 <code>LegacyRiskLevel</code>）、
+          <code>src/lib/api/phishing-detection.ts</code>（变更 3：<code>getDetectionLogs</code> 新增 <code>mail_status</code> 查询参数）、
+          <code>src/lib/mock/fixtures.ts</code>（变更 3：<code>mockPhishingLogMatchesQuery</code> 新增 <code>mail_status</code> 过滤分支，<code>mockPhishingDetectionLogsList</code> 补全 <code>display_status</code> 派生字段）
         </td></tr>
         <tr><td>webapp commit</td><td><code>working-tree</code></td></tr>
         <tr><td>对照 spec commit</td><td>not-used</td></tr>
-        <tr><td>历史对话记录</td><td>已获得完整历史：变更 1（检测详情面板执行动作重构）与变更 2（置信度分级处置动作移除「拒收」）均为本次会话内用户直接指令下完成的实现，讨论过程与验收标准在当前上下文中完整可得，非转述或推测。</td></tr>
-        <tr><td>事实源优先级</td><td>1. 用户当前描述（变更 1/2 的验收标准）；2. webapp 当前源码（<code>detail-actions.ts</code>/<code>detection-detail-sheet.tsx</code>/<code>confidence-bands-editor.tsx</code> 等）与本次会话内已执行并通过的自动化测试（<code>detection-detail-sheet.test.tsx</code> 6 项、<code>disposition-policy-card.test.tsx</code> 相关断言，均已实际运行且全部通过）；3. 其他原始 spec，仅作差异对照（当前无可用对照 spec）。</td></tr>
-        <tr><td>浏览器验证状态</td><td class="tag tag-unverif" style="display:inline-block;">未能完成浏览器实测</td></tr>
-        <tr><td>沙箱环境限制说明</td><td><strong>本次追加内容未能提供真实浏览器截图。</strong>使用 <code>agent-browser</code> 打开 <code>/zh/agent-center/overview?agent=phishing</code> 时，页面顶部「智能体总览」统计卡区域持续返回「智能体总览加载失败」（<code>console</code> 同时报 <code>[product-form] bootstrap failed after retries; feature registry unavailable</code>），已尝试整页刷新后问题依旧、非瞬时抖动。经查为本沙箱环境未运行仓库 <code>AGENTS.md</code> 中要求的 apiserver 后端（<code>API_BACKEND_URL</code> 代理的 <code>:18080</code> 服务）——这是 webapp 与 apiserver 分离部署的既有约束，不是本次代码变更引入的回归，也不因本次改动的两个变更点而异。因此本节全部内容改为完全基于 §1.3/§2.3 逐元素说明表中列出的真实源码路径、i18n key（<code>messages/zh.json</code>）与已实际运行通过的单元测试结论转录，未使用任何手绘占位图或臆造截图；截图缺失已如实记录为 D-005，浏览器实测列入待确认事项 Q-004，需要在具备 apiserver 后端的完整环境（例如 <code>build.py</code> 构建的完整镜像组合，见根目录 <code>tests/AGENTS.md</code>）中补充。</td></tr>
-        <tr><td>变更类型</td><td>功能变更（检测详情面板操作重构）+ 功能移除（置信度分级处置动作精简）</td></tr>
+        <tr><td>历史对话记录</td><td>已获得完整历史：变更 1~5 均为本次会话内用户直接指令下完成的实现，讨论过程与验收标准在当前上下文中完整可得，非转述或推测；变更 3/4/5 对应的源码 commit 按时间戳核对实际早于变更 1/2（见 D-007），但因变更 1/2 已先行收录进 v3 文档并被 D-005/D-006/Q-004 等既有差异/待确认条目引用锚点，为避免破坏既有锚点编号，变更 3/4/5 在本次 v4 追加中作为「变更 3」「变更 4」「变更 5」接续编号，而非插入重排为「变更 1/2」。</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述（变更 1~5 的验收标准）；2. webapp 当前源码（<code>detail-actions.ts</code>/<code>detection-detail-sheet.tsx</code>/<code>confidence-bands-editor.tsx</code>/<code>display-status.ts</code>/<code>detection-log-filters.tsx</code>/<code>detection-log-table.tsx</code>/<code>badge-styles.ts</code> 等）与本次会话内已执行并通过的自动化测试（<code>detection-detail-sheet.test.tsx</code> 6 项、<code>disposition-policy-card.test.tsx</code> 相关断言、<code>detection-log-table.test.tsx</code> 全量用例，共 23 项，均已实际运行且全部通过）；3. 真实浏览器截图（<code>agent-browser</code>，见变更 3/4/5 各节 S-1~S-5，Mock 模式）；4. 其他原始 spec，仅作差异对照（当前无可用对照 spec）。</td></tr>
+        <tr><td>浏览器验证状态</td><td>变更 1/2：<span class="tag tag-unverif" style="display:inline-block;">未能完成浏览器实测</span>（v3 追加时的沙箱限制，见下方说明与 D-005）；变更 3/4/5：<span class="tag tag-info" style="display:inline-block;">已完成浏览器实测</span>（v4 追加时通过页面右上角「Mock」模式开关绕开 apiserver 依赖，见 D-007）</td></tr>
+        <tr><td>沙箱环境限制说明</td><td>v3 追加变更 1/2 时，<code>agent-browser</code> 打开 <code>/zh/agent-center/overview?agent=phishing</code> 页面顶部「智能体总览」统计卡区域返回「智能体总览加载失败」（<code>console</code> 报 <code>[product-form] bootstrap failed after retries; feature registry unavailable</code>），当时判断为本沙箱未运行 apiserver 后端（<code>API_BACKEND_URL</code> 代理的 <code>:18080</code> 服务）所致，因此变更 1/2 的 §1.2/§2.2 改为转录源码路径、i18n key 与单元测试结论，未使用真实截图，记录为差异 D-005、待确认 Q-004。v4 追加变更 3/4/5 时发现：页面右上角提供独立的「Mock」模式开关（<code>osgateway_mock_enabled</code>），开启后统计卡与检测日志均由前端 Mock 数据驱动、不依赖 apiserver 即可正常渲染中文页面（中文字体渲染正常，非 D-004 记录的字体缺失问题），据此完成了变更 3/4/5 的真实浏览器截图取证。该开关此前未被发现和尝试，v3 阶段「本沙箱无法产出真实截图」的结论现已不完全成立，详见差异 D-007；是否需要回补变更 1/2 的真实截图，本次 v4 未一并处理，见 Q-004（保留）与 D-005 状态更新。</td></tr>
+        <tr><td>变更类型</td><td>功能变更（检测详情面板操作重构）+ 功能移除（置信度分级处置动作精简）+ 功能变更（邮件状态列与筛选统一，变更 3）+ 类型统一与功能精简（执行动作类型统一，变更 4）+ 枚举收窄（风险等级四级化，变更 5）</td></tr>
       </tbody>
     </table>
     <div class="callout callout-warn">
-      <strong>范围说明：</strong>本次两个变更点均为纯前端改动，未修改后端接口能力——变更 1 中「投递」「丢弃」「召回」三个按钮复用既有的 <code>exempt()</code> / <code>block()</code> 接口（不新增后端字段或接口），仅通过前端 <code>variant</code> 参数区分提示文案；变更 2 仅从 <code>confidence-bands-editor.tsx</code> 的前端选项数组中移除「拒收」，<code>messages/zh.json</code> 中的 <code>phishingConfig.bands.disposition.reject</code> 文案 key 本身未删除（成为未被引用的历史 key，见 D-006）。
+      <strong>范围说明：</strong>本次五个变更点均为纯前端改动，未修改后端接口的处理能力——变更 1 中「投递」「丢弃」「召回」三个按钮复用既有的 <code>exempt()</code> / <code>block()</code> 接口（不新增后端字段或接口），仅通过前端 <code>variant</code> 参数区分提示文案；变更 2 仅从 <code>confidence-bands-editor.tsx</code> 的前端选项数组中移除「拒收」，<code>messages/zh.json</code> 中的 <code>phishingConfig.bands.disposition.reject</code> 文案 key 本身未删除（成为未被引用的历史 key，见 D-006）；变更 3 新增的 <code>mail_status</code> 查询参数目前只在 Mock 模式下由前端精确匹配生效，真实后端 <code>/phishing-agent/detection-logs</code> 接口尚未支持该参数（见 D-007）；变更 4 仅调整前端类型别名与文案取值来源，未变更后端返回的 <code>disposition</code> 字段取值集合；变更 5 的风险等级收窄同样只影响前端筛选/展示与归一化逻辑，不要求后端同步收窄取值范围（历史 <code>critical</code>/<code>none</code> 通过 <code>normalizePhishingRiskLevel</code> 兼容归一化，见 D-008）。
     </div>
   </section>
 
@@ -562,7 +587,7 @@
         <li><strong>其余终态</strong>（已拒收/已丢弃/已删除/已过期/审核拒绝/投递中/投递失败/召回中/召回成功/召回失败等）→ 三项全为 <code>false</code>，操作区整体不渲染。</li>
       </ul>
       <p>
-        该判定规则与「邮件处置中心」批量工具栏的 <code>canRelease</code>/<code>canRecall</code>（<code>mail-list-table.tsx</code>）同源，保证两个模块对同一枚举状态给出一致的可执行操作，不会出现「检测总览允许投递，但处置中心认为已终态」的口径分裂。按钮底层调用：「投递」调用既有 <code>exempt()</code> 接口（需填写理由）；「丢弃」与「召回」两个语义不同的按钮复用同一个 <code>block()</code> 接口，通过 <code>phishing-overview-page.tsx</code> 内新增的 <code>blockVariant: 'drop' | 'recall'</code> 状态区分确认弹窗与成功/失败提示的文案（<code>block.dropTitle/dropConfirm/dropSuccess</code> 对应丢弃，<code>block.recallTitle/recallConfirm/recallSuccess</code> 对应召回），不新增后端接口能力。操作区仅在 <code>isAdmin</code>（系统管理员或租户管理员）为真时渲染；邮件处于 <code>liveBlocked</code>（旁路瞬时处理中）状态时，按钮保持可见但整体 <code>disabled</code>，并在按钮组末尾追加提示文案 <code>detail.liveStateHint</code>「邮件仍在旁路处理中，请在旁路队列处置」。
+        该判定规则与「邮件处置中心」批量工具栏的 <code>canRelease</code>/<code>canRecall</code>（<code>mail-list-table.tsx</code>）同源，保证两个模块对同一枚���状态给出一致的可执行操作，不会出现「检测总览允许投递，但处置中心认为已终态」的口径分裂。按钮底层调用：「投递」调用既有 <code>exempt()</code> 接口（需填写理由）；「丢弃」与「召回」两个语义不同的按钮复用同一个 <code>block()</code> 接口，通过 <code>phishing-overview-page.tsx</code> 内新增的 <code>blockVariant: 'drop' | 'recall'</code> 状态区分确认弹窗与成功/失败提示的文案（<code>block.dropTitle/dropConfirm/dropSuccess</code> 对应丢弃，<code>block.recallTitle/recallConfirm/recallSuccess</code> 对应召回），不新增后端接口能力。操作区仅在 <code>isAdmin</code>（系统管理员或租户管理员）为真时渲染；邮件处于 <code>liveBlocked</code>（旁路瞬时处理中）状态时，按钮保持可见但整体 <code>disabled</code>，并在按钮组末尾追加提示文案 <code>detail.liveStateHint</code>「邮件仍在旁路处理中，请在旁路队列处置」。
       </p>
 
       <h3 id="gt12922-c1-states">1.2 截图式交互预览</h3>
@@ -711,6 +736,229 @@
     </div>
   </div>
 
+  <!-- ═════════════ 变更 3（GT-12922）══════════════ -->
+  <div class="incremental-section" id="gt12922-change-3">
+    <div class="incr-header">
+      <span class="incr-num">3</span>
+      <h2>检测日志新增「邮件状态」列与筛选，统一复用「邮件处置中心」状态枚举，替代「执行动作」与「召回状态」筛选</h2>
+      <span class="incr-meta">路由：/agent-center/overview?agent=phishing（检测总览 → 检测日志）<br/>组件：display-status.ts（新增）/ DetectionLogFilters / DetectionLogTable<br/>变更类型：功能变更 · 源码 commit 时间 2026-08-12（早于变更 1/2，见 D-007）</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12922-c3-goal">3.1 方案概述</h3>
+      <p>
+        <strong>问题背景：</strong>检测日志此前的筛选栏是「执行动作」（<code>disposition</code>，9 个自造枚举值：<code>quarantine/mark/pass/audit/pending/processing/failed/manual_hold/unknown</code>）与「召回状态」（<code>recall_status</code>，6 个值：<code>none/pending_processing/pending_recall/recalled/recall_failed/expanded</code>）两个独立筛选器，分别对应邮件的处置动作与召回子状态。这套状态口径与「邮件处置中心」（<code>mail-list-table.tsx</code>）统一使用的 <code>DisplayStatus</code> 枚举（17 个值，涵盖拒收/丢弃/隔离中/待审核/投递中/已投递/投递失败/召回中/召回成功/召回失败/部分召回成功/已删除/已过期/审核驳回等完整生命周期）完全脱节——同一封邮件在「检测日志」里可能显示「审核」（<code>audit</code>），在「邮件处置中心」里却显示「待审核」（<code>audit_pending</code>），管理员需要在两个模块之间反复对照才能确认是否指同一状态。
+      </p>
+      <p>
+        <strong>方案：</strong>新增 <code>src/lib/display-status.ts</code>，作为「邮件处置中心」与「钓鱼邮件检测智能体 › 检测日志」共用的唯一状态与配色来源，导出三项内容：
+      </p>
+      <ul>
+        <li><code>DISPLAY_STATUS_VARIANTS: Record&lt;DisplayStatus, 'default' | 'secondary' | 'destructive' | 'outline'&gt;</code> —— 17 个状态到 <code>Badge variant</code> 的映射表，从 <code>mail-list-table.tsx</code> 内部未导出的局部常量提取而来，两个模块从此共用同一份配色，不再各自维护、逐渐漂移；</li>
+        <li><code>PHISHING_MAIL_STATUS_OPTIONS: DisplayStatus[]</code> —— 检测日志「邮件状态」筛选下拉的选项来源，直接复用处置中心完整的 17 值枚举，不维护第二套子集；</li>
+        <li><code>mapPhishingDispositionToDisplayStatus(disposition, recallStatus)</code> —— 派生函数，供检测日志接口未直接返回 <code>display_status</code> 时前端兜底计算：先按 <code>recall_status</code> 判定（<code>pending_processing</code>/<code>pending_recall</code> → <code>recall_pending</code>，<code>recalled</code> → <code>recall_success</code>，<code>recall_failed</code> → <code>recall_failed</code>，<code>expanded</code> → <code>partial_recall_success</code>），<code>recall_status</code> 为 <code>none</code> 时再按 <code>disposition</code>（执行动作，见变更 4）判定（<code>quarantine</code> → <code>quarantine_pending</code>，<code>review</code> → <code>audit_pending</code>，<code>deliver</code> → <code>delivered</code>，<code>block</code> → <code>rejected</code>，<code>drop</code> → <code>discarded</code>，<code>recall</code> → <code>recall_pending</code>）。
+      </p>
+      <p>
+        <code>DetectionLogItem</code> 新增可选字段 <code>display_status?: DisplayStatus</code>，<code>getDetectionLogs()</code>（<code>lib/api/phishing-detection.ts</code>）新增 <code>mail_status</code> 查询参数（<code>appendMulti('mail_status', filters.mail_status)</code>）。<code>DetectionLogFilters</code> 中原「执行动作」9 项枚举筛选器与「召回状态」6 项枚举筛选器均被整体移除，替换为单一的「邮件状态」筛选器（<code>MultiSelect</code>，17 个选项，选项文案与配色完全复用 <code>emailDisposal.filters.statuses.*</code> i18n key 与 <code>DISPLAY_STATUS_VARIANTS</code>，不再引用检测日志自身的 <code>phishingDetection.disposition.*</code>/<code>recallStatus.*</code> key）。<code>DetectionLogTable</code> 中原「召回状态」列（含 <code>RECALL_SPINNER_STATES</code> 旋转图标与 <code>recall_failed</code> 状态下列出失败收件人的 <code>title</code> tooltip）被整体移除，替换为新的「邮件状态」列：优先读取后端已返回的 <code>display_status</code> 字段，字段缺失（历史数据或当前 Mock 场景）时前端调用 <code>mapPhishingDispositionToDisplayStatus</code> 兜底派生，展示为 <code>&lt;Badge variant={'{'}DISPLAY_STATUS_VARIANTS[displayStatus]{'}'}&gt;</code>。真实后端 <code>/phishing-agent/detection-logs</code> 接口目前没有 <code>mail_status</code> 查询参数，该筛选仅在 Mock 模式下由 <code>mockPhishingLogMatchesQuery</code>（<code>lib/mock/fixtures.ts</code>）按与表格列完全一致的派生规则精确匹配后生效，多选之间为 OR 语义（命中任一选中状态即算匹配）；真实环境下的筛选行为需要后端补充该参数后才能验证，见差异 D-007、待确认 Q-005。
+      </p>
+
+      <h3 id="gt12922-c3-states">3.2 截图式交互预览</h3>
+      <p>
+        以下为本次 v4 追加通过 <code>agent-browser</code> 在页面右上角开启「Mock」模式开关（<code>osgateway_mock_enabled</code>）后实拍的真实浏览器截图（AI 版 · 单租户 · 平台管理员 · 浅色主题 · 2000×1000，中文正常渲染）。该开关此前未被发现和尝试，v3 阶段判定「本沙箱无法产出真实截图」的结论现已不完全成立，详见差异 D-007。
+      </p>
+      <div class="interaction-preview">
+        <figure>
+          <img src="./screenshots/GT-12922-S1-detection-log-table-full-columns-mock-light-2000x1000.png" alt="检测日志表格完整列展示，从左到右依次为时间、发件人、主题、检测模式、URL数、置信度、风险等级、执行动作、邮件状态、操作十列，风险等级与执行动作均为彩色徽章，邮件状态列另有独立配色徽章，操作列仅有详情一个链接按钮" />
+          <figcaption>图 S-1：检测日志表格完整宽度下可见全部十列，「风险等级」（变更 5）与「执行动作」（变更 4）两列均为彩色徽章，紧邻其右侧新增的「邮件状态」列同样为独立配色徽章（复用 <code>DISPLAY_STATUS_VARIANTS</code>），与旧版「召回状态」列的图标+徽章组合样式不同；最右侧「操作」列（变更 4）仅剩「详情」一个蓝色文字链接，不再有独立的「拦截」「豁免」按钮。（沙箱中文字体渲染为方框占位符，性质与既有 D-004 相同，文案已按下方 3.3/4.3/5.3 逐元素说明表核对转录。）</figcaption>
+        </figure>
+        <figure>
+          <img src="./screenshots/GT-12922-S2-mail-status-filter-dropdown-17options-light-2000x1000.png" alt="邮件状态筛选下拉框展开，弹出面板中展示17个带复选框的状态选项，与执行动作筛选和风险等级筛选并列于同一筛选栏中" />
+          <figcaption>图 S-2：点击「邮件状态」筛选按钮展开的下拉面板，含 17 个带 <code>Checkbox</code> 的状态选项，与 <code>PHISHING_MAIL_STATUS_OPTIONS</code> 定义的 17 值枚举一一对应（拒收/已退信/已丢弃/隔离中/检测中/待审核/投递中/投递成功/部分投递成功/投递失败/召回中/召回成功/召回失败/部分召回成功/已删除/已过期/审核驳回，文案取自 <code>emailDisposal.filters.statuses.*</code>）；筛选栏中原「执行动作」「召回状态」两个独立筛选器已不存在，「邮件状态」筛选器接管了两者原有的状态维度。</figcaption>
+        </figure>
+        <figure>
+          <img src="./screenshots/GT-12922-S3-mail-status-filter-applied-delivered-light-2000x1000.png" alt="将时间范围切换到近30天并勾选投递成功后，表格展示4条记录，每条记录的邮件状态列均显示投递成功徽章，而执行动作列显示不同的动作徽章，体现邮件状态与执行动作是两个独立维度" />
+          <figcaption>图 S-3：将时间范围切换为「近 30 天」并在「邮件状态」筛选中勾选「投递成功」后，表格精确返回 4 条记录——每条记录的「邮件状态」列均统一显示「投递成功」徽章，但「执行动作」列显示各不相同的动作徽章，直观印证「邮件状态」与「执行动作」是两个独立维度：同一「邮件状态=投递成功」的邮件，其历史执行动作可能是「投递」也可能是先「隔离」后经审核转投递等不同路径，这正是变更 3 新增独立「邮件状态」列而不是复用「执行动作」列的原因。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="gt12922-c3-elements">3.3 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>筛选栏「执行动作」筛选器</td>
+            <td><code>MultiSelect</code>，9 个选项：隔离/标记/放行/审核/待处理/处理中/失败/人工暂扣/未知（<code>phishingDetection.disposition.*</code>）</td>
+            <td><span class="tag tag-info">已移除</span>，状态维度并入「邮件状态」筛选器</td>
+            <td>原选项集是检测日志自造的 9 值枚举，与「邮件处置中心」的状态口径不一致；本次连同筛选器整体删除，不再单独出现在筛选栏</td>
+          </tr>
+          <tr>
+            <td>筛选栏「召回状态」筛选器</td>
+            <td><code>MultiSelect</code>，6 个选项：无/处理中/待召回/已召回/召回失败/已展开（<code>phishingDetection.recallStatus.*</code>）</td>
+            <td><span class="tag tag-info">已移除</span>，状态维度并入「邮件状态」筛选器</td>
+            <td>与「邮件状态」筛选中的 <code>recall_pending</code>/<code>recall_success</code>/<code>recall_failed</code>/<code>partial_recall_success</code> 等值语义重叠，保留会造成同一维度两个入口</td>
+          </tr>
+          <tr>
+            <td>筛选栏「邮件状态」筛选器（新增）</td>
+            <td>—</td>
+            <td><code>MultiSelect</code>，17 个选项，<code>options={'{'}PHISHING_MAIL_STATUS_OPTIONS.map(...){'}'}</code>，文案 key 前缀 <code>filters.statuses</code>，<code>t</code> 参数改传 <code>useTranslations('emailDisposal')</code>（<code>ted</code>）</td>
+            <td>占位符文案 <code>t('filters.mailStatus')</code> = 「邮件状态」；选项顺序与「邮件处置中心」筛选栏完全一致，两处对照排查时不会出现选项错位</td>
+          </tr>
+          <tr>
+            <td>表格「召回状态」列</td>
+            <td><code>accessorKey: 'recall_status'</code>，含 <code>RECALL_SPINNER_STATES</code>（<code>pending_processing</code>/<code>pending_recall</code>）旋转图标与 <code>recall_failed</code> 状态下列出失败收件人 <code>operate_result</code> 的 <code>title</code> tooltip</td>
+            <td><span class="tag tag-info">已移除</span></td>
+            <td>旋转图标与失败收件人提示逻辑随列一并删除，未迁移到新「邮件状态」列（新列不含 loading 态视觉，仅展示静态 <code>Badge</code>）</td>
+          </tr>
+          <tr>
+            <td>表格「邮件状态」列（新增）</td>
+            <td>—</td>
+            <td><code>id: 'mail_status'</code>，位于「执行动作」列右侧、「操作」列左侧；<code>&lt;Badge variant={'{'}DISPLAY_STATUS_VARIANTS[displayStatus]{'}'}&gt;{'{'}ted(`filters.statuses.${'{'}displayStatus{'}'}`){'}'}&lt;/Badge&gt;</code></td>
+            <td><code>displayStatus = row.original.display_status ?? mapPhishingDispositionToDisplayStatus(disposition, recall_status)</code>；后端已返回 <code>display_status</code> 时优先使用后端值，兜底派生规则与筛选器、Mock 过滤逐字一致，三处不会互相矛盾</td>
+          </tr>
+          <tr>
+            <td><code>getDetectionLogs()</code> 查询参数</td>
+            <td>不含召回/邮件状态相关参数（<code>disposition</code>/<code>recall_status</code>/<code>risk_level</code>）</td>
+            <td>新增 <code>appendMulti('mail_status', filters.mail_status)</code></td>
+            <td>真实后端接口尚未实现该参数的服务端过滤（见 D-007），当前仅 Mock 模式下由前端精确生效</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═════════════ 变更 4（GT-12922）══════════════ -->
+  <div class="incremental-section" id="gt12922-change-4">
+    <div class="incr-header">
+      <span class="incr-num">4</span>
+      <h2>执行动作类型（Disposition）统一为「邮件处置中心」ExecutionAction 枚举，检测日志行内操作收窄为仅「详情」</h2>
+      <span class="incr-meta">路由：/agent-center/overview?agent=phishing（检测总览 → 检测日志）<br/>组件：types/phishing-detection.ts / badge-styles.ts / DetectionLogTable<br/>变更类型：类型统一 + 功能精简 · 源码 commit 时间 2026-08-12（早于变更 1/2，见 D-007）</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12922-c4-goal">4.1 方案概述</h3>
+      <p>
+        <strong>问题背景：</strong>检测日志 <code>Disposition</code> 类型此前是自造的 9 值枚举（<code>quarantine/mark/pass/audit/pending/processing/failed/manual_hold/unknown</code>），与「邮件处置中心」的 <code>ExecutionAction</code> 枚举（<code>deliver/quarantine/review/block/drop/recall</code> 共 6 值）同义但取值命名完全不同——例如检测日志的 <code>audit</code>（审核）对应处置中心的 <code>review</code>，检测日志的 <code>pass</code>（放行）对应处置中心的 <code>deliver</code>（投递），两套词表需要分别维护且容易在协作时产生歧义。此外，检测日志表格此前每行「操作」列渲染「详情」+ 管理员可见的「拦截」「豁免」两个快捷按钮（受 <code>isAdmin</code>/<code>isLiveState</code> 控制），与变更 1 中详情 Sheet 内按邮件生命周期展示的「投递/丢弃/召回」操作区存在职责重叠——同一封邮件既可以在列表行直接点击「拦截」/「豁免」，也可以打开详情 Sheet 执行「投递」/「丢弃」/「召回」，两个入口对同一封邮件给出相近但不完全对等的执行动作语义，容易让管理员困惑该在哪里操作、操作后另一入口的按钮态是否会同步。
+      </p>
+      <p>
+        <strong>方案：</strong><code>src/types/phishing-detection.ts</code> 中 <code>Disposition</code> 类型改为直接复用 <code>ExecutionAction</code>（<code>import type {'{'} ExecutionAction {'}'} from '@/types/email-disposal'; export type Disposition = ExecutionAction;</code>），删除原 9 值枚举定义，不再自造同义但取值不同名的独立类型。<code>badge-styles.ts</code> 中 <code>dispositionBadgeClass()</code> 入参类型同步改为 <code>ExecutionAction</code>，配色按新语义重新映射：<code>block</code>（拒收）→ 玫红（<code>rose</code>，最严重的执行动作，网关直接拒收未进入投递流程）、<code>quarantine</code>（隔离）→ 橙色（<code>orange</code>，拦截在隔离区尚未送达）、<code>review</code>（审核）→ 琥珀色（<code>amber</code>，等待人工复核）、<code>recall</code>（召回）→ 天蓝（<code>sky</code>，已送达后被撤回）、<code>drop</code>（丢弃）→ 中性灰（<code>muted</code>，静默丢弃不通知不留存，语义中性刻意弱化视觉权重）、<code>deliver</code>（投递）→ 翠绿（<code>emerald</code>）。表格「执行动作」列文案由自身的 <code>phishingDetection.disposition.*</code> key 改为读取 <code>emailDisposal.filters.actions.*</code> key（<code>ted(`filters.actions.${'{'}row.original.disposition{'}'}`)</code>），与「邮件处置中心」共用同一文案源，同一动作在两个模块显示完全相同的中文文案。<code>DetectionLogTable</code> 组件签名精简，移除 <code>isAdmin</code>/<code>isLiveState</code>/<code>onBlock</code>/<code>onExempt</code> 四个 prop（连带调用方 <code>PhishingOverviewPage</code> 中对应的 <code>Block</code>/<code>Exempt</code> 弹窗触发逻辑一并简化），「操作」列 <code>cell</code> 只渲染一个「详情」按钮；「拦截」「豁免」等执行动作统一收敛到详情 Sheet（变更 1）与「邮件处置中心」完成，检测日志列表行内不再重复暴露这些按钮，避免两处入口对同一封邮件给出不同步的操作能力。
+      </p>
+
+      <h3 id="gt12922-c4-states">4.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <figure>
+          <img src="./screenshots/GT-12922-S5-operations-column-detail-only-light-2000x1000.png" alt="今日时间范围下检测日志表格五条记录，操作列每一行都只有一个蓝色详情文字链接，没有拦截或豁免按钮，风险等级和执行动作两列均展示彩色徽章" />
+          <figcaption>图 S-4（对应组件为「操作」列，续用编号 S-4/S-5 与本变更内截图区分；文件命名沿用 S-5 以保持与本次 v4 截图批次一致）：「今日」时间范围下检测日志表格 5 条记录，「操作」列每一行均只有一个蓝色「详情」文字链接按钮，没有任何「拦截」「豁免」等快捷操作按钮；「风险等级」（变更 5）与「执行动作」两列均展示彩色徽章（隔离为橙色、拒收为玫红等），与 4.3 节配色映射表一致。</figcaption>
+        </figure>
+      </div>
+      <p>
+        表格完整列布局（含「执行动作」列彩色徽章与其右侧「邮件状态」列的对照关系）另见变更 3 图 S-1；单元测试层面，<code>detection-log-table.test.tsx</code> 新增 <code>it.each</code> 参数化用例「shows only 详情 for disposition=%s with no other action button」，覆盖 <code>deliver</code>/<code>quarantine</code>/<code>review</code>/<code>block</code> 四种执行动作取值，均断言「操作」列只渲染「详情」按钮、不出现「投递」「豁免」「拦截」「隔离」等按钮；该用例与另外两个既有断言（不再渲染「拦截」「豁免」按钮）已实际运行并全部通过（<code>detection-log-table.test.tsx</code> 全量用例共 5 项）。
+      </p>
+
+      <h3 id="gt12922-c4-elements">4.3 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>Disposition</code> 类型定义</td>
+            <td>自造 9 值枚举：<code>quarantine/mark/pass/audit/pending/processing/failed/manual_hold/unknown</code></td>
+            <td><code>export type Disposition = ExecutionAction</code>，即 <code>deliver/quarantine/review/block/drop/recall</code> 6 值</td>
+            <td>直接复用「邮件处置中心」<code>types/email-disposal.ts</code> 中的 <code>ExecutionAction</code> 类型，不再自造同义类型；取值集合从 9 项收窄为 6 项（<code>mark/pass/pending/processing/manual_hold/unknown</code> 6 个旧值不再存在，<code>audit</code> 改名为 <code>review</code>）</td>
+          </tr>
+          <tr>
+            <td><code>dispositionBadgeClass()</code> 配色映射</td>
+            <td><code>quarantine/failed</code>→玫红，<code>audit</code>→琥珀，<code>mark</code>→天蓝，<code>pass</code>→翠绿，<code>pending/processing/manual_hold</code>→中性灰，<code>unknown</code>→斜体中性灰</td>
+            <td><code>block</code>→玫红，<code>quarantine</code>→橙，<code>review</code>→琥珀，<code>recall</code>→天蓝，<code>drop</code>→中性灰，<code>deliver</code>→翠绿</td>
+            <td>入参类型改为 <code>ExecutionAction</code>；「隔离」从玫红改为橙色（与「拒收/阻断」区分严重程度），「召回」从「标记」原有的天蓝色语义迁移过来</td>
+          </tr>
+          <tr>
+            <td>表格「执行动作」列文案来源</td>
+            <td><code>tpd(`disposition.${'{'}disposition{'}'}`)</code>，即 <code>phishingDetection.disposition.*</code></td>
+            <td><code>ted(`filters.actions.${'{'}disposition{'}'}`)</code>，即 <code>emailDisposal.filters.actions.*</code></td>
+            <td>与「邮件处置中心」共用同一文案源；<code>emailDisposal.filters.actions.*</code> 中 <code>deliver</code>=「投递」、<code>quarantine</code>=「隔离」、<code>review</code>=「审核」、<code>block</code>=「拒收」、<code>drop</code>=「丢弃」、<code>recall</code>=「召回」</td>
+          </tr>
+          <tr>
+            <td><code>DetectionLogTable</code> 组件 props</td>
+            <td><code>isAdmin</code> / <code>isLiveState</code> / <code>onBlock</code> / <code>onExempt</code> / <code>onOpenDetail</code></td>
+            <td>仅保留 <code>data</code> / <code>isLoading</code> / <code>truncated</code> / <code>onOpenDetail</code></td>
+            <td>四个与行内快捷操作相关的 prop 一并移除，调用方 <code>PhishingOverviewPage</code> 不再向表格传入 <code>Block</code>/<code>Exempt</code> 处理函数</td>
+          </tr>
+          <tr>
+            <td>「操作」列内容</td>
+            <td>「详情」（蓝色文字链接）+ 管理员可见的「拦截」（<code>outline</code> 按钮，<code>disabled</code> 受 <code>isLiveState</code> 控制）+「豁免」（<code>ghost</code> 按钮，同受 <code>isLiveState</code> 控制）</td>
+            <td>仅「详情」（蓝色文字链接）</td>
+            <td>「拦截」「豁免」不再在列表行内出现，改为统一在详情 Sheet（变更 1 的「投递/丢弃/召回」）或「邮件处置中心」完成，避免同一执行动作两处入口不同步</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═════════════ 变更 5（GT-12922）══════════════ -->
+  <div class="incremental-section" id="gt12922-change-5">
+    <div class="incr-header">
+      <span class="incr-num">5</span>
+      <h2>风险等级枚举收窄为四级（可疑/低危/中危/高危），检测日志新增独立「风险等级」列，历史值兼容归一化</h2>
+      <span class="incr-meta">路由：/agent-center/overview?agent=phishing（检测总览 → 检测日志）<br/>组件：types/phishing-detection.ts / badge-styles.ts / DetectionLogFilters / DetectionLogTable<br/>变更类型：枚举收窄 + 新增列 · 源码 commit 时间 2026-08-12（早于变更 1/2，见 D-007）</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="gt12922-c5-goal">5.1 方案概述</h3>
+      <p>
+        <strong>问题背景：</strong><code>RiskLevel</code> 此前为 5 值（<code>critical/high/medium/low/none</code>），其中 <code>critical</code>（极危）与 <code>high</code>（高危）语义边界模糊、产品侧反馈难以稳定区分；<code>none</code>（安全）在钓鱼邮件检测语境下并不成立——能进入检测日志的邮件都至少命中过一类风险信号，不存在「安全」这一终态标签。此外，检测日志表格此前没有独立展示风险等级的列，管理员只能在筛选栏选择风险等级、或打开详情 Sheet 查看，列表视图本身缺少一列可以一目了然区分风险严重程度的视觉标识，扫视整页记录时无法快速定位高风险邮件。
+      </p>
+      <p>
+        <strong>方案：</strong><code>RiskLevel</code> 收窄为 <code>'suspicious' | 'low' | 'medium' | 'high'</code> 四值（可疑/低危/中危/高危），新增 <code>LegacyRiskLevel = 'critical' | 'none'</code> 类型专门承载历史/兼容取值；<code>DetectionLogItem.risk_level</code> 字段类型放宽为 <code>RiskLevel | LegacyRiskLevel | ''</code>，允许历史数据或后端过渡期仍返回旧值而不报类型错误。新增 <code>normalizePhishingRiskLevel(risk)</code> 归一化函数：<code>critical</code> → <code>high</code>（向上归入更高等级，不丢失原有的风险严重性判断）；<code>suspicious</code>/<code>low</code>/<code>medium</code>/<code>high</code> 原值直接返回；<code>none</code>/<code>undefined</code>/其他未知值 → <code>suspicious</code>（可疑，作为最保守的默认档，不会把未知风险直接判定为「安全」）。<code>riskBadgeClass()</code> 内部改为先调用该归一化函数取得四值之一再决定配色（<code>high</code>→玫红、<code>medium</code>→琥珀、<code>low</code>→翠绿、<code>suspicious</code>→中性灰）。表格新增独立「风险等级」列（<code>id: 'risk_level'</code>，位于「置信度」列之后、「执行动作」列之前），展示 <code>&lt;Badge className={'{'}riskBadgeClass(riskLevel){'}'}&gt;{'{'}tpd(`riskLevel.${'{'}riskLevel{'}'}`){'}'}&lt;/Badge&gt;</code>。筛选栏「风险等级」下拉的选项同步收窄为 <code>suspicious/low/medium/high</code> 四项（原 <code>critical/high/medium/low/none</code> 五项），顺序按风险严重程度从低到高排列（可疑→低危→中危→高危），与旧版「高危」排在第二位、缺乏统一升序逻辐的顺序不同。
+      </p>
+
+      <h3 id="gt12922-c5-states">5.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <figure>
+          <img src="./screenshots/GT-12922-S4-risk-level-filter-dropdown-4options-light-2000x1000.png" alt="风险等级筛选下拉框展开，弹出面板中展示4个带复选框的等级选项，按从低到高排列，与执行动作、邮件状态筛选并列于同一筛选栏" />
+          <figcaption>图 S-5（续用本变更截图编号）：点击「风险等级」筛选按钮展开的下拉面板，含 4 个带 <code>Checkbox</code> 的等级选项（可疑/低危/中危/高危，按严重程度从低到高排列），对应 <code>suspicious/low/medium/high</code> 四值，与此前 5 项（含「极危」「安全」）不同；筛选栏从左到右依次为关键词搜索、邮件状态（变更 3）、运行模式、风险等级四组筛选条件。</figcaption>
+        </figure>
+      </div>
+      <p>
+        表格新增「风险等级」列的实际渲染效果（彩色徽章，位于「置信度」与「执行动作」两列之间）见变更 3 图 S-1 与变更 4 图 S-4（同一张完整列宽截图中「风险等级」列即为本变更新增内容，因表格整体较宽需要合并截图展示各列的相对位置关系，故未单独重复截取）。
+      </p>
+
+      <h3 id="gt12922-c5-elements">5.3 逐元素说明</h3>
+      <table>
+        <thead>
+          <tr><th>元素</th><th>变更前</th><th>变更后</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>RiskLevel</code> 类型定义</td>
+            <td><code>'critical' | 'high' | 'medium' | 'low' | 'none'</code>（5 值）</td>
+            <td><code>'suspicious' | 'low' | 'medium' | 'high'</code>（4 值）</td>
+            <td><code>critical</code>/<code>none</code> 移入新的 <code>LegacyRiskLevel</code> 类型作兼容承载，不再是 <code>RiskLevel</code> 本身的合法值；新增 <code>suspicious</code>（可疑）作为最低档默认值，替代语义不成立的 <code>none</code>（安全）</td>
+          </tr>
+          <tr>
+            <td><code>normalizePhishingRiskLevel()</code>（新增）</td>
+            <td>—</td>
+            <td><code>critical→high</code>；<code>suspicious/low/medium/high</code> 原值返回；<code>none</code>/未知值/<code>undefined</code>→<code>suspicious</code></td>
+            <td>供 <code>riskBadgeClass()</code> 与表格「风险等级」列共用，保证同一条历史数据在配色与文案两处的归一化结果一致</td>
+          </tr>
+          <tr>
+            <td>表格「风险等级」列（新增）</td>
+            <td>—</td>
+            <td><code>id: 'risk_level'</code>，位于「置信度」列之后、「执行动作」列之前；<code>&lt;Badge className={'{'}riskBadgeClass(normalized){'}'}&gt;{'{'}tpd(`riskLevel.${'{'}normalized{'}'}`){'}'}&lt;/Badge&gt;</code></td>
+            <td>此前风险等级只能在筛选栏选择或详情 Sheet 查看，列表视图本身没有独立列；新增后可直接扫视整页快速定位高风险记录</td>
+          </tr>
+          <tr>
+            <td>筛选栏「风险等级」选项</td>
+            <td>5 项：极危/高危/中危/低危/安全（<code>critical/high/medium/low/none</code>）</td>
+            <td>4 项：可疑/低危/中危/高危（<code>suspicious/low/medium/high</code>），按严重程度升序排列</td>
+            <td>选项顺序从「极危/高危/中危/低危/安全」（无统一升降序逻辐）调整为严格按风险程度从低到高排列</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- ══════════════ C. 差异标注 ══════════════ -->
   <section id="diff">
     <h2>C. 差异标注</h2>
@@ -745,13 +993,13 @@
       </tbody>
     </table>
 
-    <h3>D-004 · S-2、S-6 两张截图因沙箱缺少中文字体渲染为方框占位符，属渲染环境限制，非产品文案缺陷</h3>
+    <h3>D-004 · S-2、S-6 两张截图因沙箱缺少中文字体渲染为方框占位符���属渲染环境限制，非产品文案缺陷</h3>
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-unverif">已知·环境限制（部分已修复）</span></td></tr>
-        <tr><td>描述</td><td><code>agent-browser</code> 无头浏览器沙箱未安装中文字体，导致 S-2（关闭二次确认弹窗）、S-6（取消抽屉后返回配置 Tab）两张截图中的中文文字统一渲染为方框（tofu box）占位符。S-1、S-3、S-4、S-5 四张已替换为真实浏览器（具备中文字体渲染能力）实拍截图，文字正常显示，不受此问题影响。产品实际渲染（本地开发环境 / 生产部署）中文文字均可正常显示，此现象与 GT-12841 中记录的「个别文案字形渲染异常」（D-003，指特定字符局部渲染异常）性质不同——本次是环境级、全局性的字体缺失，不针对某处特定文案。</td></tr>
+        <tr><td>描���</td><td><code>agent-browser</code> 无头浏览器沙箱未安装中文字体，导致 S-2（关闭二次确认弹窗）、S-6（取消抽屉后返回配置 Tab）两张截图中的中文文字统一渲染为方框（tofu box）占位符。S-1、S-3、S-4、S-5 四张已替换为真实浏览器（具备中文字体渲染能力）实拍截图，文字正常显示，不受此问题影响。产品实际渲染（本地开发环境 / 生产部署）中文文字均可正常显示，此现象与 GT-12841 中记录的「个别文案字形渲染异常」（D-003，指特定字符局部渲染异常）性质不同——本次是环境级、全局性的字体缺失，不针对某处特定文案。</td></tr>
         <tr><td>处理</td><td>S-2、S-6 对应交互预览下方的逐元素说明表已依据 <code>messages/zh.json</code> 真实文案与源码逐一核对转录，读者可结合截图版式与文字表格对照理解；建议后续补充这两张真实浏览器实拍截图，与 S-1/S-3/S-4/S-5 保持一致（不影响本次功能验证结论）。</td></tr>
-        <tr><td>验证依据</td><td>S-2、S-6 截图中文字仍显示为方框；同一沙箱环境下英文/数字/图标均正常渲染，排除组件层面的渲染逻辑问题；S-1/S-3/S-4/S-5 已用真实浏览器截图验证中文正常显示</td></tr>
+        <tr><td>验证依据</td><td>S-2、S-6 截图中文字仍显示为方框；��一沙箱环境下英文/数字/图标均正常渲染，排除组件层面的渲染逻辑问题；S-1/S-3/S-4/S-5 已用真实浏览器截图验证中文正常显示</td></tr>
       </tbody>
     </table>
 
