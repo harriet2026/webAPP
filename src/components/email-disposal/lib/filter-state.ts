@@ -28,6 +28,18 @@ export function isCompleteFilterCondition(condition: {
   return hasScalarValue(condition.value);
 }
 
+// GT-12923 阶段三：执行动作筛选的取值来源统一在这里解析一次——优先取多选
+// 字段 executionActions，为空时兼容旧收藏模板里遗留的单值字段
+// executionAction。countQuickFilterConditions / selected-conditions.tsx /
+// email-disposal-center-page.tsx（构建 searchParams）三处都需要同一份取值
+// 逻辑，避免各自重复实现后语义走散。
+export function resolveExecutionActions(quick: DisposalQuickFilter): string[] {
+  if (quick.executionActions && quick.executionActions.length > 0) {
+    return quick.executionActions;
+  }
+  return quick.executionAction ? [quick.executionAction] : [];
+}
+
 export function countQuickFilterConditions(quick: DisposalQuickFilter): number {
   let count = 0;
 
@@ -51,13 +63,7 @@ export function countQuickFilterConditions(quick: DisposalQuickFilter): number {
         : [];
   count += statuses.filter(Boolean).length;
 
-  const executionActions =
-    quick.executionActions && quick.executionActions.length > 0
-      ? quick.executionActions
-      : quick.executionAction
-        ? [quick.executionAction]
-        : [];
-  count += executionActions.filter(Boolean).length;
+  count += resolveExecutionActions(quick).filter(Boolean).length;
   count += (quick.emailTypes ?? []).filter(Boolean).length;
   count += (quick.disposalPolicyKeys ?? []).filter(Boolean).length;
   count += (quick.disposalRuleIds ?? []).filter(Boolean).length;

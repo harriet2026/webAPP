@@ -181,6 +181,13 @@ export async function getDisposalList(
     // email_type=a,b / disposal_policy_keys=IPBL,CR query params.
     emailTypes?: string[];
     disposalPolicyKeys?: string[];
+    // GT-12923 阶段三：执行动作筛选值，与 emailTypes/disposalPolicyKeys 一样
+    // 序列化为逗号分隔的顶层查询参数 action=deliver,quarantine（OR 语义）。
+    // 之所以不再走 advanced 里的 FilterCondition，是因为该字段在后端需要
+    // 对 mixed 记录（同一封邮件不同收件人执行了不同动作）做 disposition_
+    // actions 数组交集匹配，这跟通用高级筛选引擎的 eq/in 精确匹配语义不
+    // 一致，需要后端单独识别这个参数名。
+    executionActions?: string[];
     sortOrder?: 'asc' | 'desc';
   },
   requestFn: ApiRequestFn,
@@ -207,6 +214,7 @@ export async function getDisposalList(
   if (params.displayStatus) query.set('display_status', params.displayStatus);
   if (params.emailTypes && params.emailTypes.length > 0) query.set('email_type', params.emailTypes.join(','));
   if (params.disposalPolicyKeys && params.disposalPolicyKeys.length > 0) query.set('disposal_policy_keys', params.disposalPolicyKeys.join(','));
+  if (params.executionActions && params.executionActions.length > 0) query.set('action', params.executionActions.join(','));
   if (params.sortOrder) query.set('sort_order', params.sortOrder);
   if (params.advanced && params.advanced.groups.length > 0) {
     query.set('advanced_filters', JSON.stringify(params.advanced));

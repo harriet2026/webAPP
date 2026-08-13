@@ -35,6 +35,7 @@ import {
   getApplicableAiConditions,
   getDisposalFilterSignature,
   hasSavableDisposalFilters,
+  resolveExecutionActions,
 } from "./lib/filter-state";
 import { SearchBar } from "./search-bar";
 import { SaveTemplateDialog } from "./save-template-dialog";
@@ -328,6 +329,11 @@ export function EmailDisposalCenterPage({
             appliedQuickFilter.emailStatus),
       emailTypes: appliedQuickFilter.emailTypes,
       disposalPolicyKeys: appliedQuickFilter.disposalPolicyKeys,
+      // GT-12923 阶段三：执行动作作为独立的顶层查询参数传给后端，取值时兼容
+      // 旧收藏模板遗留的单值 executionAction（resolveExecutionActions 统一
+      // 处理，与 countQuickFilterConditions / selected-conditions 保持同一套
+      // 解析逻辑，避免三处实现各自走散）。
+      executionActions: resolveExecutionActions(appliedQuickFilter),
       sortOrder: timeSort === "none" ? undefined : timeSort,
     }),
     [

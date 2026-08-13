@@ -167,6 +167,26 @@ describe('getDisposalList - multi-value quick filter serialization', () => {
     expect(url).not.toContain('disposal_policy_keys=');
   });
 
+  // GT-12923 阶段三：执行动作从 advanced_filters 的 action eq/in 条件挪到顶层
+  // 查询参数，序列化方式与 emailTypes/disposalPolicyKeys 一致。
+  it('serializes executionActions as comma-separated action, not an advanced_filters condition', async () => {
+    const requestFn = vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, page_size: 20 });
+    await getDisposalList(
+      { page: 1, pageSize: 20, executionActions: ['deliver', 'quarantine'] },
+      requestFn,
+    );
+    const url = requestFn.mock.calls[0][0] as string;
+    expect(url).toContain('action=deliver%2Cquarantine');
+    expect(url).not.toContain('advanced_filters=');
+  });
+
+  it('omits the action param when executionActions is empty or absent', async () => {
+    const requestFn = vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, page_size: 20 });
+    await getDisposalList({ page: 1, pageSize: 20, executionActions: [] }, requestFn);
+    const url = requestFn.mock.calls[0][0] as string;
+    expect(url).not.toContain('action=');
+  });
+
   it('serializes the controlled received-time sort order', async () => {
     const requestFn = vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, page_size: 100 });
     await getDisposalList({ page: 1, pageSize: 100, sortOrder: 'asc' }, requestFn);

@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────��──������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────���──������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -686,7 +686,7 @@ const SECURITY_KPI = {
   blocked: 12_101,
 };
 
-// 确定性伪值：在 [base, base+width) 内按 index 平滑取值��无 Math.random，可复现）。
+// 确定性伪值：在 [base, base+width) 内按 index 平滑取����无 Math.random，可复现）。
 function threatSeriesValue(
   i: number,
   base: number,
@@ -1819,7 +1819,7 @@ export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
   return mockAlertSmtpConfig();
 }
 
-// ─── 待处置邮件 / 举报待审（KPI）───────────────��──────────────────────────────
+// ─── 待处置邮件 / 举报待审（KPI）─────────────��─��──────────────────────────────
 // 隔离（disposal.total）：today 3 / 7d 11 / 30d 19；举报待审（inbound-audit.total）：
 // today 2 / 7d 6 / 30d 13。两个查询都不带范围参数，故按模块级 currentSystemStatusRange 分支。
 const DISPOSAL_PENDING: Record<SystemStatusRangeKey, number> = {
@@ -2031,7 +2031,7 @@ export function mockPhishingStats(): PhishingStats {
 
 // ─── 钓鱼邮件检测总览：研判日志列表 / 详情（mock）───────────────────────────
 // 真实后端: GET /phishing-agent/detection-logs(/:id)、POST .../block、
-// .../exempt。此前只 mock 了 /phishing-agent/stats，检测总览页的日志��格在
+// .../exempt。此前只 mock 了 /phishing-agent/stats，检测总览页��日志��格在
 // �� mock ��式下始终为空（无后端时看不到任何数据）——这里补一份覆盖全部
 // disposition/recall_status/risk_level/detection_mode 枚举取值的种子数据，
 // 并支持列表关键字/时间范围/多选筛选分页，以及阻断/豁免对种子状态的迁移。
@@ -3829,7 +3829,7 @@ export function mockIPFilterRulesList(query: {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // RBL 过滤（mock）
-// ════════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════��═════════════
 
 function makeRBLRule(input: {
   id: number;
@@ -6093,12 +6093,12 @@ export function mockDeleteAttachmentPassword(id: number) {
   if (index >= 0) mockAttachmentPasswords.splice(index, 1);
 }
 
-// ═══════════════��════════════════════════════════════════════════════════════════
+// ═══════════════��═════════════════════════════════════��══════════════════════════
 // 邮件处置中心（email-handling-disposal-center，mock）
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
 // 为 mock 引入第二套数据模型。
-// ════════════════════════════════════════��═══════════════════════════════════════
+// ════════════════════════════════════��═══��═══════════════════════════════════════
 
 interface MockDisposalSeed {
   tid: string;
@@ -6550,7 +6550,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     mailType: "spam",
     deliveryStatus: "rejected",
     sourceIp: "23.225.11.4",
-    ipLocation: "美国",
+    ipLocation: "��国",
     cluster: "Node 3",
     attachmentCount: 0,
     hasQrCode: false,
@@ -7083,7 +7083,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "user19@company.com",
     subject: "PayPal: Action Required - Verify your account",
     action: "quarantine",
-    reason: "钓鱼链接指向已知恶意域",
+    reason: "钓鱼链接指向已知恶意��",
     mailType: "phishing",
     deliveryStatus: "quarantine_pending",
     sourceIp: "78.141.203.22",
@@ -7787,6 +7787,22 @@ export function mockEmailDisposalList(path: string) {
     items = items.filter((item) =>
       policyKeys.includes(item.disposal_policy_keys ?? ""),
     );
+  // GT-12923 阶段三：执行动作从 AdvancedFilter 的 action eq/in 条件挪到顶层
+  // 查询参数 action=deliver,quarantine（与 email_type/disposal_policy_keys
+  // 处理方式一致，OR 语义）。非 mixed 记录按归一化后的单一动作精确匹配；
+  // mixed 记录改为对 disposition_actions 数组做归一化后取交集——只要邮件里
+  // 任一收件人的最终动作命中筛选值就算命中，而不是要求恒为 'mixed' 的整体
+  // action 字符串精确等于筛选值。
+  const executionActions = query.get("action")?.split(",").filter(Boolean);
+  if (executionActions?.length) {
+    items = items.filter((item) => {
+      const itemActions =
+        item.action === "mixed"
+          ? (item.disposition_actions ?? []).map(normalizeToExecutionAction)
+          : [normalizeToExecutionAction(item.action)];
+      return itemActions.some((action) => executionActions.includes(action));
+    });
+  }
   const advanced = query.get("advanced_filters");
   if (advanced)
     items = items.filter((item) => mockAdvancedMatches(item, advanced));

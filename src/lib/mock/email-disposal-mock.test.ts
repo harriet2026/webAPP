@@ -178,6 +178,37 @@ describe('email disposal center mock contract', () => {
     expect(recallResult.items.some((item) => item.tid === 'MIC053')).toBe(false);
   });
 
+  // GT-12923 阶段三：`action` 从 advanced_filters 里的条件挪到顶层查询参数
+  // action=deliver,quarantine（OR 语义，与 email_type/disposal_policy_keys
+  // 的处理方式一致），供 getDisposalList(disposal-api.ts) 的新参数落地对接。
+  // 归一化 + mixed 交集的语义与阶段二一致，这里只验证新的参数名路径本身
+  // 也接得上，不重复阶段二已经覆盖的归一化细节。
+  it('filters by the top-level action query param (not advanced_filters), applying the same normalization + mixed intersection semantics', () => {
+    const reviewResult = mockEmailDisposalList(
+      '/mail-logs?page=1&page_size=100&action=review',
+    );
+    expect(reviewResult.total).toBeGreaterThan(0);
+    expect(reviewResult.items.every((item) => item.action === 'audit')).toBe(true);
+
+    const multiResult = mockEmailDisposalList(
+      '/mail-logs?page=1&page_size=100&action=deliver,quarantine',
+    );
+    // MIC053 (mixed) 命中：disposition_actions 里含归一化后的 deliver/quarantine。
+    expect(multiResult.items.some((item) => item.tid === 'MIC053')).toBe(true);
+    // 命中的记录本身要么直接是 accept/quarantine，要么是 mixed 且交集非空。
+    expect(
+      multiResult.items.every(
+        (item) =>
+          item.action === 'accept' ||
+          item.action === 'quarantine' ||
+          (item.action === 'mixed' &&
+            (item.disposition_actions ?? []).some((a) =>
+              ['accept', 'quarantine'].includes(a),
+            )),
+      ),
+    ).toBe(true);
+  });
+
   it('sorts by received time without mutating the canonical fixture order', () => {
     const ascending = mockEmailDisposalList('/mail-logs?page=1&page_size=100&sort_order=asc');
     expect(ascending.items[0].received_at <= ascending.items.at(-1)!.received_at).toBe(true);

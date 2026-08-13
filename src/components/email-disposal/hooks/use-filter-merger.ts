@@ -72,28 +72,15 @@ export function useFilterMerger() {
           value: quick.subject,
         });
       }
-      // GT-12923 阶段一（过渡期）：执行动作筛选控件已改为多选
-      // (executionActions)，这里先用标准 in 操作符透传多值，让筛选在阶段三
-      // 把 action 挪到顶层查询参数、补齐 mixed 记录的 disposition_actions 交
-      // 集匹配之前也能生效——但对 mixed 记录（action === 'mixed'）仍无法命
-      // 中，这是阶段三要解决的后端语义缺口，不在本阶段范围内。
-      if (quick.executionActions && quick.executionActions.length > 0) {
-        quickConditions.push({
-          field: "action",
-          op: quick.executionActions.length > 1 ? "in" : "eq",
-          value:
-            quick.executionActions.length > 1
-              ? quick.executionActions
-              : quick.executionActions[0],
-        });
-      } else if (quick.executionAction) {
-        // 兼容旧收藏模板里遗留的单值字段。
-        quickConditions.push({
-          field: "action",
-          op: "eq",
-          value: quick.executionAction,
-        });
-      }
+      // GT-12923 阶段三：执行动作（executionActions / 兼容旧模板的
+      // executionAction）不再走这里拼进 AdvancedFilter 的 action eq/in 条件——
+      // 那条路径只能精确匹配 mail_log.action 这个整体字符串，mixed 记录（同一
+      // 封邮件不同收件人执行了不同动作）的 action 恒为 'mixed'，永远匹配不
+      // 上，导致按执行动作筛选会漏掉本该命中的多投信。现在改为在
+      // getDisposalList 里作为独立的顶层查询参数 action=deliver,quarantine
+      // 传给后端（与 emailTypes/disposalPolicyKeys 的处理方式一致），由后端
+      // 对 mixed 记录按 disposition_actions 数组做交集匹配。见
+      // email-disposal-center-page.tsx 的 searchParams.executionActions。
       if (quick.ipLocation) {
         quickConditions.push({
           field: "geo_region_name",
