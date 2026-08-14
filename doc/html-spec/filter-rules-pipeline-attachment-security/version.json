@@ -17,6 +17,16 @@
       "ticket": "GT-12754",
       "incremental": true,
       "summary": "GT-12754 反病毒引擎配置优化：1) 移除多租户视角下 platformManagedHint 信息横幅；2) 移除「当前方向执行动作」标题行；3) 执行动作 reject 由「阻断」改为「拒收」（4语言同步）；4) 执行动作下拉加描述文案（展开显示，触发器只显示名称）。追加3张截图、增量 section、更新差异矩阵"
+    },
+    {
+      "version": 3,
+      "generated_at": "2026-08-14",
+      "webapp_commit": "not-recorded",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-128938",
+      "requirement_name": "GT-12952 附件安全模块：执行动作去掉拒收，部分策略执行动作增加审核",
+      "incremental": true,
+      "summary": "GT-12952 执行动作去掉拒收、部分策略增加审核：1) 反病毒引擎「发现病毒后的处置」去掉拒收（隔离/审核/丢弃 3项）；2) 反病毒引擎「扫描超时处置」去掉拒收（隔离/审核/丢弃/继续流水线 4项）；3) 图片识别「轻度检测配置·执行动作」去掉拒收（隔离/审核/丢弃 3项）；4) 加密附件「解密失败处置」去掉拒收、新增审核（隔离/放行/审核 3项）。涉及 layer-1/layer-2/layer-3 三个子文件，追加4张用户提供截图与增量 section，均复用已有 attachmentSecurity.actions.audit 国际化文案，未新增 i18n key"
     }
   ]
 }

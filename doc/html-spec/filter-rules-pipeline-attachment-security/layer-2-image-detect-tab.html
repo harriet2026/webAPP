@@ -220,5 +220,48 @@
       if (!isNaN(v)) qrLimit.value = Math.min(50, Math.max(1, v));
     });
   </script>
+
+  <section id="incremental-GT-128938-remove-reject-add-audit">
+    <h3>增量：GT-128938 附件安全模块：执行动作去掉拒收，部分策略执行动作增加审核（2026-08-14）</h3>
+    <p class="hint">需求名称：GT-12952 附件安全模块：执行动作去掉拒收，部分策略执行动作增加审核</p>
+
+    <h4>变更概述</h4>
+    <table class="spec-table">
+      <thead><tr><th>变更点</th><th>变更前</th><th>变更后</th><th>关联代码路径</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>二维码图片检测 · 轻度检测配置 · 执行动作（qr_light_action）选项调整</td>
+          <td>隔离 / 审核 / 拒收 / 丢弃（4 项，注：主文档「UI 元素清单」历史记录为「隔离/审核/阻断/丢弃」，阻断/拒收为同一选项的历史命名）</td>
+          <td>隔离 / 审核 / 丢弃（3 项）；去掉「拒收」选项，默认值 <code>quarantine</code>（隔离）不变</td>
+          <td><code>src/components/security/attachment-security/ImageDetectTab.tsx</code>（<code>LIGHT_ACTIONS</code> 常量）</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>状态截图：轻度检测配置 - 执行动作下拉展开态（去除拒收后）</h4>
+    <p class="trigger-path"><strong>触发路径：</strong>策略流水线 → 附件安全检测「配置」→「图片识别」Tab → 二维码图片检测「检测模式」选择「轻度检测 - 识别到二维码即拦截」→ 点击「轻度检测配置 · 执行动作」下拉触发器 → 下拉列表展开</p>
+    <figure class="screenshot-figure">
+      <img src="./screenshots/GT-128938-image-detect-light-action-dropdown-open.png" alt="轻度检测配置执行动作下拉展开（去除拒收）">
+      <figcaption>下拉展开：3 个选项（隔离/审核/丢弃），当前选中值「隔离」（高亮）；「拒收」选项已移除。</figcaption>
+    </figure>
+    <table class="spec-table">
+      <thead><tr><th>选项值</th><th>动作名称</th><th>i18n key</th></tr></thead>
+      <tbody>
+        <tr><td>quarantine</td><td>隔离</td><td>attachmentSecurity.actions.quarantine</td></tr>
+        <tr><td>audit</td><td>审核</td><td>attachmentSecurity.actions.audit</td></tr>
+        <tr><td>discard</td><td>丢弃</td><td>attachmentSecurity.actions.discard</td></tr>
+      </tbody>
+    </table>
+
+    <h4>失效内容标注</h4>
+    <p>本增量导致「UI 元素清单」表第 4 行「轻度：执行动作 Select」的选项描述过期：</p>
+    <ul>
+      <li><del>选项/校验：隔离/审核/阻断/丢弃（4 项）</del> → 隔离/审核/丢弃（3 项），见上方截图与表格</li>
+    </ul>
+    <p>注：深度检测配置区「超限处置」（放行并记录告警/隔离兜底）不属于本次变更范围，未改动。</p>
+
+    <h4>验证依据</h4>
+    <p>单元测试套件（<code>AttachmentSecurityPage.test.tsx</code>、i18n-parity、save-contract，共 530 项）全部通过；<code>audit</code> 文案已在 zh/en/ru/th 四语命名空间下确认存在，无需新增 i18n key。截图由用户在实际运行环境中提供（浏览器实拍，已确认为本次改动后的真实渲染态）。</p>
+  </section>
 </body>
 </html>
