@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────����──������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────�����──������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -686,7 +686,7 @@ const SECURITY_KPI = {
   blocked: 12_101,
 };
 
-// 确定性伪值：在 [base, base+width) 内按 index 平滑������无 Math.random，可复现）。
+// 确定性伪值：在 [base, base+width) 内按 index 平��������无 Math.random，可复现）。
 function threatSeriesValue(
   i: number,
   base: number,
@@ -1819,7 +1819,7 @@ export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
   return mockAlertSmtpConfig();
 }
 
-// ─── 待处置邮件 / 举报待审（KPI）───────────��─��─��──────────────────────────────
+// ─── 待处置邮件 / 举报待审（KPI）─────────��─��─��─��──────────────────────────────
 // 隔离（disposal.total）：today 3 / 7d 11 / 30d 19；举报待审（inbound-audit.total）：
 // today 2 / 7d 6 / 30d 13。两个查询都不带范围参数，故按模块级 currentSystemStatusRange 分支。
 const DISPOSAL_PENDING: Record<SystemStatusRangeKey, number> = {
@@ -2031,7 +2031,7 @@ export function mockPhishingStats(): PhishingStats {
 
 // ─── 钓鱼邮件检测总览：研判日志列表 / 详情（mock）───────────────────────────
 // 真实后端: GET /phishing-agent/detection-logs(/:id)、POST .../block、
-// .../exempt。此前只 mock 了 /phishing-agent/stats，检测��览页��日志��格在
+// .../exempt。此前只 mock 了 /phishing-agent/stats��检测��览页��日志��格在
 // �� mock ��式下始终为空（无后端时看不到任何数据）——这里补一份覆盖全部
 // disposition/recall_status/risk_level/detection_mode 枚举取值的种子数据，
 // 并支持列表关键字/时间范围/多选筛选分页，以及阻断/豁免对种子状态的迁移。
@@ -3643,7 +3643,7 @@ function makeMockIPFilterRules(): IPFilterRuleView[] {
     makeIpFilterRule({
       id: 11,
       name: "申诉解封申请",
-      description: "已完成审核",
+      description: "���完成审核",
       list_type: "blacklist",
       ip_config_type: "single",
       ip_value: "203.0.113.77",
@@ -6098,7 +6098,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
 // 为 mock 引入第二套数据模型。
-// ══════════════════════════════��═════��═══��═══════════════════════════════════════
+// ═════════════════════════��════��═════��═══��═══════════════════════════════════════
 
 interface MockDisposalSeed {
   tid: string;
@@ -6107,7 +6107,9 @@ interface MockDisposalSeed {
   sender: string;
   recipients: string;
   subject: string;
-  action: "quarantine" | "block" | "discard" | "deliver" | "mixed";
+  // "sideline"（检测中/旁路复检）为群发邮件日志数据补充新增，此前仅
+  // quarantine/block/discard/deliver/mixed 五种动作有种子覆盖。
+  action: "quarantine" | "block" | "discard" | "deliver" | "mixed" | "sideline";
   reason: string;
   mailType: string;
   deliveryStatus: string;
@@ -6139,7 +6141,33 @@ interface MockDisposalSeed {
   // isMixed -- 标记这封邮件是多收件人混合处置（action='mixed'），mockMailLog
   // 据此生成 disposition_actions + 逐收件人 final_action 各异的 dispositions。
   isMixed?: boolean;
+  // mixedBreakdown -- 群发邮件日志数据补充新增：不同 isMixed 种子按收件人下标
+  // 各自的动作/状态/原因分布。缺省时沿用 DEFAULT_MIXED_BREAKDOWN（即 MIC053
+  // 原有的固定 3投递+1隔离+1旁路分布），使已有种子行为不变；新增的多个混合
+  // 处置群发种子借此各自呈现不同的执行动作组合（而不是所有 mixed 记录都长
+  // 得一样）。
+  mixedBreakdown?: Array<{ action: string; status: string; reason: string }>;
+  // mixedDeliveryStatusSummary / mixedWorkflowOutcomeSummary -- 同上，
+  // 覆盖 mixed 种子整封维度的 delivery_status_summary / workflow_outcome_summary
+  // 展示字段，缺省沿用原有的 "partial_delivered" / "released"。
+  mixedDeliveryStatusSummary?: string;
+  mixedWorkflowOutcomeSummary?: string;
 }
+
+// DEFAULT_MIXED_BREAKDOWN -- MIC053 原有的硬编码分布（3 投递白名单 + 1 隔离
+// 扣留 + 1 旁路），提取为常量供 mockMailLog 在种子未提供 mixedBreakdown 时
+// 兜底，保证既有 mixed 记录渲染结果不变。
+const DEFAULT_MIXED_BREAKDOWN: Array<{
+  action: string;
+  status: string;
+  reason: string;
+}> = [
+  { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
+  { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
+  { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
+  { action: "quarantine", status: "quarantined", reason: "rule 隔离扣留 matched at data stage" },
+  { action: "sideline", status: "delivered", reason: "default_sideline" },
+];
 
 const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
   {
@@ -6565,7 +6593,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "finance@company.com",
     subject: "代开各类正规发票，点数优惠",
     action: "block",
-    reason: "内容规则命中：违规发票��告",
+    reason: "内容规则命��：违规发票��告",
     mailType: "spam",
     deliveryStatus: "rejected",
     sourceIp: "119.28.55.30",
@@ -7172,6 +7200,170 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     senderIsNewOnThisMail: true,
     domainAgeDays: 3,
   },
+  // ═══════════════════════════════════════════════════════════════════════
+  // 群发邮件日志数据补充（多类型）：以下 7 条均为多收件人群发邮件，覆盖此前
+  // 群发场景缺失的执行动作（discard/sideline）、邮件状态
+  // （audit_pending/sideline_pending/delivery_cancelled/expired，含此前
+  // 群发场景零覆盖的两个全新枚举值）与处置依据组合；另新增 2 条 mixed
+  // 记录，各自的收件人动作分布（mixedBreakdown）互不相同，避免"所有混合
+  // 处置群发邮件长得一样"。
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    tid: "MIC054",
+    time: "2026-06-20 10:05:00",
+    direction: "incoming",
+    sender: "promo-blast@survey-reward.net",
+    recipients:
+      "ops1@company.com, ops2@company.com, ops3@company.com, ops4@company.com, ops5@company.com, ops6@company.com",
+    subject: "限时抽奖活动通知（多投信 - 恶意宏文档丢弃）",
+    action: "discard",
+    reason: "命中恶意宏文档特征库，批量丢弃",
+    mailType: "virus",
+    deliveryStatus: "discarded",
+    sourceIp: "103.224.182.51",
+    ipLocation: "越南",
+    cluster: "Node 2",
+    attachmentCount: 1,
+    hasQrCode: false,
+    score: 97,
+    basis: ["ATT-AV", "恶意宏文档批量拦截", "ATT-AV-011"],
+  },
+  {
+    tid: "MIC055",
+    time: "2026-06-20 14:20:00",
+    direction: "outgoing",
+    sender: "sales@company.com",
+    recipients:
+      "partner1@overseas-client.com, partner2@overseas-client.com, partner3@overseas-client.com, partner4@overseas-client.com, partner5@overseas-client.com",
+    subject: "合作合同附件（多投信 - 涉密内容待审核）",
+    action: "quarantine",
+    reason: "涉密关键词命中，转人工审核",
+    mailType: "sensitive",
+    deliveryStatus: "audit_pending",
+    sourceIp: "10.0.0.15",
+    ipLocation: "中国",
+    cluster: "Node 1",
+    attachmentCount: 2,
+    hasQrCode: false,
+    score: 58,
+    basis: ["CONTENT", "涉密内容外发批量审核", "CT-015"],
+  },
+  {
+    tid: "MIC056",
+    time: "2026-06-21 09:40:00",
+    direction: "incoming",
+    sender: "billing@partner-finance-group.com",
+    recipients:
+      "fin1@company.com, fin2@company.com, fin3@company.com, fin4@company.com",
+    subject: "月度对账单核对（多投信 - 相似度检测中）",
+    action: "sideline",
+    reason: "命中批量群发相似度检测规则，转旁路复检",
+    mailType: "normal",
+    deliveryStatus: "sideline_pending",
+    sourceIp: "170.106.42.18",
+    ipLocation: "新加坡",
+    cluster: "Node 3",
+    attachmentCount: 1,
+    hasQrCode: false,
+    score: 52,
+    basis: ["BEHAVIOR", "批量外发相似度异常检测", "BEHAVIOR-014"],
+  },
+  {
+    tid: "MIC057",
+    time: "2026-06-21 16:10:00",
+    direction: "outgoing",
+    sender: "it-notice@company.com",
+    recipients: "dept1@company.com, dept2@company.com, dept3@company.com",
+    subject: "系统维护通知（多投信 - 投递中止）",
+    action: "deliver",
+    reason: "内容复检未通过，投递队列中主动中止转发",
+    mailType: "normal",
+    deliveryStatus: "cancelled",
+    sourceIp: "10.0.0.22",
+    ipLocation: "中国",
+    cluster: "Node 1",
+    attachmentCount: 0,
+    hasQrCode: false,
+    score: 40,
+    basis: ["ACF", "批量群发内容复检中止投递", "ACF-021"],
+  },
+  {
+    tid: "MIC058",
+    time: "2026-06-22 08:30:00",
+    direction: "incoming",
+    sender: "event-promo@expo-mailer.net",
+    recipients:
+      "mkt1@company.com, mkt2@company.com, mkt3@company.com, mkt4@company.com, mkt5@company.com",
+    subject: "行业展会邀请函（多投信 - 隔离超时自动清理）",
+    action: "quarantine",
+    reason: "隔离后超过保留期限未处理，系统自动清理",
+    mailType: "spam",
+    deliveryStatus: "expired",
+    sourceIp: "185.220.101.44",
+    ipLocation: "荷兰",
+    cluster: "Node 2",
+    attachmentCount: 0,
+    hasQrCode: false,
+    score: 45,
+    basis: ["IPBL", "批量外发IP黑名单-隔离超时自动清理", "IPBL-013"],
+  },
+  {
+    tid: "MIC059",
+    time: "2026-06-22 11:50:00",
+    direction: "incoming",
+    sender: "invoice-support@supplier-verify-group.com",
+    recipients:
+      "fina@company.com, finb@company.com, proca@company.com, procb@company.com, opsa@company.com, opsb@company.com",
+    subject: "供应商发票变更通知（多投信 - 混合处置：投递/拒收/丢弃）",
+    action: "quarantine",
+    reason: "混合处置：白名单收件人投递 + AI二次复核拒收 + 恶意附件丢弃",
+    mailType: "phishing",
+    deliveryStatus: "partial_delivered",
+    sourceIp: "196.245.11.87",
+    ipLocation: "尼日利亚",
+    cluster: "Node 3",
+    attachmentCount: 1,
+    hasQrCode: false,
+    score: 78,
+    basis: ["AI-PHISH", "仿冒供应商钓鱼-批量混合处置", "AI-PHISH-018"],
+    isMixed: true,
+    mixedBreakdown: [
+      { action: "accept", status: "delivered", reason: "发件人在信任白名单，直接投递" },
+      { action: "accept", status: "delivered", reason: "发件人在信任白名单，直接投递" },
+      { action: "reject", status: "blocked", reason: "AI二次复核判定为钓鱼，拒收" },
+      { action: "reject", status: "blocked", reason: "AI二次复核判定为钓鱼，拒收" },
+      { action: "discard", status: "discarded", reason: "命中恶意附件哈希黑名单，丢弃" },
+      { action: "quarantine", status: "quarantined", reason: "行为异常触发隔离规则" },
+    ],
+  },
+  {
+    tid: "MIC060",
+    time: "2026-06-23 15:00:00",
+    direction: "incoming",
+    sender: "billing-notice@telecom-service-provider.com",
+    recipients:
+      "user31@company.com, user32@company.com, user33@company.com, user34@company.com, user35@company.com",
+    subject: "话费账单通知（多投信 - 混合处置：投递/退信/隔离）",
+    action: "quarantine",
+    reason: "混合处置：正常收件人投递 + 邮箱不存在退信 + 敏感附件隔离",
+    mailType: "normal",
+    deliveryStatus: "partial_delivered",
+    sourceIp: "89.34.22.10",
+    ipLocation: "法国",
+    cluster: "Node 1",
+    attachmentCount: 1,
+    hasQrCode: false,
+    score: 30,
+    basis: ["CONTENT", "批量账单邮件-混合处置内容复核", "CT-022"],
+    isMixed: true,
+    mixedBreakdown: [
+      { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
+      { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
+      { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
+      { action: "reject", status: "rejected", reason: "对方邮箱不存在，退信" },
+      { action: "quarantine", status: "quarantined", reason: "附件命中敏感内容规则，隔离" },
+    ],
+  },
 ];
 
 function disposalAction(seed: MockDisposalSeed): string {
@@ -7186,6 +7378,9 @@ function disposalAction(seed: MockDisposalSeed): string {
     deliver: "accept",
     discard: "discard",
     quarantine: "quarantine",
+    // sideline（检测中/旁路复检）：群发邮件日志数据补充新增，与
+    // quarantine/audit 一样是"仍在我方系统内、尚未确定去向"的动作。
+    sideline: "sideline",
     // Aggregate mixed rows still need a scalar fallback in detail-only mock
     // fields; the per-recipient actions are emitted separately below.
     mixed: "accept",
@@ -7198,12 +7393,19 @@ function disposalDelivery(seed: MockDisposalSeed): string | undefined {
       delivered: "delivered",
       delivery_failed: "failed",
       partial_delivered: "partial_delivered",
+      // cancelled（投递中止）：群发邮件日志数据补充新增，区别于从未进入
+      // 投递队列的 discard —— 已进入投递队列后被我方主动中止转发。
+      cancelled: "cancelled",
     } as Record<string, string>
   )[seed.deliveryStatus];
 }
 
 function disposalWorkflow(seed: MockDisposalSeed): string | undefined {
-  return seed.deliveryStatus === "discarded" ? "discarded" : undefined;
+  if (seed.deliveryStatus === "discarded") return "discarded";
+  // expired（已过期）：群发邮件日志数据补充新增，隔离/待处理邮件超过保留
+  // 期限未被人工处理后系统自动清理的场景。
+  if (seed.deliveryStatus === "expired") return "expired";
+  return undefined;
 }
 
 function recipientDisposalStatus(seed: MockDisposalSeed): string {
@@ -7356,7 +7558,13 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     subject: seed.subject,
     action: seed.isMixed ? "mixed" : disposalAction(seed),
     status: seed.isMixed ? "mixed" : seed.deliveryStatus,
-    disposition_actions: seed.isMixed ? ["accept", "quarantine", "sideline"] : undefined,
+    disposition_actions: seed.isMixed
+      ? Array.from(
+          new Set(
+            (seed.mixedBreakdown ?? DEFAULT_MIXED_BREAKDOWN).map((b) => b.action),
+          ),
+        )
+      : undefined,
     reason: seed.reason,
     authenticated: seed.direction === "outgoing",
     smtp_user: seed.direction === "outgoing" ? seed.sender : undefined,
@@ -7364,8 +7572,12 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     queue_id: `MOCK${String(index + 1).padStart(5, "0")}`,
     storage_node: seed.cluster,
     storage_size: seed.storageSizeBytes ?? 18_000 + index * 1371,
-    delivery_status_summary: seed.isMixed ? "partial_delivered" : disposalDelivery(seed),
-    workflow_outcome_summary: seed.isMixed ? "released" : disposalWorkflow(seed),
+    delivery_status_summary: seed.isMixed
+      ? seed.mixedDeliveryStatusSummary ?? "partial_delivered"
+      : disposalDelivery(seed),
+    workflow_outcome_summary: seed.isMixed
+      ? seed.mixedWorkflowOutcomeSummary ?? "released"
+      : disposalWorkflow(seed),
     recall_status_summary: "none",
     received_at: seed.time.replace(" ", "T") + "+08:00",
     processed_at: seed.time.replace(" ", "T") + "+08:00",
@@ -7474,22 +7686,16 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     },
     recipient_dispositions: recipients.map((recipient, i) => {
       const status = recipientStatusFor(seed, recipients.length, i);
-      // mixed seed: 前半投递、后半隔离/旁路，模拟真实 mixed 场景
-      const mixedActions = ["accept", "accept", "accept", "quarantine", "sideline"];
-      const mixedStatuses = ["delivered", "delivered", "delivered", "quarantined", "delivered"];
-      const mixedReasons = [
-        "rule 投递白名单 matched at data stage",
-        "rule 投递白名单 matched at data stage",
-        "rule 投递白名单 matched at data stage",
-        "rule 隔离扣留 matched at data stage",
-        "default_sideline",
-      ];
-      const isMixedRcpt = seed.isMixed && i < mixedActions.length;
+      // mixed seed: 按 seed.mixedBreakdown（未提供时兜底 DEFAULT_MIXED_BREAKDOWN，
+      // 即 MIC053 原有的 3投递+1隔离+1旁路分布）逐收件人分配动作/状态/原因，
+      // 让不同的群发 mixed 记录呈现不同的执行动作组合。
+      const breakdown = seed.mixedBreakdown ?? DEFAULT_MIXED_BREAKDOWN;
+      const isMixedRcpt = seed.isMixed && i < breakdown.length;
       return {
         recipient,
-        final_action: isMixedRcpt ? mixedActions[i] : disposalAction(seed),
-        status: isMixedRcpt ? mixedStatuses[i] : status,
-        reason: isMixedRcpt ? mixedReasons[i] : seed.reason,
+        final_action: isMixedRcpt ? breakdown[i].action : disposalAction(seed),
+        status: isMixedRcpt ? breakdown[i].status : status,
+        reason: isMixedRcpt ? breakdown[i].reason : seed.reason,
         object_id: OPERABLE_RECIPIENT_STATUSES.has(status)
           ? `obj-${index + 1}-${i}`
           : undefined,
@@ -7553,6 +7759,9 @@ function displayStatusOf(item: (typeof mockDisposalMailLogs)[number]): string {
   // deleted / rejected_after_review：均已"停在网关"，归并为「已丢弃」。
   if (item.workflow_outcome_summary === "deleted") return "discarded";
   if (item.workflow_outcome_summary === "rejected_after_review") return "discarded";
+  // expired：隔离/待处理邮件超过保留期限未被人工处理，系统自动清理，与
+  // discard（一次性丢弃）区分为独立的终态位置节点。
+  if (item.workflow_outcome_summary === "expired") return "expired";
   if (item.action === "quarantine") return "quarantine_pending";
   if (item.action === "sideline") return "sideline_pending";
   if (item.action === "audit") return "audit_pending";
@@ -8697,7 +8906,7 @@ export function mockContactSourceDelete(id: number) {
   if (i >= 0) contactSources.splice(i, 1);
 }
 
-// GT-12034：自动同步开关走专用端点（列表 config 已脱敏，不能整体回传）。
+// GT-12034：自动同步开关走专用���点（列表 config 已脱敏，不能整体回传）。
 export function mockContactSourceSetAutoSync(id: number, body: { enabled?: boolean; cron_expr?: string }) {
   const row = contactSources.find((s) => s.id === id);
   if (!row) return null;
