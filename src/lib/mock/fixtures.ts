@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────��������──������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────���������──������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -1819,7 +1819,7 @@ export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
   return mockAlertSmtpConfig();
 }
 
-// ─── 待处置邮件 / 举报待审（KPI）────��────��─��─��─��──────────────────────────────
+// ─── 待处置邮件 / 举报待审（KPI）��───��────��─��─��─��──────────────────────────────
 // 隔离（disposal.total）：today 3 / 7d 11 / 30d 19；举报待审（inbound-audit.total）：
 // today 2 / 7d 6 / 30d 13。两个查询都不带范围参数，故按模块级 currentSystemStatusRange 分支。
 const DISPOSAL_PENDING: Record<SystemStatusRangeKey, number> = {
@@ -2236,7 +2236,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     sideline_id: 'ph-100007',
     message_id: '<8f2c1a0007@drive-share-cn.net>',
     sender: 'notify@drive-share-cn.net',
-    subject: '您有一份共享文档待查看',
+    subject: '您有一份共享文档待��看',
     recipients: ['chenjing@example.com'],
     direction: 'inbound',
     status: 'sidelined',
@@ -2952,7 +2952,7 @@ function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
     makeRule({
       id: 3,
       name: "可疑IP严格限制",
-      description: "临时限制，观察中",
+      description: "临时限制，观���中",
       priority: 200,
       scopeType: "range",
       scopeValue: "198.51.100.0/24",
@@ -3642,7 +3642,7 @@ function makeMockIPFilterRules(): IPFilterRuleView[] {
     }),
     makeIpFilterRule({
       id: 11,
-      name: "申诉解封申请",
+      name: "���诉解封申请",
       description: "���完成审核",
       list_type: "blacklist",
       ip_config_type: "single",
@@ -5168,7 +5168,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 发信行为管控（behavior_control，mock）
+// 发信���为管控（behavior_control，mock）
 // 数据源自 demo `design/origin/demo/components/sender-behavior-control/mock-data.ts`
 // 的 `mockBehaviorRules`（7 条手工命名 + 生成的 #8..#35，共 35 条），并映射到统一规则。
 // demo 中的 organization 发件人对象尚未被后端支持，因此 mock 也只生成 individual/group，
@@ -6098,7 +6098,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
 // 为 mock 引入第二套数据模型。
-// ═════════════��══��══��═════��════��═════��═══��═══════════════════════════════════════
+// ═══════��═════��══��══��═════��════��═════��═══��═══════════════════════════════════════
 
 interface MockDisposalSeed {
   tid: string;
@@ -6125,7 +6125,7 @@ interface MockDisposalSeed {
   // 现状（暂无 whois/RDAP 数据）的优雅降级。
   domainAgeDays?: number;
   // senderIsNewOnThisMail -- true 时该行的 sender_first_seen_at 等于自己的
-  // received_at（首次出现新发信人场景），否则沿用既有的固定历史值（已知
+  // received_at（首次出现新发信��场景），否则沿用既有的固定历史值（已知
   // 发信人场景）。
   senderIsNewOnThisMail?: boolean;
   // storageSizeBytes -- 覆盖默认按 index 递增的 storage_size 演算值，用于对齐
@@ -6275,6 +6275,21 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     score: 35,
     basis: ["CONTENT", "内容关键字匹配", "CT-007"],
     isMixed: true,
+    // 8 个收件人需要 8 条明确的处置分布；此前未设置 mixedBreakdown 时回退到
+    // 仅 5 条的 DEFAULT_MIXED_BREAKDOWN，第 6~8 位收件人（frank/grace/henry）
+    // 会落入通用状态轮转逻辑取到 "pending_review"，而"邮件状态"分类表不识别
+    // 该值，兜底归类为"其他"，导致列表页徽章上出现异常的"其他 x1"。这里为
+    // 全部 8 位收件人显式补齐动作/状态/原因，修复该问题。
+    mixedBreakdown: [
+      { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
+      { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
+      { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
+      { action: "quarantine", status: "quarantined", reason: "rule 隔离扣留 matched at data stage" },
+      { action: "sideline", status: "delivered", reason: "default_sideline" },
+      { action: "quarantine", status: "quarantined", reason: "混合处置：白名单收件人投递 + 规则命中隔离" },
+      { action: "quarantine", status: "quarantined", reason: "混合处置：白名单收件人投递 + 规则命中隔离" },
+      { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
+    ],
   },
   {
     tid: "MIC002",
@@ -8195,7 +8210,7 @@ export function mockEmailDisposalFields() {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 处置设置（email-disposal/disposal-settings，mock）
-// ════════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════���════════════
 
 // ---- 处置设置（demo disposal-settings-page.tsx 初始 state，数据照抄 demo）----
 let disposalSettingsState: DisposalSettings | null = null;
@@ -8404,7 +8419,7 @@ const mockLinkClickLogs: LinkClickLog[] = [
     click_source: "attachment",
     trigger_stage: "phishing_agent",
     verdict: "suspicious",
-    detail: "URL沙箱引爆：页面尝试下载可疑可执行文件",
+    detail: "URL沙箱引爆：页面尝试下载可疑可��行文件",
     final_result: "alerted",
     user_action: "abandoned",
     deep_inspect_state: "done",
