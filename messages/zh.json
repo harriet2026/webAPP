@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测�����������������能�������������",
+    "spoofingDetection": "仿冒邮件检测�������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -758,7 +758,7 @@
         "deleted": "转发规则已删除",
         "masterSwitchEnabled": "转发规则总开关已开启",
         "masterSwitchDisabled": "转发规则总开关已关闭",
-        "saveError": "请修正表单中的校验错误"
+        "saveError": "请修正表单中的���验错误"
       },
       "deleteDialogTitle": "删除转发规则「{name}」？",
       "deleteDialogDescription": "删除后该连接层过滤规则立即失效。",
@@ -1112,7 +1112,7 @@
         "imap": "IMAP"
       },
       "toasts": {
-        "created": "认证配置��添加",
+        "created": "认证��置��添加",
         "updated": "认证���置已更���",
         "deleted": "认证配置已删除",
         "saveError": "请修正表单中的校验错误"
@@ -1336,7 +1336,7 @@
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
-    "targetGroups": "适����������",
+    "targetGroups": "适�����������",
     "policyConfig": "策略配置",
     "priority": "优先��",
     "newPolicy": "新建群组策略",
@@ -1629,7 +1629,7 @@
     "released": "已释放",
     "releasedAt": "释放时间",
     "releasedBy": "释放人",
-    "batchRelease": "批量释放",
+    "batchRelease": "批量释���",
     "releaseTo": "释放���",
     "release": "释放",
     "notes": "备注",
@@ -3526,7 +3526,7 @@
     "preview": {
       "title": "当前配置效果",
       "allUnlimited": "当前规则未设置任何限制条件，建议至少配置一项阈值，否则规则无实际作用。",
-      "whenIP": "当 IP 地址",
+      "whenIP": "当 IP 地��",
       "allIP": "���部 IP",
       "notFilled": "未���写",
       "affectAbout": "（影响约 {count} 个 IP）",
@@ -3712,7 +3712,7 @@
     "priorityTip": "数值越大越优先。建议常规规则设为 100-500，需要更优先的规则设更大数值。",
     "priorityHint": "数值越大越优先",
     "executeAction": "执行动作",
-    "executeActionBlacklistTip": "选择当IP命中黑名单规则时的处理方式。隔离/审核会暂存邮件待处理，阻断会退回邮件，丢���会静默删除邮件。",
+    "executeActionBlacklistTip": "选择当IP命中黑名单规则时的处理方式。隔离/审核会暂存邮��待处理，阻断会退回邮件，丢���会静默删除邮件。",
     "executeActionWhitelistTip": "选择当IP命中白名单规则时的处理方式。投递会直接放行，标记投递会添加标记后放行���",
     "basicSettings": "基础设置",
     "remarkTitle": "备注说明",
@@ -3831,7 +3831,7 @@
     "bulkApprove": "批量放行",
     "bulkReject": "批量拒绝",
     "comment": "审核意见",
-    "commentPlaceholder": "请输入审核意见...",
+    "commentPlaceholder": "请输入��核意见...",
     "approveConfirm": "确认放行此邮件？",
     "rejectConfirm": "确认拒绝此邮件���",
     "noItems": "暂无入站审���项",
@@ -4426,7 +4426,7 @@
     "title": "认证仿冒检测",
     "description": "检测伪造发件人和认证仿冒，包括SPF/DKIM/DMARC/PTR验证和显示名仿冒检测",
     "save": "保存",
-    "saveSuccess": "保存成功",
+    "saveSuccess": "保存���功",
     "saveFailed": "保存失败",
     "warning": "提示",
     "viewObserveStats": "查看观察统计",
@@ -4893,7 +4893,7 @@
       "enabled": "启用",
       "disabled": "禁用",
       "reset": "重置",
-      "import": "导入",
+      "import": "��入",
       "export": "导出"
     },
     "pagination": {
@@ -5135,7 +5135,7 @@
       "detectPolicy": "检测策略",
       "mode_none": "不检测",
       "mode_deep": "深度检测（尝试解密并扫描内容）",
-      "decryptFailAction": "解密失败处置",
+      "decryptFailAction": "���密失败处置",
       "receiveDefault": "收信方向默认：继续流水线",
       "advancedOptions": "高级选项",
       "recursiveDetectDepth": "解密成功后递归检测解压内容（深度限制：3层）",
@@ -5232,7 +5232,7 @@
     "masterSwitch": "总开关",
     "receiveOnlyNotice": "链接保护仅对接收方向生效",
     "failedToUpdate": "更新失败",
-    "failedToLoad": "加载设置失败",
+    "failedToLoad": "���载设置失败",
     "enabled": "已启用",
     "disabled": "已禁用",
     "saved": "���保存",
@@ -5365,7 +5365,7 @@
         "block": "拦截并提示（安全优先，推荐）",
         "allow": "放行并标记（可用性优先）",
         "hold": "继续等待（保持等待页轮询结果）",
-        "hint": "到达超时上限仍无检测结果时的处理方式"
+        "hint": "到达超时上限仍无检测结果时��处理方式"
       }
     },
     "statusEnabled": "已启用",
@@ -5692,7 +5692,7 @@
     "editOverride": "编辑覆盖",
     "deleteOverride": "删除覆盖",
     "extraOverrides": "额外覆盖项（文件中不存在的键）",
-    "noteLabel": "备注"
+    "noteLabel": "��注"
   },
   "ruleSync": {
     "banner": {
@@ -6005,7 +6005,6 @@
       "empty": "暂无数据",
       "selected": "已选 {n} 封",
       "disposalBasis": "处置依据",
-      "disposalBasisMoreSuffix": "等 {count} 项",
       "disposalBasisGroupHeader": "{module}（{count} 人）",
       "disposalBasisRuleLine": "{recipient} — 规则：{ruleName}（{ruleId}）",
       "disposalBasisPlatformRuleLine": "{recipient} — 规则：{policyLabel}",
@@ -6120,7 +6119,7 @@
         },
         "confidenceScore": "置信度 {pct}%",
         "confidenceBlacklist": "黑名单命中（无置信度）",
-        "confidenceRule": "规则命中（无置信度）",
+        "confidenceRule": "规��命中（无置信度）",
         "action": "执行动作",
         "subject": "主题",
         "sender": "发信人",
@@ -6813,7 +6812,7 @@
       "matchModeLabel": "匹配模式",
       "comparisonLabel": "比较",
       "valuesLabel": "值(每行一个)",
-      "valuesHint": "每行一个值",
+      "valuesHint": "每��一个值",
       "aiGenerateRegex": "AI 生成正则",
       "aiRegexComingSoon": "AI 辅助正则生成即将上线",
       "thresholdLabel": "阈值",
@@ -6903,7 +6902,7 @@
         "senderIpCount15Min": "发件 IP 数 (15分钟)",
         "senderRecipientCount15Min": "发件收件人数 (15分钟)",
         "senderMailCount15Min": "发件邮件数 (15分钟)",
-        "senderMailCountDaily": "发件邮件数 (每天)",
+        "senderMailCountDaily": "发件邮件��� (每天)",
         "senderRateLimit15": "发件频率限制 (15分钟)",
         "recipientCount": "收件人数"
       },
@@ -7077,7 +7076,7 @@
       },
       "desc_rblResult": {
         "source": "RBL实时黑名单服务",
-        "usage": "根据RBL查询结果过滤邮件",
+        "usage": "根据RBL查��结果过滤邮件",
         "note": "支持多个RBL源联合查询"
       },
       "desc_urlDomain": {
@@ -7157,7 +7156,7 @@
       "desc_senderMailCountDaily": {
         "source": "发信行为统计",
         "usage": "统计当天发信人发送的邮件总数",
-        "note": "日级别的发信频率限制"
+        "note": "日级别的发信频率限��"
       },
       "desc_senderRateLimit15": {
         "source": "发信行为管控",
@@ -7233,7 +7232,7 @@
       "rangeMin": "≥ {min}",
       "rangeMax": "≤ {max}",
       "mapWildcardHint": "* 表示任意对象（匹配全部键）；如需限定具体对象，请在上方选择。",
-      "mapObjectHint": "仅匹配所选对象；选择 * 可匹配任意对象。",
+      "mapObjectHint": "仅匹配所选��象；选择 * 可匹配任意对象。",
       "inputType": {
         "text": "文本（每行一个值）",
         "number": "数值",
@@ -7702,7 +7701,7 @@
     "kpi": {
       "totalFiltered": "过滤邮件总量",
       "blockRate": "拦截率",
-      "recallRate": "召回率",
+      "recallRate": "召回��",
       "pendingReview": "待审积压",
       "vsPrevious": "较上期"
     },
@@ -9010,7 +9009,7 @@
     },
     "personForm": {
       "addTitle": "添加保护对象",
-      "addDescription": "仅添加的保护对象会纳入显示名仿冒检测范围。请配置该对象的检测与处置策略。",
+      "addDescription": "仅添加的保护对象会纳入显示名仿冒检测范围。请配置该对象的检���与处置策略。",
       "editTitle": "编辑保护对象",
       "modeSingle": "单个录入",
       "modePaste": "批量粘贴",
@@ -9728,7 +9727,7 @@
     "errServerRequired": "服务器地址不能为空",
     "errUrlInvalid": "请输入正确的 URL 地址",
     "export": "导出",
-    "exportFailures": "导出失败明细",
+    "exportFailures": "导出失败���细",
     "exportLimitToast": "数据量超过 50,000 条导出上限，请添加筛选条件",
     "exportSelected": "导出选中",
     "exportTaskToast": "已生成导出任务，共 {count} 条记录",
@@ -10323,7 +10322,7 @@
       "overflowPolicy": "「拒绝新登录」更严：合法会话在线时，攻击者的新登录会被直接拒绝",
       "lockoutMinutes": "-1 = 永久锁定，只能由管理员在用户列表里手工解锁",
       "captchaAfterFailures": "连续失败达该次数后，后续登录需输入图形验证码",
-      "twoFactorEnabled": "启用后，本租户全体成员登录需进行二次认证",
+      "twoFactorEnabled": "启用后，本租户全体成员登录需��行二次认证",
       "twoFactorLocked": "平台已强制启用二次认证，本租户无法关闭",
       "forceTwoFactor": "启用后，平台内所有租户的成员登录均需进行二次认证"
     },
@@ -10783,7 +10782,7 @@
       "key_not_found": "签名密钥不存在，可���已被删除",
       "key_size_too_large": "密钥长度不能超过 {max} 位",
       "selector_invalid": "选择器「{value}」格式不正确",
-      "tenant_id_invalid": "租户参数无效，必须是正整数"
+      "tenant_id_invalid": "租户参数无效，必须是正整���"
     },
     "link_blacklist": {
       "access_denied": "没有权限执行该操作",
@@ -11020,7 +11019,7 @@
     },
     "quarantine": {
       "id_required": "请填写隔离邮件 ID",
-      "item_not_found": "隔离邮件不存在",
+      "item_not_found": "隔离邮件���存在",
       "access_denied": "无权访问该隔离邮件"
     },
     "antispam_notify": {
@@ -11056,7 +11055,7 @@
       "link_redirect_tls_not_configured": "链接跳转服务(8082)未配置 TLS 证书。请先在集群管理台���对外服务 TLS 证书」上传证书，或确认已由前置反代终结 TLS 后开启 link_protection/tls_terminated_by_proxy"
     },
     "login_policy": {
-      "two_factor_platform_admin_only": "二次认证强制策略仅平台管理员可设置",
+      "two_factor_platform_admin_only": "二次认证强制策略仅平��管理员可设置",
       "two_factor_locked_by_platform": "平台已强制启用二次认证，租户不可关闭",
       "two_factor_self_service_tenant_only": "二次认证自助开关是租户级设置，全局基线不���持",
       "baseline_platform_admin_only": "仅平台管理员可��改平台基线",
@@ -11340,7 +11339,7 @@
       "merged_limit_limit_1_unlimited_between": "合并限额必须是 -1（不限）或 1-1000 之间",
       "invalid_action_merged_limit": "合并限额不支持该操作",
       "action_invalid": "{name} 的处置动作无效",
-      "scope_invalid": "{name} 的生效范围无效，只能是本域或全部"
+      "scope_invalid": "{name} 的生效范围无效，只能是本域或���部"
     },
     "roles": {
       "system_default_role_cannot_edited": "系统内置角色不可修改",

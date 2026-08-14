@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────�����������──������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────������������──������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -2236,7 +2236,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     sideline_id: 'ph-100007',
     message_id: '<8f2c1a0007@drive-share-cn.net>',
     sender: 'notify@drive-share-cn.net',
-    subject: '您有一份共��文档待��看',
+    subject: '您有一份����文档待��看',
     recipients: ['chenjing@example.com'],
     direction: 'inbound',
     status: 'sidelined',
@@ -4389,7 +4389,7 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
       }),
       sfGroupRule({
         id: 8107,
-        name: "恶意附件特�����",
+        name: "恶意附件�������",
         type: "feature",
         created_at: "2024-01-12T00:00:00Z",
         member_count: 2,
@@ -6145,6 +6145,20 @@ interface MockDisposalSeed {
   // 处置群发种子借此各自呈现不同的执行动作组合（而不是所有 mixed 记录都长
   // 得一样）。
   mixedBreakdown?: Array<{ action: string; status: string; reason: string }>;
+  // mixedBasis -- 群发邮件（isMixed）逐收件人的处置依据（策略模块/规则），
+  // 与 mixedBreakdown 按下标对齐（长度也应一致）。用于生成
+  // disposal_basis.per_recipient[]，支撑列表页"处置依据"列的多桶展示——
+  // 同一封群发邮件不同收件人命中不同策略模块时，按 policy_key 分组显示
+  // "模块A 等 N 项"，hover 展开逐收件人明细。缺省（isMixed 但未提供）时
+  // per_recipient 不生成，沿用旧行为：全体收件人共享顶层 disposal_basis
+  // （即 seed.basis 对应的单一依据），兼容尚未补充多依据的既有 mixed 种子
+  // （如 MIC053）。
+  mixedBasis?: Array<{
+    policyKey: string;
+    ruleName: string;
+    ruleId: string;
+    hitValues?: Record<string, string>;
+  }>;
   // mixedDeliveryStatusSummary / mixedWorkflowOutcomeSummary -- 同上，
   // 覆盖 mixed 种子整封维度的 delivery_status_summary / workflow_outcome_summary
   // 展示字段，缺省沿用原有的 "partial_delivered" / "released"。
@@ -6223,6 +6237,47 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
       { action: "quarantine", status: "quarantined", reason: "行为异常触发隔离规则" },
       { action: "sideline", status: "delivered", reason: "命中相似度检测规则，转旁路复检后投递" },
     ],
+    // mixedBasis：4 个不同策略模块命中（SBL 命中 2 人合并 1 桶、ATT-AV 命中 2
+    // 人合并 1 桶、BEHAVIOR/SIM 各 1 人 1 桶），用于验证"处置依据"列多桶展示
+    // （主文案 + "等 4 项" + Tooltip 按 policy_key 分组展开）。
+    mixedBasis: [
+      {
+        policyKey: "SBL",
+        ruleName: "供应商发件人白名单",
+        ruleId: "SBL-201",
+        hitValues: { sender: "invoice-support@supplier-verify-group.com", list_type: "whitelist" },
+      },
+      {
+        policyKey: "SBL",
+        ruleName: "供应商发件人白名单",
+        ruleId: "SBL-201",
+        hitValues: { sender: "invoice-support@supplier-verify-group.com", list_type: "whitelist" },
+      },
+      {
+        policyKey: "ATT-AV",
+        ruleName: "恶意附件哈希黑名单",
+        ruleId: "ATT-AV-305",
+        hitValues: { filename: "供应商发票变更通知.exe", virus_name: "Trojan.GenericKD.44", engine: "MockAV", version: "2026.06" },
+      },
+      {
+        policyKey: "ATT-AV",
+        ruleName: "恶意附件哈希黑名单",
+        ruleId: "ATT-AV-305",
+        hitValues: { filename: "供应商发票变更通知.exe", virus_name: "Trojan.GenericKD.44", engine: "MockAV", version: "2026.06" },
+      },
+      {
+        policyKey: "BEHAVIOR",
+        ruleName: "批量群发行为异常",
+        ruleId: "BEHAVIOR-118",
+        hitValues: { sender: "invoice-support@supplier-verify-group.com", abnormal_type: "频率", detail: "短时间内向 6 个内部地址群发相似邮件" },
+      },
+      {
+        policyKey: "SIM",
+        ruleName: "相似邮件批量检测",
+        ruleId: "SIM-077",
+        hitValues: { similar_type: "钓鱼", dimension: "正文", similarity: "91" },
+      },
+    ],
   },
   {
     tid: "MIC055",
@@ -6250,6 +6305,41 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
       { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
       { action: "discard", status: "discarded", reason: "附件命中恶意特征库，丢弃" },
       { action: "quarantine", status: "quarantined", reason: "附件命中敏感内容规则，隔离" },
+    ],
+    // mixedBasis：3 个不同策略模块命中（UBL 命中 3 人合并 1 桶，ATT-AV/CR 各
+    // 1 人各 1 桶），用于验证"处置依据"列多桶展示的另一种分布（同模块多数
+    // 收件人 + 少数收件人各命中不同模块）。
+    mixedBasis: [
+      {
+        policyKey: "UBL",
+        ruleName: "常规用户白名单",
+        ruleId: "UBL-045",
+        hitValues: { user: "user31@company.com", list_type: "whitelist" },
+      },
+      {
+        policyKey: "UBL",
+        ruleName: "常规用户白名单",
+        ruleId: "UBL-045",
+        hitValues: { user: "user32@company.com", list_type: "whitelist" },
+      },
+      {
+        policyKey: "UBL",
+        ruleName: "常规用户白名单",
+        ruleId: "UBL-045",
+        hitValues: { user: "user33@company.com", list_type: "whitelist" },
+      },
+      {
+        policyKey: "ATT-AV",
+        ruleName: "恶意特征库匹配",
+        ruleId: "ATT-AV-312",
+        hitValues: { filename: "话费账单.zip", virus_name: "Trojan.Downloader", engine: "MockAV", version: "2026.06" },
+      },
+      {
+        policyKey: "CR",
+        ruleName: "敏感内容关键词规则",
+        ruleId: "CR-088",
+        hitValues: { match_position: "正文", match_method: "关键词", matched_content: "身份证号/银行卡号" },
+      },
     ],
   },
   {
@@ -7429,12 +7519,12 @@ function mockAttachmentsFor(seed: MockDisposalSeed) {
 
 function disposalBasis(seed: MockDisposalSeed) {
   if (!seed.basis) return undefined;
-  return {
+  const base = {
     policy_key: seed.basis[0],
     rule_name: seed.basis[1],
     rule_id: seed.basis[2],
     // disposalBasisActionOverride 只影响这个展示字段（威胁摘要卡「处置依据」
-    // 行的动作徽标），不影响下面 mockMailLog 里真正驱动收件人按钮/派发状��的
+    // 行的动作徽标），不影响下面 mockMailLog 里真正驱动收件人按钮/派发状态的
     // action/deliveryStatus 字段。
     action: seed.disposalBasisActionOverride ?? disposalAction(seed),
     // confidence 供 disposal-basis-config.ts 里 AI-* 策略的 hitDetail() 模板
@@ -7443,6 +7533,27 @@ function disposalBasis(seed: MockDisposalSeed) {
     hit_values: { reason: seed.reason, score: String(seed.score), confidence: String(seed.score) },
     detection_tags: [`source:${seed.basis[0].toLowerCase()}`],
   };
+  // 群发邮件多处置依据支撑：seed.mixedBasis 提供时，按下标对齐
+  // recipients/mixedBreakdown 生成 per_recipient[]，让"处置依据"列在不同
+  // 收件人命中不同策略模块时能分桶展示（disposal-basis-config.ts 的
+  // groupRecipientBasisByPolicy() 消费这个字段）。未提供 mixedBasis 的 mixed
+  // 种子（如 MIC053）不受影响，per_recipient 缺省不生成。
+  if (seed.isMixed && seed.mixedBasis?.length) {
+    const recipients = seed.recipients.split(",").map((item) => item.trim());
+    const breakdown = seed.mixedBreakdown ?? DEFAULT_MIXED_BREAKDOWN;
+    return {
+      ...base,
+      per_recipient: seed.mixedBasis.map((mb, i) => ({
+        policy_key: mb.policyKey,
+        rule_name: mb.ruleName,
+        rule_id: mb.ruleId,
+        action: breakdown[i]?.action ?? base.action,
+        hit_values: mb.hitValues,
+        recipient: recipients[i],
+      })),
+    };
+  }
+  return base;
 }
 
 function mockMailLog(seed: MockDisposalSeed, index: number) {
@@ -7801,7 +7912,16 @@ function mockAdvancedValue(
       item.disposal_policy_keys === "RBL" ? "triggered" : "notTriggered",
     threat_level:
       (item.phish_agent_check?.confidence ?? 0) >= 0.8 ? "critical" : "none",
-    disposal_rule_id: item.disposal_basis?.rule_id,
+    // disposal_rule_id 筛选（disposalRuleIds 快捷筛选，走 disposal_rule_id
+    // eq/in 高级筛选条件）：mixed 记录（群发邮件不同收件人命中不同规则）
+    // 返回 per_recipient[] 里全部 rule_id 的数组——mockConditionMatches 对
+    // 数组 current 走 candidates.some(...) 的 OR 语义，只要邮件里任一收件人
+    // 命中的具体规则匹配筛选值就算命中，不要求恒为顶层单一 rule_id 精确
+    // 匹配（该字段此前只读顶层 disposal_basis.rule_id，对没有
+    // mixedBasis 的 mixed 记录退化到顶层字段，行为不变）。
+    disposal_rule_id: item.disposal_basis?.per_recipient?.length
+      ? item.disposal_basis.per_recipient.map((r) => r.rule_id)
+      : item.disposal_basis?.rule_id,
   };
   return values[field] ?? (item as unknown as Record<string, unknown>)[field];
 }

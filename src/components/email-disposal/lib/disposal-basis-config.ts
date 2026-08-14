@@ -552,7 +552,7 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
       switch (lang) {
         case 'en': return 'Hit link protection';
         case 'th': return 'ตรงกับการป้องกันลิงก์';
-        case 'ru': return 'Сработала защита ссылок';
+        case 'ru': return 'Сработала защи��а ссылок';
         default: return '命中链接保护';
       }
     },
@@ -913,4 +913,126 @@ export function groupDisposalModulesByStage(lang: DisposalLang = 'zh'): Disposal
     }
   }
   return groups;
+}
+
+// ============================================================================
+// 群发邮件（mixed action）多处置依据支撑 —— 按 policy_key 分组展示
+// ============================================================================
+// 单封群发邮件可能因为不同收件人命中不同策略模块而产生多条处置依据
+// （disposal_basis.per_recipient[]，每条附带 recipient 字段标识命中人）。
+// 列表页「处置依据」列仍保持纯文本风格：单模块命中不变，多模块命中时主文案
+// 取"优先桶"的 formatListReason 摘要 + "等 N 项"（N = 命中的模块数，不是
+// 收件人数/规则条数），明细下沉到 Tooltip。
+
+export interface DisposalBasisRecipientGroup {
+  /** 该桶对应的策略模块 key（GT-12236 附件安全检测等已合并展示的模块名以
+   *  moduleOf() 结果为准，但分组粒度仍按原始 policy_key，同一模块下的多个
+   *  policy_key 各自成桶——处置依据列的分桶目的是区分"具体命中了什么"，
+   *  与筛选面板"同模块合并勾选"是两个不同粒度，不复用 groupDisposalModulesByStage。 */
+  policyKey: string;
+  /** 该桶下所有命中记录（每条对应一个收件人 + 具体规则），用于 Tooltip 展开明细。 */
+  entries: DisposalBasis[];
+}
+
+// 将单条 mail_log 的 disposal_basis 按 policy_key 分组。
+// - 没有 per_recipient（非群发 / 群发但全员命中同一依据）时，只要顶层
+//   policy_key 存在就返回单元素数组，保证下游渲染逻辑（单桶/多桶判断只看
+//   数组长度）不用额外分支处理"没有 per_recipient"的旧数据形态。
+// - 有 per_recipient 时忽略顶层字段，只按 per_recipient 内的记录分组
+//   （per_recipient 是顶层字段的展开，两者不会同时提供不同信息）。
+export function groupRecipientBasisByPolicy(
+  basis: DisposalBasis | undefined,
+): DisposalBasisRecipientGroup[] {
+  if (!basis) return [];
+  const source =
+    basis.per_recipient && basis.per_recipient.length > 0
+      ? basis.per_recipient
+      : basis.policy_key
+        ? [basis]
+        : [];
+  const groups: DisposalBasisRecipientGroup[] = [];
+  for (const entry of source) {
+    if (!entry.policy_key) continue;
+    const existing = groups.find((g) => g.policyKey === entry.policy_key);
+    if (existing) {
+      existing.entries.push(entry);
+    } else {
+      groups.push({ policyKey: entry.policy_key, entries: [entry] });
+    }
+  }
+  return groups;
+}
+
+// 从多个分组里选出"优先桶"（列表主文案取用）：
+// - 筛选生效时（highlightPolicyKeys/highlightRuleIds 非空），命中筛选值的桶
+//   优先——用户勾选的是想看的东西，主文案应该直接体现出来，不用再点开
+//   Tooltip 确认"到底是不是我筛的这条"。
+// - 未筛选时，按分组在 per_recipient 中出现的原始顺序（即数组第一个分组），
+//   与后端返回顺序保持一致，不引入额外的模块严重度排序假设。
+export function pickPrimaryBasisGroup(
+  groups: DisposalBasisRecipientGroup[],
+  highlightPolicyKeys?: string[],
+  highlightRuleIds?: string[],
+): DisposalBasisRecipientGroup | undefined {
+  if (groups.length === 0) return undefined;
+  const hasPolicyHighlight = !!highlightPolicyKeys?.length;
+  const hasRuleHighlight = !!highlightRuleIds?.length;
+  if (hasPolicyHighlight || hasRuleHighlight) {
+    const matched = groups.find((g) =>
+      g.entries.some(
+        (e) =>
+          (hasPolicyHighlight &&
+            !!e.policy_key &&
+            highlightPolicyKeys!.includes(e.policy_key)) ||
+          (hasRuleHighlight && !!e.rule_id && highlightRuleIds!.includes(e.rule_id)),
+      ),
+    );
+    if (matched) return matched;
+  }
+  return groups[0];
+}
+
+// 排序分组用于 Tooltip 展开顺序：命中筛选值的桶排最前，其余保持原始顺序。
+export function sortBasisGroupsForTooltip(
+  groups: DisposalBasisRecipientGroup[],
+  highlightPolicyKeys?: string[],
+  highlightRuleIds?: string[],
+): DisposalBasisRecipientGroup[] {
+  const hasPolicyHighlight = !!highlightPolicyKeys?.length;
+  const hasRuleHighlight = !!highlightRuleIds?.length;
+  if (!hasPolicyHighlight && !hasRuleHighlight) return groups;
+  const isHighlighted = (g: DisposalBasisRecipientGroup) =>
+    g.entries.some(
+      (e) =>
+        (hasPolicyHighlight &&
+          !!e.policy_key &&
+          highlightPolicyKeys!.includes(e.policy_key)) ||
+        (hasRuleHighlight && !!e.rule_id && highlightRuleIds!.includes(e.rule_id)),
+    );
+  const highlighted = groups.filter(isHighlighted);
+  const rest = groups.filter((g) => !isHighlighted(g));
+  return [...highlighted, ...rest];
+}
+
+// 列表页主文案：单桶复用现有 formatListReason；多桶取优先桶摘要 + "等 N 项"
+// （N = 模块数）。"等 N 项"与主文案同等字重，不做灰色弱化——处置依据列本身
+// 是纯文本风格，没有 Badge 承载主次层级，强行弱化会显得样式突兀（与「执行
+// 动作」列"隔离1+3"的 Badge 弱化角标是两种不同的视觉语言，不强行统一）。
+export function formatMultiBasisListReason(
+  groups: DisposalBasisRecipientGroup[],
+  lang: DisposalLang = 'zh',
+  highlightPolicyKeys?: string[],
+  highlightRuleIds?: string[],
+): string {
+  if (groups.length === 0) return '';
+  const primary = pickPrimaryBasisGroup(groups, highlightPolicyKeys, highlightRuleIds);
+  const primaryText = primary ? formatListReason(primary.entries[0], lang) : '';
+  if (groups.length <= 1) return primaryText;
+  const suffixMap: Record<DisposalLang, (count: number) => string> = {
+    zh: (n) => `等 ${n} 项`,
+    en: (n) => `and ${n} more`,
+    th: (n) => `และอีก ${n} รายการ`,
+    ru: (n) => `и еще ${n}`,
+  };
+  return `${primaryText} ${suffixMap[lang](groups.length)}`;
 }
