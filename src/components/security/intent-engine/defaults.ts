@@ -17,14 +17,14 @@ function defaultThresholdSegments(risk: IntentRiskLevel, dir: IntentDirection): 
     return [
       { min: 0, max: 0.3, action: 'audit' },
       { min: 0.3, max: 0.6, action: 'quarantine' },
-      { min: 0.6, max: 1, action: 'reject' },
+      { min: 0.6, max: 1, action: 'discard' },
     ];
   }
   if (risk === 'medium') {
     return [
       { min: 0, max: 0.2, action: downgrade('accept') },
       { min: 0.2, max: 0.6, action: 'quarantine' },
-      { min: 0.6, max: 1, action: 'reject' },
+      { min: 0.6, max: 1, action: 'discard' },
     ];
   }
   return [
@@ -44,7 +44,7 @@ export function createDefaultIntentConfig(it: IntentType, dir: IntentDirection):
   const isReceive = dir === 'receive';
   let action: IntentSingleConfig['action'];
   if (risk === 'high') {
-    action = isReceive ? 'quarantine' : 'reject';
+    action = isReceive ? 'quarantine' : 'discard';
   } else if (risk === 'medium') {
     action = isReceive ? 'quarantine' : 'audit';
   } else {

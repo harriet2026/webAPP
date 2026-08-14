@@ -1,7 +1,7 @@
 export type IntentDirection = 'receive' | 'send' | 'internal';
 export type IntentType = 'porn_gambling' | 'political' | 'phishing' | 'spam' | 'subscription';
-export type IntentAction = 'accept' | 'quarantine' | 'audit' | 'reject' | 'discard';
-export type UIIntentAction = 'mark_deliver' | 'quarantine' | 'audit' | 'reject' | 'discard';
+export type IntentAction = 'accept' | 'quarantine' | 'audit' | 'discard';
+export type UIIntentAction = 'mark_deliver' | 'quarantine' | 'audit' | 'discard';
 export type IntentRiskLevel = 'high' | 'medium' | 'low';
 export type DetectionMode = 'classification' | 'threshold';
 
@@ -64,11 +64,11 @@ export const HIGH_RISK_INTENTS: IntentType[] = ['porn_gambling', 'political', 'p
 export const MEDIUM_RISK_INTENTS: IntentType[] = ['spam'];
 export const LOW_RISK_INTENTS: IntentType[] = ['subscription'];
 
-export const RECEIVE_ACTIONS: IntentAction[] = ['accept', 'quarantine', 'audit', 'reject', 'discard'];
-export const NON_RECEIVE_ACTIONS: IntentAction[] = ['quarantine', 'audit', 'reject', 'discard'];
+export const RECEIVE_ACTIONS: IntentAction[] = ['accept', 'quarantine', 'audit', 'discard'];
+export const NON_RECEIVE_ACTIONS: IntentAction[] = ['quarantine', 'audit', 'discard'];
 
-export const RECEIVE_UI_ACTIONS: UIIntentAction[] = ['mark_deliver', 'quarantine', 'audit', 'reject', 'discard'];
-export const NON_RECEIVE_UI_ACTIONS: UIIntentAction[] = ['quarantine', 'audit', 'reject', 'discard'];
+export const RECEIVE_UI_ACTIONS: UIIntentAction[] = ['mark_deliver', 'quarantine', 'audit', 'discard'];
+export const NON_RECEIVE_UI_ACTIONS: UIIntentAction[] = ['quarantine', 'audit', 'discard'];
 
 export function toUIAction(cfg: IntentSingleConfig): UIIntentAction {
   if (cfg.action === 'accept') {

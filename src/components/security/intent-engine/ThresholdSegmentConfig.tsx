@@ -19,7 +19,6 @@ const ACTION_COLOR: Record<IntentAction, string> = {
   accept: 'bg-[var(--action-mark-deliver)]',
   quarantine: 'bg-[var(--action-quarantine)]',
   audit: 'bg-[var(--action-review)]',
-  reject: 'bg-[var(--action-block)]',
   discard: 'bg-red-700',
 };
 
@@ -76,11 +75,11 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
     let next: ThresholdSegment[];
     if (preset === 'strict') {
       next = [
-        { min: 0, max: 0.3, action: 'quarantine' }, { min: 0.3, max: 0.6, action: 'reject' }, { min: 0.6, max: 1, action: 'discard' },
+        { min: 0, max: 0.3, action: 'quarantine' }, { min: 0.3, max: 1, action: 'discard' },
       ];
     } else if (preset === 'standard') {
       next = [
-        { min: 0, max: 0.3, action: dirAcc }, { min: 0.3, max: 0.7, action: 'quarantine' }, { min: 0.7, max: 1, action: 'reject' },
+        { min: 0, max: 0.3, action: dirAcc }, { min: 0.3, max: 0.7, action: 'quarantine' }, { min: 0.7, max: 1, action: 'discard' },
       ];
     } else {
       next = [

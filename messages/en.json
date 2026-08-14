@@ -5392,7 +5392,7 @@
       "high": "High-risk Intents",
       "medium": "Medium-risk Intents",
       "low": "Low-risk Intents",
-      "highHint": "Recommend block or quarantine",
+      "highHint": "Recommend discard or quarantine",
       "mediumHint": "Recommend review",
       "lowHint": "Recommend mark and deliver",
       "highDesc": "Contains {n} categories with strict default handling; adjust carefully",
@@ -5423,7 +5423,6 @@
       "mark_deliver": "Mark & Deliver",
       "quarantine": "Quarantine",
       "audit": "Review",
-      "reject": "Block",
       "discard": "Drop"
     },
     "markConfig": {

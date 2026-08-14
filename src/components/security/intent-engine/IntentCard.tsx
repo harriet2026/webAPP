@@ -64,7 +64,6 @@ const ACTION_TEXT_COLOR: Record<UIIntentAction, string> = {
   mark_deliver: 'text-[var(--action-mark-deliver)]',
   quarantine: 'text-[var(--action-quarantine)]',
   audit: 'text-[var(--action-review)]',
-  reject: 'text-[var(--action-block)]',
   discard: 'text-red-700 dark:text-red-400',
 };
 
