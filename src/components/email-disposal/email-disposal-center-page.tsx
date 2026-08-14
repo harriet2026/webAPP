@@ -940,6 +940,12 @@ export function EmailDisposalCenterPage({
           loading={similarMode ? similarLoading : isLoading}
           // GT-12923 阶段四：相似邮件模式下没有执行动作筛选的概念，不传。
           activeExecutionActions={similarMode ? undefined : searchParams.executionActions}
+          // 群发邮件"邮件状态"筛选修复：同理，相似邮件模式下不传；否则拆分
+          // searchParams.displayStatus（逗号分隔的 DisplayStatus 值字符串）
+          // 让命中筛选的收件人徽章优先展示为主类别。
+          activeDisplayStatuses={
+            similarMode ? undefined : searchParams.displayStatus?.split(",").filter(Boolean)
+          }
           selectedIds={selectedIds}
           onSelectionChange={(newPageIds) => {
             // 跨页追加/移除：以当前页 items 的 id 集合作为"当前页范围"

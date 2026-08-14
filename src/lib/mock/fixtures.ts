@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────���������──������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────����������──������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -1819,7 +1819,7 @@ export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
   return mockAlertSmtpConfig();
 }
 
-// ─── 待处置邮件 / 举报待审（KPI）��───��────��─��─��─��──────────────────────────────
+// ─── 待处置邮件 / 举报待审（KPI����───��────��─��─��─��──────────────────────────────
 // 隔离（disposal.total）：today 3 / 7d 11 / 30d 19；举报待审（inbound-audit.total）：
 // today 2 / 7d 6 / 30d 13。两个查询都不带范围参数，故按模块级 currentSystemStatusRange 分支。
 const DISPOSAL_PENDING: Record<SystemStatusRangeKey, number> = {
@@ -2952,7 +2952,7 @@ function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
     makeRule({
       id: 3,
       name: "可疑IP严格限制",
-      description: "临时限制，观���中",
+      description: "临时限���，观���中",
       priority: 200,
       scopeType: "range",
       scopeValue: "198.51.100.0/24",
@@ -4157,7 +4157,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 发信人黑���名单（sender_filter，mock）
-// 数据结构对齐统一规则系统 `Rule`���webapp/src/types/unified-rules.ts）：
+// ���据结构对齐统一规则系统 `Rule`���webapp/src/types/unified-rules.ts）：
 //   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
 //   - metadata 携带 `{feature:'sender_filter', sender_config, ip_range, list_type}`，
@@ -6955,7 +6955,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "incoming",
     sender: "it-helpdesk@company-internal.net",
     recipients: "user9@company.com, user10@company.com",
-    subject: "内部IT系统维护通知",
+    subject: "内部IT系��维护通知",
     action: "quarantine",
     reason: "仿冒内部域名发信",
     mailType: "spoofing",
@@ -7715,6 +7715,35 @@ function normalizeToExecutionAction(raw: string): string {
   return RAW_ACTION_TO_EXECUTION_ACTION[raw] ?? raw;
 }
 
+// 群发（mixed）邮件的"邮件状态"筛选（display_status，如"投递成功"）同样
+// 存在两套词表——recipient_dispositions[i].status 用的是逐收件人原始状态词
+// 表（delivered/quarantined/pending_review/sidelined/audited/blocked/
+// discarded/bounced/...），而 display_status 查询参数用的是 displayStatusOf()
+// 这套整封邮件粒度的位置词表（delivered/quarantine_pending/sideline_pending/
+// audit_pending/rejected/discarded/delivery_failed/...）。mixed 记录的
+// displayStatusOf() 恒返回 "delivering"（详情见该函数注释），如果直接拿它
+// 去匹配 display_status 筛选值，会导致所有群发邮件（即使其中确实有投递成功
+// 的收件人）在筛"投递成功"时都搜不出来——这里做一次归一化，让 mixed 记录
+// 按"任一收件人的最终状态命中筛选值即算命中"的 OR 语义匹配，与 action
+// 筛选（executionActions）的既有处理方式保持一致。
+const RAW_STATUS_TO_DISPLAY_STATUS: Record<string, string> = {
+  delivered: "delivered",
+  marked_delivered: "delivered",
+  quarantined: "quarantine_pending",
+  pending_review: "audit_pending",
+  sidelined: "sideline_pending",
+  audited: "audit_pending",
+  blocked: "rejected",
+  rejected: "rejected",
+  bounced: "delivery_failed",
+  failed: "delivery_failed",
+  cancelled: "delivery_cancelled",
+};
+
+function normalizeToDisplayStatus(raw: string): string {
+  return RAW_STATUS_TO_DISPLAY_STATUS[raw] ?? raw;
+}
+
 function mockAdvancedValue(
   item: (typeof mockDisposalMailLogs)[number],
   field: string,
@@ -7904,9 +7933,23 @@ export function mockEmailDisposalList(path: string) {
     items = items.filter((item) =>
       direction === "send" ? item.authenticated : !item.authenticated,
     );
+  // 群发邮件"邮件状态"筛选修复：mixed 记录改为对 recipient_dispositions
+  // 做归一化后取交集——只要邮件里任一收件人的最终状态命中筛选值就算命中
+  // （例如筛"投递成功"应搜出含有已投递收件人的群发邮件），而不是要求
+  // displayStatusOf() 恒为 "delivering" 的整体状态精确等于筛选值。非 mixed
+  // 记录行为不变，仍按 displayStatusOf() 精确匹配。
   const statuses = query.get("display_status")?.split(",").filter(Boolean);
-  if (statuses?.length)
-    items = items.filter((item) => statuses.includes(displayStatusOf(item)));
+  if (statuses?.length) {
+    items = items.filter((item) => {
+      const itemStatuses =
+        item.action === "mixed"
+          ? (item.recipient_dispositions ?? []).map((d) =>
+              normalizeToDisplayStatus((d.status ?? "").toLowerCase()),
+            )
+          : [displayStatusOf(item)];
+      return itemStatuses.some((status) => statuses.includes(status));
+    });
+  }
   const emailTypes = query.get("email_type")?.split(",").filter(Boolean);
   if (emailTypes?.length)
     items = items.filter((item) => emailTypes.includes(item.email_type));

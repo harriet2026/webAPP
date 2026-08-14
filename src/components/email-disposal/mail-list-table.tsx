@@ -60,6 +60,14 @@ interface MailListTableProps {
    * 本身（筛选逻辑在阶段三已经挪到 getDisposalList 的顶层 action 参数）。
    */
   activeExecutionActions?: string[];
+  /**
+   * 群发邮件"邮件状态"筛选修复：当前生效的"邮件状态"筛选值（DisplayStatus
+   * 词表，如 ['delivered']，对应搜索栏"投递成功"）。仅用于高亮 mixed 行
+   * "邮件状态"列里命中筛选的收件人徽章的主类别（例如筛"投递成功"命中一封
+   * 含隔离收件人的群发邮件时，主 Badge 展示"投递成功"而不是"隔离中"），不
+   * 影响筛选本身（筛选逻辑见 mockEmailDisposalList 的 display_status 处理）。
+   */
+  activeDisplayStatuses?: string[];
 }
 
 export type TimeSortOrder = 'none' | 'asc' | 'desc';
@@ -100,6 +108,7 @@ export function MailListTable({
   onTimeSortChange,
   exportLoading = false,
   activeExecutionActions,
+  activeDisplayStatuses,
 }: MailListTableProps) {
   const t = useTranslations('emailDisposal');
   const tFeatures = useTranslations('emailDisposal.detail.features');
@@ -744,9 +753,16 @@ export function MailListTable({
                 )}
                 {isColVisible('status') && (
                 <TableCell className="text-xs">
-                  {/* mixed + 有逐收件人明细时用 status 维度的单一"主要类别"Badge */}
+                  {/* mixed + 有逐收件人明细时用 status 维度的单一"主要类别"Badge；
+                      传入 activeDisplayStatuses 让命中"邮件状态"筛选的收件人
+                      徽章优先展示为主类别（如筛"投递成功"命中的群发邮件，主
+                      Badge 展示"投递成功"而不是"隔离中"），避免表面矛盾 */}
                   {item.action === 'mixed' && item.recipientDispositions && item.recipientDispositions.length > 0 ? (
-                    <RecipientStatusBadges dispositions={item.recipientDispositions} dimension="status" />
+                    <RecipientStatusBadges
+                      dispositions={item.recipientDispositions}
+                      dimension="status"
+                      highlightKeys={activeDisplayStatuses}
+                    />
                   ) : (
                     <Badge variant={STATUS_VARIANTS[item.displayStatus] || 'outline'}>
                       {t(`filters.statuses.${item.displayStatus}`)}

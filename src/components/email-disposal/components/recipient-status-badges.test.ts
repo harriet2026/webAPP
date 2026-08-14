@@ -190,6 +190,31 @@ describe('pickPrimaryBucket', () => {
   });
 });
 
+// 群发邮件"邮件状态"筛选修复：筛"投递成功"命中一封含隔离收件人的群发
+// 邮件时，status 维度的主 Badge 必须展示"投递成功"，否则会出现"筛选投递
+// 成功却看到隔离中"的表面矛盾（与 action 维度的既有设计动机一致）。
+describe('isBucketHighlighted (status dimension)', () => {
+  it('matches after normalizing the raw recipient status vocabulary to the DisplayStatus filter vocabulary', () => {
+    expect(isBucketHighlighted('delivered', ['delivered'], 'status')).toBe(true);
+    expect(isBucketHighlighted('quarantined', ['quarantine_pending'], 'status')).toBe(true);
+    expect(isBucketHighlighted('pending_review', ['audit_pending'], 'status')).toBe(true);
+  });
+
+  it('does not match an unrelated status', () => {
+    expect(isBucketHighlighted('quarantined', ['delivered'], 'status')).toBe(false);
+  });
+});
+
+describe('pickPrimaryBucket (status dimension)', () => {
+  const bucket = (key: string, count: number) => ({ key, recipients: Array(count).fill('x@x.com') });
+
+  it('picks the matched "delivered" bucket over a larger unmatched "quarantined" bucket when filtering by 投递成功', () => {
+    const buckets = [bucket('quarantined', 5), bucket('delivered', 1)];
+    const primary = pickPrimaryBucket(buckets, statusCategory, ['delivered'], 'status');
+    expect(primary.key).toBe('delivered');
+  });
+});
+
 describe('sortBucketsByHighlight', () => {
   const bucket = (key: string) => ({ key });
 

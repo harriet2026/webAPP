@@ -16,16 +16,22 @@
 //     别优先于已成功投递的终态），让运营人员刷列表时第一眼看到风险信号。
 //
 // 两个维度：
-//   - 执行动作列（dimension='action'）：按 final_action 聚类，支持 highlightKeys
-//   - 邮件状态列（dimension='status'）：按投递 status 聚类，不接收 highlightKeys
-//     （状态筛选与本文件的高亮机制不是同一语义轴，始终走风险优先级默认规则）
+//   - 执行动作列（dimension='action'）：按 final_action 聚类，highlightKeys 按
+//     EXECUTION_ACTIONS 词表归一化后比较
+//   - 邮件状态列（dimension='status'）：按投递 status 聚类，highlightKeys 按
+//     DisplayStatus 词表归一化后比较——群发邮件筛"邮件状态"（如"投递成功"）
+//     命中后，主 Badge 必须展示"投递成功"而不是别的类别，否则会出现"筛选投
+//     递成功却看到隔离"的表面矛盾（与 action 维度的既有设计动机一致）
 
 import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { normalizeRawActionToExecutionAction } from '@/lib/email-log-action';
+import {
+  normalizeRawActionToExecutionAction,
+  normalizeRawStatusToDisplayStatus,
+} from '@/lib/email-log-action';
 import type { RecipientDisposition } from '@/types/phishing-detection';
 
 export type Dimension = 'action' | 'status';
@@ -57,16 +63,22 @@ const STATUS_CATEGORY: Record<string, Category> = {
   delivered: 'delivered',
   delivering: 'delivered',
   in_delivery: 'delivered',
+  marked_delivered: 'delivered',
   quarantined: 'quarantine',
   sidelined: 'sideline',
   pending: 'sideline',
   reinjected: 'delivered',
   rejected: 'rejected',
+  blocked: 'rejected',
   bounced: 'rejected',
   discarded: 'discarded',
   failed: 'rejected',
   cancelled: 'discarded',
   audited: 'audit',
+  // pending_review（人工复核中）此前未收录，落进 default 'other' 分支，会让
+  // 群发邮件的"邮件状态"徽章展示成语义空洞的"其他"——归入 audit（与 audited
+  // 同属"待人工判定"的语义），修复展示"其他"的问题。
+  pending_review: 'audit',
 };
 
 export function statusCategory(status: string): Category {
@@ -112,9 +124,10 @@ export function pickPrimaryBucket<T extends { key: string; recipients: string[] 
   buckets: T[],
   toCat: (key: string) => Category,
   highlightKeys?: string[],
+  dimension: Dimension = 'action',
 ): T {
   if (highlightKeys?.length) {
-    const matched = buckets.filter((b) => isBucketHighlighted(b.key, highlightKeys));
+    const matched = buckets.filter((b) => isBucketHighlighted(b.key, highlightKeys, dimension));
     if (matched.length > 0) {
       return matched.reduce((best, b) => (b.recipients.length > best.recipients.length ? b : best));
     }
@@ -230,11 +243,23 @@ export function bucketRecipients(
 /** 向后兼容旧导出名。 */
 export const bucketRecipientsByAction = (d: RecipientDisposition[]) => bucketRecipients(d, 'action');
 
-// GT-12923 阶段四：判断某个 bucket（bucket.key 是原始动作值，如 'accept'）
-// 是否命中"执行动作"筛选值（EXECUTION_ACTIONS 词表，如 'deliver'）。抽成
-// 纯函数导出，便于单测覆盖归一化 + 高亮判定，不依赖组件渲染。
-export function isBucketHighlighted(bucketKey: string, highlightKeys: string[] | undefined): boolean {
-  return !!highlightKeys?.length && highlightKeys.includes(normalizeRawActionToExecutionAction(bucketKey));
+// GT-12923 阶段四：判断某个 bucket（bucket.key 是原始动作值，如 'accept'，
+// 或 dimension='status' 时是原始 status 值，如 'quarantined'）是否命中筛选
+// 值（action 维度对应 EXECUTION_ACTIONS 词表，如 'deliver'；status 维度对
+// 应 DisplayStatus 词表，如 'delivery_pending'/'quarantine_pending'）。抽成
+// 纯函数导出，便于单测覆盖归一化 + 高亮判定，不依赖组件渲染。dimension 默认
+// 'action'，保持既有调用方（不传 dimension）行为不变。
+export function isBucketHighlighted(
+  bucketKey: string,
+  highlightKeys: string[] | undefined,
+  dimension: Dimension = 'action',
+): boolean {
+  if (!highlightKeys?.length) return false;
+  const normalized =
+    dimension === 'action'
+      ? normalizeRawActionToExecutionAction(bucketKey)
+      : normalizeRawStatusToDisplayStatus(bucketKey);
+  return highlightKeys.includes(normalized);
 }
 
 // 命中筛选值的桶置顶，未命中的桶维持原有的 CATEGORY_ORDER 相对顺序
@@ -244,11 +269,12 @@ export function isBucketHighlighted(bucketKey: string, highlightKeys: string[] |
 export function sortBucketsByHighlight<T extends { key: string }>(
   buckets: T[],
   highlightKeys: string[] | undefined,
+  dimension: Dimension = 'action',
 ): T[] {
   if (!highlightKeys?.length) return buckets;
   return [...buckets].sort((a, b) => {
-    const ah = isBucketHighlighted(a.key, highlightKeys) ? 0 : 1;
-    const bh = isBucketHighlighted(b.key, highlightKeys) ? 0 : 1;
+    const ah = isBucketHighlighted(a.key, highlightKeys, dimension) ? 0 : 1;
+    const bh = isBucketHighlighted(b.key, highlightKeys, dimension) ? 0 : 1;
     return ah - bh;
   });
 }
@@ -256,12 +282,13 @@ export function sortBucketsByHighlight<T extends { key: string }>(
 interface RecipientStatusBadgesProps {
   dispositions: RecipientDisposition[];
   dimension?: Dimension;
-  // GT-12923 阶段四：搜索栏"执行动作"筛选生效时，命中的收件人徽章需要突出
-  // 显示（否则用户只会看到 [投递 4][隔离 1] 却不知道为什么这封 mixed 邮件
-  // 出现在"隔离"筛选结果里）。传入归一化后的筛选值（EXECUTION_ACTIONS 词
-  // 表，如 ['quarantine']）；仅在 dimension='action' 时生效——status 维��
-  // 走的是完全不同的一套状态词表，与"执行动作"筛选不是同一个语义轴，传
-  // 了也不会产生任何高亮（bucket.key 是原始动作值，不是 displayStatus）。
+  // GT-12923 阶段四 + 群发邮件"邮件状态"筛选修复：搜索栏"执行动作"/"邮件
+  // 状态"筛选生效时，命中的收件人徽章需要突出显示（否则用户只会看到
+  // [投递 4][隔离 1] 却不知道为什么这封 mixed 邮件出现在"隔离"/"投递成功"
+  // 筛选结果里）。传入按当前 dimension 对应词表归一化后的筛选值——
+  // dimension='action' 时是 EXECUTION_ACTIONS 词表（如 ['quarantine']），
+  // dimension='status' 时是 DisplayStatus 词表（如 ['delivered']）。
+  // isBucketHighlighted 会按 dimension 选择对应的归一化函数再比较。
   highlightKeys?: string[];
 }
 
@@ -270,7 +297,7 @@ export function RecipientStatusBadges({ dispositions, dimension = 'action', high
   const toCat = dimension === 'action' ? actionCategory : statusCategory;
 
   const buckets = useMemo(
-    () => sortBucketsByHighlight(bucketRecipients(dispositions, dimension), highlightKeys),
+    () => sortBucketsByHighlight(bucketRecipients(dispositions, dimension), highlightKeys, dimension),
     [dispositions, dimension, highlightKeys],
   );
 
@@ -300,7 +327,7 @@ export function RecipientStatusBadges({ dispositions, dimension = 'action', high
   // 成同一 Badge 尾部的中性灰 "+N"（N = 其他类别数，不区分具体是谁）。
   // 高度/密度与单桶完全一致，颜色数量始终只有 1 种类别色，hover 展开完整
   // 逐收件人明细（主要类别对应的那一行用浅底色标出，呼应 Badge 上的数字）。
-  const primary = pickPrimaryBucket(buckets, toCat, highlightKeys);
+  const primary = pickPrimaryBucket(buckets, toCat, highlightKeys, dimension);
   const primaryCat = toCat(primary.key);
   const otherCategoryCount = buckets.length - 1;
 

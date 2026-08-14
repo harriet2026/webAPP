@@ -45,6 +45,36 @@ export function normalizeRawActionToExecutionAction(action: string | undefined |
   return RAW_ACTION_TO_EXECUTION_ACTION[raw] ?? raw;
 }
 
+// 群发邮件"邮件状态"筛选（如"投递成功"）同样存在两套并存的词表——
+//   1) 收件人明细的原始 status 字段（delivered/marked_delivered/quarantined/
+//      pending_review/sidelined/audited/blocked/rejected/discarded/bounced/
+//      failed/cancelled），用于逐收件人明细的徽章分类展示；
+//   2) 搜索栏"邮件状态"筛选下拉框的 DisplayStatus 词表（types/email-disposal.ts，
+//      delivered/quarantine_pending/sideline_pending/audit_pending/rejected/
+//      discarded/delivery_cancelled/delivery_failed/…），是整封邮件粒度的位置
+//      状态，也是 getDisposalList 顶层查询参数 display_status= 用的取值。
+// 高亮命中收件人徽章、以及群发（mixed）邮件按"邮件状态"筛选命中判断，都需要
+// 把收件人原始 status 归一化到词表 2，才能和筛选值对上。未在映射表中的原始
+// 值原样返回。
+const RAW_STATUS_TO_DISPLAY_STATUS: Record<string, string> = {
+  delivered: 'delivered',
+  marked_delivered: 'delivered',
+  quarantined: 'quarantine_pending',
+  pending_review: 'audit_pending',
+  sidelined: 'sideline_pending',
+  audited: 'audit_pending',
+  blocked: 'rejected',
+  rejected: 'rejected',
+  bounced: 'delivery_failed',
+  failed: 'delivery_failed',
+  cancelled: 'delivery_cancelled',
+};
+
+export function normalizeRawStatusToDisplayStatus(status: string | undefined | null): string {
+  const raw = (status || '').toLowerCase();
+  return RAW_STATUS_TO_DISPLAY_STATUS[raw] ?? raw;
+}
+
 export function actionToVariant(action: string | undefined | null): ActionBadgeVariant {
   switch ((action || '').toLowerCase()) {
     case 'accept':
