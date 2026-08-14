@@ -1086,7 +1086,7 @@
             <p>路由: /monitor/infrastructure · spec: 未提供 · 多租户租户视角导航隐藏（v2 用户决定：URL 直连也应 403/404 拦截）</p>
             <p>组件: monitor-infrastructure-page.tsx（4 Tab：硬件资源/服务进程/数据库与缓存/存储与备份；Kingbase/Redis × 指标切换）</p>
             <p>子文件: <a href="monitor-infrastructure/layer-1-tab-container.html">服务进程</a> / <a href="monitor-infrastructure/layer-2-tab-database.html">数据库与缓存(双态)</a> / <a href="monitor-infrastructure/layer-3-tab-storage.html">存储与备份</a></p>
-            <p>预览可交互（Tab/库切换）· 形态×角色 5×2 矩阵实测 · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
+            <p>预览可交互（Tab/库切换）· 形态×角色 5×2 矩阵实�� · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1166,7 +1166,7 @@
           <div class="card-detail">
             <p>路由: /admin/forwarding · spec: 邮件路由模块 · 功能需求文档(PRD).md（菜单仅单租户形态显示 SINGLE_ONLY；多租户经租户中心下钻复用同一组件）</p>
             <p>组件: mail-routing-page.tsx（四 Tab：收信域管理 / 转发设置 / 出站路由三步向导 / 发信认证）+ receiving-domain-tab + relay-tab + outbound-route-tab + auth-tab + shared.tsx + types.ts</p>
-            <p>子文件: <a href="admin-forwarding/layer-1-receiving-drawer.html">收信域抽屉</a> / <a href="admin-forwarding/layer-2-receiving-delete.html">删除+探测</a> / <a href="admin-forwarding/layer-3-relay-drawer.html">转发抽屉·SPF+模拟器</a> / <a href="admin-forwarding/layer-4-relay-delete.html">转发删除</a> / <a href="admin-forwarding/layer-5-outbound-proxy-drawer.html">代理抽屉·rDNS</a> / <a href="admin-forwarding/layer-6-outbound-channels.html">投递通道</a> / <a href="admin-forwarding/layer-7-outbound-rules.html">路由规则+模拟链路</a> / <a href="admin-forwarding/layer-8-auth-drawer.html">发信认证·TLS联动</a></p>
+            <p>子文件: <a href="admin-forwarding/layer-1-receiving-drawer.html">收信域抽屉</a> / <a href="admin-forwarding/layer-2-receiving-delete.html">删除+探测</a> / <a href="admin-forwarding/layer-3-relay-drawer.html">转发抽屉·SPF+模拟器</a> / <a href="admin-forwarding/layer-4-relay-delete.html">转发删除</a> / <a href="admin-forwarding/layer-5-outbound-proxy-drawer.html">代理抽屉·rDNS</a> / <a href="admin-forwarding/layer-6-outbound-channels.html">投递通道</a> / <a href="admin-forwarding/layer-7-outbound-rules.html">路由规则+���拟链路</a> / <a href="admin-forwarding/layer-8-auth-drawer.html">发信认证·TLS联动</a></p>
             <p>预览可交互 · 8 交互层级子文件 · 6 抽屉 + 6 删除确认 + 4 筛选弹层 + 域名多选全���实测 · 12 处 demo↔PRD 差异 / 8 项需网关确认（优先级语义相反、authd fail-closed vs TLS 关闭档、通道删除拦截 vs 降级）</p>
           </div>
         </details>
@@ -1437,7 +1437,7 @@
             </div>
           </summary>
           <div class="card-detail">
-            <p>范围: ���局（app-shell / sidebar-nav）</p>
+            <p>���围: ���局（app-shell / sidebar-nav）</p>
             <div class="cl-tags">
               <span class="cl-tag cl-tag-bugfix">缺陷修复</span>
               <span class="cl-tag cl-tag-arch">架构</span>
@@ -1670,7 +1670,7 @@
         <span class="chevron"></span>
         <span class="l1-icon">🛠️</span>
         <h2>GT-12923【0813】邮件处置中心总优化工单</h2>
-        <span class="l1-stats"><span class="done-count">2</span> 已完成 / 2 总计</span>
+        <span class="l1-stats"><span class="done-count">3</span> 已完成 / 3 总计</span>
       </div>
     </summary>
     <div class="l1-body">
@@ -1681,8 +1681,8 @@
               <span class="chevron"></span>
               <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md" target="_blank" rel="noopener noreferrer">GT-12923 · 邮件处置中心总优化（增量变更规格 · Markdown）</a>
               <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v2</span>
-              <span class="card-generated-at">2026-08-13</span>
+              <span class="card-version-badge">v3</span>
+              <span class="card-generated-at">2026-08-14</span>
             </div>
           </summary>
           <div class="card-detail">
@@ -1698,8 +1698,8 @@
               <span class="chevron"></span>
               <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12931群发邮件多投递信执行动作筛选逻辑以及展示逻辑调整" target="_blank" rel="noopener noreferrer">GT-12931 · 群发邮件/多投递信：执行动作筛选逻辑，以及展示逻辑调整</a>
               <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v2</span>
-              <span class="card-generated-at">2026-08-13</span>
+              <span class="card-version-badge">v3</span>
+              <span class="card-generated-at">2026-08-14</span>
             </div>
           </summary>
           <div class="card-detail">
@@ -1707,6 +1707,23 @@
             <p>变更类型: 需求名称拆分归拢（原变更一、变更六合并为独立需求）· 收录于 GT-12923 文档内的同名二级章节</p>
             <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a></p>
             <p>内含: ① mixed 记录展示逻辑优化（单一主要类别 Badge + hover 明细，含执行动作筛选态下的主要类别选取规则）② 执行动作批量按钮文案统一「放行」→「投递」</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12955邮件状态枚举值优化" target="_blank" rel="noopener noreferrer">GT-12955 · 邮件状态枚举值优化</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v3</span>
+              <span class="card-generated-at">2026-08-14</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（同属邮件处置中心模块，深链跳转至本工单文档内的对应章节）</p>
+            <p>变更类型: 需求变更（枚举维度重定义）· 收录于 GT-12923 文档内的同名二级章节</p>
+            <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a></p>
+            <p>内含: ① "邮件状态"枚举维度由"风险/结果"改为"邮件当前所在位置"，17 项精简为 13 项，新增 `delivery_cancelled`（投递中止）② 已移除枚举值（已退信/部分投递成功/部分召回成功/已删除/审核驳回）的归并映射规则 ③ 与"钓鱼邮件检测智能体 › 检测日志"共用状态源的联动更新</p>
           </div>
         </details>
       </div>
