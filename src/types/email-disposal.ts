@@ -100,6 +100,19 @@ export interface DisposalBasis {
   action?: string;
   hit_values?: Record<string, string>;
   detection_tags?: string[];
+  /**
+   * Recipient email this entry describes; only set on items inside
+   * per_recipient[] (群发邮件多处置依据支撑). Absent on the top-level
+   * DisposalBasis, which still represents the whole message's primary basis.
+   */
+  recipient?: string;
+  /**
+   * Per-recipient disposal basis breakdown for a single mail_log — present
+   * when a group-sent (mixed action) message triggered different
+   * policy/rule hits for different recipients. Each entry's `recipient`
+   * field identifies who it applies to. Absent/empty means every recipient
+   * shares the top-level basis (backward-compatible with existing records).
+   */
   per_recipient?: DisposalBasis[];
 }
 
