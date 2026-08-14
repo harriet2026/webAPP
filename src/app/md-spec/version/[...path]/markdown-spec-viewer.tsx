@@ -23,6 +23,21 @@ function extractText(node: ReactNode): string {
   return '';
 }
 
+// MD Spec 文档里的图片全部用 `./assets/<TICKET>/<file>.png` 这种相对当前
+// .md 文件所在目录（doc/md_spec-version/）的路径引用。react-markdown 只是
+// 把 src 原样传给 <img>，浏览器会拿它去拼当前页面 URL（/md-spec/version/...
+// .md#hash），得到一个从未被任何路由处理过的地址，图片永远 404。
+// `/md-spec/assets/[...path]/route.ts` 把 doc/md_spec-version/assets/** 原样
+// 服务出来，这里把相对路径改写为指向那个路由的绝对路径；已经是绝对路径、
+// 站外链接或 data URI 的 src 原样放行。
+function resolveSpecImageSrc(src: string | undefined): string | undefined {
+  if (!src) return src;
+  if (/^(https?:)?\/\//.test(src) || src.startsWith('/') || src.startsWith('data:')) {
+    return src;
+  }
+  return `/md-spec/${src.replace(/^\.\//, '')}`;
+}
+
 function slugify(text: string): string {
   return text
     .trim()
@@ -119,8 +134,12 @@ function buildComponents(getHeadingId: (children: ReactNode) => string): Compone
     <td className="border-b border-border px-3 py-2 align-top text-xs text-foreground">{children}</td>
   ),
     img: ({ src, alt }) => (
-      // eslint-disable-next-line @next/next/no-img-element -- 只读 spec 查看器，图片路径为相对文档路径，非站内资产。
-      <img src={typeof src === 'string' ? src : undefined} alt={alt} className="mb-2 max-w-full rounded-md border border-border" />
+      // eslint-disable-next-line @next/next/no-img-element -- 只读 spec 查看器，图片来自 doc/md_spec-version/assets，经 resolveSpecImageSrc 重写为站内 /md-spec/assets 路由。
+      <img
+        src={resolveSpecImageSrc(typeof src === 'string' ? src : undefined)}
+        alt={alt}
+        className="mb-2 max-w-full rounded-md border border-border"
+      />
     ),
   };
 }
