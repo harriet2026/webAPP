@@ -73,7 +73,7 @@ export interface EncryptedConfig {
 }
 
 export interface EncryptedActionConfig {
-  decrypt_fail_action: 'quarantine' | 'accept' | 'reject';
+  decrypt_fail_action: 'quarantine' | 'accept' | 'audit';
 }
 
 export interface PasswordBookEntry {

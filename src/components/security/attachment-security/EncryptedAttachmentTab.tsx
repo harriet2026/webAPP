@@ -77,7 +77,7 @@ export function EncryptedAttachmentTab({
           <SelectContent data-testid="decrypt-fail-action-options">
             <SelectItem value="quarantine" data-testid="decrypt-fail-action-quarantine">{t('actions.quarantine')}</SelectItem>
             <SelectItem value="accept" data-testid="decrypt-fail-action-accept">{t('actions.accept')}</SelectItem>
-            <SelectItem value="reject" data-testid="decrypt-fail-action-reject">{t('actions.reject')}</SelectItem>
+            <SelectItem value="audit" data-testid="decrypt-fail-action-audit">{t('actions.audit')}</SelectItem>
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">{t('encrypted.receiveDefault')}</p>
