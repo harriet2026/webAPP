@@ -6,7 +6,6 @@ export type SimilarDetectionAction =
   | 'mark-delivery'
   | 'quarantine'
   | 'review'
-  | 'block'
   | 'discard';
 
 export interface SimilarDetectionDirectionConfig {

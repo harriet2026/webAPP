@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测�������������能�������������",
+    "spoofingDetection": "仿冒邮件检测���������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1020,7 +1020,7 @@
         },
         "toasts": {
           "created": "路��规��已��加",
-          "updated": "路由��则已��新",
+          "updated": "��由��则已��新",
           "deleted": "��由规则已删除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
@@ -1336,7 +1336,7 @@
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
-    "targetGroups": "适���对���",
+    "targetGroups": "适���对����",
     "policyConfig": "策略配置",
     "priority": "优先��",
     "newPolicy": "新建群组策略",
@@ -1630,7 +1630,7 @@
     "releasedAt": "释放时间",
     "releasedBy": "释放人",
     "batchRelease": "批量释放",
-    "releaseTo": "释放至",
+    "releaseTo": "释放���",
     "release": "释放",
     "notes": "备注",
     "preview": "预览",
@@ -1834,7 +1834,7 @@
       "rule_type": "规则类型",
       "email_size": "大小",
       "queue_id": "队列 ID",
-      "delivery_status_summary": "投递状态",
+      "delivery_status_summary": "投递状��",
       "workflow_outcome_summary": "工作流结果",
       "delivery_attempts": "投递次数",
       "last_delivery_event_at": "��后投递��件",
@@ -2039,7 +2039,7 @@
       "enabled": "启用",
       "disabled": "停用",
       "tabs": {
-        "receiving": "收信域",
+        "receiving": "收��域",
         "relay": "��发",
         "outbound": "出站",
         "auth": "发信认证"
@@ -2456,7 +2456,7 @@
     "scenes": {
       "userspace": "用户空间认证",
       "smtpsend": "SMTP 发信认证",
-      "mailsync": "邮件同步代理"
+      "mailsync": "邮件��步代理"
     },
     "failReasons": {
       "wrongPassword": "密码��误",
@@ -2728,7 +2728,7 @@
     },
     "trustedDevices": {
       "count": "授信终端（{n}）",
-      "empty": "暂无授信终端。登录时勾选「信任此设备」后，下次在此设备��跳过二次认证。",
+      "empty": "暂无授信终端。登录时勾选「信任��设备」后，下次在此设备��跳过二次认证。",
       "createdAt": "授信时间",
       "lastUsed": "最近使用",
       "expires": "到期时间",
@@ -3529,7 +3529,7 @@
       "whenIP": "当 IP 地址",
       "allIP": "全部 IP",
       "notFilled": "未填写",
-      "affectAbout": "（影响约 {count} 个 IP）",
+      "affectAbout": "（影响��� {count} 个 IP）",
       "triggerCondition": "触发以下任一条件时：",
       "noConditions": "暂未���置触发条件",
       "systemWill": "系统将：",
@@ -3684,7 +3684,7 @@
     "ipGroupRequired": "请选择一个IP组",
     "ipGroupMembersUnit": "个IP",
     "ruleNameTip": "为规则添加描述性名称，便于管理识别",
-    "ruleNamePlaceholder": "如：恶意攻击来源、合作伙伴IP等",
+    "ruleNamePlaceholder": "如：恶意攻击来源、合作��伴IP等",
     "ipAddressTip": "支持单个IP地址、CIDR网段或IP组",
     "ipAddressRequired": "请输入IP地址/段",
     "invalidIp": "请输入有效的IP地址",
@@ -3950,7 +3950,7 @@
     "greylistWindowInvalid": "频率窗口必须不少于 10 秒",
     "greylistWindowBeforeDelay": "延迟模式下，频率窗口不能短于延迟时间",
     "greylistMaxRequestsInvalid": "最大请求数必须不少于 1",
-    "greylistTTLInvalid": "白名单有效期必须不少于 1 小时",
+    "greylistTTLInvalid": "白名单有效期��须不少于 1 小时",
     "greylistDelayShortWarning": "延迟时��过短可能无法有效过滤",
     "greylistDelayLongWarning": "延迟时间过长可能影响正常邮件",
     "unsavedChanges": "有未保存的更改",
@@ -4123,7 +4123,7 @@
     "simMatch": "匹配成功 - 该规则将对测试数据生效",
     "simNoMatch": "未匹配 - 该规则不会对测试数据生效",
     "unsavedChangesTitle": "放弃更改？",
-    "unsavedChanges": "有未保存的修改，确定要关闭吗？所��修改将丢失。",
+    "unsavedChanges": "有未��存的修改，确定要关闭吗？所��修改将丢失。",
     "groupDeleted": "群组已删除",
     "resetFilters": "重���",
     "simGroupNotice": "群组类型规则的模拟需在生产环境验证",
@@ -5442,7 +5442,7 @@
       "label": "检测模式",
       "classification": "分类优先",
       "threshold": "分段阈值",
-      "classificationDesc": "只要识别为该意图即执行处置，忽���置信度分数。",
+      "classificationDesc": "只要识别为该意图即执行处置，忽���置信度��数。",
       "thresholdDesc": "根据置信度分数落入的区间执��不同处置动作。"
     },
     "threshold": {
@@ -5523,9 +5523,8 @@
     "triggerCount": "触发数量",
     "emails": "封",
     "triggerAction": "触发动作",
-    "actionMarkDelivery": "标记投递",
+    "actionMarkDelivery": "进行下一步",
     "actionReview": "审核",
-    "actionBlock": "阻断",
     "actionDiscard": "丢弃",
     "tagModeTitle": "标记方式",
     "tagModeHint": "至少选择一种标记方式，可同时启用主题标记与信头标记",
@@ -5753,7 +5752,7 @@
       "renameTemplateDesc": "修改后将立即生效",
       "templateNameLabel": "模板名称",
       "templateNamePlaceholder": "为这组搜索���件起个名字",
-      "templateNameRequired": "���输入模板名称",
+      "templateNameRequired": "����输入模板名称",
       "templateOverwriteWarning": "已存在同名模板，保存将覆盖原有条件",
       "templateOverwriteConfirm": "��盖保存",
       "templateLimitWarning": "已��上限（{max} 个），��存将删除最旧的一条模板",
@@ -6918,7 +6917,7 @@
       "desc_cc": {
         "source": "邮件头 CC 字段",
         "usage": "识别抄送给哪些��件人",
-        "note": "抄送收件人可见此字段"
+        "note": "抄送���件人可见此字段"
       },
       "desc_bcc": {
         "source": "邮件头 BCC 字段",
@@ -7547,7 +7546,7 @@
     "timeoutMarkText": "标记文本",
     "senderNotification": "发件人通��管理",
     "queueEntryNotify": "进入队列通知",
-    "queueEntryDesc": "邮件进入审核队列时通知发件人",
+    "queueEntryDesc": "邮件进入审核��列时通知发件人",
     "resultNotify": "审核结果通知",
     "resultNotifyDesc": "审核完成后通知发件人结果",
     "reviewerNotification": "审核人通知机制",
@@ -9022,7 +9021,7 @@
       "jobTitlePlaceholder": "请输入岗位，如 CEO、财务总监",
       "category": "分类",
       "protectionLevel": "保护等级",
-      "legitEmail": "合法邮箱绑定",
+      "legitEmail": "合法���箱绑定",
       "addEmail": "添加邮箱",
       "matchType": "匹配方式",
       "matchExact": "精确",
@@ -10134,7 +10133,7 @@
       }
     },
     "trend": {
-      "title": "威胁态势趋势",
+      "title": "威胁��势趋势",
       "empty": "暂无威胁数据",
       "viewOverview": "查看邮件安全总览",
       "series": {
@@ -10496,7 +10495,7 @@
       "policyTest": "策略测试",
       "aiUrlLogs": "沙箱日志",
       "executive": "高管保护",
-      "executiveDashboard": "高管保护概览",
+      "executiveDashboard": "高管��护概览",
       "executivePolicy": "高管保护策略",
       "executiveMonitoring": "���管保护监控",
       "network": "网络设置",
@@ -10794,7 +10793,7 @@
       "helo_pattern_regex_invalid": "HELO ��配的正则表达式不合法，请检查语���",
       "is_active_required": "请指定是否生效",
       "not_found": "准入规则���存在，可能已被删除",
-      "null_sender_requires_cidr": "允许���发件人的规则只按来源 IP 匹配，因此必须填写来源 IP 段",
+      "null_sender_requires_cidr": "允许���发件人的规则只按来源 IP 匹配，因此必须填写来源 IP ��",
       "privileged_requires_system_admin": "创建特权准入规则需要平台管理员权限",
       "rate_limit_must_be_positive": "每小时限额必须大于 0",
       "rcpt_domain_not_owned": "收件域必须是本租户已验证的域名或其子域",
@@ -11036,7 +11035,7 @@
       "scan_result_all_invalid": "校验后没有任何有效的扫描结果"
     },
     "url_protection": {
-      "deep_inspect_timeout_out_of_range": "深度检测超时时间必须在 {min}-{max} 秒之间",
+      "deep_inspect_timeout_out_of_range": "深度检测超时时间必须在 {min}-{max} 秒��间",
       "deep_inspect_timeout_policy_invalid": "深度检测超时处置无效，可选：{allowed}",
       "domain_format_invalid": "域名格式不正确",
       "domain_limit_exceeded": "每个租户最多 {max} 个域名",
@@ -11046,7 +11045,7 @@
       "cidr_already_exists": "该 IP 段已存在",
       "tenant_id_required": "请指定租户",
       "tenant_id_invalid": "租户 ID 无效",
-      "link_redirect_tls_not_configured": "链接跳转服务(8082)未配置 TLS 证书。请先在集群管理台���对外服务 TLS 证书」上传证书，或确认已由前置反代终结 TLS 后开启 link_protection/tls_terminated_by_proxy"
+      "link_redirect_tls_not_configured": "链接跳转服务(8082)未配置 TLS 证书。请先在集群管理台���对外��务 TLS 证书」上传证书，或确认已由前置反代终结 TLS 后开启 link_protection/tls_terminated_by_proxy"
     },
     "login_policy": {
       "two_factor_platform_admin_only": "二次认证强制策略仅平台管理员可设置",
