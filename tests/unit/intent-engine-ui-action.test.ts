@@ -10,10 +10,11 @@ function singleConfig(cfg: Omit<IntentSingleConfig, 'detection_mode'> & Partial<
   return { detection_mode: 'classification', ...cfg };
 }
 
-describe('RECEIVE_UI_ACTIONS (GT-11746)', () => {
-  it('has exactly 5 actions (no deliver)', () => {
-    expect(RECEIVE_UI_ACTIONS).toHaveLength(5);
+describe('RECEIVE_UI_ACTIONS (GT-11746, GT-12965 已去掉阻断)', () => {
+  it('has exactly 4 actions (no deliver, no reject)', () => {
+    expect(RECEIVE_UI_ACTIONS).toHaveLength(4);
     expect(RECEIVE_UI_ACTIONS).not.toContain('deliver');
+    expect(RECEIVE_UI_ACTIONS).not.toContain('reject');
   });
 });
 
@@ -33,7 +34,7 @@ describe('toUIAction', () => {
   });
 
   it('passes through non-accept actions', () => {
-    for (const a of ['quarantine', 'audit', 'reject', 'discard'] as const) {
+    for (const a of ['quarantine', 'audit', 'discard'] as const) {
       expect(toUIAction(singleConfig({ enabled: true, action: a }))).toBe(a);
     }
   });
@@ -81,7 +82,7 @@ describe('applyUIAction', () => {
       action: 'accept',
       mark_config: { delivery_target: 'inbox', subject_mark: { enabled: true, text: '[X]', position: 'prefix' } },
     });
-    for (const a of ['quarantine', 'audit', 'reject', 'discard'] as const) {
+    for (const a of ['quarantine', 'audit', 'discard'] as const) {
       const next = applyUIAction(cfg, a, 'subscription');
       expect(next.action).toBe(a);
       expect(next.mark_config).toBeUndefined();
@@ -91,12 +92,12 @@ describe('applyUIAction', () => {
   it('preserves enabled flag', () => {
     const cfg = singleConfig({ enabled: false, action: 'quarantine' });
     expect(applyUIAction(cfg, 'mark_deliver', 'subscription').enabled).toBe(false);
-    expect(applyUIAction(cfg, 'reject', 'subscription').enabled).toBe(false);
+    expect(applyUIAction(cfg, 'discard', 'subscription').enabled).toBe(false);
   });
 
   it('round-trip: applyUIAction then toUIAction is identity', () => {
     const start = singleConfig({ enabled: true, action: 'quarantine' });
-    for (const ui of ['mark_deliver', 'quarantine', 'audit', 'reject', 'discard'] as const) {
+    for (const ui of ['mark_deliver', 'quarantine', 'audit', 'discard'] as const) {
       const after = applyUIAction(start, ui, 'subscription');
       expect(toUIAction(after)).toBe(ui);
     }

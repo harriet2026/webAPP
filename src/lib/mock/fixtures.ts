@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────��──������──────────────────────────���────────────────────
+// ─── 租户 ─────────────────────������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -6098,7 +6098,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
 // 为 mock 引入第二套数据模型。
-// ════════════════════════════════════════��═══════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════════
 
 interface MockDisposalSeed {
   tid: string;
@@ -8090,7 +8090,7 @@ function buildDefaultDisposalSettingsFixture(): DisposalSettings {
 // ---- 收信人组（demo recipient-groups.ts，ruleId 用 9101-9105 稳定值；
 // 刻意避开 9001-9099：群组策略的 mock 写路由按 /unified-rules/90\d\d 收窄，
 // 且群组策略演示规则本身占用 9001-9005）----
-// 复��既有的 sfGroupRule（见本文件 group-management 区）生成一个符合
+// 复用既有的 sfGroupRule（见本文件 group-management 区）生成一个符合
 // ruleToGroup（webapp/src/lib/api/groups.ts）判型条件的 Rule：
 // stage='rcpt' → GroupType 'recipient'，且 tags 带 `grp:<name>` 前缀
 // （否则 ruleToGroup 会因找不到 tag 直接判空丢弃这条数据）。member_count

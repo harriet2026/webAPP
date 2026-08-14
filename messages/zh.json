@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测���������������能�������������",
+    "spoofingDetection": "仿冒邮件检测�������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1020,7 +1020,7 @@
         },
         "toasts": {
           "created": "路��规��已��加",
-          "updated": "��由��则已��新",
+          "updated": "路由��则已��新",
           "deleted": "��由规则已删除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
@@ -1336,7 +1336,7 @@
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
-    "targetGroups": "适���对����",
+    "targetGroups": "适���对���",
     "policyConfig": "策略配置",
     "priority": "优先��",
     "newPolicy": "新建群组策略",
@@ -2456,7 +2456,7 @@
     "scenes": {
       "userspace": "用户空间认证",
       "smtpsend": "SMTP 发信认证",
-      "mailsync": "邮件��步代理"
+      "mailsync": "邮件同步代理"
     },
     "failReasons": {
       "wrongPassword": "密码��误",
@@ -3529,7 +3529,7 @@
       "whenIP": "当 IP 地址",
       "allIP": "全部 IP",
       "notFilled": "未填写",
-      "affectAbout": "（影响��� {count} 个 IP）",
+      "affectAbout": "（影响约 {count} 个 IP）",
       "triggerCondition": "触发以下任一条件时：",
       "noConditions": "暂未���置触发条件",
       "systemWill": "系统将：",
@@ -3684,7 +3684,7 @@
     "ipGroupRequired": "请选择一个IP组",
     "ipGroupMembersUnit": "个IP",
     "ruleNameTip": "为规则添加描述性名称，便于管理识别",
-    "ruleNamePlaceholder": "如：恶意攻击来源、合作��伴IP等",
+    "ruleNamePlaceholder": "如：恶意攻击来源、合作伙伴IP等",
     "ipAddressTip": "支持单个IP地址、CIDR网段或IP组",
     "ipAddressRequired": "请输入IP地址/段",
     "invalidIp": "请输入有效的IP地址",
@@ -3950,7 +3950,7 @@
     "greylistWindowInvalid": "频率窗口必须不少于 10 秒",
     "greylistWindowBeforeDelay": "延迟模式下，频率窗口不能短于延迟时间",
     "greylistMaxRequestsInvalid": "最大请求数必须不少于 1",
-    "greylistTTLInvalid": "白名单有效期��须不少于 1 小时",
+    "greylistTTLInvalid": "白名单有效期必须不少于 1 小时",
     "greylistDelayShortWarning": "延迟时��过短可能无法有效过滤",
     "greylistDelayLongWarning": "延迟时间过长可能影响正常邮件",
     "unsavedChanges": "有未保存的更改",
@@ -4123,7 +4123,7 @@
     "simMatch": "匹配成功 - 该规则将对测试数据生效",
     "simNoMatch": "未匹配 - 该规则不会对测试数据生效",
     "unsavedChangesTitle": "放弃更改？",
-    "unsavedChanges": "有未��存的修改，确定要关闭吗？所��修改将丢失。",
+    "unsavedChanges": "有未保存的修改，确定要关闭吗？所��修改将丢失。",
     "groupDeleted": "群组已删除",
     "resetFilters": "重���",
     "simGroupNotice": "群组类型规则的模拟需在生产环境验证",
@@ -6035,7 +6035,7 @@
       "reclassifyPartial": "{n} 封邮件已处置，但改判失败",
       "exportSelected": "导出已选 {n} 条",
       "exportAll": "导出全部筛选（{n} 条）",
-      "exportAllLimit": "导出全部筛选（共 {n} 条，超出上限将只导出前 {limit} ��）",
+      "exportAllLimit": "导出全部筛选（共 {n} 条，超出上限将只导出前 {limit} 条）",
       "exportLimitWarning": "筛选结果较多（{n} 条），将导出前 {limit} 条，建议缩��筛选范围",
       "exportAllFiltered": "导出全部筛选",
       "crossPageSelected": "已���页选中 {n} 条"
@@ -6393,7 +6393,7 @@
         "urlIndex": "序号",
         "originalUrl": "原始 URL",
         "securityStatus": "安全状态",
-        "urlSuspicious": "���疑",
+        "urlSuspicious": "可疑",
         "urlSafe": "安全",
         "attachmentSecurity": "附件安全分析",
         "attIndex": "序号",
@@ -6802,7 +6802,7 @@
       "upcoming": "即将上线",
       "unavailable": "当前主动作下不可用",
       "catalogueOnly": "仅目录（无后端支持）",
-      "selectConditionHint": "从左侧��择条件进行配置,或点击已有条件进行编辑。",
+      "selectConditionHint": "从左侧选择条件进行配置,或点击已有条件进行编辑。",
       "previewTitle": "表达式预览",
       "previewHint": "条件树的实时 JSON 预览。",
       "previewC6Hint": "富表达式预览将在下一迭代上线。",
@@ -7173,7 +7173,7 @@
       "conditionSearchPlaceholder": "搜索条件...",
       "addConditionHeader": "添加条件",
       "noMatchingConditions": "未找到匹配的条件",
-      "emptyConfigPanel": "选择一个条件���行配置",
+      "emptyConfigPanel": "选择一个条件进行配置",
       "descCardTitle": "条件说明",
       "descSourceLabel": "数据来源",
       "descUsageLabel": "用途",
@@ -7547,7 +7547,7 @@
     "timeoutMarkPositions": "标记位置",
     "markPosition_subject_prefix": "主题前缀",
     "markPosition_header": "邮件头",
-    "timeoutMarkText": "标��文本",
+    "timeoutMarkText": "标记文本",
     "senderNotification": "发件人通��管理",
     "queueEntryNotify": "进入队列通知",
     "queueEntryDesc": "邮件进入审核队列时通知发件人",
@@ -8565,7 +8565,7 @@
       "dropAlready": "该邮件已被丢弃",
       "dropError": "丢弃失败",
       "recallTitle": "召回该邮件",
-      "recallDescription": "确认召回该邮件？该邮件已投递，若收件人已读取���能召回失败。",
+      "recallDescription": "确认召回该邮件？该邮件已投递，若收件人已读取可能召回失败。",
       "recallConfirm": "确认召回",
       "recallSuccess": "已发起召回",
       "recallAlready": "该邮件已发起召回",
@@ -8678,7 +8678,7 @@
       "qrcode": "邮件包含二维码",
       "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
       "clickableAttachment": "邮件包含可点击附件",
-      "clickableAttachmentDesc": "附件内含可点击链接/按钮时命中（如 HTML 附件、可交互 PDF ���）",
+      "clickableAttachmentDesc": "附件内含可点击链接/按钮时命中（如 HTML 附件、可交互 PDF 等）",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
       "riskLabels": {
         "senderFirstSeen": "发信人���次出现",
@@ -8721,7 +8721,7 @@
   "timeoutEditTitle": "编辑超时策略",
   "timeoutEditDescription": "保存后仅更新本页草稿，点击页面底部「保存」才会真正生效；取消丢弃改动。",
 
-      "description": "运行模式决定是否执行处置，防护等级与置���度分级决定处置方式；超时策略对所有旁路检测生效。",
+      "description": "运行模式决定是否执行处置，防护等级与置信度分级决定处置方式；超时策略对所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败�����行模式仍按真实引擎配置展示。",
@@ -9070,7 +9070,7 @@
         "format": "请按 姓名,邮箱 ��式填���",
         "email": "邮箱格式不正确",
         "duplicate": "邮箱在本次粘贴中重复",
-        "existing": "该邮箱已是保���对象"
+        "existing": "该邮箱已是保护对象"
       },
       "sectionSource": "数据来源",
       "sectionIdentity": "身份信息",
@@ -9985,7 +9985,7 @@
       "cpu_usage": "CPU 使用率",
       "memory_usage": "内存使用率",
       "data_dir_usage": "数据目录使用率",
-      "network_retransmit": "网络重传��",
+      "network_retransmit": "网络重传率",
       "disk_io": "磁盘 I/O",
       "kb_repl_delay": "DB 复制延迟",
       "kb_active_conn": "DB 活跃连接",
@@ -10342,7 +10342,7 @@
     "permanentLock": "永久锁定",
     "platformOnly": "由平台统一设置，租户不可修改",
     "tenantBanner": "平台已下发登录安全基线。本租户只能在基线之上加严，不可低于基线；置灰选项即为低于基线、不可选择的取值。",
-    "belowBaseline": "低于平台基线，��前按基线生效",
+    "belowBaseline": "低于平台基线，当前按基线生效",
     "noRules": "暂无 IP 规则",
     "addRule": "新增 IP",
     "delete": "删除",
@@ -10786,7 +10786,7 @@
       "match_type_invalid": "匹配方式取值无效",
       "name_and_pattern_required": "名称和匹���内容都必须填写",
       "not_found": "链接黑名单规则不存在，可能已被删除",
-      "tenant_access_denied": "���有权限访问该租户的数据",
+      "tenant_access_denied": "没有权限访问该租户的数据",
       "tenant_id_required": "必须指定租户（平台管理员需通过 X-Tenant-ID 指定）",
       "verdict_invalid": "判定结果取值无效"
     },
@@ -10796,7 +10796,7 @@
       "helo_match_invalid": "HELO 匹配方式无效，只���是：{allowed}",
       "helo_pattern_regex_invalid": "HELO ��配的正则表达式不合法，请检查语���",
       "is_active_required": "请指定是否生效",
-      "not_found": "准入规则������在，可能已被删除",
+      "not_found": "准入规则���存在，可能已被删除",
       "null_sender_requires_cidr": "允许���发件人的规则只按来源 IP 匹配，因此必须填写来源 IP 段",
       "privileged_requires_system_admin": "创建特权准入规则需要平台管理员权限",
       "rate_limit_must_be_positive": "每小时限额必须大于 0",
@@ -11036,7 +11036,7 @@
       "request_body_unreadable": "请求内容读取失败",
       "scan_result_format_invalid": "附件扫描结果数据格式不正确",
       "scan_result_missing": "未提供附件扫描结果数据",
-      "scan_result_all_invalid": "校���后没有任何有效的扫描结果"
+      "scan_result_all_invalid": "校验后没有任何有效的扫描结果"
     },
     "url_protection": {
       "deep_inspect_timeout_out_of_range": "深度检测超时时间必须在 {min}-{max} 秒之间",
@@ -11344,7 +11344,7 @@
       "system_default_role_cannot_deleted": "系统内置角色不可删除"
     },
     "smtp_auth_ip_lockout": {
-      "invalid_ip": "IP 地址���效"
+      "invalid_ip": "IP 地址无效"
     },
     "spoofing_notification_preview": {
       "admin_emails_invalid": "管理员邮箱列表中含有无效邮箱",
