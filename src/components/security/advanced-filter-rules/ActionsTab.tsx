@@ -27,7 +27,7 @@ import { ActionSummary } from './ActionSummary';
 // 本 Tab 使用，保留仅为与 F6 ConditionsTab 一致的容器签名(RuleEditorDrawer
 // 对所有 Tab 统一传参).
 
-const PRIMARY_ACTIONS: PrimaryAction[] = ['none', 'deliver', 'tagDeliver', 'quarantine', 'review', 'discard'];
+const PRIMARY_ACTIONS: PrimaryAction[] = ['none', 'deliver', 'quarantine', 'review', 'discard'];
 
 type Selection = { type: 'action' } | { type: 'addon'; key: AddonKey };
 
