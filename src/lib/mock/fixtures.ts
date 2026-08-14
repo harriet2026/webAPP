@@ -5805,7 +5805,7 @@ export function mockPutURLProtectionSettings(
 
 // ─── 意图引擎（intent-engine，mock）────────────────────────────────
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
-// 动作映射后端枚举（proceed→accept、review→audit、block→reject、drop→discard），
+// 动作映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），
 // 非 receive 方向默认区间 accept→quarantine（D-06）。
 // 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF���DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
 
@@ -5839,13 +5839,19 @@ function intentMockSingle(it: string, dir: string) {
   if (risk === "high") action = isReceive ? "quarantine" : "discard";
   else if (risk === "medium") action = isReceive ? "quarantine" : "audit";
   else action = isReceive ? "accept" : "audit";
+  const segments = intentMockSegments(risk, dir);
   const cfg: Record<string, unknown> = {
     enabled: true,
     action,
     detection_mode: "classification",
-    threshold_segments: intentMockSegments(risk, dir),
+    threshold_segments: segments,
   };
-  if (action === "accept") {
+  // mark_config 是分类级别的单一配置，切到分段阈值模式时也可能用到（只要
+  // 有区间动作是 accept），所以只看顶层 action 会漏掉「分类动作非 accept，
+  // 但阈值区间里有 accept」的组合——按两者的并集判断，避免用户切到阈值模式
+  // 却看不到已配置好的标记面板。
+  const hasAcceptSegment = segments.some((s) => s.action === "accept");
+  if (action === "accept" || hasAcceptSegment) {
     cfg.mark_config = createDefaultMarkConfig(it as IntentType);
   }
   return cfg;

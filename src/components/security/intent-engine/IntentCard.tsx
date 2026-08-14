@@ -16,6 +16,7 @@ import {
   toUIAction,
   thresholdActionSummary,
   applyUIAction,
+  applyThresholdSegments,
 } from '@/types/intent-engine';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -92,7 +93,15 @@ export function IntentCard({
   const dimmed = !value.enabled;
   const showHighRiskWarning = uiAction === 'proceed' && risk === 'high';
   const showProceedMarkConfig =
-    direction === 'receive' && uiAction === 'proceed' && detectionMode === 'classification';
+    direction === 'receive' &&
+    detectionMode === 'classification' &&
+    uiAction === 'proceed';
+  // 分段阈值模式下 mark_config 是否任一区间需要（而不是卡头单一 uiAction），
+  // 与 thresholdSummary 摘要口径一致：只要有一段是"进行下一步"就需要展示标记配置。
+  const showThresholdMarkConfig =
+    direction === 'receive' &&
+    detectionMode === 'threshold' &&
+    thresholdSummary.includes('proceed');
 
   const handleActionChange = (v: string | null) => {
     if (!v) return;
@@ -104,7 +113,7 @@ export function IntentCard({
   };
 
   const handleThresholdChange = (segments: IntentSingleConfig['threshold_segments']) => {
-    onChange({ ...value, threshold_segments: segments });
+    onChange(applyThresholdSegments(value, segments, intent));
   };
 
   // 卡片头是唯一可点区域（展开/收起）——pointer 驱动 hover（柔和交互反馈规格 §6.4/§7.2）。
@@ -293,12 +302,26 @@ export function IntentCard({
 
             {/* 分段阈值模式配置 */}
             {detectionMode === 'threshold' && value.threshold_segments && (
-              <ThresholdSegmentConfig
-                segments={value.threshold_segments}
-                onChange={handleThresholdChange}
-                direction={direction}
-                disabled={!value.enabled || !engineEnabled}
-              />
+              <div className="space-y-3">
+                <ThresholdSegmentConfig
+                  segments={value.threshold_segments}
+                  onChange={handleThresholdChange}
+                  direction={direction}
+                  disabled={!value.enabled || !engineEnabled}
+                />
+                {/* GT-12171 补齐：分段阈值模式下只要有区间选择"进行下一步"，
+                    就需要展示标记配置（信头/主题打标）——mark_config 是分类
+                    级别的单一配置，与卡头 uiAction 无关，需按 thresholdSummary
+                    判断而非分类模式的 uiAction。 */}
+                {showThresholdMarkConfig && value.mark_config && (
+                  <ProceedMarkConfig
+                    value={value.mark_config}
+                    intent={intent}
+                    onChange={(mark_config) => onChange({ ...value, mark_config })}
+                    disabled={!value.enabled || !engineEnabled}
+                  />
+                )}
+              </div>
             )}
           </div>
         )}

@@ -172,6 +172,30 @@ export function applyUIAction(cfg: IntentSingleConfig, ui: UIIntentAction, inten
   return next;
 }
 
+/**
+ * 分段阈值模式下同步 mark_config：只要任一区间的动作是"进行下一步"（accept），
+ * 该分类就需要一份标记配置（信头/主题打标），与分类优先模式下 applyUIAction
+ * 的建立/清理逻辑保持一致——没有区间选择"进行下一步"时清空 mark_config，
+ * 避免保存无用的隔离/丢弃分类还带着标记配置。
+ */
+export function applyThresholdSegments(
+  cfg: IntentSingleConfig,
+  segments: ThresholdSegment[] | undefined,
+  intent: IntentType,
+): IntentSingleConfig {
+  const hasProceedSegment = (segments ?? []).some((s) => s.action === 'accept');
+  if (hasProceedSegment) {
+    return {
+      ...cfg,
+      threshold_segments: segments,
+      mark_config: cfg.mark_config || createDefaultMarkConfig(intent),
+    };
+  }
+  const next: IntentSingleConfig = { ...cfg, threshold_segments: segments };
+  delete next.mark_config;
+  return next;
+}
+
 /** Threshold segment action options per direction (exclude 'accept' for non-receive). */
 export function thresholdActionsForDirection(direction: IntentDirection): IntentAction[] {
   return direction === 'receive' ? RECEIVE_ACTIONS : NON_RECEIVE_ACTIONS;
