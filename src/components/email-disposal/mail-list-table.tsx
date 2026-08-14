@@ -31,10 +31,10 @@ import { formatDate } from '@/lib/utils';
 import { resolveActionBadges, actionToVariant } from '@/lib/email-log-action';
 import { DISPLAY_STATUS_VARIANTS as STATUS_VARIANTS } from '@/lib/display-status';
 import type { DisposalMailItem, DisplayStatus } from '@/types/email-disposal';
-import { formatListReason, isStage1Policy, type DisposalLang } from './lib/disposal-basis-config';
+import { type DisposalLang } from './lib/disposal-basis-config';
 import { RecipientStatusBadges } from './components/recipient-status-badges';
+import { DisposalBasisCell } from './components/disposal-basis-cell';
 import { mailTypeLabelKey, correctionSourceLabelKey } from './lib/detail-helpers';
-import { useProductForm } from '@/contexts/product-form-context';
 
 interface MailListTableProps {
   items: DisposalMailItem[];
@@ -68,6 +68,19 @@ interface MailListTableProps {
    * 影响筛选本身（筛选逻辑见 mockEmailDisposalList 的 display_status 处理）。
    */
   activeDisplayStatuses?: string[];
+  /**
+   * 处置依据多桶展示：当前生效的"处置依据"筛选值（策略模块 policy_key，
+   * 对应搜索栏的模块勾选）。仅用于在 mixed 行"处置依据"列多模块命中时把
+   * 命中筛选值的桶排在主文案与 Tooltip 最前面，不影响筛选本身（筛选逻辑
+   * 见 mockEmailDisposalList 的 disposal_policy_keys 处理）。
+   */
+  activeDisposalPolicyKeys?: string[];
+  /**
+   * 处置依据多桶展示：当前生效的"处置依据"筛选值（具体规则 rule_id，对应
+   * 搜索栏模块下的规则勾选）。语义与 activeDisposalPolicyKeys 一致，两者
+   * 任一命中即视为该桶被筛选高亮。
+   */
+  activeDisposalRuleIds?: string[];
 }
 
 export type TimeSortOrder = 'none' | 'asc' | 'desc';
@@ -109,16 +122,16 @@ export function MailListTable({
   exportLoading = false,
   activeExecutionActions,
   activeDisplayStatuses,
+  activeDisposalPolicyKeys,
+  activeDisposalRuleIds,
 }: MailListTableProps) {
   const t = useTranslations('emailDisposal');
-  const tFeatures = useTranslations('emailDisposal.detail.features');
   const rawLocale = useLocale();
   // Map next-intl locale to one of the disposal-basis dictionary's supported
   // langs; unknown locales fall back to zh (the dictionary's primary language).
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(rawLocale as DisposalLang)
     ? (rawLocale as DisposalLang)
     : 'zh';
-  const { viewer, capabilities } = useProductForm();
 
   // GT-11579: localize enum badges (direction / action) with safe fallback to
   // the raw value when the i18n key is missing.
@@ -184,7 +197,7 @@ export function MailListTable({
   const directionOptions = ['incoming', 'outgoing', 'internal'];
   const emailTypeOptions = ['normal', 'subscription', 'advertising', 'spam', 'harmful', 'phishing', 'account_compromised', 'suspicious', 'spoofing', 'virus', 'sensitive'];
   // 与 quick-filters.tsx 的 statuses 数组、DisplayStatus 类型保持同一套位置
-  // 维度枚举，避免同一页面出现两份不一致的「邮件状态」选项列表。
+  // 维度枚举，避免同一页面出现两份不一致的「邮件状��」选项列表。
   const statusOptions: DisplayStatus[] = ['delivering', 'quarantine_pending', 'sideline_pending', 'audit_pending', 'rejected', 'discarded', 'delivery_cancelled', 'delivered', 'delivery_failed', 'recall_pending', 'recall_success', 'recall_failed', 'expired'];
 
   const updateHeaderFilter = useCallback((key: keyof TableHeaderFilters, option: string, checked: boolean) => {
@@ -654,38 +667,13 @@ export function MailListTable({
                 )}
                 {isColVisible('disposalBasis') && (
                 <TableCell className="text-xs max-w-[280px] truncate">
-                  {item.disposalBasis ? (() => {
-                    const isPlatformPolicy =
-                      viewer === 'tenant' &&
-                      capabilities?.multiTenant === true &&
-                      isStage1Policy(item.disposalBasis.policy_key);
-                    const label = isPlatformPolicy
-                      ? tFeatures('platformPolicyListReason')
-                      : formatListReason(item.disposalBasis, disposalLang);
-                    return (
-                      <Tooltip>
-                        <TooltipTrigger render={<span className="cursor-default truncate block" />}>
-                          {label}
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-md text-xs">
-                          {isPlatformPolicy
-                            ? tFeatures('platformPolicyHitDetail')
-                            : label}
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  })() : item.reason ? (
-                    // GT-12578 / GT-12686：落地 spec §4.1「合成失败/无命中时
-                    // disposal_basis 存 null，前端回退现有 MailLog.Reason
-                    // 自由文本」。此前这里直接落 '—'，于是 mail_marking 这类
-                    // 不参与 disposal_basis 合成的规则命中后列表上什么都看不到。
-                    <Tooltip>
-                      <TooltipTrigger render={<span className="cursor-default truncate block" />}>
-                        {item.reason}
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-md text-xs">{item.reason}</TooltipContent>
-                    </Tooltip>
-                  ) : '—'}
+                  <DisposalBasisCell
+                    basis={item.disposalBasis}
+                    reason={item.reason}
+                    lang={disposalLang}
+                    highlightPolicyKeys={activeDisposalPolicyKeys}
+                    highlightRuleIds={activeDisposalRuleIds}
+                  />
                 </TableCell>
                 )}
                 {isColVisible('mailType') && (

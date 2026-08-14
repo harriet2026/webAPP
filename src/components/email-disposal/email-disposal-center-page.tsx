@@ -946,6 +946,16 @@ export function EmailDisposalCenterPage({
           activeDisplayStatuses={
             similarMode ? undefined : searchParams.displayStatus?.split(",").filter(Boolean)
           }
+          // GT-12946：群发邮件多处置依据支撑。同理，相似邮件模式下不传；
+          // 否则把当前生效的"处置依据"筛选值（模块/具体规则）传下去，让
+          // mixed 行"处置依据"列多模块命中时把命中筛选值的桶排在主文案与
+          // Tooltip 最前面。
+          activeDisposalPolicyKeys={
+            similarMode ? undefined : appliedQuickFilter.disposalPolicyKeys
+          }
+          activeDisposalRuleIds={
+            similarMode ? undefined : appliedQuickFilter.disposalRuleIds
+          }
           selectedIds={selectedIds}
           onSelectionChange={(newPageIds) => {
             // 跨页追加/移除：以当前页 items 的 id 集合作为"当前页范围"

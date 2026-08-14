@@ -35,6 +35,7 @@ import type {
   RBLFilterLegacyProductAction,
 } from "@/types/rbl-filter";
 import type { DetectionProfile } from "@/lib/api/detection-profiles";
+import type { DisposalBasis } from "@/types/email-disposal";
 import { mapPhishingDispositionToDisplayStatus } from "@/lib/display-status";
 import type {
   OverseasMailConfigResponse,
@@ -469,7 +470,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────������������──������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────�������������──������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -3666,7 +3667,7 @@ function makeMockIPFilterRules(): IPFilterRuleView[] {
     makeIpFilterRule({
       id: 13,
       name: "恶意IP库联动",
-      description: "表达式引用恶意 IP 库并排除误报网段",
+      description: "表达式引用��意 IP 库并排除误报网段",
       list_type: "blacklist",
       ip_config_type: "expression",
       ip_value: "203.0.113.0/24;!203.0.113.66",
@@ -4156,7 +4157,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 发信人黑���名单（sender_filter，mock）
+// 发信人黑���名��（sender_filter，mock）
 // ���据结构对齐统一规则系统 `Rule`���webapp/src/types/unified-rules.ts）：
 //   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
@@ -6124,7 +6125,7 @@ interface MockDisposalSeed {
   // deriveDomainAge() 只在存在且 <=7 天时渲染）。缺省 undefined����即真实后端
   // 现状（暂无 whois/RDAP 数据）的优雅降级。
   domainAgeDays?: number;
-  // senderIsNewOnThisMail -- true 时该行的 sender_first_seen_at 等于自己的
+  // senderIsNewOnThisMail -- true 时该行��� sender_first_seen_at 等于自己的
   // received_at（首次出现新发信��场景），否则沿用既有的固定历史值（已知
   // 发信人场景）。
   senderIsNewOnThisMail?: boolean;
@@ -7517,9 +7518,9 @@ function mockAttachmentsFor(seed: MockDisposalSeed) {
   return { attachments, scanResults };
 }
 
-function disposalBasis(seed: MockDisposalSeed) {
+function disposalBasis(seed: MockDisposalSeed): DisposalBasis | undefined {
   if (!seed.basis) return undefined;
-  const base = {
+  const base: DisposalBasis = {
     policy_key: seed.basis[0],
     rule_name: seed.basis[1],
     rule_id: seed.basis[2],
@@ -8073,14 +8074,24 @@ export function mockEmailDisposalList(path: string) {
   const emailTypes = query.get("email_type")?.split(",").filter(Boolean);
   if (emailTypes?.length)
     items = items.filter((item) => emailTypes.includes(item.email_type));
+  // 处置依据（策略模块）筛选修复：mixed 记录（群发邮件不同收件人命中不同
+  // 策略模块）改为对 disposal_basis.per_recipient 做取交集匹配——只要邮件
+  // 里任一收件人的 policy_key 命中已选模块就算命中，而不是要求顶层单一
+  // disposal_policy_keys 精确等于筛选值（顶层字段固定取 seed.basis[0]，
+  // 对多依据的 mixed 记录只反映"第一个"依据，会漏掉其余收件人命中的模块）。
+  // 非 mixed 记录，以及没有提供 mixedBasis 的既有 mixed 记录（如 MIC053），
+  // per_recipient 为空，回退到顶层字段精确匹配，行为不变。
   const policyKeys = query
     .get("disposal_policy_keys")
     ?.split(",")
     .filter(Boolean);
   if (policyKeys?.length)
-    items = items.filter((item) =>
-      policyKeys.includes(item.disposal_policy_keys ?? ""),
-    );
+    items = items.filter((item) => {
+      const itemPolicyKeys = item.disposal_basis?.per_recipient?.length
+        ? item.disposal_basis.per_recipient.map((r) => r.policy_key ?? "")
+        : [item.disposal_policy_keys ?? ""];
+      return itemPolicyKeys.some((key) => policyKeys.includes(key));
+    });
   // GT-12923 阶段三：执行动作从 AdvancedFilter 的 action eq/in 条件挪到顶层
   // 查询参数 action=deliver,quarantine（与 email_type/disposal_policy_keys
   // 处理方式一致，OR 语义）。非 mixed 记录按归一化后的单一动作精确匹配；
