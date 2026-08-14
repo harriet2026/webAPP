@@ -202,25 +202,29 @@
           GT-12952：<code>src/components/security/attachment-security/AntivirusTab.tsx</code>（<code>VIRUS_ACTIONS</code>/<code>TIMEOUT_ACTIONS</code> 常量）、<code>ImageDetectTab.tsx</code>（<code>LIGHT_ACTIONS</code> 常量）、<code>EncryptedAttachmentTab.tsx</code>（<code>SelectItem</code> 列表）、<code>src/types/attachment-security.ts</code>（<code>EncryptedActionConfig.decrypt_fail_action</code> 类型联合）<br/>
           GT-12960：<code>src/types/intent-engine.ts</code>（<code>IntentAction</code>/<code>UIIntentAction</code> 类型联合、<code>RECEIVE_ACTIONS</code>/<code>NON_RECEIVE_ACTIONS</code>/<code>RECEIVE_UI_ACTIONS</code>/<code>NON_RECEIVE_UI_ACTIONS</code> 常量、<code>toUIAction</code>/<code>applyUIAction</code>/<code>thresholdActionSummary</code>/<code>applyThresholdSegments</code> 函数、<code>IntentMarkConfig</code> 类型）、<code>src/components/security/intent-engine/IntentCard.tsx</code>（<code>showProceedMarkConfig</code>/<code>showThresholdMarkConfig</code> 展示条件）、<code>ThresholdSegmentConfig.tsx</code>（区间动作下拉选项）、<code>ProceedMarkConfig.tsx</code>（原 <code>MarkDeliverConfig.tsx</code> 重命名，标记配置面板）、<code>defaults.ts</code>
         </td></tr>
-        <tr><td>webapp commit</td><td>GT-12940：<code>3ce30d8</code>（<code>feat: move content rule to stage 3 first policy for GT-12938</code>）<br/>GT-12952：<code>b4dd0c7</code>（<code>fix: update TIMEOUT_ACTIONS to include audit and remove reject</code>）、<code>74a1b4d</code>（<code>feat: update light actions to include audit instead of reject</code>）、<code>d0134f7</code>（<code>feat: replace reject with audit in decrypt fail action options</code>）<br/>GT-12960：<code>a4a04a8</code>（<code>feat: update quarantine and block action hints in messages</code>，去掉「拒收」/阻断动作）、<code>1a9b5d1</code>（<code>feat: update translations and terminology in zh.json</code>，<code>mark_deliver</code> → <code>proceed</code> 重命名，<code>MarkDeliverConfig.tsx</code> → <code>ProceedMarkConfig.tsx</code>）、<code>7e5f585</code>（<code>feat: enhance IntentCard with threshold segment handling and mark config logic</code>，新增 <code>applyThresholdSegments</code> 修复分段阈值模式标记配置同步问题）</td></tr>
+        <tr><td>webapp commit</td><td>GT-12940：<code>3ce30d8</code>（<code>feat: move content rule to stage 3 first policy for GT-12938</code>）<br/>GT-12952：<code>b4dd0c7</code>（<code>fix: update TIMEOUT_ACTIONS to include audit and remove reject</code>）、<code>74a1b4d</code>（<code>feat: update light actions to include audit instead of reject</code>）、<code>d0134f7</code>（<code>feat: replace reject with audit in decrypt fail action options</code>）<br/>GT-12960：<code>c661d2d</code>（<code>feat(intent-engine): 去掉执行动作"阻断"，高风险默认改为"丢弃"</code>，类型与 i18n 层删除 <code>reject</code>/「阻断」）、<code>a4a04a8</code>（<code>feat: update quarantine and block action hints in messages</code>，同步调整隔离/阻断相关提示文案与 <code>IntentCard.tsx</code>/<code>ThresholdSegmentConfig.tsx</code>/<code>defaults.ts</code>）、<code>1a9b5d1</code>（<code>feat: update translations and terminology in zh.json</code>，<code>MarkDeliverConfig.tsx</code> → <code>ProceedMarkConfig.tsx</code> 组件重命名）、<code>3ff119f</code>（<code>feat: update messaging for new action "Proceed" and remove "Mark & Deliver" references</code>，zh/en/ru/th 四语与 mock fixtures 中 <code>mark_deliver</code> → <code>proceed</code> 重命名，「标记投递」→「进行下一步」）、<code>7e5f585</code>（<code>feat: enhance IntentCard with threshold segment handling and mark config logic</code>，新增 <code>applyThresholdSegments</code> 修复分段阈值模式标记配置同步问题）</td></tr>
         <tr><td>对照 spec commit</td><td>not-used</td></tr>
         <tr><td>历史对话记录</td><td>当前上下文可获得完整历史：GT-12940 顺序调整、GT-12952 执行动作调整与 GT-12960 意图引擎执行动作调整均为本会话内用户直接指令下完成的实现，验收标准（「内容规则」调整为「阶段3：内容层」第一个策略；附件安全模块执行动作去掉拒收、部分策略增加审核；意图引擎执行动作去掉「标记投递」「阻断」、增加「进行下一步」并保证标记配置面板正确同步）在当前上下文中完整可得，非转述或推测</td></tr>
         <tr><td>事实源优先级</td><td>1. 用户当前描述（GT-12940/GT-12952/GT-12960 需求名称与验收标准）；2. webapp 当前源码与 <code>git show</code> 实际 diff；3. GT-12940 部分为 <code>agent-browser</code> 浏览器实测（变更前/变更后对照截图）；GT-12952 部分为用户在本地真实浏览器环境手动截取并提供的下拉展开态截图；GT-12960 部分为 <code>agent-browser</code> 浏览器实测（意图引擎抽屉内执行动作下拉展开态与标记配置面板显隐状态实拍）；4. 其他原始 spec，仅作差异对照（<code>doc/html_spec-version/GT-12731.html</code> 收录本页面此前的完整增量历史，含 GT-11651「内容规则执行动作调整」等既往变更，本文档新建独立记录，未修改 GT-12731.html 内容，仅作交叉参考）。</td></tr>
         <tr><td>浏览器验证状态</td><td>GT-12940：已通过 <code>agent-browser</code> 打开 <code>/zh/security/pipeline</code> 页面，分别在变更前（<code>git checkout</code> 至上一次提交的 <code>PolicyPipelinePage.tsx</code>）与变更后（当前工作区版本）两个状态下截取「阶段3：内容层」卡片区整列截图，逐一比对卡片顺序变化，见 §1.2 截图。<br/>GT-12952：由用户在本地真实浏览器环境（AI版·单租户 · 平台管理员视角）手动截取「反病毒引擎」「图片识别」「加密附件」三个子 Tab 中执行动作下拉展开态提供，均为改动后的真实渲染效果，见 §2.2/§3.2/§4.2 截图。<br/>GT-12960：已通过 <code>agent-browser</code> 打开 <code>/zh/security/pipeline</code> 页面进入「意图引擎」策略详情抽屉，在「接收方向」Tab 下分别对「订阅」（分类优先模式）与「涉政/反动」（切换为分段阈值模式）两张意图卡片展开执行动作下拉，实拍选项列表；并对分段阈值模式下将某一区间动作切换为「进行下一步」/切换离开「进行下一步」两种状态分别截图，验证标记配置面板随之正确展开/收起，见 §5.2 截图。</td></tr>
         <tr><td>沙箱渲染限制</td><td><strong>图 S-1（变更前，GT-12940）来自本沙箱的无头浏览器环境，该沙箱缺少中文字体，导致截图中的中文文字统一渲染为方框（tofu box）占位符，而非实际字形缺失或产品文案异常。</strong>这是渲染环境限制，不是产品缺陷，性质与既有文档 GT-12865 中记录的 D-004 相同；本文档已尝试开启页面右上角「Mock」模式开关（<code>osgateway_mock_enabled</code>），但该开关只改变数据来源（阶段4卡片内容切换为 AI 智能体数据），未能修复本次「阶段3：内容层」区域截图的中文字体渲染，故 S-1 仍保留方框占位符。<strong>图 S-2（变更后，GT-12940）及图 S-3~S-6（GT-12952，四张下拉展开态截图）均已由用户在本地真实浏览器环境手动截取并提供，中文文字正常显示，不受本沙箱字体限制影响</strong>，可作为对应调整最终效果的直接证据。S-1 交互预览下方的表格与说明文字均依据 <code>messages/zh.json</code> 中 <code>pipeline.content</code>/<code>pipeline.attachment</code>/<code>pipeline.url</code>/<code>pipeline.intentEngine</code>/<code>attachmentSecurity.actions</code> 等真实 i18n 文案与源码逐一核对后如实转录，读者可结合 S-1 中卡片的相对位置与 S-2 的真实文案对照理解实际效果。已在 D-001 中记录该限制及其解决状态，避免被误认为文案渲染缺陷。</td></tr>
-        <tr><td>变更类型</td><td>GT-12940：功能变更（策略展示顺序调整，不涉及策略配置逻辑、数据模型或后端接口）<br/>GT-12952：功能变更（附件安全检测三个子 Tab 的执行动作选项调整：去掉「拒收」，反病毒引擎/图片识别保持原选项数量不变，加密附件新增「审核」；不涉及页面路由、数据模型结构或后端接口协议）</td></tr>
+        <tr><td>变更类型</td><td>GT-12940：功能变更（策略展示顺序调整，不涉及策略配置逻辑、数据模型或后端接口）<br/>GT-12952：功能变更（附件安全检测三个子 Tab 的执行动作选项调整：去掉「拒收」，反病毒引擎/图片识别保持原选项数量不变，加密附件新增「审核」；不涉及页面路由、数据模型结构或后端接口协议）<br/>GT-12960：功能变更 + 缺陷修复（意图引擎执行动作展示层选项统一去掉「标记投递」「阻断」、新增「进行下一步」，含 UI 展示层类型 <code>UIIntentAction</code> 与数据层双向映射；另修复分段阈值检测模式下标记配置面板不同步展开的一处遗留缺陷；不涉及数据层 <code>IntentAction</code> 枚举值或后端接口协议）</td></tr>
       </tbody>
     </table>
     <div class="callout callout-info">
-      本规格为增量文档，记录两个独立需求的完整实现：<br/>
+      本规格为增量文档，记录三个独立需求的完整实现：<br/>
       <strong>GT-12940</strong>「内容规则顺序调整：调整到"阶段3：内容层"第一个策略」——策略流水线页面「阶段3：内容层」此前的策略展示顺序为「附件安全检测 → URL检测与防护 → 内容规则 → 意图引擎」，本次调整为「内容规则 → 附件安全检测 → URL检测与防护 → 意图引擎」，即把「内容规则」从原第三位提升为阶段3内的第一个策略（意图引擎因是强制生效的综合判定策略，固定展示在阶段3末位，不参与本次排序调整）。<br/>
-      <strong>GT-12952</strong>「附件安全模块：执行动作去掉拒收，部分策略执行动作增加审核」——「附件安全检测」策略详情抽屉内「反病毒引擎」「图片识别」「加密附件」三个子 Tab 的执行动作下拉选项统一去掉「拒收」（reject）；其中「加密附件」的「解密失败处置」额外新增「审核」（audit）选项，「反病毒引擎」「图片识别」中「审核」选项此前（GT-12754）已存在，本次仅移除「拒收」。详见下方变更 2~4。
+      <strong>GT-12952</strong>「附件安全模块：执行动作去掉拒收，部分策略执行动作增加审核」——「附件安全检测」策略详情抽屉内「反病毒引擎」「图片识别」「加密附件」三个子 Tab 的执行动作下拉选项统一去掉「拒收」（reject）；其中「加密附件」的「解密失败处置」额外新增「审核」（audit）选项，「反病毒引擎」「图片识别」中「审核」选项此前（GT-12754）已存在，本次仅移除「拒收」。详见下方变更 2~4。<br/>
+      <strong>GT-12960</strong>「意图引擎：执行动作去掉标记投递、阻断，增加进行下一步」——「意图引擎」策略详情抽屉内接收/外发/域内三个方向 Tab 下所有意图分类卡片的执行动作下拉统一去掉历史「标记投递」「阻断」两项，新增「进行下一步」（对应数据层 <code>accept</code>，含放行 + 可选打标语义）；同时修复分段阈值检测模式下选择「进行下一步」区间时标记配置面板不同步展开的缺陷，使其与分类优先模式的行为对齐。详见下方变更 5。
     </div>
     <div class="callout callout-warn">
       <strong>范围说明（GT-12940）：</strong>本次调整仅涉及前端展示顺序（卡片区排列顺序 + 策略详情抽屉左侧导航条目顺序），不改变任一策略自身的配置字段、启用状态、生效逻辑或与后端接口的数据交互方式；「内容规则」「附件安全检测」「URL检测与防护」在阶段3内均标记为 <code>configurable</code>（可独立配置），「意图引擎」标记为 <code>forced</code>（强制生效），该分类未发生变化。
     </div>
     <div class="callout callout-warn">
       <strong>范围说明（GT-12952）：</strong>本次调整仅涉及三个子 Tab 内执行动作下拉的可选项集合与对应类型定义，不改变任何默认值以外的既有数据（改动前无任何配置项以 <code>reject</code> 为当前保存值，故移除该选项不产生数据迁移问题）；不改变下拉组件本身的交互方式、i18n 文案键命名规则或保存接口的字段结构；「审核」（<code>audit</code>）文案复用项目现有国际化框架，已在 zh/en/ru/th 四语 <code>attachmentSecurity.actions</code>/<code>actionDesc</code> 命名空间下确认存在，未新增 i18n key。
+    </div>
+    <div class="callout callout-warn">
+      <strong>范围说明（GT-12960）：</strong>本次调整仅涉及意图引擎执行动作的展示层选项集合（<code>UIIntentAction</code>）与其到数据层 <code>IntentAction</code> 的映射逻辑，不改变底层数据模型字段名（<code>action</code> 字段仍存 <code>'accept' | 'quarantine' | 'audit' | 'discard'</code> 之一，未新增/删除任何数据层枚举值）与后端接口协议；改动前「标记投递」「阻断」本身并非独立的 <code>IntentAction</code> 数据值（仅为 UI 下拉历史文案/概念），故本次调整不涉及已保存配置的数据迁移；新增的 <code>applyThresholdSegments</code> 为纯前端状态同步修复，不影响已保存的 <code>threshold_segments</code> 数据结构；「进行下一步」（<code>proceed</code>）文案已在 zh/en/ru/th 四语 <code>intentEngine.action</code> 命名空间下确认存在，未新增 i18n key，而是由旧 key <code>mark_deliver</code>（标记投递）就地改名为 <code>proceed</code>（进行下一步），另一旧 key <code>reject</code>（阻断）已删除。
     </div>
   </section>
 
@@ -338,7 +342,7 @@
             <td>「意图引擎」卡片（<code>key: 'intentEngine'</code>）</td>
             <td>阶段3第 4 位</td>
             <td><span class="tag tag-info">阶段3第 4 位（不变）</span></td>
-            <td>标题文案 <code>pipeline.intentEngine</code> = 「意图引擎」；<code>type: 'forced'</code>（强制生效），左边条红色，作为综合判定策略固定保留在阶段3末位，未参与本次排序调整</td>
+            <td>标题文案 <code>pipeline.intentEngine</code> = 「意图引擎」；<code>type: 'forced'</code>���强制生效），左边条红色，作为综合判定策略固定保留在阶段3末位，未参与本次排序调整</td>
           </tr>
           <tr>
             <td>策略详情抽屉左侧导航（<code>stage3NavItems</code>）</td>
@@ -501,9 +505,106 @@
     </div>
   </div>
 
+  <div class="incremental-section" id="change-5">
+    <div class="incr-header">
+      <span class="incr-num">5</span>
+      <h2>意图引擎：执行动作去掉标记投递、阻断，增加进行下一步</h2>
+      <span class="incr-meta">路由：/zh/security/pipeline（意图引擎 → 接收方向/外发方向/域内方向 Tab → 各风险等级意图卡片）<br/>组件：src/types/intent-engine.ts（IntentAction/UIIntentAction 类型联合、RECEIVE_ACTIONS 等常量、applyThresholdSegments 函数）、IntentCard.tsx、ThresholdSegmentConfig.tsx、ProceedMarkConfig.tsx<br/>变更类型：执行动作选项调整 + 分段阈值模式标记配置同步缺陷修复 · 2026-08-14</span>
+    </div>
+    <div class="incr-body">
+
+      <h3 id="c5-goal">5.1 方案概述</h3>
+      <p>
+        <strong>问题背景：</strong>「意图引擎」策略详情抽屉内，每个意图分类（涉黄/赌、涉政/反动、钓鱼、垃圾、订阅）卡片的执行动作下拉此前包含「标记投递」（历史上作为「放行但打标」的动作项独立存在）与「阻断」（作为「隔离」的同义/重复动作项存在）。产品要求统一去掉这两项，改为新增一个语义更清晰的「进行下一步」——含义是放行邮件继续走后续检测流水线，同时仍可选配「标记配置」（信头/主题打标），即把「标记投递」原本承载的「放行 + 打标」能力合并进「进行下一步」，不再作为独立动作项出现。
+      </p>
+      <p>
+        <strong>方案：</strong>
+      </p>
+      <ul>
+        <li><code>src/types/intent-engine.ts</code>：底层数据模型 <code>IntentAction</code> 类型联合保留 <code>'accept' | 'quarantine' | 'audit' | 'discard'</code>（<code>accept</code> 字段值本身未变，避免破坏已保存配置与后端协议），新增面向 UI 展示的 <code>UIIntentAction</code> 类型联合 <code>'proceed' | 'quarantine' | 'audit' | 'discard'</code>，通过 <code>toUIAction()</code>/<code>applyUIAction()</code> 两个纯函数在 <code>accept</code>（数据层）与 <code>proceed</code>（展示层，中文渲染为「进行下一步」）之间做双向映射，实现「界面只讲进行下一步，数据契约不变」；</li>
+        <li>执行动作下拉选项常量由此前的「标记投递 / 隔离 / 审核 / 丢弃 / 阻断」等历史命名集合，统一收敛为 <code>RECEIVE_UI_ACTIONS = ['proceed', 'quarantine', 'audit', 'discard']</code>（接收方向，4 项）与 <code>NON_RECEIVE_UI_ACTIONS = ['quarantine', 'audit', 'discard']</code>（外发/域内方向，3 项，不含「进行下一步」——非接收方向邮件已经在出站/内部传输中，不存在「继续投递流水线」的语义，故该选项对这两个方向不适用）；</li>
+        <li>「进行下一步」选中时（<code>applyUIAction</code> 中 <code>ui === 'proceed'</code> 分支）自动创建/保留 <code>mark_config</code>（默认開启主题打标、关闭信头打标，默认文案取自 <code>DEFAULT_MARK_TEXT</code>，如「涉政/反动」对应 <code>[涉政/反动]</code>），切换到其余三个动作时清空 <code>mark_config</code>，与卡片下方「标记配置」面板的展示条件保持完全同步；</li>
+        <li><strong>缺陷修复（分段阈值模式）：</strong>「分类优先」检测模式下选择「进行下一步」会立即触发 <code>applyUIAction</code> 建立 <code>mark_config</code>、面板正确展开；但「分段阈值」检测模式（按置信度区间分别配置动作）此前缺少对应的同步函数，任一区间选择「进行下一步」时 <code>mark_config</code> 不会被创建，标记配置面板不会展开，导致管理员在阈值模式下无法为「进行下一步」区间配置打标文案。本次新增 <code>applyThresholdSegments()</code> 函数：只要 <code>threshold_segments</code> 中存在任意一段 <code>action === 'accept'</code>，即建立/保留 <code>mark_config</code>；当所有区间都不是「进行下一步」时清空 <code>mark_config</code>，逻辑与分类优先模式的 <code>applyUIAction</code> 完全对齐，<code>IntentCard.tsx</code> 中改为按检测模式分别调用 <code>applyUIAction</code>（分类优先）或 <code>applyThresholdSegments</code>（分段阈值）；</li>
+        <li>组件重命名（<code>1a9b5d1</code>）：原 <code>MarkDeliverConfig.tsx</code>（对应旧「标记投递」命名）重命名为 <code>ProceedMarkConfig.tsx</code>，与新动作命名「进行下一步」保持一致；「阻断」对应的旧 i18n key 实际命名为 <code>intentEngine.action.reject</code>（<code>c661d2d</code> 中删除），「标记投递」对应的旧 i18n key 为 <code>intentEngine.action.mark_deliver</code>（<code>3ff119f</code> 中重命名为 <code>proceed</code>，值同步改为「进行下一步」）；当前 <code>intentEngine.action</code> 命名空间下仅剩 <code>proceed</code>（进行下一步）/<code>quarantine</code>（隔离）/<code>audit</code>（审核）/<code>discard</code>（丢弃）四项；</li>
+        <li>已确认改动前无任何已保存配置以旧「标记投递」「阻断」为当前动作值存在于 mock 数据或类型定义中（历史上这两项本身也从未作为独立的 <code>IntentAction</code> 数据值存在，只是 UI 下拉曾经的选项文案/历史遗留概念），故本次调整不产生数据迁移问题，属纯 UI 层选项收敛 + 一处此前遗漏的阈值模式同步逻辑修复。</li>
+      </ul>
+
+      <h3 id="c5-states">5.2 截图式交互预览</h3>
+      <div class="interaction-preview">
+        <h4>状态一：接收方向 ·「订阅」（低危，分类优先模式）执行动作下拉展开态</h4>
+        <p class="trigger-path">触发路径：策略流水线 → 「意图引擎」配置 → 接收方向 Tab → 低危面板 →「订阅」卡片展开 → 点击执行动作下拉触发器 → 下拉列表展开</p>
+        <figure>
+          <img src="./screenshots/GT-12960-S1-classification-action-dropdown.png" alt="订阅卡片执行动作下拉展开态，agent-browser 沙箱实拍：进行下一步、隔离、审核、丢弃四个选项，当前选中进行下一步（高亮）" />
+          <figcaption>图 S-1（agent-browser 沙箱实拍，中文因沙箱字体限制渲染为方框，见 D-003）：下拉展开 4 个选项——进行下一步、隔离、审核、丢弃；当前选中值「进行下一步」高亮显示；「标记投递」「阻断」两个历史选项已不存在。</figcaption>
+        </figure>
+      </div>
+      <div class="interaction-preview">
+        <h4>状态二：接收方向 ·「涉政/反动」（高危，切换为分段阈值模式）区间动作下拉展开态</h4>
+        <p class="trigger-path">触发路径：同上 → 高危面板 →「涉政/反动」卡片展开 → 检测模式切换为「分段阈值」→ 点击第一个区间的动作下拉触发器 → 下拉列表展开</p>
+        <figure>
+          <img src="./screenshots/GT-12960-S2-threshold-action-dropdown.png" alt="涉政反动分段阈值模式下第一区间动作下拉展开态，agent-browser 沙箱实拍：进行下一步、隔离、审核、丢弃四个选项" />
+          <figcaption>图 S-2（agent-browser 沙箱实拍）：分段阈值模式下每个置信度区间的动作下拉选项集合与分类优先模式一致——进行下一步、隔离、审核、丢弃 4 项，验证 <code>thresholdActionsForDirection('receive')</code> 返回值与 <code>RECEIVE_UI_ACTIONS</code> 保持同一收敛后的选项集合。</figcaption>
+        </figure>
+      </div>
+      <div class="interaction-preview">
+        <h4>状态三：区间动作选择「进行下一步」后，标记配置面板自动展开（缺陷修复后的正确效果）</h4>
+        <p class="trigger-path">触发路径：同上 → 将第一个区间的动作由默认值切换为「进行下一步」→ 面板自动向下展开「标记配置」区块</p>
+        <figure>
+          <img src="./screenshots/GT-12960-S3-threshold-proceed-markconfig-shown.png" alt="分段阈值模式下区间动作选择进行下一步后，标记配置面板自动展开，agent-browser 沙箱实拍" />
+          <figcaption>图 S-3（agent-browser 沙箱实拍）：区间动作切换为「进行下一步」后，卡片下方立即展开「标记配置」面板（信头标记/主题标记开关与文案输入框），修复前该面板在分段阈值模式下不会展开，验证 <code>applyThresholdSegments</code> 修复生效。</figcaption>
+        </figure>
+      </div>
+      <div class="interaction-preview">
+        <h4>状态四：所有区间动作均切离「进行下一步」后，标记配置面板自动收起</h4>
+        <p class="trigger-path">触发路径：同上 → 将该区间动作由「进行下一步」切换回「隔离」→ 面板自动收起「标记配置」区块</p>
+        <figure>
+          <img src="./screenshots/GT-12960-S4-threshold-no-proceed-markconfig-hidden.png" alt="分段阈值模式下所有区间动作均不是进行下一步时，标记配置面板自动收起，agent-browser 沙箱实拍" />
+          <figcaption>图 S-4（agent-browser 沙箱实拍）：当前风险等级面板内所有区间动作均不是「进行下一步」时，「标记配置」面板不再展示，卡片在「应用模板」按钮行后即结束；验证 <code>applyThresholdSegments</code> 的清空分支同样生效，与分类优先模式下 <code>applyUIAction</code> 的清空逻辑对称。</figcaption>
+        </figure>
+      </div>
+
+      <h3 id="c5-elements">5.3 逐元素说明</h3>
+      <table>
+        <thead><tr><th>元素</th><th>变更前选项/行为</th><th>变更后选项/行为</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>接收方向 · 执行动作下拉（分类优先模式，<code>RECEIVE_UI_ACTIONS</code>）</td>
+            <td>标记投递 / 隔离 / 审核 / 丢弃 / 阻断（历史命名集合，含重复语义项）</td>
+            <td><span class="tag tag-changed">进行下一步 / 隔离 / 审核 / 丢弃（4 项）</span></td>
+            <td>去掉「标记投递」「阻断」，新增「进行下一步」；数据层 <code>accept</code> 字段值不变，<code>toUIAction</code>/<code>applyUIAction</code> 负责 UI 展示层映射</td>
+          </tr>
+          <tr>
+            <td>外发/域内方向 · 执行动作下拉（<code>NON_RECEIVE_UI_ACTIONS</code>）</td>
+            <td>隔离 / 审核 / 丢弃 / 阻断（历史命名集合）</td>
+            <td><span class="tag tag-changed">隔离 / 审核 / 丢弃（3 项）</span></td>
+            <td>去掉「阻断」；不新增「进行下一步」——非接收方向邮件不存在继续投递流水线的语义，该方向选项集合本身不含「进行下一步」（<code>NON_RECEIVE_ACTIONS</code> 从未包含 <code>accept</code>）</td>
+          </tr>
+          <tr>
+            <td>分段阈值模式 · 各区间动作下拉（<code>thresholdActionsForDirection</code>）</td>
+            <td>同方向对应的历史选项集合，且选中「进行下一步/放行类」动作时标记配置面板<strong>不同步展开</strong>（缺陷）</td>
+            <td><span class="tag tag-changed">与分类优先模式选项集合一致；新增 <code>applyThresholdSegments</code> 同步逻辑</span></td>
+            <td>选项集合调整同上两行；新增修复：任一区间选择「进行下一步」即建立 <code>mark_config</code> 并展开面板，全部区间离开「进行下一步」则清空并收起</td>
+          </tr>
+          <tr>
+            <td>标记配置面板组件（<code>MarkDeliverConfig.tsx</code>）</td>
+            <td>组件名与「标记投递」旧动作命名绑定</td>
+            <td><span class="tag tag-changed">重命名为 <code>ProceedMarkConfig.tsx</code></span></td>
+            <td>组件内部字段（信头标记/主题标记开关、文案、前缀后缀位置）未变，仅重命名以匹配新动作命名「进行下一步」，导入路径同步更新</td>
+          </tr>
+          <tr>
+            <td>i18n 文案（<code>messages/zh.json</code> → <code>intentEngine.action</code>）</td>
+            <td><code>mark_deliver</code>: 标记投递；<code>reject</code>: 阻断</td>
+            <td><span class="tag tag-changed">删除以上两项；新增 <code>proceed</code>: 进行下一步</span></td>
+            <td><code>quarantine</code>（隔离）/<code>audit</code>（审核）/<code>discard</code>（丢弃）三项文案未变</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- ══════════════ C. 差异标注 ══════════════ -->
   <section id="diff">
-    <h2>C. 差异标注（D-001 ~ D-002）</h2>
+    <h2>C. 差异标注（D-001 ~ D-003）</h2>
 
     <h3>D-001 · agent-browser 沙箱缺少中文字体导致截图方框化；已通过用户手动截图（S-2）解决变更后效果的证据问题</h3>
     <table>
@@ -520,17 +621,28 @@
     <table>
       <tbody>
         <tr><td width="140">状态</td><td><span class="tag tag-changed">已处理</span></td></tr>
-        <tr><td>描述</td><td>本文档所在项目此前的规格记录（含反病毒引擎的历史增量说明）中，「发现病毒后的处置」「扫描超时处置」「轻度检测配置 · 执行动作」「解密失败处置」四处下拉的选项集合均包含「拒收」（<code>reject</code>，GT-12754 增量中由「阻断」改名而来）。GT-12952 要求统一去掉「拒收」，其中「解密失败处置」额外新增「审核」。</td></tr>
+        <tr><td>描述</td><td>本文档所在项目此前的规格记录（含反病毒引擎的历史增量说明）中，「发现病毒后的处置」「扫描超时处置」「轻度检测配置 · 执行动作」「解密失败处置」四处下拉的选项集合均包含「拒收」（<code>reject</code>，GT-12754 增量中由「阻断」改名而来）。GT-12952 要求统一��掉「拒收」，其中「解密失败处置」额外新增「审核」。</td></tr>
         <tr><td>影响</td><td>四处选项集合发生变化（见变更 2/3/4 逐元素说明表），但均已确认改动前无任何已保存配置以 <code>reject</code> 为当前值，不涉及历史数据迁移；「反病毒引擎」「图片识别」中的「审核」选项本身在 GT-12754 增量中已存在，未受本次影响</td></tr>
         <tr><td>处理</td><td>已在变更 2/3/4 中如实记录新旧选项对照，标记过期内容；相关组件源码常量数组与类型定义已同步更新（<code>VIRUS_ACTIONS</code>/<code>TIMEOUT_ACTIONS</code>/<code>LIGHT_ACTIONS</code>/<code>EncryptedActionConfig</code>）</td></tr>
         <tr><td>验证依据</td><td>用户手动截图 <code>GT-12938-S3</code>~<code>S-6</code>（本地真实浏览器，中文正常显示，四处下拉展开态实拍）；相关单元测试套件（<code>AttachmentSecurityPage.test.tsx</code>、i18n-parity、save-contract、<code>attachment-security.test.ts</code> API 层测试）全部通过；<code>tsc --noEmit</code> 类型检查无报错</td></tr>
+      </tbody>
+    </table>
+
+    <h3>D-003 · GT-12960 意图引擎截图沿用 agent-browser 沙箱实拍，未替换为用户手动截图</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">已知·环境限制</span></td></tr>
+        <tr><td>描述</td><td>与 D-001 相同的 <code>agent-browser</code> 沙箱中文字体渲染限制同样出现在图 S-1~S-4（GT-12960 部分）：意图卡片标题「订阅」「涉政/反动」、下拉选项「进行下一步」「隔离」「审核」「丢弃」等中文文字在沙箱截图中渲染为方框（tofu box）占位符，但页面结构、下拉选项数量与相对顺序、标记配置面板的展开/收起状态均正常渲染，可通过无头浏览器的可访问性快照（accessibility snapshot）逐一核对每个选项的真实中文文本，快照文本与源码 <code>messages/zh.json</code> 中的 i18n key 取值完全一致。本次未像 GT-12940/GT-12952 部分一样额外请用户在本地真实浏览器环境手动重新截取。</td></tr>
+        <tr><td>影响</td><td>图 S-1~S-4 的像素级截图本身无法直接读出中文文案，但配套的可访问性快照（在本文档生成过程中逐条核对，非转述）已完整确认每处选项文本、卡片标题与面板展开状态，功能性结论（选项集合、标记配置面板显隐同步）不受影响</td></tr>
+        <tr><td>处理</td><td>本次未寻求替换为用户手动截图；figcaption 中已补全通过快照核对得到的真实中文选项文案作为替代事实依据，与 D-001 处理方式一致；如需像素级可读的中文截图证据，可在后续版本中请用户补充手动截图替换 S-1~S-4</td></tr>
+        <tr><td>验证依据</td><td>agent-browser <code>snapshot</code> 命令输出（可访问性树，含完整中文文本节点，逐条核对「进行下一步」「隔离」「审核」「丢弃」「订阅」「涉政/反动」等文案）；<code>messages/zh.json</code> 中 <code>intentEngine.action.proceed</code> 等 i18n key 真实取值交叉核对；<code>src/types/intent-engine.ts</code> 源码常量与函数实现</td></tr>
       </tbody>
     </table>
   </section>
 
   <!-- ══════════════ D. 待确认事项 ══════════════ -->
   <section id="questions">
-    <h2>D. 待确认事项（Q-001）</h2>
+    <h2>D. 待确认事项（Q-001 ~ Q-002）</h2>
 
     <h3>Q-001 · 其余产品形态与角色下的展示顺序是否需要逐一验证</h3>
     <table>
@@ -539,6 +651,16 @@
         <tr><td>问题</td><td>本次调整的两个常量数组（<code>stage3NavItems</code> / <code>stages.stage3.policies</code>）为静态数据，不包含任何按产品形态或角色分支的条件逻辑，理论上应在全部形态与角色下表现一致。但本次截图仅在 AI版·单租户 / 平台管理员下完成，未在传统版、云网关多租户、AI版多租户等其余形态与角色下逐一复核。</td></tr>
         <tr><td>影响</td><td>若后续发现某形态或角色存在独立的策略展示顺序覆盖逻辑（本次未在源码中发现此类分支），可能与本次调整结论不一致</td></tr>
         <tr><td>建议</td><td>如需完整覆盖验证，可在具备多产品形态切换条件的环境中补充抽样截图；当前基于源码为静态常量数组的事实，判断该调整对全部形态/角色生效</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Q-002 · GT-12960「外发方向」「域内方向」两个 Tab 的下拉展开态未逐一实拍</h3>
+    <table>
+      <tbody>
+        <tr><td width="140">状态</td><td><span class="tag tag-unverif">待确认</span></td></tr>
+        <tr><td>问题</td><td>本次浏览器实测仅覆盖「接收方向」Tab 下「订阅」（分类优先模式）与「涉政/反动」（分段阈值模式）两张卡片的执行动作下拉展开态与标记配置面板显隐状态。「外发方向」「域内方向」两个 Tab 使用同一套 <code>NON_RECEIVE_UI_ACTIONS</code> 常量与 <code>IntentCard</code> 组件，理论上表现一致，但未逐一截图复核。</td></tr>
+        <tr><td>影响</td><td>若「外发方向」/「域内方向」下存在本次未在源码中发现的特殊分支逻辑，可能与本次调整结论不一致；基于源码复用同一组件与常量数组的事实，风险较低</td></tr>
+        <tr><td>建议</td><td>如需完整覆盖验证，可补充「外发方向」「域内方向」Tab 下任一高危意图卡片的执行动作下拉展开态截图；当前基于 <code>IntentCard.tsx</code>/<code>thresholdActionsForDirection</code> 源码为方向参数化的统一实现，判断该调整对三个方向 Tab 均一致生效</td></tr>
       </tbody>
     </table>
   </section>
@@ -566,6 +688,12 @@
           <td>2026-08-14</td>
           <td><code>b4dd0c7</code> / <code>74a1b4d</code> / <code>d0134f7</code></td>
           <td>在既有 GT-12940 记录基础上新增第二个一级需求 GT-12952「附件安全模块：执行动作去掉拒收，部分策略执行动作增加审核」的完整实现：目录追加 GT-12952 一级需求锚点 + 变更 2/3/4 三个二级条目；A 节元信息表补充 GT-12952 相关需求名称/规格类型/路由/组件路径/commit/事实源优先级/浏览器验证状态/变更类型，新增对应范围说明 callout。新增变更 2（反病毒引擎 <code>AntivirusTab.tsx</code> 的 <code>VIRUS_ACTIONS</code>/<code>TIMEOUT_ACTIONS</code> 去掉「拒收」）、变更 3（图片识别 <code>ImageDetectTab.tsx</code> 的 <code>LIGHT_ACTIONS</code> 去掉「拒收」）、变更 4（加密附件 <code>EncryptedAttachmentTab.tsx</code> 的解密失败处置去掉「拒收」、新增「审核」，同步更新 <code>types/attachment-security.ts</code> 类型联合），均含 2.1/3.1/4.1 方案概述、2.2/3.2/4.2 截图式交互预览（用户提供的本地真实浏览器手动截图 S-3~S-6，均为改动后下拉展开态实拍，中文正常显示）、2.3/3.3/4.3 逐元素说明表；新增差异标注 D-002（记录 GT-12754 历史增量中「拒收」相关选项过期说明）；顺带修复本文档 v1/v2 中「变更 1」区块注释与标题、逐元素说明表内两处历史遗留的乱码字符（<code>&#65533;</code>），不改变其原有语义内容；未修改 GT-12940 部分的方案概述、截图、逐元素说明表、D-001、Q-001 的实质内容；文档不含 <code>&lt;script&gt;</code>、表单控件或事件属性，已通过残留扫描确认无匹配，全文 Grep 确认无乱码字符。</td>
+        </tr>
+        <tr>
+          <td>v4</td>
+          <td>2026-08-14</td>
+          <td><code>c661d2d</code> / <code>a4a04a8</code> / <code>1a9b5d1</code> / <code>3ff119f</code> / <code>7e5f585</code></td>
+          <td>在既有 GT-12940/GT-12952 记录基础上新增第三个一级需求 GT-12960「意图引擎：执行动作去掉标记投递、阻断，增加进行下一步」的完整实现：目录追加 GT-12960 一级需求锚点 + 变更 5 二级条目（含 5.1/5.2/5.3 三级结构）；A 节元信息表补充 GT-12960 相关需求名称/规格类型/路由/组件路径/5 个相关 commit/事实源优先级/浏览器验证状态。新增变更 5：<code>src/types/intent-engine.ts</code> 新增 <code>UIIntentAction</code> 展示层类型联合与 <code>toUIAction</code>/<code>applyUIAction</code> 双向映射函数，执行动作选项收敛为 <code>RECEIVE_UI_ACTIONS</code>（进行下一步/隔离/审核/丢弃，4 项）与 <code>NON_RECEIVE_UI_ACTIONS</code>（隔离/审核/丢弃，3 项），去掉历史「标记投递」（旧 key <code>mark_deliver</code>）「阻断」（旧 key <code>reject</code>）两项；新增 <code>applyThresholdSegments</code> 函数修复分段阈值检测模式下选择「进行下一步」区间时标记配置面板不同步展开的缺陷，与分类优先模式 <code>applyUIAction</code> 的建立/清理逻辑对齐；组件 <code>MarkDeliverConfig.tsx</code> 重命名为 <code>ProceedMarkConfig.tsx</code>；<code>messages/zh.json</code> 等四语文件中旧 key <code>intentEngine.action.reject</code>（阻断）已删除，<code>mark_deliver</code>（标记投递）就地改名为 <code>proceed</code>（进行下一步），<code>intentEngine.action</code> 命名空间当前保留 <code>proceed</code>/<code>quarantine</code>/<code>audit</code>/<code>discard</code> 四项。新增 <code>agent-browser</code> 浏览器实测截图 S-1~S-4（接收方向「订阅」分类优先模式动作下拉、「涉政/反动」分段阈值模式区间动作下拉、选择「进行下一步」后标记配置面板展开、切离「进行下一步」后面板收起），逐元素说明表依据源码常量与函数逐一核对；新增差异标注 D-003（沙箱中文字体渲染限制说明，已通过可访问性快照核对真实中文文案，未替换为用户手动截图）、待确认事项 Q-002（外发方向/域内方向 Tab 的下拉展开态未逐一实拍）；未修改 GT-12940/GT-12952 部分的方案概述、截图、逐元素说明表、D-001/D-002、Q-001 的实质内容；文档不含 <code>&lt;script&gt;</code>、表单控件或事件属性，已通过残留扫描确认无匹配。</td>
         </tr>
       </tbody>
     </table>
