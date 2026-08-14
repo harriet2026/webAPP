@@ -122,8 +122,8 @@
     <ul class="toc-list">
       <li><a href="#component-2-1">2.1 策略流水线入口卡片（阶段3）</a><span class="toc-badge">1层</span></li>
       <li><a href="#component-2-2">2.2 内容策略抽屉宿主 + 基础限制 Tab</a><span class="toc-badge">2层</span></li>
-      <li><a href="#component-2-3">2.3 附件安全检测配置 Tab 组（多层交互）</a><span class="toc-badge">5层</span><span class="toc-badge" style="background:#dcfce7;color:#15803d;">GT-12754 已更新</span><span class="toc-badge" style="background:#eef4ff;color:#155eef;">GT-12952(GT-128938) 已更新</span><br>
-        <a href="layer-1-antivirus-tab.html">层级2：反病毒引擎</a>（<a href="layer-1-antivirus-tab.html#incremental-GT-12754-antivirus-engine-opt">↑ GT-12754 增量</a> · <a href="layer-1-antivirus-tab.html#incremental-GT-128938-remove-reject-add-audit">↑ GT-128938 增量</a>） · <a href="layer-2-image-detect-tab.html">层级3：图片识别（轻度/深度）</a>（<a href="layer-2-image-detect-tab.html#incremental-GT-128938-remove-reject-add-audit">↑ GT-128938 增量</a>） · <a href="layer-3-encrypted-tab.html">层级4：加密附件</a>（<a href="layer-3-encrypted-tab.html#incremental-GT-128938-remove-reject-add-audit">↑ GT-128938 增量</a>） · <a href="layer-4-disabled-tenant-states.html">层级5：禁用/租户/多语言变体</a></li>
+      <li><a href="#component-2-3">2.3 附件安全检测配置 Tab 组（多层交互）</a><span class="toc-badge">5层</span><span class="toc-badge" style="background:#dcfce7;color:#15803d;">GT-12754 已更新</span><br>
+        <a href="layer-1-antivirus-tab.html">层级2：反病毒引擎</a>（<a href="layer-1-antivirus-tab.html#incremental-GT-12754-antivirus-engine-opt">↑ GT-12754 增量</a>） · <a href="layer-2-image-detect-tab.html">层级3：图片识别（轻度/深度）</a> · <a href="layer-3-encrypted-tab.html">层级4：加密附件</a> · <a href="layer-4-disabled-tenant-states.html">层级5：禁用/租户/多语言变体</a></li>
       <li><a href="#api-mapping">4. 数据模型与 API 映射</a><span class="toc-badge">配置系统映射</span></li>
     </ul>
   </nav>
@@ -331,7 +331,7 @@
 
     <article class="component-spec" id="component-2-3">
       <h3>2.3 附件安全检测配置 Tab 组 AttachmentSecurityModule（多层交互）</h3>
-      <p>4 个 Tab 中「基础限制」已在 2.2 层级1 内���；其余 Tab 及状态变体拆分为独立子文件。左导航切换到其他策略再切回时，<strong>Tab 选中态与未保存的表单改动全部重置</strong>（组件重挂载，浏览器实测：加密附件 Tab 切走再回来变回基础限制）。</p>
+      <p>4 个 Tab 中「基础限制」已在 2.2 层级1 内嵌；其余 Tab 及状态变体拆分为独立子文件。左导航切换到其他策略再切回时，<strong>Tab 选中态与未保存的表单改动全部重置</strong>（组件重挂载，浏览器实测：加密附件 Tab 切走再回来变回基础限制）。</p>
       <div class="mermaid">
         graph LR
           A[层级0 策略卡] --> B[层级1 抽屉默认态·基础限制]
