@@ -215,6 +215,34 @@ describe('email disposal center mock contract', () => {
     ).toBe(true);
   });
 
+  // 群发邮件"邮件状态"筛选修复：筛选"投递成功"（display_status=delivered）
+  // 需要搜出包含至少一个已投递收件人的群发（mixed）邮件，而不是要求整封
+  // 邮件的（恒为 "delivering" 的）汇总状态精确等于 delivered——否则所有
+  // mixed 记录在筛"投递成功"时都会被漏掉，即使其中确实有投递成功的收件人。
+  it('matches a mixed row by any recipient status via recipient_dispositions intersection (display_status=delivered), not the scalar aggregate status', () => {
+    const deliveredResult = mockEmailDisposalList(
+      '/mail-logs?page=1&page_size=100&display_status=delivered',
+    );
+    // MIC053/MIC054/MIC055 均含已投递收件人，应命中"投递成功"筛选。
+    expect(deliveredResult.items.some((item) => item.tid === 'MIC053')).toBe(true);
+    expect(deliveredResult.items.some((item) => item.tid === 'MIC054')).toBe(true);
+    expect(deliveredResult.items.some((item) => item.tid === 'MIC055')).toBe(true);
+    // 命中的记录本身要么直接是整体已投递，要么是 mixed 且至少一个收件人已投递。
+    expect(
+      deliveredResult.items.every(
+        (item) =>
+          item.action !== 'mixed' ||
+          (item.recipient_dispositions ?? []).some((d) => d.status === 'delivered'),
+      ),
+    ).toBe(true);
+
+    // 筛"隔离中"（quarantine_pending）也应命中含隔离收件人的群发邮件。
+    const quarantineResult = mockEmailDisposalList(
+      '/mail-logs?page=1&page_size=100&display_status=quarantine_pending',
+    );
+    expect(quarantineResult.items.some((item) => item.tid === 'MIC054')).toBe(true);
+  });
+
   it('sorts by received time without mutating the canonical fixture order', () => {
     const ascending = mockEmailDisposalList('/mail-logs?page=1&page_size=100&sort_order=asc');
     expect(ascending.items[0].received_at <= ascending.items.at(-1)!.received_at).toBe(true);
