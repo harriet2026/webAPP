@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GT-12938 · GT-12940 内容规则顺序调整 / GT-12952 附件安全模块执行动作调整 · 增量功能规格 · v3</title>
+  <title>GT-12938 · GT-12940 内容规则顺序调整 / GT-12952 附件安全模块执行动作调整 / GT-12960 意图引擎执行动作调整 · 增量功能规格 · v4</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; scroll-behavior: smooth; }
@@ -163,8 +163,19 @@
         <li class="toc-change"><span class="toc-num">4</span><a href="#change-4">加密附件「解密失败处置」去掉拒收、新增审核</a></li>
       </ul>
 
-      <li><a href="#diff">C. 差异标注（D-001 ~ D-002）</a></li>
-      <li><a href="#questions">D. 待确认事项（Q-001）</a></li>
+      <!-- 一级需求：GT-12960 -->
+      <li class="toc-l1"><a href="#gt-12960">GT-12960 意图引擎：执行动作去掉标记投递、阻断，增加进行下一步</a></li>
+      <ul class="toc-l2-group">
+        <li class="toc-change"><span class="toc-num">5</span><a href="#change-5">执行动作选项统一调整为「进行下一步/隔离/审核/丢弃」，并修复分段阈值模式下标记配置面板不同步的问题</a></li>
+        <ul class="toc-l2-group">
+          <li class="toc-l3"><a href="#c5-goal">5.1 方案概述</a></li>
+          <li class="toc-l3"><a href="#c5-states">5.2 截图式交互预览</a></li>
+          <li class="toc-l3"><a href="#c5-elements">5.3 逐元素说明</a></li>
+        </ul>
+      </ul>
+
+      <li><a href="#diff">C. 差异标注（D-001 ~ D-003）</a></li>
+      <li><a href="#questions">D. 待确认事项（Q-001 ~ Q-002）</a></li>
       <li><a href="#version-history">E. 版本历史</a></li>
     </ul>
   </section>
@@ -172,6 +183,7 @@
   <!-- 需求入口锚点（供目录一级链接跳转）-->
   <div id="gt-12940" style="scroll-margin-top: 1rem;"></div>
   <div id="gt-12952" style="scroll-margin-top: 1rem;"></div>
+  <div id="gt-12960" style="scroll-margin-top: 1rem;"></div>
 
   <!-- ══════════════ A. 元信息 ══════════════ -->
   <section id="meta">
@@ -180,20 +192,21 @@
       <thead><tr><th>字段</th><th>内容</th></tr></thead>
       <tbody>
         <tr><td>文档编号（文件 ticket）</td><td>GT-12938</td></tr>
-        <tr><td>需求名称</td><td>GT-12940 内容规则顺序调整：调整到「阶段3：内容层」第一个策略（v1~v2）<br/>GT-12952 附件安全模块：执行动作去掉拒收，部分策略执行动作增加审核（v3 新增）</td></tr>
-        <tr><td>规格类型</td><td>增量规格（Incremental）· GT-12940 为展示顺序调整；GT-12952 为附件安全检测三个子 Tab（反病毒引擎/图片识别/加密附件）的执行动作选项调整（均不涉及数据模型或接口结构变更）</td></tr>
-        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v3</span></span></td></tr>
-        <tr><td>生成日期</td><td>2026-08-13（v1/v2）；v3 更新日期：2026-08-14</td></tr>
-        <tr><td>路由路径</td><td>GT-12940：<code>/zh/security/pipeline</code>（策略流水线页面 → 「阶段3：内容层」卡片区；策略详情抽屉左侧导航同步复用同一顺序）<br/>GT-12952：同路由 → 「阶段3：内容层」→「附件安全检测」策略详情抽屉 →「反病毒引擎」/「图片识别」/「加密附件」三个子 Tab</td></tr>
+        <tr><td>需求名称</td><td>GT-12940 内容规则顺序调整：调整到「阶段3：内容层」第一个策略（v1~v2）<br/>GT-12952 附件安全模块：执行动作去掉拒收，部分策略执行动作增加审核（v3 新增）<br/>GT-12960 意图引擎：执行动作去掉标记投递、阻断，增加进行下一步（v4 新增）</td></tr>
+        <tr><td>规格类型</td><td>增量规格（Incremental）· GT-12940 为展示顺序调整；GT-12952 为附件安全检测三个子 Tab（反病毒引擎/图片识别/加密附件）的执行动作选项调整；GT-12960 为意图引擎「分类优先」「分段阈值」两种检测模式共用的执行动作选项调整与命名统一，并修复分段阈值模式下标记配置面板不同步的缺陷（均不涉及后端接口协议变更）</td></tr>
+        <tr><td>当前版本</td><td><span class="version-badge"><span class="vnum">v4</span></span></td></tr>
+        <tr><td>生成日期</td><td>2026-08-13（v1/v2）；v3 更新日期：2026-08-14；v4 更新日期：2026-08-14</td></tr>
+        <tr><td>路由路径</td><td>GT-12940：<code>/zh/security/pipeline</code>（策略流水线页面 → 「阶段3：内容层」卡片区；策略详情抽屉左侧导航同步复用同一顺序）<br/>GT-12952：同路由 → 「阶段3：内容层」→「附件安全检测」策略详情抽屉 →「反病毒引擎」/「图片识别」/「加密附件」三个子 Tab<br/>GT-12960：同路由 → 「阶段3：内容层」→「意图引擎」策略详情抽屉 →「接收方向」/「外发方向」/「域内方向」三个 Tab 内各风险等级意图卡片</td></tr>
         <tr><td>组件路径</td><td>
           GT-12940：<code>src/components/security/PolicyPipelinePage.tsx</code>（<code>stage3NavItems</code> 数组——驱动策略详情抽屉左侧导航顺序；<code>stages</code> 常量中 <code>stage3</code>（阶段3：内容层）对应的 <code>policies</code> 数组——驱动卡片区展示顺序）<br/>
-          GT-12952：<code>src/components/security/attachment-security/AntivirusTab.tsx</code>（<code>VIRUS_ACTIONS</code>/<code>TIMEOUT_ACTIONS</code> 常量）、<code>ImageDetectTab.tsx</code>（<code>LIGHT_ACTIONS</code> 常量）、<code>EncryptedAttachmentTab.tsx</code>（<code>SelectItem</code> 列表）、<code>src/types/attachment-security.ts</code>（<code>EncryptedActionConfig.decrypt_fail_action</code> 类型联合）
+          GT-12952：<code>src/components/security/attachment-security/AntivirusTab.tsx</code>（<code>VIRUS_ACTIONS</code>/<code>TIMEOUT_ACTIONS</code> 常量）、<code>ImageDetectTab.tsx</code>（<code>LIGHT_ACTIONS</code> 常量）、<code>EncryptedAttachmentTab.tsx</code>（<code>SelectItem</code> 列表）、<code>src/types/attachment-security.ts</code>（<code>EncryptedActionConfig.decrypt_fail_action</code> 类型联合）<br/>
+          GT-12960：<code>src/types/intent-engine.ts</code>（<code>IntentAction</code>/<code>UIIntentAction</code> 类型联合、<code>RECEIVE_ACTIONS</code>/<code>NON_RECEIVE_ACTIONS</code>/<code>RECEIVE_UI_ACTIONS</code>/<code>NON_RECEIVE_UI_ACTIONS</code> 常量、<code>toUIAction</code>/<code>applyUIAction</code>/<code>thresholdActionSummary</code>/<code>applyThresholdSegments</code> 函数、<code>IntentMarkConfig</code> 类型）、<code>src/components/security/intent-engine/IntentCard.tsx</code>（<code>showProceedMarkConfig</code>/<code>showThresholdMarkConfig</code> 展示条件）、<code>ThresholdSegmentConfig.tsx</code>（区间动作下拉选项）、<code>ProceedMarkConfig.tsx</code>（原 <code>MarkDeliverConfig.tsx</code> 重命名，标记配置面板）、<code>defaults.ts</code>
         </td></tr>
-        <tr><td>webapp commit</td><td>GT-12940：<code>3ce30d8</code>（<code>feat: move content rule to stage 3 first policy for GT-12938</code>）<br/>GT-12952：<code>b4dd0c7</code>（<code>fix: update TIMEOUT_ACTIONS to include audit and remove reject</code>）、<code>74a1b4d</code>（<code>feat: update light actions to include audit instead of reject</code>）、<code>d0134f7</code>（<code>feat: replace reject with audit in decrypt fail action options</code>）</td></tr>
+        <tr><td>webapp commit</td><td>GT-12940：<code>3ce30d8</code>（<code>feat: move content rule to stage 3 first policy for GT-12938</code>）<br/>GT-12952：<code>b4dd0c7</code>（<code>fix: update TIMEOUT_ACTIONS to include audit and remove reject</code>）、<code>74a1b4d</code>（<code>feat: update light actions to include audit instead of reject</code>）、<code>d0134f7</code>（<code>feat: replace reject with audit in decrypt fail action options</code>）<br/>GT-12960：<code>a4a04a8</code>（<code>feat: update quarantine and block action hints in messages</code>，去掉「拒收」/阻断动作）、<code>1a9b5d1</code>（<code>feat: update translations and terminology in zh.json</code>，<code>mark_deliver</code> → <code>proceed</code> 重命名，<code>MarkDeliverConfig.tsx</code> → <code>ProceedMarkConfig.tsx</code>）、<code>7e5f585</code>（<code>feat: enhance IntentCard with threshold segment handling and mark config logic</code>，新增 <code>applyThresholdSegments</code> 修复分段阈值模式标记配置同步问题）</td></tr>
         <tr><td>对照 spec commit</td><td>not-used</td></tr>
-        <tr><td>历史对话记录</td><td>当前上下文可获得完整历史：GT-12940 顺序调整与 GT-12952 执行动作调整均为本会话内用户直接指令下完成的实现，验收标准（「内容规则」调整为「阶段3：内容层」第一个策略；附件安全模块执行动作去掉拒收、部分策略增加审核）在当前上下文中完整可得，非转述或推测</td></tr>
-        <tr><td>事实源优先级</td><td>1. 用户当前描述（GT-12940/GT-12952 需求名称与验收标准）；2. webapp 当前源码与 <code>git show</code> 实际 diff；3. GT-12940 部分为 <code>agent-browser</code> 浏览器实测（变更前/变更后对照截图）；GT-12952 部分为用户在本地真实浏览器环境手动截取并提供的下拉展开态截图；4. 其他原始 spec，仅作差异对照（<code>doc/html_spec-version/GT-12731.html</code> 收录本页面此前的完整增量历史，含 GT-11651「内容规则执行动作调整」等既往变更，本文档新建独立记录，未修改 GT-12731.html 内容，仅作交叉参考）。</td></tr>
-        <tr><td>浏览器验证状态</td><td>GT-12940：已通过 <code>agent-browser</code> 打开 <code>/zh/security/pipeline</code> 页面，分别在变更前（<code>git checkout</code> 至上一次提交的 <code>PolicyPipelinePage.tsx</code>）与变更后（当前工作区版本）两个状态下截取「阶段3：内容层」卡片区整列截图，逐一比对卡片顺序变化，见 §1.2 截图。<br/>GT-12952：由用户在本地真实浏览器环境（AI版·单租户 · 平台管理员视角）手动截取「反病毒引擎」「图片识别」「加密附件」三个子 Tab 中执行动作下拉展开态提供，均为改动后的真实渲染效果，见 §2.2/§3.2/§4.2 截图。</td></tr>
+        <tr><td>历史对话记录</td><td>当前上下文可获得完整历史：GT-12940 顺序调整、GT-12952 执行动作调整与 GT-12960 意图引擎执行动作调整均为本会话内用户直接指令下完成的实现，验收标准（「内容规则」调整为「阶段3：内容层」第一个策略；附件安全模块执行动作去掉拒收、部分策略增加审核；意图引擎执行动作去掉「标记投递」「阻断」、增加「进行下一步」并保证标记配置面板正确同步）在当前上下文中完整可得，非转述或推测</td></tr>
+        <tr><td>事实源优先级</td><td>1. 用户当前描述（GT-12940/GT-12952/GT-12960 需求名称与验收标准）；2. webapp 当前源码与 <code>git show</code> 实际 diff；3. GT-12940 部分为 <code>agent-browser</code> 浏览器实测（变更前/变更后对照截图）；GT-12952 部分为用户在本地真实浏览器环境手动截取并提供的下拉展开态截图；GT-12960 部分为 <code>agent-browser</code> 浏览器实测（意图引擎抽屉内执行动作下拉展开态与标记配置面板显隐状态实拍）；4. 其他原始 spec，仅作差异对照（<code>doc/html_spec-version/GT-12731.html</code> 收录本页面此前的完整增量历史，含 GT-11651「内容规则执行动作调整」等既往变更，本文档新建独立记录，未修改 GT-12731.html 内容，仅作交叉参考）。</td></tr>
+        <tr><td>浏览器验证状态</td><td>GT-12940：已通过 <code>agent-browser</code> 打开 <code>/zh/security/pipeline</code> 页面，分别在变更前（<code>git checkout</code> 至上一次提交的 <code>PolicyPipelinePage.tsx</code>）与变更后（当前工作区版本）两个状态下截取「阶段3：内容层」卡片区整列截图，逐一比对卡片顺序变化，见 §1.2 截图。<br/>GT-12952：由用户在本地真实浏览器环境（AI版·单租户 · 平台管理员视角）手动截取「反病毒引擎」「图片识别」「加密附件」三个子 Tab 中执行动作下拉展开态提供，均为改动后的真实渲染效果，见 §2.2/§3.2/§4.2 截图。<br/>GT-12960：已通过 <code>agent-browser</code> 打开 <code>/zh/security/pipeline</code> 页面进入「意图引擎」策略详情抽屉，在「接收方向」Tab 下分别对「订阅」（分类优先模式）与「涉政/反动」（切换为分段阈值模式）两张意图卡片展开执行动作下拉，实拍选项列表；并对分段阈值模式下将某一区间动作切换为「进行下一步」/切换离开「进行下一步」两种状态分别截图，验证标记配置面板随之正确展开/收起，见 §5.2 截图。</td></tr>
         <tr><td>沙箱渲染限制</td><td><strong>图 S-1（变更前，GT-12940）来自本沙箱的无头浏览器环境，该沙箱缺少中文字体，导致截图中的中文文字统一渲染为方框（tofu box）占位符，而非实际字形缺失或产品文案异常。</strong>这是渲染环境限制，不是产品缺陷，性质与既有文档 GT-12865 中记录的 D-004 相同；本文档已尝试开启页面右上角「Mock」模式开关（<code>osgateway_mock_enabled</code>），但该开关只改变数据来源（阶段4卡片内容切换为 AI 智能体数据），未能修复本次「阶段3：内容层」区域截图的中文字体渲染，故 S-1 仍保留方框占位符。<strong>图 S-2（变更后，GT-12940）及图 S-3~S-6（GT-12952，四张下拉展开态截图）均已由用户在本地真实浏览器环境手动截取并提供，中文文字正常显示，不受本沙箱字体限制影响</strong>，可作为对应调整最终效果的直接证据。S-1 交互预览下方的表格与说明文字均依据 <code>messages/zh.json</code> 中 <code>pipeline.content</code>/<code>pipeline.attachment</code>/<code>pipeline.url</code>/<code>pipeline.intentEngine</code>/<code>attachmentSecurity.actions</code> 等真实 i18n 文案与源码逐一核对后如实转录，读者可结合 S-1 中卡片的相对位置与 S-2 的真实文案对照理解实际效果。已在 D-001 中记录该限制及其解决状态，避免被误认为文案渲染缺陷。</td></tr>
         <tr><td>变更类型</td><td>GT-12940：功能变更（策略展示顺序调整，不涉及策略配置逻辑、数据模型或后端接口）<br/>GT-12952：功能变更（附件安全检测三个子 Tab 的执行动作选项调整：去掉「拒收」，反病毒引擎/图片识别保持原选项数量不变，加密附件新增「审核」；不涉及页面路由、数据模型结构或后端接口协议）</td></tr>
       </tbody>
@@ -368,7 +381,7 @@
         <p class="trigger-path">触发路径：策略流水线 → 附件安全检测「配置」→「反病毒引擎」Tab → 点击「发现病毒后的处置」下拉触发器 → 下拉列表展开</p>
         <figure>
           <img src="./screenshots/GT-12938-S3-antivirus-virus-action-dropdown-manual-zh.png" alt="发现病毒后的处置下拉展开态，用户本地浏览器手动截图：隔离、审核、丢弃三个选项，每项含动作名称与灰色描述两行，当前选中隔离" />
-          <figcaption>图 S-3（用户手动截图，中文正常显示）：下拉展开 3 个选项——隔离（邮件进入隔离区，管理员审核后可放行或删除）、审核（邮件进入待审核队列，人工确认后投递或退回）、丢弃（静默丢弃，发件方无感知，无退信），当前选中值「隔离」；「拒收」选项已不再出现。</figcaption>
+          <figcaption>图 S-3（用户手动截图，中文正常显示）：下拉展开 3 个选项——隔离（邮件进入隔离区，管理员审核后可放行或删除）、审核（邮件进入待审核队列，人工确认后投递或退回）、丢弃（静默丢弃���发件方无感知，无退信），当前选中值「隔离」；「拒收」选项已不再出现。</figcaption>
         </figure>
         <h4>状态 2：「扫描超时处置（超过30秒）」下拉展开态（去除拒收后）</h4>
         <p class="trigger-path">触发路径：（接上）关闭病毒动作下拉 → 点击「扫描超时处置（超过30秒）」下拉触发器 → 下拉列表展开</p>
@@ -469,7 +482,7 @@
         <p class="trigger-path">触发路径：策略流水线 → 附件安全检测「配置」→「加密附件」Tab → 点击「解密失败处置」下拉触发器 → 下拉列表展开</p>
         <figure>
           <img src="./screenshots/GT-12938-S5-encrypted-decrypt-fail-action-dropdown-manual-zh.png" alt="解密失败处置下拉展开态，用户本地浏览器手动截图：隔离、继续流水线、审核三个选项，当前选中继续流水线" />
-          <figcaption>图 S-5（用户手动截图，中文正常显示）：下拉展开 3 个选项——隔离、继续流水线（放行）、审核，当前选中值「继续流水线」（高亮）；「拒收」选项已移除，「审核」为本次新增选项。</figcaption>
+          <figcaption>图 S-5（用户手动截图，中文正常显示）：下拉展开 3 个选项——隔离、继续流水线（放行）、审核，当前���中值「继续流水线」（高亮）；「拒收」选项已移除，「审核」为本次新增选项。</figcaption>
         </figure>
       </div>
 
@@ -540,7 +553,7 @@
           <td>v1</td>
           <td>2026-08-13</td>
           <td><code>3ce30d8</code></td>
-          <td>新建 GT-12938.html，按 <code>html-spec-PM-version</code> 技能规范记录 GT-12940「内容规则顺序调整：调整到"阶段3：内容层"第一个策略」的完整实现：目录含 A/B 固定章节 + GT-12940 一级需求 + 变更 1 二级 + 1.1/1.2/1.3 三级结构；元信息与事实源（含沙箱中文字体渲染限制说明）、产品形态 × 角色矩阵（B）。变更 1（<code>PolicyPipelinePage.tsx</code> 中 <code>stage3NavItems</code> 与 <code>stages.stage3.policies</code> 两处顺序数组同步调整，「内容规则」由阶段3第 3 位提升为第 1 位，「附件安全检测」「URL检测与防护」依次后移一位，「意图引擎」固定保留末位不变）；补充真实 <code>agent-browser</code> 浏览器实测截图 S-1（变更前）、S-2（变更后）（浅色主题 · 1506×936，因沙箱缺少中文字体渲染为方框占位符），逐元素说明表均依据 <code>messages/zh.json</code> 真实 i18n 文案核对转录；新增差异标注 D-001（沙箱中文字体缺失导致截图文字方框化的环境限制说明）、待确认事项 Q-001（其余产品形态/角色展示顺序待抽样复核）；文档不含 <code>&lt;script&gt;</code>、表单控件或事件属性，已通过残留扫描确认无匹配。</td>
+          <td>新建 GT-12938.html，按 <code>html-spec-PM-version</code> 技能规范记录 GT-12940「内容规则顺序调整：调整到"阶段3：内容层"第一个策略」的完整实现：目录含 A/B 固定章节 + GT-12940 一级需求 + 变更 1 二级 + 1.1/1.2/1.3 三级结构；元信息与事实源（含沙箱中文字体渲染限制说明）、产品形态 × 角色矩阵（B）。变更 1（<code>PolicyPipelinePage.tsx</code> 中 <code>stage3NavItems</code> 与 <code>stages.stage3.policies</code> 两���顺序数组同步调整，「内容规则」由阶段3第 3 位提升为第 1 位，「附件安全检测」「URL检测与防护」依次后移一位，「意图引擎」固定保留末位不变）；补充真实 <code>agent-browser</code> 浏览器实测截图 S-1（变更前）、S-2（变更后）（浅色主题 · 1506×936，因沙箱缺少中文字体渲染为方框占位符），逐元素说明表均依据 <code>messages/zh.json</code> 真实 i18n 文案核对转录；新增差异标注 D-001（沙箱中文字体缺失导致截图文字方框化的环境限制说明）、待确认事项 Q-001（其余产品形态/角色展示顺序待抽样复核）；文档不含 <code>&lt;script&gt;</code>、表单控件或事件属性，已通过残留扫描确认无匹配。</td>
         </tr>
         <tr>
           <td>v2</td>
