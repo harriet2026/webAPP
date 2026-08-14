@@ -5384,17 +5384,17 @@
     "statusEnabled": "Enabled",
     "statusDisabled": "Disabled",
     "actionLabel": "Action",
-    "sendMarkUnsupported": "\"Mark & Deliver\" is not supported on outbound direction; it will be downgraded to \"Quarantine\".",
-    "internalMarkUnsupported": "\"Mark & Deliver\" is not supported on internal direction; it will be downgraded to \"Quarantine\".",
-    "directionMarkUnsupported": "\"Mark & Deliver\" is not supported on outbound/internal directions; it will be downgraded to \"Quarantine\".",
-    "highRiskWarning": "High-risk intents marked & delivered will reach users' inboxes — please confirm the risk.",
+    "sendMarkUnsupported": "\"Proceed\" is not supported on outbound direction; it will be downgraded to \"Quarantine\".",
+    "internalMarkUnsupported": "\"Proceed\" is not supported on internal direction; it will be downgraded to \"Quarantine\".",
+    "directionMarkUnsupported": "\"Proceed\" is not supported on outbound/internal directions; it will be downgraded to \"Quarantine\".",
+    "highRiskWarning": "High-risk intents set to \"Proceed\" will still reach users' inboxes — please confirm the risk.",
     "panel": {
       "high": "High-risk Intents",
       "medium": "Medium-risk Intents",
       "low": "Low-risk Intents",
       "highHint": "Recommend discard or quarantine",
       "mediumHint": "Recommend review",
-      "lowHint": "Recommend mark and deliver",
+      "lowHint": "Recommend proceed",
       "highDesc": "Contains {n} categories with strict default handling; adjust carefully",
       "mediumDesc": "Contains {n} categories; standard handling recommended",
       "lowDesc": "Contains {n} categories; adjust freely per business needs",
@@ -5420,18 +5420,15 @@
       "low": "Low"
     },
     "action": {
-      "mark_deliver": "Mark & Deliver",
+      "proceed": "Proceed",
       "quarantine": "Quarantine",
       "audit": "Review",
       "discard": "Drop"
     },
     "markConfig": {
-      "title": "Mark & Deliver Configuration",
-      "deliveryTarget": "Delivery Target",
-      "targetInbox": "Inbox (mark only)",
-      "targetSpamFolder": "Spam Folder",
+      "title": "Marking Configuration",
       "subjectMark": "Subject Mark",
-      "bodyMark": "Body Mark",
+      "headerMark": "Header Mark",
       "markTextPlaceholder": "Mark text",
       "prefix": "Prefix",
       "suffix": "Suffix"
@@ -5469,7 +5466,7 @@
     "copyDialog": {
       "title": "Copy configuration to other directions",
       "description": "Select target directions to copy the current [{src}] direction configuration to.",
-      "downgradeNotice": "Note: Outbound/Internal directions do not support \"Mark & Deliver\", which will be downgraded to \"Quarantine\"",
+      "downgradeNotice": "Note: Outbound/Internal directions do not support \"Proceed\", which will be downgraded to \"Quarantine\"",
       "confirm": "Confirm copy",
       "noTarget": "Please select at least one target direction"
     },

@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────��──������──────────────────────────���────────────────────
+// ─── 租户 ─────────────────────������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -686,7 +686,7 @@ const SECURITY_KPI = {
   blocked: 12_101,
 };
 
-// 确定性伪值：在 [base, base+width) 内按 index 平滑取值��无 Math.random，可复现）。
+// 确定性伪值：在 [base, base+width) 内按 index 平滑取值（无 Math.random，可复现）。
 function threatSeriesValue(
   i: number,
   base: number,
@@ -5807,7 +5807,7 @@ export function mockPutURLProtectionSettings(
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
 // 动作映射后端枚举（proceed→accept、review→audit、block→reject、drop→discard），
 // 非 receive 方向默认区间 accept→quarantine（D-06）。
-// 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF、DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
+// 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF���DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
 
 function intentMockSegments(risk: "high" | "medium" | "low", dir: string) {
   const acc = dir === "receive" ? "accept" : "quarantine";
@@ -6098,7 +6098,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
 // 为 mock 引入第二套数据模型。
-// ═══════════════════════════════════════��════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════════
 
 interface MockDisposalSeed {
   tid: string;
@@ -6352,7 +6352,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     sender: "security@microsoft-verify.com",
     recipients:
       "employee1@company.com, employee2@company.com, employee3@company.com, employee4@company.com",
-    subject: "MFA验证更新通知（多��信 - 4人）",
+    subject: "MFA验证更新通知（多投信 - 4人）",
     action: "quarantine",
     reason: "二维码指向钓鱼页面",
     mailType: "phishing",

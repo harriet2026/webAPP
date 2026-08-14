@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测���������������能�������������",
+    "spoofingDetection": "仿冒邮件检测�������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1020,7 +1020,7 @@
         },
         "toasts": {
           "created": "路��规��已��加",
-          "updated": "��由��则已��新",
+          "updated": "路由��则已��新",
           "deleted": "��由规则已删除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
@@ -1336,7 +1336,7 @@
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
-    "targetGroups": "适���对����",
+    "targetGroups": "适���对���",
     "policyConfig": "策略配置",
     "priority": "优先��",
     "newPolicy": "新建群组策略",
@@ -1630,7 +1630,7 @@
     "releasedAt": "释放时间",
     "releasedBy": "释放人",
     "batchRelease": "批量释放",
-    "releaseTo": "释放���",
+    "releaseTo": "释放至",
     "release": "释放",
     "notes": "备注",
     "preview": "预览",
@@ -1834,7 +1834,7 @@
       "rule_type": "规则类型",
       "email_size": "大小",
       "queue_id": "队列 ID",
-      "delivery_status_summary": "投递状��",
+      "delivery_status_summary": "投递状态",
       "workflow_outcome_summary": "工作流结果",
       "delivery_attempts": "投递次数",
       "last_delivery_event_at": "��后投递��件",
@@ -2456,7 +2456,7 @@
     "scenes": {
       "userspace": "用户空间认证",
       "smtpsend": "SMTP 发信认证",
-      "mailsync": "邮件��步代理"
+      "mailsync": "邮件同步代理"
     },
     "failReasons": {
       "wrongPassword": "密码��误",
@@ -2728,7 +2728,7 @@
     },
     "trustedDevices": {
       "count": "授信终端（{n}）",
-      "empty": "暂无授信终端。登录时勾选「信任��设备」后，下次在此设备��跳过二次认证。",
+      "empty": "暂无授信终端。登录时勾选「信任此设备」后，下次在此设备��跳过二次认证。",
       "createdAt": "授信时间",
       "lastUsed": "最近使用",
       "expires": "到期时间",
@@ -3189,7 +3189,7 @@
       "find_similar": "搜索相似邮件",
       "search_similar_messages": "搜索相��邮件",
       "query_auth_attempts": "加载认证尝试",
-      "query_recent_mail": "加载最���邮件活�����",
+      "query_recent_mail": "加载最���邮件活���",
       "analyze_account_activity": "分析账号��动",
       "rank_urls": "排序候选 URL",
       "llm_analysis": "LLM 分析",
@@ -3533,7 +3533,7 @@
       "triggerCondition": "触发以下任一条件时：",
       "noConditions": "暂未���置触发条件",
       "systemWill": "系统将：",
-      "logOnly": "仅当次处���，不额外封禁",
+      "logOnly": "仅当次处置，不额外封禁",
       "suspendFor": "额外封禁 {duration}",
       "suspendLogTip": "阈值触发后仅当次���置，不会额外封禁 IP。如需封禁���配置挂起策略。",
       "priorityLabel": "优先级：",
@@ -4123,7 +4123,7 @@
     "simMatch": "匹配成功 - 该规则将对测试数据生效",
     "simNoMatch": "未匹配 - 该规则不会对测试数据生效",
     "unsavedChangesTitle": "放弃更改？",
-    "unsavedChanges": "有未��存的修改，确定要关闭吗？所��修改将丢失。",
+    "unsavedChanges": "有未保存的修改，确定要关闭吗？所��修改将丢失。",
     "groupDeleted": "群组已删除",
     "resetFilters": "重���",
     "simGroupNotice": "群组类型规则的模拟需在生产环境验证",
@@ -4255,7 +4255,7 @@
     "disabled": "已���用",
     "matchType": "匹配类型",
     "typeLabel": "类���",
-    "matchCondition": "���配条件",
+    "matchCondition": "匹配条件",
     "matchTypeTip": "选择关键词、正则表达式或全局���容组进行匹配",
     "matchTypeKeyword": "关��词",
     "matchTypeRegex": "正则表达式",
@@ -4408,7 +4408,7 @@
     "mixedDirectionActionsPreserved": "此历史规则在不同方向使用不同动作；除非重新选择动作，否则将原样保留。",
     "unsavedTitle": "放弃未保存的更��？",
     "unsavedDescription": "当前修改尚未保存，确定放弃并关闭编辑器吗？",
-    "discardChanges": "放弃更��",
+    "discardChanges": "放弃更改",
     "jumpToPage": "跳至页码",
     "actionSection": "执行动作",
     "actionTip": "选择规则命中后执行的处置动作",
@@ -4561,7 +4561,7 @@
       "substring": "子串匹配",
       "addUser": "添加",
       "userNamePlaceholder": "输入用户名或显示名",
-      "emptyUsersWarning": "未配置内部用���，显示名仿冒检测的内部方向将无法生效"
+      "emptyUsersWarning": "未配置内部用户，显示名仿冒检测的内部方向将无法生效"
     },
     "observeStats": {
       "title": "观察模式命中统计",
@@ -5116,7 +5116,7 @@
       "qrMaxCount": "二维码最大数量",
       "qrDeepRoutesSection": "二维码深度路由配置",
       "urlCheck": "URL 检查",
-      "urlUnshorten": "URL 短链���开",
+      "urlUnshorten": "URL 短链展开",
       "keywordScope": "关键词范围",
       "advancedRules": "高级规则",
       "arbitration_highest_priority": "最高优先级",
@@ -5399,7 +5399,7 @@
       "low": "低危意图",
       "highHint": "建议丢弃或隔离",
       "mediumHint": "建议审核",
-      "lowHint": "建议标记后投递",
+      "lowHint": "建议进行下一步",
       "highDesc": "包含 {n} 个分类，默认处置较为严格，请谨慎调整",
       "mediumDesc": "包含 {n} 个分类，建议使用标准处置策略",
       "lowDesc": "包含 {n} 个分类，可根据业务需要灵活调整",
@@ -5425,18 +5425,15 @@
       "low": "低危"
     },
     "action": {
-      "mark_deliver": "标记投递",
+      "proceed": "进行下一步",
       "quarantine": "隔离",
       "audit": "审核",
       "discard": "丢弃"
     },
     "markConfig": {
-      "title": "标记投递配置",
-      "deliveryTarget": "投递目标",
-      "targetInbox": "收件箱（仅标记）",
-      "targetSpamFolder": "垃圾邮件文件夹",
+      "title": "标记配置",
       "subjectMark": "主题标记",
-      "bodyMark": "正文标记",
+      "headerMark": "信头标记",
       "markTextPlaceholder": "标记文案",
       "prefix": "前缀",
       "suffix": "后缀"
@@ -5474,7 +5471,7 @@
     "copyDialog": {
       "title": "复制配置到其他方向",
       "description": "选择目标方向，将当前【{src}】方向的配置复制过去。",
-      "downgradeNotice": "提示：外发/域内方向不支持\"标记投递\"，将自动降级为\"隔离\"",
+      "downgradeNotice": "提示：外发/域内方向不支持\"进行下一步\"，将自动降级为\"隔离\"",
       "confirm": "确认复制",
       "noTarget": "请至少选择一个目标方向"
     },
@@ -5577,7 +5574,7 @@
     "createReceiveRule": "新建接收标记规则",
     "editReceiveRule": "编辑接收标记规则",
     "createSendRule": "新建外发声明规则",
-    "editSendRule": "编辑外发声��规则",
+    "editSendRule": "编辑外发声明规则",
     "basicConfig": "基础配置",
     "ruleNamePlaceholder": "如：高管外站警示",
     "ruleNameTip": "用于识别规则，建议说明适用部门和用途",
@@ -6616,7 +6613,7 @@
       "deleteAttachmentNoticePositionTop": "正文顶部",
       "deleteAttachmentNoticePositionBottom": "正文底部",
       "disclaimerPositionHeader": "信头",
-      "deleteAttachmentInsertTextFile": "生成删�����记录文件",
+      "deleteAttachmentInsertTextFile": "生成删���记录文件",
       "deleteAttachmentInsertHeaderMark": "添加信头标记",
       "deleteAttachmentException": "例外规则",
       "deleteAttachmentExceptionRegex": "文件名正则",
@@ -7407,7 +7404,7 @@
         "none": {
           "source": "无",
           "usage": "不对邮件执行任何主动作",
-          "note": "未设置执行动作，邮件将仅执行下方已启用的附加���略。"
+          "note": "未设置执行动作，邮件将仅执行下方已启用的附加策略。"
         },
         "deliver": {
           "source": "投递引擎",
@@ -8155,7 +8152,7 @@
       "rank": "排名",
       "domain": "域名",
       "count": "检出次数",
-      "blockRate": "���击拦截率",
+      "blockRate": "点击拦截率",
       "blockRateHelp": "该域名点击后进入威胁拦截页面的比例",
       "firstSeen": "首次出现",
       "status": "封禁状态",
@@ -8679,7 +8676,7 @@
       "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
       "clickableAttachment": "邮件包含可点击附件",
       "clickableAttachmentDesc": "附件内含可点击链接/按钮时命中（如 HTML 附件、可交互 PDF 等）",
-      "urlNotQRHint": "���包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
+      "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
       "riskLabels": {
         "senderFirstSeen": "发信人���次出现",
         "qrcode": "含二维码",
@@ -8721,7 +8718,7 @@
   "timeoutEditTitle": "编辑超时策略",
   "timeoutEditDescription": "保存后仅更新本页草稿，点击页面底部「保存」才会真正生效；取消丢弃改动。",
 
-      "description": "运行模式决定是否执行处置，防护等级与置信度分级决定处置���式；超时策略对所有旁路检测生效。",
+      "description": "运行模式决定是否执行处置，防护等级与置信度分级决定处置方式；超时策略对所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败�����行模式仍按真实引擎配置展示。",
@@ -9022,7 +9019,7 @@
       "namePlaceholder": "请输入保护���象姓名",
       "email": "真实邮箱",
       "emailPlaceholder": "请输入合法邮箱地址",
-      "jobTitlePlaceholder": "请输入岗位，�� CEO、财务总监",
+      "jobTitlePlaceholder": "请输入岗位，如 CEO、财务总监",
       "category": "分类",
       "protectionLevel": "保护等级",
       "legitEmail": "合法邮箱绑定",
@@ -9611,7 +9608,7 @@
       "highImmediate": "发现高危威胁时立即通知（置信度 ≥ 90%）",
       "mediumImmediate": "发现中危威胁且置信度达到阈值时立即通知",
       "mediumThresholdInvalid": "中危阈值必须是 70–89 的整数。",
-      "mediumNoFallbackHint": "中危未达到该阈值时不会回退到低危汇总���",
+      "mediumNoFallbackHint": "中危未达到该阈值时不会回退到低危汇总。",
       "lowDigest": "低危威胁每日汇总时间",
       "notifyVersionHint": "修改收件人或汇总时间只影响新任务；当天可能按不同配置版本分别汇总。",
       "previewImmediate": "高/中危即时通知",
@@ -10053,7 +10050,7 @@
       "recoveryNotify": "恢复通知",
       "err": {
         "nameRequired": "规则名称不能为空",
-        "reservedPrefix": "名称不能以 __deleted__ 开��",
+        "reservedPrefix": "名称不能以 __deleted__ 开头",
         "thresholdRequired": "阈值为必填",
         "thresholdPositive": "阈值必须为正数",
         "durationPositive": "持续时间必须大于 0",
@@ -10496,7 +10493,7 @@
       "report": "举报中心",
       "reportManagement": "举报管理",
       "reportStrategy": "举报策略设置",
-      "policyTest": "��略测试",
+      "policyTest": "策略测试",
       "aiUrlLogs": "沙箱日志",
       "executive": "高管保护",
       "executiveDashboard": "高管保护概览",
