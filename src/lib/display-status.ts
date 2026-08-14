@@ -13,22 +13,18 @@ export const DISPLAY_STATUS_VARIANTS: Record<
   'default' | 'secondary' | 'destructive' | 'outline'
 > = {
   rejected: 'destructive',
-  bounced: 'destructive',
   discarded: 'outline',
+  delivery_cancelled: 'outline',
   quarantine_pending: 'destructive',
   sideline_pending: 'secondary',
   audit_pending: 'secondary',
   delivering: 'secondary',
   delivered: 'default',
-  partial_delivered: 'secondary',
   delivery_failed: 'destructive',
   recall_pending: 'secondary',
   recall_success: 'default',
   recall_failed: 'destructive',
-  partial_recall_success: 'secondary',
-  deleted: 'outline',
   expired: 'outline',
-  reviewed_rejected: 'destructive',
 };
 
 /**
@@ -40,23 +36,19 @@ export const DISPLAY_STATUS_VARIANTS: Record<
  * 这里不维护第二套子集，避免检测日志与处置中心出现状态类型不一致。
  */
 export const PHISHING_MAIL_STATUS_OPTIONS: DisplayStatus[] = [
-  'rejected',
-  'bounced',
-  'discarded',
+  'delivering',
   'quarantine_pending',
   'sideline_pending',
   'audit_pending',
-  'delivering',
+  'rejected',
+  'discarded',
+  'delivery_cancelled',
   'delivered',
-  'partial_delivered',
   'delivery_failed',
   'recall_pending',
   'recall_success',
   'recall_failed',
-  'partial_recall_success',
-  'deleted',
   'expired',
-  'reviewed_rejected',
 ];
 
 export function mapPhishingDispositionToDisplayStatus(
@@ -72,7 +64,9 @@ export function mapPhishingDispositionToDisplayStatus(
     case 'recall_failed':
       return 'recall_failed';
     case 'expanded':
-      return 'partial_recall_success';
+      // 位置维度下"部分召回成功"不再是独立位置节点：邮件仍留在收件箱这个
+      // 位置（只是多收件人场景下只召回了一部分），归并到「召回成功」。
+      return 'recall_success';
     case 'none':
     default:
       break;

@@ -134,24 +134,24 @@ export function QuickFilters({
     },
     [tErrors],
   );
+  // 邮件状态枚举按"邮件当前所在位置"维度组织（而非风险/结果性质），
+  // 与 DisplayStatus（@/types/email-disposal）保持一致：
+  //   仍在我方系统内 → 已停在网关 → 已离开网关(去向已确定) →
+  //   针对已送达邮件的位置变更 → 已归档/清理
   const statuses = [
-    "rejected",
-    "bounced",
-    "discarded",
+    "delivering",
     "quarantine_pending",
     "sideline_pending",
     "audit_pending",
-    "delivering",
+    "rejected",
+    "discarded",
+    "delivery_cancelled",
     "delivered",
-    "partial_delivered",
     "delivery_failed",
     "recall_pending",
     "recall_success",
     "recall_failed",
-    "partial_recall_success",
-    "deleted",
     "expired",
-    "reviewed_rejected",
   ] as const;
 
   const startTime = value.sendReceiveTime?.start;

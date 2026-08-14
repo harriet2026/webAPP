@@ -19,43 +19,56 @@ export function mapToDisplayStatus(action: string, deliveryStatus?: string, work
     if (deliveryStatus === 'delivered') return 'delivered';
     if (deliveryStatus === 'in_delivery') return 'delivering';
     if (deliveryStatus === 'failed') return 'delivery_failed';
-    if (deliveryStatus === 'partial_delivered') return 'partial_delivered';
+    // partial_delivered 不再是独立位置：邮件已离开网关、去向已确定（部分
+    // 收件人送达），归并到「投递失败」的"未完全离开"语义下由 delivering
+    // 兜底展示（仍在这一轮投递里）。
+    if (deliveryStatus === 'partial_delivered') return 'delivering';
     // V2 §三 `delivering`'s trigger condition is delivery_status=unknown/
     // in_delivery — an already-released/approved mail with no terminal
     // delivery status yet is "handed to Postfix, in flight", not a distinct
     // 18th state.
     return 'delivering';
   }
-  if (workflowOutcome === 'rejected_after_review') return 'reviewed_rejected';
+  // reviewed_rejected（审核后拦截）与 deleted（人工清除）不再是独立位置节点：
+  // 前者本质仍是"已停在网关"（discarded），后者本质仍是"待审核队列"位置的
+  // 一次清理动作，归并到 discarded / audit_pending 语境下。
+  if (workflowOutcome === 'rejected_after_review') return 'discarded';
   if (workflowOutcome === 'discarded') return 'discarded';
   if (workflowOutcome === 'expired') return 'expired';
-  if (workflowOutcome === 'deleted') return 'deleted';
+  if (workflowOutcome === 'deleted') return 'discarded';
 
   if (action === 'quarantine') return 'quarantine_pending';
   if (action === 'sideline') return 'sideline_pending';
   if (action === 'audit') return 'audit_pending';
   if (action === 'reject') return 'rejected';
-  if (action === 'bounce') return 'bounced';
+  // bounce（对方退信）不再是独立位置：邮件已离开网关、去向已确定，归并到
+  // 「投递失败」——都表示"离开网关后没有成功停在收件箱"这同一个位置结果。
+  if (action === 'bounce') return 'delivery_failed';
   if (action === 'discard') return 'discarded';
 
   if (action === 'accept') {
     if (deliveryStatus === 'delivered') return 'delivered';
     if (deliveryStatus === 'in_delivery') return 'delivering';
-    if (deliveryStatus === 'partial_delivered') return 'partial_delivered';
+    // partial_delivered：位置未确定为单一终态，仍按"投递中"展示。
+    if (deliveryStatus === 'partial_delivered') return 'delivering';
     if (deliveryStatus === 'failed') return 'delivery_failed';
-    if (deliveryStatus === 'cancelled') return 'discarded';
+    // cancelled（场景 B：已进入投递队列，我方主动中止转发，未离开网关）
+    // 与 discard（从未进入队列，直接丢弃）是两个不同的位置节点，不能再
+    // 合并成同一个 discarded。
+    if (deliveryStatus === 'cancelled') return 'delivery_cancelled';
     return 'delivering';
   }
 
   // mixed: 收件人被拆分成不同处置（部分投递/部分隔离/部分旁路…）。
   // 执行动作列已用 mini 堆叠色条展示明细，状态列表示整体投递结果。
-  // 如果有 delivery_status_summary，优先采用后端值；否则用 partial_delivered。
+  // 位置维度下没有"部分投递成功"这一独立终态，只要不是全部送达/失败，
+  // 邮件的整体位置仍算"投递中"。
   if (action === 'mixed') {
     if (deliveryStatus === 'delivered') return 'delivered';
     if (deliveryStatus === 'in_delivery') return 'delivering';
-    if (deliveryStatus === 'partial_delivered') return 'partial_delivered';
+    if (deliveryStatus === 'partial_delivered') return 'delivering';
     if (deliveryStatus === 'failed') return 'delivery_failed';
-    return 'partial_delivered';
+    return 'delivering';
   }
 
   return 'delivering';

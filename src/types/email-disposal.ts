@@ -74,23 +74,24 @@ export const EXECUTION_ACTIONS = [
 export type ExecutionAction = (typeof EXECUTION_ACTIONS)[number];
 
 export type DisplayStatus =
-  | "rejected"
-  | "bounced"
-  | "discarded"
+  // 仍在我方系统内
+  | "delivering"
   | "quarantine_pending"
   | "sideline_pending"
   | "audit_pending"
-  | "delivering"
+  // 已停在网关（未离开我方）
+  | "rejected"
+  | "discarded"
+  | "delivery_cancelled"
+  // 已离开网关，去向已确定
   | "delivered"
-  | "partial_delivered"
   | "delivery_failed"
+  // 针对已送达邮件的位置变更
   | "recall_pending"
   | "recall_success"
   | "recall_failed"
-  | "partial_recall_success"
-  | "deleted"
-  | "expired"
-  | "reviewed_rejected";
+  // 已归档/清理
+  | "expired";
 
 export interface DisposalBasis {
   policy_key?: string;
