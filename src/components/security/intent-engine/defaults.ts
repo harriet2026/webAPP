@@ -50,7 +50,7 @@ export function createDefaultIntentConfig(it: IntentType, dir: IntentDirection):
   } else {
     action = isReceive ? 'accept' : 'audit';
   }
-  // Non-receive directions don't support 'accept' (mark_deliver)
+  // Non-receive directions don't support 'accept' (proceed)
   if (!isReceive && action === 'accept') {
     action = 'quarantine';
   }

@@ -19,18 +19,18 @@ describe('RECEIVE_UI_ACTIONS (GT-11746, GT-12965 已去掉阻断)', () => {
 });
 
 describe('toUIAction', () => {
-  it('maps accept without mark_config to mark_deliver', () => {
+  it('maps accept without mark_config to proceed', () => {
     const cfg = singleConfig({ enabled: true, action: 'accept' });
-    expect(toUIAction(cfg)).toBe('mark_deliver');
+    expect(toUIAction(cfg)).toBe('proceed');
   });
 
-  it('maps accept with mark_config to mark_deliver', () => {
+  it('maps accept with mark_config to proceed', () => {
     const cfg = singleConfig({
       enabled: true,
       action: 'accept',
-      mark_config: { delivery_target: 'inbox', subject_mark: { enabled: true, text: '[订阅]', position: 'prefix' } },
+      mark_config: { subject_mark: { enabled: true, text: '[订阅]', position: 'prefix' } },
     });
-    expect(toUIAction(cfg)).toBe('mark_deliver');
+    expect(toUIAction(cfg)).toBe('proceed');
   });
 
   it('passes through non-accept actions', () => {
@@ -39,40 +39,38 @@ describe('toUIAction', () => {
     }
   });
 
-  it('treats empty mark_config object as mark_deliver (truthy)', () => {
+  it('treats empty mark_config object as proceed (truthy)', () => {
     // Defensive: an explicitly-empty mark_config still indicates intent to mark.
     const cfg = singleConfig({
       enabled: true,
       action: 'accept',
-      mark_config: { delivery_target: 'inbox' },
+      mark_config: {},
     });
-    expect(toUIAction(cfg)).toBe('mark_deliver');
+    expect(toUIAction(cfg)).toBe('proceed');
   });
 });
 
 describe('applyUIAction', () => {
-  it('mark_deliver preserves existing mark_config', () => {
+  it('proceed preserves existing mark_config', () => {
     const cfg = singleConfig({
       enabled: true,
       action: 'accept',
-      mark_config: { delivery_target: 'spam_folder', subject_mark: { enabled: true, text: '[X]', position: 'prefix' } },
+      mark_config: { subject_mark: { enabled: true, text: '[X]', position: 'prefix' } },
     });
-    const next = applyUIAction(cfg, 'mark_deliver', 'subscription');
+    const next = applyUIAction(cfg, 'proceed', 'subscription');
     expect(next.action).toBe('accept');
     expect(next.mark_config).toEqual({
-      delivery_target: 'spam_folder',
       subject_mark: { enabled: true, text: '[X]', position: 'prefix' },
     });
   });
 
-  it('mark_deliver auto-creates default mark_config when missing', () => {
+  it('proceed auto-creates default mark_config when missing', () => {
     const cfg = singleConfig({ enabled: true, action: 'accept' });
-    const next = applyUIAction(cfg, 'mark_deliver', 'subscription');
+    const next = applyUIAction(cfg, 'proceed', 'subscription');
     expect(next.action).toBe('accept');
     expect(next.mark_config).toEqual({
-      delivery_target: 'spam_folder',
       subject_mark: { enabled: true, text: '[订阅]', position: 'prefix' },
-      body_mark: { enabled: false, text: '[订阅]', position: 'prefix' },
+      header_mark: { enabled: false, text: '[订阅]', position: 'prefix' },
     });
   });
 
@@ -80,7 +78,7 @@ describe('applyUIAction', () => {
     const cfg = singleConfig({
       enabled: true,
       action: 'accept',
-      mark_config: { delivery_target: 'inbox', subject_mark: { enabled: true, text: '[X]', position: 'prefix' } },
+      mark_config: { subject_mark: { enabled: true, text: '[X]', position: 'prefix' } },
     });
     for (const a of ['quarantine', 'audit', 'discard'] as const) {
       const next = applyUIAction(cfg, a, 'subscription');
@@ -91,13 +89,13 @@ describe('applyUIAction', () => {
 
   it('preserves enabled flag', () => {
     const cfg = singleConfig({ enabled: false, action: 'quarantine' });
-    expect(applyUIAction(cfg, 'mark_deliver', 'subscription').enabled).toBe(false);
+    expect(applyUIAction(cfg, 'proceed', 'subscription').enabled).toBe(false);
     expect(applyUIAction(cfg, 'discard', 'subscription').enabled).toBe(false);
   });
 
   it('round-trip: applyUIAction then toUIAction is identity', () => {
     const start = singleConfig({ enabled: true, action: 'quarantine' });
-    for (const ui of ['mark_deliver', 'quarantine', 'audit', 'discard'] as const) {
+    for (const ui of ['proceed', 'quarantine', 'audit', 'discard'] as const) {
       const after = applyUIAction(start, ui, 'subscription');
       expect(toUIAction(after)).toBe(ui);
     }

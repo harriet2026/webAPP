@@ -1,7 +1,7 @@
 export type IntentDirection = 'receive' | 'send' | 'internal';
 export type IntentType = 'porn_gambling' | 'political' | 'phishing' | 'spam' | 'subscription';
 export type IntentAction = 'accept' | 'quarantine' | 'audit' | 'discard';
-export type UIIntentAction = 'mark_deliver' | 'quarantine' | 'audit' | 'discard';
+export type UIIntentAction = 'proceed' | 'quarantine' | 'audit' | 'discard';
 export type IntentRiskLevel = 'high' | 'medium' | 'low';
 export type DetectionMode = 'classification' | 'threshold';
 
@@ -20,9 +20,8 @@ export interface IntentMark {
 }
 
 export interface IntentMarkConfig {
-  delivery_target: 'inbox' | 'spam_folder';
   subject_mark?: IntentMark;
-  body_mark?: IntentMark;
+  header_mark?: IntentMark;
 }
 
 export interface IntentSingleConfig {
@@ -67,19 +66,19 @@ export const LOW_RISK_INTENTS: IntentType[] = ['subscription'];
 export const RECEIVE_ACTIONS: IntentAction[] = ['accept', 'quarantine', 'audit', 'discard'];
 export const NON_RECEIVE_ACTIONS: IntentAction[] = ['quarantine', 'audit', 'discard'];
 
-export const RECEIVE_UI_ACTIONS: UIIntentAction[] = ['mark_deliver', 'quarantine', 'audit', 'discard'];
+export const RECEIVE_UI_ACTIONS: UIIntentAction[] = ['proceed', 'quarantine', 'audit', 'discard'];
 export const NON_RECEIVE_UI_ACTIONS: UIIntentAction[] = ['quarantine', 'audit', 'discard'];
 
 export function toUIAction(cfg: IntentSingleConfig): UIIntentAction {
   if (cfg.action === 'accept') {
-    return 'mark_deliver';
+    return 'proceed';
   }
   return cfg.action;
 }
 
 /**
  * GT-12171 D-03：分段阈值模式下卡头 Badge 的"区间处置摘要"。
- * 按阈值区间升序取各段的处置动作（accept 归一到 mark_deliver 与卡内一致），
+ * 按阈值区间升序取各段的处置动作（accept 归一到 proceed 与卡内一致），
  * 去重后保留出现顺序，让管理员一眼看清该意图在不同置信度区间会被怎么处置，
  * 而不是像分类模式那样只显示单一动作。
  */
@@ -91,7 +90,7 @@ export function thresholdActionSummary(segments: ThresholdSegment[] | undefined)
   const seen = new Set<UIIntentAction>();
   const out: UIIntentAction[] = [];
   for (const seg of sorted) {
-    const ui: UIIntentAction = seg.action === 'accept' ? 'mark_deliver' : seg.action;
+    const ui: UIIntentAction = seg.action === 'accept' ? 'proceed' : seg.action;
     if (!seen.has(ui)) {
       seen.add(ui);
       out.push(ui);
@@ -159,14 +158,13 @@ export const DEFAULT_MARK_TEXT: Record<IntentType, string> = {
 export function createDefaultMarkConfig(intent: IntentType): IntentMarkConfig {
   const text = DEFAULT_MARK_TEXT[intent];
   return {
-    delivery_target: 'spam_folder',
     subject_mark: { enabled: true, text, position: 'prefix' },
-    body_mark: { enabled: false, text, position: 'prefix' },
+    header_mark: { enabled: false, text, position: 'prefix' },
   };
 }
 
 export function applyUIAction(cfg: IntentSingleConfig, ui: UIIntentAction, intent: IntentType): IntentSingleConfig {
-  if (ui === 'mark_deliver') {
+  if (ui === 'proceed') {
     return { ...cfg, action: 'accept', mark_config: cfg.mark_config || createDefaultMarkConfig(intent) };
   }
   const next: IntentSingleConfig = { ...cfg, action: ui };

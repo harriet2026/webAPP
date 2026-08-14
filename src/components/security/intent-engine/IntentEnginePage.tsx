@@ -217,7 +217,7 @@ export function IntentEnginePage({
     for (const d of ['receive', 'send', 'internal'] as IntentDirection[]) {
       for (const it of INTENT_TYPES) {
         const mc = payload.directions[d][it].mark_config;
-        for (const m of [mc?.subject_mark, mc?.body_mark]) {
+        for (const m of [mc?.subject_mark, mc?.header_mark]) {
           if (m?.enabled && !m.text.trim()) m.text = DEFAULT_MARK_TEXT[it];
         }
       }

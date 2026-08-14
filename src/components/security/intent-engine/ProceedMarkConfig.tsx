@@ -8,19 +8,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
-interface MarkDeliverConfigProps {
+interface ProceedMarkConfigProps {
   value: IntentMarkConfig;
   intent: IntentType;
   onChange: (next: IntentMarkConfig) => void;
   disabled?: boolean;
 }
 
-// html_spec L1-7/8/9：投递目标 Radio + 主题/正文标记（Checkbox+文案+前缀/后缀）
-export function MarkDeliverConfig({ value, intent, onChange, disabled }: MarkDeliverConfigProps) {
+// "进行下一步"动作不再选择投递目标（固定放行到收件箱），仅保留主题/信头两行可
+// 独立勾选的打标配置（Checkbox+文案+前缀/后缀），两者可同时启用。
+export function ProceedMarkConfig({ value, intent, onChange, disabled }: ProceedMarkConfigProps) {
   const t = useTranslations('intentEngine.markConfig');
 
   const markRow = (
-    kind: 'subject_mark' | 'body_mark',
+    kind: 'subject_mark' | 'header_mark',
     label: string,
     mark: IntentMark | undefined,
   ) => {
@@ -80,26 +81,8 @@ export function MarkDeliverConfig({ value, intent, onChange, disabled }: MarkDel
   return (
     <div className="rounded-lg bg-info/5 border border-info/20 p-4 space-y-4" data-testid="ie-mark-config">
       <div className="text-sm font-medium text-info">{t('title')}</div>
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">{t('deliveryTarget')}</Label>
-        <RadioGroup
-          value={value.delivery_target}
-          onValueChange={(v) => onChange({ ...value, delivery_target: v as 'inbox' | 'spam_folder' })}
-          className="flex items-center gap-4"
-          disabled={disabled}
-        >
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="inbox" id={`ie-target-inbox-${intent}`} data-testid="ie-target-inbox" />
-            <Label htmlFor={`ie-target-inbox-${intent}`} className="text-sm cursor-pointer">{t('targetInbox')}</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="spam_folder" id={`ie-target-spam-${intent}`} data-testid="ie-target-spam" />
-            <Label htmlFor={`ie-target-spam-${intent}`} className="text-sm cursor-pointer">{t('targetSpamFolder')}</Label>
-          </div>
-        </RadioGroup>
-      </div>
       {markRow('subject_mark', t('subjectMark'), value.subject_mark)}
-      {markRow('body_mark', t('bodyMark'), value.body_mark)}
+      {markRow('header_mark', t('headerMark'), value.header_mark)}
     </div>
   );
 }

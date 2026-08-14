@@ -66,7 +66,7 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
   };
 
   const actionLabel = (a: IntentAction) => {
-    if (a === 'accept') return tAction('mark_deliver');
+    if (a === 'accept') return tAction('proceed');
     return tAction(a as 'quarantine');
   };
 

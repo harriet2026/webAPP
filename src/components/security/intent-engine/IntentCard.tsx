@@ -26,7 +26,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 import { ChevronDown, ChevronRight, AlertTriangle, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
-import { MarkDeliverConfig } from './MarkDeliverConfig';
+import { ProceedMarkConfig } from './ProceedMarkConfig';
 import { ThresholdSegmentConfig } from './ThresholdSegmentConfig';
 
 interface IntentCardProps {
@@ -61,7 +61,7 @@ const RISK_STYLES: Record<IntentRiskLevel, { border: string; bg: string; badge: 
 
 // GT-11743/D-09: 动作色映射 — 卡头 Badge + Select 选项文字色，对齐 demo 动作语义色
 const ACTION_TEXT_COLOR: Record<UIIntentAction, string> = {
-  mark_deliver: 'text-[var(--action-mark-deliver)]',
+  proceed: 'text-[var(--action-mark-deliver)]',
   quarantine: 'text-[var(--action-quarantine)]',
   audit: 'text-[var(--action-review)]',
   discard: 'text-red-700 dark:text-red-400',
@@ -90,9 +90,9 @@ export function IntentCard({
   const thresholdSummary = thresholdActionSummary(value.threshold_segments);
   const detectionMode: DetectionMode = value.detection_mode || 'classification';
   const dimmed = !value.enabled;
-  const showHighRiskWarning = uiAction === 'mark_deliver' && risk === 'high';
-  const showMarkDeliverConfig =
-    direction === 'receive' && uiAction === 'mark_deliver' && detectionMode === 'classification';
+  const showHighRiskWarning = uiAction === 'proceed' && risk === 'high';
+  const showProceedMarkConfig =
+    direction === 'receive' && uiAction === 'proceed' && detectionMode === 'classification';
 
   const handleActionChange = (v: string | null) => {
     if (!v) return;
@@ -280,8 +280,8 @@ export function IntentCard({
                     )}
                   </div>
                 </div>
-                {showMarkDeliverConfig && value.mark_config && (
-                  <MarkDeliverConfig
+                {showProceedMarkConfig && value.mark_config && (
+                  <ProceedMarkConfig
                     value={value.mark_config}
                     intent={intent}
                     onChange={(mark_config) => onChange({ ...value, mark_config })}
