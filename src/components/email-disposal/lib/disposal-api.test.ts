@@ -74,16 +74,25 @@ describe('mapToDisplayStatus - recall priority', () => {
   it('recall_status_summary empty string is treated as no recall', () => {
     expect(mapToDisplayStatus('accept', 'delivered', undefined, '')).toBe('delivered');
   });
-  it('partial_recall_success surfaces correctly', () => {
-    expect(mapToDisplayStatus('accept', 'delivered', 'released', 'partial_recall_success')).toBe('partial_recall_success');
+  // GT-12923 阶段三：位置维度下"部分召回成功"不再是独立位置节点（邮件仍
+  // 留在收件箱这个位置），历史/后端仍可能回填 partial_recall_success，
+  // 归并展示为「召回成功」。
+  it('partial_recall_success 归并为 recall_success', () => {
+    expect(mapToDisplayStatus('accept', 'delivered', 'released', 'partial_recall_success')).toBe('recall_success');
   });
 });
 
-// TestMapToDisplayStatus 17-state truth table (V2 status dict, design doc §5.1).
+// TestMapToDisplayStatus 位置维度状态表（GT-12923 阶段三）。
+// 邮件状态枚举从「风险/结果」维度改为「邮件当前所在位置」维度：
+//   仍在我方系统内 → 已停在网关 → 已离开网关(去向已确定) →
+//   针对已送达邮件的位置变更 → 已归档/清理
+// bounced/reviewed_rejected/deleted/partial_delivered/partial_recall_success
+// 不再是独立位置节点，全部归并到语义最贴近的位置节点上；新增
+// delivery_cancelled 区分"已进入投递队列但被我方中止"与"discard/直接丢弃"。
 // Regression coverage for review finding 1: audit_pending was entirely
 // unhandled (fell through to the removed 'processing' bucket), and
 // 'processing'/'delay_detecting' were extra states outside the 17-state set.
-describe('mapToDisplayStatus - 17-state truth table', () => {
+describe('mapToDisplayStatus - 位置维度状态表', () => {
   it('action=audit with no workflow outcome yet maps to audit_pending', () => {
     expect(mapToDisplayStatus('audit', undefined, undefined, undefined)).toBe('audit_pending');
     expect(mapToDisplayStatus('audit', undefined, '', undefined)).toBe('audit_pending');
@@ -91,8 +100,8 @@ describe('mapToDisplayStatus - 17-state truth table', () => {
   it('action=audit approved and delivered maps to delivered, not audit_pending', () => {
     expect(mapToDisplayStatus('audit', 'delivered', 'approved', undefined)).toBe('delivered');
   });
-  it('action=audit rejected after review maps to reviewed_rejected', () => {
-    expect(mapToDisplayStatus('audit', undefined, 'rejected_after_review', undefined)).toBe('reviewed_rejected');
+  it('action=audit rejected after review 归并为 discarded（已停在网关）', () => {
+    expect(mapToDisplayStatus('audit', undefined, 'rejected_after_review', undefined)).toBe('discarded');
   });
   it('action=quarantine with no workflow outcome maps to quarantine_pending', () => {
     expect(mapToDisplayStatus('quarantine', undefined, undefined, undefined)).toBe('quarantine_pending');
@@ -103,8 +112,8 @@ describe('mapToDisplayStatus - 17-state truth table', () => {
   it('action=reject maps to rejected', () => {
     expect(mapToDisplayStatus('reject', undefined, undefined, undefined)).toBe('rejected');
   });
-  it('action=bounce maps to bounced', () => {
-    expect(mapToDisplayStatus('bounce', undefined, undefined, undefined)).toBe('bounced');
+  it('action=bounce 归并为 delivery_failed（已离开网关但未成功送达）', () => {
+    expect(mapToDisplayStatus('bounce', undefined, undefined, undefined)).toBe('delivery_failed');
   });
   it('action=discard maps to discarded', () => {
     expect(mapToDisplayStatus('discard', undefined, undefined, undefined)).toBe('discarded');
@@ -115,8 +124,8 @@ describe('mapToDisplayStatus - 17-state truth table', () => {
   it('workflow_outcome=expired maps to expired', () => {
     expect(mapToDisplayStatus('quarantine', undefined, 'expired', undefined)).toBe('expired');
   });
-  it('workflow_outcome=deleted maps to deleted', () => {
-    expect(mapToDisplayStatus('quarantine', undefined, 'deleted', undefined)).toBe('deleted');
+  it('workflow_outcome=deleted 归并为 discarded（已停在网关）', () => {
+    expect(mapToDisplayStatus('quarantine', undefined, 'deleted', undefined)).toBe('discarded');
   });
   it('accept with no delivery status yet maps to delivering, never processing', () => {
     expect(mapToDisplayStatus('accept', undefined, undefined, undefined)).toBe('delivering');
@@ -124,8 +133,8 @@ describe('mapToDisplayStatus - 17-state truth table', () => {
   it('released with no delivery status yet maps to delivering, never processing', () => {
     expect(mapToDisplayStatus('accept', undefined, 'released', undefined)).toBe('delivering');
   });
-  it('accept + delivery cancelled maps to discarded', () => {
-    expect(mapToDisplayStatus('accept', 'cancelled', undefined, undefined)).toBe('discarded');
+  it('accept + delivery cancelled maps to delivery_cancelled（已进入队列但被中止，非 discard）', () => {
+    expect(mapToDisplayStatus('accept', 'cancelled', undefined, undefined)).toBe('delivery_cancelled');
   });
   it('accept + delivery in_delivery maps to delivering', () => {
     expect(mapToDisplayStatus('accept', 'in_delivery', undefined, undefined)).toBe('delivering');
@@ -133,8 +142,8 @@ describe('mapToDisplayStatus - 17-state truth table', () => {
   it('accept + delivery failed maps to delivery_failed', () => {
     expect(mapToDisplayStatus('accept', 'failed', undefined, undefined)).toBe('delivery_failed');
   });
-  it('accept + delivery partial_delivered maps to partial_delivered', () => {
-    expect(mapToDisplayStatus('accept', 'partial_delivered', undefined, undefined)).toBe('partial_delivered');
+  it('accept + delivery partial_delivered 归并为 delivering（位置未确定为单一终态）', () => {
+    expect(mapToDisplayStatus('accept', 'partial_delivered', undefined, undefined)).toBe('delivering');
   });
   it('recall states always win regardless of action/workflow/delivery', () => {
     expect(mapToDisplayStatus('accept', 'delivered', 'released', 'recall_pending')).toBe('recall_pending');
@@ -239,8 +248,8 @@ describe('审核终态的展示映射 (GT-12353)', () => {
     expect(mapToDisplayStatus('audit', 'delivered', 'approved')).toBe('delivered');
   });
 
-  it('rejected_after_review 渲染为已驳回', () => {
-    expect(mapToDisplayStatus('audit', undefined, 'rejected_after_review')).toBe('reviewed_rejected');
+  it('rejected_after_review 渲染为已丢弃（位置维度下归并到 discarded）', () => {
+    expect(mapToDisplayStatus('audit', undefined, 'rejected_after_review')).toBe('discarded');
   });
 
   it('终态缺失时仍显示待审核（这正是修复前的现象，必须保持可区分）', () => {

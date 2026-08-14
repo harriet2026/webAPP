@@ -21,27 +21,10 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils';
-import type { DisplayStatus, DisposalMailItem } from '@/types/email-disposal';
-
-const STATUS_VARIANTS: Record<DisplayStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  rejected: 'destructive',
-  bounced: 'destructive',
-  discarded: 'outline',
-  quarantine_pending: 'destructive',
-  sideline_pending: 'secondary',
-  audit_pending: 'secondary',
-  delivering: 'secondary',
-  delivered: 'default',
-  partial_delivered: 'secondary',
-  delivery_failed: 'destructive',
-  recall_pending: 'secondary',
-  recall_success: 'default',
-  recall_failed: 'destructive',
-  partial_recall_success: 'secondary',
-  deleted: 'outline',
-  expired: 'outline',
-  reviewed_rejected: 'destructive',
-};
+import type { DisposalMailItem } from '@/types/email-disposal';
+// GT-12923 阶段三：不再在本文件重复维护一份 DisplayStatus → Badge 配色表，
+// 直接复用邮件处置中心 / 检测日志共用的唯一状态源，避免两处枚举同步遗漏。
+import { DISPLAY_STATUS_VARIANTS as STATUS_VARIANTS } from '@/lib/display-status';
 
 const ACTION_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   accept: 'default',

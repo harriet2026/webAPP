@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测���������������能�������������",
+    "spoofingDetection": "仿冒邮件检测�����������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1112,7 +1112,7 @@
         "imap": "IMAP"
       },
       "toasts": {
-        "created": "认证配置已添加",
+        "created": "认证配置��添加",
         "updated": "认证���置已更���",
         "deleted": "认证配置已删除",
         "saveError": "请修正表单中的校验错误"
@@ -1336,7 +1336,7 @@
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
-    "targetGroups": "适���对����",
+    "targetGroups": "适���������",
     "policyConfig": "策略配置",
     "priority": "优先��",
     "newPolicy": "新建群组策略",
@@ -1459,7 +1459,7 @@
     "previewSimulationNote": "基于策略配置的模拟推演，实际处置以引擎判定为准。",
     "previewEmpty": "该群组暂无已启用的命中策略。",
     "previewHitBadge": "优先级 {priority} · {name}",
-    "previewIgnoredHigher": "注意：「{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
+    "previewIgnoredHigher": "注意：���{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
     "previewNotExecuted": "未执行（前序已短路）",
     "previewShortCircuitPoint": "短路点 · {action}",
     "previewNoGroupConfig": "无群组配置（按全局执行）",
@@ -2423,7 +2423,7 @@
     "failed": "失败",
     "result": "结果",
     "failureReason": "失败原因",
-    "authBackend": "认证后端",
+    "authBackend": "认证后��",
     "mechanism": "认证方式",
     "sessionId": "会话 ID",
     "duration": "认证耗���",
@@ -2728,7 +2728,7 @@
     },
     "trustedDevices": {
       "count": "授信终端（{n}）",
-      "empty": "暂无授信终端。登录时勾��「信任此设备」后，下次在此设备��跳过二次认证。",
+      "empty": "暂无���信终端。登录时勾��「信任此设备」后，下次在此设备��跳过二次认证。",
       "createdAt": "授信时间",
       "lastUsed": "最近使用",
       "expires": "到期时间",
@@ -2837,7 +2837,7 @@
   "advancedFilter": {
     "title": "高级搜索",
     "conditionGroup": "搜索条件组",
-    "match": "满足条件",
+    "match": "满足条��",
     "all": "所有条件",
     "any": "任一条件",
     "exclude": "排除",
@@ -2989,7 +2989,7 @@
       "actionResultSummary": "动作结果",
       "relatedObjects": "关联对象",
       "details": "结构化详情",
-      "targetSummary": "目标摘要",
+      "targetSummary": "��标摘要",
       "urlAnalysis": "URL 分析",
       "similaritySummary": "相似性摘要",
       "candidateRules": "候选规则",
@@ -3528,7 +3528,7 @@
       "allUnlimited": "当前规则未设置任何限制条件，建议至少配置一项阈值，否则规则无实际作用。",
       "whenIP": "当 IP 地址",
       "allIP": "全部 IP",
-      "notFilled": "未填写",
+      "notFilled": "未���写",
       "affectAbout": "（影响约 {count} 个 IP）",
       "triggerCondition": "触发以下任一条件时：",
       "noConditions": "暂未���置触发条件",
@@ -4521,7 +4521,7 @@
       "ptr_nomatch": "与A记录不匹配",
       "ptr_nomatchDesc": "PTR反查的A记录不指向原IP",
       "ptr_ehlo_mismatch": "与EHLO不匹配",
-      "ptr_ehlo_mismatchDesc": "PTR记录与SMTP EHLO/HELO不一致"
+      "ptr_ehlo_mismatchDesc": "PTR记��与SMTP EHLO/HELO不一致"
     },
     "dkimOutbound": {
       "title": "DKIM 外发签名",
@@ -4933,7 +4933,7 @@
       "ipCount": "测试发信 IP 数",
       "mailCount": "测试邮件数",
       "recipientCount": "测试收��人数",
-      "run": "执行测试",
+      "run": "执行测���",
       "hit": "命中规则",
       "miss": "未命中",
       "missReason": "未触发阈值，当前测试数据未命中规则",
@@ -5235,7 +5235,7 @@
     "failedToLoad": "加载设置失败",
     "enabled": "已启用",
     "disabled": "已禁用",
-    "saved": "已保存",
+    "saved": "���保存",
     "failedToSave": "保存失败",
     "tenantRequired": {
       "title": "需要选择租户",
@@ -5836,17 +5836,13 @@
         "delivering": "投递中",
         "delivered": "投递成功",
         "delivery_failed": "投递失败",
+        "delivery_cancelled": "投递中止",
         "recalling": "召回中",
         "recalled": "召回成功",
         "recall_pending": "召回中",
         "recall_success": "召回成功",
         "recall_failed": "召回失败",
-        "partial_recall_success": "部分召回成功",
-        "deleted": "已删除",
-        "bounced": "已退信",
-        "expired": "已过期",
-        "reviewed_rejected": "审核驳回",
-        "partial_delivered": "部分投递成功"
+        "expired": "已过期"
       },
       "mailType": "邮件类型",
       "disposalPolicyKeys": "处置依据",
@@ -6565,7 +6561,7 @@
       "quarantine": "隔离",
       "quarantineDesc": "将邮件放入隔离区",
       "review": "审核",
-      "reviewDesc": "将邮件提交管理员审核",
+      "reviewDesc": "将邮���提交管理员审核",
       "discard": "丢弃",
       "discardDesc": "静默丢弃邮件",
       "block": "阻断",
@@ -6909,7 +6905,7 @@
       },
       "desc_sender": {
         "source": "邮件头 From 字段",
-        "usage": "识别用户邮箱客户端中看到的发件人",
+        "usage": "���别用户邮箱客户端中看到的发件人",
         "note": "钓鱼邮件���伪造此字段，建议配合信封发信人(SMTP)检测"
       },
       "desc_recipient": {
@@ -7083,7 +7079,7 @@
       "desc_urlDomain": {
         "source": "URL域名解析",
         "usage": "过滤特定域名的URL",
-        "note": "支持域名黑白名单"
+        "note": "支持域名黑白��单"
       },
       "desc_spfResult": {
         "source": "SPF验证引擎",
@@ -8557,7 +8553,7 @@
       "runLog": "运行日志",
       "searchSteps": "搜索步骤...",
       "exportJson": "导出 JSON",
-      "noSteps": "暂无步骤记录",
+      "noSteps": "暂无步骤记���",
       "noVerdictContent": "智能体已完成检测，详细研判内容暂未生成",
       "resultTruncatedHint": "调查明细可能因体量被截断，部分内容不完整"
     },
@@ -8716,7 +8712,7 @@
   "summaryObserve": "观察模式：{status}",
   "observeModeBanner": "观察模式已开启，当前配置仅执行检测与标记，不执行隔离、审核、召回等实质性处置动作。",
   "observeMarkEnabled": "观察期间追加标记",
-  "observeMarkEnabledHint": "开启后，系统会在放行邮件前按下方设置在主题前缀或邮件头中追加��记，便于后续��查观察样本；关闭则静默放行，不做任何标记。",
+  "observeMarkEnabledHint": "���启后，系统会在放行邮件前按下方设置在主题前缀或邮件头中追加��记，便于后续��查观察样本；关闭则静默放行，不做任何标记。",
   "observeMarkOn": "追加标记（{positions}）",
   "observeMarkOff": "不追加标记",
   "observeMarkNoPosition": "未选择标记位置",
@@ -9732,7 +9728,7 @@
     "exportLimitToast": "数据量超过 50,000 条导出上限，请添加筛选条件",
     "exportSelected": "导出选中",
     "exportTaskToast": "已生成导出任务，共 {count} 条记录",
-    "eyebrow": "系统管理 / 组织通讯录",
+    "eyebrow": "系统管理 / 组织通���录",
     "failuresTitle": "失败明细（{count}）",
     "fieldAccount": "管理账号",
     "fieldAccountPassword": "账号密码",
@@ -10117,7 +10113,7 @@
       "danger": "检测到 {n} 项紧急事件待处理，请立即查看待办与告警面板",
       "warning": "检测到 {n} 项警告事项���请及时处理",
       "normal": "系统运行正常，{range}已拦截 {n} 封威胁邮件，无待处理告警",
-      "error": "系统状态数据加载失败，请刷新后重试"
+      "error": "系统���态数据加载失败，请刷新后重试"
     },
     "kpi": {
       "inbound": "收信总量",
@@ -10484,7 +10480,7 @@
     "expiredTitle": "链接已过期或无效",
     "expiredDesc": "请联系管理员获取��的链接。",
     "errorTitle": "操作失败",
-    "errorDesc": "请稍后重试或联系管理员。",
+    "errorDesc": "请稍后重试或联系管���员。",
     "confirmTitle": "确认将发件人加入黑名单",
     "confirmHint": "加入后���该发件人发给���的邮件将被直接拒收。",
     "confirmButton": "确认加黑",
@@ -10778,7 +10774,7 @@
       "algorithm_unsupported": "不支持的签名算法「{value}」，只能是：{allowed}",
       "cross_tenant_manage_denied": "无权管理其他租户的签名密钥",
       "cross_tenant_read_denied": "无权查看其他租户的签名域名",
-      "dns_not_verified": "该密钥的 DNS 记录尚未验证通过，请先在域��服务商处添加 TXT 记录并完成验证，再启用它",
+      "dns_not_verified": "该密钥的 DNS 记录尚未验证通过，请先在域��服务商处添加 TXT 记录并完成验证，���启用它",
       "forbidden": "没有权限执行此操作",
       "key_not_found": "签名密钥不存在，可���已被删除",
       "key_size_too_large": "密钥长度不能超过 {max} 位",
@@ -11027,7 +11023,7 @@
       "tenant_id_invalid": "租户 ID 无效",
       "limit_invalid": "条数限制无效",
       "recipient_required": "请填写收件人",
-      "since_invalid": "起始时间格式不正确，请使用 RFC3339",
+      "since_invalid": "起始时间格式不��确，请使用 RFC3339",
       "no_pending_sideline_item": "没有待处理的旁路邮件"
     },
     "attachment_security": {

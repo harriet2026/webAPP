@@ -17,10 +17,11 @@ export interface PhishingDetailActions {
  *
  * - quarantine_pending | sideline_pending | audit_pending（隔离中/灰名单中/
  *   待审核，均未投递）→ 可投递或丢弃。
- * - delivered | partial_delivered（已投递/部分投递）→ 唯一有意义的操作是
- *   召回，不能再叫"拦截"（邮件已经送达，拦不住）。
- * - 其余终态（rejected/bounced/discarded/deleted/expired/reviewed_rejected/
- *   delivering/delivery_failed/recall_* 等）→ 无任何可执行操作。
+ * - delivered（已投递，位置维度下"部分投递成功"已归并为「投递中」，不再
+ *   是独立终态）→ 唯一有意义的操作是召回，不能再叫"拦截"（邮件已经送达，
+ *   拦不住）。
+ * - 其余状态（rejected/discarded/delivery_cancelled/expired/delivering/
+ *   delivery_failed/recall_* 等）→ 无任何可执行操作。
  */
 export function getPhishingDetailActions(displayStatus: DisplayStatus): PhishingDetailActions {
   switch (displayStatus) {
@@ -29,7 +30,6 @@ export function getPhishingDetailActions(displayStatus: DisplayStatus): Phishing
     case 'audit_pending':
       return { canDeliver: true, canDrop: true, canRecall: false };
     case 'delivered':
-    case 'partial_delivered':
       return { canDeliver: false, canDrop: false, canRecall: true };
     default:
       return { canDeliver: false, canDrop: false, canRecall: false };

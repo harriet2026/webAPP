@@ -126,8 +126,10 @@ export function MailListTable({
   const canRelease = hasSelection && selectedItems.every((item) =>
     ['quarantine_pending', 'sideline_pending', 'audit_pending'].includes(item.displayStatus),
   );
+  // GT-12923 阶段三：partial_delivered 不再是独立的邮件状态（位置维度下未
+  // 完全确定去向的邮件统一归入「投递中」），已投递完成才允许召回。
   const canRecall = hasSelection && selectedIds.size <= 10 && selectedItems.every((item) =>
-    ['delivered', 'partial_delivered'].includes(item.displayStatus),
+    ['delivered'].includes(item.displayStatus),
   );
 
   // GT-11580: per-browser column show/hide preference. Initialised empty (all
@@ -172,7 +174,9 @@ export function MailListTable({
 
   const directionOptions = ['incoming', 'outgoing', 'internal'];
   const emailTypeOptions = ['normal', 'subscription', 'advertising', 'spam', 'harmful', 'phishing', 'account_compromised', 'suspicious', 'spoofing', 'virus', 'sensitive'];
-  const statusOptions: DisplayStatus[] = ['rejected', 'bounced', 'discarded', 'quarantine_pending', 'sideline_pending', 'audit_pending', 'reviewed_rejected', 'expired', 'deleted', 'delivering', 'delivered', 'partial_delivered', 'delivery_failed', 'recall_pending', 'recall_success', 'recall_failed', 'partial_recall_success'];
+  // 与 quick-filters.tsx 的 statuses 数组、DisplayStatus 类型保持同一套位置
+  // 维度枚举，避免同一页面出现两份不一致的「邮件状态」选项列表。
+  const statusOptions: DisplayStatus[] = ['delivering', 'quarantine_pending', 'sideline_pending', 'audit_pending', 'rejected', 'discarded', 'delivery_cancelled', 'delivered', 'delivery_failed', 'recall_pending', 'recall_success', 'recall_failed', 'expired'];
 
   const updateHeaderFilter = useCallback((key: keyof TableHeaderFilters, option: string, checked: boolean) => {
     const current = headerFilters[key] as string[];

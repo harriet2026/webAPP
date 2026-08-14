@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────���──������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────����──������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -686,7 +686,7 @@ const SECURITY_KPI = {
   blocked: 12_101,
 };
 
-// 确定性伪值：在 [base, base+width) 内按 index 平滑取����无 Math.random，可复现）。
+// 确定性伪值：在 [base, base+width) 内按 index 平滑������无 Math.random，可复现）。
 function threatSeriesValue(
   i: number,
   base: number,
@@ -1819,7 +1819,7 @@ export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
   return mockAlertSmtpConfig();
 }
 
-// ─── 待处置邮件 / 举报待审（KPI）─────────────��─��──────────────────────────────
+// ─── 待处置邮件 / 举报待审（KPI）───────────��─��─��──────────────────────────────
 // 隔离（disposal.total）：today 3 / 7d 11 / 30d 19；举报待审（inbound-audit.total）：
 // today 2 / 7d 6 / 30d 13。两个查询都不带范围参数，故按模块级 currentSystemStatusRange 分支。
 const DISPOSAL_PENDING: Record<SystemStatusRangeKey, number> = {
@@ -2031,7 +2031,7 @@ export function mockPhishingStats(): PhishingStats {
 
 // ─── 钓鱼邮件检测总览：研判日志列表 / 详情（mock）───────────────────────────
 // 真实后端: GET /phishing-agent/detection-logs(/:id)、POST .../block、
-// .../exempt。此前只 mock 了 /phishing-agent/stats，检测总览页��日志��格在
+// .../exempt。此前只 mock 了 /phishing-agent/stats，检测��览页��日志��格在
 // �� mock ��式下始终为空（无后端时看不到任何数据）——这里补一份覆盖全部
 // disposition/recall_status/risk_level/detection_mode 枚举取值的种子数据，
 // 并支持列表关键字/时间范围/多选筛选分页，以及阻断/豁免对种子状态的迁移。
@@ -3913,7 +3913,7 @@ function makeMockRBLFilterRules(): RBLFilterRuleView[] {
     makeRBLRule({
       id: 5,
       name: "临时测试规则",
-      description: "已禁用，保留以备恢复",
+      description: "已禁用，保��以备恢复",
       match_mode: "specific",
       match_servers: ["zen.spamhaus.org"],
       product_action: "block",
@@ -6098,7 +6098,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
 // 为 mock 引入第二套数据模型。
-// ════════════════════════════════════��═══��═══════════════════════════════════════
+// ══════════════════════════════��═════��═══��═══════════════════════════════════════
 
 interface MockDisposalSeed {
   tid: string;
@@ -6565,7 +6565,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "finance@company.com",
     subject: "代开各类正规发票，点数优惠",
     action: "block",
-    reason: "内容规则命中：违规发票广告",
+    reason: "内容规则命中：违规发票��告",
     mailType: "spam",
     deliveryStatus: "rejected",
     sourceIp: "119.28.55.30",
@@ -6603,7 +6603,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "user4@company.com",
     subject: "您的账单已逾期，请点击处理",
     action: "quarantine",
-    reason: "高级内容过滤命中：外部+仿冒品牌+紧急话术",
+    reason: "高级内容过滤命中：外部+���冒品牌+紧急话术",
     mailType: "phishing",
     deliveryStatus: "quarantine_pending",
     sourceIp: "185.220.101.44",
@@ -7083,7 +7083,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "user19@company.com",
     subject: "PayPal: Action Required - Verify your account",
     action: "quarantine",
-    reason: "钓鱼链接指向已知恶意��",
+    reason: "钓鱼��接指向已知恶意��",
     mailType: "phishing",
     deliveryStatus: "quarantine_pending",
     sourceIp: "78.141.203.22",
@@ -7536,21 +7536,43 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
 
 let mockDisposalMailLogs = MOCK_DISPOSAL_SEEDS.map(mockMailLog);
 
+// GT-12923 阶段三：邮件状态改为「位置维度」枚举（与
+// src/components/email-disposal/lib/disposal-api.ts 的 mapToDisplayStatus
+// 保持一致）。partial_delivered/partial_recall_success 不再是独立位置节点，
+// bounced/reviewed_rejected/deleted 也已归并到语义更贴近的位置节点上，此处
+// 的 mock 筛选逻辑需要同步，否则按新枚举值筛选时会匹配不到任何 mock 记录。
 function displayStatusOf(item: (typeof mockDisposalMailLogs)[number]): string {
-  if (item.recall_status_summary && item.recall_status_summary !== "none")
-    return item.recall_status_summary;
+  if (item.recall_status_summary && item.recall_status_summary !== "none") {
+    // recall_status_summary 的 mock 原始取值里仍可能出现历史遗留的
+    // "expanded"（部分召回成功），位置维度下归并为「召回成功」。
+    return item.recall_status_summary === "expanded"
+      ? "recall_success"
+      : item.recall_status_summary;
+  }
   if (item.workflow_outcome_summary === "discarded") return "discarded";
+  // deleted / rejected_after_review：均已"停在网关"，归并为「已丢弃」。
+  if (item.workflow_outcome_summary === "deleted") return "discarded";
+  if (item.workflow_outcome_summary === "rejected_after_review") return "discarded";
   if (item.action === "quarantine") return "quarantine_pending";
+  if (item.action === "sideline") return "sideline_pending";
   if (item.action === "audit") return "audit_pending";
   if (item.action === "reject") return "rejected";
+  // bounce（对方退信）已离开网关但未成功送达，归并为「投递失败」。
+  if (item.action === "bounce") return "delivery_failed";
   if (item.action === "discard") return "discarded";
-  if (item.action === "mixed") return "partial_delivered";
+  // mixed：整体位置未确定为单一终态时，按「投递中」展示（与
+  // mapToDisplayStatus 的 mixed 分支保持一致）。
+  if (item.action === "mixed") return "delivering";
   return (
     (
       {
         delivered: "delivered",
-        partial_delivered: "partial_delivered",
+        // partial_delivered：位置仍未确定为单一终态，按「投递中」展示。
+        partial_delivered: "delivering",
         failed: "delivery_failed",
+        // cancelled（场景 B：已进入投递队列、我方主动中止转发，未离开网关）
+        // 是独立于 discard（从未进入队列直接丢弃）的位置节点。
+        cancelled: "delivery_cancelled",
       } as Record<string, string>
     )[item.delivery_status_summary ?? ""] ?? "delivering"
   );
@@ -9236,7 +9258,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 10, operation_id: 'OP20260622012', admin_user_id: 3, username: 'chenjing@lanhai.cn', operator_name: '陈静（我）',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'update',
     resource_type: 'policy_pipeline', status: 'success', client_ip: '112.65.1.18', ip_location: '上海',
-    details: { summary: '钓鱼邮件处置由隔离改为直接拒收' }, before_value: { text: '隔离' }, after_value: { text: '拒收' },
+    details: { summary: '钓鱼邮��处置由隔离改为直接拒收' }, before_value: { text: '隔离' }, after_value: { text: '拒收' },
     created_at: '2026-06-22T10:15:36Z' },
   { id: 14, operation_id: 'OP20260622016', admin_user_id: 4, username: 'sunqi@lanhai.cn', operator_name: '孙琦',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'create',
