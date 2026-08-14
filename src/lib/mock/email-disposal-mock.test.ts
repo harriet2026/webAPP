@@ -140,7 +140,7 @@ describe('email disposal center mock contract', () => {
   //      不一致，需要先归一化才能匹配——用 'review'/'block' 验证这条链路，
   //      避免既有词表不对齐的回归。
   //   2) mixed 记录（MIC053）：action 恒为 'mixed'，筛选需改为对
-  //      disposition_actions 数组做��一化后取交集（OR），而不是要求
+  //      disposition_actions 数组做归一化后取交集（OR），而不是要求
   //      item.action 本身精确等于筛选值。
   const advancedFilterFor = (field: string, op: string, value: unknown) =>
     encodeURIComponent(

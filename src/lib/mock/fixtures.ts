@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────����������──������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────�����������──������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -2236,7 +2236,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     sideline_id: 'ph-100007',
     message_id: '<8f2c1a0007@drive-share-cn.net>',
     sender: 'notify@drive-share-cn.net',
-    subject: '您有一份共享文档待��看',
+    subject: '您有一份共��文档待��看',
     recipients: ['chenjing@example.com'],
     direction: 'inbound',
     status: 'sidelined',
@@ -2952,7 +2952,7 @@ function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
     makeRule({
       id: 3,
       name: "可疑IP严格限制",
-      description: "临时限���，观���中",
+      description: "临���限���，观���中",
       priority: 200,
       scopeType: "range",
       scopeValue: "198.51.100.0/24",
@@ -4389,7 +4389,7 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
       }),
       sfGroupRule({
         id: 8107,
-        name: "恶意附件特���",
+        name: "恶意附件特�����",
         type: "feature",
         created_at: "2024-01-12T00:00:00Z",
         member_count: 2,
@@ -6097,7 +6097,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // 邮件处置中心（email-handling-disposal-center，mock）
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
-// 为 mock 引入第二套数据模型。
+// 为 mock 引入第二���数据模型。
 // ═══════��═════��══��══��═════��════��═════��═══��═══════════════════════════════════════
 
 interface MockDisposalSeed {
@@ -6161,7 +6161,7 @@ const DEFAULT_MIXED_BREAKDOWN: Array<{
   reason: string;
 }> = [
   { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
-  { action: "accept", status: "delivered", reason: "rule 投��白名单 matched at data stage" },
+  { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
   { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
   { action: "quarantine", status: "quarantined", reason: "rule 隔离扣留 matched at data stage" },
   { action: "sideline", status: "delivered", reason: "default_sideline" },
@@ -6264,7 +6264,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     // 派生（mockMailLog 的 `seed.isMixed ? "mixed" : disposalAction(seed)`），
     // 不能直接写进 action —— MockDisposalSeed.action 是逐收件人的基础处置。
     action: "quarantine",
-    reason: "混合处置：白名单收件人投递 + 规则命中隔离",
+    reason: "混合处置：白名单收件人投递 + 规则命中隔��",
     mailType: "normal",
     deliveryStatus: "partial_delivered",
     sourceIp: "45.137.21.88",
@@ -6736,7 +6736,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     attachmentCount: 0,
     hasQrCode: true,
     score: 81,
-    basis: ["ACF", "多条件组合策略", "ACF-001"],
+    basis: ["ACF", "多条件组合策��", "ACF-001"],
   },
   {
     tid: "MIC025",
@@ -6994,7 +6994,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "finance@company.com",
     subject: "紧���转账 - 请今日完成",
     action: "quarantine",
-    reason: "CEO 欺诈：Unicode 域名仿冒",
+    reason: "CEO ��诈：Unicode 域名仿冒",
     mailType: "spoofing",
     deliveryStatus: "quarantine_pending",
     sourceIp: "149.154.160.10",
@@ -8361,7 +8361,7 @@ export function mockContactDepartmentsList() {
     ["财务部", 1, ["总部 AD"]],
     ["市场部", 1, ["邮件系统"]],
     ["总裁办", 1, ["网易企邮"]],
-    ["人力资源部", 1, ["网易企邮"]],
+    ["人力资源部", 1, ["网易��邮"]],
     ["销售部 / 华东区", 1, ["邮件系统"]],
     ["法务部", 1, ["总部 AD"]],
   ];
