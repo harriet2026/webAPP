@@ -14,12 +14,16 @@ describe('email disposal center mock contract', () => {
     // demo 合入: +25 跨页选中/全量导出验证行（顺延编号 MIC028-MIC052）。
     // +MIC053 混合处置（mixed）演示行。
     // 群发邮件日志数据补充: +2 群发邮件行（MIC054/MIC055），均为单封邮件内
-    // 不同收件人邮件状态各不相同的 mixed 记录。
+    // 不同收件人邮件状态各不相同的 mixed 记录。紧跟在 MIC001 之后插入（索引
+    // 1/2），使其在默认（未排序）视图下排在日志列表最开始的几条；MIC053 随之
+    // 后移一位到索引 3。
     const result = mockEmailDisposalList('/mail-logs?page=1&page_size=100');
     expect(result.total).toBe(55);
     expect(result.items).toHaveLength(55);
     expect(result.items[0]).toMatchObject({ tid: 'MIC001', subject: 'Q2财务报表 - 紧急审批（多投信）' });
-    expect(result.items[1]).toMatchObject({ tid: 'MIC053', subject: '季度营销报告 - 部分收件人白名单（混合处置演示）' });
+    expect(result.items[1]).toMatchObject({ tid: 'MIC054', subject: '供应商发票变更通知（多投信 - 混合处置：投递/丢弃/隔离）' });
+    expect(result.items[2]).toMatchObject({ tid: 'MIC055', subject: '话费账单通知（多投信 - 混合处置：投递/丢弃/隔离）' });
+    expect(result.items[3]).toMatchObject({ tid: 'MIC053', subject: '季度营销报告 - 部分收件人白名单（混合处置演示）' });
     expect(mockEmailDisposalFields()).toHaveLength(30);
   });
 

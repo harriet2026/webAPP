@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────�������──������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────��������──������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -1758,7 +1758,7 @@ let alertRuleState: AlertRule[] = [
   { ...ruleDefaults, id: 102, name: "deferred 队列堆积", metric_key: "queue_deferred", module: "mailflow_queue", operator: "gt", threshold_warn: 50000, severity: "p0" },
   { ...ruleDefaults, id: 103, name: "Kingbase 主从延迟", metric_key: "kb_repl_delay", module: "database", operator: "gt", threshold_warn: 60, severity: "p1" },
   { ...ruleDefaults, id: 104, name: "RBL 响应超时", metric_key: "rbl_hits", module: "detection", operator: "gt", threshold_warn: 5, severity: "p3" },
-  { ...ruleDefaults, id: 105, name: "备份任��失败", metric_key: "data_dir_usage", module: "system", operator: "eq", threshold_warn: 0, severity: "p1" },
+  { ...ruleDefaults, id: 105, name: "备份任����失败", metric_key: "data_dir_usage", module: "system", operator: "eq", threshold_warn: 0, severity: "p1" },
 ];
 
 export function mockAlertRules(): { items: AlertRule[] } {
@@ -3912,7 +3912,7 @@ function makeMockRBLFilterRules(): RBLFilterRuleView[] {
     }),
     makeRBLRule({
       id: 5,
-      name: "临时测试规则",
+      name: "临时��试规则",
       description: "已禁用，保��以备恢复",
       match_mode: "specific",
       match_servers: ["zen.spamhaus.org"],
@@ -4157,7 +4157,7 @@ export function mockDeleteGeoIpRule(id: number): void {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 发信人黑���名单（sender_filter，mock）
-// 数据结构对齐统一规则系统 `Rule`（webapp/src/types/unified-rules.ts）：
+// 数据结构对齐统一规则系统 `Rule`���webapp/src/types/unified-rules.ts）：
 //   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
 //     保证 `resolveSenderFilterRule` 能按同一套语法解析回 sender_config/ip_range。
 //   - metadata 携带 `{feature:'sender_filter', sender_config, ip_range, list_type}`，
@@ -6098,7 +6098,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
 // 为 mock 引入第二套数据模型。
-// ════════════════��══��═════��════��═════��═══��═══════════════════════════════════════
+// ═════════════��══��══��═════��════��═════��═══��═══════════════════════════════════════
 
 interface MockDisposalSeed {
   tid: string;
@@ -6161,7 +6161,7 @@ const DEFAULT_MIXED_BREAKDOWN: Array<{
   reason: string;
 }> = [
   { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
-  { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
+  { action: "accept", status: "delivered", reason: "rule 投��白名单 matched at data stage" },
   { action: "accept", status: "delivered", reason: "rule 投递白名单 matched at data stage" },
   { action: "quarantine", status: "quarantined", reason: "rule 隔离扣留 matched at data stage" },
   { action: "sideline", status: "delivered", reason: "default_sideline" },
@@ -6187,6 +6187,70 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     hasQrCode: false,
     score: 94,
     basis: ["AI-SPOOF", "高管仿冒识别", "AI-SPOOF-012"],
+  },
+  // ═══════════════════════════════════════════════════════════════════════
+  // 群发邮件日志数据补充：以下 2 条均为多收件人群发邮件，且单封邮件内不同
+  // 收件人的最终邮件状态各不相同（isMixed + mixedBreakdown），用于验证列表
+  // 页在"同一封群发邮件含多个邮件状态"场景下的展示与筛选。紧跟在 MIC001 之
+  // 后，确保默认（未排序）视图下排在日志列表最开始的几条，同时不改动
+  // MIC001 作为数组首条记录的既有约定（id=1 的相关测试依赖此顺序）。
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    tid: "MIC054",
+    time: "2026-06-22 11:50:00",
+    direction: "incoming",
+    sender: "invoice-support@supplier-verify-group.com",
+    recipients:
+      "fina@company.com, finb@company.com, proca@company.com, procb@company.com, opsa@company.com, opsb@company.com",
+    subject: "供应商发票变更通知（多投信 - 混合处置：投递/丢弃/隔离）",
+    action: "quarantine",
+    reason: "混合处置：白名单收件人投递 + 恶意附件丢弃 + 行为异常隔离",
+    mailType: "phishing",
+    deliveryStatus: "partial_delivered",
+    sourceIp: "196.245.11.87",
+    ipLocation: "尼日利亚",
+    cluster: "Node 3",
+    attachmentCount: 1,
+    hasQrCode: false,
+    score: 78,
+    basis: ["AI-PHISH", "仿冒供应商钓鱼-批量混合处置", "AI-PHISH-018"],
+    isMixed: true,
+    mixedBreakdown: [
+      { action: "accept", status: "delivered", reason: "发件人在信任白名单，直接投递" },
+      { action: "accept", status: "delivered", reason: "发件人在信任白名单，直接投递" },
+      { action: "discard", status: "discarded", reason: "命中恶意附件哈希黑名单，丢弃" },
+      { action: "discard", status: "discarded", reason: "命中恶意附件哈希黑名单，丢弃" },
+      { action: "quarantine", status: "quarantined", reason: "行为异常触发隔离规则" },
+      { action: "sideline", status: "delivered", reason: "命中相似度检测规则，转旁路复检后投递" },
+    ],
+  },
+  {
+    tid: "MIC055",
+    time: "2026-06-23 15:00:00",
+    direction: "incoming",
+    sender: "billing-notice@telecom-service-provider.com",
+    recipients:
+      "user31@company.com, user32@company.com, user33@company.com, user34@company.com, user35@company.com",
+    subject: "话费账单通知（多投信 - 混合处置：投递/丢弃/隔离）",
+    action: "quarantine",
+    reason: "混合处置：正常收件人投递 + 恶意附件丢弃 + 敏感内容隔离",
+    mailType: "normal",
+    deliveryStatus: "partial_delivered",
+    sourceIp: "89.34.22.10",
+    ipLocation: "法国",
+    cluster: "Node 1",
+    attachmentCount: 1,
+    hasQrCode: false,
+    score: 30,
+    basis: ["CONTENT", "批量账单邮件-混合处置内容复核", "CT-022"],
+    isMixed: true,
+    mixedBreakdown: [
+      { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
+      { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
+      { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
+      { action: "discard", status: "discarded", reason: "附件命中恶意特征库，丢弃" },
+      { action: "quarantine", status: "quarantined", reason: "附件命中敏感内容规则，隔离" },
+    ],
   },
   {
     tid: "MIC053",
@@ -7197,68 +7261,6 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     basis: ["AI-PHISH", "仿冒电子签名平台", "AI-029"],
     senderIsNewOnThisMail: true,
     domainAgeDays: 3,
-  },
-  // ═══════════════════════════════════════════════════════════════════════
-  // 群发邮件日志数据补充：以下 2 条均为多收件人群发邮件，且单封邮件内不同
-  // 收件人的最终邮件状态各不相同（isMixed + mixedBreakdown），用于验证列表
-  // 页在"同一封群发邮件含多个邮件状态"场景下的展示与筛选。
-  // ═══════════════════════════════════════════════════════════════════════
-  {
-    tid: "MIC054",
-    time: "2026-06-22 11:50:00",
-    direction: "incoming",
-    sender: "invoice-support@supplier-verify-group.com",
-    recipients:
-      "fina@company.com, finb@company.com, proca@company.com, procb@company.com, opsa@company.com, opsb@company.com",
-    subject: "供应商发票变更通知（多投信 - 混合处置：投递/丢弃/隔离）",
-    action: "quarantine",
-    reason: "混合处置：白名单收件人投递 + 恶意附件丢弃 + 行为异常隔离",
-    mailType: "phishing",
-    deliveryStatus: "partial_delivered",
-    sourceIp: "196.245.11.87",
-    ipLocation: "尼日利亚",
-    cluster: "Node 3",
-    attachmentCount: 1,
-    hasQrCode: false,
-    score: 78,
-    basis: ["AI-PHISH", "仿冒供应商钓鱼-批量混合处置", "AI-PHISH-018"],
-    isMixed: true,
-    mixedBreakdown: [
-      { action: "accept", status: "delivered", reason: "发件人在信任白名单，直接投递" },
-      { action: "accept", status: "delivered", reason: "发件人在信任白名单，直接投递" },
-      { action: "discard", status: "discarded", reason: "命中恶意附件哈希黑名单，丢弃" },
-      { action: "discard", status: "discarded", reason: "命中恶意附件哈希黑名单，丢弃" },
-      { action: "quarantine", status: "quarantined", reason: "行为异常触发隔离规则" },
-      { action: "sideline", status: "delivered", reason: "命中相似度检测规则，转旁路复检后投递" },
-    ],
-  },
-  {
-    tid: "MIC055",
-    time: "2026-06-23 15:00:00",
-    direction: "incoming",
-    sender: "billing-notice@telecom-service-provider.com",
-    recipients:
-      "user31@company.com, user32@company.com, user33@company.com, user34@company.com, user35@company.com",
-    subject: "话费账单通知（多投信 - 混合处置：投递/丢弃/隔离）",
-    action: "quarantine",
-    reason: "混合处置：正常收件人投递 + 恶意附件丢弃 + 敏感内容隔离",
-    mailType: "normal",
-    deliveryStatus: "partial_delivered",
-    sourceIp: "89.34.22.10",
-    ipLocation: "法国",
-    cluster: "Node 1",
-    attachmentCount: 1,
-    hasQrCode: false,
-    score: 30,
-    basis: ["CONTENT", "批量账单邮件-混合处置内容复核", "CT-022"],
-    isMixed: true,
-    mixedBreakdown: [
-      { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
-      { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
-      { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
-      { action: "discard", status: "discarded", reason: "附件命中恶意特征库，丢弃" },
-      { action: "quarantine", status: "quarantined", reason: "附件命中敏感内容规则，隔离" },
-    ],
   },
 ];
 
@@ -8684,7 +8686,7 @@ const contactPeople: MockContactRow[] = [
   { id: 5, source_id: 11, source_name: '网易企邮', department_path: '总裁办', display_name: '陈总', email: 'chenzong@corp.cn', job_title: '首席执行官', tag: 'executive', status: 'active', email_alias: '陈总.alias@corp.cn' },
   { id: 6, source_id: 11, source_name: '网易企邮', department_path: '人力资源部', display_name: '孙七', email: 'sunqi@corp.cn', job_title: 'HRBP', tag: 'none', status: 'active', email_alias: '孙七.alias@corp.cn' },
   { id: 7, source_id: 5, source_name: '邮件系统', department_path: '销售部 / 华东区', display_name: '周八', email: 'zhouba@corp.cn', job_title: '区域总监', tag: 'key_position', status: 'active', email_alias: '周八.alias@corp.cn' },
-  { id: 8, source_id: 3, source_name: '总部 AD', department_path: '法务部', display_name: '吴九', email: 'wujiu@corp.cn', job_title: '法务专员', tag: 'none', status: 'active', email_alias: '吴九.alias@corp.cn' },
+  { id: 8, source_id: 3, source_name: '总部 AD', department_path: '法务部', display_name: '吴��', email: 'wujiu@corp.cn', job_title: '法务专员', tag: 'none', status: 'active', email_alias: '吴九.alias@corp.cn' },
 ];
 
 interface MockSyncLogRow {
