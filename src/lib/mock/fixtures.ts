@@ -4037,7 +4037,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
 // ─── 自定义 IP 定位库（GeoIP rules，mock）──────────────────────────────────
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
-// 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
+// ���段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
 function generateMockGeoIpRules(): GeoIpRule[] {
   const base: GeoIpRule[] = [
     {
@@ -4390,7 +4390,7 @@ export function mockSenderFilterGroupsList(): { items: Rule[] } {
       }),
       sfGroupRule({
         id: 8107,
-        name: "恶意附件�������",
+        name: "恶意附件特征",
         type: "feature",
         created_at: "2024-01-12T00:00:00Z",
         member_count: 2,
@@ -5168,7 +5168,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
   };
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════��══════════════════════════════════════════
 // 发信���为管控（behavior_control，mock）
 // 数据源自 demo `design/origin/demo/components/sender-behavior-control/mock-data.ts`
 // 的 `mockBehaviorRules`（7 条手工命名 + 生成的 #8..#35，共 35 条），并映射到统一规则。
@@ -5885,7 +5885,7 @@ export function mockPutIntentEngineConfig(
 // ─── 相似检测（similar-detection，mock）────────────────────────────────
 // 数据源：T7 defaults.ts 的 defaultConfig()（逐字段等于 Go
 // DefaultSimilarDetectionConfig 的 demo 运行态默认值），version 固定为 3
-// （非 0，便于测试乐观锁 expected_version 传递）。
+// （非 0，便于测��乐观锁 expected_version 传递）。
 
 export const mockSimilarDetectionConfig: SimilarDetectionConfig = {
   ...defaultSimilarDetectionConfig(),
@@ -6097,7 +6097,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // ═══════════════��═════════════════════════════════════��══════════════════════════
 // 邮件处置中心（email-handling-disposal-center，mock）
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
-// 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
+// 的业务语义，���转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
 // 为 mock 引入第二���数据模型。
 // ═══════��═════��══��══��═════��════��═════��═══��═══════════════════════════════════════
 

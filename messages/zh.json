@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测�������������������能�������������",
+    "spoofingDetection": "仿冒邮件检测���������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -758,7 +758,7 @@
         "deleted": "转发规则已删除",
         "masterSwitchEnabled": "转发规则总开关已开启",
         "masterSwitchDisabled": "转发规则总开关已关闭",
-        "saveError": "请修正表单中的���验错误"
+        "saveError": "请修正表单���的���验错误"
       },
       "deleteDialogTitle": "删除转发规则「{name}」？",
       "deleteDialogDescription": "删除后该连接层过滤规则立即失效。",
@@ -861,8 +861,8 @@
         },
         "editButton": "编辑",
         "deleteButton": "删除",
-        "emptyText": "暂��通道，建议��配置自定义通道",
-        "proxyDeletedBadge": "���理已删�������������",
+        "emptyText": "暂无通道，建议先配置自定义通道",
+        "proxyDeletedBadge": "代理已删除",
         "systemDefaultHelo": "系统默认",
         "drawerTitleNew": "新建投递通道",
         "drawerTitleEdit": "编辑投递通道",
@@ -1014,7 +1014,7 @@
           "header": "命中规则《{name}》",
           "channel": "投递通道：{channel}",
           "proxy": "代理 IP：{name}（出口：{egress}）",
-          "helo": "HELO 声明：{helo}",
+          "helo": "HELO ��明：{helo}",
           "tls": "TLS ��略：{level}",
           "response": "预计对端响应：250 2.0.0 Ok"
         },
@@ -1186,7 +1186,7 @@
     "audit": "审核",
     "timeoutMinutes": "超时(分钟)",
     "globalRule": "全局规则",
-    "systemRule": "系统规则",
+    "systemRule": "系统���则",
     "systemRuleTooltip": "该规则由系统提供，无法删除��只有系统管理员可编辑部分字段",
     "systemRuleEditBanner": "��在编��系统��线规则��只允许修改 action / priority / 条��阈值��其��字段已锁定。",
     "stage": "阶段"
@@ -1655,7 +1655,7 @@
     "noItems": "无旁路邮件",
     "statusPending": "待处理",
     "statusProcessing": "处理中",
-    "statusQuarantined": "已隔离",
+    "statusQuarantined": "已隔���",
     "statusFailed": "失败",
     "statusReinjected": "已重新��入",
     "statusReleasedPending": "已放行待复检",
@@ -2454,7 +2454,7 @@
       "LOCAL": "本地"
     },
     "scenes": {
-      "userspace": "用户空间认证",
+      "userspace": "用户空间认���",
       "smtpsend": "SMTP 发��认证",
       "mailsync": "邮件����步代理"
     },
@@ -4403,7 +4403,7 @@
     "simulateTest": "模拟测试",
     "ruleNameTooLong": "规则名称不能超过 50 个字符",
     "ruleNameForbiddenChars": "规则名称不能包含 <、>、& 或双引号",
-    "priorityInvalid": "优先级必须是 1 到 9999 的整数",
+    "priorityInvalid": "优先级���须是 1 到 9999 的整数",
     "invalidDate": "请输入有效的失效��间",
     "mixedDirectionActionsPreserved": "此历史规则在不同方向使用不同动作；除��重新选择动作，否则将原样保留。",
     "unsavedTitle": "放弃未保存的更��？",
@@ -5134,7 +5134,7 @@
     "encrypted": {
       "detectPolicy": "检测策略",
       "mode_none": "不检测",
-      "mode_deep": "深度检测（尝试解密并扫描内容）",
+      "mode_deep": "深度检测（尝试解密并扫描内���）",
       "decryptFailAction": "���密失败处置",
       "receiveDefault": "收信方向默认：继续流水线",
       "advancedOptions": "高级选项",
@@ -5400,7 +5400,7 @@
       "highHint": "建议阻断或隔离",
       "mediumHint": "建议审核",
       "lowHint": "建议标记后投递",
-      "highDesc": "包含 {n} 个分类，默认处置较为严格，请谨慎调整",
+      "highDesc": "包含 {n} ���分类，默认处置较为严格，请谨慎调整",
       "mediumDesc": "包含 {n} 个分类，建议使用标准处置策略",
       "lowDesc": "包含 {n} 个分类，可根据业务需要灵活调整",
       "count": "({n} 个分类)"
@@ -5436,7 +5436,7 @@
       "deliveryTarget": "投递目标",
       "targetInbox": "收件箱（仅标记）",
       "targetSpamFolder": "垃圾邮件文件夹",
-      "subjectMark": "主题标记",
+      "subjectMark": "主题���记",
       "bodyMark": "正文标记",
       "markTextPlaceholder": "标记文案",
       "prefix": "前缀",
@@ -5564,7 +5564,7 @@
     "priorityHint": "数值越大优先级越高，命中多条规则时优先执行数值大的规则",
     "ruleName": "规则名称",
     "applyTo": "适用对象",
-    "applyToAllUsers": "全部用户",
+    "applyToAllUsers": "全部���户",
     "position": "位置",
     "status": "状态",
     "operation": "操作",
@@ -5719,7 +5719,7 @@
     "exitTooltip": "此动作命中后邮件流永久终止，不再进入后续阶段"
   },
   "emailDisposal": {
-    "pageDescription": "查看和分析邮件安全事件，进行威胁调查和处置",
+    "pageDescription": "查看和���析邮件安全事件，进行威胁调查和处置",
     "pageTitle": "邮件处置中心",
     "investigationTitle": "邮件调查中心",
     "investigationSubtitle": "查看和分析邮件安全事件，进行威胁调��和处置",
@@ -6119,7 +6119,7 @@
         },
         "confidenceScore": "置信度 {pct}%",
         "confidenceBlacklist": "黑名单命中（无置信度）",
-        "confidenceRule": "规��命中（无置信度）",
+        "confidenceRule": "规则命中（无置信度）",
         "action": "执行动作",
         "subject": "主题",
         "sender": "发信人",
@@ -6963,7 +6963,7 @@
       },
       "desc_senderIp": {
         "source": "SMTP连接��",
-        "usage": "匹配发信���务器IP地址",
+        "usage": "��配发信���务器IP地址",
         "note": "支持CIDR格式，如10.0.0.0/8"
       },
       "desc_senderIpGroup": {
@@ -7156,7 +7156,7 @@
       "desc_senderMailCountDaily": {
         "source": "发信行为统计",
         "usage": "统计当天发信人发送的邮件总数",
-        "note": "日级别的发信频率限��"
+        "note": "日级别��发信频率限��"
       },
       "desc_senderRateLimit15": {
         "source": "发信行为管控",
@@ -7458,7 +7458,7 @@
     "selectTenantEmpty": "请先选择租户以管理其处置��置",
     "save": "保存设置",
     "reset": "重置",
-    "saveSuccess": "设置已保存",
+    "saveSuccess": "设置已��存",
     "saveFailed": "保存失败",
     "tabQuarantine": "隔离区设���",
     "tabReview": "审核设置",
@@ -7530,7 +7530,7 @@
     "portalBaseUrlLabel": "外部访问地址",
     "portalBaseUrlPlaceholder": "https://gw.example.com",
     "portalBaseUrlHelp": "收件人浏览器可访问的控制台地址（https）；启用取回、预览、加白或加黑权限时必填。",
-    "periodAndTimeout": "审核时长与超时配置",
+    "periodAndTimeout": "审核时���与超时配置",
     "durationControl": "审核时长控制",
     "duration_unlimited": "不限时长",
     "duration_custom": "自定义等待时长",
@@ -8764,7 +8764,7 @@
       "confirmClose": "确认关闭",
       "timeoutTempDisposal": "超时临时处置",
       "timeoutTempDisposalHint": "超时发生时的临时处置动作；若启用超时异步处理，后台会继续检测并按异步召回策略跟进。",
-      "timeoutTempSectionTitle": "超时临时处置",
+      "timeoutTempSectionTitle": "超时临��处置",
       "timeoutTempValue": {
         "deliver": "正常投递",
         "mark": "标记",
@@ -9009,7 +9009,7 @@
     },
     "personForm": {
       "addTitle": "添加保护对象",
-      "addDescription": "仅添加的保护对象会纳入显示名仿冒检测范围。请配置该对象的检���与处置策略。",
+      "addDescription": "仅添加的保护对象会纳入显示名仿冒检测���围。请配置该对象的检���与处置策略。",
       "editTitle": "编辑保护对象",
       "modeSingle": "单个录入",
       "modePaste": "批量粘贴",
@@ -9187,7 +9187,7 @@
       "preview": "当发信域名与受保护域名编辑距离介于 1 与阈值之间时，触发研判与处置。",
       "errBrandName": "品牌名必须 1-30 字符",
       "errKeywords": "关键词最多 20 个",
-      "errKeywordLen": "单个关键词最多 30 字符",
+      "errKeywordLen": "��个关键词最多 30 字符",
       "errNoDomain": "至少配置一个受保护域名",
       "errEmptyDomain": "保存前请填写或删除空白域名行",
       "errDomainThreshold": "编辑距离阈值必须大于等于 1",
@@ -10073,7 +10073,7 @@
       "port": "端口",
       "encryption": "加密方式",
       "encNone": "无",
-      "auth": "认证方式",
+      "auth": "认证方���",
       "auth_none": "无",
       "auth_plain": "Plain",
       "auth_login": "Login",
@@ -10265,7 +10265,7 @@
     "timeLabel": "时间",
     "expiredTitle": "链接已过期或无效",
     "expiredDesc": "请联系管理员获取新的预览链接。",
-    "purgedTitle": "邮件已超出保留期",
+    "purgedTitle": "邮件已超出��留期",
     "purgedDesc": "该邮件已超出隔离区保留期限并被清理，无法再预览。",
     "errorTitle": "加载失败",
     "errorDesc": "请稍后重试或联系管理员。",
@@ -10774,7 +10774,7 @@
     "dkim": {
       "activate_failed": "启用签名密钥失败，请稍后重试",
       "active_key_cannot_delete": "正在使用的签名密钥不能删除，请先启用另一个密钥或停用当前密钥",
-      "algorithm_unsupported": "不支持的签名算法「{value}」，只能是：{allowed}",
+      "algorithm_unsupported": "不支持的签名���法「{value}」，只能是：{allowed}",
       "cross_tenant_manage_denied": "无权管理其他租户的签名密钥",
       "cross_tenant_read_denied": "无权查看其他租户的签名域名",
       "dns_not_verified": "该密钥的 DNS 记录尚未验证通过，请先在域��服务商处添加 TXT 记录并完成验证，���启用它",
@@ -10862,7 +10862,7 @@
       "super_admin_required": "管理平台级角色需要超级管理员权限",
       "system_default_cannot_delete": "系统内置角色不能删除",
       "system_default_cannot_disable": "系统内置角色与超级管理员角色不能停用",
-      "system_default_cannot_edit": "系统内置角色不能编辑"
+      "system_default_cannot_edit": "系统内置角��不能编辑"
     },
     "rule_analytics": {
       "range_invalid": "时间范围无效，只能是：{allowed}",
@@ -11018,7 +11018,7 @@
       "interpret_too_many_concurrent": "当前 AI 请求过多，请稍后重试"
     },
     "quarantine": {
-      "id_required": "请填写隔离邮件 ID",
+      "id_required": "请填写隔离邮��� ID",
       "item_not_found": "隔离邮件���存在",
       "access_denied": "无权访问该隔离邮件"
     },
@@ -11328,7 +11328,7 @@
       "recall_request_does_not_belong_your": "该召回请求不属于当前租户"
     },
     "recipient_check": {
-      "invalid_existence_action": "收件人存在性处置动作无效"
+      "invalid_existence_action": "收��人存在性处置动作无效"
     },
     "recipient_config_access": {
       "recipient_configuration_requires_tenant_context": "多租户模式下，收件人配置需要先选择租户",
@@ -11446,7 +11446,7 @@
       "feature_disabled": "密码重置功能未启用",
       "code_invalid_or_expired": "验证码错误或已过期",
       "ticket_invalid_or_expired": "凭证无效或已过期",
-      "rate_limited": "请求过于频繁，请稍后再试"
+      "rate_limited": "请求��于频繁，请稍后再试"
     }
   }
 }
