@@ -43,7 +43,7 @@ export const DEFAULT_IMAGE_DETECT_ACTIONS: ImageDetectActionConfig = {
   qr_deep_exceed_warn: true,
 };
 
-const LIGHT_ACTIONS: AttachmentAction[] = ['quarantine', 'reject', 'discard'];
+const LIGHT_ACTIONS: AttachmentAction[] = ['quarantine', 'audit', 'discard'];
 
 interface ImageDetectTabProps {
   direction?: Direction;
