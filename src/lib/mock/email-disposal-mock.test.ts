@@ -9,13 +9,15 @@ import {
 } from './fixtures';
 
 describe('email disposal center mock contract', () => {
-  it('provides the exact 53-row demo dataset and 30 advanced fields', () => {
+  it('provides the exact 55-row demo dataset and 30 advanced fields', () => {
     // GT-12649: +2 阶段1（IPBL/RBL 平台策略）示例行 MIC026/MIC027；
     // demo 合入: +25 跨页选中/全量导出验证行（顺延编号 MIC028-MIC052）。
     // +MIC053 混合处置（mixed）演示行。
+    // 群发邮件日志数据补充: +2 群发邮件行（MIC054/MIC055），均为单封邮件内
+    // 不同收件人邮件状态各不相同的 mixed 记录。
     const result = mockEmailDisposalList('/mail-logs?page=1&page_size=100');
-    expect(result.total).toBe(53);
-    expect(result.items).toHaveLength(53);
+    expect(result.total).toBe(55);
+    expect(result.items).toHaveLength(55);
     expect(result.items[0]).toMatchObject({ tid: 'MIC001', subject: 'Q2财务报表 - 紧急审批（多投信）' });
     expect(result.items[1]).toMatchObject({ tid: 'MIC053', subject: '季度营销报告 - 部分收件人白名单（混合处置演示）' });
     expect(mockEmailDisposalFields()).toHaveLength(30);
@@ -134,7 +136,7 @@ describe('email disposal center mock contract', () => {
   //      不一致，需要先归一化才能匹配——用 'review'/'block' 验证这条链路，
   //      避免既有词表不对齐的回归。
   //   2) mixed 记录（MIC053）：action 恒为 'mixed'，筛选需改为对
-  //      disposition_actions 数组做归一化后取交集（OR），而不是要求
+  //      disposition_actions 数组做��一化后取交集（OR），而不是要求
   //      item.action 本身精确等于筛选值。
   const advancedFilterFor = (field: string, op: string, value: unknown) =>
     encodeURIComponent(

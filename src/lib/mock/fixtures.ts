@@ -469,7 +469,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────�����──������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────�������──������──────────────────────────���────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -686,7 +686,7 @@ const SECURITY_KPI = {
   blocked: 12_101,
 };
 
-// 确定性伪值：在 [base, base+width) 内按 index 平��������无 Math.random，可复现）。
+// 确定性伪值：在 [base, base+width) 内按 index ����������无 Math.random，可复现）。
 function threatSeriesValue(
   i: number,
   base: number,
@@ -1758,7 +1758,7 @@ let alertRuleState: AlertRule[] = [
   { ...ruleDefaults, id: 102, name: "deferred 队列堆积", metric_key: "queue_deferred", module: "mailflow_queue", operator: "gt", threshold_warn: 50000, severity: "p0" },
   { ...ruleDefaults, id: 103, name: "Kingbase 主从延迟", metric_key: "kb_repl_delay", module: "database", operator: "gt", threshold_warn: 60, severity: "p1" },
   { ...ruleDefaults, id: 104, name: "RBL 响应超时", metric_key: "rbl_hits", module: "detection", operator: "gt", threshold_warn: 5, severity: "p3" },
-  { ...ruleDefaults, id: 105, name: "备份任务失败", metric_key: "data_dir_usage", module: "system", operator: "eq", threshold_warn: 0, severity: "p1" },
+  { ...ruleDefaults, id: 105, name: "备份任��失败", metric_key: "data_dir_usage", module: "system", operator: "eq", threshold_warn: 0, severity: "p1" },
 ];
 
 export function mockAlertRules(): { items: AlertRule[] } {
@@ -1819,7 +1819,7 @@ export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
   return mockAlertSmtpConfig();
 }
 
-// ─── 待处置邮件 / 举报待审（KPI）─────────��─��─��─��──────────────────────────────
+// ─── 待处置邮件 / 举报待审（KPI）────��────��─��─��─��──────────────────────────────
 // 隔离（disposal.total）：today 3 / 7d 11 / 30d 19；举报待审（inbound-audit.total）：
 // today 2 / 7d 6 / 30d 13。两个查询都不带范围参数，故按模块级 currentSystemStatusRange 分支。
 const DISPOSAL_PENDING: Record<SystemStatusRangeKey, number> = {
@@ -2479,7 +2479,7 @@ const mockPhishingInvestigations: Record<string, InvestigationTask> = {
       summary: '批量投递的仿冒薪资平台钓鱼邮件，已隔离并对 3 位收件人发起召回。',
       confidence: 0.98,
       evidence: [
-        { type: 'page_clone', severity: 'critical', title: '仿冒登录页', detail: '落地页与 HR 门户登录页像素级一致，域名为新注册域名' },
+        { type: 'page_clone', severity: 'critical', title: '仿冒登录页', detail: '落地页与 HR 门��登录页像素级一致，域名为新注册域名' },
         { type: 'batch_delivery', severity: 'high', title: '批量投递', detail: '同一发件人在短时间内向多个 HR 相关邮箱投递' },
       ],
       details: {
@@ -6098,7 +6098,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
 // 为 mock 引入第二套数据模型。
-// ═════════════════════════��════��═════��═══��═══════════════════════════════════════
+// ════════════════��══��═════��════��═════��═══��═══════════════════════════════════════
 
 interface MockDisposalSeed {
   tid: string;
@@ -6107,9 +6107,7 @@ interface MockDisposalSeed {
   sender: string;
   recipients: string;
   subject: string;
-  // "sideline"（检测中/旁路复检）为群发邮件日志数据补充新增，此前仅
-  // quarantine/block/discard/deliver/mixed 五种动作有种子覆盖。
-  action: "quarantine" | "block" | "discard" | "deliver" | "mixed" | "sideline";
+  action: "quarantine" | "block" | "discard" | "deliver" | "mixed";
   reason: string;
   mailType: string;
   deliveryStatus: string;
@@ -6708,7 +6706,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "admin@company.com",
     subject: "专属折扣，仅限今日",
     action: "block",
-    reason: "发信 IP 被 RBL 服务标记为垃圾邮件来源",
+    reason: "���信 IP 被 RBL 服务标记为垃圾邮件来源",
     mailType: "spam",
     deliveryStatus: "rejected",
     sourceIp: "91.108.56.200",
@@ -7201,122 +7199,20 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     domainAgeDays: 3,
   },
   // ═══════════════════════════════════════════════════════════════════════
-  // 群发邮件日志数据补充（多类型）：以下 7 条均为多收件人群发邮件，覆盖此前
-  // 群发场景缺失的执行动作（discard/sideline）、邮件状态
-  // （audit_pending/sideline_pending/delivery_cancelled/expired，含此前
-  // 群发场景零覆盖的两个全新枚举值）与处置依据组合；另新增 2 条 mixed
-  // 记录，各自的收件人动作分布（mixedBreakdown）互不相同，避免"所有混合
-  // 处置群发邮件长得一样"。
+  // 群发邮件日志数据补充：以下 2 条均为多收件人群发邮件，且单封邮件内不同
+  // 收件人的最终邮件状态各不相同（isMixed + mixedBreakdown），用于验证列表
+  // 页在"同一封群发邮件含多个邮件状态"场景下的展示与筛选。
   // ═══════════════════════════════════════════════════════════════════════
   {
     tid: "MIC054",
-    time: "2026-06-20 10:05:00",
-    direction: "incoming",
-    sender: "promo-blast@survey-reward.net",
-    recipients:
-      "ops1@company.com, ops2@company.com, ops3@company.com, ops4@company.com, ops5@company.com, ops6@company.com",
-    subject: "限时抽奖活动通知（多投信 - 恶意宏文档丢弃）",
-    action: "discard",
-    reason: "命中恶意宏文档特征库，批量丢弃",
-    mailType: "virus",
-    deliveryStatus: "discarded",
-    sourceIp: "103.224.182.51",
-    ipLocation: "越南",
-    cluster: "Node 2",
-    attachmentCount: 1,
-    hasQrCode: false,
-    score: 97,
-    basis: ["ATT-AV", "恶意宏文档批量拦截", "ATT-AV-011"],
-  },
-  {
-    tid: "MIC055",
-    time: "2026-06-20 14:20:00",
-    direction: "outgoing",
-    sender: "sales@company.com",
-    recipients:
-      "partner1@overseas-client.com, partner2@overseas-client.com, partner3@overseas-client.com, partner4@overseas-client.com, partner5@overseas-client.com",
-    subject: "合作合同附件（多投信 - 涉密内容待审核）",
-    action: "quarantine",
-    reason: "涉密关键词命中，转人工审核",
-    mailType: "sensitive",
-    deliveryStatus: "audit_pending",
-    sourceIp: "10.0.0.15",
-    ipLocation: "中国",
-    cluster: "Node 1",
-    attachmentCount: 2,
-    hasQrCode: false,
-    score: 58,
-    basis: ["CONTENT", "涉密内容外发批量审核", "CT-015"],
-  },
-  {
-    tid: "MIC056",
-    time: "2026-06-21 09:40:00",
-    direction: "incoming",
-    sender: "billing@partner-finance-group.com",
-    recipients:
-      "fin1@company.com, fin2@company.com, fin3@company.com, fin4@company.com",
-    subject: "月度对账单核对（多投信 - 相似度检测中）",
-    action: "sideline",
-    reason: "命中批量群发相似度检测规则，转旁路复检",
-    mailType: "normal",
-    deliveryStatus: "sideline_pending",
-    sourceIp: "170.106.42.18",
-    ipLocation: "新加坡",
-    cluster: "Node 3",
-    attachmentCount: 1,
-    hasQrCode: false,
-    score: 52,
-    basis: ["BEHAVIOR", "批量外发相似度异常检测", "BEHAVIOR-014"],
-  },
-  {
-    tid: "MIC057",
-    time: "2026-06-21 16:10:00",
-    direction: "outgoing",
-    sender: "it-notice@company.com",
-    recipients: "dept1@company.com, dept2@company.com, dept3@company.com",
-    subject: "系统维护通知（多投信 - 投递中止）",
-    action: "deliver",
-    reason: "内容复检未通过，投递队列中主动中止转发",
-    mailType: "normal",
-    deliveryStatus: "cancelled",
-    sourceIp: "10.0.0.22",
-    ipLocation: "中国",
-    cluster: "Node 1",
-    attachmentCount: 0,
-    hasQrCode: false,
-    score: 40,
-    basis: ["ACF", "批量群发内容复检中止投递", "ACF-021"],
-  },
-  {
-    tid: "MIC058",
-    time: "2026-06-22 08:30:00",
-    direction: "incoming",
-    sender: "event-promo@expo-mailer.net",
-    recipients:
-      "mkt1@company.com, mkt2@company.com, mkt3@company.com, mkt4@company.com, mkt5@company.com",
-    subject: "行业展会邀请函（多投信 - 隔离超时自动清理）",
-    action: "quarantine",
-    reason: "隔离后超过保留期限未处理，系统自动清理",
-    mailType: "spam",
-    deliveryStatus: "expired",
-    sourceIp: "185.220.101.44",
-    ipLocation: "荷兰",
-    cluster: "Node 2",
-    attachmentCount: 0,
-    hasQrCode: false,
-    score: 45,
-    basis: ["IPBL", "批量外发IP黑名单-隔离超时自动清理", "IPBL-013"],
-  },
-  {
-    tid: "MIC059",
     time: "2026-06-22 11:50:00",
     direction: "incoming",
     sender: "invoice-support@supplier-verify-group.com",
     recipients:
       "fina@company.com, finb@company.com, proca@company.com, procb@company.com, opsa@company.com, opsb@company.com",
-    subject: "供应商发票变更通知（多投信 - 混合处置：投递/拒收/丢弃）",
+    subject: "供应商发票变更通知（多投信 - 混合处置：投递/丢弃/隔离）",
     action: "quarantine",
-    reason: "混合处置：白名单收件人投递 + AI二次复核拒收 + 恶意附件丢弃",
+    reason: "混合处置：白名单收件人投递 + 恶意附件丢弃 + 行为异常隔离",
     mailType: "phishing",
     deliveryStatus: "partial_delivered",
     sourceIp: "196.245.11.87",
@@ -7330,22 +7226,22 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     mixedBreakdown: [
       { action: "accept", status: "delivered", reason: "发件人在信任白名单，直接投递" },
       { action: "accept", status: "delivered", reason: "发件人在信任白名单，直接投递" },
-      { action: "reject", status: "blocked", reason: "AI二次复核判定为钓鱼，拒收" },
-      { action: "reject", status: "blocked", reason: "AI二次复核判定为钓鱼，拒收" },
+      { action: "discard", status: "discarded", reason: "命中恶意附件哈希黑名单，丢弃" },
       { action: "discard", status: "discarded", reason: "命中恶意附件哈希黑名单，丢弃" },
       { action: "quarantine", status: "quarantined", reason: "行为异常触发隔离规则" },
+      { action: "sideline", status: "delivered", reason: "命中相似度检测规则，转旁路复检后投递" },
     ],
   },
   {
-    tid: "MIC060",
+    tid: "MIC055",
     time: "2026-06-23 15:00:00",
     direction: "incoming",
     sender: "billing-notice@telecom-service-provider.com",
     recipients:
       "user31@company.com, user32@company.com, user33@company.com, user34@company.com, user35@company.com",
-    subject: "话费账单通知（多投信 - 混合处置：投递/退信/隔离）",
+    subject: "话费账单通知（多投信 - 混合处置：投递/丢弃/隔离）",
     action: "quarantine",
-    reason: "混合处置：正常收件人投递 + 邮箱不存在退信 + 敏感附件隔离",
+    reason: "混合处置：正常收件人投递 + 恶意附件丢弃 + 敏感内容隔离",
     mailType: "normal",
     deliveryStatus: "partial_delivered",
     sourceIp: "89.34.22.10",
@@ -7360,7 +7256,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
       { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
       { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
       { action: "accept", status: "delivered", reason: "收件人邮箱状态正常，投递成功" },
-      { action: "reject", status: "rejected", reason: "对方邮箱不存在，退信" },
+      { action: "discard", status: "discarded", reason: "附件命中恶意特征库，丢弃" },
       { action: "quarantine", status: "quarantined", reason: "附件命中敏感内容规则，隔离" },
     ],
   },
@@ -7378,9 +7274,6 @@ function disposalAction(seed: MockDisposalSeed): string {
     deliver: "accept",
     discard: "discard",
     quarantine: "quarantine",
-    // sideline（检测中/旁路复检）：群发邮件日志数据补充新增，与
-    // quarantine/audit 一样是"仍在我方系统内、尚未确定去向"的动作。
-    sideline: "sideline",
     // Aggregate mixed rows still need a scalar fallback in detail-only mock
     // fields; the per-recipient actions are emitted separately below.
     mixed: "accept",
@@ -7393,19 +7286,12 @@ function disposalDelivery(seed: MockDisposalSeed): string | undefined {
       delivered: "delivered",
       delivery_failed: "failed",
       partial_delivered: "partial_delivered",
-      // cancelled（投递中止）：群发邮件日志数据补充新增，区别于从未进入
-      // 投递队列的 discard —— 已进入投递队列后被我方主动中止转发。
-      cancelled: "cancelled",
     } as Record<string, string>
   )[seed.deliveryStatus];
 }
 
 function disposalWorkflow(seed: MockDisposalSeed): string | undefined {
-  if (seed.deliveryStatus === "discarded") return "discarded";
-  // expired（已过期）：群发邮件日志数据补充新增，隔离/待处理邮件超过保留
-  // 期限未被人工处理后系统自动清理的场景。
-  if (seed.deliveryStatus === "expired") return "expired";
-  return undefined;
+  return seed.deliveryStatus === "discarded" ? "discarded" : undefined;
 }
 
 function recipientDisposalStatus(seed: MockDisposalSeed): string {
@@ -7531,7 +7417,7 @@ function disposalBasis(seed: MockDisposalSeed) {
     rule_name: seed.basis[1],
     rule_id: seed.basis[2],
     // disposalBasisActionOverride 只影响这个展示字段（威胁摘要卡「处置依据」
-    // 行的动作徽标），不影响下面 mockMailLog 里真正驱动收件人按钮/派发状态的
+    // 行的动作徽标），不影响下面 mockMailLog 里真正驱动收件人按钮/派发状��的
     // action/deliveryStatus 字段。
     action: seed.disposalBasisActionOverride ?? disposalAction(seed),
     // confidence 供 disposal-basis-config.ts 里 AI-* 策略的 hitDetail() 模板
@@ -7759,9 +7645,6 @@ function displayStatusOf(item: (typeof mockDisposalMailLogs)[number]): string {
   // deleted / rejected_after_review：均已"停在网关"，归并为「已丢弃」。
   if (item.workflow_outcome_summary === "deleted") return "discarded";
   if (item.workflow_outcome_summary === "rejected_after_review") return "discarded";
-  // expired：隔离/待处理邮件超过保留期限未被人工处理，系统自动清理，与
-  // discard（一次性丢弃）区分为独立的终态位置节点。
-  if (item.workflow_outcome_summary === "expired") return "expired";
   if (item.action === "quarantine") return "quarantine_pending";
   if (item.action === "sideline") return "sideline_pending";
   if (item.action === "audit") return "audit_pending";
@@ -7791,7 +7674,7 @@ function displayStatusOf(item: (typeof mockDisposalMailLogs)[number]): string {
 //
 // 处置中心存在两套"动作"词表，历史上从未对齐：
 //   1) 筛选/展示词表 EXECUTION_ACTIONS（deliver/quarantine/review/block/drop/
-//      recall），与真实后端 internal/models/security_overview.go
+//      recall），��真实后端 internal/models/security_overview.go
 //      `AllActions` 一致，是「执行动作」快捷筛选下拉框实际吐给用户、也是
 //      quick-filters.tsx 发给 action 字段的取值。
 //   2) mock 内部生成 item.action / disposition_actions / recipient_dispositions
