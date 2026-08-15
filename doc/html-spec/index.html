@@ -345,7 +345,7 @@
             </div>
           </summary>
           <div class="card-detail">
-            <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独�������页）</p>
+            <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独���������页）</p>
             <p>spec: IP黑白名单需求文档.md</p>
             <p>组件: connection-layer-page.tsx (renderIpFilterConfig)</p>
             <p>v2: 黑/白名�����独立选中、跨页全选、行高亮、删除选中（N）与批量删除确认；<a href="filter-rules-pipeline-ip-filter/layer-7-batch-delete.html">查看可交互层级 7</a></p>
@@ -871,7 +871,7 @@
           </div></summary>
           <div class="card-detail">
             <p>路由: /logs/ai-url-logs（仅传统版形态可见）</p>
-            <p>spec: 无独立 PRD；关联钓鱼邮件智能体与 URL 检测需求</p>
+            <p>spec: 无独立 PRD；关联钓鱼邮件智能体�� URL 检测需求</p>
             <p>组件: ai-url-logs-page.tsx + search-filters + table + detail-modal/detail-content</p>
             <p>子文件: <a href="logs-ai-url-logs/layer-1-detail-modal.html">5-Tab ���箱���判详情弹窗（6 态可交互）</a></p>
           </div>
@@ -1549,7 +1549,7 @@
           <summary>
             <div class="card-summary">
               <span class="chevron"></span>
-              <a class="card-title" href="/html-spec/version/GT-12695.html" target="_blank" rel="noopener noreferrer">GT-12695 · 黑白名单执行动作与规则列表优化（增量变更规格）</a>
+              <a class="card-title" href="/html-spec/version/GT-12695.html" target="_blank" rel="noopener noreferrer">GT-12695 · 黑白名单执行动作与规则列表优化（增量变更���格）</a>
               <span class="badge badge-done">✅</span>
               <span class="card-version-badge">v7+</span>
               <span class="card-generated-at">2026-08-01</span>
@@ -1670,7 +1670,7 @@
         <span class="chevron"></span>
         <span class="l1-icon">🛠️</span>
         <h2>GT-12923【0813】邮件处置中心总优化工单</h2>
-        <span class="l1-stats"><span class="done-count">5</span> 已完成 / 5 总计</span>
+        <span class="l1-stats"><span class="done-count">6</span> 已完成 / 6 总计</span>
       </div>
     </summary>
     <div class="l1-body">
@@ -1681,7 +1681,7 @@
               <span class="chevron"></span>
               <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md" target="_blank" rel="noopener noreferrer">GT-12923 · 邮件处置中心总优化（增量变更规格 · Markdown）</a>
               <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v6</span>
+              <span class="card-version-badge">v7</span>
               <span class="card-generated-at">2026-08-15</span>
             </div>
           </summary>
@@ -1758,6 +1758,23 @@
             <p>变更类型: 功能新增 + 缺陷修正（分组展示逻辑 + 筛选逻辑）· 收录于 GT-12923 文档内的同名二级章节</p>
             <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a></p>
             <p>内含: ① 新增按 `policy_key` 对 mixed 记录 `per_recipient` 分组的模型，"处置依据"列多模块命中时主文案取优先桶摘要 + "等 N 项"，hover 按模块分组展开逐收件人明细 ② 命中当前"处置依据"筛选值的分组在主文案与 Tooltip 展开顺序中优先展示，与 GT-12931/GT-12934 的高亮机制对称但独立实现 ③ 关联修正 mixed 记录在"处置依据"筛选下的漏项缺陷（`disposal_policy_keys` 改为对 `per_recipient` 取交集匹配）</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12965邮件处置中心详情页去掉更多ai判定依据" target="_blank" rel="noopener noreferrer">GT-12965 · 邮件处置中心：详情页，去掉"更多""AI判定依据"</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v7</span>
+              <span class="card-generated-at">2026-08-15</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（同属邮件处置中心模块，深链跳转至本工单文档内的对应章节；作用于详情弹窗/详情页，与其余变更点作用于日志列表页不同）</p>
+            <p>变更类型: 功能移除 · 收录于 GT-12923 文档内的同名二级章节</p>
+            <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（详情·概览与处置层级，即 <a href="email-handling-disposal-center/layer-10-detail-overview-single.html">layer-10-detail-overview-single.html</a>）</p>
+            <p>内含: ① 移除详情页"概览与处置"卡片头部的"更多"下拉按钮（含"标记误报""标记漏报"两项未实现菜单）② 移除"命中特征"与"处置依据"两行之间的"AI判定依据"内联展示行 ③ 四语言 i18n 词表同步清理孤立 key</p>
           </div>
         </details>
       </div>
