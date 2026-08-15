@@ -345,7 +345,7 @@
             </div>
           </summary>
           <div class="card-detail">
-            <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独�����页）</p>
+            <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独�������页）</p>
             <p>spec: IP黑白名单需求文档.md</p>
             <p>组件: connection-layer-page.tsx (renderIpFilterConfig)</p>
             <p>v2: 黑/白名�����独立选中、跨页全选、行高亮、删除选中（N）与批量删除确认；<a href="filter-rules-pipeline-ip-filter/layer-7-batch-delete.html">查看可交互层级 7</a></p>
@@ -1086,7 +1086,7 @@
             <p>路由: /monitor/infrastructure · spec: 未提供 · 多租户租户视角导航隐藏（v2 用户决定：URL 直连也应 403/404 拦截）</p>
             <p>组件: monitor-infrastructure-page.tsx（4 Tab：硬件资源/服务进程/数据库与缓存/存储与备份；Kingbase/Redis × 指标切换）</p>
             <p>子文件: <a href="monitor-infrastructure/layer-1-tab-container.html">服务进程</a> / <a href="monitor-infrastructure/layer-2-tab-database.html">数据库与缓存(双态)</a> / <a href="monitor-infrastructure/layer-3-tab-storage.html">存储与备份</a></p>
-            <p>预览可交互（Tab/库切换）· 形态×角色 5×2 矩阵实��� · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
+            <p>预览可交互（Tab/库切换）· 形态×角色 5×2 矩��实��� · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1670,7 +1670,7 @@
         <span class="chevron"></span>
         <span class="l1-icon">🛠️</span>
         <h2>GT-12923【0813】邮件处置中心总优化工单</h2>
-        <span class="l1-stats"><span class="done-count">4</span> 已完成 / 4 总计</span>
+        <span class="l1-stats"><span class="done-count">5</span> 已完成 / 5 总计</span>
       </div>
     </summary>
     <div class="l1-body">
@@ -1681,8 +1681,8 @@
               <span class="chevron"></span>
               <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md" target="_blank" rel="noopener noreferrer">GT-12923 · 邮件处置中心总优化（增量变更规格 · Markdown）</a>
               <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v3</span>
-              <span class="card-generated-at">2026-08-14</span>
+              <span class="card-version-badge">v6</span>
+              <span class="card-generated-at">2026-08-15</span>
             </div>
           </summary>
           <div class="card-detail">
@@ -1741,6 +1741,23 @@
             <p>变更类型: 缺陷修正（筛选逻辑 + 展示逻辑）· 收录于 GT-12923 文档内的同名二级章节</p>
             <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a></p>
             <p>内含: ① mixed 记录"邮件状态"筛选改为对收件人状态归一化后取交集匹配（OR 语义），修正搜"投递成功"漏搜含已投递收件人的群发邮件 ② 复用 GT-12931 已有的高亮机制，使命中筛选值的收件人分组优先展示为主要类别 Badge，消除"筛选值与展示类别不一致"的表面矛盾 ③ 关联修正收件人状态词表 `pending_review` 的归类空洞</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12935群发邮件多投递信处置依据筛选逻辑以及展示逻辑调整" target="_blank" rel="noopener noreferrer">GT-12935 · 群发邮件/多投递信：处置依据筛选逻辑，以及展示逻辑调整</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v6</span>
+              <span class="card-generated-at">2026-08-15</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（同属邮件处置中心模块，深链跳转至本工单文档内的对应章节）</p>
+            <p>变更类型: 功能新增 + 缺陷修正（分组展示逻辑 + 筛选逻辑）· 收录于 GT-12923 文档内的同名二级章节</p>
+            <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a></p>
+            <p>内含: ① 新增按 `policy_key` 对 mixed 记录 `per_recipient` 分组的模型，"处置依据"列多模块命中时主文案取优先桶摘要 + "等 N 项"，hover 按模块分组展开逐收件人明细 ② 命中当前"处置依据"筛选值的分组在主文案与 Tooltip 展开顺序中优先展示，与 GT-12931/GT-12934 的高亮机制对称但独立实现 ③ 关联修正 mixed 记录在"处置依据"筛选下的漏项缺陷（`disposal_policy_keys` 改为对 `per_recipient` 取交集匹配）</p>
           </div>
         </details>
       </div>
