@@ -108,6 +108,7 @@ function displayScopes(scopes: ContentRuleScope[]): string[] {
   if (scopes.includes('attachment_names')) values.push('attachmentNames');
   if (scopes.includes('attachment_types')) values.push('attachmentTypes');
   if (scopes.includes('urls')) values.push('urls');
+  if (scopes.includes('attachment_hash')) values.push('attachmentHash');
   return values;
 }
 
@@ -185,7 +186,18 @@ export function ContentRulesTable({
       header: t('contentRules.ruleName'),
       cell: ({ row }) => (
         <div className="min-w-[180px] max-w-[280px]">
-          <div className="truncate font-medium">{row.original.rule.name}</div>
+          <div className="flex items-center gap-1.5">
+            <span className="truncate font-medium">{row.original.rule.name}</span>
+            {row.original.resolved?.source === 'email_disposal_center' && (
+              <Badge
+                variant="outline"
+                className="shrink-0 whitespace-nowrap text-[10px] text-muted-foreground"
+                data-testid="content-rule-source-email-disposal-center"
+              >
+                {t('contentRules.sourceEmailDisposalCenter')}
+              </Badge>
+            )}
+          </div>
           <div className="truncate text-xs text-muted-foreground">
             {row.original.resolved?.match_content || row.original.rule.description || '—'}
           </div>

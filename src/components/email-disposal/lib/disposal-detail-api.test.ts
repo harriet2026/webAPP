@@ -23,7 +23,7 @@ describe('disposeByObject', () => {
 });
 
 describe('addUrlRule', () => {
-  test('domain field: page=url_protection, field=urls, operator=contain, value=domain', async () => {
+  test('domain field: page=content_rules, field=urls, operator=contain, value=domain', async () => {
     const requestFn = vi.fn().mockResolvedValue({}) as unknown as ApiRequestFn;
     await addUrlRule('evil.com', 'domain', requestFn, 5000);
 
@@ -32,12 +32,23 @@ describe('addUrlRule', () => {
     expect(url).toContain('/unified-rules');
     expect(opts.method).toBe('POST');
     expect(opts.body).toMatchObject({
-      page: 'url_protection',
+      page: 'content_rules',
       rule_class: 'action',
       stage: 'data',
-      action: 'reject',
+      action: 'quarantine',
       priority: 5000,
-      condition_tree: { type: 'condition', field: 'urls', operator: 'contain', value: 'evil.com' },
+      condition_tree: {
+        type: 'AND',
+        children: [
+          { type: 'condition', field: 'is_outbound', operator: 'eq', value: 'false' },
+          { type: 'condition', field: 'urls', operator: 'contain', value: 'evil.com' },
+        ],
+      },
+      metadata: expect.objectContaining({
+        feature: 'content_rules',
+        scopes: ['urls'],
+        source: 'email_disposal_center',
+      }),
     });
   });
 
@@ -48,13 +59,17 @@ describe('addUrlRule', () => {
     const [, opts] = (requestFn as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(opts.body.priority).toBe(1000);
     expect(opts.body.condition_tree).toEqual({
-      type: 'condition', field: 'urls', operator: 'contain', value: 'https://evil.com/phish',
+      type: 'AND',
+      children: [
+        { type: 'condition', field: 'is_outbound', operator: 'eq', value: 'false' },
+        { type: 'condition', field: 'urls', operator: 'contain', value: 'https://evil.com/phish' },
+      ],
     });
   });
 });
 
 describe('addAttachmentHashRule', () => {
-  test('page=attachment_security, stage=sideline, field=attachment_md5, operator=eq', async () => {
+  test('page=content_rules, stage=sideline, field=attachment_md5, operator=eq', async () => {
     const requestFn = vi.fn().mockResolvedValue({}) as unknown as ApiRequestFn;
     await addAttachmentHashRule('deadbeef', requestFn, 1000);
 
@@ -63,12 +78,23 @@ describe('addAttachmentHashRule', () => {
     expect(url).toContain('/unified-rules');
     expect(opts.method).toBe('POST');
     expect(opts.body).toMatchObject({
-      page: 'attachment_security',
+      page: 'content_rules',
       rule_class: 'action',
       stage: 'sideline',
-      action: 'reject',
+      action: 'quarantine',
       priority: 1000,
-      condition_tree: { type: 'condition', field: 'attachment_md5', operator: 'eq', value: 'deadbeef' },
+      condition_tree: {
+        type: 'AND',
+        children: [
+          { type: 'condition', field: 'is_outbound', operator: 'eq', value: 'false' },
+          { type: 'condition', field: 'attachment_md5', operator: 'eq', value: 'deadbeef' },
+        ],
+      },
+      metadata: expect.objectContaining({
+        feature: 'content_rules',
+        scopes: ['attachment_hash'],
+        source: 'email_disposal_center',
+      }),
     });
   });
 });

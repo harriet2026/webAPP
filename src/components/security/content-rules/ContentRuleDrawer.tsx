@@ -373,7 +373,9 @@ export function ContentRuleDrawer({
     }
   };
 
-  const legacyScopes = draft.scopes.filter((scope) => scope === 'attachment_types' || scope === 'urls');
+  const legacyScopes = draft.scopes.filter(
+    (scope) => scope === 'attachment_types' || scope === 'urls' || scope === 'attachment_hash',
+  );
   const actionLabel = (action: ContentRuleUiAction) => {
     const suffix = action.split('_').map((part) => part[0].toUpperCase() + part.slice(1)).join('');
     return t(`contentRules.action${suffix}` as 'contentRules.actionDeliver');

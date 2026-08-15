@@ -65,6 +65,17 @@ function buildContentMatchNode(data: Pick<ContentRuleFormData, 'match_type' | 'm
   const scopeChildren: RuleNode[] = [];
 
   for (const scope of data.scopes) {
+    // attachment_hash 是精确匹配（field='attachment_md5', operator='eq'），
+    // 与 keyword 的 'contain' / regex 的 'match' 语义不同，即使当前
+    // match_type 是 keyword/regex 也不能套用那两套 switch 分支——否则把哈希
+    // 塞进 'contain' 会导致规则永远命中不了（附件的哈希值不会是"包含"关系）。
+    if (scope === 'attachment_hash') {
+      const value = data.match_content.trim();
+      if (value) {
+        scopeChildren.push({ type: 'condition', field: 'attachment_md5', operator: 'eq', value });
+      }
+      continue;
+    }
     switch (data.match_type) {
       case 'keyword': {
         const keywords = data.match_content.split('|');
@@ -104,6 +115,9 @@ const scopeFields: Record<string, string> = {
   attachment_names: 'attachment_names',
   attachment_types: 'attachment_types',
   urls: 'urls',
+  // attachment_md5 只用于哈希精确匹配（operator='eq'），字段名在这套 scope
+  // 里是唯一的，按字段名反查不需要额外校验 operator。
+  attachment_hash: 'attachment_md5',
 };
 
 export function toContentRuleUiAction(action: ContentRuleAction, markConfig?: MarkConfig): ContentRuleUiAction {

@@ -2211,7 +2211,7 @@
     "batchDisableTitle": "批量停用",
     "batchDisableDescription": "确定批量停用选中的 {count} 个账号？停用后将立即终止其登录会话。",
     "batchDeleteTitle": "批量删除",
-    "batchDeleteDescription": "确定批量删除选中的 {count} 个账号？此操作不可撤销。",
+    "batchDeleteDescription": "确定批量删除选中的 {count} 个账号？此���作不可撤销。",
     "batchSuccess": "批量操���成功",
     "rbac": {
       "searchPlaceholder": "搜索角色名��…",
@@ -3218,7 +3218,7 @@
     },
     "targetResolution": {
       "mail_log_id": "邮件日志 ID",
-      "mail_log_batch": "邮件日志批次",
+      "mail_log_batch": "邮件日志批���",
       "account_identifier": "账号标识",
       "cac_tid": "CAC 簇"
     },
@@ -3525,7 +3525,7 @@
     "reasonHeader": "原因",
     "preview": {
       "title": "当前配置效果",
-      "allUnlimited": "当前规则未设置任何限制条件，建议至少配置一项阈值，否则规则无实际作用。",
+      "allUnlimited": "当前规则未设置任何��制条件，建议至少配置一项阈值，否则规则无实际作用。",
       "whenIP": "当 IP 地��",
       "allIP": "���部 IP",
       "notFilled": "未���写",
@@ -3864,7 +3864,7 @@
     "presetSorbs": "SORBS",
     "presetSorbsTip": "垃圾邮件和开放中继阻止系统",
     "manualQuery": "手动查询",
-    "queryIP": "IP 地址",
+    "queryIP": "IP 地��",
     "queryButton": "查询",
     "queryDomain": "查询域名",
     "dnsResult": "DNS 结果",
@@ -4118,7 +4118,7 @@
     "senderPlaceholder_group": "请选择发件人组",
     "validUntil": "生效结束",
     "currentEffect": "当前配置效果",
-    "configExamples": "配置示例",
+    "configExamples": "配��示例",
     "simulationTest": "模拟测试",
     "simMatch": "匹配成功 - 该规则将对测试数据生效",
     "simNoMatch": "未匹配 - 该规则不会对测试数据生效",
@@ -4389,6 +4389,8 @@
     "applyToTip": "选择需要检查的邮件内容区域",
     "scopeDisplayAttachmentTypes": "附件类型",
     "scopeDisplayUrls": "URL",
+    "scopeDisplayAttachmentHash": "附件哈希",
+    "sourceEmailDisposalCenter": "来源：邮件处置中心",
     "attachmentContentUnavailable": "附件内容匹配仅由旁路扫描器提供，当前编辑器暂不能配置。",
     "legacyScopesPreserved": "此规则保留了 {count} 个简化编辑器未展示的兼容作用域。",
     "headerOnlyTagHint": "标记仅添加邮件头，不会修改邮件主题。",
@@ -4675,7 +4677,7 @@
     "emptyHint": "点击��方按钮创建第一条规则",
     "createNow": "立即创建",
     "createTitle": "新建规则",
-    "editTitle": "编辑规则",
+    "editTitle": "编辑规��",
     "col": {
       "id": "规则ID",
       "name": "规则名称",
@@ -4771,7 +4773,7 @@
       "validUntil": "有效期结束",
       "isActive": "启用",
       "description": "备注",
-      "thresholdA": "阈值A",
+      "thresholdA": "阈��A",
       "thresholdB": "阈值B",
       "orToggle": "���用OR组合条件",
       "timeWindow": "时间窗口",
@@ -5070,7 +5072,7 @@
     },
     "imageDetect": {
       "ocrDetection": "图片OCR检测",
-      "ocrSendHint": "（外发方向建议启用，防截图泄密）",
+      "ocrSendHint": "（外发方向建议启���，防截图泄密）",
       "detectionMode": "检测模式",
       "ocrLimit": "检测数量上限（防止性能耗尽）",
       "ocrLimitDisabledHint": "选择「检测」后可配置",
@@ -5686,7 +5688,7 @@
     "status": "状态",
     "section": "配置节",
     "valueType": "值类型",
-    "overridden": "已覆盖",
+    "overridden": "已���盖",
     "inactive": "已禁用",
     "addOverride": "添加覆盖",
     "editOverride": "编辑覆盖",
@@ -5743,7 +5745,7 @@
       "saveTemplate": "保存为模板",
       "templates": "模板",
       "advancedFilter": "高级筛选",
-      "collapse": "收起",
+      "collapse": "收���",
       "saveCurrent": "保存当前条件",
       "savedTemplates": "已保存模板",
       "deleteTemplate": "删除模板",
@@ -5855,7 +5857,7 @@
       "policyStages": {
         "1": "连接层",
         "2": "身份层",
-        "3": "内容层",
+        "3": "��容层",
         "4": "智能分析层",
         "5": "综合策略层"
       },
@@ -6024,7 +6026,7 @@
       "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
       "releaseAuditHint": "放行与类型改判都会写入审计记录。",
       "recallDescription": "尝试���收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
-      "recallAuditHint": "召回可能受目标邮件系统限制；操作结果与类型改判会写入审计记录。",
+      "recallAuditHint": "召回可能受目标邮件系统限制；操��结果与类型改判会写入审计记录。",
       "similarLimit": "最多支持 10 封样本",
       "similarFound": "找到 {n} 封���似邮件",
       "exportNotImplemented": "导出功能即将推出",
@@ -6809,7 +6811,7 @@
       "valuesHint": "每��一个值",
       "aiGenerateRegex": "AI 生成正则",
       "aiRegexComingSoon": "AI 辅助正则生成即将上线",
-      "thresholdLabel": "阈值",
+      "thresholdLabel": "��值",
       "intentSelectLabel": "意图分类",
       "intentSelectPlaceholder": "请选择意图分类",
       "intentAddLabel": "添加意图",
@@ -7154,7 +7156,7 @@
       },
       "desc_senderRateLimit15": {
         "source": "发信行为管控",
-        "usage": "15分钟内发信频率限制阈值",
+        "usage": "15分钟内发信频率限���阈值",
         "note": "超���阈值触发���则"
       },
       "desc_recipientCount": {
@@ -7228,7 +7230,7 @@
       "mapWildcardHint": "* 表示任意对象（匹配全部键）；如需限定具体对象，请在上方选择。",
       "mapObjectHint": "仅匹配所选��象；选择 * 可匹配任意对象。",
       "inputType": {
-        "text": "文本（每行一个值）",
+        "text": "文本（每行一��值）",
         "number": "数值",
         "select": "枚举选择",
         "group": "群组对象",
@@ -7388,7 +7390,7 @@
       "orGroupTag": "OR 策略��",
       "fullExpressionTitle": "完整表达式",
       "willBeActioned": "邮件将被{action}",
-      "blockResponseCodeSuffix": "（SMTP响应码：{code}）",
+      "blockResponseCodeSuffix": "（SMTP响��码：{code}）",
       "andExecuteAddons": "并执行以下附加策略：",
       "configSummaryTitle": "配置摘要",
       "configSummaryPolicyCol": "策略",
@@ -7951,7 +7953,7 @@
         "bounceRate": "当前方向失败/退信邮件数 ÷ 总数。",
         "avgLatencyMs": "当前方向从接收到完成处理的平均耗时。",
         "sidelineQueue": "当前等待旁路处理的任务数（近似反垃圾队列）。",
-        "latencyP99": "99% 的外发邮件在该耗时内完成；超过 30 秒告警。",
+        "latencyP99": "99% 的外发邮件在该���时内完成；超过 30 秒告警。",
         "outboundQueueBacklog": "基于投递中邮件估算的外发队列积压。",
         "threatRate": "检测到内部威胁的域内邮件占比。",
         "internalThreatCount": "检测到垃圾、钓鱼或病毒的域内邮件数。"
@@ -8334,7 +8336,7 @@
     "description": "邮件系统队列、投递质量与连接会话的准实时监控",
     "tabs": {
       "queue": "队列监控",
-      "delivery": "投递质量",
+      "delivery": "投��质量",
       "connection": "连接会话"
     },
     "selectNode": "选择节点",
@@ -8663,7 +8665,7 @@
       "recipientTagsHint": "群组、部门、个人三者命中任一即满足（OR），按方向自动约束{target}；同时留空表示对所有匹配方向���效。",
       "recipientFilter": "特定收发信人筛选",
       "allRecipients": "全部收发信人",
-      "enabledLabel": "启用该规则",
+      "enabledLabel": "启用该���则",
       "sectionScope": "检测范围",
       "sectionRisk": "风���信号",
       "basicScreen": "基础筛查条件",
@@ -9004,7 +9006,7 @@
     "personForm": {
       "addTitle": "添加保护对象",
       "addDescription": "仅添加的保���对象会纳入显示名仿冒检测���围。请配置该对象的检���与处置策略。",
-      "editTitle": "编辑保护对象",
+      "editTitle": "编辑保护���象",
       "modeSingle": "单个录入",
       "modePaste": "批量粘贴",
       "modeContacts": "从组��架构导入",
@@ -9182,7 +9184,7 @@
       "errBrandName": "品牌名必须 1-30 字符",
       "errKeywords": "关键词最多 20 个",
       "errKeywordLen": "��个关键词最多 30 字符",
-      "errNoDomain": "至少配置一个受保护域名",
+      "errNoDomain": "至少配���一个受保护域名",
       "errEmptyDomain": "保存前请填写或删除空白域名行",
       "errDomainThreshold": "编辑距离阈值必须大于等于 1",
       "save": "保存",
@@ -9389,7 +9391,7 @@
     "falsePositive": {
       "title": "标记为误报",
       "description": "标记后将停止对该邮��执行���回，可选把发件人加入白名单。",
-      "addWhitelist": "同时���发件人加入白名单",
+      "addWhitelist": "同时���发件人加入���名单",
       "detailPlaceholder": "补充说明（可选）",
       "cancel": "取消",
       "submit": "提交",
@@ -10107,7 +10109,7 @@
     },
     "refresh": "刷新",
     "health": {
-      "danger": "检测到 {n} 项紧急事件待处理，请立即查看待办与告警面板",
+      "danger": "检测到 {n} 项紧急事件待处理��请立即查看待办与告警面板",
       "warning": "���测到 {n} 项警告事项����请及时处理",
       "normal": "系统运行正常，{range}已拦截 {n} 封威胁邮件，无待处理告警",
       "error": "系统���态数据加载失败，请刷新后重试"
@@ -10146,7 +10148,7 @@
         "suspicious": "可疑邮件",
         "sensitive": "敏感内���邮件",
         "spoofing": "仿冒邮件",
-        "phishing": "钓鱼邮件",
+        "phishing": "钓鱼邮���",
         "virus": "病毒邮件",
         "account_compromised": "账号沦陷"
       }
@@ -10768,7 +10770,7 @@
     "dkim": {
       "activate_failed": "启用签名密钥失败，请稍后重试",
       "active_key_cannot_delete": "正在使用的签名密钥不能删除，请先启用另一个密钥或停用当前密钥",
-      "algorithm_unsupported": "不支持的签名���法「{value}」，只能是：{allowed}",
+      "algorithm_unsupported": "不支持的签名���法「{value}」，只能是���{allowed}",
       "cross_tenant_manage_denied": "无权管理��他租户的签名密钥",
       "cross_tenant_read_denied": "无权查看其他租户的签名域名",
       "dns_not_verified": "该密钥的 DNS 记录尚未验证通过，请先在域��服务商处添加 TXT 记录并完成验证，���启用它",

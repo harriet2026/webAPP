@@ -3,6 +3,8 @@ import type { ApiRequestFn } from '@/lib/api/client';
 import { API_BASE } from '@/lib/api/client';
 import { getTenantHeader } from '@/lib/api/logs';
 import { createUnifiedRule } from '@/lib/api/unified-rules';
+import { buildConditionTree, CONTENT_RULES_PAGE } from '@/lib/api/content-rules';
+import type { ContentRulesMetadata } from '@/types/content-rules';
 import { bulkDispose } from './disposal-api';
 import type {
   MailLogDetail,
@@ -294,36 +296,45 @@ export async function addSenderFilterRule(
 }
 
 // addUrlRule / addAttachmentHashRule -- EntityDetection (C6/C7) 的域名/URL/
-// 哈希加黑，同样复用统一规则系统的 createUnifiedRule（不新增动作类型，一律
-// action='reject'）。
+// 哈希加黑。原先各自落在独立的 'url_protection' / 'attachment_security'
+// page；本次迁移统一落到 CONTENT_RULES_PAGE（'content_rules'，即"内容规则"
+// 模块），使这三类加黑规则可以在内容规则列表里统一管理（改优先级/启停/改名/
+// 删除/查看生效范围），不再散落在两个不同的详情抽屉里。condition_tree 复用
+// content-rules.ts 的 buildConditionTree，保证结构与"内容规则"手工创建的规则
+// 完全一致（AND[方向节点, 内容匹配节点]），可以在 ContentRuleDrawer 里正常
+// 打开编辑（is_complex=false）。metadata.source='email_disposal_center'
+// 标记规则来源，供 ContentRulesTable 展示"来源：邮件处置中心"徽章，与手工
+// 创建的内容规则区分。
 //
 // 字段映射说明（task-9：已核对 internal/api/field_registry.go +
 // internal/antispam/rule_eval.go，不是照抄 brief 里假设的字面字段名）：
 //
-// - url_protection：evalCtx 里**没有**独立的 "domain" / "url" 字段——milter.go
+// - 域名/URL 加黑：evalCtx 里**没有**独立的 "domain" / "url" 字段——milter.go
 //   在 DATA 阶段把解析出的全部 URL 逗号拼接写入 ctx["urls"]（rule_eval.go 的
 //   stringFields 表 + internal/api/field_registry.go 的 "urls" 条目，
-//   MinStage="data"，无 Pages 限制）。webapp 自己的 54-条件目录
-//   （advanced-filter-rules/catalogue.ts）里 'url' 和 'urlDomain' 两个目录项
-//   也都回落到同一个 field:'urls'（RuleNode.note 字段的注释原话就是
-//   "urls ← url/urlDomain"），用 text 面板做子串匹配。因此域名加黑和 URL加黑
-//   都落在同一个 field='urls'、operator='contain'（rule_eval.go 的真实算子
-//   token 是 "contain"，不是 brief 里写的 "contains" —— 那是另一套系统
-//   MailLogFieldRegistry/SearchOperator 的词汇表，与统一规则条件树算子不是
-//   同一套），差异只在 value：域名加黑传 domain（子串匹配命中该域名下任意
-//   URL），URL加黑传完整 url（子串匹配命中这一条 URL）。
-// - attachment_security：sideline 阶段的 attachment_security 检查把附件 MD5
-//   逗号拼接写入 evalCtx["attachment_md5"]（internal/sideline/final_action.go），
+//   MinStage="data"，无 Pages 限制）。这与"内容规则"本身的 'urls' scope
+//   字段完全同源，因此可以直接迁移，stage 仍是 'data'，与 ContentRulesPage
+//   手工创建规则时硬编码的 stage 一致。用 operator='contain' 做子串匹配，
+//   差异只在 value：域名加黑传 domain（命中该域名下任意 URL），URL加黑传
+//   完整 url（只命中这一条 URL）。
+// - 哈希加黑：sideline 阶段的 attachment_security 检查把附件 MD5 逗号拼接写入
+//   evalCtx["attachment_md5"]（internal/sideline/final_action.go），
 //   field_registry.go 对应条目 MinStage="sideline"、Operators=["eq","ne",
-//   "within"]，用 operator='eq' 精确匹配单个 MD5。
+//   "within"]。**这与"内容规则"模块的固定假设冲突**：ContentRulesPage.tsx
+//   手工创建规则时 stage 硬编码为 'data'，但 attachment_md5 必须在 sideline
+//   阶段才有值——这条规则被创建后必须在 sideline 阶段参与评估，因此这里显式
+//   传 stage='sideline'（而不是套用 ContentRulesPage 的 'data'）。**这依赖
+//   后端 CreateUnifiedRule 对 page='content_rules' 的校验分支放开允许
+//   stage='sideline' + field='attachment_md5' 的组合**（对齐产品决策：新增
+//   content_rules 专属作用域 'attachment_hash'，需要后端同步）；如果后端还
+//   没跟进，这里的创建请求会被 validateConditionNode/pagespec 拒绝
+//   （400），而不是"创建成功但永远不生效"——是预期中的、更安全的失败方式。
 //
-// 两个 page（'url_protection' / 'attachment_security'）都不在
+// 迁移前，'url_protection' / 'attachment_security' 两个 page 都不在
 // internal/api/unified_rules_pagespec.go 的 unifiedPageSpecs 注册表里，走的是
-// CreateUnifiedRule 的生成式（generic）分支：只有 validateConditionNode 校验
-// field/operator/stage，field_registry.go 里 attachment_md5 声明的
-// `Pages:["advanced_rules"]` 只在 page=='advanced_rules' 时由
-// validateAdvancedRulesAllowedFields 强制，对 page='attachment_security' 不
-// 生效——如果未来把这条限制收紧到覆盖所有 page，这里也需要同步跟进。
+// CreateUnifiedRule 的生成式（generic）分支。迁移到 'content_rules' 后校验
+// 分支可能不同（更严格），如遇到 400 需要核对后端 pagespec 是否已支持上述
+// stage/field 组合。
 // disposalRulePriority -- GT-12601：后端 validatePriority（internal/api/
 // unified_rules.go）对 tenant_admin 强制 100-1000 区间，此前这里硬编码 5000
 // 导致租户管理员从详情页做域名/URL/哈希加黑一律 400（"tenant admin priority
@@ -341,16 +352,24 @@ export async function addUrlRule(
   requestFn: ApiRequestFn,
   priority: number,
 ): Promise<void> {
+  const metadata: ContentRulesMetadata = {
+    feature: 'content_rules',
+    match_type: 'keyword',
+    match_content: value,
+    scopes: ['urls'],
+    directions: { receive: { enabled: true, action: 'quarantine' } },
+    source: 'email_disposal_center',
+  };
   await createUnifiedRule(
     {
       name: `${field === 'domain' ? '域名加黑' : 'URL加黑'} ${value}`,
-      page: 'url_protection',
+      page: CONTENT_RULES_PAGE,
       rule_class: 'action',
       stage: 'data',
-      action: 'reject',
+      action: 'quarantine',
       priority,
-      condition_tree: { type: 'condition', field: 'urls', operator: 'contain', value },
-      metadata: { feature: 'url_protection', target: field },
+      condition_tree: buildConditionTree(metadata),
+      metadata,
       is_active: true,
     },
     requestFn,
@@ -362,16 +381,26 @@ export async function addAttachmentHashRule(
   requestFn: ApiRequestFn,
   priority: number,
 ): Promise<void> {
+  const metadata: ContentRulesMetadata = {
+    feature: 'content_rules',
+    match_type: 'keyword',
+    match_content: md5,
+    scopes: ['attachment_hash'],
+    directions: { receive: { enabled: true, action: 'quarantine' } },
+    source: 'email_disposal_center',
+  };
   await createUnifiedRule(
     {
       name: `附件哈希加黑 ${md5}`,
-      page: 'attachment_security',
+      page: CONTENT_RULES_PAGE,
       rule_class: 'action',
+      // 见上方大注释：attachment_md5 只在 sideline 阶段才有值，不能沿用
+      // ContentRulesPage 手工创建规则时的 stage='data'。
       stage: 'sideline',
-      action: 'reject',
+      action: 'quarantine',
       priority,
-      condition_tree: { type: 'condition', field: 'attachment_md5', operator: 'eq', value: md5 },
-      metadata: { feature: 'attachment_security' },
+      condition_tree: buildConditionTree(metadata),
+      metadata,
       is_active: true,
     },
     requestFn,

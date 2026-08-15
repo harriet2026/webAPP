@@ -129,7 +129,7 @@ describe('EntityDetection', () => {
     expect(screen.queryByTestId(`email-disposal-overview-entity-link-${key}-vt-score`)).not.toBeInTheDocument();
   });
 
-  it('clicking 域名加黑 calls requestFn with a POST to /unified-rules, page=url_protection, field=urls', async () => {
+  it('clicking 域名加黑 calls requestFn with a POST to /unified-rules, page=content_rules, field=urls', async () => {
     const user = userEvent.setup();
     const requestFn = vi.fn().mockResolvedValue({}) as never;
     const urls = [{ url: 'https://evil.com/phish', domain: 'evil.com', check_result: 'THREAT', threat_type: 'MALWARE' }];
@@ -142,9 +142,15 @@ describe('EntityDetection', () => {
     const [url, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(url).toContain('/unified-rules');
     expect(opts.method).toBe('POST');
-    expect(opts.body.page).toBe('url_protection');
-    expect(opts.body.action).toBe('reject');
-    expect(opts.body.condition_tree).toEqual({ type: 'condition', field: 'urls', operator: 'contain', value: 'evil.com' });
+    expect(opts.body.page).toBe('content_rules');
+    expect(opts.body.action).toBe('quarantine');
+    expect(opts.body.condition_tree).toEqual({
+      type: 'AND',
+      children: [
+        { type: 'condition', field: 'is_outbound', operator: 'eq', value: 'false' },
+        { type: 'condition', field: 'urls', operator: 'contain', value: 'evil.com' },
+      ],
+    });
   });
 
   it('clicking URL加黑 sends the full URL as the condition value', async () => {
@@ -158,7 +164,13 @@ describe('EntityDetection', () => {
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
     const [, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(opts.body.condition_tree).toEqual({ type: 'condition', field: 'urls', operator: 'contain', value: 'https://evil.com/phish' });
+    expect(opts.body.condition_tree).toEqual({
+      type: 'AND',
+      children: [
+        { type: 'condition', field: 'is_outbound', operator: 'eq', value: 'false' },
+        { type: 'condition', field: 'urls', operator: 'contain', value: 'https://evil.com/phish' },
+      ],
+    });
   });
 
   // GT-12601 防回归：tenant_admin 的加黑请求 priority 必须落在后端
@@ -231,7 +243,7 @@ describe('EntityDetection', () => {
     expect(onDownload.mock.calls[0][0]).toMatchObject({ md5sum: 'deadbeef', filename: 'report.pdf' });
   });
 
-  it('clicking 哈希加黑 calls requestFn with page=attachment_security, field=attachment_md5, operator=eq', async () => {
+  it('clicking 哈希加黑 calls requestFn with page=content_rules, field=attachment_md5, operator=eq', async () => {
     const user = userEvent.setup();
     const requestFn = vi.fn().mockResolvedValue({}) as never;
     const attachments = [{ filename: 'report.pdf', size: 2048, md5sum: 'deadbeef', content_type: 'application/pdf', inline: false, content_length: 2048 }];
@@ -242,9 +254,16 @@ describe('EntityDetection', () => {
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
     const [url, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(url).toContain('/unified-rules');
-    expect(opts.body.page).toBe('attachment_security');
+    expect(opts.body.page).toBe('content_rules');
     expect(opts.body.stage).toBe('sideline');
-    expect(opts.body.condition_tree).toEqual({ type: 'condition', field: 'attachment_md5', operator: 'eq', value: 'deadbeef' });
+    expect(opts.body.action).toBe('quarantine');
+    expect(opts.body.condition_tree).toEqual({
+      type: 'AND',
+      children: [
+        { type: 'condition', field: 'is_outbound', operator: 'eq', value: 'false' },
+        { type: 'condition', field: 'attachment_md5', operator: 'eq', value: 'deadbeef' },
+      ],
+    });
   });
 
   it('shows an AV verdict badge when scan_results has a matching virus_name', async () => {
