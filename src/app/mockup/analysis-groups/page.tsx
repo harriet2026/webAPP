@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Info,
+  Layers,
   ShieldAlert,
   ShieldCheck,
   ShieldX,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 /**
@@ -133,8 +135,19 @@ export default function AnalysisGroupsMockupPage() {
           </div>
         </div>
 
-        {/* 卡片容器：对齐详情弹窗“安全分析” Tab 的卡片间距 */}
+        {/* Tier 2：概览（Overview）Tab 内的「处置依据」常显行——ThreatSummaryCard
+            A12。这一行始终可见（不需要点进"安全分析" Tab），群发场景下必须能
+            体现"这条邮件的处置依据不止一份"，同时不能把 Overview 卡片撑成
+            安全分析 Tab 的复刻版——所以只做"主依据 + N 项徽标 + 点击展开
+            Popover 摘要"，完整明细仍导向"安全分析" Tab。 */}
+        <div className="rounded-lg border bg-muted/30 p-4" data-testid="mockup-overview-threat-card">
+          <div className="mb-2 text-xs font-medium text-muted-foreground">概览（Overview）Tab · 处置依据常显行（A12）</div>
+          <OverviewDisposalBasisRow groups={groups} isMulti={isMulti} />
+        </div>
+
+        {/* 卡片容器：对齐详情弹窗"安全分析" Tab 的卡片间距 */}
         <div className="space-y-5 rounded-lg border bg-background p-5">
+          <div className="text-xs font-medium text-muted-foreground">安全分析（Analysis）Tab · 完整明细展开</div>
           {/* 1. 群发结果摘要行——仅分组数 > 1 时出现 */}
           {isMulti && (
             <div
@@ -275,6 +288,85 @@ export default function AnalysisGroupsMockupPage() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// OverviewDisposalBasisRow —— Overview「处置依据」常显行（对应生产代码
+// ThreatSummaryCard 的 A12 区块）的群发场景改造草案。
+// 现状问题：生产代码这一行只读 detail.disposal_basis 顶层单一对象，群发多
+// 依据（disposal_basis.per_recipient）完全被忽略——运营看到的"处置依据"
+// 可能只是 5 个收件人里随便一个人的依据，跟其他 4 人命中的规则完全不一致
+// 却毫无提示。
+// 这里复用列表页"处置依据"列已经落地的分组心智（groupRecipientBasisByPolicy
+// + pickPrimaryBasisGroup + formatMultiBasisListReason，见
+// lib/disposal-basis-config.ts）：单依据=现状不变的一行；多依据=主依据 +
+// 「+N 项」徽标，点击徽标弹出 Popover 逐条列出"收件人 — 模块「规则」— 动作"，
+// 而不是把 Overview 卡片本身撑大。完整时间线/分阶段明细仍在「安全分析」
+// Tab（Tier 3）。
+function OverviewDisposalBasisRow({ groups, isMulti }: { groups: RecipientGroup[]; isMulti: boolean }) {
+  const primary = groups[0];
+  const primaryHit = primary.stage3Hit ?? primary.stage5Hit;
+  const extraCount = groups.length - 1;
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-sm" data-testid="mockup-overview-disposal-basis">
+      <ShieldAlert className="h-4 w-4 shrink-0 text-orange-600" />
+      <span className="shrink-0 text-muted-foreground">处置依据：</span>
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+      <span className="font-medium text-foreground">
+        {primaryHit ? primaryHit.module : '默认策略'}
+        {primaryHit && <span className="font-normal text-muted-foreground">「{primaryHit.rule}」</span>}
+      </span>
+      <span className={cn('rounded px-2 py-0.5 text-xs font-medium', ACTION_BADGE_STYLE[primary.action])}>
+        {primary.action}
+      </span>
+
+      {isMulti && extraCount > 0 && (
+        <Popover>
+          <PopoverTrigger
+            render={
+              <button
+                type="button"
+                className="flex items-center gap-1 rounded-full border border-violet-300 bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700 transition-colors hover:bg-violet-200"
+                data-testid="mockup-overview-disposal-basis-more"
+              />
+            }
+          >
+            <Layers className="h-3 w-3" />
+            {`+${extraCount} 项`}
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-80">
+            <div className="mb-1.5 text-xs font-medium text-muted-foreground">
+              该邮件命中 {groups.length} 类处置依据（不同收件人结果不同）
+            </div>
+            <div className="space-y-1.5">
+              {groups.map((g) => {
+                const hit = g.stage3Hit ?? g.stage5Hit;
+                return (
+                  <div key={g.id} className="rounded-md border bg-muted/30 p-2 text-xs">
+                    <div className="mb-1 flex items-center gap-1.5 text-muted-foreground">
+                      <Users className="h-3 w-3" />
+                      {g.recipients.join('、')}（{g.recipients.length}人）
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="min-w-0 truncate font-medium text-foreground">
+                        {hit ? `${hit.module}「${hit.rule}」` : '默认策略'}
+                      </span>
+                      <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium', ACTION_BADGE_STYLE[g.action])}>
+                        {g.action}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-2 border-t pt-2 text-xs text-primary">查看依据详情 → 跳转「安全分析」Tab 完整明细</div>
+          </PopoverContent>
+        </Popover>
+      )}
+
+      {!isMulti && <span className="ml-auto text-xs text-primary">查看依据详情 →</span>}
     </div>
   );
 }
