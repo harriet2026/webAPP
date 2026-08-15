@@ -1,8 +1,9 @@
 'use client';
 
-// 头部处置按钮组 SenderActions（发信人级）—— 概览模块「处置」区的顶部三个
-// 按钮：发信人加黑（E1）/ 发信人加白（E2）/ 更多（E7），以及非单收件人场景下的
-// A6 多投提示。单收件人的投递/召回/丢弃/通知按钮不在本组件范围内，由 Task 11b
+// 头部处置按钮组 SenderActions（发信人级）—— 概览模块「处置」区的顶部两个
+// 按钮：发信人加黑（E1）/ 发信人加白（E2），以及非单收件人场景下的
+// A6 多投提示。「更多」（E7）按钮已按需求移除。单收件人的投递/召回/丢弃/
+// 通知按钮不在本组件范围内，由 Task 11b
 // 的 sections/overview/single-recipient-actions.tsx（与 RecipientStatus 共用
 // useRecipientDisposition dispatch hook）承载，由 ThreatSummaryCard 在本组件
 // 旁边一起渲染（本组件只暴露 isSingleRecipient 供调用方判断是否还需渲染 A6
@@ -12,7 +13,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Info, Loader2, MoreHorizontal, UserMinus, UserPlus } from 'lucide-react';
+import { Info, Loader2, UserMinus, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
@@ -26,12 +27,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import type { ApiRequestFn } from '@/lib/api/client';
 import { addSenderFilterRule, disposalRulePriority } from '../../lib/disposal-detail-api';
 import { useAuth } from '@/contexts/auth-context';
@@ -111,10 +106,6 @@ export function SenderActions({
     }
   }
 
-  function notImplemented() {
-    toast.info(t('notImplementedToast'));
-  }
-
   const showOverlay = blacklistOpen || whitelistOpen;
 
   return (
@@ -144,30 +135,6 @@ export function SenderActions({
         <UserPlus className="mr-1 h-3.5 w-3.5" />
         {t('whitelist')}
       </Button>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={readOnly}
-              data-testid="email-disposal-overview-action-more"
-            />
-          }
-        >
-          <MoreHorizontal className="mr-1 h-3.5 w-3.5" />
-          {t('more')}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={notImplemented} data-testid="email-disposal-overview-action-more-mark-fp">
-            {t('menu.markFalsePositive')}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={notImplemented} data-testid="email-disposal-overview-action-more-mark-fn">
-            {t('menu.markFalseNegative')}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
 
       {!isSingleRecipient && (
         <div

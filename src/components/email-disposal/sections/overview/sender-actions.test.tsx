@@ -47,11 +47,11 @@ beforeEach(() => {
 });
 
 describe('SenderActions', () => {
-  it('renders the blacklist / whitelist / more buttons', () => {
+  it('renders the blacklist / whitelist buttons (更多 removed)', () => {
     render(<SenderActions {...baseProps()} />);
     expect(screen.getByTestId('email-disposal-overview-action-blacklist')).toBeInTheDocument();
     expect(screen.getByTestId('email-disposal-overview-action-whitelist')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-overview-action-more')).toBeInTheDocument();
+    expect(screen.queryByTestId('email-disposal-overview-action-more')).not.toBeInTheDocument();
   });
 
   it('renders the multi-recipient hint when isSingleRecipient is false', () => {
@@ -142,22 +142,9 @@ describe('SenderActions', () => {
     );
   });
 
-  it('renders the E7 more menu with only the mark-fp/mark-fn items (export/investigation removed)', async () => {
-    const user = userEvent.setup();
-    render(<SenderActions {...baseProps()} />);
-    await user.click(screen.getByTestId('email-disposal-overview-action-more'));
-
-    expect(await screen.findByTestId('email-disposal-overview-action-more-mark-fp')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-overview-action-more-mark-fn')).toBeInTheDocument();
-    expect(screen.queryByTestId('email-disposal-overview-action-more-export-eml')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('email-disposal-overview-action-more-export-pdf')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('email-disposal-overview-action-more-investigate')).not.toBeInTheDocument();
-  });
-
-  it('disables the blacklist/whitelist/more buttons when readOnly', () => {
+  it('disables the blacklist/whitelist buttons when readOnly', () => {
     render(<SenderActions {...baseProps({ readOnly: true })} />);
     expect(screen.getByTestId('email-disposal-overview-action-blacklist')).toBeDisabled();
     expect(screen.getByTestId('email-disposal-overview-action-whitelist')).toBeDisabled();
-    expect(screen.getByTestId('email-disposal-overview-action-more')).toBeDisabled();
   });
 });

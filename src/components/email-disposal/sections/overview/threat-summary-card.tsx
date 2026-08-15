@@ -10,16 +10,14 @@
 //   Row2 命中特征（A7/A8/A9/A10，inline label）-- SPF/DKIM/DMARC + 首次出现 +
 //        域名年龄（deriveDomainAge，值缺失/不够新时不渲染，后端暂无
 //        whois/RDAP 数据时优雅降级）+ 紧急
-//   Row3 AI判定依据（A11 restructure）-- 短判定文本（formatHitDetail /
-//        cac_result.description）内联可见（demo 无独立的 SSE 深度推理小节，
-//        这里与 demo 对齐：仅此一行）
+//   Row3（原 AI判定依据 / A11 restructure）已按需求移除，卡片内不再渲染该行。
 //   Row4 处置依据（A12，action 本地化，修复 G4：此前 getActionLabel 对
 //        disposal_basis.action==="audit" 等值落回原始英文字符串）-- 阶段色点
 //        + 模块「规则名」+ 动作徽标 + 查看依据详情 链接，同一行内联展示
 
 import { useLocale, useTranslations } from 'next-intl';
 import {
-  AlertTriangle, CheckCircle, Info, Pencil, ShieldAlert, Sparkles, XCircle, ArrowRight,
+  AlertTriangle, CheckCircle, Info, Pencil, ShieldAlert, XCircle, ArrowRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
@@ -32,7 +30,7 @@ import {
   stripDetailPrefix, isNewSender, deriveConfidence, deriveHitSource, isSensitiveUrgent, deriveDomainAge,
 } from '../../lib/detail-helpers';
 import {
-  getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor, formatHitDetail, isStage1Policy, type DisposalLang,
+  getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor, isStage1Policy, type DisposalLang,
 } from '../../lib/disposal-basis-config';
 import { useProductForm } from '@/contexts/product-form-context';
 import { SenderActions } from './sender-actions';
@@ -223,35 +221,8 @@ export function ThreatSummaryCard({
   // 特征，否则不渲染（后端暂无 whois/RDAP 数据，真实环境下这个字段本就缺席）。
   const domainAge = deriveDomainAge(detail);
 
-  // AI判定依据（inline，A11 restructure）：短判定文本默认可见，来源优先取
-  // disposal_basis 经统一规则字典渲染出的「命中」叙述（formatHitDetail，与
-  // analysis-section「处置依据」区块用的是同一份事实源，因此这里的文案与
-  // 下方安全分析里的「命中」行天然一致，不会出现两处对不上的判定依据），
-  // 缺失时退回 cac_result.description。完整 SSE 深度推理仍保留在下方可展开
-  // 区块（aiExpanded），不受这行是否有内容影响。
+  // 处置依据（A12）行的阶段色点仍需要 policy_key 对应的 stage 元信息。
   const stagePolicyMeta = detail.disposal_basis?.policy_key ? getPolicyMeta(detail.disposal_basis.policy_key) : undefined;
-  // 真实环境下，很多经 AI 智能体研判（旁路 sideline）的邮件没有 disposal_basis
-  // /cac_result（这两个字段来自规则命中链路），但 phish_agent_check 里带有智能体
-  // 自己的结论摘要（summary，如 "credential harvesting page detected"）。此时应
-  // 把这条真实结论作为「AI判定依据」内联显示，而不是让这行落空、只剩下方需手动
-  // 「生成 AI 推理」的 SSE 按钮——否则真实态的钓鱼邮件看起来比 demo「缺内容」。
-  const phishAgentInline = detail.phish_agent_check?.checked
-    ? (detail.phish_agent_check.summary || '')
-    : '';
-  // GT-12578：这一行的**标签必须跟着来源走**。此前它固定写「AI判定依据」，
-  // 而 fallback 链里的 cac_result.description 来自外部 CAC 反垃圾云查服务
-  // （internal/cac/client.go 的 CAC_PROT_DESC，典型值 "Check by predict
-  // engine"），与我们的 AI 智能体（phish_agent_check）无关——给云查的话贴 AI
-  // 标签是误标。同时把真实的智能体结论排到云查之前：两者都存在时应该显示
-  // 智能体自己的结论，而不是云查文案。
-  const inlineVerdict: { text: string; labelKey: 'aiJudgmentBasis' | 'cloudCheckBasis' } | null =
-    (detail.disposal_basis?.policy_key && formatHitDetail(detail.disposal_basis, disposalLang))
-      ? { text: formatHitDetail(detail.disposal_basis, disposalLang), labelKey: 'aiJudgmentBasis' }
-      : phishAgentInline
-        ? { text: phishAgentInline, labelKey: 'aiJudgmentBasis' }
-        : detail.cac_result?.description
-          ? { text: detail.cac_result.description, labelKey: 'cloudCheckBasis' }
-          : null;
 
   return (
     <div
@@ -299,8 +270,8 @@ export function ThreatSummaryCard({
 
         <div className="flex flex-wrap items-center gap-2">
           {/* G1 (v2 html_spec §②): header button order is dispose-actions
-              FIRST (投递·隔离·阻断·丢弃), THEN sender/more (发信人加黑/加白/
-              更多) -- 隔离/阻断 stay omitted per spec §9. Task 11b:
+              FIRST (投递·隔离·阻断·丢弃), THEN sender actions (发信人加黑/加白，
+              「更多」按钮已按需求移除) -- 隔离/阻断 stay omitted per spec §9. Task 11b:
               single-recipient deliver/discard/recall/notify buttons reuse
               the SAME dispatch hook as the multi-recipient matrix
               (RecipientStatus). Renders nothing for a multi-recipient
@@ -338,17 +309,6 @@ export function ThreatSummaryCard({
         {domainAge !== undefined && <DomainAgeBadge days={domainAge} t={t} />}
         {isSensitiveUrgent(detail) && <UrgentBadge t={t} />}
       </div>
-
-      {/* Row 3: AI判定依据（A11 restructure）-- 短判定文本内联展示，来源见
-          上方 aiInlineText 注释。demo 无独立的 SSE 深度推理小节，此处与 demo
-          对齐：仅此一行，不再有可展开的「AI 深度推理」区块。 */}
-      {inlineVerdict && (
-        <div className="flex items-start gap-2 border-t pt-3 text-sm">
-          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-purple-600" />
-          <span className="shrink-0 font-semibold text-muted-foreground">{t(inlineVerdict.labelKey)}：</span>
-          <p className="flex-1 text-muted-foreground">{inlineVerdict.text}</p>
-        </div>
-      )}
 
       {/* Row 4: 处置依据（A12）-- 现在是卡片内的一行内联展示（此前是卡片内
           另起一个独立橙色边框/背景的子块，视觉上像"卡中卡"），阶段色点
