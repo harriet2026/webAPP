@@ -1655,7 +1655,7 @@
     "noItems": "无旁路邮件",
     "statusPending": "待处理",
     "statusProcessing": "处理中",
-    "statusQuarantined": "已隔���",
+    "statusQuarantined": "已隔�����",
     "statusFailed": "失败",
     "statusReinjected": "已重新��入",
     "statusReleasedPending": "已放行待复检",
@@ -1771,7 +1771,7 @@
       "rules": "规则",
       "detection": "检测设置",
       "content": "内容",
-      "result": "结果",
+      "result": "��果",
       "delivery": "投递",
       "tenant": "租户",
       "meta": "元数据",
@@ -2454,7 +2454,7 @@
       "LOCAL": "本地"
     },
     "scenes": {
-      "userspace": "用户空间认���",
+      "userspace": "用户���间认���",
       "smtpsend": "SMTP 发��认证",
       "mailsync": "邮件����步代理"
     },
@@ -2835,7 +2835,7 @@
     "eyebrow": "proxysvr"
   },
   "advancedFilter": {
-    "title": "高级搜索",
+    "title": "高级���索",
     "conditionGroup": "搜索条件组",
     "match": "满足条��",
     "all": "所有条件",
@@ -3830,7 +3830,7 @@
     "reject": "拒绝",
     "bulkApprove": "批量放行",
     "bulkReject": "批量拒绝",
-    "comment": "审核意见",
+    "comment": "审���意见",
     "commentPlaceholder": "请输入��核意见...",
     "approveConfirm": "确认放行此邮件？",
     "rejectConfirm": "确认拒绝此邮件���",
@@ -3910,7 +3910,7 @@
     "serverTipGeneric": "实时黑名单查询服务器，用于检测发信IP是否在垃圾邮件黑名单中",
     "serverTipZenSpamhaus": "Spamhaus综合黑名单，包含SBL、XBL、PBL等多个子列表，覆盖范围广",
     "serverTipBlSpamcop": "SpamCop用户举报黑名单，基于用户举报的垃圾邮件来源IP",
-    "serverTipBarracuda": "Barracuda实时黑名单，由Barracuda安全网络维护",
+    "serverTipBarracuda": "Barracuda实时黑名单，由Barracuda安全���络维护",
     "actionRejectTip": "立即拒绝连接，返回5xx错误。适用于高风险场景，可能误拦合法邮件",
     "actionQuarantineTip": "将邮件放入隔离队列，等待管理员审核。平衡安全与可用性",
     "actionReviewTip": "邮件进入人工审核队列，等待管理员决策。适用于需要人工判断的场景",
@@ -4424,7 +4424,7 @@
   },
   "authSpoofing": {
     "title": "认证仿冒检测",
-    "description": "检测伪造发件人和认证仿冒，包括SPF/DKIM/DMARC/PTR验证和显示名仿冒检测",
+    "description": "检测伪造发件人和认证仿冒，包括SPF/DKIM/DMARC/PTR验证和显示名仿冒检��",
     "save": "保存",
     "saveSuccess": "保存���功",
     "saveFailed": "保存失败",
@@ -4518,7 +4518,7 @@
       "dmarc_query_failDesc": "DNS查询DMARC记录时发生错误（超时/SERVFAIL）",
       "ptr_noptr": "记录不存在",
       "ptr_noptrDesc": "发信IP无PTR反向解析记录",
-      "ptr_nomatch": "与A记录不匹配",
+      "ptr_nomatch": "与A记录��匹配",
       "ptr_nomatchDesc": "PTR反查的A记录不指向原IP",
       "ptr_ehlo_mismatch": "与EHLO不匹配",
       "ptr_ehlo_mismatchDesc": "PTR记��与SMTP EHLO/HELO不一致"
@@ -5134,7 +5134,7 @@
     "encrypted": {
       "detectPolicy": "检测策略",
       "mode_none": "不检测",
-      "mode_deep": "深度检测（尝试解密并扫描内�����）",
+      "mode_deep": "深���检测（尝试解密并扫描内�����）",
       "decryptFailAction": "���密失败处置",
       "receiveDefault": "收信方向默认：继续流水线",
       "advancedOptions": "高级选项",
@@ -5435,7 +5435,7 @@
       "title": "标记投递配置",
       "deliveryTarget": "投递目标",
       "targetInbox": "收件箱（仅标记）",
-      "targetSpamFolder": "垃圾邮件文件夹",
+      "targetSpamFolder": "垃���邮件文件夹",
       "subjectMark": "主题���记",
       "bodyMark": "正文标记",
       "markTextPlaceholder": "标记文案",
@@ -6026,7 +6026,7 @@
       "recallDescription": "尝试从收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
       "recallAuditHint": "召回可能受目标邮件系统限制；操作结果与类型改判会写入审计记录。",
       "similarLimit": "最多支持 10 封样本",
-      "similarFound": "找到 {n} 封相似邮件",
+      "similarFound": "找到 {n} 封���似邮件",
       "exportNotImplemented": "导出功能即将推出",
       "partialResult": "{succeeded} 封处置成功，{failed} 封失败，{notApplicable} 封不适用",
       "allSucceeded": "{n} 封处置成功",
@@ -6248,14 +6248,14 @@
           "linksTab": "链接 ({n})",
           "attachmentsTab": "附件 ({n})",
           "globalHint": "当前实体处置将作用于全局策略，影响所有收件人。",
-          "noLinks": "未检��到链接",
+          "noLinks": "未检测到链接",
           "noAttachments": "未检测到附件",
           "blacklistDomain": "域名加黑",
           "blacklistUrl": "URL加黑",
           "blacklistHash": "哈希加黑",
           "download": "下载",
           "ruleSuccess": "已加入黑名单规则",
-          "ruleFailed": "加��黑名单规则失败",
+          "ruleFailed": "加入黑名单规则失败",
           "vtScore": "VirusTotal检测：{score}",
           "title": "内容实体检测与处置"
         },
@@ -6397,7 +6397,7 @@
         "attIndex": "序号",
         "filename": "附件名",
         "contentType": "文件类型",
-        "size": "大���",
+        "size": "大小",
         "encrypted": "是否加密",
         "containsQr": "含二维码",
         "virusScan": "病毒检测",
@@ -6406,10 +6406,10 @@
         "virus": {
           "detected": "检出病毒",
           "clean": "安全",
-          "error": "检测���败"
+          "error": "检测失败"
         },
         "disposalBasis": "处置依据",
-        "module": "���略模块",
+        "module": "策略模块",
         "ruleName": "规则名",
         "ruleId": "规则ID",
         "hitDetail": "命中详情",
@@ -6418,7 +6418,7 @@
         "viewPolicyConfigTitle": "前往策略配置页",
         "platformPolicyModule": "平台管控策略",
         "platformPolicyRuleName": "平台统一管控",
-        "platformPolicyHitDetail": "该邮件由平台连接层策略拦截���如需了解详情请联系平台管理员",
+        "platformPolicyHitDetail": "该邮件由平台连接层策略拦截，如需了解详情请联系平台管理员",
         "platformPolicyListReason": "平台管控策略拦截"
       },
       "delivery": {
@@ -6431,7 +6431,7 @@
           "success": "投递成功",
           "failed": "投递失败",
           "delivering": "投递中",
-          "pending": "待��递"
+          "pending": "待投递"
         }
       },
       "mailType": {
@@ -7156,7 +7156,7 @@
       "desc_senderRateLimit15": {
         "source": "发信行为管控",
         "usage": "15分钟内发信频率限制阈值",
-        "note": "超过阈值触发规则"
+        "note": "超过阈值触发���则"
       },
       "desc_recipientCount": {
         "source": "邮件收信人解析",
@@ -7862,7 +7862,7 @@
       "noData": "暂无数据",
       "loading": "加载中…"
     },
-    "normalHiddenHint": "正常邮件默认隐藏，避免其量级压制威胁曲线，可点击图例展开",
+    "normalHiddenHint": "正常邮件默认隐藏，避免其量级压制威胁曲线，可点���图例展开",
     "deliveryResults": {
       "delivered": "已投递",
       "success_rate": "投递成功率",
@@ -8666,7 +8666,7 @@
       "allRecipients": "全部收发信人",
       "enabledLabel": "启用该规则",
       "sectionScope": "检测范围",
-      "sectionRisk": "风险信号",
+      "sectionRisk": "风���信号",
       "basicScreen": "基础筛查条件",
       "noBasicScreen": "无基础筛查条件",
       "requireUrl": "邮件包含 URL",
@@ -10109,7 +10109,7 @@
     "refresh": "刷新",
     "health": {
       "danger": "检测到 {n} 项紧急事件待处理，请立即查看待办与告警面板",
-      "warning": "检测到 {n} 项警告事项���请及时处理",
+      "warning": "检测到 {n} 项警告事项����请及时处理",
       "normal": "系统运行正常，{range}已拦截 {n} 封威胁邮件，无待处理告警",
       "error": "系统���态数据加载失败，请刷新后重试"
     },
@@ -10475,7 +10475,7 @@
   "portalBlacklist": {
     "loading": "加载中...",
     "senderLabel": "发件人",
-    "expiredTitle": "链接已过期或无效",
+    "expiredTitle": "���接已过期或无效",
     "expiredDesc": "请联系管理员获取��的链接。",
     "errorTitle": "操作失败",
     "errorDesc": "请稍后重试或联系管���员。",

@@ -6166,8 +6166,6 @@
         "urgentTooltip": "Email hit sensitive/urgent keywords",
         "domainAge": "Domain age {n}d",
         "domainAgeTooltip": "The sender domain was registered only {n} days ago -- newly-registered domains are a common phishing/spoofing signal",
-        "aiJudgmentBasis": "AI Judgment Basis",
-        "cloudCheckBasis": "Cloud check basis",
         "recipientStatus": {
           "title": "Recipient Status",
           "header": "Recipient Status ({n})",
@@ -6224,14 +6222,11 @@
         "senderActions": {
           "blacklist": "Blacklist Sender",
           "whitelist": "Whitelist Sender",
-          "more": "More",
           "recipientHint": "Deliver, quarantine and other per-recipient actions are available in the recipient matrix below",
           "notImplementedToast": "Not implemented yet",
           "menu": {
             "exportEml": "Export EML",
             "exportPdf": "Export PDF Report",
-            "markFalsePositive": "Mark as False Positive",
-            "markFalseNegative": "Mark as False Negative",
             "addToInvestigation": "Add to Investigation"
           },
           "blacklistDialog": {
@@ -7613,7 +7608,7 @@
       "ed25519": "Ed25519"
     },
     "dnsStatus": {
-      "unverified": "⚠ Unverified",
+      "unverified": "�� Unverified",
       "verified": "✅ Verified",
       "mismatch": "Mismatch",
       "not_found": "Not found",
