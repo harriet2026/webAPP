@@ -208,7 +208,7 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
           <ChevronDown className={`ml-1 h-3 w-3 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${expanded ? 'rotate-180' : ''}`} />
         </Button>
 
-        {/* B7 展开完整信息详情：邮件头信息（GT-12967 起替换原「身份验证详情」/
+        {/* B7 展开完整信息详情：邮件头信息（GT-12966 起替换原「身份验证详情」/
             「网络特征」两个模块——按真实邮件头（RFC 5322）字段顺序 From/To/
             Subject/Date/Message-ID/Return-Path/Reply-To/X-Mailer 拼接为等宽
             信头格式文本。后端目前未落地完整原始信头字符串（无 Received 链、

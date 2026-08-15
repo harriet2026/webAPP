@@ -162,10 +162,10 @@ describe('SendReceiveContextCard', () => {
     expect(row.textContent).toContain('20.0 KB');
   });
 
-  // GT-12967: B7 原「身份验证详情」/「网络特征」两个模块整体移除，改为按
+  // GT-12966: B7 原「身份验证详情」/「网络特征」两个模块整体移除，改为按
   // From/To/Subject/Date/Message-ID/Return-Path/Reply-To/X-Mailer 顺序拼接
   // 的「邮件头信息」等宽文本块；不应再出现身份验证详情标题、PTR/ASN/TLS。
-  it('expands to show 邮件头信息 (From/To/Subject/Date/Message-ID/Return-Path/Reply-To/X-Mailer) and NOT 身份验证详情/网络特征/PTR/ASN/TLS (B6/B7, GT-12967)', () => {
+  it('expands to show 邮件头信息 (From/To/Subject/Date/Message-ID/Return-Path/Reply-To/X-Mailer) and NOT 身份验证详情/网络特征/PTR/ASN/TLS (B6/B7, GT-12966)', () => {
     renderCard(baseDetail());
     expect(screen.queryByTestId('email-disposal-overview-context-fullinfo')).not.toBeInTheDocument();
 
