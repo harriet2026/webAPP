@@ -345,7 +345,7 @@
             </div>
           </summary>
           <div class="card-detail">
-            <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独�����������页）</p>
+            <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独�������������页）</p>
             <p>spec: IP黑白名单需求文档.md</p>
             <p>组件: connection-layer-page.tsx (renderIpFilterConfig)</p>
             <p>v2: 黑/白名�����独立选中、跨页全选、行高亮、删除选中（N）与批量删除确认；<a href="filter-rules-pipeline-ip-filter/layer-7-batch-delete.html">查看可交互层级 7</a></p>
@@ -871,7 +871,7 @@
           </div></summary>
           <div class="card-detail">
             <p>路由: /logs/ai-url-logs（仅传统版形态可见）</p>
-            <p>spec: 无独立 PRD；关联钓鱼邮件智��体�� URL 检测需求</p>
+            <p>spec: 无独立 PRD；关联钓鱼邮��智��体�� URL 检测需求</p>
             <p>组件: ai-url-logs-page.tsx + search-filters + table + detail-modal/detail-content</p>
             <p>子文件: <a href="logs-ai-url-logs/layer-1-detail-modal.html">5-Tab ���箱���判详情弹窗（6 态可交互）</a></p>
           </div>
@@ -1086,7 +1086,7 @@
             <p>路由: /monitor/infrastructure · spec: 未提供 · 多租户租户视角导航隐藏（v2 用户决定：URL 直连也应 403/404 拦截）</p>
             <p>组件: monitor-infrastructure-page.tsx（4 Tab：硬件资源/服务进程/数据库与缓存/存储与备份；Kingbase/Redis × 指标切换）</p>
             <p>子文件: <a href="monitor-infrastructure/layer-1-tab-container.html">服务进程</a> / <a href="monitor-infrastructure/layer-2-tab-database.html">数据库与缓存(双态)</a> / <a href="monitor-infrastructure/layer-3-tab-storage.html">存储与备份</a></p>
-            <p>预览可交互（Tab/库切换）· 形态×��色 5×2 矩��实��� · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
+            <p>预览可交互（Tab/库切换）· ���态×��色 5×2 矩��实��� · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1500,7 +1500,7 @@
     </div>
   </details>
 
-  <!-- ==================== 迭代：GT-126811【0731】RBL 优化 · 灰名单从执行动作分离 ==================== -->
+  <!-- ==================== 迭代：GT-126811【0731】RBL 优化 · 灰名单从执行动作���离 ==================== -->
   <details class="l1-section iteration" open>
     <summary>
       <div class="l1-header">
@@ -1670,7 +1670,7 @@
         <span class="chevron"></span>
         <span class="l1-icon">🛠️</span>
         <h2>GT-12923【0813】邮件处置中心总优化工单</h2>
-        <span class="l1-stats"><span class="done-count">7</span> 已完成 / 7 总计</span>
+        <span class="l1-stats"><span class="done-count">8</span> 已完成 / 8 总计</span>
       </div>
     </summary>
     <div class="l1-body">
@@ -1681,7 +1681,7 @@
               <span class="chevron"></span>
               <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md" target="_blank" rel="noopener noreferrer">GT-12923 · 邮件处置中心总优化（增量变更规格 · Markdown）</a>
               <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v8</span>
+              <span class="card-version-badge">v9</span>
               <span class="card-generated-at">2026-08-15</span>
             </div>
           </summary>
@@ -1757,7 +1757,7 @@
             <p>路由: /email-handling/disposal-center（同属邮件处置中心模块，深链跳转至本工单文档内的对应章节）</p>
             <p>变更类型: 功能新增 + 缺陷修正（分组展示逻辑 + 筛选逻辑）· 收录于 GT-12923 文档内的同名二级章节</p>
             <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a></p>
-            <p>内含: ① 新增按 `policy_key` 对 mixed 记录 `per_recipient` 分组的模型，"处置依据"列多模块命中时主文案取优先桶摘要 + "等 N 项"，hover 按模块分组展开逐收件人明细 ② 命中当前"处置依据"筛选值的分组在主文案与 Tooltip 展开顺序中优先展示，与 GT-12931/GT-12934 的高亮机制对称但独立实现 ③ 关联修正 mixed 记录在"处置依据"筛选下的漏项缺陷（`disposal_policy_keys` 改为对 `per_recipient` 取交集匹配）</p>
+            <p>内含: ① 新增按 `policy_key` 对 mixed 记录 `per_recipient` 分组的模型，"处置依���"列多模块命中时主文案取优先桶摘要 + "等 N 项"，hover 按模块分组展开逐收件人明细 ② 命中当前"处置依据"筛选值的分组在主文案与 Tooltip 展开顺序中优先展示，与 GT-12931/GT-12934 的高亮机制对称但独立实现 ③ 关联修正 mixed 记录在"处置依据"筛选下的漏项缺陷（`disposal_policy_keys` 改为对 `per_recipient` 取交集匹配）</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1792,6 +1792,23 @@
             <p>变更类型: 功能替换（模块移除 + 新模块新增）· 收录于 GT-12923 文档内的同名二级章节</p>
             <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（详情·概览与处置层级，即 <a href="email-handling-disposal-center/layer-10-detail-overview-single.html">layer-10-detail-overview-single.html</a>）</p>
             <p>内含: ① 移除「展开完整信息」模块内的"身份验证详情"（Message-ID/Return-Path/Reply-To/X-Mailer）与"网络特征"（PTR/ASN）② 新增统一的"邮件头信息"模块，按 From/To/Subject/Date/Message-ID/Return-Path/Reply-To/X-Mailer 邮件头顺序拼接展示等宽信头格式文本 ③ 四语言 i18n 词表同步替换孤立 key</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12967邮件处置中心查看域名加黑url加黑哈希加黑" target="_blank" rel="noopener noreferrer">GT-12967 · 邮件处置中心——》查看：域名加黑，URL加黑，哈希加黑</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v9</span>
+              <span class="card-generated-at">2026-08-15</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（同属邮件处置中心模块，深链跳转至本工单文档内的对应章节；作用于详情弹窗"概览与处置"卡片右侧的「内容实体检测与处置」模块，与 GT-12965/GT-12966 作用于卡片头部/展开完整信息模块均不同）</p>
+            <p>变更类型: 功能新增（二次确认交互 + 规则来源标识）· 收录于 GT-12923 文档内的同名二级章节</p>
+            <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（详情·概览与处置层级，即 <a href="email-handling-disposal-center/layer-10-detail-overview-single.html">layer-10-detail-overview-single.html</a>）；<a href="filter-rules-pipeline-content-rules/index.html">内容规则</a>（规则来源徽章展示）</p>
+            <p>内含: ① "域名加黑""URL加黑""哈希加黑"三个按钮由直接调用 API 改为先弹出单例复用的二次确认弹窗，确认后才写入内容规则 ② mock 数据层新增 3 条 `metadata.source=email_disposal_center` 演示规则，使内容规则列表已有的"来源：邮件处置中心"徽章渲染逻辑首次在验证环境下可见 ③ 四语言 i18n 词表同步新增确认弹窗文案</p>
           </div>
         </details>
       </div>
