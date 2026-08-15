@@ -4,9 +4,13 @@ import { describe, it, expect } from 'vitest';
 import {
   formatListReason,
   formatHitDetail,
+  formatMultiBasisListReason,
   getModuleName,
   getActionLabel,
   getPolicyRoute,
+  groupRecipientBasisByPolicy,
+  pickPrimaryBasisGroup,
+  sortBasisGroupsForTooltip,
   DISPOSAL_POLICY_MAP,
 } from './disposal-basis-config';
 import type { DisposalBasis } from '@/types/email-disposal';
@@ -236,5 +240,118 @@ describe('IPBL / UBL allow-block list rendering (GT-12214 复开)', () => {
       const pagePath = join(dashboardDir, route, 'page.tsx');
       expect(existsSync(pagePath), `route ${route} -> ${pagePath} 不存在`).toBe(true);
     }
+  });
+});
+
+// GT-12946：群发邮件多处置依据支撑——按 policy_key 分组、优先桶选取、
+// Tooltip 排序、多桶主文案拼接。
+describe('multi-recipient disposal basis grouping (GT-12946)', () => {
+  const ipfreq: DisposalBasis = {
+    policy_key: 'IPFREQ',
+    rule_name: '默认频率规则',
+    rule_id: 'IPFREQ-1',
+    action: 'discard',
+    recipient: 'user1@company.com',
+  };
+  const ipbl: DisposalBasis = {
+    policy_key: 'IPBL',
+    rule_name: 'Spamhaus',
+    rule_id: 'IPBL-1',
+    action: 'quarantine',
+    recipient: 'user2@company.com',
+    hit_values: { source_ip: '203.0.113.5', entry: 'spamhaus-X' },
+  };
+  const ipbl2: DisposalBasis = {
+    policy_key: 'IPBL',
+    rule_name: 'Spamhaus',
+    rule_id: 'IPBL-1',
+    action: 'quarantine',
+    recipient: 'user3@company.com',
+    hit_values: { source_ip: '203.0.113.5', entry: 'spamhaus-X' },
+  };
+  const mixedBasis: DisposalBasis = {
+    policy_key: ipfreq.policy_key,
+    rule_name: ipfreq.rule_name,
+    rule_id: ipfreq.rule_id,
+    per_recipient: [ipfreq, ipbl, ipbl2],
+  };
+
+  it('groupRecipientBasisByPolicy groups per_recipient entries by policy_key', () => {
+    const groups = groupRecipientBasisByPolicy(mixedBasis);
+    expect(groups).toHaveLength(2);
+    const ipblGroup = groups.find((g) => g.policyKey === 'IPBL');
+    expect(ipblGroup?.entries).toHaveLength(2);
+    const ipfreqGroup = groups.find((g) => g.policyKey === 'IPFREQ');
+    expect(ipfreqGroup?.entries).toHaveLength(1);
+  });
+
+  it('groupRecipientBasisByPolicy degrades to a single group without per_recipient', () => {
+    const single: DisposalBasis = { policy_key: 'IPBL', rule_name: 'r', rule_id: 'IPBL-1' };
+    const groups = groupRecipientBasisByPolicy(single);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].policyKey).toBe('IPBL');
+  });
+
+  it('groupRecipientBasisByPolicy returns empty array for undefined/empty basis', () => {
+    expect(groupRecipientBasisByPolicy(undefined)).toEqual([]);
+    expect(groupRecipientBasisByPolicy({} as DisposalBasis)).toEqual([]);
+  });
+
+  it('pickPrimaryBasisGroup defaults to the first group in original order when unfiltered', () => {
+    const groups = groupRecipientBasisByPolicy(mixedBasis);
+    const primary = pickPrimaryBasisGroup(groups);
+    expect(primary?.policyKey).toBe('IPFREQ');
+  });
+
+  it('pickPrimaryBasisGroup prioritizes the group matching an active policy-key filter', () => {
+    const groups = groupRecipientBasisByPolicy(mixedBasis);
+    const primary = pickPrimaryBasisGroup(groups, ['IPBL']);
+    expect(primary?.policyKey).toBe('IPBL');
+  });
+
+  it('pickPrimaryBasisGroup prioritizes the group matching an active rule-id filter', () => {
+    const groups = groupRecipientBasisByPolicy(mixedBasis);
+    const primary = pickPrimaryBasisGroup(groups, undefined, ['IPBL-1']);
+    expect(primary?.policyKey).toBe('IPBL');
+  });
+
+  it('sortBasisGroupsForTooltip is a no-op when no filter is active', () => {
+    const groups = groupRecipientBasisByPolicy(mixedBasis);
+    const sorted = sortBasisGroupsForTooltip(groups);
+    expect(sorted.map((g) => g.policyKey)).toEqual(groups.map((g) => g.policyKey));
+  });
+
+  it('sortBasisGroupsForTooltip moves the highlighted group to the front', () => {
+    const groups = groupRecipientBasisByPolicy(mixedBasis);
+    const sorted = sortBasisGroupsForTooltip(groups, ['IPBL']);
+    expect(sorted[0].policyKey).toBe('IPBL');
+    expect(sorted).toHaveLength(groups.length);
+  });
+
+  it('formatMultiBasisListReason falls back to the plain summary for a single group', () => {
+    const groups = groupRecipientBasisByPolicy({ policy_key: 'IPBL', rule_name: 'r', rule_id: 'IPBL-1' });
+    const label = formatMultiBasisListReason(groups, 'zh');
+    expect(label).toBe(formatListReason(groups[0].entries[0], 'zh'));
+  });
+
+  it('formatMultiBasisListReason appends the module count suffix for multiple groups', () => {
+    const groups = groupRecipientBasisByPolicy(mixedBasis);
+    const label = formatMultiBasisListReason(groups, 'zh');
+    expect(label).toContain('等 2 项');
+    expect(label).toContain(formatListReason(ipfreq, 'zh'));
+  });
+
+  it('formatMultiBasisListReason uses the highlighted group as the primary summary', () => {
+    const groups = groupRecipientBasisByPolicy(mixedBasis);
+    const label = formatMultiBasisListReason(groups, 'zh', ['IPBL']);
+    expect(label).toContain(formatListReason(ipbl, 'zh'));
+    expect(label).toContain('等 2 项');
+  });
+
+  it('formatMultiBasisListReason localizes the count suffix per language', () => {
+    const groups = groupRecipientBasisByPolicy(mixedBasis);
+    expect(formatMultiBasisListReason(groups, 'en')).toContain('and 2 more');
+    expect(formatMultiBasisListReason(groups, 'th')).toContain('และอีก 2 รายการ');
+    expect(formatMultiBasisListReason(groups, 'ru')).toContain('и еще 2');
   });
 });
