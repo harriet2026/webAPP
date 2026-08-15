@@ -6263,7 +6263,14 @@
           "ruleSuccess": "Added to blacklist rule",
           "ruleFailed": "Failed to add blacklist rule",
           "vtScore": "VirusTotal: {score}",
-          "title": "Content Entity Detection & Disposal"
+          "title": "Content Entity Detection & Disposal",
+          "confirmDialog": {
+            "title": "Blacklist {type} {value}?",
+            "descContent": "This rule will be added to the Content Rules module (quarantine action). You can view, edit, or delete it later under \"Security Policy \u2192 Content Rules\".",
+            "typeDomain": "domain",
+            "typeUrl": "URL",
+            "typeHash": "attachment hash"
+          }
         },
         "reclassify": {
           "title": "Reclassify Email Type",

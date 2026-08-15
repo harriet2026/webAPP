@@ -129,7 +129,9 @@ describe('EntityDetection', () => {
     expect(screen.queryByTestId(`email-disposal-overview-entity-link-${key}-vt-score`)).not.toBeInTheDocument();
   });
 
-  it('clicking 域名加黑 calls requestFn with a POST to /unified-rules, page=content_rules, field=urls', async () => {
+  // 二次确认：点击「域名加黑」只打开弹窗，不立即调用 requestFn——对齐
+  // SenderActions 发信人加黑/加白的确认交互，避免误触直接产生隔离规则。
+  it('clicking 域名加黑 opens a confirm dialog without calling requestFn yet', async () => {
     const user = userEvent.setup();
     const requestFn = vi.fn().mockResolvedValue({}) as never;
     const urls = [{ url: 'https://evil.com/phish', domain: 'evil.com', check_result: 'THREAT', threat_type: 'MALWARE' }];
@@ -137,6 +139,40 @@ describe('EntityDetection', () => {
 
     const key = encodeURIComponent('https://evil.com/phish').slice(0, 64);
     await user.click(screen.getByTestId(`email-disposal-overview-entity-link-${key}-blacklist-domain`));
+
+    expect(await screen.findByTestId('email-disposal-overview-entity-confirm-dialog')).toBeInTheDocument();
+    expect(requestFn).not.toHaveBeenCalled();
+  });
+
+  // 取消：不应调用 requestFn，弹窗应关闭。
+  it('clicking cancel on the confirm dialog does not call requestFn', async () => {
+    const user = userEvent.setup();
+    const requestFn = vi.fn().mockResolvedValue({}) as never;
+    const urls = [{ url: 'https://evil.com/phish', domain: 'evil.com', check_result: 'THREAT', threat_type: 'MALWARE' }];
+    render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ entity_urls: urls }) })} />);
+
+    const key = encodeURIComponent('https://evil.com/phish').slice(0, 64);
+    await user.click(screen.getByTestId(`email-disposal-overview-entity-link-${key}-blacklist-domain`));
+    await user.click(await screen.findByTestId('email-disposal-overview-entity-confirm-cancel'));
+
+    // Base UI keeps the dialog mounted during its closing animation
+    // (data-closed transient state) -- assert on the `open` attribute
+    // rather than DOM presence to avoid a flaky race against that animation.
+    await waitFor(() =>
+      expect(screen.getByTestId('email-disposal-overview-entity-confirm-dialog')).toHaveAttribute('data-closed'),
+    );
+    expect(requestFn).not.toHaveBeenCalled();
+  });
+
+  it('confirming 域名加黑 calls requestFn with a POST to /unified-rules, page=content_rules, field=urls', async () => {
+    const user = userEvent.setup();
+    const requestFn = vi.fn().mockResolvedValue({}) as never;
+    const urls = [{ url: 'https://evil.com/phish', domain: 'evil.com', check_result: 'THREAT', threat_type: 'MALWARE' }];
+    render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ entity_urls: urls }) })} />);
+
+    const key = encodeURIComponent('https://evil.com/phish').slice(0, 64);
+    await user.click(screen.getByTestId(`email-disposal-overview-entity-link-${key}-blacklist-domain`));
+    await user.click(await screen.findByTestId('email-disposal-overview-entity-confirm-confirm'));
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
     const [url, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
@@ -153,7 +189,7 @@ describe('EntityDetection', () => {
     });
   });
 
-  it('clicking URL加黑 sends the full URL as the condition value', async () => {
+  it('confirming URL加黑 sends the full URL as the condition value', async () => {
     const user = userEvent.setup();
     const requestFn = vi.fn().mockResolvedValue({}) as never;
     const urls = [{ url: 'https://evil.com/phish', domain: 'evil.com', check_result: 'THREAT' }];
@@ -161,6 +197,7 @@ describe('EntityDetection', () => {
 
     const key = encodeURIComponent('https://evil.com/phish').slice(0, 64);
     await user.click(screen.getByTestId(`email-disposal-overview-entity-link-${key}-blacklist-url`));
+    await user.click(await screen.findByTestId('email-disposal-overview-entity-confirm-confirm'));
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
     const [, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
@@ -184,6 +221,7 @@ describe('EntityDetection', () => {
 
     const key = encodeURIComponent('https://evil.com/phish').slice(0, 64);
     await user.click(screen.getByTestId(`email-disposal-overview-entity-link-${key}-blacklist-domain`));
+    await user.click(await screen.findByTestId('email-disposal-overview-entity-confirm-confirm'));
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
     const [, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
@@ -199,6 +237,7 @@ describe('EntityDetection', () => {
 
     const key = encodeURIComponent('https://evil.com/phish').slice(0, 64);
     await user.click(screen.getByTestId(`email-disposal-overview-entity-link-${key}-blacklist-url`));
+    await user.click(await screen.findByTestId('email-disposal-overview-entity-confirm-confirm'));
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
     const [, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
@@ -213,6 +252,7 @@ describe('EntityDetection', () => {
     render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ attachments }), tab: 'attachments' })} />);
 
     await user.click(screen.getByTestId('email-disposal-overview-entity-attachment-deadbeef-blacklist-hash'));
+    await user.click(await screen.findByTestId('email-disposal-overview-entity-confirm-confirm'));
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
     const [, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
@@ -243,13 +283,14 @@ describe('EntityDetection', () => {
     expect(onDownload.mock.calls[0][0]).toMatchObject({ md5sum: 'deadbeef', filename: 'report.pdf' });
   });
 
-  it('clicking 哈希加黑 calls requestFn with page=content_rules, field=attachment_md5, operator=eq', async () => {
+  it('confirming 哈希加黑 calls requestFn with page=content_rules, field=attachment_md5, operator=eq', async () => {
     const user = userEvent.setup();
     const requestFn = vi.fn().mockResolvedValue({}) as never;
     const attachments = [{ filename: 'report.pdf', size: 2048, md5sum: 'deadbeef', content_type: 'application/pdf', inline: false, content_length: 2048 }];
     render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ attachments }), tab: 'attachments' })} />);
 
     await user.click(screen.getByTestId('email-disposal-overview-entity-attachment-deadbeef-blacklist-hash'));
+    await user.click(await screen.findByTestId('email-disposal-overview-entity-confirm-confirm'));
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
     const [url, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];

@@ -16,11 +16,22 @@
 // 右列），浏览器像素对齐同样是 Task 10 的范围。
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Ban, Download, Info } from 'lucide-react';
+import { Ban, Download, Info, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
 import type { ApiRequestFn } from '@/lib/api/client';
@@ -75,6 +86,18 @@ function vtScoreIsPositive(vtScore: string): boolean {
   return Number.isFinite(numerator) && numerator > 0;
 }
 
+// PendingBlacklistAction -- 域名/URL/哈希加黑三个按钮共用的"待确认"状态。三者
+// 弹窗结构完全一致（标题+说明+取消/确认），用单个状态 + 单个 AlertDialog 复用，
+// 而不是渲染三份 Dialog 实例：链接/附件 tab 里每一行都有加黑按钮，若每行各自
+// 挂一个 Dialog，行数一多就会有大量永远不显示的 Dialog 挂载在 DOM 里；单例
+// 复用的前提是同一时刻只可能有一个弹窗打开，这与用户操作方式（一次只点一个
+// 按钮）天然吻合。
+interface PendingBlacklistAction {
+  key: string;
+  kind: 'domain' | 'url' | 'hash';
+  value: string;
+}
+
 export function EntityDetection({ detail, requestFn, readOnly = false, onDownload, onDisposed, tab: tabProp }: EntityDetectionProps) {
   const t = useTranslations('emailDisposal.detail.overview.entityDetection');
   const tOverview = useTranslations('emailDisposal.detail.overview');
@@ -82,6 +105,7 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
   // 受控模式：调用方提供 tab 时使用外部 state；未提供时固定默认 'links'。
   const tab: EntityTab = tabProp ?? 'links';
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<PendingBlacklistAction | null>(null);
 
   const urls = detail.entity_urls ?? [];
   const attachments = detail.attachments ?? [];
@@ -90,24 +114,29 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
   // 100-1000），否则后端 400、加黑永远失败。
   const rulePriority = disposalRulePriority(isSystemAdmin);
 
-  async function handleUrlRule(key: string, value: string, field: 'domain' | 'url') {
-    setBusyKey(key);
-    try {
-      await addUrlRule(value, field, requestFn, rulePriority);
-      toast.success(t('ruleSuccess'));
-      onDisposed?.();
-    } catch {
-      toast.error(t('ruleFailed'));
-    } finally {
-      setBusyKey(null);
-    }
+  // 三个加黑按钮点击后只打开确认弹窗，不立即调用 API——对齐 SenderActions
+  // 的发信人加黑/加白二次确认交互（sender-actions.tsx 的 openBlacklist /
+  // openWhitelist），避免研判人员误触直接产生隔离规则。
+  function requestUrlRule(key: string, value: string, kind: 'domain' | 'url') {
+    setPendingAction({ key, kind, value });
   }
 
-  async function handleAttachmentRule(key: string, md5: string) {
+  function requestAttachmentRule(key: string, md5: string) {
+    setPendingAction({ key, kind: 'hash', value: md5 });
+  }
+
+  async function confirmPendingAction() {
+    if (!pendingAction) return;
+    const { key, kind, value } = pendingAction;
     setBusyKey(key);
     try {
-      await addAttachmentHashRule(md5, requestFn, rulePriority);
+      if (kind === 'hash') {
+        await addAttachmentHashRule(value, requestFn, rulePriority);
+      } else {
+        await addUrlRule(value, kind, requestFn, rulePriority);
+      }
       toast.success(t('ruleSuccess'));
+      setPendingAction(null);
       onDisposed?.();
     } catch {
       toast.error(t('ruleFailed'));
@@ -121,7 +150,19 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
     else toast.info(tOverview('senderActions.notImplementedToast'));
   }
 
+  const confirmBusy = pendingAction !== null && busyKey === pendingAction.key;
+  // confirmDialog.type* 三个 key 按 pendingAction.kind 选取，拼进标题
+  // "确认将{type} {value} 加入黑名单？"。
+  const pendingTypeLabel = pendingAction
+    ? t(pendingAction.kind === 'domain' ? 'confirmDialog.typeDomain' : pendingAction.kind === 'url' ? 'confirmDialog.typeUrl' : 'confirmDialog.typeHash')
+    : '';
+
   return (
+    <>
+    {pendingAction !== null && typeof document !== 'undefined' && createPortal(
+      <div className="fixed inset-0 z-[199] bg-black/60 transition-opacity duration-150" aria-hidden="true" />,
+      document.body
+    )}
     <div className="space-y-3" data-testid="email-disposal-overview-entity-detection">
       <div
         className="flex items-start gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/20 dark:text-blue-300"
@@ -182,7 +223,7 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
                       size="sm"
                       variant="outline"
                       disabled={readOnly || busy}
-                      onClick={() => handleUrlRule(key, u.domain, 'domain')}
+                      onClick={() => requestUrlRule(key, u.domain, 'domain')}
                       data-testid={`email-disposal-overview-entity-link-${key}-blacklist-domain`}
                     >
                       <Ban className="mr-1 h-3.5 w-3.5" />
@@ -193,7 +234,7 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
                       size="sm"
                       variant="outline"
                       disabled={readOnly || busy}
-                      onClick={() => handleUrlRule(key, u.url, 'url')}
+                      onClick={() => requestUrlRule(key, u.url, 'url')}
                       data-testid={`email-disposal-overview-entity-link-${key}-blacklist-url`}
                     >
                       <Ban className="mr-1 h-3.5 w-3.5" />
@@ -251,7 +292,7 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
                       size="sm"
                       variant="outline"
                       disabled={readOnly || !a.md5sum || busy}
-                      onClick={() => a.md5sum && handleAttachmentRule(key, a.md5sum)}
+                      onClick={() => a.md5sum && requestAttachmentRule(key, a.md5sum)}
                       data-testid={`email-disposal-overview-entity-attachment-${key}-blacklist-hash`}
                     >
                       <Ban className="mr-1 h-3.5 w-3.5" />
@@ -275,5 +316,35 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
         )
       )}
     </div>
+
+    {/* 域名/URL/哈希加黑二次确认——结构对齐 SenderActions 的发信人加黑/加白
+        弹窗（sender-actions.tsx），description 额外说明规则落点，让运营
+        知道后续去"内容规则"模块管理这条规则，而不是去链接防护/附件安全。 */}
+    <AlertDialog open={pendingAction !== null} onOpenChange={(o) => !confirmBusy && !o && setPendingAction(null)}>
+      <AlertDialogContent data-testid="email-disposal-overview-entity-confirm-dialog" overlayClassName="bg-black/60">
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {pendingAction && t('confirmDialog.title', { type: pendingTypeLabel, value: pendingAction.value })}
+          </AlertDialogTitle>
+          <AlertDialogDescription>{t('confirmDialog.descContent')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={confirmBusy} data-testid="email-disposal-overview-entity-confirm-cancel">
+            {tOverview('cancel')}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            disabled={confirmBusy}
+            data-testid="email-disposal-overview-entity-confirm-confirm"
+            onClick={(e) => {
+              e.preventDefault();
+              void confirmPendingAction();
+            }}
+          >
+            {confirmBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : tOverview('confirmBtn')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

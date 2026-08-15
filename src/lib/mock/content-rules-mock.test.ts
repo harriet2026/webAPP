@@ -18,7 +18,10 @@ describe('content_rules mock routes', () => {
       path: '/unified-rules?rule_page=content_rules&page=1&page_size=10',
     });
     expect(list.status).toBe(200);
-    expect(list.data).toMatchObject({ total: 30, page: 1, page_size: 10 });
+    // 30 手工创建的 mock 规则 + 3 条邮件处置中心来源（域名/URL/哈希加黑）演示
+    // 数据（fixtures.ts 的 emailDisposalFixtureRule），见 GT-xxxx「内容规则来源
+    // 标识」需求。
+    expect(list.data).toMatchObject({ total: 33, page: 1, page_size: 10 });
     expect((list.data as { items: unknown[] }).items).toHaveLength(10);
 
     const groups = dispatch({

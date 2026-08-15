@@ -248,7 +248,7 @@ function mailMarkingRule(o: {
 let mockMailMarkingRules: Rule[] = [
   mailMarkingRule({
     id: 5101,
-    name: "高管外站警示",
+    name: "高管��站警示",
     direction: "receive",
     priority: 1,
     active: true,
@@ -470,7 +470,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────�������������──������──────────────────────────���────────────────────
+// ─── 租户 ──────────────────�������������──������──────────────────────────���──────────��─────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -4156,7 +4156,7 @@ export function mockDeleteGeoIpRule(id: number): void {
   if (idx !== -1) mockGeoIpRules.splice(idx, 1);
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════��═══════════════
 // 发信人黑���名��（sender_filter，mock）
 // ���据结构对齐统一规则系统 `Rule`���webapp/src/types/unified-rules.ts）：
 //   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
@@ -4688,6 +4688,57 @@ function contentFixtureRule(o: {
   };
 }
 
+// emailDisposalFixtureRule -- 复刻 disposal-detail-api.ts 的
+// addUrlRule/addAttachmentHashRule 落库形态（name 前缀、scopes、
+// metadata.source、哈希用 sideline 阶段），而不是套用上面的
+// contentFixtureRule：后者的 scopes 只覆盖手工创建入口开放的
+// subject/body/header/attachment_names，不支持 urls/attachment_hash 这两个
+// "仅邮件处置中心可写"的兼容作用域（见 ContentRuleScope 的注释）。
+function emailDisposalFixtureRule(o: {
+  id: number;
+  kind: "domain" | "url" | "hash";
+  value: string;
+  priority: number;
+  createdAt: string;
+}): Rule {
+  const namePrefix =
+    o.kind === "domain" ? "域名加黑" : o.kind === "url" ? "URL加黑" : "附件哈希加黑";
+  const scope = o.kind === "hash" ? "attachment_hash" : "urls";
+  const metadata = {
+    feature: "content_rules",
+    match_type: "keyword",
+    match_content: o.value,
+    scopes: [scope],
+    directions: { receive: { enabled: true, action: "quarantine" } },
+    source: "email_disposal_center",
+  };
+  const conditionTree: RuleNode = {
+    type: "AND",
+    children: [
+      { type: "condition", field: "is_outbound", operator: "eq", value: "false" },
+      o.kind === "hash"
+        ? { type: "condition", field: "attachment_md5", operator: "eq", value: o.value }
+        : { type: "condition", field: "urls", operator: "contain", value: o.value },
+    ],
+  };
+  return {
+    id: o.id,
+    name: `${namePrefix} ${o.value}`,
+    description: "",
+    page: "content_rules",
+    rule_class: "action",
+    stage: o.kind === "hash" ? "sideline" : "data",
+    priority: o.priority,
+    condition_tree: JSON.stringify(conditionTree),
+    action: "quarantine",
+    metadata: JSON.stringify(metadata),
+    is_active: true,
+    valid_until: null,
+    created_at: o.createdAt,
+    updated_at: o.createdAt,
+  };
+}
+
 let mockContentRules: Rule[] = [
   contentFixtureRule({
     id: 1,
@@ -4768,6 +4819,32 @@ let mockContentRules: Rule[] = [
       active: id % 5 !== 0,
       createdAt: `2026-03-${String(Math.max(1, 20 - (id % 15))).padStart(2, "0")}T10:00:00Z`,
     });
+  }),
+  // 邮件处置中心「域名加黑/URL加黑/哈希加黑」创建的规则（mock）——
+  // metadata.source='email_disposal_center'，供 ContentRulesTable 展示
+  // "来源：邮件处置中心"徽章，与上面手工创建的规则区分（见
+  // disposal-detail-api.ts 的 addUrlRule/addAttachmentHashRule 字段映射，
+  // 以及 ContentRulesTable.tsx 的徽章渲染分支）。
+  emailDisposalFixtureRule({
+    id: 31,
+    kind: "domain",
+    value: "phishing-bank-login.com",
+    priority: 5000,
+    createdAt: "2026-08-10T09:12:00Z",
+  }),
+  emailDisposalFixtureRule({
+    id: 32,
+    kind: "url",
+    value: "http://malicious-tracker.io/click?id=8842",
+    priority: 5000,
+    createdAt: "2026-08-11T15:40:00Z",
+  }),
+  emailDisposalFixtureRule({
+    id: 33,
+    kind: "hash",
+    value: "e99a18c428cb38d5f260853678922e03",
+    priority: 1000,
+    createdAt: "2026-08-12T11:05:00Z",
   }),
 ];
 
@@ -5168,7 +5245,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
   };
 }
 
-// ═════════════════════════════════════��══════════════════════════════════════════
+// ═════════════════════════════════════��═��════════════════════════════════════════
 // 发信���为管控（behavior_control，mock）
 // 数据源自 demo `design/origin/demo/components/sender-behavior-control/mock-data.ts`
 // 的 `mockBehaviorRules`（7 条手工命名 + 生成的 #8..#35，共 35 条），并映射到统一规则。
@@ -6097,7 +6174,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // ═══════════════��═════════════════════════════════════��══════════════════════════
 // 邮件处置中心（email-handling-disposal-center，mock）
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
-// 的业务语义，���转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
+// 的业务语义，�����转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
 // 为 mock 引入第二���数据模型。
 // ═══════��═════��══��══��═════��════��═════��═══��═══════════════════════════════════════
 
@@ -6203,7 +6280,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     score: 94,
     basis: ["AI-SPOOF", "高管仿冒识别", "AI-SPOOF-012"],
   },
-  // ═══════════════════════════════════════════════════════════════════════
+  // ════════════════════════════════════════════���══════════════════════════
   // 群发邮件日志数据补充：以下 2 条均为多收件人群发邮件，且单封邮件内不同
   // 收件人的最终邮件状态各不相同（isMixed + mixedBreakdown），用于验证列表
   // 页在"同一封群发邮件含多个邮件状态"场景下的展示与筛选。紧跟在 MIC001 之
@@ -8535,7 +8612,7 @@ export function mockRecallKeyDelete(id: number): void {
 
 // ─── 链接保护日志（logs-link-logs html_spec §2.2/§4.1）────────────────────────
 // 数据照抄 demo components/link-logs/link-logs-page.tsx 的 MOCK_LOGS 6 行，
-// 租户按 demo 同样的轮转规则分配（idx % 租户数 → mockTenants 1/2/3）。
+// 租户按 demo 同样的轮��规则分配（idx % 租户数 → mockTenants 1/2/3）。
 // demo 行3 的 triggerStage 是 "sandbox"（URL沙箱）；本产品按 2026-07-09 v2 spec
 // §3.1 只有 回扫黑名单→查询情报→深度复检 三段、无独立沙箱段，映射为 phishing_agent。
 const mockLinkClickLogs: LinkClickLog[] = [
@@ -9528,7 +9605,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 22, operation_id: 'OP20260622008', admin_user_id: 2, username: 'wangping', operator_name: '王平',
     operator_role: 'platform', layer: 'platform', action: 'export', resource_type: 'security_config',
     status: 'success', client_ip: '10.8.0.20', ip_location: '内网',
-    details: { summary: '生成月度安全态势报告并归档' }, created_at: '2026-06-22T08:50:27Z' },
+    details: { summary: '生成月度安全态势报告并归��' }, created_at: '2026-06-22T08:50:27Z' },
   { id: 8, operation_id: 'OP20260622010', admin_user_id: 3, username: 'chenjing@lanhai.cn', operator_name: '陈静（我）',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'create',
     resource_type: 'users', status: 'success', client_ip: '112.65.1.18', ip_location: '上海',
