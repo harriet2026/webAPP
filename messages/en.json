@@ -4384,6 +4384,8 @@
     "applyToTip": "Select the message areas that the rule should inspect",
     "scopeDisplayAttachmentTypes": "Attachment type",
     "scopeDisplayUrls": "URL",
+    "scopeDisplayAttachmentHash": "Attachment hash",
+    "sourceEmailDisposalCenter": "Source: Email Disposal Center",
     "attachmentContentUnavailable": "Attachment-content matching is available only in the sideline scanner and cannot be configured here yet.",
     "legacyScopesPreserved": "This rule retains {count} legacy scopes that are not shown in the simplified editor.",
     "headerOnlyTagHint": "Tagging adds an email header only; it does not change the Subject.",

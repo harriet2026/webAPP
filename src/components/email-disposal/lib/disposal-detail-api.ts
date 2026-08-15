@@ -369,7 +369,12 @@ export async function addUrlRule(
       action: 'quarantine',
       priority,
       condition_tree: buildConditionTree(metadata),
-      metadata,
+      // ContentRulesMetadata 是封闭接口（无索引签名），与 CreateRuleRequest
+      // 的 metadata?: Record<string, unknown> 不结构兼容，需要显式断言——
+      // ContentRulesPage.tsx 自己是直接写对象字面量（走类型推断，天然满足
+      // 索引签名），这里为了在赋值前获得强类型检查特意声明了变量类型，两者
+      // 目的不同，收尾都用同一种断言方式。
+      metadata: metadata as unknown as Record<string, unknown>,
       is_active: true,
     },
     requestFn,
@@ -400,7 +405,7 @@ export async function addAttachmentHashRule(
       action: 'quarantine',
       priority,
       condition_tree: buildConditionTree(metadata),
-      metadata,
+      metadata: metadata as unknown as Record<string, unknown>,
       is_active: true,
     },
     requestFn,
