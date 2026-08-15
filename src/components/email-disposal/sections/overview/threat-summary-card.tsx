@@ -21,7 +21,6 @@ import {
   AlertTriangle, CheckCircle, Info, Pencil, ShieldAlert, XCircle, ArrowRight, Layers, Users,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';

@@ -6125,6 +6125,9 @@
           "label": "Mail Type"
         },
         "confidenceScore": "Confidence {pct}%",
+    "recipientOutcomeLabel": "Bulk-send outcomes",
+    "multiBasisCount": "+{n} more",
+    "multiBasisPopoverTitle": "{count} disposal bases in total",
         "confidenceBlacklist": "Blacklist hit (no score)",
         "confidenceRule": "Rule hit (no score)",
         "action": "Action",
@@ -6435,7 +6438,8 @@
         "platformPolicyModule": "Platform-managed Policy",
         "platformPolicyRuleName": "Platform-managed",
         "platformPolicyHitDetail": "This email was intercepted by a platform-level connection policy. Contact your platform administrator for details.",
-        "platformPolicyListReason": "Intercepted by platform-managed policy"
+        "platformPolicyListReason": "Intercepted by platform-managed policy",
+        "basisScope": "Applies to"
       },
       "delivery": {
         "noData": "No delivery records",
