@@ -78,6 +78,28 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
   }
   // notImplemented 仍保留供 B4「查看策略命中详情」fallback 使用
 
+  // From 头：有显示名时按 RFC 5322 惯例加引号（"Name" <addr>），无显示名时只
+  // 输出裸地址，与 B1 发件人行 deriveDomainName 的展示口径保持一致但不复用
+  // 其"域名替代文案"分支——信头场景需要的是原始 sender_name，不做域名兜底。
+  const fromHeader = detail.sender_name
+    ? `"${detail.sender_name}" <${detail.sender}>`
+    : detail.sender || '—';
+  // To 头：recipients 是投递目标全量地址（不同于 B2/B3 展示的收件人状态矩阵），
+  // 按邮件头惯例用 ", " 连接；为空时兜底 em dash，不做静默省略。
+  const toHeader = detail.recipients && detail.recipients.length > 0
+    ? detail.recipients.join(', ')
+    : '—';
+  const mailHeaderText = [
+    `From: ${fromHeader}`,
+    `To: ${toHeader}`,
+    `Subject: ${detail.subject || '—'}`,
+    `Date: ${formatTimestamp(detail.received_at) || detail.received_at || '—'}`,
+    `Message-ID: ${detail.message_id || '—'}`,
+    `Return-Path: ${detail.return_path || '—'}`,
+    `Reply-To: ${detail.reply_to || '—'}`,
+    `X-Mailer: ${detail.x_mailer || '—'}`,
+  ].join('\n');
+
   return (
     <div className="rounded-lg border bg-muted/30 p-4 space-y-3" data-testid="email-disposal-overview-context-card">
       <h3 className="flex items-center gap-2 text-sm font-semibold">
@@ -186,25 +208,22 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
           <ChevronDown className={`ml-1 h-3 w-3 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${expanded ? 'rotate-180' : ''}`} />
         </Button>
 
-        {/* B7 展开完整信息详情 */}
+        {/* B7 展开完整信息详情：邮件头信息（GT-12967 起替换原「身份验证详情」/
+            「网络特征」两个模块——按真实邮件头（RFC 5322）字段顺序 From/To/
+            Subject/Date/Message-ID/Return-Path/Reply-To/X-Mailer 拼接为等宽
+            信头格式文本。后端目前未落地完整原始信头字符串（无 Received 链、
+            X-Originating-IP 等），本区块由 detail 上已有的结构化字段现场拼接
+            展示，字段顺序/取值与真实邮件头语义保持一致，为后续切换为后端返回
+            的原始信头文本预留同一插槽（data-testid 不变）。 */}
         {expanded && (
-          <div className="grid grid-cols-2 gap-4 border-t pt-3 text-xs" data-testid="email-disposal-overview-context-fullinfo">
-            <div>
-              <h5 className="mb-2 font-medium">{t('context.authDetails')}</h5>
-              <div className="space-y-1 text-muted-foreground">
-                <p data-testid="email-disposal-overview-context-message-id">Message-ID: {detail.message_id || '—'}</p>
-                <p data-testid="email-disposal-overview-context-return-path">Return-Path: {detail.return_path || '—'}</p>
-                <p data-testid="email-disposal-overview-context-reply-to">Reply-To: {detail.reply_to || '—'}</p>
-                <p data-testid="email-disposal-overview-context-x-mailer">X-Mailer: {detail.x_mailer || '—'}</p>
-              </div>
-            </div>
-            <div>
-              <h5 className="mb-2 font-medium">{t('context.networkFeatures')}</h5>
-              <div className="space-y-1 text-muted-foreground">
-                <p data-testid="email-disposal-overview-context-ptr">PTR: {detail.ptr_domain || '—'}</p>
-                <p data-testid="email-disposal-overview-context-asn">ASN: {detail.geo_asn ? `AS${detail.geo_asn}` : '—'}</p>
-              </div>
-            </div>
+          <div className="border-t pt-3 text-xs" data-testid="email-disposal-overview-context-fullinfo">
+            <h5 className="mb-2 font-medium">{t('context.mailHeaders')}</h5>
+            <pre
+              className="overflow-x-auto whitespace-pre-wrap break-all rounded-md border bg-background p-3 font-mono text-[11px] leading-5 text-muted-foreground"
+              data-testid="email-disposal-overview-context-mail-headers"
+            >
+              {mailHeaderText}
+            </pre>
           </div>
         )}
       </div>

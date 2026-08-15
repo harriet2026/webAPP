@@ -162,22 +162,43 @@ describe('SendReceiveContextCard', () => {
     expect(row.textContent).toContain('20.0 KB');
   });
 
-  it('expands to show full info (Message-ID/Return-Path/PTR/ASN) and NOT TLS (B6/B7, §9-A)', () => {
+  // GT-12967: B7 原「身份验证详情」/「网络特征」两个模块整体移除，改为按
+  // From/To/Subject/Date/Message-ID/Return-Path/Reply-To/X-Mailer 顺序拼接
+  // 的「邮件头信息」等宽文本块；不应再出现身份验证详情标题、PTR/ASN/TLS。
+  it('expands to show 邮件头信息 (From/To/Subject/Date/Message-ID/Return-Path/Reply-To/X-Mailer) and NOT 身份验证详情/网络特征/PTR/ASN/TLS (B6/B7, GT-12967)', () => {
     renderCard(baseDetail());
     expect(screen.queryByTestId('email-disposal-overview-context-fullinfo')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('email-disposal-overview-context-expand-fullinfo'));
 
     const full = screen.getByTestId('email-disposal-overview-context-fullinfo');
-    expect(full.textContent).toContain('Message-ID: <abc123@mail.company-security.com>');
-    expect(full.textContent).toContain('Return-Path: bounce@company-security.com');
-    expect(full.textContent).toContain('Reply-To: ceo@company-security.com');
-    expect(full.textContent).toContain('X-Mailer: Microsoft Outlook 16.0');
-    expect(full.textContent).toContain('PTR: mail.company-security.com');
-    expect(full.textContent).toContain('ASN: AS12345');
-    expect(full.textContent).not.toContain('TLS');
+    expect(full.textContent).toContain('邮件头信息');
+    expect(full.textContent).not.toContain('身份验证详情');
+    expect(full.textContent).not.toContain('网络特征');
+
+    const headers = screen.getByTestId('email-disposal-overview-context-mail-headers');
+    expect(headers.textContent).toContain('From: "CEO" <attacker@evil.com>');
+    expect(headers.textContent).toContain('To: victim@company.com');
+    expect(headers.textContent).toContain('Subject: Q2财务报表 - 紧急审批');
+    expect(headers.textContent).toContain('Date: 2026-07-20 18:00:00');
+    expect(headers.textContent).toContain('Message-ID: <abc123@mail.company-security.com>');
+    expect(headers.textContent).toContain('Return-Path: bounce@company-security.com');
+    expect(headers.textContent).toContain('Reply-To: ceo@company-security.com');
+    expect(headers.textContent).toContain('X-Mailer: Microsoft Outlook 16.0');
+    expect(headers.textContent).not.toContain('PTR');
+    expect(headers.textContent).not.toContain('ASN');
+    expect(headers.textContent).not.toContain('TLS');
 
     fireEvent.click(screen.getByTestId('email-disposal-overview-context-expand-fullinfo'));
     expect(screen.queryByTestId('email-disposal-overview-context-fullinfo')).not.toBeInTheDocument();
+  });
+
+  it('falls back to bare address in From header when sender_name is absent, and em dash for empty recipients (B7 edge cases)', () => {
+    renderCard(baseDetail({ sender_name: undefined, recipients: [] }));
+    fireEvent.click(screen.getByTestId('email-disposal-overview-context-expand-fullinfo'));
+    const headers = screen.getByTestId('email-disposal-overview-context-mail-headers');
+    expect(headers.textContent).toContain('From: attacker@evil.com');
+    expect(headers.textContent).not.toContain('From: "');
+    expect(headers.textContent).toContain('To: —');
   });
 });

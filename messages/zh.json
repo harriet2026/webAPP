@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测���������������������能�������������",
+    "spoofingDetection": "仿冒邮件检测�����������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -706,7 +706,7 @@
       "drawerTitleNew": "新建转发规则",
       "drawerTitleEdit": "编��转发规��",
       "drawerDescription": "在 SMTP 握手阶段决定连接的接入与过滤策略",
-      "sectionBasic": "���础信息",
+      "sectionBasic": "�����础信息",
       "sectionMatch": "匹配��件",
       "sectionSimulator": "规���模拟器",
       "simulatorDesc": "按当前列表规则优先级逐条匹配，验证命中结果",
@@ -1020,7 +1020,7 @@
         },
         "toasts": {
           "created": "路��规��已��加",
-          "updated": "��由���则已��新",
+          "updated": "���由���则已��新",
           "deleted": "��由规则已删除",
           "saveError": "请修正表单中的校验错误",
           "noConditionSaved": "当前规则未设置条件，将作为兜底规则，请确认优先级设置"
@@ -1112,7 +1112,7 @@
         "imap": "IMAP"
       },
       "toasts": {
-        "created": "认证��置��添加",
+        "created": "认证��置���添加",
         "updated": "认证���置已更���",
         "deleted": "认证配置已删除",
         "saveError": "请修正表单中的校验错误"
@@ -1336,7 +1336,7 @@
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
-    "targetGroups": "适������������",
+    "targetGroups": "适�������������",
     "policyConfig": "策略配置",
     "priority": "优先��",
     "newPolicy": "新建群组策略",
@@ -1655,7 +1655,7 @@
     "noItems": "无旁路邮件",
     "statusPending": "待处理",
     "statusProcessing": "处理中",
-    "statusQuarantined": "已隔�����",
+    "statusQuarantined": "已隔�������",
     "statusFailed": "失败",
     "statusReinjected": "已重新��入",
     "statusReleasedPending": "已放行待复检",
@@ -3362,7 +3362,7 @@
     "drawerIpFrequency": "IP频率限制配置",
     "drawerClose": "关闭",
     "ipFrequencyConfig": "IP频率限制配置",
-    "ipFilterConfig": "IP黑白名单配置",
+    "ipFilterConfig": "IP黑白名单���置",
     "rblConfig": "RBL过滤配置",
     "overseasConfig": "海外邮件检测配置",
     "goToIpFrequencyModule": "前往IP频率限制模块",
@@ -3549,7 +3549,7 @@
       "suspend15minText": "15分钟",
       "suspend30minText": "30分钟",
       "suspend1hourText": "1小时",
-      "suspend2hourText": "2小时",
+      "suspend2hourText": "2小��",
       "actionReject": "拒绝连接",
       "actionTempfail": "返回 421 临时拒��",
       "actionDisconnect": "断开连接"
@@ -3801,7 +3801,7 @@
     "importInvalidRange": "IP 区间格式错误",
     "importActionListMismatch": "动作与当前名单不符",
     "importExceedLimit": "单次最多导入 {max} 条，已超出",
-    "importNothingToImport": "没有可导入的有效记录",
+    "importNothingToImport": "没有可导入的���效记录",
     "importConfirm": "导入 {count} 条",
     "importDone": "导入完成：新增 {created}，覆盖 {overwritten}",
     "importPartialFail": "部分失败：新增 {created}，覆盖 {overwritten}，失败 {failed}",
@@ -3947,7 +3947,7 @@
     "greylistExemptWhitelist": "白名单 IP / 域自动豁免",
     "greylistExemptInternal": "内部域名互发豁免",
     "greylistDelayInvalid": "延迟秒数必须不少于 10 秒",
-    "greylistWindowInvalid": "频率窗口必须不少于 10 秒",
+    "greylistWindowInvalid": "频率窗口���须不少于 10 秒",
     "greylistWindowBeforeDelay": "延迟模式下，频率窗口不能短于延迟时间",
     "greylistMaxRequestsInvalid": "最大请求数必须不少于 1",
     "greylistTTLInvalid": "白名���有效期必须不少于 1 小时",
@@ -4095,7 +4095,7 @@
     "action_audit": "审核",
     "action_audit_desc": "邮件正常投递，同时写入审核日志供管理员事后审查",
     "action_accept": "投递",
-    "action_accept_desc": "允许邮件通过，跳过后续检测直接投递至收件箱",
+    "action_accept_desc": "允许���件通过，跳过后续检测直接投递至收件箱",
     "whitelistMode": "白名单模式",
     "whitelistMode_bypass_content": "跳过内容检测",
     "whitelistMode_direct_deliver": "直接投递",
@@ -4244,7 +4244,7 @@
     "ruleDescription": "规则描述",
     "basicSettings": "基础设置",
     "ruleName": "规则名称",
-    "ruleNameTip": "为规则设置一个易于识别的名称，便于管理和查找",
+    "ruleNameTip": "为规则设置一个易于识别的名称，便于管理和查���",
     "ruleNamePlaceholder": "如：身份证号红线规则",
     "ruleNameRequired": "请输入规则名称",
     "effectScope": "生效范围",
@@ -4402,7 +4402,7 @@
     "runTest": "运行测试",
     "simulateTest": "模拟测试",
     "ruleNameTooLong": "规则名称不能超过 50 个字符",
-    "ruleNameForbiddenChars": "规则名称不能包含 <、>、& 或双引号",
+    "ruleNameForbiddenChars": "规则名称不能包含 <、>、& ���双引号",
     "priorityInvalid": "优先级���须是 1 到 9999 的整数",
     "invalidDate": "请输入有效的失效��间",
     "mixedDirectionActionsPreserved": "此历史规则在不同方向使用不同动作；除��重新选择动作，否则将原样保留。",
@@ -4773,7 +4773,7 @@
       "description": "备注",
       "thresholdA": "阈值A",
       "thresholdB": "阈值B",
-      "orToggle": "启用OR组合条件",
+      "orToggle": "���用OR组合条件",
       "timeWindow": "时间窗口",
       "dimA": "检测维度A",
       "dimB": "检测维度B",
@@ -4858,7 +4858,7 @@
       "thresholdMax": "阈值过大",
       "valueRequired": "请填写该字段",
       "priorityRange": "优先级范围应为 {min}-{max}",
-      "validUntilPast": "有效期不能早于当前日期",
+      "validUntilPast": "有效期不能早于���前日期",
       "emailRequired": "请输入邮箱地址",
       "groupRequired": "请选择发信人群组",
       "orgRequired": "请选择组织部门",
@@ -5133,7 +5133,7 @@
     },
     "encrypted": {
       "detectPolicy": "检测策略",
-      "mode_none": "不检测",
+      "mode_none": "不��测",
       "mode_deep": "深���检测（尝试解密并扫描内�����）",
       "decryptFailAction": "���密失败处置",
       "receiveDefault": "收信方向默认：继续流水线",
@@ -6023,7 +6023,7 @@
       "confirmDelete": "确认丢弃选中邮件？丢弃后无法恢复。",
       "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
       "releaseAuditHint": "放行与类型改判都会写入审计记录。",
-      "recallDescription": "尝试从收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
+      "recallDescription": "尝试���收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
       "recallAuditHint": "召回可能受目标邮件系统限制；操作结果与类型改判会写入审计记录。",
       "similarLimit": "最多支持 10 封样本",
       "similarFound": "找到 {n} 封���似邮件",
@@ -6132,8 +6132,7 @@
           "time": "时间",
           "size": "大小",
           "expandFullInfo": "展开完整信息",
-          "authDetails": "身份验证详情",
-          "networkFeatures": "网络特征"
+          "mailHeaders": "邮件头信息"
         },
         "emailContent": "邮件原文",
         "noContent": "暂无正文内容",
@@ -7156,7 +7155,7 @@
       "desc_senderRateLimit15": {
         "source": "发信行为管控",
         "usage": "15分钟内发信频率限制阈值",
-        "note": "超过阈值触发���则"
+        "note": "超���阈值触发���则"
       },
       "desc_recipientCount": {
         "source": "邮件收信人解析",
@@ -7862,7 +7861,7 @@
       "noData": "暂无数据",
       "loading": "加载中…"
     },
-    "normalHiddenHint": "正常邮件默认隐藏，避免其量级压制威胁曲线，可点���图例展开",
+    "normalHiddenHint": "正常邮件默认隐藏，避免其量级压制���胁曲线，可点���图例展开",
     "deliveryResults": {
       "delivered": "已投递",
       "success_rate": "投递成功率",
@@ -8548,7 +8547,7 @@
       "configSnapshot": "配置快照",
       "configPlaceholder": "配置模块上线后提供",
       "configSnapshotStaleNotice": "当前配置已变更，此为历史快照",
-      "runLog": "运行日志",
+      "runLog": "���行日志",
       "searchSteps": "搜索步骤...",
       "exportJson": "导出 JSON",
       "noSteps": "暂无步骤记���",
@@ -9351,7 +9350,7 @@
       "falsePositive": "标记���报",
       "prev": "上一页",
       "next": "下一页",
-      "empty": "暂无扫描任务"
+      "empty": "暂��扫描任务"
     },
     "leakDetail": {
       "title": "漏报明细",
@@ -10109,7 +10108,7 @@
     "refresh": "刷新",
     "health": {
       "danger": "检测到 {n} 项紧急事件待处理，请立即查看待办与告警面板",
-      "warning": "检测到 {n} 项警告事项����请及时处理",
+      "warning": "���测到 {n} 项警告事项����请及时处理",
       "normal": "系统运行正常，{range}已拦截 {n} 封威胁邮件，无待处理告警",
       "error": "系统���态数据加载失败，请刷新后重试"
     },
@@ -10770,7 +10769,7 @@
       "activate_failed": "启用签名密钥失败，请稍后重试",
       "active_key_cannot_delete": "正在使用的签名密钥不能删除，请先启用另一个密钥或停用当前密钥",
       "algorithm_unsupported": "不支持的签名���法「{value}」，只能是：{allowed}",
-      "cross_tenant_manage_denied": "无权管理其他租户的签名密钥",
+      "cross_tenant_manage_denied": "无权管理��他租户的签名密钥",
       "cross_tenant_read_denied": "无权查看其他租户的签名域名",
       "dns_not_verified": "该密钥的 DNS 记录尚未验证通过，请先在域��服务商处添加 TXT 记录并完成验证，���启用它",
       "forbidden": "没有权限执行此操作",
@@ -10895,7 +10894,7 @@
       "ids_required": "请至少选择一条规则",
       "metadata_invalid": "规��元数据格式不正确",
       "name_exists": "规则名称已存在，请换一个",
-      "not_found": "规则不存在，可能已被删除",
+      "not_found": "规则不存��，可能已被删除",
       "role_not_permitted": "当前角色没有创建规则的权限",
       "route_metadata_required": "路由类规则必须填写下一跳信息：{required}",
       "stage_not_allowed_for_role": "租户管理员只能管理以下阶段的规则：{allowed}",

@@ -6137,8 +6137,7 @@
           "time": "Time",
           "size": "Size",
           "expandFullInfo": "Expand Full Info",
-          "authDetails": "Authentication Details",
-          "networkFeatures": "Network Features"
+          "mailHeaders": "Mail Headers"
         },
         "emailContent": "Email Content",
         "noContent": "No content available",
