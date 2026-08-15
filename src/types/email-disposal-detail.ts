@@ -232,10 +232,23 @@ export type { MailLifecycleLog, MailLifecycleLogsResponse };
 
 export type CheckStatus = 'pass' | 'suspicious' | 'threat' | 'processing' | 'skipped';
 
+// 群发邮件（mixed action）单个 check 内的收件人归因分组——同一个 check
+// 命中的规则集合（ruleIds）在不同收件人之间可能不同（例如附件安全检测对
+// 5 个收件人里的 2 人命中了规则 A，另 3 人命中了规则 B）。每一组代表"命中
+// 完全相同规则集合的一批收件人"。长度为 1 时代表该 check 内所有收件人命
+// 中结果一致（与非群发场景等价，UI 不需要额外展示分组）。
+export interface RecipientRuleGroup {
+  recipients: string[];
+  ruleIds: number[];
+}
+
 export interface DetectionCheckItem {
   key: string;
   status: CheckStatus;
   ruleIds: number[];
+  /** 见 RecipientRuleGroup 说明；由 matched_action_rules/matched_tag_rules
+   *  （recipient 索引）与本 check 的 ruleIds 交叉推导，不需要后端改动。 */
+  recipientGroups?: RecipientRuleGroup[];
 }
 
 export interface DetectionStage {

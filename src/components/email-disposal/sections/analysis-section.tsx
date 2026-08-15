@@ -7,7 +7,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import {
   CheckCircle2, AlertTriangle, XCircle, MinusCircle, ChevronDown,
-  Clock, ShieldQuestion, ShieldAlert, ExternalLink, ArrowRight, User,
+  Clock, ShieldQuestion, ShieldAlert, ExternalLink, ArrowRight, User, Layers,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
 import type { MailLogDetail, CheckStatus, FinalVerdict, MailChildEvent } from '@/types/email-disposal-detail';
+import type { DisposalBasis } from '@/types/email-disposal';
 import { formatTimestamp } from '@/lib/format-time';
 import { useDetectionStages } from '../hooks/use-detection-stages';
 import {
@@ -22,7 +23,7 @@ import {
 } from '../lib/detail-helpers';
 import {
   formatHitDetail, getModuleName, getActionLabel, getActionColor, getPolicyRoute, getPolicyMeta,
-  getStageColor, isStage1Policy, type DisposalLang,
+  getStageColor, isStage1Policy, groupRecipientBasisByPolicy, type DisposalLang,
 } from '../lib/disposal-basis-config';
 import { useProductForm } from '@/contexts/product-form-context';
 
@@ -215,12 +216,6 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
 
   // --- 处置依据（gap 2.7）---
   const basis = detail.disposal_basis;
-  const policyMeta = basis?.policy_key ? getPolicyMeta(basis.policy_key) : undefined;
-  const basisRoute = basis?.policy_key ? getPolicyRoute(basis.policy_key) : undefined;
-  const hasRuleName = !!basis?.rule_name && basis.rule_name !== '—';
-  const combinedRuleLabel = hasRuleName
-    ? (basis?.rule_id ? `${basis.rule_name}（${basis.rule_id}）` : basis!.rule_name)
-    : (basis?.rule_id || '—');
 
   // 方案A：多租户产品形态 + 租户管理员视角 + 阶段1（连接层/IP策略）→ 显示"平台策略"，
   // 不暴露策略模块细节、规则名、命中详情，也不提供"前往策略配置页"跳转。
@@ -228,6 +223,115 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
     viewer === 'tenant' &&
     capabilities?.multiTenant === true &&
     isStage1Policy(basis?.policy_key);
+  // 复用同一个租户判断，用于下方处置依据多卡片场景——每张卡片按自己的
+  // policy_key 独立判断是否命中阶段1平台策略，不能整体沿用上面按顶层
+  // basis.policy_key 算出的 isPlatformPolicyContext。
+  const isTenantPlatformViewer = viewer === 'tenant' && capabilities?.multiTenant === true;
+
+  // 群发邮件多处置依据支撑：按 policy_key 分组，与列表页「处置依据」列
+  // （disposal-basis-cell.tsx）复用同一套 groupRecipientBasisByPolicy()。
+  // 没有 per_recipient（非群发 / 群发但全员命中同一依据）时长度 <= 1，
+  // 下方渲染分支与改造前完全一致。
+  const basisGroups = useMemo(() => groupRecipientBasisByPolicy(basis), [basis]);
+
+  // 单张处置依据卡片渲染——非群发/单一依据场景直接传 basis 本身
+  // （scope 不传，不新增"适用范围"行，DOM 结构与改造前逐字节一致）；
+  // 群发多依据场景每个"模块+具体规则"组合各渲染一张卡，附带
+  // "适用范围：收件人列表（N人）"。
+  const renderDisposalBasisCard = (
+    entry: DisposalBasis,
+    opts: { scope?: string[]; idSuffix?: string } = {},
+  ) => {
+    const meta = entry.policy_key ? getPolicyMeta(entry.policy_key) : undefined;
+    const route = entry.policy_key ? getPolicyRoute(entry.policy_key) : undefined;
+    const entryHasRuleName = !!entry.rule_name && entry.rule_name !== '—';
+    const entryRuleLabel = entryHasRuleName
+      ? (entry.rule_id ? `${entry.rule_name}（${entry.rule_id}）` : entry.rule_name!)
+      : (entry.rule_id || '—');
+    const isPlatform = isTenantPlatformViewer && isStage1Policy(entry.policy_key);
+    const testIdSuffix = opts.idSuffix ? `-${opts.idSuffix}` : '';
+    return (
+      <div
+        key={opts.idSuffix ?? 'primary'}
+        id={opts.idSuffix ? undefined : 'disposal-basis'}
+        data-testid={`analysis-disposal-basis${testIdSuffix}`}
+        className="rounded-lg border bg-card p-4 scroll-mt-4"
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <ShieldAlert className="h-4 w-4 text-orange-600" />
+          <h4 className="text-sm font-semibold">{tFeatures('disposalBasis')}</h4>
+          {entry.action && (
+            <span
+              data-testid={`analysis-disposal-basis-action${testIdSuffix}`}
+              className={cn('text-xs font-medium px-2 py-0.5 rounded ml-auto', getActionColor(entry.action))}
+            >
+              {getActionLabel(entry.action, disposalLang)}
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-[72px_1fr] gap-x-3 gap-y-2.5 text-sm">
+          {opts.scope && (
+            <>
+              <span className="text-muted-foreground">{tFeatures('basisScope')}</span>
+              <span className="text-foreground" data-testid={`analysis-disposal-basis-scope${testIdSuffix}`}>
+                {t('recipientScopeLine', { recipients: opts.scope.join('、'), count: opts.scope.length })}
+              </span>
+            </>
+          )}
+          <span className="text-muted-foreground">{tFeatures('module')}</span>
+          {isPlatform ? (
+            // 平台策略模糊化：不展示阶段色点和具体模块名，仅显示"平台策略"
+            <span className="font-medium text-muted-foreground">
+              {tFeatures('platformPolicyModule')}
+            </span>
+          ) : (
+            <div className="flex items-center gap-2 min-w-0">
+              <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', getStageColor(meta?.stage ?? 0))} />
+              <span className="font-medium">
+                {entry.policy_key ? (getModuleName(entry.policy_key, disposalLang) || '—') : '—'}
+              </span>
+            </div>
+          )}
+          <span className="text-muted-foreground">{tFeatures('ruleName')}</span>
+          {isPlatform ? (
+            // 租户不可见规则名，展示固定文案
+            <span className="text-muted-foreground">{tFeatures('platformPolicyRuleName')}</span>
+          ) : route && entryHasRuleName ? (
+            <InteractiveSurface asChild variant="text" className="min-w-0 text-primary data-[hovered=true]:text-primary/80">
+              <button
+                type="button"
+                data-testid={`analysis-disposal-basis-rule-link${testIdSuffix}`}
+                className="flex items-center gap-1.5 text-left"
+                title={tFeatures('viewPolicyConfigTitle')}
+                onClick={() => router.push(route)}
+              >
+                <span className="truncate">{entryRuleLabel}</span>
+                <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70 transition-opacity duration-[120ms] group-data-[hovered=true]/interactive:opacity-100 motion-reduce:transition-none" />
+              </button>
+            </InteractiveSurface>
+          ) : (
+            <span className="min-w-0 truncate">{entryRuleLabel}</span>
+          )}
+          <span className="text-muted-foreground">{tFeatures('hitDetail')}</span>
+          <span className="text-muted-foreground leading-relaxed">
+            {isPlatform
+              ? tFeatures('platformPolicyHitDetail')
+              : (formatHitDetail(entry, disposalLang) || '—')}
+          </span>
+          {!isPlatform && entry.detection_tags && entry.detection_tags.length > 0 && (
+            <>
+              <span className="text-muted-foreground">{tFeatures('detectionTags')}</span>
+              <span className="flex flex-wrap gap-1">
+                {entry.detection_tags.map((tag) => (
+                  <span key={tag} className="rounded bg-muted px-1.5 py-0.5 text-xs">{tag}</span>
+                ))}
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-5">
@@ -242,6 +346,15 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
         <div className="flex items-start gap-0 overflow-x-auto pb-2">
           {stages.map((st, i) => {
             const isExpanded = expandedStages.includes(st.stage);
+            // 群发邮件多依据支撑：本阶段内任意一个 check 的收件人命中结果
+            // 出现分歧（recipientGroups.length > 1）时，卡片右上角提示
+            // "N组"，与列表页处置依据列的多依据文案（"等 N 项"）呼应，
+            // 提前告知运营"这个阶段不同收件人结果不一致，需要点开看明细"。
+            const maxRecipientGroupCount = Math.max(
+              0,
+              ...st.checks.map((c) => c.recipientGroups?.length ?? 0),
+            );
+            const hasRecipientSplit = maxRecipientGroupCount > 1;
             return (
               <div key={st.stage} className="flex items-start">
                 <InteractiveSurface
@@ -259,6 +372,15 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                     aria-expanded={isExpanded}
                     onClick={() => toggleStage(st.stage)}
                   >
+                    {hasRecipientSplit && (
+                      <span
+                        data-testid={`analysis-stage-${st.stage}-recipient-split-badge`}
+                        className="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-full border border-violet-300 bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300"
+                      >
+                        <Layers className="h-3 w-3" />
+                        {t('recipientGroupsBadge', { n: maxRecipientGroupCount })}
+                      </span>
+                    )}
                     <div className="text-center">
                       <div className="text-xs text-muted-foreground mb-1">{t('stage')} {st.stage}</div>
                       {/* 阶段1 + 多租户租户视角：标题改为"平台管控" */}
@@ -292,20 +414,48 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                               {st.key === 'ai' ? t('agentJudgementLabel') : t('hitPolicyLabel')}
                             </div>
                             <div className="space-y-1.5">
-                              {st.checks.map((c) => (
-                                <div key={c.key} className="flex items-center justify-between gap-2 text-xs">
-                                  <div className="flex items-center gap-1 min-w-0">
-                                    {STATUS_ICON[c.status]}
-                                    <span className="truncate">{t(`check.${c.key}`)}</span>
-                                  </div>
-                                  <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[c.status])}>
-                                    {c.status === 'skipped' ? t('notIntegrated') : t(`status.${c.status}`)}
-                                    {c.ruleIds.length > 0 && (
-                                      <span className="ml-1 text-muted-foreground">#{c.ruleIds.join(', #')}</span>
+                              {st.checks.map((c) => {
+                                // recipientGroups.length > 1：这个 check 内不同
+                                // 收件人命中了不同的规则集合，展开为分组明细
+                                // 而不是把所有规则 ID 笼统合并成一行——否则运
+                                // 营看到 "#101, #102" 时无法判断到底是谁命中
+                                // 了哪一条。
+                                const isSplit = (c.recipientGroups?.length ?? 0) > 1;
+                                return (
+                                  <div key={c.key} className="text-xs">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <div className="flex items-center gap-1 min-w-0">
+                                        {STATUS_ICON[c.status]}
+                                        <span className="truncate">{t(`check.${c.key}`)}</span>
+                                      </div>
+                                      <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[c.status])}>
+                                        {c.status === 'skipped' ? t('notIntegrated') : t(`status.${c.status}`)}
+                                        {!isSplit && c.ruleIds.length > 0 && (
+                                          <span className="ml-1 text-muted-foreground">#{c.ruleIds.join(', #')}</span>
+                                        )}
+                                      </span>
+                                    </div>
+                                    {isSplit && (
+                                      <div
+                                        className="mt-1 space-y-1 rounded-md bg-background/60 p-1.5"
+                                        data-testid={`analysis-check-${c.key}-recipient-groups`}
+                                      >
+                                        {c.recipientGroups!.map((g, gi) => (
+                                          <div key={gi} className="flex items-center justify-between gap-2 text-muted-foreground">
+                                            <span className="min-w-0 truncate">
+                                              {t('recipientGroupLine', {
+                                                recipients: g.recipients.join('、'),
+                                                count: g.recipients.length,
+                                              })}
+                                            </span>
+                                            <span className="shrink-0">#{g.ruleIds.join(', #')}</span>
+                                          </div>
+                                        ))}
+                                      </div>
                                     )}
-                                  </span>
-                                </div>
-                              ))}
+                                  </div>
+                                );
+                              })}
                             </div>
                           </>
                         )}
@@ -369,76 +519,35 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
         </div>
       )}
 
-      {/* 处置依据（gap 2.7） */}
+      {/* 处置依据（gap 2.7）—— 非群发/单一依据场景（basisGroups.length <= 1）
+          渲染与改造前逐字节一致的单卡；群发邮件因不同收件人命中不同策略
+          模块/规则而产生多条依据时（GT-12946 详情页落地），按"模块 + 具体
+          规则"组合各渲染一张卡片，附带"适用范围"行标明命中人群。 */}
       {basis?.policy_key && (
-        <div
-          id="disposal-basis"
-          data-testid="analysis-disposal-basis"
-          className="rounded-lg border bg-card p-4 scroll-mt-4"
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <ShieldAlert className="h-4 w-4 text-orange-600" />
-            <h4 className="text-sm font-semibold">{tFeatures('disposalBasis')}</h4>
-            {basis.action && (
-              <span
-                data-testid="analysis-disposal-basis-action"
-                className={cn('text-xs font-medium px-2 py-0.5 rounded ml-auto', getActionColor(basis.action))}
-              >
-                {getActionLabel(basis.action, disposalLang)}
-              </span>
-            )}
+        basisGroups.length <= 1 ? (
+          renderDisposalBasisCard(basis)
+        ) : (
+          <div className="space-y-3" data-testid="analysis-disposal-basis-groups">
+            {basisGroups.flatMap((group, gi) => {
+              // 同一策略模块下，不同收件人仍可能命中不同的具体规则——按
+              // "规则 id + 规则名"再分一层，确保"适用范围"始终精确对应
+              // 真正命中同一条规则的收件人，不会把命中不同规则的人混进
+              // 同一行"适用范围"文案里。
+              const subGroups = new Map<string, { entry: DisposalBasis; recipients: string[] }>();
+              for (const entry of group.entries) {
+                const subKey = `${entry.rule_id ?? ''}|${entry.rule_name ?? ''}`;
+                const existing = subGroups.get(subKey);
+                if (existing) {
+                  existing.recipients.push(entry.recipient ?? '—');
+                } else {
+                  subGroups.set(subKey, { entry, recipients: [entry.recipient ?? '—'] });
+                }
+              }
+              return [...subGroups.values()].map((sub, si) =>
+                renderDisposalBasisCard(sub.entry, { scope: sub.recipients, idSuffix: `${gi}-${si}` }));
+            })}
           </div>
-          <div className="grid grid-cols-[72px_1fr] gap-x-3 gap-y-2.5 text-sm">
-            <span className="text-muted-foreground">{tFeatures('module')}</span>
-            {isPlatformPolicyContext ? (
-              // 平台策略模糊化：不展示阶段色点和具体模块名，仅显示"平台策略"
-              <span className="font-medium text-muted-foreground">
-                {tFeatures('platformPolicyModule')}
-              </span>
-            ) : (
-              <div className="flex items-center gap-2 min-w-0">
-                <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', getStageColor(policyMeta?.stage ?? 0))} />
-                <span className="font-medium">{getModuleName(basis.policy_key, disposalLang) || '—'}</span>
-              </div>
-            )}
-            <span className="text-muted-foreground">{tFeatures('ruleName')}</span>
-            {isPlatformPolicyContext ? (
-              // 租户不可见规则名，展示固定文案
-              <span className="text-muted-foreground">{tFeatures('platformPolicyRuleName')}</span>
-            ) : basisRoute && hasRuleName ? (
-              <InteractiveSurface asChild variant="text" className="min-w-0 text-primary data-[hovered=true]:text-primary/80">
-                <button
-                  type="button"
-                  data-testid="analysis-disposal-basis-rule-link"
-                  className="flex items-center gap-1.5 text-left"
-                  title={tFeatures('viewPolicyConfigTitle')}
-                  onClick={() => router.push(basisRoute)}
-                >
-                  <span className="truncate">{combinedRuleLabel}</span>
-                  <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70 transition-opacity duration-[120ms] group-data-[hovered=true]/interactive:opacity-100 motion-reduce:transition-none" />
-                </button>
-              </InteractiveSurface>
-            ) : (
-              <span className="min-w-0 truncate">{combinedRuleLabel}</span>
-            )}
-            <span className="text-muted-foreground">{tFeatures('hitDetail')}</span>
-            <span className="text-muted-foreground leading-relaxed">
-              {isPlatformPolicyContext
-                ? tFeatures('platformPolicyHitDetail')
-                : (formatHitDetail(basis, disposalLang) || '—')}
-            </span>
-            {!isPlatformPolicyContext && basis.detection_tags && basis.detection_tags.length > 0 && (
-              <>
-                <span className="text-muted-foreground">{tFeatures('detectionTags')}</span>
-                <span className="flex flex-wrap gap-1">
-                  {basis.detection_tags.map((tag) => (
-                    <span key={tag} className="rounded bg-muted px-1.5 py-0.5 text-xs">{tag}</span>
-                  ))}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
+        )
       )}
 
       {/* 事后处置时间线（gap 2.5，两级展开）*/}

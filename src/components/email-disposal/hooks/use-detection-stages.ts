@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type {
   MailLogDetail, DetectionStage, DetectionCheckItem, CheckStatus, FinalVerdict,
+  RecipientRuleGroup, MatchedRulesByStage,
 } from '@/types/email-disposal-detail';
 
 const STAGE_DEFS: { stage: number; key: string; checks: { key: string; pages: string[] }[] }[] = [
@@ -55,8 +56,52 @@ function rulesForPages(
   return ids;
 }
 
-function checkStatus(ml: MailLogDetail, pages: string[]): { status: CheckStatus; ruleIds: number[] } {
-  if (pages.length === 0) return { status: 'skipped', ruleIds: [] };
+// 群发邮件多依据支撑：某个 check 命中的规则集合（ruleIds，已按 page 过滤）
+// 在不同收件人之间可能不一致。matched_action_rules/matched_tag_rules 是
+// stage → recipient → ruleId[] 的持久化原始索引（与 page 投影是同一份底层
+// 数据的两种索引方式），交叉引用即可推导"谁命中了这个 check 里的哪些规
+// 则"——ruleId 全局唯一，不会因为交叉引用而误标到不相关的收件人。
+// 按"命中规则集合完全相同"对收件人分组；只有一组时代表该 check 内所有收
+// 件人结果一致，与非群发场景等价。
+function recipientGroupsForRuleIds(
+  buckets: MatchedRulesByStage | undefined,
+  ruleIds: number[],
+): RecipientRuleGroup[] {
+  if (!buckets || ruleIds.length === 0) return [];
+  const ruleIdSet = new Set(ruleIds);
+  const recipientToRules = new Map<string, Set<number>>();
+  for (const stageKey of Object.keys(buckets)) {
+    const recipientMap = buckets[stageKey] ?? {};
+    for (const recipient of Object.keys(recipientMap)) {
+      const hits = (recipientMap[recipient] ?? []).filter((id) => ruleIdSet.has(id));
+      if (hits.length === 0) continue;
+      const existing = recipientToRules.get(recipient);
+      if (existing) {
+        for (const id of hits) existing.add(id);
+      } else {
+        recipientToRules.set(recipient, new Set(hits));
+      }
+    }
+  }
+  const groupsByKey = new Map<string, RecipientRuleGroup>();
+  for (const [recipient, rules] of recipientToRules) {
+    const sortedIds = [...rules].sort((a, b) => a - b);
+    const key = sortedIds.join(',');
+    const existing = groupsByKey.get(key);
+    if (existing) {
+      existing.recipients.push(recipient);
+    } else {
+      groupsByKey.set(key, { recipients: [recipient], ruleIds: sortedIds });
+    }
+  }
+  return [...groupsByKey.values()];
+}
+
+function checkStatus(
+  ml: MailLogDetail,
+  pages: string[],
+): { status: CheckStatus; ruleIds: number[]; recipientGroups: RecipientRuleGroup[] } {
+  if (pages.length === 0) return { status: 'skipped', ruleIds: [], recipientGroups: [] };
   // Persisted matched_*_rules are indexed by recipient, not page. The detail
   // API provides the page projections after resolving the matched rule IDs;
   // never fall back to scanning all recipient buckets or an unrelated match
@@ -64,29 +109,40 @@ function checkStatus(ml: MailLogDetail, pages: string[]): { status: CheckStatus;
   const actionIds = rulesForPages(ml.matched_action_rule_pages, pages);
   const tagIds = rulesForPages(ml.matched_tag_rule_pages, pages);
   if (actionIds.length > 0) {
+    const recipientGroups = recipientGroupsForRuleIds(ml.matched_action_rules, actionIds);
     // When the overall mail action is "accept", matched action rules are whitelist/accept
     // rules — do not flag them as threats.
-    if (ml.action === 'accept') return { status: 'pass', ruleIds: actionIds };
-    return { status: 'threat', ruleIds: actionIds };
+    if (ml.action === 'accept') return { status: 'pass', ruleIds: actionIds, recipientGroups };
+    return { status: 'threat', ruleIds: actionIds, recipientGroups };
   }
-  if (tagIds.length > 0) return { status: 'suspicious', ruleIds: tagIds };
-  return { status: 'pass', ruleIds: [] };
+  if (tagIds.length > 0) {
+    return {
+      status: 'suspicious',
+      ruleIds: tagIds,
+      recipientGroups: recipientGroupsForRuleIds(ml.matched_tag_rules, tagIds),
+    };
+  }
+  return { status: 'pass', ruleIds: [], recipientGroups: [] };
 }
 
-function aiCheckStatus(ml: MailLogDetail, key: string): { status: CheckStatus; ruleIds: number[] } {
+function aiCheckStatus(
+  ml: MailLogDetail,
+  key: string,
+): { status: CheckStatus; ruleIds: number[]; recipientGroups: RecipientRuleGroup[] } {
   const tag = (ml.cac_result?.tag ?? '').toLowerCase();
   const intTag = ml.cac_result?.int_tag ?? 0;
+  // AI 阶段没有 ruleIds（研判结论不是规则命中），天然没有分组归因。
   if (key === 'intentRecognitionAgent') {
-    if (!ml.cac_result?.tag) return { status: 'skipped', ruleIds: [] };
-    if (intTag >= 5) return { status: 'threat', ruleIds: [] };
-    if (intTag >= 3) return { status: 'suspicious', ruleIds: [] };
-    return { status: 'pass', ruleIds: [] };
+    if (!ml.cac_result?.tag) return { status: 'skipped', ruleIds: [], recipientGroups: [] };
+    if (intTag >= 5) return { status: 'threat', ruleIds: [], recipientGroups: [] };
+    if (intTag >= 3) return { status: 'suspicious', ruleIds: [], recipientGroups: [] };
+    return { status: 'pass', ruleIds: [], recipientGroups: [] };
   }
   if (key === 'phishingDetectionAgent') {
-    if (!ml.cac_result?.tag) return { status: 'skipped', ruleIds: [] };
-    return { status: tag.includes('phish') ? 'threat' : 'pass', ruleIds: [] };
+    if (!ml.cac_result?.tag) return { status: 'skipped', ruleIds: [], recipientGroups: [] };
+    return { status: tag.includes('phish') ? 'threat' : 'pass', ruleIds: [], recipientGroups: [] };
   }
-  return { status: 'skipped', ruleIds: [] };
+  return { status: 'skipped', ruleIds: [], recipientGroups: [] };
 }
 
 function aggregate(checks: DetectionCheckItem[]): CheckStatus {
@@ -99,10 +155,10 @@ function aggregate(checks: DetectionCheckItem[]): CheckStatus {
 export function buildDetectionStages(ml: MailLogDetail): DetectionStage[] {
   return STAGE_DEFS.map((def) => {
     const checks: DetectionCheckItem[] = def.checks.map((c) => {
-      const { status, ruleIds } = def.key === 'ai'
+      const { status, ruleIds, recipientGroups } = def.key === 'ai'
         ? aiCheckStatus(ml, c.key)
         : checkStatus(ml, c.pages);
-      return { key: c.key, status, ruleIds };
+      return { key: c.key, status, ruleIds, recipientGroups };
     });
     if (def.key === 'identity') {
       const auth = checks.find((c) => c.key === 'authSpoofing');
