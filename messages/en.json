@@ -6375,7 +6375,10 @@
           "recommendedActionsLabel": "Recommended Actions",
           "noRecommendedActions": "No recommendations available"
         },
-        "noAiData": "No data available"
+        "noAiData": "No data available",
+        "recipientGroupsBadge": "{n} groups",
+        "recipientScopeLine": "{recipients} ({count})",
+        "recipientGroupLine": "{recipients} ({count})"
       },
       "features": {
         "basicInfo": "Basic Information",

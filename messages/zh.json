@@ -1014,7 +1014,7 @@
           "header": "命中规则《{name}》",
           "channel": "投递通道：{channel}",
           "proxy": "代理 IP：{name}（出口：{egress}）",
-          "helo": "HELO ��明：{helo}",
+          "helo": "HELO ����：{helo}",
           "tls": "TLS ��略：{level}",
           "response": "预计对端响应：250 2.0.0 Ok"
         },
@@ -1335,7 +1335,7 @@
     "collapseConfig": "收起完整配置",
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
-    "name": "名称",
+    "name": "名���",
     "targetGroups": "适�������������",
     "policyConfig": "策略配置",
     "priority": "优先��",
@@ -1654,7 +1654,7 @@
     "confirmDelete": "确定要删除此旁路邮件吗？",
     "noItems": "无旁路邮件",
     "statusPending": "待处理",
-    "statusProcessing": "处理中",
+    "statusProcessing": "处理��",
     "statusQuarantined": "已隔�������",
     "statusFailed": "失败",
     "statusReinjected": "已重新��入",
@@ -4421,7 +4421,7 @@
     "editorSubtitle": "配置内容关键词/正则规���，识别并处置含敏感信息的邮件",
     "cardTooltipStrategy": "策略：内容规则",
     "cardTooltipActions": "动作：隔离、投递",
-    "cardTooltipEffect": "影响：命中则隔离，邮件保留至隔离区",
+    "cardTooltipEffect": "影响：命中则隔离，邮���保留至隔离区",
     "cardTooltipQuarantineHint": "被隔离邮件可在邮件隔离模块查看"
   },
   "authSpoofing": {
@@ -6024,7 +6024,7 @@
       "confirmRelease": "确认放行选中邮件？",
       "confirmDelete": "确认丢弃选中邮件？丢弃后无法恢复。",
       "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
-      "releaseAuditHint": "放行与类型改判都会写入审计记录。",
+      "releaseAuditHint": "放行与类型改判都��写入审计记录。",
       "recallDescription": "尝������收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
       "recallAuditHint": "召回可能受目标邮件系统限制；操��结果与类型改判会写入审计记录。",
       "similarLimit": "最多支持 10 封样本",
@@ -6111,7 +6111,7 @@
           "maliciousAttachment": "恶意附件"
         },
         "aiReasoning": "AI 深度推理",
-        "generateAi": "生成 AI 推理",
+        "generateAi": "生成 AI 推��",
         "aiGenerating": "正在生成…",
         "regenerate": "重新生成",
         "aiError": "AI 推理服务暂不可用，请稍后重试",
@@ -6120,6 +6120,9 @@
           "label": "邮件类型"
         },
         "confidenceScore": "置信度 {pct}%",
+        "recipientOutcomeLabel": "群发结果",
+        "multiBasisCount": "+{n} 项",
+        "multiBasisPopoverTitle": "共 {count} 种处置依据",
         "confidenceBlacklist": "黑名单命中（无置信度）",
         "confidenceRule": "规则命中（无置信度）",
         "action": "执行动作",
@@ -6370,7 +6373,10 @@
           "recommendedActionsLabel": "处置建议",
           "noRecommendedActions": "暂无建议"
         },
-        "noAiData": "暂无数据"
+        "noAiData": "暂无数据",
+        "recipientGroupsBadge": "{n} 组",
+        "recipientScopeLine": "{recipients}（{count} 人）",
+        "recipientGroupLine": "{recipients}（{count} 人）"
       },
       "features": {
         "basicInfo": "邮件基本信息",
@@ -6427,7 +6433,8 @@
         "platformPolicyModule": "平台管控策略",
         "platformPolicyRuleName": "平台统一管控",
         "platformPolicyHitDetail": "该邮件由平台连接层策略拦截，如需了解详情请联系平台管理员",
-        "platformPolicyListReason": "平台管控策略拦截"
+        "platformPolicyListReason": "平台管控策略拦截",
+        "basisScope": "适用范围"
       },
       "delivery": {
         "noData": "暂无投递记录",
@@ -7148,7 +7155,7 @@
       },
       "desc_senderRecipientCount15Min": {
         "source": "发信行为统计",
-        "usage": "统计15分钟内发信人发送的不同收信人数量",
+        "usage": "统计15分钟内发信人发送的不���收信人数量",
         "note": "大量收信人可能为群发攻击"
       },
       "desc_senderMailCount15Min": {
@@ -7480,7 +7487,7 @@
     "category_harmful": "有害内容",
     "notify": "通知",
     "noNotify": "不通知",
-    "scoreHint": "分数区间仅作用于引擎概率检测；命中黑名单、规则等确定性判定的邮件（无置信度分数）将始终通知，不受分数区间限制。",
+    "scoreHint": "分数区间仅作用于引擎概率检测；��中黑名单、规则等确定性判定的邮件（无置信度分数）将始终通知，不受分数区间限制。",
     "minConfidenceScore": "最低置信度阈值",
     "maxConfidenceScore": "最高置信度阈值",
     "scoreRangeError": "最低阈值不能大于最高阈值",
@@ -8263,7 +8270,7 @@
     "loadTimeout": "加载超时，请稍后重试",
     "retry": "重试",
     "agentOffline": "数据采集异常",
-    "degradeBackendUnavailable": "监控数据源（时序数据库）暂时不可达，数据可能缺失",
+    "degradeBackendUnavailable": "监控数据源（时序数据库）暂时不可达，数据��能缺失",
     "degradeNotInitialized": "监控库尚未初始化",
     "degradeDbUnavailable": "数据库监控数据源暂时不可用",
     "backendUnsupported": "该后端暂不支持",
@@ -8993,7 +9000,7 @@
       "deleteConfirmDesc": "删除后将停止对该对象的仿冒检测，历史检测日志保留。",
       "emptyTitle": "暂无保护对象",
       "emptyDescription": "添加保护对象后开启防护，引擎需至少 1 个对象才能启用",
-      "emptyFiltered": "未找到匹配的保护对象",
+      "emptyFiltered": "未找到匹配的��护对象",
       "level": {
         "high": "高",
         "medium": "中",
@@ -9179,7 +9186,7 @@
       "addKeyword": "添加关键词",
       "protectedDomains": "受保护域名",
       "addDomain": "添加域名",
-      "editDistance": "编辑距离阈值",
+      "editDistance": "编辑距离���值",
       "confidenceThreshold": "置信度阈值",
       "confidenceThresholdHint": "仿冒概率达到该阈值时触发处置",
       "modeObserveDesc": "仅标记投递，不拦截",
@@ -9717,7 +9724,7 @@
     "detailTitle": "人员详情",
     "detailUsername": "用户名",
     "emptyAddNow": "立即添加",
-    "emptyNoMatch": "未找到匹配结果",
+    "emptyNoMatch": "��找到匹配结果",
     "emptyText": "暂无数据",
     "errBaseDnRequired": "请输入 Base DN",
     "errBindDnRequired": "请输入 Bind DN",
@@ -10776,7 +10783,7 @@
     },
     "dkim": {
       "activate_failed": "启用签名密钥失败，请稍后重试",
-      "active_key_cannot_delete": "正在使用的签名密钥不能删除，请先启用另一个密钥或停用当前密钥",
+      "active_key_cannot_delete": "正在使用的签名密钥不能删除，请先启用���一个密钥或停用当前密钥",
       "algorithm_unsupported": "不支持的签名���法「{value}」，只能是���{allowed}",
       "cross_tenant_manage_denied": "无权管理��他租户的签名密钥",
       "cross_tenant_read_denied": "无权查看其他租户的签名域名",
@@ -11315,7 +11322,7 @@
     },
     "portal_quarantine_listadd": {
       "quarantine_item_has_no_tenant_cannot": "该隔离邮件没有归属租户，无法加入用户名单",
-      "quarantined_mail_has_no_usable_sender": "该隔离邮件没有可用于添加的发件人"
+      "quarantined_mail_has_no_usable_sender": "该隔离邮件没有可��于添加的发件人"
     },
     "portal_quarantine_release": {
       "quarantine_item_not_found": "隔离邮件不存在",

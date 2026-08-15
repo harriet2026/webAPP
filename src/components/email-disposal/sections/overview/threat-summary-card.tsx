@@ -16,11 +16,14 @@
 //        + 模块「规则名」+ 动作徽标 + 查看依据详情 链接，同一行内联展示
 
 import { useLocale, useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 import {
-  AlertTriangle, CheckCircle, Info, Pencil, ShieldAlert, XCircle, ArrowRight,
+  AlertTriangle, CheckCircle, Info, Pencil, ShieldAlert, XCircle, ArrowRight, Layers, Users,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { ApiRequestFn } from '@/lib/api/client';
@@ -30,11 +33,13 @@ import {
   stripDetailPrefix, isNewSender, deriveConfidence, deriveHitSource, isSensitiveUrgent, deriveDomainAge,
 } from '../../lib/detail-helpers';
 import {
-  getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor, isStage1Policy, type DisposalLang,
+  getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor, isStage1Policy,
+  groupRecipientBasisByPolicy, pickPrimaryBasisGroup, sortBasisGroupsForTooltip, type DisposalLang,
 } from '../../lib/disposal-basis-config';
 import { useProductForm } from '@/contexts/product-form-context';
 import { SenderActions } from './sender-actions';
 import { SingleRecipientActions } from './single-recipient-actions';
+import { RecipientStatusBadges } from '../../components/recipient-status-badges';
 
 interface ThreatSummaryCardProps {
   detail: MailLogDetail;
@@ -197,15 +202,38 @@ export function ThreatSummaryCard({
   const t = useTranslations('emailDisposal.detail.overview'); // this card's own strings
   const tDetail = useTranslations('emailDisposal.detail'); // mailTypeConfig / correctionSourceLabelKey keys
   const tFeatures = useTranslations('emailDisposal.detail.features'); // shared disposal-basis strings (same source as analysis-section)
+  // GT-12946 详情页落地：Overview 常显行的多依据 Popover 复用列表页「处置
+  // 依据」列（disposal-basis-cell.tsx）已经上线的分组文案 key（
+  // disposalBasisGroupHeader/disposalBasisRuleLine/disposalBasisPlatformRuleLine），
+  // 保持"列表 Tooltip"与"详情 Overview 常显行"两处的措辞完全一致，不新增
+  // 一套平行文案。
+  const tTable = useTranslations('emailDisposal.table');
   const locale = useLocale();
   const { viewer, capabilities } = useProductForm();
-  const isPlatformPolicyContext =
-    viewer === 'tenant' &&
-    capabilities?.multiTenant === true &&
-    isStage1Policy(detail.disposal_basis?.policy_key);
+  const isTenantPlatformViewer = viewer === 'tenant' && capabilities?.multiTenant === true;
+  const isPlatformPolicyContext = isTenantPlatformViewer && isStage1Policy(detail.disposal_basis?.policy_key);
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(locale as DisposalLang)
     ? (locale as DisposalLang)
     : 'zh';
+
+  // 群发邮件多处置依据支撑：groups.length <= 1 时（非群发 / 群发但全员命
+  // 中同一依据）下方渲染分支与改造前完全一致；> 1 时主依据行不变，行尾追
+  // 加"+N 项"Popover 徽标展示全部分组。
+  const basisGroups = useMemo(
+    () => groupRecipientBasisByPolicy(detail.disposal_basis),
+    [detail.disposal_basis],
+  );
+  const isMultiBasis = basisGroups.length > 1;
+  // 主依据行取"优先桶"的代表记录——多依据场景下 detail.disposal_basis 顶
+  // 层字段只是 per_recipient 里随便一条，不能直接展示，否则运营看到的可
+  // 能只是 N 个收件人里某一人的依据；统一从 basisGroups 推导（非群发/单
+  // 依据时 groupRecipientBasisByPolicy 内部会把 basis 本身包成单元素分
+  // 组，取出的 entries[0] 与直接使用 detail.disposal_basis 完全等价），
+  // 保证"模块/规则/动作"三者严格对应同一条命中记录，且不依赖顶层
+  // policy_key 与 per_recipient 是否同时存在这一隐含假设。
+  const primaryBasisEntry = pickPrimaryBasisGroup(basisGroups)?.entries[0];
+  const primaryStagePolicyMeta = primaryBasisEntry?.policy_key ? getPolicyMeta(primaryBasisEntry.policy_key) : undefined;
+  const orderedBasisGroupsForPopover = isMultiBasis ? sortBasisGroupsForTooltip(basisGroups) : [];
 
   const typeCfg = detail.email_type ? mailTypeConfig[detail.email_type] : null;
 
@@ -221,14 +249,26 @@ export function ThreatSummaryCard({
   // 特征，否则不渲染（后端暂无 whois/RDAP 数据，真实环境下这个字段本就缺席）。
   const domainAge = deriveDomainAge(detail);
 
-  // 处置依据（A12）行的阶段色点仍需要 policy_key 对应的 stage 元信息。
-  const stagePolicyMeta = detail.disposal_basis?.policy_key ? getPolicyMeta(detail.disposal_basis.policy_key) : undefined;
-
   return (
     <div
       className="rounded-lg border bg-muted/30 p-4 space-y-3"
       data-testid="email-disposal-overview-threat-card"
     >
+      {/* Row 0：群发结果摘要（仅群发命中多个收件人结果时渲染）——运营打开抽
+          屉前只能靠列表页「执行动作」列的 [投递 6][隔离 1] 摘要判断这是一
+          封 mixed 结果的群发邮件，进入详情后 Row1-4 全按单一结果叙事，看
+          不到"这封信到底有几种不同结局"。复用列表页同款
+          RecipientStatusBadges（recipient-status-badges.tsx），保证列表
+          摘要与详情摘要永远是同一套聚类/主类别选取逻辑，不新增一套平行
+          实现。单收件人邮件（isSingleRecipient）不渲染——那种场景下面的
+          单收件人处置按钮组已经完整表达"这封信只有一个结局"。 */}
+      {!isSingleRecipient && detail.recipient_dispositions && detail.recipient_dispositions.length > 0 && (
+        <div className="flex items-center gap-2 text-sm" data-testid="email-disposal-overview-recipient-outcomes">
+          <span className="shrink-0 font-medium text-muted-foreground">{t('recipientOutcomeLabel')}：</span>
+          <RecipientStatusBadges dispositions={detail.recipient_dispositions} />
+        </div>
+      )}
+
       {/* Row 1: 邮件类型（A1）+ 置信度（A2）+ 已纠正（A3）  |  头部处置按钮组（A4/A5/A6） */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
@@ -322,7 +362,7 @@ export function ThreatSummaryCard({
           mail_marking（接收标记）这类不参与 disposal_basis 合成的规则，
           命中后处置依据处什么都看不到——尽管规则名早已由 decision.go 写进
           mail_log.reason。html-spec 对该卡片的规定也是「常显」。 */}
-      {!detail.disposal_basis?.policy_key && detail.reason && (
+      {basisGroups.length === 0 && detail.reason && (
         <div
           className="flex flex-wrap items-start gap-2 border-t pt-3 text-sm"
           data-testid="email-disposal-overview-disposal-basis"
@@ -333,31 +373,91 @@ export function ThreatSummaryCard({
         </div>
       )}
 
-      {detail.disposal_basis?.policy_key && (
+      {primaryBasisEntry?.policy_key && (
         <div
           className="flex flex-wrap items-center gap-2 border-t pt-3 text-sm"
           data-testid="email-disposal-overview-disposal-basis"
         >
           <ShieldAlert className="h-4 w-4 shrink-0 text-orange-600" />
           <span className="shrink-0 text-muted-foreground">{tFeatures('disposalBasis')}：</span>
-          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', getStageColor(stagePolicyMeta?.stage ?? 0))} />
+          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', getStageColor(primaryStagePolicyMeta?.stage ?? 0))} />
           {isPlatformPolicyContext ? (
             <span className="font-medium text-foreground">
               {tFeatures('platformPolicyModule')}
             </span>
           ) : (
             <span className="font-medium text-foreground">
-              {getModuleName(detail.disposal_basis.policy_key, disposalLang) || detail.disposal_basis.policy_key}
-              {detail.disposal_basis.rule_name && detail.disposal_basis.rule_name !== '—' && (
-                <span className="font-normal text-muted-foreground">「{detail.disposal_basis.rule_name}」</span>
+              {getModuleName(primaryBasisEntry.policy_key, disposalLang) || primaryBasisEntry.policy_key}
+              {primaryBasisEntry.rule_name && primaryBasisEntry.rule_name !== '—' && (
+                <span className="font-normal text-muted-foreground">「{primaryBasisEntry.rule_name}」</span>
               )}
             </span>
           )}
-          {detail.disposal_basis.action && (
-            <span className={cn('rounded px-2 py-0.5 text-xs font-medium', getActionColor(detail.disposal_basis.action))}>
-              {getActionLabel(detail.disposal_basis.action, disposalLang)}
+          {primaryBasisEntry.action && (
+            <span className={cn('rounded px-2 py-0.5 text-xs font-medium', getActionColor(primaryBasisEntry.action))}>
+              {getActionLabel(primaryBasisEntry.action, disposalLang)}
             </span>
           )}
+
+          {/* GT-12946 详情页落地：群发邮件不同收件人命中不同处置依据时，
+              主依据行只能展示"优先桶"的一条记录——这里追加"+N 项"徽标，
+              点击展开 Popover 逐组列出全部命中记录，避免运营误把主依据当
+              成"这条邮件唯一的依据"。groups.length <= 1 时不渲染，DOM 结
+              构与改造前完全一致。 */}
+          {isMultiBasis && (
+            <Popover>
+              <PopoverTrigger
+                data-testid="email-disposal-overview-disposal-basis-more"
+                render={
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 rounded-full border border-violet-300 bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 transition-colors hover:bg-violet-100 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300"
+                  />
+                }
+              >
+                <Layers className="h-3 w-3" />
+                {t('multiBasisCount', { n: basisGroups.length - 1 })}
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-80">
+                <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Users className="h-3 w-3" />
+                  {t('multiBasisPopoverTitle', { count: basisGroups.length })}
+                </div>
+                <div className="max-h-72 space-y-2 overflow-y-auto text-xs">
+                  {orderedBasisGroupsForPopover.map((group) => {
+                    const isPlatformGroup = isTenantPlatformViewer && isStage1Policy(group.policyKey);
+                    const moduleLabel = isPlatformGroup
+                      ? tFeatures('platformPolicyListReason')
+                      : getModuleName(group.policyKey, disposalLang);
+                    return (
+                      <div key={group.policyKey}>
+                        <div className="font-medium text-foreground">
+                          {tTable('disposalBasisGroupHeader', { module: moduleLabel, count: group.entries.length })}
+                        </div>
+                        <ul className="mt-0.5 space-y-0.5 text-muted-foreground">
+                          {group.entries.map((entry, i) => (
+                            <li key={`${entry.recipient ?? i}-${entry.rule_id ?? i}`}>
+                              {isPlatformGroup
+                                ? tTable('disposalBasisPlatformRuleLine', {
+                                    recipient: entry.recipient ?? '—',
+                                    policyLabel: tFeatures('platformPolicyListReason'),
+                                  })
+                                : tTable('disposalBasisRuleLine', {
+                                    recipient: entry.recipient ?? '—',
+                                    ruleName: entry.rule_name ?? '',
+                                    ruleId: entry.rule_id ?? '',
+                                  })}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+
           {onViewBasis && (
             <InteractiveSurface asChild variant="text" className="ml-auto shrink-0 text-primary data-[hovered=true]:text-primary/80">
               <button
